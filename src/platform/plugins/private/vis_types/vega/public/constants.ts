@@ -12,5 +12,8 @@ export const VEGA_EVENT_APPLY_FILTER = 'applyFilter';
 
 export const ADD_VEGA_EMBEDDABLE_ACTION_ID = 'addVegaEmbeddableAction';
 
+export const VEGA_EDITOR_OPTIONS_ACTION = 'VEGA_EDITOR_OPTIONS_ACTION';
+export const VEGA_EDITOR_HELP_ACTION = 'VEGA_EDITOR_HELP_ACTION';
+
 /** Legacy "Add Vega" action that navigates to the Visualize editor (Canvas + flag-off Dashboard). */
 export const ADD_VEGA_PANEL_ACTION_ID = 'addVegaPanelAction';

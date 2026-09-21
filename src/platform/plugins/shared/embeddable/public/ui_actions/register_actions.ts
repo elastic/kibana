@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ON_OPEN_PANEL_MENU, PANEL_BADGE_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import {
+  EMBEDDABLE_EDITOR_MENU_TRIGGER,
+  ON_OPEN_PANEL_MENU,
+  PANEL_BADGE_TRIGGER,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import { ACTION_EDIT_PANEL } from './edit_panel_action/constants';
 import { ACTION_INSPECT_PANEL } from './inspect_panel_action/constants';
@@ -19,8 +23,15 @@ import {
 } from './customize_panel_action/constants';
 import { ACTION_SHOW_CONFIG_PANEL } from './show_config_panel_action/constants';
 import { OPEN_FLYOUT_ADD_DRILLDOWN, OPEN_FLYOUT_EDIT_DRILLDOWN } from './constants';
+import { EDITOR_MENU_EDIT_FILTERS_ACTION } from '../editor_menu/constants';
 
 export const registerActions = (uiActions: UiActionsSetup) => {
+  uiActions.registerActionAsync(EDITOR_MENU_EDIT_FILTERS_ACTION, async () => {
+    const { getEditFiltersAction } = await import('../async_module');
+    return getEditFiltersAction();
+  });
+  uiActions.attachAction(EMBEDDABLE_EDITOR_MENU_TRIGGER, EDITOR_MENU_EDIT_FILTERS_ACTION);
+
   uiActions.registerActionAsync(ACTION_REMOVE_PANEL, async () => {
     const { RemovePanelAction } = await import('../async_module');
     return new RemovePanelAction();

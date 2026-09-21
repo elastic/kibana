@@ -25,6 +25,7 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
   ADD_CANVAS_ELEMENT_TRIGGER,
   ADD_PANEL_TRIGGER,
+  EMBEDDABLE_EDITOR_MENU_TRIGGER,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import {
   setNotifications,
@@ -45,7 +46,12 @@ import type { ConfigSchema } from '../server/config';
 import { getVegaInspectorView } from './vega_inspector/vega_inspector';
 import { getServiceSettingsLazy } from './vega_view/vega_map_view/service_settings/get_service_settings_lazy';
 import { VEGA_EMBEDDABLE_TYPE, VEGA_STANDALONE_EMBEDDABLE_FLAG } from '../common/constants';
-import { ADD_VEGA_EMBEDDABLE_ACTION_ID, ADD_VEGA_PANEL_ACTION_ID } from './constants';
+import {
+  ADD_VEGA_EMBEDDABLE_ACTION_ID,
+  ADD_VEGA_PANEL_ACTION_ID,
+  VEGA_EDITOR_HELP_ACTION,
+  VEGA_EDITOR_OPTIONS_ACTION,
+} from './constants';
 
 /** @internal */
 export interface VegaVisualizationDependencies {
@@ -135,16 +141,25 @@ export class VegaPlugin implements Plugin<void, void> {
     setUsageCollectionStart(deps.usageCollection);
 
     deps.uiActions.registerActionAsync(ADD_VEGA_PANEL_ACTION_ID, async () => {
-      const { getAddVegaPanelAction } = await import('./add_vega_panel_action');
+      const { getAddVegaPanelAction } = await import('./async_module');
       return getAddVegaPanelAction(deps);
     });
+
+    deps.uiActions.registerActionAsync(VEGA_EDITOR_OPTIONS_ACTION, async () => {
+      const { getVegaEditorOptionsAction } = await import('./async_module');
+      return getVegaEditorOptionsAction();
+    });
+    deps.uiActions.registerActionAsync(VEGA_EDITOR_HELP_ACTION, async () => {
+      const { getVegaEditorHelpAction } = await import('./async_module');
+      return getVegaEditorHelpAction();
+    });
+    deps.uiActions.attachAction(EMBEDDABLE_EDITOR_MENU_TRIGGER, VEGA_EDITOR_OPTIONS_ACTION);
+    deps.uiActions.attachAction(EMBEDDABLE_EDITOR_MENU_TRIGGER, VEGA_EDITOR_HELP_ACTION);
 
     // The embeddable definition is always registered (see setup) so existing Vega panels keep
     // rendering even after a flag rollback.
     deps.uiActions.registerActionAsync(ADD_VEGA_EMBEDDABLE_ACTION_ID, async () => {
-      const { getAddVegaEmbeddableAction } = await import(
-        './embeddable/add_vega_embeddable_action'
-      );
+      const { getAddVegaEmbeddableAction } = await import('./async_module');
       return getAddVegaEmbeddableAction();
     });
 

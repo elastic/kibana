@@ -15,6 +15,7 @@ import {
   ON_SELECT_RANGE,
   ON_APPLY_FILTER,
   ON_OPEN_PANEL_MENU,
+  EMBEDDABLE_EDITOR_MENU_TRIGGER,
   ADD_PANEL_TRIGGER,
   ALERT_RULE_TRIGGER,
   VISUALIZE_FIELD_TRIGGER,
@@ -106,6 +107,15 @@ export const triggers: { [key: string]: Trigger } = {
     }),
     description: i18n.translate('uiActions.triggers.onOpenPanelMenu.description', {
       defaultMessage: "A new option will be added to the panel's context menu",
+    }),
+  },
+  [EMBEDDABLE_EDITOR_MENU_TRIGGER]: {
+    id: EMBEDDABLE_EDITOR_MENU_TRIGGER,
+    title: i18n.translate('uiActions.triggers.embeddableEditorMenu.title', {
+      defaultMessage: 'Embeddable editor menu',
+    }),
+    description: i18n.translate('uiActions.triggers.embeddableEditorMenu.description', {
+      defaultMessage: 'Actions available from an embeddable editor menu',
     }),
   },
   // Legacy triggers below this line

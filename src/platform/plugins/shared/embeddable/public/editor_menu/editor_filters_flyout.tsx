@@ -18,22 +18,27 @@ import {
   EuiFlyoutFooter,
   getFlyoutManagerStore,
 } from '@elastic/eui';
+import type { EuiFlyoutProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { MenuManager } from './menu_manager';
+import type { EditorMenuManager } from './types';
 
-export const VegaFiltersFlyout = ({
+export interface EditorFiltersFlyoutProps {
+  menuManager: EditorMenuManager;
+  flyoutProps: Pick<
+    EuiFlyoutProps,
+    'maxWidth' | 'ownFocus' | 'paddingSize' | 'resizable' | 'size' | 'type'
+  >;
+}
+
+export const EditorFiltersFlyout = ({
   menuManager,
-  type,
-}: {
-  menuManager: MenuManager;
-  type: 'push' | 'overlay';
-}): React.ReactElement => {
+  flyoutProps,
+}: EditorFiltersFlyoutProps): React.ReactElement => {
   const { goBack } = getFlyoutManagerStore();
   useEffect(() => {
     const editor = document.getElementById(menuManager.flyoutId);
     editor?.setAttribute('inert', '');
     editor?.setAttribute('aria-hidden', 'true');
-    // Capture before EUI's bubbling window listener can close the entire editing session.
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         event.preventDefault();
@@ -41,7 +46,6 @@ export const VegaFiltersFlyout = ({
         goBack();
       }
     };
-    // The background flyout still has outside-click listeners while it is in history.
     const onOutsidePointer = (event: Event) => {
       const filters = document.getElementById(`${menuManager.flyoutId}-filters`);
       if (event.target instanceof Node && !filters?.contains(event.target)) {
@@ -60,23 +64,18 @@ export const VegaFiltersFlyout = ({
     };
   }, [menuManager, goBack]);
 
-  const title = i18n.translate('visTypeVega.editor.panelLevelFiltersTitle', {
+  const title = i18n.translate('embeddableApi.editorMenu.panelLevelFiltersTitle', {
     defaultMessage: 'Panel level filters',
   });
   return (
     <EuiFlyout
+      {...flyoutProps}
       id={`${menuManager.flyoutId}-filters`}
       session="start"
       historyKey={menuManager.historyKey}
-      size="m"
-      maxWidth={800}
-      paddingSize="m"
-      type={type}
-      ownFocus={type !== 'overlay'}
-      resizable
       outsideClickCloses={false}
       hideCloseButton
-      data-test-subj="vegaFiltersFlyout"
+      data-test-subj="editorFiltersFlyout"
       aria-label={title}
       onActive={() => {
         requestAnimationFrame(() => {
@@ -93,7 +92,7 @@ export const VegaFiltersFlyout = ({
         trailingActions: [
           {
             iconType: 'cross',
-            'aria-label': i18n.translate('visTypeVega.editor.closeFiltersButtonAriaLabel', {
+            'aria-label': i18n.translate('embeddableApi.editorMenu.closeFiltersButtonAriaLabel', {
               defaultMessage: 'Close filters',
             }),
             onClick: () => goBack(),
@@ -101,19 +100,19 @@ export const VegaFiltersFlyout = ({
         ],
       }}
     >
-      <EuiFlyoutBody data-test-subj="vegaFiltersFlyoutBody" />
+      <EuiFlyoutBody data-test-subj="editorFiltersFlyoutBody" />
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty onClick={goBack}>
-              {i18n.translate('visTypeVega.editor.cancelFiltersButtonLabel', {
+              {i18n.translate('embeddableApi.editorMenu.cancelFiltersButtonLabel', {
                 defaultMessage: 'Cancel',
               })}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton fill onClick={goBack}>
-              {i18n.translate('visTypeVega.editor.applyFiltersButtonLabel', {
+              {i18n.translate('embeddableApi.editorMenu.applyFiltersButtonLabel', {
                 defaultMessage: 'Apply',
               })}
             </EuiButton>

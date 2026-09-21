@@ -12,10 +12,16 @@ import { act, fireEvent, render, screen, waitFor, within } from '@testing-librar
 import userEvent from '@testing-library/user-event';
 import { EuiFlyout, EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
+import {
+  initializeEditorMenuManager,
+  type EditorMenuActionContext,
+} from '@kbn/embeddable-plugin/public';
+import { uiActions as embeddableUiActions } from '@kbn/embeddable-plugin/public/kibana_services';
+import { createAction, type Action } from '@kbn/ui-actions-plugin/public';
 import hjson from 'hjson';
 import { VegaSpecEditor } from '../components/vega_vis_editor';
 import { getNotifications } from '../services';
-import { initializeMenuManager } from './menu_manager';
+import { getVegaEditorHelpAction, getVegaEditorOptionsAction } from './editor_menu_actions';
 import { VegaEditorFlyout } from './vega_editor_flyout';
 
 // Exercise real flyout and focus behavior instead of EUI's simplified Jest components.
@@ -23,6 +29,13 @@ jest.mock('@elastic/eui', () =>
   jest.requireActual(require.resolve('@elastic/eui/package.json').replace('package.json', 'lib'))
 );
 jest.mock('@kbn/monaco', () => ({ XJsonLang: { ID: 'json' } }));
+jest.mock('@kbn/embeddable-plugin/public/kibana_services', () => ({
+  core: { notifications: { toasts: { addError: jest.fn() } } },
+  uiActions: {
+    getTrigger: jest.fn(() => ({ id: 'EMBEDDABLE_EDITOR_MENU_TRIGGER' })),
+    getTriggerCompatibleActions: jest.fn(),
+  },
+}));
 jest.mock('../services', () => ({
   getNotifications: jest.fn(() => ({ toasts: { addError: jest.fn() } })),
   getDocLinks: () => ({ links: { visualize: { vega: 'https://elastic.co/vega-help' } } }),
@@ -48,7 +61,11 @@ jest.mock('@kbn/code-editor', () => ({
 }));
 
 describe('VegaEditorFlyout', () => {
-  const renderFlyout = ({
+  const mockGetTriggerCompatibleActions = jest.mocked(
+    embeddableUiActions.getTriggerCompatibleActions
+  );
+
+  const renderFlyout = async ({
     isNewPanel = false,
     type = 'push',
   }: { isNewPanel?: boolean; type?: 'push' | 'overlay' } = {}) => {
@@ -56,7 +73,26 @@ describe('VegaEditorFlyout', () => {
     const onRevert = jest.fn();
     const onPreview = jest.fn();
     const onSave = jest.fn();
-    const menuManager = initializeMenuManager();
+    const editFiltersAction = createAction<EditorMenuActionContext>({
+      id: 'editFilters',
+      order: 10,
+      getIconType: () => 'filter',
+      getDisplayName: () => 'Edit filters',
+      execute: async ({ anchor, editor }) => {
+        if (anchor) editor.openFilters?.(anchor);
+      },
+    });
+    const actions = [
+      createAction(getVegaEditorOptionsAction()),
+      createAction(getVegaEditorHelpAction()),
+      editFiltersAction,
+    ] as unknown as Array<Action<object>>;
+    mockGetTriggerCompatibleActions.mockResolvedValue(actions);
+    const menuManager = await initializeEditorMenuManager({
+      editorType: 'vega',
+      title: 'Vega',
+      supportedMenus: ['options', 'help', 'filters'],
+    });
     const { unmount } = render(
       <I18nProvider>
         <EuiProvider>
@@ -90,7 +126,7 @@ describe('VegaEditorFlyout', () => {
   };
 
   it('does not preview while typing; Preview pushes the current spec', async () => {
-    const { onPreview } = renderFlyout();
+    const { onPreview } = await renderFlyout();
     const user = userEvent.setup();
 
     expect(screen.getByRole('heading', { name: 'Vega', level: 2 })).toBeInTheDocument();
@@ -114,7 +150,7 @@ describe('VegaEditorFlyout', () => {
   });
 
   it('disables Apply and close until an existing panel has real changes', async () => {
-    renderFlyout();
+    await renderFlyout();
     const user = userEvent.setup();
 
     // No edits yet → nothing to save.
@@ -131,13 +167,13 @@ describe('VegaEditorFlyout', () => {
     expect(screen.getByTestId('vegaEditorFlyoutSaveButton')).toBeDisabled();
   });
 
-  it('enables Apply and close for a new panel so its default spec can be accepted', () => {
-    renderFlyout({ isNewPanel: true });
+  it('enables Apply and close for a new panel so its default spec can be accepted', async () => {
+    await renderFlyout({ isNewPanel: true });
     expect(screen.getByTestId('vegaEditorFlyoutSaveButton')).toBeEnabled();
   });
 
   it('saves the current spec, closes, and does not revert on unmount', async () => {
-    const { closeFlyout, onPreview, onRevert, onSave, unmount } = renderFlyout();
+    const { closeFlyout, onPreview, onRevert, onSave, unmount } = await renderFlyout();
     const user = userEvent.setup();
 
     const editor = screen.getByRole('textbox', { name: 'Vega spec' });
@@ -156,7 +192,7 @@ describe('VegaEditorFlyout', () => {
   });
 
   it('reverts to the pre-edit state on unmount when not applied (e.g. Esc / click-away)', async () => {
-    const { onRevert, unmount } = renderFlyout();
+    const { onRevert, unmount } = await renderFlyout();
     const user = userEvent.setup();
 
     const editor = screen.getByRole('textbox', { name: 'Vega spec' });
@@ -169,7 +205,7 @@ describe('VegaEditorFlyout', () => {
   });
 
   it('closes the flyout when Cancel is clicked (revert happens on the ensuing unmount)', async () => {
-    const { closeFlyout, onSave, onRevert } = renderFlyout();
+    const { closeFlyout, onSave, onRevert } = await renderFlyout();
     const user = userEvent.setup();
 
     await user.click(screen.getByTestId('vegaEditorFlyoutCancelButton'));
@@ -180,7 +216,7 @@ describe('VegaEditorFlyout', () => {
   });
 
   it('places gear then help then filters in the flyout menu and opens only one popover', async () => {
-    renderFlyout();
+    await renderFlyout();
     const user = userEvent.setup();
     const options = screen.getByRole('button', { name: 'Vega editor options' });
     const help = screen.getByRole('button', { name: 'Vega help' });
@@ -216,7 +252,10 @@ describe('VegaEditorFlyout', () => {
   )(
     'returns from $type filters with $action without ending the edit session',
     async ({ type, action }) => {
-      const { closeFlyout, onPreview, onSave, onRevert } = renderFlyout({ isNewPanel: true, type });
+      const { closeFlyout, onPreview, onSave, onRevert } = await renderFlyout({
+        isNewPanel: true,
+        type,
+      });
       const user = userEvent.setup();
       const editor = screen.getByRole('textbox', { name: 'Vega spec' });
       await user.clear(editor);
@@ -237,9 +276,9 @@ describe('VegaEditorFlyout', () => {
         expect(editor).toHaveAttribute('data-language', 'json');
         const filtersButton = screen.getByRole('button', { name: 'Edit filters' });
         await user.click(filtersButton);
-        const filters = screen.getByTestId('vegaFiltersFlyout');
+        const filters = screen.getByTestId('editorFiltersFlyout');
         expect(within(filters).getByText('Panel level filters')).toBeVisible();
-        expect(screen.getByTestId('vegaFiltersFlyoutBody').textContent).toBe('');
+        expect(screen.getByTestId('editorFiltersFlyoutBody').textContent).toBe('');
         expect(within(filters).getByRole('button', { name: 'Apply' })).toBeEnabled();
         expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
         expect(editor.closest('[inert]')).not.toBeNull();
@@ -260,7 +299,7 @@ describe('VegaEditorFlyout', () => {
           );
         }
         await waitFor(() => expect(filtersButton).toHaveFocus());
-        expect(screen.queryByTestId('vegaFiltersFlyout')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('editorFiltersFlyout')).not.toBeInTheDocument();
         expect(screen.getByRole('textbox')).toBe(editor);
         expect(editor).toHaveValue(draft);
         expect(editor).toHaveAttribute('data-language', 'json');
@@ -274,8 +313,33 @@ describe('VegaEditorFlyout', () => {
     15000
   );
 
+  it('preserves an unpreviewed draft and format while visiting filters', async () => {
+    const { closeFlyout, onPreview, onSave, onRevert } = await renderFlyout();
+    const user = userEvent.setup();
+    const editor = screen.getByRole('textbox', { name: 'Vega spec' });
+    await user.clear(editor);
+    await user.paste('{"mark": "bar"}');
+    await user.click(screen.getByRole('button', { name: 'Vega editor options' }));
+    await user.click(screen.getByText('Reformat as JSON, delete comments'));
+    const draft = (editor as HTMLTextAreaElement).value;
+
+    await user.click(screen.getByRole('button', { name: 'Edit filters' }));
+    await user.click(
+      within(screen.getByTestId('editorFiltersFlyout')).getByRole('button', { name: 'Cancel' })
+    );
+
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Edit filters' })).toHaveFocus());
+    expect(editor).toHaveValue(draft);
+    expect(editor).toHaveAttribute('data-language', 'json');
+    expect(screen.getByTestId('vegaEditorFlyoutPreviewButton')).toBeEnabled();
+    expect(closeFlyout).not.toHaveBeenCalled();
+    expect(onPreview).not.toHaveBeenCalled();
+    expect(onSave).not.toHaveBeenCalled();
+    expect(onRevert).not.toHaveBeenCalled();
+  });
+
   it('opens with the keyboard and restores focus after Escape', async () => {
-    const { closeFlyout } = renderFlyout();
+    const { closeFlyout } = await renderFlyout();
     const user = userEvent.setup();
     const options = screen.getByRole('button', { name: 'Vega editor options' });
     act(() => options.focus());
@@ -296,7 +360,7 @@ describe('VegaEditorFlyout', () => {
     ['Reformat as HJSON', 'hjson'],
     ['Reformat as JSON, delete comments', 'json'],
   ])('formats the latest text with %s without previewing or saving', async (label, language) => {
-    const { onPreview, onSave } = renderFlyout();
+    const { onPreview, onSave } = await renderFlyout();
     const user = userEvent.setup();
     const editor = screen.getByRole('textbox', { name: 'Vega spec' });
     await user.clear(editor);
@@ -322,7 +386,7 @@ describe('VegaEditorFlyout', () => {
       ...getNotifications(),
       toasts: { ...getNotifications().toasts, addError },
     });
-    const { onPreview, onSave } = renderFlyout();
+    const { onPreview, onSave } = await renderFlyout();
     const user = userEvent.setup();
     const editor = screen.getByRole('textbox', { name: 'Vega spec' });
     await user.clear(editor);

@@ -11,7 +11,7 @@ import React from 'react';
 import { EuiWrappingPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import type { MenuManager } from './menu_manager';
+import type { EditorMenuManager } from '@kbn/embeddable-plugin/public';
 import type { VegaActionsMenuProps } from '../components/vega_actions_menu';
 import { VegaActionsMenuContent } from '../components/vega_actions_menu';
 import { VegaHelpMenuContent } from '../components/vega_help_menu';
@@ -20,7 +20,7 @@ export const VegaEditorMenu = ({
   menuManager,
   formatHJson,
   formatJson,
-}: VegaActionsMenuProps & { menuManager: MenuManager }): React.ReactElement | null => {
+}: VegaActionsMenuProps & { menuManager: EditorMenuManager }): React.ReactElement | null => {
   const [activeMenu] = useBatchedPublishingSubjects(menuManager.activeMenu$);
   if (!activeMenu || activeMenu.menu === 'filters') return null;
 
@@ -51,7 +51,7 @@ export const VegaEditorMenu = ({
       panelPaddingSize="none"
       anchorPosition="downRight"
       aria-label={
-        menu === 'format'
+        menu === 'options'
           ? i18n.translate('visTypeVega.editor.vegaEditorOptionsPopoverAriaLabel', {
               defaultMessage: 'Vega editor options',
             })
@@ -60,7 +60,7 @@ export const VegaEditorMenu = ({
             })
       }
     >
-      {menu === 'format' ? (
+      {menu === 'options' ? (
         <VegaActionsMenuContent
           formatHJson={formatAndClose(formatHJson)}
           formatJson={formatAndClose(formatJson)}

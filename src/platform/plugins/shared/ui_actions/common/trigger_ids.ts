@@ -20,6 +20,7 @@ export const ON_SELECT_RANGE = 'on_select_range';
 export const ON_APPLY_FILTER = 'on_apply_filter';
 
 export const ON_OPEN_PANEL_MENU = 'on_open_panel_menu';
+export const EMBEDDABLE_EDITOR_MENU_TRIGGER = 'EMBEDDABLE_EDITOR_MENU_TRIGGER';
 
 /**
  * These triggers have not yet been updated, and may be removed or consolidated later.

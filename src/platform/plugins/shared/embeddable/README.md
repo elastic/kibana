@@ -116,6 +116,18 @@ The embeddable panel uses UiActions and Triggers registry to make the embeddable
 | ON_OPEN_PANEL_MENU | trigger to add an action to a panel's context menu or hover action menu. Only actions listed in QUICK_ACTION_IDS are displayed in hover action menu. |
 | PANEL_BADGE_TRIGGER | trigger to add a badge to a panel's title bar |
 
+### Editor menus
+
+Embeddable editors can create a transient editor-menu session with
+`initializeEditorMenuManager`. The manager discovers compatible actions attached to
+`EMBEDDABLE_EDITOR_MENU_TRIGGER` before the editor opens and exposes them as ordered flyout trailing
+actions. Create one manager for each editor flyout and call `dispose` when the flyout closes.
+
+Embeddable registers `EDITOR_MENU_EDIT_FILTERS_ACTION` on this trigger. The action is compatible
+with editors that include `filters` in `supportedMenus` and opens `EditorFiltersFlyout`. Editor-owning
+plugins can register additional actions against the same trigger, such as Vega's Options and Help
+actions.
+
 The embeddable panel passes the embeddable API to UiActions. Each UiAction uses its `isCompatable` method to exclude embeddable API's that do not implement the required shared interfaces. An action is not displayed when `isCompatable` returns false.
 
 The table below lists the UiActions registered to embeddable panel triggers.

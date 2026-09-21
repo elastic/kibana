@@ -9,13 +9,20 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiTitle,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { ManagedEditorFooter } from '@kbn/presentation-util-plugin/public';
-import type { MenuManager } from './menu_manager';
-import { VegaFiltersFlyout } from './vega_filters_flyout';
+import { EditorFiltersFlyout, type EditorMenuManager } from '@kbn/embeddable-plugin/public';
 import { VegaEditorMenu } from './vega_editor_menu';
 import { VegaSpecEditor } from '../components/vega_vis_editor';
 import type { VegaByValueState } from '../../server';
@@ -54,7 +61,7 @@ export const VegaEditorFlyout = ({
   onSave,
 }: {
   flyoutType?: 'push' | 'overlay';
-  menuManager: MenuManager;
+  menuManager: EditorMenuManager;
   ariaLabelledBy: string;
   closeFlyout: () => void;
   initialSpec: VegaByValueState['spec'];
@@ -101,7 +108,17 @@ export const VegaEditorFlyout = ({
       {activeMenu?.menu === 'filters' &&
         activeMenu.isOpen &&
         createPortal(
-          <VegaFiltersFlyout menuManager={menuManager} type={flyoutType} />,
+          <EditorFiltersFlyout
+            menuManager={menuManager}
+            flyoutProps={{
+              size: 'm',
+              maxWidth: 800,
+              paddingSize: 'm',
+              type: flyoutType,
+              ownFocus: flyoutType !== 'overlay',
+              resizable: true,
+            }}
+          />,
           document.body
         )}
       <EuiFlyoutHeader hasBorder>
@@ -118,27 +135,50 @@ export const VegaEditorFlyout = ({
           onFormatChange={setFormat}
         />
       </EuiFlyoutBody>
-      <ManagedEditorFooter
-        onCancel={closeFlyout}
-        cancelButtonLabel={i18n.translate('visTypeVega.dashboard.cancelButtonLabel', {
-          defaultMessage: 'Cancel',
-        })}
-        cancelButtonDataTestSubj="vegaEditorFlyoutCancelButton"
-        previewAction={{
-          onPreview: previewChanges,
-          label: i18n.translate('visTypeVega.dashboard.previewButtonLabel', {
-            defaultMessage: 'Run Preview',
-          }),
-          isEnabled: canPreview,
-          'data-test-subj': 'vegaEditorFlyoutPreviewButton',
-        }}
-        onSave={handleSave}
-        saveButtonLabel={i18n.translate('visTypeVega.dashboard.applyAndCloseButtonLabel', {
-          defaultMessage: 'Apply and close',
-        })}
-        isSaveDisabled={!canSave}
-        saveButtonDataTestSubj="vegaEditorFlyoutSaveButton"
-      />
+      <EuiFlyoutFooter>
+        <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              flush="left"
+              onClick={closeFlyout}
+              data-test-subj="vegaEditorFlyoutCancelButton"
+            >
+              {i18n.translate('visTypeVega.dashboard.cancelButtonLabel', {
+                defaultMessage: 'Cancel',
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  color="success"
+                  iconType="play"
+                  disabled={!canPreview}
+                  onClick={previewChanges}
+                  data-test-subj="vegaEditorFlyoutPreviewButton"
+                >
+                  {i18n.translate('visTypeVega.dashboard.previewButtonLabel', {
+                    defaultMessage: 'Run Preview',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  disabled={!canSave}
+                  onClick={handleSave}
+                  data-test-subj="vegaEditorFlyoutSaveButton"
+                >
+                  {i18n.translate('visTypeVega.dashboard.applyAndCloseButtonLabel', {
+                    defaultMessage: 'Apply and close',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
     </>
   );
 };

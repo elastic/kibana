@@ -8,15 +8,20 @@
  */
 
 import React from 'react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import type { CoreStart } from '@kbn/core/public';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import { openLazySystemFlyout } from './open_lazy_system_flyout';
 
 const overlayRef = { close: jest.fn() } as unknown as OverlayRef;
-const openSystemFlyout = jest.fn(() => overlayRef);
+type OpenSystemFlyout = CoreStart['overlays']['openSystemFlyout'];
+const openSystemFlyout = jest.fn<ReturnType<OpenSystemFlyout>, Parameters<OpenSystemFlyout>>(
+  () => overlayRef
+);
 const core = {
   overlays: { openSystemFlyout },
   application: { currentAppId$: { pipe: () => ({ subscribe: () => undefined }) } },
+  notifications: { toasts: { addWarning: jest.fn() } },
 } as unknown as CoreStart;
 
 describe('openLazySystemFlyout', () => {
@@ -54,5 +59,45 @@ describe('openLazySystemFlyout', () => {
     expect(parentApi.openOverlay).toHaveBeenCalledWith(overlayRef, {
       focusedPanelId: 'panel-1',
     });
+  });
+
+  it('closes, clears tracking, notifies, and restores focus after loading fails', async () => {
+    const parentApi = { openOverlay: jest.fn(), clearOverlays: jest.fn() };
+    const returnFocus = jest.fn();
+    openLazySystemFlyout({
+      core,
+      parentApi,
+      returnFocus,
+      loadContent: async () => {
+        throw new Error('Failed');
+      },
+    });
+    render(openSystemFlyout.mock.calls[0][0]);
+
+    await waitFor(() => expect(core.notifications.toasts.addWarning).toHaveBeenCalledTimes(1));
+    expect(overlayRef.close).toHaveBeenCalledTimes(1);
+    expect(parentApi.clearOverlays).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(returnFocus).toHaveBeenCalledTimes(1));
+  });
+
+  it.each(['resolve', 'reject'] as const)('ignores a late %s after closing', async (outcome) => {
+    let resolveLoad: (content: JSX.Element) => void = () => {};
+    let rejectLoad: (error: Error) => void = () => {};
+    const loading = new Promise<JSX.Element>((resolve, reject) => {
+      resolveLoad = resolve;
+      rejectLoad = reject;
+    });
+    openLazySystemFlyout({ core, loadContent: () => loading });
+    const view = render(openSystemFlyout.mock.calls[0][0]);
+    openSystemFlyout.mock.calls[0][1]?.onClose?.(overlayRef);
+    view.unmount();
+
+    await act(async () => {
+      if (outcome === 'resolve') resolveLoad(<div>Late content</div>);
+      else rejectLoad(new Error('Late failure'));
+    });
+    expect(screen.queryByText('Late content')).not.toBeInTheDocument();
+    expect(core.notifications.toasts.addWarning).not.toHaveBeenCalled();
+    expect(overlayRef.close).toHaveBeenCalledTimes(1);
   });
 });

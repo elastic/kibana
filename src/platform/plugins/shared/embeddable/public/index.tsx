@@ -55,6 +55,17 @@ export type { PresentationPanelProps } from './react_embeddable_system/panel_com
 
 export type { DrilldownsManager, HasDrilldowns } from './drilldowns/types';
 
+export { EditorFiltersFlyout, initializeEditorMenuManager } from './editor_menu';
+export type {
+  ActiveEditorMenu,
+  EditorFiltersFlyoutProps,
+  EditorMenuActionContext,
+  EditorMenuDescriptor,
+  EditorMenuItem,
+  EditorMenuManager,
+  InitializeEditorMenuManagerParams,
+} from './editor_menu';
+
 import type { PresentationPanelErrorProps } from './react_embeddable_system/panel_component/presentation_panel_error';
 const LazyPanelError = React.lazy(async () => {
   const { PresentationPanelError } = await import('./async_module');

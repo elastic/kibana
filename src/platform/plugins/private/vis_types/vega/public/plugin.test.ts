@@ -11,6 +11,7 @@ import { BehaviorSubject } from 'rxjs';
 import {
   ADD_CANVAS_ELEMENT_TRIGGER,
   ADD_PANEL_TRIGGER,
+  EMBEDDABLE_EDITOR_MENU_TRIGGER,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -23,14 +24,27 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { VEGA_EMBEDDABLE_TYPE } from '../common/constants';
-import { ADD_VEGA_EMBEDDABLE_ACTION_ID, ADD_VEGA_PANEL_ACTION_ID } from './constants';
+import {
+  ADD_VEGA_EMBEDDABLE_ACTION_ID,
+  ADD_VEGA_PANEL_ACTION_ID,
+  VEGA_EDITOR_HELP_ACTION,
+  VEGA_EDITOR_OPTIONS_ACTION,
+} from './constants';
 import { VegaPlugin, type VegaPluginStartDependencies } from './plugin';
 
 const mockCreateVegaFn = jest.fn();
 const mockGetVegaVisRenderer = jest.fn();
+const mockGetAddVegaPanelAction = jest.fn(() => ({ id: ADD_VEGA_PANEL_ACTION_ID }));
+const mockGetAddVegaEmbeddableAction = jest.fn(() => ({ id: ADD_VEGA_EMBEDDABLE_ACTION_ID }));
+const mockGetVegaEditorOptionsAction = jest.fn(() => ({ id: VEGA_EDITOR_OPTIONS_ACTION }));
+const mockGetVegaEditorHelpAction = jest.fn(() => ({ id: VEGA_EDITOR_HELP_ACTION }));
 
 jest.mock('./async_module', () => ({
   createVegaFn: mockCreateVegaFn,
+  getAddVegaEmbeddableAction: mockGetAddVegaEmbeddableAction,
+  getAddVegaPanelAction: mockGetAddVegaPanelAction,
+  getVegaEditorHelpAction: mockGetVegaEditorHelpAction,
+  getVegaEditorOptionsAction: mockGetVegaEditorOptionsAction,
   getVegaVisRenderer: mockGetVegaVisRenderer,
   vegaVisType: {},
 }));
@@ -127,6 +141,50 @@ describe('VegaPlugin', () => {
         ADD_CANVAS_ELEMENT_TRIGGER,
         ADD_VEGA_PANEL_ACTION_ID
       );
+    });
+
+    it('registers the Vega editor menu actions once and attaches them to the shared trigger', async () => {
+      const { uiActions } = startPlugin(new BehaviorSubject(false));
+      expect(uiActions.registerActionAsync).toHaveBeenCalledWith(
+        VEGA_EDITOR_OPTIONS_ACTION,
+        expect.any(Function)
+      );
+      expect(uiActions.registerActionAsync).toHaveBeenCalledWith(
+        VEGA_EDITOR_HELP_ACTION,
+        expect.any(Function)
+      );
+      expect(uiActions.attachAction).toHaveBeenCalledWith(
+        EMBEDDABLE_EDITOR_MENU_TRIGGER,
+        VEGA_EDITOR_OPTIONS_ACTION
+      );
+      expect(uiActions.attachAction).toHaveBeenCalledWith(
+        EMBEDDABLE_EDITOR_MENU_TRIGGER,
+        VEGA_EDITOR_HELP_ACTION
+      );
+
+      const optionsLoader = uiActions.registerActionAsync.mock.calls.find(
+        ([actionId]) => actionId === VEGA_EDITOR_OPTIONS_ACTION
+      )?.[1];
+      const helpLoader = uiActions.registerActionAsync.mock.calls.find(
+        ([actionId]) => actionId === VEGA_EDITOR_HELP_ACTION
+      )?.[1];
+      if (!optionsLoader || !helpLoader) throw new Error('Expected editor action loaders');
+      expect((await optionsLoader()).id).toBe(VEGA_EDITOR_OPTIONS_ACTION);
+      expect((await helpLoader()).id).toBe(VEGA_EDITOR_HELP_ACTION);
+    });
+
+    it('loads both add actions from the shared async module', async () => {
+      const { uiActions } = startPlugin(new BehaviorSubject(false));
+      const legacyLoader = uiActions.registerActionAsync.mock.calls.find(
+        ([actionId]) => actionId === ADD_VEGA_PANEL_ACTION_ID
+      )?.[1];
+      const embeddableLoader = uiActions.registerActionAsync.mock.calls.find(
+        ([actionId]) => actionId === ADD_VEGA_EMBEDDABLE_ACTION_ID
+      )?.[1];
+      if (!legacyLoader || !embeddableLoader) throw new Error('Expected add action loaders');
+
+      expect((await legacyLoader()).id).toBe(ADD_VEGA_PANEL_ACTION_ID);
+      expect((await embeddableLoader()).id).toBe(ADD_VEGA_EMBEDDABLE_ACTION_ID);
     });
 
     it('swaps in the standalone action and detaches the legacy action when the flag is enabled', () => {

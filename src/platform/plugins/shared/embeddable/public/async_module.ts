@@ -18,6 +18,7 @@ export { CustomizePanelAction } from './ui_actions/customize_panel_action';
 export { EditPanelAction } from './ui_actions/edit_panel_action/edit_panel_action';
 export { ShowConfigPanelAction } from './ui_actions/show_config_panel_action/show_config_panel_action';
 export { InspectPanelAction } from './ui_actions/inspect_panel_action/inspect_panel_action';
+export { getEditFiltersAction } from './editor_menu/edit_filters_action';
 export { PresentationPanel } from './react_embeddable_system/panel_component/presentation_panel';
 export { PresentationPanelError } from './react_embeddable_system/panel_component/presentation_panel_error';
 export { buildEmbeddable } from './react_embeddable_system/build_embeddable';

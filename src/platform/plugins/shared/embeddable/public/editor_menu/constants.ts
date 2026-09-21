@@ -7,12 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { vegaVisType } from './vega_type';
-export { createVegaFn } from './vega_fn';
-export { getVegaVisRenderer } from './vega_vis_renderer';
-export { getAddVegaPanelAction } from './add_vega_panel_action';
-export { getAddVegaEmbeddableAction } from './embeddable/add_vega_embeddable_action';
-export {
-  getVegaEditorHelpAction,
-  getVegaEditorOptionsAction,
-} from './embeddable/editor_menu_actions';
+export const EDITOR_MENU_EDIT_FILTERS_ACTION = 'EDITOR_MENU_EDIT_FILTERS_ACTION';

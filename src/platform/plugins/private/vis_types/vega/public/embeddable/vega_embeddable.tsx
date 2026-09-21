@@ -49,7 +49,7 @@ import {
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { openLazySystemFlyout, tracksOverlays } from '@kbn/presentation-util';
-import { initializeMenuManager } from './menu_manager';
+import { initializeEditorMenuManager } from '@kbn/embeddable-plugin/public';
 import {
   VEGA_EMBEDDABLE_TYPE,
   VEGA_STANDALONE_EMBEDDABLE_FLAG,
@@ -205,9 +205,18 @@ export const vegaEmbeddableFactory = (
       isEditingEnabled: () => true,
       onEdit: async ({ isNewPanel = false, returnFocus } = {}) => {
         const initialSpec = spec$.getValue();
-        const menuManager = initializeMenuManager();
+        let menuManager;
+        try {
+          menuManager = await initializeEditorMenuManager({
+            editorType: VEGA_EMBEDDABLE_TYPE,
+            title: 'Vega',
+            supportedMenus: ['options', 'help', 'filters'],
+          });
+        } catch {
+          return;
+        }
         const flyoutType = (tracksOverlays(parentApi) && parentApi.panelFlyoutType) || 'push';
-        openLazySystemFlyout({
+        const flyoutRef = openLazySystemFlyout({
           core,
           parentApi,
           returnFocus,
@@ -241,6 +250,7 @@ export const vegaEmbeddableFactory = (
             );
           },
         });
+        void flyoutRef.onClose.then(menuManager.dispose);
       },
       getInspectorAdapters: () => inspectorAdapters,
       // Only when the flag is on: the public dashboards-as-code schema is registered then, so
