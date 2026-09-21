@@ -66,7 +66,11 @@ export function SettingsPage() {
 
   if (isAvailabilityLoading) {
     return (
-      <SignificantEventsAppPageTemplate.Body grow alignment="center">
+      <SignificantEventsAppPageTemplate.Body
+        grow
+        alignment="center"
+        css={{ minBlockSize: 'var(--kbn-application--content-height, 100vh)' }}
+      >
         <EuiLoadingElastic size="xxl" />
       </SignificantEventsAppPageTemplate.Body>
     );
