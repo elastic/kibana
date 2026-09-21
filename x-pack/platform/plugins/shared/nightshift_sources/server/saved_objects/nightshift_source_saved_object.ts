@@ -52,7 +52,7 @@ export const nightshiftSourceSavedObjectType: SavedObjectsType<NightshiftSourceA
       title: { type: 'keyword', ignore_above: 1024 },
       enabled: { type: 'boolean' },
       // Create looks this up in the current space so two sources with the same title do not share a view.
-      view_name: { type: 'keyword' },
+      view_name: { type: 'keyword', ignore_above: 1024 },
       // tags and slug stay in `_source`; list only filters/sorts title and enabled.
     },
   },
