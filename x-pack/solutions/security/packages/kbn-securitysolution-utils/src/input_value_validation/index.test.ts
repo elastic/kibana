@@ -9,23 +9,34 @@ import { hasControlCharacters, trimInputValues } from '.';
 
 describe('hasControlCharacters', () => {
   it.each([
-    ['tab', 'value\twith-tab'],
-    ['line feed', 'value\nwith-line-feed'],
-    ['carriage return', 'value\rwith-carriage-return'],
-    ['NUL', 'value\u0000with-nul'],
-    ['DEL', 'value\u007Fwith-del'],
-    ['C1', 'value\u0085with-c1'],
-  ])('detects an interior %s', (_, value) => {
+    ['interior NUL', 'value\u0000with-nul'],
+    ['leading NUL', '\u0000value'],
+    ['trailing NUL', 'value\u0000'],
+  ])('detects a %s', (_, value) => {
     expect(hasControlCharacters(value)).toBe(true);
   });
 
-  it('ignores edge whitespace but still detects a remaining control character', () => {
+  it('detects a NUL surrounded by edge whitespace', () => {
     expect(hasControlCharacters(' value\u0000 ')).toBe(true);
+  });
+
+  // Deliberately allowed: a real process.command_line or a Linux file name can contain these,
+  // and the Endpoint matches values literally, so rejecting them would break valid entries.
+  it.each([
+    ['interior tab', 'powershell.exe\t-Command'],
+    ['interior line feed', 'powershell.exe\n-Command'],
+    ['interior carriage return', 'value\rmore'],
+    ['interior DEL', 'value\u007Fmore'],
+    ['interior C1', 'value\u0085more'],
+    ['interior vertical tab', 'value\u000Bmore'],
+  ])('allows an %s', (_, value) => {
+    expect(hasControlCharacters(value)).toBe(false);
   });
 
   it('inspects every array member', () => {
     expect(hasControlCharacters([' whitespace ', 'ctl\u0000'])).toBe(true);
-    expect(hasControlCharacters(['clean', 'also clean', 'bad\u007Fvalue'])).toBe(true);
+    expect(hasControlCharacters(['clean', 'also clean', 'bad\u0000value'])).toBe(true);
+    expect(hasControlCharacters(['clean', 'also clean'])).toBe(false);
   });
 
   it.each([

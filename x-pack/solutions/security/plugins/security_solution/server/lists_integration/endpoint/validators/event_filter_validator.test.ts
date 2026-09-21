@@ -77,7 +77,7 @@ describe('Endpoint Exceptions API validations', () => {
       expect(item.entries[0]).toEqual(expect.objectContaining({ value: '/opt/Elastic/*\u00A0' }));
     });
 
-    it('rejects a control character in a nested entry on update', async () => {
+    it('rejects a null character in a nested entry on update', async () => {
       const item = buildItem('process.parent');
       item.entries = [
         {
@@ -88,7 +88,7 @@ describe('Endpoint Exceptions API validations', () => {
               field: 'name',
               type: 'match',
               operator: 'included',
-              value: 'endpoint\u007F',
+              value: 'endpoint\u0000',
             },
           ],
         },
@@ -99,7 +99,7 @@ describe('Endpoint Exceptions API validations', () => {
           { ...item, _version: undefined, id: 'event-filter-id' },
           {} as ExceptionListItemSchema
         )
-      ).rejects.toThrow(/control characters in fields: name/);
+      ).rejects.toThrow(/null characters in fields: name/);
     });
   });
   // -----------------------------------------------------------------------------

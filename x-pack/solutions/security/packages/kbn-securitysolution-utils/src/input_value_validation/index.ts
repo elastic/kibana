@@ -10,14 +10,14 @@ import { i18n } from '@kbn/i18n';
 export const CONTROL_CHARACTER_ERROR = i18n.translate(
   'utils.inputValueValidation.controlCharacterErrorMessage',
   {
-    defaultMessage: 'Control characters prevent matching. Remove them and re-enter the value.',
+    defaultMessage: 'Null characters prevent matching. Remove them and re-enter the value.',
   }
 );
 
-// C0 controls (incl. tab, LF, CR), DEL and C1 controls.
-const CONTROL_CHARACTER_PATTERN = /[\u0000-\u001F\u007F-\u009F]/;
+// NUL only: other control characters (tab, newline) can appear in a real command line or path.
+const NULL_CHARACTER = '\u0000';
 
-/** Returns true when a value (or any array member) still contains a control character after trimming. */
+/** Returns true when a value, or any array member, contains a NUL character. */
 export const hasControlCharacters = (value?: string | string[]): boolean => {
   if (value === undefined) {
     return false;
@@ -25,7 +25,7 @@ export const hasControlCharacters = (value?: string | string[]): boolean => {
 
   const values = Array.isArray(value) ? value : [value];
 
-  return values.some((member) => CONTROL_CHARACTER_PATTERN.test(member.trim()));
+  return values.some((member) => member.includes(NULL_CHARACTER));
 };
 
 /** Trims edge whitespace; array members that become empty are dropped. */

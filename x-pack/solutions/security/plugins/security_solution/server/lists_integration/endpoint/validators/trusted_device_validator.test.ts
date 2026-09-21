@@ -250,10 +250,10 @@ describe('Endpoint Trusted Device API validations', () => {
       expect(item.entries[0]).toEqual(expect.objectContaining({ value: ' DESKTOP-1 ' }));
     });
 
-    it('rejects a control character on create', async () => {
+    it('rejects a null character on create', async () => {
       await expect(
         trustedDeviceValidator.validatePreCreateItem(buildItem('DESKTOP\u0000-1'))
-      ).rejects.toThrow(/control characters in fields: host\.name/);
+      ).rejects.toThrow(/null characters in fields: host\.name/);
     });
   });
 

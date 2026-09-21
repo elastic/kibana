@@ -133,7 +133,7 @@ describe('Endpoint Exceptions API validations', () => {
       expect(item.entries[0]).toEqual(expect.objectContaining({ value: 'a'.repeat(64) }));
     });
 
-    it('rejects a nested control character on update', async () => {
+    it('rejects a nested null character on update', async () => {
       await expect(
         validator.validatePreUpdateItem(
           {
@@ -143,7 +143,7 @@ describe('Endpoint Exceptions API validations', () => {
           },
           {} as ExceptionListItemSchema
         )
-      ).rejects.toThrow(/control characters in fields: subject_name/);
+      ).rejects.toThrow(/null characters in fields: subject_name/);
     });
 
     it('accepts an advanced-mode field at the 1024 character limit', async () => {

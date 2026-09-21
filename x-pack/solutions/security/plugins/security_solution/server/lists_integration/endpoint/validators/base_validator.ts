@@ -241,8 +241,9 @@ export class BaseValidator {
   }
 
   /**
-   * Rejects entry values containing control characters. These prevent the Endpoint from matching
-   * the value and are never legitimate, so this applies to every artifact type.
+   * Rejects entry values containing a NUL character. NUL can never be part of a real value and
+   * prevents the Endpoint from matching, so this applies to every artifact type. Other control
+   * characters are allowed: a tab or newline can appear in a genuine command line or path.
    */
   protected validateEntryValueCharacters(item: ExceptionItemLikeOptions): void {
     const controlCharacterFields = new Set<string>();
@@ -258,7 +259,7 @@ export class BaseValidator {
         i18n.translate(
           'xpack.securitySolution.endpointArtifactValidation.invalidEntryValuesErrorMessage',
           {
-            defaultMessage: 'Invalid entry values: control characters in fields: {fields}',
+            defaultMessage: 'Invalid entry values: null characters in fields: {fields}',
             values: { fields: i18n.formatList('unit', [...controlCharacterFields]) },
           }
         )

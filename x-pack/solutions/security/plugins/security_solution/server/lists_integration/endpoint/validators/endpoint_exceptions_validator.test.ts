@@ -60,10 +60,10 @@ describe('Endpoint Exceptions API validations', () => {
       );
     });
 
-    it('rejects a control character on create', async () => {
+    it('rejects a null character on create', async () => {
       await expect(
         validator.validatePreCreateItem(buildItem('C:\\Windows\\note\u0000pad.exe'))
-      ).rejects.toThrow(/control characters in fields: process\.executable\.caseless/);
+      ).rejects.toThrow(/null characters in fields: process\.executable\.caseless/);
     });
   });
 });

@@ -438,10 +438,12 @@ describe('Trusted apps form', () => {
         );
       });
 
-      it('blocks submission for an interior control character', async () => {
+      it('blocks submission for an interior null character', async () => {
         formProps.item = createItem({
           name: 'Trusted app',
-          entries: [createEntry(ConditionEntryField.PATH, 'match', 'C:\\Elastic\tEndpoint.exe')],
+          entries: [
+            createEntry(ConditionEntryField.PATH, 'match', 'C:\\Elastic\u0000Endpoint.exe'),
+          ],
         });
         rerender();
 

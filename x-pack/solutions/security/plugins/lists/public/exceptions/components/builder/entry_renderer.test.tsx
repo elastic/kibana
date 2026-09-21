@@ -1194,7 +1194,7 @@ describe('BuilderEntryItem', () => {
     ['blocklists', 'endpoint_blocklists', ENDPOINT_ARTIFACT_LISTS.blocklists.id],
     ['endpoint exceptions', 'endpoint', ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id],
   ] as const)(
-    'it reports a blocking control-character error for %s match values',
+    'it reports a blocking null-character error for %s match values',
     (_, listType, listId) => {
       (hasControlCharacters as jest.Mock).mockReturnValue(true);
       const mockSetErrorsExist = jest.fn();
@@ -1231,7 +1231,7 @@ describe('BuilderEntryItem', () => {
     }
   );
 
-  test('control-character feedback takes precedence over wildcard path feedback', () => {
+  test('null-character feedback takes precedence over wildcard path feedback', () => {
     (hasControlCharacters as jest.Mock).mockReturnValue(true);
     (validatePotentialWildcardInput as jest.Mock).mockReturnValue('path warning');
 
@@ -1266,7 +1266,7 @@ describe('BuilderEntryItem', () => {
     expect(validatePotentialWildcardInput).not.toHaveBeenCalled();
   });
 
-  test('it reports a blocking control-character error for Endpoint artifact match_any values', () => {
+  test('it reports a blocking null-character error for Endpoint artifact match_any values', () => {
     (hasControlCharacters as jest.Mock).mockReturnValue(true);
 
     wrapper = mount(

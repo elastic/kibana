@@ -128,7 +128,7 @@ describe('Condition entry input', () => {
   it.each([
     ['a clean value', 'trustedApp'],
     ['an all-whitespace value', ' \t\n'],
-    ['an interior control character', 'trusted\tApp'],
+    ['an interior null character', 'trusted\u0000App'],
   ])('does not update %s on blur', (_, value) => {
     props = { ...props, entry: { ...baseEntry, value } };
     render();

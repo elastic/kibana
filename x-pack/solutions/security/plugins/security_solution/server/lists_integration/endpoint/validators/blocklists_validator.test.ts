@@ -151,17 +151,17 @@ describe('Blocklists API validations', () => {
       );
     });
 
-    it('rejects a nested match_any control character on update', async () => {
+    it('rejects a nested match_any null character on update', async () => {
       await expect(
         validator.validatePreUpdateItem(
           {
-            ...buildItem(signerEntry(['Elastic', 'bad\rname'])),
+            ...buildItem(signerEntry(['Elastic', 'bad\u0000name'])),
             _version: undefined,
             id: 'blocklist-id',
           },
           {} as ExceptionListItemSchema
         )
-      ).rejects.toThrow(/control characters in fields: subject_name/);
+      ).rejects.toThrow(/null characters in fields: subject_name/);
     });
   });
   // -----------------------------------------------------------------------------

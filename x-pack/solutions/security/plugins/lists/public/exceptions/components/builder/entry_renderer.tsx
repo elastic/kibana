@@ -136,8 +136,8 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
     [setWarningsExist]
   );
 
-  // Endpoint artifact values are matched literally by the Endpoint agent, so control characters
-  // always prevent a match and are rejected outright. Keyed off the list id rather than the list
+  // Endpoint artifact values are matched literally by the Endpoint agent, so a NUL character
+  // always prevents a match and is rejected outright. Keyed off the list id rather than the list
   // type because the type/list_id pairs differ per artifact. Detection/rule exception values are
   // left untouched: their entries are evaluated by the detection engine, not the Endpoint.
   const isEndpointArtifactBuilder = listId != null && ENDPOINT_ARTIFACT_LIST_IDS.includes(listId);
