@@ -35,7 +35,9 @@ const throwScopedQueryError = (
   errorPrefix: string,
   error: Error
 ): never => {
-  const boomError = Boom.badRequest(`${errorPrefix} - ${getScopedQueryErrorMessage(error.message)}`);
+  const boomError = Boom.badRequest(
+    `${errorPrefix} - ${getScopedQueryErrorMessage(error.message)}`
+  );
   boomError.output.payload.attributes = getScopedQueryErrorAttributes(scope, error.message);
   throw boomError;
 };

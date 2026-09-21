@@ -23,7 +23,11 @@ export const transformCreateBody = (
   // Drop `enabled` from scopedQuery: the domain AlertsFilterQueryAttributes does not have that
   // field — it is a legacy storage field. The scope.alerting field carries enabled in the domain.
   const scopedQuery = rawScopedQuery
-    ? { kql: rawScopedQuery.kql ?? '', filters: rawScopedQuery.filters ?? [], dsl: rawScopedQuery.dsl }
+    ? {
+        kql: rawScopedQuery.kql ?? '',
+        filters: rawScopedQuery.filters ?? [],
+        dsl: rawScopedQuery.dsl,
+      }
     : rawScopedQuery;
   const scope = createBody.scope;
   return {
