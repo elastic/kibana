@@ -75,7 +75,7 @@ const schema = z.object({
     .record(z.string().max(MAX_STRING_LENGTH), mlEntityFieldValueSchema.optional())
     .optional()
     .describe(
-      '(single_metric_viewer only) Required when the chosen detector has partition_field_name, by_field_name, or over_field_name set. Key-value map of field name → value (e.g. {"host.name": "web-01"}). ALWAYS source these from a prior ml.ad_get_anomaly_records call — extract partition_field_value / by_field_value / over_field_value from a returned record. Do not guess or omit.'
+      '(single_metric_viewer only) Required when the chosen detector has partition_field_name, by_field_name, or over_field_name set. Key-value map of field name → value (e.g. {"host.name": "web-01"}). ALWAYS source these from a prior ml.query_anomalies call using the ad_query_anomaly_records reference query — extract partition_field_value / by_field_value / over_field_value from a returned record. Do not guess or omit.'
     ),
   function_description: z
     .string()

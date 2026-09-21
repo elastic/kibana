@@ -449,7 +449,7 @@ export const createAdCreateJobTool = (
             results: [
               {
                 type: ToolResultType.other,
-                data: { valid, documentsFound, sample_documents: documents },
+                data: { valid, documentsFound: documents?.length > 0, sample_documents: documents },
               },
             ],
           };
