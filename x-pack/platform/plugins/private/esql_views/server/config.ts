@@ -10,12 +10,9 @@ import { schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
 
 const configSchema = schema.object({
-  managementUi: schema.object(
-    {
-      enabled: schema.boolean({ defaultValue: false }),
-    },
-    { defaultValue: undefined }
-  ),
+  managementUi: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
 });
 
 export type EsqlViewsConfig = TypeOf<typeof configSchema>;
