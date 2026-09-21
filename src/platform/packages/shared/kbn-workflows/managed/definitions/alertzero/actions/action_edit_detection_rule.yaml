@@ -115,6 +115,8 @@ outputs:
     type: number
   - name: severity
     type: string
+  - name: threshold
+    type: object
   - name: interval
     type: string
   - name: from
@@ -138,5 +140,6 @@ steps:
       query: "{{ steps.patch_rule.output.query }}"
       risk_score: "${{ steps.patch_rule.output.risk_score }}"
       severity: "{{ steps.patch_rule.output.severity }}"
+      threshold: "${{ steps.patch_rule.output.threshold }}"
       interval: "{{ steps.patch_rule.output.interval }}"
       from: "{{ steps.patch_rule.output.from }}"
