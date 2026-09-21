@@ -19,8 +19,11 @@ export const ALERT_TRIAGE_SETTINGS: WorkerSettingsDeclaration = {
 
 export const ATTACK_DISCOVERY_SETTINGS: WorkerSettingsDeclaration = {
   workerId: SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
-  // Attack Discovery has no assisted gate: a run either waits for an analyst (manual) or
-  // generates on its own schedule with review after the fact (supervised).
+  // Two levels rather than the shared three: this Worker has exactly one gate — the
+  // forensics handoff a true-positive or inconclusive verdict proposes — so it needs
+  // one level that gates it and one that does not. `assisted` sits between those and
+  // would mean the same thing as `manual` here. Scoped down from three by product on
+  // 2026-09-14; the shared scale itself is unchanged.
   allowedAutonomyLevels: ['manual', 'supervised'],
   // Matches the Attack Discovery schedule form default.
   scheduleInterval: { defaultValue: '24h' },

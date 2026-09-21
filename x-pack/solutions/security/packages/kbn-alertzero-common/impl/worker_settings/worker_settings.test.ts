@@ -172,6 +172,18 @@ describe('allowed autonomy levels', () => {
       })
     ).toContain('autonomy');
   });
+
+  // Attack Discovery takes two of the three shared levels: it gates exactly one thing —
+  // the forensics handoff its verdicts propose — so it needs one level that gates that
+  // and one that does not. `assisted` sits between them and would be indistinguishable
+  // from `manual` here, which is why it is rejected rather than merely unused.
+  it.each(['manual', 'supervised'] as const)('accepts Attack Discovery autonomy %s', (autonomy) => {
+    const defaults = createDefaultWorkerSettings(ATTACK_DISCOVERY);
+
+    expect(
+      getCompleteWorkerSettingsSchema(ATTACK_DISCOVERY).safeParse({ ...defaults, autonomy }).success
+    ).toBe(true);
+  });
 });
 
 describe('projectStoredAutonomyLevel', () => {
