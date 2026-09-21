@@ -1365,7 +1365,8 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
               body: genericErrorResponse,
             },
             403: {
-              description: 'Forbidden. The caller lacks a privilege required by one of the gated asset types in the archive.',
+              description:
+                'Forbidden. The caller lacks a privilege required by one of the gated asset types in the archive.',
               body: genericErrorResponse,
             },
           },
