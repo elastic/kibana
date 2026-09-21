@@ -1732,9 +1732,6 @@ importers:
       '@kbn/data-federation-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/private/data_federation
-      '@kbn/data-forge':
-        specifier: workspace:*
-        version: link:x-pack/platform/packages/shared/kbn-data-forge
       '@kbn/data-grid-in-table-search':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-data-grid-in-table-search
@@ -5294,6 +5291,9 @@ importers:
       '@kbn/cypress-test-helper':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-cypress-test-helper
+      '@kbn/data-forge':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/kbn-data-forge
       '@kbn/dependency-ownership':
         specifier: workspace:*
         version: link:packages/kbn-dependency-ownership
