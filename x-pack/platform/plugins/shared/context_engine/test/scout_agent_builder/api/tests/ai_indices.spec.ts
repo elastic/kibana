@@ -217,7 +217,7 @@ apiTest.describe.skip('context engine AI indices API', { tag: tags.stateful.clas
         responseType: 'json',
         body: {
           ...aiIndexBody,
-          dest: dataStreamDest('ai-index-ds-does-not-exist*'),
+          dest: dataStreamDest('ai-index-ds-does-not-exist'),
         },
       });
 
@@ -227,7 +227,7 @@ apiTest.describe.skip('context engine AI indices API', { tag: tags.stateful.clas
   );
 
   apiTest('creates and reads an index AI index', async ({ apiClient }) => {
-    const dest = { type: 'index', value: `${DEST.index}*` };
+    const dest = { type: 'index', value: DEST.index };
     const path = aiIndexPath(AI_INDEX.index);
 
     const createResponse = await apiClient.put(path, {
@@ -442,29 +442,27 @@ apiTest.describe.skip('context engine AI indices API', { tag: tags.stateful.clas
     }
   );
 
-  apiTest(
-    'does not delete an index-pattern dest when deleting knowledge indicators',
-    async ({ apiClient }) => {
-      const path = aiIndexPath(AI_INDEX.pattern);
-      const createResponse = await apiClient.put(path, {
-        headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
-        responseType: 'json',
-        body: emptyAiIndex('ai-index-ds-scout-pattern*'),
-      });
-      expect(createResponse).toHaveStatusCode(201);
+  apiTest('rejects a wildcard dest', async ({ apiClient }) => {
+    const response = await apiClient.put(aiIndexPath(AI_INDEX.pattern), {
+      headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
+      responseType: 'json',
+      body: emptyAiIndex('ai-index-ds-scout-pattern*'),
+    });
 
-      const deleteResponse = await apiClient.delete(`${path}?delete_knowledge_indicators=true`, {
-        headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
-        responseType: 'json',
-      });
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.message).toContain('must name a single data stream, not a pattern');
+  });
 
-      expect(deleteResponse).toHaveStatusCode(200);
-      expect(deleteResponse.body).toStrictEqual({
-        acknowledged: true,
-        errors: [expect.stringContaining('index pattern')],
-      });
-    }
-  );
+  apiTest('rejects a comma-separated dest', async ({ apiClient }) => {
+    const response = await apiClient.put(aiIndexPath(AI_INDEX.pattern), {
+      headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
+      responseType: 'json',
+      body: emptyAiIndex(`${DEST.dataStream},${DEST.shared}`),
+    });
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.message).toContain('must name a single data stream, not a pattern');
+  });
 
   apiTest(
     'accepts an index trace pointing at an existing data stream and returns a FROM query',

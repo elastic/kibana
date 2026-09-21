@@ -22,6 +22,7 @@ import type {
   AiIndexHttpItem,
   AiIndexProperties,
 } from '../../common/http_api/ai_indices';
+import { isIndexPattern } from '../../common/ai_index_dest';
 import { createSpaceDslFilter } from '../utils/space_filter';
 import {
   InvalidAiIndexDestError,
@@ -455,14 +456,22 @@ export class AiIndexService {
   }
 
   /**
-   * The dest value must follow the type-specific naming convention and match
-   * the declared `type`. A managed entry may also use the dot-prefixed form,
-   * which is reserved for Kibana-internal backing stores.
+   * The dest value must name a single index or data stream, follow the
+   * type-specific naming convention, and match the declared `type`. A managed
+   * entry may also use the dot-prefixed form, which is reserved for
+   * Kibana-internal backing stores.
    */
   private async assertValidDest(
     { type, value }: AiIndexDest,
     { managed = false }: { managed?: boolean } = {}
   ): Promise<void> {
+    if (isIndexPattern(value)) {
+      throw new InvalidAiIndexDestError(
+        `dest.value '${value}' is not allowed: it must name a single ${
+          type === 'data_stream' ? 'data stream' : 'index'
+        }, not a pattern`
+      );
+    }
     if (type === 'data_stream') {
       await this.assertValidDataStreamDest(value, managed);
     } else {
@@ -474,17 +483,11 @@ export class AiIndexService {
     return managed ? [basePrefix, `.${basePrefix}`] : [basePrefix];
   }
 
-  /**
-   * Every expression in the dest value must start with one of the type-specific
-   * prefixes.
-   */
+  /** The dest value must start with one of the type-specific prefixes. */
   private assertDestValueHasPrefix(value: string, prefixes: string[]): void {
-    const invalid = value
-      .split(',')
-      .find((expression) => !prefixes.some((prefix) => expression.startsWith(prefix)));
-    if (invalid !== undefined) {
+    if (!prefixes.some((prefix) => value.startsWith(prefix))) {
       throw new InvalidAiIndexDestError(
-        `dest.value '${value}' is not allowed: every expression must start with '${prefixes[0]}'`
+        `dest.value '${value}' is not allowed: it must start with '${prefixes[0]}'`
       );
     }
   }

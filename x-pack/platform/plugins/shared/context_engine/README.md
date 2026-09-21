@@ -4,8 +4,7 @@ Server-side plugin for the Context Engine.
 
 ## AI Indices API
 
-AI Indices attach a logical name to an existing user index pattern or data
-stream. AI Index records are stored in a hidden Kibana system index
+AI Indices attach a logical name to a single user index or data stream. AI Index records are stored in a hidden Kibana system index
 (`.contextengine-ai-indices`), separate from the backing data.
 
 | Method   | Path                                                            | Description                          |
@@ -28,10 +27,10 @@ Notes:
   spans into per-space signals, and no-ops while the setting is off.
 - The backing store is set via `dest`, an object of the form
   `{ "type": "data_stream" | "index", "value": "<data stream or index>" }`.
-  `dest.value` must match `dest.type`. Every
-  expression in `dest.value` must start with `ai-index-ds-` for data streams or
-  `ai-index-idx-` for indices (e.g. `ai-index-ds-foo`, `ai-index-idx-foo*`);
-  system indices are not allowed.
+  `dest.value` must match `dest.type` and name a single data stream or index;
+  wildcards and comma-separated lists are rejected. It must start with
+  `ai-index-ds-` for data streams or `ai-index-idx-` for indices (e.g.
+  `ai-index-ds-foo`, `ai-index-idx-foo`); system indices are not allowed.
 - `automations` is an array of `{ "type": "workflow", "value": "<name>" }`
   objects. Required, may be empty.
 - `sources` is an array whose entries are one of:
