@@ -149,6 +149,8 @@ outputs:
       type: array
       items:
         type: object
+    impacted_entities_truncated:
+      type: string
     false_positive_count:
       type: number
     true_positive_count:
@@ -262,6 +264,8 @@ steps:
       # Structured entity × verdict array built in build_grouped_counts_summary_gate
       # (Worker path only). Workers pass this to the security.impact attachment.
       impacted_entities: []
+      # Set true when impacted_entities was truncated to 50; false otherwise.
+      impacted_entities_truncated: "false"
 
   # ---------------------------------------------------------------------------
   # Read this space's configuration at run time
@@ -1671,6 +1675,16 @@ steps:
                 with:
                   impacted_entities: "${{ variables.impacted_entities | push: variables.current_entity }}"
 
+          # Cap at 50 entities so the security.impact attachment schema (max: 50) never
+          # rejects the payload. Batches with many unique hosts + users can exceed 50 even
+          # under normal conditions; truncated records whether rows were dropped.
+          - name: cap_impacted_entities
+            type: data.set
+            with:
+              impacted_entities_truncated: >-
+                {% if variables.impacted_entities.size > 50 %}true{% else %}false{% endif %}
+              impacted_entities: "${{ variables.impacted_entities | slice: 0, 50 }}"
+
       # -----------------------------------------------------------------------
       # Auto-close: close every alert that meets the FP thresholds, in bulk
       # -----------------------------------------------------------------------
@@ -1758,3 +1772,5 @@ steps:
       agent_id: "{{ variables.agent_id }}"
       # Structured entity × verdict array for the security.impact attachment.
       impacted_entities: "${{ variables.impacted_entities }}"
+      # "true" when the list was capped at 50; "false" otherwise.
+      impacted_entities_truncated: "{{ variables.impacted_entities_truncated }}"

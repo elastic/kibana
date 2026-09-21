@@ -95,6 +95,7 @@ import {
   registerExceptionAttachment,
   registerRuleAttachment,
   registerRulePreviewAttachment,
+  registerImpactAttachment,
   registerInvestigationTimelineAttachment,
   registerInvestigationIocsAttachment,
 } from './agent_builder/attachment_types';
@@ -435,6 +436,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           attachments: plugins.agentBuilder.attachments,
         });
         registerInvestigationIocsAttachment({
+          attachments: plugins.agentBuilder.attachments,
+        });
+        registerImpactAttachment({
           attachments: plugins.agentBuilder.attachments,
         });
       }

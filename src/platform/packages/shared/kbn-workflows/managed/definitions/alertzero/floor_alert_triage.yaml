@@ -232,6 +232,25 @@ steps:
           {% if steps.classify_alerts.output.connector_id != '' %}Connector: {{ steps.classify_alerts.output.connector_id }}. Agent: {{ steps.classify_alerts.output.agent_id }}.{% endif %}
 
   # ---------------------------------------------------------------------------
+  # 4b. Attach impact summary (entity × verdict breakdown) to the Investigation.
+  #     Capped at 50 entities per attachment; truncated flag set when the sub-
+  #     workflow emitted more (the sub-workflow already caps at MAX_IMPACTED_ENTITIES).
+  # ---------------------------------------------------------------------------
+  - name: attach_impact
+    type: ai.attachment.add
+    on-failure:
+      continue: true
+    with:
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      type: security.impact
+      render_inline: true
+      data:
+        entities: "${{ steps.classify_alerts.output.impacted_entities }}"
+        total_alert_count: "${{ steps.classify_alerts.output.verdicts | size }}"
+        truncated: "{{ steps.classify_alerts.output.impacted_entities_truncated }}"
+      description: "Impacted entities from alert triage"
+
+  # ---------------------------------------------------------------------------
   # 5. Apply static AZ classification tags to every analysed alert (R5).
   #    Tags are always written — never gated on autonomy level or FP count.
   #    Replaces any stale AZ classification tag before adding the current one.

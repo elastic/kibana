@@ -133,6 +133,28 @@ export const registerInvestigationIocsAttachment = ({
 };
 
 /**
+ * Registers the `security.impact` attachment renderer (entity × verdict table summarising
+ * alert-analysis results for impacted hosts and users). Dynamically imports
+ * [./impact](./impact/index.ts) so EuiBasicTable and the impact-specific code stay off the
+ * main `securitySolution` page-load bundle.
+ */
+export const registerImpactAttachment = ({
+  attachments,
+}: {
+  attachments: AttachmentServiceStartContract;
+}): void => {
+  void import(
+    /* webpackChunkName: "security_impact_attachment" */
+    './impact'
+  ).then(({ createImpactAttachmentDefinition }) => {
+    attachments.addAttachmentType(
+      SecurityAgentBuilderAttachments.impact,
+      createImpactAttachmentDefinition()
+    );
+  });
+};
+
+/**
  * Registers the rich `security.entity` attachment renderer (entity card for a single entity,
  * entity table with per-row Explore links for multiple, Canvas preview for single host/user/
  * service). Callable from `plugin.tsx#start()` alongside `registerRuleAttachment` /
