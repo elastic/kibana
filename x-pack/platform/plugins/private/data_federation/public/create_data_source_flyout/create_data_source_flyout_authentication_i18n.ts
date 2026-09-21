@@ -18,12 +18,9 @@ export const authenticationStrings = {
     defaultMessage: 'Preferred method',
   }),
 
-  recommendedBadge: i18n.translate(
-    'xpack.dataFederation.createFlyout.authentication.recommended',
-    {
-      defaultMessage: 'Recommended',
-    }
-  ),
+  recommendedBadge: i18n.translate('xpack.dataFederation.createFlyout.authentication.recommended', {
+    defaultMessage: 'Recommended',
+  }),
 
   learnMore: i18n.translate('xpack.dataFederation.createFlyout.authentication.learnMore', {
     defaultMessage: 'Learn more',
@@ -107,10 +104,13 @@ export const authenticationStrings = {
       defaultMessage:
         'No credentials are stored. Your S3 bucket must allow anonymous public read access.',
     }),
-    gcs: i18n.translate('xpack.dataFederation.createFlyout.authentication.anonymousDescription.gcs', {
-      defaultMessage:
-        'No credentials are stored. Your GCS bucket must allow anonymous public read access.',
-    }),
+    gcs: i18n.translate(
+      'xpack.dataFederation.createFlyout.authentication.anonymousDescription.gcs',
+      {
+        defaultMessage:
+          'No credentials are stored. Your GCS bucket must allow anonymous public read access.',
+      }
+    ),
     azure: i18n.translate(
       'xpack.dataFederation.createFlyout.authentication.anonymousDescription.azure',
       {
