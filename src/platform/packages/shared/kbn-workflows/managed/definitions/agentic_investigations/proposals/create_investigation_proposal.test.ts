@@ -28,7 +28,11 @@ interface WorkflowStep {
   condition?: string;
   if?: string;
   timeout?: string;
-  'on-failure'?: { continue?: boolean | string; fallback?: WorkflowStep[] };
+  'on-failure'?: {
+    continue?: boolean | string;
+    fallback?: WorkflowStep[];
+    retry?: { 'max-attempts'?: number; delay?: string; condition?: string };
+  };
   'max-iterations'?: number | { limit?: number; 'on-limit'?: string };
   'iteration-timeout'?: string;
   with?: Record<string, unknown>;
@@ -261,9 +265,15 @@ describe('create-investigation-proposal workflow', () => {
       // integration tests: the gate's handler settles an unanswered proposal
       // as `expired`, and the action's keeps a failed action inside the loop
       // so it can be cloned and re-offered. Pinned, not removed.
+      // The two settle blocks use the same engine-honoured-but-schema-unmodelled
+      // key on `if` steps: their `on-failure.retry` re-resolves the live head
+      // before rewriting when a revision wins the TOCTOU race against
+      // `record_expiry`/`record_exhaustion`. Same #19315 gap, pinned likewise.
       expect(unmodelled.sort()).toEqual([
         'await_decision (waitForApproval): on-failure',
         'execute_action (workflow.execute): on-failure',
+        'settle_exhausted (if): on-failure',
+        'settle_expired (if): on-failure',
       ]);
     });
   });
@@ -392,6 +402,10 @@ describe('create-investigation-proposal workflow', () => {
       for (const branch of ['handle_dismissal', 'approve_without_action', 'approve_with_action']) {
         expect(body.indexOf(branch)).toBeGreaterThan(checkIndex);
       }
+      // The chain resolve reads the proposal, so it waits for the check too:
+      // an unauthorized resumer is re-parked before anything reads on its
+      // behalf.
+      expect(body.indexOf('adopt_live_head_after_wait_branch')).toBeGreaterThan(checkIndex);
     });
 
     it('only checks when a human answered, since the auto path has no decider', () => {
@@ -467,6 +481,16 @@ describe('create-investigation-proposal workflow', () => {
         ({ name }) => name
       );
       expect(gateBranchOrder).toEqual(['await_decision', 'handle_gate_timeout', 'resolve_gate']);
+      // The adoption used to sit here, between the wait and everything that
+      // reads or writes the carried id. It now happens on each path that
+      // needs it: the timeout handler adopts before its own write, and the
+      // answered path adopts after the privilege check. Same guarantee - a
+      // revision that landed during the park makes the carried id a
+      // superseded row, which the timeout write and the release route both
+      // refuse - without reading the chain before the resumer is authorized.
+      expect((handle?.steps ?? []).map(({ name }) => name)[0]).toBe(
+        'adopt_live_head_on_timeout_branch'
+      );
 
       expect(handle?.condition).toContain('steps.await_decision.error != blank');
       expect(record?.with?.status).toBe('expired');
@@ -490,12 +514,147 @@ describe('create-investigation-proposal workflow', () => {
       expect(findStep(workflow.steps, 'break_dismissed')?.type).toBe('loop.break');
     });
 
-    it('does not read the proposal back, since nothing in the loop adopts a successor', () => {
-      // `cloneProposal` writes `supersededBy` onto a proposal that already
-      // failed, never one awaiting a decision, so there is nothing to adopt
-      // until the tune route lands.
-      expect(findStep(workflow.steps, 'read_proposal')).toBeUndefined();
-      expect(findStep(workflow.steps, 'adopt_superseded')).toBeUndefined();
+    it('adopts the live head after the gate, since a revision moves the chain under it', () => {
+      // The gate belongs to the chain, not to one revision: a revision appended
+      // while it was parked marks the row this execution created `superseded`,
+      // which is terminal, so a decision written on the carried id would be
+      // refused. This is the adoption the dismissal branch used to defer.
+      const resolve = findStep(workflow.steps, 'resolve_live_head_after_wait');
+      const adopt = findStep(workflow.steps, 'adopt_live_head_after_wait');
+
+      expect(resolve?.type).toBe('proposals.getLatestRevision');
+      expect(String(resolve?.with?.proposalId)).toContain('variables.current_proposal_id');
+      expect(String(adopt?.with?.current_proposal_id)).toContain(
+        'steps.resolve_live_head_after_wait.output.proposalId'
+      );
+      // The input travels with the id: resolving the head but keeping the
+      // trigger's input would approve one revision and execute another's.
+      expect(String(adopt?.with?.action_input)).toContain(
+        'steps.resolve_live_head_after_wait.output.actionInput'
+      );
+    });
+
+    it('adopts on each path that writes, before the timeout write and the release call', () => {
+      // A timed-out gate writes `expired` on the carried id, and `resolve_gate`
+      // hands that id to the release route, which refuses a row that is already
+      // `superseded`. Adopting after either would settle the superseded
+      // predecessor — or fail the resume outright. The timeout path adopts
+      // inside its own handler; the answered path adopts in the loop body,
+      // after the privilege check, so no chain read happens on behalf of a
+      // resumer who has not been authorized yet.
+      const timeoutSteps = (findStep(workflow.steps, 'handle_gate_timeout')?.steps ?? []).map(
+        ({ name }) => name
+      );
+      const timeoutAdopt = timeoutSteps.indexOf('adopt_live_head_on_timeout_branch');
+      expect(timeoutAdopt).toBeGreaterThanOrEqual(0);
+      expect(timeoutAdopt).toBeLessThan(timeoutSteps.indexOf('record_gate_expiry'));
+
+      const body = (loop().steps ?? []).map(({ name }) => name);
+      const answeredAdopt = body.indexOf('adopt_live_head_after_wait_branch');
+      expect(answeredAdopt).toBeGreaterThan(body.indexOf('authorize_decision'));
+      for (const write of ['handle_dismissal', 'approve_without_action', 'approve_with_action']) {
+        expect(body.indexOf(write)).toBeGreaterThan(answeredAdopt);
+      }
+
+      const expiry = findStep(workflow.steps, 'record_gate_expiry');
+      expect(String(expiry?.with?.proposalId)).toBe('{{ variables.current_proposal_id }}');
+    });
+
+    it('adopts in the auto branch too, for a loop parked by an earlier iteration', () => {
+      const autoSteps = (findStep(workflow.steps, 'auto_branch')?.steps ?? []).map(
+        ({ name }) => name
+      );
+      const adoptIndex = autoSteps.indexOf('adopt_live_head_before_auto_branch');
+
+      expect(adoptIndex).toBeGreaterThanOrEqual(0);
+      expect(adoptIndex).toBeLessThan(autoSteps.indexOf('resolve_auto'));
+    });
+
+    it('adopts the live head before the first write of an iteration, not only after the gate', () => {
+      // `settle_expired` and `settle_exhausted` are the iteration's earliest
+      // writes. A revision appended between iterations moves the chain head, so
+      // resolving only inside `gate_branch` leaves those two settling a row the
+      // service now refuses -- the run fails and the live revision stays pending.
+      const body = (loop().steps ?? []).map(({ name }) => name);
+      const adoptIndex = body.indexOf('adopt_live_head_each_iteration_branch');
+      expect(adoptIndex).toBeGreaterThanOrEqual(0);
+      for (const write of ['settle_expired', 'settle_exhausted']) {
+        expect(body.indexOf(write)).toBeGreaterThan(adoptIndex);
+      }
+    });
+    it('resolves the chain head from the carried id when adopting each iteration', () => {
+      const resolve = findStep(workflow.steps, 'resolve_live_head_each_iteration');
+      const adopt = findStep(workflow.steps, 'adopt_live_head_each_iteration');
+      expect(resolve?.type).toBe('proposals.getLatestRevision');
+      expect(String(resolve?.with?.proposalId)).toContain('variables.current_proposal_id');
+      expect(String(adopt?.with?.current_proposal_id)).toContain(
+        'steps.resolve_live_head_each_iteration.output.proposalId'
+      );
+    });
+    it('adopts before every write after the gate, so each lands on the current revision', () => {
+      // Ordering is the whole point: adopting after a write would leave that
+      // write on a row the service now refuses to settle.
+      const body = (loop().steps ?? []).map(({ name }) => name);
+      const adoptIndex = body.indexOf('gate_branch');
+
+      expect(adoptIndex).toBeGreaterThanOrEqual(0);
+      for (const write of [
+        'settle_expired_after_gate',
+        'handle_dismissal',
+        'approve_without_action',
+        'approve_with_action',
+      ]) {
+        expect(body.indexOf(write)).toBeGreaterThan(adoptIndex);
+      }
+    });
+
+    it('settles onto the live head when a revision wins the race to record_expiry', () => {
+      // TOCTOU: the top-of-loop adoption resolves the head, but a revision can
+      // still supersede it before `record_expiry` writes. The write then throws
+      // ConflictError; the retry re-runs the block's children, so a re-resolve
+      // placed first lands the write on the new head instead of failing the run
+      // and stranding the live revision pending.
+      const block = findStep(workflow.steps, 'settle_expired');
+      const retry = block?.['on-failure']?.retry;
+      expect(retry?.['max-attempts']).toBeGreaterThanOrEqual(2);
+      expect(String(retry?.condition)).toContain('ConflictError');
+      const names = (block?.steps ?? []).map(({ name }) => name);
+      expect(names.indexOf('resolve_live_head_on_expiry_conflict')).toBeGreaterThanOrEqual(0);
+      expect(names.indexOf('resolve_live_head_on_expiry_conflict')).toBeLessThan(
+        names.indexOf('record_expiry')
+      );
+      const adopt = findStep(workflow.steps, 'adopt_live_head_on_expiry_conflict');
+      expect(String(adopt?.with?.current_proposal_id)).toContain(
+        'steps.resolve_live_head_on_expiry_conflict.output.proposalId'
+      );
+      const write = findStep(workflow.steps, 'record_expiry');
+      expect(String(write?.with?.proposalId)).toContain('variables.current_proposal_id');
+    });
+
+    it('settles onto the live head when a revision wins the race to record_exhaustion', () => {
+      const block = findStep(workflow.steps, 'settle_exhausted');
+      const retry = block?.['on-failure']?.retry;
+      expect(retry?.['max-attempts']).toBeGreaterThanOrEqual(2);
+      expect(String(retry?.condition)).toContain('ConflictError');
+      const names = (block?.steps ?? []).map(({ name }) => name);
+      expect(names.indexOf('resolve_live_head_on_exhaustion_conflict')).toBeGreaterThanOrEqual(0);
+      expect(names.indexOf('resolve_live_head_on_exhaustion_conflict')).toBeLessThan(
+        names.indexOf('record_exhaustion')
+      );
+      const adopt = findStep(workflow.steps, 'adopt_live_head_on_exhaustion_conflict');
+      expect(String(adopt?.with?.current_proposal_id)).toContain(
+        'steps.resolve_live_head_on_exhaustion_conflict.output.proposalId'
+      );
+    });
+
+    it('does not retry a non-conflict settle failure', () => {
+      // Only a ConflictError means "the head moved under us"; a transport or
+      // service fault wants the workflow-level fallback, not a blind rewrite.
+      for (const name of ['settle_expired', 'settle_exhausted']) {
+        const retry = findStep(workflow.steps, name)?.['on-failure']?.retry;
+        expect(String(retry?.condition)).toContain('ConflictError');
+        expect(String(retry?.condition)).not.toContain('ApiError');
+      }
     });
   });
 
@@ -535,6 +694,17 @@ describe('create-investigation-proposal workflow', () => {
       // `workflow-id` is the only key the engine reads; `workflowId` is ignored.
       expect(settings['workflow-id']).toContain('variables.action_workflow_id');
       expect(Object.keys(settings.inputs ?? {})).toEqual(['actionInput']);
+    });
+
+    it('executes the live revision input, not the trigger input a revision may have corrected', () => {
+      // The trigger value is captured before the gate is parked, so a revision
+      // that corrected the parameters would otherwise be approved and then
+      // ignored: the analyst approves one input and the action runs another.
+      const execute = findStep(workflow.steps, 'execute_action');
+      const settings = execute?.with as { inputs?: Record<string, unknown> };
+
+      expect(String(settings.inputs?.actionInput)).toContain('variables.action_input');
+      expect(String(settings.inputs?.actionInput)).not.toContain('inputs.actionInput');
     });
 
     it('records the execution outcome after the action', () => {

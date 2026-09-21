@@ -28,6 +28,7 @@ export type { ActionMetadata } from '@kbn/workflows';
 
 export {
   approveProposalRequestSchema,
+  boundedActionInput,
   createProposalRequestSchema,
   dismissProposalRequestSchema,
   dismissReasonSchema,

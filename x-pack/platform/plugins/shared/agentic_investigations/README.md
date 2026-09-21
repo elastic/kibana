@@ -70,7 +70,7 @@ All checks **fail closed**, including when the `security` plugin is absent entir
 - A **proposal** is a recommendation awaiting a human decision. It lives in `.kibana-investigation-proposals` and points at the conversation it belongs to.
 - An **action proposal** additionally references a managed **action workflow** (`actionWorkflowId`) plus its `actionInput`. Approving it runs that workflow.
 - A **non-action proposal** carries only its `comment` — instructions the analyst carries out themselves before approving. It is always gated: autonomy governs whether an action may run unattended, and there is no action here to govern, so `autoApprove` is ignored.
-- Proposals are immutable once decided, and are never tuned: changing an action means dismissing the proposal and creating a new one.
+- Proposals are immutable once **decided**. An undecided proposal can still be **revised**: `revise()` supersedes the current head with a new revision that carries the correction, and the gate decides whichever revision is live when the analyst answers. The predecessor is marked `superseded` and hidden from the queue by `excludeSuperseded`, so a chain shows one live row at a time.
 
 ### Decision and status are two axes
 
@@ -113,6 +113,27 @@ Re-writing the *same* terminal status is deliberately allowed, so settling stays
 **`expired` is persisted but expiry is also computed.** Between the deadline passing and the loop settling the record there is task lag during which it still reads `pending`. The computed `expired` flag on the read model is for the UI; persisted `status: expired` is the durable settlement.
 
 `supersededBy` points at the proposal that replaced this one — written when a failed action is re-offered as a fresh proposal. The queue filters superseded records out so a chain of retries appears once rather than per attempt.
+
+### The revision chain
+
+A proposal that is still undecided can be corrected rather than dismissed and
+re-offered. `revise()` writes a new revision, points the predecessor at it with
+`supersededBy`, and marks that predecessor `superseded`; both rows carry the same
+`rootProposalId`, so the chain is one query rather than a pointer walk. Only the
+head is live: `excludeSuperseded` hides the rest from the queue, and `revise()`
+refuses a proposal that is already superseded, decided, or expired, so a chain
+cannot fork and cannot be extended past its deadline.
+
+The gate does not re-park on a revision. It stays parked on the *original*
+execution, and the decision is applied to whichever revision is live when the
+analyst answers — `proposals.getLatestRevision`, called after the resumer is
+authorized and before any write, resolves the carried id to the chain head. An
+approval therefore carries the `actionInput` of the revision the approver was
+shown, not the one the Worker first proposed.
+
+Chains predating this field have `rootProposalId` on neither row; the term query
+misses and the fallback returns the row asked about, which is the correct answer
+for a chain of one. The plugin is unshipped, so there is nothing to migrate.
 
 ### Architecture
 
@@ -180,7 +201,9 @@ sequenceDiagram
     S->>G: resume(approved: true), as the analyst
 
     G->>S: proposals.checkDecidePrivileges
-    Note over G,S: Before any write. A denial re-parks<br/>rather than spending the gate.
+    Note over G,S: Before any read or write. A denial re-parks<br/>rather than spending the gate.
+    G->>S: proposals.getLatestRevision
+    Note over G,S: A revision may have landed during the park,<br/>so the decision settles the chain's live head.
     G->>S: proposals.updateProposal(approved + executing)
     S->>I: decision=approved, decidedBy=<analyst>
     G->>AW: workflow.execute(actionInput)
@@ -289,8 +312,10 @@ All routes are internal and versioned (`/internal/investigations/proposals`, ver
 - `GET /internal/investigations/proposals/{id}` — read one, with action metadata resolved
 - `POST /internal/investigations/proposals/{id}/approve` — release the gate positively
 - `POST /internal/investigations/proposals/{id}/dismiss` — annotate the reason, then release the gate negatively
+- `POST /internal/investigations/proposals/{proposalId}/revisions` — supersede the current head with a corrected revision, which becomes the proposal the gate decides
+- `GET /internal/investigations/proposals/charts-summary` — aggregate counts for the queue's charts
 
-Reads need `read_proposals`; both decisions need `manage_proposals`.
+Reads and the chart summary need `read_proposals`; both decisions and a revision need `manage_proposals`.
 
 Two routes are deliberately absent. There is **no update route**: `status` is a consequence of deciding and executing, never something a caller sets. And there is **no create route**: a decision is written behind the proposal's gate, so a proposal created without a gate execution could never be decided — approving it would annotate the record and report success while nothing settled it. `proposals.createProposal` is the only way to make one, and the only caller that knows the execution id to stamp.
 
@@ -329,6 +354,7 @@ The service surface follows from that: `releaseGate()` makes at most that one an
 
 - **The decision is written behind the gate, by the workflow.** Every resume surface funnels through the gate, so one write there covers them all; a write in the approve route would only ever cover that route.
 - **Nothing durable is written before the resume**, so a failed resume needs no rollback. The sole exception is the dismiss reason, which the gate cannot carry.
+- **The privilege check precedes every read and write in the loop.** The chain resolve reads the proposal on the resumer's behalf, so it waits for the check too; an unauthorized resumer is re-parked before anything is read for it. The timeout path resolves the chain separately, inside its own handler, because it writes without ever reaching that check.
 - **The privilege check precedes every write in the loop.** A write that failed first would leave the gate spent and the proposal stranded.
 - **A settled status cannot move and a decision cannot be overwritten.** Two independent guards, because the two axes settle independently.
 - **The gate step is resolved explicitly.** The platform's waiting-step lookup only matches `waitForInput`; for a `waitForApproval` gate it returns nothing and would resume *without* claiming the step or stamping the audit envelope. `resumeGate` finds the step itself and passes `stepExecutionId`.

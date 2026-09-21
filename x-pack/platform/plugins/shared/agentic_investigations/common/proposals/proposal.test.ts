@@ -7,6 +7,7 @@
 
 import { MAX_CHARTS_SUMMARY_BUCKETS } from './constants';
 import { proposalChartsSummaryQuerySchema } from './proposal';
+import { reviseProposalResponseSchema } from './revision';
 
 describe('proposalChartsSummaryQuerySchema', () => {
   it('should default to a 24h window at 30 minute granularity', () => {
@@ -45,5 +46,32 @@ describe('proposalChartsSummaryQuerySchema', () => {
     expect(proposalChartsSummaryQuerySchema.safeParse({ windowHours, bucketMinutes }).success).toBe(
       true
     );
+  });
+});
+
+describe('reviseProposalResponseSchema', () => {
+  /**
+   * The route and the Agent Builder tool both build this response by hand, so a
+   * plain `z.string()` here would let either drift to a status the rest of the
+   * system does not know about while the schema still reports a valid response.
+   */
+  it('should reject a status outside the proposal vocabulary', () => {
+    const result = reviseProposalResponseSchema.safeParse({
+      proposalId: 'proposal-1',
+      revision: 2,
+      status: 'revised',
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('should accept a status the proposal vocabulary defines', () => {
+    expect(
+      reviseProposalResponseSchema.parse({
+        proposalId: 'proposal-1',
+        revision: 2,
+        status: 'pending',
+      })
+    ).toEqual({ proposalId: 'proposal-1', revision: 2, status: 'pending' });
   });
 });

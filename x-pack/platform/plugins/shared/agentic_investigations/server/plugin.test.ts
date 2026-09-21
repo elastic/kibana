@@ -20,6 +20,7 @@ import {
   CheckDecidePrivilegesStepId,
   CloneProposalStepId,
   CreateProposalStepId,
+  GetLatestRevisionStepId,
   GetProposalStepId,
   UpdateProposalStepId,
 } from '../common/proposals/step_types';
@@ -172,6 +173,7 @@ describe('AgenticInvestigationsPlugin', () => {
         CheckDecidePrivilegesStepId,
         GetProposalStepId,
         CloneProposalStepId,
+        GetLatestRevisionStepId,
       ]);
     });
 

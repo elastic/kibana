@@ -27,6 +27,13 @@ export {
 } from './create_proposal_step';
 
 export {
+  GetLatestRevisionStepId,
+  getLatestRevisionStepCommonDefinition,
+  getLatestRevisionStepInputSchema,
+  getLatestRevisionStepOutputSchema,
+} from './get_latest_revision_step';
+
+export {
   GetProposalStepId,
   getProposalStepCommonDefinition,
   getProposalStepInputSchema,

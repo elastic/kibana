@@ -53,6 +53,13 @@ const STATUS_BADGE_LABELS: Record<ProposalStatus, string> = {
   // `no_action` describes the absence of an outcome, so the decision is what
   // the badge reports instead — see DECISION_BADGE_LABELS.
   no_action: '',
+  // A revised proposal (elastic/security-team#19289) is not itself an
+  // outcome — the badge for a superseded row points at whichever revision
+  // replaced it instead, so this label is a fallback that should rarely render.
+  superseded: i18n.translate(
+    'xpack.agenticInvestigations.proposals.attachments.statusBadge.superseded',
+    { defaultMessage: 'Superseded' }
+  ),
 };
 
 /** Badge color map for how far a proposal got. */
@@ -63,6 +70,7 @@ const STATUS_BADGE_COLORS: Record<ProposalStatus, string> = {
   failed: 'danger',
   expired: 'danger',
   no_action: 'default',
+  superseded: 'default',
 };
 
 /** Translated labels for what an analyst concluded. */

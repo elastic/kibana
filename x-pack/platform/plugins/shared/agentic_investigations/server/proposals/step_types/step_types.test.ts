@@ -224,6 +224,7 @@ describe('proposals.createProposal step', () => {
     expect(resolveUser).toHaveBeenCalledWith(FAKE_REQUEST);
     expect(result.output).toEqual({
       proposalId: 'proposal-1',
+      rootProposalId: 'proposal-1',
       status: 'pending',
       category: 'tune',
       requiresDecision: true,
