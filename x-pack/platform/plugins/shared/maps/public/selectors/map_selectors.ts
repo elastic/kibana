@@ -62,6 +62,9 @@ import type { EMSTMSSource } from '../classes/sources/ems_tms_source';
 import type { IRasterSource } from '../classes/sources/raster_source';
 import type { ILayer } from '../classes/layers/layer';
 import { getIsReadOnly } from './ui_selectors';
+import { getLayerListRaw } from './get_layer_list_raw';
+
+export { getLayerListRaw } from './get_layer_list_raw';
 
 function createJoinInstances(vectorLayerDescriptor: VectorLayerDescriptor, source: IVectorSource) {
   return vectorLayerDescriptor.joins
@@ -160,9 +163,6 @@ export const getMapInitError = ({ map }: MapStoreState): string | null | undefin
 export const getSelectedLayerId = ({ map }: MapStoreState): string | null => {
   return !map.selectedLayerId || !map.layerList ? null : map.selectedLayerId;
 };
-
-export const getLayerListRaw = ({ map }: MapStoreState): LayerDescriptor[] =>
-  map.layerList ? map.layerList : [];
 
 export const getWaitingForMapReadyLayerListRaw = ({ map }: MapStoreState): LayerDescriptor[] =>
   map.waitingForMapReadyLayerList ? map.waitingForMapReadyLayerList : [];
