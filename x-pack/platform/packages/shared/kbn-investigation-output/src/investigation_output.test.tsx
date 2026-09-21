@@ -258,6 +258,24 @@ describe('InvestigationOutput', () => {
     }
   );
 
+  it.each([
+    ['description', { description: '   ' }],
+    ['code', { code: '   ' }],
+  ] as const)(
+    'does not make a recommendation interactive when its %s is whitespace-only',
+    (_field, details) => {
+      const title = 'Restart the checkout service';
+      const stateWithWhitespaceDetails: InvestigationState = {
+        ...finalState,
+        recommendations: [{ title, confidence: 0.8, ...details }],
+      };
+
+      renderWithI18n(<InvestigationOutput status="complete" state={stateWithWhitespaceDetails} />);
+
+      expect(screen.getByText(title).closest('button')).toBeNull();
+    }
+  );
+
   it('opens recommendation details with a click and blind-spot details from a collapsed accordion', async () => {
     const user = userEvent.setup();
     renderWithI18n(<InvestigationOutput status="complete" state={finalState} />);

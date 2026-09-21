@@ -231,7 +231,7 @@ export const FinalResults: React.FC<{ state: InvestigationState }> = ({ state })
                   isRecommended={index === 0}
                   isLast={index === recommendations.length - 1}
                   onClick={
-                    recommendation.description || recommendation.code
+                    recommendation.description?.trim() || recommendation.code?.trim()
                       ? () => setSelectedRecommendation(recommendation)
                       : undefined
                   }
