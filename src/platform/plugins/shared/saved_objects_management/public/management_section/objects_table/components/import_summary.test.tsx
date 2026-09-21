@@ -38,6 +38,15 @@ describe('ImportSummary', () => {
     obj: { type: 'error-obj-type', id: 'error-obj-id', meta: { title: 'Error object' } },
     error: { type: 'unsupported_type' },
   };
+  const errorUnknown: FailedImport = {
+    obj: { type: 'dashboard', id: 'invalid-dashboard', meta: { title: 'Invalid dashboard' } },
+    error: {
+      type: 'unknown',
+      statusCode: 400,
+      message:
+        '[attributes.kibanaSavedObjectMeta.searchSourceJSON]: expected value of type [string] but got [Object]',
+    },
+  };
   const successNew = { type: 'dashboard', id: 'dashboard-id', meta: { title: 'New' } };
   const successOverwritten = {
     type: 'visualization',
@@ -129,6 +138,18 @@ describe('ImportSummary', () => {
       expect.objectContaining({ values: { errorCount: 1 } })
     );
     expect(findObjectRow(wrapper)).toHaveLength(1);
+  });
+
+  it('should display an actionable validation error message', async () => {
+    const props = getProps({
+      failedImports: [errorUnknown],
+      successfulImports: [],
+    });
+    const wrapper = mountWithI18nProvider(<ImportSummary {...props} />);
+
+    expect(
+      wrapper.find('[data-test-subj="importSavedObjectsErrorMessage"]').hostNodes().text()
+    ).toBe(errorUnknown.error.type === 'unknown' ? errorUnknown.error.message : '');
   });
 
   it('should render as expected with mixed objects', async () => {
