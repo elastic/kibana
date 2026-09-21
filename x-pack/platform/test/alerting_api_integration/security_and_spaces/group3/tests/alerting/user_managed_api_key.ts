@@ -27,8 +27,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
   const objectRemover = new ObjectRemover(supertest);
   const retry = getService('retry');
 
-  // Failing: See https://github.com/elastic/kibana/issues/290845
-  describe.skip('user managed api key', () => {
+  describe('user managed api key', () => {
     let apiKey: string;
 
     before(async () => {
@@ -98,7 +97,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
       // The caller's key is not persisted on the rule, so its lifecycle stays with the framework
       expect(response.body.api_key_created_by_user).to.eql(false);
       expect(response.body.api_key_owner).to.eql('elastic');
-      expect(await apiKeyExists(testRuleData.rule_type_id, testRuleData.name)).to.eql(true);
+      await expectApiKeyToExist(testRuleData.rule_type_id, testRuleData.name);
 
       // Make sure the rule runs successfully with the generated key
       const events = await retry.try(async () => {
@@ -245,7 +244,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
         });
 
         // Ensure an API key was generated
-        expect(await apiKeyExists('test.noop', updatedData.name)).to.eql(true);
+        await expectApiKeyToExist('test.noop', updatedData.name);
       });
 
       it('should successfully clone rule with user managed API key', async () => {
@@ -424,7 +423,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
         });
 
         // Ensure an API key was generated
-        expect(await apiKeyExists(response.body.rule_type_id, response.body.name)).to.eql(true);
+        await expectApiKeyToExist(response.body.rule_type_id, response.body.name);
       });
 
       it('should successfully bulk edit rule with user managed API key', async () => {
@@ -495,7 +494,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
         });
 
         // Ensure an API key was generated
-        expect(await apiKeyExists('test.noop', 'test_bulk_edit2')).to.eql(true);
+        await expectApiKeyToExist('test.noop', 'test_bulk_edit2');
       });
 
       it('should successfully update api key for rule with user managed API key', async () => {
@@ -544,7 +543,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
         });
 
         // Ensure an API key was generated
-        expect(await apiKeyExists('test.noop', 'test_update_api_key2')).to.eql(true);
+        await expectApiKeyToExist('test.noop', 'test_update_api_key2');
       });
 
       it('should successfully enable rule with user managed API key', async () => {
@@ -585,7 +584,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
         });
 
         // Ensure an API key was generated
-        expect(await apiKeyExists('test.noop', 'test_enable2')).to.eql(true);
+        await expectApiKeyToExist('test.noop', 'test_enable2');
       });
 
       it('should successfully bulk enable rule with user managed API key', async () => {
@@ -632,7 +631,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
         });
 
         // Ensure an API key was generated
-        expect(await apiKeyExists('test.noop', 'test_bulk_enable2')).to.eql(true);
+        await expectApiKeyToExist('test.noop', 'test_bulk_enable2');
       });
 
       it('should successfully delete rule with user managed API key', async () => {
@@ -709,6 +708,14 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
       .expect(200);
 
     return !!allApiKeys.apiKeys.find((key: { name: string }) => key.name === generatedApiKeyName);
+  }
+
+  async function expectApiKeyToExist(ruleTypeId: string, ruleName: string) {
+    // The _query search hits the .security index, which can lag a just-completed write,
+    // so poll the read until the generated key is searchable instead of asserting once.
+    await retry.waitForWithTimeout(`API key for "${ruleName}" to be queryable`, 30_000, () =>
+      apiKeyExists(ruleTypeId, ruleName)
+    );
   }
 
   async function createRule(apiKey: string, ruleName: string, enabled: boolean = true) {

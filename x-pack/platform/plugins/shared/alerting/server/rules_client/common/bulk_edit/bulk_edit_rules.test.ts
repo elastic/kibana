@@ -8,7 +8,6 @@
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import {
-  coreFeatureFlagsMock,
   loggingSystemMock,
   savedObjectsClientMock,
   savedObjectsRepositoryMock,
@@ -87,7 +86,6 @@ const rulesClientContext: RulesClientContext = {
   backfillClient: backfillClientMock.create(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
   minimumScheduleIntervalInMs: 0,
-  featureFlags: coreFeatureFlagsMock.createStart(),
   isServerless: false,
 };
 
