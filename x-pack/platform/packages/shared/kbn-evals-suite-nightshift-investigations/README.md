@@ -100,21 +100,23 @@ export SANDBOX_CLIENT_KEY_PATH=/absolute/path/to/sandbox-service/ssl/client.key
 export SANDBOX_CA_CERT_PATH=/absolute/path/to/sandbox-service/ssl/server.crt
 ```
 
-Scout reads the PEM files into the current `sandbox.ssl` configuration and connects with mTLS.
+Scout reads the PEM files into the `xpack.sandbox.ssl` configuration and connects with mTLS.
 The sandbox configuration is passed through a mode-0600 temporary file in a private directory,
 so sandbox credentials, connector secrets, and trace-exporter headers do not appear in process arguments. Scout removes the
 temporary directory when its process exits normally.
 The gRPC API listens on `9090`; `8090` is only for probes. Leave the `WORKSPACE_SNAPSHOT_*`
 variables unset so each new conversation starts independently. Persistence is owned by
-sandbox-api; the Kibana workspace manager and backup hook were removed in #289300. The shared
-`space__conversation` scoping remains in the sandbox tools and Cortex hydration. The Docker network must allow
+sandbox-api; the Kibana workspace persistence and backup hook were removed in #289300. The shared
+`space__conversation` scoping is applied by the sandbox plugin (#291391) for the sandbox tools
+and Cortex hydration. The Docker network must allow
 native sandbox-api to reach container ports `8080` and `8081`. The sandbox must also reach
 Scout Elasticsearch at `http://host.docker.internal:9220`; override
 `NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL` if your Docker networking uses another address.
 
 The `evals_nightshift_investigations` Scout config extends `evals_tracing`. It adds the plugin,
 sandbox, a preconfigured basic-auth telemetry webhook, Agent Builder experimental features,
-and all eight tracing/privacy settings. Both trace exporters use the selected profile.
+and the two tracing/privacy settings that `evals_tracing` does not already set, so all eight are
+on. Both trace exporters use the selected profile.
 The telemetry connector uses a generated file-realm identity on the ephemeral Scout cluster.
 It can only read and inspect index metadata for `logs-*`, `metrics-*`, and `traces-*`; it has
 no cluster, write, impersonation, or restricted-index privileges. Its random password is

@@ -23,7 +23,6 @@ jest.mock('../../evals_tracing/stateful/classic.stateful.config', () => ({
       serverArgs: [
         '--telemetry.enabled=true',
         '--telemetry.tracing.exporters=[{"http":{"url":"https://traces.example","headers":{"Authorization":"synthetic-trace-key"}}}]',
-        '--xpack.actions.preconfigured={"existing":{"secrets":{"apiKey":"synthetic-model-key"}}}',
       ],
     },
   },
@@ -75,7 +74,8 @@ describe('Nightshift sandbox configuration', () => {
     expect(statSync(configPath).mode.toString(8).slice(-3)).toBe('600');
     const config = parse(readFileSync(configPath, 'utf8'));
     expect(config).toMatchObject({
-      'xpack.nightshift_investigations.sandbox': {
+      'xpack.sandbox': {
+        enabled: true,
         host: customCa ? 'sandbox.example' : 'localhost',
         port: customCa ? 9091 : 9090,
         api_key: 'synthetic-api-key',
@@ -84,8 +84,10 @@ describe('Nightshift sandbox configuration', () => {
           key: 'synthetic private key\nsecond line',
           ...(customCa ? { certificate_authorities: 'synthetic CA' } : {}),
         },
-        telemetry_connector_id: 'nightshift-evals-telemetry',
       },
+    });
+    expect(config['xpack.nightshift_investigations.sandbox']).toEqual({
+      telemetry_connector_id: 'nightshift-evals-telemetry',
     });
     expect(config['telemetry.tracing.exporters']).toEqual([
       {
@@ -98,16 +100,13 @@ describe('Nightshift sandbox configuration', () => {
     const connector = config['xpack.actions.preconfigured']['nightshift-evals-telemetry'];
     expect(connector.secrets.user).toBe('nightshift_evals_telemetry');
     expect(connector.secrets.password).toMatch(/^[a-f0-9]{64}$/);
-    expect(config['xpack.actions.preconfigured'].existing.secrets.apiKey).toBe(
-      'synthetic-model-key'
-    );
     const args = serverArgs.join(' ');
     expect(args).not.toContain(connector.secrets.password);
-    expect(args).not.toContain('synthetic-model-key');
     expect(args).not.toContain('synthetic-trace-key');
     expect(args).not.toContain('--xpack.actions.preconfigured=');
     expect(args).not.toContain('synthetic-api-key');
     expect(args).not.toContain('synthetic private key');
+    expect(args).not.toContain('--xpack.sandbox');
     expect(args).not.toContain('--xpack.nightshift_investigations.sandbox=');
 
     for (const listener of process.listeners('exit')) {

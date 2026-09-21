@@ -29,13 +29,8 @@ if (!certificatePath || !keyPath) {
   );
 }
 
-const connectorPrefix = '--xpack.actions.preconfigured=';
 const exporterPrefix = '--telemetry.tracing.exporters=';
 const parentArgs = tracing.kbnTestServer.serverArgs;
-const connectorArg = parentArgs.find((arg) => arg.startsWith(connectorPrefix));
-const connectors: Record<string, object> = connectorArg
-  ? JSON.parse(connectorArg.slice(connectorPrefix.length))
-  : {};
 const exporterArg = parentArgs.find((arg) => arg.startsWith(exporterPrefix));
 const exporters: Array<{ http?: { url: string; headers?: Record<string, string> } }> = exporterArg
   ? JSON.parse(exporterArg.slice(exporterPrefix.length))
@@ -49,7 +44,6 @@ const sandboxConfig = {
   ...(exporterArg ? { 'telemetry.tracing.exporters': exporters } : {}),
   'xpack.agentBuilder.tracing.exporters': exporters.flatMap(({ http }) => (http ? [http] : [])),
   'xpack.actions.preconfigured': {
-    ...connectors,
     'nightshift-evals-telemetry': {
       name: 'Scout Elasticsearch telemetry',
       actionTypeId: '.webhook',
@@ -66,7 +60,8 @@ const sandboxConfig = {
       },
     },
   },
-  'xpack.nightshift_investigations.sandbox': {
+  'xpack.sandbox': {
+    enabled: true,
     host: process.env.SANDBOX_API_HOST ?? 'localhost',
     port: Number(process.env.SANDBOX_API_PORT ?? 9090),
     api_key: sandboxKey,
@@ -75,6 +70,8 @@ const sandboxConfig = {
       key: readFileSync(keyPath, 'utf8'),
       ...(caPath ? { certificate_authorities: readFileSync(caPath, 'utf8') } : {}),
     },
+  },
+  'xpack.nightshift_investigations.sandbox': {
     telemetry_connector_id: 'nightshift-evals-telemetry',
   },
 };
@@ -87,25 +84,16 @@ export const servers: ScoutServerConfig = {
   kbnTestServer: {
     ...tracing.kbnTestServer,
     serverArgs: [
-      ...parentArgs.filter(
-        (arg) => !arg.startsWith(connectorPrefix) && !arg.startsWith(exporterPrefix)
-      ),
+      ...parentArgs.filter((arg) => !arg.startsWith(exporterPrefix)),
       '--xpack.nightshift_investigations.enabled=true',
       '--xpack.nightshift_investigations.cortex.enabled=false',
       `--config=${sandboxConfigPath}`,
       '--uiSettings.overrides.workflows:ui:enabled=true',
       '--uiSettings.overrides.workflows:aiAgent:enabled=true',
       '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',
-      ...[
-        'enabled',
-        'includeUserPrompts',
-        'includeSystemPrompt',
-        'includeLlmResponses',
-        'includeToolDetails',
-        'includeRealNames',
-        'includeRealIds',
-        'includeUserData',
-      ].map((setting) => `--uiSettings.overrides.agentBuilder:tracing:${setting}=true`),
+      // The tracing config set already lifts the content redaction settings.
+      '--uiSettings.overrides.agentBuilder:tracing:enabled=true',
+      '--uiSettings.overrides.agentBuilder:tracing:includeUserData=true',
     ],
   },
 };
