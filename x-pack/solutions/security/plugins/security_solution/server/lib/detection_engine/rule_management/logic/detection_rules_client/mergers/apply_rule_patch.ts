@@ -302,13 +302,8 @@ export const patchTypeSpecificParams = (
       if (!result.success) {
         throw new BadRequestError(stringifyZodError(result.error));
       }
-      const patchedParams = patchThreatMatchParams(result.data, existingRule);
-      if (result.data.threat_mapping) {
-        assertNoValidationErrors(
-          validateThreatMapping({ threat_mapping: patchedParams.threat_mapping })
-        );
-      }
-      return patchedParams;
+      assertNoValidationErrors(validateThreatMapping(result.data));
+      return patchThreatMatchParams(result.data, existingRule);
     }
     case 'query': {
       const result = QueryRulePatchFields.safeParse(params);
