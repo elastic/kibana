@@ -5,8 +5,15 @@
  * 2.0.
  */
 
+import type { Client } from '@elastic/elasticsearch';
+
 import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+
+import {
+  createSystemIndicesEsClient,
+  SYSTEM_INDICES_HEADERS,
+} from '../fixtures/system_indices_es_client';
 
 /**
  * Local only: this suite needs the `service_accounts` custom server config set, and custom config
@@ -19,6 +26,8 @@ const NAMESPACE = 'kibana';
 /** The single token Kibana mints per account, named in `ES_SERVICE_ACCOUNT_TOKEN_NAME`. */
 const TOKEN_NAME = 'kibana-managed';
 const CREDENTIAL_TYPE = 'service-account-credential';
+/** Alias of the main saved objects index, which the credential type lands in. */
+const KIBANA_INDEX = '.kibana';
 /** Raw field path of an attribute on a saved object document, which nests them under the type. */
 const CREDENTIAL_ACCOUNT_FIELD = `${CREDENTIAL_TYPE}.serviceAccountId`;
 
@@ -28,7 +37,7 @@ const uniqueName = (prefix: string) => `${prefix}-${Date.now()}-${Math.floor(Mat
 apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, () => {
   const created: string[] = [];
 
-  apiTest.afterAll(async ({ esClient }) => {
+  apiTest.afterAll(async ({ esClient, config }) => {
     const failures: string[] = [];
 
     for (const name of created) {
@@ -69,27 +78,47 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
     // `indexPattern`, which puts it in the main saved objects index, and `serviceAccountId` is
     // mapped as a keyword. Matching on that rather than re-deriving the hashed document ID keeps
     // this working if the derivation ever changes.
+    //
+    // `.kibana` is restricted, and the plain `esClient` authenticates as `elastic`, whose
+    // `superuser` role does not reach restricted indices. The `allow_restricted_indices` role
+    // behind the client below, plus the product-origin header, is what makes the delete land.
     if (created.length > 0) {
+      let systemIndicesEsClient: Client | undefined;
+
       try {
-        await esClient.deleteByQuery({
-          index: '.kibana',
-          refresh: true,
-          conflicts: 'proceed',
-          query: {
-            bool: {
-              filter: [
-                { term: { type: CREDENTIAL_TYPE } },
-                {
-                  terms: {
-                    [CREDENTIAL_ACCOUNT_FIELD]: created.map((name) => `${NAMESPACE}/${name}`),
+        systemIndicesEsClient = await createSystemIndicesEsClient(esClient, config);
+
+        const result = await systemIndicesEsClient.deleteByQuery(
+          {
+            index: KIBANA_INDEX,
+            refresh: true,
+            conflicts: 'proceed',
+            query: {
+              bool: {
+                filter: [
+                  { term: { type: CREDENTIAL_TYPE } },
+                  {
+                    terms: {
+                      [CREDENTIAL_ACCOUNT_FIELD]: created.map((name) => `${NAMESPACE}/${name}`),
+                    },
                   },
-                },
-              ],
+                ],
+              },
             },
           },
-        });
+          { headers: SYSTEM_INDICES_HEADERS }
+        );
+
+        // A partial delete still resolves, so shard-level failures only surface here. The
+        // `deleted` count is not worth asserting on: the tests that expect a 400 or a 403
+        // register a name that never gets a credential saved object written for it.
+        if (result.failures?.length) {
+          failures.push(`credential saved objects: ${JSON.stringify(result.failures)}`);
+        }
       } catch (err) {
         failures.push(`credential saved objects: ${err.message}`);
+      } finally {
+        await systemIndicesEsClient?.close();
       }
     }
 
