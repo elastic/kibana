@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { Instruction } from '@atlaskit/pragmatic-drag-and-drop-hitbox/list-item';
 import {
@@ -20,7 +20,6 @@ import { useStepsProcessingSummary } from '../hooks/use_steps_processing_summary
 import type { InteractiveModeContext } from '../state_management/interactive_mode_machine';
 import { DragDropMonitor } from './drag_drop_monitor';
 import { handleDragDropReorder } from './drag_drop_reorder_handler';
-import { ProcessingButtonsManual } from '../empty_prompts';
 
 export const RootSteps = ({
   stepRefs,
@@ -92,16 +91,6 @@ export const RootSteps = ({
             readOnly={readOnly}
           />
         ))}
-        {!readOnly && (
-          <>
-            <EuiSpacer size="s" />
-            <EuiFlexGroup alignItems="center" justifyContent="center" wrap>
-              <EuiFlexItem grow={false}>
-                <ProcessingButtonsManual center={true} color="primary" />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </>
-        )}
       </EuiPanel>
     </>
   );

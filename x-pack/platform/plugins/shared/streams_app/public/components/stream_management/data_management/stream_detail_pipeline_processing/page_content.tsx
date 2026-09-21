@@ -37,6 +37,7 @@ import { getDefinitionFields } from '../schema_editor/hooks/use_schema_fields';
 import { SchemaChangesReviewModal, getChanges } from '../schema_editor/schema_changes_review_modal';
 import type { SchemaEditorField } from '../schema_editor/types';
 import { isFieldUncommitted } from '../schema_editor/utils';
+import { AddStepButtons } from './add_step_buttons';
 import { EditModeToggle } from './edit_mode_toggle';
 import { SimulationPlayground } from './simulation_playground';
 import { stepUnderEditSelector } from './state_management/interactive_mode_machine/selectors';
@@ -319,6 +320,9 @@ export function StreamDetailEnrichmentContentImpl() {
                           </EuiToolTip>
                         </EuiFlexItem>
                       )}
+                      <EuiFlexItem grow={false}>
+                        <AddStepButtons />
+                      </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiFlexItem>
                   <EuiFlexItem grow style={{ minHeight: 0, overflow: 'auto' }}>

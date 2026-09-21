@@ -29,13 +29,9 @@ import {
 
 interface ProcessingButtonsManualProps {
   center?: boolean;
-  color?: 'text' | 'primary';
 }
 
-export const ProcessingButtonsManual = ({
-  center = false,
-  color = 'text',
-}: ProcessingButtonsManualProps) => {
+export const ProcessingButtonsManual = ({ center = false }: ProcessingButtonsManualProps) => {
   const { euiTheme } = useEuiTheme();
   const { addProcessor } = useStreamEnrichmentEvents();
 
@@ -53,7 +49,7 @@ export const ProcessingButtonsManual = ({
       <EuiFlexItem grow={false}>
         <EuiButton
           size="s"
-          color={color}
+          color="text"
           fill={false}
           css={css`
             color: ${euiTheme.colors.textPrimary};
