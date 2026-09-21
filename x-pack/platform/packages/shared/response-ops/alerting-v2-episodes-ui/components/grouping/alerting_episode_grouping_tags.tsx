@@ -7,7 +7,14 @@
 
 import React, { Fragment, useState } from 'react';
 import { css } from '@emotion/react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiText } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { getValueByFieldPath } from '@kbn/alerting-v2-utils';
 import { formatGroupingValue, getNonEmptyGroupingFields } from '../../utils/episode_grouping_data';
@@ -37,24 +44,6 @@ const groupingTagCss = css`
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-`;
-
-/**
- * Box each badge into exactly one line of the surrounding text (`1lh`) and center it there.
- * A hollow badge is 20px tall, so left to size itself it makes its line taller than the rest and
- * the row runs out of room for the following line. `vertical-align: top` keeps the box from
- * growing the line, which top and bottom aligned boxes only do when they do not fit.
- */
-const inlineGroupingTagsCss = css`
-  /* Keep a gap before the data grid's line-clamp ellipsis; a trailing space would collapse. */
-  padding-inline-end: 0.35em;
-
-  > * {
-    display: inline-flex;
-    align-items: center;
-    block-size: 1lh;
-    vertical-align: top;
-  }
 `;
 
 function GroupingTagPopover({ field, valueText }: { field: string; valueText: string }) {
@@ -103,6 +92,25 @@ export function AlertingEpisodeGroupingTags({
   inline = false,
   'data-test-subj': dataTestSubj,
 }: AlertingEpisodeGroupingTagsProps) {
+  const { euiTheme } = useEuiTheme();
+  /**
+   * Box each badge into exactly one line of the surrounding text (`1lh`) and center it there.
+   * A hollow badge is 20px tall, so left to size itself it makes its line taller than the rest and
+   * the row runs out of room for the following line. `vertical-align: top` keeps the box from
+   * growing the line, which top and bottom aligned boxes only do when they do not fit.
+   */
+  const inlineGroupingTagsCss = css`
+    /* Keep a gap before the data grid's line-clamp ellipsis; a trailing space would collapse. */
+    padding-inline-end: ${euiTheme.size.xs};
+
+    > * {
+      display: inline-flex;
+      align-items: center;
+      block-size: 1lh;
+      vertical-align: top;
+    }
+  `;
+
   const fieldsWithValues = getNonEmptyGroupingFields(fields, data, dataView);
 
   if (fieldsWithValues.length === 0) {

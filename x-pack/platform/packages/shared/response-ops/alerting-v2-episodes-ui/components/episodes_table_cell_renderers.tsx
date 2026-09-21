@@ -212,7 +212,6 @@ export const EpisodeRuleCell = ({
                 inline
                 fields={groupingFields}
                 data={groupingData}
-                dataView={ruleId ? sourceDataViewsByRule?.get(ruleId) : undefined}
                 data-test-subj="episodeRuleCellGroupingTags"
               />
             </>

@@ -57,9 +57,8 @@ export interface AlertEpisode extends BaseAlertEpisode {
    */
   is_muted?: boolean;
   /**
-   * Flattened grouping values copied from classic `kibana.alert.grouping`
-   * (e.g. `{ 'host.name': 'web-01' }`). Used to render grouping tags on source
-   * (v1) alert rows. V2 episodes never set this.
+   * Flattened grouping object (e.g. `{ 'host.name': 'web-01' }`).
+   * Used to render grouping tags on source alert rows. Native episodes never set this.
    */
   source_grouping?: Record<string, unknown>;
 }
