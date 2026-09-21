@@ -6,7 +6,10 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  MappingRuntimeFields,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 
 import { AGENTS_INDEX } from '../../../common';
 import { buildPolicyBaseIdWithFallbackEsFilter } from '../../../common/services/version_specific_policies_utils';
@@ -22,7 +25,7 @@ import { buildPolicyBaseIdWithFallbackEsFilter } from '../../../common/services/
 export const getAgentCountForAgentPolicies = async (
   esClient: ElasticsearchClient,
   agentPolicyIds: string[],
-  { runtimeMappings }: { runtimeMappings?: Record<string, unknown> } = {}
+  { runtimeMappings }: { runtimeMappings?: MappingRuntimeFields } = {}
 ): Promise<Record<string, number>> => {
   if (agentPolicyIds.length === 0) {
     return {};
