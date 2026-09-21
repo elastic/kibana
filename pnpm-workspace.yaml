@@ -1380,6 +1380,7 @@ packages:
   - 'x-pack/platform/plugins/private/data_visualizer'
   - 'x-pack/platform/plugins/private/discover_enhanced'
   - 'x-pack/platform/plugins/private/drilldowns/url_drilldown'
+  - 'x-pack/platform/plugins/private/esql_views'
   - 'x-pack/platform/plugins/private/feedback'
   - 'x-pack/platform/plugins/private/file_upload'
   - 'x-pack/platform/plugins/private/gen_ai_settings'

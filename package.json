@@ -725,6 +725,7 @@
     "@kbn/esql-utils": "workspace:*",
     "@kbn/esql-ux-example-plugin": "workspace:*",
     "@kbn/esql-validation-example-plugin": "workspace:*",
+    "@kbn/esql-views-plugin": "workspace:*",
     "@kbn/eval-kql": "workspace:*",
     "@kbn/evals-common": "workspace:*",
     "@kbn/evals-plugin": "workspace:*",

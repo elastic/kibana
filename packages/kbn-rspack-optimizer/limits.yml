@@ -68,6 +68,7 @@ pageLoadAssetSize:
   entityStore: 2252
   esql: 306
   esqlDataGrid: 215
+  esqlViews: 1205
   esUiShared: 2284
   evals: 4875
   eventAnnotation: 17278
