@@ -13,9 +13,11 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
+import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
 import { CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID } from '../common/constants';
 import { apiPrivileges } from '../common/features';
 import type {
@@ -24,7 +26,9 @@ import type {
   ContextEngineSetupDependencies,
   ContextEngineStartDependencies,
   DeleteWorkflowsApi,
+  GetAiIndexDataReadServiceParams,
 } from './types';
+import type { KiVerifierWorkflowRunner } from './ki_verification';
 import { registerFeatures } from './features';
 import { registerAiIndexRoutes } from './routes/ai_indices';
 import { registerSignalRoutes } from './routes/signals';
@@ -33,6 +37,7 @@ import type {
   WorkflowEnablementApi,
 } from './feedback_analysis/schedule';
 import { createFeedbackAnalysisScheduleService } from './feedback_analysis/schedule';
+import { AiIndexDataReadService } from './ai_indices/data_read_service';
 import { AiIndexService } from './ai_indices/service';
 import { AiIndexRegistry } from './ai_indices/registry';
 import { ImprovementsService } from './improvements/service';
@@ -44,6 +49,7 @@ import { createVerifyKiStepDefinition } from './step_types/verify_ki_step';
 import { registerStepDefinitions } from './step_types';
 import { ContextEngineAnalyticsService } from './telemetry';
 import { isContextEngineEnabledInSpace } from './utils/is_context_engine_enabled_in_space';
+import { resolveSpaceId } from './utils/resolve_space_id';
 
 /** Must match the `pluginId` on the managed workflow definition. */
 const CONTEXT_ENGINE_WORKFLOW_OWNER = 'contextEngine';
@@ -64,6 +70,9 @@ export class ContextEnginePlugin
     esClient: ElasticsearchClient,
     spaceId: string
   ) => ImprovementsService;
+  private createAiIndexDataReadService?: (
+    params: GetAiIndexDataReadServiceParams
+  ) => AiIndexDataReadService;
   private esClient?: ElasticsearchClient;
   private scheduleService?: FeedbackAnalysisScheduleService;
   /** Captured at setup because the schedule service, built at start, enables workflows with it. */
@@ -71,8 +80,9 @@ export class ContextEnginePlugin
   private isFeedbackLoopEnabled: () => Promise<boolean> = async () => false;
   private readonly aiIndexRegistry = new AiIndexRegistry();
   private analyticsService?: ContextEngineAnalyticsService;
-  private workflowsManagementApiPromise: Promise<DeleteWorkflowsApi | undefined> =
-    Promise.resolve(undefined);
+  private workflowsManagementApiPromise: Promise<
+    (DeleteWorkflowsApi & KiVerifierWorkflowRunner) | undefined
+  > = Promise.resolve(undefined);
 
   constructor(context: PluginInitializerContext) {
     this.logger = context.logger.get();
@@ -94,8 +104,30 @@ export class ContextEnginePlugin
     this.analyticsService.registerContextEngineEventTypes();
     const analyticsService = this.analyticsService;
 
+    const checkApiPrivileges = async (
+      request: KibanaRequest,
+      spaceId: string,
+      actions: readonly string[]
+    ): Promise<boolean> => {
+      const [, startDeps] = await coreSetup.getStartServices();
+      const { security } = startDeps;
+      if (!security) {
+        return true;
+      }
+      const { hasAllRequested } = await security.authz
+        .checkPrivilegesWithRequest(request)
+        .atSpace(spaceId, {
+          kibana: actions.map((action) => security.authz.actions.api.get(action)),
+        });
+      return hasAllRequested;
+    };
+
     setupDeps.workflowsExtensions.registerStepDefinition(
-      createVerifyKiStepDefinition(coreSetup, this.logger.get('context_steps'), analyticsService)
+      createVerifyKiStepDefinition(coreSetup, this.logger.get('context_steps'), analyticsService, {
+        getWorkflowsManagement: () => this.workflowsManagementApiPromise,
+        checkExecutePrivilege: (request, spaceId) =>
+          checkApiPrivileges(request, spaceId, WorkflowsManagementOperationPrivileges.execute),
+      })
     );
 
     coreSetup.uiSettings.registerGlobal({
@@ -163,9 +195,23 @@ export class ContextEnginePlugin
       getAiIndexService,
       getImprovementsService,
       getScheduleService,
+      getAiIndexDataReadService: (params) => {
+        if (!this.createAiIndexDataReadService) {
+          throw new Error('AI index read service not available — plugin has not started');
+        }
+        return this.createAiIndexDataReadService(params);
+      },
       getActions: async () => {
         const [, startDeps] = await coreSetup.getStartServices();
         return startDeps.actions;
+      },
+      // Resolved at runtime because a static dependency on agentBuilder would be a cycle:
+      // agentBuilder -> agentBuilderSml -> contextEngine.
+      getAgentBuilder: async () => {
+        const { agentBuilder } = await coreSetup.plugins.onStart<{
+          agentBuilder: AgentBuilderPluginStart;
+        }>('agentBuilder');
+        return agentBuilder.found ? agentBuilder.contract : undefined;
       },
       getWorkflowsManagementApi: () => this.workflowsManagementApiPromise,
       getSpaces: async () => {
@@ -239,7 +285,9 @@ export class ContextEnginePlugin
   ): void {
     try {
       this.workflowsManagementApiPromise = coreSetup.plugins
-        .onSetup<{ workflowsManagement: { management: DeleteWorkflowsApi } }>('workflowsManagement')
+        .onSetup<{
+          workflowsManagement: { management: DeleteWorkflowsApi & KiVerifierWorkflowRunner };
+        }>('workflowsManagement')
         .then(({ workflowsManagement }) =>
           workflowsManagement.found ? workflowsManagement.contract.management : undefined
         )
@@ -285,6 +333,7 @@ export class ContextEnginePlugin
         ensure: ensureAiIndex,
       },
     });
+    const aiIndexService = this.aiIndexService;
 
     this.signalsService = new SignalsService({
       esClient: this.esClient,
@@ -296,6 +345,16 @@ export class ContextEnginePlugin
     this.createImprovementsService = (esClient: ElasticsearchClient, spaceId: string) =>
       new ImprovementsService({ esClient, logger: improvementsLogger, space: spaceId });
     const createImprovementsService = this.createImprovementsService;
+
+    this.createAiIndexDataReadService = ({ esClient, request }) =>
+      new AiIndexDataReadService({
+        esClient,
+        spaceId: resolveSpaceId(startDeps.spaces, request),
+        auditLogger: coreStart.security.audit.asScoped(request),
+        aiIndexService,
+        logger: this.logger,
+      });
+    const createAiIndexDataReadService = this.createAiIndexDataReadService;
 
     // Installed as Kibana, with the cluster privilege it already holds. The index is left for the
     // first user write to create from it, so the store needs no grant on the internal user.
@@ -337,6 +396,7 @@ export class ContextEnginePlugin
         }
         return this.aiIndexService;
       },
+      getAiIndexDataReadService: (params) => createAiIndexDataReadService(params),
       getSignalsService: () => signalsService,
       getImprovementsService: (esClient, spaceId) => createImprovementsService(esClient, spaceId),
     };

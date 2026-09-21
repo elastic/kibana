@@ -59,14 +59,14 @@ export const ALERTZERO_THIN_AGENT_ID = 'alertzero-thin-agent' as const;
 /** Managed catalog workflow ids — owned by Security. */
 export const SYSTEM_SECURITY_WATCH_FLOOR_ID = 'system-security-watch-floor' as const;
 export const SYSTEM_SECURITY_WATCH_OFFICER_ID = 'system-security-watch-officer' as const;
-export const SYSTEM_SECURITY_WATCH_DARK_ID = 'system-security-watch-dark' as const;
+export const SYSTEM_SECURITY_WATCH_HUNT_ID = 'system-security-watch-hunt' as const;
 export const SYSTEM_SECURITY_WATCH_DEEP_ID = 'system-security-watch-deep' as const;
 export const SYSTEM_SECURITY_WATCH_DETECTION_ID = 'system-security-watch-detection' as const;
 
 export const SYSTEM_SECURITY_WATCH_IDS = [
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
   SYSTEM_SECURITY_WATCH_OFFICER_ID,
-  SYSTEM_SECURITY_WATCH_DARK_ID,
+  SYSTEM_SECURITY_WATCH_HUNT_ID,
   SYSTEM_SECURITY_WATCH_DEEP_ID,
   SYSTEM_SECURITY_WATCH_DETECTION_ID,
 ] as const;
@@ -107,9 +107,9 @@ export const SYSTEM_SECURITY_WATCH_CATALOG = [
     color: '#3b82f6',
   },
   {
-    id: SYSTEM_SECURITY_WATCH_DARK_ID,
-    deepLinkId: SecurityPageName.alertZeroWatchDark,
-    name: 'Dark Watch',
+    id: SYSTEM_SECURITY_WATCH_HUNT_ID,
+    deepLinkId: SecurityPageName.alertZeroWatchHunt,
+    name: 'Hunt Watch',
     color: '#f59e0b',
     isBeta: true,
   },
@@ -134,25 +134,25 @@ export type SystemSecurityWatchCatalogEntry = (typeof SYSTEM_SECURITY_WATCH_CATA
 export const WATCH_TAG = 'watch' as const;
 export const WATCH_FLOOR_TAG = 'watch-floor' as const;
 export const WATCH_OFFICER_TAG = 'watch-officer' as const;
-export const WATCH_DARK_TAG = 'watch-dark' as const;
+export const WATCH_HUNT_TAG = 'watch-hunt' as const;
 export const WATCH_DEEP_TAG = 'watch-deep' as const;
 export const WATCH_DETECTION_TAG = 'watch-detection' as const;
 
 export const WATCH_TIER_TAGS = [
   WATCH_FLOOR_TAG,
   WATCH_OFFICER_TAG,
-  WATCH_DARK_TAG,
+  WATCH_HUNT_TAG,
   WATCH_DEEP_TAG,
   WATCH_DETECTION_TAG,
 ] as const;
 
-/** Managed Worker workflow ids — tagged Watch members. Dark CTH is the externally settled id. */
+/** Managed Worker workflow ids — tagged Watch members. Hunt CTH is the externally settled id. */
 export const SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID =
   'system-security-floor-alert-triage' as const;
 export const SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID =
   'system-security-floor-attack-discovery' as const;
-export const SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID =
-  'system-security-dark-continuous-threat-hunt' as const;
+export const SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID =
+  'system-security-hunt-continuous-threat-hunt' as const;
 export const SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID =
   'system-security-detection-rule-tuning' as const;
 export const SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID =
@@ -161,7 +161,7 @@ export const SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID =
 export const SYSTEM_SECURITY_WORKER_IDS = [
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
-  SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID,
+  SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
 ] as const;
@@ -184,10 +184,10 @@ export const SYSTEM_SECURITY_WORKER_CATALOG = [
     watchTag: WATCH_FLOOR_TAG,
   },
   {
-    id: SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID,
+    id: SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
     name: 'Continuous Threat Hunt',
-    watchId: SYSTEM_SECURITY_WATCH_DARK_ID,
-    watchTag: WATCH_DARK_TAG,
+    watchId: SYSTEM_SECURITY_WATCH_HUNT_ID,
+    watchTag: WATCH_HUNT_TAG,
   },
   {
     id: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
@@ -212,6 +212,29 @@ export type SystemSecurityWorkerCatalogEntry = (typeof SYSTEM_SECURITY_WORKER_CA
 export const WORKER_SCHEDULE_UNITS = ['m', 'h', 'd'] as const;
 
 export type WorkerScheduleUnit = (typeof WORKER_SCHEDULE_UNITS)[number];
+
+/**
+ * Inference feature registry ids. Operators pick the model for each tier in Stack Management >
+ * Model Settings, and Worker `ai.agent` steps resolve through them with
+ * `connector-id-by-feature` instead of naming an endpoint themselves.
+ *
+ * The axis is the kind of call, not the Worker. One Worker can span several tiers — Attack
+ * Discovery generates and then investigates, three `workflow.execute` hops apart — and a step
+ * names its own tier wherever it sits in the call tree, so nothing has to be threaded through
+ * `workflow.execute` inputs. A new Worker usually costs no new tier.
+ *
+ * Tiers are named for the execution profile a model needs rather than the task it happens to serve
+ * today, so a step is not pushed toward the wrong rung by a name that reads like a job title: the
+ * same fast model that gates an alert also enriches a threat report. Other Security features are
+ * expected to pin to these rather than register per-feature rows of their own.
+ */
+export const ALERTZERO_INFERENCE_PARENT_FEATURE_ID = 'alertzero_parent' as const;
+/** Low latency, high volume, lightweight judgment. */
+export const ALERTZERO_FAST_INFERENCE_FEATURE_ID = 'alertzero_fast' as const;
+/** Deeper single-shot thinking on a self-contained task. */
+export const ALERTZERO_REASONING_INFERENCE_FEATURE_ID = 'alertzero_reasoning' as const;
+/** Multi-step work over tools and iteration, where cost multiplies by the round count. */
+export const ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID = 'alertzero_agentic' as const;
 
 export const TEMPLATE_ID_INVESTIGATION = 'investigation' as const;
 export const TEMPLATE_ID_PROPOSAL = 'proposal' as const;
