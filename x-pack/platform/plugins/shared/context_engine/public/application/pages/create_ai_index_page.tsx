@@ -21,7 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
-import { MAX_AI_INDEX_DESCRIPTION_LENGTH } from '../../../common/constants';
+import { DEFAULT_AI_INDEX_TYPE, MAX_AI_INDEX_DESCRIPTION_LENGTH } from '../../../common/constants';
 import { TraceSelector, type EditableAiIndexTrace } from '../components/trace_selector';
 import { useCreateAiIndex } from '../hooks/use_create_ai_index';
 import { useNavigation } from '../hooks/use_navigation';
@@ -44,8 +44,6 @@ const createPageDescription = i18n.translate('xpack.contextEngine.createAiIndex.
 const createPageTitle = i18n.translate('xpack.contextEngine.createAiIndex.title', {
   defaultMessage: 'Create AI index',
 });
-
-const DEFAULT_AI_INDEX_TYPE = 'index' as const;
 
 export const CreateAiIndexPage = () => {
   const { createContextEngineUrl, navigateToContextEngine } = useNavigation();
