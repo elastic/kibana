@@ -7,11 +7,10 @@
 
 import type { Capabilities } from '@kbn/core/public';
 import {
-  OBSERVABILITY_ALERTS_FEATURE_ID,
-  STACK_ALERTS_ONLY_FEATURE_ID,
-  AlertConsumers,
-} from '@kbn/rule-data-utils';
-import { hasObservabilityAlertingPrivilege } from './has_observability_alerting_privilege';
+  hasObservabilityAlertingCapabilities,
+  hasObservabilityAlertsV1Capability,
+  hasObservabilityRulesV1Capability,
+} from './has_observability_alerting_privilege';
 
 const capabilities = (features: Record<string, Record<string, boolean>>): Capabilities =>
   ({
@@ -21,127 +20,159 @@ const capabilities = (features: Record<string, Record<string, boolean>>): Capabi
     ...features,
   } as Capabilities);
 
-describe('hasObservabilityAlertingPrivilege', () => {
-  describe('read', () => {
-    it('allows a v1 logs show user', () => {
-      expect(
-        hasObservabilityAlertingPrivilege(
-          capabilities({ [AlertConsumers.LOGS]: { show: true } }),
-          ['alerts'],
-          'read'
-        )
-      ).toBe(true);
+describe('hasObservabilityRulesV1Capability', () => {
+  it('returns true for apm navLink', () => {
+    expect(hasObservabilityRulesV1Capability(capabilities({ navLinks: { apm: true } }))).toBe(true);
+  });
+
+  it('returns true for metrics navLink', () => {
+    expect(hasObservabilityRulesV1Capability(capabilities({ navLinks: { metrics: true } }))).toBe(
+      true
+    );
+  });
+
+  it('returns true for uptime navLink', () => {
+    expect(hasObservabilityRulesV1Capability(capabilities({ navLinks: { uptime: true } }))).toBe(
+      true
+    );
+  });
+
+  it('returns true for synthetics navLink', () => {
+    expect(
+      hasObservabilityRulesV1Capability(capabilities({ navLinks: { synthetics: true } }))
+    ).toBe(true);
+  });
+
+  it('returns true for slo navLink', () => {
+    expect(hasObservabilityRulesV1Capability(capabilities({ navLinks: { slo: true } }))).toBe(true);
+  });
+
+  it('returns true for logs.show', () => {
+    expect(hasObservabilityRulesV1Capability(capabilities({ logs: { show: true } }))).toBe(true);
+  });
+
+  it('returns false without any observability capability', () => {
+    expect(hasObservabilityRulesV1Capability(capabilities({}))).toBe(false);
+  });
+});
+
+describe('hasObservabilityAlertsV1Capability', () => {
+  it('returns true for observabilityAlerts.show', () => {
+    expect(
+      hasObservabilityAlertsV1Capability(capabilities({ observabilityAlerts: { show: true } }))
+    ).toBe(true);
+  });
+
+  it('returns true when rules v1 capability is present', () => {
+    expect(hasObservabilityAlertsV1Capability(capabilities({ navLinks: { apm: true } }))).toBe(
+      true
+    );
+  });
+
+  it('returns false without any observability capability', () => {
+    expect(hasObservabilityAlertsV1Capability(capabilities({}))).toBe(false);
+  });
+});
+
+describe('hasObservabilityAlertingCapabilities', () => {
+  describe('alerts', () => {
+    it('returns v1: true for observabilityAlerts.show', () => {
+      const result = hasObservabilityAlertingCapabilities(
+        capabilities({ observabilityAlerts: { show: true } }),
+        'alerts'
+      );
+      expect(result).toEqual({ v1: true, v2: false });
     });
 
-    it('allows a v1 observabilityAlerts show user', () => {
-      expect(
-        hasObservabilityAlertingPrivilege(
-          capabilities({ [OBSERVABILITY_ALERTS_FEATURE_ID]: { show: true } }),
-          ['alerts'],
-          'read'
-        )
-      ).toBe(true);
+    it('returns v1: true for logs.show', () => {
+      const result = hasObservabilityAlertingCapabilities(
+        capabilities({ logs: { show: true } }),
+        'alerts'
+      );
+      expect(result).toEqual({ v1: true, v2: false });
     });
 
-    it('allows a v1 stackAlertsOnly show user', () => {
-      expect(
-        hasObservabilityAlertingPrivilege(
-          capabilities({ [STACK_ALERTS_ONLY_FEATURE_ID]: { show: true } }),
-          ['alerts'],
-          'read'
-        )
-      ).toBe(true);
+    it('returns v2: true for alerting_v2_alerts read', () => {
+      const result = hasObservabilityAlertingCapabilities(
+        capabilities({ alerting_v2_alerts: { read: true } }),
+        'alerts'
+      );
+      expect(result).toEqual({ v1: false, v2: true });
     });
 
-    it('allows a v2 alerts read user', () => {
-      expect(
-        hasObservabilityAlertingPrivilege(
-          capabilities({ alerting_v2_alerts: { read: true } }),
-          ['alerts'],
-          'read'
-        )
-      ).toBe(true);
+    it('returns both true when v1 and v2 capabilities present', () => {
+      const result = hasObservabilityAlertingCapabilities(
+        capabilities({
+          observabilityAlerts: { show: true },
+          alerting_v2_alerts: { read: true },
+        }),
+        'alerts'
+      );
+      expect(result).toEqual({ v1: true, v2: true });
     });
 
-    it('denies when the user has neither v1 show nor v2 read', () => {
-      expect(
-        hasObservabilityAlertingPrivilege(
-          capabilities({ advancedSettings: { show: true } }),
-          ['alerts'],
-          'read'
-        )
-      ).toBe(false);
-    });
-
-    it('denies a v2 user missing read on any requested feature', () => {
-      expect(
-        hasObservabilityAlertingPrivilege(
-          capabilities({
-            alerting_v2_alerts: { read: true },
-            alerting_v2_rules: { read: false },
-          }),
-          ['alerts', 'rules'],
-          'read'
-        )
-      ).toBe(false);
+    it('returns both false without any alerting capability', () => {
+      const result = hasObservabilityAlertingCapabilities(capabilities({}), 'alerts');
+      expect(result).toEqual({ v1: false, v2: false });
     });
   });
 
-  describe('all', () => {
-    it('allows a v1 observabilityAlerts write user', () => {
-      expect(
-        hasObservabilityAlertingPrivilege(
-          capabilities({ [OBSERVABILITY_ALERTS_FEATURE_ID]: { write: true } }),
-          ['alerts'],
-          'all'
-        )
-      ).toBe(true);
+  describe('rules', () => {
+    it('returns v1: true for apm navLink', () => {
+      const result = hasObservabilityAlertingCapabilities(
+        capabilities({ navLinks: { apm: true } }),
+        'rules'
+      );
+      expect(result).toEqual({ v1: true, v2: false });
     });
 
-    it('allows a v1 stackAlertsOnly write user', () => {
-      expect(
-        hasObservabilityAlertingPrivilege(
-          capabilities({ [STACK_ALERTS_ONLY_FEATURE_ID]: { write: true } }),
-          ['alerts'],
-          'all'
-        )
-      ).toBe(true);
+    it('returns v2: true for alerting_v2_rules read', () => {
+      const result = hasObservabilityAlertingCapabilities(
+        capabilities({ alerting_v2_rules: { read: true } }),
+        'rules'
+      );
+      expect(result).toEqual({ v1: false, v2: true });
     });
 
-    it('denies a v1 logs all user because logs exposes save, not write', () => {
-      expect(
-        hasObservabilityAlertingPrivilege(
-          capabilities({
-            [AlertConsumers.LOGS]: { show: true, configureSource: true, save: true },
-          }),
-          ['alerts'],
-          'all'
-        )
-      ).toBe(false);
+    it('returns both false without any rules capability', () => {
+      const result = hasObservabilityAlertingCapabilities(capabilities({}), 'rules');
+      expect(result).toEqual({ v1: false, v2: false });
+    });
+  });
+
+  describe('actionPolicies (v2-only)', () => {
+    it('returns v1: false regardless of v1 capabilities', () => {
+      const result = hasObservabilityAlertingCapabilities(
+        capabilities({ observabilityAlerts: { show: true }, navLinks: { apm: true } }),
+        'actionPolicies'
+      );
+      expect(result.v1).toBe(false);
     });
 
-    it('allows a v2 alerts all user', () => {
-      expect(
-        hasObservabilityAlertingPrivilege(
-          capabilities({ alerting_v2_alerts: { all: true } }),
-          ['alerts'],
-          'all'
-        )
-      ).toBe(true);
+    it('returns v2: true for alerting_v2_action_policies read', () => {
+      const result = hasObservabilityAlertingCapabilities(
+        capabilities({ alerting_v2_action_policies: { read: true } }),
+        'actionPolicies'
+      );
+      expect(result).toEqual({ v1: false, v2: true });
+    });
+  });
+
+  describe('executionHistory (v2-only)', () => {
+    it('returns v1: false regardless of v1 capabilities', () => {
+      const result = hasObservabilityAlertingCapabilities(
+        capabilities({ observabilityAlerts: { show: true }, navLinks: { apm: true } }),
+        'executionHistory'
+      );
+      expect(result.v1).toBe(false);
     });
 
-    it('denies a v2 read-only user', () => {
-      expect(
-        hasObservabilityAlertingPrivilege(
-          capabilities({ alerting_v2_alerts: { read: true } }),
-          ['alerts'],
-          'all'
-        )
-      ).toBe(false);
-    });
-
-    it('denies when the user has neither v1 write nor v2 all', () => {
-      expect(hasObservabilityAlertingPrivilege(capabilities({}), ['alerts'], 'all')).toBe(false);
+    it('returns v2: true for alerting_v2_execution_history read', () => {
+      const result = hasObservabilityAlertingCapabilities(
+        capabilities({ alerting_v2_execution_history: { read: true } }),
+        'executionHistory'
+      );
+      expect(result).toEqual({ v1: false, v2: true });
     });
   });
 });
