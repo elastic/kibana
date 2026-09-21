@@ -15,8 +15,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [
       require.resolve('./apis/epm_upload_default/install_by_upload_registry_name'),
       require.resolve('./apis/epm_upload_default/install_by_upload_live_stream'),
-      // Must run last: successful installs here set the 10 s process-wide rate-limit;
-      // the other suites have no rate-limit guard and would get 429 if this ran first.
       require.resolve('./apis/epm_upload_default/upload_preflight_authz'),
     ],
     junit: {
