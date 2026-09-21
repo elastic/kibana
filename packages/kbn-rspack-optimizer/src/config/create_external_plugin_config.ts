@@ -17,7 +17,6 @@ import { DEFAULT_THEME_TAGS } from '@kbn/core-ui-settings-common';
 import { rspack } from '../rspack_runtime';
 import { discoverPlugins } from '../utils/plugin_discovery';
 import { findTargetEntry } from '../utils/entry_generation';
-import { loadDllManifest } from './dll_manifest';
 import { getExternals, isKeaReactReduxImport } from './externals';
 import {
   getSharedResolveConfig,
@@ -46,7 +45,6 @@ const CACHE_CONFIG_FILES = [
   'packages/kbn-swc-config/src/browser.js',
   'packages/kbn-transpiler-config/src/shared_config.ts',
   'package.json',
-  UiSharedDepsNpm.dllManifestPath,
 ];
 
 export interface ExternalPluginConfigOptions {
@@ -66,6 +64,8 @@ export interface ExternalPluginConfigOptions {
   cache?: boolean;
   /** Theme tags to compile (default: borealislight, borealisdark) */
   themeTags?: ThemeTag[];
+  /** Override the shared dependency DLL manifest path. */
+  dllManifestPath?: string;
 }
 
 /**
@@ -93,6 +93,7 @@ export async function createExternalPluginConfig(
     watch = false,
     cache = true,
     themeTags = [...DEFAULT_THEME_TAGS],
+    dllManifestPath = UiSharedDepsNpm.dllManifestPath,
   } = options;
 
   // Discover all in-repo browser plugins to build the cross-plugin externals map.
@@ -213,7 +214,7 @@ export async function createExternalPluginConfig(
       repoRoot,
       cacheRoot: pluginDir,
       versionPrefix: 'external-plugin-v4', // bumped for the Rspack 2.x cache format
-      configFiles: CACHE_CONFIG_FILES,
+      configFiles: [...CACHE_CONFIG_FILES, dllManifestPath],
       extraBuildDependencies: [Path.resolve(pluginDir, 'package.json')],
     }),
 
@@ -231,7 +232,7 @@ export async function createExternalPluginConfig(
       }),
       new rspack.DllReferencePlugin({
         context: repoRoot,
-        manifest: loadDllManifest(),
+        manifest: dllManifestPath,
       }),
       new rspack.DefinePlugin({
         'process.env.NODE_ENV': JSON.stringify(dist ? 'production' : 'development'),

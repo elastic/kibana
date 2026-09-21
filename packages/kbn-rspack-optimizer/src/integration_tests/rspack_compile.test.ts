@@ -34,6 +34,7 @@ function compileInWorker(options: {
   pluginId: string;
   outputDir: string;
   dist: boolean;
+  dllManifestPath: string;
 }): CompileWorkerResult {
   try {
     execFileSync(
@@ -127,6 +128,24 @@ function createEmotionFixturePlugin(tmpDir: string): { pluginDir: string; plugin
 }
 
 describe('rspack compile integration', () => {
+  let suiteTmpDir: string;
+  let dllManifestPath: string;
+
+  beforeAll(() => {
+    const tmpRoot = Path.join(REPO_ROOT, 'target', 'kbn-rspack-integration');
+    Fs.mkdirSync(tmpRoot, { recursive: true });
+    suiteTmpDir = Fs.mkdtempSync(Path.join(tmpRoot, 'suite-'));
+    dllManifestPath = Path.join(suiteTmpDir, 'test-dll-manifest.json');
+    Fs.writeFileSync(
+      dllManifestPath,
+      JSON.stringify({ name: '__kbnSharedDeps_npm__', content: {} })
+    );
+  });
+
+  afterAll(() => {
+    Fs.rmSync(suiteTmpDir, { recursive: true, force: true });
+  });
+
   describe('createSingleCompileConfig', () => {
     it('produces a valid rspack config with entry, output, plugins, and module rules', async () => {
       const options: SingleCompileConfigOptions = {
@@ -136,6 +155,7 @@ describe('rspack compile integration', () => {
         cache: false,
         examples: false,
         testPlugins: false,
+        dllManifestPath,
       };
 
       const config = await createSingleCompileConfig(options);
@@ -173,6 +193,7 @@ describe('rspack compile integration', () => {
         cache: false,
         examples: false,
         testPlugins: false,
+        dllManifestPath,
       });
 
       expect(config.mode).toBe('production');
@@ -187,9 +208,7 @@ describe('rspack compile integration', () => {
     let tmpDir: string;
 
     beforeEach(() => {
-      const tmpRoot = Path.join(REPO_ROOT, 'target', 'kbn-rspack-integration');
-      Fs.mkdirSync(tmpRoot, { recursive: true });
-      tmpDir = Fs.mkdtempSync(Path.join(tmpRoot, 'test-'));
+      tmpDir = Fs.mkdtempSync(Path.join(suiteTmpDir, 'test-'));
     });
 
     afterEach(() => {
@@ -200,7 +219,13 @@ describe('rspack compile integration', () => {
       const { pluginDir, pluginId } = createFixturePlugin(tmpDir);
       const outputDir = Path.join(tmpDir, 'output');
 
-      const result = compileInWorker({ pluginDir, pluginId, outputDir, dist: false });
+      const result = compileInWorker({
+        pluginDir,
+        pluginId,
+        outputDir,
+        dist: false,
+        dllManifestPath,
+      });
 
       expect(result.errors).toEqual([]);
       expect(result.success).toBe(true);
@@ -235,7 +260,13 @@ describe('rspack compile integration', () => {
         const { pluginDir, pluginId } = createEmotionFixturePlugin(tmpDir);
         const outputDir = Path.join(tmpDir, dist ? 'output-emotion-dist' : 'output-emotion-dev');
 
-        const result = compileInWorker({ pluginDir, pluginId, outputDir, dist });
+        const result = compileInWorker({
+          pluginDir,
+          pluginId,
+          outputDir,
+          dist,
+          dllManifestPath,
+        });
 
         if (!result.success) {
           throw new Error(JSON.stringify(result.errors, null, 2));
@@ -260,7 +291,13 @@ describe('rspack compile integration', () => {
       const { pluginDir, pluginId } = createFixturePlugin(tmpDir);
       const outputDir = Path.join(tmpDir, 'output-dist');
 
-      const result = compileInWorker({ pluginDir, pluginId, outputDir, dist: true });
+      const result = compileInWorker({
+        pluginDir,
+        pluginId,
+        outputDir,
+        dist: true,
+        dllManifestPath,
+      });
 
       expect(result.errors).toEqual([]);
       expect(result.success).toBe(true);
@@ -275,6 +312,7 @@ describe('rspack compile integration', () => {
         pluginId,
         outputDir: Path.join(tmpDir, 'output-dev'),
         dist: false,
+        dllManifestPath,
       });
       expect(devResult.errors).toEqual([]);
       expect(devResult.success).toBe(true);
