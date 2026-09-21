@@ -49,8 +49,17 @@ export const recursiveRecord: z.ZodType<RecursiveRecord> = z
 
 export type FlattenRecord = Record<PropertyKey, Primitive | Primitive[] | unknown[]>;
 
+// FlattenRecord field values must NOT be direct records (per the type contract).
+// Array items may still be objects (unknown[] is broader than Primitive[]), so
+// boundedValue is reused for item validation while the top-level union excludes
+// the record branch.
+const flattenFieldValue: z.ZodType<unknown> = z.union([
+  primitive,
+  z.array(boundedValue).max(1000),
+]) as z.ZodType<unknown>;
+
 export const flattenRecord: z.ZodType<FlattenRecord> = z
-  .record(z.string().max(1000), boundedValue)
+  .record(z.string().max(1000), flattenFieldValue)
   .meta({ id: 'FlattenRecord' }) as unknown as z.ZodType<FlattenRecord>;
 
 export const sampleDocument = recursiveRecord;
