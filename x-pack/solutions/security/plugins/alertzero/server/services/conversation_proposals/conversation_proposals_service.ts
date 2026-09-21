@@ -47,11 +47,7 @@ export class ConversationProposalsService {
     return { proposals: this.enrichProposals(proposals, conversations), total };
   }
 
-  /**
-   * Returns proposals that stopped awaiting a human in the last 72 h.
-   * Includes any non-pending status (dismissed, approved, executing,
-   * succeeded, failed, expired). Sorted by decidedAt desc, then createdAt desc.
-   */
+  /** Proposals that stopped awaiting a human in the last 72 h, newest decision first. */
   async listClosed(
     request: KibanaRequest,
     spaceId: string,
@@ -77,10 +73,7 @@ export class ConversationProposalsService {
     return { proposals: this.enrichProposals(proposals, conversations), total };
   }
 
-  /**
-   * Fetches conversation data for the given ids in a single bulk request.
-   * Returns an empty map if the read fails — enrichment is decoration, not load-bearing.
-   */
+  /** Returns an empty map if the read fails: enrichment is decoration, not load-bearing. */
   private async fetchConversations(
     conversationIds: string[],
     request: KibanaRequest
@@ -107,7 +100,6 @@ export class ConversationProposalsService {
     }
   }
 
-  /** Merges conversation decoration into each proposal. Missing conversations are skipped gracefully. */
   private enrichProposals(
     proposals: ProposalWithMetadata[],
     conversations: Map<string, ConversationDecoration>

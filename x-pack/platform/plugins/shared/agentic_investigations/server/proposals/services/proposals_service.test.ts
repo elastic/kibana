@@ -1508,11 +1508,7 @@ describe('ProposalsService', () => {
     const issuedQueries = (storage: ReturnType<typeof createStorage>): string[] =>
       storage.esql.mock.calls.map(([args]) => args.pipeline.toRequest().query as string);
 
-    /**
-     * The four bucketed queries. The `currentOpen` scalar is deliberately excluded:
-     * it has no COALESCE and no LIMIT because a bare STATS returns a single row, and
-     * it legitimately filters on request-time expiry — see the assertions below.
-     */
+    /** Excludes the `currentOpen` scalar, which has no COALESCE or LIMIT and filters on NOW(). */
     const bucketQueries = (storage: ReturnType<typeof createStorage>): string[] =>
       issuedQueries(storage).slice(0, 4);
 
@@ -1538,8 +1534,7 @@ describe('ProposalsService', () => {
 
       const { buckets } = await service.chartsSummary(chartsQuery, SPACE_ID);
 
-      // Bucket 3 holds the close, and still counts the proposal: it was open for
-      // part of that bucket. The decrement shows up in bucket 4.
+      // Bucket 3 holds the close and still counts it; the decrement lands in bucket 4.
       expect(buckets.map((b) => b.counts.contain)).toEqual([2, 5, 5, 5, 4]);
     });
 
@@ -1578,11 +1573,7 @@ describe('ProposalsService', () => {
       expect(buckets.map((b) => b.counts.contain)).toEqual([1, 1, 1, 0, 0]);
     });
 
-    /**
-     * The bug this fixes: a proposal created and decided inside one bucket netted
-     * +1 −1 = 0 under an end-of-bucket snapshot, so it never appeared in the chart
-     * at all. Reported from a manual test where the slice read 0.
-     */
+    // Netted +1 −1 = 0 under the old end-of-bucket snapshot, so it never appeared.
     it('should count a proposal that opened and closed within the same bucket', async () => {
       const storage = createStorage();
       mockEsql(storage, {
@@ -1593,8 +1584,7 @@ describe('ProposalsService', () => {
 
       const { buckets } = await service.chartsSummary(chartsQuery, SPACE_ID);
 
-      // Normalised because a category carries no key until its first event, which
-      // is why the buckets before the open are absent rather than zero.
+      // Normalised: a category carries no key until its first event.
       expect(buckets.map((b) => b.counts.contain ?? 0)).toEqual([0, 0, 1, 0, 0]);
     });
 
@@ -1644,11 +1634,7 @@ describe('ProposalsService', () => {
       }
     });
 
-    /**
-     * The exemption to the rule above: `currentOpen` has no history to distort, so
-     * "open right now" is only answerable with a right-now predicate. Asserted
-     * explicitly so narrowing the ban to the bucketed queries stays deliberate.
-     */
+    // The exemption to the rule above, asserted so narrowing the ban stays deliberate.
     it('should filter the currentOpen query on request-time expiry', async () => {
       const storage = createStorage();
       const { service } = createService(storage);

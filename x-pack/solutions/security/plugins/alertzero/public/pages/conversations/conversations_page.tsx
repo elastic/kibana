@@ -61,8 +61,8 @@ export const ConversationsPage: React.FC = () => {
   const configure = useProposalsByCategory('configure');
   const closed = useClosedProposals();
 
-  // Aggregate loading / error state across all four queries. An error only counts once
-  // nothing is cached: a failed refetch must not blank a queue that is still readable.
+  // An error only counts once nothing is cached, so a failed refetch does not
+  // blank a queue that is still readable.
   const isLoading =
     respond.isLoading || investigate.isLoading || configure.isLoading || closed.isLoading;
   const hasAnyData = respond.data ?? investigate.data ?? configure.data ?? closed.data;
@@ -105,10 +105,8 @@ export const ConversationsPage: React.FC = () => {
     [proposalsById]
   );
 
-  // Header count: authoritative total of pending proposals in this space.
-  // Uses `currentOpen` from chartsSummary — no page-size cap, covers all
-  // categories, excludes expired. React Query dedupes with the chart row
-  // (same query key and defaults), so this adds no extra request.
+  // From chartsSummary rather than the pages: no page-size cap, and every
+  // category. Shares the chart row's query key, so it costs no extra request.
   const chartsSummary = useProposalChartsSummary();
   const openCount = chartsSummary.data?.currentOpen ?? 0;
 
@@ -236,8 +234,8 @@ export const ConversationsPage: React.FC = () => {
     [conversations, selectedIdForRecommendedAction]
   );
 
-  // Each category query sorts createdAt-descending on its own, so the merged list has no
-  // single order; the adapter's synthetic priorityScore is what restores an impact-first one.
+  // Each category pages by its own recency, so the merged list has no single
+  // order; priorityScore is what restores an impact-first one.
   const sortedConversations = useMemo(
     () =>
       conversations.toSorted((a, b) => {

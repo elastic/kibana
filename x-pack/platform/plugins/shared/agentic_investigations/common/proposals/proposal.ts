@@ -242,11 +242,7 @@ export type ProposalFilters = z.infer<typeof proposalFiltersSchema>;
 export const listProposalsQuerySchema = proposalFiltersSchema.extend({
   /** Filters to proposals in the given action category. */
   category: proposalCategorySchema.optional(),
-  /**
-   * Filters to proposals whose `decidedAt` falls within the last N hours. The
-   * closed queue is a recency window rather than the whole decided history, so
-   * the bound belongs on the query instead of being applied after paging.
-   */
+  /** Bounds the closed queue to a recency window rather than all decided history. */
   decidedWithinHours: z.coerce.number().int().min(1).max(168).optional(),
   size: z.coerce.number().int().min(1).max(MAX_PROPOSALS_PAGE_SIZE).default(50),
   from: z.coerce.number().int().min(0).max(MAX_PROPOSALS_PAGE_OFFSET).default(0),

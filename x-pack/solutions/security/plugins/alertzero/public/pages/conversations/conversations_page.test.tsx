@@ -39,11 +39,7 @@ const mockUseProposalChartsSummary = useProposalChartsSummary as jest.Mock;
 const mockUseApproveProposal = useApproveProposal as jest.Mock;
 const mockUseDismissProposal = useDismissProposal as jest.Mock;
 
-/**
- * The queue is fetched as one page per category plus one for closed. Cases still
- * describe a scenario as the whole queue, so this fans a category→proposals map
- * out across those hooks and leaves unlisted categories empty.
- */
+/** Fans a category→proposals map across the per-category and closed page hooks. */
 const mockProposals = (groups: Record<string, ProposalItem[]>) => {
   mockUseProposalsByCategory.mockImplementation((category: string) => {
     const proposals = groups[category] ?? [];
@@ -354,9 +350,7 @@ describe('ConversationsPage decisions', () => {
     expect(screen.queryByText('Dismiss')).not.toBeInTheDocument();
   });
 
-  // The header reads the charts-summary scalar rather than counting the pages, so it is
-  // neither capped by page size nor inflated by the closed page. That the scalar itself
-  // excludes decided proposals is enforced in the proposals service tests.
+  // That the scalar itself excludes decided proposals is covered in the service tests.
   it('counts only undecided proposals as work needing attention', () => {
     mockProposals({
       respond: [actionProposal],
