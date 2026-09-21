@@ -41,8 +41,12 @@ jest.mock('./destination_row', () => ({
 }));
 
 jest.mock('../labels', () => ({
+  DISPATCH_PER_LABEL: 'Dispatch per',
+  FREQUENCY_LABEL: 'Frequency',
+  GROUP_BY_LABEL: 'Group by',
   getGroupingModeLabel: (mode: string | undefined) => mode ?? 'Not configured',
-  getThrottleStrategyLabel: (strategy: string | undefined) => strategy ?? 'Not configured',
+  getFrequencyLabel: (throttle: { strategy?: string } | null | undefined) =>
+    throttle?.strategy ?? 'Not configured',
 }));
 
 const defaultProps: ActionPolicyDefinitionListProps = {
@@ -104,9 +108,10 @@ describe('ActionPolicyDefinitionList', () => {
     expect(screen.getAllByTestId('mockDestinationRow')).toHaveLength(2);
   });
 
-  it('renders frequency interval when present', () => {
+  it('renders the frequency label', () => {
     renderWithI18n(defaultProps);
 
-    expect(screen.getByText(/Every 5m/)).toBeDefined();
+    // mock resolves strategy to its key; on_status_change is the fixture strategy
+    expect(screen.getByText('on_status_change')).toBeDefined();
   });
 });
