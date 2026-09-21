@@ -5,17 +5,11 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License.
- */
-
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { FormProvider, useForm, useFormContext } from 'react-hook-form';
 import { render } from '../../../utils/testing/rtl_helpers';
-import { ParameterValuesEditor, ParameterValuesVisibilityToggle } from './parameter_values';
+import { ParameterValuesEditor } from './parameter_values';
 import { ParameterValuesProvider } from '../form/parameter_values_context';
 import { ConfigKey } from '../../../../../../common/runtime_types';
 import { fetchSyntheticsMonitor } from '../../../state/monitor_details/api';
@@ -27,22 +21,12 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: () => mockUseKibana(),
 }));
 
-jest.mock('./code_editor', () => ({
-  CodeEditor: ({ readOnly, value }: { readOnly?: boolean; value: string }) => (
-    <input data-test-subj="parameterValuesEditor" readOnly={readOnly} value={value} />
-  ),
-}));
-
 jest.mock('../../../state/monitor_details/api', () => ({
   fetchSyntheticsMonitor: jest.fn(),
 }));
 
 jest.mock('../../../hooks', () => ({
   useGetUrlParams: () => ({}),
-}));
-
-jest.mock('../hooks', () => ({
-  useIsEditFlow: () => true,
 }));
 
 jest.mock('react-router-dom', () => ({
@@ -52,6 +36,7 @@ jest.mock('react-router-dom', () => ({
 
 describe('ParameterValuesEditor', () => {
   beforeEach(() => {
+    (fetchSyntheticsMonitor as jest.Mock).mockReset();
     mockUseKibana.mockReturnValue({
       services: {
         application: {
@@ -66,63 +51,27 @@ describe('ParameterValuesEditor', () => {
     });
   });
 
-  it('masks parameter values and makes the editor read-only by default', () => {
-    const { getByTestId } = render(
-      <ParameterValuesProvider hideParameterValuesByDefault>
-        <ParameterValuesEditor
-          ariaLabel="Monitor params code editor"
-          id="syntheticsMonitorConfigParams"
-          onChange={() => {}}
-          value={'{"username":"elastic","password":"changeme"}'}
-        />
-      </ParameterValuesProvider>
-    );
+  it('renders password inputs with a visibility toggle', () => {
+    const { getByTestId } = render(<ParameterValuesEditorForm />);
 
-    const editor = getByTestId('parameterValuesEditor') as HTMLInputElement;
-    expect(editor.value).toBe('{"username":"********","password":"********"}');
-    expect(editor).toHaveAttribute('readonly');
+    expect(getByTestId('keyValuePairsKey0')).toHaveValue('password');
+    expect(getByTestId('keyValuePairsValue0')).toHaveAttribute('type', 'password');
+    expect(getByTestId('keyValuePairsValue0')).toHaveValue('********');
+    expect(getByTestId('syntheticsParamValueVisibility0')).toBeInTheDocument();
   });
 
-  it('shows parameter values when masking is disabled', () => {
-    const { getByTestId } = render(
-      <ParameterValuesProvider hideParameterValuesByDefault={false}>
-        <ParameterValuesEditor
-          ariaLabel="Monitor params code editor"
-          id="syntheticsMonitorConfigParams"
-          onChange={() => {}}
-          value={'{"username":"elastic"}'}
-        />
-      </ParameterValuesProvider>
-    );
+  it('lets the user replace a hidden value', () => {
+    const { getByTestId } = render(<ParameterValuesEditorForm />);
 
-    const editor = getByTestId('parameterValuesEditor') as HTMLInputElement;
-    expect(editor.value).toBe('{"username":"elastic"}');
-    expect(editor).not.toHaveAttribute('readonly');
+    fireEvent.change(getByTestId('keyValuePairsValue0'), {
+      target: { value: 'replacement' },
+    });
+
+    expect(getByTestId('parameterValuesValue')).toHaveTextContent('{"password":"replacement"}');
+    expect(getByTestId('keyValuePairsValue0')).toHaveAttribute('type', 'password');
   });
 
-  it('fetches and displays parameter values when the toggle is disabled', async () => {
-    (fetchSyntheticsMonitor as jest.Mock).mockResolvedValue({
-      [ConfigKey.PARAMS]: '{"password":"changeme"}',
-    });
-
-    const { getByRole, getByTestId } = render(<ParameterValuesToggleForm />);
-
-    fireEvent.click(getByRole('switch', { name: 'Hide parameter values' }));
-
-    await waitFor(() => {
-      expect(fetchSyntheticsMonitor).toHaveBeenCalledWith({
-        monitorId: 'monitor-id',
-        spaceId: undefined,
-        hideParams: false,
-      });
-    });
-
-    await waitFor(() => {
-      expect(getByTestId('parameterValuesValue')).toHaveTextContent('{"password":"changeme"}');
-    });
-  });
-
-  it('does not render the toggle without both required privileges', () => {
+  it('disables the visibility toggle without canReadParamValues', () => {
     mockUseKibana.mockReturnValue({
       services: {
         application: {
@@ -136,23 +85,101 @@ describe('ParameterValuesEditor', () => {
       },
     });
 
-    const { queryByRole } = render(<ParameterValuesToggleForm />);
+    const { getByTestId } = render(<ParameterValuesEditorForm />);
+    const toggle = getByTestId('syntheticsParamValueVisibility0');
 
-    expect(queryByRole('switch', { name: 'Hide parameter values' })).not.toBeInTheDocument();
+    expect(toggle).toBeDisabled();
+    expect(toggle).toHaveAttribute(
+      'aria-label',
+      'You do not have permission to read parameter values.'
+    );
+    fireEvent.click(toggle);
+    expect(fetchSyntheticsMonitor).not.toHaveBeenCalled();
+    expect(getByTestId('keyValuePairsValue0')).toHaveAttribute('type', 'password');
+    expect(getByTestId('keyValuePairsValue0')).not.toHaveAttribute('readonly');
+  });
+
+  it('fetches stored values when the password visibility toggle is shown', async () => {
+    (fetchSyntheticsMonitor as jest.Mock).mockResolvedValue({
+      [ConfigKey.PARAMS]: '{"password":"changeme"}',
+    });
+
+    const { getByTestId } = render(<ParameterValuesEditorForm />);
+
+    fireEvent.click(getByTestId('syntheticsParamValueVisibility0'));
+
+    await waitFor(() => {
+      expect(fetchSyntheticsMonitor).toHaveBeenCalledWith({
+        monitorId: 'monitor-id',
+        spaceId: undefined,
+        hideParams: false,
+      });
+    });
+
+    await waitFor(() => {
+      expect(getByTestId('keyValuePairsValue0')).toHaveValue('changeme');
+    });
+  });
+
+  it('keeps in-progress replacements when revealing stored values', async () => {
+    (fetchSyntheticsMonitor as jest.Mock).mockResolvedValue({
+      [ConfigKey.PARAMS]: '{"password":"changeme","token":"stored"}',
+    });
+
+    const { getByTestId } = render(
+      <ParameterValuesEditorForm defaultParams={'{"password":"********","token":"********"}'} />
+    );
+
+    fireEvent.change(getByTestId('keyValuePairsValue0'), {
+      target: { value: 'replacement' },
+    });
+    fireEvent.click(getByTestId('syntheticsParamValueVisibility0'));
+
+    await waitFor(() => {
+      expect(JSON.parse(getByTestId('parameterValuesValue').textContent ?? '')).toEqual({
+        password: 'replacement',
+        token: 'stored',
+      });
+    });
+  });
+
+  it('does not refetch after values have been revealed', async () => {
+    (fetchSyntheticsMonitor as jest.Mock).mockResolvedValue({
+      [ConfigKey.PARAMS]: '{"password":"changeme"}',
+    });
+
+    const { getByTestId } = render(<ParameterValuesEditorForm />);
+
+    fireEvent.click(getByTestId('syntheticsParamValueVisibility0'));
+    await waitFor(() => {
+      expect(getByTestId('keyValuePairsValue0')).toHaveValue('changeme');
+    });
+
+    fireEvent.click(getByTestId('syntheticsParamValueVisibility0'));
+
+    expect(fetchSyntheticsMonitor).toHaveBeenCalledTimes(1);
   });
 });
 
-const ParameterValuesToggleForm = () => {
+const ParameterValuesEditorForm = ({
+  defaultParams = '{"password":"********"}',
+}: {
+  defaultParams?: string;
+}) => {
   const methods = useForm({
     defaultValues: {
-      [ConfigKey.PARAMS]: '{"password":"********"}',
+      [ConfigKey.PARAMS]: defaultParams,
     },
   });
+  const params = methods.watch(ConfigKey.PARAMS);
 
   return (
     <ParameterValuesProvider hideParameterValuesByDefault>
       <FormProvider {...methods}>
-        <ParameterValuesVisibilityToggle />
+        <ParameterValuesEditor
+          onChange={(next) => methods.setValue(ConfigKey.PARAMS, next)}
+          value={params}
+        />
         <ParameterValuesValue />
       </FormProvider>
     </ParameterValuesProvider>

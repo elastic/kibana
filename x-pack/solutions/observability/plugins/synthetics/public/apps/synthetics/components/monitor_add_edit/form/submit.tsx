@@ -12,6 +12,8 @@ import { i18n } from '@kbn/i18n';
 import { useFormContext } from 'react-hook-form';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { restoreMaskedMonitorParams } from '../../../../../../common/utils/mask_monitor_params';
+import { MONITORS_ROUTE } from '../../../../../../common/constants';
 import { useEnablement } from '../../../hooks';
 import { RunTestButton } from './run_test_btn';
 import { useCanEditSynthetics } from '../../../../../hooks/use_capabilities';
@@ -23,8 +25,6 @@ import { ConfigKey, SourceType } from '../types';
 import { format } from './formatter';
 import { getAddMonitorCancelHref } from './cancel_href';
 import { useParameterValues } from './parameter_values_context';
-
-import { MONITORS_ROUTE } from '../../../../../../common/constants';
 
 export const ActionBar = ({
   readOnly = false,
@@ -49,7 +49,7 @@ export const ActionBar = ({
     { monitor: SyntheticsMonitor; preserveMaskedParams: boolean } | undefined
   >(undefined);
 
-  const { parametersAreMasked } = useParameterValues();
+  const { parametersAreMasked, plaintextSnapshot } = useParameterValues();
   const { status, loading, isEdit } = useMonitorSave({
     submission,
   });
@@ -59,12 +59,23 @@ export const ActionBar = ({
   const { isServiceAllowed } = useEnablement();
 
   const formSubmitter = (formData: Record<string, any>) => {
-    if (isValid) {
-      setSubmission({
-        monitor: format(formData, readOnly),
-        preserveMaskedParams: parametersAreMasked,
-      });
+    if (!isValid) {
+      return;
     }
+    const monitor = format(formData, readOnly);
+    const hasPlaintextSnapshot = Boolean(plaintextSnapshot);
+    setSubmission({
+      monitor: hasPlaintextSnapshot
+        ? {
+            ...monitor,
+            [ConfigKey.PARAMS]: restoreMaskedMonitorParams({
+              previousParams: plaintextSnapshot,
+              submittedParams: monitor[ConfigKey.PARAMS],
+            }),
+          }
+        : monitor,
+      preserveMaskedParams: parametersAreMasked && !hasPlaintextSnapshot,
+    });
   };
 
   return status === FETCH_STATUS.SUCCESS ? (

@@ -8,10 +8,9 @@
 import React, { createContext, useContext, useMemo, useState } from 'react';
 
 interface ParameterValuesContextValue {
-  hideParameterValues: boolean;
   parametersAreMasked: boolean;
-  revealParameterValues: () => void;
-  setHideParameterValues: (hideParameterValues: boolean) => void;
+  plaintextSnapshot?: string;
+  revealParameterValues: (plaintext?: string) => void;
 }
 
 const ParameterValuesContext = createContext<ParameterValuesContextValue | undefined>(undefined);
@@ -20,20 +19,21 @@ export const ParameterValuesProvider = ({
   children,
   hideParameterValuesByDefault,
 }: React.PropsWithChildren<{ hideParameterValuesByDefault: boolean }>) => {
-  const [hideParameterValues, setHideParameterValues] = useState(hideParameterValuesByDefault);
   const [parametersAreMasked, setParametersAreMasked] = useState(hideParameterValuesByDefault);
+  const [plaintextSnapshot, setPlaintextSnapshot] = useState<string | undefined>();
 
   const value = useMemo(
     () => ({
-      hideParameterValues,
       parametersAreMasked,
-      revealParameterValues: () => {
-        setHideParameterValues(false);
+      plaintextSnapshot,
+      revealParameterValues: (plaintext?: string) => {
         setParametersAreMasked(false);
+        if (plaintext !== undefined) {
+          setPlaintextSnapshot(plaintext);
+        }
       },
-      setHideParameterValues,
     }),
-    [hideParameterValues, parametersAreMasked]
+    [parametersAreMasked, plaintextSnapshot]
   );
 
   return (
