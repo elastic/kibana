@@ -8,7 +8,6 @@
 import { EuiProvider } from '@elastic/eui';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { createAppChromeMock } from '../test_utils/app_chrome_mock';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -16,6 +15,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { CONTEXT_ENGINE_APP_ID } from '../../../common/features';
+import { searchDataStreams } from '../api/data_streams';
 import { CONTEXT_ENGINE_PATHS } from '../paths';
 import { CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ } from '../layout/context_engine_page_header';
 import { CreateAiIndexPage } from './create_ai_index_page';
@@ -37,18 +37,10 @@ jest.mock('../hooks/use_agent_builder_agents', () => ({
   }),
 }));
 
-const defaultDataStream = {
-  name: 'logs-genai-default',
-  tags: [{ key: 'data_stream', name: 'Data stream', color: 'default' }],
-  item: { name: 'logs-genai-default' },
-};
+jest.mock('../api/data_streams');
+const mockedSearchDataStreams = jest.mocked(searchDataStreams);
 
-const renderWithProviders = (
-  services: ReturnType<typeof coreMock.createStart>,
-  getIndices = jest.fn().mockResolvedValue([])
-) => {
-  const data = dataPluginMock.createStartContract();
-  data.dataViews.getIndices = getIndices;
+const renderWithProviders = (services: ReturnType<typeof coreMock.createStart>) => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <ChromeServiceProvider value={{ chrome: services.chrome }}>
@@ -57,7 +49,6 @@ const renderWithProviders = (
           <KibanaContextProvider
             services={{
               ...services,
-              data,
               history: scopedHistoryMock.create(),
               appChrome: createAppChromeMock(),
             }}
@@ -85,6 +76,10 @@ const typeDescription = (description: string) => {
 const VALID_ID = 'support-ticket-triage';
 
 describe('CreateAiIndexPage', () => {
+  beforeEach(() => {
+    mockedSearchDataStreams.mockResolvedValue({ dataStreams: [] });
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -222,9 +217,9 @@ describe('CreateAiIndexPage', () => {
   it('includes a selected data stream trace in the create request', async () => {
     const services = coreMock.createStart();
     services.http.post.mockResolvedValue({});
-    const getIndices = jest.fn().mockResolvedValue([defaultDataStream]);
+    mockedSearchDataStreams.mockResolvedValue({ dataStreams: ['logs-genai-default'] });
 
-    renderWithProviders(services, getIndices);
+    renderWithProviders(services);
 
     typeId(VALID_ID);
     fireEvent.click(screen.getByTestId('contextTraceToggle-index'));
@@ -236,10 +231,10 @@ describe('CreateAiIndexPage', () => {
     fireEvent.change(input, { target: { value: 'lo' } });
 
     await waitFor(() => {
-      expect(getIndices).toHaveBeenCalledWith({
-        pattern: '*lo*',
-        isRollupIndex: expect.any(Function),
-      });
+      expect(mockedSearchDataStreams).toHaveBeenCalledWith(
+        services.http,
+        expect.objectContaining({ search: 'lo' })
+      );
     });
 
     await waitFor(() => {

@@ -120,11 +120,9 @@ const aiIndex: GetAiIndexResponse = {
 };
 
 const createServices = () => {
-  const data = dataPluginMock.createStartContract();
-  data.dataViews.getIndices = jest.fn().mockResolvedValue([]);
   const services = {
     ...coreMock.createStart(),
-    data,
+    data: dataPluginMock.createStartContract(),
     share: sharePluginMock.createStartContract(),
     history: scopedHistoryMock.create(),
     appChrome: createAppChromeMock(),
