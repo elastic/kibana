@@ -9,7 +9,7 @@ import type { PromptRequest } from '@kbn/agent-builder-common/agents';
 import { TimelineEventType } from '@kbn/agent-builder-common';
 import type { TimelineDisplayEvent } from '../../../../services/events';
 
-export interface OutstandingPrompt {
+export interface AwaitingPrompt {
   promptRequestedEventId: string;
   prompts: PromptRequest[];
 }
@@ -61,9 +61,7 @@ const answerSettlesPrompt = (events: TimelineDisplayEvent[], answeringEventId: s
  * are ignored — an interrupted resume never owns the pause, mirroring the server's
  * `lastTerminatedExecutionIndex`). It is closed when any of its answers settles it.
  */
-export const findOutstandingPrompt = (
-  events: TimelineDisplayEvent[]
-): OutstandingPrompt | undefined => {
+export const findAwaitingPrompt = (events: TimelineDisplayEvent[]): AwaitingPrompt | undefined => {
   let pauseEvent: TimelineDisplayEvent | undefined;
   for (const event of events) {
     if (event.type === TimelineEventType.executionTerminated) {

@@ -6,9 +6,6 @@
  */
 
 import { useMemo } from 'react';
-import { of } from 'rxjs';
-import type { Observable } from 'rxjs';
-import useObservable from 'react-use/lib/useObservable';
 import type { UserMessageEvent } from '@kbn/agent-builder-common';
 import {
   TimelineEventType,
@@ -19,18 +16,15 @@ import {
 import type { TimelineDisplayEvent } from '../../../../services/events';
 import type { OptimisticAttachments } from '../../../utils/build_optimistic_attachments';
 import { useConversation } from '../../../hooks/use_conversation';
+import { useLiveEvents } from '../../../hooks/use_live_events';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
-import {
-  useStreamRecord,
-  useConversationStreamService,
-} from '../../../context/streaming/streaming_context';
+import { useStreamRecord } from '../../../context/streaming/streaming_context';
 import { buildItems } from './to_timeline_items';
 import type { TimelineItem } from './types';
 
 const PENDING_USER_MESSAGE_ID = 'pending::user_message';
 /** Key of the placeholder turn shown between hitting send and the run reporting that it started. */
 const AWAITING_RUN_ITEM_KEY = 'active';
-const EMPTY_EVENTS: TimelineDisplayEvent[] = [];
 
 const startsARunTriggeredByAUserMessage = (event: TimelineDisplayEvent): boolean =>
   event.type === TimelineEventType.executionStarted &&
@@ -66,16 +60,7 @@ const withStagedAttachments = (
 export const useTimelineItems = (): TimelineItem[] => {
   const conversationId = useConversationId();
   const { conversation } = useConversation();
-  const conversationStreamService = useConversationStreamService();
-
-  const activeStream$: Observable<TimelineDisplayEvent[]> = useMemo(
-    () =>
-      conversationId
-        ? conversationStreamService.getActiveStream$(conversationId)
-        : of(EMPTY_EVENTS),
-    [conversationStreamService, conversationId]
-  );
-  const liveEvents = useObservable(activeStream$, EMPTY_EVENTS);
+  const liveEvents = useLiveEvents();
 
   const { pendingMessage, pendingAttachments } = useStreamRecord(conversationId);
   const startedUserMessageId = savedUserMessageId(liveEvents);

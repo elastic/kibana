@@ -8,7 +8,7 @@
 import { EventActorType, TimelineEventType } from '@kbn/agent-builder-common';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents';
 import type { TimelineDisplayEvent } from '../../../../services/events';
-import { findOutstandingPrompt, requestedPrompts } from './outstanding_prompt';
+import { findAwaitingPrompt, requestedPrompts } from './awaiting_prompt';
 import { createExecutionPausedEvent } from './items/execution_paused_event.factory';
 import { createPromptResponseEvent } from './items/prompt_response_event.factory';
 import { createExecutionAbortedEvent } from './items/execution_aborted_event.factory';
@@ -78,28 +78,28 @@ describe('requestedPrompts', () => {
   });
 });
 
-describe('findOutstandingPrompt', () => {
+describe('findAwaitingPrompt', () => {
   it('returns undefined when there are no events', () => {
-    expect(findOutstandingPrompt([])).toBeUndefined();
+    expect(findAwaitingPrompt([])).toBeUndefined();
   });
 
   it('returns the pause when no prompt_response has answered it (fresh pause)', () => {
-    const result = findOutstandingPrompt([pauseEvent()]);
+    const result = findAwaitingPrompt([pauseEvent()]);
     expect(result).toEqual({ promptRequestedEventId: PAUSE_EVENT_ID, prompts: expect.any(Array) });
   });
 
   it('returns undefined when prompt_response is present but no execution_started yet (optimistic answer)', () => {
-    const result = findOutstandingPrompt([pauseEvent(), promptResponse()]);
+    const result = findAwaitingPrompt([pauseEvent(), promptResponse()]);
     expect(result).toBeUndefined();
   });
 
   it('returns undefined when resume is running (no terminal yet)', () => {
-    const result = findOutstandingPrompt([pauseEvent(), promptResponse(), resumeStarted()]);
+    const result = findAwaitingPrompt([pauseEvent(), promptResponse(), resumeStarted()]);
     expect(result).toBeUndefined();
   });
 
   it('returns undefined when resume completed successfully', () => {
-    const result = findOutstandingPrompt([
+    const result = findAwaitingPrompt([
       pauseEvent(),
       promptResponse(),
       resumeStarted(),
@@ -108,8 +108,8 @@ describe('findOutstandingPrompt', () => {
     expect(result).toBeUndefined();
   });
 
-  it('returns the pause when resume ended in abort (pause is still outstanding)', () => {
-    const result = findOutstandingPrompt([
+  it('returns the pause when resume ended in abort (pause still waits for an answer)', () => {
+    const result = findAwaitingPrompt([
       pauseEvent(),
       promptResponse(),
       resumeStarted(),
@@ -127,7 +127,7 @@ describe('findOutstandingPrompt', () => {
       },
     }) as TimelineDisplayEvent;
 
-    const result = findOutstandingPrompt([
+    const result = findAwaitingPrompt([
       pauseEvent(),
       promptResponse(),
       resumeStarted(),
@@ -166,7 +166,7 @@ describe('findOutstandingPrompt', () => {
       trigger_event_id: secondPromptResponseId,
     }) as TimelineDisplayEvent;
 
-    const result = findOutstandingPrompt([
+    const result = findAwaitingPrompt([
       pauseEvent(),
       promptResponse(),
       resumeStarted(),
