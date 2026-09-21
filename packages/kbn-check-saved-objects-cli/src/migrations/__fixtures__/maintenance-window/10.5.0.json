@@ -1,72 +1,261 @@
 {
   "10.4.0": [
     {
-      "TODO": "Please create one or more sample objects with properties that reflect real '[object Object]' objects",
-      "NOTE": "That each modelVersion has a corresponding fixture file, which defines the previous and current versions.",
-      "NOTE2": "These fixtures define the before and after state, and are used for both upgrade and rollback testing.",
-      "HINT": "You can use the template below and create sample objects for 10.4.0 and 10.5.0 versions.",
-      "HINT2": "Alternatively, you can copy the contents from older fixture files (if they exist) and adapt them accordingly.",
-      "IMPORTANT": "The current version fixtures (below) are defining how objects from the previous version fixtures (this array) would look like AFTER upgrading.",
-      "IMPORTANT2": "They are NOT defining random sample objects with properties that are valid for the current model version."
-    }
-  ],
-  "10.5.0": [
-    {
-      "categoryIds": "array?|null",
-      "createdAt": "string",
-      "createdBy": "string?|null",
-      "duration": "number",
-      "enabled": "boolean",
-      "events": "array",
-      "expirationDate": "string",
-      "scopedQuery": "object?|null",
-      "title": "string",
-      "updatedAt": "string",
-      "updatedBy": "string?|null",
+      "title": "No scope (v5 schema-only migration)",
+      "duration": 3600000,
+      "enabled": true,
       "rRule": {
-        "dtstart": "string",
-        "tzid": "string",
-        "freq": "0?|1?|2?|3?|4?|5?|6?",
-        "until": "string?",
-        "count": "number?",
-        "interval": "number?",
-        "wkst": "MO?|TU?|WE?|TH?|FR?|SA?|SU?",
-        "byweekday": "array?|null",
-        "bymonth": "array?|null",
-        "bysetpos": "array?|null",
-        "bymonthday": "array?|null",
-        "byyearday": "array?|null",
-        "byweekno": "array?|null",
-        "byhour": "array?|null",
-        "byminute": "array?|null",
-        "bysecond": "array?|null"
+        "tzid": "UTC",
+        "dtstart": "2023-02-26T00:00:00.000Z",
+        "freq": 2,
+        "count": 2,
+        "byweekday": ["MO"]
       },
+      "events": [
+        { "gte": "2023-02-26T00:00:00.000Z", "lte": "2023-02-26T01:00:00.000Z" }
+      ],
+      "createdAt": "2023-02-26T00:00:00.000Z",
+      "updatedAt": "2023-02-26T00:00:00.000Z",
+      "createdBy": "test-user",
+      "updatedBy": "test-user",
+      "expirationDate": "2023-03-26T00:00:00.000Z",
       "schedule": {
         "custom": {
-          "start": "string",
-          "duration": "string",
-          "timezone": "string?",
-          "recurring": {
-            "end": "string?",
-            "every": "string?",
-            "onWeekDay": "array?",
-            "onMonthDay": "array?",
-            "onMonth": "array?",
-            "occurrences": "number?"
-          }
+          "start": "2023-02-26T00:00:00.000Z",
+          "duration": "60m",
+          "timezone": "UTC",
+          "recurring": { "every": "1w", "occurrences": 2, "onWeekDay": ["MO"] }
+        }
+      }
+    },
+    {
+      "title": "Unfiltered v1 scope (alerting null)",
+      "duration": 3600000,
+      "enabled": true,
+      "rRule": {
+        "tzid": "UTC",
+        "dtstart": "2023-02-26T00:00:00.000Z",
+        "freq": 2,
+        "count": 2,
+        "byweekday": ["MO"]
+      },
+      "events": [
+        { "gte": "2023-02-26T00:00:00.000Z", "lte": "2023-02-26T01:00:00.000Z" }
+      ],
+      "createdAt": "2023-02-26T00:00:00.000Z",
+      "updatedAt": "2023-02-26T00:00:00.000Z",
+      "createdBy": "test-user",
+      "updatedBy": "test-user",
+      "expirationDate": "2023-03-26T00:00:00.000Z",
+      "schedule": {
+        "custom": {
+          "start": "2023-02-26T00:00:00.000Z",
+          "duration": "60m",
+          "timezone": "UTC",
+          "recurring": { "every": "1w", "occurrences": 2, "onWeekDay": ["MO"] }
+        }
+      },
+      "scope": { "alerting": null }
+    },
+    {
+      "title": "Filtered v1 scope (alerting with kql/filters/dsl)",
+      "duration": 3600000,
+      "enabled": true,
+      "rRule": {
+        "tzid": "UTC",
+        "dtstart": "2023-02-26T00:00:00.000Z",
+        "freq": 2,
+        "count": 2,
+        "byweekday": ["MO"]
+      },
+      "events": [
+        { "gte": "2023-02-26T00:00:00.000Z", "lte": "2023-02-26T01:00:00.000Z" }
+      ],
+      "scopedQuery": {
+        "kql": "kibana.alert.rule.name : \"Elasticsearch query rule\"",
+        "filters": [],
+        "dsl": "{\"bool\":{\"must\":[],\"filter\":[{\"bool\":{\"should\":[{\"match_phrase\":{\"kibana.alert.rule.name\":\"Elasticsearch query rule\"}}],\"minimum_should_match\":1}}],\"should\":[],\"must_not\":[]}}"
+      },
+      "createdAt": "2023-02-26T00:00:00.000Z",
+      "updatedAt": "2023-02-26T00:00:00.000Z",
+      "createdBy": "test-user",
+      "updatedBy": "test-user",
+      "expirationDate": "2023-03-26T00:00:00.000Z",
+      "schedule": {
+        "custom": {
+          "start": "2023-02-26T00:00:00.000Z",
+          "duration": "60m",
+          "timezone": "UTC",
+          "recurring": { "every": "1w", "occurrences": 2, "onWeekDay": ["MO"] }
         }
       },
       "scope": {
         "alerting": {
-          "enabled": "boolean",
-          "kql": "string?",
-          "filters": "array?",
-          "dsl": "string?"
-        },
-        "alertingV2": {
-          "enabled": "boolean",
-          "kql": "string?"
+          "kql": "kibana.alert.rule.name : \"Elasticsearch query rule\"",
+          "filters": [],
+          "dsl": "{\"bool\":{\"must\":[],\"filter\":[{\"bool\":{\"should\":[{\"match_phrase\":{\"kibana.alert.rule.name\":\"Elasticsearch query rule\"}}],\"minimum_should_match\":1}}],\"should\":[],\"must_not\":[]}}"
         }
+      }
+    },
+    {
+      "title": "MV4 empty-filter bug (kql='', filters=[], dsl='')",
+      "duration": 3600000,
+      "enabled": true,
+      "rRule": {
+        "tzid": "UTC",
+        "dtstart": "2023-02-26T00:00:00.000Z",
+        "freq": 2,
+        "count": 2,
+        "byweekday": ["MO"]
+      },
+      "events": [
+        { "gte": "2023-02-26T00:00:00.000Z", "lte": "2023-02-26T01:00:00.000Z" }
+      ],
+      "createdAt": "2023-02-26T00:00:00.000Z",
+      "updatedAt": "2023-02-26T00:00:00.000Z",
+      "createdBy": "test-user",
+      "updatedBy": "test-user",
+      "expirationDate": "2023-03-26T00:00:00.000Z",
+      "schedule": {
+        "custom": {
+          "start": "2023-02-26T00:00:00.000Z",
+          "duration": "60m",
+          "timezone": "UTC",
+          "recurring": { "every": "1w", "occurrences": 2, "onWeekDay": ["MO"] }
+        }
+      },
+      "scope": {
+        "alerting": { "kql": "", "filters": [], "dsl": "" }
+      }
+    }
+  ],
+  "10.5.0": [
+    {
+      "title": "No scope (v5 schema-only migration)",
+      "duration": 3600000,
+      "enabled": true,
+      "rRule": {
+        "tzid": "UTC",
+        "dtstart": "2023-02-26T00:00:00.000Z",
+        "freq": 2,
+        "count": 2,
+        "byweekday": ["MO"]
+      },
+      "events": [
+        { "gte": "2023-02-26T00:00:00.000Z", "lte": "2023-02-26T01:00:00.000Z" }
+      ],
+      "createdAt": "2023-02-26T00:00:00.000Z",
+      "updatedAt": "2023-02-26T00:00:00.000Z",
+      "createdBy": "test-user",
+      "updatedBy": "test-user",
+      "expirationDate": "2023-03-26T00:00:00.000Z",
+      "schedule": {
+        "custom": {
+          "start": "2023-02-26T00:00:00.000Z",
+          "duration": "60m",
+          "timezone": "UTC",
+          "recurring": { "every": "1w", "occurrences": 2, "onWeekDay": ["MO"] }
+        }
+      }
+    },
+    {
+      "title": "Unfiltered v1 scope (alerting null)",
+      "duration": 3600000,
+      "enabled": true,
+      "rRule": {
+        "tzid": "UTC",
+        "dtstart": "2023-02-26T00:00:00.000Z",
+        "freq": 2,
+        "count": 2,
+        "byweekday": ["MO"]
+      },
+      "events": [
+        { "gte": "2023-02-26T00:00:00.000Z", "lte": "2023-02-26T01:00:00.000Z" }
+      ],
+      "createdAt": "2023-02-26T00:00:00.000Z",
+      "updatedAt": "2023-02-26T00:00:00.000Z",
+      "createdBy": "test-user",
+      "updatedBy": "test-user",
+      "expirationDate": "2023-03-26T00:00:00.000Z",
+      "schedule": {
+        "custom": {
+          "start": "2023-02-26T00:00:00.000Z",
+          "duration": "60m",
+          "timezone": "UTC",
+          "recurring": { "every": "1w", "occurrences": 2, "onWeekDay": ["MO"] }
+        }
+      },
+      "scope": { "alerting": null }
+    },
+    {
+      "title": "Filtered v1 scope (alerting with kql/filters/dsl)",
+      "duration": 3600000,
+      "enabled": true,
+      "rRule": {
+        "tzid": "UTC",
+        "dtstart": "2023-02-26T00:00:00.000Z",
+        "freq": 2,
+        "count": 2,
+        "byweekday": ["MO"]
+      },
+      "events": [
+        { "gte": "2023-02-26T00:00:00.000Z", "lte": "2023-02-26T01:00:00.000Z" }
+      ],
+      "scopedQuery": {
+        "kql": "kibana.alert.rule.name : \"Elasticsearch query rule\"",
+        "filters": [],
+        "dsl": "{\"bool\":{\"must\":[],\"filter\":[{\"bool\":{\"should\":[{\"match_phrase\":{\"kibana.alert.rule.name\":\"Elasticsearch query rule\"}}],\"minimum_should_match\":1}}],\"should\":[],\"must_not\":[]}}"
+      },
+      "createdAt": "2023-02-26T00:00:00.000Z",
+      "updatedAt": "2023-02-26T00:00:00.000Z",
+      "createdBy": "test-user",
+      "updatedBy": "test-user",
+      "expirationDate": "2023-03-26T00:00:00.000Z",
+      "schedule": {
+        "custom": {
+          "start": "2023-02-26T00:00:00.000Z",
+          "duration": "60m",
+          "timezone": "UTC",
+          "recurring": { "every": "1w", "occurrences": 2, "onWeekDay": ["MO"] }
+        }
+      },
+      "scope": {
+        "alerting": {
+          "kql": "kibana.alert.rule.name : \"Elasticsearch query rule\"",
+          "filters": [],
+          "dsl": "{\"bool\":{\"must\":[],\"filter\":[{\"bool\":{\"should\":[{\"match_phrase\":{\"kibana.alert.rule.name\":\"Elasticsearch query rule\"}}],\"minimum_should_match\":1}}],\"should\":[],\"must_not\":[]}}"
+        }
+      }
+    },
+    {
+      "title": "MV4 empty-filter bug (kql='', filters=[], dsl='')",
+      "duration": 3600000,
+      "enabled": true,
+      "rRule": {
+        "tzid": "UTC",
+        "dtstart": "2023-02-26T00:00:00.000Z",
+        "freq": 2,
+        "count": 2,
+        "byweekday": ["MO"]
+      },
+      "events": [
+        { "gte": "2023-02-26T00:00:00.000Z", "lte": "2023-02-26T01:00:00.000Z" }
+      ],
+      "createdAt": "2023-02-26T00:00:00.000Z",
+      "updatedAt": "2023-02-26T00:00:00.000Z",
+      "createdBy": "test-user",
+      "updatedBy": "test-user",
+      "expirationDate": "2023-03-26T00:00:00.000Z",
+      "schedule": {
+        "custom": {
+          "start": "2023-02-26T00:00:00.000Z",
+          "duration": "60m",
+          "timezone": "UTC",
+          "recurring": { "every": "1w", "occurrences": 2, "onWeekDay": ["MO"] }
+        }
+      },
+      "scope": {
+        "alerting": { "kql": "", "filters": [], "dsl": "" }
       }
     }
   ]

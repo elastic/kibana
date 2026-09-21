@@ -54,7 +54,8 @@ export const transformCreateBody = (
     title: createBody.title,
     enabled: createBody.enabled,
     // scopedQuery mirrors scope.alerting for the v1 alerting consumer and telemetry.
-    ...(alertingKql ? { scopedQuery: { enabled: true, kql: alertingKql, filters: [] } } : {}),
+    // Domain AlertsFilterQueryAttributes has no `enabled` field — drop it here.
+    ...(alertingKql ? { scopedQuery: { kql: alertingKql, filters: [] } } : {}),
     ...(scope !== undefined ? { scope } : {}),
     duration,
     schedule: createBody.schedule,

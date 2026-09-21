@@ -11,7 +11,7 @@ import { verifyApiAccess } from '../../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../../_mock_handler_arguments';
 import { maintenanceWindowClientMock } from '../../../../../maintenance_window_client.mock';
 import { createMaintenanceWindowRoute } from './create_maintenance_window_route';
-import { getMockMaintenanceWindow } from '../../../../../data/test_helpers';
+import { getMockMaintenanceWindowDomain } from '../../../../../data/test_helpers';
 import { MaintenanceWindowStatus } from '../../../../../../common';
 import type { MaintenanceWindow } from '../../../../../application/types';
 import type { CreateMaintenanceWindowRequestBody } from '../../../../schemas/maintenance_window/external/request/create';
@@ -23,7 +23,7 @@ jest.mock('../../../../../lib/license_api_access', () => ({
 }));
 
 const mockMaintenanceWindow = {
-  ...getMockMaintenanceWindow(),
+  ...getMockMaintenanceWindowDomain(),
   eventStartTime: new Date().toISOString(),
   eventEndTime: new Date().toISOString(),
   status: MaintenanceWindowStatus.Running,
@@ -31,10 +31,10 @@ const mockMaintenanceWindow = {
   duration: 864000000,
   schedule: {
     custom: {
-      ...getMockMaintenanceWindow().schedule.custom,
+      ...getMockMaintenanceWindowDomain().schedule.custom,
       duration: '10d',
       recurring: {
-        ...getMockMaintenanceWindow().schedule.custom.recurring,
+        ...getMockMaintenanceWindowDomain().schedule.custom.recurring,
       },
     },
   },
@@ -115,7 +115,6 @@ describe('createMaintenanceWindowRoute', () => {
         title: 'test-maintenance-window',
         enabled: false,
         scopedQuery: {
-          enabled: true,
           filters: [],
           kql: "_id: '1234'",
         },
@@ -169,6 +168,7 @@ describe('createMaintenanceWindowRoute', () => {
             timezone: 'UTC',
           },
         },
+        scope: { alerting: { enabled: true, query: { kql: '' } } },
         status: 'running',
         title: 'test-title',
         updated_at: '2023-02-26T00:00:00.000Z',

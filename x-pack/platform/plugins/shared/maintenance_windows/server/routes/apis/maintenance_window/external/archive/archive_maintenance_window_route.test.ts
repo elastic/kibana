@@ -11,7 +11,7 @@ import { verifyApiAccess } from '../../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../../_mock_handler_arguments';
 import { maintenanceWindowClientMock } from '../../../../../maintenance_window_client.mock';
 import { archiveMaintenanceWindowRoute } from './archive_maintenance_window_route';
-import { getMockMaintenanceWindow } from '../../../../../data/test_helpers';
+import { getMockMaintenanceWindowDomain } from '../../../../../data/test_helpers';
 import { MaintenanceWindowStatus } from '../../../../../../common';
 
 const maintenanceWindowClient = maintenanceWindowClientMock.create();
@@ -21,7 +21,7 @@ jest.mock('../../../../../lib/license_api_access', () => ({
 }));
 
 const mockMaintenanceWindow = {
-  ...getMockMaintenanceWindow(),
+  ...getMockMaintenanceWindowDomain(),
   eventStartTime: new Date().toISOString(),
   eventEndTime: new Date().toISOString(),
   status: MaintenanceWindowStatus.Running,
@@ -99,6 +99,7 @@ describe('archiveMaintenanceWindowRoute', () => {
             timezone: 'UTC',
           },
         },
+        scope: { alerting: { enabled: true, query: { kql: '' } } },
         status: 'running',
         title: 'test-title',
         updated_at: '2023-02-26T00:00:00.000Z',

@@ -362,112 +362,17 @@ describe('maintenanceWindowModelVersions', () => {
   describe('version 5', () => {
     const modelVersion5 = maintenanceWindowModelVersions['5'] as SavedObjectsFullModelVersion;
 
-    it('should have a data_backfill change', () => {
-      expect(modelVersion5.changes).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "backfillFn": [Function],
-            "type": "data_backfill",
-          },
-        ]
-      `);
+    it('should have no changes (schema-only version)', () => {
+      expect(modelVersion5.changes).toMatchInlineSnapshot(`Array []`);
     });
 
     it('should have correct schemas', () => {
       expect(modelVersion5.schemas?.create).toBe(rawMaintenanceWindowSchemaV3);
     });
 
-    describe('backfillFn (scopeV5Backfill)', () => {
-      const backfillFn = (doc: unknown) =>
-        modelVersion5?.changes[0]?.type === 'data_backfill'
-          ? modelVersion5.changes[0].backfillFn(doc as any, {} as any)
-          : null;
-
-      const baseDoc = {
-        id: 'test-id',
-        type: 'maintenance-window',
-        references: [],
-        migrationVersion: {},
-        coreMigrationVersion: '8.0.0',
-        typeMigrationVersion: '8.0.0',
-        updated_at: '2023-01-01T00:00:00.000Z',
-        version: '1',
-        namespaces: ['default'],
-        originId: 'test-origin',
-      };
-
-      it('sets scope.alerting = { enabled: true } when scope is absent (no prior filter)', () => {
-        const doc = { ...baseDoc, attributes: { title: 'No scope', enabled: true } };
-        expect(backfillFn(doc)).toEqual({
-          attributes: { scope: { alerting: { enabled: true } } },
-        });
-      });
-
-      it('is a no-op when scope.alerting already has enabled: true (selected, no filter)', () => {
-        const doc = {
-          ...baseDoc,
-          attributes: {
-            title: 'Already enabled',
-            enabled: true,
-            scope: { alerting: { enabled: true } },
-          },
-        };
-        expect(backfillFn(doc)).toEqual({ attributes: {} });
-      });
-
-      it('upgrades legacy scope.alerting (no enabled field) by adding enabled: true', () => {
-        const doc = {
-          ...baseDoc,
-          attributes: {
-            title: 'Has filter',
-            enabled: true,
-            scope: { alerting: { kql: 'severity: "critical"', filters: [], dsl: '{}' } },
-          },
-        };
-        expect(backfillFn(doc)).toEqual({
-          attributes: {
-            scope: { alerting: { enabled: true, kql: 'severity: "critical"', dsl: '{}' } },
-          },
-        });
-      });
-
-      it('upgrades legacy null scope.alerting to { enabled: true }', () => {
-        const doc = {
-          ...baseDoc,
-          attributes: { title: 'Null alerting', enabled: true, scope: { alerting: null } },
-        };
-        expect(backfillFn(doc)).toEqual({
-          attributes: { scope: { alerting: { enabled: true } } },
-        });
-      });
-
-      it('upgrades empty-filter legacy scope.alerting to { enabled: true }', () => {
-        const doc = {
-          ...baseDoc,
-          attributes: {
-            title: 'Empty filter bug',
-            enabled: true,
-            scope: { alerting: { kql: '', filters: [], dsl: '' } },
-          },
-        };
-        expect(backfillFn(doc)).toEqual({
-          attributes: { scope: { alerting: { enabled: true } } },
-        });
-      });
-
-      it('is a no-op when scope.alerting already has enabled and a real filter', () => {
-        const doc = {
-          ...baseDoc,
-          attributes: {
-            title: 'kql only, already migrated',
-            enabled: true,
-            scope: {
-              alerting: { enabled: true, kql: 'severity: "critical"', dsl: '{}' },
-            },
-          },
-        };
-        expect(backfillFn(doc)).toEqual({ attributes: {} });
-      });
+    it('has no data_backfill — pre-MV5 documents are not rewritten on disk', () => {
+      const hasBackfill = modelVersion5.changes.some((c) => c.type === 'data_backfill');
+      expect(hasBackfill).toBe(false);
     });
   });
 });

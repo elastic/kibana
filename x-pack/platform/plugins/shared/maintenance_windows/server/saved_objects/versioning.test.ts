@@ -179,8 +179,8 @@ describe('Maintenance Window Model Version Migrations', () => {
     });
   });
 
-  describe('Scope backfill from v4 to v5', () => {
-    it('backfills scope.alerting = { enabled: true } when scope is absent', () => {
+  describe('Migration from v4 to v5 (schema-only — no document rewrite)', () => {
+    it('leaves a document with no scope key byte-exact', () => {
       const doc = {
         id: 'test-id',
         type: 'maintenance-window',
@@ -200,15 +200,16 @@ describe('Maintenance Window Model Version Migrations', () => {
 
       const migrated = migrator.migrate({ document: doc, fromVersion: 4, toVersion: 5 });
 
-      expect(migrated.attributes).toMatchObject({ scope: { alerting: { enabled: true } } });
+      // No backfill — document unchanged so a rollback to MV4 is byte-exact.
+      expect(migrated.attributes).toEqual(doc.attributes);
     });
 
-    it('is a no-op when scope.alerting already has enabled: true', () => {
+    it('leaves scope.alerting = null byte-exact', () => {
       const doc = {
         id: 'test-id',
         type: 'maintenance-window',
         attributes: {
-          title: 'Already enabled',
+          title: 'Alerting null',
           enabled: true,
           schedule: {
             custom: {
@@ -217,18 +218,22 @@ describe('Maintenance Window Model Version Migrations', () => {
               timezone: 'Europe/London',
             },
           },
-          scope: { alerting: { enabled: true } },
+          scope: { alerting: null },
         },
         references: [],
       };
 
       const migrated = migrator.migrate({ document: doc, fromVersion: 4, toVersion: 5 });
 
-      expect(migrated.attributes).toMatchObject({ scope: { alerting: { enabled: true } } });
+      expect(migrated.attributes).toEqual(doc.attributes);
     });
 
-    it('upgrades legacy scope.alerting object by adding enabled: true', () => {
-      const filter = { kql: 'severity: "critical"', filters: [], dsl: '{}' };
+    it('leaves a filtered scope (kql/filters/dsl) byte-exact', () => {
+      const filter = {
+        kql: 'severity: "critical"',
+        filters: [],
+        dsl: '{"bool":{"must":[],"filter":[],"should":[],"must_not":[]}}',
+      };
       const doc = {
         id: 'test-id',
         type: 'maintenance-window',
@@ -249,33 +254,55 @@ describe('Maintenance Window Model Version Migrations', () => {
 
       const migrated = migrator.migrate({ document: doc, fromVersion: 4, toVersion: 5 });
 
-      expect(migrated.attributes).toMatchObject({
-        scope: { alerting: { enabled: true, kql: 'severity: "critical"', dsl: '{}' } },
-      });
+      expect(migrated.attributes).toEqual(doc.attributes);
     });
 
-    it('repairs empty-filter bug to scope.alerting = { enabled: true }', () => {
-      const doc = {
+    it('accepts MV5-written shape with alertingEnabled via forwardCompatibility (rolled-forward)', () => {
+      // Verify that the MV4 forwardCompatibility schema (rawMaintenanceWindowSchemaV2 + unknowns:ignore)
+      // accepts documents the new node writes. This is the guard against regression.
+      // The document must be a complete MV4-valid document with MV5 additions.
+      const mv5Doc = {
         id: 'test-id',
         type: 'maintenance-window',
         attributes: {
-          title: 'Empty filter bug',
+          title: 'MV5 written',
           enabled: true,
+          duration: 3600000,
+          rRule: {
+            tzid: 'UTC',
+            dtstart: '2023-02-26T00:00:00.000Z',
+            freq: 2,
+            count: 2,
+          },
+          events: [{ gte: '2023-02-26T00:00:00.000Z', lte: '2023-02-26T01:00:00.000Z' }],
+          createdAt: '2023-02-26T00:00:00.000Z',
+          updatedAt: '2023-02-26T00:00:00.000Z',
+          createdBy: 'test-user',
+          updatedBy: 'test-user',
+          expirationDate: '2023-03-26T00:00:00.000Z',
           schedule: {
             custom: {
+              start: '2023-02-26T00:00:00.000Z',
               duration: '60m',
-              start: '2026-01-08T12:01:17.327Z',
-              timezone: 'Europe/London',
+              timezone: 'UTC',
+              recurring: { every: '1w', occurrences: 2 },
             },
           },
-          scope: { alerting: { kql: '', filters: [], dsl: '' } },
+          // MV5 additions — `alertingEnabled` and `alertingV2` are stripped by MV4 unknowns:ignore.
+          scope: {
+            alertingEnabled: true,
+            alerting: null,
+            alertingV2: { enabled: true, kql: 'host.name: "prod"' },
+          },
         },
         references: [],
       };
 
-      const migrated = migrator.migrate({ document: doc, fromVersion: 4, toVersion: 5 });
+      // Migrate from v5 back to v4 — this exercises the MV4 forwardCompatibility path.
+      const rolledBack = migrator.migrate({ document: mv5Doc, fromVersion: 5, toVersion: 4 });
 
-      expect(migrated.attributes).toMatchObject({ scope: { alerting: { enabled: true } } });
+      // MV4 strips alertingEnabled and alertingV2 via unknowns:'ignore', leaving alerting: null.
+      expect((rolledBack.attributes as Record<string, unknown>).scope).toEqual({ alerting: null });
     });
   });
 });

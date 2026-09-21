@@ -20,8 +20,10 @@ export const transformCreateBody = (
   // validation. scopedQuery is kept for back-compat with existing callers that only send it.
   // `enabled` is optional in the route schema (defaultValue: true) for back-compat; coerce here.
   const rawScopedQuery = createBody.scoped_query;
+  // Drop `enabled` from scopedQuery: the domain AlertsFilterQueryAttributes does not have that
+  // field — it is a legacy storage field. The scope.alerting field carries enabled in the domain.
   const scopedQuery = rawScopedQuery
-    ? { ...rawScopedQuery, enabled: rawScopedQuery.enabled ?? true }
+    ? { kql: rawScopedQuery.kql ?? '', filters: rawScopedQuery.filters ?? [], dsl: rawScopedQuery.dsl }
     : rawScopedQuery;
   const scope = createBody.scope;
   return {

@@ -131,6 +131,9 @@ describe('MaintenanceWindowClient - update', () => {
         updatedAt: updatedMetadata.updatedAt,
         updatedBy: updatedMetadata.updatedBy,
         categoryIds: ['observability', 'securitySolution'],
+        // sibling-flag encoding: alertingEnabled = true (pre-MV5 docs default to v1-in-scope),
+        // alerting: null (no filter set), alertingV2 absent.
+        scope: { alertingEnabled: true, alerting: null },
       },
       {
         id: 'test-id',
@@ -235,6 +238,7 @@ describe('MaintenanceWindowClient - update', () => {
         updatedAt: updatedMetadata.updatedAt,
         updatedBy: updatedMetadata.updatedBy,
         categoryIds: ['observability', 'securitySolution'],
+        scope: { alertingEnabled: true, alerting: null },
       },
       {
         id: 'test-id',
@@ -551,13 +555,15 @@ describe('MaintenanceWindowClient - update', () => {
       },
     });
 
-    // scope.alerting.enabled=true with no kql means "v1 selected, no filter".
-    expect(
-      (savedObjectsClient.create.mock.calls[0][1] as MaintenanceWindow).scope?.alerting?.enabled
-    ).toBe(true);
-    expect(
-      (savedObjectsClient.create.mock.calls[0][1] as MaintenanceWindow).scope?.alerting?.kql
-    ).toBeUndefined();
+    // Sibling-flag encoding: alertingEnabled=true means "v1 selected, no filter".
+    // alerting is null (no filter kql/filters), so alerting.kql is absent (alerting is null).
+    const storedAttrs = savedObjectsClient.create.mock.calls[0][1] as Record<string, unknown>;
+    const storedScope = storedAttrs.scope as {
+      alertingEnabled?: boolean;
+      alerting: null | { kql: string; filters: unknown[]; dsl?: string };
+    };
+    expect(storedScope?.alertingEnabled).toBe(true);
+    expect(storedScope?.alerting).toBeNull();
   });
 
   it('should throw if updating a maintenance window with invalid scope', async () => {

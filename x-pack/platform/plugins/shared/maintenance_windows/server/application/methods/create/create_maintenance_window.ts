@@ -64,8 +64,16 @@ export async function createMaintenanceWindow(
     enabled,
     expirationDate,
     categoryIds,
+    // scopedQuery mirrors scope.alerting for the legacy v1 alerting consumer and telemetry.
+    // Only set when alerting v1 is enabled with a KQL filter (null = selected but unfiltered).
     scopedQuery:
-      resolvedScope.alerting?.enabled && resolvedScope.alerting.kql ? resolvedScope.alerting : null,
+      resolvedScope.alerting?.enabled && resolvedScope.alerting.kql
+        ? {
+            kql: resolvedScope.alerting.kql,
+            filters: resolvedScope.alerting.filters ?? [],
+            dsl: resolvedScope.alerting.dsl,
+          }
+        : null,
     rRule,
     duration,
     events,

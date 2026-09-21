@@ -115,9 +115,14 @@ async function updateWithOCC(
         ...(resolvedScope !== undefined
           ? {
               scope: resolvedScope,
+              // scopedQuery mirrors scope.alerting for the legacy v1 alerting consumer and telemetry.
               scopedQuery:
                 resolvedScope.alerting?.enabled && resolvedScope.alerting.kql
-                  ? resolvedScope.alerting
+                  ? {
+                      kql: resolvedScope.alerting.kql,
+                      filters: resolvedScope.alerting.filters ?? [],
+                      dsl: resolvedScope.alerting.dsl,
+                    }
                   : null,
             }
           : {}),

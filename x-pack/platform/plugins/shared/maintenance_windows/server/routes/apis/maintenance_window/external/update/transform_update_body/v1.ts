@@ -58,7 +58,7 @@ export const transformUpdateBody = (
     ...(updateBody.enabled !== undefined && { enabled: updateBody.enabled }),
     ...(durationInMilliseconds && { duration: durationInMilliseconds }),
     ...(customSchedule?.rRule && { rRule: customSchedule.rRule }),
-    ...(alertingKql ? { scopedQuery: { enabled: true, kql: alertingKql, filters: [] } } : {}),
+    ...(alertingKql ? { scopedQuery: { kql: alertingKql, filters: [] } } : {}),
     ...(updateBody.schedule && { schedule: updateBody.schedule }),
     ...(scope !== undefined ? { scope } : {}),
   };

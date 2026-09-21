@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import {
   alertsFilterQuerySchema,
+  alertingScopeSchema,
   alertingV2ScopeSchema,
 } from '../../../schemas/alerts_filter_query_schemas';
 import { rRuleRequestSchema } from '../../../../routes/schemas/r_rule';
@@ -25,7 +26,7 @@ export const createMaintenanceWindowParamsSchema = schema.object({
     schedule: schema.object({ custom: scheduleRequestSchema }),
     scope: schema.maybe(
       schema.object({
-        alerting: schema.maybe(alertsFilterQuerySchema),
+        alerting: schema.maybe(alertingScopeSchema),
         alertingV2: schema.maybe(alertingV2ScopeSchema),
       })
     ),

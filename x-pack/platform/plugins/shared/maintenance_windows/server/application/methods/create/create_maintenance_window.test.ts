@@ -202,7 +202,7 @@ describe('MaintenanceWindowClient - create', () => {
         rRule: mockMaintenanceWindow.rRule as CreateMaintenanceWindowParams['data']['rRule'],
         schedule: mockMaintenanceWindow.schedule,
         categoryIds: ['securitySolution'],
-        scopedQuery: { enabled: true, ...query },
+        scopedQuery: { ...query },
         scope: { alerting: { enabled: true, ...query } },
       },
     });

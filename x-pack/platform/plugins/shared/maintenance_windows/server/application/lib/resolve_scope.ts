@@ -13,20 +13,20 @@ import {
   getScopedQueryErrorMessage,
   type MaintenanceWindowScopeName,
 } from '../../../common';
-import type { AlertsFilterQueryAttributes, AlertingV2ScopeAttributes } from '../../data/types';
+import type { AlertingV2ScopeAttributes } from '../../data/types';
+import type { MaintenanceWindow } from '../types';
+
+// Domain-layer type for the v1 alerting scope — has `enabled` at this layer.
+// The storage layer (AlertsFilterQueryAttributes) uses a sibling `alertingEnabled` flag instead.
+type AlertingScopeAttributes = NonNullable<NonNullable<MaintenanceWindow['scope']>['alerting']>;
 
 export interface ScopeInput {
-  alerting?: {
-    enabled: boolean;
-    kql?: string;
-    filters?: AlertsFilterQueryAttributes['filters'];
-    dsl?: string;
-  };
+  alerting?: AlertingScopeAttributes;
   alertingV2?: { enabled: boolean; kql?: string };
 }
 
 export interface ResolvedScope {
-  alerting?: AlertsFilterQueryAttributes;
+  alerting?: AlertingScopeAttributes;
   alertingV2?: AlertingV2ScopeAttributes;
 }
 

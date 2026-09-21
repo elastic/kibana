@@ -20,8 +20,13 @@ export const transformMaintenanceWindowResponse = (
     ...(response.category_ids !== undefined ? { categoryIds: response.category_ids } : {}),
     ...(response.scoped_query != null
       ? {
-          // `enabled` is optional in the route schema for back-compat; coerce before handing to UI.
-          scopedQuery: { ...response.scoped_query, enabled: response.scoped_query.enabled ?? true },
+          // `enabled` is not in the domain AlertsFilterQueryAttributes — it is a route-layer
+          // convenience that we drop here. The UI reads enabled from scope.alerting.enabled.
+          scopedQuery: {
+            kql: response.scoped_query.kql ?? '',
+            filters: response.scoped_query.filters ?? [],
+            dsl: response.scoped_query.dsl,
+          },
         }
       : {}),
     ...(response.scope !== undefined
