@@ -10,9 +10,12 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { productDocInstallStatusSavedObjectTypeName } from '../common/consts';
+import { LockManagerService } from '@kbn/lock-manager';
 import { ProductDocBasePlugin } from './plugin';
 import type { ProductDocBaseSetupDependencies, ProductDocBaseStartDependencies } from './types';
+import { PRODUCT_DOC_INSTALL_LOCK_ID } from './services/install_lock';
 
+jest.mock('@kbn/lock-manager');
 jest.mock('./services/package_installer');
 jest.mock('./services/search');
 jest.mock('./services/doc_install_status');
@@ -26,6 +29,9 @@ import { DocumentationManager } from './services/doc_manager';
 
 const PackageInstallMock = PackageInstaller as jest.Mock;
 const DocumentationManagerMock = DocumentationManager as jest.Mock;
+const LockManagerServiceMock = LockManagerService as jest.Mock;
+
+const callOrderOf = (fn: jest.Mock): number => fn.mock.invocationCallOrder[0];
 
 const mockEisAvailable = (coreStart: ReturnType<typeof coreMock.createStart>) => {
   coreStart.elasticsearch.client.asInternalUser.inference.get = jest.fn().mockResolvedValue({
@@ -70,7 +76,13 @@ describe('ProductDocBasePlugin', () => {
       taskManager: taskManagerMock.createStart(),
     };
 
-    PackageInstallMock.mockReturnValue({ ensureUpToDate: jest.fn().mockResolvedValue({}) });
+    PackageInstallMock.mockReturnValue({
+      purgeArtifactsFolder: jest.fn().mockResolvedValue(undefined),
+    });
+    LockManagerServiceMock.mockReset();
+    LockManagerServiceMock.mockImplementation(() => ({
+      withLock: jest.fn((_lockId: string, callback: () => Promise<unknown>) => callback()),
+    }));
 
     DocumentationManagerMock.mockReturnValue({
       install: jest.fn().mockResolvedValue({}),
@@ -146,6 +158,27 @@ describe('ProductDocBasePlugin', () => {
       await new Promise((resolve) => setImmediate(resolve));
       expect(DocumentationManagerMock().ensureDefaultProductDocumentation).toHaveBeenCalledTimes(1);
       expect(DocumentationManagerMock().updateAll).toHaveBeenCalledTimes(1);
+    });
+
+    it('purges leftover artifacts under the install lock before the startup tasks', async () => {
+      const coreStart = coreMock.createStart();
+      mockEisAvailable(coreStart);
+      plugin.setup(coreMock.createSetup(), pluginSetupDeps);
+      plugin.start(coreStart, pluginStartDeps);
+      await new Promise((resolve) => setImmediate(resolve));
+
+      const lockManager = LockManagerServiceMock.mock.results[0].value as {
+        withLock: jest.Mock;
+      };
+      expect(lockManager.withLock).toHaveBeenCalledWith(
+        PRODUCT_DOC_INSTALL_LOCK_ID,
+        expect.any(Function),
+        expect.objectContaining({ metadata: { source: 'purgeArtifactsFolder' } })
+      );
+      expect(PackageInstallMock().purgeArtifactsFolder).toHaveBeenCalledTimes(1);
+      expect(callOrderOf(PackageInstallMock().purgeArtifactsFolder)).toBeLessThan(
+        callOrderOf(DocumentationManagerMock().ensureDefaultProductDocumentation)
+      );
     });
 
     it('skips startup tasks when EIS is not available', async () => {
