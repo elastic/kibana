@@ -20,6 +20,7 @@ import { AddEditMonitorAPI } from './add_monitor/add_monitor_api';
 import { ELASTIC_MANAGED_LOCATIONS_DISABLED } from './project_monitor/add_monitor_project';
 import { getPrivateLocations } from '../../synthetics_service/get_private_locations';
 import { mergeSourceMonitor } from './formatters/saved_object_to_monitor';
+import { assertCanPerformMonitorBulkActionInAllSpaces } from './monitor_locations_utils';
 import type { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
 import type {
   MonitorFields,
@@ -139,6 +140,21 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
             message: err,
           },
         });
+      }
+
+      const editedMonitorSpaces = new Set([
+        ...(decryptedMonitorPrevMonitor.namespaces ?? []),
+        ...((editedMonitor as MonitorFields)[ConfigKey.KIBANA_SPACES] ?? []),
+      ]);
+      if (editedMonitorSpaces.size > 0) {
+        const spaceAuthError = await assertCanPerformMonitorBulkActionInAllSpaces(
+          routeContext,
+          [...editedMonitorSpaces],
+          decryptedMonitorPrevMonitor.type
+        );
+        if (spaceAuthError) {
+          return spaceAuthError;
+        }
       }
 
       const monitorWithRevision = {

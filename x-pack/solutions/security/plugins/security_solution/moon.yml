@@ -304,6 +304,7 @@ fileGroups:
     - server/**/*
     - scripts/**/*
     - test/scout/**/*
+    - test/scout_es_max_response_size/**/*
     - test/scout_security_attacks_alignment/**/*
     - common/**/*.json
     - server/**/*.json
