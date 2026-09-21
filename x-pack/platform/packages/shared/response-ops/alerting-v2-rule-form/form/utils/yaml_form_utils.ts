@@ -14,8 +14,10 @@ import type {
   StateTransition as ApiStateTransition,
 } from '@kbn/alerting-v2-schemas';
 import {
+  noDataSchema,
   noDataStrategy,
   noDataStrategySchema,
+  recoverySchema,
   recoveryStrategy,
   recoveryStrategySchema,
 } from '@kbn/alerting-v2-schemas';
@@ -26,7 +28,12 @@ import {
   deriveRecoveryDelayModeFromStateTransition,
 } from './state_transition_helpers';
 import { ruleQueryToApiQuery } from './query_mappers';
-import { formNoDataToApiNoData, formRecoveryToApiRecovery } from './lifecycle_mappers';
+import {
+  apiNoDataToFormNoData,
+  apiRecoveryToFormRecovery,
+  formNoDataToApiNoData,
+  formRecoveryToApiRecovery,
+} from './lifecycle_mappers';
 import { mergeArtifactsByType, splitArtifactsByType } from './artifact_mappers';
 
 export type YamlParseResult = { values: FormValues; error: null } | { values: null; error: string };
@@ -147,22 +154,21 @@ const parseQuery = (queryObj: Record<string, unknown> | undefined): RuleQuery =>
 
 const ALERT_ONLY_KEYS = ['recovery', 'no_data', 'state_transition'] as const;
 
+/*
+ * Both blocks are parsed with the write schema rather than the strategy alone.
+ * The form state is widened across strategies so a user can switch between them
+ * without losing what they typed, but a field the chosen strategy does not
+ * accept would be dropped on save, leaving the editor showing something the
+ * rule does not do.
+ */
 const parseRecovery = (value: unknown): RuleRecovery | undefined => {
-  const recoveryObj = asRecord(value);
-  const parsedStrategy = recoveryStrategySchema.safeParse(recoveryObj?.strategy);
-  if (!parsedStrategy.success) return undefined;
-  return {
-    strategy: parsedStrategy.data,
-    segment: asOptionalString(recoveryObj?.segment),
-    query: asOptionalString(recoveryObj?.query),
-  };
+  const parsed = recoverySchema.safeParse(value);
+  return parsed.success ? apiRecoveryToFormRecovery(parsed.data) : undefined;
 };
 
 const parseNoData = (value: unknown): RuleNoData | undefined => {
-  const noDataObj = asRecord(value);
-  const parsedStrategy = noDataStrategySchema.safeParse(noDataObj?.strategy);
-  if (!parsedStrategy.success) return undefined;
-  return { strategy: parsedStrategy.data, query: asOptionalString(noDataObj?.query) };
+  const parsed = noDataSchema.safeParse(value);
+  return parsed.success ? apiNoDataToFormNoData(parsed.data) : undefined;
 };
 
 const parseStateTransition = (value: unknown): StateTransition | undefined => {
@@ -248,8 +254,9 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
   if (obj.recovery !== undefined && parsedRecovery === undefined) {
     return {
       values: null,
-      error: i18n.translate('xpack.alertingV2.yamlRuleForm.invalidRecoveryStrategyError', {
-        defaultMessage: 'Recovery strategy must be one of {strategies}.',
+      error: i18n.translate('xpack.alertingV2.yamlRuleForm.invalidRecoveryError', {
+        defaultMessage:
+          'Invalid recovery. Set strategy to one of {strategies}, with the fields that strategy accepts.',
         values: { strategies: recoveryStrategySchema.options.join(', ') },
       }),
     };
@@ -259,8 +266,9 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
   if (obj.no_data !== undefined && parsedNoData === undefined) {
     return {
       values: null,
-      error: i18n.translate('xpack.alertingV2.yamlRuleForm.invalidNoDataStrategyError', {
-        defaultMessage: 'No-data strategy must be one of {strategies}.',
+      error: i18n.translate('xpack.alertingV2.yamlRuleForm.invalidNoDataError', {
+        defaultMessage:
+          'Invalid no_data. Set strategy to one of {strategies}, with the fields that strategy accepts.',
         values: { strategies: noDataStrategySchema.options.join(', ') },
       }),
     };

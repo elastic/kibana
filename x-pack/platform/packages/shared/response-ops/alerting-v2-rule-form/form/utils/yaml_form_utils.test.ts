@@ -337,35 +337,42 @@ describe('yaml_form_utils', () => {
       });
     });
 
-    it('reports an invalid no_data strategy instead of defaulting it', () => {
+    it.each([
+      ['an unknown strategy', { strategy: 'invalid_value' }],
+      ['a field the strategy does not accept', { strategy: 'ignore', query: 'FROM logs-*' }],
+    ])('reports no_data with %s instead of defaulting it', (_label, noData) => {
       const yaml = stringify({
         kind: 'alert',
-        metadata: { name: 'Invalid strategy' },
+        metadata: { name: 'Invalid no_data' },
         query: { base: 'FROM logs-*' },
-        no_data: { strategy: 'invalid_value' },
+        no_data: noData,
       });
 
       const result = parseYamlToFormValues(yaml);
 
       expect(result.values).toBeNull();
       expect(result.error).toBe(
-        'No-data strategy must be one of ignore, keep_last, resolve, alert.'
+        'Invalid no_data. Set strategy to one of ignore, keep_last, resolve, alert, with the fields that strategy accepts.'
       );
     });
 
-    it('reports an invalid recovery strategy instead of defaulting it', () => {
+    it.each([
+      ['an unknown strategy', { strategy: 'manuall' }],
+      ['a field the strategy does not accept', { strategy: 'no_breach', query: 'FROM logs-*' }],
+      ['a missing required field', { strategy: 'condition' }],
+    ])('reports recovery with %s instead of defaulting it', (_label, recovery) => {
       const yaml = stringify({
         kind: 'alert',
-        metadata: { name: 'Invalid strategy' },
+        metadata: { name: 'Invalid recovery' },
         query: { base: 'FROM logs-*' },
-        recovery: { strategy: 'manuall' },
+        recovery,
       });
 
       const result = parseYamlToFormValues(yaml);
 
       expect(result.values).toBeNull();
       expect(result.error).toBe(
-        'Recovery strategy must be one of no_breach, condition, query, manual.'
+        'Invalid recovery. Set strategy to one of no_breach, condition, query, manual, with the fields that strategy accepts.'
       );
     });
 
