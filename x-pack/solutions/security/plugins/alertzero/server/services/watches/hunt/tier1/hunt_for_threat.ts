@@ -246,11 +246,10 @@ export const huntForThreat = async (
   const perIndex = (aggs?.per_index?.buckets ?? []).map((b) => ({
     index: b.key,
     hitCount: b.doc_count,
+    required: matchesRequired(b.key),
   }));
 
-  const hasConfirmedHit = perIndex.some(
-    (bucket) => matchesRequired(bucket.index) && bucket.hitCount > 0
-  );
+  const hasConfirmedHit = perIndex.some((bucket) => bucket.required && bucket.hitCount > 0);
 
   return {
     status: total === 0 ? 'no_environment_hits' : 'environment_hits_found',

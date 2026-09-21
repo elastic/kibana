@@ -102,6 +102,24 @@ export const HuntForThreatHit = lazySchema(() =>
       index: z.string(),
       id: z.string(),
       score: z.number().nullable(),
+      /**
+       * Which IOC and/or ATT&CK technique produced this hit. Not yet populated by Tier 1 — requires per-IOC attribution (highlight or a per-IOC query) that Tier 1's current single combined `should` query doesn't provide. Declared here so the SSE mapper's `events[].matched` has a stable contract to fill in once Tier 1 adds attribution (plan 7 follow-up, SSE durability review).
+       */
+      matched: z
+        .object({
+          ioc: z
+            .object({
+              type: z.string().optional(),
+              value: z.string().optional(),
+            })
+            .optional(),
+          technique_id: z.string().optional(),
+          field: z.string().optional(),
+        })
+        .optional()
+        .describe(
+          "Which IOC and/or ATT&CK technique produced this hit. Not yet populated by Tier 1 — requires per-IOC attribution (highlight or a per-IOC query) that Tier 1's current single combined `should` query doesn't provide. Declared here so the SSE mapper's `events[].matched` has a stable contract to fill in once Tier 1 adds attribution (plan 7 follow-up, SSE durability review)."
+        ),
     })
     .catchall(z.unknown())
 );
@@ -141,6 +159,14 @@ export const HuntForThreatResult = lazySchema(() =>
       z.object({
         index: z.string(),
         hitCount: z.number().int(),
+        /**
+         * Regex match of this concrete `_index` bucket against the resolved technology's required index patterns (e.g. `logs-aws.*`) — computed once by Tier 1, not re-derived downstream (plan 7, SSE durability review fix).
+         */
+        required: z
+          .boolean()
+          .describe(
+            "Regex match of this concrete `_index` bucket against the resolved technology's required index patterns (e.g. `logs-aws.*`) — computed once by Tier 1, not re-derived downstream (plan 7, SSE durability review fix)."
+          ),
       })
     ),
     message: z.string().optional(),

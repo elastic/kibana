@@ -104,6 +104,27 @@ components:
         score:
           type: number
           nullable: true
+        matched:
+          type: object
+          description: >-
+            Which IOC and/or ATT&CK technique produced this hit. Not yet
+            populated by Tier 1 — requires per-IOC attribution (highlight or
+            a per-IOC query) that Tier 1's current single combined `should`
+            query doesn't provide. Declared here so the SSE mapper's
+            `events[].matched` has a stable contract to fill in once Tier 1
+            adds attribution (plan 7 follow-up, SSE durability review).
+          properties:
+            ioc:
+              type: object
+              properties:
+                type:
+                  type: string
+                value:
+                  type: string
+            technique_id:
+              type: string
+            field:
+              type: string
 
     HuntForThreatResult:
       type: object
@@ -180,11 +201,18 @@ components:
           type: array
           items:
             type: object
-            required: [index, hitCount]
+            required: [index, hitCount, required]
             properties:
               index:
                 type: string
               hitCount:
                 type: integer
+              required:
+                type: boolean
+                description: >-
+                  Regex match of this concrete `_index` bucket against the
+                  resolved technology's required index patterns (e.g.
+                  `logs-aws.*`) — computed once by Tier 1, not re-derived
+                  downstream (plan 7, SSE durability review fix).
         message:
           type: string
