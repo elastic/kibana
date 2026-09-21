@@ -32,32 +32,39 @@ import { FLYOUT_MIN_WIDTH } from '../utils';
 
 const APP_MAIN_SCROLL_ID = 'app-main-scroll';
 
-const readInlinePadding = () => ({
+const readPushState = () => ({
   container: document.getElementById(APP_MAIN_SCROLL_ID)?.style.paddingInlineEnd ?? 'n/a',
   body: document.body.style.paddingInlineEnd,
+  // Counts every flyout on the page, not just this section's: the other examples push too.
+  openFlyouts: document.querySelectorAll('.euiFlyout').length,
 });
+
+/** Labels contain spaces, which are not valid in `id` / `aria-labelledby` references. */
+const slug = (label: string) => label.replace(/\s+/g, '-');
 
 /**
  * Live view of the inline `padding-inline-end` EUI writes for push flyouts. Kibana scopes flyouts
  * to `#app-main-scroll`, so that element is the padding target; `document.body` is shown too in
  * case a flyout falls back to the viewport.
  */
-const PushPaddingReadout: React.FC<{ openCount: number }> = ({ openCount }) => {
-  const [padding, setPadding] = useState(readInlinePadding);
+const PushPaddingReadout: React.FC = () => {
+  const [padding, setPadding] = useState(readPushState);
 
   useEffect(() => {
-    const update = () => setPadding(readInlinePadding());
+    const update = () => setPadding(readPushState());
     const observer = new MutationObserver(update);
-    const targets = [document.getElementById(APP_MAIN_SCROLL_ID), document.body].filter(
-      (el): el is HTMLElement => el != null
-    );
-    targets.forEach((el) => observer.observe(el, { attributes: true, attributeFilter: ['style'] }));
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['style'],
+    });
     update();
     return () => observer.disconnect();
   }, []);
 
   const hasPadding = padding.container !== '' || padding.body !== '';
-  const stranded = openCount === 0 && hasPadding;
+  const stranded = padding.openFlyouts === 0 && hasPadding;
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
@@ -77,7 +84,7 @@ const PushPaddingReadout: React.FC<{ openCount: number }> = ({ openCount }) => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText size="s">
-          Flyouts open from this section: <strong>{openCount}</strong>
+          Flyouts open on the page: <strong>{padding.openFlyouts}</strong>
         </EuiText>
       </EuiFlexItem>
       {stranded && (
@@ -93,16 +100,13 @@ const PushPaddingReadout: React.FC<{ openCount: number }> = ({ openCount }) => {
 
 interface SlotProps {
   label: string;
-  onOpenChange: (isOpen: boolean) => void;
 }
 
 /** A plain `EuiFlyout` with `session="never"`: no manager session, rendered in this app's root. */
-const StandalonePushSlot: React.FC<SlotProps> = ({ label, onOpenChange }) => {
+const StandalonePushSlot: React.FC<SlotProps> = ({ label }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const toggle = () => {
-    setIsOpen(!isOpen);
-    onOpenChange(!isOpen);
-  };
+  const toggle = () => setIsOpen(!isOpen);
+  const titleId = `pushPaddingFlyout-${slug(label)}`;
   return (
     <>
       <EuiButton
@@ -121,12 +125,12 @@ const StandalonePushSlot: React.FC<SlotProps> = ({ label, onOpenChange }) => {
           resizable
           minWidth={FLYOUT_MIN_WIDTH}
           onClose={toggle}
-          aria-labelledby={`pushPaddingFlyout-${label}`}
+          aria-labelledby={titleId}
           data-test-subj={`pushPaddingFlyout-${label}`}
         >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="s">
-              <h2 id={`pushPaddingFlyout-${label}`}>{label}</h2>
+              <h2 id={titleId}>{label}</h2>
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
@@ -149,7 +153,6 @@ const SystemSlot: React.FC<SlotProps & { type: 'push' | 'overlay'; overlays: Ove
   label,
   type,
   overlays,
-  onOpenChange,
 }) => {
   const overlayRef = useRef<OverlayRef | null>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -157,7 +160,7 @@ const SystemSlot: React.FC<SlotProps & { type: 'push' | 'overlay'; overlays: Ove
   const open = () => {
     const ref = overlays.openFlyoutTemplate(
       {
-        id: `pushPaddingSystemFlyout-${label}`,
+        id: `pushPaddingSystemFlyout-${slug(label)}`,
         session: 'start',
         type,
         size: 's',
@@ -184,11 +187,9 @@ const SystemSlot: React.FC<SlotProps & { type: 'push' | 'overlay'; overlays: Ove
     ref.onClose.then(() => {
       overlayRef.current = null;
       setIsOpen(false);
-      onOpenChange(false);
     });
     overlayRef.current = ref;
     setIsOpen(true);
-    onOpenChange(true);
   };
 
   const close = () => {
@@ -308,9 +309,6 @@ const scenarioListItems = SCENARIOS.map(({ title, steps, status, resolution }) =
 }));
 
 export const PushPaddingScenarios: React.FC<{ overlays: OverlayStart }> = ({ overlays }) => {
-  const [openCount, setOpenCount] = useState(0);
-  const onOpenChange = (isOpen: boolean) => setOpenCount((count) => count + (isOpen ? 1 : -1));
-
   return (
     <>
       <EuiTitle size="s">
@@ -326,38 +324,23 @@ export const PushPaddingScenarios: React.FC<{ overlays: OverlayStart }> = ({ ove
           </p>
         </EuiText>
         <EuiSpacer size="m" />
-        <PushPaddingReadout openCount={openCount} />
+        <PushPaddingReadout />
         <EuiSpacer size="m" />
         <EuiFlexGroup gutterSize="s" wrap>
           <EuiFlexItem grow={false}>
-            <StandalonePushSlot label="Standalone A" onOpenChange={onOpenChange} />
+            <StandalonePushSlot label="Standalone A" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <StandalonePushSlot label="Standalone B" onOpenChange={onOpenChange} />
+            <StandalonePushSlot label="Standalone B" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <SystemSlot
-              label="System push C"
-              type="push"
-              overlays={overlays}
-              onOpenChange={onOpenChange}
-            />
+            <SystemSlot label="System push C" type="push" overlays={overlays} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <SystemSlot
-              label="System push D"
-              type="push"
-              overlays={overlays}
-              onOpenChange={onOpenChange}
-            />
+            <SystemSlot label="System push D" type="push" overlays={overlays} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <SystemSlot
-              label="System overlay E"
-              type="overlay"
-              overlays={overlays}
-              onOpenChange={onOpenChange}
-            />
+            <SystemSlot label="System overlay E" type="overlay" overlays={overlays} />
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="m" />
