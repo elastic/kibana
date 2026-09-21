@@ -22,7 +22,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
-  const pageObjects = getPageObjects(['common', 'findings', 'header']);
+  const pageObjects = getPageObjects(['common', 'findings']);
   const chance = new Chance();
 
   const cspmResourceId = chance.guid();
@@ -166,12 +166,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await findings.index.add(data);
 
       await findings.navigateToLatestFindingsPage();
-      await pageObjects.header.waitUntilLoadingHasFinished();
+      await findings.waitForFindingsPageToLoad();
     });
 
     after(async () => {
       await findings.navigateToLatestFindingsPage();
-      await pageObjects.header.waitUntilLoadingHasFinished();
+      await findings.waitForFindingsPageToLoad();
       const groupSelector = await findings.groupSelector();
       await groupSelector.openDropDown();
       await groupSelector.setValue('None');
@@ -523,7 +523,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await findings.index.add([modifiedFinding]);
 
         await findings.navigateToLatestFindingsPage();
-        await pageObjects.header.waitUntilLoadingHasFinished();
+        await findings.waitForFindingsPageToLoad();
 
         const groupSelector = await findings.groupSelector();
         await groupSelector.openDropDown();
@@ -556,7 +556,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           .expect(200);
 
         await findings.navigateToLatestFindingsPage();
-        await pageObjects.header.waitUntilLoadingHasFinished();
+        await findings.waitForFindingsPageToLoad();
 
         const groupCountAfterMute = await grouping.getGroupCount();
         expect(groupCountAfterMute).to.be(`${resourceGroupCount} resources`);

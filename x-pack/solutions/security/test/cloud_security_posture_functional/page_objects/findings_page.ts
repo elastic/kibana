@@ -295,6 +295,12 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     );
   };
 
+  // Gates on the page's own signals; the global chrome spinner stays busy for unrelated requests.
+  const waitForFindingsPageToLoad = async (timeout = 60 * 1000) => {
+    await testSubjects.existOrFail('group-selector-dropdown', { timeout });
+    await testSubjects.missingOrFail('cloudSecurityGroupingLoading', { timeout });
+  };
+
   const latestFindingsTable = createDataTableObject('latest_findings_table');
   const latestVulnerabilitiesTable = createDataTableObject('latest_vulnerabilities_table');
 
@@ -387,6 +393,7 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     navigateToLatestFindingsPage,
     navigateToLatestVulnerabilitiesPage,
     navigateToMisconfigurations,
+    waitForFindingsPageToLoad,
     latestFindingsTable,
     latestVulnerabilitiesTable,
     notInstalledVulnerabilities,
