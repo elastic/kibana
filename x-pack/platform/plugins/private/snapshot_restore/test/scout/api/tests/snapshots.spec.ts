@@ -76,6 +76,22 @@ interface ApiParams {
   searchOperator?: string;
 }
 
+// `GET /snapshots` lists every repository in the cluster, so requests that don't search on their
+// own are scoped to this run's repositories (both names contain `runId`).
+const RUN_REPOSITORY_SEARCH: ApiParams = {
+  searchField: 'repository',
+  searchValue: runId,
+  searchMatch: 'must',
+  searchOperator: 'eq',
+};
+
+// The API accepts a single search field, so excluding (`must_not`) searches can't also carry the
+// repository scope: they request a large page and assert on this run's snapshots in the response.
+const EXCLUDING_SEARCH_PAGE_SIZE = 100;
+
+const thisRunOnly = (snapshots: SnapshotDetails[]): SnapshotDetails[] =>
+  snapshots.filter(({ repository }) => repository.includes(runId));
+
 const getApiPath = ({
   pageIndex,
   pageSize,
@@ -106,7 +122,8 @@ apiTest.describe('Snapshot and Restore - snapshots', { tag: ['@local-stateful-cl
     apiClient: ApiClientFixture,
     params: ApiParams
   ): Promise<{ total: number; snapshots: SnapshotDetails[] }> => {
-    const response = await apiClient.get(getApiPath(params), {
+    const path = getApiPath(params.searchField ? params : { ...params, ...RUN_REPOSITORY_SEARCH });
+    const response = await apiClient.get(path, {
       headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
       responseType: 'json',
     });
@@ -318,13 +335,15 @@ apiTest.describe('Snapshot and Restore - snapshots', { tag: ['@local-stateful-cl
   apiTest('search snapshot name: excluding search with exact match', async ({ apiClient }) => {
     // list snapshots with the name not equal to the 3rd snapshot in the first batch
     const { snapshots } = await getSnapshots(apiClient, {
+      pageSize: EXCLUDING_SEARCH_PAGE_SIZE,
       searchField: 'snapshot',
       searchValue: BATCH_1_SNAPSHOT_2_NAME,
       searchMatch: 'must_not',
       searchOperator: 'exact',
     });
-    expect(snapshots).toHaveLength(SNAPSHOT_COUNT - 1);
-    const snapshotIsExcluded = snapshots.every(
+    const runSnapshots = thisRunOnly(snapshots);
+    expect(runSnapshots).toHaveLength(SNAPSHOT_COUNT - 1);
+    const snapshotIsExcluded = runSnapshots.every(
       (snapshot) => snapshot.snapshot !== BATCH_1_SNAPSHOT_2_NAME
     );
     expect(snapshotIsExcluded).toBe(true);
@@ -333,14 +352,16 @@ apiTest.describe('Snapshot and Restore - snapshots', { tag: ['@local-stateful-cl
   apiTest('search snapshot name: excluding search with partial match', async ({ apiClient }) => {
     // list snapshots whose name does not contain the first batch prefix (excludes both batches)
     const { snapshots } = await getSnapshots(apiClient, {
+      pageSize: EXCLUDING_SEARCH_PAGE_SIZE,
       searchField: 'snapshot',
       searchValue: BATCH_SNAPSHOT_NAME_1,
       searchMatch: 'must_not',
       searchOperator: 'eq',
     });
     // both batches created snapshots whose name contains the first batch prefix
-    expect(snapshots).toHaveLength(SNAPSHOT_COUNT - BATCH_SIZE_1 - BATCH_SIZE_2);
-    const snapshotsAreExcluded = snapshots.every(
+    const runSnapshots = thisRunOnly(snapshots);
+    expect(runSnapshots).toHaveLength(SNAPSHOT_COUNT - BATCH_SIZE_1 - BATCH_SIZE_2);
+    const snapshotsAreExcluded = runSnapshots.every(
       (snapshot) => !snapshot.snapshot.includes(BATCH_SNAPSHOT_NAME_1)
     );
     expect(snapshotsAreExcluded).toBe(true);
@@ -395,28 +416,32 @@ apiTest.describe('Snapshot and Restore - snapshots', { tag: ['@local-stateful-cl
   apiTest('search repository name: excluding search with exact match', async ({ apiClient }) => {
     // list snapshots from repositories with the name not "test_repo_1"
     const { snapshots } = await getSnapshots(apiClient, {
+      pageSize: EXCLUDING_SEARCH_PAGE_SIZE,
       searchField: 'repository',
       searchValue: REPO_NAME_1,
       searchMatch: 'must_not',
       searchOperator: 'exact',
     });
-    // snapshots not in repo 1 are only snapshots created in batch 2
-    expect(snapshots).toHaveLength(BATCH_SIZE_2);
-    const repositoryNameMatches = snapshots.every(
+    // snapshots of this run not in repo 1 are only snapshots created in batch 2
+    const runSnapshots = thisRunOnly(snapshots);
+    expect(runSnapshots).toHaveLength(BATCH_SIZE_2);
+    const repositoryNameMatches = runSnapshots.every(
       (snapshot) => snapshot.repository !== REPO_NAME_1
     );
     expect(repositoryNameMatches).toBe(true);
   });
 
   apiTest('search repository name: excluding search with partial match', async ({ apiClient }) => {
-    // list snapshots from repository with the name not containing "test"
+    // list snapshots from repositories whose name does not contain this run's id, which excludes
+    // both of this run's repositories
     const { snapshots } = await getSnapshots(apiClient, {
+      pageSize: EXCLUDING_SEARCH_PAGE_SIZE,
       searchField: 'repository',
-      searchValue: 'test',
+      searchValue: runId,
       searchMatch: 'must_not',
       searchOperator: 'eq',
     });
-    expect(snapshots).toHaveLength(0);
+    expect(thisRunOnly(snapshots)).toHaveLength(0);
   });
 
   // search - policy name
@@ -459,6 +484,7 @@ apiTest.describe('Snapshot and Restore - snapshots', { tag: ['@local-stateful-cl
   apiTest('search policy name: excluding search with exact match', async ({ apiClient }) => {
     // list snapshots created by the policy with the name not "test_policy_1"
     const { snapshots } = await getSnapshots(apiClient, {
+      pageSize: EXCLUDING_SEARCH_PAGE_SIZE,
       searchField: 'policyName',
       searchValue: POLICY_NAME_1,
       searchMatch: 'must_not',
@@ -466,8 +492,9 @@ apiTest.describe('Snapshot and Restore - snapshots', { tag: ['@local-stateful-cl
     });
     // only 1 snapshot was created by policy 1
     // search results should also contain snapshots without SLM policy
-    expect(snapshots).toHaveLength(SNAPSHOT_COUNT - 1);
-    const snapshotsExcluded = snapshots.every(
+    const runSnapshots = thisRunOnly(snapshots);
+    expect(runSnapshots).toHaveLength(SNAPSHOT_COUNT - 1);
+    const snapshotsExcluded = runSnapshots.every(
       (snapshot) => (snapshot.policyName ?? '') !== POLICY_NAME_1
     );
     expect(snapshotsExcluded).toBe(true);
@@ -476,6 +503,7 @@ apiTest.describe('Snapshot and Restore - snapshots', { tag: ['@local-stateful-cl
   apiTest('search policy name: excluding search with partial match', async ({ apiClient }) => {
     // list snapshots created by the policy whose name does not contain the policy-2 token
     const { snapshots } = await getSnapshots(apiClient, {
+      pageSize: EXCLUDING_SEARCH_PAGE_SIZE,
       searchField: 'policyName',
       searchValue: POLICY_2_SEARCH_TOKEN,
       searchMatch: 'must_not',
@@ -483,8 +511,9 @@ apiTest.describe('Snapshot and Restore - snapshots', { tag: ['@local-stateful-cl
     });
     // only 1 snapshot was created by POLICY_NAME_2
     // search results should also contain snapshots without SLM policy
-    expect(snapshots).toHaveLength(SNAPSHOT_COUNT - 1);
-    const snapshotsExcluded = snapshots.every(
+    const runSnapshots = thisRunOnly(snapshots);
+    expect(runSnapshots).toHaveLength(SNAPSHOT_COUNT - 1);
+    const snapshotsExcluded = runSnapshots.every(
       (snapshot) => (snapshot.policyName ?? '') !== POLICY_NAME_2
     );
     expect(snapshotsExcluded).toBe(true);
@@ -493,8 +522,9 @@ apiTest.describe('Snapshot and Restore - snapshots', { tag: ['@local-stateful-cl
   apiTest(
     'bulk_delete: deletes snapshots from several repositories in one request',
     async ({ apiClient, esClient }) => {
-      await seedBulkDeleteSnapshots(esClient);
       try {
+        await seedBulkDeleteSnapshots(esClient);
+
         const response = await bulkDelete(apiClient, [
           { repository: REPO_NAME_1, snapshot: BULK_DELETE_SNAPSHOT_1 },
           { repository: REPO_NAME_2, snapshot: BULK_DELETE_SNAPSHOT_3 },
@@ -521,8 +551,9 @@ apiTest.describe('Snapshot and Restore - snapshots', { tag: ['@local-stateful-cl
   apiTest(
     'bulk_delete: reports only the missing snapshot and still deletes the others',
     async ({ apiClient, esClient }) => {
-      await seedBulkDeleteSnapshots(esClient);
       try {
+        await seedBulkDeleteSnapshots(esClient);
+
         const response = await bulkDelete(apiClient, [
           { repository: REPO_NAME_1, snapshot: MISSING_SNAPSHOT_NAME },
           { repository: REPO_NAME_1, snapshot: BULK_DELETE_SNAPSHOT_1 },

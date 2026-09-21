@@ -259,20 +259,16 @@ apiTest.describe('Snapshot and Restore - SLM policies', { tag: tags.stateful.cla
   });
 
   apiTest('show info: should get slm status', async ({ apiClient, esClient }) => {
-    // Make sure SLM is running before asserting on its status.
-    await esClient.slm.start();
+    // The SLM operation mode is cluster-wide, so read it instead of starting SLM and leaving that
+    // state behind for other suites on the shared cluster.
+    const slmStatus = await esClient.slm.getStatus();
 
-    await expect
-      .poll(
-        async () => {
-          const response = await apiClient.get(`${API_BASE_PATH}/policies/slm_status`, {
-            headers: headers(),
-            responseType: 'json',
-          });
-          return response.body;
-        },
-        { timeout: 30_000 }
-      )
-      .toStrictEqual({ operation_mode: 'RUNNING' });
+    const response = await apiClient.get(`${API_BASE_PATH}/policies/slm_status`, {
+      headers: headers(),
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(200);
+    expect(response.body).toStrictEqual({ operation_mode: slmStatus.operation_mode });
   });
 });
