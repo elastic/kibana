@@ -854,11 +854,13 @@ describe('WatchDetailPage', () => {
       initialEntries: [`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`],
     });
     render(
-      <Router history={history}>
-        <Route path="/watches/:watchId">
-          <WatchDetailPage />
-        </Route>
-      </Router>
+      <TestProviders>
+        <Router history={history}>
+          <Route path="/watches/:watchId">
+            <WatchDetailPage />
+          </Route>
+        </Router>
+      </TestProviders>
     );
 
     const amount = screen.getByTestId(`alertZeroTriggerAmount-${shared.id}`);
@@ -919,11 +921,13 @@ describe('WatchDetailPage', () => {
       initialEntries: [`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`],
     });
     render(
-      <Router history={history}>
-        <Route path="/watches/:watchId">
-          <WatchDetailPage />
-        </Route>
-      </Router>
+      <TestProviders>
+        <Router history={history}>
+          <Route path="/watches/:watchId">
+            <WatchDetailPage />
+          </Route>
+        </Router>
+      </TestProviders>
     );
 
     const amount = screen.getByTestId(`alertZeroTriggerAmount-${shared.id}`);
@@ -972,11 +976,13 @@ describe('WatchDetailPage', () => {
     mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync } as never);
 
     render(
-      <MemoryRouter initialEntries={[`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`]}>
-        <Route path="/watches/:watchId">
-          <WatchDetailPage />
-        </Route>
-      </MemoryRouter>
+      <TestProviders>
+        <MemoryRouter initialEntries={[`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`]}>
+          <Route path="/watches/:watchId">
+            <WatchDetailPage />
+          </Route>
+        </MemoryRouter>
+      </TestProviders>
     );
 
     const amount = screen.getByTestId(`alertZeroTriggerAmount-${shared.id}`);
