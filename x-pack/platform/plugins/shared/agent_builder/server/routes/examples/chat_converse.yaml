@@ -22,6 +22,12 @@ requestBody:
             input: "What is Elasticsearch?"
             agent_id: "elastic-ai-agent"
             inference_id: "my-inference-endpoint-id"
+        converseSimpleRequestExample:
+          description: "Example request that returns only conversation_id and the final answer"
+          value:
+            input: "What is Elasticsearch?"
+            agent_id: "elastic-ai-agent"
+            response_mode: "simple"
 responses:
   200:
     description: "Indicates a successful response"
@@ -50,6 +56,11 @@ responses:
                     message: "Could not figure out which index to use"
               response:
                 message: "Elasticsearch is a distributed, RESTful search and analytics engine capable of addressing a growing number of use cases. As the heart of the Elastic Stack, it centrally stores your data for lightning fast search, fine‑tuned relevancy, and powerful analytics that scale with ease."
+          converseSimpleResponseExample:
+            description: "Example simple-mode response with only conversation_id and answer"
+            value:
+              conversation_id: "696ccd6d-4bff-4b26-a62e-522ccf2dcd16"
+              answer: "Elasticsearch is a distributed, RESTful search and analytics engine."
 x-codeSamples:
 - lang: curl
   source: |

@@ -15,7 +15,7 @@ import {
   type ConversationCreatedEvent,
   type ConversationUpdatedEvent,
 } from '@kbn/agent-builder-common';
-import type { ChatResponse } from '../../../../common/http_api/chat';
+import type { ChatResponse, ChatSimpleResponse } from '../../../../common/http_api/chat';
 
 /** Recovers the conversation created/updated event that a conversation-mode run always emits*/
 export const findConversationEvent = (
@@ -54,5 +54,19 @@ export const buildChatResponseFromEvents = (events: ChatEvent[]): ChatResponse =
       ...round.response,
       prompts: round.pending_prompts,
     },
+  };
+};
+
+/** Builds the minimal `{ conversation_id, answer }` payload for `response_mode: 'simple'`. */
+export const buildSimpleChatResponseFromEvents = (events: ChatEvent[]): ChatSimpleResponse => {
+  const roundCompleteEvent = events.find(isRoundCompleteEvent);
+  if (!roundCompleteEvent) {
+    throw createInternalError('No round_complete event was emitted by the agent run');
+  }
+  const conversationEvent = findConversationEvent(events);
+
+  return {
+    conversation_id: conversationEvent.data.conversation_id,
+    answer: roundCompleteEvent.data.round.response?.message ?? '',
   };
 };

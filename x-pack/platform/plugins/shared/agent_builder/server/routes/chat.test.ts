@@ -147,6 +147,22 @@ describe('conversePayloadSchema', () => {
       })
     ).toThrow(/enable_elastic_capabilities/);
   });
+
+  it('defaults response_mode to full', () => {
+    expect(conversePayloadSchema.validate({ input: 'Hello' }).response_mode).toBe('full');
+  });
+
+  it('accepts response_mode simple', () => {
+    expect(
+      conversePayloadSchema.validate({ input: 'Hello', response_mode: 'simple' }).response_mode
+    ).toBe('simple');
+  });
+
+  it('rejects unknown response_mode values', () => {
+    expect(() =>
+      conversePayloadSchema.validate({ input: 'Hello', response_mode: 'minimal' })
+    ).toThrow(/response_mode/);
+  });
 });
 
 describe('chatPayloadSchema', () => {

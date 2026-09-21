@@ -28,6 +28,16 @@ export enum ChatTriggerMode {
 }
 
 /**
+ * Controls the shape of the synchronous `/converse` JSON response.
+ * `simple` returns only `conversation_id` and the final assistant answer.
+ * Ignored by `/converse/async` (streaming always emits full event SSE).
+ */
+export enum ChatResponseMode {
+  Full = 'full',
+  Simple = 'simple',
+}
+
+/**
  * Body payload for the public agent_builder converse endpoints (`/api/agent_builder/converse`, `/converse/async`).
  */
 export interface ChatRequestBodyPayload {
@@ -52,6 +62,11 @@ export interface ChatRequestBodyPayload {
   _execution_mode?: 'local' | 'task_manager';
   /** Use `never` to persist a message without executing the agent. */
   trigger_mode?: ChatTriggerMode;
+  /**
+   * Synchronous `/converse` only. `simple` returns `{ conversation_id, answer }` instead of the
+   * full round payload. Defaults to `full`.
+   */
+  response_mode?: ChatResponseMode;
 }
 
 /** Response of `POST /internal/agent_builder/executions/{id}/abort`. */
@@ -81,5 +96,14 @@ export type ChatResponse = Omit<
     prompts?: PromptRequest[];
   };
 };
+
+/**
+ * Minimal synchronous `/converse` response when `response_mode: 'simple'`.
+ */
+export interface ChatSimpleResponse {
+  conversation_id: string;
+  /** Final assistant text for the completed round. Empty when the round ended without a message. */
+  answer: string;
+}
 
 export type ChatConverseResponse = ConversationWithPermissions;
