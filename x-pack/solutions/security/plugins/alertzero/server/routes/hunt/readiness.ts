@@ -16,7 +16,7 @@ import { resolveIndexScope } from '../../services/watches/hunt/common/resolve_in
 import type { HuntTechnology } from '../../services/watches/hunt/common/types';
 import type { RouteDependencies } from '../register_routes';
 
-/** `GET /internal/alertzero/threat_intel/readiness` path (plan.md:249). */
+/** `GET /internal/alertzero/hunt/readiness` path (plan.md:249). */
 export const HUNT_READINESS_URL = `${HUNT_INTERNAL_ROUTE_BASE}/readiness` as const;
 
 const HUNT_TECHNOLOGIES: HuntTechnology[] = ['aws_iam', 'fortigate'];

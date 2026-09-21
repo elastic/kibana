@@ -3,7 +3,7 @@ info:
   title: Run AlertZero Hunt Tier 1 threat hunt API endpoint
   version: '1'
 paths:
-  /internal/alertzero/threat_intel/hunt_for_threat:
+  /internal/alertzero/hunt/hunt_for_threat:
     post:
       x-codegen-enabled: true
       x-labels: [ess, serverless]
@@ -27,11 +27,11 @@ paths:
               additionalProperties: false
               properties:
                 technology:
-                  $ref: '../components/threat_intel.schema.yaml#/components/schemas/HuntTechnology'
+                  $ref: '../components/hunt.schema.yaml#/components/schemas/HuntTechnology'
                 iocs:
                   type: array
                   items:
-                    $ref: '../components/threat_intel.schema.yaml#/components/schemas/HuntIoc'
+                    $ref: '../components/hunt.schema.yaml#/components/schemas/HuntIoc'
                 techniques:
                   type: array
                   items:
@@ -57,8 +57,8 @@ paths:
                 required: [scope, result]
                 properties:
                   scope:
-                    $ref: '../components/threat_intel.schema.yaml#/components/schemas/ResolvedIndexScope'
+                    $ref: '../components/hunt.schema.yaml#/components/schemas/ResolvedIndexScope'
                   result:
-                    $ref: '../components/threat_intel.schema.yaml#/components/schemas/HuntForThreatResult'
+                    $ref: '../components/hunt.schema.yaml#/components/schemas/HuntForThreatResult'
         '409':
           description: The technology's index scope is blocked (a required pattern is missing)

@@ -3,7 +3,7 @@ info:
   title: AlertZero correlate route (E7 anchor correlation engine)
   version: '1'
 paths:
-  /internal/alertzero/threat_intel/correlate:
+  /internal/alertzero/hunt/correlate:
     post:
       x-codegen-enabled: true
       x-labels: [ess, serverless]

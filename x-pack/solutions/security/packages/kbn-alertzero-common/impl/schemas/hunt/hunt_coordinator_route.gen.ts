@@ -16,7 +16,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-import { HuntIoc } from '../components/threat_intel.gen';
+import { HuntIoc } from '../components/hunt.gen';
 
 export const HuntCoordinatorStatus = lazySchema(() =>
   z.enum(['tier1_only', 'tier1_and_tier2', 'tier2_only_skipped'])

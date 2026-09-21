@@ -13,7 +13,7 @@ import type { HuntTechnology } from '../../services/watches/hunt/common/types';
 import { huntForThreat } from '../../services/watches/hunt/tier1/hunt_for_threat';
 import type { RouteDependencies } from '../register_routes';
 
-/** `POST /internal/alertzero/threat_intel/hunt_for_threat` path (plan.md Phase 3). */
+/** `POST /internal/alertzero/hunt/hunt_for_threat` path (plan.md Phase 3). */
 export const HUNT_FOR_THREAT_URL = `${HUNT_INTERNAL_ROUTE_BASE}/hunt_for_threat` as const;
 
 /**

@@ -3,7 +3,7 @@ info:
   title: AlertZero candidates route
   version: '1'
 paths:
-  /internal/alertzero/threat_intel/candidates:
+  /internal/alertzero/hunt/candidates:
     post:
       x-codegen-enabled: true
       x-labels: [ess, serverless]
