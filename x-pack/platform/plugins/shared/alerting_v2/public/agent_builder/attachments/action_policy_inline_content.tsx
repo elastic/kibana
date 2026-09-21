@@ -57,18 +57,6 @@ export const ActionPolicyInlineContent: React.FC<AttachmentRenderProps<ActionPol
             })}
           </EuiText>
         </EuiFlexItem>
-
-        {data.tags && data.tags.length > 0 && (
-          <EuiFlexItem>
-            <EuiFlexGroup gutterSize="xs" wrap>
-              {data.tags.map((tag: string) => (
-                <EuiFlexItem key={tag} grow={false}>
-                  <EuiBadge color="default">{tag}</EuiBadge>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        )}
       </EuiFlexGroup>
     </EuiPanel>
   );
