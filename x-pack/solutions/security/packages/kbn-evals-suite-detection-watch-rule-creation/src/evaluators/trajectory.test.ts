@@ -265,10 +265,20 @@ describe('scoreCallOrder', () => {
     expect(scoreCallOrder(settled([SKILL, CREATE])).score).toBe(1);
   });
 
-  it('accepts the skill given as a path, as long as it is the right skill', () => {
-    expect(
-      scoreCallOrder(settled([SKILL, CREATE], `skill://${RULE_CREATION_SKILL_ID}`)).score
-    ).toBe(1);
+  it('accepts the skill as a folder path or a SKILL.md path, like load_skill does', () => {
+    const folder = `skills/security/${RULE_CREATION_SKILL_ID}`;
+    expect(scoreCallOrder(settled([SKILL, CREATE], folder)).score).toBe(1);
+    expect(scoreCallOrder(settled([SKILL, CREATE], `/${folder}/SKILL.md`)).score).toBe(1);
+  });
+
+  it('does not accept a skill whose name merely contains the required one', () => {
+    for (const wrong of [
+      `not-${RULE_CREATION_SKILL_ID}`,
+      `${RULE_CREATION_SKILL_ID}-legacy`,
+      `skills/${RULE_CREATION_SKILL_ID}/other-skill`,
+    ]) {
+      expect(scoreCallOrder(settled([SKILL, CREATE], wrong)).score).toBe(0);
+    }
   });
 
   it('fails when the wrong skill was loaded', () => {

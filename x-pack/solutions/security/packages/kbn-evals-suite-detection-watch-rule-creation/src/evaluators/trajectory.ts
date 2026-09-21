@@ -53,6 +53,11 @@ const skillArgument = (toolArguments: string | null): string | undefined => {
   }
 };
 
+const skillName = (input: string): string => {
+  const target = input.trim().replace(/\/SKILL\.md$/, '');
+  return target.slice(target.lastIndexOf('/') + 1);
+};
+
 const fetchToolCalls = async (
   traceEsClient: EsClient,
   where: string
@@ -239,7 +244,7 @@ export const scoreCallOrder: ScoreFn = ({ calls }) => {
     violations.push(
       'loaded skill is not recorded on the span (agentBuilder:tracing:includeToolDetails is off)'
     );
-  } else if (!first.skill.includes(RULE_CREATION_SKILL_ID)) {
+  } else if (skillName(first.skill) !== RULE_CREATION_SKILL_ID) {
     violations.push(`loaded skill "${first.skill}" instead of ${RULE_CREATION_SKILL_ID}`);
   }
   if (firstDraft === -1) violations.push('never drafted a rule');
