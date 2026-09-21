@@ -65,7 +65,9 @@ export const ActionResponseOutputs = memo<ActionResponseOutputsProps>(
       return (
         <div data-test-subj={getTestId()}>
           {action.agents.map((agentId) => {
-            const { wasSuccessful, isCompleted, completedAt } = action.agentState[agentId] ?? {
+            const { wasSuccessful, isCompleted, wasCanceled, completedAt } = action.agentState[
+              agentId
+            ] ?? {
               wasSuccessful: action.wasSuccessful,
               isCompleted: action.isCompleted,
               completedAt: action.completedAt,
@@ -199,7 +201,7 @@ export const ActionResponseOutputs = memo<ActionResponseOutputsProps>(
                       </div>
                     )}
 
-                    {!wasSuccessful && !hostOutput && (
+                    {(wasCanceled || (!wasSuccessful && !hostOutput)) && (
                       <EndpointActionFailureMessage
                         action={action}
                         agentId={agentId}
