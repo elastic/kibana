@@ -32,7 +32,10 @@ export function EsqlNotificationPopover({ api }: { api: EsqlNotificationActionAp
 
   const [esqlQueries] = useBatchedPublishingSubjects(api.esql$);
 
-  if (!esqlQueries || esqlQueries.length === 0) return null;
+  if (!esqlQueries || esqlQueries.length === 0) {
+    closePopover();
+    return null;
+  }
 
   return (
     <EuiPopover
@@ -44,9 +47,9 @@ export function EsqlNotificationPopover({ api }: { api: EsqlNotificationActionAp
             onClick={() => {
               setIsPopoverOpen(!isPopoverOpen);
               if (apiCanLockHoverActions(api)) {
-                api?.lockHoverActions(!api.hasLockedHoverActions$.value);
+                api?.lockHoverActions(!isPopoverOpen);
               }
-                api.lockHoverActions(!isPopoverOpen);
+            }}
             data-test-subj={`embeddablePanelEsqlNotification-${api.uuid}`}
             aria-label={esqlLabel}
           />
