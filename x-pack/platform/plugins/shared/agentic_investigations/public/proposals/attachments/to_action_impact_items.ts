@@ -38,7 +38,8 @@ export const toActionImpactItems = (proposal: ProposalWithMetadata): ActionImpac
     iconType: 'warning',
     text: i18n.translate('xpack.agenticInvestigations.proposals.actionImpact.impactText', {
       defaultMessage: '{impact} impact',
-      values: { impact: proposal.action?.impact ?? proposal.impact },
+      // The proposal's own impact first: a revision can override it.
+      values: { impact: proposal.impact ?? proposal.action?.impact },
     }),
   });
 
