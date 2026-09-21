@@ -18,11 +18,8 @@ import { i18n } from '@kbn/i18n';
 import {
   ALERTZERO_APP_ID,
   ALERTZERO_APP_PATH,
-  API_VERSIONS,
   TEMPLATE_ID_INVESTIGATION,
-  buildInvestigationUrl,
 } from '@kbn/alertzero-common';
-import type { GetInvestigationResponse } from '@kbn/alertzero-common';
 import { registerAgenticInvestigationTemplateUI } from '@kbn/agentic-investigations-common';
 import { getAlertZeroDeepLinks } from './deep_links';
 import { registerAlertZeroAttachmentTypesUI } from './agent_builder/attachment_types';
@@ -94,7 +91,7 @@ export class AlertZeroPublicPlugin
     return {};
   }
 
-  public start(core: CoreStart, startDeps: AlertZeroStartDependencies): AlertZeroPublicStart {
+  public start(_core: CoreStart, startDeps: AlertZeroStartDependencies): AlertZeroPublicStart {
     if (!this.config.enabled) {
       return {};
     }
@@ -104,13 +101,6 @@ export class AlertZeroPublicPlugin
       templateId: TEMPLATE_ID_INVESTIGATION,
       name: INVESTIGATION_TEMPLATE_NAME,
       icon: 'securitySignalDetected',
-      loadInvestigation: async (conversationId) => {
-        const { investigation } = await core.http.get<GetInvestigationResponse>(
-          buildInvestigationUrl(conversationId),
-          { version: API_VERSIONS.internal.v1 }
-        );
-        return investigation;
-      },
     });
 
     const registerAttachments = async () => {
