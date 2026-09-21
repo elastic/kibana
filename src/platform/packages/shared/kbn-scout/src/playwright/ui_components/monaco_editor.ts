@@ -160,6 +160,8 @@ export class KibanaCodeEditorWrapper {
   async getCodeEditorValueByContainer(container: Locator): Promise<string> {
     let result = '';
 
+    await this.waitCodeEditorReady(dataTestSubjId);
+
     await expect(async () => {
       const uri = await this.getEditorUri(container, container.toString());
       result = await this.page.evaluate((modelUri) => {
@@ -189,6 +191,7 @@ export class KibanaCodeEditorWrapper {
    * for why this doesn't use `data-uri`), and verifies that the value was applied.
    */
   async setCodeEditorValueByTestSubj(dataTestSubjId: string, value: string): Promise<string> {
+    await this.waitCodeEditorReady(dataTestSubjId);
     return this.setCodeEditorValueByContainer(this.page.getByTestId(dataTestSubjId), value);
   }
 
