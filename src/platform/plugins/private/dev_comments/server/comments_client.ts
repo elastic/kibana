@@ -72,7 +72,8 @@ const changesFor = (
 export class CommentsClient {
   constructor(
     private readonly comments: CommentsStorage,
-    private readonly snapshots: SnapshotsStorage
+    private readonly snapshots: SnapshotsStorage,
+    private readonly logger: Logger
   ) {}
 
   /** Every comment, oldest first, with the size of its screenshot but not the image (see `getSnapshot`). */
@@ -109,12 +110,24 @@ export class CommentsClient {
       updatedAt: now,
       ...(snapshot ? { snapshot: sizeOf(snapshot) } : {}),
     };
-    // The image goes first, so that a comment never points at a screenshot that is
-    // not there; a screenshot whose comment then failed to be stored is never read.
+    // The image goes first, so that a comment is never seen without its screenshot.
     if (snapshot) {
       await this.snapshots.index({ id, document: snapshot });
     }
-    await this.comments.index({ id, document });
+    try {
+      await this.comments.index({ id, document });
+    } catch (error) {
+      // Nothing would ever read or remove the screenshot of a comment that was not
+      // stored: it is taken out again, or at least left a trace of.
+      if (snapshot) {
+        await this.snapshots.delete({ id }).catch((failure) => {
+          this.logger.warn(
+            `Comment ${id} could not be stored, nor could its screenshot be removed again: ${failure}`
+          );
+        });
+      }
+      throw error;
+    }
     return fromStored(id, document);
   }
 
@@ -165,5 +178,6 @@ export const createCommentsClient = (esClient: ElasticsearchClient, logger: Logg
       esClient,
       logger,
       SNAPSHOTS_STORAGE
-    ).getClient()
+    ).getClient(),
+    logger
   );

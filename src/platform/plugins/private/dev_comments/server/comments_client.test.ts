@@ -8,7 +8,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { NewComment } from '../common';
 import { CommentsClient, type CommentsStorage, type SnapshotsStorage } from './comments_client';
 import { CommentsLimitError } from './limit_error';
@@ -18,7 +18,12 @@ const responseError = (statusCode: number) =>
   new errors.ResponseError(elasticsearchServiceMock.createApiResponse({ statusCode }));
 
 const storageMock = <T>() =>
-  ({ search: jest.fn(), get: jest.fn(), index: jest.fn() } as unknown as jest.Mocked<T>);
+  ({
+    search: jest.fn(),
+    get: jest.fn(),
+    index: jest.fn(),
+    delete: jest.fn(),
+  } as unknown as jest.Mocked<T>);
 
 const searchResponse = (hits: Array<{ _id: string; _source: object }>, total = hits.length) => ({
   hits: { total: { value: total, relation: 'eq' }, hits },
@@ -57,7 +62,8 @@ const reply = { author: input.author, text: 'Reply' };
 describe('CommentsClient', () => {
   const comments = storageMock<CommentsStorage>();
   const snapshots = storageMock<SnapshotsStorage>();
-  const client = () => new CommentsClient(comments, snapshots);
+  const logger = loggingSystemMock.createLogger();
+  const client = () => new CommentsClient(comments, snapshots, logger);
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -66,6 +72,7 @@ describe('CommentsClient', () => {
     comments.index.mockResolvedValue({} as never);
     snapshots.get.mockResolvedValue(getResponse('a', snapshot) as never);
     snapshots.index.mockResolvedValue({} as never);
+    snapshots.delete.mockResolvedValue({ acknowledged: true, result: 'deleted' });
   });
 
   describe('create', () => {
@@ -107,6 +114,32 @@ describe('CommentsClient', () => {
       comments.search.mockResolvedValueOnce(searchResponse([], MAX_COMMENTS) as never);
       await expect(client().create(input)).rejects.toThrow(CommentsLimitError);
       expect(comments.index).toHaveBeenCalledTimes(1);
+    });
+
+    it('removes the screenshot again when the comment cannot be stored', async () => {
+      comments.index.mockRejectedValueOnce(responseError(503));
+
+      await expect(client().create({ ...input, snapshot })).rejects.toThrow(errors.ResponseError);
+
+      const [{ id }] = snapshots.index.mock.calls[0];
+      expect(snapshots.delete).toHaveBeenCalledWith({ id });
+      expect(logger.warn).not.toHaveBeenCalled();
+
+      // Without a screenshot there is nothing to remove.
+      comments.index.mockRejectedValueOnce(responseError(503));
+      await expect(client().create(input)).rejects.toThrow(errors.ResponseError);
+      expect(snapshots.delete).toHaveBeenCalledTimes(1);
+    });
+
+    it('reports the comment failure, and logs the screenshot it could not remove either', async () => {
+      comments.index.mockRejectedValueOnce(new Error('comment failed'));
+      snapshots.delete.mockRejectedValueOnce(new Error('delete failed'));
+
+      await expect(client().create({ ...input, snapshot })).rejects.toThrow('comment failed');
+
+      const [{ id }] = snapshots.index.mock.calls[0];
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining(`Comment ${id}`));
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('delete failed'));
     });
   });
 
