@@ -107,17 +107,17 @@ export const ActionPolicyDetailsFlyout = ({
           }
         )
       : matcherTags
-      ? i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.policyScope.tags', {
-          defaultMessage:
-            'This policy matches all alerts from rules with one of the following tags.',
-        })
-      : matcherExpression
-      ? i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.policyScope.expression', {
-          defaultMessage: 'This policy matches all alerts matching this query.',
-        })
-      : i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.policyScope.matchesAll', {
-          defaultMessage: 'This policy matches all alerts.',
-        });
+        ? i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.policyScope.tags', {
+            defaultMessage:
+              'This policy matches all alerts from rules with one of the following tags.',
+          })
+        : matcherExpression
+          ? i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.policyScope.expression', {
+              defaultMessage: 'This policy matches all alerts matching this query.',
+            })
+          : i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.policyScope.matchesAll', {
+              defaultMessage: 'This policy matches all alerts.',
+            });
 
   return (
     <>

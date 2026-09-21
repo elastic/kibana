@@ -205,9 +205,9 @@ function DiscoverDocumentsComponent({
   const setExpandedDoc = useCurrentTabAction(internalStateActions.setExpandedDoc);
   const getExpandedDocSetter = useCallback(
     (
-        owner: string,
-        expandedDocCascadePath?: ExpandedDocCascadePath
-      ): NonNullable<UnifiedDataTableProps['setExpandedDoc']> =>
+      owner: string,
+      expandedDocCascadePath?: ExpandedDocCascadePath
+    ): NonNullable<UnifiedDataTableProps['setExpandedDoc']> =>
       (
         doc: DataTableRecord | undefined,
         options?: {

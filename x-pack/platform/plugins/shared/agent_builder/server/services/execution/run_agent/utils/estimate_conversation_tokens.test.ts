@@ -173,7 +173,7 @@ describe('failed-entry token accounting', () => {
       ...createMockRound('v'),
       id,
       started_at: startedAt,
-    } as ProcessedConversationRound);
+    }) as ProcessedConversationRound;
 
   // r1 → F (between r1 and r2) → r2
   const timeline: ProcessedTimelineEvent[] = [

@@ -211,8 +211,8 @@ export const updateTabs: InternalStateThunkActionCreator<
         const refreshInterval =
           existingTabToDuplicateFrom.id === currentTab.id
             ? services.timefilter.getRefreshInterval()
-            : existingTabToDuplicateFrom.globalState.refreshInterval ??
-              services.timefilter.getRefreshInterval();
+            : (existingTabToDuplicateFrom.globalState.refreshInterval ??
+              services.timefilter.getRefreshInterval());
         tab.globalState = {
           ...tab.globalState,
           refreshInterval: cloneDeep(refreshInterval),

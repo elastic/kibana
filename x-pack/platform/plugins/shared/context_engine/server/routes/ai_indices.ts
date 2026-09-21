@@ -441,8 +441,8 @@ const handleAiIndexError = (error: unknown, response: KibanaResponseFactory, log
   ) {
     return response.conflict({ body: { message: error.message } });
   }
-  logger.error(error instanceof Error ? error.stack ?? error.message : String(error));
-  const statusCode = isResponseError(error) ? error.statusCode ?? 500 : 500;
+  logger.error(error instanceof Error ? (error.stack ?? error.message) : String(error));
+  const statusCode = isResponseError(error) ? (error.statusCode ?? 500) : 500;
   return response.customError({
     statusCode,
     body: { message: formatErrorMessage(error) },

@@ -117,7 +117,7 @@ describe('EsqlService.getAllIndices', () => {
 
 describe('EsqlService ES|QL views', () => {
   const makeViewsClient = (getView: jest.Mock) =>
-    ({ esql: { getView } } as unknown as ElasticsearchClient);
+    ({ esql: { getView } }) as unknown as ElasticsearchClient;
 
   it('gets all views through the generated Elasticsearch client', async () => {
     const response = {

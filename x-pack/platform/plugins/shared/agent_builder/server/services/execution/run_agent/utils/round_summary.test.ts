@@ -24,22 +24,22 @@ const reasoning = (text: string, transient?: boolean): ConvertedEvents =>
   ({
     type: ChatEventType.reasoning,
     data: { reasoning: text, ...(transient ? { transient: true } : {}) },
-  } as ConvertedEvents);
+  }) as ConvertedEvents;
 
 const toolCall = (id: string): ConvertedEvents =>
   ({
     type: ChatEventType.toolCall,
     data: { tool_call_id: id, tool_id: `tool-${id}`, params: { q: id } },
-  } as ConvertedEvents);
+  }) as ConvertedEvents;
 
 const toolResult = (id: string): ConvertedEvents =>
   ({
     type: ChatEventType.toolResult,
     data: { tool_call_id: id, tool_id: `tool-${id}`, results: [{ type: 'other', data: id }] },
-  } as unknown as ConvertedEvents);
+  }) as unknown as ConvertedEvents;
 
 const modelProvider = (calls: unknown[] = []) =>
-  ({ getUsageStats: () => ({ calls }) } as unknown as ModelProvider);
+  ({ getUsageStats: () => ({ calls }) }) as unknown as ModelProvider;
 
 describe('eventsToSteps', () => {
   it('maps reasoning and tool calls in order, with empty results for a call that never resolved', () => {

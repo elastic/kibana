@@ -203,7 +203,7 @@ export const useSloDetailsTabs = ({
       disabled: Boolean(isRemote),
       isSelected: selectedTabId === ALERTS_TAB_ID,
       toolTipContent: isRemote ? alertsTooltip : undefined,
-      badge: slo && !isRemote ? activeAlerts?.get(slo) ?? 0 : undefined,
+      badge: slo && !isRemote ? (activeAlerts?.get(slo) ?? 0) : undefined,
       ...tabNavigation(ALERTS_TAB_ID),
     },
   ];

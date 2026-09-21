@@ -152,7 +152,7 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
 
   const proposals = () =>
     [...documents.entries()].map(
-      ([id, { document }]) => ({ id, ...document } as Proposal & { id: string })
+      ([id, { document }]) => ({ id, ...document }) as Proposal & { id: string }
     );
 
   return {

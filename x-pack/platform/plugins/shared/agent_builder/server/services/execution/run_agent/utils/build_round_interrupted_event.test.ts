@@ -35,7 +35,7 @@ describe('buildRoundInterruptedEvent', () => {
       getAll: jest.fn(() => [{ id: 'a1' }]),
       drainChanges: jest.fn(() => changes),
       getAttachmentRecord: jest.fn(() => undefined),
-    } as unknown as AttachmentStateManager);
+    }) as unknown as AttachmentStateManager;
 
   const modelProvider = { getUsageStats: () => ({ calls: [] }) } as unknown as ModelProvider;
 

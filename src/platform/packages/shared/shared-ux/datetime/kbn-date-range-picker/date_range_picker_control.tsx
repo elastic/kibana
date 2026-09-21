@@ -302,8 +302,8 @@ export function DateRangePickerControl() {
               disabled && disabledTooltip
                 ? disabledTooltip
                 : !disabled && displayFullFormattedText !== displayText
-                ? displayFullFormattedText
-                : undefined
+                  ? displayFullFormattedText
+                  : undefined
             }
             display="block"
             css={tooltipStyles}

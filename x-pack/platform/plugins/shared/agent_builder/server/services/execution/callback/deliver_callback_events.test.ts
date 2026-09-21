@@ -87,7 +87,7 @@ const createExecutionFailedEvent = (): ChatEvent =>
     execution_id: 'round-1::execution',
     trigger_event_id: 'round-1::user_message',
     data: { time_to_last_token: 1, error: { code: 'internalError', message: 'boom' } },
-  } as unknown as ChatEvent);
+  }) as unknown as ChatEvent;
 
 const createExecutionAbortedEvent = (): ChatEvent =>
   ({
@@ -98,7 +98,7 @@ const createExecutionAbortedEvent = (): ChatEvent =>
     execution_id: 'round-1::execution',
     trigger_event_id: 'round-1::user_message',
     data: { time_to_last_token: 1 },
-  } as unknown as ChatEvent);
+  }) as unknown as ChatEvent;
 
 const createCallbackDeliveryServiceMock = () => {
   const transport = jest.fn().mockResolvedValue({ status: 200 });

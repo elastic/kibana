@@ -24,7 +24,7 @@ describe('UninstallAll task', () => {
     registerUninstallAllTaskDefinition({
       taskManager,
       lockManager: { withLock },
-      getServices: () => ({ packageInstaller: { uninstallAll } } as unknown as InternalServices),
+      getServices: () => ({ packageInstaller: { uninstallAll } }) as unknown as InternalServices,
     });
     const definition =
       taskManager.registerTaskDefinitions.mock.calls[0][0][UNINSTALL_ALL_TASK_TYPE];

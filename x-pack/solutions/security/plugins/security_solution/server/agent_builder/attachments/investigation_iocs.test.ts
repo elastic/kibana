@@ -37,7 +37,7 @@ describe('createInvestigationIocsAttachmentType', () => {
       id: 'att-1',
       type: SecurityAgentBuilderAttachments.investigationIocs,
       data,
-    } as Attachment<string, unknown>);
+    }) as Attachment<string, unknown>;
 
   it('has the investigation IoCs type id', () => {
     expect(attachmentType.id).toBe(SecurityAgentBuilderAttachments.investigationIocs);

@@ -37,7 +37,7 @@ describe('data streams routes', () => {
           client: { asCurrentUser: { indices: { getDataStream } } },
         },
       }),
-    } as unknown as Parameters<RequestHandler>[0]);
+    }) as unknown as Parameters<RequestHandler>[0];
 
   const getRoute = (path: string): RegisteredRoute => {
     const route = routes[`GET:${path}`];

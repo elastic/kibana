@@ -3054,7 +3054,7 @@ describe('ConversationClient', () => {
             time_to_last_token: 1,
             outcome: { type: 'responded', response: { message: 'ok' } },
           },
-        } as TimelineEvent);
+        }) as TimelineEvent;
       const failed = (roundId: string): TimelineEvent =>
         ({
           id: `${roundId}::execution_failed`,
@@ -3064,7 +3064,7 @@ describe('ConversationClient', () => {
           execution_id: `${roundId}::execution`,
           trigger_event_id: `${roundId}::user_message`,
           data: { time_to_last_token: 1, error: { code: 'internalError', message: 'boom' } },
-        } as TimelineEvent);
+        }) as TimelineEvent;
 
       it('replaceRoundEvents skips the write and returns the stored document when a terminal exists for the execution', async () => {
         const stored = [...startTimelineEvents('round-1'), terminated('round-1')];

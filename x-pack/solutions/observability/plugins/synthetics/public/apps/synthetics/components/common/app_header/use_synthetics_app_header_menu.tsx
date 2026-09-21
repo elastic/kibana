@@ -166,8 +166,8 @@ export function useSyntheticsAppHeaderMenu(
   const createMonitorTooltip = !isServiceAllowed
     ? SERVICE_NOT_ALLOWED
     : !canEditSynthetics
-    ? CANNOT_PERFORM_ACTION_SYNTHETICS
-    : undefined;
+      ? CANNOT_PERFORM_ACTION_SYNTHETICS
+      : undefined;
 
   const menu = useMemo<AppHeaderMenu>(() => {
     const items: NonNullable<AppHeaderMenu['items']> = [];
@@ -199,8 +199,8 @@ export function useSyntheticsAppHeaderMenu(
             tooltipContent: !hasUptimeWrite
               ? noWritePermissionsTooltipContent
               : !statusRuleExists
-              ? statusRuleNotAvailableTooltipContent
-              : undefined,
+                ? statusRuleNotAvailableTooltipContent
+                : undefined,
             run: () => {
               dispatch(
                 setAlertFlyoutVisible({ id: SYNTHETICS_STATUS_RULE, isNewRuleFlyout: false })
@@ -232,8 +232,8 @@ export function useSyntheticsAppHeaderMenu(
             tooltipContent: !hasUptimeWrite
               ? noWritePermissionsTooltipContent
               : !tlsRuleExists
-              ? tlsRuleNotAvailableTooltipContent
-              : undefined,
+                ? tlsRuleNotAvailableTooltipContent
+                : undefined,
             run: () => {
               dispatch(setAlertFlyoutVisible({ id: SYNTHETICS_TLS_RULE, isNewRuleFlyout: false }));
             },

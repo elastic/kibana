@@ -501,7 +501,7 @@ describe('lastTerminatedExecutionIndex', () => {
       execution_id: executionId,
       trigger_event_id: 'r1::user_message',
       data: {},
-    } as unknown as TimelineEvent);
+    }) as unknown as TimelineEvent;
 
   it('returns the index of the last execution_terminated of the round, skipping interrupted ones', () => {
     const events = [

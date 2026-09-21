@@ -77,7 +77,7 @@ export const InvestigationActionModals = ({
     ) : null}
 
     {action === 'close' && recordId
-      ? renderDismissModal?.({ recordId, onClose: onCloseAction }) ?? (
+      ? (renderDismissModal?.({ recordId, onClose: onCloseAction }) ?? (
           <BaseActionModal
             type="dismiss"
             title={MODAL_TRANSLATIONS.dismiss.title}
@@ -91,7 +91,7 @@ export const InvestigationActionModals = ({
               onClick: onCloseAction,
             }}
           />
-        )
+        ))
       : null}
   </>
 );

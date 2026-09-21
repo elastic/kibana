@@ -22,7 +22,7 @@ const workflowsManagement = {
 const createFeatureFlagsMock = (enabled = true): FeatureFlagsStart =>
   ({
     getBooleanValue: jest.fn().mockResolvedValue(enabled),
-  } as unknown as FeatureFlagsStart);
+  }) as unknown as FeatureFlagsStart;
 
 it('returns true when every start requirement is available', async () => {
   const featureFlags = createFeatureFlagsMock(true);

@@ -55,7 +55,7 @@ const terminalEvent = (
     execution_id: 'round-1::execution',
     trigger_event_id: 'round-1::user_message',
     data: { time_to_last_token: 1 },
-  } as unknown as ChatEvent);
+  }) as unknown as ChatEvent;
 
 /**
  * Helper to build the return value of `executionClient.peek`.

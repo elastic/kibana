@@ -23,7 +23,7 @@ const integration = (integrationId: string, title: string) =>
       created_by: 'elastic',
       metadata: { title, description: `${title} description` },
     },
-  } as SavedObject<IntegrationAttributes>);
+  }) as SavedObject<IntegrationAttributes>;
 
 describe('AutomaticImportSavedObjectService', () => {
   let clientMock: ReturnType<typeof savedObjectsClientMock.create>;
