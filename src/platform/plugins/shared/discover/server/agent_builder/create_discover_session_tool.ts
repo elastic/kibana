@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Parser } from '@elastic/esql';
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import { ATTACHMENT_REF_ACTOR, getLatestVersion } from '@kbn/agent-builder-common/attachments';
@@ -146,11 +147,35 @@ const createDiscoverSessionSchema = z
       .describe(
         'Optional table columns. On update, omit to keep the existing columns. Pass null or [] to reset to default columns.'
       ),
+    create_new: z
+      .boolean()
+      .optional()
+      .describe('Set true only when the user asked for another table. Otherwise omit.'),
   })
   .check((ctx) => {
-    const { attachment_id: attachmentId, title, esql, time_range: timeRange, columns } = ctx.value;
+    const {
+      attachment_id: attachmentId,
+      title,
+      esql,
+      time_range: timeRange,
+      columns,
+      create_new: createNew,
+    } = ctx.value;
     const issue = (message: string) =>
       ctx.issues.push({ code: 'custom', message, input: ctx.value });
+
+    if (createNew && esql === undefined) {
+      issue('esql is required when creating a Discover session.');
+      return;
+    }
+
+    if (esql !== undefined) {
+      const { errors } = Parser.parse(esql);
+      if (errors.length > 0) {
+        issue(`${errors[0].message} ES|QL comparisons use ==, >=, <=, <, and >.`);
+        return;
+      }
+    }
 
     if (
       title === undefined &&
@@ -471,7 +496,7 @@ Pass an ES|QL query that returns documents (FROM or TS with WHERE/LIMIT as neede
 
 Do not pass attachment_id unless a previous result of this same tool returned that exact id. Never invent an id. Omit attachment_id to create when none exists, or to update the conversation's only Discover session. On update, omit fields you want to keep; pass null for time_range or columns to clear them. esql is required only when creating.
 
-Call this tool once per user request. After a successful result, stop calling tools. Paste the returned "render" string into your reply verbatim — do not build the tag yourself. Do not create a second session unless the user asked for another table.
+Call this tool once per user request. After a successful result, stop calling tools. Paste the returned "render" string into your reply verbatim — do not build the tag yourself. Pass create_new: true and omit attachment_id only when the user asked for another table.
 
 This tool does not execute the query. It stores a by-value Discover session (one tab, chart hidden). Do not paste rows, tab JSON, or vis_context into the conversation.`,
     schema: createDiscoverSessionSchema,
@@ -484,34 +509,43 @@ This tool does not execute the query. It stores a by-value Discover session (one
       openWorldHint: false,
     },
     handler: async (
-      { attachment_id: attachmentId, title, esql, time_range: timeRange, columns },
+      {
+        attachment_id: attachmentId,
+        create_new: createNew,
+        title,
+        esql,
+        time_range: timeRange,
+        columns,
+      },
       { attachments, logger }
     ) => {
-      const { targetId, unknownId, existingIds } = resolveDiscoverSessionTargetId({
-        attachmentId,
-        attachments,
-      });
-
-      if (targetId) {
-        return updateDiscoverSessionAttachment({
-          attachmentId: targetId,
-          patch: { title, esql, time_range: timeRange, columns },
+      if (!createNew) {
+        const { targetId, unknownId, existingIds } = resolveDiscoverSessionTargetId({
+          attachmentId,
           attachments,
-          logger,
         });
-      }
 
-      if (unknownId) {
-        const existingHint = existingIds.length
-          ? ` Existing Discover session ids: ${existingIds.join(', ')}.`
-          : '';
-        return {
-          results: [
-            createErrorResult(
-              `Discover session attachment "${unknownId}" not found.${existingHint}`
-            ),
-          ],
-        };
+        if (targetId) {
+          return updateDiscoverSessionAttachment({
+            attachmentId: targetId,
+            patch: { title, esql, time_range: timeRange, columns },
+            attachments,
+            logger,
+          });
+        }
+
+        if (unknownId) {
+          const existingHint = existingIds.length
+            ? ` Existing Discover session ids: ${existingIds.join(', ')}.`
+            : '';
+          return {
+            results: [
+              createErrorResult(
+                `Discover session attachment "${unknownId}" not found.${existingHint}`
+              ),
+            ],
+          };
+        }
       }
 
       if (!esql) {

@@ -43,7 +43,7 @@ describe('discoverSessionSkill', () => {
   it('tells the agent how to create or update a Discover session', () => {
     expect(discoverSessionSkill.content).toContain('attachment_id');
     expect(discoverSessionSkill.content).toContain('<render_attachment');
-    expect(discoverSessionSkill.content).toContain('Do **not** create a second session');
+    expect(discoverSessionSkill.content).toContain('create_new');
     expect(discoverSessionSkill.content).toContain(
       'Omit `attachment_id` unless a previous result from this tool returned that exact ID.'
     );

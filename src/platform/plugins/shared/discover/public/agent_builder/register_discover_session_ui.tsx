@@ -53,6 +53,7 @@ export const registerDiscoverSessionAttachmentUi = ({
       <Suspense fallback={null}>
         <LazyDiscoverSessionInline
           data={attachment.data}
+          version={attachment.versionData?.version}
           screenContextTimeRange={screenContext?.time_range}
           unifiedSearch={unifiedSearch}
           locator={locator}

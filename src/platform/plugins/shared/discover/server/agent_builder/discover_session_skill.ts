@@ -40,7 +40,7 @@ Lens \`data_table\` is only for aggregated tabular summaries. It is not a substi
 3. Call \`${platformCoreTools.createDiscoverSession}\` **exactly once**:
    - Omit \`attachment_id\` unless a previous result from this tool returned that exact ID.
    - To **create** when the conversation has no Discover session: omit \`attachment_id\`. Pass \`esql\` as the **string** from generateEsql (the \`esql\` field, not the whole tool result). \`title\` is optional. Optional \`time_range\`. Omit \`columns\` unless the user named specific fields — the table then uses a matching Discover profile, or Summary plus time.
-   - If a Discover session already exists, omit \`attachment_id\` to **update** that table. Do **not** create a second session unless the user asked for another table.
+   - If a Discover session already exists, omit \`attachment_id\` to **update** that table. Pass \`create_new: true\` and omit \`attachment_id\` only when the user asked for another table.
    - Call \`${platformCoreTools.generateEsql}\` on update **only** when the user wants a different query. For title or time-range-only changes, omit \`esql\` so the stored query is kept. Pass \`columns\` only when the user named specific fields.
 4. After a successful tool result, **stop calling tools**. Paste the returned \`render\` string into your reply verbatim. Do not construct a \`<render_attachment>\` tag yourself. Do not call \`${platformCoreTools.createDiscoverSession}\` again for the same request.
 

@@ -51,6 +51,7 @@ const embeddableApi = {
 const navigateToWithEmbeddablePackages = jest.fn();
 
 let exposeApi = true;
+let embeddableMounts = 0;
 let capturedOnSave: ((args: Record<string, unknown>) => Promise<void>) | undefined;
 let capturedSaveModalDocumentInfo: { title?: string; description?: string } | undefined;
 const capturedSearchBarProps: Array<{
@@ -112,41 +113,82 @@ const SearchBar = (props: {
   );
 };
 
-const renderInline = ({
+const inlineProps = ({
   registerActionButtons,
   canWriteDashboards = true,
   data = sessionData,
+  version,
 }: {
   registerActionButtons?: jest.Mock;
   canWriteDashboards?: boolean;
   data?: DiscoverSessionApiData;
+  version?: number;
 } = {}) => {
   const navigate = jest.fn();
-  render(
-    <EuiProvider>
-      <DiscoverSessionInline
-        data={data}
-        unifiedSearch={{ ui: { SearchBar } } as unknown as UnifiedSearchPublicPluginStart}
-        locator={{ navigate } as unknown as DiscoverAppLocator}
-        embeddable={
-          {
-            getStateTransfer: () => ({ navigateToWithEmbeddablePackages }),
-          } as unknown as EmbeddableStart
-        }
-        application={
-          {
-            capabilities: { dashboard_v2: { showWriteControls: canWriteDashboards } },
-          } as unknown as ApplicationStart
-        }
-        registerActionButtons={registerActionButtons}
-      />
-    </EuiProvider>
-  );
-  return { navigate };
+  return {
+    navigate,
+    element: (
+      <EuiProvider>
+        <DiscoverSessionInline
+          data={data}
+          version={version}
+          unifiedSearch={{ ui: { SearchBar } } as unknown as UnifiedSearchPublicPluginStart}
+          locator={{ navigate } as unknown as DiscoverAppLocator}
+          embeddable={
+            {
+              getStateTransfer: () => ({ navigateToWithEmbeddablePackages }),
+            } as unknown as EmbeddableStart
+          }
+          application={
+            {
+              capabilities: { dashboard_v2: { showWriteControls: canWriteDashboards } },
+            } as unknown as ApplicationStart
+          }
+          registerActionButtons={registerActionButtons}
+        />
+      </EuiProvider>
+    ),
+  };
 };
 
-const MockEmbeddableRenderer = ({ onApiAvailable }: { onApiAvailable?: (api: never) => void }) => {
+const renderInline = (options?: Parameters<typeof inlineProps>[0]) => {
+  const { navigate, element } = inlineProps(options);
+  return { navigate, ...render(element) };
+};
+
+const readEmbeddableQuery = (
+  getParentApi?: () => {
+    getSerializedStateForChild: (childId: string) => unknown;
+  }
+) => {
+  const state = getParentApi?.().getSerializedStateForChild('');
+  if (
+    typeof state !== 'object' ||
+    state === null ||
+    !('tabs' in state) ||
+    !Array.isArray(state.tabs)
+  ) {
+    return undefined;
+  }
+
+  const [tab] = state.tabs as Array<{ data_source?: { query?: string } }>;
+  return tab?.data_source?.query;
+};
+
+const MockEmbeddableRenderer = ({
+  onApiAvailable,
+  getParentApi,
+}: {
+  onApiAvailable?: (api: never) => void;
+  getParentApi?: () => {
+    getSerializedStateForChild: (childId: string) => unknown;
+  };
+}) => {
   const { leftSide, saveToDashboardButton, onVisibleColumnsChange } = useSearchEmbeddableToolbar();
+
+  useEffect(() => {
+    embeddableMounts += 1;
+  }, []);
 
   useEffect(() => {
     if (exposeApi) {
@@ -159,7 +201,7 @@ const MockEmbeddableRenderer = ({ onApiAvailable }: { onApiAvailable?: (api: nev
   }, [onVisibleColumnsChange]);
 
   return (
-    <div data-test-subj="mockedSearchEmbeddable">
+    <div data-test-subj="mockedSearchEmbeddable" data-query={readEmbeddableQuery(getParentApi)}>
       {leftSide}
       {saveToDashboardButton}
     </div>
@@ -170,13 +212,14 @@ describe('DiscoverSessionInline', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     exposeApi = true;
+    embeddableMounts = 0;
     capturedOnSave = undefined;
     capturedSaveModalDocumentInfo = undefined;
     capturedSearchBarProps.length = 0;
     jest
       .mocked(EmbeddableRenderer)
-      .mockImplementation(({ onApiAvailable }) => (
-        <MockEmbeddableRenderer onApiAvailable={onApiAvailable} />
+      .mockImplementation(({ onApiAvailable, getParentApi }) => (
+        <MockEmbeddableRenderer onApiAvailable={onApiAvailable} getParentApi={getParentApi} />
       ));
   });
 
@@ -212,6 +255,46 @@ describe('DiscoverSessionInline', () => {
         query: { esql: 'FROM logs-* | LIMIT 100' },
         timeRange: { from: 'now-15m', to: 'now' },
       })
+    );
+  });
+
+  it('reloads the embeddable when a follow-up changes the query', async () => {
+    const user = userEvent.setup();
+    const updatedQuery = 'FROM logs-* | WHERE log.level == "error" | LIMIT 100';
+    const { rerender } = renderInline({ version: 1 });
+
+    expect(screen.getByTestId('mockedSearchEmbeddable')).toHaveAttribute(
+      'data-query',
+      'FROM logs-* | LIMIT 100'
+    );
+    expect(embeddableMounts).toBe(1);
+
+    await user.click(screen.getByRole('button', { name: 'change time' }));
+
+    expect(embeddableMounts).toBe(1);
+
+    rerender(
+      inlineProps({
+        version: 2,
+        data: {
+          ...sessionData,
+          tabs: [
+            {
+              ...sessionData.tabs[0],
+              data_source: {
+                type: AS_CODE_ESQL_DATA_SOURCE_TYPE,
+                query: updatedQuery,
+              },
+            },
+          ],
+        },
+      }).element
+    );
+
+    expect(embeddableMounts).toBe(2);
+    expect(screen.getByTestId('mockedSearchEmbeddable')).toHaveAttribute(
+      'data-query',
+      updatedQuery
     );
   });
 

@@ -75,6 +75,11 @@ const saveModalObjectType = i18n.translate('discover.agentBuilder.saveToDashboar
 
 export interface DiscoverSessionInlineProps {
   data: DiscoverSessionApiData;
+  /**
+   * Attachment snapshot version. Combined with session state so a follow-up update
+   * remounts the embeddable. Omit when version metadata is unavailable.
+   */
+  version?: number;
   screenContextTimeRange?: TimeRange;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   locator?: DiscoverAppLocator;
@@ -85,6 +90,7 @@ export interface DiscoverSessionInlineProps {
 
 export const DiscoverSessionInline = ({
   data,
+  version,
   screenContextTimeRange,
   unifiedSearch,
   locator,
@@ -118,6 +124,10 @@ export const DiscoverSessionInline = ({
     }),
     [serializedState]
   );
+
+  // EmbeddableRenderer reloads only when `type` changes and keeps the first parent API.
+  // A new attachment version or session state remounts it. Local time stays on setTimeRange.
+  const embeddableKey = `${version ?? 'unversioned'}:${JSON.stringify(data)}`;
 
   const toolbarLeftSide = useMemo(
     () => (
@@ -249,6 +259,7 @@ export const DiscoverSessionInline = ({
         `}
       >
         <EmbeddableRenderer<SearchEmbeddablePanelApiState, SearchEmbeddableApi>
+          key={embeddableKey}
           maybeId={undefined}
           type={SEARCH_EMBEDDABLE_TYPE}
           getParentApi={() => parentApi}

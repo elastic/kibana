@@ -122,6 +122,16 @@ describe('createDiscoverSessionTool schema', () => {
     expect(schema.safeParse({ columns: ['response'] }).success).toBe(true);
   });
 
+  it('accepts create_new with esql', () => {
+    expect(schema.safeParse({ create_new: true, esql: ESQL }).success).toBe(true);
+  });
+
+  it('rejects create_new without esql', () => {
+    expect(
+      schema.safeParse({ create_new: true, title: 'Warnings', columns: ['message'] }).success
+    ).toBe(false);
+  });
+
   it('rejects an empty create', () => {
     expect(schema.safeParse({}).success).toBe(false);
   });
@@ -153,6 +163,28 @@ describe('createDiscoverSessionTool schema', () => {
     if (parsed.success) {
       expect(parsed.data.esql).toBe('FROM logs-*\n| WHERE @timestamp >= "now-1h"');
     }
+  });
+
+  it('rejects esql that does not parse after sanitizing', () => {
+    const parsed = schema.safeParse({
+      esql: 'FROM logs-*\n| WHERE @timestamp \u0000= ?_tstart AND @timestamp \u0000< ?_tend AND log.level == "error"',
+    });
+    expect(parsed.success).toBe(false);
+    if (!parsed.success) {
+      expect(parsed.error.issues[0].message).toContain("mismatched input '='");
+      expect(parsed.error.issues[0].message).toContain(
+        'ES|QL comparisons use ==, >=, <=, <, and >.'
+      );
+    }
+  });
+
+  it('accepts esql with Discover time parameters', () => {
+    expect(
+      schema.safeParse({
+        esql: 'FROM logs-* | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND log.level == "error" | LIMIT 100',
+        time_range: { from: 'now-15m', to: 'now' },
+      }).success
+    ).toBe(true);
   });
 
   it('rejects an over-long attachment_id', () => {
@@ -377,6 +409,25 @@ describe('createDiscoverSessionTool updates', () => {
       render: '<render_attachment id="att-session" version="1" />',
       next_action: 'stop',
     });
+  });
+
+  it('creates another session when create_new is true even if one session and an attachment id are present', async () => {
+    const attachments = createAttachments();
+    attachments.add.mockResolvedValue({ id: 'att-session-2', current_version: 1 });
+    attachments.getActive.mockReturnValue([
+      { id: 'att-session', type: DISCOVER_SESSION_ATTACHMENT_TYPE },
+    ]);
+
+    const { result } = await runHandler(
+      { create_new: true, attachment_id: 'att-session', esql: UPDATED_ESQL },
+      { attachments }
+    );
+
+    expect(attachments.getActive).not.toHaveBeenCalled();
+    expect(attachments.getAttachmentRecord).not.toHaveBeenCalled();
+    expect(attachments.update).not.toHaveBeenCalled();
+    expect(attachments.add).toHaveBeenCalled();
+    expect(result.results[0].data.attachment_id).toBe('att-session-2');
   });
 
   it('updates the sole active Discover session when attachment_id is omitted', async () => {
