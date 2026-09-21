@@ -393,12 +393,12 @@ export class ActionPolicyClient {
 
       const policyMatcher = PolicyMatcher.of(matcher);
       if (policyMatcher.isCatchAll()) {
-        items.push({ actionPolicy, category: 'catch-all' });
+        items.push({ action_policy: actionPolicy, category: 'catch-all' });
         continue;
       }
 
       if (policyMatcher.hasTags() && policyMatcher.matchesTags(ruleTags)) {
-        items.push({ actionPolicy, category: 'tags' });
+        items.push({ action_policy: actionPolicy, category: 'tags' });
       }
     }
 
