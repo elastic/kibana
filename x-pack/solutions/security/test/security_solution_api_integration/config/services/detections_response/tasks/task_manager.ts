@@ -28,6 +28,7 @@ export const launchTask = async (
   logger: ToolingLog
 ): Promise<Date> => {
   logger.info(`Launching task ${taskId}`);
+  let after = new Date();
 
   await waitFor(
     async () => {
@@ -42,14 +43,13 @@ export const launchTask = async (
       if (data.error) {
         throw new Error(`Failed to launch task ${taskId}: ${data.error}`);
       }
+      // runSoon sets runAt to now, so capture the threshold after it returns: taskHasRun then stays false until the post-run reschedule.
+      after = new Date();
       return true;
     },
     'launchTask',
     logger
   );
-
-  // runSoon sets runAt to now, so capture the threshold after it returns: taskHasRun then stays false until the post-run reschedule.
-  const after = new Date();
 
   logger.info(`Task ${taskId} launched`);
 
