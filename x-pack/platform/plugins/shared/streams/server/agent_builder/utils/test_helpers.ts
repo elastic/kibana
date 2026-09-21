@@ -24,10 +24,7 @@ import type { RouteHandlerScopedClients, GetScopedClients } from '../../routes/t
  */
 type ToolScopedClients = Pick<
   RouteHandlerScopedClients,
-  | 'streamsClient'
-  | 'scopedClusterClient'
-  | 'uiSettingsClient'
-  | 'attachmentClient'
+  'streamsClient' | 'scopedClusterClient' | 'uiSettingsClient' | 'attachmentClient'
 >;
 
 /**
