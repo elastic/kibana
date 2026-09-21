@@ -71,10 +71,10 @@ function FactParts({ parts }: { parts: LevelCardFactPart[] }) {
 }
 
 /**
- * Fact-row label column. Narrower than `SettingRow`'s 200px: these rows sit inside a card that is
- * itself in the control column, so they align to each other rather than to the page-level rows.
+ * Gap between a fact's label and its value. The label column itself is `max-content`, not a fixed
+ * width: it sizes to the widest label in the card, so rows stay aligned with each other while a
+ * short label ("Hunt") keeps its value beside it instead of stranding it past a fixed column.
  */
-const FACT_LABEL_COL_PX = 100;
 const FACT_LABEL_GAP_PX = 12;
 
 function LevelCardBody({ card }: { card: AutonomyLevelCard }) {
@@ -98,7 +98,7 @@ function LevelCardBody({ card }: { card: AutonomyLevelCard }) {
       <dl
         css={css`
           display: grid;
-          grid-template-columns: ${FACT_LABEL_COL_PX}px minmax(0, 1fr);
+          grid-template-columns: max-content minmax(0, 1fr);
           column-gap: ${FACT_LABEL_GAP_PX}px;
           row-gap: 2px;
           align-items: baseline;

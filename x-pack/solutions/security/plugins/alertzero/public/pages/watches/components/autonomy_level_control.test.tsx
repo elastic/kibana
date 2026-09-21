@@ -45,12 +45,14 @@ describe('AutonomyLevelControl (Sep 14 radios)', () => {
     const [fact] = screen.getAllByTestId('alertZeroAutonomyCardFact');
 
     // `display: contents` drops the per-fact wrapper from layout so its `dt`/`dd` become columns of
-    // the shared grid — that is what keeps every value on the same left edge across rows.
+    // the shared grid — that is what keeps every value on the same left edge across rows. The label
+    // column is `max-content` so a short label keeps its value beside it rather than past a fixed
+    // column, while the grid still aligns the rows with each other.
     expect(fact).toHaveStyleRule('display', 'contents');
     expect(fact.parentElement).toHaveStyleRule('display', 'grid');
     expect(fact.parentElement).toHaveStyleRule(
       'grid-template-columns',
-      expect.stringMatching(/^\d+px minmax\(0, ?1fr\)$/) as unknown as string
+      expect.stringMatching(/^max-content minmax\(0, ?1fr\)$/) as unknown as string
     );
   });
 
