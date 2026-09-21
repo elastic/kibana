@@ -81725,12 +81725,14 @@ paths:
                     ]
                   }
             schema:
+              additionalProperties: false
               type: object
               properties:
                 updates:
                   description: |
-                    Monitors to update. Minimum 1 entry, maximum 500. Each `id` may appear at most once. `attributes` must contain at least one field.
+                    Monitors to update. Minimum 1 entry, maximum 1000. Each `id` may appear at most once. `attributes` must contain at least one field.
                   items:
+                    additionalProperties: false
                     type: object
                     properties:
                       attributes:
@@ -81747,7 +81749,7 @@ paths:
                     required:
                       - id
                       - attributes
-                  maxItems: 500
+                  maxItems: 1000
                   minItems: 1
                   type: array
               required:
