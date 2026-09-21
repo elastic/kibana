@@ -7,7 +7,7 @@
 
 import type { SyntheticsMonitorSchedule } from '../runtime_types';
 import { ScheduleUnit } from '../runtime_types';
-import { scheduleToMilli } from './schedule_to_time';
+import { scheduleFilterToMonitorIntervals, scheduleToMilli } from './schedule_to_time';
 
 describe('schedule_to_time', () => {
   describe('scheduleToMilli', () => {
@@ -19,6 +19,22 @@ describe('schedule_to_time', () => {
     it('converts minutes schedule to millis', () => {
       const schedule: SyntheticsMonitorSchedule = { unit: ScheduleUnit.MINUTES, number: '6' };
       expect(scheduleToMilli(schedule)).toEqual(6 * 60 * 1000);
+    });
+  });
+
+  describe('scheduleFilterToMonitorIntervals', () => {
+    it('converts minute schedule numbers to monitor.interval seconds', () => {
+      expect(scheduleFilterToMonitorIntervals(['3', '10'])).toEqual([180, 600]);
+    });
+
+    it('accepts a single string value', () => {
+      expect(scheduleFilterToMonitorIntervals('5')).toEqual([300]);
+    });
+
+    it('drops empty and non-numeric values', () => {
+      expect(scheduleFilterToMonitorIntervals(undefined)).toEqual([]);
+      expect(scheduleFilterToMonitorIntervals([])).toEqual([]);
+      expect(scheduleFilterToMonitorIntervals(['daily', '0', '-1'])).toEqual([]);
     });
   });
 });

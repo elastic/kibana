@@ -128,7 +128,7 @@ describe('SelectedFilterPills', () => {
     const { getByText, queryByText } = render(
       <SelectedFilterPills
         handleFilterChange={handleFilterChange}
-        excludeFields={['schedules', 'remoteNames']}
+        excludeFields={['remoteNames']}
         includeStatusFilter={false}
         includeStatusCodes
       />

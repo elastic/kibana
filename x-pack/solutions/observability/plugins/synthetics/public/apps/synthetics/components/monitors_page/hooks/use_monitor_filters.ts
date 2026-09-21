@@ -8,6 +8,7 @@
 import type { UrlFilter } from '@kbn/exploratory-view-plugin/public';
 import { useSelector } from 'react-redux-v7';
 import { isEmpty, uniqueId } from 'lodash';
+import { scheduleFilterToMonitorIntervals } from '../../../../../../common/lib/schedule_to_time';
 import { useGetUrlParams } from '../../../hooks/use_url_params';
 import { useKibanaSpace } from '../../../../../hooks/use_kibana_space';
 import { selectOverviewStatus } from '../../../state/overview_status';
@@ -37,10 +38,10 @@ export const useMonitorFilters = ({ forAlerts }: { forAlerts?: boolean }): UrlFi
   const { status: overviewStatus } = useSelector(selectOverviewStatus);
   const allIds = overviewStatus?.allIds ?? [];
 
-  // since schedule isn't available in heartbeat data, in that case we rely on monitor.id
-  // We need to rely on monitor.id also for locations, because each heartbeat data only contains one location
-  if (!isEmpty(schedules) || (!isEmpty(locations) && useLogicalAndFor?.includes('locations'))) {
-    // If allIds is empty we return an array with a random id just to not get any result, there's probably a better solution
+  // Location AND isn't representable on a single ping (one location per doc),
+  // so fall back to the overview-status monitor.id set.
+  if (!isEmpty(locations) && useLogicalAndFor?.includes('locations')) {
+    // If allIds is empty we return an array with a random id just to not get any result
     return [{ field: 'monitor.id', values: allIds.length ? allIds : [uniqueId()] }];
   }
 
@@ -53,6 +54,10 @@ export const useMonitorFilters = ({ forAlerts }: { forAlerts?: boolean }): UrlFi
       values: tags,
     }),
     ...(locations?.length ? [{ field: 'observer.geo.name', values: getValues(locations) }] : []),
+    ...createFiltersForField({
+      field: 'monitor.interval',
+      values: scheduleFilterToMonitorIntervals(schedules).map(String),
+    }),
     ...(space
       ? [{ field: forAlerts ? 'kibana.space_ids' : 'meta.space_id', values: [space.id] }]
       : []),

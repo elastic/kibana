@@ -14,6 +14,7 @@ import {
   getQueryFilters,
 } from '../../../../../../common/constants/client_defaults';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
+import { scheduleFilterToMonitorIntervals } from '../../../../../../common/lib/schedule_to_time';
 import { useSyntheticsRefreshContext } from '../../../contexts';
 import { useGetUrlParams } from '../../../hooks';
 import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
@@ -23,6 +24,11 @@ function buildTermsFilter(field: string, values?: string | string[]) {
   if (!values || (Array.isArray(values) && values.length === 0)) return [];
   const arr = Array.isArray(values) ? values : [values];
   return [{ terms: { [field]: arr } }];
+}
+
+function buildNumericTermsFilter(field: string, values: number[]) {
+  if (!values.length) return [];
+  return [{ terms: { [field]: values } }];
 }
 
 function buildStatusCodesFilter(values?: string | string[]) {
@@ -47,6 +53,7 @@ export function useAllMonitorErrors() {
     locations,
     tags,
     projects,
+    schedules,
     statusCodes,
   } = useGetUrlParams();
 
@@ -69,6 +76,7 @@ export function useAllMonitorErrors() {
     ...buildTermsFilter('observer.geo.name', locations),
     ...buildTermsFilter('tags', tags),
     ...buildTermsFilter('monitor.project.id', projects),
+    ...buildNumericTermsFilter('monitor.interval', scheduleFilterToMonitorIntervals(schedules)),
     ...buildStatusCodesFilter(statusCodes),
   ];
 
@@ -83,6 +91,7 @@ export function useAllMonitorErrors() {
     locations,
     tags,
     projects,
+    schedules,
     statusCodes,
     spaceId: space?.id,
   });
@@ -140,6 +149,7 @@ export function useAllMonitorErrors() {
       locations,
       tags,
       projects,
+      schedules,
       statusCodes,
       space?.id,
     ],

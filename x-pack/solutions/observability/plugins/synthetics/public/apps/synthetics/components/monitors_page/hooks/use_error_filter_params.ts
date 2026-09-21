@@ -16,6 +16,7 @@ export function buildErrorFilterParams(urlParams: ReturnType<typeof useGetUrlPar
     locations,
     tags,
     projects,
+    schedules,
     statusCodes,
   } = urlParams;
 
@@ -36,6 +37,9 @@ export function buildErrorFilterParams(urlParams: ReturnType<typeof useGetUrlPar
   }
   if (projects) {
     params.projects = JSON.stringify(Array.isArray(projects) ? projects : [projects]);
+  }
+  if (schedules) {
+    params.schedules = JSON.stringify(Array.isArray(schedules) ? schedules : [schedules]);
   }
   if (statusCodes?.length) {
     params.statusCodes = JSON.stringify(statusCodes);

@@ -14,6 +14,7 @@ import {
   getQueryFilters,
 } from '../../common/constants/client_defaults';
 import type { SyntheticsEsClient } from '../lib';
+import { scheduleFilterToMonitorIntervals } from '../../common/lib/schedule_to_time';
 import type {
   ErrorStats,
   ErrorInsights,
@@ -34,6 +35,7 @@ interface GetErrorStatsParams {
   locations?: string[];
   tags?: string[];
   projects?: string[];
+  schedules?: string[];
   statusCodes?: string[];
   query?: string;
   spaceId: string;
@@ -65,6 +67,7 @@ export async function getErrorStats({
   locations,
   tags,
   projects,
+  schedules,
   statusCodes,
   query,
   spaceId,
@@ -91,6 +94,10 @@ export async function getErrorStats({
     : null;
   const projectFilter: QueryDslQueryContainer | null = projects?.length
     ? { terms: { 'monitor.project.id': projects } }
+    : null;
+  const monitorIntervals = scheduleFilterToMonitorIntervals(schedules);
+  const scheduleFilter: QueryDslQueryContainer | null = monitorIntervals.length
+    ? { terms: { 'monitor.interval': monitorIntervals } }
     : null;
   // `http.response.status_code` is mapped as a numeric field, so coerce
   // any URL-string codes to numbers before sending the `terms` query.
@@ -134,6 +141,7 @@ export async function getErrorStats({
     tagsFilter,
     locationFilter,
     projectFilter,
+    scheduleFilter,
     statusCodeFilter,
     queryFilter,
   ];
@@ -144,6 +152,7 @@ export async function getErrorStats({
     tagsFilter,
     locationFilter,
     projectFilter,
+    scheduleFilter,
     statusCodeFilter,
     queryFilter,
   ];
@@ -153,6 +162,7 @@ export async function getErrorStats({
     monitorTypeFilter,
     locationFilter,
     projectFilter,
+    scheduleFilter,
     statusCodeFilter,
     queryFilter,
   ];
@@ -165,6 +175,7 @@ export async function getErrorStats({
     tagsFilter,
     locationFilter,
     projectFilter,
+    scheduleFilter,
     queryFilter,
   ];
 
