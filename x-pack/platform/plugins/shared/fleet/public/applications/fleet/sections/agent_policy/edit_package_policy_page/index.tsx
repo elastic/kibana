@@ -637,7 +637,11 @@ export const EditPackagePolicyForm = memo<{
   });
 
   return (
-    <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="editPackagePolicy">
+    <CreatePackagePolicySinglePageLayout
+      {...layoutProps}
+      useWidePageLayout={replaceDefineStepView?.useWidePageLayout}
+      data-test-subj="editPackagePolicy"
+    >
       <EuiErrorBoundary>
         {isLoadingData ? (
           <Loading />
