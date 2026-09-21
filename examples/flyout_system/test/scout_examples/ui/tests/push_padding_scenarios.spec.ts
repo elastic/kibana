@@ -43,7 +43,7 @@ test.describe(
       await expect(containerPadding(page)).toHaveText(NO_PADDING);
     });
 
-    // eslint-disable-next-line playwright/no-skipped-test
+    // eslint-disable-next-line playwright/no-skipped-test -- fails until elastic/eui#10063 ships in Kibana
     test.skip(
       'two standalone push flyouts, close oldest first, returns to no padding (elastic/eui#9788)',
       failsOnMain(
@@ -72,6 +72,7 @@ test.describe(
     }) => {
       await toggle(page, 'Standalone A').click();
       await expect(standaloneFlyout(page, 'Standalone A')).toBeVisible();
+      await expect(standaloneFlyout(page, 'Standalone A')).toHaveAccessibleName('Standalone A');
       await expect(containerPadding(page)).not.toHaveText(NO_PADDING);
       await toggle(page, 'Standalone B').click();
       await expect(standaloneFlyout(page, 'Standalone B')).toBeVisible();
@@ -86,7 +87,7 @@ test.describe(
       await expect(strandedBadge(page)).toHaveCount(0);
     });
 
-    // eslint-disable-next-line playwright/no-skipped-test
+    // eslint-disable-next-line playwright/no-skipped-test -- fails until elastic/eui#10063 ships in Kibana
     test.skip(
       'standalone push + system push, close standalone first, keeps the system flyout pushed',
       failsOnMain(
@@ -111,7 +112,7 @@ test.describe(
       }
     );
 
-    // eslint-disable-next-line playwright/no-skipped-test
+    // eslint-disable-next-line playwright/no-skipped-test -- fails until elastic/eui#10063 ships in Kibana
     test.skip(
       'standalone push under a system overlay keeps its padding when the overlay closes',
       failsOnMain(
@@ -140,7 +141,7 @@ test.describe(
       }
     );
 
-    // eslint-disable-next-line playwright/no-skipped-test
+    // eslint-disable-next-line playwright/no-skipped-test -- fails until elastic/eui#10063 ships in Kibana
     test.skip(
       'resizing a standalone push flyout behind an active system push flyout keeps following the active one',
       failsOnMain(
@@ -213,7 +214,7 @@ test.describe(
       await expect(strandedBadge(page)).toHaveCount(0);
     });
 
-    // eslint-disable-next-line playwright/no-skipped-test
+    // eslint-disable-next-line playwright/no-skipped-test -- fails until elastic/eui#10062 ships in Kibana
     test.skip(
       'two system push sessions, close oldest first, keeps the newest open',
       failsOnMain(
