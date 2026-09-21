@@ -9,8 +9,8 @@
 
 import type { DashboardApi } from '../../dashboard_api/types';
 
-export const PRETTIFY_DASHBOARD_ACTION_ID = 'prettifyDashboard';
+export const ENHANCE_DASHBOARD_ACTION_ID = 'enhanceDashboard';
 
-export interface PrettifyDashboardActionContext {
+export interface EnhanceDashboardActionContext {
   dashboardApi: DashboardApi;
 }

@@ -11,8 +11,8 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import type { DashboardApi } from '../../dashboard_api/types';
 import { uiActionsService } from '../../services/kibana_services';
-import { PRETTIFY_DASHBOARD_ACTION_ID } from './prettify_dashboard_action';
-import { usePrettifyDashboardAction } from './use_prettify_dashboard_action';
+import { ENHANCE_DASHBOARD_ACTION_ID } from './enhance_dashboard_action';
+import { useEnhanceDashboardAction } from './use_enhance_dashboard_action';
 
 type TestDashboardApi = DashboardApi & {
   viewMode$: BehaviorSubject<string>;
@@ -24,7 +24,7 @@ const createDashboardApi = (): TestDashboardApi =>
     children$: new BehaviorSubject({}),
   } as unknown as TestDashboardApi);
 
-describe('usePrettifyDashboardAction', () => {
+describe('useEnhanceDashboardAction', () => {
   const mockExecute = jest.fn();
   const mockIsCompatible = jest.fn(async () => true);
 
@@ -48,7 +48,7 @@ describe('usePrettifyDashboardAction', () => {
     (uiActionsService.hasAction as jest.Mock).mockReturnValue(false);
     const dashboardApi = createDashboardApi();
 
-    const { result } = renderHook(() => usePrettifyDashboardAction(dashboardApi));
+    const { result } = renderHook(() => useEnhanceDashboardAction(dashboardApi));
 
     expect(result.current).toBeNull();
   });
@@ -57,7 +57,7 @@ describe('usePrettifyDashboardAction', () => {
     mockIsCompatible.mockResolvedValue(false);
     const dashboardApi = createDashboardApi();
 
-    const { result } = renderHook(() => usePrettifyDashboardAction(dashboardApi));
+    const { result } = renderHook(() => useEnhanceDashboardAction(dashboardApi));
 
     await waitFor(() => {
       expect(mockIsCompatible).toHaveBeenCalled();
@@ -68,7 +68,7 @@ describe('usePrettifyDashboardAction', () => {
   it('returns an execute handler when the action is compatible', async () => {
     const dashboardApi = createDashboardApi();
 
-    const { result } = renderHook(() => usePrettifyDashboardAction(dashboardApi));
+    const { result } = renderHook(() => useEnhanceDashboardAction(dashboardApi));
 
     await waitFor(() => {
       expect(result.current).not.toBeNull();
@@ -78,7 +78,7 @@ describe('usePrettifyDashboardAction', () => {
 
     expect(mockExecute).toHaveBeenCalledWith({
       dashboardApi,
-      trigger: { id: PRETTIFY_DASHBOARD_ACTION_ID },
+      trigger: { id: ENHANCE_DASHBOARD_ACTION_ID },
     });
   });
 
@@ -86,7 +86,7 @@ describe('usePrettifyDashboardAction', () => {
     mockIsCompatible.mockResolvedValue(true);
     const dashboardApi = createDashboardApi();
 
-    const { result } = renderHook(() => usePrettifyDashboardAction(dashboardApi));
+    const { result } = renderHook(() => useEnhanceDashboardAction(dashboardApi));
 
     await waitFor(() => {
       expect(result.current).not.toBeNull();

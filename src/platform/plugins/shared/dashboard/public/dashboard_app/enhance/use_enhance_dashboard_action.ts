@@ -13,38 +13,38 @@ import { catchError, EMPTY, from, of, startWith, switchMap } from 'rxjs';
 import type { DashboardApi } from '../../dashboard_api/types';
 import { uiActionsService } from '../../services/kibana_services';
 import {
-  PRETTIFY_DASHBOARD_ACTION_ID,
-  type PrettifyDashboardActionContext,
-} from './prettify_dashboard_action';
+  ENHANCE_DASHBOARD_ACTION_ID,
+  type EnhanceDashboardActionContext,
+} from './enhance_dashboard_action';
 
-const getPrettifyAction = async (): Promise<Action<PrettifyDashboardActionContext>> =>
+const getEnhanceAction = async (): Promise<Action<EnhanceDashboardActionContext>> =>
   (await uiActionsService.getAction(
-    PRETTIFY_DASHBOARD_ACTION_ID
-  )) as Action<PrettifyDashboardActionContext>;
+    ENHANCE_DASHBOARD_ACTION_ID
+  )) as Action<EnhanceDashboardActionContext>;
 
-export interface UsePrettifyDashboardAction {
+export interface UseEnhanceDashboardAction {
   execute: () => Promise<void>;
 }
 
-export const usePrettifyDashboardAction = (
+export const useEnhanceDashboardAction = (
   dashboardApi: DashboardApi
-): UsePrettifyDashboardAction | null => {
-  const [action, setAction] = useState<Action<PrettifyDashboardActionContext> | null>(null);
+): UseEnhanceDashboardAction | null => {
+  const [action, setAction] = useState<Action<EnhanceDashboardActionContext> | null>(null);
   const context = useMemo(
     () => ({
       dashboardApi,
-      trigger: { id: PRETTIFY_DASHBOARD_ACTION_ID },
+      trigger: { id: ENHANCE_DASHBOARD_ACTION_ID },
     }),
     [dashboardApi]
   );
 
   useEffect(() => {
-    if (!uiActionsService.hasAction(PRETTIFY_DASHBOARD_ACTION_ID)) {
+    if (!uiActionsService.hasAction(ENHANCE_DASHBOARD_ACTION_ID)) {
       setAction(null);
       return;
     }
 
-    const subscription = from(getPrettifyAction())
+    const subscription = from(getEnhanceAction())
       .pipe(
         switchMap((nextAction) =>
           (nextAction.getCompatibilityChangesSubject?.(context) ?? EMPTY).pipe(
