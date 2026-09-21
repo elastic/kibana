@@ -12,7 +12,7 @@ import type {
 } from '@kbn/agent-builder-server/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { ALERTZERO_ATTACHMENT_TYPES } from '../../../common/constants';
-import { alertZeroAttachmentDataSchema } from './attachment_data_schema';
+import { alertZeroAttachmentDataSchema } from '../../../common/attachment_data_schema';
 
 export const HUNT_CORRELATION_ATTACHMENT_ID = ALERTZERO_ATTACHMENT_TYPES.huntCorrelation;
 
