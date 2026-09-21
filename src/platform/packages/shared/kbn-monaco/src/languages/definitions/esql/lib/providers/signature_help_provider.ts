@@ -19,13 +19,10 @@ export function getSignatureProvider(
   return {
     signatureHelpTriggerCharacters: ['(', ','],
     signatureHelpRetriggerCharacters: ['(', ','],
-    async provideSignatureHelp(
-      model: monaco.editor.ITextModel,
-      position: monaco.Position,
-      token: monaco.CancellationToken
-    ): Promise<monaco.languages.SignatureHelpResult | null> {
+    provideSignatureHelp: (async (model, position, token) => {
       return createMonacoProvider({
         model,
+        cancellationToken: token,
         run: async (safeModel) => {
           const fullText = safeModel.getValue();
           const offset = monacoPositionToOffset(fullText, position);
@@ -56,6 +53,6 @@ export function getSignatureProvider(
         },
         emptyResult: null,
       });
-    },
+    }) satisfies monaco.languages.SignatureHelpProvider['provideSignatureHelp'],
   };
 }

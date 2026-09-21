@@ -17,36 +17,29 @@ export function getInlineCompletionsProvider(
 ): monaco.languages.InlineCompletionsProvider {
   return {
     provideInlineCompletions: (async (model, position, _context, token) => {
-      return new Promise((resolve) => {
-        token.onCancellationRequested(() => {
-          resolve({ items: [] });
-        });
+      return createMonacoProvider({
+        model,
+        cancellationToken: token,
+        run: async (safeModel) => {
+          const fullText = safeModel.getValue();
+          const textBeforeCursor = safeModel.getValueInRange({
+            startLineNumber: 1,
+            startColumn: 1,
+            endLineNumber: position.lineNumber,
+            endColumn: position.column,
+          });
 
-        resolve(
-          createMonacoProvider({
-            model,
-            run: async (safeModel) => {
-              const fullText = safeModel.getValue();
-              const textBeforeCursor = safeModel.getValueInRange({
-                startLineNumber: 1,
-                startColumn: 1,
-                endLineNumber: position.lineNumber,
-                endColumn: position.column,
-              });
+          const range = new monaco.Range(
+            position.lineNumber,
+            position.column,
+            position.lineNumber,
+            position.column
+          );
 
-              const range = new monaco.Range(
-                position.lineNumber,
-                position.column,
-                position.lineNumber,
-                position.column
-              );
-
-              const cancellableCallbacks = createCancellableCallbacks(callbacks, token);
-              return await inlineSuggest(fullText, textBeforeCursor, range, cancellableCallbacks);
-            },
-            emptyResult: { items: [] },
-          })
-        );
+          const cancellableCallbacks = createCancellableCallbacks(callbacks, token);
+          return await inlineSuggest(fullText, textBeforeCursor, range, cancellableCallbacks);
+        },
+        emptyResult: { items: [] },
       });
     }) satisfies monaco.languages.InlineCompletionsProvider['provideInlineCompletions'],
     disposeInlineCompletions: () => {},
