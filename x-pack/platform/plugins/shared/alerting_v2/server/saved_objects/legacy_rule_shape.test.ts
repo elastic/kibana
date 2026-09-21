@@ -165,6 +165,7 @@ describe('collapseLegacyRuleShape', () => {
         collapseLegacyRuleShape({
           kind: 'alert',
           query: { format: 'standalone', breach: { query: STANDALONE_QUERY } },
+          recovery_strategy: 'no_breach',
           state_transition: {
             pending_count: 3,
             pending_timeframe: '5m',
@@ -183,6 +184,7 @@ describe('collapseLegacyRuleShape', () => {
         collapseLegacyRuleShape({
           kind: 'alert',
           query: { format: 'standalone', breach: { query: STANDALONE_QUERY } },
+          recovery_strategy: 'no_breach',
           state_transition: {
             pending_operator: 'AND',
             recovering_count: 2,
@@ -190,6 +192,26 @@ describe('collapseLegacyRuleShape', () => {
           },
         }).state_transition
       ).toEqual({ recovering: { count: 2 } });
+    });
+
+    it.each([
+      ['an absent legacy strategy', undefined],
+      ['the "none" legacy strategy', 'none' as const],
+    ])('drops the recovering phase of %s, which maps to manual recovery', (_label, strategy) => {
+      const collapsed = collapseLegacyRuleShape({
+        kind: 'alert',
+        query: { format: 'standalone', breach: { query: STANDALONE_QUERY } },
+        recovery_strategy: strategy,
+        state_transition: {
+          pending_count: 3,
+          pending_timeframe: '5m',
+          recovering_count: 0,
+          recovering_timeframe: '10m',
+        },
+      });
+
+      expect(collapsed.recovery).toEqual({ strategy: 'manual' });
+      expect(collapsed.state_transition).toEqual({ pending: { count: 3, timeframe: '5m' } });
     });
 
     it.each([

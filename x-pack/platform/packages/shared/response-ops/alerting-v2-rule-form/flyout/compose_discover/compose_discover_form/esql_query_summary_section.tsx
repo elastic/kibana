@@ -10,6 +10,7 @@ import { EuiButton, EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { RuleKind, RuleQuery } from '../../../form/types';
+import { getBreachQuery } from '../../../form/utils/query_helpers';
 import { QueryBlock, QuerySummary } from '../query_summary';
 
 export type EsqlSummaryState =
@@ -162,6 +163,8 @@ export const EsqlQuerySummarySection: React.FC<EsqlQuerySummarySectionProps> = (
 }) => {
   const state = getEsqlSummaryState(queryCommitted, query);
   const showBlocks = state !== 'before_apply';
+  // A signal breaches on nothing, so a segment is part of the single query it
+  // runs rather than a condition to summarise on its own.
   const showUnifiedBlock = kind === 'signal';
   const callout = getSummaryCallout(state, kind);
   const description = getDescription(state, kind);
@@ -191,7 +194,11 @@ export const EsqlQuerySummarySection: React.FC<EsqlQuerySummarySectionProps> = (
 
       {showBlocks ? (
         showUnifiedBlock ? (
-          <QueryBlock label={QUERY_LABEL} query={query.base} emptyMessage={NOT_DEFINED} />
+          <QueryBlock
+            label={QUERY_LABEL}
+            query={getBreachQuery(query)}
+            emptyMessage={NOT_DEFINED}
+          />
         ) : (
           <>
             <QueryBlock label={BASE_QUERY_LABEL} query={query.base} emptyMessage={NOT_DEFINED} />

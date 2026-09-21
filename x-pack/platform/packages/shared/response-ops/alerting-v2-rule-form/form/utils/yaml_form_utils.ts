@@ -145,6 +145,8 @@ const parseQuery = (queryObj: Record<string, unknown> | undefined): RuleQuery =>
   breach: { segment: extractNestedString(queryObj?.breach, 'segment') },
 });
 
+const ALERT_ONLY_KEYS = ['recovery', 'no_data', 'state_transition'] as const;
+
 const parseRecovery = (value: unknown): RuleRecovery | undefined => {
   const recoveryObj = asRecord(value);
   const parsedStrategy = recoveryStrategySchema.safeParse(recoveryObj?.strategy);
@@ -228,6 +230,19 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
   const name = metadata?.name;
   const resolvedKind = (kind as 'alert' | 'signal') ?? 'alert';
   const isAlert = resolvedKind === 'alert';
+
+  // The request mappers drop these for signals, so accepting them here would
+  // save a rule that silently differs from the YAML in front of the user.
+  const alertOnlyBlocks = ALERT_ONLY_KEYS.filter((key) => obj[key] != null);
+  if (!isAlert && alertOnlyBlocks.length > 0) {
+    return {
+      values: null,
+      error: i18n.translate('xpack.alertingV2.yamlRuleForm.signalAlertOnlyFieldsError', {
+        defaultMessage: 'Signal rules cannot set {fields}.',
+        values: { fields: alertOnlyBlocks.join(', ') },
+      }),
+    };
+  }
 
   const parsedRecovery = parseRecovery(obj.recovery);
   if (obj.recovery !== undefined && parsedRecovery === undefined) {

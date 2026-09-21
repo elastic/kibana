@@ -409,6 +409,24 @@ describe('yaml_form_utils', () => {
       expect(result.values?.noData).toBeUndefined();
     });
 
+    it.each([
+      ['recovery', { recovery: { strategy: 'no_breach' } }],
+      ['no_data', { no_data: { strategy: 'ignore' } }],
+      ['state_transition', { state_transition: { pending: { count: 3 } } }],
+    ])('rejects a signal rule that sets %s', (field, block) => {
+      const yaml = stringify({
+        kind: 'signal',
+        metadata: { name: 'Signal rule' },
+        query: { base: 'FROM logs-*' },
+        ...block,
+      });
+
+      const result = parseYamlToFormValues(yaml);
+
+      expect(result.values).toBeNull();
+      expect(result.error).toBe(`Signal rules cannot set ${field}.`);
+    });
+
     it('ignores invalid artifacts entries', () => {
       const yaml = stringify({
         metadata: { name: 'Rule with mixed artifacts' },

@@ -8,7 +8,12 @@
 import { EuiCodeBlock, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { formatDuration } from '@kbn/alerting-plugin/common';
 import { RULE_KIND_LABELS } from '@kbn/alerting-v2-constants';
-import { getRootEsqlQuery, hasBreachCondition, noDataStrategy } from '@kbn/alerting-v2-schemas';
+import {
+  getBreachEsqlQuery,
+  getRootEsqlQuery,
+  hasBreachCondition,
+  noDataStrategy,
+} from '@kbn/alerting-v2-schemas';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -64,8 +69,11 @@ export const RuleConditions: React.FC<RuleConditionsProps> = ({ rule, variant = 
   const isSummary = variant === 'summary';
   const dataSource = getIndexPatternFromESQLQuery(getRootEsqlQuery(rule.query)) || EMPTY_VALUE;
   const recoveryCondition = getRecoverEsqlSegment(rule.recovery);
-  const { base: baseQuery, breach } = rule.query;
-  const alertCondition = hasBreachCondition(breach) ? breach.segment : undefined;
+  const { base, breach } = rule.query;
+  // A signal breaches on nothing, so a segment is part of the single query it
+  // runs rather than a condition of its own.
+  const baseQuery = isAlertKind ? base : getBreachEsqlQuery(rule.query);
+  const alertCondition = isAlertKind && hasBreachCondition(breach) ? breach.segment : undefined;
 
   const conditionItems = [
     {

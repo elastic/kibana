@@ -348,9 +348,6 @@
         "recovering_count": 0,
         "pending": {
           "count": 0
-        },
-        "recovering": {
-          "count": 0
         }
       },
       "grouping": {

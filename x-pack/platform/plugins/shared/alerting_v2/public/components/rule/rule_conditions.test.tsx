@@ -66,6 +66,20 @@ describe('RuleConditions', () => {
     expect(screen.queryByTestId('alertingV2RuleDetailsAlertCondition')).not.toBeInTheDocument();
   });
 
+  it('renders a signal breach segment as part of the one query it runs', () => {
+    renderConditions({
+      ...baseRule,
+      query: {
+        base: 'FROM logs-* | STATS count() BY host.name',
+        breach: { segment: 'WHERE count() > 10' },
+      },
+    });
+    expect(screen.getByTestId('alertingV2RuleDetailsBaseQuery')).toHaveTextContent(
+      'FROM logs-* | STATS COUNT() BY host.name | WHERE COUNT() > 10'
+    );
+    expect(screen.queryByTestId('alertingV2RuleDetailsAlertCondition')).not.toBeInTheDocument();
+  });
+
   it('renders the base query and the breach segment in separate blocks', () => {
     renderConditions({
       ...alertRule,

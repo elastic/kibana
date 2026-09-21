@@ -205,6 +205,7 @@ describe('migrateRuleQueryShape', () => {
   describe('state_transition', () => {
     it('nests the flat scalars under their phase', () => {
       const { state_transition: stateTransition } = migrate({
+        recovery_strategy: 'no_breach',
         state_transition: {
           pending_count: 3,
           pending_timeframe: '5m',
@@ -232,6 +233,7 @@ describe('migrateRuleQueryShape', () => {
 
     it('keeps a zero count, which skips the phase rather than disabling gating', () => {
       const { state_transition: stateTransition } = migrate({
+        recovery_strategy: 'no_breach',
         state_transition: { pending_count: 0, recovering_count: 0 },
       });
 
@@ -239,6 +241,16 @@ describe('migrateRuleQueryShape', () => {
         pending: { count: 0 },
         recovering: { count: 0 },
       });
+    });
+
+    it('drops a recovering phase that a manual recovery would never run', () => {
+      const { recovery, state_transition: stateTransition } = migrate({
+        state_transition: { pending_count: 3, recovering_count: 0 },
+      });
+
+      expect(recovery).toEqual({ strategy: 'manual' });
+      expect(stateTransition).toMatchObject({ pending: { count: 3 } });
+      expect(stateTransition).not.toHaveProperty('recovering');
     });
 
     it.each([

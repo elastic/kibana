@@ -128,7 +128,8 @@ const toPhase = (
   });
 
 const toStateTransition = (
-  stateTransition?: LegacyStateTransition | null
+  stateTransition: LegacyStateTransition | null | undefined,
+  recovery: Recovery | undefined
 ): StateTransition | undefined => {
   if (stateTransition == null) {
     return undefined;
@@ -144,7 +145,12 @@ const toStateTransition = (
   } = stateTransition;
 
   const pending = toPhase(pendingCount, pendingTimeframe, pendingOperator);
-  const recovering = toPhase(recoveringCount, recoveringTimeframe, recoveringOperator);
+  // A manual recovery never runs the recovering phase, and the collapsed schema
+  // rejects the pair, so the legacy delay is dropped along with it.
+  const recovering =
+    recovery?.strategy === 'manual'
+      ? undefined
+      : toPhase(recoveringCount, recoveringTimeframe, recoveringOperator);
 
   return omitEmpty({
     ...(pending ? { pending } : {}),
@@ -166,13 +172,12 @@ export const collapseLegacyRuleShape = (rule: LegacyRuleShape): CollapsedRuleSha
     recovery_strategy: recoveryStrategy,
     no_data_strategy: noDataStrategy,
   } = rule;
-  const stateTransition = toStateTransition(rule.state_transition);
+  const recovery = kind === 'alert' ? toRecovery(query, recoveryStrategy) : undefined;
+  const stateTransition = toStateTransition(rule.state_transition, recovery);
 
   return {
     query: toQuery(query),
-    ...(kind === 'alert'
-      ? { recovery: toRecovery(query, recoveryStrategy), no_data: toNoData(query, noDataStrategy) }
-      : {}),
+    ...(recovery ? { recovery, no_data: toNoData(query, noDataStrategy) } : {}),
     ...(stateTransition ? { state_transition: stateTransition } : {}),
   };
 };
