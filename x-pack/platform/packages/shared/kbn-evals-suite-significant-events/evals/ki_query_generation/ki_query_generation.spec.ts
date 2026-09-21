@@ -12,18 +12,14 @@ import {
   type AnalysisTarget,
   type ExistingQuerySummary,
 } from '@kbn/nightshift-ai';
-import {
-  createMemoryDiscoveryTools,
-  MemoryServiceImpl,
-} from '@kbn/significant-events-plugin/server';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
 import { tags } from '@kbn/scout';
-import { connectorToInference, getConnectorDefaultModel } from '@kbn/inference-common';
 
 import {
   getCurrentTraceId,
   createSpanLatencyEvaluator,
   createChatCallsEvaluator,
+  buildModelFromConnector,
 } from '@kbn/evals';
 import { getSourcesForStream, getStreamSamplingSource, type Streams } from '@kbn/streams-schema';
 import type { Feature } from '@kbn/significant-events-schema';
@@ -78,14 +74,6 @@ import {
 const TRUST_UPSTREAM = process.env.SIGEVENTS_TRUST_UPSTREAM === 'true';
 
 const EMPTY_DATASTREAM_MAX_STEPS = 4;
-
-const resolveConnectorModel = (connector: Parameters<typeof connectorToInference>[0]): string => {
-  try {
-    return getConnectorDefaultModel(connectorToInference(connector)) ?? connector.id;
-  } catch {
-    return connector.id;
-  }
-};
 
 evaluate.describe('KI query generation', { tag: tags.serverless.observability.complete }, () => {
   const scenarioResolution = resolveQueryGenerationDatasets(getActiveDatasets());
@@ -271,13 +259,6 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                 { kis, sampleLogs, sampleDocs },
               ])
             );
-
-            // Exercise the same grounding tools that production query generation
-            // wires in, so the eval covers the memory + prior-SigEvents code paths.
-            const memoryTools = createMemoryDiscoveryTools({
-              memoryService: new MemoryServiceImpl({ logger: logger.get('memory'), esClient }),
-            });
-
             const executeAgentBuilderTool = async (
               toolId: string,
               toolParams: Record<string, unknown>
@@ -394,11 +375,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                     `ki_types=${JSON.stringify(kiTypeCounts)}, sample_logs=${sampleLogs.length}`
                 );
 
-                const promptSnippet = [
-                  groundingTools?.promptSnippet,
-                  memoryTools.promptSnippet,
-                  eventSearchTool.promptSnippet,
-                ]
+                const promptSnippet = [groundingTools?.promptSnippet, eventSearchTool.promptSnippet]
                   .filter(Boolean)
                   .join('\n');
 
@@ -420,12 +397,10 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                           )
                       ),
                     additionalTools: {
-                      ...memoryTools.tools,
                       ...eventSearchTool.tools,
                       ...groundingTools?.additionalTools,
                     },
                     additionalToolCallbacks: {
-                      ...memoryTools.callbacks,
                       ...eventSearchTool.callbacks,
                       ...groundingTools?.additionalToolCallbacks,
                     },
@@ -483,8 +458,8 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                   evaluator_names: evaluatorsList.map((evaluator) => evaluator.name),
                   effective_max_steps: effectiveMaxSteps,
                   repetitions,
-                  generation_model: resolveConnectorModel(connector),
-                  judge_model: resolveConnectorModel(evaluationConnector),
+                  generation_model: buildModelFromConnector(connector).id,
+                  judge_model: buildModelFromConnector(evaluationConnector).id,
                 })}`
               );
 
@@ -563,8 +538,8 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
             evaluator_names: emptyDatastreamEvaluators.map((evaluator) => evaluator.name),
             effective_max_steps: EMPTY_DATASTREAM_MAX_STEPS,
             repetitions,
-            generation_model: resolveConnectorModel(connector),
-            judge_model: resolveConnectorModel(evaluationConnector),
+            generation_model: buildModelFromConnector(connector).id,
+            judge_model: buildModelFromConnector(evaluationConnector).id,
           })}`
         );
 
