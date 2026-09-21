@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ALL_CONNECTOR_IDS, type ConnectorTypeInfo } from '@kbn/workflows';
+import { ALL_CONNECTOR_IDS, type ConnectorInstance, type ConnectorTypeInfo } from '@kbn/workflows';
 import { isTemplateReference } from './is_template_reference';
 import {
   getActionTypeDisplayNameFromStepType,
@@ -50,7 +50,8 @@ const TRANSLATIONS = {
 export function validateConnectorIds(
   connectorIdItems: ConnectorIdItem[],
   dynamicConnectorTypes: Record<string, ConnectorTypeInfo>,
-  connectorsManagementUrl: string
+  connectorsManagementUrl: string,
+  customConnectorInstancesByStepType: ReadonlyMap<string, ConnectorInstance[]> = new Map()
 ): YamlValidationResult[] {
   const results: YamlValidationResult[] = [];
 
@@ -78,7 +79,9 @@ export function validateConnectorIds(
       const connectorType = dynamicConnectorTypes[stepType];
       const displayName =
         connectorType?.displayName ?? getActionTypeDisplayNameFromStepType(stepType);
-      const instances = getConnectorInstancesForType(stepType, dynamicConnectorTypes);
+      const instances =
+        customConnectorInstancesByStepType.get(stepType) ??
+        getConnectorInstancesForType(stepType, dynamicConnectorTypes);
 
       const instance = instances.find((ins) => ins.id === connectorIdItem.key);
       // Create insert position at the start of the connector-id value
@@ -125,7 +128,7 @@ export function validateConnectorIds(
         actions.push(
           getEditConnectorHoverCommandLink({
             text: TRANSLATIONS.editConnector,
-            connectorType: instance.connectorType,
+            connectorType: instance.connectorType ?? getActionTypeIdFromStepType(stepType),
             connectorId: instance.id,
           })
         );
@@ -133,7 +136,7 @@ export function validateConnectorIds(
           actions.push(
             getCreateConnectorHoverCommandLink({
               text: TRANSLATIONS.createConnector,
-              connectorType: instance.connectorType,
+              connectorType: instance.connectorType ?? getActionTypeIdFromStepType(stepType),
               insertPosition,
             })
           );

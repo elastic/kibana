@@ -11,7 +11,21 @@ import { parseDocument } from 'yaml';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
 import { parseLineForCompletion } from '@kbn/workflows-yaml';
 import { getConnectorIdSuggestions } from './get_connector_id_suggestions';
+import {
+  getCustomStepConnectorIdSelectionHandler,
+  getInferenceConnectorInstances,
+} from '../../../../../../shared/lib/connectors_utils';
 import type { AutocompleteContext } from '../../context/autocomplete.types';
+
+jest.mock('../../../../../../shared/lib/connectors_utils', () => ({
+  ...jest.requireActual('../../../../../../shared/lib/connectors_utils'),
+  getCustomStepConnectorIdSelectionHandler: jest.fn(),
+}));
+
+const mockGetCustomStepConnectorIdSelectionHandler =
+  getCustomStepConnectorIdSelectionHandler as jest.MockedFunction<
+    typeof getCustomStepConnectorIdSelectionHandler
+  >;
 
 describe('getConnectorIdSuggestions', () => {
   const fakeConnectorTypes: Record<string, ConnectorTypeInfo> = {
@@ -42,8 +56,24 @@ describe('getConnectorIdSuggestions', () => {
       ],
     },
   };
-  it('should return an empty array if the line parse result is null', () => {
-    const result = getConnectorIdSuggestions({
+  beforeEach(() => {
+    mockGetCustomStepConnectorIdSelectionHandler.mockReturnValue(undefined);
+  });
+
+  it('should only load inference endpoints for unified completion connector types', () => {
+    const getInferenceConnectorInstancesMock = jest.fn();
+
+    expect(
+      getInferenceConnectorInstances({
+        connectorTypes: ['slack'],
+        getInferenceConnectorInstances: getInferenceConnectorInstancesMock,
+      })
+    ).toBeUndefined();
+    expect(getInferenceConnectorInstancesMock).not.toHaveBeenCalled();
+  });
+
+  it('should return an empty array if the line parse result is null', async () => {
+    const result = await getConnectorIdSuggestions({
       line: '',
       lineParseResult: null,
       range: { startLineNumber: 1, endLineNumber: 1, startColumn: 1, endColumn: 1 },
@@ -53,9 +83,9 @@ describe('getConnectorIdSuggestions', () => {
     expect(result).toEqual([]);
   });
 
-  it('should return a list of available instances for the current step connector type', () => {
+  it('should return a list of available instances for the current step connector type', async () => {
     const line = 'connector-id: ';
-    const result = getConnectorIdSuggestions({
+    const result = await getConnectorIdSuggestions({
       line,
       lineParseResult: parseLineForCompletion(line),
       range: { startLineNumber: 1, endLineNumber: 1, startColumn: 1, endColumn: line.length + 1 },
@@ -75,9 +105,37 @@ describe('getConnectorIdSuggestions', () => {
     expect(result.map((item) => item.insertText)).not.toContain('"*"');
   });
 
-  it('should suggest slack connectors for waitForApproval channel connector-id', () => {
+  it('should use custom instances without the shared connector catalog', async () => {
+    mockGetCustomStepConnectorIdSelectionHandler.mockReturnValue({
+      connectorTypes: ['inference.unified_completion'],
+      getInferenceConnectorInstances: jest.fn().mockResolvedValue([
+        {
+          id: 'inference-endpoint',
+          name: 'Inference endpoint',
+          connectorType: '.inference',
+          isPreconfigured: true,
+          isDeprecated: false,
+        },
+      ]),
+    });
+    const line = 'connector-id: ';
+
+    const result = await getConnectorIdSuggestions({
+      line,
+      lineParseResult: parseLineForCompletion(line),
+      range: { startLineNumber: 1, endLineNumber: 1, startColumn: 1, endColumn: line.length + 1 },
+      focusedStepInfo: { stepType: 'ai.summarize' },
+      focusedYamlPair: null,
+      path: ['steps', 0, 'connector-id'],
+      dynamicConnectorTypes: null,
+    } as unknown as AutocompleteContext);
+
+    expect(result.map(({ insertText }) => insertText)).toContain('inference-endpoint');
+  });
+
+  it('should suggest slack connectors for waitForApproval channel connector-id', async () => {
     const line = '        connector-id: ';
-    const result = getConnectorIdSuggestions({
+    const result = await getConnectorIdSuggestions({
       line,
       lineParseResult: parseLineForCompletion(line),
       range: { startLineNumber: 1, endLineNumber: 1, startColumn: 1, endColumn: line.length + 1 },
@@ -94,13 +152,13 @@ describe('getConnectorIdSuggestions', () => {
     expect(result.map((item) => item.insertText)).not.toContain('"*"');
   });
 
-  it('should suggest inbound webhook instances for a trigger connector-id', () => {
+  it('should suggest inbound webhook instances for a trigger connector-id', async () => {
     const line = '    connector-id: ';
     const yamlDocument = parseDocument(`triggers:
   - type: inboundWebhook.received
     connector-id: 
 `);
-    const result = getConnectorIdSuggestions({
+    const result = await getConnectorIdSuggestions({
       line,
       lineParseResult: parseLineForCompletion(line),
       range: { startLineNumber: 3, endLineNumber: 3, startColumn: 19, endColumn: line.length + 1 },

@@ -577,6 +577,7 @@ export interface ConnectorInstance {
   isPreconfigured: boolean;
   isDeprecated: boolean;
   config?: ConnectorInstanceConfig;
+  connectorType?: string;
 }
 
 export interface ConnectorInstanceConfig {
@@ -849,6 +850,10 @@ export interface ConnectorIdSelectionHandler {
    * If true, creation from the connector ID selection will be enabled for the first type in the `connectorTypes` list.
    */
   enableCreation?: boolean;
+  /**
+   * Loads inference endpoints for `inference.unified_completion` selections.
+   */
+  getInferenceConnectorInstances?: () => Promise<ConnectorInstance[]>;
 }
 
 export interface ConnectorExamples {

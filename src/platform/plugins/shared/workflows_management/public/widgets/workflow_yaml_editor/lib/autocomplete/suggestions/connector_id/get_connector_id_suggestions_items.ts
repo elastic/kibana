@@ -28,11 +28,13 @@ import {
 export function getConnectorIdSuggestionsItems(
   stepType: string,
   range: monaco.IRange | monaco.languages.CompletionItemRanges,
-  dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>
+  dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>,
+  customConnectorInstances?: ConnectorInstance[]
 ): monaco.languages.CompletionItem[] {
   const suggestions: monaco.languages.CompletionItem[] = [];
 
-  const instances = getConnectorInstancesForType(stepType, dynamicConnectorTypes);
+  const instances =
+    customConnectorInstances ?? getConnectorInstancesForType(stepType, dynamicConnectorTypes);
 
   instances.forEach((instance) =>
     suggestions.push(createConnectorSuggestion(instance, stepType, range))

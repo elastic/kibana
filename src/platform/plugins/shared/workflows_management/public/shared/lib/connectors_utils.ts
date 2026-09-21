@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TASK_TYPE_BY_SUB_ACTION } from '@kbn/connector-schemas/inference/constants';
-import type { ConnectorIdSelectionHandler } from '@kbn/workflows/types/v1';
+import { SUB_ACTION, TASK_TYPE_BY_SUB_ACTION } from '@kbn/connector-schemas/inference/constants';
+import type { ConnectorIdSelectionHandler, ConnectorInstance } from '@kbn/workflows/types/v1';
 import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { stepSchemas } from '../../../common/step_schemas';
 
@@ -36,6 +36,15 @@ export function isCreateConnectorEnabledForStepType(stepType: string): boolean {
   }
   // If customStepSelectionHandler defined (custom step with connector-id property), the default is to disable connector creation, unless enableCreation is explicitly set to true
   return customStepSelectionHandler.enableCreation ?? false;
+}
+
+export function getInferenceConnectorInstances(
+  selection: ConnectorIdSelectionHandler | undefined
+): Promise<ConnectorInstance[]> | undefined {
+  if (!selection?.connectorTypes.includes(`inference.${SUB_ACTION.UNIFIED_COMPLETION}`)) {
+    return undefined;
+  }
+  return selection.getInferenceConnectorInstances?.().catch(() => []);
 }
 
 export function getInferenceConnectorTaskTypeFromSubAction(subAction: string): string | undefined {

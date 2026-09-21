@@ -129,6 +129,41 @@ describe('validateConnectorIds', () => {
       });
     });
 
+    it('should use instances supplied by the connector selection', () => {
+      const results = validateConnectorIds(
+        [
+          createConnectorIdItem({
+            key: 'inference-endpoint',
+            connectorType: 'ai.summarize',
+          }),
+        ],
+        mockConnectorTypes,
+        '',
+        new Map([
+          [
+            'ai.summarize',
+            [
+              {
+                id: 'inference-endpoint',
+                name: 'Inference endpoint',
+                connectorType: '.inference',
+                isPreconfigured: true,
+                isDeprecated: false,
+              },
+            ],
+          ],
+        ])
+      );
+
+      expect(results).toEqual([
+        expect.objectContaining({
+          severity: 'info',
+          message: null,
+          beforeMessage: '✓ Inference endpoint',
+        }),
+      ]);
+    });
+
     it('should accept the wildcard only on a trigger connector-id', () => {
       const results = validateConnectorIds(
         [

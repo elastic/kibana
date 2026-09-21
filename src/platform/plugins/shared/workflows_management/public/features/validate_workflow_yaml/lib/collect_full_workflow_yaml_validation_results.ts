@@ -10,7 +10,7 @@
 import type { Document, LineCounter } from 'yaml';
 import type { monaco } from '@kbn/code-editor';
 import type { ESQLCallbacks } from '@kbn/esql-types';
-import type { ConnectorTypeInfo, WorkflowYaml } from '@kbn/workflows';
+import type { ConnectorInstance, ConnectorTypeInfo, WorkflowYaml } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import { collectAllConnectorIds } from './collect_all_connector_ids';
 import { collectAllStepPropertyItems } from './collect_all_step_property_items';
@@ -22,6 +22,10 @@ import { validateWorkflowInputs } from './validate_workflow_inputs';
 import type { WorkflowsResponse } from '../../../entities/workflows/model/types';
 import type { GraphBuildErrorInfo } from '../../../entities/workflows/store/workflow_detail/types';
 import type { WorkflowLookup } from '../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
+import {
+  getCustomStepConnectorIdSelectionHandler,
+  getInferenceConnectorInstances,
+} from '../../../shared/lib/connectors_utils';
 import type { GetStepPropertyHandler } from '../../../widgets/workflow_yaml_editor/lib/autocomplete/suggestions/step_property/get_step_property_suggestions';
 import { validateEsqlSteps } from '../../../widgets/workflow_yaml_editor/lib/esql_validation/validate_esql_steps';
 import type { YamlValidationResult } from '../model/types';
@@ -92,8 +96,30 @@ export async function collectFullWorkflowYamlValidationResults({
   });
 
   if (connectorTypes.status === 'ready') {
+    const customConnectorInstances = new Map<string, ConnectorInstance[]>();
+    const customConnectorEntries = await Promise.all(
+      [...new Set(connectorIdItems.map(({ connectorType }) => connectorType))].map(
+        async (stepType) =>
+          [
+            stepType,
+            await getInferenceConnectorInstances(
+              getCustomStepConnectorIdSelectionHandler(stepType)
+            ),
+          ] as const
+      )
+    );
+    customConnectorEntries.forEach(([stepType, instances]) => {
+      if (instances) {
+        customConnectorInstances.set(stepType, instances);
+      }
+    });
     results.push(
-      ...validateConnectorIds(connectorIdItems, connectorTypes.value, connectorsManagementUrl)
+      ...validateConnectorIds(
+        connectorIdItems,
+        connectorTypes.value,
+        connectorsManagementUrl,
+        customConnectorInstances
+      )
     );
   }
   results.push(...validateGraphBuild(graphBuildError, workflowLookup, lineCounter));

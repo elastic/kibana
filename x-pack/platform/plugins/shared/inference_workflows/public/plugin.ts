@@ -15,15 +15,17 @@ interface InferenceWorkflowsPublicSetupDeps {
 export class InferenceWorkflowsPublicPlugin
   implements Plugin<{}, {}, InferenceWorkflowsPublicSetupDeps>
 {
-  setup(_core: CoreSetup, deps: InferenceWorkflowsPublicSetupDeps) {
+  setup(core: CoreSetup, deps: InferenceWorkflowsPublicSetupDeps) {
     deps.workflowsExtensions.registerStepDefinition(() =>
-      import('./steps/ai/ai_prompt_step').then((m) => m.AiPromptStepDefinition)
+      import('./steps/ai/ai_prompt_step').then((m) => m.createAiPromptStepDefinition(core.http))
     );
     deps.workflowsExtensions.registerStepDefinition(() =>
-      import('./steps/ai/ai_summarize_step').then((m) => m.AiSummarizeStepDefinition)
+      import('./steps/ai/ai_summarize_step').then((m) =>
+        m.createAiSummarizeStepDefinition(core.http)
+      )
     );
     deps.workflowsExtensions.registerStepDefinition(() =>
-      import('./steps/ai/ai_classify_step').then((m) => m.AiClassifyStepDefinition)
+      import('./steps/ai/ai_classify_step').then((m) => m.createAiClassifyStepDefinition(core.http))
     );
     return {};
   }

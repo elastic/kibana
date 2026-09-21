@@ -15,9 +15,13 @@ import {
   resolveConnectorIdStepType,
   resolveConnectorIdTriggerType,
 } from './resolve_connector_id_step_type';
+import {
+  getCustomStepConnectorIdSelectionHandler,
+  getInferenceConnectorInstances,
+} from '../../../../../../shared/lib/connectors_utils';
 import type { AutocompleteContext } from '../../context/autocomplete.types';
 
-export function getConnectorIdSuggestions({
+export async function getConnectorIdSuggestions({
   line,
   lineParseResult,
   range,
@@ -31,12 +35,12 @@ export function getConnectorIdSuggestions({
   const stepConnectorType =
     resolveConnectorIdStepType(focusedStepInfo, path, focusedYamlPair) ?? triggerConnectorType;
 
-  if (
-    !stepConnectorType ||
-    !lineParseResult ||
-    lineParseResult.matchType !== 'connector-id' ||
-    !dynamicConnectorTypes
-  ) {
+  if (!stepConnectorType || !lineParseResult || lineParseResult.matchType !== 'connector-id') {
+    return [];
+  }
+  const connectorSelection = getCustomStepConnectorIdSelectionHandler(stepConnectorType);
+  const customConnectorInstances = await getInferenceConnectorInstances(connectorSelection);
+  if (!dynamicConnectorTypes && !customConnectorInstances) {
     return [];
   }
   // If the user has typed part of the connector-id, replace from the value start to the line end.
@@ -51,7 +55,8 @@ export function getConnectorIdSuggestions({
   const suggestions = getConnectorIdSuggestionsItems(
     stepConnectorType,
     replacementRange,
-    dynamicConnectorTypes
+    dynamicConnectorTypes ?? undefined,
+    customConnectorInstances
   );
 
   if (!triggerConnectorType) {
