@@ -19,13 +19,18 @@ interface YamlStep {
   else?: YamlStep[];
   foreach?: string;
   condition?: string;
-  'on-failure'?: { continue?: boolean };
+  'on-failure'?: { continue?: boolean; fallback?: YamlStep[] };
 }
 
 const parsed = parse(FLOOR_ALERT_TRIAGE_YAML) as { steps: YamlStep[] };
 
 const flatten = (steps: YamlStep[]): YamlStep[] =>
-  steps.flatMap((s) => [s, ...flatten(s.steps ?? []), ...flatten(s.else ?? [])]);
+  steps.flatMap((s) => [
+    s,
+    ...flatten(s.steps ?? []),
+    ...flatten(s.else ?? []),
+    ...flatten(s['on-failure']?.fallback ?? []),
+  ]);
 
 const allSteps = flatten(parsed.steps);
 const stepByName = (name: string) => allSteps.find((s) => s.name === name);
@@ -233,5 +238,81 @@ describe('floor_alert_triage — require_analysis_enabled', () => {
     );
     expect(abort?.type).toBe('workflow.fail');
     expect(abort?.with?.message).toContain('Alert Analysis');
+  });
+
+  it('evaluates workflowEnabled true/false — a missing field must not abort', () => {
+    const condition = stepByName('require_analysis_enabled')?.condition;
+    expect(condition).toBeDefined();
+    const enabledContext = {
+      steps: { fetch_analysis_runtime_config: { output: { workflowEnabled: true } } },
+    };
+    const disabledContext = {
+      steps: { fetch_analysis_runtime_config: { output: { workflowEnabled: false } } },
+    };
+    const missingContext = {
+      steps: { fetch_analysis_runtime_config: { output: {} } },
+    };
+    expect(evalExpr(condition ?? '', enabledContext)).toBe(false);
+    expect(evalExpr(condition ?? '', disabledContext)).toBe(true);
+    expect(evalExpr(condition ?? '', missingContext)).toBe(false);
+  });
+});
+
+describe('floor_alert_triage — classify_alerts on-failure', () => {
+  it('fails the run after the warning so close_investigation_no_fp cannot run', () => {
+    const classify = stepByName('classify_alerts');
+    const abort = stepByName('abort_classify_failed');
+    expect(classify?.['on-failure']?.fallback?.map((step) => step.name)).toEqual([
+      'post_comment_classify_failed',
+      'abort_classify_failed',
+    ]);
+    expect(abort?.type).toBe('workflow.fail');
+  });
+});
+
+describe('floor_alert_triage — guard_classification_nonempty', () => {
+  it('compares precomputed counts — `| size` after a filter is invalid Liquid in if-conditions', () => {
+    const counts = stepByName('compute_classification_guard_counts');
+    const outer = stepByName('guard_classification_nonempty');
+    const inner = stepByName('guard_classification_nonempty_inner');
+
+    expect(counts?.with).toEqual({
+      alert_count: '${{ event.alerts | size }}',
+      verdict_count: '${{ steps.classify_alerts.output.verdicts | size }}',
+    });
+    expect(outer?.condition).toBe('${{ variables.alert_count > 0 }}');
+    expect(inner?.condition).toBe('${{ variables.verdict_count == 0 }}');
+    expect(outer?.condition).not.toContain('|');
+    expect(inner?.condition).not.toContain('|');
+  });
+
+  it('evaluates the precomputed comparisons and rejects `| size > 0`', () => {
+    expect(evalExpr('${{ variables.alert_count > 0 }}', { variables: { alert_count: 3 } })).toBe(
+      true
+    );
+    expect(
+      evalExpr('${{ variables.verdict_count == 0 }}', { variables: { verdict_count: 0 } })
+    ).toBe(true);
+    expect(() =>
+      evalExpr('${{ event.alerts | size > 0 }}', { event: { alerts: [{ _id: 'a' }] } })
+    ).toThrow();
+  });
+
+  it('does not tell the operator to enable Alert Analysis — that path aborted earlier', () => {
+    const comment = stepByName('post_comment_classification_empty');
+    const input = (comment?.with?.body as { input?: string } | undefined)?.input ?? '';
+    expect(input).toContain('already carry the analysis tag');
+    expect(input).not.toContain('Verify the Alert Analysis workflow is enabled');
+  });
+});
+
+describe('floor_alert_triage — if-conditions', () => {
+  it('keeps every if-condition free of Liquid filters', () => {
+    const ifSteps = allSteps.filter((step) => step.type === 'if');
+    expect(ifSteps.length).toBeGreaterThan(0);
+    for (const step of ifSteps) {
+      expect(step.condition).toBeDefined();
+      expect(step.condition).not.toContain('|');
+    }
   });
 });

@@ -38,6 +38,9 @@ consts:
 #
 # ORDERING IS LOAD-BEARING — do not rearrange.
 #
+# Abort / preflight steps MUST stay above create_investigation. A disabled or
+# unusable Alert Analysis path must not open an Investigation.
+#
 # The conclusion metadata-patch, tags, and notes MUST be written before the
 # gate (`workflow.execute system-create-investigation-proposal`). The gate
 # parks this Worker for up to 72 h at Manual autonomy; anything sequenced
@@ -218,9 +221,18 @@ steps:
               trigger_mode: "never"
               input: >-
                 🤖 **Alert Triage** ⚠️ — Classification step failed for {{ event.alerts | size }} alert(s).
-                Verify the Alert Analysis workflow is enabled in this space and the `alertzero_alert_triage`
-                Model Management feature is configured with a connector.
+                The Alert Analysis workflow may be disabled, or `workflow.execute` threw.
                 Alerts have NOT been tagged or closed.
+
+        # Fallback handles the comment only. Without this fail the parent continues into
+        # empty FP candidates and close_investigation_no_fp — a hollow "triage complete".
+        - name: abort_classify_failed
+          type: workflow.fail
+          with:
+            message: >-
+              Alert Triage classification failed. The Alert Analysis workflow may be
+              disabled in this deployment, or the sub-workflow threw. Alerts were not
+              tagged or closed.
     with:
       workflow-id: system-security-alert-analysis
       inputs:
@@ -263,17 +275,25 @@ steps:
     with:
       fp_candidate_count: "${{ variables.fp_candidate_ids | size }}"
 
-  # Guard: if the sub-workflow returned 0 verdicts for a non-empty alert batch, the Alert
-  # Analysis workflow is likely disabled or its connector is misconfigured. Surface this
-  # explicitly rather than completing silently with zero results.
-  # Two nested ifs because the expression engine does not support `and` in ${{ }}.
+  # Guard: analysis is on (or this run would have aborted at step 0) but the
+  # sub-workflow returned 0 verdicts for a non-empty batch — already-tagged
+  # alerts, a missing Model Management connector, or the sub-workflow skipped.
+  # Counts are materialised first: `${{ event.alerts | size > 0 }}` is invalid Liquid
+  # (the engine parses `size > 0` as a filter name). The if-condition engine also
+  # rejects `and`, so the two comparisons stay nested.
+  - name: compute_classification_guard_counts
+    type: data.set
+    with:
+      alert_count: "${{ event.alerts | size }}"
+      verdict_count: "${{ steps.classify_alerts.output.verdicts | size }}"
+
   - name: guard_classification_nonempty
     type: if
-    condition: "${{ event.alerts | size > 0 }}"
+    condition: "${{ variables.alert_count > 0 }}"
     steps:
       - name: guard_classification_nonempty_inner
         type: if
-        condition: "${{ steps.classify_alerts.output.verdicts | size == 0 }}"
+        condition: "${{ variables.verdict_count == 0 }}"
         steps:
           - name: post_comment_classification_empty
             type: kibana.request
@@ -291,8 +311,9 @@ steps:
                 trigger_mode: "never"
                 input: >-
                   🤖 **Alert Triage** ⚠️ — Alert Analysis returned no verdicts for {{ event.alerts | size }} alert(s).
-                  Verify the Alert Analysis workflow is enabled in this space and the `alertzero_alert_triage`
-                  Model Management feature is configured with a connector.
+                  Analysis is on for this space (a disabled setting aborts before an Investigation is opened).
+                  Likely causes: the alerts already carry the analysis tag, the `alertzero_alert_triage`
+                  Model Management feature has no connector, or the sub-workflow skipped the batch.
                   Alerts have NOT been tagged or closed.
 
   # ---------------------------------------------------------------------------
