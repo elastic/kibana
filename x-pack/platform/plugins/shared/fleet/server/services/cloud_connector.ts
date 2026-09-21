@@ -8,6 +8,7 @@
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
+import { isIamRoleArn } from '../../common/services/cloud_connectors';
 import {
   CLOUD_CONNECTOR_IAC_REQUEST_KEYS,
   isCloudConnectorSecretReference,
@@ -45,11 +46,13 @@ import {
   CloudConnectorGetListError,
   CloudConnectorInvalidVarsError,
   CloudConnectorDeleteError,
+  CloudConnectorRoleArnPropagationError,
   rethrowIfInstanceOrWrap,
   getErrorMessage,
 } from '../errors';
 
 import { appContextService } from './app_context';
+import { propagateRoleArnToPackagePolicies } from './cloud_connectors';
 import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
 import { extractSecretIdsFromCloudConnectorVars } from './secrets/cloud_connector';
 import { deleteSecrets } from './secrets/common';
@@ -103,7 +106,8 @@ export interface CloudConnectorServiceInterface {
   update(
     soClient: SavedObjectsClientContract,
     cloudConnectorId: string,
-    cloudConnectorUpdate: Partial<UpdateCloudConnectorRequest>
+    cloudConnectorUpdate: Partial<UpdateCloudConnectorRequest>,
+    options?: { esClient?: ElasticsearchClient }
   ): Promise<CloudConnector>;
   delete(
     soClient: SavedObjectsClientContract,
@@ -412,7 +416,8 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
   async update(
     soClient: SavedObjectsClientContract,
     cloudConnectorId: string,
-    cloudConnectorUpdate: Partial<UpdateCloudConnectorRequest>
+    cloudConnectorUpdate: Partial<UpdateCloudConnectorRequest>,
+    options?: { esClient?: ElasticsearchClient }
   ): Promise<CloudConnector> {
     const logger = this.getLogger('update');
 
@@ -459,12 +464,65 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
 
       Object.assign(updateAttributes, iacAttributesFromConfirm(cloudConnectorUpdate));
 
-      // Update the saved object
-      const updatedSavedObject = await soClient.update<CloudConnectorSOAttributes>(
-        CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
-        cloudConnectorId,
-        updateAttributes
-      );
+      const isAws = existingCloudConnector.attributes.cloudProvider === 'aws';
+      const existingAwsVars = existingCloudConnector.attributes.vars as
+        | AwsCloudConnectorVars
+        | undefined;
+      const incomingAwsVars = cloudConnectorUpdate.vars as AwsCloudConnectorVars | undefined;
+      const oldRoleArn = existingAwsVars?.role_arn?.value;
+      const newRoleArn = incomingAwsVars?.role_arn?.value;
+      const roleArnChanged = isAws && typeof newRoleArn === 'string' && newRoleArn !== oldRoleArn;
+      const esClient = options?.esClient;
+
+      if (roleArnChanged) {
+        if (!esClient) {
+          logger.error(
+            `Role ARN change requested for connector ${cloudConnectorId} but no esClient was provided; cannot fan out.`
+          );
+          throw new CloudConnectorCreateError(
+            'Role ARN update is not supported from this code path (missing esClient for package-policy fan-out).'
+          );
+        }
+        await propagateRoleArnToPackagePolicies({
+          soClient,
+          esClient,
+          connectorId: cloudConnectorId,
+          newRoleArn,
+        });
+        updateAttributes.verification_status = 'pending';
+        updateAttributes.verification_started_at = null;
+        updateAttributes.verification_failed_at = null;
+      }
+
+      let updatedSavedObject;
+      try {
+        updatedSavedObject = await soClient.update<CloudConnectorSOAttributes>(
+          CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+          cloudConnectorId,
+          updateAttributes
+        );
+      } catch (writeError) {
+        if (roleArnChanged && typeof oldRoleArn === 'string' && esClient) {
+          logger.error(
+            `Connector ${cloudConnectorId} write failed after successful role ARN fan-out; reverting policies.`,
+            writeError
+          );
+          try {
+            await propagateRoleArnToPackagePolicies({
+              soClient,
+              esClient,
+              connectorId: cloudConnectorId,
+              newRoleArn: oldRoleArn,
+            });
+          } catch (revertError) {
+            logger.error(
+              `Revert after failed connector write also failed for ${cloudConnectorId}`,
+              revertError
+            );
+          }
+        }
+        throw writeError;
+      }
 
       logger.info(`Successfully updated cloud connector ${cloudConnectorId}`);
 
@@ -483,6 +541,9 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       };
     } catch (error) {
       logger.error(`Failed to update cloud connector: ${getErrorMessage(error)}`);
+      if (error instanceof CloudConnectorRoleArnPropagationError) {
+        throw error;
+      }
       rethrowIfInstanceOrWrap(error, CloudConnectorCreateError, 'Failed to update cloud connector');
     }
   }
@@ -580,6 +641,12 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       if (!roleArn) {
         logger.error('Package policy must contain role_arn variable');
         throw new CloudConnectorInvalidVarsError('Package policy must contain role_arn variable');
+      }
+      if (typeof roleArn !== 'string' || !isIamRoleArn(roleArn)) {
+        logger.error('role_arn variable is not a valid IAM role ARN');
+        throw new CloudConnectorInvalidVarsError(
+          'role_arn must be a valid IAM role ARN (arn:<partition>:iam::<account>:role/<name>)'
+        );
       }
 
       // external_id is optional for AWS. When present, it must be a valid

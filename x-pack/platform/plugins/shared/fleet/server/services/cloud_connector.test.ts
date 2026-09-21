@@ -35,11 +35,17 @@ import type {
 
 import { CloudConnectorService } from './cloud_connector';
 import { appContextService } from './app_context';
+import { propagateRoleArnToPackagePolicies } from './cloud_connectors';
 
 // Mock dependencies
 jest.mock('./app_context');
+jest.mock('./cloud_connectors', () => ({
+  ...jest.requireActual('./cloud_connectors'),
+  propagateRoleArnToPackagePolicies: jest.fn(),
+}));
 
 const mockAppContextService = appContextService;
+const propagateRoleArnToPackagePoliciesMock = propagateRoleArnToPackagePolicies as jest.Mock;
 
 describe('CloudConnectorService', () => {
   let service: CloudConnectorService;
@@ -1215,9 +1221,14 @@ describe('CloudConnectorService', () => {
       mockSoClient.get.mockResolvedValue(mockExistingSavedObject);
       mockSoClient.update.mockResolvedValue(mockUpdatedWithVars);
 
-      const result = await service.update(mockSoClient, 'cloud-connector-123', {
-        vars: validVars,
-      });
+      const result = await service.update(
+        mockSoClient,
+        'cloud-connector-123',
+        {
+          vars: validVars,
+        },
+        { esClient: mockEsClient }
+      );
 
       expect(mockSoClient.update).toHaveBeenCalledWith(
         CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
@@ -1225,6 +1236,9 @@ describe('CloudConnectorService', () => {
         {
           vars: validVars,
           updated_at: expect.any(String),
+          verification_status: 'pending',
+          verification_started_at: null,
+          verification_failed_at: null,
         }
       );
 
@@ -1262,10 +1276,15 @@ describe('CloudConnectorService', () => {
       mockSoClient.get.mockResolvedValue(mockExistingSavedObject);
       mockSoClient.update.mockResolvedValue(mockFullyUpdated);
 
-      const result = await service.update(mockSoClient, 'cloud-connector-123', {
-        name: 'fully-updated-connector',
-        vars: validVars,
-      });
+      const result = await service.update(
+        mockSoClient,
+        'cloud-connector-123',
+        {
+          name: 'fully-updated-connector',
+          vars: validVars,
+        },
+        { esClient: mockEsClient }
+      );
 
       expect(result.name).toEqual('fully-updated-connector');
       const awsVars = result.vars as AwsCloudConnectorVars;
@@ -1310,12 +1329,128 @@ describe('CloudConnectorService', () => {
       };
 
       await expect(
-        service.update(mockSoClient, 'cloud-connector-123', {
-          vars: varsWithoutExternalId,
-        })
+        service.update(
+          mockSoClient,
+          'cloud-connector-123',
+          {
+            vars: varsWithoutExternalId,
+          },
+          { esClient: mockEsClient }
+        )
       ).resolves.toBeDefined();
 
       expect(mockSoClient.update).toHaveBeenCalled();
+    });
+
+    describe('AWS role_arn change', () => {
+      const connectorId = 'cc-1';
+      const oldArn = 'arn:aws:iam::123456789012:role/Old';
+      const newArn = 'arn:aws:iam::123456789012:role/New';
+
+      beforeEach(() => {
+        mockSoClient.get.mockResolvedValue({
+          id: connectorId,
+          attributes: {
+            name: 'Test',
+            namespace: '*',
+            cloudProvider: 'aws',
+            vars: { role_arn: { type: 'text', value: oldArn } },
+            verification_status: 'success',
+            verification_started_at: '2026-09-01T00:00:00Z',
+            created_at: '2026-01-01T00:00:00Z',
+            updated_at: '2026-01-01T00:00:00Z',
+          },
+        } as SavedObject);
+        mockSoClient.update.mockResolvedValue({
+          id: connectorId,
+          type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+          references: [],
+          attributes: {},
+        });
+      });
+
+      it('calls propagateRoleArnToPackagePolicies when role_arn actually changes', async () => {
+        await service.update(
+          mockSoClient,
+          connectorId,
+          { vars: { role_arn: { type: 'text', value: newArn } } },
+          { esClient: mockEsClient }
+        );
+
+        expect(propagateRoleArnToPackagePoliciesMock).toHaveBeenCalledWith(
+          expect.objectContaining({ connectorId, newRoleArn: newArn })
+        );
+      });
+
+      it('is a no-op when the incoming role_arn equals the stored one', async () => {
+        await service.update(
+          mockSoClient,
+          connectorId,
+          { vars: { role_arn: { type: 'text', value: oldArn } } },
+          { esClient: mockEsClient }
+        );
+
+        expect(propagateRoleArnToPackagePoliciesMock).not.toHaveBeenCalled();
+      });
+
+      it('resets verification fields when role_arn changes', async () => {
+        await service.update(
+          mockSoClient,
+          connectorId,
+          { vars: { role_arn: { type: 'text', value: newArn } } },
+          { esClient: mockEsClient }
+        );
+
+        expect(mockSoClient.update).toHaveBeenCalledWith(
+          CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+          connectorId,
+          expect.objectContaining({
+            verification_status: 'pending',
+            verification_started_at: null,
+            verification_failed_at: null,
+          })
+        );
+      });
+
+      it('reverts policies when the connector write fails after successful fan-out', async () => {
+        mockSoClient.update.mockRejectedValueOnce(new Error('write-failed'));
+
+        await expect(
+          service.update(
+            mockSoClient,
+            connectorId,
+            { vars: { role_arn: { type: 'text', value: newArn } } },
+            { esClient: mockEsClient }
+          )
+        ).rejects.toThrow('write-failed');
+
+        expect(propagateRoleArnToPackagePoliciesMock).toHaveBeenCalledTimes(2);
+        expect(propagateRoleArnToPackagePoliciesMock).toHaveBeenNthCalledWith(
+          2,
+          expect.objectContaining({ newRoleArn: oldArn })
+        );
+      });
+
+      it('throws when a role ARN change is requested without an esClient', async () => {
+        await expect(
+          service.update(mockSoClient, connectorId, {
+            vars: { role_arn: { type: 'text', value: newArn } },
+          })
+        ).rejects.toThrow(/missing esClient/i);
+      });
+
+      it('rejects an invalid ARN before any fan-out', async () => {
+        await expect(
+          service.update(
+            mockSoClient,
+            connectorId,
+            { vars: { role_arn: { type: 'text', value: 'not-an-arn' } } },
+            { esClient: mockEsClient }
+          )
+        ).rejects.toThrow(/valid IAM role ARN/);
+
+        expect(propagateRoleArnToPackagePoliciesMock).not.toHaveBeenCalled();
+      });
     });
 
     it('should throw error when cloud connector not found', async () => {

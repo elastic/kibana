@@ -12,6 +12,7 @@ import type { CloudProvider, CloudConnector } from '../../../common/types/models
 
 import { CLOUD_CONNECTOR_API_ROUTES } from '../../../common/constants';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
+import { CloudConnectorRoleArnPropagationError } from '../../errors';
 import { cloudConnectorService } from '../../services';
 import { packagePolicyService } from '../../services';
 import { createSecrets, deleteSecrets } from '../../services/secrets';
@@ -823,7 +824,8 @@ describe('Cloud Connector API', () => {
         'connector-123',
         {
           name: 'updated-aws-connector',
-        }
+        },
+        { esClient: expect.any(Object) }
       );
 
       expect(response.ok).toHaveBeenCalledWith({
@@ -874,7 +876,8 @@ describe('Cloud Connector API', () => {
         'connector-456',
         {
           name: 'updated-azure-connector',
-        }
+        },
+        { esClient: expect.any(Object) }
       );
 
       expect(response.ok).toHaveBeenCalledWith({
@@ -920,7 +923,8 @@ describe('Cloud Connector API', () => {
         'connector-123',
         {
           vars: updatedVars,
-        }
+        },
+        { esClient: expect.any(Object) }
       );
 
       expect(response.ok).toHaveBeenCalledWith({
@@ -973,7 +977,8 @@ describe('Cloud Connector API', () => {
         'connector-456',
         {
           vars: updatedVars,
-        }
+        },
+        { esClient: expect.any(Object) }
       );
 
       expect(response.ok).toHaveBeenCalledWith({
@@ -1024,7 +1029,8 @@ describe('Cloud Connector API', () => {
         {
           name: 'fully-updated-connector',
           vars: updatedVars,
-        }
+        },
+        { esClient: expect.any(Object) }
       );
 
       expect(response.ok).toHaveBeenCalledWith({
@@ -1079,7 +1085,8 @@ describe('Cloud Connector API', () => {
         {
           name: 'fully-updated-azure-connector',
           vars: updatedVars,
-        }
+        },
+        { esClient: expect.any(Object) }
       );
 
       expect(response.ok).toHaveBeenCalledWith({
@@ -1112,6 +1119,36 @@ describe('Cloud Connector API', () => {
         statusCode: 400,
         body: {
           message: 'External ID secret reference is not valid',
+        },
+      });
+    });
+
+    it('returns 500 with propagation failure details', async () => {
+      mockCloudConnectorService.update.mockRejectedValue(
+        new CloudConnectorRoleArnPropagationError('Role ARN fan-out failed', {
+          updateFailed: ['policy-1'],
+          revertFailed: ['policy-2'],
+        })
+      );
+      const request = httpServerMock.createKibanaRequest({
+        params: { cloudConnectorId: 'connector-123' },
+        body: {
+          vars: {
+            role_arn: { value: 'arn:aws:iam::123456789012:role/UpdatedRole', type: 'text' },
+          },
+        },
+      });
+
+      await updateCloudConnectorHandler(context, request, response);
+
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 500,
+        body: {
+          message: 'Role ARN fan-out failed',
+          attributes: {
+            updateFailed: ['policy-1'],
+            revertFailed: ['policy-2'],
+          },
         },
       });
     });
@@ -1171,7 +1208,8 @@ describe('Cloud Connector API', () => {
       expect(mockCloudConnectorService.update).toHaveBeenCalledWith(
         expect.any(Object), // internalSoClient
         'connector-123',
-        {}
+        {},
+        { esClient: expect.any(Object) }
       );
 
       expect(response.ok).toHaveBeenCalledWith({
