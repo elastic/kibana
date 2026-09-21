@@ -24,8 +24,6 @@ export type { ReplayStats } from './replay_into_managed_stream';
 export {
   deleteTemporaryReplayIndices,
   replayIntoManagedStream,
-  resetMemoryPages,
-  replayIntoMemoryPages,
   shiftSnapshotTimestamp,
 } from './replay_into_managed_stream';
 

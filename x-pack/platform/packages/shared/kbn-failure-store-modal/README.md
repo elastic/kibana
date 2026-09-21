@@ -200,7 +200,7 @@ The package includes comprehensive test coverage:
 
 ```bash
 # Run tests
-yarn jest --config x-pack/platform/packages/shared/kbn-failure-store-modal/jest.config.js
+pnpm exec jest --config x-pack/platform/packages/shared/kbn-failure-store-modal/jest.config.js
 ```
 
 ### Storybook
@@ -208,6 +208,6 @@ yarn jest --config x-pack/platform/packages/shared/kbn-failure-store-modal/jest.
 View and develop the component in Storybook:
 
 ```bash
-yarn storybook failure_store_modal
+pnpm storybook failure_store_modal
 ```
 

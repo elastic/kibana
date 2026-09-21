@@ -56,10 +56,40 @@ describe('updateAttachmentStepDefinition', () => {
       attachmentId: 'att-1',
       data: { text: 'new' },
       description: undefined,
+      render_inline: undefined,
     });
     expect(result).toEqual({
       output: { attachment_id: 'att-1', current_version: 3 },
     });
+  });
+
+  it('forwards render_inline to the client', async () => {
+    const { update, getAttachmentClient } = createWorkflowStepAttachmentClientMock({
+      update: jest
+        .fn()
+        .mockResolvedValue({ id: 'att-1', type: 'text', current_version: 2, versions: [] }),
+    });
+    const definition = updateAttachmentStepDefinition({
+      getAttachmentClient,
+      isExperimentalEnabled: experimentalEnabled,
+    });
+
+    expect(
+      definition.inputSchema.safeParse({
+        conversation_id: 'conv-1',
+        attachment_id: 'att-1',
+        data: {},
+        render_inline: true,
+      }).success
+    ).toBe(true);
+
+    await definition.handler(
+      createStepHandlerContext({
+        input: { conversation_id: 'conv-1', attachment_id: 'att-1', data: {}, render_inline: true },
+      })
+    );
+
+    expect(update).toHaveBeenCalledWith(expect.objectContaining({ render_inline: true }));
   });
 
   it('returns an error when experimental is disabled', async () => {
