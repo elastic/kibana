@@ -109,7 +109,11 @@ export interface QueriesOccurrencesGetResponse {
 
 export interface QueryLink {
   query: StreamQuery;
-  /** Nightshift source the query belongs to. */
+  /**
+   * Nightshift source the query belongs to. Stamped by the server from the
+   * route it was written through, never supplied by callers. Equals the stream
+   * name until sources replace streams as the onboarding unit.
+   */
   source_id: string;
   /** Whether a Kibana rule exists for this query. */
   rule_backed: boolean;

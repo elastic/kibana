@@ -20,10 +20,11 @@ import {
   pickLatestPerGroup,
   withSort,
   withWhere,
+  type LatestSourceGroupBy,
   type LatestSourceWhereCondition,
 } from '../../significant_events/latest_source_query';
 import { runEsqlQuery } from '../../significant_events/run_esql_query';
-import { ID, KI_TYPE_FEATURE, QUERY_RULE_BACKED, QUERY_RULE_ID, SOURCE_ID, TYPE } from '../fields';
+import { ID, KI_TYPE_FEATURE, SOURCE_ID, TYPE } from '../fields';
 
 export const REVISION_SIZE_LIMIT = 10_000;
 
@@ -33,8 +34,12 @@ export const REVISION_SIZE_LIMIT = 10_000;
  * `(source_id, slug)`, so the same stream onboarded from two spaces yields the
  * same `id` in both and one space's revision would otherwise shadow the other's.
  */
-const REVISION_GROUP_KEY = [SOURCE_ID, TYPE, ID] as [string, string, string];
+const REVISION_GROUP_KEY: LatestSourceGroupBy = [SOURCE_ID, TYPE, ID];
 
+/**
+ * Space-scoped access to raw knowledge indicator revisions. Every query starts
+ * from `inSpace(space)`; nothing in this class can read another space's data.
+ */
 export class RevisionReader {
   constructor(
     private readonly esClient: ElasticsearchClient,
@@ -119,36 +124,4 @@ export class RevisionReader {
     const docs = await this.fetchLatestRevisions(where, IS_NOT_DELETED);
     return docs.filter(isStoredFeatureKnowledgeIndicator);
   }
-}
-
-/**
- * Every rule id ever recorded on a rule-backed query revision, across all
- * spaces and including legacy `stream.name` documents. Deliberately not
- * space-scoped: only the cluster-wide `_reset` route uses it, to delete
- * Significant Events v1 rules before wiping the data stream.
- */
-export async function fetchAllRuleIdsClusterWide(
-  esClient: ElasticsearchClient,
-  logger: Logger
-): Promise<string[]> {
-  const query = esql.from([KNOWLEDGE_INDICATORS_DATA_STREAM]).where`${esql.col(
-    QUERY_RULE_BACKED
-  )} == true AND ${esql.col(QUERY_RULE_ID)} IS NOT NULL`
-    .pipe`STATS __count = COUNT(*) BY ruleId = ${esql.col(QUERY_RULE_ID)}`
-    .keep('ruleId')
-    .limit(REVISION_SIZE_LIMIT);
-
-  const response = await runEsqlQuery(esClient, query.print('basic'));
-  if (!response) {
-    return [];
-  }
-
-  const rows = esqlToObjects<{ ruleId?: unknown }>(response);
-  if (rows.length >= REVISION_SIZE_LIMIT) {
-    logger.warn(
-      `Cluster-wide rule id enumeration hit REVISION_SIZE_LIMIT (${REVISION_SIZE_LIMIT}); some legacy rules may not be deleted by this reset.`
-    );
-  }
-
-  return rows.map((row) => row.ruleId).filter((id): id is string => typeof id === 'string');
 }

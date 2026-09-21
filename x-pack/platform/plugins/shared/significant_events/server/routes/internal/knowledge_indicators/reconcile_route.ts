@@ -34,7 +34,9 @@ const reconcileKnowledgeIndicatorsRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
 
-    await streamsClient.ensureStream(params.path.streamName);
+    // `getStream` (not `ensureStream`): it 404s on a missing stream and enforces the read
+    // privilege, and it never materialises a stream definition as a side effect.
+    await streamsClient.getStream(params.path.streamName);
     const kiClient = await getKnowledgeIndicatorClient();
     return kiClient.reconcileSource(params.path.streamName);
   },

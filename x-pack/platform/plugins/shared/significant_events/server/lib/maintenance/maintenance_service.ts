@@ -38,7 +38,8 @@ import {
   buildDisableTargets,
   type MaintenanceWorkflowTarget,
 } from './managed_workflow_targets';
-import { getAllSpaceIds as enumerateSpaceIds } from '../spaces/get_all_space_ids';
+import { getAllSpaceIds } from '../spaces/get_all_space_ids';
+import { toErrorMessage } from '../errors/to_error_message';
 
 type ManagementApi = WorkflowsServerPluginSetup['management'];
 
@@ -99,9 +100,6 @@ export interface SignificantEventsMaintenanceService {
    */
   reassertPausedWorkflows(params: { request: KibanaRequest }): Promise<void>;
 }
-
-const toMessage = (error: unknown): string =>
-  error instanceof Error ? error.message : String(error);
 
 const workflowKey = ({ id, spaceId }: MaintenanceWorkflowTarget): string => `${id}@${spaceId}`;
 
@@ -264,13 +262,11 @@ export const createSignificantEventsMaintenanceService = ({
     );
   };
 
-  // Surfaces (not just logs) the under-scoping so pause doesn't silently skip
-  // per-space workflows in every space but the default.
-  const getAllSpaceIds = async (
+  const collectSpaceIds = async (
     request: KibanaRequest,
     failures: SignificantEventsMaintenanceFailure[]
   ): Promise<SpaceId[]> => {
-    const { spaceIds, failure } = await enumerateSpaceIds({
+    const { spaceIds, failure } = await getAllSpaceIds({
       request,
       spacesService: server.spaces?.spacesService,
     });
@@ -302,7 +298,7 @@ export const createSignificantEventsMaintenanceService = ({
       }
       return true;
     } catch (error) {
-      failures.push({ target, error: toMessage(error) });
+      failures.push({ target, error: toErrorMessage(error) });
       return false;
     }
   };
@@ -323,7 +319,7 @@ export const createSignificantEventsMaintenanceService = ({
       if (error instanceof WorkflowNotFoundError) {
         return;
       }
-      failures.push({ target: `execution:${id}@${spaceId}`, error: toMessage(error) });
+      failures.push({ target: `execution:${id}@${spaceId}`, error: toErrorMessage(error) });
     }
   };
 
@@ -360,7 +356,7 @@ export const createSignificantEventsMaintenanceService = ({
       // which only record what pause itself disabled).
       return toggledIds;
     } catch (error) {
-      failures.push({ target: 'rules', error: toMessage(error) });
+      failures.push({ target: 'rules', error: toErrorMessage(error) });
       return [];
     }
   };
@@ -390,7 +386,7 @@ export const createSignificantEventsMaintenanceService = ({
       failures.push(...ruleFailures);
       return { failedIds, toggledCount: toggledIds.length };
     } catch (error) {
-      failures.push({ target: 'rules', error: toMessage(error) });
+      failures.push({ target: 'rules', error: toErrorMessage(error) });
       return { failedIds: ruleIds, toggledCount: 0 };
     }
   };
@@ -434,7 +430,7 @@ export const createSignificantEventsMaintenanceService = ({
       }
       return 'toggled';
     } catch (error) {
-      failures.push({ target, error: toMessage(error) });
+      failures.push({ target, error: toErrorMessage(error) });
       return 'failed';
     }
   };
@@ -465,7 +461,7 @@ export const createSignificantEventsMaintenanceService = ({
     const mgmt = server.workflowsManagement?.management;
     // Enumerate spaces regardless of workflow availability: settings still need
     // to be turned off per space even when workflows management is down.
-    const spaceIds = await getAllSpaceIds(request, failures);
+    const spaceIds = await collectSpaceIds(request, failures);
     const newlyDisabled: MaintenanceWorkflowTarget[] = [];
 
     if (mgmt) {
@@ -558,13 +554,13 @@ export const createSignificantEventsMaintenanceService = ({
       } catch (writeError) {
         logFailures(
           log,
-          `Significant Events ${mode} failed before sweep: could not persist paused intent: ${toMessage(
+          `Significant Events ${mode} failed before sweep: could not persist paused intent: ${toErrorMessage(
             writeError
           )}`,
           [
             {
               target: mode === 'reassert' ? 'reassert' : 'pause',
-              error: `Failed to persist pause intent: ${toMessage(writeError)}`,
+              error: `Failed to persist pause intent: ${toErrorMessage(writeError)}`,
             },
           ]
         );
@@ -627,7 +623,7 @@ export const createSignificantEventsMaintenanceService = ({
       // a later Pause retries the snapshot write.
       const snapshotFailure: SignificantEventsMaintenanceFailure = {
         target: mode === 'reassert' ? 'reassert' : 'pause',
-        error: `Failed to persist pause snapshot: ${toMessage(writeError)}`,
+        error: `Failed to persist pause snapshot: ${toErrorMessage(writeError)}`,
       };
       const failuresWithSnapshot = [...sweep.failures, snapshotFailure];
       logFailures(
@@ -636,7 +632,7 @@ export const createSignificantEventsMaintenanceService = ({
           sweep.workflowsDisabledThisSweep
         } workflow(s) / ${sweep.rulesDisabledThisSweep} rule(s), snapshot would have ${
           sweep.disabledWorkflows.length
-        } workflow(s); write error: ${toMessage(writeError)}`,
+        } workflow(s); write error: ${toErrorMessage(writeError)}`,
         failuresWithSnapshot
       );
       // User pause: return partial success so the UI shows a warning, not "pause failed".
@@ -760,11 +756,11 @@ export const createSignificantEventsMaintenanceService = ({
         } catch (writeError) {
           failures.push({
             target: 'resume',
-            error: `Failed to persist resume state: ${toMessage(writeError)}`,
+            error: `Failed to persist resume state: ${toErrorMessage(writeError)}`,
           });
           logFailures(
             log,
-            `Significant Events resume persist failed after best-effort re-enable: ${toMessage(
+            `Significant Events resume persist failed after best-effort re-enable: ${toErrorMessage(
               writeError
             )}`,
             failures
@@ -817,7 +813,7 @@ export const createSignificantEventsMaintenanceService = ({
       } catch (error) {
         featureSettingsUnavailable = true;
         log.warn(
-          `Significant Events maintenance status: failed to read feature settings: ${toMessage(
+          `Significant Events maintenance status: failed to read feature settings: ${toErrorMessage(
             error
           )}`
         );

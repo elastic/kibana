@@ -263,7 +263,7 @@ describe('RulesAdapterV2', () => {
   });
 
   describe('findOwnedRuleIds', () => {
-    it('returns an empty list when no rules match the source tag', async () => {
+    it('looks up both the source tag and the legacy stream tag for the source', async () => {
       const mock = makeRulesClientMock();
       mock.findRules.mockResolvedValue({ items: [], total: 0, page: 1, perPage: 500 });
       const adapter = makeAdapter(mock);
@@ -274,28 +274,44 @@ describe('RulesAdapterV2', () => {
         perPage: 500,
         page: 1,
       });
+      expect(mock.findRules).toHaveBeenCalledWith({
+        filter: 'metadata.tags: "sigevents:stream:my-stream"',
+        perPage: 500,
+        page: 1,
+      });
+    });
+
+    it('unions current and legacy owned rules so pre-upgrade rules are reconciled as orphans', async () => {
+      const mock = makeRulesClientMock();
+      mock.findRules.mockImplementation(async ({ filter }: { filter: string }) => ({
+        items: filter.includes('nightshift:source:')
+          ? [{ id: 'new-1' }]
+          : [{ id: 'legacy-1' }, { id: 'new-1' }],
+        total: filter.includes('nightshift:source:') ? 1 : 2,
+        page: 1,
+        perPage: 500,
+      }));
+      const adapter = makeAdapter(mock);
+
+      await expect(adapter.findOwnedRuleIds('my-stream')).resolves.toEqual(['new-1', 'legacy-1']);
     });
 
     it('pages until all owned rule ids are collected', async () => {
       const mock = makeRulesClientMock();
-      mock.findRules
-        .mockResolvedValueOnce({
-          items: [{ id: 'r1' }, { id: 'r2' }],
-          total: 3,
-          page: 1,
-          perPage: 500,
-        })
-        .mockResolvedValueOnce({
-          items: [{ id: 'r3' }],
-          total: 3,
-          page: 2,
-          perPage: 500,
-        });
+      mock.findRules.mockImplementation(
+        async ({ filter, page }: { filter: string; page: number }) => {
+          if (filter.includes('sigevents:stream:')) {
+            return { items: [], total: 0, page: 1, perPage: 500 };
+          }
+          return page === 1
+            ? { items: [{ id: 'r1' }, { id: 'r2' }], total: 3, page: 1, perPage: 500 }
+            : { items: [{ id: 'r3' }], total: 3, page: 2, perPage: 500 };
+        }
+      );
       const adapter = makeAdapter(mock);
 
       await expect(adapter.findOwnedRuleIds('my-stream')).resolves.toEqual(['r1', 'r2', 'r3']);
-      expect(mock.findRules).toHaveBeenCalledTimes(2);
-      expect(mock.findRules).toHaveBeenNthCalledWith(2, {
+      expect(mock.findRules).toHaveBeenCalledWith({
         filter: 'metadata.tags: "nightshift:source:my-stream"',
         perPage: 500,
         page: 2,
@@ -388,23 +404,30 @@ describe('RulesAdapterV2', () => {
   });
 
   describe('findSourceIdsWithOwnedRules', () => {
-    it('derives distinct source ids from ownership tags, ignoring unrelated tags', async () => {
+    it('derives distinct source ids from both ownership tags, ignoring unrelated tags', async () => {
       const mock = makeRulesClientMock();
-      mock.getTags.mockResolvedValueOnce([
-        'nightshift:source:logs.nginx',
-        'production',
-        'nightshift:source:logs.apache',
-        'nightshift:source:logs.nginx',
-        // `search` is a substring match; a legacy tag must not leak into the result.
-        'sigevents:stream:logs.legacy',
-      ]);
+      mock.getTags.mockImplementation(async ({ search }: { search: string }) =>
+        search === NIGHTSHIFT_RULE_SOURCE_TAG_PREFIX
+          ? [
+              'nightshift:source:logs.nginx',
+              'production',
+              'nightshift:source:logs.apache',
+              'nightshift:source:logs.nginx',
+            ]
+          : ['sigevents:stream:logs.legacy', 'sigevents:stream:logs.nginx', 'production']
+      );
       const adapter = makeAdapter(mock);
 
       const sourceIds = await adapter.findSourceIdsWithOwnedRules();
 
-      expect(new Set(sourceIds)).toEqual(new Set(['logs.nginx', 'logs.apache']));
+      expect(new Set(sourceIds)).toEqual(new Set(['logs.nginx', 'logs.apache', 'logs.legacy']));
       expect(mock.getTags).toHaveBeenCalledWith({
         search: NIGHTSHIFT_RULE_SOURCE_TAG_PREFIX,
+        kind: 'signal',
+        size: 10000,
+      });
+      expect(mock.getTags).toHaveBeenCalledWith({
+        search: LEGACY_RULE_STREAM_TAG_PREFIX,
         kind: 'signal',
         size: 10000,
       });

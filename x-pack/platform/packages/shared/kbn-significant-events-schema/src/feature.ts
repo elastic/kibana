@@ -91,6 +91,9 @@ export type FeatureUpsert = z.infer<typeof featureUpsertSchema>;
 
 // Canonical persisted feature. Once a feature has been stored and read back it
 // always carries its derived `uuid` and the Nightshift source it belongs to.
+// `source_id` is stamped by the server from the route the feature was written
+// through, never supplied by callers; it equals the stream name until sources
+// replace streams as the onboarding unit.
 export const featureSchema = featureUpsertSchema.and(
   z.object({
     uuid: z.string().max(MAX_ID_LENGTH),

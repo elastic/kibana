@@ -213,7 +213,7 @@ const enrichCausalFeatures = async (
     ).flatMap(({ hits: featureHits }) => featureHits);
     // Both lookups can return the same indicator; keep one entry per uuid.
     // Event references still carry `stream_name`; it matches the feature's `source_id`
-    // while streams are the source universe (#1307).
+    // while streams are the source universe (nightshift-program#1307).
     const uniqueHits = [...new Map(hits.map((feature) => [feature.uuid, feature])).values()];
     const featuresByReference = new Map(
       uniqueHits.flatMap((feature) => [

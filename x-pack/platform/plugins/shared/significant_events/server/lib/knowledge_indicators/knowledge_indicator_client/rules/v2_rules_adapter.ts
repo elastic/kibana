@@ -8,6 +8,7 @@
 import { isBoom } from '@hapi/boom';
 import { ALERTING_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import pLimit from 'p-limit';
+import { uniq } from 'lodash';
 import { compileMatchCountBreachQuery } from '../../../significant_events/rules/match_count_query_compiler';
 import { withAllProjectsRouting } from '../../../significant_events/rules/project_routing';
 import {
@@ -16,10 +17,12 @@ import {
 } from '../../../significant_events/rules/metric_series_contract';
 import { getMetricSeriesRuleSchedule } from '../../../significant_events/rules/schedule';
 import {
-  NIGHTSHIFT_RULE_SOURCE_TAG_PREFIX,
-  sourceIdFromTag,
+  RULE_OWNERSHIP_TAG_PREFIXES,
+  sourceIdFromOwnershipTag,
+  toLegacyStreamTag,
   toSourceTag,
   type IRulesManagementClient,
+  type RuleOwnershipTagPrefix,
   type SignificantEventsRuleDefinition,
 } from './rules_management_client';
 
@@ -106,41 +109,41 @@ export class RulesAdapterV2 implements IRulesManagementClient {
   }
 
   async findOwnedRuleIds(sourceId: string): Promise<string[]> {
-    return this.findRuleIdsByTag(toSourceTag(sourceId));
+    const perTag = await Promise.all(
+      [toSourceTag(sourceId), toLegacyStreamTag(sourceId)].map((tag) => this.findRuleIdsByTag(tag))
+    );
+    return uniq(perTag.flat());
   }
 
   async findSourceIdsWithOwnedRules(): Promise<string[]> {
-    // Prefix-search returns matching tag buckets (not rule documents). Non-ownership
-    // tags are still filtered client-side in case the include pattern is broadened.
-    const tags = await this.findTagsByPrefix(NIGHTSHIFT_RULE_SOURCE_TAG_PREFIX);
-    const sourceIds = new Set<string>();
-    for (const tag of tags) {
-      const sourceId = sourceIdFromTag(tag);
-      if (sourceId) {
-        sourceIds.add(sourceId);
-      }
-    }
-    return [...sourceIds];
+    const perPrefix = await Promise.all(
+      RULE_OWNERSHIP_TAG_PREFIXES.map((prefix) => this.findTagsByPrefix(prefix))
+    );
+    return uniq(
+      perPrefix
+        .flat()
+        .map(sourceIdFromOwnershipTag)
+        .filter((sourceId): sourceId is string => sourceId !== undefined)
+    );
   }
 
-  async findRuleIdsByTagPrefix(prefix: string): Promise<string[]> {
+  async findRuleIdsByTagPrefix(prefix: RuleOwnershipTagPrefix): Promise<string[]> {
     const tags = await this.findTagsByPrefix(prefix);
-    const ids = new Set<string>();
-    for (const tag of tags) {
-      for (const id of await this.findRuleIdsByTag(tag)) {
-        ids.add(id);
-      }
-    }
-    return [...ids];
+    const limit = pLimit(RULE_EXISTS_CONCURRENCY);
+    const perTag = await Promise.all(tags.map((tag) => limit(() => this.findRuleIdsByTag(tag))));
+    return uniq(perTag.flat());
   }
 
-  private async findTagsByPrefix(prefix: string): Promise<string[]> {
+  /**
+   * Tag buckets (not rule documents) that start with `prefix`. `getTags`'s
+   * `search` is a substring match, so the prefix is re-checked client-side.
+   */
+  private async findTagsByPrefix(prefix: RuleOwnershipTagPrefix): Promise<string[]> {
     const tags = await this.rulesClient.getTags({
       search: prefix,
       kind: 'signal',
       size: OWNED_SOURCE_TAGS_SIZE,
     });
-    // `search` is a substring match; keep only tags that really start with the prefix.
     return tags.filter((tag) => tag.startsWith(prefix));
   }
 

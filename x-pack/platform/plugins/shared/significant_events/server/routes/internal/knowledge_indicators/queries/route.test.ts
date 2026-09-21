@@ -120,7 +120,7 @@ describe('reconcileQueriesRoute', () => {
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
         streamsClient: {
-          ensureStream: jest.fn().mockResolvedValue(undefined),
+          getStream: jest.fn().mockImplementation((name: string) => Promise.resolve({ name })),
         },
         licensing: {},
         uiSettingsClient: {},
@@ -151,7 +151,7 @@ describe('reconcileQueriesRoute', () => {
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
         streamsClient: {
-          ensureStream: jest.fn().mockResolvedValue(undefined),
+          getStream: jest.fn().mockImplementation((name: string) => Promise.resolve({ name })),
         },
         licensing: {},
         uiSettingsClient: {},
@@ -255,7 +255,9 @@ describe('bulkDeleteQueriesRoute', () => {
       params: { body: { queryIds: ['q1', 'q2'] } },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
-        streamsClient: { ensureStream: jest.fn().mockResolvedValue(undefined) },
+        streamsClient: {
+          getStream: jest.fn().mockImplementation((name: string) => Promise.resolve({ name })),
+        },
         licensing: {},
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
           getQueryLinks: jest
@@ -300,7 +302,9 @@ describe('bulkDeleteQueriesRoute', () => {
       params: { body: { queryIds: ['q1', 'q2'] } },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
-        streamsClient: { ensureStream: jest.fn().mockResolvedValue(undefined) },
+        streamsClient: {
+          getStream: jest.fn().mockImplementation((name: string) => Promise.resolve({ name })),
+        },
         licensing: {},
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
           getQueryLinks: jest

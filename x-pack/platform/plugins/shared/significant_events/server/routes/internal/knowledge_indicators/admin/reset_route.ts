@@ -11,6 +11,7 @@ import { assertSignificantEventsAccess } from '../../../utils/assert_significant
 import { assertNotPaused } from '../../../utils/assert_not_paused';
 import { FeatureNotEnabledError } from '../../../../lib/errors/feature_not_enabled_error';
 import { getAllSpaceIds } from '../../../../lib/spaces/get_all_space_ids';
+import { fetchLegacyRuleIds } from '../../../../lib/knowledge_indicators/admin/fetch_legacy_rule_ids';
 import {
   resetKnowledgeIndicators,
   type KnowledgeIndicatorsResetResult,
@@ -30,9 +31,11 @@ const resetKnowledgeIndicatorsRoute = createServerRoute({
       '(including legacy documents keyed by stream name, which are otherwise invisible), deletes ' +
       'every Nightshift-owned Alerting v2 rule in every space, removes Significant Events v1 rules ' +
       'and the documents in `.alerts-streams.alerts-default`. Nothing is migrated: re-onboard your ' +
-      'streams afterwards to create new knowledge indicators and rules. Does not modify detections, ' +
-      'discoveries, events, or `.rule-events`. Blocked while Significant Events activity is paused ' +
-      '(resume first), because reset deletes rules that Pause recorded for Resume.',
+      'streams afterwards to create new knowledge indicators and rules. If a rule sweep fails in any ' +
+      'space the response reports `completed: false` and no document is deleted, so the reset can be ' +
+      'retried. Does not modify detections, discoveries, events, or `.rule-events`. Blocked while ' +
+      'Significant Events activity is paused (resume first), because reset deletes rules that Pause ' +
+      'recorded for Resume.',
   },
   security: {
     authz: {
@@ -58,13 +61,16 @@ const resetKnowledgeIndicatorsRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
 
+    const resetLogger = logger.get('significantEvents');
+    const { asInternalUser, asCurrentUser } = scopedClusterClient;
+
     return resetKnowledgeIndicators({
-      // Internal user: the hidden knowledge indicators stream is plugin-owned, like every
-      // other write the KI client makes to it.
-      esClient: scopedClusterClient.asInternalUser,
-      logger: logger.get('significantEvents'),
+      knowledgeIndicatorsEsClient: asInternalUser,
+      alertsEsClient: asCurrentUser,
+      logger: resetLogger,
       request,
       streamsKIsOnboardingClient,
+      fetchLegacyRuleIds: () => fetchLegacyRuleIds(asInternalUser, resetLogger),
       getAllSpaceIds: () =>
         getAllSpaceIds({ request, spacesService: server.spaces?.spacesService }),
       getRulesManagementClientInSpace,

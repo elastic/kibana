@@ -356,7 +356,7 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
     const scopedClients = await getScopedClients({
       request,
     });
-    const { licensing } = scopedClients;
+    const { licensing, streamsClient } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
 
@@ -422,6 +422,9 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
 
     for (const sourceId of sourcesWithShrinkingOps) {
       try {
+        // Source ids are stream names until nightshift-program#1307; `getStream` keeps the
+        // existence and read-privilege check that gated this reconcile before.
+        await streamsClient.getStream(sourceId);
         await kiClient.reconcileSource(sourceId);
       } catch (err) {
         logger.warn(

@@ -46,6 +46,12 @@ export function computeExpiresAt(timestamp: string, ttlDays: number): string {
   return new Date(new Date(timestamp).getTime() + ttlDays * 24 * 60 * 60 * 1000).toISOString();
 }
 
+/**
+ * No `space` here, unlike `ToStoredQueryParams`: a feature's identity is
+ * `computeFeatureUuid(source_id, slug)` on purpose, so the same feature keeps
+ * its uuid across spaces and space isolation comes from `kibana.space_ids` at
+ * read time (which is why readers must filter on space before grouping).
+ */
 export interface ToStoredFeatureParams {
   sourceId: string;
   feature: FeatureUpsert;
@@ -89,6 +95,7 @@ export function toStoredFeature({
 }
 
 export interface ToStoredQueryParams {
+  /** Only used to derive `rule_id`: rules live in the space, so their ids must too. */
   space: string;
   sourceId: string;
   query: StreamQuery & { rule_backed?: boolean; rule_id?: string };

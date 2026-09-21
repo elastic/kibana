@@ -19,6 +19,7 @@ import {
   KNOWLEDGE_INDICATORS_DATA_STREAM,
 } from '../data_stream';
 import {
+  andWhere,
   combineWhere,
   inPredicate,
   inSpace,
@@ -253,22 +254,23 @@ export class IndicatorSearcher {
     const docById = new Map(docs.map((d) => [`${d['source.id']}:${d.type}:${d.id}`, d]));
 
     // Phase 2: rank via ES|QL on the latest doc subset. We re-issue a query
-    // constrained by the (source.id, type, id) tuples from phase 1, in the same space.
+    // constrained by the (source.id, type, id) tuples from phase 1.
     if (docById.size === 0) {
       return { hits: [] };
     }
 
     const ids = Array.from(new Set(docs.map((d) => d.id)));
     const limit = options.limit ?? SEARCH_SIZE_LIMIT;
-    const phase2Where = combineWhere(
-      inSpace(this.space),
-      inPredicate(ID, ids),
-      inPredicate(SOURCE_ID, sourceIds),
-      inPredicate(TYPE, options.types ?? [])
+    // `buildRankQuery` issues its own FROM and bypasses `RevisionReader`, so the space
+    // filter has to be re-applied here.
+    const phase2Where = andWhere(
+      combineWhere(
+        inPredicate(ID, ids),
+        inPredicate(SOURCE_ID, sourceIds),
+        inPredicate(TYPE, options.types ?? [])
+      ),
+      inSpace(this.space)
     );
-    if (!phase2Where) {
-      return { hits: [] };
-    }
 
     const query = this.buildRankQuery(mode, phase2Where, queryText, options.types ?? [], limit);
     const rankedRows = esqlToObjects<RankedIndicatorRow>(

@@ -224,8 +224,8 @@ export class SignificantEventsPlugin
 
       const streamsClient = await streamsSetup.getStreamsClient({ request, rulesClientOptions });
 
-      // Same resolution as `nightshiftSources.getSourcesClient`, so the space stamped on
-      // knowledge indicators is the one that owns the source they are keyed by.
+      // Core always populates `request.spaceId` (default space when the URL has no prefix), so
+      // no fallback is needed. Knowledge indicators and their rules are scoped to this space.
       const space = request.spaceId;
 
       const significantEventsClients = createSignificantEventsClients({
@@ -458,10 +458,8 @@ export class SignificantEventsPlugin
         workflowClients,
         maintenanceService: this.maintenanceService,
         priceService,
-        getSpaceId: async (request: KibanaRequest) => {
-          const [, pluginsStart] = await core.getStartServices();
-          return pluginsStart.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
-        },
+        // Same resolution as the knowledge indicator space above; core always populates it.
+        getSpaceId: async (request: KibanaRequest) => request.spaceId,
       },
       core,
       logger: this.logger,

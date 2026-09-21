@@ -9,14 +9,20 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SpaceId } from '@kbn/core-spaces-common';
 import { KNOWLEDGE_INDICATORS_DATA_STREAM } from '../data_stream';
-import { fetchAllRuleIdsClusterWide } from '../knowledge_indicator_client/revision_reader';
 import {
   LEGACY_RULE_STREAM_TAG_PREFIX,
   NIGHTSHIFT_RULE_SOURCE_TAG_PREFIX,
   type IRulesManagementClient,
 } from '../knowledge_indicator_client/rules/rules_management_client';
 import type { SignificantEventsKIsOnboardingClient } from '../../workflows/onboarding_workflow_client';
+import type { SpaceEnumerationFailure } from '../../spaces/get_all_space_ids';
+import { toErrorMessage } from '../../errors/to_error_message';
 
+/**
+ * Alerts written by the retired Significant Events v1 integration (alerting
+ * framework rules). The index is shared by every space; `-default` is the
+ * alerting framework's index suffix, not a Kibana space.
+ */
 const V1_ALERTS_INDEX = '.alerts-streams.alerts-default';
 
 const OWNERSHIP_TAG_PREFIXES = [
@@ -32,6 +38,11 @@ export interface KnowledgeIndicatorsResetFailure {
 
 /** Response from POST /internal/significant_events/knowledge_indicators/_reset. */
 export interface KnowledgeIndicatorsResetResult {
+  /**
+   * `false` when a rule sweep failed and the document wipe was skipped so the
+   * reset can be retried; `deleted.documents` and `deleted.alerts_v1` are then 0.
+   */
+  completed: boolean;
   canceled_onboarding_count: number;
   /** Spaces whose Nightshift-owned rules were swept. */
   spaces: string[];
@@ -46,20 +57,18 @@ export interface KnowledgeIndicatorsResetResult {
 }
 
 export interface ResetKnowledgeIndicatorsDeps {
-  esClient: ElasticsearchClient;
+  /** Internal user: the hidden knowledge indicators stream is plugin-owned. */
+  knowledgeIndicatorsEsClient: ElasticsearchClient;
+  /** Current user: the v1 alerts index is not ours, so ES authorization must apply. */
+  alertsEsClient: ElasticsearchClient;
   logger: Logger;
   request: KibanaRequest;
   streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient;
-  getAllSpaceIds: () => Promise<{
-    spaceIds: SpaceId[];
-    failure?: KnowledgeIndicatorsResetFailure;
-  }>;
+  fetchLegacyRuleIds: () => Promise<string[]>;
+  getAllSpaceIds: () => Promise<{ spaceIds: SpaceId[]; failure?: SpaceEnumerationFailure }>;
   getRulesManagementClientInSpace: (spaceId: SpaceId) => Promise<IRulesManagementClient>;
   deleteLegacyRules: (ruleIds: string[]) => Promise<void>;
 }
-
-const toMessage = (error: unknown): string =>
-  error instanceof Error ? error.message : String(error);
 
 /**
  * Cluster-wide, destructive reset of the knowledge indicator system.
@@ -69,14 +78,17 @@ const toMessage = (error: unknown): string =>
  * in every space the caller can see, Significant Events v1 rules, and the v1
  * alerts index. Nothing is migrated: sources must be re-onboarded afterwards.
  *
- * Rules go before documents so a mid-flight failure leaves the KI links that
- * point at them and the reset stays retryable.
+ * Rules go before documents, and the document wipe is skipped when any rule
+ * sweep failed: the KI links that point at the surviving rules are what makes a
+ * re-run able to find and delete them.
  */
 export const resetKnowledgeIndicators = async ({
-  esClient,
+  knowledgeIndicatorsEsClient,
+  alertsEsClient,
   logger,
   request,
   streamsKIsOnboardingClient,
+  fetchLegacyRuleIds,
   getAllSpaceIds,
   getRulesManagementClientInSpace,
   deleteLegacyRules,
@@ -86,9 +98,8 @@ export const resetKnowledgeIndicators = async ({
   const canceledOnboardingCount = await streamsKIsOnboardingClient.cancelAllRunning({ request });
 
   // v1 rules were keyed by the same rule ids the KI links carry and only ever lived in the
-  // default space. Delete them before the documents so a failure keeps the ids reachable.
-  const legacyRuleIds = await fetchAllRuleIdsClusterWide(esClient, logger);
-  await deleteLegacyRules(legacyRuleIds);
+  // default space. A failure here throws before anything is deleted.
+  await deleteLegacyRules(await fetchLegacyRuleIds());
 
   const { spaceIds, failure: spacesFailure } = await getAllSpaceIds();
   if (spacesFailure) {
@@ -99,27 +110,43 @@ export const resetKnowledgeIndicators = async ({
   for (const spaceId of spaceIds) {
     try {
       const rulesClient = await getRulesManagementClientInSpace(spaceId);
-      const ruleIds = new Set<string>();
-      for (const prefix of OWNERSHIP_TAG_PREFIXES) {
-        for (const id of await rulesClient.findRuleIdsByTagPrefix(prefix)) {
-          ruleIds.add(id);
-        }
-      }
-      if (ruleIds.size > 0) {
+      const perPrefix = await Promise.all(
+        OWNERSHIP_TAG_PREFIXES.map((prefix) => rulesClient.findRuleIdsByTagPrefix(prefix))
+      );
+      const ruleIds = [...new Set(perPrefix.flat())];
+      if (ruleIds.length > 0) {
         logger.info(
-          `Knowledge indicators reset: deleting ${ruleIds.size} Nightshift-owned rules in space "${spaceId}"`
+          `Knowledge indicators reset: deleting ${ruleIds.length} Nightshift-owned rules in space "${spaceId}"`
         );
-        await rulesClient.bulkDeleteRules([...ruleIds]);
-        deletedRules += ruleIds.size;
+        await rulesClient.bulkDeleteRules(ruleIds);
+        deletedRules += ruleIds.length;
       }
     } catch (error) {
-      failures.push({ target: `rules:${spaceId}`, error: toMessage(error) });
+      failures.push({ target: `rules:${spaceId}`, error: toErrorMessage(error) });
     }
   }
 
+  const base = {
+    canceled_onboarding_count: canceledOnboardingCount,
+    spaces: spaceIds,
+    failures,
+  };
+
+  if (failures.length > 0) {
+    logger.warn(
+      `Knowledge indicators reset: skipping the document wipe because ${failures.length} rule sweep(s) failed; re-run once resolved`
+    );
+    return {
+      ...base,
+      completed: false,
+      deleted: { documents: 0, rules: deletedRules, alerts_v1: 0 },
+    };
+  }
+
   // Intentionally not space-scoped: this is the only path that removes legacy `stream.name`
-  // documents, which no space-scoped reader can see any more.
-  const documentsDeleteResponse = await esClient.deleteByQuery(
+  // documents, which no space-scoped reader can see any more. `refresh: true` so a re-onboard
+  // that starts right after the reset returns cannot read the wiped revisions.
+  const documentsDeleteResponse = await knowledgeIndicatorsEsClient.deleteByQuery(
     {
       index: KNOWLEDGE_INDICATORS_DATA_STREAM,
       conflicts: 'proceed',
@@ -131,7 +158,7 @@ export const resetKnowledgeIndicators = async ({
 
   // Intentionally cluster-wide as well: `.alerts-streams.alerts-default` is a shared,
   // space-partitioned index, but the reset is a one-time v1 orphan cleanup.
-  const alertsDeleteResponse = await esClient.deleteByQuery(
+  const alertsDeleteResponse = await alertsEsClient.deleteByQuery(
     {
       index: V1_ALERTS_INDEX,
       conflicts: 'proceed',
@@ -141,13 +168,12 @@ export const resetKnowledgeIndicators = async ({
   );
 
   return {
-    canceled_onboarding_count: canceledOnboardingCount,
-    spaces: spaceIds,
+    ...base,
+    completed: true,
     deleted: {
       documents: documentsDeleteResponse.deleted ?? 0,
       rules: deletedRules,
       alerts_v1: alertsDeleteResponse.deleted ?? 0,
     },
-    failures,
   };
 };

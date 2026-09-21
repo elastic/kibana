@@ -50,6 +50,12 @@ function ruleUnbackedPostGroupingWhere(
   }
 }
 
+/**
+ * Read side of the knowledge indicator store. Every method is scoped to the
+ * space of the injected `RevisionReader`, including the ones that take no
+ * source id (`getRuleBackedQueryLinks`, `getPromotableUnbackedQueries`,
+ * `findFeaturesByIds`): "all sources" means all sources in that space.
+ */
 export class IndicatorReader {
   constructor(private readonly revisionReader: RevisionReader) {}
 

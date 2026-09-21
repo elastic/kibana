@@ -19,7 +19,9 @@ export interface SourcesWithIndicatorsResponse {
  * `getSourceIdsToReconcile`). Deliberately independent of the extraction
  * `_eligible` endpoint: the sweep runs regardless of extraction interval,
  * exclusions, or the continuous-extraction toggle. The response shape mirrors
- * the foreach idiom used by the managed sync workflow YAML.
+ * the foreach idiom used by the managed sync workflow YAML. The path still says
+ * `_streams_with_indicators`; the KI route prefix sweep (nightshift-program#1307)
+ * renames it together with the workflow that calls it.
  */
 export const sourcesWithIndicatorsRoute = createServerRoute({
   endpoint: 'GET /internal/streams/_knowledge_indicators/_streams_with_indicators',

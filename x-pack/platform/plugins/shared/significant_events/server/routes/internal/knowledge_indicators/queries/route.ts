@@ -127,7 +127,7 @@ const promoteUnbackedQueriesRoute = createServerRoute({
     await assertNotPaused({ maintenanceService, request });
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
-    // Streams are the source universe until #1307 swaps this for the sources catalog.
+    // Streams are the source universe until nightshift-program#1307 swaps in the sources catalog.
     const sourceIds = (await streamsClient.listStreams()).map((definition) => definition.name);
 
     return kiClient.promoteUnbackedQueries({
@@ -269,11 +269,11 @@ const bulkDeleteQueriesRoute = createServerRoute({
     }
 
     // Check only the sources we actually need. A source that no longer exists
-    // (streams are the source universe until #1307) gets its batch counted as
-    // failed below.
+    // (streams are the source universe until nightshift-program#1307) gets its
+    // batch counted as failed below. `getStream` also enforces the read privilege.
     const sourceIds = Array.from(bySource.keys());
     const sourceExistence = await Promise.allSettled(
-      sourceIds.map((sourceId) => streamsClient.ensureStream(sourceId))
+      sourceIds.map((sourceId) => streamsClient.getStream(sourceId))
     );
     const existingSourceIds = new Set(
       sourceIds.filter((_, index) => sourceExistence[index].status === 'fulfilled')
@@ -379,7 +379,7 @@ const reconcileQueriesRoute = createServerRoute({
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     const { streamNames } = params.body;
     const existence = await Promise.allSettled(
-      streamNames.map((streamName) => streamsClient.ensureStream(streamName))
+      streamNames.map((streamName) => streamsClient.getStream(streamName))
     );
     const limiter = pLimit(RECONCILE_STREAM_CONCURRENCY);
 
@@ -801,9 +801,10 @@ const upsertQueryRoute = createServerRoute({
     await assertNotPaused({ maintenanceService, request });
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
-    const streamName = targetName ?? (await resolveExistingQuerySourceId(kiClient, queryId));
-    // The definition is still needed for ES|QL validation until #1307 validates against sources.
-    const definition = await streamsClient.getStream(streamName);
+    const sourceId = targetName ?? (await resolveExistingQuerySourceId(kiClient, queryId));
+    // The source id is the stream name until nightshift-program#1307, so it doubles as the
+    // stream whose definition the ES|QL is validated against.
+    const definition = await streamsClient.getStream(sourceId);
 
     validateEsqlQueryForStreamOrThrow({
       esqlQuery: queryBody.esql.query,
@@ -815,7 +816,7 @@ const upsertQueryRoute = createServerRoute({
       id: queryId,
       type: deriveQueryType(queryBody.esql.query),
     };
-    await kiClient.upsertQuery(streamName, query);
+    await kiClient.upsertQuery(sourceId, query);
 
     return { acknowledged: true };
   },
