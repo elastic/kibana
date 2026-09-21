@@ -61,7 +61,10 @@ interface GenerateVisualizationEsqlParams {
  * there are no existing queries. Shared by the Lens and Vega engines so edits
  * are seeded the same way.
  */
-const buildEsqlEditContext = (nlQuery: string, existingQueries: readonly string[] = []): string => {
+export const buildEsqlEditContext = (
+  nlQuery: string,
+  existingQueries: readonly string[] = []
+): string => {
   if (existingQueries.length === 0) {
     return nlQuery;
   }
