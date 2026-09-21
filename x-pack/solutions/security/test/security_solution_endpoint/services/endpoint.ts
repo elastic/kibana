@@ -37,7 +37,7 @@ import { kibanaPackageJson } from '@kbn/repo-info';
 import type seedrandom from 'seedrandom';
 import { fetchFleetLatestAvailableAgentVersion } from '@kbn/security-solution-plugin/common/endpoint/utils/fetch_fleet_version';
 import type { KbnClient } from '@kbn/test';
-import { isServerlessKibanaFlavor } from '@kbn/security-solution-plugin/common/endpoint/utils/kibana_status';
+import { isServerlessKibanaFlavor } from '@kbn/security-solution-plugin/common/endpoint/utils/kibana_status.test_helpers';
 import { addSpaceIdToPath, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { createKbnClient } from '@kbn/security-solution-plugin/scripts/endpoint/common/stack_services';
 import { catchHttpErrorFormatAndThrow } from '@kbn/security-solution-plugin/common/endpoint/format_http_error';

@@ -24,6 +24,6 @@ if (!process.env.NODE_DISABLE_COMPILE_CACHE) {
   }
 }
 
-require('@kbn/swc-register').install();
+require('./scripts/install_swc_register');
 
 require('@kbn/security-hardening');

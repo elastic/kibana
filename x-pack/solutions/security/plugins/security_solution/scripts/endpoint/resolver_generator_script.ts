@@ -14,7 +14,7 @@ import { CA_CERT_PATH } from '@kbn/dev-utils';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClientOptions } from '@kbn/test';
 import { KbnClient } from '@kbn/test';
-import { isServerlessKibanaFlavor } from '../../common/endpoint/utils/kibana_status';
+import { isServerlessKibanaFlavor } from '../../common/endpoint/utils/kibana_status.test_helpers';
 import { createToolingLogger } from '../../common/endpoint/data_loaders/utils';
 import { EndpointSecurityTestRolesLoader } from './common/role_and_user_loader';
 import { METADATA_DATASTREAM } from '../../common/endpoint/constants';

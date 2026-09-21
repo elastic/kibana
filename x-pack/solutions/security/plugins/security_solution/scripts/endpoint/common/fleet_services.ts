@@ -72,7 +72,7 @@ import { userInfo } from 'os';
 import pRetry from 'p-retry';
 import { getPolicyDataForUpdate } from '../../../common/endpoint/service/policy';
 import { fetchActiveSpace } from './spaces';
-import { fetchKibanaStatus } from '../../../common/endpoint/utils/kibana_status';
+import { fetchKibanaStatus } from '../../../common/endpoint/utils/kibana_status.test_helpers';
 import { isFleetServerRunning } from './fleet_server/fleet_server_services';
 import { getEndpointPackageInfo } from '../../../common/endpoint/utils/package';
 import type { DownloadAndStoreAgentResponse } from './agent_downloads_service';

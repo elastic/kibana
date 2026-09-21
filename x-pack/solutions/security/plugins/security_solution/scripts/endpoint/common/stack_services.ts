@@ -19,7 +19,7 @@ import { enableFleetSpaceAwareness } from './fleet_services';
 import {
   fetchKibanaStatus,
   isServerlessKibanaFlavor,
-} from '../../../common/endpoint/utils/kibana_status';
+} from '../../../common/endpoint/utils/kibana_status.test_helpers';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import { isLocalhost } from './is_localhost';
 import { getLocalhostRealIp } from './network_services';

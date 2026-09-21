@@ -9,7 +9,7 @@ import { kibanaPackageJson } from '@kbn/repo-info';
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { fetchActiveSpace } from './spaces';
-import { isServerlessKibanaFlavor } from '../../../common/endpoint/utils/kibana_status';
+import { isServerlessKibanaFlavor } from '../../../common/endpoint/utils/kibana_status.test_helpers';
 import { fetchFleetLatestAvailableAgentVersion } from '../../../common/endpoint/utils/fetch_fleet_version';
 import { prefixedOutputLogger } from './utils';
 import type { HostVm } from './types';

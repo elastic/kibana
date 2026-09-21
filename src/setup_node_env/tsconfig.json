@@ -6,6 +6,7 @@
   "include": [
     "harden/**/*",
     "root/**/*",
+    "scripts/**/*",
     "*.js",
     "*.ts",
   ],

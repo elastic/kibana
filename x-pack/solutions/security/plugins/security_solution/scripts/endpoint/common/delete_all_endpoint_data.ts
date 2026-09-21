@@ -8,7 +8,7 @@
 import type { Client, estypes } from '@elastic/elasticsearch';
 import assert from 'assert';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { isServerlessKibanaFlavor } from '../../../common/endpoint/utils/kibana_status';
+import { isServerlessKibanaFlavor } from '../../../common/endpoint/utils/kibana_status.test_helpers';
 import { createEsClient } from './stack_services';
 import type { CreatedSecuritySuperuser } from './security_user_services';
 import { createSecuritySuperuser } from './security_user_services';

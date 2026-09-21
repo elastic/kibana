@@ -10,7 +10,7 @@ import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/kbn-client';
 import { kibanaPackageJson } from '@kbn/repo-info';
-import { isServerlessKibanaFlavor } from '../../../../common/endpoint/utils/kibana_status';
+import { isServerlessKibanaFlavor } from '../../../../common/endpoint/utils/kibana_status.test_helpers';
 import { fetchFleetLatestAvailableAgentVersion } from '../../../../common/endpoint/utils/fetch_fleet_version';
 import { isFleetServerRunning } from '../../../../scripts/endpoint/common/fleet_server/fleet_server_services';
 import type { HostVm } from '../../../../scripts/endpoint/common/types';

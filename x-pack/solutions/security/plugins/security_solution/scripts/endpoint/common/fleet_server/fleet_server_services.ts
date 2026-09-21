@@ -39,7 +39,7 @@ import {
 import { maybeCreateDockerNetwork, SERVERLESS_NODES, verifyDockerInstalled } from '@kbn/es';
 import { resolve } from 'path';
 import { KbnClientRequesterError } from '@kbn/kbn-client';
-import { isServerlessKibanaFlavor } from '../../../../common/endpoint/utils/kibana_status';
+import { isServerlessKibanaFlavor } from '../../../../common/endpoint/utils/kibana_status.test_helpers';
 import { captureCallingStack, dump, prefixedOutputLogger } from '../utils';
 import { createToolingLogger } from '../../../../common/endpoint/data_loaders/utils';
 import {

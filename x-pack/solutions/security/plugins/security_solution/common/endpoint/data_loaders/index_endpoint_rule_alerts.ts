@@ -16,7 +16,7 @@ import type {
   Name,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { KbnClient } from '@kbn/test';
-import { isServerlessKibanaFlavor } from '../utils/kibana_status';
+import { isServerlessKibanaFlavor } from '../utils/kibana_status.test_helpers';
 import { fetchFleetLatestAvailableAgentVersion } from '../utils/fetch_fleet_version';
 import { createToolingLogger, wrapErrorIfNeeded } from './utils';
 import { DEFAULT_ALERTS_INDEX } from '../../constants';
