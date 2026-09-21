@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../ftr_provider_context';
-
-export default function consoleApiIntegrationTests({ loadTestFile }: FtrProviderContext) {
-  describe('console', () => {
-    loadTestFile(require.resolve('./feature_controls'));
-  });
+/** Response of the data streams search API. */
+export interface SearchDataStreamsResponse {
+  dataStreams: string[];
 }
