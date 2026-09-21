@@ -105,6 +105,12 @@ export interface RunRuleParams<Params extends RuleTypeParams> {
    * to look at the raw `apiKey`/`uiamApiKey` fields again.
    */
   effectiveApiKey: string | null;
+  /**
+   * Id of the UIAM API key in `effectiveApiKey`, so the connector tasks the run enqueues record
+   * it and the API key invalidation task's in-use guard can find them. Undefined when the run
+   * did not resolve to the UIAM key.
+   */
+  uiamApiKeyId?: string;
   fakeRequest: KibanaRequest;
   rule: SanitizedRule<Params> & { snoozedInstances: RawRuleSnoozedInstance[] };
   validatedParams: Params;

@@ -112,6 +112,35 @@ describe('rule_loader', () => {
         expect(result.validatedParams).toEqual(ruleParams);
         expect(result.version).toBe('1');
       });
+
+      test('returns the UIAM API key id when the run authenticates with the UIAM key', () => {
+        const result = validateRuleAndCreateFakeRequest({
+          ...getDefaultValidateRuleParams(),
+          ruleData: {
+            rawRule: {
+              ...mockedRawRuleSO.attributes,
+              enabled,
+              uiamApiKey: Buffer.from('uiam-key-id:essu_uiam_api_key').toString('base64'),
+            },
+            version: '1',
+            references: [],
+          },
+          context: { ...context, shouldGrantUiam: true, apiKeyType: ApiKeyType.UIAM },
+        });
+
+        expect(result.effectiveApiKey).toBe('essu_uiam_api_key');
+        expect(result.uiamApiKeyId).toBe('uiam-key-id');
+      });
+
+      test('does not return a UIAM API key id when the run falls back to the ES key', () => {
+        const result = validateRuleAndCreateFakeRequest({
+          ...getDefaultValidateRuleParams(),
+          context,
+        });
+
+        expect(result.effectiveApiKey).toBe(apiKey);
+        expect(result.uiamApiKeyId).toBeUndefined();
+      });
     });
 
     test('throws when rule is not enabled', () => {
