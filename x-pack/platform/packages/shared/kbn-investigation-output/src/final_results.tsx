@@ -32,6 +32,8 @@ import type {
   InvestigationState,
 } from '@kbn/significant-events-schema';
 
+const hasVisibleText = (text?: string): text is string => Boolean(text?.trim());
+
 const AgentText: React.FC<{ text: string; bold?: boolean; subdued?: boolean }> = ({
   text,
   bold = false,
@@ -137,7 +139,7 @@ const BlindSpotRow: React.FC<{
 }> = ({ blindSpot: { title, description }, isMostImpactful, isLast }) => {
   const accordionId = useGeneratedHtmlId({ prefix: 'investigationBlindSpot' });
   const { euiTheme } = useEuiTheme();
-  const hasDescription = Boolean(description.trim() && description !== title);
+  const hasDescription = hasVisibleText(description) && description !== title;
   const badge = isMostImpactful ? (
     <EuiBadge color="primary">
       {i18n.translate('xpack.investigationOutput.mostImpactfulLabel', {
@@ -192,8 +194,10 @@ export const FinalResults: React.FC<{ state: InvestigationState }> = ({ state })
   const [selectedRecommendation, setSelectedRecommendation] =
     useState<InvestigationRecommendation>();
   const recommendationModalTitleId = useGeneratedHtmlId({ prefix: 'investigationRecommendation' });
+  const selectedDescription = selectedRecommendation?.description;
+  const selectedCode = selectedRecommendation?.code;
 
-  if (!conclusion && !recommendations?.length && !blindSpots?.length) {
+  if (!hasVisibleText(conclusion) && !recommendations?.length && !blindSpots?.length) {
     return null;
   }
 
@@ -203,7 +207,7 @@ export const FinalResults: React.FC<{ state: InvestigationState }> = ({ state })
       gutterSize="l"
       data-test-subj="investigationOutputFinalResults"
     >
-      {conclusion && (
+      {hasVisibleText(conclusion) && (
         <EuiFlexItem grow={false}>
           <EuiMarkdownFormat textSize="s">{conclusion}</EuiMarkdownFormat>
         </EuiFlexItem>
@@ -231,7 +235,8 @@ export const FinalResults: React.FC<{ state: InvestigationState }> = ({ state })
                   isRecommended={index === 0}
                   isLast={index === recommendations.length - 1}
                   onClick={
-                    recommendation.description?.trim() || recommendation.code?.trim()
+                    hasVisibleText(recommendation.description) ||
+                    hasVisibleText(recommendation.code)
                       ? () => setSelectedRecommendation(recommendation)
                       : undefined
                   }
@@ -285,15 +290,15 @@ export const FinalResults: React.FC<{ state: InvestigationState }> = ({ state })
             </EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>
-            {selectedRecommendation.description && (
+            {hasVisibleText(selectedDescription) && (
               <>
-                <AgentText text={selectedRecommendation.description} />
-                {selectedRecommendation.code && <EuiSpacer size="m" />}
+                <AgentText text={selectedDescription} />
+                {hasVisibleText(selectedCode) && <EuiSpacer size="m" />}
               </>
             )}
-            {selectedRecommendation.code && (
+            {hasVisibleText(selectedCode) && (
               <EuiCodeBlock language="shell" fontSize="s" paddingSize="s" isCopyable>
-                {selectedRecommendation.code}
+                {selectedCode}
               </EuiCodeBlock>
             )}
           </EuiModalBody>

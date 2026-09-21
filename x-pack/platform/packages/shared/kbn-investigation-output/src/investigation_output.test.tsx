@@ -276,6 +276,40 @@ describe('InvestigationOutput', () => {
     }
   );
 
+  it('omits whitespace-only fields from mixed recommendation details', async () => {
+    const user = userEvent.setup();
+    const stateWithMixedDetails: InvestigationState = {
+      ...finalState,
+      recommendations: [
+        {
+          title: 'Restart the checkout service',
+          confidence: 0.9,
+          description: 'Restart every checkout instance.',
+          code: '   ',
+        },
+        {
+          title: 'Roll back the checkout service',
+          confidence: 0.8,
+          description: '   ',
+          code: 'kubectl rollout undo deployment/checkout-service',
+        },
+      ],
+    };
+
+    renderWithI18n(<InvestigationOutput status="complete" state={stateWithMixedDetails} />);
+
+    await user.click(screen.getByRole('button', { name: /Restart the checkout service/ }));
+    expect(screen.getByRole('dialog')).toHaveTextContent('Restart every checkout instance.');
+    expect(screen.getByRole('dialog').querySelector('pre')).not.toBeInTheDocument();
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
+
+    await user.click(screen.getByRole('button', { name: /Roll back the checkout service/ }));
+    expect(screen.getByRole('dialog')).toHaveTextContent(
+      'kubectl rollout undo deployment/checkout-service'
+    );
+    expect(screen.getByRole('dialog').querySelector('pre')).toBeInTheDocument();
+  });
+
   it('opens recommendation details with a click and blind-spot details from a collapsed accordion', async () => {
     const user = userEvent.setup();
     renderWithI18n(<InvestigationOutput status="complete" state={finalState} />);
@@ -352,6 +386,18 @@ describe('InvestigationOutput', () => {
     };
 
     renderWithI18n(<InvestigationOutput status="complete" state={withoutFinalResults} />);
+
+    expect(screen.queryByTestId('investigationOutputFinalResults')).not.toBeInTheDocument();
+  });
+
+  it('renders no final results block for a whitespace-only conclusion', () => {
+    const withoutVisibleFinalResults: InvestigationState = {
+      summary: finalState.summary,
+      hypotheses: finalState.hypotheses,
+      conclusion: '   ',
+    };
+
+    renderWithI18n(<InvestigationOutput status="complete" state={withoutVisibleFinalResults} />);
 
     expect(screen.queryByTestId('investigationOutputFinalResults')).not.toBeInTheDocument();
   });
