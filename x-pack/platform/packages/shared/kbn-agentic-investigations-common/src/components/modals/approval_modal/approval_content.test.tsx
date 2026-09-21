@@ -18,7 +18,7 @@ const baseProps: ApprovalContentProps = {
   title: 'Block IP 10.0.0.4',
   tone: 'danger',
   iconType: 'lock',
-  blastRadius: { variant: 'description', description: 'Isolate the compromised host.' },
+  actionImpact: { variant: 'description', description: 'Isolate the compromised host.' },
   primaryAction: {
     label: 'Approve',
     onClick: jest.fn(),
@@ -52,9 +52,9 @@ describe('ApprovalContent', () => {
     expect(screen.queryByText(/approval required/i)).not.toBeInTheDocument();
   });
 
-  it('renders the blast radius section label', () => {
+  it('renders the action impact section label', () => {
     renderContent();
-    expect(screen.getByText('Blast radius')).toBeInTheDocument();
+    expect(screen.getByText('Impact')).toBeInTheDocument();
   });
 
   it('renders the description variant prose', () => {
@@ -64,7 +64,7 @@ describe('ApprovalContent', () => {
 
   it('renders list variant items', () => {
     renderContent({
-      blastRadius: {
+      actionImpact: {
         variant: 'list',
         items: [
           { id: 'item-1', iconType: 'globe', text: 'host: 10.0.0.4' },

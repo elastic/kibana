@@ -62,7 +62,7 @@ const UNTITLED_INVESTIGATION = i18n.translate(
  * - `watch_id`         fabricated `''`; no equivalent on a proposal.
  * - `watch_execution_id` fabricated `''`; no equivalent.
  * - `events`           `[]`; proposals have no timeline. The flyout renders an empty list.
- * - `affectedSurface`  `undefined`; BlastRadius self-hides (returns null) with no surfaces.
+ * - `affectedSurface`  `undefined`; Impact self-hides (returns null) with no surfaces.
  * - `status`           deliberately `undefined`. A proposal's own statuses (`'pending'`,
  *                      `'succeeded'`, …) are not investigation statuses, and mapping them
  *                      across would be inventing a meaning. The bucket carries the part
@@ -119,6 +119,6 @@ export const proposalToInvestigation = (proposal: ProposalItem): Investigation =
     // conversation adapter.
     assignee: proposal.conversationAssignees[0] ?? null,
     events: [],
-    // affectedSurface left undefined → BlastRadius self-hides (returns null).
+    // affectedSurface left undefined → Impact self-hides (returns null).
   };
 };

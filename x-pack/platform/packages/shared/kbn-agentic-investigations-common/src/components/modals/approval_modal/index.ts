@@ -12,4 +12,4 @@ export {
   type ApprovalAction,
   type AlwaysAllowOption,
 } from './approval_content';
-export { type BlastRadiusContent, type BlastRadiusSectionProps } from './blast_radius_section';
+export { type ActionImpactContent, type ActionImpactSectionProps } from './action_impact_section';
