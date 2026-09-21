@@ -507,7 +507,6 @@ export const OnlineEvalDetailPage: React.FC = () => {
   if (isWorkflowLoading) {
     return (
       <EuiPageSection paddingSize="none">
-        <EuiSpacer size="m" />
         <EuiText>
           <p>
             {i18n.translate('xpack.evals.onlineEvaluations.detail.loadingWorkflow', {
@@ -522,7 +521,6 @@ export const OnlineEvalDetailPage: React.FC = () => {
   if (workflowError || !workflow) {
     return (
       <EuiPageSection paddingSize="none">
-        <EuiSpacer size="m" />
         <EuiEmptyPrompt
           color="danger"
           iconType="warning"
@@ -556,7 +554,6 @@ export const OnlineEvalDetailPage: React.FC = () => {
   return (
     <>
       <EuiPageSection paddingSize="none">
-        <EuiSpacer size="m" />
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
           <EuiFlexItem>
             <EuiTitle size="m">

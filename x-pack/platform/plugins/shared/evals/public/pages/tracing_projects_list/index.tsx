@@ -155,7 +155,6 @@ export const TracingProjectsListPage: React.FC = () => {
 
   return (
     <EuiPageSection paddingSize="none">
-      <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="m" alignItems="center">
         <EuiFlexItem>
           <EuiFieldSearch

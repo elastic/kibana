@@ -716,7 +716,6 @@ export const DatasetDetailPage: React.FC = () => {
   if (isDatasetLoading) {
     return (
       <EuiPageSection paddingSize="none">
-        <EuiSpacer size="m" />
         <EuiLoadingSpinner size="xl" />
       </EuiPageSection>
     );
@@ -726,7 +725,6 @@ export const DatasetDetailPage: React.FC = () => {
     const isNotFound = isHttpFetchError(datasetError) && datasetError.response?.status === 404;
     return (
       <EuiPageSection paddingSize="none">
-        <EuiSpacer size="m" />
         <EuiEmptyPrompt
           color={isNotFound ? 'subdued' : 'danger'}
           iconType={isNotFound ? 'magnify' : 'warning'}
@@ -753,7 +751,6 @@ export const DatasetDetailPage: React.FC = () => {
   return (
     <>
       <EuiPageSection paddingSize="none">
-        <EuiSpacer size="m" />
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>

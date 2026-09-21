@@ -451,7 +451,6 @@ export const ExperimentDetailPage: React.FC = () => {
   if (experimentLoading && !isLaunching) {
     return (
       <EuiPageSection paddingSize="none">
-        <EuiSpacer size="m" />
         <EuiLoadingSpinner size="xl" />
       </EuiPageSection>
     );
@@ -463,7 +462,6 @@ export const ExperimentDetailPage: React.FC = () => {
   if (experimentError && !showLaunchView) {
     return (
       <EuiPageSection paddingSize="none">
-        <EuiSpacer size="m" />
         <EuiEmptyPrompt
           color={isNotFound ? 'subdued' : 'danger'}
           iconType={isNotFound ? 'magnify' : 'warning'}
@@ -490,7 +488,6 @@ export const ExperimentDetailPage: React.FC = () => {
   return (
     <>
       <EuiPageSection paddingSize="none">
-        <EuiSpacer size="m" />
         <EuiTitle size="m">
           <h2>{pageTitle}</h2>
         </EuiTitle>

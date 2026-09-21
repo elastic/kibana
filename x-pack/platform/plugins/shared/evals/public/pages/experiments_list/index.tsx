@@ -336,7 +336,6 @@ export const ExperimentsListPage: React.FC = () => {
 
   return (
     <EuiPageSection paddingSize="none">
-      <EuiSpacer size="m" />
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFieldSearch

@@ -787,7 +787,6 @@ export const CompareExperimentsPage: React.FC = () => {
   if (!baselineId || !targetId) {
     return (
       <EuiPageSection paddingSize="none">
-        <EuiSpacer size="m" />
         <EuiEmptyPrompt
           iconType="compareArrows"
           title={<h2>{i18n.MISSING_EXPERIMENT_IDS_TITLE}</h2>}
@@ -802,7 +801,6 @@ export const CompareExperimentsPage: React.FC = () => {
 
   return (
     <EuiPageSection paddingSize="none">
-      <EuiSpacer size="m" />
       <EuiFlexGroup alignItems="center" responsive={false}>
         <EuiFlexItem>
           <EuiTitle size="m">

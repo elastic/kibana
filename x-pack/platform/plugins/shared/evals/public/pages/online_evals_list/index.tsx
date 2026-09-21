@@ -177,7 +177,6 @@ export const OnlineEvalsListPage: React.FC = () => {
   return (
     <>
       <EuiPageSection paddingSize="none">
-        <EuiSpacer size="m" />
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButton
@@ -305,25 +304,26 @@ export const OnlineEvalsListPage: React.FC = () => {
                       }
                     )}
                     size="s"
-                  >
-                    <p>
-                      {i18n.translate(
-                        'xpack.evals.onlineEvaluations.list.empty.noConnectorCalloutBody',
-                        {
-                          defaultMessage:
-                            'Set up an AI connector in Stack Management before creating an online evaluation.',
-                        }
-                      )}{' '}
-                      <EuiLink href={CONNECTORS_MANAGEMENT_URL}>
+                    text={
+                      <p>
                         {i18n.translate(
-                          'xpack.evals.onlineEvaluations.list.empty.noConnectorCalloutLink',
+                          'xpack.evals.onlineEvaluations.list.empty.noConnectorCalloutBody',
                           {
-                            defaultMessage: 'Open connectors',
+                            defaultMessage:
+                              'Set up an AI connector in Stack Management before creating an online evaluation.',
                           }
-                        )}
-                      </EuiLink>
-                    </p>
-                  </KbnWarningCallout>
+                        )}{' '}
+                        <EuiLink href={CONNECTORS_MANAGEMENT_URL}>
+                          {i18n.translate(
+                            'xpack.evals.onlineEvaluations.list.empty.noConnectorCalloutLink',
+                            {
+                              defaultMessage: 'Open connectors',
+                            }
+                          )}
+                        </EuiLink>
+                      </p>
+                    }
+                  />
                 ) : null}
               </>
             }

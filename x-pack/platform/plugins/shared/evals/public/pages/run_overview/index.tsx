@@ -144,7 +144,6 @@ export const RunOverviewPage: React.FC = () => {
   if (models.length === 0) {
     return (
       <EuiPageSection paddingSize="none">
-        <EuiSpacer size="m" />
         <EuiEmptyPrompt
           iconType="info"
           title={<h2>{i18n.EMPTY_TITLE}</h2>}
@@ -161,7 +160,6 @@ export const RunOverviewPage: React.FC = () => {
 
   return (
     <EuiPageSection paddingSize="none">
-      <EuiSpacer size="m" />
       <EuiFlexGroup alignItems="flexStart" justifyContent="spaceBetween" responsive={false}>
         <EuiFlexItem>
           <EuiTitle size="l">

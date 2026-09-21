@@ -217,7 +217,6 @@ export const TracingProjectDetailPage: React.FC = () => {
   return (
     <>
       <EuiPageSection paddingSize="none">
-        <EuiSpacer size="m" />
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiTitle size="m">

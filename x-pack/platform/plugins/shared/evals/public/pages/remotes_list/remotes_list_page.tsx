@@ -11,7 +11,6 @@ import {
   EuiBasicTable,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiCodeBlock,
   EuiConfirmModal,
   EuiFieldPassword,
@@ -34,6 +33,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { goldenClusterPrivileges } from '@kbn/evals-common';
+import { KbnDangerCallout, KbnSuccessCallout } from '@kbn/ui-callout';
 import {
   useCreateRemote,
   useDeleteRemote,
@@ -320,7 +320,6 @@ export const RemotesListPage: React.FC = () => {
   return (
     <>
       <EuiPageSection paddingSize="none">
-        <EuiSpacer size="m" />
         {canManage ? (
           <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
             <EuiFlexItem grow={false}>
@@ -333,30 +332,24 @@ export const RemotesListPage: React.FC = () => {
         <EuiSpacer size="m" />
         {actionError ? (
           <>
-            <EuiCallOut
+            <KbnDangerCallout
               announceOnMount
               title={i18n.DELETE_ERROR_TITLE}
-              color="danger"
-              iconType="error"
               size="s"
               onDismiss={() => setActionError(null)}
-            >
-              <p>{actionError}</p>
-            </EuiCallOut>
+              text={<p>{actionError}</p>}
+            />
             <EuiSpacer size="m" />
           </>
         ) : null}
         {error ? (
           <>
-            <EuiCallOut
+            <KbnDangerCallout
               announceOnMount
               title={i18n.LOAD_ERROR_TITLE}
-              color="danger"
-              iconType="error"
               size="s"
-            >
-              <p>{error instanceof Error ? error.message : String(error)}</p>
-            </EuiCallOut>
+              text={<p>{error instanceof Error ? error.message : String(error)}</p>}
+            />
             <EuiSpacer size="m" />
           </>
         ) : null}
@@ -381,15 +374,12 @@ export const RemotesListPage: React.FC = () => {
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
             {formError ? (
-              <EuiCallOut
+              <KbnDangerCallout
                 announceOnMount
                 title={i18n.FORM_ERROR_TITLE}
-                color="danger"
-                iconType="error"
                 size="s"
-              >
-                <p>{formError}</p>
-              </EuiCallOut>
+                text={<p>{formError}</p>}
+              />
             ) : null}
 
             <EuiForm component="form">
@@ -481,19 +471,20 @@ export const RemotesListPage: React.FC = () => {
               {testResult ? (
                 <>
                   <EuiSpacer size="s" />
-                  <EuiCallOut
-                    announceOnMount
-                    title={
-                      testResult.success
-                        ? i18n.TEST_CONNECTION_SUCCESS
-                        : i18n.TEST_CONNECTION_FAILURE
-                    }
-                    color={testResult.success ? 'success' : 'danger'}
-                    iconType={testResult.success ? 'check' : 'error'}
-                    size="s"
-                  >
-                    {testResult.message && !testResult.success ? <p>{testResult.message}</p> : null}
-                  </EuiCallOut>
+                  {testResult.success ? (
+                    <KbnSuccessCallout
+                      announceOnMount
+                      title={i18n.TEST_CONNECTION_SUCCESS}
+                      size="s"
+                    />
+                  ) : (
+                    <KbnDangerCallout
+                      announceOnMount
+                      title={i18n.TEST_CONNECTION_FAILURE}
+                      size="s"
+                      text={testResult.message ? <p>{testResult.message}</p> : null}
+                    />
+                  )}
                 </>
               ) : null}
             </EuiForm>

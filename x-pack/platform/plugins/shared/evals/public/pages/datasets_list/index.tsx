@@ -342,7 +342,6 @@ export const DatasetsListPage: React.FC = () => {
   return (
     <>
       <EuiPageSection paddingSize="none">
-        <EuiSpacer size="m" />
         {showSearchBar ? (
           <>
             <EuiFlexGroup
