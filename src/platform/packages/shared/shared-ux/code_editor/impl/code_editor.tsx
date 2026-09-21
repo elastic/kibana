@@ -44,6 +44,22 @@ import { styles } from './editor.styles';
 /** Monaco action ID for Escape; use `editor.trigger()` — synthetic key events are unreliable in EditContext mode (Monaco 0.54+). */
 export const KBN_A11Y_HANDLE_ESCAPE_ACTION_ID = 'kbn.a11y.handleEscape' as const;
 
+/**
+ * Resolves the editor's real, focusable keyboard-input surface.
+ *
+ * Monaco 0.54+ defaults to Chrome's native EditContext API whenever it's available
+ * (`typeof globalThis.EditContext === 'function'`), which renders the actual input
+ * target as a focusable `<div class="native-edit-context">` and demotes the plain
+ * `<textarea>` to a `readonly`, `aria-hidden` IME/composition fallback that's never
+ * part of the tab order. Code that manages the editor's tab stop or its
+ * `aria-describedby` must target whichever of the two is actually live in the current
+ * browser, or it silently no-ops in Chrome.
+ */
+const getRealInputSurface = (editorDomNode: HTMLElement | null): HTMLElement | null =>
+  editorDomNode?.querySelector<HTMLElement>('.native-edit-context') ??
+  editorDomNode?.querySelector<HTMLElement>('textarea:not([readonly])') ??
+  null;
+
 export interface CodeEditorProps
   extends Pick<ReactMonacoEditorProps, 'overflowWidgetsContainerZIndexOverride'> {
   /** Width of editor. Defaults to 100%. */
@@ -62,11 +78,17 @@ export interface CodeEditorProps
   onChange?: (value: string, event: monaco.editor.IModelContentChangedEvent) => void;
 
   /**
+   * Sets whether the new experimental edit context should be used instead of the text area.
+   * See https://microsoft.github.io/monaco-editor/docs.html#interfaces/editor_editor_api.editor.IEditorOptions.html#editContext
+   */
+  editContext?: boolean;
+
+  /**
    * Options for the Monaco Code Editor
    * Documentation of options can be found here:
    * https://microsoft.github.io/monaco-editor/docs.html#interfaces/editor.IStandaloneEditorConstructionOptions.html
    */
-  options?: monaco.editor.IStandaloneEditorConstructionOptions;
+  options?: Omit<monaco.editor.IStandaloneEditorConstructionOptions, 'editContext'>;
 
   /**
    * Suggestion provider for autocompletion
@@ -257,6 +279,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   links = false,
   onFocus,
   onBlur,
+  editContext = false,
   overflowWidgetsContainerZIndexOverride,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -506,19 +529,19 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
       remeasureFonts();
 
-      const textbox = editor.getDomNode()?.getElementsByTagName('textarea')[0];
-      if (textbox) {
-        // Make sure the textarea is not directly accessible with TAB
-        textbox.tabIndex = -1;
+      const inputSurface = getRealInputSurface(editor.getDomNode());
+      if (inputSurface) {
+        // Make sure the real input surface is not directly accessible with TAB
+        inputSurface.tabIndex = -1;
 
         // The Monaco editor seems to override the tabindex and set it back to "0"
         // so we make sure that whenever the attributes change the tabindex stays at -1
         textboxMutationObserver.current = new MutationObserver(function onTextboxAttributeChange() {
-          if (textbox.tabIndex >= 0) {
-            textbox.tabIndex = -1;
+          if (inputSurface.tabIndex >= 0) {
+            inputSurface.tabIndex = -1;
           }
         });
-        textboxMutationObserver.current.observe(textbox, { attributes: true });
+        textboxMutationObserver.current.observe(inputSurface, { attributes: true });
       }
 
       editor.onKeyDown((ev: monaco.IKeyboardEvent) => {
@@ -611,10 +634,10 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   useEffect(() => {
     // apply aria described by on editor element
     if (_editor && ariaDescribedBy) {
-      _editor
-        .getDomNode()
-        ?.querySelector('textarea[aria-roledescription="editor"]')
-        ?.setAttribute('aria-describedby', ariaDescribedBy);
+      getRealInputSurface(_editor.getDomNode() ?? null)?.setAttribute(
+        'aria-describedby',
+        ariaDescribedBy
+      );
     }
   }, [_editor, ariaDescribedBy]);
 
@@ -670,6 +693,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
             overflowWidgetsContainerZIndexOverride={overflowWidgetsContainerZIndexOverride}
             options={{
               padding: allowFullScreen || isCopyable ? { top: 24 } : {},
+              editContext,
               renderLineHighlight: 'none',
               scrollBeyondLastLine: false,
               stickyScroll: { enabled: false },
