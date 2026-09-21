@@ -244,6 +244,12 @@ describe('ProposalApprovalCard', () => {
       expect(getByTestId('info-callout')).toBeInTheDocument();
     });
 
+    it('renders an info callout for a dismissed proposal', () => {
+      setupMocks(baseProposal({ decision: 'dismissed', status: 'no_action' }));
+      const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+      expect(getByTestId('info-callout')).toBeInTheDocument();
+    });
+
     it('does not render action buttons when proposal is already decided', () => {
       setupMocks(baseProposal({ decision: 'dismissed', status: 'no_action' }));
       const { container } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
@@ -273,6 +279,24 @@ describe('ProposalApprovalCard', () => {
       );
       expect(getByTestId('warning-callout')).toBeInTheDocument();
       expect(queryByTestId('info-callout')).toBeNull();
+    });
+  });
+
+  describe('executing proposal', () => {
+    it('renders an info callout for an executing proposal', () => {
+      setupMocks(baseProposal({ decision: 'approved', status: 'executing' }));
+      const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+      expect(getByTestId('info-callout')).toBeInTheDocument();
+    });
+
+    it('does not render action buttons when proposal is executing', () => {
+      setupMocks(baseProposal({ status: 'executing' }));
+      const { container } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+      expect(
+        container.querySelector(
+          '[data-test-subj="agenticInvestigationsProposalApprove-proposal-1"]'
+        )
+      ).toBeNull();
     });
   });
 
@@ -400,6 +424,29 @@ describe('ProposalApprovalCard', () => {
           '[data-test-subj="agenticInvestigationsProposalApprove-proposal-1"]'
         )
       ).toBeInTheDocument();
+    });
+
+    it('keeps Confirm disabled when rationale is whitespace-only', () => {
+      setupMocks();
+      const { container } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+
+      // Open dismiss mode
+      fireEvent.click(
+        container.querySelector(
+          '[data-test-subj="agenticInvestigationsProposalDismiss-proposal-1"]'
+        ) as HTMLButtonElement
+      );
+
+      // Enter only whitespace
+      const rationaleInput = container.querySelector(
+        '[data-test-subj="rationale-input"]'
+      ) as HTMLInputElement;
+      fireEvent.change(rationaleInput, { target: { value: '   ' } });
+
+      const confirmBtn = container.querySelector(
+        '[data-test-subj="agenticInvestigationsProposalDismissConfirm-proposal-1"]'
+      ) as HTMLButtonElement;
+      expect(confirmBtn).toBeDisabled();
     });
 
     it('calls dismissProposal.mutateAsync with the reason and rationale on confirm', async () => {
