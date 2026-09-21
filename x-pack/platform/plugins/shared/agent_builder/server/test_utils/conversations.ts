@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { type ConversationRound, ConversationRoundStatus } from '@kbn/agent-builder-common';
+import {
+  type ConversationRound,
+  ConversationRoundStatus,
+  DEFAULT_CONVERSATION_TITLE,
+} from '@kbn/agent-builder-common';
 import type { ConversationWithPermissions } from '../../common/http_api/conversations';
 import type { ConversationService, ConversationClient } from '../services/conversation';
 
@@ -19,7 +23,7 @@ export const createEmptyConversation = (
 ): ConversationWithPermissions => {
   return {
     id: 'id',
-    title: 'New conversation',
+    title: DEFAULT_CONVERSATION_TITLE,
     agent_id: 'agent_id',
     rounds: [],
     updated_at: new Date().toISOString(),
@@ -60,14 +64,19 @@ export const createConversationClientMock = (): ConversationClientMock => {
     getByOrigin: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
-    addAttachmentsToLastRound: jest.fn(),
-    upsertRound: jest.fn(),
+    appendEvents: jest.fn(),
+    addCustomEvents: jest.fn(),
+    replaceRoundEvents: jest.fn(),
+    updateRoundFeedback: jest.fn(),
+    markRead: jest.fn(),
+    setPinned: jest.fn(),
     list: jest.fn(),
+    bulkGet: jest.fn(),
+    search: jest.fn(),
     delete: jest.fn(),
+    updateAccessControl: jest.fn(),
     applyTemplate: jest.fn(),
     patchMetadata: jest.fn(),
-    appendEvents: jest.fn(),
-    getEvents: jest.fn(),
   };
 };
 
@@ -75,5 +84,6 @@ export const createConversationServiceMock = (): ConversationServiceMock => {
   return {
     getScopedClient: jest.fn().mockImplementation(async () => createConversationClientMock()),
     getConversationRoundAuthor: jest.fn().mockResolvedValue(undefined),
+    appendUserMessage: jest.fn(),
   };
 };

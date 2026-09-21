@@ -12,6 +12,7 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
+  const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'cspSecurity', 'cloudPostureDashboard', 'header']);
   const chance = new Chance();
 
@@ -37,8 +38,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     },
   ];
 
-  // Failing: See https://github.com/elastic/kibana/issues/277858
-  describe.skip('Cloud Posture Dashboard Page', function () {
+  describe('Cloud Posture Dashboard Page', function () {
     this.tags(['cloud_security_posture_compliance_dashboard']);
     let cspDashboard: typeof pageObjects.cloudPostureDashboard;
     let dashboard: typeof pageObjects.cloudPostureDashboard.dashboard;
@@ -54,9 +54,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cspDashboard.index.add(data);
       await cspDashboard.waitForKspmStatsData();
       await cspDashboard.navigateToComplianceDashboardPage();
-      await retry.waitFor(
-        'Cloud posture integration dashboard to be displayed',
-        async () => !!dashboard.getIntegrationDashboardContainer()
+      await retry.waitFor('Cloud posture integration dashboard to be displayed', async () =>
+        testSubjects.exists('dashboard-container', { timeout: 0 })
       );
     });
 
@@ -85,9 +84,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await cspSecurity.logout();
         await cspSecurity.login('csp_read_user');
         await cspDashboard.navigateToComplianceDashboardPage();
-        await retry.waitFor(
-          'Cloud posture integration dashboard to be displayed',
-          async () => !!dashboard.getIntegrationDashboardContainer()
+        await retry.waitFor('Cloud posture integration dashboard to be displayed', async () =>
+          testSubjects.exists('dashboard-container', { timeout: 0 })
         );
         const scoreElement = await dashboard.getKubernetesComplianceScore();
 

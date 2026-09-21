@@ -50,6 +50,8 @@ interface PrepareOperationExecutionParams {
   failures: OperationExecutionContext['failures'];
   panelAuthoringNotes: OperationExecutionContext['panelAuthoringNotes'];
   resolvePanelContent?: OperationExecutionContext['resolvePanelContent'];
+  resolveCustomContentTemplate?: OperationExecutionContext['resolveCustomContentTemplate'];
+  resolveAttachmentPanel?: OperationExecutionContext['resolveAttachmentPanel'];
 }
 
 export const prepareOperationExecution = async ({
@@ -58,6 +60,8 @@ export const prepareOperationExecution = async ({
   failures,
   panelAuthoringNotes,
   resolvePanelContent,
+  resolveCustomContentTemplate,
+  resolveAttachmentPanel,
 }: PrepareOperationExecutionParams): Promise<OperationExecutionContext> => {
   const resolvedPanelCreationRequests = await resolvePanelCreationRequests({
     operations,
@@ -69,8 +73,37 @@ export const prepareOperationExecution = async ({
     failures,
     panelAuthoringNotes,
     resolvedPanelCreationRequests,
+    sectionIdsByKey: new Map(),
     resolvePanelContent,
+    resolveCustomContentTemplate,
+    resolveAttachmentPanel,
   };
+};
+
+const resolveSectionReferences = (
+  operation: DashboardOperation,
+  sectionIdsByKey: ReadonlyMap<string, string>
+): DashboardOperation => {
+  const resolveId = (id: string): string => sectionIdsByKey.get(id) ?? id;
+  const resolvePanelSections = <TPanel extends { sectionId?: string | null }>(
+    panels: TPanel[]
+  ): TPanel[] =>
+    panels.map((panel) =>
+      typeof panel.sectionId === 'string'
+        ? { ...panel, sectionId: resolveId(panel.sectionId) }
+        : panel
+    );
+
+  switch (operation.operation) {
+    case 'add_panels':
+      return { ...operation, panels: resolvePanelSections(operation.panels) };
+    case 'update_panel_layouts':
+      return { ...operation, panels: resolvePanelSections(operation.panels) };
+    case 'remove_section':
+      return { ...operation, id: resolveId(operation.id) };
+    default:
+      return operation;
+  }
 };
 
 export const executeOperationHandler = async ({
@@ -89,5 +122,10 @@ export const executeOperationHandler = async ({
     throw new Error(`No handler for ${operation.operation}`);
   }
 
-  return definition.handler({ dashboardData, operation, operationIndex, context });
+  return definition.handler({
+    dashboardData,
+    operation: resolveSectionReferences(operation, context.sectionIdsByKey),
+    operationIndex,
+    context,
+  });
 };

@@ -7,7 +7,12 @@
 
 import { z } from '@kbn/zod/v4';
 import { createRuleDataSchema } from './rule_data_schema';
-import { ruleTemplateDataSchema } from './rule_template_schema';
+import {
+  findRuleTemplatesRequestSchema,
+  ruleTemplateDataSchema,
+  ruleTemplateIdParamsSchema,
+} from './rule_template_schema';
+import { FIND_MAX_RESULT_WINDOW, RULE_TEMPLATE_MAX_PER_PAGE } from './constants';
 
 const exampleTemplateAttributes = {
   engine: 'v2' as const,
@@ -119,6 +124,68 @@ describe('ruleTemplateDataSchema', () => {
   });
 });
 
+describe('findRuleTemplatesRequestSchema', () => {
+  it('accepts an empty query', () => {
+    expect(findRuleTemplatesRequestSchema.parse({})).toEqual({});
+  });
+
+  it('accepts valid query params', () => {
+    expect(
+      findRuleTemplatesRequestSchema.parse({
+        page: 2,
+        per_page: 50,
+        search: 'kubernetes',
+        sort_field: 'name',
+        sort_order: 'asc',
+        tags: ['Kubernetes'],
+      })
+    ).toEqual({
+      page: 2,
+      per_page: 50,
+      search: 'kubernetes',
+      sort_field: 'name',
+      sort_order: 'asc',
+      tags: ['Kubernetes'],
+    });
+  });
+
+  it('coerces numeric strings for page and per_page', () => {
+    expect(findRuleTemplatesRequestSchema.parse({ page: '2', per_page: '50' })).toEqual({
+      page: 2,
+      per_page: 50,
+    });
+  });
+
+  it.each([0, 1.5, 'abc', FIND_MAX_RESULT_WINDOW + 1])('rejects page %p', (page) => {
+    expect(findRuleTemplatesRequestSchema.safeParse({ page }).success).toBe(false);
+  });
+
+  it.each([0, 1.5, RULE_TEMPLATE_MAX_PER_PAGE + 1])('rejects per_page %p', (perPage) => {
+    expect(findRuleTemplatesRequestSchema.safeParse({ per_page: perPage }).success).toBe(false);
+  });
+
+  it('rejects a page beyond the result window', () => {
+    const lastPage = FIND_MAX_RESULT_WINDOW / RULE_TEMPLATE_MAX_PER_PAGE;
+
+    expect(
+      findRuleTemplatesRequestSchema.safeParse({
+        page: lastPage,
+        per_page: RULE_TEMPLATE_MAX_PER_PAGE,
+      }).success
+    ).toBe(true);
+    expect(
+      findRuleTemplatesRequestSchema.safeParse({
+        page: lastPage + 1,
+        per_page: RULE_TEMPLATE_MAX_PER_PAGE,
+      }).success
+    ).toBe(false);
+  });
+
+  it('rejects unknown keys', () => {
+    expect(() => findRuleTemplatesRequestSchema.parse({ unknown_field: 'x' })).toThrow();
+  });
+});
+
 /**
  * Tripwire: template.rule must stay the full create-rule schema
  * (same Zod value, including refines), not a forked copy.
@@ -159,46 +226,94 @@ describe('rule template create-rule schema coupling', () => {
         "hint": "Create-rule schema changed. Update this snapshot and confirm ruleTemplateDataSchema.rule still uses createRuleDataSchema.",
         "schema": Object {
           "additionalProperties": false,
-          "properties": Object {
-            "artifacts": Object {
-              "description": "Artifacts attached to the rule, each shaped as \`{ id, type, data }\`. \`data\` carries type-specific fields: a \`runbook\` artifact requires \`data.content\` holding markdown, and a \`dashboard\` artifact requires \`data.dashboardId\` holding a dashboard saved object id. Artifacts of any other type may carry whatever fields they need in \`data\`.",
-              "items": Object {
-                "additionalProperties": false,
-                "properties": Object {
-                  "data": Object {
-                    "additionalProperties": Object {},
-                    "description": "Structured artifact data.",
-                    "propertyNames": Object {
-                      "maxLength": 256,
+          "definitions": Object {
+            "alerting_composed_rule_query": Object {
+              "additionalProperties": false,
+              "description": "Composed query: a shared base with appendable breach and recovery segments.",
+              "properties": Object {
+                "base": Object {
+                  "description": "Base ES|QL query. Time filters are applied automatically via the lookback window.",
+                  "maxLength": 10000,
+                  "minLength": 1,
+                  "type": "string",
+                },
+                "breach": Object {
+                  "additionalProperties": false,
+                  "description": "Breach detection configuration. Omit to treat every base row as a breach.",
+                  "properties": Object {
+                    "segment": Object {
+                      "description": "A clause appended to the end of the rule's ES|QL query. Required in breach blocks.",
+                      "maxLength": 10000,
                       "minLength": 1,
                       "type": "string",
                     },
-                    "type": "object",
                   },
-                  "id": Object {
-                    "description": "Artifact identifier.",
+                  "required": Array [
+                    "segment",
+                  ],
+                  "type": "object",
+                },
+                "format": Object {
+                  "const": "composed",
+                  "type": "string",
+                },
+                "recovery": Object {
+                  "additionalProperties": false,
+                  "description": "Recovery query segment. Required when recovery_strategy is \\"query\\".",
+                  "properties": Object {
+                    "segment": Object {
+                      "description": "Appendable ES|QL segment for recovery detection.",
+                      "maxLength": 10000,
+                      "minLength": 1,
+                      "type": "string",
+                    },
+                  },
+                  "required": Array [
+                    "segment",
+                  ],
+                  "type": "object",
+                },
+              },
+              "required": Array [
+                "format",
+                "base",
+              ],
+              "type": "object",
+            },
+            "alerting_rule_artifact": Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "data": Object {
+                  "additionalProperties": Object {},
+                  "description": "Structured artifact data.",
+                  "propertyNames": Object {
                     "maxLength": 256,
                     "minLength": 1,
                     "type": "string",
                   },
-                  "type": Object {
-                    "description": "Artifact type.",
-                    "maxLength": 128,
-                    "minLength": 1,
-                    "type": "string",
-                  },
+                  "type": "object",
                 },
-                "required": Array [
-                  "id",
-                  "type",
-                  "data",
-                ],
-                "type": "object",
+                "id": Object {
+                  "description": "Artifact identifier.",
+                  "maxLength": 256,
+                  "minLength": 1,
+                  "type": "string",
+                },
+                "type": Object {
+                  "description": "Artifact type.",
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "type": "string",
+                },
               },
-              "maxItems": 100,
-              "type": "array",
+              "required": Array [
+                "id",
+                "type",
+                "data",
+              ],
+              "type": "object",
             },
-            "grouping": Object {
+            "alerting_rule_grouping": Object {
               "additionalProperties": false,
               "description": "Grouping configuration.",
               "properties": Object {
@@ -218,22 +333,7 @@ describe('rule template create-rule schema coupling', () => {
               ],
               "type": "object",
             },
-            "kind": Object {
-              "anyOf": Array [
-                Object {
-                  "const": "alert",
-                  "description": "Default. Tracks each problem as an alert episode across state changes — lifecycle, recovery detection, and notification dispatch via workflows. Use when the user wants to be notified, needs lifecycle tracking, or wants recovery detection.",
-                  "type": "string",
-                },
-                Object {
-                  "const": "signal",
-                  "description": "Records each match as a queryable event with no alerts, lifecycle tracking, or notifications — just data. Use for logging or detection without automated action.",
-                  "type": "string",
-                },
-              ],
-              "description": "The kind of the rule.",
-            },
-            "metadata": Object {
+            "alerting_rule_metadata": Object {
               "additionalProperties": false,
               "description": "Rule metadata.",
               "properties": Object {
@@ -275,183 +375,29 @@ describe('rule template create-rule schema coupling', () => {
               ],
               "type": "object",
             },
-            "no_data_strategy": Object {
-              "anyOf": Array [
-                Object {
-                  "const": "last_known_status",
-                  "description": "Holds the last known episode status when no data is present.",
-                  "type": "string",
-                },
-                Object {
-                  "const": "emit",
-                  "description": "Emits a \`no_data\` alert event when no_data query returns no rows for the group. \\"emit\\" is not currently accepted by the create/update API.",
-                  "type": "string",
-                },
-                Object {
-                  "const": "recover",
-                  "description": "Forces recovery when no data is present.",
-                  "type": "string",
-                },
-                Object {
-                  "const": "none",
-                  "description": "No-data situations are ignored (default).",
-                  "type": "string",
-                },
-              ],
-              "description": "How to handle no-data situations. \\"last_known_status\\" holds the last known status; \\"recover\\" forces recovery; \\"none\\" disables no-data detection. \\"emit\\" is not currently accepted by the create/update API. Standalone-format rules must provide a \`no_data\` query block when this is not \\"none\\"; composed-format rules use \`base\` as the data-presence query.",
-            },
-            "query": Object {
+            "alerting_rule_query": Object {
               "description": "Detection query configuration.",
               "oneOf": Array [
                 Object {
-                  "additionalProperties": false,
-                  "description": "Composed query: a shared base with appendable breach and recovery segments.",
-                  "properties": Object {
-                    "base": Object {
-                      "description": "Base ES|QL query. Time filters are applied automatically via the lookback window.",
-                      "maxLength": 10000,
-                      "minLength": 1,
-                      "type": "string",
-                    },
-                    "breach": Object {
-                      "additionalProperties": false,
-                      "description": "Breach detection configuration (required).",
-                      "properties": Object {
-                        "segment": Object {
-                          "description": "Appendable ES|QL segment for breach detection (required).",
-                          "maxLength": 10000,
-                          "minLength": 1,
-                          "type": "string",
-                        },
-                      },
-                      "required": Array [
-                        "segment",
-                      ],
-                      "type": "object",
-                    },
-                    "format": Object {
-                      "const": "composed",
-                      "type": "string",
-                    },
-                    "recovery": Object {
-                      "additionalProperties": false,
-                      "description": "Recovery query segment. Required when recovery_strategy is \\"query\\".",
-                      "properties": Object {
-                        "segment": Object {
-                          "description": "Appendable ES|QL segment for recovery detection.",
-                          "maxLength": 10000,
-                          "minLength": 1,
-                          "type": "string",
-                        },
-                      },
-                      "required": Array [
-                        "segment",
-                      ],
-                      "type": "object",
-                    },
-                  },
-                  "required": Array [
-                    "format",
-                    "base",
-                    "breach",
-                  ],
-                  "type": "object",
+                  "$ref": "#/definitions/alerting_composed_rule_query",
                 },
                 Object {
-                  "additionalProperties": false,
-                  "description": "Standalone queries: independent full queries for breach, recovery, and no_data.",
-                  "properties": Object {
-                    "breach": Object {
-                      "additionalProperties": false,
-                      "description": "Breach detection configuration (required).",
-                      "properties": Object {
-                        "query": Object {
-                          "description": "Full ES|QL query for breach detection (required).",
-                          "maxLength": 10000,
-                          "minLength": 1,
-                          "type": "string",
-                        },
-                      },
-                      "required": Array [
-                        "query",
-                      ],
-                      "type": "object",
-                    },
-                    "format": Object {
-                      "const": "standalone",
-                      "type": "string",
-                    },
-                    "no_data": Object {
-                      "additionalProperties": false,
-                      "description": "No-data detection query. Required when no_data_strategy is not \\"none\\".",
-                      "properties": Object {
-                        "query": Object {
-                          "description": "Full ES|QL query that detects presence of data.",
-                          "maxLength": 10000,
-                          "minLength": 1,
-                          "type": "string",
-                        },
-                      },
-                      "required": Array [
-                        "query",
-                      ],
-                      "type": "object",
-                    },
-                    "recovery": Object {
-                      "additionalProperties": false,
-                      "description": "Recovery query. Required when recovery_strategy is \\"query\\".",
-                      "properties": Object {
-                        "query": Object {
-                          "description": "Full ES|QL query for recovery detection.",
-                          "maxLength": 10000,
-                          "minLength": 1,
-                          "type": "string",
-                        },
-                      },
-                      "required": Array [
-                        "query",
-                      ],
-                      "type": "object",
-                    },
-                  },
-                  "required": Array [
-                    "format",
-                    "breach",
-                  ],
-                  "type": "object",
+                  "$ref": "#/definitions/alerting_standalone_rule_query",
                 },
               ],
             },
-            "recovery_strategy": Object {
-              "anyOf": Array [
-                Object {
-                  "const": "no_breach",
-                  "description": "recovers groups that stop breaching (default).",
-                  "type": "string",
-                },
-                Object {
-                  "const": "query",
-                  "description": "uses a custom recovery query to detect recovery.",
-                  "type": "string",
-                },
-                Object {
-                  "const": "none",
-                  "description": "disables recovery entirely.",
-                  "type": "string",
-                },
-              ],
-              "description": "How recovery is detected. \\"no_breach\\" recovers groups that stop breaching; \\"query\\" uses a custom recovery query; \\"none\\" disables recovery.",
-            },
-            "schedule": Object {
+            "alerting_rule_schedule": Object {
               "additionalProperties": false,
               "description": "Execution schedule configuration.",
               "properties": Object {
                 "every": Object {
                   "description": "Execution interval, e.g. 1m, 5m, 1h.",
+                  "maxLength": 32,
                   "type": "string",
                 },
                 "lookback": Object {
                   "description": "Lookback window for the query, e.g. 5m, 1h. Can also be expressed in ES|QL.",
+                  "maxLength": 32,
                   "type": "string",
                 },
               },
@@ -460,20 +406,169 @@ describe('rule template create-rule schema coupling', () => {
               ],
               "type": "object",
             },
+            "alerting_standalone_rule_query": Object {
+              "additionalProperties": false,
+              "description": "Standalone queries: independent full queries for breach, recovery, and no_data.",
+              "properties": Object {
+                "breach": Object {
+                  "additionalProperties": false,
+                  "description": "Breach detection configuration (required).",
+                  "properties": Object {
+                    "query": Object {
+                      "description": "Full ES|QL query for breach detection (required).",
+                      "maxLength": 10000,
+                      "minLength": 1,
+                      "type": "string",
+                    },
+                  },
+                  "required": Array [
+                    "query",
+                  ],
+                  "type": "object",
+                },
+                "format": Object {
+                  "const": "standalone",
+                  "type": "string",
+                },
+                "no_data": Object {
+                  "additionalProperties": false,
+                  "description": "No-data detection query. Required when no_data_strategy is not \\"none\\".",
+                  "properties": Object {
+                    "query": Object {
+                      "description": "Full ES|QL query that detects presence of data.",
+                      "maxLength": 10000,
+                      "minLength": 1,
+                      "type": "string",
+                    },
+                  },
+                  "required": Array [
+                    "query",
+                  ],
+                  "type": "object",
+                },
+                "recovery": Object {
+                  "additionalProperties": false,
+                  "description": "Recovery query. Required when recovery_strategy is \\"query\\".",
+                  "properties": Object {
+                    "query": Object {
+                      "description": "Full ES|QL query for recovery detection.",
+                      "maxLength": 10000,
+                      "minLength": 1,
+                      "type": "string",
+                    },
+                  },
+                  "required": Array [
+                    "query",
+                  ],
+                  "type": "object",
+                },
+              },
+              "required": Array [
+                "format",
+                "breach",
+              ],
+              "type": "object",
+            },
+          },
+          "properties": Object {
+            "artifacts": Object {
+              "description": "Optional objects attached to the rule, such as a runbook or a dashboard. Each item has \`id\`, \`type\`, and \`data\`. The shape of \`data\` depends on \`type\`. For example, a \`runbook\` uses \`content\` and a \`dashboard\` uses \`dashboard_id\`. Known types are validated against that shape. Unknown types are stored when \`id\`, \`type\`, and \`data\` are present.",
+              "items": Object {
+                "$ref": "#/definitions/alerting_rule_artifact",
+              },
+              "maxItems": 100,
+              "type": "array",
+            },
+            "grouping": Object {
+              "allOf": Array [
+                Object {
+                  "$ref": "#/definitions/alerting_rule_grouping",
+                },
+              ],
+            },
+            "kind": Object {
+              "anyOf": Array [
+                Object {
+                  "const": "alert",
+                  "description": "Creates an alert for each matching group and tracks it until it recovers. Use this when you want to detect a problem and notify or automate a response.",
+                  "type": "string",
+                },
+                Object {
+                  "const": "signal",
+                  "description": "Stores each match as a rule event you can query. Alerts are not created and notifications are not sent.",
+                  "type": "string",
+                },
+              ],
+              "description": "Whether the rule creates alerts (\`alert\`) or only stores matching events (\`signal\`).",
+            },
+            "metadata": Object {
+              "$ref": "#/definitions/alerting_rule_metadata",
+            },
+            "no_data_strategy": Object {
+              "anyOf": Array [
+                Object {
+                  "const": "last_known_status",
+                  "description": "Keeps the alert's last status when the rule finds no data.",
+                  "type": "string",
+                },
+                Object {
+                  "const": "emit",
+                  "description": "Not accepted when creating or updating rules. Do not send this value.",
+                  "type": "string",
+                },
+                Object {
+                  "const": "recover",
+                  "description": "Marks the alert \`inactive\` the first time the rule finds no data for the alert.",
+                  "type": "string",
+                },
+                Object {
+                  "const": "none",
+                  "description": "Ignores runs where the rule finds no data.",
+                  "type": "string",
+                },
+              ],
+              "description": "How the rule behaves when it finds no data for a group. If you omit this field or set it to \`none\`, those runs are ignored. If you set \`last_known_status\` or \`recover\`, a standalone query (\`query.format: standalone\`) must include \`query.no_data\`. A composed query (\`query.format: composed\`) uses \`query.base\` to detect whether data is present. The \`emit\` value is not accepted when creating or updating rules.",
+            },
+            "query": Object {
+              "$ref": "#/definitions/alerting_rule_query",
+            },
+            "recovery_strategy": Object {
+              "anyOf": Array [
+                Object {
+                  "const": "no_breach",
+                  "description": "Recovers an alert when the breach query no longer returns matches.",
+                  "type": "string",
+                },
+                Object {
+                  "const": "query",
+                  "description": "Recovers an alert when a separate recovery query matches. Requires \`query.recovery\`.",
+                  "type": "string",
+                },
+                Object {
+                  "const": "none",
+                  "description": "The rule never marks an alert as \`recovered\`, even after the breach query stops returning matches.",
+                  "type": "string",
+                },
+              ],
+              "description": "The condition that marks an alert recovered. If omitted or set to \`none\`, recovery is disabled: the alert stays \`active\` even after the breach query stops returning matches, and \`state_transition.recovering_count\` / \`recovering_timeframe\` are not allowed. Set to \`no_breach\` to recover when the breach query stops returning matches. Set to \`query\` only when you also provide \`query.recovery\`.",
+            },
+            "schedule": Object {
+              "$ref": "#/definitions/alerting_rule_schedule",
+            },
             "state_transition": Object {
               "anyOf": Array [
                 Object {
                   "additionalProperties": false,
-                  "description": "Episode state transition thresholds (alert-only).",
+                  "description": "Consecutive-match or time requirements before an alert becomes \`active\` or \`inactive\`. Applies only when \`kind\` is \`alert\`.",
                   "properties": Object {
                     "pending_count": Object {
-                      "description": "Consecutive breaches before transitioning to active.",
+                      "description": "Number of consecutive matches required before the alert becomes \`active\`.",
                       "maximum": 1000,
                       "minimum": 0,
                       "type": "integer",
                     },
                     "pending_operator": Object {
-                      "description": "How to combine count and timeframe for pending.",
+                      "description": "The operator that combines \`pending_count\` and \`pending_timeframe\`. \`AND\` requires both. \`OR\` requires either.",
                       "enum": Array [
                         "AND",
                         "OR",
@@ -481,17 +576,18 @@ describe('rule template create-rule schema coupling', () => {
                       "type": "string",
                     },
                     "pending_timeframe": Object {
-                      "description": "Time window for pending evaluation, e.g. 5m, 15m.",
+                      "description": "Time window used with \`pending_count\`, for example \`5m\` or \`15m\`.",
+                      "maxLength": 32,
                       "type": "string",
                     },
                     "recovering_count": Object {
-                      "description": "Consecutive recoveries before transitioning to inactive.",
+                      "description": "Number of consecutive recoveries required before the alert becomes \`inactive\`.",
                       "maximum": 1000,
                       "minimum": 0,
                       "type": "integer",
                     },
                     "recovering_operator": Object {
-                      "description": "How to combine count and timeframe for recovering.",
+                      "description": "The operator that combines \`recovering_count\` and \`recovering_timeframe\`. \`AND\` requires both. \`OR\` requires either.",
                       "enum": Array [
                         "AND",
                         "OR",
@@ -499,7 +595,8 @@ describe('rule template create-rule schema coupling', () => {
                       "type": "string",
                     },
                     "recovering_timeframe": Object {
-                      "description": "Time window for recovering evaluation, e.g. 5m, 15m.",
+                      "description": "Time window used with \`recovering_count\`, for example \`5m\` or \`15m\`.",
+                      "maxLength": 32,
                       "type": "string",
                     },
                   },
@@ -512,7 +609,7 @@ describe('rule template create-rule schema coupling', () => {
             },
             "time_field": Object {
               "default": "@timestamp",
-              "description": "Time field used for the lookback window range filter.",
+              "description": "Document field used as the event time when applying the lookback window. Defaults to \`@timestamp\`.",
               "maxLength": 128,
               "minLength": 1,
               "type": "string",
@@ -536,6 +633,7 @@ describe('rule template create-rule schema coupling', () => {
     const templateJson = toStableJsonSchema(ruleTemplateDataSchema) as {
       properties?: Record<string, unknown>;
       required?: string[];
+      definitions?: Record<string, unknown>;
     };
 
     expect({
@@ -552,14 +650,40 @@ describe('rule template create-rule schema coupling', () => {
       required: ['engine', 'rule'],
     });
 
+    // createRuleDataSchema carries .meta({ id: 'alerting_new_rule' }), so when nested
+    // under the template schema Zod emits a $ref instead of inlining the object.
+    expect(templateJson.properties?.rule).toEqual({
+      $ref: '#/definitions/alerting_new_rule',
+    });
+
+    const { alerting_new_rule: ruleBody, ...ruleNestedDefs } = templateJson.definitions ?? {};
+    const resolvedRule = {
+      ...(ruleBody as Record<string, unknown>),
+      definitions: ruleNestedDefs,
+    };
+
     expect({
       hint: 'Rule template rule property must match createRuleDataSchema. Keep rule: createRuleDataSchema.',
-      rule: templateJson.properties?.rule,
+      rule: resolvedRule,
       createRule: createJson,
     }).toEqual({
       hint: 'Rule template rule property must match createRuleDataSchema. Keep rule: createRuleDataSchema.',
       rule: createJson,
       createRule: createJson,
     });
+  });
+});
+
+describe('ruleTemplateIdParamsSchema', () => {
+  it('accepts a valid id', () => {
+    expect(ruleTemplateIdParamsSchema.parse({ id: 'template-1' })).toEqual({ id: 'template-1' });
+  });
+
+  it('rejects an empty id', () => {
+    expect(() => ruleTemplateIdParamsSchema.parse({ id: '' })).toThrow();
+  });
+
+  it('rejects unknown keys', () => {
+    expect(() => ruleTemplateIdParamsSchema.parse({ id: 'template-1', foo: 'bar' })).toThrow();
   });
 });

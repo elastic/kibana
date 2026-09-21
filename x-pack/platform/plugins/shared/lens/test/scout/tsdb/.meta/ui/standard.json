@@ -1,10 +1,519 @@
 {
-  "sha1": "73152a4e5cb7cff04be0fa4b1def02c9c672414b",
+  "sha1": "956b58e204934fb4eb2be15465a942d86d99dacc",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "7605c99b1dc08db-a386c89acde511c",
+      "title": "Lens downgraded LogsDB stream with another LogsDB stream renders a timestamp histogram",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/logsdb/additional_logsdb_stream.spec.ts",
+        "line": 21,
+        "column": 66
+      }
+    },
+    {
+      "id": "7605c99b1dc08db-7d835a9e0ead42a",
+      "title": "Lens downgraded LogsDB stream with another LogsDB stream renders an alternate-date histogram",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/logsdb/additional_logsdb_stream.spec.ts",
+        "line": 31,
+        "column": 76
+      }
+    },
+    {
+      "id": "7605c99b1dc08db-c20c11d056442a6",
+      "title": "Lens downgraded LogsDB stream with another LogsDB stream renders a timestamp annotation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/logsdb/additional_logsdb_stream.spec.ts",
+        "line": 34,
+        "column": 9
+      }
+    },
+    {
+      "id": "7605c99b1dc08db-6453dd55de6bc66",
+      "title": "Lens downgraded LogsDB stream with another LogsDB stream renders an alternate-time-field annotation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/logsdb/additional_logsdb_stream.spec.ts",
+        "line": 42,
+        "column": 59
+      }
+    },
+    {
+      "id": "7605c99b1dc08db-f7b726220829c9e",
+      "title": "Lens downgraded LogsDB stream with another LogsDB stream opens an ES|QL visualization from Discover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/logsdb/additional_logsdb_stream.spec.ts",
+        "line": 51,
+        "column": 24
+      }
+    },
+    {
+      "id": "f055700171bed5e-2adb74ed1cce642",
+      "title": "Lens downgraded LogsDB stream with a TSDB stream renders a timestamp histogram",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/logsdb/additional_tsdb_stream.spec.ts",
+        "line": 21,
+        "column": 66
+      }
+    },
+    {
+      "id": "f055700171bed5e-273e29372c8c392",
+      "title": "Lens downgraded LogsDB stream with a TSDB stream renders an alternate-date histogram",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/logsdb/additional_tsdb_stream.spec.ts",
+        "line": 31,
+        "column": 76
+      }
+    },
+    {
+      "id": "f055700171bed5e-dda949afe1e9aa2",
+      "title": "Lens downgraded LogsDB stream with a TSDB stream renders a timestamp annotation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/logsdb/additional_tsdb_stream.spec.ts",
+        "line": 34,
+        "column": 9
+      }
+    },
+    {
+      "id": "f055700171bed5e-216bab7bfa5bbec",
+      "title": "Lens downgraded LogsDB stream with a TSDB stream renders an alternate-time-field annotation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/logsdb/additional_tsdb_stream.spec.ts",
+        "line": 42,
+        "column": 59
+      }
+    },
+    {
+      "id": "f055700171bed5e-caddde3fa300167",
+      "title": "Lens downgraded LogsDB stream with a TSDB stream opens an ES|QL visualization from Discover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/logsdb/additional_tsdb_stream.spec.ts",
+        "line": 51,
+        "column": 24
+      }
+    },
+    {
+      "id": "b6791c12d1cda28-bb0c6ce3e1e7fe9",
+      "title": "Lens downgraded LogsDB stream without additional indices renders a timestamp histogram",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/logsdb/base_stream.spec.ts",
+        "line": 21,
+        "column": 66
+      }
+    },
+    {
+      "id": "b6791c12d1cda28-f5dce0e11489b67",
+      "title": "Lens downgraded LogsDB stream without additional indices renders an alternate-date histogram",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/logsdb/base_stream.spec.ts",
+        "line": 31,
+        "column": 76
+      }
+    },
+    {
+      "id": "b6791c12d1cda28-16e59ceb2985b79",
+      "title": "Lens downgraded LogsDB stream without additional indices renders a timestamp annotation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/logsdb/base_stream.spec.ts",
+        "line": 34,
+        "column": 9
+      }
+    },
+    {
+      "id": "b6791c12d1cda28-de9893025a94557",
+      "title": "Lens downgraded LogsDB stream without additional indices renders an alternate-time-field annotation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/logsdb/base_stream.spec.ts",
+        "line": 42,
+        "column": 59
+      }
+    },
+    {
+      "id": "b6791c12d1cda28-0fef8362b05fdbc",
+      "title": "Lens downgraded LogsDB stream without additional indices opens an ES|QL visualization from Discover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/logsdb/base_stream.spec.ts",
+        "line": 51,
+        "column": 24
+      }
+    },
+    {
+      "id": "8536e25ca449328-2487e34ef717e6b",
+      "title": "Lens downgraded LogsDB stream with a downsampled TSDB stream renders a timestamp histogram",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/logsdb/downsampled_tsdb_stream.spec.ts",
+        "line": 21,
+        "column": 66
+      }
+    },
+    {
+      "id": "8536e25ca449328-cc920ab5efa9ecc",
+      "title": "Lens downgraded LogsDB stream with a downsampled TSDB stream renders an alternate-date histogram",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/logsdb/downsampled_tsdb_stream.spec.ts",
+        "line": 31,
+        "column": 76
+      }
+    },
+    {
+      "id": "8536e25ca449328-9ad1c867abac5b3",
+      "title": "Lens downgraded LogsDB stream with a downsampled TSDB stream renders a timestamp annotation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/logsdb/downsampled_tsdb_stream.spec.ts",
+        "line": 34,
+        "column": 9
+      }
+    },
+    {
+      "id": "8536e25ca449328-2f9055f26b2e59b",
+      "title": "Lens downgraded LogsDB stream with a downsampled TSDB stream renders an alternate-time-field annotation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/logsdb/downsampled_tsdb_stream.spec.ts",
+        "line": 42,
+        "column": 59
+      }
+    },
+    {
+      "id": "8536e25ca449328-546fecbc0e58ad2",
+      "title": "Lens downgraded LogsDB stream with a downsampled TSDB stream opens an ES|QL visualization from Discover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/logsdb/downsampled_tsdb_stream.spec.ts",
+        "line": 51,
+        "column": 24
+      }
+    },
+    {
+      "id": "298774f7e71d5ff-092ec7c59dc0252",
+      "title": "Lens LogsDB stream without a predefined host.name mapping renders a timestamp histogram",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/logsdb/no_host_mapping.spec.ts",
+        "line": 21,
+        "column": 66
+      }
+    },
+    {
+      "id": "298774f7e71d5ff-cb487fad46cd4e2",
+      "title": "Lens LogsDB stream without a predefined host.name mapping renders an alternate-date histogram",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/logsdb/no_host_mapping.spec.ts",
+        "line": 26,
+        "column": 25
+      }
+    },
+    {
+      "id": "298774f7e71d5ff-39bd49f0a5169e9",
+      "title": "Lens LogsDB stream without a predefined host.name mapping renders a timestamp annotation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/logsdb/no_host_mapping.spec.ts",
+        "line": 31,
+        "column": 76
+      }
+    },
+    {
+      "id": "298774f7e71d5ff-26cc1e66c913129",
+      "title": "Lens LogsDB stream without a predefined host.name mapping renders an alternate-time-field annotation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/logsdb/no_host_mapping.spec.ts",
+        "line": 38,
+        "column": 59
+      }
+    },
+    {
+      "id": "298774f7e71d5ff-311cf390254def3",
+      "title": "Lens LogsDB stream without a predefined host.name mapping opens an ES|QL visualization from Discover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/logsdb/no_host_mapping.spec.ts",
+        "line": 47,
+        "column": 24
+      }
+    },
+    {
+      "id": "c719512e78dd8d3-9555bd33f823824",
+      "title": "Lens downgraded LogsDB stream with a regular index renders a timestamp histogram",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/logsdb/regular_index.spec.ts",
+        "line": 21,
+        "column": 66
+      }
+    },
+    {
+      "id": "c719512e78dd8d3-770b5d711b5bf0a",
+      "title": "Lens downgraded LogsDB stream with a regular index renders an alternate-date histogram",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/logsdb/regular_index.spec.ts",
+        "line": 31,
+        "column": 76
+      }
+    },
+    {
+      "id": "c719512e78dd8d3-e7fff81bf27b494",
+      "title": "Lens downgraded LogsDB stream with a regular index renders a timestamp annotation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/logsdb/regular_index.spec.ts",
+        "line": 34,
+        "column": 9
+      }
+    },
+    {
+      "id": "c719512e78dd8d3-14f33ac57f8d7ea",
+      "title": "Lens downgraded LogsDB stream with a regular index renders an alternate-time-field annotation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/logsdb/regular_index.spec.ts",
+        "line": 42,
+        "column": 59
+      }
+    },
+    {
+      "id": "c719512e78dd8d3-157d0d97f5ab076",
+      "title": "Lens downgraded LogsDB stream with a regular index opens an ES|QL visualization from Discover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/logsdb/regular_index.spec.ts",
+        "line": 51,
+        "column": 24
+      }
+    },
     {
       "id": "064473da6bae435-105fe7bf8fcfb38",
       "title": "Lens TSDB query and editor behavior defaults to median without warnings for non-rolled-up metrics",
@@ -21,7 +530,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/query_behavior.spec.ts",
-        "line": 61,
+        "line": 64,
         "column": 22
       }
     },
@@ -41,7 +550,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/query_behavior.spec.ts",
-        "line": 74,
+        "line": 77,
         "column": 62
       }
     },
@@ -61,7 +570,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/query_behavior.spec.ts",
-        "line": 107,
+        "line": 110,
         "column": 23
       }
     },
@@ -81,7 +590,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/query_behavior.spec.ts",
-        "line": 208,
+        "line": 211,
         "column": 11
       }
     },
@@ -101,8 +610,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/stream_downgrade.spec.ts",
-        "line": 171,
-        "column": 14
+        "line": 146,
+        "column": 8
       }
     },
     {
@@ -121,8 +630,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/stream_downgrade.spec.ts",
-        "line": 179,
-        "column": 41
+        "line": 154,
+        "column": 5
       }
     },
     {
@@ -141,8 +650,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/stream_downgrade.spec.ts",
-        "line": 193,
-        "column": 59
+        "line": 166,
+        "column": 5
       }
     },
     {
@@ -161,8 +670,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/stream_downgrade.spec.ts",
-        "line": 204,
-        "column": 16
+        "line": 178,
+        "column": 5
       }
     },
     {
@@ -181,8 +690,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/stream_downgrade.spec.ts",
-        "line": 218,
-        "column": 5
+        "line": 195,
+        "column": 16
       }
     },
     {

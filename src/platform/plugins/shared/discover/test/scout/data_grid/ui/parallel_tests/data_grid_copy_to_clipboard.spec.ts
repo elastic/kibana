@@ -100,13 +100,6 @@ spaceTest.describe(
       expect(copiedTimestampName, `copied column name should be "@timestamp"`).toBe('@timestamp');
 
       await expectSingleToastThenDismiss(page);
-
-      await clickCopyColumnName(page, dataGrid, '_source');
-
-      const copiedSourceName = await readClipboard(page);
-      expect(copiedSourceName, `copied column name should be "Summary"`).toBe('Summary');
-
-      await expectSingleToastThenDismiss(page);
     });
   }
 );

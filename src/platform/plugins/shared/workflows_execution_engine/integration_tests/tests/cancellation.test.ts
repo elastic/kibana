@@ -8,7 +8,7 @@
  */
 
 import { ExecutionStatus } from '@kbn/workflows';
-import { FakeConnectors } from '../mocks/actions_plugin_mock';
+import { FakeConnectors, getMockedConnectorResult } from '../mocks/actions_plugin_mock';
 import { WorkflowRunFixture } from '../workflow_run_fixture';
 
 describe('when cancellation requested', () => {
@@ -21,6 +21,27 @@ describe('when cancellation requested', () => {
     workflowRunFixture = new WorkflowRunFixture();
     outerArray = ['outer1', 'outer2', 'outer3', 'outer4'];
   });
+
+  const blockThirdConnectorExecution = () => {
+    const thirdExecutionStarted = Promise.withResolvers<void>();
+    const releaseThirdExecution = Promise.withResolvers<void>();
+    let connectorExecutionCount = 0;
+
+    workflowRunFixture.unsecuredActionsClientMock.execute.mockImplementation(async (options) => {
+      const connectorId = 'id' in options ? options.id : options.actionId;
+      if (connectorId === FakeConnectors.slow_1sec_inference.id) {
+        connectorExecutionCount++;
+        if (connectorExecutionCount === 3) {
+          thirdExecutionStarted.resolve();
+          await releaseThirdExecution.promise;
+        }
+      }
+
+      return getMockedConnectorResult(connectorId, options.params);
+    });
+
+    return { thirdExecutionStarted, releaseThirdExecution };
+  };
 
   const workflowYaml = `
 consts:
@@ -46,33 +67,25 @@ steps:
 
   describe('cancellation triggered by user', () => {
     beforeAll(() => {
+      const { thirdExecutionStarted, releaseThirdExecution } = blockThirdConnectorExecution();
       runWorkflowPromise = workflowRunFixture.runWorkflow({
         workflowYaml,
       });
 
       requestCancellationPromise = (async function () {
-        while (true) {
-          const outerForeachStep = Array.from(
-            workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
-          ).find((se) => se.stepId === 'outerForeachStep');
-          if (outerForeachStep?.state?.index === 2) {
-            const workflowExecutionDoc =
-              workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
-                'fake_workflow_execution_id'
-              )!;
-            workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.set(
-              workflowExecutionDoc.id,
-              {
-                ...workflowExecutionDoc,
-                cancelRequested: true,
-              }
-            );
-
-            break;
+        await thirdExecutionStarted.promise;
+        const workflowExecutionDoc =
+          workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+            'fake_workflow_execution_id'
+          )!;
+        workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.set(
+          workflowExecutionDoc.id,
+          {
+            ...workflowExecutionDoc,
+            cancelRequested: true,
           }
-
-          await new Promise<void>((resolve) => setTimeout(() => resolve(), 100));
-        }
+        );
+        releaseThirdExecution.resolve();
       })();
     });
 
@@ -98,22 +111,15 @@ steps:
 
   describe('cancellation triggered by task', () => {
     beforeAll(() => {
+      const { thirdExecutionStarted, releaseThirdExecution } = blockThirdConnectorExecution();
       runWorkflowPromise = workflowRunFixture.runWorkflow({
         workflowYaml,
       });
 
       requestCancellationPromise = (async function () {
-        while (true) {
-          const outerForeachStep = Array.from(
-            workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
-          ).find((se) => se.stepId === 'outerForeachStep');
-          if (outerForeachStep?.state?.index === 2) {
-            workflowRunFixture.taskAbortController.abort();
-            break;
-          }
-
-          await new Promise<void>((resolve) => setTimeout(() => resolve(), 100));
-        }
+        await thirdExecutionStarted.promise;
+        workflowRunFixture.taskAbortController.abort();
+        releaseThirdExecution.resolve();
       })();
     });
 

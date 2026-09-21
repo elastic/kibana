@@ -8,11 +8,11 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import type { AppMenuBreakpointSource } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuBreakpointSource } from '@kbn/app-menu';
 import { useAppMenu } from './chrome_hooks';
 
 const AppMenu = lazy(async () => {
-  const { AppMenuComponent } = await import('@kbn/core-chrome-app-menu-components');
+  const { AppMenuComponent } = await import('@kbn/app-menu');
   return { default: AppMenuComponent };
 });
 

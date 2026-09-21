@@ -18,7 +18,7 @@ import {
   getDetailedTypeDescription,
   getZodTypeName,
   inferZodType,
-  VARIABLE_REGEX,
+  matchVariable,
 } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
 import { InvalidForeachParameterError, InvalidForeachParameterErrorCodes } from './errors';
@@ -51,7 +51,7 @@ export function getForeachStateSchema(
       });
     }
     const cleanedForeachParam =
-      foreachStep.foreach.match(VARIABLE_REGEX)?.groups?.key ?? foreachStep.foreach;
+      matchVariable(foreachStep.foreach)?.groups.key ?? foreachStep.foreach;
     itemSchema = getForeachItemSchema(stepContextSchema, cleanedForeachParam);
     return ForEachContextSchema.extend({
       item: itemSchema,

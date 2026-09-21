@@ -116,6 +116,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/324.0.0"
+      },
+      "asset": {
+        "criticality": "high_impact"
       }
     }
   }
@@ -239,6 +242,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/324.0.0"
+      },
+      "asset": {
+        "criticality": "medium_impact"
       }
     }
   }
@@ -362,6 +368,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/324.0.0"
+      },
+      "asset": {
+        "criticality": "low_impact"
       }
     }
   }
@@ -485,6 +494,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/324.0.0"
+      },
+      "asset": {
+        "criticality": "low_impact"
       }
     }
   }
@@ -726,6 +738,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/324.0.0"
+      },
+      "asset": {
+        "criticality": "high_impact"
       }
     }
   }
@@ -807,6 +822,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/400.0.0"
+      },
+      "asset": {
+        "criticality": "high_impact"
       }
     }
   }
@@ -981,6 +999,9 @@
         },
         "name": "Other",
         "original": "test-client/1.0.0"
+      },
+      "asset": {
+        "criticality": "medium_impact"
       }
     }
   }
@@ -1087,6 +1108,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/350.0.0"
+      },
+      "asset": {
+        "criticality": "extreme_impact"
       }
     }
   }
@@ -1182,6 +1206,9 @@
         "target": {
           "id": "entity-service-target-1"
         }
+      },
+      "asset": {
+        "criticality": "extreme_impact"
       }
     }
   }
@@ -1279,6 +1306,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/380.0.0"
+      },
+      "asset": {
+        "criticality": "medium_impact"
       }
     }
   }
@@ -1650,6 +1680,9 @@
         },
         "name": "AWS SDK",
         "original": "aws-sdk-go/1.44.0"
+      },
+      "asset": {
+        "criticality": "high_impact"
       }
     }
   }
@@ -1715,6 +1748,9 @@
         },
         "name": "google-cloud-sdk",
         "original": "google-cloud-sdk gcloud/450.0.0"
+      },
+      "asset": {
+        "criticality": "medium_impact"
       }
     }
   }
@@ -1782,6 +1818,9 @@
         },
         "name": "google-cloud-sdk",
         "original": "google-cloud-sdk gcloud/450.0.0"
+      },
+      "asset": {
+        "criticality": "low_impact"
       }
     }
   }
@@ -1849,6 +1888,9 @@
         },
         "name": "gcloud",
         "original": "gcloud/450.0.0"
+      },
+      "asset": {
+        "criticality": "extreme_impact"
       }
     }
   }
@@ -1911,6 +1953,9 @@
         },
         "name": "gcloud",
         "original": "gcloud/450.0.0"
+      },
+      "asset": {
+        "criticality": "medium_impact"
       }
     }
   }
@@ -1973,6 +2018,9 @@
         },
         "name": "gcloud",
         "original": "gcloud/450.0.0"
+      },
+      "asset": {
+        "criticality": "medium_impact"
       }
     }
   }
@@ -2036,6 +2084,80 @@
         "id": "entities-host-multiple-ips-event-id",
         "kind": "event",
         "outcome": "success"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "MultiActorMultiTargetEvent123",
+    "index": ".ds-logs-gcp.audit-default-2024.10.07-000001",
+    "source": {
+      "@timestamp": "2024-09-01T14:00:00.000Z",
+      "user": {
+        "email": [
+          "multi-actor-1@example.com",
+          "multi-actor-2@example.com"
+        ],
+        "name": [
+          "Multi Actor 1",
+          "Multi Actor 2"
+        ],
+        "id": [
+          "multi-actor-1@example.com",
+          "multi-actor-2@example.com"
+        ]
+      },
+      "cloud": {
+        "project": {
+          "id": "your-project-id"
+        },
+        "provider": "gcp"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "google.iam.admin.v1.ManageMultipleResources",
+        "agent_id_status": "missing",
+        "category": [
+          "session",
+          "network",
+          "configuration"
+        ],
+        "id": "multi-actor-multi-target-event",
+        "ingested": "2024-10-07T17:47:35Z",
+        "kind": "event",
+        "outcome": "success",
+        "provider": "activity",
+        "type": [
+          "change",
+          "access",
+          "allowed"
+        ]
+      },
+      "entity": {
+        "target": {
+          "id": [
+            "projects/your-project-id/buckets/target-bucket-1",
+            "projects/your-project-id/buckets/target-bucket-2"
+          ]
+        }
+      },
+      "service": {
+        "name": "iam.googleapis.com",
+        "target": {
+          "name": "TargetMultiService1"
+        }
+      },
+      "source": {
+        "ip": "10.0.0.20"
+      },
+      "asset": {
+        "criticality": "extreme_impact"
       }
     }
   }

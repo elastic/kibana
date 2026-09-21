@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { MAX_ARTIFACT_DATA_BYTES } from '@kbn/alerting-v2-constants';
+
 /** Maximum number of consecutive breaches before transition */
 export const MAX_CONSECUTIVE_BREACHES = 1000;
 
@@ -12,6 +14,12 @@ export const MAX_ESQL_QUERY_LENGTH = 10000;
 
 /** Maximum allowed duration for schedule and timeframe fields */
 export const MAX_DURATION = '365d';
+
+/**
+ * Maximum length of a duration string. The longest value {@link MAX_DURATION}
+ * admits is 13 characters (`31536000000ms`); the headroom is deliberate.
+ */
+export const MAX_DURATION_LENGTH = 32;
 
 /** Minimum allowed interval for schedule.every */
 export const MIN_SCHEDULE_INTERVAL = '5s';
@@ -58,6 +66,13 @@ export const MAX_BULK_ITEMS = 100;
 /** Maximum length for human-readable name fields (rule name, action policy name). */
 export const MAX_NAME_LENGTH = 256;
 
+/**
+ * Maximum length for episode attachment display labels (`episode.label`).
+ * Sized for `{ruleName} alert for {groupName}` where each name is at most
+ * {@link MAX_NAME_LENGTH}, plus room for the connecting phrase.
+ */
+export const MAX_EPISODE_LABEL_LENGTH = MAX_NAME_LENGTH * 2 + 32;
+
 /** Maximum length for human-readable description fields (rule description, action policy description). */
 export const MAX_DESCRIPTION_LENGTH = 1024;
 
@@ -77,6 +92,15 @@ export const MAX_ALERT_EVENT_DATA_KEYS = 100;
  * large one.
  */
 export const MAX_ARTIFACT_DATA_FIELDS = 32;
+
+/**
+ * Maximum length of an artifact's `data` record once JSON-serialized. This is
+ * the envelope ceiling for every artifact type, registered or not; registered
+ * types apply their own, tighter `dataSchema` on top. It must stay above the
+ * largest bound any registered type allows so a rollback of the owning plugin
+ * cannot fail writes.
+ */
+export const MAX_ARTIFACT_DATA_LENGTH = MAX_ARTIFACT_DATA_BYTES;
 
 /** Maximum number of destinations per action policy. */
 export const ACTION_POLICY_MAX_DESTINATIONS = 10;
@@ -106,6 +130,16 @@ export const EXECUTION_HISTORY_MAX_RULE_ID_FILTER = 50;
 
 /** Maximum number of rule templates returned per page. */
 export const RULE_TEMPLATE_MAX_PER_PAGE = 100;
+
+/** Default number of items returned per page by the rule, action policy and rule template list APIs. */
+export const FIND_DEFAULT_PER_PAGE = 20;
+
+/**
+ * Maximum number of items that can be paged through on the rule, action policy
+ * and rule template list APIs (`page * per_page`). Mirrors the Elasticsearch
+ * default `index.max_result_window`.
+ */
+export const FIND_MAX_RESULT_WINDOW = 10_000;
 
 /**
  * Maximum length of the `episode_data` JSON string snapshotted into an episode

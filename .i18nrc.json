@@ -10,6 +10,7 @@
     "apmUiShared": "src/platform/packages/shared/kbn-apm-ui-shared",
     "apmTypes": "x-pack/platform/packages/shared/kbn-apm-types",
     "asCodeExport": "src/platform/packages/shared/as-code/export-flyout-component",
+    "asCodeImport": "src/platform/packages/shared/as-code/import-flyout-component",
     "autocomplete": "x-pack/solutions/security/packages/kbn-securitysolution-autocomplete/src",
     "avcBanner": "src/platform/packages/shared/kbn-avc-banner/src",
     "cases": [
@@ -115,6 +116,7 @@
       "src/platform/packages/shared/react",
       "src/platform/packages/private/react"
     ],
+    "esqlBrowser": "src/platform/packages/shared/esql/kbn-esql-browser",
     "esqlEditor": "src/platform/packages/private/kbn-esql-editor",
     "esqlUtils": "src/platform/packages/shared/kbn-esql-utils",
     "reporting": "src/platform/packages/private/kbn-reporting",
@@ -194,6 +196,7 @@
     ],
     "visualizationUiComponents": "src/platform/packages/shared/kbn-visualization-ui-components",
     "visualizationUtils": "src/platform/packages/shared/kbn-visualization-utils",
+    "workflowsUi": "src/platform/packages/shared/kbn-workflows-ui/src/components/run_workflow_panel",
     "unifiedDocViewer": [
       "src/platform/plugins/shared/unified_doc_viewer",
       "src/platform/packages/shared/kbn-unified-doc-viewer"

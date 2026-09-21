@@ -65,8 +65,10 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
     secondaryLabel: {
       types: ['string'],
       help: i18n.translate('expressionMetricVis.function.secondaryLabel.help', {
-        defaultMessage: 'Optional text displayed next to the Secondary Metric.',
+        defaultMessage:
+          'Legacy custom label for the Secondary Metric, used as a runtime fallback until a future migration copies it onto the column',
       }),
+      required: false,
     },
     progressDirection: {
       types: ['string'],
@@ -195,10 +197,11 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       multi: true,
       required: false,
     },
-    secondaryLabelPosition: {
+    secondaryNameVisibility: {
       types: ['string'],
-      help: i18n.translate('expressionMetricVis.function.secondaryLabelPosition.help', {
-        defaultMessage: 'Specifies the position of the Secondary Metric label',
+      help: i18n.translate('expressionMetricVis.function.secondaryNameVisibility.help', {
+        defaultMessage:
+          'Specifies whether the Secondary Metric name is hidden, or placed before or after the value',
       }),
       required: false,
     },
@@ -299,7 +302,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
               palette: args.secondaryTrendPalette,
               textPalette: args.secondaryTrendTextPalette,
             },
-            secondaryLabelPosition: args.secondaryLabelPosition,
+            secondaryNameVisibility: args.secondaryNameVisibility,
             applyColorTo: args.applyColorTo,
           },
           dimensions: {

@@ -34,7 +34,7 @@ describe('fetchEsql', () => {
     data: discoverServiceMock.data,
     expressions: discoverServiceMock.expressions,
     scopedProfilesManager,
-    isApproximate: false,
+    esqlApproximation: false,
   };
 
   it('resolves with returned records', async () => {
@@ -212,14 +212,14 @@ describe('fetchEsql', () => {
     expect(result.time).toEqual(absoluteTimeRange);
   });
 
-  it('passes isApproximate to the expression searchContext', async () => {
+  it('passes esqlApproximation to the expression searchContext', async () => {
     const expressionsExecuteSpy = jest.spyOn(discoverServiceMock.expressions, 'execute');
     expressionsExecuteSpy.mockReturnValueOnce({
       cancel: jest.fn(),
       getData: jest.fn(() => of({ result: { columns: [], rows: [] } })),
     } as unknown as ExecutionContract);
 
-    await fetchEsql({ ...fetchEsqlMockProps, isApproximate: true });
+    await fetchEsql({ ...fetchEsqlMockProps, esqlApproximation: true });
 
     expect(expressionsExecuteSpy).toHaveBeenCalledWith(
       expect.anything(),
@@ -258,6 +258,37 @@ describe('fetchEsql', () => {
     });
     expect(result.records[1].raw.inline_highlights).toEqual({
       snippets: { preTag: '<em>', postTag: '</em>' },
+    });
+  });
+
+  it('should add inline_highlights for HIGHLIGHT command columns', async () => {
+    const hits = [
+      { _index: 'i', _id: '1', highlight_title: '<em>bar</em>' },
+      { _index: 'i', _id: '2', highlight_title: '<em>baz</em>' },
+    ] as unknown as EsHitRecord[];
+    const expressionsExecuteSpy = jest.spyOn(discoverServiceMock.expressions, 'execute');
+    expressionsExecuteSpy.mockReturnValueOnce({
+      cancel: jest.fn(),
+      getData: jest.fn(() =>
+        of({
+          result: {
+            columns: ['_id', 'highlight_title'],
+            rows: hits,
+          },
+        })
+      ),
+    } as unknown as ExecutionContract);
+
+    const result = await fetchEsql({
+      ...fetchEsqlMockProps,
+      query: { esql: 'from * | HIGHLIGHT "bar" ON title' },
+    });
+
+    expect(result.records[0].raw.inline_highlights).toEqual({
+      highlight_title: { preTag: '<em>', postTag: '</em>' },
+    });
+    expect(result.records[1].raw.inline_highlights).toEqual({
+      highlight_title: { preTag: '<em>', postTag: '</em>' },
     });
   });
 });

@@ -8,7 +8,7 @@
 import type { ChangeEvent } from 'react';
 import React, { useCallback, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { getRuleDetailsRoute } from '@kbn/rule-data-utils';
+import { getRuleDetailsRoute, getTriggersActionsManagementPath } from '@kbn/rule-data-utils';
 import type { EuiBasicTableColumn, EuiTableSortingType } from '@elastic/eui';
 import {
   EuiBasicTable,
@@ -153,7 +153,7 @@ export const ConnectorRulesList = (props: ConnectorRulesListProps) => {
                 <EuiLink
                   title={name}
                   href={getUrlForApp('management', {
-                    path: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(rule.id)}`,
+                    path: getTriggersActionsManagementPath(getRuleDetailsRoute(rule.id)),
                   })}
                 >
                   {name}

@@ -8,7 +8,8 @@
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiCode, EuiFlexGroup, EuiFlexItem, EuiTextColor, EuiTextTruncate } from '@elastic/eui';
+import { EuiCode, EuiTextColor } from '@elastic/eui';
+import { endpointActionResponseCodes } from '../../endpoint_responder/lib/endpoint_action_response_codes';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import type { KillProcessActionOutputContent } from '../../../../../common/endpoint/types';
 
@@ -41,17 +42,22 @@ export interface ProcessResultProps {
   command: 'kill-process' | 'suspend-process';
   processResult: Required<KillProcessActionOutputContent>['descendants'][number] &
     Pick<KillProcessActionOutputContent, 'process_name'>;
+  /** If Entity ID should be shown. `true` by default.  */
+  showEntityId?: boolean;
   'data-test-subj'?: string;
 }
 
 export const ProcessResult = memo<ProcessResultProps>(
-  ({ command, processResult, 'data-test-subj': dataTestSubj }) => {
+  ({ command, processResult, showEntityId = true, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
 
     const processData: React.ReactNode = useMemo(() => {
       const processResultData: React.ReactNode[] = [];
-      const successMsg = command === 'kill-process' ? KILLED_LABEL : SUSPENDED_LABEL;
-      const failedMsg = command === 'kill-process' ? NOT_KILLED_LABEL : NOT_SUSPENDED_LABEL;
+      const defaultSuccessMsg = command === 'kill-process' ? KILLED_LABEL : SUSPENDED_LABEL;
+      const defaultFailedMsg = `${
+        command === 'kill-process' ? NOT_KILLED_LABEL : NOT_SUSPENDED_LABEL
+      }${processResult.error ? ` - ${processResult.error}` : ''}`;
+      const responseCodeMsg = endpointActionResponseCodes[processResult.code ?? ''];
 
       if (processResult?.pid) {
         processResultData.push(
@@ -65,7 +71,7 @@ export const ProcessResult = memo<ProcessResultProps>(
         );
       }
 
-      if (processResult?.entity_id) {
+      if (processResult?.entity_id && showEntityId) {
         if (processResultData.length > 0) {
           processResultData.push(<DataSeparator key="entityId-sep" />);
         }
@@ -97,49 +103,25 @@ export const ProcessResult = memo<ProcessResultProps>(
         );
       }
 
-      if (processResult?.command) {
-        if (processResultData.length > 0) {
-          processResultData.push(<DataSeparator key="command-sep" />);
-        }
-
-        processResultData.push(
-          <span key="command" className="eui-displayInlineBlock">
-            <EuiFlexGroup responsive={false} gutterSize="none">
-              <EuiFlexItem grow={false}>
-                <FormattedMessage
-                  id="xpack.securitySolution.management.killProcessActionResult.command"
-                  defaultMessage="Command"
-                />{' '}
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiCode className="eui-displayBlock">
-                  <EuiTextTruncate
-                    truncation="middle"
-                    width={350}
-                    text={processResult?.command ?? ''}
-                  />
-                </EuiCode>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </span>
-        );
-      }
-
       if (processResultData.length > 0) {
         processResultData.push(<DataSeparator key="failureMsg-sep" />);
       }
 
-      if (processResult.was_killed === false || processResult.error) {
+      if (
+        processResult.error &&
+        // We treat "Not found" as a non-error condition on the UI
+        processResult.code !== 'ra_kill-process_descendant_error_not-found' &&
+        processResult.code !== 'ra_kill-process_error_not-found'
+      ) {
         processResultData.push(
           <EuiTextColor color="danger" key="failureMsg">
-            {failedMsg}
-            {processResult.error && ` - ${processResult.error}`}
+            {responseCodeMsg ?? defaultFailedMsg}
           </EuiTextColor>
         );
       } else {
         processResultData.push(
           <EuiTextColor key="successMsg" color="success">
-            {successMsg}
+            {responseCodeMsg ?? defaultSuccessMsg}
           </EuiTextColor>
         );
       }
@@ -147,12 +129,12 @@ export const ProcessResult = memo<ProcessResultProps>(
       return processResultData;
     }, [
       command,
-      processResult?.command,
+      processResult.code,
       processResult?.entity_id,
       processResult.error,
       processResult?.pid,
       processResult?.process_name,
-      processResult.was_killed,
+      showEntityId,
     ]);
 
     return <div data-test-subj={getTestId()}>{processData}</div>;

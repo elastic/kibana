@@ -226,6 +226,82 @@ describe('useLensProps', () => {
     });
   });
 
+  it('shows a custom y-axis title when yAxisTitle is provided', async () => {
+    const chartRef = createMockChartRef();
+
+    renderHook(() =>
+      useLensProps({
+        chartId: 'testChartId',
+        title: 'Test Chart',
+        query: 'FROM metrics-*',
+        services: servicesMock as UnifiedHistogramServices,
+        fetchParams,
+        discoverFetch$,
+        chartRef,
+        chartLayers: mockChartLayers,
+        yAxisTitle: 'Avg',
+        profileId: 'testProfileId',
+      })
+    );
+
+    act(() => {
+      discoverFetch$.next({ fetchParams, lensVisServiceState: undefined });
+    });
+
+    await waitFor(() => {
+      expect(LensConfigBuilder.prototype.build).toHaveBeenCalledWith(
+        expect.objectContaining({
+          yTitle: 'Avg',
+          axisTitleVisibility: {
+            showYRightAxisTitle: false,
+            showXAxisTitle: false,
+            showYAxisTitle: true,
+          },
+        }),
+        expect.anything()
+      );
+    });
+  });
+
+  it('keeps the y-axis title hidden when yAxisTitle is not provided', async () => {
+    const chartRef = createMockChartRef();
+
+    renderHook(() =>
+      useLensProps({
+        chartId: 'testChartId',
+        title: 'Test Chart',
+        query: 'FROM metrics-*',
+        services: servicesMock as UnifiedHistogramServices,
+        fetchParams,
+        discoverFetch$,
+        chartRef,
+        chartLayers: mockChartLayers,
+        profileId: 'testProfileId',
+      })
+    );
+
+    act(() => {
+      discoverFetch$.next({ fetchParams, lensVisServiceState: undefined });
+    });
+
+    await waitFor(() => {
+      expect(LensConfigBuilder.prototype.build).toHaveBeenCalledWith(
+        expect.objectContaining({
+          axisTitleVisibility: {
+            showYRightAxisTitle: false,
+            showXAxisTitle: false,
+            showYAxisTitle: false,
+          },
+        }),
+        expect.anything()
+      );
+      expect(LensConfigBuilder.prototype.build).not.toHaveBeenCalledWith(
+        expect.objectContaining({ yTitle: expect.anything() }),
+        expect.anything()
+      );
+    });
+  });
+
   it('updates lensProps when discoverFetch$ emits', async () => {
     const chartRef = createMockChartRef();
     const testFetchParams = {

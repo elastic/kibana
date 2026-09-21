@@ -16,6 +16,8 @@ import { useOverviewStatus } from './hooks/use_overview_status';
 import { isExternalOverviewMonitor } from '../../state/overview_status';
 import { selectOverviewPageState } from '../../state';
 import { GETTING_STARTED_ROUTE } from '../../../../../common/constants';
+import { useCpsLinkedProjects } from '../../hooks/use_cps_linked_projects';
+import { shouldRedirectToGettingStarted } from './hooks/should_redirect_to_getting_started';
 
 import { useLocations } from '../../hooks';
 
@@ -27,6 +29,10 @@ import { MonitorListContainer } from './management/monitor_list_container';
 import { useMonitorListBreadcrumbs } from './hooks/use_breadcrumbs';
 import { useMonitorList } from './hooks/use_monitor_list';
 import * as labels from './management/labels';
+import { AutoRefreshButton } from '../common/components/auto_refresh_button';
+import { LastRefreshed } from '../common/components/last_refreshed';
+import { RefreshButton } from '../common/components/refresh_button';
+import { MonitorsListingPage, SyntheticsHeaderToolbar } from '../common/app_header';
 
 export const MonitorManagementPage: React.FC = () => {
   useTrackPageview({ app: 'synthetics', path: 'monitors' });
@@ -36,9 +42,14 @@ export const MonitorManagementPage: React.FC = () => {
 
   const { error: enablementError, isEnabled, loading: enablementLoading } = useEnablement();
 
-  const { allConfigs, settled: overviewSettled } = useOverviewStatus({
+  const {
+    allConfigs,
+    settled: overviewSettled,
+    error: overviewError,
+  } = useOverviewStatus({
     scopeStatusByLocation: false,
   });
+  const { cpsReady, hasLinkedProjects } = useCpsLinkedProjects();
 
   const pageState = useSelector(selectOverviewPageState);
 
@@ -65,26 +76,37 @@ export const MonitorManagementPage: React.FC = () => {
   // so they are absent from `absoluteTotal` but surface in the overview status
   // `allConfigs`. Don't redirect to Getting Started when the only monitors are ping-driven.
   //
-  // `overviewSettled` is true once the status request has completed, success OR failure.
-  // A failed request must still count as settled (the reducer never flips `loaded` on
-  // error, and `error` is transient), otherwise a truly empty deployment would be stranded
-  // on the management page whenever the status request fails.
+  // A failed status fetch must not look like an empty install (CPS origin-only
+  // races used to onboard the user away from linked-project remotes).
   //
   // We also don't redirect while a monitor filter is active: a filter that excludes the
   // ping-only monitors would otherwise make `allConfigs` empty and wrongly onboard away
   // from a filtered view of a ping-only deployment.
-  const hasNoMonitors =
-    absoluteTotal === 0 &&
-    overviewSettled &&
-    !hasActiveOverviewFilter &&
-    !allConfigs.some(isExternalOverviewMonitor);
+  const hasNoMonitors = shouldRedirectToGettingStarted({
+    absoluteTotal,
+    overviewSettled,
+    overviewError: Boolean(overviewError),
+    hasActiveFilter: hasActiveOverviewFilter,
+    hasExternalMonitors: allConfigs.some(isExternalOverviewMonitor),
+    cpsReady,
+    hasLinkedProjects,
+  });
 
   if (isEnabled && !monitorsLoading && loaded && hasNoMonitors) {
     return <Redirect to={GETTING_STARTED_ROUTE} />;
   }
 
   return (
-    <>
+    <MonitorsListingPage
+      selectedTab="management"
+      toolbar={
+        <SyntheticsHeaderToolbar>
+          <LastRefreshed />
+          <RefreshButton />
+          <AutoRefreshButton />
+        </SyntheticsHeaderToolbar>
+      }
+    >
       <Loader
         loading={enablementLoading || locationsLoading}
         error={Boolean(enablementError)}
@@ -97,6 +119,6 @@ export const MonitorManagementPage: React.FC = () => {
         <MonitorListContainer isEnabled={isEnabled} monitorListProps={monitorListProps} />
       </Loader>
       {showEmptyState && <EnablementEmptyState />}
-    </>
+    </MonitorsListingPage>
   );
 };

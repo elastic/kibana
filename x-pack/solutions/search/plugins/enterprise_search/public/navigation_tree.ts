@@ -69,17 +69,18 @@ export const getNavigationTreeDefinition = ({
         const navTree: NavigationTreeDefinition = {
           body: [
             {
-              icon,
+              icon: 'home',
               link: SEARCH_HOMEPAGE,
-              renderAs: 'home',
-              title,
+              title: i18n.translate('xpack.enterpriseSearch.searchNav.home', {
+                defaultMessage: 'Home',
+              }),
             },
             {
               icon: 'productAgent',
               link: 'agent_builder',
             },
             {
-              icon: 'sparkles',
+              icon: 'tableSparkles',
               link: 'context_engine',
             },
             {
@@ -268,6 +269,7 @@ export const getNavigationTreeDefinition = ({
                     { link: 'management:watcher' },
                     { link: 'management:maintenanceWindows' },
                   ],
+                  id: 'alerts_and_insights',
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.management.alerts', {
                     defaultMessage: 'Alerts and Insights',
                   }),

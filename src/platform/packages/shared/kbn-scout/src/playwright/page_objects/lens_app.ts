@@ -28,6 +28,7 @@ export class LensApp {
   readonly saveModal;
   readonly savedObjectTitleInput;
   readonly confirmSaveButton;
+  readonly addToLibraryCheckbox;
   /**
    * Needed by the Lens plugin's `openDimensionEditor` / `secondaryFlyoutBackButton` alias
    * as well as `closeDimensionEditor` here.
@@ -35,6 +36,11 @@ export class LensApp {
   protected readonly closeDimensionEditorButton;
   readonly applyFlyoutButton;
   readonly cancelFlyoutButton;
+  /**
+   * Series colour input of the open dimension editor. Matched with `~=` because the
+   * input carries two space-separated test subjects (`euiColorPickerAnchor` and this one).
+   */
+  readonly dimensionColorPicker;
   protected readonly codeEditor: KibanaCodeEditorWrapper;
 
   private readonly chartSwitchPopover;
@@ -54,6 +60,7 @@ export class LensApp {
     this.saveModal = this.page.testSubj.locator('savedObjectSaveModal');
     this.savedObjectTitleInput = this.page.testSubj.locator('savedObjectTitle');
     this.confirmSaveButton = this.page.testSubj.locator('confirmSaveSavedObjectButton');
+    this.addToLibraryCheckbox = this.page.locator('#add-to-library-checkbox');
     this.closeDimensionEditorButton = this.page.testSubj.locator(
       'lns-indexPattern-dimensionContainerClose'
     );
@@ -62,6 +69,9 @@ export class LensApp {
     );
     this.applyFlyoutButton = this.page.getByTestId('applyFlyoutButton');
     this.cancelFlyoutButton = this.page.getByTestId('cancelFlyoutButton');
+    this.dimensionColorPicker = this.page.locator(
+      '[data-test-subj~="indexPattern-dimension-colorPicker"]'
+    );
     this.codeEditor = new KibanaCodeEditorWrapper(this.page);
   }
 
@@ -155,6 +165,14 @@ export class LensApp {
     await this.page.testSubj.locator('dshDashboardViewport').waitFor({ state: 'visible' });
   }
 
+  /** Opens the Save and return split menu when Save as lives under it. */
+  async openSaveOptionsIfNeeded() {
+    const saveOptions = this.page.testSubj.locator('lnsApp_saveAndReturnButton-secondary-button');
+    if (await saveOptions.isVisible()) {
+      await saveOptions.click();
+    }
+  }
+
   /**
    * Opens the Lens save modal, fills in the title, optionally selects
    * a dashboard target, and confirms. Waits for the modal to close.
@@ -168,11 +186,14 @@ export class LensApp {
         }
       | {
           addToDashboard: 'new';
+          saveAsNew?: boolean;
+          saveToLibrary?: boolean;
         }
       | {
           addToDashboard: 'none';
         }
   ) {
+    await this.openSaveOptionsIfNeeded();
     await this.saveButton.click();
     await this.saveModal.waitFor({ state: 'visible' });
     await this.savedObjectTitleInput.fill(title);
@@ -185,7 +206,17 @@ export class LensApp {
         .locator(`dashboard-picker-option-${options.dashboardTitle.split(' ').join('-')}`)
         .click();
     } else if (options?.addToDashboard === 'new') {
+      if (options.saveAsNew !== undefined) {
+        await this.setEuiSwitch('saveAsNewCheckbox', options.saveAsNew);
+      }
       await this.page.locator('#new-dashboard-option').check();
+      if (options.saveToLibrary !== undefined) {
+        if (options.saveToLibrary) {
+          await this.addToLibraryCheckbox.check();
+        } else {
+          await this.addToLibraryCheckbox.uncheck();
+        }
+      }
     } else if (options?.addToDashboard === 'none') {
       await this.page.locator('#add-to-library-option').check();
     }
@@ -269,9 +300,31 @@ export class LensApp {
     }
   }
 
+  async configureTextBasedDimension({
+    dimension,
+    field,
+  }: {
+    dimension: string;
+    field: string;
+  }): Promise<void> {
+    await this.page.testSubj.locator(dimension).click();
+
+    const fieldPicker = this.page.components.comboBox('text-based-dimension-field');
+    await fieldPicker.setSelectedOptions([field]);
+
+    await this.closeDimensionEditor();
+    await this.applyFlyoutButton.click();
+  }
+
   private async openDimensionSelector(dimension: string) {
     await this.page.testSubj.locator(dimension).click();
     await this.closeDimensionEditorButton.waitFor({ state: 'visible' });
+  }
+
+  async removeDimension(dimensionTestSubj: string) {
+    await this.page.testSubj
+      .locator(`${dimensionTestSubj} > indexPattern-dimension-remove`)
+      .click();
   }
 
   async switchToFormula() {
@@ -282,10 +335,10 @@ export class LensApp {
     const operationSelector = isPreviousIncompatible
       ? `lns-indexPatternDimension-${operation} incompatible`
       : `lns-indexPatternDimension-${operation}`;
-    const operationButton = this.page.testSubj.locator(operationSelector);
-    await operationButton.waitFor({ state: 'visible' });
-    await operationButton.scrollIntoViewIfNeeded();
-    await operationButton.click();
+    const operationLabel = this.page.testSubj.locator(`${operationSelector}-label`);
+    await operationLabel.waitFor({ state: 'visible' });
+    await operationLabel.scrollIntoViewIfNeeded();
+    await operationLabel.click();
     await this.page.waitForFunction(
       (selector) =>
         document.querySelector(`[data-test-subj="${selector}"]`)?.getAttribute('aria-pressed') ===
@@ -301,6 +354,18 @@ export class LensApp {
       .setSelectedOptions([field], {
         timeout: 10_000,
       });
+    // ComboBox can show the typed option before Lens layer state commits.
+    // data-selected-field is the committed display name and updates only after
+    // insertOrReplaceColumn. Poll the attribute as data so labels with CSS
+    // metacharacters are not interpolated into a selector.
+    await this.page.waitForFunction(
+      (expected) =>
+        document
+          .querySelector('[data-test-subj="indexPattern-dimension-field"]')
+          ?.getAttribute('data-selected-field') === expected,
+      field,
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
+    );
   }
 
   /**
@@ -366,6 +431,20 @@ export class LensApp {
       [testSubj, want] as const,
       { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
     );
+  }
+
+  /**
+   * Opens the dimension editor for the XY chart's vertical axis, so callers can
+   * read or edit the series configuration.
+   *
+   * Deliberately does not wait: `lns-indexPattern-dimensionContainerClose` comes
+   * from the shared flyout container, so it can already be visible without the
+   * dimension editor being open, and waiting on it lets callers proceed too early.
+   * Assert on the control you actually need (e.g. {@link dimensionColorPicker});
+   * its own auto-waiting is the accurate readiness signal.
+   */
+  async openXYDimensionEditor() {
+    await this.page.testSubj.click('lnsXY_yDimensionPanel');
   }
 
   /**

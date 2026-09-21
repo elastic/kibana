@@ -5,10 +5,12 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import type { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { getPackagePolicySavedObjectType } from '@kbn/fleet-plugin/server/services/package_policy';
 import { isEmpty } from 'lodash';
+import { queryBoolean, routeId } from '../zod_query';
 import { syntheticsMonitorSavedObjectType } from '../../../common/types/saved_objects';
 import { invalidOriginError } from './add_monitor';
 import {
@@ -22,7 +24,7 @@ import { ELASTIC_MANAGED_LOCATIONS_DISABLED } from './project_monitor/add_monito
 import { getPrivateLocationsForNamespaces } from '../../synthetics_service/get_private_locations';
 import { mergeSourceMonitor } from './formatters/saved_object_to_monitor';
 import {
-  assertCanUpdateMonitorInAllSpaces,
+  assertCanPerformMonitorBulkActionInAllSpaces,
   validateMonitorPrivateLocationSpaces,
 } from './monitor_locations_utils';
 import type { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
@@ -52,15 +54,11 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
   validate: {},
   validation: {
     request: {
-      params: schema.object({
-        monitorId: schema.string(),
+      params: z.strictObject({
+        monitorId: routeId,
       }),
-      query: schema.object({
-        internal: schema.maybe(
-          schema.boolean({
-            defaultValue: false,
-          })
-        ),
+      query: z.strictObject({
+        internal: queryBoolean.optional().default(false),
       }),
       body: schema.any(),
     },
@@ -154,11 +152,14 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         });
       }
 
-      const editedMonitorSpaces = (editedMonitor as MonitorFields)[ConfigKey.KIBANA_SPACES] ?? [];
-      if (editedMonitorSpaces.length > 0) {
-        const spaceAuthError = await assertCanUpdateMonitorInAllSpaces(
+      const editedMonitorSpaces = new Set([
+        ...(decryptedMonitorPrevMonitor.namespaces ?? []),
+        ...((editedMonitor as MonitorFields)[ConfigKey.KIBANA_SPACES] ?? []),
+      ]);
+      if (editedMonitorSpaces.size > 0) {
+        const spaceAuthError = await assertCanPerformMonitorBulkActionInAllSpaces(
           routeContext,
-          editedMonitorSpaces,
+          [...editedMonitorSpaces],
           decryptedMonitorPrevMonitor.type
         );
         if (spaceAuthError) {

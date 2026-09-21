@@ -41,7 +41,7 @@ export const testChannels: {
   current(): ScoutTestChannel[];
 } = {
   all: ScoutTestChannelSchema.options,
-  default: ['ci-on-commit', 'ci-batch-3h'],
+  default: ['ci-on-commit'],
   match(pattern) {
     return this.all.filter((channel) => channel.match(pattern));
   },

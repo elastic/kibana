@@ -15,35 +15,39 @@ import { generateObservabilityAlerts } from '../../fixtures/alerts_data';
 // The flyout has since been redesigned from a static description list into an
 // Overview/Metadata tabbed layout, so instead of the FTR's exact field-value
 // assertions we verify the current flyout structure and navigation affordances.
-test.describe('Observability alerts - flyout', { tag: [...tags.stateful.classic] }, () => {
-  test.beforeAll(async ({ esClient }) => {
-    await generateObservabilityAlerts(esClient);
-  });
+test.describe(
+  'Observability alerts - flyout',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  () => {
+    test.beforeAll(async ({ esClient }) => {
+      await generateObservabilityAlerts(esClient);
+    });
 
-  test.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsViewer();
-    await pageObjects.alertsTablePage.goto();
-  });
+    test.beforeEach(async ({ browserAuth, pageObjects }) => {
+      await browserAuth.loginAsViewer();
+      await pageObjects.alertsTablePage.goto();
+    });
 
-  test('opens and closes the alert flyout', async ({ pageObjects }) => {
-    const { alertsTablePage } = pageObjects;
+    test('opens and closes the alert flyout', async ({ pageObjects }) => {
+      const { alertsTablePage } = pageObjects;
 
-    await alertsTablePage.openFlyout(0);
-    await expect(alertsTablePage.flyout).toBeVisible();
-    await expect(alertsTablePage.flyoutTitle).toContainText('APM Failed Transaction Rate (one)');
+      await alertsTablePage.openFlyout(0);
+      await expect(alertsTablePage.flyout).toBeVisible();
+      await expect(alertsTablePage.flyoutTitle).toContainText('APM Failed Transaction Rate (one)');
 
-    await alertsTablePage.closeFlyout();
-    await expect(alertsTablePage.flyout).toBeHidden();
-  });
+      await alertsTablePage.closeFlyout();
+      await expect(alertsTablePage.flyout).toBeHidden();
+    });
 
-  test('shows the alert overview and navigation links in the flyout', async ({ pageObjects }) => {
-    const { alertsTablePage } = pageObjects;
+    test('shows the alert overview and navigation links in the flyout', async ({ pageObjects }) => {
+      const { alertsTablePage } = pageObjects;
 
-    await alertsTablePage.openFlyout(0);
+      await alertsTablePage.openFlyout(0);
 
-    await expect(alertsTablePage.flyoutOverviewPanel).toBeVisible();
-    await expect(alertsTablePage.flyoutViewRuleDetailsLink).toBeVisible();
-    await expect(alertsTablePage.flyoutViewInAppButton).toBeVisible();
-    await expect(alertsTablePage.flyoutAlertDetailsButton).toBeVisible();
-  });
-});
+      await expect(alertsTablePage.flyoutOverviewPanel).toBeVisible();
+      await expect(alertsTablePage.flyoutViewRuleDetailsLink).toBeVisible();
+      await expect(alertsTablePage.flyoutViewInAppButton).toBeVisible();
+      await expect(alertsTablePage.flyoutAlertDetailsButton).toBeVisible();
+    });
+  }
+);

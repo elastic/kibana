@@ -16,12 +16,26 @@ import {
   IAC_PROVISIONER_FALLBACK_REASON_RENDER_FAILED,
   IAC_PROVISIONER_RENDER_FALLBACK_EVENT,
 } from '../../../../common/telemetry/iac_provisioner_events';
-import { AWS_CLOUD_PROVIDER } from '../../../../common/types/models/cloud_connector';
+import {
+  AWS_CLOUD_PROVIDER,
+  type CloudConnectorIacState,
+} from '../../../../common/types/models/cloud_connector';
+import {
+  IAC_FEDERATED_IDENTITY_WORKFLOW,
+  type IacPolicyTemplateSelection,
+  type RenderIacTemplateIntegration,
+} from '../../../../common/types/rest_spec/iac_provisioner';
 import type { AccountType } from '../../../types';
 import type { CloudSetupForCloudConnector } from '../types';
 import { getCloudConnectorRemoteRoleTemplate } from '../utils';
 
 const TEMPLATE_URL_PARAM_REGEX = /templateURL=[^&]+/;
+
+const STATIC_FALLBACK_IAC: CloudConnectorIacState = {
+  iac_key: null,
+  iac_blueprint_id: null,
+  iac_blueprint_version: null,
+};
 
 export interface UseCloudConnectorTemplateParams {
   cloud?: CloudSetupForCloudConnector;
@@ -29,11 +43,40 @@ export interface UseCloudConnectorTemplateParams {
   iacTemplateUrl?: string;
   packageName?: string;
   /**
-   * Policy templates the user has enabled in the policy being configured.
-   * The rendered template grants permissions for exactly these — no more.
+   * Policy templates the user has enabled in the policy being configured,
+   * each with the inputs they actually turned on. The rendered template
+   * grants permissions for exactly these — no more.
    */
-  policyTemplates?: string[];
+  policyTemplates?: IacPolicyTemplateSelection[];
+  /**
+   * Multi-package render payload. When set, takes precedence over
+   * `packageName` + `policyTemplates` (Ingest Hub can cover several packages
+   * in one Launch).
+   */
+  integrations?: RenderIacTemplateIntegration[];
+  /**
+   * Stored template digest from this connector. Omit on first render and
+   * after a static-template fallback.
+   */
+  templateSha?: string;
 }
+
+const toRenderIntegrations = ({
+  integrations,
+  packageName,
+  policyTemplates,
+}: Pick<UseCloudConnectorTemplateParams, 'integrations' | 'packageName' | 'policyTemplates'>):
+  | RenderIacTemplateIntegration[]
+  | undefined => {
+  if (integrations?.length) {
+    const usable = integrations.filter((integration) => integration.policyTemplates.length > 0);
+    return usable.length > 0 ? usable : undefined;
+  }
+  if (packageName && policyTemplates?.length) {
+    return [{ name: packageName, policyTemplates }];
+  }
+  return undefined;
+};
 
 export type CloudConnectorLaunchButtonProps =
   /**
@@ -53,6 +96,10 @@ export interface UseCloudConnectorTemplateResult {
   isDisabled: boolean;
   isGeneratingTemplate: boolean;
   templateGenerationError?: string;
+  /** Shown when IaCP reports the stored templateSha still matches. */
+  templateAlreadyCurrent?: string;
+  /** Persisted on the cloud connector when the package policy is saved. */
+  iacConfirm?: CloudConnectorIacState;
 }
 
 export const useCloudConnectorTemplate = ({
@@ -61,6 +108,8 @@ export const useCloudConnectorTemplate = ({
   iacTemplateUrl,
   packageName,
   policyTemplates,
+  integrations,
+  templateSha,
 }: UseCloudConnectorTemplateParams): UseCloudConnectorTemplateResult => {
   const { isIacProvisionerEnabled } = useIacProvisioner();
   const { analytics } = useStartServices();
@@ -68,15 +117,24 @@ export const useCloudConnectorTemplate = ({
   const [templateGenerationError, setTemplateGenerationError] = useState<string | undefined>(
     undefined
   );
+  const [templateAlreadyCurrent, setTemplateAlreadyCurrent] = useState<string | undefined>(
+    undefined
+  );
+  const [iacConfirm, setIacConfirm] = useState<CloudConnectorIacState | undefined>(undefined);
 
   // The static URL doubles as the quick-create scaffold for the rendered
-  // artifact (console host + param_ElasticResourceId), so it is always built.
+  // artifact (console host plus any quick-create params the package's URL
+  // carries), so it is always built.
   const staticTemplateUrl = cloud
     ? getCloudConnectorRemoteRoleTemplate({ cloud, accountType, iacTemplateUrl })
     : undefined;
 
   const launchTemplate = useCallback(async () => {
     setTemplateGenerationError(undefined);
+    setTemplateAlreadyCurrent(undefined);
+    // Drop any previous confirm so a failed later launch cannot persist
+    // a checksum from an earlier successful render.
+    setIacConfirm(undefined);
 
     const reportFallback = (reason: string) => {
       analytics.reportEvent(IAC_PROVISIONER_RENDER_FALLBACK_EVENT.eventType, {
@@ -90,14 +148,20 @@ export const useCloudConnectorTemplate = ({
     // URL must contain a templateURL param: it is the quick-create scaffold
     // the rendered artifact gets swapped into, and String.replace on a
     // non-matching URL would silently discard the render.
+    const renderIntegrations = toRenderIntegrations({
+      integrations,
+      packageName,
+      policyTemplates,
+    });
+
     if (
-      !packageName ||
-      !policyTemplates?.length ||
+      !renderIntegrations ||
       !staticTemplateUrl ||
       !TEMPLATE_URL_PARAM_REGEX.test(staticTemplateUrl)
     ) {
       if (staticTemplateUrl) {
         reportFallback(IAC_PROVISIONER_FALLBACK_REASON_MISSING_CONTEXT);
+        setIacConfirm(STATIC_FALLBACK_IAC);
         window.open(staticTemplateUrl, '_blank');
       } else {
         setTemplateGenerationError(
@@ -124,19 +188,49 @@ export const useCloudConnectorTemplate = ({
       }
     };
 
+    const fallbackToStatic = (reason: string) => {
+      reportFallback(reason);
+      setIacConfirm(STATIC_FALLBACK_IAC);
+      navigateTo(staticTemplateUrl);
+    };
+
     setIsGeneratingTemplate(true);
     try {
       const { data, error } = await sendRenderIacTemplate({
         provider: AWS_CLOUD_PROVIDER,
+        workflow: IAC_FEDERATED_IDENTITY_WORKFLOW,
         flow: CLOUD_CONNECTOR_RENDER_FLOW,
-        integrations: [{ name: packageName, policyTemplates }],
+        integrations: renderIntegrations,
+        ...(templateSha ? { templateSha } : {}),
       });
 
       if (error || !data) {
-        reportFallback(IAC_PROVISIONER_FALLBACK_REASON_RENDER_FAILED);
-        navigateTo(staticTemplateUrl);
+        fallbackToStatic(IAC_PROVISIONER_FALLBACK_REASON_RENDER_FAILED);
         return;
       }
+
+      if (data.render === false) {
+        cloudFormationTab?.close();
+        setIacConfirm(undefined);
+        setTemplateAlreadyCurrent(
+          i18n.translate('xpack.fleet.cloudConnector.iacProvisioner.templateAlreadyCurrent', {
+            defaultMessage:
+              'The CloudFormation stack is already up to date. No template update is required.',
+          })
+        );
+        return;
+      }
+
+      if (data.render !== true || !data.artifactUrl) {
+        fallbackToStatic(IAC_PROVISIONER_FALLBACK_REASON_RENDER_FAILED);
+        return;
+      }
+
+      setIacConfirm({
+        iac_key: data.templateSha,
+        iac_blueprint_id: data.blueprint.id,
+        iac_blueprint_version: data.blueprint.version,
+      });
 
       // Only the template source changes: swap the templateURL query param on
       // the existing quick-create URL. artifactUrl embeds signing credentials
@@ -149,6 +243,7 @@ export const useCloudConnectorTemplate = ({
       );
     } catch (e) {
       cloudFormationTab?.close();
+      setIacConfirm(undefined);
       setTemplateGenerationError(
         i18n.translate('xpack.fleet.cloudConnector.iacProvisioner.templateGenerationError', {
           defaultMessage:
@@ -158,7 +253,7 @@ export const useCloudConnectorTemplate = ({
     } finally {
       setIsGeneratingTemplate(false);
     }
-  }, [analytics, packageName, policyTemplates, staticTemplateUrl]);
+  }, [analytics, integrations, packageName, policyTemplates, staticTemplateUrl, templateSha]);
 
   if (!isIacProvisionerEnabled) {
     return {
@@ -173,5 +268,7 @@ export const useCloudConnectorTemplate = ({
     isDisabled: false,
     isGeneratingTemplate,
     templateGenerationError,
+    templateAlreadyCurrent,
+    iacConfirm,
   };
 };

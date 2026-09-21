@@ -1,20 +1,9 @@
 {
   "sha1": "f0067f37d06f24cde6ad2981b061c934789f0723",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
-    {
-      "id": "bd41f0240dfdfcb-9b0e8252d0034ea",
-      "title": "Reset profiling state after API tests",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/global.teardown.ts",
-        "line": 13,
-        "column": 1
-      }
-    },
     {
       "id": "1219f91050e9ce3-f2cd2d3cdc77643",
       "title": "Ingest data to Elasticsearch",
@@ -27,7 +16,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/global.setup.ts",
-        "line": 20,
+        "line": 15,
         "column": 1
       }
     },
@@ -41,8 +30,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/00_has_no_setup.spec.ts",
-        "line": 29,
-        "column": 12
+        "line": 21,
+        "column": 65
       }
     },
     {
@@ -55,8 +44,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/00_has_no_setup.spec.ts",
-        "line": 43,
-        "column": 12
+        "line": 33,
+        "column": 27
       }
     },
     {
@@ -69,8 +58,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/01_has_setup_apm_not_installed.spec.ts",
-        "line": 33,
-        "column": 12
+        "line": 24,
+        "column": 28
       }
     },
     {
@@ -83,8 +72,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/01_has_setup_apm_not_installed.spec.ts",
-        "line": 48,
-        "column": 12
+        "line": 37,
+        "column": 27
       }
     },
     {
@@ -97,8 +86,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/02_has_setup_with_data.spec.ts",
-        "line": 38,
-        "column": 10
+        "line": 28,
+        "column": 5
       }
     },
     {
@@ -111,8 +100,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/02_has_setup_with_data.spec.ts",
-        "line": 52,
-        "column": 10
+        "line": 42,
+        "column": 25
       }
     },
     {
@@ -125,8 +114,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/03_has_setup_with_integrations.spec.ts",
-        "line": 69,
-        "column": 10
+        "line": 61,
+        "column": 28
       }
     },
     {
@@ -139,8 +128,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/03_has_setup_with_integrations.spec.ts",
-        "line": 92,
-        "column": 10
+        "line": 81,
+        "column": 12
       }
     },
     {
@@ -153,8 +142,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/04_functions.spec.ts",
-        "line": 42,
-        "column": 10
+        "line": 34,
+        "column": 27
       }
     },
     {
@@ -167,8 +156,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/05_flamegraph.spec.ts",
-        "line": 57,
-        "column": 10
+        "line": 58,
+        "column": 13
       }
     },
     {
@@ -181,8 +170,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/06_feature_controls.spec.ts",
-        "line": 83,
-        "column": 10
+        "line": 85,
+        "column": 40
       }
     },
     {
@@ -195,8 +184,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/06_feature_controls.spec.ts",
-        "line": 104,
-        "column": 10
+        "line": 105,
+        "column": 11
+      }
+    },
+    {
+      "id": "bd41f0240dfdfcb-9b0e8252d0034ea",
+      "title": "Reset profiling state after API tests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/global.teardown.ts",
+        "line": 6,
+        "column": 1
       }
     }
   ]

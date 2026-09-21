@@ -29,6 +29,7 @@ const COMPARE_SOURCE_FIELDS = [
   'example.id',
   'evaluator.name',
   'evaluator.score',
+  'evaluator.direction',
   'task.repetition_index',
 ];
 
@@ -57,9 +58,9 @@ export const registerCompareExperimentsRoute = ({
       },
       async (context, request, response) => {
         try {
-          const { type, baseline_id: idA, target_id: idB } = request.query;
+          const { type, baseline_id: idBaseline, target_id: idTarget } = request.query;
 
-          if (idA === idB) {
+          if (idBaseline === idTarget) {
             return response.badRequest({
               body: {
                 message: `baseline_id and target_id must differ; cannot compare an ${type} with itself.`,
@@ -72,16 +73,16 @@ export const registerCompareExperimentsRoute = ({
           const evalsContext = await context.evals;
           const spaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
 
-          const [responseA, responseB] = await Promise.all([
+          const [responseBaseline, responseTarget] = await Promise.all([
             evalsContext.evaluationScoreService.search({
-              query: buildExperimentFilterQuery(idA, { filterField, spaceId }),
+              query: buildExperimentFilterQuery(idBaseline, { filterField, spaceId }),
               sort: SCORES_SORT_ORDER,
               size: MAX_SCORES_PER_EXPERIMENT,
               _source: COMPARE_SOURCE_FIELDS,
               track_total_hits: true,
             }),
             evalsContext.evaluationScoreService.search({
-              query: buildExperimentFilterQuery(idB, { filterField, spaceId }),
+              query: buildExperimentFilterQuery(idTarget, { filterField, spaceId }),
               sort: SCORES_SORT_ORDER,
               size: MAX_SCORES_PER_EXPERIMENT,
               _source: COMPARE_SOURCE_FIELDS,
@@ -89,46 +90,46 @@ export const registerCompareExperimentsRoute = ({
             }),
           ]);
 
-          const totalHitsA =
-            typeof responseA.hits.total === 'number'
-              ? responseA.hits.total
-              : responseA.hits.total?.value ?? 0;
-          const totalHitsB =
-            typeof responseB.hits.total === 'number'
-              ? responseB.hits.total
-              : responseB.hits.total?.value ?? 0;
-          const truncatedA = totalHitsA > MAX_SCORES_PER_EXPERIMENT;
-          const truncatedB = totalHitsB > MAX_SCORES_PER_EXPERIMENT;
+          const totalHitsBaseline =
+            typeof responseBaseline.hits.total === 'number'
+              ? responseBaseline.hits.total
+              : responseBaseline.hits.total?.value ?? 0;
+          const totalHitsTarget =
+            typeof responseTarget.hits.total === 'number'
+              ? responseTarget.hits.total
+              : responseTarget.hits.total?.value ?? 0;
+          const truncatedBaseline = totalHitsBaseline > MAX_SCORES_PER_EXPERIMENT;
+          const truncatedTarget = totalHitsTarget > MAX_SCORES_PER_EXPERIMENT;
 
-          if (truncatedA || truncatedB) {
+          if (truncatedBaseline || truncatedTarget) {
             logger.warn(
               `Compare experiments: results truncated to ${MAX_SCORES_PER_EXPERIMENT} scores per experiment. ` +
-                `A (${idA}): ${totalHitsA} total, B (${idB}): ${totalHitsB} total.`
+                `Baseline (${idBaseline}): ${totalHitsBaseline} total, target (${idTarget}): ${totalHitsTarget} total.`
             );
           }
 
-          const scoresA = (responseA.hits?.hits ?? [])
+          const scoresBaseline = (responseBaseline.hits?.hits ?? [])
             .map((hit) => hit._source as EvaluationScoreDocument | undefined)
             .filter((source): source is EvaluationScoreDocument => source !== undefined);
 
-          const scoresB = (responseB.hits?.hits ?? [])
+          const scoresTarget = (responseTarget.hits?.hits ?? [])
             .map((hit) => hit._source as EvaluationScoreDocument | undefined)
             .filter((source): source is EvaluationScoreDocument => source !== undefined);
 
-          if (scoresA.length === 0) {
+          if (scoresBaseline.length === 0) {
             return response.notFound({
-              body: { message: `No scores found for ${filterField}: ${idA}` },
+              body: { message: `No scores found for ${filterField}: ${idBaseline}` },
             });
           }
-          if (scoresB.length === 0) {
+          if (scoresTarget.length === 0) {
             return response.notFound({
-              body: { message: `No scores found for ${filterField}: ${idB}` },
+              body: { message: `No scores found for ${filterField}: ${idTarget}` },
             });
           }
 
-          const datasetsA = new Set(scoresA.map((s) => s.example.dataset.id));
-          const datasetsB = new Set(scoresB.map((s) => s.example.dataset.id));
-          const overlapping = [...datasetsA].filter((id) => datasetsB.has(id));
+          const datasetsBaseline = new Set(scoresBaseline.map((s) => s.example.dataset.id));
+          const datasetsTarget = new Set(scoresTarget.map((s) => s.example.dataset.id));
+          const overlapping = [...datasetsBaseline].filter((id) => datasetsTarget.has(id));
 
           if (overlapping.length === 0) {
             return response.ok({
@@ -138,20 +139,24 @@ export const registerCompareExperimentsRoute = ({
                   totalPairs: 0,
                   skippedMissingPairs: 0,
                   skippedNullScores: 0,
-                  truncatedA,
-                  truncatedB,
+                  truncatedBaseline,
+                  truncatedTarget,
                 },
               },
             });
           }
 
           const overlappingSet = new Set(overlapping);
-          const filteredA = scoresA.filter((s) => overlappingSet.has(s.example.dataset.id));
-          const filteredB = scoresB.filter((s) => overlappingSet.has(s.example.dataset.id));
+          const filteredBaseline = scoresBaseline.filter((s) =>
+            overlappingSet.has(s.example.dataset.id)
+          );
+          const filteredTarget = scoresTarget.filter((s) =>
+            overlappingSet.has(s.example.dataset.id)
+          );
 
           const { pairs, skippedMissingPairs, skippedNullScores } = pairScores(
-            filteredA,
-            filteredB
+            filteredTarget,
+            filteredBaseline
           );
           const results = computePairedTTestResults(pairs);
 
@@ -162,8 +167,8 @@ export const registerCompareExperimentsRoute = ({
                 totalPairs: pairs.length,
                 skippedMissingPairs,
                 skippedNullScores,
-                truncatedA,
-                truncatedB,
+                truncatedBaseline,
+                truncatedTarget,
               },
             },
           });

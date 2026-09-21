@@ -45,30 +45,30 @@ export function useBrowseIntegrationHook({
     isLoadingAppendCustomIntegrations,
     eprPackageLoadingError,
     eprCategoryLoadingError,
-    allCards: originalFilteredCards,
-  } = useAvailablePackages({ prereleaseIntegrationsEnabled });
+    allCards,
+  } = useAvailablePackages({ prereleaseIntegrationsEnabled, enableCollectionGrouping: true });
 
   const urlFilters = useUrlFilters();
 
-  const localSearch = useLocalSearch(originalFilteredCards, !!isLoading);
+  const localSearch = useLocalSearch(allCards, !!isLoading);
   const searchTerm = urlFilters.q ?? urlFilters.q !== '' ? urlFilters.q : undefined;
 
   const sortedCards: IntegrationCardItem[] = useMemo(() => {
     const sortKey = urlFilters.sort ?? 'recent-old';
 
     if (sortKey === 'a-z') {
-      return [...originalFilteredCards].sort((a, b) => {
+      return [...allCards].sort((a, b) => {
         return a.title.localeCompare(b.title);
       });
     } else if (sortKey === 'z-a') {
-      return [...originalFilteredCards].sort((a, b) => {
+      return [...allCards].sort((a, b) => {
         return b.title.localeCompare(a.title);
       });
     } else {
       // TODO implement recent-old and old-recent sorting when we have a date field
-      return originalFilteredCards;
+      return allCards;
     }
-  }, [originalFilteredCards, urlFilters.sort]);
+  }, [allCards, urlFilters.sort]);
 
   // Cards filtered by non-category filters (search, status, setup method, signal).
   // Used to compute accurate category counts in the sidebar.
@@ -188,6 +188,7 @@ export function useBrowseIntegrationHook({
     eprPackageLoadingError,
     eprCategoryLoadingError,
     filteredCards,
+    allCards,
     availableSubCategories,
     onCategoryChange,
     onSortChange,

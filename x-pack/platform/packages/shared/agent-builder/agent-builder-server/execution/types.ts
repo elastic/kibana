@@ -7,22 +7,26 @@
 
 import type { Observable } from 'rxjs';
 import type {
-  AgentCapabilities,
   AgentExecutionMode,
   ChatEvent,
   ConverseInput,
   AgentConfigurationOverrides,
   BrowserApiToolMetadata,
-  ConversationAction,
   ConversationAccessControl,
   ConversationRoundOrigin,
   ConversationOrigin,
   ConversationRoundAuthor,
   ExecutionStatus,
+  InteractivityConfig,
+  InteractivityConfigInput,
   SerializedExecutionError,
+  ExecutionAbortReason,
 } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
+import type {
+  ChatCompletionReasoningEffort,
+  ConnectorTelemetryMetadata,
+} from '@kbn/inference-common';
 
 /**
  * Common execution parameters shared between conversation and standalone modes.
@@ -32,8 +36,6 @@ export interface BaseExecutionParams {
   agentId?: string;
   /** Id of the genAI connector to use. */
   connectorId?: string;
-  /** Capabilities to use for this execution. */
-  capabilities?: AgentCapabilities;
   /** The input for this execution. */
   nextInput: ConverseInput;
   /** Whether to use structured output mode. */
@@ -54,6 +56,11 @@ export interface BaseExecutionParams {
    * Optional connector response content length override for buffered LLM calls.
    */
   maxContentLength?: number;
+  /**
+   * Optional reasoning level forwarded to the inference plugin.
+   */
+  reasoningLevel?: ChatCompletionReasoningEffort;
+  projectRouting?: string;
 }
 
 /**
@@ -90,8 +97,15 @@ export interface ConversationExecutionParams extends BaseExecutionParams {
   };
   /** Browser API tools to make available to the agent. */
   browserApiTools?: BrowserApiToolMetadata[];
-  /** The action to perform: "regenerate" re-executes the last round with original input (requires conversationId). */
-  action?: ConversationAction;
+  /**
+   * Used to establish the parent linkage and add subagent-specific metadata
+   * to the newly-created child conversation.
+   */
+  subagentCreation?: {
+    parentConversationId: string;
+    subagentName: string;
+    subagentPurpose?: string;
+  };
 }
 
 /**
@@ -122,6 +136,8 @@ interface BaseAgentExecution {
   spaceId: string;
   /** Error details, present when status is 'failed'. */
   error?: SerializedExecutionError;
+  /** Why the execution was aborted, present when status is 'aborted' and the origin recorded it. */
+  abortReason?: ExecutionAbortReason;
   /** Number of events stored on the document (kept in sync with `events.length`). */
   eventCount: number;
   /** Inline events emitted during the execution. The array index is the event number. */
@@ -130,6 +146,10 @@ interface BaseAgentExecution {
   metadata?: Record<string, string>;
   /** The ID of the parent execution that spawned this standalone execution. */
   parentExecutionId?: string;
+  /**
+   * Canonical interactivity config for this execution, snapshotted at creation.
+   */
+  interactivity?: InteractivityConfig;
 }
 
 /**
@@ -187,6 +207,10 @@ interface ExecuteAgentBaseParams {
    * - `undefined` (default): auto-decide based on context.
    */
   useTaskManager?: boolean;
+  /**
+   * Interactivity configuration for this execution.
+   */
+  interactive?: InteractivityConfigInput;
 }
 
 export interface ExecuteConversationAgentParams extends ExecuteAgentBaseParams {
@@ -242,6 +266,26 @@ export interface FindExecutionsOptions {
  * The agent execution service - entry point for deferred agent execution.
  * Replaces the direct call to ChatService.converse in the request flow.
  */
+export interface AbortExecutionOptions {
+  /** Where the abort comes from; defaults to `{ source: 'api' }`. */
+  reason?: ExecutionAbortReason;
+  /**
+   * Wait for the executing node to record the interruption (the terminal timeline event) before
+   * resolving, bounded by a timeout. Defaults to true.
+   */
+  waitForTerminal?: boolean;
+}
+
+export interface AbortExecutionResult {
+  /** False when the execution was unknown or already terminal (nothing was aborted). */
+  acknowledged: boolean;
+  /**
+   * True when the interruption is recorded on the conversation. False when the abort was not
+   * awaited, the execution had not started yet (nothing to record), or the wait timed out.
+   */
+  terminalPersisted: boolean;
+}
+
 export interface AgentExecutionService {
   /**
    * Execute an agent, either locally or on a Task Manager node.
@@ -256,9 +300,16 @@ export interface AgentExecutionService {
 
   /**
    * Abort an ongoing execution.
-   * Sets the execution status to 'aborted', which the TM handler will detect via polling.
+   * Sets the execution status to 'aborted', which the executing node detects via polling and then
+   * winds down, recording the interruption on the conversation. By default the call waits (bounded)
+   * for that record to land, so a caller that re-reads the conversation afterwards sees the aborted
+   * execution rather than a dangling message; `waitForTerminal: false` returns right after the
+   * status flip. `reason` records where the abort came from; it defaults to the abort API.
    */
-  abortExecution(executionId: string): Promise<void>;
+  abortExecution(
+    executionId: string,
+    options?: AbortExecutionOptions
+  ): Promise<AbortExecutionResult>;
 
   /**
    * Follow an execution by polling for events.

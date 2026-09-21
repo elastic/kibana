@@ -7,6 +7,7 @@
 
 import type { EuiCommentProps, EuiThemeComputed } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import type { CasesPermissions } from '../../../common/ui/types';
 import type { UserActionTypes } from '../../../common/types/domain';
 import type {
   CaseUI,
@@ -48,6 +49,7 @@ export interface UserActionBuilderArgs {
   userProfiles: Map<string, UserProfileWithAvatar>;
   currentUserProfile: CurrentUserProfile;
   unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
+  permissions: CasesPermissions;
   caseConnectors: CaseConnectors;
   userAction: UserActionUI;
   attachments: AttachmentUIV2[];

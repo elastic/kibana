@@ -12,10 +12,15 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import pLimit from 'p-limit';
-import { buildDocsArchive, buildDocsAssets, buildDocsRegistry } from '@kbn/storybook';
 import type { BuildDocsArchiveResult, BuildDocsRegistryResult } from '@kbn/storybook';
-import { storybookAliases } from '@kbn/dev/storybook/aliases';
+import { loadKibanaModule } from '../../../pipeline-utils/load_kibana_module.ts';
 import { getKibanaDir } from '#pipeline-utils';
+
+const { buildDocsArchive, buildDocsAssets, buildDocsRegistry } =
+  loadKibanaModule<typeof import('@kbn/storybook')>('@kbn/storybook');
+const { storybookAliases } = loadKibanaModule<typeof import('@kbn/dev/storybook/aliases')>(
+  '@kbn/dev/storybook/aliases'
+);
 
 const GITHUB_CONTEXT = 'Build and Publish Storybooks';
 
@@ -45,7 +50,8 @@ const annotateStorybookDocsArtifacts = (
   registry: BuildDocsRegistryResult
 ) => {
   const annotation = [
-    '### Storybook docs artifacts',
+    '<details>',
+    '<summary>Storybook docs artifacts</summary>',
     '',
     `* Commit: \`${STORYBOOK_DOCS_ARCHIVE_SHA}\``,
     `* Registry: [${STORYBOOK_DOCS_REGISTRY_FILE}](${STORYBOOK_DOCS_REGISTRY_URL})`,
@@ -66,6 +72,8 @@ const annotateStorybookDocsArtifacts = (
     `    artifact: ${STORYBOOK_DOCS_ARCHIVE_URL}`,
     `    integrity: ${archive.integrity}`,
     '```',
+    '',
+    '</details>',
   ].join('\n');
 
   execSync('buildkite-agent annotate --style info --context storybook-docs-artifacts', {
@@ -81,7 +89,7 @@ const buildStorybook = (storybook: string): Promise<{ logs: string }> => {
       logsBuffer.push(chunk.toString());
     };
 
-    const child = spawn('yarn', ['storybook', '--site', storybook], {
+    const child = spawn('pnpm', ['storybook', '--site', storybook], {
       stdio: 'pipe',
       env: {
         ...process.env,

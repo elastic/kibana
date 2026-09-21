@@ -54,6 +54,8 @@ import { getConnectorType } from '../fixtures';
 import { createMockInMemoryConnector } from '../application/connector/mocks';
 import { authTypeRegistryMock } from '../auth_types/auth_type_registry.mock';
 import type { AuthTypeRegistry } from '../auth_types/auth_type_registry';
+import { securityServiceMock } from '@kbn/core/server/mocks';
+import { encodeApiKey } from '../inbound/event_identity/encode_api_key';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -104,6 +106,7 @@ let actionTypeRegistryParams: ActionTypeRegistryOpts;
 let authTypeRegistry: AuthTypeRegistry;
 const connectorTokenClient = connectorTokenClientMock.create();
 const inMemoryMetrics = inMemoryMetricsMock.create();
+const securityService = securityServiceMock.createStart();
 
 const actionTypeIdFromSavedObjectMock = (actionTypeId = 'my-connector-type') => {
   return {
@@ -156,6 +159,7 @@ beforeEach(() => {
     encryptedSavedObjectsClient,
     isESOCanEncrypt,
     getAxiosInstanceWithAuth,
+    securityService,
   });
   (getOAuthJwtAccessToken as jest.Mock).mockResolvedValue(`Bearer jwttokentokentoken`);
   (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValue(
@@ -552,6 +556,7 @@ describe('create()', () => {
       inboundEvents: {
         enabled: false,
         maxBodyBytes: new ByteSizeValue(1024 * 1024),
+        maxEmitted: 25,
       },
     });
 
@@ -1882,6 +1887,12 @@ describe('delete()', () => {
       },
       references: [],
     });
+    unsecuredSavedObjectsClient.find.mockResolvedValue({
+      saved_objects: [],
+      total: 0,
+      page: 1,
+      per_page: 10,
+    } as never);
   });
 
   describe('authorization', () => {
@@ -2228,14 +2239,79 @@ describe('delete()', () => {
       `Failed fetching action type from registry: Action type \"unregistered-action-type-id\" is not registered. - deletion will proceed.`
     );
 
-    // deletion is called with the right params
-    expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledTimes(1);
-    expect(unsecuredSavedObjectsClient.delete.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        "action",
-        "2",
-      ]
-    `);
+    expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith('action', '2');
+  });
+
+  test('invalidates the last-saver API key before deleting an inbound connector', async () => {
+    const expectedResult = Symbol();
+    unsecuredSavedObjectsClient.delete.mockResolvedValueOnce(expectedResult);
+    unsecuredSavedObjectsClient.get.mockReset();
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: 'inbound-1',
+      type: 'action',
+      attributes: {
+        actionTypeId: '.inboundWebhook',
+        isMissingSecrets: false,
+        config: {},
+        secrets: {},
+      },
+      references: [],
+    });
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      id: 'inbound-1',
+      type: 'action',
+      attributes: {
+        actionTypeId: '.inboundWebhook',
+        name: 'ingress',
+        isMissingSecrets: false,
+        config: {},
+        secrets: {},
+        apiKey: encodeApiKey('old-id', 'old-secret'),
+      },
+      references: [],
+    } as never);
+    securityService.authc.apiKeys.invalidateAsInternalUser.mockResolvedValue({
+      invalidated_api_keys: ['old-id'],
+      previously_invalidated_api_keys: [],
+      error_count: 0,
+    });
+
+    const result = await actionsClient.delete({ id: 'inbound-1' });
+
+    expect(result).toEqual(expectedResult);
+    expect(securityService.authc.apiKeys.invalidateAsInternalUser).toHaveBeenCalledWith({
+      ids: ['old-id'],
+    });
+    expect(unsecuredSavedObjectsClient.find).toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith('action', 'inbound-1');
+  });
+
+  test('does not delete the connector when ingest credential cleanup fails', async () => {
+    unsecuredSavedObjectsClient.find.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'cred-1',
+          type: 'connector_ingress_credential',
+          attributes: {
+            connectorId: '1',
+            ingestTokenHash: 'a'.repeat(64),
+            createdAt: '2026-01-01T00:00:00.000Z',
+          },
+          references: [],
+        },
+      ],
+      total: 1,
+      page: 1,
+      per_page: 10,
+    } as never);
+    unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+      statuses: [{ id: 'cred-1', type: 'connector_ingress_credential', success: false }],
+    } as never);
+
+    await expect(actionsClient.delete({ id: '1' })).rejects.toThrow(
+      'Failed to delete 1 ingest credential(s) for connector "1"'
+    );
+    expect(unsecuredSavedObjectsClient.delete).not.toHaveBeenCalled();
   });
 });
 
