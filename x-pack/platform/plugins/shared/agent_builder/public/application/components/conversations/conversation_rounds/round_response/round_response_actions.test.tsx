@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, render, screen } from '@testing-library/react';
 import copy from 'copy-to-clipboard';
 import type { ConversationRound } from '@kbn/agent-builder-common';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
@@ -80,21 +79,21 @@ describe('RoundResponseActions', () => {
     useConversationReadOnlyMock.mockReturnValue({ isReadOnly: false, isLoading: false });
   });
 
-  it('labels the copy action for the agent response by default', async () => {
+  it('labels the copy action for the agent response by default', () => {
     render(<RoundResponseActions content="the answer" isVisible />);
 
     const copyButton = screen.getByRole('button', { name: 'Copy response' });
-    await userEvent.click(copyButton);
+    fireEvent.click(copyButton);
 
     expect(copyMock).toHaveBeenCalledWith('the answer');
     expect(addSuccessToast).toHaveBeenCalledWith('Response copied to clipboard');
   });
 
-  it('labels the copy action for the user prompt when copyTarget is prompt', async () => {
+  it('labels the copy action for the user prompt when copyTarget is prompt', () => {
     render(<RoundResponseActions content="my question" isVisible copyTarget="prompt" />);
 
     const copyButton = screen.getByRole('button', { name: 'Copy prompt' });
-    await userEvent.click(copyButton);
+    fireEvent.click(copyButton);
 
     expect(copyMock).toHaveBeenCalledWith('my question');
     expect(addSuccessToast).toHaveBeenCalledWith('Prompt copied to clipboard');
