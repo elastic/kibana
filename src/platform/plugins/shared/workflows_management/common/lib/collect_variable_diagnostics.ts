@@ -16,6 +16,7 @@ import type { WorkflowContextRegistry } from '@kbn/workflows-yaml';
 import {
   collectAllVariables,
   createStepContextResolver,
+  createValidationBudget,
   validateLiquidForLoopCollections,
   validateVariables,
 } from '@kbn/workflows-yaml';
@@ -37,29 +38,29 @@ export const MAX_STEPS_FOR_VARIABLE_VALIDATION = 250;
  * Reference budget, the other cost dimension, and the steeper one at scale:
  * 20,000 references measures ~800 ms / ~440 MiB regardless of step count.
  *
- * Liquid tags count against it too: they carry no `{{ ... }}` reference, and
- * 250 steps of 90 tags each — 1 MiB, zero references — measures ~710 ms.
+ * Spent as the references are collected rather than counted up front, so the
+ * collection itself is bounded: a 1 MiB body of short `{{ x }}` holds ~58,000
+ * of them and allocated ~36 MiB before a pre-count could refuse it.
  */
 export const MAX_VARIABLES_FOR_VARIABLE_VALIDATION = 1000;
+
+/**
+ * Liquid for-loop budget. Separate because the unit differs: one loop scope,
+ * not one reference. Each costs a template walk plus a context build, and 250
+ * steps of 45 loops each — 1 MiB, zero references — measures ~710 ms.
+ */
+export const MAX_FOR_LOOP_SCOPES_FOR_VARIABLE_VALIDATION = 1000;
 
 export interface VariableDiagnosticsResult {
   diagnostics: WorkflowDiagnostic[];
   /**
-   * Set when the workflow exceeded a budget and the rules did not run. The
-   * absence of diagnostics then means "not checked", not "nothing wrong", so
-   * callers must report it separately instead of implying a clean result.
+   * Set when a budget ran out. Whatever was checked is reported, but the rest
+   * of the workflow was not, so the absence of a diagnostic past that point
+   * means "not checked" and callers must say so instead of implying a clean
+   * result.
    */
   notRunReason?: string;
 }
-
-/** Counts the `{%` delimiter, so the budget holds for tags the validator does not know. */
-const countLiquidTags = (yaml: string): number => {
-  let count = 0;
-  for (let index = yaml.indexOf('{%'); index !== -1; index = yaml.indexOf('{%', index + 2)) {
-    count++;
-  }
-  return count;
-};
 
 /**
  * Runs the `variable-validation` rule group the editor runs, so
@@ -89,14 +90,18 @@ export function collectVariableDiagnostics(
   const lineCounter = new LineCounter();
   const yamlDocument = parseDocument(yaml, { lineCounter, keepSourceTokens: true });
 
-  const variableItems = collectAllVariables(yaml, yamlDocument, lineCounter, workflowGraph);
-  const referenceCount = variableItems.length + countLiquidTags(yaml);
-  if (referenceCount > MAX_VARIABLES_FOR_VARIABLE_VALIDATION) {
-    return {
-      diagnostics: [],
-      notRunReason: `Variable validation skipped: the workflow has ${referenceCount} template references, above the limit of ${MAX_VARIABLES_FOR_VARIABLE_VALIDATION}.`,
-    };
-  }
+  // Budgets are spent while collecting, so an oversized workflow still gets the
+  // rules applied to everything up to the limit instead of nothing at all.
+  const referenceBudget = createValidationBudget(MAX_VARIABLES_FOR_VARIABLE_VALIDATION);
+  const forLoopBudget = createValidationBudget(MAX_FOR_LOOP_SCOPES_FOR_VARIABLE_VALIDATION);
+
+  const variableItems = collectAllVariables(
+    yaml,
+    yamlDocument,
+    lineCounter,
+    workflowGraph,
+    referenceBudget
+  );
 
   // One resolver for both passes: each builds a context schema per step, and
   // building one walks that step's predecessors, so private caches would do the
@@ -117,7 +122,8 @@ export function collectVariableDiagnostics(
       yaml,
       yamlDocument,
       lineCounter,
-      workflowDefinition
+      workflowDefinition,
+      forLoopBudget
     ),
   ];
 
@@ -134,6 +140,23 @@ export function collectVariableDiagnostics(
         ]
       : []
   );
+
+  const overBudget: string[] = [];
+  if (referenceBudget.exhausted) {
+    overBudget.push(`more than ${MAX_VARIABLES_FOR_VARIABLE_VALIDATION} variable references`);
+  }
+  if (forLoopBudget.exhausted) {
+    overBudget.push(`more than ${MAX_FOR_LOOP_SCOPES_FOR_VARIABLE_VALIDATION} Liquid for-loops`);
+  }
+
+  if (overBudget.length > 0) {
+    return {
+      diagnostics,
+      notRunReason: `Variable validation is partial: the workflow has ${overBudget.join(
+        ' and '
+      )}, so the rest of it was not checked.`,
+    };
+  }
 
   return { diagnostics };
 }

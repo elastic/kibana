@@ -100,6 +100,10 @@ export {
   type StepContextResolver,
 } from './common/validation/context/step_context_resolver';
 
+// Work budgets for the bounded validation passes
+export { createValidationBudget } from './common/validation/budget';
+export type { ValidationBudget } from './common/validation/budget';
+
 // Variable validation rules (the `variable-validation` rule group)
 export { collectAllVariables } from './common/validation/variables/collect_all_variables';
 export { validateVariables } from './common/validation/variables/validate_variables';

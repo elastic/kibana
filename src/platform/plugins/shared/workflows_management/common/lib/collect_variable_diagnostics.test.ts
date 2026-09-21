@@ -9,6 +9,7 @@
 
 import { MAX_WORKFLOW_YAML_LENGTH } from '@kbn/workflows/types/v1';
 import {
+  MAX_FOR_LOOP_SCOPES_FOR_VARIABLE_VALIDATION,
   MAX_STEPS_FOR_VARIABLE_VALIDATION,
   MAX_VARIABLES_FOR_VARIABLE_VALIDATION,
 } from './collect_variable_diagnostics';
@@ -89,30 +90,36 @@ describe('variable validation budgets', () => {
     ]);
   });
 
-  it('skips and reports when the variable count is over the limit', () => {
-    const varsPerStep = MAX_VARIABLES_FOR_VARIABLE_VALIDATION + 1;
-    const result = validate(buildWorkflow(1, varsPerStep));
+  it('reports a partial result when the variable count is over the limit', () => {
+    const result = validate(buildWorkflow(1, MAX_VARIABLES_FOR_VARIABLE_VALIDATION + 1));
 
-    expect(result.diagnostics.filter(({ source }) => source === 'variable')).toEqual([]);
     expect(result.validationNotRun).toEqual([
-      `Variable validation skipped: the workflow has ${varsPerStep} template references, above the limit of ${MAX_VARIABLES_FOR_VARIABLE_VALIDATION}.`,
+      `Variable validation is partial: the workflow has more than ${MAX_VARIABLES_FOR_VARIABLE_VALIDATION} variable references, so the rest of it was not checked.`,
     ]);
   });
 
-  it('skips and reports when Liquid tags alone are over the limit', () => {
-    const tagCount = MAX_VARIABLES_FOR_VARIABLE_VALIDATION;
-    // `{% for %}` and `{% endfor %}` each open a tag.
-    const openings = tagCount * 2;
-    const result = validate(buildTagWorkflow(tagCount));
+  it('bounds collection on a body at the route limit', () => {
+    // ~58,000 short references. Counting them only after collection allocated
+    // ~36 MiB, which is the cost the budget exists to avoid.
+    const reference = '{{ consts.seed }}';
+    const count = Math.floor((MAX_WORKFLOW_YAML_LENGTH - 400) / (reference.length + 1));
+    const yaml = buildWorkflow(1, count);
 
-    expect(result.diagnostics.filter(({ source }) => source === 'variable')).toEqual([]);
+    expect(yaml.length).toBeLessThanOrEqual(MAX_WORKFLOW_YAML_LENGTH);
+    expect(validate(yaml).validationNotRun).toHaveLength(1);
+  });
+
+  it('reports a partial result when Liquid for-loops are over the limit', () => {
+    // Zero `{{ ... }}` references, so only the for-loop budget can stop this.
+    const result = validate(buildTagWorkflow(MAX_FOR_LOOP_SCOPES_FOR_VARIABLE_VALIDATION + 1));
+
     expect(result.validationNotRun).toEqual([
-      `Variable validation skipped: the workflow has ${openings} template references, above the limit of ${MAX_VARIABLES_FOR_VARIABLE_VALIDATION}.`,
+      `Variable validation is partial: the workflow has more than ${MAX_FOR_LOOP_SCOPES_FOR_VARIABLE_VALIDATION} Liquid for-loops, so the rest of it was not checked.`,
     ]);
   });
 
-  it('validates a workflow at the tag limit', () => {
-    const result = validate(buildTagWorkflow(MAX_VARIABLES_FOR_VARIABLE_VALIDATION / 2));
+  it('validates a workflow at the for-loop limit', () => {
+    const result = validate(buildTagWorkflow(MAX_FOR_LOOP_SCOPES_FOR_VARIABLE_VALIDATION));
 
     expect(result.validationNotRun).toBeUndefined();
   });
