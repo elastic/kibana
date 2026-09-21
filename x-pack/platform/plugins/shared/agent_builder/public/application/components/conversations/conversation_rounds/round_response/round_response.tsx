@@ -46,8 +46,8 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
 }) => {
   const hasMessage = Boolean(response.message);
 
-  const showStreamingText = isLoading && hasMessage;
-  const showCompletedAnswer = !isLoading;
+  const showStreamingText = isLoading && hasMessage && !response.structured_output;
+  const showCompletedAnswer = !isLoading || Boolean(response.structured_output);
 
   return (
     <EuiFlexGroup

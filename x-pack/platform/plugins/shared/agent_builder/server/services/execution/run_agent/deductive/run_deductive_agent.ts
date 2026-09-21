@@ -190,7 +190,16 @@ export const runDeductiveAgent = async (
   };
 
   // Finalize the streamed message so the UI can reconcile the round.
-  context.events.emit(createMessageEvent(round.response.message, { messageId }));
+  // Pass the parsed object when structured output is available so the client can
+  // suppress the raw JSON streaming text and switch to the formatted block early.
+  context.events.emit(
+    createMessageEvent(
+      params.structuredOutput && round.response.structured_output
+        ? round.response.structured_output
+        : round.response.message,
+      { messageId }
+    )
+  );
   context.events.emit({
     type: ChatEventType.roundComplete,
     data: { round },

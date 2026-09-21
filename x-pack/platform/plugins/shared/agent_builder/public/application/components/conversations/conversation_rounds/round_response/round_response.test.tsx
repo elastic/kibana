@@ -102,6 +102,31 @@ describe('RoundResponse', () => {
     expect(roundResponseActionsMock).not.toHaveBeenCalled();
   });
 
+  it('renders JsonCodeBlock (not StreamingText) when isLoading and structured_output is present', () => {
+    const round = createRound();
+    const structuredOutput = { verdict: 'covered_enabled' };
+    round.response = {
+      message: JSON.stringify(structuredOutput),
+      structured_output: structuredOutput,
+    };
+
+    render(
+      <RoundResponse
+        hasError={false}
+        response={round.response}
+        steps={round.steps}
+        isLoading={true}
+        rawRound={round}
+      />
+    );
+
+    expect(jsonCodeBlockMock).toHaveBeenCalledWith(
+      expect.objectContaining({ data: structuredOutput }),
+      expect.anything()
+    );
+    expect(chatMessageTextMock).not.toHaveBeenCalled();
+  });
+
   it('renders ChatMessageText when there is no structured_output', () => {
     const round = createRound();
 
