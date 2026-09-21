@@ -13,7 +13,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ContentList, ContentListProvider } from '@kbn/content-list';
 import type { FieldDefinition } from '@kbn/content-list-provider';
-import { TAG_FILTER_ID } from '@kbn/content-list-provider';
 import {
   ActionPolicyCreateOptionsPanel,
   getCreateActionPolicyWithAgentTooltipText,
@@ -57,13 +56,7 @@ const enabledFieldDefinition: FieldDefinition = {
   },
 };
 
-const tagFieldDefinition: FieldDefinition = {
-  fieldName: TAG_FILTER_ID,
-  resolveIdToDisplay: (id) => id,
-  resolveDisplayToId: (displayValue) => displayValue,
-};
-
-const FEATURES_FIELDS: FieldDefinition[] = [enabledFieldDefinition, tagFieldDefinition];
+const FEATURES_FIELDS: FieldDefinition[] = [enabledFieldDefinition];
 
 const CREATE_POLICY_OPTION_TITLE = i18n.translate(
   'xpack.alertingV2.actionPolicyCreateOptionsPanel.createPolicyTitle',
@@ -163,7 +156,6 @@ export const ActionPoliciesTable = () => {
         matcher,
         group_by: groupBy,
         throttle,
-        tags,
         grouping_mode: groupingMode,
       } = policy;
       const data: CreateActionPolicyData = {
@@ -171,7 +163,6 @@ export const ActionPoliciesTable = () => {
         description,
         destinations,
         grouping_mode: groupingMode ?? 'per_episode',
-        ...(tags != null && { tags }),
         ...(matcher != null && { matcher }),
         ...(groupBy != null && { group_by: groupBy }),
         ...(throttle != null && { throttle }),

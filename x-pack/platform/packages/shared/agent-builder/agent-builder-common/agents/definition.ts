@@ -152,6 +152,12 @@ export interface AgentConfiguration {
    * the accuracy and token efficiency.
    * */
   ai_indices?: string[];
+
+  /**
+   * Optional list of agent IDs this agent may spawn as sub-agents.
+   * Must use SELF_AGENT_ID (_self) to reference itself.
+   */
+  subagent_ids?: string[];
 }
 
 /**

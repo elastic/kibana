@@ -7,6 +7,7 @@
 
 import { internalTools } from '@kbn/agent-builder-common';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type { AiIndexTraceWithQuery } from '@kbn/context-engine-plugin/common/http_api/ai_indices';
 import { AI_INDEX_ATTACHMENT_TYPE } from '../../common/agent_builder_attachments';
 import {
   aiIndexAttachmentDataSchema,
@@ -53,7 +54,7 @@ export const createAiIndexAttachmentType = (): AttachmentTypeDefinition<
   getAgentDescription: () =>
     [
       'An `ai_index` attachment is a read-only snapshot of a Context Engine AI index (destination,',
-      'sources, and workflow automations). Use it to scope the conversation to this index — do not',
+      'sources, workflow automations, and traces). Use it to scope the conversation to this index — do not',
       're-run discovery for destination or sources already listed here.',
       `Before acting on this index, load \`${ANALYZE_AND_IMPROVE_SKILL_ID}\` to decide what it should`,
       `hold. That skill is read-only: also load \`${AI_INDEX_AUTOMATIONS_SKILL_ID}\` to draft,`,
@@ -71,7 +72,7 @@ export const createAiIndexAttachmentType = (): AttachmentTypeDefinition<
       `ask which strategy in the same question. Use \`${internalTools.askUserQuestion}\` for it rather than`,
       'paraphrasing the options as chat text.',
       'Then always ask again before handing anything to a subagent, whether it would create an',
-      'automation or replace one. Put the whole plan in that question: the strategy, the sources and',
+      'automation or replace one. Lay the plan out in chat before it: the strategy, the sources and',
       'the corpus filter you propose, and which it is — naming the automation being replaced. Propose',
       'values rather than asking for them. A filter you chose and stated can be corrected in a word,',
       'where an open question about what to filter on cannot be answered without the user doing the',
@@ -131,5 +132,19 @@ const formatAiIndex = (data: AiIndexAttachmentData): string => {
       : 'Existing automations: none'
   );
 
+  parts.push(
+    data.traces.length > 0
+      ? `Traces:\n${data.traces.map((trace) => `- ${formatTrace(trace)}`).join('\n')}`
+      : 'Traces: none configured'
+  );
+
   return parts.join('\n');
+};
+
+// For 'esql' traces, value is already the query, so showing both would just repeat it.
+const formatTrace = (trace: AiIndexTraceWithQuery): string => {
+  if (trace.type === 'esql') {
+    return `esql: ${trace.query.replace(/\n/g, ' ')}`;
+  }
+  return `${trace.type}:${trace.value} -> ${trace.query.replace(/\n/g, ' ')}`;
 };
