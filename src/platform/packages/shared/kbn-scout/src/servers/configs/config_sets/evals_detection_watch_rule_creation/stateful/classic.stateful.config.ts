@@ -33,7 +33,6 @@ export const servers: ScoutServerConfig = {
       '--xpack.agenticInvestigations.enabled=true',
       '--xpack.inbox.enabled=true',
       '--xpack.securitySolution.enableExperimental=["rulePreviewAttachmentEnabled"]',
-      '--uiSettings.overrides.agentBuilder:tracing:includeToolDetails=true',
       '--uiSettings.overrides.workflows:ui:enabled=true',
       '--uiSettings.overrides.workflows:aiAgent:enabled=true',
     ],
