@@ -454,6 +454,33 @@ describe('useMonitorIdFilter', () => {
     );
   });
 
+  it('scopes a remote-cluster selection to the API allIds instead of the full CCS data view', () => {
+    paramSpy.mockReturnValue({ remoteNames: ['cluster-east'] } as any);
+    selSPy.mockReturnValue({
+      status: {
+        allIds: [
+          {
+            monitorQueryId: 'shared-id',
+            remoteName: 'cluster-east',
+            locationId: 'us-east-1',
+          },
+        ],
+      },
+    });
+
+    const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: WrappedHelper });
+
+    expect(result.current).toEqual({
+      bool: {
+        filter: [
+          { terms: { 'monitor.id': ['shared-id'] } },
+          { wildcard: { _index: 'cluster-east:*' } },
+          { term: { 'observer.name': 'us-east-1' } },
+        ],
+      },
+    });
+  });
+
   it('scopes a search-filtered allIds by cluster and location, not a shared monitor.id', () => {
     paramSpy.mockReturnValue({ query: 'shared' } as any);
     selSPy.mockReturnValue({

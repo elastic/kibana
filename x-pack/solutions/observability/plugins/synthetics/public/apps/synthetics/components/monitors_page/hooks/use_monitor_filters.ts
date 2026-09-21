@@ -130,7 +130,8 @@ const monitorIdQuery = (ids: OverviewStatusFilterId[]): estypes.QueryDslQueryCon
 // Elasticsearch's boolean-clause limit (commonly 1024), that errors instead of
 // rendering. A `terms` query has no such per-value clause cost.
 export const useOverviewMonitorFilterIds = (): OverviewStatusFilterId[] | undefined => {
-  const { locations, schedules, statusFilter, useLogicalAndFor, query } = useGetUrlParams();
+  const { locations, schedules, statusFilter, useLogicalAndFor, query, remoteNames } =
+    useGetUrlParams();
   const { status: overviewStatus } = useSelector(selectOverviewStatus);
   const allIds = overviewStatus?.allIds ?? [];
   const statusIds = idsForStatusFilter(overviewStatus, statusFilter);
@@ -140,12 +141,15 @@ export const useOverviewMonitorFilterIds = (): OverviewStatusFilterId[] | undefi
   // `getQueryFilters` would otherwise AND onto the annotation layer.
   const allIdKeys = new Set(allIds.map(overviewStatusFilterIdKey));
 
-  // since schedule isn't available in heartbeat data, in that case we rely on monitor.id
-  // We need to rely on monitor.id also for locations, because each heartbeat data only contains one location
+  // Schedule isn't on heartbeat docs, and each heartbeat doc is one location, so
+  // those filters have to become `monitor.id` clauses. `remoteNames` is applied
+  // by the status API, but the chart data view still spans every configured
+  // cluster, so it has to use the already-filtered `allIds` too.
   if (
     !isEmpty(schedules) ||
     (!isEmpty(locations) && useLogicalAndFor?.includes('locations')) ||
-    Boolean(query)
+    Boolean(query) ||
+    !isEmpty(remoteNames)
   ) {
     // Intersect with the status filter (if any) rather than ignoring it —
     // otherwise selecting e.g. "Down" would stop narrowing anything once a
