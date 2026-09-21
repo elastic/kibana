@@ -3,7 +3,7 @@
 exports[`Field Renderers #HostIdRenderer it renders correctly against snapshot 1`] = `
 <DocumentFragment>
   <span
-    class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
     data-test-subj="DefaultFieldRendererComponent"
   >
     <div
@@ -24,7 +24,7 @@ exports[`Field Renderers #HostIdRenderer it renders correctly against snapshot 1
                   tabindex="-1"
                 >
                   <span
-                    class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
+                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                     data-test-subj="render-content-host.id"
                   >
                     <span
@@ -73,7 +73,7 @@ exports[`Field Renderers #HostNameRenderer it renders correctly against snapshot
             tabindex="-1"
           >
             <span
-              class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
+              class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
               data-test-subj="render-content-host.name"
             >
               <span
@@ -117,7 +117,7 @@ exports[`Field Renderers #autonomousSystemRenderer it renders correctly against 
                 tabindex="-1"
               >
                 <span
-                  class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
+                  class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                   data-test-subj="render-content-source.as.organization.name"
                 >
                   <span
@@ -153,7 +153,7 @@ exports[`Field Renderers #autonomousSystemRenderer it renders correctly against 
                 tabindex="-1"
               >
                 <span
-                  class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
+                  class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                   data-test-subj="render-content-source.as.number"
                 >
                   <span
@@ -193,7 +193,7 @@ exports[`Field Renderers #locationRenderer it renders correctly against snapshot
                 tabindex="-1"
               >
                 <span
-                  class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
+                  class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                   data-test-subj="render-content-source.geo.city_name"
                 >
                   <span
@@ -225,7 +225,7 @@ exports[`Field Renderers #locationRenderer it renders correctly against snapshot
                 tabindex="-1"
               >
                 <span
-                  class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
+                  class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                   data-test-subj="render-content-source.geo.region_name"
                 >
                   <span
