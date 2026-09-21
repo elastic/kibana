@@ -137,11 +137,11 @@ export const buildSseAttachmentId = ({
 };
 
 /**
- * Options the caller (the hunt child workflow) supplies — everything the
+ * Options the caller (the hunt child workflow) supplies: everything the
  * mapper needs beyond the coordinator's own result. `requiredIndices` was
  * removed (plan 7, SSE durability review fix): `hunt_result.tier1.per_index[].required`
  * now comes straight from `HuntCoordinatorResult.tier1.perIndex[].required`,
- * which Tier 1 already computes via pattern matching — the mapper no longer
+ * which Tier 1 already computes via pattern matching. The mapper no longer
  * re-derives it from a raw index list (that re-derivation compared concrete
  * `_index` bucket names against wildcard patterns with exact string equality
  * and was always false in production).
@@ -152,7 +152,7 @@ export interface SseMapperOptions {
 
 /**
  * Builds `security_knowledge_indicators`. When `onlyTechniqueId` is set, the
- * output is scoped to that one technique — the SSE is meant to be 1:1 with a
+ * output is scoped to that one technique. The SSE is meant to be 1:1 with a
  * Proposal (mvp-slice.md worked example), so a two-technique hit run must
  * not put both techniques' behaviors/rule names on either SSE (plan 7, SSE
  * durability review fix).
@@ -200,7 +200,7 @@ const buildEntities = (result: HuntCoordinatorResult): SseEntityRef[] => [
 
 // Tier 1 doesn't attribute a hit to a specific IOC/technique today (plan 7
 // flagged this as a follow-up: `events[].matched` needs Tier 1 to tag which
-// IOC produced each hit, e.g. via `highlight` or a per-IOC query — deferred,
+// IOC produced each hit, e.g. via `highlight` or a per-IOC query (deferred,
 // not silently dropped). Events therefore stay shared across every SSE for a
 // hit run, unlike `security_knowledge_indicators` which IS attributable.
 const buildEvents = (result: HuntCoordinatorResult): SseEventRef[] =>
@@ -215,13 +215,21 @@ const buildEvents = (result: HuntCoordinatorResult): SseEventRef[] =>
 
 /**
  * `per_index[].required` is copied straight from Tier 1's own computation
- * (`HuntCoordinatorResult.tier1.perIndex[].required`) — no re-derivation
- * here. Tier 1 already pattern-matches concrete `_index` bucket names
- * against the resolved technology's required index *patterns*; redoing
- * that with a raw index list and exact string equality was the bug this
- * function used to have (plan 7, SSE durability review fix).
+ * (`HuntCoordinatorResult.tier1.perIndex[].required`), not re-derived here.
+ * Tier 1 already pattern-matches concrete `_index` bucket names against the
+ * resolved technology's required index *patterns*; redoing that with a raw
+ * index list and exact string equality was the bug this function used to
+ * have (plan 7, SSE durability review fix).
+ *
+ * When `onlyTechniqueId` is set, `tier2.behaviors` is filtered to that one
+ * technique for the same reason `buildSecurityKnowledgeIndicators` is: the
+ * SSE is 1:1 with a Proposal, so a technique-scoped entry must not carry a
+ * sibling technique's behavior/rule name (plan 7, SSE durability review fix).
  */
-const buildHuntResult = (result: HuntCoordinatorResult): SseHuntResult => {
+const buildHuntResult = (
+  result: HuntCoordinatorResult,
+  onlyTechniqueId?: string
+): SseHuntResult => {
   const { tier1, tier2 } = result;
   return {
     has_confirmed_hit: tier1.hasConfirmedHit,
@@ -244,12 +252,14 @@ const buildHuntResult = (result: HuntCoordinatorResult): SseHuntResult => {
     tier2: tier2
       ? {
           status: tier2.status,
-          behaviors: tier2.behaviors.map((behavior) => ({
-            technique_id: behavior.technique_id,
-            tactic_ids: behavior.tactic_ids,
-            confidence: behavior.confidence,
-            rule_name: behavior.rule_name,
-          })),
+          behaviors: tier2.behaviors
+            .filter((behavior) => !onlyTechniqueId || behavior.technique_id === onlyTechniqueId)
+            .map((behavior) => ({
+              technique_id: behavior.technique_id,
+              tactic_ids: behavior.tactic_ids,
+              confidence: behavior.confidence,
+              rule_name: behavior.rule_name,
+            })),
         }
       : undefined,
   };
@@ -258,15 +268,16 @@ const buildHuntResult = (result: HuntCoordinatorResult): SseHuntResult => {
 /**
  * Pure function: coordinator output in, one SSE entry per confirmed
  * technique out (report-scoped single entry when Tier 2 produced none). No
- * I/O, no ES calls — the hunt child workflow's step calls this after
+ * I/O, no ES calls. The hunt child workflow's step calls this after
  * `hunt_coordinator` returns and fans out over the result with
  * `ai.attachment.add`, one call per entry.
  *
- * Each technique-scoped entry's `security_knowledge_indicators` is filtered
- * to that technique alone — the SSE is 1:1 with a Proposal, so the T1078.004
- * entry must not carry T1552.001's behavior/rule name (plan 7, SSE
- * durability review fix). `events`/`entities`/`hunt_result` stay shared:
- * Tier 1 doesn't attribute hits to a specific technique (see `buildEvents`).
+ * Each technique-scoped entry's `security_knowledge_indicators` AND
+ * `hunt_result.tier2.behaviors` are filtered to that technique alone. The
+ * SSE is 1:1 with a Proposal, so the T1078.004 entry must not carry
+ * T1552.001's behavior/rule name in either place (plan 7, SSE durability
+ * review fix). `events`/`entities`/`hunt_result.tier1` stay shared: Tier 1
+ * doesn't attribute hits to a specific technique (see `buildEvents`).
  */
 export const buildSseData = (
   result: HuntCoordinatorResult,
@@ -275,7 +286,6 @@ export const buildSseData = (
 ): SseEntry[] => {
   const entities = buildEntities(result);
   const events = buildEvents(result);
-  const huntResult = buildHuntResult(result);
 
   const techniqueIds = result.tier2?.behaviors.map((behavior) => behavior.technique_id) ?? [];
 
@@ -291,7 +301,7 @@ export const buildSseData = (
           security_knowledge_indicators: buildSecurityKnowledgeIndicators(result, reportId),
           entities,
           events,
-          hunt_result: huntResult,
+          hunt_result: buildHuntResult(result),
         },
       },
     ];
@@ -311,7 +321,7 @@ export const buildSseData = (
       ),
       entities,
       events,
-      hunt_result: huntResult,
+      hunt_result: buildHuntResult(result, techniqueId),
     },
   }));
 };
