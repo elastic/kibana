@@ -6,10 +6,7 @@
  */
 
 import type { Capabilities } from '@kbn/core/public';
-import {
-  STACK_ALERTS_ONLY_FEATURE_ID,
-  canAccessTriggersActionsRules,
-} from '@kbn/rule-data-utils';
+import { STACK_ALERTS_ONLY_FEATURE_ID, canAccessTriggersActionsRules } from '@kbn/rule-data-utils';
 
 const ALERTING_V2_FEATURE_IDS: Record<string, string> = {
   rules: 'alerting_v2_rules',
