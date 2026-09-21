@@ -73491,7 +73491,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Disable the Entity Store history scheduled snapshot task.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+        Disable the Entity Store history snapshot task for this space so it no longer creates snapshot indices. Existing snapshot indices remain unless you set `clearHistorySnapshots` to `true`. Returns 404 if the Entity Store is not installed in the current space.<br/><br/>[Required authorization] Route required privileges: securitySolution.
       operationId: put-security-entity-store-history-snapshot-disable
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -73506,7 +73506,7 @@ paths:
           application/json:
             examples:
               disableAndClear:
-                summary: Disable and clear all history snapshot indices
+                summary: Disable and clear snapshot indices
                 value:
                   clearHistorySnapshots: true
               disableOnly:
@@ -73518,8 +73518,7 @@ paths:
               properties:
                 clearHistorySnapshots:
                   default: false
-                  description: |
-                    When set to `true`, all existing history snapshot indices for this namespace are deleted in the background after the task is disabled. The response returns immediately without waiting for deletion to complete.
+                  description: When `true`, deletes existing history snapshot indices for this space in the background after the task is disabled. The response returns immediately and does not wait for deletion to finish. Deletion failures are logged and are not returned to the caller. If the task is already disabled, the request succeeds and does not delete indices. Defaults to `false`.
                   type: boolean
       responses:
         '200':
@@ -73544,7 +73543,7 @@ paths:
                     message: Entity store is not installed
                     statusCode: 404
           description: Entity store is not installed.
-      summary: Disable history snapshot task
+      summary: Disable the history snapshot task
       tags:
         - Security entity store
       x-codeSamples:
@@ -73572,7 +73571,7 @@ paths:
             {
               "clearHistorySnapshots": true
             }
-      x-state: ''
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -73585,7 +73584,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Enables and runs the Entity Store history scheduled snapshot task.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+        Enable the Entity Store history snapshot task for this space. After a successful enable, Kibana schedules an immediate snapshot run. If that immediate run fails, the response is still 200 and the task remains enabled for the next scheduled interval. If the task is already enabled, the request succeeds and does not start an extra run. Returns 404 if the Entity Store is not installed in the current space.<br/><br/>[Required authorization] Route required privileges: securitySolution.
       operationId: put-security-entity-store-history-snapshot-enable
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -73618,7 +73617,7 @@ paths:
                     message: Entity store is not installed
                     statusCode: 404
           description: Entity store is not installed.
-      summary: Enable history snapshot task
+      summary: Enable the history snapshot task
       tags:
         - Security entity store
       x-codeSamples:
@@ -73629,7 +73628,7 @@ paths:
         - lang: Console
           source: |
             PUT kbn://api/security/entity_store/history_snapshot/enable
-      x-state: ''
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
