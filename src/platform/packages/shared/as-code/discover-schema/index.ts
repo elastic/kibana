@@ -15,9 +15,11 @@ export {
   classicTabSchema,
   esqlTabSchema,
   tabSchema,
+  panelTabSchema,
   visContextSchema,
   discoverSessionControlPanelSchema,
   discoverSessionControlPanelsSchema,
+  discoverSessionDefaultTabTypeStateSchema,
   discoverSessionClassicTabSchema,
   discoverSessionEsqlTabSchema,
   discoverSessionMetricsTabSchema,
@@ -33,5 +35,6 @@ export type {
   DiscoverSessionApiEsqlTab,
   DiscoverSessionApiMetricsTab,
   DiscoverSessionApiTab,
+  DiscoverSessionApiMetricsTabTypeState,
   DiscoverSessionApiTabTypeState,
 } from './src/types';
