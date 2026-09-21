@@ -162,6 +162,8 @@ export const ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH =
   '/entity_analytics_privileged_user_monitoring' as const;
 export const ENTITY_ANALYTICS_OVERVIEW_PATH = `/entity_analytics_overview` as const;
 export const ENTITY_ANALYTICS_HOME_PAGE_PATH = '/entity_analytics_home_page' as const;
+export const USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG =
+  'securitySolution.useNewEntityAnalyticsPage' as const;
 export const APP_ALERTS_PATH = `${APP_PATH}${ALERTS_PATH}` as const;
 export const APP_CASES_PATH = `${APP_PATH}${CASES_PATH}` as const;
 export const APP_ENDPOINTS_PATH = `${APP_PATH}${ENDPOINTS_PATH}` as const;
@@ -747,10 +749,14 @@ export const ESSENTIAL_ALERT_FIELDS: string[] = [
 export enum SecurityAgentBuilderAttachments {
   alert = 'security.alert',
   alerts = 'security.alerts',
+  attackDiscovery = 'security.attack_discovery',
+  attackDiscoveryVerdict = 'security.attack_discovery.verdict',
   entity = 'security.entity',
   entityAnalyticsDashboard = 'security.entity_analytics_dashboard',
   entityGraph = 'security.entity_graph',
   entityRiskScoreHistory = 'security.entity_risk_score_history',
+  investigationIocs = 'security.investigation.iocs',
+  investigationTimeline = 'security.investigation.timeline',
   rule = 'security.rule',
   rulePreview = 'security.rule.preview',
 }
