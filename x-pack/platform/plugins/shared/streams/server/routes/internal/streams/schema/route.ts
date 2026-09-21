@@ -19,12 +19,6 @@ import {
   LOGS_ROOT_STREAM_NAME,
   isDraftStream,
 } from '@kbn/streams-schema';
-
-// Cap field-name length and array count for HTTP inputs that iterate over all supplied fields.
-const boundedNamedFieldDefinition = namedFieldDefinitionConfigSchema.and(
-  z.object({ name: z.string().nonempty().max(256) })
-);
-const boundedFieldDefinitionsArray = z.array(boundedNamedFieldDefinition).max(1000);
 import { z } from '@kbn/zod/v4';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { SearchHit } from '@kbn/es-types';
@@ -54,6 +48,13 @@ import {
   fetchDraftViewSamples,
 } from '../../../../lib/streams/helpers/draft_helpers';
 const FIELD_SIMULATION_TIMEOUT = '1s';
+
+// Cap field-name length and array count for HTTP inputs that build mapping properties
+// and ES|QL predicates from every supplied item — unbounded work from a read-only caller.
+const boundedNamedFieldDefinition = namedFieldDefinitionConfigSchema.and(
+  z.object({ name: z.string().nonempty().max(256) })
+) as z.ZodType<NamedFieldDefinitionConfig>;
+const boundedFieldDefinitionsArray = z.array(boundedNamedFieldDefinition).max(1000);
 
 const isFieldDefinitionType = (value: unknown): value is FieldDefinitionType =>
   typeof value === 'string' && (FIELD_DEFINITION_TYPES as readonly string[]).includes(value);
