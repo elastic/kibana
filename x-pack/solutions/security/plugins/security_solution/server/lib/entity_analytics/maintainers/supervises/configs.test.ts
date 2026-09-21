@@ -286,11 +286,11 @@ describe('workday (log-inverted) supervises config', () => {
     )!;
 
   it('is registered alongside the two IDP configs', () => {
-    expect(buildSupervisesConfigs().map((c) => c.id).sort()).toEqual([
-      'entityanalytics_entra_id',
-      'entityanalytics_okta',
-      'workday',
-    ]);
+    expect(
+      buildSupervisesConfigs()
+        .map((c) => c.id)
+        .sort()
+    ).toEqual(['entityanalytics_entra_id', 'entityanalytics_okta', 'workday']);
   });
 
   it('reads the workday user log data stream, not the entity index', () => {
