@@ -617,6 +617,21 @@ describe('QueryRuleOrchestrator', () => {
       expect(summary.orphanRulesDeleted).toBe(1);
     });
 
+    it('chunks orphan rule deletion at the Alerting bulk limit', async () => {
+      const rulesClient = makeReconcileRulesClient();
+      const orphanIds = Array.from({ length: 201 }, (_, index) => `orphan-rule-${index}`);
+      rulesClient.findOwnedRuleIds.mockResolvedValue(orphanIds);
+      const reader = makeReconcileReader({ links: [] });
+      const orchestrator = makeReconcileOrchestrator({ rulesClient, reader });
+
+      const summary = await orchestrator.reconcileStream(definition);
+
+      const chunks = rulesClient.bulkDeleteRules.mock.calls.map(([ids]) => ids);
+      expect(chunks.map((ids) => ids.length)).toEqual([100, 51, 50]);
+      expect(chunks.flat()).toEqual(orphanIds);
+      expect(summary.orphanRulesDeleted).toBe(201);
+    });
+
     it('tombstones a rule-backed query whose rule was deleted out of band (seam)', async () => {
       const rulesClient = makeReconcileRulesClient();
       const writer = {

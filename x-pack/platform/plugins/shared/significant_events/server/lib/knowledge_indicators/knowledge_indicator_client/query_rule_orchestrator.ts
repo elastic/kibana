@@ -545,7 +545,7 @@ export class QueryRuleOrchestrator {
     const orphans = ownedRuleIds.filter((id) => !keepSet.has(id));
     let orphanRulesDeleted = 0;
     if (orphans.length > 0) {
-      await this.rulesManagementClient.bulkDeleteRules(orphans);
+      await uninstallRuleIds(this.rulesManagementClient, orphans);
       orphanRulesDeleted = orphans.length;
     }
 

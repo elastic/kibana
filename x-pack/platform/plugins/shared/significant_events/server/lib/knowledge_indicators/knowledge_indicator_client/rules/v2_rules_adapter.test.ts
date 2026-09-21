@@ -418,17 +418,222 @@ describe('RulesAdapterV2', () => {
       expect(mock.createRule).not.toHaveBeenCalled();
     });
 
-    it('propagates whole-request failures unchanged', async () => {
+    it('updates all known-existing rules after the bulk schedule preflight rejects them', async () => {
+      const mock = makeRulesClientMock();
+      const rules = Array.from({ length: 51 }, (_, index) => ({
+        id: `rule-${index}`,
+        definition: createDefinition,
+      }));
+      const requestError = Boom.badRequest('schedule limit exceeded', {
+        code: ALERTING_ERROR_CODES.MAX_SCHEDULES_PER_MINUTE_EXCEEDED,
+      });
+      mock.bulkCreateRules.mockRejectedValueOnce(requestError);
+      mock.ruleExists.mockResolvedValue(true);
+      mock.updateRule.mockResolvedValue({} as never);
+      const adapter = makeAdapter(mock);
+
+      await expect(adapter.bulkCreateRules(rules)).resolves.toEqual({ createdIds: [] });
+
+      expect(mock.bulkCreateRules).toHaveBeenCalledTimes(1);
+      expect(mock.ruleExists).toHaveBeenCalledTimes(51);
+      expect(mock.updateRule).toHaveBeenCalledTimes(51);
+    });
+
+    it('retries a rejected mixed batch with only net-new rules', async () => {
       const mock = makeRulesClientMock();
       const requestError = Boom.badRequest('schedule limit exceeded', {
         code: ALERTING_ERROR_CODES.MAX_SCHEDULES_PER_MINUTE_EXCEEDED,
       });
+      mock.bulkCreateRules
+        .mockRejectedValueOnce(requestError)
+        .mockResolvedValueOnce({ rules: [{ id: 'rule-new' }], errors: [] } as never);
+      mock.ruleExists.mockImplementation(({ id }: { id: string }) =>
+        Promise.resolve(id === 'rule-existing')
+      );
+      mock.updateRule.mockResolvedValue({} as never);
+      const adapter = makeAdapter(mock);
+
+      await expect(
+        adapter.bulkCreateRules([
+          { id: 'rule-existing', definition: updateDefinition },
+          { id: 'rule-new', definition: createDefinition },
+        ])
+      ).resolves.toEqual({ createdIds: ['rule-new'] });
+
+      expect(mock.bulkCreateRules).toHaveBeenCalledTimes(2);
+      const retryRules = mock.bulkCreateRules.mock.calls[1][0].rules as Array<{ id: string }>;
+      expect(retryRules.map(({ id }) => id)).toEqual(['rule-new']);
+      expect(mock.updateRule).toHaveBeenCalledTimes(1);
+      expect(mock.updateRule).toHaveBeenCalledWith({
+        id: 'rule-existing',
+        data: expect.objectContaining({
+          metadata: expect.objectContaining({ name: updateDefinition.name }),
+        }),
+      });
+    });
+
+    it('still updates a retry-time conflict alongside a known-existing rule', async () => {
+      const mock = makeRulesClientMock();
+      const requestError = Boom.badRequest('schedule limit exceeded', {
+        code: ALERTING_ERROR_CODES.MAX_SCHEDULES_PER_MINUTE_EXCEEDED,
+      });
+      mock.bulkCreateRules.mockRejectedValueOnce(requestError).mockResolvedValueOnce({
+        rules: [],
+        errors: [
+          {
+            id: 'rule-raced',
+            error: {
+              code: ALERTING_ERROR_CODES.RULE_ALREADY_EXISTS,
+              message: 'already exists',
+            },
+          },
+        ],
+      } as never);
+      mock.ruleExists.mockImplementation(({ id }: { id: string }) =>
+        Promise.resolve(id === 'rule-existing')
+      );
+      mock.updateRule.mockResolvedValue({} as never);
+      const adapter = makeAdapter(mock);
+
+      await expect(
+        adapter.bulkCreateRules([
+          { id: 'rule-existing', definition: updateDefinition },
+          { id: 'rule-raced', definition: createDefinition },
+        ])
+      ).resolves.toEqual({ createdIds: [] });
+
+      expect(mock.updateRule.mock.calls.map(([{ id }]) => id)).toEqual([
+        'rule-existing',
+        'rule-raced',
+      ]);
+    });
+
+    it('preserves retry-created and known-conflict ids when the retry has a fatal error', async () => {
+      const mock = makeRulesClientMock();
+      const requestError = Boom.badRequest('schedule limit exceeded', {
+        code: ALERTING_ERROR_CODES.MAX_SCHEDULES_PER_MINUTE_EXCEEDED,
+      });
+      mock.bulkCreateRules.mockRejectedValueOnce(requestError).mockResolvedValueOnce({
+        rules: [{ id: 'rule-created' }],
+        errors: [
+          {
+            id: 'rule-failed',
+            error: {
+              code: ALERTING_ERROR_CODES.INTERNAL_SERVER_ERROR,
+              message: 'storage unavailable',
+            },
+          },
+        ],
+      } as never);
+      mock.ruleExists.mockImplementation(({ id }: { id: string }) =>
+        Promise.resolve(id === 'rule-existing')
+      );
+      const adapter = makeAdapter(mock);
+
+      const thrown = await adapter
+        .bulkCreateRules([
+          { id: 'rule-existing', definition: updateDefinition },
+          { id: 'rule-created', definition: createDefinition },
+          { id: 'rule-failed', definition: createDefinition },
+        ])
+        .catch((error) => error);
+
+      expect(thrown).toBeInstanceOf(BulkCreateRulesError);
+      expect(thrown).toMatchObject({
+        createdIds: ['rule-created'],
+        conflictIds: ['rule-existing'],
+        failedIds: ['rule-failed'],
+      });
+      expect(mock.updateRule).not.toHaveBeenCalled();
+    });
+
+    it('does not recreate a known-existing rule deleted before its fallback update', async () => {
+      const mock = makeRulesClientMock();
+      const requestError = Boom.badRequest('schedule limit exceeded', {
+        code: ALERTING_ERROR_CODES.MAX_SCHEDULES_PER_MINUTE_EXCEEDED,
+      });
+      const updateError = Boom.notFound('deleted after lookup');
+      mock.bulkCreateRules
+        .mockRejectedValueOnce(requestError)
+        .mockResolvedValueOnce({ rules: [{ id: 'rule-created' }], errors: [] } as never);
+      mock.ruleExists.mockImplementation(({ id }: { id: string }) =>
+        Promise.resolve(id === 'rule-existing')
+      );
+      mock.updateRule.mockRejectedValue(updateError);
+      const adapter = makeAdapter(mock);
+
+      const thrown = await adapter
+        .bulkCreateRules([
+          { id: 'rule-existing', definition: updateDefinition },
+          { id: 'rule-created', definition: createDefinition },
+        ])
+        .catch((error) => error);
+
+      expect(thrown).toBeInstanceOf(BulkCreateRulesError);
+      expect(thrown).toMatchObject({
+        cause: updateError,
+        createdIds: ['rule-created'],
+        conflictIds: ['rule-existing'],
+        failedIds: ['rule-existing'],
+      });
+      expect(mock.createRule).not.toHaveBeenCalled();
+    });
+
+    it('classifies known conflicts separately when the net-new retry is still rejected', async () => {
+      const mock = makeRulesClientMock();
+      const requestError = Boom.badRequest('schedule limit exceeded', {
+        code: ALERTING_ERROR_CODES.MAX_SCHEDULES_PER_MINUTE_EXCEEDED,
+      });
+      mock.bulkCreateRules.mockRejectedValue(requestError);
+      mock.ruleExists.mockImplementation(({ id }: { id: string }) =>
+        Promise.resolve(id === 'rule-existing')
+      );
+      const adapter = makeAdapter(mock);
+
+      const thrown = await adapter
+        .bulkCreateRules([
+          { id: 'rule-existing', definition: updateDefinition },
+          { id: 'rule-new', definition: createDefinition },
+        ])
+        .catch((error) => error);
+
+      expect(thrown).toBeInstanceOf(BulkCreateRulesError);
+      expect(thrown).toMatchObject({
+        cause: requestError,
+        createdIds: [],
+        conflictIds: ['rule-existing'],
+        failedIds: ['rule-new'],
+      });
+      expect(mock.bulkCreateRules).toHaveBeenCalledTimes(2);
+      expect(mock.updateRule).not.toHaveBeenCalled();
+    });
+
+    it('rethrows a genuine net-new schedule limit failure unchanged', async () => {
+      const mock = makeRulesClientMock();
+      const requestError = Boom.badRequest('schedule limit exceeded', {
+        code: ALERTING_ERROR_CODES.MAX_SCHEDULES_PER_MINUTE_EXCEEDED,
+      });
+      mock.bulkCreateRules.mockRejectedValue(requestError);
+      mock.ruleExists.mockResolvedValue(false);
+      const adapter = makeAdapter(mock);
+
+      await expect(
+        adapter.bulkCreateRules([{ id: 'rule-1', definition: createDefinition }])
+      ).rejects.toBe(requestError);
+      expect(mock.bulkCreateRules).toHaveBeenCalledTimes(1);
+      expect(mock.updateRule).not.toHaveBeenCalled();
+    });
+
+    it('propagates non-schedule whole-request failures without existence checks', async () => {
+      const mock = makeRulesClientMock();
+      const requestError = Boom.serverUnavailable('storage unavailable');
       mock.bulkCreateRules.mockRejectedValue(requestError);
       const adapter = makeAdapter(mock);
 
       await expect(
         adapter.bulkCreateRules([{ id: 'rule-1', definition: createDefinition }])
       ).rejects.toBe(requestError);
+      expect(mock.ruleExists).not.toHaveBeenCalled();
       expect(mock.updateRule).not.toHaveBeenCalled();
     });
   });

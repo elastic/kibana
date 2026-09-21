@@ -28,6 +28,14 @@ const FIND_PAGE_SIZE = 500;
 const RULE_EXISTS_CONCURRENCY = 10;
 const CONFLICT_UPDATE_CONCURRENCY = 10;
 
+const isScheduleLimitError = (error: unknown): boolean =>
+  isBoom(error) &&
+  error.output.statusCode === 400 &&
+  typeof error.data === 'object' &&
+  error.data !== null &&
+  'code' in error.data &&
+  error.data.code === ALERTING_ERROR_CODES.MAX_SCHEDULES_PER_MINUTE_EXCEEDED;
+
 export interface RulesAdapterV2Params {
   rulesClient: Pick<
     RulesClientApi,
@@ -83,72 +91,34 @@ export class RulesAdapterV2 implements IRulesManagementClient {
   async bulkCreateRules(
     rules: Array<{ id: string; definition: SignificantEventsRuleDefinition }>
   ): Promise<{ createdIds: string[] }> {
-    const definitionsById = new Map(rules.map(({ id, definition }) => [id, definition]));
-    const { rules: created, errors } = await this.rulesClient.bulkCreateRules({
-      rules: rules.map(({ id, definition }) => ({
-        ...toV2CreateBody({ definition, isServerless: this.isServerless }),
-        id,
-        enabled: true,
-      })),
-    });
+    try {
+      return await this.createRulesAndUpdateConflicts(rules, []);
+    } catch (error) {
+      if (!isScheduleLimitError(error)) {
+        throw error;
+      }
 
-    const createdIds = created.map(({ id }) => id);
-    const conflicts = errors.filter(
-      ({ error }) => error.code === ALERTING_ERROR_CODES.RULE_ALREADY_EXISTS
-    );
-    const conflictIds = conflicts.map(({ id }) => id);
-    const fatal = errors.filter(
-      ({ error }) => error.code !== ALERTING_ERROR_CODES.RULE_ALREADY_EXISTS
-    );
-    if (fatal.length > 0) {
-      const detail = fatal
-        .map(({ id, error }) => `${id} [${error.code}]: ${error.message}`)
-        .join('; ');
-      throw new BulkCreateRulesError(
-        new Error(`V2 bulk create failed for ${fatal.length} rule(s): ${detail}`),
-        createdIds,
-        conflictIds,
-        fatal.map(({ id }) => id)
-      );
-    }
+      const existingIds = new Set(await this.findExistingRuleIds(rules.map(({ id }) => id)));
+      if (existingIds.size === 0) {
+        throw error;
+      }
 
-    const limit = pLimit(CONFLICT_UPDATE_CONCURRENCY);
-    const updateResults = await Promise.allSettled(
-      conflicts.map(({ id }) =>
-        limit(async () => {
-          const definition = definitionsById.get(id);
-          if (!definition) {
-            throw new Error(`V2 bulk create returned a conflict for unknown rule "${id}"`);
-          }
-          await this.updateRuleWithoutFallback(id, definition);
-        })
-      )
-    );
-
-    const updateFailures: Array<{ id: string; cause: Error }> = [];
-    for (const [index, result] of updateResults.entries()) {
-      if (result.status === 'rejected') {
-        const id = conflictIds[index];
-        if (!id) {
-          continue;
+      const rulesToCreate = rules.filter(({ id }) => !existingIds.has(id));
+      const rulesToUpdate = rules.filter(({ id }) => existingIds.has(id));
+      try {
+        return await this.createRulesAndUpdateConflicts(rulesToCreate, rulesToUpdate);
+      } catch (retryError) {
+        if (retryError instanceof BulkCreateRulesError) {
+          throw retryError;
         }
-        updateFailures.push({
-          id,
-          cause: result.reason instanceof Error ? result.reason : new Error(String(result.reason)),
-        });
+        throw new BulkCreateRulesError(
+          retryError instanceof Error ? retryError : new Error(String(retryError)),
+          [],
+          rulesToUpdate.map(({ id }) => id),
+          rulesToCreate.map(({ id }) => id)
+        );
       }
     }
-    const [firstUpdateFailure] = updateFailures;
-    if (firstUpdateFailure) {
-      throw new BulkCreateRulesError(
-        firstUpdateFailure.cause,
-        createdIds,
-        conflictIds,
-        updateFailures.map(({ id }) => id)
-      );
-    }
-
-    return { createdIds };
   }
 
   async updateRule(id: string, definition: SignificantEventsRuleDefinition): Promise<void> {
@@ -215,6 +185,83 @@ export class RulesAdapterV2 implements IRulesManagementClient {
       }
     }
     return [...streamNames];
+  }
+
+  private async createRulesAndUpdateConflicts(
+    rulesToCreate: Array<{ id: string; definition: SignificantEventsRuleDefinition }>,
+    knownConflicts: Array<{ id: string; definition: SignificantEventsRuleDefinition }>
+  ): Promise<{ createdIds: string[] }> {
+    const definitionsById = new Map(
+      [...rulesToCreate, ...knownConflicts].map(({ id, definition }) => [id, definition])
+    );
+    const { rules: created, errors } =
+      rulesToCreate.length === 0
+        ? { rules: [], errors: [] }
+        : await this.rulesClient.bulkCreateRules({
+            rules: rulesToCreate.map(({ id, definition }) => ({
+              ...toV2CreateBody({ definition, isServerless: this.isServerless }),
+              id,
+              enabled: true,
+            })),
+          });
+
+    const createdIds = created.map(({ id }) => id);
+    const conflicts = errors.filter(
+      ({ error }) => error.code === ALERTING_ERROR_CODES.RULE_ALREADY_EXISTS
+    );
+    const conflictIds = [...knownConflicts.map(({ id }) => id), ...conflicts.map(({ id }) => id)];
+    const fatal = errors.filter(
+      ({ error }) => error.code !== ALERTING_ERROR_CODES.RULE_ALREADY_EXISTS
+    );
+    if (fatal.length > 0) {
+      const detail = fatal
+        .map(({ id, error }) => `${id} [${error.code}]: ${error.message}`)
+        .join('; ');
+      throw new BulkCreateRulesError(
+        new Error(`V2 bulk create failed for ${fatal.length} rule(s): ${detail}`),
+        createdIds,
+        conflictIds,
+        fatal.map(({ id }) => id)
+      );
+    }
+
+    const limit = pLimit(CONFLICT_UPDATE_CONCURRENCY);
+    const updateResults = await Promise.allSettled(
+      conflictIds.map((id) =>
+        limit(async () => {
+          const definition = definitionsById.get(id);
+          if (!definition) {
+            throw new Error(`V2 bulk create returned a conflict for unknown rule "${id}"`);
+          }
+          await this.updateRuleWithoutFallback(id, definition);
+        })
+      )
+    );
+
+    const updateFailures: Array<{ id: string; cause: Error }> = [];
+    for (const [index, result] of updateResults.entries()) {
+      if (result.status === 'rejected') {
+        const id = conflictIds[index];
+        if (!id) {
+          continue;
+        }
+        updateFailures.push({
+          id,
+          cause: result.reason instanceof Error ? result.reason : new Error(String(result.reason)),
+        });
+      }
+    }
+    const [firstUpdateFailure] = updateFailures;
+    if (firstUpdateFailure) {
+      throw new BulkCreateRulesError(
+        firstUpdateFailure.cause,
+        createdIds,
+        conflictIds,
+        updateFailures.map(({ id }) => id)
+      );
+    }
+
+    return { createdIds };
   }
 
   private async updateRuleWithoutFallback(
