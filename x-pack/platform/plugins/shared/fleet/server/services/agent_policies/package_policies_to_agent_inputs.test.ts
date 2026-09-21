@@ -1956,6 +1956,65 @@ describe('storedPackagePolicyToAgentInputs - condition handling', () => {
     expect('condition' in (result[0].streams?.[0] ?? {})).toBe(false);
   });
 
+  it('boolean stream condition is preserved as string in emitted output', () => {
+    // The Fleet UI can persist condition as boolean `true`; combineConditions must coerce
+    // it to the string 'true' rather than dropping it or throwing.
+    const result = storedPackagePolicyToAgentInputs({
+      ...basePolicy,
+      inputs: [
+        makeInput({
+          streams: [
+            {
+              id: 'stream-1',
+              enabled: true,
+              data_stream: { dataset: 'foo', type: 'logs' },
+              condition: true as any,
+            },
+          ],
+        }),
+      ],
+    });
+    expect(result[0].streams?.[0]?.condition).toBe('true');
+  });
+
+  it('boolean false stream condition is preserved as string in emitted output', () => {
+    const result = storedPackagePolicyToAgentInputs({
+      ...basePolicy,
+      inputs: [
+        makeInput({
+          streams: [
+            {
+              id: 'stream-1',
+              enabled: true,
+              data_stream: { dataset: 'foo', type: 'logs' },
+              condition: false as any,
+            },
+          ],
+        }),
+      ],
+    });
+    expect(result[0].streams?.[0]?.condition).toBe('false');
+  });
+
+  it('boolean input-level condition is preserved as string in emitted output', () => {
+    const result = storedPackagePolicyToAgentInputs({
+      ...basePolicy,
+      inputs: [
+        makeInput({
+          condition: true as any,
+          streams: [
+            {
+              id: 'stream-1',
+              enabled: true,
+              data_stream: { dataset: 'foo', type: 'logs' },
+            },
+          ],
+        }),
+      ],
+    });
+    expect(result[0].condition).toBe('true');
+  });
+
   it('overrides.inputs[id].condition still wins (no regression)', () => {
     const inputId = 'logfile-pkg-uuid';
     const result = storedPackagePolicyToAgentInputs({
