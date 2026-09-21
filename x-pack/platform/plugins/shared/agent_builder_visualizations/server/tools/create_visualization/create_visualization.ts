@@ -82,7 +82,7 @@ const customContentHasDataField = z
   .nullable()
   .optional()
   .describe(
-    '(optional) Whether the panel shows live Elasticsearch values. Omit or true: generate a query from "query" when esql is omitted. Pass false only when the panel has no data at all — a banner, a legend, an explanatory note. Never pass false to get past a failed query generation; fix the index or fields and retry instead.'
+    '(optional) Whether the panel shows live Elasticsearch values. Omit or true: generate a query from "query" when esql is omitted. Pass false only when the panel has no data at all — a banner, a legend, an explanatory note. false always wins: it yields a data-free panel even when an esql is passed alongside it. Never pass false to get past a failed query generation; fix the index or fields and retry instead.'
   );
 
 const attachmentHasDataField = z
@@ -90,7 +90,7 @@ const attachmentHasDataField = z
   .nullable()
   .optional()
   .describe(
-    '(optional, custom content only) Omit to keep the panel\'s current data state. true: generate a query from "query" even if the panel currently has none. false: drop the stored query so the panel has no data. Ignored for Lens and Vega. Never pass false to get past a failed query generation.'
+    '(optional, custom content only) Omit to keep the panel\'s current data state. true: ensure the panel has data — keeps the stored query, generating one from "query" only when the panel has none. false: drop the stored query so the panel has no data; it wins even when an esql is passed alongside it. Ignored for Lens and Vega. Never pass false to get past a failed query generation.'
   );
 
 const requiredChartTypeField = z
@@ -239,16 +239,24 @@ const resolveCustomContentEsql = async ({
   existingEsql: string | undefined;
   generate: () => Promise<string>;
 }): Promise<string | undefined> => {
-  if (esql !== undefined) {
-    return esql;
-  }
+  // has_data is the explicit data on/off switch, so false always yields a data-free
+  // panel — it wins over an esql passed alongside it.
   if (hasData === false) {
     return undefined;
   }
-  if (hasData === true || !existingData) {
+  if (esql !== undefined) {
+    return esql;
+  }
+  if (!existingData) {
     return generate();
   }
-  return existingEsql;
+  // On update a stored query always survives unless explicitly replaced (esql) or
+  // dropped (has_data: false) — a redundant has_data: true must not regenerate it
+  // from what may be a style-only prompt.
+  if (existingEsql) {
+    return existingEsql;
+  }
+  return hasData === true ? generate() : undefined;
 };
 
 export const createVisualizationTool = (): BuiltinToolDefinition<
@@ -265,7 +273,7 @@ You say what to build via "target", discriminated by "target.type":
     )}).
 - "vega" for a custom Vega-Lite specification when no Lens chart type can express the request, e.g. small multiples / faceting, layered or combination charts (bars plus an overlaid line), scatter / bubble plots with an encoded size dimension, or custom tooltips/encodings. "chartType" is optional for Vega and acts only as a styling hint.
 - "custom_content" for an HTML/CSS layout neither chart grammar can express — a KPI scorecard with status badges, a health or status board, a panel mixing narrative text with live values. The HTML is generated server-side from your natural-language "query"; never author markup yourself. Omit "esql" to generate a query; pass "has_data": false only when the panel genuinely has no data (a banner, a legend, a note).
-- "attachment" with "attachment_id" to update an existing visualization; edits keep its renderer. "chartType" is optional on updates. Omit "esql" and "has_data" to keep the current data state; pass "has_data": false to drop a stored query, or "has_data": true to generate one.
+- "attachment" with "attachment_id" to update an existing visualization; edits keep its renderer. "chartType" is optional on updates. Omit "esql" and "has_data" to keep the current data state; pass "has_data": false to drop a stored query, or "has_data": true to ensure the panel has one (a stored query is kept, one is generated only when the panel has none).
 
 Only pass "time_range" when the user explicitly named a time window (e.g. "last 7 days", "May 20–24"). Do not set it otherwise: create applies a data-aware default, and edits keep the existing range.
 

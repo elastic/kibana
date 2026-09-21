@@ -746,6 +746,29 @@ describe('createVisualizationTool handler', () => {
       expect(data.esql).toBeUndefined();
     });
 
+    // has_data is the explicit data on/off switch: false wins over an esql passed
+    // alongside it instead of silently producing a data panel.
+    it('yields a data-free panel when has_data: false is passed together with an esql', async () => {
+      const { result, attachments } = await runHandler({
+        query: 'a welcome banner',
+        target: customContentTarget({
+          esql: 'FROM logs | STATS count() BY host',
+          has_data: false,
+        }),
+      });
+
+      expect(mockGenerateEsql).not.toHaveBeenCalled();
+      expect(mockResolveTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({ esqlQuery: undefined })
+      );
+      expect(attachments.add).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.not.objectContaining({ esql: expect.anything() }),
+        })
+      );
+      expect(result.results[0].data.esql).toBeUndefined();
+    });
+
     const dataAttachment = () => {
       const attachments = createAttachments();
       attachments.getAttachmentRecord.mockReturnValue({
@@ -798,6 +821,24 @@ describe('createVisualizationTool handler', () => {
       expect(result.results[0].data.esql).toBe('FROM logs | STATS count() BY host');
     });
 
+    // A redundant has_data: true on a style-only edit must not regenerate a working
+    // query from the styling prompt.
+    it('keeps the stored query when an update passes has_data: true on a data-backed panel', async () => {
+      const { result } = await runHandler(
+        {
+          query: 'use a darker background',
+          target: attachmentTarget('att-1', { has_data: true }),
+        },
+        { attachments: dataAttachment() }
+      );
+
+      expect(mockGenerateEsql).not.toHaveBeenCalled();
+      expect(mockResolveTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({ esqlQuery: undefined, hasExistingQuery: true })
+      );
+      expect(result.results[0].data.esql).toBe('FROM logs | STATS count() BY host');
+    });
+
     it('re-samples when an update supplies a different esql', async () => {
       const { result } = await runHandler(
         {
@@ -845,6 +886,31 @@ describe('createVisualizationTool handler', () => {
 
       const [{ data }] = result.results;
       expect(data.esql).toBeUndefined();
+    });
+
+    it('drops the query when an update passes has_data: false together with an esql', async () => {
+      const { result, attachments } = await runHandler(
+        {
+          query: 'turn this into a plain banner',
+          target: attachmentTarget('att-1', {
+            esql: 'FROM logs | STATS errors = COUNT() BY host',
+            has_data: false,
+          }),
+        },
+        { attachments: dataAttachment() }
+      );
+
+      expect(mockGenerateEsql).not.toHaveBeenCalled();
+      expect(mockResolveTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({ esqlQuery: undefined, hasExistingQuery: false })
+      );
+      expect(attachments.update).toHaveBeenCalledWith(
+        'att-1',
+        expect.objectContaining({
+          data: expect.not.objectContaining({ esql: expect.anything() }),
+        })
+      );
+      expect(result.results[0].data.esql).toBeUndefined();
     });
 
     const dataFreeAttachment = () => {
