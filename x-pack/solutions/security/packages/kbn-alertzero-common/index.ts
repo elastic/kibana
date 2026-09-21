@@ -118,6 +118,22 @@ export {
   IndexScopeStatus,
   IndexScopeWindow,
   ResolvedIndexScope,
+  HuntBehaviorArticleContext,
+  HuntBehaviorIoc,
+  HuntBehaviorRequestBody,
+  HuntBehaviorResponse,
+  HuntBehaviorStatus,
+  CandidatesRequestBody,
+  CandidatesResponse,
+  CandidateSkipReason,
+  HuntCoordinatorRequestBody,
+  HuntCoordinatorResponse,
+  HuntCoordinatorStatus,
+  AnchorIoc,
+  AnchorSet,
+  CorrelateRequestBody,
+  CorrelateResponse,
+  CorrelationEngineStatus,
 } from './impl/schemas';
 
 export {
