@@ -320,7 +320,8 @@ export const sseToEvents = (state: LiveEventsState, event: ChatEvent): LiveEvent
   }
 
   if (isPromptRequestEvent(event)) {
-    // The prompt outcome is carried on the terminal execution_terminated event; no state needed.
+    // The prompts are carried on the terminal `execution_terminated` event, so no state is needed.
+    // Never turn a prompt into a step either: that would shift every later step id.
     return state;
   }
 
