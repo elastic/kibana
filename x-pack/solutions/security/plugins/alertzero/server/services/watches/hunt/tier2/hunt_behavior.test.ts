@@ -7,10 +7,15 @@
 
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { huntBehavior } from './hunt_behavior';
-import { huntBehaviorLlmExtractionSchema, huntBehaviorEsqlGenerationSchema } from './extraction_contract';
+import {
+  huntBehaviorLlmExtractionSchema,
+  huntBehaviorEsqlGenerationSchema,
+} from './extraction_contract';
 
 const buildMockModel = (
-  extractionResult: Partial<{ candidates: Array<{ technique_id: string; evidence_quote: string; llm_confidence: number }> }> = {}
+  extractionResult: Partial<{
+    candidates: Array<{ technique_id: string; evidence_quote: string; llm_confidence: number }>;
+  }> = {}
 ): ScopedModel => {
   const withStructuredOutput = jest.fn().mockImplementation((schema) => {
     if (schema === huntBehaviorLlmExtractionSchema) {

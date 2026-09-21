@@ -13,7 +13,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { HUNT_REPORTS_INDEX } from '../../../../common/constants';
+import { HUNT_REPORTS_INDEX } from '../../../../../common/constants';
 import { buildHuntSpaceFilterTerms } from '../common/space_filter';
 import { IOC_NOISE_DOMAINS } from './ioc_noise_domains';
 import type {

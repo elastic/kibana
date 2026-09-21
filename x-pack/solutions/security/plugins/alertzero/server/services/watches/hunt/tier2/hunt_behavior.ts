@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import { subtechniqueById, tacticsToIds, techniqueById } from '@kbn/securitysolution-mitre-catalog';
 import {
   huntBehaviorLlmExtractionSchema,
@@ -46,7 +46,11 @@ const severityToRiskScore = (severity: SeverityLevel): number => {
   }
 };
 
-const sanitizeRuleName = (techniqueId: string, techniqueName: string, reportId?: string): string => {
+const sanitizeRuleName = (
+  techniqueId: string,
+  techniqueName: string,
+  reportId?: string
+): string => {
   const safe = techniqueName.replace(/[()\/\\]/g, '').trim();
   return reportId
     ? `Hunt: ${safe} (${techniqueId}) [${reportId.slice(0, 8)}]`

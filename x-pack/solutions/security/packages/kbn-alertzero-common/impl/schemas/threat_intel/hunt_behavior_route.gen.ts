@@ -30,9 +30,7 @@ export const HuntBehaviorArticleContext = lazySchema(() =>
     affected_hosts: z.array(z.string()).optional(),
     affected_users: z.array(z.string()).optional(),
     sample_events: z.array(z.string()).optional(),
-    time_range: z
-      .object({ from: z.string(), to: z.string() })
-      .optional(),
+    time_range: z.object({ from: z.string(), to: z.string() }).optional(),
     proposed_atomic_rules: z
       .array(
         z.object({

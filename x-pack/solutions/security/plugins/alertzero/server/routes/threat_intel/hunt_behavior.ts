@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  API_VERSIONS,
-  HuntBehaviorRequestBody,
-  INTERNAL_API_ACCESS,
-} from '@kbn/alertzero-common';
+import { API_VERSIONS, HuntBehaviorRequestBody, INTERNAL_API_ACCESS } from '@kbn/alertzero-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_READ, HUNT_INTERNAL_ROUTE_BASE } from '../../../common/constants';
 import { huntBehavior } from '../../services/watches/hunt/tier2/hunt_behavior';
@@ -65,8 +61,12 @@ export const registerHuntBehaviorRoute = ({
               statusCode: modelOutcome.reason === 'no_inference_plugin' ? 503 : 400,
               body: {
                 message: modelOutcome.message,
-                tier2_skipped_reason:
-                  modelOutcome.reason === 'no_inference_plugin' ? 'no_inference_plugin' : 'no_connector',
+                attributes: {
+                  tier2_skipped_reason:
+                    modelOutcome.reason === 'no_inference_plugin'
+                      ? 'no_inference_plugin'
+                      : 'no_connector',
+                },
               },
             });
           }
@@ -87,7 +87,9 @@ export const registerHuntBehaviorRoute = ({
           return response.customError({
             statusCode: 500,
             body: {
-              message: `LLM extraction failed: ${(err as Error).message}. Verify a default GenAI connector is configured.`,
+              message: `LLM extraction failed: ${
+                (err as Error).message
+              }. Verify a default GenAI connector is configured.`,
             },
           });
         }

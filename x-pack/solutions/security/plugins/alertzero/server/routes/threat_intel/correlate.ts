@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  API_VERSIONS,
-  CorrelateRequestBody,
-  INTERNAL_API_ACCESS,
-} from '@kbn/alertzero-common';
+import { API_VERSIONS, CorrelateRequestBody, INTERNAL_API_ACCESS } from '@kbn/alertzero-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_READ, HUNT_INTERNAL_ROUTE_BASE } from '../../../common/constants';
 import { runCorrelationEngine } from '../../services/watches/hunt/correlation/correlation_engine';
@@ -44,12 +40,11 @@ export const registerCorrelateRoute = ({ router, logger, getSpaceId }: RouteDepe
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
           const { source_report_id, anchors, size } = request.body;
 
-          const result = await runCorrelationEngine(
-            esClient,
-            logger,
-            spaceId,
-            { source_report_id, anchors, size }
-          );
+          const result = await runCorrelationEngine(esClient, logger, spaceId, {
+            source_report_id,
+            anchors,
+            size,
+          });
 
           // Strip the toAttachmentData helper before serialising to JSON.
           const { toAttachmentData: _fn, ...body } = result;
