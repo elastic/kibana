@@ -23,7 +23,7 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import type { BlocklistConditionEntryField } from '@kbn/securitysolution-utils';
-import { OperatingSystem, hasControlCharacters, isPathValid } from '@kbn/securitysolution-utils';
+import { OperatingSystem, isPathValid } from '@kbn/securitysolution-utils';
 import { isOneOfOperator, isOperator } from '@kbn/securitysolution-list-utils';
 import { uniq } from 'lodash';
 
@@ -283,12 +283,6 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
           newValueErrors.INVALID_HASH = createValidationMessage(ERRORS.INVALID_HASH);
         } else {
           delete newValueErrors.INVALID_HASH;
-        }
-
-        if (hasControlCharacters(values)) {
-          newValueErrors.CONTROL_CHARACTER = createValidationMessage(ERRORS.CONTROL_CHARACTER);
-        } else {
-          delete newValueErrors.CONTROL_CHARACTER;
         }
 
         const isInvalidPath = values.some(

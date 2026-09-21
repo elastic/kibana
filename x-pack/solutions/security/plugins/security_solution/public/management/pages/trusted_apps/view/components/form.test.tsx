@@ -10,11 +10,7 @@ import { screen, cleanup, act, fireEvent, getByTestId, waitFor } from '@testing-
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { TrustedAppEntryTypes } from '@kbn/securitysolution-utils';
-import {
-  CONTROL_CHARACTER_ERROR,
-  OperatingSystem,
-  ConditionEntryField,
-} from '@kbn/securitysolution-utils';
+import { OperatingSystem, ConditionEntryField } from '@kbn/securitysolution-utils';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { useFetchIndex } from '../../../../../common/containers/source';
@@ -433,23 +429,6 @@ describe('Trusted apps form', () => {
         rerender();
 
         expect(renderResult.getByText(INPUT_ERRORS.invalidHash(0))).toBeInTheDocument();
-        expect(formProps.onChange).toHaveBeenLastCalledWith(
-          expect.objectContaining({ isValid: false })
-        );
-      });
-
-      it('blocks submission for an interior null character', async () => {
-        formProps.item = createItem({
-          name: 'Trusted app',
-          entries: [
-            createEntry(ConditionEntryField.PATH, 'match', 'C:\\Elastic\u0000Endpoint.exe'),
-          ],
-        });
-        rerender();
-
-        await userEvent.type(getNameField(), ' ');
-
-        expect(renderResult.getByText(CONTROL_CHARACTER_ERROR)).toBeInTheDocument();
         expect(formProps.onChange).toHaveBeenLastCalledWith(
           expect.objectContaining({ isValid: false })
         );

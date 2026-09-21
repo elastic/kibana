@@ -9,11 +9,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { isEqual } from 'lodash/fp';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import {
-  OperatingSystem,
-  hasControlCharacters,
-  trimInputValues,
-} from '@kbn/securitysolution-utils';
+import { OperatingSystem, hasNullCharacter, trimInputValues } from '@kbn/securitysolution-utils';
 
 import { i18n } from '@kbn/i18n';
 import {} from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client_types';
@@ -246,21 +242,21 @@ export class BaseValidator {
    * characters are allowed: a tab or newline can appear in a genuine command line or path.
    */
   protected validateEntryValueCharacters(item: ExceptionItemLikeOptions): void {
-    const controlCharacterFields = new Set<string>();
+    const nullCharacterFields = new Set<string>();
 
     this.forEachLiteralEntry(item, (entry) => {
-      if (hasControlCharacters(entry.value)) {
-        controlCharacterFields.add(entry.field);
+      if (hasNullCharacter(entry.value)) {
+        nullCharacterFields.add(entry.field);
       }
     });
 
-    if (controlCharacterFields.size) {
+    if (nullCharacterFields.size) {
       throw new EndpointArtifactExceptionValidationError(
         i18n.translate(
           'xpack.securitySolution.endpointArtifactValidation.invalidEntryValuesErrorMessage',
           {
             defaultMessage: 'Invalid entry values: null characters in fields: {fields}',
-            values: { fields: i18n.formatList('unit', [...controlCharacterFields]) },
+            values: { fields: i18n.formatList('unit', [...nullCharacterFields]) },
           }
         )
       );

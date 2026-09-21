@@ -47,8 +47,6 @@ interface AutocompleteFieldMatchProps {
   onError?: (arg: boolean) => void;
   onWarning?: (arg: boolean) => void;
   warning?: Warning;
-  /** Error supplied by the parent. Takes precedence over internally derived errors. */
-  externalError?: string;
   'aria-label'?: string;
 }
 
@@ -68,19 +66,11 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
   onError,
   onWarning,
   warning,
-  externalError,
   'aria-label': ariaLabel,
 }): JSX.Element => {
   const [searchQuery, setSearchQuery] = useState('');
   const [touched, setIsTouched] = useState(false);
-  const [internalError, setError] = useState<string | undefined>(undefined);
-  const error = externalError ?? internalError;
-
-  // Keep the parent's notion of "this row has an error" in sync with the combined state,
-  // so an error handed down via `externalError` also gates submission.
-  useEffect(() => {
-    onError?.(error != null);
-  }, [error, onError]);
+  const [error, setError] = useState<string | undefined>(undefined);
   const [showSpacesWarning, setShowSpacesWarning] = useState<boolean>(false);
   const [isLoadingSuggestions, isSuggestingValues, suggestions] = useFieldValueAutocomplete({
     autocompleteService,
@@ -112,18 +102,26 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
     [setShowSpacesWarning]
   );
 
-  // Reporting upward is handled by the effect that watches the combined error state,
-  // so this only has to record the internally derived error.
   const handleError = useCallback(
     (err: string | undefined): void => {
-      setError(err);
+      setError((existingErr): string | undefined => {
+        const oldErr = existingErr != null;
+        const newErr = err != null;
+        if (oldErr !== newErr && onError != null) {
+          onError(newErr);
+        }
+
+        return err;
+      });
     },
-    [setError]
+    [setError, onError]
   );
 
   const handleWarning = useCallback(
     (warn: Warning | undefined): void => {
-      onWarning?.(warn !== undefined);
+      if (onWarning) {
+        onWarning(warn !== undefined);
+      }
     },
     [onWarning]
   );
@@ -248,12 +246,13 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
 
   useEffect((): void => {
     setError(undefined);
+    if (onError != null) onError(false);
 
     handleSpacesWarning(selectedValue);
     // Looks like selectedField return new object every time when we for example add "and" entry
     // that's why we need to check for name and type here
     // Probably we should use some kind of memoization on parent components for entries
-  }, [selectedField?.name, selectedField?.type, selectedValue, handleSpacesWarning]);
+  }, [selectedField?.name, selectedField?.type, selectedValue, handleSpacesWarning, onError]);
 
   const defaultInput = useMemo((): JSX.Element => {
     return (

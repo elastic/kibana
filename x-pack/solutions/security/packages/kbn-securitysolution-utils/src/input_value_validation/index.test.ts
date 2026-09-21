@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { hasControlCharacters, trimInputValues } from '.';
+import { hasNullCharacter, trimInputValues } from '.';
 
-describe('hasControlCharacters', () => {
+describe('hasNullCharacter', () => {
   it.each([
     ['interior NUL', 'value\u0000with-nul'],
     ['leading NUL', '\u0000value'],
     ['trailing NUL', 'value\u0000'],
   ])('detects a %s', (_, value) => {
-    expect(hasControlCharacters(value)).toBe(true);
+    expect(hasNullCharacter(value)).toBe(true);
   });
 
   it('detects a NUL surrounded by edge whitespace', () => {
-    expect(hasControlCharacters(' value\u0000 ')).toBe(true);
+    expect(hasNullCharacter(' value\u0000 ')).toBe(true);
   });
 
   // Deliberately allowed: a real process.command_line or a Linux file name can contain these,
@@ -30,13 +30,13 @@ describe('hasControlCharacters', () => {
     ['interior C1', 'value\u0085more'],
     ['interior vertical tab', 'value\u000Bmore'],
   ])('allows an %s', (_, value) => {
-    expect(hasControlCharacters(value)).toBe(false);
+    expect(hasNullCharacter(value)).toBe(false);
   });
 
   it('inspects every array member', () => {
-    expect(hasControlCharacters([' whitespace ', 'ctl\u0000'])).toBe(true);
-    expect(hasControlCharacters(['clean', 'also clean', 'bad\u0000value'])).toBe(true);
-    expect(hasControlCharacters(['clean', 'also clean'])).toBe(false);
+    expect(hasNullCharacter([' whitespace ', 'ctl\u0000'])).toBe(true);
+    expect(hasNullCharacter(['clean', 'also clean', 'bad\u0000value'])).toBe(true);
+    expect(hasNullCharacter(['clean', 'also clean'])).toBe(false);
   });
 
   it.each([
@@ -54,7 +54,7 @@ describe('hasControlCharacters', () => {
     ['edge byte order mark', '\uFEFFvalue\uFEFF'],
     ['array of edge-whitespace members', ['clean', ' trailing ']],
   ])('returns false for a clean %s', (_, value) => {
-    expect(hasControlCharacters(value)).toBe(false);
+    expect(hasNullCharacter(value)).toBe(false);
   });
 });
 

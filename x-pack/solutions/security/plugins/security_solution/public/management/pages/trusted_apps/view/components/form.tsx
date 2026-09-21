@@ -35,8 +35,6 @@ import {
   hasEntryEscaping,
 } from '@kbn/securitysolution-list-utils';
 import {
-  CONTROL_CHARACTER_ERROR,
-  hasControlCharacters,
   hasSimpleExecutableName,
   validateHasWildcardWithWrongOperator,
   isPathValid,
@@ -238,12 +236,6 @@ export const validateValues = (values: ArtifactFormComponentProps['item']): Vali
       if (!entry.field || !entryValue.trim()) {
         isValid = false;
         validation.entryResults[index].requiredError = INPUT_ERRORS.mustHaveValue(index);
-        return;
-      }
-
-      if (hasControlCharacters(entryValue)) {
-        isValid = false;
-        addEntryResultToValidation(validation, index, 'errors', CONTROL_CHARACTER_ERROR);
         return;
       }
 

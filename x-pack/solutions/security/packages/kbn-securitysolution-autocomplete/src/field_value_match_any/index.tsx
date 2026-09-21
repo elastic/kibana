@@ -37,10 +37,6 @@ interface AutocompleteFieldMatchAnyProps {
   autocompleteService: AutocompleteStart;
   onChange: (arg: string[]) => void;
   onError?: (arg: boolean) => void;
-  onWarning?: (arg: boolean) => void;
-  warning?: string | React.ReactNode;
-  /** Error supplied by the parent. Takes precedence over internally derived errors. */
-  externalError?: string;
   'aria-label'?: string;
 }
 
@@ -56,22 +52,12 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
   isRequired = false,
   onChange,
   onError,
-  onWarning,
-  warning,
-  externalError,
   autocompleteService,
   'aria-label': ariaLabel,
 }): JSX.Element => {
   const [searchQuery, setSearchQuery] = useState('');
   const [touched, setIsTouched] = useState(false);
-  const [internalError, setError] = useState<string | undefined>(undefined);
-  const error = externalError ?? internalError;
-
-  // Keep the parent's notion of "this row has an error" in sync with the combined state,
-  // so an error handed down via `externalError` also gates submission.
-  useEffect(() => {
-    onError?.(error != null);
-  }, [error, onError]);
+  const [error, setError] = useState<string | undefined>(undefined);
   const [showSpacesWarning, setShowSpacesWarning] = useState<boolean>(false);
   const [isLoadingSuggestions, isSuggestingValues, suggestions] = useFieldValueAutocomplete({
     autocompleteService,
@@ -100,30 +86,29 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
       setShowSpacesWarning(!!params.find((param: string) => paramContainsSpace(param))),
     [setShowSpacesWarning]
   );
-  // Reporting upward is handled by the effect that watches the combined error state,
-  // so this only has to record the internally derived error.
   const handleError = useCallback(
     (err: string | undefined): void => {
-      setError(err);
+      setError((existingErr): string | undefined => {
+        const oldErr = existingErr != null;
+        const newErr = err != null;
+        if (oldErr !== newErr && onError != null) {
+          onError(newErr);
+        }
+
+        return err;
+      });
     },
-    [setError]
-  );
-  const handleWarning = useCallback(
-    (warn: string | React.ReactNode | undefined): void => {
-      onWarning?.(warn !== undefined);
-    },
-    [onWarning]
+    [setError, onError]
   );
 
   const handleValuesChange = useCallback(
     (newOptions: EuiComboBoxOptionOption[]): void => {
       const newValues: string[] = newOptions.map(({ label }) => optionsMemo[labels.indexOf(label)]);
       handleError(undefined);
-      handleWarning(warning);
       handleSpacesWarning(newValues);
       onChange(newValues);
     },
-    [handleError, handleSpacesWarning, handleWarning, labels, onChange, optionsMemo, warning]
+    [handleError, handleSpacesWarning, labels, onChange, optionsMemo]
   );
 
   const handleSearchChange = useCallback(
@@ -156,21 +141,10 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
       }
 
       onChange([...(selectedValue || []), option]);
-      handleWarning(warning);
       handleSpacesWarning([option]);
       return true;
     },
-    [
-      handleError,
-      handleSpacesWarning,
-      handleWarning,
-      isRequired,
-      onChange,
-      selectedField,
-      selectedValue,
-      touched,
-      warning,
-    ]
+    [handleError, handleSpacesWarning, isRequired, onChange, selectedField, selectedValue, touched]
   );
 
   const setIsTouchedValue = useCallback((): void => {
@@ -189,8 +163,7 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
   );
   useEffect((): void => {
     handleSpacesWarning(selectedValue);
-    handleWarning(warning);
-  }, [selectedField, selectedValue, handleSpacesWarning, handleWarning, warning]);
+  }, [selectedField, selectedValue, handleSpacesWarning]);
 
   const defaultInput = useMemo((): JSX.Element => {
     return (
@@ -198,7 +171,7 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
         label={rowLabel}
         error={error}
         isInvalid={selectedField != null && error != null}
-        helpText={warning || (showSpacesWarning && i18n.FIELD_SPACE_WARNING)}
+        helpText={showSpacesWarning && i18n.FIELD_SPACE_WARNING}
         fullWidth
       >
         <EuiComboBox
@@ -225,7 +198,6 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
     rowLabel,
     error,
     selectedField,
-    warning,
     showSpacesWarning,
     inputPlaceholder,
     isLoadingState,

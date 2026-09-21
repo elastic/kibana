@@ -6,11 +6,7 @@
  */
 
 import React from 'react';
-import {
-  CONTROL_CHARACTER_ERROR,
-  ConditionEntryField,
-  OperatingSystem,
-} from '@kbn/securitysolution-utils';
+import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
 import type { TrustedAppConditionEntry } from '../../../../../../../common/endpoint/types';
 
 import type { ConditionEntryInputProps } from '.';
@@ -25,6 +21,8 @@ import { ENTRY_PROPERTY_TITLES, OPERATOR_TITLES } from '../../translations';
 let onRemoveMock: jest.Mock;
 let onChangeMock: jest.Mock;
 let onVisitedMock: jest.Mock;
+
+const SAMPLE_ERROR = 'Sample entry error';
 
 const baseEntry: Readonly<TrustedAppConditionEntry> = {
   field: ConditionEntryField.HASH,
@@ -148,28 +146,28 @@ describe('Condition entry input', () => {
   });
 
   it('renders an inline error and marks the value input invalid', () => {
-    props = { ...props, validation: { errors: [CONTROL_CHARACTER_ERROR], warnings: [] } };
+    props = { ...props, validation: { errors: [SAMPLE_ERROR], warnings: [] } };
     render();
 
     const valueInput = renderResult.getByTestId(`${formPrefix}-value`);
-    const error = renderResult.getByText(CONTROL_CHARACTER_ERROR);
+    const error = renderResult.getByText(SAMPLE_ERROR);
     expect(error).toBeInTheDocument();
     expect(valueInput).toHaveAttribute('aria-invalid', 'true');
-    expect(valueInput).toHaveAccessibleDescription(CONTROL_CHARACTER_ERROR);
+    expect(valueInput).toHaveAccessibleDescription(SAMPLE_ERROR);
   });
 
   it('renders feedback for a repeated row without adding a visible label', () => {
     props = {
       ...props,
       showLabels: false,
-      validation: { errors: [CONTROL_CHARACTER_ERROR], warnings: [] },
+      validation: { errors: [SAMPLE_ERROR], warnings: [] },
     };
     render();
 
-    expect(renderResult.getByText(CONTROL_CHARACTER_ERROR)).toBeInTheDocument();
+    expect(renderResult.getByText(SAMPLE_ERROR)).toBeInTheDocument();
     expect(renderResult.queryByText(ENTRY_PROPERTY_TITLES.value)).not.toBeInTheDocument();
     expect(renderResult.getByTestId(`${formPrefix}-value`)).toHaveAccessibleDescription(
-      CONTROL_CHARACTER_ERROR
+      SAMPLE_ERROR
     );
   });
 
