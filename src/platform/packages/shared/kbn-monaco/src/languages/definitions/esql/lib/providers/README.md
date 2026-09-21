@@ -7,7 +7,7 @@ This folder contains Monaco language providers used by ES|QL (suggestions, hover
 Each provider follows the same pattern:
 
 1. Monaco calls a provider entry point like `provideCompletionItems` or `provideHover`.
-2. The provider calls `createMonacoProvider({ model, run, emptyResult })`.
+2. The provider calls `createMonacoProvider({ model, run, cancellationToken, emptyResult })`.
 3. `createMonacoProvider` executes `run` with a proxied model called `safeModel`.
 4. If the editor model is disposed while async work is running, the factory returns `emptyResult` instead of crashing.
 

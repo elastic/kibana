@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apm } from '@elastic/apm-rum';
 import { isArray } from 'lodash';
 import type { ISuggestionItem } from '@kbn/esql-language/src/commands/registry/types';
 import { monaco } from '../../../../../monaco_imports';
@@ -109,9 +108,8 @@ export const getDecorationHoveredMessages = (
       .filter(Boolean);
   } catch (error) {
     // Silently fail to avoid breaking the hover functionality
-    apm.captureError(error instanceof Error ? error : new Error(String(error)), {
-      labels: { source: 'esql_decoration_hover' },
-    });
+    // eslint-disable-next-line no-console
+    console.error('Error extracting decoration hover messages:', error);
     return [];
   }
 };

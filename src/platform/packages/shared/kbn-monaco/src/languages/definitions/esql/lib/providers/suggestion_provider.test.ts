@@ -12,26 +12,33 @@ import { monaco } from '../../../../../monaco_imports';
 import { ESQLLang, type ESQLDependencies } from '../../language';
 import { createDisposedTextModel, createField, createTextModel } from './test_helpers';
 
-const cancellationToken = new monaco.CancellationTokenSource().token;
-
 export const getCompletionItemFromProvider = async (
   suggestionProvider: monaco.languages.CompletionItemProvider,
   model: monaco.editor.ITextModel,
   label: string,
+  tokenSource: monaco.CancellationTokenSource,
   position = new monaco.Position(1, model.getValue().length + 1)
 ) => {
   const result = await suggestionProvider.provideCompletionItems(
     model,
     position,
     {} as monaco.languages.CompletionContext,
-    cancellationToken
+    tokenSource.token
   );
   return result?.suggestions.find((suggestion) => suggestion.label === label);
 };
 
 describe('suggestion_provider', () => {
   describe('resolveCompletionItem', () => {
+    let tokenSource: monaco.CancellationTokenSource;
+
+    beforeEach(() => {
+      tokenSource = new monaco.CancellationTokenSource();
+    });
+
     afterEach(() => {
+      tokenSource.cancel();
+      tokenSource.dispose();
       jest.clearAllMocks();
     });
 
@@ -57,10 +64,15 @@ describe('suggestion_provider', () => {
       });
 
       const model = createTextModel({ value: 'FROM index | WHERE ' });
-      const ecsItem = await getCompletionItemFromProvider(suggestionProvider, model, 'test.field');
+      const ecsItem = await getCompletionItemFromProvider(
+        suggestionProvider,
+        model,
+        'test.field',
+        tokenSource
+      );
       const resolvedItem = await suggestionProvider.resolveCompletionItem!(
         ecsItem!,
-        cancellationToken
+        tokenSource.token
       );
 
       expect(resolvedItem).toEqual({
@@ -73,11 +85,12 @@ describe('suggestion_provider', () => {
       const ecsItemWithKeywordSuffix = await getCompletionItemFromProvider(
         suggestionProvider,
         model,
-        'test.field.keyword'
+        'test.field.keyword',
+        tokenSource
       );
       const resolvedItemWithKeywordSuffix = await suggestionProvider.resolveCompletionItem!(
         ecsItemWithKeywordSuffix!,
-        cancellationToken
+        tokenSource.token
       );
 
       expect(resolvedItemWithKeywordSuffix).toEqual({
@@ -102,10 +115,15 @@ describe('suggestion_provider', () => {
       });
 
       const model = createTextModel({ value: 'FROM index | WHERE EVAL test.field' });
-      const item = await getCompletionItemFromProvider(suggestionProvider, model, 'test.field');
+      const item = await getCompletionItemFromProvider(
+        suggestionProvider,
+        model,
+        'test.field',
+        tokenSource
+      );
       const resolvedItem = await suggestionProvider.resolveCompletionItem!(
         item!,
-        cancellationToken
+        tokenSource.token
       );
 
       expect(resolvedItem).toEqual(item);
@@ -129,10 +147,15 @@ describe('suggestion_provider', () => {
       const model = createTextModel({ value: 'FROM logs-* | ' });
 
       // Keyword kind (not Variable): ECS check still fires, then early return.
-      const notFieldItem = await getCompletionItemFromProvider(suggestionProvider, model, 'LIMIT');
+      const notFieldItem = await getCompletionItemFromProvider(
+        suggestionProvider,
+        model,
+        'LIMIT',
+        tokenSource
+      );
       const notFieldResolvedItem = await suggestionProvider.resolveCompletionItem!(
         notFieldItem!,
-        cancellationToken
+        tokenSource.token
       );
       expect(mockFind).toHaveBeenCalledTimes(1);
       expect(notFieldResolvedItem).toEqual(notFieldItem);
@@ -142,14 +165,15 @@ describe('suggestion_provider', () => {
       const notECSFieldItem = await getCompletionItemFromProvider(
         suggestionProvider,
         fieldModel,
-        'not.ecs.field'
+        'not.ecs.field',
+        tokenSource
       );
 
       mockFind.mockClear();
 
       const notECSFieldResolvedItem = await suggestionProvider.resolveCompletionItem!(
         notECSFieldItem!,
-        cancellationToken
+        tokenSource.token
       );
       expect(mockFind).toHaveBeenCalledTimes(1);
       expect(notECSFieldResolvedItem).toEqual(notECSFieldItem);
@@ -177,10 +201,15 @@ describe('suggestion_provider', () => {
         });
 
         const model = createTextModel({ value: 'FROM logs-kibana.otel-default | WHERE ' });
-        const item = await getCompletionItemFromProvider(suggestionProvider, model, 'body.text');
+        const item = await getCompletionItemFromProvider(
+          suggestionProvider,
+          model,
+          'body.text',
+          tokenSource
+        );
         const resolvedItem = await suggestionProvider.resolveCompletionItem!(
           item!,
-          cancellationToken
+          tokenSource.token
         );
 
         expect(resolvedItem).toEqual({
@@ -217,10 +246,15 @@ describe('suggestion_provider', () => {
         });
 
         const model = createTextModel({ value: 'FROM logs-kibana.otel-default | WHERE ' });
-        const item = await getCompletionItemFromProvider(suggestionProvider, model, 'body.text');
+        const item = await getCompletionItemFromProvider(
+          suggestionProvider,
+          model,
+          'body.text',
+          tokenSource
+        );
         const resolvedItem = await suggestionProvider.resolveCompletionItem!(
           item!,
-          cancellationToken
+          tokenSource.token
         );
 
         expect(resolvedItem).toEqual({
@@ -257,10 +291,15 @@ describe('suggestion_provider', () => {
         });
 
         const model = createTextModel({ value: 'FROM stream-a, stream-b | WHERE ' });
-        const item = await getCompletionItemFromProvider(suggestionProvider, model, 'my.field');
+        const item = await getCompletionItemFromProvider(
+          suggestionProvider,
+          model,
+          'my.field',
+          tokenSource
+        );
         const resolvedItem = await suggestionProvider.resolveCompletionItem!(
           item!,
-          cancellationToken
+          tokenSource.token
         );
 
         expect(resolvedItem).toEqual({
@@ -282,10 +321,15 @@ describe('suggestion_provider', () => {
 
         // No FROM clause: streamNames will be empty, so no stream fetch.
         const model = createTextModel({ value: 'ROW body = "test" | EVAL ' });
-        const item = await getCompletionItemFromProvider(suggestionProvider, model, 'body');
+        const item = await getCompletionItemFromProvider(
+          suggestionProvider,
+          model,
+          'body',
+          tokenSource
+        );
         const resolvedItem = await suggestionProvider.resolveCompletionItem!(
           item!,
-          cancellationToken
+          tokenSource.token
         );
 
         expect(resolvedItem).toEqual(item);
@@ -318,11 +362,16 @@ describe('suggestion_provider', () => {
         });
 
         const model = createTextModel({ value: 'FROM logs-kibana.otel-default | WHERE ' });
-        const item = await getCompletionItemFromProvider(suggestionProvider, model, 'body.text');
+        const item = await getCompletionItemFromProvider(
+          suggestionProvider,
+          model,
+          'body.text',
+          tokenSource
+        );
         item!.label = 'body.text.keyword';
         const resolvedItem = await suggestionProvider.resolveCompletionItem!(
           item!,
-          cancellationToken
+          tokenSource.token
         );
 
         expect(resolvedItem).toEqual({
@@ -342,8 +391,13 @@ describe('suggestion_provider', () => {
         });
 
         const model = createTextModel({ value: 'FROM wild-* | WHERE ' });
-        const item = await getCompletionItemFromProvider(suggestionProvider, model, 'body.text');
-        await suggestionProvider.resolveCompletionItem!(item!, cancellationToken);
+        const item = await getCompletionItemFromProvider(
+          suggestionProvider,
+          model,
+          'body.text',
+          tokenSource
+        );
+        await suggestionProvider.resolveCompletionItem!(item!, tokenSource.token);
 
         // Wildcard source excluded: no stream fetch.
         expect(mockFind).not.toHaveBeenCalledWith(expect.objectContaining({ source: ['streams'] }));
@@ -374,13 +428,12 @@ describe('suggestion_provider', () => {
 
       const mockPosition = new monaco.Position(1, 'FROM index | LIMIT ?'.length + 1);
       const mockContext = {} as monaco.languages.CompletionContext;
-      const mockToken = new monaco.CancellationTokenSource().token;
 
       await suggestionProvider.provideCompletionItems(
         mockModel,
         mockPosition,
         mockContext,
-        mockToken
+        tokenSource.token
       );
 
       expect(mockOnSuggestionsWithCustomCommandShown).toHaveBeenCalledWith([
@@ -390,6 +443,17 @@ describe('suggestion_provider', () => {
   });
 
   describe('disposed model', () => {
+    let tokenSource: monaco.CancellationTokenSource;
+
+    beforeEach(() => {
+      tokenSource = new monaco.CancellationTokenSource();
+    });
+
+    afterEach(() => {
+      tokenSource.cancel();
+      tokenSource.dispose();
+    });
+
     it('getCompletion returns an empty list when the model is disposed without calling the model value', async () => {
       const disposedModel = createDisposedTextModel();
 
@@ -409,7 +473,7 @@ describe('suggestion_provider', () => {
           {
             triggerKind: monaco.languages.CompletionTriggerKind.Invoke,
           } as monaco.languages.CompletionContext,
-          new monaco.CancellationTokenSource().token
+          tokenSource.token
         );
 
         expect(result).toEqual({ suggestions: [] });
@@ -417,6 +481,46 @@ describe('suggestion_provider', () => {
       } finally {
         getEditorsSpy.mockRestore();
       }
+    });
+  });
+
+  describe('cancellation', () => {
+    let tokenSource: monaco.CancellationTokenSource;
+
+    beforeEach(() => {
+      tokenSource = new monaco.CancellationTokenSource();
+    });
+
+    afterEach(() => {
+      tokenSource.cancel();
+      tokenSource.dispose();
+    });
+
+    it('returns empty suggestions when the token is cancelled before completions resolve', async () => {
+      const settleHangs: Array<(value: unknown) => void> = [];
+      const hang = () =>
+        new Promise((resolve) => {
+          settleHangs.push(resolve);
+        });
+
+      const suggestionProvider = ESQLLang.getSuggestionProvider({
+        getColumnsFor: jest.fn(hang),
+      });
+      const model = createTextModel({ value: 'FROM logs*' });
+
+      const resultPromise = suggestionProvider.provideCompletionItems(
+        model,
+        new monaco.Position(1, 1),
+        {} as monaco.languages.CompletionContext,
+        tokenSource.token
+      );
+
+      tokenSource.cancel();
+
+      await expect(resultPromise).resolves.toEqual({ suggestions: [] });
+
+      // Settle hanging callbacks so Jest does not detect open handles.
+      await Promise.all(settleHangs);
     });
   });
 });

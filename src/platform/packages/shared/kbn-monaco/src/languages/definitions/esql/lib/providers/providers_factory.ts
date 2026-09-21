@@ -9,11 +9,13 @@
 
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import { isPromise } from '@kbn/std';
-import type { monaco } from '../../../../../monaco_imports';
+import { createInterruptibleLanguageProvider } from '../../../../helpers';
+import { monaco } from '../../../../../monaco_imports';
 
 export interface CreateProviderParams<T> {
   model: monaco.editor.ITextModel;
   run: (safeModel: monaco.editor.ITextModel) => T | Promise<T>;
+  cancellationToken?: monaco.CancellationToken;
   emptyResult: T;
 }
 
@@ -35,6 +37,7 @@ export class ProviderEmptyResultError extends Error {
  * It executes the "run" function provided with a Proxied instance of the Monaco model.
  * If the providers tries to access the model after it has been disposed,
  * it will return the "emptyResult" instead of throwing an error.
+ * It will also abort the execution if the cancellation token is triggered by Monaco.
  *
  * - Use safeModel for accessing any property or function of the model.
  * - Use the original model if you need to compare instances.
@@ -42,15 +45,22 @@ export class ProviderEmptyResultError extends Error {
 export async function createMonacoProvider<T>({
   model,
   run,
+  cancellationToken = new monaco.CancellationTokenSource().token,
   emptyResult,
 }: CreateProviderParams<T>): Promise<T> {
   const safeModel = createDisposedSafeModel(model);
 
   try {
-    const result = await Promise.resolve(run(safeModel));
+    const result = await createInterruptibleLanguageProvider(
+      () => run(safeModel),
+      cancellationToken
+    );
     return model.isDisposed() ? emptyResult : result;
   } catch (error) {
-    if (error instanceof ProviderEmptyResultError) {
+    if (
+      error instanceof ProviderEmptyResultError ||
+      (error instanceof Error && error.message === 'AbortedDueToCancellationRequest')
+    ) {
       return emptyResult;
     }
     throw error;

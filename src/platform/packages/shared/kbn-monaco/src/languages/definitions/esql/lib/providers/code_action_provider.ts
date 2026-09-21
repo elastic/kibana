@@ -18,9 +18,10 @@ export function getCodeActionProvider(
   deps?: ESQLDependencies
 ): monaco.languages.CodeActionProvider {
   return {
-    async provideCodeActions(model, _range, context, token) {
+    provideCodeActions: (async (model, _range, context, token) => {
       return createMonacoProvider({
         model,
+        cancellationToken: token,
         run: async (safeModel) => {
           const modelDeps = deps?.getModelDependencies?.(model);
           const resolvedDeps = modelDeps ? { ...deps, ...modelDeps } : deps;
@@ -52,6 +53,6 @@ export function getCodeActionProvider(
         },
         emptyResult: { actions: [], dispose: () => {} },
       });
-    },
+    }) satisfies monaco.languages.CodeActionProvider['provideCodeActions'],
   };
 }
