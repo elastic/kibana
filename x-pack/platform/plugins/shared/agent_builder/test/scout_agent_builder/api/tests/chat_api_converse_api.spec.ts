@@ -114,8 +114,8 @@ const postChatConverse = (
 /**
  * The events-native `/api/chat` converse surface. It runs the same execution service as the legacy
  * `/api/agent_builder/converse`, so we assert only the delta: the response is the conversation with
- * its `events` timeline. The experimental feature flag that gates `/api/chat` is force-enabled by the
- * Scout server config, so these routes are reachable here (the flag-off 404 is covered by unit tests).
+ * its `events` timeline. These routes are public and not gated on the `agentBuilder:experimentalFeatures`
+ * setting, so they are reachable regardless of the Scout server config.
  */
 apiTest.describe(
   'Agent Builder — chat API converse (/api/chat)',
