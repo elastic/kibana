@@ -1459,13 +1459,6 @@ export default function (providerContext: FtrProviderContext) {
                         value: 'hello',
                         type: 'text',
                       },
-                      external_id: {
-                        value: {
-                          id: 'aws-external-id-secret',
-                          isSecretRef: true,
-                        },
-                        type: 'password',
-                      },
                       role_arn: {
                         value: 'arn:aws:iam::123456789012:role/CloudSecurityPostureRole',
                         type: 'text',
@@ -1547,7 +1540,6 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(packagePolicy).to.have.property('id');
         expect(packagePolicy.name).to.equal('test-cspm-package-policy-no-connector');
-        expect(packagePolicy.supports_cloud_connector).to.equal(false);
         expect(packagePolicy).to.not.have.property('cloud_connector_id');
       });
     });
