@@ -46,6 +46,8 @@ const ARTIFACT_FORM_IDENTITY_FIELDS: Record<
   },
 };
 
+export type BlocklistOperator = 'is' | 'is one of';
+
 export class PolicyArtifactsPage {
   readonly emptyUnexisting: Locator;
   readonly emptyUnassigned: Locator;
@@ -64,6 +66,11 @@ export class PolicyArtifactsPage {
   readonly removeFromPolicyAction: Locator;
   readonly confirmModalConfirmButton: Locator;
   readonly perPolicyRadio: Locator;
+  readonly blocklistFieldSelect: Locator;
+  readonly blocklistSignatureFieldOption: Locator;
+  readonly blocklistOperatorSelect: Locator;
+  readonly blocklistValueInput: Locator;
+  readonly blocklistValuesInput: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.emptyUnexisting = this.page.testSubj.locator('policy-artifacts-empty-unexisting');
@@ -90,6 +97,15 @@ export class PolicyArtifactsPage {
     this.confirmModalConfirmButton = this.page.testSubj.locator('confirmModalConfirmButton');
     // Forms prefix this id (`*-form-effectedPolicies-perPolicy`).
     this.perPolicyRadio = this.page.getByTestId(/-perPolicy$/);
+    this.blocklistFieldSelect = this.page.testSubj.locator('blocklist-form-field-select');
+    this.blocklistSignatureFieldOption = this.page.testSubj.locator(
+      'blocklist-form-file.Ext.code_signature'
+    );
+    this.blocklistOperatorSelect = this.page.testSubj.locator(
+      'blocklist-form-operator-select-multi'
+    );
+    this.blocklistValueInput = this.page.testSubj.locator('blocklist-form-value-input');
+    this.blocklistValuesInput = this.page.testSubj.locator('blocklist-form-values-input');
   }
 
   criteria(selector: string): Locator {
@@ -230,9 +246,66 @@ export class PolicyArtifactsPage {
       'Blocklist name',
       'This is the blocklist description'
     );
-    await this.page.testSubj.locator('blocklist-form-field-select').click();
+    await this.blocklistFieldSelect.click();
     await this.page.testSubj.locator('blocklist-form-file.hash.*').click();
     await this.fillComboBox('blocklist-form-values-input', TRUSTED_APP_HASH.toUpperCase(), true);
+    await this.page.testSubj.locator('blocklist-form-name-input').click();
+  }
+
+  /**
+   * Windows signature is the only blocklist field whose operator can be
+   * `is` (single value) or `is one of` (combo). Hash/path keep a read-only
+   * "is one of".
+   */
+  async fillBlocklistSignatureCreateForm({
+    name,
+    description,
+    operator,
+    value,
+  }: {
+    name: string;
+    description: string;
+    operator: BlocklistOperator;
+    value: string | string[];
+  }) {
+    await this.fillNameAndDescription('blocklists', name, description);
+    await this.selectBlocklistSignatureField();
+    await this.selectBlocklistOperator(operator);
+    await this.fillBlocklistSignatureValue(operator, value);
+  }
+
+  private async selectBlocklistSignatureField() {
+    await this.blocklistFieldSelect.click();
+    await this.blocklistSignatureFieldOption.click();
+    await this.blocklistOperatorSelect.waitFor({ state: 'visible' });
+  }
+
+  async selectBlocklistOperator(operator: BlocklistOperator) {
+    // Value is ListOperatorTypeEnum (`match` / `match_any`). Label `is` is a
+    // prefix of `is one of`, so select by value rather than accessible name.
+    await this.blocklistOperatorSelect.waitFor({ state: 'visible' });
+    await this.page.components
+      .superSelect('blocklist-form-operator-select-multi')
+      .selectOptionByValue(operator === 'is' ? 'match' : 'match_any');
+
+    if (operator === 'is') {
+      await this.blocklistValueInput.waitFor({ state: 'visible' });
+      return;
+    }
+    await this.blocklistValuesInput.waitFor({ state: 'visible' });
+  }
+
+  private async fillBlocklistSignatureValue(operator: BlocklistOperator, value: string | string[]) {
+    if (operator === 'is') {
+      const singleValue = Array.isArray(value) ? value.join(',') : value;
+      await this.blocklistValueInput.fill(singleValue);
+      return;
+    }
+
+    const values = Array.isArray(value) ? value : [value];
+    await this.page.components
+      .comboBox('blocklist-form-values-input')
+      .setCustomSelectedOptions(values);
     await this.page.testSubj.locator('blocklist-form-name-input').click();
   }
 
