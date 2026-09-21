@@ -7,6 +7,67 @@
 
 import { schema } from '@kbn/config-schema';
 
+// V2 extends V1 with: widened authMethod enum (3 new literals for agent_based) and agentPolicyIds
+// (array, replaces the singular agentPolicyId which the UI never wrote). No mapping change needed —
+// neither field is in mappings.properties (dynamic: false, only connectorId is indexed).
+export const CloudOnboardingDeploymentSchemaV2 = schema.object({
+  provider: schema.oneOf([schema.literal('aws'), schema.literal('azure'), schema.literal('gcp')]),
+  connectorId: schema.maybe(schema.string({ minLength: 1 })),
+  mechanisms: schema.arrayOf(
+    schema.oneOf([
+      schema.literal('managed_integration'),
+      schema.literal('ecf'),
+      schema.literal('agent_based'),
+    ]),
+    { maxSize: 10 }
+  ),
+  deploymentId: schema.maybe(schema.string()),
+  deploymentName: schema.maybe(schema.string()),
+  services: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 1000 }),
+  status: schema.oneOf(
+    [
+      schema.literal('pending'),
+      schema.literal('deploying'),
+      schema.literal('succeeded'),
+      schema.literal('failed'),
+    ],
+    { defaultValue: 'pending' }
+  ),
+  statusMessage: schema.maybe(schema.string()),
+  attemptCount: schema.number({ min: 1, defaultValue: 1 }),
+  serviceVars: schema.maybe(
+    schema.recordOf(schema.string({ minLength: 1 }), schema.recordOf(schema.string(), schema.any()))
+  ),
+  globalRegion: schema.maybe(schema.string()),
+  dataFormat: schema.maybe(schema.oneOf([schema.literal('ecs'), schema.literal('otel')])),
+  authMethod: schema.maybe(
+    schema.oneOf([
+      schema.literal('identity_federation'),
+      schema.literal('static_keys'),
+      schema.literal('temporary_keys'),
+      schema.literal('shared_credentials'),
+      schema.literal('assume_role'),
+    ])
+  ),
+  packagePolicyIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+  agentPolicyIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+  apiKeyId: schema.maybe(schema.string()),
+  ecfStacks: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        family: schema.oneOf([
+          schema.literal('unified'),
+          schema.literal('otel'),
+          schema.literal('crowdstrike'),
+        ]),
+        stackName: schema.string({ minLength: 1, maxLength: 128 }),
+        templateVersion: schema.string({ minLength: 1, maxLength: 32 }),
+      }),
+      { maxSize: 10 }
+    )
+  ),
+});
+
 export const CloudOnboardingDeploymentSchemaV1 = schema.object({
   provider: schema.oneOf([schema.literal('aws'), schema.literal('azure'), schema.literal('gcp')]),
   connectorId: schema.maybe(schema.string({ minLength: 1 })),
@@ -41,7 +102,7 @@ export const CloudOnboardingDeploymentSchemaV1 = schema.object({
     schema.oneOf([schema.literal('identity_federation'), schema.literal('static_keys')])
   ),
   packagePolicyIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
-  agentPolicyId: schema.maybe(schema.string()),
+  agentPolicyId: schema.maybe(schema.string()), // kept for forward-compat reads of V1 docs
   apiKeyId: schema.maybe(schema.string()),
   /** ECF CloudFormation stacks launched for this deployment, one entry per template family. */
   ecfStacks: schema.maybe(

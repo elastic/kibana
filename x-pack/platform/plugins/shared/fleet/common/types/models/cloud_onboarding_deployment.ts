@@ -24,7 +24,12 @@ export interface CloudOnboardingEcfStack {
 
 export type DeploymentMethod = 'managed_integration' | 'ecf' | 'agent_based';
 
-export type CloudOnboardingDeploymentAuthMethod = 'identity_federation' | 'static_keys';
+export type CloudOnboardingDeploymentAuthMethod =
+  | 'identity_federation'
+  | 'static_keys'
+  | 'temporary_keys'
+  | 'shared_credentials'
+  | 'assume_role';
 
 export type CloudOnboardingDeploymentStatus = 'pending' | 'deploying' | 'succeeded' | 'failed';
 
@@ -47,14 +52,17 @@ export interface CloudOnboardingDeployment {
   /** Data format selected in the Services step. Used to hydrate the services step on resume so service filtering is consistent. */
   dataFormat?: 'ecs' | 'otel';
   packagePolicyIds?: string[];
-  /** Agent policy ID for agent_based mechanism. Separate from packagePolicyIds (in agentless those are equal; for agent_based the agent policy is user-managed). */
-  agentPolicyId?: string;
+  /** Agent policy IDs for agent_based mechanism — one per targeted agent policy. For new-policy deploys this is a single-element array; for existing-policy deploys it contains every policy the package policies were attached to. */
+  agentPolicyIds?: string[];
   /** Elasticsearch API key ID for push mechanisms (ecf). Set by the backend after key creation; used to identify the key for rotation/revocation. */
   apiKeyId?: string;
   /** ECF CloudFormation stacks launched as part of this deployment. Written by the wizard after the user clicks Launch. */
   ecfStacks?: CloudOnboardingEcfStack[];
-  // TODO: add agent-based auth methods
-  /** Authentication method used for managed integrations. */
+  /**
+   * Authentication method used for this deployment.
+   * - managed_integration: identity_federation | static_keys
+   * - agent_based: static_keys (direct_access_keys) | temporary_keys | shared_credentials | assume_role
+   */
   authMethod?: CloudOnboardingDeploymentAuthMethod;
 }
 
@@ -68,7 +76,7 @@ export type CreateCloudOnboardingDeploymentInput = Omit<
   | 'deploymentId'
   | 'deploymentName'
   | 'packagePolicyIds'
-  | 'agentPolicyId'
+  | 'agentPolicyIds'
   | 'apiKeyId'
 >;
 

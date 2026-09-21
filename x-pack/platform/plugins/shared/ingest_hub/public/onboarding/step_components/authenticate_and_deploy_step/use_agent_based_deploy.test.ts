@@ -24,6 +24,18 @@ jest.mock('./agent_based_deploy', () => ({
   buildAgentPolicyName: jest.fn(),
 }));
 
+jest.mock('./use_onboarding_so', () => ({
+  useOnboardingSO: jest.fn(),
+}));
+
+jest.mock('./package_inputs', () => ({
+  toSOServiceVars: jest.fn().mockReturnValue({}),
+}));
+
+jest.mock('./agent_based_section/credential_method_selector', () => ({
+  toSOAuthMethod: jest.fn().mockReturnValue('static_keys'),
+}));
+
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import {
@@ -32,8 +44,11 @@ import {
   buildAgentBasedInstanceStatuses,
   extractErrorMessage,
 } from './agent_based_deploy';
+import { useOnboardingSO } from './use_onboarding_so';
 
 import { useAgentBasedDeploy } from './use_agent_based_deploy';
+
+const mockUseOnboardingSO = useOnboardingSO as jest.Mock;
 
 const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
 const mockUseSessionStorage = useSessionStorage as jest.Mock;
@@ -65,7 +80,7 @@ function makeFlowMock({
 } = {}) {
   const updateDetectAndReviewStep = jest.fn();
   mockUseOnboardingFlow.mockReturnValue({
-    servicesStep: { selectedServiceIds: [] },
+    servicesStep: { selectedServiceIds: [], dataFormat: 'ecs' as const },
     authenticateAndDeployStep: {},
     detectAndReviewStep: { policyIdsByInstance },
     updateDetectAndReviewStep,
@@ -83,12 +98,21 @@ function makeFlowMock({
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
+const mockCreateDeployment = jest.fn().mockResolvedValue(null);
+const mockUpdateDeployment = jest.fn().mockResolvedValue(undefined);
+const mockPersistDeploymentId = jest.fn();
+
 describe('useAgentBasedDeploy — incremental deploy filtering', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseSessionStorage.mockReturnValue([{ globalRegion: '', serviceVars: {} }, jest.fn()]);
     mockBuildAgentBasedInstanceStatuses.mockReturnValue({});
     mockExtractErrorMessage.mockReturnValue('error');
+    mockUseOnboardingSO.mockReturnValue({
+      createDeployment: mockCreateDeployment,
+      updateDeployment: mockUpdateDeployment,
+      persistDeploymentId: mockPersistDeploymentId,
+    });
   });
 
   it('skips already-deployed instances and only deploys new ones (A deployed, B added → only B deployed)', async () => {

@@ -71,7 +71,7 @@ export const useBulkGetAgentPoliciesQuery = (
       sendRequestForRq<BulkGetAgentPoliciesResponse>({
         path: agentPolicyRouteService.getBulkGetPath(),
         method: 'post',
-        body: JSON.stringify({ ids, full: options?.full }),
+        body: JSON.stringify({ ids, full: options?.full, ignoreMissing: options?.ignoreMissing }),
         version: API_VERSIONS.public.v1,
       }),
     {

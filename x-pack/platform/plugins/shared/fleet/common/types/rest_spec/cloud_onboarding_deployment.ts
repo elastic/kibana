@@ -44,7 +44,7 @@ export interface UpdateCloudOnboardingDeploymentRequest {
     deploymentName?: string;
     serviceVars?: Record<string, Record<string, unknown>>;
     attemptCount?: number;
-    agentPolicyId?: string;
+    agentPolicyIds?: string[];
     packagePolicyIds?: string[];
     apiKeyId?: string;
     ecfStacks?: CloudOnboardingEcfStack[];

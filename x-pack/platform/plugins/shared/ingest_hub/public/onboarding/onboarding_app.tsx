@@ -20,6 +20,7 @@ import {
   KibanaVersionContext,
   sendGetCloudOnboardingDeployment,
 } from '@kbn/fleet-plugin/public';
+import { fromSOAuthMethod } from './step_components/authenticate_and_deploy_step/agent_based_section/credential_method_selector';
 import type { IngestHubStartDependencies } from '../types';
 
 import { OnboardingShell } from './onboarding_shell';
@@ -86,9 +87,21 @@ export async function hydrateOnboardingSession(
         serviceVars: item.serviceVars ?? {},
       })
     );
+    const isAgentBased = item.mechanisms?.includes('agent_based') ?? false;
+    const policyIds = item.agentPolicyIds ?? [];
     sessionStorage.setItem(
       getOnboardingSessionKey(integrationId, 'authenticateAndDeployStep'),
-      item.connectorId
+      isAgentBased
+        ? JSON.stringify({
+            deploymentMethod: 'agent_based',
+            // Any persisted policy ids mean the policies already exist, so resume in
+            // 'existing' mode — otherwise the hook's new-policy route would create another.
+            agentHostsMode: policyIds.length ? 'existing' : 'new',
+            selectedAgentPolicyIds: policyIds,
+            // Secrets are never persisted; restoring the method puts the right form in front of the user.
+            agentCredentialMethod: fromSOAuthMethod(item.authMethod),
+          })
+        : item.connectorId
         ? JSON.stringify({ connectorId: item.connectorId, authMethod: 'identity_federation' })
         : JSON.stringify({ authMethod: 'static_keys' })
     );

@@ -122,15 +122,28 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
   ),
   dataFormat: schema.maybe(DataFormatSchema),
   authMethod: schema.maybe(
-    schema.oneOf([schema.literal('identity_federation'), schema.literal('static_keys')], {
-      meta: { description: 'Authentication method for managed integrations.' },
-    })
+    schema.oneOf(
+      [
+        schema.literal('identity_federation'),
+        schema.literal('static_keys'),
+        schema.literal('temporary_keys'),
+        schema.literal('shared_credentials'),
+        schema.literal('assume_role'),
+      ],
+      {
+        meta: {
+          description:
+            'Authentication method. managed_integration: identity_federation | static_keys. agent_based: static_keys (direct_access_keys) | temporary_keys | shared_credentials | assume_role.',
+        },
+      }
+    )
   ),
-  agentPolicyId: schema.maybe(
-    schema.string({
+  agentPolicyIds: schema.maybe(
+    schema.arrayOf(schema.string(), {
+      maxSize: 100,
       meta: {
         description:
-          'Agent policy ID created for agent-based deployments. Present only when agent_based is in mechanisms.',
+          'Agent policy IDs for agent_based deployments. Single-element for new-policy deploys; multiple for existing-policy deploys targeting several policies.',
       },
     })
   ),
@@ -196,9 +209,21 @@ export const CreateCloudOnboardingDeploymentRequestSchema = {
     ),
     dataFormat: schema.maybe(DataFormatSchema),
     authMethod: schema.maybe(
-      schema.oneOf([schema.literal('identity_federation'), schema.literal('static_keys')], {
-        meta: { description: 'Authentication method for managed integrations.' },
-      })
+      schema.oneOf(
+        [
+          schema.literal('identity_federation'),
+          schema.literal('static_keys'),
+          schema.literal('temporary_keys'),
+          schema.literal('shared_credentials'),
+          schema.literal('assume_role'),
+        ],
+        {
+          meta: {
+            description:
+              'Authentication method. managed_integration: identity_federation | static_keys. agent_based: static_keys (direct_access_keys) | temporary_keys | shared_credentials | assume_role.',
+          },
+        }
+      )
     ),
   }),
 };
@@ -248,7 +273,15 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
     attemptCount: schema.maybe(
       schema.number({ min: 1, meta: { description: 'Incremented by callers performing a retry.' } })
     ),
-    agentPolicyId: schema.maybe(schema.string({ maxLength: 255 })),
+    agentPolicyIds: schema.maybe(
+      schema.arrayOf(schema.string({ maxLength: 255 }), {
+        maxSize: 100,
+        meta: {
+          description:
+            'Agent policy IDs for agent_based deployments. Single-element for new-policy deploys; multiple for existing-policy deploys targeting several policies.',
+        },
+      })
+    ),
     packagePolicyIds: schema.maybe(
       schema.arrayOf(schema.string({ maxLength: 255 }), { maxSize: 100 })
     ),

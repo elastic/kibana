@@ -267,7 +267,7 @@ export const LazyAwsTemporaryKeysForm = lazy(() =>
 export type { AwsTemporaryKeysFormProps } from './components/cloud_connector/aws_connect_setup/aws_temporary_keys_form';
 
 // Agent policies query — used by the agent-based policy selector in ingest_hub
-export { useGetAgentPoliciesQuery } from './hooks/use_request/agent_policy';
+export { useGetAgentPoliciesQuery, useBulkGetAgentPoliciesQuery } from './hooks/use_request/agent_policy';
 
 // Imperative agent policies fetcher — used to resolve the next available policy name
 export { sendGetAgentPolicies } from './hooks/use_request/agent_policy';

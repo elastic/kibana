@@ -20,7 +20,10 @@ import {
   buildAgentPolicyName,
 } from './agent_based_deploy';
 import type { AgentCredentialVars } from './package_inputs';
+import { toSOServiceVars } from './package_inputs';
 import type { DeployGroup } from './deploy_groups';
+import { toSOAuthMethod } from './agent_based_section/credential_method_selector';
+import { useOnboardingSO } from './use_onboarding_so';
 
 export interface UseAgentBasedDeployResult {
   targets: DeployGroup[];
@@ -49,6 +52,8 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
     agentBasedDeployment,
     setAgentBasedDeployment,
   } = useOnboardingFlow();
+
+  const { createDeployment, updateDeployment, persistDeploymentId } = useOnboardingSO();
 
   const { selectedServiceIds } = servicesStep;
 
@@ -113,9 +118,11 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
       updateDetectAndReviewStep({ isDeploying: true });
 
       try {
-        const { agentHostsMode, agentPolicyId, selectedAgentPolicyIds } = agentBasedDeployment;
+        const { agentHostsMode, agentPolicyId, selectedAgentPolicyIds, agentCredentialMethod } =
+          agentBasedDeployment;
         const globalRegion = serviceSettings?.globalRegion ?? '';
         const storedServiceVars = serviceSettings?.serviceVars ?? {};
+        const { dataFormat } = servicesStep;
 
         const baseOpts = {
           namespace,
@@ -126,9 +133,32 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           agentCredentials: agentCredentialsRef.current,
         };
 
+        // ── SO create (initial deploy only, best-effort) ──────────────────────
+        // Mirror the managed-integration guard: !isRetry && !onboardingDeploymentId avoids
+        // creating a second SO on Back→Next re-entry and on retry.
+        let onboardingDeploymentId = detectAndReviewStep.onboardingDeploymentId;
+        if (!isRetry && !onboardingDeploymentId) {
+          onboardingDeploymentId =
+            (await createDeployment({
+              provider: 'aws',
+              mechanisms: ['agent_based'],
+              services: selectedServiceIds,
+              serviceVars: toSOServiceVars(storedServiceVars, servicesMap ?? new Map()) as Record<
+                string,
+                Record<string, unknown>
+              >,
+              globalRegion,
+              dataFormat,
+              authMethod: toSOAuthMethod(agentCredentialMethod),
+            })) ?? undefined;
+          if (onboardingDeploymentId) persistDeploymentId(onboardingDeploymentId);
+        }
+
         let policyIdsByInstance: Record<string, string> = {};
         let failed: string[] = [];
         let errorsByInstance: Record<string, string> = {};
+        // Resolved agent policy ids to write to the SO after deploy.
+        let resolvedAgentPolicyIds: string[] = [];
 
         // Route to the existing-policy path when:
         // - agentHostsMode === 'existing': user selected an existing policy.
@@ -137,6 +167,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         //   policy to avoid creating a second one (double-creation guard applies on retry too).
         if (agentHostsMode === 'existing' || agentPolicyId) {
           const targetPolicyIds = agentPolicyId ? [agentPolicyId] : selectedAgentPolicyIds ?? [];
+          resolvedAgentPolicyIds = targetPolicyIds;
 
           const result = await deployToExistingAgentPolicies(targetsToDeploy, {
             ...baseOpts,
@@ -156,6 +187,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
               withSysMonitoring: agentBasedDeployment.withSysMonitoring ?? true,
             });
             policyIdsByInstance = result.packagePolicyIdsByInstance;
+            resolvedAgentPolicyIds = [result.agentPolicyId];
             // Persist the agent policy id so retries and step 4 can find it.
             setAgentBasedDeployment({
               agentPolicyId: result.agentPolicyId,
@@ -173,6 +205,22 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
 
         const allTargetIds = targetsToDeploy.flatMap((g) => g.instanceIds);
         const statuses = buildAgentBasedInstanceStatuses(targetsToDeploy, failed);
+
+        // ── SO update (best-effort) ───────────────────────────────────────────
+        if (onboardingDeploymentId) {
+          await updateDeployment(onboardingDeploymentId, {
+            ...(resolvedAgentPolicyIds.length ? { agentPolicyIds: resolvedAgentPolicyIds } : {}),
+            packagePolicyIds: [
+              ...new Set(
+                Object.values({
+                  ...detectAndReviewStep.policyIdsByInstance,
+                  ...policyIdsByInstance,
+                })
+              ),
+            ],
+            status: failed.length === 0 ? 'succeeded' : 'failed',
+          });
+        }
 
         setFailedInstances(failed);
         updateDetectAndReviewStep({
@@ -213,6 +261,12 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
       detectAndReviewStep,
       updateDetectAndReviewStep,
       getLatestFailedInstances,
+      selectedServiceIds,
+      servicesStep,
+      servicesMap,
+      createDeployment,
+      updateDeployment,
+      persistDeploymentId,
     ]
   );
 
