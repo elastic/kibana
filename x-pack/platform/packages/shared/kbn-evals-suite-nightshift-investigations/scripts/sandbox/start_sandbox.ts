@@ -16,7 +16,8 @@ import { renderSandboxEnv, type SandboxPorts } from './sandbox_env';
 
 const REPOSITORY = 'https://github.com/elastic/sandbox-service.git';
 const SANDBOX_IMAGE = 'kibana-nightshift-sandbox';
-const SANDBOX_NETWORK = 'kibana-nightshift-sandbox';
+/** One network per running launcher, keyed by its unique gRPC port, so cleanup stays scoped. */
+const getSandboxNetwork = ({ grpc }: SandboxPorts): string => `kibana-nightshift-sandbox-${grpc}`;
 const CERTIFICATE_DAYS = 30;
 const READY_TIMEOUT_MS = 60_000;
 
@@ -32,6 +33,8 @@ export interface StartSandboxOptions {
   repoDir?: string;
   /** Rebuild the binaries and the sandbox image even when they already exist. */
   rebuild: boolean;
+  /** Registers synchronous work to run while the CLI exits. */
+  addCleanupTask: (task: () => void) => void;
 }
 
 const requireTools = async (tools: string[]): Promise<void> => {
@@ -93,7 +96,7 @@ const buildBinaries = async (
 };
 
 const ensureDockerResources = async (
-  { log, rebuild }: StartSandboxOptions,
+  { log, rebuild, ports }: StartSandboxOptions,
   repository: string
 ): Promise<void> => {
   const image = await execa('docker', ['image', 'inspect', SANDBOX_IMAGE], { reject: false });
@@ -104,24 +107,27 @@ const ensureDockerResources = async (
       stdio: 'inherit',
     });
   }
-  const network = await execa('docker', ['network', 'inspect', SANDBOX_NETWORK], { reject: false });
-  if (network.failed) await execa('docker', ['network', 'create', SANDBOX_NETWORK]);
+  const network = getSandboxNetwork(ports);
+  const existing = await execa('docker', ['network', 'inspect', network], { reject: false });
+  if (existing.failed) await execa('docker', ['network', 'create', network]);
 };
 
 /**
- * Removes the per-conversation containers that container-manager leaves running when it stops.
- * Synchronous so it can run from a CLI cleanup task while the process is exiting.
+ * Removes the per-conversation containers this launcher's container-manager left running, then
+ * its network. Synchronous so it can run from a CLI cleanup task while the process is exiting.
  */
-export const removeSandboxContainers = (log: ToolingLog): void => {
+const removeSandboxContainers = (log: ToolingLog, network: string): void => {
   const { stdout } = execa.sync(
     'docker',
-    ['ps', '--all', '--quiet', '--filter', `network=${SANDBOX_NETWORK}`],
+    ['ps', '--all', '--quiet', '--filter', `network=${network}`],
     { reject: false }
   );
   const containers = stdout.split('\n').filter(Boolean);
-  if (containers.length === 0) return;
-  log.info(`Removing ${containers.length} sandbox container(s)`);
-  execa.sync('docker', ['rm', '--force', ...containers], { reject: false });
+  if (containers.length > 0) {
+    log.info(`Removing ${containers.length} sandbox container(s)`);
+    execa.sync('docker', ['rm', '--force', ...containers], { reject: false });
+  }
+  execa.sync('docker', ['network', 'rm', network], { reject: false });
 };
 
 /** Creates a private CA-and-server certificate plus a client certificate for Kibana's mTLS. */
@@ -225,6 +231,11 @@ export const startSandbox = async (options: StartSandboxOptions): Promise<void> 
     return service;
   };
 
+  // Only from here on can containers on this network belong to this invocation: the port check
+  // above already failed for a second launcher on the same ports, before it could clean up.
+  const network = getSandboxNetwork(ports);
+  options.addCleanupTask(() => removeSandboxContainers(log, network));
+
   // With CLUSTER_NAME=localhost container-manager uses the host Docker socket and reads its
   // certificate from ./ssl, so it runs from the data directory.
   const manager = forward(
@@ -236,7 +247,7 @@ export const startSandbox = async (options: StartSandboxOptions): Promise<void> 
         WORKSPACE_PVC_PATH: workspaces,
         CONTAINERMANAGER_LISTEN_PORT: String(ports.manager),
         CONTAINERMANAGER_SANDBOX_IMAGE: SANDBOX_IMAGE,
-        CONTAINERMANAGER_DOCKER_SANDBOX_NETWORK: SANDBOX_NETWORK,
+        CONTAINERMANAGER_DOCKER_SANDBOX_NETWORK: network,
       },
     })
   );
@@ -284,6 +295,10 @@ export const startSandbox = async (options: StartSandboxOptions): Promise<void> 
   log.info(`In the terminal that runs the evals:\n\n  source ${envFile}\n`);
   log.info('Press Ctrl+C to stop the sandbox.');
 
-  await Promise.allSettled([manager, api]);
-  if (!signal.aborted) throw new Error('The sandbox services stopped unexpectedly');
+  // Both services run until aborted, so either one exiting on its own makes the sandbox unusable.
+  await Promise.race([manager, api].map((service) => service.catch(() => undefined)));
+  if (!signal.aborted) {
+    for (const service of [manager, api]) service.kill('SIGTERM');
+    throw new Error('A sandbox service stopped unexpectedly; see its output above.');
+  }
 };

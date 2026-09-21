@@ -9,17 +9,14 @@ import { join, resolve } from 'path';
 import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { DEFAULT_SANDBOX_PORTS, readSandboxPorts } from './sandbox_env';
-import { removeSandboxContainers, startSandbox } from './start_sandbox';
+import { startSandbox } from './start_sandbox';
 
 const DEFAULT_DATA_DIR = join(REPO_ROOT, 'data/nightshift_sandbox');
 
 run(
   ({ log, addCleanupTask, flags }) => {
     const controller = new AbortController();
-    addCleanupTask(() => {
-      controller.abort();
-      removeSandboxContainers(log);
-    });
+    addCleanupTask(() => controller.abort());
 
     return startSandbox({
       log,
@@ -29,6 +26,7 @@ run(
       ref: flags.ref ? String(flags.ref) : 'main',
       repoDir: flags['repo-dir'] ? resolve(String(flags['repo-dir'])) : undefined,
       rebuild: Boolean(flags.rebuild),
+      addCleanupTask,
     });
   },
   {
