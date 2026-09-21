@@ -38,18 +38,30 @@ export const foldAttachmentRefs = (
   }
 };
 
-export const resolveStatus = ({ terminal, streaming }: ExecutionAccumulator): AgentTurnStatus => {
+export const resolveStatus = (
+  { terminal }: ExecutionAccumulator,
+  outstandingPromptRequestedEventId?: string
+): AgentTurnStatus => {
   if (!terminal) {
-    return streaming?.pending_prompts?.length ? 'awaiting_prompt' : 'running';
+    return 'running';
   }
-  if (terminal.type === TimelineEventType.executionTerminated) return 'completed';
+  if (terminal.type === TimelineEventType.executionTerminated) {
+    if (
+      terminal.data.outcome.type === 'prompt_requested' &&
+      terminal.id === outstandingPromptRequestedEventId
+    ) {
+      return 'awaiting_prompt';
+    }
+    return 'completed';
+  }
   if (terminal.type === TimelineEventType.executionFailed) return 'failed';
   return 'aborted';
 };
 
 export const accumulatorToItem = (
   acc: ExecutionAccumulator,
-  eventsById: Map<string, TimelineDisplayEvent>
+  eventsById: Map<string, TimelineDisplayEvent>,
+  outstandingPromptRequestedEventId?: string
 ): AgentTurnItem => {
   const { executionId, startedAt, triggerEventId, steps, terminal, streaming, attachmentRefs } =
     acc;
@@ -57,11 +69,12 @@ export const accumulatorToItem = (
   const origin: ConversationRoundOrigin | undefined = trigger?.actor.origin;
   const triggerAttachmentRefs =
     trigger?.type === TimelineEventType.userMessage ? trigger.data.attachment_refs : undefined;
+  const status = resolveStatus(acc, outstandingPromptRequestedEventId);
   const item: AgentTurnItem = {
     kind: 'agentTurn',
     key: executionId,
     executionId,
-    status: resolveStatus(acc),
+    status,
     startedAt,
     steps,
   };
@@ -78,13 +91,18 @@ export const accumulatorToItem = (
     item.response = { message: streaming.message };
   }
 
-  const stillStreaming = terminal ? undefined : streaming;
-  if (stillStreaming?.pending_prompts?.length) {
-    item.pendingPrompts = stillStreaming.pending_prompts;
+  if (streaming?.time_to_first_token !== undefined && !terminal) {
+    item.timeToFirstToken = streaming.time_to_first_token;
   }
-  if (stillStreaming?.time_to_first_token !== undefined) {
-    item.timeToFirstToken = stillStreaming.time_to_first_token;
+
+  if (
+    status === 'awaiting_prompt' &&
+    terminal?.type === TimelineEventType.executionTerminated &&
+    terminal.data.outcome.type === 'prompt_requested'
+  ) {
+    item.pendingPrompts = terminal.data.outcome.prompts;
   }
+
   return item;
 };
 
@@ -102,3 +120,10 @@ export const isAbortedTurn = (
   item: AgentTurnItem
 ): item is AgentTurnItem & { status: 'aborted'; terminal: ExecutionAbortedEvent } =>
   item.status === 'aborted';
+
+export const isAwaitingPromptTurn = (
+  item: AgentTurnItem
+): item is AgentTurnItem & {
+  status: 'awaiting_prompt';
+  pendingPrompts: NonNullable<AgentTurnItem['pendingPrompts']>;
+} => item.status === 'awaiting_prompt' && Array.isArray(item.pendingPrompts);

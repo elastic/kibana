@@ -7,8 +7,9 @@
 
 import type { Observable, Subscription } from 'rxjs';
 import { BehaviorSubject, defer, finalize, map } from 'rxjs';
+import type { PromptResponseEvent } from '@kbn/agent-builder-common';
 import type { LiveEventsState, TimelineDisplayEvent } from './sse_to_events';
-import { emptyLiveEventsState, sseToEvents } from './sse_to_events';
+import { emptyLiveEventsState, sseToEvents, upsertEvent } from './sse_to_events';
 import type { EventsService } from './events_service';
 
 export type ChatEventSource = Pick<EventsService, 'getChatEvents$' | 'getStreamEnded$'>;
@@ -77,6 +78,32 @@ export class ConversationStreamService {
   /** Non-reactive snapshot: the live events accumulated so far for this conversation. */
   getSnapshot(conversationId: string): TimelineDisplayEvent[] {
     return this.streams.get(conversationId)?.state$.getValue().events ?? [];
+  }
+
+  /**
+   * Optimistically inserts a `prompt_response` event into the live stream so the timeline
+   * immediately reflects the human's answer before the server persists it.
+   */
+  recordPromptResponse(conversationId: string, event: PromptResponseEvent): void {
+    const stream = this.ensure(conversationId);
+    const current = stream.state$.getValue();
+    stream.state$.next({ ...current, events: upsertEvent(current.events, event) });
+  }
+
+  /**
+   * Removes a previously optimistic `prompt_response` event (rollback on request failure).
+   * No-op when the stream or the event is gone.
+   */
+  clearPromptResponse(conversationId: string, eventId: string): void {
+    const stream = this.streams.get(conversationId);
+    if (!stream) {
+      return;
+    }
+    const current = stream.state$.getValue();
+    const next = current.events.filter((e) => e.id !== eventId);
+    if (next.length !== current.events.length) {
+      stream.state$.next({ ...current, events: next });
+    }
   }
 
   /**

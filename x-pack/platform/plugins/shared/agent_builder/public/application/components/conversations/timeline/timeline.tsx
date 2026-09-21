@@ -10,7 +10,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import moment from 'moment';
 import type { AgentDefinition, VersionedAttachment } from '@kbn/agent-builder-common';
 import { UserMessageEvent } from './items/user_message_event';
-import { PromptResponseEvent } from './items/prompt_response_event';
 import { AgentTurn } from './agent_turn';
 import { ConversationDateDivider } from './conversation_date_divider';
 import type { TimelineItem } from './types';
@@ -32,6 +31,8 @@ export const Timeline: React.FC<TimelineProps> = ({ items, agent, conversationAt
           const previous = items[index - 1];
           const showDivider =
             !previous || !moment(itemDate(item)).isSame(moment(itemDate(previous)), 'day');
+          const showHeader =
+            showDivider || !(item.kind === 'agentTurn' && previous?.kind === 'agentTurn');
           let content: React.ReactNode;
           switch (item.kind) {
             case 'userMessage':
@@ -43,15 +44,13 @@ export const Timeline: React.FC<TimelineProps> = ({ items, agent, conversationAt
                 />
               );
               break;
-            case 'promptResponse':
-              content = <PromptResponseEvent event={item.event} />;
-              break;
             case 'agentTurn':
               content = (
                 <AgentTurn
                   item={item}
                   agent={agent}
                   conversationAttachments={conversationAttachments}
+                  showHeader={showHeader}
                 />
               );
               break;

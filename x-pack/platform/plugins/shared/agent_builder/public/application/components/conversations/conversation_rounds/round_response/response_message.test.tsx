@@ -54,6 +54,20 @@ describe('ResponseMessage', () => {
     );
   });
 
+  it('does not render response actions when there is no message (e.g. an answered pause)', () => {
+    render(
+      <ResponseMessage
+        hasError={false}
+        response={{ message: '' }}
+        steps={[]}
+        isLoading={false}
+        executionTerminatedEvent={terminated}
+      />
+    );
+
+    expect(roundResponseActionsMock).not.toHaveBeenCalled();
+  });
+
   it('does not render response actions while loading', () => {
     render(
       <ResponseMessage

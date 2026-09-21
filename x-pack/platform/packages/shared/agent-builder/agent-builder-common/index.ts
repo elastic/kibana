@@ -411,6 +411,8 @@ export {
   parseExecutionId,
   executionTerminatedEventId,
   executionStepEventId,
+  promptResponseEventId,
+  nextResumeIndexFromEvents,
   RESERVED_CONVERSATION_EVENT_TYPES,
   type ReservedConversationEventType,
   BUILT_IN_CONVERSATION_EVENT_TYPES,

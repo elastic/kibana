@@ -9,27 +9,16 @@ import { ConversationRoundStepType } from '@kbn/agent-builder-common';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents';
 import type { AgentTurnItem, TimelineItem } from '../types';
 import { createUserMessageEvent } from './user_message_event.factory';
-import { createPromptResponseEvent } from './prompt_response_event.factory';
 import { createExecutionTerminatedEvent } from './execution_terminated_event.factory';
 import { createExecutionFailedEvent } from './execution_failed_event.factory';
 import { createExecutionAbortedEvent } from './execution_aborted_event.factory';
 
 type UserMessageItem = Extract<TimelineItem, { kind: 'userMessage' }>;
-type PromptResponseItem = Extract<TimelineItem, { kind: 'promptResponse' }>;
 
 export const createUserMessageItem = (overrides?: Partial<UserMessageItem>): UserMessageItem => ({
   kind: 'userMessage',
   key: 'event-1',
   event: createUserMessageEvent(),
-  ...overrides,
-});
-
-export const createPromptResponseItem = (
-  overrides?: Partial<PromptResponseItem>
-): PromptResponseItem => ({
-  kind: 'promptResponse',
-  key: 'event-3',
-  event: createPromptResponseEvent(),
   ...overrides,
 });
 

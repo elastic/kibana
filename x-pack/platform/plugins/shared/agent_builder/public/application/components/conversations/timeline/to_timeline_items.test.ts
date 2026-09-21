@@ -22,6 +22,7 @@ import type { ExecutionStreamingEvent, TimelineDisplayEvent } from '../../../../
 import { EXECUTION_STREAMING_EVENT_TYPE } from '../../../../services/events';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents';
+import { createExecutionPausedEvent } from './items/execution_paused_event.factory';
 
 const makeEventsById = (events: TimelineDisplayEvent[]) => new Map(events.map((e) => [e.id, e]));
 
@@ -170,14 +171,13 @@ describe('groupTimelineEvents', () => {
     }
   });
 
-  it('renders prompt_response as its own promptResponse item', () => {
+  it('skips prompt_response events (no item pushed; attachment refs still folded)', () => {
     const promptResponse = createPromptResponseEvent({ id: 'pr-1' });
 
     const events = [promptResponse];
     const items = groupTimelineEvents(events, makeEventsById(events));
 
-    expect(items).toHaveLength(1);
-    expect(items[0]).toEqual({ kind: 'promptResponse', key: 'pr-1', event: promptResponse });
+    expect(items).toHaveLength(0);
   });
 
   it('handles execution_aborted as aborted status', () => {
@@ -223,12 +223,39 @@ describe('groupTimelineEvents while a run streams', () => {
     }
   });
 
-  it('moves the turn to awaiting_prompt once prompts are pending', () => {
+  it('keeps the turn running during streaming even when prompts are expected', () => {
+    const started = createExecutionStartedEvent({ execution_id: 'exec-live' });
+    const events = [started, streamingEvent({ message: 'thinking' })];
+
+    const [turn] = groupTimelineEvents(events, makeEventsById(events));
+
+    expect(turn.kind).toBe('agentTurn');
+    if (turn.kind === 'agentTurn') {
+      expect(turn.status).toBe('running');
+    }
+  });
+
+  it('moves the turn to awaiting_prompt when the terminal event carries a prompt_requested outcome', () => {
     const prompts: PromptRequest[] = [
       { id: 'p1', type: AgentPromptType.ask_user_question, questions: [] },
     ];
+    const paused = createExecutionPausedEvent({
+      id: 'round-live::execution_terminated',
+      execution_id: 'exec-live',
+      data: {
+        outcome: { type: 'prompt_requested', prompts },
+        model_usage: {
+          connector_id: '',
+          llm_calls: 1,
+          input_tokens: 1,
+          output_tokens: 1,
+        },
+        time_to_first_token: 0,
+        time_to_last_token: 0,
+      },
+    });
     const started = createExecutionStartedEvent({ execution_id: 'exec-live' });
-    const events = [started, streamingEvent({ message: 'thinking', pending_prompts: prompts })];
+    const events = [started, paused];
 
     const [turn] = groupTimelineEvents(events, makeEventsById(events));
 

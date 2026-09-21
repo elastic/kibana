@@ -33,7 +33,14 @@ jest.mock('../../hooks/use_kibana', () => ({
 }));
 
 const conversationId = 'conv-1';
-const vars = { prompts: {}, conversationId, agentId: 'agent-1' };
+const roundId = 'round-1';
+const vars = {
+  prompts: {},
+  conversationId,
+  agentId: 'agent-1',
+  promptRequestedEventId: `${roundId}::execution_terminated`,
+  roundId,
+};
 const terminated = createExecutionTerminatedEvent({ execution_id: 'round-1::execution::1' });
 
 const setup = () => {

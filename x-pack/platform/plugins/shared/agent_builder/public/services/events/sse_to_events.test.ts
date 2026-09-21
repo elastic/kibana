@@ -147,17 +147,25 @@ describe('sseToEvents', () => {
     expect(afterTerminal.events).toEqual(state.events);
   });
 
-  it('puts time_to_first_token and pending prompts on the streaming event', () => {
-    const prompt = { id: 'p1', type: 'confirmation', message: 'ok?' };
-    const state = fold(
-      executionStarted(),
-      { type: ChatEventType.thinkingComplete, data: { time_to_first_token: 42 } } as ChatEvent,
-      { type: ChatEventType.promptRequest, data: { prompt } } as ChatEvent
-    );
+  it('puts time_to_first_token on the streaming event', () => {
+    const state = fold(executionStarted(), {
+      type: ChatEventType.thinkingComplete,
+      data: { time_to_first_token: 42 },
+    } as ChatEvent);
 
     expect(streamingEvent(state)?.data).toMatchObject({
       time_to_first_token: 42,
-      pending_prompts: [prompt],
     });
+  });
+
+  it('ignores prompt_request events (outcome is carried on the terminal event)', () => {
+    const prompt = { id: 'p1', type: 'confirmation', message: 'ok?' };
+    const before = fold(executionStarted(), chunk('Hello'));
+    const after = sseToEvents(before, {
+      type: ChatEventType.promptRequest,
+      data: { prompt },
+    } as ChatEvent);
+
+    expect(after).toBe(before);
   });
 });

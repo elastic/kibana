@@ -10,7 +10,15 @@ import { useCallback, useMemo, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { toToolMetadata } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
-import { isExecutionStartedEvent, isExecutionTerminatedEvent } from '@kbn/agent-builder-common';
+import {
+  isExecutionStartedEvent,
+  isExecutionTerminatedEvent,
+  EventActorType,
+  TimelineEventType,
+  promptResponseEventId,
+  nextResumeIndexFromEvents,
+} from '@kbn/agent-builder-common';
+import type { Conversation, PromptResponseEvent } from '@kbn/agent-builder-common';
 import { tap } from 'rxjs';
 import type { PromptResponse } from '@kbn/agent-builder-common/agents';
 import { useKibana } from '../../hooks/use_kibana';
@@ -21,6 +29,8 @@ import { BrowserToolExecutor } from '../../services/browser_tool_executor';
 import { createConversationActions } from '../conversation/use_conversation_actions';
 import type { ConversationStreamService } from '../../../services/events';
 import { releaseLocalContent } from './release_local_content';
+import { mergeEventsById } from '../../components/conversations/timeline/merge_events';
+import { queryKeys } from '../../query_keys';
 
 export interface ResumeRoundVars {
   prompts: Record<string, PromptResponse>;
@@ -28,6 +38,8 @@ export interface ResumeRoundVars {
   agentId: string;
   connectorId?: string;
   browserApiTools?: Array<BrowserApiToolDefinition<any>>;
+  promptRequestedEventId: string;
+  roundId: string;
 }
 
 export interface ResumeRoundMutationBindings {
@@ -77,13 +89,30 @@ export const useResumeRoundMutation = ({
       const executionId = uuidv4();
       controllersRef.current.set(vars.conversationId, { controller, executionId });
 
-      // Optimistically populate ask_user_question step answers before clearing the prompt —
-      // pending_prompts is needed to reconstruct the step, so this must come first.
-      streamActions.setAskUserQuestionAnswers(vars.prompts);
-      // Drop pending prompts from the round — the user has answered, the round is back in progress.
-      streamActions.clearPendingPrompts();
+      // The optimistic answer takes the id the server will write, so the saved twin replaces it
+      // after the refetch. The index counts the round's stored executions, same as the server.
+      const cachedConversation = queryClient.getQueryData<Conversation>(
+        queryKeys.conversations.byId(vars.conversationId)
+      );
+      const liveEvents = conversationStreamService.getSnapshot(vars.conversationId);
+      const mergedEvents = mergeEventsById(cachedConversation?.events ?? [], liveEvents);
+      const executionIndex = nextResumeIndexFromEvents(mergedEvents, vars.roundId);
+      const predictedId = promptResponseEventId(vars.roundId, executionIndex);
+
+      const optimisticResponse: PromptResponseEvent = {
+        id: predictedId,
+        type: TimelineEventType.promptResponse,
+        created_at: new Date().toISOString(),
+        actor: { type: EventActorType.user, id: 'optimistic' },
+        data: {
+          prompt_requested_event_id: vars.promptRequestedEventId,
+          responses: vars.prompts,
+        },
+      };
+      conversationStreamService.recordPromptResponse(vars.conversationId, optimisticResponse);
 
       let timelineExecutionId: string | undefined;
+      let streamEventArrived = false;
 
       try {
         const browserApiToolsMetadata = vars.browserApiTools?.map(toToolMetadata);
@@ -102,19 +131,25 @@ export const useResumeRoundMutation = ({
         const events$ = rawEvents$.pipe(
           tap((event) => {
             if (isExecutionStartedEvent(event) || isExecutionTerminatedEvent(event)) {
+              streamEventArrived = true;
               timelineExecutionId ??= event.execution_id;
             }
           })
         );
 
-        // Failures are persisted by the server and arrive through the refetch below.
+        // Failures are persisted by the server and arrive through the refetch below. A failure
+        // before any stream event means the resume never started: roll back the optimistic answer.
         await subscribeToChatEvents({
           events$,
           conversationActions: streamActions,
           browserApiTools: vars.browserApiTools,
           browserToolExecutor,
           isAborted: () => controller.signal.aborted,
-        }).catch(() => {});
+        }).catch(() => {
+          if (!streamEventArrived) {
+            conversationStreamService.clearPromptResponse(vars.conversationId, predictedId);
+          }
+        });
 
         clearActiveStream(vars.conversationId);
         await releaseLocalContent({
@@ -126,6 +161,11 @@ export const useResumeRoundMutation = ({
               persistedExecutionId
             ),
         });
+      } catch (err) {
+        if (!streamEventArrived) {
+          conversationStreamService.clearPromptResponse(vars.conversationId, predictedId);
+        }
+        throw err;
       } finally {
         clearActiveStream(vars.conversationId);
         if (controllersRef.current.get(vars.conversationId)?.controller === controller) {

@@ -11,6 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { createToolCallStep } from '@kbn/agent-builder-common/chat/conversation';
 import { createExecutionTerminatedEvent } from './items/execution_terminated_event.factory';
+import { createExecutionPausedEvent } from './items/execution_paused_event.factory';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { TimelineItem } from './types';
 import { Timeline } from './timeline';
@@ -115,6 +116,17 @@ describe('AgentTurn', () => {
     renderTimeline({ ...running, triggerAttachmentRefs: [{ attachment_id: 'att-2', version: 1 }] });
 
     expect(screen.queryByTestId('references')).not.toBeInTheDocument();
+  });
+
+  it('renders the steps of an answered pause even though it has no response', () => {
+    const answeredPause: TimelineItem = {
+      ...completedSaved,
+      terminal: createExecutionPausedEvent({ execution_id: executionId }),
+    };
+    renderTimeline(answeredPause);
+
+    fireEvent.click(screen.getByRole('button'));
+    expect(screen.getAllByTestId('agentBuilderToolCallStep')).toHaveLength(2);
   });
 
   it('keeps an expanded tool group open through completion and the saved replacement', () => {
