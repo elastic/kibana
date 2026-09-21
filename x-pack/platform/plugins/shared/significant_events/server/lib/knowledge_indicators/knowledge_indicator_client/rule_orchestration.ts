@@ -18,6 +18,16 @@ import { getMetricSeriesRuleSchedule } from '../../significant_events/rules/sche
 
 const RULE_INSTALL_CONCURRENCY = 10;
 
+export class InstallQueriesError extends Error {
+  constructor(
+    public readonly cause: Error,
+    public readonly createdIds: string[]
+  ) {
+    super(cause.message);
+    this.name = 'InstallQueriesError';
+  }
+}
+
 /**
  * KI titles are uncapped but Alerting v2 rejects a `metadata.name` over
  * {@link MAX_NAME_LENGTH}, so a long title would fail rule creation. Trim the
@@ -43,6 +53,7 @@ export function toRuleDefinition(queryLink: QueryLink): SignificantEventsRuleDef
   };
 }
 
+// Splits into chunks of up to maxItems, rebalancing the last two to avoid a singleton tail (which gets no jitter from bulkSchedule).
 function partitionForBulk<T>(items: T[], maxItems: number): T[][] {
   const chunks: T[][] = [];
   for (let index = 0; index < items.length; index += maxItems) {
@@ -64,14 +75,21 @@ export async function installQueries(
   client: IRulesManagementClient,
   queriesToCreate: QueryLink[],
   queriesToUpdate: QueryLink[]
-): Promise<void> {
+): Promise<{ createdIds: string[] }> {
+  const createdIds: string[] = [];
+
   if (queriesToCreate.length > 0) {
     const rules = queriesToCreate.map((queryLink) => ({
       id: queryLink.rule_id,
       definition: toRuleDefinition(queryLink),
     }));
-    for (const chunk of partitionForBulk(rules, MAX_BULK_ITEMS)) {
-      await client.bulkCreateRules(chunk);
+    try {
+      for (const chunk of partitionForBulk(rules, MAX_BULK_ITEMS)) {
+        const { createdIds: chunkIds } = await client.bulkCreateRules(chunk);
+        createdIds.push(...chunkIds);
+      }
+    } catch (error) {
+      throw new InstallQueriesError(error instanceof Error ? error : new Error(String(error)), createdIds);
     }
   }
 
@@ -83,6 +101,8 @@ export async function installQueries(
       )
     );
   }
+
+  return { createdIds };
 }
 
 export async function uninstallQueries(

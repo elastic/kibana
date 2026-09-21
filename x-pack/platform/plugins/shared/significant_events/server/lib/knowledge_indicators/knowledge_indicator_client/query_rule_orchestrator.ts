@@ -11,7 +11,7 @@ import { deriveQueryType, hasSameEsql } from '@kbn/streams-schema';
 import { isExpirable, isExpired, QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import type { Streams } from '@kbn/streams-schema';
 import { computeRuleId } from '../helpers/compute_rule_id';
-import { installQueries, uninstallQueries } from './rule_orchestration';
+import { InstallQueriesError, installQueries, uninstallQueries } from './rule_orchestration';
 import { queryFromLink } from './serializers';
 import { KI_TYPE_QUERY } from '../fields';
 import type { KIBulkOperation } from './types';
@@ -123,20 +123,25 @@ export class QueryRuleOrchestrator {
         demotedIneligible.some((d) => d.query.id === link.query.id)
     );
 
+    let createdIds: string[] = [];
     try {
-      await installQueries(this.rulesManagementClient, toCreate, toUpdate);
+      ({ createdIds } = await installQueries(this.rulesManagementClient, toCreate, toUpdate));
     } catch (installError) {
+      const partialIds =
+        installError instanceof InstallQueriesError ? installError.createdIds : [];
       this.logger.error(
-        `installQueries failed during syncQueries for stream "${stream}". Compensating by uninstalling created rules.`
+        `installQueries failed during syncQueries for stream "${stream}". Compensating ${partialIds.length} created rule(s).`
       );
-      await uninstallQueries(this.rulesManagementClient, toCreate).catch((compensateError) => {
-        this.logger.error(
-          `Failed to compensate after installQueries failure for stream "${stream}": ${
-            compensateError instanceof Error ? compensateError.message : String(compensateError)
-          }`
-        );
-      });
-      throw installError;
+      if (partialIds.length > 0) {
+        await this.rulesManagementClient.bulkDeleteRules(partialIds).catch((compensateError) => {
+          this.logger.error(
+            `Failed to compensate after installQueries failure for stream "${stream}": ${
+              compensateError instanceof Error ? compensateError.message : String(compensateError)
+            }`
+          );
+        });
+      }
+      throw installError instanceof InstallQueriesError ? installError.cause : installError;
     }
 
     // Install succeeded — safe to remove stale and replaced rules now.
@@ -168,15 +173,17 @@ export class QueryRuleOrchestrator {
       await this.writer.bulk(stream, operations);
     } catch (storageError) {
       this.logger.error(
-        `Storage append failed after rule install for stream "${stream}". Compensating by uninstalling new rules.`
+        `Storage append failed after rule install for stream "${stream}". Compensating ${createdIds.length} created rule(s).`
       );
-      await uninstallQueries(this.rulesManagementClient, toCreate).catch((compensateError) => {
-        this.logger.error(
-          `Failed to compensate after bulk failure for stream "${stream}": ${
-            compensateError instanceof Error ? compensateError.message : String(compensateError)
-          }`
-        );
-      });
+      if (createdIds.length > 0) {
+        await this.rulesManagementClient.bulkDeleteRules(createdIds).catch((compensateError) => {
+          this.logger.error(
+            `Failed to compensate after bulk failure for stream "${stream}": ${
+              compensateError instanceof Error ? compensateError.message : String(compensateError)
+            }`
+          );
+        });
+      }
       throw storageError;
     }
   }
@@ -305,7 +312,26 @@ export class QueryRuleOrchestrator {
       return { promoted: 0, skipped_stats: skippedStats, skipped_ineligible: skippedIneligible };
     }
 
-    await installQueries(this.rulesManagementClient, toPromote, []);
+    let createdIds: string[] = [];
+    try {
+      ({ createdIds } = await installQueries(this.rulesManagementClient, toPromote, []));
+    } catch (installError) {
+      const partialIds =
+        installError instanceof InstallQueriesError ? installError.createdIds : [];
+      this.logger.error(
+        `installQueries failed during promoteQueries for stream "${streamName}". Compensating ${partialIds.length} created rule(s).`
+      );
+      if (partialIds.length > 0) {
+        await this.rulesManagementClient.bulkDeleteRules(partialIds).catch((compensateError) => {
+          this.logger.error(
+            `Failed to compensate after installQueries failure for stream "${streamName}": ${
+              compensateError instanceof Error ? compensateError.message : String(compensateError)
+            }`
+          );
+        });
+      }
+      throw installError instanceof InstallQueriesError ? installError.cause : installError;
+    }
 
     try {
       await this.writer.bulk(
@@ -322,15 +348,17 @@ export class QueryRuleOrchestrator {
       );
     } catch (storageError) {
       this.logger.error(
-        `Storage append failed after installing rules for stream "${streamName}". Compensating by uninstalling.`
+        `Storage append failed after installing rules for stream "${streamName}". Compensating ${createdIds.length} created rule(s).`
       );
-      await uninstallQueries(this.rulesManagementClient, toPromote).catch((uninstallError) => {
-        this.logger.error(
-          `Failed to compensate — orphaned rules may remain for stream "${streamName}": ${
-            uninstallError instanceof Error ? uninstallError.message : String(uninstallError)
-          }`
-        );
-      });
+      if (createdIds.length > 0) {
+        await this.rulesManagementClient.bulkDeleteRules(createdIds).catch((compensateError) => {
+          this.logger.error(
+            `Failed to compensate — orphaned rules may remain for stream "${streamName}": ${
+              compensateError instanceof Error ? compensateError.message : String(compensateError)
+            }`
+          );
+        });
+      }
       throw storageError;
     }
 

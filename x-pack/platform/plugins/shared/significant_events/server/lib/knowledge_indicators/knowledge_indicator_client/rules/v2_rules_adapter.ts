@@ -81,15 +81,25 @@ export class RulesAdapterV2 implements IRulesManagementClient {
 
   async bulkCreateRules(
     rules: Array<{ id: string; definition: SignificantEventsRuleDefinition }>
-  ): Promise<void> {
+  ): Promise<{ createdIds: string[] }> {
     const definitionsById = new Map(rules.map(({ id, definition }) => [id, definition]));
-    const { errors } = await this.rulesClient.bulkCreateRules({
+    const { rules: created, errors } = await this.rulesClient.bulkCreateRules({
       rules: rules.map(({ id, definition }) => ({
         ...toV2CreateBody({ definition, isServerless: this.isServerless }),
         id,
         enabled: true,
       })),
     });
+
+    const fatal = errors.filter(
+      ({ error }) => error.code !== ALERTING_ERROR_CODES.RULE_ALREADY_EXISTS
+    );
+    if (fatal.length > 0) {
+      const detail = fatal
+        .map(({ id, error }) => `${id} [${error.code}]: ${error.message}`)
+        .join('; ');
+      throw new Error(`V2 bulk create failed for ${fatal.length} rule(s): ${detail}`);
+    }
 
     const conflicts = errors.filter(
       ({ error }) => error.code === ALERTING_ERROR_CODES.RULE_ALREADY_EXISTS
@@ -107,15 +117,7 @@ export class RulesAdapterV2 implements IRulesManagementClient {
       )
     );
 
-    const fatal = errors.filter(
-      ({ error }) => error.code !== ALERTING_ERROR_CODES.RULE_ALREADY_EXISTS
-    );
-    if (fatal.length > 0) {
-      const detail = fatal
-        .map(({ id, error }) => `${id} [${error.code}]: ${error.message}`)
-        .join('; ');
-      throw new Error(`V2 bulk create failed for ${fatal.length} rule(s): ${detail}`);
-    }
+    return { createdIds: created.map(({ id }) => id) };
   }
 
   async updateRule(id: string, definition: SignificantEventsRuleDefinition): Promise<void> {

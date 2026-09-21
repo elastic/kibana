@@ -239,13 +239,16 @@ describe('RulesAdapterV2', () => {
   });
 
   describe('bulkCreateRules', () => {
-    it('creates enabled rules in one v2 request', async () => {
+    it('creates enabled rules in one v2 request and returns createdIds', async () => {
       const mock = makeRulesClientMock();
       mock.bulkCreateRules.mockResolvedValue({ rules: [{ id: 'rule-1' }], errors: [] } as never);
       const adapter = makeAdapter(mock);
 
-      await adapter.bulkCreateRules([{ id: 'rule-1', definition: createDefinition }]);
+      const result = await adapter.bulkCreateRules([
+        { id: 'rule-1', definition: createDefinition },
+      ]);
 
+      expect(result).toEqual({ createdIds: ['rule-1'] });
       expect(mock.bulkCreateRules).toHaveBeenCalledWith({
         rules: [
           expect.objectContaining({
@@ -261,7 +264,7 @@ describe('RulesAdapterV2', () => {
       });
     });
 
-    it('updates conflicts with the matching definitions and limits fallback concurrency', async () => {
+    it('updates conflicts with the matching definitions, limits fallback concurrency, and excludes them from createdIds', async () => {
       const mock = makeRulesClientMock();
       const rules = Array.from({ length: 11 }, (_, index) => ({
         id: `rule-${index}`,
@@ -288,8 +291,9 @@ describe('RulesAdapterV2', () => {
       });
       const adapter = makeAdapter(mock);
 
-      await adapter.bulkCreateRules(rules);
+      const result = await adapter.bulkCreateRules(rules);
 
+      expect(result).toEqual({ createdIds: [] });
       expect(mock.updateRule).toHaveBeenCalledTimes(11);
       expect(maxActiveUpdates).toBe(10);
       expect(mock.updateRule).toHaveBeenCalledWith({
@@ -300,7 +304,7 @@ describe('RulesAdapterV2', () => {
       });
     });
 
-    it('updates conflicts before reporting other per-rule failures with their details', async () => {
+    it('skips conflict updates and throws when fatal errors are present', async () => {
       const mock = makeRulesClientMock();
       mock.bulkCreateRules.mockResolvedValue({
         rules: [],
@@ -321,7 +325,6 @@ describe('RulesAdapterV2', () => {
           },
         ],
       } as never);
-      mock.updateRule.mockResolvedValue({} as never);
       const adapter = makeAdapter(mock);
 
       await expect(
@@ -330,12 +333,7 @@ describe('RulesAdapterV2', () => {
           { id: 'rule-failed', definition: updateDefinition },
         ])
       ).rejects.toThrow('rule-failed [INTERNAL_SERVER_ERROR]: storage unavailable');
-      expect(mock.updateRule).toHaveBeenCalledWith({
-        id: 'rule-conflict',
-        data: expect.objectContaining({
-          metadata: expect.objectContaining({ name: createDefinition.name }),
-        }),
-      });
+      expect(mock.updateRule).not.toHaveBeenCalled();
     });
 
     it('propagates a failed conflict update', async () => {

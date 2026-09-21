@@ -8,7 +8,12 @@
 import { MAX_NAME_LENGTH } from '@kbn/alerting-v2-schemas';
 import type { QueryLink } from '@kbn/significant-events-schema';
 import type { IRulesManagementClient } from './rules/rules_management_client';
-import { installQueries, toRuleDefinition, uninstallQueries } from './rule_orchestration';
+import {
+  InstallQueriesError,
+  installQueries,
+  toRuleDefinition,
+  uninstallQueries,
+} from './rule_orchestration';
 import {
   METRIC_SERIES_EVERY,
   METRIC_SERIES_RULE_NAME_SUFFIX,
@@ -43,7 +48,9 @@ const makeQueryLinks = (count: number): QueryLink[] =>
 
 const makeRulesClient = (): jest.Mocked<IRulesManagementClient> => ({
   createRule: jest.fn().mockResolvedValue(undefined),
-  bulkCreateRules: jest.fn().mockResolvedValue(undefined),
+  bulkCreateRules: jest.fn().mockImplementation((rules) =>
+    Promise.resolve({ createdIds: rules.map(({ id }: { id: string }) => id) })
+  ),
   updateRule: jest.fn().mockResolvedValue(undefined),
   bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
   findExistingRuleIds: jest.fn().mockResolvedValue([]),
@@ -127,9 +134,9 @@ describe('installQueries', () => {
     const client = makeRulesClient();
     let finishCreate = () => {};
     client.bulkCreateRules.mockImplementation(
-      () =>
-        new Promise<void>((resolve) => {
-          finishCreate = resolve;
+      (rules: Array<{ id: string }>) =>
+        new Promise<{ createdIds: string[] }>((resolve) => {
+          finishCreate = () => resolve({ createdIds: rules.map(({ id }) => id) });
         })
     );
 
@@ -144,14 +151,19 @@ describe('installQueries', () => {
     expect(client.updateRule).toHaveBeenCalledTimes(1);
   });
 
-  it('propagates a create failure without starting updates', async () => {
+  it('propagates a create failure as InstallQueriesError without starting updates', async () => {
     const client = makeRulesClient();
     const createError = new Error('bulk create failed');
     client.bulkCreateRules.mockRejectedValue(createError);
 
-    await expect(installQueries(client, makeQueryLinks(2), makeQueryLinks(1))).rejects.toBe(
-      createError
+    await expect(installQueries(client, makeQueryLinks(2), makeQueryLinks(1))).rejects.toThrow(
+      InstallQueriesError
     );
+    const thrown = await installQueries(client, makeQueryLinks(2), makeQueryLinks(1)).catch(
+      (error) => error
+    );
+    expect(thrown.cause).toBe(createError);
+    expect(thrown.createdIds).toEqual([]);
     expect(client.updateRule).not.toHaveBeenCalled();
   });
 });

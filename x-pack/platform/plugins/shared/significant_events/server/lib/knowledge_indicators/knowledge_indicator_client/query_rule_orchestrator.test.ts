@@ -45,7 +45,9 @@ function createOrchestrator({
 } = {}) {
   const rulesManagementClient = {
     createRule: jest.fn().mockResolvedValue(undefined),
-    bulkCreateRules: jest.fn().mockResolvedValue(undefined),
+    bulkCreateRules: jest.fn().mockImplementation((rules: Array<{ id: string }>) =>
+      Promise.resolve({ createdIds: rules.map(({ id }) => id) })
+    ),
     updateRule: jest.fn().mockResolvedValue(undefined),
     bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
   } as unknown as jest.Mocked<IRulesManagementClient>;
@@ -84,7 +86,7 @@ describe('QueryRuleOrchestrator', () => {
       expect(rulesManagementClient.bulkCreateRules).toHaveBeenCalledTimes(1);
     });
 
-    it('compensates created rule ids when bulk create fails', async () => {
+    it('skips compensation when bulk create rejects before returning any created ids', async () => {
       const { orchestrator, rulesManagementClient, writer } = createOrchestrator();
       const createError = new Error('bulk create failed');
       rulesManagementClient.bulkCreateRules.mockRejectedValueOnce(createError);
@@ -96,10 +98,28 @@ describe('QueryRuleOrchestrator', () => {
 
       await expect(orchestrator.syncQueries(definition, [newQuery])).rejects.toBe(createError);
 
-      const [createdRules] = rulesManagementClient.bulkCreateRules.mock.calls[0];
-      expect(rulesManagementClient.bulkDeleteRules).toHaveBeenCalledWith(
-        createdRules.map(({ id }) => id)
+      expect(rulesManagementClient.bulkDeleteRules).not.toHaveBeenCalled();
+      expect(writer.bulk).not.toHaveBeenCalled();
+    });
+
+    it('compensates only actually created ids when a later chunk fails', async () => {
+      const { orchestrator, rulesManagementClient, writer } = createOrchestrator();
+      const createError = new Error('chunk 2 failed');
+      rulesManagementClient.bulkCreateRules
+        .mockResolvedValueOnce({ createdIds: ['rule-chunk1'] })
+        .mockRejectedValueOnce(createError);
+
+      const queries = Array.from({ length: 101 }, (_, index) =>
+        makeQuery({
+          id: `q-${index}`,
+          severity_score: 80,
+          esql: { query: `FROM logs | WHERE body.text:"error-${index}"` },
+        })
       );
+
+      await expect(orchestrator.syncQueries(definition, queries)).rejects.toBe(createError);
+
+      expect(rulesManagementClient.bulkDeleteRules).toHaveBeenCalledWith(['rule-chunk1']);
       expect(writer.bulk).not.toHaveBeenCalled();
     });
 
@@ -331,7 +351,9 @@ describe('QueryRuleOrchestrator', () => {
     function makeReconcileRulesClient(): jest.Mocked<IRulesManagementClient> {
       return {
         createRule: jest.fn().mockResolvedValue(undefined),
-        bulkCreateRules: jest.fn().mockResolvedValue(undefined),
+        bulkCreateRules: jest.fn().mockImplementation((rules: Array<{ id: string }>) =>
+          Promise.resolve({ createdIds: rules.map(({ id }) => id) })
+        ),
         updateRule: jest.fn().mockResolvedValue(undefined),
         bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
         findExistingRuleIds: jest.fn().mockResolvedValue([]),
