@@ -1,0 +1,151 @@
+name: 'Mirror ralph-investigate issues to the error backlog'
+
+on:
+  issues:
+    types: [labeled]
+
+# Applying a label requires Triage or above. A pre-flight step (below) further restricts
+# triggering to Elastic org members, so external Triage contributors cannot invoke Ralph.
+# (`labeled` carries no author_association for the labeler; `github.event.issue.author_association`
+# is the issue *author*, not whoever applied the label — so we check org membership directly.)
+
+permissions:
+  issues: write # post the backlink comment and apply ralph-mirrored on this repo's issue
+
+concurrency:
+  # Every `labeled` event on an issue (`Team:*`, `bug`, anything) queues a run that claims this group
+  # *before* the job-level `if` is evaluated, so an unconditional group would let unrelated labels
+  # collide with a real mirror. Non-matching events get a unique single-use lane.
+  # Keep this expression in sync with the job `if` below.
+  group: >-
+    ${{
+      (
+        github.event.label.name == 'ralph-investigate' &&
+        format('ralph-mirror-{0}', github.event.issue.number)
+      ) ||
+      format('ralph-mirror-noop-{0}', github.run_id)
+    }}
+  cancel-in-progress: false
+
+jobs:
+  mirror:
+    name: 'Mirror to observability-error-backlog'
+    if: >-
+      github.event.issue.pull_request == null &&
+      github.event.label.name == 'ralph-investigate' &&
+      !contains(github.event.issue.labels.*.name, 'ralph-mirrored')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check actor is an Elastic org member
+        env:
+          # kibanamachine is an org member, so it receives 204 for all Elastic members
+          # regardless of whether they set their membership to private. github.token is a
+          # repo-scoped installation token — not an org member — and gets a 302 redirect
+          # for private members, causing the 204 check to fail for Elastic employees.
+          GH_TOKEN: ${{ secrets.KIBANAMACHINE_TOKEN }}
+          ACTOR: ${{ github.actor }}
+        run: |
+          # `labeled` events carry no author_association for the labeler, so we check org
+          # membership directly. This gates Ralph invocations to Elastic employees and
+          # prevents external Triage contributors from triggering mirroring.
+          STATUS=$(gh api "orgs/elastic/members/$ACTOR" --include 2>/dev/null \
+            | head -1 | grep -oE '[0-9]{3}')
+          if [[ "$STATUS" != "204" ]]; then
+            echo "::notice::$ACTOR is not a confirmed Elastic org member (HTTP $STATUS); skipping mirror."
+            exit 1
+          fi
+
+      - name: Check live issue state
+        id: livecheck
+        env:
+          GH_TOKEN: ${{ secrets.KIBANAMACHINE_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          # The job `if` reads github.event.issue.labels from the immutable event payload.
+          # A failed-job rerun and two quickly-queued label events both bypass that check
+          # because their payloads were captured before ralph-mirrored was applied.
+          # Query the live issue to guard against duplicate mirrors in those cases.
+          ALREADY_MIRRORED=$(gh api "repos/elastic/kibana/issues/$ISSUE_NUMBER" \
+            --jq '[.labels[].name] | contains(["ralph-mirrored"])')
+
+          if [[ "$ALREADY_MIRRORED" == "true" ]]; then
+            # ralph-mirrored is set but the backlink comment may still be missing if a prior
+            # run applied the label but the comment step failed. Reconcile it here so the
+            # source issue always ends up with a link to the investigation.
+            HAS_COMMENT=$(gh api "repos/elastic/kibana/issues/$ISSUE_NUMBER/comments" \
+              --jq '[.[] | select(.user.login == "kibanamachine" and (.body | test("error backlog")))] | length > 0')
+            if [[ "$HAS_COMMENT" == "false" ]]; then
+              echo "::notice::ralph-mirrored set but backlink comment missing; reconciling."
+              MIRROR_URL=$(gh api \
+                "search/issues?q=repo:elastic/observability-error-backlog+in:body+https://github.com/elastic/kibana/issues/$ISSUE_NUMBER" \
+                --jq '.items[0].html_url // ""')
+              if [[ -n "$MIRROR_URL" ]]; then
+                gh issue comment "$ISSUE_NUMBER" --repo "elastic/kibana" \
+                  --body "Detective Ralph is investigating this in the error backlog (Elastic-internal): $MIRROR_URL"
+              else
+                echo "::warning::Could not locate mirror issue in the backlog; post the backlink manually."
+              fi
+            fi
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create the mirror issue and start Detective Ralph
+        id: mirror
+        if: steps.livecheck.outputs.skip != 'true'
+        env:
+          # kibanamachine, not GITHUB_TOKEN: events created by GITHUB_TOKEN do not trigger
+          # workflows, so a mirror labeled with it would never start Detective Ralph.
+          # Same reason as .github/workflows/failed-test-investigator.md:140-142.
+          GH_TOKEN: ${{ secrets.KIBANAMACHINE_TOKEN }}
+          TARGET_REPO: elastic/observability-error-backlog
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_URL: ${{ github.event.issue.html_url }}
+        run: |
+          set -euo pipefail
+
+          # Keep the mirror body minimal — just a pointer to the source issue. Detective Ralph
+          # has GitHub API access and elastic/kibana is public, so it can read the full content
+          # from the source URL. This avoids copying user-authored content into the workflow,
+          # eliminates the body-size limit problem, and keeps the mirror always up to date.
+          {
+            printf 'This issue was mirrored from elastic/kibana for Ralph investigation.\n'
+            printf 'Read the source issue at the link below for the full bug report.\n\n'
+            printf '**Source:** %s\n\n' "$ISSUE_URL"
+            printf '<!--kibana-mirror %s-->\n' "$ISSUE_NUMBER"
+          } > "$RUNNER_TEMP/body.md"
+
+          MIRROR_URL=$(gh issue create --repo "$TARGET_REPO" \
+            --title "$ISSUE_TITLE" --body-file "$RUNNER_TEMP/body.md")
+          echo "url=$MIRROR_URL" >> "$GITHUB_OUTPUT"
+
+          # Separate call on purpose. This label is what starts Detective Ralph; labels set at
+          # creation time are not reliably delivered as a `labeled` event.
+          # On failure, close the orphan mirror so the state is clean for retry — the Kibana
+          # issue will not be labeled ralph-mirrored, so re-applying ralph-investigate retries safely.
+          gh issue edit "$MIRROR_URL" --add-label 'ralph-investigate' || {
+            gh issue close "$MIRROR_URL" \
+              --comment "Labeling failed; closing orphan mirror. Re-apply ralph-investigate on the source Kibana issue to retry."
+            exit 1
+          }
+
+      - name: Mark mirrored and post backlink
+        if: steps.livecheck.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }} # own-repo writes only; no PAT needed
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          MIRROR_URL: ${{ steps.mirror.outputs.url }}
+        run: |
+          set -euo pipefail
+          # Post the backlink comment first. Non-fatal: a transient failure here is recoverable
+          # because ralph-mirrored is applied below regardless. The live-state check reconciles
+          # the missing comment the next time this workflow runs for the issue.
+          gh issue comment "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" \
+            --body "Detective Ralph is investigating this in the error backlog (Elastic-internal): $MIRROR_URL" \
+            || echo "::warning::Backlink comment failed; ralph-mirrored will still be applied. The comment will be reconciled on the next workflow run for this issue."
+          # Apply ralph-mirrored last. This is the idempotency guard; applying it after the
+          # comment means both writes must be attempted before the guard is set.
+          gh issue edit "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --add-label 'ralph-mirrored'
