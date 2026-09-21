@@ -12,10 +12,20 @@ import { getMeta } from '@kbn/connector-specs';
 import type { ConnectorSpecResponse } from '../apis/fetch_connector_spec';
 import {
   applyActionInputFieldMeta,
+  getSpecActionInputFieldKeys,
   getSpecActionInputSchema,
   getSpecDefaultSubAction,
   validateSpecActionParams,
 } from './spec_action_params_schema';
+
+const EMPTY_SLACK_LIKE_ERRORS = {
+  subAction: [],
+  query: [],
+  channel: [],
+  text: [],
+  threadTs: [],
+  unfurlLinks: [],
+};
 
 const slackLikeSpec = (): ConnectorSpecResponse => ({
   metadata: {
@@ -102,27 +112,75 @@ describe('spec_action_params_schema', () => {
     });
   });
 
+  describe('getSpecActionInputFieldKeys', () => {
+    it('returns the union of input field names across all actions', () => {
+      expect(getSpecActionInputFieldKeys(slackLikeSpec())).toEqual([
+        'query',
+        'channel',
+        'text',
+        'threadTs',
+        'unfurlLinks',
+      ]);
+    });
+  });
+
   describe('validateSpecActionParams', () => {
-    it('maps a missing required text field to errors.text', async () => {
+    it('maps a missing required text field to errors.text and keeps other keys empty', async () => {
       const result = await validateSpecActionParams(slackLikeSpec(), {
         subAction: 'sendMessage',
         subActionParams: { channel: 'C123' },
       });
 
-      expect(result.errors.text).toEqual(expect.arrayContaining([expect.any(String)]));
+      expect(result.errors).toEqual({
+        ...EMPTY_SLACK_LIKE_ERRORS,
+        text: [expect.any(String)],
+      });
+    });
+
+    it('returns an empty array for every known field so hosts that merge per key clear stale errors', async () => {
+      const invalid = await validateSpecActionParams(slackLikeSpec(), {
+        subAction: 'sendMessage',
+        subActionParams: {},
+      });
+      expect(invalid.errors.channel).toHaveLength(1);
+      expect(invalid.errors.text).toHaveLength(1);
+
+      const valid = await validateSpecActionParams(slackLikeSpec(), {
+        subAction: 'sendMessage',
+        subActionParams: { channel: 'C123', text: 'hello' },
+      });
+      expect({ ...invalid.errors, ...valid.errors }).toEqual(EMPTY_SLACK_LIKE_ERRORS);
+    });
+
+    it('clears errors from a previous action after switching to another action', async () => {
+      const previous = await validateSpecActionParams(slackLikeSpec(), {
+        subAction: 'sendMessage',
+        subActionParams: {},
+      });
+      const next = await validateSpecActionParams(slackLikeSpec(), {
+        subAction: 'searchMessages',
+        subActionParams: {},
+      });
+      expect({ ...previous.errors, ...next.errors }).toEqual(EMPTY_SLACK_LIKE_ERRORS);
     });
 
     it('returns a subAction error when the action is missing or unknown', async () => {
       const missing = await validateSpecActionParams(slackLikeSpec(), {
         subActionParams: { text: 'hi' },
       });
-      expect(missing.errors.subAction).toEqual(expect.arrayContaining([expect.any(String)]));
+      expect(missing.errors).toEqual({
+        ...EMPTY_SLACK_LIKE_ERRORS,
+        subAction: [expect.any(String)],
+      });
 
       const unknown = await validateSpecActionParams(slackLikeSpec(), {
         subAction: 'notARealAction',
         subActionParams: {},
       });
-      expect(unknown.errors.subAction).toEqual(expect.arrayContaining([expect.any(String)]));
+      expect(unknown.errors).toEqual({
+        ...EMPTY_SLACK_LIKE_ERRORS,
+        subAction: [expect.any(String)],
+      });
     });
 
     it('returns empty errors for the reserved test sub-action', async () => {
@@ -130,7 +188,7 @@ describe('spec_action_params_schema', () => {
         subAction: '_test',
         subActionParams: {},
       });
-      expect(result.errors).toEqual({});
+      expect(result.errors).toEqual(EMPTY_SLACK_LIKE_ERRORS);
     });
 
     it('returns empty errors when params are valid', async () => {
@@ -138,7 +196,7 @@ describe('spec_action_params_schema', () => {
         subAction: 'sendMessage',
         subActionParams: { channel: 'C123', text: 'hello' },
       });
-      expect(result.errors).toEqual({});
+      expect(result.errors).toEqual(EMPTY_SLACK_LIKE_ERRORS);
     });
   });
 });
