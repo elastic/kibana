@@ -106,6 +106,7 @@ describe('mapClassicAlertToEpisode', () => {
     expect(episode.last_tags).toEqual([]);
     expect(episode.last_assignee_uid).toBeNull();
     expect(episode.episode_data).toBeNull();
+    expect(episode.source_grouping).toBeUndefined();
   });
 
   it('computes duration from start/end when kibana.alert.duration.us is absent', () => {
@@ -142,5 +143,34 @@ describe('mapClassicAlertToEpisode', () => {
     expect(episode.last_ack_action).toBeNull();
     expect(episode).not.toHaveProperty('last_snooze_action');
     expect(episode).not.toHaveProperty('snooze_expiry');
+  });
+
+  it('maps kibana.alert.grouping onto source_grouping', () => {
+    const episode = mapClassicAlertToEpisode(
+      {
+        ...baseSource,
+        'kibana.alert.grouping': { host: { name: 'web-01' }, 'service.name': 'api' },
+      },
+      TEST_INDEX
+    );
+
+    expect(episode.source_grouping).toEqual({
+      'host.name': 'web-01',
+      'service.name': 'api',
+    });
+  });
+
+  it('omits empty nested grouping objects from source_grouping', () => {
+    const episode = mapClassicAlertToEpisode(
+      {
+        ...baseSource,
+        'kibana.alert.grouping': { host: {}, 'service.name': 'api' },
+      },
+      TEST_INDEX
+    );
+
+    expect(episode.source_grouping).toEqual({
+      'service.name': 'api',
+    });
   });
 });
