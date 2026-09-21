@@ -283,12 +283,39 @@ outages, backfills and re-indexes of up to a month without losing edges, while
 still bounding the steady-state scan to recently-synced workers rather than the
 entire inventory.
 
-**Correctness note.** Because the integration re-ingests the *full* inventory on
-every 24h poll, `event.ingested` advances for every active worker each cycle. A
-re-org, transfer or newly-assigned report is therefore picked up on the next run
-— which is precisely what an `@timestamp`/`Hire_Date` window would have missed.
-Workers who stop being synced (departures) age out of the window and retain their
-last-known edges; removing stale edges is not in scope here.
+**Why a narrowing window is safe: writes are additive.**
+
+`writeEntityIds` builds a partial-document update per actor containing only the
+targets computed by the *current* run (`update_entities.ts:224-243`), and
+`bulkUpdateEntity` issues it as an ES `update` with `{ doc }`
+(`crud_client.ts:449-452`). A partial update replaces the `ids` array it is
+given, but touches no field absent from the payload — and an actor with no
+targets this run is dropped entirely, first by `hasAnyTargets`
+(`update_entities.ts:29-31`) and again by the `Object.keys(relationships).length > 0`
+guard (`:232`). This matches the documented invariant "omit unchanged
+relationship fields with `undefined`, not `{ ids: [] }`", whose rationale is
+exactly that an empty array "erases relationships observed in an earlier window
+but absent in the current one".
+
+Consequences, both of which follow from that one mechanism:
+
+- **A worker outside the window keeps their edge.** Nothing is retracted by
+  virtue of not being re-observed, so narrowing the window cannot lose
+  previously-written edges. This is what makes the incremental path safe.
+- **Active workers never leave the window anyway.** The integration re-ingests
+  the full inventory every 24h poll, so `event.ingested` advances for every
+  active worker each cycle regardless of hire date. Re-orgs, transfers and newly
+  assigned reports are picked up on the next run — precisely what an
+  `@timestamp`/`Hire_Date` window would have missed.
+
+**Known limitation — stale edges on departure.** When a worker leaves, Workday
+stops emitting their row; their `event.ingested` freezes and they age out of the
+window. Because writes are additive, their manager's `supervises.ids` retains
+them indefinitely. This is **not** introduced by the `event.ingested` window — an
+unconditional full scan behaves identically, since a departed worker's document
+is simply absent from the index either way. Retraction would require a
+framework-level capability (diffing previous against current target sets) that
+no maintainer has today. Out of scope; flagged for the epic.
 
 | Option | Verdict |
 |---|---|
@@ -369,8 +396,9 @@ purpose-built Workday spec is acceptable rather than duplicating 390 lines.
 
 Per the ticket: new reverse ECS fields (security-team#18732), Workday ingest
 pipeline changes, leaver watchlists, stripping manager ids from `related.user`.
-Additionally: actor-side EUID pre-validation (D3), and chunking
-`matchExistingTargetIds`.
+Additionally: actor-side EUID pre-validation (D3), chunking
+`matchExistingTargetIds`, and **edge retraction for departed workers** (D5) —
+a framework-level gap affecting every maintainer, not just this one.
 
 ## Known risks
 
