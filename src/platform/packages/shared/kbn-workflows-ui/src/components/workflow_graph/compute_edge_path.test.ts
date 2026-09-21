@@ -404,8 +404,12 @@ describe('buildFailureLanePath', () => {
     expect(r.labelY).toBeLessThan(300);
   });
 
-  it('LR: produces an orthogonal path from source to target', () => {
-    // Owner at right edge (200,150), failure head at (400,300). LR layout.
+  it('LR: drops from bottom edge then runs right — no horizontal bus stub', () => {
+    // LR failure handle is on the bottom edge (Position.Bottom), so the path
+    // must leave perpendicularly downward, reach the lane head's row, then run
+    // right into the lane head. The old shape (horizontal stub busX = sx+trunk)
+    // would draw a segment along the node's bottom border — wrong.
+    // Source: bottom of node at (200,150). Target: lane head at (400,300).
     const trunk = 20;
     const r = buildFailureLanePath(
       { sourceX: 200, sourceY: 150, targetX: 400, targetY: 300 },
@@ -413,8 +417,34 @@ describe('buildFailureLanePath', () => {
       trunk
     );
     expect(r.path.length).toBeGreaterThan(0);
-    // Path must pass through the bus X = sourceX + trunk = 220
-    expect(r.path).toContain('220');
+    // Path must reach the lane head's row (ty = 300).
+    expect(r.path).toContain('300');
+    // Path must reach the target column (tx = 400).
+    expect(r.path).toContain('400');
+    // Old horizontal-stub busX = 220 must NOT appear — the route drops first.
+    expect(r.path).not.toContain('220');
+  });
+
+  it('computeEdgePath routes LR isFailure:true as LR even with bottom source handle', () => {
+    // Regression gate for the `isLR` check — after moving the failure handle to
+    // Position.Bottom unconditionally, `sourcePosition === Right` is no longer
+    // sufficient to detect LR. This test ensures that `targetPosition === Left`
+    // (LR's target side) still triggers the LR path.
+    const r = computeEdgePath({
+      sourceX: 200,
+      sourceY: 150,
+      targetX: 400,
+      targetY: 300,
+      sourcePosition: Position.Bottom, // the new unconditional handle position
+      targetPosition: Position.Left,   // LR target side — the direction signal
+      isFailure: true,
+    });
+    expect(r.path.length).toBeGreaterThan(0);
+    // In LR the path drops to ty=300, so the path must contain 300.
+    expect(r.path).toContain('300');
+    // Old horizontal busX (200 + FORK_BUS_TRUNK = 220) must not appear.
+    // If it does, the TB branch was taken and the route is wrong.
+    expect(r.path).not.toContain('220');
   });
 
   it('computeEdgePath routes isFailure:true edges via buildFailureLanePath (not fork bus)', () => {

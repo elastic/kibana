@@ -11,6 +11,7 @@ import type { DagPositionedEdge, DagPositionedNode } from '@kbn/dag-layout';
 import { dagLayout, separatePositionedOverlapsInPlace } from '@kbn/dag-layout';
 import type { LayoutDirection, TransformResult } from '@kbn/workflows';
 import {
+  enforceForkBranchCompoundOrder,
   enforceForkLaneOrder,
   enforceTriggerLaneOrder,
   reconcileEdgePoints,
@@ -133,10 +134,23 @@ export const computeWorkflowLayout = (
     WORKFLOW_NODE_SEP
   );
 
-  // Post-dagre pass 2: enforce trigger lane declaration order.
-  const { nodes: triggeredNodes, edges: triggeredEdges } = enforceTriggerLaneOrder(
+  // Post-dagre pass 1b: pack fork branches as per-step micro-compounds.
+  // Each step's fallback hierarchy is placed contiguously next to that step,
+  // before the next branch starts — "invisible compound container" model.
+  // Runs after pass 1 (which enforces declaration order using spine-only widths)
+  // so this pass can assume branches are already in the correct cross-axis order.
+  const { nodes: compactedNodes, edges: compactedEdges } = enforceForkBranchCompoundOrder(
     orderedNodes,
     orderedEdges,
+    transformed,
+    direction,
+    WORKFLOW_NODE_SEP
+  );
+
+  // Post-dagre pass 2: enforce trigger lane declaration order.
+  const { nodes: triggeredNodes, edges: triggeredEdges } = enforceTriggerLaneOrder(
+    compactedNodes,
+    compactedEdges,
     transformed.nodeRefs,
     direction
   );

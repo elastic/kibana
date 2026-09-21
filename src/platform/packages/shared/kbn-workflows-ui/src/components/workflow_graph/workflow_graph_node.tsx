@@ -18,6 +18,9 @@ import { ExecutionStatus, TRIGGER_STEP_TYPES } from '@kbn/workflows';
 import { deslugifyStepName } from './deslugify_step_name';
 import { getStepChipPalette } from './step_chip_palette';
 import type { ChipOutcome } from './step_chip_palette';
+
+/** Inset from the node's right edge where spec 07's fork port (failure anchor) sits. */
+const FAILURE_PORT_RIGHT_INSET = 24;
 import { useWorkflowGraphActions } from './workflow_graph_actions_context';
 import type { RenderStepIcon } from './workflow_graph_actions_context';
 import { getStepFamily, getStepIconType, getTriggerTypeIconType } from '../step_icons';
@@ -251,15 +254,19 @@ function NodePreviewCard({
         />
       </div>
       <Handle type="source" position={sourceHandlePos} style={{ opacity: 0 }} />
-      {/* Secondary source handle for the failure edge — exits bottom-right (TB)
-          or right-bottom (LR). opacity: 0 keeps it invisible; the visible port
-          is spec 07's. React Flow reads sourceHandle="failure" on the edge to
-          pick this handle's coordinates as sourceX/sourceY. */}
+      {/* Secondary source handle for the failure edge — always on the bottom
+          edge, inset from the right corner. `Position.Bottom` is unconditional:
+          in LR the fallback margin is below the spine, so the route must leave
+          the bottom edge rather than the right centre. `transform: 'none'`
+          overrides React Flow's `.react-flow__handle-bottom` default of
+          `translate(-50%, 0)` so that `right` + `left: auto` places the handle
+          precisely. The visible port is spec 07's; React Flow reads
+          sourceHandle="failure" on the edge to pick these coordinates. */}
       <Handle
         type="source"
         id="failure"
-        position={sourceHandlePos}
-        style={{ opacity: 0, right: 0, left: 'auto' }}
+        position={Position.Bottom}
+        style={{ opacity: 0, right: FAILURE_PORT_RIGHT_INSET, left: 'auto', transform: 'none' }}
       />
     </>
   );
@@ -570,8 +577,8 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
       <Handle
         type="source"
         id="failure"
-        position={sourceHandlePos}
-        style={{ opacity: 0, right: 0, left: 'auto' }}
+        position={Position.Bottom}
+        style={{ opacity: 0, right: FAILURE_PORT_RIGHT_INSET, left: 'auto', transform: 'none' }}
       />
     </>
   );

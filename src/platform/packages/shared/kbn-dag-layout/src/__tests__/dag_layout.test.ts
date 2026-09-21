@@ -847,6 +847,50 @@ describe('dagLayout — reservedLanes', () => {
 
     expectNoPairwiseOverlap(laid);
   });
+
+  it('parallel branch is not pushed by D7 (topology-based push, Fix 6)', () => {
+    // gate→then→loop→merge   gate→els→merge   then.fallback: [fb]
+    //
+    // `els` is the else-branch of an if-fork. `loop` is the next step in the
+    // then-branch. When the graph has unequal branch depths, dagre may assign
+    // `els` to the same rank as `loop` (rank 2) to tighten edge lengths.
+    // The old geometric push treated any node at y >= loop.y as a successor of
+    // `then` and pushed `els` down — even though it is a parallel branch.
+    // The topology-based push (Fix 6) uses transitive reachability via spine
+    // edges: `els` is reachable from `gate` but NOT from `then`, so it stays.
+    const nodes = [node('gate'), node('then'), node('loop'), node('els'), node('fb'), node('merge')];
+    const edgeList = [
+      edge('gate-then', 'gate', 'then'),
+      edge('then-loop', 'then', 'loop'),
+      edge('loop-merge','loop', 'merge'),
+      edge('gate-els',  'gate', 'els'),
+      edge('els-merge', 'els',  'merge'),
+    ];
+    const { nodes: laid } = dagLayout(nodes, edgeList, [], {
+      reservedLanes: [{ nodeIds: ['fb'], depth: 0, ownerId: 'then' }],
+    });
+    const thenN  = findNode(laid, 'then');
+    const elsN   = findNode(laid, 'els');
+    const loopN  = findNode(laid, 'loop');
+    const mergeN = findNode(laid, 'merge');
+    const fbN    = findNode(laid, 'fb');
+
+    // `els` must NOT be pushed below `then`. `loop` was pushed by deficit D,
+    // so loop.y = rank2_y + D. With topology-based push `els` stays at its
+    // original dagre rank (rank2_y or rank1_y), giving els.y < loop.y.
+    // The old geometric push pushed `els` too when dagre placed it at rank 2,
+    // giving els.y == loop.y — this assertion would fail in that case.
+    expect(elsN.y).toBeLessThan(loopN.y - CENTER_TOLERANCE);
+
+    // Cascade: fb lands one rank below its owner.
+    expect(fbN.y).toBeCloseTo(thenN.y + thenN.height + DEFAULT_RANK_SEP, 0);
+
+    // Loop and merge ARE pushed (real topological successors of then).
+    expect(loopN.y).toBeGreaterThanOrEqual(fbN.y + fbN.height + DEFAULT_RANK_SEP - CENTER_TOLERANCE);
+    expect(mergeN.y).toBeGreaterThan(loopN.y);
+
+    expectNoPairwiseOverlap(laid);
+  });
 });
 
 // ─── Invariants ───────────────────────────────────────────────────────────────

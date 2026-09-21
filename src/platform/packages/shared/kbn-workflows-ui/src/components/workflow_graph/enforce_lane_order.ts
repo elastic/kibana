@@ -8,7 +8,7 @@
  */
 
 import type { DagPositionedEdge, DagPositionedNode } from '@kbn/dag-layout';
-import type { ForeachGroup, GraphEdge, NodeRef } from '@kbn/workflows';
+import type { FallbackLane, ForeachGroup, GraphEdge, NodeRef } from '@kbn/workflows';
 
 /**
  * Two pure post-dagre passes that enforce lane declaration order.
@@ -349,6 +349,259 @@ export const enforceForkLaneOrder = (
   });
 
   // Edge points are reconciled by reconcileEdgePoints after all passes.
+  return { nodes: resultNodes, edges: [...edges] };
+};
+
+/**
+ * Pack if/switch/parallel fork branches as per-step micro-compounds.
+ *
+ * After `enforceForkLaneOrder` packs branches using spine-only widths, this pass
+ * re-packs each branch so its fallback hierarchy sits contiguously next to the
+ * step that owns it, before the next branch starts. Scope: fork-children only —
+ * top-level spine steps keep the current cascade layout.
+ *
+ * Algorithm: for each fork (source with > 1 out-edge), process branches in
+ * declaration order. Branch 0 keeps its spine position. For branch N > 0:
+ *   1. Shift all branch N spine nodes so the head starts at prevCompoundRight + nodeSep.
+ *   2. Re-place branch N lane nodes with branch-local obstacles only.
+ *   3. Compute branch N compound right edge (spine + lanes) → becomes prevCompoundRight.
+ */
+export const enforceForkBranchCompoundOrder = (
+  nodes: readonly DagPositionedNode[],
+  edges: readonly DagPositionedEdge[],
+  transformed: {
+    edges: readonly GraphEdge[];
+    fallbackLanes: readonly FallbackLane[];
+    foreachGroups: readonly ForeachGroup[];
+  },
+  direction: 'TB' | 'LR',
+  nodeSep: number
+): { nodes: DagPositionedNode[]; edges: DagPositionedEdge[] } => {
+  const crossAxis: 'x' | 'y' = direction === 'TB' ? 'x' : 'y';
+  const mainAxis: 'x' | 'y' = crossAxis === 'x' ? 'y' : 'x';
+  const crossSpan: 'width' | 'height' = crossAxis === 'x' ? 'width' : 'height';
+  const mainSpan: 'width' | 'height' = mainAxis === 'x' ? 'width' : 'height';
+
+  const mutableNodes: MutableNodes = new Map(
+    nodes.map((n) => [n.id, { x: n.x, y: n.y, width: n.width, height: n.height }])
+  );
+
+  // Container inner ids — needed to carry inner nodes when a container shifts.
+  const containerInnerIds = new Map<string, Set<string>>();
+  for (const group of transformed.foreachGroups) {
+    containerInnerIds.set(
+      group.id,
+      new Set([
+        ...group.innerNodes.map((n) => n.id),
+        ...(group.bypassLaneNodes ?? []).map((n) => n.id),
+      ])
+    );
+  }
+
+  // Only process outer-graph lanes (graphId === undefined).
+  const outerLanes = transformed.fallbackLanes.filter((l) => l.graphId === undefined);
+
+  const spineEdges = transformed.edges.filter((e) => !e.isFailure && !e.isRejoin);
+
+  // Group out-edges by source, preserving declaration order.
+  const outEdges = new Map<string, string[]>();
+  for (const e of spineEdges) {
+    if (!mutableNodes.has(e.source)) continue;
+    if (!outEdges.has(e.source)) outEdges.set(e.source, []);
+    outEdges.get(e.source)!.push(e.target);
+  }
+
+  // Reachability BFS for exclusive branch membership computation.
+  const adjList = new Map<string, string[]>();
+  for (const e of spineEdges) {
+    if (!adjList.has(e.source)) adjList.set(e.source, []);
+    adjList.get(e.source)!.push(e.target);
+  }
+  const reachableFrom = (start: string): Set<string> => {
+    const visited = new Set<string>();
+    const queue: string[] = [start];
+    while (queue.length > 0) {
+      const id = queue.shift()!;
+      if (visited.has(id)) continue;
+      visited.add(id);
+      for (const next of adjList.get(id) ?? []) {
+        if (!visited.has(next)) queue.push(next);
+      }
+    }
+    return visited;
+  };
+
+  // Shift a node (and its container inner nodes) along the cross axis by delta.
+  const shiftNode = (id: string, delta: number): void => {
+    const n = mutableNodes.get(id);
+    if (!n) return;
+    mutableNodes.set(id, {
+      ...n,
+      x: n.x + (crossAxis === 'x' ? delta : 0),
+      y: n.y + (crossAxis === 'y' ? delta : 0),
+    });
+    for (const innerId of containerInnerIds.get(id) ?? []) {
+      const inner = mutableNodes.get(innerId);
+      if (inner) {
+        mutableNodes.set(innerId, {
+          ...inner,
+          x: inner.x + (crossAxis === 'x' ? delta : 0),
+          y: inner.y + (crossAxis === 'y' ? delta : 0),
+        });
+      }
+    }
+  };
+
+  for (const [, heads] of outEdges) {
+    if (heads.length < 2) continue;
+
+    // Build exclusive branch node sets (same logic as buildLaneSets).
+    const perHeadReachable = new Map(heads.map((h) => [h, reachableFrom(h)]));
+    const branchSets = new Map<string, Set<string>>();
+    for (const head of heads) {
+      const mine = perHeadReachable.get(head)!;
+      const exclusive = new Set<string>([head]);
+      for (const id of mine) {
+        let shared = false;
+        for (const [otherHead, otherReachable] of perHeadReachable) {
+          if (otherHead !== head && otherReachable.has(id)) {
+            shared = true;
+            break;
+          }
+        }
+        if (!shared) exclusive.add(id);
+      }
+      branchSets.set(head, exclusive);
+    }
+
+    let prevBranchCrossEnd = -Infinity;
+
+    for (let i = 0; i < heads.length; i++) {
+      const head = heads[i];
+      const branchSpineIds = branchSets.get(head)!;
+
+      // 1. Shift branch spine nodes to start immediately after the previous branch compound.
+      if (i > 0 && isFinite(prevBranchCrossEnd)) {
+        const headNode = mutableNodes.get(head);
+        if (headNode) {
+          const delta = prevBranchCrossEnd + nodeSep - headNode[crossAxis];
+          if (Math.abs(delta) >= 0.001) {
+            for (const spineId of branchSpineIds) {
+              shiftNode(spineId, delta);
+            }
+          }
+        }
+      }
+
+      // 2. Collect lanes in this branch (BFS from spine node owners, then nested lane owners).
+      const branchLaneIds = new Set<string>();
+      const branchLanes: FallbackLane[] = [];
+      let queue = outerLanes.filter((l) => branchSpineIds.has(l.owner));
+      while (queue.length > 0) {
+        const next: FallbackLane[] = [];
+        for (const lane of queue) {
+          if (branchLaneIds.has(lane.head)) continue; // already collected
+          branchLanes.push(lane);
+          for (const id of lane.nodes) branchLaneIds.add(id);
+          for (const nested of outerLanes) {
+            if (lane.nodes.includes(nested.owner) && !branchLaneIds.has(nested.head)) {
+              next.push(nested);
+            }
+          }
+        }
+        queue = next;
+      }
+
+      // Sort shallowest-first, then by owner's main position.
+      branchLanes.sort((a, b) => {
+        if (a.depth !== b.depth) return a.depth - b.depth;
+        const aOwner = mutableNodes.get(a.owner);
+        const bOwner = mutableNodes.get(b.owner);
+        return (aOwner?.[mainAxis] ?? 0) - (bOwner?.[mainAxis] ?? 0);
+      });
+
+      // Re-place lanes using branch-local obstacles only.
+      type Rect = { crossStart: number; crossEnd: number; mainStart: number; mainEnd: number };
+      const placedPlacements: Rect[] = [];
+
+      for (const lane of branchLanes) {
+        const lanePos = lane.nodes
+          .map((id) => mutableNodes.get(id))
+          .filter((n): n is NonNullable<ReturnType<MutableNodes['get']>> => n !== undefined);
+        if (lanePos.length === 0) continue;
+
+        const ownerNode = mutableNodes.get(lane.owner);
+        const bandMainStart = ownerNode
+          ? ownerNode[mainAxis]
+          : Math.min(...lanePos.map((n) => n[mainAxis]));
+        const bandMainEnd = Math.max(...lanePos.map((n) => n[mainAxis] + n[mainSpan]));
+
+        // Branch-local spine obstacles: only spine nodes in this branch.
+        const spineObstacles = [...branchSpineIds]
+          .map((id) => mutableNodes.get(id))
+          .filter((n): n is NonNullable<ReturnType<MutableNodes['get']>> => n !== undefined)
+          .filter((n) => n[mainAxis] < bandMainEnd && bandMainStart < n[mainAxis] + n[mainSpan]);
+
+        // Already-placed branch lane obstacles.
+        const laneObstacles = placedPlacements.filter(
+          (p) => p.mainStart < bandMainEnd && bandMainStart < p.mainEnd
+        );
+
+        const maxCrossEnd = Math.max(
+          ...spineObstacles.map((n) => n[crossAxis] + n[crossSpan]),
+          ...laneObstacles.map((p) => p.crossEnd),
+          -Infinity
+        );
+
+        const origin = maxCrossEnd === -Infinity ? 0 : maxCrossEnd + nodeSep;
+        const currentMin = Math.min(...lanePos.map((n) => n[crossAxis]));
+        const delta = origin - currentMin;
+
+        if (Math.abs(delta) >= 0.001) {
+          for (const id of lane.nodes) shiftNode(id, delta);
+        }
+
+        const updatedPos = lane.nodes
+          .map((id) => mutableNodes.get(id))
+          .filter((n): n is NonNullable<ReturnType<MutableNodes['get']>> => n !== undefined);
+        if (updatedPos.length > 0) {
+          placedPlacements.push({
+            crossStart: Math.min(...updatedPos.map((n) => n[crossAxis])),
+            crossEnd: Math.max(...updatedPos.map((n) => n[crossAxis] + n[crossSpan])),
+            mainStart: Math.min(...updatedPos.map((n) => n[mainAxis])),
+            mainEnd: Math.max(...updatedPos.map((n) => n[mainAxis] + n[mainSpan])),
+          });
+        }
+      }
+
+      // 3. Compute branch compound cross extent (spine + lanes).
+      let branchCrossEnd = -Infinity;
+      for (const id of branchSpineIds) {
+        const n = mutableNodes.get(id);
+        if (n) {
+          const end = n[crossAxis] + n[crossSpan];
+          if (end > branchCrossEnd) branchCrossEnd = end;
+        }
+      }
+      for (const id of branchLaneIds) {
+        const n = mutableNodes.get(id);
+        if (n) {
+          const end = n[crossAxis] + n[crossSpan];
+          if (end > branchCrossEnd) branchCrossEnd = end;
+        }
+      }
+
+      if (isFinite(branchCrossEnd)) prevBranchCrossEnd = branchCrossEnd;
+    }
+  }
+
+  const resultNodes = nodes.map((original) => {
+    const updated = mutableNodes.get(original.id);
+    if (!updated) return original;
+    if (updated.x === original.x && updated.y === original.y) return original;
+    return { ...original, x: updated.x, y: updated.y } as DagPositionedNode;
+  });
+
   return { nodes: resultNodes, edges: [...edges] };
 };
 

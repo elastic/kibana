@@ -741,6 +741,109 @@ describe('spec 02 regression — named fixtures', () => {
     expect(pairs).toHaveLength(0);
   });
 
+  // ── Variant E — fallback owner in then branch, unequal-depth if ─────────────
+  // The then branch has 2 spine steps (then-step + foreach), else has 1.
+  // Dagre's tight-tree ranker puts else-step at rank 2 to tighten the else→merge
+  // edge. Fork head alignment (step 3.5 in layoutGraphWithLanes) must move
+  // else-step back to rank 1 so the fork is symmetric and the topology push
+  // does not incorrectly push else-step into the loop container's Y band.
+  it('variant E (unequal-depth if, fallback owner in then): fork heads are aligned and no pairwise overlap', () => {
+    const { result, transformed } = runLayout(
+      minimal({
+        steps: [
+          {
+            name: 'gate',
+            type: 'if',
+            condition: 'true',
+            steps: [
+              {
+                name: 'then-step',
+                type: 'http',
+                'on-failure': {
+                  fallback: [{ name: 'then-fallback', type: 'http' }],
+                },
+              },
+              {
+                name: 'loop-step',
+                type: 'foreach',
+                foreach: 'items',
+                steps: [{ name: 'inner', type: 'http' }],
+              },
+            ],
+            else: [{ name: 'else-step', type: 'http' }],
+          },
+          { name: 'final-step', type: 'http' },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    const thenStepNode = result.nodes.find((n) => n.id === 'then-step')!;
+    const elseStepNode = result.nodes.find((n) => n.id === 'else-step')!;
+    expect(thenStepNode).toBeDefined();
+    expect(elseStepNode).toBeDefined();
+    // Both fork heads must be at the same rank (fork head alignment).
+    expect(Math.abs(centerY(thenStepNode) - centerY(elseStepNode))).toBeLessThan(CENTER_TOLERANCE);
+    // No pairwise overlaps — else must not end up inside the foreach container.
+    const groupIds = new Set(transformed.foreachGroups.map((g) => g.id));
+    const pairs = findOverlappingPairs(result.nodes, groupIds);
+    expect(pairs).toHaveLength(0);
+  });
+
+  // ── Variant F — micro-compound ordering: each branch's fallback packed before next branch ──
+  // then branch has one step with a fallback; else branch has one step with a fallback.
+  // Expected cross-axis order (TB, left→right): then-step | then-fallback | else-step | else-fallback.
+  // The fallback for then must be to the LEFT of else-step (packed within the then compound),
+  // and the fallback for else must be to the RIGHT of else-step (packed within the else compound).
+  it('variant F (micro-compound): then-fallback is between then and else, else-fallback is right of else', () => {
+    const { result, transformed } = runLayout(
+      minimal({
+        steps: [
+          {
+            name: 'gate',
+            type: 'if',
+            condition: 'true',
+            steps: [
+              {
+                name: 'then-step',
+                type: 'http',
+                'on-failure': {
+                  fallback: [{ name: 'then-fallback', type: 'http' }],
+                },
+              },
+            ],
+            else: [
+              {
+                name: 'else-step',
+                type: 'http',
+                'on-failure': {
+                  fallback: [{ name: 'else-fallback', type: 'http' }],
+                },
+              },
+            ],
+          },
+          { name: 'final-step', type: 'http' },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    const thenNode = result.nodes.find((n) => n.id === 'then-step')!;
+    const thenFallback = result.nodes.find((n) => n.id === 'then-fallback')!;
+    const elseNode = result.nodes.find((n) => n.id === 'else-step')!;
+    const elseFallback = result.nodes.find((n) => n.id === 'else-fallback')!;
+    expect(thenNode).toBeDefined();
+    expect(thenFallback).toBeDefined();
+    expect(elseNode).toBeDefined();
+    expect(elseFallback).toBeDefined();
+    // then compound (then-step + then-fallback) is entirely left of else compound.
+    expect(centerX(thenFallback)).toBeLessThan(centerX(elseNode));
+    // else compound (else-step + else-fallback): else-fallback is right of else-step.
+    expect(centerX(elseNode)).toBeLessThan(centerX(elseFallback));
+    // Declaration order: then before else on cross axis.
+    expect(centerX(thenNode)).toBeLessThan(centerX(elseNode));
+    // No pairwise overlaps.
+    const groupIds = new Set(transformed.foreachGroups.map((g) => g.id));
+    const pairs = findOverlappingPairs(result.nodes, groupIds);
+    expect(pairs).toHaveLength(0);
+  });
+
   // ── continue: true — spine head shared between fallback and spine lanes ────
   it('continue: true — fork is not skipped (asymmetric exclusion)', () => {
     // Without the asymmetric exclusion fix, buildLaneSets would classify the

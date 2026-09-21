@@ -233,6 +233,76 @@ export function layoutGraphWithLanes(
     return maxEnd;
   }
 
+  // ── 3.5. Align fork heads (post-dagre rank correction) ──────────────────────
+  //
+  // Dagre's tight-tree ranker assigns the shorter branch of an if/switch/parallel
+  // fork to a later rank to tighten the edge to the merge node. For example, with
+  // then: [A, B] and else: [C], dagre puts C at rank 2 (tight C→merge) instead of
+  // rank 1 (parallel to A). The D7 topology push then leaves C stranded between
+  // the then head and the pushed loop step, producing an asymmetric fork.
+  //
+  // Fix: for each spine node with 2+ outgoing edges (a fork), move all fork heads
+  // to the minimum main position among them. After this, all fork heads share rank 1
+  // and the topology push correctly skips them (they are not successors of the owner).
+  const repositionedByAlignment = new Set<string>();
+  {
+    const outTargetsBySource = new Map<string, string[]>();
+    for (const e of spineEdges) {
+      if (!outTargetsBySource.has(e.source)) outTargetsBySource.set(e.source, []);
+      outTargetsBySource.get(e.source)!.push(e.target);
+    }
+    for (const targets of outTargetsBySource.values()) {
+      if (targets.length < 2) continue;
+      const targetNodes = targets.flatMap((t) => {
+        const n = spineById.get(t);
+        return n ? [n] : [];
+      });
+      if (targetNodes.length < 2) continue;
+      const minMain = Math.min(...targetNodes.map((n) => mainOf(n, isLR)));
+      for (const n of targetNodes) {
+        const curMain = mainOf(n, isLR);
+        if (curMain > minMain + 0.001) {
+          spineById.set(n.id, shiftMain(n, minMain - curMain, isLR));
+          repositionedByAlignment.add(n.id);
+        }
+      }
+    }
+    // Clear stale dagre waypoints for edges whose endpoint was realigned.
+    if (repositionedByAlignment.size > 0) {
+      spineLayout.edges.forEach((e, i) => {
+        if (repositionedByAlignment.has(e.source) || repositionedByAlignment.has(e.target)) {
+          spineLayout.edges[i] = { ...e, points: [] };
+        }
+      });
+    }
+  }
+
+  // Build a spine adjacency list for topology-based successor lookup (Fix 6).
+  // D7 push must only move actual spine successors of the owner — not parallel
+  // branches that happen to share a similar main-axis position. Using centre-y
+  // comparison would push else-branch nodes when they are at the same rank as
+  // a then-branch owner, moving them far below the Loop Step.
+  const spineAdj = new Map<string, string[]>();
+  for (const e of spineEdges) {
+    if (!spineAdj.has(e.source)) spineAdj.set(e.source, []);
+    spineAdj.get(e.source)!.push(e.target);
+  }
+
+  function getTransitiveSuccessors(startId: string): Set<string> {
+    const visited = new Set<string>();
+    const queue = [startId];
+    while (queue.length > 0) {
+      const id = queue.shift()!;
+      for (const next of spineAdj.get(id) ?? []) {
+        if (!visited.has(next)) {
+          visited.add(next);
+          queue.push(next);
+        }
+      }
+    }
+    return visited;
+  }
+
   // Process spine owners top-down; each push applies before the next owner is
   // visited so every owner's position is final when we level its lanes.
   const spineOwnersTopDown = [...spineById.values()]
@@ -252,9 +322,11 @@ export function layoutGraphWithLanes(
       const required = subtreeMainEnd(lane) + rankSep;
 
       // 3. Push the spine so the first successor starts at `required`.
-      const ownerMainCentre = mainOf(owner, isLR) + mainSpanOf(owner, isLR) / 2;
+      //    Use topology (transitive reachability via spine edges) to select only
+      //    real successors — parallel branches must not be pushed (Fix 6).
+      const ownerSuccessors = getTransitiveSuccessors(owner.id);
       const successors = [...spineById.values()]
-        .filter((n) => mainOf(n, isLR) + mainSpanOf(n, isLR) / 2 > ownerMainCentre)
+        .filter((n) => ownerSuccessors.has(n.id))
         .sort((a, b) => mainOf(a, isLR) - mainOf(b, isLR));
 
       if (successors.length === 0) continue; // owner is the last spine node
@@ -264,24 +336,24 @@ export function layoutGraphWithLanes(
       const deficit = Math.max(0, required - successorMainStart);
 
       if (deficit > 0) {
-        // Shift all spine nodes at or after the first successor.
+        // Shift only topological successors of the owner (Fix 6).
+        // Using `mainOf(n) >= successorMainStart` would also move parallel
+        // branches that happen to share the same Y as the first successor, e.g.
+        // the else-branch of an if-fork whose owner is in the then-branch.
         for (const n of [...spineById.values()]) {
-          if (mainOf(n, isLR) >= successorMainStart - 0.001) {
+          if (ownerSuccessors.has(n.id)) {
             spineById.set(n.id, shiftMain(n, deficit, isLR));
           }
         }
         // Translate spine edges across the push boundary.
         spineLayout.edges.forEach((e, i) => {
-          const targetNode = spineById.get(e.target);
-          if (targetNode && mainOf(targetNode, isLR) >= successorMainStart - 0.001 + deficit) {
-            const sourceNode = spineById.get(e.source);
-            if (sourceNode && e.source === owner.id) {
+          const targetPushed = ownerSuccessors.has(e.target);
+          const sourcePushed = ownerSuccessors.has(e.source);
+          if (targetPushed) {
+            if (e.source === owner.id) {
               // Owner → successor is straight (same column), clear waypoints.
               spineLayout.edges[i] = { ...e, points: [] };
-            } else if (
-              sourceNode &&
-              mainOf(sourceNode, isLR) >= successorMainStart - 0.001 + deficit
-            ) {
+            } else if (sourcePushed) {
               // Both endpoints were pushed — translate.
               spineLayout.edges[i] = {
                 ...e,

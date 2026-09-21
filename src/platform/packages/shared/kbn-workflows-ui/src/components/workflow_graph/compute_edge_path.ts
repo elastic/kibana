@@ -217,7 +217,9 @@ export function buildForkBusPath(
  * this path is never shared with a sibling edge.
  *
  * TB shape: source → trunk down → across to target-X → down to target.
- * LR shape: source → trunk right → across to target-Y → right to target.
+ * LR shape: source (bottom edge, inset from right) → drop to target-Y → run right to target.
+ *   The failure handle is unconditionally `Position.Bottom`, so the route leaves the bottom
+ *   edge and drops perpendicularly before turning right into the lane head.
  *
  * Exported for unit testing.
  */
@@ -228,17 +230,16 @@ export function buildFailureLanePath(
 ): { path: string; labelX: number; labelY: number } {
   const { sourceX: sx, sourceY: sy, targetX: tx, targetY: ty } = p;
   if (isLR) {
-    const busX = sx + trunk;
+    // Handle is on the bottom edge — drop straight to the lane head's row, then run right.
     const { path } = buildRoundedOrthogonalPath(
       [
-        { x: sx - 2, y: sy },
-        { x: busX, y: sy },
-        { x: busX, y: ty },
+        { x: sx, y: sy - 2 },
+        { x: sx, y: ty },
         { x: tx, y: ty },
       ],
       CORNER_RADIUS
     );
-    return { path, labelX: busX + FORK_BUS_LABEL_OFFSET, labelY: ty };
+    return { path, labelX: (sx + tx) / 2, labelY: ty - FORK_BUS_LABEL_OFFSET };
   }
   const busY = sy + trunk;
   const { path } = buildRoundedOrthogonalPath(
@@ -324,7 +325,15 @@ export const computeEdgePath = ({
   // the bus (LR) so all branch labels align on one row/column regardless of
   // how deep each branch target sits.
   const isForkEdge = branchType === 'switch' || branchType === 'then' || branchType === 'else';
-  const isLR = sourcePosition === Position.Right || sourcePosition === Position.Left;
+  // isLR checks both sides: the failure handle is unconditionally Position.Bottom (so that
+  // the edge exits the bottom edge in both TB and LR), but spine/fork edges still anchor
+  // on the right in LR. The target side is always direction-faithful, so checking it
+  // avoids mis-routing a failure edge in LR through the TB branch.
+  const isLR =
+    sourcePosition === Position.Right ||
+    sourcePosition === Position.Left ||
+    targetPosition === Position.Right ||
+    targetPosition === Position.Left;
   const forkGap = isLR ? targetX - sourceX : targetY - sourceY;
   const useFork = isForkEdge && forkGap > FORK_BUS_TRUNK;
 
