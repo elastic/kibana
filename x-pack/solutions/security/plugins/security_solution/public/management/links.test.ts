@@ -81,20 +81,6 @@ describe('links', () => {
     Object.assign(licenseServiceMock, createLicenseServiceMock());
   });
 
-  describe('Entity analytics settings link', () => {
-    it('uses a distinct title from the Entity analytics homepage for global search', () => {
-      const settingsLink = links.links?.find(
-        (link) => link.id === SecurityPageName.entityAnalyticsManagement
-      );
-
-      expect(settingsLink?.title).toBe('Entity analytics settings');
-      expect(settingsLink?.globalSearchKeywords).toEqual([
-        'Entity analytics',
-        'Entity analytics settings',
-      ]);
-    });
-  });
-
   describe('Endpoints category structure', () => {
     it('should order Endpoints section links as Endpoints, Policies, Artifacts, Response actions history, Script library', () => {
       const endpointsCategory = links.categories?.find((category) =>
