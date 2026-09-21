@@ -81,7 +81,7 @@ const setCasesMigratedFlag = async (
  * subject to the from/size result-window limit that breaks past ~10k docs). Fills only the
  * `extended_fields` keys a case does not have at all (absent or `null` — never overwriting any
  * existing entry, including an explicit `''` clear) and stops when the space is exhausted, the
- * per-run scan budget is hit, or the task is cancelled — returning where to resume in each of
+ * per-run scan budget is hit, or `shouldPause` goes true — returning where to resume in each of
  * those cases.
  */
 const backfillCasesForSpace = async (
@@ -89,7 +89,7 @@ const backfillCasesForSpace = async (
   so: SavedObject<ConfigurationPersistedAttributes>,
   resumeCursor: CaseBackfillCursor | undefined,
   scanBudget: number,
-  signal: AbortSignal,
+  shouldPause: () => boolean,
   executionId: string,
   log: Logger
 ): Promise<SpaceBackfillResult> => {
@@ -187,7 +187,7 @@ const backfillCasesForSpace = async (
   };
 
   while (true) {
-    if (signal.aborted) {
+    if (shouldPause()) {
       return { outcome: 'paused', scanned, backfilled, cursor: makeCursor() };
     }
 
@@ -278,7 +278,8 @@ const backfillCasesForSpace = async (
     }
 
     // Per-run scan budget hit. If a page failed, report `failed` (retry the space fresh — its cases
-    // are idempotent); otherwise `paused` with the PIT cursor so the next run resumes where we left off.
+    // are idempotent); otherwise `paused` with the PIT cursor so the next run resumes where we left
+    // off. The run budget is handled by `shouldPause` at the top of the next iteration.
     if (scanned >= scanBudget) {
       if (hadFailures) {
         await safeClosePit(repo, cursor.pitId, log);
@@ -332,7 +333,7 @@ export const runCaseBackfillPhase = async (
   repo: ISavedObjectsRepository,
   configures: Array<SavedObject<ConfigurationPersistedAttributes>>,
   resumeCursor: CaseBackfillCursor | undefined,
-  signal: AbortSignal,
+  shouldPause: () => boolean,
   executionId: string,
   log: Logger
 ): Promise<CaseBackfillPhaseResult> => {
@@ -361,7 +362,7 @@ export const runCaseBackfillPhase = async (
   let hadFailures = false;
 
   for (const so of ordered) {
-    if (signal.aborted) {
+    if (shouldPause()) {
       return { complete: false, backfilled, hadFailures, nextCursor: undefined };
     }
 
@@ -379,7 +380,7 @@ export const runCaseBackfillPhase = async (
       so,
       cursorForSpace,
       budgetLeft,
-      signal,
+      shouldPause,
       executionId,
       log
     );
@@ -387,7 +388,8 @@ export const runCaseBackfillPhase = async (
     backfilled += result.backfilled;
 
     if (result.outcome === 'paused') {
-      // Budget hit or cancelled on this space — stop and resume it (via its cursor) next run.
+      // Scan budget, run budget, or cancellation on this space — stop and resume it (via its
+      // cursor) next run.
       return { complete: false, backfilled, hadFailures, nextCursor: result.cursor };
     }
 

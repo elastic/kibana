@@ -32,6 +32,9 @@ import {
   CASE_BACKFILL_PAGE_SIZE,
   CASE_BACKFILL_RESCHEDULE_DELAY_MS,
   CASE_BACKFILL_FAILURE_RESCHEDULE_DELAY_MS,
+  CASE_BACKFILL_RUN_BUDGET_MS,
+  CASES_TEMPLATES_MIGRATION_TASK_TIMEOUT,
+  CASES_TEMPLATES_MIGRATION_TASK_TIMEOUT_MS,
   MAX_CASE_BACKFILL_FAILED_RUNS,
 } from './types';
 
@@ -220,6 +223,43 @@ describe('TemplatesMigrationTaskManager', () => {
       new TemplatesMigrationTaskManager(taskManagerSetupMock, logger);
       expect(taskManagerSetupMock.registerTaskDefinitions).toHaveBeenCalledWith(
         expect.objectContaining({ [CASES_TEMPLATES_MIGRATION_TASK_TYPE]: expect.any(Object) })
+      );
+    });
+
+    it('registers the task with the timeout the run budget is derived from', () => {
+      new TemplatesMigrationTaskManager(taskManagerSetupMock, logger);
+      const taskDef =
+        taskManagerSetupMock.registerTaskDefinitions.mock.calls[0][0][
+          CASES_TEMPLATES_MIGRATION_TASK_TYPE
+        ];
+      // A literal timeout here would let the registered value drift away from the constant the
+      // run budget is a fraction of, silently eroding the margin.
+      expect(taskDef.timeout).toBe(CASES_TEMPLATES_MIGRATION_TASK_TIMEOUT);
+    });
+  });
+
+  describe('run budget invariants', () => {
+    /** Parses a Task Manager timeout string like '10m' or '30s' to milliseconds. */
+    const parseTimeoutMs = (timeout: string): number => {
+      const match = timeout.match(/^(\d+)(m|s)$/);
+      if (!match) throw new Error(`Unknown timeout format: ${timeout}`);
+      const [, value, unit] = match;
+      return Number(value) * (unit === 'm' ? 60_000 : 1_000);
+    };
+
+    it('keeps the millisecond timeout in sync with the registered timeout string', () => {
+      expect(CASES_TEMPLATES_MIGRATION_TASK_TIMEOUT_MS).toBe(
+        parseTimeoutMs(CASES_TEMPLATES_MIGRATION_TASK_TIMEOUT)
+      );
+    });
+
+    it('leaves at least a 30% margin under the task timeout', () => {
+      // The margin must cover the work still outstanding when the budget is noticed at a page
+      // boundary — one find plus one bulkUpdate of a full page, then flagging the space and
+      // closing the PIT — on the slow cluster that is the only reason the budget ever binds. Past
+      // the timeout the run is expired and Task Manager discards the cursor it returns.
+      expect(CASE_BACKFILL_RUN_BUDGET_MS).toBeLessThanOrEqual(
+        CASES_TEMPLATES_MIGRATION_TASK_TIMEOUT_MS * 0.7
       );
     });
   });
@@ -2469,8 +2509,8 @@ describe('TemplatesMigrationTaskManager', () => {
     });
   });
 
-  describe('migration cancellation (Task Manager timeout / shutdown)', () => {
-    const abortFullPage = (sortValue: number) => ({
+  describe('pausing mid-run (abort signal or run budget)', () => {
+    const fullPage = (sortValue: number) => ({
       saved_objects: Array.from({ length: CASE_BACKFILL_PAGE_SIZE }, (_, i) => ({
         id: `case-abort-${sortValue}-${i}`,
         type: CASE_SAVED_OBJECT,
@@ -2482,7 +2522,7 @@ describe('TemplatesMigrationTaskManager', () => {
       pit_id: `pit-${sortValue}`,
     });
 
-    const abortFullPageWithLegacyField = (sortValue: number) => ({
+    const fullPageWithLegacyField = (sortValue: number) => ({
       saved_objects: Array.from({ length: CASE_BACKFILL_PAGE_SIZE }, (_, i) => ({
         id: `case-abort-${sortValue}-${i}`,
         type: CASE_SAVED_OBJECT,
@@ -2498,14 +2538,13 @@ describe('TemplatesMigrationTaskManager', () => {
       pit_id: `pit-${sortValue}`,
     });
 
-    const routeWithAbort = (
+    const routePages = (
       configSO: unknown,
-      controller: AbortController,
       {
-        abortAfterPage = 1,
-        pageFactory = abortFullPage,
+        onPage,
+        pageFactory = fullPage,
       }: {
-        abortAfterPage?: number;
+        onPage?: (page: number) => void;
         pageFactory?: (n: number) => unknown;
       } = {}
     ) => {
@@ -2519,13 +2558,21 @@ describe('TemplatesMigrationTaskManager', () => {
         }
         if (opts.type === CASE_SAVED_OBJECT) {
           casePageCount++;
-          if (casePageCount === abortAfterPage) {
-            controller.abort();
-          }
+          onPage?.(casePageCount);
           return Promise.resolve(pageFactory(casePageCount));
         }
         return Promise.resolve({ saved_objects: [], total: 0 });
       });
+    };
+
+    const abortOnPage = (controller: AbortController, page: number) => (fetchedPage: number) => {
+      if (fetchedPage === page) {
+        controller.abort();
+      }
+    };
+
+    const burnRunBudgetPerPage = (divisor: number) => () => {
+      jest.advanceTimersByTime(Math.ceil(CASE_BACKFILL_RUN_BUDGET_MS / divisor));
     };
 
     it('stops scanning at the next page boundary once the signal is aborted', async () => {
@@ -2535,9 +2582,9 @@ describe('TemplatesMigrationTaskManager', () => {
         legacyCustomFieldsMigrated: true,
         legacyTemplatesMigrated: true,
       });
-      // Abort fires during page 1's find call — the signal is checked (and honoured) at the top
-      // of the next loop iteration, so page 2 is never fetched.
-      routeWithAbort(configSO, controller, { abortAfterPage: 1 });
+      // Abort fires during page 1's find call — the stop condition is checked (and honoured) at
+      // the top of the next loop iteration, so page 2 is never fetched.
+      routePages(configSO, { onPage: abortOnPage(controller, 1) });
 
       const manager = await buildAndSchedule();
       await getTaskRunner(manager, controller.signal).run();
@@ -2547,7 +2594,7 @@ describe('TemplatesMigrationTaskManager', () => {
       expect(caseFinds).toHaveLength(1);
     });
 
-    it('pauses cleanly: persists the resume cursor, leaves the space unflagged, keeps the PIT open', async () => {
+    it('pauses cleanly: returns the resume cursor, leaves the space unflagged, keeps the PIT open', async () => {
       const controller = new AbortController();
       const configSO = buildConfigureSO({
         id: 'cfg-abort',
@@ -2556,12 +2603,11 @@ describe('TemplatesMigrationTaskManager', () => {
         legacyTemplatesMigrated: true,
       });
       // Abort fires during page 2's find — cursor reflects page 2's pit_id and searchAfter.
-      routeWithAbort(configSO, controller, { abortAfterPage: 2 });
+      routePages(configSO, { onPage: abortOnPage(controller, 2) });
 
       const manager = await buildAndSchedule();
       const result = await getTaskRunner(manager, controller.signal).run();
 
-      // Canceled run is indistinguishable from a budget-paused run: no throw, normal reschedule.
       expect(result).toMatchObject({
         runAt: expect.any(Date),
         state: {
@@ -2586,8 +2632,10 @@ describe('TemplatesMigrationTaskManager', () => {
       expect(repo.closePointInTime).not.toHaveBeenCalled();
     });
 
-    it('resumes from the aborted run cursor and finishes the space', async () => {
+    it('resumes from a paused run cursor and finishes the space', async () => {
       // ── Run 1: abort after two pages ───────────────────────────────────────────────
+      // Run 2 is handed run 1's state directly, standing in for the `partialUpdate` Task Manager
+      // performs for a non-expired run. What is under test here is this task's resume logic.
       const controller = new AbortController();
       const configSO = buildConfigureSO({
         id: 'cfg-resume',
@@ -2595,7 +2643,7 @@ describe('TemplatesMigrationTaskManager', () => {
         legacyCustomFieldsMigrated: true,
         legacyTemplatesMigrated: true,
       });
-      routeWithAbort(configSO, controller, { abortAfterPage: 2 });
+      routePages(configSO, { onPage: abortOnPage(controller, 2) });
 
       const manager = await buildAndSchedule();
       const run1Result = (await getTaskRunner(manager, controller.signal).run()) as {
@@ -2654,9 +2702,9 @@ describe('TemplatesMigrationTaskManager', () => {
       });
       // Pages where every case has a legacy field; abort after page 1.  The page-1 bulkUpdate
       // runs before the abort check fires, so the writes are complete and must not be lost.
-      routeWithAbort(configSO, controller, {
-        abortAfterPage: 1,
-        pageFactory: abortFullPageWithLegacyField,
+      routePages(configSO, {
+        onPage: abortOnPage(controller, 1),
+        pageFactory: fullPageWithLegacyField,
       });
 
       const manager = await buildAndSchedule();
@@ -2749,7 +2797,7 @@ describe('TemplatesMigrationTaskManager', () => {
         legacyCustomFieldsMigrated: true,
         legacyTemplatesMigrated: true,
       });
-      routeWithAbort(configSO, controller, { abortAfterPage: 1 });
+      routePages(configSO, { onPage: abortOnPage(controller, 1) });
 
       const manager = new TemplatesMigrationTaskManager(
         taskManagerSetupMock,
@@ -2810,9 +2858,9 @@ describe('TemplatesMigrationTaskManager', () => {
         legacyTemplatesMigrated: true,
       });
       // Pages with backfillable cases; abort fires during page 2's find call.
-      routeWithAbort(configSO, controller, {
-        abortAfterPage: 2,
-        pageFactory: abortFullPageWithLegacyField,
+      routePages(configSO, {
+        onPage: abortOnPage(controller, 2),
+        pageFactory: fullPageWithLegacyField,
       });
 
       const manager = await buildAndSchedule();
@@ -2824,6 +2872,95 @@ describe('TemplatesMigrationTaskManager', () => {
       expect(repo.bulkUpdate).toHaveBeenCalledTimes(2);
       // Cursor is past page 2 so the resumed run starts from page 3, not page 2 again.
       expect(result.state.caseBackfill).toMatchObject({ searchAfter: [2] });
+    });
+
+    describe('run budget (CASE_BACKFILL_RUN_BUDGET_MS)', () => {
+      // The production code schedules no timers; it reads the budget off `Date.now()`. Fake timers
+      // are here only to make that clock controllable from the `repo` mocks.
+      beforeEach(() => {
+        jest.useFakeTimers();
+      });
+
+      afterEach(() => {
+        jest.useRealTimers();
+      });
+
+      const budgetConfigSO = (id: string) =>
+        buildConfigureSO({
+          id,
+          customFields: [buildLegacyCustomField('cf_text')],
+          legacyCustomFieldsMigrated: true,
+          legacyTemplatesMigrated: true,
+        });
+
+      it('stops on the run budget alone, with the signal never aborted', async () => {
+        const controller = new AbortController();
+        routePages(budgetConfigSO('cfg-budget'), { onPage: burnRunBudgetPerPage(2) });
+
+        const manager = await buildAndSchedule();
+        const result = await getTaskRunner(manager, controller.signal).run();
+
+        expect(controller.signal.aborted).toBe(false);
+        const caseFinds = repo.find.mock.calls.filter((c) => c[0]?.type === CASE_SAVED_OBJECT);
+        expect(caseFinds).toHaveLength(2);
+        // Same clean pause as a cancellation: resumable cursor, space unflagged, PIT kept open.
+        expect(result).toMatchObject({
+          runAt: expect.any(Date),
+          state: {
+            caseBackfill: { configureId: 'cfg-budget', pitId: 'pit-2', searchAfter: [2] },
+          },
+        });
+        expect(result).not.toHaveProperty('shouldDeleteTask');
+        expect(repo.update).not.toHaveBeenCalledWith(
+          CASE_CONFIGURE_SAVED_OBJECT,
+          'cfg-budget',
+          { legacyCasesMigrated: true },
+          expect.anything()
+        );
+        expect(repo.closePointInTime).not.toHaveBeenCalled();
+      });
+
+      it('stops well before the scan budget would have (25 pages)', async () => {
+        routePages(budgetConfigSO('cfg-budget'), { onPage: burnRunBudgetPerPage(3) });
+
+        const manager = await buildAndSchedule();
+        await getTaskRunner(manager).run();
+
+        const caseFinds = repo.find.mock.calls.filter((c) => c[0]?.type === CASE_SAVED_OBJECT);
+        expect(caseFinds).toHaveLength(3);
+      });
+
+      it('counts Phase 1 against the budget: exhausting it there skips the case backfill', async () => {
+        // Phase 1 is unbudgeted (no scan budget applies) but shares the same task timeout, so the
+        // deadline is measured from the top of the run. A cluster where Phase 1 alone eats the
+        // budget must reschedule rather than start an unbounded scan it cannot finish in time.
+        const configSO = buildConfigureSO({
+          customFields: [buildLegacyCustomField('cf_text')],
+          templates: [buildLegacyTemplate('My Template', ['cf_text'])],
+          // Neither migration flag is set — Phase 1 has real work to do.
+        });
+        repo.find
+          .mockResolvedValueOnce({ saved_objects: [configSO], total: 1 }) // configure SOs
+          .mockResolvedValueOnce({ saved_objects: [], total: 0 }) // existing field-defs (none)
+          .mockResolvedValueOnce({ saved_objects: [], total: 0 }); // existing templates (none)
+        repo.create.mockImplementation(() => {
+          jest.advanceTimersByTime(CASE_BACKFILL_RUN_BUDGET_MS);
+          return Promise.resolve({ id: 'new-id', attributes: {}, references: [], type: 'test' });
+        });
+
+        const manager = await buildAndSchedule();
+        const result = await getTaskRunner(manager).run();
+
+        // Phase 1 still ran to completion — it is bounded, idempotent, and must not leave a space
+        // half-migrated with its flags unset.
+        expect(repo.create).toHaveBeenCalled();
+        // Phase 2 never started.
+        expect(repo.openPointInTimeForType).not.toHaveBeenCalled();
+        const caseFinds = repo.find.mock.calls.filter((c) => c[0]?.type === CASE_SAVED_OBJECT);
+        expect(caseFinds).toHaveLength(0);
+        expect(result).toMatchObject({ runAt: expect.any(Date) });
+        expect(result).not.toHaveProperty('shouldDeleteTask');
+      });
     });
   });
 });
