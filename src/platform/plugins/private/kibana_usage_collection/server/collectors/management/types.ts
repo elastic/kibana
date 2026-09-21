@@ -58,6 +58,7 @@ export interface UsageStats {
   'agentBuilder:externalMcp': boolean;
   'agentBuilder:experimentalFeatures': boolean;
   'agentBuilder:bashSupport': boolean;
+  'agentBuilder:apiDiscovery': boolean;
   'agentBuilder:deductiveEnabled': boolean;
   'agentBuilder:deductiveEndpoint': string;
   'agentBuilder:deductiveApiKey': string;
