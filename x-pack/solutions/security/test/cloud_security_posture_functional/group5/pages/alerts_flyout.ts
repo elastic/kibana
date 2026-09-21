@@ -35,7 +35,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
   const expandedFlyoutGraph = pageObjects.expandedFlyoutGraph;
   const timelinePage = pageObjects.timeline;
 
-  describe('Security Alerts Page - Graph visualization', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/284956
+  describe.skip('Security Alerts Page - Graph visualization', function () {
     this.tags(['cloud_security_posture_graph_viz']);
 
     before(async () => {
@@ -268,7 +269,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await alertsPage.flyout.assertPreviewPanelGroupedItemsNumber(2);
     });
 
-    describe('ECS fields only', function () {
+    // Failing: See https://github.com/elastic/kibana/issues/292038
+    describe.skip('ECS fields only', function () {
       // Entity store v2 is installed at the parent level for graph visibility.
       // Enrichment tests use LOOKUP JOIN (v2) with custom entity data loaded via esArchiver.
       before(async () => {
@@ -413,7 +415,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         });
       };
 
-      describe('via LOOKUP JOIN (v2)', () => {
+      // Failing: See https://github.com/elastic/kibana/issues/271798
+      describe.skip('via LOOKUP JOIN (v2)', () => {
         before(async () => {
           // Load v2 entity data into the entity store index created by v2 install
           await esArchiver.load(

@@ -128,6 +128,10 @@ export const ConfigurationBasicWithoutOwnerRt = rt.strict({
    * Observable types configured for the case
    */
   observableTypes: ObservableTypesConfigurationRt,
+  /**
+   * Whether to extract observables from the case
+   */
+  extractObservables: rt.boolean,
 });
 
 export const CasesConfigureBasicRt = rt.intersection([

@@ -118,7 +118,7 @@ export async function resumeWorkflow({
       { workflowExecutionGraph, workflowExecutionState },
       loadedExecution,
       workflowExecutionCursor.currentStackFrames,
-      { node, startedAt: stepExecution?.startedAt }
+      { node, startedAt: stepExecution?.startedAt, state: stepExecution?.state }
     );
     const resumeAt = stepExecution?.state?.resumeAt;
     const waitDeadline = typeof resumeAt === 'string' ? new Date(resumeAt).getTime() : Infinity;
