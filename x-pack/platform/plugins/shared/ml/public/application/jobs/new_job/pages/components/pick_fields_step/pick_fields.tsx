@@ -40,12 +40,16 @@ export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
 
   useEffect(() => {
     setNextActive(selectionValid && jobValidator.isPickFieldsStepValid);
+  }, [jobValidator, jobValidatorUpdated, selectionValid]);
 
-    return () => {
+  // reset the field stats flyout when leaving this step, not on every validation update
+  useEffect(
+    () => () => {
       setIsFlyoutVisible(false);
       setFieldName(undefined);
-    };
-  }, [jobValidator, jobValidatorUpdated, selectionValid, setIsFlyoutVisible, setFieldName]);
+    },
+    [setIsFlyoutVisible, setFieldName]
+  );
 
   return (
     <Fragment>
