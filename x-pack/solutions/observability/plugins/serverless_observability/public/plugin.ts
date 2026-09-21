@@ -12,7 +12,7 @@ import type { Subscription } from 'rxjs';
 import { combineLatest, distinctUntilChanged, map, of, switchMap } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
-import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
+import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/significant-events-plugin/common';
 import { createNavigationTree } from './navigation_tree';
 import type {
   ServerlessObservabilityPublicSetup,
@@ -50,7 +50,7 @@ export class ServerlessObservabilityPlugin
 
     const chatExperience$ = core.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
     const significantEventsAvailable = core.featureFlags.getBooleanValue(
-      STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG,
+      NIGHTSHIFT_ENABLED_FLAG,
       false
     );
 

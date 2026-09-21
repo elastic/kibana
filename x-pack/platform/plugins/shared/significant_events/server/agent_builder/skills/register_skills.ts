@@ -51,7 +51,7 @@ interface RegisterSignificantEventsSkillsOptions {
 
 /**
  * Registers the significant events agent-builder skills at start, gated by the
- * `streams.significantEventsAvailable` feature flag. Skills register through the start-phase
+ * `nightshift.enabled` feature flag. Skills register through the start-phase
  * `skills.register` API only when the feature is available, and again when the flag flips on. The
  * investigation skill is part of the unified experience, so it registers with the rest.
  *
@@ -145,7 +145,7 @@ export const registerSignificantEventsSkills = async ({
     await registerSkills(
       getCoreSkills(),
       'core',
-      'Significant events skills registered (streams.significantEventsAvailable is enabled)'
+      'Significant events skills registered (nightshift.enabled is enabled)'
     );
   };
 

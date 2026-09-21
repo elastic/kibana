@@ -6,7 +6,7 @@
  */
 
 import { globalTeardownHook } from '@kbn/scout';
-import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '../../../../common';
+import { NIGHTSHIFT_ENABLED_FLAG } from '../../../../common';
 
 globalTeardownHook(
   'Teardown environment for Significant Events API tests',
@@ -14,7 +14,7 @@ globalTeardownHook(
     log.debug('[teardown] Reverting significant events availability feature flag...');
     await apiServices.core.settings({
       'feature_flags.overrides': {
-        [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: false,
+        [NIGHTSHIFT_ENABLED_FLAG]: false,
       },
     });
 

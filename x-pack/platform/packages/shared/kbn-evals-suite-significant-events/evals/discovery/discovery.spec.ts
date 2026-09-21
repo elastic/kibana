@@ -6,7 +6,7 @@
  */
 
 import { SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID } from '@kbn/significant-events-plugin/server';
-import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
+import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/significant-events-plugin/common';
 import { tags } from '@kbn/scout';
 import { getCurrentTraceId } from '@kbn/evals';
 import type { Detection, SignificantEvent } from '@kbn/significant-events-schema';
@@ -68,7 +68,7 @@ evaluate.describe(
         headers: { 'elastic-api-version': '1' },
         body: {
           'feature_flags.overrides': {
-            [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: true,
+            [NIGHTSHIFT_ENABLED_FLAG]: true,
           },
         },
       });

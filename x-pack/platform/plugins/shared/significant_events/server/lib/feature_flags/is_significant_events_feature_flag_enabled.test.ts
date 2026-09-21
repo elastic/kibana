@@ -6,7 +6,7 @@
  */
 
 import type { FeatureFlagsStart } from '@kbn/core/server';
-import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '../../../common/feature_flags';
+import { NIGHTSHIFT_ENABLED_FLAG } from '../../../common/feature_flags';
 import { isSignificantEventsFeatureFlagEnabled } from './is_significant_events_feature_flag_enabled';
 
 describe('isSignificantEventsFeatureFlagEnabled', () => {
@@ -15,7 +15,7 @@ describe('isSignificantEventsFeatureFlagEnabled', () => {
     const featureFlags = { getBooleanValue } as unknown as FeatureFlagsStart;
 
     await expect(isSignificantEventsFeatureFlagEnabled(featureFlags)).resolves.toBe(false);
-    expect(getBooleanValue).toHaveBeenCalledWith(STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG, false);
+    expect(getBooleanValue).toHaveBeenCalledWith(NIGHTSHIFT_ENABLED_FLAG, false);
   });
 
   it('returns true when the feature flag is enabled', async () => {
@@ -23,6 +23,6 @@ describe('isSignificantEventsFeatureFlagEnabled', () => {
     const featureFlags = { getBooleanValue } as unknown as FeatureFlagsStart;
 
     await expect(isSignificantEventsFeatureFlagEnabled(featureFlags)).resolves.toBe(true);
-    expect(getBooleanValue).toHaveBeenCalledWith(STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG, false);
+    expect(getBooleanValue).toHaveBeenCalledWith(NIGHTSHIFT_ENABLED_FLAG, false);
   });
 });

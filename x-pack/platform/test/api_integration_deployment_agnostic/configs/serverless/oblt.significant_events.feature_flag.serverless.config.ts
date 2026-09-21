@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
+import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/significant-events-plugin/common';
 import { createServerlessFeatureFlagTestConfig } from '../../default_configs/feature_flag.serverless.config.base';
 import { services } from '../../services';
 
@@ -17,7 +17,7 @@ export default createServerlessFeatureFlagTestConfig<typeof services>({
   // engine override here until config/serverless.yml no longer disables it. The global UI setting
   // only exposes the Alerting v2 HTTP API used by these suites for rule lifecycle assertions.
   kbnServerArgs: [
-    `--feature_flags.overrides.${STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG}=true`,
+    `--feature_flags.overrides.${NIGHTSHIFT_ENABLED_FLAG}=true`,
     '--xpack.alerting_v2.enabled=true',
     '--uiSettings.globalOverrides.alerting:v2:enabled=true',
   ],

@@ -108,7 +108,7 @@ import {
 } from './agent_builder/agents/feature_identification';
 import { createSignificantEventsAvailability } from './agent_builder/tools/significant_events_availability';
 import { SIGNIFICANT_EVENT_TIERED_FEATURES } from '../common/constants';
-import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '../common/feature_flags';
+import { NIGHTSHIFT_ENABLED_FLAG } from '../common/feature_flags';
 import { isSignificantEventsAvailable } from './routes/utils/assert_significant_events_access';
 import type { SignificantEventsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
 
@@ -506,7 +506,7 @@ export class SignificantEventsPlugin
         ? isSignificantEventsAvailable({ server: this.server, licensing: plugins.licensing })
         : Promise.resolve(false);
     const available$ = combineLatest([
-      core.featureFlags.getBooleanValue$(STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG, false),
+      core.featureFlags.getBooleanValue$(NIGHTSHIFT_ENABLED_FLAG, false),
       plugins.licensing.license$,
     ]).pipe(switchMap(isAvailable), distinctUntilChanged());
 

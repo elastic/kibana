@@ -10,7 +10,7 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import {
   SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
-  STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG,
+  NIGHTSHIFT_ENABLED_FLAG,
 } from '@kbn/significant-events-schema';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -39,10 +39,7 @@ export const isInvestigationAvailable = async ({
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
   workflowsManagement?: WorkflowsServerPluginSetup;
 }): Promise<boolean> => {
-  const isFlagEnabled = await featureFlags.getBooleanValue(
-    STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG,
-    false
-  );
+  const isFlagEnabled = await featureFlags.getBooleanValue(NIGHTSHIFT_ENABLED_FLAG, false);
   if (!isFlagEnabled) {
     return false;
   }

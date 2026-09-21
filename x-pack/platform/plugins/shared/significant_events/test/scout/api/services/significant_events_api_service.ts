@@ -8,7 +8,7 @@
 import type { KbnClient, ScoutLogger } from '@kbn/scout/src/common';
 import { measurePerformanceAsync } from '@kbn/scout/src/common';
 import { COMMON_API_HEADERS } from '../fixtures/constants';
-import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '../../../../common';
+import { NIGHTSHIFT_ENABLED_FLAG } from '../../../../common';
 
 export interface SignificantEventsTestApiService {
   runSignificantEventsDiscovery: () => Promise<{ executionId: string }>;
@@ -39,7 +39,7 @@ export function getSignificantEventsTestApiService({
       headers: COMMON_API_HEADERS,
       body: {
         'feature_flags.overrides': {
-          [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: enabled,
+          [NIGHTSHIFT_ENABLED_FLAG]: enabled,
         },
       },
     });

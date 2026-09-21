@@ -173,4 +173,4 @@ export {
 
 export type { KnowledgeIndicatorClientContract } from './src/knowledge_indicator_client';
 
-export { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from './src/feature_flags';
+export { NIGHTSHIFT_ENABLED_FLAG } from './src/feature_flags';

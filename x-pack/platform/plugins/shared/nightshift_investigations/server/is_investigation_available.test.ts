@@ -6,7 +6,7 @@
  */
 
 import type { FeatureFlagsStart, KibanaRequest } from '@kbn/core/server';
-import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-schema';
+import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/significant-events-schema';
 import { isInvestigationAvailable } from './is_investigation_available';
 
 const request = {} as KibanaRequest;
@@ -41,10 +41,7 @@ it('returns true when every start requirement is available', async () => {
       workflowsManagement,
     })
   ).resolves.toBe(true);
-  expect(featureFlags.getBooleanValue).toHaveBeenCalledWith(
-    STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG,
-    false
-  );
+  expect(featureFlags.getBooleanValue).toHaveBeenCalledWith(NIGHTSHIFT_ENABLED_FLAG, false);
   expect(getForFeature).toHaveBeenCalledWith('significant_events_investigation', request);
 });
 
@@ -65,10 +62,7 @@ it('returns false when feature flag is disabled', async () => {
     })
   ).resolves.toBe(false);
 
-  expect(featureFlags.getBooleanValue).toHaveBeenCalledWith(
-    STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG,
-    false
-  );
+  expect(featureFlags.getBooleanValue).toHaveBeenCalledWith(NIGHTSHIFT_ENABLED_FLAG, false);
 });
 
 it('returns false when any dependency, connector, or workflow definition is unavailable', async () => {

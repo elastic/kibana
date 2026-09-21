@@ -18,7 +18,7 @@ import {
   SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
 } from '@kbn/significant-events-schema';
-import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
+import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/significant-events-plugin/common';
 import type { ConnectionConfig } from './get_connection_config';
 import { kibanaRequest } from './kibana';
 import { withTempSuperuser } from './user_utils';
@@ -76,7 +76,7 @@ export async function enableSignificantEvents(
   log.info('Enabling significant events...');
   const { status, data } = await kibanaRequest(config, 'PUT', '/internal/core/_settings', {
     'feature_flags.overrides': {
-      [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: true,
+      [NIGHTSHIFT_ENABLED_FLAG]: true,
     },
   });
 

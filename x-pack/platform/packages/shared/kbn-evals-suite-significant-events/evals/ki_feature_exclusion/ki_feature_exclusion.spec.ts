@@ -11,7 +11,7 @@ import {
   createChatCallsEvaluator,
   createSpanLatencyEvaluator,
 } from '@kbn/evals';
-import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
+import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/significant-events-plugin/common';
 import type { GcsConfig } from '../../src/data_generators/replay';
 import {
   SIGEVENTS_SNAPSHOT_RUN,
@@ -53,7 +53,7 @@ evaluate.describe(
         headers: { 'elastic-api-version': '1' },
         body: {
           'feature_flags.overrides': {
-            [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: true,
+            [NIGHTSHIFT_ENABLED_FLAG]: true,
           },
         },
       });
@@ -76,7 +76,7 @@ evaluate.describe(
         headers: { 'elastic-api-version': '1' },
         body: {
           'feature_flags.overrides': {
-            [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: null,
+            [NIGHTSHIFT_ENABLED_FLAG]: null,
           },
         },
       });

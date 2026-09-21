@@ -15,7 +15,7 @@ import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
 import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
 import { EVALS_APP_ID } from '@kbn/deeplinks-evals';
-import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
+import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/significant-events-plugin/common';
 import type { Location } from 'history';
 import { NightshiftNavigationIcon } from '@kbn/observability-shared-plugin/public';
 import type { ObservabilityPublicPluginsStart } from './plugin';
@@ -725,7 +725,7 @@ export const createDefinition = (
   pluginsStart: ObservabilityPublicPluginsStart
 ): AddSolutionNavigationArg => {
   const significantEventsAvailable = coreStart.featureFlags.getBooleanValue(
-    STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG,
+    NIGHTSHIFT_ENABLED_FLAG,
     false
   );
 

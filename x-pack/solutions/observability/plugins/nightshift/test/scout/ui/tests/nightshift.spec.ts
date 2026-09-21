@@ -8,7 +8,7 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { APP_HEADER_TEST_SUBJECTS, getAppMenuItemTestSubj } from '@kbn/app-header';
-import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
+import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/significant-events-plugin/common';
 import { test } from '../fixtures';
 
 test.describe(
@@ -16,14 +16,14 @@ test.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ apiServices, config }) => {
-      // Significant events discovery is gated behind the streams.significantEventsAvailable feature
+      // Significant events discovery is gated behind the nightshift.enabled feature
       // flag (defaults to false). The /internal/core/_settings route used to force it on is only
       // registered when coreApp.allowDynamicConfigOverrides=true (Scout's local base configs);
       // ECH/MKI deployments don't carry that override, so the PUT 404s — skip there.
       // eslint-disable-next-line playwright/no-skipped-test
       test.skip(
         config.isCloud === true,
-        `Cannot override '${STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG}' on Cloud deployments`
+        `Cannot override '${NIGHTSHIFT_ENABLED_FLAG}' on Cloud deployments`
       );
       // skip() in beforeAll only skips the tests, not the hook body, so guard the requests too.
       if (config.isCloud) {
@@ -32,7 +32,7 @@ test.describe(
 
       await apiServices.core.settings({
         'feature_flags.overrides': {
-          [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: true,
+          [NIGHTSHIFT_ENABLED_FLAG]: true,
         },
       });
     });
@@ -47,7 +47,7 @@ test.describe(
       }
       await apiServices.core.settings({
         'feature_flags.overrides': {
-          [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: false,
+          [NIGHTSHIFT_ENABLED_FLAG]: false,
         },
       });
     });
