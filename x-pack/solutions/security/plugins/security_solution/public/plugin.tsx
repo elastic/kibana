@@ -372,6 +372,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       registerAttackDiscoveryVerdictAttachment({
         attachments: plugins.agentBuilder.attachments,
       });
+      // Same as the server type: the Alert Triage Worker always writes
+      // `security.impact`. Gating the UI on endpointForensicAnalysisSkill left
+      // the investigation Attachments tab with only the alerts ID list.
+      registerImpactAttachment({
+        attachments: plugins.agentBuilder.attachments,
+      });
       if (this.experimentalFeatures.aiRuleCreationEnabled) {
         registerRuleAttachment({
           attachments: plugins.agentBuilder.attachments,
@@ -436,9 +442,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           attachments: plugins.agentBuilder.attachments,
         });
         registerInvestigationIocsAttachment({
-          attachments: plugins.agentBuilder.attachments,
-        });
-        registerImpactAttachment({
           attachments: plugins.agentBuilder.attachments,
         });
       }
