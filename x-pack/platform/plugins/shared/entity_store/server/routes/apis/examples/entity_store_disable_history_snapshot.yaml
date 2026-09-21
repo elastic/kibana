@@ -1,21 +1,12 @@
 requestBody:
   content:
     application/json:
-      schema:
-        type: object
-        properties:
-          clearHistorySnapshots:
-            type: boolean
-            description: >
-              When set to `true`, all existing history snapshot indices for this namespace are
-              deleted in the background after the task is disabled. The response returns
-              immediately without waiting for deletion to complete.
       examples:
         disableOnly:
           summary: Disable without clearing
           value: {}
         disableAndClear:
-          summary: Disable and clear all history snapshot indices
+          summary: Disable and clear snapshot indices
           value:
             clearHistorySnapshots: true
 responses:

@@ -17,7 +17,12 @@ import { EntityStoreNotInstalledError } from '../../domain/errors';
 import { buildStrictRouteValidationWithZod } from './utils/build_strict_route_validation';
 
 const bodySchema = z.object({
-  clearHistorySnapshots: z.boolean().default(false),
+  clearHistorySnapshots: z
+    .boolean()
+    .default(false)
+    .describe(
+      'When `true`, deletes existing history snapshot indices for this space in the background after the task is disabled. The response returns immediately and does not wait for deletion to finish. Deletion failures are logged and are not returned to the caller. If the task is already disabled, the request succeeds and does not delete indices. Defaults to `false`.'
+    ),
 });
 
 export function registerDisableHistorySnapshot(router: EntityStorePluginRouter) {
@@ -25,11 +30,12 @@ export function registerDisableHistorySnapshot(router: EntityStorePluginRouter) 
     .put({
       path: ENTITY_STORE_ROUTES.public.DISABLE_HISTORY_SNAPSHOT,
       access: 'public',
-      summary: 'Disable history snapshot task',
-      description: 'Disable the Entity Store history scheduled snapshot task.',
+      summary: 'Disable the history snapshot task',
+      description:
+        'Disable the Entity Store history snapshot task for this space so it no longer creates snapshot indices. Existing snapshot indices remain unless you set `clearHistorySnapshots` to `true`. Returns 404 if the Entity Store is not installed in the current space.',
       options: {
         tags: ['oas-tag:Security entity store'],
-        availability: { since: '9.6.0' },
+        availability: { stability: 'stable', since: '9.6.0' },
       },
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,

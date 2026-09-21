@@ -19,11 +19,12 @@ export function registerEnableHistorySnapshot(router: EntityStorePluginRouter) {
     .put({
       path: ENTITY_STORE_ROUTES.public.ENABLE_HISTORY_SNAPSHOT,
       access: 'public',
-      summary: 'Enable history snapshot task',
-      description: 'Enables and runs the Entity Store history scheduled snapshot task.',
+      summary: 'Enable the history snapshot task',
+      description:
+        'Enable the Entity Store history snapshot task for this space. After a successful enable, Kibana schedules an immediate snapshot run. If that immediate run fails, the response is still 200 and the task remains enabled for the next scheduled interval. If the task is already enabled, the request succeeds and does not start an extra run. Returns 404 if the Entity Store is not installed in the current space.',
       options: {
         tags: ['oas-tag:Security entity store'],
-        availability: { since: '9.6.0' },
+        availability: { stability: 'stable', since: '9.6.0' },
       },
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
