@@ -13,7 +13,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { findPackageForPath } from '@kbn/repo-packages';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Command } from '@kbn/dev-cli-runner';
-import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
+import { createFlagError } from '@kbn/dev-cli-errors';
 import type { ScoutTestChannel } from '@kbn/scout-info';
 import {
   ScoutTestTarget,
@@ -532,7 +532,7 @@ export const createTestTracks: Command<void> = {
         try {
           return testChannel.fromString(channel);
         } catch (e) {
-          throw createFailError(String(e));
+          throw createFlagError(String(e));
         }
       })
     );
