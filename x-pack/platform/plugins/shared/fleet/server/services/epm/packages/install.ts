@@ -71,11 +71,7 @@ import { licenseService } from '../..';
 import { appContextService } from '../../app_context';
 import { AUTO_INSTALL_CONTENT_PACKAGES_TASK_ID } from '../../../tasks/auto_install_content_packages_task';
 import * as Registry from '../registry';
-import {
-  setPackageInfo,
-  deleteVerificationResult,
-  unpackBufferToAssetsMap,
-} from '../archive';
+import { setPackageInfo, deleteVerificationResult, unpackBufferToAssetsMap } from '../archive';
 import { createArchiveIteratorFromMap } from '../archive/archive_iterator';
 import { toAssetReference } from '../kibana/assets/install';
 import type { ArchiveAsset } from '../kibana/assets/install';
@@ -119,7 +115,6 @@ export const UPLOAD_RETRY_AFTER_MS = 10000; // 10s
 const MAX_ENSURE_INSTALL_TIME = 60 * 1000;
 const MAX_INSTALL_RETRIES = 5;
 const BASE_RETRY_DELAY_MS = 1000; // 1s
-
 
 export async function isPackageInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;

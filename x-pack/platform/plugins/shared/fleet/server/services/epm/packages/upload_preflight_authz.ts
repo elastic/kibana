@@ -16,10 +16,7 @@ import { KibanaAssetType, KibanaSavedObjectType, type Installation } from '../..
 import { FleetUnauthorizedError } from '../../../errors';
 import { appContextService } from '../../app_context';
 import { getPathParts, traverseArchiveEntries } from '../archive';
-import {
-  filterAssetPathForParseAndVerifyArchive,
-  parseAndVerifyArchive,
-} from '../archive/parse';
+import { filterAssetPathForParseAndVerifyArchive, parseAndVerifyArchive } from '../archive/parse';
 import { PACKAGES_TO_INSTALL_WITH_STREAMING } from './streaming_packages';
 
 // Single source of truth: asset type → required Kibana API privileges.
@@ -167,7 +164,6 @@ export async function checkUploadPackageAssetPrivileges({
   installation,
   savedObjectsClient,
 }: CheckUploadPackageAssetPrivilegesOptions): Promise<string[]> {
-
   // Compute destination spaces first — needed for both the existing-asset scan
   // and the privilege check, so the two are always consistent.
   const effectivePrimarySpace =
@@ -288,7 +284,9 @@ export async function checkUploadPackageAssetPrivileges({
         ),
       ];
       throw new FleetUnauthorizedError(
-        `Insufficient privileges to upload this package in space(s) ${spaces.join(', ')}. Missing: ${missingPrivileges.join(', ')}`
+        `Insufficient privileges to upload this package in space(s) ${spaces.join(
+          ', '
+        )}. Missing: ${missingPrivileges.join(', ')}`
       );
     }
   }

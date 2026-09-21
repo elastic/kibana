@@ -12,7 +12,6 @@ import { FleetUnauthorizedError } from '../../../errors';
 import { appContextService } from '../../app_context';
 import { traverseArchiveEntries } from '../archive';
 
-import type { ArchiveSignals } from './upload_preflight_authz';
 import {
   checkUploadPackageAssetPrivileges,
   collectArchiveSignals,
@@ -279,7 +278,10 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     await checkUploadPackageAssetPrivileges({
       request: mockRequest,
-      archiveSignals: { gatedTypesFound: new Set([KibanaAssetType.securityRule]), hasMlSecurityRules: false },
+      archiveSignals: {
+        gatedTypesFound: new Set([KibanaAssetType.securityRule]),
+        hasMlSecurityRules: false,
+      },
       spaceId: mockSpaceId,
       pkgName: 'mypackage',
       installation: undefined,
@@ -303,7 +305,10 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     await checkUploadPackageAssetPrivileges({
       request: mockRequest,
-      archiveSignals: { gatedTypesFound: new Set([KibanaAssetType.securityRule]), hasMlSecurityRules: true },
+      archiveSignals: {
+        gatedTypesFound: new Set([KibanaAssetType.securityRule]),
+        hasMlSecurityRules: true,
+      },
       spaceId: mockSpaceId,
       pkgName: 'mypackage',
       installation: undefined,
@@ -326,7 +331,10 @@ describe('checkUploadPackageAssetPrivileges', () => {
     await expect(
       checkUploadPackageAssetPrivileges({
         request: mockRequest,
-        archiveSignals: { gatedTypesFound: new Set([KibanaAssetType.securityRule]), hasMlSecurityRules: true },
+        archiveSignals: {
+          gatedTypesFound: new Set([KibanaAssetType.securityRule]),
+          hasMlSecurityRules: true,
+        },
         spaceId: mockSpaceId,
         pkgName: 'mypackage',
         installation: undefined,
@@ -342,7 +350,10 @@ describe('checkUploadPackageAssetPrivileges', () => {
     await expect(
       checkUploadPackageAssetPrivileges({
         request: mockRequest,
-        archiveSignals: { gatedTypesFound: new Set([KibanaAssetType.securityRule]), hasMlSecurityRules: false },
+        archiveSignals: {
+          gatedTypesFound: new Set([KibanaAssetType.securityRule]),
+          hasMlSecurityRules: false,
+        },
         spaceId: mockSpaceId,
         pkgName: 'mypackage',
         installation: undefined,
@@ -357,7 +368,10 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     await checkUploadPackageAssetPrivileges({
       request: mockRequest,
-      archiveSignals: { gatedTypesFound: new Set([KibanaAssetType.securityAIPrompt]), hasMlSecurityRules: false },
+      archiveSignals: {
+        gatedTypesFound: new Set([KibanaAssetType.securityAIPrompt]),
+        hasMlSecurityRules: false,
+      },
       spaceId: mockSpaceId,
       pkgName: 'mypackage',
       installation: undefined,
@@ -377,7 +391,10 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     await checkUploadPackageAssetPrivileges({
       request: mockRequest,
-      archiveSignals: { gatedTypesFound: new Set([KibanaAssetType.securityRule, KibanaAssetType.securityAIPrompt]), hasMlSecurityRules: true },
+      archiveSignals: {
+        gatedTypesFound: new Set([KibanaAssetType.securityRule, KibanaAssetType.securityAIPrompt]),
+        hasMlSecurityRules: true,
+      },
       spaceId: mockSpaceId,
       pkgName: 'mypackage',
       installation: undefined,
@@ -403,7 +420,10 @@ describe('checkUploadPackageAssetPrivileges', () => {
     await expect(
       checkUploadPackageAssetPrivileges({
         request: mockRequest,
-        archiveSignals: { gatedTypesFound: new Set([KibanaAssetType.securityRule]), hasMlSecurityRules: false },
+        archiveSignals: {
+          gatedTypesFound: new Set([KibanaAssetType.securityRule]),
+          hasMlSecurityRules: false,
+        },
         spaceId: mockSpaceId,
         pkgName: 'mypackage',
         installation: undefined,
@@ -425,7 +445,10 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     await checkUploadPackageAssetPrivileges({
       request: mockRequest,
-      archiveSignals: { gatedTypesFound: new Set([KibanaAssetType.securityRule]), hasMlSecurityRules: false },
+      archiveSignals: {
+        gatedTypesFound: new Set([KibanaAssetType.securityRule]),
+        hasMlSecurityRules: false,
+      },
       spaceId: mockSpaceId,
       pkgName: 'mypackage',
       installation,
@@ -452,7 +475,10 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     await checkUploadPackageAssetPrivileges({
       request: mockRequest,
-      archiveSignals: { gatedTypesFound: new Set([KibanaAssetType.securityRule]), hasMlSecurityRules: false },
+      archiveSignals: {
+        gatedTypesFound: new Set([KibanaAssetType.securityRule]),
+        hasMlSecurityRules: false,
+      },
       spaceId: 'space-x',
       pkgName: 'mypackage',
       installation,
@@ -480,7 +506,10 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     const result = await checkUploadPackageAssetPrivileges({
       request: mockRequest,
-      archiveSignals: { gatedTypesFound: new Set([KibanaAssetType.securityRule]), hasMlSecurityRules: false },
+      archiveSignals: {
+        gatedTypesFound: new Set([KibanaAssetType.securityRule]),
+        hasMlSecurityRules: false,
+      },
       spaceId: mockSpaceId,
       pkgName: 'mypackage',
       installation,
@@ -504,7 +533,10 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     const result = await checkUploadPackageAssetPrivileges({
       request: mockRequest,
-      archiveSignals: { gatedTypesFound: new Set([KibanaAssetType.securityRule]), hasMlSecurityRules: false },
+      archiveSignals: {
+        gatedTypesFound: new Set([KibanaAssetType.securityRule]),
+        hasMlSecurityRules: false,
+      },
       spaceId: 'space-x',
       pkgName: 'mypackage',
       installation,
@@ -647,7 +679,10 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     const result = await checkUploadPackageAssetPrivileges({
       request: mockRequest,
-      archiveSignals: { gatedTypesFound: new Set([KibanaAssetType.securityRule]), hasMlSecurityRules: false },
+      archiveSignals: {
+        gatedTypesFound: new Set([KibanaAssetType.securityRule]),
+        hasMlSecurityRules: false,
+      },
       spaceId: mockSpaceId,
       pkgName: 'security_detection_engine',
       installation,
