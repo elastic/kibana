@@ -9,7 +9,7 @@
 
 import path from 'node:path';
 import { ToolingLog } from '@kbn/tooling-log';
-import { SCOUT_REPORT_OUTPUT_ROOT, ScoutTestTarget } from '@kbn/scout-info';
+import { SCOUT_REPORT_OUTPUT_ROOT, ScoutTestTarget, targetAttributes } from '@kbn/scout-info';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ScoutFileInfo } from '@kbn/scout-reporting';
 import { computeTestID } from '@kbn/scout-reporting';
@@ -73,6 +73,7 @@ export class ScoutFTRReporter {
       target: {
         type: testTarget?.location || 'local',
         mode: testTarget?.tagWithoutLocation || 'unknown',
+        attributes: targetAttributes.current(),
       },
       config: {
         file: this.getScoutFileInfoForPath(path.relative(REPO_ROOT, config.path)),
