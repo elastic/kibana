@@ -139,7 +139,9 @@ export const createVegaGraph = async (
       // restyle cannot fail or regenerate because the probe could not run.
       return {
         esqlQuery: state.esqlQuery,
-        actions: [{ type: 'generate_esql', success: true, query: state.esqlQuery }],
+        actions: [
+          { type: 'generate_esql', success: true, preserved: true, query: state.esqlQuery },
+        ],
       };
     }
 

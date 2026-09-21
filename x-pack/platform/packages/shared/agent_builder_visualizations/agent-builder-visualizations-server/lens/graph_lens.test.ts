@@ -540,6 +540,16 @@ describe('createVisualizationGraph', () => {
 
     expect(mockedExecuteEsql).not.toHaveBeenCalled();
     expect(mockedGenerateEsql).not.toHaveBeenCalled();
+    expect(finalState.actions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'generate_esql',
+          success: true,
+          preserved: true,
+          query: existingQuery,
+        }),
+      ])
+    );
     expect(finalState.error).toBeNull();
     expect(finalState.validatedConfig).toEqual({
       type: 'metric',

@@ -411,6 +411,16 @@ describe('createVegaGraph', () => {
 
     expect(mockedExecuteEsql).not.toHaveBeenCalled();
     expect(mockedGenerateEsql).not.toHaveBeenCalled();
+    expect(state.actions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'generate_esql',
+          success: true,
+          preserved: true,
+          query: PROVIDED_ESQL,
+        }),
+      ])
+    );
     expect(state.error).toBeNull();
     expect(JSON.parse(state.spec!).data.url.query).toBe(PROVIDED_ESQL);
   });

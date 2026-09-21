@@ -100,12 +100,12 @@ export const resolveEsqlForAuthoring = async ({
     const generated = await generateVisualizationEsql({
       nlQuery,
       existingQueries,
+      extraInstructions,
       index,
       modelProvider,
       events,
       logger,
       esClient,
-      ...(extraInstructions ? { extraInstructions } : {}),
     });
 
     if (!generated.query) {
