@@ -6,7 +6,6 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { escapeKuery } from '@kbn/es-query';
 import type { UrlFilter } from '@kbn/exploratory-view-plugin/public';
 import { useSelector } from 'react-redux-v7';
 import { isEmpty } from 'lodash';
@@ -15,7 +14,6 @@ import type { OverviewStatusFilter } from '../../../../../../common/constants/mo
 import {
   getHeartbeatLocationFilter,
   groupOverviewStatusFilterIds,
-  isUnmappedHeartbeatLocation,
   overviewStatusFilterIdKey,
 } from '../../../../../../common/lib';
 import type { OverviewStatusFilterId } from '../../../../../../common/runtime_types';
@@ -110,34 +108,6 @@ const monitorIdQuery = (ids: OverviewStatusFilterId[]): estypes.QueryDslQueryCon
   return { bool: { should: clauses, minimum_should_match: 1 } };
 };
 
-const locationKuery = (locationId: string): string =>
-  isUnmappedHeartbeatLocation(locationId)
-    ? 'not observer.name: *'
-    : kqlValuesClause('observer.name', [locationId]);
-
-const monitorFilterIdsToKuery = (ids: OverviewStatusFilterId[]): string => {
-  if (!ids.length) {
-    return kqlValuesClause('monitor.id', [NO_MATCHING_MONITOR_ID]);
-  }
-
-  const groupClauses = groupOverviewStatusFilterIds(ids).map(
-    ({ remoteName, locationId, queryIds }) => {
-      const parts = [kqlValuesClause('monitor.id', queryIds)];
-      if (remoteName) {
-        // `escapeKuery` would escape `*` / `:`, so only the cluster name is
-        // escaped; `\:*` keeps the CCS `cluster:index` wildcard.
-        parts.push(`_index: ${escapeKuery(remoteName)}\\:*`);
-      }
-      if (locationId) {
-        parts.push(locationKuery(locationId));
-      }
-      return parts.length === 1 ? parts[0] : `(${parts.join(' and ')})`;
-    }
-  );
-
-  return groupClauses.length === 1 ? groupClauses[0] : `(${groupClauses.join(' or ')})`;
-};
-
 // The `monitor.id` scoping (status filter, or the schedules/AND-locations
 // branch's `allIds`) is deliberately kept out of `useMonitorFilters`'s
 // `UrlFilter[]` output and expressed as DSL here instead. `UrlFilter`s get
@@ -187,30 +157,24 @@ export const useMonitorIdFilter = (): estypes.QueryDslQueryContainer | undefined
 };
 
 /**
- * Alert-compatible KQL for the overview Alerts count destination. Mirrors
- * `useOverviewAlertsCount` (UrlFilters + locations + monitor-id identity)
- * because the observability alerts URL can only take kuery, not a `terms`
- * query.
+ * Alert-compatible KQL for the overview Alerts count destination. Mirrors the
+ * count's UrlFilters + locations + lifecycle statuses. Monitor-id identity
+ * stays a `terms` DSL on the count/chart — the alerts URL only accepts KQL,
+ * and expanding the unpaginated ID set with `or` hits Elasticsearch's
+ * boolean-clause limit (and can overflow the URL).
  */
-export const useOverviewAlertsKuery = (): string | undefined => {
+export const useOverviewAlertsKuery = (): string => {
   const { locations } = useGetUrlParams();
   const alertsFilters = useMonitorFilters({ forAlerts: true });
-  const ids = useOverviewMonitorFilterIds();
 
-  const clauses: string[] = [];
-  for (const filter of alertsFilters) {
-    if (filter.values?.length) {
-      clauses.push(kqlValuesClause(filter.field, filter.values));
-    }
-  }
+  const clauses = [
+    kqlValuesClause('kibana.alert.status', ['active', 'recovered']),
+    ...alertsFilters
+      .filter((filter) => Boolean(filter.values?.length))
+      .map((filter) => kqlValuesClause(filter.field, filter.values ?? [])),
+  ];
   if (locations?.length && !alertsFilters.some((filter) => filter.field === 'observer.geo.name')) {
     clauses.push(kqlValuesClause('observer.geo.name', getValues(locations)));
-  }
-  if (ids) {
-    clauses.push(monitorFilterIdsToKuery(ids));
-  }
-  if (!clauses.length) {
-    return undefined;
   }
   return clauses.join(' and ');
 };

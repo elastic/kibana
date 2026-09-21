@@ -460,7 +460,7 @@ describe('useOverviewAlertsKuery', () => {
   const paramSpy = jest.spyOn(paramHook, 'useGetUrlParams');
   const selSPy = jest.spyOn(redux, 'useSelector');
 
-  it('includes space, location, and Down-status monitor identity', () => {
+  it('includes lifecycle status, space, and location without expanding monitor ids to KQL', () => {
     spaceSpy.mockReturnValue({ space: { id: 'space1' } } as any);
     paramSpy.mockReturnValue({
       statusFilter: 'down',
@@ -476,36 +476,8 @@ describe('useOverviewAlertsKuery', () => {
     const { result } = renderHook(() => useOverviewAlertsKuery(), { wrapper: WrappedHelper });
 
     expect(result.current).toEqual(
-      'observer.geo.name: "Japan" and kibana.space_ids: "space1" and monitor.id: "id2"'
+      'kibana.alert.status: ("active" or "recovered") and observer.geo.name: "Japan" and kibana.space_ids: "space1"'
     );
-  });
-
-  it('scopes a remote Down filter by cluster and location in KQL', () => {
-    spaceSpy.mockReturnValue({} as any);
-    paramSpy.mockReturnValue({ statusFilter: 'down' } as any);
-    selSPy.mockReturnValue({
-      status: {
-        allIds: [
-          {
-            monitorQueryId: 'shared-id',
-            remoteName: 'cluster-east',
-            locationId: 'us-east-1',
-          },
-        ],
-        downIds: [
-          {
-            monitorQueryId: 'shared-id',
-            remoteName: 'cluster-east',
-            locationId: 'us-east-1',
-          },
-        ],
-      },
-    });
-
-    const { result } = renderHook(() => useOverviewAlertsKuery(), { wrapper: WrappedHelper });
-
-    expect(result.current).toEqual(
-      '(monitor.id: "shared-id" and _index: cluster-east\\:* and observer.name: "us-east-1")'
-    );
+    expect(result.current).not.toContain('monitor.id');
   });
 });

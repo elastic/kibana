@@ -13,9 +13,12 @@ jest.mock('../../../contexts', () => ({
   useSyntheticsSettingsContext: () => ({ basePath: '/s/default' }),
 }));
 
-const decodeKuery = (url: string): string => {
+const decodeAppState = (url: string) => {
   const encoded = url.split('_a=')[1];
-  return (rison.decode(decodeURIComponent(encoded)) as { kuery: string }).kuery;
+  return rison.decode(decodeURIComponent(encoded)) as {
+    kuery: string;
+    status?: string;
+  };
 };
 
 describe('useAlertsUrl', () => {
@@ -24,7 +27,7 @@ describe('useAlertsUrl', () => {
   it('scopes to monitor status alerts by default', () => {
     const { result } = renderHook(() => useAlertsUrl(range));
 
-    const kuery = decodeKuery(result.current);
+    const { kuery } = decodeAppState(result.current);
     expect(kuery).toContain('Synthetics monitor status');
     expect(kuery).not.toContain('Synthetics TLS certificate');
   });
@@ -32,7 +35,7 @@ describe('useAlertsUrl', () => {
   it('includes TLS alerts when includeTls is set', () => {
     const { result } = renderHook(() => useAlertsUrl({ ...range, includeTls: true }));
 
-    const kuery = decodeKuery(result.current);
+    const { kuery } = decodeAppState(result.current);
     expect(kuery).toContain('Synthetics monitor status');
     expect(kuery).toContain('Synthetics TLS certificate');
   });
@@ -42,13 +45,16 @@ describe('useAlertsUrl', () => {
       useAlertsUrl({
         ...range,
         includeTls: true,
-        extraKuery: 'kibana.space_ids: "default" and monitor.id: "id2"',
+        extraKuery:
+          'kibana.space_ids: "default" and kibana.alert.status: ("active" or "recovered")',
+        status: 'all',
       })
     );
 
-    const kuery = decodeKuery(result.current);
+    const { kuery, status } = decodeAppState(result.current);
     expect(kuery).toContain('Synthetics TLS certificate');
     expect(kuery).toContain('kibana.space_ids: "default"');
-    expect(kuery).toContain('monitor.id: "id2"');
+    expect(kuery).toContain('kibana.alert.status: ("active" or "recovered")');
+    expect(status).toBe('all');
   });
 });

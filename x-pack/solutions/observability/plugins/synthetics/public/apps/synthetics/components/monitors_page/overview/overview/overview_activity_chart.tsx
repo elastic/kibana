@@ -52,6 +52,7 @@ export const useOverviewActivityStats = (): MonitorStatProps[] => {
     rangeTo: to,
     includeTls: true,
     extraKuery,
+    status: 'all',
   });
 
   return [

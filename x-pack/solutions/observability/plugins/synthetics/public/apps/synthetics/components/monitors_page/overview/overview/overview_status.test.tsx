@@ -141,4 +141,16 @@ describe('OverviewStatus', () => {
       statusFilter: 'up',
     });
   });
+
+  it('uses onStatusFilterClick instead of merging into the current URL', () => {
+    const onStatusFilterClick = jest.fn();
+    const { getByText } = render(
+      <OverviewStatus areStatsClickable onStatusFilterClick={onStatusFilterClick} />
+    );
+
+    fireEvent.click(getByText('Down'));
+
+    expect(onStatusFilterClick).toHaveBeenCalledWith('down');
+    expect(updateUrlParamsMock).not.toHaveBeenCalled();
+  });
 });

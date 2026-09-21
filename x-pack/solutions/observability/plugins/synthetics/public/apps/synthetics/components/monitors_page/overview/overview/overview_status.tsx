@@ -130,12 +130,17 @@ export function OverviewStatus({
   areStatsClickable = false,
   extraStats = [],
   onStatusViewChange,
+  onStatusFilterClick,
 }: {
   titleAppend?: React.ReactNode;
   hideTitle?: boolean;
   areStatsClickable?: boolean;
   extraStats?: MonitorStatProps[];
   onStatusViewChange?: (view: OverviewStatusView) => void;
+  // Dashboard embeddables host this on a private history — merge-style
+  // `updateUrlParams` would only change the dashboard URL. Callers that are
+  // not the Synthetics overview pass a handler that `navigateToApp`s instead.
+  onStatusFilterClick?: (statusFilter: string) => void;
 }) {
   const { statusFilter } = useGetUrlParams();
   const [, updateUrlParams] = useUrlParams();
@@ -246,12 +251,16 @@ export function OverviewStatus({
   const getOnClickStat = useCallback(
     (statusFilterName: string) => {
       return () => {
+        if (onStatusFilterClick) {
+          onStatusFilterClick(statusFilterName);
+          return;
+        }
         updateUrlParams({
           statusFilter: statusFilter !== statusFilterName ? statusFilterName : undefined,
         });
       };
     },
-    [statusFilter, updateUrlParams]
+    [statusFilter, updateUrlParams, onStatusFilterClick]
   );
 
   const monitorStatData = useMemo(() => {

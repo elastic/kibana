@@ -116,12 +116,17 @@ export const useAlertsUrl = ({
   monitorId,
   includeTls,
   extraKuery,
+  status,
 }: {
   monitorId?: string;
   rangeFrom: string;
   rangeTo: string;
   includeTls?: boolean;
   extraKuery?: string;
+  // Observability Alerts defaults the status control to `active`. Overview
+  // passes `all` so recovered alerts remain visible, then restricts untracked
+  // via `kibana.alert.status` in extraKuery.
+  status?: 'all' | 'active' | 'recovered' | 'untracked';
 }) => {
   const { basePath } = useSyntheticsSettingsContext();
 
@@ -141,6 +146,7 @@ export const useAlertsUrl = ({
     kuery,
     rangeFrom,
     rangeTo,
+    ...(status ? { status } : {}),
   })}`;
 };
 
