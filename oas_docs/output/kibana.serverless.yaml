@@ -10022,18 +10022,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the user does not have the required privileges to perform the request.
-        '404':
-          content:
-            application/json:
-              examples:
-                actionPolicyNotFound:
-                  summary: Indicates an action policy with the given ID does not exist.
-                  value:
-                    code: ACTION_POLICY_NOT_FOUND
-                    details:
-                      action_policy_id: action-policy-1
-                    error: Not Found
-                    message: Action policy with ID "action-policy-1" not found
         '409':
           content:
             application/json:
@@ -15167,18 +15155,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the user does not have the required privileges to perform the request.
-        '404':
-          content:
-            application/json:
-              examples:
-                ruleNotFound:
-                  summary: No rule exists for the given ID
-                  value:
-                    code: RULE_NOT_FOUND
-                    details:
-                      rule_id: rule-1
-                    error: Not Found
-                    message: Rule with id "rule-1" not found
         '409':
           content:
             application/json:
