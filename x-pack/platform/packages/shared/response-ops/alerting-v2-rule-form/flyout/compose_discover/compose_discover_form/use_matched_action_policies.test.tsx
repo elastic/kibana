@@ -48,7 +48,7 @@ describe('useMatchedActionPolicies', () => {
     expect(result.current.evaluatedCount).toBe(fakeResponse.evaluated_count);
     expect(result.current.isTruncated).toBe(fakeResponse.is_truncated);
     expect(http.fetch).toHaveBeenCalledWith(
-      '/internal/alerting/v2/action_policies/_match_for_rule',
+      '/internal/alerting/v2/action_policies/_match',
       expect.objectContaining({
         method: 'POST',
         body: JSON.stringify({ rule: { tags: ['env:prod'] } }),
@@ -121,7 +121,7 @@ describe('useMatchedActionPolicies', () => {
 
     expect(result.current.items).toEqual(fakeResponse.items);
     expect(http.fetch).toHaveBeenCalledWith(
-      '/internal/alerting/v2/action_policies/_match_for_rule',
+      '/internal/alerting/v2/action_policies/_match',
       expect.objectContaining({
         method: 'POST',
         body: JSON.stringify({ rule: {} }),
