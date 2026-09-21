@@ -46,7 +46,7 @@ export function EsqlNotificationPopover({ api }: { api: EsqlNotificationActionAp
               if (apiCanLockHoverActions(api)) {
                 api?.lockHoverActions(!api.hasLockedHoverActions$.value);
               }
-            }}
+                api.lockHoverActions(!isPopoverOpen);
             data-test-subj={`embeddablePanelEsqlNotification-${api.uuid}`}
             aria-label={esqlLabel}
           />
