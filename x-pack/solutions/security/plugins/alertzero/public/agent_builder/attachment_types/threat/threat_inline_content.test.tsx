@@ -26,10 +26,7 @@ const mockShare = {
   url: {
     locators: {
       get: () => ({
-        getRedirectUrl: (params: {
-          query?: { esql?: string };
-          filters?: unknown[];
-        }) => {
+        getRedirectUrl: (params: { query?: { esql?: string }; filters?: unknown[] }) => {
           if (params.query?.esql) {
             return `https://example.test/discover?esql=${encodeURIComponent(params.query.esql)}`;
           }

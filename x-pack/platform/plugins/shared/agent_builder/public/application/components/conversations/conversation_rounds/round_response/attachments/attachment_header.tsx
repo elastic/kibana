@@ -64,6 +64,12 @@ interface AttachmentHeaderProps {
   isCanvas?: boolean;
   /** When true, rounds all corners and omits the bottom border (no body content). */
   isHeaderOnly?: boolean;
+  /**
+   * When true, render the header even with no action or close buttons. Opted into per
+   * attachment type via `AttachmentUIDefinition.alwaysShowHeader`, so content-only
+   * attachments keep their chrome title without changing types that never had a header.
+   */
+  alwaysShowHeader?: boolean;
 }
 
 export const COMPACT_WIDTH_THRESHOLD = 560;
@@ -79,6 +85,7 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
   previewBadgeState = 'none',
   isCanvas = false,
   isHeaderOnly = false,
+  alwaysShowHeader = false,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -129,9 +136,14 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
   const hasCloseButton = Boolean(onClose);
   const hasActionButtons = actionButtons && actionButtons.length > 0;
   const showPreviewClose = previewBadgeState === 'previewing' && Boolean(onClosePreview);
-  // Always render the title/icon header, even when there are no trailing actions.
-  // Content-only attachments still need the chrome title from getLabel.
   const hasTrailingActions = hasActionButtons || showPreviewClose || hasCloseButton;
+
+  // Types that opt in keep the title/icon row so content-only attachments still get the
+  // chrome title from getLabel; everything else keeps the original no-buttons-no-header
+  // behavior.
+  if (!alwaysShowHeader && !hasCloseButton && !hasActionButtons) {
+    return null;
+  }
 
   return (
     <div ref={measureRef} style={{ width: '100%' }}>
@@ -221,12 +233,7 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
                 )}
                 {showPreviewClose && (
                   <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      color="text"
-                      size="s"
-                      iconType="cross"
-                      onClick={onClosePreview}
-                    >
+                    <EuiButtonEmpty color="text" size="s" iconType="cross" onClick={onClosePreview}>
                       {CLOSE_PREVIEW_LABEL}
                     </EuiButtonEmpty>
                   </EuiFlexItem>

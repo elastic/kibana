@@ -249,6 +249,12 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
    * When provided, the outer panel will not exceed this width.
    */
   getMaxWidth?: (attachment: TAttachment) => number | undefined;
+  /**
+   * Render the inline header even when the attachment has no action or close buttons.
+   * Content-only attachments need this to keep the chrome title from `getLabel`; without
+   * it the header is omitted entirely. Defaults to `false`.
+   */
+  alwaysShowHeader?: boolean;
 }
 
 /**

@@ -20,7 +20,6 @@ import {
   attachmentEntityRefToParsed,
   parseAttachmentEntity,
   type AttachmentEntityKind,
-  type ParsedAttachmentEntity,
 } from './parse_attachment_entity';
 import { isAttachmentEntityRef } from '../../../../common/attachment_entity_string';
 import type { AttachmentEntityRef } from '../../../../common/attachment_entity_string';
@@ -38,10 +37,10 @@ const nameStyles = css`
 
 export interface EntityChipProps {
   /**
-   * Structured ECS entity ref, a pre-parsed entity, a legacy `field: value`
-   * string, or a bare actor name when `kindOverride` is `actor`.
+   * Structured ECS entity ref, a legacy `field: value` string, or a bare actor
+   * name when `kindOverride` is `actor`.
    */
-  entity: string | AttachmentEntityRef | ParsedAttachmentEntity;
+  entity: string | AttachmentEntityRef;
   /** Hunt correlation actor anchors only. */
   kindOverride?: Extract<AttachmentEntityKind, 'actor'>;
   share?: SharePluginStart;
@@ -94,14 +93,9 @@ export const EntityChip: React.FC<EntityChipProps> = ({
       ? parseAttachmentEntity(entity)
       : isAttachmentEntityRef(entity)
       ? attachmentEntityRefToParsed(entity)
-      : entity;
+      : undefined;
   if (!parsed) {
-    const raw =
-      typeof entity === 'string'
-        ? entity
-        : isAttachmentEntityRef(entity)
-        ? `${entity.field}: ${entity.value}`
-        : entity.raw;
+    const raw = typeof entity === 'string' ? entity : `${entity.field}: ${entity.value}`;
     return (
       <span css={chipStyles} data-test-subj="alertzeroEntityChip">
         <EuiText size="xs">

@@ -44,7 +44,7 @@ export const huntCorrelationAttachmentDataSchema = alertZeroAttachmentDataSchema
   diamond_scores: z.array(diamondScoreSchema).max(100),
   thresholds: thresholdsSchema,
   self_match_excluded: z.literal(true),
-  report_revision: z.string().max(256).optional(),
+  report_revision: z.string().min(1).max(256).optional(),
 });
 
 export type HuntCorrelationAttachmentData = z.infer<typeof huntCorrelationAttachmentDataSchema>;

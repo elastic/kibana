@@ -60,9 +60,7 @@ export const isAttachmentEntityRef = (candidate: unknown): candidate is Attachme
  * Parse a legacy `field: value` entity string into `{ field, value }`.
  * Prefer writing structured `AttachmentEntityRef` objects on new payloads.
  */
-export const parseTypedAttachmentEntityString = (
-  raw: string
-): AttachmentEntityRef | undefined => {
+export const parseTypedAttachmentEntityString = (raw: string): AttachmentEntityRef | undefined => {
   const trimmed = raw.trim();
   if (!trimmed) {
     return undefined;

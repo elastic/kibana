@@ -100,11 +100,7 @@ export const buildEntityLookupEsql = ({
 /**
  * Hunt correlation actor anchors live on threat reports, not ECS logs fields.
  */
-export const buildActorLookupEsql = ({
-  value,
-}: {
-  value: string;
-}): string | undefined => {
+export const buildActorLookupEsql = ({ value }: { value: string }): string | undefined => {
   if (!value.trim()) {
     return undefined;
   }

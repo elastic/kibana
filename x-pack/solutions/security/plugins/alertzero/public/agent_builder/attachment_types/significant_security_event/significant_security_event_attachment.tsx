@@ -39,6 +39,8 @@ export const createSignificantSecurityEventAttachmentDefinition = ({
   getLabel: (attachment) => attachment?.data?.attachmentLabel ?? DEFAULT_LABEL,
   getIcon: () => 'flag',
   getHeader: () => ({ icon: 'flag' }),
+  // No action buttons at all, so without this the header (and its title) is omitted.
+  alwaysShowHeader: true,
   renderInlineContent: (props) => (
     <React.Suspense fallback={<EuiSkeletonText lines={3} />}>
       <LazySignificantSecurityEventInlineContent {...props} navigation={navigation} />

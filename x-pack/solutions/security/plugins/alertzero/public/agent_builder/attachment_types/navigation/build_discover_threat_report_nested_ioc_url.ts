@@ -8,10 +8,7 @@
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { Filter } from '@kbn/es-query';
-import {
-  DISCOVER_LOOKUP_TIME_RANGE,
-  THREAT_REPORTS_INDEX_PATTERN,
-} from './constants';
+import { DISCOVER_LOOKUP_TIME_RANGE, THREAT_REPORTS_INDEX_PATTERN } from './constants';
 import type { DiscoverLookupTimeRange } from './build_discover_esql_url';
 
 /** Ad-hoc data view id for threat-report Discover exits that need nested filters. */

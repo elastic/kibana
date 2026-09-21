@@ -32,17 +32,18 @@ export const ATTACHMENT_ENTITY_ICON: Record<AttachmentEntityKind, IconType> = {
   generic: 'globe',
 };
 
-const FIELD_TO_KIND: Readonly<Record<AttachmentEntityField, Exclude<AttachmentEntityKind, 'actor'>>> =
-  {
-    'user.name': 'user',
-    'user.email': 'user',
-    'user.id': 'user',
-    'host.name': 'host',
-    'host.hostname': 'host',
-    'host.id': 'host',
-    'service.name': 'service',
-    'service.id': 'service',
-  };
+const FIELD_TO_KIND: Readonly<
+  Record<AttachmentEntityField, Exclude<AttachmentEntityKind, 'actor'>>
+> = {
+  'user.name': 'user',
+  'user.email': 'user',
+  'user.id': 'user',
+  'host.name': 'host',
+  'host.hostname': 'host',
+  'host.id': 'host',
+  'service.name': 'service',
+  'service.id': 'service',
+};
 
 /**
  * Parse an SSE entity string (`field: value`) into a display/query model.
@@ -68,4 +69,3 @@ export const attachmentEntityRefToParsed = (
   kind: FIELD_TO_KIND[ref.field],
   raw,
 });
-

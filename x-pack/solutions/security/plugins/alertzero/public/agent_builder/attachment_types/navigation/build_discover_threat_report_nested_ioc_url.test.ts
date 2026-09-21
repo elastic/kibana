@@ -35,11 +35,10 @@ describe('buildDiscoverThreatReportNestedIocUrl', () => {
       },
     } as unknown as SharePluginStart;
 
-    const hash =
-      'abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789';
-    expect(
-      buildDiscoverThreatReportNestedIocUrl({ share, iocType: 'hash', value: hash })
-    ).toBe('/app/discover#/?_a=nested');
+    const hash = 'abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789';
+    expect(buildDiscoverThreatReportNestedIocUrl({ share, iocType: 'hash', value: hash })).toBe(
+      '/app/discover#/?_a=nested'
+    );
 
     expect(getRedirectUrl).toHaveBeenCalledWith({
       dataViewSpec: {

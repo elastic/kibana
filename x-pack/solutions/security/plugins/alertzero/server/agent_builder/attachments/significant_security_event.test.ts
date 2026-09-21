@@ -110,7 +110,9 @@ describe('createSignificantSecurityEventAttachmentType', () => {
     it('rejects unknown entity fields', async () => {
       const result = await attachmentType.validate({
         ...validPayload,
-        entities: [{ field: 'source.ip', value: '1.2.3.4' }] as unknown as typeof validPayload.entities,
+        entities: [
+          { field: 'source.ip', value: '1.2.3.4' },
+        ] as unknown as typeof validPayload.entities,
       });
 
       expect(result.valid).toBe(false);

@@ -18,9 +18,9 @@ const createConfig = (overrides: Partial<AlertZeroClientConfig> = {}): AlertZero
 });
 
 const createContext = (config: AlertZeroClientConfig) =>
-  ({
-    config: { get: () => config },
-  } as unknown as ConstructorParameters<typeof AlertZeroPublicPlugin>[0]);
+  coreMock.createPluginInitializerContext(config) as unknown as ConstructorParameters<
+    typeof AlertZeroPublicPlugin
+  >[0];
 
 describe('AlertZeroPublicPlugin feature-flag gating', () => {
   it('does not register the browser app when disabled', () => {
@@ -71,5 +71,64 @@ describe('AlertZeroPublicPlugin conversation template UI registration', () => {
 
     expect(conversationTemplates.registerTemplateUIDefinition).not.toHaveBeenCalled();
     expect(conversationTemplates.registerTab).not.toHaveBeenCalled();
+  });
+});
+
+describe('AlertZeroPublicPlugin attachment UI registration', () => {
+  // Registration is kicked off as a floating promise in start(), so let the dynamic
+  // imports and the getActiveSpace await settle before asserting.
+  const flushRegistration = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+  const startPlugin = ({
+    enabled = true,
+    spaces,
+  }: {
+    enabled?: boolean;
+    spaces?: { getActiveSpace: jest.Mock };
+  } = {}) => {
+    const plugin = new AlertZeroPublicPlugin(createContext(createConfig({ enabled })));
+    const agentBuilder = agentBuilderMocks.createStart();
+
+    plugin.start(coreMock.createStart(), { agentBuilder, spaces } as never);
+
+    return agentBuilder;
+  };
+
+  it('registers the three Hunt Watch attachment types', async () => {
+    const { attachments } = startPlugin();
+    await flushRegistration();
+
+    expect(attachments.addAttachmentType).toHaveBeenCalledTimes(3);
+    expect(attachments.addAttachmentType.mock.calls.map(([type]) => type).sort()).toEqual([
+      'security.hunt_correlation',
+      'security.significant_security_event',
+      'security.threat',
+    ]);
+  });
+
+  it('registers against the active space when spaces is available', async () => {
+    const spaces = { getActiveSpace: jest.fn().mockResolvedValue({ id: 'soc' }) };
+    const { attachments } = startPlugin({ spaces });
+    await flushRegistration();
+
+    expect(spaces.getActiveSpace).toHaveBeenCalled();
+    expect(attachments.addAttachmentType).toHaveBeenCalledTimes(3);
+  });
+
+  it('registers nothing when the active space cannot be resolved', async () => {
+    const spaces = { getActiveSpace: jest.fn().mockRejectedValue(new Error('no space')) };
+    const { attachments } = startPlugin({ spaces });
+    await flushRegistration();
+
+    // Fail closed: registering with a guessed 'default' space would build alert-index
+    // links pointing at the wrong space's alerts index.
+    expect(attachments.addAttachmentType).not.toHaveBeenCalled();
+  });
+
+  it('registers nothing when disabled', async () => {
+    const { attachments } = startPlugin({ enabled: false });
+    await flushRegistration();
+
+    expect(attachments.addAttachmentType).not.toHaveBeenCalled();
   });
 });

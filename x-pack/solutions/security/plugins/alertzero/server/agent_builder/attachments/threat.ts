@@ -24,9 +24,9 @@ export const THREAT_ATTACHMENT_ID = ALERTZERO_ATTACHMENT_TYPES.threat;
  */
 export const threatAttachmentDataSchema = alertZeroAttachmentDataSchema.extend({
   report_id: z.string().min(1).max(512),
-  title: z.string().max(512).optional(),
+  title: z.string().min(1).max(512).optional(),
   severity: z.enum(['low', 'medium', 'high', 'critical']).optional(),
-  source: z.string().max(256).optional(),
+  source: z.string().min(1).max(256).optional(),
 });
 
 export type ThreatAttachmentData = z.infer<typeof threatAttachmentDataSchema>;
