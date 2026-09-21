@@ -12,7 +12,16 @@ import type { GetWatchResponse, ListWatchesResponse } from '@kbn/alertzero-commo
 import { retryOnTransientError } from '@kbn/agentic-investigations-plugin/public';
 import { queryKeys } from '../query_keys';
 
-export const useWatches = () => {
+/**
+ * Bounds the shared transient-error retry to a single retry. The onboarding gate
+ * blocks routing on these queries, so a persistently-failing backend must surface
+ * the empty state in about a second instead of holding a spinner through the full
+ * three-attempt backoff (~11s).
+ */
+export const retryOnceOnTransientError = (failureCount: number, error: unknown): boolean =>
+  failureCount < 1 && retryOnTransientError(failureCount, error);
+
+export const useWatches = (options?: { enabled?: boolean }) => {
   const { services } = useKibana();
 
   return useQuery({
@@ -21,8 +30,9 @@ export const useWatches = () => {
       services.http!.get<ListWatchesResponse>(ALERTZERO_WATCHES_URL, {
         version: API_VERSIONS.internal.v1,
       }),
+    enabled: options?.enabled,
     keepPreviousData: true,
-    retry: retryOnTransientError,
+    retry: retryOnceOnTransientError,
   });
 };
 
@@ -35,11 +45,12 @@ export const useWatch = (watchId: string | undefined) => {
       if (!watchId) {
         throw new Error('watchId is required');
       }
+
       return services.http!.get<GetWatchResponse>(buildWatchUrl(watchId), {
         version: API_VERSIONS.internal.v1,
       });
     },
     enabled: Boolean(watchId),
-    retry: retryOnTransientError,
+    retry: retryOnceOnTransientError,
   });
 };

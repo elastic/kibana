@@ -21,8 +21,14 @@ export const DEFAULT_PROPOSALS_WINDOW_HOURS = 24;
  * Unlike `usePendingProposals` this is sorted `createdAt asc` server-side and
  * does not filter expired proposals — an expired proposal is still visible and
  * its Approve CTA is active (the API will reject it on submission).
+ *
+ * `options.retry` overrides the retry policy for callers that block routing on
+ * this query (the onboarding gate) and need a faster path to the empty state.
  */
-export const useProposalsList = (windowHours = DEFAULT_PROPOSALS_WINDOW_HOURS) => {
+export const useProposalsList = (
+  windowHours = DEFAULT_PROPOSALS_WINDOW_HOURS,
+  options?: { retry?: (failureCount: number, error: unknown) => boolean }
+) => {
   const { services } = useKibana();
 
   return useQuery({
@@ -33,6 +39,6 @@ export const useProposalsList = (windowHours = DEFAULT_PROPOSALS_WINDOW_HOURS) =
         query: { windowHours },
       }),
     keepPreviousData: true,
-    retry: retryOnTransientError,
+    retry: options?.retry ?? retryOnTransientError,
   });
 };
