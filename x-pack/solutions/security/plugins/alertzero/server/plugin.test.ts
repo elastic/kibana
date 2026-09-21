@@ -10,10 +10,10 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { AlertZeroConfig } from './config';
 import {
-  ALERTZERO_API_PRIVILEGE_MANAGE_INCIDENTS,
+  ALERTZERO_API_PRIVILEGE_MANAGE_ESCALATIONS,
   ALERTZERO_API_PRIVILEGE_READ,
   ALERTZERO_API_PRIVILEGE_WRITE,
-  ALERTZERO_UI_CAPABILITY_MANAGE_INCIDENTS,
+  ALERTZERO_UI_CAPABILITY_MANAGE_ESCALATIONS,
 } from '../common/constants';
 import { AlertZeroPlugin } from './plugin';
 import { initializeManagedWorkflows } from './managed_workflows/initialize_managed_workflows';
@@ -141,10 +141,10 @@ describe('AlertZeroPlugin feature-flag gating', () => {
                 expect.objectContaining({
                   privileges: expect.arrayContaining([
                     expect.objectContaining({
-                      id: 'manage_incidents',
+                      id: 'manage_escalations',
                       includeIn: 'all',
-                      api: [ALERTZERO_API_PRIVILEGE_MANAGE_INCIDENTS],
-                      ui: [ALERTZERO_UI_CAPABILITY_MANAGE_INCIDENTS],
+                      api: [ALERTZERO_API_PRIVILEGE_MANAGE_ESCALATIONS],
+                      ui: [ALERTZERO_UI_CAPABILITY_MANAGE_ESCALATIONS],
                     }),
                   ]),
                 }),

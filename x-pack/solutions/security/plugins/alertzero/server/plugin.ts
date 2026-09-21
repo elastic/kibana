@@ -18,12 +18,12 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { i18n } from '@kbn/i18n';
 import {
-  ALERTZERO_API_PRIVILEGE_MANAGE_INCIDENTS,
+  ALERTZERO_API_PRIVILEGE_MANAGE_ESCALATIONS,
   ALERTZERO_API_PRIVILEGE_READ,
   ALERTZERO_API_PRIVILEGE_WRITE,
   ALERTZERO_FEATURE_ID,
   ALERTZERO_PLUGIN_NAME,
-  ALERTZERO_UI_CAPABILITY_MANAGE_INCIDENTS,
+  ALERTZERO_UI_CAPABILITY_MANAGE_ESCALATIONS,
 } from '../common/constants';
 import type { AlertZeroConfig } from './config';
 import type {
@@ -133,14 +133,14 @@ export class AlertZeroPlugin
               groupType: 'independent',
               privileges: [
                 {
-                  id: 'manage_incidents',
-                  name: i18n.translate('xpack.alertzero.feature.manageIncidentsLabel', {
+                  id: 'manage_escalations',
+                  name: i18n.translate('xpack.alertzero.feature.manageEscalationsLabel', {
                     defaultMessage: 'Create and link incidents',
                   }),
                   includeIn: 'all',
                   savedObject: { all: [], read: [] },
-                  api: [ALERTZERO_API_PRIVILEGE_MANAGE_INCIDENTS],
-                  ui: [ALERTZERO_UI_CAPABILITY_MANAGE_INCIDENTS],
+                  api: [ALERTZERO_API_PRIVILEGE_MANAGE_ESCALATIONS],
+                  ui: [ALERTZERO_UI_CAPABILITY_MANAGE_ESCALATIONS],
                 },
               ],
             },
