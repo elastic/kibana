@@ -25,6 +25,12 @@ import {
 } from '../../../../common/endpoint/service/artifacts/constants';
 import type { ExperimentalFeatures } from '../../../../common';
 import { isProcessDescendantsEnabled } from '../../../../common/endpoint/service/artifacts/utils';
+import {
+  MetaArchValue,
+  MetaScanTypeValue,
+  EndpointArtifactScanContext,
+} from '../../../../common/endpoint/types';
+import type { YaraCompiledRule } from '../libyara';
 import { validateYaraRule } from '../libyara';
 import type {
   InternalArtifactCompleteSchema,
@@ -171,6 +177,58 @@ export async function getAllItemsFromEndpointExceptionList({
   });
 }
 
+const DEFAULT_YARA_ARCH_CONTEXT: TranslatedYaraRule['arch_context'] = [
+  MetaArchValue.X86,
+  MetaArchValue.ARM64,
+];
+
+const DEFAULT_YARA_SCAN_CONTEXT: TranslatedYaraRule['scan_context'] = [
+  EndpointArtifactScanContext.MEMORY,
+];
+
+const unifyArchMeta = (arch?: string): string | undefined =>
+  arch?.split(/, ?/).sort().join(', ') ?? undefined;
+
+function getArchContextFromCompiledRules(
+  rules: YaraCompiledRule[]
+): TranslatedYaraRule['arch_context'] | undefined {
+  const [referenceRule, ...restOfRules] = rules;
+  if (referenceRule === undefined) {
+    return undefined;
+  }
+
+  const referenceArch = unifyArchMeta(referenceRule.meta.arch);
+
+  for (const rule of restOfRules) {
+    if (unifyArchMeta(rule.meta.arch) !== referenceArch) {
+      return undefined;
+    }
+  }
+
+  const originalArch = referenceRule.meta.arch;
+  if (originalArch === undefined) {
+    return [...DEFAULT_YARA_ARCH_CONTEXT];
+  }
+
+  return originalArch.split(/, ?/) as TranslatedYaraRule['arch_context'];
+}
+
+/**
+ * `meta.scan_type` is omitted or `Memory` on every rule (API-enforced).
+ * Endpoint currently always receives `["memory"]`.
+ */
+function getScanContextFromCompiledRules(
+  rules: YaraCompiledRule[]
+): TranslatedYaraRule['scan_context'] | undefined {
+  for (const rule of rules) {
+    if (rule.meta.scan_type !== undefined && rule.meta.scan_type !== MetaScanTypeValue.MEMORY) {
+      return undefined;
+    }
+  }
+
+  return [...DEFAULT_YARA_SCAN_CONTEXT];
+}
+
 const skipYaraItem = (logger: Logger | undefined, itemId: string, reason: string): void => {
   logger?.warn(
     `Skipping Custom YARA Signature [${itemId}] while building the endpoint artifact: ${reason}`
@@ -203,13 +261,26 @@ async function translateOneYaraException(
       return undefined;
     }
 
-    if (result.rules.length === 0) {
-      skipYaraItem(logger, exception.item_id, 'no compiled rules');
+    const archContext = getArchContextFromCompiledRules(result.rules);
+    if (archContext === undefined) {
+      skipYaraItem(
+        logger,
+        exception.item_id,
+        'no compiled rules or inconsistent meta.arch across rules in this entry'
+      );
+      return undefined;
+    }
+
+    const scanContext = getScanContextFromCompiledRules(result.rules);
+    if (scanContext === undefined) {
+      skipYaraItem(logger, exception.item_id, 'invalid meta.scan_type');
       return undefined;
     }
 
     return {
       yara_rule_data: entry.value,
+      arch_context: archContext,
+      scan_context: scanContext,
     };
   } catch {
     skipYaraItem(logger, exception.item_id, 'libyara validation failed');

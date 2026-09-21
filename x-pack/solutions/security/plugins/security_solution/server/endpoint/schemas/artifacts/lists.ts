@@ -7,6 +7,8 @@
 
 import * as t from 'io-ts';
 import { listOperator as operator } from '@kbn/securitysolution-io-ts-list-types';
+import { enumeration, NonEmptyArray } from '@kbn/securitysolution-io-ts-types';
+import { MetaArchValue, EndpointArtifactScanContext } from '../../../../common/endpoint/types';
 
 export const translatedEntryMatchAnyMatcher = t.keyof({
   exact_cased_any: null,
@@ -163,9 +165,20 @@ export const wrappedTranslatedExceptionList = t.exact(
 );
 export type WrappedTranslatedExceptionList = t.TypeOf<typeof wrappedTranslatedExceptionList>;
 
+export const translatedYaraArchContext = enumeration('translatedYaraArchContext', MetaArchValue);
+export type TranslatedYaraArchContext = t.TypeOf<typeof translatedYaraArchContext>;
+
+export const translatedYaraScanContext = enumeration(
+  'translatedYaraScanContext',
+  EndpointArtifactScanContext
+);
+export type TranslatedYaraScanContext = t.TypeOf<typeof translatedYaraScanContext>;
+
 export const translatedYaraRule = t.exact(
   t.type({
     yara_rule_data: t.string,
+    arch_context: NonEmptyArray(translatedYaraArchContext),
+    scan_context: NonEmptyArray(translatedYaraScanContext),
   })
 );
 export type TranslatedYaraRule = t.TypeOf<typeof translatedYaraRule>;

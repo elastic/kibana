@@ -28,3 +28,7 @@ export enum MetaOsValue {
   LINUX = 'Linux',
   MACOS = 'MacOS',
 }
+
+export enum EndpointArtifactScanContext {
+  MEMORY = 'memory',
+}
