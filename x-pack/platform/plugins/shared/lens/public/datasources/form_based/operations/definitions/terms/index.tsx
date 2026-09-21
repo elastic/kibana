@@ -50,6 +50,7 @@ import {
   getDisallowedTermsMessage,
   getMultiTermsScriptedFieldErrorMessage,
   getOrderAggErrorMessages,
+  getOrderAggLastValueSortFieldStatus,
   isCustomLastValueOrderAgg,
   getFieldsByValidationState,
   isSortableByColumn,
@@ -57,7 +58,6 @@ import {
   isPercentileSortable,
   getOtherBucketSwitchDefault,
 } from './helpers';
-import { getDefaultDateFieldName } from '../last_value';
 import {
   DEFAULT_MAX_DOC_COUNT,
   DEFAULT_SIZE,
@@ -336,13 +336,17 @@ export const termsOperation: OperationDefinition<
         let resolvedOrderAggColumn = orderAggColumn;
         // When a terms column is custom-ranked by a last_value order-agg with no sortField, fall
         // back to the data view's default date field so the chart still renders with a valid sort.
-        if (isCustomLastValueOrderAgg(column) && !column.params.orderAgg.params?.sortField) {
-          const defaultField = getDefaultDateFieldName(_indexPattern);
-          if (defaultField) {
+        if (isCustomLastValueOrderAgg(column)) {
+          const sortFieldStatus = getOrderAggLastValueSortFieldStatus(
+            layer,
+            columnId,
+            _indexPattern
+          );
+          if (sortFieldStatus.status === 'missing-with-default') {
             const { orderAgg: lastValueOrderAgg } = column.params;
             const orderAggWithDefaultSort: LastValueIndexPatternColumn = {
               ...lastValueOrderAgg,
-              params: { ...lastValueOrderAgg.params, sortField: defaultField },
+              params: { ...lastValueOrderAgg.params, sortField: sortFieldStatus.defaultField },
             };
             resolvedOrderAggColumn = orderAggWithDefaultSort;
           }
