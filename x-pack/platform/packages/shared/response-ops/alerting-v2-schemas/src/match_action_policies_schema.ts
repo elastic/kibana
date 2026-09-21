@@ -10,7 +10,7 @@ import { actionPolicyResponseSchema } from './action_policy_response_schema';
 
 const tagItemSchema = z.string().min(1).max(256);
 
-export const matchActionPoliciesForRuleBodySchema = z
+export const matchActionPoliciesBodySchema = z
   .object({
     rule: z
       .object({
@@ -26,9 +26,9 @@ export const matchActionPoliciesForRuleBodySchema = z
       .optional(),
   })
   .strict()
-  .meta({ id: 'alerting_match_action_policies_for_rule_request' });
+  .meta({ id: 'alerting_match_action_policies_request' });
 
-export type MatchActionPoliciesForRuleBody = z.infer<typeof matchActionPoliciesForRuleBodySchema>;
+export type MatchActionPoliciesBody = z.infer<typeof matchActionPoliciesBodySchema>;
 
 export const matchedActionPolicyCategorySchema = z
   .enum(['catch-all', 'tags'])
@@ -48,7 +48,7 @@ export const matchedActionPolicySchema = z
 
 export type MatchedActionPolicy = z.infer<typeof matchedActionPolicySchema>;
 
-export const matchActionPoliciesForRuleResponseSchema = z
+export const matchActionPoliciesResponseSchema = z
   .object({
     items: z.array(matchedActionPolicySchema).describe('The list of matched action policies.'),
     total: z
@@ -72,8 +72,6 @@ export const matchActionPoliciesForRuleResponseSchema = z
       ),
   })
   .describe('Action policies that match a given rule, grouped by match category.')
-  .meta({ id: 'alerting_match_action_policies_for_rule_response' });
+  .meta({ id: 'alerting_match_action_policies_response' });
 
-export type MatchActionPoliciesForRuleResponse = z.infer<
-  typeof matchActionPoliciesForRuleResponseSchema
->;
+export type MatchActionPoliciesResponse = z.infer<typeof matchActionPoliciesResponseSchema>;

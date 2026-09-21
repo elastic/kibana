@@ -19,6 +19,7 @@ import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import { DURATION_LOWER_BOUND_FIELD } from '@kbn/alerting-v2-common-queries';
 import { parseEpisodeDataJson } from '@kbn/alerting-v2-utils';
 import type { EpisodeActionState, EpisodeStatusGroupAction } from '../types/action';
+import { isSourceEpisode, type AlertEpisode } from '../queries/episodes_query';
 import { CopyableShortId } from './copyable_short_id';
 import { AlertingEpisodeGroupingTags } from './grouping/alerting_episode_grouping_tags';
 import { AlertEpisodeStatusBadges } from './status/status_badges';
@@ -30,6 +31,26 @@ import * as i18n from './translations';
 
 type Rule = FindRulesResponse['items'][number];
 type CellRendererProps = Parameters<CustomCellRenderer[string]>[0];
+
+const getEpisodeGroupingFromRow = (
+  row: CellRendererProps['row'],
+  ruleGroupingFields: readonly string[] = []
+): { groupingFields: readonly string[]; groupingData: Record<string, unknown> } => {
+  const episode = row.flattened as unknown as AlertEpisode;
+
+  if (isSourceEpisode(episode)) {
+    const sourceGrouping = episode.source_grouping ?? {};
+    return {
+      groupingFields: Object.keys(sourceGrouping),
+      groupingData: sourceGrouping,
+    };
+  }
+
+  return {
+    groupingFields: ruleGroupingFields,
+    groupingData: parseEpisodeDataJson(episode.episode_data),
+  };
+};
 
 export const EpisodeStatusCell = ({ row, columnId }: CellRendererProps) => {
   const status = row.flattened[columnId] as AlertEpisodeStatus;
@@ -171,7 +192,23 @@ export const EpisodeRuleCell = ({
     const displayName = dataRuleName ?? eventRuleName;
 
     if (displayName) {
-      return <span css={nameCss}>{displayName}</span>;
+      const { groupingFields, groupingData } = getEpisodeGroupingFromRow(row);
+      return (
+        <span data-test-subj="episodeRuleCell">
+          <span css={nameCss}>{displayName}</span>
+          {groupingFields.length > 0 ? (
+            <>
+              {' '}
+              <AlertingEpisodeGroupingTags
+                inline
+                fields={groupingFields}
+                data={groupingData}
+                data-test-subj="episodeRuleCellGroupingTags"
+              />
+            </>
+          ) : null}
+        </span>
+      );
     }
 
     if (!ruleId) {
@@ -223,8 +260,10 @@ export const EpisodeRuleCell = ({
     );
   }
 
-  const episodeData = parseEpisodeDataJson(row.flattened.episode_data);
-  const groupingFields = rule.grouping?.fields ?? [];
+  const { groupingFields, groupingData } = getEpisodeGroupingFromRow(
+    row,
+    rule.grouping?.fields ?? []
+  );
   const showQuery = rowHeight !== ROWS_HEIGHT_OPTIONS.single;
   const detailsHref = getRuleDetailsHref(ruleId);
   // The href stays on the link either way, so opening the rule page in a new tab keeps working.
@@ -243,7 +282,7 @@ export const EpisodeRuleCell = ({
           <AlertingEpisodeGroupingTags
             inline
             fields={groupingFields}
-            data={episodeData}
+            data={groupingData}
             dataView={sourceDataViewsByRule?.get(ruleId)}
             data-test-subj="episodeRuleCellGroupingTags"
           />

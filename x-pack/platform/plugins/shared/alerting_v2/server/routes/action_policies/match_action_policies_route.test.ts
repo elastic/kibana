@@ -9,12 +9,12 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ActionPolicyClient } from '../../lib/action_policy_client';
 import { createRouteDependencies } from '../test_utils';
-import { MatchActionPoliciesForRuleRoute } from './match_action_policies_for_rule_route';
+import { MatchActionPoliciesRoute } from './match_action_policies_route';
 
 const createMocks = () => {
   const deps = createRouteDependencies();
-  const actionPolicyClient: jest.Mocked<Pick<ActionPolicyClient, 'matchActionPoliciesForRule'>> = {
-    matchActionPoliciesForRule: jest.fn().mockResolvedValue({
+  const actionPolicyClient: jest.Mocked<Pick<ActionPolicyClient, 'matchActionPolicies'>> = {
+    matchActionPolicies: jest.fn().mockResolvedValue({
       items: [],
       total: 0,
       evaluated_count: 0,
@@ -25,13 +25,13 @@ const createMocks = () => {
 };
 
 const buildRoute = (request: KibanaRequest, mocks: ReturnType<typeof createMocks>) =>
-  new MatchActionPoliciesForRuleRoute(
+  new MatchActionPoliciesRoute(
     mocks.deps.ctx,
     request as any,
     mocks.actionPolicyClient as unknown as ActionPolicyClient
   );
 
-describe('MatchActionPoliciesForRuleRoute', () => {
+describe('MatchActionPoliciesRoute', () => {
   it('forwards rule.tags from body to the client', async () => {
     const mocks = createMocks();
     const request = httpServerMock.createKibanaRequest({
@@ -41,7 +41,7 @@ describe('MatchActionPoliciesForRuleRoute', () => {
 
     await route.handle();
 
-    expect(mocks.actionPolicyClient.matchActionPoliciesForRule).toHaveBeenCalledWith({
+    expect(mocks.actionPolicyClient.matchActionPolicies).toHaveBeenCalledWith({
       ruleTags: ['prod', 'infra'],
     });
   });
@@ -53,7 +53,7 @@ describe('MatchActionPoliciesForRuleRoute', () => {
 
     await route.handle();
 
-    expect(mocks.actionPolicyClient.matchActionPoliciesForRule).toHaveBeenCalledWith({
+    expect(mocks.actionPolicyClient.matchActionPolicies).toHaveBeenCalledWith({
       ruleTags: undefined,
     });
   });
@@ -66,9 +66,11 @@ describe('MatchActionPoliciesForRuleRoute', () => {
       evaluated_count: 100,
       is_truncated: true,
     };
-    mocks.actionPolicyClient.matchActionPoliciesForRule.mockResolvedValue(clientResult as any);
+    mocks.actionPolicyClient.matchActionPolicies.mockResolvedValue(clientResult as any);
 
-    const request = httpServerMock.createKibanaRequest({ body: { rule: { id: 'rule-1' } } });
+    const request = httpServerMock.createKibanaRequest({
+      body: { rule: { tags: ['prod'] } },
+    });
     const route = buildRoute(request as unknown as KibanaRequest, mocks);
 
     await route.handle();
@@ -79,9 +81,11 @@ describe('MatchActionPoliciesForRuleRoute', () => {
 
   it('lets errors propagate so BaseAlertingRoute.onError handles the response', async () => {
     const mocks = createMocks();
-    mocks.actionPolicyClient.matchActionPoliciesForRule.mockRejectedValueOnce(new Error('boom'));
+    mocks.actionPolicyClient.matchActionPolicies.mockRejectedValueOnce(new Error('boom'));
 
-    const request = httpServerMock.createKibanaRequest({ body: { rule: { id: 'rule-1' } } });
+    const request = httpServerMock.createKibanaRequest({
+      body: { rule: { tags: ['prod'] } },
+    });
     const route = buildRoute(request as unknown as KibanaRequest, mocks);
 
     await route.handle();
