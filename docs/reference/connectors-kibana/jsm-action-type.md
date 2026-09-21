@@ -66,7 +66,7 @@ The create alert action form has the following configuration properties.
 Message
 :   The message for the alert (required). 
      
-    {applies_to}`serverless: ga` {applies_to}`stack: ga 9.6+` {{jsm}} limits this field to 130 characters. {{kib}} truncates longer values, including values expanded from Mustache templates, instead of failing the action. Values longer than 15,000 characters are still rejected.
+    {applies_to}`serverless: ga` {applies_to}`stack: ga 9.5+` {{jsm}} limits this field to 130 characters. {{kib}} truncates longer values, including values expanded from Mustache templates, instead of failing the action. Values longer than 15,000 characters are still rejected.
 
 Jira Service Management tags
 :   The tags for the alert (optional).
