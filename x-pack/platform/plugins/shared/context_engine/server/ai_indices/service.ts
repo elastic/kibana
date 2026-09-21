@@ -52,7 +52,7 @@ const toAiIndexItem = (document: AiIndexDocument): AiIndexHttpItem => ({
     feedback_analysis: document.feedback_analysis,
   }),
   managed: document.managed ?? false,
-  memory_enabled: document.memory_enabled ?? false,
+  memory_enabled: document.memory_enabled ?? true,
   dest: document.dest,
   automations: document.automations,
   sources: document.sources,
@@ -208,7 +208,7 @@ export class AiIndexService {
     const now = new Date().toISOString();
     const fullDocument: AiIndexDocument = {
       ...document,
-      memory_enabled: document.memory_enabled ?? false,
+      memory_enabled: document.memory_enabled ?? true,
       date_created: existing?.document.date_created ?? now,
       date_modified: now,
     };
