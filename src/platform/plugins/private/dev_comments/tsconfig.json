@@ -13,6 +13,7 @@
     "@kbn/dev-comments",
     "@kbn/developer-toolbar-plugin",
     "@kbn/i18n-react",
-    "@kbn/std"
+    "@kbn/std",
+    "@kbn/storage-adapter"
   ]
 }

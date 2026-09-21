@@ -19,6 +19,7 @@ export type {
   CommentSnapshot,
   CommentsApi,
   NewComment,
+  NewSnapshot,
   TrailStep,
 } from '@kbn/dev-comments';
 
