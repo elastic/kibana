@@ -45,7 +45,9 @@ describe('esql notification popover', () => {
   it('renders the trigger button when there are queries', async () => {
     const api = makeApi([{ esql: 'FROM logs' }]);
     renderPopover(api);
-    expect(await screen.findByTestId(`embeddablePanelEsqlNotification-${api.uuid}`)).toBeInTheDocument();
+    expect(
+      await screen.findByTestId(`embeddablePanelEsqlNotification-${api.uuid}`)
+    ).toBeInTheDocument();
   });
 
   it('renders a code block for each query after opening', async () => {

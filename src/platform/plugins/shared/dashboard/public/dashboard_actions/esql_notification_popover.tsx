@@ -9,13 +9,7 @@
 
 import React, { useCallback, useState } from 'react';
 
-import {
-  EuiButtonIcon,
-  EuiCodeBlock,
-  EuiFormLabel,
-  EuiPopover,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiCodeBlock, EuiFormLabel, EuiPopover, EuiToolTip } from '@elastic/eui';
 
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -71,9 +65,7 @@ export function EsqlNotificationPopover({ api }: { api: EsqlNotificationActionAp
           gap: ${euiThemeVars.euiSizeS};
         `}
       >
-        <EuiFormLabel>
-          {esqlLabel}
-        </EuiFormLabel>
+        <EuiFormLabel>{esqlLabel}</EuiFormLabel>
         {esqlQueries.map((query, index) => (
           <EuiCodeBlock
             key={index}
