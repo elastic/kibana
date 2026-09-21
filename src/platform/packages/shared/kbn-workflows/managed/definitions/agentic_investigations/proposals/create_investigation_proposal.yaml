@@ -2,40 +2,89 @@ version: '1'
 name: Create investigation proposal
 description: >
   Creates a proposal, gates it on a human decision unless the caller already
-  resolved autonomy, and runs the proposed action workflow once approved.
-  Solution-agnostic: callers supply the action workflow id and its input.
+  resolved autonomy, records that decision, and runs the proposed action
+  workflow once approved. Solution-agnostic: callers supply the action workflow
+  id and its input.
+
+  The gate sits inside a loop because a release is not the same thing as a
+  decision. A resumer who lacks the privilege to decide, or an action that
+  fails and is re-offered, both need the proposal parked again rather than
+  settled — and the loop is what lets the same subject be presented to a second
+  approver on a fresh gate.
 enabled: true
 tags:
   - agentic-investigation-proposals
+
+consts:
+  # Must stay equal to `max-iterations.limit` on the loop below.
+  #
+  # The in-loop check is what actually settles the record. `on-limit: fail` is
+  # only an unreachable backstop: a `while` is a flow-control step, so it is
+  # excluded from the workflow-level `on-failure` wrapping, and the error it
+  # throws on exhaustion reaches no handler at all — the proposal would strand
+  # awaiting forever.
+  max_attempts: 20
+
 settings:
-  # The parked gate's wake-up is bounded by the workflow timeout, whose default
-  # is 6h. Without this the gate below would expire silently, so this has to
-  # stay comfortably above the gate's own 72h.
-  timeout: '80h'
+  # A backstop, never the mechanism. A ceiling timeout runs no handler at all —
+  # `EnterWorkflowTimeoutZoneNodeImpl.monitor()` marks the execution TIMED_OUT
+  # and `catchError` returns early — so anything it catches strands as
+  # `pending`. The gate's own timeout is what settles an unanswered proposal,
+  # and it can only do that if it fires first.
+  #
+  # Hence the size. Each park waits a fixed 72h rather than the time left on
+  # the deadline (elastic/kibana#290258), so a proposal re-parked just before
+  # its deadline waits out a second full 72h: ~144h in the worst case before
+  # the gate times out and the loop settles it. A re-park cannot extend that
+  # further, because every iteration settles on the deadline before parking
+  # again.
+  timeout: '168h'
   on-failure:
-    # A gate timeout surfaces as a step failure rather than a branch, and HITL
-    # steps take no on-failure of their own. Without this a timed-out proposal
-    # would stay pending in the queue forever.
+    # Attached per step, not once for the whole workflow: the engine wraps each
+    # non-flow-control step in its own try/fallback pair. The fallback runs and
+    # then the original error is restored, so the workflow still fails and the
+    # remaining steps are skipped — which is what makes this safe to use for
+    # settling the record.
+    #
+    # This is also what catches a gate timeout, since a HITL step cannot opt out
+    # with an `on-failure` of its own (elastic/security-team#19315). The action
+    # step does opt out, because its failure is recoverable inside the loop.
     fallback:
-      # An expired gate is a decision that never came, not a malfunction, so it
-      # lands on `dismissed`. `waitForApproval` fails with an ExecutionError of
-      # type `TimeoutError`, which is the only signal that distinguishes it from
-      # a genuine failure.
-      - name: record_expiry
-        type: investigations.updateProposal
-        if: "${{ steps.create_proposal.output.proposalId != null and steps.create_proposal.output.proposalId != '' and error.type == 'TimeoutError' }}"
-        with:
-          proposalId: '{{ steps.create_proposal.output.proposalId }}'
-          status: dismissed
-      - name: record_failure
-        type: investigations.updateProposal
-        # Skipped when creation itself failed: there is no proposal to mark, and
+      # `variables.current_proposal_id` rather than the create step's output:
+      # a clone moves the id, and data.set variables survive both the loop and
+      # a HITL park, whereas a loop-body step output does not.
+      - name: read_proposal_on_failure
+        type: proposals.getProposal
+        # Skipped when creation itself failed: there is nothing to settle, and
         # the template would resolve to an empty id.
-        if: "${{ steps.create_proposal.output.proposalId != null and steps.create_proposal.output.proposalId != '' and error.type != 'TimeoutError' }}"
+        if: '${{ variables.current_proposal_id != blank }}'
         with:
-          proposalId: '{{ steps.create_proposal.output.proposalId }}'
+          proposalId: '{{ variables.current_proposal_id }}'
+
+      # Discriminates on the proposal's own decision rather than on the error.
+      # All three timeout sources share `type: TimeoutError` and `ExecutionError`
+      # carries nothing else to tell them apart, so the record is the only
+      # reliable signal for what state the proposal was actually in.
+      - name: record_failure_after_decision
+        type: proposals.updateProposal
+        if: '${{ variables.current_proposal_id != blank and steps.read_proposal_on_failure.output.decision != blank }}'
+        with:
+          proposalId: '{{ variables.current_proposal_id }}'
           status: failed
           executionError: '{{ error.message }}'
+
+      # `expired` is the only terminal status an undecided proposal has: the
+      # execution states all require an approval, so a malfunction before
+      # anyone decided settles as "no decision was reached" rather than as a
+      # failure — which is why this is an expiry and not a `record_failure`.
+      - name: record_expiry_before_decision
+        type: proposals.updateProposal
+        if: '${{ variables.current_proposal_id != blank and steps.read_proposal_on_failure.output.decision == blank }}'
+        with:
+          proposalId: '{{ variables.current_proposal_id }}'
+          status: expired
+          executionError: '{{ error.message }}'
+
 triggers:
   - type: manual
     inputs:
@@ -61,11 +110,21 @@ triggers:
             `actionInput` object.
         impact:
           type: string
-          enum: ['low', 'medium', 'high', 'critical']
-          description: Impact snapshotted at creation.
+          enum: ['low', 'medium', 'high', 'critical', ''] # empty string is equivalent to undefined, adding it to prevent errors
+          description: >
+            Impact snapshotted at creation. Takes precedence over the action
+            workflow's own declared impact, since the caller knows the
+            situation the proposal came out of.
+        category:
+          type: string
+          description: >
+            Grouping axis for the decision queue. Overrides the action
+            workflow's own declared category, and is the only way a proposal
+            with no action gets one — consumers group by it, so without it such
+            a proposal has nowhere to appear.
         confidence:
           type: string
-          enum: ['low', 'medium', 'high']
+          enum: ['low', 'medium', 'high', ''] # empty string is equivalent to undefined, adding it to prevent errors
           description: Confidence in the recommendation.
         autoApprove:
           type: boolean
@@ -79,93 +138,415 @@ triggers:
 
 # The contract a caller gets back from `workflow.execute`. `workflow.execute`
 # declares its output as unknown, so this is documentation for the caller; the
-# `workflow.output` steps below emit the values.
+# `workflow.output` step below emits the values.
 outputs:
   - name: proposalId
     type: string
   - name: status
     type: string
+  - name: decision
+    type: string
 
 steps:
   - name: create_proposal
-    type: investigations.createProposal
+    type: proposals.createProposal
     with:
       conversationId: '{{ inputs.conversationId }}'
       comment: '{{ inputs.comment }}'
       actionWorkflowId: '{{ inputs.actionWorkflowId }}'
       actionInput: '${{ inputs.actionInput }}'
-      impact: "{{ inputs.impact | default: 'low' }}"
-      confidence: "{{ inputs.confidence | default: 'medium' }}"
+      impact: '{{ inputs.impact }}'
+      category: '{{ inputs.category }}'
+      confidence: '{{ inputs.confidence }}'
       origin: worker
-      # Must stay equal to the gate timeout below, or the deadline the queue
+      # Must stay equal to the gate timeout above, or the deadline the queue
       # shows an analyst is not the one the gate actually enforces.
       expiresIn: '72h'
 
-  - name: decision_gate
-    type: if
-    # `autoApprove` is only meaningful for an action proposal: autonomy governs
-    # whether an action may run without a human, and a non-action proposal has
-    # no action to govern. Approval is its entire lifecycle, so it is always
-    # gated and the flag is deliberately ignored.
-    condition: "${{ inputs.autoApprove != true or inputs.actionWorkflowId == null or inputs.actionWorkflowId == '' }}"
+  # Everything the loop carries lives in variables, because `data.set` is the
+  # only step type exempt from output eviction: its values survive a HITL park,
+  # a task resumption and the loop's own exit, which a step output does not.
+  - name: init_state
+    type: data.set
+    with:
+      completed: false
+      final_status: pending
+      final_decision: ''
+      current_proposal_id: '{{ steps.create_proposal.output.proposalId }}'
+      # Captured once. Every iteration derives its remaining time from this
+      # fixed point, so a failed attempt can never extend the deadline.
+      expires_epoch: "${{ steps.create_proposal.output.expiresAt | date: '%s' | plus: 0 }}"
+      has_deadline: '${{ steps.create_proposal.output.expiresAt != blank }}'
+      action_workflow_id: '{{ inputs.actionWorkflowId }}'
+      decided_by: ''
+      # `autoApprove` is only meaningful for an action proposal: autonomy
+      # governs whether an action may run without a human, and a non-action
+      # proposal has no action to govern. Approval is its entire lifecycle, so
+      # it is always gated and the flag is deliberately ignored.
+      needs_gate: '${{ inputs.autoApprove != true or inputs.actionWorkflowId == blank }}'
+
+  - name: decision_loop
+    type: while
+    # do-while: the first iteration always runs, and the condition is
+    # re-evaluated after each one.
+    condition: '${{ variables.completed != true }}'
+    max-iterations:
+      limit: 20
+      on-limit: fail
+    # Deliberately NO `iteration-timeout`. It wraps the body in a step-timeout
+    # zone, which would cut the parked approval gate short — the same warning
+    # is in definitions/alertzero/rule_tuning.yaml.
     steps:
-      # The API records the decision before resuming, so this gate only needs
-      # the release signal. waitForApproval reconstructs its response as
-      # `{ approved: approved === true }`, which makes the branch below
-      # fail-closed by construction.
-      - name: await_decision
-        type: waitForApproval
-        # Static, and equal to the `expiresIn` recorded above: the engine does
-        # not template-render `timeout`, it hands the raw string to the duration
-        # parser, so a template here fails at execution time. A caller-supplied
-        # deadline returns once elastic/kibana#290258 lands.
-        timeout: '72h'
+      - name: compute_now
+        type: data.set
         with:
-          message: "{{ inputs.comment | default: 'A proposal is awaiting your decision.' }}"
-          approveLabel: Approve
-          rejectLabel: Dismiss
+          now_epoch: "${{ 'now' | date: '%s' | plus: 0 }}"
+          # `while.iteration` is 0-based: EnterWhileNodeImpl seeds
+          # `{ iteration: 0 }`, so the first pass is 0 and the budget is spent
+          # once this reaches zero.
+          attempts_left: '${{ consts.max_attempts | minus: while.iteration | minus: 1 }}'
+
+      # A separate step because Liquid cannot read a variable written by the
+      # same `data.set`.
+      - name: compute_remaining
+        type: data.set
+        with:
+          remaining_seconds: '${{ variables.expires_epoch | minus: variables.now_epoch }}'
+
+      # Conditions below use a single `and` or a single comparison on purpose.
+      # Liquid has no operator precedence and no parentheses, so a mixed
+      # `and`/`or` expression binds in a way that does not match how it reads.
+      - name: settle_expired
+        type: if
+        condition: '${{ variables.has_deadline == true and variables.remaining_seconds <= 0 }}'
+        steps:
+          - name: record_expiry
+            type: proposals.updateProposal
+            with:
+              proposalId: '{{ variables.current_proposal_id }}'
+              status: expired
+          - name: complete_expired
+            type: data.set
+            with:
+              completed: true
+              final_status: expired
+          - name: break_expired
+            type: loop.break
+
+      - name: settle_exhausted
+        type: if
+        condition: '${{ variables.attempts_left <= 0 }}'
+        steps:
+          - name: record_exhaustion
+            type: proposals.updateProposal
+            with:
+              proposalId: '{{ variables.current_proposal_id }}'
+              status: expired
+              executionError: 'No decision was reached within the attempt budget.'
+          - name: complete_exhausted
+            type: data.set
+            with:
+              completed: true
+              final_status: expired
+          - name: break_exhausted
+            type: loop.break
+
+      - name: gate_branch
+        type: if
+        condition: '${{ variables.needs_gate == true }}'
+        steps:
+          - name: await_decision
+            type: waitForApproval
+            # TODO(elastic/kibana#290258): becomes
+            # `{{ variables.remaining_seconds }}s` once the engine renders a
+            # step's `timeout`. Today it hands the raw string to the duration
+            # parser, so a template here fails at execution time.
+            timeout: '72h'
+            on-failure:
+              # A timeout is the expected end of an unanswered proposal, not a
+              # malfunction, so it is settled here rather than left to the
+              # workflow-level handler — which would settle the record too, but
+              # end the run as `failed` and skip the output step.
+              #
+              # `WaitForApprovalStepSchema` does not model this key, so it
+              # reaches the engine only because managed workflows install under
+              # lightweight validation. The engine honours it: the wait fails
+              # with a `TimeoutError` through the ordinary `failStep` path, and
+              # `handleStepLevelOnFailure` wraps any step that declares the key
+              # with no exclusion for HITL types. Pinned by the schema-parity
+              # test beside this file; the schema gap is
+              # elastic/security-team#19315.
+              continue: true
+            with:
+              message: "{{ inputs.comment | default: 'A proposal is awaiting your decision.' }}"
+              approveLabel: Approve
+              rejectLabel: Dismiss
+
+          # Before anything reads the gate's answer, because a timed-out gate
+          # has no answer to read: `response.approved` comes back blank, which
+          # `resolve_gate` below would record as a dismissal — a decision
+          # nobody made, attributed to nobody.
+          - name: handle_gate_timeout
+            type: if
+            condition: '${{ steps.await_decision.error != blank }}'
+            steps:
+              # `expired` rather than `failed`: the gate's timeout and the
+              # deadline on the record are the same literal, and the gate
+              # starts marginally after the proposal is created, so a gate that
+              # times out is always past the deadline. No decision was reached.
+              - name: record_gate_expiry
+                type: proposals.updateProposal
+                with:
+                  proposalId: '{{ variables.current_proposal_id }}'
+                  status: expired
+                  executionError: '{{ steps.await_decision.error.message }}'
+              - name: complete_gate_expiry
+                type: data.set
+                with:
+                  completed: true
+                  final_status: expired
+              - name: break_gate_expiry
+                type: loop.break
+
+          # Copied into variables immediately. `waitForApproval` is not exempt
+          # from output eviction, and a step output resolves to its latest
+          # execution — so a later iteration that skips this branch would still
+          # read this pass's values.
+          - name: resolve_gate
+            type: data.set
+            with:
+              gate_approved: '${{ steps.await_decision.output.response.approved == true }}'
+              decided_by: '{{ steps.await_decision.output.respondedBy }}'
+
+      - name: auto_branch
+        type: if
+        condition: '${{ variables.needs_gate != true }}'
+        steps:
+          # No human in this path: the caller's autonomy policy already decided,
+          # so the approval is attributed to the execution identity.
+          - name: resolve_auto
+            type: data.set
+            with:
+              gate_approved: true
+              decided_by: ''
+
+      # The clock is re-read after the gate, not only before it. The deadline
+      # check at the top of the iteration was evaluated before the park, which
+      # may have lasted days — and only the HTTP routes refuse an expired
+      # decision, so a resume arriving through the platform resume API or the
+      # Inbox would otherwise be recorded and run its action past the deadline
+      # the analyst was shown.
+      - name: recompute_now
+        type: data.set
+        with:
+          now_epoch: "${{ 'now' | date: '%s' | plus: 0 }}"
+
+      - name: recompute_remaining
+        type: data.set
+        with:
+          remaining_seconds: '${{ variables.expires_epoch | minus: variables.now_epoch }}'
+
+      - name: settle_expired_after_gate
+        type: if
+        condition: '${{ variables.has_deadline == true and variables.remaining_seconds <= 0 }}'
+        steps:
+          - name: record_late_expiry
+            type: proposals.updateProposal
+            with:
+              proposalId: '{{ variables.current_proposal_id }}'
+              status: expired
+              executionError: 'The decision arrived after the deadline had passed.'
+          - name: complete_late_expiry
+            type: data.set
+            with:
+              completed: true
+              final_status: expired
+          - name: break_late_expiry
+            type: loop.break
+
+      # Only when a human answered. On the autonomy path the principal is the
+      # Worker, which necessarily holds the privilege — it had to, to create the
+      # proposal — so the check could only ever pass, at the cost of a round
+      # trip per iteration. The writes below assert the privilege inside each
+      # step regardless; what is skipped here is the *decide* check, and there
+      # is no decider to check.
+      - name: authorize_decision
+        type: if
+        condition: '${{ variables.needs_gate == true }}'
+        steps:
+          # Ordering is load-bearing: this runs after the gate and before any
+          # write. If a write came first and threw instead, the gate would
+          # already be claimed and spent, and the proposal would strand with no
+          # way for a privileged approver to retry.
+          - name: check_privileges
+            type: proposals.checkDecidePrivileges
+            with:
+              proposalId: '{{ variables.current_proposal_id }}'
+              # An external resume carries no request, so the execution wakes
+              # under the workflow runner's own key — which always holds the
+              # privilege. The gate's `respondedBy` is the only thing that
+              # distinguishes that from a human, so the step needs it to avoid
+              # authorizing every external click as the Worker.
+              respondedBy: '{{ variables.decided_by }}'
+
+          - name: reject_unprivileged
+            type: if
+            condition: '${{ steps.check_privileges.output.canDecide != true }}'
+            steps:
+              # Nothing has been written, so re-parking leaves the proposal
+              # exactly as a privileged approver will find it.
+              - name: park_for_privileged
+                type: loop.continue
 
       - name: handle_dismissal
         type: if
-        condition: '${{ steps.await_decision.output.response.approved != true }}'
+        condition: '${{ variables.gate_approved != true }}'
         steps:
-          - name: output_dismissed
-            type: workflow.output
-            status: completed
+          # Adopting a `supersededBy` successor belongs here and lands with the
+          # tune route, which is the only thing that will write that field onto
+          # a proposal still awaiting a decision. `cloneProposal` writes it onto
+          # one that already failed, so there is nothing to adopt today.
+          - name: record_dismissal
+            type: proposals.updateProposal
             with:
-              proposalId: '{{ steps.create_proposal.output.proposalId }}'
-              status: dismissed
+              proposalId: '{{ variables.current_proposal_id }}'
+              decision: dismissed
+              decidedBy: '{{ variables.decided_by }}'
+              # A human answered and nothing will run. The dismiss reason and
+              # rationale are written by the route before it releases the gate,
+              # because `waitForApproval` reduces its resume payload to a bare
+              # boolean and discards everything else.
+              status: no_action
+          - name: complete_dismissed
+            type: data.set
+            with:
+              completed: true
+              final_status: no_action
+              final_decision: dismissed
+          - name: break_dismissed
+            type: loop.break
 
-  - name: run_action
-    type: if
-    # Absent for proposals the analyst carries out themselves; approval is the
-    # whole lifecycle in that case.
-    condition: "${{ inputs.actionWorkflowId != null and inputs.actionWorkflowId != '' }}"
-    steps:
-      - name: mark_executing
-        type: investigations.updateProposal
-        with:
-          proposalId: '{{ steps.create_proposal.output.proposalId }}'
-          status: executing
+      # The decision and the status are written together, in one call per
+      # branch, because `approved` + `pending` is not a state the model allows:
+      # an approval either has an action to run or it has nothing to run, and
+      # both are known here. Writing the decision first and the status after
+      # would leave the record briefly claiming an approval with no outcome.
+      #
+      # Each branch carries the full condition rather than nesting under a
+      # shared one, so no condition has to mix `and` with `or`.
+      - name: approve_without_action
+        type: if
+        # No action means the analyst carries it out themselves, so the
+        # approval is the whole lifecycle.
+        condition: '${{ variables.gate_approved == true and variables.action_workflow_id == blank }}'
+        steps:
+          - name: record_approval_no_action
+            type: proposals.updateProposal
+            with:
+              proposalId: '{{ variables.current_proposal_id }}'
+              decision: approved
+              decidedBy: '{{ variables.decided_by }}'
+              status: no_action
+          - name: complete_no_action
+            type: data.set
+            with:
+              completed: true
+              final_status: no_action
+              final_decision: approved
+          - name: break_no_action
+            type: loop.break
 
-      - name: execute_action
-        type: workflow.execute
-        with:
-          workflow-id: '{{ inputs.actionWorkflowId }}'
-          inputs:
-            # Every action workflow takes one `actionInput` object, so this
-            # workflow never needs to know an action's parameter names.
-            actionInput: '${{ inputs.actionInput }}'
+      - name: approve_with_action
+        type: if
+        condition: '${{ variables.gate_approved == true and variables.action_workflow_id != blank }}'
+        steps:
+          - name: record_approval_executing
+            type: proposals.updateProposal
+            with:
+              proposalId: '{{ variables.current_proposal_id }}'
+              decision: approved
+              decidedBy: '{{ variables.decided_by }}'
+              status: executing
 
-      - name: record_success
-        type: investigations.updateProposal
-        with:
-          proposalId: '{{ steps.create_proposal.output.proposalId }}'
-          status: succeeded
+          - name: execute_action
+            type: workflow.execute
+            on-failure:
+              # Keeps the failure inside the loop so it can be re-offered.
+              # Without this the workflow-level handler would settle the
+              # proposal and stop, and the clone branch below would be
+              # unreachable.
+              #
+              # The engine honours this, but `WorkflowExecuteStepSchema` does
+              # not model the key — it reaches the engine only because managed
+              # workflows install under lightweight validation, which does not
+              # validate steps. Pinned by the schema-parity test next to this
+              # file so it cannot start being stripped unnoticed; the schema
+              # gap belongs with elastic/security-team#19315.
+              continue: true
+            with:
+              workflow-id: '{{ variables.action_workflow_id }}'
+              inputs:
+                # Every action workflow takes one `actionInput` object, so this
+                # workflow never needs to know an action's parameter names.
+                actionInput: '${{ inputs.actionInput }}'
 
+          - name: handle_action_success
+            type: if
+            condition: '${{ steps.execute_action.error == blank }}'
+            steps:
+              - name: record_success
+                type: proposals.updateProposal
+                with:
+                  proposalId: '{{ variables.current_proposal_id }}'
+                  status: succeeded
+              - name: complete_succeeded
+                type: data.set
+                with:
+                  completed: true
+                  final_status: succeeded
+                  final_decision: approved
+              - name: break_succeeded
+                type: loop.break
+
+          - name: handle_action_failure
+            type: if
+            condition: '${{ steps.execute_action.error != blank }}'
+            steps:
+              - name: record_action_failure
+                type: proposals.updateProposal
+                with:
+                  proposalId: '{{ variables.current_proposal_id }}'
+                  status: failed
+                  executionError: '{{ steps.execute_action.error.message }}'
+
+              # The failed proposal has settled, so the retry is a new record
+              # pointing at the same still-parked gate execution. Its deadline
+              # and creation time are inherited, so a chain of failures cannot
+              # outlive the deadline the queue showed.
+              - name: clone_proposal
+                type: proposals.cloneProposal
+                with:
+                  proposalId: '{{ variables.current_proposal_id }}'
+
+              # Assigned inside the branch that produced the new id rather than
+              # reconciled at the end of the iteration, because a step that did
+              # not run this pass still returns its previous value.
+              - name: adopt_clone
+                type: data.set
+                with:
+                  current_proposal_id: '{{ steps.clone_proposal.output.proposalId }}'
+                  # A human should see that the action failed, even if the first
+                  # attempt ran under autonomy.
+                  needs_gate: true
+              - name: park_on_clone
+                type: loop.continue
+
+  # Reads variables, never loop-body step outputs: those are evicted when the
+  # loop exits.
   - name: output_result
     type: workflow.output
     status: completed
     with:
-      proposalId: '{{ steps.create_proposal.output.proposalId }}'
-      status: "{{ steps.record_success.output.status | default: 'approved' }}"
+      proposalId: '{{ variables.current_proposal_id }}'
+      status: '{{ variables.final_status }}'
+      decision: '{{ variables.final_decision }}'

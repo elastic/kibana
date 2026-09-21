@@ -49,6 +49,7 @@ function toInvestigationState(
   progress?: InvestigationState
 ): InvestigationState {
   return {
+    title: inv.title,
     summary: inv.summary ?? progress?.summary ?? '',
     hypotheses: inv.hypotheses ?? progress?.hypotheses ?? [],
     conclusion: inv.conclusion ?? progress?.conclusion,
@@ -97,11 +98,6 @@ function SectionTitle({ children }: { children: React.ReactNode }): React.ReactE
   );
 }
 
-const getPrimaryText = (investigation: GetInvestigationResponse): string =>
-  investigation.subject.summary?.trim() ||
-  investigation.subject.id ||
-  investigation.investigation_id;
-
 export function InvestigationDetailFlyout({
   investigation,
   isLoading,
@@ -113,7 +109,7 @@ export function InvestigationDetailFlyout({
   progress,
 }: InvestigationDetailFlyoutProps): React.ReactElement {
   const primaryText = investigation
-    ? getPrimaryText(investigation)
+    ? investigation.title
     : i18n.translate('xpack.nightshiftInvestigations.flyout.loading', {
         defaultMessage: 'Loading…',
       });

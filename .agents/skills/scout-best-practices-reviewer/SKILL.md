@@ -1,13 +1,13 @@
 ---
 name: scout-best-practices-reviewer
-description: Review Scout UI/API tests (including Scout test migrations) for best practices, reuse, parity, and server config hygiene.
+description: Review Scout UI/API tests (including Scout test migrations) and Scout reuse surfaces (page objects, UI component objects, API services) for best practices, reuse, correct placement, parity, and server config hygiene.
 ---
 
 # Scout Best Practices Reviewer
 
 ## Overview
 
-Perform a static PR review of Scout UI and API test files (`*.spec.ts`) against Scout best practices and existing Scout abstractions (fixtures, page objects, API helpers). Produce actionable, PR-review-ready feedback that pushes for reuse over one-off implementations.
+Perform a static PR review of Scout UI and API test files (`*.spec.ts`) and of Scout reuse surfaces (page objects, UI component objects, API services) against Scout best practices and existing Scout abstractions (fixtures, page objects, API helpers). Produce actionable, PR-review-ready feedback that pushes for reuse over one-off implementations.
 
 **Solution-specific skills may extend this skill** with additional review criteria. Check if one exists for your solution (e.g., Security Solution has one at `<security_solution plugin>/.agents/skills/security-scout-best-practices-reviewer/`). Run the general review first, then apply solution-specific checks.
 
@@ -18,6 +18,7 @@ Important: Do not post GitHub comments unless explicitly stated.
 1. Changed `*.spec.ts` files (and imported helpers/fixtures).
    - UI Tests: Use `test` / `spaceTest` (usually in `**/test/scout/ui/**`).
    - API Tests: Use `apiTest` (usually in `**/test/scout/api/**`).
+   - A PR may also touch only reuse surfaces and no spec: page objects, UI component objects, or API services under `**/kbn-scout*/src/playwright/{page_objects,ui_components,eui_components}/**`, `**/kbn-scout*/src/playwright/fixtures/scope/worker/apis/**`, or a plugin's `**/test/scout*/**/fixtures/{page_objects,apis}/**`. Review those against Critical check 6.
 2. Neighboring Scout code in the same plugin/solution (existing specs + `test/scout/**/fixtures/**`) to spot reuse opportunities and avoid duplicating helpers.
 3. Removed/previous tests (if this is a migration) to verify behavior parity.
 4. Scout docs (open only what you need — best practices are split by test type so you can skip the irrelevant half):
@@ -45,6 +46,7 @@ The **Fires when the PR…** column only determines when to perform a check; it 
 | 3 | **Right test type, 100% justified** | adds or migrates a UI or API spec, or an FTR/Cypress→Scout migration | UI asserts data/logic only, or drives a pure local UI toggle already covered by a Jest unit/RTL test → move down the pyramid or remove. "It works / it's easier / that's how the FTR did it" isn't justification. → `docs/extend/testing/scout-best-practices.md#pick-the-right-test-type`, `docs/extend/testing/migrate-tests.md#dont-migrate-blindly` |
 | 4 | **Migration parity — no major coverage loss** | removes or replaces FTR/Cypress tests alongside new or changed Scout specs | Flag **only major** changes or drops: removed scenarios, dropped roles/error paths or classic/serverless coverage, weakened assertions or lost side-effect checks. Skip benign deltas — don't post an FYI parity map. Depth in **Migration parity analysis** below. → `docs/extend/testing/migrate-tests.md#dont-migrate-blindly` |
 | 5 | **Doesn't assume or leak shared-server state** | adds or changes a spec, fixture, or setup/teardown hook | The suite assumes state that a shared server can't guarantee, or leaves state behind for the suites that run after it: asserts data is *absent* cluster-wide (empty prompt / "no data" redirect / zero-count → move to a lower-level test with mocked data when you can - e.g., RTL component test); uses a fixed literal resource name (index, pipeline, saved object, data view, alert, Fleet config, default UI setting, or other Kibana entity) or a fixed time window other suites likely reuse → namespace per run / per suite; deletes the tracking object but not the underlying resource (e.g. API keys, tasks); or changes settings, feature flags, or index templates without reverting them. These pass locally and alone, then fail rarely and unreproducibly in CI. → `docs/extend/testing/scout-best-practices.md#expect-a-shared-test-environment`, `docs/extend/testing/scout-best-practices.md#dont-leak-state-into-the-next-suite` |
+| 6 | **Helper lives in the right place** | adds, moves, or renames a page object, UI component object, or API service class (paths listed under Inputs) | Wraps a Kibana component that two or more plugins render but sits in one plugin → belongs in `@kbn/scout` (or the solution package if only that solution renders it). Drives a screen only its own plugin's tests use but sits in `@kbn/scout` → keep it plugin-local. Same class name already exists in another Scout location → duplicate, reuse or consolidate. Renames or removes a `pageObjects.<key>` / `apiServices.<key>` → breaking for every consumer, ask for the key to stay. For consumer counts run `node scripts/scout audit`. → `docs/extend/testing/page-objects.md#scout-page-objects-placement` |
 
 ## Scope (be comprehensive)
 
@@ -63,7 +65,7 @@ Checklist items are tagged with the document they're detailed in:
 
 Open only the docs relevant to the test type(s) under review.
 
-- **[general]** **Reuse-first**: prefer existing `pageObjects`, fixtures, and `apiServices`; if adding helpers/page objects, place them in the right scope (plugin vs solution vs `@kbn/scout`) and register via fixtures.
+- **[general]** **Reuse-first**: prefer existing `pageObjects`, fixtures, and `apiServices`; if adding helpers/page objects, place them per **Critical check 6** and `docs/extend/testing/page-objects.md#scout-page-objects-placement` (plugin vs solution vs `@kbn/scout`) and register via fixtures.
 - **[general]** **No unused constants**: flag constants that are unused or used in only one place — prefer inlining them.
 - **[general]** **Don't circumvent the linter**: CI gates lint *violations*, so don't re-flag those — but it can't see a **suppressed** rule, so read every `eslint-disable` the diff adds. A file-level `/* eslint-disable <rule> */` is a `blocker`; it silences code added later too. An undescribed `// eslint-disable-next-line` is a `major`. With a stated reason (`-- <why>`) it is acceptable only when the rule genuinely can't express the case; if a supported alternative exists, name it. Same bar for hiding a flagged pattern behind a hack, or a sanctioned escape hatch like `dispatchEvent('click')`: both need a documented justification.
   - Most common offender: `playwright/no-nth-methods`. A suppressed `.first()` almost always means the locator matched more than one element — the selector is the bug; name the replacement from **Avoid selecting elements by index or position** in `docs/extend/testing/ui-best-practices.md`. Only a genuinely ordered collection, or elements that are truly indistinguishable in a component the author doesn't own, justify a described `.nth()` / `.last()`, and both need a preceding `toHaveCount` to bound the index.
@@ -128,7 +130,7 @@ These EUI/Kibana component behaviours are non-obvious and cannot be inferred fro
 - **EUI disabled button tooltip**: hover the `span:has([data-test-subj="..."])` wrapper, not the button itself.
 - **EUI CSS class selectors** (`.euiTableRow`, `.euiToolTipAnchor`, etc.): internal to EUI, change between versions — use `data-test-subj` or ARIA roles.
 - **DOM instability from app bugs**: use `dispatchEvent('click')` over `{ force: true }`; document the bug location in a comment.
-- **EUI Test Objects (`page.components.*`)**: prefer the published `@elastic/eui-test-helpers` via `page.components.*` over raw selectors. Flag new or suite-local wrapper/helper extensions; missing capabilities should follow the shared contribution workflow. See the `docs/extend/testing/eui-test-helpers.md` for details.
+- **EUI test helpers (`page.components.*`)**: prefer the published `@elastic/eui-test-helpers` via `page.components.*` over raw selectors (`@kbn/eslint/scout_no_raw_eui_selectors` flags the covered classes; when no object method fits, build the locator from the exported `Eui*Selectors` constants rather than a literal). Flag new or suite-local wrapper/helper extensions; missing capabilities should follow the shared contribution workflow. See the `docs/extend/testing/eui-test-helpers.md` for details.
 
 ## Output
 
