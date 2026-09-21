@@ -9,7 +9,9 @@ import {
   ConversationOriginType,
   ConversationRoundStepType,
   EventActorType,
+  ToolResultType,
 } from '@kbn/agent-builder-common';
+import type { ToolResult } from '@kbn/agent-builder-common';
 import { groupTimelineEvents, buildItems } from './to_timeline_items';
 import { createUserMessageEvent } from './items/user_message_event.factory';
 import { createExecutionStartedEvent } from './items/execution_started.factory';
@@ -194,6 +196,69 @@ describe('groupTimelineEvents', () => {
       expect(execItem.status).toBe('aborted');
       expect(execItem.terminal).toBe(aborted);
     }
+  });
+});
+
+describe('groupTimelineEvents deduping a paused tool call', () => {
+  const toolCallStep = (results: ToolResult[]) => ({
+    type: ConversationRoundStepType.toolCall as const,
+    tool_call_id: 'tc-1',
+    tool_id: 'platform.core.list_indices',
+    params: {},
+    results,
+  });
+  const result: ToolResult = { type: ToolResultType.other, data: {}, tool_result_id: 'r-1' };
+
+  it('drops the unresolved copy once the resume execution resolves the same tool call', () => {
+    const user = createUserMessageEvent({ id: 'user-1' });
+    const pausedStarted = createExecutionStartedEvent({ execution_id: 'exec-1', id: 'es-1' });
+    const pausedStep = createExecutionStepEvent({
+      execution_id: 'exec-1',
+      id: 'paused-step',
+      data: { step: toolCallStep([]), sequence: 0 },
+    });
+    const pausedTerm = createExecutionTerminatedEvent({ execution_id: 'exec-1', id: 'et-1' });
+    const promptResponse = createPromptResponseEvent({ id: 'pr-1' });
+    const resumeStarted = createExecutionStartedEvent({ execution_id: 'exec-2', id: 'es-2' });
+    const resumeStep = createExecutionStepEvent({
+      execution_id: 'exec-2',
+      id: 'resume-step',
+      data: { step: toolCallStep([result]), sequence: 0 },
+    });
+    const resumeTerm = createExecutionTerminatedEvent({ execution_id: 'exec-2', id: 'et-2' });
+
+    const events = [
+      user,
+      pausedStarted,
+      pausedStep,
+      pausedTerm,
+      promptResponse,
+      resumeStarted,
+      resumeStep,
+      resumeTerm,
+    ];
+    const turns = groupTimelineEvents(events, makeEventsById(events)).filter(
+      (item) => item.kind === 'agentTurn'
+    );
+
+    const [paused, resumed] = turns;
+    expect(paused.kind === 'agentTurn' && paused.steps).toHaveLength(0);
+    expect(resumed.kind === 'agentTurn' && resumed.steps).toEqual([resumeStep.data.step]);
+  });
+
+  it('keeps an unresolved tool call while the run is still paused on it', () => {
+    const user = createUserMessageEvent({ id: 'user-1' });
+    const started = createExecutionStartedEvent({ execution_id: 'exec-1', id: 'es-1' });
+    const step = createExecutionStepEvent({
+      execution_id: 'exec-1',
+      id: 'paused-step',
+      data: { step: toolCallStep([]), sequence: 0 },
+    });
+
+    const events = [user, started, step];
+    const [, turn] = groupTimelineEvents(events, makeEventsById(events));
+
+    expect(turn.kind === 'agentTurn' && turn.steps).toEqual([step.data.step]);
   });
 });
 
