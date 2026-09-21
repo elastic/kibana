@@ -936,3 +936,78 @@ describe('spec 02 regression — named fixtures', () => {
     }
   });
 });
+
+/**
+ * Cycle C — group-hosted lane placement.
+ *
+ * A step inside a `foreach` body has `on-failure.fallback`. The fallback step
+ * is a reserved lane node whose owner lives in the group's dagre sub-graph, not
+ * the root graph. The lane must land in the +cross margin (to the right of its
+ * owner in TB direction) so it is visually separate from the spine.
+ *
+ * Current defect: pass 1 (enforceForkLaneOrder) filters isFailure edges before
+ * building the fork map, so it cannot see the fallback edge inside the group.
+ * Pass 1b (enforceForkBranchCompoundOrder) only processes outer-graph lanes
+ * (graphId === undefined) and skips group-hosted lanes entirely.
+ *
+ * As a result, after all post-dagre passes the fallback node ends up at the
+ * wrong cross position.
+ *
+ * The assertion is PLACEMENT (lane is in the +cross margin), not overlap. Pass 3
+ * already guarantees no overlap on raw dagLayout output, so an overlap assertion
+ * would be green regardless.
+ */
+describe('Cycle C — group-hosted lane placement (foreach body on-failure)', () => {
+  it('fallback step inside a foreach body is in the +cross margin of its owner (TB)', () => {
+    // Topology: loop(foreach) → body: [ if-fork → { then: [good + on-failure/recover], else: [bad] } ]
+    // The lane (recover) is group-hosted (graphId = 'loop'). Pass 1b skips it.
+    // After pass 1 reorders the fork branches, pass 1b would normally shift recover
+    // to stay right of good's NEW position. Since pass 1b skips it, recover may
+    // end up left of bad (i.e., NOT in the +cross margin relative to good).
+    const { result } = runLayout(
+      minimal({
+        steps: [
+          {
+            name: 'loop',
+            type: 'foreach',
+            foreach: 'items',
+            steps: [
+              {
+                name: 'fork',
+                type: 'if',
+                condition: 'true',
+                steps: [
+                  {
+                    name: 'good',
+                    type: 'http',
+                    'on-failure': {
+                      fallback: [{ name: 'recover', type: 'http' }],
+                    },
+                  },
+                ],
+                else: [{ name: 'bad', type: 'http' }],
+              },
+            ],
+          },
+        ] as unknown as WorkflowYaml['steps'],
+      }),
+      'TB'
+    );
+
+    const good = findNode(result.nodes, 'good');
+    const recover = findNode(result.nodes, 'recover');
+    const bad = findNode(result.nodes, 'bad');
+
+    // In TB layout the cross axis is x. After pass 1b packs the fork branches
+    // as compound units (good+recover, then bad), the order must be:
+    //   good.x < recover.x < bad.x
+    //
+    // Specifically: bad must start at or beyond recover's right edge + nodeSep.
+    // Without pass 1b handling group-hosted lanes, dagLayout places recover at
+    // the right of ALL spine nodes in the band (including bad), so the order
+    // becomes good < bad < recover — bad is between good and recover.
+    expect(bad.x).toBeGreaterThanOrEqual(
+      recover.x + recover.width + WORKFLOW_NODE_SEP - 1 // -1: float tolerance
+    );
+  });
+});
