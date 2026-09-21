@@ -175,45 +175,32 @@ const createVisualizationSchema = z.object({
     ),
   target: targetSchema,
   time_range: z
-    .preprocess(
-      (value) => {
-        if (value && typeof value === 'object' && !Array.isArray(value)) {
-          const from = (value as { from?: unknown }).from;
-          const to = (value as { to?: unknown }).to;
-          if ((from === '' || from == null) && (to === '' || to == null)) {
-            return undefined;
-          }
-        }
-        return value;
-      },
-      z
-        .object({
-          from: z
-            .string()
-            .max(256)
-            .describe(
-              'Start of the time range. Use Kibana date math for relative ranges (e.g. "now-30m", "now-24h", "now-7d") or an ISO 8601 string for an absolute start.'
-            ),
-          to: z
-            .string()
-            .max(256)
-            .describe(
-              'End of the time range. Use "now" for the current time, or an ISO 8601 string for an absolute end.'
-            ),
-        })
-        .check((ctx) => {
-          try {
-            getDateRange(ctx.value);
-          } catch (err) {
-            ctx.issues.push({
-              code: 'custom',
-              message: err instanceof Error ? err.message : 'Invalid time_range',
-              input: ctx.value,
-            });
-          }
-        })
-        .optional()
-    )
+    .object({
+      from: z
+        .string()
+        .max(256)
+        .describe(
+          'Start of the time range. Use Kibana date math for relative ranges (e.g. "now-30m", "now-24h", "now-7d") or an ISO 8601 string for an absolute start.'
+        ),
+      to: z
+        .string()
+        .max(256)
+        .describe(
+          'End of the time range. Use "now" for the current time, or an ISO 8601 string for an absolute end.'
+        ),
+    })
+    .check((ctx) => {
+      try {
+        getDateRange(ctx.value);
+      } catch (err) {
+        ctx.issues.push({
+          code: 'custom',
+          message: err instanceof Error ? err.message : 'Invalid time_range',
+          input: ctx.value,
+        });
+      }
+    })
+    .optional()
     .describe(
       '(optional) Only set this when the user explicitly named a time window (e.g. "last 7 days", "May 20–24"). Do not invent a range. Omit it otherwise — create applies a data-aware default, and edits keep the existing range.'
     ),

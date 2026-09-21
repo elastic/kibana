@@ -222,10 +222,6 @@ describe('createVisualizationTool schema', () => {
   it('rejects a time_range whose endpoints are not valid Kibana date math', () => {
     const base = { query: 'errors over time', target: lensTarget() };
 
-    expect(schema.safeParse({ ...base, time_range: { from: '', to: '' } }).success).toBe(true);
-    expect(schema.safeParse({ ...base, time_range: { from: '', to: '' } }).data?.time_range).toBe(
-      undefined
-    );
     expect(schema.safeParse({ ...base, time_range: { from: '', to: 'not-a-date' } }).success).toBe(
       false
     );
