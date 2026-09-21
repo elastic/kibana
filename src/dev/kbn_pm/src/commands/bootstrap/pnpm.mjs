@@ -33,10 +33,8 @@ export function hasYarnInstallLeftovers() {
 
 /**
  * Verify pnpm is available before we spawn it, and warn on version drift.
- * We deliberately don't ship a package.json "packageManager" field: it makes
- * yarn refuse to run, and docs.elastic.dev (plus a few leftover tools) still
- * invoke yarn. So we detect pnpm ourselves and point devs at corepack, pinning
- * from "engines.pnpm".
+ * Corepack uses package.json "packageManager" to provision the pinned version;
+ * this check covers environments where Corepack is not enabled or is shadowed.
  *
  * @param {import('src/platform/packages/private/kbn-some-dev-log').SomeDevLog} log
  */
