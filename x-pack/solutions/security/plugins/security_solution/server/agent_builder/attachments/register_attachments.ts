@@ -16,6 +16,7 @@ import { createEntityAttachmentType } from './entity';
 import { createEntityAnalyticsDashboardAttachmentType } from './entity_analytics_dashboard';
 import { createEntityGraphAttachmentType } from './entity_graph';
 import { createEntityRiskScoreHistoryAttachmentType } from './entity_risk_score_history';
+import { createExceptionAttachmentType } from './exception';
 import { createInvestigationIocsAttachmentType } from './investigation_iocs';
 import { createInvestigationTimelineAttachmentType } from './investigation_timeline';
 import { createSiemReadinessAttachmentType } from './siem_readiness';
@@ -43,6 +44,7 @@ export const registerAttachments = async (
   if (experimentalFeatures.riskScoreHistoryEnabled) {
     agentBuilder.attachments.registerType(createEntityRiskScoreHistoryAttachmentType());
   }
+  agentBuilder.attachments.registerType(createExceptionAttachmentType());
   if (experimentalFeatures.endpointForensicAnalysisSkill) {
     agentBuilder.attachments.registerType(createInvestigationTimelineAttachmentType());
     agentBuilder.attachments.registerType(createInvestigationIocsAttachmentType());
