@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { BehaviorSubject } from 'rxjs';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -93,6 +93,8 @@ const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockUseDeveloperMode = useDeveloperMode as jest.MockedFunction<typeof useDeveloperMode>;
 
 const setDeveloperMode = jest.fn();
+const settingsClientSet = jest.fn();
+const settingsGlobalClientSet = jest.fn();
 
 const setup = ({
   isDeveloperMode = false,
@@ -128,9 +130,11 @@ const setup = ({
       settings: {
         client: {
           get: jest.fn().mockReturnValue('logs-*'),
+          set: settingsClientSet,
         },
         globalClient: {
           get: jest.fn().mockReturnValue({}),
+          set: settingsGlobalClientSet,
         },
       },
       featureFlags: {
@@ -154,6 +158,8 @@ const setup = ({
 describe('SettingsTab developer mode', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    settingsClientSet.mockResolvedValue(true);
+    settingsGlobalClientSet.mockResolvedValue(true);
   });
 
   it('persists the developer mode switch immediately', () => {
@@ -194,10 +200,13 @@ describe('SettingsTab developer mode', () => {
 
   it('reverts a dirty YAML draft and drops it from the save bar when developer mode turns off', () => {
     const { rerender } = setup({ isDeveloperMode: true });
+    const savedYaml = (screen.getByTestId('streams-settings-tuning-editor') as HTMLTextAreaElement)
+      .value;
 
     fireEvent.change(screen.getByTestId('streams-settings-tuning-editor'), {
       target: { value: 'sample_size: 99' },
     });
+    expect(screen.getByTestId('streams-settings-tuning-editor')).not.toHaveValue(savedYaml);
     expect(
       screen.getByTestId('streams-significant-events-settings-bottom-bar')
     ).toBeInTheDocument();
@@ -229,7 +238,7 @@ describe('SettingsTab developer mode', () => {
       </I18nProvider>
     );
 
-    expect(screen.getByTestId('streams-settings-tuning-editor')).toHaveValue('{}');
+    expect(screen.getByTestId('streams-settings-tuning-editor')).toHaveValue(savedYaml);
     expect(
       screen.queryByTestId('streams-significant-events-settings-bottom-bar')
     ).not.toBeInTheDocument();
@@ -240,9 +249,6 @@ describe('SettingsTab developer mode', () => {
 
     fireEvent.change(screen.getByTestId('streams-settings-index-patterns'), {
       target: { value: 'metrics-*' },
-    });
-    fireEvent.change(screen.getByTestId('streams-settings-tuning-editor'), {
-      target: { value: 'sample_size: 99' },
     });
     expect(screen.getByTestId('streams-settings-save-button')).toBeEnabled();
 
@@ -259,5 +265,31 @@ describe('SettingsTab developer mode', () => {
 
     expect(screen.queryByTestId('nightshiftSettingsTuningPanel')).not.toBeInTheDocument();
     expect(screen.getByTestId('streams-settings-save-button')).toBeDisabled();
+  });
+
+  it('disables the developer mode switch while settings are saving', async () => {
+    setup({ isDeveloperMode: true });
+
+    let resolveSet: () => void = () => undefined;
+    settingsClientSet.mockReturnValue(
+      new Promise<boolean>((resolve) => {
+        resolveSet = () => resolve(true);
+      })
+    );
+
+    fireEvent.change(screen.getByTestId('streams-settings-index-patterns'), {
+      target: { value: 'metrics-*' },
+    });
+    fireEvent.click(screen.getByTestId('streams-settings-save-button'));
+    fireEvent.click(screen.getByRole('button', { name: 'Save anyway' }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('nightshiftDeveloperModeSwitch')).toBeDisabled();
+    });
+
+    resolveSet();
+    await waitFor(() => {
+      expect(screen.getByTestId('nightshiftDeveloperModeSwitch')).toBeEnabled();
+    });
   });
 });

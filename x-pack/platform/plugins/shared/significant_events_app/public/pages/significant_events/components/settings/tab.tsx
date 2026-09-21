@@ -857,7 +857,7 @@ export function SettingsTab() {
                     onChange={(e) => {
                       void setDeveloperMode(e.target.checked);
                     }}
-                    disabled={!canSaveAdvancedSettings || isDeveloperModeSaving}
+                    disabled={!canSaveAdvancedSettings || isDeveloperModeSaving || isSaving}
                   />
                 </EuiFormRow>
               </EuiForm>
