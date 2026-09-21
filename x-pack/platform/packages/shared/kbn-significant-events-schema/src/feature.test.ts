@@ -81,20 +81,6 @@ describe('normalizeFeatureSlugForMatching', () => {
   });
 });
 
-describe('computeFeatureUuid', () => {
-  it('derives the uuid from the stream name and the normalized slug', () => {
-    expect(computeFeatureUuid({ id: '  Okta ', stream_name: 'logs.test' })).toBe(
-      computeFeatureUuid({ id: 'okta', stream_name: 'logs.test' })
-    );
-  });
-
-  it('gives the same slug a different uuid per stream', () => {
-    expect(computeFeatureUuid({ id: 'okta', stream_name: 'logs.test' })).not.toBe(
-      computeFeatureUuid({ id: 'okta', stream_name: 'logs.other' })
-    );
-  });
-});
-
 describe('mergeFeature version history', () => {
   it('records the superseded version when the incoming version changes', () => {
     const merged = mergeFeature(

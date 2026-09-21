@@ -15,7 +15,7 @@ import type {
 } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
-import { DEFAULT_SPACE_ID, type SpaceId } from '@kbn/core-spaces-common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
 import {
   catchError,
@@ -58,8 +58,7 @@ import { deleteLegacyRules } from './lib/significant_events/rules/delete_legacy_
 
 import { createSignificantEventsAlertingContextResolver } from './lib/significant_events/alerting/significant_events_alerting_context';
 import type { SignificantEventsAlertingContext } from './lib/significant_events/alerting/significant_events_alerting_context';
-import type { IRulesManagementClient } from './lib/knowledge_indicators/knowledge_indicator_client/rules/rules_management_client';
-import { RulesAdapterV2 } from './lib/knowledge_indicators/knowledge_indicator_client/rules/v2_rules_adapter';
+
 import { EbtTelemetryService } from './lib/telemetry/ebt';
 import { significantEventsRouteRepository } from './routes';
 import type { GetScopedClients, RouteHandlerScopedClients } from './routes/types';
@@ -240,21 +239,8 @@ export class SignificantEventsPlugin
         }),
       });
 
-      // Rules live where the source lives: the request space. Only the cluster-wide reset
-      // needs rules clients for other spaces, through `getRulesManagementClientInSpace`.
       const getAlertingV2RulesClient = async () =>
         pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(request, space);
-
-      const getRulesManagementClientInSpace = async (
-        spaceId: SpaceId
-      ): Promise<IRulesManagementClient> =>
-        new RulesAdapterV2({
-          rulesClient: await pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(
-            request,
-            spaceId
-          ),
-          isServerless,
-        });
 
       // Significant Events v1 rules only ever existed in the default space.
       const deleteLegacyRulesById = async (ruleIds: string[]): Promise<void> => {
@@ -302,7 +288,7 @@ export class SignificantEventsPlugin
         attachmentClient,
         getSignificantEventsAlertingContext: resolveSignificantEventsAlertingContext,
         getKnowledgeIndicatorClient,
-        getRulesManagementClientInSpace,
+
         deleteLegacyRules: deleteLegacyRulesById,
         ...significantEventsClients,
         inferenceClient,

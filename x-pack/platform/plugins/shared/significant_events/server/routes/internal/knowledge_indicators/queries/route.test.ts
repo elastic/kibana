@@ -112,15 +112,17 @@ describe('reconcileQueriesRoute', () => {
 
   it('replays current stream queries through replaceStreamQueries', async () => {
     const currentLinks = [makeQueryLink('critical', 80), makeQueryLink('default', 60)];
-    const replaceStreamQueries = jest.fn().mockImplementation(async (_sourceId, getNextQueries) => {
-      expect(getNextQueries(currentLinks)).toEqual(currentLinks.map((link) => link.query));
-    });
+    const replaceStreamQueries = jest
+      .fn()
+      .mockImplementation(async (_definition, getNextQueries) => {
+        expect(getNextQueries(currentLinks)).toEqual(currentLinks.map((link) => link.query));
+      });
     const handlerParams = {
       params: { body: { streamNames: ['logs.test'] } },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
         streamsClient: {
-          getStream: jest.fn().mockImplementation((name: string) => Promise.resolve({ name })),
+          getStream: jest.fn().mockResolvedValue({ name: 'logs.test' }),
         },
         licensing: {},
         uiSettingsClient: {},
@@ -151,7 +153,10 @@ describe('reconcileQueriesRoute', () => {
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
         streamsClient: {
-          getStream: jest.fn().mockImplementation((name: string) => Promise.resolve({ name })),
+          getStream: jest
+            .fn()
+            .mockResolvedValueOnce({ name: 'logs.a' })
+            .mockResolvedValueOnce({ name: 'logs.b' }),
         },
         licensing: {},
         uiSettingsClient: {},
@@ -255,9 +260,7 @@ describe('bulkDeleteQueriesRoute', () => {
       params: { body: { queryIds: ['q1', 'q2'] } },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
-        streamsClient: {
-          getStream: jest.fn().mockImplementation((name: string) => Promise.resolve({ name })),
-        },
+        streamsClient: { getStream: jest.fn().mockResolvedValue({ name: 'logs.test' }) },
         licensing: {},
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
           getQueryLinks: jest

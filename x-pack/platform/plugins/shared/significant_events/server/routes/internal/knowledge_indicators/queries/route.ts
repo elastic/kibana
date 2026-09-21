@@ -127,7 +127,6 @@ const promoteUnbackedQueriesRoute = createServerRoute({
     await assertNotPaused({ maintenanceService, request });
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
-    // Streams are the source universe until nightshift-program#1307 swaps in the sources catalog.
     const sourceIds = (await streamsClient.listStreams()).map((definition) => definition.name);
 
     return kiClient.promoteUnbackedQueries({
@@ -178,29 +177,31 @@ const demoteBackedQueriesRoute = createServerRoute({
       includeExpired: true,
     });
 
-    const bySource = toDemote.reduce<Record<string, string[]>>((acc, link) => {
-      const sourceId = link.stream_name;
+    const byStream = toDemote.reduce<Record<string, string[]>>((acc, link) => {
+      const stream = link.stream_name;
 
-      if (!acc[sourceId]) {
-        acc[sourceId] = [];
+      if (!acc[stream]) {
+        acc[stream] = [];
       }
 
-      acc[sourceId].push(link.query.id);
+      acc[stream].push(link.query.id);
       return acc;
     }, {});
 
-    const knownSourceIds = new Set(
-      (await streamsClient.listStreams()).map((definition) => definition.name)
+    const streamDefinitions = await streamsClient.listStreams();
+    const streamDefinitionsByName = new Map(
+      streamDefinitions.map((streamDefinition) => [streamDefinition.name, streamDefinition])
     );
 
     let demoted = 0;
 
-    for (const [sourceId, queryIds] of Object.entries(bySource)) {
-      if (!knownSourceIds.has(sourceId)) {
-        logger.warn(`Skipping demotion for missing source ${sourceId}`);
+    for (const [streamName, queryIds] of Object.entries(byStream)) {
+      const definition = streamDefinitionsByName.get(streamName);
+      if (!definition) {
+        logger.warn(`Skipping demotion for missing stream ${streamName}`);
         continue;
       }
-      const result = await kiClient.demoteQueries(sourceId, queryIds);
+      const result = await kiClient.demoteQueries(definition.name, queryIds);
       demoted += result.demoted;
     }
 
@@ -257,27 +258,34 @@ const bulkDeleteQueriesRoute = createServerRoute({
     const foundIds = new Set(queryLinks.map((link) => link.query.id));
     const skipped = params.body.queryIds.filter((id) => !foundIds.has(id)).length;
 
-    // Capture backed rule IDs per source to log on mid-flight failure.
-    const bySource = new Map<string, { queryIds: string[]; backedRuleIds: string[] }>();
+    // Capture backed rule IDs per stream to log on mid-flight failure.
+    const byStream = new Map<string, { queryIds: string[]; backedRuleIds: string[] }>();
     for (const link of queryLinks) {
-      const bucket = bySource.get(link.stream_name) ?? { queryIds: [], backedRuleIds: [] };
+      const bucket = byStream.get(link.stream_name) ?? { queryIds: [], backedRuleIds: [] };
       bucket.queryIds.push(link.query.id);
       if (link.rule_backed && link.rule_id) {
         bucket.backedRuleIds.push(link.rule_id);
       }
-      bySource.set(link.stream_name, bucket);
+      byStream.set(link.stream_name, bucket);
     }
 
-    // Check only the sources we actually need. A source that no longer exists
-    // (streams are the source universe until nightshift-program#1307) gets its
-    // batch counted as failed below. `getStream` also enforces the read privilege.
-    const sourceIds = Array.from(bySource.keys());
-    const sourceExistence = await Promise.allSettled(
-      sourceIds.map((sourceId) => streamsClient.getStream(sourceId))
+    // Fetch only the stream definitions we actually need. Rejections (e.g. the
+    // stream definition no longer exists) are treated the same way as the old
+    // `listStreams() + Map.get === undefined` check: that stream's batch is
+    // counted as failed below.
+    const streamNames = Array.from(byStream.keys());
+    const streamDefinitionResults = await Promise.allSettled(
+      streamNames.map((name) => streamsClient.getStream(name))
     );
-    const existingSourceIds = new Set(
-      sourceIds.filter((_, index) => sourceExistence[index].status === 'fulfilled')
-    );
+    const streamDefinitionsByName = new Map<
+      string,
+      Awaited<ReturnType<typeof streamsClient.getStream>>
+    >();
+    streamDefinitionResults.forEach((result, i) => {
+      if (result.status === 'fulfilled') {
+        streamDefinitionsByName.set(streamNames[i], result.value);
+      }
+    });
 
     // deleteQueries uninstalls rules before writing storage, so a mid-flight
     // throw can leave rules gone while stored links still reference them. Log
@@ -288,14 +296,15 @@ const bulkDeleteQueriesRoute = createServerRoute({
     let failed = 0;
     const candidateRuleIds = new Set<string>();
 
-    for (const [sourceId, { queryIds, backedRuleIds }] of bySource) {
-      if (!existingSourceIds.has(sourceId)) {
-        logger.warn(`Skipping bulk delete for missing source ${sourceId}`);
+    for (const [streamName, { queryIds, backedRuleIds }] of byStream) {
+      const definition = streamDefinitionsByName.get(streamName);
+      if (!definition) {
+        logger.warn(`Skipping bulk delete for missing stream ${streamName}`);
         failed += queryIds.length;
         continue;
       }
       try {
-        await kiClient.deleteQueries(sourceId, queryIds);
+        await kiClient.deleteQueries(definition.name, queryIds);
         backedRuleIds.forEach((ruleId) => candidateRuleIds.add(ruleId));
         succeeded += queryIds.length;
       } catch (error) {
@@ -303,7 +312,7 @@ const bulkDeleteQueriesRoute = createServerRoute({
         const orphanContext =
           backedRuleIds.length > 0 ? ` candidateOrphanedRuleIds=[${backedRuleIds.join(',')}]` : '';
         sigEventsLogger.error(
-          `Bulk delete failed for source ${sourceId}: ${errorMessage}. ` +
+          `Bulk delete failed for stream ${streamName}: ${errorMessage}. ` +
             `queryIds=[${queryIds.join(',')}]${orphanContext}`
         );
         failed += queryIds.length;
@@ -378,16 +387,16 @@ const reconcileQueriesRoute = createServerRoute({
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     const { streamNames } = params.body;
-    const existence = await Promise.allSettled(
+    const definitions = await Promise.allSettled(
       streamNames.map((streamName) => streamsClient.getStream(streamName))
     );
     const limiter = pLimit(RECONCILE_STREAM_CONCURRENCY);
 
     const streams = await Promise.all(
-      existence.map((result, index) =>
+      definitions.map((result, index) =>
         limiter(async () => {
-          const streamName = streamNames[index];
           if (result.status === 'rejected') {
+            const streamName = streamNames[index];
             const error =
               result.reason instanceof Error ? result.reason.message : String(result.reason);
             logger.warn(`Skipping query reconciliation for missing stream ${streamName}: ${error}`);
@@ -396,20 +405,22 @@ const reconcileQueriesRoute = createServerRoute({
 
           let reconciledQueries = 0;
           try {
-            await kiClient.replaceStreamQueries(streamName, (currentLinks) => {
+            await kiClient.replaceStreamQueries(result.value.name, (currentLinks) => {
               reconciledQueries = currentLinks.filter((link) => link.rule_backed).length;
               return currentLinks.map(queryFromLink);
             });
             return {
-              streamName,
+              streamName: result.value.name,
               status: 'reconciled' as const,
               queries: reconciledQueries,
             };
           } catch (error) {
             const errorMessage = error instanceof Error ? error.message : String(error);
-            logger.warn(`Query reconciliation failed for stream ${streamName}: ${errorMessage}`);
+            logger.warn(
+              `Query reconciliation failed for stream ${result.value.name}: ${errorMessage}`
+            );
             return {
-              streamName,
+              streamName: result.value.name,
               status: 'failed' as const,
               queries: reconciledQueries,
               error: errorMessage,
@@ -801,10 +812,8 @@ const upsertQueryRoute = createServerRoute({
     await assertNotPaused({ maintenanceService, request });
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
-    const sourceId = targetName ?? (await resolveExistingQuerySourceId(kiClient, queryId));
-    // The source id is the stream name until nightshift-program#1307, so it doubles as the
-    // stream whose definition the ES|QL is validated against.
-    const definition = await streamsClient.getStream(sourceId);
+    const streamName = targetName ?? (await resolveExistingQueryStreamName(kiClient, queryId));
+    const definition = await streamsClient.getStream(streamName);
 
     validateEsqlQueryForStreamOrThrow({
       esqlQuery: queryBody.esql.query,
@@ -816,17 +825,17 @@ const upsertQueryRoute = createServerRoute({
       id: queryId,
       type: deriveQueryType(queryBody.esql.query),
     };
-    await kiClient.upsertQuery(sourceId, query);
+    await kiClient.upsertQuery(definition.name, query);
 
     return { acknowledged: true };
   },
 });
 
-async function resolveExistingQuerySourceId(
+async function resolveExistingQueryStreamName(
   kiClient: KnowledgeIndicatorClient,
   queryId: string
 ): Promise<string> {
-  // Empty source list means "no source filter"; include expired and unbacked so
+  // Empty stream list means "no stream filter"; include expired and unbacked so
   // an omitted target_name can still resolve an existing query for update.
   const [existing] = await kiClient.getQueryLinks([], {
     queryIds: [queryId],
