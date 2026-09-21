@@ -112,6 +112,23 @@ describe('createExceptionAttachmentType', () => {
       }
     });
 
+    it('includes the proposal comments when present', async () => {
+      const formatted = await attachmentType.format(
+        buildAttachment({
+          ...validData,
+          comments: ['Approved by the platform team', 'Revisit after the maintenance window'],
+        }),
+        formatContext
+      );
+      const representation = await formatted.getRepresentation?.();
+
+      if (representation?.type === 'text') {
+        expect(representation.value).toContain('## Comments');
+        expect(representation.value).toContain('- Approved by the platform team');
+        expect(representation.value).toContain('- Revisit after the maintenance window');
+      }
+    });
+
     it('throws on data that does not match the schema', async () => {
       expect(() =>
         attachmentType.format(buildAttachment({ name: 'No entries' }), formatContext)

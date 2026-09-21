@@ -62,7 +62,15 @@ const formatEntry = ({
 };
 
 const formatExceptionData = (data: ExceptionAttachmentData): string => {
-  const { name, description, entries, os_types: osTypes, tags, expire_time: expireTime } = data;
+  const {
+    name,
+    description,
+    entries,
+    os_types: osTypes,
+    tags,
+    expire_time: expireTime,
+    comments,
+  } = data;
 
   return [
     `Proposed security rule exception: ${name}`,
@@ -74,5 +82,8 @@ const formatExceptionData = (data: ExceptionAttachmentData): string => {
     ...(osTypes?.length ? ['', `Operating systems: ${osTypes.join(', ')}`] : []),
     ...(tags?.length ? [`Tags: ${tags.join(', ')}`] : []),
     ...(expireTime ? [`Expires: ${expireTime}`] : []),
+    ...(comments?.length
+      ? ['', '## Comments', '', ...comments.map((comment) => `- ${comment}`)]
+      : []),
   ].join('\n');
 };
