@@ -31,7 +31,7 @@ describe('esql_queries', () => {
         eventId: 'abc"def',
       })
     ).toBe(
-      'FROM "logs-endpoint.events.process-default" METADATA _id | WHERE event.id == "abc\\"def" OR _id == "abc\\"def"'
+      'FROM "logs-endpoint.events.process-default" METADATA _id | WHERE _id == "abc\\"def"'
     );
   });
 
@@ -45,14 +45,13 @@ describe('esql_queries', () => {
         ],
       })
     ).toBe(
-      'FROM "logs-a-default", "logs-b-default" METADATA _id | ' +
-        'WHERE event.id IN ("evt-1", "evt-2") OR _id IN ("evt-1", "evt-2")'
+      'FROM "logs-a-default", "logs-b-default" METADATA _id | ' + 'WHERE _id IN ("evt-1", "evt-2")'
     );
   });
 
   it('escapes quotes in event ids and indices', () => {
     expect(buildEventsLookupEsql({ events: [{ event_id: 'a"b', source_index: 'logs-"x"' }] })).toBe(
-      'FROM "logs-\\"x\\"" METADATA _id | WHERE event.id IN ("a\\"b") OR _id IN ("a\\"b")'
+      'FROM "logs-\\"x\\"" METADATA _id | WHERE _id IN ("a\\"b")'
     );
   });
 

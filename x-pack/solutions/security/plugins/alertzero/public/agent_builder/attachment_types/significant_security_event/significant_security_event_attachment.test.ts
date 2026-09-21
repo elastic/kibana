@@ -103,7 +103,7 @@ describe('createSignificantSecurityEventAttachmentDefinition', () => {
       expect(buttons?.[0].label).toBe('Open events in Discover');
       expect(decodeURIComponent(buttons?.[0].href ?? '')).toContain(
         'FROM "logs-endpoint.events.process-default", "logs-endpoint.events.network-default" ' +
-          'METADATA _id | WHERE event.id IN ("evt-1", "evt-2") OR _id IN ("evt-1", "evt-2")'
+          'METADATA _id | WHERE _id IN ("evt-1", "evt-2")'
       );
     });
 

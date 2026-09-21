@@ -33,9 +33,11 @@ export const buildEventLookupEsql = ({
 }): string => {
   const escapedEventId = escapeEsqlString(eventId);
   // `_id` is only available after METADATA _id (otherwise Discover reports Unknown column [_id]).
+  // Match on `_id` only: `event.id` isn't populated by every integration (e.g. AWS CloudTrail),
+  // and querying it there fails with "Unknown column [event.id]" instead of just missing a hit.
   return `FROM ${quoteEsqlIdentifier(
     index
-  )} METADATA _id | WHERE event.id == "${escapedEventId}" OR _id == "${escapedEventId}"`;
+  )} METADATA _id | WHERE _id == "${escapedEventId}"`;
 };
 
 const uniqueNonEmpty = (values: string[]): string[] => [
@@ -55,7 +57,13 @@ const buildDocRefsLookupEsql = ({
   idField,
 }: {
   refs: Array<{ id: string; index: string }>;
-  idField: string;
+  /**
+   * Optional ECS/field alias to OR against `_id`. Omit when the field isn't
+   * guaranteed present across every source index (e.g. `event.id` is absent
+   * from some integrations, such as AWS CloudTrail, and querying an absent
+   * field fails the whole ES|QL request instead of just missing a hit).
+   */
+  idField?: string;
 }): string | undefined => {
   const ids = uniqueNonEmpty(refs.map((ref) => ref.id));
   const indices = uniqueNonEmpty(refs.map((ref) => ref.index));
@@ -64,9 +72,10 @@ const buildDocRefsLookupEsql = ({
   }
 
   const quotedIds = quoteEsqlList(ids);
+  const idFieldClause = idField ? `${idField} IN (${quotedIds}) OR ` : '';
   return `FROM ${indices
     .map(quoteEsqlIdentifier)
-    .join(', ')} METADATA _id | WHERE ${idField} IN (${quotedIds}) OR _id IN (${quotedIds})`;
+    .join(', ')} METADATA _id | WHERE ${idFieldClause}_id IN (${quotedIds})`;
 };
 
 /** Discover exit for all of an SSE's `events[]` refs at once. */
@@ -77,7 +86,6 @@ export const buildEventsLookupEsql = ({
 }): string | undefined =>
   buildDocRefsLookupEsql({
     refs: events.map((event) => ({ id: event.event_id, index: event.source_index })),
-    idField: 'event.id',
   });
 
 /** Discover exit for all of an SSE's `alerts[]` refs at once. */
