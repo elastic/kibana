@@ -39,8 +39,8 @@ const OutputSchema = z.object({
     .meta({ description: 'The ISO timestamp assigned to the event by the server.' }),
 });
 
-type AddConversationEventInputSchema = typeof InputSchema;
-type AddConversationEventOutputSchema = typeof OutputSchema;
+export type AddConversationEventInputSchema = typeof InputSchema;
+export type AddConversationEventOutputSchema = typeof OutputSchema;
 
 export type AddConversationEventStepInput = z.infer<typeof InputSchema>;
 

@@ -9,7 +9,7 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import {
   addConversationEventStepCommonDefinition,
-  type AddConversationEventStepInput,
+  type AddConversationEventInputSchema,
 } from '../../../common/workflows/steps/add_conversation_event';
 import type { ConversationStepDeps } from '../registry';
 
@@ -19,7 +19,7 @@ export const addConversationEventStepDefinition = ({
 }: ConversationStepDeps) =>
   createServerStepDefinition({
     ...addConversationEventStepCommonDefinition,
-    handler: async (context: StepHandlerContext) => {
+    handler: async (context: StepHandlerContext<AddConversationEventInputSchema>) => {
       try {
         const request = context.contextManager.getFakeRequest();
         if (!(await isExperimentalEnabled(request))) {
@@ -30,7 +30,7 @@ export const addConversationEventStepDefinition = ({
           };
         }
         const client = await getConversationClient(request);
-        const input = context.input as AddConversationEventStepInput;
+        const input = context.input;
 
         const [event] = await client.addCustomEvents({
           id: input.conversation_id,
