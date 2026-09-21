@@ -549,7 +549,7 @@ describe('EditIlmPhasesFlyout', () => {
       );
     });
 
-    it('hides and unmounts readonly while downsampling is enabled, and re-adds it when disabled', async () => {
+    it('shows readonly as checked and disabled while downsampling is enabled, and preserves the previous readonly state when disabled', async () => {
       const onChange = jest.fn();
       renderFlyout(
         {
@@ -565,20 +565,26 @@ describe('EditIlmPhasesFlyout', () => {
       await tick();
       const warmPanel = withinPhase('warm');
 
-      // Initially visible.
-      expect(warmPanel.getByTestId(`${DATA_TEST_SUBJ}ReadOnlyCheckbox`)).toBeInTheDocument();
+      // Initially visible, enabled and unchecked.
+      const initialCheckbox = warmPanel.getByTestId(`${DATA_TEST_SUBJ}ReadOnlyCheckbox`);
+      expect(initialCheckbox).toBeInTheDocument();
+      expect(initialCheckbox).toBeEnabled();
+      expect(initialCheckbox).not.toBeChecked();
 
       // Set it to true.
-      fireEvent.click(warmPanel.getByTestId(`${DATA_TEST_SUBJ}ReadOnlyCheckbox`));
+      fireEvent.click(initialCheckbox);
       await tick();
 
-      // Enable downsampling -> readonly should be cleared and hidden.
+      // Enable downsampling -> readonly stays visible but becomes checked and disabled.
       fireEvent.click(warmPanel.getByTestId(`${DATA_TEST_SUBJ}DownsamplingSwitch`));
       await tick();
 
-      expect(warmPanel.queryByTestId(`${DATA_TEST_SUBJ}ReadOnlyCheckbox`)).not.toBeInTheDocument();
+      const downsamplingCheckbox = warmPanel.getByTestId(`${DATA_TEST_SUBJ}ReadOnlyCheckbox`);
+      expect(downsamplingCheckbox).toBeInTheDocument();
+      expect(downsamplingCheckbox).toBeChecked();
+      expect(downsamplingCheckbox).toBeDisabled();
 
-      // Ensure output does not include warm.readonly even if it was previously enabled.
+      // The previously enabled readonly state is preserved in the output alongside downsample.
       expect(onChange).toHaveBeenLastCalledWith(
         {
           hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
@@ -586,19 +592,21 @@ describe('EditIlmPhasesFlyout', () => {
             name: 'warm',
             size_in_bytes: 0,
             min_age: '30d',
+            readonly: true,
             downsample: { after: '30d', fixed_interval: '1d' },
           },
         },
         { invalidPhases: [] }
       );
 
-      // Disable downsampling -> readonly should re-appear (re-mounted).
+      // Disable downsampling -> readonly should be enabled again and keep its previous checked state.
       fireEvent.click(warmPanel.getByTestId(`${DATA_TEST_SUBJ}DownsamplingSwitch`));
       await tick();
 
       const checkbox = warmPanel.getByTestId(`${DATA_TEST_SUBJ}ReadOnlyCheckbox`);
       expect(checkbox).toBeInTheDocument();
-      expect(checkbox).not.toBeChecked();
+      expect(checkbox).toBeEnabled();
+      expect(checkbox).toBeChecked();
     });
 
     it('revalidates cold downsampling interval when re-enabling cold (warm interval changed while cold disabled)', async () => {
@@ -1099,6 +1107,56 @@ describe('EditIlmPhasesFlyout', () => {
       expect(
         withinPhase('delete').getByText('Must occur after the frozen phase (40d).')
       ).toBeInTheDocument();
+    });
+
+    it('hides boundary help text when a single-bound violation fires, keeps it for non-boundary errors', async () => {
+      // delete has only a lower bound (frozen), so help text = error when boundary fires.
+      renderFlyout(
+        {
+          initialPhases: {
+            hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
+            warm: { name: 'warm', size_in_bytes: 0, min_age: '30d' },
+            frozen: { name: 'frozen', size_in_bytes: 0, min_age: '40d' },
+            delete: { name: 'delete', min_age: '50d' },
+          },
+        },
+        { initialSelectedPhase: 'delete' }
+      );
+      await tick();
+
+      const deletePanel = withinPhase('delete');
+      const helpText = 'Must occur after the frozen phase (40d).';
+
+      // Valid state: help text is shown.
+      expect(deletePanel.getByText(helpText)).toBeInTheDocument();
+
+      // Enter a value below frozen (boundary violation) — message should appear exactly once.
+      const moveAfterInput = deletePanel.getByTestId(
+        `${DATA_TEST_SUBJ}MoveAfterValue`
+      ) as HTMLInputElement;
+      fireEvent.change(moveAfterInput, { target: { value: '20' } });
+      fireEvent.blur(moveAfterInput);
+
+      await waitFor(() => {
+        // Boundary error is shown via EuiFormRow error; help text is suppressed — only one instance.
+        expect(deletePanel.getAllByText(helpText)).toHaveLength(1);
+      });
+
+      // Restore a valid value, then enter a non-integer: help text must remain visible.
+      fireEvent.change(moveAfterInput, { target: { value: '50' } });
+      fireEvent.blur(moveAfterInput);
+      await waitFor(() =>
+        expect(deletePanel.queryByText(/An integer is required/)).not.toBeInTheDocument()
+      );
+
+      fireEvent.change(moveAfterInput, { target: { value: '50.5' } });
+      fireEvent.blur(moveAfterInput);
+
+      await waitFor(() => {
+        expect(deletePanel.getByText(/An integer is required/)).toBeInTheDocument();
+        // Help text remains — "An integer is required." ≠ help text so no suppression.
+        expect(deletePanel.getByText(helpText)).toBeInTheDocument();
+      });
     });
 
     it('references the closest previous phase when values are equal', async () => {

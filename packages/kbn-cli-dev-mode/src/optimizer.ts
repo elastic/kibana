@@ -26,6 +26,7 @@ import {
   logOptimizerState,
   logOptimizerProgress,
 } from '@kbn/optimizer';
+import type { KibanaGroup } from '@kbn/projects-solutions-groups';
 
 export interface Options {
   enabled: boolean;
@@ -40,6 +41,7 @@ export interface Options {
   writeLogTo?: Writable;
   pluginPaths?: string[];
   pluginScanDirs?: string[];
+  allowlistPluginGroups?: readonly KibanaGroup[];
   basePath?: string;
 }
 
@@ -87,6 +89,7 @@ export class Optimizer {
       examples: options.runExamples,
       pluginPaths: options.pluginPaths,
       pluginScanDirs: options.pluginScanDirs,
+      allowlistPluginGroups: options.allowlistPluginGroups,
     });
 
     const log = this.createLog(options, '@kbn/optimizer');
@@ -136,6 +139,9 @@ export class Optimizer {
             cache: options.cache,
             dist: options.dist,
             examples: options.runExamples,
+            pluginPaths: options.pluginPaths,
+            pluginScanDirs: options.pluginScanDirs,
+            allowlistPluginGroups: options.allowlistPluginGroups,
             basePath: options.basePath,
             log,
           });
@@ -165,10 +171,7 @@ export class Optimizer {
         })
         .catch((error) => {
           log.error(`Failed to load @kbn/rspack-optimizer: ${error.message}`);
-          log.warning('Falling back to @kbn/optimizer...');
-
-          // Fallback to webpack optimizer
-          this.createWebpackRun$(options).subscribe(subscriber);
+          subscriber.error(error);
         });
 
       // Cleanup when run$ completes or is unsubscribed (e.g., on SIGINT)

@@ -71,6 +71,22 @@ describe('Package Policy Utils', () => {
 
       expect(mapPackagePolicySavedObjectToPackagePolicy(soItem).inputs).toEqual([]);
     });
+
+    it('should use namespaces over stale spaceIds stored in SO attributes', () => {
+      const soItem = {
+        id: 'so-stale',
+        type: 'fleet-package-policies',
+        version: 'abc',
+        references: [],
+        attributes: {
+          ...PackagePolicyMocks.generatePackagePolicySOAttributes(),
+          spaceIds: ['space-a'],
+        } as any,
+        namespaces: ['space-b'],
+      };
+
+      expect(mapPackagePolicySavedObjectToPackagePolicy(soItem).spaceIds).toEqual(['space-b']);
+    });
   });
 
   describe('preflightCheckPackagePolicy', () => {

@@ -36,6 +36,8 @@ const SCENARIO_ALIASES: Record<string, string> = {
     'x-pack/solutions/observability/plugins/apm/test/scenarios/apm_service_multi_env_otel_migration.ts',
   apm_service_overlapping_otel_metrics:
     'x-pack/solutions/observability/plugins/apm/test/scenarios/apm_service_overlapping_otel_metrics.ts',
+  apm_view_in_app_truncation:
+    'x-pack/solutions/observability/plugins/apm/test/scenarios/apm_view_in_app_truncation.ts',
   aws_lambda: 'x-pack/solutions/observability/plugins/apm/test/scenarios/aws_lambda.ts',
   azure_functions: 'x-pack/solutions/observability/plugins/apm/test/scenarios/azure_functions.ts',
   cloud_services_icons:
@@ -113,6 +115,8 @@ const SCENARIO_ALIASES: Record<string, string> = {
     'x-pack/solutions/observability/plugins/apm/test/scenarios/trace_with_long_service_names.ts',
   trace_with_orphan_items:
     'x-pack/solutions/observability/plugins/apm/test/scenarios/trace_with_orphan_items.ts',
+  trace_with_service_names_with_colons:
+    'x-pack/solutions/observability/plugins/apm/test/scenarios/trace_with_service_names_with_colons.ts',
   trace_with_service_names_with_slashes:
     'x-pack/solutions/observability/plugins/apm/test/scenarios/trace_with_service_names_with_slashes.ts',
   unstructured_logs: 'x-pack/platform/plugins/shared/streams/test/scenarios/unstructured_logs.ts',

@@ -45,6 +45,12 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsEndpointMemoryDump: true,
 
   /**
+   * `physical` memory dump type for the Memory Dump response action for Elastic Defend Endpoint
+   * Release: 9.6, backported to 9.5.x
+   */
+  responseActionsEndpointMemoryDumpRaw: true,
+
+  /**
    * `runscript` response action for Elastic Defend Endpoint
    * Release: 9.4
    */
@@ -302,7 +308,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the risk score history API endpoint for Entity Analytics.
    */
-  riskScoreHistoryEnabled: false,
+  riskScoreHistoryEnabled: true,
 
   /**
    * Enables UI treatments surfacing rules whose MITRE ATT&CK mappings drift

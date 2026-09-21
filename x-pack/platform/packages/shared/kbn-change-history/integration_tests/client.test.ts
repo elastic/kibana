@@ -15,11 +15,11 @@ import { ChangeHistoryClient } from '..';
 import { DATA_STREAM_NAME } from '../src/client';
 import type { ObjectChange } from '..';
 import { sha256, REDACTED } from '../src/utils';
+import { asKibanaClient } from '../test_utils';
 
 const KIBANA_SPACE = 'default';
 const TEST_MODULE = 'test-module';
 const TEST_DATASET = 'test-dataset';
-const ES_CLIENT_OPTIONS = { headers: { 'x-elastic-product-origin': 'kibana' } };
 
 const defaultLogOpts = {
   action: 'rule_create',
@@ -53,7 +53,7 @@ describe('ChangeHistoryClient', () => {
       log: new ToolingLog({ writeTo: process.stdout, level: 'debug' }),
     });
     await esServer.start();
-    esClient = esServer.getClient().child(ES_CLIENT_OPTIONS);
+    esClient = asKibanaClient(esServer.getClient());
   });
 
   afterAll(async () => {

@@ -40,7 +40,7 @@ import type { KbnClient } from '@kbn/test';
 import { isServerlessKibanaFlavor } from '@kbn/security-solution-plugin/common/endpoint/utils/kibana_status';
 import { addSpaceIdToPath, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { createKbnClient } from '@kbn/security-solution-plugin/scripts/endpoint/common/stack_services';
-import { catchAxiosErrorFormatAndThrow } from '@kbn/security-solution-plugin/common/endpoint/format_axios_error';
+import { catchHttpErrorFormatAndThrow } from '@kbn/security-solution-plugin/common/endpoint/format_http_error';
 import {
   startMetadataTransforms,
   stopMetadataTransforms,
@@ -368,7 +368,7 @@ export function EndpointTestResourcesProvider({ getService }: FtrProviderContext
           body: updatedMetadataDoc,
           op_type: 'create',
         })
-        .catch(catchAxiosErrorFormatAndThrow);
+        .catch(catchHttpErrorFormatAndThrow);
 
       await startMetadataTransforms(this.esClient, [], endpointPackage.version);
 

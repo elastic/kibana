@@ -75,6 +75,11 @@ export class NotificationsService {
   }: StartDeps): NotificationsStart {
     this.targetDomElement = targetDomElement;
     const toastsContainer = document.createElement('div');
+    // Global toasts must remain visible above full-screen data grids. Full-screen
+    // `UnifiedDataTable` mode (see `useFullScreenWatcher`) resets `z-index` on all
+    // elements except those opted out via `data-kbn-preserve-zindex`, so mark the
+    // toasts container to preserve its stacking context and that of its toasts.
+    toastsContainer.setAttribute('data-kbn-preserve-zindex', 'true');
     targetDomElement.appendChild(toastsContainer);
 
     return {

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, screen } from '@testing-library/react';
 import { AlertsDetailsTable } from './alerts_findings_details_table';
 import { TestProviders } from '../../../common/mock/test_providers';
 import { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
@@ -95,9 +95,7 @@ const renderTable = (
   );
 
 const clickRowAction = () => {
-  // The row action is an icon-only button rendered with the `expand` EuiIcon.
-  const expandIcon = document.querySelector('[data-euiicon-type="expand"]');
-  fireEvent.click(expandIcon?.closest('button') as HTMLElement);
+  fireEvent.click(screen.getByTestId('securitySolutionFlyoutAlertsFindingsTableExpandButton'));
 };
 
 describe('AlertsDetailsTable', () => {

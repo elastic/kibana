@@ -8,9 +8,10 @@
  */
 
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
-import type { MetricVisualizationState } from '@kbn/lens-common';
+import type { MetricVisualizationState, TermsIndexPatternColumn } from '@kbn/lens-common';
 
 import { validator } from '../utils/validator';
+import { DEFAULT_LAYER_ID } from '../../constants';
 import type { MetricConfig } from '../../schema/charts/metric';
 import { AUTO_COLOR, NO_COLOR } from '../../schema/color';
 import { LensConfigBuilder } from '../../config_builder';
@@ -127,6 +128,178 @@ describe('Metric', () => {
         type: 'primary',
         background_chart: { type: 'trend' },
       });
+    });
+
+    it('uses an aliased TBUCKET result column for a TS metric trendline', () => {
+      const builder = new LensConfigBuilder(undefined, true);
+      const query =
+        'TS metrics-* | STATS avg_cpu = AVG(AVG_OVER_TIME(cpu)) BY custom_time_bucket = TBUCKET(100)';
+      const lensState = builder.fromAPIFormat({
+        type: 'metric',
+        title: 'TS metric with aliased TBUCKET trendline',
+        data_source: { type: 'esql', query },
+        ignore_global_filters: false,
+        sampling: 1,
+        metrics: [
+          {
+            type: 'primary',
+            column: 'avg_cpu',
+            background_chart: { type: 'trend' },
+          },
+        ],
+      } satisfies MetricConfig);
+      const visualization = lensState.state.visualization as MetricVisualizationState;
+      const trendlineLayerId = visualization.trendlineLayerId;
+      const trendlineTimeAccessor = visualization.trendlineTimeAccessor;
+
+      if (!trendlineLayerId || !trendlineTimeAccessor) {
+        throw new Error('Expected trendline accessors in metric visualization state');
+      }
+
+      const trendlineLayer = lensState.state.datasourceStates.textBased?.layers[trendlineLayerId];
+      expect(trendlineLayer?.query?.esql).toBe(query);
+      expect(trendlineLayer?.query?.esql).not.toContain('BUCKET(@timestamp');
+      expect(
+        trendlineLayer?.columns.find(({ columnId }) => columnId === trendlineTimeAccessor)
+          ?.fieldName
+      ).toBe('custom_time_bucket');
+    });
+
+    it('derives the trendline from the FORK branch producing the metric column', () => {
+      const builder = new LensConfigBuilder(undefined, true);
+      const query =
+        'FROM kibana_sample_data_flights | WHERE timestamp >= ?_tstart AND timestamp < ?_tend | FORK (STATS `Total Flights` = COUNT(*)) (STATS `Flight Count` = COUNT(*) BY `Time Bucket` = BUCKET(timestamp, 75, ?_tstart, ?_tend))';
+      const lensState = builder.fromAPIFormat({
+        type: 'metric',
+        title: 'FORK metric with trendline',
+        data_source: { type: 'esql', query },
+        ignore_global_filters: false,
+        sampling: 1,
+        metrics: [
+          {
+            type: 'primary',
+            column: 'Total Flights',
+            background_chart: { type: 'trend' },
+          },
+        ],
+      } satisfies MetricConfig);
+      const visualization = lensState.state.visualization as MetricVisualizationState;
+      const trendlineLayerId = visualization.trendlineLayerId;
+      const trendlineTimeAccessor = visualization.trendlineTimeAccessor;
+
+      if (!trendlineLayerId || !trendlineTimeAccessor) {
+        throw new Error('Expected trendline accessors in metric visualization state');
+      }
+
+      const trendlineLayer = lensState.state.datasourceStates.textBased?.layers[trendlineLayerId];
+      expect(trendlineLayer?.query?.esql).toBe(
+        'FROM kibana_sample_data_flights | WHERE timestamp >= ?_tstart AND timestamp < ?_tend | STATS `Total Flights` = COUNT(*) BY BUCKET(timestamp, 75, ?_tstart, ?_tend)'
+      );
+      expect(trendlineLayer?.query?.esql).not.toContain('FORK');
+      expect(
+        trendlineLayer?.columns.find(({ columnId }) => columnId === trendlineTimeAccessor)
+          ?.fieldName
+      ).toBe('BUCKET(timestamp, 75, ?_tstart, ?_tend)');
+    });
+  });
+
+  describe('form-based trendline breakdown ordering', () => {
+    const TRENDLINE_LAYER_ID = `${DEFAULT_LAYER_ID}_trendline`;
+
+    const trendlineBreakdownConfig = {
+      type: 'metric',
+      title: 'Metric - Trendline with breakdown',
+      data_source: {
+        type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+        index_pattern: 'test-index',
+        time_field: '@timestamp',
+      },
+      metrics: [
+        {
+          type: 'primary',
+          operation: 'average',
+          field: 'system.cpu',
+          background_chart: { type: 'trend' },
+        },
+        {
+          type: 'secondary',
+          operation: 'average',
+          field: 'bytes',
+        },
+      ],
+      breakdown_by: {
+        operation: 'terms',
+        fields: ['host.name'],
+        limit: 3,
+        columns: 3,
+        rank_by: { type: 'metric', metric_index: 0, direction: 'desc' },
+      },
+      sampling: 1,
+      ignore_global_filters: false,
+    } satisfies MetricConfig;
+
+    const getTermsColumn = (
+      lensState: ReturnType<LensConfigBuilder['fromAPIFormat']>,
+      layerId: string,
+      columnId: string
+    ): TermsIndexPatternColumn => {
+      const formBased = lensState.state.datasourceStates.formBased;
+      if (!formBased) {
+        throw new Error('expected a form-based datasource state');
+      }
+      return formBased.layers[layerId].columns[columnId] as TermsIndexPatternColumn;
+    };
+
+    it(`orders the trendline layer breakdown by the trendline layer's own metric column (rank_by primary)`, () => {
+      const builder = new LensConfigBuilder(undefined, true);
+      const lensState = builder.fromAPIFormat(trendlineBreakdownConfig);
+
+      // The main layer breakdown orders by the main metric column.
+      expect(
+        getTermsColumn(lensState, DEFAULT_LAYER_ID, 'metric_accessor_breakdown').params.orderBy
+      ).toEqual({ type: 'column', columnId: 'metric_accessor_metric' });
+
+      // The trendline layer breakdown must order by the trendline layer's own metric column,
+      // otherwise the runtime terms agg silently falls back to `_key` (alphabetical) ordering.
+      const trendlineBreakdown = getTermsColumn(
+        lensState,
+        TRENDLINE_LAYER_ID,
+        'metric_accessor_breakdown_trendline'
+      );
+      expect(trendlineBreakdown.params.orderBy).toEqual({
+        type: 'column',
+        columnId: 'metric_accessor_trendline',
+      });
+
+      // The referenced column must actually exist in the trendline layer.
+      const trendlineLayer = lensState.state.datasourceStates.formBased!.layers[TRENDLINE_LAYER_ID];
+      expect(trendlineLayer.columns).toHaveProperty('metric_accessor_trendline');
+    });
+
+    it('orders the trendline layer breakdown by the trendline secondary column (rank_by secondary)', () => {
+      const config = {
+        ...trendlineBreakdownConfig,
+        breakdown_by: {
+          ...trendlineBreakdownConfig.breakdown_by,
+          rank_by: { type: 'metric', metric_index: 1, direction: 'desc' },
+        },
+      } satisfies MetricConfig;
+
+      const builder = new LensConfigBuilder(undefined, true);
+      const lensState = builder.fromAPIFormat(config);
+
+      const trendlineBreakdown = getTermsColumn(
+        lensState,
+        TRENDLINE_LAYER_ID,
+        'metric_accessor_breakdown_trendline'
+      );
+      expect(trendlineBreakdown.params.orderBy).toEqual({
+        type: 'column',
+        columnId: 'metric_accessor_secondary_trendlineX0',
+      });
+
+      const trendlineLayer = lensState.state.datasourceStates.formBased!.layers[TRENDLINE_LAYER_ID];
+      expect(trendlineLayer.columns).toHaveProperty('metric_accessor_secondary_trendlineX0');
     });
   });
 
@@ -286,6 +459,57 @@ describe('Metric', () => {
       expect(outViz.palette?.params?.continuity).toBe('all');
       expect(outViz.palette?.params?.stops).toBeUndefined();
       expect(outViz.palette?.params?.colorStops).toBeUndefined();
+    });
+  });
+
+  describe('ES|QL Control Variable', () => {
+    const builder = new LensConfigBuilder(undefined, true);
+    const esqlControlMetric = {
+      type: 'metric',
+      title: 'Identifier Control variable',
+      data_source: {
+        type: 'esql',
+        query: 'FROM logs | STATS count = COUNT(*) BY ??field',
+      },
+      metrics: [{ type: 'primary', column: 'count' }],
+      breakdown_by: { column: '??field', columns: 3 },
+      sampling: 1,
+      ignore_global_filters: true,
+    } satisfies MetricConfig;
+
+    const getColumnByFieldName = (
+      attributes: ReturnType<LensConfigBuilder['fromAPIFormat']>,
+      fieldName: string
+    ) =>
+      Object.values(attributes.state.datasourceStates.textBased?.layers ?? {})
+        .flatMap((layer) => layer.columns)
+        .find((column) => column.fieldName === fieldName);
+
+    it('(SO -> API -> SO) preserves `variable`', () => {
+      const original = builder.fromAPIFormat(esqlControlMetric);
+      expect(getColumnByFieldName(original, '??field')?.variable).toBe('field');
+
+      const api = builder.toAPIFormat(original) as MetricConfig;
+      const so = builder.fromAPIFormat(api);
+      expect(getColumnByFieldName(so, '??field')?.variable).toBe('field');
+    });
+
+    it('(SO -> API -> SO) does not stamp `variable` for a Value (`?`) control', () => {
+      const original = builder.fromAPIFormat({
+        ...esqlControlMetric,
+        title: 'Value Control variable',
+        data_source: {
+          ...esqlControlMetric.data_source,
+          query: 'FROM logs | STATS count = COUNT(*) BY ??field, ?os',
+        },
+        breakdown_by: { ...esqlControlMetric.breakdown_by, column: '?os' },
+      } satisfies MetricConfig);
+      expect(getColumnByFieldName(original, '?os')?.variable).toBeUndefined();
+
+      const api = builder.toAPIFormat(original) as MetricConfig;
+      const so = builder.fromAPIFormat(api);
+
+      expect(getColumnByFieldName(so, '?os')?.variable).toBeUndefined();
     });
   });
 });

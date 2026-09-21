@@ -72,7 +72,10 @@ export class DiscoverApp {
     return discoverVisible ? discoverSwitch : fallbackSwitch;
   }
 
-  async selectDataView(name: string) {
+  async selectDataView(
+    name: string,
+    { createAdHocIfMissing = true }: { createAdHocIfMissing?: boolean } = {}
+  ) {
     const dataViewSwitch = await this.getVisibleDataViewSwitch();
     const currentValue = await dataViewSwitch.innerText();
     if (currentValue === name) {
@@ -84,7 +87,11 @@ export class DiscoverApp {
     const matchingDataViewLocator = this.page.testSubj
       .locator('indexPattern-switcher')
       .locator(`[data-test-subj="dataView-${name}"]`);
-    if (await matchingDataViewLocator.isVisible()) {
+    if (!createAdHocIfMissing) {
+      // Let Playwright wait for the filtered option to render instead of checking visibility
+      // immediately after the final keystroke.
+      await matchingDataViewLocator.click();
+    } else if (await matchingDataViewLocator.isVisible()) {
       await matchingDataViewLocator.click();
     } else {
       await this.page.testSubj.locator('explore-matching-indices-button').click();
@@ -230,6 +237,36 @@ export class DiscoverApp {
     await this.page.testSubj.click('confirmSaveSavedObjectButton');
     await this.page.testSubj.waitForSelector('savedObjectSaveModal', { state: 'hidden' });
     await this.waitUntilSearchingHasFinished();
+  }
+
+  async getSharedUrl(): Promise<string> {
+    await this.clickAppMenuItem('shareTopNavButton');
+
+    const copyButton = this.page.testSubj.locator('copyShareUrlButton');
+
+    await copyButton.waitFor({ state: 'visible' });
+    await copyButton.click();
+
+    const sharedUrl = await this.page.waitForFunction(() => {
+      return document
+        .querySelector('[data-test-subj="copyShareUrlButton"]')
+        ?.getAttribute('data-share-url');
+    });
+
+    const url = await sharedUrl.jsonValue();
+    if (typeof url !== 'string') {
+      throw new Error('Share URL was not available on the copy button');
+    }
+    return url;
+  }
+
+  async closeShareModal() {
+    const shareModal = this.page.testSubj.locator('shareContextModal');
+
+    if (await shareModal.isVisible()) {
+      await shareModal.getByLabel(/Close/).click();
+      await shareModal.waitFor({ state: 'hidden' });
+    }
   }
 
   /**

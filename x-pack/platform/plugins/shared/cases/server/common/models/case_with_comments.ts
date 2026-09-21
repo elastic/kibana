@@ -20,10 +20,8 @@ import {
   isEventAttachmentType,
 } from '../../../common/utils/attachments';
 import type {
-  AlertAttachmentPayload,
   AttachmentAttributes,
   Case,
-  EventAttachmentPayload,
   UserCommentAttachmentPayload,
 } from '../../../common/types/domain';
 import {
@@ -49,6 +47,7 @@ import {
   getOrUpdateLensReferences,
   isCommentRequestTypeAlert,
   getAlertInfoFromComments,
+  getEventInfoFromComments,
   getIDsAndIndicesAsArrays,
   isCommentRequestTypeEvent,
   countEventsForID,
@@ -288,6 +287,8 @@ export class CaseCommentModel {
 
       const { id: commentId, ...attachment } = attachmentsWithoutDuplicates[0];
 
+      await this.ensureIndexedAttachmentsValid([attachment]);
+
       const references = [...this.buildRefsToCase(), ...this.getCommentReferences(attachment)];
 
       const comment = await this.params.services.attachmentService.create({
@@ -486,13 +487,6 @@ export class CaseCommentModel {
     return dedupedAttachments;
   }
 
-  private getAttachmentsByType<
-    T extends AttachmentType,
-    R = T extends AttachmentType.event ? AlertAttachmentPayload[] : EventAttachmentPayload[]
-  >(attachments: AttachmentRequestV2[], attachmentType: T): R {
-    return attachments.filter((attachment) => attachment.type === attachmentType) as R;
-  }
-
   private async validateCreateCommentRequest(req: Array<AttachmentRequestV2>) {
     if (this.caseInfo.attributes.status === CaseStatuses.closed) {
       const hasAlertsInRequest = req.some((a) => isAlertAttachmentType(a.type));
@@ -501,8 +495,9 @@ export class CaseCommentModel {
         throw Boom.badRequest('Alert cannot be attached to a closed case');
       }
 
-      const eventAttachments = this.getAttachmentsByType(req, AttachmentType.event);
-      const hasEventsInRequest = eventAttachments.length > 0;
+      // `isEventAttachmentType` matches both the legacy `event` type and the unified
+      // `security.event` type — a type-only match here would miss unified events.
+      const hasEventsInRequest = req.some((a) => isEventAttachmentType(a.type));
 
       if (hasEventsInRequest) {
         throw Boom.badRequest('Event cannot be attached to a closed case');
@@ -560,13 +555,32 @@ export class CaseCommentModel {
     return references;
   }
 
+  /**
+   * Validates alert/event attachments before the saved object is persisted, so a failure here
+   * never leaves an already-created attachment on the case.
+   */
+  private async ensureIndexedAttachmentsValid(attachments: AttachmentRequestV2[]) {
+    const alertAttachments = attachments.filter((a) => isAlertAttachmentType(a.type));
+    const alerts = getAlertInfoFromComments(alertAttachments, true);
+
+    if (alerts.length > 0) {
+      await this.params.services.alertsService.ensureAlertsAuthorized({ alerts });
+    }
+
+    const eventAttachments = attachments.filter((a) => isEventAttachmentType(a.type));
+    const events = getEventInfoFromComments(eventAttachments, true);
+
+    if (events.length > 0) {
+      await this.params.services.alertsService.ensureDocumentsExist({ alerts: events });
+    }
+  }
+
   private async handleAlertComments(attachments: AttachmentRequestV2[]) {
     const alertAttachments = attachments.filter((a) => isAlertAttachmentType(a.type));
 
     const alerts = getAlertInfoFromComments(alertAttachments);
 
     if (alerts.length > 0) {
-      await this.params.services.alertsService.ensureAlertsAuthorized({ alerts });
       await this.updateAlertsSchemaWithCaseInfo(alerts);
 
       if (this.caseInfo.attributes.settings.syncAlerts) {
@@ -688,6 +702,8 @@ export class CaseCommentModel {
       if (attachmentWithoutDuplicateAlerts.length === 0) {
         return this;
       }
+
+      await this.ensureIndexedAttachmentsValid(attachmentWithoutDuplicateAlerts);
 
       const caseReference = this.buildRefsToCase();
 

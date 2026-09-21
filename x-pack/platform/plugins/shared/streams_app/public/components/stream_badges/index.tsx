@@ -34,6 +34,8 @@ import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 
 import { truncateText } from '../../util/truncate_text';
 
+const INFINITY_SYMBOL = '∞';
+
 const DataRetentionTooltip: React.FC<{ children: React.ReactElement }> = ({ children }) => (
   <EuiToolTip
     position="top"
@@ -175,9 +177,16 @@ export function LifecycleBadge({
 
   let badge: React.ReactElement;
 
+  const indefiniteLabel = i18n.translate(
+    'xpack.streams.entityDetailViewWithoutParams.dslIndefiniteBadgeLabel',
+    {
+      defaultMessage: 'Indefinite',
+    }
+  );
+
   if (isIlmLifecycle(lifecycle)) {
     badge = (
-      <EuiBadge color="hollow" iconType="clockCounter" iconSide="left" tabIndex={0}>
+      <EuiBadge color="hollow" iconType="clock" iconSide="left" tabIndex={0}>
         <EuiLink
           data-test-subj={dataTestSubj}
           color="text"
@@ -205,26 +214,30 @@ export function LifecycleBadge({
       </EuiBadge>
     );
   } else if (isDslLifecycle(lifecycle)) {
+    const hasRetention = Boolean(lifecycle.dsl.data_retention);
     badge = (
       <EuiBadge
         color="hollow"
-        iconType="clockCounter"
+        iconType="clock"
         iconSide="left"
         tabIndex={0}
         data-test-subj={dataTestSubj}
+        aria-label={hasRetention ? undefined : indefiniteLabel}
       >
-        {lifecycle.dsl.data_retention ??
-          i18n.translate('xpack.streams.entityDetailViewWithoutParams.dslIndefiniteBadgeLabel', {
-            defaultMessage: 'Indefinite',
-          })}
+        {hasRetention ? lifecycle.dsl.data_retention : INFINITY_SYMBOL}
       </EuiBadge>
     );
   } else {
     badge = (
-      <EuiBadge color="hollow" tabIndex={0} data-test-subj={dataTestSubj}>
-        {i18n.translate('xpack.streams.entityDetailViewWithoutParams.disabledLifecycleBadgeLabel', {
-          defaultMessage: 'Retention: Disabled',
-        })}
+      <EuiBadge
+        color="hollow"
+        iconType="clock"
+        iconSide="left"
+        tabIndex={0}
+        data-test-subj={dataTestSubj}
+        aria-label={indefiniteLabel}
+      >
+        {INFINITY_SYMBOL}
       </EuiBadge>
     );
   }

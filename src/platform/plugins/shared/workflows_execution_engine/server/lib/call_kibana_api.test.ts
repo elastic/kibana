@@ -117,6 +117,42 @@ describe('callKibanaApi', () => {
     expect((init as RequestInit).body).toBeUndefined();
   });
 
+  it('prefixes the path with /s/{spaceId} for a non-default space', async () => {
+    mockedFetch.mockResolvedValue(createMockResponse({ body: { ok: true } }));
+
+    await callKibanaApi(
+      { fakeRequest: createFakeRequest(), coreStart: createCoreStart(), spaceId: 'my-space' },
+      { method: 'GET', path: '/api/cases/_find', query: { perPage: 20 } }
+    );
+
+    const [url] = mockedFetch.mock.calls[0];
+    expect(url).toBe('https://kibana.example.com/s/my-space/api/cases/_find?perPage=20');
+  });
+
+  it('does not prefix the path for the default space', async () => {
+    mockedFetch.mockResolvedValue(createMockResponse({ body: { ok: true } }));
+
+    await callKibanaApi(
+      { fakeRequest: createFakeRequest(), coreStart: createCoreStart(), spaceId: 'default' },
+      { method: 'GET', path: '/api/cases/_find' }
+    );
+
+    const [url] = mockedFetch.mock.calls[0];
+    expect(url).toBe('https://kibana.example.com/api/cases/_find');
+  });
+
+  it('does not prefix the path when no space is provided', async () => {
+    mockedFetch.mockResolvedValue(createMockResponse({ body: { ok: true } }));
+
+    await callKibanaApi(
+      { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+      { method: 'GET', path: '/api/status' }
+    );
+
+    const [url] = mockedFetch.mock.calls[0];
+    expect(url).toBe('https://kibana.example.com/api/status');
+  });
+
   it('serializes the body as JSON for POST', async () => {
     mockedFetch.mockResolvedValue(createMockResponse({ body: { id: 'abc' } }));
 

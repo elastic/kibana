@@ -69,6 +69,8 @@ import {
   FleetError,
 } from '../errors';
 
+import { OUTPUT_ENCRYPTED_FIELDS } from '../saved_objects';
+
 import type { OutputType } from '../types';
 
 import { agentPolicyService } from './agent_policy';
@@ -124,11 +126,12 @@ export function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): 
   } catch (e) {
     logger.warn(`Unable to parse ssl for output ${so.id}: ${e.message}`);
   }
+  // canonical id placed last so attributes.id cannot shadow it
   return {
-    id: outputId ?? so.id,
     ...attributes,
     ...(parsedSsl ? { ssl: parsedSsl } : {}),
     ...(proxyId ? { proxy_id: proxyId } : {}),
+    id: outputId ?? so.id,
   };
 }
 
@@ -715,6 +718,8 @@ class OutputService {
         data.username = undefined;
         data.password = undefined;
       }
+      // Kafka does not support proxies — clear any proxy_id silently (#267281)
+      data.proxy_id = null;
     }
 
     await remoteSyncIntegrationsCheck(esClient, output);
@@ -837,6 +842,43 @@ class OutputService {
       total,
       page,
       perPage,
+    };
+  }
+
+  public async listPreconfigured() {
+    // Use the plain (non-decrypting) soClient to avoid the cost of decrypting every output.
+    // is_preconfigured is mapped with index:false so it cannot be used in a KQL filter;
+    // filter client-side instead.
+    const outputs = await this.soClient.find<OutputSOAttributes>({
+      type: SAVED_OBJECT_TYPE,
+      perPage: SO_SEARCH_LIMIT,
+    });
+
+    const preconfigured = outputs.saved_objects.filter(
+      (so) => so.attributes.is_preconfigured === true
+    );
+
+    for (const output of preconfigured) {
+      auditLoggingService.writeCustomSoAuditLog({
+        action: 'get',
+        id: output.id,
+        name: output.attributes.name,
+        savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
+      });
+    }
+
+    const encryptedFieldKeys = [...OUTPUT_ENCRYPTED_FIELDS].map((f) => f.key);
+
+    return {
+      items: preconfigured.map<Output>((so) =>
+        outputSavedObjectToOutput({
+          ...so,
+          attributes: omit(so.attributes, encryptedFieldKeys) as OutputSOAttributes,
+        })
+      ),
+      total: preconfigured.length,
+      page: 1,
+      perPage: preconfigured.length,
     };
   }
 
@@ -968,7 +1010,10 @@ class OutputService {
       );
     }
 
-    const updateData: Nullable<Partial<OutputSOAttributes>> = { ...omit(data, ['ssl', 'secrets']) };
+    // id is stripped to prevent poisoning the saved object's identity field.
+    const updateData: Nullable<Partial<OutputSOAttributes>> = {
+      ...omit(data, ['ssl', 'secrets', 'id']),
+    };
 
     if (updateData.type && outputTypeSupportPresets(updateData.type)) {
       if (
@@ -1162,6 +1207,11 @@ class OutputService {
       updateData.hosts
     ) {
       updateData.hosts = updateData.hosts.map(normalizeHostsForAgents);
+    }
+
+    // Kafka does not support proxies — clear any proxy_id silently (#267281)
+    if (mergedType === outputType.Kafka) {
+      updateData.proxy_id = null;
     }
 
     if (

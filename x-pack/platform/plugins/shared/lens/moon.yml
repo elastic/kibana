@@ -136,6 +136,7 @@ dependsOn:
   - '@kbn/css-utils'
   - '@kbn/lens-common'
   - '@kbn/lens-common-2'
+  - '@kbn/lens-test-helpers'
   - '@kbn/react-kibana-context-common'
   - '@kbn/control-group-renderer'
   - '@kbn/unified-tabs'
@@ -154,6 +155,7 @@ dependsOn:
   - '@kbn/as-code-shared-telemetry'
   - '@kbn/core-http-browser'
   - '@kbn/use-observable'
+  - '@kbn/core-http-common'
 tags:
   - plugin
   - prod

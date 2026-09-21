@@ -25,7 +25,7 @@ import {
   testChannels,
 } from '@kbn/scout-info';
 import { type ScoutTestConfig, ScoutTestConfigStats, testConfigs } from '@kbn/scout-reporting';
-import yaml from 'js-yaml';
+import { parse } from 'yaml';
 import CliTable3 from 'cli-table3';
 import dedent from 'dedent';
 import type { TestTrackLoad } from '../execution/test_track';
@@ -59,7 +59,7 @@ export interface ScoutCIConfig {
 
 function loadScoutCIConfig(): ScoutCIConfig {
   try {
-    return yaml.load(readFileSync(SCOUT_CI_CONFIG_PATH, 'utf-8')) as ScoutCIConfig;
+    return parse(readFileSync(SCOUT_CI_CONFIG_PATH, 'utf-8')) as ScoutCIConfig;
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
     throw createFlagError(`Failed to load Scout CI config: ${message}`);

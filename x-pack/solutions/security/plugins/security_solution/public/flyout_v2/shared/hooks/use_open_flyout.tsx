@@ -15,9 +15,10 @@ import { useKibana } from '../../../common/lib/kibana';
 import { flyoutProviders } from '../components/flyout_provider';
 import { FlyoutLoading } from '../components/flyout_loading';
 import type { FlyoutTelemetryMeta } from './use_flyout_telemetry';
-import { useFlyoutTelemetry } from './use_flyout_telemetry';
+import { trackFlyoutOpen } from './use_flyout_telemetry';
 import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../../session_context';
 import type { MainFlyoutSession } from '../../session_context';
+import { getStoredFlyoutType } from './use_flyout_push_vs_overlay';
 
 /**
  * Opens a system flyout, optionally reporting telemetry for it. When `meta` is provided, an
@@ -41,15 +42,19 @@ export type OpenFlyout = (
  */
 export const useOpenFlyout = (): OpenFlyout => {
   const { services } = useKibana();
-  const { overlays } = services;
+  const { overlays, storage } = services;
   const store = useStore();
   const history = useHistory();
-  const { reportOpened, reportClosed } = useFlyoutTelemetry();
   const { session: mainSession, historyKey } = useFlyoutSessionContext();
 
   return useCallback(
     (children, properties, meta, sessionOverride) => {
       const session = sessionOverride ?? mainSession;
+      // Seed the flyout's push/overlay mode from the persisted preference (read
+      // fresh at open time), unless the caller pinned an explicit `type`. The
+      // core system flyout keeps this reactive, so the settings menu can switch
+      // it live afterwards.
+      const type = properties.type ?? getStoredFlyoutType(storage);
       const ref = overlays.openSystemFlyout(
         flyoutProviders({
           services,
@@ -61,17 +66,15 @@ export const useOpenFlyout = (): OpenFlyout => {
             </FlyoutSessionContextProvider>
           ),
         }),
-        properties
+        { ...properties, type }
       );
 
       if (meta) {
-        const openedAt = Date.now();
-        reportOpened(meta);
-        ref.onClose.then(() => reportClosed(meta, Date.now() - openedAt)).catch(() => {});
+        trackFlyoutOpen(services.telemetry, ref, meta);
       }
 
       return ref;
     },
-    [overlays, services, store, history, reportOpened, reportClosed, mainSession, historyKey]
+    [overlays, storage, services, store, history, mainSession, historyKey]
   );
 };

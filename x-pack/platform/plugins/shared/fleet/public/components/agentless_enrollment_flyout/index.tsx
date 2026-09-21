@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { EuiStepStatus } from '@elastic/eui';
 import {
   EuiFlyout,
@@ -22,8 +22,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { AGENTS_PREFIX, FLEET_CONNECTORS_PACKAGE, MAX_FLYOUT_WIDTH } from '../../constants';
-import type { Agent } from '../../types';
-import { sendGetAgents, useStartServices, useGetPackageInfoByKeyQuery } from '../../hooks';
+
+import { useGetAgentsQuery, useGetPackageInfoByKeyQuery, useStartServices } from '../../hooks';
+import { buildPolicyBaseIdWithFallbackKuery } from '../../../common/services';
 
 import { AgentlessStepConfirmEnrollment } from './step_confirm_enrollment';
 import { AgentlessStepConfirmData } from './step_confirm_data';
@@ -54,62 +55,39 @@ export const AgentlessEnrollmentFlyout = ({
   agentPolicy,
   connectors,
 }: AgentlessEnrollmentFlyoutProps) => {
-  const core = useStartServices();
-  const { notifications } = core;
+  const { notifications } = useStartServices();
   const [confirmEnrollmentStatus, setConfirmEnrollmentStatus] = useState<EuiStepStatus>('loading');
   const [confirmDataStatus, setConfirmDataStatus] = useState<EuiStepStatus>('disabled');
-  const [agentData, setAgentData] = useState<Agent>();
+  const [agentOnline, setAgentOnline] = useState(false);
 
-  // Clear agent data polling
-  // Called when component is unmounted or when agent is healthy
-  const agentDataInterval = useRef<NodeJS.Timeout>();
-  const clearAgentDataPolling = useMemo(() => {
-    return () => {
-      if (agentDataInterval.current) {
-        clearInterval(agentDataInterval.current);
-      }
-    };
-  }, [agentDataInterval]);
+  // Fetch agent for the policy identified by `policyId` (including version-specific variants,
+  // e.g. `policyId#9.2`), polling every 30s until online.
+  const agentKuery = buildPolicyBaseIdWithFallbackKuery(
+    policyId,
+    `${AGENTS_PREFIX}.policy_base_id`,
+    `${AGENTS_PREFIX}.policy_id`
+  );
+  const { data: agentsData, error: agentsError } = useGetAgentsQuery(
+    { kuery: agentKuery },
+    { refetchInterval: agentOnline ? false : REFRESH_INTERVAL_MS }
+  );
+  const agentData = agentsData?.data?.items?.[0];
 
-  // Fetch agent(s) data for the agent policy identified by the `policyId` prop
-  // Polls every 30 seconds until agent is found and healthy
+  // Watches agent data and updates step statuses; stops polling when agent is online
   useEffect(() => {
-    const fetchAgents = async () => {
-      const { data: agentsData, error } = await sendGetAgents({
-        kuery: `${AGENTS_PREFIX}.policy_id: "${policyId}"`,
+    if (agentsError) {
+      notifications.toasts.addError(agentsError as Error, {
+        title: i18n.translate(
+          'xpack.fleet.epm.packageDetails.integrationList.agentlessStatusError',
+          { defaultMessage: 'Error fetching managed integration status information' }
+        ),
       });
-
-      if (error) {
-        notifications.toasts.addError(error, {
-          title: i18n.translate(
-            'xpack.fleet.epm.packageDetails.integrationList.agentlessStatusError',
-            {
-              defaultMessage: 'Error fetching managed integration status information',
-            }
-          ),
-        });
-      }
-
-      if (agentsData?.items?.[0]) {
-        setAgentData(agentsData.items?.[0]);
-      }
-    };
-
-    fetchAgents();
-    agentDataInterval.current = setInterval(() => {
-      fetchAgents();
-    }, REFRESH_INTERVAL_MS);
-
-    return () => clearAgentDataPolling();
-  }, [clearAgentDataPolling, notifications.toasts, policyId]);
-
-  // Watches agent data and updates step statuses and clears polling when agent is healthy
-  useEffect(() => {
+    }
     if (agentData) {
       if (agentData.status === 'online') {
         setConfirmEnrollmentStatus('complete');
         setConfirmDataStatus('loading');
-        clearAgentDataPolling();
+        setAgentOnline(true);
       } else if (agentData.status === 'error' || agentData.status === 'degraded') {
         setConfirmEnrollmentStatus('danger');
         setConfirmDataStatus('disabled');
@@ -121,7 +99,7 @@ export const AgentlessEnrollmentFlyout = ({
       setConfirmEnrollmentStatus('loading');
       setConfirmDataStatus('disabled');
     }
-  }, [agentData, clearAgentDataPolling]);
+  }, [agentData, agentsError, notifications.toasts]);
 
   // Calculate integration title from the base package info
   const { data: packageInfoData } = useGetPackageInfoByKeyQuery(

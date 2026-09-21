@@ -29,7 +29,7 @@ jest.mock('../components/flyout_provider', () => ({
   flyoutProviders: jest.fn(() => 'FLYOUT_CONTENT'),
 }));
 jest.mock('../hooks/use_default_flyout_properties', () => ({
-  defaultToolsFlyoutProperties: { size: 'm' },
+  useDefaultToolsFlyoutProperties: jest.fn(() => ({ minWidth: 384, size: 'm' })),
 }));
 
 const mockWriteOnOpen = jest.fn();
@@ -55,6 +55,7 @@ describe('useSharedToolsFlyoutApi', () => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         overlays: { openSystemFlyout: mockOpenSystemFlyout },
+        storage: { get: jest.fn(), set: jest.fn(), remove: jest.fn() },
         telemetry: { reportEvent: jest.fn() },
       },
     });

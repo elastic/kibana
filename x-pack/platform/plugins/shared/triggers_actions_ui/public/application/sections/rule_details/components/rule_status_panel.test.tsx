@@ -124,6 +124,27 @@ describe('rule status panel', () => {
     await waitFor(() => expect(bulkDisableRules).toHaveBeenCalledTimes(1));
   });
 
+  it('renders the last response status stat', async () => {
+    const rule = mockRule({
+      executionStatus: { status: 'ok', lastExecutionDate: new Date('2020-08-20T19:23:38Z') },
+    });
+    render(
+      <IntlProvider locale="en">
+        <RuleStatusPanelWithProvider
+          {...mockAPIs}
+          rule={rule}
+          isEditable
+          healthColor="primary"
+          statusMessage="Ok"
+          requestRefresh={requestRefresh}
+        />
+      </IntlProvider>
+    );
+
+    const lastResponseStat = screen.getByTestId('ruleStatusLastResponseStat');
+    expect(lastResponseStat).toHaveTextContent('Last response');
+  });
+
   it('should disable the rule when picking disable in the dropdown without showing untrack alerts modal', async () => {
     const rule = mockRule({ enabled: true });
     const bulkDisableRules = jest.fn();

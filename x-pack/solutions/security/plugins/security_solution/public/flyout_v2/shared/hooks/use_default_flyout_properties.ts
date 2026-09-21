@@ -24,17 +24,27 @@ export const useDefaultDocumentFlyoutProperties = (): OverlaySystemFlyoutOpenOpt
       paddingSize: 'm',
       resizable: true,
       size: 's',
+      flyoutMenuDisplayMode: 'always',
     }),
     [euiTheme.breakpoint.xl, euiTheme.base]
   );
 };
 
 /**
- * Hook that returns the main properties used when opening a tools flyout, to ensure consistency.
+ * Hook that returns the properties used when opening a tools flyout, to ensure consistency.
  */
-export const defaultToolsFlyoutProperties: OverlaySystemFlyoutOpenOptions = {
-  ownFocus: false,
-  paddingSize: 'm',
-  resizable: true,
-  size: 'm',
+export const useDefaultToolsFlyoutProperties = (): OverlaySystemFlyoutOpenOptions => {
+  const { euiTheme } = useEuiTheme();
+
+  return useMemo(
+    () => ({
+      minWidth: euiTheme.base * 24,
+      ownFocus: false,
+      paddingSize: 'm',
+      resizable: true,
+      size: 'm',
+      flyoutMenuDisplayMode: 'always',
+    }),
+    [euiTheme.base]
+  );
 };

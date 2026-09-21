@@ -8,6 +8,7 @@
 import type { KueryNode } from '@kbn/es-query';
 import type {
   Logger,
+  KibanaRequest,
   SavedObjectsClientContract,
   PluginInitializerContext,
   ISavedObjectsRepository,
@@ -65,6 +66,14 @@ export type {
 
 export interface RulesClientContext {
   readonly logger: Logger;
+  /**
+   * The request that this rules client is scoped to. On rule write paths it is
+   * passed to rule-type-defined params authorizers so that authorization can be
+   * resolved against the acting user's privileges. In background/task contexts
+   * this is a fake request built from the rule's stored API key, which carries
+   * a snapshot of the rule owner's privileges.
+   */
+  readonly request: KibanaRequest;
   readonly getUserName: () => Promise<string | null>;
   readonly spaceId: string;
   readonly namespace?: string;
@@ -75,7 +84,10 @@ export interface RulesClientContext {
   readonly minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
   readonly maxScheduledPerMinute: AlertingRulesConfig['maxScheduledPerMinute'];
   readonly minimumScheduleIntervalInMs: number;
-  readonly createAPIKey: (name: string) => Promise<CreateAPIKeyResult>;
+  readonly createAPIKey: (
+    name: string,
+    refresh?: boolean | 'wait_for'
+  ) => Promise<CreateAPIKeyResult>;
   readonly getActionsClient: () => Promise<ActionsClient>;
   readonly actionsAuthorization: ActionsAuthorization;
   readonly getEventLogClient: () => Promise<IEventLogClient>;

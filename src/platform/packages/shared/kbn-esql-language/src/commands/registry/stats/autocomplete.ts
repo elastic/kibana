@@ -70,7 +70,7 @@ export async function autocomplete(
     return [];
   }
   const isInlineStats = command.name === 'inline stats';
-  const isTimeseriesSource = query.trimStart().toLowerCase().startsWith('ts ');
+  const isTimeseriesSource = context?.isTimeseriesSource;
 
   const columnExists = (name: string) => _columnExists(name, context);
 

@@ -173,8 +173,8 @@ export function AddCisIntegrationFormPageProvider({
         };
 
     await PageObjects.common.navigateToUrl(
-      'fleet', // Defined in Security Solution plugin
-      'integrations/cloud_security_posture/add-integration/cspm',
+      'integrations',
+      'detail/cloud_security_posture/add-integration/cspm',
       options
     );
     await PageObjects.header.waitUntilLoadingHasFinished();
@@ -194,8 +194,8 @@ export function AddCisIntegrationFormPageProvider({
         };
 
     await PageObjects.common.navigateToUrl(
-      'fleet',
-      `integrations/cloud_security_posture-${packageVersion}/add-integration`,
+      'integrations',
+      `detail/cloud_security_posture-${packageVersion}/add-integration`,
       options
     );
     await PageObjects.header.waitUntilLoadingHasFinished();
@@ -215,8 +215,8 @@ export function AddCisIntegrationFormPageProvider({
         };
 
     await PageObjects.common.navigateToUrl(
-      'fleet',
-      `integrations/cloud_security_posture-${packageVersion}/add-integration/cspm`,
+      'integrations',
+      `detail/cloud_security_posture-${packageVersion}/add-integration/cspm`,
       options
     );
     await PageObjects.header.waitUntilLoadingHasFinished();
@@ -233,8 +233,8 @@ export function AddCisIntegrationFormPageProvider({
         };
 
     await PageObjects.common.navigateToUrl(
-      'fleet', // Defined in Security Solution plugin
-      'integrations/cloud_security_posture/add-integration/vuln_mgmt',
+      'integrations',
+      'detail/cloud_security_posture/add-integration/vuln_mgmt',
       options
     );
     await PageObjects.header.waitUntilLoadingHasFinished();
@@ -262,8 +262,8 @@ export function AddCisIntegrationFormPageProvider({
         };
 
     await PageObjects.common.navigateToUrl(
-      'fleet', // Defined in Security Solution plugin
-      'integrations/cloud_security_posture/add-integration/kspm',
+      'integrations',
+      'detail/cloud_security_posture/add-integration/kspm',
       options
     );
     await PageObjects.header.waitUntilLoadingHasFinished();
@@ -282,9 +282,17 @@ export function AddCisIntegrationFormPageProvider({
   };
 
   const clickPolicyToBeEdited = async (name: string) => {
-    const table = await testSubjects.find(TEST_IDS.INTEGRATION_POLICY_TABLE);
-    const integrationToBeEdited = await table.findByXpath(`//text()="${name}"`);
-    await integrationToBeEdited.click();
+    await retry.waitFor('integration policy name links to appear', async () =>
+      testSubjects.exists(TEST_IDS.INTEGRATION_NAME_LINK)
+    );
+    const nameLinks = await testSubjects.findAll(TEST_IDS.INTEGRATION_NAME_LINK);
+    for (const nameLink of nameLinks) {
+      if ((await nameLink.getVisibleText()).trim() === name) {
+        await nameLink.click();
+        return;
+      }
+    }
+    throw new Error(`Integration policy "${name}" was not found in the policies table`);
   };
 
   const clickFirstElementOnIntegrationTable = async () => {
@@ -534,7 +542,11 @@ export function AddCisIntegrationFormPageProvider({
   const inputUniqueIntegrationName = async () => {
     const flyout = await testSubjects.find(TEST_IDS.CREATE_PACKAGE_POLICY_PAGE);
     const nameField = await flyout.findAllByCssSelector('input[id="name"]');
-    await nameField[0].type(uuidv4());
+    const name = uuidv4();
+    // Clear the auto-generated default name so the saved policy name equals `name` exactly and `clickPolicyToBeEdited(name)` can match its row.
+    await nameField[0].clearValueWithKeyboard();
+    await nameField[0].type(name);
+    return name;
   };
 
   const inputIntegrationName = async (text: string) => {

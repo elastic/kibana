@@ -12,12 +12,17 @@ export type { LoggerConfigType } from './src/logger';
 export type { LayoutConfigType, JsonLayoutConfigType, PatternLayoutConfigType } from './src/layout';
 export type {
   FileAppenderConfig,
+  FileAppenderPluginConfig,
   ConsoleAppenderConfig,
+  LogFileWriteError,
+  LogFileWriteErrorHandler,
   OtelAppenderConfig,
   OtelAppenderTlsConfig,
   RollingFileAppenderConfig,
+  RollingFileAppenderPluginConfig,
   RewriteAppenderConfig,
   AppenderConfigType,
+  PluginAppenderConfigType,
   RollingStrategyConfig,
   NumericRollingStrategyConfig,
   TimeIntervalTriggeringPolicyConfig,

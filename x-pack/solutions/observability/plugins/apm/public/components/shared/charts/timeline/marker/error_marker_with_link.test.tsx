@@ -70,6 +70,29 @@ describe('ErrorMarkerWithLink', () => {
       'kuery=trace.id : "123" and transaction.id : "456"'
     );
   });
+  it('renders link with trace and span.id when transaction.id is missing', () => {
+    const { transaction, ...withoutTransaction } = mark.error;
+    const newMark = {
+      ...mark,
+      error: { ...withoutTransaction, span: { id: 'span-1' } },
+    } as ErrorMark;
+    const component = openPopover(newMark);
+    const errorLink = component.getByTestId('errorLink') as HTMLAnchorElement;
+    expect(getKueryDecoded(errorLink.search)).toEqual(
+      'kuery=trace.id : "123" and span.id : "span-1"'
+    );
+  });
+  it('ORs transaction.id and span.id when both are present', () => {
+    const newMark = {
+      ...mark,
+      error: { ...mark.error, span: { id: 'span-1' } },
+    } as ErrorMark;
+    const component = openPopover(newMark);
+    const errorLink = component.getByTestId('errorLink') as HTMLAnchorElement;
+    expect(getKueryDecoded(errorLink.search)).toEqual(
+      'kuery=trace.id : "123" and (transaction.id : "456" or span.id : "span-1")'
+    );
+  });
   it('renders link with trace', () => {
     const { transaction, ...withoutTransaction } = mark.error;
     const newMark = {

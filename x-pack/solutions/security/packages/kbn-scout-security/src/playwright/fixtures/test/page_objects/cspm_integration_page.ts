@@ -41,7 +41,7 @@ export class CspmIntegrationPage {
   constructor(private readonly page: ScoutPage) {}
 
   async navigate() {
-    await this.page.gotoApp('fleet/integrations/cloud_security_posture/add-integration/cspm');
+    await this.page.gotoApp('integrations/detail/cloud_security_posture/add-integration/cspm');
     // Wait for the provider selector tabs to be visible before continuing
     await this.page
       .getByTestId(AWS_PROVIDER_TEST_SUBJ)

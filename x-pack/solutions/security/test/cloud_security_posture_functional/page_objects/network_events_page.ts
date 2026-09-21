@@ -15,8 +15,8 @@ const {
   EVENTS_TABLE_ROW_CSS_SELECTOR,
   VISUALIZATIONS_SECTION_HEADER_TEST_ID,
   VISUALIZATIONS_SECTION_CONTENT_TEST_ID,
+  GRAPH_PREVIEW_TEST_ID,
   GRAPH_PREVIEW_CONTENT_TEST_ID,
-  GRAPH_PREVIEW_LOADING_TEST_ID,
   GROUPED_ITEM_TEST_ID,
 } = testSubjectIds;
 
@@ -92,6 +92,13 @@ export class NetworkEventsPageObject extends FtrService {
 
   flyout = {
     expandVisualizations: async (): Promise<void> => {
+      // The section content can mount slowly under CI load. It starts collapsed (present
+      // in the DOM but not displayed), so wait for DOM presence with `allowHidden` rather
+      // than for a displayed element, then read its height to decide whether to expand.
+      await this.testSubjects.existOrFail(VISUALIZATIONS_SECTION_CONTENT_TEST_ID, {
+        timeout: this.defaultTimeoutMs,
+        allowHidden: true,
+      });
       const contentEl = await this.testSubjects.find(VISUALIZATIONS_SECTION_CONTENT_TEST_ID);
       const isVisualizationVisible = (await contentEl.getSize()).height > 0;
 
@@ -108,12 +115,24 @@ export class NetworkEventsPageObject extends FtrService {
       await this.flyout.waitGraphIsLoaded();
       const graph = await this.testSubjects.find(GRAPH_PREVIEW_CONTENT_TEST_ID);
       await graph.scrollIntoView();
-      const nodes = await graph.findAllByCssSelector('.react-flow__nodes .react-flow__node');
-      expect(nodes.length).to.be(expected);
+      // react-flow mounts the graph container before all nodes are laid out, so wait for
+      // the node count to settle rather than reading it the instant the graph appears.
+      await this.retry.waitForWithTimeout(
+        `graph preview to render ${expected} nodes`,
+        this.defaultTimeoutMs,
+        async () => {
+          const nodes = await graph.findAllByCssSelector('.react-flow__nodes .react-flow__node');
+          return nodes.length === expected;
+        }
+      );
     },
 
     waitGraphIsLoaded: async () => {
-      await this.testSubjects.missingOrFail(GRAPH_PREVIEW_LOADING_TEST_ID, { timeout: 10000 });
+      // Wait positively for the rendered graph root (only mounts once loading is done)
+      // instead of racing the loading skeleton's removal against a hardcoded budget.
+      await this.testSubjects.existOrFail(GRAPH_PREVIEW_TEST_ID, {
+        timeout: this.defaultTimeoutMs,
+      });
     },
 
     assertPreviewPanelIsOpen: async (type: 'alert' | 'event' | 'group') => {

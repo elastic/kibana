@@ -796,6 +796,8 @@ describe('EmailActionConnectorFields', () => {
         </ConnectorFormTestProvider>
       );
 
+      // Wait for the lazily-loaded Exchange fields to mount so their validators register before submit.
+      await screen.findByTestId('emailClientId');
       const submitButton = await screen.findByTestId('form-test-provide-submit');
       await userEvent.click(submitButton);
 

@@ -143,7 +143,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should render metric', async () => {
       await lens.switchToVisualization('lnsLegacyMetric');
       await lens.waitForVisualization('legacyMtrVis');
-      await lens.assertLegacyMetric('Average of bytes', '5,727.322');
+      await lens.assertLegacyMetric('Average of bytes', '5,727.314');
     });
   });
 }

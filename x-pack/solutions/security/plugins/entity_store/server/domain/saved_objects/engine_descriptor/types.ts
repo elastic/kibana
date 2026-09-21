@@ -8,8 +8,9 @@
 import type { SavedObjectsFullModelVersion } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsType } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { ENGINE_DESCRIPTOR_TYPE_NAME } from '../../../../common/privileges';
 
-export const EngineDescriptorTypeName = 'entity-engine-descriptor-v2';
+export const EngineDescriptorTypeName = ENGINE_DESCRIPTOR_TYPE_NAME;
 
 export const EngineDescriptorTypeMappings: SavedObjectsType['mappings'] = {
   dynamic: false,

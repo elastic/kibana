@@ -73,9 +73,8 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
       avatar_symbol: agent.avatar_symbol ?? '',
       avatar_color: agent.avatar_color ?? '',
       labels: agent.labels ?? [],
-      access_control: agent.access_control ?? {
-        access_mode: AgentAccessControlMode.Private,
-        entries: [],
+      access_control: {
+        access_mode: agent.access_control?.access_mode ?? AgentAccessControlMode.Private,
       },
       configuration: {
         enable_elastic_capabilities: agent.configuration?.enable_elastic_capabilities ?? false,
@@ -96,7 +95,9 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
         avatar_symbol: data.avatar_symbol || undefined,
         avatar_color: data.avatar_color || undefined,
         labels: data.labels,
-        access_control: data.access_control,
+        // Send only the access mode; the update endpoint's schema rejects `entries`, which
+        // are managed via the dedicated access-control endpoint.
+        access_control: { access_mode: data.access_control.access_mode },
         configuration: {
           enable_elastic_capabilities: data.configuration.enable_elastic_capabilities,
           workflow_ids: data.configuration.workflow_ids,

@@ -12,6 +12,7 @@ import * as globby from 'globby';
 import DISABLED_JEST_CONFIGS from '../../../disabled_jest_configs.json';
 import SHARDED_JEST_CONFIGS from '../../../sharded_jest_configs.json';
 import { filterEmptyJestConfigs } from '../get_tests_from_config';
+import { getKibanaDir } from '#pipeline-utils';
 
 export const SHARD_ANNOTATION_SEP = '||shard=';
 
@@ -26,15 +27,14 @@ export function discoverJestUnitConfigs(limitSolutions: string[] | undefined): s
 
 /**
  * Discover Jest integration configs honoring LIMIT_SOLUTIONS, the disabled list,
- * and the shard map. Integration configs are intentionally not filtered for
- * emptiness (matches historical behavior).
+ * the empty-config filter, and the shard map.
  */
 export function discoverJestIntegrationConfigs(limitSolutions: string[] | undefined): string[] {
   const raw = globJestConfigs(
     ['**/jest.integration.config.js', '!**/__fixtures__/**'],
     limitSolutions
   );
-  return expandShardedJestConfigs(raw);
+  return expandShardedJestConfigs(filterEmptyJestConfigs(raw));
 }
 
 /**
@@ -64,7 +64,7 @@ export function expandShardedJestConfigs(configs: string[]): string[] {
 
 function globJestConfigs(patterns: string[], limitSolutions: string[] | undefined): string[] {
   return globby.sync(globsForSolutions(patterns, limitSolutions), {
-    cwd: process.cwd(),
+    cwd: getKibanaDir(),
     absolute: false,
     ignore: [...DISABLED_JEST_CONFIGS, '**/node_modules/**'],
   });

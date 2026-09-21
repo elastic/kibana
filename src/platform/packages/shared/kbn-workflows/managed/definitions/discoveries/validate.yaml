@@ -5,8 +5,8 @@ description: >
   then persists deduplicated discoveries
 enabled: true
 tags:
-  - Attack discovery
-  - Security
+  - attack-discovery
+  - security
   - attackDiscovery:validate
 
 triggers:

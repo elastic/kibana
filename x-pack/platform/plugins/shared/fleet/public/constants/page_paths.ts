@@ -97,9 +97,6 @@ export const FLEET_ROUTING_PATHS = {
   settings_edit_fleet_proxy: '/settings/fleet-proxies/:itemId',
   settings_edit_download_sources: '/settings/downloadSources/:downloadSourceId',
   debug: '/_debug',
-
-  // TODO: Move this to the integrations app
-  add_integration_to_policy: '/integrations/:pkgkey/add-integration/:integration?',
 };
 
 export const INTEGRATIONS_SEARCH_QUERYPARAM = 'q';
@@ -125,6 +122,7 @@ export const INTEGRATIONS_ROUTING_PATHS = {
   integration_policy_edit: '/edit-integration/:packagePolicyId',
   integration_policy_copy: '/copy-integration/:packagePolicyId',
   integration_policy_upgrade: '/edit-integration/:packagePolicyId',
+  add_integration_to_policy: '/detail/:pkgkey/add-integration/:integration?',
 };
 
 export const pagePathGetters: {
@@ -266,9 +264,9 @@ export const pagePathGetters: {
       ...(prerelease ? { prerelease } : {}),
     });
     return [
-      FLEET_BASE_PATH,
+      INTEGRATIONS_BASE_PATH,
       // prettier-ignore
-      `/integrations/${pkgkey}/add-integration${integration ? `/${integration}` : ''}${qs ? `?${qs}` : ''}`,
+      `/detail/${pkgkey}/add-integration${integration ? `/${integration}` : ''}${qs ? `?${qs}` : ''}`,
     ];
   },
   edit_integration: ({ policyId, packagePolicyId }) => [

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ConstructorOptions } from '../../../../rules_client/rules_client';
 import { RulesClient } from '../../../../rules_client/rules_client';
 import {
@@ -59,6 +60,7 @@ const alertsService = alertsServiceMock.create();
 
 const kibanaVersion = 'v7.10.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
+  request: httpServerMock.createKibanaRequest(),
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
@@ -310,7 +312,7 @@ describe('enable()', () => {
     expect(unsecuredSavedObjectsClient.create).not.toBeCalledWith(
       API_KEY_PENDING_INVALIDATION_TYPE
     );
-    expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: myType/name');
+    expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: myType/name', undefined);
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,
       '1',
@@ -873,7 +875,7 @@ describe('enable()', () => {
         'alert',
         '1',
         expect.objectContaining({
-          tags: expect.arrayContaining(['existing-tag', 'Missing Universal Api Key']),
+          tags: expect.arrayContaining(['existing-tag', 'Missing Elastic Cloud API Key']),
         }),
         expect.anything()
       );
@@ -926,7 +928,7 @@ describe('enable()', () => {
         'alert',
         '1',
         expect.objectContaining({
-          tags: expect.arrayContaining(['existing-tag', 'Missing Universal Api Key']),
+          tags: expect.arrayContaining(['existing-tag', 'Missing Elastic Cloud API Key']),
         }),
         expect.anything()
       );

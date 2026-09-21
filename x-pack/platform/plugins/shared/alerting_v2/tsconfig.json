@@ -127,7 +127,8 @@
     "@kbn/alerts-ui-shared",
     "@kbn/es-types",
     "@kbn/app-header",
-    "@kbn/core-chrome-browser-context-mocks"
+    "@kbn/core-chrome-browser-context-mocks",
+    "@kbn/core-test-helpers-model-versions"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }

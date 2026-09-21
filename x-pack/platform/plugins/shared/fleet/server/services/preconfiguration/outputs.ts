@@ -268,14 +268,11 @@ export async function cleanPreconfiguredOutputs(
   esClient: ElasticsearchClient,
   outputs: PreconfiguredOutput[]
 ) {
-  const existingOutputs = await outputService.list();
-  const existingPreconfiguredOutput = existingOutputs.items.filter(
-    (o) => o.is_preconfigured === true
-  );
+  const existingPreconfiguredOutputs = await outputService.listPreconfigured();
 
   const logger = appContextService.getLogger();
 
-  for (const output of existingPreconfiguredOutput) {
+  for (const output of existingPreconfiguredOutputs.items) {
     const hasBeenDelete = !outputs.find(({ id }) => output.id === id);
     if (!hasBeenDelete) {
       continue;
@@ -462,7 +459,9 @@ async function isPreconfiguredOutputDifferentFromCurrent(
           existingOutput.otel_disable_beatsauth,
           preconfiguredOutput.otel_disable_beatsauth
         ))) ||
-    isDifferent(existingOutput.proxy_id, preconfiguredOutput.proxy_id) ||
+    // Kafka does not support proxies; proxy_id is always cleared on save (#267281)
+    (existingOutput.type !== 'kafka' &&
+      isDifferent(existingOutput.proxy_id, preconfiguredOutput.proxy_id)) ||
     isDifferent(existingOutput.allow_edit ?? [], preconfiguredOutput.allow_edit ?? []) ||
     (preconfiguredOutput.preset &&
       isDifferent(existingOutput.preset, preconfiguredOutput.preset)) ||

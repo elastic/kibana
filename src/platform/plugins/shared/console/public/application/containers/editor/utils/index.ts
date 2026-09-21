@@ -34,3 +34,5 @@ export {
   isJSONContentType,
 } from './output_data';
 export { convertMapboxVectorTileToJson } from './mapbox_vector_tile';
+export { getTripleQuoteContext } from './triple_quote_context';
+export type { TripleQuoteContext } from './triple_quote_context';

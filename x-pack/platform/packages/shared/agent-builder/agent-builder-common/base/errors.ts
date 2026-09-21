@@ -22,6 +22,7 @@ export enum AgentBuilderErrorCode {
   agentNotFound = 'agentNotFound',
   agentUnavailable = 'agentUnavailable',
   conversationNotFound = 'conversationNotFound',
+  conversationWriteConflict = 'conversationWriteConflict',
   pluginNotFound = 'pluginNotFound',
   agentExecutionError = 'agentExecutionError',
   requestAborted = 'requestAborted',
@@ -266,6 +267,35 @@ export const createConversationNotFoundError = ({
 };
 
 /**
+ * Error thrown when concurrent writes to a conversation could not be reconciled.
+ */
+export type AgentBuilderConversationWriteConflictError =
+  AgentBuilderError<AgentBuilderErrorCode.conversationWriteConflict>;
+
+/**
+ * Checks if the given error is a {@link AgentBuilderConversationWriteConflictError}
+ */
+export const isConversationWriteConflictError = (
+  err: unknown
+): err is AgentBuilderConversationWriteConflictError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.conversationWriteConflict;
+};
+
+export const createConversationWriteConflictError = ({
+  conversationId,
+  meta = {},
+}: {
+  conversationId: string;
+  meta?: Record<string, any>;
+}): AgentBuilderConversationWriteConflictError => {
+  return new AgentBuilderError(
+    AgentBuilderErrorCode.conversationWriteConflict,
+    `Conversation ${conversationId} was modified concurrently and the change could not be saved`,
+    { ...meta, conversationId, statusCode: 409 }
+  );
+};
+
+/**
  * Error thrown when trying to retrieve a plugin not present in the current context.
  */
 export type AgentBuilderPluginNotFoundError =
@@ -441,6 +471,7 @@ export const AgentBuilderErrorUtils = {
   isAgentNotFoundError,
   isAgentUnavailableError,
   isConversationNotFoundError,
+  isConversationWriteConflictError,
   isPluginNotFoundError,
   isWorkflowAbortedError,
   isWorkflowExecutionError,
@@ -453,6 +484,7 @@ export const AgentBuilderErrorUtils = {
   createAgentNotFoundError,
   createAgentUnavailableError,
   createConversationNotFoundError,
+  createConversationWriteConflictError,
   createPluginNotFoundError,
   createWorkflowAbortedError,
   createWorkflowExecutionError,

@@ -213,7 +213,6 @@ export const createNavigationTree = (
                       link: 'cloud_connect' as const,
                     },
                   ]),
-              { link: 'monitoring' },
             ],
           },
           ...getAlertingV2ManagementNavPanel(services),

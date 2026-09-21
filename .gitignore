@@ -16,6 +16,9 @@ node_modules
 !/src/dev/notice/__fixtures__/node_modules
 !/src/platform/packages/private/kbn-import-resolver/src/__fixtures__/node_modules
 !/src/platform/packages/private/kbn-import-resolver/src/__fixtures__/packages/box/node_modules
+!/packages/kbn-check-prod-native-modules-cli/integration_tests/__fixtures__/*/node_modules
+!/packages/kbn-check-prod-native-modules-cli/integration_tests/__fixtures__/*/node_modules/**
+/node_modules.tar.zst
 trash
 /optimize
 /built_assets
@@ -102,6 +105,7 @@ selenium
 *.out
 package-lock.json
 !/.buildkite/package-lock.json
+yarn.lock
 .yo-rc.json
 .vscode
 *.sublime-*
@@ -121,9 +125,6 @@ npm-debug.log*
 ## @cypress/snapshot from apm plugin
 /snapshots.js
 /apm-diagnostics*.json
-/x-pack/solutions/observability/plugins/apm/ftr_e2e/cypress/e2e/service_map/snapshots/*.actual.png
-/x-pack/solutions/observability/plugins/apm/ftr_e2e/cypress/e2e/service_map/snapshots/*.diff.png
-
 # transpiled cypress config
 x-pack/platform/plugins/shared/fleet/cypress.config.d.ts
 x-pack/platform/plugins/shared/fleet/cypress.config.js
@@ -156,12 +157,9 @@ report.asciidoc
 # Yarn local mirror content
 .yarn-local-mirror
 
-# Bazel | TODO: Remove later
-.ijwb
-/bazel
-/bazel-*
-.bazelrc.user
-.bazelrc.cache
+# PNPM
+.pnpm-store
+.pnpm
 
 elastic-agent-*
 fleet-server-*

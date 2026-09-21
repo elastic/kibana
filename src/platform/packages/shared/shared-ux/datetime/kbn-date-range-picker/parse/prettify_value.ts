@@ -13,8 +13,8 @@ import moment from 'moment';
 import { DATE_RANGE_INPUT_DELIMITER, DEFAULT_DATE_FORMAT } from '../constants';
 import type { TimePrecision, TimeRangeBoundsOption } from '../types';
 import { applyTimePrecision } from '../format';
-import { buildDelimiterPattern, getCompiledGrammar } from './locale_grammar';
-import { textToTimeRange } from './parse_text';
+import { buildDelimiterPattern, getCompiledGrammar, normalizeDigits } from './locale_grammar';
+import { getPresetLabel } from './preset_label';
 
 /**
  * Simplifies a dateMath value string into a compact shorthand suitable for
@@ -44,7 +44,10 @@ const getDelimiterPatterns = (
   locale: string | undefined
 ): RegExp[] => {
   const compiled = getCompiledGrammar(locale ?? i18n.getLocale());
-  const extraPatterns = [DATE_RANGE_INPUT_DELIMITER, ...(extraDelimiter ? [extraDelimiter] : [])]
+  const extraPatterns = [
+    { text: DATE_RANGE_INPUT_DELIMITER },
+    ...(extraDelimiter ? [{ text: extraDelimiter }] : []),
+  ]
     .map(buildDelimiterPattern)
     .filter((p): p is RegExp => p !== null);
 
@@ -88,13 +91,9 @@ export interface PrettifyValueOptions {
 }
 
 /**
- * Tries to match a split `{start, end}` pair against a preset.
- * Returns the preset label only when it is natural language (e.g. "Last 7 days",
- * "Today") and therefore safe to show in the editable input. Display-form labels
- * (e.g. `"Feb 3 → Feb 10"`) must not leak into the input; we gate on
- * `isNaturalLanguage` rather than `!isInvalid` because moment's forgiving parser
- * "validates" display labels by matching a fragment, so they are prettified from
- * their bounds instead.
+ * Tries to match a split `{start, end}` pair against a preset and returns its
+ * label when it is a real name safe to show in the editable input (see
+ * {@link getPresetLabel}); frozen display text is prettified from the bounds instead.
  */
 const matchPresetBounds = (
   start: string,
@@ -103,11 +102,7 @@ const matchPresetBounds = (
   locale: string | undefined
 ): string | null => {
   const match = presets.find((p) => p.start === start && p.end === end);
-  if (!match?.label) return null;
-
-  // Pass only `locale` to the parser: including `presets` would let the matched
-  // preset's own label self-match as "natural language".
-  return textToTimeRange(match.label, { locale }).isNaturalLanguage ? match.label : null;
+  return match ? getPresetLabel(match, { locale }) : null;
 };
 
 /**
@@ -118,7 +113,7 @@ const matchPresetBounds = (
  * @returns A simplified string, or the original value if no simplification applies.
  */
 export const prettifyValue = (value: string, options?: PrettifyValueOptions): string => {
-  const trimmed = value.trim();
+  const trimmed = normalizeDigits(value.trim());
   if (!trimmed) return value;
 
   const { extraDelimiter, presets = [], locale } = options ?? {};

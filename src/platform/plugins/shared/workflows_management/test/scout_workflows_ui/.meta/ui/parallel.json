@@ -1,14 +1,13 @@
 {
-  "sha1": "12e591fa6a697dd889d98e11d686fb93352bdc1c",
+  "sha1": "9e86cde7350fefc97b24a1170c2f29f962600d84",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
       "id": "a8dc0a71dd65d42-65fd9c357892a20",
       "title": "InternalActions/Cases should run create_get_update_case workflow successfully",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -19,7 +18,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/internal_actions/create_get_update_case.spec.ts",
-        "line": 52,
+        "line": 51,
         "column": 9
       }
     },
@@ -83,7 +82,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 124,
+        "line": 120,
         "column": 9
       }
     },
@@ -97,7 +96,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 132,
+        "line": 128,
         "column": 9
       }
     },
@@ -111,7 +110,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 124,
+        "line": 120,
         "column": 9
       }
     },
@@ -125,7 +124,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 132,
+        "line": 128,
         "column": 9
       }
     },
@@ -139,7 +138,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 124,
+        "line": 120,
         "column": 9
       }
     },
@@ -153,7 +152,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 132,
+        "line": 128,
         "column": 9
       }
     },
@@ -167,7 +166,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 141,
+        "line": 137,
         "column": 7
       }
     },
@@ -181,7 +180,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 149,
+        "line": 145,
         "column": 7
       }
     },
@@ -195,7 +194,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 157,
+        "line": 153,
         "column": 7
       }
     },
@@ -209,7 +208,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 179,
+        "line": 175,
         "column": 7
       }
     },
@@ -223,7 +222,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 198,
+        "line": 194,
         "column": 7
       }
     },
@@ -237,7 +236,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 217,
+        "line": 213,
         "column": 7
       }
     },
@@ -251,7 +250,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 230,
+        "line": 226,
         "column": 7
       }
     },
@@ -265,7 +264,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 257,
+        "line": 253,
         "column": 7
       }
     },
@@ -279,7 +278,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 270,
+        "line": 266,
         "column": 7
       }
     },
@@ -293,7 +292,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 289,
+        "line": 285,
         "column": 7
       }
     },
@@ -307,7 +306,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 311,
+        "line": 307,
         "column": 7
       }
     },

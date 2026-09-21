@@ -84,6 +84,8 @@ import { getErrorGroupsRoute } from './errors/get_error_groups';
 import { getErrorStatsRoute } from './errors/get_error_stats';
 import { getMonitorSummaryStatsRoute } from './monitor_cruds/get_monitor_summary_stats';
 import { getSyntheticsDiagnosticsRoute } from './diagnostics/get_synthetics_diagnostics';
+import { getMaintenanceWindowsRoute } from './maintenance_windows/get_maintenance_windows';
+import { getOutdatedMwAgentLocations } from './settings/private_locations/get_outdated_mw_agents';
 
 export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   addSyntheticsProjectMonitorRoute,
@@ -139,6 +141,8 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   getErrorStatsRoute,
   getMonitorSummaryStatsRoute,
   getSyntheticsDiagnosticsRoute,
+  getOutdatedMwAgentLocations,
+  getMaintenanceWindowsRoute,
 ];
 
 export const syntheticsAppPublicRestApiRoutes: SyntheticsRestApiRouteFactory[] = [

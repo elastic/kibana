@@ -442,6 +442,61 @@ describe('executeRuleOperations', () => {
     });
   });
 
+  describe('set_query no_data cross-field validation', () => {
+    it('throws when a no_data block is present but no_data_strategy is not set', async () => {
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
+            no_data: { query: 'FROM heartbeat-* | STATS COUNT(*) BY host.name' },
+          },
+        },
+      ];
+
+      await expect(executeRuleOperations({}, ops)).rejects.toThrow(
+        'query.no_data is only allowed when no_data_strategy is set to a non-"none" value'
+      );
+    });
+
+    it('throws when a no_data_strategy is set but no no_data block is provided (standalone)', async () => {
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
+          },
+          no_data_strategy: 'last_known_status',
+        },
+      ];
+
+      const promise = executeRuleOperations({}, ops);
+      await expect(promise).rejects.toThrow('requires a no_data block in the query');
+      await expect(executeRuleOperations({}, ops)).rejects.toBeInstanceOf(
+        RuleOperationValidationError
+      );
+    });
+
+    it('passes when no_data_strategy is set and a no_data block is provided', async () => {
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
+            no_data: { query: 'FROM heartbeat-* | STATS COUNT(*) BY host.name' },
+          },
+          no_data_strategy: 'last_known_status',
+        },
+      ];
+
+      const result = await executeRuleOperations({}, ops);
+      expect(result.data.no_data_strategy).toBe('last_known_status');
+    });
+  });
+
   describe('set_grouping with column validation', () => {
     it('accepts grouping fields that exist in query columns', async () => {
       const esClient = createMockEsClient();

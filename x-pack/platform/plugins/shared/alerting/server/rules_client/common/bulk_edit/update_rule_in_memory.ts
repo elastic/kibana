@@ -8,6 +8,7 @@
 import { omit } from 'lodash';
 import type { SavedObjectsBulkUpdateObject, SavedObjectsFindResult } from '@kbn/core/server';
 import {
+  authorizeRuleTypeParams,
   getRuleNotifyWhenType,
   validateMutatedRuleTypeParams,
   validateRuleTypeParams,
@@ -153,6 +154,10 @@ export async function updateRuleInMemory<Params extends RuleParams>(
     rule.attributes.params,
     ruleType.validate.params
   );
+  await authorizeRuleTypeParams(validatedMutatedAlertTypeParams, ruleType.authorize?.params, {
+    request: context.request,
+    previousParams: rule.attributes.params,
+  });
 
   const {
     references,
@@ -219,6 +224,7 @@ async function prepareApiKeys(
     shouldUpdateApiKey: attributes.enabled || hasUpdateApiKeyOperation,
     errorMessage: 'Error updating rule: could not create API key',
     apiKeyOwnership: { apiKeyCreatedByUser: rule.attributes.apiKeyCreatedByUser },
+    refresh: false,
   });
 
   // collect generated API keys

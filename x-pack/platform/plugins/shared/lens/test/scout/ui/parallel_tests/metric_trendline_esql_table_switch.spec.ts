@@ -10,6 +10,7 @@ import { expect } from '@kbn/scout/ui';
 import {
   applyLensInlineEditorAndWaitClosed,
   createDashboardWithPanelId,
+  getMetricTrendline,
   openDimensionEditorAndWaitForFlyout,
   openInlineEditorAndWaitVisible,
   testData,
@@ -134,13 +135,13 @@ spaceTest.describe(
             await breakdownPanel.getByTestId('indexPattern-dimension-remove').click();
 
             await expectMetricPanelHasNotCrashed(page);
-            await expect(page.locator('.echSingleMetricSparkline')).toBeVisible();
+            await expect(getMetricTrendline(page)).toBeVisible();
             await waitForMetricTileCount(page, 1);
 
             await applyLensInlineEditorAndWaitClosed({ lens });
             await dashboard.waitForPanelsToLoad(1);
             await expectMetricPanelHasNotCrashed(page);
-            await expect(page.locator('.echSingleMetricSparkline')).toBeVisible();
+            await expect(getMetricTrendline(page)).toBeVisible();
             await waitForMetricTileCount(page, 1);
           }
         );

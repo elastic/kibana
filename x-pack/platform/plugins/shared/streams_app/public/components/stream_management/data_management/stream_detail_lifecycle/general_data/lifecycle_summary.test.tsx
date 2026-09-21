@@ -285,7 +285,7 @@ describe('LifecycleSummary', () => {
       );
 
       expect(screen.getByTestId('lifecyclePhase-delete-button')).toHaveStyle(
-        `box-shadow: inset 0 0 0 2px #000000`
+        `box-shadow: inset 0 0 0 2px #07101F`
       );
     });
 
@@ -295,7 +295,7 @@ describe('LifecycleSummary', () => {
       renderWithSync(<LifecycleSummary definition={definition} isMetricsStream />);
 
       expect(screen.getByTestId('lifecyclePhase-delete-button')).not.toHaveStyle(
-        `box-shadow: inset 0 0 0 2px #000000`
+        `box-shadow: inset 0 0 0 2px #07101F`
       );
     });
 

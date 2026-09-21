@@ -150,6 +150,13 @@ export class ConsolePageObject extends FtrService {
     await textArea.pressKeys(shift ? [Key.SHIFT, Key.LEFT] : Key.LEFT);
   }
 
+  public async pressDelete(times: number = 1) {
+    const textArea = await this.getTextArea();
+    for (let i = 0; i < times; i++) {
+      await textArea.pressKeys(Key.DELETE);
+    }
+  }
+
   public async pressCtrlSpace() {
     const textArea = await this.getTextArea();
     await textArea.pressKeys([
@@ -204,6 +211,18 @@ export class ConsolePageObject extends FtrService {
     await textArea.pressKeys([selectionKey, 'a']);
   }
 
+  public async getSelectedRequestsCount() {
+    const container = await this.testSubjects.find('consoleMonacoEditorContainer');
+    const count = await container.getAttribute('data-currently-selected-requests');
+    return Number(count ?? 0);
+  }
+
+  public async waitForSelectedRequestsCount(expectedCount: number) {
+    await this.retry.waitFor(`editor to recognize ${expectedCount} selected requests`, async () => {
+      return (await this.getSelectedRequestsCount()) === expectedCount;
+    });
+  }
+
   public async getEditor() {
     return await this.testSubjects.find('consoleMonacoEditor');
   }
@@ -248,28 +267,16 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async clickPlayAndWaitForResults() {
-    await this.clickPlay();
-
-    // Try to catch the in-flight loading state. Fast requests (or identical repeated requests)
-    // may complete before we poll, so we tolerate never seeing the loading indicators — as long
-    // as output and a status badge are present when we check.
-    await this.retry
-      .tryForTime(5000, async () => {
-        const inFlight =
-          (await this.testSubjects.exists('consoleEditorContentSpinner')) ||
-          (await this.testSubjects.exists('consoleRequestInProgressBadge'));
-        if (!inFlight) throw new Error('Waiting for request to start');
-      })
-      .catch(async () => {
-        // We didn't catch the in-progress state — verify that output is already available,
-        // which means the request completed before we could observe it loading.
-        if (
-          !(await this.testSubjects.exists('consoleMonacoOutput')) ||
-          !(await this.testSubjects.exists('consoleResponseStatusBadge'))
-        ) {
-          throw new Error('Console request did not start or produce output');
-        }
-      });
+    // Retry the Play click until the request starts. A single click can be a no-op if the editor
+    // hasn't finished registering the current request (see #240147).
+    await this.retry.try(async () => {
+      await this.clickPlay();
+      const started =
+        (await this.testSubjects.exists('consoleEditorContentSpinner')) ||
+        (await this.testSubjects.exists('consoleRequestInProgressBadge')) ||
+        (await this.testSubjects.exists('consoleMonacoOutput'));
+      if (!started) throw new Error('Console request did not start after clicking Play');
+    });
 
     // Wait for loading indicators to clear and output to be present.
     await this.waitForRequestToComplete();
@@ -416,6 +423,11 @@ export class ConsolePageObject extends FtrService {
     });
 
     await this.testSubjects.click('addNewVariableButton');
+
+    await this.retry.waitFor(`variable \${${name}} to appear in the table`, async () => {
+      const variables = await this.getVariables();
+      return variables.some((variable) => variable.name === `\${${name}}`);
+    });
   }
 
   public async removeVariables() {

@@ -528,7 +528,12 @@ export const updateRuleDataSchema = z
   .object({
     metadata: metadataSchema
       .partial()
-      .extend({ builder_type: z.string().max(64).optional().nullable() })
+      .extend({
+        builder_type: z.string().max(64).optional().nullable(),
+        // `null` clears all tags (an empty array is rejected by `.min(1)`, and
+        // omitting `tags` preserves the existing ones on a partial update).
+        tags: tagsSchema.min(1).nullable().optional(),
+      })
       .optional(),
     time_field: z.string().min(1).max(128).optional(),
     schedule: scheduleSchema.partial().optional().nullable(),
