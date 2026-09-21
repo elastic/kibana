@@ -125,12 +125,19 @@ const getDescription = (state: EsqlSummaryState, kind: RuleKind): string | null 
 interface EsqlQuerySummarySectionProps {
   query: RuleQuery;
   queryCommitted: boolean;
-  /** Used to hide alert-condition guidance (subtitle + callout) for signal rules. */
+  /** Used to hide the alert-condition block, subtitle and callout for signal rules. */
   kind: RuleKind;
   /** Disables the edit CTA while the sandbox is already open. */
   isEditorOpen: boolean;
   onOpenEditor: () => void;
 }
+
+const QUERY_LABEL = (
+  <FormattedMessage
+    id="xpack.alertingV2.composeDiscover.esqlSummary.queryLabel"
+    defaultMessage="Query"
+  />
+);
 
 const BASE_QUERY_LABEL = (
   <FormattedMessage
@@ -155,6 +162,7 @@ export const EsqlQuerySummarySection: React.FC<EsqlQuerySummarySectionProps> = (
 }) => {
   const state = getEsqlSummaryState(queryCommitted, query);
   const showBlocks = state !== 'before_apply';
+  const showUnifiedBlock = kind === 'signal';
   const callout = getSummaryCallout(state, kind);
   const description = getDescription(state, kind);
 
@@ -182,15 +190,19 @@ export const EsqlQuerySummarySection: React.FC<EsqlQuerySummarySectionProps> = (
       {callout != null && <EuiSpacer size="m" />}
 
       {showBlocks ? (
-        <>
-          <QueryBlock label={BASE_QUERY_LABEL} query={query.base} emptyMessage={NOT_DEFINED} />
-          <EuiSpacer size="m" />
-          <QueryBlock
-            label={ALERT_CONDITION_LABEL}
-            query={query.breach.segment}
-            emptyMessage={NOT_DEFINED}
-          />
-        </>
+        showUnifiedBlock ? (
+          <QueryBlock label={QUERY_LABEL} query={query.base} emptyMessage={NOT_DEFINED} />
+        ) : (
+          <>
+            <QueryBlock label={BASE_QUERY_LABEL} query={query.base} emptyMessage={NOT_DEFINED} />
+            <EuiSpacer size="m" />
+            <QueryBlock
+              label={ALERT_CONDITION_LABEL}
+              query={query.breach.segment}
+              emptyMessage={NOT_DEFINED}
+            />
+          </>
+        )
       ) : (
         <QuerySummary query="" emptyMessage={NOT_DEFINED} />
       )}

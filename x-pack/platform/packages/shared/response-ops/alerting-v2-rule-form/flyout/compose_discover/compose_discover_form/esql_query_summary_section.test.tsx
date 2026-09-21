@@ -126,14 +126,24 @@ describe('EsqlQuerySummarySection callouts', () => {
     expect(screen.queryByTestId('esqlSummaryNoAlertConditionCallout')).not.toBeInTheDocument();
   });
 
-  it('hides alert-condition subtitle and callout for signal kind', () => {
+  it('hides the alert-condition block, subtitle and callout for signal kind', () => {
     renderSection(true, ruleQuery(BASE, ''), 'signal');
 
     expect(screen.getByTestId('esqlQuerySummarySection-no_alert_condition')).toBeInTheDocument();
-    expect(screen.getByText('Base query')).toBeInTheDocument();
+    expect(screen.getByText('Query')).toBeInTheDocument();
+    expect(screen.queryByText('Base query')).not.toBeInTheDocument();
+    expect(screen.queryByText('Alert condition')).not.toBeInTheDocument();
     expect(
       screen.queryByText('Base query defined — no separate alert condition')
     ).not.toBeInTheDocument();
     expect(screen.queryByTestId('esqlSummaryNoAlertConditionCallout')).not.toBeInTheDocument();
+  });
+
+  it('splits the summary into base query and alert condition for alert kind', () => {
+    renderSection(true, ruleQuery(BASE, ALERT_SEGMENT));
+
+    expect(screen.getByText('Base query')).toBeInTheDocument();
+    expect(screen.getByText('Alert condition')).toBeInTheDocument();
+    expect(screen.queryByText('Query')).not.toBeInTheDocument();
   });
 });

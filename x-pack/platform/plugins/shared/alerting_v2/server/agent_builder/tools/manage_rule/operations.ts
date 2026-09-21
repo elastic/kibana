@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { omit } from 'lodash';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import {
   isSavedObjectErrorResult,
@@ -148,7 +149,7 @@ export const setKindOperationSchema = z
     kind: ruleKindSchema,
   })
   .describe(
-    "Use `set_kind` to choose a rule kind matching the user's goal: detect and respond (`alert`) or collect evidence (`signal`)."
+    "Use `set_kind` to choose a rule kind matching the user's goal: detect and respond (`alert`) or collect evidence (`signal`). Switching to `signal` drops the alert-only `recovery`, `no_data` and `state_transition` settings."
   );
 
 export const setScheduleOperationSchema = scheduleSchema
@@ -348,7 +349,12 @@ export const executeRuleOperations = async (
       }
 
       case 'set_kind':
-        next = { ...next, kind: op.kind };
+        // An alert draft always carries the alert-only fields and no operation
+        // can remove them, so converting to a signal has to clear them here.
+        next =
+          op.kind === 'signal'
+            ? omit({ ...next, kind: op.kind }, ['recovery', 'no_data', 'state_transition'])
+            : { ...next, kind: op.kind };
         break;
 
       case 'set_schedule': {

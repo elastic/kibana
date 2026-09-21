@@ -583,6 +583,24 @@ describe('executeRuleOperations', () => {
   });
 
   describe('cross-field validation', () => {
+    it('clears the alert-only fields when an existing alert becomes a signal', async () => {
+      const existing: Partial<RuleAttachmentData> = {
+        kind: 'alert',
+        metadata: { name: 'Existing Rule' },
+        query: { base: 'FROM metrics-*', breach: { segment: 'WHERE cpu > 90' } },
+        recovery: { strategy: 'no_breach' },
+        no_data: { strategy: 'ignore' },
+        state_transition: { pending: { count: 3, timeframe: '5m' } },
+      };
+      const ops: RuleOperation[] = [{ operation: 'set_kind', kind: 'signal' }];
+
+      const result = await executeRuleOperations(existing, ops, undefined, createMockSoClient());
+
+      expect(result.data).not.toHaveProperty('recovery');
+      expect(result.data).not.toHaveProperty('no_data');
+      expect(result.data).not.toHaveProperty('state_transition');
+    });
+
     it('throws when isNew is true and no name is provided', async () => {
       const ops: RuleOperation[] = [{ operation: 'set_kind', kind: 'alert' }];
 
@@ -770,13 +788,16 @@ describe('executeRuleOperations', () => {
     });
 
     it('throws when a signal rule has recovery set', async () => {
-      const ops: RuleOperation[] = [{ operation: 'set_kind', kind: 'signal' }];
-      const initial: Partial<RuleAttachmentData> = {
-        recovery: { strategy: 'query', query: 'FROM logs-* | WHERE ok' },
-        query: { base: 'FROM logs-* | LIMIT 1' },
-      };
+      const ops: RuleOperation[] = [
+        { operation: 'set_kind', kind: 'signal' },
+        {
+          operation: 'set_query',
+          query: { base: 'FROM logs-* | LIMIT 1' },
+          recovery: { strategy: 'query', query: 'FROM logs-* | WHERE ok' },
+        },
+      ];
 
-      await expect(executeRuleOperations(initial, ops)).rejects.toThrow(
+      await expect(executeRuleOperations({}, ops)).rejects.toThrow(
         'Signal rules cannot set recovery or no_data'
       );
     });
@@ -860,13 +881,13 @@ describe('executeRuleOperations', () => {
 
     it('wraps a lifecycle object on signal kind', async () => {
       await expectValidationError(
-        executeRuleOperations(
+        executeRuleOperations({ kind: 'signal' }, [
           {
-            recovery: { strategy: 'query', query: 'FROM logs-* | WHERE ok' },
+            operation: 'set_query',
             query: { base: 'FROM logs-* | LIMIT 1' },
+            recovery: { strategy: 'query', query: 'FROM logs-* | WHERE ok' },
           },
-          [{ operation: 'set_kind', kind: 'signal' }]
-        )
+        ])
       );
     });
   });
