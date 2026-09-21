@@ -25,6 +25,7 @@ import {
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_RULE_DETECTION_THRESHOLD,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_RULE_PROBE_AFTER_MINUTES,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_RULE_EXEMPT_SEVERITY_SCORE,
+  OBSERVABILITY_NIGHTSHIFT_DEVELOPER_MODE,
 } from '@kbn/management-settings-ids';
 import { DEFAULT_INDEX_PATTERNS } from '@kbn/streams-schema';
 import {
@@ -400,6 +401,30 @@ export function registerFeatureFlags(
               readonly: true,
               readonlyMode: 'ui',
             },
+        });
+
+        core.uiSettings.register({
+          [OBSERVABILITY_NIGHTSHIFT_DEVELOPER_MODE]: {
+            category: ['observability'],
+            name: i18n.translate('xpack.significantEvents.nightshiftDeveloperModeName', {
+              defaultMessage: 'Nightshift developer mode',
+            }) as string,
+            value: false,
+            description: i18n.translate(
+              'xpack.significantEvents.nightshiftDeveloperModeDescription',
+              {
+                defaultMessage:
+                  'When enabled, Nightshift Management shows developer-only tabs and the Significant Events tuning YAML editor in this Kibana space.',
+              }
+            ),
+            type: 'boolean',
+            schema: schema.boolean(),
+            requiresPageReload: false,
+            solutionViews: ['classic', 'oblt'],
+            technicalPreview: true,
+            readonly: true,
+            readonlyMode: 'ui',
+          },
         });
 
         core.uiSettings.registerGlobal({
