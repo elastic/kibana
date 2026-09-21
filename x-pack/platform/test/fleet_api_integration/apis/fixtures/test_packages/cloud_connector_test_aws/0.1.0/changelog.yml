@@ -3,4 +3,4 @@
   changes:
     - description: Initial draft of the package
       type: enhancement
-      link: https://github.com/elastic/kibana/pull/1 # FIXME Replace with the real PR link
+      link: https://github.com/elastic/kibana/pull/292515
