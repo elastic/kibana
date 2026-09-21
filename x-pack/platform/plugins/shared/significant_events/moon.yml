@@ -18,7 +18,6 @@ project:
   sourceRoot: x-pack/platform/plugins/shared/significant_events
 dependsOn:
   - '@kbn/agent-builder-elastic-ai-index-ki-types'
-  - '@kbn/nightshift-shared'
   - '@kbn/streams-plugin'
   - '@kbn/core'
   - '@kbn/core-pricing-common'
@@ -40,13 +39,12 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/workflows'
   - '@kbn/core-elasticsearch-server'
-  - '@kbn/core-security-server'
   - '@kbn/logging-mocks'
   - '@kbn/agent-builder-plugin'
   - '@kbn/nightshift-ai'
   - '@kbn/config-schema'
   - '@kbn/management-settings-ids'
-  - '@kbn/data-streams'
+  - '@kbn/core-data-streams-server'
   - '@kbn/streamlang'
   - '@kbn/es-mappings'
   - '@kbn/alerting-plugin'
@@ -84,6 +82,7 @@ dependsOn:
   - '@kbn/inference-prompt-utils'
   - '@kbn/esql-utils'
   - '@kbn/nightshift-investigations-plugin'
+  - '@kbn/nightshift-shared'
 tags:
   - plugin
   - prod
