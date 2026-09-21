@@ -8,13 +8,12 @@
 import { EuiFlexGroup, EuiIconTip, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import type { RenderContentPanelProps } from '@kbn/response-ops-alerts-table/types';
+import { ALERT_TAG_ACTION_ID } from '../../../constants/action_ids';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import type { BulkAlertTagsPanelComponentProps } from './alert_bulk_tags';
 import { BulkAlertTagsPanel } from './alert_bulk_tags';
 import * as i18n from './translations';
 import { useSetAlertTags } from './use_set_alert_tags';
-
-export const ALERT_TAG_ACTION_ID = 'manage-alert-tags';
 
 export interface UseBulkAlertTagsItemsProps {
   refetch?: () => void;
