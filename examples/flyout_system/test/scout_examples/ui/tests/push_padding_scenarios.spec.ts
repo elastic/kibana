@@ -193,27 +193,6 @@ test.describe(
       await expect(strandedBadge(page)).toHaveCount(0);
     });
 
-    test('two system push sessions, Back from the newest, ends with no padding', async ({
-      page,
-    }) => {
-      await toggle(page, 'System push C').click();
-      await expect(systemFlyout(page, 'System push C')).toBeVisible();
-      await toggle(page, 'System push D').click();
-      const flyoutD = systemFlyout(page, 'System push D');
-      await expect(flyoutD).toBeVisible();
-
-      // Back routes through the template's onClose, unlike the page toggle which calls ref.close().
-      await flyoutD.getByRole('button', { name: 'Back' }).click();
-      await expect(flyoutD).toHaveCount(0);
-      await expect(systemFlyout(page, 'System push C')).toBeVisible();
-      await expect(containerPadding(page)).not.toHaveText(NO_PADDING);
-
-      await toggle(page, 'System push C').click();
-      await expect(systemFlyout(page, 'System push C')).toHaveCount(0);
-      await expect(containerPadding(page)).toHaveText(NO_PADDING);
-      await expect(strandedBadge(page)).toHaveCount(0);
-    });
-
     // eslint-disable-next-line playwright/no-skipped-test -- fails until elastic/eui#10062 ships in Kibana
     test.skip(
       'two system push sessions, close oldest first, keeps the newest open',

@@ -37,9 +37,6 @@ const readInlinePadding = () => ({
   body: document.body.style.paddingInlineEnd,
 });
 
-/** Shared by the system flyouts so a newer session shows the Back button to the older one. */
-const HISTORY_KEY = Symbol('pushPaddingScenarios');
-
 /** Labels contain spaces, which are not valid in `id` / `aria-labelledby` references. */
 const slug = (label: string) => label.replace(/\s+/g, '-');
 
@@ -168,7 +165,6 @@ const SystemSlot: React.FC<SlotProps & { type: 'push' | 'overlay'; overlays: Ove
       {
         id: `pushPaddingSystemFlyout-${slug(label)}`,
         session: 'start',
-        historyKey: HISTORY_KEY,
         type,
         size: 's',
         resizable: true,
@@ -276,9 +272,9 @@ const SCENARIOS: Scenario[] = [
     resolution: { text: 'Fixed by', href: EUI_PUSH_PADDING_PR, linkText: 'elastic/eui#10063' },
   },
   {
-    title: 'Two system push sessions (multi-root), close newest first or Back',
+    title: 'Two system push sessions (multi-root), close newest first',
     steps:
-      'Open System push C, open System push D, then close D or use the flyout Back button, then close C. Expected: padding follows the active push flyout and ends at (none).',
+      'Open System push C, open System push D, then close D, then close C. Expected: padding follows the active push flyout and ends at (none).',
     status: 'passing',
   },
   {
