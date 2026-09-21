@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { v5 } from 'uuid';
+
 import type {
   ISavedObjectsImporter,
   SavedObjectsImportFailure,
@@ -138,8 +140,7 @@ describe('installKibanaSavedObjects', () => {
       attributes: {},
     });
 
-    const { getSpaceScopedAssetId } = await import('./install');
-    const spaceScopedId = getSpaceScopedAssetId(archiveId, spaceId);
+    const spaceScopedId = v5(`$${spaceId}:${archiveId}`, v5.DNS);
 
     // Initial import succeeds and returns the existing object as destinationId
     mockImporter.import.mockResolvedValueOnce(
@@ -370,8 +371,7 @@ describe('installKibanaSavedObjects', () => {
 
     // Compute the space-scoped id the same way createSavedObjectKibanaAsset does, so the
     // ambiguous error and resolve response use the real rewritten id.
-    const { getSpaceScopedAssetId } = await import('./install');
-    const spaceScopedId = getSpaceScopedAssetId(archiveId, spaceId);
+    const spaceScopedId = v5(`$${spaceId}:${archiveId}`, v5.DNS);
 
     const ambiguousError: SavedObjectsImportFailure = {
       type: archiveAsset.type,
@@ -420,8 +420,7 @@ describe('installKibanaSavedObjects', () => {
     const archiveId = 'dashboard-markdown-ref';
     const spaceId = 'my-space';
 
-    const { getSpaceScopedAssetId } = await import('./install');
-    const spaceScopedId = getSpaceScopedAssetId(archiveId, spaceId);
+    const spaceScopedId = v5(`$${spaceId}:${archiveId}`, v5.DNS);
 
     // Simulate an already-processed SavedObjectToBe as replaceInMarkdown would queue it:
     // id already rewritten to space-scoped UUID, originId = archive id.
@@ -476,8 +475,7 @@ describe('installKibanaSavedObjects', () => {
       attributes: {},
     });
 
-    const { getSpaceScopedAssetId } = await import('./install');
-    const spaceScopedId = getSpaceScopedAssetId(archiveId, spaceId);
+    const spaceScopedId = v5(`$${spaceId}:${archiveId}`, v5.DNS);
 
     // Initial import returns missing_references for the rewritten dashboard
     mockImporter.import.mockResolvedValueOnce(
