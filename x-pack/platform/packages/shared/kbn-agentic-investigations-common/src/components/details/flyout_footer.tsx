@@ -21,9 +21,8 @@ export interface ConversationDetailsFlyoutFooterProps {
   /** Supplied by the caller because flyout slots render outside a `KibanaContextProvider`. */
   onOpenChat: () => void;
   /**
-   * When provided, renders a dedicated "Open escalation" primary button in the footer and
-   * handles rendering the escalation modal. Supplied by the caller who has access to Kibana
-   * HTTP hooks unavailable in this package.
+   * When provided, the "Open an escalation" item in the actions menu opens the escalation modal.
+   * Supplied by the caller who has access to Kibana HTTP hooks unavailable in this package.
    */
   onOpenEscalation?: (props: EscalationModalRenderProps) => React.ReactNode;
 }
@@ -70,32 +69,15 @@ export const ConversationDetailsFlyoutFooter = ({
           </EuiButton>
         </EuiFlexItem>
 
-        {onOpenEscalation ? (
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              iconType="document"
-              onClick={() =>
-                setModalState({ type: 'openIncident', recordId: investigation.recordId })
-              }
-              size="s"
-              fill
-              color="primary"
-              data-test-subj="investigationFlyoutOpenEscalation"
-            >
-              {DETAILS_FLYOUT_LABELS.actions.openEscalation}
-            </EuiButton>
-          </EuiFlexItem>
-        ) : (
-          <EuiFlexItem grow={false}>
-            <BaseActions
-              investigation={investigation}
-              isFlyout={true}
-              onClickAction={onClickAction}
-              onClickRecommendedAction={openApproval}
-              data-test-subj="investigationFlyoutActions"
-            />
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem grow={false}>
+          <BaseActions
+            investigation={investigation}
+            isFlyout={true}
+            onClickAction={onClickAction}
+            onClickRecommendedAction={openApproval}
+            data-test-subj="investigationFlyoutActions"
+          />
+        </EuiFlexItem>
       </EuiFlexGroup>
 
       <InvestigationActionModals

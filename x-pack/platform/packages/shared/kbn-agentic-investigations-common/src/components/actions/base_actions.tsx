@@ -133,7 +133,7 @@ export const BaseActions = memo<BaseActionsProps>(
         {
           key: 'openIncident',
           icon: 'document',
-          name: ACTIONS_TRANSLATIONS.buttons.openIncident,
+          name: ACTIONS_TRANSLATIONS.buttons.openEscalation,
           onClick: () => onClickAction('openIncident', investigation.recordId),
         },
         {

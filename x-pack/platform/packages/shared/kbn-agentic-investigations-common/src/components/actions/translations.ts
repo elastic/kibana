@@ -19,8 +19,8 @@ export const ACTIONS_TRANSLATIONS = Object.freeze({
     openInChat: i18n.translate('xpack.alertzero.baseActions.openInChat', {
       defaultMessage: 'Open in chat',
     }),
-    openIncident: i18n.translate('xpack.alertzero.baseActions.openIncident', {
-      defaultMessage: 'Open an incident',
+    openEscalation: i18n.translate('xpack.alertzero.baseActions.openEscalation', {
+      defaultMessage: 'Open an escalation',
     }),
     attachToIncident: i18n.translate('xpack.alertzero.baseActions.attachToIncident', {
       defaultMessage: 'Attach to an incident',
