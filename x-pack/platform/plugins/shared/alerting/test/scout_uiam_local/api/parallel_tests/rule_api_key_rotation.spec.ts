@@ -99,7 +99,7 @@ apiTest.describe(
     );
 
     apiTest(
-      'rotating with an Elasticsearch API key drops the UIAM key rather than stranding it',
+      'rule execution reconciles missing UIAM API key tags',
       async ({ apiClient, esClient, requestAuth, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
         const headers = { ...COMMON_HEADERS, ...cookieHeader };
@@ -125,8 +125,46 @@ apiTest.describe(
         const after = await getRuleSavedObjectAttributes(esClient, ruleId);
         expect(after.uiamApiKey).toBeUndefined();
         expect(after.apiKey).not.toBe(before.apiKey);
+        expect(after.tags).toStrictEqual([]);
 
         await waitForSuccessfulEventLogEntry(apiClient, ruleId, headers);
+
+        const afterMissingKeyExecution = await getRuleSavedObjectAttributes(esClient, ruleId);
+        expect(afterMissingKeyExecution.tags).toStrictEqual(['Missing Elastic Cloud API Key']);
+
+        const updateWithLegacyTagResponse = await apiClient.put(`api/alerting/rule/${ruleId}`, {
+          headers: { ...COMMON_HEADERS, ...apiKeyHeader },
+          responseType: 'json',
+          body: {
+            name: 'uiam-rotate-with-es-key-rule',
+            tags: ['existing-tag', 'Missing Universal Api Key'],
+            schedule: { interval: '1h' },
+            params: ES_QUERY_RULE_PARAMS,
+            actions: [],
+          },
+        });
+        expect(updateWithLegacyTagResponse).toHaveStatusCode(200);
+
+        await waitForSuccessfulEventLogEntry(apiClient, ruleId, headers);
+
+        const afterLegacyTagExecution = await getRuleSavedObjectAttributes(esClient, ruleId);
+        expect(afterLegacyTagExecution.uiamApiKey).toBeUndefined();
+        expect(afterLegacyTagExecution.tags).toStrictEqual([
+          'existing-tag',
+          'Missing Elastic Cloud API Key',
+        ]);
+
+        const restoreUiamKeyResponse = await apiClient.post(
+          `api/alerting/rule/${ruleId}/_update_api_key`,
+          { headers }
+        );
+        expect(restoreUiamKeyResponse).toHaveStatusCode(204);
+
+        await waitForSuccessfulEventLogEntry(apiClient, ruleId, headers);
+
+        const afterRestoredKeyExecution = await getRuleSavedObjectAttributes(esClient, ruleId);
+        expect(typeof afterRestoredKeyExecution.uiamApiKey).toBe('string');
+        expect(afterRestoredKeyExecution.tags).toStrictEqual(['existing-tag']);
       }
     );
 
