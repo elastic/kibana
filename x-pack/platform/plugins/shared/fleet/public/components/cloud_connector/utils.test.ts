@@ -27,6 +27,8 @@ import {
   getAwsStackConsoleUrl,
   hasTemplateUrlParam,
   isStackArnInvalid,
+  isIamRoleArnInvalid,
+  INVALID_IAM_ROLE_ARN_MESSAGE,
 } from './utils';
 import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT } from './constants';
 import type { CloudConnectorCredentials } from './types';
@@ -1193,5 +1195,28 @@ describe('isStackArnInvalid', () => {
 
   it('ignores leading and trailing whitespace around a valid ARN', () => {
     expect(isStackArnInvalid(`  ${STACK_ARN}\n`)).toBe(false);
+  });
+});
+
+describe('isIamRoleArnInvalid', () => {
+  it('returns false for empty/undefined (an empty field is "unchanged", not "invalid")', () => {
+    expect(isIamRoleArnInvalid(undefined)).toBe(false);
+    expect(isIamRoleArnInvalid('')).toBe(false);
+    expect(isIamRoleArnInvalid('   ')).toBe(false);
+  });
+
+  it('returns false for a valid ARN (whitespace ignored)', () => {
+    expect(isIamRoleArnInvalid('  arn:aws:iam::123456789012:role/MyRole  ')).toBe(false);
+  });
+
+  it('returns true for any non-empty value that is not a valid IAM role ARN', () => {
+    expect(isIamRoleArnInvalid('not-an-arn')).toBe(true);
+    expect(isIamRoleArnInvalid('arn:aws:cloudformation:us-east-1:123456789012:stack/x/y')).toBe(
+      true
+    );
+  });
+
+  it('exports a human-readable error message', () => {
+    expect(INVALID_IAM_ROLE_ARN_MESSAGE).toMatch(/IAM role ARN/i);
   });
 });

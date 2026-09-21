@@ -20,6 +20,7 @@ import {
   getIacTemplateUrlFromVarGroupSelection,
   getAwsConsoleHostFromArn,
   isCloudFormationStackArn,
+  isIamRoleArn,
   parseAwsRegionFromArn,
 } from '../../../common/services/cloud_connectors';
 
@@ -652,6 +653,22 @@ export const INVALID_STACK_ARN_MESSAGE = i18n.translate(
 export const isStackArnInvalid = (stackArn: string | undefined): boolean => {
   const trimmed = stackArn?.trim() ?? '';
   return trimmed !== '' && !isCloudFormationStackArn(trimmed);
+};
+
+export const INVALID_IAM_ROLE_ARN_MESSAGE = i18n.translate(
+  'xpack.fleet.cloudConnector.aws.roleArnInvalid',
+  {
+    defaultMessage: 'Enter an IAM role ARN, for example arn:aws:iam::123456789012:role/MyRole',
+  }
+);
+
+/**
+ * True for a non-empty value that is not a valid IAM role ARN. Whitespace is ignored so a pasted
+ * value is judged as it will be saved. Matches the server-side connector API validation.
+ */
+export const isIamRoleArnInvalid = (roleArn: string | undefined): boolean => {
+  const trimmed = roleArn?.trim() ?? '';
+  return trimmed !== '' && !isIamRoleArn(trimmed);
 };
 
 /** Read-only link to the deployed stack; needs no render. */
