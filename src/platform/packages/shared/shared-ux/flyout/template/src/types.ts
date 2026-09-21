@@ -171,8 +171,8 @@ export interface FlyoutFooterProps {
 }
 
 /**
- * `children` represents the declarative zones rather than free-form flyout content. 
- * `flyoutMenuDisplayMode` is always set to `auto`. 
+ * `children` represents the declarative zones rather than free-form flyout content.
+ * `flyoutMenuDisplayMode` is always set to `auto`.
  * `ref` is omitted because the template does not forward it.
  */
 type TemplateOwnedFlyoutProps = 'children' | 'flyoutMenuDisplayMode' | 'ref';
