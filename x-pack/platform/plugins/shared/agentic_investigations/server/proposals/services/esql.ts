@@ -24,7 +24,7 @@ export interface ChartsWindow {
 }
 
 /** A superseded proposal is represented by its replacement; counting both double-counts a retry. */
-const LIVE: ESQLAstExpression = exp`supersededBy IS NULL`;
+const NOT_SUPERSEDED: ESQLAstExpression = exp`supersededBy IS NULL`;
 
 export type EventStream = 'opens' | 'closes' | 'expiries';
 
@@ -34,11 +34,11 @@ export type EventStream = 'opens' | 'closes' | 'expiries';
  * proposal that expired and was later decided is decremented once, by `closes`.
  */
 const EVENT_STREAMS: Record<EventStream, { field: string; where: ESQLAstExpression }> = {
-  opens: { field: 'createdAt', where: LIVE },
-  closes: { field: 'decidedAt', where: exp`${LIVE} AND decidedAt IS NOT NULL` },
+  opens: { field: 'createdAt', where: NOT_SUPERSEDED },
+  closes: { field: 'decidedAt', where: exp`${NOT_SUPERSEDED} AND decidedAt IS NOT NULL` },
   expiries: {
     field: 'expiresAt',
-    where: exp`${LIVE} AND decidedAt IS NULL AND expiresAt IS NOT NULL AND expiresAt <= NOW()`,
+    where: exp`${NOT_SUPERSEDED} AND decidedAt IS NULL AND expiresAt IS NOT NULL AND expiresAt <= NOW()`,
   },
 };
 
@@ -68,7 +68,7 @@ export const bucketedEventQuery = (
 /** Seeds the running sum: open at the window start, so no event stream covers it. */
 export const anchorQuery = ({ spaceId, windowStartIso }: ChartsWindow) =>
   esql`WHERE spaceId == ${{ spaceId }}
-      AND ${LIVE}
+      AND ${NOT_SUPERSEDED}
       AND createdAt < TO_DATETIME(${{ created: windowStartIso }})
       AND (decidedAt IS NULL OR decidedAt >= TO_DATETIME(${{ decided: windowStartIso }}))
       AND (expiresAt IS NULL OR expiresAt >= TO_DATETIME(${{ expires: windowStartIso }}))
@@ -84,7 +84,7 @@ export const anchorQuery = ({ spaceId, windowStartIso }: ChartsWindow) =>
  */
 export const currentOpenQuery = ({ spaceId }: ChartsWindow) =>
   esql`WHERE spaceId == ${{ spaceId }}
-      AND ${LIVE}
+      AND ${NOT_SUPERSEDED}
       AND decidedAt IS NULL
       AND (expiresAt IS NULL OR expiresAt > NOW())
     | STATS currentOpen = COUNT(*)`;
