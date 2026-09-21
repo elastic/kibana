@@ -112,7 +112,7 @@ describe('resolveEsqlForAuthoring', () => {
     });
   });
 
-  it('executes the generated query when generation returns no columns', async () => {
+  it('executes the generated query when generation omits columns', async () => {
     mockedGenerate.mockResolvedValue({
       query: 'FROM logs-* | STATS count = COUNT(*)',
     });
@@ -130,6 +130,32 @@ describe('resolveEsqlForAuthoring', () => {
       query: 'FROM logs-* | STATS count = COUNT(*)',
       columns: COLUMNS,
     });
+  });
+
+  it('does not re-execute when generation already returned an empty column list', async () => {
+    mockedGenerate.mockResolvedValue({
+      query: 'FROM logs-* | STATS count = COUNT(*)',
+      columns: [],
+    });
+
+    const result = await resolveEsqlForAuthoring({ ...params, providedQuery: '' });
+
+    expect(mockedExecuteEsql).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      query: 'FROM logs-* | STATS count = COUNT(*)',
+      columns: [],
+    });
+  });
+
+  it('keeps the generated query when the omitted-columns probe fails', async () => {
+    mockedGenerate.mockResolvedValue({
+      query: 'FROM logs-* | STATS count = COUNT(*)',
+    });
+    mockedExecuteEsql.mockRejectedValue(new Error('response too large'));
+
+    const result = await resolveEsqlForAuthoring({ ...params, providedQuery: '' });
+
+    expect(result).toEqual({ query: 'FROM logs-* | STATS count = COUNT(*)' });
   });
 
   it('returns the generation error when no usable query is produced', async () => {

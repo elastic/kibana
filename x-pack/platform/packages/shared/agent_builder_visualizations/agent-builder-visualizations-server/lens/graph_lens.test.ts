@@ -110,7 +110,7 @@ describe('createVisualizationGraph', () => {
 
     expect(mockedGenerateEsql).not.toHaveBeenCalled();
     expect(mockedExecuteEsql).toHaveBeenCalledWith(
-      expect.objectContaining({ query: esqlQuery, dropNullColumns: false })
+      expect.objectContaining({ query: esqlQuery, dropNullColumns: false, limit: 1 })
     );
     expect(finalState.esqlQuery).toBe(esqlQuery);
 

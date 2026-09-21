@@ -70,9 +70,10 @@ describe('createVegaGraph', () => {
       getDefaultModel: jest.fn().mockResolvedValue(scopedModel),
       selectModel: jest.fn().mockResolvedValue(scopedModel),
     } as unknown as ModelProvider;
-    mockedGenerateEsql.mockResolvedValue({ query: GENERATED_ESQL } as Awaited<
-      ReturnType<typeof generateEsql>
-    >);
+    mockedGenerateEsql.mockResolvedValue({
+      query: GENERATED_ESQL,
+      results: { columns: EXECUTED_COLUMNS, values: [] },
+    } as Awaited<ReturnType<typeof generateEsql>>);
     mockedExecuteEsql.mockResolvedValue({ columns: [], values: [] } as Awaited<
       ReturnType<typeof executeEsql>
     >);
@@ -255,7 +256,7 @@ describe('createVegaGraph', () => {
 
     expect(mockedGenerateEsql).not.toHaveBeenCalled();
     expect(mockedExecuteEsql).toHaveBeenCalledWith(
-      expect.objectContaining({ query: PROVIDED_ESQL, dropNullColumns: false })
+      expect.objectContaining({ query: PROVIDED_ESQL, dropNullColumns: false, limit: 1 })
     );
     const spec = JSON.parse(state.spec!);
     expect(spec.data.url.query).toBe(PROVIDED_ESQL);

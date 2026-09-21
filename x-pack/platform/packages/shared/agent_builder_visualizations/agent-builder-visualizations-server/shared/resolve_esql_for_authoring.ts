@@ -51,14 +51,18 @@ const executeSchemaParams = {
   limit: 1,
 } as const;
 
-/**
- * Resolve an ES|QL query and its result columns for visualization authoring.
- *
- * A provided query is executed first; if it fails (or none was given),
- * `generateVisualizationEsql` produces a replacement. Time-picker params
- * (`?_tstart`/`?_tend`) are bound with a default range inside execute/generate
- * so the query can run server-side; Kibana binds the live range at render time.
- */
+const executeForSchema = (
+  query: string,
+  esClient: IScopedClusterClient
+): ReturnType<typeof executeEsql> =>
+  executeEsql({
+    query,
+    params: buildTimeRangeParams(DEFAULT_VALIDATION_TIME_RANGE),
+    ...executeSchemaParams,
+    esClient: esClient.asCurrentUser,
+  });
+
+/** Resolve a runnable ES|QL query and its schema-probe columns for visualization authoring. */
 export const resolveEsqlForAuthoring = async ({
   providedQuery,
   nlQuery,
@@ -81,12 +85,7 @@ export const resolveEsqlForAuthoring = async ({
   if (query) {
     logger.debug('Validating provided ES|QL query for visualization');
     try {
-      ({ columns } = await executeEsql({
-        query,
-        params: buildTimeRangeParams(DEFAULT_VALIDATION_TIME_RANGE),
-        ...executeSchemaParams,
-        esClient: esClient.asCurrentUser,
-      }));
+      ({ columns } = await executeForSchema(query, esClient));
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.warn(
@@ -116,13 +115,15 @@ export const resolveEsqlForAuthoring = async ({
     query = generated.query;
     logger.debug(`Generated ES|QL query: ${query}`);
     columns = generated.columns;
-    if (!columns) {
-      ({ columns } = await executeEsql({
-        query,
-        params: buildTimeRangeParams(DEFAULT_VALIDATION_TIME_RANGE),
-        ...executeSchemaParams,
-        esClient: esClient.asCurrentUser,
-      }));
+    if (columns === undefined) {
+      try {
+        ({ columns } = await executeForSchema(query, esClient));
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        logger.warn(
+          `Generated ES|QL query executed without returning columns (${errorMessage}); authoring will infer fields from the query text`
+        );
+      }
     }
   }
 
