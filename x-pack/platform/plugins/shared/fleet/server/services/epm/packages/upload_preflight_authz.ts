@@ -213,7 +213,10 @@ export async function checkUploadPackageAssetPrivileges({
     }
 
     let hasMlRules = signals.hasMlSecurityRules;
-    if (installation) {
+    // Only probe existing rule SOs when the archive scan didn't already confirm ML presence.
+    // Process in bounded chunks and stop as soon as one ML rule (or any read error) is found —
+    // avoids materialising the full ref list for large packages like security_detection_engine.
+    if (installation && !hasMlRules) {
       const ruleIds = (refs ?? [])
         .filter((ref) => ref.type === KibanaSavedObjectType.securityRule)
         .map((ref) => ref.id);
@@ -221,14 +224,18 @@ export async function checkUploadPackageAssetPrivileges({
         const clientForSpace = usePrimaryRefs
           ? savedObjectsClient
           : appContextService.getInternalUserSOClientForSpaceId(space);
-        try {
-          const bulkResult = await clientForSpace.bulkGet<{ type?: string }>(
-            ruleIds.map((id) => ({ type: KibanaSavedObjectType.securityRule, id }))
-          );
-          for (const so of bulkResult.saved_objects) {
-            if (isSavedObjectErrorResult(so) || so.attributes?.type === 'machine_learning') {
-              hasMlRules = true;
-              break;
+        const CHUNK_SIZE = 100;
+        outer: try {
+          for (let i = 0; i < ruleIds.length; i += CHUNK_SIZE) {
+            const chunk = ruleIds.slice(i, i + CHUNK_SIZE);
+            const bulkResult = await clientForSpace.bulkGet<{ type?: string }>(
+              chunk.map((id) => ({ type: KibanaSavedObjectType.securityRule, id }))
+            );
+            for (const so of bulkResult.saved_objects) {
+              if (isSavedObjectErrorResult(so) || so.attributes?.type === 'machine_learning') {
+                hasMlRules = true;
+                break outer;
+              }
             }
           }
         } catch {
