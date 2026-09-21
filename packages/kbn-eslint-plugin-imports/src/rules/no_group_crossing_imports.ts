@@ -17,6 +17,7 @@ import { getSourcePath } from '../helpers/source';
 import { getRepoSourceClassifier } from '../helpers/repo_source_classifier';
 import { getImportResolver } from '../get_import_resolver';
 import { formatSuggestions } from '../helpers/report';
+import { isTypeOnlyImport } from '../helpers/ast';
 import { isDevOnlyPackage, isImportableFrom, mayImportDevOnlyPackage } from '../helpers/groups';
 
 const DEV_ONLY_SUGGESTIONS = [
@@ -43,7 +44,7 @@ export const NoGroupCrossingImportsRule: Rule.RuleModule = {
     const self = classifier.classify(sourcePath);
     const relativePath = sourcePath.replace(REPO_ROOT, '').replace(/^\//, '');
 
-    return visitAllImportStatements((req, { node }) => {
+    return visitAllImportStatements((req, { node, importer }) => {
       if (
         req === null ||
         // we can ignore imports using the ?raw (replacing legacy raw-loader), they will need to be resolved but can be managed on a case by case basis
@@ -59,7 +60,11 @@ export const NoGroupCrossingImportsRule: Rule.RuleModule = {
 
       const imported = classifier.classify(result.absolute);
 
-      if (isDevOnlyPackage(imported) && !mayImportDevOnlyPackage(self)) {
+      if (
+        isDevOnlyPackage(imported) &&
+        !mayImportDevOnlyPackage(self) &&
+        !isTypeOnlyImport(importer)
+      ) {
         context.report({
           node: node as Node,
           messageId: 'DEV_ONLY_IMPORT',

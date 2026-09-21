@@ -181,6 +181,14 @@ for (const [name, tester] of [tsTester, babelTester]) {
           { group: 'platform', visibility: 'shared', moduleType: 'tooling' },
           { group: 'platform', visibility: 'shared', devOnly: true }
         ),
+        {
+          filename: `${encode({ group: 'platform', visibility: 'shared' })}.ts`,
+          code: `import type { Foo } from '${encode({
+            group: 'platform',
+            visibility: 'shared',
+            devOnly: true,
+          })}'`,
+        },
       ],
 
       invalid: [
