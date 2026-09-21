@@ -76,9 +76,8 @@ export {
   type ApprovalAction,
   type AlwaysAllowOption,
 } from './src/components/modals/approval_modal/approval_content';
-export { type BlastRadiusItemProps } from './src/components/modals/approval_modal/blast_radius_item';
 export {
-  BlastRadiusSection,
-  type BlastRadiusContent,
-  type BlastRadiusSectionProps,
-} from './src/components/modals/approval_modal/blast_radius_section';
+  getProposalTone,
+  isProposalExpired,
+} from './src/components/modals/approval_modal/proposal_helpers';
+export type { ApprovalProposal } from './src/components/modals/approval_modal/types';

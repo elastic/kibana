@@ -12,4 +12,5 @@ export {
   type ApprovalAction,
   type AlwaysAllowOption,
 } from './approval_content';
-export { type BlastRadiusContent, type BlastRadiusSectionProps } from './blast_radius_section';
+export { getProposalTone, isProposalExpired } from './proposal_helpers';
+export type { ApprovalProposal } from './types';

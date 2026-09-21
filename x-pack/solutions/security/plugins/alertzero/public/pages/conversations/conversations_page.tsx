@@ -151,14 +151,23 @@ export const ConversationsPage: React.FC = () => {
   );
 
   const confirmApproval = useCallback(
-    (investigation: Investigation) => {
-      const proposal = proposalsById.get(investigation.id);
+    (proposal: ProposalItem) => {
       approve.mutate(
-        { id: investigation.id, body: { actionInput: proposal?.actionInput } },
+        { id: proposal.id, body: { actionInput: proposal.actionInput } },
         { onSuccess: closeApproval, onError: onDecisionError }
       );
     },
-    [approve, closeApproval, onDecisionError, proposalsById]
+    [approve, closeApproval, onDecisionError]
+  );
+
+  // Dismissing is a decision with a reason, so the approval modal hands off to the dismiss
+  // modal the ⋮ menu already opens rather than growing a second form of its own.
+  const dismissApproval = useCallback(
+    (proposal: ProposalItem) => {
+      closeApproval();
+      setModalState({ type: 'close', recordId: proposal.id });
+    },
+    [closeApproval]
   );
 
   const renderDismissModal = useCallback(
@@ -215,13 +224,10 @@ export const ConversationsPage: React.FC = () => {
     [conversations, modalState.recordId]
   );
 
-  const selectedRecommendedActionConversation = useMemo(
-    () =>
-      selectedIdForRecommendedAction
-        ? conversations.find((c) => c.id === selectedIdForRecommendedAction)
-        : undefined,
-    [conversations, selectedIdForRecommendedAction]
-  );
+  // Cards are keyed by proposal id, so the click already names the row the modal decides on.
+  const selectedProposal = selectedIdForRecommendedAction
+    ? proposalsById.get(selectedIdForRecommendedAction)
+    : undefined;
 
   // `listByWindow` sorts createdAt-ascending, which buries the proposals that matter;
   // the adapter's synthetic priorityScore is what restores an impact-first ordering.
@@ -273,10 +279,11 @@ export const ConversationsPage: React.FC = () => {
         action={modalState.type}
         recordId={modalState.recordId}
         initialAssignee={actionInvestigation?.assignee}
-        approvalInvestigation={selectedRecommendedActionConversation}
+        approvalProposal={selectedProposal}
         onCloseAction={closeModal}
         onCloseApproval={closeApproval}
         onConfirmApproval={confirmApproval}
+        onDismissApproval={dismissApproval}
         renderDismissModal={renderDismissModal}
       />
 

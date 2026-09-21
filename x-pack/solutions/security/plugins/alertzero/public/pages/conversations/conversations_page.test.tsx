@@ -287,7 +287,7 @@ describe('ConversationsPage decisions', () => {
     renderPage('/');
     openApproval();
 
-    fireEvent.click(approvalDialog().getByRole('button', { name: 'Revoke sessions' }));
+    fireEvent.click(approvalDialog().getByRole('button', { name: 'Approve' }));
 
     expect(approveMutate).toHaveBeenCalledWith(
       { id: 'prop-1', body: { actionInput: { user: 'cfo@corp' } } },
@@ -298,7 +298,7 @@ describe('ConversationsPage decisions', () => {
   it('keeps the approval modal open until the mutation succeeds', () => {
     renderPage('/');
     openApproval();
-    fireEvent.click(approvalDialog().getByRole('button', { name: 'Revoke sessions' }));
+    fireEvent.click(approvalDialog().getByRole('button', { name: 'Approve' }));
 
     // A refusal — expired deadline, someone decided first — must not close the modal as
     // though the decision had landed. onSuccess is the only thing that closes it.
@@ -308,6 +308,29 @@ describe('ConversationsPage decisions', () => {
     act(() => handlers.onSuccess());
 
     expect(screen.queryByRole('dialog', { name: 'Revoke sessions' })).not.toBeInTheDocument();
+  });
+
+  it('hands Dismiss off to the dismiss modal rather than deciding without a reason', () => {
+    renderPage('/');
+    openApproval();
+
+    fireEvent.click(approvalDialog().getByRole('button', { name: 'Dismiss' }));
+
+    // The approval modal closes and the reason form takes over for the same proposal: a
+    // dismissal is a decision with a reason, never a silent close.
+    expect(screen.queryByRole('dialog', { name: 'Revoke sessions' })).not.toBeInTheDocument();
+
+    const dialog = within(screen.getByRole('dialog', { name: 'Action modal' }));
+    fireEvent.change(screen.getByTestId('alertZeroDismissReasonSelect'), {
+      target: { value: 'low_value' },
+    });
+    fireEvent.change(dialog.getByRole('textbox'), { target: { value: 'Not worth chasing.' } });
+    fireEvent.click(dialog.getByRole('button', { name: 'Dismiss' }));
+
+    expect(dismissMutate).toHaveBeenCalledWith(
+      { id: 'prop-1', body: { dismissReason: 'low_value', rationale: 'Not worth chasing.' } },
+      expect.objectContaining({ onSuccess: expect.any(Function) })
+    );
   });
 
   it('dismisses with the reason the analyst chose rather than a default', () => {

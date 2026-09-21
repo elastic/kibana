@@ -11,12 +11,15 @@ import { EuiLoadingSpinner, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { isHttpFetchError } from '@kbn/core-http-browser';
-import { ApprovalContent } from '@kbn/agentic-investigations-common';
+import {
+  ApprovalContent,
+  getProposalTone,
+  isProposalExpired,
+} from '@kbn/agentic-investigations-common';
 import type { ApprovalAction } from '@kbn/agentic-investigations-common';
 import { isAwaitingDecision } from '../../../common';
 import { PROPOSAL_WITHOUT_ACTION_LABEL } from '../translations';
 import type { DismissReason, ProposalDecision } from '../../../common';
-import { toBlastRadiusItems } from '../attachments/to_blast_radius_items';
 import { useApproveProposal, useDismissProposal, useProposal } from '../hooks/use_proposals_api';
 import { ProposalDismissForm } from './proposal_dismiss_form';
 
@@ -192,24 +195,11 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
       liveProposal.action?.name ?? liveProposal.actionWorkflowId ?? PROPOSAL_WITHOUT_ACTION_LABEL;
 
     const isPending = isAwaitingDecision(liveProposal);
-    // `expired` is the computed flag for a deadline that has passed; `status:
-    // 'expired'` is the durable settlement, which the workflow can write before
-    // the deadline when no decision was reached. Without both, a proposal
-    // settled early shows neither actions nor an explanation.
-    const isExpired = liveProposal.expired || liveProposal.status === 'expired';
+    const isExpired = isProposalExpired(liveProposal);
     // The decision, not the status: a proposal stays `pending` while its
     // approval is still travelling through the gate workflow, and an expired one
     // is settled without anyone having decided anything.
     const decision = liveProposal.decision;
-
-    // The row's own impact first: a revision can override it, and it is the
-    // value the queue sorts by, so preferring the action's declared impact
-    // would let an approved revision display the impact it replaced. The
-    // action's value is only the default for a proposal that never set one.
-    // (`category` keeps the opposite precedence — a revision cannot change it.)
-    const impact = liveProposal.impact ?? liveProposal.action?.impact;
-    const tone =
-      impact === 'high' || impact === 'critical' ? ('danger' as const) : ('primary' as const);
 
     let primaryAction: ApprovalAction | undefined;
     let secondaryActions: ApprovalAction[] | undefined;
@@ -271,10 +261,9 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
         <ApprovalContent
           showHeader={false}
           title={actionName}
-          tone={tone}
+          tone={getProposalTone(liveProposal)}
           iconType="lock"
-          description={liveProposal.comment}
-          blastRadius={{ variant: 'list', items: toBlastRadiusItems(liveProposal) }}
+          comment={liveProposal.comment}
           primaryAction={primaryAction}
           secondaryActions={secondaryActions}
         >

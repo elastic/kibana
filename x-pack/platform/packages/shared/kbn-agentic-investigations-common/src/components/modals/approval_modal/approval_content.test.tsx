@@ -18,7 +18,7 @@ const baseProps: ApprovalContentProps = {
   title: 'Block IP 10.0.0.4',
   tone: 'danger',
   iconType: 'lock',
-  blastRadius: { variant: 'description', description: 'Isolate the compromised host.' },
+  comment: 'Isolate the compromised host.',
   primaryAction: {
     label: 'Approve',
     onClick: jest.fn(),
@@ -52,28 +52,45 @@ describe('ApprovalContent', () => {
     expect(screen.queryByText(/approval required/i)).not.toBeInTheDocument();
   });
 
-  it('renders the blast radius section label', () => {
-    renderContent();
-    expect(screen.getByText('Blast radius')).toBeInTheDocument();
-  });
-
-  it('renders the description variant prose', () => {
+  it('renders the comment', () => {
     renderContent();
     expect(screen.getByText('Isolate the compromised host.')).toBeInTheDocument();
   });
 
-  it('renders list variant items', () => {
-    renderContent({
-      blastRadius: {
-        variant: 'list',
-        items: [
-          { id: 'item-1', iconType: 'globe', text: 'host: 10.0.0.4' },
-          { id: 'item-2', iconType: 'tag', text: 'network' },
-        ],
-      },
+  it('renders emphasis in the comment as markdown rather than literal asterisks', () => {
+    renderContent({ comment: 'Revoking **all** sessions.' });
+    expect(screen.getByText('all').tagName).toBe('STRONG');
+  });
+
+  it('renders a GFM table in the comment, which is how a proposal lists what it touches', () => {
+    const { container } = renderContent({
+      comment: ['| Field | Value |', '| --- | --- |', '| host | fin-dc-01 |'].join('\n'),
     });
-    expect(screen.getByText('host: 10.0.0.4')).toBeInTheDocument();
-    expect(screen.getByText('network')).toBeInTheDocument();
+
+    expect(container.querySelector('table')).toBeInTheDocument();
+    expect(screen.getByText('fin-dc-01')).toBeInTheDocument();
+  });
+
+  it('omits the comment block entirely when no comment is supplied', () => {
+    renderContent({ comment: undefined });
+    expect(screen.queryByTestId('approvalContent-comment')).not.toBeInTheDocument();
+  });
+
+  it('renders the secondary action before the primary, so the committing decision sits last', () => {
+    renderContent();
+    const cancel = screen.getByTestId('content-cancel');
+    const confirm = screen.getByTestId('content-confirm');
+    // eslint-disable-next-line no-bitwise
+    expect(cancel.compareDocumentPosition(confirm) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('renders the icon a secondary action asks for', () => {
+    renderContent({
+      secondaryActions: [
+        { label: 'Dismiss', iconType: 'cross', onClick: jest.fn(), 'data-test-subj': 'content-x' },
+      ],
+    });
+    expect(screen.getByTestId('content-x').querySelector('[data-euiicon-type]')).toBeTruthy();
   });
 
   it('renders the actor row by default', () => {

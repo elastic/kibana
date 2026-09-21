@@ -8,32 +8,27 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
-import type { Investigation } from '../../../types';
 import { ApprovalModal, type ApprovalModalProps } from './approval_modal';
+import type { ApprovalProposal } from './types';
 
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <EuiProvider>{children}</EuiProvider>
 );
 
-const mockInvestigation: Investigation = {
-  id: 'inv-1',
-  title: 'test proposal',
-  template_id: 'investigation',
-  createdAt: '2024-01-01T00:00:00Z',
-  updatedAt: '2024-01-01T00:00:00Z',
-  watch_id: 'watch-1',
-  watch_execution_id: 'exec-1',
-  pendingProposalCount: 0,
-  events: [],
-  primaryActionLabel: 'Apply monitored exception',
-  summary: 'This action suppresses qualys-scan on the DMZ scan pool only.',
-  recommendedAction: 'investigate',
+const mockProposal: ApprovalProposal = {
+  comment: 'This action suppresses qualys-scan on the DMZ scan pool only.',
+  impact: 'low',
+  status: 'pending',
+  expired: false,
+  actionWorkflowId: 'system-alertzero-action-edit-rule',
+  action: { name: 'Apply monitored exception' },
 };
 
 const baseProps: ApprovalModalProps = {
-  selectedRecommendedActionConversation: mockInvestigation,
+  proposal: mockProposal,
   onConfirm: jest.fn(),
   onClose: jest.fn(),
+  onDismiss: jest.fn(),
   'data-test-subj': 'approvalModal',
 };
 
@@ -45,22 +40,29 @@ describe('ApprovalModal', () => {
     jest.clearAllMocks();
   });
 
-  it('renders the title and warningLabel', () => {
+  it('titles the modal with the action name and shows the warning label', () => {
     renderModal();
-    expect(screen.getAllByText('Apply monitored exception').length).toBeGreaterThan(0);
+    expect(screen.getByText('Apply monitored exception')).toBeInTheDocument();
     expect(screen.getByText(/approval required/i)).toBeInTheDocument();
   });
 
-  it('renders the description from the investigation summary', () => {
+  it('falls back to the workflow id when the action metadata carries no name', () => {
+    renderModal({ proposal: { ...mockProposal, action: undefined } });
+    expect(screen.getByText('system-alertzero-action-edit-rule')).toBeInTheDocument();
+  });
+
+  it('falls back to the no-action label when the proposal carries no action at all', () => {
+    renderModal({
+      proposal: { ...mockProposal, action: undefined, actionWorkflowId: undefined },
+    });
+    expect(screen.getByText('No automated action')).toBeInTheDocument();
+  });
+
+  it("renders the proposal's own comment as the body", () => {
     renderModal();
     expect(
       screen.getByText('This action suppresses qualys-scan on the DMZ scan pool only.')
     ).toBeInTheDocument();
-  });
-
-  it('renders the blast radius section label', () => {
-    renderModal();
-    expect(screen.getByText('Blast radius')).toBeInTheDocument();
   });
 
   it('always renders the actor row', () => {
@@ -75,13 +77,12 @@ describe('ApprovalModal', () => {
   });
 
   it('renders always-allow checkbox when alwaysAllow is supplied', () => {
-    const onChange = jest.fn();
     renderModal({
       alwaysAllow: {
         id: 'always-allow',
         label: <span>Always allow session revocation in this case</span>,
         checked: false,
-        onChange,
+        onChange: jest.fn(),
       },
     });
     expect(screen.getByRole('checkbox')).toBeInTheDocument();
@@ -91,39 +92,38 @@ describe('ApprovalModal', () => {
   it('calls onChange when always-allow checkbox is toggled', () => {
     const onChange = jest.fn();
     renderModal({
-      alwaysAllow: {
-        id: 'always-allow',
-        label: 'Always allow',
-        checked: false,
-        onChange,
-      },
+      alwaysAllow: { id: 'always-allow', label: 'Always allow', checked: false, onChange },
     });
     fireEvent.click(screen.getByRole('checkbox'));
     expect(onChange).toHaveBeenCalledWith(true);
   });
 
-  it('calls onConfirm when the confirm button is clicked', () => {
+  it('calls onConfirm when the approve button is clicked', () => {
     renderModal();
     fireEvent.click(screen.getByTestId('approvalModal-confirm'));
     expect(baseProps.onConfirm).toHaveBeenCalledTimes(1);
   });
 
-  it('calls onClose when the cancel button is clicked', () => {
-    renderModal();
-    fireEvent.click(screen.getByTestId('approvalModal-cancel'));
-    expect(baseProps.onClose).toHaveBeenCalledTimes(1);
+  it('disables approving a proposal whose deadline has passed', () => {
+    renderModal({ proposal: { ...mockProposal, expired: true } });
+    expect(screen.getByTestId('approvalModal-confirm')).toBeDisabled();
   });
 
-  it('renders the cancel label', () => {
-    renderModal();
-    expect(screen.getByTestId('approvalModal-cancel')).toHaveTextContent('Cancel');
+  it('disables approving a proposal the workflow settled as expired before its deadline', () => {
+    renderModal({ proposal: { ...mockProposal, expired: false, status: 'expired' } });
+    expect(screen.getByTestId('approvalModal-confirm')).toBeDisabled();
   });
 
-  it('renders the confirm button with the investigation primaryActionLabel as its label', () => {
+  it('routes Dismiss to onDismiss rather than silently closing', () => {
     renderModal();
-    expect(screen.getByTestId('approvalModal-confirm')).toHaveTextContent(
-      'Apply monitored exception'
-    );
+    fireEvent.click(screen.getByTestId('approvalModal-dismiss'));
+    expect(baseProps.onDismiss).toHaveBeenCalledTimes(1);
+    expect(baseProps.onClose).not.toHaveBeenCalled();
+  });
+
+  it('omits Dismiss for a host that cannot record one', () => {
+    renderModal({ onDismiss: undefined });
+    expect(screen.queryByTestId('approvalModal-dismiss')).not.toBeInTheDocument();
   });
 
   it('wires aria-labelledby to the rendered title', () => {

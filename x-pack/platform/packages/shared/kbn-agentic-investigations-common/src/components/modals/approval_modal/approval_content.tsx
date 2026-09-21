@@ -7,11 +7,15 @@
 
 import React, { memo } from 'react';
 import { css } from '@emotion/react';
-import { EuiButton, EuiButtonEmpty, useEuiTheme, type EuiButtonColor } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiMarkdownFormat,
+  useEuiTheme,
+  type EuiButtonColor,
+} from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import { ApprovalModalHeader } from './approval_modal_header';
-import { BlastRadiusSection } from './blast_radius_section';
-import type { BlastRadiusContent } from './blast_radius_section';
 import { ApprovalActorRow } from './approval_actor_row';
 import { AlwaysAllowCheckbox } from './always_allow_checkbox';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
@@ -37,11 +41,10 @@ export interface ApprovalAction {
 export interface ApprovalContentProps {
   title: string;
   tone: 'primary' | 'danger';
-  /** Used for the header avatar, the blast-radius default icon colour, and (fallback) the primary-action button icon. */
+  /** Used for the header avatar and, as a fallback, the primary-action button icon. */
   iconType: IconType;
-  blastRadius: BlastRadiusContent;
-  /** Optional prose rendered above the blast radius section. */
-  description?: React.ReactNode;
+  /** The proposal's own markdown, rendered as the body. */
+  comment?: string;
   /**
    * Show the avatar + warning-label + title header.
    * Set to `false` when a host (e.g. Agent Builder attachment framework) already draws its own header.
@@ -51,7 +54,7 @@ export interface ApprovalContentProps {
   titleId?: string;
   warningLabel?: string;
   /**
-   * Show the actor row (who is acting) below the blast radius.
+   * Show the actor row (who is acting) below the comment.
    * @default true
    */
   showActorRow?: boolean;
@@ -80,8 +83,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     title,
     tone,
     iconType,
-    blastRadius,
-    description,
+    comment,
     showHeader = true,
     titleId,
     warningLabel,
@@ -94,7 +96,6 @@ export const ApprovalContent = memo<ApprovalContentProps>(
   }) => {
     const { euiTheme } = useEuiTheme();
 
-    const iconColor = tone === 'danger' ? euiTheme.colors.danger : euiTheme.colors.primary;
     const defaultButtonColor: EuiButtonColor = tone === 'danger' ? 'danger' : 'primary';
 
     const hasFooter =
@@ -113,11 +114,25 @@ export const ApprovalContent = memo<ApprovalContentProps>(
           />
         )}
 
-        <div css={css({ padding: `${euiTheme.size.m} 0` })}>
-          {description !== undefined && (
-            <div css={css({ marginBottom: euiTheme.size.m })}>{description}</div>
+        {/* A comment is as long as the worker made it, so the body scrolls and the footer stays
+            reachable without the modal growing past the viewport. */}
+        <div
+          css={css({
+            padding: euiTheme.size.m,
+            maxBlockSize: '50vh',
+            overflowY: 'auto',
+          })}
+        >
+          {comment !== undefined && (
+            <div css={css({ marginBottom: euiTheme.size.m })}>
+              <EuiMarkdownFormat
+                textSize="s"
+                data-test-subj={dataTestSubj ? `${dataTestSubj}-comment` : undefined}
+              >
+                {comment}
+              </EuiMarkdownFormat>
+            </div>
           )}
-          <BlastRadiusSection content={blastRadius} defaultItemIconColor={iconColor} />
           {showActorRow && <ApprovalActorRow />}
         </div>
 
@@ -135,11 +150,26 @@ export const ApprovalContent = memo<ApprovalContentProps>(
             css={css({
               display: 'flex',
               gap: euiTheme.size.s,
-              justifyContent: 'flex-start',
+              justifyContent: 'flex-end',
               padding: euiTheme.size.m,
               borderTop: `1px solid ${euiTheme.colors.lightestShade}`,
             })}
           >
+            {/* Secondaries first so the decision that commits something sits rightmost. */}
+            {secondaryActions?.map((action, i) => (
+              <EuiButtonEmpty
+                key={i}
+                size="s"
+                color={action.color ?? 'text'}
+                iconType={action.iconType}
+                isDisabled={action.isDisabled}
+                isLoading={action.isLoading}
+                onClick={action.onClick}
+                data-test-subj={action['data-test-subj']}
+              >
+                {action.label}
+              </EuiButtonEmpty>
+            ))}
             {primaryAction && (
               <EuiButton
                 fill
@@ -154,19 +184,6 @@ export const ApprovalContent = memo<ApprovalContentProps>(
                 {primaryAction.label}
               </EuiButton>
             )}
-            {secondaryActions?.map((action, i) => (
-              <EuiButtonEmpty
-                key={i}
-                size="s"
-                color={action.color ?? 'text'}
-                isDisabled={action.isDisabled}
-                isLoading={action.isLoading}
-                onClick={action.onClick}
-                data-test-subj={action['data-test-subj']}
-              >
-                {action.label}
-              </EuiButtonEmpty>
-            ))}
           </div>
         )}
       </>
