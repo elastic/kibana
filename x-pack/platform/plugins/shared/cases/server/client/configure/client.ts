@@ -245,7 +245,7 @@ export async function get(
         return {
           ...caseConfigureWithoutConnector,
           connector,
-          extractObservables: caseConfigureWithoutConnector.extractObservables ?? true,
+          extractObservables: caseConfigureWithoutConnector.extractObservables,
           mappings: mappings != null ? mappings.mappings : [],
           version: configuration.version ?? '',
           error,
@@ -429,7 +429,7 @@ export async function update(
     const res = {
       ...merged,
       connector: patch.attributes.connector ?? configuration.attributes.connector,
-      extractObservables: merged.extractObservables ?? true,
+      extractObservables: merged.extractObservables,
       mappings,
       version: patch.version ?? '',
       error,
