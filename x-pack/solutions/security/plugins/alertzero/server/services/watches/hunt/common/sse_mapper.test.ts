@@ -211,10 +211,9 @@ describe('buildSseData', () => {
       },
     ]);
 
-    const threatIndicator = entry.data.security_knowledge_indicators.find(
-      (i) => i.type === 'threat'
-    );
-    expect(threatIndicator?.value).toBe('tr-aws-iam-assumerole-2026-07-28');
+    // `report_id` is its own top-level field (asserted separately below);
+    // it's no longer duplicated into `security_knowledge_indicators`.
+    expect(entry.data.report_id).toBe('tr-aws-iam-assumerole-2026-07-28');
 
     const iocIndicator = entry.data.security_knowledge_indicators.find((i) => i.type === 'ioc');
     expect(iocIndicator?.ioc).toEqual({ type: 'hash', value: '9f2b1e7c4a6d8e0f1b3c5d7e9f0a1b2c' });
