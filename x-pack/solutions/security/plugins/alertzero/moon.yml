@@ -51,6 +51,8 @@ dependsOn:
   - '@kbn/core-http-server'
   - '@kbn/charts-theme'
   - '@kbn/i18n-react'
+  - '@kbn/app-menu'
+  - '@kbn/search-inference-endpoints'
 tags:
   - plugin
   - prod

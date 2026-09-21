@@ -11,7 +11,27 @@ import {
   TimelineEventType,
   isAttachmentEvent,
   isBuiltInConversationEventType,
+  isExecutionTerminalEvent,
 } from './timeline_events';
+
+describe('isExecutionTerminalEvent', () => {
+  it.each([
+    TimelineEventType.executionTerminated,
+    TimelineEventType.executionFailed,
+    TimelineEventType.executionAborted,
+  ])('is true for %s', (type) => {
+    expect(isExecutionTerminalEvent({ type })).toBe(true);
+  });
+
+  it.each([
+    TimelineEventType.executionStarted,
+    TimelineEventType.executionStep,
+    TimelineEventType.userMessage,
+    TimelineEventType.attachmentAdded,
+  ])('is false for %s', (type) => {
+    expect(isExecutionTerminalEvent({ type })).toBe(false);
+  });
+});
 
 describe('attachment timeline events', () => {
   const actor = { type: EventActorType.system, id: 'system' };
