@@ -65,6 +65,7 @@ describe('resolveClassicRules', () => {
         updated_at: '2026-06-01T00:00:00.000Z',
       },
     ]);
+    expect(result[0]).not.toHaveProperty('kind');
   });
 
   it('propagates errors when the classic find API fails', async () => {

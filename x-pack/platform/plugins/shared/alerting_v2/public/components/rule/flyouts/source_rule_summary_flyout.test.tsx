@@ -41,14 +41,6 @@ jest.mock('../rule_details_table', () => ({
   ),
 }));
 
-jest.mock('../../action_policy/details_flyout/take_action_button', () => ({
-  TakeActionButton: ({ onClick }: { onClick: () => void }) => (
-    <button data-test-subj="mockTakeActionButton" onClick={onClick}>
-      Take action
-    </button>
-  ),
-}));
-
 const makeRule = (overrides: Partial<RuleResponse> = {}): RuleResponse =>
   ({
     id: 'rule-1',
@@ -134,7 +126,7 @@ describe('SourceRuleSummaryFlyout', () => {
   it('renders the Take action button and View details menu item', () => {
     renderFlyout();
 
-    fireEvent.click(screen.getByTestId('mockTakeActionButton'));
+    fireEvent.click(screen.getByTestId('sourceRuleSummaryFlyoutTakeActionButton'));
 
     const menuItem = screen.getByTestId('sourceRuleSummaryFlyoutViewDetailsAction');
     expect(menuItem).toHaveAttribute(
@@ -146,7 +138,7 @@ describe('SourceRuleSummaryFlyout', () => {
   it('does not render Take action button when href is null', () => {
     renderFlyout({ ruleDetailsHref: null });
 
-    expect(screen.queryByTestId('mockTakeActionButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('sourceRuleSummaryFlyoutTakeActionButton')).not.toBeInTheDocument();
   });
 
   it('calls onClose when the close icon is clicked', () => {

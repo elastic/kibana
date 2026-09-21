@@ -33,7 +33,7 @@ import { TagBadges } from './actions/tags';
 import { AlertEpisodeSeverityBadge } from './severity/episode_severity_badge';
 import type { EpisodeSeverity } from './severity/severity_utils';
 import { EMPTY_VALUE } from '../constants';
-import { isSourceEpisode, type AlertEpisode } from '../queries/episodes_query';
+import { isNativeV2Rule, isSourceEpisode, type AlertEpisode } from '../queries/episodes_query';
 import * as i18n from './translations';
 
 type Rule = FindRulesResponse['items'][number];
@@ -129,8 +129,8 @@ export interface EpisodeRuleCellProps extends CellRendererProps {
   rulesCache: Record<string, Rule>;
   isLoadingRules: boolean;
   rowHeight: number;
-  /** Builds the href of the rule details page for a rule id. */
-  getRuleDetailsHref: (ruleId: string, isSourceRule?: boolean) => string;
+  /** Builds the href of the rule details page for a rule id. Omit when there is no details route. */
+  getRuleDetailsHref: (ruleId: string, isSourceRule?: boolean) => string | undefined;
   /**
    * Called when the rule name is clicked, for hosts that show the rule somewhere on the page
    * instead of navigating to it. Modified and non-left clicks still follow the link.
@@ -255,9 +255,14 @@ export const EpisodeRuleCell = ({
   const groupingFields = rule.grouping?.fields ?? [];
   const showQuery = rowHeight !== ROWS_HEIGHT_OPTIONS.single;
   const episode = row.flattened as unknown as AlertEpisode;
-  const sourceRuleInfo = isSourceEpisode(episode) ? { category: episode.rule_category } : undefined;
+  // `source_id` means the row came from a source fetch, not that the rule is classic. Mixed
+  // rows (classic alert, native v2 rule) keep the v2 href and flyout.
+  const sourceRuleInfo =
+    isSourceEpisode(episode) && !isNativeV2Rule(rule)
+      ? { category: episode.rule_category }
+      : undefined;
   // The href stays on the link either way, so opening the rule page in a new tab keeps working.
-  const detailsHref = getRuleDetailsHref(ruleId, !!sourceRuleInfo);
+  const detailsHref = getRuleDetailsHref(ruleId, !!sourceRuleInfo) || undefined;
   const nameLinkProps = onRuleNameClick
     ? getRouterLinkProps({
         href: detailsHref,
@@ -267,6 +272,7 @@ export const EpisodeRuleCell = ({
 
   return (
     <span data-test-subj="episodeRuleCell">
+      {/* eslint-disable-next-line @elastic/eui/require-href-for-link -- source rules may have no details route */}
       <EuiLink {...nameLinkProps} css={nameCss} data-test-subj="episodeRuleCellNameLink">
         {rule.metadata.name}
       </EuiLink>

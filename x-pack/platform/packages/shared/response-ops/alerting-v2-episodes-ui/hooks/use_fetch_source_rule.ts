@@ -14,6 +14,8 @@ import { queryKeys } from '../query_keys';
 export interface UseFetchSourceRuleOptions {
   ruleId: string | undefined;
   http: HttpStart;
+  /** Cached rule from the episodes table, shown while the source fetch refreshes. */
+  initialRule?: RuleResponse;
 }
 
 export interface UseFetchSourceRuleResult {
@@ -26,6 +28,7 @@ export interface UseFetchSourceRuleResult {
 export const useFetchSourceRule = ({
   ruleId,
   http,
+  initialRule,
 }: UseFetchSourceRuleOptions): UseFetchSourceRuleResult => {
   const dataSource = useAdditionalEpisodesDataSource();
   const hasResolver = Boolean(dataSource?.resolveRules);
@@ -37,6 +40,9 @@ export const useFetchSourceRule = ({
       return rules.length > 0 ? rules[0] : null;
     },
     enabled: hasResolver && Boolean(ruleId),
+    initialData: initialRule,
+    // Treat the table cache as immediately stale so the flyout can refresh from the source.
+    initialDataUpdatedAt: initialRule ? 0 : undefined,
     retry: false,
     refetchOnWindowFocus: false,
     staleTime: 5 * 60_000,

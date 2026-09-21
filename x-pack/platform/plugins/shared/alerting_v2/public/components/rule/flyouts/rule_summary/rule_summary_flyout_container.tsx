@@ -27,6 +27,7 @@ import { SourceRuleSummaryFlyout } from '../source_rule_summary_flyout';
 interface Props {
   ruleId: string;
   sourceRuleInfo?: { category?: string };
+  cachedRule?: RuleApiResponse;
   onClose: () => void;
   onEdit: (rule: RuleApiResponse) => void;
   onClone: (rule: RuleApiResponse) => void;
@@ -35,6 +36,7 @@ interface Props {
 export const RuleSummaryFlyoutContainer = ({
   ruleId,
   sourceRuleInfo,
+  cachedRule,
   onClose,
   onEdit,
   onClone,
@@ -60,10 +62,11 @@ export const RuleSummaryFlyoutContainer = ({
   } = useFetchSourceRule({
     ruleId: isSourceRule ? ruleId : undefined,
     http,
+    initialRule: isSourceRule ? cachedRule : undefined,
   });
 
   if ((!isSourceRule && isLoading) || (isSourceRule && isLoadingSourceRule)) {
-    return <LoadingFlyout onClose={onClose} />;
+    return <LoadingFlyout type="overlay" onClose={onClose} />;
   }
 
   if (isSourceRule && sourceRule) {
@@ -80,6 +83,7 @@ export const RuleSummaryFlyoutContainer = ({
   if (isSourceRule || isSourceRuleError || isError || !rule) {
     return (
       <EntityNotFoundFlyout
+        type="overlay"
         title={i18n.translate('xpack.alertingV2.rule.summaryFlyout.notFoundTitle', {
           defaultMessage: 'Rule not found',
         })}

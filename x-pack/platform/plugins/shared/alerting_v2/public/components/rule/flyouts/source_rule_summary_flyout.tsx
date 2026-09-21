@@ -8,6 +8,7 @@
 import React, { useCallback, useState } from 'react';
 import {
   EuiBadge,
+  EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiContextMenuItem,
@@ -34,7 +35,6 @@ import {
   getTagsOverflowLimits,
 } from '@kbn/alerting-v2-episodes-ui/components/actions/tags_overflow_badge_row';
 import { EMPTY_VALUE } from '../../../utils/rule_display';
-import { TakeActionButton } from '../../action_policy/details_flyout/take_action_button';
 import { RuleDetailsTable } from '../rule_details_table';
 
 const FLYOUT_TITLE_ID = 'sourceRuleSummaryFlyoutTitle';
@@ -309,7 +309,20 @@ export const SourceRuleSummaryFlyout = ({
                     'xpack.alertingV2.sourceRuleSummaryFlyout.takeActionAriaLabel',
                     { defaultMessage: 'Rule actions' }
                   )}
-                  button={<TakeActionButton onClick={toggleActions} />}
+                  button={
+                    <EuiButton
+                      fill
+                      iconType={isActionsOpen ? 'chevronSingleUp' : 'chevronSingleDown'}
+                      iconSide="right"
+                      onClick={toggleActions}
+                      data-test-subj="sourceRuleSummaryFlyoutTakeActionButton"
+                    >
+                      <FormattedMessage
+                        id="xpack.alertingV2.sourceRuleSummaryFlyout.takeAction"
+                        defaultMessage="Take action"
+                      />
+                    </EuiButton>
+                  }
                 >
                   <EuiContextMenuPanel
                     items={[

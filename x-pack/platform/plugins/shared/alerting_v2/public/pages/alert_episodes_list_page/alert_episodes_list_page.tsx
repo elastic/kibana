@@ -406,10 +406,10 @@ const AlertEpisodesListPageContent = () => {
   );
 
   const getRuleDetailsHref = useCallback(
-    (ruleId: string, isSourceRule?: boolean) => {
+    (ruleId: string, isSourceRule?: boolean): string | undefined => {
       if (isSourceRule) {
         const sourceHref = additionalDataSource?.getRuleDetailsHref?.(ruleId);
-        return sourceHref ? services.http.basePath.prepend(sourceHref) : '';
+        return sourceHref ? services.http.basePath.prepend(sourceHref) : undefined;
       }
       return rulesLocators.getRedirectUrl({ ruleId });
     },
@@ -437,7 +437,7 @@ const AlertEpisodesListPageContent = () => {
           groupHash={hit.flattened.group_hash as string | undefined}
           onClose={closeFlyout}
           actions={episodeActions}
-          getRuleDetailsHref={getRuleDetailsHref}
+          getRuleDetailsHref={(ruleId) => getRuleDetailsHref(ruleId) ?? ''}
           getEpisodeDetailsHref={getEpisodeDetailsHref}
           services={{
             data: services.data,
@@ -687,6 +687,7 @@ const AlertEpisodesListPageContent = () => {
         <RuleSummaryFlyoutContainer
           ruleId={ruleIdToView}
           sourceRuleInfo={sourceRuleInfoToView}
+          cachedRule={rulesCache[ruleIdToView]}
           onClose={closeRuleFlyout}
           onEdit={(rule) => {
             setRuleIdToView(null);

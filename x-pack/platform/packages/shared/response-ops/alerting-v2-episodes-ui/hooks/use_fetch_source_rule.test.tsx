@@ -115,4 +115,59 @@ describe('useFetchSourceRule', () => {
 
     expect(result.current.ruleDetailsHref).toBeNull();
   });
+
+  it('uses initialRule immediately and still refreshes from the data source', async () => {
+    const http = createHttp();
+    const initialRule = { id: 'r1', metadata: { name: 'Cached Rule' } } as unknown as RuleResponse;
+    const fetchedRule = { id: 'r1', metadata: { name: 'Fetched Rule' } } as unknown as RuleResponse;
+    const source = createTestEpisodeSource({
+      resolveRules: jest.fn().mockResolvedValue([fetchedRule]),
+    });
+    const { Wrapper } = createWrapper(source);
+
+    const { result } = renderHook(() => useFetchSourceRule({ ruleId: 'r1', http, initialRule }), {
+      wrapper: Wrapper,
+    });
+
+    expect(result.current.rule).toEqual(initialRule);
+
+    await waitFor(() => expect(result.current.rule).toEqual(fetchedRule));
+    expect(source.resolveRules).toHaveBeenCalledWith({
+      services: { http },
+      ids: ['r1'],
+    });
+  });
+
+  it('does not reuse a cached rule when the data source id changes', async () => {
+    const http = createHttp();
+    const ruleA = { id: 'r1', metadata: { name: 'Source A' } } as unknown as RuleResponse;
+    const ruleB = { id: 'r1', metadata: { name: 'Source B' } } as unknown as RuleResponse;
+    const sourceA = createTestEpisodeSource({
+      id: 'source-a',
+      resolveRules: jest.fn().mockResolvedValue([ruleA]),
+    });
+    const sourceB = createTestEpisodeSource({
+      id: 'source-b',
+      resolveRules: jest.fn().mockResolvedValue([ruleB]),
+    });
+    const queryClient = createTestQueryClient();
+    let dataSource = sourceA;
+    const Wrapper = ({ children }: PropsWithChildren) => (
+      <QueryClientProvider client={queryClient}>
+        <EpisodeDataSourceProvider dataSource={dataSource}>{children}</EpisodeDataSourceProvider>
+      </QueryClientProvider>
+    );
+
+    const { result, rerender } = renderHook(() => useFetchSourceRule({ ruleId: 'r1', http }), {
+      wrapper: Wrapper,
+    });
+
+    await waitFor(() => expect(result.current.rule).toEqual(ruleA));
+
+    dataSource = sourceB;
+    rerender();
+
+    await waitFor(() => expect(result.current.rule).toEqual(ruleB));
+    expect(sourceB.resolveRules).toHaveBeenCalled();
+  });
 });

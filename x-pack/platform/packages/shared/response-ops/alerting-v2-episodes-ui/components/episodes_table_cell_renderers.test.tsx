@@ -538,6 +538,59 @@ describe('EpisodeRuleCell', () => {
     expect(mockGetRuleDetailsHref).toHaveBeenCalledWith('r1', false);
   });
 
+  it('treats a source episode whose cached rule has kind as a native v2 rule', () => {
+    const mockGetRuleDetailsHref = jest.fn().mockReturnValue('/app/alerting/rules/v2-rule-id');
+    const mockOnRuleNameClick = jest.fn();
+    const v2Rule = { ...makeRule('V2 Rule'), kind: 'alert' };
+    const row = makeRow({
+      'rule.id': 'v2-rule-id',
+      source_id: 'classic-alerts',
+      rule_category: 'Custom query',
+    });
+    render(
+      <EpisodeRuleCell
+        {...ruleCellProps}
+        getRuleDetailsHref={mockGetRuleDetailsHref}
+        row={row}
+        rulesCache={{ 'v2-rule-id': v2Rule }}
+        isLoadingRules={false}
+        rowHeight={1}
+        onRuleNameClick={mockOnRuleNameClick}
+      />
+    );
+
+    const link = screen.getByTestId('episodeRuleCellNameLink');
+    expect(mockGetRuleDetailsHref).toHaveBeenCalledWith('v2-rule-id', false);
+    expect(link).toHaveAttribute('href', '/app/alerting/rules/v2-rule-id');
+    fireEvent.click(link);
+    expect(mockOnRuleNameClick).toHaveBeenCalledWith('v2-rule-id', undefined);
+  });
+
+  it('omits href when getRuleDetailsHref returns no details route', () => {
+    const mockOnRuleNameClick = jest.fn();
+    const row = makeRow({
+      'rule.id': 'v1-rule-id',
+      source_id: 'classic-alerts',
+      rule_category: 'Test',
+    });
+    render(
+      <EpisodeRuleCell
+        {...ruleCellProps}
+        getRuleDetailsHref={() => undefined}
+        row={row}
+        rulesCache={{ 'v1-rule-id': makeRule('Classic Rule') }}
+        isLoadingRules={false}
+        rowHeight={1}
+        onRuleNameClick={mockOnRuleNameClick}
+      />
+    );
+
+    const link = screen.getByTestId('episodeRuleCellNameLink');
+    expect(link).not.toHaveAttribute('href');
+    fireEvent.click(link);
+    expect(mockOnRuleNameClick).toHaveBeenCalledWith('v1-rule-id', { category: 'Test' });
+  });
+
   it('calls onRuleNameClick with sourceRuleInfo for a source episode', () => {
     const mockOnRuleNameClick = jest.fn();
     const row = makeRow({

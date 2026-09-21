@@ -56,11 +56,15 @@ jest.mock('./rule_summary_flyout', () => ({
 }));
 
 jest.mock('../../../loading_flyout', () => ({
-  LoadingFlyout: () => <div data-test-subj="mockLoadingFlyout" />,
+  LoadingFlyout: ({ type }: { type?: string }) => (
+    <div data-test-subj="mockLoadingFlyout" data-type={type} />
+  ),
 }));
 
 jest.mock('../../../entity_not_found_flyout', () => ({
-  EntityNotFoundFlyout: () => <div data-test-subj="mockEntityNotFoundFlyout" />,
+  EntityNotFoundFlyout: ({ type }: { type?: string }) => (
+    <div data-test-subj="mockEntityNotFoundFlyout" data-type={type} />
+  ),
 }));
 
 jest.mock('../source_rule_summary_flyout', () => ({
@@ -125,6 +129,7 @@ describe('RuleSummaryFlyoutContainer', () => {
       renderContainer();
 
       expect(screen.getByTestId('mockLoadingFlyout')).toBeInTheDocument();
+      expect(screen.getByTestId('mockLoadingFlyout')).toHaveAttribute('data-type', 'overlay');
     });
 
     it('renders the fetched rule', () => {
@@ -155,6 +160,10 @@ describe('RuleSummaryFlyoutContainer', () => {
       renderContainer();
 
       expect(screen.getByTestId('mockEntityNotFoundFlyout')).toBeInTheDocument();
+      expect(screen.getByTestId('mockEntityNotFoundFlyout')).toHaveAttribute(
+        'data-type',
+        'overlay'
+      );
       expect(screen.queryByTestId('mockRuleSummaryFlyout')).not.toBeInTheDocument();
     });
 
@@ -197,6 +206,7 @@ describe('RuleSummaryFlyoutContainer', () => {
       renderContainer({ sourceRuleInfo: {} });
 
       expect(screen.getByTestId('mockLoadingFlyout')).toBeInTheDocument();
+      expect(screen.getByTestId('mockLoadingFlyout')).toHaveAttribute('data-type', 'overlay');
     });
 
     it('renders entity not found when the source cannot resolve the rule', () => {
@@ -206,6 +216,30 @@ describe('RuleSummaryFlyoutContainer', () => {
       renderContainer({ sourceRuleInfo: {} });
 
       expect(screen.getByTestId('mockEntityNotFoundFlyout')).toBeInTheDocument();
+      expect(screen.getByTestId('mockEntityNotFoundFlyout')).toHaveAttribute(
+        'data-type',
+        'overlay'
+      );
+    });
+
+    it('forwards cachedRule as initialRule to the source fetch', () => {
+      const cachedRule = makeRule('Cached classic');
+      mockUseFetchRule.mockReturnValue(mockFetchRuleResult({}));
+      mockUseFetchSourceRule.mockReturnValue({
+        rule: cachedRule as unknown as RuleResponse,
+        ruleDetailsHref: null,
+        isLoading: false,
+        isError: false,
+      });
+
+      renderContainer({ sourceRuleInfo: {}, cachedRule });
+
+      expect(mockUseFetchSourceRule).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ruleId: 'rule-1',
+          initialRule: cachedRule,
+        })
+      );
     });
   });
 });

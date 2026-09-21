@@ -66,6 +66,12 @@ export interface AlertEpisode extends BaseAlertEpisode {
 /** Whether the episode originated from an `EpisodeDataSource` (e.g. classic alerts). */
 export const isSourceEpisode = (episode: AlertEpisode): boolean => episode.source_id != null;
 
+/**
+ * Native v2 rules always include `kind`. Classic adapters omit it so a source-stamped
+ * episode whose rule was loaded from the v2 API can still take the v2 flyout path.
+ */
+export const isNativeV2Rule = (rule: { kind?: unknown }): boolean => rule.kind != null;
+
 /** V2 episodes leave `supports_actions` unset; classic rows set it to `false`. */
 export const episodeSupportsActions = (episode: AlertEpisode): boolean =>
   episode.supports_actions !== false;

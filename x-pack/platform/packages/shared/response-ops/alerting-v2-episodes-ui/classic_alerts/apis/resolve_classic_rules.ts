@@ -48,6 +48,11 @@ const extractGroupingFields = (params: Record<string, unknown> | undefined): str
   );
 };
 
+/**
+ * Maps classic `_find` fields onto the `RuleResponse` shape the rules cache expects.
+ * Intentionally omits `kind` (and other v2-only fields): native v2 rules always have `kind`,
+ * so the episodes table can tell a cached v2 rule from a classic-adapted one.
+ */
 const adaptClassicRule = (rule: ClassicRule): RuleResponse => {
   const groupingFields = extractGroupingFields(rule.params);
   return {
