@@ -70,33 +70,27 @@ Read the surrounding `describe` block and mirror its style for the new test. Exi
 
 - [ ] **Step 2: Write the failing test**
 
-Add to `common/domain/euid/field_evaluations.test.ts`, inside the same `describe` block as the existing `sourceMatchesAny` tests. Adapt the surrounding block's helper calls — the assertion below states the required behaviour; match the file's existing invocation style for building the evaluation input:
+Add to `common/domain/euid/field_evaluations.test.ts`, inside the existing `describe('applyFieldEvaluations', ...)` block (starts line 68), directly after the `it('should map okta and entityanalytics_okta to okta', ...)` test.
+
+That block already defines `userEvaluations` at its top (line 70) — reuse it; do not redefine it. The signature is `applyFieldEvaluations(doc, evaluations)` and the doc is **nested**, not flattened:
 
 ```ts
-it('maps a workday-sourced document to the workday namespace', () => {
-  const result = applyFieldEvaluations('user', {
-    'event.module': 'workday',
-    'event.kind': 'asset',
-    'user.email': 'jdoe@example.com',
-    'user.id': '007066',
-    'user.name': 'jdoe',
+  it('should map workday to the workday namespace', () => {
+    expect(applyFieldEvaluations({ event: { module: 'workday' } }, userEvaluations)).toEqual({
+      'entity.namespace': 'workday',
+    });
   });
 
-  expect(result['entity.namespace']).toBe('workday');
-});
-
-it('maps a workday document identified only by data_stream.dataset', () => {
-  const result = applyFieldEvaluations('user', {
-    'data_stream.dataset': 'workday.user',
-    'event.kind': 'asset',
-    'user.email': 'jdoe@example.com',
+  it('should map a workday document identified only by data_stream.dataset', () => {
+    expect(
+      applyFieldEvaluations({ data_stream: { dataset: 'workday.user' } }, userEvaluations)
+    ).toEqual({
+      'entity.namespace': 'workday',
+    });
   });
-
-  expect(result['entity.namespace']).toBe('workday');
-});
 ```
 
-If `applyFieldEvaluations` is not the symbol the neighbouring tests use, use whatever they use — the point is: a workday-sourced user document must resolve `entity.namespace` to `'workday'`, not `'unknown'`.
+The second test covers the real Workday document shape: the integration sets `event.module: workday` via `base-fields.yml`, but the `data_stream.dataset` first-chunk path is the fallback the evaluation also supports, and the ES|QL EUID helper relies on it.
 
 - [ ] **Step 3: Run the test to verify it fails**
 
