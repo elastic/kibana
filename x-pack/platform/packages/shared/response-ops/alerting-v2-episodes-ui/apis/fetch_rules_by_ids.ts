@@ -35,13 +35,13 @@ export const fetchRulesByIds = async ({
     return [];
   }
 
-  const requestBody: FindRulesRequest = {
+  const queryInput: FindRulesRequest = {
     filter: buildRuleIdsFilter(idsToFetch),
     per_page: ALERT_EPISODES_LIST_PAGE_SIZE,
     page: 1,
   };
   const response = await http.get<FindRulesResponse>(ALERTING_V2_RULE_API_PATH, {
-    query: requestBody,
+    query: queryInput,
   });
 
   return response.items;
