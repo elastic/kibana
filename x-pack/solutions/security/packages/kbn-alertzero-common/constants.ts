@@ -34,12 +34,6 @@ export const buildWorkerUrl = (workerId: string) =>
 export const buildSkillUrl = (skillId: string) =>
   `${ALERTZERO_SKILLS_URL}/${encodeURIComponent(skillId)}`;
 
-export const ALERTZERO_INVESTIGATIONS_URL = `${ALERTZERO_INTERNAL_URL}/investigations` as const;
-export const ALERTZERO_INVESTIGATION_URL_TEMPLATE = `${ALERTZERO_INVESTIGATIONS_URL}/{id}` as const;
-
-export const buildInvestigationUrl = (id: string) =>
-  `${ALERTZERO_INVESTIGATIONS_URL}/${encodeURIComponent(id)}`;
-
 /** Proposals grouped by category — AlertZero landing page. */
 export const ALERTZERO_PROPOSALS_URL = `${ALERTZERO_INTERNAL_URL}/proposals` as const;
 
@@ -248,7 +242,7 @@ export const ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID = 'alertzero_agentic' as con
 
 export const TEMPLATE_ID_INVESTIGATION = 'investigation' as const;
 export const TEMPLATE_ID_PROPOSAL = 'proposal' as const;
-export const TEMPLATE_ID_INCIDENT = 'incident' as const;
+export const TEMPLATE_ID_ESCALATION = 'escalation' as const;
 
 export const API_VERSIONS = {
   internal: {

@@ -110,7 +110,7 @@ triggers:
             `actionInput` object.
         impact:
           type: string
-          enum: ['low', 'medium', 'high', 'critical']
+          enum: ['low', 'medium', 'high', 'critical', ''] # empty string is equivalent to undefined, adding it to prevent errors
           description: >
             Impact snapshotted at creation. Takes precedence over the action
             workflow's own declared impact, since the caller knows the
@@ -124,7 +124,7 @@ triggers:
             a proposal has nowhere to appear.
         confidence:
           type: string
-          enum: ['low', 'medium', 'high']
+          enum: ['low', 'medium', 'high', ''] # empty string is equivalent to undefined, adding it to prevent errors
           description: Confidence in the recommendation.
         autoApprove:
           type: boolean
