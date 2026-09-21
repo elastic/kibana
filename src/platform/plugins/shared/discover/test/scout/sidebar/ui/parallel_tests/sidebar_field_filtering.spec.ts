@@ -25,7 +25,7 @@ spaceTest.describe('Discover sidebar field filtering', { tag: tags.deploymentAgn
     await discoverScoutSpace.teardownDiscoverDefaults();
   });
 
-  spaceTest('filters the field list by field type', async ({ pageObjects }) => {
+  spaceTest('filters the field list by field type', async ({ page, pageObjects }) => {
     const { unifiedFieldList } = pageObjects;
 
     await unifiedFieldList.waitUntilSidebarHasLoaded();
@@ -34,6 +34,17 @@ spaceTest.describe('Discover sidebar field filtering', { tag: tags.deploymentAgn
     );
 
     await unifiedFieldList.openFieldTypeFilter();
+
+    // `EuiPopover` portals the panel out of the sidebar, so it is scanned as a
+    // second root alongside the sidebar itself.
+    const { violations } = await page.checkA11y({
+      include: [
+        '[data-test-subj="discover-sidebar"]',
+        '[data-test-subj="fieldListFiltersFieldTypeFilterPanel"]',
+      ],
+    });
+    expect(violations).toStrictEqual([]);
+
     await unifiedFieldList.selectFieldTypeFilter('keyword');
     await unifiedFieldList.closeFieldTypeFilter();
 

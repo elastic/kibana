@@ -15,28 +15,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '../../../common/ui/fixtures';
-
-/** Page root, including the top nav. The tabs bar renders above it. */
-const PAGE_TEST_SUBJ = '[data-test-subj="dscPage"]';
-
-/** Scanned as a second root: the tabs bar sits outside the page root. */
-const TABS_BAR_TEST_SUBJ = '[data-test-subj="unifiedTabs_tabsBar"]';
-
-/**
- * Excluded from page scans: the tablist container holds its tabs through
- * `aria-owns` rather than as children, which axe reports as a pre-existing
- * `aria-required-children` violation in `@kbn/unified-tabs`. Scoped to the
- * tablist so the rest of the bar stays covered.
- */
-const TABS_LIST_TEST_SUBJ = '[data-test-subj="unifiedTabs_tabsBar"] [role="tablist"]';
-
-/**
- * Excluded from page scans: EUI's virtualized grid body reports
- * `scrollable-region-focusable` whenever it overflows. Covered instead by
- * `data_grid_accessibility.spec.ts`.
- */
-const DOC_TABLE_TEST_SUBJ = '[data-test-subj="discoverDocTable"]';
+import { getPageA11yViolations, spaceTest } from '../../../common/ui/fixtures';
 
 const SAVE_MODAL_TEST_SUBJ = '[data-test-subj="savedObjectSaveModal"]';
 
@@ -63,21 +42,13 @@ spaceTest.describe('Discover app - accessibility', { tag: '@local-stateful-class
     'has no automated a11y violations on the main page or after starting a new search',
     async ({ page, pageObjects }) => {
       await spaceTest.step('main page', async () => {
-        const { violations } = await page.checkA11y({
-          include: [PAGE_TEST_SUBJ, TABS_BAR_TEST_SUBJ],
-          exclude: [DOC_TABLE_TEST_SUBJ, TABS_LIST_TEST_SUBJ],
-        });
-        expect(violations).toStrictEqual([]);
+        expect(await getPageA11yViolations(page)).toStrictEqual([]);
       });
 
       await spaceTest.step('after clicking New', async () => {
         await pageObjects.discover.clickNewSearch();
 
-        const { violations } = await page.checkA11y({
-          include: [PAGE_TEST_SUBJ, TABS_BAR_TEST_SUBJ],
-          exclude: [DOC_TABLE_TEST_SUBJ, TABS_LIST_TEST_SUBJ],
-        });
-        expect(violations).toStrictEqual([]);
+        expect(await getPageA11yViolations(page)).toStrictEqual([]);
       });
     }
   );
@@ -113,11 +84,7 @@ spaceTest.describe('Discover app - accessibility', { tag: '@local-stateful-class
         await toasts.dismissAll();
         await discover.waitUntilTabIsLoaded();
 
-        const { violations } = await page.checkA11y({
-          include: [PAGE_TEST_SUBJ, TABS_BAR_TEST_SUBJ],
-          exclude: [DOC_TABLE_TEST_SUBJ, TABS_LIST_TEST_SUBJ],
-        });
-        expect(violations).toStrictEqual([]);
+        expect(await getPageA11yViolations(page)).toStrictEqual([]);
       });
     }
   );
@@ -171,43 +138,33 @@ spaceTest.describe('Discover app - accessibility', { tag: '@local-stateful-class
   );
 
   spaceTest(
-    'has no automated a11y violations in the histogram controls',
+    'has no automated a11y violations in the histogram interval selector',
     async ({ page, pageObjects }) => {
-      const { discover } = pageObjects;
+      await pageObjects.discover.openChartIntervalSelector();
 
-      await spaceTest.step('histogram hidden', async () => {
-        await discover.hideChart();
-
-        const { violations } = await page.checkA11y({
-          include: [PAGE_TEST_SUBJ, TABS_BAR_TEST_SUBJ],
-          exclude: [DOC_TABLE_TEST_SUBJ, TABS_LIST_TEST_SUBJ],
-        });
-        expect(violations).toStrictEqual([]);
-
-        await discover.showChart();
+      const { violations } = await page.checkA11y({
+        include: ['[data-test-subj="unifiedHistogramTimeIntervalSelectorSelectable"]'],
       });
-
-      await spaceTest.step('interval selector popover', async () => {
-        await discover.openChartIntervalSelector();
-
-        const { violations } = await page.checkA11y({
-          include: ['[data-test-subj="unifiedHistogramTimeIntervalSelectorSelectable"]'],
-        });
-        expect(violations).toStrictEqual([]);
-      });
+      expect(violations).toStrictEqual([]);
     }
   );
 
   spaceTest(
     'has no automated a11y violations in the field statistics view',
     async ({ page, pageObjects }) => {
-      const { discover } = pageObjects;
+      await pageObjects.discover.selectFieldStatisticsView();
 
-      await discover.selectFieldStatisticsView();
+      expect(await getPageA11yViolations(page)).toStrictEqual([]);
+    }
+  );
+
+  spaceTest(
+    'has no automated a11y violations in the field editor opened from the sidebar',
+    async ({ page, pageObjects }) => {
+      await pageObjects.discover.openAddFieldEditorFromSidebar();
 
       const { violations } = await page.checkA11y({
-        include: [PAGE_TEST_SUBJ, TABS_BAR_TEST_SUBJ],
-        exclude: [DOC_TABLE_TEST_SUBJ, TABS_LIST_TEST_SUBJ],
+        include: ['[data-test-subj="fieldEditor"]'],
       });
       expect(violations).toStrictEqual([]);
     }

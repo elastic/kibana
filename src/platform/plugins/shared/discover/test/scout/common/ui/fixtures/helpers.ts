@@ -109,3 +109,34 @@ export const runCascadeQuery = async (
   await pageObjects.discover.writeAndSubmitEsqlQuery(query);
   return pageObjects.discover.isShowingCascadeLayout();
 };
+
+/**
+ * Discover page root, including the top nav. The tabs bar renders above it and
+ * is scanned as a second root.
+ */
+const PAGE_TEST_SUBJ = '[data-test-subj="dscPage"]';
+const TABS_BAR_TEST_SUBJ = '[data-test-subj="unifiedTabs_tabsBar"]';
+
+/**
+ * Left out of page-level scans, both for pre-existing violations we do not own:
+ * the tablist holds its tabs through `aria-owns` rather than as children
+ * (`aria-required-children`, `@kbn/unified-tabs`), and EUI's virtualized grid
+ * body reports `scrollable-region-focusable` whenever it overflows. The grid is
+ * scanned directly by the data-grid specs.
+ */
+const PAGE_SCAN_EXCLUSIONS = [
+  '[data-test-subj="unifiedTabs_tabsBar"] [role="tablist"]',
+  '[data-test-subj="discoverDocTable"]',
+];
+
+/**
+ * Runs an axe scan over the Discover page and returns the violations, so the
+ * assertion stays in the test body.
+ */
+export const getPageA11yViolations = async (page: ScoutPage): Promise<string[]> => {
+  const { violations } = await page.checkA11y({
+    include: [PAGE_TEST_SUBJ, TABS_BAR_TEST_SUBJ],
+    exclude: PAGE_SCAN_EXCLUSIONS,
+  });
+  return violations;
+};

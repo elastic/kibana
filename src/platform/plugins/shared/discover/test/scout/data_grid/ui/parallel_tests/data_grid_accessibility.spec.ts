@@ -8,23 +8,25 @@
  */
 
 /**
- * Automated a11y scans of the Discover data grid.
+ * Automated a11y scans of the data grid's column menu and toolbar popovers.
  *
- * The toolbar popovers and the column menu render through EUI portals, so each
- * of those scans targets the popover rather than the grid.
+ * These states are not reached by any other data-grid spec — the specs that do
+ * open them (`data_grid_copy_to_clipboard`, `data_grid_sample_size`) click
+ * straight through to an action, leaving nothing open to scan. Grid states that
+ * other specs do reach are scanned there instead: columns and full screen in
+ * `data_grid.spec.ts`, flyout-added columns in `data_grid_doc_viewer.spec.ts`.
+ *
+ * All three render through EUI portals, so each scan targets the popover rather
+ * than the grid.
  */
 
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../fixtures';
 
-const GRID_TEST_SUBJ = '[data-test-subj="discoverDocTable"]';
 const SORT_POPOVER_TEST_SUBJ = '[data-test-subj="dataGridColumnSortingPopover"]';
 const DISPLAY_POPOVER_TEST_SUBJ = '[data-test-subj="dataGridDisplaySelectorPopover"]';
 
-const SIDEBAR_COLUMNS = ['extension', 'geo.src'];
-
-/** Fields the flyout's "toggle column" action exposes for the first row. */
-const FLYOUT_COLUMNS = ['agent', '_index'];
+const COLUMN = 'extension';
 
 spaceTest.describe('Discover data grid - accessibility', { tag: '@local-stateful-classic' }, () => {
   // EUI truncates inline cell actions and toolbar controls at narrow widths.
@@ -49,59 +51,16 @@ spaceTest.describe('Discover data grid - accessibility', { tag: '@local-stateful
   });
 
   spaceTest(
-    'has no automated a11y violations with columns added from the sidebar',
-    async ({ page, pageObjects }) => {
-      const { unifiedFieldList, dataGrid } = pageObjects;
-
-      await unifiedFieldList.waitUntilSidebarHasLoaded();
-      for (const column of SIDEBAR_COLUMNS) {
-        await unifiedFieldList.clickFieldListItemAdd(column);
-      }
-      for (const column of SIDEBAR_COLUMNS) {
-        await expect(dataGrid.getColumnHeader(column)).toBeVisible();
-      }
-
-      const { violations } = await page.checkA11y({ include: [GRID_TEST_SUBJ] });
-      expect(violations).toStrictEqual([]);
-    }
-  );
-
-  spaceTest(
-    'has no automated a11y violations with columns added from the doc viewer flyout',
-    async ({ page, pageObjects }) => {
-      const { docViewer, dataGrid, toasts } = pageObjects;
-
-      await docViewer.openAndWaitForFlyout({ rowIndex: 0 });
-      for (const column of FLYOUT_COLUMNS) {
-        await docViewer.toggleColumn(column);
-      }
-      await docViewer.close();
-      // Adding columns raises toasts that overlay the grid.
-      await toasts.dismissAll();
-
-      // Assert every column, not just the last: the toggle is idempotent per
-      // click, so a column dropped along the way would otherwise go unnoticed.
-      for (const column of FLYOUT_COLUMNS) {
-        await expect(dataGrid.getColumnHeader(column)).toBeVisible();
-      }
-
-      const { violations } = await page.checkA11y({ include: [GRID_TEST_SUBJ] });
-      expect(violations).toStrictEqual([]);
-    }
-  );
-
-  spaceTest(
     'has no automated a11y violations in the column actions menu',
     async ({ page, pageObjects }) => {
       const { unifiedFieldList, dataGrid } = pageObjects;
-      const [column] = SIDEBAR_COLUMNS;
 
       await unifiedFieldList.waitUntilSidebarHasLoaded();
-      await unifiedFieldList.clickFieldListItemAdd(column);
-      await dataGrid.openColumnMenuByField(column);
+      await unifiedFieldList.clickFieldListItemAdd(COLUMN);
+      await dataGrid.openColumnMenuByField(COLUMN);
 
       const { violations } = await page.checkA11y({
-        include: [`[data-test-subj="dataGridHeaderCellActionGroup-${column}"]`],
+        include: [`[data-test-subj="dataGridHeaderCellActionGroup-${COLUMN}"]`],
       });
       expect(violations).toStrictEqual([]);
     }
@@ -129,20 +88,6 @@ spaceTest.describe('Discover data grid - accessibility', { tag: '@local-stateful
         const { violations } = await page.checkA11y({ include: [DISPLAY_POPOVER_TEST_SUBJ] });
         expect(violations).toStrictEqual([]);
       });
-    }
-  );
-
-  spaceTest(
-    'has no automated a11y violations in full screen mode',
-    async ({ page, pageObjects }) => {
-      const { dataGrid } = pageObjects;
-
-      await dataGrid.toggleFullScreen();
-
-      const { violations } = await page.checkA11y({ include: [GRID_TEST_SUBJ] });
-      expect(violations).toStrictEqual([]);
-
-      await dataGrid.toggleFullScreen();
     }
   );
 });
