@@ -127,8 +127,7 @@ export class QueryRuleOrchestrator {
     try {
       ({ createdIds } = await installQueries(this.rulesManagementClient, toCreate, toUpdate));
     } catch (installError) {
-      const partialIds =
-        installError instanceof InstallQueriesError ? installError.createdIds : [];
+      const partialIds = installError instanceof InstallQueriesError ? installError.createdIds : [];
       this.logger.error(
         `installQueries failed during syncQueries for stream "${stream}". Compensating ${partialIds.length} created rule(s).`
       );
@@ -316,8 +315,7 @@ export class QueryRuleOrchestrator {
     try {
       ({ createdIds } = await installQueries(this.rulesManagementClient, toPromote, []));
     } catch (installError) {
-      const partialIds =
-        installError instanceof InstallQueriesError ? installError.createdIds : [];
+      const partialIds = installError instanceof InstallQueriesError ? installError.createdIds : [];
       this.logger.error(
         `installQueries failed during promoteQueries for stream "${streamName}". Compensating ${partialIds.length} created rule(s).`
       );

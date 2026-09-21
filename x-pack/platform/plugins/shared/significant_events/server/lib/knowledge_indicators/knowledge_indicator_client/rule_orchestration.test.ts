@@ -48,9 +48,11 @@ const makeQueryLinks = (count: number): QueryLink[] =>
 
 const makeRulesClient = (): jest.Mocked<IRulesManagementClient> => ({
   createRule: jest.fn().mockResolvedValue(undefined),
-  bulkCreateRules: jest.fn().mockImplementation((rules) =>
-    Promise.resolve({ createdIds: rules.map(({ id }: { id: string }) => id) })
-  ),
+  bulkCreateRules: jest
+    .fn()
+    .mockImplementation((rules) =>
+      Promise.resolve({ createdIds: rules.map(({ id }: { id: string }) => id) })
+    ),
   updateRule: jest.fn().mockResolvedValue(undefined),
   bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
   findExistingRuleIds: jest.fn().mockResolvedValue([]),

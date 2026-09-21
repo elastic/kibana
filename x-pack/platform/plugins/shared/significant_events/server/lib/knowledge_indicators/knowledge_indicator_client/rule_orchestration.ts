@@ -19,10 +19,7 @@ import { getMetricSeriesRuleSchedule } from '../../significant_events/rules/sche
 const RULE_INSTALL_CONCURRENCY = 10;
 
 export class InstallQueriesError extends Error {
-  constructor(
-    public readonly cause: Error,
-    public readonly createdIds: string[]
-  ) {
+  constructor(public readonly cause: Error, public readonly createdIds: string[]) {
     super(cause.message);
     this.name = 'InstallQueriesError';
   }
@@ -89,7 +86,10 @@ export async function installQueries(
         createdIds.push(...chunkIds);
       }
     } catch (error) {
-      throw new InstallQueriesError(error instanceof Error ? error : new Error(String(error)), createdIds);
+      throw new InstallQueriesError(
+        error instanceof Error ? error : new Error(String(error)),
+        createdIds
+      );
     }
   }
 

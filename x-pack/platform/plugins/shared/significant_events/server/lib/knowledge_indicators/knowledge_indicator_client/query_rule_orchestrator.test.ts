@@ -45,9 +45,11 @@ function createOrchestrator({
 } = {}) {
   const rulesManagementClient = {
     createRule: jest.fn().mockResolvedValue(undefined),
-    bulkCreateRules: jest.fn().mockImplementation((rules: Array<{ id: string }>) =>
-      Promise.resolve({ createdIds: rules.map(({ id }) => id) })
-    ),
+    bulkCreateRules: jest
+      .fn()
+      .mockImplementation((rules: Array<{ id: string }>) =>
+        Promise.resolve({ createdIds: rules.map(({ id }) => id) })
+      ),
     updateRule: jest.fn().mockResolvedValue(undefined),
     bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
   } as unknown as jest.Mocked<IRulesManagementClient>;
@@ -351,9 +353,11 @@ describe('QueryRuleOrchestrator', () => {
     function makeReconcileRulesClient(): jest.Mocked<IRulesManagementClient> {
       return {
         createRule: jest.fn().mockResolvedValue(undefined),
-        bulkCreateRules: jest.fn().mockImplementation((rules: Array<{ id: string }>) =>
-          Promise.resolve({ createdIds: rules.map(({ id }) => id) })
-        ),
+        bulkCreateRules: jest
+          .fn()
+          .mockImplementation((rules: Array<{ id: string }>) =>
+            Promise.resolve({ createdIds: rules.map(({ id }) => id) })
+          ),
         updateRule: jest.fn().mockResolvedValue(undefined),
         bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
         findExistingRuleIds: jest.fn().mockResolvedValue([]),
