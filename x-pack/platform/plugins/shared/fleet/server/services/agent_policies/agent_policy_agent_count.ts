@@ -38,7 +38,11 @@ export const getAgentCountForAgentPolicies = async (
   const baseFilter: QueryDslQueryContainer[] = excludeInactive
     ? [
         { term: { active: 'true' } },
-        { bool: { must_not: [{ term: { status: 'inactive' } }, { term: { status: 'unenrolled' } }] } },
+        {
+          bool: {
+            must_not: [{ term: { status: 'inactive' } }, { term: { status: 'unenrolled' } }],
+          },
+        },
       ]
     : [{ term: { active: 'true' } }];
 
