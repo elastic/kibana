@@ -49,6 +49,30 @@ describe('ScheduleIntervalField (Sep 14 Every N unit)', () => {
     expect(amount).toBeInvalid();
   });
 
+  it('flags an amount wider than the stored schema instead of emitting an unsavable interval', () => {
+    render(<ScheduleIntervalField workerId={WORKER_ID} current="1h" onChange={onChange} />);
+    const amount = screen.getByTestId(`alertZeroTriggerAmount-${WORKER_ID}`);
+
+    // WorkerScheduleInterval caps the stored string at 6 characters, so 100000h cannot be saved.
+    // Emitting it would fail validation at Save with a generic page error, with this field looking
+    // valid and unrelated edits blocked alongside it.
+    fireEvent.change(amount, { target: { value: '100000' } });
+
+    expect(onChange).not.toHaveBeenCalled();
+    expect(amount).toBeInvalid();
+  });
+
+  it('commits the widest amount the stored schema still accepts', () => {
+    render(<ScheduleIntervalField workerId={WORKER_ID} current="1h" onChange={onChange} />);
+    const amount = screen.getByTestId(`alertZeroTriggerAmount-${WORKER_ID}`);
+
+    // 99999h is 6 characters — the boundary the schema allows.
+    fireEvent.change(amount, { target: { value: '99999' } });
+
+    expect(onChange).toHaveBeenLastCalledWith('99999h');
+    expect(amount).not.toBeInvalid();
+  });
+
   it('does not commit the stale persisted amount when the unit changes over an invalid draft', () => {
     render(<ScheduleIntervalField workerId={WORKER_ID} current="1h" onChange={onChange} />);
     const amount = screen.getByTestId(`alertZeroTriggerAmount-${WORKER_ID}`);

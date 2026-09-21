@@ -195,12 +195,28 @@ describe('projectStoredAutonomyLevel', () => {
     expect(projectStoredAutonomyLevel(attackDiscovery, 'assisted')).toBe('manual');
   });
 
-  it('falls back to the least autonomous level offered when nothing sits at or below', () => {
+  it('keeps a disallowed stored level when nothing sits at or below, so validation fails closed', () => {
     const supervisedOnly: WorkerSettingsDeclaration = {
       workerId: 'test-worker',
       allowedAutonomyLevels: ['supervised'],
     };
-    expect(projectStoredAutonomyLevel(supervisedOnly, 'assisted')).toBe('supervised');
+    // Projecting up to 'supervised' would hand a stored 'assisted' Worker unattended authority.
+    // Keeping the stored value makes the complete schema reject it instead.
+    expect(projectStoredAutonomyLevel(supervisedOnly, 'assisted')).toBe('assisted');
+  });
+
+  it('picks the closest offered level regardless of declaration order', () => {
+    const unordered: WorkerSettingsDeclaration = {
+      workerId: 'test-worker',
+      allowedAutonomyLevels: ['manual', 'assisted'],
+    };
+    const reversed: WorkerSettingsDeclaration = {
+      workerId: 'test-worker',
+      allowedAutonomyLevels: ['assisted', 'manual'],
+    };
+    // Both declarations offer the same set, so both must project 'supervised' to 'assisted'.
+    expect(projectStoredAutonomyLevel(unordered, 'supervised')).toBe('assisted');
+    expect(projectStoredAutonomyLevel(reversed, 'supervised')).toBe('assisted');
   });
 
   it('passes values outside the shared scale through, so validation still reports them', () => {

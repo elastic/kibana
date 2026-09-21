@@ -66,10 +66,18 @@ export const projectStoredAutonomyLevel = (
     return stored;
   }
   const storedIndex = WATCH_AUTONOMY_LEVELS.indexOf(stored);
-  return (
-    [...declaration.allowedAutonomyLevels]
-      .filter((level) => WATCH_AUTONOMY_LEVELS.indexOf(level) <= storedIndex)
-      .pop() ?? declaration.allowedAutonomyLevels[0]
+  // Never escalate: when the declaration offers nothing at or below the stored level, keep the
+  // disallowed value so the complete schema marks the Worker unavailable instead of silently
+  // granting more autonomy than was stored.
+  const atOrBelow = declaration.allowedAutonomyLevels.filter(
+    (level) => WATCH_AUTONOMY_LEVELS.indexOf(level) <= storedIndex
+  );
+  if (atOrBelow.length === 0) {
+    return stored;
+  }
+  // Declaration order is not guaranteed, so pick by position on the shared scale.
+  return atOrBelow.reduce((highest, level) =>
+    WATCH_AUTONOMY_LEVELS.indexOf(level) > WATCH_AUTONOMY_LEVELS.indexOf(highest) ? level : highest
   );
 };
 

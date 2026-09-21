@@ -30,6 +30,16 @@ const parseInterval = (interval: string | undefined): { amount: number; unit: Sc
 
 const formatInterval = (amount: number, unit: ScheduleUnit): string => `${amount}${unit}`;
 
+/**
+ * `WorkerScheduleInterval` caps the stored string at 6 characters, so the amount cannot exceed five
+ * digits. Committing a larger number would emit a value the settings schema rejects: Save would then
+ * fail with a generic page error while this field still looked valid, and block unrelated edits.
+ */
+const MAX_SCHEDULE_AMOUNT = 99999;
+
+const isCommittableAmount = (amount: number): boolean =>
+  Number.isInteger(amount) && amount >= 1 && amount <= MAX_SCHEDULE_AMOUNT;
+
 interface ScheduleIntervalFieldProps {
   workerId: string;
   current: string;
@@ -71,7 +81,7 @@ export const ScheduleIntervalField: React.FC<ScheduleIntervalFieldProps> = ({
       // A typed value that is not a whole number of units (1.9, 0) is not a cadence this control can
       // store, and flooring it would silently save a different one. Keep it on screen — and flagged
       // by `amountInvalid` below — instead of committing.
-      if (!Number.isInteger(nextAmount) || nextAmount < 1) {
+      if (!isCommittableAmount(nextAmount)) {
         setAmountDraft(rawDraft ?? String(nextAmount));
         return;
       }
@@ -82,8 +92,7 @@ export const ScheduleIntervalField: React.FC<ScheduleIntervalFieldProps> = ({
   );
 
   const amountValue = amountDraft ?? String(amount);
-  const amountInvalid =
-    amountDraft != null && (!/^\d+$/.test(amountDraft) || Number(amountDraft) < 1);
+  const amountInvalid = amountDraft != null && !isCommittableAmount(Number(amountDraft));
 
   useEffect(() => {
     onValidityChange?.(!amountInvalid);
