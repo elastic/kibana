@@ -5,18 +5,21 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest, testData } from '../fixtures';
 
 const COLLECTION = 'api/context_engine/ai_index';
-const AI_INDEX_ID = 'scout_view_ai_index';
+// Unique per run so stale resources from an interrupted run cannot leak into the assertions.
+const RUN_ID = randomUUID().slice(0, 8);
+const AI_INDEX_ID = `scout_view_ai_index_${RUN_ID}`;
 const VIEW_NAME = `v-ai-index-${AI_INDEX_ID}`;
-const DEST = 'ai-index-idx-scout-view';
-const DS_AI_INDEX_ID = 'scout_view_ai_index_ds';
+const DEST = `ai-index-idx-scout-view-${RUN_ID}`;
+const DS_AI_INDEX_ID = `scout_view_ai_index_ds_${RUN_ID}`;
 const DS_VIEW_NAME = `v-ai-index-${DS_AI_INDEX_ID}`;
-const DS_DEST = 'ai-index-ds-scout-view';
+const DS_DEST = `ai-index-ds-scout-view-${RUN_ID}`;
 
 const API_HEADERS = {
   ...testData.COMMON_HEADERS,
