@@ -10,6 +10,7 @@ import type { Case } from '@kbn/cases-plugin/common/types/domain';
 import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
 import {
   CASE_ATTACHMENT_SAVED_OBJECT,
+  CASE_COMMENT_SAVED_OBJECT,
   COMMENT_ATTACHMENT_TYPE,
   LENS_ATTACHMENT_TYPE,
   OSQUERY_ATTACHMENT_TYPE,
@@ -53,6 +54,41 @@ export default ({ getService }: FtrProviderContext): void => {
         })
       )
     );
+
+  const auditFields = {
+    created_at: '2024-01-01T00:00:00.000Z',
+    created_by: { username: 'elastic', full_name: null, email: null },
+    pushed_at: null,
+    pushed_by: null,
+    updated_at: null,
+    updated_by: null,
+  };
+
+  const seedLeftoverCommentSO = ({
+    id,
+    caseId,
+    attributes,
+  }: {
+    id: string;
+    caseId: string;
+    attributes: Record<string, unknown>;
+  }) =>
+    es.index({
+      index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+      id: `${CASE_COMMENT_SAVED_OBJECT}:${id}`,
+      refresh: 'wait_for',
+      document: {
+        type: CASE_COMMENT_SAVED_OBJECT,
+        [CASE_COMMENT_SAVED_OBJECT]: {
+          ...auditFields,
+          ...attributes,
+        },
+        references: [{ type: 'cases', id: caseId, name: 'associated-cases' }],
+        namespaces: ['default'],
+        updated_at: '2024-01-01T00:00:00.000Z',
+        coreMigrationVersion: '8.8.0',
+      },
+    });
 
   describe('Mixed Legacy + Unified Reads', () => {
     afterEach(async () => {
@@ -418,6 +454,85 @@ export default ({ getService }: FtrProviderContext): void => {
         const ids = attachments.data.map((a) => a.id);
         expect(ids).to.contain(legacyAlertId);
         expect(ids).to.contain(unifiedAlertId);
+      });
+
+      it('GET /attachments?type=security.endpoint includes leftover `actions` rows', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const leftoverActionsId = 'leftover-actions-1';
+
+        await seedLeftoverCommentSO({
+          id: leftoverActionsId,
+          caseId: postedCase.id,
+          attributes: {
+            type: 'actions',
+            owner: 'securitySolutionFixture',
+            comment: 'leftover isolate',
+            actions: {
+              type: 'isolate',
+              targets: [{ hostname: 'host-1', endpointId: 'endpoint-1' }],
+            },
+          },
+        });
+
+        const unifiedCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            type: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+            attachmentId: 'leftover-endpoint-1',
+            owner: 'securitySolutionFixture',
+            data: { content: 'isolated via unified payload' },
+            metadata: {
+              command: 'isolate',
+              targets: [{ endpointId: 'endpoint-1', hostname: 'host-1', agentType: 'endpoint' }],
+            },
+          } as AttachmentRequestV2,
+        });
+        const unifiedId = unifiedCase.comments![0].id;
+
+        const attachments = await findAttachmentsV2({
+          supertest,
+          caseId: postedCase.id,
+          query: { type: 'security.endpoint' },
+        });
+
+        const ids = attachments.data.map((a) => a.id);
+        expect(ids).to.contain(leftoverActionsId);
+        expect(ids).to.contain(unifiedId);
+        expect(attachments.data.every((a) => a.type === SECURITY_ENDPOINT_ATTACHMENT_TYPE)).to.be(
+          true
+        );
+      });
+
+      it('GET /attachments?type=observability.alert excludes leftover security `alert` rows', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const leftoverAlertId = 'leftover-security-alert-1';
+
+        await seedLeftoverCommentSO({
+          id: leftoverAlertId,
+          caseId: postedCase.id,
+          attributes: {
+            type: AttachmentType.alert,
+            owner: 'securitySolutionFixture',
+            alertId: 'leftover-alert-1',
+            index: '.alerts-security.alerts-default',
+            rule: { id: 'rule-leftover-1', name: 'Rule leftover 1' },
+          },
+        });
+
+        const observabilityHits = await findAttachmentsV2({
+          supertest,
+          caseId: postedCase.id,
+          query: { type: 'observability.alert' },
+        });
+        expect(observabilityHits.data.map((a) => a.id)).not.to.contain(leftoverAlertId);
+
+        const securityHits = await findAttachmentsV2({
+          supertest,
+          caseId: postedCase.id,
+          query: { type: 'security.alert' },
+        });
+        expect(securityHits.data.map((a) => a.id)).to.contain(leftoverAlertId);
       });
     });
 

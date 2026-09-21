@@ -52,7 +52,7 @@ export function wrapError(
 export const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
 /** Same io-ts decode as the client, run as Core `validate.body` / `validate.query`. */
-export const createIoTsBodyValidation =
+export const createIoTsRouteValidation =
   <A, O, I>(runtimeType: rt.Type<A, O, I>): RouteValidationFunction<A> =>
   (inputValue, { ok, badRequest }) => {
     try {

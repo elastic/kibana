@@ -6,102 +6,46 @@
  */
 
 import type { KueryNode } from '@kbn/es-query';
-import {
-  CASE_ATTACHMENT_SAVED_OBJECT,
-  CASE_COMMENT_SAVED_OBJECT,
-  LEGACY_EXTERNAL_REFERENCE_TYPE,
-  LEGACY_PERSISTABLE_STATE_TYPE,
-  PERSISTABLE_STATE_UNIFIED_TO_LEGACY_MAP,
-  UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP,
-} from '../../../common/constants';
-import {
-  toLegacyAttachmentType,
-  toLegacyPersistableStateAttachmentType,
-} from '../../../common/utils/attachments';
+import { CASE_ATTACHMENT_SAVED_OBJECT, CASE_COMMENT_SAVED_OBJECT } from '../../../common/constants';
+import { toLegacyTypeMatches, type LegacyTypeMatch } from '../../../common/utils/attachments';
 import { buildFilter, combineFilters, NodeBuilderOperators } from '../utils';
 
+const commentsFilter = (field: string, values: string[]): KueryNode | undefined =>
+  buildFilter({
+    filters: values,
+    field,
+    operator: 'or',
+    type: CASE_COMMENT_SAVED_OBJECT,
+  });
+
+const commentsMatchFilter = ({ type, field, values }: LegacyTypeMatch): KueryNode | undefined => {
+  const typeFilter = commentsFilter('type', [type]);
+  if (field == null || values == null || values.length === 0) {
+    return typeFilter;
+  }
+  return combineFilters([typeFilter, commentsFilter(field, values)], NodeBuilderOperators.and);
+};
+
 /**
- * Builds the `cases-comments` + `cases-attachments` type filter for `find`. `types`
- * are unified type strings only; omitted means every type. Legacy SOs store the old
- * vocabulary, so each unified type still maps to its legacy equivalent.
+ * Find type filter: `cases-attachments` by unified type, `cases-comments` by the
+ * mapped legacy type (and subtype/owner when comments rows share a type bucket).
  */
 export const buildAttachmentTypeFilter = (types: string[] | undefined): KueryNode | undefined => {
   if (!types || types.length === 0) {
     return undefined;
   }
 
-  const unifiedTypes = new Set<string>();
-  const legacyTypes = new Set<string>();
-  // externalReference/persistableState share one legacy SO-level `type` bucket across
-  // several unified subtypes, so matching one subtype also needs its nested id field.
-  const legacyExternalReferenceIds = new Set<string>();
-  const legacyPersistableStateIds = new Set<string>();
-
-  for (const type of types) {
-    unifiedTypes.add(type);
-
-    if (type in PERSISTABLE_STATE_UNIFIED_TO_LEGACY_MAP) {
-      legacyPersistableStateIds.add(toLegacyPersistableStateAttachmentType(type));
-    } else {
-      const legacyBucket = toLegacyAttachmentType(type);
-      if (legacyBucket === LEGACY_EXTERNAL_REFERENCE_TYPE) {
-        legacyExternalReferenceIds.add(UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP[type]);
-      } else if (legacyBucket && legacyBucket !== type) {
-        legacyTypes.add(legacyBucket);
-      }
-    }
-    // Otherwise unified-only (e.g. `security.entity`, `dashboard`) — no legacy form.
-  }
-
-  const legacySubtypeFilter = (bucketType: string, idField: string, ids: Set<string>) =>
-    ids.size === 0
-      ? undefined
-      : combineFilters(
-          [
-            buildFilter({
-              filters: [bucketType],
-              field: 'type',
-              operator: 'or',
-              type: CASE_COMMENT_SAVED_OBJECT,
-            }),
-            buildFilter({
-              filters: [...ids],
-              field: idField,
-              operator: 'or',
-              type: CASE_COMMENT_SAVED_OBJECT,
-            }),
-          ],
-          NodeBuilderOperators.and
-        );
-
-  const legacyFilter = combineFilters(
-    [
-      buildFilter({
-        filters: [...legacyTypes],
-        field: 'type',
-        operator: 'or',
-        type: CASE_COMMENT_SAVED_OBJECT,
-      }),
-      legacySubtypeFilter(
-        LEGACY_EXTERNAL_REFERENCE_TYPE,
-        'externalReferenceAttachmentTypeId',
-        legacyExternalReferenceIds
-      ),
-      legacySubtypeFilter(
-        LEGACY_PERSISTABLE_STATE_TYPE,
-        'persistableStateAttachmentTypeId',
-        legacyPersistableStateIds
-      ),
-    ],
+  const commentsSoFilter = combineFilters(
+    types.flatMap(toLegacyTypeMatches).map(commentsMatchFilter),
     NodeBuilderOperators.or
   );
 
-  const unifiedFilter = buildFilter({
-    filters: [...unifiedTypes],
+  const attachmentsSoFilter = buildFilter({
+    filters: types,
     field: 'type',
     operator: 'or',
     type: CASE_ATTACHMENT_SAVED_OBJECT,
   });
 
-  return combineFilters([legacyFilter, unifiedFilter], NodeBuilderOperators.or);
+  return combineFilters([commentsSoFilter, attachmentsSoFilter], NodeBuilderOperators.or);
 };
