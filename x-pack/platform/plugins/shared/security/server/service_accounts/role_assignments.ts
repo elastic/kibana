@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ServiceAccountRoleAssignments } from '@kbn/core-security-server';
+import type { ServiceAccountRoleAssignments } from '../uiam';
 
 /**
  * The role assignments Kibana sends when creating a service account.

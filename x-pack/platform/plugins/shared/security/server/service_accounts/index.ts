@@ -10,6 +10,12 @@ export {
   SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
 } from './bindings';
 export type { ServiceAccountWorkloadBindingsApi } from './bindings';
+export {
+  registerServiceAccountCredentialSavedObjectType,
+  SERVICE_ACCOUNT_CREDENTIAL_TYPE,
+  ServiceAccountCredentialStore,
+} from './credentials';
+export type { ServiceAccountCredentialAttributes } from './credentials';
 export { ServiceAccountsService } from './service_accounts_service';
 export type { ServiceAccountsServiceStartParams } from './service_accounts_service';
 export type {

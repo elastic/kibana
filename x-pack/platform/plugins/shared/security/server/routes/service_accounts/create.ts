@@ -26,7 +26,8 @@ export function defineCreateServiceAccountRoute({
         authz: {
           enabled: false,
           reason:
-            'This route delegates authorization to the upstream UIAM service via the forwarded access token',
+            'This route delegates authorization to the service account provider: UIAM via the ' +
+            "forwarded access token, or Elasticsearch via the caller's `manage_security` cluster privilege",
         },
       },
       validate: { body: createServiceAccountBodySchema },
