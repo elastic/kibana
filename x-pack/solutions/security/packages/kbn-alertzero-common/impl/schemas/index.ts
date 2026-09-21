@@ -24,19 +24,7 @@ export {
 } from './components/watch.gen';
 
 export {
-  ApprovalRequirement,
-  WatchApprovalGate,
   WatchAutonomyLevel,
-  WatchLedgerEntry,
-  WatchRunOutcome,
-  WatchScopeRoutingSettings,
-  WatchSelectSetting,
-  WatchSettings,
-  WatchSkill,
-  WatchSkillAttachment,
-  WatchTriggersSettings,
-  WatchWorker,
-  WatchWorkerAttachment,
   Worker,
   WorkerRunState,
   WorkerScheduleInterval,
@@ -58,4 +46,3 @@ export {
   UpdateWorkerRequestParams,
   UpdateWorkerResponse,
 } from './workers/update_worker_route.gen';
-export { ListSkillsResponse } from './skills/list_skills_route.gen';

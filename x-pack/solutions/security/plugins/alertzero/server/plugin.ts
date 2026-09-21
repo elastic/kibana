@@ -122,7 +122,6 @@ export class AlertZeroPlugin
     registerRoutes({
       router,
       logger: this.logger,
-      config: this.config,
       getSpaceId: (request) => this.getSpaceId(request),
       getWatchesService: () => this.requireWatchesService(),
       getWorkersService: () => this.requireWorkersService(),
@@ -170,7 +169,6 @@ export class AlertZeroPlugin
       this.logger
     );
 
-    // Mock mode changes presentation data only; durable Worker settings and enablement still use Workflows.
     this.watchesService = new WatchesService();
     this.actionsService = new ActionsService(
       () =>

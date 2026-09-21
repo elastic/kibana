@@ -21,18 +21,13 @@ export const ALERTZERO_WATCH_URL_TEMPLATE = `${ALERTZERO_WATCHES_URL}/{watchId}`
 export const buildWatchUrl = (watchId: string) =>
   `${ALERTZERO_WATCHES_URL}/${encodeURIComponent(watchId)}`;
 
-/** Global worker / skill catalogs — shared across watches. */
+/** Global worker catalog — shared across watches. */
 export const ALERTZERO_WORKERS_URL = `${ALERTZERO_INTERNAL_URL}/workers` as const;
-export const ALERTZERO_SKILLS_URL = `${ALERTZERO_INTERNAL_URL}/skills` as const;
 
 export const ALERTZERO_WORKER_URL_TEMPLATE = `${ALERTZERO_WORKERS_URL}/{workerId}` as const;
-export const ALERTZERO_SKILL_URL_TEMPLATE = `${ALERTZERO_SKILLS_URL}/{skillId}` as const;
 
 export const buildWorkerUrl = (workerId: string) =>
   `${ALERTZERO_WORKERS_URL}/${encodeURIComponent(workerId)}`;
-
-export const buildSkillUrl = (skillId: string) =>
-  `${ALERTZERO_SKILLS_URL}/${encodeURIComponent(skillId)}`;
 
 /** Proposals grouped by category — AlertZero landing page. */
 export const ALERTZERO_PROPOSALS_URL = `${ALERTZERO_INTERNAL_URL}/proposals` as const;
@@ -88,9 +83,8 @@ export const WATCH_AUTONOMY_REVIEW_GATED = ['manual', 'assisted'] as const;
  * trip — the app's deep links and the solution navigation tree — build their
  * entries from this list rather than from `list_watches`.
  *
- * Deliberately free of schema and sample imports: both consumers are page-load critical, and pulling
- * `WATCHES_SEED` in would drag Zod and the mock samples into that bundle. Live placeholders and
- * `WATCHES_SEED` both take name, colour and lifecycle from here so the two cannot drift.
+ * Deliberately free of schema imports: both consumers are page-load critical, and pulling a schema
+ * in would drag Zod into that bundle. Live placeholders take name, colour and lifecycle from here.
  *
  * Custom (unmanaged) watches are absent by construction — they are discoverable only at runtime.
  */
