@@ -6,7 +6,14 @@
  */
 
 import { schema, type Type, type TypeOf } from '@kbn/config-schema';
-import { IOC_TYPES, SEVERITY_LEVELS, THREAT_CATEGORIES, type ThreatCategory } from '../constants';
+import {
+  IOC_TYPES,
+  MAX_URL_LENGTH,
+  SEVERITY_LEVELS,
+  THREAT_CATEGORIES,
+  THREAT_REGIONS,
+  type ThreatCategory,
+} from '../constants';
 
 export const enumLiterals = <T extends string>(values: readonly T[]): string => values.join(', ');
 
@@ -26,6 +33,9 @@ export const extractIocsBodySchema = schema.object({
 // Bounded plain-text bodies can exceed Kibana's default 1 MiB cap; 10 MiB matches other large-text internal routes.
 export const EXTRACT_IOCS_MAX_BODY_BYTES = 10 * 1024 * 1024;
 
+/** Matches `MAX_IOCS_PER_REPORT` in the extract_iocs service (truncation ceiling). */
+export const EXTRACT_IOCS_MAX_RESPONSE_SIZE = 5_000;
+
 const IOC_TIERS = ['discriminating', 'contextual', 'reference', 'denied', 'uncertain'] as const;
 
 const extractedIocSchema = schema.object({
@@ -40,7 +50,7 @@ const extractedIocSchema = schema.object({
 
 export const extractIocsResponseSchema = schema.object({
   count: schema.number(),
-  iocs: schema.arrayOf(extractedIocSchema),
+  iocs: schema.arrayOf(extractedIocSchema, { maxSize: EXTRACT_IOCS_MAX_RESPONSE_SIZE }),
   ioc_set_hash: schema.nullable(schema.string()),
   truncated: schema.maybe(schema.literal(true)),
 });
@@ -88,6 +98,9 @@ export const assessRelevanceBodySchema = schema.object({
 
 export const ASSESS_RELEVANCE_MAX_BODY_BYTES = 10 * 1024 * 1024;
 
+/** Matches `MAX_PRIMARY_LINKS` in the assess_relevance service. */
+export const ASSESS_RELEVANCE_MAX_PRIMARY_LINKS = 20;
+
 export const assessRelevanceResponseSchema = schema.object({
   is_intelligence: schema.boolean(),
   quality_class: schema.oneOf([
@@ -102,7 +115,9 @@ export const assessRelevanceResponseSchema = schema.object({
     schema.literal('mixed'),
   ]),
   needs_render: schema.boolean(),
-  primary_links: schema.arrayOf(schema.string()),
+  primary_links: schema.arrayOf(schema.string({ maxLength: MAX_URL_LENGTH }), {
+    maxSize: ASSESS_RELEVANCE_MAX_PRIMARY_LINKS,
+  }),
   has_original_commentary: schema.boolean(),
   reason: schema.string(),
 });
@@ -120,8 +135,12 @@ export const enrichTaxonomyBodySchema = schema.object({
 export const ENRICH_TAXONOMY_MAX_BODY_BYTES = 10 * 1024 * 1024;
 
 export const enrichTaxonomyResponseSchema = schema.object({
-  categories: schema.arrayOf(schema.string()),
-  regions: schema.arrayOf(schema.string()),
+  categories: schema.arrayOf(schema.string({ maxLength: 64 }), {
+    maxSize: THREAT_CATEGORIES.length,
+  }),
+  regions: schema.arrayOf(schema.string({ maxLength: 64 }), {
+    maxSize: THREAT_REGIONS.length,
+  }),
   relevance: schema.number(),
   diamond_suitable: schema.boolean(),
 });

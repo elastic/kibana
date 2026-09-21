@@ -9,8 +9,14 @@ import { schema, type TypeOf } from '@kbn/config-schema';
 
 // ── list_sources ─────────────────────────────────────────────────────────────
 
+/** Matches the `size` upper bound on the list_sources request body. */
+export const LIST_SOURCES_MAX_SIZE = 500;
+
+/** Soft ceiling for catalog tags on a single source. */
+export const LIST_SOURCES_MAX_TAGS = 64;
+
 export const listSourcesBodySchema = schema.object({
-  size: schema.maybe(schema.number({ min: 1, max: 500 })),
+  size: schema.maybe(schema.number({ min: 1, max: LIST_SOURCES_MAX_SIZE })),
   time_range: schema.maybe(
     schema.object({
       from: schema.string({ maxLength: 64 }),
@@ -25,7 +31,9 @@ const listSourcesItemSchema = schema.object({
   adapter_type: schema.maybe(schema.string()),
   enabled: schema.maybe(schema.boolean()),
   url: schema.maybe(schema.string()),
-  tags: schema.maybe(schema.arrayOf(schema.string())),
+  tags: schema.maybe(
+    schema.arrayOf(schema.string({ maxLength: 64 }), { maxSize: LIST_SOURCES_MAX_TAGS })
+  ),
   created_at: schema.maybe(schema.string()),
   updated_at: schema.maybe(schema.string()),
   space_id: schema.maybe(schema.string()),
@@ -41,7 +49,7 @@ export type ListSourcesItem = TypeOf<typeof listSourcesItemSchema>;
 
 export const listSourcesResponseSchema = schema.object({
   total: schema.number(),
-  sources: schema.arrayOf(listSourcesItemSchema),
+  sources: schema.arrayOf(listSourcesItemSchema, { maxSize: LIST_SOURCES_MAX_SIZE }),
 });
 
 export type ListSourcesResponse = TypeOf<typeof listSourcesResponseSchema>;

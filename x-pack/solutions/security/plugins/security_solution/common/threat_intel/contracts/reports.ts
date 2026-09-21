@@ -85,6 +85,12 @@ export interface GetThreatReportResponse {
 export const FIND_THREAT_REPORTS_DEFAULT_PAGE_SIZE = 20;
 export const FIND_THREAT_REPORTS_MAX_PAGE_SIZE = 100;
 
+/** Matches `IOC_SUMMARY_MAX` in the find_threat_reports service. */
+export const FIND_THREAT_REPORTS_MAX_IOC_SUMMARY = 25;
+
+/** Soft ceiling for readiness reason / optional code lists (closed set in practice). */
+export const READINESS_MAX_REASON_CODES = 32;
+
 export const THREAT_REPORT_SORTS = ['relevance', 'rank', 'updated_at'] as const;
 export type ThreatReportSort = (typeof THREAT_REPORT_SORTS)[number];
 
@@ -123,14 +129,18 @@ const threatReportSummarySchema = schema.object({
       score: schema.maybe(schema.number()),
     })
   ),
-  iocs: schema.arrayOf(threatReportIocSummarySchema),
+  iocs: schema.arrayOf(threatReportIocSummarySchema, {
+    maxSize: FIND_THREAT_REPORTS_MAX_IOC_SUMMARY,
+  }),
   diamond: schema.maybe(threatReportDiamondSummarySchema),
 });
 
 export type ThreatReportSummary = TypeOf<typeof threatReportSummarySchema>;
 
 export const findThreatReportsResponseSchema = schema.object({
-  items: schema.arrayOf(threatReportSummarySchema),
+  items: schema.arrayOf(threatReportSummarySchema, {
+    maxSize: FIND_THREAT_REPORTS_MAX_PAGE_SIZE,
+  }),
   nextCursor: schema.maybe(schema.nullable(schema.string())),
 });
 
@@ -172,11 +182,15 @@ export const readinessResponseSchema = schema.object({
     schema.literal('degraded'),
     schema.literal('blocked'),
   ]),
-  reasonCodes: schema.arrayOf(schema.string()),
+  reasonCodes: schema.arrayOf(schema.string({ maxLength: 64 }), {
+    maxSize: READINESS_MAX_REASON_CODES,
+  }),
   lastIngestAt: schema.maybe(schema.nullable(schema.string())),
   lastEnrichAt: schema.maybe(schema.nullable(schema.string())),
   usableReportCount: schema.number(),
-  optional: schema.maybe(schema.arrayOf(schema.string())),
+  optional: schema.maybe(
+    schema.arrayOf(schema.string({ maxLength: 64 }), { maxSize: READINESS_MAX_REASON_CODES })
+  ),
 });
 
 export type ReadinessResponse = TypeOf<typeof readinessResponseSchema>;
