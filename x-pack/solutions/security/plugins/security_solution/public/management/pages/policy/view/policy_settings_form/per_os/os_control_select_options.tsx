@@ -27,14 +27,6 @@ const osControlInputDisplayCss = ({ euiTheme }: UseEuiTheme): CSSObject => ({
   overflow: 'hidden',
 });
 
-const osControlInputLabelCss: CSSObject = {
-  flex: 1,
-  minWidth: 0,
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
-};
-
 /** Gives every OS-row select the shared severity-dot treatment. */
 export const buildOsControlSelectOptions = <TValue extends string>(
   specs: ReadonlyArray<OsControlSelectOptionSpec<TValue>>
@@ -44,7 +36,7 @@ export const buildOsControlSelectOptions = <TValue extends string>(
     inputDisplay: (
       <span css={osControlInputDisplayCss}>
         <EuiIcon type="dot" color={healthColor} aria-hidden={true} />
-        <span css={osControlInputLabelCss}>{label}</span>
+        <span className="eui-textTruncate">{label}</span>
       </span>
     ),
     dropdownDisplay: (
