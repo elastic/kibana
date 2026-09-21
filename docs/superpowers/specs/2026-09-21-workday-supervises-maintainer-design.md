@@ -156,9 +156,17 @@ re-keying needs a deliberate call.
 
 The engine prepends `SET unmapped_fields="nullify"`; the override must not.
 
+The `<ingestedClause>` below is emitted only when a watermark exists (i.e. not on
+the first run), mirroring the `compositeAggAdditionalFilters` range so Step 1 and
+Step 2 narrow identically:
+
+```
+    AND event.ingested >= NOW() - 30 day
+```
+
 ```
 FROM logs-workday.user-<ns>
-| WHERE (workday.user.Manager_Email IS NOT NULL OR workday.user.Manager_ID IS NOT NULL)
+| WHERE (workday.user.Manager_Email IS NOT NULL OR workday.user.Manager_ID IS NOT NULL)<ingestedClause>
 | EVAL <getEuidEvaluation('user', 'targetEntityId', { withTypeId: true })>
 | EVAL managerKey = CASE(
     workday.user.Manager_Email IS NULL, workday.user.Manager_ID,
@@ -198,8 +206,9 @@ Notes:
   relationshipKey: 'supervises',
   // Step 1 buckets MANAGERS, not reports.
   customActor: { fields: ['workday.user.Manager_Email', 'workday.user.Manager_ID'] },
-  // @timestamp is Hire_Date, so the default 30d lookback would select only
-  // new hires rather than recently-synced workers. See D5.
+  // @timestamp is Hire_Date, so the engine's default 30d lookback would select
+  // only new hires rather than recently-synced workers. Replaced by an
+  // event.ingested window below. See D5.
   disableLookbackWindow: true,
   validateTargetIds: true,
   compositeAggAdditionalFilters: [
@@ -207,65 +216,88 @@ Notes:
         { exists: { field: 'workday.user.Manager_Email' } },
         { exists: { field: 'workday.user.Manager_ID' } },
       ], minimum_should_match: 1 } },
+    // First run (no watermark) scans the full inventory; later runs narrow to
+    // workers re-synced in the window.
+    ...(lastProcessedTimestamp
+      ? [{ range: { 'event.ingested': { gte: WORKDAY_INGESTED_LOOKBACK } } }]
+      : []),
   ],
-  esqlQueryOverride: (ns) => buildWorkdaySupervisesEsqlQuery(ns),
+  esqlQueryOverride: (ns) => buildWorkdaySupervisesEsqlQuery(ns, lastProcessedTimestamp),
 }
 ```
+
+`WORKDAY_INGESTED_LOOKBACK = 'now-30d'`. The watermark's *presence* selects
+full-scan vs incremental; the window itself is a fixed 30d rather than
+`> lastProcessedTimestamp`, so a delayed or skipped run cannot open a gap.
 
 `customActor.fields` holds only the two manager fields. Both are keyword-mapped
 and low-cardinality relative to the workforce (managers ⊂ employees), so composite
 bucketing is safe — contrast the `system_auth` bucket-explosion caused by including
 a per-host-varying `user.id` (PR #278471).
 
-### D5 — `disableLookbackWindow: true` with no replacement time filter
+### D5 — full scan on first run, then a 30d `event.ingested` window
 
-This is the one place the design deliberately diverges from the Entra ID `owns`
-precedent, so the reasoning is recorded in full.
-
-The engine's 30d lookback is applied as an **ES|QL `filter` parameter**
+The engine's default 30d lookback is applied as an **ES|QL `filter` parameter**
 (`run_relationship_maintainer.ts:138`), not as text in the query body, so it
 reaches `kind: 'override'` configs too — an override cannot sidestep it. Entra ID
-`owns` simply omits `disableLookbackWindow` and therefore runs with the default
-30d window on `@timestamp`.
+`owns` simply omits `disableLookbackWindow` and runs with the default 30d window
+on `@timestamp`.
 
-That default is wrong for Workday. `default.yml:201-205` sets `@timestamp` from
-`Hire_Date`, so a 30d `@timestamp` window selects workers **hired** in the last 30
-days — not workers *synced* in the last 30 days. A tenured employee is re-ingested
-every 24h but keeps a years-old `@timestamp`, so they fall outside the window
-permanently. All five documents in the integration's own test fixture
-(`@timestamp` 2024-03-19 / 2024-04-15) would be excluded. The result would be an
-org chart containing only new hires.
+**That default is wrong for Workday.** `default.yml:201-205` sets `@timestamp`
+from `Hire_Date`, so a 30d `@timestamp` window selects workers **hired** in the
+last 30 days — not workers *synced* in the last 30 days. A tenured employee is
+re-ingested every 24h but keeps a years-old `@timestamp`. All five documents in
+the integration's test fixture (`@timestamp` 2024-03-19 / 2024-04-15) would be
+excluded. The result would be an org chart containing only new hires.
 
-Three options were evaluated:
+`entity.lifecycle.last_seen` is not an alternative: it is
+`newestValue({ source: '@timestamp' })` (`common_fields.ts:164-168`), so the
+`Hire_Date` problem propagates into the entity index too.
+
+**`event.ingested` is the correct field, and it is available.** `sample_event.json`
+— captured from a real ingested document, unlike the pipeline-test fixtures —
+carries `event.ingested: "2026-08-25T07:08:39Z"` alongside
+`@timestamp: "2024-03-19T00:00:00.000Z"` on the same document: exactly the
+sync-time-vs-hire-date split this config needs.
+
+It is mapped even though the package does not declare it in `fields/*.yml`. The
+package is `format_version: 3.4.2`, and since package-spec 3.0 Fleet composes
+every data stream's index template with the managed **`ecs@mappings`** component
+template, which maps the full ECS field set (`event.ingested` as a `date`).
+Packages that declare it explicitly are generally older or customizing it;
+absence from `fields/*.yml` does not imply unmapped for a 3.x package.
+
+So:
+
+| Run | Window |
+|---|---|
+| First (no watermark) | **Full scan** — no time filter; builds the standing org chart |
+| Subsequent | `event.ingested >= now-30d` — workers re-synced in the window |
+
+`disableLookbackWindow: true` is still required, to suppress the engine's
+`@timestamp`/`Hire_Date` window; the `event.ingested` range replaces it in
+`compositeAggAdditionalFilters` and in the override ES|QL.
+
+A 30d window against a 24h poll is deliberately generous — it tolerates sync
+outages, backfills and re-indexes of up to a month without losing edges, while
+still bounding the steady-state scan to recently-synced workers rather than the
+entire inventory.
+
+**Correctness note.** Because the integration re-ingests the *full* inventory on
+every 24h poll, `event.ingested` advances for every active worker each cycle. A
+re-org, transfer or newly-assigned report is therefore picked up on the next run
+— which is precisely what an `@timestamp`/`Hire_Date` window would have missed.
+Workers who stop being synced (departures) age out of the window and retain their
+last-known edges; removing stale edges is not in scope here.
 
 | Option | Verdict |
 |---|---|
 | Engine default 30d on `@timestamp` (Entra ID parity) | **Rejected** — selects only new hires; the standing org chart is never built |
-| 30d on `event.ingested` | **Rejected** — not available (below) |
-| `disableLookbackWindow: true`, full scan | **Chosen** — correct; heaviest; sanctioned by the ticket |
+| `disableLookbackWindow: true`, unconditional full scan | **Rejected** — correct but rescans the whole inventory daily with no incrementality |
+| Full scan first run, then 30d on `event.ingested` | **Chosen** |
 
-`event.ingested` would be the natural incremental field and is what the ticket
-gestures at ("watermark on `event.ingested` if needed"). It is **not usable**:
-Workday's `data_stream/user/fields/base-fields.yml` declares only
-`data_stream.*`, `event.dataset`, `event.module`, and `@timestamp`, and its
-`ecs.yml` declares a single field — `event.ingested` is mapped nowhere in the
-package (109 other packages declare it explicitly when they depend on it). Fleet's
-managed final pipeline still sets a value, but building an incremental window on
-an undeclared, dynamically-mapped field is fragile and would silently select
-nothing if the mapping is absent. Adding the mapping is a **Workday ingest
-change, explicitly out of scope**.
-
-The engine watermark does not help either: `lastProcessedTimestamp` is
-per-maintainer (shared with the Okta and Entra configs) and gates on
-`entity.lifecycle.last_seen`, which does not exist on log documents.
-
-So this config performs a full scan of the inventory each run — which the ticket
-explicitly accepts ("a full scan of the inventory is fine"). No watermark clause
-is added to the ES|QL. The maintainer already declares `timeout: '1h'`.
-
-If inventory size later makes this tight, the fix is to declare `event.ingested`
-in the Workday package and add a range filter here — a follow-up spanning both
-repos.
+The maintainer already declares `timeout: '1h'`, which covers the first-run full
+scan.
 
 ## Files to change
 
@@ -289,8 +321,19 @@ literals in `user.ts`. `workday` follows that existing convention.
 **Unit** (`configs.test.ts`): Okta and Entra configs unchanged; Workday config
 shape (`kind`, `indexPattern`, `targetEntityType`, `customActor.fields`,
 `disableLookbackWindow`, `validateTargetIds`); Step 1 composite filters; ES|QL
-contract — emits `actorUserId`/`supervises`, no `SET unmapped_fields`, references
-neither `Worker_s_Manager` nor any 30d lookback; golden snapshot.
+contract — emits `actorUserId`/`supervises`, no `SET unmapped_fields`, and never
+references `Worker_s_Manager`.
+
+The first-run/steady-state split is tested explicitly, since it is the design's
+most subtle behaviour:
+
+- `buildSupervisesConfigs()` (no watermark) → **no** `event.ingested` filter in
+  `compositeAggAdditionalFilters` and none in the ES|QL (full scan).
+- `buildSupervisesConfigs('<ts>')` → `event.ingested` range present in **both**
+  Step 1 and Step 2, so the two stages narrow identically.
+- Neither variant filters on `@timestamp`.
+
+Golden snapshots cover both variants.
 
 A separate unit assertion covers the `user.ts` change: a Workday-sourced document
 resolves `entity.namespace` to `workday` (not `unknown`).
@@ -302,12 +345,21 @@ resolves `entity.namespace` to `workday` (not `unknown`).
 3. **Shared manager** (two reports) → one actor write with both targets.
 4. **Manager missing from store** → write dropped, no phantom manager entity minted.
 
+Plus one case for D5, since seeded log documents must carry an explicit
+`event.ingested` for the incremental path to be exercised at all:
+
+5. **A worker whose `@timestamp` (`Hire_Date`) is years old but whose
+   `event.ingested` is recent** still produces a `supervises` edge. This is the
+   regression guard for the `Hire_Date` trap — it fails if the config ever falls
+   back to the engine's `@timestamp` lookback.
+
 A new spec file is required: `scout_max_one_describe` forbids a second suite
 registration in `log_inverted_relationship_maintainer.spec.ts`.
 
 `seedLogDocument` must be generalized — it currently hardcodes `host.id` /
 `host.name` and `event.category: ['host']`, which cannot express a user-target
-Workday row. The existing `LogInvertedRelationshipMaintainerSuiteConfig` is also
+Workday row, and it sets only `@timestamp`, so it needs to accept an explicit
+`event.ingested` for case 5. The existing `LogInvertedRelationshipMaintainerSuiteConfig` is also
 host-shaped (`buildIntegrationFields` takes `{ id, mail, upn }` and the assertions
 expect `host:<id>` targets). Generalizing that suite to parameterize the target
 EUID form is preferred over copying it; if generalization proves invasive, a
@@ -326,9 +378,13 @@ Additionally: actor-side EUID pre-validation (D3), and chunking
   `max_terms_count` on large stores — a pre-existing, documented engine risk for
   any `validateTargetIds: true` maintainer, not introduced here, but Workday
   org-scale full scans will exercise it.
-- **Full scan every run.** No usable time filter or watermark exists (see D5).
-  Acceptable per the ticket; revisit if inventory size makes the 1h timeout
-  tight. This is the main divergence from the Entra ID `owns` precedent and the
-  most likely thing a reviewer will question — D5 records why each alternative
-  was rejected.
+- **First run is a full inventory scan** (see D5), covered by the existing
+  `timeout: '1h'`. Steady-state runs narrow to a 30d `event.ingested` window.
+- **`event.ingested` is mapped via the managed `ecs@mappings` component
+  template, not declared in the Workday package.** This is standard for
+  package-spec 3.x and verified against `sample_event.json`, but it is an
+  implicit dependency: if a future package revision opted out of ECS mappings,
+  the incremental filter would match nothing and steady-state runs would
+  silently write zero relationships. An integration test asserting
+  `event.ingested` is present and queryable guards this.
 - **`user.ts` re-keying.** See D4 blast radius.
