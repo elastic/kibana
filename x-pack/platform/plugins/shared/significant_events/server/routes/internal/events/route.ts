@@ -13,7 +13,6 @@ import {
   severitySchema,
   MAX_ID_LENGTH,
   MAX_ASSESSMENT_NOTE_LENGTH,
-  triggerFeedbackSchema,
   type ChangePointType,
   type Detection,
   type InvestigationRunStatus,
@@ -25,10 +24,7 @@ import {
 import { notFound, serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
-import {
-  attachInvestigationToEvent,
-  type SignificantEventTriggerFeedback,
-} from '../../../lib/significant_events/events/attach_investigation';
+import { attachInvestigationToEvent } from '../../../lib/significant_events/events/attach_investigation';
 import { updateSignificantEventStatus } from '../../../lib/significant_events/events/update_event_status';
 import {
   cleanupStaleEvents,
@@ -236,8 +232,7 @@ const eventsAttachInvestigationRoute = createServerRoute({
   options: {
     access: 'internal',
     summary: 'Attach investigation to event',
-    description:
-      'Record a completed investigation against a significant event and apply any trigger feedback in the same append-only version.',
+    description: 'Record a completed investigation against a significant event.',
   },
   security: {
     authz: {
@@ -248,25 +243,17 @@ const eventsAttachInvestigationRoute = createServerRoute({
     path: z.object({
       id: z.string().max(255),
     }),
-    body: significantEventInvestigationSchema
-      .extend({
-        trigger_feedback: z.array(triggerFeedbackSchema).max(3).optional(),
-      })
-      .required({ completed_at: true }),
+    body: significantEventInvestigationSchema.required({ completed_at: true }),
   }),
-  handler: async ({ params, request, getScopedClients, server, logger }) => {
+  handler: async ({ params, request, getScopedClients, server }) => {
     const { getEventClient, licensing } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
 
-    const { trigger_feedback: triggerFeedback, ...investigation } = params.body;
-
     return attachInvestigationToEvent({
       eventClient: await getEventClient(),
       eventId: params.path.id,
-      investigation,
-      triggerFeedback: triggerFeedback as SignificantEventTriggerFeedback | undefined,
-      logger,
+      investigation: params.body,
     });
   },
 });

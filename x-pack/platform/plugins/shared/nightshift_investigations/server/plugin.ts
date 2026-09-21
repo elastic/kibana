@@ -35,7 +35,6 @@ import { createCortexStore, registerCortexAiIndex } from './cortex/register_cort
 import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/emit';
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import { registerInvestigationAgentType } from './agents/investigation';
-import { registerDeductiveInvestigationAgentType } from './agents/deductive_investigation';
 import { createInvestigationProgressReportTool } from './tools/investigation_progress_report/tool';
 import { createSandboxBashTool } from './tools/sandbox_bash/tool';
 import { createSandboxViewFileTool } from './tools/sandbox_bash/view_file_tool';
@@ -125,10 +124,7 @@ export class NightshiftInvestigationsPlugin
     if (plugins.agentBuilder) {
       const config = this.ctx.config.get();
       const telemetryConnectorId = config.sandbox?.telemetry_connector_id;
-      // The significant-events investigator keeps its own prompt and Elastic tools; only the
-      // deductive agent runs from the sandbox and talks to Cortex.
-      registerInvestigationAgentType(plugins.agentBuilder);
-      registerDeductiveInvestigationAgentType(plugins.agentBuilder, {
+      registerInvestigationAgentType(plugins.agentBuilder, {
         sandboxEnabled: plugins.sandbox?.isAvailable ?? false,
         cortexEnabled: this.cortexEnabled,
         telemetryConnectorId,

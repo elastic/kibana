@@ -7,68 +7,87 @@
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
-import { platformCoreTools, platformSignificantEventsTools } from '@kbn/agent-builder-common/tools';
-import instructions from './instructions/investigator.md.text';
+import { platformSignificantEventsTools } from '@kbn/agent-builder-common/tools';
 import {
-  OBSERVABILITY_GET_LOGS_TOOL_ID,
-  OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
-  OBSERVABILITY_GET_SERVICE_TOPOLOGY_TOOL_ID,
-  OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
-  OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID,
-  OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID,
-  OBSERVABILITY_GET_SERVICES_TOOL_ID,
-  OBSERVABILITY_GET_TRACES_TOOL_ID,
-} from './discovery_tool_ids';
+  NIGHTSHIFT_CORTEX_HYDRATE_WORKFLOW_ID,
+  NIGHTSHIFT_CORTEX_OPTIMIZE_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
+import instructions from './instructions/investigator.md.text';
 import { SANDBOX_BASH_TOOL_ID } from '../../tools/sandbox_bash/tool';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../../tools/sandbox_bash/view_file_tool';
 import { SANDBOX_STR_REPLACE_TOOL_ID } from '../../tools/sandbox_bash/str_replace_tool';
 import { SANDBOX_WRITE_FILE_TOOL_ID } from '../../tools/sandbox_bash/write_file_tool';
 
-export const SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID = 'significant-events.investigation';
-export const SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_TYPE_ID =
-  'platform.sig_events.investigation-type';
+export const NIGHTSHIFT_INVESTIGATION_AGENT_ID = 'nightshift.investigation';
+export const NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID = 'platform.nightshift.investigation-type';
 
-export const investigationAgentType = {
-  id: SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_TYPE_ID,
-  name: 'Nightshift Investigator',
-  description:
-    'Investigates an observability issue by querying available signals (logs, traces, metrics), ' +
-    'reasoning about causality direction, and producing a contributing-factors conclusion with supporting evidence.',
+const SANDBOX_TOOL_IDS = [
+  SANDBOX_BASH_TOOL_ID,
+  SANDBOX_VIEW_FILE_TOOL_ID,
+  SANDBOX_STR_REPLACE_TOOL_ID,
+  SANDBOX_WRITE_FILE_TOOL_ID,
+] as const;
+
+export const INVESTIGATION_AGENT_NAME = 'Nightshift Investigator';
+export const INVESTIGATION_AGENT_DESCRIPTION =
+  'Answers an arbitrary investigation question by reasoning from cluster telemetry it queries ' +
+  'inside a sandbox, and records what it learns in the Nightshift Cortex wiki.';
+
+/**
+ * Builds the Nightshift investigation agent type. It works from the sandbox, so it carries a
+ * standalone prompt and no Elastic tools. Telemetry is reached through `telemetryConnectorId` as
+ * described in `/workspace/elastic.md`.
+ */
+export const getInvestigationAgentType = ({
+  sandboxEnabled,
+  cortexEnabled,
+  telemetryConnectorId,
+}: {
+  sandboxEnabled: boolean;
+  cortexEnabled: boolean;
+  telemetryConnectorId?: string;
+}): AgentTypeDefinition => ({
+  id: NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID,
+  name: INVESTIGATION_AGENT_NAME,
+  description: INVESTIGATION_AGENT_DESCRIPTION,
   avatar_icon: 'logoElastic',
   baseConfiguration: {
     instructions,
-    skill_ids: ['observability.investigation', 'streams-management'],
+    skill_ids: [],
     tools: [
       {
         tool_ids: [
           platformSignificantEventsTools.reportInvestigationProgress,
-          platformSignificantEventsTools.searchKnowledgeIndicators,
-          platformCoreTools.executeEsql,
-          platformCoreTools.generateEsql,
-          platformCoreTools.executeWorkflow,
-          platformCoreTools.getWorkflowExecutionStatus,
-          OBSERVABILITY_GET_LOGS_TOOL_ID,
-          OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
-          OBSERVABILITY_GET_SERVICE_TOPOLOGY_TOOL_ID,
-          OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
-          OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID,
-          OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID,
-          OBSERVABILITY_GET_SERVICES_TOOL_ID,
-          OBSERVABILITY_GET_TRACES_TOOL_ID,
-          SANDBOX_BASH_TOOL_ID,
-          SANDBOX_VIEW_FILE_TOOL_ID,
-          SANDBOX_STR_REPLACE_TOOL_ID,
-          SANDBOX_WRITE_FILE_TOOL_ID,
+          ...(sandboxEnabled ? [...SANDBOX_TOOL_IDS] : []),
         ],
       },
     ],
-    // Keep Elastic capabilities available while starting with no connectors. Admin-selected
-    // connectors are persisted on the derived agent and merged into this allow-list.
-    enable_elastic_capabilities: true,
-    connector_ids: [],
+    enable_elastic_capabilities: false,
+    connector_ids: telemetryConnectorId ? [telemetryConnectorId] : [],
+    // Cortex hydrate runs as the beforeAgent hook and writes into /workspace, so it needs both
+    // the sandbox and Cortex; without the sandbox the step would throw on every round.
+    ...(sandboxEnabled && cortexEnabled
+      ? { workflow_ids: [NIGHTSHIFT_CORTEX_HYDRATE_WORKFLOW_ID] }
+      : {}),
+    ...(cortexEnabled
+      ? { post_execution_workflow_ids: [NIGHTSHIFT_CORTEX_OPTIMIZE_WORKFLOW_ID] }
+      : {}),
   },
-} as const satisfies AgentTypeDefinition;
+});
 
-export const registerInvestigationAgentType = (agentBuilder: AgentBuilderPluginSetup): void => {
-  agentBuilder.agents.registerType(investigationAgentType);
+export const registerInvestigationAgentType = (
+  agentBuilder: AgentBuilderPluginSetup,
+  {
+    sandboxEnabled,
+    cortexEnabled,
+    telemetryConnectorId,
+  }: {
+    sandboxEnabled: boolean;
+    cortexEnabled: boolean;
+    telemetryConnectorId?: string;
+  } = { sandboxEnabled: false, cortexEnabled: false }
+): void => {
+  agentBuilder.agents.registerType(
+    getInvestigationAgentType({ sandboxEnabled, cortexEnabled, telemetryConnectorId })
+  );
 };

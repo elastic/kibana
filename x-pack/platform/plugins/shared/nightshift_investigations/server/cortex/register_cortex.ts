@@ -13,7 +13,7 @@ import { SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID } from '@kbn/sign
 import { i18n } from '@kbn/i18n';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import { CORTEX_AI_INDEX_DEST, CORTEX_AI_INDEX_ID } from '../../common/cortex';
-import { NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID } from '../agents/deductive_investigation';
+import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
 import { materializeCortex } from './materialize';
 import { createLlmProposeCortexEdits, optimizeCortex } from './optimize';
 import { createCortexPageStore, type CortexPageStore } from './page_store';
@@ -91,12 +91,14 @@ export const runCortexOptimize = async ({
   getSearchInferenceEndpoints: () => SearchInferenceEndpointsPluginStart | undefined;
   logger: Logger;
 }): Promise<void> => {
-  // Only the deductive investigator writes to Cortex: it is the one agent whose post-execution
+  // Only the Nightshift investigator writes to Cortex: it is the one agent whose post-execution
   // hook runs this workflow, and other agents' rounds must not edit the wiki. An unidentified
   // caller is refused rather than trusted — the optimize workflow has a manual trigger, so it can
   // be run without an agent id.
-  if (agentId !== NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID) {
-    logger.debug('Cortex optimizer skipped — round was not produced by the deductive investigator');
+  if (agentId !== NIGHTSHIFT_INVESTIGATION_AGENT_ID) {
+    logger.debug(
+      'Cortex optimizer skipped — round was not produced by the Nightshift investigator'
+    );
     return;
   }
 

@@ -17,10 +17,10 @@ const sandboxConfigSchema = schema.object({
 });
 
 const cortexConfigSchema = schema.object({
-  // Governs Cortex end to end: the hydrate/optimize hooks on the deductive agent, the
+  // Governs Cortex end to end: the hydrate/optimize hooks on the investigator agent, the
   // Cortex HTTP routes, and the Cortex tab in the significant events app, which reads
   // this flag through the routes below.
-  enabled: schema.boolean({ defaultValue: false }),
+  enabled: schema.boolean({ defaultValue: true }),
 });
 
 const configSchema = schema.object({

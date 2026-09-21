@@ -9,8 +9,10 @@ import { AgentAccessControlMode } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
 import {
-  SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID,
-  SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_TYPE_ID,
+  INVESTIGATION_AGENT_DESCRIPTION,
+  INVESTIGATION_AGENT_NAME,
+  NIGHTSHIFT_INVESTIGATION_AGENT_ID,
+  NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID,
 } from '../agents/investigation';
 
 export const installInvestigationAgent = async ({
@@ -26,13 +28,11 @@ export const installInvestigationAgent = async ({
     spaceId,
     availability,
     agent: {
-      id: SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID,
-      type: SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_TYPE_ID,
-      name: 'Nightshift Investigator',
-      description:
-        'Investigates an observability issue by querying available signals (logs, traces, metrics), ' +
-        'reasoning about causality direction, and producing a contributing-factors conclusion with supporting evidence.',
-      labels: ['observability', 'streams', 'significant-events', 'investigation', 'root-cause'],
+      id: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
+      type: NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID,
+      name: INVESTIGATION_AGENT_NAME,
+      description: INVESTIGATION_AGENT_DESCRIPTION,
+      labels: ['observability', 'significant-events', 'investigation', 'cortex', 'sandbox'],
       avatar_symbol: 'NI',
       access_control: { access_mode: AgentAccessControlMode.Public },
       configuration: {

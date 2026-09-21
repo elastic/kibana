@@ -406,7 +406,7 @@ export const runAgentStepCommonDefinition: CommonStepDefinition<
 \`\`\`yaml
 - name: investigate
   type: ${RunAgentStepTypeId}
-  agent-id: "significant-events.investigation"
+  agent-id: "nightshift.investigation"
   connector-id-by-feature: "significant_events_investigation"
   with:
     message: "Investigate the significant events in this stream."

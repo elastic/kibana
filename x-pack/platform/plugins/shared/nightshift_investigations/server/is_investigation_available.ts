@@ -15,7 +15,7 @@ import {
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
-import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
+import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 export const isInvestigationAvailable = async ({
@@ -56,7 +56,7 @@ export const isInvestigationAvailable = async ({
       spaceId ?? spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
     const [workflow, { endpoints }] = await Promise.all([
       workflowsManagement.management.getWorkflow(
-        SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
+        NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
         resolvedSpaceId
       ),
       searchInferenceEndpoints.endpoints.getForFeature(
