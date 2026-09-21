@@ -31,7 +31,10 @@ const ENTITY_SOURCE = 'workday';
 const RELATIONSHIP_KEY = 'supervises';
 const MAINTAINER_ID = 'supervises';
 
-/** Workday's ingest pipeline sets @timestamp from Hire_Date, so it is deliberately stale. */
+// Workday's ingest pipeline sets @timestamp from Hire_Date. This value must stay
+// more than 30 days in the past: test 5 proves the maintainer does NOT apply
+// the engine's @timestamp lookback — freshening it inside 30 days would let
+// test 5 pass while silently guarding nothing.
 const HIRE_DATE = '2024-03-19T00:00:00.000Z';
 
 interface WorkdayRow {
