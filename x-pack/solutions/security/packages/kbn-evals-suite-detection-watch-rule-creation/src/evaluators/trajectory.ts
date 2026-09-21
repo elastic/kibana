@@ -8,7 +8,11 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Evaluator } from '@kbn/evals';
-import { internalTools, isAttachmentTool } from '@kbn/agent-builder-common/tools';
+import {
+  internalTools,
+  isAttachmentTool,
+  platformCoreTools,
+} from '@kbn/agent-builder-common/tools';
 import { RULE_CREATION_SKILL_ID, RULE_CREATION_TOOL_ID, RULE_PREVIEW_TOOL_ID } from '../constants';
 import type { RuleCreationResult } from '../rule_creation_client';
 import { extractConversationId, toolSpanJoinClauses, LLM_ISSUED_TOOL_SPAN } from './tool_routing';
@@ -217,12 +221,15 @@ export const scoreCallOrder: ScoreFn = ({ calls }) => {
   const finishingTool = (name: string) => name === RULE_PREVIEW_TOOL_ID || isAttachmentTool(name);
   const beforeDraft = names.slice(1, firstDraft === -1 ? undefined : firstDraft);
   const finishedBeforeDrafting = beforeDraft.filter(finishingTool);
-  const exploredAfterDraft =
-    firstDraft === -1
-      ? []
-      : names
-          .slice(firstDraft + 1)
-          .filter((name) => name !== RULE_CREATION_TOOL_ID && !finishingTool(name));
+  const exploredAfterDraft: string[] = [];
+  let previewed = false;
+  for (const name of firstDraft === -1 ? [] : names.slice(firstDraft + 1)) {
+    if (name === RULE_PREVIEW_TOOL_ID) previewed = true;
+    const validatingPreview = previewed && name === platformCoreTools.generateEsql;
+    if (name !== RULE_CREATION_TOOL_ID && !finishingTool(name) && !validatingPreview) {
+      exploredAfterDraft.push(name);
+    }
+  }
   const unique = (list: string[]) => [...new Set(list)].join(', ');
 
   const violations: string[] = [];

@@ -28,6 +28,7 @@ const CREATE = RULE_CREATION_TOOL_ID;
 const PREVIEW = 'security.run_rule_preview';
 const LABS = 'security.security_labs_search';
 const LIST_INDICES = 'platform.core.list_indices';
+const GEN_ESQL = 'platform.core.generate_esql';
 const ATTACH_READ = 'attachments.read';
 
 const AGENT_TRACE = 'agent-trace-1';
@@ -302,6 +303,18 @@ describe('scoreCallOrder', () => {
     expect(r.score).toBe(0);
     expect(r.metadata.finishedBeforeDrafting).toEqual([PREVIEW]);
     expect(r.explanation).toContain('before drafting');
+  });
+
+  it('accepts generate_esql after a preview, which the skill prescribes for zero-alert previews', () => {
+    const r = scoreCallOrder(settled([SKILL, LABS, CREATE, PREVIEW, GEN_ESQL, ATTACH_READ]));
+    expect(r.score).toBe(1);
+    expect(r.metadata.exploredAfterDraft).toEqual([]);
+  });
+
+  it('still flags generate_esql after the draft when no preview came first', () => {
+    const r = scoreCallOrder(settled([SKILL, CREATE, GEN_ESQL]));
+    expect(r.score).toBe(0);
+    expect(r.metadata.exploredAfterDraft).toEqual([GEN_ESQL]);
   });
 
   it('fails a run that drafted more than once', () => {
