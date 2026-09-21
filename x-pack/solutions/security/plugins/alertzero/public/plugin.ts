@@ -20,11 +20,8 @@ import {
   ALERTZERO_APP_ID,
   ALERTZERO_APP_PATH,
   ALERTZERO_ENABLED_SETTING_ID,
-  API_VERSIONS,
   TEMPLATE_ID_INVESTIGATION,
-  buildInvestigationUrl,
 } from '@kbn/alertzero-common';
-import type { GetInvestigationResponse } from '@kbn/alertzero-common';
 import { registerAgenticInvestigationTemplateUI } from '@kbn/agentic-investigations-common';
 import { getAlertZeroDeepLinks } from './deep_links';
 import type {
@@ -117,9 +114,7 @@ export class AlertZeroPublicPlugin
     // The template registration API has no deregistration counterpart, so this is one-shot: we
     // register on the first `true` and cannot remove the entry if the setting is later disabled.
     // The setting is therefore registered with `requiresPageReload`, so disabling it prompts for a
-    // reload and the next session starts without the registration. `loadInvestigation` re-checks
-    // the live setting to cover the window before that reload, where slots opened while AlertZero
-    // is disabled surface an error instead of issuing a 404.
+    // reload and the next session starts without the registration.
     //
     // Errors from registerAgenticInvestigationTemplateUI are re-raised as unhandled rejections
     // so they surface in the browser console and unhandledrejection listeners, rather than
@@ -135,16 +130,6 @@ export class AlertZeroPublicPlugin
               templateId: TEMPLATE_ID_INVESTIGATION,
               name: INVESTIGATION_TEMPLATE_NAME,
               icon: 'securitySignalDetected',
-              loadInvestigation: async (conversationId) => {
-                if (!core.uiSettings.get<boolean>(ALERTZERO_ENABLED_SETTING_ID, false)) {
-                  throw new Error('AlertZero is disabled for this space');
-                }
-                const { investigation } = await core.http.get<GetInvestigationResponse>(
-                  buildInvestigationUrl(conversationId),
-                  { version: API_VERSIONS.internal.v1 }
-                );
-                return investigation;
-              },
             });
           } catch (err) {
             Promise.reject(err);

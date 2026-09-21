@@ -22,7 +22,7 @@ import { alertZeroLink } from '../links';
  * The AlertZero nodes that sit directly in the solution navigation body, in display order.
  *
  * Returned as a list rather than a single node because AlertZero contributes several top-level entries that
- * interleave with platform ones (Discover sits between Chats and Alerts).
+ * interleave with platform ones (Discover sits between this group and Alerts).
  */
 export const createAlertZeroNavigationTree = (): NodeDefinition[] => [
   {
@@ -30,10 +30,6 @@ export const createAlertZeroNavigationTree = (): NodeDefinition[] => [
     // Note the sidebar sentence-cases every label, so "AlertZero" is also registered in the `@kbn/shared-ux-label-formatter` title case glossary.
     title: i18nStrings.alertZero.title,
     icon: 'sun',
-  },
-  {
-    link: alertZeroLink(SecurityPageName.alertZeroChats),
-    icon: 'comment',
   },
 ];
 
@@ -54,10 +50,6 @@ export const createAlertZeroSecondaryNavigationTree = (): NodeDefinition[] => [
     // that `NodeDefinition` cannot express.
     link: alertZeroLink(SecurityPageName.alertZeroWatches),
     icon: 'eye',
-  },
-  {
-    link: alertZeroLink(SecurityPageName.alertZeroRecords),
-    icon: 'documents',
   },
   {
     link: alertZeroLink(SecurityPageName.alertZeroThreatHunt),
