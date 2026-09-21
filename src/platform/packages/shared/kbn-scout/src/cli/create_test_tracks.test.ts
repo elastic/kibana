@@ -90,6 +90,7 @@ const createStatsEntry = (
   ({
     path: configPath,
     test_target: testTarget,
+    target_attributes: [],
     runCount: 10,
     runtime: {
       avg: estimate,
@@ -705,6 +706,72 @@ describe('identifyTestLoads', () => {
             log
           )
         ).toHaveLength(0);
+      });
+
+      describe('runtime statistics', () => {
+        const attributeStats = new ScoutTestConfigStats({
+          lastUpdated: new Date(),
+          lookbackDays: 1,
+          buildkite: {},
+          configs: [
+            createStatsEntry('plugin-a/config.ts', testTarget, 60000),
+            {
+              ...createStatsEntry('plugin-a/config.ts', testTarget, 300000),
+              target_attributes: ['fips'],
+            } as ScoutTestConfigStatsEntry,
+          ],
+        });
+
+        beforeEach(() => {
+          mockTestConfigs = [
+            createConfigWithTests('plugin-a/config.ts', [
+              { id: 'agnostic', tags: ['@local-stateful-classic'] },
+            ]),
+          ];
+        });
+
+        it('picks the statistics recorded without attributes for an attribute-less run', () => {
+          const loads = identifyTestLoads(
+            ciConfig,
+            attributeStats,
+            testTarget,
+            [{ kind: 'targetAttributes', attributes: new Set() }],
+            log
+          );
+
+          expect(loads[0].stats?.runtime.estimate).toBe(60000);
+        });
+
+        it('picks the fips statistics when fips is declared', () => {
+          const loads = identifyTestLoads(
+            ciConfig,
+            attributeStats,
+            testTarget,
+            [{ kind: 'targetAttributes', attributes: new Set(['fips'] as const) }],
+            log
+          );
+
+          expect(loads[0].stats?.runtime.estimate).toBe(300000);
+        });
+
+        it('reports no statistics when none were recorded for the declared attributes', () => {
+          const withoutFipsStats = new ScoutTestConfigStats({
+            lastUpdated: new Date(),
+            lookbackDays: 1,
+            buildkite: {},
+            configs: [createStatsEntry('plugin-a/config.ts', testTarget, 60000)],
+          });
+
+          const loads = identifyTestLoads(
+            ciConfig,
+            withoutFipsStats,
+            testTarget,
+            [{ kind: 'targetAttributes', attributes: new Set(['fips'] as const) }],
+            log
+          );
+
+          expect(loads[0].stats).toBeUndefined();
+        });
       });
     });
   });

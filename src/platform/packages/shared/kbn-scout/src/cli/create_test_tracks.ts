@@ -96,6 +96,15 @@ export function identifyTestLoads(
   testLoadFilters: TestLoadFilter[],
   log: ToolingLog
 ): ScoutCITestLoad[] {
+  // Runtime statistics are recorded per attribute set, so a lane must only draw on history
+  // gathered under the same attributes it is about to run with.
+  const runTargetAttributeKey = targetAttributes.key(
+    testLoadFilters.find(
+      (filter): filter is Extract<TestLoadFilter, { kind: 'targetAttributes' }> =>
+        filter.kind === 'targetAttributes'
+    )?.attributes ?? []
+  );
+
   const testLoads = testConfigs.all
     .filter((config) => !scoutCIConfig.excluded_configs.includes(config.path))
     .filter((config) =>
@@ -148,7 +157,9 @@ export function identifyTestLoads(
         enabled,
         stats: testConfigStats.data.configs.find(
           (statsEntry) =>
-            statsEntry.path === config.path && statsEntry.test_target.tag === testTarget.tag
+            statsEntry.path === config.path &&
+            statsEntry.test_target.tag === testTarget.tag &&
+            targetAttributes.key(statsEntry.target_attributes) === runTargetAttributeKey
         ),
       };
     });
