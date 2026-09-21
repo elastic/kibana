@@ -23,27 +23,33 @@ export interface SnapshotState {
   failed: boolean;
 }
 
-/** Loads the comment's screenshot once `enabled` and keeps it for the component's lifetime. */
+/**
+ * Loads the comment's screenshot once `enabled` and keeps it for the component's
+ * lifetime; a load that failed is made again the next time it is enabled (the
+ * screenshot hidden and shown again), a failure being as likely passing as not.
+ */
 export const useSnapshot = (commentId: string, enabled: boolean): SnapshotState => {
   const { services } = useComments();
   const [state, setState] = useState<SnapshotState>({ src: null, loading: false, failed: false });
-  const started = useRef(false);
+  const requested = useRef(false);
 
   useEffect(() => {
-    if (!enabled || started.current) {
+    if (!enabled || requested.current) {
       return;
     }
-    started.current = true;
+    requested.current = true;
     setState({ src: null, loading: true, failed: false });
-    services.api.getSnapshot(commentId).then(
-      (snapshot) =>
-        setState({
-          src: snapshot?.image ? `data:${snapshot.mimeType};base64,${snapshot.image}` : null,
-          loading: false,
-          failed: !snapshot?.image,
-        }),
-      () => setState({ src: null, loading: false, failed: true })
-    );
+    services.api
+      .getSnapshot(commentId)
+      .then(
+        (snapshot) =>
+          snapshot?.image ? `data:${snapshot.mimeType};base64,${snapshot.image}` : null,
+        () => null
+      )
+      .then((src) => {
+        requested.current = src !== null;
+        setState({ src, loading: false, failed: src === null });
+      });
   }, [enabled, commentId, services]);
 
   return state;
@@ -73,7 +79,7 @@ export const SnapshotImage = ({
     return (
       <EuiText size="xs" color="subdued">
         {i18n.translate('devComments.snapshot.unavailable', {
-          defaultMessage: 'The screenshot could not be loaded',
+          defaultMessage: 'The screenshot could not be loaded. Hide and show it to try again.',
         })}
       </EuiText>
     );

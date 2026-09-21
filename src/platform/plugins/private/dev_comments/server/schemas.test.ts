@@ -41,8 +41,17 @@ describe('newCommentSchema', () => {
     'https://evil.example/',
     'app/one',
     '',
+    // Dot segments that climb out of the base path the host puts before the path.
+    '/../outside',
+    '/app/one/../../../outside',
+    '/app/%2e%2e/%2E%2E/outside',
+    '/\\..\\outside',
   ])('rejects the path %s', (path) => {
     expect(() => newCommentSchema.validate(withRoute(path))).toThrow();
+  });
+
+  it('accepts dot segments that stay within the deployment', () => {
+    expect(() => newCommentSchema.validate(withRoute('/app/one/../two'))).not.toThrow();
   });
 
   it('takes a screenshot with its image only: a comment is kept for good, and one without could never be shown', () => {

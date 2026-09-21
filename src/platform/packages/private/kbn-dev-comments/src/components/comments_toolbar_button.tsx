@@ -21,6 +21,15 @@ const preventFocusChange = (event: MouseEvent) => {
   event.preventDefault();
 };
 
+/** The toggle shortcut (see `isToggleShortcut`) as the platform writes it. */
+const isMac =
+  typeof navigator !== 'undefined' &&
+  /mac/i.test(
+    (navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData?.platform ??
+      navigator.userAgent
+  );
+const SHORTCUT = isMac ? '⌘⇧K' : 'Ctrl+Shift+K';
+
 export const CommentsToolbarButton = () => {
   const controller = useComments();
   const active = useCommentsState((state) => state.active);
@@ -28,7 +37,11 @@ export const CommentsToolbarButton = () => {
     ? i18n.translate('devComments.button.exit', { defaultMessage: 'Exit comment mode' })
     : i18n.translate('devComments.button.enter', { defaultMessage: 'Comment mode' });
   return (
-    <EuiToolTip content={label} disableScreenReaderOutput anchorProps={ignoreProps}>
+    <EuiToolTip
+      content={`${label} (${SHORTCUT})`}
+      disableScreenReaderOutput
+      anchorProps={ignoreProps}
+    >
       <EuiButtonIcon
         iconType="comment"
         aria-label={label}

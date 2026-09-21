@@ -10,7 +10,7 @@ Development-only in-page comments.
 
 ## How it works
 
-- `public/`: registers the button with the `developerToolbar` plugin. The layer mounts with the toolbar item rather than on first use, so that the clicks that reveal UI are recorded before comment mode is ever switched on; only the screenshot library (`dom-to-image-more`) loads on first capture. `host_services.ts` implements the layer's host services on top of core: location and navigation relative to the base path, the current user, viewport capture and the internal API client.
+- `public/`: registers the button with the `developerToolbar` plugin. The layer mounts with the toolbar item rather than on first use, so that the clicks that reveal UI are recorded before comment mode is ever switched on; only the screenshot library (`dom-to-image-more`) loads on first capture. `host_services.ts` implements the layer's host services on top of core: location and navigation relative to the server base path (so a comment stays with the space it was made in), the current user, viewport capture and the internal API client.
 - `server/`: only in dev mode, registers `/internal/dev_comments` routes backed by a hidden, cluster-global index (`.kibana-dev-comments`) written as the internal user. Comments are never deleted, only resolved; the store holds at most 1000 comments with 200 replies each.
 
 ## Configuration

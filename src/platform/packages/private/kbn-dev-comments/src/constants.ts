@@ -13,6 +13,9 @@ export const IGNORE_SELECTOR = `[${IGNORE_ATTR}]`;
 
 export const DISPLAY_NAME_STORAGE_KEY = 'dev_comments_display_name';
 
+/** Session storage: a guide handed over a page load, see `createCommentsController`. */
+export const GUIDE_HANDOFF_STORAGE_KEY = 'dev_comments_guide';
+
 export const PIN_SIZE = 24;
 
 // Bounds shared with hosts: what the layer produces stays within what a host stores.

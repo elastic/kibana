@@ -24,11 +24,24 @@ const HOST_IGNORE_SELECTORS = [
   '[data-devtool-resize-handle]',
 ];
 
-/** The current page as a comment's route: within this deployment (no origin, no base path). */
+/** `pathname` without the server's base path, which `basePath.remove` would take the space prefix off along with. */
+const removeServerBasePath = (pathname: string, { serverBasePath }: IBasePath): string =>
+  pathname === serverBasePath
+    ? '/'
+    : pathname.startsWith(`${serverBasePath}/`)
+    ? pathname.slice(serverBasePath.length)
+    : pathname;
+
+/**
+ * The current page as a comment's route: within this deployment (no origin, no
+ * server base path), space prefix included, so that a comment made in one space
+ * is not taken for one on the same page of another, and opens in its own.
+ */
 export const routeOf = (
   { pathname, search, hash }: Pick<Location, 'pathname' | 'search' | 'hash'>,
   basePath: IBasePath
-): CommentRoute => routeFromLocation({ pathname: basePath.remove(pathname), search, hash });
+): CommentRoute =>
+  routeFromLocation({ pathname: removeServerBasePath(pathname, basePath), search, hash });
 
 export const createCommentsHostServices = ({
   http,
@@ -46,11 +59,12 @@ export const createCommentsHostServices = ({
     },
   },
 
+  // The path has the space in it (see `routeOf`); core reloads the page for a URL out of the current one.
   navigateToPath: async (path) => {
     if (!isSafeRelativePath(path)) {
       throw new Error(`Refusing to navigate outside of this deployment: ${path}`);
     }
-    await application.navigateToUrl(http.basePath.prepend(path));
+    await application.navigateToUrl(`${http.basePath.serverBasePath}${path}`);
   },
 
   getCurrentUser: async () => {

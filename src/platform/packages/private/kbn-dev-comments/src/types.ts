@@ -143,9 +143,10 @@ export interface CommentsHostServices {
   location: CommentsLocationService;
   /**
    * Navigates to a path as returned by `location.getPath()`, in-app when
-   * possible. The path comes from a stored comment, which anyone with access to
-   * the store can have written: the host must refuse one that leaves its
-   * deployment (`//host/...`, a scheme) rather than open it.
+   * possible; a guide under way survives a page load made instead. The path
+   * comes from a stored comment, which anyone with access to the store can have
+   * written: the host must refuse one that leaves its deployment (`//host/...`,
+   * a scheme) rather than open it.
    */
   navigateToPath(path: string): Promise<void>;
   getCurrentUser(): Promise<CommentsUser>;

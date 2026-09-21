@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DISPLAY_NAME_STORAGE_KEY } from '../constants';
+import { DISPLAY_NAME_STORAGE_KEY, GUIDE_HANDOFF_STORAGE_KEY } from '../constants';
 import { buildAnchor } from '../lib/anchor';
 import { createSnapshot } from '../lib/snapshot';
 import { createTrailRecorder } from '../lib/trail';
@@ -110,7 +110,11 @@ export interface CommentsController {
   openThread(id: string | null, options?: { focusPin?: boolean }): void;
   /** Called by a pin once it took the focus requested through `focusPinId`. */
   pinFocused(id: string): void;
-  /** Opens the page the comment was made on and guides the reader through the author's clicks. */
+  /**
+   * Opens the page the comment was made on and guides the reader through the
+   * author's clicks; when the host opens the page by loading it anew (it is in
+   * another space), the guide goes on there, with the layer of that page.
+   */
   guideTo(comment: Comment): Promise<void>;
   /** Ends the guide; with `found`, opens the comment it led to. */
   stopGuide(found?: boolean): void;
@@ -137,6 +141,47 @@ const storeDisplayName = (displayName: string) => {
     localStorage.setItem(DISPLAY_NAME_STORAGE_KEY, displayName);
   } catch {
     // see above
+  }
+};
+
+/**
+ * A guide that was running as the page was left, for the layer of the page
+ * loaded next to go on with: the host opens a page in another space by loading
+ * it anew, which would otherwise end the guide that asked for it.
+ */
+interface GuideHandoff {
+  id: string;
+  /** The comment's page; the guide goes on only if that is the page loaded. */
+  pageKey: string;
+  /** When the page was left (epoch ms). */
+  at: number;
+}
+
+/** How long the page gets to load before a handoff lapses; a development server takes its time. */
+export const GUIDE_HANDOFF_TTL_MS = 60_000;
+
+// Session storage is this tab's alone, which is where the page load happens; it can be disabled too.
+const storeGuideHandoff = (handoff: GuideHandoff) => {
+  try {
+    sessionStorage.setItem(GUIDE_HANDOFF_STORAGE_KEY, JSON.stringify(handoff));
+  } catch {
+    // see above
+  }
+};
+
+/** The handoff left by the page before, if any; it is for this one page load, so it is taken off. */
+const takeGuideHandoff = (): GuideHandoff | null => {
+  try {
+    const stored = sessionStorage.getItem(GUIDE_HANDOFF_STORAGE_KEY);
+    sessionStorage.removeItem(GUIDE_HANDOFF_STORAGE_KEY);
+    const handoff = stored ? (JSON.parse(stored) as Partial<GuideHandoff>) : null;
+    return typeof handoff?.id === 'string' &&
+      typeof handoff.pageKey === 'string' &&
+      typeof handoff.at === 'number'
+      ? (handoff as GuideHandoff)
+      : null;
+  } catch {
+    return null;
   }
 };
 
@@ -330,6 +375,29 @@ export const createCommentsController = (services: CommentsHostServices): Commen
     void load();
   };
 
+  // The guide outlives the page: the host opens a page in another space by loading
+  // it anew, and a reload with a guide under way should not lose it either.
+  const onPageHide = () => {
+    const { guide, comments } = store.getState();
+    const comment = guide && comments.find(({ id }) => id === guide.id);
+    if (comment) {
+      storeGuideHandoff({ id: guide.id, pageKey: comment.route.pageKey, at: Date.now() });
+    }
+  };
+
+  // ...and goes on, in comment mode, once the comments are here, if the page loaded
+  // is the comment's, soon enough after the one that left it.
+  const resumeGuide = () => {
+    const handoff = takeGuideHandoff();
+    if (
+      handoff &&
+      Date.now() - handoff.at <= GUIDE_HANDOFF_TTL_MS &&
+      handoff.pageKey === location.getPageKey()
+    ) {
+      store.setState({ active: true, guide: { id: handoff.id, navigating: false } });
+    }
+  };
+
   // Every way out of comment mode (toolbar button, panel, shortcut) ends here; a
   // draft being saved must not be dropped by any of them, so the mode waits for it.
   const setActive = (active: boolean) => {
@@ -357,7 +425,9 @@ export const createCommentsController = (services: CommentsHostServices): Commen
       }
       started = true;
       unsubscribeLocation = location.subscribe(onLocationChange);
+      window.addEventListener('pagehide', onPageHide);
       trail.start();
+      resumeGuide();
       void load();
       void loadAuthor();
     },
@@ -369,6 +439,7 @@ export const createCommentsController = (services: CommentsHostServices): Commen
       started = false;
       unsubscribeLocation?.();
       unsubscribeLocation = undefined;
+      window.removeEventListener('pagehide', onPageHide);
       trail.stop();
       clearTimeout(noticeTimer);
     },

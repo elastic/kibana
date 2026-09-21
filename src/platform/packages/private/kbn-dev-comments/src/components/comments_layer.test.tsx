@@ -369,6 +369,39 @@ describe('CommentsLayer', () => {
     expect(Number(panel.style.zIndex)).toBe(above);
   });
 
+  it('loads the screenshot again, after a load that failed, when it is hidden and shown again', async () => {
+    const api = createInMemoryCommentsApi([
+      createComment('a', {
+        snapshot: { mimeType: 'image/jpeg', width: 800, height: 600, image: 'AAAA' },
+      }),
+    ]);
+    const getSnapshot = jest.spyOn(api, 'getSnapshot').mockRejectedValueOnce(new Error('offline'));
+    const controller = await renderLayer({ api });
+    act(() => controller.setActive(true));
+    act(() => controller.openThread('a'));
+    const thread = await screen.findByRole('dialog', { name: 'Comment thread' });
+
+    fireEvent.click(within(thread).getByTestId('devCommentsShowSnapshot'));
+    expect(
+      await within(thread).findByText(
+        'The screenshot could not be loaded. Hide and show it to try again.'
+      )
+    ).toBeInTheDocument();
+
+    fireEvent.click(within(thread).getByTestId('devCommentsShowSnapshot'));
+    fireEvent.click(within(thread).getByTestId('devCommentsShowSnapshot'));
+    expect(
+      await within(thread).findByRole('img', { name: /Screenshot of the UI/ })
+    ).toHaveAttribute('src', 'data:image/jpeg;base64,AAAA');
+    expect(getSnapshot).toHaveBeenCalledTimes(2);
+
+    // Loaded, it is kept: hiding and showing it again asks for nothing.
+    fireEvent.click(within(thread).getByTestId('devCommentsShowSnapshot'));
+    fireEvent.click(within(thread).getByTestId('devCommentsShowSnapshot'));
+    expect(within(thread).getByRole('img', { name: /Screenshot of the UI/ })).toBeInTheDocument();
+    expect(getSnapshot).toHaveBeenCalledTimes(2);
+  });
+
   it('keeps the pins, and the thread the screenshot is shown from, while the full-screen mask covers the page', async () => {
     const controller = await renderLayer();
     act(() => controller.setActive(true));

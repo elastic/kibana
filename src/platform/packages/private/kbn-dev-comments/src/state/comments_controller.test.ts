@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DISPLAY_NAME_STORAGE_KEY } from '../constants';
+import { DISPLAY_NAME_STORAGE_KEY, GUIDE_HANDOFF_STORAGE_KEY } from '../constants';
 import {
   createComment,
   createLocation,
@@ -18,7 +18,7 @@ import {
   renderPage,
 } from '../test_helpers';
 import type { Comment, CommentsApi, CommentsHostServices } from '../types';
-import { createCommentsController } from './comments_controller';
+import { GUIDE_HANDOFF_TTL_MS, createCommentsController } from './comments_controller';
 
 const target = () => query('#target');
 
@@ -49,6 +49,7 @@ describe('createCommentsController', () => {
   beforeEach(() => {
     renderPage('<button id="target">Target</button>');
     localStorage.clear();
+    sessionStorage.clear();
   });
 
   describe('loading', () => {
@@ -489,6 +490,64 @@ describe('createCommentsController', () => {
           message: 'Could not open the page of the comment - no such app',
         })
       );
+    });
+
+    it('goes on after the page load the host makes for the comment page, in comment mode, on that page only', async () => {
+      const { api, services } = createHost();
+      const far = createComment('far', {
+        route: { pageKey: '/s/other/app/two', path: '/s/other/app/two' },
+      });
+      api.list.mockResolvedValue([far]);
+      const controller = createCommentsController(services);
+      controller.start();
+      controller.store.setState({ active: true });
+      // Another space: the host loads the page anew, and the location does not change before that.
+      (services.navigateToPath as jest.Mock).mockResolvedValueOnce(undefined);
+      await controller.guideTo(far);
+      expect(controller.store.getState().guide).toEqual({ id: 'far', navigating: false });
+
+      window.dispatchEvent(new Event('pagehide'));
+      const handoff = JSON.parse(sessionStorage.getItem(GUIDE_HANDOFF_STORAGE_KEY)!);
+      expect(handoff).toEqual({ id: 'far', pageKey: '/s/other/app/two', at: expect.any(Number) });
+
+      // The state of a layer started on the page at `path`, with the handoff in place.
+      const startedAt = (path: string) => {
+        const { location } = createLocation(path);
+        const next = createCommentsController({ ...createHost().services, location });
+        next.start();
+        next.dispose();
+        return next.store.getState();
+      };
+
+      // The page loaded is another one: nothing goes on, and the handoff is spent.
+      expect(startedAt('/app/one')).toEqual(
+        expect.objectContaining({ active: false, guide: null })
+      );
+      expect(sessionStorage.getItem(GUIDE_HANDOFF_STORAGE_KEY)).toBeNull();
+
+      sessionStorage.setItem(GUIDE_HANDOFF_STORAGE_KEY, JSON.stringify(handoff));
+      expect(startedAt('/s/other/app/two')).toEqual(
+        expect.objectContaining({ active: true, guide: { id: 'far', navigating: false } })
+      );
+      expect(sessionStorage.getItem(GUIDE_HANDOFF_STORAGE_KEY)).toBeNull();
+
+      // Too long ago to be the page load the guide asked for.
+      sessionStorage.setItem(
+        GUIDE_HANDOFF_STORAGE_KEY,
+        JSON.stringify({ ...handoff, at: Date.now() - GUIDE_HANDOFF_TTL_MS - 1 })
+      );
+      expect(startedAt('/s/other/app/two')).toEqual(
+        expect.objectContaining({ active: false, guide: null })
+      );
+
+      // Without a guide under way, or once disposed, the page is left with nothing.
+      controller.stopGuide();
+      window.dispatchEvent(new Event('pagehide'));
+      expect(sessionStorage.getItem(GUIDE_HANDOFF_STORAGE_KEY)).toBeNull();
+      await controller.guideTo(far);
+      controller.dispose();
+      window.dispatchEvent(new Event('pagehide'));
+      expect(sessionStorage.getItem(GUIDE_HANDOFF_STORAGE_KEY)).toBeNull();
     });
 
     it('says nothing of a failed navigation once the guide was stopped or another one started', async () => {
