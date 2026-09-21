@@ -22,11 +22,6 @@ import { packagePolicyService } from './package_policy';
 import { auditLoggingService } from './audit_logging';
 import { findAgentlessPolicies } from './outputs/helpers';
 import { outputSavedObjectToOutput } from './output';
-import {
-  extractAndWriteOutputSecrets,
-  extractAndUpdateOutputSecrets,
-  isOutputSecretStorageEnabled,
-} from './secrets';
 import { getAgentCountForAgentPolicies } from './agent_policies/agent_policy_agent_count';
 import { buildAgentStatusRuntimeField } from './agents/build_status_runtime_field';
 
