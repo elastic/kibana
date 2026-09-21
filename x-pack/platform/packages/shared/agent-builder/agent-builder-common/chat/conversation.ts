@@ -25,7 +25,7 @@ import type {
 import type { RuntimeAgentConfigurationOverrides } from '../agents/definition';
 import type { ConversationAccessControl } from './access_control';
 import type { RoundState } from './round_state';
-import type { TimelineEvent } from './timeline_events';
+import type { ConversationEvent } from './timeline_events';
 import type { MetadataFieldValue } from '../templates';
 
 /**
@@ -640,8 +640,8 @@ export interface Conversation {
   pinned?: boolean;
   /** Whether the conversation's history is presented as frozen in the UI. Purely presentational. */
   read_only?: boolean;
-  /** Coarse event timeline for this conversation, derived from `rounds` on read.*/
-  events?: TimelineEvent[];
+  /** Event timeline for this conversation. */
+  events?: ConversationEvent[];
   /** Schema version of the stored events. */
   schema_version?: number;
 }

@@ -1,3 +1,0 @@
-# Without this file pnpm walks up to the root workspace, and `pnpm install` here
-# installs all of Kibana instead of this project's OpenAPI tooling.
-packages: []

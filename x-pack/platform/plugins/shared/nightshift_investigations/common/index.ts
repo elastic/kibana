@@ -201,22 +201,8 @@ export interface PaginatedResponse<T> {
 
 export type ListInvestigationsResponse = PaginatedResponse<ListInvestigationItem>;
 
-/**
- * Filters for the severity-count facet. A subset of `ListInvestigationsRequest`: no pagination,
- * no sort, and no `severities` — the counts describe how many investigations sit in each tier
- * under the other active filters, so narrowing by tier would make them self-referential.
- */
-export type SeverityCountsRequest = Omit<
-  ListInvestigationsRequest,
-  'severities' | 'sort_field' | 'sort_order' | 'page' | 'size'
->;
-
 /** Counts of investigations at each severity tier, zero-filled for all four tiers. */
 export type SeverityCounts = Record<Severity, number>;
-
-export interface SeverityCountsResponse {
-  severity_counts: SeverityCounts;
-}
 
 export {
   CORTEX_AI_INDEX_ID,
