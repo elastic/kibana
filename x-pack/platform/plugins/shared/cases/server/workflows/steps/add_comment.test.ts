@@ -48,6 +48,7 @@ describe('addCommentStepDefinition', () => {
         owner: createCaseResponseFixture.owner,
       },
     });
+    expect(get).toHaveBeenCalledWith({ id: 'case-1', includeComments: true });
     expect(result).toEqual({
       output: {
         case: createCaseResponseFixture,

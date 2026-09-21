@@ -343,8 +343,6 @@ export const findAttachments = async ({
   return body;
 };
 
-// -----------------------------V2 Unified Attachments API----------------------------
-
 export const addAttachmentV2 = async ({
   supertest,
   caseId,

@@ -102,16 +102,14 @@ describe('update', () => {
 
     const res = await update({ updateRequest: unifiedUpdateRequest, caseID }, clientArgs);
 
-    expect(res.attachment).toStrictEqual(
+    expect(res).toStrictEqual(
       expect.objectContaining({
         id: commentId,
         type: updatedAttachment.attributes.type,
         data: updatedAttachment.attributes.data,
       })
     );
-    // Not a `Case` — no case-shaped fields on the returned attachment.
-    expect(res.attachment).not.toHaveProperty('comments');
-    expect(res.theCase).toHaveProperty('comments');
+    expect(res).not.toHaveProperty('comments');
 
     expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith(
       expect.objectContaining({

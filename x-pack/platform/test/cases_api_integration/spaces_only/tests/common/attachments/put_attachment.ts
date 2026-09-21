@@ -72,8 +72,6 @@ export default ({ getService }: FtrProviderContext): void => {
         supertest: supertestWithoutAuth,
         caseId: postedCase.id,
         attachmentId: attachment.id,
-        // Valid `security.alert` payload on its own — must fail because it differs
-        // from the attachment's existing `comment` type, not because of its shape.
         req: {
           version: attachment.version,
           type: 'security.alert',

@@ -8,11 +8,11 @@
 import Boom from '@hapi/boom';
 
 import { UnifiedAttachmentPutRequestRt } from '../../../common/types/api';
-import { UnifiedAttachmentRt } from '../../../common/types/domain/attachment/v2';
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
-import type { Case, UnifiedAttachment } from '../../../common/types/domain';
-import { decodeOrThrow, decodeWithExcessOrThrow } from '../../common/runtime_types';
+import type { UnifiedAttachment } from '../../../common/types/domain';
+import { decodeWithExcessOrThrow } from '../../common/runtime_types';
+import { toUnifiedAttachment } from '../../services/attachments/operations/utils';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
@@ -20,19 +20,10 @@ import type { UpdateArgs } from './types';
 import { validateMaxUserActions } from '../../common/validators';
 import { validateUnifiedAttachments } from './validators';
 
-export interface UpdateCommentResult {
-  attachment: UnifiedAttachment;
-  theCase: Case;
-}
-
-/**
- * Replaces an attachment. Public `attachments.update` returns only `attachment`.
- * Legacy `PATCH /comments` uses `theCase` from this same encode (not a second get).
- */
 export async function update(
   { caseID, updateRequest: queryParams }: UpdateArgs,
   clientArgs: CasesClientArgs
-): Promise<UpdateCommentResult> {
+): Promise<UnifiedAttachment> {
   const {
     services: { attachmentService, userActionService },
     logger,
@@ -52,8 +43,6 @@ export async function update(
       userActionsToAdd: 1,
     });
 
-    // Enforce registry registration and the unified zod schema; mirrors the
-    // add/bulk_create paths so PUT stays in sync with POST.
     validateUnifiedAttachments({
       query: queryRestAttributes,
       unifiedAttachmentTypeRegistry,
@@ -114,13 +103,10 @@ export async function update(
       throw new Error(`Failed to locate updated attachment ${queryCommentId} on case ${caseID}`);
     }
 
-    return {
-      attachment: decodeOrThrow(UnifiedAttachmentRt)(attachment),
-      theCase: updatedCase,
-    };
+    return toUnifiedAttachment(attachment);
   } catch (error) {
     throw createCaseError({
-      message: `Failed to patch comment case id: ${caseID}: ${error}`,
+      message: `Failed to replace attachment case id: ${caseID}: ${error}`,
       error,
       logger,
     });

@@ -14,12 +14,9 @@ import {
 } from '../../../../common/types/domain/attachment/v2';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
-import { createIoTsBodyValidation } from '../utils';
+import { createIoTsRouteValidation } from '../utils';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 
-/**
- * Creates a single attachment from a unified payload — no legacy shapes accepted.
- */
 export const postAttachmentRoute = createCasesRoute<
   { case_id: string },
   unknown,
@@ -32,7 +29,7 @@ export const postAttachmentRoute = createCasesRoute<
     params: schema.object({
       case_id: schema.string({ maxLength: MAX_CASE_ID_LENGTH }),
     }),
-    body: createIoTsBodyValidation(UnifiedAttachmentPayloadRt),
+    body: createIoTsRouteValidation(UnifiedAttachmentPayloadRt),
   },
   routerOptions: {
     // TODO(security-team#15572): flip to 'public' once this API is ready to ship.

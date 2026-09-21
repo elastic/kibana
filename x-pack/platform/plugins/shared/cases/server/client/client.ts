@@ -35,10 +35,8 @@ export class CasesClient {
   private readonly _metrics: MetricsSubClient;
   private readonly _templates: TemplatesSubClient;
   private readonly _fieldDefinitions: FieldDefinitionsSubClient;
-  private readonly args: CasesClientArgs;
 
   constructor(args: CasesClientArgs) {
-    this.args = args;
     this._casesClientInternal = createCasesClientInternal(args);
     this._cases = createCasesSubClient(args, this, this._casesClientInternal);
     this._attachments = createAttachmentsSubClient(args, this, this._casesClientInternal);
@@ -47,13 +45,6 @@ export class CasesClient {
     this._metrics = createMetricsSubClient(args, this);
     this._templates = createTemplatesSubClient(args);
     this._fieldDefinitions = createFieldDefinitionsSubClient(args);
-  }
-
-  /**
-   * @internal Used by legacy `/comments` routes to reuse add/update's encoded case.
-   */
-  public getClientArgs(): CasesClientArgs {
-    return this.args;
   }
 
   /**

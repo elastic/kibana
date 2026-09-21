@@ -49,7 +49,7 @@ import { withUsageCounter } from '../usage_counters';
  */
 export interface AttachmentsSubClient {
   /**
-   * Creates an attachment and returns it in its unified shape.
+   * Adds an attachment to a case.
    */
   add(params: AddArgs): Promise<UnifiedAttachment>;
   bulkCreate(params: BulkCreateArgs): Promise<Case>;
@@ -80,8 +80,7 @@ export interface AttachmentsSubClient {
    */
   get(getArgs: GetArgs): Promise<AttachmentV2>;
   /**
-   * Replaces an attachment and returns it in its unified shape. `PUT` semantics —
-   * the request must include every field; there are no partial updates.
+   * Full replace. The request must include every field.
    */
   update(updateArgs: UpdateArgs): Promise<UnifiedAttachment>;
   /**
@@ -117,10 +116,9 @@ export const createAttachmentsSubClient = (
   casesClientInternal: CasesClientInternal
 ): AttachmentsSubClient => {
   const attachmentSubClient: AttachmentsSubClient = {
-    add: withUsageCounter(usageCounterByMethod.add, clientArgs, async (params: AddArgs) => {
-      const { attachment } = await addComment(params, clientArgs);
-      return attachment;
-    }),
+    add: withUsageCounter(usageCounterByMethod.add, clientArgs, (params: AddArgs) =>
+      addComment(params, clientArgs)
+    ),
     bulkCreate: withUsageCounter(
       usageCounterByMethod.bulkCreate,
       clientArgs,
@@ -145,13 +143,8 @@ export const createAttachmentsSubClient = (
       getAllDocumentsAttachedToCase(params, clientArgs, casesClient),
     getAll: (params: GetAllArgs) => getAll(params, clientArgs),
     get: (params: GetArgs) => get(params, clientArgs),
-    update: withUsageCounter(
-      usageCounterByMethod.update,
-      clientArgs,
-      async (params: UpdateArgs) => {
-        const { attachment } = await update(params, clientArgs);
-        return attachment;
-      }
+    update: withUsageCounter(usageCounterByMethod.update, clientArgs, (params: UpdateArgs) =>
+      update(params, clientArgs)
     ),
     addFile: withUsageCounter(usageCounterByMethod.addFile, clientArgs, (params: AddFileArgs) =>
       addFile(params, clientArgs, casesClient)

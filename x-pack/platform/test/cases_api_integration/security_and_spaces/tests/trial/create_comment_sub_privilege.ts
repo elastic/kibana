@@ -66,12 +66,12 @@ export default ({ getService }: FtrProviderContext): void => {
 
       // Create
       for (const scenario of [
-        { user: secOnlyReadCreateComment, space: 'space1' },
-        { user: secOnlyCreateComment, space: 'space1' },
+        { user: secOnlyReadCreateComment, space: 'space1', expectedHttpCode: 200 },
+        { user: secOnlyCreateComment, space: 'space1', expectedHttpCode: 403 },
       ]) {
         it(`User ${scenario.user.username} with role(s) ${scenario.user.roles.join()} and space ${
           scenario.space
-        } - should create user comments`, async () => {
+        } - create user comments returns ${scenario.expectedHttpCode}`, async () => {
           const postedCase = await createCase(
             supertestWithoutAuth,
             getPostCaseRequest({ owner: 'securitySolutionFixture' }),
@@ -86,7 +86,7 @@ export default ({ getService }: FtrProviderContext): void => {
             caseId: postedCase.id,
             params: postCommentUserReq,
             auth: scenario,
-            expectedHttpCode: 200,
+            expectedHttpCode: scenario.expectedHttpCode,
           });
         });
       }
@@ -211,12 +211,12 @@ export default ({ getService }: FtrProviderContext): void => {
 
       // Create
       for (const scenario of [
-        { user: secOnlyCreateComment, space: 'space1' },
-        { user: secOnlyReadCreateComment, space: 'space1' },
+        { user: secOnlyReadCreateComment, space: 'space1', expectedHttpCode: 200 },
+        { user: secOnlyCreateComment, space: 'space1', expectedHttpCode: 403 },
       ]) {
         it(`User ${scenario.user.username} with role(s) ${scenario.user.roles.join()} and space ${
           scenario.space
-        } - should attach alerts`, async () => {
+        } - attach alerts returns ${scenario.expectedHttpCode}`, async () => {
           const postedCase = await createCase(
             supertestWithoutAuth,
             getPostCaseRequest({ owner: 'securitySolutionFixture' }),
@@ -231,7 +231,7 @@ export default ({ getService }: FtrProviderContext): void => {
             caseId: postedCase.id,
             params: postCommentAlertMultipleIdsReq,
             auth: scenario,
-            expectedHttpCode: 200,
+            expectedHttpCode: scenario.expectedHttpCode,
           });
         });
       }
@@ -294,39 +294,51 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      // Create
-      for (const scenario of [
-        { user: secOnlyCreateComment, space: 'space1' },
-        { user: secOnlyReadCreateComment, space: 'space1' },
-      ]) {
-        it(`User ${scenario.user.username} with role(s) ${scenario.user.roles.join()} and space ${
-          scenario.space
-        } - should attach files`, async () => {
-          const postedCase = await createCase(
-            supertestWithoutAuth,
-            getPostCaseRequest({ owner: 'securitySolutionFixture' }),
-            200,
-            {
-              user: superUser,
-              space: 'space1',
-            }
-          );
+      it('should attach files and return the case when the user can read', async () => {
+        const postedCase = await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+          200,
+          {
+            user: superUser,
+            space: 'space1',
+          }
+        );
 
-          const caseWithAttachments = await createComment({
-            supertest: supertestWithoutAuth,
-            caseId: postedCase.id,
-            auth: scenario,
-            params: getFilesAttachmentReq(),
-            expectedHttpCode: 200,
-          });
-
-          const fileAttachment =
-            caseWithAttachments.comments![0] as ExternalReferenceSOAttachmentPayload;
-
-          expect(caseWithAttachments.totalComment).to.be(1);
-          expect(fileAttachment.externalReferenceMetadata).to.eql(fileAttachmentMetadata);
+        const caseWithAttachments = await createComment({
+          supertest: supertestWithoutAuth,
+          caseId: postedCase.id,
+          auth: { user: secOnlyReadCreateComment, space: 'space1' },
+          params: getFilesAttachmentReq(),
+          expectedHttpCode: 200,
         });
-      }
+
+        const fileAttachment =
+          caseWithAttachments.comments![0] as ExternalReferenceSOAttachmentPayload;
+
+        expect(caseWithAttachments.totalComment).to.be(1);
+        expect(fileAttachment.externalReferenceMetadata).to.eql(fileAttachmentMetadata);
+      });
+
+      it('should not return the case after attaching a file without read', async () => {
+        const postedCase = await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+          200,
+          {
+            user: superUser,
+            space: 'space1',
+          }
+        );
+
+        await createComment({
+          supertest: supertestWithoutAuth,
+          caseId: postedCase.id,
+          auth: { user: secOnlyCreateComment, space: 'space1' },
+          params: getFilesAttachmentReq(),
+          expectedHttpCode: 403,
+        });
+      });
 
       // Delete
       for (const scenario of [

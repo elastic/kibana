@@ -7,17 +7,18 @@
 
 import { SavedObjectsUtils } from '@kbn/core/server';
 
-import type { AttachmentV2, Case, UnifiedAttachment } from '../../../common/types/domain';
-import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
+import type { AttachmentV2, UnifiedAttachment } from '../../../common/types/domain';
 import {
   UnifiedAttachmentPayloadRt,
-  UnifiedAttachmentRt,
+  type UnifiedAttachmentPayload,
 } from '../../../common/types/domain/attachment/v2';
 import type { AttachmentRequestV2 } from '../../../common/types/api';
-import { decodeOrThrow, decodeWithExcessOrThrow } from '../../common/runtime_types';
+import { decodeWithExcessOrThrow } from '../../common/runtime_types';
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
 import { getIDsAndIndicesAsArrays } from '../../common/utils';
+import { isAlertAttachmentType, isEventAttachmentType } from '../../../common/utils/attachments';
+import { toUnifiedAttachment } from '../../services/attachments/operations/utils';
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import type { AddArgs } from './types';
@@ -26,10 +27,16 @@ import { validateMaxUserActions } from '../../common/validators';
 import { extractAndAddObservables } from './extract_observables';
 import { emitAttachmentsAddedEvent } from './trigger_utils';
 
-/**
- * Duplicate alert/event ids are dropped before persist. Prefer the newly created
- * SO, otherwise an existing attachment that already holds one of those ids.
- */
+const isSameAlertOrEventFamily = (storedType: string, requestType: string): boolean => {
+  if (isAlertAttachmentType(requestType)) {
+    return isAlertAttachmentType(storedType);
+  }
+  if (isEventAttachmentType(requestType)) {
+    return isEventAttachmentType(storedType);
+  }
+  return storedType === requestType;
+};
+
 const pickCreatedOrExistingAttachment = (
   comments: AttachmentV2[] | undefined,
   savedObjectID: string,
@@ -47,26 +54,19 @@ const pickCreatedOrExistingAttachment = (
 
   const requestedIdSet = new Set(requestedIds);
 
-  return comments?.find((comment) =>
-    getIDsAndIndicesAsArrays(comment as AttachmentRequestV2).ids.some((id) =>
-      requestedIdSet.has(id)
-    )
+  return comments?.find(
+    (comment) =>
+      isSameAlertOrEventFamily(comment.type, query.type) &&
+      getIDsAndIndicesAsArrays(comment as AttachmentRequestV2).ids.some((id) =>
+        requestedIdSet.has(id)
+      )
   );
 };
 
-export interface AddCommentResult {
-  attachment: UnifiedAttachment;
-  theCase: Case;
-}
-
-/**
- * Creates an attachment. Public `attachments.add` returns only `attachment`.
- * Legacy `POST /comments` uses `theCase` from this same encode (not a second get).
- */
 export const addComment = async (
   addArgs: AddArgs,
   clientArgs: CasesClientArgs
-): Promise<AddCommentResult> => {
+): Promise<UnifiedAttachment> => {
   const { comment, caseId } = addArgs;
 
   const {
@@ -119,10 +119,7 @@ export const addComment = async (
       await extractAndAddObservables(caseId, [query], updatedCase, clientArgs);
     }
 
-    return {
-      attachment: decodeOrThrow(UnifiedAttachmentRt)(attachment),
-      theCase: updatedCase,
-    };
+    return toUnifiedAttachment(attachment);
   } catch (error) {
     throw createCaseError({
       message: `Failed while adding a comment to case id: ${caseId} error: ${error}`,

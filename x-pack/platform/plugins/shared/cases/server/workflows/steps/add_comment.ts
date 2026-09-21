@@ -37,8 +37,6 @@ export const addCommentStepDefinition = (
           includeComments: true,
         });
 
-        // The client returns unified comments; the output schema mirrors the
-        // public (legacy) wire shape, so convert back before validating.
         return safeParseCaseForWorkflowOutput(
           addCommentStepCommonDefinition.outputSchema.shape.case,
           toLegacyCaseResponse(updatedCase)

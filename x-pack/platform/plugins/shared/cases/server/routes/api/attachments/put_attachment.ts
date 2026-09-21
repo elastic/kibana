@@ -18,12 +18,9 @@ import {
 } from '../../../../common/types/api/attachment/v2';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
-import { createIoTsBodyValidation } from '../utils';
+import { createIoTsRouteValidation } from '../utils';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 
-/**
- * Replaces a single attachment. `PUT`, not `PATCH` — every field is required.
- */
 export const putAttachmentRoute = createCasesRoute<
   { case_id: string; attachment_id: string },
   unknown,
@@ -37,7 +34,7 @@ export const putAttachmentRoute = createCasesRoute<
       case_id: schema.string({ maxLength: MAX_CASE_ID_LENGTH }),
       attachment_id: schema.string({ maxLength: MAX_ATTACHMENT_ID_LENGTH }),
     }),
-    body: createIoTsBodyValidation(UnifiedAttachmentPutRequestRt),
+    body: createIoTsRouteValidation(UnifiedAttachmentPutRequestRt),
   },
   routerOptions: {
     // TODO(security-team#15572): flip to 'public' once this API is ready to ship.

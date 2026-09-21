@@ -66,8 +66,6 @@ export default ({ getService }: FtrProviderContext): void => {
       await addAttachmentV2({
         supertest,
         caseId: postedCase.id,
-        // Legacy `/comments` shape (`type: 'user'`, `comment` instead of `data`) —
-        // this API only accepts unified payloads.
         params: {
           type: 'user',
           comment: 'This is a cool comment',

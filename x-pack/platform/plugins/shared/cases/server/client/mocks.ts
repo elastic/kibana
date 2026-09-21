@@ -216,7 +216,6 @@ export const createCasesClientMock = (): CasesClientMock => {
     metrics: createMetricsSubClientMock(),
     templates: createTemplatesSubClientMock(),
     fieldDefinitions: createFieldDefinitionsSubClientMock(),
-    getClientArgs: jest.fn(),
   });
   return client as unknown as CasesClientMock;
 };
