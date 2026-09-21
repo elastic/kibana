@@ -371,6 +371,10 @@ describe('OnboardingFlowProvider', () => {
       rerender();
 
       expect(result.current.authenticateAndDeployStep.authMethod).toBe('static_keys');
+      expect(result.current.authenticateAndDeployStep.staticKeys).toEqual({
+        access_key_id: 'AKIA',
+        secret_access_key: 'secret',
+      });
       expect(result.current.authenticateAndDeployStep.connectorId).toBeUndefined();
       expect(result.current.authenticateAndDeployStep.connectorName).toBeUndefined();
     });
