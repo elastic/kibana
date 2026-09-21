@@ -31,7 +31,7 @@ jest.mock('./tier1/hunt_for_threat', () => ({
     timeRange: { from: 'now-24h', to: 'now' },
     counts: { totalHits: 0, returnedHits: 0, affectedHosts: 0, affectedUsers: 0 },
     hits: [],
-    affectedAssets: { hosts: [], users: [] },
+    affectedAssets: { hosts: [], users: [], services: [] },
     perIndex: [],
   }),
 }));
@@ -79,7 +79,7 @@ describe('huntCoordinator', () => {
       timeRange: { from: 'now-24h', to: 'now' },
       counts: { totalHits: 5, returnedHits: 5, affectedHosts: 1, affectedUsers: 0 },
       hits: [],
-      affectedAssets: { hosts: [{ name: 'host-1', hitCount: 5 }], users: [] },
+      affectedAssets: { hosts: [{ name: 'host-1', hitCount: 5 }], users: [], services: [] },
       perIndex: [],
     });
 
@@ -106,7 +106,7 @@ describe('huntCoordinator', () => {
       timeRange: { from: 'now-24h', to: 'now' },
       counts: { totalHits: 1, returnedHits: 1, affectedHosts: 0, affectedUsers: 0 },
       hits: [],
-      affectedAssets: { hosts: [], users: [] },
+      affectedAssets: { hosts: [], users: [], services: [] },
       perIndex: [],
     });
 

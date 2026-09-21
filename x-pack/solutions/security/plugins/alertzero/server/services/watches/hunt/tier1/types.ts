@@ -78,7 +78,15 @@ export interface HuntForThreatResult {
     affectedUsers: number;
   };
   hits: HuntForThreatHit[];
-  affectedAssets: { hosts: AffectedAsset[]; users: AffectedAsset[] };
+  /**
+   * `users` and `services` both come from the `user.name` aggregation, split
+   * by `classifyIdentityType` (`hunt_for_threat.ts`): an AWS assumed-role or
+   * service-principal identity (CloudTrail `user_identity.type` of
+   * `AssumedRole`/`Role`/`AWSAccount`/`AWSService`) lands in `services`
+   * instead of `users`, since a role name like `escalated-role` is not a
+   * person and would never resolve on the Security Users entity page.
+   */
+  affectedAssets: { hosts: AffectedAsset[]; users: AffectedAsset[]; services: AffectedAsset[] };
   /**
    * `required` reflects a regex match against the resolved technology's
    * required index *patterns* (e.g. `logs-aws.*`), not a set-membership

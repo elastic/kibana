@@ -112,7 +112,7 @@ const emptyResult = (
   timeRange,
   counts: { totalHits: 0, returnedHits: 0, affectedHosts: 0, affectedUsers: 0 },
   hits: [],
-  affectedAssets: { hosts: [], users: [] },
+  affectedAssets: { hosts: [], users: [], services: [] },
   perIndex: [],
   message,
 });
@@ -120,8 +120,44 @@ const emptyResult = (
 interface HuntAggregations {
   per_index?: { buckets: Array<{ key: string; doc_count: number }> };
   affected_hosts?: { buckets: Array<{ key: string; doc_count: number }> };
-  affected_users?: { buckets: Array<{ key: string; doc_count: number }> };
+  affected_users?: {
+    buckets: Array<{
+      key: string;
+      doc_count: number;
+      identity_types?: { buckets: Array<{ key: string; doc_count: number }> };
+    }>;
+  };
 }
+
+/**
+ * AWS CloudTrail `user_identity.type` values that represent a non-person
+ * credential (an assumed IAM role, an AWS service principal, or a
+ * cross-account role) rather than an actual human user. `user.name` for
+ * these is a role/service name (e.g. `escalated-role` assumed via
+ * `sts:AssumeRole`), so surfacing it as a Security "user" entity is wrong:
+ * it will never resolve on the Users page, human or not. See
+ * `classifyIdentityType` below.
+ */
+const NON_HUMAN_AWS_IDENTITY_TYPES = new Set(['AssumedRole', 'Role', 'AWSAccount', 'AWSService']);
+
+/**
+ * Classifies a `user.name` bucket as a person or a role/service identity from
+ * its most common `aws.cloudtrail.user_identity.type` value (majority vote,
+ * since a handful of demo/edge-case docs could carry a stray type). Buckets
+ * with no identity-type sub-aggregation data (non-CloudTrail sources, or an
+ * index pattern that doesn't map the field) default to 'user': the
+ * conservative choice, since misclassifying a real user as a service is worse
+ * than the reverse for the entity-chip's Security-page link.
+ */
+const classifyIdentityType = (
+  identityTypeBuckets: Array<{ key: string; doc_count: number }> | undefined
+): 'user' | 'service' => {
+  if (!identityTypeBuckets || identityTypeBuckets.length === 0) return 'user';
+  const topBucket = identityTypeBuckets.reduce((max, bucket) =>
+    bucket.doc_count > max.doc_count ? bucket : max
+  );
+  return NON_HUMAN_AWS_IDENTITY_TYPES.has(topBucket.key) ? 'service' : 'user';
+};
 
 /**
  * Tier 1 deterministic hunt: search the scope A2 resolved for a report's
@@ -218,6 +254,11 @@ export const huntForThreat = async (
       },
       affected_users: {
         terms: { field: 'user.name', size: maxAssets },
+        aggs: {
+          identity_types: {
+            terms: { field: 'aws.cloudtrail.user_identity.type.keyword', size: 5 },
+          },
+        },
       },
     },
   });
@@ -239,10 +280,17 @@ export const huntForThreat = async (
     name: b.key,
     hitCount: b.doc_count,
   }));
-  const users: AffectedAsset[] = (aggs?.affected_users?.buckets ?? []).map((b) => ({
-    name: b.key,
-    hitCount: b.doc_count,
-  }));
+  const userBuckets = aggs?.affected_users?.buckets ?? [];
+  const users: AffectedAsset[] = [];
+  const services: AffectedAsset[] = [];
+  for (const bucket of userBuckets) {
+    const asset: AffectedAsset = { name: bucket.key, hitCount: bucket.doc_count };
+    if (classifyIdentityType(bucket.identity_types?.buckets) === 'service') {
+      services.push(asset);
+    } else {
+      users.push(asset);
+    }
+  }
   const perIndex = (aggs?.per_index?.buckets ?? []).map((b) => ({
     index: b.key,
     hitCount: b.doc_count,
@@ -266,7 +314,7 @@ export const huntForThreat = async (
       affectedUsers: users.length,
     },
     hits,
-    affectedAssets: { hosts, users },
+    affectedAssets: { hosts, users, services },
     perIndex,
   };
 };

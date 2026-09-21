@@ -197,6 +197,13 @@ const buildEntities = (result: HuntCoordinatorResult): SseEntityRef[] => [
   ...result.tier1.affectedAssets.users.map(
     (user): SseEntityRef => ({ field: 'user.name', value: user.name })
   ),
+  // Assumed-role / service-principal identities (e.g. an AWS IAM role
+  // reached via sts:AssumeRole) are not people, so they're kept out of
+  // `user.name` and rendered as `service.name` instead (tier1's
+  // `classifyIdentityType`, `hunt_for_threat.ts`).
+  ...result.tier1.affectedAssets.services.map(
+    (service): SseEntityRef => ({ field: 'service.name', value: service.name })
+  ),
 ];
 
 // Tier 1 doesn't attribute a hit to a specific IOC/technique today.

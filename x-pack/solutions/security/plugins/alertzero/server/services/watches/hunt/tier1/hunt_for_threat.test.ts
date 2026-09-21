@@ -166,4 +166,44 @@ describe('huntForThreat', () => {
       })
     );
   });
+
+  it('classifies affected_users buckets into users vs. services by AWS identity type', async () => {
+    const esClient = buildEsClient({
+      hits: { total: { value: 0 }, hits: [] },
+      aggregations: {
+        per_index: { buckets: [] },
+        affected_hosts: { buckets: [] },
+        affected_users: {
+          buckets: [
+            {
+              key: 'dev-user',
+              doc_count: 4,
+              identity_types: { buckets: [{ key: 'IAMUser', doc_count: 4 }] },
+            },
+            {
+              key: 'escalated-role',
+              doc_count: 6,
+              identity_types: { buckets: [{ key: 'AssumedRole', doc_count: 6 }] },
+            },
+            {
+              key: 'legacy-service-account',
+              doc_count: 2,
+              identity_types: { buckets: [] },
+            },
+          ],
+        },
+      },
+    });
+
+    const result = await huntForThreat(esClient, {
+      scope,
+      iocs: [{ type: 'ip', value: '10.0.0.1' }],
+    });
+
+    expect(result.affectedAssets.users).toEqual([
+      { name: 'dev-user', hitCount: 4 },
+      { name: 'legacy-service-account', hitCount: 2 },
+    ]);
+    expect(result.affectedAssets.services).toEqual([{ name: 'escalated-role', hitCount: 6 }]);
+  });
 });
