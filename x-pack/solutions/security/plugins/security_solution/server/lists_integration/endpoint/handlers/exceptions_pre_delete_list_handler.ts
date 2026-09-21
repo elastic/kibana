@@ -62,7 +62,7 @@ export const getExceptionsPreDeleteListHandler = (
         type: getSavedObjectType({ namespaceType: data.namespaceType }),
       },
       filter: undefined,
-      fields: undefined,
+      fields: ['name', 'params.ruleId'],
       sortField: undefined,
       sortOrder: undefined,
       page: undefined,
