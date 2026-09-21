@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { significantSecurityEventAttachmentDataSchema } from '../../../../../common/significant_security_event_schema';
 import { huntCoordinator } from '../hunt_coordinator';
 import { buildSseData, buildSseAttachmentId } from './sse_mapper';
 
@@ -279,5 +280,58 @@ describe('buildSseData', () => {
     expect(entries[0].data.hunt_result.tier2).toBeUndefined();
     expect(entries[0].data.entities).toEqual([]);
     expect(entries[0].data.events).toEqual([]);
+  });
+});
+
+describe('buildSseData output parses against the SSE attachment schema', () => {
+  it('validates a full hit-with-behaviors entry against significantSecurityEventAttachmentDataSchema', async () => {
+    const { huntForThreat } = jest.requireMock('../tier1/hunt_for_threat');
+    const { huntBehavior } = jest.requireMock('../tier2/hunt_behavior');
+    huntForThreat.mockResolvedValue(HIT_TIER1_RESULT);
+    huntBehavior.mockResolvedValue(HIT_TIER2_RESULT_TWO_BEHAVIORS);
+
+    const coordinatorResult = await huntCoordinator(esClient, {} as never, logger, {
+      report_id: 'tr-aws-iam-assumerole-2026-07-28',
+      spaceId: 'default',
+      text: 'AssumeRole chain from a rarely used identity',
+      trigger: 'scheduled',
+      runId: 'run-hunt-20260730T160000Z',
+      tier2_when: 'on_hits',
+    });
+
+    const [entry] = buildSseData(coordinatorResult, 'tr-aws-iam-assumerole-2026-07-28', {
+      spaceId: 'default',
+      requiredIndices: ['logs-aws.cloudtrail-default'],
+    });
+
+    // PR 1 owns title/severity/status/hypothesis_tested/evidence_for/evidence_against/
+    // evaluation_record_ref; the hunt child's packaging step fills these in before
+    // writing the attachment. This is the schema lock: buildSseData's own fields
+    // (report_id, run_id, source_watch, capability, security_knowledge_indicators,
+    // entities, events, hunt_result) must parse as-is against PR 1's real schema, with
+    // no cast, so a drift between the two PRs fails this test instead of surfacing at
+    // demo time.
+    const candidateAttachment = {
+      ...entry.data,
+      title: 'AssumeRole into OrgAdminBoundary from ci-deploy-runner-07',
+      severity: 'high' as const,
+      confidence: 0.82,
+      status: 'open' as const,
+      timeline: [
+        { at: '2026-07-30T13:05:00.000Z', what: 'AssumeRole into OrgAdminBoundary observed.' },
+      ],
+      hypothesis_tested: 'A rarely used identity assumed a high-privilege role outside business hours.',
+      evidence_for: ['AssumeRole event outside the identity\'s normal access pattern.'],
+      evidence_against: [] as string[],
+      evaluation_record_ref: 'eval-run-hunt-20260730T160000Z',
+    };
+
+    const parsed = significantSecurityEventAttachmentDataSchema.safeParse(candidateAttachment);
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.report_id).toBe('tr-aws-iam-assumerole-2026-07-28');
+      expect(parsed.data.hunt_result?.has_confirmed_hit).toBe(true);
+      expect(parsed.data.hunt_result?.tier2?.behaviors).toHaveLength(2);
+    }
   });
 });
