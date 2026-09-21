@@ -15,11 +15,14 @@ export type MobileFiltersResponse = Array<{
   options: string[];
 }>;
 
+export type MobileFilterErrorType = 'error' | 'crash';
+
 export async function getMobileFilters({
   kuery,
   apmEventClient,
   serviceName,
   transactionType,
+  errorType,
   environment,
   start,
   end,
@@ -28,6 +31,7 @@ export async function getMobileFilters({
   apmEventClient: APMEventClient;
   serviceName: string;
   transactionType?: string;
+  errorType?: MobileFilterErrorType;
   environment: string;
   start: number;
   end: number;
@@ -38,6 +42,7 @@ export async function getMobileFilters({
     apmEventClient,
     serviceName,
     transactionType,
+    errorType,
     environment,
     start,
     end,

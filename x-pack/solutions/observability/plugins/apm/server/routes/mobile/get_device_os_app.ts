@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { termQuery, kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import {
   DEVICE_MODEL_IDENTIFIER,
+  ERROR_TYPE,
   HOST_OS_VERSION,
   SERVICE_NAME,
   SERVICE_VERSION,
@@ -17,12 +20,14 @@ import { environmentQuery } from '../../../common/utils/environment_query';
 import { ApmDocumentType } from '../../../common/document_type';
 import { RollupInterval } from '../../../common/rollup';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import type { MobileFilterErrorType } from './get_mobile_filters';
 
 export async function getDeviceOSApp({
   kuery,
   apmEventClient,
   serviceName,
   transactionType,
+  errorType,
   environment,
   start,
   end,
@@ -32,20 +37,35 @@ export async function getDeviceOSApp({
   apmEventClient: APMEventClient;
   serviceName: string;
   transactionType?: string;
+  errorType?: MobileFilterErrorType;
   environment: string;
   start: number;
   end: number;
   size: number;
 }) {
+  // On the errors & crashes tabs the dropdown options must be sourced from the
+  // matching error documents (crashes only show `error.type: crash`, errors show
+  // everything else), rather than from transaction documents.
+  const errorTypeFilter: QueryDslQueryContainer[] =
+    errorType === 'crash'
+      ? termQuery(ERROR_TYPE, 'crash')
+      : errorType === 'error'
+      ? [{ bool: { must_not: termQuery(ERROR_TYPE, 'crash') } }]
+      : [];
+
   return await apmEventClient.search('get_mobile_device_os_app', {
-    apm: {
-      sources: [
-        {
-          documentType: ApmDocumentType.TransactionEvent,
-          rollupInterval: RollupInterval.None,
+    apm: errorType
+      ? {
+          events: [ProcessorEvent.error],
+        }
+      : {
+          sources: [
+            {
+              documentType: ApmDocumentType.TransactionEvent,
+              rollupInterval: RollupInterval.None,
+            },
+          ],
         },
-      ],
-    },
     track_total_hits: false,
     size: 0,
     query: {
@@ -55,6 +75,7 @@ export async function getDeviceOSApp({
           ...termQuery(TRANSACTION_TYPE, transactionType),
           ...rangeQuery(start, end),
           ...environmentQuery(environment),
+          ...errorTypeFilter,
           ...kqlQuery(kuery),
         ],
       },

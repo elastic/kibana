@@ -78,6 +78,34 @@ describe('mobileFiltersRoute params', () => {
 
     expectParseError(result);
   });
+
+  it('accepts a query with a valid errorType', () => {
+    const result = mobileFiltersRoute.params!.safeParse({
+      path: { serviceName: 'opbeans-swift' },
+      query: {
+        ...range,
+        kuery: '',
+        environment: 'production',
+        errorType: 'crash',
+      },
+    });
+
+    expectParseSuccess(result);
+  });
+
+  it('rejects a query with an invalid errorType', () => {
+    const result = mobileFiltersRoute.params!.safeParse({
+      path: { serviceName: 'opbeans-swift' },
+      query: {
+        ...range,
+        kuery: '',
+        environment: 'production',
+        errorType: 'not-a-valid-type',
+      },
+    });
+
+    expectParseError(result);
+  });
 });
 
 describe('mobileHttpRequestsRoute params', () => {
