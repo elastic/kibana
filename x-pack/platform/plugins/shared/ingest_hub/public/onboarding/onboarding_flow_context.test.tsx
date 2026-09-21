@@ -271,7 +271,10 @@ describe('OnboardingFlowProvider', () => {
       const { result, rerender } = renderHook(() => useOnboardingFlow(), { wrapper });
 
       act(() => {
-        result.current.setAgentBasedDeployment({ agentPolicyId: 'policy-1', agentPolicyName: 'My Policy' });
+        result.current.setAgentBasedDeployment({
+          agentPolicyId: 'policy-1',
+          agentPolicyName: 'My Policy',
+        });
       });
       rerender();
 
