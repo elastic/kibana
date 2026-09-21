@@ -333,6 +333,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       description: 'Get the number of agent policies and active agents using an output. Default outputs also include policies that do not set a data or monitoring output. Optional query parameters override the saved default flags so counts can reflect a pending change.',
       options: {
         tags: ['oas-tag:Fleet outputs'],
+        availability: {
+          stability: 'stable',
+          since: '9.6.0',
+        },
       },
     })
     .addVersion(
