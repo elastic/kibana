@@ -386,9 +386,6 @@ export const triggerMaintainerRun = async (
 interface SeedLogDocumentOptions {
   /** `logs-*` data-stream target; `op_type: 'create'` is required. */
   index: string;
-  /** Written to `host.id` — becomes the `host:<id>` target EUID. */
-  hostId: string;
-  hostName: string;
   /**
    * Integration-specific fields merged into the document root. For plain-object
    * mapped fields (e.g. `device.registered_owners`), pass flattened parallel
@@ -397,14 +394,42 @@ interface SeedLogDocumentOptions {
   integrationFields: Record<string, unknown>;
   /** Defaults to 5 minutes ago (within the 30d lookback window). */
   timestamp?: string;
+  /**
+   * Written to `event.ingested`. Required for maintainers that gate on sync
+   * recency rather than `@timestamp` (e.g. Workday, whose `@timestamp` carries
+   * Hire_Date). Defaults to `timestamp`.
+   */
+  eventIngested?: string;
+  /** Overrides the default `{ kind: 'asset', category: [...] }` block. */
+  event?: Record<string, unknown>;
+  /** Written to `host.id` — becomes the `host:<id>` target EUID. Omit for user-target rows. */
+  hostId?: string;
+  hostName?: string;
 }
 
-/** Seeds one log document with standard ECS host fields plus integration-specific fields. */
+/** Seeds one log document with ECS scaffolding plus integration-specific fields. */
 export const seedLogDocument = async (
   esClient: EsClient,
-  { index, hostId, hostName, integrationFields, timestamp }: SeedLogDocumentOptions
+  {
+    index,
+    hostId,
+    hostName,
+    integrationFields,
+    timestamp,
+    eventIngested,
+    event,
+  }: SeedLogDocumentOptions
 ): Promise<void> => {
   const ts = timestamp ?? new Date(Date.now() - 5 * 60_000).toISOString();
+  const host =
+    hostId !== undefined || hostName !== undefined
+      ? {
+          host: {
+            ...(hostId !== undefined && { id: hostId }),
+            ...(hostName !== undefined && { name: hostName }),
+          },
+        }
+      : {};
 
   await esClient.index({
     index,
@@ -412,8 +437,8 @@ export const seedLogDocument = async (
     refresh: 'wait_for',
     document: {
       '@timestamp': ts,
-      event: { kind: 'asset', category: ['host'] },
-      host: { id: hostId, name: hostName },
+      event: { kind: 'asset', category: ['host'], ingested: eventIngested ?? ts, ...event },
+      ...host,
       ...integrationFields,
     },
   });
