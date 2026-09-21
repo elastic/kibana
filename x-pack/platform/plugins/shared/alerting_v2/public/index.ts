@@ -96,6 +96,7 @@ export type {
   AlertingV2PublicStart,
   CreateRuleOptionsFlyoutLegacyItem,
   AlertingV2PageProps,
+  PrivilegeCheck,
 } from './types';
 export type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
 export type { AlertingV2HostApp, CreateAlertingV2HostApp } from './locator_host';
