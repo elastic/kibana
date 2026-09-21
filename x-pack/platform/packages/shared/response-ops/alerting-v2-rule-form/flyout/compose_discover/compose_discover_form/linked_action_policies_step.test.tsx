@@ -194,10 +194,12 @@ describe('LinkedActionPoliciesStep', () => {
       </IntlProvider>
     );
 
-    const editBtn = screen.getByTestId('linkedActionPolicyEdit-ap-1');
-    expect(editBtn).toBeInTheDocument();
-    expect(editBtn).toHaveAttribute('href', '/app/management/alertingV2/action_policies/edit/ap-1');
-    expect(editBtn).toHaveAttribute('target', '_blank');
+    const editLink = screen.getByTestId('linkedActionPolicyEdit-ap-1');
+    expect(editLink).toBeInTheDocument();
+    expect(editLink).toHaveTextContent('Global Policy');
+    expect(editLink).toHaveAttribute('href', '/app/management/alertingV2/action_policies/edit/ap-1');
+    expect(editLink).toHaveAttribute('target', '_blank');
+    expect(editLink).toHaveAttribute('rel', 'noopener noreferrer');
   });
 
   it('shows an error callout when the fetch fails', () => {

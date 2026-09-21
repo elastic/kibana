@@ -6,15 +6,14 @@
  */
 
 import {
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
@@ -110,9 +109,18 @@ export const LinkedActionPoliciesStep = ({ http }: Props) => {
                   >
                     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                       <EuiFlexItem>
-                        <EuiText size="s">
-                          <strong>{actionPolicy.name}</strong>
-                        </EuiText>
+                        <EuiLink
+                          href={http.basePath.prepend(
+                            `${ACTION_POLICY_EDIT_BASE}/${encodeURIComponent(actionPolicy.id)}`
+                          )}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          external={false}
+                          aria-label={editLabel}
+                          data-test-subj={`linkedActionPolicyEdit-${actionPolicy.id}`}
+                        >
+                          {actionPolicy.name}
+                        </EuiLink>
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <MatchedPolicyReason
@@ -120,20 +128,6 @@ export const LinkedActionPoliciesStep = ({ http }: Props) => {
                           matcher={actionPolicy.matcher}
                           ruleTags={ruleTags}
                         />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiToolTip content={editLabel} disableScreenReaderOutput>
-                          <EuiButtonIcon
-                            iconType="external"
-                            href={http.basePath.prepend(
-                              `${ACTION_POLICY_EDIT_BASE}/${encodeURIComponent(actionPolicy.id)}`
-                            )}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            aria-label={editLabel}
-                            data-test-subj={`linkedActionPolicyEdit-${actionPolicy.id}`}
-                          />
-                        </EuiToolTip>
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiPanel>
