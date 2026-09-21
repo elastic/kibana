@@ -52,6 +52,7 @@ import { GLOBAL_ARTIFACT_TAG } from '../../../../../common/endpoint/service/arti
 import { CUSTOM_YARA_SIGNATURE_FIELD_TYPE } from '../../../../../common/endpoint/service/artifacts/constants';
 import { buildPerPolicyTag } from '../../../../../common/endpoint/service/artifacts/utils';
 import { getIsEndpointExceptionsPerPolicyEnabled } from '../../../lib/reference_data';
+import { MetaArchValue, EndpointArtifactScanContext } from '../../../../../common/endpoint/types';
 
 jest.mock('../../../lib/reference_data');
 jest.mock('../../../lib/libyara', () => ({
@@ -1367,7 +1368,13 @@ describe('ManifestManager', () => {
       expect(getArtifactObject(yaraMacosArtifact!)).toStrictEqual({ entries: [] });
       expect(getArtifactObject(yaraLinuxArtifact!)).toStrictEqual({ entries: [] });
       expect(getArtifactObject(yaraWindowsArtifact!)).toStrictEqual({
-        entries: [{ yara_rule_data: yaraRuleText }],
+        entries: [
+          {
+            yara_rule_data: yaraRuleText,
+            arch_context: [MetaArchValue.X86, MetaArchValue.ARM64],
+            scan_context: [EndpointArtifactScanContext.MEMORY],
+          },
+        ],
       });
     });
   });

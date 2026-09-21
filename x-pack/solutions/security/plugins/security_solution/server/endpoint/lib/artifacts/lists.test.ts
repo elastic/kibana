@@ -32,6 +32,11 @@ import {
 } from '../../../../common/endpoint/service/artifacts/constants';
 import type { ExperimentalFeatures } from '../../../../common';
 import { allowedExperimentalValues } from '../../../../common';
+import {
+  MetaArchValue,
+  MetaScanTypeValue,
+  EndpointArtifactScanContext,
+} from '../../../../common/endpoint/types';
 import type { YaraValidateResult } from '../libyara';
 import { validateYaraRule } from '../libyara';
 
@@ -42,7 +47,7 @@ jest.mock('../libyara', () => ({
 const mockValidateYaraRule = validateYaraRule as jest.MockedFunction<typeof validateYaraRule>;
 
 const createYaraValidateResult = (
-  rules: Array<{ identifier?: string }> = [{}]
+  rules: Array<{ identifier?: string; arch?: string; scanType?: string }>
 ): YaraValidateResult => ({
   errors: [],
   warnings: [],
@@ -50,7 +55,10 @@ const createYaraValidateResult = (
   warningCount: 0,
   rules: rules.map((rule, index) => ({
     identifier: rule.identifier ?? `rule${index}`,
-    meta: {},
+    meta: {
+      ...(rule.arch !== undefined ? { arch: rule.arch } : {}),
+      ...(rule.scanType !== undefined ? { scan_type: rule.scanType } : {}),
+    },
     duplicateMeta: [],
   })),
 });
@@ -76,7 +84,7 @@ describe('artifacts lists', () => {
     jest.clearAllMocks();
     mockExceptionClient = listMock.getExceptionListClient();
     defaultFeatures = allowedExperimentalValues;
-    mockValidateYaraRule.mockResolvedValue(createYaraValidateResult());
+    mockValidateYaraRule.mockResolvedValue(createYaraValidateResult([{}]));
   });
 
   describe('getFilteredEndpointExceptionListRaw + convertExceptionsToEndpointFormat', () => {
@@ -476,6 +484,8 @@ describe('artifacts lists', () => {
         entries: [
           {
             yara_rule_data: yaraRuleText,
+            arch_context: [MetaArchValue.X86, MetaArchValue.ARM64],
+            scan_context: [EndpointArtifactScanContext.MEMORY],
           },
         ],
       });
@@ -501,9 +511,13 @@ describe('artifacts lists', () => {
         entries: [
           {
             yara_rule_data: firstRule,
+            arch_context: [MetaArchValue.X86, MetaArchValue.ARM64],
+            scan_context: [EndpointArtifactScanContext.MEMORY],
           },
           {
             yara_rule_data: secondRule,
+            arch_context: [MetaArchValue.X86, MetaArchValue.ARM64],
+            scan_context: [EndpointArtifactScanContext.MEMORY],
           },
         ],
       });
@@ -539,6 +553,8 @@ describe('artifacts lists', () => {
         entries: [
           {
             yara_rule_data: enabledRule,
+            arch_context: [MetaArchValue.X86, MetaArchValue.ARM64],
+            scan_context: [EndpointArtifactScanContext.MEMORY],
           },
         ],
       });
@@ -580,8 +596,197 @@ describe('artifacts lists', () => {
       );
     });
 
+    test('it should copy meta.arch into arch_context', async () => {
+      mockValidateYaraRule.mockResolvedValue(
+        createYaraValidateResult([{ arch: MetaArchValue.X86 }])
+      );
+
+      await expect(
+        convertYaraRulesToEndpointFormat(
+          [getCustomYaraExceptionItem('rule X86Only { condition: true }')],
+          'v1'
+        )
+      ).resolves.toEqual({
+        entries: [
+          {
+            yara_rule_data: 'rule X86Only { condition: true }',
+            arch_context: [MetaArchValue.X86],
+            scan_context: [EndpointArtifactScanContext.MEMORY],
+          },
+        ],
+      });
+    });
+
+    test('it should split comma-separated meta.arch into arch_context', async () => {
+      mockValidateYaraRule.mockResolvedValue(
+        createYaraValidateResult([{ arch: `${MetaArchValue.ARM64}, ${MetaArchValue.X86}` }])
+      );
+
+      await expect(
+        convertYaraRulesToEndpointFormat(
+          [getCustomYaraExceptionItem('rule BothArch { condition: true }')],
+          'v1'
+        )
+      ).resolves.toEqual({
+        entries: [
+          {
+            yara_rule_data: 'rule BothArch { condition: true }',
+            arch_context: [MetaArchValue.ARM64, MetaArchValue.X86],
+            scan_context: [EndpointArtifactScanContext.MEMORY],
+          },
+        ],
+      });
+    });
+
+    test('it should accept matching meta.arch across rules in one entry', async () => {
+      mockValidateYaraRule.mockResolvedValue(
+        createYaraValidateResult([
+          { identifier: 'First', arch: `${MetaArchValue.X86}, ${MetaArchValue.ARM64}` },
+          { identifier: 'Second', arch: `${MetaArchValue.ARM64},${MetaArchValue.X86}` },
+        ])
+      );
+
+      await expect(
+        convertYaraRulesToEndpointFormat(
+          [
+            getCustomYaraExceptionItem(
+              'rule First { condition: true } rule Second { condition: true }'
+            ),
+          ],
+          'v1'
+        )
+      ).resolves.toEqual({
+        entries: [
+          {
+            yara_rule_data: 'rule First { condition: true } rule Second { condition: true }',
+            arch_context: [MetaArchValue.X86, MetaArchValue.ARM64],
+            scan_context: [EndpointArtifactScanContext.MEMORY],
+          },
+        ],
+      });
+    });
+
+    test('it should skip an entry when meta.arch differs across rules', async () => {
+      mockValidateYaraRule.mockResolvedValue(
+        createYaraValidateResult([
+          { identifier: 'First', arch: MetaArchValue.X86 },
+          { identifier: 'Second', arch: MetaArchValue.ARM64 },
+        ])
+      );
+
+      await expect(
+        convertYaraRulesToEndpointFormat(
+          [
+            getCustomYaraExceptionItem(
+              'rule First { condition: true } rule Second { condition: true }'
+            ),
+          ],
+          'v1'
+        )
+      ).resolves.toEqual({ entries: [] });
+    });
+
+    test('it should skip an entry when some rules omit meta.arch and others set it', async () => {
+      mockValidateYaraRule.mockResolvedValue(
+        createYaraValidateResult([
+          { identifier: 'First', arch: MetaArchValue.X86 },
+          { identifier: 'Second' },
+        ])
+      );
+
+      await expect(
+        convertYaraRulesToEndpointFormat(
+          [
+            getCustomYaraExceptionItem(
+              'rule First { condition: true } rule Second { condition: true }'
+            ),
+          ],
+          'v1'
+        )
+      ).resolves.toEqual({ entries: [] });
+    });
+
     test('it should skip an entry when libyara returns no compiled rules', async () => {
       mockValidateYaraRule.mockResolvedValue(createYaraValidateResult([]));
+
+      await expect(
+        convertYaraRulesToEndpointFormat(
+          [getCustomYaraExceptionItem('rule Example { condition: true }')],
+          'v1'
+        )
+      ).resolves.toEqual({ entries: [] });
+    });
+
+    test('it should set scan_context to memory when meta.scan_type is omitted', async () => {
+      mockValidateYaraRule.mockResolvedValue(createYaraValidateResult([{}]));
+
+      await expect(
+        convertYaraRulesToEndpointFormat(
+          [getCustomYaraExceptionItem('rule Example { condition: true }')],
+          'v1'
+        )
+      ).resolves.toEqual({
+        entries: [
+          {
+            yara_rule_data: 'rule Example { condition: true }',
+            arch_context: [MetaArchValue.X86, MetaArchValue.ARM64],
+            scan_context: [EndpointArtifactScanContext.MEMORY],
+          },
+        ],
+      });
+    });
+
+    test('it should set scan_context to memory when meta.scan_type is Memory', async () => {
+      mockValidateYaraRule.mockResolvedValue(
+        createYaraValidateResult([{ scanType: MetaScanTypeValue.MEMORY }])
+      );
+
+      await expect(
+        convertYaraRulesToEndpointFormat(
+          [getCustomYaraExceptionItem('rule Example { condition: true }')],
+          'v1'
+        )
+      ).resolves.toEqual({
+        entries: [
+          {
+            yara_rule_data: 'rule Example { condition: true }',
+            arch_context: [MetaArchValue.X86, MetaArchValue.ARM64],
+            scan_context: [EndpointArtifactScanContext.MEMORY],
+          },
+        ],
+      });
+    });
+
+    test('it should set scan_context to memory when some rules omit meta.scan_type and others set Memory', async () => {
+      mockValidateYaraRule.mockResolvedValue(
+        createYaraValidateResult([
+          { identifier: 'First', scanType: MetaScanTypeValue.MEMORY },
+          { identifier: 'Second' },
+        ])
+      );
+
+      await expect(
+        convertYaraRulesToEndpointFormat(
+          [
+            getCustomYaraExceptionItem(
+              'rule First { condition: true } rule Second { condition: true }'
+            ),
+          ],
+          'v1'
+        )
+      ).resolves.toEqual({
+        entries: [
+          {
+            yara_rule_data: 'rule First { condition: true } rule Second { condition: true }',
+            arch_context: [MetaArchValue.X86, MetaArchValue.ARM64],
+            scan_context: [EndpointArtifactScanContext.MEMORY],
+          },
+        ],
+      });
+    });
+
+    test('it should skip an entry when meta.scan_type is not Memory', async () => {
+      mockValidateYaraRule.mockResolvedValue(createYaraValidateResult([{ scanType: 'File' }]));
 
       await expect(
         convertYaraRulesToEndpointFormat(
@@ -612,7 +817,7 @@ describe('artifacts lists', () => {
       const validRule = 'rule Valid { condition: true }';
       mockValidateYaraRule
         .mockRejectedValueOnce(new Error('libyara WASM trap'))
-        .mockResolvedValueOnce(createYaraValidateResult());
+        .mockResolvedValueOnce(createYaraValidateResult([{}]));
 
       await expect(
         convertYaraRulesToEndpointFormat(
@@ -626,6 +831,8 @@ describe('artifacts lists', () => {
         entries: [
           {
             yara_rule_data: validRule,
+            arch_context: [MetaArchValue.X86, MetaArchValue.ARM64],
+            scan_context: [EndpointArtifactScanContext.MEMORY],
           },
         ],
       });
@@ -1407,6 +1614,8 @@ describe('artifacts lists', () => {
         entries: [
           {
             yara_rule_data: yaraRuleText,
+            arch_context: [MetaArchValue.X86, MetaArchValue.ARM64],
+            scan_context: [EndpointArtifactScanContext.MEMORY],
           },
         ],
       });
