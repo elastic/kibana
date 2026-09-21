@@ -37,6 +37,7 @@ export const transformUpdateBody = (
 
   // Determine scope to forward. Explicit `scope` from body takes precedence over legacy
   // `scoped_query`; when neither is provided, omit scope so the stored value is kept.
+  // `scoped_query: null` means "clear scope"; `scoped_query: undefined` means "keep as-is".
   const resolvedScope =
     scope !== undefined
       ? {
@@ -45,6 +46,8 @@ export const transformUpdateBody = (
             : {}),
           ...(scope.alerting_v2 !== undefined ? { alertingV2: scope.alerting_v2 } : {}),
         }
+      : rawScopedQuery === null
+      ? {}
       : scopedQuery != null
       ? { alerting: { enabled: true, kql: scopedQuery.kql, filters: scopedQuery.filters } }
       : undefined;
