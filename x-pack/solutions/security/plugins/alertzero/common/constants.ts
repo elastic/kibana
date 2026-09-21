@@ -75,6 +75,13 @@ export const HUNT_TIERS = [HUNT_TIER_1, HUNT_TIER_2] as const;
 export const HUNT_ALERTS_INDEX_PATTERN_PREFIX = '.alerts-security.alerts-' as const;
 
 /**
+ * Single source of truth for the Hunt Watch attachment type ids, used by the server
+ * attachment definitions, the client attachment UI definitions, and their tests.
+ * PR 1 (hunt-watch-attachment-types) defines these; mirrored here until that branch merges.
+ */
+export const ALERTZERO_ATTACHMENT_TYPE_HUNT_CORRELATION = 'security.hunt_correlation' as const;
+
+/**
  * Global-catalog space sentinel on `.kibana-threat-reports` (buildout.md:150:
  * "global catalog rows use `space_id: '*'`"). Reads filter to `{terms: {
  * space_id: [currentSpaceId, HUNT_GLOBAL_SPACE_ID] }}`; F4's feedback write is
