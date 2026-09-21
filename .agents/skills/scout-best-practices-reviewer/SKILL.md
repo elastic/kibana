@@ -1,6 +1,6 @@
 ---
 name: scout-best-practices-reviewer
-description: Review Scout UI/API tests (including Scout test migrations) for best practices, reuse, parity, and server config hygiene.
+description: Review Scout UI/API tests (including Scout test migrations) and Scout reuse surfaces (page objects, UI component objects, API services) for best practices, reuse, correct placement, parity, and server config hygiene.
 ---
 
 # Scout Best Practices Reviewer
@@ -130,7 +130,7 @@ These EUI/Kibana component behaviours are non-obvious and cannot be inferred fro
 - **EUI disabled button tooltip**: hover the `span:has([data-test-subj="..."])` wrapper, not the button itself.
 - **EUI CSS class selectors** (`.euiTableRow`, `.euiToolTipAnchor`, etc.): internal to EUI, change between versions — use `data-test-subj` or ARIA roles.
 - **DOM instability from app bugs**: use `dispatchEvent('click')` over `{ force: true }`; document the bug location in a comment.
-- **EUI Test Objects (`page.components.*`)**: prefer the published `@elastic/eui-test-helpers` via `page.components.*` over raw selectors (`@kbn/eslint/scout_no_raw_eui_selectors` flags the covered classes; when no object method fits, build the locator from the exported `Eui*Selectors` constants rather than a literal). Flag new or suite-local wrapper/helper extensions; missing capabilities should follow the shared contribution workflow. See the `docs/extend/testing/eui-test-helpers.md` for details.
+- **EUI test helpers (`page.components.*`)**: prefer the published `@elastic/eui-test-helpers` via `page.components.*` over raw selectors (`@kbn/eslint/scout_no_raw_eui_selectors` flags the covered classes; when no object method fits, build the locator from the exported `Eui*Selectors` constants rather than a literal). Flag new or suite-local wrapper/helper extensions; missing capabilities should follow the shared contribution workflow. See the `docs/extend/testing/eui-test-helpers.md` for details.
 
 ## Output
 
