@@ -86,6 +86,7 @@
       "serverless",
       "agentBuilder",
       "llmTasks",
+      "mitreAttack",
       "cps",
       "searchInferenceEndpoints",
       "esql"
@@ -98,6 +99,7 @@
       "usageCollection",
       "lists",
       "ml",
+      "mitreAttack",
       "unifiedSearch",
       "esql",
       "agentBuilder",
