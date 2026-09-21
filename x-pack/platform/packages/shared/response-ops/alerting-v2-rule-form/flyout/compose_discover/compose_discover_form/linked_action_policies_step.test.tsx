@@ -213,7 +213,10 @@ describe('LinkedActionPoliciesStep', () => {
     const editLink = screen.getByTestId('linkedActionPolicyEdit-ap-1');
     expect(editLink).toBeInTheDocument();
     expect(editLink).toHaveTextContent('Global Policy');
-    expect(editLink).toHaveAttribute('href', '/app/management/alertingV2/action_policies/edit/ap-1');
+    expect(editLink).toHaveAttribute(
+      'href',
+      '/app/management/alertingV2/action_policies/edit/ap-1'
+    );
     expect(editLink).toHaveAttribute('target', '_blank');
     expect(editLink).toHaveAttribute('rel', 'noopener noreferrer');
   });
@@ -256,7 +259,12 @@ describe('LinkedActionPoliciesStep', () => {
       error: null,
       items: [
         {
-          action_policy: { id: 'ap-1', name: 'Global Policy', matcher: null, destinations: [] } as any,
+          action_policy: {
+            id: 'ap-1',
+            name: 'Global Policy',
+            matcher: null,
+            destinations: [],
+          } as any,
           category: 'catch-all',
         },
       ],
