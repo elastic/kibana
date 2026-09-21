@@ -618,6 +618,7 @@ describe('usePrebuiltRulesUpgrade', () => {
 
     it('fetchAllRulesCustomizationCounts re-fetches the review and derives counts from the fresh response', async () => {
       const refetch = jest.fn().mockResolvedValue({
+        isSuccess: true,
         data: buildReviewResult([], { total: 7, counts: { isCustomized: { true: 3, false: 4 } } })
           .data,
       });
@@ -645,8 +646,29 @@ describe('usePrebuiltRulesUpgrade', () => {
       expect(refetch).toHaveBeenCalledTimes(1);
     });
 
+    it('fetchAllRulesCustomizationCounts resolves to null when the re-fetch fails even though cached data is retained', async () => {
+      const cached = buildReviewResult([], {
+        total: 5,
+        counts: { isCustomized: { true: 0, false: 5 } },
+      });
+      const refetch = jest.fn().mockResolvedValue({
+        isSuccess: false,
+        isError: true,
+        error: new Error('boom'),
+        data: cached.data,
+      });
+      mockUsePrebuiltRulesUpgradeReview.mockReturnValue({ ...cached, refetch });
+
+      const { result } = renderHook(
+        () => usePrebuiltRulesUpgrade({ withCustomizationCounts: true }),
+        { wrapper: TestProviders }
+      );
+
+      await expect(result.current.fetchAllRulesCustomizationCounts()).resolves.toBeNull();
+    });
+
     it('fetchAllRulesCustomizationCounts resolves to null when the re-fetch yields no data', async () => {
-      const refetch = jest.fn().mockResolvedValue({ data: undefined });
+      const refetch = jest.fn().mockResolvedValue({ isSuccess: true, data: undefined });
       mockUsePrebuiltRulesUpgradeReview.mockReturnValue({ ...buildReviewResult([]), refetch });
 
       const { result } = renderHook(() => usePrebuiltRulesUpgrade({}), {

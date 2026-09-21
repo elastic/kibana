@@ -344,11 +344,7 @@ export function usePrebuiltRulesUpgrade({
         customizedCount: selectedRuleUpgradeStates.filter((state) =>
           isRuleCustomized(state.current_rule)
         ).length,
-        // Compare the versions TARGET actually swaps rather than `has_update`, which is false for
-        // `CustomizedValueNoUpdate` (BASE=A, CURRENT=B, TARGET=A) even though the type is reset.
-        ruleTypeChangeCount: selectedRuleUpgradeStates.filter(
-          (state) => state.current_rule.type !== state.target_rule.type
-        ).length,
+        ruleTypeChangeCount: selectedRuleUpgradeStates.filter(hasRuleTypeChange).length,
       };
     },
     [rulesUpgradeState]
@@ -366,9 +362,15 @@ export function usePrebuiltRulesUpgrade({
    * "Update all" confirmation reflects customizations made since the cached review loaded.
    */
   const fetchAllRulesCustomizationCounts = useCallback(async () => {
-    const { data } = await refetch();
+    const result = await refetch();
 
-    return toAllRulesCustomizationCounts(data);
+    // A failed refetch keeps the previously cached `data`, so the status has to be checked
+    // explicitly or stale counts would be mistaken for fresh ones.
+    if (!result.isSuccess) {
+      return null;
+    }
+
+    return toAllRulesCustomizationCounts(result.data);
   }, [refetch]);
 
   const subHeaderFactory = useCallback(
@@ -385,7 +387,7 @@ export function usePrebuiltRulesUpgrade({
         return null;
       }
 
-      const hasRuleTypeChange = ruleUpgradeState.diff.fields.type?.has_update ?? false;
+      const isRuleTypeChanging = hasRuleTypeChange(ruleUpgradeState);
       return (
         <EuiButton
           disabled={
@@ -393,11 +395,11 @@ export function usePrebuiltRulesUpgrade({
             loadingRules.includes(rule.rule_id) ||
             isRefetching ||
             isInitializingPrebuiltRulesPackage ||
-            (ruleUpgradeState.hasUnresolvedConflicts && !hasRuleTypeChange) ||
+            (ruleUpgradeState.hasUnresolvedConflicts && !isRuleTypeChanging) ||
             isEditingRule
           }
           onClick={() => {
-            if (hasRuleTypeChange || isRulesCustomizationEnabled === false) {
+            if (isRuleTypeChanging || isRulesCustomizationEnabled === false) {
               // If there is a rule type change, we can't resolve conflicts, only accept the target rule
               upgradeRulesToTarget([rule.rule_id]);
             } else {
@@ -431,7 +433,7 @@ export function usePrebuiltRulesUpgrade({
         return [];
       }
 
-      const hasRuleTypeChange = ruleUpgradeState.diff.fields.type?.has_update ?? false;
+      const isRuleTypeChanging = hasRuleTypeChange(ruleUpgradeState);
       const hasCustomizations =
         ruleUpgradeState.current_rule.rule_source.type === 'external' &&
         ruleUpgradeState.current_rule.rule_source.is_customized;
@@ -439,7 +441,7 @@ export function usePrebuiltRulesUpgrade({
       let headerCallout = null;
       if (hasCustomizations && !isRulesCustomizationEnabled) {
         headerCallout = <CustomizationDisabledCallout />;
-      } else if (hasRuleTypeChange && isRulesCustomizationEnabled) {
+      } else if (isRuleTypeChanging && isRulesCustomizationEnabled) {
         headerCallout = <RuleTypeChangeCallout hasCustomizations={hasCustomizations} />;
       }
 
@@ -457,7 +459,7 @@ export function usePrebuiltRulesUpgrade({
       // Show the resolver tab only if rule customization is enabled and there
       // is no rule type change. In case of rule type change users can't resolve
       // conflicts, only accept the target rule.
-      if (isRulesCustomizationEnabled && !hasRuleTypeChange) {
+      if (isRulesCustomizationEnabled && !isRuleTypeChanging) {
         updateTabContent = (
           <RuleUpgradeTab
             ruleUpgradeState={ruleUpgradeState}
@@ -567,6 +569,16 @@ export function usePrebuiltRulesUpgrade({
     allRulesCustomizationCounts,
     fetchAllRulesCustomizationCounts,
   };
+}
+
+/**
+ * Upgrading to the target version always applies the target rule type, so the type changes
+ * whenever it differs from the current one. `diff.fields.type.has_update` is not usable here
+ * because it is false for `CustomizedValueNoUpdate` (BASE=A, CURRENT=B, TARGET=A) although the
+ * upgrade resets the type, matching `hasRuleTypeChanged` on the server.
+ */
+function hasRuleTypeChange(ruleUpgradeState: RuleUpgradeState): boolean {
+  return ruleUpgradeState.current_rule.type !== ruleUpgradeState.target_rule.type;
 }
 
 function toAllRulesCustomizationCounts(
