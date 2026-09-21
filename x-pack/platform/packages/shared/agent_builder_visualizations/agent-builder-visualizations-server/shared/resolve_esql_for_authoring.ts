@@ -42,6 +42,12 @@ interface ResolveEsqlForAuthoringParams {
  * Default range used only to bind `?_tstart`/`?_tend` when executing a query
  * server-side to collect its result columns. The live dashboard range is applied
  * by Kibana at render time.
+ *
+ * Keep in sync with generateEsql's default in
+ * `agent-builder-genai-utils/tools/generate_esql/nl_to_esql.ts` (`now-24h` →
+ * `now`). This probe omits `timeRange` on generateVisualizationEsql so both
+ * paths share that window; changing only one side would validate against
+ * different ranges.
  */
 const DEFAULT_VALIDATION_TIME_RANGE = { from: 'now-24h', to: 'now' } as const;
 
