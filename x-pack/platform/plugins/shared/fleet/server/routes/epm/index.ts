@@ -1366,7 +1366,7 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
             },
             403: {
               description:
-                'Forbidden. The caller lacks a privilege required by one of the gated asset types in the archive.',
+                'Forbidden. The caller lacks a Kibana API privilege required by an asset in the archive.',
               body: genericErrorResponse,
             },
           },
