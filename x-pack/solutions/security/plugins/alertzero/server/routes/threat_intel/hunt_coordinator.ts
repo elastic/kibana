@@ -109,10 +109,7 @@ export const registerHuntCoordinatorRoute = ({
 
           const sse =
             result.tier1.hasConfirmedHit && report_id
-              ? buildSseData(result, report_id, {
-                  spaceId,
-                  requiredIndices: result.requiredIndexPatterns,
-                })
+              ? buildSseData(result, report_id, { spaceId })
               : undefined;
 
           return response.ok({ body: sse ? { ...result, sse } : result });
