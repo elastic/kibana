@@ -53,15 +53,19 @@ function getConfig(overrides: Partial<StreamsConfig> = {}): StreamsConfig {
 
 function createPluginsSetup(): jest.Mocked<StreamsPluginSetupDependencies> {
   return {
-    encryptedSavedObjects: { canEncrypt: false, registerType: jest.fn() } as unknown as
-      StreamsPluginSetupDependencies['encryptedSavedObjects'],
+    encryptedSavedObjects: {
+      canEncrypt: false,
+      registerType: jest.fn(),
+    } as unknown as StreamsPluginSetupDependencies['encryptedSavedObjects'],
     alerting: alertsMock.createSetup(),
-    ruleRegistry: { registerType: jest.fn() } as unknown as
-      StreamsPluginSetupDependencies['ruleRegistry'],
+    ruleRegistry: {
+      registerType: jest.fn(),
+    } as unknown as StreamsPluginSetupDependencies['ruleRegistry'],
     features: featuresPluginMock.createSetup(),
     usageCollection: usageCollectionPluginMock.createSetupContract(),
-    fieldsMetadata: { registerIntegrationFieldsExtractor: jest.fn() } as unknown as
-      StreamsPluginSetupDependencies['fieldsMetadata'],
+    fieldsMetadata: {
+      registerIntegrationFieldsExtractor: jest.fn(),
+    } as unknown as StreamsPluginSetupDependencies['fieldsMetadata'],
   } as unknown as jest.Mocked<StreamsPluginSetupDependencies>;
 }
 
