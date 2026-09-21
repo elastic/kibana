@@ -57,6 +57,7 @@ jobs:
           fi
 
       - name: Check live issue state
+        id: livecheck
         env:
           GH_TOKEN: ${{ secrets.KIBANAMACHINE_TOKEN }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
@@ -67,13 +68,33 @@ jobs:
           # Query the live issue to guard against duplicate mirrors in those cases.
           ALREADY_MIRRORED=$(gh api "repos/elastic/kibana/issues/$ISSUE_NUMBER" \
             --jq '[.labels[].name] | contains(["ralph-mirrored"])')
+
           if [[ "$ALREADY_MIRRORED" == "true" ]]; then
-            echo "::notice::Issue $ISSUE_NUMBER is already mirrored; skipping."
-            exit 1
+            # ralph-mirrored is set but the backlink comment may still be missing if a prior
+            # run applied the label but the comment step failed. Reconcile it here so the
+            # source issue always ends up with a link to the investigation.
+            HAS_COMMENT=$(gh api "repos/elastic/kibana/issues/$ISSUE_NUMBER/comments" \
+              --jq '[.[] | select(.user.login == "kibanamachine" and (.body | test("error backlog")))] | length > 0')
+            if [[ "$HAS_COMMENT" == "false" ]]; then
+              echo "::notice::ralph-mirrored set but backlink comment missing; reconciling."
+              MIRROR_URL=$(gh api \
+                "search/issues?q=repo:elastic/observability-error-backlog+in:body+https://github.com/elastic/kibana/issues/$ISSUE_NUMBER" \
+                --jq '.items[0].html_url // ""')
+              if [[ -n "$MIRROR_URL" ]]; then
+                gh issue comment "$ISSUE_NUMBER" --repo "elastic/kibana" \
+                  --body "Detective Ralph is investigating this in the error backlog (Elastic-internal): $MIRROR_URL"
+              else
+                echo "::warning::Could not locate mirror issue in the backlog; post the backlink manually."
+              fi
+            fi
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Create the mirror issue and start Detective Ralph
         id: mirror
+        if: steps.livecheck.outputs.skip != 'true'
         env:
           # kibanamachine, not GITHUB_TOKEN: events created by GITHUB_TOKEN do not trigger
           # workflows, so a mirror labeled with it would never start Detective Ralph.
@@ -112,14 +133,19 @@ jobs:
           }
 
       - name: Mark mirrored and post backlink
+        if: steps.livecheck.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ github.token }} # own-repo writes only; no PAT needed
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           MIRROR_URL: ${{ steps.mirror.outputs.url }}
         run: |
           set -euo pipefail
-          # Apply ralph-mirrored first: this is the idempotency guard. If the comment below
-          # fails, the guard is still in place and no duplicate mirror will be created on retry.
-          gh issue edit "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --add-label 'ralph-mirrored'
+          # Post the backlink comment first. Non-fatal: a transient failure here is recoverable
+          # because ralph-mirrored is applied below regardless. The live-state check reconciles
+          # the missing comment the next time this workflow runs for the issue.
           gh issue comment "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" \
-            --body "Detective Ralph is investigating this in the error backlog (Elastic-internal): $MIRROR_URL"
+            --body "Detective Ralph is investigating this in the error backlog (Elastic-internal): $MIRROR_URL" \
+            || echo "::warning::Backlink comment failed; ralph-mirrored will still be applied. The comment will be reconciled on the next workflow run for this issue."
+          # Apply ralph-mirrored last. This is the idempotency guard; applying it after the
+          # comment means both writes must be attempted before the guard is set.
+          gh issue edit "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --add-label 'ralph-mirrored'
