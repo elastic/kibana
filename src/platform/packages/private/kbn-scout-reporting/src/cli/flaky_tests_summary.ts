@@ -13,6 +13,7 @@ import dedent from 'dedent';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
   compareByFailedBuilds,
+  formatCounts,
   type FlakyTestBranchStats,
   type FlakyTestClassification,
   type FlakyTestEntry,
@@ -114,6 +115,8 @@ const formatRate = (rate: number): string => `${(rate * 100).toFixed(1)}%`;
 /**
  * Branch with the highest build failure rate. Branches with fewer builds than `minBuilds` only
  * count when no branch has enough, so one failure on a barely exercised branch does not win.
+ * Only checks `minBuilds`, so it is just the fallback for reports written before the branch a
+ * test qualified on was recorded; see `qualifyingBranch`.
  */
 export const flakiestBranch = (
   byBranch: FlakyTestEntry['byBranch'],
@@ -123,6 +126,22 @@ export const flakiestBranch = (
   return [...(exercised.length > 0 ? exercised : byBranch)].sort(
     (a, b) => b.buildFailRate - a.buildFailRate
   )[0];
+};
+
+/**
+ * Stats of the branch the test qualified on, which is what the thresholds were checked against.
+ * The per-branch row carries the latest run; should it be missing, the recorded counts are shown
+ * on their own. Reports written before `flakiestBranch` existed fall back to `flakiestBranch()`.
+ */
+export const qualifyingBranch = (
+  entry: Pick<FlakyTestEntry, 'byBranch' | 'flakiestBranch'>,
+  minBuilds: number
+): FlakyTestBranchStats | undefined => {
+  if (!entry.flakiestBranch) {
+    return flakiestBranch(entry.byBranch, minBuilds);
+  }
+  const { branch } = entry.flakiestBranch;
+  return entry.byBranch.find((stats) => stats.branch === branch) ?? entry.flakiestBranch;
 };
 
 const formatFlakiestBranch = (flakiest: FlakyTestBranchStats | undefined): string =>
@@ -221,7 +240,7 @@ export const buildTopFailingTable = (
 
     entries.forEach(({ entry, classification }, index) => {
       rank += 1;
-      const flakiest = flakiestBranch(entry.byBranch, minBuilds);
+      const flakiest = qualifyingBranch(entry, minBuilds);
       table.push([
         colorize(classification, rank),
         entry.framework,
@@ -251,9 +270,8 @@ export const displaySummary = (
   width: number = terminalWidth()
 ): void => {
   const { window, scope, thresholds, summary } = report;
-  const flakyByFramework = Object.entries(summary.flakyByFramework)
-    .map(([framework, count]) => `${framework}: ${count}`)
-    .join(', ');
+  const flakyByFramework = formatCounts(summary.flakyByFramework);
+  const flakyByBranch = formatCounts(summary.flakyByBranch);
 
   const panel = new CliTable3();
   panel.push(
@@ -277,12 +295,16 @@ export const displaySummary = (
     ],
     [
       dedent(`\
-        Thresholds
-          Min builds        : ${thresholds.minBuilds} (tests seen in fewer builds are ignored)
-          Min failed builds : ${thresholds.minFailedBuilds} (tests that failed in fewer builds are ignored)
+        Thresholds (per branch: one branch must clear all three on its own)
+          Min builds        : ${thresholds.minBuilds} (builds the branch ran the test in)
+          Min failed builds : ${thresholds.minFailedBuilds} (builds the branch failed the test in)
+          Min fail rate     : ${formatRate(
+            thresholds.minFailRate
+          )} (failed / all builds on the branch)
           Max tests         : ${thresholds.maxTests} per list
           Flaky                = qualifying test with at least one pass or in-run retry recovery
           Consistently failing = qualifying test that never passed in the window
+          Ranking              = failed builds, then fail rate on the flakiest branch, then latest failure
         `),
     ],
     [
@@ -290,6 +312,10 @@ export const displaySummary = (
         Results
           Flaky                : ${summary.totalFlaky}${
         flakyByFramework ? ` (${flakyByFramework})` : ''
+      }${
+        flakyByBranch
+          ? `\n          Flaky by branch      : ${flakyByBranch} (branch each test qualified on)`
+          : ''
       }
           Consistently failing : ${summary.totalConsistentlyFailing}
         `),
