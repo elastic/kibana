@@ -108,14 +108,13 @@ describe('fetchLatestVersions', () => {
 
   it('returns the latest version when its tags match the filter', async () => {
     const RULE_ID = 'aws-s3-bucket-public';
-    const NEW_TAG = 'Platform: AWS';
 
     searchMock
       .mockResolvedValueOnce(aggResponse(RULE_ID, 10))
       .mockResolvedValueOnce(hitsResponse(RULE_ID, 10));
 
     const result = await fetchLatestVersions(savedObjectsClient, {
-      filter: `${PREBUILT_RULE_ASSETS_SO_TYPE}.tags: "${NEW_TAG}"`,
+      filter: `${PREBUILT_RULE_ASSETS_SO_TYPE}.tags: "Platform: AWS"`,
     });
 
     expect(result).toEqual([{ rule_id: RULE_ID, version: 10, type: 'query' }]);
