@@ -80,14 +80,6 @@ test.describe(
       }
     });
 
-    test('hides Significant Events tuning YAML by default', async ({ page }) => {
-      await page.gotoApp('significant_events/settings');
-      await expect(page.testSubj.locator('nightshiftDeveloperModeSwitch')).toBeVisible({
-        timeout: 60_000,
-      });
-      await expect(page.testSubj.locator('nightshiftSettingsTuningPanel')).toHaveCount(0);
-    });
-
     test('shows the not-enabled empty prompt when the feature flag is disabled', async ({
       apiServices,
       page,

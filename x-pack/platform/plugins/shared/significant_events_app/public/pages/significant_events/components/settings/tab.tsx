@@ -192,7 +192,8 @@ export function SettingsTab() {
   const [isConfirmingZeroMatch, setIsConfirmingZeroMatch] = useState(false);
   const zeroMatchConfirmModalTitleId = useGeneratedHtmlId({ prefix: 'zeroMatchConfirmModalTitle' });
 
-  const hasTuningConfigChanges = isDeveloperMode && draftConfigYaml !== savedConfigYamlState;
+  const hasTuningConfigChanges =
+    isDeveloperMode && !isDeveloperModeSaving && draftConfigYaml !== savedConfigYamlState;
   const hasChanges =
     canEditSettings &&
     (indexPatterns !== savedIndexPatterns ||
@@ -229,7 +230,13 @@ export function SettingsTab() {
         await scheduledDiscovery.save();
       }
 
-      if (canEditSettings && isDeveloperMode && hasTuningConfigChanges && parsedTuningConfig) {
+      if (
+        canEditSettings &&
+        isDeveloperMode &&
+        !isDeveloperModeSaving &&
+        hasTuningConfigChanges &&
+        parsedTuningConfig
+      ) {
         const fullConfig = { ...DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG, ...parsedTuningConfig };
         await core.settings.globalClient.set(
           OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG,
@@ -262,6 +269,7 @@ export function SettingsTab() {
     parsedTuningConfig,
     canEditSettings,
     isDeveloperMode,
+    isDeveloperModeSaving,
   ]);
 
   const handleSave = useCallback(() => {
@@ -860,7 +868,7 @@ export function SettingsTab() {
         </EuiPanel>
       </EuiPanel>
 
-      {isDeveloperMode && (
+      {isDeveloperMode && !isDeveloperModeSaving && (
         <>
           <EuiSpacer />
 
@@ -994,6 +1002,7 @@ export function SettingsTab() {
                       isLoading={isSaving}
                       isDisabled={
                         !canEditSettings ||
+                        isDeveloperModeSaving ||
                         saveBlockedByPause ||
                         (hasTuningConfigChanges && parsedTuningConfig === null)
                       }

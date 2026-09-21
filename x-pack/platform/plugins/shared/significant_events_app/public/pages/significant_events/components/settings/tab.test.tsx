@@ -217,5 +217,47 @@ describe('SettingsTab developer mode', () => {
     expect(
       screen.queryByTestId('streams-significant-events-settings-bottom-bar')
     ).not.toBeInTheDocument();
+
+    mockUseDeveloperMode.mockReturnValue({
+      isDeveloperMode: true,
+      isSaving: false,
+      setDeveloperMode,
+    });
+    rerender(
+      <I18nProvider>
+        <SettingsTab />
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('streams-settings-tuning-editor')).toHaveValue('{}');
+    expect(
+      screen.queryByTestId('streams-significant-events-settings-bottom-bar')
+    ).not.toBeInTheDocument();
+  });
+
+  it('hides the tuning panel and disables save while developer mode is saving', () => {
+    const { rerender } = setup({ isDeveloperMode: true });
+
+    fireEvent.change(screen.getByTestId('streams-settings-index-patterns'), {
+      target: { value: 'metrics-*' },
+    });
+    fireEvent.change(screen.getByTestId('streams-settings-tuning-editor'), {
+      target: { value: 'sample_size: 99' },
+    });
+    expect(screen.getByTestId('streams-settings-save-button')).toBeEnabled();
+
+    mockUseDeveloperMode.mockReturnValue({
+      isDeveloperMode: true,
+      isSaving: true,
+      setDeveloperMode,
+    });
+    rerender(
+      <I18nProvider>
+        <SettingsTab />
+      </I18nProvider>
+    );
+
+    expect(screen.queryByTestId('nightshiftSettingsTuningPanel')).not.toBeInTheDocument();
+    expect(screen.getByTestId('streams-settings-save-button')).toBeDisabled();
   });
 });
