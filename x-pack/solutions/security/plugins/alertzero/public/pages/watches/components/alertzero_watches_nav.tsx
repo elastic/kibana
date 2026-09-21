@@ -18,7 +18,12 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
-import { compareWatchesForDisplay, type Lifecycle, type Watch } from '@kbn/alertzero-common';
+import {
+  compareWatchesForDisplay,
+  SYSTEM_SECURITY_WATCH_OFFICER_ID,
+  type Lifecycle,
+  type Watch,
+} from '@kbn/alertzero-common';
 import { ALERTZERO_WATCHES_SUBNAV_WIDTH } from '../../../components/layout/constants';
 // Shared with the deep-link registry, which is page-load critical — see the note on their definition.
 import { useWatches } from '../../../hooks/use_watches_api';
@@ -44,7 +49,10 @@ export const AlertZeroWatchesNav: React.FC<AlertZeroWatchesNavProps> = ({ active
   const { data, isLoading } = useWatches();
 
   const watches = useMemo(
-    () => [...(data?.watches ?? [])].sort(compareWatchesForDisplay),
+    () =>
+      [...(data?.watches ?? [])]
+        .filter((watch) => watch.id !== SYSTEM_SECURITY_WATCH_OFFICER_ID)
+        .sort(compareWatchesForDisplay),
     [data?.watches]
   );
 

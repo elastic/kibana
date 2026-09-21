@@ -39,6 +39,7 @@ describe('CoverageOverviewDashboard', () => {
     (useFetchCoverageOverviewQuery as jest.Mock).mockReturnValue({
       data: getMockCoverageOverviewDashboard(),
       isLoading: false,
+      isMitreError: false,
       refetch: jest.fn(),
     });
   });
@@ -69,11 +70,46 @@ describe('CoverageOverviewDashboard', () => {
     (useFetchCoverageOverviewQuery as jest.Mock).mockReturnValue({
       data: mockDashboard,
       isLoading: false,
+      isMitreError: false,
       refetch: jest.fn(),
     });
 
     renderCoverageOverviewDashboard();
 
     expect(screen.getByTestId('coverageOverviewInvalidMitreRulesCallout')).toBeInTheDocument();
+  });
+
+  test('shows a loading spinner while isLoading is true', () => {
+    (useFetchCoverageOverviewQuery as jest.Mock).mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      isMitreError: false,
+      refetch: jest.fn(),
+    });
+
+    renderCoverageOverviewDashboard();
+
+    expect(screen.getByTestId('coverageOverviewLoadingSpinner')).toBeInTheDocument();
+    expect(screen.queryByTestId('coverageOverviewMitreErrorCallout')).not.toBeInTheDocument();
+  });
+
+  test('shows a MITRE error callout when isMitreError is true and loading is false', () => {
+    (useFetchCoverageOverviewQuery as jest.Mock).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isMitreError: true,
+      refetch: jest.fn(),
+    });
+
+    renderCoverageOverviewDashboard();
+
+    expect(screen.getByTestId('coverageOverviewMitreErrorCallout')).toBeInTheDocument();
+    expect(screen.queryByTestId('coverageOverviewLoadingSpinner')).not.toBeInTheDocument();
+  });
+
+  test('does NOT show error callout when MITRE data loads successfully', () => {
+    renderCoverageOverviewDashboard();
+
+    expect(screen.queryByTestId('coverageOverviewMitreErrorCallout')).not.toBeInTheDocument();
   });
 });

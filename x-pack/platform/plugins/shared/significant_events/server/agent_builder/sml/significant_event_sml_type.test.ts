@@ -180,12 +180,17 @@ describe('createSignificantEventSmlType', () => {
           type: SIGNIFICANT_EVENT_KI_TYPE,
           title: 'Payment outage',
           content: 'Payment outage',
-          attributes: {
-            id: 'chunk-1',
-            origin: { uri: `${SIGNIFICANT_EVENT_KI_TYPE}://payment-outage` },
-            created_at: '2026-01-01T00:00:00.000Z',
-            updated_at: '2026-01-01T00:00:00.000Z',
-            ingestion_method: 'manual',
+          id: 'chunk-1',
+          '@timestamp': '2026-01-01T00:00:00.000Z',
+          updated_at: '2026-01-01T00:00:00.000Z',
+          references: [
+            { uri: `${SIGNIFICANT_EVENT_KI_TYPE}://payment-outage`, relation: 'derived_from' },
+          ],
+          governance: {
+            provenance: {
+              created_by: { uri: 'crawler://sml', metadata: { ingestion_method: 'manual' } },
+              updated_by: { uri: 'crawler://sml', metadata: { ingestion_method: 'manual' } },
+            },
           },
           permissions: {
             kibana: {
