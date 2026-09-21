@@ -231,8 +231,8 @@ importers:
         specifier: 1.24.2
         version: 1.24.2(@types/react@18.2.79)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)
       '@elastic/request-converter':
-        specifier: 9.5.1
-        version: 9.5.1
+        specifier: 9.6.0
+        version: 9.6.0
       '@elastic/request-crypto':
         specifier: 2.0.4
         version: 2.0.4
@@ -10870,11 +10870,11 @@ packages:
       react: '>= 16.8.0 < 20'
       react-dom: '>= 16.8.0 < 20'
 
-  '@elastic/request-converter@9.5.1':
-    resolution: {integrity: sha512-NSepTwUG8uqhcFdDyIZJuNktbeG/Az4bIGSPzqMRg9Q00clQiTORpxfpth1FUWEtGI39xipvIfA1jreWFJEE1w==}
+  '@elastic/request-converter@9.6.0':
+    resolution: {integrity: sha512-NbhcFXPKbyknRekybRTc5NwzHsT4S0GI0g9aFZJwbLyegHEFFRrKXXqmqG1UO00dnhvmNe5EW0ez4KaZuHDIdg==}
     hasBin: true
     peerDependencies:
-      '@elastic/request-converter-dotnet': ~9.5.0
+      '@elastic/request-converter-dotnet': latest
     peerDependenciesMeta:
       '@elastic/request-converter-dotnet':
         optional: true
@@ -27983,7 +27983,7 @@ snapshots:
       - '@types/react'
       - supports-color
 
-  '@elastic/request-converter@9.5.1':
+  '@elastic/request-converter@9.6.0':
     dependencies:
       base64url: 3.0.1
       commander: 12.1.0
