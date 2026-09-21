@@ -5,24 +5,17 @@
  * 2.0.
  */
 
-import type { EvaluationWorkerFixtures } from '@kbn/evals';
-import {
-  getConnectorModel,
-  InferenceConnectorType,
-  type InferenceClient,
-} from '@kbn/inference-common';
+import { getInferenceEndpointId, type EvaluationWorkerFixtures } from '@kbn/evals';
+import { getConnectorModel, type InferenceClient } from '@kbn/inference-common';
 
 /** Reads the judge model from its runtime inference connector. */
 export const getJudgeModel = async (
   client: Pick<InferenceClient, 'getConnectorById'>,
   connector: EvaluationWorkerFixtures['evaluationConnector']
 ): Promise<string> => {
-  const { inferenceId } = connector.config;
   // REST discovery deduplicates .inference aliases in favor of their endpoint IDs.
-  const lookupId =
-    connector.actionTypeId === InferenceConnectorType.Inference && typeof inferenceId === 'string'
-      ? inferenceId
-      : connector.id;
-  const resolved = await client.getConnectorById(lookupId);
+  const resolved = await client.getConnectorById(
+    getInferenceEndpointId(connector) ?? connector.id
+  );
   return getConnectorModel(resolved) ?? connector.name;
 };
