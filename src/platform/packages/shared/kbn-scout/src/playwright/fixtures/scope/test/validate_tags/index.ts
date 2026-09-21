@@ -8,13 +8,67 @@
  */
 
 import { test as base } from '@playwright/test';
-import { testTargets } from '@kbn/scout-info';
+import { ScoutTestLimit, testLimits, testTargets } from '@kbn/scout-info';
 import { tags } from '../../../../tags';
 
-const supportedTags = [
+const supportedSelectionTags = [
   ...testTargets.all.map((target) => target.playwrightTag),
   ...tags.performance,
 ];
+
+const supportedLimitTags = testLimits.all.map((limit) => limit.playwrightTag);
+
+const supportedTags = [...supportedSelectionTags, ...supportedLimitTags];
+
+/**
+ * Limit tags only narrow an existing selection, so they can never stand in for a
+ * deployment tag: a test tagged with limits alone would never be discovered.
+ */
+export const findTagIssues = (testTags: string[]): string[] => {
+  const issues: string[] = [];
+
+  const invalidTags = testTags.filter((tag) => !supportedTags.includes(tag));
+  if (invalidTags.length > 0) {
+    issues.push(
+      `Unsupported tag(s) found: ${invalidTags.join(', ')}. ` +
+        `Supported tags are: ${supportedTags.join(', ')}.`
+    );
+  }
+
+  if (!testTags.some((tag) => supportedSelectionTags.includes(tag))) {
+    issues.push(
+      `At least one of the following tags is required: ${supportedSelectionTags.join(', ')}. ` +
+        `Limit tags (${supportedLimitTags.join(', ')}) only narrow an existing selection.`
+    );
+  }
+
+  const selectionMethodsByAttribute = new Map<string, Set<string>>();
+  testLimits
+    .fromPlaywrightTags(testTags.filter((tag) => supportedLimitTags.includes(tag)))
+    .forEach((limit) => {
+      const selectionMethods =
+        selectionMethodsByAttribute.get(limit.targetAttribute) ?? new Set<string>();
+      selectionMethods.add(limit.selectionMethod);
+      selectionMethodsByAttribute.set(limit.targetAttribute, selectionMethods);
+    });
+
+  selectionMethodsByAttribute.forEach((selectionMethods, targetAttribute) => {
+    if (selectionMethods.size < 2) {
+      return;
+    }
+
+    issues.push(
+      `Conflicting limit tags for the '${targetAttribute}' target attribute: ` +
+        `${[...selectionMethods]
+          .map(
+            (selectionMethod) => new ScoutTestLimit(selectionMethod, targetAttribute).playwrightTag
+          )
+          .join(', ')}. A test carrying both would never run.`
+    );
+  });
+
+  return issues;
+};
 
 export const validateTagsFixture = base.extend<{ validateTags: void }>({
   validateTags: [
@@ -23,12 +77,12 @@ export const validateTagsFixture = base.extend<{ validateTags: void }>({
         throw new Error(`At least one tag is required: ${supportedTags.join(', ')}`);
       }
 
-      const invalidTags = testInfo.tags.filter((tag: string) => !supportedTags.includes(tag));
-      if (invalidTags.length > 0) {
+      const issues = findTagIssues(testInfo.tags);
+      if (issues.length > 0) {
         throw new Error(
-          `Unsupported tag(s) found in test suite "${testInfo.title}": ${invalidTags.join(
-            ', '
-          )}. ` + `Supported tags are: ${supportedTags.join(', ')}.`
+          `Invalid tag(s) found in test suite "${testInfo.title}":\n${issues
+            .map((issue) => `- ${issue}`)
+            .join('\n')}`
         );
       }
 
