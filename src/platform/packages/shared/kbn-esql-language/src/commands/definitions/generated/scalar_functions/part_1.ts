@@ -5673,7 +5673,7 @@ const fieldExtractDefinition: FunctionDefinition = {
     defaultMessage:
       'Extracts the value of a single sub-field from a `flattened` field root as `keyword`.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {

@@ -4,6 +4,7 @@ plugins:
     - advanced_settings
     - agent_builder
     - agent_builder_dashboards
+    - agentic_investigations
     - alerting
     - alerting_v2
     - apm
@@ -16,6 +17,7 @@ plugins:
     - contentManagementExamples
     - content_management
     - context_engine
+    - context_engine_agent_builder
     - cross_cluster_replication
     - custom_branding
     - custom_content
@@ -32,13 +34,13 @@ plugins:
     - dev_tools
     - discover
     - discoverCustomizationExamples
-    - discover_enhanced
     - discoveries
     - embeddable_alerts_table
     - entity_store
     - error_boundary_example
     - event_annotation_listing
     - exploratory_view
+    - files_management
     - fleet
     - flyoutSystemExamples
     - gen_ai_settings
@@ -51,6 +53,7 @@ plugins:
     - infra
     - ingest_hub
     - ingest_pipelines
+    - interactive_setup
     - intercepts
     - kibana_overview
     - kql
@@ -67,6 +70,7 @@ plugins:
     - nightshift_investigations
     - notification_center
     - observability
+    - observability_alerting
     - observability_onboarding
     - osquery
     - painless_lab

@@ -7,15 +7,11 @@
 
 import type { HttpStart } from '@kbn/core-http-browser';
 import { useQuery } from '@kbn/react-query';
-import type {
-  MatchActionPoliciesForRuleResponse,
-  MatchedActionPolicy,
-} from '@kbn/alerting-v2-schemas';
+import type { MatchActionPoliciesResponse, MatchedActionPolicy } from '@kbn/alerting-v2-schemas';
+import { ALERTING_V2_INTERNAL_ACTION_POLICY_MATCH_API_PATH } from '@kbn/alerting-v2-constants';
 
 interface UseMatchedActionPoliciesParams {
   http: HttpStart;
-  ruleId?: string;
-  name?: string;
   tags?: string[];
 }
 
@@ -24,40 +20,33 @@ export interface UseMatchedActionPoliciesResult {
   error: Error | null;
   items: MatchedActionPolicy[];
   total: number;
+  evaluatedCount: number;
+  isTruncated: boolean;
 }
 
 export const useMatchedActionPolicies = ({
   http,
-  ruleId,
-  name,
   tags,
 }: UseMatchedActionPoliciesParams): UseMatchedActionPoliciesResult => {
-  const enabled = Boolean(ruleId) || Boolean(name) || Boolean(tags?.length);
-
-  const body = {
-    rule: {
-      ...(ruleId ? { id: ruleId } : {}),
-      ...(name ? { name } : {}),
-      ...(tags?.length ? { tags } : {}),
-    },
-  };
+  const body = { rule: tags?.length ? { tags } : {} };
 
   const { isLoading, error, data } = useQuery({
-    queryKey: ['matchedActionPolicies', ruleId, name, tags],
+    queryKey: ['matchedActionPolicies', tags],
     queryFn: () =>
-      http.fetch<MatchActionPoliciesForRuleResponse>(
-        '/api/alerting/v2/action_policies/_match_for_rule',
-        { method: 'POST', body: JSON.stringify(body) }
-      ),
-    enabled,
+      http.fetch<MatchActionPoliciesResponse>(ALERTING_V2_INTERNAL_ACTION_POLICY_MATCH_API_PATH, {
+        method: 'POST',
+        body: JSON.stringify(body),
+      }),
     keepPreviousData: true,
     refetchOnWindowFocus: false,
   });
 
   return {
-    isLoading: enabled && isLoading,
+    isLoading,
     error: error instanceof Error ? error : error != null ? new Error(String(error)) : null,
     items: data?.items ?? [],
     total: data?.total ?? 0,
+    evaluatedCount: data?.evaluated_count ?? 0,
+    isTruncated: data?.is_truncated ?? false,
   };
 };

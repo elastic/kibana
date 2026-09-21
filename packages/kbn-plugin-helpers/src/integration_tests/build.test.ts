@@ -25,7 +25,7 @@ const TMP_DIR = Path.resolve(__dirname, '__tmp__');
 
 expect.addSnapshotSerializer(createReplaceSerializer(/[\d\.]+ sec/g, '<time>'));
 expect.addSnapshotSerializer(createReplaceSerializer(/\d+(\.\d+)?[sm]/g, '<time>'));
-expect.addSnapshotSerializer(createReplaceSerializer(/yarn (\w+) v[\d\.]+/g, 'yarn $1 <version>'));
+expect.addSnapshotSerializer(createReplaceSerializer(/pnpm (\w+) v[\d\.]+/g, 'pnpm $1 <version>'));
 expect.addSnapshotSerializer(createStripAnsiSerializer());
 
 describe('scripts/generate_plugin', () => {
@@ -84,7 +84,7 @@ describe('scripts/generate_plugin', () => {
      info compressing js and css bundles found at plugins/foo_test_plugin/build/kibana/fooTestPlugin/target/public to brotli
      info copying assets from \`public/assets\` to build
      info copying server source into the build and converting with babel
-     info running yarn to install dependencies
+     info running pnpm to install dependencies
      info compressing plugin into [fooTestPlugin-7.5.0.zip]
      succ plugin archive created"
   `);
@@ -100,8 +100,10 @@ describe('scripts/generate_plugin', () => {
       "kibana/fooTestPlugin/.i18nrc.json",
       "kibana/fooTestPlugin/common/index.js",
       "kibana/fooTestPlugin/kibana.json",
-      "kibana/fooTestPlugin/node_modules/.yarn-integrity",
+      "kibana/fooTestPlugin/node_modules/.modules.yaml",
+      "kibana/fooTestPlugin/node_modules/.pnpm-workspace-state-v1.json",
       "kibana/fooTestPlugin/package.json",
+      "kibana/fooTestPlugin/pnpm-lock.yaml",
       "kibana/fooTestPlugin/server/index.js",
       "kibana/fooTestPlugin/server/plugin.js",
       "kibana/fooTestPlugin/server/routes/index.js",
@@ -145,6 +147,15 @@ describe('scripts/generate_plugin', () => {
       all: true,
     });
 
+    // Third-party plugins commonly ship stylesheets. Every plugin .scss pulls in
+    // Kibana's theme globals, which must resolve when built from the plugin dir.
+    Fs.writeFileSync(
+      Path.resolve(PLUGIN_DIR, 'public/styles.scss'),
+      '.fooTestPlugin { color: $euiColorPrimary; }\n'
+    );
+    const entryPath = Path.resolve(PLUGIN_DIR, 'public/index.ts');
+    Fs.writeFileSync(entryPath, `import './styles.scss';\n${Fs.readFileSync(entryPath, 'utf8')}`);
+
     const filterLogs = (logs: string | undefined) => {
       return logs
         ?.split('\n')
@@ -178,10 +189,9 @@ describe('scripts/generate_plugin', () => {
     const publicFiles = files.filter((f) => f.includes('target/public/'));
     expect(publicFiles.length).toBeGreaterThanOrEqual(1);
 
-    const mainBundle = publicFiles.find(
-      (f) => f.endsWith('.plugin.js') || f.endsWith('.plugin.js.br')
-    );
+    const mainBundle = publicFiles.find((f) => f.endsWith('.plugin.js'));
     expect(mainBundle).toBeDefined();
+    expect(Fs.readFileSync(Path.resolve(TMP_DIR, mainBundle!), 'utf8')).toContain('.fooTestPlugin');
 
     const serverFiles = files.filter((f) => f.includes('server/'));
     expect(serverFiles.length).toBeGreaterThan(0);
