@@ -129,7 +129,7 @@ import * as i18n from './translations';
 import { NeedAdminForUpdateRulesCallOut } from '../../../rule_management/components/callouts/need_admin_for_update_rules_callout';
 import { MissingDetectionsPrivilegesCallOut } from '../../../../detections/components/callouts/missing_detections_privileges_callout';
 import { useRuleWithFallback } from '../../../rule_management/logic/use_rule_with_fallback';
-import { SyncShowBuildingBlockAlerts } from './use_sync_show_building_block_alerts';
+import { useSyncShowBuildingBlockAlerts } from './use_sync_show_building_block_alerts';
 import type { BadgeOptions } from '../../../../common/components/header_page/types';
 import type { AlertsStackByField } from '../../../../detections/components/alerts_kpis/common/types';
 import { type RuleResponse, type Status } from '../../../../../common/api/detection_engine';
@@ -345,6 +345,8 @@ export const RuleDetailsPage = connector(
     const { showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts } = useDataTableFilters(
       TableId.alertsOnRuleDetailsPage
     );
+    // Page lifetime so tab navigation does not remount and reset the toolbar filter.
+    useSyncShowBuildingBlockAlerts(rule?.building_block_type != null);
 
     const mlCapabilities = useMlCapabilities();
     const { globalFullScreen } = useGlobalFullScreen();
@@ -881,9 +883,6 @@ export const RuleDetailsPage = connector(
                   {canReadAlerts && (
                     <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts})`}>
                       <>
-                        <SyncShowBuildingBlockAlerts
-                          isBuildingBlockRule={rule?.building_block_type != null}
-                        />
                         <FiltersGlobal>
                           <SiemSearchBar dataView={dataView} id={InputsModelId.global} />
                         </FiltersGlobal>

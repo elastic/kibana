@@ -7,16 +7,13 @@
 
 import { dataTableSelectors, TableId } from '@kbn/securitysolution-data-table';
 import { useEffect, useMemo } from 'react';
-import type { FC } from 'react';
 import { useDataTableFilters } from '../../../../common/hooks/use_data_table_filters';
 import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 
-interface SyncShowBuildingBlockAlertsProps {
-  isBuildingBlockRule: boolean;
-}
-
 /**
  * Applies the building-block alerts filter once the rule-details table exists in the store.
+ * Must run at rule-details page lifetime so Alerts-tab route remounts do not reset a user's
+ * toolbar choice.
  */
 export const useSyncShowBuildingBlockAlerts = (isBuildingBlockRule: boolean): void => {
   const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
@@ -31,14 +28,4 @@ export const useSyncShowBuildingBlockAlerts = (isBuildingBlockRule: boolean): vo
     }
     setShowBuildingBlockAlerts(isBuildingBlockRule);
   }, [hasAlertsTableState, isBuildingBlockRule, setShowBuildingBlockAlerts]);
-};
-
-/**
- * Runs the building-block alerts filter sync only while the Alerts tab is mounted.
- */
-export const SyncShowBuildingBlockAlerts: FC<SyncShowBuildingBlockAlertsProps> = ({
-  isBuildingBlockRule,
-}) => {
-  useSyncShowBuildingBlockAlerts(isBuildingBlockRule);
-  return null;
 };

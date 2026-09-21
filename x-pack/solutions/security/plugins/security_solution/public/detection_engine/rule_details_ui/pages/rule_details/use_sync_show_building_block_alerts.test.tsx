@@ -46,11 +46,12 @@ const renderUseSyncShowBuildingBlockAlerts = (
 ) => {
   const dispatchSpy = jest.spyOn(store, 'dispatch');
 
-  renderHook(() => useSyncShowBuildingBlockAlerts(isBuildingBlockRule), {
+  const view = renderHook((value: boolean) => useSyncShowBuildingBlockAlerts(value), {
+    initialProps: isBuildingBlockRule,
     wrapper: ({ children }) => <TestProviders store={store}>{children}</TestProviders>,
   });
 
-  return { dispatchSpy, store };
+  return { dispatchSpy, store, ...view };
 };
 
 describe('useSyncShowBuildingBlockAlerts', () => {
@@ -115,6 +116,28 @@ describe('useSyncShowBuildingBlockAlerts', () => {
     act(() => {
       store.dispatch(buildingBlockFilterAction(false));
     });
+
+    expect(dispatchSpy).not.toHaveBeenCalledWith(buildingBlockFilterAction(true));
+    expect(
+      store.getState().dataTable.tableById[TableId.alertsOnRuleDetailsPage].additionalFilters
+        .showBuildingBlockAlerts
+    ).toBe(false);
+  });
+
+  it('does not reset the filter when the hook stays mounted after the table already exists', () => {
+    const { dispatchSpy, store, rerender } = renderUseSyncShowBuildingBlockAlerts(
+      true,
+      createMockStore(stateWithRuleDetailsTable())
+    );
+
+    expect(dispatchSpy).toHaveBeenCalledWith(buildingBlockFilterAction(true));
+
+    act(() => {
+      store.dispatch(buildingBlockFilterAction(false));
+    });
+    dispatchSpy.mockClear();
+
+    rerender(true);
 
     expect(dispatchSpy).not.toHaveBeenCalledWith(buildingBlockFilterAction(true));
     expect(
