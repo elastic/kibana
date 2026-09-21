@@ -11,6 +11,7 @@ import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { Redirect } from 'react-router-dom';
 import { DisabledCallout } from '../management/disabled_callout';
 import { FilterGroup } from '../common/monitor_filters/filter_group';
+import { SelectedFilterPills } from '../common/monitor_filters/selected_filter_pills';
 import { OverviewAlerts } from './overview/overview_alerts';
 import { useEnablement } from '../../../hooks';
 import {
@@ -170,6 +171,7 @@ export const OverviewPage: React.FC = () => {
           <FilterGroup handleFilterChange={handleFilterChange} showRemoteClusterFilter />
         </EuiFlexItem>
       </EuiFlexGroup>
+      <SelectedFilterPills handleFilterChange={handleFilterChange} />
       <EuiSpacer />
       {hasMonitors ? (
         <>
