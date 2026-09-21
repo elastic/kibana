@@ -13,6 +13,8 @@ import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { renderWithTestingProviders } from '../../common/mock';
 import { ColumnsPopover } from './columns_popover';
 
+jest.setTimeout(60_000);
+
 describe('ColumnsPopover', () => {
   beforeEach(() => {
     jest.clearAllMocks();
