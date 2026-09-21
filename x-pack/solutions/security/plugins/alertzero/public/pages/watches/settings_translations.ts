@@ -101,16 +101,6 @@ export const WORKER_SETTINGS_UNAVAILABLE = i18n.translate(
   { defaultMessage: 'Settings could not be read; reload and try again' }
 );
 
-export const SKILLS_SECTION_TITLE = i18n.translate(
-  'xpack.alertzero.watches.settings.skills.sectionTitle',
-  { defaultMessage: 'Skills' }
-);
-
-export const SKILLS_SECTION_SUBTITLE = i18n.translate(
-  'xpack.alertzero.watches.settings.skills.sectionSubtitle',
-  { defaultMessage: 'what this Worker can use' }
-);
-
 export const SKILLS_VIEW_ALL = i18n.translate('xpack.alertzero.watches.settings.skills.viewAll', {
   defaultMessage: 'View all skills',
 });
@@ -136,6 +126,7 @@ export const LEDGER_SECTION_SUBTITLE = i18n.translate(
   'xpack.alertzero.watches.settings.ledger.sectionSubtitle',
   { defaultMessage: 'ledger for this Watch' }
 );
+
 
 /* -------------------------------------------------------------------------- */
 /* Autonomy                                                                   */
