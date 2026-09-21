@@ -133,11 +133,6 @@ export function parseEsqlDescription(description: string): { indices: number; qu
  * Child tasks are hidden only while their parent is still present in the current
  * `_tasks` response. Once the parent finishes (e.g. an async search wrapper), the
  * orphaned child remains visible so long-running queries keep showing in the UI.
- *
- * Non-cancellable tasks are excluded: with `detailed: false` on the list path we
- * cannot check for an empty description, so cancellable is the stand-in for the
- * old `!cancellable && !description` filter that hid post-handler background
- * async tasks (e.g. ES|QL) which have nothing useful to show or cancel.
  */
 export function isQueryTaskCandidate(
   task: TasksTaskInfo,
@@ -154,10 +149,6 @@ export function isQueryTaskCandidate(
   }
 
   if ((task.running_time_in_nanos ?? 0) < thresholdNanos) {
-    return false;
-  }
-
-  if (!task.cancellable) {
     return false;
   }
 

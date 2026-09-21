@@ -151,19 +151,13 @@ describe('parseEsqlDescription', () => {
 });
 
 describe('isQueryTaskCandidate', () => {
-  it('includes a qualifying task without a description field', () => {
-    expect(
-      isQueryTaskCandidate({ ...baseTask, description: undefined }, DEFAULT_THRESHOLD_NANOS)
-    ).toBe(true);
-  });
-
-  it('excludes non-cancellable tasks even when the action is whitelisted', () => {
+  it('includes a qualifying task without detailed fields', () => {
     expect(
       isQueryTaskCandidate(
         { ...baseTask, cancellable: false, description: undefined },
         DEFAULT_THRESHOLD_NANOS
       )
-    ).toBe(false);
+    ).toBe(true);
   });
 
   it('includes verified root action variants', () => {
