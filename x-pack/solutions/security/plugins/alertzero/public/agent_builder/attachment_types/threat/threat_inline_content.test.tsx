@@ -17,7 +17,7 @@ import {
 } from './threat_inline_content';
 import { threatAttachmentQueryClient } from './query_client';
 import type { ThreatAttachment } from './types';
-import { buildIocLookupEsql, buildThreatReportLookupEsql } from '../navigation';
+import { buildDiscoverThreatReportNestedIocUrl, buildThreatReportLookupEsql } from '../navigation';
 
 const buildAttachment = (data: ThreatAttachment['data']): ThreatAttachment =>
   ({ id: 'att-1', type: 'security.threat', data } as ThreatAttachment);
@@ -26,8 +26,20 @@ const mockShare = {
   url: {
     locators: {
       get: () => ({
-        getRedirectUrl: ({ query }: { query: { esql: string } }) =>
-          `https://example.test/discover?esql=${encodeURIComponent(query.esql)}`,
+        getRedirectUrl: (params: {
+          query?: { esql?: string };
+          filters?: unknown[];
+        }) => {
+          if (params.query?.esql) {
+            return `https://example.test/discover?esql=${encodeURIComponent(params.query.esql)}`;
+          }
+          if (params.filters) {
+            return `https://example.test/discover?nested=${encodeURIComponent(
+              JSON.stringify(params.filters)
+            )}`;
+          }
+          return 'https://example.test/discover';
+        },
       }),
     },
   },
@@ -213,12 +225,13 @@ describe('ThreatAttachmentInlineContent', () => {
     expect(node).toHaveTextContent(reportId);
   });
 
-  it('renders an IOC value as a Discover link for ipv4-addr', async () => {
+  it('renders an IOC value as a nested threat-report Discover link', async () => {
     const iocValue = '198.51.100.10';
-    const expectedEsql = buildIocLookupEsql({ type: 'ipv4-addr', value: iocValue });
-    const expectedHref = `https://example.test/discover?esql=${encodeURIComponent(
-      expectedEsql as string
-    )}`;
+    const expectedHref = buildDiscoverThreatReportNestedIocUrl({
+      share: mockShare,
+      iocType: 'ipv4-addr',
+      value: iocValue,
+    });
     const http = {
       fetch: jest.fn().mockResolvedValue({
         reportId: 'r-ioc',

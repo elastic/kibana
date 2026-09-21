@@ -25,13 +25,13 @@ import {
   buildAlertDetailsUrl,
   buildDiscoverEsqlUrl,
   buildEventLookupEsql,
-  buildIocLookupEsql,
   DiscoverLink,
 } from '../navigation';
 import { EntityChip } from '../entity_chip';
 import { parseSignificantSecurityEventData } from './types';
 import type {
   ParsedSignificantSecurityEvent,
+  SignificantSecurityAlertRef,
   SignificantSecurityEventAttachment,
   SignificantSecurityEventRef,
   SecurityKnowledgeIndicator,
@@ -121,7 +121,7 @@ const EventRows: React.FC<{
 };
 
 const AlertList: React.FC<{
-  alerts: string[];
+  alerts: SignificantSecurityAlertRef[];
   navigation: AttachmentNavigationDeps;
 }> = ({ alerts, navigation }) => {
   if (alerts.length === 0) {
@@ -139,19 +139,21 @@ const AlertList: React.FC<{
   return (
     <EuiText size="s">
       <ul>
-        {alerts.map((alertId) => {
+        {alerts.map((alert) => {
           const href = buildAlertDetailsUrl({
             prependPath: navigation.prependPath,
             spaceId: navigation.spaceId,
-            alertId,
+            alertId: alert.alert_id,
+            index: alert.index,
+            timestamp: alert.timestamp,
           });
           return (
-            <li key={alertId}>
+            <li key={`${alert.index}:${alert.alert_id}`}>
               <DiscoverLink
                 href={href}
-                testSubj={`alertzeroSignificantSecurityEventAlertLink-${alertId}`}
+                testSubj={`alertzeroSignificantSecurityEventAlertLink-${alert.alert_id}`}
               >
-                <span css={cellStyles}>{alertId}</span>
+                <span css={cellStyles}>{alert.alert_id}</span>
               </DiscoverLink>
             </li>
           );
@@ -161,10 +163,10 @@ const AlertList: React.FC<{
   );
 };
 
+/** Taxonomy labels only. Not Discover IOCs; do not invent logs-* field mappings. */
 const IndicatorList: React.FC<{
   indicators: SecurityKnowledgeIndicator[];
-  navigation: AttachmentNavigationDeps;
-}> = ({ indicators, navigation }) => {
+}> = ({ indicators }) => {
   if (indicators.length === 0) {
     return (
       <EuiText size="s" color="subdued">
@@ -180,19 +182,17 @@ const IndicatorList: React.FC<{
   return (
     <EuiText size="s">
       <ul>
-        {indicators.map((indicator, index) => {
-          const esql = buildIocLookupEsql({ type: indicator.type, value: indicator.value });
-          const href = esql ? buildDiscoverEsqlUrl({ share: navigation.share, esql }) : undefined;
-          const testSubj = `alertzeroSignificantSecurityEventIocLink-${indicator.type}-${index}`;
-          return (
-            <li key={`${indicator.type}-${indicator.value}-${index}`}>
-              <span css={cellStyles}>{indicator.type}: </span>
-              <DiscoverLink href={href} testSubj={testSubj}>
-                <span css={cellStyles}>{indicator.value}</span>
-              </DiscoverLink>
-            </li>
-          );
-        })}
+        {indicators.map((indicator, index) => (
+          <li
+            key={`${indicator.type}-${indicator.value}-${index}`}
+            data-test-subj={`alertzeroSignificantSecurityEventIndicator-${indicator.type}-${index}`}
+          >
+            <span css={cellStyles}>
+              {indicator.type}: {indicator.value}
+              {indicator.confidence != null ? ` (${indicator.confidence})` : ''}
+            </span>
+          </li>
+        ))}
       </ul>
     </EuiText>
   );
@@ -412,7 +412,7 @@ export const SignificantSecurityEventInlineContent: React.FC<
           })}
         </strong>
       </EuiText>
-      <IndicatorList indicators={parsed.indicators} navigation={navigation} />
+      <IndicatorList indicators={parsed.indicators} />
 
       <EuiSpacer size="s" />
       <EvidenceSection
@@ -446,7 +446,7 @@ export const SignificantSecurityEventInlineContent: React.FC<
         ) : (
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
             {parsed.entities.map((entity, index) => (
-              <EuiFlexItem grow={false} key={`${entity}-${index}`}>
+              <EuiFlexItem grow={false} key={`${entity.field}:${entity.value}:${index}`}>
                 <EntityChip
                   entity={entity}
                   share={navigation.share}

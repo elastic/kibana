@@ -28,7 +28,7 @@ import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachmen
 import type { AttachmentNavigationDeps } from '../navigation';
 import {
   buildDiscoverEsqlUrl,
-  buildIocLookupEsql,
+  buildDiscoverThreatReportNestedIocUrl,
   buildThreatReportLookupEsql,
   DiscoverLink,
 } from '../navigation';
@@ -254,10 +254,12 @@ const renderEnrichedSections = ({
                 {type}
               </EuiText>
               {visible.map((ioc, index) => {
-                const esql = buildIocLookupEsql({ type: ioc.type, value: ioc.value });
-                const href = esql
-                  ? buildDiscoverEsqlUrl({ share: navigation.share, esql })
-                  : undefined;
+                // Threat report IOCs live on nested `extracted.iocs`, not inventable logs-* fields.
+                const href = buildDiscoverThreatReportNestedIocUrl({
+                  share: navigation.share,
+                  iocType: ioc.type,
+                  value: ioc.value,
+                });
                 const label = `${ioc.value}${ioc.tier ? ` (${ioc.tier})` : ''}`;
                 return (
                   <span key={`${ioc.value}-${index}`} css={{ marginRight: 4, marginBottom: 4 }}>

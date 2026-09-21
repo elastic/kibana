@@ -6,8 +6,8 @@
  */
 
 /**
- * ECS fields Hunt Watch writers may put on SSE `entities[]` as `field: value`.
- * No EUID / ARN decoding: the field written is the field Discover queries.
+ * Allowlisted ECS fields for SSE `entities[]`.
+ * The field written is the field Discover queries. No EUID/ARN decoding.
  */
 export const ATTACHMENT_ENTITY_FIELDS = [
   'user.name',
@@ -22,6 +22,13 @@ export const ATTACHMENT_ENTITY_FIELDS = [
 
 export type AttachmentEntityField = (typeof ATTACHMENT_ENTITY_FIELDS)[number];
 
+export interface AttachmentEntityRef {
+  field: AttachmentEntityField;
+  value: string;
+}
+
+const FIELD_SET = new Set<string>(ATTACHMENT_ENTITY_FIELDS);
+
 const FIELD_BY_LOWER = new Map(
   ATTACHMENT_ENTITY_FIELDS.map((field) => [field.toLowerCase(), field] as const)
 );
@@ -31,18 +38,31 @@ const ENTITY_STRING_PATTERN = new RegExp(
   'i'
 );
 
-export interface ParsedTypedAttachmentEntityString {
-  field: AttachmentEntityField;
-  value: string;
-}
+/** True when `field` is an allowlisted entity ECS field. */
+export const isAttachmentEntityField = (field: string): field is AttachmentEntityField =>
+  FIELD_SET.has(field);
+
+/** True when a value is a well-formed `{ field, value }` entity ref. */
+export const isAttachmentEntityRef = (candidate: unknown): candidate is AttachmentEntityRef => {
+  if (!candidate || typeof candidate !== 'object') {
+    return false;
+  }
+  const record = candidate as Record<string, unknown>;
+  return (
+    typeof record.field === 'string' &&
+    isAttachmentEntityField(record.field) &&
+    typeof record.value === 'string' &&
+    record.value.trim().length > 0
+  );
+};
 
 /**
- * Parse an SSE entity string into `{ field, value }`.
- * Returns undefined for anything that is not an allowlisted `field: value` form.
+ * Parse a legacy `field: value` entity string into `{ field, value }`.
+ * Prefer writing structured `AttachmentEntityRef` objects on new payloads.
  */
 export const parseTypedAttachmentEntityString = (
   raw: string
-): ParsedTypedAttachmentEntityString | undefined => {
+): AttachmentEntityRef | undefined => {
   const trimmed = raw.trim();
   if (!trimmed) {
     return undefined;

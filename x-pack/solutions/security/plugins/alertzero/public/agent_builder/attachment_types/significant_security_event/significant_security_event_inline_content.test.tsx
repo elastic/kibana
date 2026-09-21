@@ -14,7 +14,7 @@ import {
   SSE_ATTACHMENT_EMPTY_TEST_ID,
 } from './significant_security_event_inline_content';
 import type { SignificantSecurityEventAttachment } from './types';
-import { buildEntityLookupEsql, buildEventLookupEsql, getAlertsIndex } from '../navigation';
+import { buildEntityLookupEsql, buildEventLookupEsql } from '../navigation';
 
 const buildAttachment = (
   data: SignificantSecurityEventAttachment['data']
@@ -29,8 +29,12 @@ const mockShare = {
   url: {
     locators: {
       get: () => ({
-        getRedirectUrl: ({ query }: { query: { esql: string } }) =>
-          `https://example.test/discover?esql=${encodeURIComponent(query.esql)}`,
+        getRedirectUrl: (params: { query?: { esql?: string } }) => {
+          if (params.query?.esql) {
+            return `https://example.test/discover?esql=${encodeURIComponent(params.query.esql)}`;
+          }
+          return 'https://example.test/discover?nested=1';
+        },
       }),
     },
   },
@@ -54,12 +58,15 @@ const baseData = {
   title: 'Suspicious lateral movement',
   severity: 'high' as const,
   confidence: 0.8,
-  status: 'open',
+  status: 'open' as const,
   source_watch: 'watch-1',
   capability: 'lateral-movement-detector',
   run_id: 'run-1',
-  security_knowledge_indicators: [{ type: 'hash', value: 'abc123' }],
-  entities: ['host.name: host-1', 'user.name: user-1'],
+  security_knowledge_indicators: [{ type: 'technique', value: 'T1021', confidence: 0.9 }],
+  entities: [
+    { field: 'host.name' as const, value: 'host-1' },
+    { field: 'user.name' as const, value: 'user-1' },
+  ],
   timeline: [{ at: '2024-01-01T00:00:00Z', what: 'RDP session opened' }],
   hypothesis_tested: 'Attacker pivoted via RDP',
   evidence_for: ['e1', 'e2'],
@@ -126,8 +133,12 @@ describe('SignificantSecurityEventInlineContent', () => {
     expect(screen.getByText('No entities recorded')).toBeInTheDocument();
   });
 
-  it('renders entity names as Discover links on the exact ECS field', () => {
-    const entities = ['user.name: dev-user', 'user.name: escalated-role', 'host.name: ci-deploy-runner-07'];
+  it('renders entity refs as Discover links on the exact ECS field', () => {
+    const entities = [
+      { field: 'user.name' as const, value: 'dev-user' },
+      { field: 'user.name' as const, value: 'escalated-role' },
+      { field: 'host.name' as const, value: 'ci-deploy-runner-07' },
+    ];
     const userEsql = buildEntityLookupEsql({ field: 'user.name', value: 'dev-user' });
     const roleEsql = buildEntityLookupEsql({ field: 'user.name', value: 'escalated-role' });
     const hostEsql = buildEntityLookupEsql({ field: 'host.name', value: 'ci-deploy-runner-07' });
@@ -161,6 +172,17 @@ describe('SignificantSecurityEventInlineContent', () => {
       `https://example.test/discover?esql=${encodeURIComponent(hostEsql as string)}`
     );
     expect(hostLink).toHaveTextContent('ci-deploy-runner-07');
+  });
+
+  it('renders knowledge indicators as plain taxonomy text, not Discover links', () => {
+    render(<SignificantSecurityEventInlineContent {...renderProps(buildAttachment(baseData))} />);
+
+    expect(
+      screen.getByTestId('alertzeroSignificantSecurityEventIndicator-technique-0')
+    ).toHaveTextContent('technique: T1021 (0.9)');
+    expect(
+      screen.queryByTestId('alertzeroSignificantSecurityEventIocLink-technique-0')
+    ).not.toBeInTheDocument();
   });
 
   it('renders a Discover link for an event when share returns a URL', () => {
@@ -205,21 +227,24 @@ describe('SignificantSecurityEventInlineContent', () => {
     expect(node).toHaveTextContent('evt-plain');
   });
 
-  it('renders a Security alert-details link for an alert id', () => {
-    const alertId = 'alert-abc';
-    const alertsIndex = getAlertsIndex('default');
+  it('renders a Security alert-details link using the alert index from the payload', () => {
+    const alert = {
+      alert_id: 'alert-abc',
+      index: '.alerts-security.alerts-soc',
+      timestamp: '2026-01-01T00:00:00.000Z',
+    };
 
     render(
       <SignificantSecurityEventInlineContent
-        {...renderProps(buildAttachment({ ...baseData, alerts: [alertId] }))}
+        {...renderProps(buildAttachment({ ...baseData, alerts: [alert] }))}
       />
     );
 
-    const link = screen.getByTestId(`alertzeroSignificantSecurityEventAlertLink-${alertId}`);
+    const link = screen.getByTestId(`alertzeroSignificantSecurityEventAlertLink-${alert.alert_id}`);
     expect(link).toHaveAttribute('href', expect.stringContaining('/app/security/alerts/redirect/'));
-    expect(link).toHaveAttribute('href', expect.stringContaining(alertId));
-    expect(link).toHaveAttribute('href', expect.stringContaining(`index=${alertsIndex}`));
-    expect(link.getAttribute('href')).not.toContain('timestamp=');
+    expect(link).toHaveAttribute('href', expect.stringContaining(alert.alert_id));
+    expect(link).toHaveAttribute('href', expect.stringContaining(`index=${alert.index}`));
+    expect(link.getAttribute('href')).toContain('timestamp=2026-01-01T00%3A00%3A00.000Z');
   });
 
   it('renders evidence bullet text from evidence_for', () => {

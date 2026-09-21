@@ -27,7 +27,7 @@ describe('createSignificantSecurityEventAttachmentDefinition', () => {
     title: 'Suspicious lateral movement',
     severity: 'high' as const,
     confidence: 0.8,
-    status: 'open',
+    status: 'open' as const,
     source_watch: 'watch-1',
     capability: 'lateral-movement-detector',
     run_id: 'run-1',

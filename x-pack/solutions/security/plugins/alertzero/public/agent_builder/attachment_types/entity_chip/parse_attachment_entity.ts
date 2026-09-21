@@ -55,10 +55,17 @@ export const parseAttachmentEntity = (raw: string): ParsedAttachmentEntity | und
     return undefined;
   }
 
-  return {
-    field: parsed.field,
-    value: parsed.value,
-    kind: FIELD_TO_KIND[parsed.field],
-    raw: raw.trim(),
-  };
+  return attachmentEntityRefToParsed(parsed, raw.trim());
 };
+
+/** Convert a structured entity ref into the chip display/query model. */
+export const attachmentEntityRefToParsed = (
+  ref: { field: AttachmentEntityField; value: string },
+  raw = `${ref.field}: ${ref.value}`
+): ParsedAttachmentEntity => ({
+  field: ref.field,
+  value: ref.value,
+  kind: FIELD_TO_KIND[ref.field],
+  raw,
+});
+

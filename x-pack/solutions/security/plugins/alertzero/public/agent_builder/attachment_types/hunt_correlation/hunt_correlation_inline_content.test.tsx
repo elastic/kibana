@@ -16,6 +16,7 @@ import {
 import type { HuntCorrelationAttachment } from './types';
 import {
   buildActorLookupEsql,
+  buildDiscoverThreatReportNestedIocUrl,
   buildThreatReportIocSetHashLookupEsql,
   buildThreatReportLookupEsql,
   buildThreatReportsInEsql,
@@ -28,8 +29,20 @@ const mockShare = {
   url: {
     locators: {
       get: () => ({
-        getRedirectUrl: ({ query }: { query: { esql: string } }) =>
-          `https://example.test/discover?esql=${encodeURIComponent(query.esql)}`,
+        getRedirectUrl: (params: {
+          query?: { esql?: string };
+          filters?: unknown[];
+        }) => {
+          if (params.query?.esql) {
+            return `https://example.test/discover?esql=${encodeURIComponent(params.query.esql)}`;
+          }
+          if (params.filters) {
+            return `https://example.test/discover?nested=${encodeURIComponent(
+              JSON.stringify(params.filters)
+            )}`;
+          }
+          return 'https://example.test/discover';
+        },
       }),
     },
   },
@@ -147,7 +160,11 @@ describe('HuntCorrelationInlineContent', () => {
         { vertex: 'infrastructure', related_report_id: relatedReportId, score: 0.75 },
       ],
     };
-    const hashEsql = buildThreatReportsInEsql({ reportIds: [relatedReportId] });
+    const expectedHashHref = buildDiscoverThreatReportNestedIocUrl({
+      share: mockShare,
+      iocType: 'hash',
+      value: hashValue,
+    });
     const iocSetEsql = buildThreatReportIocSetHashLookupEsql({ value: iocSetHashValue });
     const actorEsql = buildActorLookupEsql({ value: 'APT-99' });
 
@@ -158,10 +175,7 @@ describe('HuntCorrelationInlineContent', () => {
     );
 
     const hashLink = screen.getByTestId('alertzeroHuntCorrelationAnchorLink-hash-0');
-    expect(hashLink).toHaveAttribute(
-      'href',
-      `https://example.test/discover?esql=${encodeURIComponent(hashEsql as string)}`
-    );
+    expect(hashLink).toHaveAttribute('href', expectedHashHref);
     expect(hashLink).toHaveTextContent(hashValue);
 
     const iocSetLink = screen.getByTestId('alertzeroHuntCorrelationAnchorLink-ioc_set_hash-0');

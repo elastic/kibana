@@ -19,12 +19,15 @@ const validPayload = {
   title: 'Suspicious lateral movement detected',
   severity: 'high' as const,
   confidence: 0.82,
-  status: 'open',
+  status: 'open' as const,
   source_watch: 'lateral-movement-watch',
   capability: 'lateral-movement-detection',
   run_id: 'run-123',
   security_knowledge_indicators: [{ type: 'technique', value: 'T1021', confidence: 0.9 }],
-  entities: ['host.name: srv-01', 'user.name: jdoe'],
+  entities: [
+    { field: 'host.name' as const, value: 'srv-01' },
+    { field: 'user.name' as const, value: 'jdoe' },
+  ],
   timeline: [{ at: '2026-01-01T00:00:00Z', what: 'RDP session established' }],
   hypothesis_tested: 'Adversary used stolen credentials to move laterally',
   evidence_for: ['RDP session from unusual host'],
@@ -81,33 +84,63 @@ describe('createSignificantSecurityEventAttachmentType', () => {
     it('rejects arrays exceeding the 50-item cap', async () => {
       const result = await attachmentType.validate({
         ...validPayload,
-        entities: Array.from({ length: 51 }, (_, i) => `user.name: entity-${i}`),
+        entities: Array.from({ length: 51 }, (_, i) => ({
+          field: 'user.name' as const,
+          value: `entity-${i}`,
+        })),
       });
 
       expect(result.valid).toBe(false);
     });
 
-    it('rejects bare entity identifiers', async () => {
+    it('rejects bare entity identifiers and legacy strings', async () => {
+      const bare = await attachmentType.validate({
+        ...validPayload,
+        entities: ['dev-user'] as unknown as typeof validPayload.entities,
+      });
+      const legacyString = await attachmentType.validate({
+        ...validPayload,
+        entities: ['user.name: jdoe'] as unknown as typeof validPayload.entities,
+      });
+
+      expect(bare.valid).toBe(false);
+      expect(legacyString.valid).toBe(false);
+    });
+
+    it('rejects unknown entity fields', async () => {
       const result = await attachmentType.validate({
         ...validPayload,
-        entities: ['dev-user'],
+        entities: [{ field: 'source.ip', value: '1.2.3.4' }] as unknown as typeof validPayload.entities,
       });
 
       expect(result.valid).toBe(false);
     });
 
-    it('rejects EUID and ARN entity strings', async () => {
-      const euid = await attachmentType.validate({
+    it('rejects alerts missing index', async () => {
+      const result = await attachmentType.validate({
         ...validPayload,
-        entities: ['entity:generic:arn:aws:iam::123456789012:user/dev-user'],
-      });
-      const arn = await attachmentType.validate({
-        ...validPayload,
-        entities: ['arn:aws:iam::123456789012:user/dev-user'],
+        alerts: [{ alert_id: 'alert-1' }] as unknown as Array<{
+          alert_id: string;
+          index: string;
+        }>,
       });
 
-      expect(euid.valid).toBe(false);
-      expect(arn.valid).toBe(false);
+      expect(result.valid).toBe(false);
+    });
+
+    it('accepts structured alerts with index', async () => {
+      const result = await attachmentType.validate({
+        ...validPayload,
+        alerts: [
+          {
+            alert_id: 'alert-1',
+            index: '.alerts-security.alerts-default',
+            timestamp: '2026-01-01T00:00:00.000Z',
+          },
+        ],
+      });
+
+      expect(result.valid).toBe(true);
     });
 
     it('accepts the optional maps_to_proposal field when present', async () => {
@@ -188,7 +221,7 @@ describe('createSignificantSecurityEventAttachmentType', () => {
       expect(value).toContain('RDP session established');
     });
 
-    it('includes indicators, evidence content, and the evaluation record ref', async () => {
+    it('includes indicators, structured entities, evidence, and the evaluation record ref', async () => {
       const attachment: Attachment<string, unknown> = {
         id: 'test-id',
         type: SIGNIFICANT_SECURITY_EVENT_ATTACHMENT_ID,
@@ -202,9 +235,12 @@ describe('createSignificantSecurityEventAttachmentType', () => {
 
       const value = (representation as TextAttachmentRepresentation).value;
       expect(value).toContain('technique: T1021 (confidence 0.9)');
+      expect(value).toContain('host.name: srv-01');
+      expect(value).toContain('user.name: jdoe');
       expect(value).toContain('- RDP session from unusual host');
       expect(value).toContain('Evidence against:\n  none recorded');
       expect(value).toContain('Evaluation record: eval-record-1');
+      expect(value).toContain('taxonomy labels, not Discover IOCs');
     });
 
     it('renders maps_to_proposal details when present', async () => {
@@ -272,6 +308,8 @@ describe('createSignificantSecurityEventAttachmentType', () => {
       expect(description).toContain('Significant Security Event');
       expect(description).toContain('timeline');
       expect(description).toContain('hypothesis_tested');
+      expect(description).toContain('{ field, value }');
+      expect(description).toContain('NOT Discover IOCs');
       expect(description).toContain('<render_attachment id="ATTACHMENT_ID" version="VERSION" />');
     });
   });

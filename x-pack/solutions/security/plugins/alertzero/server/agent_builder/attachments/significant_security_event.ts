@@ -12,11 +12,39 @@ import type {
 } from '@kbn/agent-builder-server/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { ALERTZERO_ATTACHMENT_TYPES } from '../../../common/constants';
-import { isTypedAttachmentEntityString } from '../../../common/attachment_entity_string';
+import { ATTACHMENT_ENTITY_FIELDS } from '../../../common/attachment_entity_string';
 import { alertZeroAttachmentDataSchema } from './attachment_data_schema';
 
 export const SIGNIFICANT_SECURITY_EVENT_ATTACHMENT_ID =
   ALERTZERO_ATTACHMENT_TYPES.significantSecurityEvent;
+
+/**
+ * Significant Security Event (SSE) attachment schema.
+ *
+ * ECS-first writer contract:
+ * - `entities` are `{ field, value }` pairs using allowlisted ECS entity fields.
+ * - `alerts` carry both `alert_id` and the concrete alerts index (no client inventing).
+ * - `events` carry `event_id` plus the concrete source index.
+ * - `security_knowledge_indicators` are threat-intel taxonomy labels only
+ *   (not Discover IOCs). Prefer writing IOCs onto threat reports
+ *   (`extracted.iocs` / `threat.indicator.*`); do not invent logs-* field
+ *   mappings from `type`.
+ */
+const entityRefSchema = z.object({
+  field: z.enum(ATTACHMENT_ENTITY_FIELDS),
+  value: z.string().min(1).max(2048),
+});
+
+const alertRefSchema = z.object({
+  alert_id: z.string().min(1).max(512),
+  index: z.string().min(1).max(256),
+  timestamp: z.string().min(1).max(64).optional(),
+});
+
+const eventRefSchema = z.object({
+  event_id: z.string().min(1).max(512),
+  source_index: z.string().min(1).max(256),
+});
 
 const securityKnowledgeIndicatorSchema = z.object({
   type: z.string().min(1).max(64),
@@ -31,11 +59,6 @@ const timelineEntrySchema = z.object({
 
 const evidenceItemSchema = z.string().min(1).max(2000);
 
-const significantSecurityEventRefSchema = z.object({
-  event_id: z.string().min(1).max(512),
-  source_index: z.string().min(1).max(256),
-});
-
 /** Cap serialized actionInput so arbitrary JSON values cannot grow without limit. */
 const ACTION_INPUT_MAX_SERIALIZED_BYTES = 32_768;
 
@@ -44,10 +67,10 @@ const serializedActionInputByteLength = (input: Record<string, unknown>): number
 
 const mapsToProposalSchema = z
   .object({
-    category: z.string().max(256).optional(),
-    impact: z.string().max(2000).optional(),
+    category: z.string().min(1).max(256).optional(),
+    impact: z.string().min(1).max(2000).optional(),
     confidence: z.number().min(0).max(1).optional(),
-    actionWorkflowId: z.string().max(512).optional(),
+    actionWorkflowId: z.string().min(1).max(512).optional(),
     // Workflow input values are arbitrary JSON. Bound both key count and serialized
     // size so a hostile payload cannot grow without limit.
     actionInput: z
@@ -68,7 +91,7 @@ const mapsToProposalSchema = z
         }
       )
       .optional(),
-    manual_remediation: z.array(z.string().max(2000)).max(50).optional(),
+    manual_remediation: z.array(z.string().min(1).max(2000)).max(50).optional(),
   })
   .optional();
 
@@ -77,38 +100,26 @@ const mapsToProposalSchema = z
  * (docs/working-groups/dark-watch/artifacts/mvp-slice.md:541-561).
  */
 export const significantSecurityEventAttachmentDataSchema = alertZeroAttachmentDataSchema.extend({
-  title: z.string().max(512),
+  title: z.string().min(1).max(512),
   severity: z.enum(['low', 'medium', 'high', 'critical']),
   confidence: z.number().min(0).max(1),
-  status: z.string().max(64),
-  source_watch: z.string().max(256),
-  capability: z.string().max(256),
-  run_id: z.string().max(256),
+  status: z.enum(['open', 'investigating', 'resolved', 'false_positive']),
+  source_watch: z.string().min(1).max(256),
+  capability: z.string().min(1).max(256),
+  run_id: z.string().min(1).max(256),
   security_knowledge_indicators: z.array(securityKnowledgeIndicatorSchema).max(50),
-  // Writers must emit allowlisted ECS `field: value` strings. No EUID/ARN decoding.
-  entities: z
-    .array(
-      z
-        .string()
-        .min(1)
-        .max(2048)
-        .refine(isTypedAttachmentEntityString, {
-          message:
-            'entities entries must be allowlisted ECS field: value (e.g. user.name: jdoe)',
-        })
-    )
-    .max(50),
-  alerts: z.array(z.string().min(1).max(2048)).max(50).optional(),
-  events: z.array(significantSecurityEventRefSchema).max(50).optional(),
+  entities: z.array(entityRefSchema).max(50),
+  alerts: z.array(alertRefSchema).max(50).optional(),
+  events: z.array(eventRefSchema).max(50).optional(),
   timeline: z.array(timelineEntrySchema).max(50),
-  hypothesis_tested: z.string().max(4000),
+  hypothesis_tested: z.string().min(1).max(4000),
   evidence_for: z.array(evidenceItemSchema).max(50),
   evidence_against: z.array(evidenceItemSchema).max(50),
   maps_to_proposal: mapsToProposalSchema,
-  evaluation_record_ref: z.string().max(512),
+  evaluation_record_ref: z.string().min(1).max(512),
   truncated: z.boolean().optional(),
   truncated_original_count: z.number().int().min(0).optional(),
-  report_revision: z.string().max(256).optional(),
+  report_revision: z.string().min(1).max(256).optional(),
 });
 
 export type SignificantSecurityEventAttachmentData = z.infer<
@@ -137,7 +148,7 @@ const formatSignificantSecurityEventForAgent = (
     }
   }
 
-  lines.push('', 'Security knowledge indicators:');
+  lines.push('', 'Security knowledge indicators (taxonomy labels, not Discover IOCs):');
   if (data.security_knowledge_indicators.length === 0) {
     lines.push('  no indicators recorded');
   } else {
@@ -152,19 +163,24 @@ const formatSignificantSecurityEventForAgent = (
   if (data.entities.length === 0) {
     lines.push('  no entities recorded');
   } else {
-    lines.push(`  ${data.entities.join(', ')}`);
+    for (const entity of data.entities) {
+      lines.push(`  ${entity.field}: ${entity.value}`);
+    }
   }
 
   if (data.alerts && data.alerts.length > 0) {
     lines.push('', 'Alerts:');
-    lines.push(`  ${data.alerts.join(', ')}`);
+    for (const alert of data.alerts) {
+      const timestamp = alert.timestamp ? ` @ ${alert.timestamp}` : '';
+      lines.push(`  ${alert.alert_id} (${alert.index})${timestamp}`);
+    }
   }
 
   if (data.events && data.events.length > 0) {
     lines.push('', 'Events:');
-    lines.push(
-      `  ${data.events.map((event) => `${event.event_id} (${event.source_index})`).join(', ')}`
-    );
+    for (const event of data.events) {
+      lines.push(`  ${event.event_id} (${event.source_index})`);
+    }
   }
 
   lines.push('', 'Evidence for:');
@@ -228,8 +244,11 @@ This attachment carries a Hunt-owned Significant Security Event.
 The payload contains:
 - title, severity, confidence, status: the headline classification of the event
 - source_watch, capability, run_id: provenance of the hunt run that produced this event
-- security_knowledge_indicators, entities, alerts, events: the supporting signals, already scoped
-  and ordered by the hunt worker — do not re-classify or re-order them
+- security_knowledge_indicators: threat-intel taxonomy labels (type/value/confidence).
+  These are NOT Discover IOCs. Do not invent logs-* field mappings from \`type\`.
+- entities: ECS \`{ field, value }\` refs (allowlisted entity fields only)
+- alerts: \`{ alert_id, index, timestamp? }\` — always include the concrete alerts index
+- events: \`{ event_id, source_index }\` — always include the concrete source index
 - timeline: an ordered sequence of (at, what) entries describing what happened
 - hypothesis_tested, evidence_for, evidence_against: the hunt's working hypothesis and its evidence
 - maps_to_proposal, evaluation_record_ref: optional links into the proposal/evaluation subsystem

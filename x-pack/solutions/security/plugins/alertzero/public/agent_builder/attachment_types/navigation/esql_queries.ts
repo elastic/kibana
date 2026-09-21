@@ -10,7 +10,6 @@ import {
   DEFAULT_LOGS_INDEX_PATTERN,
   THREAT_REPORTS_INDEX_PATTERN,
 } from './constants';
-import { getIocEsqlFields } from './ioc_field_map';
 
 /** Escape a value for use inside a double-quoted ES|QL string literal. */
 export const escapeEsqlString = (value: string): string =>
@@ -75,28 +74,8 @@ export const buildThreatReportsInEsql = ({
   )} METADATA _id | WHERE _id IN (${quotedIds})`;
 };
 
-export const buildIocLookupEsql = ({
-  type,
-  value,
-  indexPattern = DEFAULT_LOGS_INDEX_PATTERN,
-}: {
-  type: string;
-  value: string;
-  indexPattern?: string;
-}): string | undefined => {
-  const fields = getIocEsqlFields(type);
-  if (!fields || fields.length === 0) {
-    return undefined;
-  }
-
-  return `FROM ${quoteEsqlIdentifier(indexPattern)} | WHERE ${buildFieldEqualityWhere(
-    fields,
-    value
-  )}`;
-};
-
 /**
- * Build an ES|QL lookup for an exact ECS field + value from an SSE entity string.
+ * Build an ES|QL lookup for an exact ECS field + value from an SSE entity ref.
  * `field` must already be allowlisted by the attachment entity schema.
  */
 export const buildEntityLookupEsql = ({

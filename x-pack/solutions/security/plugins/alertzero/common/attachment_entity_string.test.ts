@@ -5,24 +5,39 @@
  * 2.0.
  */
 
-import { isTypedAttachmentEntityString } from './attachment_entity_string';
+import {
+  ATTACHMENT_ENTITY_FIELDS,
+  isAttachmentEntityField,
+  isAttachmentEntityRef,
+  isTypedAttachmentEntityString,
+  parseTypedAttachmentEntityString,
+} from './attachment_entity_string';
 
 describe('attachment_entity_string', () => {
-  it('accepts allowlisted ECS field: value forms', () => {
-    expect(isTypedAttachmentEntityString('user.name: jdoe')).toBe(true);
-    expect(isTypedAttachmentEntityString('host.name:srv-01')).toBe(true);
-    expect(isTypedAttachmentEntityString('user.email: dev-user@corp.example')).toBe(true);
-    expect(isTypedAttachmentEntityString('service.id: svc-1')).toBe(true);
+  it('accepts allowlisted entity fields', () => {
+    for (const field of ATTACHMENT_ENTITY_FIELDS) {
+      expect(isAttachmentEntityField(field)).toBe(true);
+    }
   });
 
-  it('rejects EUID, ARN, bare identifiers, and empty values', () => {
+  it('rejects unknown fields', () => {
+    expect(isAttachmentEntityField('source.ip')).toBe(false);
+    expect(isAttachmentEntityField('user.target.name')).toBe(false);
+  });
+
+  it('validates entity refs', () => {
+    expect(isAttachmentEntityRef({ field: 'user.name', value: 'jdoe' })).toBe(true);
+    expect(isAttachmentEntityRef({ field: 'user.name', value: '  ' })).toBe(false);
+    expect(isAttachmentEntityRef({ field: 'source.ip', value: '1.2.3.4' })).toBe(false);
+    expect(isAttachmentEntityRef('user.name: jdoe')).toBe(false);
+  });
+
+  it('parses legacy field: value strings', () => {
+    expect(parseTypedAttachmentEntityString('user.name: jdoe')).toEqual({
+      field: 'user.name',
+      value: 'jdoe',
+    });
+    expect(isTypedAttachmentEntityString('host.name: srv-01')).toBe(true);
     expect(isTypedAttachmentEntityString('dev-user')).toBe(false);
-    expect(
-      isTypedAttachmentEntityString('entity:generic:arn:aws:iam::123456789012:user/dev-user')
-    ).toBe(false);
-    expect(isTypedAttachmentEntityString('arn:aws:iam::123456789012:user/dev-user')).toBe(false);
-    expect(isTypedAttachmentEntityString('user.name:')).toBe(false);
-    expect(isTypedAttachmentEntityString('user.name:   ')).toBe(false);
-    expect(isTypedAttachmentEntityString('')).toBe(false);
   });
 });

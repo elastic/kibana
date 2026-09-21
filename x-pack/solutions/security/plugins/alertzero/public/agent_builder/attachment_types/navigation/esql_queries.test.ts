@@ -10,7 +10,6 @@ import {
   buildActorLookupEsql,
   buildEntityLookupEsql,
   buildEventLookupEsql,
-  buildIocLookupEsql,
   buildThreatReportIocSetHashLookupEsql,
   buildThreatReportLookupEsql,
   buildThreatReportsInEsql,
@@ -54,22 +53,6 @@ describe('esql_queries', () => {
 
   it('returns undefined for an empty report ids array', () => {
     expect(buildThreatReportsInEsql({ reportIds: [] })).toBeUndefined();
-  });
-
-  it('returns undefined IOC query for unknown types', () => {
-    expect(buildIocLookupEsql({ type: 'unknown', value: 'x' })).toBeUndefined();
-  });
-
-  it('builds IPV4 IOC query', () => {
-    expect(buildIocLookupEsql({ type: 'ipv4-addr', value: '1.2.3.4' })).toBe(
-      'FROM "logs-*" | WHERE source.ip == "1.2.3.4" OR destination.ip == "1.2.3.4" OR client.ip == "1.2.3.4" OR server.ip == "1.2.3.4"'
-    );
-  });
-
-  it('builds email IOC query against user.email fields present in logs', () => {
-    expect(buildIocLookupEsql({ type: 'email-addr', value: 'dev-user@corp.example' })).toBe(
-      'FROM "logs-*" | WHERE user.email == "dev-user@corp.example" OR user.target.email == "dev-user@corp.example"'
-    );
   });
 
   it('builds entity lookup ES|QL on the exact ECS field', () => {

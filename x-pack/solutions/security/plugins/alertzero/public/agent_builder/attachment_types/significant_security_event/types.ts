@@ -6,6 +6,10 @@
  */
 
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import {
+  isAttachmentEntityRef,
+  type AttachmentEntityRef,
+} from '../../../../common/attachment_entity_string';
 
 export interface SecurityKnowledgeIndicator {
   type: string;
@@ -23,6 +27,12 @@ export interface SignificantSecurityEventRef {
   source_index: string;
 }
 
+export interface SignificantSecurityAlertRef {
+  alert_id: string;
+  index: string;
+  timestamp?: string;
+}
+
 export interface MapsToProposal {
   category?: string;
   impact?: string;
@@ -38,13 +48,13 @@ export interface SignificantSecurityEventAttachmentData {
   title: string;
   severity: 'low' | 'medium' | 'high' | 'critical';
   confidence: number;
-  status: string;
+  status: 'open' | 'investigating' | 'resolved' | 'false_positive';
   source_watch: string;
   capability: string;
   run_id: string;
   security_knowledge_indicators: SecurityKnowledgeIndicator[];
-  entities: string[];
-  alerts?: string[];
+  entities: AttachmentEntityRef[];
+  alerts?: SignificantSecurityAlertRef[];
   events?: SignificantSecurityEventRef[];
   timeline: TimelineEntry[];
   hypothesis_tested: string;
@@ -75,7 +85,9 @@ const isValidIndicator = (candidate: unknown): candidate is SecurityKnowledgeInd
     candidate &&
       typeof candidate === 'object' &&
       typeof (candidate as SecurityKnowledgeIndicator).type === 'string' &&
-      typeof (candidate as SecurityKnowledgeIndicator).value === 'string'
+      typeof (candidate as SecurityKnowledgeIndicator).value === 'string' &&
+      (candidate as SecurityKnowledgeIndicator).type.length > 0 &&
+      (candidate as SecurityKnowledgeIndicator).value.length > 0
   );
 
 const isValidEventRef = (candidate: unknown): candidate is SignificantSecurityEventRef =>
@@ -83,7 +95,19 @@ const isValidEventRef = (candidate: unknown): candidate is SignificantSecurityEv
     candidate &&
       typeof candidate === 'object' &&
       typeof (candidate as SignificantSecurityEventRef).event_id === 'string' &&
-      typeof (candidate as SignificantSecurityEventRef).source_index === 'string'
+      typeof (candidate as SignificantSecurityEventRef).source_index === 'string' &&
+      (candidate as SignificantSecurityEventRef).event_id.length > 0 &&
+      (candidate as SignificantSecurityEventRef).source_index.length > 0
+  );
+
+const isValidAlertRef = (candidate: unknown): candidate is SignificantSecurityAlertRef =>
+  Boolean(
+    candidate &&
+      typeof candidate === 'object' &&
+      typeof (candidate as SignificantSecurityAlertRef).alert_id === 'string' &&
+      typeof (candidate as SignificantSecurityAlertRef).index === 'string' &&
+      (candidate as SignificantSecurityAlertRef).alert_id.length > 0 &&
+      (candidate as SignificantSecurityAlertRef).index.length > 0
   );
 
 /**
@@ -102,8 +126,8 @@ export interface ParsedSignificantSecurityEvent {
   runId?: string;
   hypothesisTested?: string;
   timeline: TimelineEntry[];
-  entities: string[];
-  alerts: string[];
+  entities: AttachmentEntityRef[];
+  alerts: SignificantSecurityAlertRef[];
   events: SignificantSecurityEventRef[];
   indicators: SecurityKnowledgeIndicator[];
   evidenceFor: string[];
@@ -139,12 +163,8 @@ export const parseSignificantSecurityEventData = (
     hypothesisTested:
       typeof record.hypothesis_tested === 'string' ? record.hypothesis_tested : undefined,
     timeline: Array.isArray(record.timeline) ? record.timeline.filter(isValidTimelineEntry) : [],
-    entities: Array.isArray(record.entities)
-      ? record.entities.filter((entity): entity is string => typeof entity === 'string')
-      : [],
-    alerts: Array.isArray(record.alerts)
-      ? record.alerts.filter((alert): alert is string => typeof alert === 'string')
-      : [],
+    entities: Array.isArray(record.entities) ? record.entities.filter(isAttachmentEntityRef) : [],
+    alerts: Array.isArray(record.alerts) ? record.alerts.filter(isValidAlertRef) : [],
     events: Array.isArray(record.events) ? record.events.filter(isValidEventRef) : [],
     indicators: Array.isArray(record.security_knowledge_indicators)
       ? record.security_knowledge_indicators.filter(isValidIndicator)

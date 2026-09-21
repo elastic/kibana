@@ -26,12 +26,10 @@ export {
   buildActorLookupEsql,
   buildEntityLookupEsql,
   buildEventLookupEsql,
-  buildIocLookupEsql,
   buildThreatReportIocSetHashLookupEsql,
   buildThreatReportLookupEsql,
   buildThreatReportsInEsql,
   escapeEsqlString,
   getAlertsIndex,
 } from './esql_queries';
-export { ecsFieldForIocType, getIocEsqlFields } from './ioc_field_map';
 export type { AttachmentNavigationDeps } from './types';
