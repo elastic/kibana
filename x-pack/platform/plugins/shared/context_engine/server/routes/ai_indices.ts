@@ -127,6 +127,8 @@ const hasWorkflowDeletePrivilege = (request: KibanaRequest): boolean =>
     (privilege) => request.authzResult?.[privilege] === true
   );
 
+class MemoryFeatureDisabledError extends Error {}
+
 const handleAiIndexError = (error: unknown, response: KibanaResponseFactory, logger: Logger) => {
   if (
     error instanceof InvalidAiIndexDestError ||

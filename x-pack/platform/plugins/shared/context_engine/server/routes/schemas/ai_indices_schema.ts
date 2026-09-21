@@ -257,10 +257,13 @@ const aiIndexPropertiesSchema = {
       meta: { description: 'Human-readable description of the AI Index.' },
     })
   ),
-  memory_enabled: schema.boolean({
-    defaultValue: true,
-    meta: { description: 'Whether this AI index accepts memory writes.' },
-  }),
+  memory_enabled: schema.maybe(
+    schema.boolean({
+      meta: {
+        description: 'Whether this AI index accepts memory writes. Defaults to true when omitted.',
+      },
+    })
+  ),
   feedback_analysis: schema.maybe(feedbackAnalysisSchema),
   dest: aiIndexDestSchema,
   automations: schema.arrayOf(aiIndexAutomationSchema, {

@@ -12,7 +12,6 @@ import { kiFieldsSchema } from '@kbn/context-engine-plugin/common/step_types/ki'
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
 import { CONTEXT_ENGINE_REMEMBER_TOOL_ID } from '../../../../common/agent_builder_tools';
 import { assertContextEngineWriteAccess } from '../../assert_context_engine_write_access';
-import { aiIndexToolsAvailability } from '../ai_index_tools_availability';
 import { createRememberTool } from './tool';
 
 jest.mock('../../assert_context_engine_write_access', () => ({
@@ -100,7 +99,7 @@ describe('remember tool', () => {
     const tool = createTool();
 
     expect(tool.id).toBe(CONTEXT_ENGINE_REMEMBER_TOOL_ID);
-    expect(tool.availability).toBe(aiIndexToolsAvailability);
+    expect(tool.availability?.cacheMode).toBe('space');
     expect(tool.confirmation).toBeUndefined();
     expect(tool.schema.safeParse(params).success).toBe(true);
     expect(tool.schema.safeParse({ ...params, expires_at: null }).success).toBe(true);

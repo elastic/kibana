@@ -9,6 +9,7 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import { CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID } from '@kbn/context-engine-plugin/common/constants';
 import { apiPrivileges } from '@kbn/context-engine-plugin/common/features';
 import { assertContextEngineWriteAccess } from './assert_context_engine_write_access';
 
@@ -102,6 +103,29 @@ describe('assertContextEngineWriteAccess', () => {
       {
         kibana: [apiPrivileges.writeContextEngine],
       }
+    );
+  });
+
+  it('throws when memory access is required and the global memory flag is disabled', async () => {
+    const coreStart = coreMock.createStart();
+    coreStart.uiSettings.asScopedToClient = jest
+      .fn()
+      .mockReturnValue({ get: jest.fn().mockResolvedValue(true) });
+    const globalUiSettingsClient = { get: jest.fn().mockResolvedValue(false) };
+    coreStart.uiSettings.globalAsScopedToClient = jest.fn().mockReturnValue(globalUiSettingsClient);
+
+    await expect(
+      assertContextEngineWriteAccess({
+        request,
+        spaceId,
+        getCoreStart: async () => coreStart,
+        getSecurityStart: async () => createSecurityStart(),
+        requireMemoryEnabled: true,
+      })
+    ).rejects.toThrow('Context Engine memory is not enabled.');
+
+    expect(globalUiSettingsClient.get).toHaveBeenCalledWith(
+      CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID
     );
   });
 });
