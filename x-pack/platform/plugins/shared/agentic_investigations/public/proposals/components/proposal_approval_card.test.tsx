@@ -239,13 +239,58 @@ describe('ProposalApprovalCard', () => {
 
   describe('already-decided proposal', () => {
     it('renders an info callout for an approved proposal', () => {
-      setupMocks(baseProposal({ status: 'approved' }));
+      setupMocks(baseProposal({ decision: 'approved', status: 'executing' }));
+      const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+      expect(getByTestId('info-callout')).toBeInTheDocument();
+    });
+
+    it('renders an info callout for a dismissed proposal', () => {
+      setupMocks(baseProposal({ decision: 'dismissed', status: 'no_action' }));
       const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
       expect(getByTestId('info-callout')).toBeInTheDocument();
     });
 
     it('does not render action buttons when proposal is already decided', () => {
-      setupMocks(baseProposal({ status: 'dismissed' }));
+      setupMocks(baseProposal({ decision: 'dismissed', status: 'no_action' }));
+      const { container } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+      expect(
+        container.querySelector(
+          '[data-test-subj="agenticInvestigationsProposalApprove-proposal-1"]'
+        )
+      ).toBeNull();
+    });
+
+    it('reads the decision rather than the status, which lags behind the gate', () => {
+      // An approval stays `pending` until the gate workflow's post-gate steps
+      // run, so a card keyed on the status would offer the buttons again to
+      // the next person to look at it.
+      setupMocks(baseProposal({ decision: 'approved', status: 'pending' }));
+      const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+      expect(getByTestId('info-callout')).toBeInTheDocument();
+    });
+
+    it('explains an expiry the workflow settled before the deadline', () => {
+      // Attempt exhaustion settles `expired` while the computed `expired` flag
+      // is still false, and nobody decided — so this is the expiry callout,
+      // not the decided one.
+      setupMocks(baseProposal({ expired: false, status: 'expired' }));
+      const { getByTestId, queryByTestId } = render(
+        <ProposalApprovalCard proposalId={PROPOSAL_ID} />
+      );
+      expect(getByTestId('warning-callout')).toBeInTheDocument();
+      expect(queryByTestId('info-callout')).toBeNull();
+    });
+  });
+
+  describe('executing proposal', () => {
+    it('renders an info callout for an executing proposal', () => {
+      setupMocks(baseProposal({ decision: 'approved', status: 'executing' }));
+      const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+      expect(getByTestId('info-callout')).toBeInTheDocument();
+    });
+
+    it('does not render action buttons when proposal is executing', () => {
+      setupMocks(baseProposal({ status: 'executing' }));
       const { container } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
       expect(
         container.querySelector(
@@ -379,6 +424,29 @@ describe('ProposalApprovalCard', () => {
           '[data-test-subj="agenticInvestigationsProposalApprove-proposal-1"]'
         )
       ).toBeInTheDocument();
+    });
+
+    it('keeps Confirm disabled when rationale is whitespace-only', () => {
+      setupMocks();
+      const { container } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+
+      // Open dismiss mode
+      fireEvent.click(
+        container.querySelector(
+          '[data-test-subj="agenticInvestigationsProposalDismiss-proposal-1"]'
+        ) as HTMLButtonElement
+      );
+
+      // Enter only whitespace
+      const rationaleInput = container.querySelector(
+        '[data-test-subj="rationale-input"]'
+      ) as HTMLInputElement;
+      fireEvent.change(rationaleInput, { target: { value: '   ' } });
+
+      const confirmBtn = container.querySelector(
+        '[data-test-subj="agenticInvestigationsProposalDismissConfirm-proposal-1"]'
+      ) as HTMLButtonElement;
+      expect(confirmBtn).toBeDisabled();
     });
 
     it('calls dismissProposal.mutateAsync with the reason and rationale on confirm', async () => {
