@@ -215,8 +215,8 @@ export const scoreCallCount: ScoreFn = ({ calls }) => {
 };
 
 /**
- * The detection-rule-edit skill prescribes: load the skill → research → draft the rule once →
- * preview / render the attachment. Checks the run against that shape.
+ * The detection-rule-edit skill prescribes: load the skill → optional research → draft the rule
+ * once → preview / render the attachment. Checks the run against that shape.
  */
 export const scoreCallOrder: ScoreFn = ({ calls }) => {
   const names = calls.map((call) => call.name);
