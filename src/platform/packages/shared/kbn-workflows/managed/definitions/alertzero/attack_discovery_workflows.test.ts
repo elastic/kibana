@@ -1053,7 +1053,7 @@ describe('Attack Discovery worker chain', () => {
 
       // An analysis that failed produced no verdict about the attack, and an
       // expired proposal means nobody looked. Neither is grounds for closing.
-      it.each(['record_analysis_failure', 'record_decision_lapsed'])(
+      it.each(['record_analysis_failure', 'record_decision_lapsed', 'record_forensics_handoff'])(
         'leaves the Investigation open in %s',
         (name) => {
           expect((stepIn(reviewSteps, name)?.with?.updates as { status?: string })?.status).toBe(
@@ -1085,6 +1085,7 @@ describe('Attack Discovery worker chain', () => {
       const postDecision = [
         'close_investigation_false_positive',
         'record_analysis_failure',
+        'record_forensics_handoff',
         'close_investigation_declined',
         'record_decision_lapsed',
       ];
@@ -1197,6 +1198,7 @@ describe('Attack Discovery worker chain', () => {
 
   describe('the forensics handoff escalation', () => {
     const resolve = stepIn(reviewSteps, 'resolve_escalation');
+    const handoff = stepIn(reviewSteps, 'record_forensics_handoff');
 
     it('creates exactly one proposal', () => {
       expect(
@@ -1219,16 +1221,6 @@ describe('Attack Discovery worker chain', () => {
       expect(ALERTZERO_ACTION_WORKFLOW_IDS).toContain(
         ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW_ID
       );
-    });
-
-    it('stubs the forensics action steps pending #19396', () => {
-      expect(
-        forensicsSteps.filter((step) => step.type === 'console').map((step) => step.name)
-      ).toEqual(['stub_write_analyze_endpoint_ki']);
-    });
-
-    it('does not write a knowledge indicator yet', () => {
-      expect(forensicsSteps.filter((step) => step.type === 'context-engine.createKi')).toEqual([]);
     });
 
     // The action closes `actionInput` to additional properties, so a key the review
@@ -1286,6 +1278,59 @@ describe('Attack Discovery worker chain', () => {
       });
     });
 
+    // The knowledge indicator IS the handoff contract. Forensics Watch sweeps for it and
+    // reads it without ever calling back, so its type and its attribute names belong to
+    // that consumer rather than to this producer.
+    describe('the knowledge indicator', () => {
+      const ki = stepIn(flatten(forensicsAction.steps), 'write_analyze_endpoint_ki');
+      const fields = (ki?.with?.ki ?? {}) as {
+        type?: string;
+        attributes?: Record<string, string>;
+      };
+
+      it('writes it with the Context Engine step the sweep reads', () => {
+        expect(ki?.type).toBe('context-engine.createKi');
+      });
+
+      it('declares the type the Forensics sweep selects on', () => {
+        expect(fields.type).toBe('security.analyze_endpoint');
+      });
+
+      // Keyed on the ATTACK, which is the object the request is about and the id the
+      // consumer dereferences. Keying on the Investigation is now merely equivalent
+      // rather than wrong — kibana-q0t5 made that id a pure function of this one —
+      // but it would reach the same place through a second derivation, and only for
+      // as long as that stays true.
+      it('keys the knowledge indicator on the attack', () => {
+        expect(ki?.with?.ki_id).toBe(
+          'analyze-endpoint-{{ inputs.actionInput.attack_discovery_id }}'
+        );
+      });
+
+      it('carries the Attack Discovery alert id the consumer dereferences', () => {
+        expect(fields.attributes?.attack_discovery_alert_id).toBe(
+          '{{ inputs.actionInput.attack_discovery_id }}'
+        );
+      });
+
+      it('carries the Investigation the narrative and the report live on', () => {
+        expect(fields.attributes?.investigation_id).toBe(
+          '{{ inputs.actionInput.investigation_id }}'
+        );
+      });
+
+      // Every space's `security-investigations` knowledge indicators share one backing
+      // index, whose name derives from the AI index id alone, so a consumer cannot
+      // resolve either id above without being told which space they belong to.
+      it('carries the executing space', () => {
+        expect(fields.attributes?.space_id).toBe('{{ workflow.spaceId }}');
+      });
+
+      it('requests the handoff as pending', () => {
+        expect(fields.attributes?.status).toBe('pending');
+      });
+    });
+
     describe('autoApprove', () => {
       const evaluateAutoApprove = (output: Record<string, string>): unknown =>
         createWorkflowLiquidEngine().evalValueSync(
@@ -1332,8 +1377,17 @@ describe('Attack Discovery worker chain', () => {
     });
 
     describe('the approve branch', () => {
-      // #19396 records the KI id on the Investigation. Until then an approval
-      // executes the forensics action (console stub) and patches nothing extra.
+      it('runs only on approval', () => {
+        expect(handoff?.if).toContain('steps.record_decision.output.approved == true');
+      });
+
+      // Forensics Watch writes its report into this Investigation, so closing it
+      // would delete the thing the handoff exists to produce, and closing the attack
+      // would contradict a run that is about to start.
+      it('leaves the Investigation open for the forensics report', () => {
+        expect((handoff?.with?.updates as { status?: string })?.status).toBe('open');
+      });
+
       it('closes nothing', () => {
         const closing = reviewSteps.filter(
           (step) =>
@@ -1488,7 +1542,6 @@ describe('Attack Discovery worker chain', () => {
   });
 
   describe('the Investigation journal', () => {
-    // host steps, so the last five land with #19214's verdict switch and gate.
     const reviewJournal = journalExecutes(reviewSteps);
 
     const INFLECTIONS = [
@@ -1584,6 +1637,31 @@ describe('Attack Discovery worker chain', () => {
 
     it('does not journal from the worker or the Watch Floor', () => {
       expect([...journalExecutes(workerSteps), ...journalExecutes(floorSteps)]).toEqual([]);
+    });
+  });
+
+  describe('the forensics handoff journal', () => {
+    const ki = stepIn(forensicsSteps, 'write_analyze_endpoint_ki');
+    const fallback = ki?.['on-failure']?.fallback ?? [];
+
+    it('journals after a successful knowledge indicator write', () => {
+      const names = forensicsAction.steps.map((step) => step.name);
+
+      expect(names.indexOf('journal_handoff_succeeded')).toBeGreaterThan(
+        names.indexOf('write_analyze_endpoint_ki')
+      );
+    });
+
+    it('journals a KI failure then fails the proposal', () => {
+      expect(fallback.map((step) => step.name)).toEqual(['journal_handoff_failed', 'fail_handoff']);
+    });
+
+    it('points the handoff journal at the helper', () => {
+      expect(forensicsAction.consts?.journal_note).toBe(ALERTZERO_JOURNAL_NOTE_WORKFLOW_ID);
+    });
+
+    it('fails the handoff after journaling the KI error', () => {
+      expect(stepIn(fallback, 'fail_handoff')?.type).toBe('workflow.fail');
     });
   });
 
