@@ -48,6 +48,7 @@
     "@kbn/safer-lodash-set",
     "@kbn/core-di-internal",
     "@kbn/i18n",
+    "@kbn/ui-callout",
     "@kbn/zod-helpers",
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/apm-utils",
@@ -92,6 +93,7 @@
     "@kbn/expressions-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/field-formats-plugin",
+    "@kbn/flyout-template",
     "@kbn/charts-plugin",
     "@kbn/unified-data-table",
     "@kbn/unified-histogram",
@@ -133,6 +135,8 @@
     "@kbn/es-types",
     "@kbn/announcement-banner",
     "@kbn/app-header",
+    "@kbn/flyout-template",
+    "@kbn/flyout-sections",
     "@kbn/core-chrome-browser-context-mocks",
     "@kbn/change-history",
     "@kbn/change-history-ui",
@@ -145,7 +149,8 @@
     "@kbn/security-authorization-core",
     "@kbn/security-plugin-types-server",
     "@kbn/core-test-helpers-model-versions",
-    "@kbn/content-list-common"
+    "@kbn/content-list-common",
+    "@kbn/core-ui-settings-server"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }

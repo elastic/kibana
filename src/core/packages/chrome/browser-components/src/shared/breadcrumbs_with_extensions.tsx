@@ -9,13 +9,14 @@
 
 import type { PropsWithChildren } from 'react';
 import React, { Suspense } from 'react';
-import { EuiFlexGroup } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import classnames from 'classnames';
 import { css } from '@emotion/react';
 import { useBreadcrumbsAppendExtensions } from './chrome_hooks';
 
 const styles = {
-  breadcrumbsWithExtensionContainer: css`
+  breadcrumbsWithExtensionContainer: ({ euiTheme }: UseEuiTheme) => css`
     overflow: hidden; // enables text-ellipsis in the last breadcrumb
     .euiHeaderBreadcrumbs,
     .euiBreadcrumbs {
@@ -27,6 +28,10 @@ const styles = {
       overflow: hidden; // enables text-ellipsis in the last breadcrumb
     }
 
+    .header__breadcrumbsAppendExtension--first {
+      margin-inline-start: ${euiTheme.size.xxs};
+    }
+
     .header__breadcrumbsAppendExtension--last {
       flex-grow: 1;
     }
@@ -34,6 +39,7 @@ const styles = {
 };
 
 export const BreadcrumbsWithExtensionsWrapper = ({ children }: PropsWithChildren) => {
+  const euiTheme = useEuiTheme();
   const breadcrumbsAppendExtensions = useBreadcrumbsAppendExtensions();
 
   return breadcrumbsAppendExtensions.length === 0 ? (
@@ -44,15 +50,17 @@ export const BreadcrumbsWithExtensionsWrapper = ({ children }: PropsWithChildren
       wrap={false}
       alignItems={'center'}
       gutterSize={'none'}
-      css={styles.breadcrumbsWithExtensionContainer}
+      css={styles.breadcrumbsWithExtensionContainer(euiTheme)}
     >
       {children}
       {breadcrumbsAppendExtensions.map((breadcrumbsAppendExtension, index) => {
+        const isFirst = index === 0;
         const isLast = breadcrumbsAppendExtensions.length - 1 === index;
         return (
           <div
             key={index}
             className={classnames({
+              'header__breadcrumbsAppendExtension--first': isFirst,
               'header__breadcrumbsAppendExtension--last': isLast,
             })}
           >

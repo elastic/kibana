@@ -53,6 +53,7 @@ import { createPublicRenderersContract } from './services/renderers';
 import { createPublicToolContract } from './services/tools';
 import { createPublicAgentsContract } from './services/agents';
 import { createPublicEventsContract } from './services/events';
+import { createPublicConversationsContract } from './services/conversations';
 import { registerWorkflowSteps } from './step_types';
 import type {
   ConfigSchema,
@@ -369,6 +370,7 @@ export class AgentBuilderPlugin
       renderers: createPublicRenderersContract({ renderersService }),
       tools: createPublicToolContract({ toolsService }),
       events: createPublicEventsContract({ eventsService }),
+      conversations: createPublicConversationsContract({ conversationsService }),
       getAgentBuilderAccess: createPublicEmbeddableChatAccess({
         accessChecker,
         application: core.application,
@@ -419,7 +421,7 @@ export class AgentBuilderPlugin
     };
 
     if (hasAgentBuilder) {
-      core.chrome.next.aiButton.register({
+      core.chrome.controls.aiButton.register({
         content: (
           <AgentBuilderNavControlInitiator
             coreStart={core}

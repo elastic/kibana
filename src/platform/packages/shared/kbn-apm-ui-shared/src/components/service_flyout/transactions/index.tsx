@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { EuiLink, EuiText } from '@elastic/eui';
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { NotificationsStart } from '@kbn/core/public';
+import type { DocLinksStart, NotificationsStart } from '@kbn/core/public';
 import type { LatencyAggregationType } from '@kbn/apm-types';
 import {
   SERVICE_ALERTS_LOCATOR_ID,
@@ -29,17 +29,14 @@ import { TransactionsTable } from '../../transactions_table';
 import { SERVICE_FLYOUT_TRANSACTIONS_EBT_ELEMENTS } from './ebt_constants';
 import { useServiceFlyoutTransactionData } from './hooks/use_service_flyout_transaction_data';
 
-const MAX_GROUPS_TOOLTIP = (
+const getMaxGroupsTooltip = (docsHref: string) => (
   <EuiText size="s" style={{ maxWidth: 448 }}>
     <FormattedMessage
       id="apmUiShared.serviceFlyout.transactions.maxGroupsTooltip"
       defaultMessage="The cardinality of APM data being collected is too high. Please review {docs} to mitigate the situation."
       values={{
         docs: (
-          <EuiLink
-            href="https://www.elastic.co/guide/en/kibana/current/troubleshooting.html#troubleshooting-too-many-transactions"
-            target="_blank"
-          >
+          <EuiLink data-test-subj="apmMaxGroupsTooltipDocsLink" href={docsHref} target="_blank">
             {i18n.translate('apmUiShared.serviceFlyout.transactions.maxGroupsDocsLink', {
               defaultMessage: 'docs',
             })}
@@ -51,6 +48,7 @@ const MAX_GROUPS_TOOLTIP = (
 );
 
 interface ServiceFlyoutTransactionsSectionProps {
+  docLinks: DocLinksStart;
   http: HttpStart;
   notifications: NotificationsStart;
   serviceName: string;
@@ -61,10 +59,14 @@ interface ServiceFlyoutTransactionsSectionProps {
   latencyAggregationType?: LatencyAggregationType;
   locators?: SharePluginStart['url']['locators'];
   refreshToken?: number;
+  onTransactionClick?: (item: TransactionGroup) => void;
+  /** When set with onTransactionClick, drives the expand/collapse icon state. */
+  isTransactionExpanded?: (item: TransactionGroup) => boolean;
   projectRouting?: string;
 }
 
 export function ServiceFlyoutTransactionsSection({
+  docLinks,
   http,
   notifications,
   serviceName,
@@ -75,6 +77,8 @@ export function ServiceFlyoutTransactionsSection({
   latencyAggregationType,
   locators,
   refreshToken,
+  onTransactionClick,
+  isTransactionExpanded,
   projectRouting,
 }: ServiceFlyoutTransactionsSectionProps) {
   const [searchQuery, setSearchQuery] = useState('');
@@ -135,6 +139,11 @@ export function ServiceFlyoutTransactionsSection({
     [serviceAlertsLocator, serviceName, start, end]
   );
 
+  const maxGroupsTooltip = useMemo(
+    () => getMaxGroupsTooltip(docLinks.links.apm.troubleshootingTooManyTransactions),
+    [docLinks]
+  );
+
   return (
     <TransactionsTable
       data-test-subj="serviceFlyoutSection-transactions"
@@ -174,10 +183,13 @@ export function ServiceFlyoutTransactionsSection({
           : undefined
       }
       showMaxTransactionGroupsExceededWarning
-      remainingTransactionsCellTooltipContent={MAX_GROUPS_TOOLTIP}
+      remainingTransactionsCellTooltipContent={maxGroupsTooltip}
       columnInteractions={{
         name: {
-          href: getTransactionDetailHref,
+          // Hosts with nested tx flyouts pass onTransactionClick; others keep the APM deep link.
+          ...(onTransactionClick
+            ? { onClick: onTransactionClick, isExpanded: isTransactionExpanded }
+            : { href: getTransactionDetailHref }),
           ebt: { element: SERVICE_FLYOUT_TRANSACTIONS_EBT_ELEMENTS.ROW_NAME },
         },
         alerts: {
