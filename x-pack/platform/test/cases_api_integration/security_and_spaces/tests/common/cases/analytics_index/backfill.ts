@@ -31,6 +31,7 @@ import {
   updateCase,
   deleteCases,
   deleteAllCaseAnalyticsItems,
+  elasticUserProfileId,
 } from '../../../../../common/lib/api';
 import {
   getPostCaseRequest,
@@ -114,7 +115,6 @@ export default ({ getService }: FtrProviderContext): void => {
           '@timestamp': timestamp,
           created_at: createdAt,
           created_at_ms: createdAtMs,
-          created_by: { profile_uid: profileUid, ...createdByRest },
           ...analyticsFields
         } = caseAnalytics._source as any;
 
@@ -125,12 +125,13 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(createdAtMs).not.to.be(null);
         expect(createdAtMs).not.to.be(undefined);
 
-        expect({ ...analyticsFields, created_by: createdByRest }).to.eql({
+        expect(analyticsFields).to.eql({
           assignees: [],
           category: 'foobar',
           created_by: {
             email: null,
             full_name: null,
+            profile_uid: elasticUserProfileId,
             username: 'elastic',
           },
           custom_fields: [
@@ -237,7 +238,6 @@ export default ({ getService }: FtrProviderContext): void => {
           '@timestamp': timestamp,
           created_at: createdAt,
           case_id: caseId,
-          created_by: { profile_uid: profileUid, ...createdByRest },
           ...analyticsFields
         } = commentAnalytics._source as any;
 
@@ -248,11 +248,12 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(createdAt).not.to.be(null);
         expect(createdAt).not.to.be(undefined);
 
-        expect({ ...analyticsFields, created_by: createdByRest }).to.eql({
+        expect(analyticsFields).to.eql({
           comment: 'This is a cool comment',
           created_by: {
             email: null,
             full_name: null,
+            profile_uid: elasticUserProfileId,
             username: 'elastic',
           },
           owner: 'securitySolution',

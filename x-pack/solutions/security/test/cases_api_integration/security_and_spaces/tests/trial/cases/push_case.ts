@@ -518,12 +518,9 @@ export default ({ getService }: FtrProviderContext): void => {
       describe('user profile uid', () => {
         let headers: Record<string, string>;
         let superUserWithProfile: User;
-        let superUserInfo: User;
 
         before(async () => {
-          ({ headers, superUserInfo, superUserWithProfile } = await setupSuperUserProfile(
-            getService
-          ));
+          ({ headers, superUserWithProfile } = await setupSuperUserProfile(getService));
         });
 
         it('sets the closed by profile uid in the case and comment', async () => {
@@ -559,7 +556,7 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(pushedComment.pushed_by).to.eql(superUserWithProfile);
         });
 
-        it('falls back to authc to get the user information when the profile uid is not available', async () => {
+        it('sets the pushed by profile uid when authenticating without a session', async () => {
           const { postedCase, connector } = await createCaseWithConnector({
             supertest,
             serviceNowSimulatorURL,
@@ -585,13 +582,8 @@ export default ({ getService }: FtrProviderContext): void => {
             commentId: patchedCase.comments![0].id,
           });
 
-          const { username, full_name, email } = superUserInfo;
-          expect(theCase.external_service?.pushed_by).to.have.property('username', username);
-          expect(theCase.external_service?.pushed_by).to.have.property('full_name', full_name);
-          expect(theCase.external_service?.pushed_by).to.have.property('email', email);
-          expect(pushedComment.pushed_by).to.have.property('username', username);
-          expect(pushedComment.pushed_by).to.have.property('full_name', full_name);
-          expect(pushedComment.pushed_by).to.have.property('email', email);
+          expect(theCase.external_service?.pushed_by).to.eql(superUserWithProfile);
+          expect(pushedComment.pushed_by).to.eql(superUserWithProfile);
         });
       });
 
