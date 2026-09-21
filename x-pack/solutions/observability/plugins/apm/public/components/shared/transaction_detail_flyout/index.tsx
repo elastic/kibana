@@ -12,6 +12,7 @@ import { TransactionDetailFlyoutHeader } from './header';
 import { TransactionDetailFlyoutFooter } from './footer';
 import { TransactionDetailFlyoutLatencyDistribution } from './latency_distribution';
 import { TransactionDetailFlyoutRedMetrics } from './red_metrics';
+import { TransactionDetailFlyoutSummary } from './summary';
 import { TransactionDetailFlyoutTraceSample } from './trace_sample';
 import {
   TransactionDetailFlyoutContextProvider,
@@ -79,6 +80,8 @@ export function TransactionDetailFlyout({
       >
         <TransactionDetailFlyoutHeader transactionName={transactionName} titleId={titleId} />
         <EuiFlyoutBody>
+          <TransactionDetailFlyoutSummary />
+          <EuiSpacer size="m" />
           <TransactionDetailFlyoutRedMetrics />
           <EuiSpacer size="m" />
           <TransactionDetailFlyoutLatencyDistribution />

@@ -182,6 +182,8 @@ export function ServiceFlyout({
             setEnvironment: setFlyoutEnvironment,
             rangeFrom: flyoutRange.rangeFrom,
             rangeTo: flyoutRange.rangeTo,
+            start,
+            end,
             setRange: setFlyoutRange,
             refreshToken,
             onRefresh: () => setRefreshToken(Date.now()),

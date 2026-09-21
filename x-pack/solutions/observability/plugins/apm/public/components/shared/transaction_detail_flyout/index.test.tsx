@@ -37,6 +37,11 @@ jest.mock('./trace_sample', () => ({
     <div data-test-subj="transactionDetailFlyoutSection-traceSample">trace sample</div>
   ),
 }));
+jest.mock('./summary', () => ({
+  TransactionDetailFlyoutSummary: () => (
+    <div data-test-subj="transactionDetailFlyoutSummary">summary</div>
+  ),
+}));
 jest.mock('./footer', () => ({
   TransactionDetailFlyoutFooter: () => (
     <div data-test-subj="transactionDetailFlyoutFooter">footer</div>
@@ -54,6 +59,8 @@ const FILTERS = {
   environment: 'oteldemo',
   rangeFrom: '2026-08-20T10:00:00.000Z',
   rangeTo: '2026-08-21T10:43:35.610Z',
+  start: '2026-08-20T10:00:00.000Z',
+  end: '2026-08-21T10:43:35.610Z',
 };
 
 const BASE_PROPS = {

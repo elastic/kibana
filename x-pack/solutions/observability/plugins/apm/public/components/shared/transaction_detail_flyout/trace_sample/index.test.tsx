@@ -46,6 +46,8 @@ const FILTERS = {
   environment: 'oteldemo',
   rangeFrom: '2026-08-20T10:00:00.000Z',
   rangeTo: '2026-08-21T10:43:35.610Z',
+  start: '2026-08-20T10:00:00.000Z',
+  end: '2026-08-21T10:43:35.610Z',
 };
 
 const mockedUseUnifiedWaterfallFetcher = useUnifiedWaterfallFetcher as jest.Mock;

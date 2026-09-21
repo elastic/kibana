@@ -25,17 +25,20 @@ import { SERVICE_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
 import type { LensESQLConfig } from './types';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { useServiceFlyoutContext } from '../service_flyout_context';
-import { useTimeRange } from '../../../../hooks/use_time_range';
 import { LatencyAggregationTypeSelect } from '../../charts/latency_chart/latency_aggregation_type_select';
 import { useServiceHasSystemMetrics } from '../hooks/use_service_has_system_metrics';
 import { useProjectRouting } from '../hooks/use_project_routing';
 import { TransactionDetailFlyout } from '../../transaction_detail_flyout';
-import type { TransactionDetailFlyoutFilters } from '../../transaction_detail_flyout/types';
 import { ServiceFlyoutApmCharts } from './apm_charts';
 import { getEsqlKeyMetricCharts, getInfrastructureMetricCharts } from './chart_configs';
 import { ServiceFlyoutLensChart } from './lens_chart';
 import { ServiceFlyoutQueryControls } from './query_controls';
 
+/** Selection only — env / time range stay live from service flyout context. */
+interface SelectedTransactionDetail {
+  transactionName: string;
+  transactionType: string;
+}
 const KEY_METRICS_SECTION_TITLE = i18n.translate('xpack.apm.serviceFlyout.keyMetricsSectionTitle', {
   defaultMessage: 'Key metrics',
 });
@@ -185,8 +188,9 @@ function ServiceFlyoutChartsSection({
 }
 
 export function ServiceFlyoutOverview() {
-  const [transactionDetailFilters, setTransactionDetailFilters] =
-    useState<TransactionDetailFlyoutFilters | null>(null);
+  const [selectedTransaction, setSelectedTransaction] = useState<SelectedTransactionDetail | null>(
+    null
+  );
   const {
     deps: { core, share, lens, dataViews },
     contextActions,
@@ -199,6 +203,8 @@ export function ServiceFlyoutOverview() {
       environment,
       rangeFrom,
       rangeTo,
+      start,
+      end,
       transactionType,
       refreshToken,
       latencyAggregationType: initialLatencyAggregationType,
@@ -207,8 +213,6 @@ export function ServiceFlyoutOverview() {
   const [latencyAggregationType, setLatencyAggregationType] = useState(
     initialLatencyAggregationType ?? LatencyAggregationType.avg
   );
-
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const { hasSystemMetrics, isLoading: isSystemMetricsLoading } = useServiceHasSystemMetrics({
     serviceName: service.name,
     environment,
@@ -227,7 +231,7 @@ export function ServiceFlyoutOverview() {
       if (!resolvedTransactionType) {
         return;
       }
-      setTransactionDetailFilters((prev) => {
+      setSelectedTransaction((prev) => {
         if (
           prev?.transactionName === item.name &&
           prev.transactionType === resolvedTransactionType
@@ -235,30 +239,26 @@ export function ServiceFlyoutOverview() {
           return null;
         }
         return {
-          serviceName: service.name,
           transactionName: item.name,
           transactionType: resolvedTransactionType,
-          environment,
-          rangeFrom,
-          rangeTo,
         };
       });
     },
-    [service.name, transactionType, environment, rangeFrom, rangeTo]
+    [transactionType]
   );
 
   const isTransactionExpanded = useCallback(
     (item: TransactionGroup) => {
-      if (!transactionDetailFilters) {
+      if (!selectedTransaction) {
         return false;
       }
       const resolvedTransactionType = item.transactionType || transactionType;
       return (
-        transactionDetailFilters.transactionName === item.name &&
-        transactionDetailFilters.transactionType === resolvedTransactionType
+        selectedTransaction.transactionName === item.name &&
+        selectedTransaction.transactionType === resolvedTransactionType
       );
     },
-    [transactionDetailFilters, transactionType]
+    [selectedTransaction, transactionType]
   );
   // ES|QL charts over raw documents for: unprocessed OTel services (invisible to
   // the APM chart APIs) and document-based hosts like Discover (whose surrounding
@@ -394,12 +394,22 @@ export function ServiceFlyoutOverview() {
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-      {transactionDetailFilters && (
+      {selectedTransaction && (
         <TransactionDetailFlyout
           deps={{ core, share, lens, dataViews }}
           contextActions={contextActions}
-          filters={transactionDetailFilters}
-          onClose={() => setTransactionDetailFilters(null)}
+          filters={{
+            serviceName: service.name,
+            transactionName: selectedTransaction.transactionName,
+            transactionType: selectedTransaction.transactionType,
+            // Live from service flyout
+            environment,
+            rangeFrom,
+            rangeTo,
+            start,
+            end,
+          }}
+          onClose={() => setSelectedTransaction(null)}
           historyKey={flyoutHistoryKey}
           preferDocumentBasedCharts={preferDocumentBasedCharts}
           schema={capabilities.schema}

@@ -124,6 +124,8 @@ function buildContextValue({
       setEnvironment: jest.fn(),
       rangeFrom: 'now-15m',
       rangeTo: 'now',
+      start: '2026-09-11T00:00:00.000Z',
+      end: '2026-09-18T15:20:34.096Z',
       setRange: jest.fn(),
       transactionType,
       setTransactionType: jest.fn(),
@@ -489,6 +491,66 @@ describe('ServiceFlyoutOverview transactions section props', () => {
       getByRole('button', { name: 'close' }).click();
     });
     expect(queryByTestId('transactionDetailFlyoutMock')).not.toBeInTheDocument();
+  });
+
+  it('keeps nested transaction flyout filters live with the service flyout time range and environment', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    const { rerender } = renderOverview();
+
+    act(() => {
+      transactionsSectionProps!.onTransactionClick!({
+        name: 'GET /api/orders',
+        transactionType: 'request',
+        latency: { value: 1 },
+        throughput: { value: 1 },
+        errorRate: { value: 0 },
+      });
+    });
+
+    expect(mockTransactionDetailFlyoutProps).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        filters: expect.objectContaining({
+          transactionName: 'GET /api/orders',
+          transactionType: 'request',
+          environment: 'production',
+          rangeFrom: 'now-15m',
+          rangeTo: 'now',
+          start: '2026-09-11T00:00:00.000Z',
+          end: '2026-09-18T15:20:34.096Z',
+        }),
+      })
+    );
+
+    mockUseServiceFlyoutContext.mockReturnValue(
+      buildContextValue({
+        filters: {
+          environment: 'staging',
+          rangeFrom: 'now-1h',
+          rangeTo: 'now-5m',
+          start: '2026-09-18T14:20:34.096Z',
+          end: '2026-09-18T15:15:34.096Z',
+        },
+      })
+    );
+    rerender(
+      <IntlProvider locale="en">
+        <ServiceFlyoutOverview />
+      </IntlProvider>
+    );
+
+    expect(mockTransactionDetailFlyoutProps).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        filters: expect.objectContaining({
+          transactionName: 'GET /api/orders',
+          transactionType: 'request',
+          environment: 'staging',
+          rangeFrom: 'now-1h',
+          rangeTo: 'now-5m',
+          start: '2026-09-18T14:20:34.096Z',
+          end: '2026-09-18T15:15:34.096Z',
+        }),
+      })
+    );
   });
   it('forwards projectRouting to ServiceFlyoutTransactionsSection', () => {
     mockUseProjectRouting.mockReturnValue('_alias:*');

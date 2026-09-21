@@ -15,6 +15,9 @@ export interface TransactionDetailFlyoutFilters {
   environment: string;
   rangeFrom: string;
   rangeTo: string;
+  /** Resolved timestamps from the host flyout; do not re-parse rangeFrom/rangeTo. */
+  start: string;
+  end: string;
 }
 
 export interface TransactionDetailFlyoutProps {
