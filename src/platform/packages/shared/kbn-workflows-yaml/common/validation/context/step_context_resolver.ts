@@ -12,6 +12,7 @@ import type { WorkflowYaml } from '@kbn/workflows';
 import { DynamicStepContextSchema } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import { getContextSchemaForStep } from './get_context_for_path';
+import type { StepEntrySchemaCache } from './get_steps_collection_schema';
 import { getWorkflowContextSchema } from './get_workflow_context_schema';
 import type { WorkflowContextRegistry } from './registry';
 
@@ -32,6 +33,8 @@ export function createStepContextResolver(
   ) as typeof DynamicStepContextSchema;
 
   const byStepName = new Map<string, typeof DynamicStepContextSchema>();
+  // Share entries within this run; foreach entries still depend on each resolving context.
+  const stepEntrySchemaCache: StepEntrySchemaCache = new WeakMap();
 
   return {
     baseSchema,
@@ -43,7 +46,13 @@ export function createStepContextResolver(
       if (cached) {
         return cached;
       }
-      const schema = getContextSchemaForStep(registry, baseSchema, workflowGraph, stepName);
+      const schema = getContextSchemaForStep(
+        registry,
+        baseSchema,
+        workflowGraph,
+        stepName,
+        stepEntrySchemaCache
+      );
       byStepName.set(stepName, schema);
       return schema;
     },

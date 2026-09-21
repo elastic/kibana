@@ -16,20 +16,14 @@ import { getForeachStateSchema } from './get_foreach_state_schema';
 import { getOutputSchemaForStepType } from './get_output_schema_for_step_type';
 import type { WorkflowContextRegistry } from './registry';
 
-// Share entries across step contexts to avoid quadratic allocations.
-// Foreach entries depend on the resolving context and cannot be shared.
-const stepEntrySchemaCache = new WeakMap<
-  WorkflowContextRegistry,
-  WeakMap<GraphNodeUnion, z.ZodTypeAny>
->();
+export type StepEntrySchemaCache = WeakMap<GraphNodeUnion, z.ZodType>;
 
-function getStepEntrySchema(registry: WorkflowContextRegistry, node: GraphNodeUnion): z.ZodTypeAny {
-  let byNode = stepEntrySchemaCache.get(registry);
-  if (!byNode) {
-    byNode = new WeakMap();
-    stepEntrySchemaCache.set(registry, byNode);
-  }
-  const cached = byNode.get(node);
+function getStepEntrySchema(
+  registry: WorkflowContextRegistry,
+  node: GraphNodeUnion,
+  stepEntrySchemaCache: StepEntrySchemaCache
+): z.ZodType {
+  const cached = stepEntrySchemaCache.get(node);
   if (cached) {
     return cached;
   }
@@ -39,7 +33,7 @@ function getStepEntrySchema(registry: WorkflowContextRegistry, node: GraphNodeUn
       error: z.any().optional(),
     })
   );
-  byNode.set(node, schema);
+  stepEntrySchemaCache.set(node, schema);
   return schema;
 }
 
@@ -53,7 +47,8 @@ function addNodesToStepsSchema(
   nodes: GraphNodeUnion[],
   stepsSchema: z.ZodObject,
   seenStepIds: Set<string>,
-  stepContextSchema: typeof DynamicStepContextSchema
+  stepContextSchema: typeof DynamicStepContextSchema,
+  stepEntrySchemaCache: StepEntrySchemaCache
 ): z.ZodObject {
   let schema = stepsSchema;
   let batch: Record<string, z.ZodTypeAny> = {};
@@ -72,7 +67,7 @@ function addNodesToStepsSchema(
     seenStepIds.add(node.stepId);
 
     if (!isEnterForeach(node)) {
-      batch[node.stepId] = getStepEntrySchema(registry, node);
+      batch[node.stepId] = getStepEntrySchema(registry, node, stepEntrySchemaCache);
     } else {
       flushBatch();
       schema = schema.extend({
@@ -99,7 +94,8 @@ export function getStepsCollectionSchema(
   stepContextSchema: typeof DynamicStepContextSchema,
   workflowExecutionGraph: WorkflowGraph,
   stepName: string,
-  precomputedPredecessors?: GraphNodeUnion[]
+  precomputedPredecessors?: GraphNodeUnion[],
+  stepEntrySchemaCache: StepEntrySchemaCache = new WeakMap()
 ): StepsCollectionSchema {
   const stepId = getStepId(stepName);
   const stepNode = workflowExecutionGraph.getStepNode(stepId);
@@ -133,7 +129,8 @@ export function getStepsCollectionSchema(
     predecessors,
     z.object({}),
     seenStepIds,
-    stepContextSchema
+    stepContextSchema,
+    stepEntrySchemaCache
   );
 
   // For step types whose inner steps have guaranteed execution before certain
@@ -147,7 +144,8 @@ export function getStepsCollectionSchema(
       innerNodes,
       stepsSchema,
       seenStepIds,
-      stepContextSchema
+      stepContextSchema,
+      stepEntrySchemaCache
     );
   }
 

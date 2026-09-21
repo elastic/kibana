@@ -27,6 +27,7 @@ import {
 } from './get_data_map_context_schema';
 import { getForeachStateSchema } from './get_foreach_state_schema';
 import { getNearestStepPath } from './get_nearest_step_path';
+import type { StepEntrySchemaCache } from './get_steps_collection_schema';
 import { getStepsCollectionSchema } from './get_steps_collection_schema';
 import type { WorkflowContextRegistry } from './registry';
 import { getValueAtYamlPath } from './get_value_at_yaml_path';
@@ -44,7 +45,8 @@ export function getContextSchemaForStep(
   registry: WorkflowContextRegistry,
   baseSchema: typeof DynamicStepContextSchema,
   workflowGraph: WorkflowGraph,
-  stepName: string
+  stepName: string,
+  stepEntrySchemaCache?: StepEntrySchemaCache
 ): typeof DynamicStepContextSchema {
   const stepId = getStepId(stepName);
   const stepNode = workflowGraph.getStepNode(stepId);
@@ -60,7 +62,8 @@ export function getContextSchemaForStep(
     baseSchema,
     workflowGraph,
     stepName,
-    predecessors
+    predecessors,
+    stepEntrySchemaCache
   );
   if (stepsCollection.size > 0) {
     extension.steps = stepsCollection.schema;

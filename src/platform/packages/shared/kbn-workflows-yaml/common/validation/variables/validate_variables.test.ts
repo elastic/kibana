@@ -369,7 +369,8 @@ describe('validateVariables', () => {
       emptyRegistry,
       expect.anything(),
       mockWorkflowGraph,
-      'step-a'
+      'step-a',
+      expect.any(WeakMap)
     );
     expect(mockValidateVariable).toHaveBeenCalledWith(variable, mockContext);
   });
