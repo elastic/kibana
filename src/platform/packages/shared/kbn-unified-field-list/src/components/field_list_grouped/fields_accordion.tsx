@@ -215,9 +215,9 @@ export const getFieldKey = (field: FieldListItem): string =>
 
 const DeselectSelectedFieldsButton = ({ id, onClick }: { id: string; onClick?: () => void }) => {
   const buttonLabel = i18n.translate(
-    'unifiedFieldList.fieldsAccordion.deselectSelectedFieldsButtonLabel',
+    'unifiedFieldList.fieldsAccordion.restartSelectedFieldsButtonLabel',
     {
-      defaultMessage: 'Deselect selected fields',
+      defaultMessage: 'Restart selected fields',
     }
   );
 
@@ -227,7 +227,7 @@ const DeselectSelectedFieldsButton = ({ id, onClick }: { id: string; onClick?: (
         aria-label={buttonLabel}
         color="text"
         data-test-subj={`${id}-deselectSelectedFields`}
-        iconType="cross"
+        iconType="undo"
         size="xs"
         onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
           event.preventDefault();
