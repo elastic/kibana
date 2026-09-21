@@ -331,19 +331,40 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
   }
 
   /**
-   * A rejected account write is not proof that Elasticsearch never committed it: the write can
-   * land and its response be lost. Left alone, that strands an enabled account with no token and
-   * no credential, and the pre-flight check then refuses that name on every retry until an
-   * operator removes the account by hand.
+   * Whether the account already holds the one token Kibana mints for it. The `nodes_credentials`
+   * the same response carries are file-realm tokens an operator deployed, and Kibana only ever
+   * mints through the API, so they are deliberately not consulted.
+   */
+  private async hasManagedToken(
+    esClient: ElasticsearchClient,
+    namespace: string,
+    name: string
+  ): Promise<boolean> {
+    const { tokens } = await esClient.transport.request<{ tokens: Record<string, unknown> }>({
+      method: 'GET',
+      path:
+        `/_security/service/${encodeURIComponent(namespace)}/${encodeURIComponent(name)}` +
+        `/credential`,
+    });
+
+    return Object.hasOwn(tokens, ES_SERVICE_ACCOUNT_TOKEN_NAME);
+  }
+
+  /**
+   * A rejected account write may still have landed, with only the response lost. Left alone that
+   * strands an account with no token, and the pre-flight refuses that name on every retry that
+   * follows.
    *
-   * Ownership is inferred, not proven, because Elasticsearch records no owner on a user-managed
-   * account. The pre-flight found the name free moments earlier, so an account here is either the
-   * one this call wrote or one a concurrent create landed in between. A stored credential means
-   * that other create already finished and owns the account, so it is left alone. The window that
-   * remains, a concurrent create that has not stored its credential yet, is the same narrow race
-   * the pre-flight already accepts, and that create rolls itself back on its own failure path.
+   * Elasticsearch records no owner on a user-managed account, so ownership is inferred. The
+   * pre-flight found the name free moments ago, so an account here is either this call's or a
+   * concurrent create's. The token tells them apart: this call failed before `createToken`, so a
+   * token on the account came from the other create, and the account stays. Not the stored
+   * credential, which can outlive its account and would have us strand the orphan we came for.
    *
-   * Best effort throughout: the caller needs the error that got us here, not this one.
+   * What is left is a concurrent create that wrote the account but has not minted yet. Same race
+   * the pre-flight already accepts, and that create rolls itself back.
+   *
+   * Best effort: the caller needs the error that got us here, not this one.
    */
   private async reconcileFailedAccountWrite(
     esClient: ElasticsearchClient,
@@ -357,10 +378,10 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
         return;
       }
 
-      if (await this.credentialStore.getDecrypted(principal)) {
+      if (await this.hasManagedToken(esClient, namespace, name)) {
         this.logger.warn(
-          `Service account [${principal}] is present after a failed create, but a credential for ` +
-            `it is already stored, so it was left in place.`
+          `Service account [${principal}] is present after a failed create, but it already holds ` +
+            `a [${ES_SERVICE_ACCOUNT_TOKEN_NAME}] token, so it was left in place.`
         );
         return;
       }

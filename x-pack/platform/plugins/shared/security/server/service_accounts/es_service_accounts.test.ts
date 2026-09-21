@@ -30,13 +30,29 @@ jest.mock('../otel/instrumentation', () => ({
 const ACCOUNT_PATH = '/_security/service/kibana/nightshift-relay';
 /** Kibana only ever manages user-managed accounts, so the GET asks for that type explicitly. */
 const READ_ACCOUNT = { method: 'GET', path: ACCOUNT_PATH, querystring: { type: 'user_managed' } };
-const TOKEN_PATH = `${ACCOUNT_PATH}/credential/token/kibana-managed`;
+const CREDENTIALS_PATH = `${ACCOUNT_PATH}/credential`;
+const TOKEN_PATH = `${CREDENTIALS_PATH}/token/kibana-managed`;
+/** The shape Elasticsearch returns for a GET of an account's credentials. */
+const accountCredentials = (tokenNames: string[] = []) => ({
+  tokens: Object.fromEntries(tokenNames.map((tokenName) => [tokenName, {}])),
+});
 
 const clusterPrivilegesResponse = (authorized: boolean) =>
   ({
     hasAllRequested: authorized,
     privileges: { elasticsearch: { cluster: [{ privilege: 'manage_security', authorized }] } },
   } as unknown as CheckPrivilegesResponse);
+
+/** A credential document left behind by an account that is no longer there. */
+const staleCredential = () => ({
+  serviceAccountId: 'kibana/nightshift-relay',
+  namespace: 'kibana',
+  name: 'nightshift-relay',
+  tokenName: 'kibana-managed',
+  createdAt: '2026-09-21T00:00:00.000Z',
+  createdBy: { type: 'user' as const, username: 'user' },
+  token: 'AAEAAWtpYmFuYS9...',
+});
 
 /** The shape Elasticsearch returns for a scoped GET of a user-managed account. */
 const accountEntry = (overrides = {}) => ({
@@ -485,19 +501,45 @@ describe('EsServiceAccounts', () => {
         .mockResolvedValueOnce({})
         .mockRejectedValueOnce(new Error('socket hang up'))
         .mockResolvedValueOnce(accountEntry())
+        .mockResolvedValueOnce(accountCredentials()) // no token, so the account is this call's
         .mockResolvedValue({});
 
       await expect(serviceAccounts.create(request, createParams)).rejects.toThrow('socket hang up');
 
       const calls = esClient.asCurrentUser.transport.request.mock.calls;
       expect(calls[2][0]).toEqual(READ_ACCOUNT);
-      expect(calls[3][0]).toEqual({ method: 'DELETE', path: TOKEN_PATH });
-      expect(calls[4][0]).toEqual({
+      expect(calls[3][0]).toEqual({ method: 'GET', path: CREDENTIALS_PATH });
+      expect(calls[4][0]).toEqual({ method: 'DELETE', path: TOKEN_PATH });
+      expect(calls[5][0]).toEqual({
         method: 'DELETE',
         path: ACCOUNT_PATH,
         querystring: { force: 'true' },
       });
       expect(credentialStore.set).not.toHaveBeenCalled();
+    });
+
+    // The one case that makes the token the discriminator rather than the stored credential: a
+    // credential can outlive its account, and reading that leftover as ownership would strand
+    // the account this call just wrote.
+    it('removes the account when a credential is stored but the account holds no token', async () => {
+      esClient.asCurrentUser.transport.request
+        .mockResolvedValueOnce({})
+        .mockRejectedValueOnce(new Error('socket hang up'))
+        .mockResolvedValueOnce(accountEntry())
+        .mockResolvedValueOnce(accountCredentials())
+        .mockResolvedValue({});
+      credentialStore.getDecrypted.mockResolvedValue(staleCredential());
+
+      await expect(serviceAccounts.create(request, createParams)).rejects.toThrow('socket hang up');
+
+      const calls = esClient.asCurrentUser.transport.request.mock.calls;
+      expect(calls[5][0]).toEqual({
+        method: 'DELETE',
+        path: ACCOUNT_PATH,
+        querystring: { force: 'true' },
+      });
+      // The leftover goes with it: its token belonged to an account that is gone.
+      expect(credentialStore.delete).toHaveBeenCalledWith('kibana/nightshift-relay');
     });
 
     it('deletes nothing when the failed account write never committed', async () => {
@@ -512,30 +554,41 @@ describe('EsServiceAccounts', () => {
       expect(credentialStore.delete).not.toHaveBeenCalled();
     });
 
-    // A credential at the same principal means a concurrent create already finished and owns the
-    // account, so it is not this call's to remove.
-    it('leaves the account alone when a credential for it is already stored', async () => {
+    // This call failed before minting anything, so a token on the account means a concurrent
+    // create put it there. That account is not this call's to remove.
+    it('leaves the account alone when it already holds the managed token', async () => {
       esClient.asCurrentUser.transport.request
         .mockResolvedValueOnce({})
         .mockRejectedValueOnce(new Error('socket hang up'))
-        .mockResolvedValueOnce(accountEntry());
-      credentialStore.getDecrypted.mockResolvedValue({
-        serviceAccountId: 'kibana/nightshift-relay',
-        namespace: 'kibana',
-        name: 'nightshift-relay',
-        tokenName: 'kibana-managed',
-        createdAt: '2026-09-21T00:00:00.000Z',
-        createdBy: { type: 'user', username: 'user' },
-        token: 'AAEAAWtpYmFuYS9...',
-      });
+        .mockResolvedValueOnce(accountEntry())
+        .mockResolvedValueOnce(accountCredentials(['kibana-managed']));
 
       await expect(serviceAccounts.create(request, createParams)).rejects.toThrow('socket hang up');
 
-      expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledTimes(3);
+      expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledTimes(4);
       expect(credentialStore.delete).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('a credential for it is already stored')
+        expect.stringContaining('it already holds a [kibana-managed] token')
       );
+    });
+
+    // A token an operator minted under another name says nothing about who owns the account.
+    it('removes the account when its only token is not the one Kibana mints', async () => {
+      esClient.asCurrentUser.transport.request
+        .mockResolvedValueOnce({})
+        .mockRejectedValueOnce(new Error('socket hang up'))
+        .mockResolvedValueOnce(accountEntry())
+        .mockResolvedValueOnce(accountCredentials(['operator-token']))
+        .mockResolvedValue({});
+
+      await expect(serviceAccounts.create(request, createParams)).rejects.toThrow('socket hang up');
+
+      const calls = esClient.asCurrentUser.transport.request.mock.calls;
+      expect(calls[5][0]).toEqual({
+        method: 'DELETE',
+        path: ACCOUNT_PATH,
+        querystring: { force: 'true' },
+      });
     });
 
     it('surfaces the original failure when the reconciliation read itself fails', async () => {
@@ -554,6 +607,25 @@ describe('EsServiceAccounts', () => {
       expect(securityTelemetry.recordServiceAccountRollbackFailure).toHaveBeenCalledWith({
         serviceAccountRollbackResource: 'account',
       });
+    });
+
+    // The response is not validated, so this pins the behavior that keeps that safe: a shape
+    // without `tokens` raises, and "I cannot tell" must not read as "no token". The alternative
+    // is force-deleting an account a concurrent create owns.
+    it('leaves the account alone when the token read comes back unreadable', async () => {
+      esClient.asCurrentUser.transport.request
+        .mockResolvedValueOnce({})
+        .mockRejectedValueOnce(new Error('socket hang up'))
+        .mockResolvedValueOnce(accountEntry())
+        .mockResolvedValueOnce({ count: 1 }); // no `tokens`
+
+      await expect(serviceAccounts.create(request, createParams)).rejects.toThrow('socket hang up');
+
+      expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledTimes(4);
+      expect(credentialStore.delete).not.toHaveBeenCalled();
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Could not determine whether the failed create')
+      );
     });
   });
 
