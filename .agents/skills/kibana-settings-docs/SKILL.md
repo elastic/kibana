@@ -37,7 +37,7 @@ Do not document a `kibana.yml` key in the Advanced Settings YAML. Do not documen
 Task progress:
 - [ ] 1. Classify kibana.yml vs space vs global
 - [ ] 2. Grep docs/reference and {settings} includes for the collection
-- [ ] 3. Read the registration for key, type, default, category, and availability
+- [ ] 3. Read the registration for key, type, default, category, and availability. Use the merge base if this branch removes the setting
 - [ ] 4. Copy the nearest valid sibling
 - [ ] 5. Tag applies_to from the docs-builder settings page
 - [ ] 6. Check kibana.yml ech against the Cloud user-settings allowlist
@@ -69,10 +69,16 @@ Do not add YAML for internal flags, test-only config, or a rename that a documen
 
 Do not copy defaults, types, or availability from the issue body or PR title.
 
-If this branch adds, changes, or removes the setting, read the implementation on this branch. Otherwise read Elastic `main`. If `origin` is your fork, fetch `upstream/main`. If `origin` is `elastic/kibana`, fetch `origin/main`.
+If this branch adds or changes the setting, read the implementation on this branch. If this branch removes the setting, grep the PR merge base. HEAD no longer has the registration. Keep the existing YAML entry and follow the docs-builder settings page for `removed`. If the setting is not part of this branch, read Elastic `main`. If `origin` is your fork, fetch `upstream/main`. If `origin` is `elastic/kibana`, fetch `origin/main`.
 
 ```bash
 git grep -n -- '<setting.key>' HEAD -- '*.ts' '*.tsx'
+```
+
+For a removal, recover the registration from the merge base. Use `upstream/main` if `origin` is your fork:
+
+```bash
+git grep -n -- '<setting.key>' "$(git merge-base HEAD origin/main)" -- '*.ts' '*.tsx'
 ```
 
 | Claim | kibana.yml source | Advanced Settings source |
@@ -84,7 +90,7 @@ git grep -n -- '<setting.key>' HEAD -- '*.ts' '*.tsx'
 | Availability | `offeringBasedSchema`, `schema.contextRef('serverless')`, Cloud support | Serverless allowlists and `technicalPreview` / `experimental` / `deprecation` |
 | UI category / group | n/a | `category` array. YAML `group` title. |
 
-The `setting` value must match the runtime key. Quote keys that contain a colon, for example `"dateFormat:tz"`. The `name` i18n string is the UI label. It is not the YAML `setting` key.
+The `setting` value must match the runtime key at HEAD, or the merge-base key when this branch removes the setting. Quote keys that contain a colon, for example `"dateFormat:tz"`. The `name` i18n string is the UI label. It is not the YAML `setting` key.
 
 Copy the nearest sibling. Change only what this setting needs. Include `datatype` and `default` when the source defines them. Copy the `datatype` term the surrounding file already uses. Include `id` when the generated slug would collide or stay unreadable.
 
@@ -121,7 +127,7 @@ Skip this when the reference entry is enough.
 ## Verification
 
 - [ ] YAML file matches kibana.yml vs space vs global
-- [ ] `setting` matches the runtime key at HEAD
+- [ ] `setting` matches the runtime key at HEAD, or at the merge base when this branch removes the setting
 - [ ] Description, `default`, `applies_to`, and lifecycle follow the docs-builder settings page
 - [ ] kibana.yml `ech` matches the Cloud user-settings allowlist in `elastic/cloud`
 - [ ] Advanced Settings `serverless` matches `common/index.ts` or the nested project allowlists, following each file's imports
