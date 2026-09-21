@@ -309,7 +309,7 @@ export const ImportSummary: FC<ImportSummaryProps> = ({
       <ImportWarnings warnings={importWarnings} basePath={basePath} />
       <EuiHorizontalRule />
       {importItems.map((item, index) => {
-        const { type, title, icon } = item;
+        const { type, title, icon, errorMessage } = item;
         const typeLabel = getSavedObjectLabel(type, allowedTypes);
         return (
           <EuiFlexGroup
@@ -327,6 +327,11 @@ export const ImportSummary: FC<ImportSummaryProps> = ({
               <EuiText size="s">
                 <EuiTextTruncate text={title} />
               </EuiText>
+              {errorMessage && (
+                <EuiText size="xs" color="danger">
+                  <p data-test-subj="importSavedObjectsErrorMessage">{errorMessage}</p>
+                </EuiText>
+              )}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <div className="eui-textRight">
