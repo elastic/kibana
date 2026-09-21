@@ -15,7 +15,11 @@ import { mapOk, unwrap } from '../lib/result_type';
 import type { TaskLifecycleEvent, TaskPollingLifecycle } from '../polling_lifecycle';
 import type { ConcreteTaskInstance } from '../task';
 import type { TaskRun, TaskTiming } from '../task_events';
-import { isTaskManagerWorkerUtilizationStatEvent, isTaskRunEvent } from '../task_events';
+import {
+  isTaskManagerBackpressureEvent,
+  isTaskManagerWorkerUtilizationStatEvent,
+  isTaskRunEvent,
+} from '../task_events';
 import type { MonitoredStat } from './monitoring_stats_stream';
 import type { AggregatedStat, AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
 import { createRunningAveragedStat } from './task_run_calculators';
@@ -23,6 +27,9 @@ import { WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW_SIZE_MS } from '../config';
 
 export interface PublicBackgroundTaskUtilizationStat extends JsonObject {
   load: number;
+  // 1 while Task Manager is throttling because Elasticsearch is unhealthy, else 0.
+  // Numeric (not boolean) so the autoscaler can read it as a metric.
+  es_backpressure_active: number;
 }
 
 export interface BackgroundTaskUtilizationStat extends PublicBackgroundTaskUtilizationStat {
@@ -96,6 +103,13 @@ export function createBackgroundTaskUtilizationAggregator(
     map(mapOk((num: number) => taskManagerUtilizationEventToLoadStat(num)))
   );
 
+  const taskManagerBackpressureEvent$: Observable<
+    Pick<BackgroundTaskUtilizationStat, 'es_backpressure_active'>
+  > = taskPollingLifecycle.events.pipe(
+    filter(isTaskManagerBackpressureEvent),
+    map((taskEvent) => ({ es_backpressure_active: unwrap(taskEvent.event).active ? 1 : 0 }))
+  );
+
   return combineLatest([
     taskRunAdhocEvents$.pipe(
       startWith({
@@ -131,12 +145,18 @@ export function createBackgroundTaskUtilizationAggregator(
         load: 0,
       })
     ),
+    taskManagerBackpressureEvent$.pipe(
+      startWith({
+        es_backpressure_active: 0,
+      })
+    ),
   ]).pipe(
     map(
-      ([adhoc, recurring, load]: [
+      ([adhoc, recurring, load, backpressure]: [
         Pick<BackgroundTaskUtilizationStat, 'adhoc'>,
         Pick<BackgroundTaskUtilizationStat, 'recurring'>,
-        Pick<BackgroundTaskUtilizationStat, 'load'>
+        Pick<BackgroundTaskUtilizationStat, 'load'>,
+        Pick<BackgroundTaskUtilizationStat, 'es_backpressure_active'>
       ]) => {
         return {
           key: 'utilization',
@@ -144,6 +164,7 @@ export function createBackgroundTaskUtilizationAggregator(
             ...adhoc,
             ...recurring,
             ...load,
+            ...backpressure,
           },
         } as AggregatedStat<BackgroundTaskUtilizationStat>;
       }
@@ -184,7 +205,9 @@ export function summarizeUtilizationStats({
     last_update: lastUpdate,
     stats: {
       timestamp: monitoredStats.timestamp,
-      value: isInternal ? utilizationStats : pick(utilizationStats, 'load'),
+      value: isInternal
+        ? utilizationStats
+        : pick(utilizationStats, 'load', 'es_backpressure_active'),
     },
   };
 }
