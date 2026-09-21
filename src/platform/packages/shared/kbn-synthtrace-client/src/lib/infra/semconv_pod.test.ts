@@ -17,6 +17,7 @@ import {
   SEMCONV_K8S_POD_CPU_NODE_UTILIZATION,
   SEMCONV_K8S_POD_MEMORY_LIMIT_UTILIZATION,
   SEMCONV_K8S_POD_MEMORY_NODE_UTILIZATION,
+  SEMCONV_K8S_POD_MEMORY_USAGE,
   SEMCONV_K8S_POD_MEMORY_WORKING_SET,
   SEMCONV_K8S_POD_NETWORK_IO,
   semconvPod,
@@ -67,10 +68,19 @@ describe('semconvPod', () => {
 
     expect(withLimit.fields[SEMCONV_K8S_POD_MEMORY_LIMIT_UTILIZATION]).toBe(0.55);
     expect(withLimit.fields[SEMCONV_K8S_POD_MEMORY_NODE_UTILIZATION]).toBe(0.4);
-    expect(withLimit.fields[SEMCONV_K8S_POD_MEMORY_WORKING_SET]).toBe(512 * 1024 * 1024);
+    expect(withLimit.fields[SEMCONV_K8S_POD_MEMORY_WORKING_SET]).toBe(400 * 1024 * 1024);
+    expect(withLimit.fields[SEMCONV_K8S_POD_MEMORY_USAGE]).toBe(512 * 1024 * 1024);
     expect(withoutLimit.fields[SEMCONV_K8S_POD_MEMORY_LIMIT_UTILIZATION]).toBeUndefined();
     expect(withoutLimit.fields[SEMCONV_K8S_POD_MEMORY_NODE_UTILIZATION]).toBe(0.4);
-    expect(withoutLimit.fields[SEMCONV_K8S_POD_MEMORY_WORKING_SET]).toBe(512 * 1024 * 1024);
+    expect(withoutLimit.fields[SEMCONV_K8S_POD_MEMORY_WORKING_SET]).toBe(400 * 1024 * 1024);
+    expect(withoutLimit.fields[SEMCONV_K8S_POD_MEMORY_USAGE]).toBe(512 * 1024 * 1024);
+
+    const workingSet = withLimit.fields[SEMCONV_K8S_POD_MEMORY_WORKING_SET];
+    const usage = withLimit.fields[SEMCONV_K8S_POD_MEMORY_USAGE];
+    expect(workingSet).toBeDefined();
+    expect(usage).toBeDefined();
+    // On a real kubelet, working set is a subset of usage (WorkingSetBytes ≤ UsageBytes).
+    expect(Number(workingSet)).toBeLessThanOrEqual(Number(usage));
   });
 
   it('emits a monotonically increasing network counter per direction and interface', () => {
