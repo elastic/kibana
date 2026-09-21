@@ -166,6 +166,7 @@ export {
   ALL_FIELD_DEFINITION_TYPES,
   fieldDefinitionConfigSchema,
   namedFieldDefinitionConfigSchema,
+  boundedFieldDefinitionConfigSchema,
   boundedNamedFieldDefinitionSchema,
 } from './src/fields';
 
