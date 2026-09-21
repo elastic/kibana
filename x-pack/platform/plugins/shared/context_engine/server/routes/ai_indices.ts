@@ -527,7 +527,7 @@ export const registerAiIndexRoutes = ({
       access: 'public',
       summary: 'Create an AI Index',
       description:
-        'Creates an AI Index record attached to a data stream or index pattern. Fails with a 409 if an AI Index with the same id already exists.',
+        'Creates an AI Index record attached to a data stream or index. Fails with a 409 if an AI Index with the same id already exists.',
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental' },
@@ -578,8 +578,7 @@ export const registerAiIndexRoutes = ({
       security: WRITE_SECURITY,
       access: 'public',
       summary: 'Create or update an AI Index',
-      description:
-        'Creates or updates an AI Index record attached to a data stream or index pattern.',
+      description: 'Creates or updates an AI Index record attached to a data stream or index.',
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental' },
