@@ -18,15 +18,15 @@ import {
   type DatasetFormatFormValue,
   type DatasetSchemaResolutionFormValue,
 } from './create_dataset_form_state';
-import { CsvTsvAdvancedSettings } from './form_components/csv_tsv_advanced_settings';
-import { CsvTsvCommonSettings } from './form_components/csv_tsv_common_settings';
-import { FormatSelect } from './form_components/format_select';
-import { NdjsonCommonSettings } from './form_components/ndjson_common_settings';
-import { ParquetAdvancedSettings } from './form_components/parquet_advanced_settings';
-import { ParquetCommonSettings } from './form_components/parquet_common_settings';
-import { PartitionDetectionSelect } from './form_components/partition_detection_select';
-import { SharedAdvancedSettings } from './form_components/shared_advanced_settings';
-import { SharedCommonSettings } from './form_components/shared_common_settings';
+import { CsvTsvAdvancedSettings } from './components/csv_tsv_advanced_settings';
+import { CsvTsvCommonSettings } from './components/csv_tsv_common_settings';
+import { FormatSelect } from './components/format_select';
+import { NdjsonCommonSettings } from './components/ndjson_common_settings';
+import { ParquetAdvancedSettings } from './components/parquet_advanced_settings';
+import { ParquetCommonSettings } from './components/parquet_common_settings';
+import { PartitionDetectionSelect } from './components/partition_detection_select';
+import { SharedAdvancedSettings } from './components/shared_advanced_settings';
+import { SharedCommonSettings } from './components/shared_common_settings';
 
 // ---------------------------------------------------------------------------
 // Module-level option arrays — shared across components so each select
@@ -140,23 +140,32 @@ export function CreateDatasetAdditionalSettings({
     ? FORMAT_ADVANCED_SETTING_COMPONENTS[format]
     : undefined;
 
+  // Common settings should only show if there are actual common settings for this format.
+  // When no format is selected, keep the sections visible so users know where settings live.
+  const hasCommonSettingsForFormat = format ? FORMAT_HAS_COMMON_SETTINGS[format] : true;
+  const showCommonSettings = format ? hasCommonSettingsForFormat : true;
+
   return (
     <>
-      <EuiAccordion
-        id="createDatasetWizardCommonSettings"
-        data-test-subj="createDatasetWizardCommonSettings"
-        buttonContent={
-          <h4 style={{ margin: 0, fontWeight: 'bold' }}>
-            {createDatasetWizardStrings.commonSettingsSectionTitle}
-          </h4>
-        }
-        initialIsOpen={true}
-        paddingSize="m"
-      >
-        <SharedCommonSettings control={control} />
-        {FormatCommonSettingsComponent ? <FormatCommonSettingsComponent control={control} /> : null}
-      </EuiAccordion>
-      <EuiSpacer size="m" />
+      {showCommonSettings ? (
+        <EuiAccordion
+          id="createDatasetWizardCommonSettings"
+          data-test-subj="createDatasetWizardCommonSettings"
+          buttonContent={
+            <h4 style={{ margin: 0, fontWeight: 'bold' }}>
+              {createDatasetWizardStrings.commonSettingsSectionTitle}
+            </h4>
+          }
+          initialIsOpen={true}
+          paddingSize="m"
+        >
+          <SharedCommonSettings control={control} />
+          {FormatCommonSettingsComponent ? (
+            <FormatCommonSettingsComponent control={control} />
+          ) : null}
+        </EuiAccordion>
+      ) : null}
+      {showCommonSettings ? <EuiSpacer size="m" /> : null}
       <EuiAccordion
         id="createDatasetWizardAdvancedSettings"
         data-test-subj="createDatasetWizardAdvancedSettings"
@@ -165,7 +174,7 @@ export function CreateDatasetAdditionalSettings({
             {createDatasetWizardStrings.advancedSettingsSectionTitle}
           </h4>
         }
-        initialIsOpen={false}
+        initialIsOpen={format ? !hasCommonSettingsForFormat : false}
         paddingSize="m"
       >
         <SharedAdvancedSettings control={control} />
@@ -369,6 +378,14 @@ function OrcAdvancedSettings(_props: { control: Control<CreateDatasetFormValues>
 function NdjsonAdvancedSettings(_props: { control: Control<CreateDatasetFormValues> }) {
   return null;
 }
+
+const FORMAT_HAS_COMMON_SETTINGS: Record<Exclude<DatasetFormatFormValue, ''>, boolean> = {
+  csv: true,
+  tsv: true,
+  ndjson: true,
+  parquet: false,
+  orc: false,
+};
 
 const FORMAT_COMMON_SETTING_COMPONENTS: Record<
   Exclude<DatasetFormatFormValue, ''>,
