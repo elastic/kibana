@@ -201,7 +201,6 @@ const buildPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPolic
     destinations: [{ type: 'connector', id: 'c-1' }],
     grouping_mode: 'per_episode',
     enabled: true,
-    tags: ['t1'],
     matcher: undefined,
     group_by: undefined,
     throttle: undefined,
@@ -297,7 +296,7 @@ describe('ActionPolicyDetailsFlyoutContainer', () => {
 
   it('clones a rule-scoped policy carrying over the matcher', async () => {
     mockUseFetchActionPolicy.mockReturnValue({
-      data: buildPolicy({ matcher: 'rule.id: "rule-1"' }),
+      data: buildPolicy({ matcher: { tags: ['rule-1'] } }),
     });
     renderContainer();
 
@@ -306,7 +305,7 @@ describe('ActionPolicyDetailsFlyoutContainer', () => {
     expect(mockCreateActionPolicy).toHaveBeenCalledWith(
       expect.objectContaining({
         name: 'My Policy [clone]',
-        matcher: 'rule.id: "rule-1"',
+        matcher: { tags: ['rule-1'] },
       })
     );
     expect(mockOnClose).toHaveBeenCalledTimes(1);

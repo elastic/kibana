@@ -9,7 +9,6 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ActionPoliciesArtifactsSubsection } from './action_policies_artifacts_subsection';
-import { RuleProvider } from '../../rule_context';
 import type { RuleApiResponse } from '../../../../services/rules_api';
 import { createMockLocators, MockLocatorProvider } from '../../../../test_utils/test_providers';
 import { AlertingV2ActionPoliciesLocatorDefinition } from '../../../../locators';
@@ -49,7 +48,7 @@ const baseRule: RuleApiResponse = {
   id: 'rule-1',
   kind: 'alert',
   enabled: true,
-  metadata: { name: 'Test Rule', version: 1 },
+  metadata: { name: 'Test Rule', version: 1, tags: ['prod'] },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '10m' },
   query: { format: 'composed' as const, base: 'FROM logs-*', breach: { segment: '' } },
@@ -63,9 +62,7 @@ const renderSubsection = (rule: RuleApiResponse = baseRule) =>
   render(
     <MockLocatorProvider locators={mockLocators}>
       <I18nProvider>
-        <RuleProvider rule={rule}>
-          <ActionPoliciesArtifactsSubsection />
-        </RuleProvider>
+        <ActionPoliciesArtifactsSubsection rule={rule} />
       </I18nProvider>
     </MockLocatorProvider>
   );
@@ -79,14 +76,15 @@ describe('ActionPoliciesArtifactsSubsection', () => {
       matchingCriteriaCount: 0,
       isLoading: false,
       isError: false,
+      evaluatedCount: 0,
       isCountTruncated: false,
       error: null,
     });
   });
 
-  it('loads linked policies for the current rule', () => {
+  it('loads linked policies using the current rule tags', () => {
     renderSubsection();
-    expect(mockUseLinkedActionPolicies).toHaveBeenCalledWith('rule-1');
+    expect(mockUseLinkedActionPolicies).toHaveBeenCalledWith(['prod']);
   });
 
   it('renders loading state on the stat', () => {
@@ -96,6 +94,7 @@ describe('ActionPoliciesArtifactsSubsection', () => {
       matchingCriteriaCount: 0,
       isLoading: true,
       isError: false,
+      evaluatedCount: 0,
       isCountTruncated: false,
       error: null,
     });
@@ -111,6 +110,7 @@ describe('ActionPoliciesArtifactsSubsection', () => {
       matchingCriteriaCount: 0,
       isLoading: false,
       isError: true,
+      evaluatedCount: 0,
       isCountTruncated: false,
       error: new Error('boom'),
     });
@@ -134,6 +134,7 @@ describe('ActionPoliciesArtifactsSubsection', () => {
       matchingCriteriaCount: 1,
       isLoading: false,
       isError: false,
+      evaluatedCount: 0,
       isCountTruncated: false,
       error: null,
     });
@@ -169,6 +170,7 @@ describe('ActionPoliciesArtifactsSubsection', () => {
       matchingCriteriaCount: 1,
       isLoading: false,
       isError: false,
+      evaluatedCount: 0,
       isCountTruncated: false,
       error: null,
     });
@@ -183,13 +185,14 @@ describe('ActionPoliciesArtifactsSubsection', () => {
     });
   });
 
-  it('shows a truncated count indicator when linked policy counts may be incomplete', () => {
+  it('shows the evaluated count when results are truncated', () => {
     mockUseLinkedActionPolicies.mockReturnValue({
       totalCount: 5,
       catchAllCount: 2,
       matchingCriteriaCount: 3,
       isLoading: false,
       isError: false,
+      evaluatedCount: 50,
       isCountTruncated: true,
       error: null,
     });
@@ -198,7 +201,7 @@ describe('ActionPoliciesArtifactsSubsection', () => {
 
     expect(screen.getByTestId('ruleActionPoliciesArtifactsStat')).toHaveTextContent('5+');
     expect(screen.getByTestId('ruleActionPoliciesArtifactsTruncatedHint')).toHaveTextContent(
-      'This space has more than 100 action policies, so this count may be low.'
+      `Only 50 action policies were evaluated, so this count may be low.`
     );
   });
 });

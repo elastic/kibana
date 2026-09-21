@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonGroup,
@@ -46,7 +46,7 @@ import { AlertEpisodesRelatedSection } from '@kbn/alerting-v2-episodes-ui/compon
 import { AlertEpisodeMetadataSection } from '@kbn/alerting-v2-episodes-ui/components/details/metadata_section';
 import { AlertEpisodeRunbookSection } from '@kbn/alerting-v2-episodes-ui/components/details/runbook_section';
 import { css } from '@emotion/react';
-import { useHistory, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { AlertEpisodeTimelineSection } from '@kbn/alerting-v2-episodes-ui/components/details/timeline_section';
 import { useEpisodeAutoAttach } from '@kbn/alerting-v2-browser-shared';
@@ -82,13 +82,12 @@ export function EpisodeDetailsPage() {
   const [mainPanel, setMainPanel] = useState<EpisodeDetailsMainPanel>('overview');
 
   const { services } = useKibana<AlertEpisodesKibanaServices>();
-  const { episodesLocators } = useAlertingLocators();
+  const { episodesLocators, rulesLocators } = useAlertingLocators();
   const queryClient = useQueryClient();
   const alertsCapability = useService(UserCapabilities).canWrite('alerts')
     ? EPISODE_ACTIONS_PRIVILEGE.all
     : EPISODE_ACTIONS_PRIVILEGE.read;
   const { data, http, spaces } = services;
-  const history = useHistory();
 
   const smallMediaQuery = useEuiMaxBreakpoint('s');
   const largeMediaQuery = useEuiMinBreakpoint('m');
@@ -268,6 +267,14 @@ export function EpisodeDetailsPage() {
   );
 
   const episodesListHref = episodesLocators.useUrl({});
+  const getRuleDetailsHref = useCallback(
+    (id: string) => rulesLocators.getRedirectUrl({ ruleId: id }),
+    [rulesLocators]
+  );
+  const getEpisodeDetailsHref = useCallback(
+    (id: string) => episodesLocators.getRedirectUrl({ episodeId: id }),
+    [episodesLocators]
+  );
 
   const isLoading = isLoadingEpisode;
   const episodeNotFound = !isLoading && episode == null;
@@ -283,7 +290,7 @@ export function EpisodeDetailsPage() {
           <EuiButton
             color="primary"
             fill
-            onClick={() => history.push('/')}
+            href={episodesListHref}
             data-test-subj="episodeDetailsErrorBackButton"
           >
             {i18n.BACK_TO_ALERT_EPISODES}
@@ -354,6 +361,7 @@ export function EpisodeDetailsPage() {
             <AlertEpisodeRuleOverviewPanelSection
               episodeId={episodeId}
               services={detailsServices}
+              getRuleDetailsHref={getRuleDetailsHref}
             />
           </>
         )}
@@ -499,7 +507,11 @@ export function EpisodeDetailsPage() {
                       episodeId={episodeId}
                       services={detailsServices}
                     />
-                    <AlertEpisodesRelatedSection episodeId={episodeId} services={detailsServices} />
+                    <AlertEpisodesRelatedSection
+                      episodeId={episodeId}
+                      services={detailsServices}
+                      getEpisodeDetailsHref={getEpisodeDetailsHref}
+                    />
                   </EuiFlexGroup>
                 </EuiPanel>
               )}

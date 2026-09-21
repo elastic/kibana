@@ -39,19 +39,20 @@ import deepEqual from 'fast-deep-equal';
 import { useQueryClient } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useService } from '@kbn/core-di-browser';
-import { EpisodeDataSourceProvider } from '@kbn/alerting-v2-episodes-ui/context/episode_data_source_context';
+import {
+  EpisodeDataSourceProvider,
+  useAdditionalEpisodesDataSource,
+} from '@kbn/alerting-v2-episodes-ui/context/episode_data_source_context';
 import { useFetchAlertingEpisodesQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_alerting_episodes_query';
 import { ALERT_EPISODES_LIST_PAGE_SIZE } from '@kbn/alerting-v2-episodes-ui/constants';
-import {
-  episodeSupportsActions,
-  episodeSupportsTimeline,
-} from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
+import { episodeSupportsTimeline } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 import { useInvalidateEpisodeQueries } from '@kbn/alerting-v2-episodes-ui/hooks/use_invalidate_episode_queries';
 import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache';
 import { useAlertingRuleSourceDataViews } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rule_source_data_views';
 import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
 import {
+  EpisodeDurationCell,
   EpisodeStatusCell,
   EpisodeTagsCell,
   EpisodeRuleCell,
@@ -62,7 +63,7 @@ import { AlertEpisodeAssigneeCell } from '@kbn/alerting-v2-episodes-ui/component
 import { DEFAULT_EPISODES_TABLE_SORT } from './utils/episodes_table_config';
 import { useEpisodesTableConfig } from './hooks/use_episodes_table_config';
 import { experimentalBadge } from '../../components/experimental_badge';
-import { RuleSummaryFlyoutContainer } from '../../components/rule/flyouts/rule_summary_flyout_container';
+import { RuleSummaryFlyoutContainer } from '../../components/rule/flyouts/rule_summary/rule_summary_flyout_container';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
 import { useAlertingLocators } from '../../application/locator_context';
 import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
@@ -171,8 +172,9 @@ export const AlertEpisodesListPage = () => (
 
 const AlertEpisodesListPageContent = () => {
   const services = useKibana<AlertEpisodesKibanaServices>().services;
-  const { rulesLocators } = useAlertingLocators();
+  const { rulesLocators, episodesLocators } = useAlertingLocators();
   const queryClient = useQueryClient();
+  const additionalDataSource = useAdditionalEpisodesDataSource();
   const alertsCapability = useService(UserCapabilities).canWrite('alerts')
     ? EPISODE_ACTIONS_PRIVILEGE.all
     : EPISODE_ACTIONS_PRIVILEGE.read;
@@ -382,6 +384,7 @@ const AlertEpisodesListPageContent = () => {
           expressions: services.expressions,
           spaces: services.spaces,
           queryClient,
+          additionalDataSource,
           getDiscoverHref: ({ episodeIsoTimestamp, ruleId }) =>
             getDiscoverHrefForRuleAndEpisodeTimestamp({
               share: services.share,
@@ -395,7 +398,16 @@ const AlertEpisodesListPageContent = () => {
         }),
         alertsCapability
       ),
-    [services, queryClient, rulesCache, alertsCapability]
+    [services, queryClient, additionalDataSource, rulesCache, alertsCapability]
+  );
+
+  const getRuleDetailsHref = useCallback(
+    (ruleId: string) => rulesLocators.getRedirectUrl({ ruleId }),
+    [rulesLocators]
+  );
+  const getEpisodeDetailsHref = useCallback(
+    (episodeId: string) => episodesLocators.getRedirectUrl({ episodeId }),
+    [episodesLocators]
   );
 
   const renderDocumentView = useCallback<RenderDocumentViewCallback>(
@@ -415,6 +427,8 @@ const AlertEpisodesListPageContent = () => {
           groupHash={hit.flattened.group_hash as string | undefined}
           onClose={closeFlyout}
           actions={episodeActions}
+          getRuleDetailsHref={getRuleDetailsHref}
+          getEpisodeDetailsHref={getEpisodeDetailsHref}
           services={{
             data: services.data,
             http: services.http,
@@ -428,26 +442,40 @@ const AlertEpisodesListPageContent = () => {
         />
       );
     },
-    [closeFlyout, episodeActions, services]
+    [closeFlyout, episodeActions, getEpisodeDetailsHref, getRuleDetailsHref, services]
   );
 
   const rowAdditionalLeadingControls: RowControlColumn[] = useMemo(
     () =>
       episodeActions.map((action) => ({
         id: action.id,
-        isAvailable: ({ record }: RowControlRowProps) =>
-          episodeSupportsActions(dataTableRecordToEpisode(record)) &&
-          action.isCompatible({ episodes: [dataTableRecordToEpisode(record)] }),
+        isAvailable: ({ record }: RowControlRowProps) => {
+          const episodes = [dataTableRecordToEpisode(record)];
+          return action.showWhenDisabled?.({ episodes }) || action.isCompatible({ episodes });
+        },
         render: (Control, { record }) => {
           const episodes = [dataTableRecordToEpisode(record)];
-          return (
+          const compatible = action.isCompatible({ episodes });
+          const disabled = !compatible;
+          const control = (
             <Control
               iconType={action.iconType}
               label={action.displayName}
+              disabled={disabled}
               onClick={() => action.execute({ episodes, onSuccess: invalidateEpisodeQueries })}
-              tooltipContent={action.displayName}
+              tooltipContent={disabled ? undefined : action.displayName}
             />
           );
+          if (disabled && action.disabledTooltip) {
+            return (
+              <EuiToolTip content={action.disabledTooltip}>
+                <span tabIndex={0} css={{ display: 'contents' }}>
+                  {control}
+                </span>
+              </EuiToolTip>
+            );
+          }
+          return control;
         },
       })),
     [episodeActions, invalidateEpisodeQueries]
@@ -479,14 +507,10 @@ const AlertEpisodesListPageContent = () => {
 
   const manageRulesHref = rulesLocators.useUrl({});
 
-  const getRuleDetailsHref = useCallback(
-    (ruleId: string) => rulesLocators.getRedirectUrl({ ruleId }),
-    [rulesLocators]
-  );
-
   const externalCustomRenderers = useMemo<CustomCellRenderer>(
     () => ({
       'episode.status': (props) => <EpisodeStatusCell {...props} />,
+      duration: (props) => <EpisodeDurationCell {...props} />,
       severity: (props) => <EpisodeSeverityCell {...props} />,
       tags: (props) => <EpisodeTagsCell {...props} />,
       rule_tags: (props) => (
@@ -600,7 +624,7 @@ const AlertEpisodesListPageContent = () => {
                   </span>
                 </EuiScreenReaderOnly>
                 {!dataView ? (
-                  <EuiLoadingSpinner />
+                  <EuiLoadingSpinner data-test-subj="alertingV2EpisodesListTable-loading" />
                 ) : (
                   <UnifiedDataTable
                     ariaLabelledBy="alertingEpisodesTableAriaLabel"
@@ -652,7 +676,6 @@ const AlertEpisodesListPageContent = () => {
       {ruleIdToView ? (
         <RuleSummaryFlyoutContainer
           ruleId={ruleIdToView}
-          type="overlay"
           onClose={closeRuleFlyout}
           onEdit={(rule) => {
             setRuleIdToView(null);

@@ -79,6 +79,15 @@ export const registerUpdateWorkerRoute = ({
                   }),
                 },
               });
+            case 'invalid':
+              return response.badRequest({
+                body: {
+                  message: i18n.translate('xpack.alertzero.workerSettingsInvalidErrorMessage', {
+                    defaultMessage: 'Invalid settings for worker "{workerId}": {details}',
+                    values: { details: result.message, workerId },
+                  }),
+                },
+              });
             case 'conflict':
               return response.conflict({
                 body: {
