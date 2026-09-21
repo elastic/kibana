@@ -353,6 +353,8 @@ export interface CasesTelemetry {
         manually: number;
         automatic: number;
       };
+      extractObservablesDefaultOn: number;
+      extractObservablesDefaultOff: number;
       customFields: CustomFieldsTelemetry;
     };
     sec: CustomFieldsSolutionTelemetry;
