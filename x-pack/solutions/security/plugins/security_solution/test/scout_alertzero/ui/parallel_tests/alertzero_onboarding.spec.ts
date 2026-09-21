@@ -87,5 +87,39 @@ spaceTest.describe(
         await expect(page.testSubj.locator('alertZeroOnboardingDisabledPage')).not.toBeVisible();
       }
     );
+    spaceTest(
+      'disable removes the installed watch workflows and lands back on the S0 CTA',
+      async ({ page, kbnClient, scoutSpace }) => {
+        // Enable first so there is something to remove; the route is idempotent.
+        await kbnClient.request({
+          method: 'POST',
+          path: `/s/${scoutSpace.id}/internal/alertzero/onboarding/enable`,
+          headers: INTERNAL_HEADERS,
+          body: {},
+        });
+        const deleted = await kbnClient.request({
+          method: 'DELETE',
+          path: `/s/${scoutSpace.id}/internal/alertzero/onboarding/enable`,
+          headers: INTERNAL_HEADERS,
+        });
+        expect(deleted.status).toBe(200);
+        // Real uninstall evidence: enable installs the watch workflows with
+        // workflowIdSuffix=spaceId, and disable must name the same suffixed
+        // instances — an uninstall without the suffix removes nothing and the
+        // workers keep running in a space whose UI says disabled.
+        const workers = await kbnClient.request({
+          method: 'GET',
+          path: `/s/${scoutSpace.id}/internal/alertzero/workers`,
+          headers: INTERNAL_HEADERS,
+        });
+        expect(workers.status).toBe(200);
+        const body = workers.data as { workers?: unknown[] } | unknown[];
+        const workersList = Array.isArray(body) ? body : body.workers ?? [];
+        expect(workersList).toHaveLength(0);
+        // The setting source of truth reads false again, so the gate is back on S0.
+        await page.gotoApp('alertzero');
+        await expect(page.testSubj.locator('alertZeroOnboardingDisabledPage')).toBeVisible();
+      }
+    );
   }
 );
