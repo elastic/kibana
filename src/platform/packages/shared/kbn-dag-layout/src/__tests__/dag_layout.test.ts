@@ -1056,3 +1056,63 @@ describe('dagLayout — layout invariants', () => {
     }
   });
 });
+
+/**
+ * Cycle D — `lanePlacements` coordinate space.
+ *
+ * All existing `reservedLanes` tests pass an empty `compoundGroups` array, so
+ * the path where `layoutCompoundGroup` returns group-hosted lane placements has
+ * zero coverage. This test is the first to pass a non-empty `compoundGroups`
+ * with a reserved lane whose owner lives inside the group.
+ *
+ * Defect: `layoutCompoundGroup` applies `(shiftX, shiftY)` (padding offset) to
+ * inner nodes and edges, but returns `lanePlacements` un-shifted in group-local
+ * coordinates. `dagLayout` then pushes these group-relative placements directly
+ * into `reservedLanePlacements` alongside root-absolute root-hosted placements,
+ * producing a mixed coordinate space.
+ *
+ * Fix: translate placements by `(shiftX, shiftY)` alongside `shiftedInnerNodes`
+ * in `layoutCompoundGroup`, then translate again by the group's outer absolute
+ * position when finalising inner nodes in `dagLayout`.
+ */
+describe('dagLayout — lanePlacements coordinate space (Cycle D)', () => {
+  it('group-hosted lane placement is root-absolute, consistent with the lane node position', () => {
+    // Topology (TB):
+    //   outer graph: single compound group node 'g'
+    //   group 'g' body: 'step' (spine) → 'fallback' (reserved lane, boundary edge)
+    //
+    // The key: compoundPadding.left = 32. layoutCompoundGroup applies shiftX =
+    // padLeft - minX = 32 to ALL inner nodes, but currently does NOT apply it to
+    // lanePlacements. So placement.crossStart stays at fallback.x_group_local (350),
+    // while fallback.x_absolute is 350 + 32 = 382. The diff equals padLeft.
+    const PAD_LEFT = 32;
+    const { nodes: laid, reservedLanePlacements } = dagLayout(
+      [node('g')],
+      [],
+      [
+        {
+          id: 'g',
+          innerNodes: [node('step'), node('fallback')],
+          innerEdges: [edge('e', 'step', 'fallback')], // boundary: owner→lane head
+        } satisfies DagCompoundGroup,
+      ],
+      {
+        direction: 'TB',
+        compoundPadding: { top: 0, right: 0, bottom: 0, left: PAD_LEFT },
+        reservedLanes: [{ nodeIds: ['fallback'], depth: 0, ownerId: 'step' }],
+      }
+    );
+
+    const fallbackNode = laid.find((n) => n.id === 'fallback');
+    if (!fallbackNode) throw new Error('fallback node not found');
+
+    expect(reservedLanePlacements).toHaveLength(1);
+    const placement = reservedLanePlacements[0];
+
+    // In TB layout the cross axis is x. The placement's crossStart must equal
+    // the lane node's absolute x (root-absolute). Without the fix, crossStart
+    // is group-local (no padding shift applied), so it is PAD_LEFT smaller than
+    // fallback.x.
+    expect(placement.crossStart).toBeCloseTo(fallbackNode.x, 0);
+  });
+});

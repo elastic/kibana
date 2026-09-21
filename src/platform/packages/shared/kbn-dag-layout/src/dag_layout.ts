@@ -74,12 +74,27 @@ function layoutCompoundGroup(
     points: translateEdgePoints(e.points, shiftX, shiftY),
   }));
 
+  // Apply the same (shiftX, shiftY) that repositions inner nodes to lane
+  // placements, so they stay in the same padded-group-local coordinate space.
+  // dagLayout will later translate them further to root-absolute when finalising
+  // inner nodes (adding the group's outer absolute position).
+  const isLR = direction === 'LR';
+  const mainShift = isLR ? shiftX : shiftY;
+  const crossShift = isLR ? shiftY : shiftX;
+  const shiftedLanePlacements = lanePlacements.map((p) => ({
+    ...p,
+    mainStart: p.mainStart + mainShift,
+    mainEnd: p.mainEnd + mainShift,
+    crossStart: p.crossStart + crossShift,
+    crossEnd: p.crossEnd + crossShift,
+  }));
+
   return {
     layoutedInnerNodes: shifted,
     innerEdges: shiftedInnerEdges,
     groupWidth: maxX - minX + padLeft + padRight,
     groupHeight: maxY - minY + padTop + padBottom,
-    lanePlacements,
+    lanePlacements: shiftedLanePlacements,
   };
 }
 
@@ -166,6 +181,12 @@ export function dagLayout(
     string,
     { layoutedInnerNodes: DagPositionedNode[]; innerEdges: DagPositionedEdge[] }
   >();
+  // Store group lane placements keyed by group id — they are still in
+  // padded-group-local space at this point (layoutCompoundGroup applied shiftX/shiftY
+  // but not the group's outer absolute position, which isn't known until after the
+  // outer layout runs). They are translated and pushed into allLanePlacements in the
+  // finalisation loop below, alongside the inner-node absolute translation.
+  const groupLanePlacementsById = new Map<string, DagReservedLanePlacement[]>();
   const allLanePlacements: DagReservedLanePlacement[] = [];
 
   // Index input nodes by id for O(1) lookups in the group-layout loop.
@@ -215,7 +236,7 @@ export function dagLayout(
       layoutedInnerNodes: r.layoutedInnerNodes,
       innerEdges: r.innerEdges,
     });
-    allLanePlacements.push(...r.lanePlacements);
+    groupLanePlacementsById.set(group.id, r.lanePlacements);
   }
 
   // Run the outer graph layout, using computed sizes for compound nodes.
@@ -272,6 +293,7 @@ export function dagLayout(
   const finalNodes: DagPositionedNode[] = [...outerLayout.nodes];
   const finalEdges: DagPositionedEdge[] = [...outerLayout.edges];
 
+  const isLRLayout = direction === 'LR';
   for (const [groupId, inner] of groupInnerById) {
     const groupAbs = getGroupAbsolutePosition(groupId);
     finalNodes.push(
@@ -287,6 +309,20 @@ export function dagLayout(
         points: translateEdgePoints(e.points, groupAbs.x, groupAbs.y),
       }))
     );
+    // Translate group-local lane placements to root-absolute by adding the
+    // group's outer absolute position (groupAbs is already root-absolute for
+    // nested groups because getGroupAbsolutePosition recurses up the tree).
+    const groupMainOffset = isLRLayout ? groupAbs.x : groupAbs.y;
+    const groupCrossOffset = isLRLayout ? groupAbs.y : groupAbs.x;
+    for (const p of groupLanePlacementsById.get(groupId) ?? []) {
+      allLanePlacements.push({
+        ...p,
+        mainStart: p.mainStart + groupMainOffset,
+        mainEnd: p.mainEnd + groupMainOffset,
+        crossStart: p.crossStart + groupCrossOffset,
+        crossEnd: p.crossEnd + groupCrossOffset,
+      });
+    }
   }
 
   return { nodes: finalNodes, edges: finalEdges, reservedLanePlacements: allLanePlacements };
