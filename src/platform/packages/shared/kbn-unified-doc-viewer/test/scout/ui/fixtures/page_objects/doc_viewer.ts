@@ -395,25 +395,24 @@ export class DocViewer {
   /**
    * Opens the cell popover for a field's name cell, revealing the cell-level
    * actions — unlike {@link openFieldDescription}, which opens the field's
-   * description. The expand button only mounts once the cell is hovered and
-   * focused, hence the hover and click before it.
+   * description. The expand button belongs to the enclosing grid cell and only
+   * mounts while that cell is hovered, so it is resolved from there rather than
+   * from the name element nested inside it.
    */
   async expandFieldNameCell(fieldName: string) {
     await this.openTab('doc_view_table');
 
     const flyout = this.page.testSubj.locator('docViewerFlyout');
     const nameCell = flyout.locator(`[data-test-subj="tableDocViewRow-${fieldName}-name"]`);
-    const expandButton = flyout.locator('[data-test-subj="euiDataGridCellExpandButton"]');
+    const gridCell = nameCell.locator('xpath=ancestor::*[@data-gridcell-column-id][1]');
 
     await nameCell.waitFor({ state: 'visible' });
     await nameCell.evaluate((el) => {
       el.scrollIntoView({ block: 'center', inline: 'nearest' });
     });
-    await nameCell.hover();
-    await nameCell.click();
 
-    await expandButton.waitFor({ state: 'visible' });
-    await expandButton.click();
+    await gridCell.hover();
+    await gridCell.locator('[data-test-subj="euiDataGridCellExpandButton"]').click();
 
     await this.page.testSubj.locator('euiDataGridExpansionPopover').waitFor({ state: 'visible' });
   }
