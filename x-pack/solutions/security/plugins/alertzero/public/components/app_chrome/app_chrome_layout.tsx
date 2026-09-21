@@ -39,10 +39,11 @@ export const AppChromeLayout: React.FC<AppChromeLayoutProps> = ({ children }) =>
   const { pathname } = useLocation();
 
   const overflow = matchesRoute(pathname, CHROME_SCROLLED_ROUTES) ? 'visible' : 'auto';
+  const hideAppHeading = matchesRoute(pathname, CHROME_SCROLLED_ROUTES);
 
   return (
     <>
-      <AppHeaderView title="AlertZero" spacing="compact" />
+      {hideAppHeading ? null : <AppHeaderView title="AlertZero" spacing="compact" />}
       <div
         css={css`
           display: flex;
