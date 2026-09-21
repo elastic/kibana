@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
+import type { RuleUpgradeCustomizationCounts } from '../../../../../rule_management/model/prebuilt_rule_upgrade';
 import {
   FORCE_UPGRADE_TO_TARGET_MODAL_CANCEL,
   FORCE_UPGRADE_TO_TARGET_MODAL_CONFIRM,
@@ -14,9 +15,7 @@ import {
   ForceUpgradeToTargetModalBody,
 } from './translations';
 
-export interface ForceUpgradeToTargetModalProps {
-  total: number;
-  customizedCount: number;
+export interface ForceUpgradeToTargetModalProps extends RuleUpgradeCustomizationCounts {
   dataTestSubj: string;
   onConfirm: () => void;
   onCancel: () => void;
@@ -25,11 +24,12 @@ export interface ForceUpgradeToTargetModalProps {
 /**
  * Danger-styled single-confirm-action modal warning that force-upgrading to the
  * Elastic version will permanently discard customizations on `customizedCount`
- * of the `total` rules in scope.
+ * of the `total` rules in scope and apply any rule type changes.
  */
 export const ForceUpgradeToTargetModal = ({
   total,
   customizedCount,
+  ruleTypeChangeCount,
   dataTestSubj,
   onConfirm,
   onCancel,
@@ -39,7 +39,7 @@ export const ForceUpgradeToTargetModal = ({
   return (
     <EuiConfirmModal
       aria-labelledby={modalTitleId}
-      title={FORCE_UPGRADE_TO_TARGET_MODAL_TITLE}
+      title={FORCE_UPGRADE_TO_TARGET_MODAL_TITLE(total)}
       titleProps={{ id: modalTitleId }}
       onCancel={onCancel}
       onConfirm={onConfirm}
@@ -49,9 +49,11 @@ export const ForceUpgradeToTargetModal = ({
       defaultFocusedButton="cancel"
       data-test-subj={dataTestSubj}
     >
-      <p>
-        <ForceUpgradeToTargetModalBody total={total} customizedCount={customizedCount} />
-      </p>
+      <ForceUpgradeToTargetModalBody
+        total={total}
+        customizedCount={customizedCount}
+        ruleTypeChangeCount={ruleTypeChangeCount}
+      />
     </EuiConfirmModal>
   );
 };

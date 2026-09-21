@@ -10,6 +10,9 @@ import {
   RuleCustomizationStatus,
   type RuleResponse,
   type RuleUpgradeInfoForReview,
+  ThreeWayDiffConflict,
+  ThreeWayDiffOutcome,
+  ThreeWayMergeOutcome,
 } from '../../../../common/api/detection_engine';
 import { TestProviders } from '../../../common/mock';
 import { usePrebuiltRulesUpgrade } from './use_prebuilt_rules_upgrade';
@@ -360,14 +363,40 @@ describe('usePrebuiltRulesUpgrade', () => {
   });
 
   describe('customization counts', () => {
-    it('requests the isCustomized aggregation exactly once per render pass', () => {
-      renderHook(() => usePrebuiltRulesUpgrade({}), {
+    it('requests the isCustomized aggregation exactly once per render pass when opted in', () => {
+      renderHook(() => usePrebuiltRulesUpgrade({ withCustomizationCounts: true }), {
         wrapper: TestProviders,
       });
 
       expect(mockUsePrebuiltRulesUpgradeReview).toHaveBeenCalledTimes(1);
       expect(mockUsePrebuiltRulesUpgradeReview).toHaveBeenCalledWith(
         expect.objectContaining({ aggregations: { counts: ['isCustomized'] } }),
+        expect.anything()
+      );
+    });
+
+    it('requests no aggregation by default', () => {
+      renderHook(() => usePrebuiltRulesUpgrade({}), {
+        wrapper: TestProviders,
+      });
+
+      expect(mockUsePrebuiltRulesUpgradeReview).toHaveBeenCalledWith(
+        expect.objectContaining({ aggregations: undefined }),
+        expect.anything()
+      );
+    });
+
+    it('requests no aggregation when prebuilt rules customization is disabled even if opted in', () => {
+      mockUsePrebuiltRulesCustomizationStatus.mockReturnValue({
+        isRulesCustomizationEnabled: false,
+      });
+
+      renderHook(() => usePrebuiltRulesUpgrade({ withCustomizationCounts: true }), {
+        wrapper: TestProviders,
+      });
+
+      expect(mockUsePrebuiltRulesUpgradeReview).toHaveBeenCalledWith(
+        expect.objectContaining({ aggregations: undefined }),
         expect.anything()
       );
     });
@@ -448,7 +477,7 @@ describe('usePrebuiltRulesUpgrade', () => {
 
       expect(
         result.current.getSelectedRulesCustomizationCounts(['rule-a', 'rule-b', 'rule-c'])
-      ).toEqual({ total: 3, customizedCount: 1 });
+      ).toEqual({ total: 3, customizedCount: 1, ruleTypeChangeCount: 0 });
     });
 
     it('excludes stale ids from the selected total rather than counting them as non-customized', () => {
@@ -477,6 +506,7 @@ describe('usePrebuiltRulesUpgrade', () => {
       expect(result.current.getSelectedRulesCustomizationCounts(['rule-a', 'ghost-rule'])).toEqual({
         total: 1,
         customizedCount: 1,
+        ruleTypeChangeCount: 0,
       });
     });
 
@@ -498,6 +528,45 @@ describe('usePrebuiltRulesUpgrade', () => {
       expect(mutateAsync).not.toHaveBeenCalled();
     });
 
+    it('counts selected rules whose Elastic version changes the rule type', () => {
+      mockUsePrebuiltRulesUpgradeReview.mockReturnValue(
+        buildReviewResult([
+          createRuleUpgradeInfoMock({
+            rule_id: 'rule-a',
+            revision: 1,
+            targetVersion: 1,
+            diffOverrides: {
+              num_fields_with_updates: 1,
+              fields: {
+                type: {
+                  base_version: 'query',
+                  current_version: 'query',
+                  target_version: 'esql',
+                  merged_version: 'esql',
+                  diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
+                  merge_outcome: ThreeWayMergeOutcome.Target,
+                  has_base_version: true,
+                  has_update: true,
+                  conflict: ThreeWayDiffConflict.NONE,
+                },
+              },
+            },
+          }),
+          createRuleUpgradeInfoMock({ rule_id: 'rule-b', revision: 1, targetVersion: 1 }),
+        ])
+      );
+
+      const { result } = renderHook(() => usePrebuiltRulesUpgrade({}), {
+        wrapper: TestProviders,
+      });
+
+      expect(result.current.getSelectedRulesCustomizationCounts(['rule-a', 'rule-b'])).toEqual({
+        total: 2,
+        customizedCount: 0,
+        ruleTypeChangeCount: 1,
+      });
+    });
+
     it('counts a non-external rule toward total but not toward customizedCount', () => {
       mockUsePrebuiltRulesUpgradeReview.mockReturnValue(
         buildReviewResult([
@@ -517,6 +586,7 @@ describe('usePrebuiltRulesUpgrade', () => {
       expect(result.current.getSelectedRulesCustomizationCounts(['rule-a'])).toEqual({
         total: 1,
         customizedCount: 0,
+        ruleTypeChangeCount: 0,
       });
     });
 
@@ -534,9 +604,10 @@ describe('usePrebuiltRulesUpgrade', () => {
 
       expect(
         Object.keys(result.current.getSelectedRulesCustomizationCounts(['rule-a'])).sort()
-      ).toEqual(['customizedCount', 'total']);
+      ).toEqual(['customizedCount', 'ruleTypeChangeCount', 'total']);
       expect(Object.keys(result.current.allRulesCustomizationCounts ?? {}).sort()).toEqual([
         'customizedCount',
+        'ruleTypeChangeCount',
         'total',
       ]);
     });
@@ -574,11 +645,17 @@ function createRuleUpgradeInfoMock({
   revision,
   targetVersion,
   currentRuleOverrides,
+  diffOverrides,
 }: {
   rule_id: string;
   revision: number;
   targetVersion: number;
   currentRuleOverrides?: Partial<RuleResponse>;
+  // `fields` is a per-rule-type union, so a cross-type change (e.g. query -> esql) is only
+  // representable loosely here.
+  diffOverrides?: Partial<Omit<RuleUpgradeInfoForReview['diff'], 'fields'>> & {
+    fields?: Record<string, unknown>;
+  };
 }): RuleUpgradeInfoForReview {
   return {
     id: `${ruleId}-so-id`,
@@ -592,7 +669,8 @@ function createRuleUpgradeInfoMock({
       num_fields_with_conflicts: 0,
       num_fields_with_non_solvable_conflicts: 0,
       fields: {},
-    },
+      ...diffOverrides,
+    } as RuleUpgradeInfoForReview['diff'],
     has_base_version: true,
   };
 }

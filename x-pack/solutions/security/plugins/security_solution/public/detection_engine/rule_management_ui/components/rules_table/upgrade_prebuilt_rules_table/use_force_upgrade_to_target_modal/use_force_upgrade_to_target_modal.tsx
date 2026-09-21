@@ -23,9 +23,9 @@ interface UseForceUpgradeToTargetModalArgs {
 
 /**
  * Independent per-invocation confirmation gate for force-upgrading a rule set to the
- * Elastic (TARGET) version. Skips the modal entirely when the target set contains no
- * customized rules; otherwise shows a danger-styled confirmation naming both counts and
- * resolves only once the user confirms or cancels.
+ * Elastic (TARGET) version. Skips the modal entirely when the target set is known to contain
+ * neither customized rules nor rule type changes; otherwise shows a danger-styled confirmation
+ * naming the counts and resolves only once the user confirms or cancels.
  *
  * Holds no module-level or shared state, so instantiate once per invocation scope and
  * confirming/cancelling one instance can never resolve or dismiss another.
@@ -43,7 +43,7 @@ export function useForceUpgradeToTargetModal({
 
   const confirmForceUpgradeToTarget = useCallback(
     async (counts: RuleUpgradeCustomizationCounts) => {
-      if (counts.customizedCount === 0) {
+      if (counts.customizedCount === 0 && counts.ruleTypeChangeCount === 0) {
         return true;
       }
 
@@ -59,6 +59,7 @@ export function useForceUpgradeToTargetModal({
       <ForceUpgradeToTargetModal
         total={selectedCounts.total}
         customizedCount={selectedCounts.customizedCount}
+        ruleTypeChangeCount={selectedCounts.ruleTypeChangeCount}
         dataTestSubj={dataTestSubj}
         onConfirm={handleConfirm}
         onCancel={cancel}

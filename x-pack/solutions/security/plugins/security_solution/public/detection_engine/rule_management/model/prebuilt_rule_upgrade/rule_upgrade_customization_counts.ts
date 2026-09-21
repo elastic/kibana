@@ -11,4 +11,9 @@
 export interface RuleUpgradeCustomizationCounts {
   total: number;
   customizedCount: number;
+  /**
+   * Number of rules whose Elastic version changes the rule type. `undefined` when the scope is
+   * not loaded locally (the "All" scope), in which case type changes must be assumed possible.
+   */
+  ruleTypeChangeCount: number | undefined;
 }

@@ -13,7 +13,10 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine';
 import { ThreeWayDiffConflict } from '../../../../../../common/api/detection_engine';
-import type { RuleUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade';
+import type {
+  RuleUpgradeCustomizationCounts,
+  RuleUpgradeState,
+} from '../../../../rule_management/model/prebuilt_rule_upgrade';
 import { UpgradePrebuiltRulesTableButtons } from './upgrade_prebuilt_rules_table_buttons';
 import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_table_context';
 import { usePrebuiltRulesCustomizationStatus } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_customization_status';
@@ -49,7 +52,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
       const upgradeRulesToTarget = jest.fn();
       const getSelectedRulesCustomizationCounts = jest
         .fn()
-        .mockReturnValue({ total: 2, customizedCount: 1 });
+        .mockReturnValue({ total: 2, customizedCount: 1, ruleTypeChangeCount: 0 });
       const selectedRules = [
         createRuleUpgradeStateMock({ ruleId: 'rule-customized', isCustomized: true }),
         createRuleUpgradeStateMock({ ruleId: 'rule-plain', isCustomized: false }),
@@ -80,7 +83,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
         upgradeRulesToTarget,
         getSelectedRulesCustomizationCounts: jest
           .fn()
-          .mockReturnValue({ total: 2, customizedCount: 1 }),
+          .mockReturnValue({ total: 2, customizedCount: 1, ruleTypeChangeCount: 0 }),
       });
       renderButtons(selectedRules);
 
@@ -105,18 +108,51 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
       mockContext({
         getSelectedRulesCustomizationCounts: jest
           .fn()
-          .mockReturnValue({ total: 2, customizedCount: 1 }),
+          .mockReturnValue({ total: 2, customizedCount: 1, ruleTypeChangeCount: 0 }),
       });
       renderButtons(selectedRules);
 
       await openSelectedRulesToTargetAction(user);
 
       const modal = await screen.findByTestId('forceUpgradeSelectedRulesToTargetConfirmModal');
-      expect(modal).toHaveTextContent('rules with changes that will be overwritten');
+      expect(modal).toHaveTextContent('changes that will be overwritten');
       expect(modal).toHaveTextContent('2');
       expect(modal).toHaveTextContent('1');
+      expect(modal).not.toHaveTextContent('rule type change');
       expect(modal).not.toHaveTextContent('rule-customized');
       expect(modal).not.toHaveTextContent('rule-plain');
+    });
+
+    it('shows the modal with a rule type change warning for an uncustomized selection whose Elastic version changes the rule type', async () => {
+      const user = userEvent.setup();
+      const upgradeRulesToTarget = jest.fn();
+      const selectedRules = [
+        createRuleUpgradeStateMock({ ruleId: 'rule-1' }),
+        createRuleUpgradeStateMock({ ruleId: 'rule-2' }),
+      ];
+
+      mockContext({
+        upgradeRulesToTarget,
+        getSelectedRulesCustomizationCounts: jest
+          .fn()
+          .mockReturnValue({ total: 2, customizedCount: 0, ruleTypeChangeCount: 1 }),
+      });
+      renderButtons(selectedRules);
+
+      await openSelectedRulesToTargetAction(user);
+
+      const modal = await screen.findByTestId('forceUpgradeSelectedRulesToTargetConfirmModal');
+      const warning = within(modal).getByTestId('forceUpgradeToTargetModalRuleTypeChangeWarning');
+      expect(warning).toHaveTextContent('1 of 2 has a rule type change');
+      expect(warning).toHaveTextContent('review your actions and exceptions');
+      expect(modal).not.toHaveTextContent('changes that will be overwritten');
+      expect(upgradeRulesToTarget).not.toHaveBeenCalled();
+
+      await user.click(within(modal).getByTestId('confirmModalConfirmButton'));
+
+      await waitFor(() => {
+        expect(upgradeRulesToTarget).toHaveBeenCalledWith(['rule-1', 'rule-2']);
+      });
     });
 
     it('does not display the modal before the dropdown action is confirmed', () => {
@@ -125,7 +161,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
       mockContext({
         getSelectedRulesCustomizationCounts: jest
           .fn()
-          .mockReturnValue({ total: 1, customizedCount: 0 }),
+          .mockReturnValue({ total: 1, customizedCount: 0, ruleTypeChangeCount: 0 }),
       });
 
       renderButtons(selectedRules);
@@ -148,7 +184,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
         upgradeRulesToTarget,
         getSelectedRulesCustomizationCounts: jest
           .fn()
-          .mockReturnValue({ total: 3, customizedCount: 0 }),
+          .mockReturnValue({ total: 3, customizedCount: 0, ruleTypeChangeCount: 0 }),
       });
       renderButtons(selectedRules);
 
@@ -175,7 +211,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
         upgradeRulesToTarget,
         getSelectedRulesCustomizationCounts: jest
           .fn()
-          .mockReturnValue({ total: 2, customizedCount: 2 }),
+          .mockReturnValue({ total: 2, customizedCount: 2, ruleTypeChangeCount: 0 }),
       });
       renderButtons(selectedRules);
 
@@ -211,7 +247,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
         upgradeRulesToTarget,
         getSelectedRulesCustomizationCounts: jest
           .fn()
-          .mockReturnValue({ total: 2, customizedCount: 2 }),
+          .mockReturnValue({ total: 2, customizedCount: 2, ruleTypeChangeCount: 0 }),
       });
       renderButtons(selectedRules);
 
@@ -337,7 +373,11 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
       mockContext({
         upgradeAllRulesToTarget,
         upgradeRulesToTarget,
-        allRulesCustomizationCounts: { total: 12, customizedCount: 4 },
+        allRulesCustomizationCounts: {
+          total: 12,
+          customizedCount: 4,
+          ruleTypeChangeCount: undefined,
+        },
       });
       renderButtons([]);
 
@@ -345,7 +385,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
       const modal = await screen.findByTestId('forceUpgradeAllRulesToTargetConfirmModal');
       expect(modal).toHaveTextContent('12');
       expect(modal).toHaveTextContent('4');
-      expect(modal).toHaveTextContent('rules with changes that will be overwritten');
+      expect(modal).toHaveTextContent('changes that will be overwritten');
       await user.click(within(modal).getByTestId('confirmModalConfirmButton'));
 
       await waitFor(() => {
@@ -355,25 +395,35 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
       expect(upgradeRulesToTarget).not.toHaveBeenCalled();
     });
 
-    it('a zero-customized target set upgrades immediately with no modal', async () => {
+    it('still confirms a zero-customized target set because rule type changes cannot be ruled out for the whole set', async () => {
       const user = userEvent.setup();
       const upgradeAllRulesToTarget = jest.fn();
 
       mockContext({
         upgradeAllRulesToTarget,
-        allRulesCustomizationCounts: { total: 9, customizedCount: 0 },
+        allRulesCustomizationCounts: {
+          total: 9,
+          customizedCount: 0,
+          ruleTypeChangeCount: undefined,
+        },
       });
       renderButtons([]);
 
       await openAllRulesToTargetAction(user);
 
+      const modal = await screen.findByTestId('forceUpgradeAllRulesToTargetConfirmModal');
+      const warning = within(modal).getByTestId('forceUpgradeToTargetModalRuleTypeChangeWarning');
+      expect(warning).toHaveTextContent('changes the rule type will be updated as well');
+      expect(warning).toHaveTextContent('review your actions and exceptions');
+      expect(modal).not.toHaveTextContent('changes that will be overwritten');
+      expect(upgradeAllRulesToTarget).not.toHaveBeenCalled();
+
+      await user.click(within(modal).getByTestId('confirmModalConfirmButton'));
+
       await waitFor(() => {
         expect(upgradeAllRulesToTarget).toHaveBeenCalledTimes(1);
       });
       expect(upgradeAllRulesToTarget).toHaveBeenCalledWith();
-      expect(
-        screen.queryByTestId('forceUpgradeAllRulesToTargetConfirmModal')
-      ).not.toBeInTheDocument();
     });
 
     it('cancelling the confirmation modal does not upgrade rules', async () => {
@@ -382,7 +432,11 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
 
       mockContext({
         upgradeAllRulesToTarget,
-        allRulesCustomizationCounts: { total: 5, customizedCount: 5 },
+        allRulesCustomizationCounts: {
+          total: 5,
+          customizedCount: 5,
+          ruleTypeChangeCount: undefined,
+        },
       });
       renderButtons([]);
 
@@ -535,8 +589,12 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
         upgradeRulesToTarget,
         getSelectedRulesCustomizationCounts: jest
           .fn()
-          .mockReturnValue({ total: 1, customizedCount: 1 }),
-        allRulesCustomizationCounts: { total: 12, customizedCount: 4 },
+          .mockReturnValue({ total: 1, customizedCount: 1, ruleTypeChangeCount: 0 }),
+        allRulesCustomizationCounts: {
+          total: 12,
+          customizedCount: 4,
+          ruleTypeChangeCount: undefined,
+        },
       });
       renderButtons(selectedRules);
 
@@ -567,8 +625,12 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
         upgradeRulesToTarget,
         getSelectedRulesCustomizationCounts: jest
           .fn()
-          .mockReturnValue({ total: 1, customizedCount: 1 }),
-        allRulesCustomizationCounts: { total: 12, customizedCount: 4 },
+          .mockReturnValue({ total: 1, customizedCount: 1, ruleTypeChangeCount: 0 }),
+        allRulesCustomizationCounts: {
+          total: 12,
+          customizedCount: 4,
+          ruleTypeChangeCount: undefined,
+        },
       });
       renderButtons(selectedRules);
 
@@ -607,7 +669,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
         upgradeRulesToTarget,
         getSelectedRulesCustomizationCounts: jest
           .fn()
-          .mockReturnValue({ total: 1, customizedCount: 1 }),
+          .mockReturnValue({ total: 1, customizedCount: 1, ruleTypeChangeCount: 0 }),
       });
       renderButtons(selectedRules);
 
@@ -645,8 +707,12 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
         upgradeRulesToTarget,
         getSelectedRulesCustomizationCounts: jest
           .fn()
-          .mockReturnValue({ total: 1, customizedCount: 1 }),
-        allRulesCustomizationCounts: { total: 12, customizedCount: 4 },
+          .mockReturnValue({ total: 1, customizedCount: 1, ruleTypeChangeCount: 0 }),
+        allRulesCustomizationCounts: {
+          total: 12,
+          customizedCount: 4,
+          ruleTypeChangeCount: undefined,
+        },
       });
       renderButtons(selectedRules);
 
@@ -685,8 +751,12 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
         upgradeRulesToTarget,
         getSelectedRulesCustomizationCounts: jest
           .fn()
-          .mockReturnValue({ total: 2, customizedCount: 1 }),
-        allRulesCustomizationCounts: { total: 12, customizedCount: 4 },
+          .mockReturnValue({ total: 2, customizedCount: 1, ruleTypeChangeCount: 0 }),
+        allRulesCustomizationCounts: {
+          total: 12,
+          customizedCount: 4,
+          ruleTypeChangeCount: undefined,
+        },
       });
       renderButtons(selectedRules);
 
@@ -720,8 +790,12 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
         upgradeRulesToTarget,
         getSelectedRulesCustomizationCounts: jest
           .fn()
-          .mockReturnValue({ total: 1, customizedCount: 0 }),
-        allRulesCustomizationCounts: { total: 3, customizedCount: 3 },
+          .mockReturnValue({ total: 1, customizedCount: 0, ruleTypeChangeCount: 0 }),
+        allRulesCustomizationCounts: {
+          total: 3,
+          customizedCount: 3,
+          ruleTypeChangeCount: undefined,
+        },
       });
       renderButtons(selectedRules);
 
@@ -769,18 +843,20 @@ function mockContext({
   loadingRules = [],
   isRefetching = false,
   isInitializingPrebuiltRulesPackage = false,
-  allRulesCustomizationCounts = { total: 0, customizedCount: 0 },
+  allRulesCustomizationCounts = { total: 0, customizedCount: 0, ruleTypeChangeCount: undefined },
   upgradeRules = jest.fn(),
   upgradeAllRules = jest.fn(),
   upgradeRulesToTarget = jest.fn(),
   upgradeAllRulesToTarget = jest.fn(),
-  getSelectedRulesCustomizationCounts = jest.fn().mockReturnValue({ total: 0, customizedCount: 0 }),
+  getSelectedRulesCustomizationCounts = jest
+    .fn()
+    .mockReturnValue({ total: 0, customizedCount: 0, ruleTypeChangeCount: 0 }),
 }: {
   hasRulesToUpgrade?: boolean;
   loadingRules?: string[];
   isRefetching?: boolean;
   isInitializingPrebuiltRulesPackage?: boolean;
-  allRulesCustomizationCounts?: { total: number; customizedCount: number } | null;
+  allRulesCustomizationCounts?: RuleUpgradeCustomizationCounts | null;
   upgradeRules?: jest.Mock;
   upgradeAllRules?: jest.Mock;
   upgradeRulesToTarget?: jest.Mock;

@@ -202,6 +202,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
       customizationStatus: filterOptions.customization_status,
     },
     searchTerm: filterOptions.name,
+    withCustomizationCounts: true,
   });
 
   const actions = useMemo<UpgradePrebuiltRulesTableActions>(

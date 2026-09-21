@@ -76,6 +76,11 @@ export interface UsePrebuiltRulesUpgradeParams {
   filterOptions?: UsePrebuiltRulesUpgradeFilterOptions;
   searchTerm?: string;
   onUpgrade?: () => void;
+  /**
+   * Requests the `isCustomized` facet from the upgrade review so `allRulesCustomizationCounts`
+   * can be derived. Off by default because the facet costs an extra aggregation pass on the server.
+   */
+  withCustomizationCounts?: boolean;
 }
 
 export function usePrebuiltRulesUpgrade({
@@ -84,8 +89,12 @@ export function usePrebuiltRulesUpgrade({
   filterOptions,
   searchTerm,
   onUpgrade,
+  withCustomizationCounts = false,
 }: UsePrebuiltRulesUpgradeParams) {
   const { isRulesCustomizationEnabled } = usePrebuiltRulesCustomizationStatus();
+  // Force-upgrading to the Elastic version is only offered when customization is enabled, so the
+  // facet is pointless otherwise.
+  const shouldFetchCustomizationCounts = withCustomizationCounts && isRulesCustomizationEnabled;
   const isInitializingPrebuiltRulesPackage = useIsInitializingPrebuiltRulesPackage();
   const [loadingRules, setLoadingRules] = useState<RuleSignatureId[]>([]);
   const { telemetry } = useKibana().services;
@@ -125,7 +134,7 @@ export function usePrebuiltRulesUpgrade({
         ruleIds: filterOptions?.ruleIds,
       },
       searchTerm,
-      aggregations: { counts: ['isCustomized'] },
+      aggregations: shouldFetchCustomizationCounts ? { counts: ['isCustomized'] } : undefined,
     },
     {
       refetchInterval: REVIEW_PREBUILT_RULES_UPGRADE_REFRESH_INTERVAL,
@@ -334,6 +343,9 @@ export function usePrebuiltRulesUpgrade({
         customizedCount: selectedRuleUpgradeStates.filter((state) =>
           isRuleCustomized(state.current_rule)
         ).length,
+        ruleTypeChangeCount: selectedRuleUpgradeStates.filter(
+          (state) => state.diff.fields.type?.has_update ?? false
+        ).length,
       };
     },
     [rulesUpgradeState]
@@ -347,6 +359,9 @@ export function usePrebuiltRulesUpgrade({
         ? {
             total: upgradeReviewResponse.total,
             customizedCount: upgradeReviewResponse.counts?.isCustomized?.true ?? 0,
+            // Rule type changes are a current-vs-target diff, not a stored attribute, so they cannot
+            // be counted for the whole filtered set without a dry run.
+            ruleTypeChangeCount: undefined,
           }
         : null,
     [upgradeReviewResponse]
