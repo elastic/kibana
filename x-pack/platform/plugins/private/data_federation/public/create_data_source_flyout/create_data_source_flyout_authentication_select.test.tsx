@@ -61,24 +61,24 @@ describe('CreateDataSourceFlyoutAuthenticationSelect', () => {
     const { getByText, getAllByText } = renderSelect();
 
     // A single occurrence of the method name means the dropdown is not expanded.
-    expect(getAllByText(authenticationStrings.federatedIdentityLabel())).toHaveLength(1);
-    expect(getByText(authenticationStrings.recommendedBadge())).toBeInTheDocument();
+    expect(getAllByText(authenticationStrings.federatedIdentityLabel)).toHaveLength(1);
+    expect(getByText(authenticationStrings.recommendedBadge)).toBeInTheDocument();
   });
 
   it.each([
     [
       'federated_identity' as const,
-      authenticationStrings.federatedIdentityDescription.s3(),
+      authenticationStrings.federatedIdentityDescription.s3,
       docLinks.links.dataFederation.federatedIdentity,
     ],
     [
       'access_and_secret_keys' as const,
-      authenticationStrings.storedCredentialsDescription.s3(),
+      authenticationStrings.storedCredentialsDescription.s3,
       docLinks.links.dataFederation.staticCredentials,
     ],
     [
       'anonymous' as const,
-      authenticationStrings.anonymousDescription.s3(),
+      authenticationStrings.anonymousDescription.s3,
       docLinks.links.dataFederation.quickstart,
     ],
   ])('describes %s and links to its documentation', (authenticationMode, description, href) => {
@@ -97,14 +97,14 @@ describe('CreateDataSourceFlyoutAuthenticationSelect', () => {
 
     for (const [name, description] of [
       [
-        authenticationStrings.federatedIdentityLabel(),
-        authenticationStrings.federatedIdentityDescription.s3(),
+        authenticationStrings.federatedIdentityLabel,
+        authenticationStrings.federatedIdentityDescription.s3,
       ],
       [
-        authenticationStrings.accessAndSecretKeysLabel(),
-        authenticationStrings.storedCredentialsDescription.s3(),
+        authenticationStrings.accessAndSecretKeysLabel,
+        authenticationStrings.storedCredentialsDescription.s3,
       ],
-      [authenticationStrings.anonymousLabel(), authenticationStrings.anonymousDescription.s3()],
+      [authenticationStrings.anonymousLabel, authenticationStrings.anonymousDescription.s3],
     ]) {
       expect(
         getByRole('option', { name: new RegExp(`${name}.*${description}`) })
@@ -116,7 +116,7 @@ describe('CreateDataSourceFlyoutAuthenticationSelect', () => {
     const { getByText, onAuthenticationModeChange } = renderSelect();
 
     await expandDropdown(3);
-    fireEvent.click(getByText(authenticationStrings.anonymousLabel()));
+    fireEvent.click(getByText(authenticationStrings.anonymousLabel));
 
     expect(onAuthenticationModeChange).toHaveBeenCalledWith('anonymous');
   });
@@ -129,7 +129,7 @@ describe('CreateDataSourceFlyoutAuthenticationSelect', () => {
 
     await expandDropdown(2);
 
-    expect(queryByText(authenticationStrings.federatedIdentityLabel())).not.toBeInTheDocument();
-    expect(queryByText(authenticationStrings.recommendedBadge())).not.toBeInTheDocument();
+    expect(queryByText(authenticationStrings.federatedIdentityLabel)).not.toBeInTheDocument();
+    expect(queryByText(authenticationStrings.recommendedBadge)).not.toBeInTheDocument();
   });
 });

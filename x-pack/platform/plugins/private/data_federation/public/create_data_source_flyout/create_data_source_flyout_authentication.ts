@@ -67,8 +67,8 @@ export const getCreateDataSourceAuthenticationOptions = (
 ): AuthOption[] => {
   const federatedIdentity: AuthOption = {
     value: 'federated_identity',
-    text: authenticationStrings.federatedIdentityLabel(),
-    description: authenticationStrings.federatedIdentityDescription[dataSourceType](),
+    text: authenticationStrings.federatedIdentityLabel,
+    description: authenticationStrings.federatedIdentityDescription[dataSourceType],
     recommended: true,
   };
 
@@ -77,19 +77,19 @@ export const getCreateDataSourceAuthenticationOptions = (
     dataSourceType === 'azure'
       ? {
           value: 'credentials',
-          text: authenticationStrings.azureCredentialsLabel(),
-          description: authenticationStrings.storedCredentialsDescription.azure(),
+          text: authenticationStrings.azureCredentialsLabel,
+          description: authenticationStrings.storedCredentialsDescription.azure,
         }
       : {
           value: 'access_and_secret_keys',
-          text: authenticationStrings.accessAndSecretKeysLabel(),
-          description: authenticationStrings.storedCredentialsDescription[dataSourceType](),
+          text: authenticationStrings.accessAndSecretKeysLabel,
+          description: authenticationStrings.storedCredentialsDescription[dataSourceType],
         };
 
   const anonymous: AuthOption = {
     value: 'anonymous',
-    text: authenticationStrings.anonymousLabel(),
-    description: authenticationStrings.anonymousDescription[dataSourceType](),
+    text: authenticationStrings.anonymousLabel,
+    description: authenticationStrings.anonymousDescription[dataSourceType],
   };
 
   return enableFederatedIdentity

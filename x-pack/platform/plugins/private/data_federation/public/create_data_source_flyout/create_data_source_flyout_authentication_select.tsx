@@ -39,7 +39,7 @@ const withRecommendedBadge = (label: ReactNode, recommended?: boolean): ReactNod
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>{label}</EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiBadge color="hollow">{authenticationStrings.recommendedBadge()}</EuiBadge>
+        <EuiBadge color="hollow">{authenticationStrings.recommendedBadge}</EuiBadge>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -74,11 +74,11 @@ export function CreateDataSourceFlyoutAuthenticationSelect({
     <>
       <EuiSpacer size="m" />
       <EuiTitle size="xs">
-        <h3>{authenticationStrings.title()}</h3>
+        <h3>{authenticationStrings.title}</h3>
       </EuiTitle>
       <EuiSpacer size="s" />
       <EuiFormRow
-        label={authenticationStrings.preferredMethodLabel()}
+        label={authenticationStrings.preferredMethodLabel}
         fullWidth
         helpText={
           selectedDescription && (
@@ -90,7 +90,7 @@ export function CreateDataSourceFlyoutAuthenticationSelect({
                 external
                 data-test-subj={`createDataSourceFlyoutAuthenticationLearnMore-${authenticationMode}`}
               >
-                {authenticationStrings.learnMore()}
+                {authenticationStrings.learnMore}
               </EuiLink>
             </>
           )
