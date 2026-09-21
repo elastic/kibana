@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import type {
   AttachmentAddedEvent,
-  TimelineEvent,
+  ConversationEvent,
   UserMessageEvent,
 } from '@kbn/agent-builder-common';
 import { TimelineEventType } from '@kbn/agent-builder-common';
@@ -28,10 +28,10 @@ const labels = {
   }),
 };
 
-const isJournalUserMessage = (event: TimelineEvent): event is UserMessageEvent =>
+const isJournalUserMessage = (event: ConversationEvent): event is UserMessageEvent =>
   event.type === TimelineEventType.userMessage && event.execution_id === undefined;
 
-const isAttachmentAdded = (event: TimelineEvent): event is AttachmentAddedEvent =>
+const isAttachmentAdded = (event: ConversationEvent): event is AttachmentAddedEvent =>
   event.type === TimelineEventType.attachmentAdded;
 
 const flattenVersionedAttachment = (
@@ -54,42 +54,6 @@ const flattenVersionedAttachment = (
       version: latestVersion.version,
       versionCount: attachment.versions.length,
     },
-  };
-};
-
-const TEXT_ATTACHMENT_TYPE = 'text';
-const ATTACK_DISCOVERY_VERDICT_TYPE = 'security.attack_discovery.verdict';
-
-const getTextContent = (attachment: UnknownAttachment): string | undefined => {
-  const { content } = attachment.data as { content?: unknown };
-  return typeof content === 'string' ? content : undefined;
-};
-
-/**
- * Desk-test conversations stored the analysis verdict as a `text` attachment.
- * Re-shape it so the Security verdict renderer can show field chips instead of
- * a raw code block.
- */
-const adaptLegacyAttackDiscoveryText = (attachment: UnknownAttachment): UnknownAttachment => {
-  if (attachment.type !== TEXT_ATTACHMENT_TYPE) {
-    return attachment;
-  }
-
-  const content = getTextContent(attachment);
-  if (content == null || !/^# Analysis verdict:/i.test(content)) {
-    return attachment;
-  }
-
-  const verdictMatch = content.match(/^# Analysis verdict:\s*(\S+)/i);
-  const summaryMarkdown = content.replace(/^# Analysis verdict:[^\n]*\n*/i, '').trim();
-
-  return {
-    ...attachment,
-    data: {
-      summary_markdown: summaryMarkdown,
-      verdict: verdictMatch?.[1]?.toLowerCase(),
-    },
-    type: ATTACK_DISCOVERY_VERDICT_TYPE,
   };
 };
 
@@ -181,26 +145,18 @@ export const ConversationJournal: React.FC = () => {
 
         return [];
       })}
-      {leftoverAttachments.map((attachment) => {
-        const adapted = adaptLegacyAttackDiscoveryText(attachment);
-        const canRenderAdapted =
-          adapted.type === attachment.type ||
-          attachmentsService.getAttachmentUiDefinition?.(adapted.type) != null;
-        const resolved = canRenderAdapted ? adapted : attachment;
-
-        return (
-          <EuiFlexItem grow={false} key={attachment.id}>
-            <div data-test-subj="agentBuilderJournalAttachment">
-              <InlineAttachmentWithActions
-                attachment={resolved}
-                attachmentsService={attachmentsService}
-                conversationId={conversationId}
-                isSidebar={false}
-              />
-            </div>
-          </EuiFlexItem>
-        );
-      })}
+      {leftoverAttachments.map((attachment) => (
+        <EuiFlexItem grow={false} key={attachment.id}>
+          <div data-test-subj="agentBuilderJournalAttachment">
+            <InlineAttachmentWithActions
+              attachment={attachment}
+              attachmentsService={attachmentsService}
+              conversationId={conversationId}
+              isSidebar={false}
+            />
+          </div>
+        </EuiFlexItem>
+      ))}
     </EuiFlexGroup>
   );
 };

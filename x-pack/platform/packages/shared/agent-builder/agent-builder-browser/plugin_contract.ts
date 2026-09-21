@@ -40,13 +40,6 @@ export interface EmbeddableConversationProps {
   newConversation?: boolean;
 
   /**
-   * Conversation id to restore when the embeddable mounts.
-   * Takes precedence over the last conversation stored for `sessionTag`.
-   * Invalid or missing ids fall through to a new conversation.
-   */
-  conversationId?: string;
-
-  /**
    * Session tag for conversation context. Used to maintain separate conversation
    * histories for different parts of the application.
    *

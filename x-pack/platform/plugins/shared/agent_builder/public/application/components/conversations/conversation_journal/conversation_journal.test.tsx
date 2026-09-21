@@ -152,45 +152,7 @@ describe('ConversationJournal', () => {
     expect(screen.getByTestId('inline-attack-discovery')).toBeInTheDocument();
   });
 
-  it('renders leftover analysis-verdict text attachments through the verdict renderer', () => {
-    useAgentBuilderServicesMock.mockReturnValue({
-      attachmentsService: {
-        getAttachmentUiDefinition: (type: string) =>
-          type === 'security.attack_discovery.verdict' ? {} : undefined,
-      },
-    } as ReturnType<typeof useAgentBuilderServices>);
-    useConversationMock.mockReturnValue({
-      conversation: makeConversation({
-        attachments: [
-          {
-            current_version: 1,
-            id: 'analysis-verdict',
-            type: 'text',
-            versions: [
-              {
-                content_hash: 'h-verdict',
-                created_at: '2026-09-18T00:03:00.000Z',
-                data: {
-                  content:
-                    '# Analysis verdict: inconclusive\n\nOneNote from {{ source.ip 77.75.230.128 }}.',
-                },
-                version: 1,
-              },
-            ],
-          },
-        ],
-        events: [],
-      }),
-    } as ReturnType<typeof useConversation>);
-
-    render(<ConversationJournal />);
-
-    expect(screen.getByTestId('inline-analysis-verdict')).toHaveTextContent(
-      'security.attack_discovery.verdict:inconclusive:OneNote from {{ source.ip 77.75.230.128 }}.'
-    );
-  });
-
-  it('leaves leftover text attachments unchanged when they are not analysis verdicts', () => {
+  it('renders leftover text attachments when there are no attachment_added events', () => {
     useConversationMock.mockReturnValue({
       conversation: makeConversation({
         attachments: [
