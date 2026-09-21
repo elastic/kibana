@@ -211,7 +211,10 @@ function buildEvalsYaml({
       const includeEisModelsEnv = includeEisModels
         ? `          EVAL_INCLUDE_EIS_MODELS: '1'`
         : null;
-      const serverConfigSet = suite.ci?.serverConfigSet ?? suite.serverConfigSet;
+      // Step-level env beats build-level env, so carry an explicit build-level override through
+      // instead of replacing it with the suite's declared defaults.
+      const serverConfigSet =
+        process.env.EVAL_SERVER_CONFIG_SET || suite.ci?.serverConfigSet || suite.serverConfigSet;
       const evalServerConfigSetEnv = serverConfigSet
         ? `          EVAL_SERVER_CONFIG_SET: ${toBuildkiteYamlString(serverConfigSet)}`
         : null;
