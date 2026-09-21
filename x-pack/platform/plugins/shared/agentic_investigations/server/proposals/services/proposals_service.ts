@@ -43,6 +43,7 @@ import type {
   ProposalUser,
   ProposalWithMetadata,
 } from '../../../common/proposals/proposal';
+import type { ReviseProposalRequest } from '../../../common/proposals/revision';
 import { isExpired } from '../../../common/proposals/proposal';
 import type { ProposalDocument, ProposalsStorageClient } from '../storage/proposals_storage';
 import { toSortRanks } from '../storage/sort_ranks';
@@ -159,6 +160,10 @@ export class ProposalsService {
       workflowExecutionId: blankToUndefined(params.workflowExecutionId),
       createdAt: new Date().toISOString(),
       createdBy: user,
+      // A fresh proposal is a single-member revision chain rooted at itself.
+      // `clone()` retries deliberately do not touch it: a retry is not a revision.
+      rootProposalId: id,
+      revision: 1,
     };
 
     await this.deps.storage.index({ id, document, op_type: 'create' });
@@ -417,6 +422,15 @@ export class ProposalsService {
     const { id } = params;
     const { proposal, seqNo, primaryTerm } = await this.load(id, spaceId);
 
+    // The status vocabulary admits `superseded`, but it is only correct alongside
+    // the successor that replaced the row, which only `revise()` establishes.
+    if (params.status === 'superseded') {
+      throw new ProposalConflictError(
+        `Proposal [${id}] cannot be moved to superseded: only revise() establishes that ` +
+          `status, together with the successor it points at`
+      );
+    }
+
     // Re-writing the same terminal status is allowed, so a settled proposal
     // stays idempotent: the workflow's failure handler writes `failed` onto a
     // record the loop may have already failed, and refusing that would replace
@@ -542,6 +556,252 @@ export class ProposalsService {
     await this.writeDocument(id, superseded, { seqNo, primaryTerm });
 
     return cloneId;
+  }
+
+  /**
+   * Appends a revision carrying the caller's overrides and retires the addressed
+   * proposal.
+   *
+   * `createdAt`, `expiresAt` and `workflowExecutionId` are inherited rather than
+   * restarted — the deadline and the gate execution belong to the chain, not to
+   * any single revision — mirroring `clone()`'s inheritance of the same fields.
+   */
+  async revise(
+    { id, comment, actionInput, impact, confidence }: ReviseProposalParams,
+    spaceId: string
+  ): Promise<{ proposalId: string; revision: number }> {
+    const { proposal, seqNo, primaryTerm } = await this.load(id, spaceId);
+
+    // Only the live revision may be revised: anything decided, settled or already
+    // superseded is not the head, and revising it would fork the chain.
+    if (proposal.decision !== undefined) {
+      throw new ProposalConflictError(
+        `Proposal [${id}] was already decided as ${proposal.decision} and cannot be revised`
+      );
+    }
+    if (proposal.status !== 'pending') {
+      throw new ProposalConflictError(
+        `Proposal [${id}] has settled as ${proposal.status} and cannot be revised`
+      );
+    }
+    if (proposal.supersededBy !== undefined) {
+      // Overwriting the pointer would fork the chain: two rows would claim to
+      // be the latest revision, with nothing to say which one actually is.
+      throw new ProposalConflictError(
+        `Proposal [${id}] was already superseded by ${proposal.supersededBy}`
+      );
+    }
+    // Mirrors `assertDecidable`, for the same lag: a deadline can pass before the
+    // workflow settles the record, so a revision cut here would be born expired.
+    if (isExpired(proposal)) {
+      throw new ProposalExpiredError(id);
+    }
+
+    const { id: _id, ...original } = proposal;
+
+    // The override is merged over the predecessor's input and the merged object is
+    // what gets validated: the action's contract describes the whole input, so
+    // changing one key must not silently drop the other required ones.
+    const mergedActionInput =
+      actionInput === undefined
+        ? original.actionInput
+        : { ...original.actionInput, ...actionInput };
+
+    if (mergedActionInput !== undefined && original.actionWorkflowId !== undefined) {
+      await this.resolveAndValidateAction(original.actionWorkflowId, mergedActionInput, spaceId);
+    }
+
+    // Resolved once, so the enums and the ranks derived from them cannot drift.
+    const nextImpact = impact ?? original.impact;
+    const nextConfidence = confidence ?? original.confidence;
+
+    const revisionId = uuidv4();
+    const rootProposalId = original.rootProposalId ?? id;
+    // `?? 1` covers records created before this field existed. Bound to a `number`
+    // local so the spread below does not widen it back to `number | undefined`.
+    const revision: number = (original.revision ?? 1) + 1;
+
+    const document: ProposalDocument = {
+      ...original,
+      rootProposalId,
+      supersedes: id,
+      revision,
+      supersededBy: undefined,
+      status: 'pending',
+      decision: undefined,
+      decidedBy: undefined,
+      decidedAt: undefined,
+      dismissReason: undefined,
+      rationale: undefined,
+      executionError: undefined,
+      ...(comment !== undefined ? { comment } : {}),
+      ...(mergedActionInput !== undefined ? { actionInput: mergedActionInput } : {}),
+      impact: nextImpact,
+      confidence: nextConfidence,
+      // Recomputed from the final enums rather than inherited with the rest of
+      // the document: the queue sorts on these mirrors, so a revision that
+      // changes the rating but keeps the predecessor's rank would show one
+      // impact and queue as another.
+      ...toSortRanks({ impact: nextImpact, confidence: nextConfidence }),
+    };
+
+    // The new revision is created before the predecessor is marked,
+    // deliberately — the same ordering `clone()` uses and for the same
+    // reason: if the second write loses its race, the queue shows both
+    // records rather than a pointer to a revision that does not exist.
+    await this.deps.storage.index({ id: revisionId, document, op_type: 'create' });
+
+    const superseded: ProposalDocument = {
+      ...original,
+      status: 'superseded',
+      supersededBy: revisionId,
+    };
+
+    try {
+      await this.writeDocument(id, superseded, { seqNo, primaryTerm });
+    } catch (error) {
+      // The create above already landed and nothing points at it. A concurrent
+      // revision that won the predecessor's sequence-number race would
+      // otherwise leave this row live and unreachable, giving the chain two
+      // heads that `getLatestRevision` and the queue could pick between
+      // nondeterministically. Only a conflict is compensated for: it is the
+      // one failure that proves the predecessor write did not apply, whereas
+      // any other error leaves its outcome unknown, and deleting this row
+      // could orphan the predecessor's pointer instead.
+      if (error instanceof ProposalConflictError) {
+        await this.retireOrphanRevision(revisionId);
+      }
+      throw error;
+    }
+
+    return { proposalId: revisionId, revision };
+  }
+
+  /**
+   * Removes a revision whose link write lost its race. Best-effort: the
+   * original failure is what the caller has to see, so a cleanup failure is
+   * logged rather than replacing it.
+   */
+  private async retireOrphanRevision(revisionId: string): Promise<void> {
+    try {
+      await this.deps.storage.delete({ id: revisionId });
+    } catch (error) {
+      this.deps.logger.warn(
+        `Failed to retire orphaned revision [${revisionId}] after a lost race: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  }
+
+  /**
+   * Resolves the live revision of the chain a given proposal belongs to,
+   * regardless of which revision's id was passed in. Used by the gate
+   * workflow so a decision is never written against a stale, already
+   * superseded pointer once a revision has landed while the gate was parked.
+   *
+   * A query on `rootProposalId` plus `supersededBy` absent is O(1) — it does
+   * not walk `supersedes` pointers hop by hop, so the cost does not grow with
+   * the length of the chain.
+   */
+  async getLatestRevision(
+    id: string,
+    spaceId: string
+  ): Promise<{
+    proposalId: string;
+    revision: number;
+    status: ProposalStatus;
+    decision: ProposalDecision | undefined;
+    /**
+     * The live revision's action input, so a caller that resolves the head
+     * before executing can run the parameters the analyst actually approved.
+     * A revision that corrected `actionInput` would otherwise leave the
+     * original's stale parameters in whatever the caller captured earlier.
+     */
+    actionInput: Record<string, unknown> | undefined;
+  }> {
+    const { proposal } = await this.load(id, spaceId);
+
+    if (proposal.rootProposalId === undefined) {
+      // A record written before `rootProposalId` existed: the term query below
+      // cannot find it, so following the pointers is the only way to reach the
+      // live head. Without this the fallback answers with the stale member it
+      // was asked about — exactly the id a parked gate holds across an
+      // upgrade, and the row `update()` then refuses to settle.
+      return this.walkSupersededChain(proposal, spaceId);
+    }
+
+    const rootProposalId = proposal.rootProposalId;
+
+    const response = await this.deps.storage.search({
+      track_total_hits: false,
+      size: 1,
+      query: {
+        bool: {
+          filter: [{ term: { rootProposalId } }, { term: { spaceId } }],
+          must_not: [{ exists: { field: 'supersededBy' } }],
+        },
+      },
+    });
+
+    const hit = response.hits.hits[0];
+    if (!hit?._source || hit._id === undefined) {
+      // Should be unreachable: every chain has exactly one live revision by
+      // construction. Falls back to the proposal that was asked about rather
+      // than throwing, so a storage inconsistency degrades to "trust the
+      // caller's id" instead of failing the gate outright.
+      return {
+        proposalId: proposal.id,
+        revision: proposal.revision ?? 1,
+        status: proposal.status,
+        decision: proposal.decision,
+        actionInput: proposal.actionInput,
+      };
+    }
+
+    const source = hit._source as ProposalDocument;
+    return {
+      proposalId: hit._id,
+      revision: source.revision ?? 1,
+      status: source.status,
+      decision: source.decision,
+      actionInput: source.actionInput,
+    };
+  }
+
+  /**
+   * Follows `supersededBy` hop by hop, for chains that predate
+   * `rootProposalId`. Bounded rather than open-ended: a corrupt chain that
+   * points in a circle would otherwise spin forever, and stopping after a
+   * finite number of hops degrades to the last member reached — the same
+   * "answer with what we have" the root query's fallback gives.
+   */
+  private async walkSupersededChain(
+    start: StoredProposalRecord,
+    spaceId: string
+  ): Promise<{
+    proposalId: string;
+    revision: number;
+    status: ProposalStatus;
+    decision: ProposalDecision | undefined;
+    actionInput: Record<string, unknown> | undefined;
+  }> {
+    let current = start;
+
+    for (let hop = 0; hop < MAX_LEGACY_CHAIN_HOPS; hop++) {
+      if (current.supersededBy === undefined) {
+        break;
+      }
+      current = (await this.load(current.supersededBy, spaceId)).proposal;
+    }
+
+    return {
+      proposalId: current.id,
+      revision: current.revision ?? 1,
+      status: current.status,
+      decision: current.decision,
+      actionInput: current.actionInput,
+    };
   }
 
   /**
@@ -836,6 +1096,10 @@ export interface CloneProposalParams {
   executionError?: string;
 }
 
+export interface ReviseProposalParams extends ReviseProposalRequest {
+  id: string;
+}
+
 type QueryFilterList = Array<Record<string, unknown>>;
 
 /**
@@ -896,11 +1160,25 @@ const toProposal = (id: string, document: ProposalDocument): Proposal =>
   stripRanks({ id, ...document });
 
 /**
+ * Ceiling on the legacy pointer walk in `getLatestRevision`. A chain longer
+ * than this is a corruption or an attack, and either way the walk has to end.
+ */
+const MAX_LEGACY_CHAIN_HOPS = 100;
+
+/**
  * A status that has settled. `pending` and `executing` are the only two a
  * proposal can still be moved out of.
  */
 const isTerminal = (status: ProposalStatus): boolean =>
-  status === 'succeeded' || status === 'failed' || status === 'expired' || status === 'no_action';
+  status === 'succeeded' ||
+  status === 'failed' ||
+  status === 'expired' ||
+  status === 'no_action' ||
+  // Undecided, unlike the other four, but equally unable to move: a
+  // superseded proposal is not the live revision anymore, and a caller that
+  // still holds its id (a stale workflow variable, a retried step) must not
+  // be able to resurrect it via update().
+  status === 'superseded';
 
 /**
  * The only legal decision/status pairs. Exhaustive on purpose: the two axes are
@@ -912,7 +1190,7 @@ const isTerminal = (status: ProposalStatus): boolean =>
  * dismissal, or an approval of a proposal that carries nothing to run.
  */
 const VALID_STATUSES: Record<'undecided' | ProposalDecision, readonly ProposalStatus[]> = {
-  undecided: ['pending', 'expired'],
+  undecided: ['pending', 'expired', 'superseded'],
   dismissed: ['no_action'],
   approved: ['no_action', 'executing', 'succeeded', 'failed'],
 };

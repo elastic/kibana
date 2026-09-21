@@ -33,6 +33,8 @@ export const proposalStatusSchema = z.enum([
   'failed',
   'expired',
   'no_action',
+  /** Replaced by a revision, not rejected — distinct from `dismissed`/`no_action`. */
+  'superseded',
 ]);
 export type ProposalStatus = z.infer<typeof proposalStatusSchema>;
 
@@ -72,7 +74,7 @@ export type DismissReason = z.infer<typeof dismissReasonSchema>;
 const MAX_ID_LENGTH = 256;
 const MAX_NAME_LENGTH = 256;
 /** Markdown shown to a human, so it needs room without being unbounded. */
-const MAX_COMMENT_LENGTH = 8192;
+export const MAX_COMMENT_LENGTH = 8192;
 const MAX_RATIONALE_LENGTH = 4096;
 const MAX_ERROR_LENGTH = 4096;
 /** ISO 8601 timestamps; generous enough for any offset notation. */
@@ -80,7 +82,7 @@ const MAX_TIMESTAMP_LENGTH = 64;
 /** An action's input is opaque to us, so cap its breadth rather than its shape. */
 const MAX_ACTION_INPUT_KEYS = 100;
 
-const boundedActionInput = z
+export const boundedActionInput = z
   .record(z.string().max(MAX_NAME_LENGTH), z.unknown())
   .refine((value) => Object.keys(value).length <= MAX_ACTION_INPUT_KEYS, {
     message: `actionInput may not exceed ${MAX_ACTION_INPUT_KEYS} keys`,
@@ -127,10 +129,16 @@ export const proposalSchema = z.object({
   decision: proposalDecisionSchema.optional(),
   /**
    * Set when this proposal was replaced — by a retry after a failed action, or
-   * by a tuned variant. Points at the successor so the queue can show one live
-   * proposal per subject rather than every attempt.
+   * by an analyst-requested revision. Points at the successor so the queue can
+   * show one live proposal per subject rather than every attempt.
    */
   supersededBy: z.string().max(MAX_ID_LENGTH).optional(),
+  /** First proposal in the chain; equal to `id` on the root and never rewritten. */
+  rootProposalId: z.string().max(MAX_ID_LENGTH).optional(),
+  /** Exactly one hop back, where `rootProposalId` is the first hop. Absent on the root. */
+  supersedes: z.string().max(MAX_ID_LENGTH).optional(),
+  /** 1-based position in the chain. Not incremented by `clone()`: a retry is not a revision. */
+  revision: z.number().int().min(1).optional(),
   /** Snapshotted from the triggering context at creation; never re-scored. */
   impact: proposalImpactSchema,
   confidence: proposalConfidenceSchema,
