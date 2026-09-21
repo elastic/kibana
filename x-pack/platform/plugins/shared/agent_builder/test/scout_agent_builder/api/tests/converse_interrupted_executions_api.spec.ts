@@ -122,6 +122,17 @@ apiTest.describe(
     const suiteStartedAt = new Date().toISOString();
 
     apiTest.beforeAll(async ({ requestAuth, samlAuth, log, kbnClient, systemIndicesEsClient }) => {
+      // `system_indices_superuser` does not exist on Cloud serverless (MKI) and cannot be
+      // provisioned there, and every test below needs it.
+      apiTest.skip(
+        !systemIndicesEsClient.isAvailable,
+        'system_indices_superuser does not exist on Cloud serverless (MKI)'
+      );
+      // skip() in beforeAll only skips the tests, not the hook body, so return as well.
+      if (!systemIndicesEsClient.isAvailable) {
+        return;
+      }
+
       adminCredentials = await requestAuth.getApiKeyForAdmin();
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       adminInteractiveCookieHeader = cookieHeader;

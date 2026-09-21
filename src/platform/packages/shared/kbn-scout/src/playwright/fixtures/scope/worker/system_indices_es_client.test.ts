@@ -32,6 +32,7 @@ const createConfig = (overrides: Partial<ScoutTestConfig> = {}) =>
     serverless: false,
     isCloud: false,
     hosts: { elasticsearch: 'http://localhost:9220', kibana: 'http://localhost:5620' },
+    auth: { username: 'elastic', password: 'changeme' },
     ...overrides,
   } as ScoutTestConfig);
 
@@ -82,11 +83,37 @@ describe('systemIndicesEsClient fixture', () => {
     expect(privilegedClient.child).toHaveBeenCalledWith({ headers: SYSTEM_INDICES_HEADERS });
   });
 
-  it('skips provisioning on locally-managed serverless, where @kbn/es bind-mounts the account', async () => {
+  it('provisions with the deployment admin password, not a second credential, when it creates the account', async () => {
     const esClient = createDefaultEsClient();
     const { fixture } = createSystemIndicesEsClientFixture(
       esClient,
-      createConfig({ serverless: true }),
+      createConfig({ isCloud: true, auth: { username: 'elastic', password: 'ech-admin-pw' } }),
+      noopLogger
+    );
+
+    // ECH: the fixture creates the account itself, so it works there. Reusing the deployment's
+    // own admin password keeps the account it leaves behind from being a weaker credential.
+    expect(fixture.isAvailable).toBe(true);
+    await fixture.getClient();
+
+    expect(esClient.security.putUser).toHaveBeenCalledWith(
+      expect.objectContaining({ username: 'system_indices_superuser', password: 'ech-admin-pw' })
+    );
+    expect(createEsClientForTestingMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        authOverride: { username: 'system_indices_superuser', password: 'ech-admin-pw' },
+      })
+    );
+  });
+
+  it('skips provisioning on locally-managed serverless and uses the bind-mounted account password', async () => {
+    const esClient = createDefaultEsClient();
+    const { fixture } = createSystemIndicesEsClientFixture(
+      esClient,
+      createConfig({
+        serverless: true,
+        auth: { username: 'elastic', password: 'not-the-file-realm-password' },
+      }),
       noopLogger
     );
 
@@ -95,7 +122,11 @@ describe('systemIndicesEsClient fixture', () => {
 
     expect(esClient.security.putRole).not.toHaveBeenCalled();
     expect(esClient.security.putUser).not.toHaveBeenCalled();
-    expect(createEsClientForTestingMock).toHaveBeenCalledTimes(1);
+    expect(createEsClientForTestingMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        authOverride: { username: 'system_indices_superuser', password: 'changeme' },
+      })
+    );
   });
 
   it('reports itself unavailable on Cloud serverless and refuses to hand out a client', async () => {

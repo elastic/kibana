@@ -23,10 +23,17 @@ export const SYSTEM_INDICES_HEADERS = {
 
 const SYSTEM_INDICES_SUPERUSER_ROLE = 'system_indices_superuser';
 
-const systemIndicesSuperuser = {
+/**
+ * On serverless the account is bind-mounted by `@kbn/es` with a fixed password, so that is the
+ * one to authenticate with. Everywhere else this fixture creates the account itself, including
+ * on ECH, so it reuses the deployment's own admin password rather than introducing a second,
+ * weaker credential on a cluster that outlives the run. Every worker derives the same value,
+ * which is what keeps concurrent provisioning idempotent.
+ */
+const getSystemIndicesSuperuser = (config: ScoutTestConfig) => ({
   username: SYSTEM_INDICES_SUPERUSER,
-  password: SYSTEM_INDICES_SUPERUSER_PASSWORD,
-};
+  password: config.serverless ? SYSTEM_INDICES_SUPERUSER_PASSWORD : config.auth.password,
+});
 
 export interface SystemIndicesEsClientFixture {
   /**
@@ -51,6 +58,8 @@ const provisionSystemIndicesEsClient = async (
   esClient: EsClient,
   config: ScoutTestConfig
 ): Promise<EsClient> => {
+  const systemIndicesSuperuser = getSystemIndicesSuperuser(config);
+
   if (!config.serverless) {
     await esClient.security.putRole({
       name: SYSTEM_INDICES_SUPERUSER_ROLE,
@@ -105,6 +114,11 @@ export const createSystemIndicesEsClientFixture = (
 
   return {
     fixture,
+    // Closes the client only. The role and account stay behind on purpose: workers share one
+    // cluster, so deleting them here would pull the account out from under a sibling worker
+    // that is still running. For the same reason the password cannot be randomized per worker,
+    // since one worker's `putUser` would rotate the credential out from under another.
+    //
     // The child clients above share the parent's connection pool, so closing the parent
     // releases every one of them.
     teardown: async () => {

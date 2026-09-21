@@ -146,10 +146,26 @@ apiTest('reads a hidden saved object', async ({ systemIndicesEsClient }) => {
 });
 ```
 
-`system_indices_superuser` is a file-realm account that `@kbn/es` bind-mounts into locally-managed
-clusters, so it does not exist on Cloud serverless (MKI) and cannot be provisioned there. Keep suites
-that need it on local targets, or branch on `systemIndicesEsClient.isAvailable`, which is `false`
-there -- `getClient()` throws rather than handing back a client that would fail to authenticate.
+On serverless the account is bind-mounted by `@kbn/es`, so nothing is created. Everywhere else the
+fixture creates the role and account itself, using the deployment's own admin password so that it
+does not add a weaker credential to a cluster that outlives the run. Neither is deleted afterwards:
+workers share a cluster, so a teardown delete would pull the account out from under a sibling worker.
+
+Cloud serverless (MKI) is the one target this cannot work on, because the bind-mounted account is not
+there and cannot be provisioned. `isAvailable` is `false` there and `getClient()` throws, rather than
+handing back a client that would fail to authenticate on first use. Keep suites that need the client
+on local targets, or branch on `isAvailable` and skip:
+
+```ts
+apiTest.beforeAll(async ({ systemIndicesEsClient }) => {
+  apiTest.skip(!systemIndicesEsClient.isAvailable, 'needs system_indices_superuser');
+  // skip() in beforeAll only skips the tests, not the hook body, so return as well.
+  if (!systemIndicesEsClient.isAvailable) {
+    return;
+  }
+  // ...
+});
+```
 
 Synthetic APM / logs / infra data via [`@kbn/synthtrace`](https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-synthtrace) is **not** part of `@kbn/scout`. Use the optional add-on [`@kbn/scout-synthtrace`](../kbn-scout-synthtrace/README.md) and merge its Playwright fixtures where you need `apmSynthtraceEsClient`, `infraSynthtraceEsClient`, or `logsSynthtraceEsClient`. `@kbn/scout-oblt`, `@kbn/scout-search`, and `@kbn/scout-security` do not bundle or re-export it.
 

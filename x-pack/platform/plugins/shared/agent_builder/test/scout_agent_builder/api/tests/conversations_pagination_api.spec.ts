@@ -42,6 +42,17 @@ apiTest.describe(
     let sysEsClient: Client;
 
     apiTest.beforeAll(async ({ kbnClient, asAdmin, esClient, systemIndicesEsClient }) => {
+      // `system_indices_superuser` does not exist on Cloud serverless (MKI) and cannot be
+      // provisioned there, and every test below needs it.
+      apiTest.skip(
+        !systemIndicesEsClient.isAvailable,
+        'system_indices_superuser does not exist on Cloud serverless (MKI)'
+      );
+      // skip() in beforeAll only skips the tests, not the hook body, so return as well.
+      if (!systemIndicesEsClient.isAvailable) {
+        return;
+      }
+
       // Independent setup, parallelized to stay well under the default beforeAll timeout —
       // sequential round trips here can add up to tens of seconds against a slow ES/Kibana.
       const [client] = await Promise.all([
