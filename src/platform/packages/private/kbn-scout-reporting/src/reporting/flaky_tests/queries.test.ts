@@ -521,12 +521,45 @@ describe('fetchTestMetadata', () => {
 });
 
 describe('fetchSampleFailures', () => {
-  it('returns an empty map without a search when there is nothing to sample', async () => {
+  it('returns an empty map without a search when there are no tests', async () => {
     const { client, search } = mockEs([]);
 
     await expect(fetchSampleFailures(client, scope, [], 3)).resolves.toEqual(new Map());
-    await expect(fetchSampleFailures(client, scope, ['t1'], 0)).resolves.toEqual(new Map());
     expect(search).not.toHaveBeenCalled();
+  });
+
+  it('still reads the suite title off one document when no failure samples are wanted', async () => {
+    const { client, search } = mockEs([]);
+    search.mockResolvedValue({
+      aggregations: {
+        by_test: {
+          buckets: [
+            {
+              key: 't1',
+              latest: {
+                hits: {
+                  hits: [
+                    {
+                      _source: {
+                        '@timestamp': '2026-09-02T00:00:00.000Z',
+                        event: { error: { message: 'boom' } },
+                        suite: { title: 'my suite' },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    const samples = await fetchSampleFailures(client, scope, ['t1'], 0);
+
+    expect(samples.get('t1')).toEqual({ suiteTitle: 'my suite', failures: [] });
+    const [request] = search.mock.calls[0];
+    expect(request.aggs.by_test.aggs.latest.top_hits.size).toBe(1);
   });
 
   it('groups the latest attempt failures per test, reads the suite title and skips hits without a message', async () => {

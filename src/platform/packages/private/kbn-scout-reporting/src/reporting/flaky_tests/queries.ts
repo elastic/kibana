@@ -622,7 +622,8 @@ const UNKNOWN_SUITE_TITLE = 'unknown';
  * Most recent failure messages per test. Error messages, like suite titles, are mapped as `text`
  * and cannot be aggregated in ES|QL, so this uses a `terms` + `top_hits` search over attempt-level
  * `test-end` failures instead (attempt failures carry the error for every framework, including
- * Playwright) and reads both off the same documents.
+ * Playwright) and reads both off the same documents. One document is fetched even when no
+ * failure messages are wanted, so the suite title does not depend on `samplesPerTest`.
  */
 export const fetchSampleFailures = async (
   es: ESClient,
@@ -630,9 +631,10 @@ export const fetchSampleFailures = async (
   testIds: readonly string[],
   samplesPerTest: number
 ): Promise<Map<string, TestFailureSamples>> => {
-  if (testIds.length === 0 || samplesPerTest <= 0) {
+  if (testIds.length === 0) {
     return new Map();
   }
+  const failuresPerTest = Math.max(samplesPerTest, 0);
 
   const hits = await searchLatestPerTest<SampleFailureSource>(
     es,
@@ -643,7 +645,7 @@ export const fetchSampleFailures = async (
       { terms: { 'test.id': testIds } },
     ],
     testIds,
-    samplesPerTest,
+    Math.max(failuresPerTest, 1),
     ['@timestamp', 'event.error.message', 'buildkite.build.url', 'suite.title']
   );
 
@@ -654,7 +656,7 @@ export const fetchSampleFailures = async (
       .find((title) => title && title !== UNKNOWN_SUITE_TITLE);
     samples.set(testId, {
       suiteTitle: suiteTitle || undefined,
-      failures: sources.flatMap((source) => {
+      failures: sources.slice(0, failuresPerTest).flatMap((source) => {
         const message = source.event?.error?.message?.trim();
         if (!message) return [];
         return [
