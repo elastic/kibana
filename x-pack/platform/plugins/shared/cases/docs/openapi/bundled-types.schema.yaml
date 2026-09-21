@@ -364,6 +364,11 @@ paths:
                             type: string
                             description: The observable type label.
                             example: My observable type
+                    extractObservables:
+                      type: boolean
+                      description: |
+                        Indicates whether observables are automatically extracted from alerts when they are added to new cases. Defaults to `true`.
+                      example: true
                     owner:
                       $ref: '#/components/schemas/owner'
                     templates:
@@ -549,6 +554,11 @@ paths:
                           type: string
                           description: The observable type label.
                           example: My observable type
+                  extractObservables:
+                    type: boolean
+                    description: |
+                      Indicates whether observables are automatically extracted from alerts when they are added to new cases. Defaults to `true`.
+                    example: true
                   owner:
                     $ref: '#/components/schemas/owner'
                   templates:
@@ -736,6 +746,11 @@ paths:
                           type: string
                           description: The observable type label.
                           example: My observable type
+                  extractObservables:
+                    type: boolean
+                    description: |
+                      Indicates whether observables are automatically extracted from alerts when they are added to new cases. Defaults to `true`.
+                    example: true
                   owner:
                     $ref: '#/components/schemas/owner'
                   templates:
@@ -1227,7 +1242,7 @@ paths:
                 getDefaultCaseResponse:
                   $ref: '#/components/examples/get_case_response'
                 getDefaultObservabilityCaseResponse:
-                  $ref: '#/components/examples/get_case_observability_response'
+                  $ref: ../components/examples/get_case_observability_response.yaml
         '401':
           description: Authorization information is missing or invalid.
           content:
@@ -3406,6 +3421,10 @@ components:
                 enum:
                   - text
                   - toggle
+        extractObservables:
+          type: boolean
+          description: |
+            Indicates whether observables are automatically extracted from alerts when they are added to new cases. When omitted, defaults to `true`.
         owner:
           $ref: '#/components/schemas/owner'
         templates:
@@ -3481,6 +3500,10 @@ components:
                 enum:
                   - text
                   - toggle
+        extractObservables:
+          type: boolean
+          description: |
+            Indicates whether observables are automatically extracted from alerts when they are added to new cases.
         templates:
           $ref: '#/components/schemas/templates'
         version:
@@ -4738,6 +4761,7 @@ components:
               required: false
               type: text
           observableTypes: []
+          extractObservables: true
           owner: cases
           created_at: '2024-07-01T17:07:17.767Z'
           created_by:
@@ -4841,6 +4865,7 @@ components:
             description: A description of the template.
             tags:
               - Template tag 1
+        extractObservables: true
         owner: cases
         created_at: '2024-07-01T17:07:17.767Z'
         created_by:
@@ -4905,6 +4930,7 @@ components:
             label: my-toggle
             required: false
             type: toggle
+        extractObservables: true
         owner: cases
         created_at: '2024-07-01T17:07:17.767Z'
         created_by:
@@ -5133,51 +5159,6 @@ components:
           type: .none
           fields: null
         external_service: null
-    get_case_observability_response:
-      summary: Get case response (Observability). Comments are not included; use the find case comments API. totalComment reflects the actual count.
-      value:
-        description: An Observability case description.
-        owner: observability
-        settings:
-          syncAlerts: false
-          extractObservables: false
-        tags:
-          - observability
-          - tag 1
-        title: Observability case title 1
-        category: null
-        customFields: []
-        observables: []
-        assignees:
-          - uid: u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0
-        connector:
-          id: none
-          type: .none
-          fields: null
-          name: none
-        severity: low
-        status: in-progress
-        duration: null
-        closed_at: null
-        closed_by: null
-        created_at: '2023-11-06T19:29:04.086Z'
-        created_by:
-          username: elastic
-          full_name: null
-          email: null
-        updated_at: '2023-11-06T19:47:55.662Z'
-        updated_by:
-          username: elastic
-          full_name: null
-          email: null
-          profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
-        external_service: null
-        id: c3ff7550-def1-4e90-b6bc-c9969a4a09b1
-        version: WzI0NywyXQ==
-        totalComment: 1
-        totalAlerts: 1
-        totalEvents: 0
-        total_observables: 0
     get_case_alerts_response:
       summary: Retrieves all alerts attached to a case
       value:
