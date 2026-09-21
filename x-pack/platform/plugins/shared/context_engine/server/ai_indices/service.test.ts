@@ -96,7 +96,7 @@ const aiIndexDocument: AiIndexDocument = {
 
 const toHttpItem = (document: AiIndexDocument) => {
   const { space: _space, ...item } = document;
-  return { ...item, memory_enabled: document.memory_enabled ?? false };
+  return { ...item, memory_enabled: document.memory_enabled ?? true };
 };
 
 const storedHit = (
@@ -188,12 +188,12 @@ describe('AiIndexService', () => {
       expect(storageClient.index.mock.calls[0][0]).not.toHaveProperty('op_type');
     });
 
-    it('defaults memory_enabled to false', async () => {
+    it('defaults memory_enabled to true', async () => {
       await service.create('customer_support', DEFAULT_SPACE, properties);
 
       expect(storageClient.index).toHaveBeenCalledWith(
         expect.objectContaining({
-          document: expect.objectContaining({ memory_enabled: false }),
+          document: expect.objectContaining({ memory_enabled: true }),
         })
       );
     });
@@ -790,11 +790,11 @@ describe('AiIndexService', () => {
       );
     });
 
-    it('defaults memory_enabled to false for legacy documents without the field', async () => {
+    it('defaults memory_enabled to true for legacy documents without the field', async () => {
       mockSearchHits(storedHit(aiIndexDocument));
 
       await expect(service.get('customer_support', DEFAULT_SPACE)).resolves.toEqual(
-        expect.objectContaining({ id: 'customer_support', memory_enabled: false })
+        expect.objectContaining({ id: 'customer_support', memory_enabled: true })
       );
     });
 
