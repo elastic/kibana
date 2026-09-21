@@ -394,6 +394,18 @@ describe('AllCasesListGeneric', () => {
     expect(screen.queryByTestId('cases-metrics-stats')).not.toBeInTheDocument();
   });
 
+  it('should force table view when isSelectorView=true even if stored preference is list', async () => {
+    useViewModeMock.mockReturnValue({
+      viewMode: VIEW_TOGGLE_LIST_ID,
+      setViewMode: jest.fn(),
+    });
+
+    renderWithTestingProviders(<AllCasesList isSelectorView={true} />);
+
+    expect(await screen.findByTestId('cases-table')).toBeInTheDocument();
+    expect(screen.queryByTestId('cases-list-view')).not.toBeInTheDocument();
+  });
+
   it('should call onRowClick with no cases and isSelectorView=true when create case is clicked', async () => {
     renderWithTestingProviders(<AllCasesList isSelectorView={true} onRowClick={onRowClick} />);
     await userEvent.click(await screen.findByTestId('cases-table-add-case-filter-bar'));
