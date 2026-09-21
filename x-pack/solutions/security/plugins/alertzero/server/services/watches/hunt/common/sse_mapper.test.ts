@@ -52,6 +52,7 @@ const HIT_TIER1_RESULT = {
   affectedAssets: {
     hosts: [{ name: 'ci-deploy-runner-07', hitCount: 1 }],
     users: [{ name: 'svc-deploy-bot', hitCount: 3 }],
+    services: [{ name: 'ci-deploy-role', hitCount: 2 }],
   },
   perIndex: [
     { index: 'logs-aws.cloudtrail-default', hitCount: 3, required: true },
@@ -195,6 +196,7 @@ describe('buildSseData', () => {
       expect.arrayContaining([
         { field: 'host.name', value: 'ci-deploy-runner-07' },
         { field: 'user.name', value: 'svc-deploy-bot' },
+        { field: 'service.name', value: 'ci-deploy-role' },
       ])
     );
 
@@ -282,7 +284,7 @@ describe('buildSseData', () => {
       timeRange: { from: 'now-24h', to: 'now' },
       counts: { totalHits: 0, returnedHits: 0, affectedHosts: 0, affectedUsers: 0 },
       hits: [],
-      affectedAssets: { hosts: [], users: [] },
+      affectedAssets: { hosts: [], users: [], services: [] },
       perIndex: [],
     });
     huntBehavior.mockResolvedValue({
