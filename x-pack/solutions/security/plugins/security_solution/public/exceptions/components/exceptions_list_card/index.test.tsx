@@ -17,6 +17,9 @@ import { TestProviders } from '../../../common/mock';
 
 jest.mock('../../hooks');
 jest.mock('../../hooks/use_exceptions_list.card');
+jest.mock('../../hooks/use_endpoint_exceptions_capability', () => ({
+  useEndpointExceptionsCapability: jest.fn().mockReturnValue(true),
+}));
 
 const getMockUseExceptionsListCard = () => ({
   listId: 'my-list',
