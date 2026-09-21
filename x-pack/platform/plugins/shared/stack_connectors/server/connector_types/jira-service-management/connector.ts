@@ -15,6 +15,7 @@ import {
   SUB_ACTION,
   CloseAlertParamsSchema,
   CreateAlertParamsSchema,
+  MESSAGE_MAX_LENGTH,
   Response,
 } from '@kbn/connector-schemas/jira-service-management';
 import type {
@@ -24,6 +25,7 @@ import type {
   FailureResponseType,
   Secrets,
 } from '@kbn/connector-schemas/jira-service-management';
+import { truncateMessage as truncateToMaxLength } from '../lib/truncate_message';
 import * as i18n from './translations';
 
 const INTEGRATION_API_BASE_PATH = 'jsm/ops/integration/v2';
@@ -90,7 +92,11 @@ export class JiraServiceManagementConnector extends SubActionConnector<Config, S
       {
         method: 'post',
         url,
-        data: { ...params, ...JiraServiceManagementConnector.createAliasObj(params.alias) },
+        data: {
+          ...params,
+          message: this.truncateMessage(params.message),
+          ...JiraServiceManagementConnector.createAliasObj(params.alias),
+        },
         headers: this.createHeaders(),
         responseSchema: Response,
       },
@@ -108,6 +114,18 @@ export class JiraServiceManagementConnector extends SubActionConnector<Config, S
     const newAlias = JiraServiceManagementConnector.createAlias(alias);
 
     return { alias: newAlias };
+  }
+
+  private truncateMessage(message: string): string {
+    const { originalLength, truncated, value } = truncateToMaxLength(message, MESSAGE_MAX_LENGTH);
+
+    if (truncated) {
+      this.logger.warn(
+        `connector "${this.connector.id}" message length ${originalLength} exceeds ${MESSAGE_MAX_LENGTH} and has been truncated`
+      );
+    }
+
+    return value;
   }
 
   private static createAlias(alias: string) {
