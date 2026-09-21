@@ -26,7 +26,7 @@ const NO_GROW = css`
   flex-grow: 0;
 `;
 
-const MAX_GROUPINGS = 2;
+const MAX_GROUPINGS = 3;
 
 interface Props {
   /** All fields offered in the dropdown (scoped to the current category). */
@@ -118,7 +118,7 @@ export const EntityGroupByControls = ({
       <EuiText size="xs" color="subdued" css={{ padding: '8px 12px' }}>
         <p>
           {i18n.translate('xpack.streams.entityCentricLab.entities.groupBy.help', {
-            defaultMessage: 'Select up to two fields to group by.',
+            defaultMessage: 'Select up to three fields to group by.',
           })}
         </p>
       </EuiText>

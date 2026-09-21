@@ -48,6 +48,20 @@ const NO_GROW = css`
   flex-grow: 0;
 `;
 
+const k8sFilterGroupCss = css`
+  & > .euiFlexItem:not(:first-child) .euiFormControlLayout {
+    margin-left: -1px;
+  }
+  & > .euiFlexItem:not(:first-child) .euiSelect {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+  & > .euiFlexItem:not(:last-child) .euiSelect {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+`;
+
 // Fixed-width column for the in-page Cloud tree so the main content keeps
 // the rest of the row. `flex-shrink: 0` stops the nav collapsing when the
 // grid/list is wide.
@@ -152,11 +166,20 @@ import {
   type GroupByFieldId,
 } from './entity_group_by';
 import {
-  KUBERNETES_CLUSTER_FILTER_ALL,
+  KUBERNETES_FILTER_ALL,
+  KUBERNETES_RESOURCE_TYPE_ALL,
   KubernetesClusterFilter,
-  filterEntitiesByCluster,
+  KubernetesNamespaceFilter,
+  KubernetesNodeFilter,
+  KubernetesResourceTypeFilter,
+  filterEntitiesByResourceType,
+  filterKubernetesEntities,
   getKubernetesClusterNames,
+  getKubernetesNamespaceNames,
+  getKubernetesNodeNames,
+  resourceTypeFilterVisibility,
 } from './kubernetes_cluster_filter';
+import type { KubernetesResourceType } from './kubernetes_cluster_filter';
 import {
   CLOUD_PROVIDER_FILTER_ALL,
   CloudProviderFilter,
@@ -814,7 +837,7 @@ const AllEntitiesViewInner = ({
   // entity query is per-view, not a preference.
   const [activeTagFilters, setActiveTagFilters] = useEntitiesTagFilters();
   const [viewMode, setViewMode] = useEntitiesViewMode();
-  // ElasticOn "Group by" (1–2 fields). Non-ElasticOn modes never surface the
+  // ElasticOn "Group by" (1–3 fields). Non-ElasticOn modes never surface the
   // control, so this stays at the built-in Category → Type default there.
   const [groupBy, setGroupBy] = useEntitiesGroupBy();
 
@@ -848,8 +871,8 @@ const AllEntitiesViewInner = ({
     if (activeGroupByFields.length === 0) return undefined;
 
     // On a category-scoped page, grouping by "Category" is redundant (only
-    // one value). Strip it so the user sees meaningful sub-groups instead of
-    // a single wrapper matching the page title.
+    // one value). Always strip it so the user sees meaningful sub-groups
+    // instead of a single wrapper matching the page title.
     if (categoryScope) {
       const withoutCategory = activeGroupByFields.filter((f) => f.id !== 'category');
       // If Category was the *only* field → flat / ungrouped.
@@ -863,12 +886,63 @@ const AllEntitiesViewInner = ({
   // Kubernetes cluster filter lifted to page level when on the K8s
   // category page so it appears in the toolbar row (the inner card's
   // header is hidden by `hideCategoryHeader`).
-  const showK8sClusterFilter =
+  const showK8sFilters =
     !!categoryScope && categoryScope === 'kubernetes' && isElasticOn;
-  const [k8sClusterFilter, setK8sClusterFilter] = useState<string>(KUBERNETES_CLUSTER_FILTER_ALL);
+  const [k8sResourceType, setK8sResourceType] = useState<KubernetesResourceType>(KUBERNETES_RESOURCE_TYPE_ALL);
+  const [k8sClusterFilter, setK8sClusterFilter] = useState<string>(KUBERNETES_FILTER_ALL);
+  const [k8sNamespaceFilter, setK8sNamespaceFilter] = useState<string>(KUBERNETES_FILTER_ALL);
+  const [k8sNodeFilter, setK8sNodeFilter] = useState<string>(KUBERNETES_FILTER_ALL);
+
+  const k8sFilterVisibility = useMemo(
+    () => resourceTypeFilterVisibility(k8sResourceType),
+    [k8sResourceType]
+  );
+
+  const k8sEntitiesForFilters = useMemo(
+    () => (showK8sFilters ? filterEntitiesByResourceType(scopedEntities, k8sResourceType) : scopedEntities),
+    [showK8sFilters, scopedEntities, k8sResourceType]
+  );
+
   const k8sClusterNames = useMemo(
-    () => (showK8sClusterFilter ? getKubernetesClusterNames(scopedEntities) : []),
-    [showK8sClusterFilter, scopedEntities]
+    () => (showK8sFilters ? getKubernetesClusterNames(scopedEntities) : []),
+    [showK8sFilters, scopedEntities]
+  );
+  const k8sNamespaceNames = useMemo(
+    () => (showK8sFilters && k8sFilterVisibility.showNamespace
+      ? getKubernetesNamespaceNames(k8sEntitiesForFilters, k8sClusterFilter, k8sClusterNames)
+      : []),
+    [showK8sFilters, k8sEntitiesForFilters, k8sClusterFilter, k8sClusterNames, k8sFilterVisibility.showNamespace]
+  );
+  const k8sNodeNames = useMemo(
+    () => (showK8sFilters && k8sFilterVisibility.showNode
+      ? getKubernetesNodeNames(k8sEntitiesForFilters, k8sClusterFilter, k8sClusterNames)
+      : []),
+    [showK8sFilters, k8sEntitiesForFilters, k8sClusterFilter, k8sClusterNames, k8sFilterVisibility.showNode]
+  );
+  const effectiveK8sNamespaceFilter =
+    k8sNamespaceFilter !== KUBERNETES_FILTER_ALL && !k8sNamespaceNames.includes(k8sNamespaceFilter)
+      ? KUBERNETES_FILTER_ALL
+      : k8sNamespaceFilter;
+  const effectiveK8sNodeFilter =
+    k8sNodeFilter !== KUBERNETES_FILTER_ALL && !k8sNodeNames.includes(k8sNodeFilter)
+      ? KUBERNETES_FILTER_ALL
+      : k8sNodeFilter;
+  const handleK8sResourceTypeChange = useCallback(
+    (next: KubernetesResourceType) => {
+      setK8sResourceType(next);
+      setK8sClusterFilter(KUBERNETES_FILTER_ALL);
+      setK8sNamespaceFilter(KUBERNETES_FILTER_ALL);
+      setK8sNodeFilter(KUBERNETES_FILTER_ALL);
+    },
+    []
+  );
+  const handleK8sClusterChange = useCallback(
+    (next: string) => {
+      setK8sClusterFilter(next);
+      setK8sNamespaceFilter(KUBERNETES_FILTER_ALL);
+      setK8sNodeFilter(KUBERNETES_FILTER_ALL);
+    },
+    []
   );
 
   // Cloud provider filter — shown on the Cloud category page in ElasticOn,
@@ -1064,18 +1138,30 @@ const AllEntitiesViewInner = ({
   // When on the K8s category page the cluster filter is lifted to page level.
   // Apply it to the filtered slice so counts, summary, and child views all
   // reflect the selection.
-  // Kubernetes cluster filter is page-level on the K8s category page so
-  // counts, summary, and child views all reflect the selection.
+  // Kubernetes resource-type + cascading filters are page-level on the K8s
+  // category page so counts, summary, and child views all reflect the selection.
+  const filteredEntitiesAfterResourceType = useMemo(
+    () =>
+      showK8sFilters && k8sResourceType !== KUBERNETES_RESOURCE_TYPE_ALL
+        ? filterEntitiesByResourceType(filteredEntitiesBeforeCluster, k8sResourceType)
+        : filteredEntitiesBeforeCluster,
+    [filteredEntitiesBeforeCluster, showK8sFilters, k8sResourceType]
+  );
   const filteredEntitiesAfterCluster = useMemo(
     () =>
-      showK8sClusterFilter && k8sClusterFilter !== KUBERNETES_CLUSTER_FILTER_ALL
-        ? filterEntitiesByCluster(
-            filteredEntitiesBeforeCluster,
+      showK8sFilters &&
+      (k8sClusterFilter !== KUBERNETES_FILTER_ALL ||
+        effectiveK8sNamespaceFilter !== KUBERNETES_FILTER_ALL ||
+        effectiveK8sNodeFilter !== KUBERNETES_FILTER_ALL)
+        ? filterKubernetesEntities(
+            filteredEntitiesAfterResourceType,
             k8sClusterFilter,
+            effectiveK8sNamespaceFilter,
+            effectiveK8sNodeFilter,
             k8sClusterNames
           )
-        : filteredEntitiesBeforeCluster,
-    [filteredEntitiesBeforeCluster, showK8sClusterFilter, k8sClusterFilter, k8sClusterNames]
+        : filteredEntitiesAfterResourceType,
+    [filteredEntitiesAfterResourceType, showK8sFilters, k8sClusterFilter, effectiveK8sNamespaceFilter, effectiveK8sNodeFilter, k8sClusterNames]
   );
   // Cloud provider filter — page-level on the Cloud category page.
   const filteredEntitiesAfterProvider = useMemo(
@@ -1109,10 +1195,15 @@ const AllEntitiesViewInner = ({
       ).size;
     }
 
-    const field = activeGroupByFields[0] ?? groupByFields[0];
+    // Use the effective first grouping field — `customGroupBy` strips
+    // "Category" on scoped pages so the count matches the visible top-level
+    // groups (e.g. Type buckets on the K8s page, not the single "Kubernetes"
+    // category wrapper).
+    const effectiveFields = customGroupBy ?? activeGroupByFields;
+    const field = effectiveFields[0] ?? groupByFields[0];
     if (!field) return 0;
     return new Set(filteredEntities.map((entity) => field.valueOf(entity))).size;
-  }, [isElasticOn, groupBy, activeGroupByFields, groupByFields, filteredEntities, categoryScope]);
+  }, [isElasticOn, groupBy, customGroupBy, activeGroupByFields, groupByFields, filteredEntities, categoryScope]);
 
   const entityCountLabel = useMemo(() => {
     const count = filteredEntities.length.toLocaleString();
@@ -1129,7 +1220,12 @@ const AllEntitiesViewInner = ({
     Object.values(activeExtraFilters).some((values) => values.length > 0) ||
     labFilters.length > 0 ||
     search.trim() !== '' ||
-    (showK8sClusterFilter && k8sClusterFilter !== KUBERNETES_CLUSTER_FILTER_ALL) ||
+    (showK8sFilters && (
+      k8sResourceType !== KUBERNETES_RESOURCE_TYPE_ALL ||
+      k8sClusterFilter !== KUBERNETES_FILTER_ALL ||
+      effectiveK8sNamespaceFilter !== KUBERNETES_FILTER_ALL ||
+      effectiveK8sNodeFilter !== KUBERNETES_FILTER_ALL
+    )) ||
     (isCloudCategoryPage && cloudProviderFilter !== CLOUD_PROVIDER_FILTER_ALL);
 
   // Reset every filter dimension in one click (ElasticOn toolbar).
@@ -1139,7 +1235,10 @@ const AllEntitiesViewInner = ({
     setLabFilters([]);
     setSearch('');
     setCloudProviderFilter(CLOUD_PROVIDER_FILTER_ALL);
-    setK8sClusterFilter(KUBERNETES_CLUSTER_FILTER_ALL);
+    setK8sResourceType(KUBERNETES_RESOURCE_TYPE_ALL);
+    setK8sClusterFilter(KUBERNETES_FILTER_ALL);
+    setK8sNamespaceFilter(KUBERNETES_FILTER_ALL);
+    setK8sNodeFilter(KUBERNETES_FILTER_ALL);
   }, [setActiveTagFilters]);
 
   // Resolve the clicked entity's `type` and `health` from the dataset so the
@@ -1928,13 +2027,43 @@ const AllEntitiesViewInner = ({
                       />
                     </EuiFlexItem>
                   ) : null}
-                  {showK8sClusterFilter && k8sClusterNames.length > 0 ? (
+                  {showK8sFilters ? (
                     <EuiFlexItem grow={false}>
-                      <KubernetesClusterFilter
-                        clusterNames={k8sClusterNames}
-                        value={k8sClusterFilter}
-                        onChange={setK8sClusterFilter}
-                      />
+                      <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false} css={k8sFilterGroupCss}>
+                        <EuiFlexItem grow={false}>
+                          <KubernetesResourceTypeFilter
+                            value={k8sResourceType}
+                            onChange={handleK8sResourceTypeChange}
+                          />
+                        </EuiFlexItem>
+                        {k8sFilterVisibility.showCluster && k8sClusterNames.length > 0 ? (
+                          <EuiFlexItem grow={false}>
+                            <KubernetesClusterFilter
+                              clusterNames={k8sClusterNames}
+                              value={k8sClusterFilter}
+                              onChange={handleK8sClusterChange}
+                            />
+                          </EuiFlexItem>
+                        ) : null}
+                        {k8sFilterVisibility.showNamespace && k8sNamespaceNames.length > 0 ? (
+                          <EuiFlexItem grow={false}>
+                            <KubernetesNamespaceFilter
+                              namespaceNames={k8sNamespaceNames}
+                              value={effectiveK8sNamespaceFilter}
+                              onChange={setK8sNamespaceFilter}
+                            />
+                          </EuiFlexItem>
+                        ) : null}
+                        {k8sFilterVisibility.showNode && k8sNodeNames.length > 0 ? (
+                          <EuiFlexItem grow={false}>
+                            <KubernetesNodeFilter
+                              nodeNames={k8sNodeNames}
+                              value={effectiveK8sNodeFilter}
+                              onChange={setK8sNodeFilter}
+                            />
+                          </EuiFlexItem>
+                        ) : null}
+                      </EuiFlexGroup>
                     </EuiFlexItem>
                   ) : null}
                   {isCloudCategoryPage ? (

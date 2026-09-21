@@ -131,11 +131,16 @@ import {
   type StepRule,
 } from './palette_coloring';
 import {
-  KUBERNETES_CLUSTER_FILTER_ALL,
-  KUBERNETES_SUB_TYPE_ORDER,
+  KUBERNETES_FILTER_ALL,
   KubernetesClusterFilter,
-  filterEntitiesByCluster,
+  KubernetesNamespaceFilter,
+  KubernetesNodeFilter,
   getKubernetesClusterNames,
+  getKubernetesNamespaceNames,
+  getKubernetesNodeNames,
+  filterKubernetesEntities,
+  groupKubernetesEntities,
+  type KubernetesGroupBy,
 } from './kubernetes_cluster_filter';
 import { getK8sPopoverLines } from './kubernetes_hierarchy';
 
@@ -2636,58 +2641,80 @@ const KubernetesCard = ({
     padding-left: ${euiTheme.size.l};
   `;
 
-  // Cluster filter state — transient (not persisted) so it behaves
-  // like every other filter on the page: navigate away and it resets
-  // to "All clusters".
-  const [clusterFilter, setClusterFilter] = useState<string>(KUBERNETES_CLUSTER_FILTER_ALL);
+  // --- Cascading filter state ---
+  const [clusterFilter, setClusterFilter] = useState<string>(KUBERNETES_FILTER_ALL);
+  const [namespaceFilter, setNamespaceFilter] = useState<string>(KUBERNETES_FILTER_ALL);
+  const [nodeFilter, setNodeFilter] = useState<string>(KUBERNETES_FILTER_ALL);
+  const [groupBy, setGroupBy] = useState<KubernetesGroupBy>('subType');
 
   const clusterNames = useMemo(() => getKubernetesClusterNames(entities), [entities]);
 
-  const visibleEntities = useMemo(
-    () => filterEntitiesByCluster(entities, clusterFilter, clusterNames),
+  // Namespace/node options cascade from the cluster selection.
+  const namespaceNames = useMemo(
+    () => getKubernetesNamespaceNames(entities, clusterFilter, clusterNames),
+    [entities, clusterFilter, clusterNames]
+  );
+  const nodeNames = useMemo(
+    () => getKubernetesNodeNames(entities, clusterFilter, clusterNames),
     [entities, clusterFilter, clusterNames]
   );
 
-  const groupedBySubType = useMemo(() => {
-    const groups = new Map<string, Entity[]>();
-    for (const entity of visibleEntities) {
-      const key = entity.subType ?? 'Other';
-      const list = groups.get(key) ?? [];
-      list.push(entity);
-      groups.set(key, list);
-    }
-    return groups;
-  }, [visibleEntities]);
+  // Reset downstream filters when their selected value is no longer
+  // in the available options (e.g. after changing cluster).
+  const effectiveNamespaceFilter =
+    namespaceFilter !== KUBERNETES_FILTER_ALL && !namespaceNames.includes(namespaceFilter)
+      ? KUBERNETES_FILTER_ALL
+      : namespaceFilter;
+  const effectiveNodeFilter =
+    nodeFilter !== KUBERNETES_FILTER_ALL && !nodeNames.includes(nodeFilter)
+      ? KUBERNETES_FILTER_ALL
+      : nodeFilter;
 
-  // Preserve the canonical sub-type ordering when some sub-types are
-  // still present after filtering; rendering nothing if a sub-type
-  // has zero matches keeps the card compact.
-  const orderedSubTypes = useMemo(
+  // Cluster change resets namespace + node.
+  const handleClusterChange = useCallback(
+    (next: string) => {
+      setClusterFilter(next);
+      setNamespaceFilter(KUBERNETES_FILTER_ALL);
+      setNodeFilter(KUBERNETES_FILTER_ALL);
+    },
+    []
+  );
+
+  const visibleEntities = useMemo(
     () =>
-      KUBERNETES_SUB_TYPE_ORDER.map((label) => ({
-        label,
-        rows: groupedBySubType.get(label) ?? [],
-      })).filter((group) => group.rows.length > 0),
-    [groupedBySubType]
+      filterKubernetesEntities(
+        entities,
+        clusterFilter,
+        effectiveNamespaceFilter,
+        effectiveNodeFilter,
+        clusterNames
+      ),
+    [entities, clusterFilter, effectiveNamespaceFilter, effectiveNodeFilter, clusterNames]
+  );
+
+  // Group entities by the selected dimension.
+  const orderedGroups = useMemo(
+    () => groupKubernetesEntities(visibleEntities, groupBy),
+    [visibleEntities, groupBy]
   );
 
   if (entities.length === 0) {
     return null;
   }
 
-  const subTypeContent =
-    orderedSubTypes.length === 0 ? (
+  const groupContent =
+    orderedGroups.length === 0 ? (
       <EuiText size="s" color="subdued">
         {i18n.translate(
           'xpack.streams.entityCentricLab.entities.bucket.kubernetes.clusterFilter.empty',
           {
-            defaultMessage: 'No Kubernetes {things} match the current cluster filter.',
+            defaultMessage: 'No Kubernetes {things} match the current filters.',
             values: { things: labThings(paletteEnabled) },
           }
         )}
       </EuiText>
     ) : (
-      orderedSubTypes.map((group, index) => (
+      orderedGroups.map((group, index) => (
         <div key={group.label} className={index === 0 ? undefined : subRowClass}>
           <SubTypeRow
             bucketKey={bucketKeyFor('kubernetes', group.label)}
@@ -2703,7 +2730,7 @@ const KubernetesCard = ({
   if (hideHeader) {
     return (
       <>
-        {orderedSubTypes.map((group, index) => (
+        {orderedGroups.map((group, index) => (
           <React.Fragment key={group.label}>
             {index > 0 ? <EuiSpacer size="m" /> : null}
             <EuiPanel hasBorder hasShadow={false} paddingSize="m">
@@ -2731,13 +2758,31 @@ const KubernetesCard = ({
             <KubernetesClusterFilter
               clusterNames={clusterNames}
               value={clusterFilter}
-              onChange={setClusterFilter}
+              onChange={handleClusterChange}
+            />
+          </EuiFlexItem>
+        ) : null}
+        {namespaceNames.length > 0 ? (
+          <EuiFlexItem grow={false}>
+            <KubernetesNamespaceFilter
+              namespaceNames={namespaceNames}
+              value={effectiveNamespaceFilter}
+              onChange={setNamespaceFilter}
+            />
+          </EuiFlexItem>
+        ) : null}
+        {nodeNames.length > 0 ? (
+          <EuiFlexItem grow={false}>
+            <KubernetesNodeFilter
+              nodeNames={nodeNames}
+              value={effectiveNodeFilter}
+              onChange={setNodeFilter}
             />
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <div className={nestedContentClass}>{subTypeContent}</div>
+      <div className={nestedContentClass}>{groupContent}</div>
     </EuiPanel>
   );
 };
@@ -3538,6 +3583,55 @@ const CustomGroupBucketWithControls = ({
  * bucket's tiles span the card directly. When the bucket maps to a single
  * entity type, metric controls (Color by, legend) are surfaced.
  */
+/** Renders level-2 children, possibly with level-3 grandchildren. */
+const CustomGroupLevel2 = ({
+  child,
+  onSelectEntity,
+}: {
+  child: EntityGroupNode;
+  onSelectEntity: (entityName: string) => void;
+}) => {
+  const { euiTheme } = useEuiTheme();
+  const grandchildClass = css`
+    margin-left: ${euiTheme.size.l};
+    padding-left: ${euiTheme.size.m};
+  `;
+  const grandchildDividerClass = css`
+    margin-top: ${euiTheme.size.s};
+    padding-top: ${euiTheme.size.s};
+  `;
+
+  if (child.children.length > 0) {
+    return (
+      <>
+        <GroupBucketHeader label={child.label} total={child.entities.length} size="xxs" />
+        <EuiSpacer size="s" />
+        <div className={grandchildClass}>
+          {child.children.map((grandchild, gcIndex) => (
+            <div
+              key={grandchild.key}
+              className={gcIndex === 0 ? undefined : grandchildDividerClass}
+            >
+              <CustomGroupBucketContent
+                entities={grandchild.entities}
+                label={grandchild.label}
+                onSelectEntity={onSelectEntity}
+              />
+            </div>
+          ))}
+        </div>
+      </>
+    );
+  }
+  return (
+    <CustomGroupBucketContent
+      entities={child.entities}
+      label={child.label}
+      onSelectEntity={onSelectEntity}
+    />
+  );
+};
+
 const CustomGroupCard = ({
   node,
   hasSubLevel,
@@ -3569,9 +3663,8 @@ const CustomGroupCard = ({
                 key={child.key}
                 className={index === 0 ? undefined : childDividerClass}
               >
-                <CustomGroupBucketContent
-                  entities={child.entities}
-                  label={child.label}
+                <CustomGroupLevel2
+                  child={child}
                   onSelectEntity={onSelectEntity}
                 />
               </div>

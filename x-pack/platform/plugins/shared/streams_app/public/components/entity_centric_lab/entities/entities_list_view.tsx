@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiEmptyPrompt,
@@ -38,11 +38,15 @@ import { CLOUD_PROVIDERS, type CloudProviderDescriptor } from './cloud_providers
 import { EntityDataGridSection } from './entities_data_grid';
 import { UNGROUPED_LABEL, groupEntities, type GroupByFieldDef } from './entity_group_by';
 import {
-  KUBERNETES_CLUSTER_FILTER_ALL,
+  KUBERNETES_FILTER_ALL,
   KUBERNETES_SUB_TYPE_ORDER,
   KubernetesClusterFilter,
-  filterEntitiesByCluster,
+  KubernetesNamespaceFilter,
+  KubernetesNodeFilter,
+  filterKubernetesEntities,
   getKubernetesClusterNames,
+  getKubernetesNamespaceNames,
+  getKubernetesNodeNames,
 } from './kubernetes_cluster_filter';
 
 interface Props {
@@ -428,13 +432,17 @@ type ListItem =
       category: EntityCategoryId;
       subTypeLabel?: string;
       nested?: boolean;
+      /** Nesting depth for custom grouping indentation (0 = top, 1 = under group, 2 = under sub-group). */
+      depth?: number;
       rows: Entity[];
     }
   | { kind: 'kubernetes-header'; total: number }
   | { kind: 'category-header'; category: EntityCategoryId; total: number }
   | { kind: 'cloud-provider-header'; provider: CloudProviderDescriptor; total: number }
   // Generic level-1 header for a custom "Group by" bucket (ElasticOn).
-  | { kind: 'group-header'; label: string; total: number };
+  | { kind: 'group-header'; label: string; total: number }
+  // Level-2 sub-group header for 3-field custom grouping.
+  | { kind: 'sub-group-header'; label: string; total: number };
 
 /** A simple level-1 header for a custom-grouping bucket (no category icon). */
 const GroupSectionHeader = ({ label, total }: { label: string; total: number }) => (
@@ -450,16 +458,42 @@ const GroupSectionHeader = ({ label, total }: { label: string; total: number }) 
   </EuiFlexGroup>
 );
 
+/** Level-2 sub-group header (smaller) for 3-field custom grouping. */
+const SubGroupSectionHeader = ({ label, total }: { label: string; total: number }) => (
+  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+    <EuiFlexItem grow={false}>
+      <EuiTitle size="xs">
+        <h4>{label}</h4>
+      </EuiTitle>
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiBadge color="hollow">{total.toLocaleString()}</EuiBadge>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
+
 const KubernetesSectionHeader = ({
   total,
   clusterNames,
   clusterFilter,
   onClusterFilterChange,
+  namespaceNames,
+  namespaceFilter,
+  onNamespaceFilterChange,
+  nodeNames,
+  nodeFilter,
+  onNodeFilterChange,
 }: {
   total: number;
   clusterNames: readonly string[];
   clusterFilter: string;
   onClusterFilterChange: (next: string) => void;
+  namespaceNames: readonly string[];
+  namespaceFilter: string;
+  onNamespaceFilterChange: (next: string) => void;
+  nodeNames: readonly string[];
+  nodeFilter: string;
+  onNodeFilterChange: (next: string) => void;
 }) => {
   const descriptor = getCategoryDescriptor('kubernetes');
   return (
@@ -488,6 +522,24 @@ const KubernetesSectionHeader = ({
             clusterNames={clusterNames}
             value={clusterFilter}
             onChange={onClusterFilterChange}
+          />
+        </EuiFlexItem>
+      ) : null}
+      {namespaceNames.length > 0 ? (
+        <EuiFlexItem grow={false}>
+          <KubernetesNamespaceFilter
+            namespaceNames={namespaceNames}
+            value={namespaceFilter}
+            onChange={onNamespaceFilterChange}
+          />
+        </EuiFlexItem>
+      ) : null}
+      {nodeNames.length > 0 ? (
+        <EuiFlexItem grow={false}>
+          <KubernetesNodeFilter
+            nodeNames={nodeNames}
+            value={nodeFilter}
+            onChange={onNodeFilterChange}
           />
         </EuiFlexItem>
       ) : null}
@@ -526,21 +578,53 @@ export const EntitiesListView = ({
 
   // Transient (not persisted) — matches the Grouped grid filter's
   // semantics so the two views feel identical when toggled.
-  const [clusterFilter, setClusterFilter] = useState<string>(KUBERNETES_CLUSTER_FILTER_ALL);
+  const [clusterFilter, setClusterFilter] = useState<string>(KUBERNETES_FILTER_ALL);
+  const [namespaceFilter, setNamespaceFilter] = useState<string>(KUBERNETES_FILTER_ALL);
+  const [nodeFilter, setNodeFilter] = useState<string>(KUBERNETES_FILTER_ALL);
 
-  const clusterNames = useMemo(
-    () =>
-      getKubernetesClusterNames(
-        effectiveEntities.filter((entity) => entity.category === 'kubernetes')
-      ),
+  const k8sEntities = useMemo(
+    () => effectiveEntities.filter((entity) => entity.category === 'kubernetes'),
     [effectiveEntities]
   );
 
+  const clusterNames = useMemo(
+    () => getKubernetesClusterNames(k8sEntities),
+    [k8sEntities]
+  );
+  const namespaceNames = useMemo(
+    () => getKubernetesNamespaceNames(k8sEntities, clusterFilter, clusterNames),
+    [k8sEntities, clusterFilter, clusterNames]
+  );
+  const nodeNames = useMemo(
+    () => getKubernetesNodeNames(k8sEntities, clusterFilter, clusterNames),
+    [k8sEntities, clusterFilter, clusterNames]
+  );
+
+  // Auto-reset downstream filters when their value is no longer in the
+  // available options (e.g. after changing the cluster).
+  const effectiveNamespaceFilter =
+    namespaceFilter !== KUBERNETES_FILTER_ALL && !namespaceNames.includes(namespaceFilter)
+      ? KUBERNETES_FILTER_ALL
+      : namespaceFilter;
+  const effectiveNodeFilter =
+    nodeFilter !== KUBERNETES_FILTER_ALL && !nodeNames.includes(nodeFilter)
+      ? KUBERNETES_FILTER_ALL
+      : nodeFilter;
+
+  const handleClusterChange = useCallback(
+    (next: string) => {
+      setClusterFilter(next);
+      setNamespaceFilter(KUBERNETES_FILTER_ALL);
+      setNodeFilter(KUBERNETES_FILTER_ALL);
+    },
+    []
+  );
+
   const items = useMemo<ListItem[]>(() => {
-    // ElasticOn "Group by" override: group by the chosen 1–2 fields instead of
+    // ElasticOn "Group by" override: group by the chosen 1–3 fields instead of
     // the built-in Category → Type layout. Level-1 buckets become section
-    // headers; level-2 buckets (or the level-1 bucket itself for a single
-    // field) become table panels labelled by the bucket value.
+    // headers; level-2 buckets become sub-headers or table panels; level-3
+    // buckets (when 3 fields) become the leaf table panels.
     if (useCustomGrouping && customGroupBy) {
       // Flat / ungrouped: a single "All entities" table (nested so the header
       // shows the label, not the first entity's category name).
@@ -564,13 +648,28 @@ export const EntitiesListView = ({
         if (hasSubLevel && node.children.length > 0) {
           custom.push({ kind: 'group-header', label: node.label, total: node.entities.length });
           for (const child of node.children) {
-            custom.push({
-              kind: 'panel',
-              category: child.entities[0].category,
-              subTypeLabel: child.label,
-              nested: true,
-              rows: child.entities,
-            });
+            if (child.children.length > 0) {
+              custom.push({ kind: 'sub-group-header', label: child.label, total: child.entities.length });
+              for (const grandchild of child.children) {
+                custom.push({
+                  kind: 'panel',
+                  category: grandchild.entities[0].category,
+                  subTypeLabel: grandchild.label,
+                  nested: true,
+                  depth: 2,
+                  rows: grandchild.entities,
+                });
+              }
+            } else {
+              custom.push({
+                kind: 'panel',
+                category: child.entities[0].category,
+                subTypeLabel: child.label,
+                nested: true,
+                depth: 1,
+                rows: child.entities,
+              });
+            }
           }
         } else {
           custom.push({
@@ -603,7 +702,7 @@ export const EntitiesListView = ({
         // groups by `entity.subType` (Clusters / Nodes / Namespaces
         // / ...) using the curated reading order, instead of the
         // generic `.type`-based grouping used by other categories.
-        const filtered = filterEntitiesByCluster(rows, clusterFilter, clusterNames);
+        const filtered = filterKubernetesEntities(rows, clusterFilter, effectiveNamespaceFilter, effectiveNodeFilter, clusterNames);
         result.push({ kind: 'kubernetes-header', total: filtered.length });
         const subTypeBuckets = new Map<string, Entity[]>();
         for (const entity of filtered) {
@@ -695,6 +794,8 @@ export const EntitiesListView = ({
   }, [
     effectiveEntities,
     clusterFilter,
+    effectiveNamespaceFilter,
+    effectiveNodeFilter,
     clusterNames,
     groupCloudByProvider,
     useCustomGrouping,
@@ -741,7 +842,13 @@ export const EntitiesListView = ({
                 total={item.total}
                 clusterNames={clusterNames}
                 clusterFilter={clusterFilter}
-                onClusterFilterChange={setClusterFilter}
+                onClusterFilterChange={handleClusterChange}
+                namespaceNames={namespaceNames}
+                namespaceFilter={effectiveNamespaceFilter}
+                onNamespaceFilterChange={setNamespaceFilter}
+                nodeNames={nodeNames}
+                nodeFilter={effectiveNodeFilter}
+                onNodeFilterChange={setNodeFilter}
               />
             </EuiFlexItem>
           );
@@ -768,11 +875,21 @@ export const EntitiesListView = ({
             </EuiFlexItem>
           );
         }
+        if (item.kind === 'sub-group-header') {
+          return (
+            <EuiFlexItem key={`sub-group-header-${item.label}-${index}`} grow={false} style={{ marginTop: 12, marginLeft: 16 }}>
+              <SubGroupSectionHeader label={item.label} total={item.total} />
+            </EuiFlexItem>
+          );
+        }
         return (
           <EuiFlexItem
             key={`${item.category}-${item.subTypeLabel ?? ''}-${index}`}
             grow={false}
-            style={index > 0 ? { marginTop: 8 } : undefined}
+            style={{
+              ...(index > 0 ? { marginTop: 8 } : {}),
+              ...((item.depth ?? 0) > 0 ? { marginLeft: (item.depth ?? 0) * 16 } : {}),
+            }}
           >
             {enableColumnSettings ? (
               <EntityDataGridSection

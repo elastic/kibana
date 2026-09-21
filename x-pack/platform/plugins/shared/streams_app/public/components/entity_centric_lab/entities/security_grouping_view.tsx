@@ -12,10 +12,12 @@
  * names and styles so the result is visually identical, while keeping
  * the implementation simple (no ES aggregation adapter needed).
  *
- * Supports one or two levels of grouping:
+ * Supports one, two, or three levels of grouping:
  *   - 1 field  → parent accordions, each containing a table
  *   - 2 fields → parent accordions with child accordions inside,
  *                 each child containing a table
+ *   - 3 fields → parent → child → grandchild accordions, each
+ *                 grandchild containing a table
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
@@ -61,9 +63,12 @@ interface GroupBucket {
 
 const buildBuckets = (
   entities: readonly Entity[],
-  primaryField: GroupByFieldDef,
-  secondaryField?: GroupByFieldDef
+  fields: readonly GroupByFieldDef[]
 ): GroupBucket[] => {
+  if (fields.length === 0) return [];
+  const primaryField = fields[0];
+  const remainingFields = fields.slice(1);
+
   const map = new Map<string, Entity[]>();
   for (const entity of entities) {
     const label = primaryField.valueOf(entity);
@@ -87,10 +92,9 @@ const buildBuckets = (
   }
   return entries.map(([label, groupEntities]) => {
     const category = groupEntities[0]?.category ?? ('kubernetes' as EntityCategoryId);
-    // Children are built via recursive `buildBuckets` which already respects
-    // `secondaryField.canonicalOrder` (e.g. TYPE_CANONICAL_ORDER for K8s
-    // sub-types), so no extra re-sorting is needed.
-    const children = secondaryField ? buildBuckets(groupEntities, secondaryField) : [];
+    const children = remainingFields.length > 0
+      ? buildBuckets(groupEntities, remainingFields)
+      : [];
     return {
       label,
       entities: groupEntities,
@@ -226,6 +230,8 @@ const ChildAccordion = ({
     suffix: `${parentIndex}-${childIndex}`,
   });
 
+  const hasGrandchildren = bucket.children.length > 0;
+
   return (
     <EuiAccordion
       id={accordionId}
@@ -245,14 +251,31 @@ const ChildAccordion = ({
       css={childAccordionCss(euiTheme.border.thin)}
       data-test-subj={`securityGrouping-child-${parentIndex}-${childIndex}`}
     >
-      <EntityDataGridSection
-        category={bucket.category}
-        nested
-        borderless
-        rows={bucket.entities}
-        onSelectEntity={onSelectEntity}
-        refreshTick={refreshTick}
-      />
+      {hasGrandchildren ? (
+        <>
+          {bucket.children.map((grandchild, gcIndex) => (
+            <React.Fragment key={grandchild.label}>
+              {gcIndex > 0 ? <EuiSpacer size="s" /> : null}
+              <ChildAccordion
+                bucket={grandchild}
+                parentIndex={parentIndex}
+                childIndex={gcIndex}
+                onSelectEntity={onSelectEntity}
+                refreshTick={refreshTick}
+              />
+            </React.Fragment>
+          ))}
+        </>
+      ) : (
+        <EntityDataGridSection
+          category={bucket.category}
+          nested
+          borderless
+          rows={bucket.entities}
+          onSelectEntity={onSelectEntity}
+          refreshTick={refreshTick}
+        />
+      )}
     </EuiAccordion>
   );
 };
@@ -427,25 +450,19 @@ export const SecurityGroupingView = ({
   const { euiTheme } = useEuiTheme();
   const isUngrouped = activeGroupBy.length === 0;
 
-  const primaryField = useMemo(
+  const resolvedFields = useMemo(
     () =>
       isUngrouped
-        ? undefined
-        : groupByFields.find((f) => f.id === activeGroupBy[0]) ?? groupByFields[0],
+        ? []
+        : activeGroupBy
+            .map((id) => groupByFields.find((f) => f.id === id))
+            .filter((f): f is GroupByFieldDef => f != null),
     [groupByFields, activeGroupBy, isUngrouped]
   );
 
-  const secondaryField = useMemo(
-    () =>
-      activeGroupBy.length > 1
-        ? groupByFields.find((f) => f.id === activeGroupBy[1])
-        : undefined,
-    [groupByFields, activeGroupBy]
-  );
-
   const buckets = useMemo(
-    () => (primaryField ? buildBuckets(entities, primaryField, secondaryField) : []),
-    [entities, primaryField, secondaryField]
+    () => (resolvedFields.length > 0 ? buildBuckets(entities, resolvedFields) : []),
+    [entities, resolvedFields]
   );
 
   const handleSelectEntity = useCallback(

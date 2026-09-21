@@ -9,8 +9,8 @@
  * Generic "Group by" support for the ElasticOn Inventory (list + hex grid).
  *
  * By default the views group entities by Category → Type (the built-in
- * layout). This module lets the user pick up to two arbitrary fields to group
- * by instead (Infra "Select up to two groupings" style). It's intentionally
+ * layout). This module lets the user pick up to three arbitrary fields to
+ * group by instead (Infra "Select up to three groupings" style). It's intentionally
  * React-free — just the field catalog + a grouping helper — so both views and
  * the saved-views module can share it without pulling in UI.
  */
@@ -201,7 +201,47 @@ export const getGroupByFields = (
         valueOf: (entity: Entity) => entity.attributes?.[def.key] || UNKNOWN,
       }))
     : [];
-  return [...fields, ...alertsField, ...tagGroupByFields(isElasticOn, isPhase1), ...attrFields];
+
+  // K8s-specific group-by fields — only when scoped to the Kubernetes category.
+  const k8sFields: GroupByFieldDef[] =
+    categoryScope === 'kubernetes'
+      ? [
+          {
+            id: 'k8s:cluster',
+            label: i18n.translate(
+              'xpack.streams.entityCentricLab.entities.groupBy.field.k8sCluster',
+              { defaultMessage: 'Cluster' }
+            ),
+            valueOf: (entity: Entity) => {
+              if (entity.subType === 'Clusters') return entity.name;
+              return entity.attributes?.cluster || UNKNOWN;
+            },
+          },
+          {
+            id: 'k8s:namespace',
+            label: i18n.translate(
+              'xpack.streams.entityCentricLab.entities.groupBy.field.k8sNamespace',
+              { defaultMessage: 'Namespace' }
+            ),
+            valueOf: (entity: Entity) => {
+              if (entity.subType === 'Namespaces') return entity.name;
+              return entity.attributes?.namespace || UNKNOWN;
+            },
+          },
+          {
+            id: 'k8s:node',
+            label: i18n.translate(
+              'xpack.streams.entityCentricLab.entities.groupBy.field.k8sNode',
+              { defaultMessage: 'Node' }
+            ),
+            valueOf: (entity: Entity) => {
+              if (entity.subType === 'Nodes') return entity.name;
+              return entity.attributes?.node || UNKNOWN;
+            },
+          },
+        ]
+      : [];
+  return [...fields, ...alertsField, ...k8sFields, ...tagGroupByFields(isElasticOn, isPhase1), ...attrFields];
 };
 
 export const getGroupByFieldDef = (
@@ -269,9 +309,10 @@ const groupOneLevel = (entities: readonly Entity[], def: GroupByFieldDef): Entit
 };
 
 /**
- * Group entities by 1–2 fields. Level-1 buckets are ordered largest-first
+ * Group entities by 1–3 fields. Level-1 buckets are ordered largest-first
  * (ties alphabetical), matching the built-in grouping; each carries its
- * level-2 children when a second field is supplied.
+ * level-2 children when a second field is supplied, and level-3
+ * grandchildren when a third field is supplied.
  */
 export const groupEntities = (
   entities: readonly Entity[],
@@ -280,8 +321,16 @@ export const groupEntities = (
   if (fields.length === 0) return [];
   const level1 = groupOneLevel(entities, fields[0]);
   if (fields.length === 1) return level1;
-  return level1.map((node) => ({
+  const withLevel2 = level1.map((node) => ({
     ...node,
     children: groupOneLevel(node.entities, fields[1]),
+  }));
+  if (fields.length === 2) return withLevel2;
+  return withLevel2.map((node) => ({
+    ...node,
+    children: node.children.map((child) => ({
+      ...child,
+      children: groupOneLevel(child.entities, fields[2]),
+    })),
   }));
 };
