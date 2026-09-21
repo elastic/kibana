@@ -23,6 +23,7 @@ import {
   flexColumnWidths,
   formatAge,
   groupByFile,
+  qualifyingBranch,
   terminalWidth,
   wrapOn,
   type ClassifiedEntry,
@@ -132,6 +133,36 @@ describe('flakiestBranch', () => {
       10
     );
     expect(picked?.branch).toBe('9.2');
+  });
+});
+
+describe('qualifyingBranch', () => {
+  // 9.2 has the highest raw rate but, with a single failed build, is not what qualified the test
+  const byBranch = [
+    branch({ branch: 'main', builds: 100, failedBuilds: 3, buildFailRate: 0.03 }),
+    branch({ branch: '9.2', builds: 10, failedBuilds: 1, buildFailRate: 0.1 }),
+  ];
+  const flakiestBranchOnMain = {
+    branch: 'main',
+    builds: 100,
+    failedBuilds: 3,
+    buildFailRate: 0.03,
+  };
+
+  it('returns the per-branch stats of the branch the test qualified on', () => {
+    expect(qualifyingBranch({ byBranch, flakiestBranch: flakiestBranchOnMain }, 10)).toBe(
+      byBranch[0]
+    );
+  });
+
+  it('shows the recorded counts when the per-branch stats lack that branch', () => {
+    expect(qualifyingBranch({ byBranch: [], flakiestBranch: flakiestBranchOnMain }, 10)).toBe(
+      flakiestBranchOnMain
+    );
+  });
+
+  it('falls back to the highest fail rate for reports without a qualifying branch', () => {
+    expect(qualifyingBranch({ byBranch }, 10)?.branch).toBe('9.2');
   });
 });
 
@@ -249,7 +280,51 @@ describe('buildTopFailingTable', () => {
     expect(rendered).toContain('2/10');
   });
 
-  it('uses the latest run of the flakiest branch rather than the overall latest run', () => {
+  it('shows the branch the test qualified on, not the one with the highest raw fail rate', () => {
+    const rendered = render(
+      buildTopFailingTable(
+        [
+          flaky({
+            builds: 110,
+            failedBuilds: 4,
+            // 9.2 fails more often but its single failed build is below the thresholds
+            byBranch: [
+              branch({
+                branch: '9.2',
+                builds: 10,
+                failedBuilds: 1,
+                buildFailRate: 0.1,
+                latestRun: { status: 'passed', timestamp: new Date('2026-09-07T11:00:00.000Z') },
+              }),
+              branch({
+                branch: 'main',
+                builds: 100,
+                failedBuilds: 3,
+                buildFailRate: 0.03,
+                latestRun: { status: 'failed', timestamp: new Date('2026-09-05T12:00:00.000Z') },
+              }),
+            ],
+            flakiestBranch: { branch: 'main', builds: 100, failedBuilds: 3, buildFailRate: 0.03 },
+            latestRun: {
+              status: 'passed',
+              timestamp: new Date('2026-09-07T11:00:00.000Z'),
+              branch: '9.2',
+            },
+          }),
+        ],
+        [],
+        10,
+        now
+      )
+    );
+
+    expect(rendered).toContain('main (3.0%)');
+    expect(rendered).not.toContain('9.2 (10.0%)');
+    expect(rendered).toContain('failed');
+    expect(rendered).toContain('2d ago');
+  });
+
+  it('falls back to the highest fail rate among exercised branches for reports without a qualifying branch', () => {
     const rendered = render(
       buildTopFailingTable(
         [

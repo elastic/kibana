@@ -115,6 +115,8 @@ const formatRate = (rate: number): string => `${(rate * 100).toFixed(1)}%`;
 /**
  * Branch with the highest build failure rate. Branches with fewer builds than `minBuilds` only
  * count when no branch has enough, so one failure on a barely exercised branch does not win.
+ * Only checks `minBuilds`, so it is just the fallback for reports written before the branch a
+ * test qualified on was recorded; see `qualifyingBranch`.
  */
 export const flakiestBranch = (
   byBranch: FlakyTestEntry['byBranch'],
@@ -124,6 +126,22 @@ export const flakiestBranch = (
   return [...(exercised.length > 0 ? exercised : byBranch)].sort(
     (a, b) => b.buildFailRate - a.buildFailRate
   )[0];
+};
+
+/**
+ * Stats of the branch the test qualified on, which is what the thresholds were checked against.
+ * The per-branch row carries the latest run; should it be missing, the recorded counts are shown
+ * on their own. Reports written before `flakiestBranch` existed fall back to `flakiestBranch()`.
+ */
+export const qualifyingBranch = (
+  entry: Pick<FlakyTestEntry, 'byBranch' | 'flakiestBranch'>,
+  minBuilds: number
+): FlakyTestBranchStats | undefined => {
+  if (!entry.flakiestBranch) {
+    return flakiestBranch(entry.byBranch, minBuilds);
+  }
+  const { branch } = entry.flakiestBranch;
+  return entry.byBranch.find((stats) => stats.branch === branch) ?? entry.flakiestBranch;
 };
 
 const formatFlakiestBranch = (flakiest: FlakyTestBranchStats | undefined): string =>
@@ -222,7 +240,7 @@ export const buildTopFailingTable = (
 
     entries.forEach(({ entry, classification }, index) => {
       rank += 1;
-      const flakiest = flakiestBranch(entry.byBranch, minBuilds);
+      const flakiest = qualifyingBranch(entry, minBuilds);
       table.push([
         colorize(classification, rank),
         entry.framework,
