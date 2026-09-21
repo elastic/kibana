@@ -52,6 +52,10 @@ const KNOWN_FIELDS = new Set([
   'environment',
   'team',
   'region',
+  'cluster',
+  'namespace',
+  'deployment',
+  'node',
 ]);
 
 const fieldValues = (entity: Entity, rawField: string): string[] => {
@@ -74,6 +78,11 @@ const fieldValues = (entity: Entity, rawField: string): string[] => {
     case 'team':
     case 'region':
       return entity.tags[field] ? [entity.tags[field]] : [];
+    case 'cluster':
+    case 'namespace':
+    case 'deployment':
+    case 'node':
+      return entity.attributes?.[field] ? [entity.attributes[field]] : [];
     default:
       return [];
   }
@@ -107,6 +116,10 @@ const freeTextHaystack = (entity: Entity): string =>
     entity.tags.environment,
     entity.tags.team,
     entity.tags.region,
+    entity.attributes?.cluster ?? '',
+    entity.attributes?.namespace ?? '',
+    entity.attributes?.deployment ?? '',
+    entity.attributes?.node ?? '',
   ]
     .join(' ')
     .toLowerCase();

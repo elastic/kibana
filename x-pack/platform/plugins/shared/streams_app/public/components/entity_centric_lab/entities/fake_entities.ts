@@ -821,11 +821,71 @@ const buildCategoryEntitiesWithScenario = (
  * Build Kubernetes entities with optional sub-spec overrides and health
  * override.
  */
+/**
+ * Seed K8s parent-context attributes (cluster, namespace, deployment, node)
+ * on each entity based on its sub-type. These power the cascading filters
+ * and group-by dimensions.
+ */
+const buildK8sAttributes = (
+  subType: string,
+  entityName: string,
+  index: number,
+  clusterNames: readonly string[],
+  namespaceNames: readonly string[],
+  deploymentNames: readonly string[],
+  nodeNames: readonly string[]
+): Record<string, string> | undefined => {
+  if (subType === 'Clusters') return undefined;
+  const attrs: Record<string, string> = {};
+  if (clusterNames.length > 0) {
+    attrs.cluster = clusterNames[stableHash(`k8s-cluster-${entityName}`) % clusterNames.length];
+  }
+  if (subType === 'Nodes') return attrs;
+  if (namespaceNames.length > 0 && subType !== 'Nodes') {
+    attrs.namespace = namespaceNames[stableHash(`k8s-ns-${entityName}`) % namespaceNames.length];
+  }
+  if (subType === 'Namespaces') return attrs;
+  if (deploymentNames.length > 0 && (subType === 'Pods' || subType === 'Containers')) {
+    attrs.deployment = deploymentNames[stableHash(`k8s-deploy-${entityName}`) % deploymentNames.length];
+  }
+  if (nodeNames.length > 0 && (subType === 'Pods' || subType === 'Containers')) {
+    attrs.node = nodeNames[stableHash(`k8s-node-${entityName}`) % nodeNames.length];
+  }
+  return Object.keys(attrs).length > 0 ? attrs : undefined;
+};
+
 const buildKubernetesEntitiesWithScenario = (
   subSpecs: readonly KubernetesSubSpec[],
   healthOverride?: (seed: number, index: number) => EntityHealth
 ): Entity[] => {
   const salt = stableHash('kubernetes');
+
+  // Pre-collect canonical names so attributes can reference them.
+  const clusterSpec = subSpecs.find((s) => s.label === 'Clusters');
+  const clusterNames = clusterSpec
+    ? Array.from({ length: clusterSpec.total }, (_, i) =>
+        clusterSpec.seedRows[i]?.name ?? clusterSpec.fallbackName(i)
+      )
+    : [];
+  const namespaceSpec = subSpecs.find((s) => s.label === 'Namespaces');
+  const namespaceNames = namespaceSpec
+    ? Array.from({ length: namespaceSpec.total }, (_, i) =>
+        namespaceSpec.seedRows[i]?.name ?? namespaceSpec.fallbackName(i)
+      )
+    : [];
+  const deploymentSpec = subSpecs.find((s) => s.label === 'Deployments');
+  const deploymentNames = deploymentSpec
+    ? Array.from({ length: deploymentSpec.total }, (_, i) =>
+        deploymentSpec.seedRows[i]?.name ?? deploymentSpec.fallbackName(i)
+      )
+    : [];
+  const nodeSpec = subSpecs.find((s) => s.label === 'Nodes');
+  const nodeNames = nodeSpec
+    ? Array.from({ length: nodeSpec.total }, (_, i) =>
+        nodeSpec.seedRows[i]?.name ?? nodeSpec.fallbackName(i)
+      )
+    : [];
+
   const entities: Entity[] = [];
   let runningOffset = 0;
   for (const sub of subSpecs) {
@@ -849,6 +909,7 @@ const buildKubernetesEntitiesWithScenario = (
         age: AGE_SAMPLES[i % AGE_SAMPLES.length],
         anomalyDetection: ANOMALY_SAMPLES[i % ANOMALY_SAMPLES.length],
         tags,
+        attributes: buildK8sAttributes(sub.label, name, i, clusterNames, namespaceNames, deploymentNames, nodeNames),
         alerts: buildAlerts(name, health),
       });
     }

@@ -29,6 +29,10 @@ const ENTITY_FIELDS: Record<string, FieldSpec> = {
   environment: KEYWORD('environment'),
   team: KEYWORD('team'),
   region: KEYWORD('region'),
+  cluster: KEYWORD('cluster'),
+  namespace: KEYWORD('namespace'),
+  deployment: KEYWORD('deployment'),
+  node: KEYWORD('node'),
 };
 
 /**

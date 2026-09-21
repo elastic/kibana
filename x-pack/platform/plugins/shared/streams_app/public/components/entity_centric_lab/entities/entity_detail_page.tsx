@@ -557,6 +557,42 @@ const EntityDetailPageInner = () => {
     }
   }, [entity, router, detailVariation, history, activeTab]);
 
+  // "Add to filter" — stashes the entity's K8s context in sessionStorage
+  // and navigates back to the inventory so the main page can apply filters.
+  const isK8sEntity = entity?.category === 'kubernetes';
+  const handleAddToFilter = useCallback(() => {
+    if (!entity || entity.category !== 'kubernetes') return;
+    try {
+      sessionStorage.setItem(
+        'entityCentricLab_addToFilter',
+        JSON.stringify({
+          cluster:
+            entity.subType === 'Clusters'
+              ? entity.name
+              : entity.attributes?.cluster ?? '',
+          namespace:
+            entity.subType === 'Namespaces'
+              ? entity.name
+              : entity.attributes?.namespace ?? '',
+          deployment:
+            entity.subType === 'Deployments'
+              ? entity.name
+              : entity.attributes?.deployment ?? '',
+          node:
+            entity.subType === 'Nodes'
+              ? entity.name
+              : entity.attributes?.node ?? '',
+        })
+      );
+    } catch {
+      // ignore
+    }
+    router.push('/entities/{category}', {
+      path: { category: 'kubernetes' },
+      query: {},
+    });
+  }, [entity, router]);
+
   // "Take action" popover (mirrors flyout footer)
   const [isActionMenuOpen, setIsActionMenuOpen] = useState(false);
   const closeActionMenu = useCallback(() => setIsActionMenuOpen(false), []);
@@ -805,6 +841,20 @@ const EntityDetailPageInner = () => {
                   >
                     {i18n.translate('xpack.streams.entityCentricLab.detailPage.addToChat', {
                       defaultMessage: 'Add to chat',
+                    })}
+                  </EuiButtonEmpty>,
+                ]
+              : []),
+            ...(isK8sEntity
+              ? [
+                  <EuiButtonEmpty
+                    key="add-to-filter"
+                    iconType="filter"
+                    data-test-subj="entityDetailPageAddToFilter"
+                    onClick={handleAddToFilter}
+                  >
+                    {i18n.translate('xpack.streams.entityCentricLab.detailPage.addToFilter', {
+                      defaultMessage: 'Add to filter',
                     })}
                   </EuiButtonEmpty>,
                 ]

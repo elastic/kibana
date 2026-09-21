@@ -204,6 +204,14 @@ interface EntityFlyoutProps {
    * dashboard sections.
    */
   readonly dashboardStyle?: 'embedded' | 'list';
+  /**
+   * Optional callback fired when the user clicks the "Add to filter" link
+   * in the flyout footer. The host wires it to set page-level filters
+   * (e.g. K8s resource type + cluster + namespace + node) based on the
+   * entity being viewed, then closes the flyout so the user sees the
+   * filtered results. When undefined, the link is hidden.
+   */
+  readonly onAddToFilter?: () => void;
 }
 
 type BuiltInTabId =
@@ -303,6 +311,7 @@ export const EntityFlyout = ({
   hideEvents = false,
   hiddenTabIds,
   dashboardStyle = 'embedded',
+  onAddToFilter,
 }: EntityFlyoutProps) => {
   const titleId = useGeneratedHtmlId({ prefix: 'entityCentricLabFlyoutTitle' });
   // Default tab is the leftmost one in the (possibly reordered) tab list.
@@ -969,6 +978,19 @@ export const EntityFlyout = ({
                       data-test-subj="entityCentricLabFlyoutManageEntityType"
                     />
                   </EuiToolTip>
+                </EuiFlexItem>
+              ) : null}
+              {onAddToFilter ? (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    iconType="filter"
+                    data-test-subj="entityCentricLabFlyoutAddToFilter"
+                    onClick={onAddToFilter}
+                  >
+                    {i18n.translate('entityCentricLabFlyout.flyout.addToFilter', {
+                      defaultMessage: 'Add to filter',
+                    })}
+                  </EuiButtonEmpty>
                 </EuiFlexItem>
               ) : null}
               {agentBuilder?.openChat ? (

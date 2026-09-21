@@ -158,15 +158,45 @@ export const getKubernetesNodeNames = (
 };
 
 /**
- * Apply all three cascading filters (cluster → namespace → node) at once.
- * Entities whose sub-type is not scoped by a filter dimension pass through
- * for that dimension (e.g. Clusters and Nodes are not namespace-scoped, so
- * a namespace filter does not hide them).
+ * Extract sorted, unique deployment names from a list of K8s entities,
+ * optionally scoped to a specific cluster and/or namespace.
+ */
+export const getKubernetesDeploymentNames = (
+  entities: readonly Entity[],
+  clusterFilter: string = KUBERNETES_FILTER_ALL,
+  namespaceFilter: string = KUBERNETES_FILTER_ALL,
+  clusterNames: readonly string[] = []
+): string[] => {
+  let scoped = filterEntitiesByCluster(entities, clusterFilter, clusterNames);
+  if (namespaceFilter !== KUBERNETES_FILTER_ALL) {
+    scoped = scoped.filter((entity) => {
+      if (entity.subType === 'Namespaces') return entity.name === namespaceFilter;
+      if (entity.subType === 'Clusters' || entity.subType === 'Nodes') return true;
+      return entity.attributes?.namespace === namespaceFilter;
+    });
+  }
+  const deployments = new Set<string>();
+  for (const entity of scoped) {
+    if (entity.subType === 'Deployments') {
+      deployments.add(entity.name);
+    } else if (entity.attributes?.deployment) {
+      deployments.add(entity.attributes.deployment);
+    }
+  }
+  return [...deployments].sort();
+};
+
+/**
+ * Apply all four cascading filters (cluster → namespace → deployment → node)
+ * at once. Entities whose sub-type is not scoped by a filter dimension pass
+ * through for that dimension (e.g. Clusters and Nodes are not namespace-scoped,
+ * so a namespace filter does not hide them).
  */
 export const filterKubernetesEntities = (
   entities: readonly Entity[],
   clusterFilter: string,
   namespaceFilter: string,
+  deploymentFilter: string,
   nodeFilter: string,
   clusterNames: readonly string[]
 ): readonly Entity[] => {
@@ -176,6 +206,13 @@ export const filterKubernetesEntities = (
       if (entity.subType === 'Namespaces') return entity.name === namespaceFilter;
       if (entity.subType === 'Clusters' || entity.subType === 'Nodes') return true;
       return entity.attributes?.namespace === namespaceFilter;
+    });
+  }
+  if (deploymentFilter !== KUBERNETES_FILTER_ALL) {
+    result = result.filter((entity) => {
+      if (entity.subType === 'Deployments') return entity.name === deploymentFilter;
+      if (entity.subType === 'Clusters' || entity.subType === 'Nodes' || entity.subType === 'Namespaces') return true;
+      return entity.attributes?.deployment === deploymentFilter;
     });
   }
   if (nodeFilter !== KUBERNETES_FILTER_ALL) {
@@ -262,24 +299,24 @@ export const KUBERNETES_RESOURCE_TYPE_ALL = '__all__';
 /** Which downstream filters are meaningful for each resource type. */
 export const resourceTypeFilterVisibility = (
   resourceType: KubernetesResourceType
-): { showCluster: boolean; showNamespace: boolean; showNode: boolean } => {
+): { showCluster: boolean; showNamespace: boolean; showDeployment: boolean; showNode: boolean } => {
   switch (resourceType) {
     case KUBERNETES_RESOURCE_TYPE_ALL:
-      return { showCluster: true, showNamespace: true, showNode: true };
+      return { showCluster: true, showNamespace: true, showDeployment: true, showNode: true };
     case 'Clusters':
-      return { showCluster: false, showNamespace: false, showNode: false };
+      return { showCluster: false, showNamespace: false, showDeployment: false, showNode: false };
     case 'Nodes':
-      return { showCluster: true, showNamespace: false, showNode: false };
+      return { showCluster: true, showNamespace: false, showDeployment: false, showNode: false };
     case 'Namespaces':
-      return { showCluster: true, showNamespace: false, showNode: false };
+      return { showCluster: true, showNamespace: false, showDeployment: false, showNode: false };
     case 'Deployments':
-      return { showCluster: true, showNamespace: true, showNode: false };
+      return { showCluster: true, showNamespace: true, showDeployment: true, showNode: false };
     case 'Pods':
-      return { showCluster: true, showNamespace: true, showNode: true };
+      return { showCluster: true, showNamespace: true, showDeployment: true, showNode: true };
     case 'Containers':
-      return { showCluster: true, showNamespace: true, showNode: true };
+      return { showCluster: true, showNamespace: true, showDeployment: true, showNode: true };
     default:
-      return { showCluster: true, showNamespace: true, showNode: true };
+      return { showCluster: true, showNamespace: true, showDeployment: true, showNode: true };
   }
 };
 
@@ -433,6 +470,53 @@ export const KubernetesNamespaceFilter = ({
         { defaultMessage: 'Filter Kubernetes entities by namespace' }
       )}
       data-test-subj="entityCentricLabKubernetesNamespaceFilter"
+    />
+  );
+};
+
+// ---------------------------------------------------------------------------
+// Deployment filter
+// ---------------------------------------------------------------------------
+
+interface KubernetesDeploymentFilterProps {
+  readonly deploymentNames: readonly string[];
+  readonly value: string;
+  readonly onChange: (next: string) => void;
+}
+
+export const KubernetesDeploymentFilter = ({
+  deploymentNames,
+  value,
+  onChange,
+}: KubernetesDeploymentFilterProps) => {
+  const allLabel = i18n.translate(
+    'xpack.streams.entityCentricLab.entities.kubernetesDeploymentFilter.allOption',
+    { defaultMessage: 'All deployments' }
+  );
+  const options = useMemo(
+    () => [
+      { value: KUBERNETES_FILTER_ALL, text: allLabel },
+      ...deploymentNames.map((name) => ({
+        value: name,
+        text: i18n.translate(
+          'xpack.streams.entityCentricLab.entities.kubernetesDeploymentFilter.option',
+          { defaultMessage: 'Deployment: {name}', values: { name } }
+        ),
+      })),
+    ],
+    [deploymentNames, allLabel]
+  );
+  return (
+    <EuiSelect
+      compressed
+      options={options}
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+      aria-label={i18n.translate(
+        'xpack.streams.entityCentricLab.entities.kubernetesDeploymentFilter.ariaLabel',
+        { defaultMessage: 'Filter Kubernetes entities by deployment' }
+      )}
+      data-test-subj="entityCentricLabKubernetesDeploymentFilter"
     />
   );
 };

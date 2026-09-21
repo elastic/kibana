@@ -169,12 +169,15 @@ import {
   KUBERNETES_FILTER_ALL,
   KUBERNETES_RESOURCE_TYPE_ALL,
   KubernetesClusterFilter,
+  KubernetesDeploymentFilter,
   KubernetesNamespaceFilter,
   KubernetesNodeFilter,
   KubernetesResourceTypeFilter,
+  assignClusterForEntity,
   filterEntitiesByResourceType,
   filterKubernetesEntities,
   getKubernetesClusterNames,
+  getKubernetesDeploymentNames,
   getKubernetesNamespaceNames,
   getKubernetesNodeNames,
   resourceTypeFilterVisibility,
@@ -841,6 +844,19 @@ const AllEntitiesViewInner = ({
   // control, so this stays at the built-in Category → Type default there.
   const [groupBy, setGroupBy] = useEntitiesGroupBy();
 
+  // When landing on the Kubernetes page with the global default grouping
+  // (Category → Type), swap to a more useful K8s default (Cluster → Type).
+  const k8sDefaultAppliedRef = useRef(false);
+  useEffect(() => {
+    if (categoryScope === 'kubernetes' && isElasticOn && isDefaultGroupBy(groupBy) && !k8sDefaultAppliedRef.current) {
+      k8sDefaultAppliedRef.current = true;
+      setGroupBy(['k8s:cluster', 'type']);
+    }
+    if (categoryScope !== 'kubernetes') {
+      k8sDefaultAppliedRef.current = false;
+    }
+  }, [categoryScope, isElasticOn, groupBy, setGroupBy]);
+
   // "Group by" fields offered on this page (core + category-scoped attributes)
   // and the resolved defs for the active selection. `customGroupBy` is only set
   // when ElasticOn and the selection differs from the built-in Category → Type
@@ -891,6 +907,7 @@ const AllEntitiesViewInner = ({
   const [k8sResourceType, setK8sResourceType] = useState<KubernetesResourceType>(KUBERNETES_RESOURCE_TYPE_ALL);
   const [k8sClusterFilter, setK8sClusterFilter] = useState<string>(KUBERNETES_FILTER_ALL);
   const [k8sNamespaceFilter, setK8sNamespaceFilter] = useState<string>(KUBERNETES_FILTER_ALL);
+  const [k8sDeploymentFilter, setK8sDeploymentFilter] = useState<string>(KUBERNETES_FILTER_ALL);
   const [k8sNodeFilter, setK8sNodeFilter] = useState<string>(KUBERNETES_FILTER_ALL);
 
   const k8sFilterVisibility = useMemo(
@@ -913,16 +930,26 @@ const AllEntitiesViewInner = ({
       : []),
     [showK8sFilters, k8sEntitiesForFilters, k8sClusterFilter, k8sClusterNames, k8sFilterVisibility.showNamespace]
   );
+  const effectiveK8sNamespaceFilter =
+    k8sNamespaceFilter !== KUBERNETES_FILTER_ALL && !k8sNamespaceNames.includes(k8sNamespaceFilter)
+      ? KUBERNETES_FILTER_ALL
+      : k8sNamespaceFilter;
+  const k8sDeploymentNames = useMemo(
+    () => (showK8sFilters && k8sFilterVisibility.showDeployment
+      ? getKubernetesDeploymentNames(k8sEntitiesForFilters, k8sClusterFilter, effectiveK8sNamespaceFilter, k8sClusterNames)
+      : []),
+    [showK8sFilters, k8sEntitiesForFilters, k8sClusterFilter, effectiveK8sNamespaceFilter, k8sClusterNames, k8sFilterVisibility.showDeployment]
+  );
+  const effectiveK8sDeploymentFilter =
+    k8sDeploymentFilter !== KUBERNETES_FILTER_ALL && !k8sDeploymentNames.includes(k8sDeploymentFilter)
+      ? KUBERNETES_FILTER_ALL
+      : k8sDeploymentFilter;
   const k8sNodeNames = useMemo(
     () => (showK8sFilters && k8sFilterVisibility.showNode
       ? getKubernetesNodeNames(k8sEntitiesForFilters, k8sClusterFilter, k8sClusterNames)
       : []),
     [showK8sFilters, k8sEntitiesForFilters, k8sClusterFilter, k8sClusterNames, k8sFilterVisibility.showNode]
   );
-  const effectiveK8sNamespaceFilter =
-    k8sNamespaceFilter !== KUBERNETES_FILTER_ALL && !k8sNamespaceNames.includes(k8sNamespaceFilter)
-      ? KUBERNETES_FILTER_ALL
-      : k8sNamespaceFilter;
   const effectiveK8sNodeFilter =
     k8sNodeFilter !== KUBERNETES_FILTER_ALL && !k8sNodeNames.includes(k8sNodeFilter)
       ? KUBERNETES_FILTER_ALL
@@ -932,6 +959,7 @@ const AllEntitiesViewInner = ({
       setK8sResourceType(next);
       setK8sClusterFilter(KUBERNETES_FILTER_ALL);
       setK8sNamespaceFilter(KUBERNETES_FILTER_ALL);
+      setK8sDeploymentFilter(KUBERNETES_FILTER_ALL);
       setK8sNodeFilter(KUBERNETES_FILTER_ALL);
     },
     []
@@ -940,7 +968,15 @@ const AllEntitiesViewInner = ({
     (next: string) => {
       setK8sClusterFilter(next);
       setK8sNamespaceFilter(KUBERNETES_FILTER_ALL);
+      setK8sDeploymentFilter(KUBERNETES_FILTER_ALL);
       setK8sNodeFilter(KUBERNETES_FILTER_ALL);
+    },
+    []
+  );
+  const handleK8sNamespaceChange = useCallback(
+    (next: string) => {
+      setK8sNamespaceFilter(next);
+      setK8sDeploymentFilter(KUBERNETES_FILTER_ALL);
     },
     []
   );
@@ -961,6 +997,31 @@ const AllEntitiesViewInner = ({
     const pending = consumePendingSearch();
     if (pending !== null) setSearch(pending);
   }, []);
+
+  // Consume "Add to filter" intent from the full-page detail view. The
+  // detail page stashes the entity's K8s context in sessionStorage before
+  // navigating here so the filters can be applied on mount.
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem('entityCentricLab_addToFilter');
+      if (!raw) return;
+      sessionStorage.removeItem('entityCentricLab_addToFilter');
+      const intent = JSON.parse(raw) as {
+        cluster?: string;
+        namespace?: string;
+        deployment?: string;
+        node?: string;
+      };
+      setK8sResourceType(KUBERNETES_RESOURCE_TYPE_ALL);
+      if (intent.cluster) setK8sClusterFilter(intent.cluster);
+      if (intent.namespace) setK8sNamespaceFilter(intent.namespace);
+      if (intent.deployment) setK8sDeploymentFilter(intent.deployment);
+      if (intent.node) setK8sNodeFilter(intent.node);
+    } catch {
+      // ignore
+    }
+  }, []);
+
   // Two flyout slots so the shared flyout's parent/child session can dock two
   // entities side by side: `selectedEntityName` is the parent (session
   // `'start'`), `childEntityName` is the child (session `'inherit'`). The ref
@@ -1152,16 +1213,18 @@ const AllEntitiesViewInner = ({
       showK8sFilters &&
       (k8sClusterFilter !== KUBERNETES_FILTER_ALL ||
         effectiveK8sNamespaceFilter !== KUBERNETES_FILTER_ALL ||
+        effectiveK8sDeploymentFilter !== KUBERNETES_FILTER_ALL ||
         effectiveK8sNodeFilter !== KUBERNETES_FILTER_ALL)
         ? filterKubernetesEntities(
             filteredEntitiesAfterResourceType,
             k8sClusterFilter,
             effectiveK8sNamespaceFilter,
+            effectiveK8sDeploymentFilter,
             effectiveK8sNodeFilter,
             k8sClusterNames
           )
         : filteredEntitiesAfterResourceType,
-    [filteredEntitiesAfterResourceType, showK8sFilters, k8sClusterFilter, effectiveK8sNamespaceFilter, effectiveK8sNodeFilter, k8sClusterNames]
+    [filteredEntitiesAfterResourceType, showK8sFilters, k8sClusterFilter, effectiveK8sNamespaceFilter, effectiveK8sDeploymentFilter, effectiveK8sNodeFilter, k8sClusterNames]
   );
   // Cloud provider filter — page-level on the Cloud category page.
   const filteredEntitiesAfterProvider = useMemo(
@@ -1224,6 +1287,7 @@ const AllEntitiesViewInner = ({
       k8sResourceType !== KUBERNETES_RESOURCE_TYPE_ALL ||
       k8sClusterFilter !== KUBERNETES_FILTER_ALL ||
       effectiveK8sNamespaceFilter !== KUBERNETES_FILTER_ALL ||
+      effectiveK8sDeploymentFilter !== KUBERNETES_FILTER_ALL ||
       effectiveK8sNodeFilter !== KUBERNETES_FILTER_ALL
     )) ||
     (isCloudCategoryPage && cloudProviderFilter !== CLOUD_PROVIDER_FILTER_ALL);
@@ -1238,6 +1302,7 @@ const AllEntitiesViewInner = ({
     setK8sResourceType(KUBERNETES_RESOURCE_TYPE_ALL);
     setK8sClusterFilter(KUBERNETES_FILTER_ALL);
     setK8sNamespaceFilter(KUBERNETES_FILTER_ALL);
+    setK8sDeploymentFilter(KUBERNETES_FILTER_ALL);
     setK8sNodeFilter(KUBERNETES_FILTER_ALL);
   }, [setActiveTagFilters]);
 
@@ -1372,6 +1437,42 @@ const AllEntitiesViewInner = ({
     setChildEntityName(null);
     setChildEntityContext(null);
   }, []);
+
+  // "Add to filter" from the K8s flyout: keep "All resource types" but fill
+  // in the contextual cascade filters (cluster, namespace, node) based on
+  // what the entity carries, then close the flyout so the user sees
+  // everything in that entity's context.
+  const handleAddToK8sFilter = useCallback(
+    (entity: Entity) => {
+      setK8sResourceType(KUBERNETES_RESOURCE_TYPE_ALL);
+      const cluster =
+        entity.subType === 'Clusters'
+          ? entity.name
+          : entity.attributes?.cluster ??
+            assignClusterForEntity(entity, k8sClusterNames) ??
+            KUBERNETES_FILTER_ALL;
+      setK8sClusterFilter(cluster);
+      setK8sNamespaceFilter(
+        entity.subType === 'Namespaces'
+          ? entity.name
+          : entity.attributes?.namespace ?? KUBERNETES_FILTER_ALL
+      );
+      setK8sDeploymentFilter(
+        entity.subType === 'Deployments'
+          ? entity.name
+          : entity.attributes?.deployment ?? KUBERNETES_FILTER_ALL
+      );
+      setK8sNodeFilter(
+        entity.subType === 'Nodes'
+          ? entity.name
+          : entity.attributes?.node ?? KUBERNETES_FILTER_ALL
+      );
+      setSelectedEntityName(null);
+      setChildEntityName(null);
+      setChildEntityContext(null);
+    },
+    [k8sClusterNames]
+  );
 
   // Clicking a region on the Geomap toggles that region into the shared
   // `region` tag filter — same state the filter chips drive — so the
@@ -2050,7 +2151,7 @@ const AllEntitiesViewInner = ({
                             <KubernetesNamespaceFilter
                               namespaceNames={k8sNamespaceNames}
                               value={effectiveK8sNamespaceFilter}
-                              onChange={setK8sNamespaceFilter}
+                              onChange={handleK8sNamespaceChange}
                             />
                           </EuiFlexItem>
                         ) : null}
@@ -2060,6 +2161,15 @@ const AllEntitiesViewInner = ({
                               nodeNames={k8sNodeNames}
                               value={effectiveK8sNodeFilter}
                               onChange={setK8sNodeFilter}
+                            />
+                          </EuiFlexItem>
+                        ) : null}
+                        {k8sFilterVisibility.showDeployment && k8sDeploymentNames.length > 0 ? (
+                          <EuiFlexItem grow={false}>
+                            <KubernetesDeploymentFilter
+                              deploymentNames={k8sDeploymentNames}
+                              value={effectiveK8sDeploymentFilter}
+                              onChange={setK8sDeploymentFilter}
                             />
                           </EuiFlexItem>
                         ) : null}
@@ -2493,6 +2603,11 @@ const AllEntitiesViewInner = ({
             hideEvents={isPhase1}
             hiddenTabIds={isPhase1 ? ['custom', 'relationships'] : undefined}
             dashboardStyle={dashboardStyleVariation}
+            onAddToFilter={
+              showK8sFilters && selectedEntity?.category === 'kubernetes'
+                ? () => handleAddToK8sFilter(selectedEntity)
+                : undefined
+            }
           />
           {childEntityName ? (
             <EntityFlyout
