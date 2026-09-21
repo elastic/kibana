@@ -64,12 +64,31 @@ const anchorSchema = schema.object({
   ),
 });
 
-/** A screenshot as created: with its image, which only reads leave out (see `NewSnapshot`). Comments are never deleted, so one without could never be shown. */
+/** The most a screenshot's image may weigh; base64 makes 4 characters of every 3 bytes. */
+const SNAPSHOT_BYTES_MAX = 300_000;
+const BASE64 = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
+/** The base64 of the three bytes every JPEG starts with (FF D8 FF, the start-of-image marker). */
+const JPEG_BASE64_START = '/9j/';
+
+/**
+ * A screenshot as created: with its image, which only reads leave out (see
+ * `NewSnapshot`). Comments are never deleted, so one without an image, or with
+ * one that is not the JPEG it claims to be, could never be shown.
+ */
 const newSnapshotSchema = schema.object({
   mimeType: schema.literal('image/jpeg'),
   width: schema.number({ min: 1, max: 10_000 }),
   height: schema.number({ min: 1, max: 10_000 }),
-  image: schema.string({ minLength: 1, maxLength: Math.ceil((300_000 * 4) / 3) + 4 }), // Base64 expands the byte budget by 4/3 plus padding.
+  image: schema.string({
+    minLength: 1,
+    maxLength: (SNAPSHOT_BYTES_MAX / 3) * 4,
+    validate: (value) =>
+      !BASE64.test(value)
+        ? 'must be base64'
+        : !value.startsWith(JPEG_BASE64_START)
+        ? 'must be a JPEG image'
+        : undefined,
+  }),
 });
 
 const replySchema = schema.object({

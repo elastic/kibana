@@ -54,15 +54,24 @@ describe('newCommentSchema', () => {
     expect(() => newCommentSchema.validate(withRoute('/app/one/../two'))).not.toThrow();
   });
 
-  it('takes a screenshot with its image only: a comment is kept for good, and one without could never be shown', () => {
+  describe('screenshots', () => {
     const snapshot = { mimeType: 'image/jpeg', width: 800, height: 600 };
-    expect(() =>
-      newCommentSchema.validate({ ...valid, snapshot: { ...snapshot, image: 'AAAA' } })
-    ).not.toThrow();
-    expect(() => newCommentSchema.validate({ ...valid, snapshot })).toThrow(/image/);
-    expect(() =>
-      newCommentSchema.validate({ ...valid, snapshot: { ...snapshot, image: '' } })
-    ).toThrow(/image/);
+    const withImage = (image?: string) => ({ ...valid, snapshot: { ...snapshot, image } });
+    // A 2x2 JPEG; `/9j/` is the base64 of the start-of-image marker every JPEG begins with.
+    const jpeg = '/9j/4AAQSkZJRgABAQEASABIAAD/2Q==';
+
+    it('takes one with a JPEG image only: a comment is kept for good, and one without a showable image could never be shown', () => {
+      expect(() => newCommentSchema.validate(withImage(jpeg))).not.toThrow();
+
+      expect(() => newCommentSchema.validate({ ...valid, snapshot })).toThrow(/image/);
+      expect(() => newCommentSchema.validate(withImage(''))).toThrow(/image/);
+      expect(() => newCommentSchema.validate(withImage('!!!!'))).toThrow(/base64/);
+      expect(() => newCommentSchema.validate(withImage(`${jpeg}A`))).toThrow(/base64/);
+      expect(() => newCommentSchema.validate(withImage('AAAA'))).toThrow(/JPEG/);
+      expect(() => newCommentSchema.validate(withImage(`${jpeg}${'A'.repeat(400_000)}`))).toThrow(
+        /length/
+      );
+    });
   });
 
   it('rejects timestamps Elasticsearch would not store', () => {

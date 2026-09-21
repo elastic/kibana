@@ -13,6 +13,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { StorageIndexAdapter, type IStorageClient } from '@kbn/storage-adapter';
 import type { Comment, CommentPatch, CommentSnapshot, NewComment, NewSnapshot } from '../common';
 import { CommentsLimitError } from './limit_error';
+import { UncertainWriteError } from './uncertain_write_error';
 import { MAX_COMMENTS, REPLIES_MAX } from './schemas';
 import { COMMENTS_STORAGE, SNAPSHOTS_STORAGE } from './storage';
 
@@ -111,24 +112,68 @@ export class CommentsClient {
       ...(snapshot ? { snapshot: sizeOf(snapshot) } : {}),
     };
     // The image goes first, so that a comment is never seen without its screenshot.
+    // Nothing would ever read or remove the screenshot of a comment that is not
+    // stored, so it is taken out again as soon as that is known.
     if (snapshot) {
-      await this.snapshots.index({ id, document: snapshot });
+      try {
+        await this.snapshots.index({ id, document: snapshot });
+      } catch (error) {
+        // Without an answer from Elasticsearch, the screenshot may be there all the same.
+        await this.discardSnapshot(id);
+        throw error;
+      }
     }
     try {
-      await this.comments.index({ id, document });
+      await this.storeComment(id, document);
     } catch (error) {
-      // Nothing would ever read or remove the screenshot of a comment that was not
-      // stored: it is taken out again, or at least left a trace of.
       if (snapshot) {
-        await this.snapshots.delete({ id }).catch((failure) => {
-          this.logger.warn(
-            `Comment ${id} could not be stored, nor could its screenshot be removed again: ${failure}`
-          );
-        });
+        if (error instanceof UncertainWriteError) {
+          this.logger.warn(`${error.message} Its screenshot is kept.`);
+        } else {
+          await this.discardSnapshot(id);
+        }
       }
       throw error;
     }
     return fromStored(id, document);
+  }
+
+  /**
+   * Stores a new comment. Elasticsearch answering with an error means the comment
+   * is not stored, and the error is thrown as it is. Without an answer (a timeout,
+   * a lost connection) the comment may well be stored, so the same creation is
+   * made once more: it goes through, or is refused because the comment is there
+   * already, and either way the comment is stored, without the browser having to
+   * try again and store a second one. Should that fail too, nothing is known about
+   * the comment, which an `UncertainWriteError` says.
+   */
+  private async storeComment(id: string, document: StoredComment): Promise<void> {
+    const write = () => this.comments.index({ id, document, op_type: 'create' });
+    try {
+      await write();
+    } catch (error) {
+      if (error instanceof errors.ResponseError) {
+        throw error;
+      }
+      try {
+        await write();
+      } catch (again) {
+        if (!hasStatus(again, 409)) {
+          throw new UncertainWriteError(id, again);
+        }
+      }
+    }
+  }
+
+  /** Takes out whatever is stored of the screenshot of a comment that is not; failing that, leaves a trace. */
+  private async discardSnapshot(id: string): Promise<void> {
+    try {
+      await this.snapshots.delete({ id });
+    } catch (failure) {
+      this.logger.warn(
+        `The screenshot of comment ${id}, which is not stored, could not be removed: ${failure}`
+      );
+    }
   }
 
   /**

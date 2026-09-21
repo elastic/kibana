@@ -12,6 +12,7 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
 import type { NewComment } from '../common';
 import { CommentsClient, type CommentsStorage, type SnapshotsStorage } from './comments_client';
 import { CommentsLimitError } from './limit_error';
+import { UncertainWriteError } from './uncertain_write_error';
 import { MAX_COMMENTS, REPLIES_MAX } from './schemas';
 
 const responseError = (statusCode: number) =>
@@ -94,6 +95,7 @@ describe('CommentsClient', () => {
           updatedAt: created.createdAt,
           snapshot: snapshotSize,
         },
+        op_type: 'create',
       });
       expect(snapshots.index).toHaveBeenCalledWith({ id: created.id, document: snapshot });
       expect(snapshots.index.mock.invocationCallOrder[0]).toBeLessThan(
@@ -108,6 +110,7 @@ describe('CommentsClient', () => {
       expect(comments.index).toHaveBeenCalledWith({
         id: created.id,
         document: expect.not.objectContaining({ snapshot: expect.anything() }),
+        op_type: 'create',
       });
       expect(snapshots.index).not.toHaveBeenCalled();
 
@@ -116,30 +119,77 @@ describe('CommentsClient', () => {
       expect(comments.index).toHaveBeenCalledTimes(1);
     });
 
-    it('removes the screenshot again when the comment cannot be stored', async () => {
-      comments.index.mockRejectedValueOnce(responseError(503));
+    it('removes the screenshot again when Elasticsearch refuses the comment', async () => {
+      comments.index.mockRejectedValueOnce(responseError(400));
 
       await expect(client().create({ ...input, snapshot })).rejects.toThrow(errors.ResponseError);
 
       const [{ id }] = snapshots.index.mock.calls[0];
+      expect(comments.index).toHaveBeenCalledTimes(1);
+      expect(comments.index).toHaveBeenCalledWith(
+        expect.objectContaining({ id, op_type: 'create' })
+      );
       expect(snapshots.delete).toHaveBeenCalledWith({ id });
       expect(logger.warn).not.toHaveBeenCalled();
 
       // Without a screenshot there is nothing to remove.
-      comments.index.mockRejectedValueOnce(responseError(503));
+      comments.index.mockRejectedValueOnce(responseError(400));
       await expect(client().create(input)).rejects.toThrow(errors.ResponseError);
       expect(snapshots.delete).toHaveBeenCalledTimes(1);
     });
 
-    it('reports the comment failure, and logs the screenshot it could not remove either', async () => {
-      comments.index.mockRejectedValueOnce(new Error('comment failed'));
+    it('logs the screenshot of a refused comment that it could not remove either', async () => {
+      comments.index.mockRejectedValueOnce(responseError(400));
       snapshots.delete.mockRejectedValueOnce(new Error('delete failed'));
 
-      await expect(client().create({ ...input, snapshot })).rejects.toThrow('comment failed');
+      await expect(client().create({ ...input, snapshot })).rejects.toThrow(errors.ResponseError);
 
       const [{ id }] = snapshots.index.mock.calls[0];
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining(`Comment ${id}`));
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining(`comment ${id}`));
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('delete failed'));
+    });
+
+    it('makes the creation again when Elasticsearch did not answer, and has the comment either way', async () => {
+      comments.index.mockRejectedValueOnce(new errors.TimeoutError('Request timed out'));
+      const created = await client().create({ ...input, snapshot });
+
+      expect(comments.index).toHaveBeenCalledTimes(2);
+      expect(comments.index).toHaveBeenLastCalledWith(
+        expect.objectContaining({ id: created.id, op_type: 'create' })
+      );
+      expect(snapshots.delete).not.toHaveBeenCalled();
+
+      // The first write went through after all: the creation is refused as a duplicate.
+      comments.index
+        .mockRejectedValueOnce(new errors.ConnectionError('Connection lost'))
+        .mockRejectedValueOnce(responseError(409));
+      await expect(client().create({ ...input, snapshot })).resolves.toEqual(
+        expect.objectContaining({ text: input.text, snapshot: snapshotSize })
+      );
+      expect(snapshots.delete).not.toHaveBeenCalled();
+    });
+
+    it('keeps the screenshot while it is unknown whether the comment is stored', async () => {
+      comments.index
+        .mockRejectedValueOnce(new errors.TimeoutError('Request timed out'))
+        .mockRejectedValueOnce(new errors.TimeoutError('Request timed out'));
+
+      await expect(client().create({ ...input, snapshot })).rejects.toThrow(UncertainWriteError);
+
+      const [{ id }] = snapshots.index.mock.calls[0];
+      expect(snapshots.delete).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining(`comment ${id}`));
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('kept'));
+    });
+
+    it('takes out whatever is stored of a screenshot whose write failed', async () => {
+      snapshots.index.mockRejectedValueOnce(new errors.ConnectionError('Connection lost'));
+
+      await expect(client().create({ ...input, snapshot })).rejects.toThrow('Connection lost');
+
+      const [{ id }] = snapshots.index.mock.calls[0];
+      expect(snapshots.delete).toHaveBeenCalledWith({ id });
+      expect(comments.index).not.toHaveBeenCalled();
     });
   });
 
