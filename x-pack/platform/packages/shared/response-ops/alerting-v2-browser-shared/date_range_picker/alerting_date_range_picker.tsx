@@ -100,10 +100,7 @@ export const AlertingDateRangePicker = ({
         .pipe(distinctUntilChanged()),
     [featureFlags]
   );
-  const isDateRangePickerEnabled = useObservable(
-    isDateRangePickerEnabled$,
-    featureFlags.getBooleanValue(DATE_RANGE_PICKER_FEATURE_FLAG, true)
-  );
+  const isDateRangePickerEnabled = useObservable(isDateRangePickerEnabled$, true);
 
   const dateRangePickerPresets = useDateRangePickerPresets({
     service: data.dateRangePickerPresets,

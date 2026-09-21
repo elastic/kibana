@@ -71,14 +71,6 @@ describe('AlertingDateRangePicker', () => {
     mockOnChange.mockClear();
     useNewDateRangePickerFlag = true;
     (data.query.timefilter.history.get as jest.Mock).mockReturnValue([]);
-    (core.featureFlags.getBooleanValue as jest.Mock).mockImplementation(
-      (key: string, fallback: boolean) => {
-        if (key === DATE_RANGE_PICKER_FEATURE_FLAG) {
-          return useNewDateRangePickerFlag;
-        }
-        return fallback;
-      }
-    );
     (core.featureFlags.getBooleanValue$ as jest.Mock).mockImplementation(
       (key: string, fallback: boolean) => {
         if (key === DATE_RANGE_PICKER_FEATURE_FLAG) {
@@ -338,7 +330,6 @@ describe('AlertingDateRangePicker', () => {
     );
 
     expect(screen.getByTestId('alertingDateRangePicker')).toBeInTheDocument();
-    expect(lastPickerProps).toBeUndefined();
     expect(mockSuperDatePicker).toHaveBeenCalledWith(
       expect.objectContaining({
         start: 'now-15m',
