@@ -9,12 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiPageTemplate } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { AppHeader } from '@kbn/app-header';
-import type {
-  AppHeaderBadge,
-  AppHeaderDescription,
-  AppHeaderMenu,
-  AppHeaderTitle,
-} from '@kbn/app-header';
+import type { AppHeaderBadge, AppHeaderMenu, AppHeaderTitle } from '@kbn/app-header';
 import type { AppMenuItemType, AppMenuPrimaryActionItem } from '@kbn/app-menu';
 import { ALERTZERO_WATCHES_SUBNAV_WIDTH } from '../../../components/layout/constants';
 import { AlertZeroWatchesNav, type WatchesSectionId } from './alertzero_watches_nav';
@@ -22,7 +17,6 @@ import { AlertZeroWatchesNav, type WatchesSectionId } from './alertzero_watches_
 interface WatchesSectionLayoutProps {
   active: WatchesSectionId;
   title: AppHeaderTitle;
-  description?: AppHeaderDescription;
   badges?: AppHeaderBadge[];
   /** Rendered to the left of the header's overflow menu, e.g. a watch's Enabled toggle. */
   headerSwitch?: AppHeaderMenu['switch'];
@@ -40,7 +34,6 @@ interface WatchesSectionLayoutProps {
 export const WatchesSectionLayout: React.FC<WatchesSectionLayoutProps> = ({
   active,
   title,
-  description,
   badges,
   headerSwitch,
   headerPrimaryActionItem,
@@ -53,7 +46,7 @@ export const WatchesSectionLayout: React.FC<WatchesSectionLayoutProps> = ({
         ? {
             switch: headerSwitch,
             primaryActionItem: headerPrimaryActionItem,
-            items: headerItems ?? [],
+            items: headerItems,
           }
         : undefined,
     [headerSwitch, headerPrimaryActionItem, headerItems]
@@ -105,13 +98,7 @@ export const WatchesSectionLayout: React.FC<WatchesSectionLayoutProps> = ({
       >
         <AlertZeroWatchesNav active={active} />
       </EuiPageTemplate.Sidebar>
-      <AppHeader
-        title={title}
-        description={description}
-        badges={badges}
-        menu={menu}
-        spacing="compact"
-      />
+      <AppHeader title={title} badges={badges} menu={menu} spacing="compact" />
       <EuiPageTemplate.Section paddingSize="l" grow>
         {children}
       </EuiPageTemplate.Section>

@@ -32,6 +32,7 @@ import * as i18n from '../translations';
  */
 export type WatchesSectionId = string;
 
+/** Matches unexported `COMPACT_MIN_HEIGHT_PX` in `@kbn/ui-app-header`. */
 const NAV_HEADER_HEIGHT_PX = 48;
 
 interface AlertZeroWatchesNavProps {
@@ -68,7 +69,8 @@ export const AlertZeroWatchesNav: React.FC<AlertZeroWatchesNavProps> = ({ active
         css={css`
           display: flex;
           align-items: center;
-          min-height: ${NAV_HEADER_HEIGHT_PX}px;
+          /* 48px row + border below it — compact AppHeader puts min-height on the row, not the box. */
+          min-height: calc(${NAV_HEADER_HEIGHT_PX}px + ${euiTheme.border.width.thin});
           padding: 0 ${euiTheme.size.m};
           border-bottom: ${euiTheme.border.thin};
           flex-shrink: 0;
@@ -124,9 +126,10 @@ const WatchNavItem: React.FC<{ watch: Watch; isActive: boolean }> = ({ watch, is
   const label = (
     <span
       css={css`
-        display: inline-flex;
+        display: flex;
         align-items: center;
         gap: ${euiTheme.size.s};
+        max-width: 100%;
         min-width: 0;
       `}
     >
@@ -142,6 +145,8 @@ const WatchNavItem: React.FC<{ watch: Watch; isActive: boolean }> = ({ watch, is
       />
       <span
         css={css`
+          flex: 1 1 auto;
+          min-width: 0;
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;

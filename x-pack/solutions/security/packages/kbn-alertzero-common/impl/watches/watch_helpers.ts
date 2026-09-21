@@ -99,24 +99,9 @@ export function compareWatchesForDisplay(a: WatchDisplaySortable, b: WatchDispla
   return a.name.localeCompare(b.name);
 }
 
-export type WatchVisColorKey =
-  | 'euiColorVis0'
-  | 'euiColorVis1'
-  | 'euiColorVis2'
-  | 'euiColorVis3'
-  | 'euiColorVis4'
-  | 'euiColorVis5'
-  | 'euiColorVis6'
-  | 'euiColorVis7'
-  | 'euiColorVis8'
-  | 'euiColorVis9';
-
-/** Catalog accent: a vis token, Borealis `textAssistance`, or an already-resolved CSS color. */
-export type WatchAccentKey = WatchVisColorKey | 'textAssistance';
-
 /**
- * Resolve a Watch accent for paint. Token keys follow the theme; anything else is returned as-is
- * so a live hex from the API still works.
+ * Resolve a Watch accent for paint. Catalog `color` is an EUI token key (`euiColorVisN` or
+ * `textAssistance`). Unknown values fall back to `textAssistance` rather than being painted as CSS.
  */
 export function resolveWatchAccent(
   colors: { vis: Record<string, string>; textAssistance: string },
@@ -125,9 +110,11 @@ export function resolveWatchAccent(
   if (value === 'textAssistance') {
     return colors.textAssistance;
   }
-  const visColor = colors.vis[value];
-  if (visColor) {
-    return visColor;
+  if (Object.hasOwn(colors.vis, value)) {
+    const visColor = colors.vis[value];
+    if (typeof visColor === 'string') {
+      return visColor;
+    }
   }
-  return value;
+  return colors.textAssistance;
 }

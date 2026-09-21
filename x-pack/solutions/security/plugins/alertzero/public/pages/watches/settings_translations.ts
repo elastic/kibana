@@ -8,8 +8,8 @@
 /**
  * Copy for the per-Worker settings page.
  *
- * The API carries ids only, so every autonomy level and schedule unit resolves to a message here.
- * Keep the id maps in step with the managed watch catalog in `@kbn/alertzero-common`.
+ * The API carries ids only, so every autonomy level resolves to a message here.
+ * Keep AUTONOMY_LEVEL_NAMES in step with WATCH_AUTONOMY_LEVELS.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -94,7 +94,7 @@ export const AUTONOMY_RADIOGROUP_ARIA_LABEL = i18n.translate(
 );
 
 /* -------------------------------------------------------------------------- */
-/* Worker settings layout (autonomy cards, trigger row)                       */
+/* Trigger row and Workers empty state                                        */
 /* -------------------------------------------------------------------------- */
 
 export const scheduleUnitDays = (amount: number) =>

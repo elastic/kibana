@@ -79,7 +79,7 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
   const name = workerName(worker.id, worker.name);
   const description = workerDescription(worker.id);
   const autonomyLabel = settingsI18n.autonomyLevelName(settings.autonomy);
-  const scheduleBadge =
+  const scheduleLabel =
     settings.scheduleInterval != null
       ? workerScheduleCadenceLabel(settings.scheduleInterval)
       : undefined;
@@ -178,9 +178,11 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
           <EuiFlexItem grow={false}>
             <EuiBadge color="hollow">{autonomyLabel}</EuiBadge>
           </EuiFlexItem>
-          {scheduleBadge ? (
+          {scheduleLabel ? (
             <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow">{scheduleBadge}</EuiBadge>
+              <EuiBadge color="hollow" data-test-subj={`alertZeroWorkerScheduleBadge-${worker.id}`}>
+                {scheduleLabel}
+              </EuiBadge>
             </EuiFlexItem>
           ) : null}
           {/* Carried on the band itself so a collapsed Worker still reports a failed save. */}

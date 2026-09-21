@@ -249,6 +249,29 @@ describe('WatchDetailPage', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('shows a schedule header badge only when the Worker has a schedule interval', () => {
+    renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, floorWorkers);
+
+    const attackDiscovery = screen.getByTestId(
+      `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}`
+    );
+    const alertTriage = screen.getByTestId(
+      `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
+    );
+
+    expect(
+      within(attackDiscovery).getByTestId(
+        `alertZeroWorkerScheduleBadge-${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}`
+      )
+    ).toHaveTextContent('Every 24 hours');
+    expect(
+      within(alertTriage).queryByTestId(
+        `alertZeroWorkerScheduleBadge-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
+      )
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText('Manual run')).not.toBeInTheDocument();
+  });
+
   it('shows Hunt Watch with one Worker that has enablement and autonomy', () => {
     renderWatch(SYSTEM_SECURITY_WATCH_HUNT_ID, [huntWorker, ...floorWorkers]);
 
