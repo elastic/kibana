@@ -143,13 +143,11 @@ export default function (providerContext: FtrProviderContext) {
           }
           expect(modal !== undefined).to.be(true);
         });
-        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
-          await cisIntegration.navigateToIntegrationCspList();
-          expect(
-            (await cisIntegration.getFieldValueInEditPage(AWS_INPUT_TEST_SUBJECTS.ROLE_ARN)) ===
-              roleArn
-          ).to.be(true);
-        });
+        await cisIntegration.navigateToIntegrationCspList();
+        expect(
+          (await cisIntegration.getFieldValueInEditPage(AWS_INPUT_TEST_SUBJECTS.ROLE_ARN)) ===
+            roleArn
+        ).to.be(true);
       });
     });
 
@@ -179,15 +177,13 @@ export default function (providerContext: FtrProviderContext) {
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         });
-        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
-          await cisIntegration.navigateToIntegrationCspList();
-          expect(
-            (await cisIntegration.getFieldValueInEditPage(
-              AWS_INPUT_TEST_SUBJECTS.DIRECT_ACCESS_KEY_ID
-            )) === directAccessKeyId
-          ).to.be(true);
-          expect(await cisIntegration.getReplaceSecretButton('secret-access-key')).to.not.be(null);
-        });
+        await cisIntegration.navigateToIntegrationCspList();
+        expect(
+          (await cisIntegration.getFieldValueInEditPage(
+            AWS_INPUT_TEST_SUBJECTS.DIRECT_ACCESS_KEY_ID
+          )) === directAccessKeyId
+        ).to.be(true);
+        expect(await cisIntegration.getReplaceSecretButton('secret-access-key')).to.not.be(null);
       });
     });
 
@@ -219,21 +215,19 @@ export default function (providerContext: FtrProviderContext) {
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         });
-        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
-          await cisIntegration.navigateToIntegrationCspList();
-          await cisIntegration.clickFirstElementOnIntegrationTable();
-          expect(
-            (await cisIntegration.getValueInEditPage(
-              AWS_INPUT_TEST_SUBJECTS.TEMP_ACCESS_KEY_ID
-            )) === accessKeyId
-          ).to.be(true);
-          expect(
-            (await cisIntegration.getValueInEditPage(
-              AWS_INPUT_TEST_SUBJECTS.TEMP_ACCESS_SESSION_TOKEN
-            )) === tempAccessSessionToken
-          ).to.be(true);
-          expect(await cisIntegration.getReplaceSecretButton('secret-access-key')).to.not.be(null);
-        });
+        await cisIntegration.navigateToIntegrationCspList();
+        await cisIntegration.clickFirstElementOnIntegrationTable();
+        expect(
+          (await cisIntegration.getValueInEditPage(
+            AWS_INPUT_TEST_SUBJECTS.TEMP_ACCESS_KEY_ID
+          )) === accessKeyId
+        ).to.be(true);
+        expect(
+          (await cisIntegration.getValueInEditPage(
+            AWS_INPUT_TEST_SUBJECTS.TEMP_ACCESS_SESSION_TOKEN
+          )) === tempAccessSessionToken
+        ).to.be(true);
+        expect(await cisIntegration.getReplaceSecretButton('secret-access-key')).to.not.be(null);
       });
     });
 
@@ -263,20 +257,18 @@ export default function (providerContext: FtrProviderContext) {
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         });
-        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
-          await cisIntegration.navigateToIntegrationCspList();
-          await cisIntegration.clickFirstElementOnIntegrationTable();
-          expect(
-            (await cisIntegration.getValueInEditPage(
-              AWS_INPUT_TEST_SUBJECTS.SHARED_CREDENTIALS_FILE
-            )) === sharedCredentialFile
-          ).to.be(true);
-          expect(
-            (await cisIntegration.getValueInEditPage(
-              AWS_INPUT_TEST_SUBJECTS.SHARED_CREDENTIALS_PROFILE_NAME
-            )) === sharedCredentialProfileName
-          ).to.be(true);
-        });
+        await cisIntegration.navigateToIntegrationCspList();
+        await cisIntegration.clickFirstElementOnIntegrationTable();
+        expect(
+          (await cisIntegration.getValueInEditPage(
+            AWS_INPUT_TEST_SUBJECTS.SHARED_CREDENTIALS_FILE
+          )) === sharedCredentialFile
+        ).to.be(true);
+        expect(
+          (await cisIntegration.getValueInEditPage(
+            AWS_INPUT_TEST_SUBJECTS.SHARED_CREDENTIALS_PROFILE_NAME
+          )) === sharedCredentialProfileName
+        ).to.be(true);
       });
     });
 
@@ -292,13 +284,11 @@ export default function (providerContext: FtrProviderContext) {
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         });
-        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
-          await cisIntegration.navigateToIntegrationCspList();
-          expect(
-            (await cisIntegration.getFieldValueInEditPage(AWS_INPUT_TEST_SUBJECTS.ROLE_ARN)) ===
-              roleArn
-          ).to.be(true);
-        });
+        await cisIntegration.navigateToIntegrationCspList();
+        expect(
+          (await cisIntegration.getFieldValueInEditPage(AWS_INPUT_TEST_SUBJECTS.ROLE_ARN)) ===
+            roleArn
+        ).to.be(true);
       });
     });
 
@@ -329,15 +319,13 @@ export default function (providerContext: FtrProviderContext) {
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         });
-        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
-          await cisIntegration.navigateToIntegrationCspList();
-          expect(
-            (await cisIntegration.getFieldValueInEditPage(
-              AWS_INPUT_TEST_SUBJECTS.DIRECT_ACCESS_KEY_ID
-            )) === directAccessKeyId
-          ).to.be(true);
-          expect(await cisIntegration.getReplaceSecretButton('secret-access-key')).to.not.be(null);
-        });
+        await cisIntegration.navigateToIntegrationCspList();
+        expect(
+          (await cisIntegration.getFieldValueInEditPage(
+            AWS_INPUT_TEST_SUBJECTS.DIRECT_ACCESS_KEY_ID
+          )) === directAccessKeyId
+        ).to.be(true);
+        expect(await cisIntegration.getReplaceSecretButton('secret-access-key')).to.not.be(null);
       });
     });
 
@@ -370,21 +358,19 @@ export default function (providerContext: FtrProviderContext) {
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         });
-        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
-          await cisIntegration.navigateToIntegrationCspList();
-          await cisIntegration.clickFirstElementOnIntegrationTable();
-          expect(
-            (await cisIntegration.getValueInEditPage(
-              AWS_INPUT_TEST_SUBJECTS.TEMP_ACCESS_KEY_ID
-            )) === accessKeyId
-          ).to.be(true);
-          expect(
-            (await cisIntegration.getValueInEditPage(
-              AWS_INPUT_TEST_SUBJECTS.TEMP_ACCESS_SESSION_TOKEN
-            )) === tempAccessSessionToken
-          ).to.be(true);
-          expect(await cisIntegration.getReplaceSecretButton('secret-access-key')).to.not.be(null);
-        });
+        await cisIntegration.navigateToIntegrationCspList();
+        await cisIntegration.clickFirstElementOnIntegrationTable();
+        expect(
+          (await cisIntegration.getValueInEditPage(
+            AWS_INPUT_TEST_SUBJECTS.TEMP_ACCESS_KEY_ID
+          )) === accessKeyId
+        ).to.be(true);
+        expect(
+          (await cisIntegration.getValueInEditPage(
+            AWS_INPUT_TEST_SUBJECTS.TEMP_ACCESS_SESSION_TOKEN
+          )) === tempAccessSessionToken
+        ).to.be(true);
+        expect(await cisIntegration.getReplaceSecretButton('secret-access-key')).to.not.be(null);
       });
     });
 
@@ -415,20 +401,18 @@ export default function (providerContext: FtrProviderContext) {
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         });
-        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
-          await cisIntegration.navigateToIntegrationCspList();
-          await cisIntegration.clickFirstElementOnIntegrationTable();
-          expect(
-            (await cisIntegration.getValueInEditPage(
-              AWS_INPUT_TEST_SUBJECTS.SHARED_CREDENTIALS_FILE
-            )) === sharedCredentialFile
-          ).to.be(true);
-          expect(
-            (await cisIntegration.getValueInEditPage(
-              AWS_INPUT_TEST_SUBJECTS.SHARED_CREDENTIALS_PROFILE_NAME
-            )) === sharedCredentialProfileName
-          ).to.be(true);
-        });
+        await cisIntegration.navigateToIntegrationCspList();
+        await cisIntegration.clickFirstElementOnIntegrationTable();
+        expect(
+          (await cisIntegration.getValueInEditPage(
+            AWS_INPUT_TEST_SUBJECTS.SHARED_CREDENTIALS_FILE
+          )) === sharedCredentialFile
+        ).to.be(true);
+        expect(
+          (await cisIntegration.getValueInEditPage(
+            AWS_INPUT_TEST_SUBJECTS.SHARED_CREDENTIALS_PROFILE_NAME
+          )) === sharedCredentialProfileName
+        ).to.be(true);
       });
     });
     describe('Change namespace default value', () => {
