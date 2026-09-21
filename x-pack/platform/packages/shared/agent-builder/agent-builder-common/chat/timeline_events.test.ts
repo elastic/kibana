@@ -9,6 +9,7 @@ import {
   BUILT_IN_CONVERSATION_EVENT_TYPES,
   EventActorType,
   TimelineEventType,
+  assertValidConversationEventType,
   isAttachmentEvent,
   isBuiltInConversationEventType,
   isExecutionTerminalEvent,
@@ -57,4 +58,32 @@ describe('attachment timeline events', () => {
       expect(BUILT_IN_CONVERSATION_EVENT_TYPES).toContain(type);
     }
   );
+});
+
+describe('assertValidConversationEventType', () => {
+  it('accepts a valid custom type', () => {
+    expect(() => assertValidConversationEventType('my.custom_event')).not.toThrow();
+    expect(() => assertValidConversationEventType('text_note')).not.toThrow();
+    expect(() => assertValidConversationEventType('a.b.c')).not.toThrow();
+  });
+
+  it('throws when the type contains the id delimiter "::"', () => {
+    expect(() => assertValidConversationEventType('bad::type')).toThrow('must not contain "::"');
+  });
+
+  it('throws when the type is the reserved word "execution"', () => {
+    expect(() => assertValidConversationEventType('execution')).toThrow('reserved');
+  });
+
+  it('throws when the type is the reserved word "step"', () => {
+    expect(() => assertValidConversationEventType('step')).toThrow('reserved');
+  });
+
+  it('throws for every built-in timeline event type', () => {
+    for (const builtInType of BUILT_IN_CONVERSATION_EVENT_TYPES) {
+      expect(() => assertValidConversationEventType(builtInType)).toThrow(
+        'built-in timeline event type'
+      );
+    }
+  });
 });
