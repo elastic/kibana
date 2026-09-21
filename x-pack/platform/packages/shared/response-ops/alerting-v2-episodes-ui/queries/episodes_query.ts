@@ -56,7 +56,15 @@ export interface AlertEpisode extends BaseAlertEpisode {
    * Only set for classic alert rows; native episodes never use this.
    */
   is_muted?: boolean;
+  /**
+   * Flattened grouping object (e.g. `{ 'host.name': 'web-01' }`).
+   * Used to render grouping tags on source alert rows. Native episodes never set this.
+   */
+  source_grouping?: Record<string, unknown>;
 }
+
+/** True when the row came from an additional episode data source, not the v2 pipeline. */
+export const isSourceEpisode = (episode: AlertEpisode): boolean => episode.source_id != null;
 
 /** V2 episodes leave `supports_actions` unset; classic rows set it to `false`. */
 export const episodeSupportsActions = (episode: AlertEpisode): boolean =>
