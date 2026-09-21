@@ -96,21 +96,42 @@ describe('assignStoredInlineDataViewIds', () => {
     { name: 'Renamed' },
     { timeFieldName: '@timestamp' },
     { allowHidden: true },
-    { sourceFilters: [{ value: 'secret.*' }] },
+    { sourceFilters: [{ value: 'a' }, { value: 'b' }, { value: 'secret.*' }] },
+    { sourceFilters: [{ value: 'a' }] },
     { runtimeFieldMap: { bytes: { type: 'long', script: { source: 'emit(42)' } } } },
     { fieldFormats: { bytes: { id: 'bytes' } } },
     { fieldAttrs: { bytes: { customLabel: 'Size' } } },
   ])('assigns a new ID for a changed definition: %j', (changes) => {
+    const previousSpec = { ...inlineSpec, sourceFilters: [{ value: 'a' }, { value: 'b' }] };
     const existing = createAttributes([
-      { id: 'tab', searchSource: { index: { ...inlineSpec, id: 'legacy-id' } } },
+      { id: 'tab', searchSource: { index: { ...previousSpec, id: 'legacy-id' } } },
     ]);
     const input = createAttributes([
-      { id: 'tab', searchSource: { index: { ...inlineSpec, ...changes } } },
+      { id: 'tab', searchSource: { index: { ...previousSpec, ...changes } } },
     ]);
     const result = assignStoredInlineDataViewIds(input, existing);
 
     expect(readInlineId(result)).toEqual(expect.any(String));
     expect(readInlineId(result)).not.toBe('legacy-id');
+  });
+
+  it('keeps the ID and submitted order when field exclusions are reordered', () => {
+    const previousSpec = {
+      ...inlineSpec,
+      id: 'legacy-id',
+      sourceFilters: [{ value: 'a' }, { value: 'b' }],
+    };
+    const existing = createAttributes([{ id: 'tab', searchSource: { index: previousSpec } }]);
+    const sourceFilters = [{ value: 'b' }, { value: 'a' }];
+    const input = createAttributes([
+      { id: 'tab', searchSource: { index: { ...inlineSpec, sourceFilters } } },
+    ]);
+    const before = JSON.stringify({ input, existing });
+
+    const result = assignStoredInlineDataViewIds(input, existing);
+
+    expect(readSearchSource(result).index).toEqual({ ...previousSpec, sourceFilters });
+    expect(JSON.stringify({ input, existing })).toBe(before);
   });
 
   it('matches by tab ID after reordering, preserving sharing but not borrowing IDs for new tabs', () => {

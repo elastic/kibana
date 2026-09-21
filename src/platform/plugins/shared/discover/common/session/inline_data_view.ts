@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
 import { fromStoredDataView } from '@kbn/as-code-data-views-transforms';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
@@ -35,10 +36,11 @@ export const getInlineDataView = (
 /** Compares public definitions with the same defaults, without changing the spec or including its ID. */
 export const getDataViewSpecKey = (dataView: DataViewSpec): string => {
   const spec = fromStoredDataView(dataView);
+  const fieldFilters = spec.type === AS_CODE_DATA_VIEW_SPEC_TYPE ? spec.field_filters : undefined;
   const fieldSettings = Object.fromEntries(
-    Object.entries('field_settings' in spec ? spec.field_settings ?? {} : {}).filter(([, field]) =>
-      Object.values(field).some((value) => value !== undefined)
-    )
+    Object.entries(
+      spec.type === AS_CODE_DATA_VIEW_SPEC_TYPE ? spec.field_settings ?? {} : {}
+    ).filter(([, field]) => Object.values(field).some((value) => value !== undefined))
   );
 
   // An omitted name means the title; omitted allowHidden means false. Empty field
@@ -47,6 +49,8 @@ export const getDataViewSpecKey = (dataView: DataViewSpec): string => {
     ...spec,
     name: dataView.name || dataView.title,
     allow_hidden_indices: dataView.allowHidden ?? false,
+    // Sort exclusions only for comparison, so reordering them keeps the same ID.
+    field_filters: fieldFilters ? [...fieldFilters].sort() : undefined,
     field_settings: Object.keys(fieldSettings).length > 0 ? fieldSettings : undefined,
   });
 };
