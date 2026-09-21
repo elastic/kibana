@@ -212,7 +212,11 @@ describe('isIncludedTask', () => {
 
   it('includes orphaned child tasks when the active task set is empty', () => {
     expect(
-      isIncludedTask({ ...baseTask, parent_task_id: 'node1:99' }, DEFAULT_THRESHOLD_NANOS, new Set())
+      isIncludedTask(
+        { ...baseTask, parent_task_id: 'node1:99' },
+        DEFAULT_THRESHOLD_NANOS,
+        new Set()
+      )
     ).toBe(true);
   });
 
