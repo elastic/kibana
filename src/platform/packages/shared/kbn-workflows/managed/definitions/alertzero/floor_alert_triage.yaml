@@ -476,6 +476,52 @@ steps:
                   🤖 **Alert Triage** — Proposal {{ steps.get_proposal.output.decision | default: 'approved' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %}. {{ variables.fp_candidate_count }} alert(s) closed as false positive.
 
         else:
+          # Map the dismiss reason to the correct re-tag:
+          #   wrong → az:true_positive (analyst contradicts the classification itself)
+          #   any other reason → az:inconclusive (analyst rejects the *action*, not the verdict)
+          # Defaults to az:inconclusive so a stale or failed read never asserts true_positive.
+          - name: map_dismiss_reason_to_tag
+            type: data.set
+            with:
+              dismissed_tag: >-
+                {% if steps.get_proposal.output.dismissReason == 'wrong' %}az:true_positive{% else %}az:inconclusive{% endif %}
+
+          # Two calls per alert: kibana.SetAlertTags rejects combining add+remove of the same
+          # tag (e.g. az:false_positive removed and re-added), so keep them separate.
+          # Per-alert foreach mirrors set_az_tags so one failing alert cannot abort the batch.
+          - name: retag_dismissed_alerts
+            type: foreach
+            foreach: "${{ variables.fp_candidate_ids }}"
+            on-failure:
+              continue: true
+            steps:
+              - name: remove_fp_tag
+                type: kibana.SetAlertTags
+                on-failure:
+                  retry:
+                    max-attempts: 3
+                    delay: 5s
+                with:
+                  ids:
+                    - "{{ foreach.item }}"
+                  tags:
+                    tags_to_remove:
+                      - "az:false_positive"
+                    tags_to_add: []
+              - name: add_dismissed_tag
+                type: kibana.SetAlertTags
+                on-failure:
+                  retry:
+                    max-attempts: 3
+                    delay: 5s
+                with:
+                  ids:
+                    - "{{ foreach.item }}"
+                  tags:
+                    tags_to_remove: []
+                    tags_to_add:
+                      - "{{ variables.dismissed_tag }}"
+
           # TODO: replace with ai.conversation.message.add once kibana#291688 merges
           - name: post_comment_outcome_dismissed
             type: kibana.request
@@ -492,7 +538,7 @@ steps:
                 conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
                 trigger_mode: "never"
                 input: >-
-                  🤖 **Alert Triage** — Proposal {{ steps.get_proposal.output.decision | default: 'dismissed' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %}. {{ variables.fp_candidate_count }} alert(s) remain open, tagged az:false_positive.
+                  🤖 **Alert Triage** — Proposal {{ steps.get_proposal.output.decision | default: 'dismissed' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %} (reason: {{ steps.get_proposal.output.dismissReason | default: 'not specified' }}). {{ variables.fp_candidate_count }} alert(s) re-tagged {{ variables.dismissed_tag }}.{% if steps.get_proposal.output.rationale != blank %} Rationale: "{{ steps.get_proposal.output.rationale | truncate: 500 | escape }}".{% endif %}
 
   # ---------------------------------------------------------------------------
   # 9. No-FP branch: close the Investigation immediately (D31, D41).
