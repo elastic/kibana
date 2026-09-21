@@ -10,7 +10,7 @@ import { EuiSelect } from '@elastic/eui';
 import { BaseActionModal } from './base_action_modal';
 import { MODAL_TRANSLATIONS } from './translations';
 
-export interface AssignActionModalProps {
+interface AssignActionModalProps {
   recordId: string;
   initialAssignee?: string | null;
   onClose: () => void;
