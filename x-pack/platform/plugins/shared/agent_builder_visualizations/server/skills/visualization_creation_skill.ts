@@ -80,8 +80,8 @@ Do **not** use this skill when:
      - \`target\` (required) — one of:
        - \`{ "type": "lens", "chartType": <required>, "esql"?: <validated ES|QL> }\` for a standard chart
        - \`{ "type": "vega", "chartType"?: <styling hint>, "esql"?: <validated ES|QL> }\` for a custom Vega-Lite visualization
-       - \`{ "type": "custom_content", "esql"?: <validated ES|QL> | null }\` for an HTML layout — omit \`esql\` to have a query generated, pass \`null\` only when the panel genuinely has no data
-       - \`{ "type": "attachment", "attachment_id": <id>, "chartType"?, "esql"? }\` to update an existing visualization
+       - \`{ "type": "custom_content", "esql"?: <validated ES|QL>, "has_data"?: false }\` for an HTML layout — omit \`esql\` to have a query generated; pass \`has_data: false\` only when the panel genuinely has no data
+       - \`{ "type": "attachment", "attachment_id": <id>, "chartType"?, "esql"?, "has_data"? }\` to update an existing visualization
        \`esql\` is optional everywhere it appears: pass it when you already have a validated ES|QL, otherwise it is generated for you.
      - \`time_range\` (optional; **only** when the user explicitly named a time window, e.g. "last 7 days", "May 20–24". Do not invent a range. Omit it otherwise — create applies a data-aware default, and edits keep the existing range.)
    - For multi-panel requests, resolve the index (and validate the fields) ONCE up front, then call ${
@@ -146,9 +146,9 @@ Pass \`target.type: "custom_content"\` and describe the panel in \`query\` — l
 
 You decide whether the panel has data:
 - Omit \`target.esql\` and a query is generated from \`query\` (the common case), or pass a validated ES|QL yourself.
-- Pass \`target.esql: null\` **only** when the panel genuinely shows no live values — a banner, a legend, an explanatory note, a title card. Never use \`null\` to get past a failed query generation; fix the index or fields and retry instead.
+- Pass \`target.has_data: false\` **only** when the panel genuinely shows no live values — a banner, a legend, an explanatory note, a title card. Never use \`has_data: false\` to get past a failed query generation; fix the index or fields and retry instead. Do not pass \`esql: null\` to mean "no data" — that is treated as omitting the query so one is generated.
 
-To change an existing panel, call this tool again with \`target: { "type": "attachment", "attachment_id": ... }\` and describe the update — do not read the attachment to edit the HTML. Omitting \`esql\` on an update keeps the panel's current data state (its query, or none); pass a validated \`esql\` to add or replace data and \`null\` to remove it. If the generated query is rejected, correct \`query\` (or pass a validated \`esql\`) and retry; do not fall back to writing markup yourself.
+To change an existing panel, call this tool again with \`target: { "type": "attachment", "attachment_id": ... }\` and describe the update — do not read the attachment to edit the HTML. Omitting \`esql\` and \`has_data\` on an update keeps the panel's current data state (its query, or none); pass a validated \`esql\` to add or replace data, \`has_data: true\` to generate a query, and \`has_data: false\` to remove it. If the generated query is rejected, correct \`query\` (or pass a validated \`esql\`) and retry; do not fall back to writing markup yourself.
 
 **Scope — "Vega" here means Vega-Lite, not full Vega.** The Vega renderer only supports the Vega-Lite grammar. It cannot do full Vega features such as custom signals / imperative interactivity, arbitrary data transforms or expressions, or bespoke rendering. If a request fits neither a Lens chart type nor the Vega-Lite grammar, do **not** force a broken or misleading chart. Be honest with the user: explain that the requested chart is not supported in Vega-Lite and that full Vega is not available yet, then offer alternatives — the closest Vega-Lite approximation, a standard Lens chart, or splitting the request into multiple charts — and ask how they would like to proceed.
 
@@ -233,7 +233,7 @@ For every new Lens visualization, choose and pass \`target.chartType\`; it is re
 \`\`\`json
 {
   "query": "A header banner reading 'Production overview' with a short subtitle",
-  "target": { "type": "custom_content", "esql": null }
+  "target": { "type": "custom_content", "has_data": false }
 }
 \`\`\`
 

@@ -60,13 +60,17 @@ const lensTarget = (chartType: SupportedChartType = SupportedChartType.XY) => ({
   chartType,
 });
 const vegaTarget = { type: 'vega' as const };
-const customContentTarget = (esql?: string | null) => ({
+const customContentTarget = (rest: { esql?: string | null; has_data?: boolean | null } = {}) => ({
   type: 'custom_content' as const,
-  ...(esql !== undefined ? { esql } : {}),
+  ...rest,
 });
 const attachmentTarget = (
   attachmentId: string,
-  rest: { chartType?: SupportedChartType; esql?: string | null } = {}
+  rest: {
+    chartType?: SupportedChartType;
+    esql?: string | null;
+    has_data?: boolean | null;
+  } = {}
 ) => ({ type: 'attachment' as const, attachment_id: attachmentId, ...rest });
 
 const runHandler = async (
@@ -121,26 +125,60 @@ describe('createVisualizationTool schema', () => {
     ).toBe(true);
   });
 
-  it('accepts esql: null only where a panel can be data-free', () => {
+  it('accepts leftover esql: null on every target and treats it as omitted', () => {
+    const lens = schema.safeParse({
+      query: 'errors over time',
+      target: { ...lensTarget(), esql: null },
+    });
+    expect(lens.success).toBe(true);
+    if (lens.success) {
+      expect(lens.data.target).toMatchObject({ type: 'lens', esql: null });
+    }
+
     expect(
-      schema.safeParse({ query: 'a welcome banner', target: customContentTarget(null) }).success
+      schema.safeParse({ query: 'flows by host', target: { ...vegaTarget, esql: null } }).success
+    ).toBe(true);
+    expect(
+      schema.safeParse({
+        query: 'a status board per host',
+        target: customContentTarget({ esql: null }),
+      }).success
+    ).toBe(true);
+  });
+
+  it('accepts has_data only on custom_content and attachment targets', () => {
+    expect(
+      schema.safeParse({
+        query: 'a welcome banner',
+        target: customContentTarget({ has_data: false }),
+      }).success
     ).toBe(true);
     expect(
       schema.safeParse({
         query: 'drop the data',
-        target: attachmentTarget('existing', { esql: null }),
+        target: attachmentTarget('existing', { has_data: false }),
       }).success
     ).toBe(true);
 
-    expect(
-      schema.safeParse({
-        query: 'errors over time',
-        target: { ...lensTarget(), esql: null },
-      }).success
-    ).toBe(false);
-    expect(
-      schema.safeParse({ query: 'flows by host', target: { ...vegaTarget, esql: null } }).success
-    ).toBe(false);
+    const lens = schema.safeParse({
+      query: 'errors over time',
+      target: { ...lensTarget(), has_data: false },
+    });
+    expect(lens.success).toBe(true);
+    if (lens.success) {
+      expect(lens.data.target).not.toHaveProperty('has_data');
+    }
+  });
+
+  it('strips leftover contentMode instead of failing the call', () => {
+    const lens = schema.safeParse({
+      query: 'errors over time',
+      target: { ...lensTarget(), contentMode: 'static' },
+    });
+    expect(lens.success).toBe(true);
+    if (lens.success) {
+      expect(lens.data.target).not.toHaveProperty('contentMode');
+    }
   });
 
   it('allows an attachment update without chartType and requires the attachment id', () => {
@@ -150,6 +188,12 @@ describe('createVisualizationTool schema', () => {
     ).toBe(true);
     expect(
       schema.safeParse({ query: 'use a clearer title', target: { type: 'attachment' } }).success
+    ).toBe(false);
+    expect(
+      schema.safeParse({
+        query: 'use a clearer title',
+        target: { type: 'attachment', attachment_id: '' },
+      }).success
     ).toBe(false);
   });
 
@@ -178,6 +222,10 @@ describe('createVisualizationTool schema', () => {
   it('rejects a time_range whose endpoints are not valid Kibana date math', () => {
     const base = { query: 'errors over time', target: lensTarget() };
 
+    expect(schema.safeParse({ ...base, time_range: { from: '', to: '' } }).success).toBe(true);
+    expect(schema.safeParse({ ...base, time_range: { from: '', to: '' } }).data?.time_range).toBe(
+      undefined
+    );
     expect(schema.safeParse({ ...base, time_range: { from: '', to: 'not-a-date' } }).success).toBe(
       false
     );
@@ -379,7 +427,16 @@ describe('createVisualizationTool handler', () => {
     expect(data.renderer).toBe('lens');
   });
 
-  it('rejects esql: null on a Lens or Vega update', async () => {
+  it('treats leftover esql: null on Lens as omitted so the chart still builds', async () => {
+    await runHandler({
+      query: 'errors over time',
+      target: { ...lensTarget(), esql: null },
+    });
+
+    expect(mockBuildLens).toHaveBeenCalledWith(expect.objectContaining({ esql: undefined }));
+  });
+
+  it('ignores has_data: false on a Lens update instead of failing the chart', async () => {
     const attachments = createAttachments();
     attachments.getAttachmentRecord.mockReturnValue({
       id: 'existing',
@@ -399,15 +456,13 @@ describe('createVisualizationTool handler', () => {
     });
 
     const { result } = await runHandler(
-      { query: 'drop the data', target: attachmentTarget('existing', { esql: null }) },
+      { query: 'drop the data', target: attachmentTarget('existing', { has_data: false }) },
       { attachments }
     );
 
-    const [{ type, data }] = result.results;
-    expect(type).toBe(ToolResultType.error);
-    expect(data.message).toContain('"esql": null only applies to custom content panels');
-    expect(mockBuildLens).not.toHaveBeenCalled();
-    expect(attachments.update).not.toHaveBeenCalled();
+    expect(result.results[0].type).toBe(ToolResultType.visualization);
+    expect(mockBuildLens).toHaveBeenCalledTimes(1);
+    expect(attachments.update).toHaveBeenCalled();
   });
 
   it('reuses the existing time_range on edit instead of probing', async () => {
@@ -588,7 +643,7 @@ describe('createVisualizationTool handler', () => {
     it('generates the template server-side and persists it under visualization.template', async () => {
       const { result, attachments } = await runHandler({
         query: 'a status board per host',
-        target: customContentTarget('FROM logs | STATS count() BY host'),
+        target: customContentTarget({ esql: 'FROM logs | STATS count() BY host' }),
       });
 
       expect(mockBuildLens).not.toHaveBeenCalled();
@@ -623,7 +678,7 @@ describe('createVisualizationTool handler', () => {
     it('does not return the template in the tool result', async () => {
       const { result } = await runHandler({
         query: 'a status board per host',
-        target: customContentTarget('FROM logs | STATS count() BY host'),
+        target: customContentTarget({ esql: 'FROM logs | STATS count() BY host' }),
       });
 
       const [{ data }] = result.results;
@@ -664,10 +719,21 @@ describe('createVisualizationTool handler', () => {
       expect(mockResolveTemplate).not.toHaveBeenCalled();
     });
 
-    it('persists a data-free panel with no esql when the agent passes esql: null', async () => {
+    it('generates a query when leftover esql: null means the agent has none in hand', async () => {
+      const { result } = await runHandler({
+        query: 'document count per minute over time as a line chart',
+        index: 'kibana_sample_data_logs',
+        target: customContentTarget({ esql: null }),
+      });
+
+      expect(mockGenerateEsql).toHaveBeenCalledTimes(1);
+      expect(result.results[0].data.esql).toBe('FROM logs | STATS count() BY host');
+    });
+
+    it('persists a data-free panel with no esql when has_data is false', async () => {
       const { result, attachments } = await runHandler({
         query: 'a welcome banner',
-        target: customContentTarget(null),
+        target: customContentTarget({ has_data: false }),
       });
 
       expect(mockGenerateEsql).not.toHaveBeenCalled();
@@ -726,6 +792,16 @@ describe('createVisualizationTool handler', () => {
       expect(data.esql).toBe('FROM logs | STATS count() BY host');
     });
 
+    it('keeps a stored query when an update passes leftover esql: null', async () => {
+      const { result } = await runHandler(
+        { query: 'use a darker background', target: attachmentTarget('att-1', { esql: null }) },
+        { attachments: dataAttachment() }
+      );
+
+      expect(mockGenerateEsql).not.toHaveBeenCalled();
+      expect(result.results[0].data.esql).toBe('FROM logs | STATS count() BY host');
+    });
+
     it('re-samples when an update supplies a different esql', async () => {
       const { result } = await runHandler(
         {
@@ -748,11 +824,11 @@ describe('createVisualizationTool handler', () => {
       expect(data.esql).toBe('FROM logs | STATS errors = COUNT() BY host');
     });
 
-    it('drops the query when an update passes esql: null', async () => {
+    it('drops the query when an update passes has_data: false', async () => {
       const { result, attachments } = await runHandler(
         {
           query: 'turn this into a plain banner',
-          target: attachmentTarget('att-1', { esql: null }),
+          target: attachmentTarget('att-1', { has_data: false }),
         },
         { attachments: dataAttachment() }
       );
@@ -836,12 +912,25 @@ describe('createVisualizationTool handler', () => {
       expect(data.esql).toBe('FROM logs | STATS count() BY host');
     });
 
+    it('generates a query when an update passes has_data: true on a data-free panel', async () => {
+      const { result } = await runHandler(
+        {
+          query: 'show the log count too',
+          target: attachmentTarget('banner', { has_data: true }),
+        },
+        { attachments: dataFreeAttachment() }
+      );
+
+      expect(mockGenerateEsql).toHaveBeenCalledTimes(1);
+      expect(result.results[0].data.esql).toBe('FROM logs | STATS count() BY host');
+    });
+
     it('reports a template generation failure as an error result', async () => {
       mockResolveTemplate.mockRejectedValue(new Error('ES|QL query is invalid'));
 
       const { result } = await runHandler({
         query: 'a status board per host',
-        target: customContentTarget('FROM nope'),
+        target: customContentTarget({ esql: 'FROM nope' }),
       });
 
       const [{ type, data }] = result.results;
