@@ -118,8 +118,8 @@ export class DirectorService {
           logger,
         });
 
-        if (isNewEpisode && alertEvent.episode) {
-          newEpisodeIds.push(alertEvent.episode.id);
+        if (isNewEpisode && alertEvent.alert) {
+          newEpisodeIds.push(alertEvent.alert.id);
         }
 
         return alertEvent;
@@ -177,7 +177,7 @@ export class DirectorService {
         alertEvent: {
           ...currentAlertEvent,
           type: alertEventType.alert,
-          episode: {
+          alert: {
             id: previousAlertEvent!.last_episode_id!,
             status: alertEpisodeStatus.active,
           },
@@ -213,7 +213,7 @@ export class DirectorService {
     return {
       alertEvent: {
         ...currentAlertEvent,
-        episode: {
+        alert: {
           id: episodeId,
           status: result.status,
           ...(result.statusCount != null ? { status_count: result.statusCount } : {}),

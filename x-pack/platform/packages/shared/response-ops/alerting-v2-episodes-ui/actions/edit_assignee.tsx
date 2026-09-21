@@ -50,7 +50,7 @@ const applyAssignee = async (
 ) => {
   const actionable = episodes.filter(episodeSupportsActions);
   const items: BulkAssignEpisodeActionItem[] = actionable.map((episode) => ({
-    episode_id: episode['episode.id'],
+    alert_id: episode['episode.id'],
     assignee_uid: assigneeUid,
   }));
   if (!items.length) return;

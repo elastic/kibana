@@ -11,8 +11,8 @@ import type { AlertingOasOperationObject } from '../../oas_types';
 
 export const BULK_TAG_EPISODE_ACTION_REQUEST: BulkTagEpisodeActionBody = {
   items: [
-    { episode_id: 'episode-1', tags: ['production'] },
-    { episode_id: 'episode-2', tags: ['production'] },
+    { alert_id: 'alert-1', tags: ['production'] },
+    { alert_id: 'alert-2', tags: ['production'] },
   ],
 };
 

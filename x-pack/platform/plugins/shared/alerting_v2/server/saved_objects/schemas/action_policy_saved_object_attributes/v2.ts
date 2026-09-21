@@ -36,6 +36,7 @@ export const actionPolicySavedObjectAttributesSchema = schema.object({
     schema.nullable(
       schema.oneOf([
         schema.literal('per_episode'),
+        schema.literal('per_alert'), // accepted since v7; backfilled from per_episode in S2
         schema.literal('all'),
         schema.literal('per_field'),
       ])

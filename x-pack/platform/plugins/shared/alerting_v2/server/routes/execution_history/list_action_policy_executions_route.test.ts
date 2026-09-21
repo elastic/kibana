@@ -59,10 +59,10 @@ describe('ListActionPolicyExecutionsRoute', () => {
     });
   });
 
-  it('forwards episode_ids from the query to the client as episodeIds', async () => {
+  it('forwards alert_ids from the query to the client as episodeIds', async () => {
     const mocks = createMocks();
     const request = httpServerMock.createKibanaRequest({
-      query: { episode_ids: ['ep-1', 'ep-2'] },
+      query: { alert_ids: ['ep-1', 'ep-2'] },
     });
     const route = buildRoute(request as unknown as KibanaRequest, mocks);
 
@@ -154,7 +154,7 @@ describe('toListExecutionHistoryArgs', () => {
         search: 'foo',
         rule_ids: ['rule-1', 'rule-2'],
         outcome: ['dispatched'],
-        episode_ids: ['ep-1'],
+        alert_ids: ['ep-1'],
         start_date: '2026-01-01T00:00:00.000Z',
       })
     ).toEqual({

@@ -14,8 +14,8 @@ export const buildAlertActionTagSuggestionsQuery = (spaceId: string): string =>
 FROM ${ALERT_ACTIONS_DATA_STREAM}
 | WHERE space_id == ${escapeStringValue(
     spaceId
-  )} AND action_type == "tag" AND episode_id IS NOT NULL
-| STATS last_tags = LAST(tags, @timestamp) BY episode_id
+  )} AND action_type == "tag" AND alert_id IS NOT NULL
+| STATS last_tags = LAST(tags, @timestamp) BY alert_id
 | MV_EXPAND last_tags
 | STATS cnt = COUNT(*) BY last_tags
 | SORT cnt DESC, last_tags ASC

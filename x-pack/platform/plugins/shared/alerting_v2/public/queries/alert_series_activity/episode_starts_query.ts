@@ -35,10 +35,13 @@ export const buildEpisodeStartsQuery = ({ ruleId, episodeIds }: BuildEpisodeStar
 
   return (
     esql.from(ALERT_EVENTS_DATA_STREAM).where`type == "alert"`.where`rule.id == ${ruleId}`
-      .where`episode.id IN (${episodeLiterals})`
-      .pipe`STATS episode_start = MIN(@timestamp) BY episode.id, episode.status`
+      .where`alert.id IN (${episodeLiterals})`
+      .pipe`STATS episode_start = MIN(@timestamp) BY alert.id, alert.status`
       // Explicit ceiling (≤4 phases × episodes) so the implicit result cap can't clip a phase.
       .limit(Math.max(episodeIds.length * MAX_PHASES_PER_EPISODE, 1))
+      // Temporary projection: renames alert.* mapping fields back to episode.* column names so
+      // UI row-readers don't need to change in this PR. Remove in follow-up U2.
+      .pipe`RENAME \`alert.id\` AS \`episode.id\`, \`alert.status\` AS \`episode.status\``
       .keep('episode.id', 'episode.status', 'episode_start')
   );
 };

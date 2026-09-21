@@ -12,17 +12,17 @@ import { buildOasOperation, invalidResponseExample } from '../../oas_utils';
 import type { AlertingOasOperationObject } from '../../oas_types';
 
 export const BULK_ACK_EPISODE_ACTION_REQUEST: BulkAckEpisodeActionBody = {
-  items: [{ episode_id: 'episode-1' }, { episode_id: 'episode-2' }],
+  items: [{ alert_id: 'alert-1' }, { alert_id: 'alert-2' }],
 };
 
 export const BULK_ACK_EPISODE_ACTION_RESPONSE: BulkResponse = {
   affected_count: 1,
   errors: [
     {
-      id: 'episode-2',
+      id: 'alert-2',
       error: {
-        code: ALERTING_ERROR_CODES.ALERT_EPISODE_NOT_FOUND,
-        message: getAlertEpisodeNotFoundMessage('episode-2'),
+        code: ALERTING_ERROR_CODES.ALERT_NOT_FOUND,
+        message: getAlertEpisodeNotFoundMessage('alert-2'),
       },
     },
   ],

@@ -167,13 +167,13 @@ export type SeriesAlertActionParams = z.infer<typeof seriesAlertActionParamsSche
 
 export const episodeAlertActionParamsSchema = z
   .object({
-    episode_id: z
+    alert_id: z
       .string()
       .min(1)
       .max(ID_MAX_LENGTH)
-      .describe('Identifier of the alert episode to apply the action to.'),
+      .describe('Identifier of the alert to apply the action to.'),
   })
-  .describe('Path parameters for episode-level alert action endpoints.');
+  .describe('Path parameters for alert-level action endpoints.');
 export type EpisodeAlertActionParams = z.infer<typeof episodeAlertActionParamsSchema>;
 
 // Route body schemas for the series-level endpoints (action_type comes from the path).
@@ -287,7 +287,7 @@ export type BulkUnsnoozeSeriesActionBody = z.infer<typeof bulkUnsnoozeSeriesActi
 
 export const bulkTagEpisodeActionItemSchema = tagEpisodeActionSchema
   .omit({ action_type: true })
-  .extend({ episode_id: bulkEpisodeIdSchema })
+  .extend({ alert_id: bulkEpisodeIdSchema })
   .strict()
   .meta({ id: 'alerting_bulk_tag_episodes_item' });
 export type BulkTagEpisodeActionItem = z.infer<typeof bulkTagEpisodeActionItemSchema>;
@@ -300,7 +300,7 @@ export type BulkTagEpisodeActionBody = z.infer<typeof bulkTagEpisodeActionBodySc
 
 export const bulkAckEpisodeActionItemSchema = ackEpisodeActionSchema
   .omit({ action_type: true })
-  .extend({ episode_id: bulkEpisodeIdSchema })
+  .extend({ alert_id: bulkEpisodeIdSchema })
   .strict()
   .meta({ id: 'alerting_bulk_ack_episodes_item' });
 export type BulkAckEpisodeActionItem = z.infer<typeof bulkAckEpisodeActionItemSchema>;
@@ -313,7 +313,7 @@ export type BulkAckEpisodeActionBody = z.infer<typeof bulkAckEpisodeActionBodySc
 
 export const bulkUnackEpisodeActionItemSchema = unackEpisodeActionSchema
   .omit({ action_type: true })
-  .extend({ episode_id: bulkEpisodeIdSchema })
+  .extend({ alert_id: bulkEpisodeIdSchema })
   .strict()
   .meta({ id: 'alerting_bulk_unack_episodes_item' });
 export type BulkUnackEpisodeActionItem = z.infer<typeof bulkUnackEpisodeActionItemSchema>;
@@ -326,7 +326,7 @@ export type BulkUnackEpisodeActionBody = z.infer<typeof bulkUnackEpisodeActionBo
 
 export const bulkAssignEpisodeActionItemSchema = assignEpisodeActionSchema
   .omit({ action_type: true })
-  .extend({ episode_id: bulkEpisodeIdSchema })
+  .extend({ alert_id: bulkEpisodeIdSchema })
   .strict()
   .meta({ id: 'alerting_bulk_assign_episodes_item' });
 export type BulkAssignEpisodeActionItem = z.infer<typeof bulkAssignEpisodeActionItemSchema>;
@@ -339,7 +339,7 @@ export type BulkAssignEpisodeActionBody = z.infer<typeof bulkAssignEpisodeAction
 
 export const bulkActivateEpisodeActionItemSchema = activateActionSchema
   .omit({ action_type: true })
-  .extend({ episode_id: bulkEpisodeIdSchema })
+  .extend({ alert_id: bulkEpisodeIdSchema })
   .strict()
   .meta({ id: 'alerting_bulk_activate_episodes_item' });
 export type BulkActivateEpisodeActionItem = z.infer<typeof bulkActivateEpisodeActionItemSchema>;
@@ -352,7 +352,7 @@ export type BulkActivateEpisodeActionBody = z.infer<typeof bulkActivateEpisodeAc
 
 export const bulkDeactivateEpisodeActionItemSchema = deactivateActionSchema
   .omit({ action_type: true })
-  .extend({ episode_id: bulkEpisodeIdSchema })
+  .extend({ alert_id: bulkEpisodeIdSchema })
   .strict()
   .meta({ id: 'alerting_bulk_deactivate_episodes_item' });
 export type BulkDeactivateEpisodeActionItem = z.infer<typeof bulkDeactivateEpisodeActionItemSchema>;
@@ -372,7 +372,7 @@ export type BulkCreateSeriesAlertActionItemBody = CreateSeriesAlertActionBody & 
   group_hash: string;
 };
 export type BulkCreateEpisodeAlertActionItemBody = CreateEpisodeAlertActionBody & {
-  episode_id: string;
+  alert_id: string;
 };
 
 /**

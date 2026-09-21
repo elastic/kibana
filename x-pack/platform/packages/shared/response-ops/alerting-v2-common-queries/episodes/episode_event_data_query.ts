@@ -37,12 +37,15 @@ export const buildEpisodeEventDataQuery = (
     esql.from([ALERT_EVENTS_DATA_STREAM], ['_source'])
       .where`space_id == ${spaceId}`
       .where`type == "alert"`
-      .where`episode.id == ${episodeId}`
+      .where`alert.id == ${episodeId}`
       .pipe`EVAL extracted_data = JSON_EXTRACT(_source, "data")`
       .pipe`INLINE STATS
         last_data = LAST(extracted_data, @timestamp) WHERE extracted_data != "{}",
         last_data_timestamp = MAX(@timestamp) WHERE extracted_data != "{}",
         last_event_timestamp = MAX(@timestamp)
-        BY \`episode.id\``
+        BY \`alert.id\``
+      // Temporary projection: renames alert.id back to episode.id so UI row-readers
+      // don't need to change in this PR. Remove in follow-up U2.
+      .pipe`RENAME \`alert.id\` AS \`episode.id\``
   );
 };

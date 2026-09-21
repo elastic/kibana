@@ -27,10 +27,10 @@ export const getActiveAlertGroupHashesQuery = ({
 }: GetActiveAlertGroupHashesQueryParams): ComposerQuery => {
   let query = esql.from(ALERT_EVENTS_DATA_STREAM);
 
-  query = query.where`rule.id == ${{ ruleId }} AND episode.status IS NOT NULL`;
+  query = query.where`rule.id == ${{ ruleId }} AND alert.status IS NOT NULL`;
 
-  query = query.pipe`STATS 
-      last_episode_status = LAST(episode.status, @timestamp)
+  query = query.pipe`STATS
+      last_episode_status = LAST(alert.status, @timestamp)
     BY group_hash`;
 
   query = query.where`last_episode_status IN ("pending", "active", "recovering")`;

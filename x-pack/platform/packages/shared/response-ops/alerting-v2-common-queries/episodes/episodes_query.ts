@@ -118,9 +118,12 @@ export const addEpisodeAggregation = (query: ComposerQuery) => {
   // prettier-ignore
   query
     .pipe`EVAL extracted_data = JSON_EXTRACT(_source, "data")`
-    .pipe`INLINE STATS first_timestamp = MIN(@timestamp), last_timestamp = MAX(@timestamp), triggered_at = MIN(@timestamp) WHERE \`episode.status\` == "active", start_event_timestamp = MIN(@timestamp) WHERE \`episode.status\` == "pending" AND \`episode.status_count\` == 1, episode_data = LAST(extracted_data, @timestamp) WHERE extracted_data != "{}", severity = LAST(severity, @timestamp) WHERE status == "breached" AND severity IS NOT NULL BY episode.id`
+    .pipe`INLINE STATS first_timestamp = MIN(@timestamp), last_timestamp = MAX(@timestamp), triggered_at = MIN(@timestamp) WHERE \`alert.status\` == "active", start_event_timestamp = MIN(@timestamp) WHERE \`alert.status\` == "pending" AND \`alert.status_count\` == 1, episode_data = LAST(extracted_data, @timestamp) WHERE extracted_data != "{}", severity = LAST(severity, @timestamp) WHERE status == "breached" AND severity IS NOT NULL BY alert.id`
     .pipe`EVAL duration = DATE_DIFF("ms", first_timestamp, last_timestamp)`
-    .pipe`WHERE @timestamp == last_timestamp`;
+    .pipe`WHERE @timestamp == last_timestamp`
+    // Temporary projection: renames alert.* mapping fields back to episode.* column names so
+    // UI row-readers don't need to change in this PR. Remove in follow-up U2.
+    .pipe`RENAME \`alert.id\` AS \`episode.id\`, \`alert.status\` AS \`episode.status\``;
 };
 
 const addGroupHashActionStats = (query: ComposerQuery) => {
@@ -133,12 +136,12 @@ const addGroupHashActionStats = (query: ComposerQuery) => {
 };
 
 const addEpisodeIdActionStats = (query: ComposerQuery) => {
-  // `.rule-events` documents carry the nested `episode.id`, while `.alert-actions`
-  // documents carry a flat `episode_id` — unify them so INLINE STATS groups both
+  // `.rule-events` documents carry the nested `alert.id`, while `.alert-actions`
+  // documents carry a flat `alert_id` — unify them so INLINE STATS groups both
   // sides under the same key.
   // prettier-ignore
   query
-    .pipe`EVAL episode_id = COALESCE(\`episode.id\`, episode_id)`
+    .pipe`EVAL episode_id = COALESCE(\`alert.id\`, alert_id)`
     .pipe`INLINE STATS last_ack_action      = LAST(action_type,  @timestamp) WHERE action_type IN ("ack", "unack"),
                        last_assignee_uid    = LAST(assignee_uid, @timestamp) WHERE action_type == "assign",
                        last_tags            = LAST(tags,         @timestamp) WHERE action_type == "tag"

@@ -18,7 +18,7 @@ import type {
   BulkUnsnoozeSeriesActionItem,
 } from '@kbn/alerting-v2-schemas';
 import {
-  ALERTING_V2_EPISODES_API_PATH,
+  ALERTING_V2_ALERT_API_PATH,
   ALERTING_V2_SERIES_API_PATH,
 } from '@kbn/alerting-v2-constants';
 
@@ -44,34 +44,34 @@ export const bulkTagEpisodeActions = (
   http: HttpStart,
   items: BulkTagEpisodeActionItem[]
 ): Promise<BulkResponse> =>
-  postBulkAction(http, `${ALERTING_V2_EPISODES_API_PATH}/_bulk_tag`, items);
+  postBulkAction(http, `${ALERTING_V2_ALERT_API_PATH}/_bulk_tag`, items);
 
 export const bulkAckEpisodeActions = (
   http: HttpStart,
   items: BulkAckEpisodeActionItem[]
 ): Promise<BulkResponse> =>
-  postBulkAction(http, `${ALERTING_V2_EPISODES_API_PATH}/_bulk_ack`, items);
+  postBulkAction(http, `${ALERTING_V2_ALERT_API_PATH}/_bulk_ack`, items);
 
 export const bulkUnackEpisodeActions = (
   http: HttpStart,
   items: BulkUnackEpisodeActionItem[]
 ): Promise<BulkResponse> =>
-  postBulkAction(http, `${ALERTING_V2_EPISODES_API_PATH}/_bulk_unack`, items);
+  postBulkAction(http, `${ALERTING_V2_ALERT_API_PATH}/_bulk_unack`, items);
 
 export const bulkAssignEpisodeActions = (
   http: HttpStart,
   items: BulkAssignEpisodeActionItem[]
 ): Promise<BulkResponse> =>
-  postBulkAction(http, `${ALERTING_V2_EPISODES_API_PATH}/_bulk_assign`, items);
+  postBulkAction(http, `${ALERTING_V2_ALERT_API_PATH}/_bulk_assign`, items);
 
 export const bulkActivateEpisodeActions = (
   http: HttpStart,
   items: BulkActivateEpisodeActionItem[]
 ): Promise<BulkResponse> =>
-  postBulkAction(http, `${ALERTING_V2_EPISODES_API_PATH}/_bulk_activate`, items);
+  postBulkAction(http, `${ALERTING_V2_ALERT_API_PATH}/_bulk_activate`, items);
 
 export const bulkDeactivateEpisodeActions = (
   http: HttpStart,
   items: BulkDeactivateEpisodeActionItem[]
 ): Promise<BulkResponse> =>
-  postBulkAction(http, `${ALERTING_V2_EPISODES_API_PATH}/_bulk_deactivate`, items);
+  postBulkAction(http, `${ALERTING_V2_ALERT_API_PATH}/_bulk_deactivate`, items);

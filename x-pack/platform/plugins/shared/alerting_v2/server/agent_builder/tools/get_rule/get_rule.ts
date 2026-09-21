@@ -83,7 +83,7 @@ export const getRuleTool = ({
       if (!isNotFound) {
         logger.warn({
           message: 'Failed to fetch rule for episode',
-          code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_GET_RULE_FAILED,
+          code: ALERTING_LOG_CODES.AGENT_BUILDER_ALERT_GET_RULE_FAILED,
           labels: {
             rule_id: ruleId,
             episode_id: episodeId,

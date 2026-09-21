@@ -61,7 +61,7 @@ export const buildEpisodeActionsHistoryQuery = (
   const query = esql
     .from([ALERT_ACTIONS_DATA_STREAM], ['_id'])
     .where`space_id == ${spaceId}`
-    .where`episode_id == ${episodeId} OR (group_hash == ${groupHash} AND episode_id IS NULL)`
+    .where`alert_id == ${episodeId} OR (group_hash == ${groupHash} AND alert_id IS NULL)`
     .where`action_type IN ("ack", "unack", "snooze", "unsnooze", "deactivate", "activate", "tag", "assign")`;
 
   if (before) {
@@ -72,6 +72,9 @@ export const buildEpisodeActionsHistoryQuery = (
     query
       .sort(['@timestamp', 'DESC'])
       .limit(limit)
+      // Temporary projection: renames alert_id back to episode_id so UI row-readers
+      // don't need to change in this PR. Remove in follow-up U2.
+      .pipe`RENAME alert_id AS episode_id`
       .keep(
         '_id',
         '@timestamp',

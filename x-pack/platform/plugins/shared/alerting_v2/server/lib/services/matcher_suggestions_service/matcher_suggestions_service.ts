@@ -44,7 +44,7 @@ const RULE_SO_FIELD_CONFIG: Partial<Record<MatcherField, RuleSoFieldConfig>> = {
 };
 
 const MATCHER_FIELD_TO_ES_FIELD: Partial<Record<MatcherField, string>> = {
-  [MatcherField.EpisodeId]: 'episode.id',
+  [MatcherField.EpisodeId]: 'alert.id',
   [MatcherField.GroupHash]: 'group_hash',
 };
 
@@ -115,7 +115,7 @@ export class MatcherSuggestionsService {
               { term: { type: 'alert' } },
               { range: { '@timestamp': { gte: ALERT_EVENTS_LOOKBACK } } },
               { exists: { field: 'data' } },
-              { terms: { 'episode.status': ['pending', 'active', 'recovering'] } },
+              { terms: { 'alert.status': ['pending', 'active', 'recovering'] } },
               ...buildAlertEventsFiltersFromMatcher(matcher ?? ''),
             ],
           },

@@ -153,7 +153,7 @@ export class AlertActionsClient {
    *
    * Lifecycle actions additionally require the episode to be the latest of
    * its series (see {@link isLifecycleActionType}); an old episode is
-   * rejected with a 404 `ALERT_EPISODE_NOT_LATEST`.
+   * rejected with a 404 `ALERT_NOT_LATEST`.
    */
   public async createEpisodeAction(params: {
     episodeId: string;
@@ -179,8 +179,8 @@ export class AlertActionsClient {
 
       if (latestOfGroup?.episode_id !== episodeId) {
         throw Boom.notFound(getEpisodeNotLatestMessage(episodeId, alertEvent.group_hash), {
-          code: ALERTING_ERROR_CODES.ALERT_EPISODE_NOT_LATEST,
-          details: { episode_id: episodeId, group_hash: alertEvent.group_hash },
+          code: ALERTING_ERROR_CODES.ALERT_NOT_LATEST,
+          details: { alert_id: episodeId, group_hash: alertEvent.group_hash },
         });
       }
     }
@@ -339,7 +339,7 @@ export class AlertActionsClient {
       loadLatestAlertEventsByEpisodeId({
         queryService: this.queryService,
         spaceId: this.spaceId,
-        episodeIds: items.map((item) => item.episode_id),
+        episodeIds: items.map((item) => item.alert_id),
       }),
     ]);
 
@@ -349,7 +349,7 @@ export class AlertActionsClient {
     // every series a lifecycle item points at (see isLifecycleActionType).
     const lifecycleGroupHashes = items
       .filter((item) => isLifecycleActionType(item.action_type))
-      .map((item) => eventByEpisodeId.get(item.episode_id)?.group_hash)
+      .map((item) => eventByEpisodeId.get(item.alert_id)?.group_hash)
       .filter((groupHash): groupHash is string => groupHash !== undefined);
     const latestOfGroups = await loadLatestAlertEventsByGroupHash({
       queryService: this.queryService,
@@ -364,13 +364,13 @@ export class AlertActionsClient {
     const prepared: PreparedAction[] = [];
 
     for (const item of items) {
-      const alertEvent = eventByEpisodeId.get(item.episode_id);
+      const alertEvent = eventByEpisodeId.get(item.alert_id);
 
       if (!alertEvent) {
         errors.push(
-          toBulkActionError(item.episode_id, {
-            code: ALERTING_ERROR_CODES.ALERT_EPISODE_NOT_FOUND,
-            message: getAlertEpisodeNotFoundMessage(item.episode_id),
+          toBulkActionError(item.alert_id, {
+            code: ALERTING_ERROR_CODES.ALERT_NOT_FOUND,
+            message: getAlertEpisodeNotFoundMessage(item.alert_id),
           })
         );
         continue;
@@ -378,12 +378,12 @@ export class AlertActionsClient {
 
       if (
         isLifecycleActionType(item.action_type) &&
-        latestEpisodeIdByGroupHash.get(alertEvent.group_hash) !== item.episode_id
+        latestEpisodeIdByGroupHash.get(alertEvent.group_hash) !== item.alert_id
       ) {
         errors.push(
-          toBulkActionError(item.episode_id, {
-            code: ALERTING_ERROR_CODES.ALERT_EPISODE_NOT_LATEST,
-            message: getEpisodeNotLatestMessage(item.episode_id, alertEvent.group_hash),
+          toBulkActionError(item.alert_id, {
+            code: ALERTING_ERROR_CODES.ALERT_NOT_LATEST,
+            message: getEpisodeNotLatestMessage(item.alert_id, alertEvent.group_hash),
             details: { group_hash: alertEvent.group_hash },
           })
         );
@@ -404,7 +404,7 @@ export class AlertActionsClient {
           Boom.isBoom(error) &&
           (error.output.statusCode === 400 || error.output.statusCode === 404)
         ) {
-          errors.push(boomToBulkActionError(item.episode_id, error));
+          errors.push(boomToBulkActionError(item.alert_id, error));
           continue;
         }
         throw error;
@@ -432,7 +432,7 @@ export class AlertActionsClient {
     // Strip the identifiers bulk items carry alongside the action payload
     // (`group_hash` on series items, `episode_id` on episode items) — the
     // doc's own identifier fields below are authoritative.
-    const actionData = omit(action, ['group_hash', 'episode_id', 'action_type']);
+    const actionData = omit(action, ['group_hash', 'alert_id', 'action_type']);
 
     return {
       '@timestamp': new Date().toISOString(),
@@ -442,7 +442,7 @@ export class AlertActionsClient {
       rule_id: alertEvent.rule_id,
       source: alertEvent.source,
       group_hash: alertEvent.group_hash,
-      episode_id: docEpisodeId,
+      alert_id: docEpisodeId,
       space_id: alertEvent.space_id,
       ...actionData,
     };

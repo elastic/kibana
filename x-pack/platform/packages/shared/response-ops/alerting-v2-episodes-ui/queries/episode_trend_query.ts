@@ -63,7 +63,7 @@ export const buildEpisodeTrendQuery = (
   let query = esql.from([ALERT_EVENTS_DATA_STREAM], ['_source'])
     .where`space_id == ${spaceId}`
     .where`type == "alert"`
-    .where`episode.id == ${episodeId}`;
+    .where`alert.id == ${episodeId}`;
 
   metricLabels.forEach((label) => {
     query = query.pipe(
@@ -71,7 +71,9 @@ export const buildEpisodeTrendQuery = (
     );
   });
 
-  return query.sort([TIME_FIELD, 'ASC']).keep('@timestamp', 'episode.status', ...metricLabels);
+  // Temporary projection: renames alert.status back to episode.status so UI row-readers
+  // don't need to change in this PR. Remove in follow-up U2.
+  return query.sort([TIME_FIELD, 'ASC']).pipe`RENAME \`alert.status\` AS \`episode.status\``.keep('@timestamp', 'episode.status', ...metricLabels);
 };
 
 /**

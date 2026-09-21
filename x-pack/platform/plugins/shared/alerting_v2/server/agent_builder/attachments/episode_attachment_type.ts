@@ -157,7 +157,7 @@ export const createEpisodeAttachmentType = ({
       } catch (error) {
         attachmentLogger.warn({
           message: 'Failed to resolve episode attachment',
-          code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_RESOLVE_FAILED,
+          code: ALERTING_LOG_CODES.AGENT_BUILDER_ALERT_RESOLVE_FAILED,
           labels: { episode_id: episodeId, space_id: context.spaceId },
           error,
         });
@@ -183,7 +183,7 @@ export const createEpisodeAttachmentType = ({
       } catch (error) {
         attachmentLogger.warn({
           message: 'Failed to check episode attachment staleness',
-          code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_STALENESS_CHECK_FAILED,
+          code: ALERTING_LOG_CODES.AGENT_BUILDER_ALERT_STALENESS_CHECK_FAILED,
           labels: { episode_id: attachment.origin, space_id: context.spaceId },
           error,
         });

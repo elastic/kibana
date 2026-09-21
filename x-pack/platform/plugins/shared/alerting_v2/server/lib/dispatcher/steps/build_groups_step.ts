@@ -44,6 +44,7 @@ export function buildActionGroups(
     let groupKey: Record<string, unknown>;
     switch (policy.groupingMode) {
       case 'per_episode':
+      case 'per_alert': // dual-accepted since v7; backfilled to per_episode in S2
         groupKey = {
           groupHash: episode.group_hash,
           episodeId: episode.episode_id,
@@ -57,6 +58,10 @@ export function buildActionGroups(
           policy.groupBy.map((field) => [field, get(episode, field, null)])
         );
         break;
+      default:
+        throw new Error(
+          `Unhandled groupingMode: ${String((policy as { groupingMode: unknown }).groupingMode)}`
+        );
     }
 
     const actionGroupId = objectHash({

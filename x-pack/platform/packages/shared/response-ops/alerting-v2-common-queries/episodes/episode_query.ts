@@ -48,7 +48,7 @@ export const buildEpisodeGroupHashQuery = (
   episodeId: string
 ): TypedEsqlQuery<EpisodeGroupHashEsqlRow> => {
   const query = esql.from(ALERT_EVENTS_DATA_STREAM).where`space_id == ${spaceId}`
-    .where`episode.id == ${episodeId}`;
+    .where`alert.id == ${episodeId}`;
 
   return asTypedEsqlQuery<EpisodeGroupHashEsqlRow>(
     query.sort(['@timestamp', 'DESC']).pipe`LIMIT 1`.keep('group_hash')

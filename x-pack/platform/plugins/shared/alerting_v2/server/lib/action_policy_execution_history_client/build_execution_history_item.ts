@@ -8,7 +8,7 @@
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import {
   MAX_EMBEDDED_RULES_PER_ITEM,
-  MAX_EMBEDDED_EPISODES_PER_ITEM,
+  MAX_EMBEDDED_ALERTS_PER_ITEM,
   type DispatchFailureReason,
   type PolicyExecutionHistoryItem,
   type PolicyExecutionOutcome,
@@ -159,8 +159,9 @@ export function buildExecutionHistoryItem(
     .filter(isString)
     .map((id) => ({ id, name: workflowNames.get(id) ?? null }));
 
+  // Event log still writes episode_ids / episode_count (renamed to alert_ids / alert_count in S3).
   const episodeIds = (dispatcher.episode_ids ?? []).filter(isString);
-  const episodes = episodeIds.slice(0, MAX_EMBEDDED_EPISODES_PER_ITEM).map((id) => ({ id }));
+  const alertItems = episodeIds.slice(0, MAX_EMBEDDED_ALERTS_PER_ITEM).map((id) => ({ id }));
 
   const failureReason = dispatcher.failure_reason;
   const errorMessage = event.error?.message;
@@ -169,8 +170,8 @@ export function buildExecutionHistoryItem(
     dispatched_at: timestamp,
     policy: { id: policyId, name: policyNames.get(policyId) ?? null },
     outcome: action,
-    episode_count: Number(dispatcher.episode_count ?? 0),
-    episodes,
+    alert_count: Number(dispatcher.episode_count ?? 0),
+    alerts: alertItems,
     action_group_count: Number(dispatcher.action_group_count ?? 0),
     rules,
     total_rule_count: totalRuleCount,

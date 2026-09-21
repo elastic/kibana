@@ -124,7 +124,8 @@ export const createAlertEventSourceParamsSchema = z.object({
 
 export const createAlertEventResponseSchema = z.object({
   group_hash: z.string(),
-  episode_id: z.string(),
+  // Renamed from episode_id in v7. HTTP clients must update to read alert_id.
+  alert_id: z.string(),
 });
 
 /** Normalized ingest payload — `source` is always present past the HTTP edge. */

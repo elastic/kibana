@@ -14,4 +14,9 @@ export interface ResourceDefinition {
   version: number;
   mappings: MappingsDefinition;
   lifecycle: IndicesDataStreamLifecycleWithRollover;
+  /**
+   * If set, logged at `warn` level every startup to surface a pending migration.
+   * Remove once the time-boxed pre-GA window closes (follow-up S5).
+   */
+  migrationWarning?: string;
 }

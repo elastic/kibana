@@ -10,7 +10,10 @@ import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import { z } from '@kbn/zod/v4';
 import type { ResourceDefinition } from './types';
 
-export const ALERT_EVENTS_DATA_STREAM_VERSION = 6;
+// Pre-GA rename: alert replaces episode. Bump forces index-template re-put on existing clusters.
+// A startup warn is emitted (see getAlertEventsResourceDefinition) when a pre-v7 template is
+// detected, so that clusters carrying mixed old/new documents surface the condition explicitly.
+export const ALERT_EVENTS_DATA_STREAM_VERSION = 7;
 export const ALERT_EVENTS_BACKING_INDEX = '.ds-.rule-events-*';
 
 const mappings: MappingsDefinition = {
@@ -31,7 +34,10 @@ const mappings: MappingsDefinition = {
     status: { type: 'keyword' }, // breached | recovered | no_data
     source: { type: 'keyword' },
     type: { type: 'keyword' }, // signal | alert
-    episode: {
+    // Renamed from `episode` in v7. ES|QL readers use `alert.id` / `alert.status`.
+    // Old documents with `episode.*` fields remain readable but return null for `alert.*` queries;
+    // `_reset_resources` is required to clear them (no field-level migration exists).
+    alert: {
       type: 'object',
       properties: {
         id: { type: 'keyword' },
@@ -64,7 +70,8 @@ export const alertEventSchema = z.object({
   status: alertEventStatusSchema,
   source: z.string(),
   type: alertEventTypeSchema,
-  episode: z
+  // Renamed from `episode` in v7; matches the mapping key `alert` above.
+  alert: z
     .object({
       id: z.string(),
       status: alertEpisodeStatusSchema,
@@ -82,7 +89,7 @@ export type AlertEpisodeStatus = z.infer<typeof alertEpisodeStatusSchema>;
 export type AlertEventSeverity = z.infer<typeof alertEventSeveritySchema>;
 
 export const buildRuleEventDocument = (params: AlertEvent): AlertEvent => {
-  const { scheduled_timestamp, episode, severity, ...required } = params;
+  const { scheduled_timestamp, alert, severity, ...required } = params;
 
   const doc: AlertEvent = { ...required };
 
@@ -90,11 +97,11 @@ export const buildRuleEventDocument = (params: AlertEvent): AlertEvent => {
     doc.scheduled_timestamp = scheduled_timestamp;
   }
 
-  if (episode !== undefined) {
-    doc.episode = {
-      id: episode.id,
-      status: episode.status,
-      ...(episode.status_count != null ? { status_count: episode.status_count } : {}),
+  if (alert !== undefined) {
+    doc.alert = {
+      id: alert.id,
+      status: alert.status,
+      ...(alert.status_count != null ? { status_count: alert.status_count } : {}),
     };
   }
 
@@ -111,4 +118,10 @@ export const getAlertEventsResourceDefinition = (): ResourceDefinition => ({
   version: ALERT_EVENTS_DATA_STREAM_VERSION,
   mappings,
   lifecycle: {},
+  // Pre-GA: remove in follow-up S5 once the time-boxed rename window closes.
+  migrationWarning:
+    `[alerting_v2] ${ALERT_EVENTS_DATA_STREAM} v7 renames episode.* → alert.*. ` +
+    `Clusters with pre-v7 data have mixed-schema documents until each space runs ` +
+    `POST /api/alerting/v2/_reset_resources. ` +
+    `Query results for episode.id / episode.status will be null for old documents.`,
 });

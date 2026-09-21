@@ -64,7 +64,7 @@ export const createEditTagsAction = (
             http,
             eps.map(
               (ep): BulkTagEpisodeActionItem => ({
-                episode_id: ep['episode.id'],
+                alert_id: ep['episode.id'],
                 tags,
               })
             )

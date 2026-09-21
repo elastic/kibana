@@ -63,9 +63,9 @@ export const loadLatestAlertEventsByGroupHash = async ({
     | DROP _source
     | STATS
         @timestamp = MAX(@timestamp),
-        episode_id = LAST(episode.id, @timestamp),
-        episode_status = LAST(episode.status, @timestamp),
-        episode_status_count = LAST(episode.status_count, @timestamp),
+        episode_id = LAST(alert.id, @timestamp),
+        episode_status = LAST(alert.status, @timestamp),
+        episode_status_count = LAST(alert.status_count, @timestamp),
         data_json = LAST(data_json, @timestamp),
         severity = LAST(severity, @timestamp),
         status = LAST(status, @timestamp),
@@ -112,14 +112,14 @@ export const loadLatestAlertEventsByEpisodeId = async ({
 
   const query = esql`
     FROM ${ALERT_EVENTS_DATA_STREAM} METADATA _source
-    | WHERE type == "alert" AND space_id == ${spaceId} AND episode.id IN (${episodeIdValues})
-    | EVAL data_json = JSON_EXTRACT(_source, "$.data"), episode_id = episode.id
+    | WHERE type == "alert" AND space_id == ${spaceId} AND alert.id IN (${episodeIdValues})
+    | EVAL data_json = JSON_EXTRACT(_source, "$.data"), episode_id = alert.id
     | DROP _source
     | STATS
         @timestamp = MAX(@timestamp),
         group_hash = LAST(group_hash, @timestamp),
-        episode_status = LAST(episode.status, @timestamp),
-        episode_status_count = LAST(episode.status_count, @timestamp),
+        episode_status = LAST(alert.status, @timestamp),
+        episode_status_count = LAST(alert.status_count, @timestamp),
         data_json = LAST(data_json, @timestamp),
         severity = LAST(severity, @timestamp),
         status = LAST(status, @timestamp),
@@ -174,9 +174,9 @@ interface LoadLastEpisodeAlertEventParams {
 
 /**
  * Single-episode adapter over {@link loadLatestAlertEventsByEpisodeId}:
- * returns the most recent `.rule-events` row for one `episode.id` or throws
- * `Boom.notFound` with the canonical `ALERT_EPISODE_NOT_FOUND` shape the
- * episode-level route surface relies on.
+ * returns the most recent `.rule-events` row for one `alert.id` or throws
+ * `Boom.notFound` with the canonical `ALERT_NOT_FOUND` shape the
+ * alert-level route surface relies on.
  */
 export const loadLastEpisodeAlertEventOrThrow = async ({
   queryService,
@@ -191,8 +191,8 @@ export const loadLastEpisodeAlertEventOrThrow = async ({
 
   if (events.length === 0) {
     throw Boom.notFound(getAlertEpisodeNotFoundMessage(episodeId), {
-      code: ALERTING_ERROR_CODES.ALERT_EPISODE_NOT_FOUND,
-      details: { episode_id: episodeId },
+      code: ALERTING_ERROR_CODES.ALERT_NOT_FOUND,
+      details: { alert_id: episodeId },
     });
   }
 

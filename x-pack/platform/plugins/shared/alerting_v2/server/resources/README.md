@@ -86,9 +86,9 @@ This stream is the durable history of rule evaluation.
 | `status` | `keyword` | `breached`, `recovered`, or `no_data`. |
 | `source` | `keyword` | Origin marker. |
 | `type` | `keyword` | `signal` or `alert`. |
-| `episode.id` | `keyword` | Episode id for alert-type events. |
-| `episode.status` | `keyword` | `inactive`, `pending`, `active`, or `recovering`. |
-| `episode.status_count` | `long` | Consecutive count within the current episode status. |
+| `alert.id` | `keyword` | Alert id for alert-type events. |
+| `alert.status` | `keyword` | `inactive`, `pending`, `active`, or `recovering`. |
+| `alert.status_count` | `long` | Consecutive count within the current alert status. |
 | `severity` | `keyword` | Optional. Best-effort severity extracted from the ES\|QL `severity` column on breached events. One of `info`, `low`, `medium`, `high`, `critical`. |
 
 Writers:
@@ -117,8 +117,8 @@ This stream is the dispatcher's durable memory and also stores user/system actio
 | `actor` | `keyword` | Who performed the action. |
 | `action_type` | `keyword` | `fire`, `suppress`, `notified`, `ack`, `deactivate`, and related values. |
 | `group_hash` | `keyword` | Series identity. |
-| `episode_id` | `keyword` | Optional episode scope. |
-| `episode_status` | `keyword` | Optional episode status captured with the action. |
+| `alert_id` | `keyword` | Optional alert scope. |
+| `alert_status` | `keyword` | Optional alert status captured with the action. |
 | `rule_id` | `keyword` | Rule identifier. |
 | `tags` | `keyword` | Optional tags. |
 | `notification_group_id` | `keyword` | Group identity for throttling / notify tracking. |
@@ -183,13 +183,14 @@ ES|QL views are registered as `optional: true`, which lets Kibana start even on 
 | --- | --- | --- |
 | `view:rule-events` | `$.rule-events` | Direct view of `.rule-events` |
 | `view:alert-actions` | `$.alert-actions` | Direct view of `.alert-actions` |
-| `view:alert-episodes` | `$.alert-episodes` | Episode-oriented projection over rule events |
+| `view:alerts-v2` | `$.alerts-v2` | Alert-oriented projection over rule events (canonical) |
+| `view:alert-episodes` | `$.alert-episodes` | Deprecated alias for `$.alerts-v2` — same query body, kept for backward compatibility; remove in follow-up S4 |
 
 Definitions live in `esql_views/`. The richest example is `esql_views/alert_episodes.ts`.
 
-### `$.alert-episodes` cardinality bound
+### `$.alerts-v2` cardinality bound
 
-Its `INLINE STATS ... BY episode.id` grows with total episode count, so the definition starts with `WHERE @timestamp > NOW() - 90 days`. Do not remove it: an unbounded scan exceeds the ES|QL sub-plan size limit (~20.4 MB) and returns a non-retryable HTTP 400 (`sub-plan execution results too large`).
+Its `INLINE STATS ... BY alert.id` grows with total alert count, so the definition starts with `WHERE @timestamp > NOW() - 90 days`. Do not remove it: an unbounded scan exceeds the ES|QL sub-plan size limit (~20.4 MB) and returns a non-retryable HTTP 400 (`sub-plan execution results too large`).
 
 ## Changing a datastream schema safely
 
@@ -206,6 +207,24 @@ Disallowed changes:
 - removing or renaming existing fields
 - changing field types incompatibly
 - making an existing optional field required
+
+### Pre-GA exception: `episode` → `alert` field rename (time-boxed until GA)
+
+The fields `episode.id`, `episode.status`, `episode.status_count` (`.rule-events`) and
+`episode_id`, `episode_status` (`.alert-actions`) were renamed to `alert.*` / `alert_id` /
+`alert_status` before the first GA release.  This is the **one permitted exception** to the
+"no rename" rule, justified by three conditions:
+
+1. No document has escaped into a customer cluster — the only deployed instances are internal
+   development and CI environments.
+2. Every ES|QL query builder that surfaces these columns adds a temporary `RENAME alert.* AS
+   episode.*` projection shim so external consumers (UI, API) remain unaffected until the
+   follow-up UI pass (U2).
+3. The deprecated `$.alert-episodes` view alias is registered alongside `$.alerts-v2` so
+   saved queries and runbooks written against either name continue to work.
+
+**Remove this section when S5 (un-time-box) lands** — that follow-up restores the
+prohibition so this exception cannot be cited as precedent for future renames.
 
 ### Change recipe
 

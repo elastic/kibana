@@ -317,7 +317,7 @@ describe('buildExecutionHistoryItem', () => {
       },
     });
     const historyItem = buildExecutionHistoryItem(event, EMPTY_NAME_MAPS);
-    expect(historyItem?.episode_count).toBe(0);
+    expect(historyItem?.alert_count).toBe(0);
     expect(historyItem?.action_group_count).toBe(0);
     expect(historyItem?.workflows).toEqual([]);
   });

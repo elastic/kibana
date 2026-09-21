@@ -51,9 +51,12 @@ export const buildEpisodeSelectionQuery = ({
     esql.from(ALERT_EVENTS_DATA_STREAM).where`type == "alert"`.where`rule.id == ${ruleId}`
       .where`@timestamp >= ${fromIso}::DATETIME AND @timestamp <= ${toIso}::DATETIME`
       .where`group_hash IN (${hashLiterals})`
-      .pipe`STATS last_ts = MAX(@timestamp) BY episode.id, group_hash`.sort(['last_ts', 'DESC'])
+      .pipe`STATS last_ts = MAX(@timestamp) BY alert.id, group_hash`.sort(['last_ts', 'DESC'])
       .pipe`LIMIT ${perLaneLimit} BY group_hash`
       .limit(Math.max(groupHashes.length * perLaneLimit, 1))
+      // Temporary projection: renames alert.id back to episode.id so UI row-readers
+      // don't need to change in this PR. Remove in follow-up U2.
+      .pipe`RENAME \`alert.id\` AS \`episode.id\``
       .keep('episode.id', 'group_hash', 'last_ts')
   );
 };

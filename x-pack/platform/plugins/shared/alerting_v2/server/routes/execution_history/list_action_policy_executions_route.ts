@@ -35,7 +35,7 @@ export const toListExecutionHistoryArgs = ({
   search,
   rule_ids: ruleIds,
   outcome,
-  episode_ids: episodeIds,
+  alert_ids: episodeIds,
   start_date: startDate,
   ...rest
 }: ListPolicyExecutionHistoryRequest): Complete<Omit<ListExecutionHistoryArgs, 'request'>> => {

@@ -14,7 +14,10 @@ import {
 import type { ResourceManagerContract } from '../../lib/services/resource_service/resource_manager';
 import { getAlertEventsViewDefinition } from './alert_events';
 import { getAlertActionsViewDefinition } from './alert_actions';
-import { getAlertEpisodesViewDefinition } from './alert_episodes';
+import {
+  getAlertsV2ViewDefinition,
+  getAlertEpisodesViewDefinition,
+} from './alert_episodes';
 
 export interface RegisterEsqlViewsOptions {
   resourceManager: ResourceManagerContract;
@@ -38,6 +41,7 @@ function getEsqlViewDefinitions(): EsqlViewDefinition[] {
   return [
     getAlertEventsViewDefinition(),
     getAlertActionsViewDefinition(),
-    getAlertEpisodesViewDefinition(),
+    getAlertsV2ViewDefinition(),
+    getAlertEpisodesViewDefinition(), // deprecated alias — remove in follow-up S4
   ];
 }

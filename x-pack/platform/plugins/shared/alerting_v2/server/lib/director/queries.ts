@@ -97,12 +97,12 @@ export const getLatestAlertEventStateQuery = ({
   }}) AND group_hash IN (${groupHashValues})`;
 
   query = query.pipe`STATS
-      last_status = LAST(status, @timestamp) WHERE type == "alert" AND episode.status IS NOT NULL,
-      last_episode_id = LAST(episode.id, @timestamp) WHERE type == "alert" AND episode.status IS NOT NULL,
-      last_episode_status = LAST(episode.status, @timestamp) WHERE type == "alert" AND episode.status IS NOT NULL,
-      last_episode_status_count = LAST(episode.status_count, @timestamp) WHERE type == "alert" AND episode.status IS NOT NULL,
-      last_episode_timestamp = MAX(@timestamp) WHERE type == "alert" AND episode.status IS NOT NULL,
-      last_action_episode_id = LAST(episode_id, @timestamp) WHERE action_type IN (${ALERT_EPISODE_ACTION_TYPE.ACTIVATE}, ${ALERT_EPISODE_ACTION_TYPE.DEACTIVATE}),
+      last_status = LAST(status, @timestamp) WHERE type == "alert" AND alert.status IS NOT NULL,
+      last_episode_id = LAST(alert.id, @timestamp) WHERE type == "alert" AND alert.status IS NOT NULL,
+      last_episode_status = LAST(alert.status, @timestamp) WHERE type == "alert" AND alert.status IS NOT NULL,
+      last_episode_status_count = LAST(alert.status_count, @timestamp) WHERE type == "alert" AND alert.status IS NOT NULL,
+      last_episode_timestamp = MAX(@timestamp) WHERE type == "alert" AND alert.status IS NOT NULL,
+      last_action_episode_id = LAST(alert_id, @timestamp) WHERE action_type IN (${ALERT_EPISODE_ACTION_TYPE.ACTIVATE}, ${ALERT_EPISODE_ACTION_TYPE.DEACTIVATE}),
       last_action_type = LAST(action_type, @timestamp) WHERE action_type IN (${ALERT_EPISODE_ACTION_TYPE.ACTIVATE}, ${ALERT_EPISODE_ACTION_TYPE.DEACTIVATE})
     BY group_hash`;
 

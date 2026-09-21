@@ -30,7 +30,7 @@ export const CREATE_ALERT_EVENT_BY_SOURCE_REQUEST = {
 
 export const CREATE_ALERT_EVENT_RESPONSE: CreateAlertEventResponse = {
   group_hash: 'group-hash-1',
-  episode_id: 'episode-1',
+  alert_id: 'alert-1',
 };
 
 const INVALID_CREATE_ALERT_EVENT_RESPONSE = invalidResponseExample({

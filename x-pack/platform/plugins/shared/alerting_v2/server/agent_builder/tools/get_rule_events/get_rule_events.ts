@@ -127,7 +127,7 @@ export const getRuleEventsTool = ({
       const message = error instanceof Error ? error.message : String(error);
       logger.warn({
         message: 'Failed to fetch rule events for episode',
-        code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_GET_RULE_EVENTS_FAILED,
+        code: ALERTING_LOG_CODES.AGENT_BUILDER_ALERT_GET_RULE_EVENTS_FAILED,
         labels: {
           episode_id: episodeId,
           space_id: toolContext.spaceId,
@@ -167,7 +167,7 @@ export const getRuleEventsTool = ({
         const message = error instanceof Error ? error.message : String(error);
         logger.warn({
           message: 'Failed to look up episode while fetching rule events',
-          code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_LOOKUP_FAILED,
+          code: ALERTING_LOG_CODES.AGENT_BUILDER_ALERT_LOOKUP_FAILED,
           labels: {
             episode_id: episodeId,
             space_id: toolContext.spaceId,

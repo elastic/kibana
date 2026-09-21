@@ -28,7 +28,7 @@ export const buildEpisodeActionsQuery = (
   return asTypedEsqlQuery<EpisodeActionRow>(
     esql.from(ALERT_ACTIONS_DATA_STREAM)
       .where`space_id == ${spaceId}`
-      .where`episode_id IN (${episodeIdLiterals})`
+      .where`alert_id IN (${episodeIdLiterals})`
       .where`action_type IN ("ack", "unack", "assign")`
       .pipe`EVAL
         ack_action = CASE(action_type IN ("ack", "unack"), action_type, null),
@@ -38,7 +38,10 @@ export const buildEpisodeActionsQuery = (
         last_ack_action = LAST(ack_action, @timestamp),
         last_assignee_uid = LAST(assignee_value, @timestamp),
         last_ack_actor = LAST(ack_actor, @timestamp)
-        BY episode_id, rule_id, group_hash`
+        BY alert_id, rule_id, group_hash`
+      // Temporary projection: renames alert_id back to episode_id so UI row-readers
+      // don't need to change in this PR. Remove in follow-up U2.
+      .pipe`RENAME alert_id AS episode_id`
       .keep('episode_id', 'rule_id', 'group_hash', 'last_ack_action', 'last_assignee_uid', 'last_ack_actor')
   );
 };

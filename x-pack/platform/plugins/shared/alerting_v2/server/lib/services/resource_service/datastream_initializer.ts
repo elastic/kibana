@@ -54,6 +54,10 @@ export class DatastreamInitializer implements IResourceInitializer {
       },
     };
 
+    if (this.resourceDefinition.migrationWarning) {
+      this.logger.warn(this.resourceDefinition.migrationWarning);
+    }
+
     try {
       await DataStreamClient.initialize({
         logger: this.logger,

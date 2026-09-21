@@ -22,17 +22,17 @@ describe('getLatestAlertEventStateQuery', () => {
     expect(printed).toContain('group_hash IN ("hash-a", "hash-b")');
     expect(printed).toContain('STATS');
 
-    const alertScope = '\\s+WHERE\\s+type == "alert" AND episode\\.status IS NOT NULL';
+    const alertScope = '\\s+WHERE\\s+type == "alert" AND alert\\.status IS NOT NULL';
     expect(printed).toMatch(new RegExp(`last_status = LAST\\(status, @timestamp\\)${alertScope}`));
     expect(printed).toMatch(
-      new RegExp(`last_episode_id = LAST\\(episode\\.id, @timestamp\\)${alertScope}`)
+      new RegExp(`last_episode_id = LAST\\(alert\\.id, @timestamp\\)${alertScope}`)
     );
     expect(printed).toMatch(
-      new RegExp(`last_episode_status = LAST\\(episode\\.status, @timestamp\\)${alertScope}`)
+      new RegExp(`last_episode_status = LAST\\(alert\\.status, @timestamp\\)${alertScope}`)
     );
     expect(printed).toMatch(
       new RegExp(
-        `last_episode_status_count = LAST\\(episode\\.status_count, @timestamp\\)${alertScope}`
+        `last_episode_status_count = LAST\\(alert\\.status_count, @timestamp\\)${alertScope}`
       )
     );
     expect(printed).toMatch(
@@ -40,7 +40,7 @@ describe('getLatestAlertEventStateQuery', () => {
     );
 
     expect(printed).toMatch(
-      /last_action_episode_id = LAST\(episode_id, @timestamp\)\s+WHERE\s+action_type IN\s*\(\s*"activate", "deactivate"\s*\)/
+      /last_action_episode_id = LAST\(alert_id, @timestamp\)\s+WHERE\s+action_type IN\s*\(\s*"activate", "deactivate"\s*\)/
     );
     expect(printed).toMatch(
       /last_action_type = LAST\(action_type, @timestamp\)\s+WHERE\s+action_type IN\s*\(\s*"activate", "deactivate"\s*\)/
@@ -122,7 +122,7 @@ describe('getLatestAlertEventStateQuery', () => {
     expect(keepClause).toContain('group_hash');
   });
 
-  it('scopes the rule-events aggregations with per-agg filters (type == "alert" AND episode.status IS NOT NULL)', () => {
+  it('scopes the rule-events aggregations with per-agg filters (type == "alert" AND alert.status IS NOT NULL)', () => {
     const query = getLatestAlertEventStateQuery({
       ruleId: 'rule-1',
       groupHashes: ['hash-a'],
@@ -131,7 +131,7 @@ describe('getLatestAlertEventStateQuery', () => {
     const printed = query.print();
 
     expect(printed).toContain('type == "alert"');
-    expect(printed).toContain('episode.status IS NOT NULL');
+    expect(printed).toContain('alert.status IS NOT NULL');
   });
 
   it('groups stats by group_hash', () => {

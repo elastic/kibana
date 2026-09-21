@@ -10,7 +10,8 @@ import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import { z } from '@kbn/zod/v4';
 import type { ResourceDefinition } from './types';
 
-export const ALERT_ACTIONS_DATA_STREAM_VERSION = 5;
+// Pre-GA rename: alert_id/alert_status replace episode_id/episode_status. See alert_events.ts.
+export const ALERT_ACTIONS_DATA_STREAM_VERSION = 6;
 export const ALERT_ACTIONS_BACKING_INDEX = '.ds-.alert-actions-*';
 
 const mappings: MappingsDefinition = {
@@ -23,8 +24,9 @@ const mappings: MappingsDefinition = {
     assignee_uid: { type: 'keyword' },
     action_type: { type: 'keyword' },
     group_hash: { type: 'keyword' },
-    episode_id: { type: 'keyword' },
-    episode_status: { type: 'keyword' },
+    // Renamed from episode_id/episode_status in v6.
+    alert_id: { type: 'keyword' },
+    alert_status: { type: 'keyword' },
     rule_id: { type: 'keyword' },
     tags: { type: 'keyword' },
     action_group_id: { type: 'keyword' },
@@ -43,9 +45,9 @@ export const alertActionSchema = z.object({
   assignee_uid: z.string().nullable().optional(),
   action_type: z.string(),
   // Null for series-level actions (tag/snooze/unsnooze): they target the
-  // series as a whole, not one episode.
-  episode_id: z.string().nullable().optional(),
-  episode_status: z.string().optional(),
+  // series as a whole, not one alert lifecycle. Renamed from episode_id/episode_status in v6.
+  alert_id: z.string().nullable().optional(),
+  alert_status: z.string().optional(),
   rule_id: z.string().nullable(),
   action_group_id: z.string().optional(),
   source: z.string().optional(),

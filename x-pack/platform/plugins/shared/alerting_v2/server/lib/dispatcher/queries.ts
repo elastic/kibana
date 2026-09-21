@@ -52,11 +52,11 @@ export const getDispatchableAlertEventsQuery = ({
       | WHERE type IS NULL OR (@timestamp >= ${gte}::datetime AND @timestamp <= ${lte}::datetime)
       | EVAL
           rule_id = COALESCE(rule.id, rule_id),
-          episode_id = COALESCE(episode.id, episode_id),
-          episode_status = episode.status
+          episode_id = COALESCE(alert.id, alert_id),
+          episode_status = alert.status
       | EVAL ${SUBJECT_EVAL}
       | WHERE subject IS NOT NULL
-      | DROP episode.id, rule.id, episode.status
+      | DROP alert.id, rule.id, alert.status
       | INLINE STATS last_fired = max(last_series_event_timestamp) WHERE action_type == "fire" OR action_type == "suppress" OR action_type == "unmatched" BY subject, group_hash
       | WHERE last_fired IS NULL OR last_fired < @timestamp
       | STATS
@@ -246,13 +246,14 @@ export const getAlertEpisodeSuppressionsQueries = (
             source = LAST(source, @timestamp),
             space_id = LAST(space_id, @timestamp),
             rule_id = LAST(rule_id, @timestamp)
-          BY subject, group_hash, episode_id
+          BY subject, group_hash, alert_id
         | EVAL should_suppress = CASE(
             last_snooze_action == "snooze", true,
             last_ack_action == "ack", true,
             last_deactivate_action == "deactivate", true,
             false
           )
+        | RENAME alert_id AS episode_id
         | KEEP rule_id, group_hash, episode_id, should_suppress, last_ack_action, last_deactivate_action, last_snooze_action, source, space_id`.toRequest();
     }
   );
@@ -269,7 +270,7 @@ export const getLastNotifiedTimestampsQueries = (
 
     return esql`FROM ${ALERT_ACTIONS_DATA_STREAM}
       | WHERE ${whereClause}
-      | STATS last_notified = MAX(@timestamp), episode_status = LAST(episode_status, @timestamp) BY action_group_id
+      | STATS last_notified = MAX(@timestamp), episode_status = LAST(alert_status, @timestamp) BY action_group_id
       | KEEP action_group_id, last_notified, episode_status
       `.toRequest();
   });
@@ -279,7 +280,7 @@ export const getLastNotifiedTimestampsQueries = (
 // surviving dispatchable episodes only (at most 10 000 after the scan-pass LIMIT).
 //
 // Ordering is load-bearing:
-//   - WHERE is the first command so type, episode.id, and the @timestamp range all push down to
+//   - WHERE is the first command so type, alert.id, and the @timestamp range all push down to
 //     Lucene; _source is never fetched for non-matching documents.
 //   - JSON_EXTRACT sits after WHERE so _source is materialised only for the matching rows.
 //   - DROP _source removes it before the STATS buffer.
@@ -302,10 +303,10 @@ export const getEpisodeDataQueries = (
 
     return esql`FROM ${ALERT_EVENTS_DATA_STREAM} METADATA _source
         | WHERE type == ${ALERT_EVENT_TYPE}
-            AND episode.id IN (${ids})
+            AND alert.id IN (${ids})
             AND @timestamp >= ${gte}::datetime
             AND @timestamp <= ${lte}::datetime
-        | EVAL episode_id = episode.id, data_json = JSON_EXTRACT(_source, "$.data")
+        | EVAL episode_id = alert.id, data_json = JSON_EXTRACT(_source, "$.data")
         | DROP _source
         | STATS data_json = LAST(data_json, @timestamp) BY episode_id
         | KEEP episode_id, data_json`.toRequest();

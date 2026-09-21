@@ -10,7 +10,7 @@ import { buildOasOperation, invalidResponseExample } from '../../oas_utils';
 import type { AlertingOasOperationObject } from '../../oas_types';
 
 export const BULK_DEACTIVATE_EPISODE_ACTION_REQUEST: BulkDeactivateEpisodeActionBody = {
-  items: [{ episode_id: 'episode-1', reason: 'false positive' }],
+  items: [{ alert_id: 'alert-1', reason: 'false positive' }],
 };
 
 export const BULK_DEACTIVATE_EPISODE_ACTION_RESPONSE: BulkResponse = {

@@ -17,7 +17,7 @@ import {
 } from './constants';
 
 /**
- * Id filter shared by the rule_ids and episode_ids query params.
+ * Id filter shared by the rule_ids and alert_ids query params.
  */
 const idFilterArraySchema = arrayOrSingleSchema(
   z.string().trim().min(1).max(ID_MAX_LENGTH),
@@ -77,12 +77,12 @@ export const listPolicyExecutionHistoryRequestSchema = z
       .datetime()
       .optional()
       .describe(
-        'Inclusive ISO datetime lower bound on the event timestamp; overrides the default 24-hour window. Independent of episode_ids — e.g. set it to an episode’s start time to scope results to that episode’s lifetime.'
+        "Inclusive ISO datetime lower bound on the event timestamp; overrides the default 24-hour window. Independent of alert_ids -- e.g. set it to an alert's start time to scope results to that alert's lifetime."
       ),
-    episode_ids: idFilterArraySchema
+    alert_ids: idFilterArraySchema
       .optional()
       .describe(
-        'Episode filter. Narrows events to those referencing at least one of the provided episode ids.'
+        'Alert filter. Narrows events to those referencing at least one of the provided alert ids.'
       ),
     ...sharedFilterFields,
   })
@@ -116,22 +116,22 @@ const MAX_WORKFLOWS_PER_ITEM = 100;
 // bounded sample and clients rely on `total_rule_count` for the true count.
 export const MAX_EMBEDDED_RULES_PER_ITEM = 20;
 // Cap for the embedded `episodes` array in each item.
-export const MAX_EMBEDDED_EPISODES_PER_ITEM = 50;
+export const MAX_EMBEDDED_ALERTS_PER_ITEM = 50;
 
-const episodeRefSchema = z.object({ id: z.string() });
+const alertRefSchema = z.object({ id: z.string() });
 
 export const policyExecutionHistoryItemSchema = z
   .object({
     dispatched_at: z.string(),
     policy: namedRefSchema,
     outcome: policyExecutionOutcomeSchema,
-    episode_count: z.number(),
-    episodes: z
-      .array(episodeRefSchema)
-      .max(MAX_EMBEDDED_EPISODES_PER_ITEM)
+    alert_count: z.number(),
+    alerts: z
+      .array(alertRefSchema)
+      .max(MAX_EMBEDDED_ALERTS_PER_ITEM)
       .optional()
       .describe(
-        'Episode ids referenced by this event, bounded to MAX_EMBEDDED_EPISODES_PER_ITEM. Use `episode_count` for the true total.'
+        'Alert ids referenced by this event, bounded to MAX_EMBEDDED_ALERTS_PER_ITEM. Use `alert_count` for the true total.'
       ),
     action_group_count: z.number(),
     rules: z

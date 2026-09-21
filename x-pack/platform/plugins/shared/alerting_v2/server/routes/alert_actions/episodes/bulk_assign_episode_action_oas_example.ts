@@ -11,8 +11,8 @@ import type { AlertingOasOperationObject } from '../../oas_types';
 
 export const BULK_ASSIGN_EPISODE_ACTION_REQUEST: BulkAssignEpisodeActionBody = {
   items: [
-    { episode_id: 'episode-1', assignee_uid: 'u_abc123' },
-    { episode_id: 'episode-2', assignee_uid: null },
+    { alert_id: 'alert-1', assignee_uid: 'u_abc123' },
+    { alert_id: 'alert-2', assignee_uid: null },
   ],
 };
 

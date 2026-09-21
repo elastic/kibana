@@ -56,7 +56,7 @@ export const buildEpisodeEventsQuery = (
   let query = esql.from([ALERT_EVENTS_DATA_STREAM], ['_source'])
     .where`space_id == ${spaceId}`
     .where`type == "alert"`
-    .where`episode.id == ${episodeId}`;
+    .where`alert.id == ${episodeId}`;
 
   if (timeRange) {
     query = query.where`@timestamp >= ${timeRange.start}`;
@@ -64,12 +64,15 @@ export const buildEpisodeEventsQuery = (
   }
 
   if (status !== undefined) {
-    query = query.where`episode.status == ${status}`;
+    query = query.where`alert.status == ${status}`;
   }
 
   // prettier-ignore
   let built = query
     .pipe`EVAL data = JSON_EXTRACT(_source, "$.data")`
+    // Temporary projection: renames alert.* mapping fields back to episode.* column names so
+    // UI row-readers don't need to change in this PR. Remove in follow-up U2.
+    .pipe`RENAME \`alert.id\` AS \`episode.id\`, \`alert.status\` AS \`episode.status\``
     .sort([DEFAULT_TIME_FIELD, 'ASC']);
 
   if (limit !== undefined) {

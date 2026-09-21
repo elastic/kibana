@@ -107,7 +107,7 @@ export const refreshEpisodeTool = ({
       const message = error instanceof Error ? error.message : String(error);
       logger.warn({
         message: 'Failed to refresh episode',
-        code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_REFRESH_FAILED,
+        code: ALERTING_LOG_CODES.AGENT_BUILDER_ALERT_REFRESH_FAILED,
         labels: {
           episode_id: episodeId,
           space_id: toolContext.spaceId,

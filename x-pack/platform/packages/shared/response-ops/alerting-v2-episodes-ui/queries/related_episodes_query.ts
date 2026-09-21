@@ -47,5 +47,5 @@ export const buildRelatedBaseQuery = (
   // Because addEpisodeAggregation uses JSON_EXTRACT(_source, "data"),
   // _source must be included here.
   return esql.from([ALERT_EVENTS_DATA_STREAM], ['_source']).where`space_id == ${spaceId}`
-    .where`type == "alert"`.where`rule.id == ${ruleId} AND episode.id != ${excludeEpisodeId}`;
+    .where`type == "alert"`.where`rule.id == ${ruleId} AND alert.id != ${excludeEpisodeId}`;
 };

@@ -22,7 +22,7 @@ import { inject, injectable } from 'inversify';
 import type { z } from '@kbn/zod/v4';
 import { AlertActionsClient } from '../../../lib/alert_actions_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../../lib/security/privileges';
-import { ALERTING_V2_EPISODES_API_PATH } from '../../constants';
+import { ALERTING_V2_ALERT_API_PATH } from '../../constants';
 import { BaseAlertingRoute } from '../../base_alerting_route';
 import { AlertingRouteContext } from '../../alerting_route_context';
 import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../../route_descriptions';
@@ -63,7 +63,7 @@ export const createEpisodeActionRouteForType = <
   @injectable()
   class CreateTypedEpisodeActionRoute extends BaseAlertingRoute {
     static method = 'post' as const;
-    static path = `${ALERTING_V2_EPISODES_API_PATH}/{episode_id}/${pathSuffix}`;
+    static path = `${ALERTING_V2_ALERT_API_PATH}/{alert_id}/${pathSuffix}`;
     static security: RouteSecurity = {
       authz: {
         requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.alerts.write],
@@ -109,7 +109,7 @@ export const createEpisodeActionRouteForType = <
 
     protected async execute() {
       await this.alertActionsClient.createEpisodeAction({
-        episodeId: this.request.params.episode_id,
+        episodeId: this.request.params.alert_id,
         action: {
           action_type: actionType,
           ...this.request.body,

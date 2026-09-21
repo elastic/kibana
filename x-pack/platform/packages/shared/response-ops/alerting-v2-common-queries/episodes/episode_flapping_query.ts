@@ -37,7 +37,10 @@ export const buildEpisodeFlappingQuery = (
     esql.from([ALERT_EVENTS_DATA_STREAM])
       .where`space_id == ${spaceId}`
       .where`type == "alert"`
-      .where`episode.id == ${episodeId}`
+      .where`alert.id == ${episodeId}`
+      // Temporary projection: renames alert.status back to episode.status so UI row-readers
+      // don't need to change in this PR. Remove in follow-up U2.
+      .pipe`RENAME \`alert.status\` AS \`episode.status\``
       .sort([DEFAULT_TIME_FIELD, 'DESC'])
       .keep(...ALERT_EPISODE_FLAPPING_FIELDS)
       .limit(limit)
