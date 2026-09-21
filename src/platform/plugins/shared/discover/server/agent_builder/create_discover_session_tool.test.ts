@@ -16,7 +16,7 @@ import {
   AS_CODE_ESQL_DATA_SOURCE_TYPE,
 } from '@kbn/as-code-data-views-schema';
 import { DISCOVER_SESSION_ATTACHMENT_TYPE } from '../../common/agent_builder';
-import { MAX_SESSION_TITLE_LENGTH, MAX_TAB_LABEL_LENGTH } from '../api/schema';
+import { MAX_SESSION_TITLE_LENGTH, MAX_TAB_LABEL_LENGTH } from '@kbn/discover-session-constants';
 import { createDiscoverSessionTool } from './create_discover_session_tool';
 
 const ESQL = 'FROM logs-* | WHERE status >= 500 | LIMIT 100';
@@ -193,6 +193,10 @@ describe('createDiscoverSessionTool schema', () => {
 describe('createDiscoverSessionTool', () => {
   it('uses the platform.core.create_discover_session id', () => {
     expect(createDiscoverSessionTool().id).toBe(platformCoreTools.createDiscoverSession);
+  });
+
+  it('does not list placeholder attachment ids in the tool description', () => {
+    expect(createDiscoverSessionTool().description).not.toContain('screen-context');
   });
 
   it('uses a create-or-update annotation title', () => {

@@ -170,8 +170,7 @@ export const chartTypeRegistry: ChartTypeRegistry = {
   [SupportedChartType.Datatable]: {
     schema: datatableConfigSchemaESQL,
     prompt: {
-      selection:
-        'Structured table with sortable columns. Choose when precise values, sortable columns, or multi-dimensional breakdowns matter more than visual patterns (e.g. "list top 20 hosts by CPU usage").',
+      selection: `Aggregated structured table with sortable columns. Choose when precise values, sortable columns, or multi-dimensional breakdowns of STATS or metric results matter more than visual patterns (e.g. "list top 20 hosts by CPU usage"). Do not use this for raw Elasticsearch documents or search hits — those belong in a Discover session via ${platformCoreTools.createDiscoverSession}.`,
       rules: [
         panelTitleRule,
         'Color only where it adds meaning (status, severity, magnitude), and only as badges. Numeric columns use `apply_color_to: "badge"` with `color: { type: "auto" }` so Lens computes stops from table data. Categorical columns use `color: { mode: "categorical", palette: "<palette id>", mapping: [] }` so Lens assigns colors to actual values. Do not color cell backgrounds or text unless the user asks.',

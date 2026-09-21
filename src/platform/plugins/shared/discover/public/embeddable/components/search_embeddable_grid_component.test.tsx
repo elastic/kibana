@@ -89,7 +89,18 @@ const createSavedSearch = ({
   };
 };
 
-const createApi = (savedSearch: SavedSearch, parentApi?: SearchEmbeddableApi['parentApi']) => {
+const createApi = (
+  savedSearch: SavedSearch,
+  {
+    parentApi,
+    savedObjectId,
+    panelFilters = [],
+  }: {
+    parentApi?: SearchEmbeddableApi['parentApi'];
+    savedObjectId?: string;
+    panelFilters?: Filter[];
+  } = {}
+) => {
   return {
     dataLoading$: new BehaviorSubject<boolean | undefined>(false),
     savedSearch$: new BehaviorSubject(savedSearch),
@@ -129,6 +140,11 @@ describe('SearchEmbeddableGridComponent', () => {
     parentApi,
     showKeyboardShortcuts,
     showSortSelector,
+    expandedDoc,
+    fetchContext,
+    savedObjectId,
+    panelFilters,
+    services: servicesOverride = services,
   }: {
     isEsql: boolean;
     columns?: string[];
@@ -139,9 +155,17 @@ describe('SearchEmbeddableGridComponent', () => {
     parentApi?: SearchEmbeddableApi['parentApi'];
     showKeyboardShortcuts?: boolean;
     showSortSelector?: boolean;
+    expandedDoc?: DataTableRecord;
+    fetchContext?: FetchContext;
+    savedObjectId?: string;
+    panelFilters?: Filter[];
+    services?: ReturnType<typeof createDiscoverServicesMock>;
   }) => {
     const savedSearch = createSavedSearch({ isEsql, columns, query });
-    const api = createApi(savedSearch, parentApi);
+    const api = createApi(savedSearch, { parentApi, savedObjectId, panelFilters });
+    if (fetchContext) {
+      api.fetchContext$.next(fetchContext);
+    }
     const stateManager = createStateManager();
     stateManager.columns.next(savedSearch.columns);
     const docViewerRef = React.createRef<DocViewerApi>();
@@ -168,7 +192,10 @@ describe('SearchEmbeddableGridComponent', () => {
     });
 
     render(
-      <DiscoverTestProvider services={services} scopedProfilesManager={scopedProfilesManager}>
+      <DiscoverTestProvider
+        services={servicesOverride}
+        scopedProfilesManager={scopedProfilesManager}
+      >
         <SearchEmbeddableGridComponent
           api={api}
           dataView={dataViewMock}
@@ -467,6 +494,104 @@ describe('SearchEmbeddableGridComponent', () => {
       const lastCallProps = mockDiscoverGridEmbeddableProps.mock.calls.at(-1)?.[0];
       expect(lastCallProps?.showKeyboardShortcuts).toBe(false);
       expect(lastCallProps?.showSortSelector).toBe(false);
+      expect(getLastFlyoutMenuTrailingActions()).toBeUndefined();
+    });
+  });
+
+  describe('share direct link', () => {
+    const expandedDoc = rows[0];
+    const expandedDocRef = { id: esHitsMock[0]._id, index: esHitsMock[0]._index };
+
+    const createServicesWithDiscoverAccess = () => {
+      const servicesWithAccess = createDiscoverServicesMock();
+      servicesWithAccess.capabilities.discover_v2.show = true;
+      return servicesWithAccess;
+    };
+
+    it('provides a share direct link action for the expanded document', async () => {
+      await renderComponent({
+        isEsql: false,
+        expandedDoc,
+        services: createServicesWithDiscoverAccess(),
+      });
+
+      await waitFor(() => {
+        expect(getLastFlyoutMenuTrailingActions()).toBeDefined();
+      });
+
+      const [action, ...rest] = getLastFlyoutMenuTrailingActions() ?? [];
+      expect(rest).toHaveLength(0);
+      expect(action.toolTipProps?.anchorProps).toHaveProperty(
+        'data-test-subj',
+        'discoverDocFlyoutShareDirectLink'
+      );
+    });
+
+    it('copies a Discover link carrying the document identity and an absolute time range', async () => {
+      const servicesWithAccess = createServicesWithDiscoverAccess();
+      await renderComponent({
+        isEsql: false,
+        expandedDoc,
+        fetchContext: {
+          timeRange: { from: '2024-01-01T00:00:00.000Z', to: '2024-01-02T00:00:00.000Z' },
+        } as FetchContext,
+        services: servicesWithAccess,
+      });
+
+      await waitFor(() => {
+        expect(getLastFlyoutMenuTrailingActions()).toBeDefined();
+      });
+
+      getLastFlyoutMenuTrailingActions()?.[0]?.onClick?.();
+
+      await waitFor(() => {
+        expect(servicesWithAccess.locator.getRedirectUrl).toHaveBeenCalled();
+      });
+
+      const params = jest.mocked(servicesWithAccess.locator.getRedirectUrl).mock.calls[0][0];
+      expect(params.expandedDoc).toEqual(expandedDocRef);
+      expect(params.timeRange).toEqual({
+        from: '2024-01-01T00:00:00.000Z',
+        to: '2024-01-02T00:00:00.000Z',
+      });
+      expect(params.columns).toEqual(['message']);
+      expect(params.sort).toEqual([]);
+    });
+
+    it('combines the panel filters with the dashboard filters so the result set matches', async () => {
+      const panelFilter: Filter = { meta: { key: 'panel' } };
+      const dashboardFilter: Filter = { meta: { key: 'dashboard' } };
+      const servicesWithAccess = createServicesWithDiscoverAccess();
+      await renderComponent({
+        isEsql: false,
+        expandedDoc,
+        panelFilters: [panelFilter],
+        fetchContext: { filters: [dashboardFilter] } as FetchContext,
+        services: servicesWithAccess,
+      });
+
+      await waitFor(() => {
+        expect(getLastFlyoutMenuTrailingActions()).toBeDefined();
+      });
+
+      getLastFlyoutMenuTrailingActions()?.[0]?.onClick?.();
+
+      await waitFor(() => {
+        expect(servicesWithAccess.locator.getRedirectUrl).toHaveBeenCalled();
+      });
+
+      const params = jest.mocked(servicesWithAccess.locator.getRedirectUrl).mock.calls[0][0];
+      expect(params.filters).toEqual([panelFilter, dashboardFilter]);
+    });
+
+    it('hides the share action when the user cannot access Discover', async () => {
+      // The default mock grants neither `discover_v2.show` nor `discover_v2.save`.
+      await renderComponent({ isEsql: false, expandedDoc });
+
+      await waitFor(() => {
+        expect(mockDiscoverGridEmbeddableProps).toHaveBeenCalled();
+      });
+
       expect(getLastFlyoutMenuTrailingActions()).toBeUndefined();
     });
   });

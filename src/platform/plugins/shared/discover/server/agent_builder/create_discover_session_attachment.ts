@@ -14,12 +14,12 @@ import {
   AS_CODE_DATA_VIEW_SPEC_TYPE,
   AS_CODE_ESQL_DATA_SOURCE_TYPE,
 } from '@kbn/as-code-data-views-schema';
-import { DISCOVER_SESSION_ATTACHMENT_TYPE } from '../../common/agent_builder';
 import {
   discoverSessionApiDataSchema,
-  type DiscoverSessionApiData,
   type DiscoverSessionApiTab,
-} from '../api/schema';
+  type DiscoverSessionData as DiscoverSessionApiData,
+} from '@kbn/as-code-discover-schema';
+import { DISCOVER_SESSION_ATTACHMENT_TYPE } from '../../common/agent_builder';
 
 const MAX_FORMATTED_COLUMNS = 20;
 

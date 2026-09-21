@@ -43,8 +43,10 @@ describe('discoverSessionSkill', () => {
     expect(discoverSessionSkill.content).toContain('attachment_id');
     expect(discoverSessionSkill.content).toContain('<render_attachment');
     expect(discoverSessionSkill.content).toContain('Do **not** create a second session');
-    expect(discoverSessionSkill.content).toContain('screen-context');
-    expect(discoverSessionSkill.content).toContain('The skill name');
+    expect(discoverSessionSkill.content).toContain(
+      'Omit `attachment_id` unless a previous result from this tool returned that exact ID.'
+    );
+    expect(discoverSessionSkill.content).not.toContain('screen-context');
     expect(discoverSessionSkill.content).toContain(
       'Omit `columns` unless the user named specific fields'
     );

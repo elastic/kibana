@@ -12,7 +12,8 @@ import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EuiProvider } from '@elastic/eui';
 import { AS_CODE_ESQL_DATA_SOURCE_TYPE } from '@kbn/as-code-data-views-schema';
-import { DataGridDensity, DiscoverTabType, SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
+import { DataGridDensity, DiscoverTabType } from '@kbn/discover-session-constants';
+import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import type { ApplicationStart } from '@kbn/core/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
@@ -33,6 +34,7 @@ const liveSerializedState: DiscoverSessionEmbeddableByValueState & {
   tabs: [
     {
       data_source: { type: AS_CODE_ESQL_DATA_SOURCE_TYPE, query: 'FROM logs-* | LIMIT 100' },
+      type: DiscoverTabType.Default,
       column_order: ['@timestamp'],
       density: DataGridDensity.COMPACT,
       row_height: 2,
@@ -263,6 +265,7 @@ describe('DiscoverSessionInline', () => {
                   type: AS_CODE_ESQL_DATA_SOURCE_TYPE,
                   query: 'FROM logs-* | LIMIT 100',
                 },
+                type: DiscoverTabType.Default,
                 column_order: ['event.action', '@timestamp'],
                 density: 'compact',
                 row_height: 2,

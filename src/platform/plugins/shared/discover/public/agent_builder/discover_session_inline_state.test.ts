@@ -8,13 +8,10 @@
  */
 
 import { AS_CODE_ESQL_DATA_SOURCE_TYPE } from '@kbn/as-code-data-views-schema';
-import { DataGridDensity, DiscoverTabType } from '@kbn/discover-utils';
+import type { DiscoverSessionApiTab } from '@kbn/as-code-discover-schema';
+import { DataGridDensity, DiscoverTabType } from '@kbn/discover-session-constants';
 import { NEW_TAB_ID } from '../../common/constants';
-import type {
-  DiscoverSessionApiData,
-  DiscoverSessionApiTab,
-  DiscoverSessionEmbeddableByValueState,
-} from '../../server';
+import type { DiscoverSessionApiData, DiscoverSessionEmbeddableByValueState } from '../../server';
 import {
   buildDiscoverSessionDashboardSaveState,
   buildDiscoverSessionEmbeddableInput,
@@ -163,6 +160,7 @@ describe('discover session inline state', () => {
         tabs: [
           {
             data_source: { type: AS_CODE_ESQL_DATA_SOURCE_TYPE, query: 'FROM logs-*' },
+            type: DiscoverTabType.Default,
             column_order: ['@timestamp'],
             density: DataGridDensity.COMPACT,
             sort: [],
@@ -185,6 +183,7 @@ describe('discover session inline state', () => {
         tabs: [
           {
             data_source: { type: AS_CODE_ESQL_DATA_SOURCE_TYPE, query: 'FROM logs-*' },
+            type: DiscoverTabType.Default,
             column_order: ['event.action', '@timestamp'],
             density: DataGridDensity.COMPACT,
             sort: [],
@@ -200,6 +199,7 @@ describe('discover session inline state', () => {
         tabs: [
           {
             data_source: { type: AS_CODE_ESQL_DATA_SOURCE_TYPE, query: 'FROM logs-*' },
+            type: DiscoverTabType.Default,
             column_order: ['@timestamp'],
             sort: [],
           },
@@ -226,6 +226,7 @@ describe('discover session inline state', () => {
         tabs: [
           {
             data_source: { type: AS_CODE_ESQL_DATA_SOURCE_TYPE, query: 'FROM logs-*' },
+            type: DiscoverTabType.Default,
             column_order: ['@timestamp'],
             sort: [],
           },

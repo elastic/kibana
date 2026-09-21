@@ -11,9 +11,10 @@ import {
   AS_CODE_DATA_VIEW_REFERENCE_TYPE,
   AS_CODE_ESQL_DATA_SOURCE_TYPE,
 } from '@kbn/as-code-data-views-schema';
-import { DiscoverTabType } from '@kbn/discover-utils';
+import type { DiscoverSessionApiTab } from '@kbn/as-code-discover-schema';
+import { DiscoverTabType } from '@kbn/discover-session-constants';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
-import type { DiscoverSessionApiData, DiscoverSessionApiTab } from '../../server';
+import type { DiscoverSessionApiData } from '../../server';
 import { toStoredSearchEmbeddableByValue } from '../embeddable/transform_utils';
 import { toSearchEmbeddableByValueState } from './to_search_embeddable_by_value_state';
 
@@ -47,6 +48,18 @@ const classicTab: DiscoverSessionApiTab = {
   hide_table: false,
 };
 
+const metricsTab: DiscoverSessionApiTab = {
+  ...esqlTab,
+  id: 'tab-metrics',
+  label: 'Metrics',
+  type: DiscoverTabType.Metrics,
+  dimensions: ['service.name'],
+  search_term: 'cpu',
+  counter_aggregation: 'sum',
+  gauge_aggregation: 'avg',
+  histogram_percentile: 'p95',
+};
+
 const createSession = (
   overrides: Partial<DiscoverSessionApiData> & Pick<DiscoverSessionApiData, 'title' | 'tabs'>
 ): DiscoverSessionApiData => ({
@@ -71,6 +84,7 @@ describe('toSearchEmbeddableByValueState', () => {
       tabs: [
         {
           data_source: esqlTab.data_source,
+          type: DiscoverTabType.Default,
           column_order: ['@timestamp', 'status', 'message'],
           sort: [{ name: '@timestamp', direction: 'desc' }],
         },
@@ -158,7 +172,26 @@ describe('toSearchEmbeddableByValueState', () => {
       },
       filters: [],
       sort: [],
+      type: DiscoverTabType.Default,
       view_mode: VIEW_MODE.DOCUMENT_LEVEL,
+    });
+  });
+
+  it('preserves metrics tab settings', () => {
+    const result = toSearchEmbeddableByValueState(
+      createSession({
+        title: 'Metrics',
+        tabs: [metricsTab],
+      })
+    );
+
+    expect(result.tabs[0]).toMatchObject({
+      type: DiscoverTabType.Metrics,
+      dimensions: ['service.name'],
+      search_term: 'cpu',
+      counter_aggregation: 'sum',
+      gauge_aggregation: 'avg',
+      histogram_percentile: 'p95',
     });
   });
 

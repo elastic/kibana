@@ -16,7 +16,7 @@ import type {
 } from '@kbn/agent-builder-server/attachments';
 import { AS_CODE_ESQL_DATA_SOURCE_TYPE } from '@kbn/as-code-data-views-schema';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
+import { UnifiedHistogramSuggestionType } from '@kbn/discover-session-constants';
 import { DISCOVER_SESSION_ATTACHMENT_TYPE } from '../../common/agent_builder';
 import { createDiscoverSessionAttachmentType } from './create_discover_session_attachment';
 

@@ -14,17 +14,16 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { AS_CODE_ESQL_DATA_SOURCE_TYPE } from '@kbn/as-code-data-views-schema';
+import {
+  discoverSessionApiDataSchema,
+  type DiscoverSessionData as DiscoverSessionApiData,
+} from '@kbn/as-code-discover-schema';
+import { MAX_SESSION_TITLE_LENGTH, MAX_TAB_LABEL_LENGTH } from '@kbn/discover-session-constants';
 import { getDateRange } from '@kbn/timerange';
 import {
   DISCOVER_SESSION_ATTACHMENT_TYPE,
   DISCOVER_SESSION_SKILL_ID,
 } from '../../common/agent_builder';
-import {
-  discoverSessionApiDataSchema,
-  MAX_SESSION_TITLE_LENGTH,
-  MAX_TAB_LABEL_LENGTH,
-  type DiscoverSessionApiData,
-} from '../api/schema';
 
 const MAX_ESQL_LENGTH = 4096;
 const MAX_TIME_RANGE_BOUND_LENGTH = 128;
@@ -56,6 +55,7 @@ interface DiscoverSessionToolPatch {
   columns?: string[] | null;
 }
 
+// Models sometimes send a placeholder instead of a real attachment ID. Treat those as omitted so the call can still succeed. Unknown real IDs are still rejected.
 const PLACEHOLDER_ATTACHMENT_IDS = new Set([
   '.',
   '..',
@@ -110,7 +110,7 @@ const createDiscoverSessionSchema = z
         .max(256)
         .optional()
         .describe(
-          '(optional) ID of an existing Discover session attachment to update. Use only an id from a previous result of this tool. Never invent one. Never pass the skill name, "discover.session", "screen-context", ".", or placeholders. Omit this field to create, or to update the only Discover session in the conversation.'
+          'Existing Discover session attachment ID. Set only to an exact ID from a previous result of this tool. Otherwise omit, including to create a session or update the only one.'
         )
     ),
     title: z
@@ -376,7 +376,7 @@ const updateDiscoverSessionAttachment = async ({
     return {
       results: [
         createErrorResult(
-          `Attachment "${attachmentId}" is type "${record.type}", not a Discover session. Omit attachment_id and call this tool again to create a session. Never pass screen-context or other non-session ids.`
+          `Attachment "${attachmentId}" is type "${record.type}", not a Discover session. Omit attachment_id and call this tool again to create a session. Do not pass an ID from another attachment type.`
         ),
       ],
     };
@@ -469,7 +469,7 @@ export const createDiscoverSessionTool = (): BuiltinToolDefinition<
 
 Pass an ES|QL query that returns documents (FROM or TS with WHERE/LIMIT as needed). Copy the "esql" string from generateEsql into the "esql" parameter — do not wrap it in an object and do not invent ES|QL. Do not use this for aggregations (STATS) or charts; use ${platformCoreTools.createVisualization} instead.
 
-Do not pass attachment_id unless a previous result of this same tool returned that exact id. Never invent an id. Never pass the skill name, "discover.session", "screen-context", ".", or "{attachment_id}". Omit attachment_id to create when none exists, or to update the conversation's only Discover session. On update, omit fields you want to keep; pass null for time_range or columns to clear them. esql is required only when creating.
+Do not pass attachment_id unless a previous result of this same tool returned that exact id. Never invent an id. Omit attachment_id to create when none exists, or to update the conversation's only Discover session. On update, omit fields you want to keep; pass null for time_range or columns to clear them. esql is required only when creating.
 
 Call this tool once per user request. After a successful result, stop calling tools. Paste the returned "render" string into your reply verbatim — do not build the tag yourself. Do not create a second session unless the user asked for another table.
 

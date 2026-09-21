@@ -8,15 +8,13 @@
  */
 
 import { AS_CODE_ESQL_DATA_SOURCE_TYPE } from '@kbn/as-code-data-views-schema';
-import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import type {
-  DiscoverSessionApiData,
   DiscoverSessionApiEsqlTab,
   DiscoverSessionApiTab,
-  DiscoverSessionClassicTab,
-  DiscoverSessionEmbeddableByValueState,
-  DiscoverSessionEsqlTab,
-} from '../../server';
+} from '@kbn/as-code-discover-schema';
+import { DiscoverTabType } from '@kbn/discover-session-constants';
+import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
+import type { DiscoverSessionApiData, DiscoverSessionEmbeddableByValueState } from '../../server';
 
 /**
  * Projects Discover session API data into as-code by-value search embeddable state.
@@ -60,18 +58,33 @@ const toTableFields = (tab: DiscoverSessionApiTab) => ({
 
 const toEmbeddableTab = (
   tab: DiscoverSessionApiTab
-): DiscoverSessionEsqlTab | DiscoverSessionClassicTab => {
+): DiscoverSessionEmbeddableByValueState['tabs'][number] => {
   if (isApiEsqlTab(tab)) {
-    const esqlTab: DiscoverSessionEsqlTab = {
+    const esqlTab = {
       ...toTableFields(tab),
       data_source: tab.data_source,
+      type: DiscoverTabType.Default as const,
     };
+
+    if (tab.type === DiscoverTabType.Metrics) {
+      return {
+        ...esqlTab,
+        type: tab.type,
+        dimensions: tab.dimensions,
+        search_term: tab.search_term,
+        counter_aggregation: tab.counter_aggregation,
+        gauge_aggregation: tab.gauge_aggregation,
+        histogram_percentile: tab.histogram_percentile,
+      };
+    }
+
     return esqlTab;
   }
 
-  const classicTab: DiscoverSessionClassicTab = {
+  const classicTab = {
     ...toTableFields(tab),
     data_source: tab.data_source,
+    type: DiscoverTabType.Default as const,
     filters: tab.filters ?? [],
     view_mode: tab.view_mode ?? VIEW_MODE.DOCUMENT_LEVEL,
     ...(tab.query !== undefined ? { query: tab.query } : {}),

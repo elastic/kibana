@@ -49,25 +49,15 @@ exports[`renderCustomToolbar should keep controls on one line when wrap is false
         <EuiFlexItem
           grow={false}
         >
-          <div
+          <EuiButtonGroup
             className="unifiedDataTableToolbarControlGroup"
+            legend="Data grid controls"
+            variant="segmented"
           >
-            <div
-              className="unifiedDataTableToolbarControlIconButton"
-            >
-              keyboard
-            </div>
-            <div
-              className="unifiedDataTableToolbarControlIconButton"
-            >
-              display
-            </div>
-            <div
-              className="unifiedDataTableToolbarControlIconButton"
-            >
-              fullScreen
-            </div>
-          </div>
+            keyboard
+            display
+            fullScreen
+          </EuiButtonGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexItem>
