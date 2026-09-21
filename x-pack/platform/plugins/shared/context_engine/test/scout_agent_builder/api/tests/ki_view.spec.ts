@@ -96,7 +96,7 @@ apiTest.describe('context engine KI retrieval view', { tag: tags.stateful.classi
       });
 
       await apiTest.step('writes active, deleted, and expired KIs', async () => {
-        await esClient.bulk({
+        const { errors } = await esClient.bulk({
           index: DEST,
           refresh: true,
           operations: [
@@ -110,6 +110,7 @@ apiTest.describe('context engine KI retrieval view', { tag: tags.stateful.classi
             ki('unexpired', { expires_at: '2100-01-01T00:00:00Z' }),
           ],
         });
+        expect(errors).toBe(false);
       });
 
       await apiTest.step('the view returns the active KIs without governance columns', async () => {
@@ -171,7 +172,7 @@ apiTest.describe('context engine KI retrieval view', { tag: tags.stateful.classi
       });
 
       await apiTest.step('writes multiple revisions per KI', async () => {
-        await esClient.bulk({
+        const { errors } = await esClient.bulk({
           index: DS_DEST,
           refresh: true,
           operations: [
@@ -194,6 +195,7 @@ apiTest.describe('context engine KI retrieval view', { tag: tags.stateful.classi
             ki('tied', { title: 'tied-b' }),
           ],
         });
+        expect(errors).toBe(false);
       });
 
       await apiTest.step('the view returns one row per KI from its latest revision', async () => {
