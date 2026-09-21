@@ -24,7 +24,7 @@ const fetchMock = jest.fn();
 const addSuccess = jest.fn();
 const addDanger = jest.fn();
 const mockLocator = {
-  getUrl: jest.fn(async ({ investigationId }: { investigationId: string }) =>
+  getRedirectUrl: jest.fn(({ investigationId }: { investigationId: string }) =>
     investigationId ? `/app/nightshift?investigationId=${investigationId}` : ''
   ),
 } as unknown as InvestigationLocator;
@@ -150,15 +150,12 @@ describe('useInvestigateAlert', () => {
     await waitFor(() => expect(result.current.investigateActionLabel).toBe('Re-investigate'));
     expect(result.current.isInvestigating).toBe(false);
     expect(result.current.viewInvestigationActionLabel).toBe('View investigation');
-    await waitFor(() =>
-      expect(result.current.viewInvestigationUrl).toBe(
-        '/app/nightshift?investigationId=inv-completed'
-      )
+    expect(result.current.viewInvestigationUrl).toBe(
+      '/app/nightshift?investigationId=inv-completed'
     );
-    expect(mockLocator.getUrl).toHaveBeenCalledWith(
-      { investigationId: 'inv-completed' },
-      undefined
-    );
+    expect(mockLocator.getRedirectUrl).toHaveBeenCalledWith({
+      investigationId: 'inv-completed',
+    });
   });
 
   it('keeps the completed investigation link while a newer investigation is active', async () => {

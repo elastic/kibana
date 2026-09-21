@@ -6,13 +6,20 @@
  */
 
 import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
+import type { Severity } from '@kbn/significant-events-schema';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
+
+export const NIGHTSHIFT_SEARCH_QUERY_PARAM = 'q';
+export const NIGHTSHIFT_SEVERITY_QUERY_PARAM = 'severity';
+export const NIGHTSHIFT_INVESTIGATION_ID_QUERY_PARAM = 'investigationId';
 
 export const NIGHTSHIFT_INVESTIGATION_LOCATOR_ID = 'NIGHTSHIFT_INVESTIGATION_LOCATOR';
 
 export interface InvestigationLocatorParams extends SerializableRecord {
   investigationId?: string;
+  q?: string;
+  severity?: Severity;
 }
 
 export type InvestigationLocator = LocatorPublic<InvestigationLocatorParams>;
@@ -25,7 +32,13 @@ export class InvestigationLocatorDefinition
   public readonly getLocation = async (params?: InvestigationLocatorParams) => {
     const searchParams = new URLSearchParams();
     if (params?.investigationId) {
-      searchParams.set('investigationId', params.investigationId);
+      searchParams.set(NIGHTSHIFT_INVESTIGATION_ID_QUERY_PARAM, params.investigationId);
+    }
+    if (params?.q) {
+      searchParams.set(NIGHTSHIFT_SEARCH_QUERY_PARAM, params.q);
+    }
+    if (params?.severity) {
+      searchParams.set(NIGHTSHIFT_SEVERITY_QUERY_PARAM, params.severity);
     }
     const queryString = searchParams.toString();
 

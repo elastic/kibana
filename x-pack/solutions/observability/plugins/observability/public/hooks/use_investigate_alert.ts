@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useLocatorUrl } from '@kbn/share-plugin/public';
 import {
   NIGHTSHIFT_INVESTIGATION_LOCATOR_ID,
   type InvestigationLocatorParams,
@@ -76,13 +75,10 @@ export const useInvestigateAlert = ({
   const showInvestigateAction = availability?.available === true;
   const investigationId =
     alertId && latestInvestigation ? latestInvestigation.investigation_id : '';
-  const locatorUrl = useLocatorUrl(
-    investigationId ? investigationLocator : undefined,
-    { investigationId },
-    undefined,
-    [investigationId]
+  const viewInvestigationUrl = useMemo(
+    () => (investigationId ? investigationLocator?.getRedirectUrl({ investigationId }) : undefined),
+    [investigationId, investigationLocator]
   );
-  const viewInvestigationUrl = investigationId && locatorUrl ? locatorUrl : undefined;
   const viewInvestigationActionLabel = i18n.translate(
     'xpack.observability.alerts.viewInvestigationButtonLabel',
     {

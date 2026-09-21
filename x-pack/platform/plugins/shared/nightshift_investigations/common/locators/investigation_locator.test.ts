@@ -27,6 +27,18 @@ describe('InvestigationLocatorDefinition', () => {
     });
   });
 
+  it('supports q and severity query params', async () => {
+    const location = await definition.getLocation({
+      q: 'service.name: checkout',
+      severity: 'critical',
+    });
+    expect(location).toEqual({
+      app: NIGHTSHIFT_APP_ID,
+      path: '?q=service.name%3A+checkout&severity=critical',
+      state: {},
+    });
+  });
+
   it('encodes special characters in investigationId', async () => {
     const location = await definition.getLocation({ investigationId: 'inv/test?id=1&name=a' });
     expect(location).toEqual({

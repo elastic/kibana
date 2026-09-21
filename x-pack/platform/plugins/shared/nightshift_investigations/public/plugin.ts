@@ -8,7 +8,7 @@
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import type { SharePluginSetup } from '@kbn/share-plugin/public';
-import { InvestigationLocatorDefinition, type InvestigationLocator } from '../common/locators';
+import { InvestigationLocatorDefinition } from '../common/locators';
 import {
   createNightshiftInvestigationsRepositoryClient,
   type NightshiftInvestigationsRepositoryClient,
@@ -20,17 +20,10 @@ export interface NightshiftInvestigationsPublicSetupDeps {
   workflowsExtensions?: WorkflowsExtensionsPublicPluginSetup;
 }
 
-export interface NightshiftInvestigationsPublicSetup {
-  locators: {
-    investigation: InvestigationLocator;
-  };
-}
+export type NightshiftInvestigationsPublicSetup = void;
 
 export interface NightshiftInvestigationsPublicStart {
   investigationsClient: NightshiftInvestigationsRepositoryClient;
-  locators: {
-    investigation: InvestigationLocator;
-  };
 }
 
 export class NightshiftInvestigationsPublicPlugin
@@ -41,30 +34,18 @@ export class NightshiftInvestigationsPublicPlugin
       NightshiftInvestigationsPublicSetupDeps
     >
 {
-  private investigationLocator!: InvestigationLocator;
-
   setup(
     _core: CoreSetup,
     { share, workflowsExtensions }: NightshiftInvestigationsPublicSetupDeps
   ): NightshiftInvestigationsPublicSetup {
     registerInvestigationsWorkflowTriggers(workflowsExtensions);
 
-    const investigationLocator = share.url.locators.create(new InvestigationLocatorDefinition());
-    this.investigationLocator = investigationLocator;
-
-    return {
-      locators: {
-        investigation: investigationLocator,
-      },
-    };
+    share.url.locators.create(new InvestigationLocatorDefinition());
   }
 
   start(core: CoreStart): NightshiftInvestigationsPublicStart {
     return {
       investigationsClient: createNightshiftInvestigationsRepositoryClient(core),
-      locators: {
-        investigation: this.investigationLocator,
-      },
     };
   }
 }
