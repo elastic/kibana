@@ -182,6 +182,9 @@ function buildWorkdaySupervisesConfig(
     disableLookbackWindow: true,
     validateTargetIds: true,
     compositeAggAdditionalFilters: [
+      // Duplicates the actor-presence filter that `buildActorDiscoveryQuery` already
+      // derives from `customActor.fields` (exists AND != "" per field, minimum_should_match 1).
+      // Kept for explicitness and parity with the Entra ID `owns` config — not load-bearing.
       {
         bool: {
           should: [

@@ -170,7 +170,7 @@ apiTest.describe(
     });
 
     apiTest(
-      'collapses a shared manager into one actor write with both reports',
+      'writes both reports of a shared manager onto that manager',
       async ({ apiClient, esClient }) => {
         const runId = randomUUID().slice(0, 8);
         const managerEmail = `shared.${runId}@example.com`;
@@ -289,6 +289,50 @@ apiTest.describe(
         await triggerMaintainerRun(apiClient, internalHeaders, MAINTAINER_ID, { sync: true });
 
         await waitForRelationshipIds(esClient, RELATIONSHIP_KEY, managerEntityId, reportEntityId);
+      }
+    );
+
+    apiTest(
+      'writes the report onto the email-keyed manager when both manager fields are present',
+      async ({ apiClient, esClient }) => {
+        // Covers the production-dominant shape: real Workday rows populate both
+        // Manager_Email and Manager_ID, so the managerKey CASE takes the
+        // MV_APPEND branch and expands two actor EUIDs per report. The email-
+        // keyed actor matches the entity in the store and receives the edge; the
+        // id-keyed actor (user:<managerId>@workday) 404s because no entity with
+        // that EUID was seeded — that 404 is the intended drop path, not a bug.
+        const runId = randomUUID().slice(0, 8);
+        const managerEmail = `dual.mgr.${runId}@example.com`;
+        const managerId = `000687-${runId}`;
+        const reportEmail = `dual.report.${runId}@example.com`;
+        const managerEntityId = `user:${managerEmail}@${NAMESPACE}`;
+        const managerIdEntityId = `user:${managerId}@${NAMESPACE}`;
+        const reportEntityId = `user:${reportEmail}@${NAMESPACE}`;
+
+        await seedUserEntity(esClient, {
+          entityId: managerEntityId,
+          namespace: NAMESPACE,
+          email: managerEmail,
+          entitySource: ENTITY_SOURCE,
+        });
+        await seedUserEntity(esClient, {
+          entityId: reportEntityId,
+          namespace: NAMESPACE,
+          email: reportEmail,
+          entitySource: ENTITY_SOURCE,
+        });
+        // Both manager fields present — exercises the MV_APPEND arm of managerKey.
+        await seedWorkdayRow(esClient, { userEmail: reportEmail, managerEmail, managerId });
+
+        await triggerMaintainerRun(apiClient, internalHeaders, MAINTAINER_ID, { sync: true });
+
+        // The email-keyed actor has an entity and must receive the supervises edge.
+        await waitForRelationshipIds(esClient, RELATIONSHIP_KEY, managerEntityId, reportEntityId);
+        const ids = await getRelationshipIds(esClient, RELATIONSHIP_KEY, managerEntityId);
+        expect(ids).toStrictEqual([reportEntityId]);
+
+        // The id-keyed actor has no entity; its write 404s and must produce no edge.
+        await assertNoRelationshipId(esClient, RELATIONSHIP_KEY, managerIdEntityId, reportEntityId);
       }
     );
   }
