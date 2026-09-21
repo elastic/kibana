@@ -240,6 +240,9 @@ run_scout_tests() {
     "SCOUT_TARGET_LOCATION=$SCOUT_TEST_TARGET_LOCATION"
     "SCOUT_TARGET_ARCH=$SCOUT_TEST_TARGET_ARCH"
     "SCOUT_TARGET_DOMAIN=$SCOUT_TEST_TARGET_DOMAIN"
+    # Drives the Playwright config's `grepInvert`, so tests tagged
+    # '@limit/<selection-method>-<target-attr>' only run on matching targets.
+    "SCOUT_TARGET_ATTRIBUTES=${SCOUT_TARGET_ATTRIBUTES:-}"
     "NODE_OPTIONS=${NODE_OPTIONS:-} --require=@kbn/swc-register/install"
     # Pin the JSON report to a path we control (see json_report_path).
     "PLAYWRIGHT_JSON_OUTPUT_FILE=$(json_report_path "$idx")"

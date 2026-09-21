@@ -12,8 +12,15 @@ export KBN_BOOTSTRAP_NO_PREBUILT=true
 source .buildkite/scripts/bootstrap.sh
 .buildkite/scripts/setup_es_snapshot_cache.sh
 
+# Test target attributes the distributed tests will run under. Declared explicitly here,
+# at the entry point of the distribution process, so tests tagged
+# '@limit/<selection-method>-<target-attr>' are filtered accordingly. `env.sh` exports the
+# equivalent SCOUT_TARGET_ATTRIBUTES for the steps that run the distributed tests.
+TARGET_ATTRIBUTE_FLAGS=()
+
 if should_enable_fips; then
   export NODE_OPTIONS="${NODE_OPTIONS:-} --enable-fips --openssl-config=$HOME/nodejs.cnf"
+  TARGET_ATTRIBUTE_FLAGS+=(--targetAttribute fips)
 fi
 
 echo '--- Verify Playwright CLI is functional'
@@ -113,6 +120,7 @@ if [[ "$SCOUT_TEST_DISTRIBUTION_STRATEGY" == "lanes" ]]; then
     --targetRuntimeMinutes "${SCOUT_TEST_LANE_TARGET_RUNTIME_MINUTES:-15}" \
     --testing-scope "$TESTING_SCOPE_FILE" \
     "${TEST_TARGET_FLAGS[@]}" \
+    "${TARGET_ATTRIBUTE_FLAGS[@]+"${TARGET_ATTRIBUTE_FLAGS[@]}"}" \
     --showMultiTrackSummary
 else
   if [[ "${BUILDKITE_BRANCH:-}" == "main" || "${BUILDKITE_PULL_REQUEST_BASE_BRANCH:-}" == "main" ]]; then
@@ -126,6 +134,7 @@ else
     --include-custom-servers \
     --target "$SCOUT_DISCOVERY_TARGET" \
     --testing-scope "$TESTING_SCOPE_FILE" \
+    "${TARGET_ATTRIBUTE_FLAGS[@]+"${TARGET_ATTRIBUTE_FLAGS[@]}"}" \
     --save
   cp .scout/test_configs/scout_playwright_configs.json scout_playwright_configs.json
   buildkite-agent artifact upload "scout_playwright_configs.json"
