@@ -251,15 +251,33 @@ function inferSchemaFromAssignRhs(
  * Extends the workflow context schema with template-local variables (assign/capture
  * and for-loop scope) so that validation and autocomplete recognize them.
  */
+/**
+ * Built schemas, keyed by base schema then by the locals in effect. Every
+ * reference sharing a signature shares one schema: extending a base schema with
+ * one key per assign is the bulk of the cost, and a scalar holding thousands of
+ * assigns and thousands of references would otherwise pay it once per reference.
+ */
+const extendedSchemaCache = new WeakMap<object, Map<string, typeof DynamicStepContextSchema>>();
+
 export function extendContextWithTemplateLocals(
   baseSchema: typeof DynamicStepContextSchema,
   templateString: string,
   offsetInTemplate: number
 ): typeof DynamicStepContextSchema {
-  const { assignVars, captureNames, forLoopScopes } = getTemplateLocalContext(
+  const { assignVars, captureNames, forLoopScopes, signature } = getTemplateLocalContext(
     templateString,
     offsetInTemplate
   );
+
+  let bySignature = extendedSchemaCache.get(baseSchema);
+  if (!bySignature) {
+    bySignature = new Map();
+    extendedSchemaCache.set(baseSchema, bySignature);
+  }
+  const cached = bySignature.get(signature);
+  if (cached) {
+    return cached;
+  }
 
   const extension: Record<string, z.ZodType> = {};
   for (const { name, rhs } of assignVars) {
@@ -287,13 +305,16 @@ export function extendContextWithTemplateLocals(
     extension.forloop = FORLOOP_SCHEMA;
   }
 
-  if (Object.keys(extension).length === 0) {
-    return baseSchema;
-  }
+  const extended =
+    Object.keys(extension).length === 0
+      ? baseSchema
+      : // Zod's .extend() returns a new ZodObject whose generic shape differs from
+        // DynamicStepContextSchema; the cast is necessary because the added keys are
+        // dynamic and not reflected in the static type.
+        (baseSchema.extend(extension) as typeof DynamicStepContextSchema);
 
-  // Zod's .extend() returns a new ZodObject whose generic shape differs from DynamicStepContextSchema;
-  // the cast is necessary because the added keys are dynamic and not reflected in the static type.
-  return baseSchema.extend(extension) as typeof DynamicStepContextSchema;
+  bySignature.set(signature, extended);
+  return extended;
 }
 
 const yamlStringCache = new WeakMap<Document, string | null>();

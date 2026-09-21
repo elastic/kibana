@@ -46,12 +46,18 @@ export interface TemplateLocalContext {
   /** Capture variable names; capture output is always string. */
   readonly captureNames: readonly string[];
   readonly forLoopScopes: readonly ForLoopScope[];
+  /**
+   * Identifies the locals in effect rather than the offset that asked for them,
+   * so callers can reuse a built schema across references that share them.
+   */
+  readonly signature: string;
 }
 
 const EMPTY_CONTEXT: TemplateLocalContext = Object.freeze({
   assignVars: [],
   captureNames: [],
   forLoopScopes: [],
+  signature: '',
 });
 
 // ---------------------------------------------------------------------------
@@ -261,17 +267,16 @@ function pushForLoopScope(
 // ---------------------------------------------------------------------------
 
 interface WalkAccumulator {
-  assignVars: AssignVariable[];
-  captureNames: Set<string>;
+  assignVars: Array<{ gate: number; variable: AssignVariable }>;
+  captureNames: Array<{ gate: number; name: string }>;
   forLoopScopes: ForLoopScope[];
 }
 
-/** `null` collects every tag without cursor filtering (used by {@link getAllForLoopScopes}). */
-function walkTemplates(
-  templates: Template[],
-  beforeOffset: number | null,
-  acc: WalkAccumulator
-): void {
+/**
+ * Records every tag with the offset that gates it, so one walk serves every
+ * cursor offset instead of one walk per reference.
+ */
+function walkTemplates(templates: Template[], acc: WalkAccumulator): void {
   for (const tpl of templates) {
     const { token } = tpl;
     const children = tpl.children ? resolveChildren(tpl) : [];
@@ -281,14 +286,17 @@ function walkTemplates(
         const firstId = tpl.localScope()[Symbol.iterator]().next();
         const varName = firstId.done ? null : firstId.value.content;
         const rhs = parseAssignRhs(tpl.token.args);
-        if (varName && (beforeOffset === null || token.end <= beforeOffset)) {
-          acc.assignVars.push({ name: varName, rhs: rhs ?? '' });
+        if (varName) {
+          acc.assignVars.push({
+            gate: token.end,
+            variable: { name: varName, rhs: rhs ?? '' },
+          });
         }
       } else if (isCaptureTagType(tpl)) {
-        const captureBodyEnd = getMaxTokenEnd(tpl.templates);
-        if (beforeOffset === null || captureBodyEnd <= beforeOffset) {
-          acc.captureNames.add(tpl.variable);
-        }
+        acc.captureNames.push({
+          gate: getMaxTokenEnd(tpl.templates),
+          name: tpl.variable,
+        });
       } else if (isForTagType(tpl)) {
         const { variable: variableName, collection, templates: bodyTemplates } = tpl;
         pushForLoopScope(
@@ -303,7 +311,7 @@ function walkTemplates(
     }
 
     if (children.length > 0) {
-      walkTemplates(children, beforeOffset, acc);
+      walkTemplates(children, acc);
     }
   }
 }
@@ -336,41 +344,112 @@ function walkTemplates(
  * Used to validate collection paths across the full template string.
  */
 export function getAllForLoopScopes(templateString: string): ForLoopScope[] {
+  return getTemplateLocalIndex(templateString).forLoopScopes;
+}
+
+/** One walk of a template, tagged so any cursor offset is a prefix of it. */
+interface TemplateLocalIndex {
+  /** Distinguishes templates in the signature, so two of them cannot collide. */
+  id: number;
+  assignVars: Array<{ gate: number; variable: AssignVariable }>;
+  captureNames: Array<{ gate: number; name: string }>;
+  forLoopScopes: ForLoopScope[];
+}
+
+const EMPTY_INDEX: TemplateLocalIndex = {
+  id: 0,
+  assignVars: [],
+  captureNames: [],
+  forLoopScopes: [],
+};
+
+let nextIndexId = 1;
+
+const MAX_INDEX_CACHE_SIZE = 64;
+const indexCache = new Map<string, TemplateLocalIndex>();
+
+function buildTemplateLocalIndex(templateString: string): TemplateLocalIndex {
   const templates = safeParseTemplate(templateString);
-  if (!templates) {
-    return [];
+  if (!templates || !templateHasLiquidTagNodes(templates)) {
+    return EMPTY_INDEX;
   }
-  const acc: WalkAccumulator = {
-    assignVars: [],
-    captureNames: new Set<string>(),
-    forLoopScopes: [],
+  const acc: WalkAccumulator = { assignVars: [], captureNames: [], forLoopScopes: [] };
+  walkTemplates(templates, acc);
+  // Both lists are searched by gate, so both are sorted by it. A capture is
+  // recorded before the nested tags it contains yet closes after them, so walk
+  // order is not gate order. Assigns happen to come out ordered already, but
+  // sorting only the list that visibly needs it is how that was missed once.
+  acc.assignVars.sort((a, b) => a.gate - b.gate);
+  acc.captureNames.sort((a, b) => a.gate - b.gate);
+  return {
+    id: nextIndexId++,
+    assignVars: acc.assignVars,
+    captureNames: acc.captureNames,
+    forLoopScopes: acc.forLoopScopes,
   };
-  walkTemplates(templates, null, acc);
-  return acc.forLoopScopes;
+}
+
+/** Bounded LRU, mirroring the Liquid parse cache this sits on top of. */
+function getTemplateLocalIndex(templateString: string): TemplateLocalIndex {
+  if (!templateString.includes('{%')) {
+    return EMPTY_INDEX;
+  }
+  const cached = indexCache.get(templateString);
+  if (cached) {
+    indexCache.delete(templateString);
+    indexCache.set(templateString, cached);
+    return cached;
+  }
+  const index = buildTemplateLocalIndex(templateString);
+  indexCache.set(templateString, index);
+  if (indexCache.size > MAX_INDEX_CACHE_SIZE) {
+    const oldest = indexCache.keys().next().value;
+    if (oldest !== undefined) {
+      indexCache.delete(oldest);
+    }
+  }
+  return index;
+}
+
+/**
+ * Length of the prefix gated at or before `offset`. A linear filter reads the
+ * same but measured ~70% slower on a template holding thousands of assigns.
+ */
+function prefixLength(entries: Array<{ gate: number }>, offset: number): number {
+  let low = 0;
+  let high = entries.length;
+  while (low < high) {
+    const mid = Math.floor((low + high) / 2);
+    if (entries[mid].gate <= offset) {
+      low = mid + 1;
+    } else {
+      high = mid;
+    }
+  }
+  return low;
 }
 
 export function getTemplateLocalContext(
   templateString: string,
   offsetInTemplate: number
 ): TemplateLocalContext {
-  if (!templateString.includes('{%')) {
+  const index = getTemplateLocalIndex(templateString);
+  if (index === EMPTY_INDEX) {
     return EMPTY_CONTEXT;
   }
-  const templates = safeParseTemplate(templateString);
-  if (!templates || !templateHasLiquidTagNodes(templates)) {
-    return EMPTY_CONTEXT;
-  }
-  const acc: WalkAccumulator = {
-    assignVars: [],
-    captureNames: new Set<string>(),
-    forLoopScopes: [],
-  };
 
-  walkTemplates(templates, offsetInTemplate, acc);
+  const assigns = index.assignVars.slice(0, prefixLength(index.assignVars, offsetInTemplate));
+  const captures = index.captureNames.slice(0, prefixLength(index.captureNames, offsetInTemplate));
+  // Same predicate the caller applies, so a signature cannot claim a scope the
+  // built schema leaves out.
+  const scopes = forLoopScopesContainingOffset(index.forLoopScopes, offsetInTemplate);
 
   return {
-    assignVars: acc.assignVars,
-    captureNames: Array.from(acc.captureNames),
-    forLoopScopes: acc.forLoopScopes,
+    assignVars: assigns.map(({ variable }) => variable),
+    captureNames: Array.from(new Set(captures.map(({ name }) => name))),
+    forLoopScopes: index.forLoopScopes,
+    signature: `${index.id}:${assigns.length}:${captures.length}:${scopes
+      .map(({ bodyStart }) => bodyStart)
+      .join(',')}`,
   };
 }
