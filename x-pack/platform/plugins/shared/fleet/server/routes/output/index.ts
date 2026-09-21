@@ -15,7 +15,6 @@ import {
   GetLatestOutputHealthRequestSchema,
   GetOneOutputRequestSchema,
   GetOutputAgentPolicyCountRequestSchema,
-  GetOutputAgentPolicyCountResponseSchema,
   GetOutputsRequestSchema,
   PostOutputRequestSchema,
   PutOutputRequestSchema,
@@ -171,38 +170,15 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .get({
       path: OUTPUT_API_ROUTES.GET_OUTPUT_AGENT_POLICY_COUNT_PATTERN,
       access: 'internal',
-      security: {
-        authz: {
-          requiredPrivileges: [
-            FLEET_API_PRIVILEGES.SETTINGS.READ,
-            FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
-            FLEET_API_PRIVILEGES.AGENTS.READ,
-            FLEET_API_PRIVILEGES.INTEGRATIONS.READ,
-          ],
-        },
+      fleetAuthz: (authz) => {
+        return authz.fleet.readSettings && authz.fleet.readAgentPolicies && authz.fleet.readAgents;
       },
       summary: 'Get output agent and policy count',
     })
     .addVersion(
       {
         version: API_VERSIONS.internal.v1,
-        validate: {
-          request: GetOutputAgentPolicyCountRequestSchema,
-          response: {
-            200: {
-              description: 'OK: A successful request.',
-              body: () => GetOutputAgentPolicyCountResponseSchema,
-            },
-            400: {
-              description: 'A bad request.',
-              body: genericErrorResponse,
-            },
-            404: {
-              description: 'Not found.',
-              body: genericErrorResponse,
-            },
-          },
-        },
+        validate: { request: GetOutputAgentPolicyCountRequestSchema },
       },
       getOutputAgentPolicyCountHandler
     );
