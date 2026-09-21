@@ -54759,7 +54759,6 @@
     "xpack.streams.enrichment.draftSimulationPopover.content": "草稿流仿真结合了实时 ES|QL 与摄取管道仿真。结果可能与实际流略有不同。{learnMore}",
     "xpack.streams.enrichment.draftSimulationPopover.learnMore": "了解详情",
     "xpack.streams.enrichment.editMode.errorsTooltip": "在切换模式前解决错误",
-    "xpack.streams.enrichment.editMode.interactive": "交互",
     "xpack.streams.enrichment.editMode.interactiveDisabledTooltip": "当前 YAML 配置包含交互式编辑器无法表示的功能。",
     "xpack.streams.enrichment.editMode.legend": "编辑模式选择",
     "xpack.streams.enrichment.fetchMore.buttonLabel": "加载更多匹配样本",

@@ -54753,7 +54753,6 @@
     "xpack.streams.enrichment.draftSimulationPopover.content": "ドラフトストリームシミュレーションは、リアルタイムのES|QLと取り込みパイプラインのシミュレーションを組み合わせたものです。結果は実際に発生したストリームとは若干異なる場合があります。{learnMore}",
     "xpack.streams.enrichment.draftSimulationPopover.learnMore": "詳しくはこちら",
     "xpack.streams.enrichment.editMode.errorsTooltip": "モードを切り替える前にエラーを修正",
-    "xpack.streams.enrichment.editMode.interactive": "インタラクティブ",
     "xpack.streams.enrichment.editMode.interactiveDisabledTooltip": "現在のYAML構成には、インタラクティブエディターで表現できない機能が含まれています。",
     "xpack.streams.enrichment.editMode.legend": "編集モードの選択",
     "xpack.streams.enrichment.fetchMore.buttonLabel": "一致したサンプルをさらに読み込む",

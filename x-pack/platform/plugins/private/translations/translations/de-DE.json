@@ -54575,7 +54575,6 @@
     "xpack.streams.enrichment.draftSimulationPopover.content": "Die Simulation des Entwurfsstreams kombiniert ES|QL zur Lesezeit mit der Simulation der Ingest-Pipeline. Die Ergebnisse können leicht von den materialisierten Streams abweichen. {learnMore}",
     "xpack.streams.enrichment.draftSimulationPopover.learnMore": "Weitere Informationen",
     "xpack.streams.enrichment.editMode.errorsTooltip": "Beheben Sie Fehler, bevor Sie den Modus wechseln",
-    "xpack.streams.enrichment.editMode.interactive": "Interaktiv",
     "xpack.streams.enrichment.editMode.interactiveDisabledTooltip": "Die aktuelle YAML-Konfiguration enthält Features, die im interaktiven Editor nicht dargestellt werden können.",
     "xpack.streams.enrichment.editMode.legend": "Modusauswahl bearbeiten",
     "xpack.streams.enrichment.fetchMore.buttonLabel": "Weitere passende Beispiele laden",

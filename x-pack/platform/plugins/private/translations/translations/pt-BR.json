@@ -54426,7 +54426,6 @@
     "xpack.streams.enrichment.draftSimulationPopover.content": "A simulação de fluxo em rascunho combina ES|QL no momento da leitura com a simulação do pipeline de ingestão. Os resultados podem diferir ligeiramente dos fluxos materializados. {learnMore}",
     "xpack.streams.enrichment.draftSimulationPopover.learnMore": "Saiba mais",
     "xpack.streams.enrichment.editMode.errorsTooltip": "Corrija os erros antes de mudar de modo",
-    "xpack.streams.enrichment.editMode.interactive": "Interativo",
     "xpack.streams.enrichment.editMode.interactiveDisabledTooltip": "A configuração atual do YAML contém recursos que não podem ser representados no editor interativo.",
     "xpack.streams.enrichment.editMode.legend": "Seleção do modo de edição",
     "xpack.streams.enrichment.fetchMore.buttonLabel": "Carregar mais amostras correspondentes",

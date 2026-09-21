@@ -54338,7 +54338,6 @@
     "xpack.streams.enrichment.draftSimulationPopover.content": "La simulation de flux en mode brouillon associe l'exécution ES|QL en temps réel à la simulation de pipelines d'ingestion. Les résultats peuvent différer légèrement de ceux des flux matérialisés. {learnMore}",
     "xpack.streams.enrichment.draftSimulationPopover.learnMore": "En savoir plus",
     "xpack.streams.enrichment.editMode.errorsTooltip": "Corrigez les erreurs avant de changer de mode",
-    "xpack.streams.enrichment.editMode.interactive": "Interactif",
     "xpack.streams.enrichment.editMode.interactiveDisabledTooltip": "La configuration YAML actuelle contient des fonctionnalités qui ne peuvent pas être représentées dans l'éditeur interactif.",
     "xpack.streams.enrichment.editMode.legend": "Modifier le mode de sélection",
     "xpack.streams.enrichment.fetchMore.buttonLabel": "Charger d'autres échantillons correspondants",
