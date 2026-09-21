@@ -32,7 +32,10 @@ const ANALYST = {
   profileUid: 'analyst-uid',
 };
 
-const registerAndCollect = (service: Partial<ImpactService>) => {
+const registerAndCollect = (
+  service: Partial<ImpactService>,
+  getAttachmentClient: ImpactRouteDependencies['getAttachmentClient'] = async () => undefined
+) => {
   const router = httpServiceMock.createRouter();
   const posts: RegisteredRoute[] = [];
   const gets: RegisteredRoute[] = [];
@@ -50,6 +53,7 @@ const registerAndCollect = (service: Partial<ImpactService>) => {
     getImpactService: () => service as ImpactService,
     getSpaceId: () => 'default',
     resolveUser: async () => ANALYST,
+    getAttachmentClient,
   } as ImpactRouteDependencies);
 
   return { posts, gets };
@@ -91,6 +95,30 @@ describe('investigation impact routes', () => {
       { spaceId: 'default', user: ANALYST }
     );
     expect(response.ok).toHaveBeenCalled();
+  });
+
+  it('stamps a by-reference attachment onto the conversation after writing', async () => {
+    const impact = { id: 'impact-1', conversationId: 'conv-1', entityIds: ['user-1'] };
+    const attach = jest.fn().mockResolvedValue(impact);
+    const create = jest.fn().mockResolvedValue({ id: 'impact-1' });
+    const { posts } = registerAndCollect({ attach }, async () => ({ create } as never));
+    const response = httpServerMock.createResponseFactory();
+
+    await posts[0].handler(
+      {},
+      httpServerMock.createKibanaRequest({
+        body: { conversationId: 'conv-1', entityIds: ['user-1'] },
+      }),
+      response
+    );
+
+    expect(create).toHaveBeenCalledWith({
+      conversationId: 'conv-1',
+      id: 'impact-1',
+      type: 'investigation_impact',
+      origin: 'impact-1',
+    });
+    expect(response.ok).toHaveBeenCalledWith({ body: impact });
   });
 
   it('maps a missing impact to 404', async () => {

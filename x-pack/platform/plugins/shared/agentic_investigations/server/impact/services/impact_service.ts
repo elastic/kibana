@@ -69,6 +69,25 @@ export class ImpactService {
     return existing;
   }
 
+  /** Loads an Impact document by id for by-reference attachment resolve. */
+  async get(id: string, spaceId: string): Promise<Impact> {
+    if (!id) {
+      throw new ImpactNotFoundError(id);
+    }
+
+    const response = await this.deps.storage.search({
+      track_total_hits: false,
+      size: 1,
+      query: { bool: { filter: [{ ids: { values: [id] } }, { term: { spaceId } }] } },
+    });
+
+    const hit = response.hits.hits[0];
+    if (!hit?._source || hit._id === undefined) {
+      throw new ImpactNotFoundError(id);
+    }
+    return toImpact(hit._id, hit._source as ImpactDocument);
+  }
+
   /**
    * Bulk hydrate for a landing-page list. Missing conversations are omitted,
    * not 404, so a caller can attach the field only where it exists. No HTTP

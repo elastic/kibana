@@ -14,6 +14,7 @@ import {
   type PluginInitializerContext,
 } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { AttachmentPublicClient } from '@kbn/agent-builder-server';
 import { AGENTIC_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER_ID } from '../common/constants';
 import { registerFeatures } from './features';
 import { registerImpactRoutes } from './impact/routes/register_routes';
@@ -55,6 +56,7 @@ export class AgenticInvestigationsPlugin
   private impactService?: ImpactService;
   private spaces?: AgenticInvestigationsStartDependencies['spaces'];
   private resolveUser?: ResolveProposalUser;
+  private agentBuilder?: AgenticInvestigationsStartDependencies['agentBuilder'];
 
   constructor(context: PluginInitializerContext) {
     this.logger = context.logger.get();
@@ -76,7 +78,10 @@ export class AgenticInvestigationsPlugin
 
     if (agentBuilder) {
       registerProposalAttachment(agentBuilder);
-      registerImpactAttachment(agentBuilder);
+      registerImpactAttachment(agentBuilder, {
+        getImpactService: () => this.requireImpactService(),
+        logger: this.logger,
+      });
     }
 
     // Declares ownership of this plugin's managed workflows. Without it the
@@ -107,6 +112,7 @@ export class AgenticInvestigationsPlugin
         getSecurity: async () => (await coreSetup.getStartServices())[1].security,
         logger: this.logger,
       }),
+      getAttachmentClient: (request) => this.getAttachmentClient(request),
     });
 
     const router = coreSetup.http.createRouter();
@@ -125,6 +131,7 @@ export class AgenticInvestigationsPlugin
       getImpactService: () => this.requireImpactService(),
       getSpaceId: (request) => this.getSpaceId(request),
       resolveUser: (request) => this.requireUserResolver()(request),
+      getAttachmentClient: (request) => this.getAttachmentClient(request),
     });
 
     return {};
@@ -135,6 +142,7 @@ export class AgenticInvestigationsPlugin
     plugins: AgenticInvestigationsStartDependencies
   ): AgenticInvestigationsPluginStart {
     this.spaces = plugins.spaces;
+    this.agentBuilder = plugins.agentBuilder;
     this.resolveUser = createProposalUserResolver({
       userProfile: coreStart.userProfile,
       security: coreStart.security,
@@ -207,6 +215,15 @@ export class AgenticInvestigationsPlugin
 
   private getSpaceId(request: KibanaRequest): string {
     return this.spaces?.spacesService.getSpaceId(request) ?? 'default';
+  }
+
+  private async getAttachmentClient(
+    request: KibanaRequest
+  ): Promise<AttachmentPublicClient | undefined> {
+    if (!this.agentBuilder) {
+      return undefined;
+    }
+    return this.agentBuilder.attachments.getScopedClient({ request });
   }
 
   /**

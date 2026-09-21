@@ -72,7 +72,7 @@ An **Impact** record is the set of entities (users, hosts, services) an investig
 - Writes are **upsert/merge**: attaching more entities unions them onto the existing document rather than appending a new one. That is load-bearing for hydrate-by-conversationId plus `entityIds.includes`.
 - HTTP: `POST /internal/investigations/impact` (`manage_impact`) and `GET ...?conversationId=` (`read_impact`). Bulk hydrate is in-process via `getImpactService().listByConversationIds()`.
 - Workflow steps: `investigations.attachImpact` (`manage_impact`, fails the step) and `investigations.getImpact` (`read_impact`, fails if none is attached). Same fail-closed privilege check as proposal steps.
-- Agent Builder attachment type `investigation_impact` (`isReadonly: true`) is registered for the investigation flyout (and allow-listed in `@kbn/agent-builder-server`). Nothing in this plugin writes the attachment onto a conversation yet — producers persist the Impact document; stamping it onto chat is a follow-up.
+- Agent Builder attachment type `investigation_impact` (`isReadonly: true`) is registered for the investigation flyout (and allow-listed in `@kbn/agent-builder-server`). Attach HTTP/steps stamp a **by-reference** attachment onto the conversation (`origin` = Impact document id). `resolve()` loads through `ImpactService`; Agent Builder is optional, so the stamp is skipped when that plugin is absent.
 
 ## Proposals
 
@@ -429,5 +429,4 @@ The point of the exercise is the identity behaviour: a rule created by an approv
 - **Deep paging stops at 10,000.** The list pages with `from`/`size` inside Elasticsearch's default result window. Going past that needs `search_after`, which the list does not expose yet.
 - **`.kibana-*` index naming** buys us out of a system index registration, at the cost of living in a namespace we do not own.
 - **No Scout API coverage yet.** The HTTP surface is covered by Jest only, as `anonymization` shipped.
-- **Impact attachments are registered, not produced.** The `investigation_impact` type is known to Agent Builder and the flyout, but attach HTTP/steps persist only the Impact document. Until a producer stamps the attachment onto the conversation, the flyout has nothing to render.
 - **Investigations and incidents still do not exist.** The directory convention now holds a second entity (Impact), but those two remain the reason the plugin is an umbrella.

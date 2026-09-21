@@ -5,10 +5,20 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
-import { impactAttachmentType } from './impact_attachment_type';
+import type { ImpactService } from '../services/impact_service';
+import { createImpactAttachmentType } from './impact_attachment_type';
 
 /** Registers the readonly investigation_impact type with Agent Builder. */
-export const registerImpactAttachment = (agentBuilder: AgentBuilderPluginSetup): void => {
-  agentBuilder.attachments.registerType(impactAttachmentType);
+export const registerImpactAttachment = (
+  agentBuilder: AgentBuilderPluginSetup,
+  deps: {
+    getImpactService: () => ImpactService;
+    logger: Logger;
+  }
+): void => {
+  agentBuilder.attachments.registerType(createImpactAttachmentType(deps));
 };
+
+export { stampImpactAttachment } from './stamp_impact_attachment';

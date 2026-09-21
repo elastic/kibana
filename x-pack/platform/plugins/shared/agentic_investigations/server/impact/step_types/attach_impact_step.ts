@@ -5,23 +5,28 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import type { AttachmentPublicClient } from '@kbn/agent-builder-server';
 import { attachImpactStepCommonDefinition } from '../../../common/impact/step_types/attach_impact_step';
 import type { ResolveProposalUser } from '../../proposals/services/resolve_proposal_user';
 import { parseStepInput } from '../../proposals/step_types/parse_step_input';
+import { stampImpactAttachment } from '../attachments/stamp_impact_attachment';
 import type { ImpactService } from '../services/impact_service';
 import type { ImpactPrivilegesChecker } from '../services/check_impact_privileges';
 import { toStepError } from './to_step_error';
 
-/** Upserts the conversation's impact document; does not attach it to Agent Builder chat. */
+/** Upserts the conversation's impact document and stamps a by-reference chat attachment. */
 export const getAttachImpactStepDefinition = ({
   getImpactService,
   resolveUser,
   privileges,
+  getAttachmentClient,
 }: {
   getImpactService: () => ImpactService;
   resolveUser: ResolveProposalUser;
   privileges: ImpactPrivilegesChecker;
+  getAttachmentClient: (request: KibanaRequest) => Promise<AttachmentPublicClient | undefined>;
 }) =>
   createServerStepDefinition({
     ...attachImpactStepCommonDefinition,
@@ -37,6 +42,11 @@ export const getAttachImpactStepDefinition = ({
           spaceId,
           user: await resolveUser(request),
         });
+
+        const attachmentClient = await getAttachmentClient(request);
+        if (attachmentClient) {
+          await stampImpactAttachment({ client: attachmentClient, impact });
+        }
 
         context.logger.debug(
           `Attached impact ${impact.id} to conversation ${impact.conversationId}`

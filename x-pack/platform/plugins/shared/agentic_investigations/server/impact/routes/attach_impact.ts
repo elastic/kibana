@@ -11,6 +11,7 @@ import { IMPACT_INTERNAL_URL } from '../../../common/impact/constants';
 import { attachImpactRequestSchema } from '../../../common/impact/impact';
 import { IMPACT_API_PRIVILEGE_MANAGE } from '../constants';
 import type { ImpactRouteDependencies } from '../types';
+import { stampImpactAttachment } from '../attachments/stamp_impact_attachment';
 import { handleRouteError } from './handle_route_error';
 import { INTERNAL_ACCESS } from './shared';
 
@@ -20,6 +21,7 @@ export const registerAttachImpactRoute = ({
   getImpactService,
   getSpaceId,
   resolveUser,
+  getAttachmentClient,
 }: ImpactRouteDependencies) => {
   router.versioned
     .post({
@@ -39,6 +41,10 @@ export const registerAttachImpactRoute = ({
             spaceId: getSpaceId(request),
             user: await resolveUser(request),
           });
+          const attachmentClient = await getAttachmentClient(request);
+          if (attachmentClient) {
+            await stampImpactAttachment({ client: attachmentClient, impact: body });
+          }
           return response.ok({ body });
         } catch (error) {
           return handleRouteError(error, response, logger);

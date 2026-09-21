@@ -77,11 +77,16 @@ describe('investigations.attachImpact step', () => {
     jest.clearAllMocks();
   });
 
-  const createDefinition = (attach: jest.Mock, privileges = allowAll()) => ({
+  const createDefinition = (
+    attach: jest.Mock,
+    privileges = allowAll(),
+    getAttachmentClient: () => Promise<{ create: jest.Mock } | undefined> = async () => undefined
+  ) => ({
     definition: getAttachImpactStepDefinition({
       getImpactService: () => ({ attach } as unknown as ImpactService),
       resolveUser,
       privileges,
+      getAttachmentClient,
     }),
     privileges,
   });
@@ -138,6 +143,25 @@ describe('investigations.attachImpact step', () => {
       definition.handler(createContext({ conversationId: 'conv-1' }))
     ).rejects.toMatchObject({ type: 'ValidationError' });
     expect(attach).not.toHaveBeenCalled();
+  });
+
+  it('should stamp a by-reference attachment onto the conversation after writing', async () => {
+    const attach = jest.fn().mockResolvedValue({
+      id: 'impact-1',
+      conversationId: 'conv-1',
+      entityIds: ['user-1'],
+    });
+    const create = jest.fn().mockResolvedValue({ id: 'impact-1' });
+    const { definition } = createDefinition(attach, allowAll(), async () => ({ create }));
+
+    await definition.handler(createContext({ conversationId: 'conv-1', entityIds: ['user-1'] }));
+
+    expect(create).toHaveBeenCalledWith({
+      conversationId: 'conv-1',
+      id: 'impact-1',
+      type: 'investigation_impact',
+      origin: 'impact-1',
+    });
   });
 });
 
