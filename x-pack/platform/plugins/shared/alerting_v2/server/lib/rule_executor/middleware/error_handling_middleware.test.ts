@@ -19,6 +19,7 @@ import { createLoggerService } from '../../services/logger_service/logger_servic
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import { collectStreamResults, createPipelineStream, createRulePipelineState } from '../test_utils';
 import { getFailedStep } from '../execution_outcome';
+import { createExecutionContext, RuleExecutionCancellationError } from '../../execution_context';
 
 describe('ErrorHandlingMiddleware', () => {
   let middleware: ErrorHandlingMiddleware;
@@ -165,5 +166,25 @@ describe('ErrorHandlingMiddleware', () => {
       'Step failed',
       expect.objectContaining({ labels: expect.objectContaining({ step: 'fetch_rule' }) })
     );
+  });
+
+  it('does not log RULE_EXECUTION_STEP_FAILED for a bare-abort cancellation', async () => {
+    const abortController = new AbortController();
+    abortController.abort();
+    const executionContext = createExecutionContext(abortController.signal);
+
+    const next = jest.fn().mockReturnValue(
+      (async function* () {
+        executionContext.throwIfAborted();
+      })()
+    );
+
+    const context = createRuleExecutionMiddlewareContext({ name: 'execute_rule_query' });
+
+    await expect(
+      collectStreamResults(middleware.execute(context, next, createPipelineStream()))
+    ).rejects.toThrow(RuleExecutionCancellationError);
+
+    expect(logger.error).not.toHaveBeenCalled();
   });
 });
