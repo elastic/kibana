@@ -94,18 +94,6 @@ export const viewWatchAriaLabel = (name: string) =>
   });
 
 /* -------------------------------------------------------------------------- */
-/* Lifecycle badges                                                           */
-/* -------------------------------------------------------------------------- */
-
-export const LIFECYCLE_BETA = i18n.translate('xpack.alertzero.watches.lifecycle.beta', {
-  defaultMessage: 'beta',
-});
-
-export const LIFECYCLE_PILOT = i18n.translate('xpack.alertzero.watches.lifecycle.pilot', {
-  defaultMessage: 'pilot',
-});
-
-/* -------------------------------------------------------------------------- */
 /* Relative time and run state                                                */
 /* -------------------------------------------------------------------------- */
 

@@ -84,7 +84,7 @@ export const WATCH_AUTONOMY_REVIEW_GATED = ['manual', 'assisted'] as const;
  * entries from this list rather than from `list_watches`.
  *
  * Deliberately free of schema imports: both consumers are page-load critical, and pulling a schema
- * in would drag Zod into that bundle. Live placeholders take name, colour and lifecycle from here.
+ * in would drag Zod into that bundle. Live placeholders take name and colour from here.
  *
  * Custom (unmanaged) watches are absent by construction — they are discoverable only at runtime.
  */
@@ -106,21 +106,18 @@ export const SYSTEM_SECURITY_WATCH_CATALOG = [
     deepLinkId: SecurityPageName.alertZeroWatchHunt,
     name: 'Hunt Watch',
     color: '#f59e0b',
-    isBeta: true,
   },
   {
     id: SYSTEM_SECURITY_WATCH_DEEP_ID,
     deepLinkId: SecurityPageName.alertZeroWatchDeep,
     name: 'Forensics Watch',
     color: '#8b5cf6',
-    isBeta: true,
   },
   {
     id: SYSTEM_SECURITY_WATCH_DETECTION_ID,
     deepLinkId: SecurityPageName.alertZeroWatchDetection,
     name: 'Detection Watch',
     color: '#ec4899',
-    isBeta: true,
   },
 ] as const;
 

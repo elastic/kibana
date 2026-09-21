@@ -48,7 +48,6 @@ export function createCatalogWatchPlaceholder(watchId: CatalogWatchId): Watch {
     sortOrder: (index + 1) * 10,
     mandate: '',
     description: '',
-    ...('isBeta' in entry && entry.isBeta ? { lifecycle: 'beta' as const } : {}),
     schedule: { ...PLACEHOLDER_SCHEDULE },
     triggers: [],
     coverage: [],

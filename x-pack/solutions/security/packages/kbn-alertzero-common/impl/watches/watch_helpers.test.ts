@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { SYSTEM_SECURITY_WATCH_CATALOG, SYSTEM_SECURITY_WATCH_FLOOR_ID } from '../../constants';
+import {
+  SYSTEM_SECURITY_WATCH_CATALOG,
+  SYSTEM_SECURITY_WATCH_FLOOR_ID,
+  SYSTEM_SECURITY_WATCH_HUNT_ID,
+} from '../../constants';
 import {
   compareWatchesForDisplay,
   coverageFromSchedule,
@@ -124,5 +128,9 @@ describe('createCatalogWatchPlaceholder', () => {
     );
     expect(placeholder.schedule.set).toBe(false);
     expect(placeholder.lifecycle).toBeUndefined();
+  });
+
+  it('does not mark catalog Watches as beta', () => {
+    expect(createCatalogWatchPlaceholder(SYSTEM_SECURITY_WATCH_HUNT_ID).lifecycle).toBeUndefined();
   });
 });

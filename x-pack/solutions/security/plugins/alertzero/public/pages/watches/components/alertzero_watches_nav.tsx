@@ -7,12 +7,11 @@
 
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSkeletonText, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import {
   compareWatchesForDisplay,
   SYSTEM_SECURITY_WATCH_OFFICER_ID,
-  type Lifecycle,
   type Watch,
 } from '@kbn/alertzero-common';
 import { ALERTZERO_WATCHES_SUBNAV_WIDTH } from '../../../components/layout/constants';
@@ -26,10 +25,6 @@ import * as i18n from '../translations';
  */
 export type WatchesSectionId = string;
 
-const LIFECYCLE_LABEL: Record<Exclude<Lifecycle, 'ga'>, string> = {
-  beta: i18n.LIFECYCLE_BETA,
-  pilot: i18n.LIFECYCLE_PILOT,
-};
 interface AlertZeroWatchesNavProps {
   active: WatchesSectionId;
 }
@@ -96,7 +91,6 @@ export const AlertZeroWatchesNav: React.FC<AlertZeroWatchesNavProps> = ({ active
 
 const WatchNavItem: React.FC<{ watch: Watch; isActive: boolean }> = ({ watch, isActive }) => {
   const { euiTheme } = useEuiTheme();
-  const lifecycle = watch.lifecycle && watch.lifecycle !== 'ga' ? watch.lifecycle : undefined;
 
   return (
     <NavButton id={watch.id} path={`/watches/${encodeURIComponent(watch.id)}`} isActive={isActive}>
@@ -121,11 +115,6 @@ const WatchNavItem: React.FC<{ watch: Watch; isActive: boolean }> = ({ watch, is
       >
         {watch.name}
       </span>
-      {lifecycle ? (
-        <EuiBadge color="hollow" data-test-subj={`alertZeroWatchesSubnavLifecycle-${watch.id}`}>
-          {LIFECYCLE_LABEL[lifecycle]}
-        </EuiBadge>
-      ) : null}
     </NavButton>
   );
 };
