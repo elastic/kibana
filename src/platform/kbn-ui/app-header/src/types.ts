@@ -234,6 +234,9 @@ export interface AppHeaderExperimentalDashboardAiAction {
   onClick: (context: { returnFocus: () => void }) => void;
   isDisabled?: boolean;
   testId?: string;
+  tooltip?: {
+    content: string;
+  };
 }
 
 /**

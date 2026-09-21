@@ -10,6 +10,7 @@
 import React from 'react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { fireEvent, render, screen } from '@testing-library/react';
+import type { AppHeaderExperimentalDashboardAiAction } from '@kbn/app-header';
 import { DashboardEnhanceButton } from './dashboard_enhance_button';
 
 let mockApplicationBreakpoint: string | undefined = 'xl';
@@ -18,14 +19,19 @@ jest.mock('@kbn/core-chrome-layout-utils', () => ({
   useCurrentChromeApplicationBreakpoint: () => mockApplicationBreakpoint,
 }));
 
-const renderButton = (onClick = jest.fn()) => {
+const renderButton = (
+  onClick = jest.fn(),
+  overrides: Partial<AppHeaderExperimentalDashboardAiAction> = {}
+) => {
   render(
     <EuiThemeProvider>
-      <DashboardEnhanceButton action={{ onClick }} />
+      <DashboardEnhanceButton action={{ onClick, ...overrides }} />
     </EuiThemeProvider>
   );
   return onClick;
 };
+
+const TOOLTIP = 'Improve the content and style of your dashboard using AI';
 
 describe('DashboardEnhanceButton', () => {
   beforeEach(() => {
@@ -50,5 +56,31 @@ describe('DashboardEnhanceButton', () => {
     const button = screen.getByRole('button', { name: 'Enhance' });
     expect(button).toBeInTheDocument();
     expect(button).not.toHaveTextContent('Enhance');
+  });
+
+  it('shows the provided tooltip on the labeled button', async () => {
+    renderButton(jest.fn(), { tooltip: { content: TOOLTIP } });
+
+    fireEvent.mouseOver(screen.getByRole('button', { name: 'Enhance' }));
+
+    expect(await screen.findByText(TOOLTIP)).toBeInTheDocument();
+  });
+
+  it('shows the provided tooltip on the icon-only button', async () => {
+    mockApplicationBreakpoint = 's';
+    renderButton(jest.fn(), { tooltip: { content: TOOLTIP } });
+
+    fireEvent.mouseOver(screen.getByRole('button', { name: 'Enhance' }));
+
+    expect(await screen.findByText(TOOLTIP)).toBeInTheDocument();
+  });
+
+  it('falls back to the Enhance label as the icon-only tooltip', async () => {
+    mockApplicationBreakpoint = 's';
+    renderButton();
+
+    fireEvent.mouseOver(screen.getByRole('button', { name: 'Enhance' }));
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Enhance');
   });
 });

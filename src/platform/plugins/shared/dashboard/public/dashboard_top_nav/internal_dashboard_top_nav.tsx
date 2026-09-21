@@ -389,6 +389,11 @@ export function InternalDashboardTopNav({
             onClick: () => {
               void prettifyAction.execute();
             },
+            tooltip: {
+              content: i18n.translate('dashboard.topNav.enhanceButtonTooltip', {
+                defaultMessage: 'Improve the content and style of your dashboard using AI',
+              }),
+            },
           }
         : undefined,
     [viewMode, prettifyAction]

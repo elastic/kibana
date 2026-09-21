@@ -9,7 +9,7 @@
 
 import type { MouseEvent as ReactMouseEvent } from 'react';
 import React from 'react';
-import { useCurrentEuiBreakpoint } from '@elastic/eui';
+import { EuiToolTip, useCurrentEuiBreakpoint } from '@elastic/eui';
 import type { AppHeaderExperimentalDashboardAiAction } from '@kbn/app-header';
 import { useCurrentChromeApplicationBreakpoint } from '@kbn/core-chrome-layout-utils';
 import { i18n } from '@kbn/i18n';
@@ -29,6 +29,9 @@ export const DashboardEnhanceButton = ({
   const breakpoint = applicationBreakpoint ?? viewportBreakpoint;
   const iconOnly = breakpoint !== 'm' && breakpoint !== 'l' && breakpoint !== 'xl';
 
+  const tooltipContent = action.tooltip?.content;
+  const hasCustomTooltip = !!tooltipContent;
+
   const handleClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
     const triggerElement = event.currentTarget;
     action.onClick({
@@ -36,23 +39,18 @@ export const DashboardEnhanceButton = ({
     });
   };
 
-  if (iconOnly) {
-    return (
-      <AiButton
-        iconOnly
-        variant="empty"
-        size="xs"
-        iconType="sparkles"
-        withToolTip
-        aria-label={ENHANCE_LABEL}
-        isDisabled={action.isDisabled}
-        data-test-subj={action.testId ?? 'dashboardEnhanceButton'}
-        onClick={handleClick}
-      />
-    );
-  }
-
-  return (
+  const button = iconOnly ? (
+    <AiButton
+      iconOnly
+      variant="empty"
+      size="xs"
+      iconType="sparkles"
+      aria-label={ENHANCE_LABEL}
+      isDisabled={action.isDisabled}
+      data-test-subj={action.testId ?? 'dashboardEnhanceButton'}
+      onClick={handleClick}
+    />
+  ) : (
     <AiButton
       variant="empty"
       size="xs"
@@ -64,5 +62,18 @@ export const DashboardEnhanceButton = ({
     >
       {ENHANCE_LABEL}
     </AiButton>
+  );
+
+  if (!iconOnly && !hasCustomTooltip) {
+    return button;
+  }
+
+  return (
+    <EuiToolTip
+      content={tooltipContent ?? ENHANCE_LABEL}
+      {...(!hasCustomTooltip && { disableScreenReaderOutput: true })}
+    >
+      {button}
+    </EuiToolTip>
   );
 };

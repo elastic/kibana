@@ -83,6 +83,8 @@ const useEnhanceIconOnly = (): boolean => {
 const EnhanceButton = ({ action }: { action: AppHeaderExperimentalDashboardAiAction }) => {
   const iconOnly = useEnhanceIconOnly();
   const testSubj = action.testId ?? APP_HEADER_TEST_SUBJECTS.enhance;
+  const tooltipContent = asOptionalPlainText(action.tooltip?.content);
+  const hasCustomTooltip = !!tooltipContent;
 
   const handleClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
     const triggerElement = event.currentTarget;
@@ -91,23 +93,18 @@ const EnhanceButton = ({ action }: { action: AppHeaderExperimentalDashboardAiAct
     });
   };
 
-  if (iconOnly) {
-    return (
-      <AiButton
-        iconOnly
-        variant="empty"
-        size="xs"
-        iconType="sparkles"
-        withToolTip
-        aria-label={ENHANCE_LABEL}
-        isDisabled={action.isDisabled}
-        data-test-subj={testSubj}
-        onClick={handleClick}
-      />
-    );
-  }
-
-  return (
+  const button = iconOnly ? (
+    <AiButton
+      iconOnly
+      variant="empty"
+      size="xs"
+      iconType="sparkles"
+      aria-label={ENHANCE_LABEL}
+      isDisabled={action.isDisabled}
+      data-test-subj={testSubj}
+      onClick={handleClick}
+    />
+  ) : (
     <AiButton
       variant="empty"
       size="xs"
@@ -119,6 +116,21 @@ const EnhanceButton = ({ action }: { action: AppHeaderExperimentalDashboardAiAct
     >
       {ENHANCE_LABEL}
     </AiButton>
+  );
+
+  // A labeled button only needs a tooltip when the app supplies one; the icon-only
+  // button always gets one so its label stays discoverable.
+  if (!iconOnly && !hasCustomTooltip) {
+    return button;
+  }
+
+  return (
+    <EuiToolTip
+      content={tooltipContent ?? ENHANCE_LABEL}
+      {...(!hasCustomTooltip && { disableScreenReaderOutput: true })}
+    >
+      {button}
+    </EuiToolTip>
   );
 };
 

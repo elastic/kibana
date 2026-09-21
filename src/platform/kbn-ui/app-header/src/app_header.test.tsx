@@ -245,6 +245,61 @@ describe('AppHeaderView', () => {
     expect(screen.getByRole('button', { name: 'Enhance' })).toHaveTextContent('Enhance');
   });
 
+  it('shows the enhance tooltip on the labeled button when provided', async () => {
+    mockApplicationBreakpoint = 'm';
+
+    render(
+      <AppHeaderView
+        title="Dashboard"
+        experimentalDashboardAiAction={{
+          onClick: jest.fn(),
+          tooltip: { content: 'Improve the content and style of your dashboard using AI' },
+        }}
+      />
+    );
+
+    const button = screen.getByRole('button', { name: 'Enhance' });
+    fireEvent.mouseOver(button);
+
+    expect(
+      await screen.findByText('Improve the content and style of your dashboard using AI')
+    ).toBeInTheDocument();
+  });
+
+  it('shows the enhance tooltip on the icon-only button when provided', async () => {
+    mockApplicationBreakpoint = 's';
+
+    render(
+      <AppHeaderView
+        title="Dashboard"
+        experimentalDashboardAiAction={{
+          onClick: jest.fn(),
+          tooltip: { content: 'Improve the content and style of your dashboard using AI' },
+        }}
+      />
+    );
+
+    const button = screen.getByRole('button', { name: 'Enhance' });
+    fireEvent.mouseOver(button);
+
+    expect(
+      await screen.findByText('Improve the content and style of your dashboard using AI')
+    ).toBeInTheDocument();
+  });
+
+  it('falls back to the Enhance label as the icon-only tooltip when none is provided', async () => {
+    mockApplicationBreakpoint = 's';
+
+    render(
+      <AppHeaderView title="Dashboard" experimentalDashboardAiAction={{ onClick: jest.fn() }} />
+    );
+
+    const button = screen.getByRole('button', { name: 'Enhance' });
+    fireEvent.mouseOver(button);
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Enhance');
+  });
+
   it('renders a description with a Learn more link', () => {
     render(
       <AppHeaderView
