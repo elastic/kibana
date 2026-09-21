@@ -61,43 +61,11 @@ export class WorkflowValidationService {
   }
 
   /**
-   * Pre-run gate: inline execution, workflow test and step test all refuse to
-   * run when the result is invalid, so it asks only for the rules that already
-   * blocked a run.
+   * `includeVariableRules` has no default because the callers need opposite
+   * answers: four variable rules are errors, so a caller that refuses to run an
+   * invalid workflow must leave them off. Only the reporting endpoint sets it.
    */
   async validateWorkflow(
-    yaml: string,
-    spaceId: string,
-    request: KibanaRequest
-  ): Promise<ValidateWorkflowResponseDto> {
-    return this.runValidation(yaml, spaceId, request, { includeVariableRules: false });
-  }
-
-  /**
-   * Diagnostics for `POST /api/workflows/validate`: the full rule set the
-   * editor runs, variable rules included. Four of those are errors, so gating a
-   * run on this result would block workflows that run today.
-   */
-  async validateWorkflowDiagnostics(
-    yaml: string,
-    spaceId: string,
-    request: KibanaRequest
-  ): Promise<ValidateWorkflowResponseDto> {
-    return this.runValidation(yaml, spaceId, request, { includeVariableRules: true });
-  }
-
-  async getWorkflowZodSchema(
-    options: { loose?: false },
-    spaceId: string,
-    request: KibanaRequest
-  ): Promise<z.ZodType> {
-    return getWorkflowZodSchemaFromConnectors(
-      await this.resolveConnectors(spaceId, request),
-      toCustomTriggerSchemaConfigs(this.getRegisteredCustomTriggerDefinitions())
-    );
-  }
-
-  private async runValidation(
     yaml: string,
     spaceId: string,
     request: KibanaRequest,
@@ -117,6 +85,17 @@ export class WorkflowValidationService {
         variableValidationRegistry: this.createContextRegistry(allConnectors),
       }),
     });
+  }
+
+  async getWorkflowZodSchema(
+    options: { loose?: false },
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<z.ZodType> {
+    return getWorkflowZodSchemaFromConnectors(
+      await this.resolveConnectors(spaceId, request),
+      toCustomTriggerSchemaConfigs(this.getRegisteredCustomTriggerDefinitions())
+    );
   }
 
   private async resolveConnectors(

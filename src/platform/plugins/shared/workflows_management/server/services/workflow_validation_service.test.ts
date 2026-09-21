@@ -89,7 +89,9 @@ describe('WorkflowValidationService', () => {
       const service = new WorkflowValidationService(deps);
       const request = {} as any;
 
-      const result = await service.validateWorkflow(':::\nnot yaml', 'default', request);
+      const result = await service.validateWorkflow(':::\nnot yaml', 'default', request, {
+        includeVariableRules: false,
+      });
 
       expect(result.valid).toBe(false);
       expect(result.diagnostics.length).toBeGreaterThan(0);
@@ -113,7 +115,9 @@ describe('WorkflowValidationService', () => {
         '',
       ].join('\n');
 
-      const result = await service.validateWorkflow(yaml, 'default', request);
+      const result = await service.validateWorkflow(yaml, 'default', request, {
+        includeVariableRules: false,
+      });
 
       expect(result.valid).toBe(true);
     });
@@ -138,7 +142,9 @@ describe('WorkflowValidationService', () => {
         '',
       ].join('\n');
 
-      const result = await service.validateWorkflowDiagnostics(yaml, 'default', request);
+      const result = await service.validateWorkflow(yaml, 'default', request, {
+        includeVariableRules: true,
+      });
 
       expect(result.diagnostics.some(({ source }) => source === 'variable')).toBe(true);
     });
@@ -163,7 +169,9 @@ describe('WorkflowValidationService', () => {
         '',
       ].join('\n');
 
-      const result = await service.validateWorkflowDiagnostics(yaml, 'default', request);
+      const result = await service.validateWorkflow(yaml, 'default', request, {
+        includeVariableRules: true,
+      });
 
       expect(result.diagnostics.filter(({ source }) => source === 'variable')).toEqual([]);
     });
@@ -190,8 +198,12 @@ describe('WorkflowValidationService', () => {
         '',
       ].join('\n');
 
-      const gate = await service.validateWorkflow(yaml, 'default', request);
-      const diagnostics = await service.validateWorkflowDiagnostics(yaml, 'default', request);
+      const gate = await service.validateWorkflow(yaml, 'default', request, {
+        includeVariableRules: false,
+      });
+      const diagnostics = await service.validateWorkflow(yaml, 'default', request, {
+        includeVariableRules: true,
+      });
 
       expect(gate.diagnostics.filter(({ source }) => source === 'variable')).toEqual([]);
       expect(gate.valid).toBe(true);
@@ -217,7 +229,9 @@ describe('WorkflowValidationService', () => {
         '',
       ].join('\n');
 
-      const result = await service.validateWorkflow(yaml, 'default', request);
+      const result = await service.validateWorkflow(yaml, 'default', request, {
+        includeVariableRules: false,
+      });
 
       expect(result.valid).toBe(false);
       expect(result.diagnostics.some((d) => d.source === 'schema')).toBe(true);
@@ -244,7 +258,9 @@ describe('WorkflowValidationService', () => {
         '',
       ].join('\n');
 
-      const result = await service.validateWorkflow(yaml, 'default', request);
+      const result = await service.validateWorkflow(yaml, 'default', request, {
+        includeVariableRules: false,
+      });
 
       expect(result.valid).toBe(true);
     });

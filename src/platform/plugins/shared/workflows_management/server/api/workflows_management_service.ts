@@ -672,24 +672,14 @@ export class WorkflowsService {
     return this.validationService.getRegisteredCustomTriggerDefinitions();
   }
 
-  /** Pre-run gate. Callers refuse to run the workflow when the result is invalid. */
   public async validateWorkflow(
     yaml: string,
     spaceId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    options: { includeVariableRules: boolean }
   ): Promise<ValidateWorkflowResponseDto> {
     await this.ensureInitialized();
-    return this.validationService.validateWorkflow(yaml, spaceId, request);
-  }
-
-  /** Diagnostics for the validate endpoint. Never gate a run on this result. */
-  public async validateWorkflowDiagnostics(
-    yaml: string,
-    spaceId: string,
-    request: KibanaRequest
-  ): Promise<ValidateWorkflowResponseDto> {
-    await this.ensureInitialized();
-    return this.validationService.validateWorkflowDiagnostics(yaml, spaceId, request);
+    return this.validationService.validateWorkflow(yaml, spaceId, request, options);
   }
 
   public async getWorkflowZodSchema(
