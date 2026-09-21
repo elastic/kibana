@@ -251,9 +251,9 @@ describe('detection rule workflows', () => {
     });
 
     // The review parks in WAITING_FOR_CHILD while the gate holds the decision —
-    // up to 72h per park, and the gate's ceiling allows for a second park before
-    // it settles. The engine's default 6h workflow timeout would cancel the
-    // review under the analyst.
+    // up to the proposal's 72h deadline, which every re-park is bounded by, plus
+    // the gate's margin for an action approved just before it. The engine's
+    // default 6h workflow timeout would cancel the review under the analyst.
     it('outlives the proposal gate it waits on', () => {
       const review = parse(
         getManagedYaml(ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW_ID)

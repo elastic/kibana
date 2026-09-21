@@ -10,6 +10,7 @@
 import { parse } from 'yaml';
 import type { z } from '@kbn/zod/v4';
 import CREATE_INVESTIGATION_PROPOSAL_YAML from './create_investigation_proposal.yaml';
+import { isValidDuration, parseDuration } from '../../../../common/utils';
 import {
   DataSetStepSchema,
   IfStepSchema,
@@ -70,17 +71,6 @@ const findStep = (steps: WorkflowStep[], name: string): WorkflowStep | undefined
 /** Every descendant of a step, so containment can be asserted. */
 const collectNames = (steps: WorkflowStep[]): string[] =>
   steps.flatMap((step) => [step.name ?? '', ...collectNames(step.steps ?? [])]);
-
-const durationToMs = (duration: string): number => {
-  const match = /^(\d+)(ms|[smhdw])$/.exec(duration);
-  if (!match) {
-    throw new Error(`Unparseable duration: ${duration}`);
-  }
-  const unit = { ms: 1, s: 1000, m: 60_000, h: 3_600_000, d: 86_400_000, w: 604_800_000 }[
-    match[2]
-  ] as number;
-  return Number(match[1]) * unit;
-};
 
 const gate = () => findStep(workflow.steps, 'await_decision')!;
 const loop = () => findStep(workflow.steps, 'decision_loop')!;
@@ -193,30 +183,38 @@ describe('create-investigation-proposal workflow', () => {
       expect(gate().type).toBe('waitForApproval');
     });
 
-    it('keeps the gate timeout static, since the engine does not template-render it', () => {
-      // A template here reaches the duration parser unrendered and throws at
-      // execution time. See elastic/kibana#290258.
-      expect(gate().timeout).not.toContain('{{');
-      expect(() => durationToMs(gate().timeout ?? '')).not.toThrow();
+    it('parks for what is left of the deadline rather than a duration of its own', () => {
+      // A literal here restarts the wait on every re-park, so a proposal
+      // re-parked just before its deadline waited out a second full window.
+      // It was also a second deadline that could drift from the one on the
+      // record; the gate now has none, so `expiresIn` is the only one left.
+      // Rendered once at wait-entry — elastic/kibana#291744.
+      expect(gate().timeout).toBe('{{ variables.remaining_seconds }}s');
     });
 
-    it('records the same deadline it applies to the gate', () => {
+    it('always creates with a deadline, which the gate timeout now depends on', () => {
+      // `remaining_seconds` only counts down from an `expiresAt`. Without one
+      // it renders negative, and `settle_expired` cannot catch that because it
+      // is gated on `has_deadline` — so the gate would hand an invalid
+      // duration to `assertValidDuration` instead of parking.
       const create = findStep(workflow.steps, 'create_proposal');
 
-      expect(create?.with?.expiresIn).toBe(gate().timeout);
+      expect(isValidDuration(create?.with?.expiresIn)).toBe(true);
     });
 
-    it('keeps the workflow ceiling above the gate, so the gate times out first', () => {
+    it('keeps the workflow ceiling above the gate budget, so the gate times out first', () => {
       // The ceiling must never fire first. Its timeout runs no handler at all
       // — `EnterWorkflowTimeoutZoneNodeImpl.monitor()` marks the execution
       // TIMED_OUT and `catchError` returns early — whereas the gate's timeout
       // reaches the workflow-level handler, which settles the record as
-      // `expired`. The workflow clock also starts before the gate is entered,
-      // so equal values put the ceiling first and no proposal would ever
-      // settle.
-      const ceiling = durationToMs(workflow.settings?.timeout ?? '');
+      // `expired`. Every park is bounded by what is left of the deadline, so
+      // that deadline is the gate's whole budget however often it re-parks.
+      const ceiling = parseDuration(String(workflow.settings?.timeout));
+      const gateBudget = parseDuration(
+        String(findStep(workflow.steps, 'create_proposal')?.with?.expiresIn)
+      );
 
-      expect(ceiling).toBeGreaterThan(durationToMs(gate().timeout ?? ''));
+      expect(ceiling).toBeGreaterThan(gateBudget);
     });
 
     it('does not set iteration-timeout, which would truncate the parked gate', () => {

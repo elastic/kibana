@@ -13,10 +13,17 @@ settings:
   # This run parks in WAITING_FOR_CHILD for as long as the proposal gate holds
   # the decision, and the engine's default 6h workflow timeout would cancel the
   # review out from under the analyst. So this has to stay above the gate's own
-  # ceiling, which is `168h`: a 72h decision window, plus a second full 72h for
-  # a proposal re-parked just before its deadline, plus margin. A test pins the
+  # ceiling, which is `96h`: a 72h decision window that every re-park is bounded
+  # by, plus margin for an action approved just before it. A test pins the
   # relationship, so raising the gate's ceiling fails here rather than silently
   # cancelling reviews.
+  #
+  # Sized for one gate. A manual-autonomy run can chain two: `propose_entry`
+  # only short-circuits on a *dismissal*, so an entry gate nobody answers falls
+  # through to a second gate and the pair can outlast this ceiling. Left at
+  # `176h` deliberately — it does not cover that path, but the ceiling runs no
+  # handler when it fires, so the margin is worth more here than arithmetic that
+  # matches a single gate exactly.
   timeout: "176h"
   # Keyed per rule so a later sweep cannot open a second gate for a rule whose
   # review is still pending: alerts are only tagged after the gate resolves,

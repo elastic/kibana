@@ -32,13 +32,12 @@ settings:
   # `pending`. The gate's own timeout is what settles an unanswered proposal,
   # and it can only do that if it fires first.
   #
-  # Hence the size. Each park waits a fixed 72h rather than the time left on
-  # the deadline (elastic/kibana#290258), so a proposal re-parked just before
-  # its deadline waits out a second full 72h: ~144h in the worst case before
-  # the gate times out and the loop settles it. A re-park cannot extend that
-  # further, because every iteration settles on the deadline before parking
-  # again.
-  timeout: '168h'
+  # Hence the headroom. Every park is bounded by what is left of the proposal's
+  # 72h deadline, so the gate can never wait longer than that in total however
+  # many times it re-parks. The only thing that runs past the deadline is an
+  # action approved just before it, which the next iteration settles as expired
+  # once it returns — so 72h plus a generous margin for one action execution.
+  timeout: '96h'
   on-failure:
     # Attached per step, not once for the whole workflow: the engine wraps each
     # non-flow-control step in its own try/fallback pair. The fallback runs and
@@ -159,8 +158,9 @@ steps:
       category: '{{ inputs.category }}'
       confidence: '{{ inputs.confidence }}'
       origin: worker
-      # Must stay equal to the gate timeout above, or the deadline the queue
-      # shows an analyst is not the one the gate actually enforces.
+      # The only deadline literal in this workflow. The gate derives every park
+      # from the `expiresAt` this resolves to, so the deadline the queue shows
+      # an analyst is by construction the one the gate enforces.
       expiresIn: '72h'
 
   # Everything the loop carries lives in variables, because `data.set` is the
@@ -257,11 +257,16 @@ steps:
         steps:
           - name: await_decision
             type: waitForApproval
-            # TODO(elastic/kibana#290258): becomes
-            # `{{ variables.remaining_seconds }}s` once the engine renders a
-            # step's `timeout`. Today it hands the raw string to the duration
-            # parser, so a template here fails at execution time.
-            timeout: '72h'
+            # Parks only for what is left of the proposal's own deadline, so a
+            # re-park — an unprivileged resumer, or a cloned retry after a
+            # failed action — spends the same 72h budget rather than opening a
+            # fresh one. Rendered once at wait-entry and frozen on step state
+            # as `dynamicTimeout` (elastic/kibana#291744), so the idle wake-up
+            # and the resume check read the same deadline this park started on.
+            #
+            # `settle_expired` above guarantees this is positive: a non-positive
+            # render would be rejected by `assertValidDuration`.
+            timeout: '{{ variables.remaining_seconds }}s'
             on-failure:
               # A timeout is the expected end of an unanswered proposal, not a
               # malfunction, so it is settled here rather than left to the
@@ -290,10 +295,9 @@ steps:
             type: if
             condition: '${{ steps.await_decision.error != blank }}'
             steps:
-              # `expired` rather than `failed`: the gate's timeout and the
-              # deadline on the record are the same literal, and the gate
-              # starts marginally after the proposal is created, so a gate that
-              # times out is always past the deadline. No decision was reached.
+              # `expired` rather than `failed`: the gate's timeout *is* the time
+              # left on the record's deadline, so a gate that times out has by
+              # construction reached that deadline. No decision was reached.
               - name: record_gate_expiry
                 type: proposals.updateProposal
                 with:
