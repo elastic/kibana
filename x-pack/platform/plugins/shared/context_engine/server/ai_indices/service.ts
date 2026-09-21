@@ -467,9 +467,7 @@ export class AiIndexService {
   ): Promise<void> {
     if (isIndexPattern(value)) {
       throw new InvalidAiIndexDestError(
-        `dest.value '${value}' is not allowed: it must name a single ${
-          type === 'data_stream' ? 'data stream' : 'index'
-        }, not a pattern`
+        `dest.value '${value}' is not allowed: it must name a single index or data stream, not a pattern`
       );
     }
     if (type === 'data_stream') {

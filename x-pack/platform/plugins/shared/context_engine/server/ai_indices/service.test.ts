@@ -496,7 +496,7 @@ describe('AiIndexService', () => {
           ...indexProperties,
           dest: { type: 'index', value: 'ai-index-idx-logs-*' },
         })
-      ).rejects.toThrow(/must name a single index, not a pattern/);
+      ).rejects.toThrow(/must name a single index or data stream, not a pattern/);
       expect(esClient.indices.resolveIndex).not.toHaveBeenCalled();
       expect(storageClient.index).not.toHaveBeenCalled();
     });
@@ -518,7 +518,7 @@ describe('AiIndexService', () => {
           ...properties,
           dest: { type: 'data_stream', value: 'ai-index-ds-customer_support*' },
         })
-      ).rejects.toThrow(/must name a single data stream, not a pattern/);
+      ).rejects.toThrow(/must name a single index or data stream, not a pattern/);
       expect(esClient.indices.resolveIndex).not.toHaveBeenCalled();
       expect(storageClient.index).not.toHaveBeenCalled();
     });
