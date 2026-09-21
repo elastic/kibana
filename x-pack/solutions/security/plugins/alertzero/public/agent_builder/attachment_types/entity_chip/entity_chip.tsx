@@ -7,14 +7,16 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiAvatar, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { ApplicationStart } from '@kbn/core-application-browser';
 import {
   buildActorLookupEsql,
   buildDiscoverEsqlUrl,
   buildEntityLookupEsql,
-  DiscoverLink,
+  buildSecurityEntityUrl,
 } from '../navigation';
+import { IocBadge } from '../shared/ioc_badge';
 import {
   ATTACHMENT_ENTITY_ICON,
   attachmentEntityRefToParsed,
@@ -26,13 +28,10 @@ import type { AttachmentEntityRef } from '../../../../common/attachment_entity_s
 
 const chipStyles = css`
   display: inline-flex;
+  align-items: center;
   margin-right: 8px;
   margin-bottom: 4px;
   max-width: 100%;
-`;
-
-const nameStyles = css`
-  overflow-wrap: anywhere;
 `;
 
 export interface EntityChipProps {
@@ -44,6 +43,12 @@ export interface EntityChipProps {
   /** Hunt correlation actor anchors only. */
   kindOverride?: Extract<AttachmentEntityKind, 'actor'>;
   share?: SharePluginStart;
+  /**
+   * When present, `host.*` / `user.*` chips link to the Security entity page
+   * instead of Discover. Absent in older callers and tests, in which case
+   * every chip falls back to its Discover ES|QL link.
+   */
+  getUrlForApp?: ApplicationStart['getUrlForApp'];
   testSubj?: string;
 }
 
@@ -55,6 +60,7 @@ export const EntityChip: React.FC<EntityChipProps> = ({
   entity,
   kindOverride,
   share,
+  getUrlForApp,
   testSubj,
 }) => {
   if (kindOverride === 'actor') {
@@ -75,13 +81,12 @@ export const EntityChip: React.FC<EntityChipProps> = ({
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
-            <EuiText size="xs">
-              <DiscoverLink href={href} testSubj={testSubj ?? 'alertzeroEntityChipLink'}>
-                <strong css={nameStyles} data-test-subj="alertzeroEntityChipName">
-                  {name}
-                </strong>
-              </DiscoverLink>
-            </EuiText>
+            <IocBadge
+              value={name}
+              index={0}
+              discoverHref={href}
+              testSubj={testSubj ?? 'alertzeroEntityChipLink'}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </span>
@@ -98,18 +103,15 @@ export const EntityChip: React.FC<EntityChipProps> = ({
     const raw = typeof entity === 'string' ? entity : `${entity.field}: ${entity.value}`;
     return (
       <span css={chipStyles} data-test-subj="alertzeroEntityChip">
-        <EuiText size="xs">
-          <strong css={nameStyles} data-test-subj="alertzeroEntityChipName">
-            {raw}
-          </strong>
-        </EuiText>
+        <IocBadge value={raw} index={0} testSubj="alertzeroEntityChipName" />
       </span>
     );
   }
 
   const { value, kind, field } = parsed;
+  const securityEntityHref = buildSecurityEntityUrl({ getUrlForApp, field, value });
   const esql = buildEntityLookupEsql({ field, value });
-  const href = esql ? buildDiscoverEsqlUrl({ share, esql }) : undefined;
+  const discoverHref = esql ? buildDiscoverEsqlUrl({ share, esql }) : undefined;
 
   return (
     <span css={chipStyles} data-test-subj="alertzeroEntityChip">
@@ -124,13 +126,13 @@ export const EntityChip: React.FC<EntityChipProps> = ({
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
-          <EuiText size="xs">
-            <DiscoverLink href={href} testSubj={testSubj ?? 'alertzeroEntityChipLink'}>
-              <strong css={nameStyles} data-test-subj="alertzeroEntityChipName">
-                {value}
-              </strong>
-            </DiscoverLink>
-          </EuiText>
+          <IocBadge
+            value={value}
+            index={0}
+            entityPageHref={securityEntityHref}
+            discoverHref={discoverHref}
+            testSubj={testSubj ?? 'alertzeroEntityChipLink'}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </span>

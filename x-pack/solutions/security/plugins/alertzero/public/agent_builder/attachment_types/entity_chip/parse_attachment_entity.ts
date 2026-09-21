@@ -28,7 +28,7 @@ export const ATTACHMENT_ENTITY_ICON: Record<AttachmentEntityKind, IconType> = {
   user: 'user',
   host: 'storage',
   service: 'vectorTriangle',
-  actor: 'user',
+  actor: 'crosshair',
   generic: 'globe',
 };
 

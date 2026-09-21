@@ -41,9 +41,15 @@ describe('createSignificantSecurityEventAttachmentDefinition', () => {
   };
 
   describe('getLabel', () => {
-    it('returns the default label when no attachmentLabel is set', () => {
+    it('falls back to title when no attachmentLabel is set', () => {
       const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
       const attachment = { data: { title: 'x' } } as unknown as SignificantSecurityEventAttachment;
+      expect(definition.getLabel(attachment)).toBe('x');
+    });
+
+    it('returns the default label when neither attachmentLabel nor title is set', () => {
+      const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
+      const attachment = { data: {} } as unknown as SignificantSecurityEventAttachment;
       expect(definition.getLabel(attachment)).toBe('Significant Security Event');
     });
 
@@ -64,9 +70,75 @@ describe('createSignificantSecurityEventAttachmentDefinition', () => {
   });
 
   describe('getHeader', () => {
-    it('returns the flag icon for the attachment chrome header', () => {
+    it('returns the flag icon and the source watch / capability subtitle without run_id', () => {
+      const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
+      const header = definition.getHeader?.({
+        attachment: { data: baseData } as unknown as SignificantSecurityEventAttachment,
+      } as never);
+      expect(header?.icon).toBe('flag');
+      expect(header?.subtitle).toBe('watch-1 · lateral-movement-detector');
+    });
+
+    it('returns no badges and an empty header for a malformed attachment', () => {
       const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
       expect(definition.getHeader?.({ attachment: {} as never })).toEqual({ icon: 'flag' });
+    });
+
+    it('renders a severity badge with the severity badge color', () => {
+      const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
+      const header = definition.getHeader?.({
+        attachment: {
+          data: { ...baseData, severity: 'critical' },
+        } as unknown as SignificantSecurityEventAttachment,
+      } as never);
+      expect(header?.badges).toContainEqual({ label: 'critical', color: 'danger' });
+    });
+
+    it('renders a status badge with a hollow color', () => {
+      const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
+      const header = definition.getHeader?.({
+        attachment: {
+          data: { ...baseData, status: 'investigating' },
+        } as unknown as SignificantSecurityEventAttachment,
+      } as never);
+      expect(header?.badges).toContainEqual({ label: 'investigating', color: 'hollow' });
+    });
+
+    it('renders a confidence badge without the confirmed-hit icon when there is no hunt_result', () => {
+      const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
+      const header = definition.getHeader?.({
+        attachment: {
+          data: { ...baseData, confidence: 0.9 },
+        } as unknown as SignificantSecurityEventAttachment,
+      } as never);
+      expect(header?.badges).toContainEqual({ label: '90%', color: 'hollow' });
+    });
+
+    it('renders a confidence badge with the confirmed-hit icon when hunt_result has a confirmed hit', () => {
+      const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
+      const header = definition.getHeader?.({
+        attachment: {
+          data: {
+            ...baseData,
+            confidence: 0.9,
+            hunt_result: {
+              has_confirmed_hit: true,
+              time_range: { from: '2024-01-01T00:00:00Z', to: '2024-01-02T00:00:00Z' },
+              tier1: {
+                status: 'environment_hits_found',
+                counts: { total_hits: 1, returned_hits: 1, affected_hosts: 1, affected_users: 1 },
+                per_index: [],
+                resolved_iocs: [],
+              },
+            },
+          },
+        } as unknown as SignificantSecurityEventAttachment,
+      } as never);
+      expect(header?.badges).toContainEqual({
+        label: '90%',
+        color: 'hollow',
+        iconType: 'securitySignalDetected',
+      });
     });
   });
 

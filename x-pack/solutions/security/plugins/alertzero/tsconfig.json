@@ -44,6 +44,9 @@
     "@kbn/search-inference-endpoints",
     "@kbn/share-plugin",
     "@kbn/utility-types",
-    "@kbn/es-query"
+    "@kbn/es-query",
+    "@kbn/cloud-security-posture",
+    "@kbn/security-solution-distribution-bar",
+    "@kbn/core-application-browser"
   ]
 }

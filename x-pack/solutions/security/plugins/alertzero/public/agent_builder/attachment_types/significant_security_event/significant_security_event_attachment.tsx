@@ -9,9 +9,10 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSkeletonText } from '@elastic/eui';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
-import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
+import type { AttachmentUIDefinition, HeaderBadge } from '@kbn/agent-builder-browser/attachments';
 import type { AttachmentNavigationDeps } from '../navigation';
 import { buildAlertsLookupEsql, buildDiscoverEsqlUrl, buildEventsLookupEsql } from '../navigation';
+import { severityBadgeColor, formatConfidencePercent } from '../shared/severity';
 import { parseSignificantSecurityEventData } from './types';
 import type { SignificantSecurityEventAttachment } from './types';
 
@@ -38,7 +39,7 @@ const LazySignificantSecurityEventInlineContent = React.lazy(() =>
 
 /**
  * Builds the `security.significant_security_event` `AttachmentUIDefinition`. Unlike the threat
- * attachment, this payload is static (no live fetch) so the factory takes no http — kept as a
+ * attachment, this payload is static (no live fetch) so the factory takes no http. Kept as a
  * factory to mirror the sibling types' registration shape in `attachment_types/index.ts`.
  *
  * The SSE itself is not a Discover-queryable doc, so the header exit opens the documents it
@@ -50,9 +51,35 @@ export const createSignificantSecurityEventAttachmentDefinition = ({
 }: {
   navigation: AttachmentNavigationDeps;
 }): AttachmentUIDefinition<SignificantSecurityEventAttachment> => ({
-  getLabel: (attachment) => attachment?.data?.attachmentLabel ?? DEFAULT_LABEL,
+  getLabel: (attachment) =>
+    attachment?.data?.attachmentLabel ?? attachment?.data?.title ?? DEFAULT_LABEL,
   getIcon: () => 'flag',
-  getHeader: () => ({ icon: 'flag' }),
+  getHeader: ({ attachment }) => {
+    const data = attachment?.data;
+    const parsed = parseSignificantSecurityEventData(data);
+    const subtitle = [data?.source_watch, data?.capability].filter(Boolean).join(' · ');
+
+    const badges: HeaderBadge[] = [];
+    if (parsed?.severity) {
+      badges.push({ label: parsed.severity, color: severityBadgeColor(parsed.severity) });
+    }
+    if (parsed?.status) {
+      badges.push({ label: parsed.status, color: 'hollow' });
+    }
+    if (parsed?.confidence != null) {
+      badges.push({
+        label: formatConfidencePercent(parsed.confidence),
+        color: 'hollow',
+        ...(parsed.huntResult?.hasConfirmedHit ? { iconType: 'securitySignalDetected' } : {}),
+      });
+    }
+
+    return {
+      icon: 'flag',
+      ...(subtitle ? { subtitle } : {}),
+      ...(badges.length > 0 ? { badges } : {}),
+    };
+  },
   renderInlineContent: (props) => (
     <React.Suspense fallback={<EuiSkeletonText lines={3} />}>
       <LazySignificantSecurityEventInlineContent {...props} navigation={navigation} />

@@ -13,6 +13,7 @@ export {
   THREAT_REPORTS_INDEX_PATTERN,
 } from './constants';
 export { buildAlertDetailsPath, buildAlertDetailsUrl } from './build_alert_details_url';
+export { buildSecurityEntityUrl } from './build_security_entity_url';
 export { buildDiscoverEsqlUrl } from './build_discover_esql_url';
 export type { DiscoverLookupTimeRange } from './build_discover_esql_url';
 export {

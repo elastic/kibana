@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import {
   HuntCorrelationInlineContent,
@@ -78,41 +78,29 @@ describe('HuntCorrelationInlineContent', () => {
     expect(screen.getByTestId(HUNT_CORRELATION_ATTACHMENT_EMPTY_TEST_ID)).toBeInTheDocument();
   });
 
-  it('renders anchors, diamond scores, and labeled thresholds from a valid payload', () => {
+  it('renders anchors and diamond scores from a valid payload', () => {
     render(<HuntCorrelationInlineContent {...renderProps(buildAttachment(baseData))} />);
     expect(screen.getByTestId(HUNT_CORRELATION_ATTACHMENT_TEST_ID)).toBeInTheDocument();
     expect(screen.getByText('abc123')).toBeInTheDocument();
     expect(screen.getByText('APT-99')).toBeInTheDocument();
-    expect(screen.getByText('infrastructure')).toBeInTheDocument();
     expect(screen.getByText('report-2')).toBeInTheDocument();
-    expect(screen.getByText('0.75')).toBeInTheDocument();
-    expect(screen.getByText('Anchor match')).toBeInTheDocument();
-    expect(screen.getByText('Diamond vertex')).toBeInTheDocument();
-    expect(screen.getByText('0.9')).toBeInTheDocument();
-    expect(screen.getByText('0.6')).toBeInTheDocument();
   });
 
-  it('does not render the literal anchor_match= debug string', () => {
+  it('does not render the hero summary line (it moved to the header subtitle)', () => {
     render(<HuntCorrelationInlineContent {...renderProps(buildAttachment(baseData))} />);
-    expect(screen.queryByText(/anchor_match=/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/anchors? .* related reports?/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/anchor/i, { selector: 'strong' })).toBeInTheDocument();
   });
 
-  it('renders a hero summary with unique related report count', () => {
-    const data: HuntCorrelationAttachment['data'] = {
-      ...baseData,
-      anchors: [
-        { kind: 'hash', value: 'abc123' },
-        { kind: 'actor', value: 'APT-99' },
-        { kind: 'ioc_set_hash', value: 'set-hash-1' },
-      ],
-      diamond_scores: [
-        { vertex: 'infrastructure', related_report_id: 'report-2', score: 0.75 },
-        { vertex: 'adversary', related_report_id: 'report-3', score: 0.8 },
-        { vertex: 'capability', related_report_id: 'report-2', score: 0.5 },
-      ],
-    };
-    render(<HuntCorrelationInlineContent {...renderProps(buildAttachment(data))} />);
-    expect(screen.getByText('3 anchors · 2 related reports')).toBeInTheDocument();
+  it('does not render the trailing thresholds description list', () => {
+    render(<HuntCorrelationInlineContent {...renderProps(buildAttachment(baseData))} />);
+    expect(screen.queryByText('Anchor match')).not.toBeInTheDocument();
+    expect(screen.queryByText('Diamond vertex')).not.toBeInTheDocument();
+  });
+
+  it('shows an anchor match threshold tooltip next to the Anchors heading', () => {
+    render(<HuntCorrelationInlineContent {...renderProps(buildAttachment(baseData))} />);
+    expect(screen.getByText('Anchor match threshold 0.9')).toBeInTheDocument();
   });
 
   it('renders related report id as a Discover link when share is present', () => {
@@ -126,19 +114,31 @@ describe('HuntCorrelationInlineContent', () => {
       />
     );
 
-    const link = screen.getByTestId(`alertzeroHuntCorrelationRelatedReportLink-${reportId}`);
-    expect(link).toHaveAttribute('href', expectedHref);
-    expect(link).toHaveTextContent(reportId);
+    const badgeWrapper = screen.getByTestId(
+      `alertzeroHuntCorrelationRelatedReportLink-${reportId}`
+    );
+    expect(badgeWrapper).toHaveTextContent(reportId);
+    const badge = badgeWrapper.querySelector('.euiBadge');
+    expect(badge).not.toBeNull();
+    fireEvent.mouseEnter(badge as Element);
+    const discoverAction = screen.getByLabelText('Open in Discover');
+    const openWindowSpy = jest.spyOn(window, 'open').mockImplementation(() => null);
+    fireEvent.click(discoverAction);
+    expect(openWindowSpy).toHaveBeenCalledWith(expectedHref, '_blank', 'noopener,noreferrer');
+    openWindowSpy.mockRestore();
   });
 
-  it('renders related report id as plain text when share is undefined', () => {
+  it('renders related report id with no Discover action when share is undefined', () => {
     const reportId = 'report-2';
     render(<HuntCorrelationInlineContent {...renderProps(buildAttachment(baseData))} />);
 
-    const node = screen.getByTestId(`alertzeroHuntCorrelationRelatedReportLink-${reportId}`);
-    expect(node.tagName.toLowerCase()).toBe('span');
-    expect(node).not.toHaveAttribute('href');
-    expect(node).toHaveTextContent(reportId);
+    const badgeWrapper = screen.getByTestId(
+      `alertzeroHuntCorrelationRelatedReportLink-${reportId}`
+    );
+    expect(badgeWrapper).toHaveTextContent(reportId);
+    const badge = badgeWrapper.querySelector('.euiBadge');
+    fireEvent.mouseEnter(badge as Element);
+    expect(screen.queryByLabelText('Open in Discover')).not.toBeInTheDocument();
   });
 
   it('renders hash and ioc_set_hash anchors as Discover links when share is present', () => {
@@ -163,6 +163,9 @@ describe('HuntCorrelationInlineContent', () => {
     });
     const iocSetEsql = buildThreatReportIocSetHashLookupEsql({ value: iocSetHashValue });
     const actorEsql = buildActorLookupEsql({ value: 'APT-99' });
+    const expectedIocSetHref = `https://example.test/discover?esql=${encodeURIComponent(
+      iocSetEsql as string
+    )}`;
 
     render(
       <HuntCorrelationInlineContent
@@ -170,27 +173,42 @@ describe('HuntCorrelationInlineContent', () => {
       />
     );
 
-    const hashLink = screen.getByTestId('alertzeroHuntCorrelationAnchorLink-hash-0');
-    expect(hashLink).toHaveAttribute('href', expectedHashHref);
-    expect(hashLink).toHaveTextContent(hashValue);
+    const openWindowSpy = jest.spyOn(window, 'open').mockImplementation(() => null);
 
-    const iocSetLink = screen.getByTestId('alertzeroHuntCorrelationAnchorLink-ioc_set_hash-0');
-    expect(iocSetLink).toHaveAttribute(
-      'href',
-      `https://example.test/discover?esql=${encodeURIComponent(iocSetEsql as string)}`
-    );
-    expect(iocSetLink).toHaveTextContent(iocSetHashValue);
+    const hashWrapper = screen.getByTestId('alertzeroHuntCorrelationAnchorLink-hash-0');
+    expect(hashWrapper).toHaveTextContent(hashValue);
+    const hashBadge = hashWrapper.querySelector('.euiBadge');
+    expect(hashBadge).not.toBeNull();
+    fireEvent.mouseEnter(hashBadge as Element);
+    fireEvent.click(screen.getByLabelText('Open in Discover'));
+    expect(openWindowSpy).toHaveBeenCalledWith(expectedHashHref, '_blank', 'noopener,noreferrer');
+    fireEvent.mouseLeave(hashBadge as Element);
+
+    const iocSetWrapper = screen.getByTestId('alertzeroHuntCorrelationAnchorLink-ioc_set_hash-0');
+    expect(iocSetWrapper).toHaveTextContent(iocSetHashValue);
+    const iocSetBadge = iocSetWrapper.querySelector('.euiBadge');
+    expect(iocSetBadge).not.toBeNull();
+    fireEvent.mouseEnter(iocSetBadge as Element);
+    fireEvent.click(screen.getByLabelText('Open in Discover'));
+    expect(openWindowSpy).toHaveBeenCalledWith(expectedIocSetHref, '_blank', 'noopener,noreferrer');
+    fireEvent.mouseLeave(iocSetBadge as Element);
 
     expect(
       screen.queryByTestId('alertzeroHuntCorrelationAnchorLink-actor-0')
     ).not.toBeInTheDocument();
     const actorLink = screen.getByTestId('alertzeroHuntCorrelationActorChip-0');
-    expect(actorLink).toHaveAttribute(
-      'href',
-      `https://example.test/discover?esql=${encodeURIComponent(actorEsql as string)}`
-    );
     expect(actorLink).toHaveTextContent('APT-99');
-    expect(screen.queryByText('Actor')).not.toBeInTheDocument();
+    const actorBadge = actorLink.querySelector('.euiBadge');
+    expect(actorBadge).not.toBeNull();
+    fireEvent.mouseEnter(actorBadge as Element);
+    fireEvent.click(screen.getByLabelText('Open in Discover'));
+    expect(openWindowSpy).toHaveBeenCalledWith(
+      `https://example.test/discover?esql=${encodeURIComponent(actorEsql as string)}`,
+      '_blank',
+      'noopener,noreferrer'
+    );
+
+    openWindowSpy.mockRestore();
   });
 
   it('drops malformed anchor entries but keeps the valid ones', () => {
@@ -223,5 +241,40 @@ describe('HuntCorrelationInlineContent', () => {
       />
     );
     expect(screen.getByText('No diamond scores recorded')).toBeInTheDocument();
+  });
+
+  it('groups diamond scores for the same related report into a single row', () => {
+    const data: HuntCorrelationAttachment['data'] = {
+      ...baseData,
+      diamond_scores: [
+        { vertex: 'infrastructure', related_report_id: 'report-2', score: 0.75 },
+        { vertex: 'capability', related_report_id: 'report-2', score: 0.5 },
+        { vertex: 'adversary', related_report_id: 'report-3', score: 0.8 },
+      ],
+    };
+    render(<HuntCorrelationInlineContent {...renderProps(buildAttachment(data))} />);
+
+    // One row per distinct related_report_id, not one row per score.
+    expect(
+      screen.getAllByTestId('alertzeroHuntCorrelationRelatedReportLink-report-2')
+    ).toHaveLength(1);
+    expect(
+      screen.getAllByTestId('alertzeroHuntCorrelationRelatedReportLink-report-3')
+    ).toHaveLength(1);
+  });
+
+  it('shows an n/a cell for a vertex with no score for a given report', () => {
+    const data: HuntCorrelationAttachment['data'] = {
+      ...baseData,
+      diamond_scores: [{ vertex: 'infrastructure', related_report_id: 'report-2', score: 0.75 }],
+    };
+    render(<HuntCorrelationInlineContent {...renderProps(buildAttachment(data))} />);
+    // adversary, capability, victim all have no score for report-2.
+    expect(screen.getAllByText('n/a')).toHaveLength(3);
+  });
+
+  it('shows a vertex threshold tooltip on the diamond score column headers', () => {
+    render(<HuntCorrelationInlineContent {...renderProps(buildAttachment(baseData))} />);
+    expect(screen.getAllByText('Threshold 0.6').length).toBeGreaterThan(0);
   });
 });

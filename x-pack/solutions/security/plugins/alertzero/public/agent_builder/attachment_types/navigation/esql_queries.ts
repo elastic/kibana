@@ -35,9 +35,7 @@ export const buildEventLookupEsql = ({
   // `_id` is only available after METADATA _id (otherwise Discover reports Unknown column [_id]).
   // Match on `_id` only: `event.id` isn't populated by every integration (e.g. AWS CloudTrail),
   // and querying it there fails with "Unknown column [event.id]" instead of just missing a hit.
-  return `FROM ${quoteEsqlIdentifier(
-    index
-  )} METADATA _id | WHERE _id == "${escapedEventId}"`;
+  return `FROM ${quoteEsqlIdentifier(index)} METADATA _id | WHERE _id == "${escapedEventId}"`;
 };
 
 const uniqueNonEmpty = (values: string[]): string[] => [

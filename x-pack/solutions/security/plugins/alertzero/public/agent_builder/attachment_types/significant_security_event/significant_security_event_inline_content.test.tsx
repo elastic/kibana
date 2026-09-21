@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { I18nProvider } from '@kbn/i18n-react';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import {
   SignificantSecurityEventInlineContent,
@@ -54,6 +56,8 @@ const renderProps = (
   isSidebar: false,
 });
 
+const renderWithIntl = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
+
 const baseData = {
   title: 'Suspicious lateral movement',
   severity: 'high' as const,
@@ -77,9 +81,34 @@ const baseData = {
   evaluation_record_ref: 'eval-1',
 };
 
+const huntResult = {
+  has_confirmed_hit: true,
+  time_range: { from: '2024-01-01T00:00:00Z', to: '2024-01-02T00:00:00Z' },
+  tier1: {
+    status: 'environment_hits_found' as const,
+    counts: { total_hits: 12, returned_hits: 12, affected_hosts: 2, affected_users: 3 },
+    per_index: [
+      { index: 'logs-endpoint.events.process-default', hit_count: 8, required: true },
+      { index: 'logs-endpoint.events.network-default', hit_count: 4, required: false },
+    ],
+    resolved_iocs: [],
+  },
+  tier2: {
+    status: 'behaviors_proposed' as const,
+    behaviors: [
+      {
+        technique_id: 'T1021',
+        tactic_ids: ['TA0008'],
+        confidence: 0.75,
+        rule_name: 'Lateral movement via RDP',
+      },
+    ],
+  },
+};
+
 describe('SignificantSecurityEventInlineContent', () => {
   it('renders the empty state for malformed data', () => {
-    render(
+    renderWithIntl(
       <SignificantSecurityEventInlineContent
         {...renderProps(buildAttachment({} as SignificantSecurityEventAttachment['data']))}
       />
@@ -87,20 +116,36 @@ describe('SignificantSecurityEventInlineContent', () => {
     expect(screen.getByTestId(SSE_ATTACHMENT_EMPTY_TEST_ID)).toBeInTheDocument();
   });
 
-  it('renders every field from a valid payload', () => {
-    render(<SignificantSecurityEventInlineContent {...renderProps(buildAttachment(baseData))} />);
+  it('renders the run_id and report link, hypothesis, timeline, and entities from a valid payload', () => {
+    renderWithIntl(
+      <SignificantSecurityEventInlineContent {...renderProps(buildAttachment(baseData))} />
+    );
     expect(screen.getByTestId(SSE_ATTACHMENT_TEST_ID)).toBeInTheDocument();
-    expect(screen.getByText('Suspicious lateral movement')).toBeInTheDocument();
-    expect(screen.getByText('high (0.8)')).toBeInTheDocument();
-    expect(screen.getByText('open')).toBeInTheDocument();
-    expect(screen.getByText('watch-1 · lateral-movement-detector · run-1')).toBeInTheDocument();
+    expect(screen.getByTestId('alertzeroSignificantSecurityEventRunId')).toHaveTextContent('run-1');
+    expect(screen.getByTestId('alertzeroSignificantSecurityEventReportLink')).toHaveTextContent(
+      'ti-report-1'
+    );
     expect(screen.getByText('Attacker pivoted via RDP')).toBeInTheDocument();
     expect(screen.getByText('RDP session opened')).toBeInTheDocument();
     expect(screen.getByText('host-1')).toBeInTheDocument();
     expect(screen.getByText('user-1')).toBeInTheDocument();
+  });
+
+  it('does not render a title/severity/status header row (moved to the attachment header)', () => {
+    renderWithIntl(
+      <SignificantSecurityEventInlineContent {...renderProps(buildAttachment(baseData))} />
+    );
+    expect(screen.queryByText('Suspicious lateral movement')).not.toBeInTheDocument();
+    expect(screen.queryByText('high (0.8)')).not.toBeInTheDocument();
+  });
+
+  it('does not render the evidence/indicators summary footer', () => {
+    renderWithIntl(
+      <SignificantSecurityEventInlineContent {...renderProps(buildAttachment(baseData))} />
+    );
     expect(
-      screen.getByText('Evidence for: 2 · Evidence against: 0 · Indicators: 1')
-    ).toBeInTheDocument();
+      screen.queryByText('Evidence for: 2 · Evidence against: 0 · Indicators: 1')
+    ).not.toBeInTheDocument();
   });
 
   it('drops malformed timeline entries but still renders the valid ones', () => {
@@ -112,28 +157,33 @@ describe('SignificantSecurityEventInlineContent', () => {
         { what: 'missing at' },
       ] as unknown as SignificantSecurityEventAttachment['data']['timeline'],
     };
-    render(<SignificantSecurityEventInlineContent {...renderProps(buildAttachment(data))} />);
+    renderWithIntl(
+      <SignificantSecurityEventInlineContent {...renderProps(buildAttachment(data))} />
+    );
     expect(screen.getByText('valid entry')).toBeInTheDocument();
     expect(screen.queryByText('bad at type')).not.toBeInTheDocument();
     expect(screen.queryByText('missing at')).not.toBeInTheDocument();
   });
 
-  it('shows the empty-timeline sentinel when there are no entries', () => {
-    render(
+  it('renders nothing for the timeline section when there are no entries', () => {
+    renderWithIntl(
       <SignificantSecurityEventInlineContent
         {...renderProps(buildAttachment({ ...baseData, timeline: [] }))}
       />
     );
-    expect(screen.getByText('No timeline entries recorded')).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('alertzeroSignificantSecurityEventTimeline')
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText('Timeline')).not.toBeInTheDocument();
   });
 
-  it('shows the no-entities sentinel when entities is empty', () => {
-    render(
+  it('renders nothing for the entities section when entities is empty', () => {
+    renderWithIntl(
       <SignificantSecurityEventInlineContent
         {...renderProps(buildAttachment({ ...baseData, entities: [] }))}
       />
     );
-    expect(screen.getByText('No entities recorded')).toBeInTheDocument();
+    expect(screen.queryByText('Entities')).not.toBeInTheDocument();
   });
 
   it('renders entity refs as Discover links on the exact ECS field', () => {
@@ -146,7 +196,7 @@ describe('SignificantSecurityEventInlineContent', () => {
     const roleEsql = buildEntityLookupEsql({ field: 'user.name', value: 'escalated-role' });
     const hostEsql = buildEntityLookupEsql({ field: 'host.name', value: 'ci-deploy-runner-07' });
 
-    render(
+    renderWithIntl(
       <SignificantSecurityEventInlineContent
         {...renderProps(buildAttachment({ ...baseData, entities }), {
           ...defaultNavigation,
@@ -156,47 +206,48 @@ describe('SignificantSecurityEventInlineContent', () => {
     );
 
     const userLink = screen.getByTestId('alertzeroSignificantSecurityEventEntity-0');
-    expect(userLink).toHaveAttribute(
-      'href',
-      `https://example.test/discover?esql=${encodeURIComponent(userEsql as string)}`
-    );
     expect(userLink).toHaveTextContent('dev-user');
+    let badge = userLink.querySelector('.euiBadge');
+    fireEvent.mouseEnter(badge as Element);
+    let openWindowSpy = jest.spyOn(window, 'open').mockImplementation(() => null);
+    fireEvent.click(screen.getByLabelText('Open in Discover'));
+    expect(openWindowSpy).toHaveBeenCalledWith(
+      `https://example.test/discover?esql=${encodeURIComponent(userEsql as string)}`,
+      '_blank',
+      'noopener,noreferrer'
+    );
+    openWindowSpy.mockRestore();
+    fireEvent.mouseLeave(badge as Element);
 
     const roleLink = screen.getByTestId('alertzeroSignificantSecurityEventEntity-1');
-    expect(roleLink).toHaveAttribute(
-      'href',
-      `https://example.test/discover?esql=${encodeURIComponent(roleEsql as string)}`
-    );
     expect(roleLink).toHaveTextContent('escalated-role');
+    badge = roleLink.querySelector('.euiBadge');
+    fireEvent.mouseEnter(badge as Element);
+    openWindowSpy = jest.spyOn(window, 'open').mockImplementation(() => null);
+    fireEvent.click(screen.getByLabelText('Open in Discover'));
+    expect(openWindowSpy).toHaveBeenCalledWith(
+      `https://example.test/discover?esql=${encodeURIComponent(roleEsql as string)}`,
+      '_blank',
+      'noopener,noreferrer'
+    );
+    openWindowSpy.mockRestore();
+    fireEvent.mouseLeave(badge as Element);
 
     const hostLink = screen.getByTestId('alertzeroSignificantSecurityEventEntity-2');
-    expect(hostLink).toHaveAttribute(
-      'href',
-      `https://example.test/discover?esql=${encodeURIComponent(hostEsql as string)}`
-    );
     expect(hostLink).toHaveTextContent('ci-deploy-runner-07');
+    badge = hostLink.querySelector('.euiBadge');
+    fireEvent.mouseEnter(badge as Element);
+    openWindowSpy = jest.spyOn(window, 'open').mockImplementation(() => null);
+    fireEvent.click(screen.getByLabelText('Open in Discover'));
+    expect(openWindowSpy).toHaveBeenCalledWith(
+      `https://example.test/discover?esql=${encodeURIComponent(hostEsql as string)}`,
+      '_blank',
+      'noopener,noreferrer'
+    );
+    openWindowSpy.mockRestore();
   });
 
-  it('renders knowledge indicators grouped by type, not Discover links', () => {
-    render(<SignificantSecurityEventInlineContent {...renderProps(buildAttachment(baseData))} />);
-
-    expect(
-      screen.getByTestId('alertzeroSignificantSecurityEventIndicator-technique-0')
-    ).toHaveTextContent('T1021 (0.9)');
-    expect(
-      screen.queryByTestId('alertzeroSignificantSecurityEventIocLink-technique-0')
-    ).not.toBeInTheDocument();
-  });
-
-  it('links a technique indicator to its MITRE ATT&CK reference', () => {
-    render(<SignificantSecurityEventInlineContent {...renderProps(buildAttachment(baseData))} />);
-
-    const mitreLink = screen.getByTestId('alertzeroSignificantSecurityEventIndicatorMitreLink-0');
-    expect(mitreLink).toHaveAttribute('href', 'https://attack.mitre.org/techniques/T1021/');
-    expect(mitreLink).toHaveAttribute('target', '_blank');
-  });
-
-  it('groups IOC indicators by IOC type', () => {
+  it('renders knowledge indicators grouped by type as an IocBadge in the LabeledBadgeTable', () => {
     const data = {
       ...baseData,
       security_knowledge_indicators: [
@@ -204,24 +255,44 @@ describe('SignificantSecurityEventInlineContent', () => {
         { type: 'ioc', value: '203.0.113.4', ioc: { type: 'ip', value: '203.0.113.4' } },
       ],
     };
-    render(<SignificantSecurityEventInlineContent {...renderProps(buildAttachment(data))} />);
+    renderWithIntl(
+      <SignificantSecurityEventInlineContent {...renderProps(buildAttachment(data))} />
+    );
 
+    expect(
+      screen.getByTestId('alertzeroSignificantSecurityEventIndicator-technique-0')
+    ).toHaveTextContent('T1021 (90%)');
     expect(screen.getByTestId('alertzeroSignificantSecurityEventIndicatorIocs')).toHaveTextContent(
       '203.0.113.4'
     );
     expect(
-      screen.getByTestId('alertzeroSignificantSecurityEventIndicatorTechniques')
-    ).toHaveTextContent('T1021');
+      screen.getByTestId('alertzeroSignificantSecurityEventIndicator-ioc-0')
+    ).toBeInTheDocument();
   });
 
-  it('links the SSE back to its source report', () => {
-    render(<SignificantSecurityEventInlineContent {...renderProps(buildAttachment(baseData))} />);
+  it('links a technique indicator to its MITRE ATT&CK reference', () => {
+    renderWithIntl(
+      <SignificantSecurityEventInlineContent {...renderProps(buildAttachment(baseData))} />
+    );
 
-    const reportLink = screen.getByTestId('alertzeroSignificantSecurityEventReportLink');
-    expect(reportLink).toHaveTextContent('ti-report-1');
+    const mitreLink = screen.getByTestId('alertzeroSignificantSecurityEventIndicatorMitreLink-0');
+    expect(mitreLink).toHaveAttribute('href', 'https://attack.mitre.org/techniques/T1021/');
+    expect(mitreLink).toHaveAttribute('target', '_blank');
   });
 
-  it('renders a Discover link for an event when share returns a URL', () => {
+  it('renders nothing for indicators when the list is empty', () => {
+    renderWithIntl(
+      <SignificantSecurityEventInlineContent
+        {...renderProps(buildAttachment({ ...baseData, security_knowledge_indicators: [] }))}
+      />
+    );
+    expect(
+      screen.queryByTestId('alertzeroSignificantSecurityEventIndicatorIocs')
+    ).not.toBeInTheDocument();
+  });
+
+  it('renders a Discover link for an event when share returns a URL, inside the collapsed events accordion', async () => {
+    const user = userEvent.setup();
     const event = {
       event_id: 'evt-1',
       source_index: 'logs-endpoint.events.process-default',
@@ -232,7 +303,7 @@ describe('SignificantSecurityEventInlineContent', () => {
     });
     const expectedHref = `https://example.test/discover?esql=${encodeURIComponent(expectedEsql)}`;
 
-    render(
+    renderWithIntl(
       <SignificantSecurityEventInlineContent
         {...renderProps(buildAttachment({ ...baseData, events: [event] }), {
           ...defaultNavigation,
@@ -241,78 +312,209 @@ describe('SignificantSecurityEventInlineContent', () => {
       />
     );
 
-    const link = screen.getByTestId('alertzeroSignificantSecurityEventEventLink-evt-1');
-    expect(link).toHaveAttribute('href', expectedHref);
+    const accordionButton = screen.getByTestId('alertzeroSignificantSecurityEventEventsAccordion');
+    expect(within(accordionButton).getByRole('button', { name: '1 event' })).toHaveAttribute(
+      'aria-expanded',
+      'false'
+    );
+    await user.click(within(accordionButton).getByRole('button', { name: '1 event' }));
+
+    const badgeWrapper = screen.getByTestId('alertzeroSignificantSecurityEventEventLink-evt-1');
+    const badge = badgeWrapper.querySelector('.euiBadge');
+    expect(badge).not.toBeNull();
+    fireEvent.mouseEnter(badge as Element);
+    const discoverAction = screen.getByLabelText('Open in Discover');
+    const openWindowSpy = jest.spyOn(window, 'open').mockImplementation(() => null);
+    fireEvent.click(discoverAction);
+    expect(openWindowSpy).toHaveBeenCalledWith(expectedHref, '_blank', 'noopener,noreferrer');
+    openWindowSpy.mockRestore();
   });
 
-  it('renders plain event text when share is undefined', () => {
+  it('renders no Discover action for an event when share is undefined', async () => {
+    const user = userEvent.setup();
     const event = {
       event_id: 'evt-plain',
       source_index: 'logs-endpoint.events.process-default',
     };
 
-    render(
+    renderWithIntl(
       <SignificantSecurityEventInlineContent
         {...renderProps(buildAttachment({ ...baseData, events: [event] }))}
       />
     );
 
-    const node = screen.getByTestId('alertzeroSignificantSecurityEventEventLink-evt-plain');
-    expect(node.tagName.toLowerCase()).toBe('span');
-    expect(node).not.toHaveAttribute('href');
-    expect(node).toHaveTextContent('evt-plain');
+    const accordionButton = screen.getByTestId('alertzeroSignificantSecurityEventEventsAccordion');
+    await user.click(within(accordionButton).getByRole('button', { name: '1 event' }));
+
+    const badgeWrapper = screen.getByTestId('alertzeroSignificantSecurityEventEventLink-evt-plain');
+    expect(badgeWrapper).toHaveTextContent('evt-plain');
+    const badge = badgeWrapper.querySelector('.euiBadge');
+    fireEvent.mouseEnter(badge as Element);
+    expect(screen.queryByLabelText('Open in Discover')).not.toBeInTheDocument();
   });
 
-  it('renders a Security alert-details link using the alert index from the payload', () => {
-    const alert = {
-      alert_id: 'alert-abc',
-      index: '.alerts-security.alerts-soc',
-      timestamp: '2026-01-01T00:00:00.000Z',
-    };
-
-    render(
+  it('renders nothing for the events accordion when there are no events or alerts', () => {
+    renderWithIntl(
       <SignificantSecurityEventInlineContent
-        {...renderProps(buildAttachment({ ...baseData, alerts: [alert] }))}
+        {...renderProps(buildAttachment({ ...baseData, events: [], alerts: [] }))}
       />
     );
-
-    const link = screen.getByTestId(`alertzeroSignificantSecurityEventAlertLink-${alert.alert_id}`);
-    expect(link).toHaveAttribute('href', expect.stringContaining('/app/security/alerts/redirect/'));
-    expect(link).toHaveAttribute('href', expect.stringContaining(alert.alert_id));
-    expect(link).toHaveAttribute('href', expect.stringContaining(`index=${alert.index}`));
-    expect(link.getAttribute('href')).toContain('timestamp=2026-01-01T00%3A00%3A00.000Z');
+    expect(
+      screen.queryByTestId('alertzeroSignificantSecurityEventEventsAccordion')
+    ).not.toBeInTheDocument();
   });
 
-  it('renders evidence bullet text from evidence_for', () => {
-    render(
+  it('renders nothing for alerts when the list is empty', () => {
+    renderWithIntl(
       <SignificantSecurityEventInlineContent
         {...renderProps(
           buildAttachment({
             ...baseData,
-            evidence_for: ['Suspicious RDP from unusual host'],
-            evidence_against: ['No outbound C2 observed'],
+            alerts: [],
+            events: [],
+            timeline: [],
+            evidence_for: [],
           })
         )}
       />
     );
-
-    expect(screen.getByText('Suspicious RDP from unusual host')).toBeInTheDocument();
-    expect(screen.getByText('No outbound C2 observed')).toBeInTheDocument();
+    expect(screen.queryByRole('list')).not.toBeInTheDocument();
   });
 
-  it('renders a truncation callout when truncated is true', () => {
-    render(
+  it('renders nothing for evidence sections when both are empty', () => {
+    renderWithIntl(
       <SignificantSecurityEventInlineContent
-        {...renderProps(
-          buildAttachment({
-            ...baseData,
-            truncated: true,
-            truncated_original_count: 42,
-          })
-        )}
+        {...renderProps(buildAttachment({ ...baseData, evidence_for: [], evidence_against: [] }))}
       />
     );
+    expect(screen.queryByText('Evidence for')).not.toBeInTheDocument();
+    expect(screen.queryByText('Evidence against')).not.toBeInTheDocument();
+  });
 
-    expect(screen.getByTestId('alertzeroSignificantSecurityEventTruncation')).toBeInTheDocument();
+  it('renders the evidence for section when populated', () => {
+    renderWithIntl(
+      <SignificantSecurityEventInlineContent {...renderProps(buildAttachment(baseData))} />
+    );
+    expect(screen.getByText('Evidence for')).toBeInTheDocument();
+    expect(screen.getByText('e1')).toBeInTheDocument();
+    expect(screen.getByText('e2')).toBeInTheDocument();
+  });
+
+  describe('hunt result', () => {
+    it('renders nothing when hunt_result is absent', () => {
+      renderWithIntl(
+        <SignificantSecurityEventInlineContent {...renderProps(buildAttachment(baseData))} />
+      );
+      expect(screen.queryByText('Hunt result')).not.toBeInTheDocument();
+    });
+
+    it('renders total hits, affected hosts/users stats, and the time range', () => {
+      renderWithIntl(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(buildAttachment({ ...baseData, hunt_result: huntResult }))}
+        />
+      );
+      expect(screen.getByText('Hunt result')).toBeInTheDocument();
+      expect(screen.getByText('12')).toBeInTheDocument();
+      expect(screen.getByText('2')).toBeInTheDocument();
+      expect(screen.getByText('3')).toBeInTheDocument();
+    });
+
+    it('renders a distribution bar row per index with an events-across-indices summary', () => {
+      renderWithIntl(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(buildAttachment({ ...baseData, hunt_result: huntResult }))}
+        />
+      );
+      expect(screen.getByText('12 events across 2 indices')).toBeInTheDocument();
+    });
+
+    it('renders the tier2 behaviors table with technique, rule, tactics, and confidence', () => {
+      renderWithIntl(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(buildAttachment({ ...baseData, hunt_result: huntResult }))}
+        />
+      );
+      expect(screen.getByText('Lateral movement via RDP')).toBeInTheDocument();
+      expect(screen.getByText('TA0008')).toBeInTheDocument();
+      expect(screen.getAllByText('75%').length).toBeGreaterThan(0);
+    });
+
+    it('renders no tier2 table when tier2 is absent', () => {
+      const { tier2, ...tier1Only } = huntResult;
+      renderWithIntl(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(buildAttachment({ ...baseData, hunt_result: tier1Only }))}
+        />
+      );
+      expect(screen.queryByText('Lateral movement via RDP')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('timeline', () => {
+    it('renders each entry as an EuiTimeline item with a formatted date/time and the what text', () => {
+      renderWithIntl(
+        <SignificantSecurityEventInlineContent {...renderProps(buildAttachment(baseData))} />
+      );
+      expect(screen.getByTestId('alertzeroSignificantSecurityEventTimeline')).toBeInTheDocument();
+      expect(screen.getByText('RDP session opened')).toBeInTheDocument();
+    });
+
+    it('renders nothing (no heading) when the timeline is empty', () => {
+      renderWithIntl(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(buildAttachment({ ...baseData, timeline: [] }))}
+        />
+      );
+      expect(screen.queryByText('Timeline')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('alertzeroSignificantSecurityEventTimeline')
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  describe('events accordion', () => {
+    it('is collapsed by default', () => {
+      renderWithIntl(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(
+            buildAttachment({
+              ...baseData,
+              events: [{ event_id: 'evt-1', source_index: 'logs-endpoint.events.process-default' }],
+            })
+          )}
+        />
+      );
+      const accordionButton = screen.getByTestId(
+        'alertzeroSignificantSecurityEventEventsAccordion'
+      );
+      expect(within(accordionButton).getByRole('button', { name: '1 event' })).toHaveAttribute(
+        'aria-expanded',
+        'false'
+      );
+    });
+
+    it('expands on click to reveal the events table', async () => {
+      const user = userEvent.setup();
+      renderWithIntl(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(
+            buildAttachment({
+              ...baseData,
+              events: [{ event_id: 'evt-1', source_index: 'logs-endpoint.events.process-default' }],
+            })
+          )}
+        />
+      );
+
+      const accordion = screen.getByTestId('alertzeroSignificantSecurityEventEventsAccordion');
+      const accordionButton = within(accordion).getByRole('button', { name: '1 event' });
+      expect(accordionButton).toBeInTheDocument();
+      await user.click(accordionButton);
+      expect(accordionButton).toHaveAttribute('aria-expanded', 'true');
+      expect(
+        screen.getByTestId('alertzeroSignificantSecurityEventEventLink-evt-1')
+      ).toBeInTheDocument();
+    });
   });
 });

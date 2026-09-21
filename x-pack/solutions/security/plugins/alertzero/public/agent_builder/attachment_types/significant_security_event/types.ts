@@ -27,6 +27,7 @@ export interface TimelineEntry {
 export interface SignificantSecurityEventRef {
   event_id: string;
   source_index: string;
+  timestamp?: string;
 }
 
 export interface SignificantSecurityAlertRef {
@@ -42,6 +43,75 @@ export interface MapsToProposal {
   actionWorkflowId?: string;
   actionInput?: Record<string, unknown>;
   manual_remediation?: string[];
+}
+
+export interface HuntIoc {
+  type: string;
+  value: string;
+}
+
+export interface HuntResultPerIndex {
+  index: string;
+  hitCount: number;
+  required: boolean;
+}
+
+export interface HuntResultTier1Counts {
+  totalHits: number;
+  returnedHits: number;
+  affectedHosts: number;
+  affectedUsers: number;
+}
+
+export interface HuntResultTier1 {
+  status: string;
+  counts: HuntResultTier1Counts;
+  perIndex: HuntResultPerIndex[];
+  resolvedIocs: HuntIoc[];
+}
+
+export interface HuntResultTier2Behavior {
+  techniqueId: string;
+  tacticIds: string[];
+  confidence: number;
+  ruleName: string;
+}
+
+export interface HuntResultTier2 {
+  status: string;
+  behaviors: HuntResultTier2Behavior[];
+}
+
+export interface ParsedHuntResult {
+  hasConfirmedHit: boolean;
+  timeRange: { from: string; to: string };
+  tier1: HuntResultTier1;
+  tier2?: HuntResultTier2;
+}
+
+export interface HuntResultRaw {
+  has_confirmed_hit: boolean;
+  time_range: { from: string; to: string };
+  tier1: {
+    status: string;
+    counts: {
+      total_hits: number;
+      returned_hits: number;
+      affected_hosts: number;
+      affected_users: number;
+    };
+    per_index: Array<{ index: string; hit_count: number; required: boolean }>;
+    resolved_iocs: HuntIoc[];
+  };
+  tier2?: {
+    status: string;
+    behaviors: Array<{
+      technique_id: string;
+      tactic_ids: string[];
+      confidence: number;
+      rule_name: string;
+    }>;
+  };
 }
 
 /** Mirrors `significantSecurityEventAttachmentDataSchema` (server/agent_builder/attachments/significant_security_event.ts). */
@@ -60,6 +130,7 @@ export interface SignificantSecurityEventAttachmentData {
   events?: SignificantSecurityEventRef[];
   timeline: TimelineEntry[];
   hypothesis_tested: string;
+  hunt_result?: HuntResultRaw;
   evidence_for: string[];
   evidence_against: string[];
   maps_to_proposal?: MapsToProposal;
@@ -112,10 +183,148 @@ const isValidAlertRef = (candidate: unknown): candidate is SignificantSecurityAl
       (candidate as SignificantSecurityAlertRef).index.length > 0
   );
 
+const isValidHuntIoc = (candidate: unknown): candidate is HuntIoc =>
+  Boolean(
+    candidate &&
+      typeof candidate === 'object' &&
+      typeof (candidate as HuntIoc).type === 'string' &&
+      typeof (candidate as HuntIoc).value === 'string' &&
+      (candidate as HuntIoc).type.length > 0 &&
+      (candidate as HuntIoc).value.length > 0
+  );
+
+const isValidPerIndex = (candidate: unknown): candidate is HuntResultPerIndex => {
+  if (!candidate || typeof candidate !== 'object') return false;
+  const record = candidate as Record<string, unknown>;
+  return (
+    typeof record.index === 'string' &&
+    record.index.length > 0 &&
+    typeof record.hit_count === 'number' &&
+    typeof record.required === 'boolean'
+  );
+};
+
+const parsePerIndex = (candidate: unknown): HuntResultPerIndex | undefined => {
+  if (!isValidPerIndex(candidate)) return undefined;
+  const record = candidate as unknown as Record<string, unknown>;
+  return {
+    index: record.index as string,
+    hitCount: record.hit_count as number,
+    required: record.required as boolean,
+  };
+};
+
+const isValidTier2Behavior = (candidate: unknown): boolean => {
+  if (!candidate || typeof candidate !== 'object') return false;
+  const record = candidate as Record<string, unknown>;
+  return (
+    typeof record.technique_id === 'string' &&
+    record.technique_id.length > 0 &&
+    Array.isArray(record.tactic_ids) &&
+    record.tactic_ids.every((tacticId) => typeof tacticId === 'string') &&
+    typeof record.confidence === 'number' &&
+    typeof record.rule_name === 'string' &&
+    record.rule_name.length > 0
+  );
+};
+
+const parseTier2Behavior = (candidate: unknown): HuntResultTier2Behavior | undefined => {
+  if (!isValidTier2Behavior(candidate)) return undefined;
+  const record = candidate as Record<string, unknown>;
+  return {
+    techniqueId: record.technique_id as string,
+    tacticIds: (record.tactic_ids as unknown[]).filter(
+      (tacticId): tacticId is string => typeof tacticId === 'string'
+    ),
+    confidence: record.confidence as number,
+    ruleName: record.rule_name as string,
+  };
+};
+
+const parseTier1 = (candidate: unknown): HuntResultTier1 | undefined => {
+  if (!candidate || typeof candidate !== 'object') return undefined;
+  const record = candidate as Record<string, unknown>;
+  if (typeof record.status !== 'string') return undefined;
+  const counts = record.counts;
+  if (!counts || typeof counts !== 'object') return undefined;
+  const countsRecord = counts as Record<string, unknown>;
+  if (
+    typeof countsRecord.total_hits !== 'number' ||
+    typeof countsRecord.returned_hits !== 'number' ||
+    typeof countsRecord.affected_hosts !== 'number' ||
+    typeof countsRecord.affected_users !== 'number'
+  ) {
+    return undefined;
+  }
+
+  return {
+    status: record.status,
+    counts: {
+      totalHits: countsRecord.total_hits,
+      returnedHits: countsRecord.returned_hits,
+      affectedHosts: countsRecord.affected_hosts,
+      affectedUsers: countsRecord.affected_users,
+    },
+    perIndex: Array.isArray(record.per_index)
+      ? record.per_index.map(parsePerIndex).filter((entry): entry is HuntResultPerIndex => !!entry)
+      : [],
+    resolvedIocs: Array.isArray(record.resolved_iocs)
+      ? record.resolved_iocs.filter(isValidHuntIoc)
+      : [],
+  };
+};
+
+const parseTier2 = (candidate: unknown): HuntResultTier2 | undefined => {
+  if (!candidate || typeof candidate !== 'object') return undefined;
+  const record = candidate as Record<string, unknown>;
+  if (typeof record.status !== 'string') return undefined;
+
+  return {
+    status: record.status,
+    behaviors: Array.isArray(record.behaviors)
+      ? record.behaviors
+          .map(parseTier2Behavior)
+          .filter((behavior): behavior is HuntResultTier2Behavior => !!behavior)
+      : [],
+  };
+};
+
+/**
+ * Structural, defensive parser for `hunt_result`: mirrors `huntResultSchema`
+ * (`common/significant_security_event_schema.ts`). Drops the whole block on
+ * a malformed `tier1` (a hunt result without a valid tier1 is not
+ * renderable), but tolerates a malformed `tier2` by dropping it since it is
+ * optional in the schema.
+ */
+const parseHuntResult = (candidate: unknown): ParsedHuntResult | undefined => {
+  if (!candidate || typeof candidate !== 'object') return undefined;
+  const record = candidate as Record<string, unknown>;
+  if (typeof record.has_confirmed_hit !== 'boolean') return undefined;
+
+  const timeRange = record.time_range;
+  if (!timeRange || typeof timeRange !== 'object') return undefined;
+  const timeRangeRecord = timeRange as Record<string, unknown>;
+  if (typeof timeRangeRecord.from !== 'string' || typeof timeRangeRecord.to !== 'string') {
+    return undefined;
+  }
+
+  const tier1 = parseTier1(record.tier1);
+  if (!tier1) return undefined;
+
+  const tier2 = record.tier2 !== undefined ? parseTier2(record.tier2) : undefined;
+
+  return {
+    hasConfirmedHit: record.has_confirmed_hit,
+    timeRange: { from: timeRangeRecord.from, to: timeRangeRecord.to },
+    tier1,
+    tier2,
+  };
+};
+
 /**
  * Structural, defensive parser: the server already validates this payload against
  * `significantSecurityEventAttachmentDataSchema` on write, but the renderer must not throw
- * on a malformed or stale attachment — it drops malformed array entries and falls back to
+ * on a malformed or stale attachment: it drops malformed array entries and falls back to
  * empty-state sentinels that match the server-side text formatter.
  */
 export interface ParsedSignificantSecurityEvent {
@@ -137,6 +346,7 @@ export interface ParsedSignificantSecurityEvent {
   evidenceAgainst: string[];
   evidenceForCount: number;
   evidenceAgainstCount: number;
+  huntResult?: ParsedHuntResult;
   truncated?: boolean;
   truncatedOriginalCount?: number;
 }
@@ -177,6 +387,7 @@ export const parseSignificantSecurityEventData = (
     evidenceAgainst,
     evidenceForCount: evidenceFor.length,
     evidenceAgainstCount: evidenceAgainst.length,
+    huntResult: record.hunt_result !== undefined ? parseHuntResult(record.hunt_result) : undefined,
     truncated: record.truncated === true ? true : undefined,
     truncatedOriginalCount:
       typeof record.truncated_original_count === 'number'

@@ -30,9 +30,7 @@ describe('esql_queries', () => {
         index: 'logs-endpoint.events.process-default',
         eventId: 'abc"def',
       })
-    ).toBe(
-      'FROM "logs-endpoint.events.process-default" METADATA _id | WHERE _id == "abc\\"def"'
-    );
+    ).toBe('FROM "logs-endpoint.events.process-default" METADATA _id | WHERE _id == "abc\\"def"');
   });
 
   it('builds one multi-index events lookup and de-dupes ids and indices', () => {

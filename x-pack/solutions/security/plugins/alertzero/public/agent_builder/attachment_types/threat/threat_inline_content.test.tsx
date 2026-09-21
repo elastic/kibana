@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import {
@@ -80,12 +81,12 @@ describe('ThreatAttachmentInlineContent', () => {
     expect(screen.getByTestId(THREAT_ATTACHMENT_EMPTY_TEST_ID)).toBeInTheDocument();
   });
 
-  it('renders the live report fields when the fetch resolves', async () => {
+  it('renders a Rank badge from the live severity score once the fetch resolves', async () => {
     const http = {
       fetch: jest.fn().mockResolvedValue({
         reportId: 'r-1',
         content: { title: 'Live Title' },
-        severity: { level: 'high', score: 0.9 },
+        severity: { level: 'high', score: 90 },
         source: { name: 'Live Source' },
       }),
     } as unknown as HttpStart;
@@ -93,9 +94,8 @@ describe('ThreatAttachmentInlineContent', () => {
     render(<ThreatAttachmentInlineContent {...renderProps(attachment, http)} />);
 
     await waitFor(() => {
-      expect(screen.getByText('Live Title')).toBeInTheDocument();
+      expect(screen.getByText('Rank 90')).toBeInTheDocument();
     });
-    expect(screen.getByText('Live Source')).toBeInTheDocument();
     expect(screen.queryByTestId(THREAT_ATTACHMENT_UNAVAILABLE_TEST_ID)).not.toBeInTheDocument();
   });
 
@@ -104,7 +104,7 @@ describe('ThreatAttachmentInlineContent', () => {
       fetch: jest.fn().mockResolvedValue({
         reportId: 'r-2',
         content: { title: 'Enriched Title' },
-        severity: { level: 'high', score: 0.9 },
+        severity: { level: 'high', score: 90 },
         source: { name: 'Enriched Source' },
         extracted: {
           iocs: [{ type: 'ip', value: '203.0.113.5', tier: 'high' }],
@@ -129,14 +129,30 @@ describe('ThreatAttachmentInlineContent', () => {
     render(<ThreatAttachmentInlineContent {...renderProps(attachment, http)} />);
 
     await waitFor(() => {
-      expect(screen.getByText('Enriched Title')).toBeInTheDocument();
+      expect(screen.getByText('Rank 90')).toBeInTheDocument();
     });
-    expect(screen.getByText('203.0.113.5 (high)')).toBeInTheDocument();
+    expect(screen.getByText('203.0.113.5')).toBeInTheDocument();
     expect(screen.getByText('Initial Access')).toBeInTheDocument();
     expect(screen.getByText('T1078')).toBeInTheDocument();
     expect(screen.getByText('aws-iam')).toBeInTheDocument();
     expect(screen.getByText('us-east-1')).toBeInTheDocument();
     expect(screen.getByText('credential-access')).toBeInTheDocument();
+
+    // Diamond model overview badges (no more "signal_count=…, suitable=…" caption text).
+    expect(screen.getByText('2 signals')).toBeInTheDocument();
+    expect(screen.getByText('Suitable')).toBeInTheDocument();
+
+    // Evidence stats and MITRE technique link.
+    expect(screen.getByText('5')).toBeInTheDocument();
+    expect(screen.getByText('Alert hits')).toBeInTheDocument();
+    expect(screen.getByText('completed')).toBeInTheDocument();
+    expect(screen.getByText('Last hunt status')).toBeInTheDocument();
+    expect(screen.getByText('0.71')).toBeInTheDocument();
+    expect(screen.getByText('Corroborated rank')).toBeInTheDocument();
+
+    const techniqueLink = screen.getByText('T1078').closest('a');
+    expect(techniqueLink).toHaveAttribute('href', 'https://attack.mitre.org/techniques/T1078/');
+    expect(techniqueLink).toHaveAttribute('target', '_blank');
   });
 
   it('falls back to captured fields when the fetch fails (no status-code branching)', async () => {
@@ -154,7 +170,9 @@ describe('ThreatAttachmentInlineContent', () => {
     await waitFor(() => {
       expect(screen.getByTestId(THREAT_ATTACHMENT_UNAVAILABLE_TEST_ID)).toBeInTheDocument();
     });
-    expect(screen.getByText('Captured Title')).toBeInTheDocument();
+    // Captured fields no longer render inline (title/severity/source moved to the header);
+    // the fallback callout is the observable signal that the live fetch failed.
+    expect(screen.getByTestId('alertzeroThreatAttachmentReportLink')).toHaveTextContent('r-1');
   });
 
   it('shows "Report unavailable" when neither live nor captured fields exist', async () => {
@@ -177,7 +195,7 @@ describe('ThreatAttachmentInlineContent', () => {
       fetch: jest.fn().mockResolvedValue({
         reportId,
         content: { title: 'Discover Title' },
-        severity: { level: 'high' },
+        severity: { level: 'high', score: 50 },
         source: { name: 'Source' },
       }),
     } as unknown as HttpStart;
@@ -190,21 +208,29 @@ describe('ThreatAttachmentInlineContent', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('Discover Title')).toBeInTheDocument();
+      expect(screen.getByText('Rank 50')).toBeInTheDocument();
     });
 
-    const link = screen.getByTestId('alertzeroThreatAttachmentReportLink');
-    expect(link).toHaveAttribute('href', expectedHref);
-    expect(link).toHaveTextContent(reportId);
+    const badgeWrapper = screen.getByTestId('alertzeroThreatAttachmentReportLink');
+    expect(badgeWrapper).toHaveTextContent(reportId);
+    const badge = badgeWrapper.querySelector('.euiBadge');
+    expect(badge).not.toBeNull();
+    fireEvent.mouseEnter(badge as Element);
+    const discoverAction = screen.getByLabelText('Open in Discover');
+    expect(discoverAction.closest('button')).not.toBeNull();
+    const openWindowSpy = jest.spyOn(window, 'open').mockImplementation(() => null);
+    fireEvent.click(discoverAction);
+    expect(openWindowSpy).toHaveBeenCalledWith(expectedHref, '_blank', 'noopener,noreferrer');
+    openWindowSpy.mockRestore();
   });
 
-  it('renders the report id as plain text when share is undefined', async () => {
+  it('renders the report id with no Discover action when share is undefined', async () => {
     const reportId = 'r-plain';
     const http = {
       fetch: jest.fn().mockResolvedValue({
         reportId,
         content: { title: 'Plain Title' },
-        severity: { level: 'medium' },
+        severity: { level: 'medium', score: 40 },
         source: { name: 'Source' },
       }),
     } as unknown as HttpStart;
@@ -213,13 +239,14 @@ describe('ThreatAttachmentInlineContent', () => {
     render(<ThreatAttachmentInlineContent {...renderProps(attachment, http)} />);
 
     await waitFor(() => {
-      expect(screen.getByText('Plain Title')).toBeInTheDocument();
+      expect(screen.getByText('Rank 40')).toBeInTheDocument();
     });
 
-    const node = screen.getByTestId('alertzeroThreatAttachmentReportLink');
-    expect(node.tagName.toLowerCase()).toBe('span');
-    expect(node).not.toHaveAttribute('href');
-    expect(node).toHaveTextContent(reportId);
+    const badgeWrapper = screen.getByTestId('alertzeroThreatAttachmentReportLink');
+    expect(badgeWrapper).toHaveTextContent(reportId);
+    const badge = badgeWrapper.querySelector('.euiBadge');
+    fireEvent.mouseEnter(badge as Element);
+    expect(screen.queryByLabelText('Open in Discover')).not.toBeInTheDocument();
   });
 
   it('renders an IOC value as a nested threat-report Discover link', async () => {
@@ -233,7 +260,7 @@ describe('ThreatAttachmentInlineContent', () => {
       fetch: jest.fn().mockResolvedValue({
         reportId: 'r-ioc',
         content: { title: 'IOC Title' },
-        severity: { level: 'high' },
+        severity: { level: 'high', score: 80 },
         source: { name: 'Source' },
         extracted: {
           iocs: [{ type: 'ipv4-addr', value: iocValue }],
@@ -249,12 +276,51 @@ describe('ThreatAttachmentInlineContent', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('IOC Title')).toBeInTheDocument();
+      expect(screen.getByText('Rank 80')).toBeInTheDocument();
     });
 
-    const link = screen.getByTestId('alertzeroThreatAttachmentIocLink-ipv4-addr-0');
-    expect(link).toHaveAttribute('href', expectedHref);
-    expect(link).toHaveTextContent(iocValue);
+    const wrapper = screen.getByTestId('alertzeroThreatAttachmentIocLink-ipv4-addr-0');
+    expect(wrapper).toHaveTextContent(iocValue);
+
+    const badge = wrapper.querySelector('.euiBadge');
+    expect(badge).not.toBeNull();
+    fireEvent.mouseEnter(badge as Element);
+    const openInDiscover = screen.getByLabelText('Open in Discover');
+    expect(openInDiscover).toBeInTheDocument();
+    const openWindowSpy = jest.spyOn(window, 'open').mockImplementation(() => null);
+    fireEvent.click(openInDiscover);
+    expect(openWindowSpy).toHaveBeenCalledWith(expectedHref, '_blank', 'noopener,noreferrer');
+    openWindowSpy.mockRestore();
+  });
+
+  it('collapses IOCs of the same type beyond the visible limit behind a "+N more" badge', async () => {
+    const iocs = Array.from({ length: 10 }, (_, index) => ({
+      type: 'ipv4-addr',
+      value: `203.0.113.${index}`,
+    }));
+    const http = {
+      fetch: jest.fn().mockResolvedValue({
+        reportId: 'r-overflow',
+        content: { title: 'Overflow Title' },
+        severity: { level: 'high', score: 60 },
+        source: { name: 'Source' },
+        extracted: { iocs },
+      }),
+    } as unknown as HttpStart;
+    const attachment = buildAttachment({ report_id: 'r-overflow' });
+
+    render(<ThreatAttachmentInlineContent {...renderProps(attachment, http)} />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Rank 60')).toBeInTheDocument();
+    });
+
+    expect(screen.getByTestId('alertzeroThreatAttachmentIocLink-ipv4-addr-0')).toBeInTheDocument();
+    expect(screen.getByTestId('alertzeroThreatAttachmentIocLink-ipv4-addr-7')).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('alertzeroThreatAttachmentIocLink-ipv4-addr-8')
+    ).not.toBeInTheDocument();
+    expect(screen.getByText('+2 more')).toBeInTheDocument();
   });
 
   it('renders an external reference URL as an anchor', async () => {
@@ -271,7 +337,7 @@ describe('ThreatAttachmentInlineContent', () => {
             },
           ],
         },
-        severity: { level: 'high' },
+        severity: { level: 'high', score: 70 },
         source: { name: 'Source' },
       }),
     } as unknown as HttpStart;
@@ -280,7 +346,7 @@ describe('ThreatAttachmentInlineContent', () => {
     render(<ThreatAttachmentInlineContent {...renderProps(attachment, http)} />);
 
     await waitFor(() => {
-      expect(screen.getByText('External Title')).toBeInTheDocument();
+      expect(screen.getByText('Rank 70')).toBeInTheDocument();
     });
 
     const link = screen.getByTestId(THREAT_EXTERNAL_REF_LINK_TEST_ID);
@@ -298,7 +364,7 @@ describe('ThreatAttachmentInlineContent', () => {
           external_references: [
             {
               source_name: 'Evil',
-              url: 'javascript:alert(1)',
+              url: ['javascript', 'alert(1)'].join(':'),
               external_id: 'evil',
             },
             {
@@ -308,7 +374,7 @@ describe('ThreatAttachmentInlineContent', () => {
             },
           ],
         },
-        severity: { level: 'high' },
+        severity: { level: 'high', score: 65 },
         source: { name: 'Source' },
       }),
     } as unknown as HttpStart;
@@ -317,7 +383,7 @@ describe('ThreatAttachmentInlineContent', () => {
     render(<ThreatAttachmentInlineContent {...renderProps(attachment, http)} />);
 
     await waitFor(() => {
-      expect(screen.getByText('Unsafe External Title')).toBeInTheDocument();
+      expect(screen.getByText('Rank 65')).toBeInTheDocument();
     });
 
     const links = screen.getAllByTestId(THREAT_EXTERNAL_REF_LINK_TEST_ID);
@@ -331,7 +397,7 @@ describe('ThreatAttachmentInlineContent', () => {
       fetch: jest.fn().mockResolvedValue({
         reportId: 'r-evidence',
         content: { title: 'Evidence Title' },
-        severity: { level: 'high' },
+        severity: { level: 'high', score: 55 },
         source: { name: 'Source' },
         evidence: {
           alert_hits_total: 5,
@@ -345,10 +411,62 @@ describe('ThreatAttachmentInlineContent', () => {
     render(<ThreatAttachmentInlineContent {...renderProps(attachment, http)} />);
 
     await waitFor(() => {
-      expect(screen.getByText('Evidence Title')).toBeInTheDocument();
+      expect(screen.getByText('Rank 55')).toBeInTheDocument();
     });
 
     expect(screen.getByText('Alert hits')).toBeInTheDocument();
     expect(screen.queryByText(/alert_hits_total=/)).not.toBeInTheDocument();
+  });
+
+  it('shows a relative "Last hunted" stat when lastHuntedAt is present', async () => {
+    const http = {
+      fetch: jest.fn().mockResolvedValue({
+        reportId: 'r-last-hunted',
+        content: { title: 'Last Hunted Title' },
+        severity: { level: 'high', score: 45 },
+        source: { name: 'Source' },
+        evidence: {
+          last_hunted_at: new Date().toISOString(),
+        },
+      }),
+    } as unknown as HttpStart;
+    const attachment = buildAttachment({ report_id: 'r-last-hunted' });
+
+    render(
+      <I18nProvider>
+        <ThreatAttachmentInlineContent {...renderProps(attachment, http)} />
+      </I18nProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Rank 45')).toBeInTheDocument();
+    });
+
+    expect(screen.getByText('Last hunted')).toBeInTheDocument();
+  });
+
+  it('renders regions and categories as description-list badge groups', async () => {
+    const http = {
+      fetch: jest.fn().mockResolvedValue({
+        reportId: 'r-geo',
+        content: { title: 'Geo Title' },
+        severity: { level: 'high', score: 35 },
+        source: { name: 'Source' },
+        extracted: { categories: ['exfiltration'] },
+        geography: { regions: ['eu-west-1'] },
+      }),
+    } as unknown as HttpStart;
+    const attachment = buildAttachment({ report_id: 'r-geo' });
+
+    render(<ThreatAttachmentInlineContent {...renderProps(attachment, http)} />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Rank 35')).toBeInTheDocument();
+    });
+
+    expect(screen.getByText('Regions')).toBeInTheDocument();
+    expect(screen.getByText('eu-west-1')).toBeInTheDocument();
+    expect(screen.getByText('Categories')).toBeInTheDocument();
+    expect(screen.getByText('exfiltration')).toBeInTheDocument();
   });
 });

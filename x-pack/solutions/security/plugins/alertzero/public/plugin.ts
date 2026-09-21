@@ -115,6 +115,7 @@ export class AlertZeroPublicPlugin
           share: startDeps.share,
           spaceId,
           prependPath: (path) => core.http.basePath.prepend(path),
+          getUrlForApp: core.application.getUrlForApp,
         },
       });
     };

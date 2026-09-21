@@ -50,6 +50,32 @@ describe('createThreatAttachmentDefinition', () => {
     });
   });
 
+  describe('getHeader', () => {
+    it('returns the warning icon, source subtitle, and severity badge for a full payload', () => {
+      const definition = createThreatAttachmentDefinition({ http, navigation });
+      const attachment = {
+        data: { report_id: 'r-1', source: 'Feed A', severity: 'high' },
+      } as ThreatAttachment;
+
+      const header = definition.getHeader?.({ attachment } as never);
+
+      expect(header?.icon).toBe('warning');
+      expect(header?.subtitle).toBe('Feed A');
+      expect(header?.badges).toEqual([{ label: 'high', color: 'danger' }]);
+    });
+
+    it('returns no subtitle and empty badges when source and severity are missing', () => {
+      const definition = createThreatAttachmentDefinition({ http, navigation });
+      const attachment = { data: { report_id: 'r-1' } } as ThreatAttachment;
+
+      const header = definition.getHeader?.({ attachment } as never);
+
+      expect(header?.icon).toBe('warning');
+      expect(header?.subtitle).toBeUndefined();
+      expect(header?.badges).toEqual([]);
+    });
+  });
+
   describe('renderInlineContent', () => {
     it('is defined', () => {
       const definition = createThreatAttachmentDefinition({ http, navigation });

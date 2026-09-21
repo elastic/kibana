@@ -59,6 +59,61 @@ describe('createHuntCorrelationAttachmentDefinition', () => {
     });
   });
 
+  describe('getHeader', () => {
+    it('returns the link icon and a pluralized anchor/report subtitle', () => {
+      const definition = createHuntCorrelationAttachmentDefinition({ navigation });
+      const attachment = { data: baseData } as unknown as HuntCorrelationAttachment;
+      const header = definition.getHeader?.({ attachment } as never);
+      expect(header?.icon).toBe('link');
+      expect(header?.subtitle).toBe('1 anchor · 2 related reports');
+    });
+
+    it('uses singular grammar for exactly one anchor and one related report', () => {
+      const definition = createHuntCorrelationAttachmentDefinition({ navigation });
+      const attachment = {
+        data: {
+          ...baseData,
+          diamond_scores: [
+            { vertex: 'infrastructure' as const, related_report_id: 'report-2', score: 0.75 },
+          ],
+        },
+      } as unknown as HuntCorrelationAttachment;
+      const header = definition.getHeader?.({ attachment } as never);
+      expect(header?.subtitle).toBe('1 anchor · 1 related report');
+    });
+
+    it('badges "Above threshold" (success) when every diamond score meets the threshold', () => {
+      const definition = createHuntCorrelationAttachmentDefinition({ navigation });
+      const attachment = {
+        data: {
+          ...baseData,
+          diamond_scores: [
+            { vertex: 'infrastructure' as const, related_report_id: 'report-2', score: 0.7 },
+            { vertex: 'adversary' as const, related_report_id: 'report-3', score: 0.9 },
+          ],
+        },
+      } as unknown as HuntCorrelationAttachment;
+      const header = definition.getHeader?.({ attachment } as never);
+      expect(header?.badges).toEqual([{ label: 'Above threshold', color: 'success' }]);
+    });
+
+    it('badges "Below threshold" (hollow) when any diamond score misses the threshold', () => {
+      const definition = createHuntCorrelationAttachmentDefinition({ navigation });
+      const attachment = { data: baseData } as unknown as HuntCorrelationAttachment;
+      const header = definition.getHeader?.({ attachment } as never);
+      expect(header?.badges).toEqual([{ label: 'Below threshold', color: 'hollow' }]);
+    });
+
+    it('omits the badge entirely when there are no diamond scores', () => {
+      const definition = createHuntCorrelationAttachmentDefinition({ navigation });
+      const attachment = {
+        data: { ...baseData, diamond_scores: [] },
+      } as unknown as HuntCorrelationAttachment;
+      const header = definition.getHeader?.({ attachment } as never);
+      expect(header?.badges).toEqual([]);
+    });
+  });
+
   describe('renderInlineContent', () => {
     it('is defined', () => {
       const definition = createHuntCorrelationAttachmentDefinition({ navigation });

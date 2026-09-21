@@ -10,9 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { EuiSkeletonText } from '@elastic/eui';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
+import type { AttachmentUIDefinition, HeaderBadge } from '@kbn/agent-builder-browser/attachments';
 import type { AttachmentNavigationDeps } from '../navigation';
 import { buildDiscoverEsqlUrl, buildThreatReportLookupEsql } from '../navigation';
+import { severityBadgeColor } from '../shared/severity';
 import { isValidThreatAttachmentData } from './types';
 import type { ThreatAttachment } from './types';
 
@@ -21,7 +22,7 @@ const DEFAULT_LABEL = i18n.translate('xpack.alertzero.agentBuilder.attachments.t
 });
 
 /**
- * Lazy-loaded inline renderer — pulls the `useQuery`/`http.fetch` dependencies into their own
+ * Lazy-loaded inline renderer. Pulls the `useQuery`/`http.fetch` dependencies into their own
  * chunk so the alertzero bundle doesn't pay for them until an attachment actually renders.
  */
 const LazyThreatAttachmentInlineContent = React.lazy(() =>
@@ -42,8 +43,21 @@ export const createThreatAttachmentDefinition = ({
   http: HttpStart;
   navigation: AttachmentNavigationDeps;
 }): AttachmentUIDefinition<ThreatAttachment> => ({
-  getLabel: (attachment) => attachment?.data?.attachmentLabel ?? DEFAULT_LABEL,
+  getLabel: (attachment) =>
+    attachment?.data?.attachmentLabel ?? attachment?.data?.title ?? DEFAULT_LABEL,
   getIcon: () => 'warning',
+  getHeader: ({ attachment }) => {
+    const data = attachment?.data;
+    const badges: HeaderBadge[] = [];
+    if (data?.severity) {
+      badges.push({ label: data.severity, color: severityBadgeColor(data.severity) });
+    }
+    return {
+      icon: 'warning',
+      subtitle: data?.source,
+      badges,
+    };
+  },
   renderInlineContent: (props) => (
     <React.Suspense fallback={<EuiSkeletonText lines={2} />}>
       <LazyThreatAttachmentInlineContent {...props} http={http} navigation={navigation} />
