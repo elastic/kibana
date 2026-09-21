@@ -266,6 +266,18 @@ describe('AiIndexService', () => {
       expect(storageClient.index).not.toHaveBeenCalled();
     });
 
+    it('removes the view when the write fails', async () => {
+      storageClient.index.mockRejectedValue(new Error('es_error'));
+
+      await expect(service.create('customer_support', DEFAULT_SPACE, properties)).rejects.toThrow(
+        'es_error'
+      );
+      expect(esClient.esql.deleteView).toHaveBeenCalledWith(
+        { name: 'v-ai-index-customer_support' },
+        { ignore: [404] }
+      );
+    });
+
     it('rejects an invalid dest before writing', async () => {
       await expect(
         service.create('customer_support', DEFAULT_SPACE, {
@@ -392,6 +404,28 @@ describe('AiIndexService', () => {
       await expect(
         service.put('customer_support', DEFAULT_SPACE, properties)
       ).rejects.toBeInstanceOf(AiIndexConflictError);
+    });
+
+    it('repoints the view at the winning write after a 409', async () => {
+      mockSearchHitsOnce(storedHit(aiIndexDocument));
+      mockSearchHits(
+        storedHit({
+          ...aiIndexDocument,
+          dest: { type: 'data_stream', value: 'ai-index-ds-winner' },
+        })
+      );
+      storageClient.index.mockRejectedValue(createConflictError());
+
+      await expect(
+        service.put('customer_support', DEFAULT_SPACE, {
+          ...properties,
+          dest: { type: 'data_stream', value: 'ai-index-ds-loser' },
+        })
+      ).rejects.toBeInstanceOf(AiIndexConflictError);
+      expect(esClient.esql.putView).toHaveBeenLastCalledWith({
+        name: 'v-ai-index-customer_support',
+        query: expect.stringContaining('FROM ai-index-ds-winner METADATA'),
+      });
     });
 
     it('throws AiIndexManagedError when the entry is managed', async () => {
