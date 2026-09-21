@@ -43,10 +43,8 @@ export interface AutonomyLevelCardsCopy {
 }
 
 /**
- * Actor tokens inside a fact value. A value is one whole sentence rather than a chain of English
- * fragments, so a translation can place the pills anywhere in it (including dropping or reordering
- * them) instead of inheriting the word order of the source string. `ignoreTag` keeps the tokens
- * literal: without it the ICU parser would read them as tags and demand closing ones.
+ * Actor tokens inside a fact value. The value is one whole sentence so a translation can place the
+ * pills anywhere in it. `ignoreTag` keeps the tokens literal for the ICU parser.
  */
 const ACTOR_TOKENS: Record<LevelCardActor, string> = { you: '<you>', worker: '<worker>' };
 
@@ -120,14 +118,8 @@ export const workerNameForCards = (workerId: string): string => {
 export const supervisedWarnForWorker = (workerName: string): string => supervisedWarn(workerName);
 
 /**
- * Consequence-forward level cards per Worker, ported from the Sep 14 prototype
- * (notdaybreak_mvp workerAutonomyLevelCards.ts). Copy describes what each
- * level does for THIS Worker — not a generic autonomy definition.
- *
- * Card copy may only name behaviour the Worker has: Alert Triage's cards describe
- * who decides a closure (the level's own contract, as the card intro frames it),
- * not a confidence threshold, because no Worker settings field or consumer for one
- * exists.
+ * Consequence-forward level cards per Worker: copy describes what each level does for THIS Worker,
+ * not a generic autonomy definition, and may only name behaviour the Worker actually has.
  */
 const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
   [SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID]: {
@@ -529,11 +521,7 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
   },
 };
 
-/**
- * Resolves the ported level cards for a Worker, filtered to the levels that
- * Worker offers. Returns null for Workers without card copy (the control
- * renders the plain level name).
- */
+/** Level cards for a Worker, filtered to the levels it offers; null when it has no card copy. */
 export const getAutonomyLevelCards = (workerId: string): AutonomyLevelCardsCopy | null => {
   const copy = AUTONOMY_LEVEL_CARDS[workerId];
   if (!copy) return null;

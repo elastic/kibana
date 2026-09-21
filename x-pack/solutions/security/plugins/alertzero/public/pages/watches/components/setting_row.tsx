@@ -23,12 +23,8 @@ interface SettingRowProps {
 }
 
 /**
- * Label-left / control-right settings row, ported from the Sep 14 prototype (notdaybreak_mvp
- * WorkerSettingsForm's `SettingRow`): a two-column grid with a fixed-width label column so every
- * row in a Worker's settings aligns on the same label/control boundary regardless of control
- * width. Unlike the prototype this keeps no per-row helper text or `wide` override — every
- * current row's own helper (Trigger) or intro (Autonomy) renders inside the label column or the
- * control itself, and no control here needs to escape the shared max width.
+ * Label-left / control-right settings row: a two-column grid with a fixed-width label column so
+ * every row aligns on the same label/control boundary regardless of control width.
  */
 export const SettingRow: React.FC<SettingRowProps> = ({
   label,

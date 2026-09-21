@@ -50,9 +50,8 @@ export const WatchDetailPage: React.FC = () => {
   const { discard, isDirty, isSaving, resolve, save, updateEnabled, updateSettings } =
     useWatchSettingsDraft(members);
   const [saveBlockedByInvalidDraft, setSaveBlockedByInvalidDraft] = useState(false);
-  // Workers whose trigger control holds an amount it cannot commit. That draft never reaches the
-  // settings state, so the page has to hear about it directly or Save would persist the last
-  // valid cadence while an invalid one is on screen.
+  // Workers whose trigger control holds an uncommittable amount. That draft never reaches settings
+  // state, so the page must hear about it directly or Save would persist the last valid cadence.
   const [invalidTriggerWorkerIds, setInvalidTriggerWorkerIds] = useState<Set<string>>(
     () => new Set()
   );
@@ -76,8 +75,7 @@ export const WatchDetailPage: React.FC = () => {
   }, []);
 
   const onSave = useCallback(async () => {
-    // An invalid trigger draft is not in the settings state, so `save()` cannot see it. Block here
-    // and surface the page-level message instead of persisting the stale cadence behind it.
+    // `save()` cannot see the flagged draft, so block here instead of persisting the stale value.
     if (hasInvalidDraft) {
       setSaveBlockedByInvalidDraft(true);
       return;
@@ -130,18 +128,15 @@ export const WatchDetailPage: React.FC = () => {
     ],
     [isDirty, isSaving, hasInvalidDraft, onDiscard]
   );
-  // Track which Workers the reader has collapsed (default: all expanded). `/watches/:watchId`
-  // keeps this page mounted across parameter-only navigation, so the initializer runs only on
-  // the first Watch — reset the set whenever watchId changes.
+  // Collapsed Workers (default: all expanded). Parameter-only navigation keeps this page mounted,
+  // so the initializer runs only on the first Watch — reset whenever watchId changes.
   const [collapsedWorkerIds, setCollapsedWorkerIds] = useState<Set<string>>(() => new Set());
 
   useEffect(() => {
     setCollapsedWorkerIds(new Set());
-    // A Worker on both Watches keeps its section mounted across parameter-only navigation, and
-    // `useWatchSettingsDraft` keys its overlays by `worker.id` without remounting either. Unsaved
-    // edits would otherwise follow the analyst to the next Watch, where its Save action could
-    // persist a change made somewhere else — so drop the drafts, clear the invalid-trigger flags,
-    // and bump the reset key so those controls re-read their stored settings.
+    // Overlays are keyed by `worker.id` and a shared Worker never remounts, so unsaved edits would
+    // follow the analyst to the next Watch and could be saved there. Drop drafts, clear flags, and
+    // bump the reset key so the controls re-read stored settings.
     discard();
     setInvalidTriggerWorkerIds(new Set());
     setSaveBlockedByInvalidDraft(false);

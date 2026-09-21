@@ -44,19 +44,9 @@ const isWatchAutonomyLevel = (value: unknown): value is WatchAutonomyLevel =>
   typeof value === 'string' && (WATCH_AUTONOMY_LEVELS as readonly string[]).includes(value);
 
 /**
- * Projects a stored autonomy level onto the levels the Worker still offers.
- *
- * A Worker that narrows its declaration — dropping `supervised` because rule changes always pass a
- * review gate, say — leaves every document written under the wider set holding a level the
- * complete schema now rejects. That is not a settings-version change, so there is no version to
- * migrate on, and refusing to read the document would strand the Worker as unavailable with no way
- * back through the UI. Reads therefore land on the most autonomous level the Worker does offer that
- * is no more autonomous than what was stored; a declaration offering nothing at or below the stored
- * level (no `manual`) lands on the least autonomous level it does offer. Anything outside the shared
- * scale is passed through untouched so validation still reports it.
- *
- * Writes stay strict: `buildCompleteWorkerSettingsSchema` still rejects a level the declaration
- * does not offer, and a save re-serialises the projected level, so the document heals on next write.
+ * Reads a stored autonomy level down to the closest level the Worker still offers, so narrowing a
+ * declaration does not strand documents written under the wider set. Never projects upwards: with
+ * nothing at or below the stored level the value is returned as-is for validation to reject.
  */
 export const projectStoredAutonomyLevel = (
   declaration: WorkerSettingsDeclaration,
@@ -66,16 +56,13 @@ export const projectStoredAutonomyLevel = (
     return stored;
   }
   const storedIndex = WATCH_AUTONOMY_LEVELS.indexOf(stored);
-  // Never escalate: when the declaration offers nothing at or below the stored level, keep the
-  // disallowed value so the complete schema marks the Worker unavailable instead of silently
-  // granting more autonomy than was stored.
   const atOrBelow = declaration.allowedAutonomyLevels.filter(
     (level) => WATCH_AUTONOMY_LEVELS.indexOf(level) <= storedIndex
   );
   if (atOrBelow.length === 0) {
     return stored;
   }
-  // Declaration order is not guaranteed, so pick by position on the shared scale.
+  // Declared order is not guaranteed, so rank by position on the shared scale.
   return atOrBelow.reduce((highest, level) =>
     WATCH_AUTONOMY_LEVELS.indexOf(level) > WATCH_AUTONOMY_LEVELS.indexOf(highest) ? level : highest
   );

@@ -30,12 +30,9 @@ interface AutonomyLevelControlProps {
   workerId: string;
   current: WatchAutonomyLevel;
   /**
-   * Levels this Worker supports, projected by the server from its complete settings schema
-   * (worker-settings-page-decisions-3, item 3). The control renders only these, so a Worker
-   * that narrows its schema narrows the UI with no client-side list to keep in sync.
-   *
-   * Optional only so a caller rendering a Worker fetched before this field existed degrades to
-   * "every level offered" instead of an empty control; the server always projects it.
+   * Levels this Worker supports, projected by the server. The control renders only these, so a
+   * Worker that narrows its schema narrows the UI with no client-side list to keep in sync.
+   * Optional so a Worker fetched before this field existed degrades to "every level offered".
    */
   allowedAutonomyLevels?: readonly WatchAutonomyLevel[];
   isDisabled?: boolean;
@@ -71,9 +68,8 @@ function FactParts({ parts }: { parts: LevelCardFactPart[] }) {
 }
 
 /**
- * Gap between a fact's label and its value. The label column itself is `max-content`, not a fixed
- * width: it sizes to the widest label in the card, so rows stay aligned with each other while a
- * short label ("Hunt") keeps its value beside it instead of stranding it past a fixed column.
+ * Gap between a fact's label and its value. The label column is `max-content`, not a fixed width,
+ * so rows stay aligned while a short label keeps its value beside it.
  */
 const FACT_LABEL_GAP_PX = 12;
 
@@ -139,11 +135,8 @@ function LevelCardBody({ card }: { card: AutonomyLevelCard }) {
 }
 
 /**
- * Autonomy picker ported from the Sep 14 prototype (notdaybreak_mvp
- * AutonomyLevelControl): EuiCheckableCard radios — no slider/track. Level
- * meanings stay visible on every card before selection. A single available
- * level renders as one checked, disabled card. Selecting the highest level
- * shows the supervised warning callout under the cards.
+ * Autonomy picker: EuiCheckableCard radios so level meanings stay visible before selection.
+ * Selecting the highest level shows the supervised warning callout under the cards.
  */
 export const AutonomyLevelControl: React.FC<AutonomyLevelControlProps> = ({
   workerId,
@@ -174,8 +167,8 @@ export const AutonomyLevelControl: React.FC<AutonomyLevelControlProps> = ({
   const levels = cards.levels.map((card) => card.level);
   const selectedLevel = levels.includes(current) ? current : levels[0];
 
-  // Item 3: one allowed level is a fact about the Worker, not a choice — render it as a fixed
-  // value rather than a single radio the analyst can click but never change.
+  // One allowed level is a fact about the Worker, not a choice — render it as a fixed value
+  // rather than a radio the analyst can click but never change.
   if (levels.length === 1) {
     return (
       <EuiText size="s" color="subdued">

@@ -22,10 +22,8 @@ export const parseWorkerScheduleInterval = (
 };
 
 /**
- * Human label for the Worker header band's trigger badge, e.g. "Every 2 hours" / "Every 1 hour".
- * Each unit gets its own ICU-pluralized message (rather than a static plural-only unit string
- * spliced into a shared template) so a translator can reorder the whole phrase per locale and a
- * one-unit interval reads correctly in English.
+ * Human label for the header band's trigger badge, e.g. "Every 2 hours". Each unit gets its own
+ * ICU-pluralized message so a translator can reorder the whole phrase per locale.
  */
 export const workerScheduleCadenceLabel = (interval: string | undefined): string => {
   const { amount, unit } = parseWorkerScheduleInterval(interval);

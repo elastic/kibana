@@ -10,10 +10,7 @@ import { css } from '@emotion/react';
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiSelect, EuiText } from '@elastic/eui';
 import * as i18n from '../settings_translations';
 
-/**
- * Unit labels for the "Every N unit" select, pluralized against the amount the reader can see, so
- * the expanded control agrees with the header band's cadence badge on a one-unit interval.
- */
+/** Pluralized against the visible amount so the select agrees with the header band's badge. */
 const unitOptionsFor = (amount: number) => [
   { value: 'm' as const, text: i18n.scheduleUnitMinutes(amount) },
   { value: 'h' as const, text: i18n.scheduleUnitHours(amount) },
@@ -30,11 +27,7 @@ const parseInterval = (interval: string | undefined): { amount: number; unit: Sc
 
 const formatInterval = (amount: number, unit: ScheduleUnit): string => `${amount}${unit}`;
 
-/**
- * `WorkerScheduleInterval` caps the stored string at 6 characters, so the amount cannot exceed five
- * digits. Committing a larger number would emit a value the settings schema rejects: Save would then
- * fail with a generic page error while this field still looked valid, and block unrelated edits.
- */
+/** `WorkerScheduleInterval` caps the stored string at 6 chars, so the amount is at most 5 digits. */
 const MAX_SCHEDULE_AMOUNT = 99999;
 
 const isCommittableAmount = (amount: number): boolean =>
@@ -46,24 +39,20 @@ interface ScheduleIntervalFieldProps {
   isDisabled?: boolean;
   onChange: (interval: string) => void;
   /**
-   * Reports whether the control currently holds an uncommittable amount. The draft never reaches
-   * the page's settings state, so without this the page would still see the last valid cadence
-   * and let Save persist it while the analyst is looking at an invalid field.
+   * Reports an uncommittable amount. The draft never reaches settings state, so without this Save
+   * would persist the last valid cadence while an invalid field is on screen.
    */
   onValidityChange?: (isValid: boolean) => void;
   /**
-   * Changes when the page discards its draft. An invalid amount now survives blur, so it also has
-   * to be cleared on Discard — otherwise the flagged value stays on screen with nothing left to
-   * discard and keeps Save blocked.
+   * Changes when the page discards its draft. An invalid amount survives blur, so Discard must
+   * clear it or the flagged value keeps Save blocked.
    */
   resetKey?: number;
 }
 
 /**
- * Trigger row ported from the Sep 14 prototype (notdaybreak_mvp
- * WorkerSettingsForm): plain "Every N unit" amount + unit select. Commits on
- * change; an amount that is not a whole number of units stays on screen flagged
- * instead of being floored into a different cadence.
+ * "Every N unit" trigger row. Commits on change; an amount that is not a whole number of units
+ * stays on screen flagged instead of being floored into a different cadence.
  */
 export const ScheduleIntervalField: React.FC<ScheduleIntervalFieldProps> = ({
   workerId,
@@ -78,9 +67,7 @@ export const ScheduleIntervalField: React.FC<ScheduleIntervalFieldProps> = ({
 
   const commit = useCallback(
     (nextAmount: number, nextUnit: ScheduleUnit, rawDraft?: string) => {
-      // A typed value that is not a whole number of units (1.9, 0) is not a cadence this control can
-      // store, and flooring it would silently save a different one. Keep it on screen — and flagged
-      // by `amountInvalid` below — instead of committing.
+      // Flooring 1.9 or 0 would silently save a different cadence; keep it flagged instead.
       if (!isCommittableAmount(nextAmount)) {
         setAmountDraft(rawDraft ?? String(nextAmount));
         return;

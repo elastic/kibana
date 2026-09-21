@@ -57,13 +57,9 @@ interface WorkerSettingsPanelProps {
 }
 
 /**
- * A single Worker's settings in the single-column layout. The header (name, autonomy/schedule
- * badges, enabled switch) doubles as the accordion button when a Watch has several Workers, so
- * collapsed panels still summarise their state.
- *
- * Every control, shared or Watch-owned, writes into the page draft; the page decides what to
- * render from the Worker's settings and declaration alone, so a new Worker-specific field needs
- * no change here. Save and Discard live on the page header, not on the panel.
+ * A single Worker's settings. The header doubles as the accordion button when a Watch has several
+ * Workers, so collapsed panels still summarise their state. Every control writes into the page
+ * draft; Save and Discard live on the page header.
  */
 export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
   worker,
@@ -302,9 +298,8 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
               {headerBandContent(`${worker.id}-heading`, 'h2')}
             </div>
           }
-          // Layout rides on EuiAccordion's own props and on nodes we render, not on EUI's
-          // internal accordion class names, which are not part of its public contract and
-          // may be reshaped by an EUI update without notice.
+          // Layout rides on EuiAccordion's props and our own nodes, not EUI's internal class
+          // names, which are not public contract.
           buttonProps={{ css: accordionButtonStyles }}
           arrowProps={{ css: accordionArrowStyles }}
           extraAction={

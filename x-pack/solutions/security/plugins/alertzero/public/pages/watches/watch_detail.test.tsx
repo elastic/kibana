@@ -296,10 +296,8 @@ describe('WatchDetailPage', () => {
       expect(getComputedStyle(header).padding).toBe('16px');
       expect(getComputedStyle(body).padding).toBe('16px');
 
-      // The switch is itself a <button> (EuiSwitch's own DOM node), so it can't be asserted
-      // to sit outside "a button" — it has to sit outside the accordion's own toggle button
-      // (EUI's `.euiAccordion__button`), the one that expands/collapses the section, or a
-      // click on the switch would also toggle the accordion.
+      // The switch is itself a <button>, so assert it sits outside the accordion's own toggle
+      // button (`.euiAccordion__button`) — otherwise clicking it would toggle the accordion.
       const accordionToggle = header.closest(
         '.euiAccordion__triggerWrapper, .euiAccordion__button'
       );
@@ -636,9 +634,8 @@ describe('WatchDetailPage', () => {
   });
 
   it('blocks Save and explains why while a trigger amount is invalid, even with other valid edits', async () => {
-    // The reviewer's scenario: an invalid cadence lives only in the field's local draft, so the
-    // page's settings state still holds the last valid one. Without a page-level signal, Save
-    // would persist that stale cadence while an invalid value is on screen.
+    // An invalid cadence lives only in the field's local draft, so page state still holds the
+    // last valid one; without a page-level signal Save would persist that stale cadence.
     const { mutateAsync } = renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
     const ruleTuning = screen.getByTestId(
       `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
@@ -733,11 +730,9 @@ describe('WatchDetailPage', () => {
   });
 
   it('resets collapsed accordion state when navigating to a different Watch, not just on remount', () => {
-    // `/watches/:watchId` keeps the same WatchDetailPage mounted across parameter-only
-    // navigation, so a `useState` initializer alone only runs once — collapsedWorkerIds must
-    // be reset by an effect keyed on watchId, not by the initializer. Give both Watches the
-    // *same* Worker (multi-membership) so the accordion for that Worker's id can be observed
-    // on both sides of the navigation.
+    // Parameter-only navigation keeps this page mounted, so a `useState` initializer runs once —
+    // collapsedWorkerIds must be reset by an effect keyed on watchId. Both Watches share a Worker
+    // so that Worker's accordion can be observed on both sides.
     const sharedWorkers = [...floorWorkers, huntWorker];
     mockUseWorkers.mockReturnValue({
       data: { workers: sharedWorkers },
@@ -765,9 +760,8 @@ describe('WatchDetailPage', () => {
     );
 
     const [first] = floorWorkers;
-    // Collapse the first Worker's accordion on the Floor Watch. With `buttonElement="div"`
-    // EUI puts `aria-expanded` on the arrow control (a real `<button>`), not on the accordion's
-    // own data-test-subj node — and the enable switch is also a button, so query by expanded.
+    // With `buttonElement="div"` EUI puts `aria-expanded` on the arrow control, not the
+    // data-test-subj node, and the enable switch is also a button — so query by expanded.
     const arrowFor = (workerId: string, expanded: boolean) =>
       within(screen.getByTestId(`alertZeroWatchWorkerAccordion-${workerId}`)).getByRole('button', {
         expanded,
@@ -775,9 +769,8 @@ describe('WatchDetailPage', () => {
     fireEvent.click(screen.getByTestId(`alertZeroWorkerAccordionHeader-${first.id}`));
     expect(arrowFor(first.id, false)).toBeInTheDocument();
 
-    // Navigate (parameter-only change, same component instance) to a different Watch that the
-    // same Worker also belongs to (re-tag it onto the Hunt Watch for this assertion). Its
-    // accordion must come back expanded — the default — not stay collapsed.
+    // Navigate to another Watch the same Worker belongs to; its accordion must come back
+    // expanded (the default), not stay collapsed.
     const workersOnHunt = sharedWorkers.map((worker) =>
       worker.id === first.id
         ? { ...worker, watchIds: [...worker.watchIds, SYSTEM_SECURITY_WATCH_HUNT_ID] }
@@ -803,10 +796,8 @@ describe('WatchDetailPage', () => {
   });
 
   it('drops an invalid trigger draft when navigating to another Watch that shares the Worker', async () => {
-    // `/watches/:watchId` keeps this page mounted across parameter-only navigation and each
-    // Worker section is keyed by `worker.id`, so a Worker on both Watches keeps its mounted
-    // ScheduleIntervalField. A draft flagged invalid on the first Watch must not follow the
-    // analyst to the second one and hold its Save button hostage.
+    // A Worker on both Watches keeps its ScheduleIntervalField mounted across parameter-only
+    // navigation, so an invalid draft must not follow the analyst and hold Save hostage.
     // Attack Discovery is the only schedule-driven Worker, so it is the one with a trigger.
     const shared = floorWorkers[1];
     // Keep both Watches at the same member count. `isMultiWorker` switches WorkerSettingsPanel
