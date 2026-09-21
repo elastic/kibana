@@ -75,7 +75,7 @@ export const CloseCaseModal = React.memo<CloseCaseModalProps>(
       </EuiModalBody>
       <EuiModalFooter
         css={{
-          'justify-content': 'space-between',
+          justifyContent: 'space-between',
         }}
       >
         <EuiButtonEmpty onClick={onClose}>{i18n.CLOSE_CASE_MODAL_CLOSE_BUTTON}</EuiButtonEmpty>

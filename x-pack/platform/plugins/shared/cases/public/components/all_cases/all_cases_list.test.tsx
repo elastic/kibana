@@ -58,7 +58,6 @@ import * as i18n from './translations';
 
 jest.mock('../../containers/configure/use_get_case_configuration');
 jest.mock('../../containers/use_get_cases');
-jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/use_get_categories');
 jest.mock('../../containers/user_profiles/use_get_current_user_profile');

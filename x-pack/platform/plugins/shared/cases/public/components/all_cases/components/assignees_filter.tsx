@@ -14,7 +14,7 @@ import { useIsUserTyping } from '../../../common/use_is_user_typing';
 import { useSuggestUserProfiles } from '../../../containers/user_profiles/use_suggest_user_profiles';
 import { useAvailableCasesOwners } from '../../app/use_available_owners';
 import { useCasesContext } from '../../cases_context/use_cases_context';
-import type { CurrentUserProfile } from '../types';
+import type { CurrentUserProfile } from '../../types';
 import { EmptyMessage } from '../../user_profiles/empty_message';
 import { NoMatches } from '../../user_profiles/no_matches';
 import {
