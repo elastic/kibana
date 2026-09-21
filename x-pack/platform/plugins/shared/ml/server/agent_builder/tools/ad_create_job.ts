@@ -428,7 +428,7 @@ export const createAdCreateJobTool = (
             };
           }
 
-          // Also fetch a small sample of actual documents for field verification
+          // Also fetch a small sample of actual documents for field verification.
           let documents: unknown[] = [];
           try {
             const preview = (await mlClient.previewDatafeed(
@@ -440,9 +440,7 @@ export const createAdCreateJobTool = (
               },
               { maxRetries: 0 }
             )) as unknown;
-            if (Array.isArray(preview)) {
-              documents = preview.slice(0, 20);
-            }
+            documents = getPreviewSampleDocuments(preview).slice(0, 20);
           } catch {
             // ignore — valid/documentsFound is the authoritative result
           }
@@ -546,6 +544,22 @@ export const createAdCreateJobTool = (
     }
   },
 });
+
+/**
+ * `validateDatafeedPreview` documents `previewDatafeed` as `{ body: unknown[] }`
+ * while the generated client type is `TDocument[]`. Accept both so Phase 1
+ * still receives sample documents for field inspection.
+ */
+const getPreviewSampleDocuments = (preview: unknown): unknown[] => {
+  if (Array.isArray(preview)) {
+    return preview;
+  }
+  if (preview === null || typeof preview !== 'object' || !('body' in preview)) {
+    return [];
+  }
+  const { body } = preview;
+  return Array.isArray(body) ? body : [];
+};
 
 /**
  * Projects a full Module to a slim summary to avoid large context from e.g. security_windows (13 jobs).

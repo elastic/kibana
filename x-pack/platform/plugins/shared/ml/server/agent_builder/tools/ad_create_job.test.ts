@@ -193,6 +193,38 @@ describe('adCreateJobTool', () => {
       );
     });
 
+    it('operation=preview_datafeed_config returns sample documents from preview.body', async () => {
+      const sampleDocuments = [
+        { host: 'web-1', bytes: 100 },
+        { host: 'web-2', bytes: 200 },
+      ];
+      const previewDatafeed = jest.fn().mockResolvedValue({ body: sampleDocuments });
+      const tool = createAdCreateJobTool(
+        resolveMlCapabilities,
+        undefined,
+        undefined,
+        undefined,
+        () => ({ previewDatafeed } as any)
+      );
+
+      const result = await tool.handler(
+        {
+          operation: 'preview_datafeed_config',
+          job_config: { analysis_config: { detectors: [{ function: 'count' }] } },
+          datafeed_config: { indices: ['logs-*'] },
+        },
+        createContext()
+      );
+
+      expect(previewDatafeed).toHaveBeenCalled();
+      const standardResult = result as {
+        results: Array<{ type: string; data: Record<string, unknown> }>;
+      };
+      expect(standardResult.results[0].type).toBe(ToolResultType.other);
+      expect(standardResult.results[0].data.valid).toBe(true);
+      expect(standardResult.results[0].data.sample_documents).toEqual(sampleDocuments);
+    });
+
     it('returns error result when ML client throws', async () => {
       const ml = createMlMock();
       ml.validate.mockRejectedValue(new Error('invalid spec'));
