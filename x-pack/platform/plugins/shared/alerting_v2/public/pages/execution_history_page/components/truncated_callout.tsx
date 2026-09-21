@@ -70,7 +70,8 @@ const buildSearchTruncatedCalloutTitle = (
       : summary[0];
 
   return i18n.translate('xpack.alertingV2.executionHistory.searchTruncatedCallout', {
-    defaultMessage: 'Showing events for the first {summary}. Refine your search to narrow results.',
+    defaultMessage:
+      'Your search matched {summary}, but only a subset of these events is shown. Refine your search to narrow results.',
     values: { summary: summaryText },
   });
 };
