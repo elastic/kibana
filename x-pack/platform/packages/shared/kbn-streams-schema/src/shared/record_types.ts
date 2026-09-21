@@ -79,6 +79,10 @@ function buildBoundedValue(depth: number): z.ZodType<unknown> {
 
 const boundedValue = buildBoundedValue(MAX_NESTING_DEPTH);
 
+// Bounded arbitrary JSON value for HTTP request bodies (string/number/boolean/array/record).
+// Use this wherever processors or other inputs accept generic JSON values.
+export const boundedJsonValue: z.ZodType<unknown> = buildBoundedValue(MAX_NESTING_DEPTH);
+
 // Bounded top-level record for HTTP request bodies that receive sample documents.
 export const boundedFlattenRecord: z.ZodType<FlattenRecord> = z
   .record(

@@ -128,6 +128,7 @@ export {
   type FlattenRecord,
   flattenRecord,
   boundedFlattenRecord,
+  boundedJsonValue,
   recursiveRecord,
 } from './src/shared/record_types';
 export { isSchema, createIsNarrowSchema, isRecord } from './src/shared/type_guards';

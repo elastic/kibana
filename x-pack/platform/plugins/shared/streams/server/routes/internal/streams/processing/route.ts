@@ -9,6 +9,7 @@ import type { FlattenRecord } from '@kbn/streams-schema';
 import {
   MAX_STREAM_NAME_LENGTH,
   boundedFlattenRecord,
+  boundedJsonValue,
   isEnabledFailureStore,
   namedFieldDefinitionConfigSchema,
 } from '@kbn/streams-schema';
@@ -58,7 +59,22 @@ const paramsSchema = z.object({
     }),
     z.object({
       ...simulationBaseBodySchema,
-      processors: z.array(z.record(z.string().max(PROCESSOR_TYPE_NAME_MAX_LENGTH), z.any())).max(100),
+      processors: z
+        .array(
+          z
+            .record(z.string().max(PROCESSOR_TYPE_NAME_MAX_LENGTH), z.any())
+            .superRefine((val, ctx) => {
+              for (const [key, value] of Object.entries(val)) {
+                const result = boundedJsonValue.safeParse(value);
+                if (!result.success) {
+                  result.error.issues.forEach((issue) =>
+                    ctx.addIssue({ ...issue, path: [key, ...(issue.path ?? [])] })
+                  );
+                }
+              }
+            })
+        )
+        .max(100),
     }),
   ]),
 }) satisfies z.Schema<ProcessingSimulationParams>;

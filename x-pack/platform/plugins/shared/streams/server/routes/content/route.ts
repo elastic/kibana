@@ -19,32 +19,25 @@ import {
   getInheritedFieldsFromAncestors,
 } from '@kbn/streams-schema';
 
-// Keep depth small: each nesting level expands to multiple YAML nodes in the OAS output;
-// 20 levels pushes the serializer past its 100-node maxDepth limit.
-const INCLUDE_DEPTH = 5;
-
-function buildBoundedIncludedObjects(depth: number): z.ZodType<ContentPackIncludedObjects> {
-  const includeAll = z.object({ objects: z.object({ all: z.strictObject({}) }) });
-  if (depth === 0) {
-    return includeAll as z.ZodType<ContentPackIncludedObjects>;
-  }
-  const inner = buildBoundedIncludedObjects(depth - 1);
-  return z.union([
-    includeAll,
+// Use z.lazy() so the OAS serializer sees a $ref (no static depth unrolling).
+// Bounds are enforced at runtime: destination string length and routing array count.
+const boundedIncludedObjectsSchema: z.Schema<ContentPackIncludedObjects> = z.lazy(() =>
+  z.union([
+    z.object({ objects: z.object({ all: z.strictObject({}) }) }),
     z.object({
       objects: z.strictObject({
         mappings: z.boolean(),
         routing: z
           .array(
-            inner.and(z.object({ destination: z.string().nonempty().max(MAX_STREAM_NAME_LENGTH) }))
+            boundedIncludedObjectsSchema.and(
+              z.object({ destination: z.string().nonempty().max(MAX_STREAM_NAME_LENGTH) })
+            )
           )
           .max(200),
       }),
     }),
-  ]) as z.ZodType<ContentPackIncludedObjects>;
-}
-
-const boundedIncludedObjectsSchema = buildBoundedIncludedObjects(INCLUDE_DEPTH);
+  ])
+) as z.Schema<ContentPackIncludedObjects>;
 import { omit } from 'lodash';
 import { OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS } from '@kbn/management-settings-ids';
 import type { RequestHandlerContext } from '@kbn/core/server';
