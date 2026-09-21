@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
 import { createRequire } from 'module';
+import numeral from '@elastic/numeral';
 import path from 'path';
+import { LRUCache } from 'lru-cache';
 import type { Logger } from '@kbn/logging';
 import type {
   YaraCompiledRule,
@@ -17,6 +20,35 @@ import type {
 import { YaraMetaKeyOfInterest } from '../../../../common/endpoint/types';
 
 let logger: Logger | undefined;
+
+/**
+ * Matches the packer's ES `max_result_window` ceiling (~10k items per type per OS).
+ */
+export const YARA_VALIDATE_RESULT_CACHE_MAX = 10_000;
+
+/** Byte cap so worst-case compiled results cannot pin unbounded JS heap. */
+const YARA_VALIDATE_RESULT_CACHE_MAX_SIZE_BYTES = 32 * 1024 * 1024;
+
+const createYaraValidateResultCache = (max: number): LRUCache<string, YaraValidateResult> =>
+  new LRUCache<string, YaraValidateResult>({
+    max,
+    maxSize: YARA_VALIDATE_RESULT_CACHE_MAX_SIZE_BYTES,
+    sizeCalculation: (result) => Buffer.byteLength(JSON.stringify(result), 'utf8'),
+  });
+
+/**
+ * Process-local LRU of compile results keyed by SHA-256 of the source string.
+ * Compile errors are cached; WASM traps and internal errors are not.
+ */
+let validateResultCache = createYaraValidateResultCache(YARA_VALIDATE_RESULT_CACHE_MAX);
+
+const hashYaraSource = (source: string): string =>
+  createHash('sha256').update(source, 'utf8').digest('hex');
+
+/** @internal Rebuilds the process-local validate cache. For tests. */
+export const clearYaraValidateCache = (max: number = YARA_VALIDATE_RESULT_CACHE_MAX): void => {
+  validateResultCache = createYaraValidateResultCache(max);
+};
 
 /**
  * Sets the process-wide logger used by the libyara WASM wrapper.
@@ -31,8 +63,31 @@ export const setYaraLogger = (nextLogger: Logger | undefined): void => {
  * Compile-check a YARA rule source string with classic libyara (WASM).
  * Lazy-inits the WASM module once per process; frees per-call allocations.
  * Reloads the module if a WASM trap leaves it unusable.
+ * LRU-caches successful parses and compile errors by SHA-256 of the source
+ * (up to 10,000 entries); WASM traps and internal errors are not cached.
  */
 export const validateYaraRule = async (source: string): Promise<YaraValidateResult> => {
+  const cacheKey = hashYaraSource(source);
+  const cached = validateResultCache.get(cacheKey);
+  if (cached !== undefined) {
+    logger?.debug(
+      () =>
+        `YARA validate cache hit: sourceSha256=${cacheKey}, sourceByteLength=${Buffer.byteLength(
+          source,
+          'utf8'
+        )}. [Cache: ${validateResultCache.size} entries, ${numeral(
+          validateResultCache.calculatedSize
+        ).format('0.[00] b')}]`
+    );
+    return cached;
+  }
+
+  const result = await compileYaraRule(source);
+  validateResultCache.set(cacheKey, result);
+  return result;
+};
+
+async function compileYaraRule(source: string): Promise<YaraValidateResult> {
   const started = performance.now();
   const mod = await loadYaraValidateModule();
 
@@ -93,7 +148,7 @@ export const validateYaraRule = async (source: string): Promise<YaraValidateResu
       }
     }
   }
-};
+}
 
 /**
  * Returns the pinned libyara engine version string from the WASM module
