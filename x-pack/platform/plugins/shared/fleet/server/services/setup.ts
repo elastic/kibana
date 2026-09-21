@@ -291,8 +291,14 @@ async function createSetupSideEffects(
 
   // Bump the revision of agent policies whose package policies were flagged for a bump by a
   // saved object migration (no span: this only schedules a background task).
+  // Fixed suffix: Fleet's setup pipeline reruns from scratch on every invocation (including
+  // lazy-init retries), so repeated calls should coalesce into one pending task via
+  // `ensureScheduled` rather than piling up a duplicate per retry.
   logger.debug('Scheduling agent policy revision bump for migrated package policies');
-  await scheduleBumpMigratedAgentPoliciesTask(appContextService.getTaskManagerStart()!);
+  await scheduleBumpMigratedAgentPoliciesTask(
+    appContextService.getTaskManagerStart()!,
+    'fleet-setup'
+  );
 
   stepSpan = apm.startSpan('Set up enrollment keys for preconfigured policies', 'preconfiguration');
   logger.debug(
