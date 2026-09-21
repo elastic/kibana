@@ -82,7 +82,7 @@ export interface HuntForThreatResult {
   /**
    * `required` reflects a regex match against the resolved technology's
    * required index *patterns* (e.g. `logs-aws.*`), not a set-membership
-   * check against a concrete `_index` bucket — the two are never the same
+   * check against a concrete `_index` bucket; the two are never the same
    * string. Computed once here so downstream consumers (the SSE mapper)
    * never need to re-derive it (plan 7, SSE durability review fix).
    */
