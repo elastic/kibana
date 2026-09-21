@@ -31,6 +31,7 @@ function useDateRangeRedirect() {
       rangeTo: searchParams.get('rangeTo'),
     };
   }, [location.search]);
+  const requiresDateRange = location.pathname !== '/settings';
 
   const redirect = useCallback(() => {
     const { timefilter } = queryService.timefilter;
@@ -53,7 +54,7 @@ function useDateRangeRedirect() {
     });
   }, [history, location, queryService]);
 
-  return { isDateRangeSet, rangeFrom, rangeTo, redirect, queryService };
+  return { isDateRangeSet, rangeFrom, rangeTo, requiresDateRange, redirect, queryService };
 }
 
 /**
@@ -69,18 +70,19 @@ function useDateRangeRedirect() {
  * This ensures components using useTimefilter() get the correct time from URL.
  */
 export function DateRangeRedirect({ children }: { children: React.ReactNode }) {
-  const { isDateRangeSet, rangeFrom, rangeTo, redirect, queryService } = useDateRangeRedirect();
+  const { isDateRangeSet, rangeFrom, rangeTo, requiresDateRange, redirect, queryService } =
+    useDateRangeRedirect();
 
   // Use useLayoutEffect to redirect before paint, avoiding the
   // "Cannot update a component while rendering" warning
   useLayoutEffect(() => {
-    if (!isDateRangeSet) {
+    if (requiresDateRange && !isDateRangeSet) {
       redirect();
     }
-  }, [isDateRangeSet, redirect]);
+  }, [isDateRangeSet, redirect, requiresDateRange]);
 
   useEffect(() => {
-    if (rangeFrom && rangeTo) {
+    if (requiresDateRange && rangeFrom && rangeTo) {
       const currentTime = queryService.timefilter.timefilter.getTime();
       if (currentTime.from !== rangeFrom || currentTime.to !== rangeTo) {
         queryService.timefilter.timefilter.setTime({
@@ -89,10 +91,10 @@ export function DateRangeRedirect({ children }: { children: React.ReactNode }) {
         });
       }
     }
-  }, [rangeFrom, rangeTo, queryService]);
+  }, [rangeFrom, rangeTo, queryService, requiresDateRange]);
 
   // Block rendering until time params are set
-  if (!isDateRangeSet) {
+  if (requiresDateRange && !isDateRangeSet) {
     return null;
   }
 

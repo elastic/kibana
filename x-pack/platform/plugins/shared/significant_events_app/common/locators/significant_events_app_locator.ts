@@ -19,11 +19,12 @@ export type SignificantEventsAppTab =
   | 'detections'
   | 'significant_events'
   | 'cortex'
+  // Kept for locator compatibility; resolves to the standalone Settings page.
   | 'settings';
 
 /**
- * Mirrors the query params of the `/{tab}` route one-to-one so every state of the
- * Significant Events app is addressable through the locator.
+ * Builds locations for management tabs and the standalone Settings page.
+ * Other tab values and query parameters map to the `/{tab}` route.
  */
 export interface SignificantEventsAppLocatorParams extends SerializableRecord {
   tab?: SignificantEventsAppTab;

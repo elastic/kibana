@@ -31,7 +31,6 @@ import { SignificantEventsPageProvider } from './context/significant_events_page
 import { ONBOARDING_FAILURE_TITLE } from './components/streams_view/translations';
 import { QueriesTable } from './components/queries_table/queries_table';
 import { StreamsView } from './components/streams_view/streams_view';
-import { SettingsTab } from './components/settings/tab';
 import { CortexTab } from './components/cortex/tab';
 import { useCortexEnabled } from './components/cortex/use_cortex';
 import { DetectionsTab } from './components/detections_tab';
@@ -45,7 +44,6 @@ const significantEventsTabs = [
   'detections',
   'significant_events',
   'cortex',
-  'settings',
 ] as const;
 type SignificantEventsTabId = (typeof significantEventsTabs)[number];
 
@@ -80,7 +78,6 @@ export function SignificantEventsPage() {
     isError: isMaintenanceStatusError,
     status: maintenanceStatus,
   } = useBlocksNewActivity();
-  const showMaintenanceBanners = tab !== 'settings';
 
   const onOnboardingFailed = useCallback(
     (error: string) => {
@@ -124,7 +121,7 @@ export function SignificantEventsPage() {
     ]);
   }, [chrome]);
 
-  const allTabs = useMemo(
+  const tabs = useMemo(
     () => [
       {
         id: 'streams',
@@ -179,20 +176,8 @@ export function SignificantEventsPage() {
             },
           ]
         : []),
-      {
-        id: 'settings',
-        label: i18n.translate('xpack.significantEventsApp.settingsTab', {
-          defaultMessage: 'Settings',
-        }),
-        href: router.link('/{tab}', { path: { tab: 'settings' } }),
-        isSelected: tab === 'settings',
-      },
     ],
     [tab, router, isCortexEnabled]
-  );
-  const tabs = useMemo(
-    () => allTabs.filter((item) => item.id !== 'settings' || canConfigure),
-    [allTabs, canConfigure]
   );
 
   if (isAvailabilityLoading) {
@@ -223,7 +208,7 @@ export function SignificantEventsPage() {
       <SignificantEventsAppHeader title={pageTitle} menu={menu} tabs={tabs} />
       <SignificantEventsPageProvider>
         <SignificantEventsAppPageTemplate.Body grow>
-          {showMaintenanceBanners && isMaintenanceStatusLoading && (
+          {isMaintenanceStatusLoading && (
             <>
               <EuiCallOut
                 announceOnMount
@@ -243,7 +228,7 @@ export function SignificantEventsPage() {
               <EuiSpacer />
             </>
           )}
-          {showMaintenanceBanners && isMaintenanceStatusError && (
+          {isMaintenanceStatusError && (
             <>
               <EuiCallOut
                 announceOnMount
@@ -262,7 +247,7 @@ export function SignificantEventsPage() {
                 </p>
                 {canManage && canConfigure && (
                   <EuiButton
-                    href={router.link('/{tab}', { path: { tab: 'settings' } })}
+                    href={router.link('/settings')}
                     color="danger"
                     size="s"
                     data-test-subj="significantEventsStatusErrorBannerSettingsLink"
@@ -276,7 +261,7 @@ export function SignificantEventsPage() {
               <EuiSpacer />
             </>
           )}
-          {showMaintenanceBanners && isBlocked && (
+          {isBlocked && (
             <>
               <EuiCallOut
                 announceOnMount
@@ -308,7 +293,7 @@ export function SignificantEventsPage() {
                 )}
                 {canManage && canConfigure && (
                   <EuiButton
-                    href={router.link('/{tab}', { path: { tab: 'settings' } })}
+                    href={router.link('/settings')}
                     color="warning"
                     size="s"
                     data-test-subj="significantEventsPausedBannerSettingsLink"
@@ -322,7 +307,7 @@ export function SignificantEventsPage() {
               <EuiSpacer />
             </>
           )}
-          {showMaintenanceBanners && <RunLimitsBanner />}
+          <RunLimitsBanner />
           {canShow && (
             <KiGenerationProvider onFailed={onOnboardingFailed}>
               {tab === 'streams' && <StreamsView />}
@@ -333,7 +318,6 @@ export function SignificantEventsPage() {
           {tab === 'detections' && <DetectionsTab />}
           {tab === 'significant_events' && <SignificantEventsTab />}
           {tab === 'cortex' && isCortexEnabled && <CortexTab />}
-          {tab === 'settings' && canConfigure && <SettingsTab />}
         </SignificantEventsAppPageTemplate.Body>
       </SignificantEventsPageProvider>
     </>

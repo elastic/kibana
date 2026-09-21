@@ -10,6 +10,7 @@ import * as t from 'io-ts';
 import React from 'react';
 import { SignificantEventsAppPageTemplate } from '../components/page_template';
 import { RedirectTo } from '../components/redirect_to';
+import { SettingsPage } from '../pages/settings/page';
 import { SignificantEventsPage } from '../pages/significant_events/page';
 
 /**
@@ -28,6 +29,9 @@ const significantEventsAppRoutes = {
     children: {
       '/': {
         element: <RedirectTo path="/{tab}" params={{ path: { tab: 'streams' } }} />,
+      },
+      '/settings': {
+        element: <SettingsPage />,
       },
       '/{tab}': {
         element: <SignificantEventsPage />,
