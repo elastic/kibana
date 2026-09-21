@@ -198,8 +198,6 @@ export const WatchDetailPage: React.FC = () => {
     );
   }
 
-  const intro = settingsI18n.watchIntro(watch.id);
-
   const renderWorkers = () => {
     if (workersError) {
       return (
@@ -276,14 +274,6 @@ export const WatchDetailPage: React.FC = () => {
           <EuiFlexItem grow={false}>
             <EuiText size="s" color="danger" data-test-subj="alertZeroWatchSettingsInvalid">
               <p>{settingsI18n.WATCH_SETTINGS_INVALID}</p>
-            </EuiText>
-          </EuiFlexItem>
-        ) : null}
-
-        {intro ? (
-          <EuiFlexItem grow={false}>
-            <EuiText size="s" color="subdued" data-test-subj="alertZeroWatchIntro">
-              <p>{intro}</p>
             </EuiText>
           </EuiFlexItem>
         ) : null}

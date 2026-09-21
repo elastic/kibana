@@ -8,19 +8,11 @@
 /**
  * Copy for the per-watch settings page.
  *
- * The API carries ids only, so every autonomy level, select option, approval gate, run outcome and
- * per-watch intro resolves to a message here. Keep the id maps in step with the managed watch
- * catalog in `@kbn/alertzero-common`.
+ * The API carries ids only, so every autonomy level and schedule unit resolves to a message here.
+ * Keep the id maps in step with the managed watch catalog in `@kbn/alertzero-common`.
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  SYSTEM_SECURITY_WATCH_HUNT_ID,
-  SYSTEM_SECURITY_WATCH_DEEP_ID,
-  SYSTEM_SECURITY_WATCH_DETECTION_ID,
-  SYSTEM_SECURITY_WATCH_FLOOR_ID,
-  SYSTEM_SECURITY_WATCH_OFFICER_ID,
-} from '@kbn/alertzero-common';
 
 /* -------------------------------------------------------------------------- */
 /* Header                                                                     */
@@ -624,41 +616,6 @@ export const RUN_OUTCOME_LABELS: Record<string, string> = {
     defaultMessage: 'Completed',
   }),
 };
-
-/* -------------------------------------------------------------------------- */
-/* Per-watch intro                                                            */
-/* -------------------------------------------------------------------------- */
-
-const WATCH_INTROS: Record<string, string> = {
-  [SYSTEM_SECURITY_WATCH_FLOOR_ID]: i18n.translate('xpack.alertzero.watches.settings.intro.floor', {
-    defaultMessage:
-      'Groups the Workers that reduce alert volume and route what still needs a person. Settings below belong to each Worker, not to this Watch.',
-  }),
-  [SYSTEM_SECURITY_WATCH_OFFICER_ID]: i18n.translate(
-    'xpack.alertzero.watches.settings.intro.officer',
-    {
-      defaultMessage:
-        'Watch grouping for investigation hand-off. No Workers are attached yet. Settings, when added, will belong to each Worker, not to this Watch.',
-    }
-  ),
-  [SYSTEM_SECURITY_WATCH_HUNT_ID]: i18n.translate('xpack.alertzero.watches.settings.intro.hunt', {
-    defaultMessage:
-      'Groups the Continuous Threat Hunt Worker. Findings arrive as reviewable evidence. Settings below belong to that Worker, not to this Watch.',
-  }),
-  [SYSTEM_SECURITY_WATCH_DEEP_ID]: i18n.translate('xpack.alertzero.watches.settings.intro.deep', {
-    defaultMessage:
-      'Watch grouping for specialist analysis. No Workers are attached yet. Settings, when added, will belong to each Worker, not to this Watch.',
-  }),
-  [SYSTEM_SECURITY_WATCH_DETECTION_ID]: i18n.translate(
-    'xpack.alertzero.watches.settings.intro.detection',
-    {
-      defaultMessage:
-        'Groups the Rule Tuning and Rule Creation Workers. Settings below belong to each Worker, not to this Watch.',
-    }
-  ),
-};
-
-export const watchIntro = (watchId: string): string | undefined => WATCH_INTROS[watchId];
 
 /* -------------------------------------------------------------------------- */
 /* Worker settings layout (autonomy cards, trigger row)                       */
