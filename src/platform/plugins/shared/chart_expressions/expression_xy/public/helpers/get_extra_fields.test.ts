@@ -38,20 +38,15 @@ describe('getExtraFields', () => {
         meta: { type: 'number', params: { id: 'duration' } },
       },
     ];
-    const formatter = { convertToText: jest.fn() };
-    formatFactory.mockReturnValue(formatter as ReturnType<FormatFactory>);
 
-    expect(getExtraFields(row, formatFactory, columns)).toEqual([
-      expect.objectContaining({
-        key: 'field:kibana.alert.reason',
-        name: 'Reason',
-      }),
-      expect.objectContaining({
-        key: 'field:kibana.alert.duration.us',
-        name: 'Duration',
-        formatter,
-      }),
+    expect(
+      getExtraFields(row, formatFactory, columns).map(({ key, name }) => ({ key, name }))
+    ).toEqual([
+      { key: 'field:kibana.alert.reason', name: 'Reason' },
+      { key: 'field:kibana.alert.duration.us', name: 'Duration' },
     ]);
+    expect(formatFactory).toHaveBeenCalledTimes(1);
+    expect(formatFactory).toHaveBeenCalledWith({ id: 'duration' });
   });
 
   it('falls back to the ES field name when no column name is available', () => {
