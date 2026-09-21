@@ -142,6 +142,13 @@
       "name": "Nightshift Investigations",
       "slackChannel": "#nightshift-alerts",
       "configPath": "x-pack/platform/packages/shared/kbn-evals-suite-nightshift-investigations/playwright.config.ts",
+      "serverConfigSet": "evals_nightshift_investigations",
+      "ci": {
+        "serverConfigSet": "evals_tracing",
+        "env": {
+          "NIGHTSHIFT_DATASETS": "synthetic-smoke"
+        }
+      },
       "tags": [
         "platform",
         "nightshift-investigations"
