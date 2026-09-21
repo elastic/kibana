@@ -511,25 +511,27 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
       statsRow({ testId: 'still-running', failedBuilds: 20 }),
     ]);
     // `diluted` outranks `flaky-on-9.5` and would have taken a slot had the check happened after the cap
-    const fetchBranchCounts = jest.spyOn(queries, 'fetchBranchCounts').mockResolvedValue(
-      new Map([
-        [
-          'diluted',
+    const fetchBranchCounts = jest
+      .spyOn(queries, 'fetchBranchCounts')
+      .mockResolvedValue(
+        new Map([
           [
-            mainCounts({ builds: 500, failedBuilds: 4 }),
-            mainCounts({ branch: '9.5', builds: 500, failedBuilds: 8 }),
+            'diluted',
+            [
+              mainCounts({ builds: 500, failedBuilds: 4 }),
+              mainCounts({ branch: '9.5', builds: 500, failedBuilds: 8 }),
+            ],
           ],
-        ],
-        [
-          'flaky-on-9.5',
           [
-            mainCounts({ builds: 500, failedBuilds: 1 }),
-            mainCounts({ branch: '9.5', builds: 100, failedBuilds: 5 }),
+            'flaky-on-9.5',
+            [
+              mainCounts({ builds: 500, failedBuilds: 1 }),
+              mainCounts({ branch: '9.5', builds: 100, failedBuilds: 5 }),
+            ],
           ],
-        ],
-        ...activeCounts(['still-running']),
-      ])
-    );
+          ...activeCounts(['still-running']),
+        ])
+      );
     const fetchTestMetadata = jest.spyOn(queries, 'fetchTestMetadata').mockResolvedValue(new Map());
     const fetchBranchStats = jest
       .spyOn(queries, 'fetchBranchStats')
