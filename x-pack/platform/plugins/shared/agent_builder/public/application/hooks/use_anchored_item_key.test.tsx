@@ -43,12 +43,10 @@ interface State {
   items: TimelineItem[];
 }
 
-const setState = ({
-  conversationId = 'a',
-  isStreaming = false,
-  isPosting = false,
-  items,
-}: State) => {
+const setState = (state: State) => {
+  const { isStreaming = false, isPosting = false, items } = state;
+  // An explicit `undefined` is the new-conversation page, which has no id yet.
+  const conversationId = 'conversationId' in state ? state.conversationId : 'a';
   jest.mocked(useConversationId).mockReturnValue(conversationId);
   jest.mocked(useIsCurrentConversationStreaming).mockReturnValue(isStreaming);
   jest.mocked(useIsMutating).mockReturnValue(isPosting ? 1 : 0);
@@ -115,13 +113,37 @@ describe('useAnchoredItemKey', () => {
     expect(result.current).toBe('u2');
   });
 
-  it('does not carry over to another conversation', () => {
+  it('does not carry over to another conversation, nor back to one that is still streaming', () => {
     const { result, update } = renderAnchor({ isStreaming: true, items: [] });
     update({ isStreaming: true, items: [message('u1')] });
     expect(result.current).toBe('u1');
 
     update({ conversationId: 'b', items: [message('x1'), turn('y1')] });
-
     expect(result.current).toBeUndefined();
+
+    update({ conversationId: 'a', isStreaming: true, items: [message('u1'), turn('t1')] });
+    expect(result.current).toBeUndefined();
+
+    update({ conversationId: 'a', isStreaming: false, items: [message('u1'), turn('t1')] });
+    update({ conversationId: 'a', isStreaming: true, items: [message('u1'), turn('t1')] });
+    update({
+      conversationId: 'a',
+      isStreaming: true,
+      items: [message('u1'), turn('t1'), message('u2'), turn('t2')],
+    });
+    expect(result.current).toBe('u2');
+  });
+
+  it('anchors the first message of a new conversation, which arrives with its stream running', () => {
+    const { result, update } = renderAnchor({ conversationId: undefined, items: [] });
+
+    update({ conversationId: 'created', isStreaming: true, items: [] });
+    update({
+      conversationId: 'created',
+      isStreaming: true,
+      items: [message('u1'), turn('active')],
+    });
+
+    expect(result.current).toBe('u1');
   });
 });
