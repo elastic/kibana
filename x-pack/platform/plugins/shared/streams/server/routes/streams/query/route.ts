@@ -141,7 +141,14 @@ const upsertQueryStreamRoute = createServerRoute({
       // API accepts esql for UX simplicity, not the stored query format
       query: queryRequestBodySchema,
       // Optional field descriptions map
-      field_descriptions: z.record(z.string().max(1000), z.string().max(1000)).optional(),
+      field_descriptions: z
+        .record(z.string().max(1000), z.string().max(1000))
+        .superRefine((val, ctx) => {
+          if (Object.keys(val).length > 1000) {
+            ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'At most 1000 field descriptions allowed' });
+          }
+        })
+        .optional(),
     }),
   }),
   handler: async ({ params, request, getScopedClients, context }) => {

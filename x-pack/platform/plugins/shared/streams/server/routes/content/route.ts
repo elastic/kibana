@@ -19,7 +19,9 @@ import {
   getInheritedFieldsFromAncestors,
 } from '@kbn/streams-schema';
 
-const INCLUDE_DEPTH = 20;
+// Keep depth small: each nesting level expands to multiple YAML nodes in the OAS output;
+// 20 levels pushes the serializer past its 100-node maxDepth limit.
+const INCLUDE_DEPTH = 5;
 
 function buildBoundedIncludedObjects(depth: number): z.ZodType<ContentPackIncludedObjects> {
   const includeAll = z.object({ objects: z.object({ all: z.strictObject({}) }) });
