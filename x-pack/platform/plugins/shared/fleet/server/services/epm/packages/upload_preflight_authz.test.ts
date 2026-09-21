@@ -15,6 +15,7 @@ import { traverseArchiveEntries } from '../archive';
 import {
   checkUploadPackageAssetPrivileges,
   collectArchiveSignals,
+  parsePackageAndCollectSignals,
   buildRequiredActions,
 } from './upload_preflight_authz';
 
@@ -33,6 +34,11 @@ jest.mock('../archive', () => ({
 
 jest.mock('./streaming_packages', () => ({
   PACKAGES_TO_INSTALL_WITH_STREAMING: ['security_detection_engine'],
+}));
+
+jest.mock('../archive/parse', () => ({
+  filterAssetPathForParseAndVerifyArchive: jest.fn().mockReturnValue(false),
+  parseAndVerifyArchive: jest.fn().mockReturnValue({ name: 'mock-package', version: '1.0.0' }),
 }));
 
 const mockRequest = {} as KibanaRequest;
@@ -174,6 +180,60 @@ describe('collectArchiveSignals', () => {
     const signals = await collectArchiveSignals(mockArchiveBuffer, mockContentType);
 
     expect(signals.gatedTypesFound.size).toBe(0);
+  });
+});
+
+describe('parsePackageAndCollectSignals — signal collection parity with collectArchiveSignals', () => {
+  // These tests use the production entry point (parsePackageAndCollectSignals) so that any drift
+  // between the two scanning paths is caught by the same test matrix as collectArchiveSignals.
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('returns empty signals for archives with no gated asset types', async () => {
+    mockTraverseEntries([
+      { path: 'mypackage-1.0.0/kibana/dashboard/my-dashboard.json' },
+      { path: 'mypackage-1.0.0/elasticsearch/index_template/my-template.json' },
+    ]);
+
+    const { archiveSignals } = await parsePackageAndCollectSignals(
+      mockArchiveBuffer,
+      mockContentType
+    );
+
+    expect(archiveSignals.gatedTypesFound.size).toBe(0);
+    expect(archiveSignals.hasMlSecurityRules).toBe(false);
+    expect(archiveSignals.incomingRuleIds).toEqual([]);
+  });
+
+  it('detects security_rule and collects incomingRuleIds', async () => {
+    const ruleBuffer = Buffer.from(JSON.stringify({ id: 'rule-abc', attributes: { type: 'query' } }));
+    mockTraverseEntries([
+      { path: 'mypackage-1.0.0/kibana/security_rule/my-rule.json', buffer: ruleBuffer },
+    ]);
+
+    const { archiveSignals } = await parsePackageAndCollectSignals(
+      mockArchiveBuffer,
+      mockContentType
+    );
+
+    expect(archiveSignals.gatedTypesFound.has('security_rule' as any)).toBe(true);
+    expect(archiveSignals.incomingRuleIds).toEqual(['rule-abc']);
+    expect(archiveSignals.hasMlSecurityRules).toBe(false);
+  });
+
+  it('sets hasMlSecurityRules for ML security_rule', async () => {
+    const mlBuffer = makeAssetBuffer({ type: 'machine_learning', machine_learning_job_id: 'job-1' });
+    mockTraverseEntries([
+      { path: 'mypackage-1.0.0/kibana/security_rule/ml-rule.json', buffer: mlBuffer },
+    ]);
+
+    const { archiveSignals } = await parsePackageAndCollectSignals(
+      mockArchiveBuffer,
+      mockContentType
+    );
+
+    expect(archiveSignals.hasMlSecurityRules).toBe(true);
   });
 });
 

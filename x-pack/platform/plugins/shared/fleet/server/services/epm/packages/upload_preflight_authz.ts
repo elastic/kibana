@@ -42,45 +42,50 @@ export interface ArchiveSignals {
   incomingRuleIds?: string[];
 }
 
+// Single implementation of per-entry signal collection shared by both archive-scanning functions.
+// Mutates `out` in place; callers hold the accumulator object.
+function collectSignalFromEntry(
+  path: string,
+  buffer: Buffer | undefined,
+  out: { gatedTypesFound: Set<KibanaAssetType>; incomingRuleIds: string[]; hasMlSecurityRules: boolean }
+): void {
+  const parts = getPathParts(path);
+  if (parts.service !== 'kibana') return;
+  const assetType = parts.type as KibanaAssetType;
+  if (!GATED_ASSET_TYPES.has(assetType)) return;
+  out.gatedTypesFound.add(assetType);
+  if (assetType === KibanaAssetType.securityRule && buffer) {
+    try {
+      const asset = JSON.parse(buffer.toString('utf8'));
+      if (typeof asset?.id === 'string') out.incomingRuleIds.push(asset.id);
+      if (asset?.attributes?.type === 'machine_learning') out.hasMlSecurityRules = true;
+    } catch {
+      // Malformed JSON in a security_rule file; install will fail later with a better error.
+    }
+  }
+}
+
 export async function collectArchiveSignals(
   archiveBuffer: Buffer,
   contentType: string
 ): Promise<ArchiveSignals> {
-  const gatedTypesFound = new Set<KibanaAssetType>();
-  const incomingRuleIds: string[] = [];
-  let hasMlSecurityRules = false;
+  const out = {
+    gatedTypesFound: new Set<KibanaAssetType>(),
+    incomingRuleIds: [] as string[],
+    hasMlSecurityRules: false,
+  };
 
   await traverseArchiveEntries(
     archiveBuffer,
     contentType,
-    async (entry) => {
-      const parts = getPathParts(entry.path);
-
-      if (parts.service !== 'kibana') return;
-      const assetType = parts.type as KibanaAssetType;
-      if (!GATED_ASSET_TYPES.has(assetType)) return;
-
-      gatedTypesFound.add(assetType);
-
-      if (assetType === KibanaAssetType.securityRule && entry.buffer) {
-        try {
-          const asset = JSON.parse(entry.buffer.toString('utf8'));
-          if (typeof asset?.id === 'string') incomingRuleIds.push(asset.id);
-          if (asset?.attributes?.type === 'machine_learning') {
-            hasMlSecurityRules = true;
-          }
-        } catch {
-          // Malformed JSON in a security_rule file; install will fail later with a better error.
-        }
-      }
-    },
+    async (entry) => collectSignalFromEntry(entry.path, entry.buffer, out),
     (path) => {
       const parts = getPathParts(path);
       return parts.service === 'kibana' && parts.type === KibanaAssetType.securityRule;
     }
   );
 
-  return { gatedTypesFound, hasMlSecurityRules, incomingRuleIds };
+  return out;
 }
 
 export async function parsePackageAndCollectSignals(
@@ -89,9 +94,11 @@ export async function parsePackageAndCollectSignals(
 ): Promise<{ packageInfo: ArchivePackage; archiveSignals: ArchiveSignals }> {
   const assetsMap: Record<string, Buffer> = {};
   const paths: string[] = [];
-  const gatedTypesFound = new Set<KibanaAssetType>();
-  const incomingRuleIds: string[] = [];
-  let hasMlSecurityRules = false;
+  const signalOut = {
+    gatedTypesFound: new Set<KibanaAssetType>(),
+    incomingRuleIds: [] as string[],
+    hasMlSecurityRules: false,
+  };
 
   await traverseArchiveEntries(
     archiveBuffer,
@@ -99,25 +106,7 @@ export async function parsePackageAndCollectSignals(
     async (entry) => {
       paths.push(entry.path);
       if (entry.buffer) assetsMap[entry.path] = entry.buffer;
-
-      const parts = getPathParts(entry.path);
-      if (parts.service === 'kibana') {
-        const assetType = parts.type as KibanaAssetType;
-        if (GATED_ASSET_TYPES.has(assetType)) {
-          gatedTypesFound.add(assetType);
-          if (assetType === KibanaAssetType.securityRule && entry.buffer) {
-            try {
-              const asset = JSON.parse(entry.buffer.toString('utf8'));
-              if (typeof asset?.id === 'string') incomingRuleIds.push(asset.id);
-              if (asset?.attributes?.type === 'machine_learning') {
-                hasMlSecurityRules = true;
-              }
-            } catch {
-              // Malformed JSON; install will fail later with a better error.
-            }
-          }
-        }
-      }
+      collectSignalFromEntry(entry.path, entry.buffer, signalOut);
     },
     (path) => {
       // Buffer manifest/lifecycle/tags for parseAndVerifyArchive, and
@@ -130,7 +119,7 @@ export async function parsePackageAndCollectSignals(
 
   return {
     packageInfo: parseAndVerifyArchive(paths, assetsMap),
-    archiveSignals: { gatedTypesFound, hasMlSecurityRules, incomingRuleIds },
+    archiveSignals: signalOut,
   };
 }
 
