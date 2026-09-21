@@ -76,7 +76,7 @@ describe('getStreamsToolAvailability', () => {
     expect(result).toEqual({ status: 'available' });
   });
 
-  it('returns available when getActiveSpace throws', async () => {
+  it('returns unavailable when getActiveSpace throws', async () => {
     const coreSetup = coreMock.createSetup();
     const pluginsStart = {
       spaces: {
@@ -91,6 +91,6 @@ describe('getStreamsToolAvailability', () => {
       logger,
       request,
     });
-    expect(result).toEqual({ status: 'available' });
+    expect(result).toEqual({ status: 'unavailable', reason: expect.any(String) });
   });
 });

@@ -6,9 +6,12 @@
  */
 
 import type { CoreSetup } from '@kbn/core/server';
-import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
-import type { ToolAvailabilityResult } from '@kbn/agent-builder-server';
+import type {
+  ToolAvailabilityConfig,
+  ToolAvailabilityContext,
+  ToolAvailabilityResult,
+} from '@kbn/agent-builder-server';
 import type { StreamsPluginStartDependencies } from '../../types';
 
 /** Solutions where Streams tools are available (undefined = stateful, no gating). */
@@ -21,22 +24,31 @@ export const getStreamsToolAvailability = async ({
 }: {
   core: CoreSetup<StreamsPluginStartDependencies>;
   logger: Logger;
-  request: KibanaRequest;
+  request: ToolAvailabilityContext['request'];
 }): Promise<ToolAvailabilityResult> => {
+  const [, pluginsStart] = await core.getStartServices();
+
+  if (!pluginsStart.spaces) {
+    return { status: 'available' };
+  }
+
   try {
-    const [, pluginsStart] = await core.getStartServices();
-    const activeSpace = await pluginsStart.spaces?.spacesService.getActiveSpace(request);
+    const activeSpace = await pluginsStart.spaces.spacesService.getActiveSpace(request);
     if (!ALLOWED_SOLUTIONS.has(activeSpace?.solution)) {
       return {
         status: 'unavailable',
         reason: 'Streams is not available in this project type',
       };
     }
+    return { status: 'available' };
   } catch (error) {
-    logger.debug('Streams tool availability check failed, defaulting to available.');
+    logger.debug('Streams tool availability check failed, defaulting to unavailable.');
     logger.debug(error instanceof Error ? error.message : String(error));
+    return {
+      status: 'unavailable',
+      reason: 'Unable to determine space solution',
+    };
   }
-  return { status: 'available' };
 };
 
 /**
@@ -46,8 +58,7 @@ export const getStreamsToolAvailability = async ({
 export const createStreamsToolAvailability = (
   core: CoreSetup<StreamsPluginStartDependencies>,
   logger: Logger
-) => ({
-  cacheMode: 'space' as const,
-  handler: ({ request }: { request: KibanaRequest }) =>
-    getStreamsToolAvailability({ core, logger, request }),
+): ToolAvailabilityConfig => ({
+  cacheMode: 'space',
+  handler: ({ request }) => getStreamsToolAvailability({ core, logger, request }),
 });
