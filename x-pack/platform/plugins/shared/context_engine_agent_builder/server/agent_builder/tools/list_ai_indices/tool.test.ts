@@ -50,7 +50,7 @@ describe('list_ai_indices tool', () => {
         {
           type: ToolResultType.other,
           data: {
-            ai_indices: [{ id: 'runbooks', esql_target: 'ai-index-runbooks', managed: false }],
+            ai_indices: [{ id: 'runbooks', esql_target: 'v-ai-index-runbooks', managed: false }],
           },
         },
       ],

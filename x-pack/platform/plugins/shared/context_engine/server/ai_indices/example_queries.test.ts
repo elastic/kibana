@@ -9,16 +9,17 @@ import { Parser } from '@elastic/esql';
 import { buildExampleQueries } from './example_queries';
 
 describe('buildExampleQueries', () => {
-  const queries = buildExampleQueries('ai-index-idx-support*');
+  const queries = buildExampleQueries('v-ai-index-support');
 
-  it('returns the three fixed shapes, targeting the given index', () => {
+  it('returns the three fixed shapes, targeting the given view', () => {
     expect(queries.map(({ title }) => title)).toEqual([
       'Full text search, lexical and semantic fused together (?query)',
       'Filter by knowledge item type and tag (?type, ?tag; tags is multi-valued, so MATCH)',
       'Count by type',
     ]);
     for (const { esql } of queries) {
-      expect(esql.startsWith('FROM ai-index-idx-support*')).toBe(true);
+      expect(esql.startsWith('FROM v-ai-index-support')).toBe(true);
+      expect(esql).not.toContain('METADATA');
     }
   });
 

@@ -222,11 +222,11 @@ apiTest.describe('AI Index tools over MCP', { tag: tags.stateful.classic }, () =
       expect(chain.listedIds).toContain(DEFAULT_ONLY_AI_INDEX_ID);
       expect(chain.entry).toStrictEqual({
         id: AI_INDEX_ID,
-        esql_target: INDEX,
+        esql_target: `v-ai-index-${AI_INDEX_ID}`,
         description: DESCRIPTION.default,
         managed: false,
       });
-      expect(chain.block).toContain(`FROM ${INDEX}`);
+      expect(chain.block).toContain(`FROM v-ai-index-${AI_INDEX_ID}`);
       expect(chain.block).toContain('Fields');
       expect(chain.block).toContain('title: keyword');
       expect(chain.titles).toStrictEqual(['Shared']);
@@ -250,7 +250,7 @@ apiTest.describe('AI Index tools over MCP', { tag: tags.stateful.classic }, () =
     // entry registered only in the default space.
     expect(entry.description).toBe(DESCRIPTION.other);
     expect(listedIds).not.toContain(DEFAULT_ONLY_AI_INDEX_ID);
-    expect(block).toContain(`FROM ${INDEX}`);
+    expect(block).toContain(`FROM v-ai-index-${AI_INDEX_ID}`);
     expect(titles).toStrictEqual(['Other space only', 'Shared']);
 
     const viaRoute = await apiClient.post(

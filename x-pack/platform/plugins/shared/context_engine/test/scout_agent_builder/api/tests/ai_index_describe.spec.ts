@@ -198,7 +198,7 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
     expect(block.split('\n').slice(0, 3)).toStrictEqual([
       `AI index: ${PATTERN_AI_INDEX_ID}`,
       `Scout describe fixture ${PATTERN_AI_INDEX_ID}`,
-      `Query with ES|QL against: ${INDEX_PATTERN}`,
+      `Query with ES|QL against: v-ai-index-${PATTERN_AI_INDEX_ID}`,
     ]);
     // Fields not truncated: plain heading, no `(showing …)`.
     expect(block).toContain('\n\nFields\n');
@@ -229,7 +229,7 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
 
     expect(response).toHaveStatusCode(200);
     const block = blockOf(response.body);
-    expect(block).toContain(`\nQuery with ES|QL against: ${INDEX_A}\n`);
+    expect(block).toContain(`\nQuery with ES|QL against: v-ai-index-${SINGLE_AI_INDEX_ID}\n`);
     expect(fieldLine(block, 'status')).toBe('status: keyword, searchable, aggregatable');
   });
 
@@ -241,7 +241,7 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
 
     expect(response).toHaveStatusCode(200);
     const block = blockOf(response.body);
-    expect(block).toContain(`\nQuery with ES|QL against: ${DATA_STREAM}\n`);
+    expect(block).toContain(`\nQuery with ES|QL against: v-ai-index-${DATA_STREAM_AI_INDEX_ID}\n`);
     expect(fieldLine(block, '@timestamp')).toMatch(/^@timestamp: date/);
   });
 
@@ -272,7 +272,7 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
     // Semantic branch needs a deployed inference endpoint: checked structurally here, and by the
     // ES|QL parser in unit tests.
     const hybrid = exampleQuery('Full text search, lexical and semantic fused together');
-    expect(hybrid.startsWith(`FROM ${INDEX_A} METADATA _id, _index, _score\n| FORK\n`)).toBe(true);
+    expect(hybrid.startsWith(`FROM v-ai-index-${SINGLE_AI_INDEX_ID}\n| FORK\n`)).toBe(true);
     expect(hybrid).toContain('\n| FUSE\n');
 
     const run = async (query: string, params?: Record<string, string>) => {

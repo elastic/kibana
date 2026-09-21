@@ -15,14 +15,15 @@ const KEEP = '| KEEP title, description, content, type, tags';
 
 /**
  * Three fixed ES|QL shapes for the canonical KI schema (`title`, `description`, `content`, their
- * `.semantic` multi-fields, `type`, `tags`); only the `FROM` target changes. Indices with other
- * mappings need the field names adapted.
+ * `.semantic` multi-fields, `type`, `tags`); only the `FROM` target changes. The target is an AI
+ * index view, which already exposes `_id`, `_index` and `_score`. Indices with other mappings need
+ * the field names adapted.
  */
 export const buildExampleQueries = (target: string): AiIndexExampleQuery[] => [
   {
     title: 'Full text search, lexical and semantic fused together (?query)',
     esql: [
-      `FROM ${target} METADATA _id, _index, _score`,
+      `FROM ${target}`,
       '| FORK',
       '    ( WHERE MATCH(title, ?query) OR MATCH(description, ?query) OR MATCH(content, ?query) | SORT _score DESC | LIMIT 20 )',
       '    ( WHERE MATCH(title.semantic, ?query) OR MATCH(description.semantic, ?query) OR MATCH(content.semantic, ?query) | SORT _score DESC | LIMIT 20 )',
