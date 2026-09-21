@@ -337,7 +337,7 @@ describe('yaml_form_utils', () => {
       });
     });
 
-    it('defaults an invalid no_data strategy to ignore for alert rules', () => {
+    it('reports an invalid no_data strategy instead of defaulting it', () => {
       const yaml = stringify({
         kind: 'alert',
         metadata: { name: 'Invalid strategy' },
@@ -347,8 +347,26 @@ describe('yaml_form_utils', () => {
 
       const result = parseYamlToFormValues(yaml);
 
-      expect(result.error).toBeNull();
-      expect(result.values?.noData).toEqual({ strategy: 'ignore' });
+      expect(result.values).toBeNull();
+      expect(result.error).toBe(
+        'No-data strategy must be one of ignore, keep_last, resolve, alert.'
+      );
+    });
+
+    it('reports an invalid recovery strategy instead of defaulting it', () => {
+      const yaml = stringify({
+        kind: 'alert',
+        metadata: { name: 'Invalid strategy' },
+        query: { base: 'FROM logs-*' },
+        recovery: { strategy: 'manuall' },
+      });
+
+      const result = parseYamlToFormValues(yaml);
+
+      expect(result.values).toBeNull();
+      expect(result.error).toBe(
+        'Recovery strategy must be one of no_breach, condition, query, manual.'
+      );
     });
 
     it('defaults noData to ignore for alert rules when absent from YAML', () => {

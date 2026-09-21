@@ -178,6 +178,20 @@ describe('collapseLegacyRuleShape', () => {
       });
     });
 
+    it('drops an operator the collapsed phase has nothing to combine with', () => {
+      expect(
+        collapseLegacyRuleShape({
+          kind: 'alert',
+          query: { format: 'standalone', breach: { query: STANDALONE_QUERY } },
+          state_transition: {
+            pending_operator: 'AND',
+            recovering_count: 2,
+            recovering_operator: 'OR',
+          },
+        }).state_transition
+      ).toEqual({ recovering: { count: 2 } });
+    });
+
     it.each([
       ['null', null],
       ['absent', undefined],

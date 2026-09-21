@@ -111,6 +111,22 @@ const toNoData = (query: LegacyQuery, strategy?: LegacyNoDataStrategy): NoData =
   }
 };
 
+/**
+ * `operator` combines a count with a timeframe, and the collapsed schema only
+ * accepts it alongside both. The flat scalars were independently optional, so an
+ * operator that never had anything to combine is dropped rather than migrated.
+ */
+const toPhase = (
+  count?: number,
+  timeframe?: string,
+  operator?: StateTransitionOperator
+): NonNullable<StateTransition['pending']> | undefined =>
+  omitEmpty({
+    ...(count != null ? { count } : {}),
+    ...(timeframe != null ? { timeframe } : {}),
+    ...(count != null && timeframe != null && operator != null ? { operator } : {}),
+  });
+
 const toStateTransition = (
   stateTransition?: LegacyStateTransition | null
 ): StateTransition | undefined => {
@@ -127,16 +143,8 @@ const toStateTransition = (
     recovering_operator: recoveringOperator,
   } = stateTransition;
 
-  const pending = omitEmpty({
-    ...(pendingCount != null ? { count: pendingCount } : {}),
-    ...(pendingTimeframe != null ? { timeframe: pendingTimeframe } : {}),
-    ...(pendingOperator != null ? { operator: pendingOperator } : {}),
-  });
-  const recovering = omitEmpty({
-    ...(recoveringCount != null ? { count: recoveringCount } : {}),
-    ...(recoveringTimeframe != null ? { timeframe: recoveringTimeframe } : {}),
-    ...(recoveringOperator != null ? { operator: recoveringOperator } : {}),
-  });
+  const pending = toPhase(pendingCount, pendingTimeframe, pendingOperator);
+  const recovering = toPhase(recoveringCount, recoveringTimeframe, recoveringOperator);
 
   return omitEmpty({
     ...(pending ? { pending } : {}),

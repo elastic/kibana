@@ -229,12 +229,33 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
   const resolvedKind = (kind as 'alert' | 'signal') ?? 'alert';
   const isAlert = resolvedKind === 'alert';
 
+  const parsedRecovery = parseRecovery(obj.recovery);
+  if (obj.recovery !== undefined && parsedRecovery === undefined) {
+    return {
+      values: null,
+      error: i18n.translate('xpack.alertingV2.yamlRuleForm.invalidRecoveryStrategyError', {
+        defaultMessage: 'Recovery strategy must be one of {strategies}.',
+        values: { strategies: recoveryStrategySchema.options.join(', ') },
+      }),
+    };
+  }
+
+  const parsedNoData = parseNoData(obj.no_data);
+  if (obj.no_data !== undefined && parsedNoData === undefined) {
+    return {
+      values: null,
+      error: i18n.translate('xpack.alertingV2.yamlRuleForm.invalidNoDataStrategyError', {
+        defaultMessage: 'No-data strategy must be one of {strategies}.',
+        values: { strategies: noDataStrategySchema.options.join(', ') },
+      }),
+    };
+  }
+
   // Alert rules always carry both blocks and the write API defaults neither,
   // so an omitted block is filled in here before the form can submit it.
   const recovery =
-    parseRecovery(obj.recovery) ?? (isAlert ? { strategy: recoveryStrategy.no_breach } : undefined);
-  const noData =
-    parseNoData(obj.no_data) ?? (isAlert ? { strategy: noDataStrategy.ignore } : undefined);
+    parsedRecovery ?? (isAlert ? { strategy: recoveryStrategy.no_breach } : undefined);
+  const noData = parsedNoData ?? (isAlert ? { strategy: noDataStrategy.ignore } : undefined);
 
   return {
     values: {
