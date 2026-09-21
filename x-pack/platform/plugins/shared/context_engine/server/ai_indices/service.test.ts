@@ -360,6 +360,19 @@ describe('AiIndexService', () => {
       expect(storageClient.index).toHaveBeenCalled();
     });
 
+    it('rejects a data_stream dest when an alias exists at that name', async () => {
+      esClient.indices.resolveIndex.mockResponse({
+        indices: [],
+        aliases: [{ name: 'ai-index-ds-customer_support', indices: ['ai-index-ds-a'] }],
+        data_streams: [],
+      });
+
+      await expect(service.put('customer_support', DEFAULT_SPACE, properties)).rejects.toThrow(
+        /'ai-index-ds-customer_support' is an alias/
+      );
+      expect(storageClient.index).not.toHaveBeenCalled();
+    });
+
     it('rejects a data_stream dest when a plain index exists at that name', async () => {
       esClient.indices.resolveIndex.mockResponse({
         indices: [{ name: 'ai-index-ds-customer_support', attributes: ['open'] }],
@@ -428,6 +441,19 @@ describe('AiIndexService', () => {
 
       await expect(service.put('logs', DEFAULT_SPACE, indexProperties)).resolves.toBe('created');
       expect(storageClient.index).toHaveBeenCalled();
+    });
+
+    it('rejects an index dest when an alias exists at that name', async () => {
+      esClient.indices.resolveIndex.mockResponse({
+        indices: [],
+        aliases: [{ name: 'ai-index-idx-logs', indices: ['ai-index-idx-a', 'ai-index-idx-b'] }],
+        data_streams: [],
+      });
+
+      await expect(service.put('logs', DEFAULT_SPACE, indexProperties)).rejects.toBeInstanceOf(
+        InvalidAiIndexDestError
+      );
+      expect(storageClient.index).not.toHaveBeenCalled();
     });
 
     it('rejects an index dest when a data stream exists at that name', async () => {

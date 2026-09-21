@@ -503,6 +503,7 @@ export class AiIndexService {
 
     let indices: estypes.IndicesResolveIndexResolveIndexItem[] = [];
     let dataStreams: estypes.IndicesResolveIndexResolveIndexDataStreamsItem[] = [];
+    let aliases: estypes.IndicesResolveIndexResolveIndexAliasItem[] = [];
     try {
       const resolved = await this.esClient.indices.resolveIndex({
         name: value,
@@ -510,10 +511,17 @@ export class AiIndexService {
       });
       indices = resolved.indices;
       dataStreams = resolved.data_streams;
+      aliases = resolved.aliases;
     } catch (error) {
       if (!(isResponseError(error) && error.statusCode === 404)) {
         throw error;
       }
+    }
+
+    if (aliases.length > 0) {
+      throw new InvalidAiIndexDestError(
+        `dest.value '${value}' is not allowed: '${aliases[0].name}' is an alias`
+      );
     }
 
     if (indices.length > 0) {
@@ -538,6 +546,7 @@ export class AiIndexService {
 
     let indices: estypes.IndicesResolveIndexResolveIndexItem[] = [];
     let dataStreams: estypes.IndicesResolveIndexResolveIndexDataStreamsItem[] = [];
+    let aliases: estypes.IndicesResolveIndexResolveIndexAliasItem[] = [];
     try {
       const resolved = await this.esClient.indices.resolveIndex({
         name: value,
@@ -545,10 +554,17 @@ export class AiIndexService {
       });
       indices = resolved.indices;
       dataStreams = resolved.data_streams;
+      aliases = resolved.aliases;
     } catch (error) {
       if (!(isResponseError(error) && error.statusCode === 404)) {
         throw error;
       }
+    }
+
+    if (aliases.length > 0) {
+      throw new InvalidAiIndexDestError(
+        `dest.value '${value}' is not allowed: '${aliases[0].name}' is an alias`
+      );
     }
 
     if (dataStreams.length > 0) {
