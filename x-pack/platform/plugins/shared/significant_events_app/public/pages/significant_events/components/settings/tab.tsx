@@ -831,7 +831,7 @@ export function SettingsTab() {
           <EuiText size="s">
             <h3>
               {i18n.translate('xpack.significantEventsApp.settings.developerModeTitle', {
-                defaultMessage: 'Developer mode',
+                defaultMessage: 'Nightshift developer mode',
               })}
             </h3>
           </EuiText>
@@ -842,7 +842,7 @@ export function SettingsTab() {
               <EuiText color="subdued" size="s">
                 {i18n.translate('xpack.significantEventsApp.settings.developerModeHelpText', {
                   defaultMessage:
-                    'The Significant Events tuning YAML editor is only visible while this is on.',
+                    'Show extra details and configurations options for expert users.',
                 })}
               </EuiText>
             </EuiFlexItem>
@@ -853,7 +853,7 @@ export function SettingsTab() {
                     data-test-subj="nightshiftDeveloperModeSwitch"
                     label={i18n.translate(
                       'xpack.significantEventsApp.settings.developerModeToggleSwitch',
-                      { defaultMessage: 'Enable developer mode' }
+                      { defaultMessage: 'Enable Nightshift developer mode' }
                     )}
                     checked={isDeveloperMode}
                     onChange={(e) => {

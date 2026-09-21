@@ -16,7 +16,7 @@ export const DEVELOPER_MODE_BADGE_LABEL = i18n.translate(
 
 export const DEVELOPER_MODE_BADGE_TOOLTIP = i18n.translate(
   'xpack.significantEventsApp.developerModeBadge.tooltip',
-  { defaultMessage: 'Only visible in developer mode' }
+  { defaultMessage: 'Only visible in Nightshift developer mode' }
 );
 
 export function DeveloperModeBadge() {
