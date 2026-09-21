@@ -98,24 +98,10 @@ export function createNavigationTree({
             children: [
               { link: 'management:index_management', breadcrumbStatus: 'hidden' },
               { link: 'management:data_federation', breadcrumbStatus: 'hidden' },
-              { link: 'management:index_lifecycle_management', breadcrumbStatus: 'hidden' },
-              { link: 'management:snapshot_restore', breadcrumbStatus: 'hidden' },
-              { link: 'management:transform', breadcrumbStatus: 'hidden' },
-              { link: 'management:rollup_jobs', breadcrumbStatus: 'hidden' },
-              { link: 'management:data_quality', breadcrumbStatus: 'hidden' },
-              { link: 'management:data_usage', breadcrumbStatus: 'hidden' },
+              { link: 'management:esql_views', breadcrumbStatus: 'hidden' },
             ],
             title: i18n.translate('xpack.serverlessVectordb.nav.ingest.indices.title', {
               defaultMessage: 'Indices and data streams',
-            }),
-          },
-          {
-            children: [
-              { link: 'management:ingest_pipelines', breadcrumbStatus: 'hidden' },
-              { link: 'management:pipelines', breadcrumbStatus: 'hidden' },
-            ],
-            title: i18n.translate('xpack.serverlessVectordb.nav.ingest.pipelines.title', {
-              defaultMessage: 'Ingest',
             }),
           },
         ],

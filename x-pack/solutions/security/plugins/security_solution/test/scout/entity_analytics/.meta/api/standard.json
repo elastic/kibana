@@ -1,5 +1,5 @@
 {
-  "sha1": "61e55aa6572882c446605fb5a396226fe190467d",
+  "sha1": "33dc85a447cb96192c58163502e29735e3466fdd",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -336,6 +336,48 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/enable_disable.spec.ts",
         "line": 100,
         "column": 11
+      }
+    },
+    {
+      "id": "ae55cad059630c5-934dabc0c13ebdf",
+      "title": "Lead Generation - POST /internal/entity_analytics/leads/generate quiet environment: zero qualifying candidates produces zero leads without calling the LLM",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/generate.spec.ts",
+        "line": 69,
+        "column": 13
+      }
+    },
+    {
+      "id": "ae55cad059630c5-8e6f19c61fbe092",
+      "title": "Lead Generation - POST /internal/entity_analytics/leads/generate repeat-run dedup: an unchanged candidate refreshes the existing lead without calling the LLM again",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/generate.spec.ts",
+        "line": 85,
+        "column": 7
+      }
+    },
+    {
+      "id": "ae55cad059630c5-7b44c493879d383",
+      "title": "Lead Generation - POST /internal/entity_analytics/leads/generate dismissal survives decay: unchanged evidence on a dismissed lead stays dismissed without calling the LLM",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/generate.spec.ts",
+        "line": 138,
+        "column": 32
       }
     },
     {
