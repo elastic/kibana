@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiEmptyPrompt,
@@ -33,7 +33,6 @@ import type { CoreStart } from '@kbn/core/public';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { AlertZeroPageHeader } from '../../components/alertzero_page_header';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
-import { useInvestigation } from '../../hooks/use_investigations_api';
 import { useProposalsList } from '../../hooks/use_proposals_api';
 import { useOpenInChat } from '../../hooks/use_open_in_chat';
 import { useConversationsUrlParams } from './conversations_url_params';
@@ -43,6 +42,7 @@ import { DismissProposalModal } from '../../components/pending_proposals/dismiss
 import { CLOSED_GROUP_KEY } from '../../../common/proposals/list';
 import type { ProposalItem } from '../../../common/proposals/list';
 import { proposalToInvestigation } from './proposal_to_investigation';
+import { AttachmentSummary } from './attachment_summary';
 
 /**
  * The proposals route distinguishes why a decision was refused — 410 the deadline passed,
@@ -73,7 +73,6 @@ export const ConversationsPage: React.FC = () => {
     selectConversation,
     showTab,
     clearSelectedConversation,
-    dismissMissingConversation,
   } = useConversationsUrlParams();
   const [modalState, setModalState] = useState<{
     type: CardActionType | null;
@@ -197,28 +196,20 @@ export const ConversationsPage: React.FC = () => {
     [flyoutConversationId, proposalsById]
   );
 
-  // The flyout shows the investigation the proposal belongs to, not the proposal again: a
-  // proposal has no timeline, watch or assignee, so rendering the adapted card here would
-  // just repeat the card with every detail field blank.
-  const investigationQuery = useInvestigation(flyoutConversationId);
-  const selectedInvestigation = investigationQuery.data?.investigation;
-
-  // A link to a conversation that no longer exists closes the flyout rather than leaving an empty
-  // one open. Gated on loading so a background refetch cannot close a flyout that is in use.
-  // Dismissed rather than closed, so Back cannot return to the bad id and warn all over again.
-  useEffect(() => {
-    if (!flyoutConversationId || investigationQuery.isLoading || selectedInvestigation) {
-      return;
-    }
-    notifications?.toasts.addDanger(QUEUE_PAGE_INFO.conversationNotFound(flyoutConversationId));
-    dismissMissingConversation();
-  }, [
-    dismissMissingConversation,
-    flyoutConversationId,
-    investigationQuery.isLoading,
-    notifications,
-    selectedInvestigation,
-  ]);
+  // POC: resolve the flyout's investigation from the proposals the page already loaded and
+  // adapted (via `proposalToInvestigation`), matching on conversation id. This bypasses the
+  // server `get_investigation` projection, which is unimplemented in live mode and 404s, so the
+  // flyout opens against the real proposal without mock data. Overview renders from the proposal;
+  // the timeline is empty until a real investigation projection exists.
+  const selectedInvestigation = useMemo(
+    () =>
+      flyoutConversationId
+        ? conversations.find(
+            (inv) => proposalsById.get(inv.id)?.conversationId === flyoutConversationId
+          )
+        : undefined,
+    [flyoutConversationId, conversations, proposalsById]
+  );
 
   const actionInvestigation = useMemo(
     () =>
@@ -285,11 +276,12 @@ export const ConversationsPage: React.FC = () => {
       {flyoutConversationId && show && (
         <InvestigationDetailsFlyout
           investigation={selectedInvestigation}
-          isLoading={investigationQuery.isLoading}
+          isLoading={isLoading}
           selectedTab={show}
           onSelectTab={showTab}
           onClose={clearSelectedConversation}
           onOpenChat={() => openInChat(flyoutConversationId)}
+          attachmentsSlot={<AttachmentSummary />}
         />
       )}
 

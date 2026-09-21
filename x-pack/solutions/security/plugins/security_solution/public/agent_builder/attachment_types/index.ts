@@ -25,56 +25,20 @@ import type { SecurityCanvasEmbeddedBundle } from '../components/security_redux_
 import type { SecurityAgentBuilderChrome } from './entity_explore_navigation';
 import type { AiRuleCreationService } from '../../detection_engine/common/ai_rule_creation_store';
 
-/**
- * Extension of UnknownAttachment that includes an optional attachmentLabel field in the data property
- */
-type UnknownAttachmentWithLabel = Attachment<
-  string,
-  { attachmentLabel?: string } & Record<string, unknown>
->;
-
-interface AttachmentTypeConfig {
-  type: SecurityAgentBuilderAttachments;
-  label: string;
-  icon: string;
-}
-
-const ALERT_ATTACHMENT_CONFIG: AttachmentTypeConfig = {
-  type: SecurityAgentBuilderAttachments.alert,
-  label: i18n.translate('xpack.securitySolution.agentBuilder.attachments.alert.label', {
-    defaultMessage: 'Security Alert',
-  }),
-  icon: 'bell',
-};
-
 const ALERTS_DEFAULT_LABEL = i18n.translate(
   'xpack.securitySolution.agentBuilder.attachments.alerts.label',
   { defaultMessage: 'Security alerts' }
 );
 
-const createAttachmentTypeConfig = (defaultLabel: string, icon: string) => ({
-  getLabel: (attachment: UnknownAttachmentWithLabel) => {
-    const attachmentLabel = attachment?.data?.attachmentLabel;
-    return attachmentLabel ?? defaultLabel;
-  },
-  getIcon: () => icon,
-});
-
 /**
- * Registers the baseline attachment UI definitions that do not require Security Solution runtime
- * context:
- *   - `security.alert` — label + icon only (no rich renderer yet).
+ * Registers the baseline `security.alerts` (plural) attachment UI definition (label + icon only).
  *
- * The rich `security.entity` renderer (card/table + Canvas) is installed via the separate
- * {@link registerEntityAttachment} entry point so the plugin's `start()` can supply
- * `application`, `chrome`, `agentBuilder`, and the lazy Redux/services bundle.
+ * The rich single-alert `security.alert` renderer (opens the flyout_v2 alert flyout) is installed
+ * via {@link registerAlertAttachment}, and the rich `security.entity` renderer via
+ * {@link registerEntityAttachment} — both need the plugin's `start()` to supply the lazy
+ * Redux/services bundle (`resolveSecurityCanvasContext`).
  */
 export const registerAttachmentUiDefinitions = (attachments: AttachmentServiceStartContract) => {
-  attachments.addAttachmentType<UnknownAttachmentWithLabel>(
-    ALERT_ATTACHMENT_CONFIG.type,
-    createAttachmentTypeConfig(ALERT_ATTACHMENT_CONFIG.label, ALERT_ATTACHMENT_CONFIG.icon)
-  );
-
   attachments.addAttachmentType<Attachment<string, { alertIds?: unknown[] }>>(
     SecurityAgentBuilderAttachments.alerts,
     {
@@ -90,6 +54,30 @@ export const registerAttachmentUiDefinitions = (attachments: AttachmentServiceSt
       getIcon: () => 'bell',
     }
   );
+};
+
+/**
+ * Registers the rich single-alert `security.alert` renderer. Its conversation-details content is a
+ * clickable row that opens the flyout_v2 alert (document) flyout for the alert's `_id` + `_index`,
+ * wrapped in `SecurityReduxEmbeddedProvider` so the flyout API resolves the Security store, router,
+ * and services even when rendered on an AlertZero surface outside the Security app shell.
+ */
+export const registerAlertAttachment = ({
+  attachments,
+  resolveSecurityCanvasContext,
+}: {
+  attachments: AttachmentServiceStartContract;
+  resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
+}): void => {
+  void import(
+    /* webpackChunkName: "security_alert_attachment_rich" */
+    './alert_attachment/alert_attachment_definition'
+  ).then(({ createAlertAttachmentDefinition }) => {
+    attachments.addAttachmentType(
+      SecurityAgentBuilderAttachments.alert,
+      createAlertAttachmentDefinition({ resolveSecurityCanvasContext })
+    );
+  });
 };
 
 /**

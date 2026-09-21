@@ -19,6 +19,7 @@ import {
   useGeneratedHtmlId,
   useEuiTheme,
 } from '@elastic/eui';
+import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import type { Investigation } from '../../types';
 import { ConversationDetailsFlyoutHeader } from './flyout_header';
 import { ConversationDetailsFlyoutMenuBar } from './flyout_menu_bar';
@@ -52,6 +53,11 @@ export interface InvestigationDetailsFlyoutProps {
   onSelectTab: (tab: InvestigationFlyoutTab) => void;
   onClose: () => void;
   onOpenChat: () => void;
+  /**
+   * Solution-specific content rendered as an "Attachment summary" section beneath the overview.
+   * Kept as an opaque slot so this shared host stays solution-agnostic — AlertZero fills it.
+   */
+  attachmentsSlot?: React.ReactNode;
 }
 
 /**
@@ -69,6 +75,7 @@ export const InvestigationDetailsFlyout = ({
   onSelectTab,
   onClose,
   onOpenChat,
+  attachmentsSlot,
 }: InvestigationDetailsFlyoutProps) => {
   const { euiTheme } = useEuiTheme();
   const titleId = useGeneratedHtmlId({ prefix: 'investigationDetailsFlyoutTitle' });
@@ -84,6 +91,13 @@ export const InvestigationDetailsFlyout = ({
       onClose={onClose}
       ownFocus={false}
       hideCloseButton
+      // Join EUI's flyout manager as a managed main flyout under the same history group the alert
+      // flyout uses (in AlertZero the alert falls back to DOC_VIEWER_FLYOUT_HISTORY_KEY). With a
+      // shared `historyKey` + `session="start"`, opening the alert stacks in the same group and EUI
+      // renders a Back button to return here. Without `session` the flyout is unmanaged and joins no
+      // group, which is why there was no Back before.
+      session="start"
+      historyKey={DOC_VIEWER_FLYOUT_HISTORY_KEY}
       aria-labelledby={titleId}
       data-test-subj="investigationDetailsFlyout"
     >
@@ -124,7 +138,15 @@ export const InvestigationDetailsFlyout = ({
             data-test-subj="investigationDetailsFlyoutBodySkeleton"
           />
         ) : activeTab === 'overview' ? (
-          <OverviewTab investigation={investigation} />
+          <>
+            <OverviewTab investigation={investigation} />
+            {attachmentsSlot ? (
+              <>
+                <EuiSpacer size="l" />
+                {attachmentsSlot}
+              </>
+            ) : null}
+          </>
         ) : (
           <TimelineTab events={investigation.events} />
         )}

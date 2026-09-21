@@ -85,6 +85,7 @@ import { defaultDeepLinks } from './app/links/default_deep_links';
 import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
 import {
   registerAttachmentUiDefinitions,
+  registerAlertAttachment,
   registerAiRuleCreationHandler,
   registerAttackDiscoveryAttachment,
   registerAttackDiscoveryVerdictAttachment,
@@ -364,6 +365,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       }
 
       registerAttachmentUiDefinitions(plugins.agentBuilder.attachments);
+      registerAlertAttachment({
+        attachments: plugins.agentBuilder.attachments,
+        resolveSecurityCanvasContext: () =>
+          this.getSecurityCanvasContext(core, plugins as StartPluginsDependencies),
+      });
       registerAttackDiscoveryAttachment({
         attachments: plugins.agentBuilder.attachments,
       });
