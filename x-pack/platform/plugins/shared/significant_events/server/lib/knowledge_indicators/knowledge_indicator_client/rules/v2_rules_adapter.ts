@@ -120,7 +120,7 @@ export class RulesAdapterV2 implements IRulesManagementClient {
           if (!definition) {
             throw new Error(`V2 bulk create returned a conflict for unknown rule "${id}"`);
           }
-          await this.updateRule(id, definition);
+          await this.updateRuleWithoutFallback(id, definition);
         })
       )
     );
@@ -152,14 +152,12 @@ export class RulesAdapterV2 implements IRulesManagementClient {
   }
 
   async updateRule(id: string, definition: SignificantEventsRuleDefinition): Promise<void> {
-    await this.rulesClient
-      .updateRule({ id, data: toV2UpdateBody({ definition, isServerless: this.isServerless }) })
-      .catch((error) => {
-        if (isBoom(error) && error.output.statusCode === 404) {
-          return this.createRuleWithoutFallback(id, definition);
-        }
-        throw error;
-      });
+    await this.updateRuleWithoutFallback(id, definition).catch((error) => {
+      if (isBoom(error) && error.output.statusCode === 404) {
+        return this.createRuleWithoutFallback(id, definition);
+      }
+      throw error;
+    });
   }
 
   async bulkDeleteRules(ids: string[]): Promise<void> {
@@ -217,6 +215,16 @@ export class RulesAdapterV2 implements IRulesManagementClient {
       }
     }
     return [...streamNames];
+  }
+
+  private async updateRuleWithoutFallback(
+    id: string,
+    definition: SignificantEventsRuleDefinition
+  ): Promise<void> {
+    await this.rulesClient.updateRule({
+      id,
+      data: toV2UpdateBody({ definition, isServerless: this.isServerless }),
+    });
   }
 
   /**

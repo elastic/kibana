@@ -383,6 +383,41 @@ describe('RulesAdapterV2', () => {
       });
     });
 
+    it('does not recreate a conflicted rule deleted before its update', async () => {
+      const mock = makeRulesClientMock();
+      const updateError = Boom.notFound('deleted after conflict');
+      mock.bulkCreateRules.mockResolvedValue({
+        rules: [{ id: 'rule-created' }],
+        errors: [
+          {
+            id: 'rule-conflict',
+            error: {
+              code: ALERTING_ERROR_CODES.RULE_ALREADY_EXISTS,
+              message: 'already exists',
+            },
+          },
+        ],
+      } as never);
+      mock.updateRule.mockRejectedValue(updateError);
+      const adapter = makeAdapter(mock);
+
+      const thrown = await adapter
+        .bulkCreateRules([
+          { id: 'rule-created', definition: createDefinition },
+          { id: 'rule-conflict', definition: createDefinition },
+        ])
+        .catch((error) => error);
+
+      expect(thrown).toBeInstanceOf(BulkCreateRulesError);
+      expect(thrown).toMatchObject({
+        cause: updateError,
+        createdIds: ['rule-created'],
+        conflictIds: ['rule-conflict'],
+        failedIds: ['rule-conflict'],
+      });
+      expect(mock.createRule).not.toHaveBeenCalled();
+    });
+
     it('propagates whole-request failures unchanged', async () => {
       const mock = makeRulesClientMock();
       const requestError = Boom.badRequest('schedule limit exceeded', {
