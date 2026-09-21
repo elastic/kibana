@@ -10,7 +10,7 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { createEsResponseError } from './es_errors.mock';
 import { EsqlViewsClient } from './esql_views_client';
 
-const VIEW_NAME = '$.nightshift.sources.a';
+const VIEW_NAME = '$.nightshift.sources.default.a';
 
 describe('EsqlViewsClient', () => {
   const setup = () => {

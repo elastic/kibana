@@ -12,8 +12,13 @@ import {
 } from './view_name';
 
 describe('getNightshiftSourceViewName', () => {
-  it('puts the slug after the Nightshift sources prefix', () => {
-    expect(getNightshiftSourceViewName('nginx-errors')).toBe('$.nightshift.sources.nginx-errors');
+  it('puts the space id then the slug after the Nightshift sources prefix', () => {
+    expect(getNightshiftSourceViewName('default', 'nginx-errors')).toBe(
+      '$.nightshift.sources.default.nginx-errors'
+    );
+    expect(getNightshiftSourceViewName('marketing', 'nginx-errors')).toBe(
+      '$.nightshift.sources.marketing.nginx-errors'
+    );
   });
 });
 

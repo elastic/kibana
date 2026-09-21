@@ -8,6 +8,7 @@
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import type { RoleSessionCredentials } from '@kbn/scout';
+import { getNightshiftSourceViewName } from '@kbn/nightshift-shared';
 import {
   NIGHTSHIFT_MANAGER_ROLE,
   NIGHTSHIFT_READ_ONLY_NO_ES_ROLE,
@@ -127,6 +128,9 @@ apiTest.describe(
           const created = await createSource(apiClient, manager.cookieHeader, body, { spaceId });
           expect(created).toHaveStatusCode(200);
           const id = created.body.source.id;
+          expect(created.body.source.view_name).toBe(
+            getNightshiftSourceViewName(spaceId, created.body.source.slug)
+          );
           try {
             const listedHere = await listSources(
               apiClient,

@@ -65,14 +65,14 @@ apiTest.describe(
         const created = await createSource(apiClient, manager.cookieHeader, body);
         expect(created).toHaveStatusCode(200);
         const { source } = created.body;
-        const viewName = getNightshiftSourceViewName(source.slug);
+        const viewName = source.view_name;
         expect(source).toMatchObject({
           ...body,
           slug: source.slug,
           view_name: viewName,
           enabled: true,
         });
-        expect(viewName).toBe(`$.nightshift.sources.${source.slug}`);
+        expect(viewName).toBe(getNightshiftSourceViewName('default', source.slug));
         expect(source.slug).not.toBe(source.id);
         expect(source.esql_updated_at).toBe(source.created_at);
 

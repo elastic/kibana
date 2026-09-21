@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import type {
-  ElasticsearchClient,
-  ISavedObjectsRepository,
-  Logger,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { escapeKuery } from '@kbn/es-query';
 import { hasSameEsql } from '@kbn/streams-schema';
@@ -46,15 +41,16 @@ const FULL_UPDATE = { mergeAttributes: false } as const;
 export type SourceViewsClient = Pick<EsqlViewsClient, 'putView' | 'getView' | 'deleteView'>;
 
 const MAX_SLUG_ALLOCATION_ATTEMPTS = 100;
+const VIEW_NAME_CATALOG_PAGE_SIZE = 1000;
 
 interface SourcesClientDependencies {
   soClient: SavedObjectsClientContract;
-  /** Unscoped: view names are cluster-global, so uniqueness cannot stay in the request space. */
-  catalogSoClient: Pick<ISavedObjectsRepository, 'find'>;
   viewsClient: SourceViewsClient;
   dataEsClient: ElasticsearchClient;
   logger: Logger;
   username: string;
+  /** Request space; encoded in the view name so grants can be `$.nightshift.sources.<spaceId>.*`. */
+  spaceId: string;
 }
 
 const toSource = (id: string, attributes: NightshiftSourceAttributes): NightshiftSource => ({
@@ -99,7 +95,7 @@ export class SourcesClient {
     const attributes: NightshiftSourceAttributes = {
       ...parsed,
       slug,
-      view_name: getNightshiftSourceViewName(slug),
+      view_name: getNightshiftSourceViewName(this.deps.spaceId, slug),
       enabled: true,
       created_by: username,
       created_at: now,
@@ -310,29 +306,51 @@ export class SourcesClient {
 
   /**
    * Slug is immutable after create. Walk `title-slug`, `title-slug-2`, … until neither a
-   * live/orphaned view nor a catalog row in any space already uses that name.
+   * live/orphaned view nor a catalog row in this space already uses that name.
+   * Catalog names are loaded once; suffixes are checked in memory so we do not re-find
+   * the same space for every attempt.
    */
   private async allocateSlug(title: string): Promise<string> {
+    const takenViewNames = await this.listViewNamesInSpace();
     for (let attempt = 1; attempt <= MAX_SLUG_ALLOCATION_ATTEMPTS; attempt++) {
       const slug = getSourceSlugCandidate(title, attempt);
-      if (!(await this.isViewNameTaken(getNightshiftSourceViewName(slug)))) {
-        return slug;
+      const viewName = getNightshiftSourceViewName(this.deps.spaceId, slug);
+      if (takenViewNames.has(viewName)) {
+        continue;
       }
+      if (await this.deps.viewsClient.getView(viewName)) {
+        continue;
+      }
+      return slug;
     }
     throw badRequest('Could not allocate a unique source view name');
   }
 
-  private async isViewNameTaken(viewName: string): Promise<boolean> {
-    const existing = await this.deps.catalogSoClient.find<NightshiftSourceAttributes>({
-      type: NIGHTSHIFT_SOURCE_SO_TYPE,
-      perPage: 1,
-      namespaces: ['*'],
-      filter: `${NIGHTSHIFT_SOURCE_SO_TYPE}.attributes.view_name: "${escapeKuery(viewName)}"`,
-    });
-    if (existing.total > 0) {
-      return true;
+  /** Pages the current space's `view_name` values. Sequential finds: each page depends on the last. */
+  private async listViewNamesInSpace(): Promise<Set<string>> {
+    const names = new Set<string>();
+    let page = 1;
+    while (true) {
+      const { saved_objects: savedObjects, total } = await this.deps.soClient.find<{
+        view_name: string;
+      }>({
+        type: NIGHTSHIFT_SOURCE_SO_TYPE,
+        page,
+        perPage: VIEW_NAME_CATALOG_PAGE_SIZE,
+        fields: ['view_name'],
+      });
+      for (const { attributes } of savedObjects) {
+        names.add(attributes.view_name);
+      }
+      if (
+        savedObjects.length === 0 ||
+        names.size >= total ||
+        savedObjects.length < VIEW_NAME_CATALOG_PAGE_SIZE
+      ) {
+        return names;
+      }
+      page += 1;
     }
-    return Boolean(await this.deps.viewsClient.getView(viewName));
   }
 
   private async getSavedObject(id: string) {

@@ -41,6 +41,8 @@ export function getNightshiftCapabilities(
 
 export {
   MAX_SOURCE_SLUG_LENGTH,
+  MAX_SOURCE_SPACE_ID_LENGTH,
+  MAX_SOURCE_VIEW_NAME_LENGTH,
   NIGHTSHIFT_SOURCE_VIEW_PREFIX,
   getNightshiftSourceViewName,
   getSourceSlugCandidate,

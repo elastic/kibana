@@ -1,7 +1,7 @@
 # Nightshift Sources
 
 A **source** is the unit of work every Nightshift engine consumes: a space-scoped saved object
-holding an ES|QL query, materialised as the ES|QL view `$.nightshift.sources.<slug>`. Engines
+holding an ES|QL query, materialised as the ES|QL view `$.nightshift.sources.<spaceId>.<slug>`. Engines
 (knowledge indicator onboarding, detection, investigation context) query the view, never the
 raw ES|QL, so a source can be edited in one place and every consumer follows.
 
@@ -53,10 +53,12 @@ A source is rows only. On create and update the ES|QL must:
 - not `FROM` a Nightshift source view, or a `$` wildcard that would match one (`$.nightshift.sources.*`,
   `$.nightshift.*`, `$.*`, `$.*.sources.*-*`), or the new view can match itself.
 
-The view name is `$.nightshift.sources.<slug>`. `<slug>` is derived from the title at create
-(`nginx-errors` from "Nginx errors") and never changes, even if the title does. If that name is
-already taken — another source in any space, or an orphaned view — create walks `-2`, `-3`, …
-The saved-object id stays a uuid; it is not in the view name.
+The view name is `$.nightshift.sources.<spaceId>.<slug>`. `<spaceId>` is the Kibana space that
+owns the saved object. `<slug>` is derived from the title at create (`nginx-errors` from
+"Nginx errors") and never changes, even if the title does. If that name is already taken in
+this space — another source, or an orphaned view — create walks `-2`, `-3`, … Two spaces can
+both have an `nginx-errors` source; the views are `….default.nginx-errors` and
+`….marketing.nginx-errors`. The saved-object id stays a uuid; it is not in the view name.
 
 Wildcards, several sources and date math are fine. Create always runs `<esql> | LIMIT 0` as
 the calling user. Update does too when the normalized query changes. A title-only PUT, or a
@@ -99,7 +101,7 @@ the query reads. ES|QL view operations are index privileges applied to the view 
 {
   "indices": [
     {
-      "names": ["$.nightshift.sources.*"],
+      "names": ["$.nightshift.sources.<spaceId>.*"],
       "privileges": ["read", "manage"]
     },
     {
@@ -109,6 +111,11 @@ the query reads. ES|QL view operations are index privileges applied to the view 
   ]
 }
 ```
+
+`$.nightshift.sources.*` still matches every space. Prefer the space-scoped pattern so a role
+for `marketing` cannot see `default`'s views in ES|QL autocomplete. Implicit privileges can
+later grant `read` on that pattern from `read_nightshift` / `manage_nightshift`; this plugin
+does not do that yet.
 
 `manage` covers create, read-definition and delete. Where the cluster supports them,
 `create_view`, `read_view_metadata` and `delete_view` are the least-privilege alternative.
@@ -130,15 +137,18 @@ project type in `config/serverless.yml` and back on for Observability Complete i
   `PUT` of the current values repairs it. `DELETE` cannot take a version: Core's `soClient.delete`
   has no version option. A concurrent `PUT` can recreate the view after `DELETE` has removed it
   and still delete the catalog row, leaving an orphaned view.
-- Create allocates the slug with a cross-space find then a view write, not an atomic reserve.
-  Two concurrent POSTs of the same title can share a `view_name`; the later `putView` wins,
-  `GET` reports `view_drift`, and a `PUT` of the earlier source's values repairs it.
+- Create allocates the slug from the current space's view names (one paged find) then a view
+  write, not an atomic reserve. Two concurrent POSTs of the same title in the same space can
+  share a `view_name`; the later `putView` wins, `GET` reports `view_drift`, and a `PUT` of
+  the earlier source's values repairs it.
 - Deleting a space removes the saved objects but leaves their views behind. Nothing cleans
-  orphaned `$.nightshift.sources.*` views yet. ES|QL views are cluster-global; the Spaces
-  boundary is the saved object, not the view name.
+  orphaned `$.nightshift.sources.<spaceId>.*` views yet. ES|QL views are cluster-global; the
+  Spaces boundary is the saved object. The space id in the view name is for privilege patterns,
+  not ES isolation.
 - The saved objects security extension is excluded for this hidden type, so saved-object-level
   audit events are not emitted; HTTP audit events still are.
-- Views show up in the ES|QL editor's source suggestions under their `$.nightshift.sources.<slug>` name.
+- Views show up in the ES|QL editor's source suggestions under their
+  `$.nightshift.sources.<spaceId>.<slug>` name.
 
 ## Development
 

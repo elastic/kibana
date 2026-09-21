@@ -12,17 +12,19 @@ const SOURCE_COMMANDS = new Set(['from', 'ts']);
 const ALLOWED_PROCESSING_COMMANDS = new Set(['where']);
 // Drop the trailing `.` so `$.nightshift.sources` and `$.nightshift.sources*` match too.
 const NIGHTSHIFT_SOURCE_VIEW_NAMESPACE = NIGHTSHIFT_SOURCE_VIEW_PREFIX.slice(0, -1);
-// `x` is the punctuation-only fallback. Hyphenated names are what a real title produces; a
-// single letter misses patterns such as `$.*.sources.*-*`.
+// `x` is the punctuation-only fallback. Hyphenated space ids and slugs are what real
+// names produce; a single letter misses patterns such as `$.*.sources.*-*`.
 const NIGHTSHIFT_SOURCE_VIEW_EXAMPLES = [
-  `${NIGHTSHIFT_SOURCE_VIEW_PREFIX}x`,
-  `${NIGHTSHIFT_SOURCE_VIEW_PREFIX}nginx-errors`,
-  `${NIGHTSHIFT_SOURCE_VIEW_PREFIX}nginx-errors-2`,
+  `${NIGHTSHIFT_SOURCE_VIEW_PREFIX}default.x`,
+  `${NIGHTSHIFT_SOURCE_VIEW_PREFIX}default.nginx-errors`,
+  `${NIGHTSHIFT_SOURCE_VIEW_PREFIX}default.nginx-errors-2`,
+  `${NIGHTSHIFT_SOURCE_VIEW_PREFIX}team-a.nginx-errors`,
 ] as const;
 
 /**
- * ES `simpleMatch`: `*` is multi-segment, so `$.nightshift.*` hits `$.nightshift.sources.<slug>`.
- * Index wildcards (`*`, `logs-*`) never enter the `$.` namespace; leave those alone.
+ * ES `simpleMatch`: `*` is multi-segment, so `$.nightshift.*` hits
+ * `$.nightshift.sources.<spaceId>.<slug>`. Index wildcards (`*`, `logs-*`) never enter
+ * the `$.` namespace; leave those alone.
  */
 const isNightshiftSourceViewPattern = (name: string): boolean => {
   const pattern = name.toLowerCase();

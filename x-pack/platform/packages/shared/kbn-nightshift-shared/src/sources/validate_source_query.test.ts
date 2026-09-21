@@ -83,10 +83,13 @@ describe('validateSourceQuery', () => {
         'FROM $.nightshift.sources.*',
         'Nightshift source views cannot be used as a source'
       );
-      expectRejected('FROM $.nightshift.sources.abc', 'found "$.nightshift.sources.abc"');
       expectRejected(
-        'FROM logs-*, $.nightshift.sources.foo | WHERE status >= 500',
-        'found "$.nightshift.sources.foo"'
+        'FROM $.nightshift.sources.default.abc',
+        'found "$.nightshift.sources.default.abc"'
+      );
+      expectRejected(
+        'FROM logs-*, $.nightshift.sources.marketing.foo | WHERE status >= 500',
+        'found "$.nightshift.sources.marketing.foo"'
       );
     });
 

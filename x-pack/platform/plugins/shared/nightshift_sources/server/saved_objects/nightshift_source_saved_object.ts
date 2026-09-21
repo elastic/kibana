@@ -11,6 +11,7 @@ import {
   MAX_SOURCE_SLUG_LENGTH,
   MAX_SOURCE_TAG_LENGTH,
   MAX_SOURCE_TAGS,
+  MAX_SOURCE_VIEW_NAME_LENGTH,
 } from '@kbn/nightshift-shared';
 
 export const NIGHTSHIFT_SOURCE_SO_TYPE = 'nightshift-source';
@@ -23,7 +24,7 @@ const nightshiftSourceAttributesSchemaV1 = schema.object({
   }),
   esql: schema.string(),
   slug: schema.string({ maxLength: MAX_SOURCE_SLUG_LENGTH }),
-  view_name: schema.string(),
+  view_name: schema.string({ maxLength: MAX_SOURCE_VIEW_NAME_LENGTH }),
   enabled: schema.boolean(),
   created_by: schema.string(),
   created_at: schema.string(),
@@ -50,7 +51,7 @@ export const nightshiftSourceSavedObjectType: SavedObjectsType<NightshiftSourceA
       // keyword rather than text: the list endpoint sorts on it.
       title: { type: 'keyword', ignore_above: 1024 },
       enabled: { type: 'boolean' },
-      // Create looks this up across every space so two "Nginx errors" sources do not share a view.
+      // Create looks this up in the current space so two sources with the same title do not share a view.
       view_name: { type: 'keyword' },
       // tags and slug stay in `_source`; list only filters/sorts title and enabled.
     },
