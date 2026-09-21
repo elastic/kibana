@@ -24,7 +24,7 @@ import { CasesTableFilters } from './components/table_filters';
 import { CASES_TABLE_PER_PAGE_VALUES } from './types';
 import { CasesTable } from './components/table';
 import { CasesList } from './components/list_view';
-import { VIEW_TOGGLE_TABLE_ID, type ViewToggleId } from './constants';
+import { VIEW_TOGGLE_LIST_ID, VIEW_TOGGLE_TABLE_ID, type ViewToggleId } from './constants';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { CasesMetrics } from './components/cases_metrics';
 import { CasesListOnboarding } from './onboarding/cases_list_onboarding';
@@ -195,8 +195,12 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       (mode: ViewToggleId) => {
         setViewMode(mode);
         trackViewModeChanged(mode);
+        if (mode === VIEW_TOGGLE_LIST_ID) {
+          deselectCases();
+          setQueryParams({ sortField: SortFieldCase.createdAt, sortOrder: queryParams.sortOrder });
+        }
       },
-      [setViewMode, trackViewModeChanged]
+      [setViewMode, trackViewModeChanged, deselectCases, setQueryParams, queryParams.sortOrder]
     );
 
     const selectedColumnFields = useMemo(

@@ -13,6 +13,9 @@ import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { buildCasesPermissions, renderWithTestingProviders } from '../../../common/mock';
 import { KibanaServices } from '../../../common/lib/kibana';
 import { CasesListAppHeader } from './cases_list_app_header';
+import { getListMenu } from './header_menu';
+import { allCasesPermissions } from '../../../common/mock/permissions';
+import * as listI18n from '../translations';
 
 jest.mock('../../../common/navigation/hooks');
 
@@ -149,6 +152,80 @@ describe('CasesListAppHeader', () => {
 
       expect(await screen.findByTestId('cases-templates-button')).toBeInTheDocument();
       expect(screen.queryByTestId('configure-case-button')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('action license tooltip (getListMenu)', () => {
+    const baseArgs = {
+      permissions: allCasesPermissions(),
+      isTemplatesEnabled: false,
+      navigateToCreateCase: jest.fn(),
+      navigateToConfigureCases: jest.fn(),
+      navigateToCasesTemplates: jest.fn(),
+      getCasesTemplatesUrl: jest.fn().mockReturnValue('/templates'),
+    };
+
+    it('does not set tooltipContent when action license is fully enabled', () => {
+      const menu = getListMenu({
+        ...baseArgs,
+        actionLicense: {
+          id: '.jira',
+          name: 'Jira',
+          enabled: true,
+          enabledInConfig: true,
+          enabledInLicense: true,
+        },
+      });
+
+      const configureItem = menu.items?.find((item) => item.id === 'configureCases');
+      expect(configureItem).toBeDefined();
+      expect((configureItem as Record<string, unknown>).tooltipContent).toBeUndefined();
+    });
+
+    it('sets license tooltip when enabledInLicense is false', () => {
+      const menu = getListMenu({
+        ...baseArgs,
+        actionLicense: {
+          id: '.jira',
+          name: 'Jira',
+          enabled: false,
+          enabledInConfig: true,
+          enabledInLicense: false,
+        },
+      });
+
+      const configureItem = menu.items?.find((item) => item.id === 'configureCases');
+      expect(configureItem).toBeDefined();
+      expect((configureItem as Record<string, unknown>).tooltipContent).toBe(
+        listI18n.ACTION_LICENSE_REQUIRED
+      );
+    });
+
+    it('sets config tooltip when enabledInConfig is false', () => {
+      const menu = getListMenu({
+        ...baseArgs,
+        actionLicense: {
+          id: '.jira',
+          name: 'Jira',
+          enabled: false,
+          enabledInConfig: false,
+          enabledInLicense: true,
+        },
+      });
+
+      const configureItem = menu.items?.find((item) => item.id === 'configureCases');
+      expect(configureItem).toBeDefined();
+      expect((configureItem as Record<string, unknown>).tooltipContent).toBe(
+        listI18n.ACTION_LICENSE_DISABLED_BY_CONFIG
+      );
+    });
+
+    it('does not set tooltipContent when actionLicense is null', () => {
+      const menu = getListMenu({ ...baseArgs, actionLicense: null });
+
+      const configureItem = menu.items?.find((item) => item.id === 'configureCases');
+      expect(configureItem).toBeDefined();
+      expect((configureItem as Record<string, unknown>).tooltipContent).toBeUndefined();
     });
   });
 });
