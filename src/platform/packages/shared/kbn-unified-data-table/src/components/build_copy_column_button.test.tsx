@@ -78,8 +78,8 @@ describe('Build a column button to copy to clipboard', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Copy column' }));
 
-    // first row out of 3 rows does not have a value
-    expect(writeText).toHaveBeenCalledWith('"custom_extension"\n\njpg\ngif');
+    // first row out of 3 rows does not have a value, so it copies as the dash the grid renders
+    expect(writeText).toHaveBeenCalledWith('"custom_extension"\n-\njpg\ngif');
   });
 
   it('should copy source column values to clipboard on click', async () => {

@@ -553,6 +553,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'text',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'alerting:v2:experimentalFeatures': {
+    type: 'boolean',
+    _meta: { description: 'Enables experimental features in Alerting v2 when true.' },
+  },
   'observability:logSources': {
     type: 'array',
     items: {
@@ -935,6 +939,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Enable diagnostic mode',
+    },
+  },
+  'observability:nightshiftDeveloperMode': {
+    type: 'boolean',
+    _meta: {
+      description: 'Non-default value of whether Nightshift developer mode is enabled.',
     },
   },
   'genAiSettings:defaultAIConnector': {
