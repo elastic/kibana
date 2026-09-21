@@ -35,7 +35,6 @@
     "@kbn/css-utils",
     "@kbn/shared-ux-utility",
     "@kbn/ui-callout",
-    "@kbn/developer-toolbar",
   ],
   "exclude": [
     "target/**/*",

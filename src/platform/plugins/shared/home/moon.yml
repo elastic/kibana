@@ -46,7 +46,6 @@ dependsOn:
   - '@kbn/css-utils'
   - '@kbn/shared-ux-utility'
   - '@kbn/ui-callout'
-  - '@kbn/developer-toolbar'
 tags:
   - plugin
   - prod
