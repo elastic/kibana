@@ -75,8 +75,7 @@
   },
   "engines": {
     "node": "24.21.0",
-    "pnpm": "~11.27.0",
-    "yarn": "1.22.22"
+    "pnpm": "~12.4.2"
   },
   "resolutions": {
     "**/@babel/core": "7.29.7",
@@ -2258,5 +2257,6 @@
     "xml-crypto": "6.1.2",
     "xmlbuilder": "15.1.1",
     "yaml-language-server": "1.23.0"
-  }
+  },
+  "packageManager": "pnpm@12.4.2"
 }
