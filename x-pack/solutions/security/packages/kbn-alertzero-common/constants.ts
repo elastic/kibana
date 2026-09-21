@@ -56,15 +56,15 @@ export const ALERTZERO_THIN_AGENT_ID = 'alertzero-thin-agent' as const;
 export const SYSTEM_SECURITY_WATCH_FLOOR_ID = 'system-security-watch-floor' as const;
 export const SYSTEM_SECURITY_WATCH_OFFICER_ID = 'system-security-watch-officer' as const;
 export const SYSTEM_SECURITY_WATCH_HUNT_ID = 'system-security-watch-hunt' as const;
-export const SYSTEM_SECURITY_WATCH_DEEP_ID = 'system-security-watch-deep' as const;
+export const SYSTEM_SECURITY_WATCH_FORENSICS_ID = 'system-security-watch-forensics' as const;
 export const SYSTEM_SECURITY_WATCH_DETECTION_ID = 'system-security-watch-detection' as const;
 
 export const SYSTEM_SECURITY_WATCH_IDS = [
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
   SYSTEM_SECURITY_WATCH_OFFICER_ID,
   SYSTEM_SECURITY_WATCH_HUNT_ID,
-  SYSTEM_SECURITY_WATCH_DEEP_ID,
   SYSTEM_SECURITY_WATCH_DETECTION_ID,
+  SYSTEM_SECURITY_WATCH_FORENSICS_ID,
 ] as const;
 
 /**
@@ -82,6 +82,8 @@ export const WATCH_AUTONOMY_LEVELS = ['manual', 'assisted', 'supervised'] as con
  * never leave these declarations behind.
  */
 export const WATCH_AUTONOMY_REVIEW_GATED = ['manual', 'assisted'] as const;
+
+export const WATCH_AUTONOMY_MANUAL = ['manual'] as const;
 
 /**
  * Presentation metadata for the managed watch catalog.
@@ -116,43 +118,45 @@ export const SYSTEM_SECURITY_WATCH_CATALOG = [
     isBeta: true,
   },
   {
-    id: SYSTEM_SECURITY_WATCH_DEEP_ID,
-    deepLinkId: SecurityPageName.alertZeroWatchDeep,
-    name: 'Forensics Watch',
-    color: '#8b5cf6',
-    isBeta: true,
-  },
-  {
     id: SYSTEM_SECURITY_WATCH_DETECTION_ID,
     deepLinkId: SecurityPageName.alertZeroWatchDetection,
     name: 'Detection Watch',
     color: '#ec4899',
     isBeta: true,
   },
+  {
+    id: SYSTEM_SECURITY_WATCH_FORENSICS_ID,
+    deepLinkId: SecurityPageName.alertZeroWatchForensics,
+    name: 'Forensics Watch',
+    color: '#8b5cf6',
+    isBeta: true,
+  },
 ] as const;
-
-export type SystemSecurityWatchCatalogEntry = (typeof SYSTEM_SECURITY_WATCH_CATALOG)[number];
 
 export const WATCH_TAG = 'watch' as const;
 export const WATCH_FLOOR_TAG = 'watch-floor' as const;
 export const WATCH_OFFICER_TAG = 'watch-officer' as const;
 export const WATCH_HUNT_TAG = 'watch-hunt' as const;
-export const WATCH_DEEP_TAG = 'watch-deep' as const;
+export const WATCH_FORENSICS_TAG = 'watch-forensics' as const;
 export const WATCH_DETECTION_TAG = 'watch-detection' as const;
 
 export const WATCH_TIER_TAGS = [
   WATCH_FLOOR_TAG,
   WATCH_OFFICER_TAG,
   WATCH_HUNT_TAG,
-  WATCH_DEEP_TAG,
   WATCH_DETECTION_TAG,
+  WATCH_FORENSICS_TAG,
 ] as const;
+
+export type SystemSecurityWatchCatalogEntry = (typeof SYSTEM_SECURITY_WATCH_CATALOG)[number];
 
 /** Managed Worker workflow ids — tagged Watch members. Hunt CTH is the externally settled id. */
 export const SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID =
   'system-security-floor-alert-triage' as const;
 export const SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID =
   'system-security-floor-attack-discovery' as const;
+export const SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID =
+  'system-security-forensics-endpoint-analysis' as const;
 export const SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID =
   'system-security-hunt-continuous-threat-hunt' as const;
 export const SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID =
@@ -166,6 +170,7 @@ export const SYSTEM_SECURITY_WORKER_IDS = [
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
+  SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
 ] as const;
 
 /**
@@ -202,6 +207,12 @@ export const SYSTEM_SECURITY_WORKER_CATALOG = [
     name: 'Rule Creation',
     watchId: SYSTEM_SECURITY_WATCH_DETECTION_ID,
     watchTag: WATCH_DETECTION_TAG,
+  },
+  {
+    id: SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
+    name: 'Endpoint Analysis',
+    watchId: SYSTEM_SECURITY_WATCH_FORENSICS_ID,
+    watchTag: WATCH_FORENSICS_TAG,
   },
 ] as const;
 

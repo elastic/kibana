@@ -16,9 +16,9 @@
 import { i18n } from '@kbn/i18n';
 import {
   SYSTEM_SECURITY_WATCH_HUNT_ID,
-  SYSTEM_SECURITY_WATCH_DEEP_ID,
   SYSTEM_SECURITY_WATCH_DETECTION_ID,
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
+  SYSTEM_SECURITY_WATCH_FORENSICS_ID,
   SYSTEM_SECURITY_WATCH_OFFICER_ID,
 } from '@kbn/alertzero-common';
 
@@ -645,15 +645,18 @@ const WATCH_INTROS: Record<string, string> = {
     defaultMessage:
       'Groups the Continuous Threat Hunt Worker. Findings arrive as reviewable evidence. Settings below belong to that Worker, not to this Watch.',
   }),
-  [SYSTEM_SECURITY_WATCH_DEEP_ID]: i18n.translate('xpack.alertzero.watches.settings.intro.deep', {
-    defaultMessage:
-      'Watch grouping for specialist analysis. No Workers are attached yet. Settings, when added, will belong to each Worker, not to this Watch.',
-  }),
   [SYSTEM_SECURITY_WATCH_DETECTION_ID]: i18n.translate(
     'xpack.alertzero.watches.settings.intro.detection',
     {
       defaultMessage:
         'Groups the Rule Tuning and Rule Creation Workers. Settings below belong to each Worker, not to this Watch.',
+    }
+  ),
+  [SYSTEM_SECURITY_WATCH_FORENSICS_ID]: i18n.translate(
+    'xpack.alertzero.watches.settings.intro.forensics',
+    {
+      defaultMessage:
+        'Groups the Forensic Analysis Workers. Settings below belong to that Worker, not to this Watch.',
     }
   ),
 };

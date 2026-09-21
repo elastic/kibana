@@ -22,6 +22,7 @@ import { CLOSED_GROUP_KEY } from '../../../common/proposals/list';
  */
 const CATEGORY_TO_BUCKET: Record<string, RecommendedAction> = {
   respond: 'respond',
+  contain: 'respond',
   investigate: 'investigate',
   configure: 'configure',
   tune: 'configure',
