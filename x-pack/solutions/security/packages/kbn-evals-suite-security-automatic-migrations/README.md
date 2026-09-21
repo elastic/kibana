@@ -41,7 +41,7 @@ node scripts/evals start --suite security-automatic-migrations
 
 The v2 agent graph is enabled via the `evals_rule_migration_v2` server config set. Add
 `"serverConfigSet"` to the suite entry in
-[`.buildkite/pipelines/evals/evals.suites.json`](../../../../.buildkite/pipelines/evals/evals.suites.json)
+[`.buildkite/pipelines/evals/evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json)
 **before** starting the run, and revert it afterwards so CI stays on the default (v1) config:
 
 ```json
