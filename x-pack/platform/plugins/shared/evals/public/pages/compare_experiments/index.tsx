@@ -570,7 +570,6 @@ const clickableRowClass = css`
 export const CompareExperimentsPage: React.FC = () => {
   const history = useHistory();
   const { search } = useLocation();
-  const { euiTheme } = useEuiTheme();
 
   const params = useMemo(() => new URLSearchParams(search), [search]);
   const compareType = params.get('type') === 'execution' ? 'execution' : 'experiment';
@@ -787,7 +786,8 @@ export const CompareExperimentsPage: React.FC = () => {
 
   if (!baselineId || !targetId) {
     return (
-      <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
+      <EuiPageSection paddingSize="none">
+        <EuiSpacer size="m" />
         <EuiEmptyPrompt
           iconType="compareArrows"
           title={<h2>{i18n.MISSING_EXPERIMENT_IDS_TITLE}</h2>}
@@ -801,7 +801,8 @@ export const CompareExperimentsPage: React.FC = () => {
   }
 
   return (
-    <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
+    <EuiPageSection paddingSize="none">
+      <EuiSpacer size="m" />
       <EuiFlexGroup alignItems="center" responsive={false}>
         <EuiFlexItem>
           <EuiTitle size="m">

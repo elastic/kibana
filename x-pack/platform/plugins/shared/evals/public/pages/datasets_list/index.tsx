@@ -28,7 +28,6 @@ import {
   EuiTextArea,
   EuiTitle,
   EuiToolTip,
-  useEuiTheme,
   type CriteriaWithPagination,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
@@ -69,7 +68,6 @@ type SortableField = Extract<
 
 export const DatasetsListPage: React.FC = () => {
   const history = useHistory();
-  const { euiTheme } = useEuiTheme();
   const { canManage } = useEvalsPermissions();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(25);
@@ -343,7 +341,8 @@ export const DatasetsListPage: React.FC = () => {
 
   return (
     <>
-      <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
+      <EuiPageSection paddingSize="none">
+        <EuiSpacer size="m" />
         {showSearchBar ? (
           <>
             <EuiFlexGroup

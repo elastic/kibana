@@ -39,7 +39,6 @@ import {
   EuiTextArea,
   EuiTitle,
   EuiToolTip,
-  useEuiTheme,
   type EuiBasicTableColumn,
   type CriteriaWithPagination,
 } from '@elastic/eui';
@@ -125,7 +124,6 @@ const truncatedCellStyles = css`
 export const DatasetDetailPage: React.FC = () => {
   const { datasetId } = useParams<{ datasetId: string }>();
   const history = useHistory();
-  const { euiTheme } = useEuiTheme();
   const { canManage } = useEvalsPermissions();
 
   const { data: dataset, isLoading: isDatasetLoading, error: datasetError } = useDataset(datasetId);
@@ -717,7 +715,8 @@ export const DatasetDetailPage: React.FC = () => {
 
   if (isDatasetLoading) {
     return (
-      <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
+      <EuiPageSection paddingSize="none">
+        <EuiSpacer size="m" />
         <EuiLoadingSpinner size="xl" />
       </EuiPageSection>
     );
@@ -726,7 +725,8 @@ export const DatasetDetailPage: React.FC = () => {
   if (datasetError) {
     const isNotFound = isHttpFetchError(datasetError) && datasetError.response?.status === 404;
     return (
-      <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
+      <EuiPageSection paddingSize="none">
+        <EuiSpacer size="m" />
         <EuiEmptyPrompt
           color={isNotFound ? 'subdued' : 'danger'}
           iconType={isNotFound ? 'magnify' : 'warning'}
@@ -752,7 +752,8 @@ export const DatasetDetailPage: React.FC = () => {
 
   return (
     <>
-      <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
+      <EuiPageSection paddingSize="none">
+        <EuiSpacer size="m" />
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>

@@ -33,7 +33,6 @@ import {
   EuiTitle,
   EuiSwitch,
   EuiToolTip,
-  useEuiTheme,
   type EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
@@ -242,7 +241,6 @@ const buildScoreCountByLabelLensConfig = ({
 export const OnlineEvalDetailPage: React.FC = () => {
   const history = useHistory();
   const { workflowId } = useParams<{ workflowId: string }>();
-  const { euiTheme } = useEuiTheme();
   const { services } = useKibana<{
     http: HttpStart;
     dataViews: DataViewsPublicPluginStart;
@@ -508,7 +506,8 @@ export const OnlineEvalDetailPage: React.FC = () => {
 
   if (isWorkflowLoading) {
     return (
-      <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
+      <EuiPageSection paddingSize="none">
+        <EuiSpacer size="m" />
         <EuiText>
           <p>
             {i18n.translate('xpack.evals.onlineEvaluations.detail.loadingWorkflow', {
@@ -522,7 +521,8 @@ export const OnlineEvalDetailPage: React.FC = () => {
 
   if (workflowError || !workflow) {
     return (
-      <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
+      <EuiPageSection paddingSize="none">
+        <EuiSpacer size="m" />
         <EuiEmptyPrompt
           color="danger"
           iconType="warning"
@@ -555,7 +555,8 @@ export const OnlineEvalDetailPage: React.FC = () => {
 
   return (
     <>
-      <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
+      <EuiPageSection paddingSize="none">
+        <EuiSpacer size="m" />
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
           <EuiFlexItem>
             <EuiTitle size="m">

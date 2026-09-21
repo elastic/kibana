@@ -31,7 +31,6 @@ import {
   EuiText,
   EuiTitle,
   type EuiBasicTableColumn,
-  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { goldenClusterPrivileges } from '@kbn/evals-common';
@@ -92,7 +91,6 @@ const getUrlValidationError = (value: string): string | null => {
 };
 
 export const RemotesListPage: React.FC = () => {
-  const { euiTheme } = useEuiTheme();
   const { canManage } = useEvalsPermissions();
   const deleteModalTitleId = useGeneratedHtmlId();
   const flyoutTitleId = useGeneratedHtmlId();
@@ -321,7 +319,8 @@ export const RemotesListPage: React.FC = () => {
 
   return (
     <>
-      <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
+      <EuiPageSection paddingSize="none">
+        <EuiSpacer size="m" />
         {canManage ? (
           <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
             <EuiFlexItem grow={false}>
