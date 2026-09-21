@@ -130,8 +130,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           throw new Error(`Expected resolved evidence, received ${result.status}`);
         }
 
-        expect(result.readiness).to.be('immediate');
-        expect(result.profile_selection).to.be('auto');
+        expect(result).not.to.have.property('best_effort');
         expect(result.profile).to.be('elastic-inference');
         expect(result.evidence).to.eql({
           input: { message: 'What is the service status?' },
@@ -159,8 +158,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           throw new Error(`Expected resolved evidence, received ${result.status}`);
         }
 
-        expect(result.readiness).to.be('complete');
-        expect(result.profile_selection).to.be('explicit');
+        expect(result).not.to.have.property('best_effort');
         expect(result.profile).to.be('elastic-inference');
       });
     });

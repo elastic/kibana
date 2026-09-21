@@ -9,18 +9,17 @@ import { GetTraceEvidenceResponse } from './traces/get_trace_evidence_route.gen'
 
 describe('GetTraceEvidenceResponse', () => {
   const evidenceStatus = {
-    user_query: { status: 'found' as const },
-    agent_response: { status: 'found' as const },
-    tool_calls: { status: 'found' as const },
+    user_query: 'found' as const,
+    agent_response: 'found' as const,
+    tool_calls: 'found' as const,
   };
 
   it('accepts unbounded message content and arbitrary optional tool JSON', () => {
     const longMessage = 'x'.repeat(100_000);
     const result = GetTraceEvidenceResponse.safeParse({
       status: 'resolved',
-      readiness: 'immediate',
       trace_id: '0af7651916cd43dd8448eb211c80319c',
-      profile_selection: 'auto',
+      best_effort: true,
       profile: 'elastic-inference',
       evidence: {
         input: { message: longMessage },
@@ -30,7 +29,6 @@ describe('GetTraceEvidenceResponse', () => {
           { tool_id: 'optional-payloads' },
         ],
       },
-      evidence_status: evidenceStatus,
     });
 
     expect(result.success).toBe(true);
@@ -39,9 +37,7 @@ describe('GetTraceEvidenceResponse', () => {
   it('accepts unresolved diagnostics without an evidence field', () => {
     const result = GetTraceEvidenceResponse.safeParse({
       status: 'unresolved',
-      readiness: 'immediate',
       trace_id: '0af7651916cd43dd8448eb211c80319c',
-      profile_selection: 'auto',
       profile: null,
       profile_diagnostics: Array.from({ length: 5 }, () => ({
         profile: 'elastic-inference',

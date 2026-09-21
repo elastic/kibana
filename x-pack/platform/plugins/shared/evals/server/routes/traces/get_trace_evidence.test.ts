@@ -46,6 +46,11 @@ const EVIDENCE = {
   agent_response: { status: 'found' as const, field: 'output', sample: 'world' },
   tool_calls: { status: 'found' as const, field: 'tool', sample: 'search' },
 };
+const DIAGNOSTIC_EVIDENCE = {
+  user_query: 'found' as const,
+  agent_response: 'found' as const,
+  tool_calls: 'found' as const,
+};
 const PROFILE_RESULT = {
   profile: 'elastic-inference' as const,
   round: ROUND,
@@ -57,8 +62,6 @@ describe('GET /internal/evals/traces/{traceId}/evidence', () => {
   const hasResolvedEvidenceMock = evidenceServiceModule.hasResolvedEvidence as jest.Mock;
   const extractSelectedEvidenceMock = evidenceServiceModule.extractSelectedEvidence as jest.Mock;
   const extractProfilesEvidenceMock = evidenceServiceModule.extractProfilesEvidence as jest.Mock;
-  const toInstrumentationProfileProbesMock =
-    evidenceServiceModule.toInstrumentationProfileProbes as jest.Mock;
   const awaitTraceReadyMock = awaitTraceReady as jest.MockedFunction<typeof awaitTraceReady>;
 
   const setup = () => {
@@ -106,9 +109,6 @@ describe('GET /internal/evals/traces/{traceId}/evidence', () => {
     hasResolvedEvidenceMock.mockReturnValue(true);
     extractSelectedEvidenceMock.mockResolvedValue({ selected: PROFILE_RESULT });
     extractProfilesEvidenceMock.mockResolvedValue([PROFILE_RESULT]);
-    toInstrumentationProfileProbesMock.mockImplementation((profiles: (typeof PROFILE_RESULT)[]) =>
-      profiles.map(({ profile, evidence }) => ({ profile, evidence }))
-    );
     awaitTraceReadyMock.mockResolvedValue({
       ...PROFILE_RESULT,
       readiness: 'stable',
@@ -149,12 +149,9 @@ describe('GET /internal/evals/traces/{traceId}/evidence', () => {
     expect(result.status).toBe(200);
     expect(result.payload).toEqual({
       status: 'resolved',
-      readiness: 'immediate',
       trace_id: TRACE_ID,
-      profile_selection: 'explicit',
       profile: 'elastic-inference',
       evidence: ROUND,
-      evidence_status: EVIDENCE,
     });
     expect(extractSelectedEvidenceMock).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -172,7 +169,6 @@ describe('GET /internal/evals/traces/{traceId}/evidence', () => {
     expect(result.payload).toEqual(
       expect.objectContaining({
         status: 'resolved',
-        profile_selection: 'auto',
         profile: 'elastic-inference',
         evidence: ROUND,
       })
@@ -194,16 +190,14 @@ describe('GET /internal/evals/traces/{traceId}/evidence', () => {
 
     expect(result.payload).toEqual({
       status: 'unresolved',
-      readiness: 'immediate',
       trace_id: TRACE_ID,
-      profile_selection: 'explicit',
       profile: 'otel-genai-events',
-      profile_diagnostics: [{ profile: 'elastic-inference', evidence: EVIDENCE }],
+      profile_diagnostics: [{ profile: 'elastic-inference', evidence: DIAGNOSTIC_EVIDENCE }],
     });
     expect(result.payload).not.toHaveProperty('evidence');
   });
 
-  it('waits with the requested mode and returns achieved readiness', async () => {
+  it('waits with the requested mode without echoing it in the response', async () => {
     const { handler, context, logger } = setup();
 
     const result = await handler(
@@ -212,11 +206,29 @@ describe('GET /internal/evals/traces/{traceId}/evidence', () => {
       kibanaResponseFactory
     );
 
-    expect(result.payload.readiness).toBe('stable');
+    expect(result.payload).not.toHaveProperty('best_effort');
     expect(awaitTraceReadyMock).toHaveBeenCalledWith(
       expect.any(Object),
       { mode: 'stable', profile: 'elastic-inference' },
       logger
+    );
+  });
+
+  it('marks waited evidence as best effort when the readiness budget expires', async () => {
+    awaitTraceReadyMock.mockResolvedValue({
+      ...PROFILE_RESULT,
+      readiness: 'best_effort',
+    });
+    const { handler, context } = setup();
+
+    const result = await handler(
+      context,
+      request({ profile: 'elastic-inference', wait: 'complete' }),
+      kibanaResponseFactory
+    );
+
+    expect(result.payload).toEqual(
+      expect.objectContaining({ status: 'resolved', best_effort: true })
     );
   });
 
@@ -246,9 +258,8 @@ describe('GET /internal/evals/traces/{traceId}/evidence', () => {
     expect(result.payload).toEqual(
       expect.objectContaining({
         status: 'unresolved',
-        readiness: 'best_effort',
         profile: null,
-        profile_diagnostics: [{ profile: 'elastic-inference', evidence: EVIDENCE }],
+        profile_diagnostics: [{ profile: 'elastic-inference', evidence: DIAGNOSTIC_EVIDENCE }],
       })
     );
   });

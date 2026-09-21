@@ -634,8 +634,6 @@ describe('trace evidence reconstruction integration', () => {
     expect(claudeResponse.payload as GetTraceEvidenceResponse).toEqual(
       expect.objectContaining({
         status: 'resolved',
-        readiness: 'immediate',
-        profile_selection: 'auto',
         profile: 'claude-code',
         evidence: expect.objectContaining({
           input: { message: 'Summarize workflow run status.' },
@@ -647,7 +645,6 @@ describe('trace evidence reconstruction integration', () => {
     expect(otelResponse.payload as GetTraceEvidenceResponse).toEqual(
       expect.objectContaining({
         status: 'resolved',
-        profile_selection: 'explicit',
         profile: 'otel-genai-events',
       })
     );

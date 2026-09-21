@@ -25,20 +25,11 @@ export type EvidenceProbeStatus = z.infer<typeof EvidenceProbeStatus>;
 export type EvidenceProbeStatusEnum = typeof EvidenceProbeStatus.enum;
 export const EvidenceProbeStatusEnum = EvidenceProbeStatus.enum;
 
-export const EvidenceItemStatus = lazySchema(() =>
-  z.object({
-    status: EvidenceProbeStatus,
-    field: z.string().max(1024).optional(),
-    sample: z.string().max(123).optional(),
-  })
-);
-export type EvidenceItemStatus = z.infer<typeof EvidenceItemStatus>;
-
 export const EvidenceStatus = lazySchema(() =>
   z.object({
-    user_query: EvidenceItemStatus,
-    agent_response: EvidenceItemStatus,
-    tool_calls: EvidenceItemStatus,
+    user_query: EvidenceProbeStatus,
+    agent_response: EvidenceProbeStatus,
+    tool_calls: EvidenceProbeStatus,
   })
 );
 export type EvidenceStatus = z.infer<typeof EvidenceStatus>;
@@ -87,12 +78,18 @@ export type ProfileDiagnostic = z.infer<typeof ProfileDiagnostic>;
 export const ResolvedTraceEvidenceResponse = lazySchema(() =>
   z.object({
     status: z.literal('resolved'),
-    readiness: z.enum(['immediate', 'stable', 'complete', 'best_effort']),
     trace_id: z.string().max(32),
-    profile_selection: z.enum(['explicit', 'auto']),
+    /**
+     * Present only when a waited request exhausts its readiness budget and returns the latest usable evidence.
+     */
+    best_effort: z
+      .boolean()
+      .optional()
+      .describe(
+        'Present only when a waited request exhausts its readiness budget and returns the latest usable evidence.'
+      ),
     profile: InstrumentationProfile,
     evidence: EvidenceRound,
-    evidence_status: EvidenceStatus,
   })
 );
 export type ResolvedTraceEvidenceResponse = z.infer<typeof ResolvedTraceEvidenceResponse>;
@@ -100,9 +97,7 @@ export type ResolvedTraceEvidenceResponse = z.infer<typeof ResolvedTraceEvidence
 export const UnresolvedTraceEvidenceResponse = lazySchema(() =>
   z.object({
     status: z.literal('unresolved'),
-    readiness: z.enum(['immediate', 'best_effort']),
     trace_id: z.string().max(32),
-    profile_selection: z.enum(['explicit', 'auto']),
     profile: InstrumentationProfile.nullable(),
     profile_diagnostics: z.array(ProfileDiagnostic),
   })

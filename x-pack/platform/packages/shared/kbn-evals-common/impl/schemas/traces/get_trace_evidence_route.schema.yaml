@@ -59,20 +59,6 @@ components:
         - not_found
         - content_redacted
 
-    EvidenceItemStatus:
-      type: object
-      required:
-        - status
-      properties:
-        status:
-          $ref: '#/components/schemas/EvidenceProbeStatus'
-        field:
-          type: string
-          maxLength: 1024
-        sample:
-          type: string
-          maxLength: 123
-
     EvidenceStatus:
       type: object
       required:
@@ -81,11 +67,11 @@ components:
         - tool_calls
       properties:
         user_query:
-          $ref: '#/components/schemas/EvidenceItemStatus'
+          $ref: '#/components/schemas/EvidenceProbeStatus'
         agent_response:
-          $ref: '#/components/schemas/EvidenceItemStatus'
+          $ref: '#/components/schemas/EvidenceProbeStatus'
         tool_calls:
-          $ref: '#/components/schemas/EvidenceItemStatus'
+          $ref: '#/components/schemas/EvidenceProbeStatus'
 
     EvidenceToolCall:
       type: object
@@ -143,46 +129,30 @@ components:
       type: object
       required:
         - status
-        - readiness
         - trace_id
-        - profile_selection
         - profile
         - evidence
-        - evidence_status
       properties:
         status:
           type: string
           enum:
             - resolved
-        readiness:
-          type: string
-          enum:
-            - immediate
-            - stable
-            - complete
-            - best_effort
         trace_id:
           type: string
           maxLength: 32
-        profile_selection:
-          type: string
-          enum:
-            - explicit
-            - auto
+        best_effort:
+          type: boolean
+          description: Present only when a waited request exhausts its readiness budget and returns the latest usable evidence.
         profile:
           $ref: '../common_attributes.schema.yaml#/components/schemas/InstrumentationProfile'
         evidence:
           $ref: '#/components/schemas/EvidenceRound'
-        evidence_status:
-          $ref: '#/components/schemas/EvidenceStatus'
 
     UnresolvedTraceEvidenceResponse:
       type: object
       required:
         - status
-        - readiness
         - trace_id
-        - profile_selection
         - profile
         - profile_diagnostics
       properties:
@@ -190,19 +160,9 @@ components:
           type: string
           enum:
             - unresolved
-        readiness:
-          type: string
-          enum:
-            - immediate
-            - best_effort
         trace_id:
           type: string
           maxLength: 32
-        profile_selection:
-          type: string
-          enum:
-            - explicit
-            - auto
         profile:
           $ref: '../common_attributes.schema.yaml#/components/schemas/InstrumentationProfile'
           nullable: true

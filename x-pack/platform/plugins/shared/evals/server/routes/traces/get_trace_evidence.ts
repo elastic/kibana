@@ -21,7 +21,6 @@ import {
   extractSelectedEvidence,
   hasResolvedEvidence,
   hasTraceDocuments,
-  toInstrumentationProfileProbes,
   type InstrumentationProfileProbeResult,
 } from '../../evaluators/evidence/evidence_service';
 import type { InstrumentationProfile } from '../../evaluators/evidence/types';
@@ -37,43 +36,43 @@ import { handleMaximumResponseSizeExceededError } from '../utils/handle_response
 
 const toResolvedResponse = ({
   traceId,
-  profileSelection,
   result,
 }: {
   traceId: string;
-  profileSelection: 'explicit' | 'auto';
   result: Omit<AwaitTraceReadyResult, 'readiness'> & {
     readiness: AwaitTraceReadyResult['readiness'] | 'immediate';
   };
 }): GetTraceEvidenceResponse => ({
   status: 'resolved',
-  readiness: result.readiness,
   trace_id: traceId,
-  profile_selection: profileSelection,
   profile: result.profile,
   evidence: result.round,
-  evidence_status: result.evidence,
+  ...(result.readiness === 'best_effort' ? { best_effort: true as const } : {}),
 });
+
+const toProfileDiagnostics = (profiles: InstrumentationProfileProbeResult[]) =>
+  profiles.map(({ profile, evidence }) => ({
+    profile,
+    evidence: {
+      user_query: evidence.user_query.status,
+      agent_response: evidence.agent_response.status,
+      tool_calls: evidence.tool_calls.status,
+    },
+  }));
 
 const toUnresolvedResponse = ({
   traceId,
-  profileSelection,
   profile,
-  readiness,
   profiles,
 }: {
   traceId: string;
-  profileSelection: 'explicit' | 'auto';
   profile: InstrumentationProfile | null;
-  readiness: 'immediate' | 'best_effort';
   profiles: InstrumentationProfileProbeResult[];
 }): GetTraceEvidenceResponse => ({
   status: 'unresolved',
-  readiness,
   trace_id: traceId,
-  profile_selection: profileSelection,
   profile,
-  profile_diagnostics: profiles,
+  profile_diagnostics: toProfileDiagnostics(profiles),
 });
 
 export const registerGetTraceEvidenceRoute = ({ router, logger }: RouteDependencies) => {
@@ -105,8 +104,6 @@ export const registerGetTraceEvidenceRoute = ({ router, logger }: RouteDependenc
           });
         }
 
-        const profileSelection = profile ? 'explicit' : 'auto';
-
         try {
           const coreContext = await context.core;
           const traceAccessor = createTraceAccessor({
@@ -118,7 +115,7 @@ export const registerGetTraceEvidenceRoute = ({ router, logger }: RouteDependenc
             try {
               const result = await awaitTraceReady(traceAccessor, { mode: wait, profile }, logger);
               return response.ok({
-                body: toResolvedResponse({ traceId, profileSelection, result }),
+                body: toResolvedResponse({ traceId, result }),
               });
             } catch (error) {
               if (error instanceof TraceReadinessError) {
@@ -129,9 +126,7 @@ export const registerGetTraceEvidenceRoute = ({ router, logger }: RouteDependenc
                 return response.ok({
                   body: toUnresolvedResponse({
                     traceId,
-                    profileSelection,
                     profile: profile ?? null,
-                    readiness: 'best_effort',
                     profiles: error.profiles,
                   }),
                 });
@@ -153,7 +148,6 @@ export const registerGetTraceEvidenceRoute = ({ router, logger }: RouteDependenc
             return response.ok({
               body: toResolvedResponse({
                 traceId,
-                profileSelection,
                 result: { ...selection.selected, readiness: 'immediate' },
               }),
             });
@@ -163,10 +157,8 @@ export const registerGetTraceEvidenceRoute = ({ router, logger }: RouteDependenc
           return response.ok({
             body: toUnresolvedResponse({
               traceId,
-              profileSelection,
               profile: profile ?? null,
-              readiness: 'immediate',
-              profiles: toInstrumentationProfileProbes(profiles),
+              profiles,
             }),
           });
         } catch (error) {
