@@ -58,7 +58,8 @@ export interface SearchByAnchorsResult {
 export type CorrelationEngineStatus = 'matched' | 'no_match' | 'unavailable';
 
 export interface DiamondScore {
-  vertex: string;
+  vertex: 'adversary' | 'capability' | 'infrastructure' | 'victim';
+  related_report_id: string;
   score: number;
 }
 
@@ -79,10 +80,23 @@ export interface AnchorItem {
   value: string;
 }
 
+/**
+ * The `security.hunt_correlation` attachment's own `thresholds` shape
+ * (`alertzero/server/agent_builder/attachments/hunt_correlation.ts`, PR 1,
+ * kibana#291882): `anchor_match` and `diamond_vertex`, both 0-1. Distinct
+ * from this engine's internal `CorrelationEngineResult.thresholds`
+ * (`discriminating_min`), which gates the anchors search itself rather than
+ * describing what the attachment payload means to a reader.
+ */
+export interface HuntCorrelationAttachmentThresholds {
+  anchor_match: number;
+  diamond_vertex: number;
+}
+
 export interface HuntCorrelationAttachmentData {
   anchors: AnchorItem[];
   diamond_scores: DiamondScore[];
-  thresholds: { discriminating_min: number };
+  thresholds: HuntCorrelationAttachmentThresholds;
   self_match_excluded: true;
   report_revision: string;
 }

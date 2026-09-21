@@ -58,7 +58,9 @@ export const CorrelateResponse = lazySchema(() =>
     matches: z.array(z.record(z.string(), z.unknown())),
     thresholds: z.object({ discriminating_min: z.number() }),
     self_match_excluded: z.literal(true),
-    diamond_scores: z.array(z.object({ vertex: z.string(), score: z.number() })),
+    diamond_scores: z.array(
+      z.object({ vertex: z.string(), related_report_id: z.string(), score: z.number() })
+    ),
     anchor_summary: z.object({
       hash_ioc_count: z.number().int(),
       network_ioc_count: z.number().int(),
