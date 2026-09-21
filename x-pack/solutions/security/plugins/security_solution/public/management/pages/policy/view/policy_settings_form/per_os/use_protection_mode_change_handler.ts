@@ -32,11 +32,8 @@ type ProtectionPolicyBranch<Protection extends PolicyProtection> = {
   popup: { [Key in Protection]: { enabled: boolean } };
 };
 
-export const useProtectionModeChangeHandler = <
-  Protection extends PolicyProtection,
-  OS extends ProtectionOperatingSystems[Protection]
->(
-  accessor: PerOsPolicyAccessor<OS>,
+export const useProtectionModeChangeHandler = <Protection extends PolicyProtection>(
+  accessor: PerOsPolicyAccessor<ProtectionOperatingSystems[Protection]>,
   protection: Protection,
   onChange: PolicyFormComponentCommonProps['onChange']
 ): ((nextMode: ProtectionModes) => void) => {
@@ -45,8 +42,9 @@ export const useProtectionModeChangeHandler = <
   return useCallback(
     (nextMode: ProtectionModes) => {
       const updatedPolicy = accessor.update((currentOsPolicy) => {
-        const protectionPolicy = currentOsPolicy as PolicyConfig[OS] &
-          ProtectionPolicyBranch<Protection>;
+        const protectionPolicy =
+          currentOsPolicy as PolicyConfig[ProtectionOperatingSystems[Protection]] &
+            ProtectionPolicyBranch<Protection>;
         // Spread rather than assign into the branch: a policy stored before the protection
         // existed has no object there, and any sibling field it does carry must survive.
         protectionPolicy[protection] = { ...protectionPolicy[protection], mode: nextMode };

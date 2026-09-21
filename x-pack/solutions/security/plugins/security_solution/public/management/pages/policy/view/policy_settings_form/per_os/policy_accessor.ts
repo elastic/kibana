@@ -22,6 +22,10 @@ type PerOsPolicyOperatingSystem =
   | RansomwareProtectionOSes
   | DeviceControlOSes;
 
+/**
+ * `OS` is invariant because `update` takes an `OS`-typed callback. Callers therefore use the
+ * protection's full OS union rather than a narrow literal.
+ */
 export interface PerOsPolicyAccessor<OS extends PerOsPolicyOperatingSystem> {
   read: () => Immutable<PolicyConfig[OS]>;
   update: (updater: (osPolicy: PolicyConfig[OS]) => void) => PolicyConfig;
@@ -41,27 +45,27 @@ const createPerOsPolicyAccessor = <OS extends PerOsPolicyOperatingSystem>(
   };
 };
 
-export const createMalwarePolicyAccessor = <OS extends MalwareProtectionOSes>(
+export const createMalwarePolicyAccessor = (
   policy: PolicyConfig,
-  os: OS
-): PerOsPolicyAccessor<OS> => createPerOsPolicyAccessor(policy, os);
+  os: MalwareProtectionOSes
+): PerOsPolicyAccessor<MalwareProtectionOSes> => createPerOsPolicyAccessor(policy, os);
 
-export const createMemoryProtectionPolicyAccessor = <OS extends MemoryProtectionOSes>(
+export const createMemoryProtectionPolicyAccessor = (
   policy: PolicyConfig,
-  os: OS
-): PerOsPolicyAccessor<OS> => createPerOsPolicyAccessor(policy, os);
+  os: MemoryProtectionOSes
+): PerOsPolicyAccessor<MemoryProtectionOSes> => createPerOsPolicyAccessor(policy, os);
 
-export const createBehaviorProtectionPolicyAccessor = <OS extends BehaviorProtectionOSes>(
+export const createBehaviorProtectionPolicyAccessor = (
   policy: PolicyConfig,
-  os: OS
-): PerOsPolicyAccessor<OS> => createPerOsPolicyAccessor(policy, os);
+  os: BehaviorProtectionOSes
+): PerOsPolicyAccessor<BehaviorProtectionOSes> => createPerOsPolicyAccessor(policy, os);
 
-export const createRansomwarePolicyAccessor = <OS extends RansomwareProtectionOSes>(
+export const createRansomwarePolicyAccessor = (
   policy: PolicyConfig,
-  os: OS
-): PerOsPolicyAccessor<OS> => createPerOsPolicyAccessor(policy, os);
+  os: RansomwareProtectionOSes
+): PerOsPolicyAccessor<RansomwareProtectionOSes> => createPerOsPolicyAccessor(policy, os);
 
-export const createDeviceControlPolicyAccessor = <OS extends DeviceControlOSes>(
+export const createDeviceControlPolicyAccessor = (
   policy: PolicyConfig,
-  os: OS
-): PerOsPolicyAccessor<OS> => createPerOsPolicyAccessor(policy, os);
+  os: DeviceControlOSes
+): PerOsPolicyAccessor<DeviceControlOSes> => createPerOsPolicyAccessor(policy, os);

@@ -35,10 +35,10 @@ describe('PerOsDeviceControlNotifyUserOption', () => {
   let hasRendered: boolean;
 
   const renderMacOption = (
-    overrides: Partial<PerOsDeviceControlNotifyUserOptionProps<PolicyOperatingSystem.mac>> = {},
+    overrides: Partial<PerOsDeviceControlNotifyUserOptionProps> = {},
     policyToRender: PolicyConfig = policy
   ) => {
-    const props: PerOsDeviceControlNotifyUserOptionProps<PolicyOperatingSystem.mac> = {
+    const props: PerOsDeviceControlNotifyUserOptionProps = {
       accessor: createDeviceControlPolicyAccessor(policyToRender, PolicyOperatingSystem.mac),
       onChange,
       mode: 'edit',

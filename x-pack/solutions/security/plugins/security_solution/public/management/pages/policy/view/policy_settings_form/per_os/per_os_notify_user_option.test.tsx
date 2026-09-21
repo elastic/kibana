@@ -36,7 +36,7 @@ describe('PerOsNotifyUserOption', () => {
   let hasRendered: boolean;
 
   const render = (mode: 'edit' | 'view' = 'edit', policyToRender: PolicyConfig = policy) => {
-    const props: PerOsNotifyUserOptionProps<'malware', 'mac'> = {
+    const props: PerOsNotifyUserOptionProps = {
       accessor: createMalwarePolicyAccessor(policyToRender, 'mac'),
       onChange,
       mode,

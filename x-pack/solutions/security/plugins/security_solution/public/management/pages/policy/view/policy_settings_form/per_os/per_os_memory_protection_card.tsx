@@ -111,52 +111,52 @@ export const PerOsMemoryProtectionCard = memo(
 );
 PerOsMemoryProtectionCard.displayName = 'PerOsMemoryProtectionCard';
 
-interface PerOsMemoryProtectionRowProps<OS extends MemoryProtectionOSes> {
-  os: OS;
-  accessor: PerOsPolicyAccessor<OS>;
+interface PerOsMemoryProtectionRowProps {
+  os: MemoryProtectionOSes;
+  accessor: PerOsPolicyAccessor<MemoryProtectionOSes>;
   onChange: PolicyFormComponentCommonProps['onChange'];
   mode: 'edit' | 'view';
   'data-test-subj'?: string;
   isLast: boolean;
 }
 
-const PerOsMemoryProtectionRow = <OS extends MemoryProtectionOSes>({
-  os,
-  accessor,
-  onChange,
-  mode,
-  'data-test-subj': dataTestSubj,
-  isLast,
-}: PerOsMemoryProtectionRowProps<OS>) => {
-  const getTestId = useTestIdGenerator(dataTestSubj);
-  const osPolicy = accessor.read();
-  const memoryProtectionMode = osPolicy.memory_protection.mode;
-  const subfeaturesVisible = memoryProtectionMode !== ProtectionModes.off;
-  const handleModeChange = useProtectionModeChangeHandler(accessor, 'memory_protection', onChange);
+const PerOsMemoryProtectionRow = memo<PerOsMemoryProtectionRowProps>(
+  ({ os, accessor, onChange, mode, 'data-test-subj': dataTestSubj, isLast }) => {
+    const getTestId = useTestIdGenerator(dataTestSubj);
+    const osPolicy = accessor.read();
+    const memoryProtectionMode = osPolicy.memory_protection.mode;
+    const subfeaturesVisible = memoryProtectionMode !== ProtectionModes.off;
+    const handleModeChange = useProtectionModeChangeHandler(
+      accessor,
+      'memory_protection',
+      onChange
+    );
 
-  return (
-    <OsRow
-      os={POLICY_OS_TO_OPERATING_SYSTEM[os]}
-      primaryControl={
-        <OsProtectionModeSelect
-          mode={memoryProtectionMode}
-          onModeChange={handleModeChange}
-          disabled={mode !== 'edit'}
-          data-test-subj={getTestId('mode')}
-        />
-      }
-      isLast={isLast}
-      data-test-subj={getTestId()}
-    >
-      {subfeaturesVisible && (
-        <PerOsNotifyUserOption
-          accessor={accessor}
-          onChange={onChange}
-          mode={mode}
-          protection="memory_protection"
-          data-test-subj={getTestId('notifyUser')}
-        />
-      )}
-    </OsRow>
-  );
-};
+    return (
+      <OsRow
+        os={POLICY_OS_TO_OPERATING_SYSTEM[os]}
+        primaryControl={
+          <OsProtectionModeSelect
+            mode={memoryProtectionMode}
+            onModeChange={handleModeChange}
+            disabled={mode !== 'edit'}
+            data-test-subj={getTestId('mode')}
+          />
+        }
+        isLast={isLast}
+        data-test-subj={getTestId()}
+      >
+        {subfeaturesVisible && (
+          <PerOsNotifyUserOption
+            accessor={accessor}
+            onChange={onChange}
+            mode={mode}
+            protection="memory_protection"
+            data-test-subj={getTestId('notifyUser')}
+          />
+        )}
+      </OsRow>
+    );
+  }
+);
+PerOsMemoryProtectionRow.displayName = 'PerOsMemoryProtectionRow';

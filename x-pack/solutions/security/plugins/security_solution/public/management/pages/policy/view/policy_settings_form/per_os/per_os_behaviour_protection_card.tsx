@@ -112,66 +112,62 @@ export const PerOsBehaviourProtectionCard = memo(
 );
 PerOsBehaviourProtectionCard.displayName = 'PerOsBehaviourProtectionCard';
 
-interface PerOsBehaviourProtectionRowProps<OS extends BehaviorProtectionOSes> {
-  os: OS;
-  accessor: PerOsPolicyAccessor<OS>;
+interface PerOsBehaviourProtectionRowProps {
+  os: BehaviorProtectionOSes;
+  accessor: PerOsPolicyAccessor<BehaviorProtectionOSes>;
   onChange: PolicyFormComponentCommonProps['onChange'];
   mode: 'edit' | 'view';
   isLast: boolean;
   'data-test-subj'?: string;
 }
 
-const PerOsBehaviourProtectionRow = <OS extends BehaviorProtectionOSes>({
-  os,
-  accessor,
-  onChange,
-  mode,
-  isLast,
-  'data-test-subj': dataTestSubj,
-}: PerOsBehaviourProtectionRowProps<OS>) => {
-  const getTestId = useTestIdGenerator(dataTestSubj);
-  const osPolicy = accessor.read();
-  const behaviorMode = osPolicy.behavior_protection.mode;
-  const subfeaturesVisible = behaviorMode !== ProtectionModes.off;
-  const handleModeChange = useProtectionModeChangeHandler(
-    accessor,
-    'behavior_protection',
-    onChange
-  );
+const PerOsBehaviourProtectionRow = memo<PerOsBehaviourProtectionRowProps>(
+  ({ os, accessor, onChange, mode, isLast, 'data-test-subj': dataTestSubj }) => {
+    const getTestId = useTestIdGenerator(dataTestSubj);
+    const osPolicy = accessor.read();
+    const behaviorMode = osPolicy.behavior_protection.mode;
+    const subfeaturesVisible = behaviorMode !== ProtectionModes.off;
+    const handleModeChange = useProtectionModeChangeHandler(
+      accessor,
+      'behavior_protection',
+      onChange
+    );
 
-  return (
-    <OsRow
-      os={POLICY_OS_TO_OPERATING_SYSTEM[os]}
-      primaryControl={
-        <OsProtectionModeSelect
-          mode={behaviorMode}
-          onModeChange={handleModeChange}
-          disabled={mode !== 'edit'}
-          data-test-subj={getTestId('mode')}
-        />
-      }
-      inlineControls={
-        subfeaturesVisible ? (
-          <PerOsReputationService
+    return (
+      <OsRow
+        os={POLICY_OS_TO_OPERATING_SYSTEM[os]}
+        primaryControl={
+          <OsProtectionModeSelect
+            mode={behaviorMode}
+            onModeChange={handleModeChange}
+            disabled={mode !== 'edit'}
+            data-test-subj={getTestId('mode')}
+          />
+        }
+        inlineControls={
+          subfeaturesVisible ? (
+            <PerOsReputationService
+              accessor={accessor}
+              onChange={onChange}
+              mode={mode}
+              data-test-subj={getTestId('reputationService')}
+            />
+          ) : undefined
+        }
+        isLast={isLast}
+        data-test-subj={getTestId()}
+      >
+        {subfeaturesVisible && (
+          <PerOsNotifyUserOption
             accessor={accessor}
             onChange={onChange}
             mode={mode}
-            data-test-subj={getTestId('reputationService')}
+            protection="behavior_protection"
+            data-test-subj={getTestId('notifyUser')}
           />
-        ) : undefined
-      }
-      isLast={isLast}
-      data-test-subj={getTestId()}
-    >
-      {subfeaturesVisible && (
-        <PerOsNotifyUserOption
-          accessor={accessor}
-          onChange={onChange}
-          mode={mode}
-          protection="behavior_protection"
-          data-test-subj={getTestId('notifyUser')}
-        />
-      )}
-    </OsRow>
-  );
-};
+        )}
+      </OsRow>
+    );
+  }
+);
+PerOsBehaviourProtectionRow.displayName = 'PerOsBehaviourProtectionRow';

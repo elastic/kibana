@@ -123,52 +123,48 @@ export const PerOsRansomwareProtectionCard = memo(
 );
 PerOsRansomwareProtectionCard.displayName = 'PerOsRansomwareProtectionCard';
 
-interface PerOsRansomwareProtectionRowProps<OS extends RansomwareProtectionOSes> {
-  os: OS;
-  accessor: PerOsPolicyAccessor<OS>;
+interface PerOsRansomwareProtectionRowProps {
+  os: RansomwareProtectionOSes;
+  accessor: PerOsPolicyAccessor<RansomwareProtectionOSes>;
   onChange: PolicyFormComponentCommonProps['onChange'];
   mode: 'edit' | 'view';
   isLast: boolean;
   'data-test-subj'?: string;
 }
 
-const PerOsRansomwareProtectionRow = <OS extends RansomwareProtectionOSes>({
-  os,
-  accessor,
-  onChange,
-  mode,
-  isLast,
-  'data-test-subj': dataTestSubj,
-}: PerOsRansomwareProtectionRowProps<OS>) => {
-  const getTestId = useTestIdGenerator(dataTestSubj);
-  const osPolicy = accessor.read();
-  const ransomwareMode = readRansomwareMode(osPolicy);
-  const subfeaturesVisible = ransomwareMode !== ProtectionModes.off;
-  const handleModeChange = useProtectionModeChangeHandler(accessor, 'ransomware', onChange);
+const PerOsRansomwareProtectionRow = memo<PerOsRansomwareProtectionRowProps>(
+  ({ os, accessor, onChange, mode, isLast, 'data-test-subj': dataTestSubj }) => {
+    const getTestId = useTestIdGenerator(dataTestSubj);
+    const osPolicy = accessor.read();
+    const ransomwareMode = readRansomwareMode(osPolicy);
+    const subfeaturesVisible = ransomwareMode !== ProtectionModes.off;
+    const handleModeChange = useProtectionModeChangeHandler(accessor, 'ransomware', onChange);
 
-  return (
-    <OsRow
-      os={POLICY_OS_TO_OPERATING_SYSTEM[os]}
-      primaryControl={
-        <OsProtectionModeSelect
-          mode={ransomwareMode}
-          onModeChange={handleModeChange}
-          disabled={mode !== 'edit'}
-          data-test-subj={getTestId('mode')}
-        />
-      }
-      isLast={isLast}
-      data-test-subj={getTestId()}
-    >
-      {subfeaturesVisible && (
-        <PerOsNotifyUserOption
-          accessor={accessor}
-          onChange={onChange}
-          mode={mode}
-          protection="ransomware"
-          data-test-subj={getTestId('notifyUser')}
-        />
-      )}
-    </OsRow>
-  );
-};
+    return (
+      <OsRow
+        os={POLICY_OS_TO_OPERATING_SYSTEM[os]}
+        primaryControl={
+          <OsProtectionModeSelect
+            mode={ransomwareMode}
+            onModeChange={handleModeChange}
+            disabled={mode !== 'edit'}
+            data-test-subj={getTestId('mode')}
+          />
+        }
+        isLast={isLast}
+        data-test-subj={getTestId()}
+      >
+        {subfeaturesVisible && (
+          <PerOsNotifyUserOption
+            accessor={accessor}
+            onChange={onChange}
+            mode={mode}
+            protection="ransomware"
+            data-test-subj={getTestId('notifyUser')}
+          />
+        )}
+      </OsRow>
+    );
+  }
+);
+PerOsRansomwareProtectionRow.displayName = 'PerOsRansomwareProtectionRow';

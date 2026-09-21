@@ -137,116 +137,109 @@ interface PerOsDeviceControlMasterToggleProps {
   'data-test-subj'?: string;
 }
 
-const PerOsDeviceControlMasterToggle = ({
-  policy,
-  onChange,
-  mode,
-  selected,
-  'data-test-subj': dataTestSubj,
-}: PerOsDeviceControlMasterToggleProps) => {
-  const getTestId = useTestIdGenerator(dataTestSubj);
-  const handleSwitchChange = useCallback<EuiSwitchProps['onChange']>(
-    (event) => {
-      const enabled = event.target.checked;
-      const updatedPolicy = cloneDeep(policy);
+const PerOsDeviceControlMasterToggle = memo<PerOsDeviceControlMasterToggleProps>(
+  ({ policy, onChange, mode, selected, 'data-test-subj': dataTestSubj }) => {
+    const getTestId = useTestIdGenerator(dataTestSubj);
+    const handleSwitchChange = useCallback<EuiSwitchProps['onChange']>(
+      (event) => {
+        const enabled = event.target.checked;
+        const updatedPolicy = cloneDeep(policy);
 
-      for (const os of DEVICE_CONTROL_OS_VALUES) {
-        const osPolicy = updatedPolicy[os];
+        for (const os of DEVICE_CONTROL_OS_VALUES) {
+          const osPolicy = updatedPolicy[os];
 
-        osPolicy.device_control = {
-          enabled,
-          usb_storage: enabled
-            ? DeviceControlAccessLevelEnum.deny_all
-            : DeviceControlAccessLevelEnum.audit,
-        };
-        osPolicy.popup.device_control ??= {
-          enabled,
-          message: DefaultPolicyDeviceNotificationMessage,
-        };
-        osPolicy.popup.device_control.enabled = enabled;
-      }
+          osPolicy.device_control = {
+            enabled,
+            usb_storage: enabled
+              ? DeviceControlAccessLevelEnum.deny_all
+              : DeviceControlAccessLevelEnum.audit,
+          };
+          osPolicy.popup.device_control ??= {
+            enabled,
+            message: DefaultPolicyDeviceNotificationMessage,
+          };
+          osPolicy.popup.device_control.enabled = enabled;
+        }
 
-      onChange({ isValid: true, updatedPolicy });
-    },
-    [onChange, policy]
-  );
+        onChange({ isValid: true, updatedPolicy });
+      },
+      [onChange, policy]
+    );
 
-  return (
-    <EuiSwitch
-      label={DEVICE_CONTROL_PROTECTION_LABEL}
-      labelProps={{ 'data-test-subj': getTestId('label') }}
-      showLabel={false}
-      checked={selected}
-      disabled={mode !== 'edit'}
-      onChange={handleSwitchChange}
-      data-test-subj={getTestId()}
-    />
-  );
-};
+    return (
+      <EuiSwitch
+        label={DEVICE_CONTROL_PROTECTION_LABEL}
+        labelProps={{ 'data-test-subj': getTestId('label') }}
+        showLabel={false}
+        checked={selected}
+        disabled={mode !== 'edit'}
+        onChange={handleSwitchChange}
+        data-test-subj={getTestId()}
+      />
+    );
+  }
+);
+PerOsDeviceControlMasterToggle.displayName = 'PerOsDeviceControlMasterToggle';
 
-interface PerOsDeviceControlRowProps<OS extends DeviceControlOSes> {
-  os: OS;
-  accessor: PerOsPolicyAccessor<OS>;
+interface PerOsDeviceControlRowProps {
+  os: DeviceControlOSes;
+  accessor: PerOsPolicyAccessor<DeviceControlOSes>;
   onChange: PolicyFormComponentCommonProps['onChange'];
   mode: 'edit' | 'view';
   isLast: boolean;
   'data-test-subj'?: string;
 }
 
-const PerOsDeviceControlRow = <OS extends DeviceControlOSes>({
-  os,
-  accessor,
-  onChange,
-  mode,
-  isLast,
-  'data-test-subj': dataTestSubj,
-}: PerOsDeviceControlRowProps<OS>) => {
-  const getTestId = useTestIdGenerator(dataTestSubj);
-  const deviceControl = accessor.read().device_control;
-  const accessLevel: DeviceControlAccessLevel =
-    deviceControl?.usb_storage ?? DeviceControlAccessLevelEnum.audit;
-  const handleAccessLevelChange = useCallback(
-    (nextAccessLevel: DeviceControlAccessLevel) => {
-      const updatedPolicy = accessor.update((currentOsPolicy) => {
-        currentOsPolicy.device_control ??= {
-          enabled: true,
-          usb_storage: nextAccessLevel,
-        };
-        currentOsPolicy.device_control.usb_storage = nextAccessLevel;
-        // Create the branch rather than skip the sync, matching the master toggle: an OS whose
-        // popup branch is missing would otherwise keep a disabled notification after Block all.
-        currentOsPolicy.popup.device_control ??= {
-          enabled: false,
-          message: DefaultPolicyDeviceNotificationMessage,
-        };
-        currentOsPolicy.popup.device_control.enabled =
-          nextAccessLevel === DeviceControlAccessLevelEnum.deny_all;
-      });
-      onChange({ isValid: true, updatedPolicy });
-    },
-    [accessor, onChange]
-  );
+const PerOsDeviceControlRow = memo<PerOsDeviceControlRowProps>(
+  ({ os, accessor, onChange, mode, isLast, 'data-test-subj': dataTestSubj }) => {
+    const getTestId = useTestIdGenerator(dataTestSubj);
+    const deviceControl = accessor.read().device_control;
+    const accessLevel: DeviceControlAccessLevel =
+      deviceControl?.usb_storage ?? DeviceControlAccessLevelEnum.audit;
+    const handleAccessLevelChange = useCallback(
+      (nextAccessLevel: DeviceControlAccessLevel) => {
+        const updatedPolicy = accessor.update((currentOsPolicy) => {
+          currentOsPolicy.device_control ??= {
+            enabled: true,
+            usb_storage: nextAccessLevel,
+          };
+          currentOsPolicy.device_control.usb_storage = nextAccessLevel;
+          // Create the branch rather than skip the sync, matching the master toggle: an OS whose
+          // popup branch is missing would otherwise keep a disabled notification after Block all.
+          currentOsPolicy.popup.device_control ??= {
+            enabled: false,
+            message: DefaultPolicyDeviceNotificationMessage,
+          };
+          currentOsPolicy.popup.device_control.enabled =
+            nextAccessLevel === DeviceControlAccessLevelEnum.deny_all;
+        });
+        onChange({ isValid: true, updatedPolicy });
+      },
+      [accessor, onChange]
+    );
 
-  return (
-    <OsRow
-      os={POLICY_OS_TO_OPERATING_SYSTEM[os]}
-      primaryControl={
-        <PerOsDeviceControlAccessLevelSelect
-          accessLevel={accessLevel}
-          onAccessLevelChange={handleAccessLevelChange}
-          disabled={mode !== 'edit' || !deviceControl?.enabled}
-          data-test-subj={getTestId('accessLevel')}
+    return (
+      <OsRow
+        os={POLICY_OS_TO_OPERATING_SYSTEM[os]}
+        primaryControl={
+          <PerOsDeviceControlAccessLevelSelect
+            accessLevel={accessLevel}
+            onAccessLevelChange={handleAccessLevelChange}
+            disabled={mode !== 'edit' || !deviceControl?.enabled}
+            data-test-subj={getTestId('accessLevel')}
+          />
+        }
+        isLast={isLast}
+        data-test-subj={getTestId()}
+      >
+        <PerOsDeviceControlNotifyUserOption
+          accessor={accessor}
+          onChange={onChange}
+          mode={mode}
+          data-test-subj={getTestId('notifyUser')}
         />
-      }
-      isLast={isLast}
-      data-test-subj={getTestId()}
-    >
-      <PerOsDeviceControlNotifyUserOption
-        accessor={accessor}
-        onChange={onChange}
-        mode={mode}
-        data-test-subj={getTestId('notifyUser')}
-      />
-    </OsRow>
-  );
-};
+      </OsRow>
+    );
+  }
+);
+PerOsDeviceControlRow.displayName = 'PerOsDeviceControlRow';

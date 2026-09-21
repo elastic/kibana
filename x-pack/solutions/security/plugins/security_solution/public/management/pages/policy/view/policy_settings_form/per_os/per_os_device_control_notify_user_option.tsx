@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useId } from 'react';
+import React, { memo, useCallback, useId } from 'react';
 import type { EuiCheckboxProps, EuiTextAreaProps } from '@elastic/eui';
 import {
   EuiCheckbox,
@@ -29,146 +29,130 @@ import { NOTIFY_USER_CHECKBOX_LABEL } from '../components/shared_translations';
 import type { PerOsPolicyAccessor } from './policy_accessor';
 import { osRowPanelCss } from './os_control_layout';
 
-export interface PerOsDeviceControlNotifyUserOptionProps<
-  OS extends DeviceControlOSes = DeviceControlOSes
-> {
-  accessor: PerOsPolicyAccessor<OS>;
+export interface PerOsDeviceControlNotifyUserOptionProps {
+  accessor: PerOsPolicyAccessor<DeviceControlOSes>;
   onChange: (options: { isValid: boolean; updatedPolicy: PolicyConfig }) => void;
   mode?: 'edit' | 'view';
   'data-test-subj'?: string;
 }
 
-interface PerOsDeviceControlNotifyUserOptionComponent {
-  <OS extends DeviceControlOSes>(
-    props: PerOsDeviceControlNotifyUserOptionProps<OS>
-  ): React.ReactElement | null;
-  displayName?: string;
-}
+export const PerOsDeviceControlNotifyUserOption = memo<PerOsDeviceControlNotifyUserOptionProps>(
+  ({ accessor, onChange, mode = 'edit', 'data-test-subj': dataTestSubj }) => {
+    const isEnterprise = useLicense().isEnterprise();
+    const getTestId = useTestIdGenerator(dataTestSubj);
+    const checkboxId = useId();
+    const CustomNotificationUpsellingComponent = useGetCustomNotificationUnavailableComponent();
+    const isEditMode = mode === 'edit';
+    const osPolicy = accessor.read();
+    const deviceControl = osPolicy.device_control;
+    const currentAccessLevel = deviceControl?.usb_storage ?? DeviceControlAccessLevel.audit;
+    const userNotificationSelected = osPolicy.popup.device_control?.enabled ?? false;
+    const userNotificationMessage = osPolicy.popup.device_control?.message ?? '';
 
-const PerOsDeviceControlNotifyUserOptionComponent = <OS extends DeviceControlOSes>({
-  accessor,
-  onChange,
-  mode = 'edit',
-  'data-test-subj': dataTestSubj,
-}: PerOsDeviceControlNotifyUserOptionProps<OS>): React.ReactElement | null => {
-  const isEnterprise = useLicense().isEnterprise();
-  const getTestId = useTestIdGenerator(dataTestSubj);
-  const checkboxId = useId();
-  const CustomNotificationUpsellingComponent = useGetCustomNotificationUnavailableComponent();
-  const isEditMode = mode === 'edit';
-  const osPolicy = accessor.read();
-  const deviceControl = osPolicy.device_control;
-  const currentAccessLevel = deviceControl?.usb_storage ?? DeviceControlAccessLevel.audit;
-  const userNotificationSelected = osPolicy.popup.device_control?.enabled ?? false;
-  const userNotificationMessage = osPolicy.popup.device_control?.message ?? '';
+    const handleUserNotificationCheckbox = useCallback<EuiCheckboxProps['onChange']>(
+      (event) => {
+        const updatedPolicy = accessor.update((currentOsPolicy) => {
+          currentOsPolicy.popup.device_control ??= {
+            enabled: event.target.checked,
+            message: DefaultPolicyDeviceNotificationMessage,
+          };
+          currentOsPolicy.popup.device_control.enabled = event.target.checked;
+        });
+        onChange({ isValid: true, updatedPolicy });
+      },
+      [accessor, onChange]
+    );
 
-  const handleUserNotificationCheckbox = useCallback<EuiCheckboxProps['onChange']>(
-    (event) => {
-      const updatedPolicy = accessor.update((currentOsPolicy) => {
-        currentOsPolicy.popup.device_control ??= {
-          enabled: event.target.checked,
-          message: DefaultPolicyDeviceNotificationMessage,
-        };
-        currentOsPolicy.popup.device_control.enabled = event.target.checked;
-      });
-      onChange({ isValid: true, updatedPolicy });
-    },
-    [accessor, onChange]
-  );
+    const handleCustomUserNotification = useCallback<NonNullable<EuiTextAreaProps['onChange']>>(
+      (event) => {
+        const updatedPolicy = accessor.update((currentOsPolicy) => {
+          currentOsPolicy.popup.device_control ??= {
+            enabled: false,
+            message: event.target.value,
+          };
+          currentOsPolicy.popup.device_control.message = event.target.value;
+        });
+        onChange({ isValid: true, updatedPolicy });
+      },
+      [accessor, onChange]
+    );
 
-  const handleCustomUserNotification = useCallback<NonNullable<EuiTextAreaProps['onChange']>>(
-    (event) => {
-      const updatedPolicy = accessor.update((currentOsPolicy) => {
-        currentOsPolicy.popup.device_control ??= {
-          enabled: false,
-          message: event.target.value,
-        };
-        currentOsPolicy.popup.device_control.message = event.target.value;
-      });
-      onChange({ isValid: true, updatedPolicy });
-    },
-    [accessor, onChange]
-  );
+    // Custom notification is a paid control: show its upsell only after opt-in.
+    // When unchecked, keep the disabled textarea unless an upsell is active (then nothing).
+    const customNotificationComponent = !CustomNotificationUpsellingComponent ? (
+      <EuiTextArea
+        placeholder={i18n.translate(
+          'xpack.securitySolution.endpoint.policyDetails.customizeMessagePlaceholder',
+          { defaultMessage: 'Customize message' }
+        )}
+        aria-label={i18n.translate(
+          'xpack.securitySolution.endpoint.policyDetails.customizeMessageAriaLabel',
+          { defaultMessage: 'Customize message' }
+        )}
+        value={userNotificationMessage}
+        onChange={handleCustomUserNotification}
+        disabled={!userNotificationSelected || !deviceControl?.enabled || !isEditMode}
+        fullWidth={true}
+        // One line tall by default to keep the OS row compact; the control stays a textarea so
+        // multi-line messages can still be authored and are shown in full when the user resizes.
+        rows={1}
+        data-test-subj={getTestId('customMessage')}
+      />
+    ) : userNotificationSelected ? (
+      <CustomNotificationUpsellingComponent />
+    ) : null;
 
-  // Custom notification is a paid control: show its upsell only after opt-in.
-  // When unchecked, keep the disabled textarea unless an upsell is active (then nothing).
-  const customNotificationComponent = !CustomNotificationUpsellingComponent ? (
-    <EuiTextArea
-      placeholder={i18n.translate(
-        'xpack.securitySolution.endpoint.policyDetails.customizeMessagePlaceholder',
-        { defaultMessage: 'Customize message' }
-      )}
-      aria-label={i18n.translate(
-        'xpack.securitySolution.endpoint.policyDetails.customizeMessageAriaLabel',
-        { defaultMessage: 'Customize message' }
-      )}
-      value={userNotificationMessage}
-      onChange={handleCustomUserNotification}
-      disabled={!userNotificationSelected || !deviceControl?.enabled || !isEditMode}
-      fullWidth={true}
-      // One line tall by default to keep the OS row compact; the control stays a textarea so
-      // multi-line messages can still be authored and are shown in full when the user resizes.
-      rows={1}
-      data-test-subj={getTestId('customMessage')}
-    />
-  ) : userNotificationSelected ? (
-    <CustomNotificationUpsellingComponent />
-  ) : null;
+    if (!isEnterprise || currentAccessLevel !== DeviceControlAccessLevel.deny_all) {
+      return null;
+    }
 
-  if (!isEnterprise || currentAccessLevel !== DeviceControlAccessLevel.deny_all) {
-    return null;
+    return (
+      <EuiPanel
+        color="subdued"
+        paddingSize="s"
+        hasShadow={false}
+        data-test-subj={getTestId()}
+        css={osRowPanelCss}
+      >
+        <EuiFlexGroup alignItems="center" gutterSize="m" wrap={true}>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiCheckbox
+                  id={checkboxId}
+                  data-test-subj={getTestId('checkbox')}
+                  label={NOTIFY_USER_CHECKBOX_LABEL}
+                  checked={userNotificationSelected}
+                  disabled={!deviceControl?.enabled || !isEditMode}
+                  onChange={handleUserNotificationCheckbox}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  position="right"
+                  data-test-subj={getTestId('tooltipInfo')}
+                  anchorProps={{ 'data-test-subj': getTestId('tooltipIcon') }}
+                  content={
+                    <>
+                      <FormattedMessage
+                        id="xpack.securitySolution.endpoint.policyDetailsConfig.deviceControl.notifyUserTooltip.a"
+                        defaultMessage="Selecting the user notification option will display a notification to the host user when device access is blocked or restricted."
+                      />
+                      <EuiSpacer size="m" />
+                      <FormattedMessage
+                        id="xpack.securitySolution.endpoint.policyDetailsConfig.deviceControl.notifyUserTooltip.c"
+                        defaultMessage="The user notification can be customized in the text box below. Bracketed tags can be used to dynamically populate the applicable action and device type."
+                      />
+                    </>
+                  }
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem>{customNotificationComponent}</EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+    );
   }
-
-  return (
-    <EuiPanel
-      color="subdued"
-      paddingSize="s"
-      hasShadow={false}
-      data-test-subj={getTestId()}
-      css={osRowPanelCss}
-    >
-      <EuiFlexGroup alignItems="center" gutterSize="m" wrap={true}>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiCheckbox
-                id={checkboxId}
-                data-test-subj={getTestId('checkbox')}
-                label={NOTIFY_USER_CHECKBOX_LABEL}
-                checked={userNotificationSelected}
-                disabled={!deviceControl?.enabled || !isEditMode}
-                onChange={handleUserNotificationCheckbox}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiIconTip
-                position="right"
-                data-test-subj={getTestId('tooltipInfo')}
-                anchorProps={{ 'data-test-subj': getTestId('tooltipIcon') }}
-                content={
-                  <>
-                    <FormattedMessage
-                      id="xpack.securitySolution.endpoint.policyDetailsConfig.deviceControl.notifyUserTooltip.a"
-                      defaultMessage="Selecting the user notification option will display a notification to the host user when device access is blocked or restricted."
-                    />
-                    <EuiSpacer size="m" />
-                    <FormattedMessage
-                      id="xpack.securitySolution.endpoint.policyDetailsConfig.deviceControl.notifyUserTooltip.c"
-                      defaultMessage="The user notification can be customized in the text box below. Bracketed tags can be used to dynamically populate the applicable action and device type."
-                    />
-                  </>
-                }
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem>{customNotificationComponent}</EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
-  );
-};
-
-export const PerOsDeviceControlNotifyUserOption = React.memo(
-  PerOsDeviceControlNotifyUserOptionComponent
-) as PerOsDeviceControlNotifyUserOptionComponent;
+);
 PerOsDeviceControlNotifyUserOption.displayName = 'PerOsDeviceControlNotifyUserOption';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { memo, useCallback } from 'react';
 import type { EuiCheckboxProps } from '@elastic/eui';
 import { EuiCheckbox, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -18,72 +18,73 @@ import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import type { BehaviorProtectionOSes } from '../../../types';
 import type { PerOsPolicyAccessor } from './policy_accessor';
 
-export interface PerOsReputationServiceProps<OS extends BehaviorProtectionOSes> {
-  accessor: PerOsPolicyAccessor<OS>;
+export interface PerOsReputationServiceProps {
+  accessor: PerOsPolicyAccessor<BehaviorProtectionOSes>;
   onChange: (options: { isValid: boolean; updatedPolicy: PolicyConfig }) => void;
   mode?: 'edit' | 'view';
   'data-test-subj'?: string;
 }
 
-export const PerOsReputationService = <OS extends BehaviorProtectionOSes>({
-  accessor,
-  onChange,
-  mode = 'edit',
-  'data-test-subj': dataTestSubj,
-}: PerOsReputationServiceProps<OS>): React.ReactElement | null => {
-  const isPlatinumPlus = useLicense().isPlatinumPlus();
-  const { cloud } = useKibana().services;
-  const isCloud = cloud?.isCloudEnabled ?? false;
-  const getTestId = useTestIdGenerator(dataTestSubj);
-  const behaviorProtection = accessor.read().behavior_protection;
-  const protectionTurnedOn = behaviorProtection.mode !== ProtectionModes.off;
-  const checkboxChecked = behaviorProtection.reputation_service && protectionTurnedOn;
+export const PerOsReputationService = memo<PerOsReputationServiceProps>(
+  ({ accessor, onChange, mode = 'edit', 'data-test-subj': dataTestSubj }) => {
+    const isPlatinumPlus = useLicense().isPlatinumPlus();
+    const { cloud } = useKibana().services;
+    const isCloud = cloud?.isCloudEnabled ?? false;
+    const getTestId = useTestIdGenerator(dataTestSubj);
+    const behaviorProtection = accessor.read().behavior_protection;
+    const protectionTurnedOn = behaviorProtection.mode !== ProtectionModes.off;
+    const checkboxChecked = behaviorProtection.reputation_service && protectionTurnedOn;
 
-  const handleChange = useCallback<EuiCheckboxProps['onChange']>(
-    (event) => {
-      const updatedPolicy = accessor.update((currentOsPolicy) => {
-        currentOsPolicy.behavior_protection.reputation_service = event.target.checked;
-      });
-      onChange({ isValid: true, updatedPolicy });
-    },
-    [accessor, onChange]
-  );
+    const handleChange = useCallback<EuiCheckboxProps['onChange']>(
+      (event) => {
+        const updatedPolicy = accessor.update((currentOsPolicy) => {
+          currentOsPolicy.behavior_protection.reputation_service = event.target.checked;
+        });
+        onChange({ isValid: true, updatedPolicy });
+      },
+      [accessor, onChange]
+    );
 
-  if (!isCloud || !isPlatinumPlus) {
-    return null;
+    if (!isCloud || !isPlatinumPlus) {
+      return null;
+    }
+
+    return (
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="xs"
+        responsive={false}
+        data-test-subj={getTestId()}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiCheckbox
+            data-test-subj={getTestId('checkbox')}
+            id={`${dataTestSubj ?? 'behaviorProtection'}ReputationServiceCheckbox`}
+            onChange={handleChange}
+            checked={checkboxChecked}
+            disabled={!protectionTurnedOn || mode !== 'edit'}
+            label={i18n.translate(
+              'xpack.securitySolution.endpoint.policyDetail.reputationService',
+              {
+                defaultMessage: 'Reputation service',
+              }
+            )}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} data-test-subj={getTestId('tooltipIcon')}>
+          <EuiIconTip
+            position="right"
+            data-test-subj={getTestId('tooltip')}
+            content={
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.policyDetailsConfig.reputationServiceTooltip"
+                defaultMessage="This option enables/disables the Reputation Service feature in Endpoint. When the option is ON, Endpoint will reach out to a Cloud API for additional detection coverage. When it's OFF, Endpoint will not reach out to the Cloud API, resulting in reduced efficacy."
+              />
+            }
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
   }
-
-  return (
-    <EuiFlexGroup
-      alignItems="center"
-      gutterSize="xs"
-      responsive={false}
-      data-test-subj={getTestId()}
-    >
-      <EuiFlexItem grow={false}>
-        <EuiCheckbox
-          data-test-subj={getTestId('checkbox')}
-          id={`${dataTestSubj ?? 'behaviorProtection'}ReputationServiceCheckbox`}
-          onChange={handleChange}
-          checked={checkboxChecked}
-          disabled={!protectionTurnedOn || mode !== 'edit'}
-          label={i18n.translate('xpack.securitySolution.endpoint.policyDetail.reputationService', {
-            defaultMessage: 'Reputation service',
-          })}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} data-test-subj={getTestId('tooltipIcon')}>
-        <EuiIconTip
-          position="right"
-          data-test-subj={getTestId('tooltip')}
-          content={
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.policyDetailsConfig.reputationServiceTooltip"
-              defaultMessage="This option enables/disables the Reputation Service feature in Endpoint. When the option is ON, Endpoint will reach out to a Cloud API for additional detection coverage. When it's OFF, Endpoint will not reach out to the Cloud API, resulting in reduced efficacy."
-            />
-          }
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
+);
+PerOsReputationService.displayName = 'PerOsReputationService';

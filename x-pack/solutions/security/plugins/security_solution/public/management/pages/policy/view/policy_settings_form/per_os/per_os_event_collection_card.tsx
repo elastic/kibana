@@ -118,7 +118,7 @@ export const PerOsEventCollectionCard = memo<PerOsEventCollectionCardProps>(
         selected={selected}
         dataTestSubj={getTestId()}
       >
-        <PerOsEventCollectionRow<OperatingSystem.WINDOWS>
+        <PerOsEventCollectionRow
           os={OperatingSystem.WINDOWS}
           selection={selections[OperatingSystem.WINDOWS]}
           options={WINDOWS_EVENT_OPTIONS}
@@ -127,7 +127,7 @@ export const PerOsEventCollectionCard = memo<PerOsEventCollectionCardProps>(
           isLast={false}
           data-test-subj={getTestId('windows')}
         />
-        <PerOsEventCollectionRow<OperatingSystem.MAC>
+        <PerOsEventCollectionRow
           os={OperatingSystem.MAC}
           selection={selections[OperatingSystem.MAC]}
           options={MAC_EVENT_OPTIONS}
@@ -136,7 +136,7 @@ export const PerOsEventCollectionCard = memo<PerOsEventCollectionCardProps>(
           data-test-subj={getTestId('mac')}
           isLast={false}
         />
-        <PerOsEventCollectionRow<OperatingSystem.LINUX>
+        <PerOsEventCollectionRow
           os={OperatingSystem.LINUX}
           selection={selections[OperatingSystem.LINUX]}
           options={linuxOptions}
@@ -153,7 +153,9 @@ export const PerOsEventCollectionCard = memo<PerOsEventCollectionCardProps>(
 );
 PerOsEventCollectionCard.displayName = 'PerOsEventCollectionCard';
 
-interface PerOsEventCollectionRowProps<OS extends OperatingSystem> {
+type EventCollectionOs = OperatingSystem.WINDOWS | OperatingSystem.MAC | OperatingSystem.LINUX;
+
+interface PerOsEventCollectionRowOsProps<OS extends EventCollectionOs> {
   os: OS;
   selection: EventFormSelection<OS>;
   options: ReadonlyArray<EventFormOption<OS>>;
@@ -168,27 +170,48 @@ interface PerOsEventCollectionRowProps<OS extends OperatingSystem> {
   'data-test-subj'?: string;
 }
 
-const PerOsEventCollectionRow = <OS extends OperatingSystem>({
-  os,
-  selection,
-  options,
-  supplementalOptions,
-  isSupplementalOptionDisabled,
-  onFieldChange,
-  mode,
-  isLast,
-  'data-test-subj': dataTestSubj,
-}: PerOsEventCollectionRowProps<OS>) => {
-  const getTestId = useTestIdGenerator(dataTestSubj);
+type PerOsEventCollectionRowProps =
+  | PerOsEventCollectionRowOsProps<OperatingSystem.WINDOWS>
+  | PerOsEventCollectionRowOsProps<OperatingSystem.MAC>
+  | PerOsEventCollectionRowOsProps<OperatingSystem.LINUX>;
+
+const PerOsEventCollectionRow = memo<PerOsEventCollectionRowProps>((props) => {
+  const getTestId = useTestIdGenerator(props['data-test-subj']);
   const inputIdPrefix = useId();
+
+  // The arms are identical on purpose: the switch only narrows the discriminated props so the
+  // generic helper keeps `selection`, `options` and `onFieldChange` correlated to one OS.
+  // Passing the union straight through loses that correlation and stops type-checking.
+  switch (props.os) {
+    case OperatingSystem.WINDOWS:
+      return renderPerOsEventCollectionRow(props, getTestId, inputIdPrefix);
+    case OperatingSystem.MAC:
+      return renderPerOsEventCollectionRow(props, getTestId, inputIdPrefix);
+    case OperatingSystem.LINUX:
+      return renderPerOsEventCollectionRow(props, getTestId, inputIdPrefix);
+  }
+});
+PerOsEventCollectionRow.displayName = 'PerOsEventCollectionRow';
+
+const renderPerOsEventCollectionRow = <OS extends EventCollectionOs>(
+  {
+    os,
+    selection,
+    options,
+    supplementalOptions,
+    isSupplementalOptionDisabled,
+    onFieldChange,
+    mode,
+    isLast,
+  }: PerOsEventCollectionRowOsProps<OS>,
+  getTestId: ReturnType<typeof useTestIdGenerator>,
+  inputIdPrefix: string
+) => {
   const isEditMode = mode === 'edit';
   const totalOptions = options.length;
   // Count the rendered options only: a field hidden by a feature flag must not appear in the
   // numerator while the denominator excludes it. Supplemental fields count toward neither.
-  const selectedCount = useMemo(
-    () => countSelectedEvents(selection, options),
-    [selection, options]
-  );
+  const selectedCount = countSelectedEvents(selection, options);
 
   return (
     <OsRow
