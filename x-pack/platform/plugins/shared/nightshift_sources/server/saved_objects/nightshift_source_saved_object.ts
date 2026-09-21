@@ -12,9 +12,10 @@ import {
   MAX_SOURCE_TAG_LENGTH,
   MAX_SOURCE_TAGS,
   MAX_SOURCE_VIEW_NAME_LENGTH,
+  NIGHTSHIFT_SOURCE_SO_TYPE,
 } from '@kbn/nightshift-shared';
 
-export const NIGHTSHIFT_SOURCE_SO_TYPE = 'nightshift-source';
+export { NIGHTSHIFT_SOURCE_SO_TYPE };
 
 const nightshiftSourceAttributesSchemaV1 = schema.object({
   title: schema.string(),
@@ -37,9 +38,9 @@ const nightshiftSourceAttributesSchemaV1 = schema.object({
 export type NightshiftSourceAttributes = TypeOf<typeof nightshiftSourceAttributesSchemaV1>;
 
 /**
- * Hidden and not on the Nightshift feature's `savedObject` lists: access goes through the
- * `/internal/nightshift/sources` route authz and a scoped client that includes this hidden
- * type and skips the saved objects security extension.
+ * Hidden so it stays out of Saved Objects Management. The Nightshift feature grants it:
+ * `all` can write, `read` can read. The scoped client still has to name it in
+ * `includedHiddenTypes`.
  */
 export const nightshiftSourceSavedObjectType: SavedObjectsType<NightshiftSourceAttributes> = {
   name: NIGHTSHIFT_SOURCE_SO_TYPE,

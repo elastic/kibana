@@ -7,6 +7,9 @@
 
 export const NIGHTSHIFT_FEATURE_ID = 'nightshift';
 
+/** Saved object type registered by `nightshiftSources` and granted by the Nightshift feature. */
+export const NIGHTSHIFT_SOURCE_SO_TYPE = 'nightshift-source';
+
 export const NIGHTSHIFT_MANAGE_ENGINES_SUB_FEATURE_ID = 'manage-engines';
 
 /** HTTP `security.authz.requiredPrivileges` tags registered on the Nightshift feature. */

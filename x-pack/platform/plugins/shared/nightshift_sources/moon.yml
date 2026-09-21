@@ -21,7 +21,6 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/core-elasticsearch-server-utils'
   - '@kbn/core-plugins-server'
-  - '@kbn/core-saved-objects-server'
   - '@kbn/cps-server-utils'
   - '@kbn/es-errors'
   - '@kbn/es-query'
