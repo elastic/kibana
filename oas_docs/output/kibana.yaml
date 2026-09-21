@@ -53875,7 +53875,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get the number of agent policies and active agents using an output by ID.<br/><br/>[Required authorization] Route required privileges: fleet-settings-read AND fleet-agent-policies-read AND fleet-agents-read.
+        Get the number of agent policies and active agents using an output. Default outputs also include policies that do not set a data or monitoring output. Optional query parameters override the saved default flags so counts can reflect a pending change.<br/><br/>[Required authorization] Route required privileges: fleet-settings-read AND fleet-agent-policies-read AND fleet-agents-read.
       operationId: get-fleet-outputs-outputid-agent-policy-count
       parameters:
         - description: The ID of the output
@@ -53885,13 +53885,13 @@ paths:
           schema:
             maxLength: 500
             type: string
-        - description: Pending is_default value from the flyout (before save)
+        - description: If true, count policies as if this output is the default data output, including policies with no `data_output_id`. If omitted, uses the output's saved `is_default` value.
           in: query
           name: isDefault
           required: false
           schema:
             type: boolean
-        - description: Pending is_default_monitoring value from the flyout (before save)
+        - description: If true, count policies as if this output is the default monitoring output, including policies with no `monitoring_output_id`. If omitted, uses the output's saved `is_default_monitoring` value.
           in: query
           name: isDefaultMonitoring
           required: false
@@ -53982,6 +53982,7 @@ paths:
       summary: Get output agent and policy count
       tags:
         - Fleet outputs
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
