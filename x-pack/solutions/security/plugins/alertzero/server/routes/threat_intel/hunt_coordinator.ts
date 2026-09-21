@@ -15,6 +15,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { randomUUID } from 'crypto';
 import { ALERTZERO_API_PRIVILEGE_READ, HUNT_INTERNAL_ROUTE_BASE } from '../../../common/constants';
 import { huntCoordinator } from '../../services/watches/hunt/hunt_coordinator';
+import { buildSseData } from '../../services/watches/hunt/common/sse_mapper';
 import { resolveScopedModel } from './lib/scoped_model';
 import type { RouteDependencies } from '../register_routes';
 
@@ -106,7 +107,15 @@ export const registerHuntCoordinatorRoute = ({
             runId: runId ?? randomUUID(),
           });
 
-          return response.ok({ body: result });
+          const sse =
+            result.tier1.hasConfirmedHit && report_id
+              ? buildSseData(result, report_id, {
+                  spaceId,
+                  requiredIndices: result.requiredIndexPatterns,
+                })
+              : undefined;
+
+          return response.ok({ body: sse ? { ...result, sse } : result });
         } catch (err) {
           logger.error(`hunt_coordinator route failed: ${(err as Error).message}`);
           return response.customError({
