@@ -25097,7 +25097,6 @@
     "xpack.idxMgmt.indexDetails.overviewTab.storage.shardsLabel": "Shards",
     "xpack.idxMgmt.indexDetails.overviewTab.storage.totalSizeLabel": "Total",
     "xpack.idxMgmt.indexDetails.overviewTitle": "Visão geral",
-    "xpack.idxMgmt.indexDetails.recentDocsActionMessage": "Você está visualizando uma amostra de {pageSize, plural, one {# document} other {# documentos}} ingeridos neste índice.",
     "xpack.idxMgmt.indexDetails.reloadButtonLabel": "Recarregar",
     "xpack.idxMgmt.indexDetails.settings.docsCardLink": "Saiba mais sobre configurações",
     "xpack.idxMgmt.indexDetails.settings.docsCardTitle": "Editar configurações de índice",

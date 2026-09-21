@@ -25114,7 +25114,6 @@
     "xpack.idxMgmt.indexDetails.overviewTab.storage.shardsLabel": "分片",
     "xpack.idxMgmt.indexDetails.overviewTab.storage.totalSizeLabel": "合计",
     "xpack.idxMgmt.indexDetails.overviewTitle": "概览",
-    "xpack.idxMgmt.indexDetails.recentDocsActionMessage": "您正在查看此索引中收录的 {pageSize, plural, one {# document} other {# 个文档}}的样本。",
     "xpack.idxMgmt.indexDetails.reloadButtonLabel": "重新加载",
     "xpack.idxMgmt.indexDetails.settings.docsCardLink": "详细了解设置",
     "xpack.idxMgmt.indexDetails.settings.docsCardTitle": "编辑索引设置",

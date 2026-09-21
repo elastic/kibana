@@ -25028,7 +25028,6 @@
     "xpack.idxMgmt.indexDetails.overviewTab.storage.shardsLabel": "Shards",
     "xpack.idxMgmt.indexDetails.overviewTab.storage.totalSizeLabel": "Gesamt",
     "xpack.idxMgmt.indexDetails.overviewTitle": "Überblick",
-    "xpack.idxMgmt.indexDetails.recentDocsActionMessage": "Sie sehen hier ein Beispiel für {pageSize, plural, one {# document} other {# documents}}, die in diesen Index ingestiert wurden.",
     "xpack.idxMgmt.indexDetails.reloadButtonLabel": "Neu laden",
     "xpack.idxMgmt.indexDetails.settings.docsCardLink": "Informationen zu Einstellungen",
     "xpack.idxMgmt.indexDetails.settings.docsCardTitle": "Indexeinstellungen bearbeiten",

@@ -25107,7 +25107,6 @@
     "xpack.idxMgmt.indexDetails.overviewTab.storage.shardsLabel": "シャード",
     "xpack.idxMgmt.indexDetails.overviewTab.storage.totalSizeLabel": "合計",
     "xpack.idxMgmt.indexDetails.overviewTitle": "概要",
-    "xpack.idxMgmt.indexDetails.recentDocsActionMessage": "このインデックスで取り込まれた{pageSize, plural, one {# document} other {#件のドキュメント}}のサンプルを表示しています。",
     "xpack.idxMgmt.indexDetails.reloadButtonLabel": "再読み込み",
     "xpack.idxMgmt.indexDetails.settings.docsCardLink": "設定の詳細",
     "xpack.idxMgmt.indexDetails.settings.docsCardTitle": "インデックス設定を編集",
