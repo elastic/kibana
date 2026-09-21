@@ -342,6 +342,22 @@ export async function getCompiledVersionsForAgentPolicy(
 }
 
 /**
+ * Narrows a stored package policy to the payload `packagePolicyService.update` expects when a
+ * caller only means to change part of it: the update replaces what it is given, and `package` is
+ * what the package info the inputs are validated and compiled against is resolved from.
+ */
+export function toPackagePolicyUpdate(packagePolicy: PackagePolicy): UpdatePackagePolicy {
+  return {
+    name: packagePolicy.name,
+    enabled: packagePolicy.enabled,
+    policy_ids: packagePolicy.policy_ids,
+    inputs: packagePolicy.inputs,
+    vars: packagePolicy.vars,
+    ...(packagePolicy.package ? { package: packagePolicy.package } : {}),
+  };
+}
+
+/**
  * Returns a kuery string that excludes package policies with latest_revision:false,
  * optionally AND-ing with an additional kuery clause.
  */
@@ -715,6 +731,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       ) {
         const cloudConnector = await this.createCloudConnectorForPackagePolicy(
           soClient,
+          esClient,
           enrichedPackagePolicy,
           agentPolicies[0],
           pkgInfo
@@ -3264,13 +3281,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     if (packagePolicies.length > 0) {
       const getPackagePolicyUpdate = (packagePolicy: PackagePolicy) => ({
-        name: packagePolicy.name,
-        enabled: packagePolicy.enabled,
-        policy_ids: packagePolicy.policy_ids,
-        inputs: packagePolicy.inputs,
-        vars: packagePolicy.vars,
+        ...toPackagePolicyUpdate(packagePolicy),
         output_id: packagePolicy.output_id === outputId ? null : packagePolicy.output_id,
-        package: packagePolicy.package,
       });
 
       // Validate that the new cleared/default output is valid for the package policies
@@ -3639,6 +3651,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
   public async createCloudConnectorForPackagePolicy(
     soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     enrichedPackagePolicy: NewPackagePolicy,
     agentPolicy: AgentPolicy,
     packageInfo: PackageInfo
@@ -3669,7 +3682,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             enrichedPackagePolicy.cloud_connector_id,
             {
               vars: cloudConnectorVars,
-            }
+            },
+            // A role ARN change has to reach the package policies already using this connector;
+            // without a client to do that the connector service refuses the update outright.
+            { esClient }
           );
           logger.info(`Successfully updated cloud connector: ${cloudConnector.id}`);
           return cloudConnector;
