@@ -404,7 +404,8 @@ steps:
               reasoning:
                 type: string
               confidence:
-                type: string  
+                type: string
+                enum: [low, medium, high]
               proposed_query:
                 type: string
                 minLength: 1
@@ -422,7 +423,8 @@ steps:
               reasoning:
                 type: string
               confidence:
-                type: string  
+                type: string
+                enum: [low, medium, high]
               proposed_risk_score:
                 type: integer
                 minimum: 0
@@ -444,7 +446,8 @@ steps:
               reasoning:
                 type: string
               confidence:
-                type: string     
+                type: string
+                enum: [low, medium, high]
             required: [change_type, summary, title, fp_pattern, reasoning, confidence]
 
   # Rules using a data view, timestamp override, or alert suppression need fields
@@ -551,7 +554,7 @@ steps:
         **{{ steps.diagnose_rule.output.structured_output.title | default: "Rule tuning review" }}**
 
         {{ steps.compose_evidence.output.rule_line }}
-        **Recommended action:** {% case steps.diagnose_rule.output.structured_output.change_type %}{% when "query" %}Edit rule query{% when "exception" %}Create exception{% when "risk_score" %}Edit rule settings (risk score and severity){% when "manual" %}Manual change, no automated action{% else %}{{ steps.diagnose_rule.output.structured_output.change_type }}{% endcase %}
+        **Recommended action:** {% case steps.diagnose_rule.output.structured_output.change_type %}{% when "query" %}Edit rule query{% when "exception" %}Create exception{% when "risk_score" %}Edit rule settings (risk score and severity){% else %}Manual change, no automated action{% endcase %}
         {{ steps.compose_evidence.output.investigation_line }}
 
         **Why this rule needs tuning**
@@ -573,7 +576,8 @@ steps:
         {{ steps.compose_evidence.output.sample_alerts }}
 
         **Proposed change**
-        {% if steps.diagnose_rule.output.structured_output.change_type == "query" %}
+        {% case steps.diagnose_rule.output.structured_output.change_type %}
+        {% when "query" %}
         Current query:
         ```
         {{ steps.fetch_rule.output.query }}
@@ -583,29 +587,23 @@ steps:
         ```
         {{ steps.diagnose_rule.output.structured_output.proposed_query }}
         ```
-        {% endif %}
-
-        {% if steps.diagnose_rule.output.structured_output.change_type == "exception" %}
+        {% when "exception" %}
         Proposed exception:
         {% for entry in steps.diagnose_rule.output.structured_output.exception_entries %}
         - {{ entry.field }} {{ entry.operator }}{% if entry.values %} {{ entry.values | join: ", " }}{% elsif entry.value %} {{ entry.value }}{% endif %}
         {% endfor %}
         Approving adds the exception to the rule's own exception list. It can be removed in the Detection Rules UI.
-        {% endif %}
-
-        {% if steps.diagnose_rule.output.structured_output.change_type == "risk_score" %}
+        {% when "risk_score" %}
         Current risk score: {{ steps.fetch_rule.output.risk_score }}
         Current severity: {{ steps.fetch_rule.output.severity }}
         Proposed risk score: {{ steps.diagnose_rule.output.structured_output.proposed_risk_score }}
         Proposed severity: {{ steps.diagnose_rule.output.structured_output.proposed_severity }}
         Approving patches the rule's risk score and severity. It can be changed back in the Detection Rules UI.
-        {% endif %}
-        
-        {% if steps.diagnose_rule.output.structured_output.change_type == "manual" %}
+        {% else %}
         No automated change can be applied safely for this rule.
         Approving records the handoff — no rule changes are made automatically.
         Apply the recommended change in the Detection Rules UI.
-        {% endif %}
+        {% endcase %}
 
         {% if steps.diagnose_rule.output.structured_output.change_type == "query" %}
         {% if steps.can_preview_query_change.output.supported %}
@@ -695,7 +693,10 @@ steps:
                   description: "Added by the rule tuning workflow after {{ inputs.fp_count }} false positives were reviewed."
                   # `${{ }}` keeps the entries as objects.
                   entries: "${{ steps.diagnose_rule.output.structured_output.exception_entries }}"
-                impact: low
+                # Same as a query edit: an exception changes how many alerts the
+                # rule produces, so it can lose a detection. Re-ranking cannot,
+                # which is why the risk score arm is lower.
+                impact: medium
                 confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
                 autoApprove: false
 
@@ -721,10 +722,16 @@ steps:
   # when there was nothing to run, `expired` when nobody answered). Spelled out
   # per outcome rather than derived from a single flag so a run that never
   # proposed (no diagnosis) matches none of them and leaves the alerts untagged.
-  # A dismissal always carries `status: no_action`, so it is read off `decision`.
+  # One axis per question: what the analyst concluded is read off `decision`,
+  # whether the change landed is read off `status`. Reading a decision off
+  # `status` cannot work, because a dismissal and an approved action-less
+  # proposal both report `no_action`.
   #
-  # NOTE: `approved` reads `succeeded` for the action paths, so an approved
-  # change whose apply failed counts as not approved here.
+  # NOTE: the gate reports `decision: approved` only once it has settled that
+  # way, which is either an approval with no action or an action that succeeded.
+  # An approval whose action failed through every retry settles as expired and
+  # reports no decision, so it counts as neither approved nor dismissed and the
+  # alerts stay untagged for the next sweep.
   - name: record_proposal_action_decision
     type: data.set
     with:
@@ -733,9 +740,9 @@ steps:
           or steps.propose_risk_score.output.status == 'succeeded'
           or steps.propose_exception.output.status == 'succeeded' }}
       approved: >-
-        ${{ steps.propose_query.output.status == 'succeeded'
-          or steps.propose_risk_score.output.status == 'succeeded'
-          or steps.propose_exception.output.status == 'succeeded'
+        ${{ steps.propose_query.output.decision == 'approved'
+          or steps.propose_risk_score.output.decision == 'approved'
+          or steps.propose_exception.output.decision == 'approved'
           or steps.propose_manual.output.decision == 'approved' }}
       dismissed: >-
         ${{ steps.propose_query.output.decision == 'dismissed'
@@ -801,12 +808,14 @@ steps:
   # on. Tagging retires these alerts so later sweeps do not re-open the same gate;
   # the rule returns once new false positives accumulate past the watermark. The
   # auto-apply path stays untagged when its apply fell through, so a later sweep can retry with current data.
-  # Liquid evaluates right-to-left: approved gates both the manual path and the
-  # unsupported-query path without needing parentheses.
+  # Keyed on the proposal rather than on the change type: `propose_manual` is the
+  # switch's default arm, so it is the one that ran for `manual` and for any value
+  # the three action arms did not match. Testing the change type here would leave
+  # those alerts untagged after an approval, and the next sweep would re-propose
+  # the rule the analyst just decided.
   - name: mark_alerts_acknowledged
     type: security.setAlertTags
-    if: >-
-      ${{ steps.diagnose_rule.output.structured_output.change_type == 'manual' and steps.propose_manual.output.decision == 'approved' }}
+    if: "${{ steps.propose_manual.output.decision == 'approved' }}"
     with:
       alert_ids: "${{ inputs.alert_ids }}"
       tags_to_add:
@@ -826,7 +835,9 @@ steps:
       updates:
         status: closed
         close_reason: resolved
-        verdict: "Analyst approved the {{ steps.diagnose_rule.output.structured_output.change_type }} tuning proposal."
+        # No raw change type: the default arm accepts values the arms do not
+        # name, and an unrecognised one would leave a gap in the sentence.
+        verdict: "Analyst approved the tuning proposal."
     on-failure:
       continue: true
 

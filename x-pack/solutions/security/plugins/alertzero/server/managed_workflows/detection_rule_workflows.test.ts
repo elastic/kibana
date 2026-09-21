@@ -547,10 +547,11 @@ describe('detection rule workflows', () => {
         // Approving a recommendation the pipeline cannot apply itself acknowledges
         // the manual follow-up and retires the alerts; the auto-apply path keeps
         // its alerts untagged on failure so a later sweep can retry.
-        expect(acknowledged.if).toContain(
-          "steps.diagnose_rule.output.structured_output.change_type == 'manual'"
-        );
         expect(acknowledged.if).toContain("steps.propose_manual.output.decision == 'approved'");
+        // Keyed on the default arm's proposal, not on the change type. The arm also
+        // runs for a value the three action arms do not match, and testing the type
+        // would leave those alerts untagged after an approval.
+        expect(acknowledged.if).not.toContain('change_type');
         expect(acknowledged.if).not.toContain('review_tuning');
         expect(acknowledged.with?.tags_to_add).toEqual([
           '{{ consts.reviewed_tag }}',
@@ -561,9 +562,10 @@ describe('detection rule workflows', () => {
         }
       });
 
-      // `status` says how far the gate got; `decision` says what the analyst
-      // concluded. A dismissal always carries `status: no_action`, so it is read
-      // off `decision`.
+      // One axis per question. What the analyst concluded is read off `decision`
+      // on every arm; whether the change landed is read off `status`. A decision
+      // cannot be read off `status`, because a dismissal and an approved
+      // action-less proposal both report `no_action`.
       it('derives every decision flag from the right gate axis', () => {
         const decision = reviewSteps.find(
           ({ name }) => name === 'record_proposal_action_decision'
@@ -573,7 +575,7 @@ describe('detection rule workflows', () => {
         for (const proposal of ['propose_query', 'propose_risk_score', 'propose_exception']) {
           expect(String(flags.applied)).toContain(`steps.${proposal}.output.status == 'succeeded'`);
           expect(String(flags.approved)).toContain(
-            `steps.${proposal}.output.status == 'succeeded'`
+            `steps.${proposal}.output.decision == 'approved'`
           );
           expect(String(flags.dismissed)).toContain(
             `steps.${proposal}.output.decision == 'dismissed'`
@@ -587,6 +589,8 @@ describe('detection rule workflows', () => {
           "steps.propose_manual.output.decision == 'dismissed'"
         );
         expect(String(flags.applied)).not.toContain('propose_manual');
+        // Neither decision flag touches the status axis; only `applied` does.
+        expect(String(flags.approved)).not.toContain('.output.status');
         expect(String(flags.dismissed)).not.toContain('.output.status');
         // Only one proposal step runs per review, so every flag is a plain or-chain.
         for (const flag of [flags.applied, flags.approved, flags.dismissed]) {
