@@ -250,7 +250,6 @@ async function validateLogstashOutputNotUsedInAPMPolicy(outputId?: string, isDef
 // ES filters aggregation creates one bucket per ID; stay well under search.max_buckets (default 65536).
 const AGENT_COUNT_POLICY_ID_CHUNK_SIZE = 1000;
 
-
 async function findPoliciesWithFleetServerOrSynthetics(outputId?: string, isDefault?: boolean) {
   const internalSoClientWithoutSpaceExtension =
     appContextService.getInternalUserSOClientWithoutSpaceExtension();

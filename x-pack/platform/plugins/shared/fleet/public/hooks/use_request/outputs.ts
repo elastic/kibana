@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { GetOutputAgentPolicyCountResponse, GetOutputHealthResponse } from '../../../common/types';
+import type {
+  GetOutputAgentPolicyCountResponse,
+  GetOutputHealthResponse,
+} from '../../../common/types';
 
 import { outputRoutesService } from '../../services';
 import type {
