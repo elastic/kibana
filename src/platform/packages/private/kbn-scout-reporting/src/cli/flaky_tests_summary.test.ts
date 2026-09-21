@@ -315,7 +315,6 @@ describe('displaySummary', () => {
       minFailedBuilds: 2,
       minFailRate: 0,
       maxTests: 200,
-      lastRunWithinHours: 24,
     },
     summary: {
       totalFlaky: 2,
@@ -384,7 +383,6 @@ describe('displaySummary', () => {
     expect(output).toContain('Min builds        : 10');
     expect(output).toContain('Min failed builds : 2');
     expect(output).toContain('Min fail rate     : 0.0%');
-    expect(output).toContain('Last run within   : 24h');
     expect(output).toContain('Max tests         : 200 per list');
     expect(output).toContain('Consistently failing = qualifying test that never passed');
     expect(output).toContain('Flaky                : 2 (jest: 2)');

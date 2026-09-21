@@ -284,9 +284,6 @@ export const displaySummary = (
             thresholds.minFailRate
           )} (failed / all builds on the branch)
           Max tests         : ${thresholds.maxTests} per list
-          Last run within   : ${
-            thresholds.lastRunWithinHours
-          }h (tests that did not run since are dropped)
           Flaky                = qualifying test with at least one pass or in-run retry recovery
           Consistently failing = qualifying test that never passed in the window
           Ranking              = failed builds, then fail rate on the flakiest branch, then latest failure

@@ -169,19 +169,6 @@ export const formatCounts = (counts: Readonly<Partial<Record<string, number>>>):
     .map(([key, count]) => `${key}: ${count}`)
     .join(', ');
 
-const MS_PER_HOUR = 60 * 60 * 1000;
-
-/** Whether the test ran on any branch in the last `lastRunWithinHours` of the window. */
-export const isActive = (
-  byBranch: ReadonlyArray<Pick<BranchCountsRow, 'latestExecutionAt'>>,
-  to: Date,
-  lastRunWithinHours: number
-): boolean =>
-  byBranch.some(
-    ({ latestExecutionAt }) =>
-      to.getTime() - latestExecutionAt.getTime() <= lastRunWithinHours * MS_PER_HOUR
-  );
-
 const groupByFramework = <T extends { framework: TestFramework }>(
   items: readonly T[]
 ): Map<TestFramework, T[]> => {
@@ -198,8 +185,8 @@ const elapsed = (startedAt: number): string =>
 /**
  * Failures are rare, so everything starts from them: find files with failures, aggregate
  * per-test execution and build counts scoped to those files, check the thresholds branch by
- * branch and drop the tests that no longer execute, then decorate the highest ranked ones with
- * metadata, per-branch and per-pipeline stats and recent failure samples.
+ * branch, then decorate the highest ranked ones with metadata, per-branch and per-pipeline
+ * stats and recent failure samples.
  */
 const buildReport = async (
   es: ESClient,
@@ -261,22 +248,20 @@ const buildReport = async (
     return mayQualify(row, thresholds) && classifications.has(classification);
   });
 
-  // The thresholds proper apply per branch, and tests that no longer execute in the scope
-  // (skipped, moved or deleted since) are dropped; both before ranking, so the caps are filled
-  // with tests that are flaky somewhere and can still be fixed
+  // The thresholds proper apply per branch, before ranking, so the caps are filled with tests
+  // that are flaky on at least one branch rather than only in the diluted total
   const qualified: Array<{ row: TestStatsRow; flakiestBranch: FlakyTestFlakiestBranch }> = [];
   if (candidates.length > 0) {
     startedAt = performance.now();
     const branchCounts = await fetchBranchCounts(es, scope, candidates);
     let belowThresholds = 0;
-    let notRunLately = 0;
     for (const row of candidates) {
-      const byBranch = branchCounts.get(row.testId) ?? [];
-      const flakiestBranch = flakiestQualifyingBranch(byBranch, thresholds);
+      const flakiestBranch = flakiestQualifyingBranch(
+        branchCounts.get(row.testId) ?? [],
+        thresholds
+      );
       if (!flakiestBranch) {
         belowThresholds += 1;
-      } else if (!isActive(byBranch, to, thresholds.lastRunWithinHours)) {
-        notRunLately += 1;
       } else {
         qualified.push({ row, flakiestBranch });
       }
@@ -285,9 +270,7 @@ const buildReport = async (
     log.info(
       `Checked ${candidates.length} tests branch by branch in ${elapsed(startedAt)}: ` +
         `${qualified.length} qualify (${formatCounts(qualifiedByBranch) || 'none'}), ` +
-        `${belowThresholds} clear the thresholds on no single branch, ` +
-        `${notRunLately} did not run in the last ${thresholds.lastRunWithinHours}h ` +
-        `(skipped, moved or deleted)`
+        `${belowThresholds} clear the thresholds on no single branch`
     );
   }
 

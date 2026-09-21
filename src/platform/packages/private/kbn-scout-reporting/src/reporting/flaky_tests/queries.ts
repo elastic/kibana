@@ -177,10 +177,9 @@ export const buildBranchStatsQuery = (
 };
 
 /**
- * Per-branch execution and build counts, plus the latest execution, for the given tests of one
- * execution model. This is what the thresholds are checked against, branch by branch, and what
- * tells active tests from skipped, moved or deleted ones; it runs for every test that clears the
- * thresholds on its totals, before ranking. Only counts and a `MAX`, so it stays cheap; the
+ * Per-branch execution and build counts for the given tests of one execution model. This is
+ * what the thresholds are checked against, branch by branch; it runs for every test that
+ * clears the thresholds on its totals, before ranking. Counts only, so it stays cheap; the
  * expensive latest-run lookup is left to `buildBranchStatsQuery`, which only runs for the tests
  * that make the report.
  */
@@ -200,8 +199,7 @@ export const buildBranchCountsQuery = (
     ].join(' AND ')}`,
     `EVAL failed = ${model.failedExpression}`,
     'STATS builds = COUNT_DISTINCT(buildkite.build.id),' +
-      ' failed_builds = COUNT_DISTINCT(CASE(failed == 1, buildkite.build.id, NULL)),' +
-      ' latest_execution_at = MAX(@timestamp)' +
+      ' failed_builds = COUNT_DISTINCT(CASE(failed == 1, buildkite.build.id, NULL))' +
       ' BY test.id, buildkite.branch',
     'RENAME test.id AS test_id, buildkite.branch AS branch',
     `LIMIT ${ESQL_ROW_LIMIT}`,
@@ -373,15 +371,14 @@ export const fetchBranchStats = async (
   return byTest;
 };
 
-/** Build counts and latest execution of one test on one branch. */
+/** Build counts of one test on one branch. */
 export interface BranchCountsRow {
   branch: string;
   builds: number;
   failedBuilds: number;
-  latestExecutionAt: Date;
 }
 
-/** Per-branch build counts and latest execution keyed by test id, most failed builds first. */
+/** Per-branch build counts keyed by test id, most failed builds first. */
 export const fetchBranchCounts = async (
   es: ESClient,
   scope: FlakyTestQueryScope,
@@ -398,20 +395,18 @@ export const fetchBranchCounts = async (
         branch: string | null;
         builds: number;
         failed_builds: number;
-        latest_execution_at: string | null;
       }>(es, buildBranchCountsQuery(scope, frameworks, testIds))
     )
   );
 
   const byTest = new Map<string, BranchCountsRow[]>();
   for (const record of results.flat()) {
-    if (record.branch === null || record.latest_execution_at === null) continue;
+    if (record.branch === null) continue;
     const rows = byTest.get(record.test_id) ?? [];
     rows.push({
       branch: record.branch,
       builds: record.builds,
       failedBuilds: record.failed_builds,
-      latestExecutionAt: new Date(record.latest_execution_at),
     });
     byTest.set(record.test_id, rows);
   }

@@ -276,7 +276,7 @@ describe('fetchBranchStats', () => {
 });
 
 describe('buildBranchCountsQuery', () => {
-  it('counts builds and the latest execution per test and branch for the given tests only', () => {
+  it('counts builds per test and branch for the given tests only', () => {
     const query = buildBranchCountsQuery(scope, ['jest', 'ftr'], ['j1', 'f1']);
 
     expect(query).toContain('@timestamp >= "2026-08-31T00:00:00.000Z"');
@@ -287,12 +287,13 @@ describe('buildBranchCountsQuery', () => {
     expect(query).toContain('EVAL failed = CASE(test.status IN ("failed", "timedOut"), 1, 0)');
     expect(query).toContain(
       'STATS builds = COUNT_DISTINCT(buildkite.build.id), ' +
-        'failed_builds = COUNT_DISTINCT(CASE(failed == 1, buildkite.build.id, NULL)), ' +
-        'latest_execution_at = MAX(@timestamp) BY test.id, buildkite.branch'
+        'failed_builds = COUNT_DISTINCT(CASE(failed == 1, buildkite.build.id, NULL)) ' +
+        'BY test.id, buildkite.branch'
     );
     expect(query).toContain('RENAME test.id AS test_id, buildkite.branch AS branch');
     // no LAST: the latest run is left to the branch stats query
     expect(query).not.toContain('LAST(');
+    expect(query).not.toContain('latest_execution_at');
   });
 });
 
@@ -320,17 +321,15 @@ describe('fetchBranchCounts', () => {
               branch: '9.5',
               builds: 100,
               failed_builds: 8,
-              latest_execution_at: '2026-09-06T20:00:00.000Z',
             },
             {
               test_id: 'j1',
               branch: 'main',
               builds: 500,
               failed_builds: 10,
-              latest_execution_at: '2026-09-06T23:30:00.000Z',
             },
-            // no branch or no execution at all: ignored
-            { test_id: 'j1', branch: null, builds: 1, failed_builds: 1, latest_execution_at: null },
+            // no branch: ignored
+            { test_id: 'j1', branch: null, builds: 1, failed_builds: 1 },
           ],
         }),
       })
@@ -348,13 +347,11 @@ describe('fetchBranchCounts', () => {
         branch: 'main',
         builds: 500,
         failedBuilds: 10,
-        latestExecutionAt: new Date('2026-09-06T23:30:00.000Z'),
       },
       {
         branch: '9.5',
         builds: 100,
         failedBuilds: 8,
-        latestExecutionAt: new Date('2026-09-06T20:00:00.000Z'),
       },
     ]);
     // a test without any row is absent
