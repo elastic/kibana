@@ -64,8 +64,7 @@ spaceTest.describe(
         await expect(page.testSubj.locator(COUNT)).toHaveText('Count: 2');
 
         // A second Discover tab gets its own counter, so incrementing here must not leak back.
-        await unifiedTabs.createNewTab();
-        await discover.waitUntilTabIsLoaded();
+        await discover.createNewTabAndSearch();
         await docViewer.openAndWaitForFlyout({ rowIndex: 0 });
         await docViewer.openTab(RESTORABLE_STATE_TAB);
         await page.testSubj.click(INCREMENT_BUTTON);
@@ -94,8 +93,7 @@ spaceTest.describe(
         await page.testSubj.click(INCREMENT_BUTTON);
         await expect(page.testSubj.locator(COUNT)).toHaveText('Count: 2');
 
-        await unifiedTabs.createNewTab();
-        await discover.waitUntilTabIsLoaded();
+        await discover.createNewTabAndSearch();
         await docViewer.openAndWaitForFlyout({ rowIndex: 0 });
         await docViewer.openTab(RESTORABLE_STATE_TAB);
         await page.testSubj.click(INCREMENT_BUTTON);
