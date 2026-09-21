@@ -144,6 +144,13 @@ describe('DENSE_VECTOR Validation', () => {
       );
     });
 
+    it.each([
+      'FROM index | DENSE_VECTOR textField WITH { "type": "text" }',
+      'FROM index | DENSE_VECTOR textField WITH { "type": "image" }',
+    ])('accepts the type parameter: %s', (query) => {
+      denseVectorExpectErrors(query, []);
+    });
+
     it('does not report errors when the WITH map is omitted, since inference_id is optional', () => {
       denseVectorExpectErrors('FROM index | DENSE_VECTOR textField', []);
     });

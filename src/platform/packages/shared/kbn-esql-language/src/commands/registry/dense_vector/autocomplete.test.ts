@@ -259,7 +259,7 @@ describe('DENSE_VECTOR Autocomplete', () => {
     test('suggests parameter keys inside an empty map', async () => {
       await expectDenseVectorSuggestions(
         'from a | dense_vector textField WITH { ',
-        ['"inference_id": "$0"', '"timeout": "$0"'],
+        ['"inference_id": "$0"', '"type": "$0"', '"timeout": "$0"'],
         mockCallbacks
       );
     });
@@ -268,7 +268,7 @@ describe('DENSE_VECTOR Autocomplete', () => {
       await expectDenseVectorSuggestions(
         'from a | dense_vector textField WITH { "inference_id": "inference_1", ',
         {
-          contains: ['"timeout": "$0"'],
+          contains: ['"type": "$0"', '"timeout": "$0"'],
           notContains: ['"inference_id": "$0"'],
         },
         mockCallbacks
@@ -279,6 +279,14 @@ describe('DENSE_VECTOR Autocomplete', () => {
       await expectDenseVectorSuggestions(
         'from a | dense_vector textField WITH { "inference_id": "',
         ['"inference_1"'],
+        mockCallbacks
+      );
+    });
+
+    test('suggests text and image as type values', async () => {
+      await expectDenseVectorSuggestions(
+        'from a | dense_vector textField WITH { "type": "',
+        ['"text"', '"image"'],
         mockCallbacks
       );
     });

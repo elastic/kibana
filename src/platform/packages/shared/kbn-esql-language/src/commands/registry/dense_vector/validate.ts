@@ -17,9 +17,10 @@ import { validateMap } from '../../definitions/utils/validation/map';
 import type { ICommandContext, ICommandCallbacks } from '../types';
 import { DENSE_VECTOR_SUFFIX_KEYWORD, getNamingKeyword } from './utils';
 
-// `inference_id` is optional: Elasticsearch falls back to a built-in text embedding endpoint.
+// All WITH options are optional.
 const DENSE_VECTOR_MAP_DEFINITION =
-  "{name='inference_id', description='Text embedding inference endpoint used to generate the embeddings', type=[keyword]}" +
+  "{name='inference_id', description='Inference endpoint used to generate the embeddings', type=[keyword]}" +
+  "{name='type', description='Input modality: text (default) or image', type=[keyword]}" +
   "{name='timeout', description='Maximum time to wait for each inference request', type=[keyword]}";
 
 /**

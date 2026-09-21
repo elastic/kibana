@@ -33,9 +33,9 @@ export const denseVectorCommand: ICommand = {
         'Generates an embedding per row for each listed text field, appending a <field>_dense_vector column.',
     }),
     declaration:
-      'DENSE_VECTOR field1 [, field2, ...] [WITH { <options> }]\n' +
-      'DENSE_VECTOR target = field [WITH { <options> }]\n' +
-      'DENSE_VECTOR suffix = "<suffix>" ON field1 [, field2, ...] [WITH { <options> }]',
+      'DENSE_VECTOR field1 [, field2, ...] [WITH { ["inference_id": "<id>"] ["type": "text"|"image"] ["timeout": "<duration>"] }]\n' +
+      'DENSE_VECTOR target = field [WITH { ... }]\n' +
+      'DENSE_VECTOR suffix = "<suffix>" ON field1 [, field2, ...] [WITH { ... }]',
     examples: [
       'FROM books | DENSE_VECTOR title, description',
       'FROM books | DENSE_VECTOR embedding = description',

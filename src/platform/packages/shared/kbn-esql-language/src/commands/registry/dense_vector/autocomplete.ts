@@ -66,10 +66,21 @@ const getDenseVectorMapParameters = (context?: ICommandContext): MapParameters =
       'kbn-esql-language.commands.denseVector.autocomplete.inferenceIdDescription',
       {
         defaultMessage:
-          'Text embedding inference endpoint used to generate the embeddings (default: the built-in endpoint)',
+          'Inference endpoint used to generate the embeddings. For text the endpoint must be text_embedding or multimodal embedding; for image it must be multimodal embedding. Defaults to the built-in text embedding endpoint.',
       }
     ),
     suggestions: context?.inferenceEndpoints?.map(createInferenceEndpointToCompletionItem) ?? [],
+  },
+  type: {
+    type: 'string',
+    description: i18n.translate(
+      'kbn-esql-language.commands.denseVector.autocomplete.typeDescription',
+      {
+        defaultMessage:
+          'Input modality: "text" (default) embeds the field value as text; "image" expects a base64 data URI and requires a multimodal embedding endpoint.',
+      }
+    ),
+    suggestions: [buildMapValueCompleteItem('text'), buildMapValueCompleteItem('image')],
   },
   timeout: {
     type: 'string',
