@@ -25,6 +25,7 @@ const aiIndex: AiIndexHttpItem = {
   id: 'support',
   dest: { type: 'index', value: 'ai-index-idx-support' },
   managed: false,
+  memory_enabled: true,
   automations: [],
   sources: [],
   traces: [],
