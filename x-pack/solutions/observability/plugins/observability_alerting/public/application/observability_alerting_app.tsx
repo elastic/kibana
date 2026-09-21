@@ -68,9 +68,7 @@ const useObservabilityRulesTabs = (
           defaultMessage: 'V2 rules',
         }),
         isSelected: selected === 'v2',
-        href: prepend(
-          `${OBSERVABILITY_ALERTING_BASE_PATH}${OBSERVABILITY_ALERTING_RULES_V2_PATH}`
-        ),
+        href: prepend(`${OBSERVABILITY_ALERTING_BASE_PATH}${OBSERVABILITY_ALERTING_RULES_V2_PATH}`),
         badge: {
           iconType: 'sparkles',
           tooltip: i18n.translate(
@@ -89,9 +87,7 @@ const useObservabilityRulesTabs = (
           defaultMessage: 'V1 rules',
         }),
         isSelected: selected === 'v1',
-        href: prepend(
-          `${OBSERVABILITY_ALERTING_BASE_PATH}${OBSERVABILITY_ALERTING_RULES_V1_PATH}`
-        ),
+        href: prepend(`${OBSERVABILITY_ALERTING_BASE_PATH}${OBSERVABILITY_ALERTING_RULES_V1_PATH}`),
         'data-test-subj': 'v1RulesTab',
       });
     }

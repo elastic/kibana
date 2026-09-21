@@ -19,7 +19,6 @@
     "@kbn/scout-oblt",
     "@kbn/app-header",
     "@kbn/triggers-actions-ui-plugin",
-    "@kbn/rule-data-utils",
     "@kbn/triggers-actions-ui-plugin/test/scout/common/ui"
   ],
   "exclude": ["target/**/*"]
