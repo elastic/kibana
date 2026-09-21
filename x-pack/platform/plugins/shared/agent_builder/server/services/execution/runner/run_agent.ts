@@ -156,6 +156,7 @@ export const runAgent = async ({
     agentName: agent.name,
     executionId,
     conversationId: agentParams.conversation?.id,
+    origin: agentParams.origin?.type,
   });
   const manager = parentManager.createChild(forkedContext);
 

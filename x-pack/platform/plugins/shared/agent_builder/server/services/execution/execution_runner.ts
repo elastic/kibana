@@ -444,6 +444,7 @@ const handleConversationExecution = async ({
             modelProvider: connectorProvider,
             conversationId: conversation.id,
             executionId: execution.executionId,
+            roundOrigin: roundOrigin?.type,
           })
         );
       }
