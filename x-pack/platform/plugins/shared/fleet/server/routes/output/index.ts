@@ -326,6 +326,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
             FLEET_API_PRIVILEGES.SETTINGS.READ,
             FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
             FLEET_API_PRIVILEGES.AGENTS.READ,
+            FLEET_API_PRIVILEGES.INTEGRATIONS.READ,
           ],
         },
       },
