@@ -39,7 +39,12 @@ export type {
 } from './test/ui';
 
 // Worker primitives (for optional packages such as @kbn/scout-synthtrace)
-export { coreWorkerFixtures, esArchiverFixture } from './fixtures/scope/worker';
+export {
+  coreWorkerFixtures,
+  esArchiverFixture,
+  systemIndicesEsClientFixture,
+  SYSTEM_INDICES_HEADERS,
+} from './fixtures/scope/worker';
 export type { EsArchiverFixture } from './fixtures/scope/worker';
 export type { NetworkFixture } from './fixtures/scope/test';
 
@@ -60,6 +65,7 @@ export type {
   ApiClientFixture,
   ApiClientOptions,
   ApiClientResponse,
+  SystemIndicesEsClientFixture,
 } from './fixtures/scope/worker';
 
 // Tagging utility

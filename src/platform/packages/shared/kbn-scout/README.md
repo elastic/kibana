@@ -123,7 +123,33 @@ The `fixtures/scope` directory contains core Scout capabilities required for tes
 - `kbnClient`
 - `esArchiver`
 - `samlAuth`
+- `systemIndicesEsClient` (`apiTest` and single-thread UI tests only)
 - `linkedProject` (Cross-Project Search only -- provides `esClient` and `esArchiver` for the linked cluster)
+
+##### `systemIndicesEsClient`
+
+The default `esClient` authenticates as `elastic`, whose `superuser` role stops at restricted
+system indices: reads of `.kibana` and friends work, writes are refused. `systemIndicesEsClient`
+provisions the `system_indices_superuser` account (once per worker, on first use) and hands back a
+client that can write them, with the required `x-elastic-product-origin: kibana` header already
+attached.
+
+Prefer Kibana's HTTP APIs. Reach for this only for state those APIs cannot produce or observe --
+`legacy-url-alias` documents, hidden saved object types, framework-owned fields such as
+`references[]`.
+
+```ts
+apiTest('reads a hidden saved object', async ({ systemIndicesEsClient }) => {
+  const esClient = await systemIndicesEsClient.getClient();
+  const doc = await esClient.get({ index: '.kibana', id: 'my-type:my-id' });
+  // ...
+});
+```
+
+`system_indices_superuser` is a file-realm account that `@kbn/es` bind-mounts into locally-managed
+clusters, so it does not exist on Cloud serverless (MKI) and cannot be provisioned there. Keep suites
+that need it on local targets, or branch on `systemIndicesEsClient.isAvailable`, which is `false`
+there -- `getClient()` throws rather than handing back a client that would fail to authenticate.
 
 Synthetic APM / logs / infra data via [`@kbn/synthtrace`](https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-synthtrace) is **not** part of `@kbn/scout`. Use the optional add-on [`@kbn/scout-synthtrace`](../kbn-scout-synthtrace/README.md) and merge its Playwright fixtures where you need `apmSynthtraceEsClient`, `infraSynthtraceEsClient`, or `logsSynthtraceEsClient`. `@kbn/scout-oblt`, `@kbn/scout-search`, and `@kbn/scout-security` do not bundle or re-export it.
 

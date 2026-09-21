@@ -15,6 +15,7 @@ import {
   linkedEsFixtures,
   uiSettingsFixture,
   lighthouseFixture,
+  systemIndicesEsClientFixture,
 } from '../../fixtures/scope/worker';
 import type {
   ApiServicesFixture,
@@ -26,6 +27,7 @@ import type {
   ScoutLogger,
   ScoutTestConfig,
   UiSettingsFixture,
+  SystemIndicesEsClientFixture,
 } from '../../fixtures/scope/worker';
 import {
   pageContextFixture,
@@ -53,6 +55,7 @@ export const scoutFixtures = mergeTests(
   esArchiverFixture,
   linkedEsFixtures,
   uiSettingsFixture,
+  systemIndicesEsClientFixture,
   // api fixtures
   apiServicesFixture,
   // test scope fixtures
@@ -84,6 +87,7 @@ export interface ScoutWorkerFixtures extends ApiServicesFixture {
   linkedProject: LinkedProjectFixture;
   uiSettings: UiSettingsFixture;
   apiServices: ApiServicesFixture;
+  systemIndicesEsClient: SystemIndicesEsClientFixture;
   isSnapshotBuild: boolean;
 }
 
