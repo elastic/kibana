@@ -86,10 +86,13 @@ import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_repo
 import {
   registerAttachmentUiDefinitions,
   registerAiRuleCreationHandler,
+  registerAttackDiscoveryAttachment,
+  registerAttackDiscoveryVerdictAttachment,
   registerEntityAnalyticsDashboardAttachment,
   registerEntityRiskScoreHistoryAttachment,
   registerEntityAttachment,
   registerEntityGraphAttachment,
+  registerExceptionAttachment,
   registerRuleAttachment,
   registerRulePreviewAttachment,
   registerInvestigationTimelineAttachment,
@@ -362,6 +365,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       }
 
       registerAttachmentUiDefinitions(plugins.agentBuilder.attachments);
+      registerAttackDiscoveryAttachment({
+        attachments: plugins.agentBuilder.attachments,
+      });
+      registerAttackDiscoveryVerdictAttachment({
+        attachments: plugins.agentBuilder.attachments,
+      });
       if (this.experimentalFeatures.aiRuleCreationEnabled) {
         registerRuleAttachment({
           attachments: plugins.agentBuilder.attachments,
@@ -400,6 +409,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           uiSettings: core.uiSettings,
         });
       }
+      registerExceptionAttachment({ attachments: plugins.agentBuilder.attachments });
       registerEntityAttachment({
         attachments: plugins.agentBuilder.attachments,
         application: core.application,
@@ -1020,6 +1030,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       package: 'cribl',
       view: 'package-policy-replace-define-step',
       Component: LazyCustomCriblExtension,
+      useWidePageLayout: true,
     });
   }
 
