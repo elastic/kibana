@@ -1294,6 +1294,16 @@ export const SetCaseConfigurationRequest = lazySchema(() =>
       .max(10)
       .optional()
       .describe('Custom fields case configuration.'),
+    /**
+      * Indicates whether observables are automatically extracted from alerts when they are added to new cases. When omitted, defaults to `true`.
+
+      */
+    extractObservables: z
+      .boolean()
+      .optional()
+      .describe(
+        'Indicates whether observables are automatically extracted from alerts when they are added to new cases. When omitted, defaults to `true`.\n'
+      ),
     owner: Owner,
     templates: Templates.optional(),
   })
@@ -1393,6 +1403,16 @@ export const UpdateCaseConfigurationRequest = lazySchema(() =>
       )
       .optional()
       .describe('Custom fields case configuration.'),
+    /**
+      * Indicates whether observables are automatically extracted from alerts when they are added to new cases.
+
+      */
+    extractObservables: z
+      .boolean()
+      .optional()
+      .describe(
+        'Indicates whether observables are automatically extracted from alerts when they are added to new cases.\n'
+      ),
     templates: Templates.optional(),
     /**
       * The version of the connector. To retrieve the version value, use the get configuration API.
