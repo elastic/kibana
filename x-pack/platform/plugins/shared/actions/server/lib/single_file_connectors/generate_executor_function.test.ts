@@ -53,7 +53,7 @@ describe('generateExecutorFunction', () => {
       services: {} as never,
       configurationUtilities: {} as never,
       connectorUsageCollector: {} as never,
-    } as Parameters<ReturnType<typeof generateExecutorFunction>>[0]);
+    }) as Parameters<ReturnType<typeof generateExecutorFunction>>[0];
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -815,7 +815,7 @@ describe('generateExecutorFunction', () => {
         ({
           ...makeExecOptions({ subAction: 'testAction', subActionParams: {} }),
           actionId: id,
-        } as Parameters<typeof executor>[0]);
+        }) as Parameters<typeof executor>[0];
 
       await executor(makeOptsFor('connector-1'));
       await executor(makeOptsFor('connector-2'));

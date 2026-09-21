@@ -99,9 +99,8 @@ export const searchRulesRoute = (router: SecuritySolutionPluginRouter, _logger: 
 
           if (hasGapFilters) {
             const uiSettingsClient = ctx.core.uiSettings.client;
-            const excludedReasons = await uiSettingsClient.get<GapReasonType[]>(
-              EXCLUDED_GAP_REASONS_KEY
-            );
+            const excludedReasons =
+              await uiSettingsClient.get<GapReasonType[]>(EXCLUDED_GAP_REASONS_KEY);
 
             const gapPreFilter = await resolveGapPreFilter({
               rulesClient,

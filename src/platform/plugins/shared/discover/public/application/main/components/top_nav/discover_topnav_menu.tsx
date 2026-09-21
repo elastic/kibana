@@ -41,9 +41,8 @@ const createTopNavMenuContext = () => ({
 
 type DiscoverTopNavMenuContext = ReturnType<typeof createTopNavMenuContext>;
 
-export const discoverTopNavMenuContext = createContext<DiscoverTopNavMenuContext>(
-  createTopNavMenuContext()
-);
+export const discoverTopNavMenuContext =
+  createContext<DiscoverTopNavMenuContext>(createTopNavMenuContext());
 
 export const DiscoverTopNavMenuProvider = ({
   customizationContext,

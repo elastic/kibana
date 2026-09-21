@@ -44,7 +44,7 @@ describe('ensureInvestigationAgentStepDefinition', () => {
       abortSignal: new AbortController().signal,
       stepId: 'ensure_investigation_agent',
       stepType: 'nightshift.ensureInvestigationAgent',
-    } as never);
+    }) as never;
 
   const run = (input: Record<string, unknown>) =>
     ensureInvestigationAgentStepDefinition(() => agentBuilder).handler(createContext(input));

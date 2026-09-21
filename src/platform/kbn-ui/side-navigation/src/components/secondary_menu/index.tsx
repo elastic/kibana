@@ -26,8 +26,9 @@ export interface SecondaryMenuProps {
   title: string;
 }
 
-interface SecondaryMenuComponent
-  extends ForwardRefExoticComponent<SecondaryMenuProps & RefAttributes<HTMLDivElement>> {
+interface SecondaryMenuComponent extends ForwardRefExoticComponent<
+  SecondaryMenuProps & RefAttributes<HTMLDivElement>
+> {
   Item: typeof SecondaryMenuItemComponent;
   Section: typeof SecondaryMenuSectionComponent;
 }

@@ -308,7 +308,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
   private async handleResponseAction<
     TOptions extends ResponseActionsRequestBody = ResponseActionsRequestBody,
     TResponse extends ActionDetails = ActionDetails,
-    TMethodOptions extends CommonResponseActionMethodOptions = CommonResponseActionMethodOptions
+    TMethodOptions extends CommonResponseActionMethodOptions = CommonResponseActionMethodOptions,
   >(
     command: ResponseActionsApiCommandNames,
     actionReq: TOptions,

@@ -61,12 +61,12 @@ export type ToolCallOfToolOptions<TToolOptions extends ToolOptions> =
   TToolOptions['toolChoice'] extends ToolChoiceType.none
     ? never
     : TToolOptions['tools'] extends undefined
-    ? never
-    : TToolOptions['toolChoice'] extends CustomToolChoice
-    ? ToolCallOfToolDefinitions<
-        Pick<NonNullable<TToolOptions['tools']>, TToolOptions['toolChoice']['function']>
-      >
-    : ToolCallOfToolDefinitions<NonNullable<TToolOptions['tools']>>;
+      ? never
+      : TToolOptions['toolChoice'] extends CustomToolChoice
+        ? ToolCallOfToolDefinitions<
+            Pick<NonNullable<TToolOptions['tools']>, TToolOptions['toolChoice']['function']>
+          >
+        : ToolCallOfToolDefinitions<NonNullable<TToolOptions['tools']>>;
 
 /**
  * Returns the tool call shape for the given tool options, as an array.
@@ -79,14 +79,14 @@ export type ToolCallsOfToolOptions<TToolOptions extends ToolOptions> =
   TToolOptions['toolChoice'] extends ToolChoiceType.none
     ? never[]
     : TToolOptions['tools'] extends undefined
-    ? undefined
-    : TToolOptions['toolChoice'] extends CustomToolChoice
-    ? Array<
-        ToolCallOfToolDefinitions<
-          Pick<NonNullable<TToolOptions['tools']>, TToolOptions['toolChoice']['function']>
-        >
-      >
-    : Array<ToolCallOfToolDefinitions<NonNullable<TToolOptions['tools']>>>;
+      ? undefined
+      : TToolOptions['toolChoice'] extends CustomToolChoice
+        ? Array<
+            ToolCallOfToolDefinitions<
+              Pick<NonNullable<TToolOptions['tools']>, TToolOptions['toolChoice']['function']>
+            >
+          >
+        : Array<ToolCallOfToolDefinitions<NonNullable<TToolOptions['tools']>>>;
 
 type ToolCallbacksOfTools<TTools extends Record<string, ToolDefinition> | undefined> =
   TTools extends Record<string, ToolDefinition>

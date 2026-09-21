@@ -19,7 +19,7 @@ const capabilities = (features: Record<string, Record<string, boolean>>): Capabi
     management: {},
     catalogue: {},
     ...features,
-  } as Capabilities);
+  }) as Capabilities;
 
 describe('hasObservabilityAlertingPrivilege', () => {
   describe('read', () => {

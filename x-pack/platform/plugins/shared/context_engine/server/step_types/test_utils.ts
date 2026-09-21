@@ -48,7 +48,7 @@ export const createMockStepContext = ({
 export const mockAiIndexService = (dest: AiIndexDest, managed = false): AiIndexService =>
   ({
     get: jest.fn().mockResolvedValue({ id: 'my-ai-index', dest, managed }),
-  } as unknown as AiIndexService);
+  }) as unknown as AiIndexService;
 
 export const mockKiWriter = {
   uri: 'workflow://wf-1',

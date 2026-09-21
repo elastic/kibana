@@ -69,9 +69,8 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('should throw', function () {
       it('when updating write-restricted objects owned by a different user when not admin', async () => {
-        const { cookie: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin(
-          supertestWithoutAuth
-        );
+        const { cookie: adminCookie, profileUid: adminProfileUid } =
+          await loginAsKibanaAdmin(supertestWithoutAuth);
         const createResponse = await supertestWithoutAuth
           .post('/access_control_objects/create')
           .set('kbn-xsrf', 'true')

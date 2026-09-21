@@ -177,24 +177,24 @@ export const RunLimitsSection = () => {
         defaultMessage: 'Disable daily run limits?',
       })
     : warnings.enablingExhaustedGroups.length > 0
-    ? i18n.translate('xpack.significantEventsApp.settings.runLimits.enableReachedConfirmTitle', {
-        defaultMessage: 'Enable enforcement with reached limits?',
-      })
-    : i18n.translate('xpack.significantEventsApp.settings.runLimits.loweringConfirmTitle', {
-        defaultMessage: 'Lower limits to values already reached?',
-      });
+      ? i18n.translate('xpack.significantEventsApp.settings.runLimits.enableReachedConfirmTitle', {
+          defaultMessage: 'Enable enforcement with reached limits?',
+        })
+      : i18n.translate('xpack.significantEventsApp.settings.runLimits.loweringConfirmTitle', {
+          defaultMessage: 'Lower limits to values already reached?',
+        });
 
   const confirmationButtonText = warnings.disabling
     ? i18n.translate('xpack.significantEventsApp.settings.runLimits.disableConfirmButtonLabel', {
         defaultMessage: 'Disable and save changes',
       })
     : warnings.enablingExhaustedGroups.length > 0
-    ? i18n.translate('xpack.significantEventsApp.settings.runLimits.enableConfirmButtonLabel', {
-        defaultMessage: 'Enable and save changes',
-      })
-    : i18n.translate('xpack.significantEventsApp.settings.runLimits.loweringConfirmButtonLabel', {
-        defaultMessage: 'Save lower limits',
-      });
+      ? i18n.translate('xpack.significantEventsApp.settings.runLimits.enableConfirmButtonLabel', {
+          defaultMessage: 'Enable and save changes',
+        })
+      : i18n.translate('xpack.significantEventsApp.settings.runLimits.loweringConfirmButtonLabel', {
+          defaultMessage: 'Save lower limits',
+        });
 
   return (
     <>

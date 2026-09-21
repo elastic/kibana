@@ -43,9 +43,9 @@ export function joinClustersToProjects(
   return Object.entries(clusters).map(([key, clusterDetails]) => {
     const isOriginKey = key === ORIGIN_CLUSTER_KEY || key === LOCAL_CLUSTER_KEY;
     const project = isOriginKey
-      ? originProject ?? undefined
-      : linkedProjects.find(({ _alias }) => _alias === key) ??
-        (originProject?._alias === key ? originProject : undefined);
+      ? (originProject ?? undefined)
+      : (linkedProjects.find(({ _alias }) => _alias === key) ??
+        (originProject?._alias === key ? originProject : undefined));
 
     return {
       key,

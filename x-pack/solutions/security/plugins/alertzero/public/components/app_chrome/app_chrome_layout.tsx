@@ -51,7 +51,8 @@ export const AppChromeLayout: React.FC<AppChromeLayoutProps> = ({ children }) =>
           min-height: 0;
           overflow: ${overflow};
           background: ${euiTheme.colors.emptyShade};
-          background: linear-gradient(
+          background:
+            linear-gradient(
               180deg,
               ${euiTheme.colors.emptyShade} 0%,
               ${euiTheme.colors.backgroundBaseSubdued} 50%,

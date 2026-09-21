@@ -22,15 +22,12 @@ import {
   DatasetQualityDetailsLocatorDefinition,
 } from '../common/locators';
 
-export class DataQualityPlugin
-  implements
-    Plugin<
-      DataQualityPluginSetup,
-      DataQualityPluginStart,
-      AppPluginSetupDependencies,
-      AppPluginStartDependencies
-    >
-{
+export class DataQualityPlugin implements Plugin<
+  DataQualityPluginSetup,
+  DataQualityPluginStart,
+  AppPluginSetupDependencies,
+  AppPluginStartDependencies
+> {
   private capabilities$ = new Subject<Capabilities>();
 
   public setup(

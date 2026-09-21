@@ -32,7 +32,7 @@ const buildEvent = (overrides: Partial<NonNullable<IValidatedEvent>> = {}): IVal
       alerting_v2: { dispatcher: {} },
     },
     ...overrides,
-  } as IValidatedEvent);
+  }) as IValidatedEvent;
 
 describe('isString', () => {
   it('returns true for strings', () => {

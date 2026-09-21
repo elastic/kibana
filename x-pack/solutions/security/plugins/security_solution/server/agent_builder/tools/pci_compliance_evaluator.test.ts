@@ -20,7 +20,7 @@ const createEsClient = (overrides: Partial<ElasticsearchClient> = {}): Elasticse
   ({
     fieldCaps: jest.fn().mockResolvedValue({ fields: {} }),
     ...overrides,
-  } as unknown as ElasticsearchClient);
+  }) as unknown as ElasticsearchClient;
 
 describe('evaluateRequirement — ES|QL parameter binding', () => {
   beforeEach(() => {

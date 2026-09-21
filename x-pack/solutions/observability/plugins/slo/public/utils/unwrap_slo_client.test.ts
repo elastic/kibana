@@ -13,7 +13,7 @@ describe('createUnwrappingSloClient', () => {
     ({
       fetch: jest.fn().mockResolvedValue(response),
       stream: jest.fn(),
-    } as unknown as SLORepositoryClient);
+    }) as unknown as SLORepositoryClient;
 
   const fetch = (client: SLORepositoryClient) =>
     client.fetch('POST /internal/observability/slos/_historical_summary' as any, {} as any);

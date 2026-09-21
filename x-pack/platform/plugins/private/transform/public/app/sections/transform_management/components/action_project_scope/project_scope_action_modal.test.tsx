@@ -22,7 +22,7 @@ const createTransformItem = (id: string, projectRouting?: string) =>
       source: { index: ['source-index'], project_routing: projectRouting },
       dest: { index: 'dest-index' },
     },
-  } as unknown as TransformListRow);
+  }) as unknown as TransformListRow;
 
 const transformItem = createTransformItem('transform-1');
 const availableProjects: CPSProject[] = [

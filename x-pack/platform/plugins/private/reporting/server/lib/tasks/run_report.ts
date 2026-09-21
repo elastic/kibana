@@ -114,9 +114,9 @@ export interface MaxAttempts {
   maxTaskAttempts: number; // number of times the task will be retried
   maxRetries: number; // number of times the report generation logic within a single task run will be retried
 }
-export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
-  implements ReportingTask
-{
+export abstract class RunReportTask<
+  TaskParams extends ReportTaskParamsType,
+> implements ReportingTask {
   protected readonly logger: Logger;
   protected readonly queueTimeout: number;
 

@@ -76,8 +76,8 @@ export const describeIssue = (issue: GithubIssue): IssueDetails => {
     filePath: location
       ? undot(location)
       : SOURCE_FILE.test(classLocation)
-      ? classLocation
-      : undefined,
+        ? classLocation
+        : undefined,
     jestDirectory: className.startsWith(JEST_CLASS_PREFIX) ? classLocation : undefined,
     testName: metadataString(issue.body, 'test.name'),
     text: undot(`${issue.title}\n${issue.body}`),

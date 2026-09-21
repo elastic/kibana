@@ -39,15 +39,12 @@ const INVESTIGATION_TEMPLATE_NAME = i18n.translate('xpack.alertzero.conversation
   defaultMessage: 'Investigation',
 });
 
-export class AlertZeroPublicPlugin
-  implements
-    Plugin<
-      AlertZeroPublicSetup,
-      AlertZeroPublicStart,
-      AlertZeroSetupDependencies,
-      AlertZeroStartDependencies
-    >
-{
+export class AlertZeroPublicPlugin implements Plugin<
+  AlertZeroPublicSetup,
+  AlertZeroPublicStart,
+  AlertZeroSetupDependencies,
+  AlertZeroStartDependencies
+> {
   private readonly config: AlertZeroClientConfig;
 
   constructor(context: PluginInitializerContext<AlertZeroClientConfig>) {

@@ -31,7 +31,7 @@ describe('updateTransform', () => {
         }),
         updateTransform: jest.fn().mockResolvedValue({ acknowledged: true }),
       },
-    } as any);
+    }) as any;
 
   it('updates the transform with the provided current-user client', async () => {
     const esClient = createEsClient();

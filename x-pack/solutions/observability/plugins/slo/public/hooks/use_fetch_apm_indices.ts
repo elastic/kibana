@@ -47,7 +47,7 @@ export function useFetchApmIndices({
     enabled,
   });
   return {
-    data: isInitialLoading ? INITIAL_DATA : data ?? INITIAL_DATA,
+    data: isInitialLoading ? INITIAL_DATA : (data ?? INITIAL_DATA),
     isLoading: isInitialLoading || isLoading || isRefetching,
     isSuccess,
     isError,

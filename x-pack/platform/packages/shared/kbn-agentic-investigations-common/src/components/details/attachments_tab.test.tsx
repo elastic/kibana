@@ -49,7 +49,7 @@ const createService = (getAttachmentUiDefinition: jest.Mock): AttachmentServiceS
     addAttachmentType: jest.fn(),
     getAttachmentUiDefinition,
     getClient: jest.fn(),
-  } as unknown as AttachmentServiceStartContract);
+  }) as unknown as AttachmentServiceStartContract;
 
 describe('AttachmentsTab', () => {
   it('renders the latest version through the registered details renderer', () => {

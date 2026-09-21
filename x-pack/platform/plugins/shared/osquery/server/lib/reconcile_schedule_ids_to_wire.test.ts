@@ -97,7 +97,7 @@ const createMockCoreStart = (scopedClient: ReturnType<typeof createMockScopedCli
     elasticsearch: {
       client: { asInternalUser: {} },
     },
-  } as unknown as Parameters<typeof reconcileScheduleIdsToWire>[0]['coreStart']);
+  }) as unknown as Parameters<typeof reconcileScheduleIdsToWire>[0]['coreStart'];
 
 // Yields the drain as one batch (the common case for package-policy drain).
 const mockFetchAllItems = (items: unknown[]) =>
@@ -120,7 +120,7 @@ const createMockOsqueryContext = (packagePolicyService?: unknown) =>
         update: jest.fn().mockResolvedValue({}),
       }
     ),
-  } as unknown as Parameters<typeof reconcileScheduleIdsToWire>[0]['osqueryContext']);
+  }) as unknown as Parameters<typeof reconcileScheduleIdsToWire>[0]['osqueryContext'];
 
 /**
  * Build a package policy carrying a single pack block.

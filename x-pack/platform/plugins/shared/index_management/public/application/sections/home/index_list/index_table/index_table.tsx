@@ -470,7 +470,7 @@ export class IndexTable extends Component<IndexTableProps, IndexTableState> {
     if (error) {
       this.setState({ filterError: error });
     } else {
-      const queryText = typeof query === 'string' ? query : query?.text ?? '';
+      const queryText = typeof query === 'string' ? query : (query?.text ?? '');
       this.setURLParam('filter', encodeURIComponent(queryText));
       this.props.filterChanged(query ?? '');
       this.setState({ filterError: null });

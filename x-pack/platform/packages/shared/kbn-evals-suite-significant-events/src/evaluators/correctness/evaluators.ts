@@ -37,7 +37,7 @@ interface SigeventsCorrectnessConfig<TInput = unknown, TOutput = unknown, TExpec
 export const createCorrectnessEvaluators = <
   TInput = unknown,
   TOutput = unknown,
-  TExpected = unknown
+  TExpected = unknown,
 >({
   inferenceClient,
   log,

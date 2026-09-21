@@ -66,7 +66,10 @@ const getResponseData = (response: unknown): unknown => {
 };
 
 export class EvaluatorApiClient {
-  constructor(private readonly kbnClient: KbnClient, private readonly log: SomeDevLog) {}
+  constructor(
+    private readonly kbnClient: KbnClient,
+    private readonly log: SomeDevLog
+  ) {}
 
   async evaluate(body: EvaluateRequestBodyInput): Promise<EvaluateResponse> {
     const response = await this.kbnClient.request({

@@ -69,7 +69,7 @@ export class SimpleHistogram {
         .map((bucket: Bucket, index: number) => ({ count: bucket.count, index }))
         .filter(({ count }) => count > 0);
       const lastNonZeroIndex: number =
-        nonZeroCountsWithIndex.length > 0 ? last(nonZeroCountsWithIndex)?.index ?? -1 : -1;
+        nonZeroCountsWithIndex.length > 0 ? (last(nonZeroCountsWithIndex)?.index ?? -1) : -1;
       histogramToReturn =
         lastNonZeroIndex >= 0 ? this.histogramBuckets.slice(0, lastNonZeroIndex + 1) : [];
     }

@@ -398,8 +398,8 @@ ${ctx.isEntityStoreV2Enabled ? entityStoreV2Content : legacyContent}
       ctx.isEntityStoreV2Enabled
         ? []
         : FF_DYNAMICALLY_GENERATE_ESQL
-        ? [getRiskScoreEsqlTool(ctx), getAssetCriticalityEsqlTool(ctx)]
-        : [getRiskScoreInlineTool(ctx), getAssetCriticalityInlineTool(ctx)],
+          ? [getRiskScoreEsqlTool(ctx), getAssetCriticalityEsqlTool(ctx)]
+          : [getRiskScoreInlineTool(ctx), getAssetCriticalityInlineTool(ctx)],
     getRegistryTools: () =>
       ctx.isEntityStoreV2Enabled
         ? [

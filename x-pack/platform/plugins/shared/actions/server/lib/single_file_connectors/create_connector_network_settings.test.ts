@@ -34,7 +34,7 @@ const makeConfigUtils = () =>
     getProxySettings: jest.fn(),
     getCustomHostSettings: jest.fn().mockReturnValue(undefined),
     getResponseSettings: jest.fn(),
-  } as unknown as ActionsConfigurationUtilities);
+  }) as unknown as ActionsConfigurationUtilities;
 
 describe('createConnectorNetworkSettings', () => {
   let mockConfigUtils: ActionsConfigurationUtilities;

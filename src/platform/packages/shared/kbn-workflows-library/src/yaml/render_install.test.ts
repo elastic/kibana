@@ -262,7 +262,7 @@ describe('renderInstall', () => {
 
 describe('validateInstallFormValues', () => {
   const field = (overrides: Partial<InstallFormField> & Pick<InstallFormField, 'inputType'>) =>
-    ({ name: 'the-field', ...overrides } as InstallFormField);
+    ({ name: 'the-field', ...overrides }) as InstallFormField;
 
   it.each([
     ['text', field({ inputType: 'text' }), 'hello', 123],

@@ -17,7 +17,7 @@ const buildToolContext = (overrides: Partial<ToolHandlerContext> = {}): ToolHand
     request: httpServerMock.createKibanaRequest(),
     logger: loggingSystemMock.createLogger(),
     ...overrides,
-  } as ToolHandlerContext);
+  }) as ToolHandlerContext;
 
 const buildStepDef = (
   handler: ServerHandlerStepDefinition['handler']
@@ -25,7 +25,7 @@ const buildStepDef = (
   ({
     id: 'cases.create',
     handler,
-  } as ServerHandlerStepDefinition);
+  }) as ServerHandlerStepDefinition;
 
 describe('invokeStepHandler', () => {
   it('puts an agent actionSource on the step config', async () => {

@@ -83,13 +83,15 @@ export const AppMenuItem = ({
   const showAsSelected = hasItems ? isPopoverOpen : Boolean(isSelected);
 
   const buttonCss = css`
-    background-color: ${showAsSelected
-      ? getIsSelectedColor({
-          color: 'text',
-          euiTheme,
-          isFilled: false,
-        })
-      : undefined};
+    background-color: ${
+      showAsSelected
+        ? getIsSelectedColor({
+            color: 'text',
+            euiTheme,
+            isFilled: false,
+          })
+        : undefined
+    };
   `;
 
   const buttonComponent = (

@@ -10,9 +10,9 @@ import type { ScheduledItem } from './utils';
 import { findOverlappingIntervals } from './utils';
 
 const getGap = (start: string, end: string) =>
-  ({ range: { gte: new Date(start), lte: new Date(end) } } as Gap);
+  ({ range: { gte: new Date(start), lte: new Date(end) } }) as Gap;
 const getScheduledItem = (start: string, end: string) =>
-  ({ from: new Date(start), to: new Date(end), status: 'pending' } as ScheduledItem);
+  ({ from: new Date(start), to: new Date(end), status: 'pending' }) as ScheduledItem;
 
 describe('findOverlappingIntervals', () => {
   // 1 hour worth of scheduled items

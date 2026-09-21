@@ -11,9 +11,7 @@ import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability/l
 
 export type { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability/locators';
 
-export class ObservabilityOnboardingLocatorDefinition
-  implements LocatorDefinition<ObservabilityOnboardingLocatorParams>
-{
+export class ObservabilityOnboardingLocatorDefinition implements LocatorDefinition<ObservabilityOnboardingLocatorParams> {
   public readonly id = OBSERVABILITY_ONBOARDING_LOCATOR;
 
   public readonly getLocation = async (params: ObservabilityOnboardingLocatorParams = {}) => {

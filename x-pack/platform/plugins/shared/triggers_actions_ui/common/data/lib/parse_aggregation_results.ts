@@ -167,5 +167,5 @@ export const parseAggregationResults = ({
 };
 
 function totalHitsToNumber(total: SearchHitsMetadata['total']): number {
-  return typeof total === 'number' ? total : total?.value ?? 0;
+  return typeof total === 'number' ? total : (total?.value ?? 0);
 }

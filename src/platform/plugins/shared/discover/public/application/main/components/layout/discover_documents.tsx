@@ -205,9 +205,9 @@ function DiscoverDocumentsComponent({
   const setExpandedDoc = useCurrentTabAction(internalStateActions.setExpandedDoc);
   const getExpandedDocSetter = useCallback(
     (
-        owner: string,
-        expandedDocCascadePath?: ExpandedDocCascadePath
-      ): NonNullable<UnifiedDataTableProps['setExpandedDoc']> =>
+      owner: string,
+      expandedDocCascadePath?: ExpandedDocCascadePath
+    ): NonNullable<UnifiedDataTableProps['setExpandedDoc']> =>
       (
         doc: DataTableRecord | undefined,
         options?: {
@@ -560,8 +560,8 @@ function DiscoverDocumentsComponent({
               isDataLoading
                 ? DataLoadingState.loading
                 : isMoreDataLoading
-                ? DataLoadingState.loadingMore
-                : DataLoadingState.loaded
+                  ? DataLoadingState.loadingMore
+                  : DataLoadingState.loaded
             }
             rows={rows}
             sort={(sort as SortOrder[]) || []}

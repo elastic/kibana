@@ -31,10 +31,10 @@ const isolateResponseAction = (): RuleResponseAction =>
   ({
     actionTypeId: '.endpoint',
     params: { command: 'isolate', comment: 'test' },
-  } as RuleResponseAction);
+  }) as RuleResponseAction;
 
 const paramsWith = (overrides: Partial<RuleParams> = {}): RuleParams =>
-  ({ ...getQueryRuleParams(), ...overrides } as RuleParams);
+  ({ ...getQueryRuleParams(), ...overrides }) as RuleParams;
 
 const paramsWithResponseActions = (responseActions?: RuleResponseAction[]): RuleParams =>
   paramsWith({ responseActions } as Partial<RuleParams>);
@@ -131,7 +131,7 @@ describe('createSecurityRuleParamsAuthorizer', () => {
     });
 
     const osqueryAction = () =>
-      ({ actionTypeId: '.osquery', params: { savedQueryId: 'q' } } as RuleResponseAction);
+      ({ actionTypeId: '.osquery', params: { savedQueryId: 'q' } }) as RuleResponseAction;
 
     it('preserves the status code of a validator error thrown from a different class', async () => {
       // Simulates osquery's own CustomHttpRequestError: a non-Boom error carrying a

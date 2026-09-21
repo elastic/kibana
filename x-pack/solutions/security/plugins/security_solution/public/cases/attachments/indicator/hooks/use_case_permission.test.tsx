@@ -23,13 +23,12 @@ const mockCanUseCases = jest.fn();
 const getProviderComponent =
   (mockedServices: unknown) =>
   // eslint-disable-next-line react/display-name
-  ({ children }: { children: ReactNode }) =>
-    (
-      <TestProvidersComponent>
-        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-        <KibanaContextProvider services={mockedServices as any}>{children}</KibanaContextProvider>
-      </TestProvidersComponent>
-    );
+  ({ children }: { children: ReactNode }) => (
+    <TestProvidersComponent>
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+      <KibanaContextProvider services={mockedServices as any}>{children}</KibanaContextProvider>
+    </TestProvidersComponent>
+  );
 
 const getMockedServices = (permissions: object) => ({
   cases: {

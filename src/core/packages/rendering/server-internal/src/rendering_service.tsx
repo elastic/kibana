@@ -229,7 +229,7 @@ export class RenderingService {
             Promise<Record<string, UserProvidedValues>>,
             Promise<Record<string, UserProvidedValues>>,
             Promise<UserSettings> | undefined,
-            Promise<{ available: boolean; values: Record<string, unknown> }>
+            Promise<{ available: boolean; values: Record<string, unknown> }>,
           ])
     );
 

@@ -129,8 +129,8 @@ export function resolveNodeColors(
   const cardBorderColor = isSuccess
     ? colors.success
     : isFailed
-    ? colors.danger
-    : colors.borderBasePlain;
+      ? colors.danger
+      : colors.borderBasePlain;
 
   const outcome = toChipOutcome({ isRunning, isSuccess, isFailed });
   const chip = getStepChipPalette(euiTheme, family, outcome);
@@ -331,10 +331,10 @@ function NodeStatusIcon({
         isRunning
           ? i18n.translate('workflowsUi.graphNode.statusRunning', { defaultMessage: 'Running' })
           : isSuccess
-          ? i18n.translate('workflowsUi.graphNode.statusSuccess', {
-              defaultMessage: 'Completed successfully',
-            })
-          : i18n.translate('workflowsUi.graphNode.statusFailed', { defaultMessage: 'Failed' })
+            ? i18n.translate('workflowsUi.graphNode.statusSuccess', {
+                defaultMessage: 'Completed successfully',
+              })
+            : i18n.translate('workflowsUi.graphNode.statusFailed', { defaultMessage: 'Failed' })
       }
     >
       {isRunning ? (

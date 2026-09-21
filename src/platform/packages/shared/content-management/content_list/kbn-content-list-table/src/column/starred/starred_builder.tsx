@@ -45,8 +45,10 @@ const StarredColumnHeader = () => {
 /**
  * Props for the `Column.Starred` preset component.
  */
-export interface StarredColumnProps
-  extends Pick<ColumnLayoutProps, 'width' | 'minWidth' | 'maxWidth'> {
+export interface StarredColumnProps extends Pick<
+  ColumnLayoutProps,
+  'width' | 'minWidth' | 'maxWidth'
+> {
   /** Column width (CSS value). Defaults to `'40px'`. */
   width?: string;
 }

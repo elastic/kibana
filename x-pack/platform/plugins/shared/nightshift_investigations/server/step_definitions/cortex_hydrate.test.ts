@@ -44,7 +44,7 @@ describe('cortexHydrateStepDefinition', () => {
       abortSignal: new AbortController().signal,
       stepId: 'hydrate_cortex',
       stepType: 'nightshift.cortexHydrate',
-    } as never);
+    }) as never;
 
   it('hydrates the sandbox with the request-scoped ES client', async () => {
     const sandboxStart = makeSandboxStart();

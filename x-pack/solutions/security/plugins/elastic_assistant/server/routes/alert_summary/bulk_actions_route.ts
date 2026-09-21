@@ -146,7 +146,7 @@ export const bulkAlertSummaryRoute = (router: ElasticAssistantPluginRouter, logg
         const operationsCount =
           (body?.update ? body.update?.length : 0) +
           (body?.create ? body.create?.length : 0) +
-          (body?.delete ? body.delete?.ids?.length ?? 0 : 0);
+          (body?.delete ? (body.delete?.ids?.length ?? 0) : 0);
         if (operationsCount > PROMPTS_TABLE_MAX_PAGE_SIZE) {
           return assistantResponse.error({
             body: `More than ${PROMPTS_TABLE_MAX_PAGE_SIZE} ids sent for bulk edit action.`,

@@ -9,7 +9,10 @@ import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
 import { UX_APP_PATH, DEFAULT_QUERY_PARAMS } from '../constants';
 
 export class UxDashboardPage {
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {}
 
   async goto(queryParams: Record<string, string> = DEFAULT_QUERY_PARAMS): Promise<void> {
     const queryString = new URLSearchParams(queryParams).toString();

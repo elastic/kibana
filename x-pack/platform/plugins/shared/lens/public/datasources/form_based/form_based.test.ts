@@ -4019,7 +4019,7 @@ describe('IndexPattern Data Source', () => {
               },
             },
           },
-        } as FormBasedPrivateState);
+        }) as FormBasedPrivateState;
 
       it.each([
         [SeriesTypes.BAR, false],

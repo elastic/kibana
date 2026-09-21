@@ -55,7 +55,7 @@ describe('EnsureUpToDate task', () => {
             ensureOpenApiSpecUpToDate,
             wasUninstalledSince,
           },
-        } as unknown as InternalServices),
+        }) as unknown as InternalServices,
     });
     const definition =
       taskManager.registerTaskDefinitions.mock.calls[0][0][ENSURE_DOC_UP_TO_DATE_TASK_TYPE];

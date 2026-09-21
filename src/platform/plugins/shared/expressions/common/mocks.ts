@@ -12,7 +12,7 @@ import type { ExecutionContext } from './execution/types';
 
 export const createMockExecutionContext = <
   ExtraContext extends object = object,
-  ExtraAdapters extends Adapters = Adapters
+  ExtraAdapters extends Adapters = Adapters,
 >(
   extraContext: ExtraContext = {} as ExtraContext,
   extraAdapters: ExtraAdapters = {} as ExtraAdapters

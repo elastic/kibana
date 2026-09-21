@@ -13,8 +13,10 @@ import type { ComponentProps, FC, ReactNode } from 'react';
 import { useNestedMenu } from './use_nested_menu';
 import { SecondaryMenu } from '../secondary_menu';
 
-export interface PrimaryMenuItemProps
-  extends Omit<ComponentProps<typeof SecondaryMenu.Item>, 'children' | 'isHighlighted'> {
+export interface PrimaryMenuItemProps extends Omit<
+  ComponentProps<typeof SecondaryMenu.Item>,
+  'children' | 'isHighlighted'
+> {
   children: ReactNode;
   hasSubmenu?: boolean;
   isCurrent?: boolean;

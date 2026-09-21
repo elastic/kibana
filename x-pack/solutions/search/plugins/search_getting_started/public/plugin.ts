@@ -24,15 +24,12 @@ import type {
 } from './types';
 import { docLinks } from './common/doc_links';
 
-export class SearchGettingStartedPlugin
-  implements
-    Plugin<
-      SearchGettingStartedPluginSetup,
-      SearchGettingStartedPluginStart,
-      {},
-      SearchGettingStartedAppPluginStartDependencies
-    >
-{
+export class SearchGettingStartedPlugin implements Plugin<
+  SearchGettingStartedPluginSetup,
+  SearchGettingStartedPluginStart,
+  {},
+  SearchGettingStartedAppPluginStartDependencies
+> {
   private readonly kibanaVersion: string;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {

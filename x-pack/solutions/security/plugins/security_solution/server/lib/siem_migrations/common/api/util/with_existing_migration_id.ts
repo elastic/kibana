@@ -22,7 +22,7 @@ export const withExistingMigration = <
   P extends { migration_id: string },
   Q = unknown,
   B = unknown,
-  Method extends RouteMethod = never
+  Method extends RouteMethod = never,
 >(
   handler: RequestHandler<P, Q, B, SecuritySolutionRequestHandlerContext, Method>
 ): RequestHandler<P, Q, B, SecuritySolutionRequestHandlerContext, Method> => {

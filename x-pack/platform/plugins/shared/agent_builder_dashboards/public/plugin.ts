@@ -21,15 +21,12 @@ import { createIdGenerator, registerDashboardAttachmentUiDefinition } from './at
 
 const ENHANCE_DASHBOARD_ENABLED = false;
 
-export class AgentBuilderDashboardsPlugin
-  implements
-    Plugin<
-      AgentBuilderDashboardsPluginPublicSetup,
-      AgentBuilderDashboardsPluginPublicStart,
-      AgentBuilderDashboardsPluginPublicSetupDependencies,
-      AgentBuilderDashboardsPluginPublicStartDependencies
-    >
-{
+export class AgentBuilderDashboardsPlugin implements Plugin<
+  AgentBuilderDashboardsPluginPublicSetup,
+  AgentBuilderDashboardsPluginPublicStart,
+  AgentBuilderDashboardsPluginPublicSetupDependencies,
+  AgentBuilderDashboardsPluginPublicStartDependencies
+> {
   private cleanupAttachmentUi?: () => void;
 
   constructor(_initContext: PluginInitializerContext) {}
@@ -65,17 +62,15 @@ export class AgentBuilderDashboardsPlugin
 
     if (core.application.capabilities.agentBuilder?.show === true) {
       plugins.uiActions.registerActionAsync(OPEN_DASHBOARD_CHAT_ACTION_ID, async () => {
-        const { createOpenDashboardChatAction } = await import(
-          './dashboard_empty_screen/open_dashboard_chat_action'
-        );
+        const { createOpenDashboardChatAction } =
+          await import('./dashboard_empty_screen/open_dashboard_chat_action');
         return createOpenDashboardChatAction(plugins.agentBuilder.openChat);
       });
 
       if (ENHANCE_DASHBOARD_ENABLED) {
         plugins.uiActions.registerActionAsync(ENHANCE_DASHBOARD_ACTION_ID, async () => {
-          const { createEnhanceDashboardAction } = await import(
-            './enhance/enhance_dashboard_action'
-          );
+          const { createEnhanceDashboardAction } =
+            await import('./enhance/enhance_dashboard_action');
           return createEnhanceDashboardAction({
             openChat: plugins.agentBuilder.openChat,
             getAgentBuilderAccess: plugins.agentBuilder.getAgentBuilderAccess,

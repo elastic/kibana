@@ -77,10 +77,10 @@ const createMockEsClient = (): jest.Mocked<ElasticsearchClient> =>
     // findManualOriginIds (in sml_crawler.ts) calls search on the SML data index.
     // Default: no manual entries for any origin id.
     search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
-  } as unknown as jest.Mocked<ElasticsearchClient>);
+  }) as unknown as jest.Mocked<ElasticsearchClient>;
 
 const createMockSavedObjectsClient = (): jest.Mocked<ISavedObjectsRepository> =>
-  ({} as jest.Mocked<ISavedObjectsRepository>);
+  ({}) as jest.Mocked<ISavedObjectsRepository>;
 
 describe('SmlCrawlerImpl', () => {
   let logger: ReturnType<typeof createMockLogger>;

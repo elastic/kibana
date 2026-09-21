@@ -134,8 +134,8 @@ const ComposedHeader = ({
     secondaryContent === 'description'
       ? { description }
       : secondaryContent === 'metadata'
-      ? { metadata }
-      : {};
+        ? { metadata }
+        : {};
 
   return (
     <div

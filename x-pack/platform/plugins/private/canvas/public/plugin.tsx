@@ -79,9 +79,12 @@ export type CanvasSetup = CanvasApi;
 export type CanvasStart = void;
 
 /** @internal */
-export class CanvasPlugin
-  implements Plugin<CanvasSetup, CanvasStart, CanvasSetupDeps, CanvasStartDeps>
-{
+export class CanvasPlugin implements Plugin<
+  CanvasSetup,
+  CanvasStart,
+  CanvasSetupDeps,
+  CanvasStartDeps
+> {
   private appUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private initContext: PluginInitializerContext;
 

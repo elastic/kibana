@@ -79,7 +79,7 @@ export const fetchIndexInfo = async ({
   const promises: [
     typeof baselineTotalDocCountPromise,
     typeof deviationTotalDocCountPromise,
-    typeof fetchFieldCandidatesPromise | undefined
+    typeof fetchFieldCandidatesPromise | undefined,
   ] = [
     baselineTotalDocCountPromise,
     deviationTotalDocCountPromise,

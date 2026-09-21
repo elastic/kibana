@@ -48,7 +48,7 @@ describe('createConnectorTypeFromSpec', () => {
       },
       test: overrides.test ?? { handler: jest.fn(), enabled: false },
       ...overrides,
-    } as ConnectorSpec);
+    }) as ConnectorSpec;
 
   beforeEach(() => {
     jest.clearAllMocks();

@@ -236,9 +236,9 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
           },
         }),
         createShipperApiKey(client.asCurrentUser, 'standalone-elastic-agent'),
-        (
-          await context.resolve(['core'])
-        ).core.security.authc.apiKeys.create(createInstallApiKey('onboarding-install')),
+        (await context.resolve(['core'])).core.security.authc.apiKeys.create(
+          createInstallApiKey('onboarding-install')
+        ),
         getAgentVersionInfo(fleetPluginStart, kibanaVersion),
       ]);
 

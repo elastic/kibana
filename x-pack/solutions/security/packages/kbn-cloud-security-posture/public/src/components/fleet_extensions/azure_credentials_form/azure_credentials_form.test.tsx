@@ -112,13 +112,13 @@ const createMinimalMockPackageInfo = (): PackageInfo =>
     owner: { github: 'elastic' },
     description: 'Azure credentials test package',
     status: 'installed',
-  } as unknown as PackageInfo);
+  }) as unknown as PackageInfo;
 
 const createMockNewPolicyWithAzureInput = (): NewPackagePolicy =>
   ({
     name: 'test-policy',
     inputs: [{ type: 'cloudbeat/cis_azure', streams: [{}] }],
-  } as NewPackagePolicy);
+  }) as NewPackagePolicy;
 
 const getMockAzureFormFields = () => [
   { id: 'azure.tenant_id', value: 'test-tenant-123', label: 'Tenant ID' },

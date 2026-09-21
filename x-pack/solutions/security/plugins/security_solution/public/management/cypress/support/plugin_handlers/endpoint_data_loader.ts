@@ -38,8 +38,10 @@ import { EndpointMetadataGenerator } from '../../../../../common/endpoint/data_g
 import { indexHostsAndAlerts } from '../../../../../common/endpoint/index_data';
 import type { IndexedHostsAndAlertsResponse } from '../../../../../common/endpoint/index_data';
 
-export interface CyLoadEndpointDataOptions
-  extends Pick<GetCustomEndpointMetadataGeneratorOptions, 'version' | 'os'> {
+export interface CyLoadEndpointDataOptions extends Pick<
+  GetCustomEndpointMetadataGeneratorOptions,
+  'version' | 'os'
+> {
   numHosts: number;
   numHostDocs: number;
   alertsPerHost: number;

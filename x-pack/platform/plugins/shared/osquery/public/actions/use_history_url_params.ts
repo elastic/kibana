@@ -74,7 +74,7 @@ const parseSortDirection = (value: string | string[] | null | undefined): SortDi
 const parseString = (value: string | string[] | null | undefined): string => {
   if (!value) return '';
 
-  return Array.isArray(value) ? value[0] ?? '' : value;
+  return Array.isArray(value) ? (value[0] ?? '') : value;
 };
 
 export const parseHistoryUrlParams = (search: string): HistoryUrlFilters => {

@@ -12,7 +12,7 @@ import { enforceEmbeddedAlertIds } from '.';
 const getLogger = (): Logger =>
   ({
     warn: jest.fn(),
-  } as unknown as Logger);
+  }) as unknown as Logger;
 
 describe('enforceEmbeddedAlertIds', () => {
   describe('when alerts and alertIds are aligned (same length)', () => {

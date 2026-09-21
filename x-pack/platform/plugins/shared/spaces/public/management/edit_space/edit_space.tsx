@@ -278,7 +278,7 @@ export const EditSpace: FC<PageProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
-        selectedTabContent ?? null
+        (selectedTabContent ?? null)
       )}
     </div>
   );

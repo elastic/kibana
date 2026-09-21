@@ -97,8 +97,8 @@ export const ChangePointDetailsSection: React.FC<ChangePointDetailsSectionProps>
     rowType !== undefined
       ? humaniseType(rowType)
       : card.changePointTypes.length > 0
-      ? card.changePointTypes.map(humaniseType).join(', ')
-      : undefined;
+        ? card.changePointTypes.map(humaniseType).join(', ')
+        : undefined;
 
   const description = useMemo(() => {
     if (impactLevel === undefined) return undefined;

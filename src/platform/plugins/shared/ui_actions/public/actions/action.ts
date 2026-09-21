@@ -52,8 +52,10 @@ export interface ActionMenuItemProps<Context extends object> {
 export type FrequentCompatibilityChangeAction<Context extends object = object> = Action<Context> &
   Required<Pick<Action<Context>, 'getCompatibilityChangesSubject' | 'couldBecomeCompatible'>>;
 
-export interface Action<Context extends object = object, ActionExtension extends object = object>
-  extends Partial<Presentable<ActionExecutionContext<Context>>> {
+export interface Action<
+  Context extends object = object,
+  ActionExtension extends object = object,
+> extends Partial<Presentable<ActionExecutionContext<Context>>> {
   /**
    * Determined the order when there is more than one action matched to a trigger.
    * Higher numbers are displayed first.
@@ -136,7 +138,7 @@ export interface Action<Context extends object = object, ActionExtension extends
  */
 export type ActionDefinition<
   Context extends object = object,
-  ActionExtension extends object = {}
+  ActionExtension extends object = {},
 > = Partial<Presentable<ActionDefinitionContext<Context>>> & { extension?: ActionExtension } & {
   /**
    * ID of the action that uniquely identifies this action in the actions registry.

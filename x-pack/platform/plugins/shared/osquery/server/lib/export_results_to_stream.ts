@@ -158,7 +158,7 @@ export async function exportResultsToStream({
     const total =
       typeof firstPage.hits.total === 'number'
         ? firstPage.hits.total
-        : firstPage.hits.total?.value ?? 0;
+        : (firstPage.hits.total?.value ?? 0);
 
     if (total > MAX_EXPORT_RESULTS) {
       await cleanup();

@@ -74,8 +74,8 @@ export const InternalDiscoverResizableLayout = ({
   const layoutMode = isSidebarHidden
     ? ResizableLayoutMode.Single
     : isMobile || isSidebarCollapsed
-    ? ResizableLayoutMode.Static
-    : ResizableLayoutMode.Resizable;
+      ? ResizableLayoutMode.Static
+      : ResizableLayoutMode.Resizable;
   const layoutDirection = isMobile
     ? ResizableLayoutDirection.Vertical
     : ResizableLayoutDirection.Horizontal;

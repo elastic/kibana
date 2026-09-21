@@ -21,7 +21,7 @@ const ImportedDefinitionSchema = z.object({
   fields: z.array(FieldSchema).refine(
     (fields) => {
       const fieldNames = new Set(
-        fields.map((field) => ('$ref' in field ? field.name ?? field.$ref : field.name))
+        fields.map((field) => ('$ref' in field ? (field.name ?? field.$ref) : field.name))
       );
       return fieldNames.size === fields.length;
     },

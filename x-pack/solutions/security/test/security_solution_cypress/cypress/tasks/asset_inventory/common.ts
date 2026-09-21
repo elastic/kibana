@@ -19,8 +19,8 @@ export const selectCloudProvider = (provider: 'aws' | 'gcp' | 'azure') => {
     provider === 'aws'
       ? AWS_PROVIDER_TEST_ID
       : provider === 'gcp'
-      ? GCP_PROVIDER_TEST_ID
-      : AZURE_PROVIDER_TEST_ID;
+        ? GCP_PROVIDER_TEST_ID
+        : AZURE_PROVIDER_TEST_ID;
 
   cy.get(providerSelector).click();
 };

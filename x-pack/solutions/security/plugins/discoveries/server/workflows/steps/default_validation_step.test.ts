@@ -69,7 +69,7 @@ describe('getDefaultValidationStepDefinition', () => {
       },
       input,
       logger: { error: jest.fn(), info: jest.fn() },
-    } as unknown as StepHandlerContext<unknown>);
+    }) as unknown as StepHandlerContext<unknown>;
 
   beforeEach(() => {
     jest.clearAllMocks();

@@ -40,8 +40,10 @@ export const EMPTY_EXECUTION_LOG_RESULT = {
   data: [],
 };
 
-interface IActionExecution
-  extends estypes.AggregationsTermsAggregateBase<{ key: string; doc_count: number }> {
+interface IActionExecution extends estypes.AggregationsTermsAggregateBase<{
+  key: string;
+  doc_count: number;
+}> {
   buckets: Array<{ key: string; doc_count: number }>;
 }
 

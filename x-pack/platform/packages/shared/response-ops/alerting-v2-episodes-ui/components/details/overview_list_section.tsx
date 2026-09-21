@@ -84,13 +84,13 @@ export const AlertEpisodeOverviewListSection = ({
     );
   }
 
-  const groupingFields = isRuleLoaded(ruleState) ? ruleState.rule.grouping?.fields ?? [] : [];
+  const groupingFields = isRuleLoaded(ruleState) ? (ruleState.rule.grouping?.fields ?? []) : [];
   const groupingStatus: GroupingRowStatus =
     isRuleForbidden(ruleState) || isRuleNotFound(ruleState)
       ? 'hidden'
       : isRuleError(ruleState)
-      ? 'error'
-      : 'visible';
+        ? 'error'
+        : 'visible';
   const groupingData = parseEpisodeDataJson(episode?.episode_data);
   const assigneeUid = episode?.last_assignee_uid ?? undefined;
   const episodeAction = episodeActionsMap?.get(episodeId);

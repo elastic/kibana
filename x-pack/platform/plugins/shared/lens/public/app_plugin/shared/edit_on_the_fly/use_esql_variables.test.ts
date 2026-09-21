@@ -28,7 +28,7 @@ const getAttributes = (): TypedLensSerializedState['attributes'] =>
       },
       visualization: {},
     },
-  } as unknown as TypedLensSerializedState['attributes']);
+  }) as unknown as TypedLensSerializedState['attributes'];
 
 const getParentApi = (panel: { updateAttributes: jest.Mock; onEdit: jest.Mock }) => ({
   addNewPanel: jest.fn().mockResolvedValue(undefined),

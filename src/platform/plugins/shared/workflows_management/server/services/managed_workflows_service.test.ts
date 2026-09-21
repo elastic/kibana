@@ -365,7 +365,7 @@ const getLastIndexedDocument = (
 const createExecutionEngineMock = () =>
   ({
     executeWorkflow: jest.fn().mockResolvedValue({ workflowExecutionId: 'execution-1' }),
-  } as unknown as WorkflowsExecutionEnginePluginStart);
+  }) as unknown as WorkflowsExecutionEnginePluginStart;
 
 const createService = () => {
   const crudService = createCrudServiceMock();

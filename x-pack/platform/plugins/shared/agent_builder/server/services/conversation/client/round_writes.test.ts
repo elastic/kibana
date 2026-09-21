@@ -172,7 +172,7 @@ describe('reconcileAttachments', () => {
       current_version: 1,
       active: true,
       ...overrides,
-    } as unknown as VersionedAttachment);
+    }) as unknown as VersionedAttachment;
 
   it('keeps an attachment the operation created', () => {
     const created = attachment('created');

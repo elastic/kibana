@@ -35,7 +35,7 @@ const createPackageLevelPackageInfo = (): PackageInfo =>
       { name: 'external_id', type: 'password', title: 'External ID', secret: true },
     ],
     policy_templates: [],
-  } as unknown as PackageInfo);
+  }) as unknown as PackageInfo;
 
 // Mock PackageInfo with input-level vars (input mode)
 const createInputLevelPackageInfo = (): PackageInfo =>
@@ -50,7 +50,7 @@ const createInputLevelPackageInfo = (): PackageInfo =>
     format_version: '1.0.0',
     vars: [], // No package-level credential vars
     policy_templates: [],
-  } as unknown as PackageInfo);
+  }) as unknown as PackageInfo;
 
 // Mock package policy with package-level vars
 const createPackageLevelPolicy = (): NewPackagePolicy => ({

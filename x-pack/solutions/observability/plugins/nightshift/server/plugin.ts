@@ -14,15 +14,12 @@ import type {
   NightshiftServerStartDependencies,
 } from './types';
 
-export class NightshiftServerPlugin
-  implements
-    Plugin<
-      NightshiftServerSetup,
-      NightshiftServerStart,
-      NightshiftServerSetupDependencies,
-      NightshiftServerStartDependencies
-    >
-{
+export class NightshiftServerPlugin implements Plugin<
+  NightshiftServerSetup,
+  NightshiftServerStart,
+  NightshiftServerSetupDependencies,
+  NightshiftServerStartDependencies
+> {
   constructor(_context: PluginInitializerContext) {}
 
   public setup(

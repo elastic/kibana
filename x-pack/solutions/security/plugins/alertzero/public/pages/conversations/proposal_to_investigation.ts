@@ -82,7 +82,7 @@ export const proposalToInvestigation = (proposal: ProposalItem): Investigation =
   const isClosed = Boolean(proposal.decidedAt);
   const bucket: RecommendedAction = isClosed
     ? CLOSED_GROUP_KEY
-    : CATEGORY_TO_BUCKET[proposal.category ?? ''] ?? FALLBACK_BUCKET;
+    : (CATEGORY_TO_BUCKET[proposal.category ?? ''] ?? FALLBACK_BUCKET);
 
   const impactRank = IMPACT_RANK[proposal.impact];
   const confidenceRank = CONFIDENCE_RANK[proposal.confidence];

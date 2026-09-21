@@ -52,12 +52,12 @@ function getIntegrationStatus(
     return isUpgradeFailed
       ? 'upgrade_failed'
       : hasPendingUpgradeReview
-      ? 'pending_upgrade_review'
-      : hasDeclinedReview
-      ? 'declined_review'
-      : isUpgradeAvailable
-      ? 'upgrade_available'
-      : 'installed';
+        ? 'pending_upgrade_review'
+        : hasDeclinedReview
+          ? 'declined_review'
+          : isUpgradeAvailable
+            ? 'upgrade_available'
+            : 'installed';
   }
 
   return item.status ?? 'not_installed';
@@ -123,14 +123,17 @@ export function useInstalledIntegrations(
   }, [internalInstalledPackages, localSearch, filters]);
 
   const countPerStatus = useMemo(() => {
-    return internalInstalledPackagesFiltered.reduce((acc, item) => {
-      if (!acc[item.ui.installation_status]) {
-        acc[item.ui.installation_status] = 0;
-      }
-      (acc[item.ui.installation_status] as number)++;
+    return internalInstalledPackagesFiltered.reduce(
+      (acc, item) => {
+        if (!acc[item.ui.installation_status]) {
+          acc[item.ui.installation_status] = 0;
+        }
+        (acc[item.ui.installation_status] as number)++;
 
-      return acc;
-    }, {} as { [k: string]: number | undefined });
+        return acc;
+      },
+      {} as { [k: string]: number | undefined }
+    );
   }, [internalInstalledPackagesFiltered]);
 
   const customIntegrationsCount = useMemo(() => {

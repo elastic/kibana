@@ -57,7 +57,7 @@ const createContext = (input: Record<string, unknown>): StepHandlerContext<never
     abortSignal: new AbortController().signal,
     stepId: 'create_proposal',
     stepType: 'proposals.createProposal',
-  } as unknown as StepHandlerContext<never, never>);
+  }) as unknown as StepHandlerContext<never, never>;
 
 describe('proposals.createProposal input schema', () => {
   // Liquid renders a template for an absent workflow input as `''`, so the
@@ -190,7 +190,7 @@ describe('proposals.createProposal step', () => {
 
   const createDefinition = (create: jest.Mock, privileges = allowAll()) => ({
     definition: getCreateProposalStepDefinition({
-      getProposalsService: () => ({ create } as unknown as ProposalsService),
+      getProposalsService: () => ({ create }) as unknown as ProposalsService,
       resolveUser,
       privileges,
     }),
@@ -353,7 +353,7 @@ describe('proposals.updateProposal step', () => {
 
   const updateDefinition = (update: jest.Mock, privileges = allowAll()) =>
     getUpdateProposalStepDefinition({
-      getProposalsService: () => ({ update } as unknown as ProposalsService),
+      getProposalsService: () => ({ update }) as unknown as ProposalsService,
       resolveUser,
       privileges,
     });
@@ -552,7 +552,7 @@ describe('proposals.getProposal step', () => {
 
   const getDefinition = (get: jest.Mock, privileges = allowAll()) =>
     getGetProposalStepDefinition({
-      getProposalsService: () => ({ get } as unknown as ProposalsService),
+      getProposalsService: () => ({ get }) as unknown as ProposalsService,
       privileges,
     });
 
@@ -628,7 +628,7 @@ describe('proposals.cloneProposal step', () => {
 
   const cloneDefinition = (clone: jest.Mock, privileges = allowAll()) =>
     getCloneProposalStepDefinition({
-      getProposalsService: () => ({ clone } as unknown as ProposalsService),
+      getProposalsService: () => ({ clone }) as unknown as ProposalsService,
       privileges,
     });
 

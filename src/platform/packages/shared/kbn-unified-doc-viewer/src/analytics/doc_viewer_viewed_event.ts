@@ -34,8 +34,7 @@ export interface DocViewerViewedEvent {
  * Parameters for reporting a doc viewer viewed event.
  */
 export interface UseDocViewerViewedEventParams
-  extends Pick<AnalyticsServiceStart, 'reportEvent'>,
-    DocViewerViewedEvent {
+  extends Pick<AnalyticsServiceStart, 'reportEvent'>, DocViewerViewedEvent {
   /**
    * Additional values that participate in the deduplication key for the event.
    */

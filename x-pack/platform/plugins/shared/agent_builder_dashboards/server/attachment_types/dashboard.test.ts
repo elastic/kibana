@@ -60,16 +60,16 @@ const createDashboardClient = ({
         version: 'v1',
       },
     }),
-  } as jest.Mocked<DashboardPluginStart['client']>);
+  }) as jest.Mocked<DashboardPluginStart['client']>;
 
 const createLogger = (): Logger =>
   ({
     debug: jest.fn(),
     warn: jest.fn(),
-  } as unknown as Logger);
+  }) as unknown as Logger;
 
 const createSavedObjectsClient = (): SavedObjectsClientContract =>
-  ({} as SavedObjectsClientContract);
+  ({}) as SavedObjectsClientContract;
 
 const createAttachment = (
   data: DashboardAttachmentData

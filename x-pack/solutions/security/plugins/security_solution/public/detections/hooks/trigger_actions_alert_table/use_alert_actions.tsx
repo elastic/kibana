@@ -222,8 +222,8 @@ export const useBulkAlertActionItems = ({
         status === FILTER_OPEN
           ? i18n.BULK_ACTION_OPEN_SELECTED
           : status === FILTER_CLOSED
-          ? i18n.BULK_ACTION_CLOSE_SELECTED
-          : i18n.BULK_ACTION_ACKNOWLEDGED_SELECTED;
+            ? i18n.BULK_ACTION_CLOSE_SELECTED
+            : i18n.BULK_ACTION_ACKNOWLEDGED_SELECTED;
       const icon = (
         <EuiIcon
           type="dot"
@@ -231,8 +231,8 @@ export const useBulkAlertActionItems = ({
             status === FILTER_OPEN
               ? 'danger'
               : status === FILTER_ACKNOWLEDGED
-              ? 'primary'
-              : 'subdued'
+                ? 'primary'
+                : 'subdued'
           }
           aria-hidden
         />

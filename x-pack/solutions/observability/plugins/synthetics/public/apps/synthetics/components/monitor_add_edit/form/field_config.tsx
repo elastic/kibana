@@ -519,8 +519,8 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
             (isPrivateLocationsOnly && location.isServiceManaged)
               ? 'danger'
               : location.isServiceManaged
-              ? 'default'
-              : 'primary',
+                ? 'default'
+                : 'primary',
           label:
             (location.label || locations?.find((loc) => location.id === loc.id)?.label) ??
             location.id,
@@ -552,8 +552,8 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
                         'The attached agent policy for this location has been deleted.',
                     })
                   : disabledForApi
-                  ? API_PRIVATE_LOCATIONS_ONLY
-                  : ''
+                    ? API_PRIVATE_LOCATIONS_ONLY
+                    : ''
               }
             >
               <EuiFlexGroup gutterSize="s" alignItems="center">

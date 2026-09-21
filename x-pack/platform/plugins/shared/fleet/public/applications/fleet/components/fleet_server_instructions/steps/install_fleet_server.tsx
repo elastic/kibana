@@ -86,23 +86,26 @@ const InstallFleetServerStepContent: React.FunctionComponent<{
       'deb_x86_64',
       'windows_msi',
     ] as PLATFORM_TYPE[]
-  ).reduce((acc, platform) => {
-    acc[platform] = getInstallCommandForPlatform({
-      platform,
-      esOutputHost: esOutput?.hosts?.[0] ?? '<ELASTICSEARCH_HOST>',
-      esOutputProxy,
-      serviceToken: serviceToken ?? '',
-      policyId: fleetServerPolicyId,
-      fleetServerHost,
-      isProductionDeployment: deploymentMode === 'production',
-      sslCATrustedFingerprint: esOutput?.ca_trusted_fingerprint ?? undefined,
-      kibanaVersion,
-      downloadSource,
-      downloadSourceProxy,
-    });
+  ).reduce(
+    (acc, platform) => {
+      acc[platform] = getInstallCommandForPlatform({
+        platform,
+        esOutputHost: esOutput?.hosts?.[0] ?? '<ELASTICSEARCH_HOST>',
+        esOutputProxy,
+        serviceToken: serviceToken ?? '',
+        policyId: fleetServerPolicyId,
+        fleetServerHost,
+        isProductionDeployment: deploymentMode === 'production',
+        sslCATrustedFingerprint: esOutput?.ca_trusted_fingerprint ?? undefined,
+        kibanaVersion,
+        downloadSource,
+        downloadSourceProxy,
+      });
 
-    return acc;
-  }, {} as Record<PLATFORM_TYPE, string>);
+      return acc;
+    },
+    {} as Record<PLATFORM_TYPE, string>
+  );
 
   return (
     <>

@@ -237,8 +237,8 @@ export const RunOverviewPage: React.FC = () => {
                       {model.hasResults
                         ? i18n.scoresIngested(model.scores)
                         : model.settled
-                        ? i18n.NO_RESULTS
-                        : i18n.RESULTS_PENDING}
+                          ? i18n.NO_RESULTS
+                          : i18n.RESULTS_PENDING}
                     </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>

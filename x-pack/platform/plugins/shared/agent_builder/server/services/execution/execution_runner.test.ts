@@ -132,7 +132,7 @@ const createDeps = ({
     savedObjects: {
       getScopedClient: jest.fn().mockReturnValue({}),
     },
-  } as never);
+  }) as never;
 
 /**
  * Factories for the two `ChatAgentEvent`s that show up in every persistence-flow test.
@@ -150,14 +150,14 @@ const makeRoundStartedEvent = (
       started_at: '2024-01-01T00:00:00.000Z',
       ...overrides,
     },
-  } as RoundStartedEvent);
+  }) as RoundStartedEvent;
 
 const makeRoundCompleteEvent = (roundId: string = 'round-1'): RoundCompleteEvent =>
   ({
     type: ChatEventType.roundComplete,
     // The END append is scoped to the started round, so the completed round must carry its id.
     data: { round: createRound({ id: roundId }) },
-  } as RoundCompleteEvent);
+  }) as RoundCompleteEvent;
 
 const mockAgentStream = (
   events: ChatAgentEvent[],

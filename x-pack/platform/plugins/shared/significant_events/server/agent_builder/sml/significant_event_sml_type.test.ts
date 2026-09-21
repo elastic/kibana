@@ -64,7 +64,7 @@ describe('createSignificantEventSmlType', () => {
             findLatestPaginated,
             findByEventId,
           })),
-        } as unknown as EventService)
+        }) as unknown as EventService
     );
   });
 

@@ -49,7 +49,10 @@ export class TimeDuration {
     return new TimeDuration(value, unit).toNormalizedTimeDuration();
   }
 
-  constructor(public value: number, public unit: TimeDurationUnits) {}
+  constructor(
+    public value: number,
+    public unit: TimeDurationUnits
+  ) {}
 
   /**
    * Convert time duration to milliseconds.

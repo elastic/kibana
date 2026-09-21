@@ -28,9 +28,11 @@ export interface ManagementSetup {
   locator: LocatorPublic<ManagementAppLocatorParams>;
 }
 
-export class ManagementServerPlugin
-  implements Plugin<ManagementSetup, object, ManagementSetupDependencies>
-{
+export class ManagementServerPlugin implements Plugin<
+  ManagementSetup,
+  object,
+  ManagementSetupDependencies
+> {
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {

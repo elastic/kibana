@@ -16,21 +16,20 @@ const ESQLEditorLazy = React.lazy(() => import('@kbn/esql-editor'));
 const ESQLEditor = withSuspense(ESQLEditorLazy);
 
 function createEditor() {
-  return forwardRef<RestorableStateProviderApi, ESQLEditorProps>(function ESQLLangEditor(
-    props,
-    ref
-  ) {
-    return (
-      <KibanaContextProvider
-        services={{
-          settings: { client: { get: () => {} } },
-          uiSettings: { get: () => {} },
-        }}
-      >
-        <ESQLEditor ref={ref} {...props} />
-      </KibanaContextProvider>
-    );
-  });
+  return forwardRef<RestorableStateProviderApi, ESQLEditorProps>(
+    function ESQLLangEditor(props, ref) {
+      return (
+        <KibanaContextProvider
+          services={{
+            settings: { client: { get: () => {} } },
+            uiSettings: { get: () => {} },
+          }}
+        >
+          <ESQLEditor ref={ref} {...props} />
+        </KibanaContextProvider>
+      );
+    }
+  );
 }
 
 export const ESQLLangEditor = createEditor();

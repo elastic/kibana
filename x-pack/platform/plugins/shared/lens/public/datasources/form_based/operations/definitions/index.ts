@@ -144,7 +144,7 @@ export { staticValueOperation } from './static_value';
  */
 export interface ParamEditorProps<
   C,
-  U = FormBasedLayer | ((prevLayer: FormBasedLayer) => FormBasedLayer)
+  U = FormBasedLayer | ((prevLayer: FormBasedLayer) => FormBasedLayer),
 > {
   currentColumn: C;
   layer: FormBasedLayer;
@@ -209,7 +209,7 @@ export interface AdvancedOption {
 interface BaseOperationDefinitionProps<
   C extends BaseIndexPatternColumn,
   AR extends boolean,
-  P = {}
+  P = {},
 > {
   type: C['operationType'];
   /**
@@ -699,7 +699,7 @@ export type OperationDefinition<
   C extends BaseIndexPatternColumn,
   Input extends keyof OperationDefinitionMap<C>,
   P = {},
-  AR extends boolean = false
+  AR extends boolean = false,
 > = BaseOperationDefinitionProps<C, AR> & OperationDefinitionMap<C, P>[Input];
 
 /**
@@ -713,7 +713,7 @@ export type OperationType = string;
  * column types.
  */
 export type GenericOperationDefinition<
-  ColumnType extends BaseIndexPatternColumn = BaseIndexPatternColumn
+  ColumnType extends BaseIndexPatternColumn = BaseIndexPatternColumn,
 > =
   | OperationDefinition<ColumnType, 'field'>
   | OperationDefinition<ColumnType, 'none'>

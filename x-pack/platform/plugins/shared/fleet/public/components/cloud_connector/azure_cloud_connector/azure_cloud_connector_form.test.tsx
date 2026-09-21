@@ -141,7 +141,7 @@ describe('AzureCloudConnectorForm', () => {
       ],
       owner: { github: 'elastic/security' },
       ...overrides,
-    } as unknown as PackageInfo);
+    }) as unknown as PackageInfo;
 
   const createMockCloudSetup = (overrides = {}) => {
     const mock = cloudMock.createSetup();

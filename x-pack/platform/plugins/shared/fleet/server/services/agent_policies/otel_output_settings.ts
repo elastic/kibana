@@ -156,8 +156,10 @@ const DEFAULT_RETRY_ON_DOCUMENT_STATUS: readonly number[] = [
  * that differ (`idleConnectionTimeout` is out of scope; `backoffInit`/`backoffMax` are
  * required here because defaults have been applied, optional in the preset table).
  */
-interface EffectiveEsOutputSettings
-  extends Omit<EsOutputPresetConfig, 'idleConnectionTimeout' | 'backoffInit' | 'backoffMax'> {
+interface EffectiveEsOutputSettings extends Omit<
+  EsOutputPresetConfig,
+  'idleConnectionTimeout' | 'backoffInit' | 'backoffMax'
+> {
   maxRetries: number;
   backoffInit: string;
   backoffMax: string;

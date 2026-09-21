@@ -40,7 +40,7 @@ describe('WiredStream', () => {
       isServerless: false,
       isWiredStreamViewsEnabled: true,
       isDev: false,
-    } as unknown as StateDependencies);
+    }) as unknown as StateDependencies;
 
   const createMockState = (
     streams: Map<string, { definition: Streams.all.Definition }> = new Map()
@@ -49,7 +49,7 @@ describe('WiredStream', () => {
       get: (name: string) => streams.get(name),
       has: (name: string) => streams.has(name),
       all: () => Array.from(streams.values()),
-    } as unknown as State);
+    }) as unknown as State;
 
   const createBaseWiredStreamDefinition = (
     overrides: Partial<Streams.WiredStream.Definition> = {}
@@ -394,7 +394,7 @@ describe('WiredStream', () => {
             }),
           },
         },
-      } as unknown as StateDependencies);
+      }) as unknown as StateDependencies;
 
     it('includes upsert_esql_view action with correct name and query', async () => {
       const definition = createBaseWiredStreamDefinition({
@@ -653,7 +653,7 @@ describe('WiredStream', () => {
             }),
           },
         },
-      } as unknown as StateDependencies);
+      }) as unknown as StateDependencies;
 
     describe('doDetermineDeleteActions', () => {
       it('includes delete_esql_view for the stream view', async () => {

@@ -770,11 +770,11 @@ export const sourcesStateMachine = setup({
     canCreateSource: ({ context }) =>
       Boolean(
         context.creationContext &&
-          !getSourceNameValidationError({
-            sourceName: context.creationContext.formData.sourceName,
-            unitDefinition: context.unitDefinition,
-          }) &&
-          context.availableSourceTypes.includes(context.creationContext.formData.sourceType)
+        !getSourceNameValidationError({
+          sourceName: context.creationContext.formData.sourceName,
+          unitDefinition: context.unitDefinition,
+        }) &&
+        context.availableSourceTypes.includes(context.creationContext.formData.sourceType)
       ),
     isCreatedSource: ({ context, event }) =>
       (event.type === 'unit.persisted' ||
@@ -788,9 +788,9 @@ export const sourcesStateMachine = setup({
       (event.type === 'unit.loaded' || event.type === 'unit.persisted') &&
       Boolean(
         context.selectedSourceId &&
-          !getConfiguredSources(event.unitDefinition).some(
-            ({ id }) => id === context.selectedSourceId
-          )
+        !getConfiguredSources(event.unitDefinition).some(
+          ({ id }) => id === context.selectedSourceId
+        )
       ),
     targetsViewedSource: ({ context, event }) =>
       (event.type === 'apiKey.generate' || event.type === 'apiKey.delete') &&

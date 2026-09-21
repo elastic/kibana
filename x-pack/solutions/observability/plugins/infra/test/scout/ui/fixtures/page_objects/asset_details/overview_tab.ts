@@ -65,7 +65,11 @@ export class OverviewTab extends AssetDetailsTab {
   public readonly metricsDiskUsageChart: Locator;
   public readonly metricsDiskIOChart: Locator;
 
-  constructor(page: ScoutPage, kbnUrl: KibanaUrl, private readonly assetType: 'Host' | 'Docker') {
+  constructor(
+    page: ScoutPage,
+    kbnUrl: KibanaUrl,
+    private readonly assetType: 'Host' | 'Docker'
+  ) {
     super(page, kbnUrl);
     this.tab = this.page.getByTestId(`infraAssetDetails${this.tabName}Tab`);
 

@@ -11,7 +11,7 @@ import { getResultCountsForActions } from './get_result_counts_for_actions';
 const createMockEsClient = (searchResponse: object): ElasticsearchClient =>
   ({
     search: jest.fn().mockResolvedValue(searchResponse),
-  } as unknown as ElasticsearchClient);
+  }) as unknown as ElasticsearchClient;
 
 describe('getResultCountsForActions', () => {
   it('returns empty map when no action IDs provided', async () => {

@@ -112,15 +112,12 @@ const createWorkflowAuthHeaders = async ({
   }
 };
 
-export class DiscoveriesPlugin
-  implements
-    Plugin<
-      DiscoveriesPluginSetup,
-      DiscoveriesPluginStart,
-      DiscoveriesPluginSetupDeps,
-      DiscoveriesPluginStartDeps
-    >
-{
+export class DiscoveriesPlugin implements Plugin<
+  DiscoveriesPluginSetup,
+  DiscoveriesPluginStart,
+  DiscoveriesPluginSetupDeps,
+  DiscoveriesPluginStartDeps
+> {
   private analytics?: AnalyticsServiceSetup;
   private readonly config: DiscoveriesConfig;
   private readonly logger: Logger;

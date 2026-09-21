@@ -30,7 +30,7 @@ const mockSearchResponse = (
     _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
     hits: { total, max_score: null, hits: [] },
     ...(aggregations ? { aggregations } : {}),
-  } as unknown as estypes.SearchResponse);
+  }) as unknown as estypes.SearchResponse;
 
 beforeEach(() => {
   jest.resetAllMocks();

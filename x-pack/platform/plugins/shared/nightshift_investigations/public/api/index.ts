@@ -33,11 +33,11 @@ export type NightshiftInvestigationsRepositoryClient = RouteRepositoryClient<
 export type NightshiftInvestigationsEndpoint = keyof NightshiftInvestigationsRouteRepository;
 
 export type NightshiftInvestigationsAPIReturnType<
-  TEndpoint extends NightshiftInvestigationsEndpoint
+  TEndpoint extends NightshiftInvestigationsEndpoint,
 > = ReturnOf<NightshiftInvestigationsRouteRepository, TEndpoint>;
 
 export type NightshiftInvestigationsAPIClientRequestParamsOf<
-  TEndpoint extends NightshiftInvestigationsEndpoint
+  TEndpoint extends NightshiftInvestigationsEndpoint,
 > = ClientRequestParamsOf<NightshiftInvestigationsRouteRepository, TEndpoint>;
 
 export function createNightshiftInvestigationsRepositoryClient(core: {

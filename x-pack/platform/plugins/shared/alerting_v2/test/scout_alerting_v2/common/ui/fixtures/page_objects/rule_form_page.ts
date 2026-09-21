@@ -30,7 +30,10 @@ export class RuleFormPage {
 
   private readonly codeEditor: KibanaCodeEditorWrapper;
 
-  constructor(private readonly page: ScoutPage, private readonly discoverAppMenu: DiscoverAppMenu) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly discoverAppMenu: DiscoverAppMenu
+  ) {
     this.codeEditor = new KibanaCodeEditorWrapper(page);
 
     this.nameInput = this.page.testSubj.locator('ruleNameInput');

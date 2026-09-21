@@ -65,7 +65,7 @@ const createMockOsqueryContext = (): OsqueryAppContext => {
 const createMockSchemaService = (): jest.Mocked<SchemaService> =>
   ({
     getSchema: jest.fn(),
-  } as unknown as jest.Mocked<SchemaService>);
+  }) as unknown as jest.Mocked<SchemaService>;
 
 describe('createGetSchemasRoute', () => {
   let mockOsqueryContext: OsqueryAppContext;

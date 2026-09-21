@@ -31,7 +31,7 @@ import { useExperimentalFeatures } from '../../../../hooks/use_experimental_feat
 export type SubagentIdsValue = string[];
 
 interface SubagentsSectionProps<
-  TFieldValues extends { configuration: { subagent_ids: SubagentIdsValue } }
+  TFieldValues extends { configuration: { subagent_ids: SubagentIdsValue } },
 > {
   /**
    * Path of the field on the form's default values, as understood by

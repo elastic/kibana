@@ -35,5 +35,5 @@ export const EnhancedAlertFlyoutHeader = ({
 
   return renderHeader
     ? renderHeader({ hit, ...docViewProps, onAlertUpdated: handleAlertUpdated })
-    : fallbackRenderHeader?.({ hit, ...docViewProps }) ?? null;
+    : (fallbackRenderHeader?.({ hit, ...docViewProps }) ?? null);
 };

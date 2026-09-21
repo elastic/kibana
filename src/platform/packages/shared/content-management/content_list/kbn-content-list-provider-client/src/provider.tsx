@@ -88,8 +88,8 @@ const resolveFilterDimensions = (
   const merged = !filters
     ? defaults
     : typeof filters === 'function'
-    ? filters(defaults)
-    : { ...defaults, ...filters };
+      ? filters(defaults)
+      : { ...defaults, ...filters };
 
   return Object.fromEntries(Object.values(merged).map((filter) => [filter.fieldName, filter]));
 };

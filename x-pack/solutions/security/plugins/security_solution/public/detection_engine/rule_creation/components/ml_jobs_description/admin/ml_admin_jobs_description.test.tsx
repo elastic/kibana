@@ -19,7 +19,7 @@ jest.mock(
       MlAdminJobDescription: (props) => {
         return <div data-test-subj="adminMock">{props.job.id}</div>;
       },
-    } as Record<string, React.FC<{ job: MlSummaryJob }>>)
+    }) as Record<string, React.FC<{ job: MlSummaryJob }>>
 );
 
 jest.mock('../../../../../common/components/ml_popover/hooks/use_security_jobs');

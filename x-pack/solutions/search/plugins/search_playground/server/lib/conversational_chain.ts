@@ -123,9 +123,9 @@ const messageContentToString = (content: BaseMessage['content']): string => {
 const isAIMessageChunk = (chunk: any): chunk is AIMessageChunk => {
   return Boolean(
     chunk &&
-      typeof chunk === 'object' &&
-      'constructor' in chunk &&
-      (chunk as { constructor: { name?: string } }).constructor?.name === 'AIMessageChunk'
+    typeof chunk === 'object' &&
+    'constructor' in chunk &&
+    (chunk as { constructor: { name?: string } }).constructor?.name === 'AIMessageChunk'
   );
 };
 

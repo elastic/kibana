@@ -15,28 +15,25 @@ import { ContentListProvider } from '../../context';
 import type { FindItemsResult, FindItemsParams } from '../../datasource';
 import { useDeleteConfirmation } from './use_delete_confirmation';
 
-const mockFindItems = jest.fn(
-  async (_params: FindItemsParams): Promise<FindItemsResult> => ({
-    items: [],
-    total: 0,
-  })
-);
+const mockFindItems = jest.fn(async (_params: FindItemsParams): Promise<FindItemsResult> => ({
+  items: [],
+  total: 0,
+}));
 
 const mockOnDelete = jest.fn(async () => {});
 
 const createWrapper =
   () =>
-  ({ children }: { children: React.ReactNode }) =>
-    (
-      <ContentListProvider
-        id="test-list"
-        labels={{ entity: 'dashboard', entityPlural: 'dashboards' }}
-        dataSource={{ findItems: mockFindItems }}
-        item={{ actions: { delete: { onBulkAction: mockOnDelete } } }}
-      >
-        {children}
-      </ContentListProvider>
-    );
+  ({ children }: { children: React.ReactNode }) => (
+    <ContentListProvider
+      id="test-list"
+      labels={{ entity: 'dashboard', entityPlural: 'dashboards' }}
+      dataSource={{ findItems: mockFindItems }}
+      item={{ actions: { delete: { onBulkAction: mockOnDelete } } }}
+    >
+      {children}
+    </ContentListProvider>
+  );
 
 const testItems = [{ id: '1', title: 'Item 1' }];
 

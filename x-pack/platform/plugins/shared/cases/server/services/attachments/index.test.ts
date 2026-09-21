@@ -37,7 +37,7 @@ import { toUnifiedAttachmentType } from '../../../common/utils/attachments';
 import type { ConfigType } from '../../config';
 
 const createAttachmentServiceConfig = (attachmentsEnabled = false): ConfigType =>
-  ({ attachments: { enabled: attachmentsEnabled } } as ConfigType);
+  ({ attachments: { enabled: attachmentsEnabled } }) as ConfigType;
 
 describe('AttachmentService', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
@@ -1839,11 +1839,14 @@ describe('AttachmentService', () => {
       expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledTimes(1);
       const [deleteRequests] = unsecuredSavedObjectsClient.bulkDelete.mock.calls[0];
       expect(deleteRequests).toHaveLength(4);
-      const byId = (deleteRequests as Array<{ id: string; type: string }>).reduce((acc, r) => {
-        if (!acc[r.id]) acc[r.id] = [];
-        acc[r.id].push(r.type);
-        return acc;
-      }, {} as Record<string, string[]>);
+      const byId = (deleteRequests as Array<{ id: string; type: string }>).reduce(
+        (acc, r) => {
+          if (!acc[r.id]) acc[r.id] = [];
+          acc[r.id].push(r.type);
+          return acc;
+        },
+        {} as Record<string, string[]>
+      );
       expect(byId['id-1']).toEqual(
         expect.arrayContaining([CASE_ATTACHMENT_SAVED_OBJECT, CASE_COMMENT_SAVED_OBJECT])
       );

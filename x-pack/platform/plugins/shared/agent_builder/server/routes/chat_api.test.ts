@@ -273,7 +273,7 @@ describe('registerChatApiRoutes', () => {
 
     expect(mockObservableIntoEventSourceStream).toHaveBeenCalledTimes(1);
     const [passedObservable] = mockObservableIntoEventSourceStream.mock.calls[0] as [
-      { pipe: (...operators: any[]) => any }
+      { pipe: (...operators: any[]) => any },
     ];
     const emitted = (await firstValueFrom(passedObservable.pipe(toArray()))) as Array<{
       type: string;

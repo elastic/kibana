@@ -38,7 +38,7 @@ const makeProposalsService = (
       total: total ?? proposals.length,
       truncated: truncated ?? false,
     }),
-  } as unknown as ReturnType<AgenticInvestigationsPluginStart['getProposalsService']>);
+  }) as unknown as ReturnType<AgenticInvestigationsPluginStart['getProposalsService']>;
 
 /**
  * Builds an Agent Builder mock whose scoped client exposes `bulkGet`.
@@ -71,7 +71,7 @@ const makeAgentBuilder = (
         }),
       }),
     },
-  } as unknown as AgentBuilderPluginStart);
+  }) as unknown as AgentBuilderPluginStart;
 
 describe('ConversationProposalsService', () => {
   const logger = loggingSystemMock.createLogger();

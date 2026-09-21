@@ -53,12 +53,12 @@ export const ControlLabelTooltip = ({
             "This variable control isn't used by any visualization on the dashboard. Variable controls only apply to ES|QL visualizations that include them in their query.",
         })
       : isIndicatingRelatedPanels
-      ? i18n.translate('controls.controlGroup.clickToStopHighlighting', {
-          defaultMessage: 'Unselect to stop highlighting panels.',
-        })
-      : i18n.translate('controls.controlGroup.clickToHighlight', {
-          defaultMessage: 'Select to highlight panels.',
-        });
+        ? i18n.translate('controls.controlGroup.clickToStopHighlighting', {
+            defaultMessage: 'Unselect to stop highlighting panels.',
+          })
+        : i18n.translate('controls.controlGroup.clickToHighlight', {
+            defaultMessage: 'Select to highlight panels.',
+          });
 
   const tooltipProps = canIndicateRelatedPanels
     ? {

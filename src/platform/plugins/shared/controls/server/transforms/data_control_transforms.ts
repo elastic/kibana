@@ -62,7 +62,7 @@ export function transformDataControlIn<StoredStateType extends DataControlState>
 }
 
 export function transformDataControlOut<
-  StoredStateType extends Partial<LegacyStoredDataControlState & StrictDataControlState>
+  StoredStateType extends Partial<LegacyStoredDataControlState & StrictDataControlState>,
 >(
   id: string | undefined,
   state: StoredStateType,

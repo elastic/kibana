@@ -18,15 +18,12 @@ import { PLUGIN_ID } from '../common';
 import { PLUGIN_NAME } from './translations';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
-export class DataUsagePlugin
-  implements
-    Plugin<
-      DataUsagePublicSetup,
-      DataUsagePublicStart,
-      DataUsageSetupDependencies,
-      DataUsageStartDependencies
-    >
-{
+export class DataUsagePlugin implements Plugin<
+  DataUsagePublicSetup,
+  DataUsagePublicStart,
+  DataUsageSetupDependencies,
+  DataUsageStartDependencies
+> {
   private config: DataUsagePublicConfigType;
   private experimentalFeatures: ExperimentalFeatures;
 

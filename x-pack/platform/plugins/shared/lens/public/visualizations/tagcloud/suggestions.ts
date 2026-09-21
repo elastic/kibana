@@ -51,8 +51,8 @@ export function getSuggestions({
           colorMapping: !mainPalette
             ? getColorMappingDefaults()
             : mainPalette?.type === 'colorMapping'
-            ? mainPalette.value
-            : undefined,
+              ? mainPalette.value
+              : undefined,
         },
       };
     });

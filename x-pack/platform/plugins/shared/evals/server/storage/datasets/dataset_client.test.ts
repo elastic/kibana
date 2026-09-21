@@ -505,7 +505,7 @@ const createClientsInSpaces = (spaceIds: [string, string]) => {
 
   return spaceIds.map((spaceId) => createClient({ spaceId, storage }).client) as [
     DatasetClient,
-    DatasetClient
+    DatasetClient,
   ];
 };
 

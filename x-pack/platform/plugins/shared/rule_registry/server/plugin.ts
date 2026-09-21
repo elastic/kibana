@@ -57,15 +57,12 @@ export interface RuleRegistryPluginStartContract {
   alerting: AlertingServerStart;
 }
 
-export class RuleRegistryPlugin
-  implements
-    Plugin<
-      RuleRegistryPluginSetupContract,
-      RuleRegistryPluginStartContract,
-      RuleRegistryPluginSetupDependencies,
-      RuleRegistryPluginStartDependencies
-    >
-{
+export class RuleRegistryPlugin implements Plugin<
+  RuleRegistryPluginSetupContract,
+  RuleRegistryPluginStartContract,
+  RuleRegistryPluginSetupDependencies,
+  RuleRegistryPluginStartDependencies
+> {
   private readonly config: RuleRegistryPluginConfig;
   private readonly logger: Logger;
   private readonly kibanaVersion: string;

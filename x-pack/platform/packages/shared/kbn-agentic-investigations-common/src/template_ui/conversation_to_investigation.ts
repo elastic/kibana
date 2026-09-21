@@ -61,8 +61,8 @@ const summarize = (event: AgentBuilderTimelineEvent): string | undefined => {
       );
     case TimelineEventType.executionTerminated:
       return event.data.outcome.type === 'responded'
-        ? readString(event.data.outcome.response.message) ??
-            TIMELINE_EVENT_LABELS.executionCompleted
+        ? (readString(event.data.outcome.response.message) ??
+            TIMELINE_EVENT_LABELS.executionCompleted)
         : TIMELINE_EVENT_LABELS.promptRequested;
     case TimelineEventType.executionFailed:
       return TIMELINE_EVENT_LABELS.executionFailed(event.data.error.message);

@@ -18,8 +18,7 @@ import type { TagCloudVisParams, TagCloudTypeProps } from '../types';
 import { collections } from './collections';
 
 interface TagCloudOptionsProps
-  extends VisEditorOptionsProps<TagCloudVisParams>,
-    TagCloudTypeProps {}
+  extends VisEditorOptionsProps<TagCloudVisParams>, TagCloudTypeProps {}
 
 function TagCloudOptions({ stateParams, setValue, palettes }: TagCloudOptionsProps) {
   const [palettesRegistry, setPalettesRegistry] = useState<PaletteRegistry | undefined>(undefined);

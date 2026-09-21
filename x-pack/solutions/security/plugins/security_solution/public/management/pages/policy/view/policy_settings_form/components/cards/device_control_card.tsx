@@ -46,7 +46,7 @@ export const DeviceControlCard = React.memo<DeviceControlProps>(
       policy.windows.device_control !== undefined && policy.mac.device_control !== undefined;
     const selected = Boolean(
       deviceControlExists &&
-        (policy.windows.device_control?.enabled || policy.mac.device_control?.enabled)
+      (policy.windows.device_control?.enabled || policy.mac.device_control?.enabled)
     );
 
     const protectionLabel = i18n.translate(

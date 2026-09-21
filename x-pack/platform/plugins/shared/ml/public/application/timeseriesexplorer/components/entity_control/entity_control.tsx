@@ -122,7 +122,7 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
 
     const fieldValue =
       Array.isArray(options) && options[0].value?.value !== null
-        ? options[0].value?.value ?? null
+        ? (options[0].value?.value ?? null)
         : null;
     this.props.entityFieldValueChanged(this.props.entity, fieldValue);
   };

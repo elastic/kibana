@@ -68,7 +68,7 @@ const isMetricColorRule = (
   rule: ValidMetricColorRule | ValidGaugeColorRule | ValidSeriesColorRule
 ): rule is ValidMetricColorRule => {
   const metricRule = rule as ValidMetricColorRule;
-  return metricRule.background_color ?? metricRule.color ? true : false;
+  return (metricRule.background_color ?? metricRule.color) ? true : false;
 };
 
 const isGaugeColorRule = (

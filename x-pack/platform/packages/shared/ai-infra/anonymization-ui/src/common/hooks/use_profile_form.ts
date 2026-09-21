@@ -65,7 +65,7 @@ const toInitialValues = (profile?: AnonymizationProfile): ProfileFormValues => (
   fieldRules: profile
     ? isGlobalAnonymizationProfileTarget(profile.targetType, profile.targetId)
       ? []
-      : profile.rules.fieldRules ?? []
+      : (profile.rules.fieldRules ?? [])
     : [],
   regexRules: profile?.rules.regexRules ?? [],
   nerRules: normalizeNerRules(profile?.rules.nerRules ?? []),

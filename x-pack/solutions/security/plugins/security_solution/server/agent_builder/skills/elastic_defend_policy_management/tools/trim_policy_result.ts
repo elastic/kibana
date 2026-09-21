@@ -317,9 +317,9 @@ export type PresentedPolicyIdentity<T extends Partial<PolicyIdentity> = PolicyId
   Partial<Record<`${Extract<keyof T, PolicyIdentityStringKey>}_string_truncated`, true>>;
 
 type WritablePresentedIdentity = {
-  -readonly [Key in keyof PresentedPolicyIdentity<
-    Partial<PolicyIdentity>
-  >]?: PresentedPolicyIdentity<Partial<PolicyIdentity>>[Key];
+  -readonly [
+    Key in keyof PresentedPolicyIdentity<Partial<PolicyIdentity>>
+  ]?: PresentedPolicyIdentity<Partial<PolicyIdentity>>[Key];
 };
 
 const IDENTITY_STRING_KEYS = [

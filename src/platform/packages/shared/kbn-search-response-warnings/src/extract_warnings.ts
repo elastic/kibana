@@ -36,7 +36,7 @@ export function extractWarnings(
       type: 'incomplete',
       requestName,
       clusters: rawResponse._clusters
-        ? rawResponse._clusters.details ?? {}
+        ? (rawResponse._clusters.details ?? {})
         : {
             '(local)': {
               status: 'partial',

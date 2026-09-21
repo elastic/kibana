@@ -70,12 +70,12 @@ export function DashboardEmptyScreen() {
           defaultMessage: 'This dashboard is empty. Let\u2019s fill it up!',
         })
       : showWriteControls
-      ? i18n.translate('dashboard.emptyScreen.viewModeTitle', {
-          defaultMessage: 'Add visualizations to your dashboard',
-        })
-      : i18n.translate('dashboard.emptyScreen.noPermissionsTitle', {
-          defaultMessage: 'This dashboard is empty.',
-        });
+        ? i18n.translate('dashboard.emptyScreen.viewModeTitle', {
+            defaultMessage: 'Add visualizations to your dashboard',
+          })
+        : i18n.translate('dashboard.emptyScreen.noPermissionsTitle', {
+            defaultMessage: 'This dashboard is empty.',
+          });
     return <h2>{titleString}</h2>;
   })();
 

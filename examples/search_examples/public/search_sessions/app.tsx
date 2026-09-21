@@ -724,7 +724,7 @@ function doSearch(
         if (!isRunningResponse(res)) {
           const avgResult: number | undefined = res.rawResponse.aggregations
             ? // @ts-expect-error @elastic/elasticsearch no way to declare a type for aggregation in the search response
-              res.rawResponse.aggregations[1]?.value ?? res.rawResponse.aggregations[2]?.value
+              (res.rawResponse.aggregations[1]?.value ?? res.rawResponse.aggregations[2]?.value)
             : undefined;
           const message = (
             <KibanaRenderContextProvider {...startServices}>

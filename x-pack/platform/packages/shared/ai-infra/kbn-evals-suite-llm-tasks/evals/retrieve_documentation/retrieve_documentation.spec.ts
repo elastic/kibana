@@ -73,7 +73,7 @@ const createNoopLogger = (): Logger =>
     log: () => {},
     isLevelEnabled: () => false,
     get: () => createNoopLogger(),
-  } as unknown as Logger);
+  }) as unknown as Logger;
 
 evaluate.describe(
   'llm_tasks.retrieveDocumentation (task-level retriever evals)',

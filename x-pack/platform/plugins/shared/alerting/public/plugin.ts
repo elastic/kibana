@@ -85,10 +85,12 @@ export interface AlertingUIConfig {
   };
 }
 
-export class AlertingPublicPlugin
-  implements
-    Plugin<PluginSetupContract, PluginStartContract, AlertingPluginSetup, AlertingPluginStart>
-{
+export class AlertingPublicPlugin implements Plugin<
+  PluginSetupContract,
+  PluginStartContract,
+  AlertingPluginSetup,
+  AlertingPluginStart
+> {
   private alertNavigationRegistry?: AlertNavigationRegistry;
   private config: AlertingUIConfig;
   readonly maxAlertsPerRun: number;

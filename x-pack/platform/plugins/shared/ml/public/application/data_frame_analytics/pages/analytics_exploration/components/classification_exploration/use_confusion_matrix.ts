@@ -31,13 +31,16 @@ function getEvalutionMetricsItems(evalMetrics?: ClassificationEvaluateResponse['
   const accuracyMetrics = evalMetrics.accuracy?.classes || [];
   const recallMetrics = evalMetrics.recall?.classes || [];
 
-  const metricsMap = accuracyMetrics.reduce((acc, accuracyMetric) => {
-    acc[accuracyMetric.class_name] = {
-      className: accuracyMetric.class_name,
-      accuracy: accuracyMetric.value,
-    };
-    return acc;
-  }, {} as Record<string, ClassificationMetricItem>);
+  const metricsMap = accuracyMetrics.reduce(
+    (acc, accuracyMetric) => {
+      acc[accuracyMetric.class_name] = {
+        className: accuracyMetric.class_name,
+        accuracy: accuracyMetric.value,
+      };
+      return acc;
+    },
+    {} as Record<string, ClassificationMetricItem>
+  );
 
   recallMetrics.forEach((recallMetric) => {
     if (metricsMap[recallMetric.class_name] !== undefined) {

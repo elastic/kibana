@@ -60,7 +60,7 @@ export const InputText = ({
       validate.pattern = (value) => {
         if (typeof value !== 'string' || value === '') return true;
         try {
-          return new RegExp(regex).test(value) ? true : message ?? FIELD_PATTERN_MISMATCH(regex);
+          return new RegExp(regex).test(value) ? true : (message ?? FIELD_PATTERN_MISMATCH(regex));
         } catch {
           return FIELD_PATTERN_INVALID;
         }

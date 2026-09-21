@@ -153,7 +153,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
         : initialAdHocDataViewSpec?.id;
     const dataViewId = isDataViewSource(urlAppState?.dataSource)
       ? urlAppState?.dataSource.dataViewId
-      : persistedTabDataView?.id ?? initialDataViewId;
+      : (persistedTabDataView?.id ?? initialDataViewId);
 
     const tabHasInitialAdHocDataViewSpec =
       dataViewId && initialAdHocDataViewSpec?.id === dataViewId;

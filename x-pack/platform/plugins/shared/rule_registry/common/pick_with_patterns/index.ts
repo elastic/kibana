@@ -10,7 +10,7 @@ import { pick } from 'lodash';
 
 type SplitByDot<
   TPath extends string,
-  TPrefix extends string = ''
+  TPrefix extends string = '',
 > = TPath extends `${infer TKey}.${infer TRest}`
   ? [`${TPrefix}${TKey}.*`, ...SplitByDot<TRest, `${TPrefix}${TKey}.`>]
   : [`${TPrefix}${TPath}`];
@@ -21,7 +21,7 @@ type PatternMapOf<T extends Record<string, any>> = {
 
 export type PickWithPatterns<
   T extends Record<string, any>,
-  TPatterns extends string[]
+  TPatterns extends string[],
 > = OmitByValueExact<
   {
     [TFieldName in keyof T]: SetIntersection<
@@ -38,7 +38,7 @@ export type PatternsUnionOf<T extends Record<string, any>> = '*' | ValuesType<Pa
 
 export function pickWithPatterns<
   T extends Record<string, any>,
-  TPatterns extends Array<PatternsUnionOf<T>>
+  TPatterns extends Array<PatternsUnionOf<T>>,
 >(map: T, ...patterns: TPatterns): PickWithPatterns<T, TPatterns> {
   const allFields = Object.keys(map);
   const matchedFields = allFields.filter((field) =>

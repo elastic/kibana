@@ -25,7 +25,7 @@ const createManagementApi = () =>
   ({
     getWorkflow: jest.fn(),
     updateWorkflow: jest.fn().mockResolvedValue({}),
-  } as unknown as jest.Mocked<WorkflowsServerPluginSetup['management']>);
+  }) as unknown as jest.Mocked<WorkflowsServerPluginSetup['management']>;
 
 const createManagedWorkflowsClient = () => ({
   install: jest.fn().mockResolvedValue(undefined),

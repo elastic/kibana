@@ -24,7 +24,10 @@ type HighlightedLine = Array<{
 }>;
 
 export class GrokHighlighter extends MessageImporter {
-  constructor(options: ImportFactoryOptions, private http: HttpSetup) {
+  constructor(
+    options: ImportFactoryOptions,
+    private http: HttpSetup
+  ) {
     super(options);
   }
 

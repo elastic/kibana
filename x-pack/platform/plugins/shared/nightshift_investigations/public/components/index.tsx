@@ -11,9 +11,8 @@ import type { InvestigationDetailFlyoutProps } from './investigation_detail_flyo
 export { InvestigationRunStatusBadge } from './investigation_run_status_badge';
 
 const LazyInvestigationDetailFlyout = React.lazy(async () => {
-  const { InvestigationDetailFlyout: InvestigationDetailFlyoutComponent } = await import(
-    './investigation_detail_flyout'
-  );
+  const { InvestigationDetailFlyout: InvestigationDetailFlyoutComponent } =
+    await import('./investigation_detail_flyout');
   return { default: InvestigationDetailFlyoutComponent };
 });
 

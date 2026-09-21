@@ -19,7 +19,7 @@ const buildLogger = (): ScopedLogger =>
     info: jest.fn(),
     warn: jest.fn(),
     error: jest.fn(),
-  } as unknown as ScopedLogger);
+  }) as unknown as ScopedLogger;
 
 const buildScore = (
   idValue: string,
@@ -37,7 +37,7 @@ const buildScore = (
     notes: [],
     inputs: [],
     ...overrides,
-  } as unknown as EntityRiskScoreRecord);
+  }) as unknown as EntityRiskScoreRecord;
 
 const DEFAULT_MOCK_FIRST_SEEN = '2025-12-01T00:00:00.000Z';
 

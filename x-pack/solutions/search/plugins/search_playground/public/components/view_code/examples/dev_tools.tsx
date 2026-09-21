@@ -30,7 +30,7 @@ export const DevToolsCode: React.FC = () => {
     formErrors[PlaygroundFormFields.userElasticsearchQuery]
   );
   const replacedQuery =
-    searchQuery ?? ''
+    (searchQuery ?? '')
       ? JSON.stringify(query, null, 2).replace(/\"{query}\"/g, JSON.stringify(searchQuery))
       : JSON.stringify(query, null, 2);
 

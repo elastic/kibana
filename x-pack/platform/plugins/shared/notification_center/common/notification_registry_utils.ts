@@ -21,7 +21,7 @@ export type NotificationTypeName<N extends NotificationNamespace> =
 /** The declared {@link NotificationKind} for a `(namespace, type)`, defaulting to `state`. */
 export type NotificationKindOf<
   N extends NotificationNamespace,
-  T extends NotificationTypeName<N>
+  T extends NotificationTypeName<N>,
 > = (typeof NOTIFICATION_REGISTRY)[N]['types'][T] extends {
   kind: infer K extends NotificationKind;
 }
@@ -42,7 +42,7 @@ export type NotificationTypeRef = {
 /** All registered namespace ids, as a non-empty tuple for `z.enum`. */
 export const NOTIFICATION_NAMESPACES = Object.keys(NOTIFICATION_REGISTRY) as [
   NotificationNamespace,
-  ...NotificationNamespace[]
+  ...NotificationNamespace[],
 ];
 
 /**

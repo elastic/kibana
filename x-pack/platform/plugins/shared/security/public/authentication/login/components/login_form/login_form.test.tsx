@@ -25,18 +25,18 @@ function getPageModeAssertions(mode: PageMode): Array<[string, boolean]> {
         ['autoLoginOverlay', false],
       ]
     : mode === PageMode.Selector
-    ? [
-        ['loginForm', false],
-        ['loginSelector', true],
-        ['loginHelp', false],
-        ['autoLoginOverlay', false],
-      ]
-    : [
-        ['loginForm', false],
-        ['loginSelector', false],
-        ['loginHelp', true],
-        ['autoLoginOverlay', false],
-      ];
+      ? [
+          ['loginForm', false],
+          ['loginSelector', true],
+          ['loginHelp', false],
+          ['autoLoginOverlay', false],
+        ]
+      : [
+          ['loginForm', false],
+          ['loginSelector', false],
+          ['loginHelp', true],
+          ['autoLoginOverlay', false],
+        ];
 }
 
 function expectPageMode(mode: PageMode) {

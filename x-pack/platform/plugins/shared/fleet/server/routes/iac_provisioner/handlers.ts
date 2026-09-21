@@ -87,7 +87,7 @@ export const buildIacProvisionerIntegrations = async ({
             errorMessage: `${pkgName} has no policy template named ${templateName}`,
           };
         }
-        const inputs = 'inputs' in template ? template.inputs ?? [] : [];
+        const inputs = 'inputs' in template ? (template.inputs ?? []) : [];
         const declaredInputs = new Set(inputs.map(({ type }) => type));
         const enabledInputs = Array.from(enabledInputSet);
         const unknown = enabledInputs.filter((type) => !declaredInputs.has(type));

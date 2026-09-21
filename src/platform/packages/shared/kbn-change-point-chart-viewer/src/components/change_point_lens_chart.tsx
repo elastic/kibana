@@ -45,7 +45,7 @@ const EMBEDDABLE_QUICK_ACTIONS = {
     view: [ACTION_FOCUSED_VIEW, ACTION_INSPECT_PANEL, ADD_TO_EXISTING_CASE_ACTION_ID] as [
       string,
       string,
-      string
+      string,
     ],
   },
 };
@@ -76,11 +76,10 @@ const chartContainerCss = css`
   }
 `;
 
-export interface ChangePointLensChartProps
-  extends Pick<
-    UnifiedChangePointGridProps,
-    'services' | 'fetchParams' | 'fetch$' | 'onBrushEnd' | 'onFilter' | 'actions'
-  > {
+export interface ChangePointLensChartProps extends Pick<
+  UnifiedChangePointGridProps,
+  'services' | 'fetchParams' | 'fetch$' | 'onBrushEnd' | 'onFilter' | 'actions'
+> {
   card: ChangePointCardModel;
   cardIndex: number;
   valueColumn: string;

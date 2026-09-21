@@ -65,8 +65,8 @@ export const factValueParts = (value: string): LevelCardFactPart[] =>
       chunk === ACTOR_TOKENS.you
         ? pill('you')
         : chunk === ACTOR_TOKENS.worker
-        ? pill('worker')
-        : text(chunk)
+          ? pill('worker')
+          : text(chunk)
     );
 
 const actorLabel = (actor: LevelCardActor): string =>

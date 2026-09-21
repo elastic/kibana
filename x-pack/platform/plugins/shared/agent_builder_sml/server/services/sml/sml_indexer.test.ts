@@ -36,7 +36,7 @@ const createMockEsClient = (): jest.Mocked<ElasticsearchClient> =>
     deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
     count: jest.fn().mockResolvedValue({ count: 0 }),
     get: jest.fn().mockResolvedValue({ found: false }),
-  } as unknown as jest.Mocked<ElasticsearchClient>);
+  }) as unknown as jest.Mocked<ElasticsearchClient>;
 
 const createMockLogger = () => {
   const log = loggerMock.create();

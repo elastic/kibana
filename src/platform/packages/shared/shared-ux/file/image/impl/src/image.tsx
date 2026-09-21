@@ -47,7 +47,7 @@ export const Image = ({ src, url, alt, onLoad, onError, meta, ...rest }: Props) 
   }, [blurhash, width, height]);
 
   // prettier-ignore
-  const currentSrc = (isBlurHashLoaded || !blurhashSrc) ? imageSrc : blurhashSrc
+  const currentSrc = (isBlurHashLoaded || !blurhashSrc) ? imageSrc : blurhashSrc;
 
   return (
     <EuiImage

@@ -209,7 +209,7 @@ export const groupTimelineRounds = <E extends AnyTimelineEvent>(
       continue;
     }
     const stepEvents = sortedSteps(execution.events);
-    const steps = stepEvents.length > 0 ? stepEvents : terminated.data.steps ?? [];
+    const steps = stepEvents.length > 0 ? stepEvents : (terminated.data.steps ?? []);
     rounds.push({
       id: parseExecutionId(executionId)?.roundId ?? executionId,
       userMessage,

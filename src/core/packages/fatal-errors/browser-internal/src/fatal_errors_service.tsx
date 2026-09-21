@@ -41,7 +41,10 @@ export class FatalErrorsService {
    * @param onFirstErrorCb - Callback function that gets executed after the first error,
    *   but before the FatalErrorsService renders the error to the DOM.
    */
-  constructor(private rootDomElement: HTMLElement, private onFirstErrorCb: () => void) {}
+  constructor(
+    private rootDomElement: HTMLElement,
+    private onFirstErrorCb: () => void
+  ) {}
 
   public setup(deps: FatalErrorsServiceSetupDeps) {
     this.error$

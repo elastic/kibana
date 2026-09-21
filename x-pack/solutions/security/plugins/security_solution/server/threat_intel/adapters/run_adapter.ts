@@ -18,7 +18,10 @@ const ADAPTERS: Record<FetchAdapterType, FetchAdapter> = {
 };
 
 export class UnknownAdapterError extends Error {
-  constructor(public readonly adapterType: string, public readonly sourceId: string) {
+  constructor(
+    public readonly adapterType: string,
+    public readonly sourceId: string
+  ) {
     super(
       `No adapter registered for source ${sourceId} (adapter_type=${adapterType}). ` +
         `Known adapter types: ${Object.keys(ADAPTERS).join(', ')}.`

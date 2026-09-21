@@ -53,8 +53,8 @@ function withInspectQueryParam(params: ZodParamsObject): ZodParamsObject {
     query instanceof z.ZodObject
       ? query.extend(inspectQueryShape)
       : query
-      ? z.intersection(query, z.object(inspectQueryShape))
-      : z.object(inspectQueryShape);
+        ? z.intersection(query, z.object(inspectQueryShape))
+        : z.object(inspectQueryShape);
 
   return params.extend({ query: queryWithInspect }) as ZodParamsObject;
 }

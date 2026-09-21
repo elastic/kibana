@@ -9,7 +9,10 @@ import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
 import { waitForApmAppMenuReady } from '../page_helpers';
 
 export class GeneralSettingsPage {
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {}
 
   async goto() {
     await this.page.goto(`${this.kbnUrl.app('apm')}/settings/general-settings`);

@@ -41,7 +41,7 @@ const createDatatableUtilities = (meta?: DateHistogramMeta): DatatableUtilitiesS
         meta && { ...meta, domain: column?.meta?.sourceParams?.computedDomain }
     ),
     getColumnTimeRange: jest.fn().mockReturnValue(meta?.timeRange),
-  } as unknown as DatatableUtilitiesService);
+  }) as unknown as DatatableUtilitiesService;
 
 const createLayer = (
   values: number[],
@@ -63,7 +63,7 @@ const createLayer = (
       ],
       rows: values.map((value) => ({ x: value })),
     },
-  } as unknown as CommonXYDataLayerConfig);
+  }) as unknown as CommonXYDataLayerConfig;
 
 // [1970-01-01T00:00:00.000Z, 1970-01-01T00:00:10.000Z], so timestamps map to 0..10000ms.
 const TIME_RANGE = {

@@ -53,7 +53,9 @@ export const getFieldNames = (category: FieldCategory): string[] =>
     : EMPTY_ARRAY_RESULT;
 
 /** Returns all field names by category, for display in an `EuiComboBox`  */
-export const getCategorizedFieldNames = (browserFields: BrowserFields): EuiComboBoxOptionOption[] =>
+export const getCategorizedFieldNames = (
+  browserFields: BrowserFields
+): EuiComboBoxOptionOption[] =>
   !browserFields
     ? EMPTY_ARRAY_RESULT
     : Object.keys(browserFields)

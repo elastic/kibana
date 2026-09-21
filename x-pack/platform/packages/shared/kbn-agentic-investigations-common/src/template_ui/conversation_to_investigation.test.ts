@@ -29,7 +29,7 @@ const event = (overrides: Partial<TimelineEvent>): TimelineEvent =>
     created_at: '2024-01-01T01:00:00Z',
     actor,
     ...overrides,
-  } as TimelineEvent);
+  }) as TimelineEvent;
 
 /** The run stats every `execution_terminated` event carries, irrespective of how it ended. */
 const runSummary = {

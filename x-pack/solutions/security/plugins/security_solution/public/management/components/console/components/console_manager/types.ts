@@ -47,8 +47,10 @@ export interface ManagedConsoleExtensionComponentProps<TMeta extends object = an
   meta: { [key in keyof TMeta]: TMeta[key] };
 }
 
-export interface RegisteredConsoleClient<TMeta extends object = any>
-  extends Pick<ConsoleRegistrationInterface<TMeta>, 'id' | 'meta'> {
+export interface RegisteredConsoleClient<TMeta extends object = any> extends Pick<
+  ConsoleRegistrationInterface<TMeta>,
+  'id' | 'meta'
+> {
   show(): void;
 
   hide(): void;

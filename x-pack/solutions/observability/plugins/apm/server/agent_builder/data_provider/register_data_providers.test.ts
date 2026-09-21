@@ -61,7 +61,7 @@ describe('registerDataProviders (apmServiceSummary / apmServiceChangePoints / ap
       core: {} as any,
       plugins: { observabilityAgentBuilder: { registerDataProvider } } as any,
       config: {} as any,
-      logger: { get: () => ({} as Logger) } as unknown as Logger,
+      logger: { get: () => ({}) as Logger } as unknown as Logger,
     });
   });
 
@@ -169,7 +169,7 @@ describe('registerDataProviders (servicesAlertsAndSlo)', () => {
       core: {} as any,
       plugins: { observabilityAgentBuilder: { registerDataProvider } } as any,
       config: {} as any,
-      logger: { get: () => ({} as Logger) } as unknown as Logger,
+      logger: { get: () => ({}) as Logger } as unknown as Logger,
     });
   });
 

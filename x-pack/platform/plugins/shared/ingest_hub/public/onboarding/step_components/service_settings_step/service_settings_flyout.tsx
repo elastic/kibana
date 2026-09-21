@@ -34,7 +34,9 @@ function getDefaultDsInputs(
     // For single-DS services, prefer the entry-level defaultEnabledInputs (which may have been
     // overridden in the static matrix, e.g. ECF OTel entries default to S3 only). Fall back to
     // all DS inputs when no override is set (original behaviour for non-ECF services).
-    return serviceDefaultEnabledInputs?.length ? serviceDefaultEnabledInputs : dsInfo?.inputs ?? [];
+    return serviceDefaultEnabledInputs?.length
+      ? serviceDefaultEnabledInputs
+      : (dsInfo?.inputs ?? []);
   }
   return dsInfo?.defaultEnabledInputs ?? [];
 }

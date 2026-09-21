@@ -25,7 +25,7 @@ import type { SlackChannelBinding } from '@kbn/significant-events-plugin/common'
 import { useRelayAppBindings, useBindChannel, useUnbindChannel } from './use_relay_app_bindings';
 
 const channelLabel = (binding: SlackChannelBinding) =>
-  binding.displayName != null ? `#${binding.displayName}` : binding.channel ?? '';
+  binding.displayName != null ? `#${binding.displayName}` : (binding.channel ?? '');
 
 interface SlackConnectionBindingsProps {
   canEdit: boolean;

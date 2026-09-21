@@ -662,7 +662,7 @@ describe('StorageIndexAdapter', () => {
             ({
               ...source,
               migratedProp: String(source.foo).toUpperCase(),
-            } as StorageDocumentOf<typeof storageSettings>),
+            }) as StorageDocumentOf<typeof storageSettings>,
         });
         migratingClient = migratingAdapter.getClient();
         await migratingClient.bulk({

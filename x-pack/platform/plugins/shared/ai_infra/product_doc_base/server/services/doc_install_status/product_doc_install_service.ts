@@ -20,10 +20,13 @@ import type { SecurityLabsStatusResponse } from '../doc_manager/types';
 const installStatusQuery = { type: typeName, perPage: 100 };
 
 const allUninstalled = (): Record<ProductName, ProductInstallState> =>
-  Object.values(DocumentationProduct).reduce((memo, product) => {
-    memo[product] = { status: 'uninstalled' };
-    return memo;
-  }, {} as Record<ProductName, ProductInstallState>);
+  Object.values(DocumentationProduct).reduce(
+    (memo, product) => {
+      memo[product] = { status: 'uninstalled' };
+      return memo;
+    },
+    {} as Record<ProductName, ProductInstallState>
+  );
 
 export class ProductDocInstallClient {
   private soClient: SavedObjectsClientContract;

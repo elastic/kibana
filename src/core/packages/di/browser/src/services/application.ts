@@ -17,7 +17,8 @@ import type { ServiceToken } from '@kbn/core-di';
  * @public
  */
 export interface ApplicationDefinition<HistoryLocationState = unknown>
-  extends Omit<App<HistoryLocationState>, 'mount'>,
+  extends
+    Omit<App<HistoryLocationState>, 'mount'>,
     Newable<ApplicationHandler<HistoryLocationState>> {}
 
 /**

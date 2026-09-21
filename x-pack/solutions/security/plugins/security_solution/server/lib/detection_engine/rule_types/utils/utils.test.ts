@@ -605,7 +605,7 @@ describe('utils', () => {
             .mockImplementationOnce(({ executeFunctionOnStream }) => {
               executeFunctionOnStream({ data: [getExceptionListItemSchemaMock()] });
             }),
-        } as unknown as ExceptionListClient);
+        }) as unknown as ExceptionListClient;
       const client = listMock.getExceptionListClient();
       const exceptions = await getExceptions({
         client,
@@ -632,7 +632,7 @@ describe('utils', () => {
       listMock.getExceptionListClient = () =>
         ({
           findExceptionListsItemPointInTimeFinder: jest.fn().mockRejectedValue(err),
-        } as unknown as ExceptionListClient);
+        }) as unknown as ExceptionListClient;
 
       await expect(() =>
         getExceptions({
@@ -649,7 +649,7 @@ describe('utils', () => {
       listMock.getExceptionListClient = () =>
         ({
           findExceptionListsItem: jest.fn().mockResolvedValue(null),
-        } as unknown as ExceptionListClient);
+        }) as unknown as ExceptionListClient;
 
       const exceptions = await getExceptions({
         client: listMock.getExceptionListClient(),

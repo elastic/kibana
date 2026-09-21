@@ -72,7 +72,10 @@ export class OtelTelemetryService {
   private configuration: OtelTelemetryConfiguration = DEFAULT_OTEL_TELEMETRY_CONFIGURATION;
   private configSubscription?: Subscription;
 
-  constructor(logger: Logger, private readonly configurationService: ConfigurationService) {
+  constructor(
+    logger: Logger,
+    private readonly configurationService: ConfigurationService
+  ) {
     this.logger = logger.get(OtelTelemetryService.name);
   }
 

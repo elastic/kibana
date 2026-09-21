@@ -82,7 +82,7 @@ describe('SavedObjectsRepository', () => {
   describe('#openPointInTimeForType', () => {
     const type = 'index-pattern';
 
-    const generateResults = (id?: string) => ({ id: id || 'id' } as OpenPointInTimeResponse);
+    const generateResults = (id?: string) => ({ id: id || 'id' }) as OpenPointInTimeResponse;
     const successResponse = async (type: string, options?: SavedObjectsOpenPointInTimeOptions) => {
       client.openPointInTime.mockResponseOnce(generateResults());
       const result = await repository.openPointInTimeForType(type, options);

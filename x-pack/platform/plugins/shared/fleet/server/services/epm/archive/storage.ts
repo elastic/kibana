@@ -153,8 +153,8 @@ export function packageAssetToArchiveEntry(asset: PackageAsset): ArchiveEntry {
   const buffer = utf8
     ? Buffer.from(utf8, 'utf8')
     : base64
-    ? Buffer.from(base64, 'base64')
-    : undefined;
+      ? Buffer.from(base64, 'base64')
+      : undefined;
 
   return {
     path,
@@ -220,8 +220,8 @@ export const getEsPackage = async (
       isSavedObjectErrorResult(so)
         ? { type: so.type, id: so.id, error: so.error }
         : !so.attributes
-        ? { type: so.type, id: so.id, error: `No attributes retrieved` }
-        : { type: so.type, id: so.id, error: `Unknown` }
+          ? { type: so.type, id: so.id, error: `No attributes retrieved` }
+          : { type: so.type, id: so.id, error: `Unknown` }
     );
 
     logger.warn(

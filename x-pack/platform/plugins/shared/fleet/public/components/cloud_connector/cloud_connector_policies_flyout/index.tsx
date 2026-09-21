@@ -152,12 +152,12 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
           defaultMessage: 'Role ARN',
         })
       : provider === 'gcp'
-      ? i18n.translate('xpack.fleet.cloudConnector.policiesFlyout.gcpServiceAccountEmailLabel', {
-          defaultMessage: 'Service Account Email',
-        })
-      : i18n.translate('xpack.fleet.cloudConnector.policiesFlyout.cloudConnectorIdLabel', {
-          defaultMessage: 'Federated Identity ID',
-        });
+        ? i18n.translate('xpack.fleet.cloudConnector.policiesFlyout.gcpServiceAccountEmailLabel', {
+            defaultMessage: 'Service Account Email',
+          })
+        : i18n.translate('xpack.fleet.cloudConnector.policiesFlyout.cloudConnectorIdLabel', {
+            defaultMessage: 'Federated Identity ID',
+          });
 
   const copyIdentifierLabel = i18n.translate(
     'xpack.fleet.cloudConnector.policiesFlyout.copyIdentifier',

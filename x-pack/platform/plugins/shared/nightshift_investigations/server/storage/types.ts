@@ -55,7 +55,7 @@ export interface InvestigationPatch extends InvestigationStructuredOutput {
 }
 
 export interface FindInvestigationsQuery<
-  Fields extends keyof InvestigationAttributes = keyof InvestigationAttributes
+  Fields extends keyof InvestigationAttributes = keyof InvestigationAttributes,
 > {
   statuses?: InvestigationStatus[];
   subjectTypes?: InvestigationSubjectType[];
@@ -80,7 +80,7 @@ export interface FindInvestigationsQuery<
 }
 
 export type FindInvestigationsResult<
-  Fields extends keyof InvestigationAttributes = keyof InvestigationAttributes
+  Fields extends keyof InvestigationAttributes = keyof InvestigationAttributes,
 > = PaginatedResponse<ProjectedInvestigationRecord<Fields>>;
 
 export interface InvestigationRepository {
@@ -93,7 +93,7 @@ export interface InvestigationRepository {
 }
 
 export type FindInvestigationsAcrossSpacesResult<
-  Fields extends keyof InvestigationAttributes = keyof InvestigationAttributes
+  Fields extends keyof InvestigationAttributes = keyof InvestigationAttributes,
 > = PaginatedResponse<{ investigation: ProjectedInvestigationRecord<Fields>; spaceId: string }>;
 
 /**

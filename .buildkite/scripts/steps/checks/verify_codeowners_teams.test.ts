@@ -26,10 +26,10 @@ import {
 } from './verify_codeowners_teams.ts';
 
 const team = (id: string, githubTeam?: string): Team =>
-  ({ id, name: id, github: { team: githubTeam } } as Team);
+  ({ id, name: id, github: { team: githubTeam } }) as Team;
 
 const entry = (teams: string[], pattern = '*'): CodeOwnersEntry =>
-  ({ pattern, teams } as CodeOwnersEntry);
+  ({ pattern, teams }) as CodeOwnersEntry;
 
 beforeEach(() => {
   jest.clearAllMocks();

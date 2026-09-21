@@ -63,7 +63,7 @@ const makeNodeProps = (
     yPos: 0,
     targetPosition: 'top' as any,
     sourcePosition: 'bottom' as any,
-  } as unknown as NodeProps<Node<ForeachGroupNodeData>>);
+  }) as unknown as NodeProps<Node<ForeachGroupNodeData>>;
 
 const renderGroup = (data: Partial<ForeachGroupNodeData> = {}) =>
   render(<WorkflowGraphForeachGroupNode {...makeNodeProps(data)} />);

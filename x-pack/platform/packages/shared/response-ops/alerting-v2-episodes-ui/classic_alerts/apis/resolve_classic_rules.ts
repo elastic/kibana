@@ -32,7 +32,7 @@ const adaptClassicRule = (rule: ClassicFindRulesResponse['data'][number]): RuleR
   ({
     id: rule.id,
     metadata: { name: rule.name },
-  } as unknown as RuleResponse);
+  }) as unknown as RuleResponse;
 
 export interface ResolveClassicRulesParams {
   ids: string[];

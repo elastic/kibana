@@ -46,8 +46,8 @@ export const SyntheticsDatePicker = ({
   // `getUrlParams` already merges in the app-wide default, so detect absence via
   // the raw URL: only then does `defaultDateRange` take over.
   const rawParams = parse(search[0] === '?' ? search.slice(1) : search);
-  const start = rawParams.dateRangeStart != null ? urlStart : defaultDateRange?.from ?? urlStart;
-  const end = rawParams.dateRangeEnd != null ? urlEnd : defaultDateRange?.to ?? urlEnd;
+  const start = rawParams.dateRangeStart != null ? urlStart : (defaultDateRange?.from ?? urlStart);
+  const end = rawParams.dateRangeEnd != null ? urlEnd : (defaultDateRange?.to ?? urlEnd);
 
   useEffect(() => {
     const { from, to } = sharedTimeState ?? {};

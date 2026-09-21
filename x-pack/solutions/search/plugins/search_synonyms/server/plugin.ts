@@ -22,9 +22,12 @@ import type {
 import { defineRoutes } from './routes';
 import { PLUGIN_ID, PLUGIN_TITLE } from '../common';
 
-export class SearchSynonymsPlugin
-  implements Plugin<SearchSynonymsPluginSetup, SearchSynonymsPluginStart, {}, {}>
-{
+export class SearchSynonymsPlugin implements Plugin<
+  SearchSynonymsPluginSetup,
+  SearchSynonymsPluginStart,
+  {},
+  {}
+> {
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {

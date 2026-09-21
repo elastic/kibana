@@ -117,10 +117,10 @@ export const createProposalAttachmentDefinition =
         badges.push({
           label: decision
             ? DECISION_BADGE_LABELS[decision]
-            : STATUS_BADGE_LABELS[data.status] ?? data.status,
+            : (STATUS_BADGE_LABELS[data.status] ?? data.status),
           color: decision
             ? DECISION_BADGE_COLORS[decision]
-            : STATUS_BADGE_COLORS[data.status] ?? 'default',
+            : (STATUS_BADGE_COLORS[data.status] ?? 'default'),
         });
       }
 

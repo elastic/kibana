@@ -153,8 +153,8 @@ export default function (context: FtrProviderContext) {
       const suffix = overwrite
         ? ' with overwrite enabled'
         : createNewCopies
-        ? ' with createNewCopies enabled'
-        : '';
+          ? ' with createNewCopies enabled'
+          : '';
       const tests = createTests(overwrite, createNewCopies, spaceId);
       addTests(`within the ${spaceId} space${suffix}`, { spaceId, tests });
     });

@@ -24,10 +24,10 @@ export interface SetQueryStateOptions {
 export type SetQueryState<T> = (nextValue: T, setOptions?: SetQueryStateOptions) => Promise<void>;
 
 export interface UseQueryState {
-  <T>(key: string, options?: UseQueryStateOptions<T> & { defaultValue: undefined }): [
-    T | null,
-    SetQueryState<T | null>
-  ];
+  <T>(
+    key: string,
+    options?: UseQueryStateOptions<T> & { defaultValue: undefined }
+  ): [T | null, SetQueryState<T | null>];
   <T>(key: string, options?: UseQueryStateOptions<T>): [T, SetQueryState<T>];
 }
 

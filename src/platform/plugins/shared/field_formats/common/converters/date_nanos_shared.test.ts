@@ -111,7 +111,7 @@ describe('Date Nanos Format', () => {
         dateNanosFormat: 'MMM D, YYYY @ HH:mm:ss.SSSSSSSSS',
         dateFormat: fallback,
         'dateFormat:tz': 'Browser',
-      }[key] as string);
+      })[key] as string;
     const formatter = new DateNanosFormat({}, getConfig);
 
     // e.g. a min/max aggregation result, returned by Elasticsearch in ms
@@ -140,7 +140,7 @@ describe('Date Nanos Format', () => {
       ({
         dateNanosFormat: 'MMM D, YYYY @ HH:mm:ss.SSSSSSSSS',
         'dateFormat:tz': 'UTC',
-      }[key] as string);
+      })[key] as string;
     const formatter = new DateNanosFormat({}, getConfig);
 
     expect(formatter.convertToText('2019-05-20T14:04:56.357001234Z')).toMatchInlineSnapshot(
@@ -156,7 +156,7 @@ describe('Date Nanos Format', () => {
       ({
         dateNanosFormat: 'MMM D, YYYY @ HH:mm:ss.SSSSSSSSS',
         'dateFormat:tz': 'UTC',
-      }[key] as string);
+      })[key] as string;
     const formatter = new DateNanosFormat({}, getConfig);
 
     expect(
@@ -178,7 +178,7 @@ describe('Date Nanos Format', () => {
       ({
         dateNanosFormat: 'MMM D, YYYY @ HH:mm:ss.SSSSSSSSS',
         'dateFormat:tz': 'UTC',
-      }[key] as string);
+      })[key] as string;
     const formatter = new DateNanosFormat({}, getConfig);
 
     expect(formatter.convertToText(['2019-05-20T14:04:56.357001234Z'])).toMatchInlineSnapshot(
