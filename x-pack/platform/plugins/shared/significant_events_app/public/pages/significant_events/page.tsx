@@ -185,7 +185,7 @@ export function SignificantEventsPage() {
       <SignificantEventsAppPageTemplate.Body
         grow
         alignment="center"
-        css={{ minBlockSize: 'var(--kbn-application--content-height, 100vh)' }}
+        style={{ minBlockSize: 'var(--kbn-application--content-height, 100vh)' }}
       >
         <EuiLoadingElastic size="xxl" />
       </SignificantEventsAppPageTemplate.Body>
