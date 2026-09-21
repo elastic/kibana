@@ -8,7 +8,6 @@ steps:
     timeout_in_minutes: 10
     agents:
       machineType: n2-standard-2
-      diskSizeGb: 130
 
   - wait
 
@@ -21,14 +20,12 @@ steps:
       - terrazzo-initial-pipeline-upload
     agents:
       machineType: n2-highcpu-8
-      diskSizeGb: 130
 
   - command: .buildkite/scripts/steps/build_kibana.sh
     label: Build Kibana Distribution
     agents:
       machineType: n2-standard-8
       preemptible: true
-      diskSizeGb: 150
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
     depends_on: pre-build
@@ -54,7 +51,6 @@ steps:
     timeout_in_minutes: 15
     agents:
       machineType: n2-standard-2
-      diskSizeGb: 130
     env:
       FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
       FTR_EXTRA_ARGS: '$FTR_EXTRA_ARGS'

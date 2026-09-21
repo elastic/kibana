@@ -39,7 +39,6 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-highcpu-8
-      diskSizeGb: 130
 
   - label: '🧑‍🏭 Build Kibana Distribution'
     command: .buildkite/scripts/steps/build_kibana.sh
@@ -81,7 +80,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -107,7 +105,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -132,7 +129,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -156,7 +152,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -179,7 +174,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -202,7 +196,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -227,7 +220,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -253,7 +245,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -276,7 +267,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -298,7 +288,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -322,7 +311,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -346,7 +334,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -370,7 +357,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -394,7 +380,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -417,7 +402,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -448,7 +432,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -471,7 +454,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -495,7 +477,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -518,7 +499,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -541,7 +521,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -564,7 +543,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -588,7 +566,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -611,7 +588,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:

@@ -60,21 +60,6 @@ const MAX_COUNT_PER_CONFIG = 50;
 // from `package.json` (set when forking a release branch).
 const scoutDiscoveryTarget = getTrackedBranch() === 'main' ? 'local' : 'local-stateful-only';
 
-/**
- * Cypress group steps use `n2-4-virt` and a larger disk for `defend_workflows` suites. Command steps
- * inherit the same defaults unless `agentQueue` / `diskSizeGb` are set on the config entry.
- */
-function defaultCypressFlakyAgentOptions(pathHint: string): {
-  agentQueue: string;
-  diskSizeGb?: number;
-} {
-  const defendWorkflows = pathHint.includes('defend_workflows');
-  return {
-    agentQueue: defendWorkflows ? 'n2-4-virt' : 'n2-4-spot',
-    diskSizeGb: defendWorkflows ? 120 : 110,
-  };
-}
-
 interface GroupTestSuite {
   type: 'group';
   key: string;
@@ -105,7 +90,6 @@ interface CommandTestSuite {
   /** Optional label for `upload_scout_cypress_events` (Scout/Cypress analytics). */
   scoutLabel?: string;
   agentQueue?: string;
-  diskSizeGb?: number;
   /** Package path (repo-relative) where `pnpm junit:merge` should run when it differs from `workingDirectory`. */
   junitMergeWorkingDirectory?: string;
 }
@@ -175,7 +159,6 @@ function getTestSuitesFromJson(json: string) {
         ...(typeof item.job === 'string' ? { job: item.job } : {}),
         ...(typeof item.scoutLabel === 'string' ? { scoutLabel: item.scoutLabel } : {}),
         ...(typeof item.agentQueue === 'string' ? { agentQueue: item.agentQueue } : {}),
-        ...(typeof item.diskSizeGb === 'number' ? { diskSizeGb: item.diskSizeGb } : {}),
         ...(typeof item.junitMergeWorkingDirectory === 'string'
           ? { junitMergeWorkingDirectory: item.junitMergeWorkingDirectory }
           : {}),
@@ -355,15 +338,16 @@ for (const testSuite of testSuites) {
       break;
 
     case 'command': {
-      const agentDefaults = defaultCypressFlakyAgentOptions(
-        `${testSuite.workingDirectory}/${testSuite.command}`
-      );
-      const agentQueue = testSuite.agentQueue ?? agentDefaults.agentQueue;
-      const diskSizeGb = testSuite.diskSizeGb ?? agentDefaults.diskSizeGb;
+      // defend_workflows suites need nested virtualization; other command steps run on spot agents.
+      const agentQueue =
+        testSuite.agentQueue ??
+        (`${testSuite.workingDirectory}/${testSuite.command}`.includes('defend_workflows')
+          ? 'n2-4-virt'
+          : 'n2-4-spot');
       steps.push({
         command: '.buildkite/scripts/steps/flaky/run_command.sh',
         label: testSuite.label,
-        agents: expandAgentQueue(agentQueue, diskSizeGb),
+        agents: expandAgentQueue(agentQueue),
         key: `${TestSuiteType.COMMAND}-${suiteIndex++}`,
         depends_on: 'build',
         timeout_in_minutes: TEST_STEP_TIMEOUT_MINUTES,
@@ -395,11 +379,11 @@ for (const testSuite of testSuites) {
               `Group configuration was not found in groups.json for the following cypress suite: {${suiteName}}.`
             );
           }
-          const { agentQueue, diskSizeGb } = defaultCypressFlakyAgentOptions(suiteName);
+          const agentQueue = suiteName.includes('defend_workflows') ? 'n2-4-virt' : 'n2-4-spot';
           steps.push({
             command: `.buildkite/scripts/steps/functional/${suiteName}.sh`,
             label: group.name,
-            agents: expandAgentQueue(agentQueue, diskSizeGb),
+            agents: expandAgentQueue(agentQueue),
             key: `${TestSuiteType.CYPRESS}-${suiteIndex++}`,
             depends_on: 'build',
             timeout_in_minutes: TEST_STEP_TIMEOUT_MINUTES,
