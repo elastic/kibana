@@ -21,5 +21,6 @@
     "@kbn/zod",
     "@kbn/core",
     "@kbn/significant-events-schema",
+    "@kbn/repo-info",
   ]
 }

@@ -20,8 +20,8 @@ a configured model connector, and credentials for the golden evaluations cluster
    Use the existing access credentials; keep the file local. Golden examples do not need
    `gcsDatasetAccessCredentials`. The `nightshift/investigate-lite` dataset must already exist on
    that cluster; see [Dataset procurement contract](#dataset-procurement-contract).
-2. Start the native sandbox services as described below and export the same `SANDBOX_API_KEY`
-   in the terminal running evals.
+2. Start the sandbox with the launcher described below, and load its connection variables in the
+   terminal running evals.
 3. Run the standard entry point:
 
 ```bash
@@ -46,59 +46,38 @@ The four-example lite slice is intended to finish within the 55-minute test time
 
 ### External sandbox prerequisite
 
-Run [elastic/sandbox-service](https://github.com/elastic/sandbox-service) natively with its
-Docker backend and mTLS support (sandbox-service PR #7 or later). The suite does not start it.
-From a local clone:
+The golden eval needs [elastic/sandbox-service](https://github.com/elastic/sandbox-service) running
+natively with its Docker backend and mTLS. The eval stack does not start it; one script does:
 
 ```bash
-git clone https://github.com/elastic/sandbox-service.git
-cd sandbox-service
-make build-container-manager build-sandbox-api
-docker build -f Dockerfile.sandbox -t nightshift-golden-sandbox .
-docker network create nightshift-golden-sandbox
-mkdir -p ssl /tmp/nightshift-golden-workspaces
-openssl req -x509 -newkey rsa:2048 -nodes -days 7 \
-  -keyout ssl/server.key -out ssl/server.crt \
-  -subj '/CN=localhost' -addext 'subjectAltName=DNS:localhost'
-openssl req -newkey rsa:2048 -nodes -keyout ssl/client.key -out ssl/client.csr \
-  -subj '/CN=kibana-golden-evals'
-printf '%s\n' 'extendedKeyUsage=clientAuth' > ssl/client.ext
-openssl x509 -req -in ssl/client.csr -CA ssl/server.crt -CAkey ssl/server.key \
-  -CAcreateserial -out ssl/client.crt -days 7 -extfile ssl/client.ext
-chmod 600 ssl/*.key
+node scripts/nightshift_sandbox.js
 ```
 
-In a terminal in that clone, start container-manager:
+The script clones the private repository with your git credentials, builds `container-manager`
+and `sandbox-api` with Go, builds the sandbox image, creates its Docker network, generates a
+private certificate authority with server and client certificates, generates an API key, and runs
+both services in the foreground until you press Ctrl+C. It needs git access to the repository, Go
+(the version in sandbox-service's `.tool-versions`), openssl, and a running Docker whose container
+IPs are reachable from the host: native on Linux, OrbStack on macOS. Later runs reuse the clone,
+binaries, image, certificates and key; pass `--rebuild` after changing `--ref`, and see `--help`
+for ports and an existing checkout.
+
+Everything lives under the git-ignored `data/nightshift_sandbox`, kept owner-only. Once the script
+reports ready, load the connection variables in the terminal that runs the evals:
 
 ```bash
-CLUSTER_NAME=localhost \
-WORKSPACE_PVC_PATH=/tmp/nightshift-golden-workspaces \
-CONTAINERMANAGER_SANDBOX_IMAGE=nightshift-golden-sandbox \
-CONTAINERMANAGER_DOCKER_SANDBOX_NETWORK=nightshift-golden-sandbox \
-bin/container-manager-service
+source data/nightshift_sandbox/sandbox.env
 ```
 
-In another terminal in the clone, generate a local key and start the API. Export the same key
-in the eval terminal; do not include it in source control or evidence reports.
+That file holds the API key; do not commit it or include it in evidence reports. The key reaches
+`sandbox-api` through its environment, never through process arguments. CI does not run this
+script yet: an agent would need Go, Docker, and read access to the private repository.
 
-```bash
-export SANDBOX_API_KEY="$(openssl rand -hex 32)"
-CONTAINERMANAGER_ADDRESS=localhost:50051 \
-CONTAINERMANAGER_CA_CERT="$PWD/ssl/server.crt" \
-SANDBOX_API_ADDRESS=:8090 \
-SANDBOX_API_TLS_CERT="$PWD/ssl/server.crt" \
-SANDBOX_API_TLS_KEY="$PWD/ssl/server.key" \
-SANDBOX_API_CLIENT_CA_CERT="$PWD/ssl/server.crt" \
-bin/sandbox-api
-```
-
-In the eval terminal, export paths to that clone's client identity and server CA:
-
-```bash
-export SANDBOX_CLIENT_CERT_PATH=/absolute/path/to/sandbox-service/ssl/client.crt
-export SANDBOX_CLIENT_KEY_PATH=/absolute/path/to/sandbox-service/ssl/client.key
-export SANDBOX_CA_CERT_PATH=/absolute/path/to/sandbox-service/ssl/server.crt
-```
+Known issue in sandbox-service's Docker backend: a conversation's first call can reach the sandbox
+before its data port is listening. sandbox-api then drops the session, and every later call for
+that conversation fails with `allocate sandbox: ... DeadlineExceeded`, because the sandbox only
+exchanges keys once. It is intermittent. An affected investigation either gives up on the sandbox
+or runs into the 20-minute task limit, so check the Kibana log for that error and re-run.
 
 Scout reads the PEM files into the `xpack.sandbox.ssl` configuration and connects with mTLS.
 The sandbox configuration is passed through a mode-0600 temporary file in a private directory,
