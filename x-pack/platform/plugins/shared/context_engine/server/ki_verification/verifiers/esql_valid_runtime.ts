@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { errors } from '@elastic/elasticsearch';
 import { appendToESQLQuery } from '@kbn/esql-utils';
 import { isResponseError } from '@kbn/es-errors';
-import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
 import { ESQL_VALID_RUNTIME_VERIFIER_ID } from '../../../common/ki_verification';
+import { formatEsError } from '../../utils/format_es_error';
 import {
   getEsqlQueries,
   getOversizedQueryFailure,
@@ -27,15 +26,6 @@ const MAX_QUERY_ATTEMPTS = 3;
 
 const boundQuery = (query: string): string =>
   appendToESQLQuery(query, `| LIMIT ${ESQL_EXECUTION_ROW_LIMIT}`);
-
-const formatEsError = (error: errors.ResponseError): string => {
-  const details = error.body as ElasticsearchErrorDetails | undefined;
-  const { type, reason } = details?.error ?? {};
-  if (type) {
-    return reason ? `${type}: ${reason}` : type;
-  }
-  return reason ?? error.message;
-};
 
 /** Creates a verifier that executes ES|QL queries against Elasticsearch. */
 export const createEsqlValidRuntimeVerifier = (retryDelayMs = 200): KiVerifier => ({

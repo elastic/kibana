@@ -43,6 +43,7 @@ import {
   TabsBarVisibility,
   type ProfileAppStateDefaultField,
   type DiscoverInternalState,
+  type ExpandedDocCascadePath,
   type ProfileAppStateSnapshot,
   type TabState,
   type RecentlyClosedTabState,
@@ -201,6 +202,11 @@ const internalStateSliceDef = createSlice({
         tab.forceFetchOnSelect = action.payload.forceFetchOnSelect;
       }),
 
+    setSkipInitialFetch: (state, action: TabAction<Pick<TabState, 'skipInitialFetch'>>) =>
+      withTab(state, action.payload, (tab) => {
+        tab.skipInitialFetch = action.payload.skipInitialFetch;
+      }),
+
     setIsDataViewLoading: (state, action: TabAction<Pick<TabState, 'isDataViewLoading'>>) =>
       withTab(state, action.payload, (tab) => {
         tab.isDataViewLoading = action.payload.isDataViewLoading;
@@ -245,6 +251,7 @@ const internalStateSliceDef = createSlice({
       action: TabAction<{
         expandedDoc: DataTableRecord | undefined;
         expandedDocOwner?: string;
+        expandedDocCascadePath?: ExpandedDocCascadePath;
         initialDocViewerTabId?: string;
         initialDocViewerTabState?: object;
       }>
@@ -266,6 +273,9 @@ const internalStateSliceDef = createSlice({
 
         tab.expandedDoc = action.payload.expandedDoc;
         tab.expandedDocOwner = nextExpandedDocOwner;
+        tab.expandedDocCascadePath = action.payload.expandedDoc
+          ? action.payload.expandedDocCascadePath
+          : undefined;
         tab.initialDocViewerTabId = action.payload.initialDocViewerTabId;
 
         if (action.payload.initialDocViewerTabId && action.payload.initialDocViewerTabState) {
@@ -441,6 +451,7 @@ const internalStateSliceDef = createSlice({
         tab.overriddenVisContextAfterInvalidation = undefined;
         tab.expandedDoc = undefined;
         tab.expandedDocOwner = undefined;
+        tab.expandedDocCascadePath = undefined;
         tab.renderDocumentViewMeta = undefined;
         tab.initialDocViewerTabId = undefined;
         tab.uiState.docViewer = {};

@@ -167,6 +167,7 @@ dependsOn:
   - '@kbn/core-security-server'
   - '@kbn/core-http-server'
   - '@kbn/ui-callout'
+  - '@kbn/field-formats-common'
   - '@kbn/discover-session-constants'
   - '@kbn/as-code-discover-schema'
   - '@kbn/core-http-browser'

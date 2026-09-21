@@ -58,6 +58,7 @@ import {
   selectTabCombinedFilters,
   useAppStateSelector,
   useCurrentTabRuntimeState,
+  type ExpandedDocCascadePath,
 } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FetchStatus } from '../../../types';
@@ -205,7 +206,10 @@ function DiscoverDocumentsComponent({
 
   const setExpandedDoc = useCurrentTabAction(internalStateActions.setExpandedDoc);
   const getExpandedDocSetter = useCallback(
-    (owner: string): NonNullable<UnifiedDataTableProps['setExpandedDoc']> =>
+    (
+        owner: string,
+        expandedDocCascadePath?: ExpandedDocCascadePath
+      ): NonNullable<UnifiedDataTableProps['setExpandedDoc']> =>
       (
         doc: DataTableRecord | undefined,
         options?: {
@@ -217,6 +221,7 @@ function DiscoverDocumentsComponent({
           setExpandedDoc({
             expandedDoc: doc,
             expandedDocOwner: doc ? owner : undefined,
+            expandedDocCascadePath: doc ? expandedDocCascadePath : undefined,
             initialDocViewerTabId: options?.initialTabId,
             initialDocViewerTabState: options?.initialTabState,
           })

@@ -100,7 +100,8 @@ const initializeSearchSource = async (
 const initializedSavedSearch = (
   stateManager: SearchEmbeddableStateManager,
   searchSource: ISearchSource,
-  discoverServices: DiscoverServices
+  discoverServices: DiscoverServices,
+  tabTypeState: SavedSearch['tabTypeState']
 ): SavedSearch => {
   return {
     ...Object.keys(stateManager).reduce((prev, key) => {
@@ -110,6 +111,7 @@ const initializedSavedSearch = (
       };
     }, discoverServices.savedSearch.getNew()),
     searchSource,
+    tabTypeState,
   };
 };
 
@@ -222,7 +224,7 @@ export const initializeSearchEmbeddableApi = async ({
 
   /** The saved search should be the source of truth for all state  */
   const savedSearch$ = new BehaviorSubject(
-    initializedSavedSearch(stateManager, searchSource, discoverServices)
+    initializedSavedSearch(stateManager, searchSource, discoverServices, initialState.tabTypeState)
   );
 
   /** This will fire when any of the **editable** state changes */
@@ -270,6 +272,7 @@ export const initializeSearchEmbeddableApi = async ({
     );
 
     // Ensure all state updates happen synchronously to prevent multiple reloads
+    savedSearch$.next({ ...savedSearch$.getValue(), tabTypeState: state.tabTypeState });
     searchSource$.next(newSearchSource);
 
     dataViews$.next(newDataView ? [newDataView] : undefined);

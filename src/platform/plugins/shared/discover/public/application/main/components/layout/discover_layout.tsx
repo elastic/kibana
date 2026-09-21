@@ -305,6 +305,8 @@ export function DiscoverLayout() {
     () => new BehaviorSubject<SidebarToggleState>({ isCollapsed: false, toggle: () => {} })
   );
 
+  const isSidebarHidden = resultState === 'uninitialized';
+
   const mainDisplay = useMemo(() => {
     if (resultState === 'uninitialized') {
       addLog('[DiscoverLayout] uninitialized triggers data fetching');
@@ -418,6 +420,7 @@ export function DiscoverLayout() {
           )}
           <DiscoverResizableLayout
             sidebarToggleState$={sidebarToggleState$}
+            isSidebarHidden={isSidebarHidden}
             sidebarPanel={
               <SidebarMemoized
                 columns={sidebarColumns}

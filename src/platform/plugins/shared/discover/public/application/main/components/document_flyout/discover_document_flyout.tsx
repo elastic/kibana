@@ -70,6 +70,7 @@ export const DiscoverDocumentFlyout = memo(
     );
     const expandedDoc = useCurrentTabSelector((state) => state.expandedDoc);
     const expandedDocOwner = useCurrentTabSelector((state) => state.expandedDocOwner);
+    const expandedDocCascadePath = useCurrentTabSelector((state) => state.expandedDocCascadePath);
     const renderDocumentViewMeta = useCurrentTabSelector((state) => state.renderDocumentViewMeta);
     const initialDocViewerTabId = useCurrentTabSelector((state) => state.initialDocViewerTabId);
     const cascadedColumnsMeta = useCurrentTabSelector(
@@ -86,22 +87,19 @@ export const DiscoverDocumentFlyout = memo(
       rows,
       fetchStatus: documentState.fetchStatus,
     });
-    const copyLink = useCopyExpandedDocLink({ dataView });
+    const { copyLink, shareQuery } = useCopyExpandedDocLink({ dataView });
     const expandedDocLinkability = useMemo(
-      () => getExpandedDocLinkability(query, expandedDoc),
-      [query, expandedDoc]
+      () => getExpandedDocLinkability(shareQuery, expandedDoc),
+      [shareQuery, expandedDoc]
     );
     const shareDirectLinkActions = useShareDirectLinkAction({
       copyLink,
       linkability: expandedDocLinkability,
-      query,
+      query: shareQuery,
     });
     const flyoutMenuTrailingActions = useMemo<EuiFlyoutMenuAction[] | undefined>(
-      () =>
-        expandedDoc && expandedDocOwner === DEFAULT_EXPANDED_DOC_OWNER
-          ? shareDirectLinkActions
-          : undefined,
-      [expandedDoc, expandedDocOwner, shareDirectLinkActions]
+      () => (expandedDoc ? shareDirectLinkActions : undefined),
+      [expandedDoc, shareDirectLinkActions]
     );
 
     const setExpandedDoc = useCurrentTabAction(internalStateActions.setExpandedDoc);
@@ -111,10 +109,11 @@ export const DiscoverDocumentFlyout = memo(
           setExpandedDoc({
             expandedDoc: doc,
             expandedDocOwner: doc ? expandedDocOwner ?? DEFAULT_EXPANDED_DOC_OWNER : undefined,
+            expandedDocCascadePath: doc ? expandedDocCascadePath : undefined,
           })
         );
       },
-      [dispatch, expandedDocOwner, setExpandedDoc]
+      [dispatch, expandedDocCascadePath, expandedDocOwner, setExpandedDoc]
     );
 
     const docViewerRef = useRef<DocViewerApi>(null);

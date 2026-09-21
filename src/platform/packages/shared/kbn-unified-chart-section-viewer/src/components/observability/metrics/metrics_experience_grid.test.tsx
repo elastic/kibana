@@ -215,8 +215,8 @@ const TestWrapper = ({
   </EuiProvider>
 );
 
-// The "Edit grid of metrics" button is gated behind a feature flag (disabled by
-// default); this mock resolves it to `true` for tests that exercise the button.
+// The "Edit grid of metrics" button falls back to enabled; this mock resolves it
+// explicitly to `true` for tests that exercise the button.
 const editGridSettingsEnabledFeatureFlags = createFeatureFlagsMock({
   [FEATURE_FLAGS.IS_EDIT_GRID_SETTINGS_ENABLED]: true,
 });
@@ -757,12 +757,12 @@ describe('MetricsExperienceGrid', () => {
   });
 
   describe('grid settings flyout', () => {
-    it('hides the edit button when the host does not provide featureFlags (safe default)', () => {
+    it('shows the edit button when the host does not provide featureFlags (fallback enabled)', () => {
       const { queryByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
         wrapper: TestWrapper,
       });
 
-      expect(queryByTestId('metricsExperienceEditGridButton')).not.toBeInTheDocument();
+      expect(queryByTestId('metricsExperienceEditGridButton')).toBeInTheDocument();
     });
 
     it('opens the flyout when the edit button is clicked and forwards its callbacks to state', () => {

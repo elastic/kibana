@@ -17,6 +17,7 @@ import { buildDataTableRecord, type DataTableColumnsMeta } from '@kbn/discover-u
 import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import type { AggregateQuery, Query } from '@kbn/es-query';
+import { constructCascadeQuery } from '@kbn/esql-utils';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { setUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/plugin';
@@ -195,7 +196,7 @@ describe('DiscoverDocumentFlyout', () => {
     toolkit.getCurrentTabDataStateContainer().data$.documents$.next = jest.fn();
 
     const shareButton = await screen.findByRole('button', {
-      name: 'Share direct link',
+      name: 'Copy link',
     });
     expectShareButtonEbt(shareButton, 'linkable');
 
@@ -242,7 +243,7 @@ describe('DiscoverDocumentFlyout', () => {
 
     await setup({ hits: esHitsMock, services });
 
-    await user.click(await screen.findByRole('button', { name: 'Share direct link' }));
+    await user.click(await screen.findByRole('button', { name: 'Copy link' }));
 
     expect(shortUrlClient.createWithLocator).toHaveBeenCalledWith({
       locator: services.locator,
@@ -263,7 +264,7 @@ describe('DiscoverDocumentFlyout', () => {
 
     await setup({ hits: esHitsMock, services });
 
-    await user.click(await screen.findByRole('button', { name: 'Share direct link' }));
+    await user.click(await screen.findByRole('button', { name: 'Copy link' }));
 
     await waitFor(() => {
       expect(services.toastNotifications.addDanger).toHaveBeenCalledWith({
@@ -324,7 +325,7 @@ describe('DiscoverDocumentFlyout', () => {
 
       const disabledReason = getExpandedDocLinkDisabledReason(linkability);
       const shareButton = await screen.findByRole('button', {
-        name: `Cannot share direct link: ${disabledReason}`,
+        name: `Cannot copy link: ${disabledReason}`,
       });
 
       expectShareButtonEbt(shareButton, ebtDetail);
@@ -332,7 +333,7 @@ describe('DiscoverDocumentFlyout', () => {
       fireEvent.click(shareButton);
 
       expect(services.toastNotifications.addWarning).toHaveBeenCalledWith({
-        title: 'Cannot share direct link',
+        title: 'Cannot copy link',
         text: toastText,
         'data-test-subj': 'discoverDocFlyoutCopyLinkWarning',
         ...(toastLifeTimeMs !== undefined && { toastLifeTimeMs }),
@@ -554,7 +555,7 @@ describe('DiscoverDocumentFlyout', () => {
     expect(screen.getByTestId('docViewerFlyoutNotFound')).toHaveTextContent(expandedDocRef.index);
     expect(screen.queryByTestId('docViewerFlyoutNotice')).not.toBeInTheDocument();
     expect(screen.queryByTestId('docViewerFlyoutActions')).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /share direct link/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /copy link/i })).not.toBeInTheDocument();
   });
 
   it('shows an error state when the document cannot be fetched', async () => {
@@ -642,8 +643,19 @@ describe('DiscoverDocumentFlyout', () => {
   it('renders a cascade owned document with the columns and meta reported by its grid', async () => {
     const services = createDiscoverServicesMock();
     const toolkit = getDiscoverInternalStateMock({ services });
+    const groupingQuery = { esql: 'FROM logs | STATS count() BY extension' };
+    const expandedDocCascadePath = {
+      nodePath: ['extension'],
+      nodePathMap: { extension: 'png' },
+    };
 
     await toolkit.initializeTabs();
+    toolkit.internalState.dispatch(
+      internalStateActions.updateAppState({
+        tabId: toolkit.getCurrentTab().id,
+        appState: { query: groupingQuery },
+      })
+    );
     await toolkit.initializeSingleTab({
       tabId: toolkit.getCurrentTab().id,
       skipWaitForDataFetching: true,
@@ -655,7 +667,12 @@ describe('DiscoverDocumentFlyout', () => {
     const cascadedColumnsMeta: DataTableColumnsMeta = { bytes: { type: 'number' } };
 
     toolkit.internalState.dispatch(
-      internalStateActions.setExpandedDoc({ tabId, expandedDoc, expandedDocOwner: 'nested-grid' })
+      internalStateActions.setExpandedDoc({
+        tabId,
+        expandedDoc,
+        expandedDocOwner: 'nested-grid',
+        expandedDocCascadePath,
+      })
     );
     toolkit.internalState.dispatch(
       internalStateActions.setRenderDocumentViewMeta({
@@ -702,7 +719,7 @@ describe('DiscoverDocumentFlyout', () => {
       expect(screen.getByTestId('docViewerFlyout')).toBeVisible();
     });
 
-    expect(screen.queryByRole('button', { name: /share direct link/i })).not.toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: 'Copy link' })).toBeVisible();
 
     await waitFor(() => {
       expect(screen.getByTestId('docViewerFlyoutNavigation')).toBeVisible();
@@ -714,6 +731,7 @@ describe('DiscoverDocumentFlyout', () => {
           tabId,
           expandedDoc: nextExpandedDoc,
           expandedDocOwner: 'nested-grid',
+          expandedDocCascadePath,
         })
       );
     });
@@ -721,9 +739,98 @@ describe('DiscoverDocumentFlyout', () => {
     await waitFor(() => {
       expect(toolkit.getCurrentTab().expandedDoc).toEqual(nextExpandedDoc);
       expect(toolkit.getCurrentTab().expandedDocOwner).toBe('nested-grid');
+      expect(toolkit.getCurrentTab().expandedDocCascadePath).toEqual(expandedDocCascadePath);
     });
 
     expect(toolkit.getCurrentTab().appState.expandedDoc).toBeUndefined();
+  });
+
+  it('copies a document link that uses the nested grid query instead of the group-by query', async () => {
+    const services = createDiscoverServicesMock();
+    const toolkit = getDiscoverInternalStateMock({ services });
+    const groupingQuery = { esql: 'FROM logs | STATS count() BY extension' };
+    const expandedDocCascadePath = {
+      nodePath: ['extension'],
+      nodePathMap: { extension: 'png' },
+    };
+    const cascadeQuery = constructCascadeQuery({
+      query: groupingQuery,
+      dataView: dataViewMock,
+      esqlVariables: undefined,
+      nodeType: 'leaf',
+      ...expandedDocCascadePath,
+    });
+
+    await toolkit.initializeTabs();
+    toolkit.internalState.dispatch(
+      internalStateActions.updateAppState({
+        tabId: toolkit.getCurrentTab().id,
+        appState: { query: groupingQuery },
+      })
+    );
+    await toolkit.initializeSingleTab({
+      tabId: toolkit.getCurrentTab().id,
+      skipWaitForDataFetching: true,
+    });
+
+    const tabId = toolkit.getCurrentTab().id;
+    const expandedDoc = buildDataTableRecord(esHitsMock[0], dataViewMock);
+
+    toolkit.internalState.dispatch(
+      internalStateActions.setExpandedDoc({
+        tabId,
+        expandedDoc,
+        expandedDocOwner: 'nested-grid',
+        expandedDocCascadePath,
+      })
+    );
+
+    setUnifiedDocViewerServices(mockUnifiedDocViewerServices);
+
+    const dataStateContainer = toolkit.getCurrentTabDataStateContainer();
+
+    dataStateContainer.data$.documents$.next({
+      fetchStatus: FetchStatus.COMPLETE,
+      result: esHitsMock.map((hit) => buildDataTableRecord(hit, dataViewMock)),
+    });
+
+    renderWithI18n(
+      <DiscoverToolkitTestProvider toolkit={toolkit}>
+        <DiscoverDocumentFlyout
+          dataView={dataViewMock}
+          columns={['bytes']}
+          onAddColumn={jest.fn()}
+          onRemoveColumn={jest.fn()}
+          onAddFilter={jest.fn()}
+        />
+      </DiscoverToolkitTestProvider>
+    );
+
+    const shareButton = await screen.findByRole('button', { name: 'Copy link' });
+    expectShareButtonEbt(shareButton, 'linkable');
+
+    act(() => {
+      shareButton.click();
+    });
+
+    await waitFor(() => {
+      expect(copyToClipboard).toHaveBeenCalledTimes(1);
+    });
+    expect(services.locator.getRedirectUrl).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: cascadeQuery,
+        columns: [],
+        expandedDoc: {
+          id: esHitsMock[0]._id,
+          index: esHitsMock[0]._index,
+        },
+      })
+    );
+    expect(services.locator.getRedirectUrl).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: groupingQuery,
+      })
+    );
   });
 
   it('does not fetch when the expanded document already matches the reference', async () => {

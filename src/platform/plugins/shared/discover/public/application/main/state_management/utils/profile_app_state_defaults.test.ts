@@ -183,6 +183,32 @@ describe('getProfileAppStateDefaults', () => {
       expect(appState).toBeUndefined();
     });
 
+    it('should dedup configured default columns the profile already provides', () => {
+      const appState = getProfileAppStateDefaults({
+        scopedProfilesManager,
+        profileAppStateDefaults: createProfileAppStateDefaults(['columns']),
+        dataSource: dataViewSource,
+      }).getPostFetchState({
+        defaultColumns: ['bad_column', 'message', 'bytes'],
+      });
+
+      // `message` is configured and also a profile default, so it appears once, in the profile's
+      // position and keeping the profile's width. `bad_column` is not a field of the data view.
+      expect(appState).toEqual({
+        columns: ['message', 'extension', 'bytes'],
+        grid: {
+          columns: {
+            extension: {
+              width: 200,
+            },
+            message: {
+              width: 100,
+            },
+          },
+        },
+      });
+    });
+
     it('should return expected rowHeight', () => {
       const appState = getProfileAppStateDefaults({
         scopedProfilesManager,
