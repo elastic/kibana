@@ -29,6 +29,7 @@ export function TopNFunctionsView() {
     sortField,
     pageIndex = 0,
     searchFunctionName = '',
+    schema,
   } = query;
 
   const timeRange = useTimeRange({ rangeFrom, rangeTo });
@@ -46,9 +47,10 @@ export function TopNFunctionsView() {
         startIndex: 0,
         endIndex: 100000,
         kuery,
+        schema,
       });
     },
-    [fetchTopNFunctions, timeRange.start, timeRange.end, kuery]
+    [fetchTopNFunctions, timeRange.start, timeRange.end, kuery, schema]
   );
 
   const profilingRouter = useProfilingRouter();

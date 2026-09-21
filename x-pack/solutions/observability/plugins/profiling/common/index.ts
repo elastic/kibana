@@ -6,11 +6,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { ProfilingSchema } from '@kbn/profiling-utils';
 
 export const PLUGIN_ID = 'profiling';
 export const PLUGIN_NAME = 'profiling';
 
 export const INDEX_EVENTS = 'profiling-events-all';
+
+// OTel data streams are `profiling-events-*.otel-<namespace>`, same pattern the ES profiling plugin uses.
+export const getEventsIndex = (schema: ProfilingSchema): string =>
+  schema === 'otel' ? `${INDEX_EVENTS}.otel-*` : INDEX_EVENTS;
+
 export const INDEX_TRACES = 'profiling-stacktraces';
 export const INDEX_FRAMES = 'profiling-stackframes';
 export const INDEX_EXECUTABLES = 'profiling-executables';

@@ -36,6 +36,7 @@ export function DifferentialFlameGraphsView() {
       comparison = 1,
       normalizationMode,
       searchText,
+      schema,
     },
   } = useProfilingParams('/flamegraphs/differential');
   const routePath = useProfilingRoutePath();
@@ -65,6 +66,7 @@ export function DifferentialFlameGraphsView() {
           timeTo: new Date(timeRange.end).getTime(),
           kuery,
           showErrorFrames,
+          schema,
         }),
         comparisonTimeRange.start && comparisonTimeRange.end
           ? fetchElasticFlamechart({
@@ -73,6 +75,7 @@ export function DifferentialFlameGraphsView() {
               timeTo: new Date(comparisonTimeRange.end).getTime(),
               kuery: comparisonKuery,
               showErrorFrames,
+              schema,
             })
           : Promise.resolve(undefined),
       ]).then(([primaryFlamegraph, comparisonFlamegraph]) => {
@@ -91,6 +94,7 @@ export function DifferentialFlameGraphsView() {
       comparisonTimeRange.end,
       comparisonKuery,
       showErrorFrames,
+      schema,
     ]
   );
 

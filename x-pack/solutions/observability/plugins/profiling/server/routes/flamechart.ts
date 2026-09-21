@@ -12,12 +12,14 @@ import { IDLE_SOCKET_TIMEOUT } from '.';
 import { getRoutePaths, MAX_KUERY_LENGTH } from '../../common';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 import { getClient } from './compat';
+import { resolveSchema, schemaQueryParam } from './profiling_schema';
 
 export function registerFlameChartSearchRoute({
   router,
   logger,
   dependencies: {
     start: { profilingDataAccess },
+    esCapabilities,
   },
 }: RouteRegisterParameters) {
   const paths = getRoutePaths();
@@ -35,11 +37,13 @@ export function registerFlameChartSearchRoute({
           timeFrom: schema.number(),
           timeTo: schema.number(),
           kuery: schema.string({ maxLength: MAX_KUERY_LENGTH }),
+          schema: schemaQueryParam,
         }),
       },
     },
     async (context, request, response) => {
       const { timeFrom, timeTo, kuery } = request.query;
+      const profilingSchema = resolveSchema(request.query.schema, esCapabilities);
 
       const core = await context.core;
       const startSecs = timeFrom / 1000;
@@ -51,6 +55,7 @@ export function registerFlameChartSearchRoute({
           core,
           esClient,
           totalSeconds: endSecs - startSecs,
+          schema: profilingSchema,
           query: {
             bool: {
               filter: [

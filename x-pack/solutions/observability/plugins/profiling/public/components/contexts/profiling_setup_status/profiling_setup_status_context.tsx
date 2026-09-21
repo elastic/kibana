@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
+import type { AsyncStatus } from '../../../hooks/use_async';
+import { useAsync } from '../../../hooks/use_async';
 import type { ProfilingSetupStatus } from '../../../services';
+import { useProfilingDependencies } from '../profiling_dependencies/use_profiling_dependencies';
 
 export const ProfilingSetupStatusContext = React.createContext<
   | {
       profilingSetupStatus: ProfilingSetupStatus | undefined;
-      setProfilingSetupStatus: React.Dispatch<
-        React.SetStateAction<ProfilingSetupStatus | undefined>
-      >;
+      status: AsyncStatus;
+      refreshProfilingSetupStatus: () => void;
     }
   | undefined
 >(undefined);
@@ -23,12 +25,19 @@ export function ProfilingSetupStatusContextProvider({
 }: {
   children: React.ReactElement;
 }) {
-  const [profilingSetupStatus, setProfilingSetupStatus] = useState<
-    ProfilingSetupStatus | undefined
-  >();
+  const {
+    services: { fetchHasSetup },
+  } = useProfilingDependencies();
+
+  const { data, status, refresh } = useAsync(
+    ({ http }) => fetchHasSetup({ http }),
+    [fetchHasSetup]
+  );
 
   return (
-    <ProfilingSetupStatusContext.Provider value={{ profilingSetupStatus, setProfilingSetupStatus }}>
+    <ProfilingSetupStatusContext.Provider
+      value={{ profilingSetupStatus: data, status, refreshProfilingSetupStatus: refresh }}
+    >
       {children}
     </ProfilingSetupStatusContext.Provider>
   );

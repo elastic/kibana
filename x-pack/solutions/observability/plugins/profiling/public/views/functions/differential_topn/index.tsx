@@ -38,6 +38,7 @@ export function DifferentialTopNFunctionsView() {
     comparisonSortDirection,
     comparisonSortField,
     searchFunctionName = '',
+    schema,
   } = query;
 
   const timeRange = useTimeRange({ rangeFrom, rangeTo });
@@ -68,9 +69,10 @@ export function DifferentialTopNFunctionsView() {
         startIndex: 0,
         endIndex: 100000,
         kuery,
+        schema,
       });
     },
-    [fetchTopNFunctions, timeRange.start, timeRange.end, kuery]
+    [fetchTopNFunctions, timeRange.start, timeRange.end, kuery, schema]
   );
 
   const comparisonState = useTimeRangeAsync(
@@ -85,9 +87,16 @@ export function DifferentialTopNFunctionsView() {
         startIndex: 0,
         endIndex: 100000,
         kuery: comparisonKuery,
+        schema,
       });
     },
-    [comparisonTimeRange.start, comparisonTimeRange.end, fetchTopNFunctions, comparisonKuery]
+    [
+      comparisonTimeRange.start,
+      comparisonTimeRange.end,
+      fetchTopNFunctions,
+      comparisonKuery,
+      schema,
+    ]
   );
 
   const profilingRouter = useProfilingRouter();

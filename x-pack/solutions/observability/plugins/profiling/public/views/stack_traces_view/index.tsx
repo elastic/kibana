@@ -31,7 +31,7 @@ export function StackTracesView() {
     path,
     query,
     path: { topNType },
-    query: { rangeFrom, rangeTo, kuery, displayAs, limit: limitFromQueryParams },
+    query: { rangeFrom, rangeTo, kuery, displayAs, limit: limitFromQueryParams, schema },
   } = useProfilingParams('/stacktraces/{topNType}');
 
   const limit = limitFromQueryParams || 10;
@@ -63,9 +63,10 @@ export function StackTracesView() {
         timeFrom: timeRange.inSeconds.start,
         timeTo: timeRange.inSeconds.end,
         kuery,
+        schema,
       }).then(groupSamplesByCategory);
     },
-    [topNType, timeRange.inSeconds.start, timeRange.inSeconds.end, fetchTopN, kuery]
+    [topNType, timeRange.inSeconds.start, timeRange.inSeconds.end, fetchTopN, kuery, schema]
   );
 
   function onChartClick(category: string) {

@@ -14,9 +14,9 @@ export interface DownsampledEventsIndex {
   sampleRate: number;
 }
 
+// profiling-events-all[.otel-*] -> profiling-events-5pow06[.otel-*]
 function getFullDownsampledIndex(index: string, pow: number, factor: number): string {
-  const downsampledIndexPrefix = index.replaceAll('-all', '') + '-' + factor + 'pow';
-  return downsampledIndexPrefix + pow.toString().padStart(2, '0');
+  return index.replace('-all', `-${factor}pow${String(pow).padStart(2, '0')}`);
 }
 
 // Return the index that has between targetSampleSize..targetSampleSize*samplingFactor entries.

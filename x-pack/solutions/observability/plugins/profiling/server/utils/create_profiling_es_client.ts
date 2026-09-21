@@ -14,6 +14,7 @@ import type {
   AggregationField,
   BaseFlameGraph,
   ESTopNFunctions,
+  ProfilingSchema,
   ProfilingStatusResponse,
   StackTraceResponse,
 } from '@kbn/profiling-utils';
@@ -42,6 +43,7 @@ export interface ProfilingESClient {
     query: QueryDslQueryContainer;
     sampleSize: number;
     durationSeconds: number;
+    schema?: ProfilingSchema;
   }): Promise<StackTraceResponse>;
   profilingStatus(params?: { waitForResourcesCreated?: boolean }): Promise<ProfilingStatusResponse>;
   getEsClient(): ElasticsearchClient;
@@ -95,7 +97,7 @@ export function createProfilingEsClient({
 
       return unwrapEsResponse(promise);
     },
-    profilingStacktraces({ query, sampleSize, durationSeconds }) {
+    profilingStacktraces({ query, sampleSize, durationSeconds, schema }) {
       const controller = new AbortController();
 
       const promise = withProfilingSpan('_profiling/stacktraces', () => {
@@ -108,6 +110,7 @@ export function createProfilingEsClient({
                 query,
                 sample_size: sampleSize,
                 requested_duration: durationSeconds,
+                schema,
               },
             },
             {
