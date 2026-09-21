@@ -1277,7 +1277,6 @@ class OutputService {
     const pkgDerivedIdSet = new Set<string>();
     for await (const pkgPolicies of await packagePolicyService.fetchAllItems(internalSoClient, {
       kuery: packagePoliciesKuery,
-      fields: ['policy_ids'],
       spaceIds: ['*'],
     })) {
       for (const pp of pkgPolicies) {
