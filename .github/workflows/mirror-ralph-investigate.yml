@@ -56,6 +56,22 @@ jobs:
             exit 1
           fi
 
+      - name: Check live issue state
+        env:
+          GH_TOKEN: ${{ secrets.KIBANAMACHINE_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          # The job `if` reads github.event.issue.labels from the immutable event payload.
+          # A failed-job rerun and two quickly-queued label events both bypass that check
+          # because their payloads were captured before ralph-mirrored was applied.
+          # Query the live issue to guard against duplicate mirrors in those cases.
+          ALREADY_MIRRORED=$(gh api "repos/elastic/kibana/issues/$ISSUE_NUMBER" \
+            --jq '[.labels[].name] | contains(["ralph-mirrored"])')
+          if [[ "$ALREADY_MIRRORED" == "true" ]]; then
+            echo "::notice::Issue $ISSUE_NUMBER is already mirrored; skipping."
+            exit 1
+          fi
+
       - name: Create the mirror issue and start Detective Ralph
         id: mirror
         env:
