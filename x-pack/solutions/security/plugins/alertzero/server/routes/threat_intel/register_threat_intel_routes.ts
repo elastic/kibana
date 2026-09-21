@@ -8,13 +8,20 @@
 import type { RouteDependencies } from '../register_routes';
 import { registerHuntReadinessRoute } from './readiness';
 import { registerHuntForThreatRoute } from './hunt_for_threat';
+import { registerHuntBehaviorRoute } from './hunt_behavior';
+import { registerCandidatesRoute } from './candidates';
+import { registerHuntCoordinatorRoute } from './hunt_coordinator';
+import { registerCorrelateRoute } from './correlate';
 
 /**
- * Registers the threat-intel hunt routes (readiness, run hunt, get hunt
- * status, list hunt reports). Remaining routes land in Phases 4-7 as the
- * hunt pipeline is lifted from the mustard prototype.
+ * Registers the threat-intel hunt routes (readiness, Tier 1, Tier 2,
+ * coordinator, candidates, correlate). Phases 5–7 added in hunt-watch-services-lift.
  */
 export const registerThreatIntelRoutes = (deps: RouteDependencies): void => {
   registerHuntReadinessRoute(deps);
   registerHuntForThreatRoute(deps);
+  registerHuntBehaviorRoute(deps);
+  registerCandidatesRoute(deps);
+  registerHuntCoordinatorRoute(deps);
+  registerCorrelateRoute(deps);
 };
