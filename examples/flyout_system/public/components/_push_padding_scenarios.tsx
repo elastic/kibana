@@ -19,6 +19,7 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -212,38 +213,98 @@ const SystemSlot: React.FC<SlotProps & { type: 'push' | 'overlay'; overlays: Ove
   );
 };
 
-const SCENARIOS = [
+const EUI_PUSH_PADDING_PR = 'https://github.com/elastic/eui/pull/10063';
+const EUI_BACKGROUNDED_MAIN_PR = 'https://github.com/elastic/eui/pull/10062';
+
+interface Scenario {
+  title: string;
+  steps: string;
+  /** Behavior on Kibana main with the bundled EUI version. */
+  status: 'passing' | 'failing';
+  /** What fixes a failing scenario. */
+  resolution?: { text: string; href: string; linkText: string };
+}
+
+const SCENARIOS: Scenario[] = [
   {
     title: 'Two standalone push flyouts, close oldest first (elastic/eui#9788)',
-    description:
+    steps:
       'Open Standalone A, open Standalone B, close A, close B. Expected: padding back to (none). Bug: padding stays and the "Stranded padding" badge appears.',
+    status: 'failing',
+    resolution: { text: 'Fixed by', href: EUI_PUSH_PADDING_PR, linkText: 'elastic/eui#10063' },
   },
   {
     title: 'Two standalone push flyouts, close newest first',
-    description:
-      'Open Standalone A, open Standalone B, close B. Expected: A is still open and the page stays pushed. Bug (eui#10048 owner-token fix): padding drops to (none) while A is open.',
+    steps:
+      'Open Standalone A, open Standalone B, close B. Expected: A is still open and the page stays pushed.',
+    status: 'passing',
   },
   {
     title: 'Standalone push + system push, close standalone first',
-    description:
-      'Open Standalone A, open System push C, close A. Expected: C is active and the page stays pushed. Bug (eui#10048): padding drops to (none) while C is open.',
+    steps:
+      'Open Standalone A, open System push C, close A. Expected: C is active and the page stays pushed. Bug: padding drops to (none) while C is open.',
+    status: 'failing',
+    resolution: { text: 'Fixed by', href: EUI_PUSH_PADDING_PR, linkText: 'elastic/eui#10063' },
   },
   {
     title: 'Standalone push under a system overlay',
-    description:
-      'Open Standalone A, open System overlay E, close E. Expected: A keeps its padding the whole time. Watch for the padding being cleared while E is open or after it closes.',
+    steps:
+      'Open Standalone A, open System overlay E, close E. Expected: A keeps its padding the whole time. Bug: padding is cleared when E closes while A is still open.',
+    status: 'failing',
+    resolution: {
+      text: 'Needs the resetPushOffsetIfIdle workaround in system_flyout_service.tsx removed once Kibana picks up',
+      href: EUI_PUSH_PADDING_PR,
+      linkText: 'elastic/eui#10063',
+    },
   },
   {
     title: 'Resize a backgrounded push flyout while another push flyout is active',
-    description:
+    steps:
       'Open Standalone A, open System push C, then drag-resize A. Expected: padding keeps following C, the active flyout. Bug: padding jumps to the width of A, and closing A afterwards leaves C unpushed.',
+    status: 'failing',
+    resolution: { text: 'Fixed by', href: EUI_PUSH_PADDING_PR, linkText: 'elastic/eui#10063' },
   },
   {
-    title: 'Two system push sessions (multi-root), either close order',
-    description:
-      'Open System push C, open System push D, then close them in either order, or use the flyout Back button. Expected: padding follows the active push flyout and ends at (none).',
+    title: 'Two system push sessions (multi-root), close newest first or Back',
+    steps:
+      'Open System push C, open System push D, then close D or use the flyout Back button, then close C. Expected: padding follows the active push flyout and ends at (none).',
+    status: 'passing',
+  },
+  {
+    title: 'Two system push sessions (multi-root), close oldest first',
+    steps:
+      'Open System push C, open System push D, close C. Expected: D stays open and pushed, closing D ends at (none). Bug: D disappears because closing a backgrounded main closes the foreground session (elastic/eui#10061).',
+    status: 'failing',
+    resolution: {
+      text: 'Fixed by',
+      href: EUI_BACKGROUNDED_MAIN_PR,
+      linkText: 'elastic/eui#10062',
+    },
   },
 ];
+
+const scenarioListItems = SCENARIOS.map(({ title, steps, status, resolution }) => ({
+  title: (
+    <>
+      {title} <EuiBadge color={status === 'passing' ? 'success' : 'danger'}>{status}</EuiBadge>
+    </>
+  ),
+  description: (
+    <>
+      {steps}
+      {resolution && (
+        <>
+          {' '}
+          {resolution.text}{' '}
+          <EuiLink href={resolution.href} target="_blank">
+            {resolution.linkText}
+          </EuiLink>
+          .
+        </>
+      )}
+    </>
+  ),
+}));
 
 export const PushPaddingScenarios: React.FC<{ overlays: OverlayStart }> = ({ overlays }) => {
   const [openCount, setOpenCount] = useState(0);
@@ -259,7 +320,8 @@ export const PushPaddingScenarios: React.FC<{ overlays: OverlayStart }> = ({ ove
         <EuiText size="s">
           <p>
             Every push flyout below writes inline padding to the same target. Combine them in any
-            order to reproduce stale or missing push padding; the readout updates live.
+            order to reproduce stale or missing push padding; the readout updates live. Scenario
+            status reflects Kibana main with its bundled EUI; each failing one links to its fix.
           </p>
         </EuiText>
         <EuiSpacer size="m" />
@@ -298,7 +360,7 @@ export const PushPaddingScenarios: React.FC<{ overlays: OverlayStart }> = ({ ove
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="m" />
-        <EuiDescriptionList type="column" listItems={SCENARIOS} />
+        <EuiDescriptionList type="column" listItems={scenarioListItems} />
       </EuiPanel>
     </>
   );
