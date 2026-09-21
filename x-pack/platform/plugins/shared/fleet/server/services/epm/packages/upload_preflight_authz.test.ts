@@ -490,7 +490,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
       contentType: mockContentType,
       spaceId: mockSpaceId,
       pkgName: 'mypackage',
-      installation: installation,
+      installation,
       savedObjectsClient: mockSavedObjectsClient,
     });
 
@@ -522,7 +522,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
       contentType: mockContentType,
       spaceId: 'space-x',
       pkgName: 'mypackage',
-      installation: installation,
+      installation,
       savedObjectsClient: mockSavedObjectsClient,
     });
 
@@ -555,7 +555,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
       contentType: mockContentType,
       spaceId: mockSpaceId,
       pkgName: 'mypackage',
-      installation: installation,
+      installation,
       savedObjectsClient: mockSavedObjectsClient,
     });
 
@@ -584,7 +584,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
       contentType: mockContentType,
       spaceId: 'space-x',
       pkgName: 'mypackage',
-      installation: installation,
+      installation,
       savedObjectsClient: mockSavedObjectsClient,
     });
 
@@ -613,7 +613,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
       contentType: mockContentType,
       spaceId: mockSpaceId,
       pkgName: 'mypackage',
-      installation: installation,
+      installation,
       savedObjectsClient: mockSavedObjectsClient,
     });
 
@@ -649,7 +649,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
         contentType: mockContentType,
         spaceId: mockSpaceId,
         pkgName: 'mypackage',
-        installation: installation,
+        installation,
         savedObjectsClient: mockSavedObjectsClient,
       })
     ).rejects.toThrow(FleetUnauthorizedError);
@@ -677,7 +677,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
       contentType: mockContentType,
       spaceId: mockSpaceId,
       pkgName: 'mypackage',
-      installation: installation,
+      installation,
       savedObjectsClient: mockSavedObjectsClient,
     });
 
@@ -715,7 +715,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
       contentType: mockContentType,
       spaceId: 'request-space',
       pkgName: 'security_detection_engine',
-      installation: installation,
+      installation,
       savedObjectsClient: mockSavedObjectsClient,
     });
 
@@ -752,7 +752,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
       contentType: mockContentType,
       spaceId: mockSpaceId,
       pkgName: 'security_detection_engine',
-      installation: installation,
+      installation,
       savedObjectsClient: mockSavedObjectsClient,
     });
 
@@ -797,7 +797,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
       contentType: mockContentType,
       spaceId: mockSpaceId,
       pkgName: 'mypackage',
-      installation: installation,
+      installation,
       savedObjectsClient: mockSavedObjectsClient,
     });
 
@@ -847,7 +847,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
       contentType: mockContentType,
       spaceId: mockSpaceId,
       pkgName: 'mypackage',
-      installation: installation,
+      installation,
       savedObjectsClient: mockSavedObjectsClient,
     });
 
@@ -888,7 +888,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
       contentType: mockContentType,
       spaceId: mockSpaceId,
       pkgName: 'mypackage',
-      installation: installation,
+      installation,
       savedObjectsClient: mockSavedObjectsClient,
     });
 
@@ -933,7 +933,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
       contentType: mockContentType,
       spaceId: mockSpaceId,
       pkgName: 'mypackage',
-      installation: installation,
+      installation,
       savedObjectsClient: mockSavedObjectsClient,
     });
 
@@ -972,7 +972,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
       contentType: mockContentType,
       spaceId: mockSpaceId,
       pkgName: 'mypackage',
-      installation: installation,
+      installation,
       savedObjectsClient: mockSavedObjectsClient,
     });
 
@@ -998,7 +998,9 @@ describe('checkUploadPackageAssetPrivileges', () => {
     const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
     (appContextService.getInternalUserSOClientForSpaceId as jest.Mock).mockReturnValue(
-      makeSavedObjectsClient([{ id: 'ml-rule-in-space-a', attributes: { type: 'machine_learning' } }])
+      makeSavedObjectsClient([
+        { id: 'ml-rule-in-space-a', attributes: { type: 'machine_learning' } },
+      ])
     );
 
     const installation = {
@@ -1017,7 +1019,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
       contentType: mockContentType,
       spaceId: mockSpaceId,
       pkgName: 'mypackage',
-      installation: installation,
+      installation,
       savedObjectsClient: mockSavedObjectsClient,
     });
 
@@ -1060,7 +1062,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
       contentType: mockContentType,
       spaceId: mockSpaceId,
       pkgName: 'mypackage',
-      installation: installation,
+      installation,
       savedObjectsClient: mockSavedObjectsClient,
     });
 
@@ -1109,7 +1111,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
       contentType: mockContentType,
       spaceId: mockSpaceId,
       pkgName: 'mypackage',
-      installation: installation,
+      installation,
       savedObjectsClient: mockSavedObjectsClient,
     });
 
