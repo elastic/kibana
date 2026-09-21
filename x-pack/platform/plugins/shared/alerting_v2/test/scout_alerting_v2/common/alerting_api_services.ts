@@ -10,7 +10,7 @@ import type {
   EsClient,
   KbnClient,
   ScoutLogger,
-  ScoutTestConfig,
+  SystemIndicesEsClientFixture,
 } from '@kbn/scout';
 import {
   getActionPoliciesApiService,
@@ -76,19 +76,19 @@ export const buildAlertingApiServices = ({
   esClient,
   kbnClient,
   log,
-  config,
+  systemIndicesEsClient,
 }: {
   esClient: EsClient;
   kbnClient: KbnClient;
   log: ScoutLogger;
-  config: ScoutTestConfig;
+  systemIndicesEsClient: SystemIndicesEsClientFixture;
 }): AlertingApiServices => {
   const taskManager = getTaskManagerService({ kbnClient, log });
   return {
     rules: getRulesApiService({ kbnClient, log }),
-    ruleSavedObject: getRuleSavedObjectService({ esClient, log, config }),
+    ruleSavedObject: getRuleSavedObjectService({ log, systemIndicesEsClient }),
     ruleTemplates: getRuleTemplatesApiService({ kbnClient, log }),
-    ruleChangesHistory: getRuleChangesHistoryApiService({ esClient, log, config }),
+    ruleChangesHistory: getRuleChangesHistoryApiService({ log, systemIndicesEsClient }),
     ruleEvents: getRuleEventsApiService({ esClient, log }),
     alertActionsEvents: getAlertActionsEventsService({ esClient, log }),
     alertActions: getAlertActionsApiService({ kbnClient, log }),

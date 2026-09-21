@@ -39,7 +39,6 @@ import {
   setupAgentDirectError,
   setupAgentHangingAnswer,
 } from '../../../scout_agent_builder_shared/lib/proxy_scenario';
-import { createSystemIndicesEsClient } from '../../../scout_agent_builder_shared/lib/system_indices_es_client';
 import { AGENT_EXECUTIONS_INDEX } from '../../../scout_agent_builder_shared/lib/constants';
 import { apiTest } from '../fixtures';
 import { API_AGENT_BUILDER, COMMON_HEADERS, INTERNAL_AGENT_BUILDER } from '../fixtures/constants';
@@ -122,7 +121,7 @@ apiTest.describe(
     /** Executions created by this suite are those indexed after it started (API suites run sequentially). */
     const suiteStartedAt = new Date().toISOString();
 
-    apiTest.beforeAll(async ({ requestAuth, samlAuth, log, kbnClient, esClient, config }) => {
+    apiTest.beforeAll(async ({ requestAuth, samlAuth, log, kbnClient, systemIndicesEsClient }) => {
       adminCredentials = await requestAuth.getApiKeyForAdmin();
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       adminInteractiveCookieHeader = cookieHeader;
@@ -133,7 +132,7 @@ apiTest.describe(
 
       callbackServer = new CallbackTestServer();
       callbackServerUrl = await callbackServer.start();
-      sysEsClient = await createSystemIndicesEsClient(esClient, config);
+      sysEsClient = await systemIndicesEsClient.getClient();
     });
 
     apiTest.afterAll(async ({ asAdmin, kbnClient }) => {

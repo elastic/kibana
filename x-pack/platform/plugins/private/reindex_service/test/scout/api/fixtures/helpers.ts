@@ -6,59 +6,13 @@
  */
 
 import { setTimeout as delay } from 'timers/promises';
-import { SYSTEM_INDICES_SUPERUSER, SYSTEM_INDICES_SUPERUSER_PASSWORD } from '@kbn/es';
-import type { ApiClientFixture, ScoutTestConfig, ScoutWorkerFixtures } from '@kbn/scout';
-import { createEsClientForTesting } from '@kbn/test-es-server';
+import type { ApiClientFixture, ScoutWorkerFixtures } from '@kbn/scout';
 import { ReindexStatus, REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-pkg-common';
 import { ReindexStep } from '../../../../common';
 import type { ReindexOperation } from '../../../../common';
 import { API_BASE_PATH, SOURCE_INDEX } from './constants';
 
 type EsClient = ScoutWorkerFixtures['esClient'];
-
-const SYSTEM_INDICES_SUPERUSER_ROLE = 'system_indices_superuser';
-const systemIndicesSuperuser = {
-  username: SYSTEM_INDICES_SUPERUSER,
-  password: SYSTEM_INDICES_SUPERUSER_PASSWORD,
-};
-
-/**
- * ES client as `system_indices_superuser`, which (unlike Scout's default `elastic` `esClient`) can
- * write restricted system indices like `.kibana` — needed for the hidden reindex-operation saved
- * object, whose paused-op setup has no HTTP API. Stateful only.
- */
-export const createSystemIndicesEsClient = async (
-  esClient: EsClient,
-  config: ScoutTestConfig
-): Promise<EsClient> => {
-  // Tagged stateful-only; fail loudly if ever mis-tagged onto serverless rather than
-  // silently skipping the role/user provisioning below.
-  if (config.serverless) {
-    throw new Error('Reindex service API tests are stateful-only and cannot run on serverless');
-  }
-
-  await esClient.security.putRole({
-    name: SYSTEM_INDICES_SUPERUSER_ROLE,
-    refresh: 'wait_for',
-    cluster: ['all'],
-    indices: [{ names: ['*'], privileges: ['all'], allow_restricted_indices: true }],
-    applications: [{ application: '*', privileges: ['*'], resources: ['*'] }],
-    run_as: ['*'],
-  });
-
-  await esClient.security.putUser({
-    username: systemIndicesSuperuser.username,
-    refresh: 'wait_for',
-    password: systemIndicesSuperuser.password,
-    roles: [SYSTEM_INDICES_SUPERUSER_ROLE],
-  });
-
-  return createEsClientForTesting({
-    esUrl: config.hosts.elasticsearch,
-    authOverride: systemIndicesSuperuser,
-    isCloud: config.isCloud,
-  });
-};
 
 // Three-document `dummydata` index, previously provided by the
 // `es_archives/upgrade_assistant/reindex` archive. Two docs have `https: true`,

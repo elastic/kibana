@@ -22,7 +22,6 @@ import {
   createGenAiConnectorForProxy,
   deleteConnectorById,
 } from '../../../scout_agent_builder_shared/lib/connector_kbn';
-import { createSystemIndicesEsClient } from '../../../scout_agent_builder_shared/lib/system_indices_es_client';
 import { setupAgentDirectAnswer } from '../../../scout_agent_builder_shared/lib/proxy_scenario';
 import { apiTest } from '../fixtures';
 import {
@@ -85,10 +84,10 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
   const capitalizedTypeOriginId = `sml-capitalized-type-${searchRunId}`;
   const capitalizedTypeEntryId = `Workflow:${capitalizedTypeOriginId}`;
 
-  apiTest.beforeAll(async ({ samlAuth, esClient, config }) => {
+  apiTest.beforeAll(async ({ samlAuth, systemIndicesEsClient }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
     adminInteractiveCookieHeader = cookieHeader;
-    sysEsClient = await createSystemIndicesEsClient(esClient, config);
+    sysEsClient = await systemIndicesEsClient.getClient();
     // Created bare — the Elasticsearch-managed `ai-index-idx-managed` template owns the mappings.
     const exists = await sysEsClient.indices.exists({ index: smlIndexName });
     if (!exists) {

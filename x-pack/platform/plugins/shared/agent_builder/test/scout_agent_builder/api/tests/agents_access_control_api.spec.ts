@@ -15,7 +15,6 @@ import {
 } from '@kbn/agent-builder-common';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { createSystemIndicesEsClient } from '../../../scout_agent_builder_shared/lib/system_indices_es_client';
 import { publicApiPath } from '../../../../common/constants';
 import { apiTest } from '../fixtures';
 import {
@@ -163,8 +162,8 @@ apiTest.describe(
       });
     };
 
-    apiTest.beforeAll(async ({ asAdmin, config, esClient, samlAuth, kbnClient }) => {
-      sysEsClient = await createSystemIndicesEsClient(esClient, config);
+    apiTest.beforeAll(async ({ asAdmin, systemIndicesEsClient, samlAuth, kbnClient }) => {
+      sysEsClient = await systemIndicesEsClient.getClient();
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       adminCookie = cookieHeader;
 

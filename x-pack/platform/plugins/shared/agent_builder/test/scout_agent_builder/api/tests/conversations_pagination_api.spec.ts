@@ -17,7 +17,6 @@ import {
   createAgentViaKbn,
   deleteAgentViaKbn,
 } from '../../../scout_agent_builder_shared/lib/agents_kbn';
-import { createSystemIndicesEsClient } from '../../../scout_agent_builder_shared/lib/system_indices_es_client';
 import { apiTest } from '../fixtures';
 import {
   API_AGENT_BUILDER,
@@ -42,11 +41,11 @@ apiTest.describe(
     // `.chat-*` system index documents directly (e.g. to remove the `pinned` field).
     let sysEsClient: Client;
 
-    apiTest.beforeAll(async ({ kbnClient, asAdmin, esClient, config }) => {
+    apiTest.beforeAll(async ({ kbnClient, asAdmin, esClient, systemIndicesEsClient }) => {
       // Independent setup, parallelized to stay well under the default beforeAll timeout —
       // sequential round trips here can add up to tens of seconds against a slow ES/Kibana.
       const [client] = await Promise.all([
-        createSystemIndicesEsClient(esClient, config),
+        systemIndicesEsClient.getClient(),
         // Create a dedicated agent so every list request can be filtered to only
         // the conversations created by this suite, regardless of what other tests
         // have left behind.
