@@ -66,16 +66,14 @@ function buildBoundedValue(depth: number): z.ZodType<unknown> {
     return primitive as z.ZodType<unknown>;
   }
   const inner = buildBoundedValue(depth - 1);
-  const boundedRecord = z
-    .record(z.string().max(1000), inner)
-    .superRefine((val, ctx) => {
-      if (Object.keys(val).length > MAX_RECORD_KEYS) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: `Record may have at most ${MAX_RECORD_KEYS} keys`,
-        });
-      }
-    });
+  const boundedRecord = z.record(z.string().max(1000), inner).superRefine((val, ctx) => {
+    if (Object.keys(val).length > MAX_RECORD_KEYS) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `Record may have at most ${MAX_RECORD_KEYS} keys`,
+      });
+    }
+  });
   return z.union([primitive, z.array(inner).max(1000), boundedRecord]) as z.ZodType<unknown>;
 }
 

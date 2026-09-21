@@ -35,7 +35,10 @@ const suggestAttachmentsRoute = createServerRoute({
       .object({
         query: z.optional(z.string().max(1000)),
         attachmentTypes: z.optional(
-          z.union([attachmentTypeSchema, z.array(attachmentTypeSchema).max(ATTACHMENT_TYPES.length)])
+          z.union([
+            attachmentTypeSchema,
+            z.array(attachmentTypeSchema).max(ATTACHMENT_TYPES.length),
+          ])
         ),
         tags: z.optional(z.union([z.string().max(256), z.array(z.string().max(256)).max(100)])),
       })
