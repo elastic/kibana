@@ -19,6 +19,12 @@ import {
   LOGS_ROOT_STREAM_NAME,
   isDraftStream,
 } from '@kbn/streams-schema';
+
+// Cap field-name length and array count for HTTP inputs that iterate over all supplied fields.
+const boundedNamedFieldDefinition = namedFieldDefinitionConfigSchema.and(
+  z.object({ name: z.string().nonempty().max(256) })
+);
+const boundedFieldDefinitionsArray = z.array(boundedNamedFieldDefinition).max(1000);
 import { z } from '@kbn/zod/v4';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { SearchHit } from '@kbn/es-types';
@@ -142,7 +148,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
   params: z.object({
     path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
     body: z.object({
-      field_definitions: z.array(namedFieldDefinitionConfigSchema),
+      field_definitions: boundedFieldDefinitionsArray,
     }),
   }),
   handler: async ({
@@ -373,7 +379,7 @@ export const schemaFieldsConflictsRoute = createServerRoute({
   params: z.object({
     path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
     body: z.object({
-      field_definitions: z.array(namedFieldDefinitionConfigSchema),
+      field_definitions: boundedFieldDefinitionsArray,
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<FieldsConflictsResponse> => {

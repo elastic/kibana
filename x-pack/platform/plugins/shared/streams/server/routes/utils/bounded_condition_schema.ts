@@ -50,8 +50,8 @@ const boundedFilterCondition = z.union([
   }),
 ]);
 
-const boundedAlways = z.object({ always: z.object({}) });
-const boundedNever = z.object({ never: z.object({}) });
+const boundedAlways = z.strictObject({ always: z.strictObject({}) });
+const boundedNever = z.strictObject({ never: z.strictObject({}) });
 
 function buildBoundedCondition(depth: number): z.ZodType<Condition> {
   if (depth === 0) {

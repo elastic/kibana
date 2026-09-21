@@ -192,15 +192,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('accepts esql exactly at 65535 chars', async () => {
         const paddingNeeded = 65535 - 'FROM logs.otel | WHERE message == ""'.length;
         const esql = 'FROM logs.otel | WHERE message == "' + 'x'.repeat(paddingNeeded) + '"';
-        // Schema validation passes; the handler may return any non-schema status
-        // (404, feature-flag error, etc.) but must not return a Zod 400.
+        // Schema validation passes at 65535 chars. The handler may still reject with 400
+        // for domain reasons (e.g. FROM source mismatch for a child stream), but the
+        // Kibana route framework prefixes Zod schema errors with "[request body"; a domain
+        // error has a different message, so we can distinguish the two.
         const response = await apiClient.fetch('PUT /api/streams/{name}/_query 2023-10-31', {
           params: {
             path: { name: 'logs.otel.query-limit-test' },
             body: { query: { esql } },
           },
         });
-        expect(response.status).not.to.equal(400);
+        expect(String(response.body?.message ?? '')).not.to.contain('[request body');
       });
     });
 
