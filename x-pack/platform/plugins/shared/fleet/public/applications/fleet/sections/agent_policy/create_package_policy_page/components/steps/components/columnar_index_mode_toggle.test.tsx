@@ -18,7 +18,9 @@ import type {
 import { ColumnarIndexModeToggle } from './columnar_index_mode_toggle';
 
 const SWITCH_TEST_SUBJ = 'packagePolicyEditor.columnarIndexMode.switch';
+const TOOLTIP_TEST_SUBJ = 'packagePolicyEditor.columnarIndexMode.disabledTooltip';
 
+// The package declares columnar readiness, which is what makes the opt-in available.
 const mockRegistryDataStream: RegistryDataStream = {
   title: 'Access logs',
   release: 'ga',
@@ -26,9 +28,22 @@ const mockRegistryDataStream: RegistryDataStream = {
   package: 'nginx',
   dataset: 'nginx.access',
   path: 'access',
-  elasticsearch: {},
+  elasticsearch: { columnar: { supported: true } },
   ingest_pipeline: 'default',
   streams: [],
+};
+
+/**
+ * EuiToolTip only renders its content once the anchor is hovered, so the tooltip text cannot be
+ * asserted on the initial render.
+ */
+const expectTooltip = async (
+  result: ReturnType<TestRenderer['render']>,
+  content: string | RegExp
+) => {
+  const anchor = result.getByTestId(TOOLTIP_TEST_SUBJ).querySelector('.euiToolTipAnchor');
+  fireEvent.mouseOver(anchor!);
+  expect(await result.findByText(content)).toBeInTheDocument();
 };
 
 describe('ColumnarIndexModeToggle', () => {
@@ -92,12 +107,10 @@ describe('ColumnarIndexModeToggle', () => {
       { data_stream: 'logs-nginx.access', features: { tsdb: true } },
     ]);
     expect(result.getByTestId(SWITCH_TEST_SUBJ)).toBeDisabled();
-    expect(
-      result.getByTestId('packagePolicyEditor.columnarIndexMode.disabledTooltip')
-    ).toBeInTheDocument();
+    expect(result.getByTestId(TOOLTIP_TEST_SUBJ)).toBeInTheDocument();
   });
 
-  it('is disabled when the package declares index_mode: time_series', () => {
+  it('is disabled when the package declares index_mode: time_series', async () => {
     const result = render({
       ...mockRegistryDataStream,
       type: 'metrics',
@@ -105,6 +118,7 @@ describe('ColumnarIndexModeToggle', () => {
       elasticsearch: { index_mode: 'time_series' },
     });
     expect(result.getByTestId(SWITCH_TEST_SUBJ)).toBeDisabled();
+    await expectTooltip(result, /cannot be enabled on a data stream that uses time series/);
   });
 
   it('is checked and disabled when the package declares a columnar index_mode', () => {
@@ -115,5 +129,52 @@ describe('ColumnarIndexModeToggle', () => {
     const toggle = result.getByTestId(SWITCH_TEST_SUBJ);
     expect(toggle).toHaveAttribute('aria-checked', 'true');
     expect(toggle).toBeDisabled();
+  });
+
+  describe('package readiness', () => {
+    it('is disabled and unchecked when the package does not declare columnar support', async () => {
+      const result = render({ ...mockRegistryDataStream, elasticsearch: {} });
+      const toggle = result.getByTestId(SWITCH_TEST_SUBJ);
+      expect(toggle).toBeDisabled();
+      expect(toggle).toHaveAttribute('aria-checked', 'false');
+      expect(result.getByTestId(TOOLTIP_TEST_SUBJ)).toBeInTheDocument();
+      await expectTooltip(
+        result,
+        'This integration has not declared columnar index mode support for this data stream.'
+      );
+    });
+
+    it('is disabled when the data stream has no elasticsearch block at all', () => {
+      const { elasticsearch, ...withoutElasticsearch } = mockRegistryDataStream;
+      const result = render(withoutElasticsearch as RegistryDataStream);
+      expect(result.getByTestId(SWITCH_TEST_SUBJ)).toBeDisabled();
+    });
+
+    it('stays unchecked when not supported even if an opt-in is already stored', () => {
+      const result = render({ ...mockRegistryDataStream, elasticsearch: {} }, [
+        { data_stream: 'logs-nginx.access', features: { columnar: true } },
+      ]);
+      const toggle = result.getByTestId(SWITCH_TEST_SUBJ);
+      expect(toggle).toBeDisabled();
+      expect(toggle).toHaveAttribute('aria-checked', 'false');
+    });
+
+    it('is enabled and has no tooltip when the package declares columnar support', () => {
+      const result = render({
+        ...mockRegistryDataStream,
+        elasticsearch: { columnar: { supported: true } },
+      });
+      const toggle = result.getByTestId(SWITCH_TEST_SUBJ);
+      expect(toggle).not.toBeDisabled();
+      expect(result.queryByTestId(TOOLTIP_TEST_SUBJ)).not.toBeInTheDocument();
+    });
+
+    it('prefers the TSDB tooltip over the readiness tooltip', async () => {
+      const result = render({ ...mockRegistryDataStream, elasticsearch: {} }, [
+        { data_stream: 'logs-nginx.access', features: { tsdb: true } },
+      ]);
+      expect(result.getByTestId(SWITCH_TEST_SUBJ)).toBeDisabled();
+      await expectTooltip(result, /cannot be enabled on a data stream that uses time series/);
+    });
   });
 });

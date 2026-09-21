@@ -540,6 +540,15 @@ export interface RegistryElasticsearch {
   'ingest_pipeline.name'?: string;
   source_mode?: 'default' | 'synthetic';
   index_mode?: 'time_series' | 'logsdb_columnar' | 'columnar';
+  /**
+   * Stream-level readiness flag from `data_stream/<ds>/manifest.yml` (package-spec 3.7.0).
+   * A package sets `elasticsearch.columnar.supported: true` to declare that the data stream has
+   * been validated against the columnar index mode, which is what makes the Fleet opt-in
+   * available for it.
+   */
+  columnar?: {
+    supported?: boolean;
+  };
   dynamic_dataset?: boolean;
   dynamic_namespace?: boolean;
 }

@@ -1483,6 +1483,122 @@ describe('EPM template', () => {
       expect(mappings).toEqual(expectedMapping);
     });
 
+    describe('field-level columnar overrides', () => {
+      const generate = (yml: string, isIndexModeColumnar: boolean) =>
+        generateMappings(processFields(parse(yml) as Field[]), false, isIndexModeColumnar);
+
+      const docValuesYml = `
+- name: event.original
+  type: keyword
+  doc_values: false
+  columnar:
+    doc_values: true
+`;
+
+      it('overrides doc_values when the index mode is columnar', () => {
+        expect(generate(docValuesYml, true)).toEqual({
+          properties: {
+            event: {
+              properties: {
+                original: {
+                  type: 'keyword',
+                  doc_values: true,
+                },
+              },
+            },
+          },
+        });
+      });
+
+      it('ignores the columnar block when the index mode is not columnar', () => {
+        expect(generate(docValuesYml, false)).toEqual({
+          properties: {
+            event: {
+              properties: {
+                original: {
+                  type: 'keyword',
+                  doc_values: false,
+                },
+              },
+            },
+          },
+        });
+      });
+
+      const indexYml = `
+- name: event.original
+  type: keyword
+  index: false
+  columnar:
+    index: true
+`;
+
+      it('overrides index when the index mode is columnar', () => {
+        expect(generate(indexYml, true)).toEqual({
+          properties: {
+            event: {
+              properties: {
+                original: {
+                  type: 'keyword',
+                  index: true,
+                },
+              },
+            },
+          },
+        });
+      });
+
+      it('leaves index untouched when the index mode is not columnar', () => {
+        expect(generate(indexYml, false)).toEqual({
+          properties: {
+            event: {
+              properties: {
+                original: {
+                  type: 'keyword',
+                  index: false,
+                },
+              },
+            },
+          },
+        });
+      });
+
+      it('only emits the keys present in the columnar block', () => {
+        const yml = `
+- name: message
+  type: keyword
+  columnar:
+    doc_values: true
+`;
+        expect(generate(yml, true)).toEqual({
+          properties: {
+            message: {
+              type: 'keyword',
+              ignore_above: 1024,
+              doc_values: true,
+            },
+          },
+        });
+      });
+
+      it('leaves a field without a columnar block unchanged in columnar mode', () => {
+        const yml = `
+- name: message
+  type: keyword
+  doc_values: false
+`;
+        expect(generate(yml, true)).toEqual(generate(yml, false));
+        expect(generate(yml, true)).toEqual({
+          properties: {
+            message: {
+              type: 'keyword',
+              doc_values: false,
+            },
+          },
+        });
+      });
+    });
+
     it('processes meta fields', () => {
       const metaFieldLiteralYaml = `
 - name: fieldWithMetas

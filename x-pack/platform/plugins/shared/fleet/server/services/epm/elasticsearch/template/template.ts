@@ -170,12 +170,16 @@ const getOtelBaseComponents = (type: string): string[] => {
  * mapping properties out of it.
  *
  * This assumes that all fields with dotted.names have been expanded in a previous step.
+ *
+ * `isIndexModeColumnar` must be true when the resolved index mode is `columnar` or
+ * `logsdb_columnar`; it gates the per-field `columnar` overrides (package-spec 3.7.0).
  */
 export function generateMappings(
   fields: Field[],
-  isIndexModeTimeSeries = false
+  isIndexModeTimeSeries = false,
+  isIndexModeColumnar = false
 ): IndexTemplateMappings {
-  const builder = new MappingsBuilder(isIndexModeTimeSeries);
+  const builder = new MappingsBuilder(isIndexModeTimeSeries, isIndexModeColumnar);
   const { properties } = builder.build(fields);
   return builder.toIndexTemplateMappings(properties);
 }

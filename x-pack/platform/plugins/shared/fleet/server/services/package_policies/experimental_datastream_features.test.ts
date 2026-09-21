@@ -36,16 +36,25 @@ jest.mock('../epm/packages', () => {
   };
 });
 
-function mockGetInstalledPackageWithAssets(installation: any) {
+// Data streams the package declares as columnar-ready. The columnar opt-in is rejected for any
+// data stream missing `elasticsearch.columnar.supported` (or a columnar index_mode), so the
+// default fixture declares support for the data streams the tests below opt in on.
+const COLUMNAR_READY_DATA_STREAMS = [
+  { dataset: 'test.test', type: 'metrics', elasticsearch: { columnar: { supported: true } } },
+  { dataset: 'test.test', type: 'logs', elasticsearch: { columnar: { supported: true } } },
+  {
+    dataset: 'test.test',
+    type: 'logs',
+    hidden: true,
+    elasticsearch: { columnar: { supported: true } },
+  },
+];
+
+function mockGetInstalledPackageWithAssets(installation: any, dataStreams: any[] = []) {
   jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
     packageInfo: {
       name: 'test',
-      data_streams: [
-        {
-          dataset: 'test',
-          type: 'metrics',
-        },
-      ],
+      data_streams: dataStreams.length ? dataStreams : COLUMNAR_READY_DATA_STREAMS,
     },
     installation,
   } as any);
@@ -731,12 +740,19 @@ describe('experimental_datastream_features', () => {
       };
     }
 
-    function mockInstalledFeatures(dataStream: string, features: Partial<Features>) {
-      mockGetInstalledPackageWithAssets({
-        experimental_data_stream_features: [
-          { data_stream: dataStream, features: { ...noFeatures, ...features } },
-        ],
-      });
+    function mockInstalledFeatures(
+      dataStream: string,
+      features: Partial<Features>,
+      dataStreams?: any[]
+    ) {
+      mockGetInstalledPackageWithAssets(
+        {
+          experimental_data_stream_features: [
+            { data_stream: dataStream, features: { ...noFeatures, ...features } },
+          ],
+        },
+        dataStreams
+      );
     }
 
     function mockIndexTemplate(dataStream: string, index: Record<string, unknown> = {}) {
@@ -849,6 +865,88 @@ describe('experimental_datastream_features', () => {
 
       expect(esClient.cluster.putComponentTemplate).not.toHaveBeenCalled();
       expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+    });
+
+    it('enables columnar when the package declares elasticsearch.columnar.supported', async () => {
+      mockInstalledFeatures('metrics-test.test', {}, [
+        { dataset: 'test.test', type: 'metrics', elasticsearch: { columnar: { supported: true } } },
+      ]);
+      mockIndexTemplate('metrics-test.test');
+
+      await handleExperimentalDatastreamFeatureOptIn({
+        soClient,
+        esClient,
+        packagePolicy: getPolicy('metrics-test.test', { columnar: true }),
+      });
+
+      expect(putIndexSettings()).toEqual({ mode: 'columnar' });
+    });
+
+    it('enables columnar when the package already declares a columnar index_mode', async () => {
+      mockInstalledFeatures('logs-test.test', {}, [
+        { dataset: 'test.test', type: 'logs', elasticsearch: { index_mode: 'logsdb_columnar' } },
+      ]);
+      mockIndexTemplate('logs-test.test');
+
+      await handleExperimentalDatastreamFeatureOptIn({
+        soClient,
+        esClient,
+        packagePolicy: getPolicy('logs-test.test', { columnar: true }),
+      });
+
+      expect(putIndexSettings()).toEqual({ mode: 'logsdb_columnar' });
+    });
+
+    it('rejects enabling columnar on a data stream the package has not declared ready', async () => {
+      mockInstalledFeatures('metrics-test.test', {}, [{ dataset: 'test.test', type: 'metrics' }]);
+      mockIndexTemplate('metrics-test.test');
+
+      await expect(
+        handleExperimentalDatastreamFeatureOptIn({
+          soClient,
+          esClient,
+          packagePolicy: getPolicy('metrics-test.test', { columnar: true }),
+        })
+      ).rejects.toThrow(
+        'data stream metrics-test.test is not columnar-ready: the package does not declare elasticsearch.columnar.supported'
+      );
+
+      expect(esClient.cluster.putComponentTemplate).not.toHaveBeenCalled();
+      expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+    });
+
+    it('rejects enabling columnar when the package declares supported: false', async () => {
+      mockInstalledFeatures('metrics-test.test', {}, [
+        {
+          dataset: 'test.test',
+          type: 'metrics',
+          elasticsearch: { columnar: { supported: false } },
+        },
+      ]);
+      mockIndexTemplate('metrics-test.test');
+
+      await expect(
+        handleExperimentalDatastreamFeatureOptIn({
+          soClient,
+          esClient,
+          packagePolicy: getPolicy('metrics-test.test', { columnar: true }),
+        })
+      ).rejects.toThrow(/is not columnar-ready/);
+    });
+
+    it('allows opting out of columnar on a data stream that is no longer declared ready', async () => {
+      mockInstalledFeatures('metrics-test.test', { columnar: true }, [
+        { dataset: 'test.test', type: 'metrics' },
+      ]);
+      mockIndexTemplate('metrics-test.test', { mode: 'columnar' });
+
+      await handleExperimentalDatastreamFeatureOptIn({
+        soClient,
+        esClient,
+        packagePolicy: getPolicy('metrics-test.test', { columnar: false }),
+      });
+
+      expect(putIndexSettings()).toEqual({});
     });
 
     it('removes the index mode when opting out of columnar on a package without a declared mode', async () => {

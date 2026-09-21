@@ -33,6 +33,34 @@ export function getDefaultProperties(field: Field): Properties {
   return properties;
 }
 
+/**
+ * Apply a field's `columnar` block (package-spec 3.7.0) to its generated mapping.
+ *
+ * The block is only honoured when the resolved index mode belongs to the columnar family
+ * (`columnar` / `logsdb_columnar`), mirroring how `dimension` is only emitted as
+ * `time_series_dimension` for `time_series`. In any other index mode the block is ignored
+ * entirely.
+ *
+ * This must run *after* all other `doc_values`/`index` handling so that the explicit override
+ * wins, and only keys that are present in the block are emitted.
+ */
+export function applyColumnarOverrides(
+  properties: Properties,
+  field: Field,
+  isIndexModeColumnar: boolean
+): void {
+  if (!isIndexModeColumnar || !field.columnar) {
+    return;
+  }
+
+  if (field.columnar.doc_values !== undefined) {
+    properties.doc_values = field.columnar.doc_values;
+  }
+  if (field.columnar.index !== undefined) {
+    properties.index = field.columnar.index;
+  }
+}
+
 export function scaledFloat(field: Field): Properties {
   const fieldProps = getDefaultProperties(field);
   fieldProps.type = 'scaled_float';

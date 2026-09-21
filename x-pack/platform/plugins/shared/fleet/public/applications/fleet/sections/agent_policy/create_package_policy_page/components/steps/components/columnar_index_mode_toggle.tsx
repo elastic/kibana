@@ -9,7 +9,10 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSwitch, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { getRegistryDataStreamAssetBaseName } from '../../../../../../../../../common/services';
+import {
+  getRegistryDataStreamAssetBaseName,
+  isColumnarEligible,
+} from '../../../../../../../../../common/services';
 import type {
   ExperimentalDataStreamFeature,
   RegistryDataStream,
@@ -49,6 +52,14 @@ const DISABLED_BY_INTEGRATION_TOOLTIP = i18n.translate(
   }
 );
 
+const NOT_SUPPORTED_TOOLTIP = i18n.translate(
+  'xpack.fleet.packagePolicy.experimentalFeatures.columnarNotSupportedTooltip',
+  {
+    defaultMessage:
+      'This integration has not declared columnar index mode support for this data stream.',
+  }
+);
+
 /**
  * Tech preview opt-in for the columnar index mode (`logsdb_columnar` for logs data streams,
  * `columnar` otherwise). The opt-in is stored per data stream in
@@ -74,9 +85,13 @@ export const ColumnarIndexModeToggle: React.FunctionComponent<Props> = ({
     manifestIndexMode === 'logsdb_columnar' || manifestIndexMode === 'columnar';
   const isTsdbOptedIn = currentFeatures?.tsdb === true;
 
+  // The package must declare readiness (`elasticsearch.columnar.supported: true`) before the
+  // opt-in is offered; declaring a columnar index_mode outright also counts as ready.
+  const isEligible = isColumnarEligible(registryDataStream);
+
   const isTsdbEnabled = isTsdbDeclaredByPackage || isTsdbOptedIn;
-  const isDisabled = isTsdbEnabled || isColumnarDeclaredByPackage;
-  const isChecked = currentFeatures?.columnar ?? isColumnarDeclaredByPackage;
+  const isDisabled = isTsdbEnabled || isColumnarDeclaredByPackage || !isEligible;
+  const isChecked = !isEligible ? false : currentFeatures?.columnar ?? isColumnarDeclaredByPackage;
 
   const handleChange = useCallback(
     (checked: boolean) => {
@@ -99,6 +114,8 @@ export const ColumnarIndexModeToggle: React.FunctionComponent<Props> = ({
     ? DISABLED_TSDB_TOOLTIP
     : isColumnarDeclaredByPackage
     ? DISABLED_BY_INTEGRATION_TOOLTIP
+    : !isEligible
+    ? NOT_SUPPORTED_TOOLTIP
     : undefined;
 
   const switchElement = (

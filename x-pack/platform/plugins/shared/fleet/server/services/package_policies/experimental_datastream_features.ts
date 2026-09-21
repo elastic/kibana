@@ -11,6 +11,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import { merge } from 'lodash';
 
 import type { ExperimentalIndexingFeature } from '../../../common/types';
+import { getRegistryDataStreamAssetBaseName, isColumnarEligible } from '../../../common/services';
 import { PackageNotFoundError } from '../../errors';
 import type {
   NewPackagePolicy,
@@ -58,6 +59,9 @@ export async function handleExperimentalDatastreamFeatureOptIn({
   // With every mode-changing feature turned off this is exactly what the package manifest
   // declares (or undefined), which is what an opt-out must fall back to.
   const preparedIndexModes: { [templateName: string]: string | undefined } = {};
+  // Data streams (keyed by index template name) the package declared as columnar-ready, either
+  // through `elasticsearch.columnar.supported: true` or by declaring a columnar index_mode.
+  const columnarEligibleDataStreams = new Set<string>();
 
   if (packagePolicy.package) {
     const installedPackageWithAssets = await getInstalledPackageWithAssets({
@@ -76,6 +80,12 @@ export async function handleExperimentalDatastreamFeatureOptIn({
       packageInfo,
       paths,
     };
+    (packageInfo.data_streams ?? []).forEach((dataStream) => {
+      if (isColumnarEligible(dataStream)) {
+        columnarEligibleDataStreams.add(getRegistryDataStreamAssetBaseName(dataStream));
+      }
+    });
+
     const templates = await prepareDataStreamTemplates(
       packageInfo.data_streams ?? [],
       packageInstallContext,
@@ -103,6 +113,18 @@ export async function handleExperimentalDatastreamFeatureOptIn({
     if (featureMapEntry.features.tsdb && featureMapEntry.features.columnar) {
       throw new Error(
         `data stream ${featureMapEntry.data_stream} cannot have both tsdb and columnar enabled simultaneously`
+      );
+    }
+
+    // Turning columnar ON requires the package to have declared the data stream columnar-ready.
+    // Turning it OFF is always allowed, so that an opt-in made before the package dropped the
+    // declaration can still be undone.
+    if (
+      featureMapEntry.features.columnar &&
+      !columnarEligibleDataStreams.has(featureMapEntry.data_stream)
+    ) {
+      throw new Error(
+        `data stream ${featureMapEntry.data_stream} is not columnar-ready: the package does not declare elasticsearch.columnar.supported`
       );
     }
 

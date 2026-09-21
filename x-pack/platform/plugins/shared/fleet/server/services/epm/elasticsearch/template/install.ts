@@ -678,9 +678,13 @@ export function prepareTemplate({
     manifestColumnarMode ??
     (experimentalDataStreamFeature?.features.columnar ? optInColumnarMode : undefined);
 
+  // Per-field `columnar` overrides only apply when the data stream actually ends up in the
+  // columnar family, which is exactly when `resolvedIndexMode` is set.
+  const isColumnarMode = resolvedIndexMode !== undefined;
+
   const validFields = processFields(fields);
 
-  const mappings = generateMappings(validFields, isIndexModeTimeSeries);
+  const mappings = generateMappings(validFields, isIndexModeTimeSeries, isColumnarMode);
   const templateName = generateTemplateName(dataStream);
   const templateIndexPattern = generateTemplateIndexPattern(dataStream, isOtelInputType);
   const templatePriority = getTemplatePriority(dataStream);
