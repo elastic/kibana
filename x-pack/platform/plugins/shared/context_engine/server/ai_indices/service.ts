@@ -23,6 +23,7 @@ import type {
   AiIndexProperties,
 } from '../../common/http_api/ai_indices';
 import { isIndexPattern } from '../../common/ai_index_dest';
+import { AI_INDEX_ID_PATTERN } from '../../common/validation';
 import { createSpaceDslFilter } from '../utils/space_filter';
 import {
   InvalidAiIndexDestError,
@@ -481,18 +482,24 @@ export class AiIndexService {
     return managed ? [basePrefix, `.${basePrefix}`] : [basePrefix];
   }
 
-  /** The dest value must start with one of the type-specific prefixes. */
-  private assertDestValueHasPrefix(value: string, prefixes: string[]): void {
-    if (!prefixes.some((prefix) => value.startsWith(prefix))) {
+  /** The dest value must be a type-specific prefix followed by a valid AI index id. */
+  private assertDestValueFormat(value: string, prefixes: string[]): void {
+    const prefix = prefixes.find((candidate) => value.startsWith(candidate));
+    if (prefix === undefined) {
       throw new InvalidAiIndexDestError(
         `dest.value '${value}' is not allowed: it must start with '${prefixes[0]}'`
+      );
+    }
+    if (!AI_INDEX_ID_PATTERN.test(value.slice(prefix.length))) {
+      throw new InvalidAiIndexDestError(
+        `dest.value '${value}' is not allowed: the part after '${prefix}' must be a valid AI index id`
       );
     }
   }
 
   private async assertValidDataStreamDest(value: string, managed: boolean): Promise<void> {
     const prefixes = this.allowedDestPrefixes(DATA_STREAM_PREFIX, managed);
-    this.assertDestValueHasPrefix(value, prefixes);
+    this.assertDestValueFormat(value, prefixes);
 
     let indices: estypes.IndicesResolveIndexResolveIndexItem[] = [];
     let dataStreams: estypes.IndicesResolveIndexResolveIndexDataStreamsItem[] = [];
@@ -527,7 +534,7 @@ export class AiIndexService {
 
   private async assertValidIndexDest(value: string, managed: boolean): Promise<void> {
     const prefixes = this.allowedDestPrefixes(INDEX_PREFIX, managed);
-    this.assertDestValueHasPrefix(value, prefixes);
+    this.assertDestValueFormat(value, prefixes);
 
     let indices: estypes.IndicesResolveIndexResolveIndexItem[] = [];
     let dataStreams: estypes.IndicesResolveIndexResolveIndexDataStreamsItem[] = [];

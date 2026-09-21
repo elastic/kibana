@@ -30,7 +30,8 @@ Notes:
   `dest.value` must match `dest.type` and name a single data stream or index;
   wildcards and comma-separated lists are rejected. It must start with
   `ai-index-ds-` for data streams or `ai-index-idx-` for indices (e.g.
-  `ai-index-ds-foo`, `ai-index-idx-foo`); system indices are not allowed.
+  `ai-index-ds-foo`, `ai-index-idx-foo`), followed by a valid AI index id;
+  system indices are not allowed.
 - `automations` is an array of `{ "type": "workflow", "value": "<name>" }`
   objects. Required, may be empty.
 - `sources` is an array whose entries are one of:

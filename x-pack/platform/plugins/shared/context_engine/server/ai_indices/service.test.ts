@@ -512,13 +512,13 @@ describe('AiIndexService', () => {
       expect(storageClient.index).not.toHaveBeenCalled();
     });
 
-    it('rejects a wildcard data_stream dest without resolving it', async () => {
+    it('rejects an index dest whose id has invalid characters', async () => {
       await expect(
-        service.put('customer_support', DEFAULT_SPACE, {
-          ...properties,
-          dest: { type: 'data_stream', value: 'ai-index-ds-customer_support*' },
+        service.put('logs', DEFAULT_SPACE, {
+          ...indexProperties,
+          dest: { type: 'index', value: 'ai-index-idx-logs?' },
         })
-      ).rejects.toThrow(/must name a single index or data stream, not a pattern/);
+      ).rejects.toThrow(/the part after 'ai-index-idx-' must be a valid AI index id/);
       expect(esClient.indices.resolveIndex).not.toHaveBeenCalled();
       expect(storageClient.index).not.toHaveBeenCalled();
     });
