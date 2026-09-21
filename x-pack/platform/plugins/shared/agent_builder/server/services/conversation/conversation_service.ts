@@ -21,6 +21,7 @@ import type { ConversationRoundAuthor, CurrentUser } from '@kbn/agent-builder-co
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import type { ExecutionConversationOrigin } from '@kbn/agent-builder-server/execution';
+import { attachmentChangesToEvents } from '@kbn/agent-builder-server/attachments';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { getUserFromRequest } from '../utils';
 import { getCurrentSpaceId } from '../../utils/spaces';
@@ -31,6 +32,8 @@ import { createClient } from './client';
 import { userMessageActor } from './client/rounds_to_events';
 import type { ConversationWithPermissions } from '../../../common/http_api/conversations';
 import type { ConversationEventBus } from '../../workflows/triggers/conversation_event_bus';
+import { createScopedConversationEventEmitter } from '../../workflows/triggers/conversation_event_bus';
+import type { ConversationEventsServiceStart } from '../conversation_events';
 
 export interface AppendUserMessageOptions {
   request: KibanaRequest;
@@ -56,6 +59,7 @@ interface ConversationServiceDeps {
   agents: AgentsServiceStart;
   attachments: AttachmentServiceStart;
   eventBus?: ConversationEventBus;
+  conversationEvents: ConversationEventsServiceStart;
 }
 
 export class ConversationServiceImpl implements ConversationService {
@@ -66,6 +70,7 @@ export class ConversationServiceImpl implements ConversationService {
   private readonly agents: AgentsServiceStart;
   private readonly attachments: AttachmentServiceStart;
   private readonly eventBus?: ConversationEventBus;
+  private readonly conversationEvents: ConversationEventsServiceStart;
 
   constructor({
     logger,
@@ -75,6 +80,7 @@ export class ConversationServiceImpl implements ConversationService {
     agents,
     attachments,
     eventBus,
+    conversationEvents,
   }: ConversationServiceDeps) {
     this.logger = logger;
     this.security = security;
@@ -83,6 +89,7 @@ export class ConversationServiceImpl implements ConversationService {
     this.agents = agents;
     this.attachments = attachments;
     this.eventBus = eventBus;
+    this.conversationEvents = conversationEvents;
   }
 
   async getScopedClient({ request }: { request: KibanaRequest }): Promise<ConversationClient> {
@@ -98,9 +105,8 @@ export class ConversationServiceImpl implements ConversationService {
       logger: this.logger,
       space,
       agentRegistry,
-      onMetadataPatched: eventBus
-        ? (payload) => eventBus.emitMetadataPatched(request, payload)
-        : undefined,
+      conversationEvents: this.conversationEvents,
+      eventEmitter: eventBus ? createScopedConversationEventEmitter(eventBus, request) : undefined,
     });
   }
 
@@ -129,6 +135,14 @@ export class ConversationServiceImpl implements ConversationService {
 
     const user = await this.getCurrentUser({ request });
     const author = await this.getConversationRoundAuthor({ request });
+    const actor = userMessageActor({ ...conversation, user }, { author });
+    const createdAt = new Date().toISOString();
+
+    const attachmentEvents = attachmentChangesToEvents(stateManager.drainChanges(), {
+      source: 'chat_input',
+      actor,
+      created_at: createdAt,
+    });
 
     await client.appendEvents({
       id: conversationId,
@@ -136,10 +150,11 @@ export class ConversationServiceImpl implements ConversationService {
         {
           id: uuidv4(),
           type: TimelineEventType.userMessage,
-          created_at: new Date().toISOString(),
-          actor: userMessageActor({ ...conversation, user }, { author }),
+          created_at: createdAt,
+          actor,
           data: { message: message.trim(), attachment_refs: stateManager.getAccessedRefs() },
         },
+        ...attachmentEvents,
       ],
       attachments: { snapshot, produced: stateManager.getAll() },
     });
