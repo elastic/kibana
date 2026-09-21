@@ -137,7 +137,7 @@ const BlindSpotRow: React.FC<{
 }> = ({ blindSpot: { title, description }, isMostImpactful, isLast }) => {
   const accordionId = useGeneratedHtmlId({ prefix: 'investigationBlindSpot' });
   const { euiTheme } = useEuiTheme();
-  const hasDescription = description !== title;
+  const hasDescription = Boolean(description.trim() && description !== title);
   const badge = isMostImpactful ? (
     <EuiBadge color="primary">
       {i18n.translate('xpack.investigationOutput.mostImpactfulLabel', {

@@ -242,6 +242,22 @@ describe('InvestigationOutput', () => {
     expect(screen.queryByRole('button', { name: gap })).not.toBeInTheDocument();
   });
 
+  it.each(['', '   '])(
+    'does not make a blind spot expandable when its description is empty',
+    (description) => {
+      const title = 'No profiling data available';
+      const stateWithEmptyDescription: InvestigationState = {
+        ...finalState,
+        blind_spots: [{ title, confidence: 0.8, description }],
+      };
+
+      renderWithI18n(<InvestigationOutput status="complete" state={stateWithEmptyDescription} />);
+
+      expect(screen.getByText(title)).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: title })).not.toBeInTheDocument();
+    }
+  );
+
   it('opens recommendation details with a click and blind-spot details from a collapsed accordion', async () => {
     const user = userEvent.setup();
     renderWithI18n(<InvestigationOutput status="complete" state={finalState} />);
