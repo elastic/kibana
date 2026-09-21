@@ -1,6 +1,5 @@
 {
-  "sha1": "a52c67d5bd0db7616ebd3288168389813a8da65a",
-  "testChannels": [
+  "sha1": "f32de9f923dba669127a95a614fd915dfc7cb198",  "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
@@ -2007,8 +2006,8 @@
       }
     },
     {
-      "id": "35d9ac4a0b4c744-72f9da95bd9172c",
-      "title": "Rule event fields suggestions API narrows fields when matcher selects a single rule via rule.id",
+      "id": "35d9ac4a0b4c744-ea3e3e07112398d",
+      "title": "Rule event fields suggestions API falls back to the unfiltered result when matcher cannot be parsed",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -2020,32 +2019,6 @@
       }
     },
     {
-      "id": "35d9ac4a0b4c744-ea3e3e07112398d",
-      "title": "Rule event fields suggestions API falls back to the unfiltered result when matcher cannot be parsed",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/rule_event_fields_suggestions.spec.ts",
-        "line": 127,
-        "column": 14
-      }
-    },
-    {
-      "id": "35d9ac4a0b4c744-44a2f5d3a603ce8",
-      "title": "Rule event fields suggestions API falls back to the unfiltered result when matcher only references dropped fields",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/rule_event_fields_suggestions.spec.ts",
-        "line": 141,
-        "column": 30
-      }
-    },
-    {
       "id": "35d9ac4a0b4c744-fdcb48ef8a6e538",
       "title": "Rule event fields suggestions API validation: rejects empty matcher with a 400",
       "expectedStatus": "passed",
@@ -2054,8 +2027,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/rule_event_fields_suggestions.spec.ts",
-        "line": 158,
-        "column": 22
+        "line": 121,
+        "column": 11
       }
     },
     {
@@ -2067,8 +2040,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/rule_event_fields_suggestions.spec.ts",
-        "line": 169,
-        "column": 14
+        "line": 128,
+        "column": 12
       }
     },
     {
@@ -2080,8 +2053,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/rule_event_fields_suggestions.spec.ts",
-        "line": 178,
-        "column": 4
+        "line": 137,
+        "column": 9
       }
     },
     {
@@ -2093,8 +2066,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/rule_event_fields_suggestions.spec.ts",
-        "line": 189,
-        "column": 23
+        "line": 147,
+        "column": 13
       }
     },
     {

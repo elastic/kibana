@@ -10,3 +10,4 @@ export { WORKERS_SEED } from './workers';
 export type { WatchWorkerSeed } from './workers';
 export { SKILLS_SEED } from './skills';
 export type { WatchSkillSeed } from './skills';
+export { MOCK_PROPOSALS } from './proposals';

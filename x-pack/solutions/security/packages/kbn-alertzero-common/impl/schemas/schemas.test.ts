@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { SKILLS_SEED, WATCHES_SEED, WORKERS_SEED } from '../samples';
+import { proposalSchema } from '@kbn/agentic-investigations-plugin/common';
+import { MOCK_PROPOSALS, SKILLS_SEED, WATCHES_SEED, WORKERS_SEED } from '../samples';
 import type { Watch } from '.';
 import {
   GetWatchResponse,
@@ -145,5 +146,21 @@ describe('AlertZero schema smoke tests', () => {
         expect(watchIds).toContain(watchId);
       }
     }
+  });
+
+  it('parses mock proposals through the proposals API schema', () => {
+    // MOCK_PROPOSALS is the shape the proposals API returns.
+    MOCK_PROPOSALS.forEach((proposal) => {
+      expect(() => proposalSchema.parse(proposal)).not.toThrow();
+    });
+    expect(MOCK_PROPOSALS.length).toBeGreaterThanOrEqual(8);
+  });
+
+  it('resolves every mock proposal to a conversation title', () => {
+    // Titles are derived from the sample conversation set rather than restated, so a proposal
+    // pointing at an id that does not exist there would silently lose its card title.
+    MOCK_PROPOSALS.forEach((proposal) => {
+      expect(proposal.conversationTitle).toBeDefined();
+    });
   });
 });
