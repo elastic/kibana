@@ -44,9 +44,11 @@ describe('kiRetrievalSkill', () => {
   });
 
   it('documents memory exclusion and recall', () => {
-    expect(kiRetrievalSkill.content).toContain(
-      'type != "memory.session" AND type != "memory.session_fact"'
-    );
+    expect([
+      ...kiRetrievalSkill.content.matchAll(
+        /type IS NULL OR \(type != "memory\.session" AND type != "memory\.session_fact"\)/g
+      ),
+    ]).toHaveLength(2);
     expect(kiRetrievalSkill.content).toContain('Use `describe_ai_index`');
     expect(kiRetrievalSkill.content).toContain('expires_at IS NULL OR expires_at > NOW()');
     expect(kiRetrievalSkill.content).toContain('INLINE STATS latest_at = MAX(@timestamp) BY id');
@@ -59,6 +61,9 @@ describe('kiRetrievalSkill', () => {
     );
     expect(kiRetrievalSkill.content.indexOf('| WHERE @timestamp == latest_at')).toBeLessThan(
       kiRetrievalSkill.content.indexOf('expires_at IS NULL OR expires_at > NOW()')
+    );
+    expect(kiRetrievalSkill.content).toContain(
+      '| SORT updated_at DESC, id ASC\n| LIMIT <n>\n| SORT updated_at ASC, id ASC'
     );
   });
 

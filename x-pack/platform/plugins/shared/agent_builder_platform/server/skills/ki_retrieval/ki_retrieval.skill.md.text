@@ -128,7 +128,7 @@ to deduplicate across branches.
 
 ```esql
 FROM ai-index-* METADATA _id, _index, _score
-| WHERE type != "memory.session" AND type != "memory.session_fact"
+| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact")
 | FORK
     ( WHERE content:"<query>" OR title:"<query>" OR description:"<query>"          | SORT _score DESC | LIMIT 20 )
     ( WHERE content.semantic:"<query>" OR title.semantic:"<query>" OR description.semantic:"<query>" | SORT _score DESC | LIMIT 20 )
@@ -156,7 +156,7 @@ keyword-only is a valid alternative:
 
 ```esql
 FROM ai-index-* METADATA _id, _index, _score
-| WHERE type != "memory.session" AND type != "memory.session_fact"
+| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact")
 | WHERE content:"<query>" OR title:"<query>" OR description:"<query>"
 | SORT _score DESC, _id ASC
 | KEEP title, description, content, type, tags
@@ -229,10 +229,21 @@ FROM <target>
   AND (expires_at IS NULL OR expires_at > NOW())
 | EVAL session_id = FIELD_EXTRACT(attributes, "memory.session_id")
 | WHERE session_id == "<conversation-id>"
-| SORT @timestamp ASC
+| SORT updated_at DESC, id ASC
+| LIMIT <n>
+| SORT updated_at ASC, id ASC
 | KEEP id, title, description, content, type, tags, updated_at,
        references.uri, references.relation, references.description
 ```
+
+The double sort is intentional: descending order selects the most recently written memories before
+`LIMIT`, then ascending order presents that selected window chronologically. `updated_at` is used
+for both sorts because it represents the last write for index-backed memories and data-stream
+revisions alike. Start `<n>` at 10 and adjust when a longer session narrative is useful.
+
+When invoking `execute_esql`, set its result limit to the same value as `<n>`. The tool appends its
+own limit when the query ends with `KEEP`; a smaller tool limit would otherwise discard the newest
+part of the selected chronological window.
 
 Memory references identify the Agent Builder conversations from which the memory was derived.
 
