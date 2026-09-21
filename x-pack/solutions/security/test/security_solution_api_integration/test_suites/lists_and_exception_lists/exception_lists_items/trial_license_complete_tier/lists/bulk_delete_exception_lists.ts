@@ -261,6 +261,75 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body.results).to.have.length(1);
       });
 
+      it('should cascade delete items belonging to an agnostic list', async () => {
+        const { body: list } = await createList({ list_id: 'list-1', namespace_type: 'agnostic' });
+        const item = {
+          ...getCreateExceptionListItemMinimalSchemaMock(),
+          list_id: 'list-1',
+          item_id: 'agnostic-item-1',
+          namespace_type: 'agnostic' as const,
+        };
+        await supertest
+          .post(EXCEPTION_LIST_ITEM_URL)
+          .set('kbn-xsrf', 'true')
+          .send(item)
+          .expect(200);
+
+        await exceptionsApi
+          .bulkDeleteExceptionLists({
+            body: { action: 'delete', ids: [list.id], namespace_type: 'agnostic' },
+          })
+          .expect(200);
+
+        const { body } = await supertest
+          .get(`${EXCEPTION_LIST_ITEM_URL}?item_id=${item.item_id}&namespace_type=agnostic`)
+          .set('kbn-xsrf', 'true')
+          .expect(404);
+
+        expect(body.status_code).to.eql(404);
+      });
+
+      it('should not find an agnostic list when the request uses the single namespace', async () => {
+        const { body: list } = await createList({ list_id: 'list-1', namespace_type: 'agnostic' });
+
+        const { body } = await exceptionsApi
+          .bulkDeleteExceptionLists({
+            body: { action: 'delete', ids: [list.id], namespace_type: 'single' },
+          })
+          .expect(200);
+
+        expect(body.success).to.eql(false);
+        expect(body.results).to.eql([]);
+        expect(body.errors).to.have.length(1);
+        expect(body.errors[0].status_code).to.eql(404);
+        expect(body.summary).to.eql({ total: 1, succeeded: 0, failed: 1, skipped: 0 });
+
+        // the agnostic list must still exist
+        await supertest
+          .get(`${EXCEPTION_LIST_URL}?list_id=list-1&namespace_type=agnostic`)
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+      });
+
+      it('should not find a single-namespace list when the request uses the agnostic namespace', async () => {
+        const { body: list } = await createList({ list_id: 'list-1' });
+
+        const { body } = await exceptionsApi
+          .bulkDeleteExceptionLists({
+            body: { action: 'delete', ids: [list.id], namespace_type: 'agnostic' },
+          })
+          .expect(200);
+
+        expect(body.success).to.eql(false);
+        expect(body.results).to.eql([]);
+        expect(body.errors).to.have.length(1);
+        expect(body.errors[0].status_code).to.eql(404);
+        expect(body.summary).to.eql({ total: 1, succeeded: 0, failed: 1, skipped: 0 });
+
+        // the single-namespace list must still exist
+        await getList('list-1').expect(200);
+      });
+
       // These cover the rule-reference safety gate: a list that one or more detection
       // rules point at must not be deleted. The gate is the endpoint's headline safety
       // feature and, before these tests existed, nothing exercised it end to end.
