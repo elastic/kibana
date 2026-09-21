@@ -24,7 +24,7 @@ const LazyVisualizeCustomContent = React.lazy(() =>
   import('./visualize_custom_content').then((m) => ({ default: m.VisualizeCustomContent }))
 );
 
-export interface InlineVisualizationProps {
+interface InlineVisualizationProps {
   services: VisualizationServices;
   /** Absent on attachments predating the discriminator, which are Lens. */
   renderer?: VisualizationRenderer;
