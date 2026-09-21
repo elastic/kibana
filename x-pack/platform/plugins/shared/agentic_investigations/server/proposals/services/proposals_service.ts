@@ -31,7 +31,6 @@ import {
 import type {
   CreateProposalRequest,
   DismissReason,
-  ListByWindowQuery,
   ListProposalsQuery,
   ListProposalsResponse,
   Proposal,
@@ -40,12 +39,11 @@ import type {
   ProposalChartsSummaryResponse,
   ProposalDecision,
   ProposalFilters,
-  ProposalsListResponse,
   ProposalStatus,
   ProposalUser,
   ProposalWithMetadata,
 } from '../../../common/proposals/proposal';
-import { isExpired, MAX_PROPOSALS_SIZE } from '../../../common/proposals/proposal';
+import { isExpired } from '../../../common/proposals/proposal';
 import type { ProposalDocument, ProposalsStorageClient } from '../storage/proposals_storage';
 import { toSortRanks } from '../storage/sort_ranks';
 import {
@@ -180,6 +178,9 @@ export class ProposalsService {
    * alphabetically. Doing it here rather than in memory is what makes the list
    * pageable instead of capped at a single fetch. Category is not part of the
    * order: a UI groups by it and decides for itself which group leads.
+   *
+   * Action-metadata resolution is batched across the page, so a page of
+   * proposals sharing an action costs one `getWorkflow` rather than one each.
    */
   async list(
     query: ListProposalsQuery,
@@ -187,19 +188,11 @@ export class ProposalsService {
     /** Replaces the default priority sort; the queues page by recency instead. */
     sort?: SortCombinations[]
   ): Promise<ListProposalsResponse> {
-    const filter = toFilterClauses(query, spaceId);
-
-    // Not in the shared translator: `listByWindow` reads decidedAt as one arm of
-    // a disjunction, where a conjunctive clause would drop every awaiting proposal.
-    if (query.decidedWithinHours !== undefined) {
-      filter.push({ range: { decidedAt: { gte: `now-${query.decidedWithinHours}h` } } });
-    }
-
     const response = await this.deps.storage.search({
       track_total_hits: true,
       size: query.size,
       from: query.from,
-      query: { bool: { filter } },
+      query: { bool: { filter: toFilterClauses(query, spaceId) } },
       sort: sort ?? [
         { impactRank: { order: 'asc' } },
         { confidenceRank: { order: 'asc' } },
@@ -210,12 +203,11 @@ export class ProposalsService {
       ],
     });
 
-    const proposals = await Promise.all(
+    const proposals = await this.withMetadataBatch(
       response.hits.hits
         .filter((hit): hit is typeof hit & { _id: string } => hit._id !== undefined)
-        .map((hit) =>
-          this.withMetadata(toProposal(hit._id, hit._source as ProposalDocument), spaceId)
-        )
+        .map((hit) => toProposal(hit._id, hit._source as ProposalDocument)),
+      spaceId
     );
 
     return {
@@ -225,61 +217,6 @@ export class ProposalsService {
           ? response.hits.total
           : response.hits.total?.value ?? proposals.length,
     };
-  }
-
-  /**
-   * An activity view: everything still awaiting a decision, at any age, plus
-   * everything decided within the last N hours. In creation order, capped
-   * rather than paged.
-   *
-   * It is a separate method because the two halves are a disjunction — "still
-   * awaiting" and "decided recently" are unrelated conditions, so neither can
-   * be expressed as one more filter on top of `list()`. The shared filters in
-   * `ProposalFilters` apply to both halves and mean exactly what they mean in
-   * `list()`; only the union and the paging differ.
-   *
-   * Expired proposals fall out of both halves on their own: the awaiting half
-   * matches on `status: 'pending'`, and the decided half needs a `decidedAt`
-   * that a proposal nobody answered never got.
-   *
-   * No HTTP route, because a capped read with no paging is not a contract worth
-   * exposing; in-process callers reach it through the start contract.
-   *
-   * Action-metadata resolution is memoised per `actionWorkflowId` across the
-   * entire result set to avoid a `getWorkflow` fetch per proposal.
-   */
-  async listByWindow(query: ListByWindowQuery, spaceId: string): Promise<ProposalsListResponse> {
-    const response = await this.deps.storage.search({
-      track_total_hits: true,
-      size: MAX_PROPOSALS_SIZE,
-      query: {
-        bool: {
-          filter: toFilterClauses(query, spaceId),
-          should: [
-            // `pending` is only ever valid while undecided, so the status is
-            // the whole condition.
-            { term: { status: 'pending' } },
-            { range: { decidedAt: { gte: `now-${query.decidedWithinHours}h` } } },
-          ],
-          minimum_should_match: 1,
-        },
-      },
-      sort: [{ createdAt: { order: 'asc' } }],
-    });
-
-    const hits = response.hits.hits.filter(
-      (hit): hit is typeof hit & { _id: string } => hit._id !== undefined
-    );
-    const rawProposals = hits.map((hit) => toProposal(hit._id, hit._source as ProposalDocument));
-
-    const proposals = await this.withMetadataBatch(rawProposals, spaceId);
-
-    const total =
-      typeof response.hits.total === 'number'
-        ? response.hits.total
-        : response.hits.total?.value ?? proposals.length;
-
-    return { proposals, total, truncated: total > proposals.length };
   }
 
   /**
@@ -906,7 +843,7 @@ type QueryFilterList = Array<Record<string, unknown>>;
  * identically. The space term is always present: no read crosses a space.
  */
 const toFilterClauses = (
-  filters: ProposalFilters & { category?: string },
+  filters: ProposalFilters & { category?: string; decidedWithinHours?: number },
   spaceId: string
 ): QueryFilterList => {
   const filter: QueryFilterList = [{ term: { spaceId } }];
@@ -922,6 +859,9 @@ const toFilterClauses = (
   }
   if (filters.category) {
     filter.push({ term: { category: filters.category } });
+  }
+  if (filters.decidedWithinHours !== undefined) {
+    filter.push({ range: { decidedAt: { gte: `now-${filters.decidedWithinHours}h` } } });
   }
   if (filters.excludeSuperseded) {
     // A superseded proposal is represented by its successor, so showing both

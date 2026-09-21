@@ -254,28 +254,6 @@ export interface ListProposalsResponse {
   total: number;
 }
 
-export const MAX_PROPOSALS_SIZE = 500;
-
-export const proposalsQuerySchema = z.object({
-  windowHours: z.coerce.number().int().min(1).max(168).default(24),
-});
-export type ProposalsQuery = z.infer<typeof proposalsQuerySchema>;
-
-export interface ProposalsListResponse {
-  proposals: ProposalWithMetadata[];
-  total: number;
-  truncated: boolean;
-}
-
-/**
- * Parameters for `listByWindow`: the shared filters, plus how far back to reach
- * for decisions. The union of "awaiting" and "recently decided" is what the
- * shape *is*, so it is not a flag.
- */
-export interface ListByWindowQuery extends ProposalFilters {
-  decidedWithinHours: number;
-}
-
 export const proposalChartsSummaryQuerySchema = z
   .object({
     /** The 168h ceiling keeps the ES|QL queries cheap. */

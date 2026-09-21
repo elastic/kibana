@@ -1293,6 +1293,28 @@ describe('ProposalsService', () => {
       );
     });
 
+    it('should bound the closed queue to the requested recency window', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      await service.list(listQuery({ decidedWithinHours: 72 }), SPACE_ID);
+
+      const [[searchArgs]] = storage.search.mock.calls;
+      expect(searchArgs.query.bool.filter).toEqual(
+        expect.arrayContaining([{ range: { decidedAt: { gte: 'now-72h' } } }])
+      );
+    });
+
+    it('should not bound on decidedAt when no window is requested', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      await service.list(listQuery(), SPACE_ID);
+
+      const [[searchArgs]] = storage.search.mock.calls;
+      expect(JSON.stringify(searchArgs.query.bool.filter)).not.toContain('decidedAt');
+    });
+
     it('should not filter on decision or supersession by default', async () => {
       const storage = createStorage(baseDocument());
       const { service } = createService(storage);
@@ -1314,114 +1336,6 @@ describe('ProposalsService', () => {
       expect(proposals[0]).not.toHaveProperty('impactRank');
       expect(proposals[0]).not.toHaveProperty('confidenceRank');
     });
-  });
-
-  describe('listByWindow', () => {
-    const activityQuery = (decidedWithinHours = 24) => ({
-      decidedWithinHours,
-      excludeSuperseded: true,
-      excludeExpired: false,
-    });
-
-    it('includes proposals awaiting a decision regardless of age', async () => {
-      const storage = createStorage(baseDocument({ status: 'pending' }));
-      const { service } = createService(storage);
-
-      const { proposals } = await service.listByWindow(activityQuery(), SPACE_ID);
-
-      expect(proposals).toHaveLength(1);
-    });
-
-    it('unions awaiting with decided-within-window', async () => {
-      const storage = createStorage(baseDocument());
-      const { service } = createService(storage);
-
-      await service.listByWindow(activityQuery(48), SPACE_ID);
-
-      const [[searchArgs]] = storage.search.mock.calls;
-      const { bool } = searchArgs.query;
-      expect(bool.minimum_should_match).toBe(1);
-      // `pending` is only ever valid while undecided, so the status is the
-      // whole awaiting condition.
-      expect(bool.should).toEqual([
-        { term: { status: 'pending' } },
-        { range: { decidedAt: { gte: 'now-48h' } } },
-      ]);
-    });
-
-    it('applies the shared filters exactly as list does', async () => {
-      const storage = createStorage(baseDocument());
-      const { service } = createService(storage);
-
-      await service.listByWindow(
-        { ...activityQuery(), conversationId: 'conv-1', excludeExpired: true },
-        SPACE_ID
-      );
-      await service.list(
-        listQuery({ conversationId: 'conv-1', excludeExpired: true, excludeSuperseded: true }),
-        SPACE_ID
-      );
-
-      // Both reads translate the vocabulary through the same builder, so a
-      // filter cannot come to mean one thing here and another there.
-      const [[windowArgs], [listArgs]] = storage.search.mock.calls;
-      expect(windowArgs.query.bool.filter).toEqual(listArgs.query.bool.filter);
-    });
-
-    it('drops superseded proposals so a retried chain appears once', async () => {
-      const storage = createStorage(baseDocument());
-      const { service } = createService(storage);
-
-      await service.listByWindow(activityQuery(), SPACE_ID);
-
-      const [[searchArgs]] = storage.search.mock.calls;
-      expect(searchArgs.query.bool.filter).toEqual(
-        expect.arrayContaining([{ bool: { must_not: { exists: { field: 'supersededBy' } } } }])
-      );
-    });
-
-    it('reaches a recently expired proposal through the decided leg, not the awaiting one', async () => {
-      // `update` stamps `decidedAt` when it settles a proposal nobody decided,
-      // so an expired one does match the decided-recently leg — deliberately,
-      // because "you missed this" is activity worth surfacing. It carries no
-      // decision, so a consumer has to classify on the status rather than the
-      // decision or it lands back in the open queue.
-      const storage = createStorage(baseDocument());
-      const { service } = createService(storage);
-
-      await service.listByWindow(activityQuery(), SPACE_ID);
-
-      const [[searchArgs]] = storage.search.mock.calls;
-      expect(searchArgs.query.bool.should).toEqual([
-        { term: { status: 'pending' } },
-        { range: { decidedAt: { gte: 'now-24h' } } },
-      ]);
-    });
-
-    it('returns truncated=true when total exceeds the cap', async () => {
-      const doc = baseDocument();
-      const storage = {
-        ...createStorage(doc),
-        search: jest.fn().mockResolvedValue({
-          hits: { hits: [searchHit(doc)], total: { value: 9999 } },
-        }),
-      } as unknown as ReturnType<typeof createStorage>;
-      const { service } = createService(storage);
-
-      const { truncated, total } = await service.listByWindow(activityQuery(), SPACE_ID);
-
-      expect(truncated).toBe(true);
-      expect(total).toBe(9999);
-    });
-
-    it('returns truncated=false when total is within the cap', async () => {
-      const storage = createStorage(baseDocument());
-      const { service } = createService(storage);
-
-      const { truncated } = await service.listByWindow(activityQuery(), SPACE_ID);
-
-      expect(truncated).toBe(false);
-    });
 
     it('fetches action metadata only once for proposals sharing an actionWorkflowId', async () => {
       const doc = baseDocument({ actionWorkflowId: 'shared-action' });
@@ -1437,20 +1351,9 @@ describe('ProposalsService', () => {
       const workflowsApi = createWorkflowsApi();
       const { service } = createService(storage, workflowsApi);
 
-      await service.listByWindow(activityQuery(), SPACE_ID);
+      await service.list(listQuery(), SPACE_ID);
 
       expect(workflowsApi.getWorkflow).toHaveBeenCalledTimes(1);
-    });
-
-    it('does not leak sort ranks into the response', async () => {
-      const storage = createStorage(baseDocument());
-      const { service } = createService(storage);
-
-      const { proposals } = await service.listByWindow(activityQuery(), SPACE_ID);
-
-      expect(proposals[0]).not.toHaveProperty('categoryRank');
-      expect(proposals[0]).not.toHaveProperty('impactRank');
-      expect(proposals[0]).not.toHaveProperty('confidenceRank');
     });
   });
 
