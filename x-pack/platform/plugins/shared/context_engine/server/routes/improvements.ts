@@ -51,7 +51,7 @@ import { ImprovementConflictError, ImprovementNotFoundError } from '../improveme
 import type { ImprovementsServiceApi } from '../improvements/service';
 import type { WorkflowProvider } from '../workflows/provider';
 import { handleAiIndexError } from './ai_index_errors';
-import { ImprovementAuditAction, improvementDecisionAuditEvent } from './audit_events';
+import { ImprovementAuditAction, improvementDecisionAuditEvent } from '../audit/audit_events';
 import { resolveSpaceId } from './space';
 import { withContextEngineFeatureFlag } from './with_feature_flag';
 

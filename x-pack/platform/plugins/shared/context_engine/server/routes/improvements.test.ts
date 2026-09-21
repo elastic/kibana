@@ -24,7 +24,7 @@ import { applyImprovement, ApplyImprovementError } from '../improvements/apply';
 import { ImprovementConflictError } from '../improvements/errors';
 import type { ImprovementsServiceApi } from '../improvements/service';
 import type { WorkflowProvider } from '../workflows/provider';
-import { ImprovementAuditAction } from './audit_events';
+import { ImprovementAuditAction } from '../audit/audit_events';
 import { registerImprovementRoutes } from './improvements';
 
 jest.mock('../improvements/apply', () => {
