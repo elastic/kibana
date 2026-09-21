@@ -6,15 +6,12 @@
  */
 
 import type { NodeDefinition } from '@kbn/core-chrome-browser';
-import type { CoreStart } from '@kbn/core/public';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
 import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
-import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
 
 export const createManagementFooterItemsTree = (
-  core: CoreStart,
   chatExperience: AIChatExperience = AIChatExperience.Classic
 ): NodeDefinition => ({
   id: 'category-management',
@@ -119,7 +116,6 @@ export const createManagementFooterItemsTree = (
             },
           ],
         },
-        ...getAlertingV2ManagementNavPanel(core),
         {
           title: i18nStrings.stackManagementV2.alertsAndInsights.title,
           breadcrumbStatus: 'hidden',
