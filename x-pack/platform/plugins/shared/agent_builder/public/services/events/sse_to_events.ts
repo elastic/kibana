@@ -141,6 +141,9 @@ const findToolCallStep = (
   const sequence = steps.findIndex(
     (step) => isToolCallStep(step) && step.tool_call_id === toolCallId
   );
+  if (sequence === -1) {
+    return undefined;
+  }
   const step = steps[sequence];
   return isToolCallStep(step) ? { sequence, step } : undefined;
 };
@@ -311,10 +314,13 @@ export const sseToEvents = (state: LiveEventsState, event: ChatEvent): LiveEvent
   }
 
   if (isToolResultEvent(event)) {
-    const { tool_call_id: toolCallId, results } = event.data;
+    const { tool_call_id: toolCallId, tool_id: toolId, results } = event.data;
     const found = findToolCallStep(state.steps, toolCallId);
     if (!found) {
-      return state;
+      return withAppendedStep(
+        state,
+        createToolCallStep({ tool_call_id: toolCallId, tool_id: toolId, params: {}, results })
+      );
     }
     return withStepAt(state, found.sequence, { ...found.step, results });
   }

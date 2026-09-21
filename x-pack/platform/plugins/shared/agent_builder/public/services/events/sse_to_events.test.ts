@@ -147,6 +147,25 @@ describe('sseToEvents', () => {
     });
   });
 
+  it('builds a step from a resume’s tool_result when no tool_call preceded it', () => {
+    const stepId = executionStepEventId(ROUND_ID, 1, 0);
+    const state = fold(executionStarted(RESUME_EXECUTION_ID), {
+      type: ChatEventType.toolResult,
+      data: {
+        tool_call_id: 't1',
+        tool_id: 'my_tool',
+        results: [{ tool_result_id: 'r1', type: ToolResultType.other, data: { ok: true } }],
+      },
+    } as ChatEvent);
+
+    expect(ids(state)).toEqual([`${RESUME_EXECUTION_ID}::execution_started`, stepId]);
+    expect(stepAt(state, stepId)).toMatchObject({
+      tool_call_id: 't1',
+      tool_id: 'my_tool',
+      results: [{ tool_result_id: 'r1', type: ToolResultType.other, data: { ok: true } }],
+    });
+  });
+
   it('numbers a resume’s steps off its own execution id', () => {
     const state = fold(executionStarted(RESUME_EXECUTION_ID), toolCall('t1'), toolCall('t2'));
 
