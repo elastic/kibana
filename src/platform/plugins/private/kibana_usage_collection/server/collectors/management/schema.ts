@@ -1055,7 +1055,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'alerting:v2:showClassicAlertsTable': {
+  'alerting:v1:showClassicAlertsTable': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },

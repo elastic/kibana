@@ -238,5 +238,5 @@ export interface UsageStats {
   'query_activity:minRunningTime': number;
   'genAiSettings:tokenUsageTracking': boolean;
   'alerting:v2:enabled': boolean;
-  'alerting:v2:showClassicAlertsTable': boolean;
+  'alerting:v1:showClassicAlertsTable': boolean;
 }

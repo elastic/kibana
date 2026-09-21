@@ -75,7 +75,7 @@ export const shouldShowAlertingV2CreateRuleFlyout = (core: CoreStart): boolean =
  * solution navigation.
  *
  * Always shown while Alerting v2 is disabled. When v2 is enabled, shown only
- * if the space-scoped `alerting:v2:showClassicAlertsTable` setting is true.
+ * if the space-scoped `alerting:v1:showClassicAlertsTable` setting is true.
  */
 export const shouldShowClassicObservabilityAlertsTable = (core: CoreStart): boolean => {
   if (!isAlertingV2Enabled(core)) {
