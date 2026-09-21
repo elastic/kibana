@@ -143,6 +143,18 @@ describe('applyCustomOpenEndedFloorToSelection', () => {
     ).toEqual([{ min: ML_ANOMALY_THRESHOLD.MAJOR, max: ML_ANOMALY_THRESHOLD.CRITICAL }]);
   });
 
+  it('drops the partial first band when a middle overlapping band is toggled off', () => {
+    expect(
+      applyCustomOpenEndedFloorToSelection(
+        [
+          { min: ML_ANOMALY_THRESHOLD.MINOR, max: ML_ANOMALY_THRESHOLD.MAJOR },
+          { min: ML_ANOMALY_THRESHOLD.CRITICAL },
+        ],
+        [{ min: 30 }]
+      )
+    ).toEqual([{ min: ML_ANOMALY_THRESHOLD.CRITICAL }]);
+  });
+
   it('uses canonical bands when the user expands below the original floor', () => {
     expect(applyCustomOpenEndedFloorToSelection(canonicalBands.slice(1), [{ min: 30 }])).toEqual(
       canonicalBands.slice(1)

@@ -254,6 +254,32 @@ describe('SelectSeverityUI', () => {
     ).toEqual([{ min: 50, max: 75 }]);
   });
 
+  it('drops the partial first band when deselecting a middle overlapping band', async () => {
+    const onChange = jest.fn();
+    const { getByTestId, getByRole } = render(
+      <SelectSeverityUI severity={[{ min: 30 }]} onChange={onChange} />
+    );
+
+    const control = getByTestId('mlAnomalySeverityThresholdControls');
+    const button = control.querySelector('button');
+    act(() => {
+      fireEvent.click(button!);
+    });
+
+    await waitFor(() => {
+      expect(getByRole('option', { name: '50-75' })).toBeInTheDocument();
+    });
+
+    act(() => {
+      fireEvent.click(getByRole('option', { name: '50-75' }));
+    });
+
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(
+      onChange.mock.calls[0][0].map((option: { threshold: unknown }) => option.threshold)
+    ).toEqual([{ min: 75 }]);
+  });
+
   it('displays the canonical critical band as 75-100', () => {
     const { getByTestId } = render(
       <SelectSeverityUI severity={[{ min: 75 }]} onChange={jest.fn()} />

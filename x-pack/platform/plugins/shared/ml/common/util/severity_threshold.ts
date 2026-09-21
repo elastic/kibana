@@ -58,13 +58,43 @@ export const getCanonicalBandsOverlappingFloor = (
     return max === undefined || max > floor;
   });
 
+const selectedBandsContinuouslyCoverFloorToMax = (
+  selectedBands: SeverityThreshold[],
+  floor: number
+): boolean => {
+  if (selectedBands.length === 0) {
+    return false;
+  }
+
+  const sorted = [...selectedBands].sort((left, right) => left.min - right.min);
+  const first = sorted[0];
+  const firstMax = getSeverityThresholdMax(first);
+  if (first.min > floor || (firstMax !== undefined && firstMax <= floor)) {
+    return false;
+  }
+
+  const last = sorted[sorted.length - 1];
+  if (!isOpenEndedSeverityThreshold(last)) {
+    return false;
+  }
+
+  for (let index = 0; index < sorted.length - 1; index++) {
+    const currentMax = getSeverityThresholdMax(sorted[index]);
+    if (currentMax === undefined || currentMax !== sorted[index + 1].min) {
+      return false;
+    }
+  }
+
+  return true;
+};
+
 /**
  * When the current filter is a custom open-ended floor such as `{ min: 30 }`,
- * keep that floor while the remaining selection still covers floor-to-100.
- * Partial first bands cannot be persisted (schema only allows canonical
- * `{ min, max }` literals or open-ended `{ min }`), so they are dropped once
- * the selection is no longer floor-to-100. Selecting a band entirely below
- * the floor expands the filter to canonical bands.
+ * keep that floor only while the remaining selection continuously covers
+ * floor-to-100. Partial first bands cannot be persisted (schema only allows
+ * canonical `{ min, max }` literals or open-ended `{ min }`), so they are
+ * dropped once a gap appears or the open-ended last band is removed.
+ * Selecting a band entirely below the floor expands the filter to canonical bands.
  */
 export const applyCustomOpenEndedFloorToSelection = (
   selectedBands: SeverityThreshold[],
@@ -83,13 +113,12 @@ export const applyCustomOpenEndedFloorToSelection = (
     return selectedBands;
   }
 
-  const stillOpenToMax = selectedBands.some((band) => getSeverityThresholdMax(band) === undefined);
   const stillHasPartialFirst = selectedBands.some((band) => {
     const max = getSeverityThresholdMax(band);
     return band.min < floor && (max === undefined || max > floor);
   });
 
-  if (stillOpenToMax && stillHasPartialFirst) {
+  if (stillHasPartialFirst && selectedBandsContinuouslyCoverFloorToMax(selectedBands, floor)) {
     return [{ min: floor }];
   }
 
