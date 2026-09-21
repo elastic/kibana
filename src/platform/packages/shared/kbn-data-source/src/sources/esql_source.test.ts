@@ -122,7 +122,7 @@ describe('EsqlSource', () => {
         timeFieldName: '@timestamp',
       });
       expect(sort.id).not.toBe(where.id);
-      expect(sort.datasetKey).toBe('esql:logs-*:@timestamp');
+      expect(sort.datasetKey).toBe('esql:logs-*:@timestamp:');
       expect(sort.datasetKey).toBe(where.datasetKey);
       expect(sort.datasetKey).toBe(evalQuery.datasetKey);
     });
@@ -145,6 +145,33 @@ describe('EsqlSource', () => {
       });
       expect(logs.datasetKey).not.toBe(metrics.datasetKey);
       expect(logs.datasetKey).not.toBe(otherTime.datasetKey);
+    });
+
+    it('uses a different datasetKey when projectRouting differs', async () => {
+      const a = await EsqlSource.create({
+        query: 'FROM logs-*',
+        resultColumns: [],
+        timeFieldName: '@timestamp',
+        projectRouting: 'project-a',
+      });
+      const b = await EsqlSource.create({
+        query: 'FROM logs-*',
+        resultColumns: [],
+        timeFieldName: '@timestamp',
+        projectRouting: 'project-b',
+      });
+      expect(a.datasetKey).toBe('esql:logs-*:@timestamp:project-a');
+      expect(b.datasetKey).toBe('esql:logs-*:@timestamp:project-b');
+    });
+
+    it('prefers SET project_routing over the picker arg in datasetKey', async () => {
+      const source = await EsqlSource.create({
+        query: 'SET project_routing = "_alias:project-a"; FROM logs-*',
+        resultColumns: [],
+        timeFieldName: '@timestamp',
+        projectRouting: 'project-b',
+      });
+      expect(source.datasetKey).toBe('esql:logs-*:@timestamp:_alias:project-a');
     });
 
     it('produces a different id when projectRouting differs', async () => {
@@ -425,6 +452,8 @@ describe('EsqlSource', () => {
       expect(updated.id).toBe(original.id);
       expect(updated.query).toBe(original.query);
       expect(updated.timeFieldName).toBe('@timestamp');
+      expect(updated.projectRouting).toBe(original.projectRouting);
+      expect(updated.datasetKey).toBe(original.datasetKey);
       expect(updated.resultColumns).toEqual(updatedCols);
       expect(original.resultColumns).toEqual(originalCols);
       expect(updated.getColumns().map((column) => column.name)).toEqual(['message', 'bytes']);
@@ -558,6 +587,32 @@ describe('EsqlSource', () => {
 
       expect(source.getColumns()).toEqual([]);
       expect(source.timeFieldName).toBe('@timestamp');
+    });
+
+    it('retries source_info after a failed create instead of returning a cached empty schema', async () => {
+      const query = 'FROM logs-http-retry-*';
+      const failed = await EsqlSource.create({
+        query,
+        http: createHttp({
+          timeField: '@timestamp',
+          sourceInfoError: new Error('source_info failed'),
+        }),
+        timeFieldName: '@timestamp',
+      });
+      const recovered = await EsqlSource.create({
+        query,
+        http: createHttp({
+          timeField: '@timestamp',
+          sourceInfo: { columns: [{ name: 'message', esType: 'keyword' }] },
+        }),
+        timeFieldName: '@timestamp',
+      });
+
+      expect(failed.getColumns()).toEqual([]);
+      expect(recovered).not.toBe(failed);
+      expect(recovered.getColumns()).toEqual([
+        { name: 'message', type: 'string', esType: 'keyword', source: 'index' },
+      ]);
     });
 
     it('skips a second HTTP round-trip on cache hit', async () => {

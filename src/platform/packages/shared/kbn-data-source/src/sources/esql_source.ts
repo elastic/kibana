@@ -19,6 +19,7 @@ import {
   buildEsqlSourceCacheKey,
   isComputedColumn,
   getQuerySummary,
+  getProjectRoutingFromEsqlQuery,
   type ESQLSourceInfoColumn,
 } from '@kbn/esql-utils';
 import type { ESQLControlVariable } from '@kbn/esql-types';
@@ -80,6 +81,7 @@ interface EsqlSourceConstructorArgs {
   query: string;
   title: string;
   timeFieldName: string | undefined;
+  projectRouting: string | undefined;
   resultColumns: readonly DatatableColumn[];
 }
 
@@ -87,11 +89,11 @@ interface EsqlSourceConstructorArgs {
  * `DataSource` implementation for ES|QL queries.
  *
  * Does not require or create a `DataView`. Identity is derived from the trimmed
- * query, optional project routing, control variables, and time field name. When
- * `http` is provided, `http` is provided,
- * {@link EsqlSource.create} resolves the time field and LIMIT 0 schema in
- * parallel unless `timeFieldName` / `resultColumns` are already set.
- * Source-info failures are ignored and `resultColumns` (or `[]`) is used.
+ * query, optional project routing, control variables, and time field name.
+ * When `http` is provided, {@link EsqlSource.create} resolves the time field
+ * and LIMIT 0 schema in parallel unless `timeFieldName` / `resultColumns` are
+ * already set. Source-info failures still return an empty-column instance
+ * but are not cached.
  *
  * Instances are cached by query identity. The first `create` for a key wins;
  * use {@link withColumns} to attach fetch-result columns without changing `id`.
@@ -107,6 +109,7 @@ export class EsqlSource implements DataSourceBase {
   public readonly query: string;
   public readonly title: string;
   public readonly timeFieldName: string | undefined;
+  public readonly projectRouting: string | undefined;
   public readonly references: SavedObjectReference[];
   public readonly fields: DataViewFieldBase[];
 
@@ -126,12 +129,14 @@ export class EsqlSource implements DataSourceBase {
     query,
     title,
     timeFieldName,
+    projectRouting,
     resultColumns,
   }: EsqlSourceConstructorArgs) {
     this.id = id;
     this.query = query;
     this.title = title;
     this.timeFieldName = timeFieldName;
+    this.projectRouting = projectRouting;
     this.references = [{ type: 'index-pattern', id, name: 'data-source' }];
 
     this.resultColumns = resultColumns;
@@ -162,9 +167,11 @@ export class EsqlSource implements DataSourceBase {
     if (cached) return cached;
 
     const title = getIndexPatternFromESQLQuery(query);
+    const projectRouting = getProjectRoutingFromEsqlQuery(query) ?? args.projectRouting;
 
     let timeFieldName: string | undefined = args.timeFieldName;
     let resultColumns: readonly DatatableColumn[] = args.resultColumns ?? [];
+    let discoveredSchema: Awaited<ReturnType<typeof getESQLSourceInfo>> | null | undefined;
 
     const { http } = args;
     const shouldResolveTimeField = Boolean(http) && timeFieldName === undefined;
@@ -192,6 +199,9 @@ export class EsqlSource implements DataSourceBase {
       ]);
 
       timeFieldName = resolvedTimeField;
+      if (shouldResolveSchema) {
+        discoveredSchema = info;
+      }
       if (info) {
         resultColumns = columnsFromSourceInfo(info.columns, query);
       }
@@ -210,10 +220,15 @@ export class EsqlSource implements DataSourceBase {
       query,
       title,
       timeFieldName,
+      projectRouting,
       resultColumns,
     });
 
-    EsqlSource.instanceCache.set(instanceKey, instance);
+    // Failed source_info (`info === null`) is not a legitimate empty schema —
+    // skip the cache so a later create can retry discovery.
+    if (!shouldResolveSchema || discoveredSchema !== null) {
+      EsqlSource.instanceCache.set(instanceKey, instance);
+    }
     return instance;
   }
 
@@ -222,15 +237,20 @@ export class EsqlSource implements DataSourceBase {
   }
 
   /**
-   * Dataset identity for the FROM target + time field, independent of query-instance {@link id}.
-   * SORT / WHERE / EVAL keep the same key; a different FROM or time field does not.
+   * Dataset identity for the FROM target + time field + effective project routing,
+   * independent of query-instance {@link id}.
+   * SORT / WHERE / EVAL keep the same key; a different FROM, time field, or project does not.
    */
-  public static getDatasetKey(title: string, timeFieldName?: string): string {
-    return `esql:${title}:${timeFieldName ?? ''}`;
+  public static getDatasetKey(
+    title: string,
+    timeFieldName?: string,
+    projectRouting?: string
+  ): string {
+    return `esql:${title}:${timeFieldName ?? ''}:${projectRouting ?? ''}`;
   }
 
   public get datasetKey(): string {
-    return EsqlSource.getDatasetKey(this.title, this.timeFieldName);
+    return EsqlSource.getDatasetKey(this.title, this.timeFieldName, this.projectRouting);
   }
 
   public get name(): string {
@@ -255,6 +275,7 @@ export class EsqlSource implements DataSourceBase {
       query: this.query,
       title: this.title,
       timeFieldName: this.timeFieldName,
+      projectRouting: this.projectRouting,
       resultColumns,
     });
   }

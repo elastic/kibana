@@ -69,6 +69,53 @@ describe('isSameDataset', () => {
     expect(isSameDataset(logs, metrics)).toBe(false);
   });
 
+  it('treats ES|QL sources with different projectRouting as different datasets', async () => {
+    const projectA = await EsqlSource.create({
+      query: 'FROM logs-*',
+      resultColumns: [],
+      timeFieldName: '@timestamp',
+      projectRouting: 'project-a',
+    });
+    const projectB = await EsqlSource.create({
+      query: 'FROM logs-*',
+      resultColumns: [],
+      timeFieldName: '@timestamp',
+      projectRouting: 'project-b',
+    });
+    expect(isSameDataset(projectA, projectB)).toBe(false);
+  });
+
+  it('treats ES|QL sources with different SET project_routing as different datasets', async () => {
+    const projectA = await EsqlSource.create({
+      query: 'SET project_routing = "_alias:project-a"; FROM logs-*',
+      resultColumns: [],
+      timeFieldName: '@timestamp',
+    });
+    const projectB = await EsqlSource.create({
+      query: 'SET project_routing = "_alias:project-b"; FROM logs-*',
+      resultColumns: [],
+      timeFieldName: '@timestamp',
+    });
+    expect(isSameDataset(projectA, projectB)).toBe(false);
+  });
+
+  it('treats SORT vs WHERE as the same dataset when routing matches', async () => {
+    const sort = await EsqlSource.create({
+      query: 'FROM logs-* | SORT @timestamp DESC',
+      resultColumns: [],
+      timeFieldName: '@timestamp',
+      projectRouting: 'project-a',
+    });
+    const where = await EsqlSource.create({
+      query: 'FROM logs-* | WHERE bytes > 0',
+      resultColumns: [],
+      timeFieldName: '@timestamp',
+      projectRouting: 'project-a',
+    });
+    expect(sort.id).not.toBe(where.id);
+    expect(isSameDataset(sort, where)).toBe(true);
+  });
+
   it('compares Classic sources by id', () => {
     const a = new DataViewSource(makeDataView('dv-1'));
     const same = new DataViewSource(makeDataView('dv-1'));

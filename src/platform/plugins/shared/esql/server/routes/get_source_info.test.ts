@@ -143,18 +143,20 @@ describe('registerGetSourceInfoRoute', () => {
     expect(esqlQuery).not.toHaveBeenCalled();
   });
 
-  it('logs LIMIT 0 failures and returns empty columns', async () => {
+  it('logs LIMIT 0 failures and does not return empty columns', async () => {
     const { router, handler, requestHandlerContext, response, context, esqlQuery, errorLogger } =
       buildMocks();
     esqlQuery.mockRejectedValueOnce(new Error('esql failed'));
     registerGetSourceInfoRoute(router, context);
 
-    await handler(requestHandlerContext, { body: { query: 'FROM logs-*' } }, response);
+    await expect(
+      handler(requestHandlerContext, { body: { query: 'FROM logs-*' } }, response)
+    ).rejects.toThrow('esql failed');
 
     expect(errorLogger.error).toHaveBeenCalledWith(
       expect.stringContaining('Failed to fetch ES|QL source info columns'),
       expect.objectContaining({ tags: ['esql', 'source_info'] })
     );
-    expect(response.ok).toHaveBeenCalledWith({ body: { columns: [] } });
+    expect(response.ok).not.toHaveBeenCalled();
   });
 });

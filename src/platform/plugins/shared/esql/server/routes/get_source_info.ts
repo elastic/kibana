@@ -120,7 +120,7 @@ export const registerGetSourceInfoRoute = (
               stack_trace: error instanceof Error ? error.stack : undefined,
             },
           });
-          columnsResult = { columns: [], all_columns: undefined };
+          throw error;
         }
 
         const allColumnsRaw: ESQLColumn[] =
