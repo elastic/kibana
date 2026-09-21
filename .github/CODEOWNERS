@@ -48,6 +48,7 @@ examples/user_activity_example @elastic/kibana-core
 examples/user_profile_examples @elastic/kibana-security
 examples/v8_profiler_examples @elastic/response-ops
 examples/workflows_extensions_example @elastic/workflows-eng
+oas_docs @elastic/kibana-core
 packages/kbn-api-contracts @elastic/kibana-core
 packages/kbn-babel-preset @elastic/kibana-operations
 packages/kbn-capture-oas-snapshot-cli @elastic/kibana-core
@@ -467,6 +468,7 @@ src/platform/packages/shared/as-code/export-flyout-component @elastic/kibana-das
 src/platform/packages/shared/as-code/filters-constants @elastic/kibana-dashboards
 src/platform/packages/shared/as-code/filters-schema @elastic/kibana-dashboards
 src/platform/packages/shared/as-code/filters-transforms @elastic/kibana-dashboards
+src/platform/packages/shared/as-code/import-flyout-component @elastic/kibana-dashboards @elastic/kibana-discover
 src/platform/packages/shared/as-code/shared-schemas @elastic/kibana-dashboards
 src/platform/packages/shared/as-code/shared-telemetry @elastic/kibana-dashboards
 src/platform/packages/shared/as-code/shared-transforms @elastic/kibana-dashboards
@@ -1282,6 +1284,7 @@ x-pack/platform/plugins/shared/osquery/cypress @elastic/security-defend-workflow
 x-pack/platform/plugins/shared/query_activity @elastic/kibana-management
 x-pack/platform/plugins/shared/rule_registry @elastic/response-ops @elastic/nightshift-sre-agent-team
 x-pack/platform/plugins/shared/sample_data_ingest @elastic/search-ml-ux
+x-pack/platform/plugins/shared/sandbox @elastic/nightshift-context-and-research-team
 x-pack/platform/plugins/shared/saved_objects_tagging @elastic/appex-sharedux
 x-pack/platform/plugins/shared/screenshotting @elastic/kibana-reporting-services
 x-pack/platform/plugins/shared/search_inference_endpoints @elastic/search-ml-ux
@@ -1521,7 +1524,7 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/entity-store-global-state @elastic/core-analysis
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/epm-packages @elastic/streams-ui
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/fleet-agent-policies @elastic/streams-ui
-/packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/fleet-cloud-connector @elastic/streams-ui
+/packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/fleet-cloud-connector @elastic/streams-ui @elastic/siem-conduit
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/fleet-package-policies @elastic/streams-ui
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/gap_auto_fill_scheduler @elastic/response-ops
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/ingest-agent-policies @elastic/streams-ui
@@ -1943,10 +1946,9 @@ x-pack/platform/plugins/shared/significant_events/common/slack_app @elastic/nigh
 x-pack/platform/plugins/shared/significant_events/server/routes/internal/apps/slack @elastic/nightshift-context-and-research-team
 x-pack/platform/plugins/shared/significant_events_app/public/pages/significant_events/components/settings/apps_section @elastic/nightshift-context-and-research-team
 
-# Significant Events - Memory & investigation features (owned by Nightshift context & research)
-x-pack/platform/plugins/shared/significant_events/server/memory_and_investigation @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
-x-pack/platform/plugins/shared/significant_events/common/memory_and_investigation.ts @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
-x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/memory_and_investigation @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
+# Significant Events - Investigation features (owned by Nightshift context & research)
+x-pack/platform/plugins/shared/significant_events/server/agent_builder/skills/investigation_management @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
+x-pack/platform/plugins/shared/significant_events/server/agent_builder/tools/event_investigation_attach @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
 
 # Streams - Data quality overrides (owned by Kibana Management)
 /x-pack/platform/plugins/shared/streams_app/public/components/stream_data_quality @elastic/kibana-management
@@ -2001,7 +2003,7 @@ x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significa
 /x-pack/platform/test/fixtures/es_archives/fleet @elastic/streams-ui
 /x-pack/platform/test/api_integration/services/fleet_and_agents.ts @elastic/streams-ui
 /x-pack/solutions/security/test/fleet_api_integration @elastic/streams-ui
-/x-pack/platform/test/fleet_api_integration @elastic/streams-ui
+/x-pack/platform/test/fleet_api_integration @elastic/streams-ui @elastic/siem-conduit
 /x-pack/platform/test/fleet_packages @elastic/streams-ui
 /x-pack/platform/test/fleet_tasks @elastic/streams-ui
 /src/platform/test/api_integration/apis/custom_integration/*.ts @elastic/streams-ui
