@@ -126,7 +126,9 @@ describe('useAgentBasedDeploy — SO persistence', () => {
     });
 
     const { result } = renderHook(() => useAgentBasedDeploy());
-    await act(async () => { await result.current.handleDeploy(); });
+    await act(async () => {
+      await result.current.handleDeploy();
+    });
 
     expect(mockCreateDeployment).toHaveBeenCalledTimes(1);
     expect(mockCreateDeployment).toHaveBeenCalledWith(
@@ -170,7 +172,9 @@ describe('useAgentBasedDeploy — SO persistence', () => {
     });
 
     const { result } = renderHook(() => useAgentBasedDeploy());
-    await act(async () => { await result.current.handleDeploy(); });
+    await act(async () => {
+      await result.current.handleDeploy();
+    });
 
     expect(mockUpdateDeployment).toHaveBeenCalledWith(
       'so-id-456',
@@ -189,7 +193,9 @@ describe('useAgentBasedDeploy — SO persistence', () => {
     });
 
     const { result } = renderHook(() => useAgentBasedDeploy());
-    await act(async () => { await result.current.handleDeploy(); });
+    await act(async () => {
+      await result.current.handleDeploy();
+    });
 
     expect(mockUpdateDeployment).toHaveBeenCalledWith(
       'so-id-789',
@@ -223,7 +229,9 @@ describe('useAgentBasedDeploy — SO persistence', () => {
     });
 
     const { result } = renderHook(() => useAgentBasedDeploy());
-    await act(async () => { await result.current.handleDeploy(); });
+    await act(async () => {
+      await result.current.handleDeploy();
+    });
 
     expect(mockCreateDeployment).not.toHaveBeenCalled();
     expect(mockPersistDeploymentId).not.toHaveBeenCalled();
@@ -263,7 +271,9 @@ describe('useAgentBasedDeploy — SO persistence', () => {
 
     const { result } = renderHook(() => useAgentBasedDeploy());
     let deployResult: { failed: boolean } | undefined;
-    await act(async () => { deployResult = await result.current.handleDeploy(); });
+    await act(async () => {
+      deployResult = await result.current.handleDeploy();
+    });
 
     expect(deployResult?.failed).toBe(false);
     expect(mockPersistDeploymentId).not.toHaveBeenCalled();
@@ -278,7 +288,10 @@ describe('useAgentBasedDeploy — SO persistence', () => {
     mockUseOnboardingFlow.mockReturnValue({
       servicesStep: { selectedServiceIds: [], dataFormat: 'ecs' as const },
       authenticateAndDeployStep: {},
-      detectAndReviewStep: { policyIdsByInstance: { serviceA: 'pkg-A' }, onboardingDeploymentId: 'so-id-partial' },
+      detectAndReviewStep: {
+        policyIdsByInstance: { serviceA: 'pkg-A' },
+        onboardingDeploymentId: 'so-id-partial',
+      },
       updateDetectAndReviewStep: jest.fn(),
       // serviceB was a prior failure and is NOT being retried.
       getLatestFailedInstances: jest.fn().mockReturnValue(['serviceB']),
@@ -299,7 +312,9 @@ describe('useAgentBasedDeploy — SO persistence', () => {
     });
 
     const { result } = renderHook(() => useAgentBasedDeploy());
-    await act(async () => { await result.current.handleDeploy(['serviceA']); });
+    await act(async () => {
+      await result.current.handleDeploy(['serviceA']);
+    });
 
     // serviceB is still failed from before → merged status must be 'failed', not 'succeeded'.
     expect(mockUpdateDeployment).toHaveBeenCalledWith(

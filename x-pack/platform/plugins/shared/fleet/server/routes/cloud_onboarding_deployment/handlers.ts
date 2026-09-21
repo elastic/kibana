@@ -38,14 +38,18 @@ function validateAuthMethod(
 ): string | undefined {
   if (!authMethod) return undefined;
   if (mechanisms.includes('agent_based') && !AGENT_BASED_AUTH_METHODS.has(authMethod)) {
-    return `authMethod '${authMethod}' is not valid for agent_based deployments. Allowed: ${[...AGENT_BASED_AUTH_METHODS].join(', ')}`;
+    return `authMethod '${authMethod}' is not valid for agent_based deployments. Allowed: ${[
+      ...AGENT_BASED_AUTH_METHODS,
+    ].join(', ')}`;
   }
   if (
     (mechanisms.includes('managed_integration') || mechanisms.includes('ecf')) &&
     !mechanisms.includes('agent_based') &&
     !MANAGED_INTEGRATION_AUTH_METHODS.has(authMethod)
   ) {
-    return `authMethod '${authMethod}' is not valid for managed_integration/ecf deployments. Allowed: ${[...MANAGED_INTEGRATION_AUTH_METHODS].join(', ')}`;
+    return `authMethod '${authMethod}' is not valid for managed_integration/ecf deployments. Allowed: ${[
+      ...MANAGED_INTEGRATION_AUTH_METHODS,
+    ].join(', ')}`;
   }
   return undefined;
 }
