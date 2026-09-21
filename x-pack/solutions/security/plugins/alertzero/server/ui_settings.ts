@@ -33,7 +33,11 @@ export const registerUiSettings = (uiSettings: UiSettingsServiceSetup): void => 
       category: [SECURITY_SOLUTION_CATEGORY],
       solutionViews: ['classic', 'security'],
       experimental: true,
-      requiresPageReload: false,
+      // Agent Builder's conversation template contract has no deregistration counterpart, so the
+      // Investigation template and its tabs cannot be removed once registered. Prompting for a
+      // reload is what makes disabling take full effect: the next page load starts a session that
+      // never registers them.
+      requiresPageReload: true,
       schema: schema.boolean(),
     },
   });

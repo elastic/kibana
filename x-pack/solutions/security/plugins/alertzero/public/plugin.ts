@@ -114,10 +114,12 @@ export class AlertZeroPublicPlugin
       return {};
     }
 
-    // The template registration API has no deregistration counterpart, so this is one-shot:
-    // we register on the first `true` and cannot remove the entry if the setting is later
-    // disabled. `loadInvestigation` re-checks the live setting so that slots opened while
-    // AlertZero is disabled surface an error instead of issuing a 404.
+    // The template registration API has no deregistration counterpart, so this is one-shot: we
+    // register on the first `true` and cannot remove the entry if the setting is later disabled.
+    // The setting is therefore registered with `requiresPageReload`, so disabling it prompts for a
+    // reload and the next session starts without the registration. `loadInvestigation` re-checks
+    // the live setting to cover the window before that reload, where slots opened while AlertZero
+    // is disabled surface an error instead of issuing a 404.
     //
     // Errors from registerAgenticInvestigationTemplateUI are re-raised as unhandled rejections
     // so they surface in the browser console and unhandledrejection listeners, rather than

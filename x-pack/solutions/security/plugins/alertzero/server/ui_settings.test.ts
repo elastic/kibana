@@ -20,7 +20,7 @@ describe('registerUiSettings', () => {
     expect(register()).toHaveProperty(ALERTZERO_ENABLED_SETTING_ID);
   });
 
-  it('registers it off by default, per space, and without a page reload', () => {
+  it('registers it off by default, per space, and requiring a page reload', () => {
     expect(register()[ALERTZERO_ENABLED_SETTING_ID]).toEqual(
       expect.objectContaining({
         type: 'boolean',
@@ -28,7 +28,7 @@ describe('registerUiSettings', () => {
         category: ['securitySolution'],
         solutionViews: ['classic', 'security'],
         experimental: true,
-        requiresPageReload: false,
+        requiresPageReload: true,
       })
     );
   });
