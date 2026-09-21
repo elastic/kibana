@@ -176,9 +176,24 @@ describe('transaction_details/distribution', () => {
 
     describe('trace sample selection', () => {
       const traceSamples = [
-        { traceId: 'trace-a', transactionId: 'tx-a' },
-        { traceId: 'trace-b', transactionId: 'tx-b' },
-        { traceId: 'trace-c', transactionId: 'tx-c' },
+        {
+          traceId: 'trace-a',
+          transactionId: 'tx-a',
+          score: null,
+          timestamp: '2024-01-01T00:00:00Z',
+        },
+        {
+          traceId: 'trace-b',
+          transactionId: 'tx-b',
+          score: null,
+          timestamp: '2024-01-01T00:00:01Z',
+        },
+        {
+          traceId: 'trace-c',
+          transactionId: 'tx-c',
+          score: null,
+          timestamp: '2024-01-01T00:00:02Z',
+        },
       ];
 
       beforeEach(() => {
