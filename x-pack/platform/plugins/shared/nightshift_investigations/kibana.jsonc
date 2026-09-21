@@ -19,6 +19,7 @@
       "contextEngine",
       "inference",
       "ruleRegistry",
+      "sandbox",
       "searchInferenceEndpoints",
       "spaces",
       "workflowsExtensions",

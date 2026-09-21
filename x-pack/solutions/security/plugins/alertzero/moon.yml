@@ -50,6 +50,8 @@ dependsOn:
   - '@kbn/core-logging-server-mocks'
   - '@kbn/core-http-server'
   - '@kbn/charts-theme'
+  - '@kbn/i18n-react'
+  - '@kbn/search-inference-endpoints'
 tags:
   - plugin
   - prod
