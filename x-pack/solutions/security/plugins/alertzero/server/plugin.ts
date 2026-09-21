@@ -29,6 +29,7 @@ import type {
   AlertZeroSetupDependencies,
   AlertZeroStartDependencies,
 } from './types';
+import { registerAlertZeroInferenceFeatures } from './inference_features';
 import { registerRoutes } from './routes/register_routes';
 import { registerOwner } from './managed_workflows/register_owner';
 import { initializeManagedWorkflows } from './managed_workflows/initialize_managed_workflows';
@@ -36,6 +37,8 @@ import { WatchesService } from './services/watches/watches_service';
 import { WorkersService } from './services/workers/workers_service';
 import { ConversationProposalsService } from './services/conversation_proposals/conversation_proposals_service';
 import { WatchWorkflowsManagementClientImpl } from './services/watches/watch_workflows_management_client';
+import { ActionsService } from './services/actions/actions_service';
+import { listActionsTool } from './agent_builder_tools/list_actions_tool';
 import { agentType, ensureAgent, ensureAgentSafe, registerAgentType } from './agent';
 
 export class AlertZeroPlugin
@@ -54,6 +57,7 @@ export class AlertZeroPlugin
 
   /** Created during `start`; routes resolve them lazily after managed-workflow initialization. */
   private watchesService?: WatchesService;
+  private actionsService?: ActionsService;
   private workersService?: WorkersService;
   private conversationProposalsService?: ConversationProposalsService;
 
@@ -68,6 +72,7 @@ export class AlertZeroPlugin
       agentBuilder,
       agenticInvestigations: _agenticInvestigationsSetup,
       features,
+      searchInferenceEndpoints,
       workflowsExtensions,
       workflowsManagement,
     }: AlertZeroSetupDependencies
@@ -83,6 +88,12 @@ export class AlertZeroPlugin
 
     registerOwner({ workflowsExtensions });
     registerAgentType(agentBuilder);
+    registerAlertZeroInferenceFeatures(searchInferenceEndpoints, this.logger.get('inference'));
+    // Registered in setup so the builtin tool is available to Agent Builder before
+    // the first agent run; the handler resolves the service lazily like the routes do.
+    agentBuilder.tools.register({
+      ...listActionsTool(() => this.requireActionsService()),
+    });
 
     features.registerKibanaFeature({
       id: ALERTZERO_FEATURE_ID,
@@ -116,6 +127,7 @@ export class AlertZeroPlugin
       getWatchesService: () => this.requireWatchesService(),
       getWorkersService: () => this.requireWorkersService(),
       getConversationProposalsService: () => this.requireConversationProposalsService(),
+      getActionsService: () => this.requireActionsService(),
     });
 
     return {};
@@ -160,6 +172,13 @@ export class AlertZeroPlugin
 
     // Mock mode changes presentation data only; durable Worker settings and enablement still use Workflows.
     this.watchesService = new WatchesService();
+    this.actionsService = new ActionsService(
+      () =>
+        this.workflowsManagementApi
+          ? new WatchWorkflowsManagementClientImpl(this.workflowsManagementApi)
+          : undefined,
+      this.logger
+    );
     this.workersService = new WorkersService(management, managedWorkflows, this.logger, {
       ensureAgentForSpace: plugins.agentBuilder
         ? (spaceId) =>
@@ -179,6 +198,12 @@ export class AlertZeroPlugin
     return this.watchesService;
   }
 
+  private requireActionsService(): ActionsService {
+    if (!this.actionsService) {
+      throw new Error('Actions service is not available until the AlertZero plugin has started');
+    }
+    return this.actionsService;
+  }
   private requireWorkersService(): WorkersService {
     if (!this.workersService) {
       throw new Error('Workers service is not available until the AlertZero plugin has started');

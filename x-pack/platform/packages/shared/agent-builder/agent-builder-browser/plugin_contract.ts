@@ -15,6 +15,7 @@ import type { BrowserApiToolDefinition } from './tools/browser_api_tool';
 import type {
   AgentsServiceStartContract,
   AttachmentServiceStartContract,
+  ConversationsServiceStartContract,
   RendererServiceStartContract,
   EventsServiceStartContract,
   ToolServiceStartContract,
@@ -26,6 +27,11 @@ import type { ConversationTemplateServiceStartContract } from './templates';
  * Configures conversation behavior when embedded in the sidebar or other host.
  */
 export interface EmbeddableConversationProps {
+  /**
+   * Called when the user submits a prompt, immediately before the conversation starts streaming.
+   */
+  onSubmit?: () => void;
+
   /**
    * Force starting a new conversation, ignoring any stored conversation IDs.
    * When true, a fresh conversation is always created.
@@ -212,6 +218,10 @@ export interface AgentBuilderPluginStart {
    * Events service contract, can be used to listen to chat events.
    */
   events: EventsServiceStartContract;
+  /**
+   * Conversations service contract, can be used to append events to conversations.
+   */
+  conversations: ConversationsServiceStartContract;
   /**
    * Resolves Agent Builder access (enterprise license, LLM connector). Callers must
    * also require `application.capabilities.agentBuilder.show === true` before

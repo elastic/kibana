@@ -68,6 +68,23 @@ const parseSseBlocks = (streamText: string): ParsedSseBlock[] => {
  */
 const sseBlockToEvent = (block: ParsedSseBlock): unknown => ({ type: block.type, ...block.data });
 
+/** The text of a model message, whose content is either a string or a list of parts. */
+const promptText = ({ content }: { content?: unknown }): string => {
+  if (typeof content === 'string') {
+    return content;
+  }
+
+  if (Array.isArray(content)) {
+    return content
+      .map((part) =>
+        typeof part === 'string' ? part : String((part as { text?: string }).text ?? '')
+      )
+      .join('\n');
+  }
+
+  return '';
+};
+
 const conversationIdFromSseStream = (streamText: string): string | undefined => {
   for (const block of parseSseBlocks(streamText)) {
     if (
@@ -97,8 +114,8 @@ const postChatConverse = (
 /**
  * The events-native `/api/chat` converse surface. It runs the same execution service as the legacy
  * `/api/agent_builder/converse`, so we assert only the delta: the response is the conversation with
- * its `events` timeline. The experimental feature flag that gates `/api/chat` is force-enabled by the
- * Scout server config, so these routes are reachable here (the flag-off 404 is covered by unit tests).
+ * its `events` timeline. These routes are public and not gated on the `agentBuilder:experimentalFeatures`
+ * setting, so they are reachable regardless of the Scout server config.
  */
 apiTest.describe(
   'Agent Builder — chat API converse (/api/chat)',
@@ -122,6 +139,134 @@ apiTest.describe(
       llmProxy.close();
       await deleteConnectorById(kbnClient, connectorId);
     });
+
+    apiTest(
+      'user message sync requests persist context for the next model request',
+      async ({ apiClient }) => {
+        const requestsBefore = llmProxy.interceptedRequests.length;
+        const headers = { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader };
+
+        await apiTest.step('a user message without a conversation is rejected', async () => {
+          const orphan = await apiClient.post(CHAT_CONVERSE, {
+            headers,
+            body: { trigger_mode: 'never', input: 'Pool limit is now 200' },
+            responseType: 'json',
+          });
+          expect(orphan).toHaveStatusCode(400);
+        });
+
+        const conversationId = await apiTest.step('create an empty conversation', async () => {
+          const created = await apiClient.post(`${API_AGENT_BUILDER}/conversations`, {
+            headers,
+            body: { title: 'Incident 4821' },
+            responseType: 'json',
+          });
+          expect(created).toHaveStatusCode(200);
+          const id = (created.body as GetConversationResponse).id;
+          conversationIds.push(id);
+
+          return id;
+        });
+
+        const firstMessageId = await apiTest.step(
+          'append two user messages without triggering the agent',
+          async () => {
+            const first = await apiClient.post(CHAT_CONVERSE, {
+              headers,
+              body: {
+                trigger_mode: 'never',
+                conversation_id: conversationId,
+                input: 'Pool limit is now 200',
+              },
+              responseType: 'json',
+            });
+            expect(first).toHaveStatusCode(200);
+
+            const second = await apiClient.post(CHAT_CONVERSE, {
+              headers,
+              body: {
+                trigger_mode: 'never',
+                conversation_id: conversationId,
+                input: 'Errors returned to normal',
+              },
+              responseType: 'json',
+            });
+            expect(second).toHaveStatusCode(200);
+
+            return (first.body as GetConversationResponse).events?.[0].id;
+          }
+        );
+
+        await apiTest.step(
+          'both are stored as events, with no round and no model call',
+          async () => {
+            const stored = await getConversation(
+              apiClient,
+              adminCredentials.apiKeyHeader,
+              conversationId
+            );
+            expect(stored.rounds).toStrictEqual([]);
+            expect(stored.events).toHaveLength(2);
+            expect(stored.events?.[0].id).toBe(firstMessageId);
+            expect(
+              stored.events?.every((event) => event.type === TimelineEventType.userMessage)
+            ).toBe(true);
+            expect(llmProxy.interceptedRequests).toHaveLength(requestsBefore);
+          }
+        );
+
+        await apiTest.step('the next execution sees them, in order', async () => {
+          await setupAgentDirectAnswer({
+            proxy: llmProxy,
+            response: 'Incident mitigated',
+            continueConversation: true,
+          });
+          const executed = await postChatConverse(apiClient, adminCredentials.apiKeyHeader, {
+            conversation_id: conversationId,
+            input: 'Summarize the incident',
+            connector_id: connectorId,
+          });
+          expect(executed).toHaveStatusCode(200);
+          await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+          const modelRequest = llmProxy.interceptedRequests
+            .slice(requestsBefore)
+            .find(
+              (entry) => entry.matchingInterceptorName === 'final-assistant-response'
+            )?.requestBody;
+          expect(modelRequest).toBeDefined();
+
+          // Consecutive human turns reach the model as one message whose content is a list of
+          // parts, so flatten everything into the prompt text before asserting on it.
+          const prompt = (modelRequest?.messages ?? []).map(promptText).join('\n');
+
+          for (const text of [
+            'Pool limit is now 200',
+            'Errors returned to normal',
+            'Summarize the incident',
+          ]) {
+            expect(prompt.split(text)).toHaveLength(2);
+          }
+
+          expect(prompt.indexOf('Pool limit is now 200')).toBeLessThan(
+            prompt.indexOf('Errors returned to normal')
+          );
+          expect(prompt.indexOf('Errors returned to normal')).toBeLessThan(
+            prompt.indexOf('Summarize the incident')
+          );
+          // Each appended message keeps its author attribution.
+          expect(prompt).toMatch(/\[User: [^\]]+ — Sent: [^\]]+\]\n\nPool limit is now 200/);
+        });
+
+        await apiTest.step('the executed round joins the same timeline', async () => {
+          expect(
+            (
+              await getConversation(apiClient, adminCredentials.apiKeyHeader, conversationId)
+            ).events?.filter((event) => event.type === TimelineEventType.userMessage)
+          ).toHaveLength(3);
+        });
+      }
+    );
 
     apiTest('converse returns the conversation with its events timeline', async ({ apiClient }) => {
       const MOCKED_LLM_RESPONSE = 'ack from chat api';

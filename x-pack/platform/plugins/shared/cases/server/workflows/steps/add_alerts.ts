@@ -12,7 +12,7 @@ import {
   type AddAlertsStepInput,
 } from '../../../common/workflows/steps/add_alerts';
 import { LEGACY_ALERT_TYPE } from '../../../common/constants/attachments';
-import type { AttachmentRequestV2 } from '../../../common/types/api';
+import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
 import { toLegacyCaseResponse } from '../../common/attachments';
 import type { CasesClient } from '../../client';
 import { createCasesStepHandler, safeParseCaseForWorkflowOutput, withCaseOwner } from './utils';
@@ -51,7 +51,7 @@ export const addAlertsStepDefinition = (
     ...addAlertsStepCommonDefinition,
     handler: createCasesStepHandler(getCasesClient, async (client, input: AddAlertsStepInput) => {
       return withCaseOwner(client, input.case_id, async (owner) => {
-        const attachments: AttachmentRequestV2[] = [
+        const attachments: UnifiedAttachmentPayload[] = [
           ...groupAlertsByRule(input.alerts).values(),
         ].map((group) => {
           const [first] = group;
