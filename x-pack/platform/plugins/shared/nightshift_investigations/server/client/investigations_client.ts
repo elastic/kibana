@@ -14,6 +14,7 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import { investigationStateSchema } from '@kbn/significant-events-schema';
 import { assertNever } from '@kbn/std';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
+import { isInvestigationWorkflowExecution } from '../lib/managed_workflows/is_investigation_workflow_execution';
 import type { InvestigationQuotaCallback } from '../types';
 import type {
   AlertInvestigationContext,
@@ -82,8 +83,6 @@ const isSubjectType = (value: unknown): value is InvestigationSubjectType =>
 const isTriggerType = (value: unknown): value is InvestigationTriggerType =>
   typeof value === 'string' && INVESTIGATION_TRIGGER_TYPES.some((type) => type === value);
 
-const INVESTIGATION_WORKFLOW_IDS = new Set([NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID]);
-
 /** Keeps a derived summary to one readable line, since it is rendered as a list headline. */
 const MAX_DERIVED_SUBJECT_SUMMARY_LENGTH = 200;
 
@@ -113,13 +112,6 @@ const withDerivedSubjectSummary = (
 
   return { ...subject, summary };
 };
-
-const isInvestigationWorkflowExecution = (execution: {
-  workflowId?: string | null;
-  originManagedWorkflowId?: string | null;
-}): boolean =>
-  INVESTIGATION_WORKFLOW_IDS.has(execution.workflowId ?? '') ||
-  INVESTIGATION_WORKFLOW_IDS.has(execution.originManagedWorkflowId ?? '');
 
 interface ExecutionInvestigationMetadata {
   subject?: InvestigationSubject;

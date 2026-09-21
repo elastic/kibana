@@ -6,8 +6,8 @@
  */
 
 import { ExecutionStatus } from '@kbn/workflows';
-import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { InvestigationStatus } from '../../common';
+import { isInvestigationWorkflowExecution } from '../lib/managed_workflows/is_investigation_workflow_execution';
 import { InvestigationStaleWriteError } from '../storage';
 import type { InvestigationPatch } from '../storage';
 import {
@@ -102,16 +102,12 @@ const toInvestigationStatus = (
   }
 };
 
-const isCurrentInvestigationExecution = (execution: ExecutionSummary): boolean =>
-  execution.workflowId === NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID ||
-  execution.originManagedWorkflowId === NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID;
-
 const toReconciliationOutcome = ({
   execution,
 }: {
   execution: ExecutionSummary | undefined;
 }): ReconciliationOutcome | undefined => {
-  if (!execution || !isCurrentInvestigationExecution(execution)) {
+  if (!execution || !isInvestigationWorkflowExecution(execution)) {
     return undefined;
   }
 
@@ -162,8 +158,7 @@ export const reconcileInvestigationStatuses = async ({
           spaceId
         );
       } catch (error) {
-        // Not treated as "these executions are missing": that would settle healthy investigations
-        // as failed once they aged past the grace period. The next run retries.
+        /** A failed lookup is not treated as a missing execution; the next run retries. */
         logger.warn(`Failed to read workflow executions in space "${spaceId}": ${error.message}`);
         continue;
       }

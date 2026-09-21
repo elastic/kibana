@@ -80,7 +80,7 @@ execute_workflow({
     context: {
       source: "significant_event",
       event_uuid: "8f1c...",
-      event_id: "checkout-latency-slo-breach",
+      significant_event_id: "checkout-latency-slo-breach",
       status: "open",
       severity: "high",
       confidence: 0.82

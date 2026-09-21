@@ -31,7 +31,7 @@ const SANDBOX_TOOL_IDS = [
 export const INVESTIGATION_AGENT_NAME = 'Nightshift Investigator';
 export const INVESTIGATION_AGENT_DESCRIPTION =
   'Answers an arbitrary investigation question by reasoning from cluster telemetry it queries ' +
-  'inside a sandbox, and records what it learns in the Nightshift Cortex wiki.';
+  'inside a sandbox and, when Cortex is enabled, records what it learns in the Nightshift Cortex wiki.';
 
 /**
  * Builds the Nightshift investigation agent type. It works from the sandbox, so it carries a
@@ -64,8 +64,10 @@ export const getInvestigationAgentType = ({
     ],
     enable_elastic_capabilities: false,
     connector_ids: telemetryConnectorId ? [telemetryConnectorId] : [],
-    // Cortex hydrate runs as the beforeAgent hook and writes into /workspace, so it needs both
-    // the sandbox and Cortex; without the sandbox the step would throw on every round.
+    /**
+     * Cortex hydrate runs as the beforeAgent hook and writes into /workspace, so it needs both
+     * the sandbox and Cortex; without the sandbox the step would throw on every round.
+     */
     ...(sandboxEnabled && cortexEnabled
       ? { workflow_ids: [NIGHTSHIFT_CORTEX_HYDRATE_WORKFLOW_ID] }
       : {}),
@@ -85,7 +87,7 @@ export const registerInvestigationAgentType = (
     sandboxEnabled: boolean;
     cortexEnabled: boolean;
     telemetryConnectorId?: string;
-  } = { sandboxEnabled: false, cortexEnabled: false }
+  }
 ): void => {
   agentBuilder.agents.registerType(
     getInvestigationAgentType({ sandboxEnabled, cortexEnabled, telemetryConnectorId })

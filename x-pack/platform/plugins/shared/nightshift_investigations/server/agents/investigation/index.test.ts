@@ -36,7 +36,7 @@ describe('Nightshift investigation agent type', () => {
   it('registers under the Nightshift investigation type id', () => {
     const agentBuilder = agentBuilderMocks.createSetup();
 
-    registerInvestigationAgentType(agentBuilder);
+    registerInvestigationAgentType(agentBuilder, { sandboxEnabled: false, cortexEnabled: false });
 
     expect(agentBuilder.agents.registerType).toHaveBeenCalledWith(
       expect.objectContaining({ id: NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID })

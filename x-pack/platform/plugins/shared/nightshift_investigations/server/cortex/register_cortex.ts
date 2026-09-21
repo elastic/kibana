@@ -91,10 +91,11 @@ export const runCortexOptimize = async ({
   getSearchInferenceEndpoints: () => SearchInferenceEndpointsPluginStart | undefined;
   logger: Logger;
 }): Promise<void> => {
-  // Only the Nightshift investigator writes to Cortex: it is the one agent whose post-execution
-  // hook runs this workflow, and other agents' rounds must not edit the wiki. An unidentified
-  // caller is refused rather than trusted — the optimize workflow has a manual trigger, so it can
-  // be run without an agent id.
+  /**
+   * Only the Nightshift investigator writes to Cortex: it is the one agent whose post-execution
+   * hook runs this workflow, and other agents' rounds must not edit the wiki. An unidentified
+   * caller is refused rather than trusted because the optimize workflow has a manual trigger.
+   */
   if (agentId !== NIGHTSHIFT_INVESTIGATION_AGENT_ID) {
     logger.debug(
       'Cortex optimizer skipped — round was not produced by the Nightshift investigator'
