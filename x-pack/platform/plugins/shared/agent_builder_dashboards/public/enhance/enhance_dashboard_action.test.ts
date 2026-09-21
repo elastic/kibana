@@ -10,13 +10,10 @@ import type { AggregateQuery } from '@kbn/es-query';
 import type { EmbeddableChatAccess } from '@kbn/agent-builder-browser';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
-import { PRETTIFY_DASHBOARD_ACTION_ID } from '@kbn/dashboard-plugin/public';
+import { ENHANCE_DASHBOARD_ACTION_ID } from '@kbn/dashboard-plugin/public';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import type { IdGenerator } from '../attachment_types';
-import {
-  createPrettifyDashboardAction,
-  PRETTIFY_DASHBOARD_PROMPT,
-} from './prettify_dashboard_action';
+import { createEnhanceDashboardAction, ENHANCE_DASHBOARD_PROMPT } from './enhance_dashboard_action';
 
 const esqlLens = {
   type: LENS_EMBEDDABLE_TYPE,
@@ -87,7 +84,7 @@ const createAction = ({
   return {
     openChat,
     getAgentBuilderAccess,
-    action: createPrettifyDashboardAction({
+    action: createEnhanceDashboardAction({
       openChat,
       getAgentBuilderAccess,
       canWriteDashboards,
@@ -96,7 +93,7 @@ const createAction = ({
   };
 };
 
-describe('createPrettifyDashboardAction', () => {
+describe('createEnhanceDashboardAction', () => {
   it('is compatible when a child uses ES|QL', async () => {
     const { action } = createAction();
 
@@ -218,7 +215,7 @@ describe('createPrettifyDashboardAction', () => {
     expect(openChat).toHaveBeenCalledTimes(1);
     expect(openChat).toHaveBeenCalledWith({
       newConversation: true,
-      initialMessage: PRETTIFY_DASHBOARD_PROMPT,
+      initialMessage: ENHANCE_DASHBOARD_PROMPT,
       autoSendInitialMessage: true,
       sessionTag: 'dashboard',
       attachments: [
@@ -252,9 +249,9 @@ describe('createPrettifyDashboardAction', () => {
     expect(openChat).not.toHaveBeenCalled();
   });
 
-  it('uses the prettify action id', () => {
+  it('uses the enhance action id', () => {
     const { action } = createAction();
-    expect(action.id).toBe(PRETTIFY_DASHBOARD_ACTION_ID);
+    expect(action.id).toBe(ENHANCE_DASHBOARD_ACTION_ID);
   });
 
   it('getCompatibilityChangesSubject emits when layout$.panels length changes', () => {
