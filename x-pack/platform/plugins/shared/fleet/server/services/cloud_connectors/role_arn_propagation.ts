@@ -103,7 +103,7 @@ export const propagateRoleArnToPackagePolicies = async ({
     name: policy.name,
     enabled: policy.enabled,
     policy_ids: policy.policy_ids,
-    package: policy.package,
+    ...(policy.package ? { package: policy.package } : {}),
     inputs,
   });
 

@@ -91,6 +91,29 @@ describe('propagateRoleArnToPackagePolicies', () => {
     }
   });
 
+  it('omits package from the update payload when the policy has none', async () => {
+    const { package: _package, ...policyWithoutPackage } = makePolicy('a');
+    (packagePolicyService.list as jest.Mock).mockResolvedValue({
+      items: [policyWithoutPackage],
+      total: 1,
+      page: 1,
+      perPage: 10000,
+    });
+    (packagePolicyService.update as jest.Mock).mockResolvedValue({});
+
+    await propagateRoleArnToPackagePolicies({
+      soClient,
+      esClient,
+      connectorId: CONNECTOR_ID,
+      newRoleArn: NEW_ARN,
+    });
+
+    expect(packagePolicyService.update).toHaveBeenCalledTimes(1);
+    const updatePayload = (packagePolicyService.update as jest.Mock).mock.calls[0][3];
+    expect(Object.hasOwn(updatePayload, 'package')).toBe(false);
+    expect(updatePayload.inputs[0].vars.role_arn.value).toBe(NEW_ARN);
+  });
+
   it('is a no-op when no policies reference the connector', async () => {
     (packagePolicyService.list as jest.Mock).mockResolvedValue({
       items: [],
