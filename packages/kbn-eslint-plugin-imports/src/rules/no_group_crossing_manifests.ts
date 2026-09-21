@@ -17,7 +17,7 @@ import type { ModuleGroup, ModuleVisibility } from '@kbn/projects-solutions-grou
 import { getSourcePath } from '../helpers/source';
 import { getImportResolver } from '../get_import_resolver';
 import { getRepoSourceClassifier } from '../helpers/repo_source_classifier';
-import { isImportableFrom } from '../helpers/groups';
+import { isImportableFrom, mayImportDevOnlyPackage } from '../helpers/groups';
 import { formatSuggestions } from '../helpers/report';
 
 const NODE_TYPES = TSESTree.AST_NODE_TYPES;
@@ -71,7 +71,10 @@ export const NoGroupCrossingManifestsRule: Rule.RuleModule = {
         if (dependency) {
           // at this point, we know the dependency is a plugin
           const { id, group, visibility } = dependency;
-          if (!isImportableFrom(moduleId, group, visibility)) {
+          if (
+            (dependency.isDevOnly() && !mayImportDevOnlyPackage(moduleId)) ||
+            !isImportableFrom(moduleId, group, visibility)
+          ) {
             offendingDependencies.push({ id, pluginId, group, visibility });
           }
         }

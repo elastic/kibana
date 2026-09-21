@@ -14,19 +14,31 @@ import { formatSuggestions } from '../helpers/report';
 import type { ModuleGroup, ModuleVisibility } from '@kbn/projects-solutions-groups';
 import type { KibanaPackageManifest } from '@kbn/repo-packages';
 
+type EncodedModuleType = 'tests-or-mocks' | 'tooling' | 'common-package';
+
 interface ModuleInfo {
   group: ModuleGroup;
   visibility: ModuleVisibility;
   type?: KibanaPackageManifest['type'];
   devOnly?: boolean;
+  moduleType?: EncodedModuleType;
 }
 
+const encode = ({
+  group,
+  visibility,
+  type = 'shared-common',
+  devOnly = false,
+  moduleType,
+}: ModuleInfo): string => {
+  const id = `${group}.${visibility}.${type}.${devOnly}`;
+  return moduleType ? `${id}.${moduleType}` : id;
+};
+
 const make = (from: ModuleInfo, to: ModuleInfo, imp = 'import') => ({
-  filename: `${from.group}.${from.visibility}.${from.type ?? 'shared-common'}.${
-    from.devOnly ?? 'false'
-  }.ts`,
+  filename: `${encode(from)}.ts`,
   code: dedent`
-    ${imp} '${to.group}.${to.visibility}.${to.type ?? 'shared-common'}.${to.devOnly ?? 'false'}'
+    ${imp} '${encode(to)}'
   `,
 });
 
@@ -46,11 +58,16 @@ jest.mock('../get_import_resolver', () => {
 });
 
 jest.mock('../helpers/repo_source_classifier', () => {
+  const moduleTypes: Record<string, string> = {
+    'common-package': 'common package',
+    'tests-or-mocks': 'tests or mocks',
+    tooling: 'tooling',
+  };
   return {
     getRepoSourceClassifier() {
       return {
-        classify(r: string | [string, string]) {
-          const [group, visibility, type, devOnly] =
+        classify(r: string | string[]) {
+          const [group, visibility, type, devOnly, moduleType] =
             typeof r === 'string' ? (r.endsWith('.ts') ? r.slice(0, -3) : r).split('.') : r;
           return {
             pkgInfo: {
@@ -62,6 +79,7 @@ jest.mock('../helpers/repo_source_classifier', () => {
             },
             group,
             visibility,
+            type: moduleTypes[moduleType] ?? 'common package',
           };
         },
       };
@@ -147,6 +165,22 @@ for (const [name, tester] of [tsTester, babelTester]) {
           { group: 'platform', visibility: 'private' }
         ),
         make({ group: 'common', visibility: 'shared' }, { group: 'common', visibility: 'shared' }),
+        make(
+          { group: 'platform', visibility: 'shared', devOnly: true },
+          { group: 'platform', visibility: 'shared', devOnly: true }
+        ),
+        make(
+          {
+            group: 'platform',
+            visibility: 'shared',
+            moduleType: 'tests-or-mocks',
+          },
+          { group: 'platform', visibility: 'shared', devOnly: true }
+        ),
+        make(
+          { group: 'platform', visibility: 'shared', moduleType: 'tooling' },
+          { group: 'platform', visibility: 'shared', devOnly: true }
+        ),
       ],
 
       invalid: [
@@ -195,6 +229,28 @@ for (const [name, tester] of [tsTester, babelTester]) {
                   `Please review the dependencies in your module's manifest (kibana.jsonc).`,
                   `Relocate this module to a different group, and/or make sure it has the right 'visibility'.`,
                   `Address the conflicting dependencies by refactoring the code`,
+                ]),
+              },
+            },
+          ],
+        },
+        {
+          ...make(
+            { group: 'platform', visibility: 'shared' },
+            { group: 'platform', visibility: 'shared', devOnly: true }
+          ),
+          errors: [
+            {
+              line: 1,
+              messageId: 'DEV_ONLY_IMPORT',
+              data: {
+                importerPackage: 'aPackage',
+                importedPackage: 'aPackage',
+                sourcePath: 'platform.shared.shared-common.false.ts',
+                suggestion: formatSuggestions([
+                  'A devOnly package can only be imported by other devOnly packages, tests, or tooling.',
+                  'If this file is a test or tool, name or place it so it is classified as such (`.test.ts`, `mocks/`, `scripts/`).',
+                  'If this package itself should not ship, set `"devOnly": true` in its kibana.jsonc.',
                 ]),
               },
             },

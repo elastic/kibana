@@ -30,6 +30,27 @@ export function isImportableFrom(
 }
 
 /**
+ * A package flagged `devOnly` (or a test-helper / functional-tests package).
+ * Non-package files are not included: they have no manifest, which `isDevOnly`
+ * treats as true so they may import platform code.
+ */
+export function isDevOnlyPackage(module: { manifest?: ModuleId['manifest'] }): boolean {
+  return (
+    !!module.manifest?.devOnly ||
+    module.manifest?.type === 'functional-tests' ||
+    module.manifest?.type === 'test-helper'
+  );
+}
+
+/**
+ * Production runtime code cannot import a `devOnly` package. Other `devOnly`
+ * packages, test/mock files, and tooling can.
+ */
+export function mayImportDevOnlyPackage(from: ModuleId): boolean {
+  return isDevOnly(from) || from.type === 'tests or mocks' || from.type === 'tooling';
+}
+
+/**
  * Checks whether the given module is supposed to be used at dev/build/test time only
  * @param module The module to check
  * @returns true if the module is a dev-only module, false otherwise

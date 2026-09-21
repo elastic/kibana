@@ -17,7 +17,13 @@ import { getSourcePath } from '../helpers/source';
 import { getRepoSourceClassifier } from '../helpers/repo_source_classifier';
 import { getImportResolver } from '../get_import_resolver';
 import { formatSuggestions } from '../helpers/report';
-import { isImportableFrom } from '../helpers/groups';
+import { isDevOnlyPackage, isImportableFrom, mayImportDevOnlyPackage } from '../helpers/groups';
+
+const DEV_ONLY_SUGGESTIONS = [
+  'A devOnly package can only be imported by other devOnly packages, tests, or tooling.',
+  'If this file is a test or tool, name or place it so it is classified as such (`.test.ts`, `mocks/`, `scripts/`).',
+  'If this package itself should not ship, set `"devOnly": true` in its kibana.jsonc.',
+];
 
 export const NoGroupCrossingImportsRule: Rule.RuleModule = {
   meta: {
@@ -26,6 +32,7 @@ export const NoGroupCrossingImportsRule: Rule.RuleModule = {
     },
     messages: {
       ILLEGAL_IMPORT: `⚠ Illegal import statement: "{{importerPackage}}" ({{importerGroup}}) is importing "{{importedPackage}}" ({{importedGroup}}/{{importedVisibility}}). File: {{sourcePath}}\n{{suggestion}}\n`,
+      DEV_ONLY_IMPORT: `⚠ Illegal import statement: "{{importerPackage}}" is importing devOnly package "{{importedPackage}}". File: {{sourcePath}}\n{{suggestion}}\n`,
     },
   },
   create(context) {
@@ -51,6 +58,20 @@ export const NoGroupCrossingImportsRule: Rule.RuleModule = {
       }
 
       const imported = classifier.classify(result.absolute);
+
+      if (isDevOnlyPackage(imported) && !mayImportDevOnlyPackage(self)) {
+        context.report({
+          node: node as Node,
+          messageId: 'DEV_ONLY_IMPORT',
+          data: {
+            importerPackage: self.pkgInfo?.pkgId ?? 'unknown',
+            importedPackage: imported.pkgInfo?.pkgId ?? 'unknown',
+            sourcePath: relativePath,
+            suggestion: formatSuggestions(DEV_ONLY_SUGGESTIONS),
+          },
+        });
+        return;
+      }
 
       if (!isImportableFrom(self, imported.group, imported.visibility)) {
         context.report({
