@@ -97,8 +97,9 @@ export const actionPolicyModelVersions: SavedObjectsModelVersionMap = {
   /**
    * v3 migrates `matcher` from a raw KQL string to a structured object
    * `{ tags, expression }`. Existing string matchers are wrapped in
-   * `{ expression: oldMatcher }` so they continue to evaluate identically
-   * via `PolicyMatcher.toKql()`.
+   * `{ expression: oldMatcher }` so they continue to be stored identically.
+   * Note: pre-v3 expressions referencing `rule.*` fields will no longer match
+   * in the dispatcher (those fields are not present in the evaluation context).
    *
    * This reshapes an existing attribute, so it is NOT rollback-compatible: the
    * v1/v2 `forwardCompatibility` schemas type `matcher` as a string and reject

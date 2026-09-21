@@ -7,6 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
+import { MAX_LEADS_PER_RUN } from '../../../../../common/entity_analytics/lead_generation/constants';
 import type { LeadEntity, Observation, ObservationModule, ScoredEntity } from '../types';
 import { createLeadGenerationEngine, computeCohortContext } from './lead_generation_engine';
 import { llmSynthesizeBatch } from './llm_synthesize';
@@ -437,6 +438,33 @@ describe('LeadGenerationEngine', () => {
       expect(exploratory).toHaveLength(2);
       // exploratory picks up where confident leaves off, in the same priority order
       expect(exploratory.map((c) => c.entity.name)).toEqual(['entity_3', 'entity_4']);
+    });
+
+    it('selects the top MAX_LEADS_PER_RUN as confident from a realistic noisy pool, by score', async () => {
+      const poolSize = MAX_LEADS_PER_RUN + 8;
+      const entities = Array.from({ length: poolSize }, (_, i) => createMockEntity(`entity_${i}`));
+      const observations = entities.map((e, idx) =>
+        createMockObservation(e, 'mod', { score: 95 - idx * 3, confidence: 0.9 })
+      );
+
+      const engine = createLeadGenerationEngine({ logger });
+      engine.registerModule(
+        createMockModule('mod', 0.5, jest.fn().mockResolvedValue(observations))
+      );
+
+      const { confident, exploratory } = await engine.prepareLeadCandidates(entities);
+
+      expect(confident).toHaveLength(MAX_LEADS_PER_RUN);
+      expect(exploratory).toHaveLength(poolSize - MAX_LEADS_PER_RUN);
+      expect(confident.map((c) => c.entity.name)).toEqual(
+        Array.from({ length: MAX_LEADS_PER_RUN }, (_, i) => `entity_${i}`)
+      );
+      expect(exploratory.map((c) => c.entity.name)).toEqual(
+        Array.from(
+          { length: poolSize - MAX_LEADS_PER_RUN },
+          (_, i) => `entity_${i + MAX_LEADS_PER_RUN}`
+        )
+      );
     });
 
     it('excludes entities below minObservations from both confident and exploratory', async () => {
