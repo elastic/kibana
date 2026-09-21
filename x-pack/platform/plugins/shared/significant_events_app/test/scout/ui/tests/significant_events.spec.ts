@@ -74,7 +74,6 @@ test.describe(
         'Rules',
         'Detections',
         'Significant Events',
-        'Settings',
       ]) {
         await expect(tabBar.getByRole('tab', { name: label })).toBeVisible();
       }

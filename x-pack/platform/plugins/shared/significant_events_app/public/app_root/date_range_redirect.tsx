@@ -23,10 +23,13 @@ function useDateRangeRedirect() {
     },
   } = useKibana();
 
-  const { isDateRangeSet, rangeFrom, rangeTo } = useMemo(() => {
+  const { hasDateRangeParams, isDateRangeSet, rangeFrom, rangeTo } = useMemo(() => {
     const searchParams = new URLSearchParams(location.search);
+    const hasRangeFrom = searchParams.has('rangeFrom');
+    const hasRangeTo = searchParams.has('rangeTo');
     return {
-      isDateRangeSet: searchParams.has('rangeFrom') && searchParams.has('rangeTo'),
+      hasDateRangeParams: hasRangeFrom || hasRangeTo,
+      isDateRangeSet: hasRangeFrom && hasRangeTo,
       rangeFrom: searchParams.get('rangeFrom'),
       rangeTo: searchParams.get('rangeTo'),
     };
@@ -54,12 +57,31 @@ function useDateRangeRedirect() {
     });
   }, [history, location, queryService]);
 
-  return { isDateRangeSet, rangeFrom, rangeTo, requiresDateRange, redirect, queryService };
+  const removeDateRange = useCallback(() => {
+    const nextParams = new URLSearchParams(location.search);
+    nextParams.delete('rangeFrom');
+    nextParams.delete('rangeTo');
+    history.replace({
+      ...location,
+      search: nextParams.toString(),
+    });
+  }, [history, location]);
+
+  return {
+    hasDateRangeParams,
+    isDateRangeSet,
+    rangeFrom,
+    rangeTo,
+    requiresDateRange,
+    redirect,
+    removeDateRange,
+    queryService,
+  };
 }
 
 /**
- * Component that ensures time range params (rangeFrom/rangeTo) are present in the URL.
- * If they are missing, it blocks rendering and redirects to add default values.
+ * Ensures management routes have time range params and removes them from standalone Settings.
+ * While the URL is being normalized, it blocks rendering to avoid exposing stale route state.
  *
  * When adding defaults, it checks whether the global timefilter has been explicitly
  * set (isTimeTouched). If so, it preserves that value (e.g. a range the user picked
@@ -70,16 +92,26 @@ function useDateRangeRedirect() {
  * This ensures components using useTimefilter() get the correct time from URL.
  */
 export function DateRangeRedirect({ children }: { children: React.ReactNode }) {
-  const { isDateRangeSet, rangeFrom, rangeTo, requiresDateRange, redirect, queryService } =
-    useDateRangeRedirect();
+  const {
+    hasDateRangeParams,
+    isDateRangeSet,
+    rangeFrom,
+    rangeTo,
+    requiresDateRange,
+    redirect,
+    removeDateRange,
+    queryService,
+  } = useDateRangeRedirect();
 
   // Use useLayoutEffect to redirect before paint, avoiding the
   // "Cannot update a component while rendering" warning
   useLayoutEffect(() => {
-    if (requiresDateRange && !isDateRangeSet) {
+    if (!requiresDateRange && hasDateRangeParams) {
+      removeDateRange();
+    } else if (requiresDateRange && !isDateRangeSet) {
       redirect();
     }
-  }, [isDateRangeSet, redirect, requiresDateRange]);
+  }, [hasDateRangeParams, isDateRangeSet, redirect, removeDateRange, requiresDateRange]);
 
   useEffect(() => {
     if (requiresDateRange && rangeFrom && rangeTo) {
@@ -93,8 +125,8 @@ export function DateRangeRedirect({ children }: { children: React.ReactNode }) {
     }
   }, [rangeFrom, rangeTo, queryService, requiresDateRange]);
 
-  // Block rendering until time params are set
-  if (requiresDateRange && !isDateRangeSet) {
+  // Block rendering until time params are added or removed for the current route.
+  if ((requiresDateRange && !isDateRangeSet) || (!requiresDateRange && hasDateRangeParams)) {
     return null;
   }
 
