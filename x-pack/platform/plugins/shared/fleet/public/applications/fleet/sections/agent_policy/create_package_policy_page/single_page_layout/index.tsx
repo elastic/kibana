@@ -920,7 +920,11 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   );
 
   return !addIntegrationFlyoutProps ? (
-    <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="createPackagePolicy">
+    <CreatePackagePolicySinglePageLayout
+      {...layoutProps}
+      useWidePageLayout={replaceDefineStepView?.useWidePageLayout}
+      data-test-subj="createPackagePolicy"
+    >
       <Suspense fallback={<Loading />}>
         <PliAuthBlockWrapper>
           <EuiErrorBoundary>
