@@ -13,14 +13,14 @@ import { ALERTZERO_ENABLED_SETTING_ID } from '@kbn/alertzero-common';
  * While the setting is off the route 404s as if it had never been registered.
  *
  * The setting is registered next to the routes, inside the `xpack.alertzero.enabled` guard in
- * `server/plugin.ts`, so a deployment with the kill switch off registers neither and never reaches
- * the `uiSettings.client.get` call that would throw on an unregistered key.
+ * `server/plugin.ts`, so a deployment with the kill switch off registers neither. Should the key be
+ * unregistered anyway, `get` resolves to `undefined`, which keeps the route gated off.
  */
 export const withAlertZeroEnabled =
   <P, Q, B>(handler: RequestHandler<P, Q, B>): RequestHandler<P, Q, B> =>
   async (context, request, response) => {
     const { uiSettings } = await context.core;
-    const isEnabled = await uiSettings.client.get<boolean>(ALERTZERO_ENABLED_SETTING_ID, false);
+    const isEnabled = await uiSettings.client.get<boolean>(ALERTZERO_ENABLED_SETTING_ID);
     if (!isEnabled) {
       return response.notFound();
     }
