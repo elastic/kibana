@@ -326,9 +326,9 @@ describe('createVegaGraph', () => {
 
     const state = await run({ esqlQuery: PROVIDED_ESQL });
 
-    // The provided query is discarded and regeneration is attempted; when that
-    // also cannot execute, we abort instead of authoring around a broken query.
-    expect(mockedGenerateEsql).toHaveBeenCalledTimes(1);
+    // The provided query is discarded and regeneration is attempted (low-effort
+    // model, then default-model fallback); when that also fails, we abort.
+    expect(mockedGenerateEsql).toHaveBeenCalledTimes(2);
     expect(invoke).not.toHaveBeenCalled();
     expect(state.spec).toBeNull();
     expect(state.error).toContain('Could not resolve a valid ES|QL query');
