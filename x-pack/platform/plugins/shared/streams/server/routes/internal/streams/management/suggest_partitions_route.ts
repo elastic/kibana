@@ -65,11 +65,7 @@ const boundedNever = z.object({ never: z.object({}) });
 
 function buildBoundedCondition(depth: number): z.ZodType<Condition> {
   if (depth === 0) {
-    return z.union([
-      boundedFilterCondition,
-      boundedAlways,
-      boundedNever,
-    ]) as z.ZodType<Condition>;
+    return z.union([boundedFilterCondition, boundedAlways, boundedNever]) as z.ZodType<Condition>;
   }
   const inner = buildBoundedCondition(depth - 1);
   return z.union([
@@ -105,7 +101,12 @@ export const suggestPartitionsSchema = z.object({
     end: z.number(),
     user_prompt: z.string().max(2000).optional(),
     existing_partitions: z
-      .array(z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH), condition: boundedConditionSchema }))
+      .array(
+        z.object({
+          name: z.string().max(MAX_STREAM_NAME_LENGTH),
+          condition: boundedConditionSchema,
+        })
+      )
       .max(100)
       .optional(),
   }),
