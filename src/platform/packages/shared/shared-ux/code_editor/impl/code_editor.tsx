@@ -672,8 +672,12 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
               padding: allowFullScreen || isCopyable ? { top: 24 } : {},
               renderLineHighlight: 'none',
               scrollBeyondLastLine: false,
+              stickyScroll: { enabled: false },
               minimap: {
                 enabled: false,
+              },
+              quickSuggestions: {
+                other: 'on',
               },
               scrollbar: {
                 useShadows: false,
@@ -690,6 +694,10 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
               fontSize: isFullScreen ? 16 : 12,
               lineHeight: isFullScreen ? 24 : 21,
               contextmenu: enableCustomContextMenu,
+              defaultColorDecorators: 'never',
+              lightbulb: {
+                enabled: monaco.editor.ShowLightbulbIconMode.On,
+              },
               // @ts-expect-error, see https://github.com/microsoft/monaco-editor/issues/3829
               'bracketPairColorization.enabled': false,
               ...options,

@@ -205,6 +205,7 @@ export const useEditorConfig = ({
         showToolbar: 'onHover',
         suppressSuggestions: false,
         keepOnBlur: false,
+        syntaxHighlightingEnabled: false,
       },
       readOnly: isDisabled,
       renderLineHighlight: 'line',
