@@ -22,8 +22,24 @@ const getStatusQuery = (alertId: string) => ({
   subject_types: ['alert'] satisfies InvestigationSubjectType[],
   sort_field: 'created_at' as const,
   sort_order: 'desc' as const,
-  size: 2,
+  size: 1,
 });
+
+export const useInvestigationAvailability = () => {
+  const { http } = useKibana().services;
+  const investigationsClient = getInvestigationsClient();
+
+  return useQuery({
+    queryKey: ['investigationAvailability', http.basePath.get?.() ?? ''],
+    queryFn: ({ signal }) =>
+      investigationsClient!.fetch('GET /internal/nightshift/investigations/availability', {
+        signal: signal ?? null,
+      }),
+    enabled: Boolean(investigationsClient),
+    retry: false,
+    staleTime: 5 * 60_000,
+  });
+};
 
 export const useInvestigateAlert = ({
   alertId,
@@ -38,17 +54,8 @@ export const useInvestigateAlert = ({
   const investigationsClient = getInvestigationsClient();
   const statusQueryKey = ['alertInvestigations', http.basePath.get?.() ?? '', alertId] as const;
   const queryClient = useQueryClient();
+  const { data: availability } = useInvestigationAvailability();
   const canInvestigate = Boolean(enabled && alertId && investigationsClient);
-  const { data: availability } = useQuery({
-    queryKey: ['investigationAvailability', http.basePath.get?.() ?? ''],
-    queryFn: ({ signal }) =>
-      investigationsClient!.fetch('GET /internal/nightshift/investigations/availability', {
-        signal: signal ?? null,
-      }),
-    enabled: canInvestigate,
-    retry: false,
-    staleTime: 30_000,
-  });
   const { data: investigations } = useQuery({
     queryKey: statusQueryKey,
     queryFn: ({ signal }) =>

@@ -94,7 +94,7 @@ describe('useInvestigateAlert', () => {
             subject_types: ['alert'],
             sort_field: 'created_at',
             sort_order: 'desc',
-            size: 2,
+            size: 1,
           },
         },
       })
@@ -221,10 +221,13 @@ describe('useInvestigateAlert', () => {
     });
   });
 
-  it('does not fetch investigations or availability when enabled is false', async () => {
+  it('does not fetch alert investigations when enabled is false', async () => {
     renderHook(() => useInvestigateAlert({ alertId: 'alert-1', enabled: false }), { wrapper });
 
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(fetchMock).not.toHaveBeenCalledWith(
+      'GET /internal/nightshift/investigations',
+      expect.anything()
+    );
   });
 
   it('hides the action when the nightshift plugin is unavailable', async () => {
