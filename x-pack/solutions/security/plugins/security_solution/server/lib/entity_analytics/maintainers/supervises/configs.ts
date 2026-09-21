@@ -6,6 +6,7 @@
  */
 
 import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common/domain/entity_index';
+import { euid } from '@kbn/entity-store/common/euid_helpers';
 import type { RelationshipIntegrationConfig } from '../engine/types';
 import { COMPOSITE_PAGE_SIZE } from '../engine/constants';
 import { ENGINE_COLUMNS } from '../engine/columns';
@@ -101,6 +102,103 @@ function buildSupervisesEsqlQuery(
 | LIMIT ${COMPOSITE_PAGE_SIZE}`;
 }
 
+const WORKDAY_MANAGER_EMAIL_FIELD = 'workday.user.Manager_Email';
+const WORKDAY_MANAGER_ID_FIELD = 'workday.user.Manager_ID';
+const WORKDAY_NAMESPACE = 'workday';
+/**
+ * Generous against a 24h poll: tolerates sync outages and backfills without
+ * losing edges. Declared once as a day count so the DSL and ES|QL forms of the
+ * same window cannot drift — Step 1 and Step 2 must narrow identically.
+ */
+const WORKDAY_INGESTED_LOOKBACK_DAYS = 30;
+const WORKDAY_INGESTED_LOOKBACK_DSL = `now-${WORKDAY_INGESTED_LOOKBACK_DAYS}d`;
+const WORKDAY_INGESTED_LOOKBACK_ESQL = `NOW() - ${WORKDAY_INGESTED_LOOKBACK_DAYS} day`;
+
+/**
+ * Step 2 ES|QL for Workday `supervises`.
+ *
+ * Workday emits one row per worker naming only that worker's manager, so the
+ * relationship must be inverted: the row's own user is the TARGET and the
+ * manager is the ACTOR.
+ *
+ * The actor is a union of two manager fields, which is why this is a
+ * `kind: 'override'` config — the standard builder only `MV_EXPAND`s the target,
+ * so a multi-valued actor would mis-group under `STATS ... BY actorUserId`.
+ *
+ * `Worker_s_Manager` is deliberately unused: it is a display name
+ * ("Alex Manager (000687)"), not a resolvable identifier.
+ *
+ * `user:<Manager_ID>@workday` will 404 when the manager entity is keyed by
+ * email. That is the intended drop path for managers not in the store.
+ */
+function buildWorkdaySupervisesEsqlQuery(
+  namespace: string,
+  lastProcessedTimestamp?: string
+): string {
+  const logIndex = `logs-workday.user-${namespace}`;
+  // The row's own user is the target, so the canonical helper applies directly —
+  // it reproduces the full user EUID ranking and emits the entity.namespace
+  // evaluation it depends on.
+  const targetEuidEval = euid.esql.getEuidEvaluation('user', 'targetEntityId', {
+    withTypeId: true,
+  });
+  // Presence of a watermark means this is not the first run: narrow to recently
+  // re-synced workers. A fixed window (not `> lastProcessedTimestamp`) so a
+  // delayed or skipped run cannot open a gap.
+  const ingestedClause = lastProcessedTimestamp
+    ? `\n    AND event.ingested >= ${WORKDAY_INGESTED_LOOKBACK_ESQL}`
+    : '';
+
+  return `FROM ${logIndex}
+| WHERE (${WORKDAY_MANAGER_EMAIL_FIELD} IS NOT NULL OR ${WORKDAY_MANAGER_ID_FIELD} IS NOT NULL)${ingestedClause}
+| EVAL ${targetEuidEval}
+| EVAL managerKey = CASE(${WORKDAY_MANAGER_EMAIL_FIELD} IS NULL, ${WORKDAY_MANAGER_ID_FIELD}, ${WORKDAY_MANAGER_ID_FIELD} IS NULL, ${WORKDAY_MANAGER_EMAIL_FIELD}, MV_APPEND(${WORKDAY_MANAGER_EMAIL_FIELD}, ${WORKDAY_MANAGER_ID_FIELD}))
+| MV_EXPAND managerKey
+| EVAL ${ENGINE_COLUMNS.actor} = CONCAT("user:", managerKey, "@${WORKDAY_NAMESPACE}")
+| WHERE COALESCE(${ENGINE_COLUMNS.actor}, "") != ""
+    AND ${ENGINE_COLUMNS.actor} != "user:@${WORKDAY_NAMESPACE}"
+    AND ${ENGINE_COLUMNS.actor} RLIKE ".+:.+@.+"
+    AND COALESCE(targetEntityId, "") != ""
+| STATS ${RELATIONSHIP_KEY} = VALUES(targetEntityId) BY ${ENGINE_COLUMNS.actor}
+| LIMIT ${COMPOSITE_PAGE_SIZE}`;
+}
+
+function buildWorkdaySupervisesConfig(
+  lastProcessedTimestamp?: string
+): RelationshipIntegrationConfig {
+  return {
+    kind: 'override',
+    id: 'workday',
+    name: 'Workday',
+    indexPattern: (namespace) => `logs-workday.user-${namespace}`,
+    targetEntityType: 'user',
+    relationshipKey: RELATIONSHIP_KEY,
+    // Managers, not reports: step 1 must bucket the actor.
+    customActor: {
+      fields: [WORKDAY_MANAGER_EMAIL_FIELD, WORKDAY_MANAGER_ID_FIELD],
+    },
+    // @timestamp is Hire_Date, so the engine's 30d lookback would select only
+    // recently-hired workers. Replaced by the event.ingested window below.
+    disableLookbackWindow: true,
+    validateTargetIds: true,
+    compositeAggAdditionalFilters: [
+      {
+        bool: {
+          should: [
+            { exists: { field: WORKDAY_MANAGER_EMAIL_FIELD } },
+            { exists: { field: WORKDAY_MANAGER_ID_FIELD } },
+          ],
+          minimum_should_match: 1,
+        },
+      },
+      ...(lastProcessedTimestamp
+        ? [{ range: { 'event.ingested': { gte: WORKDAY_INGESTED_LOOKBACK_DSL } } }]
+        : []),
+    ],
+    esqlQueryOverride: (ns) => buildWorkdaySupervisesEsqlQuery(ns, lastProcessedTimestamp),
+  };
+}
+
 function buildSupervisesConfig(
   source: SupervisesSource,
   lastProcessedTimestamp?: string
@@ -137,7 +235,10 @@ function buildSupervisesConfig(
 export function buildSupervisesConfigs(
   lastProcessedTimestamp?: string
 ): RelationshipIntegrationConfig[] {
-  return SUPERVISES_SOURCES.map((source) => buildSupervisesConfig(source, lastProcessedTimestamp));
+  return [
+    ...SUPERVISES_SOURCES.map((source) => buildSupervisesConfig(source, lastProcessedTimestamp)),
+    buildWorkdaySupervisesConfig(lastProcessedTimestamp),
+  ];
 }
 
 // Static export for tests that don't need a watermark.
