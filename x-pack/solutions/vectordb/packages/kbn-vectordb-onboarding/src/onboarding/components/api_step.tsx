@@ -31,6 +31,7 @@ import { TryInConsoleButton } from '@kbn/try-in-console';
 import { useKibana } from '../../services';
 import { LANGUAGES } from '../constants/languages';
 import { fillPlaceholders } from '../utils/fill_placeholders';
+import { getWizardTelemetryPrefix } from '../utils/wizard_telemetry_prefix';
 import { useOnboardingCredentials } from '../../hooks/use_onboarding_credentials';
 import { useSelectedLanguage } from '../../hooks/use_selected_language';
 import type { DocsPanelProps, OnboardingPill, SnippetSet, VectorPath, WizardStep } from '../types';
@@ -75,7 +76,7 @@ export const ApiStep = ({ tabs, consoleComment, docsPanel, pills, step, path }: 
     apiKey ?? undefined
   );
 
-  const telemetryPrefix = `vectordbOnboarding-${step}-${path}`;
+  const telemetryPrefix = getWizardTelemetryPrefix(path, step);
 
   const isInTrial = cloud?.isInTrial() ?? false;
   const visiblePills = isInTrial ? pills : pills.filter(({ trialOnly }) => !trialOnly);
