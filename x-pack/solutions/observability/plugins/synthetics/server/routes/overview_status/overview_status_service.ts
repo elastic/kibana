@@ -55,6 +55,9 @@ const STATUS_RANK: Record<string, number> = {
 // `processMonitors` only sees saved-object configs. Heartbeat/remote monitors
 // are synthesized later into the status buckets, so union those query IDs
 // into `allIds` or a free-text search would drop them from the activity chart.
+// Skip the union when a schedule filter is active: schedules only apply to
+// saved-object configs, and ping-synthesized monitors would otherwise leak
+// onto the activity chart.
 const allIdsIncludingStatusBuckets = (
   savedObjectIds: string[],
   buckets: Array<Record<string, Pick<OverviewStatusMetaData, 'monitorQueryId'>>>
@@ -207,13 +210,15 @@ export class OverviewStatusService {
       projectMonitorsCount,
     } = processMonitors(allConfigs, this.filterData?.locationIds);
 
-    const allIds = allIdsIncludingStatusBuckets(savedObjectIds, [
-      upConfigs,
-      downConfigs,
-      pendingConfigs,
-      staleConfigs,
-      disabledConfigs,
-    ]);
+    const allIds = isEmpty(params.schedules)
+      ? allIdsIncludingStatusBuckets(savedObjectIds, [
+          upConfigs,
+          downConfigs,
+          pendingConfigs,
+          staleConfigs,
+          disabledConfigs,
+        ])
+      : savedObjectIds;
 
     if (!isPaginated) {
       return {

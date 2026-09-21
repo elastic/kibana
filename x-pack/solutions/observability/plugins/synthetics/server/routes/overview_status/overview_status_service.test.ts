@@ -1521,6 +1521,73 @@ describe('current status route', () => {
       expect(result.allIds).toContain('remote-monitor-1');
     });
 
+    it('does not put remote-only monitor ids into allIds when a schedule filter is active', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            {
+              key: {
+                monitorId: 'id1',
+                locationId: japanLoc.id,
+              },
+              status: {
+                key: japanLoc.id,
+                top: [
+                  {
+                    metrics: {
+                      'monitor.status': 'up',
+                    },
+                    sort: ['2022-09-15T16:19:16.724Z'],
+                  },
+                ],
+              },
+            },
+            {
+              key: {
+                monitorId: 'remote-monitor-1',
+                locationId: 'us-east-1',
+              },
+              status: {
+                key: 'us-east-1',
+                top: [
+                  {
+                    metrics: {
+                      'monitor.status': 'down',
+                      kibanaUrl: 'https://east.kibana.example.com',
+                      'monitor.name': 'Remote API Check',
+                      'monitor.type': 'http',
+                      config_id: 'remote-config-1',
+                      _index: 'cluster-east:synthetics-browser-default',
+                    },
+                    sort: ['2022-09-15T16:20:00.000Z'],
+                  },
+                ],
+              },
+            },
+          ],
+        })
+      );
+
+      const routeContext: any = {
+        request: { query: { schedules: ['1'] } },
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: false,
+        },
+      };
+
+      const overviewStatusService = new OverviewStatusService(routeContext);
+      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue(testMonitors as any);
+
+      const result = await overviewStatusService.getOverviewStatus();
+
+      expect(result.downConfigs['cluster-east-remote-config-1-us-east-1']).toBeDefined();
+      expect(result.allIds).not.toContain('remote-monitor-1');
+      expect(result.allIds).toEqual(expect.arrayContaining(['id1', 'id2']));
+    });
+
     it('discovers CPS linked-project monitors that have no local saved object', async () => {
       const { esClient, syntheticsEsClient } = getUptimeESMockClient();
 
@@ -2716,6 +2783,33 @@ describe('current status route', () => {
       expect(entry.tags).toEqual(['kube-system']);
       expect(entry.locations).toEqual([{ id: japanLoc.id, label: 'My K8s Cluster', status: 'up' }]);
       expect(result.up).toBe(1);
+    });
+
+    it('does not put Heartbeat monitor ids into allIds when a schedule filter is active', async () => {
+      // Schedules only apply to saved-object configs. The ping-synthesized
+      // Heartbeat monitor must not leak onto the activity chart's allIds set.
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [heartbeatBucket({ monitorId: 'hb-1', status: 'up' })],
+        })
+      );
+
+      const routeContext: any = {
+        request: { query: { schedules: ['1'] } },
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: false,
+          config: { experimental: { ccs: { enabled: false } } },
+        },
+      };
+      const service = new OverviewStatusService(routeContext);
+      service.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+
+      const result = await service.getOverviewStatus();
+
+      expect(result.upConfigs['heartbeat-hb-1-asia_japan']).toBeDefined();
+      expect(result.allIds).not.toContain('hb-1');
     });
 
     const runWithBuckets = async (buckets: any[]) => {
