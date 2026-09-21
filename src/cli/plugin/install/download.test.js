@@ -52,6 +52,7 @@ describe('kibana cli', function () {
     });
 
     afterAll(function () {
+      nock.restore();
       Object.assign(process.env, originalProxyEnv);
     });
 
