@@ -25,6 +25,7 @@ import {
   MAX_AI_INDEX_QUERY_PARAM_VALUE_LENGTH,
   MAX_AI_INDEX_QUERY_PARAMS,
   MAX_AI_INDEX_SOURCES,
+  MAX_AI_INDEX_ID_LENGTH,
   MAX_AI_INDEX_SOURCE_VALUE_LENGTH,
   MAX_AI_INDICES,
   MAX_AI_INDEX_TRACES,
@@ -2485,6 +2486,30 @@ describe('ai indices routes', () => {
       it(`rejects ${JSON.stringify(value)}`, () => {
         expect(() => validateBody(body(value))).toThrow(/lowercase letters, numbers, hyphens/);
       });
+    });
+  });
+
+  describe('id body validation', () => {
+    const validateBody = (body: unknown) => {
+      const { validate } = getRoute('POST', aiIndexPath);
+      if (validate === false || !validate.request?.body) {
+        throw new Error('Expected a body schema');
+      }
+      return validate.request.body.validate(body);
+    };
+    const body = (id: string) => ({
+      id,
+      dest: { type: 'index', value: 'ai-index-idx-mine' },
+      automations: [],
+      sources: [],
+    });
+
+    it('accepts an id at the maximum length', () => {
+      expect(() => validateBody(body('a'.repeat(MAX_AI_INDEX_ID_LENGTH)))).not.toThrow();
+    });
+
+    it('rejects an id over the maximum length', () => {
+      expect(() => validateBody(body('a'.repeat(MAX_AI_INDEX_ID_LENGTH + 1)))).toThrow();
     });
   });
 });

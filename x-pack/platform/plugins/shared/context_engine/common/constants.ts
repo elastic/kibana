@@ -81,11 +81,13 @@ export const AI_INDEX_INDEX_PREFIX = `${AI_INDEX_DEST_PREFIX}idx-`;
  */
 export const MAX_AI_INDICES = 100;
 
-export const MAX_AI_INDEX_ID_LENGTH = 256;
 export const MAX_AI_INDEX_FEEDBACK_AGENT_ID_LENGTH = 256;
 export const MAX_AI_INDEX_DESCRIPTION_LENGTH = 2048;
 export const MAX_AI_INDEX_DEST_VALUE_LENGTH = 1024;
 export const MAX_INDEX_NAME_BYTES = 255;
+export const KI_VIEW_NAME_PREFIX = 'v-ai-index-';
+// The view name `v-ai-index-<id>` must fit an index name.
+export const MAX_AI_INDEX_ID_LENGTH = MAX_INDEX_NAME_BYTES - KI_VIEW_NAME_PREFIX.length;
 export const MAX_AI_INDEX_AUTOMATION_LENGTH = 1024;
 export const MAX_AI_INDEX_SOURCE_VALUE_LENGTH = 10240;
 export const MAX_AI_INDEX_AUTOMATIONS = 100;
