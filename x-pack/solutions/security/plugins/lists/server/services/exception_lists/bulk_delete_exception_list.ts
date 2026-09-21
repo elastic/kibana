@@ -201,7 +201,7 @@ export const bulkDeleteExceptionList = async ({
     } else if (savedObject.attributes.list_type !== 'list') {
       validationErrors.push({
         lists: [{ id }],
-        message: getErrorMessageExceptionList({ id, listId: undefined }),
+        message: `exception list id: "${id}" is not an exception list container`,
         status_code: 404,
       });
     } else {

@@ -160,7 +160,7 @@ describe('bulkDeleteExceptionList', () => {
       expect(result.errors).toEqual([
         {
           lists: [{ id: 'item-so-id' }],
-          message: 'exception list id: "item-so-id" does not exist',
+          message: 'exception list id: "item-so-id" is not an exception list container',
           status_code: 404,
         },
       ]);
