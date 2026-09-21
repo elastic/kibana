@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { arrayOrSingleSchema, queryIntSchema } from './common';
 import {
   ID_MAX_LENGTH,
+  MAX_SEARCH_LENGTH,
   EXECUTION_HISTORY_MAX_PER_PAGE,
   EXECUTION_HISTORY_DEFAULT_PER_PAGE,
   EXECUTION_HISTORY_MAX_RESULT_WINDOW,
@@ -53,6 +54,13 @@ export const listRuleExecutionsRequestSchema = z
   .object({
     rule_ids: ruleIdArraySchema.optional().describe(`Rule id filter. `),
     outcome: outcomeArraySchema.optional().describe('Outcome filter. '),
+    search: z
+      .string()
+      .trim()
+      .min(1)
+      .max(MAX_SEARCH_LENGTH)
+      .optional()
+      .describe('Free-text search. Matches rule name or rule ID (case-insensitive).'),
     from: z.iso
       .datetime()
       .optional()
@@ -66,14 +74,19 @@ export const listRuleExecutionsRequestSchema = z
     page: queryIntSchema({ min: 1, max: EXECUTION_HISTORY_MAX_RESULT_WINDOW })
       .default(1)
       .describe(`Page number.`),
-    per_page: queryIntSchema({ min: 1, max: EXECUTION_HISTORY_MAX_PER_PAGE })
+    // Allows 0 for count-only reads (per_page=0).
+    per_page: queryIntSchema({ min: 0, max: EXECUTION_HISTORY_MAX_PER_PAGE }) // TODO check if min 0 is correct here, from task: which also gives rule executions a count-only read it does not have today
       .default(EXECUTION_HISTORY_DEFAULT_PER_PAGE)
-      .describe(`Number of results per page.`),
+      .describe(`Number of results per page. Pass 0 for a count-only read.`),
   })
-  .refine(({ page, per_page }) => page * per_page <= EXECUTION_HISTORY_MAX_RESULT_WINDOW, {
-    message: `page * per_page cannot exceed ${EXECUTION_HISTORY_MAX_RESULT_WINDOW}.`,
-    path: ['page'],
-  });
+  .refine(
+    ({ page, per_page: perPage }) =>
+      (perPage !== 0 && page * perPage <= EXECUTION_HISTORY_MAX_RESULT_WINDOW) || perPage === 0,
+    {
+      message: `page * per_page cannot exceed ${EXECUTION_HISTORY_MAX_RESULT_WINDOW}.`,
+      path: ['page'],
+    }
+  );
 export type ListRuleExecutionsRequest = z.infer<typeof listRuleExecutionsRequestSchema>;
 
 export const ruleExecutionViewSchema = z
@@ -108,7 +121,7 @@ export const listRuleExecutionsResponseSchema = z
     items: z.array(ruleExecutionViewSchema),
     total: z.number().int().nonnegative(),
     page: z.number().int().min(1),
-    per_page: z.number().int().min(1),
+    per_page: z.number().int().min(0),
   })
   .meta({ id: 'alerting_rule_executions_response' });
 

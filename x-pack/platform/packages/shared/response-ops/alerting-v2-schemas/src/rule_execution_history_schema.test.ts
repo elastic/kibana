@@ -7,6 +7,7 @@
 
 import {
   ID_MAX_LENGTH,
+  MAX_SEARCH_LENGTH,
   EXECUTION_HISTORY_DEFAULT_PER_PAGE,
   EXECUTION_HISTORY_MAX_PER_PAGE,
   EXECUTION_HISTORY_MAX_RESULT_WINDOW,
@@ -67,12 +68,41 @@ describe('rule_execution_history_schema', () => {
         });
       });
 
-      it('does not inject rule_ids / outcome / from / to when missing', () => {
+      it('does not inject rule_ids / outcome / search / from / to when missing', () => {
         const parsed = listRuleExecutionsRequestSchema.parse({});
         expect(parsed).not.toHaveProperty('rule_ids');
         expect(parsed).not.toHaveProperty('outcome');
+        expect(parsed).not.toHaveProperty('search');
         expect(parsed).not.toHaveProperty('from');
         expect(parsed).not.toHaveProperty('to');
+      });
+    });
+
+    describe('search', () => {
+      it('accepts a valid search string', () => {
+        expect(listRuleExecutionsRequestSchema.parse({ search: 'my rule' }).search).toBe('my rule');
+      });
+
+      it('trims surrounding whitespace', () => {
+        expect(listRuleExecutionsRequestSchema.parse({ search: '  hello  ' }).search).toBe('hello');
+      });
+
+      it('rejects a whitespace-only string (empty after trim)', () => {
+        expect(listRuleExecutionsRequestSchema.safeParse({ search: '   ' }).success).toBe(false);
+      });
+
+      it(`accepts a search of exactly MAX_SEARCH_LENGTH (${MAX_SEARCH_LENGTH}) chars`, () => {
+        expect(
+          listRuleExecutionsRequestSchema.safeParse({ search: 'a'.repeat(MAX_SEARCH_LENGTH) })
+            .success
+        ).toBe(true);
+      });
+
+      it(`rejects a search longer than MAX_SEARCH_LENGTH (${MAX_SEARCH_LENGTH}) chars`, () => {
+        expect(
+          listRuleExecutionsRequestSchema.safeParse({ search: 'a'.repeat(MAX_SEARCH_LENGTH + 1) })
+            .success
+        ).toBe(false);
       });
     });
 
@@ -271,8 +301,12 @@ describe('rule_execution_history_schema', () => {
         expect(parsed.per_page).toBe(25);
       });
 
-      it('rejects per_page below 1', () => {
-        expect(listRuleExecutionsRequestSchema.safeParse({ per_page: 0 }).success).toBe(false);
+      it('accepts per_page=0 for a count-only read', () => {
+        expect(listRuleExecutionsRequestSchema.parse({ per_page: 0 }).per_page).toBe(0);
+      });
+
+      it('rejects negative per_page', () => {
+        expect(listRuleExecutionsRequestSchema.safeParse({ per_page: -1 }).success).toBe(false);
       });
 
       it('rejects per_page above the maximum', () => {
@@ -306,12 +340,22 @@ describe('rule_execution_history_schema', () => {
         });
         expect(result.success).toBe(false);
       });
+
+      it('never trips the guard for a count-only read (per_page=0)', () => {
+        expect(
+          listRuleExecutionsRequestSchema.safeParse({
+            page: EXECUTION_HISTORY_MAX_RESULT_WINDOW,
+            per_page: 0,
+          }).success
+        ).toBe(true);
+      });
     });
 
     it('round-trips a fully populated query (with already-array fields)', () => {
       const input = {
         rule_ids: ['rule-x', 'rule-y'],
         outcome: ['success', 'failure'] as const,
+        search: 'db outage',
         from: '2026-06-01T00:00:00Z',
         to: '2026-06-02T00:00:00Z',
         sort: 'duration' as const,
@@ -435,7 +479,7 @@ describe('rule_execution_history_schema', () => {
       ).toBe(false);
     });
 
-    it('rejects page or per_page below 1', () => {
+    it('rejects page below 1', () => {
       expect(
         listRuleExecutionsResponseSchema.safeParse({
           items: [],
@@ -444,13 +488,26 @@ describe('rule_execution_history_schema', () => {
           per_page: 20,
         }).success
       ).toBe(false);
+    });
 
+    it('accepts per_page=0 for a count-only read', () => {
+      expect(
+        listRuleExecutionsResponseSchema.safeParse({
+          items: [],
+          total: 42,
+          page: 1,
+          per_page: 0,
+        }).success
+      ).toBe(true);
+    });
+
+    it('rejects a negative per_page', () => {
       expect(
         listRuleExecutionsResponseSchema.safeParse({
           items: [],
           total: 0,
           page: 1,
-          per_page: 0,
+          per_page: -1,
         }).success
       ).toBe(false);
     });

@@ -66,29 +66,41 @@ const sharedFilterFields = {
 export const listPolicyExecutionHistoryRequestSchema = z
   .object({
     page: queryIntSchema({ min: 1, max: EXECUTION_HISTORY_MAX_RESULT_WINDOW })
+      .default(1)
       .optional()
       .describe('Page number (1-indexed). Defaults to 1.'),
     per_page: queryIntSchema({ min: 0, max: EXECUTION_HISTORY_MAX_PER_PAGE })
+      .default(EXECUTION_HISTORY_DEFAULT_PER_PAGE)
       .optional()
       .describe(
         `Number of events per page. Defaults to ${EXECUTION_HISTORY_DEFAULT_PER_PAGE}. Pass 0 for a count-only read.`
       ),
-    start_date: z.iso
+    from: z.iso
       .datetime()
       .optional()
       .describe(
         'Inclusive ISO datetime lower bound on the event timestamp; overrides the default 24-hour window. Independent of episode_ids — e.g. set it to an episode’s start time to scope results to that episode’s lifetime.'
       ),
+    to: z.iso
+      .datetime()
+      .optional()
+      .describe('Inclusive ISO datetime upper bound on the event timestamp.'),
     episode_ids: idFilterArraySchema
       .optional()
       .describe(
         'Episode filter. Narrows events to those referencing at least one of the provided episode ids.'
       ),
+    sort: z
+      .enum(['dispatched_at'])
+      .default('dispatched_at')
+      .optional()
+      .describe('Sort field. Defaults to dispatched_at.'),
+    sort_order: z.enum(['asc', 'desc']).default('desc').optional().describe('Sort direction.'),
     ...sharedFilterFields,
   })
   .refine(
     ({ page = 1, per_page: perPage = EXECUTION_HISTORY_DEFAULT_PER_PAGE }) =>
-      page * perPage <= EXECUTION_HISTORY_MAX_RESULT_WINDOW,
+      (perPage !== 0 && page * perPage <= EXECUTION_HISTORY_MAX_RESULT_WINDOW) || perPage === 0,
     {
       message: `page * per_page cannot exceed ${EXECUTION_HISTORY_MAX_RESULT_WINDOW}.`,
       path: ['page'],
@@ -147,7 +159,12 @@ export const policyExecutionHistoryItemSchema = z
       ),
     workflows: z.array(namedRefSchema).max(MAX_WORKFLOWS_PER_ITEM),
     failure_reason: dispatchFailureReasonSchema.optional(),
-    error: z.object({ message: z.string() }).optional(),
+    error: z
+      .object({
+        message: z.string(),
+        stack_trace: z.string().nullable(),
+      })
+      .nullable(),
   })
   .meta({ id: 'alerting_policy_execution_history_item' });
 
@@ -156,7 +173,9 @@ export type PolicyExecutionHistoryItem = z.infer<typeof policyExecutionHistoryIt
 export const searchMatchCountsSchema = z.object({
   policies: z.number().describe('Total policies matching the search.'),
   rules: z.number().describe('Total rules matching the search.'),
-  cap: z.number().describe('Maximum number of policy/rule ids the server uses as a filter.'),
+  is_truncated: z
+    .boolean()
+    .describe('True when the server filter cap was reached and results may be truncated.'),
 });
 export type SearchMatchCounts = z.infer<typeof searchMatchCountsSchema>;
 
@@ -164,13 +183,13 @@ export const listPolicyExecutionHistoryResponseSchema = z
   .object({
     items: z.array(policyExecutionHistoryItemSchema),
     page: z.number().int().min(1),
-    // Allows 0 for count-only reads (per_page=0), unlike the rule executions response.
+    // Allows 0 for count-only reads (per_page=0).
     per_page: z.number().int().min(0),
-    total_events: z.number().int().nonnegative(),
+    total: z.number().int().nonnegative(),
     search_matches: searchMatchCountsSchema
       .nullable()
       .describe(
-        'Per-type match counts for the active search, plus the cap used as filter. Null when no search was provided. When policies > cap or rules > cap the result is truncated.'
+        'Per-type match counts for the active search. Null when no search was provided. When is_truncated is true the server id filter was capped and the result may be truncated.'
       ),
   })
   .meta({ id: 'alerting_policy_execution_history_response' });

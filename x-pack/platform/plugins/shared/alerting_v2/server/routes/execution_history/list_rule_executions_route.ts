@@ -33,6 +33,8 @@ import { listRuleExecutionsOasExamples } from './list_rule_executions_oas_exampl
 export const toListRuleExecutionsArgs = ({
   rule_ids: ruleIds,
   outcome: outcomes,
+  // TODO: search field added for contract parity with the action policy stream but not implemented yet.
+  search: _search,
   from,
   to,
   sort,

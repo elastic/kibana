@@ -10,7 +10,7 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import type { SearchMatchCounts } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 
-type TruncatedType = 'policies' | 'rules';
+type MatchedType = 'policies' | 'rules';
 
 interface Props {
   searchParam?: string;
@@ -21,12 +21,15 @@ interface Props {
 
 export const TruncatedCallout = ({ data, searchParam }: Props) => {
   const searchMatches = data?.search_matches ?? null;
-  const truncatedTypes: TruncatedType[] =
+  const matchedTypes: MatchedType[] =
     searchMatches !== null
-      ? (['policies', 'rules'] as const).filter((t) => searchMatches[t] > searchMatches.cap)
+      ? (['policies', 'rules'] as const).filter((t) => searchMatches[t] > 0)
       : [];
   const showSearchTruncatedCallout =
-    searchParam !== undefined && truncatedTypes.length > 0 && searchMatches !== null;
+    searchParam !== undefined &&
+    searchMatches !== null &&
+    searchMatches.is_truncated &&
+    matchedTypes.length > 0;
 
   return showSearchTruncatedCallout ? (
     <>
@@ -35,29 +38,29 @@ export const TruncatedCallout = ({ data, searchParam }: Props) => {
         size="s"
         color="warning"
         iconType="warning"
-        title={buildSearchTruncatedCalloutTitle(searchMatches, truncatedTypes)}
+        title={buildSearchTruncatedCalloutTitle(searchMatches, matchedTypes)}
       />
       <EuiSpacer size="m" />
     </>
   ) : null;
 };
 
-const renderTruncatedPart = (matches: SearchMatchCounts, type: TruncatedType): string =>
+const renderMatchedPart = (matches: SearchMatchCounts, type: MatchedType): string =>
   type === 'policies'
     ? i18n.translate('xpack.alertingV2.executionHistory.searchTruncatedCallout.policiesPart', {
-        defaultMessage: '{cap} of {total} matching action policies',
-        values: { cap: matches.cap, total: matches.policies },
+        defaultMessage: '{total} matching action policies',
+        values: { total: matches.policies },
       })
     : i18n.translate('xpack.alertingV2.executionHistory.searchTruncatedCallout.rulesPart', {
-        defaultMessage: '{cap} of {total} matching rules',
-        values: { cap: matches.cap, total: matches.rules },
+        defaultMessage: '{total} matching rules',
+        values: { total: matches.rules },
       });
 
 const buildSearchTruncatedCalloutTitle = (
   matches: SearchMatchCounts,
-  truncatedTypes: TruncatedType[]
+  matchedTypes: MatchedType[]
 ): string => {
-  const summary = truncatedTypes.map((t) => renderTruncatedPart(matches, t));
+  const summary = matchedTypes.map((t) => renderMatchedPart(matches, t));
   const summaryText =
     summary.length === 2
       ? i18n.translate('xpack.alertingV2.executionHistory.searchTruncatedCallout.joinedSummary', {
