@@ -5,40 +5,18 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import {
   CLASSIFY_SEVERITY_API_PATH,
-  THREAT_CATEGORIES,
   THREAT_INTEL_ENRICH_INFERENCE_FEATURE_ID,
+  classifySeverityBodySchema,
+  classifySeverityResponseSchema,
+  CLASSIFY_SEVERITY_MAX_BODY_BYTES,
   type ThreatCategory,
 } from '../../../common/threat_intel';
 import { classifySeverity } from '../services';
 import { resolveScopedModel } from './lib/scoped_model';
 import { THREAT_INTEL_WRITE_AUTHZ } from './lib/authz';
 import type { RouteRegistrationDeps } from '.';
-
-const enumLiterals = <T extends string>(values: readonly T[]): string => values.join(', ');
-
-const classifySeverityBodySchema = schema.object({
-  text: schema.string({ minLength: 1, maxLength: 5_000_000 }),
-  report_id: schema.maybe(schema.string({ minLength: 1, maxLength: 256 })),
-  title: schema.maybe(schema.string({ maxLength: 1024 })),
-  categories: schema.maybe(
-    schema.arrayOf(
-      schema.string({
-        maxLength: 64,
-        validate: (value) =>
-          (THREAT_CATEGORIES as readonly string[]).includes(value)
-            ? undefined
-            : `must be one of: ${enumLiterals(THREAT_CATEGORIES)}`,
-      }),
-      { maxSize: THREAT_CATEGORIES.length }
-    )
-  ),
-  ioc_count: schema.maybe(schema.number({ min: 0, max: 100_000 })),
-});
-
-const CLASSIFY_SEVERITY_MAX_BODY_BYTES = 10 * 1024 * 1024;
 
 export const registerClassifySeverityRoute = ({
   router,
@@ -61,7 +39,10 @@ export const registerClassifySeverityRoute = ({
     .addVersion(
       {
         version: '1',
-        validate: { request: { body: classifySeverityBodySchema } },
+        validate: {
+          request: { body: classifySeverityBodySchema },
+          response: { 200: { body: () => classifySeverityResponseSchema } },
+        },
       },
       async (context, request, response) => {
         const core = await context.core;
