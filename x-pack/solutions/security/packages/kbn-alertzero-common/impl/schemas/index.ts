@@ -59,36 +59,36 @@ export {
   IndexScopeStatus,
   IndexScopeWindow,
   ResolvedIndexScope,
-} from './components/threat_intel.gen';
+} from './components/hunt.gen';
 export {
   HuntForThreatRequestBody,
   HuntForThreatResponse,
-} from './threat_intel/hunt_for_threat_route.gen';
+} from './hunt/hunt_for_threat_route.gen';
 export {
   HuntReadinessRequestQuery,
   HuntReadinessResponse,
-} from './threat_intel/hunt_readiness_route.gen';
+} from './hunt/hunt_readiness_route.gen';
 export {
   HuntBehaviorArticleContext,
   HuntBehaviorIoc,
   HuntBehaviorRequestBody,
   HuntBehaviorResponse,
   HuntBehaviorStatus,
-} from './threat_intel/hunt_behavior_route.gen';
+} from './hunt/hunt_behavior_route.gen';
 export {
   CandidatesRequestBody,
   CandidatesResponse,
   CandidateSkipReason,
-} from './threat_intel/candidates_route.gen';
+} from './hunt/candidates_route.gen';
 export {
   HuntCoordinatorRequestBody,
   HuntCoordinatorResponse,
   HuntCoordinatorStatus,
-} from './threat_intel/hunt_coordinator_route.gen';
+} from './hunt/hunt_coordinator_route.gen';
 export {
   AnchorIoc,
   AnchorSet,
   CorrelateRequestBody,
   CorrelateResponse,
   CorrelationEngineStatus,
-} from './threat_intel/correlate_route.gen';
+} from './hunt/correlate_route.gen';

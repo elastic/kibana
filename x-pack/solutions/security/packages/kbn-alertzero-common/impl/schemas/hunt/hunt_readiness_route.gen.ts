@@ -16,7 +16,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-import { HuntTechnology, ResolvedIndexScope } from '../components/threat_intel.gen';
+import { HuntTechnology, ResolvedIndexScope } from '../components/hunt.gen';
 
 export const HuntReadinessRequestQuery = lazySchema(() =>
   z.object({

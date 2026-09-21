@@ -14,10 +14,10 @@ import { registerHuntCoordinatorRoute } from './hunt_coordinator';
 import { registerCorrelateRoute } from './correlate';
 
 /**
- * Registers the threat-intel hunt routes (readiness, Tier 1, Tier 2,
+ * Registers the hunt routes (readiness, Tier 1, Tier 2,
  * coordinator, candidates, correlate). Phases 5–7 added in hunt-watch-services-lift.
  */
-export const registerThreatIntelRoutes = (deps: RouteDependencies): void => {
+export const registerHuntRoutes = (deps: RouteDependencies): void => {
   registerHuntReadinessRoute(deps);
   registerHuntForThreatRoute(deps);
   registerHuntBehaviorRoute(deps);

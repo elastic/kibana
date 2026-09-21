@@ -21,7 +21,7 @@ import { registerGetProposalsByCategoryRoute } from './proposals/get_proposals_b
 import { registerGetClosedProposalsRoute } from './proposals/get_closed_proposals';
 import { registerListActionsRoute } from './actions/list_actions';
 import { registerGetInvestigationsCountRoute } from './investigations/get_investigations_count';
-import { registerThreatIntelRoutes } from './threat_intel/register_threat_intel_routes';
+import { registerHuntRoutes } from './hunt/register_hunt_routes';
 
 export interface RouteDependencies {
   router: IRouter;
@@ -44,5 +44,5 @@ export const registerRoutes = (deps: RouteDependencies): void => {
   registerGetClosedProposalsRoute(deps);
   registerListActionsRoute(deps);
   registerGetInvestigationsCountRoute(deps);
-  registerThreatIntelRoutes(deps);
+  registerHuntRoutes(deps);
 };

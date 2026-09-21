@@ -21,7 +21,7 @@ import {
   HuntIoc,
   ResolvedIndexScope,
   HuntForThreatResult,
-} from '../components/threat_intel.gen';
+} from '../components/hunt.gen';
 
 export const HuntForThreatRequestBody = lazySchema(() =>
   z
