@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 import React, { useMemo } from 'react';
 import { KnowledgeIndicatorSelectableFilter } from '../../../../components/knowledge_indicators/knowledge_indicator_selectable_filter';
-import { getKnowledgeIndicatorStreamName } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_stream_name';
+import { getKnowledgeIndicatorSourceId } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_source_id';
 
 interface StreamFilterProps {
   knowledgeIndicators: KnowledgeIndicator[];
@@ -39,26 +39,26 @@ export function StreamFilter({
     <KnowledgeIndicatorSelectableFilter
       knowledgeIndicators={knowledgeIndicators}
       searchTerm={searchTerm}
-      getValue={getKnowledgeIndicatorStreamName}
+      getValue={getKnowledgeIndicatorSourceId}
       selected={selectedStreams}
       onSelectedChange={onSelectedStreamsChange}
       labels={{
         button: i18n.translate('xpack.significantEventsApp.knowledgeIndicators.streamFilterLabel', {
-          defaultMessage: 'Stream',
+          defaultMessage: 'Source',
         }),
         groupLabel: i18n.translate(
           'xpack.significantEventsApp.knowledgeIndicators.streamFilterGroupLabel',
           {
-            defaultMessage: 'Filter by stream',
+            defaultMessage: 'Filter by source',
           }
         ),
         popoverAriaLabel: i18n.translate(
           'xpack.significantEventsApp.knowledgeIndicators.streamFilterPopoverLabel',
-          { defaultMessage: 'Stream filter' }
+          { defaultMessage: 'Source filter' }
         ),
         selectableAriaLabel: i18n.translate(
           'xpack.significantEventsApp.knowledgeIndicators.streamFilterSelectableAriaLabel',
-          { defaultMessage: 'Filter knowledge indicators by stream' }
+          { defaultMessage: 'Filter knowledge indicators by source' }
         ),
       }}
       filterCriteria={filterCriteria}

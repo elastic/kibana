@@ -29,7 +29,7 @@ const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent 
 const mockFeature = (overrides: Partial<Feature> = {}): Feature => ({
   uuid: 'feat-checkout',
   id: 'checkout-api',
-  stream_name: 'logs.checkout',
+  source_id: 'logs.checkout',
   type: 'entity',
   subtype: 'service',
   title: 'Checkout API',

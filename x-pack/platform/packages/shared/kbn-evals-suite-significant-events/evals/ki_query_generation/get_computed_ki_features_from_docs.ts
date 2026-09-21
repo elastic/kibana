@@ -72,10 +72,7 @@ const docToSampleFormat = (doc: Record<string, unknown>): Record<string, unknown
   return result;
 };
 
-const buildDatasetAnalysis = (
-  streamName: string,
-  flatDocs: Array<Record<string, unknown>>
-): FeatureUpsert => {
+const buildDatasetAnalysis = (flatDocs: Array<Record<string, unknown>>): FeatureUpsert => {
   const fieldValueCounts: Record<string, Map<string, number>> = {};
 
   for (const doc of flatDocs) {
@@ -110,7 +107,6 @@ const buildDatasetAnalysis = (
 
   return {
     id: 'dataset_analysis',
-    stream_name: streamName,
     type: 'dataset_analysis',
     description: 'Dataset schema and field analysis including value distributions and coverage',
     properties: { analysis: { total, fields, sampled: total } },
@@ -118,15 +114,11 @@ const buildDatasetAnalysis = (
   };
 };
 
-const buildLogSamples = (
-  streamName: string,
-  flatDocs: Array<Record<string, unknown>>
-): FeatureUpsert => {
+const buildLogSamples = (flatDocs: Array<Record<string, unknown>>): FeatureUpsert => {
   const samples = pickDiverseSamples(flatDocs, MAX_SAMPLE_DOCS).map(docToSampleFormat);
 
   return {
     id: 'log_samples',
-    stream_name: streamName,
     type: 'log_samples',
     description: 'Raw sample log documents from the stream',
     properties: { samples },
@@ -134,10 +126,7 @@ const buildLogSamples = (
   };
 };
 
-const buildLogPatterns = (
-  streamName: string,
-  flatDocs: Array<Record<string, unknown>>
-): FeatureUpsert => {
+const buildLogPatterns = (flatDocs: Array<Record<string, unknown>>): FeatureUpsert => {
   const bodyTexts = flatDocs
     .map((doc) => String(doc['body.text'] ?? doc.message ?? ''))
     .filter(Boolean);
@@ -172,7 +161,6 @@ const buildLogPatterns = (
 
   return {
     id: 'log_patterns',
-    stream_name: streamName,
     type: 'log_patterns',
     description: 'Log message patterns identified through categorization analysis',
     properties: { patterns },
@@ -180,10 +168,7 @@ const buildLogPatterns = (
   };
 };
 
-const buildErrorLogs = (
-  streamName: string,
-  flatDocs: Array<Record<string, unknown>>
-): FeatureUpsert => {
+const buildErrorLogs = (flatDocs: Array<Record<string, unknown>>): FeatureUpsert => {
   const errorDocs = flatDocs.filter((doc) => {
     const text = String(doc['body.text'] ?? doc.message ?? '').toLowerCase();
     return ERROR_KEYWORDS.some((kw) => text.includes(kw));
@@ -195,7 +180,6 @@ const buildErrorLogs = (
 
   return {
     id: 'error_logs',
-    stream_name: streamName,
     type: 'error_logs',
     description: 'Sample error logs extracted from the stream',
     properties: { samples },
@@ -219,9 +203,13 @@ export const getComputedKIFeaturesFromDocs = ({
   const flatDocs = docs.map((doc) => flattenDoc(doc));
 
   return [
-    buildDatasetAnalysis(streamName, flatDocs),
-    buildLogSamples(streamName, flatDocs),
-    buildLogPatterns(streamName, flatDocs),
-    buildErrorLogs(streamName, flatDocs),
-  ].map((feature) => ({ ...feature, uuid: computeFeatureUuid(feature) }));
+    buildDatasetAnalysis(flatDocs),
+    buildLogSamples(flatDocs),
+    buildLogPatterns(flatDocs),
+    buildErrorLogs(flatDocs),
+  ].map((feature) => ({
+    ...feature,
+    source_id: streamName,
+    uuid: computeFeatureUuid({ id: feature.id, source_id: streamName }),
+  }));
 };

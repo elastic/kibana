@@ -7,7 +7,7 @@
 
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { brandSpaceId, DEFAULT_SPACE_ID, type SpaceId } from '@kbn/core-spaces-common';
+import { brandSpaceId, type SpaceId } from '@kbn/core-spaces-common';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { ALERTING_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
@@ -38,6 +38,7 @@ import {
   buildDisableTargets,
   type MaintenanceWorkflowTarget,
 } from './managed_workflow_targets';
+import { getAllSpaceIds as enumerateSpaceIds } from '../spaces/get_all_space_ids';
 
 type ManagementApi = WorkflowsServerPluginSetup['management'];
 
@@ -263,36 +264,20 @@ export const createSignificantEventsMaintenanceService = ({
     );
   };
 
+  // Surfaces (not just logs) the under-scoping so pause doesn't silently skip
+  // per-space workflows in every space but the default.
   const getAllSpaceIds = async (
     request: KibanaRequest,
     failures: SignificantEventsMaintenanceFailure[]
   ): Promise<SpaceId[]> => {
-    const spacesClient = server.spaces?.spacesService.createSpacesClient(request);
-    if (!spacesClient) {
-      failures.push({
-        target: 'spaces',
-        error:
-          'Spaces client is not available; only the default space was processed for per-space workflows',
-      });
-      return [DEFAULT_SPACE_ID];
+    const { spaceIds, failure } = await enumerateSpaceIds({
+      request,
+      spacesService: server.spaces?.spacesService,
+    });
+    if (failure) {
+      failures.push(failure);
     }
-    try {
-      // SpacesClient.getAll already loads every space SO (up to xpack.spaces.maxSpaces).
-      // Space.id is already branded as SpaceId.
-      const spaces = await spacesClient.getAll();
-      const ids = spaces.map((space) => space.id);
-      return ids.length > 0 ? [...new Set([DEFAULT_SPACE_ID, ...ids])] : [DEFAULT_SPACE_ID];
-    } catch (error) {
-      // Surface (not just log) the under-scoping so pause doesn't silently skip
-      // per-space workflows in every space but the default.
-      failures.push({
-        target: 'spaces',
-        error: `Failed to enumerate spaces; only the default space was processed: ${toMessage(
-          error
-        )}`,
-      });
-      return [DEFAULT_SPACE_ID];
-    }
+    return spaceIds;
   };
 
   const disableWorkflow = async (
@@ -342,6 +327,9 @@ export const createSignificantEventsMaintenanceService = ({
     }
   };
 
+  // TODO(nightshift-program#1306 follow-up): knowledge indicators and their rules are now
+  // scoped to the request space, so this disables only the caller's space's rules while
+  // workflows are swept across every space. Iterate spaces here once the sweep helper is shared.
   const disableBackedRules = async (
     request: KibanaRequest,
     failures: SignificantEventsMaintenanceFailure[]

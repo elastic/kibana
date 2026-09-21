@@ -11,7 +11,7 @@ import { collectStreamFeatures } from './use_fetch_stream_features';
 const mockFeature = (id: string, streamName: string): Feature => ({
   uuid: `uuid-${id}`,
   id,
-  stream_name: streamName,
+  source_id: streamName,
   type: 'entity',
   subtype: 'service',
   title: id,

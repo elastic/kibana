@@ -39,7 +39,7 @@ export function useFetchKnowledgeIndicators() {
         backed: queryRow.rule_backed,
         id: queryRow.query.id,
       },
-      stream_name: queryRow.stream_name,
+      source_id: queryRow.source_id,
     }));
 
     return [...featureKnowledgeIndicators, ...queryKnowledgeIndicators];

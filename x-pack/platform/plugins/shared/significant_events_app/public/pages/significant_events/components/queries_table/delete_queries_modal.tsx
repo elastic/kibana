@@ -67,11 +67,11 @@ export function DeleteQueriesModal({
         ),
       },
       {
-        field: 'stream_name',
+        field: 'source_id',
         name: STREAM_COLUMN_LABEL,
         width: '130px',
         render: (_: unknown, item: SignificantEventQueryRow) => (
-          <EuiBadge color="hollow">{item.stream_name}</EuiBadge>
+          <EuiBadge color="hollow">{item.source_id}</EuiBadge>
         ),
       },
     ],
@@ -158,7 +158,7 @@ const SEVERITY_COLUMN_LABEL = i18n.translate(
 
 const STREAM_COLUMN_LABEL = i18n.translate(
   'xpack.significantEventsApp.deleteQueriesModal.streamColumn',
-  { defaultMessage: 'Stream' }
+  { defaultMessage: 'Source' }
 );
 
 const TYPE_COLUMN_LABEL = i18n.translate(

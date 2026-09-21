@@ -641,7 +641,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     describe('feature-grounding survives unrelated query bulk operations', () => {
       const testFeature: BaseFeature = {
         id: 'reconcile-ttl-probe',
-        stream_name: STREAM_NAME,
         type: 'entity',
         description: 'grounding probe for TTL-preservation regression tests',
         properties: {},

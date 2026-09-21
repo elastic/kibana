@@ -56,7 +56,7 @@ import { durabilityMenuItem } from '../durability_menu_item';
 import { useBlocksNewActivity } from '../../../hooks/use_significant_events_maintenance';
 import { STATS_PROMOTE_DISABLED_TOOLTIP } from '../../../pages/significant_events/components/queries_table/translations';
 import { DeleteTableItemsModal } from '../delete_table_items_modal';
-import { getKnowledgeIndicatorStreamName } from '../utils/get_knowledge_indicator_stream_name';
+import { getKnowledgeIndicatorSourceId } from '../utils/get_knowledge_indicator_source_id';
 import { KnowledgeIndicatorFeatureDetailsContent } from './knowledge_indicator_feature_details_content';
 import { KnowledgeIndicatorQueryDetailsContent } from './knowledge_indicator_query_details_content';
 
@@ -97,7 +97,7 @@ export function KnowledgeIndicatorDetailsFlyout({
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
 
-  const streamName = getKnowledgeIndicatorStreamName(knowledgeIndicator);
+  const streamName = getKnowledgeIndicatorSourceId(knowledgeIndicator);
 
   const featureFilter =
     knowledgeIndicator.kind === 'feature' ? knowledgeIndicator.feature.filter : undefined;
@@ -111,7 +111,7 @@ export function KnowledgeIndicatorDetailsFlyout({
   }, [discoverLocator, featureFilter, stream, timeState]);
 
   const streamFeatures = useMemo(
-    () => features.filter((f) => f.stream_name === streamName),
+    () => features.filter((f) => f.source_id === streamName),
     [features, streamName]
   );
 
@@ -475,7 +475,7 @@ const TYPE_LABEL = i18n.translate(
 const STREAM_LABEL = i18n.translate(
   'xpack.significantEventsApp.knowledgeIndicatorDetailsFlyout.streamLabel',
   {
-    defaultMessage: 'Stream',
+    defaultMessage: 'Source',
   }
 );
 

@@ -24,7 +24,6 @@ const createFeature = ({
   meta?: Record<string, unknown>;
 } = {}): BaseFeature => ({
   id,
-  stream_name: 'logs.test',
   type: 'technology',
   subtype: 'identity_provider',
   title: 'Okta',
@@ -74,11 +73,25 @@ describe('normalizeFeatureSlugForMatching', () => {
   });
 
   it('keeps matching normalization out of UUID generation', () => {
-    const canonical = { id: 'okta', stream_name: 'logs.test' };
-    const versioned = { id: 'okta-3.15.0', stream_name: 'logs.test' };
+    const canonical = { id: 'okta', source_id: 'logs.test' };
+    const versioned = { id: 'okta-3.15.0', source_id: 'logs.test' };
 
     expect(normalizeFeatureSlugForMatching(versioned.id)).toBe(canonical.id);
     expect(computeFeatureUuid(versioned)).not.toBe(computeFeatureUuid(canonical));
+  });
+});
+
+describe('computeFeatureUuid', () => {
+  it('derives the uuid from the source id and the normalized slug', () => {
+    expect(computeFeatureUuid({ id: '  Okta ', source_id: 'logs.test' })).toBe(
+      computeFeatureUuid({ id: 'okta', source_id: 'logs.test' })
+    );
+  });
+
+  it('gives the same slug a different uuid per source', () => {
+    expect(computeFeatureUuid({ id: 'okta', source_id: 'logs.test' })).not.toBe(
+      computeFeatureUuid({ id: 'okta', source_id: 'logs.other' })
+    );
   });
 });
 

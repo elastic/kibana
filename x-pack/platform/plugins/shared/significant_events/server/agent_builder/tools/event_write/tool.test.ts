@@ -249,7 +249,7 @@ describe('events_write tool', () => {
               {
                 id: 'checkout-api',
                 uuid: 'uuid-checkout',
-                stream_name: 'logs.test',
+                source_id: 'logs.test',
                 type: 'entity',
                 subtype: 'service',
               },
@@ -258,7 +258,7 @@ describe('events_write tool', () => {
               {
                 id: 'other-api',
                 uuid: 'other-feature-uuid',
-                stream_name: 'logs.test',
+                source_id: 'logs.test',
                 type: 'technology',
                 subtype: 'web_server',
               },
@@ -334,14 +334,14 @@ describe('events_write tool', () => {
         {
           id: 'uuid-web',
           uuid: 'uuid-web',
-          stream_name: 'logs.web',
+          source_id: 'logs.web',
           type: 'entity',
           subtype: 'service',
         },
         {
           id: 'uuid-web',
           uuid: 'uuid-batch',
-          stream_name: 'logs.batch',
+          source_id: 'logs.batch',
           type: 'technology',
           subtype: 'web_server',
         },

@@ -10,9 +10,15 @@ import { v5 } from 'uuid';
 
 /**
  * Compute a deterministic rule id for a query knowledge indicator.
- * Input is `(stream.name, query.id, esql)`.
+ * Input is `(space, source.id, query.id, esql)`: rules live in the space of the
+ * source, so the same source id in two spaces must not collide on a rule id.
  */
-export function computeRuleId(streamName: string, queryId: string, esqlQuery: string): string {
-  const queryHash = objectHash([streamName, queryId, esqlQuery]);
+export function computeRuleId(
+  spaceId: string,
+  sourceId: string,
+  queryId: string,
+  esqlQuery: string
+): string {
+  const queryHash = objectHash([spaceId, sourceId, queryId, esqlQuery]);
   return v5(queryHash, v5.DNS);
 }

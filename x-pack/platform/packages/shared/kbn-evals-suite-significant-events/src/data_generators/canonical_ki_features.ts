@@ -39,7 +39,6 @@ const parseGroundTruthBlocks = (expectedGroundTruth: string): Record<string, str
 };
 
 const makeKIFeature = ({
-  streamName,
   scenarioId,
   id,
   type,
@@ -47,7 +46,6 @@ const makeKIFeature = ({
   description,
   properties,
 }: {
-  streamName: string;
   scenarioId: string;
   id: string;
   type: string;
@@ -56,7 +54,6 @@ const makeKIFeature = ({
   properties: Record<string, unknown>;
 }): FeatureUpsert => ({
   id,
-  stream_name: streamName,
   type,
   title,
   description,
@@ -92,7 +89,6 @@ export const canonicalKIFeaturesFromExpectedGroundTruth = ({
     const id = `entity-${normalizeIdPart(name)}`;
     features.push(
       makeKIFeature({
-        streamName,
         scenarioId,
         id,
         type: 'entity',
@@ -117,7 +113,6 @@ export const canonicalKIFeaturesFromExpectedGroundTruth = ({
     const id = `dep-${normalizeIdPart(from)}-${normalizeIdPart(to)}`;
     features.push(
       makeKIFeature({
-        streamName,
         scenarioId,
         id,
         type: 'dependency',
@@ -133,7 +128,6 @@ export const canonicalKIFeaturesFromExpectedGroundTruth = ({
     const id = `infra-${normalizeIdPart(name)}`;
     features.push(
       makeKIFeature({
-        streamName,
         scenarioId,
         id,
         type: 'infrastructure',
@@ -144,5 +138,10 @@ export const canonicalKIFeaturesFromExpectedGroundTruth = ({
     );
   }
 
-  return features.map((feature) => ({ ...feature, uuid: computeFeatureUuid(feature) }));
+  // Canonical features are keyed by the stream they describe, matching what the server stamps.
+  return features.map((feature) => ({
+    ...feature,
+    source_id: streamName,
+    uuid: computeFeatureUuid({ id: feature.id, source_id: streamName }),
+  }));
 };

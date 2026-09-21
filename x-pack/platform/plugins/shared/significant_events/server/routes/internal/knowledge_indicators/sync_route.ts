@@ -10,24 +10,24 @@ import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 
-export interface StreamsWithIndicatorsResponse {
-  streams: Array<{ streamName: string }>;
+export interface SourcesWithIndicatorsResponse {
+  sources: Array<{ sourceId: string }>;
 }
 
 /**
- * Lists every stream the sync sweep must reconcile (see
- * `getStreamNamesToReconcile`). Deliberately independent of the extraction
+ * Lists every source the sync sweep must reconcile in the current space (see
+ * `getSourceIdsToReconcile`). Deliberately independent of the extraction
  * `_eligible` endpoint: the sweep runs regardless of extraction interval,
  * exclusions, or the continuous-extraction toggle. The response shape mirrors
  * the foreach idiom used by the managed sync workflow YAML.
  */
-export const streamsWithIndicatorsRoute = createServerRoute({
+export const sourcesWithIndicatorsRoute = createServerRoute({
   endpoint: 'GET /internal/streams/_knowledge_indicators/_streams_with_indicators',
   options: {
     access: 'internal',
-    summary: 'List streams to reconcile',
+    summary: 'List sources to reconcile',
     description:
-      'Returns every stream with an active knowledge indicator or a Streams-owned rule, used by the managed KI sync workflow to fan out reconciliation.',
+      'Returns every source with an active knowledge indicator or a Nightshift-owned rule in the current space, used by the managed KI sync workflow to fan out reconciliation.',
   },
   security: {
     authz: {
@@ -39,18 +39,18 @@ export const streamsWithIndicatorsRoute = createServerRoute({
     request,
     getScopedClients,
     server,
-  }): Promise<StreamsWithIndicatorsResponse> => {
+  }): Promise<SourcesWithIndicatorsResponse> => {
     const { getKnowledgeIndicatorClient, licensing } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
 
     const kiClient = await getKnowledgeIndicatorClient();
-    const streamNames = await kiClient.getStreamNamesToReconcile();
+    const sourceIds = await kiClient.getSourceIdsToReconcile();
 
-    return { streams: streamNames.map((streamName) => ({ streamName })) };
+    return { sources: sourceIds.map((sourceId) => ({ sourceId })) };
   },
 });
 
 export const syncRoutes = {
-  ...streamsWithIndicatorsRoute,
+  ...sourcesWithIndicatorsRoute,
 };

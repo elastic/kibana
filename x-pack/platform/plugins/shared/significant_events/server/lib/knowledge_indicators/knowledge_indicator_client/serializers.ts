@@ -23,8 +23,8 @@ import type {
 import { KI_TYPE_FEATURE, KI_TYPE_QUERY } from '../fields';
 import { computeRuleId } from '../helpers/compute_rule_id';
 
-export function buildSearchEmbeddingFeature(feature: FeatureUpsert, streamName: string): string {
-  const parts: string[] = [`Stream: ${streamName}`];
+export function buildSearchEmbeddingFeature(feature: FeatureUpsert, sourceId: string): string {
+  const parts: string[] = [`Source: ${sourceId}`];
   if (feature.title) parts.push(`Title: ${feature.title}`);
   if (feature.description) parts.push(`Description: ${feature.description}`);
   if (feature.type) parts.push(`Type: ${feature.type}`);
@@ -35,9 +35,9 @@ export function buildSearchEmbeddingFeature(feature: FeatureUpsert, streamName: 
 
 export function buildSearchEmbeddingQuery(
   query: Pick<StreamQuery, 'title' | 'description'>,
-  streamName: string
+  sourceId: string
 ): string {
-  const parts: string[] = [`Stream: ${streamName}`, `Title: ${query.title}`];
+  const parts: string[] = [`Source: ${sourceId}`, `Title: ${query.title}`];
   if (query.description) parts.push(`Description: ${query.description}`);
   return parts.join('\n');
 }
@@ -46,24 +46,31 @@ export function computeExpiresAt(timestamp: string, ttlDays: number): string {
   return new Date(new Date(timestamp).getTime() + ttlDays * 24 * 60 * 60 * 1000).toISOString();
 }
 
-export function toStoredFeature(
-  streamName: string,
-  feature: FeatureUpsert,
-  includeEmbedding: boolean,
-  expiresAt?: string
-): StoredFeatureKnowledgeIndicator {
-  const embedding = buildSearchEmbeddingFeature(feature, streamName);
+export interface ToStoredFeatureParams {
+  sourceId: string;
+  feature: FeatureUpsert;
+  includeEmbedding: boolean;
+  expiresAt?: string;
+}
+
+export function toStoredFeature({
+  sourceId,
+  feature,
+  includeEmbedding,
+  expiresAt,
+}: ToStoredFeatureParams): StoredFeatureKnowledgeIndicator {
+  const embedding = buildSearchEmbeddingFeature(feature, sourceId);
   const timestamp = new Date().toISOString();
   const slug = normalizeFeatureSlug(feature.id);
   return {
     '@timestamp': timestamp,
-    id: computeFeatureUuid({ id: slug, stream_name: streamName }),
+    id: computeFeatureUuid({ id: slug, source_id: sourceId }),
     type: KI_TYPE_FEATURE,
     title: feature.title,
     description: feature.description,
     tags: feature.tags,
     evidence: feature.evidence,
-    'stream.name': streamName,
+    'source.id': sourceId,
     excluded: feature.excluded,
     run_id: feature.run_id,
     ...(expiresAt ? { expires_at: expiresAt } : {}),
@@ -81,18 +88,27 @@ export function toStoredFeature(
   };
 }
 
-export function toStoredQuery(
-  streamName: string,
-  query: StreamQuery & { rule_backed?: boolean; rule_id?: string },
-  includeEmbedding: boolean,
-  expiresAt?: string
-): StoredQueryKnowledgeIndicator {
-  const embedding = buildSearchEmbeddingQuery(query, streamName);
+export interface ToStoredQueryParams {
+  space: string;
+  sourceId: string;
+  query: StreamQuery & { rule_backed?: boolean; rule_id?: string };
+  includeEmbedding: boolean;
+  expiresAt?: string;
+}
+
+export function toStoredQuery({
+  space,
+  sourceId,
+  query,
+  includeEmbedding,
+  expiresAt,
+}: ToStoredQueryParams): StoredQueryKnowledgeIndicator {
+  const embedding = buildSearchEmbeddingQuery(query, sourceId);
   const derivedType = deriveQueryType(query.esql.query);
   // Storage default only — promote/sync paths set rule_backed explicitly via QueryRuleOrchestrator.
   const ruleBacked =
     query.rule_backed !== undefined ? Boolean(query.rule_backed) : derivedType !== QUERY_TYPE_STATS;
-  const ruleId = query.rule_id ?? computeRuleId(streamName, query.id, query.esql.query);
+  const ruleId = query.rule_id ?? computeRuleId(space, sourceId, query.id, query.esql.query);
   const timestamp = new Date().toISOString();
   return {
     '@timestamp': timestamp,
@@ -101,7 +117,7 @@ export function toStoredQuery(
     title: query.title,
     description: query.description,
     evidence: query.evidence,
-    'stream.name': streamName,
+    'source.id': sourceId,
     ...(expiresAt ? { expires_at: expiresAt } : {}),
     query: {
       esql: query.esql.query,
@@ -116,14 +132,14 @@ export function toStoredQuery(
 }
 
 export function toTombstone(
-  streamName: string,
+  sourceId: string,
   identity: Pick<StoredKnowledgeIndicator, 'id' | 'type'>
 ): StoredTombstone {
   return {
     '@timestamp': new Date().toISOString(),
     id: identity.id,
     type: identity.type,
-    'stream.name': streamName,
+    'source.id': sourceId,
     deleted: true,
   };
 }
@@ -136,7 +152,7 @@ export function fromStoredFeature(doc: StoredFeatureKnowledgeIndicator): Feature
   return {
     id: doc.feature.slug,
     uuid: doc.id,
-    stream_name: doc['stream.name'],
+    source_id: doc['source.id'],
     type: doc.feature.type,
     description: doc.description,
     properties: doc.feature.properties,
@@ -167,7 +183,7 @@ export function fromStoredQuery(doc: StoredQueryKnowledgeIndicator): QueryLink {
   const ruleBacked = rule_backed;
 
   return {
-    stream_name: doc['stream.name'],
+    source_id: doc['source.id'],
     rule_backed: ruleBacked,
     rule_id,
     updated_at: doc['@timestamp'],

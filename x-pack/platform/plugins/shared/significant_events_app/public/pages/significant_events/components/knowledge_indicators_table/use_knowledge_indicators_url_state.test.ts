@@ -28,7 +28,7 @@ jest.mock('@kbn/react-hooks', () => ({
 }));
 
 function makeFeatureKI(
-  overrides: Partial<Feature> & { uuid: string; stream_name: string } & Record<string, unknown>
+  overrides: Partial<Feature> & { uuid: string; source_id: string } & Record<string, unknown>
 ): KnowledgeIndicator {
   return {
     kind: 'feature',
@@ -46,7 +46,7 @@ function makeFeatureKI(
 function makeQueryKI(opts: {
   id: string;
   title?: string;
-  stream_name: string;
+  source_id: string;
   backed?: boolean;
   type?: string;
 }): KnowledgeIndicator {
@@ -58,7 +58,7 @@ function makeQueryKI(opts: {
       type: opts.type ?? 'match',
     },
     rule: { backed: opts.backed ?? false, id: opts.id },
-    stream_name: opts.stream_name,
+    source_id: opts.source_id,
   } as KnowledgeIndicator;
 }
 
@@ -106,9 +106,7 @@ describe('useKnowledgeIndicatorsUrlState', () => {
     });
 
     it('initializes type as array from string', () => {
-      const knowledgeIndicators = [
-        makeFeatureKI({ uuid: 'f1', stream_name: 's1', type: 'entity' }),
-      ];
+      const knowledgeIndicators = [makeFeatureKI({ uuid: 'f1', source_id: 's1', type: 'entity' })];
       mockQuery = { type: 'entity' };
       const { result } = renderHook(() =>
         useKnowledgeIndicatorsUrlState({ ...defaultParams, knowledgeIndicators })
@@ -118,8 +116,8 @@ describe('useKnowledgeIndicatorsUrlState', () => {
 
     it('initializes type as array from array', () => {
       const knowledgeIndicators = [
-        makeFeatureKI({ uuid: 'f1', stream_name: 's1', type: 'entity' }),
-        makeFeatureKI({ uuid: 'f2', stream_name: 's1', type: 'infrastructure' }),
+        makeFeatureKI({ uuid: 'f1', source_id: 's1', type: 'entity' }),
+        makeFeatureKI({ uuid: 'f2', source_id: 's1', type: 'infrastructure' }),
       ];
       mockQuery = { type: ['entity', 'infrastructure'] };
       const { result } = renderHook(() =>
@@ -129,9 +127,7 @@ describe('useKnowledgeIndicatorsUrlState', () => {
     });
 
     it('initializes subtype from query', () => {
-      const knowledgeIndicators = [
-        makeFeatureKI({ uuid: 'f1', stream_name: 's1', subtype: 'sub1' }),
-      ];
+      const knowledgeIndicators = [makeFeatureKI({ uuid: 'f1', source_id: 's1', subtype: 'sub1' })];
       mockQuery = { subtype: 'sub1' };
       const { result } = renderHook(() =>
         useKnowledgeIndicatorsUrlState({ ...defaultParams, knowledgeIndicators })
@@ -141,8 +137,8 @@ describe('useKnowledgeIndicatorsUrlState', () => {
 
     it('initializes stream from query', () => {
       const knowledgeIndicators = [
-        makeFeatureKI({ uuid: 'f1', stream_name: 's1' }),
-        makeFeatureKI({ uuid: 'f2', stream_name: 's2' }),
+        makeFeatureKI({ uuid: 'f1', source_id: 's1' }),
+        makeFeatureKI({ uuid: 'f2', source_id: 's2' }),
       ];
       mockQuery = { stream: ['s1', 's2'] };
       const { result } = renderHook(() =>
@@ -160,7 +156,7 @@ describe('useKnowledgeIndicatorsUrlState', () => {
 
   describe('selectedKnowledgeIndicator from selectedItem param', () => {
     it('returns null when no selectedItem param', () => {
-      const knowledgeIndicators = [makeFeatureKI({ uuid: 'f1', stream_name: 's1' })];
+      const knowledgeIndicators = [makeFeatureKI({ uuid: 'f1', source_id: 's1' })];
       const { result } = renderHook(() =>
         useKnowledgeIndicatorsUrlState({ ...defaultParams, knowledgeIndicators })
       );
@@ -168,7 +164,7 @@ describe('useKnowledgeIndicatorsUrlState', () => {
     });
 
     it('finds matching feature by uuid', () => {
-      const ki = makeFeatureKI({ uuid: 'f1', stream_name: 's1' });
+      const ki = makeFeatureKI({ uuid: 'f1', source_id: 's1' });
       const knowledgeIndicators = [ki];
       mockQuery = { selectedItem: 'f1' };
       const { result } = renderHook(() =>
@@ -179,7 +175,7 @@ describe('useKnowledgeIndicatorsUrlState', () => {
     });
 
     it('finds matching query by id', () => {
-      const ki = makeQueryKI({ id: 'q1', stream_name: 's1' });
+      const ki = makeQueryKI({ id: 'q1', source_id: 's1' });
       const knowledgeIndicators = [ki];
       mockQuery = { selectedItem: 'q1' };
       const { result } = renderHook(() =>
@@ -189,7 +185,7 @@ describe('useKnowledgeIndicatorsUrlState', () => {
     });
 
     it('returns null when selectedItem does not match any indicator', () => {
-      const knowledgeIndicators = [makeFeatureKI({ uuid: 'f1', stream_name: 's1' })];
+      const knowledgeIndicators = [makeFeatureKI({ uuid: 'f1', source_id: 's1' })];
       mockQuery = { selectedItem: 'nonexistent' };
       const { result } = renderHook(() =>
         useKnowledgeIndicatorsUrlState({ ...defaultParams, knowledgeIndicators })
@@ -260,7 +256,7 @@ describe('useKnowledgeIndicatorsUrlState', () => {
     });
 
     it('toggleSelectedKnowledgeIndicator opens flyout for new item', () => {
-      const ki = makeFeatureKI({ uuid: 'f1', stream_name: 's1' });
+      const ki = makeFeatureKI({ uuid: 'f1', source_id: 's1' });
       const knowledgeIndicators = [ki];
       const { result } = renderHook(() =>
         useKnowledgeIndicatorsUrlState({ ...defaultParams, knowledgeIndicators })
@@ -276,7 +272,7 @@ describe('useKnowledgeIndicatorsUrlState', () => {
     });
 
     it('toggleSelectedKnowledgeIndicator closes flyout for already-open item', () => {
-      const ki = makeFeatureKI({ uuid: 'f1', stream_name: 's1' });
+      const ki = makeFeatureKI({ uuid: 'f1', source_id: 's1' });
       const knowledgeIndicators = [ki];
       mockQuery = { selectedItem: 'f1' };
       const { result } = renderHook(() =>
@@ -311,7 +307,7 @@ describe('useKnowledgeIndicatorsUrlState', () => {
 
     it('handleSelectedTypesChange updates types and clears subtypes', () => {
       const knowledgeIndicators = [
-        makeFeatureKI({ uuid: 'f1', stream_name: 's1', type: 'entity', subtype: 'sub1' }),
+        makeFeatureKI({ uuid: 'f1', source_id: 's1', type: 'entity', subtype: 'sub1' }),
       ];
       mockQuery = { subtype: ['sub1'] };
       const { result } = renderHook(() =>
@@ -335,7 +331,7 @@ describe('useKnowledgeIndicatorsUrlState', () => {
     });
 
     it('handleSelectedStreamsChange updates streams', () => {
-      const knowledgeIndicators = [makeFeatureKI({ uuid: 'f1', stream_name: 'logs' })];
+      const knowledgeIndicators = [makeFeatureKI({ uuid: 'f1', source_id: 'logs' })];
       const { result } = renderHook(() =>
         useKnowledgeIndicatorsUrlState({ ...defaultParams, knowledgeIndicators })
       );
@@ -362,8 +358,8 @@ describe('useKnowledgeIndicatorsUrlState', () => {
 
     it('handleComputedToggleChange removes computed types from selectedTypes when hiding', () => {
       const knowledgeIndicators = [
-        makeFeatureKI({ uuid: 'f1', stream_name: 's1', type: 'entity' }),
-        makeFeatureKI({ uuid: 'f2', stream_name: 's1', type: 'dataset_analysis' }),
+        makeFeatureKI({ uuid: 'f1', source_id: 's1', type: 'entity' }),
+        makeFeatureKI({ uuid: 'f2', source_id: 's1', type: 'dataset_analysis' }),
       ];
       mockQuery = { type: ['entity', 'dataset_analysis'], showComputed: 'true' };
       const { result } = renderHook(() =>
@@ -399,9 +395,7 @@ describe('useKnowledgeIndicatorsUrlState', () => {
     });
 
     it('prunes type filters that no longer match any indicator', () => {
-      const knowledgeIndicators = [
-        makeFeatureKI({ uuid: 'f1', stream_name: 's1', type: 'entity' }),
-      ];
+      const knowledgeIndicators = [makeFeatureKI({ uuid: 'f1', source_id: 's1', type: 'entity' })];
       mockQuery = { type: ['entity', 'nonexistent'] };
       const { result } = renderHook(() =>
         useKnowledgeIndicatorsUrlState({ ...defaultParams, knowledgeIndicators })
@@ -412,7 +406,7 @@ describe('useKnowledgeIndicatorsUrlState', () => {
     });
 
     it('preserves stream filters from URL when no indicators exist for that stream yet', () => {
-      const knowledgeIndicators = [makeFeatureKI({ uuid: 'f1', stream_name: 'logs' })];
+      const knowledgeIndicators = [makeFeatureKI({ uuid: 'f1', source_id: 'logs' })];
       mockQuery = { stream: ['logs', 'metrics'] };
       const { result } = renderHook(() =>
         useKnowledgeIndicatorsUrlState({ ...defaultParams, knowledgeIndicators })
@@ -423,7 +417,7 @@ describe('useKnowledgeIndicatorsUrlState', () => {
     });
 
     it('prunes stream filters that no longer match any indicator and were not in the initial URL', () => {
-      const knowledgeIndicators = [makeFeatureKI({ uuid: 'f1', stream_name: 'logs' })];
+      const knowledgeIndicators = [makeFeatureKI({ uuid: 'f1', source_id: 'logs' })];
       mockQuery = { stream: ['logs'] };
       const { result } = renderHook(() =>
         useKnowledgeIndicatorsUrlState({ ...defaultParams, knowledgeIndicators })

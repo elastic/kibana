@@ -11,7 +11,8 @@ import { ALERTING_ERROR_CODES } from '@kbn/alerting-v2-plugin/server';
 import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
 import { RulesAdapterV2, type RulesAdapterV2Params } from './v2_rules_adapter';
 import {
-  STREAMS_RULE_STREAM_TAG_PREFIX,
+  LEGACY_RULE_STREAM_TAG_PREFIX,
+  NIGHTSHIFT_RULE_SOURCE_TAG_PREFIX,
   type SignificantEventsRuleDefinition,
 } from './rules_management_client';
 import {
@@ -51,7 +52,7 @@ function lastUpdateCall(mock: ReturnType<typeof makeRulesClientMock>) {
 
 const createDefinition: SignificantEventsRuleDefinition = {
   name: 'High error rate (match count)',
-  streamName: 'my-stream',
+  sourceId: 'my-stream',
   timestampField: '@timestamp',
   esqlQuery: 'FROM logs-* | WHERE level == "error"',
   schedule: { interval: METRIC_SERIES_EVERY },
@@ -59,7 +60,7 @@ const createDefinition: SignificantEventsRuleDefinition = {
 
 const updateDefinition: SignificantEventsRuleDefinition = {
   name: 'Updated title (match count)',
-  streamName: 'my-stream',
+  sourceId: 'my-stream',
   timestampField: '@timestamp',
   esqlQuery: 'FROM logs-* | WHERE level == "error"',
   schedule: { interval: METRIC_SERIES_EVERY },
@@ -99,7 +100,7 @@ describe('RulesAdapterV2', () => {
       expect(data.kind).toBe('signal');
       expect(data.metadata).toEqual({
         name: 'High error rate (match count)',
-        tags: ['sigevents:stream:my-stream', METRIC_SERIES_RULE_TAG],
+        tags: ['nightshift:source:my-stream', METRIC_SERIES_RULE_TAG],
       });
       expect(data.time_field).toBe('@timestamp');
       expect(data.schedule).toEqual({
@@ -142,7 +143,7 @@ describe('RulesAdapterV2', () => {
       };
 
       expect(data.metadata.name).toBe('Updated title (match count)');
-      expect(data.metadata.tags).toEqual(['sigevents:stream:my-stream', METRIC_SERIES_RULE_TAG]);
+      expect(data.metadata.tags).toEqual(['nightshift:source:my-stream', METRIC_SERIES_RULE_TAG]);
       expect(data.schedule).toEqual({
         every: METRIC_SERIES_EVERY,
         lookback: METRIC_SERIES_LOOKBACK,
@@ -262,14 +263,14 @@ describe('RulesAdapterV2', () => {
   });
 
   describe('findOwnedRuleIds', () => {
-    it('returns an empty list when no rules match the stream tag', async () => {
+    it('returns an empty list when no rules match the source tag', async () => {
       const mock = makeRulesClientMock();
       mock.findRules.mockResolvedValue({ items: [], total: 0, page: 1, perPage: 500 });
       const adapter = makeAdapter(mock);
 
       await expect(adapter.findOwnedRuleIds('my-stream')).resolves.toEqual([]);
       expect(mock.findRules).toHaveBeenCalledWith({
-        filter: 'metadata.tags: "sigevents:stream:my-stream"',
+        filter: 'metadata.tags: "nightshift:source:my-stream"',
         perPage: 500,
         page: 1,
       });
@@ -295,7 +296,7 @@ describe('RulesAdapterV2', () => {
       await expect(adapter.findOwnedRuleIds('my-stream')).resolves.toEqual(['r1', 'r2', 'r3']);
       expect(mock.findRules).toHaveBeenCalledTimes(2);
       expect(mock.findRules).toHaveBeenNthCalledWith(2, {
-        filter: 'metadata.tags: "sigevents:stream:my-stream"',
+        filter: 'metadata.tags: "nightshift:source:my-stream"',
         perPage: 500,
         page: 2,
       });
@@ -386,25 +387,80 @@ describe('RulesAdapterV2', () => {
     });
   });
 
-  describe('findStreamNamesWithOwnedRules', () => {
-    it('derives distinct stream names from ownership tags, ignoring unrelated tags', async () => {
+  describe('findSourceIdsWithOwnedRules', () => {
+    it('derives distinct source ids from ownership tags, ignoring unrelated tags', async () => {
       const mock = makeRulesClientMock();
       mock.getTags.mockResolvedValueOnce([
-        'sigevents:stream:logs.nginx',
+        'nightshift:source:logs.nginx',
         'production',
-        'sigevents:stream:logs.apache',
-        'sigevents:stream:logs.nginx',
+        'nightshift:source:logs.apache',
+        'nightshift:source:logs.nginx',
+        // `search` is a substring match; a legacy tag must not leak into the result.
+        'sigevents:stream:logs.legacy',
       ]);
       const adapter = makeAdapter(mock);
 
-      const streamNames = await adapter.findStreamNamesWithOwnedRules();
+      const sourceIds = await adapter.findSourceIdsWithOwnedRules();
 
-      expect(new Set(streamNames)).toEqual(new Set(['logs.nginx', 'logs.apache']));
+      expect(new Set(sourceIds)).toEqual(new Set(['logs.nginx', 'logs.apache']));
       expect(mock.getTags).toHaveBeenCalledWith({
-        search: STREAMS_RULE_STREAM_TAG_PREFIX,
+        search: NIGHTSHIFT_RULE_SOURCE_TAG_PREFIX,
         kind: 'signal',
         size: 10000,
       });
+    });
+  });
+
+  describe('findRuleIdsByTagPrefix', () => {
+    it('collects the rule ids behind every tag that starts with the prefix', async () => {
+      const mock = makeRulesClientMock();
+      mock.getTags.mockResolvedValueOnce([
+        'sigevents:stream:logs.nginx',
+        'sigevents:stream:logs.apache',
+        'nightshift:source:logs.nginx',
+      ]);
+      mock.findRules
+        .mockResolvedValueOnce({
+          items: [{ id: 'r1' }, { id: 'r2' }],
+          total: 2,
+          page: 1,
+          perPage: 500,
+        })
+        .mockResolvedValueOnce({
+          items: [{ id: 'r2' }, { id: 'r3' }],
+          total: 2,
+          page: 1,
+          perPage: 500,
+        });
+      const adapter = makeAdapter(mock);
+
+      const ruleIds = await adapter.findRuleIdsByTagPrefix(LEGACY_RULE_STREAM_TAG_PREFIX);
+
+      expect(new Set(ruleIds)).toEqual(new Set(['r1', 'r2', 'r3']));
+      expect(mock.getTags).toHaveBeenCalledWith({
+        search: LEGACY_RULE_STREAM_TAG_PREFIX,
+        kind: 'signal',
+        size: 10000,
+      });
+      // Only the two legacy tags are queried; the current-prefix tag is skipped.
+      expect(mock.findRules).toHaveBeenCalledTimes(2);
+      expect(mock.findRules).toHaveBeenCalledWith(
+        expect.objectContaining({ filter: 'metadata.tags: "sigevents:stream:logs.nginx"' })
+      );
+      expect(mock.findRules).toHaveBeenCalledWith(
+        expect.objectContaining({ filter: 'metadata.tags: "sigevents:stream:logs.apache"' })
+      );
+    });
+
+    it('returns an empty list when no tag matches the prefix', async () => {
+      const mock = makeRulesClientMock();
+      mock.getTags.mockResolvedValueOnce(['production']);
+      const adapter = makeAdapter(mock);
+
+      await expect(adapter.findRuleIdsByTagPrefix(LEGACY_RULE_STREAM_TAG_PREFIX)).resolves.toEqual(
+        []
+      );
+      expect(mock.findRules).not.toHaveBeenCalled();
     });
   });
 });

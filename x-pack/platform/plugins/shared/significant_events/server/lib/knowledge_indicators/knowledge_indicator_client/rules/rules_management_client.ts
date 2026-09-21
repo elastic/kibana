@@ -5,14 +5,21 @@
  * 2.0.
  */
 
-export const STREAMS_RULE_STREAM_TAG_PREFIX = 'sigevents:stream:' as const;
+/** Ownership tag every Nightshift-managed rule carries: `nightshift:source:<sourceId>`. */
+export const NIGHTSHIFT_RULE_SOURCE_TAG_PREFIX = 'nightshift:source:' as const;
 
-export const toStreamTag = (streamName: string): string =>
-  `${STREAMS_RULE_STREAM_TAG_PREFIX}${streamName}`;
+/**
+ * Ownership tag written before knowledge indicators were keyed by source.
+ * Only the cluster-wide `_reset` route still looks for it.
+ */
+export const LEGACY_RULE_STREAM_TAG_PREFIX = 'sigevents:stream:' as const;
 
-export const streamNameFromTag = (tag: string): string | undefined =>
-  tag.startsWith(STREAMS_RULE_STREAM_TAG_PREFIX)
-    ? tag.slice(STREAMS_RULE_STREAM_TAG_PREFIX.length)
+export const toSourceTag = (sourceId: string): string =>
+  `${NIGHTSHIFT_RULE_SOURCE_TAG_PREFIX}${sourceId}`;
+
+export const sourceIdFromTag = (tag: string): string | undefined =>
+  tag.startsWith(NIGHTSHIFT_RULE_SOURCE_TAG_PREFIX)
+    ? tag.slice(NIGHTSHIFT_RULE_SOURCE_TAG_PREFIX.length)
     : undefined;
 
 /**
@@ -31,19 +38,26 @@ export interface IRulesManagementClient {
   /** Returns the subset of IDs that still resolve to live rules. */
   findExistingRuleIds(ids: string[]): Promise<string[]>;
 
-  findOwnedRuleIds(streamName: string): Promise<string[]>;
+  findOwnedRuleIds(sourceId: string): Promise<string[]>;
 
   /**
-   * Distinct stream names owning at least one rule, so orphan-rule cleanup can
-   * reach streams whose rules outlived all of their knowledge indicators.
+   * Distinct source ids owning at least one rule, so orphan-rule cleanup can
+   * reach sources whose rules outlived all of their knowledge indicators.
    */
-  findStreamNamesWithOwnedRules(): Promise<string[]>;
+  findSourceIdsWithOwnedRules(): Promise<string[]>;
+
+  /**
+   * Every rule id carrying a tag that starts with `prefix`, in the space the
+   * client is bound to. Used by the cluster-wide reset to find both current
+   * (`nightshift:source:`) and legacy (`sigevents:stream:`) ownership tags.
+   */
+  findRuleIdsByTagPrefix(prefix: string): Promise<string[]>;
 }
 
 /** Engine-independent Significant Events definition translated to Alerting v2 by the adapter. */
 export interface SignificantEventsRuleDefinition {
   name: string;
-  streamName: string;
+  sourceId: string;
   timestampField: string;
   esqlQuery: string;
   schedule: {

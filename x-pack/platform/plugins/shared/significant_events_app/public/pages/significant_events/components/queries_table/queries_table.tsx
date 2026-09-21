@@ -316,11 +316,11 @@ export function QueriesTable() {
         ),
       },
       {
-        field: 'stream_name',
+        field: 'source_id',
         name: STREAM_COLUMN,
         width: '130px',
         render: (_: unknown, item: SignificantEventQueryRow) => (
-          <EuiBadge color="hollow">{item.stream_name}</EuiBadge>
+          <EuiBadge color="hollow">{item.source_id}</EuiBadge>
         ),
       },
       {

@@ -37,8 +37,8 @@ export const createMockGetScopedClients = () => {
     get: jest.fn().mockResolvedValue(true),
   };
 
-  const kiClient: jest.Mocked<Pick<KnowledgeIndicatorClient, 'getStreamToQueryLinksMap'>> = {
-    getStreamToQueryLinksMap: jest.fn().mockResolvedValue({}),
+  const kiClient: jest.Mocked<Pick<KnowledgeIndicatorClient, 'getSourceToQueryLinksMap'>> = {
+    getSourceToQueryLinksMap: jest.fn().mockResolvedValue({}),
   };
 
   const getKnowledgeIndicatorClient = jest.fn().mockResolvedValue(kiClient);

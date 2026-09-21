@@ -13,7 +13,9 @@ export const TYPE = 'type';
 export const TITLE = 'title';
 export const DESCRIPTION = 'description';
 export const TAGS = 'tags';
-export const STREAM_NAME = 'stream.name';
+export const SOURCE_ID = 'source.id';
+/** Stamped by `IDataStreamClient.create({ space })`; never part of our own mapping. */
+export const SPACE_IDS = 'kibana.space_ids';
 export const SEARCH_EMBEDDING = 'search_embedding';
 export const EXCLUDED = 'excluded';
 export const RUN_ID = 'run_id';

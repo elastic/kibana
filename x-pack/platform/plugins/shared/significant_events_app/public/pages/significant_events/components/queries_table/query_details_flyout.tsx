@@ -182,7 +182,7 @@ export function QueryDetailsFlyout({
             <EuiFlexItem>
               <FlyoutMetadataCard title={STREAM_LABEL}>
                 <EuiBadge color="hollow" iconType="productStreamsClassic" iconSide="left">
-                  {item.stream_name}
+                  {item.source_id}
                 </EuiBadge>
               </FlyoutMetadataCard>
             </EuiFlexItem>
@@ -296,7 +296,7 @@ export function QueryDetailsFlyout({
             setIsDeleteModalVisible(false);
           }}
           onConfirm={async () => {
-            await onDelete(item.query.id, item.stream_name);
+            await onDelete(item.query.id, item.source_id);
             setIsDeleteModalVisible(false);
           }}
           cancelButtonText={CANCEL_BUTTON_LABEL}
@@ -317,7 +317,7 @@ function getQueryInputValue(item: StreamQueryStats) {
 }
 
 const STREAM_LABEL = i18n.translate('xpack.significantEventsApp.queryDetailsFlyout.streamLabel', {
-  defaultMessage: 'Stream',
+  defaultMessage: 'Source',
 });
 
 const GENERAL_INFORMATION_TITLE = i18n.translate(

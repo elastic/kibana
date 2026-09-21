@@ -13,7 +13,7 @@ import {
   type StoredFeatureKnowledgeIndicator,
   type StoredKnowledgeIndicator,
 } from '../data_stream';
-import { combineWhere, inPredicate, IS_NOT_DELETED } from '../esql_helpers';
+import { combineWhere, inPredicate, inSpace, IS_NOT_DELETED } from '../esql_helpers';
 import {
   esqlToObjects,
   executeAndDecodeSource,
@@ -23,12 +23,24 @@ import {
   type LatestSourceWhereCondition,
 } from '../../significant_events/latest_source_query';
 import { runEsqlQuery } from '../../significant_events/run_esql_query';
-import { ID, KI_TYPE_FEATURE, STREAM_NAME, TYPE } from '../fields';
+import { ID, KI_TYPE_FEATURE, QUERY_RULE_BACKED, QUERY_RULE_ID, SOURCE_ID, TYPE } from '../fields';
 
 export const REVISION_SIZE_LIMIT = 10_000;
 
+/**
+ * Identity of a knowledge indicator revision within a space. The space filter
+ * must be applied before this grouping: feature ids are derived from
+ * `(source_id, slug)`, so the same stream onboarded from two spaces yields the
+ * same `id` in both and one space's revision would otherwise shadow the other's.
+ */
+const REVISION_GROUP_KEY = [SOURCE_ID, TYPE, ID] as [string, string, string];
+
 export class RevisionReader {
-  constructor(private readonly esClient: ElasticsearchClient, private readonly logger: Logger) {}
+  constructor(
+    private readonly esClient: ElasticsearchClient,
+    private readonly logger: Logger,
+    private readonly space: string
+  ) {}
 
   async fetchLatestRevisions(
     where?: LatestSourceWhereCondition,
@@ -36,9 +48,11 @@ export class RevisionReader {
     sort?: ComposerSortShorthand[],
     limit: number = REVISION_SIZE_LIMIT
   ): Promise<StoredKnowledgeIndicator[]> {
-    let query = esql.from([KNOWLEDGE_INDICATORS_DATA_STREAM], ['_id', '_source']);
+    let query = esql.from([KNOWLEDGE_INDICATORS_DATA_STREAM], ['_id', '_source']).where`${inSpace(
+      this.space
+    )}`;
     query = withWhere(query, where);
-    query = pickLatestPerGroup(query, ['stream.name', 'type', 'id']);
+    query = pickLatestPerGroup(query, REVISION_GROUP_KEY);
     query = withWhere(query, postGroupingWhere);
     query = withSort(query, sort);
     // Cap at REVISION_SIZE_LIMIT regardless of the requested limit so a large
@@ -55,21 +69,23 @@ export class RevisionReader {
   }
 
   /**
-   * Returns the distinct stream names whose latest KI revision satisfies
-   * `postGroupingWhere`. Aggregates on `stream.name` in ES|QL so the
-   * `REVISION_SIZE_LIMIT` cap bounds distinct streams rather than distinct KIs;
+   * Returns the distinct source ids whose latest KI revision satisfies
+   * `postGroupingWhere`. Aggregates on `source.id` in ES|QL so the
+   * `REVISION_SIZE_LIMIT` cap bounds distinct sources rather than distinct KIs;
    * warns if the cap is hit so partial coverage isn't silent.
    */
-  async fetchDistinctStreamNames(
+  async fetchDistinctSourceIds(
     where?: LatestSourceWhereCondition,
     postGroupingWhere?: LatestSourceWhereCondition
   ): Promise<string[]> {
-    let query = esql.from([KNOWLEDGE_INDICATORS_DATA_STREAM], ['_id']);
+    let query = esql.from([KNOWLEDGE_INDICATORS_DATA_STREAM], ['_id']).where`${inSpace(
+      this.space
+    )}`;
     query = withWhere(query, where);
-    query = pickLatestPerGroup(query, ['stream.name', 'type', 'id']);
+    query = pickLatestPerGroup(query, REVISION_GROUP_KEY);
     query = withWhere(query, postGroupingWhere);
-    query = query.pipe`STATS __count = COUNT(*) BY streamName = ${esql.col(STREAM_NAME)}`
-      .keep('streamName')
+    query = query.pipe`STATS __count = COUNT(*) BY sourceId = ${esql.col(SOURCE_ID)}`
+      .keep('sourceId')
       .limit(REVISION_SIZE_LIMIT);
 
     // `runEsqlQuery` (not `queryEsql`) so a not-yet-created data stream yields
@@ -79,30 +95,60 @@ export class RevisionReader {
       return [];
     }
 
-    const rows = esqlToObjects<{ streamName?: unknown }>(response);
+    const rows = esqlToObjects<{ sourceId?: unknown }>(response);
 
     if (rows.length >= REVISION_SIZE_LIMIT) {
       this.logger.warn(
-        `Distinct stream enumeration hit REVISION_SIZE_LIMIT (${REVISION_SIZE_LIMIT}); some streams with knowledge indicators may be omitted from this result.`
+        `Distinct source enumeration hit REVISION_SIZE_LIMIT (${REVISION_SIZE_LIMIT}); some sources with knowledge indicators may be omitted from this result.`
       );
     }
 
-    return rows
-      .map((row) => row.streamName)
-      .filter((name): name is string => typeof name === 'string');
+    return rows.map((row) => row.sourceId).filter((id): id is string => typeof id === 'string');
   }
 
   async fetchLatestFeatures(
-    stream: string,
+    sourceId: string,
     ids: string[]
   ): Promise<StoredFeatureKnowledgeIndicator[]> {
     if (ids.length === 0) return [];
     const where = combineWhere(
       inPredicate(TYPE, [KI_TYPE_FEATURE]),
-      inPredicate(STREAM_NAME, [stream]),
+      inPredicate(SOURCE_ID, [sourceId]),
       inPredicate(ID, ids)
     );
     const docs = await this.fetchLatestRevisions(where, IS_NOT_DELETED);
     return docs.filter(isStoredFeatureKnowledgeIndicator);
   }
+}
+
+/**
+ * Every rule id ever recorded on a rule-backed query revision, across all
+ * spaces and including legacy `stream.name` documents. Deliberately not
+ * space-scoped: only the cluster-wide `_reset` route uses it, to delete
+ * Significant Events v1 rules before wiping the data stream.
+ */
+export async function fetchAllRuleIdsClusterWide(
+  esClient: ElasticsearchClient,
+  logger: Logger
+): Promise<string[]> {
+  const query = esql.from([KNOWLEDGE_INDICATORS_DATA_STREAM]).where`${esql.col(
+    QUERY_RULE_BACKED
+  )} == true AND ${esql.col(QUERY_RULE_ID)} IS NOT NULL`
+    .pipe`STATS __count = COUNT(*) BY ruleId = ${esql.col(QUERY_RULE_ID)}`
+    .keep('ruleId')
+    .limit(REVISION_SIZE_LIMIT);
+
+  const response = await runEsqlQuery(esClient, query.print('basic'));
+  if (!response) {
+    return [];
+  }
+
+  const rows = esqlToObjects<{ ruleId?: unknown }>(response);
+  if (rows.length >= REVISION_SIZE_LIMIT) {
+    logger.warn(
+      `Cluster-wide rule id enumeration hit REVISION_SIZE_LIMIT (${REVISION_SIZE_LIMIT}); some legacy rules may not be deleted by this reset.`
+    );
+  }
+
+  return rows.map((row) => row.ruleId).filter((id): id is string => typeof id === 'string');
 }

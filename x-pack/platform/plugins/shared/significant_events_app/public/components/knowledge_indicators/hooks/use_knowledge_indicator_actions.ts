@@ -132,7 +132,7 @@ export function useKnowledgeIndicatorActions({
       } else {
         await setQueryDurability({
           query: knowledgeIndicator.query,
-          streamName: knowledgeIndicator.stream_name,
+          streamName: knowledgeIndicator.source_id,
           expiresAt,
         });
       }

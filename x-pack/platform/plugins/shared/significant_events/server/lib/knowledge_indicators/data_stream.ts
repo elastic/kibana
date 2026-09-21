@@ -33,9 +33,9 @@ export const knowledgeIndicatorsMappings = {
     description: mappings.text(),
     tags: mappings.keyword(),
     evidence: mappings.keyword(),
-    stream: mappings.object({
+    source: mappings.object({
       properties: {
-        name: mappings.keyword(),
+        id: mappings.keyword(),
       },
     }),
     deleted: mappings.boolean(),
@@ -76,7 +76,7 @@ export const knowledgeIndicatorsMappings = {
 interface StoredKiRevisionIdentity {
   '@timestamp': string;
   id: string;
-  'stream.name': string;
+  'source.id': string;
 }
 
 export interface StoredFeature {
@@ -127,7 +127,7 @@ export interface StoredTombstone {
   '@timestamp': string;
   id: string;
   type: KnowledgeIndicatorType;
-  'stream.name': string;
+  'source.id': string;
   deleted: true;
 }
 
@@ -165,7 +165,10 @@ export const knowledgeIndicatorsDataStream: DataStreamDefinition<
   StoredKnowledgeIndicator & Record<string, unknown>
 > = {
   name: KNOWLEDGE_INDICATORS_DATA_STREAM,
-  version: 2,
+  // v3: keyed by `source.id` and space-scoped via `kibana.space_ids`. `stream.name` is gone from
+  // the definition; mapping updates are additive, so existing backing indices keep it mapped and
+  // legacy documents stay intact until the `_reset` route wipes them.
+  version: 3,
   hidden: true,
   template: {
     priority: 500,

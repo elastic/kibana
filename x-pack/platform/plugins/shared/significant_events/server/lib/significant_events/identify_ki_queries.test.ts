@@ -31,7 +31,7 @@ describe('generateSignificantEventDefinitions (semantic code search wiring)', ()
     inferenceClient: { bindTo: jest.fn().mockReturnValue({}) } as unknown as InferenceClient,
     kiClient: {
       getFeatures: jest.fn(),
-      getStreamToQueryLinksMap: jest.fn().mockResolvedValue({ 'logs.test': [] }),
+      getSourceToQueryLinksMap: jest.fn().mockResolvedValue({ 'logs.test': [] }),
     } as unknown as KnowledgeIndicatorClient,
     logger,
     signal: new AbortController().signal,

@@ -186,10 +186,11 @@ describe('identifyFeatures', () => {
     expect(result.features).toEqual([
       expect.objectContaining({
         id: 'okta',
-        stream_name: 'logs.test',
         filter: undefined,
       }),
     ]);
+    // The owning source is stamped by the server at write time, never by identification.
+    expect(result.features[0]).not.toHaveProperty('source_id');
     expect(result.ignoredFeatures).toEqual([
       {
         feature_id: 'excluded',

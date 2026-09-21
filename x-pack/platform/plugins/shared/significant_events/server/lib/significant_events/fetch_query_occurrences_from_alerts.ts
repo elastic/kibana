@@ -317,7 +317,7 @@ function createRuleScopedQueryLink(ruleUuid: string): QueryLink {
       type: 'match',
       esql: { query: '' },
     },
-    stream_name: '',
+    source_id: '',
     rule_backed: true,
     rule_id: ruleUuid,
   };
@@ -393,7 +393,7 @@ export function toQueryWithOccurrences({
     ...queryLink.query,
     expires_at: queryLink.expires_at,
     rule_uuid: queryLink.rule_id,
-    stream_name: queryLink.stream_name,
+    source_id: queryLink.source_id,
     occurrences: buildQueryOccurrences({ queryLink, queryOccurrences }),
     change_points: EMPTY_CHANGE_POINTS,
     rule_backed: queryLink.rule_backed,

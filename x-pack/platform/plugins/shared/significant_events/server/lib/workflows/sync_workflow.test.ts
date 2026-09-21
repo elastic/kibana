@@ -43,18 +43,18 @@ describe('sync.yaml managed workflow definition', () => {
     assertYamlContains('max: 1');
   });
 
-  it('lists streams from the _streams_with_indicators endpoint', () => {
+  it('lists sources from the _streams_with_indicators endpoint', () => {
     assertYamlContains('/internal/streams/_knowledge_indicators/_streams_with_indicators');
   });
 
-  it('fans out over streams and reconciles each one', () => {
-    assertYamlContains("foreach: '${{ steps.get_streams.output.streams }}'");
+  it('fans out over sources and reconciles each one', () => {
+    assertYamlContains("foreach: '${{ steps.get_sources.output.sources }}'");
     assertYamlContains(
-      '/internal/streams/{{ foreach.item.streamName }}/knowledge_indicators/_reconcile'
+      '/internal/streams/{{ foreach.item.sourceId }}/knowledge_indicators/_reconcile'
     );
   });
 
-  it('continues the sweep when a single stream fails to reconcile', () => {
+  it('continues the sweep when a single source fails to reconcile', () => {
     assertYamlContains('iteration-on-failure:\n          continue: true');
   });
 });

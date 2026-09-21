@@ -23,7 +23,7 @@ import { DurabilityBadge } from '../durability_badge/durability_badge';
 import { getKnowledgeIndicatorExpiresAt } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_expires_at';
 import { KnowledgeIndicatorActionsCell } from '../../../../components/knowledge_indicators/knowledge_indicator_actions_cell';
 import { getKnowledgeIndicatorItemId } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_item_id';
-import { getKnowledgeIndicatorStreamName } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_stream_name';
+import { getKnowledgeIndicatorSourceId } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_source_id';
 import { getKnowledgeIndicatorTitle } from './use_knowledge_indicators_table';
 import {
   TITLE_COLUMN_LABEL,
@@ -139,7 +139,7 @@ export const useKnowledgeIndicatorsColumns = ({
         name: STREAM_COLUMN_LABEL,
         width: '192px',
         render: (ki: KnowledgeIndicator) => {
-          return <EuiBadge color="hollow">{getKnowledgeIndicatorStreamName(ki)}</EuiBadge>;
+          return <EuiBadge color="hollow">{getKnowledgeIndicatorSourceId(ki)}</EuiBadge>;
         },
       },
       {
@@ -155,7 +155,7 @@ export const useKnowledgeIndicatorsColumns = ({
         align: 'right',
         render: (ki: KnowledgeIndicator) => (
           <KnowledgeIndicatorActionsCell
-            streamName={getKnowledgeIndicatorStreamName(ki)}
+            streamName={getKnowledgeIndicatorSourceId(ki)}
             knowledgeIndicator={ki}
             onDeleteRequest={(item) => setKnowledgeIndicatorsToDelete([item])}
           />

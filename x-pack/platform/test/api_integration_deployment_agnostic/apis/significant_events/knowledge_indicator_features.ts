@@ -40,7 +40,6 @@ const secondStreamDefinition: Streams.WiredStream.UpsertRequest['stream'] = {
 
 const testFeature: BaseFeature = {
   id: 'test-feature',
-  stream_name: STREAM_NAME,
   type: 'entity',
   subtype: 'service',
   title: 'Test Service',
@@ -202,11 +201,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('deletes features across multiple streams in one request', async () => {
         const featureA: BaseFeature = { ...testFeature, id: 'cross-stream-delete-a' };
-        const featureB: BaseFeature = {
-          ...testFeature,
-          id: 'cross-stream-delete-b',
-          stream_name: SECOND_STREAM_NAME,
-        };
+        const featureB: BaseFeature = { ...testFeature, id: 'cross-stream-delete-b' };
 
         const { id: idA, uuid: uuidA } = await upsertFeature(apiClient, STREAM_NAME, featureA);
         const { id: idB, uuid: uuidB } = await upsertFeature(

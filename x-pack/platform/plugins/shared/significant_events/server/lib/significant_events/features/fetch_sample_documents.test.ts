@@ -43,7 +43,7 @@ const createFeature = ({
 }): FeatureWithFilter =>
   ({
     id,
-    stream_name: 'logs.test-default',
+    source_id: 'logs.test-default',
     type: 'system',
     description: id,
     properties: {},

@@ -34,9 +34,9 @@ const reconcileKnowledgeIndicatorsRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
 
-    const definition = await streamsClient.getStream(params.path.streamName);
+    await streamsClient.ensureStream(params.path.streamName);
     const kiClient = await getKnowledgeIndicatorClient();
-    return kiClient.reconcileStream(definition);
+    return kiClient.reconcileSource(params.path.streamName);
   },
 });
 

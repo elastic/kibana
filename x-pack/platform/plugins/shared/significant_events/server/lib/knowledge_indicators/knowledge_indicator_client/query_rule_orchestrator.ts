@@ -9,7 +9,6 @@ import type { Logger } from '@kbn/core/server';
 import type { QueryLink, StreamQuery } from '@kbn/significant-events-schema';
 import { deriveQueryType, hasSameEsql } from '@kbn/streams-schema';
 import { isExpirable, isExpired, QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
-import type { Streams } from '@kbn/streams-schema';
 import { computeRuleId } from '../helpers/compute_rule_id';
 import { installQueries, uninstallQueries } from './rule_orchestration';
 import { queryFromLink } from './serializers';
@@ -46,25 +45,25 @@ export class QueryRuleOrchestrator {
     private readonly logger: Logger,
     private readonly isSignificantEventsEnabled: boolean,
     private readonly writer: IndicatorWriter,
-    private readonly reader: IndicatorReader
+    private readonly reader: IndicatorReader,
+    private readonly space: string
   ) {}
 
   async syncQueries(
-    definition: Streams.all.Definition,
+    sourceId: string,
     queries: StreamQuery[],
     options?: { currentLinks?: QueryLink[] }
   ): Promise<void> {
-    const stream = definition.name;
     if (!this.isSignificantEventsEnabled) {
       this.logger.debug(
-        `Skipping syncQueries for stream "${stream}" because significant events feature is disabled.`
+        `Skipping syncQueries for source "${sourceId}" because significant events feature is disabled.`
       );
       return;
     }
 
     const currentLinks =
       options?.currentLinks ??
-      (await this.reader.getStreamToQueryLinksMap([stream], { includeExpired: true }))[stream];
+      (await this.reader.getSourceToQueryLinksMap([sourceId], { includeExpired: true }))[sourceId];
     const currentByQueryId = new Map(currentLinks.map((link) => [link.query.id, link]));
     const nextIds = new Set(queries.map((q) => q.id));
 
@@ -77,11 +76,11 @@ export class QueryRuleOrchestrator {
       const current = currentByQueryId.get(query.id);
       const queryType = deriveQueryType(query.esql.query);
       const typedQuery = { ...query, type: queryType };
-      const ruleId = computeRuleId(stream, query.id, query.esql.query);
+      const ruleId = computeRuleId(this.space, sourceId, query.id, query.esql.query);
       const ruleBacked = canQueryBeRuleBacked({ type: queryType, esql: query.esql });
       if (!current) {
         const link: QueryLink = {
-          stream_name: stream,
+          source_id: sourceId,
           rule_backed: ruleBacked,
           rule_id: ruleId,
           query: typedQuery,
@@ -102,7 +101,7 @@ export class QueryRuleOrchestrator {
         allNext.push({ query: typedQuery, rule_backed: false, rule_id: current.rule_id });
       } else if (!hasSameEsql(current.query.esql.query, query.esql.query)) {
         const link: QueryLink = {
-          stream_name: stream,
+          source_id: sourceId,
           rule_backed: true,
           rule_id: ruleId,
           query: typedQuery,
@@ -127,11 +126,11 @@ export class QueryRuleOrchestrator {
       await installQueries(this.rulesManagementClient, toCreate, toUpdate);
     } catch (installError) {
       this.logger.error(
-        `installQueries failed during syncQueries for stream "${stream}". Compensating by uninstalling created rules.`
+        `installQueries failed during syncQueries for source "${sourceId}". Compensating by uninstalling created rules.`
       );
       await uninstallQueries(this.rulesManagementClient, toCreate).catch((compensateError) => {
         this.logger.error(
-          `Failed to compensate after installQueries failure for stream "${stream}": ${
+          `Failed to compensate after installQueries failure for source "${sourceId}": ${
             compensateError instanceof Error ? compensateError.message : String(compensateError)
           }`
         );
@@ -165,14 +164,14 @@ export class QueryRuleOrchestrator {
     }
 
     try {
-      await this.writer.bulk(stream, operations);
+      await this.writer.bulk(sourceId, operations);
     } catch (storageError) {
       this.logger.error(
-        `Storage append failed after rule install for stream "${stream}". Compensating by uninstalling new rules.`
+        `Storage append failed after rule install for source "${sourceId}". Compensating by uninstalling new rules.`
       );
       await uninstallQueries(this.rulesManagementClient, toCreate).catch((compensateError) => {
         this.logger.error(
-          `Failed to compensate after bulk failure for stream "${stream}": ${
+          `Failed to compensate after bulk failure for source "${sourceId}": ${
             compensateError instanceof Error ? compensateError.message : String(compensateError)
           }`
         );
@@ -181,16 +180,15 @@ export class QueryRuleOrchestrator {
     }
   }
 
-  async upsertQuery(definition: Streams.all.Definition, query: StreamQuery): Promise<void> {
-    const stream = definition.name;
+  async upsertQuery(sourceId: string, query: StreamQuery): Promise<void> {
     if (!this.isSignificantEventsEnabled) {
       this.logger.debug(
-        `Skipping upsertQuery for stream "${stream}" because significant events feature is disabled.`
+        `Skipping upsertQuery for source "${sourceId}" because significant events feature is disabled.`
       );
       return;
     }
 
-    const { [stream]: currentLinks } = await this.reader.getStreamToQueryLinksMap([stream], {
+    const { [sourceId]: currentLinks } = await this.reader.getSourceToQueryLinksMap([sourceId], {
       includeExpired: true,
     });
     const currentByQueryId = new Map(currentLinks.map((link) => [link.query.id, link]));
@@ -199,7 +197,7 @@ export class QueryRuleOrchestrator {
     const scopedLinks = currentLinks.filter((l) => l.rule_backed || l.query.id === query.id);
 
     if (!existing) {
-      await this.syncQueries(definition, [...scopedLinks.map(queryFromLink), query], {
+      await this.syncQueries(sourceId, [...scopedLinks.map(queryFromLink), query], {
         currentLinks: scopedLinks,
       });
       return;
@@ -208,22 +206,21 @@ export class QueryRuleOrchestrator {
     // than dropping them on a metadata-only update (e.g. a durability toggle).
     const next: StreamQuery = { ...query, features: query.features ?? existing.query.features };
     await this.syncQueries(
-      definition,
+      sourceId,
       scopedLinks.map((l) => (l.query.id === query.id ? next : queryFromLink(l))),
       { currentLinks: scopedLinks }
     );
   }
 
-  async deleteQuery(definition: Streams.all.Definition, queryId: string): Promise<void> {
-    const stream = definition.name;
+  async deleteQuery(sourceId: string, queryId: string): Promise<void> {
     if (!this.isSignificantEventsEnabled) {
       this.logger.debug(
-        `Skipping deleteQuery for stream "${stream}" because significant events feature is disabled.`
+        `Skipping deleteQuery for source "${sourceId}" because significant events feature is disabled.`
       );
       return;
     }
 
-    const { [stream]: currentLinks } = await this.reader.getStreamToQueryLinksMap([stream], {
+    const { [sourceId]: currentLinks } = await this.reader.getSourceToQueryLinksMap([sourceId], {
       includeExpired: true,
     });
     const target = currentLinks.find((link) => link.query.id === queryId);
@@ -234,21 +231,20 @@ export class QueryRuleOrchestrator {
     if (target.rule_backed) {
       await uninstallQueries(this.rulesManagementClient, [target]);
     }
-    await this.writer.bulk(stream, [{ delete: { type: KI_TYPE_QUERY, id: queryId } }]);
+    await this.writer.bulk(sourceId, [{ delete: { type: KI_TYPE_QUERY, id: queryId } }]);
   }
 
-  async deleteAllQueries(streamName: string): Promise<void> {
+  async deleteAllQueries(sourceId: string): Promise<void> {
     if (!this.isSignificantEventsEnabled) {
       this.logger.debug(
-        `Skipping deleteAllQueries for stream "${streamName}" because significant events feature is disabled.`
+        `Skipping deleteAllQueries for source "${sourceId}" because significant events feature is disabled.`
       );
       return;
     }
 
-    const { [streamName]: currentLinks } = await this.reader.getStreamToQueryLinksMap(
-      [streamName],
-      { includeExpired: true }
-    );
+    const { [sourceId]: currentLinks } = await this.reader.getSourceToQueryLinksMap([sourceId], {
+      includeExpired: true,
+    });
     const ruleBacked = currentLinks.filter((link) => link.rule_backed);
     if (ruleBacked.length > 0) {
       await uninstallQueries(this.rulesManagementClient, ruleBacked);
@@ -257,24 +253,20 @@ export class QueryRuleOrchestrator {
       return;
     }
     await this.writer.bulk(
-      streamName,
+      sourceId,
       currentLinks.map((link) => ({
         delete: { type: KI_TYPE_QUERY, id: link.query.id },
       }))
     );
   }
 
-  async promoteQueries(
-    definition: Streams.all.Definition,
-    queryIds: string[]
-  ): Promise<PromoteQueriesResult> {
-    const streamName = definition.name;
+  async promoteQueries(sourceId: string, queryIds: string[]): Promise<PromoteQueriesResult> {
     if (!this.isSignificantEventsEnabled) {
       this.logger.debug(`Skipping promoteQueries because significant events feature is disabled.`);
       return EMPTY_PROMOTE_RESULT;
     }
 
-    const { [streamName]: links } = await this.reader.getStreamToQueryLinksMap([streamName]);
+    const { [sourceId]: links } = await this.reader.getSourceToQueryLinksMap([sourceId]);
     const idSet = new Set(queryIds);
     const candidates = links.filter((link) => idSet.has(link.query.id) && !link.rule_backed);
 
@@ -291,14 +283,14 @@ export class QueryRuleOrchestrator {
     const skippedIneligible = skipped.length - skippedStats;
     if (skipped.length > 0) {
       this.logger.info(
-        `Skipping ${skipped.length} ineligible queries from promotion for stream "${streamName}" (${skippedStats} STATS, ${skippedIneligible} MATCH that is not filter-only).`
+        `Skipping ${skipped.length} ineligible queries from promotion for source "${sourceId}" (${skippedStats} STATS, ${skippedIneligible} MATCH that is not filter-only).`
       );
     }
 
     const toPromote = eligible.map((link) => ({
       ...link,
       rule_backed: true,
-      rule_id: computeRuleId(streamName, link.query.id, link.query.esql.query),
+      rule_id: computeRuleId(this.space, sourceId, link.query.id, link.query.esql.query),
     }));
 
     if (toPromote.length === 0) {
@@ -309,7 +301,7 @@ export class QueryRuleOrchestrator {
 
     try {
       await this.writer.bulk(
-        streamName,
+        sourceId,
         toPromote.map((link) => ({
           index: {
             query: {
@@ -322,11 +314,11 @@ export class QueryRuleOrchestrator {
       );
     } catch (storageError) {
       this.logger.error(
-        `Storage append failed after installing rules for stream "${streamName}". Compensating by uninstalling.`
+        `Storage append failed after installing rules for source "${sourceId}". Compensating by uninstalling.`
       );
       await uninstallQueries(this.rulesManagementClient, toPromote).catch((uninstallError) => {
         this.logger.error(
-          `Failed to compensate — orphaned rules may remain for stream "${streamName}": ${
+          `Failed to compensate — orphaned rules may remain for source "${sourceId}": ${
             uninstallError instanceof Error ? uninstallError.message : String(uninstallError)
           }`
         );
@@ -341,14 +333,19 @@ export class QueryRuleOrchestrator {
     };
   }
 
+  /**
+   * Promotes unbacked queries across sources. `sourceIds` is the set of sources
+   * the caller knows to exist; links pointing at any other source are skipped so
+   * a stale KI cannot install a rule for a source that is gone.
+   */
   async promoteUnbackedQueries({
     queryIds,
     minSeverityScore,
-    streamDefinitions,
+    sourceIds,
   }: {
     queryIds?: string[];
     minSeverityScore?: number;
-    streamDefinitions: Map<string, Streams.all.Definition>;
+    sourceIds: string[];
   }): Promise<PromoteQueriesResult> {
     if (!this.isSignificantEventsEnabled) {
       this.logger.debug(
@@ -365,21 +362,21 @@ export class QueryRuleOrchestrator {
       toPromote = candidates.filter((link) => requestedIds.has(link.query.id));
     }
 
-    const byStream = new Map<string, string[]>();
+    const bySource = new Map<string, string[]>();
     for (const link of toPromote) {
-      const group = byStream.get(link.stream_name) ?? [];
+      const group = bySource.get(link.source_id) ?? [];
       group.push(link.query.id);
-      byStream.set(link.stream_name, group);
+      bySource.set(link.source_id, group);
     }
 
+    const knownSourceIds = new Set(sourceIds);
     const totals: PromoteQueriesResult = { ...EMPTY_PROMOTE_RESULT };
-    for (const [streamName, ids] of byStream) {
-      const definition = streamDefinitions.get(streamName);
-      if (!definition) {
-        this.logger.warn(`Skipping promotion for missing stream ${streamName}`);
+    for (const [sourceId, ids] of bySource) {
+      if (!knownSourceIds.has(sourceId)) {
+        this.logger.warn(`Skipping promotion for missing source ${sourceId}`);
         continue;
       }
-      const result = await this.promoteQueries(definition, ids);
+      const result = await this.promoteQueries(sourceId, ids);
       totals.promoted += result.promoted;
       totals.skipped_stats += result.skipped_stats;
       totals.skipped_ineligible += result.skipped_ineligible;
@@ -389,15 +386,14 @@ export class QueryRuleOrchestrator {
   }
 
   async deleteQueries(
-    definition: Streams.all.Definition,
+    sourceId: string,
     queryIds: string[],
     options?: { currentLinks?: QueryLink[] }
   ): Promise<{ deleted: number }> {
     if (queryIds.length === 0) return { deleted: 0 };
-    const stream = definition.name;
     const currentLinks =
       options?.currentLinks ??
-      (await this.reader.getStreamToQueryLinksMap([stream], { includeExpired: true }))[stream];
+      (await this.reader.getSourceToQueryLinksMap([sourceId], { includeExpired: true }))[sourceId];
     const idSet = new Set(queryIds);
     const targets = currentLinks.filter((link) => idSet.has(link.query.id));
     if (targets.length === 0) return { deleted: 0 };
@@ -406,32 +402,31 @@ export class QueryRuleOrchestrator {
       await uninstallQueries(this.rulesManagementClient, ruleBacked);
     }
     await this.writer.bulk(
-      stream,
+      sourceId,
       targets.map((link) => ({ delete: { type: KI_TYPE_QUERY, id: link.query.id } }))
     );
     return { deleted: targets.length };
   }
 
-  findStreamNamesWithOwnedRules(): Promise<string[]> {
-    return this.rulesManagementClient.findStreamNamesWithOwnedRules();
+  findSourceIdsWithOwnedRules(): Promise<string[]> {
+    return this.rulesManagementClient.findSourceIdsWithOwnedRules();
   }
 
-  async reconcileStream(
-    definition: Streams.all.Definition
+  async reconcileSource(
+    sourceId: string
   ): Promise<{ tombstoned: number; orphanRulesDeleted: number }> {
-    const stream = definition.name;
     if (!this.isSignificantEventsEnabled) {
       this.logger.debug(
-        `Skipping reconcileStream for stream "${stream}" because significant events feature is disabled.`
+        `Skipping reconcileSource for source "${sourceId}" because significant events feature is disabled.`
       );
       return { tombstoned: 0, orphanRulesDeleted: 0 };
     }
 
     // includeExpired: expired queries still need their rule uninstalled/tombstoned.
     const [{ hits }, links, ownedRuleIds] = await Promise.all([
-      this.reader.getFeatures(stream),
-      this.reader.getQueryLinks([stream], { ruleUnbacked: 'include', includeExpired: true }),
-      this.rulesManagementClient.findOwnedRuleIds(stream),
+      this.reader.getFeatures(sourceId),
+      this.reader.getQueryLinks([sourceId], { ruleUnbacked: 'include', includeExpired: true }),
+      this.rulesManagementClient.findOwnedRuleIds(sourceId),
     ]);
 
     const liveSlugs = new Set(hits.map((f) => f.id));
@@ -460,24 +455,20 @@ export class QueryRuleOrchestrator {
       .filter((link) => !ownedRuleIdSet.has(link.rule_id) && !candidateIdSet.has(link.query.id))
       .map((link) => link.query.id);
 
-    const { deleted } = await this.deleteQueries(definition, [...candidateIds, ...staleQueryIds], {
+    const { deleted } = await this.deleteQueries(sourceId, [...candidateIds, ...staleQueryIds], {
       currentLinks: links,
     });
 
     return { tombstoned: deleted, orphanRulesDeleted };
   }
 
-  async demoteQueries(
-    definition: Streams.all.Definition,
-    queryIds: string[]
-  ): Promise<{ demoted: number }> {
-    const streamName = definition.name;
+  async demoteQueries(sourceId: string, queryIds: string[]): Promise<{ demoted: number }> {
     if (!this.isSignificantEventsEnabled) {
       this.logger.debug(`Skipping demoteQueries because significant events feature is disabled.`);
       return { demoted: 0 };
     }
 
-    const { [streamName]: links } = await this.reader.getStreamToQueryLinksMap([streamName], {
+    const { [sourceId]: links } = await this.reader.getSourceToQueryLinksMap([sourceId], {
       includeExpired: true,
     });
     const idSet = new Set(queryIds);
@@ -490,7 +481,7 @@ export class QueryRuleOrchestrator {
     await uninstallQueries(this.rulesManagementClient, toDemote);
 
     await this.writer.bulk(
-      streamName,
+      sourceId,
       toDemote.map((link) => ({
         index: {
           query: {

@@ -23,7 +23,7 @@ const BUCKET_INTERVAL = '1m';
 const makeQueryLink = (
   overrides: {
     rule_id?: string;
-    stream_name?: string;
+    source_id?: string;
     title?: string;
     severity_score?: number;
   } = {}
@@ -36,7 +36,7 @@ const makeQueryLink = (
     esql: { query: 'FROM logs | WHERE body.text:"error"' },
     severity_score: overrides.severity_score ?? 60,
   },
-  stream_name: overrides.stream_name ?? 'logs.test',
+  source_id: overrides.source_id ?? 'logs.test',
   rule_backed: true,
   rule_id: overrides.rule_id ?? RULE_UUID,
 });

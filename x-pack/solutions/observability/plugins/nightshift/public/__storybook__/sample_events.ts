@@ -175,7 +175,7 @@ export const checkoutOccurrences: QueryOccurrencesResponse = {
       },
       severity_score: 80,
       rule_uuid: checkoutDetection.rule_uuid ?? 'checkout-latency-rule',
-      stream_name: checkoutDetection.stream_name,
+      source_id: checkoutDetection.stream_name,
       occurrences: [
         { date: '2026-07-24T09:20:00.000Z', count: 2 },
         { date: '2026-07-24T09:25:00.000Z', count: 3 },
@@ -201,7 +201,7 @@ export const checkoutOccurrences: QueryOccurrencesResponse = {
 export const checkoutFeature: Feature = {
   uuid: 'checkout-api',
   id: 'checkout-api-service',
-  stream_name: 'logs.checkout-api',
+  source_id: 'logs.checkout-api',
   type: 'entity',
   subtype: 'service',
   title: 'checkout-api',

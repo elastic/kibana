@@ -18,13 +18,13 @@ import type { Feature } from './feature';
  * assignable to this contract.
  */
 export interface KnowledgeIndicatorClientContract {
-  /** Delete all significant-events queries linked to a stream. */
-  deleteAllQueries(streamName: string): Promise<unknown>;
-  /** Delete all knowledge indicators linked to a stream. */
-  deleteIndicators(streamName: string): Promise<unknown>;
-  /** Fetch knowledge-indicator features for one or more streams. */
+  /** Delete all significant-events queries linked to a source (streams pass the stream name). */
+  deleteAllQueries(sourceId: string): Promise<unknown>;
+  /** Delete all knowledge indicators linked to a source. */
+  deleteIndicators(sourceId: string): Promise<unknown>;
+  /** Fetch knowledge-indicator features for one or more sources. */
   getFeatures(
-    streams: string | string[],
+    sourceIds: string | string[],
     options?: {
       type?: string[];
       id?: string[];

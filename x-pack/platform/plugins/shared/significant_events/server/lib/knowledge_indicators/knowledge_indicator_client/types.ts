@@ -46,4 +46,6 @@ export interface KnowledgeIndicatorClientDeps {
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;
   logger: Logger;
+  /** Kibana space every read is filtered by and every write is stamped with. */
+  space: string;
 }

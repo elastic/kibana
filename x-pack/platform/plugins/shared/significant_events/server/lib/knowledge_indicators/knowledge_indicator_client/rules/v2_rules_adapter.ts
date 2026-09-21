@@ -16,9 +16,9 @@ import {
 } from '../../../significant_events/rules/metric_series_contract';
 import { getMetricSeriesRuleSchedule } from '../../../significant_events/rules/schedule';
 import {
-  STREAMS_RULE_STREAM_TAG_PREFIX,
-  streamNameFromTag,
-  toStreamTag,
+  NIGHTSHIFT_RULE_SOURCE_TAG_PREFIX,
+  sourceIdFromTag,
+  toSourceTag,
   type IRulesManagementClient,
   type SignificantEventsRuleDefinition,
 } from './rules_management_client';
@@ -38,7 +38,7 @@ export interface RulesAdapterV2Params {
  * Internal getTags size for ownership-tag enumeration. The HTTP tags route stays
  * capped at 20 for typeahead; server-side consumers may request up to 10000.
  */
-const OWNED_STREAM_TAGS_SIZE = 10000;
+const OWNED_SOURCE_TAGS_SIZE = 10000;
 
 /**
  * Wraps alerting_v2 `RulesClientApi` to implement IRulesManagementClient.
@@ -46,8 +46,9 @@ const OWNED_STREAM_TAGS_SIZE = 10000;
  * create/update handle their own 409/404 fallbacks internally so QueryClient does not
  * need to know Alerting v2's retry semantics.
  *
- * Space context: the caller must obtain the client with the intended space
- * (SigEvents uses default space), matching the former HTTP client behavior.
+ * Space context: the adapter inherits the space of the `RulesClientApi` it wraps.
+ * Regular KI traffic obtains it for the request space; the cluster-wide reset
+ * builds one adapter per space.
  */
 export class RulesAdapterV2 implements IRulesManagementClient {
   private readonly rulesClient: RulesAdapterV2Params['rulesClient'];
@@ -104,12 +105,51 @@ export class RulesAdapterV2 implements IRulesManagementClient {
     return results.filter(({ exists }) => exists).map(({ id }) => id);
   }
 
-  async findOwnedRuleIds(streamName: string): Promise<string[]> {
+  async findOwnedRuleIds(sourceId: string): Promise<string[]> {
+    return this.findRuleIdsByTag(toSourceTag(sourceId));
+  }
+
+  async findSourceIdsWithOwnedRules(): Promise<string[]> {
+    // Prefix-search returns matching tag buckets (not rule documents). Non-ownership
+    // tags are still filtered client-side in case the include pattern is broadened.
+    const tags = await this.findTagsByPrefix(NIGHTSHIFT_RULE_SOURCE_TAG_PREFIX);
+    const sourceIds = new Set<string>();
+    for (const tag of tags) {
+      const sourceId = sourceIdFromTag(tag);
+      if (sourceId) {
+        sourceIds.add(sourceId);
+      }
+    }
+    return [...sourceIds];
+  }
+
+  async findRuleIdsByTagPrefix(prefix: string): Promise<string[]> {
+    const tags = await this.findTagsByPrefix(prefix);
+    const ids = new Set<string>();
+    for (const tag of tags) {
+      for (const id of await this.findRuleIdsByTag(tag)) {
+        ids.add(id);
+      }
+    }
+    return [...ids];
+  }
+
+  private async findTagsByPrefix(prefix: string): Promise<string[]> {
+    const tags = await this.rulesClient.getTags({
+      search: prefix,
+      kind: 'signal',
+      size: OWNED_SOURCE_TAGS_SIZE,
+    });
+    // `search` is a substring match; keep only tags that really start with the prefix.
+    return tags.filter((tag) => tag.startsWith(prefix));
+  }
+
+  private async findRuleIdsByTag(tag: string): Promise<string[]> {
     const ids: string[] = [];
     let page = 1;
     while (true) {
       const result = await this.rulesClient.findRules({
-        filter: `metadata.tags: "${toStreamTag(streamName)}"`,
+        filter: `metadata.tags: "${tag}"`,
         perPage: FIND_PAGE_SIZE,
         page,
       });
@@ -120,24 +160,6 @@ export class RulesAdapterV2 implements IRulesManagementClient {
       page++;
     }
     return ids;
-  }
-
-  async findStreamNamesWithOwnedRules(): Promise<string[]> {
-    // Prefix-search returns matching tag buckets (not rule documents). Non-ownership
-    // tags are still filtered client-side in case the include pattern is broadened.
-    const tags = await this.rulesClient.getTags({
-      search: STREAMS_RULE_STREAM_TAG_PREFIX,
-      kind: 'signal',
-      size: OWNED_STREAM_TAGS_SIZE,
-    });
-    const streamNames = new Set<string>();
-    for (const tag of tags) {
-      const streamName = streamNameFromTag(tag);
-      if (streamName) {
-        streamNames.add(streamName);
-      }
-    }
-    return [...streamNames];
   }
 
   /**
@@ -187,7 +209,7 @@ function toV2CommonBody({ definition, isServerless }: ToV2BodyParams) {
   return {
     metadata: {
       name: definition.name,
-      tags: [toStreamTag(definition.streamName), METRIC_SERIES_RULE_TAG],
+      tags: [toSourceTag(definition.sourceId), METRIC_SERIES_RULE_TAG],
     },
     time_field: definition.timestampField,
     schedule: {

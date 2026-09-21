@@ -43,7 +43,7 @@ export interface ChangePointRuleBucket {
 
 export interface RuleMetadata {
   ruleName: string;
-  streamName: string;
+  sourceId: string;
   severityScore: number;
 }
 
@@ -91,7 +91,7 @@ export function buildRuleMetadataMap(queryLinks: QueryLink[]): Map<string, RuleM
   for (const link of queryLinks) {
     map.set(link.rule_id, {
       ruleName: link.query.title,
-      streamName: link.stream_name,
+      sourceId: link.source_id,
       severityScore: link.query.severity_score ?? 0,
     });
   }

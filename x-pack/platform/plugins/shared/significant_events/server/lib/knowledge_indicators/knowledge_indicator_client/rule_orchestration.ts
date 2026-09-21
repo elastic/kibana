@@ -35,7 +35,7 @@ export function toRuleDefinition(queryLink: QueryLink): SignificantEventsRuleDef
   const { every } = getMetricSeriesRuleSchedule();
   return {
     name: toRuleName(query.title),
-    streamName: queryLink.stream_name,
+    sourceId: queryLink.source_id,
     timestampField: TIMESTAMP,
     esqlQuery: query.esql.query,
     schedule: {

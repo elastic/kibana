@@ -36,7 +36,7 @@ const makeLink = (
     esql: { query: overrides.esql ?? 'FROM logs | WHERE body.text:"error"' },
     severity_score: overrides.severity_score ?? 60,
   },
-  stream_name: 'logs.test',
+  source_id: 'logs.test',
   rule_backed: overrides.ruleBacked ?? false,
   rule_id: `rule-${overrides.id ?? 'q1'}`,
   ...(overrides.expiresAt ? { expires_at: overrides.expiresAt } : {}),
@@ -58,16 +58,13 @@ const MOCK_DEFAULT_EXPIRES_AT = '2099-01-01T00:00:00.000Z';
 
 const createMocks = (existingLinks: QueryLink[] = []) => {
   const kiClient = {
-    getStreamToQueryLinksMap: jest.fn().mockResolvedValue({ 'logs.test': existingLinks }),
+    getSourceToQueryLinksMap: jest.fn().mockResolvedValue({ 'logs.test': existingLinks }),
     getDefaultExpiresAt: jest.fn().mockReturnValue(MOCK_DEFAULT_EXPIRES_AT),
     bulk: jest.fn().mockResolvedValue({ applied: 1, skipped: 0 }),
     syncQueries: jest.fn().mockResolvedValue(undefined),
-    replaceStreamQueries: jest.fn(
-      async (
-        def: Streams.all.Definition,
-        getNextQueries: (links: QueryLink[]) => StreamQuery[]
-      ) => {
-        await kiClient.syncQueries(def, getNextQueries(existingLinks));
+    replaceSourceQueries: jest.fn(
+      async (sourceId: string, getNextQueries: (links: QueryLink[]) => StreamQuery[]) => {
+        await kiClient.syncQueries(sourceId, getNextQueries(existingLinks));
       }
     ),
   } as unknown as jest.Mocked<KnowledgeIndicatorClient>;
@@ -222,8 +219,8 @@ describe('persistQueries', () => {
 
     expect(kiClient.bulk).not.toHaveBeenCalled();
     expect(kiClient.syncQueries).toHaveBeenCalledTimes(1);
-    const [defArg, queriesArg] = (kiClient.syncQueries as jest.Mock).mock.calls[0];
-    expect(defArg).toBe(definition);
+    const [sourceIdArg, queriesArg] = (kiClient.syncQueries as jest.Mock).mock.calls[0];
+    expect(sourceIdArg).toBe('logs.test');
     expect(queriesArg).toHaveLength(1);
     expect(queriesArg[0].id).toBe('q1');
   });
