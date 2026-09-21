@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { API_VERSIONS, HuntBehaviorRequestBody, INTERNAL_API_ACCESS } from '@kbn/alertzero-common';
+import {
+  ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
+  API_VERSIONS,
+  HuntBehaviorRequestBody,
+  INTERNAL_API_ACCESS,
+} from '@kbn/alertzero-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_READ, HUNT_INTERNAL_ROUTE_BASE } from '../../../common/constants';
 import { huntBehavior } from '../../services/watches/hunt/tier2/hunt_behavior';
@@ -47,10 +52,17 @@ export const registerHuntBehaviorRoute = ({
       async (context, request, response) => {
         try {
           const core = await context.core;
-          const { getInference } = getHuntServices();
+          const { getInference, getSearchInferenceEndpoints } = getHuntServices();
 
+          // Tier 2 is one-shot extraction plus one-shot ES|QL rule drafting, which is
+          // what the Reasoning tier is for. Resolving it by tier rather than by the
+          // deployment default is required, not cosmetic: the tiers register with
+          // `ignoreGlobalDefault: true`, so the default connector is a different model
+          // than the one the operator picked in Model Settings.
           const modelOutcome = await resolveScopedModel({
             inference: getInference(),
+            searchInferenceEndpoints: getSearchInferenceEndpoints(),
+            featureId: ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
             request,
             uiSettingsClient: core.uiSettings.client,
             logger,

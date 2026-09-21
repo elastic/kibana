@@ -1,0 +1,142 @@
+openapi: 3.0.0
+info:
+  title: AlertZero correlate route (E7 anchor correlation engine)
+  version: '1'
+paths:
+  /internal/alertzero/threat_intel/correlate:
+    post:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: Correlate
+      description: >-
+        Runs the anchors correlation leg (plan.md Phase 7). `no_match` and
+        `unavailable` are both successful outcomes: unavailable correlation
+        blocks containment but never blocks the Tier 1 finding. `diamond_scores`
+        stays empty until PR 3b lands the diamond leg behind the same engine
+        interface.
+      summary: Correlate a report against others by shared anchors
+      tags:
+        - AlertZero API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                source_report_id:
+                  type: string
+                anchors:
+                  $ref: '#/components/schemas/AnchorSet'
+                size:
+                  type: integer
+                  minimum: 1
+                  maximum: 50
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - anchors
+                  - matches
+                  - thresholds
+                  - self_match_excluded
+                  - diamond_scores
+                  - anchor_summary
+                properties:
+                  status:
+                    $ref: '#/components/schemas/CorrelationEngineStatus'
+                  anchors:
+                    $ref: '#/components/schemas/AnchorSet'
+                  matches:
+                    type: array
+                    items:
+                      type: object
+                  thresholds:
+                    type: object
+                    required: [discriminating_min]
+                    properties:
+                      discriminating_min:
+                        type: number
+                  self_match_excluded:
+                    type: boolean
+                    enum: [true]
+                    description: >-
+                      Always true. The source report is excluded from its own
+                      matches by a must_not on its `_id`.
+                  diamond_scores:
+                    type: array
+                    items:
+                      type: object
+                      required: [vertex, related_report_id, score]
+                      properties:
+                        vertex:
+                          type: string
+                        related_report_id:
+                          type: string
+                        score:
+                          type: number
+                  anchor_summary:
+                    type: object
+                    required:
+                      - hash_ioc_count
+                      - network_ioc_count
+                      - ioc_set_hash
+                      - actor_count
+                      - technique_count
+                      - discriminating_anchor_count
+                    properties:
+                      hash_ioc_count:
+                        type: integer
+                      network_ioc_count:
+                        type: integer
+                      ioc_set_hash:
+                        type: string
+                        nullable: true
+                      actor_count:
+                        type: integer
+                      technique_count:
+                        type: integer
+                      discriminating_anchor_count:
+                        type: integer
+components:
+  schemas:
+    CorrelationEngineStatus:
+      type: string
+      enum: [matched, no_match, unavailable]
+
+    AnchorIoc:
+      type: object
+      required: [type, value]
+      properties:
+        type:
+          type: string
+        value:
+          type: string
+
+    AnchorSet:
+      type: object
+      description: >-
+        Discriminating anchors are hash IOCs, `ioc_set_hash` and actors.
+        Network IOCs and techniques are boost-only and never gate a match.
+      properties:
+        iocs:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnchorIoc'
+        ioc_set_hash:
+          type: string
+          nullable: true
+        actors:
+          type: array
+          items:
+            type: string
+        technique_ids:
+          type: array
+          items:
+            type: string

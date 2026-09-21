@@ -1,0 +1,116 @@
+openapi: 3.0.0
+info:
+  title: AlertZero hunt coordinator route
+  version: '1'
+paths:
+  /internal/alertzero/threat_intel/hunt_coordinator:
+    post:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: HuntCoordinator
+      description: >-
+        Chains Tier 1 into Tier 2 with tier2_when gating and no-model
+        degradation (plan.md Phase 6). Writes no feedback of its own: it
+        returns completedSuccessfully so the calling workflow decides whether
+        to write the per-space evidence[] element.
+      summary: Run the hunt coordinator
+      tags:
+        - AlertZero API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [trigger]
+              additionalProperties: false
+              properties:
+                report_id:
+                  type: string
+                runId:
+                  type: string
+                  description: >-
+                    Run id supplied by the Worker fan-out so every child of one
+                    sweep shares it, which is what the packaging barrier and the
+                    conclusion dedupe key off. The route mints one only when the
+                    caller has no sweep to tie the run to.
+                text:
+                  type: string
+                  maxLength: 200000
+                iocs:
+                  type: array
+                  items:
+                    $ref: '../components/threat_intel.schema.yaml#/components/schemas/HuntIoc'
+                techniques:
+                  type: array
+                  items:
+                    type: string
+                time_range:
+                  type: object
+                  required: [from, to]
+                  properties:
+                    from:
+                      type: string
+                    to:
+                      type: string
+                size:
+                  type: integer
+                  minimum: 1
+                max_assets:
+                  type: integer
+                  minimum: 1
+                llm_confidence_threshold:
+                  type: number
+                  minimum: 0
+                  maximum: 1
+                tier2_when:
+                  type: string
+                  enum: [on_hits, always, never]
+                max_tier2_sample_events:
+                  type: integer
+                  minimum: 1
+                trigger:
+                  type: string
+                  enum: [manual, scheduled]
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - runId
+                  - tier1
+                  - message
+                  - next_step
+                  - completedSuccessfully
+                properties:
+                  status:
+                    $ref: '#/components/schemas/HuntCoordinatorStatus'
+                  report_id:
+                    type: string
+                  runId:
+                    type: string
+                  tier1:
+                    type: object
+                  tier2:
+                    type: object
+                  tier2_skipped_reason:
+                    type: string
+                  message:
+                    type: string
+                  next_step:
+                    type: string
+                  completedSuccessfully:
+                    type: boolean
+                    description: >-
+                      True when the run completed without hard errors. The
+                      calling workflow checks this before writing hunt evidence,
+                      so a failed run writes nothing.
+components:
+  schemas:
+    HuntCoordinatorStatus:
+      type: string
+      enum: [tier1_only, tier1_and_tier2, tier2_only_skipped]

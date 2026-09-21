@@ -35,52 +35,9 @@ paths:
                 iocs:
                   type: array
                   items:
-                    type: object
-                    required: [type, value]
-                    properties:
-                      type:
-                        type: string
-                      value:
-                        type: string
+                    $ref: '#/components/schemas/HuntBehaviorIoc'
                 article_context:
-                  type: object
-                  properties:
-                    matched_indices:
-                      type: array
-                      items:
-                        type: string
-                    affected_hosts:
-                      type: array
-                      items:
-                        type: string
-                    affected_users:
-                      type: array
-                      items:
-                        type: string
-                    sample_events:
-                      type: array
-                      items:
-                        type: string
-                    time_range:
-                      type: object
-                      required: [from, to]
-                      properties:
-                        from:
-                          type: string
-                        to:
-                          type: string
-                    proposed_atomic_rules:
-                      type: array
-                      items:
-                        type: object
-                        required: [rule_name, ioc_type, ioc_value]
-                        properties:
-                          rule_name:
-                            type: string
-                          ioc_type:
-                            type: string
-                          ioc_value:
-                            type: string
+                  $ref: '#/components/schemas/HuntBehaviorArticleContext'
       responses:
         '200':
           description: Successful response
@@ -91,8 +48,7 @@ paths:
                 required: [status, behaviors, indexed_behaviors, next_step, hasHit]
                 properties:
                   status:
-                    type: string
-                    enum: [no_behaviors_found, no_behaviors_validated, behaviors_proposed]
+                    $ref: '#/components/schemas/HuntBehaviorStatus'
                   report_id:
                     type: string
                   behaviors:
@@ -116,3 +72,60 @@ paths:
                     enum: [false]
         '503':
           description: No GenAI connector configured
+components:
+  schemas:
+    HuntBehaviorStatus:
+      type: string
+      enum: [no_behaviors_found, no_behaviors_validated, behaviors_proposed]
+
+    HuntBehaviorIoc:
+      type: object
+      required: [type, value]
+      properties:
+        type:
+          type: string
+        value:
+          type: string
+
+    HuntBehaviorArticleContext:
+      type: object
+      description: >-
+        Tier 1 context steering. Best-effort hints from Tier 1's environment hit
+        surface; missing or empty falls back to text-only extraction.
+      properties:
+        matched_indices:
+          type: array
+          items:
+            type: string
+        affected_hosts:
+          type: array
+          items:
+            type: string
+        affected_users:
+          type: array
+          items:
+            type: string
+        sample_events:
+          type: array
+          items:
+            type: string
+        time_range:
+          type: object
+          required: [from, to]
+          properties:
+            from:
+              type: string
+            to:
+              type: string
+        proposed_atomic_rules:
+          type: array
+          items:
+            type: object
+            required: [rule_name, ioc_type, ioc_value]
+            properties:
+              rule_name:
+                type: string
+              ioc_type:
+                type: string
+              ioc_value:
+                type: string

@@ -6,6 +6,7 @@
  */
 
 import {
+  ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
   API_VERSIONS,
   HuntCoordinatorRequestBody,
   INTERNAL_API_ACCESS,
@@ -55,10 +56,15 @@ export const registerHuntCoordinatorRoute = ({
           const core = await context.core;
           const spaceId = getSpaceId(request);
           const esClient = core.elasticsearch.client.asCurrentUser;
-          const { getInference } = getHuntServices();
+          const { getInference, getSearchInferenceEndpoints } = getHuntServices();
 
+          // Same Reasoning tier as the standalone Tier 2 route: this is the path that
+          // actually runs Tier 2 in production, so it must not resolve a different
+          // model than a direct hunt_behavior call would.
           const modelOutcome = await resolveScopedModel({
             inference: getInference(),
+            searchInferenceEndpoints: getSearchInferenceEndpoints(),
+            featureId: ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
             request,
             uiSettingsClient: core.uiSettings.client,
             logger,
@@ -78,6 +84,7 @@ export const registerHuntCoordinatorRoute = ({
             tier2_when,
             max_tier2_sample_events,
             trigger,
+            runId,
           } = request.body;
 
           const result = await huntCoordinator(esClient, model, logger, {
@@ -93,7 +100,10 @@ export const registerHuntCoordinatorRoute = ({
             tier2_when,
             max_tier2_sample_events,
             trigger,
-            runId: randomUUID(),
+            // The Worker fan-out supplies a run id so one sweep's children share it,
+            // which is what the packaging barrier and conclusion dedupe key off. Only
+            // mint one when the caller has no sweep to tie the run to.
+            runId: runId ?? randomUUID(),
           });
 
           return response.ok({ body: result });

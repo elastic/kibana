@@ -7,6 +7,7 @@
 
 import type { IUiSettingsClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
 
@@ -79,14 +80,56 @@ export type ResolveScopedModelOutcome =
   | { ok: true; model: ScopedModel }
   | { ok: false; reason: 'no_inference_plugin' | 'no_connector'; message: string };
 
+/**
+ * Resolves the connector an operator picked for an AlertZero model tier in
+ * Stack Management > Model Settings.
+ *
+ * This runs ahead of the deployment default on purpose. The tiers register with
+ * `ignoreGlobalDefault: true`, so falling straight through to the default
+ * connector does not merely skip a preference, it resolves a different model
+ * than the operator chose and silently undoes the tiering.
+ */
+const resolveTierConnectorId = async ({
+  searchInferenceEndpoints,
+  featureId,
+  request,
+  logger,
+}: {
+  searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
+  featureId: string;
+  request: KibanaRequest;
+  logger: Logger;
+}): Promise<string | undefined> => {
+  try {
+    const { endpoints } = await searchInferenceEndpoints.endpoints.getForFeature(
+      featureId,
+      request
+    );
+    return endpoints[0]?.connectorId;
+  } catch (err) {
+    logger.warn(
+      `[hunt:connector] tier '${featureId}' could not be resolved, falling through. ${
+        (err as Error).message
+      }`
+    );
+    return undefined;
+  }
+};
+
 export const resolveScopedModel = async ({
   inference,
+  searchInferenceEndpoints,
+  featureId,
   request,
   uiSettingsClient,
   connectorIdOverride,
   logger,
 }: {
   inference: InferenceServerStart | undefined;
+  /** Optional plugin: absent deployments fall back to the connector chain below. */
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
+  /** AlertZero model tier to resolve, e.g. `alertzero_reasoning` for Tier 2. */
+  featureId?: string;
   request: KibanaRequest;
   uiSettingsClient: IUiSettingsClient;
   connectorIdOverride?: string;
@@ -111,6 +154,19 @@ export const resolveScopedModel = async ({
       logger
     );
     if (model) return { ok: true, model };
+  }
+
+  if (searchInferenceEndpoints && featureId) {
+    const tierId = await resolveTierConnectorId({
+      searchInferenceEndpoints,
+      featureId,
+      request,
+      logger,
+    });
+    if (tierId) {
+      const model = await tryBuildScoped(inference, request, tierId, `tier:${featureId}`, logger);
+      if (model) return { ok: true, model };
+    }
   }
 
   const fallbackId = await resolveConnectorId({ inference, request, uiSettingsClient });

@@ -200,6 +200,7 @@ export class AlertZeroPlugin
       getProposalsService: plugins.agenticInvestigations.getProposalsService,
       getAiIndexService: plugins.contextEngine.getAiIndexService,
       getInference: () => plugins.inference,
+      getSearchInferenceEndpoints: () => plugins.searchInferenceEndpoints,
     };
 
     return {};

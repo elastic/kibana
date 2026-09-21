@@ -8,6 +8,7 @@
 import type { ConversationsStart } from '@kbn/agent-builder-server';
 import type { ContextEnginePluginStart } from '@kbn/context-engine-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
 
 /**
@@ -25,4 +26,10 @@ export interface HuntServices {
   getAiIndexService: ContextEnginePluginStart['getAiIndexService'];
   /** Inference plugin start contract, for building a ScopedModel per hunt run. */
   getInference: () => InferenceServerStart;
+  /**
+   * Model-tier registry, for resolving the connector an operator picked for an
+   * AlertZero tier. Optional plugin, so hunt routes fall back to the connector
+   * chain in `scoped_model.ts` when it is absent.
+   */
+  getSearchInferenceEndpoints: () => SearchInferenceEndpointsPluginStart | undefined;
 }

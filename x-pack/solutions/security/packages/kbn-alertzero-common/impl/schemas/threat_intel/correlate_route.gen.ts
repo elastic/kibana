@@ -16,6 +16,13 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+export const CorrelationEngineStatus = lazySchema(() =>
+  z.enum(['matched', 'no_match', 'unavailable'])
+);
+export type CorrelationEngineStatus = z.infer<typeof CorrelationEngineStatus>;
+export type CorrelationEngineStatusEnum = typeof CorrelationEngineStatus.enum;
+export const CorrelationEngineStatusEnum = CorrelationEngineStatus.enum;
+
 export const AnchorIoc = lazySchema(() =>
   z.object({
     type: z.string(),
@@ -24,6 +31,9 @@ export const AnchorIoc = lazySchema(() =>
 );
 export type AnchorIoc = z.infer<typeof AnchorIoc>;
 
+/**
+ * Discriminating anchors are hash IOCs, `ioc_set_hash` and actors. Network IOCs and techniques are boost-only and never gate a match.
+ */
 export const AnchorSet = lazySchema(() =>
   z.object({
     iocs: z.array(AnchorIoc).optional(),
@@ -46,20 +56,28 @@ export const CorrelateRequestBody = lazySchema(() =>
 export type CorrelateRequestBody = z.infer<typeof CorrelateRequestBody>;
 export type CorrelateRequestBodyInput = z.input<typeof CorrelateRequestBody>;
 
-export const CorrelationEngineStatus = lazySchema(() =>
-  z.enum(['matched', 'no_match', 'unavailable'])
-);
-export type CorrelationEngineStatus = z.infer<typeof CorrelationEngineStatus>;
-
 export const CorrelateResponse = lazySchema(() =>
   z.object({
     status: CorrelationEngineStatus,
     anchors: AnchorSet,
-    matches: z.array(z.record(z.string(), z.unknown())),
-    thresholds: z.object({ discriminating_min: z.number() }),
-    self_match_excluded: z.literal(true),
+    matches: z.array(z.object({})),
+    thresholds: z.object({
+      discriminating_min: z.number(),
+    }),
+    /**
+     * Always true. The source report is excluded from its own matches by a must_not on its `_id`.
+     */
+    self_match_excluded: z
+      .boolean()
+      .describe(
+        'Always true. The source report is excluded from its own matches by a must_not on its `_id`.'
+      ),
     diamond_scores: z.array(
-      z.object({ vertex: z.string(), related_report_id: z.string(), score: z.number() })
+      z.object({
+        vertex: z.string(),
+        related_report_id: z.string(),
+        score: z.number(),
+      })
     ),
     anchor_summary: z.object({
       hash_ioc_count: z.number().int(),

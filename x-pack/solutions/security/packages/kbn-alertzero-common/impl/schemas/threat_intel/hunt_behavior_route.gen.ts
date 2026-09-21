@@ -16,6 +16,13 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+export const HuntBehaviorStatus = lazySchema(() =>
+  z.enum(['no_behaviors_found', 'no_behaviors_validated', 'behaviors_proposed'])
+);
+export type HuntBehaviorStatus = z.infer<typeof HuntBehaviorStatus>;
+export type HuntBehaviorStatusEnum = typeof HuntBehaviorStatus.enum;
+export const HuntBehaviorStatusEnum = HuntBehaviorStatus.enum;
+
 export const HuntBehaviorIoc = lazySchema(() =>
   z.object({
     type: z.string(),
@@ -24,13 +31,21 @@ export const HuntBehaviorIoc = lazySchema(() =>
 );
 export type HuntBehaviorIoc = z.infer<typeof HuntBehaviorIoc>;
 
+/**
+ * Tier 1 context steering. Best-effort hints from Tier 1's environment hit surface; missing or empty falls back to text-only extraction.
+ */
 export const HuntBehaviorArticleContext = lazySchema(() =>
   z.object({
     matched_indices: z.array(z.string()).optional(),
     affected_hosts: z.array(z.string()).optional(),
     affected_users: z.array(z.string()).optional(),
     sample_events: z.array(z.string()).optional(),
-    time_range: z.object({ from: z.string(), to: z.string() }).optional(),
+    time_range: z
+      .object({
+        from: z.string(),
+        to: z.string(),
+      })
+      .optional(),
     proposed_atomic_rules: z
       .array(
         z.object({
@@ -58,21 +73,16 @@ export const HuntBehaviorRequestBody = lazySchema(() =>
 export type HuntBehaviorRequestBody = z.infer<typeof HuntBehaviorRequestBody>;
 export type HuntBehaviorRequestBodyInput = z.input<typeof HuntBehaviorRequestBody>;
 
-export const HuntBehaviorStatus = lazySchema(() =>
-  z.enum(['no_behaviors_found', 'no_behaviors_validated', 'behaviors_proposed'])
-);
-export type HuntBehaviorStatus = z.infer<typeof HuntBehaviorStatus>;
-
 export const HuntBehaviorResponse = lazySchema(() =>
   z.object({
     status: HuntBehaviorStatus,
     report_id: z.string().optional(),
-    behaviors: z.array(z.record(z.string(), z.unknown())),
-    indexed_behaviors: z.array(z.record(z.string(), z.unknown())),
+    behaviors: z.array(z.object({})),
+    indexed_behaviors: z.array(z.object({})),
     dropped_unknown_ids: z.array(z.string()).optional(),
     message: z.string().optional(),
     next_step: z.string(),
-    hasHit: z.literal(false),
+    hasHit: z.boolean(),
   })
 );
 export type HuntBehaviorResponse = z.infer<typeof HuntBehaviorResponse>;
