@@ -153,21 +153,25 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
       : undefined
   );
 
-  // Ref holds the latest persisted value so setConnectorId/setStaticKeys can spread it
-  // without closing over the state value — keeping both callbacks stable across renders.
+  // Ref holds the latest persisted value so all writers of persistedAuthenticateAndDeployStep
+  // can spread it without closing over the state value, and each writer advances the ref
+  // synchronously before calling the setter so back-to-back calls in the same event-loop
+  // tick each see the accumulated state rather than a stale pre-render snapshot.
   const persistedAuthStepRef = useRef(persistedAuthenticateAndDeployStep);
   persistedAuthStepRef.current = persistedAuthenticateAndDeployStep;
 
   const setConnectorId = useCallback(
     (id: string | undefined, name?: string) => {
       setStaticKeysState(undefined);
-      setPersistedAuthenticateAndDeployStep({
+      const next = {
         ...persistedAuthStepRef.current,
         connectorId: id,
         connectorName: id ? name : undefined,
-        authMethod: id ? 'identity_federation' : undefined,
+        authMethod: id ? ('identity_federation' as const) : undefined,
         accessKeyId: undefined,
-      });
+      };
+      persistedAuthStepRef.current = next;
+      setPersistedAuthenticateAndDeployStep(next);
     },
     [setPersistedAuthenticateAndDeployStep]
   );
@@ -175,19 +179,19 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
   const setStaticKeys = useCallback(
     (keys: AwsStaticKeyCredentials | undefined) => {
       setStaticKeysState(keys);
-      setPersistedAuthenticateAndDeployStep({
+      const next = {
         ...persistedAuthStepRef.current,
         connectorId: undefined,
         connectorName: undefined,
-        authMethod: keys ? 'static_keys' : undefined,
+        authMethod: keys ? ('static_keys' as const) : undefined,
         accessKeyId: keys?.access_key_id,
-      });
+      };
+      persistedAuthStepRef.current = next;
+      setPersistedAuthenticateAndDeployStep(next);
     },
     [setPersistedAuthenticateAndDeployStep]
   );
 
-  // Single write using persistedAuthStepRef.current — prevents stale-closure races when two
-  // callers update the same ref within the same event-loop tick. Same pattern as setDataFormat.
   const setAgentBasedDeployment = useCallback(
     (update: Partial<AgentBasedDeploymentState>) => {
       const next = {
@@ -356,13 +360,15 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
       // meaningless to the agentless path and a cloud connector is meaningless to the agent-based
       // path. Without this reset, failures from the abandoned method keep the "Deployment failed"
       // callout up and gate Next on a deploy the user is no longer attempting.
-      setPersistedAuthenticateAndDeployStep({
+      const next = {
         ...prev,
         deploymentMethod: method,
         agentPolicyId: undefined,
         agentPolicyName: undefined,
         withSysMonitoring: undefined,
-      });
+      };
+      persistedAuthStepRef.current = next;
+      setPersistedAuthenticateAndDeployStep(next);
       setPersistedDetectAndReviewStep({
         serviceStatuses: {},
         policyIdsByInstance: {},

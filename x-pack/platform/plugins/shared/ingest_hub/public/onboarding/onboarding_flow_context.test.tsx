@@ -293,6 +293,21 @@ describe('OnboardingFlowProvider', () => {
       expect(result.current.agentBasedDeployment.agentCredentialMethod).toBe('direct_access_keys');
       expect(result.current.agentBasedDeployment.selectedAgentPolicyIds).toEqual([]);
     });
+
+    it('does not lose a preceding setDeploymentMethod update in the same tick', () => {
+      const { result, rerender } = renderHook(() => useOnboardingFlow(), { wrapper });
+
+      act(() => {
+        // setDeploymentMethod writes the shared persisted object and must advance the ref
+        // so the immediately following setAgentBasedDeployment spreads the updated value.
+        result.current.setDeploymentMethod('agent_based');
+        result.current.setAgentBasedDeployment({ agentHostsMode: 'existing' });
+      });
+      rerender();
+
+      expect(result.current.deploymentMethod).toBe('agent_based');
+      expect(result.current.agentBasedDeployment.agentHostsMode).toBe('existing');
+    });
   });
 
   describe('setDataFormat', () => {
