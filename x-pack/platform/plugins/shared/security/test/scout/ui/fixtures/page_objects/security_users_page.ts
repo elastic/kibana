@@ -67,8 +67,8 @@ export class SecurityUsersPage {
     if (user.email) {
       await this.page.testSubj.locator('userFormEmailInput').fill(user.email);
     }
-    for (const role of user.roles ?? []) {
-      await this.selectRole(role);
+    if (user.roles) {
+      await this.page.components.comboBox('rolesDropdown').setSelectedOptions(user.roles);
     }
   }
 
@@ -94,7 +94,10 @@ export class SecurityUsersPage {
 
   async clickUserByName(username: string) {
     await this.searchUsersInput.fill(username);
-    await this.page.getByRole('link', { name: username }).click();
+    await this.searchUsersInput.press('Enter');
+    await this.page.waitForURL((url) => url.searchParams.get('q') === username);
+    await this.page.getByRole('link', { name: username, exact: true }).click();
+    await this.page.testSubj.locator('userFormUserNameInput').waitFor({ state: 'visible' });
   }
 
   async deleteUser(username: string) {
@@ -105,7 +108,8 @@ export class SecurityUsersPage {
   }
 
   async backToUsersList() {
-    await this.page.testSubj.locator('euiHeaderBack').click();
+    await this.page.testSubj.locator('appHeaderBack').click();
+    await this.createUserButton.waitFor({ state: 'visible' });
   }
 
   async updateUserProfile(user: UserFormValues) {
@@ -132,10 +136,11 @@ export class SecurityUsersPage {
     }
     await this.page.testSubj
       .locator('editUserChangePasswordNewPasswordInput')
-      .fill(user.password ?? '');
+      .pressSequentially(user.password ?? '');
     await this.page.testSubj
       .locator('editUserChangePasswordConfirmPasswordInput')
-      .fill(user.confirm_password ?? '');
+      .pressSequentially(user.confirm_password ?? '');
+    await this.page.testSubj.locator('editUserChangePasswordConfirmPasswordInput').blur();
     await this.page.testSubj.locator('changePasswordFormSubmitButton').click();
   }
 
@@ -179,11 +184,8 @@ export class SecurityUsersPage {
   }
 
   async getAllUsers(): Promise<UserRowData[]> {
-    const paginationButton = this.page.testSubj.locator('tablePaginationPopoverButton');
-    await paginationButton.waitFor({ state: 'visible' });
-    await paginationButton.click();
-    await this.page.testSubj.locator('tablePagination-100-rows').click();
-    const rows = await this.page.testSubj.locator('userRow').all();
+    await this.goto();
+    const rows = await this.getUserRows();
     return Promise.all(rows.map((row) => this.getUserRowData(row)));
   }
 }

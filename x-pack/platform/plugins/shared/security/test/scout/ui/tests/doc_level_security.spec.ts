@@ -5,44 +5,71 @@
  * 2.0.
  */
 
+import type { KibanaRole } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 import { test } from '../fixtures';
+import type { RoleIndexPrivilege } from '../fixtures/page_objects';
 
 const customRole = 'myroleEast';
 const customUser = 'userEast';
+const dataIndex = 'dlstest';
+const dataArchive = 'x-pack/platform/test/fixtures/es_archives/security/dlstest';
 
-const manageSecurityRole = {
-  elasticsearch: { cluster: ['manage_security'] as string[], indices: [] as never[] },
-  kibana: [{ base: ['all'] as string[], feature: {} as Record<string, string[]>, spaces: ['*'] }],
+const manageSecurityRole: KibanaRole = {
+  elasticsearch: { cluster: ['manage_security'], indices: [] },
+  kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
+};
+
+const eastOnlyIndexPrivileges: RoleIndexPrivilege[] = [
+  {
+    names: [dataIndex],
+    privileges: ['read', 'view_index_metadata'],
+    query: '{"match": {"region": "EAST"}}',
+  },
+];
+
+const eastOnlyRole: KibanaRole = {
+  elasticsearch: { cluster: [], indices: eastOnlyIndexPrivileges },
+  kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
 };
 
 test.describe('Document Level Security', { tag: tags.stateful.classic }, () => {
-  test.beforeAll(async ({ esArchiver, kbnClient }) => {
-    await kbnClient.savedObjects.cleanStandardList();
-    await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/security/dlstest');
-    await kbnClient.uiSettings.replace({ defaultIndex: 'dlstest' });
+  let dataViewId: string | undefined;
+  let defaultIndex: string | undefined;
+
+  test.beforeAll(async ({ apiServices, esArchiver, kbnClient }) => {
+    const previousDefaultIndex = await kbnClient.uiSettings.getDefaultIndex();
+    defaultIndex = typeof previousDefaultIndex === 'string' ? previousDefaultIndex : undefined;
+    await esArchiver.loadIfNeeded(dataArchive);
+    const { data: dataView } = await apiServices.dataViews.create({
+      title: dataIndex,
+      override: true,
+    });
+    dataViewId = dataView.id;
+    await kbnClient.uiSettings.update({ defaultIndex: dataViewId });
   });
 
-  test.afterAll(async ({ esClient }) => {
+  test.afterAll(async ({ apiServices, esClient, kbnClient }) => {
     await esClient.security.deleteUser({ username: customUser }).catch(() => {});
     await esClient.security.deleteRole({ name: customRole }).catch(() => {});
+    if (defaultIndex === undefined) {
+      await kbnClient.uiSettings.unset('defaultIndex');
+    } else {
+      await kbnClient.uiSettings.update({ defaultIndex });
+    }
+    if (dataViewId) {
+      await apiServices.dataViews.delete(dataViewId);
+    }
+    await esClient.indices.delete({ index: dataIndex, ignore_unavailable: true });
   });
 
   test(`should add new role ${customRole}`, async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginWithCustomRole(manageSecurityRole);
     await pageObjects.securityRoles.goto();
     await pageObjects.securityRoles.createRole(customRole, {
-      elasticsearch: {
-        indices: [
-          {
-            names: ['dlstest'],
-            privileges: ['read', 'view_index_metadata'],
-            query: '{"match": {"region": "EAST"}}',
-          },
-        ],
-      },
+      elasticsearch: { indices: eastOnlyIndexPrivileges },
     });
 
     const roles = await pageObjects.securityRoles.getAllRoles();
@@ -50,7 +77,8 @@ test.describe('Document Level Security', { tag: tags.stateful.classic }, () => {
     expect(roles.find((r) => r.rolename === customRole)!.reserved).toBe(false);
   });
 
-  test(`should add new user ${customUser}`, async ({ browserAuth, pageObjects }) => {
+  test(`should add new user ${customUser}`, async ({ browserAuth, esClient, pageObjects }) => {
+    await esClient.security.putRole({ name: customRole, indices: eastOnlyIndexPrivileges });
     await browserAuth.loginWithCustomRole(manageSecurityRole);
     await pageObjects.securityUsers.createUser({
       username: customUser,
@@ -69,22 +97,10 @@ test.describe('Document Level Security', { tag: tags.stateful.classic }, () => {
   });
 
   test('user East should only see EAST doc in Discover', async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginWithCustomRole({
-      elasticsearch: {
-        cluster: [],
-        indices: [
-          {
-            names: ['dlstest'],
-            privileges: ['read', 'view_index_metadata'],
-            // @ts-ignore — query is a valid DLS field
-            query: '{"match": {"region": "EAST"}}',
-          },
-        ],
-      },
-      kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
-    });
+    await browserAuth.loginWithCustomRole(eastOnlyRole);
 
     await pageObjects.discover.goto({ queryMode: 'classic' });
+    await pageObjects.discover.selectDataView(dataIndex, { createAdHocIfMissing: false });
     await expect(pageObjects.discover.getHitCountLocator()).toHaveText('1');
     const rowData = await pageObjects.discover.getDocTableIndex(1);
     expect(rowData).toContain('EAST');

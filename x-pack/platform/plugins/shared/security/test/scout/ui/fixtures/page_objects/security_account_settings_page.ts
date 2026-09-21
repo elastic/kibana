@@ -17,7 +17,7 @@ export class SecurityAccountSettingsPage {
   }
 
   async goto() {
-    await this.page.gotoApp('security/account');
+    await this.page.gotoApp('security_account');
   }
 
   async getUsernameText(): Promise<string> {

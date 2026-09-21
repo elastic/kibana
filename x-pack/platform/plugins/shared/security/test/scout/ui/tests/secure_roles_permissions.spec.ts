@@ -11,15 +11,24 @@ import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
 test.describe('Secure roles and permissions', { tag: tags.stateful.classic }, () => {
+  let defaultIndex: string | undefined;
+
   test.beforeAll(async ({ esArchiver, kbnClient }) => {
+    const previousDefaultIndex = await kbnClient.uiSettings.getDefaultIndex();
+    defaultIndex = typeof previousDefaultIndex === 'string' ? previousDefaultIndex : undefined;
     await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/logstash_functional');
     await kbnClient.importExport.load(
       'x-pack/platform/test/functional/fixtures/kbn_archives/security/discover'
     );
-    await kbnClient.uiSettings.replace({ defaultIndex: 'logstash-*' });
+    await kbnClient.uiSettings.update({ defaultIndex: 'logstash-*' });
   });
 
   test.afterAll(async ({ kbnClient, esClient }) => {
+    if (defaultIndex === undefined) {
+      await kbnClient.uiSettings.unset('defaultIndex');
+    } else {
+      await kbnClient.uiSettings.update({ defaultIndex });
+    }
     await kbnClient.importExport.unload(
       'x-pack/platform/test/functional/fixtures/kbn_archives/security/discover'
     );
@@ -51,7 +60,12 @@ test.describe('Secure roles and permissions', { tag: tags.stateful.classic }, ()
   test('should add new user Rashmi with logstash_reader role', async ({
     browserAuth,
     pageObjects,
+    esClient,
   }) => {
+    await esClient.security.putRole({
+      name: 'logstash_reader_perm_test',
+      indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
+    });
     await browserAuth.loginWithCustomRole({
       elasticsearch: { cluster: ['manage_security'], indices: [] },
       kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],

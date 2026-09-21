@@ -9,18 +9,48 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 import { test } from '../fixtures';
+import type { RoleIndexPrivilege } from '../fixtures/page_objects';
+
+const ssnIndexPrivileges: RoleIndexPrivilege[] = [
+  {
+    names: ['flstest'],
+    privileges: ['read', 'view_index_metadata'],
+    field_security: {
+      grant: ['customer_ssn', 'customer_name', 'customer_region', 'customer_type'],
+    },
+  },
+];
+
+const noSsnIndexPrivileges: RoleIndexPrivilege[] = [
+  {
+    names: ['flstest'],
+    privileges: ['read', 'view_index_metadata'],
+    field_security: { grant: ['customer_name', 'customer_region', 'customer_type'] },
+  },
+];
 
 test.describe('Field Level Security', { tag: tags.stateful.classic }, () => {
-  test.beforeAll(async ({ esArchiver, kbnClient }) => {
+  let defaultIndex: string | undefined;
+
+  test.beforeAll(async ({ esArchiver, kbnClient, apiServices }) => {
+    const previousDefaultIndex = await kbnClient.uiSettings.getDefaultIndex();
+    defaultIndex = typeof previousDefaultIndex === 'string' ? previousDefaultIndex : undefined;
     await esArchiver.loadIfNeeded(
       'x-pack/platform/test/fixtures/es_archives/security/flstest/data'
     );
     await kbnClient.importExport.load(
       'x-pack/platform/test/functional/fixtures/kbn_archives/security/flstest/index_pattern'
     );
+    const dataViewId = await apiServices.dataViews.getIdByTitle('flstest');
+    await kbnClient.uiSettings.update({ defaultIndex: dataViewId });
   });
 
   test.afterAll(async ({ kbnClient, esClient }) => {
+    if (defaultIndex === undefined) {
+      await kbnClient.uiSettings.unset('defaultIndex');
+    } else {
+      await kbnClient.uiSettings.update({ defaultIndex });
+    }
     await kbnClient.importExport.unload(
       'x-pack/platform/test/functional/fixtures/kbn_archives/security/flstest/index_pattern'
     );
@@ -39,15 +69,7 @@ test.describe('Field Level Security', { tag: tags.stateful.classic }, () => {
     await pageObjects.securityRoles.goto();
     await pageObjects.securityRoles.createRole('a_viewssnrole', {
       elasticsearch: {
-        indices: [
-          {
-            names: ['flstest'],
-            privileges: ['read', 'view_index_metadata'],
-            field_security: {
-              grant: ['customer_ssn', 'customer_name', 'customer_region', 'customer_type'],
-            },
-          },
-        ],
+        indices: ssnIndexPrivileges,
       },
     });
 
@@ -64,15 +86,7 @@ test.describe('Field Level Security', { tag: tags.stateful.classic }, () => {
     await pageObjects.securityRoles.goto();
     await pageObjects.securityRoles.createRole('a_view_no_ssn_role', {
       elasticsearch: {
-        indices: [
-          {
-            names: ['flstest'],
-            privileges: ['read', 'view_index_metadata'],
-            field_security: {
-              grant: ['customer_name', 'customer_region', 'customer_type'],
-            },
-          },
-        ],
+        indices: noSsnIndexPrivileges,
       },
     });
 
@@ -80,7 +94,8 @@ test.describe('Field Level Security', { tag: tags.stateful.classic }, () => {
     expect(roles.some((r) => r.rolename === 'a_view_no_ssn_role')).toBe(true);
   });
 
-  test('should add new user customer1', async ({ browserAuth, pageObjects }) => {
+  test('should add new user customer1', async ({ browserAuth, pageObjects, esClient }) => {
+    await esClient.security.putRole({ name: 'a_viewssnrole', indices: ssnIndexPrivileges });
     await browserAuth.loginWithCustomRole({
       elasticsearch: { cluster: ['manage_security'], indices: [] },
       kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
@@ -100,7 +115,8 @@ test.describe('Field Level Security', { tag: tags.stateful.classic }, () => {
     expect(user!.roles).toContain('a_viewssnrole');
   });
 
-  test('should add new user customer2', async ({ browserAuth, pageObjects }) => {
+  test('should add new user customer2', async ({ browserAuth, pageObjects, esClient }) => {
+    await esClient.security.putRole({ name: 'a_view_no_ssn_role', indices: noSsnIndexPrivileges });
     await browserAuth.loginWithCustomRole({
       elasticsearch: { cluster: ['manage_security'], indices: [] },
       kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
@@ -158,16 +174,7 @@ test.describe('Field Level Security', { tag: tags.stateful.classic }, () => {
     await browserAuth.loginWithCustomRole({
       elasticsearch: {
         cluster: [],
-        indices: [
-          {
-            names: ['flstest'],
-            privileges: ['read', 'view_index_metadata'],
-            // @ts-ignore — field_security is a valid FLS field
-            field_security: {
-              grant: ['customer_ssn', 'customer_name', 'customer_region', 'customer_type'],
-            },
-          },
-        ],
+        indices: ssnIndexPrivileges,
       },
       kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
     });
@@ -185,16 +192,7 @@ test.describe('Field Level Security', { tag: tags.stateful.classic }, () => {
     await browserAuth.loginWithCustomRole({
       elasticsearch: {
         cluster: [],
-        indices: [
-          {
-            names: ['flstest'],
-            privileges: ['read', 'view_index_metadata'],
-            // @ts-ignore — field_security is a valid FLS field
-            field_security: {
-              grant: ['customer_name', 'customer_region', 'customer_type'],
-            },
-          },
-        ],
+        indices: noSsnIndexPrivileges,
       },
       kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
     });

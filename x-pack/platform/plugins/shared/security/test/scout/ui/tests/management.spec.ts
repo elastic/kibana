@@ -174,8 +174,10 @@ test.describe('Security - Management navigation', { tag: tags.stateful.classic }
 
     try {
       await pageObjects.securityUsers.goto();
-      await pageObjects.securityUsers.clickUserByName('link-test-dashuser');
-      await page.getByRole('link', { name: 'link-test-role' }).click();
+      const userRow = page.testSubj
+        .locator('userRow')
+        .filter({ has: page.getByRole('link', { name: 'link-test-dashuser', exact: true }) });
+      await userRow.getByRole('button', { name: 'link-test-role', exact: true }).click();
       await expect(page).toHaveURL(new RegExp(EDIT_ROLES_PATH));
     } finally {
       await esClient.security.deleteUser({ username: 'link-test-dashuser' }).catch(() => {});

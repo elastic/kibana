@@ -11,10 +11,6 @@ import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
 test.describe('Security - Login Page', { tag: tags.stateful.classic }, () => {
-  test.beforeEach(async ({ kbnClient }) => {
-    await kbnClient.savedObjects.cleanStandardList();
-  });
-
   test('can login', async ({ page, browserAuth }) => {
     await browserAuth.loginAsAdmin();
     await page.gotoApp('home');

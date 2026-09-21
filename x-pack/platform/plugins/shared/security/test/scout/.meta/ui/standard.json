@@ -1,5 +1,5 @@
 {
-  "sha1": "5cd5284b3eb195b0f23648a40ffb966b4e1562f8",
+  "sha1": "42cd7d94429af9c1beddd8d8d94ff190169612c0",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -215,6 +215,734 @@
       }
     },
     {
+      "id": "69cbac632fc79b1-ee750334dc92886",
+      "title": "Document Level Security should add new role myroleEast",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/doc_level_security.spec.ts",
+        "line": 72,
+        "column": 33
+      }
+    },
+    {
+      "id": "69cbac632fc79b1-98b4a5771c857b5",
+      "title": "Document Level Security should add new user userEast",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/doc_level_security.spec.ts",
+        "line": 81,
+        "column": 20
+      }
+    },
+    {
+      "id": "69cbac632fc79b1-a2e8f799d2dd4b4",
+      "title": "Document Level Security user East should only see EAST doc in Discover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/doc_level_security.spec.ts",
+        "line": 100,
+        "column": 23
+      }
+    },
+    {
+      "id": "8a0874bdac36028-c08e487c51c1e2e",
+      "title": "Field Level Security should add new role a_viewssnrole",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/field_level_security.spec.ts",
+        "line": 67,
+        "column": 61
+      }
+    },
+    {
+      "id": "8a0874bdac36028-c8e6deb139b1740",
+      "title": "Field Level Security should add new role a_view_no_ssn_role",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/field_level_security.spec.ts",
+        "line": 89,
+        "column": 18
+      }
+    },
+    {
+      "id": "8a0874bdac36028-b458f01f676768a",
+      "title": "Field Level Security should add new user customer1",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/field_level_security.spec.ts",
+        "line": 106,
+        "column": 23
+      }
+    },
+    {
+      "id": "8a0874bdac36028-abf7b57f9634956",
+      "title": "Field Level Security should add new user customer2",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/field_level_security.spec.ts",
+        "line": 135,
+        "column": 12
+      }
+    },
+    {
+      "id": "8a0874bdac36028-7ca362dce0600e5",
+      "title": "Field Level Security should support case-sensitive fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/field_level_security.spec.ts",
+        "line": 170,
+        "column": 8
+      }
+    },
+    {
+      "id": "8a0874bdac36028-b3e6353f0f83774",
+      "title": "Field Level Security user with SSN access (a_viewssnrole) should see ssn field in Discover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/field_level_security.spec.ts",
+        "line": 285,
+        "column": 24
+      }
+    },
+    {
+      "id": "8a0874bdac36028-ccc6703b855fb86",
+      "title": "Field Level Security user without SSN access (a_view_no_ssn_role) should not see ssn field in Discover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/field_level_security.spec.ts",
+        "line": 310,
+        "column": 24
+      }
+    },
+    {
+      "id": "b565e04e3725128-2277edc47a75bdb",
+      "title": "Security - Login Page can login",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/login.spec.ts",
+        "line": 13,
+        "column": 14
+      }
+    },
+    {
+      "id": "b565e04e3725128-7a3d47f2970e034",
+      "title": "Security - Login Page displays message if login fails",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/login.spec.ts",
+        "line": 14,
+        "column": 36
+      }
+    },
+    {
+      "id": "b565e04e3725128-8b0c10fd89dd0dc",
+      "title": "Security - Login Page login page has no accessibility violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/login.spec.ts",
+        "line": 20,
+        "column": 58
+      }
+    },
+    {
+      "id": "b565e04e3725128-4d1313705fe31e1",
+      "title": "Security - Login Page logged-in state has no accessibility violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/login.spec.ts",
+        "line": 31,
+        "column": 82
+      }
+    },
+    {
+      "id": "b565e04e3725128-a4db077106e7a2f",
+      "title": "Security - Login Page login error state has no accessibility violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/login.spec.ts",
+        "line": 38,
+        "column": 72
+      }
+    },
+    {
+      "id": "b71ccc101a753c9-088af01c8325098",
+      "title": "Security - Management navigation Can navigate to create user section",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/management.spec.ts",
+        "line": 28,
+        "column": 80
+      }
+    },
+    {
+      "id": "b71ccc101a753c9-8fb0c37b3843522",
+      "title": "Security - Management navigation Clicking cancel in create user section brings user back to listing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/management.spec.ts",
+        "line": 34,
+        "column": 8
+      }
+    },
+    {
+      "id": "b71ccc101a753c9-ef287129eb9b658",
+      "title": "Security - Management navigation Clicking save in create user section brings user back to listing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/management.spec.ts",
+        "line": 41,
+        "column": 11
+      }
+    },
+    {
+      "id": "b71ccc101a753c9-accd9f32916b953",
+      "title": "Security - Management navigation Can navigate to edit user section",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/management.spec.ts",
+        "line": 63,
+        "column": 13
+      }
+    },
+    {
+      "id": "b71ccc101a753c9-ea5a812c6184652",
+      "title": "Security - Management navigation Can navigate to roles section",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/management.spec.ts",
+        "line": 78,
+        "column": 24
+      }
+    },
+    {
+      "id": "b71ccc101a753c9-39af47b4318b561",
+      "title": "Security - Management navigation Can navigate to create role section",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/management.spec.ts",
+        "line": 82,
+        "column": 22
+      }
+    },
+    {
+      "id": "b71ccc101a753c9-fc644232e134590",
+      "title": "Security - Management navigation Clicking cancel in create role section brings user back to listing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/management.spec.ts",
+        "line": 86,
+        "column": 8
+      }
+    },
+    {
+      "id": "b71ccc101a753c9-3bb700b7e8e24c2",
+      "title": "Security - Management navigation Clicking save in create role section brings user back to listing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/management.spec.ts",
+        "line": 91,
+        "column": 8
+      }
+    },
+    {
+      "id": "b71ccc101a753c9-5780f7d55d9bb0f",
+      "title": "Security - Management navigation Can navigate to edit role section",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/management.spec.ts",
+        "line": 103,
+        "column": 23
+      }
+    },
+    {
+      "id": "b71ccc101a753c9-98ce359edaea67a",
+      "title": "Security - Management navigation Can navigate to clone role section",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/management.spec.ts",
+        "line": 122,
+        "column": 22
+      }
+    },
+    {
+      "id": "b71ccc101a753c9-711d6656e60e928",
+      "title": "Security - Management navigation Can navigate to edit role section from users page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/management.spec.ts",
+        "line": 134,
+        "column": 24
+      }
+    },
+    {
+      "id": "156bbf95ee40dd2-d476b03ee6cb1a3",
+      "title": "Remote Cluster Privileges should add new role rc-custom-role with remote cluster privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/remote_cluster_security_roles.spec.ts",
+        "line": 28,
+        "column": 5
+      }
+    },
+    {
+      "id": "156bbf95ee40dd2-3ee7c5a84828972",
+      "title": "Remote Cluster Privileges should update role rc-custom-role with remote cluster privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/remote_cluster_security_roles.spec.ts",
+        "line": 61,
+        "column": 75
+      }
+    },
+    {
+      "id": "f86ea5f8db904b6-abffec24215844a",
+      "title": "Role Description Can create role with description",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/role_description.spec.ts",
+        "line": 26,
+        "column": 64
+      }
+    },
+    {
+      "id": "f86ea5f8db904b6-466cda28b623102",
+      "title": "Role Description Can create role without description",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/role_description.spec.ts",
+        "line": 41,
+        "column": 23
+      }
+    },
+    {
+      "id": "f86ea5f8db904b6-1cd7f650127b8da",
+      "title": "Role Description roles main page has no accessibility violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/role_description.spec.ts",
+        "line": 50,
+        "column": 23
+      }
+    },
+    {
+      "id": "f86ea5f8db904b6-b8e9c76a96a78ef",
+      "title": "Role Description search roles has no accessibility violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/role_description.spec.ts",
+        "line": 59,
+        "column": 23
+      }
+    },
+    {
+      "id": "f86ea5f8db904b6-e270de808e0a758",
+      "title": "Role Description show reserved roles toggle has no accessibility violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/role_description.spec.ts",
+        "line": 64,
+        "column": 78
+      }
+    },
+    {
+      "id": "f86ea5f8db904b6-e98631e16f69e32",
+      "title": "Role Description create role form has no accessibility violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/role_description.spec.ts",
+        "line": 73,
+        "column": 5
+      }
+    },
+    {
+      "id": "f86ea5f8db904b6-782fe0b0eb970d8",
+      "title": "Role Description select and delete role UI has no accessibility violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/role_description.spec.ts",
+        "line": 78,
+        "column": 81
+      }
+    },
+    {
+      "id": "5dfb377f451a07b-837d46768a7afdb",
+      "title": "Role Mappings displays a message when no role mappings exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/role_mappings.spec.ts",
+        "line": 74,
+        "column": 5
+      }
+    },
+    {
+      "id": "5dfb377f451a07b-2aacd52dcde8619",
+      "title": "Role Mappings allows a role mapping to be created",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/role_mappings.spec.ts",
+        "line": 89,
+        "column": 23
+      }
+    },
+    {
+      "id": "5dfb377f451a07b-4618af5a77986a4",
+      "title": "Role Mappings allows a role mapping to be deleted",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/role_mappings.spec.ts",
+        "line": 122,
+        "column": 8
+      }
+    },
+    {
+      "id": "5dfb377f451a07b-992b66391ca65df",
+      "title": "Role Mappings displays an error when navigating to a non-existent role mapping",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/role_mappings.spec.ts",
+        "line": 143,
+        "column": 5
+      }
+    },
+    {
+      "id": "5dfb377f451a07b-2ed88bd18bc9f16",
+      "title": "Role Mappings displays a table of all role mappings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/role_mappings.spec.ts",
+        "line": 147,
+        "column": 11
+      }
+    },
+    {
+      "id": "5dfb377f451a07b-da70bc614fccf48",
+      "title": "Role Mappings allows a role mapping to be cloned",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/role_mappings.spec.ts",
+        "line": 162,
+        "column": 23
+      }
+    },
+    {
+      "id": "5dfb377f451a07b-efcd816fc4cd4eb",
+      "title": "Role Mappings allows a role mapping to be edited",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/role_mappings.spec.ts",
+        "line": 170,
+        "column": 68
+      }
+    },
+    {
+      "id": "d0a22e4a6059fcc-c4e379ac624fcdd",
+      "title": "Roles CRUD with data source privileges can read the role from the roles listing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/roles_data_source_privileges_crud.spec.ts",
+        "line": 52,
+        "column": 12
+      }
+    },
+    {
+      "id": "d0a22e4a6059fcc-9033fd149ceb37b",
+      "title": "Roles CRUD with data source privileges can update a role and preserves its data source privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/roles_data_source_privileges_crud.spec.ts",
+        "line": 58,
+        "column": 5
+      }
+    },
+    {
+      "id": "d0a22e4a6059fcc-09fe5f6e6b305d4",
+      "title": "Roles CRUD with data source privileges can delete a role with data source privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/roles_data_source_privileges_crud.spec.ts",
+        "line": 72,
+        "column": 5
+      }
+    },
+    {
+      "id": "07cac0e133757eb-5cd9594fc3ebd58",
+      "title": "Secure roles and permissions should add new role logstash_reader",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/secure_roles_permissions.spec.ts",
+        "line": 31,
+        "column": 5
+      }
+    },
+    {
+      "id": "07cac0e133757eb-19a0aae8210cd9b",
+      "title": "Secure roles and permissions should add new user Rashmi with logstash_reader role",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/secure_roles_permissions.spec.ts",
+        "line": 63,
+        "column": 5
+      }
+    },
+    {
+      "id": "07cac0e133757eb-db945ab484a703a",
+      "title": "Secure roles and permissions Kibana User without manage_security does not have link to user management",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/secure_roles_permissions.spec.ts",
+        "line": 99,
+        "column": 62
+      }
+    },
+    {
+      "id": "07cac0e133757eb-d5323f08de95676",
+      "title": "Secure roles and permissions Kibana User with read access can navigate to Discover and see export button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/secure_roles_permissions.spec.ts",
+        "line": 128,
+        "column": 3
+      }
+    },
+    {
+      "id": "fe50f03bd4c9216-6d284003b469142",
+      "title": "User email and account settings should add new user with email",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/user_email.spec.ts",
+        "line": 35,
+        "column": 17
+      }
+    },
+    {
+      "id": "fe50f03bd4c9216-1ef5aad1868e75c",
+      "title": "User email and account settings login as new user and verify account settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/user_email.spec.ts",
+        "line": 52,
+        "column": 83
+      }
+    },
+    {
+      "id": "fe50f03bd4c9216-fab1c7e2c6bd9e3",
+      "title": "User email and account settings change password and re-login",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/user_email.spec.ts",
+        "line": 59,
+        "column": 11
+      }
+    },
+    {
       "id": "cb73557010fc86d-bff939b33db4d4f",
       "title": "User Profile Page details: should set the full name",
       "expectedStatus": "passed",
@@ -282,6 +1010,230 @@
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/user_profile.spec.ts",
         "line": 94,
         "column": 7
+      }
+    },
+    {
+      "id": "0d1225b71b2e81f-f57c4c396c70a04",
+      "title": "Security - Users management should show the default elastic and kibana_system users",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
+        "line": 31,
+        "column": 24
+      }
+    },
+    {
+      "id": "0d1225b71b2e81f-f23d7ea8ae340c1",
+      "title": "Security - Users management should add new user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
+        "line": 44,
+        "column": 22
+      }
+    },
+    {
+      "id": "0d1225b71b2e81f-a06d61a18b55e50",
+      "title": "Security - Users management should add new user with optional fields left empty",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
+        "line": 66,
+        "column": 23
+      }
+    },
+    {
+      "id": "0d1225b71b2e81f-62b3530ee3ac395",
+      "title": "Security - Users management should delete user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
+        "line": 81,
+        "column": 50
+      }
+    },
+    {
+      "id": "0d1225b71b2e81f-1ca0f201c6f9464",
+      "title": "Security - Users management should show the default roles",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
+        "line": 95,
+        "column": 8
+      }
+    },
+    {
+      "id": "0d1225b71b2e81f-fcda81c6aa37357",
+      "title": "Security - Users management update user profile when submitting form and redirects back",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
+        "line": 111,
+        "column": 16
+      }
+    },
+    {
+      "id": "0d1225b71b2e81f-67d6a0f5b90832d",
+      "title": "Security - Users management change password of other user when submitting form",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
+        "line": 135,
+        "column": 93
+      }
+    },
+    {
+      "id": "0d1225b71b2e81f-8f2db2d6379518f",
+      "title": "Security - Users management deactivates user when confirming",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
+        "line": 156,
+        "column": 13
+      }
+    },
+    {
+      "id": "0d1225b71b2e81f-8ea4806fb990e16",
+      "title": "Security - Users management activates user when confirming",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
+        "line": 172,
+        "column": 24
+      }
+    },
+    {
+      "id": "0d1225b71b2e81f-d64545aa1b841e8",
+      "title": "Security - Users management delete user when confirming closes dialog and redirects",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
+        "line": 189,
+        "column": 55
+      }
+    },
+    {
+      "id": "0d1225b71b2e81f-1720d5ae6769b2b",
+      "title": "Security - Users management users page has no accessibility violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
+        "line": 207,
+        "column": 20
+      }
+    },
+    {
+      "id": "0d1225b71b2e81f-861498ae87aa550",
+      "title": "Security - Users management search users has no accessibility violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
+        "line": 218,
+        "column": 21
+      }
+    },
+    {
+      "id": "0d1225b71b2e81f-fa59227626fd69e",
+      "title": "Security - Users management show reserved users toggle has no accessibility violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
+        "line": 225,
+        "column": 76
+      }
+    },
+    {
+      "id": "0d1225b71b2e81f-d5d5e89bc0f52da",
+      "title": "Security - Users management create user panel has no accessibility violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
+        "line": 231,
+        "column": 89
+      }
+    },
+    {
+      "id": "0d1225b71b2e81f-e611354f9dba1fe",
+      "title": "Security - Users management delete user panel has no accessibility violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
+        "line": 238,
+        "column": 8
+      }
+    },
+    {
+      "id": "0d1225b71b2e81f-a188bb325e7b525",
+      "title": "Security - Users management edit user panel has no accessibility violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
+        "line": 258,
+        "column": 9
       }
     }
   ]

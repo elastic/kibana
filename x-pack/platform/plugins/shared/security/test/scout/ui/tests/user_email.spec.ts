@@ -49,27 +49,27 @@ test.describe('User email and account settings', { tag: tags.stateful.classic },
     expect(user!.reserved).toBe(false);
   });
 
-  test('login as new user and verify account settings', async ({ browserAuth, page }) => {
-    await browserAuth.loginWithCustomRole({
-      elasticsearch: { cluster: [] },
-      kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
-    });
-
-    await page.gotoApp('security/account');
-    await expect(page.testSubj.locator('username')).toHaveText(/.+/);
+  test('login as new user and verify account settings', async ({ pageObjects, page, esClient }) => {
+    await esClient.security.putUser(testUser);
+    await page.context().clearCookies();
+    await pageObjects.login.loginWithUsernamePassword(testUser.username, testUser.password);
+    await pageObjects.securityAccountSettings.goto();
+    await expect(page.testSubj.locator('username')).toHaveText(testUser.username);
+    await expect(pageObjects.userProfile.fullNameInput).toHaveValue(testUser.full_name);
+    await expect(pageObjects.userProfile.emailInput).toHaveValue(testUser.email);
   });
 
-  test('account settings page is accessible to authenticated user', async ({
-    pageObjects,
-    browserAuth,
-  }) => {
-    await browserAuth.loginWithCustomRole({
-      elasticsearch: { cluster: [] },
-      kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
-    });
-
+  test('change password and re-login', async ({ pageObjects, page, esClient }) => {
+    await esClient.security.putUser(testUser);
+    await page.context().clearCookies();
+    await pageObjects.login.loginWithUsernamePassword(testUser.username, testUser.password);
     await pageObjects.securityAccountSettings.goto();
-    const usernameText = await pageObjects.securityAccountSettings.getUsernameText();
-    expect(usernameText).toBeTruthy();
+    const newPassword = 'changed-password';
+    await pageObjects.userProfile.changePassword(testUser.password, newPassword);
+    await pageObjects.toasts.waitForToastWithText('Password successfully changed');
+    await page.context().clearCookies();
+    await pageObjects.login.loginWithUsernamePassword(testUser.username, newPassword);
+    await pageObjects.securityAccountSettings.goto();
+    await expect(page.testSubj.locator('username')).toHaveText(testUser.username);
   });
 });

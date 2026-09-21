@@ -36,7 +36,7 @@ export class SecurityRoleMappingsPage {
   }
 
   async selectRole(role: string) {
-    await this.page.components.comboBox('roleMappingFormRolesCombo').setSelectedOptions([role]);
+    await this.page.components.comboBox('rolesDropdown').setSelectedOptions([role]);
   }
 
   async addRule() {
@@ -63,16 +63,28 @@ export class SecurityRoleMappingsPage {
   }
 
   async deleteRoleMapping(name: string) {
-    await this.page.testSubj.locator('euiCollapsedItemActionsButton').click();
+    const row = this.getRoleMappingRow(name);
+    await row.locator('[data-test-subj="euiCollapsedItemActionsButton"]').click();
     await this.page.testSubj.locator(`deleteRoleMappingButton-${name}`).click();
     await this.page.testSubj.locator('confirmModalConfirmButton').click();
     await this.page.testSubj
       .locator('deletedRoleMappingSuccessToast')
       .waitFor({ state: 'visible' });
+    await row.waitFor({ state: 'detached' });
   }
 
   async cloneRoleMapping(name: string) {
     await this.page.testSubj.locator(`cloneRoleMappingButton-${name}`).click();
+  }
+
+  async editRoleMapping(name: string) {
+    await this.getRoleMappingRow(name).locator('[data-test-subj="roleMappingName"]').click();
+  }
+
+  getRoleMappingRow(name: string): Locator {
+    return this.page
+      .locator('[data-test-subj="roleMappingRow"]')
+      .filter({ has: this.page.locator(`[data-test-subj="roleMappingName"]:text-is("${name}")`) });
   }
 
   async getRoleMappingRows(): Promise<Locator[]> {

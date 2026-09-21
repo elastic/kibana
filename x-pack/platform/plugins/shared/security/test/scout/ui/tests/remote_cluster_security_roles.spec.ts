@@ -13,11 +13,6 @@ import { test } from '../fixtures';
 const customRole = 'rc-custom-role';
 
 test.describe('Remote Cluster Privileges', { tag: tags.stateful.classic }, () => {
-  test.beforeAll(async ({ kbnClient, esArchiver }) => {
-    await kbnClient.savedObjects.cleanStandardList();
-    await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/security/dlstest');
-  });
-
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginWithCustomRole({
       elasticsearch: { cluster: ['manage_security'], indices: [] },
@@ -58,7 +53,13 @@ test.describe('Remote Cluster Privileges', { tag: tags.stateful.classic }, () =>
   test(`should update role ${customRole} with remote cluster privileges`, async ({
     pageObjects,
     page,
+    esClient,
   }) => {
+    await esClient.security.putRole({
+      name: customRole,
+      indices: [{ names: ['dlstest'], privileges: ['read', 'view_index_metadata'] }],
+      remote_cluster: [{ clusters: ['cluster1', 'cluster2'], privileges: ['monitor_enrich'] }],
+    });
     await pageObjects.securityRoles.goto();
     await pageObjects.securityRoles.clickEditRole(customRole);
 

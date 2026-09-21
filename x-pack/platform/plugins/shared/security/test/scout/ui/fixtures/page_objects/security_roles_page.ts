@@ -6,6 +6,8 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
+import { KibanaCodeEditorWrapper } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 
 export interface RoleIndexPrivilege {
   names: string[];
@@ -44,6 +46,8 @@ export class SecurityRolesPage {
   public readonly roleFormCancelButton: Locator;
   public readonly roleFormNameInput: Locator;
 
+  private readonly codeEditor: KibanaCodeEditorWrapper;
+
   constructor(private readonly page: ScoutPage) {
     this.createRoleButton = page.testSubj.locator('createRoleButton');
     this.searchRolesInput = page.testSubj.locator('searchRoles');
@@ -52,6 +56,7 @@ export class SecurityRolesPage {
     this.roleFormSaveButton = page.testSubj.locator('roleFormSaveButton');
     this.roleFormCancelButton = page.testSubj.locator('roleFormCancelButton');
     this.roleFormNameInput = page.testSubj.locator('roleFormNameInput');
+    this.codeEditor = new KibanaCodeEditorWrapper(page);
   }
 
   async goto() {
@@ -71,7 +76,9 @@ export class SecurityRolesPage {
 
   async clickEditRole(roleName: string) {
     await this.searchRolesInput.fill(roleName);
-    await this.page.getByRole('link', { name: roleName }).click();
+    await this.searchRolesInput.press('Enter');
+    await this.page.testSubj.locator('rolesTableLoading').waitFor({ state: 'hidden' });
+    await this.page.getByRole('link', { name: roleName, exact: true }).click();
     await this.roleFormNameInput.waitFor({ state: 'visible' });
   }
 
@@ -86,7 +93,9 @@ export class SecurityRolesPage {
   }
 
   async addIndexPrivilege(indexName: string, privilege: string, indexNum = 0) {
-    await this.page.components.comboBox(`indicesInput${indexNum}`).setSelectedOptions([indexName]);
+    await this.page.components
+      .comboBox(`indicesInput${indexNum}`)
+      .setCustomSelectedOptions([indexName]);
     await this.page.components
       .comboBox(`privilegesInput${indexNum}`)
       .setSelectedOptions([privilege]);
@@ -94,36 +103,33 @@ export class SecurityRolesPage {
 
   async enableDocumentLevelSecurity(query: string, indexNum = 0) {
     await this.page.testSubj.locator(`restrictDocumentsQuery${indexNum}`).click();
-    await this.page.getByRole('textbox').fill(query);
+    await this.codeEditor.waitCodeEditorReady(`queryInput${indexNum}`);
+    await this.codeEditor.setCodeEditorValueByTestSubj(`queryInput${indexNum}`, query);
   }
 
   async enableFieldLevelSecurity(indexNum = 0) {
     await this.page.testSubj.locator(`restrictFieldsQuery${indexNum}`).click();
-    const removeStarButton = this.page.locator(
-      `[data-test-subj="fieldInput${indexNum}"] [title="Remove * from selection in this group"] svg`
-    );
-    await removeStarButton.click();
+    const grantedFields = this.page.components.comboBox(`fieldInput${indexNum}`);
+    await expect.poll(() => grantedFields.getSelectedOptions()).not.toHaveLength(0);
+    await grantedFields.clear();
+    await expect.poll(() => grantedFields.getSelectedOptions()).toHaveLength(0);
   }
 
   async addGrantedFields(fields: string[], indexNum = 0) {
-    for (const field of fields) {
-      await this.page.components.comboBox(`fieldInput${indexNum}`).setSelectedOptions([field]);
-    }
+    await this.page.components.comboBox(`fieldInput${indexNum}`).setCustomSelectedOptions(fields);
   }
 
   async addDeniedFields(fields: string[], indexNum = 0) {
-    for (const field of fields) {
-      await this.page.components
-        .comboBox(`deniedFieldInput${indexNum}`)
-        .setSelectedOptions([field]);
-    }
+    await this.page.components
+      .comboBox(`deniedFieldInput${indexNum}`)
+      .setCustomSelectedOptions(fields);
   }
 
   async addRemoteClusterPrivilege(privilege: RoleRemoteClusterPrivilege, index = 0) {
     await this.page.testSubj.locator('addRemoteClusterPrivilegesButton').click();
     await this.page.components
       .comboBox(`remoteClusterClustersInput${index}`)
-      .setSelectedOptions(privilege.clusters);
+      .setCustomSelectedOptions(privilege.clusters);
     await this.page.components
       .comboBox(`remoteClusterPrivilegesInput${index}`)
       .setSelectedOptions(privilege.privileges);
@@ -145,10 +151,17 @@ export class SecurityRolesPage {
 
   async addKibanaSpacePrivilege(base: string = 'all') {
     await this.page.testSubj.locator('addSpacePrivilegeButton').click();
-    const spaceSelectorComboBox = this.page.testSubj.locator('spaceSelectorComboBox');
-    await spaceSelectorComboBox.click();
-    await this.page.locator('#spaceOption_\\*').click();
-    await spaceSelectorComboBox.locator('input').press('Escape');
+
+    const spaceSelectorSearchInput = this.page.testSubj
+      .locator('spaceSelectorComboBox')
+      .getByTestId('comboBoxSearchInput');
+    await spaceSelectorSearchInput.click();
+    await this.page
+      .locator('[data-test-subj~="spaceSelectorComboBox-optionsList"]')
+      .locator('#spaceOption_\\*')
+      .click();
+    await spaceSelectorSearchInput.blur();
+
     await this.page.testSubj.locator(`basePrivilege_${base}`).click();
     await this.page.testSubj.locator('createSpacePrivilegeButton').click();
   }
@@ -160,9 +173,7 @@ export class SecurityRolesPage {
     const indices = config.elasticsearch?.indices ?? [];
     for (let i = 0; i < indices.length; i++) {
       const idx = indices[i];
-      for (const name of idx.names) {
-        await this.page.components.comboBox(`indicesInput${i}`).setSelectedOptions([name]);
-      }
+      await this.page.components.comboBox(`indicesInput${i}`).setCustomSelectedOptions(idx.names);
       if (idx.query) {
         await this.enableDocumentLevelSecurity(idx.query, i);
       }
@@ -175,9 +186,7 @@ export class SecurityRolesPage {
           await this.addDeniedFields(idx.field_security.except, i);
         }
       }
-      for (const privilege of idx.privileges) {
-        await this.page.components.comboBox(`privilegesInput${i}`).setSelectedOptions([privilege]);
-      }
+      await this.page.components.comboBox(`privilegesInput${i}`).setSelectedOptions(idx.privileges);
     }
 
     await this.addKibanaSpacePrivilege();
