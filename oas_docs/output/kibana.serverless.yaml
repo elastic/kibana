@@ -12451,6 +12451,7 @@ paths:
           name: page
           required: false
           schema:
+            default: 1
             maximum: 10000
             minimum: 1
             type: integer
@@ -12459,12 +12460,21 @@ paths:
           name: per_page
           required: false
           schema:
+            default: 20
             maximum: 100
             minimum: 0
             type: integer
         - description: Inclusive ISO datetime lower bound on the event timestamp; overrides the default 24-hour window. Independent of episode_ids — e.g. set it to an episode’s start time to scope results to that episode’s lifetime.
           in: query
-          name: start_date
+          name: from
+          required: false
+          schema:
+            format: date-time
+            pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
+            type: string
+        - description: Inclusive ISO datetime upper bound on the event timestamp.
+          in: query
+          name: to
           required: false
           schema:
             format: date-time
@@ -12482,6 +12492,25 @@ paths:
             maxItems: 50
             minItems: 1
             type: array
+        - description: Sort field. Defaults to dispatched_at.
+          in: query
+          name: sort
+          required: false
+          schema:
+            default: dispatched_at
+            enum:
+              - dispatched_at
+            type: string
+        - description: Sort direction.
+          in: query
+          name: sort_order
+          required: false
+          schema:
+            default: desc
+            enum:
+              - asc
+              - desc
+            type: string
         - description: Free-text search. Matches policy name, rule name, policy/rule ID (case-insensitive).
           in: query
           name: search
@@ -12530,6 +12559,7 @@ paths:
                         episode_count: 1
                         episodes:
                           - id: episode-1
+                        error: null
                         outcome: dispatched
                         policy:
                           id: action-policy-1
@@ -12544,7 +12574,7 @@ paths:
                     page: 1
                     per_page: 20
                     search_matches: null
-                    total_events: 1
+                    total: 1
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_policy_execution_history_response'
           description: Returns a paginated list of execution history events.
@@ -12661,6 +12691,14 @@ paths:
             maxItems: 2
             minItems: 1
             type: array
+        - description: Free-text search. Matches rule name or rule ID (case-insensitive).
+          in: query
+          name: search
+          required: false
+          schema:
+            maxLength: 256
+            minLength: 1
+            type: string
         - description: Inclusive ISO datetime lower bound on event.start.
           in: query
           name: from
@@ -12706,14 +12744,14 @@ paths:
             maximum: 10000
             minimum: 1
             type: integer
-        - description: Number of results per page.
+        - description: Number of results per page. Pass 0 for a count-only read.
           in: query
           name: per_page
           required: true
           schema:
             default: 20
             maximum: 100
-            minimum: 1
+            minimum: 0
             type: integer
       responses:
         '200':
@@ -91836,12 +91874,17 @@ components:
           type: array
         error:
           additionalProperties: false
+          nullable: true
           type: object
           properties:
             message:
               type: string
+            stack_trace:
+              nullable: true
+              type: string
           required:
             - message
+            - stack_trace
         failure_reason:
           enum:
             - missing_api_key
@@ -91905,6 +91948,7 @@ components:
         - rules
         - total_rule_count
         - workflows
+        - error
     Kibana_HTTP_APIs_alerting_policy_execution_history_response:
       additionalProperties: false
       type: object
@@ -91923,13 +91967,13 @@ components:
           type: integer
         search_matches:
           additionalProperties: false
-          description: Per-type match counts for the active search, plus the cap used as filter. Null when no search was provided. When policies > cap or rules > cap the result is truncated.
+          description: Per-type match counts for the active search. Null when no search was provided. When is_truncated is true the server id filter was capped and the result may be truncated.
           nullable: true
           type: object
           properties:
-            cap:
-              description: Maximum number of policy/rule ids the server uses as a filter.
-              type: number
+            is_truncated:
+              description: True when the server filter cap was reached and results may be truncated.
+              type: boolean
             policies:
               description: Total policies matching the search.
               type: number
@@ -91939,8 +91983,8 @@ components:
           required:
             - policies
             - rules
-            - cap
-        total_events:
+            - is_truncated
+        total:
           maximum: 9007199254740991
           minimum: 0
           type: integer
@@ -91948,7 +91992,7 @@ components:
         - items
         - page
         - per_page
-        - total_events
+        - total
         - search_matches
     Kibana_HTTP_APIs_alerting_rule_artifact:
       additionalProperties: false
@@ -92058,7 +92102,7 @@ components:
           type: integer
         per_page:
           maximum: 9007199254740991
-          minimum: 1
+          minimum: 0
           type: integer
         total:
           maximum: 9007199254740991
