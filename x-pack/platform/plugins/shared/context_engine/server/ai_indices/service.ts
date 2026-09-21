@@ -497,32 +497,37 @@ export class AiIndexService {
     }
   }
 
+  /** Resolves the dest name, rejecting aliases since they cannot be a single write target. */
+  private async resolveDest(value: string): Promise<{
+    indices: estypes.IndicesResolveIndexResolveIndexItem[];
+    dataStreams: estypes.IndicesResolveIndexResolveIndexDataStreamsItem[];
+  }> {
+    let resolved: estypes.IndicesResolveIndexResponse;
+    try {
+      resolved = await this.esClient.indices.resolveIndex({
+        name: value,
+        expand_wildcards: ['open', 'hidden', 'closed'],
+      });
+    } catch (error) {
+      if (isResponseError(error) && error.statusCode === 404) {
+        return { indices: [], dataStreams: [] };
+      }
+      throw error;
+    }
+
+    if (resolved.aliases.length > 0) {
+      throw new InvalidAiIndexDestError(
+        `dest.value '${value}' is not allowed: '${resolved.aliases[0].name}' is an alias`
+      );
+    }
+    return { indices: resolved.indices, dataStreams: resolved.data_streams };
+  }
+
   private async assertValidDataStreamDest(value: string, managed: boolean): Promise<void> {
     const prefixes = this.allowedDestPrefixes(DATA_STREAM_PREFIX, managed);
     this.assertDestValueFormat(value, prefixes);
 
-    let indices: estypes.IndicesResolveIndexResolveIndexItem[] = [];
-    let dataStreams: estypes.IndicesResolveIndexResolveIndexDataStreamsItem[] = [];
-    let aliases: estypes.IndicesResolveIndexResolveIndexAliasItem[] = [];
-    try {
-      const resolved = await this.esClient.indices.resolveIndex({
-        name: value,
-        expand_wildcards: ['open', 'hidden', 'closed'],
-      });
-      indices = resolved.indices;
-      dataStreams = resolved.data_streams;
-      aliases = resolved.aliases;
-    } catch (error) {
-      if (!(isResponseError(error) && error.statusCode === 404)) {
-        throw error;
-      }
-    }
-
-    if (aliases.length > 0) {
-      throw new InvalidAiIndexDestError(
-        `dest.value '${value}' is not allowed: '${aliases[0].name}' is an alias`
-      );
-    }
+    const { indices, dataStreams } = await this.resolveDest(value);
 
     if (indices.length > 0) {
       throw new InvalidAiIndexDestError(
@@ -544,28 +549,7 @@ export class AiIndexService {
     const prefixes = this.allowedDestPrefixes(INDEX_PREFIX, managed);
     this.assertDestValueFormat(value, prefixes);
 
-    let indices: estypes.IndicesResolveIndexResolveIndexItem[] = [];
-    let dataStreams: estypes.IndicesResolveIndexResolveIndexDataStreamsItem[] = [];
-    let aliases: estypes.IndicesResolveIndexResolveIndexAliasItem[] = [];
-    try {
-      const resolved = await this.esClient.indices.resolveIndex({
-        name: value,
-        expand_wildcards: ['open', 'hidden', 'closed'],
-      });
-      indices = resolved.indices;
-      dataStreams = resolved.data_streams;
-      aliases = resolved.aliases;
-    } catch (error) {
-      if (!(isResponseError(error) && error.statusCode === 404)) {
-        throw error;
-      }
-    }
-
-    if (aliases.length > 0) {
-      throw new InvalidAiIndexDestError(
-        `dest.value '${value}' is not allowed: '${aliases[0].name}' is an alias`
-      );
-    }
+    const { indices, dataStreams } = await this.resolveDest(value);
 
     if (dataStreams.length > 0) {
       throw new InvalidAiIndexDestError(
