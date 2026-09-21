@@ -48,17 +48,14 @@ describe('parseAttachmentEntity', () => {
     });
   });
 
-  it('treats bare emails as users and host-like values as hosts', () => {
-    expect(parseAttachmentEntity('dev-user@corp.example').kind).toBe('user');
-    expect(parseAttachmentEntity('ci-deploy-runner-07').kind).toBe('host');
-    expect(parseAttachmentEntity('web.example.internal').kind).toBe('host');
-  });
-
-  it('defaults bare identity strings like dev-user to user', () => {
+  it('fails closed to generic for bare or unrecognized strings (no Discover kind guess)', () => {
     expect(parseAttachmentEntity('dev-user')).toEqual({
-      kind: 'user',
+      kind: 'generic',
       name: 'dev-user',
       raw: 'dev-user',
     });
+    expect(parseAttachmentEntity('dev-user@corp.example').kind).toBe('generic');
+    expect(parseAttachmentEntity('ci-deploy-runner-07').kind).toBe('generic');
+    expect(parseAttachmentEntity('web.example.internal').kind).toBe('generic');
   });
 });

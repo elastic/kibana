@@ -54,21 +54,6 @@ const EUID_TYPE_PREFIXES: ReadonlyArray<{ prefix: string; kind: AttachmentEntity
   { prefix: 'service:', kind: 'service' },
 ];
 
-const looksLikeEmail = (value: string): boolean => value.includes('@') && !value.includes(' ');
-
-const looksLikeHostname = (value: string): boolean => {
-  if (value.includes(' ')) {
-    return false;
-  }
-  // FQDN-ish or common host naming conventions from demo packs.
-  if (value.includes('.') && /^[a-z0-9][a-z0-9.-]*[a-z0-9]$/i.test(value)) {
-    return true;
-  }
-  // Prefixes must not include the separator; `ci-` in the group would consume
-  // the hyphen and fail the following `[-_]` for values like `ci-deploy-runner-07`.
-  return /^(host|srv|server|ci|runner|endpoint)[-_]/i.test(value);
-};
-
 /**
  * Parse an AWS IAM ARN into a short display name and kind.
  * Example: arn:aws:iam::123456789012:user/dev-user → { kind: 'user', name: 'dev-user' }
@@ -136,7 +121,10 @@ const parseEuid = (raw: string): ParsedAttachmentEntity | undefined => {
 /**
  * Parse an attachment entity string into a typed display model.
  * Supports EUIDs (`entity:generic:arn:…`, `entity:generic:host:…`), ECS-prefixed
- * values (`user.name: jdoe`), AWS IAM ARNs, and bare identifiers.
+ * values (`user.name: jdoe`), and AWS IAM ARNs.
+ *
+ * Unrecognized / bare strings fail closed to `generic` (no Discover link). Hunt
+ * writers must emit typed forms; the server schema rejects bare identifiers.
  */
 export const parseAttachmentEntity = (raw: string): ParsedAttachmentEntity => {
   const trimmed = raw.trim();
@@ -159,13 +147,5 @@ export const parseAttachmentEntity = (raw: string): ParsedAttachmentEntity => {
     return { kind: arn.kind, name: arn.name, raw: trimmed };
   }
 
-  if (looksLikeEmail(trimmed)) {
-    return { kind: 'user', name: trimmed, raw: trimmed };
-  }
-  if (looksLikeHostname(trimmed)) {
-    return { kind: 'host', name: trimmed, raw: trimmed };
-  }
-
-  // Bare identity strings like `dev-user` default to user for highlight treatment.
-  return { kind: 'user', name: trimmed, raw: trimmed };
+  return { kind: 'generic', name: trimmed, raw: trimmed };
 };

@@ -59,7 +59,7 @@ const baseData = {
   capability: 'lateral-movement-detector',
   run_id: 'run-1',
   security_knowledge_indicators: [{ type: 'hash', value: 'abc123' }],
-  entities: ['host-1', 'user-1'],
+  entities: ['host.name: host-1', 'user.name: user-1'],
   timeline: [{ at: '2024-01-01T00:00:00Z', what: 'RDP session opened' }],
   hypothesis_tested: 'Attacker pivoted via RDP',
   evidence_for: ['e1', 'e2'],

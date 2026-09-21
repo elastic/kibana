@@ -12,6 +12,7 @@ import type {
 } from '@kbn/agent-builder-server/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { ALERTZERO_ATTACHMENT_TYPES } from '../../../common/constants';
+import { isTypedAttachmentEntityString } from '../../../common/attachment_entity_string';
 import { alertZeroAttachmentDataSchema } from './attachment_data_schema';
 
 export const SIGNIFICANT_SECURITY_EVENT_ATTACHMENT_ID =
@@ -84,7 +85,20 @@ export const significantSecurityEventAttachmentDataSchema = alertZeroAttachmentD
   capability: z.string().max(256),
   run_id: z.string().max(256),
   security_knowledge_indicators: z.array(securityKnowledgeIndicatorSchema).max(50),
-  entities: z.array(z.string().min(1).max(2048)).max(50),
+  // Writers must emit typed entity strings (ECS / EUID / IAM ARN). Bare identifiers
+  // are rejected so the UI never guesses a Discover kind.
+  entities: z
+    .array(
+      z
+        .string()
+        .min(1)
+        .max(2048)
+        .refine(isTypedAttachmentEntityString, {
+          message:
+            'entities entries must be ECS-prefixed (e.g. user.name: jdoe), EUID-wrapped, or an AWS IAM ARN',
+        })
+    )
+    .max(50),
   alerts: z.array(z.string().min(1).max(2048)).max(50).optional(),
   events: z.array(significantSecurityEventRefSchema).max(50).optional(),
   timeline: z.array(timelineEntrySchema).max(50),

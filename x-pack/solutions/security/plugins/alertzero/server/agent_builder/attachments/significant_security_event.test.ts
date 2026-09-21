@@ -81,7 +81,16 @@ describe('createSignificantSecurityEventAttachmentType', () => {
     it('rejects arrays exceeding the 50-item cap', async () => {
       const result = await attachmentType.validate({
         ...validPayload,
-        entities: Array.from({ length: 51 }, (_, i) => `entity-${i}`),
+        entities: Array.from({ length: 51 }, (_, i) => `user.name: entity-${i}`),
+      });
+
+      expect(result.valid).toBe(false);
+    });
+
+    it('rejects bare entity identifiers', async () => {
+      const result = await attachmentType.validate({
+        ...validPayload,
+        entities: ['dev-user'],
       });
 
       expect(result.valid).toBe(false);
