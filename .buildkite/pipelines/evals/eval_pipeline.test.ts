@@ -39,6 +39,14 @@ const SUITES = {
       configPath: 'x-pack/smoke-tests/playwright.config.ts',
       defaultModelGroups: ['eis/anthropic-claude-4.5-haiku'],
     },
+    {
+      id: 'sandboxed',
+      name: 'Sandboxed',
+      ciLabels: ['evals:sandboxed'],
+      configPath: 'x-pack/sandboxed/playwright.config.ts',
+      serverConfigSet: 'evals_sandboxed',
+      ci: { serverConfigSet: 'evals_tracing', env: { SANDBOXED_DATASETS: 'smoke' } },
+    },
   ],
 };
 
@@ -246,6 +254,15 @@ describe('eval_pipeline', () => {
       expect(yaml).not.toContain("exit_status: '-1'");
       // A single generic retry is still allowed.
       expect(yaml).toContain("exit_status: '*'");
+    });
+  });
+
+  describe('getEvalPipeline server config set', () => {
+    it('prefers the CI config set a suite declares over its local default', () => {
+      const yaml = getEvalPipeline('evals:sandboxed,models:eis/openai-gpt-5.4') as string;
+
+      expect(yaml).toContain('EVAL_SERVER_CONFIG_SET: "evals_tracing"');
+      expect(yaml).not.toContain('evals_sandboxed');
     });
   });
 

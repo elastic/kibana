@@ -14,14 +14,35 @@ if [[ -z "$EVAL_SUITE_ID" ]]; then
   exit 1
 fi
 
-# Preserve the existing smoke coverage until golden sandbox provisioning lands separately.
-# Apply this before fanout so child jobs and baseline refreshes use the same profile.
-if [[ "$EVAL_SUITE_ID" == "nightshift-investigations" ]]; then
-  export NIGHTSHIFT_DATASETS="${NIGHTSHIFT_DATASETS:-synthetic-smoke}"
-  if [[ "$NIGHTSHIFT_DATASETS" == "synthetic-smoke" ]]; then
-    export EVAL_SERVER_CONFIG_SET="evals_tracing"
+# A suite can declare CI-only defaults under `ci` in evals.suites.json: each `ci.env` value applies
+# when that variable is unset or empty, and `ci.serverConfigSet` replaces the suite's local default.
+# Resolve them before fanout so child jobs and baseline refreshes run the same selection.
+EVAL_SUITE_CI="$(
+  jq -c --arg id "$EVAL_SUITE_ID" '.suites[] | select(.id == $id) | .ci // empty' \
+    .buildkite/pipelines/evals/evals.suites.json 2>/dev/null || true
+)"
+EVAL_SUITE_CI_ENV_NAMES=()
+if [[ -n "$EVAL_SUITE_CI" ]]; then
+  while IFS=$'\t' read -r ci_env_name ci_env_default; do
+    [[ -z "$ci_env_name" ]] && continue
+    EVAL_SUITE_CI_ENV_NAMES+=("$ci_env_name")
+    if [[ -z "${!ci_env_name:-}" ]]; then
+      export "$ci_env_name=$ci_env_default"
+    fi
+  done < <(printf '%s' "$EVAL_SUITE_CI" | jq -r '(.env // {}) | to_entries[] | [.key, .value] | @tsv')
+  if [[ -z "${EVAL_SERVER_CONFIG_SET:-}" ]]; then
+    EVAL_SERVER_CONFIG_SET="$(printf '%s' "$EVAL_SUITE_CI" | jq -r '.serverConfigSet // empty')"
+    export EVAL_SERVER_CONFIG_SET
   fi
 fi
+
+# Emits YAML `env` entries that forward the suite's `ci.env` selection to uploaded or triggered steps.
+suite_ci_env_yaml() {
+  local indent="$1" name
+  for name in ${EVAL_SUITE_CI_ENV_NAMES[@]+"${EVAL_SUITE_CI_ENV_NAMES[@]}"}; do
+    printf '%s%s: "%s"\n' "$indent" "$name" "${!name:-}"
+  done
+}
 
 # Boot disk for the fanout agents. Eval steps bootstrap the workspace, unpack the Kibana
 # distributable and run a local ES + Kibana; on the image default ES ends up under its merge
@@ -292,7 +313,7 @@ EOF
           EVAL_FANOUT: "0"
           TEST_RUN_ID: "${TEST_RUN_ID:-}"
           EVAL_SERVER_CONFIG_SET: "${EVAL_SERVER_CONFIG_SET:-}"
-          NIGHTSHIFT_DATASETS: "${NIGHTSHIFT_DATASETS:-}"
+$(suite_ci_env_yaml '          ')
           EVAL_GREP: "${EVAL_GREP:-}"
           EVAL_GREP_INVERT: "${EVAL_GREP_INVERT:-}"
           EVAL_SPEC_FILES: "${shard_spec_file_args}"
@@ -439,7 +460,7 @@ EOF
         EVAL_INCLUDE_EIS_MODELS: "${EVAL_INCLUDE_EIS_MODELS:-}"
         EVAL_MODEL_GROUPS: "${EVAL_MODEL_GROUPS:-}"
         EVAL_SERVER_CONFIG_SET: "${EVAL_SERVER_CONFIG_SET:-}"
-        NIGHTSHIFT_DATASETS: "${NIGHTSHIFT_DATASETS:-}"
+$(suite_ci_env_yaml '        ')
 EOF
       elif [[ -n "${FRESH_BASELINE_PR_EXPERIMENT_ID:-}" ]]; then
         # Fresh-baseline mode: emit the post-comparison step inside the fanout so

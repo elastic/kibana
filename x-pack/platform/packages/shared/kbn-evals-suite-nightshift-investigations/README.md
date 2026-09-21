@@ -327,7 +327,9 @@ Registered as `nightshift-investigations` in
 use the golden profile and Scout config `evals_nightshift_investigations` by default.
 
 PR and weekly CI retain the existing `synthetic-smoke` coverage with `evals_tracing`, which
-needs no sandbox. The CI runner forwards this selection to model jobs and baseline refreshes.
+needs no sandbox. The suite declares both as CI defaults in its `ci` block in
+[`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json); the CI runner
+applies them before startup and forwards the selection to model jobs and baseline refreshes.
 **Golden CI sandbox provisioning is deferred to a separate change**; the credentialed local
 acceptance run is the golden baseline. This PR adds no sandbox launcher. A provisioned job
 can explicitly select `NIGHTSHIFT_DATASETS=investigate-lite` and

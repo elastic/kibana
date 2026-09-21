@@ -100,3 +100,17 @@ describe('evals.suites.json shards', () => {
     expect(problems).toEqual([]);
   });
 });
+
+describe('evals.suites.json CI defaults', () => {
+  it('keeps `ci.env` names and values safe for the shell and the fanout pipeline', () => {
+    // `run_suite.sh` exports each name and writes the value into a double-quoted YAML scalar that
+    // Buildkite interpolates, so names must be plain variables and values must not need escaping.
+    const problems = suites.flatMap(({ id: suiteId, ci }) =>
+      Object.entries(ci?.env ?? {})
+        .filter(([name, value]) => !/^[A-Z][A-Z0-9_]*$/.test(name) || !/^[\w.,:/-]+$/.test(value))
+        .map(([name, value]) => `${suiteId}: unsafe ci.env entry ${name}=${JSON.stringify(value)}`)
+    );
+
+    expect(problems).toEqual([]);
+  });
+});

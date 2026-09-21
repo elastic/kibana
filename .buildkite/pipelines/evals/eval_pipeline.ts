@@ -22,12 +22,20 @@ export interface EvalsSuiteShard {
   specFiles: string[];
 }
 
+/** CI-only defaults for a suite; its top-level fields stay the local defaults. */
+export interface EvalsSuiteCiOverrides {
+  serverConfigSet?: string;
+  /** Applied by `run_suite.sh` when the variable is unset or empty. */
+  env?: Record<string, string>;
+}
+
 export interface EvalsSuiteMetadataEntry {
   id: string;
   name?: string;
   ciLabels?: string[];
   configPath?: string;
   serverConfigSet?: string;
+  ci?: EvalsSuiteCiOverrides;
   weeklyEisModelGroups?: string[];
   defaultModelGroups?: string[] | null;
   shards?: EvalsSuiteShard[];
@@ -203,8 +211,9 @@ function buildEvalsYaml({
       const includeEisModelsEnv = includeEisModels
         ? `          EVAL_INCLUDE_EIS_MODELS: '1'`
         : null;
-      const evalServerConfigSetEnv = suite.serverConfigSet
-        ? `          EVAL_SERVER_CONFIG_SET: ${toBuildkiteYamlString(suite.serverConfigSet)}`
+      const serverConfigSet = suite.ci?.serverConfigSet ?? suite.serverConfigSet;
+      const evalServerConfigSetEnv = serverConfigSet
+        ? `          EVAL_SERVER_CONFIG_SET: ${toBuildkiteYamlString(serverConfigSet)}`
         : null;
       return [
         `      - label: ${toBuildkiteYamlString(label)}`,
