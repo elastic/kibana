@@ -267,7 +267,7 @@ t1_analyst:
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
         - feature_alertzero.read
-        - feature_alertzero.manage_incidents
+        - feature_alertzero.manage_escalations
         - feature_agenticInvestigations.all
       resources: "*"
 
@@ -341,7 +341,7 @@ t2_analyst:
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
         - feature_alertzero.read
-        - feature_alertzero.manage_incidents
+        - feature_alertzero.manage_escalations
         - feature_agenticInvestigations.all
       resources: "*"
 
@@ -516,7 +516,7 @@ threat_intelligence_analyst:
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
         - feature_alertzero.read
-        - feature_alertzero.manage_incidents
+        - feature_alertzero.manage_escalations
         - feature_agenticInvestigations.all
       resources: "*"
 
@@ -971,7 +971,7 @@ endpoint_operations_analyst:
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
         - feature_alertzero.read
-        - feature_alertzero.manage_incidents
+        - feature_alertzero.manage_escalations
         - feature_agenticInvestigations.all
       resources: "*"
 
@@ -1065,6 +1065,6 @@ endpoint_policy_manager:
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
         - feature_alertzero.read
-        - feature_alertzero.manage_incidents
+        - feature_alertzero.manage_escalations
         - feature_agenticInvestigations.all
       resources: "*"
