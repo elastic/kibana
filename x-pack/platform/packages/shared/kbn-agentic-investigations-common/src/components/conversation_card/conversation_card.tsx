@@ -22,13 +22,27 @@ import { ConversationsActionsGroup } from './actions_group';
 interface ConversationCardProps {
   investigation: Investigation;
   hasBorder: boolean;
+  /** Marks the card whose details flyout is currently open. */
+  isSelected?: boolean;
   onClickRecommendedAction: BaseActionsProps['onClickRecommendedAction'];
   onClickAction: BaseActionsProps['onClickAction'];
   onClickCard: (id: Investigation['id']) => void;
+  onOpenChat: (id: Investigation['id']) => void;
+  /** URL for this card's chat, so its control renders as a link. */
+  chatHref?: string;
 }
 
 export const ConversationCard = memo<ConversationCardProps>(
-  ({ investigation, hasBorder, onClickRecommendedAction, onClickAction, onClickCard }) => {
+  ({
+    investigation,
+    hasBorder,
+    isSelected = false,
+    onClickRecommendedAction,
+    onClickAction,
+    onClickCard,
+    onOpenChat,
+    chatHref,
+  }) => {
     const { euiTheme } = useEuiTheme();
 
     return (
@@ -37,6 +51,7 @@ export const ConversationCard = memo<ConversationCardProps>(
         role="button"
         tabIndex={0}
         aria-label={investigation.title}
+        aria-current={isSelected || undefined}
         borderRadius="none"
         css={{
           cursor: 'pointer',
@@ -44,8 +59,11 @@ export const ConversationCard = memo<ConversationCardProps>(
           borderRadius: hasBorder ? 'none' : `0 0 ${euiTheme.size.s} ${euiTheme.size.s}`,
           boxSizing: 'border-box',
           boxShadow: 'none',
+          backgroundColor: isSelected ? euiTheme.colors.backgroundBaseInteractiveSelect : undefined,
           '&:hover': {
-            backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+            backgroundColor: isSelected
+              ? euiTheme.colors.backgroundBaseInteractiveSelect
+              : euiTheme.colors.backgroundBaseSubdued,
             boxShadow: 'none',
           },
         }}
@@ -87,6 +105,8 @@ export const ConversationCard = memo<ConversationCardProps>(
               investigation={investigation}
               onClickRecommendedAction={onClickRecommendedAction}
               onClickAction={onClickAction}
+              onOpenChat={() => onOpenChat(investigation.id)}
+              chatHref={chatHref}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

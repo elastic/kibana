@@ -45,7 +45,10 @@ describe('createNavigationTree', () => {
     const contextEngineIndex = body.findIndex((item) => item.link === 'context_engine');
     const agentBuilderNode = body.find((item) => item.link === 'agent_builder');
 
-    expect(body[contextEngineIndex]).toMatchObject({ icon: 'sparkles', link: 'context_engine' });
+    expect(body[contextEngineIndex]).toMatchObject({
+      icon: 'tableSparkles',
+      link: 'context_engine',
+    });
     expect(contextEngineIndex).toBe(0);
     expect(agentBuilderNode).toBeUndefined();
   });

@@ -292,7 +292,7 @@ function createNavTree({
             },
           ]),
       {
-        icon: 'sparkles',
+        icon: 'tableSparkles',
         link: 'context_engine' as const,
       },
       {
@@ -532,6 +532,9 @@ function createNavTree({
               },
               {
                 link: 'management:data_federation',
+              },
+              {
+                link: 'management:esql_views',
               },
               {
                 link: 'management:data_quality',

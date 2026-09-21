@@ -117,6 +117,8 @@ export class FeatureFlagsService {
           throw new Error('A provider has already been set. This API cannot be called twice.');
         }
         setProviderWithRetries(provider, this.logger);
+        // Emit a context change event when the provider is ready to force the reevaluation of the subscribed flags.
+        OpenFeature.addHandler(ServerProviderEvents.Ready, () => this.contextChanged$.next());
       },
       appendContext: (contextToAppend) => this.appendContext(contextToAppend),
     };

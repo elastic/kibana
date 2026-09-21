@@ -284,7 +284,7 @@ export const createNavigationTree = ({
         !showAiAssistant
       ),
       {
-        icon: 'sparkles',
+        icon: 'tableSparkles',
         link: 'context_engine',
       },
       ...filterForFeatureAvailability(
@@ -492,6 +492,7 @@ export const createNavigationTree = ({
               { link: 'management:transform' },
               { link: 'management:rollup_jobs' },
               { link: 'management:data_federation' },
+              { link: 'management:esql_views' },
               { link: 'management:data_quality' },
               { link: 'management:data_usage' },
             ],

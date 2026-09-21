@@ -54,6 +54,9 @@ export const TIMEPICKER_TIME_DEFAULTS_ID = 'timepicker:timeDefaults';
 // Accessibility settings
 export const ACCESSIBILITY_DISABLE_ANIMATIONS_ID = 'accessibility:disableAnimations';
 
+// Alerting v2 settings
+export const ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID = 'alerting:v2:experimentalFeatures';
+
 // Agent builder settings
 export const AGENT_BUILDER_NAV_ENABLED_SETTING_ID = 'agentBuilder:navEnabled';
 export const AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID = 'agentBuilder:experimentalFeatures';
@@ -202,6 +205,7 @@ export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_
   'observability:streamsSigEventsScheduledDiscoveryFlakyRuleProbeAfterMinutes';
 export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_RULE_EXEMPT_SEVERITY_SCORE =
   'observability:streamsSigEventsScheduledDiscoveryFlakyRuleExemptSeverityScore';
+export const OBSERVABILITY_NIGHTSHIFT_DEVELOPER_MODE = 'observability:nightshiftDeveloperMode';
 export const OBSERVABILITY_ENABLE_DIAGNOSTIC_MODE = 'observability:enableDiagnosticMode';
 
 // Reporting settings

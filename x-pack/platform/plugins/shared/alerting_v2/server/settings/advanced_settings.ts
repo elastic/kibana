@@ -8,27 +8,26 @@
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import type { UiSettingsParams } from '@kbn/core/types';
+import type { UiSettingsServiceSetup } from '@kbn/core-ui-settings-server';
 import {
   ALERTING_V2_ENABLED_SETTING_ID,
   ALERTING_V2_SHOW_CLASSIC_ALERTS_PAGE_SETTING_ID,
+  ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID,
   type AlertingAdvancedSettingId,
   type AlertingAdvancedSettingValueMap,
 } from '@kbn/alerting-v2-constants';
 
+// Mirrors the category identifiers in `kbn-management/settings/utilities/category/const.ts`,
+// a `shared-browser` package not consumable from plugin server code.
 const ALERTING_V2_CATEGORY = 'alertingV2';
+const ALERTING_CATEGORY = 'alerting';
 
-/**
- * Shape that the runtime registration must satisfy. For each setting ID, the
- * registered `UiSettingsParams` is parameterized by the value type declared
- * in {@link AlertingAdvancedSettingValueMap} — which forces `schema` to be
- * a `Type<T>` and `value`/`getValue` to produce `T`. This is what keeps the
- * runtime config-schema in sync with the canonical value-type contract.
- */
-type AlertingV2AdvancedSettingsRegistration = {
-  [K in AlertingAdvancedSettingId]: UiSettingsParams<AlertingAdvancedSettingValueMap[K]>;
+type AlertingV2AdvancedSettingsRegistration<K extends AlertingAdvancedSettingId> = {
+  [P in K]: UiSettingsParams<AlertingAdvancedSettingValueMap[P]>;
 };
 
-export const alertingAdvancedSettings = {
+// Global — gates the alerting v2 APIs and UI.
+export const alertingGlobalAdvancedSettings = {
   [ALERTING_V2_ENABLED_SETTING_ID]: {
     category: [ALERTING_V2_CATEGORY],
     name: i18n.translate('xpack.alertingVTwo.enabledSettingName', {
@@ -43,15 +42,11 @@ export const alertingAdvancedSettings = {
     requiresPageReload: true,
     experimental: true,
   },
-} satisfies AlertingV2AdvancedSettingsRegistration;
+} satisfies AlertingV2AdvancedSettingsRegistration<typeof ALERTING_V2_ENABLED_SETTING_ID>;
 
-/**
- * Space-scoped settings. Registered via `uiSettings.register` (not
- * `registerGlobal`) so each Kibana space can opt in independently.
- */
-export const alertingSpaceAdvancedSettings: Record<string, UiSettingsParams<boolean>> = {
+export const alertingSpaceAdvancedSettings = {
   [ALERTING_V2_SHOW_CLASSIC_ALERTS_PAGE_SETTING_ID]: {
-    category: [ALERTING_V2_CATEGORY],
+    category: [ALERTING_CATEGORY],
     name: i18n.translate('xpack.alertingVTwo.showClassicAlertsTableSettingName', {
       defaultMessage: 'Show classic alerts table',
     }),
@@ -65,4 +60,22 @@ export const alertingSpaceAdvancedSettings: Record<string, UiSettingsParams<bool
     requiresPageReload: true,
     experimental: true,
   },
+  [ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID]: {
+    category: [ALERTING_CATEGORY],
+    name: i18n.translate('xpack.alertingV2.experimentalFeaturesSettingName', {
+      defaultMessage: 'Alerting V2: Experimental Features',
+    }),
+    type: 'boolean',
+    value: false,
+    description: i18n.translate('xpack.alertingV2.experimentalFeaturesSettingDescription', {
+      defaultMessage: 'Enables experimental features for Alerting V2.',
+  },
+} satisfies AlertingV2AdvancedSettingsRegistration<
+  | typeof ALERTING_V2_SHOW_CLASSIC_ALERTS_PAGE_SETTING_ID
+  | typeof ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID
+>;
+
+export const registerAlertingAdvancedSettings = (uiSettings: UiSettingsServiceSetup): void => {
+  uiSettings.registerGlobal(alertingGlobalAdvancedSettings);
+  uiSettings.register(alertingSpaceAdvancedSettings);
 };
