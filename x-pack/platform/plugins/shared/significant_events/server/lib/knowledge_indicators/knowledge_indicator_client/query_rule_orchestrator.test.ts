@@ -184,6 +184,67 @@ describe('QueryRuleOrchestrator', () => {
       expect(deletedChunks.flat()).toEqual(createdIds);
     });
 
+    it('keeps the old rule when storage fails during an ESQL replacement', async () => {
+      const existing = makeLink({
+        id: 'replace-me',
+        severity_score: 80,
+        ruleBacked: true,
+        esql: { query: 'FROM logs | WHERE body.text:"old"' },
+      });
+      const { orchestrator, rulesManagementClient, writer } = createOrchestrator({
+        currentLinks: [existing],
+      });
+      const storageError = new Error('storage failed');
+      writer.bulk.mockRejectedValueOnce(storageError);
+      const replacement = makeQuery({
+        id: 'replace-me',
+        severity_score: 80,
+        esql: { query: 'FROM logs | WHERE body.text:"new"' },
+      });
+
+      await expect(
+        orchestrator.syncQueries(definition, [replacement], { currentLinks: [existing] })
+      ).rejects.toBe(storageError);
+
+      const [{ id: createdId }] = rulesManagementClient.bulkCreateRules.mock.calls[0][0];
+      expect(createdId).not.toBe(existing.rule_id);
+      expect(rulesManagementClient.bulkDeleteRules).toHaveBeenCalledTimes(1);
+      expect(rulesManagementClient.bulkDeleteRules).toHaveBeenCalledWith([createdId]);
+      expect(rulesManagementClient.bulkDeleteRules).not.toHaveBeenCalledWith([existing.rule_id]);
+    });
+
+    it('commits an ESQL replacement before removing its old rule', async () => {
+      const existing = makeLink({
+        id: 'replace-me',
+        severity_score: 80,
+        ruleBacked: true,
+        esql: { query: 'FROM logs | WHERE body.text:"old"' },
+      });
+      const { orchestrator, rulesManagementClient, writer } = createOrchestrator({
+        currentLinks: [existing],
+      });
+      const deleteError = new Error('old rule deletion failed');
+      rulesManagementClient.bulkDeleteRules.mockRejectedValueOnce(deleteError);
+      const replacement = makeQuery({
+        id: 'replace-me',
+        severity_score: 80,
+        esql: { query: 'FROM logs | WHERE body.text:"new"' },
+      });
+
+      await expect(
+        orchestrator.syncQueries(definition, [replacement], { currentLinks: [existing] })
+      ).rejects.toBeInstanceOf(AggregateError);
+
+      const [{ id: createdId }] = rulesManagementClient.bulkCreateRules.mock.calls[0][0];
+      const storedOperations = (writer.bulk as jest.Mock).mock.calls[0][1];
+      expect(storedOperations[0].index.query.rule_id).toBe(createdId);
+      expect(rulesManagementClient.bulkDeleteRules).toHaveBeenCalledTimes(1);
+      expect(rulesManagementClient.bulkDeleteRules).toHaveBeenCalledWith([existing.rule_id]);
+      expect(writer.bulk.mock.invocationCallOrder[0]).toBeLessThan(
+        rulesManagementClient.bulkDeleteRules.mock.invocationCallOrder[0]
+      );
+    });
+
     it('does not promote existing unbacked low-severity MATCH queries when syncing a new high-severity query', async () => {
       const existingLow = makeLink({
         id: 'low-sev',

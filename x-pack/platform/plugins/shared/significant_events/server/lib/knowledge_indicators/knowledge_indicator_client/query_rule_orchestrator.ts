@@ -186,11 +186,6 @@ export class QueryRuleOrchestrator {
       throw failure.cause;
     }
 
-    // Install succeeded — safe to remove stale and replaced rules now.
-    // Doing this after install preserves monitoring coverage during ESQL-change
-    // transitions: the old rule keeps firing until the new one is ready.
-    await uninstallQueries(this.rulesManagementClient, toUninstall);
-
     // Append revisions for every next query and a tombstone for every
     // current link that's no longer in the input set.
     const operations: KIBulkOperation[] = [];
@@ -236,6 +231,10 @@ export class QueryRuleOrchestrator {
       }
       throw storageError;
     }
+
+    // The KI revision now points to the newly installed rules, so stale and replaced rules
+    // can be removed without risking a stored query that references a deleted rule.
+    await uninstallQueries(this.rulesManagementClient, toUninstall);
   }
 
   async upsertQuery(definition: Streams.all.Definition, query: StreamQuery): Promise<void> {
