@@ -6,9 +6,8 @@
  */
 
 import { EventActorType, TimelineEventType } from '@kbn/agent-builder-common';
-import { AgentPromptType } from '@kbn/agent-builder-common/agents';
 import type { TimelineDisplayEvent } from '../../../../services/events';
-import { findAwaitingPrompt, requestedPrompts } from './awaiting_prompt';
+import { findAwaitingPromptEventId } from './awaiting_prompt';
 import { createExecutionPausedEvent } from './items/execution_paused_event.factory';
 import { createPromptResponseEvent } from './items/prompt_response_event.factory';
 import { createExecutionAbortedEvent } from './items/execution_aborted_event.factory';
@@ -60,46 +59,28 @@ const resumeAborted = (): TimelineDisplayEvent =>
     trigger_event_id: PROMPT_RESPONSE_ID,
   }) as TimelineDisplayEvent;
 
-describe('requestedPrompts', () => {
-  it('returns prompts for a paused execution_terminated', () => {
-    const event = createExecutionPausedEvent() as TimelineDisplayEvent;
-    expect(requestedPrompts(event)).toHaveLength(1);
-    expect(requestedPrompts(event)[0].type).toBe(AgentPromptType.confirmation);
-  });
-
-  it('returns [] for a non-paused execution_terminated', () => {
-    const event = createExecutionTerminatedEvent() as TimelineDisplayEvent;
-    expect(requestedPrompts(event)).toEqual([]);
-  });
-
-  it('returns [] for non-terminal events', () => {
-    const event = resumeStarted();
-    expect(requestedPrompts(event)).toEqual([]);
-  });
-});
-
-describe('findAwaitingPrompt', () => {
+describe('findAwaitingPromptEventId', () => {
   it('returns undefined when there are no events', () => {
-    expect(findAwaitingPrompt([])).toBeUndefined();
+    expect(findAwaitingPromptEventId([])).toBeUndefined();
   });
 
   it('returns the pause when no prompt_response has answered it (fresh pause)', () => {
-    const result = findAwaitingPrompt([pauseEvent()]);
-    expect(result).toEqual({ promptRequestedEventId: PAUSE_EVENT_ID, prompts: expect.any(Array) });
+    const result = findAwaitingPromptEventId([pauseEvent()]);
+    expect(result).toBe(PAUSE_EVENT_ID);
   });
 
   it('returns undefined when prompt_response is present but no execution_started yet (optimistic answer)', () => {
-    const result = findAwaitingPrompt([pauseEvent(), promptResponse()]);
+    const result = findAwaitingPromptEventId([pauseEvent(), promptResponse()]);
     expect(result).toBeUndefined();
   });
 
   it('returns undefined when resume is running (no terminal yet)', () => {
-    const result = findAwaitingPrompt([pauseEvent(), promptResponse(), resumeStarted()]);
+    const result = findAwaitingPromptEventId([pauseEvent(), promptResponse(), resumeStarted()]);
     expect(result).toBeUndefined();
   });
 
   it('returns undefined when resume completed successfully', () => {
-    const result = findAwaitingPrompt([
+    const result = findAwaitingPromptEventId([
       pauseEvent(),
       promptResponse(),
       resumeStarted(),
@@ -109,13 +90,13 @@ describe('findAwaitingPrompt', () => {
   });
 
   it('returns the pause when resume ended in abort (pause still waits for an answer)', () => {
-    const result = findAwaitingPrompt([
+    const result = findAwaitingPromptEventId([
       pauseEvent(),
       promptResponse(),
       resumeStarted(),
       resumeAborted(),
     ]);
-    expect(result).toEqual({ promptRequestedEventId: PAUSE_EVENT_ID, prompts: expect.any(Array) });
+    expect(result).toBe(PAUSE_EVENT_ID);
   });
 
   it('returns undefined when a retry answer follows an aborted resume (retry in progress)', () => {
@@ -127,7 +108,7 @@ describe('findAwaitingPrompt', () => {
       },
     }) as TimelineDisplayEvent;
 
-    const result = findAwaitingPrompt([
+    const result = findAwaitingPromptEventId([
       pauseEvent(),
       promptResponse(),
       resumeStarted(),
@@ -166,7 +147,7 @@ describe('findAwaitingPrompt', () => {
       trigger_event_id: secondPromptResponseId,
     }) as TimelineDisplayEvent;
 
-    const result = findAwaitingPrompt([
+    const result = findAwaitingPromptEventId([
       pauseEvent(),
       promptResponse(),
       resumeStarted(),
@@ -176,6 +157,6 @@ describe('findAwaitingPrompt', () => {
       secondResumeAborted,
     ]);
 
-    expect(result).toEqual({ promptRequestedEventId: PAUSE_EVENT_ID, prompts: expect.any(Array) });
+    expect(result).toBe(PAUSE_EVENT_ID);
   });
 });

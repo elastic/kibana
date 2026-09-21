@@ -9,13 +9,8 @@ import type { PromptRequest } from '@kbn/agent-builder-common/agents';
 import { TimelineEventType } from '@kbn/agent-builder-common';
 import type { TimelineDisplayEvent } from '../../../../services/events';
 
-export interface AwaitingPrompt {
-  promptRequestedEventId: string;
-  prompts: PromptRequest[];
-}
-
 /** The prompts a paused execution is waiting on, or [] when the event is not a pause. */
-export const requestedPrompts = (event: TimelineDisplayEvent): PromptRequest[] => {
+const requestedPrompts = (event: TimelineDisplayEvent): PromptRequest[] => {
   if (event.type !== TimelineEventType.executionTerminated) {
     return [];
   }
@@ -55,25 +50,21 @@ const answerSettlesPrompt = (events: TimelineDisplayEvent[], answeringEventId: s
 };
 
 /**
- * The prompts the conversation is waiting on right now, or undefined when nothing is pending.
+ * The id of the `execution_terminated` event whose prompts the conversation is waiting on right
+ * now, or undefined when nothing is pending.
  *
  * The pause is the last `execution_terminated` event (`execution_failed`/`execution_aborted`
  * are ignored — an interrupted resume never owns the pause, mirroring the server's
  * `lastTerminatedExecutionIndex`). It is closed when any of its answers settles it.
  */
-export const findAwaitingPrompt = (events: TimelineDisplayEvent[]): AwaitingPrompt | undefined => {
+export const findAwaitingPromptEventId = (events: TimelineDisplayEvent[]): string | undefined => {
   let pauseEvent: TimelineDisplayEvent | undefined;
   for (const event of events) {
     if (event.type === TimelineEventType.executionTerminated) {
       pauseEvent = event;
     }
   }
-  if (!pauseEvent) {
-    return undefined;
-  }
-
-  const prompts = requestedPrompts(pauseEvent);
-  if (prompts.length === 0) {
+  if (!pauseEvent || requestedPrompts(pauseEvent).length === 0) {
     return undefined;
   }
 
@@ -84,5 +75,5 @@ export const findAwaitingPrompt = (events: TimelineDisplayEvent[]): AwaitingProm
       event.data.prompt_requested_event_id === promptRequestedEventId &&
       answerSettlesPrompt(events, event.id)
   );
-  return isClosed ? undefined : { promptRequestedEventId, prompts };
+  return isClosed ? undefined : promptRequestedEventId;
 };

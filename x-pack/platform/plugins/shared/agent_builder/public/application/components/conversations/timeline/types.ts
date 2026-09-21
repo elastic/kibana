@@ -34,7 +34,6 @@ export interface AgentTurnItem {
   response?: { message: string };
   terminal?: TerminalEvent;
   pendingPrompts?: PromptRequest[];
-  timeToFirstToken?: number;
   /** Highest version of every attachment referenced up to and including this turn's trigger. */
   attachmentRefs?: AttachmentVersionRef[];
   /** The trigger message's own refs, including attachments the agent created in this turn. */

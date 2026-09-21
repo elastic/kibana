@@ -11,7 +11,7 @@ import type { TimelineDisplayEvent } from '../../../../services/events';
 import { EXECUTION_STREAMING_EVENT_TYPE } from '../../../../services/events';
 import type { ExecutionAccumulator, TimelineItem, UserEntry } from './types';
 import { accumulatorToItem, foldAttachmentRefs } from './timeline_item_utils';
-import { findAwaitingPrompt } from './awaiting_prompt';
+import { findAwaitingPromptEventId } from './awaiting_prompt';
 import { answersByPromptId, withQuestionAnswers } from './prompt_answers';
 
 export const groupTimelineEvents = (
@@ -20,7 +20,7 @@ export const groupTimelineEvents = (
   /** Id of the locally-built user message that has no saved twin yet. */
   pendingUserMessageId?: string
 ): TimelineItem[] => {
-  const awaitingPromptRequestedEventId = findAwaitingPrompt(events)?.promptRequestedEventId;
+  const awaitingPromptEventId = findAwaitingPromptEventId(events);
   const answers = answersByPromptId(events);
 
   const ordered: Array<UserEntry | ExecutionAccumulator> = [];
@@ -98,9 +98,7 @@ export const groupTimelineEvents = (
 
   return ordered.map(
     (entry): TimelineItem =>
-      'executionId' in entry
-        ? accumulatorToItem(entry, eventsById, awaitingPromptRequestedEventId)
-        : entry
+      'executionId' in entry ? accumulatorToItem(entry, eventsById, awaitingPromptEventId) : entry
   );
 };
 

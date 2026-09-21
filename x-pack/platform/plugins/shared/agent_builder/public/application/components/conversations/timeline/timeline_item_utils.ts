@@ -38,9 +38,9 @@ export const foldAttachmentRefs = (
   }
 };
 
-export const resolveStatus = (
+const resolveStatus = (
   { terminal }: ExecutionAccumulator,
-  awaitingPromptRequestedEventId?: string
+  awaitingPromptEventId?: string
 ): AgentTurnStatus => {
   if (!terminal) {
     return 'running';
@@ -48,7 +48,7 @@ export const resolveStatus = (
   if (terminal.type === TimelineEventType.executionTerminated) {
     if (
       terminal.data.outcome.type === 'prompt_requested' &&
-      terminal.id === awaitingPromptRequestedEventId
+      terminal.id === awaitingPromptEventId
     ) {
       return 'awaiting_prompt';
     }
@@ -61,7 +61,7 @@ export const resolveStatus = (
 export const accumulatorToItem = (
   acc: ExecutionAccumulator,
   eventsById: Map<string, TimelineDisplayEvent>,
-  awaitingPromptRequestedEventId?: string
+  awaitingPromptEventId?: string
 ): AgentTurnItem => {
   const { executionId, startedAt, triggerEventId, steps, terminal, streaming, attachmentRefs } =
     acc;
@@ -69,7 +69,7 @@ export const accumulatorToItem = (
   const origin: ConversationRoundOrigin | undefined = trigger?.actor.origin;
   const triggerAttachmentRefs =
     trigger?.type === TimelineEventType.userMessage ? trigger.data.attachment_refs : undefined;
-  const status = resolveStatus(acc, awaitingPromptRequestedEventId);
+  const status = resolveStatus(acc, awaitingPromptEventId);
   const item: AgentTurnItem = {
     kind: 'agentTurn',
     key: executionId,
@@ -89,10 +89,6 @@ export const accumulatorToItem = (
     item.response = response;
   } else if (streaming?.message) {
     item.response = { message: streaming.message };
-  }
-
-  if (streaming?.time_to_first_token !== undefined && !terminal) {
-    item.timeToFirstToken = streaming.time_to_first_token;
   }
 
   if (
