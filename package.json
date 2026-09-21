@@ -77,7 +77,7 @@
   },
   "engines": {
     "node": "24.21.0",
-    "pnpm": "~11.27.0"
+    "pnpm": "~12.4.2"
   },
   "resolutions": {
     "**/@babel/core": "7.29.7",
@@ -151,7 +151,7 @@
     "@elastic/apm-rum": "5.17.5",
     "@elastic/apm-rum-core": "5.25.3",
     "@elastic/apm-rum-react": "2.0.11",
-    "@elastic/charts": "73.0.1",
+    "@elastic/charts": "73.2.1",
     "@elastic/datemath": "5.0.3",
     "@elastic/ebt": "1.4.1",
     "@elastic/ecs": "9.3.0",
@@ -665,11 +665,8 @@
     "@kbn/default-tracer": "workspace:*",
     "@kbn/delete-managed-asset-callout": "workspace:*",
     "@kbn/dependency-injection-example-plugin": "workspace:*",
-    "@kbn/design-tools": "workspace:*",
     "@kbn/dev-tools-plugin": "workspace:*",
     "@kbn/developer-examples-plugin": "workspace:*",
-    "@kbn/developer-toolbar": "workspace:*",
-    "@kbn/developer-toolbar-plugin": "workspace:*",
     "@kbn/discover-contextual-components": "workspace:*",
     "@kbn/discover-customization-examples-plugin": "workspace:*",
     "@kbn/discover-enhanced-plugin": "workspace:*",
@@ -841,7 +838,6 @@
     "@kbn/ingest-pipelines-plugin": "workspace:*",
     "@kbn/ingest-pipelines-shared": "workspace:*",
     "@kbn/input-control-vis-plugin": "workspace:*",
-    "@kbn/inspect-component-plugin": "workspace:*",
     "@kbn/inspector-plugin": "workspace:*",
     "@kbn/interactive-setup-plugin": "workspace:*",
     "@kbn/interactive-setup-test-endpoints-plugin": "workspace:*",
@@ -1813,6 +1809,7 @@
     "@kbn/cypress-test-helper": "workspace:*",
     "@kbn/dependency-ownership": "workspace:*",
     "@kbn/dependency-usage": "workspace:*",
+    "@kbn/design-tools": "workspace:*",
     "@kbn/detections-response-ftr-services": "workspace:*",
     "@kbn/dev": "workspace:*",
     "@kbn/dev-cli-errors": "workspace:*",
@@ -1820,6 +1817,8 @@
     "@kbn/dev-proc-runner": "workspace:*",
     "@kbn/dev-utils": "workspace:*",
     "@kbn/dev-validation-runner": "workspace:*",
+    "@kbn/developer-toolbar": "workspace:*",
+    "@kbn/developer-toolbar-plugin": "workspace:*",
     "@kbn/docs-utils": "workspace:*",
     "@kbn/dot-text": "workspace:*",
     "@kbn/dot-text-loader": "workspace:*",
@@ -1885,6 +1884,7 @@
     "@kbn/import-resolver": "workspace:*",
     "@kbn/inference-cli": "workspace:*",
     "@kbn/ink": "workspace:*",
+    "@kbn/inspect-component-plugin": "workspace:*",
     "@kbn/jest-benchmarks": "workspace:*",
     "@kbn/jest-serializers": "workspace:*",
     "@kbn/journeys": "workspace:*",
@@ -1905,6 +1905,7 @@
     "@kbn/mock-idp-plugin": "workspace:*",
     "@kbn/mock-idp-utils": "workspace:*",
     "@kbn/moon": "workspace:*",
+    "@kbn/oas-docs": "workspace:*",
     "@kbn/observability-synthetics-test-data": "workspace:*",
     "@kbn/openapi-bundler": "workspace:*",
     "@kbn/openapi-generator": "workspace:*",
@@ -2149,8 +2150,9 @@
     "babel-plugin-transform-require-default": "0.1.7",
     "babel-plugin-transform-typescript-metadata": "0.3.2",
     "backport": "12.0.4",
-    "browserslist": "4.28.8",
+    "browserslist": "4.28.9",
     "buildkite-test-collector": "1.8.1",
+    "bump-cli": "2.10.0",
     "cache-manager": "7.0.0",
     "cache-manager-fs-hash": "2.0.0",
     "chance": "1.1.13",
@@ -2274,7 +2276,7 @@
     "sort-package-json": "4.0.0",
     "storybook": "8.6.18",
     "style-loader": "4.0.0",
-    "stylelint": "17.14.1",
+    "stylelint": "17.15.0",
     "stylelint-scss": "7.2.0",
     "superagent": "10.3.0",
     "supertest": "7.2.2",
@@ -2303,5 +2305,6 @@
     "xml-crypto": "6.1.2",
     "xmlbuilder": "15.1.1",
     "yaml-language-server": "1.23.0"
-  }
+  },
+  "packageManager": "pnpm@12.4.2"
 }
