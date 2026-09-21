@@ -31,11 +31,9 @@ import { isAgentlessEnabled, isOnlyAgentlessIntegration } from '../../utils/agen
 
 import * as Registry from '../registry';
 import { dataStreamService } from '../../data_streams';
-import {
-  generatePackageInfoFromArchiveBuffer,
-  setPackageInfo,
-  deleteVerificationResult,
-} from '../archive';
+import { setPackageInfo, deleteVerificationResult } from '../archive';
+
+import { parsePackageAndCollectSignals } from './upload_preflight_authz';
 
 import {
   createInstallation,
@@ -113,9 +111,6 @@ jest.mock('../kibana/index_pattern/install', () => {
 });
 jest.mock('../archive', () => {
   return {
-    generatePackageInfoFromArchiveBuffer: jest.fn(() =>
-      Promise.resolve({ packageInfo: { name: 'apache', version: '1.3.0' } })
-    ),
     unpackBufferToAssetsMap: jest.fn(() =>
       Promise.resolve({
         assetsMap: new Map(),
@@ -126,6 +121,15 @@ jest.mock('../archive', () => {
     deleteVerificationResult: jest.fn(),
   };
 });
+jest.mock('./upload_preflight_authz', () => ({
+  parsePackageAndCollectSignals: jest.fn(() =>
+    Promise.resolve({
+      packageInfo: { name: 'apache', version: '1.3.0' },
+      archiveSignals: { gatedTypesFound: new Set(), hasMlSecurityRules: false },
+    })
+  ),
+  checkUploadPackageAssetPrivileges: jest.fn(),
+}));
 jest.mock('../../audit_logging');
 
 jest.mock('../../utils/agentless', () => {
@@ -162,12 +166,12 @@ function parsedArchiveFixture(
   overrides: Pick<ArchivePackage, 'name' | 'version'> &
     Partial<Pick<ArchivePackage, 'data_streams'>>
 ): {
-  paths: string[];
   packageInfo: ArchivePackage;
+  archiveSignals: { gatedTypesFound: Set<any>; hasMlSecurityRules: boolean };
 } {
   return {
-    paths: [],
     packageInfo: archivePackageFixture(overrides),
+    archiveSignals: { gatedTypesFound: new Set(), hasMlSecurityRules: false },
   };
 }
 
@@ -420,7 +424,7 @@ describe('install', () => {
       (installStateMachine._stateMachineInstallPackage as jest.Mock).mockResolvedValue({});
       jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
       jest
-        .mocked(generatePackageInfoFromArchiveBuffer)
+        .mocked(parsePackageAndCollectSignals)
         .mockResolvedValueOnce(parsedArchiveFixture({ name: 'bad.name', version: '1.0.0' }));
       mockGetBundledPackageByPkgKey.mockResolvedValue({
         name: 'test_package',
@@ -594,7 +598,7 @@ describe('install', () => {
 
     it('validates real uploads and skips the install when validation fails', async () => {
       jest
-        .mocked(generatePackageInfoFromArchiveBuffer)
+        .mocked(parsePackageAndCollectSignals)
         .mockResolvedValueOnce(parsedArchiveFixture({ name: 'bad.name', version: '1.0.0' }));
 
       const response = await installPackage({
@@ -641,7 +645,7 @@ describe('install', () => {
           },
         ],
       });
-      jest.mocked(generatePackageInfoFromArchiveBuffer).mockResolvedValueOnce(
+      jest.mocked(parsePackageAndCollectSignals).mockResolvedValueOnce(
         parsedArchiveFixture({
           name: 'evilclaim',
           version: '1.0.0',
@@ -703,7 +707,7 @@ describe('install', () => {
           },
         ],
       });
-      jest.mocked(generatePackageInfoFromArchiveBuffer).mockResolvedValueOnce(
+      jest.mocked(parsePackageAndCollectSignals).mockResolvedValueOnce(
         parsedArchiveFixture({
           name: 'evilclaim',
           version: '1.0.0',
@@ -882,7 +886,7 @@ describe('install', () => {
     it('allows a first upload in air-gapped mode when the name has no bundled match', async () => {
       jest.mocked(appContextService.getConfig).mockReturnValue({ isAirGapped: true } as any);
       jest
-        .mocked(generatePackageInfoFromArchiveBuffer)
+        .mocked(parsePackageAndCollectSignals)
         .mockResolvedValueOnce(parsedArchiveFixture({ name: 'custom_probe', version: '1.0.0' }));
 
       try {
@@ -914,7 +918,7 @@ describe('install', () => {
     it('rejects a first upload in air-gapped mode when the name matches a bundled package', async () => {
       jest.mocked(appContextService.getConfig).mockReturnValue({ isAirGapped: true } as any);
       jest
-        .mocked(generatePackageInfoFromArchiveBuffer)
+        .mocked(parsePackageAndCollectSignals)
         .mockResolvedValueOnce(parsedArchiveFixture({ name: 'apache', version: '1.0.0' }));
       jest.mocked(getBundledPackageByName).mockResolvedValue({
         name: 'apache',

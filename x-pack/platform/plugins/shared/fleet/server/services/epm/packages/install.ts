@@ -13,6 +13,7 @@ import moment from 'moment';
 import { omit } from 'lodash';
 import type {
   ElasticsearchClient,
+  KibanaRequest,
   SavedObject,
   SavedObjectsClientContract,
   Logger,
@@ -71,12 +72,7 @@ import {
 import { dataStreamService, licenseService } from '../..';
 import { appContextService } from '../../app_context';
 import * as Registry from '../registry';
-import {
-  setPackageInfo,
-  generatePackageInfoFromArchiveBuffer,
-  deleteVerificationResult,
-  unpackBufferToAssetsMap,
-} from '../archive';
+import { setPackageInfo, deleteVerificationResult, unpackBufferToAssetsMap } from '../archive';
 import { createArchiveIteratorFromMap } from '../archive/archive_iterator';
 import { toAssetReference } from '../kibana/assets/install';
 import type { ArchiveAsset } from '../kibana/assets/install';
@@ -105,6 +101,10 @@ import { installIndexTemplatesAndPipelines } from './install_index_template_pipe
 import { optimisticallyAddEsAssetReferences } from './es_assets_reference';
 import { setLastUploadInstallCache, getLastUploadInstallCache } from './utils';
 import { removeInstallation } from './remove';
+import {
+  checkUploadPackageAssetPrivileges,
+  parsePackageAndCollectSignals,
+} from './upload_preflight_authz';
 
 export const UPLOAD_RETRY_AFTER_MS = 10000; // 10s
 const MAX_ENSURE_INSTALL_TIME = 60 * 1000;
@@ -116,6 +116,7 @@ const PACKAGES_TO_INSTALL_WITH_STREAMING = [
   // is not suitable for regular installation as it might cause OOM errors.
   'security_detection_engine',
 ];
+
 
 export async function isPackageInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -430,6 +431,7 @@ interface InstallUploadedArchiveParams {
   contentType: string;
   spaceId: string;
   version?: string;
+  request?: KibanaRequest;
   authorizationHeader?: HTTPAuthorizationHeader | null;
   ignoreMappingUpdateErrors?: boolean;
   skipDataStreamRollover?: boolean;
@@ -610,6 +612,11 @@ async function installPackageWithStateMachine(options: {
   skipDataStreamRollover?: boolean;
   retryFromLastState?: boolean;
   useStreaming?: boolean;
+  keepFailedInstallation?: boolean;
+  automaticInstall?: boolean;
+  installedAsDependencyOf?: { name: string; version: string };
+  skipDependencyCheck?: boolean;
+  authorizedSpaces?: string[];
 }): Promise<InstallResult> {
   const packageInfo = options.packageInstallContext.packageInfo;
 
@@ -630,6 +637,11 @@ async function installPackageWithStateMachine(options: {
     packageInstallContext,
     retryFromLastState,
     useStreaming,
+    keepFailedInstallation,
+    automaticInstall,
+    installedAsDependencyOf,
+    skipDependencyCheck,
+    authorizedSpaces,
   } = options;
   let { telemetryEvent } = options;
   const logger = appContextService.getLogger();
@@ -728,6 +740,9 @@ async function installPackageWithStateMachine(options: {
       skipDataStreamRollover,
       retryFromLastState,
       useStreaming,
+      installedAsDependencyOf,
+      skipDependencyCheck,
+      authorizedSpaces,
     })
       .then(async (assets) => {
         logger.debug(`Removing old assets from previous versions of ${pkgName}`);
@@ -784,6 +799,7 @@ async function installPackageByUpload({
   contentType,
   spaceId,
   version,
+  request,
   authorizationHeader,
   ignoreMappingUpdateErrors,
   skipDataStreamRollover,
@@ -794,6 +810,7 @@ async function installPackageByUpload({
 
   // if an error happens during getInstallType, report that we don't know
   let installType: InstallType = 'unknown';
+  let pkgName = 'unknown';
   const installSource = isBundledPackage ? 'bundled' : 'upload';
 
   const timeToWaitString = moment
@@ -815,8 +832,12 @@ async function installPackageByUpload({
         );
       }
     }
-    const { packageInfo } = await generatePackageInfoFromArchiveBuffer(archiveBuffer, contentType);
-    const pkgName = packageInfo.name;
+
+    const { packageInfo, archiveSignals } = await parsePackageAndCollectSignals(
+      archiveBuffer,
+      contentType
+    );
+    pkgName = packageInfo.name;
     const useStreaming = PACKAGES_TO_INSTALL_WITH_STREAMING.includes(pkgName);
 
     // Allow for overriding the version in the manifest for cases where we install
@@ -831,6 +852,21 @@ async function installPackageByUpload({
     });
 
     installType = getInstallType({ pkgVersion, installedPkg });
+
+    if (
+      !isBundledPackage &&
+      request &&
+      !appContextService.getConfig()?.internal?.skipUploadPackageValidation
+    ) {
+      await checkUploadPackageAssetPrivileges({
+        request,
+        archiveSignals,
+        spaceId,
+        pkgName,
+        installation: installedPkg,
+        savedObjectsClient,
+      });
+    }
 
     const { paths, assetsMap, archiveIterator } = await unpackBufferToAssetsMap({
       archiveBuffer,

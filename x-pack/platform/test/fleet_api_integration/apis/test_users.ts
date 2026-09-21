@@ -174,6 +174,61 @@ export const testUsers: {
     username: 'integr_all',
     password: 'changeme',
   },
+  fleet_all_int_all_siem_all: {
+    permissions: {
+      feature: {
+        fleetv2: ['all'],
+        fleet: ['all'],
+        siemV5: ['all'],
+        securitySolutionRulesV4: ['all'],
+      },
+      spaces: ['*'],
+    },
+    username: 'fleet_all_int_all_siem_all',
+    password: 'changeme',
+  },
+  fleet_all_int_all_assistant_all: {
+    permissions: {
+      feature: {
+        fleetv2: ['all'],
+        fleet: ['all'],
+        securitySolutionAssistant: ['all'],
+      },
+      spaces: ['*'],
+    },
+    username: 'fleet_all_int_all_assistant_all',
+    password: 'changeme',
+  },
+  fleet_all_int_all_siem_all_ml_all: {
+    permissions: {
+      feature: {
+        fleetv2: ['all'],
+        fleet: ['all'],
+        siemV5: ['all'],
+        securitySolutionRulesV4: ['all'],
+        ml: ['all'],
+      },
+      spaces: ['*'],
+    },
+    username: 'fleet_all_int_all_siem_all_ml_all',
+    password: 'changeme',
+  },
+  // Has SIEM (rules-all) only in the default Space — used to verify that uploading into a Space
+  // where the caller lacks the gated-asset privilege is rejected even when the same user holds
+  // the privilege in the primary (default) Space.
+  fleet_all_int_all_siem_default_only: {
+    permissions: {
+      feature: {
+        fleetv2: ['all'],
+        fleet: ['all'],
+        siemV5: ['all'],
+        securitySolutionRulesV4: ['all'],
+      },
+      spaces: ['default'],
+    },
+    username: 'fleet_all_int_all_siem_default_only',
+    password: 'changeme',
+  },
 };
 
 export const setupTestUsers = async (security: SecurityService, spaceAwarenessEnabled = false) => {
