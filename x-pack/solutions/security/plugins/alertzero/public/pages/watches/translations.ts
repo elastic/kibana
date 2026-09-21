@@ -87,57 +87,8 @@ export const SUBNAV_ARIA_LABEL = i18n.translate('xpack.alertzero.watches.subnav.
  * importing them from here would pull every message in this module into the entry bundle.
  */
 
-export const viewWatchAriaLabel = (name: string) =>
-  i18n.translate('xpack.alertzero.watches.viewWatchAriaLabel', {
-    defaultMessage: 'View {name} settings',
-    values: { name },
-  });
-
 export const workerCountLabel = (count: number) =>
   i18n.translate('xpack.alertzero.watches.header.workerCount', {
     defaultMessage: '{count, plural, one {# Worker} other {# Workers}}',
     values: { count },
   });
-
-/* -------------------------------------------------------------------------- */
-/* Relative time and run state                                                */
-/* -------------------------------------------------------------------------- */
-
-export const secondsAgoLabel = (seconds: number) =>
-  i18n.translate('xpack.alertzero.watches.relativeTime.secondsAgo', {
-    defaultMessage: '{seconds}s ago',
-    values: { seconds },
-  });
-
-export const minutesAgoLabel = (minutes: number) =>
-  i18n.translate('xpack.alertzero.watches.relativeTime.minutesAgo', {
-    defaultMessage: '{minutes}m ago',
-    values: { minutes },
-  });
-
-export const hoursAgoLabel = (hours: number) =>
-  i18n.translate('xpack.alertzero.watches.relativeTime.hoursAgo', {
-    defaultMessage: '{hours}h ago',
-    values: { hours },
-  });
-
-export const daysAgoLabel = (days: number) =>
-  i18n.translate('xpack.alertzero.watches.relativeTime.daysAgo', {
-    defaultMessage: '{days}d ago',
-    values: { days },
-  });
-
-export const RUN_STATE_PAUSED = i18n.translate('xpack.alertzero.watches.runState.paused', {
-  defaultMessage: 'Paused',
-});
-
-export const RUN_STATE_UNAVAILABLE = i18n.translate(
-  'xpack.alertzero.watches.runState.unavailable',
-  {
-    defaultMessage: 'Unavailable',
-  }
-);
-
-export const NOT_RUN_YET = i18n.translate('xpack.alertzero.watches.notRunYet', {
-  defaultMessage: 'Never run',
-});
