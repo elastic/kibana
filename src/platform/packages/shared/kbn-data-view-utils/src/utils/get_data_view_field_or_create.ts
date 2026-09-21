@@ -19,7 +19,7 @@ export const getDataViewFieldOrCreateFromColumnMeta = ({
 }: {
   dataView: DataView;
   fieldName: string;
-  columnMeta?: DatatableColumnMeta & { isComputedColumn?: boolean }; // based on ES|QL query
+  columnMeta?: DatatableColumnMeta; // based on ES|QL query
 }) => {
   const dataViewField = dataView.fields.getByName(fieldName);
 
@@ -31,7 +31,6 @@ export const getDataViewFieldOrCreateFromColumnMeta = ({
     name: fieldName,
     id: fieldName,
     meta: columnMeta,
-    isComputedColumn: columnMeta.isComputedColumn,
   });
 
   if (

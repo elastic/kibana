@@ -22,7 +22,7 @@ import { esqlRouteRequestCounter, getErrorStatusCode } from '../metrics';
 
 const ES_TIMESTAMP_FIELD_NAME = '@timestamp';
 // Temporary: remove once dataset filtering is enabled by default in ES
-export const DATASET_FILTERING_FEATURE_FLAG_KEY = 'esql.datasetFilteringEnabled';
+const DATASET_FILTERING_FEATURE_FLAG_KEY = 'esql.datasetFilteringEnabled';
 
 // ANTLR ALL(*) adaptive-prediction cost grows super-linearly with parenthesis nesting depth.
 // Reject deep queries before touching the parser to prevent event-loop stalls (DoS via a single
@@ -94,7 +94,7 @@ const checkViewLikeSourceForTimestamp = async ({
  *
  * @returns timeField or undefined
  */
-export const resolveTimeField = async (
+const resolveTimeField = async (
   client: ElasticsearchClient,
   query: string,
   logger: Logger,
