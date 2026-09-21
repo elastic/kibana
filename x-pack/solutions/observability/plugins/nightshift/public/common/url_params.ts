@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-/** Query param for the investigations search box — shareable, restored on load. */
-export const NIGHTSHIFT_SEARCH_QUERY_PARAM = 'q';
+import {
+  NIGHTSHIFT_SEARCH_QUERY_PARAM,
+  NIGHTSHIFT_SEVERITY_QUERY_PARAM,
+  NIGHTSHIFT_INVESTIGATION_ID_QUERY_PARAM,
+} from '@kbn/nightshift-investigations-plugin/common';
 
-/** Query param that scrolls to a severity section on load or from a shared link. */
-export const NIGHTSHIFT_SEVERITY_QUERY_PARAM = 'severity';
+export {
+  NIGHTSHIFT_SEARCH_QUERY_PARAM,
+  NIGHTSHIFT_SEVERITY_QUERY_PARAM,
+  NIGHTSHIFT_INVESTIGATION_ID_QUERY_PARAM,
+};
 
 /** Query param that restores the open event flyout on load or from a shared link. */
 export const NIGHTSHIFT_EVENT_ID_QUERY_PARAM = 'eventId';
-
-/** Query param that restores the open investigation detail flyout on load or from a shared link. */
-export const NIGHTSHIFT_INVESTIGATION_ID_QUERY_PARAM = 'investigationId';
 
 export const getNightshiftEventIdFromSearch = (search: string): string | undefined =>
   new URLSearchParams(search).get(NIGHTSHIFT_EVENT_ID_QUERY_PARAM) ?? undefined;

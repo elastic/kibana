@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
-import type {
-  InvestigationStatus,
-  InvestigationSubjectType,
+import {
+  NIGHTSHIFT_INVESTIGATION_LOCATOR_ID,
+  type InvestigationLocatorParams,
+  type InvestigationStatus,
+  type InvestigationSubjectType,
 } from '@kbn/nightshift-investigations-plugin/common';
 import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useKibana } from '../utils/kibana_react';
@@ -34,8 +35,11 @@ export const useInvestigateAlert = ({
   enabled?: boolean;
   onInvestigate?: () => void;
 }) => {
-  const { application, http, notifications } = useKibana().services;
+  const { http, notifications, share } = useKibana().services;
   const investigationsClient = getInvestigationsClient();
+  const investigationLocator = share.url.locators.get<InvestigationLocatorParams>(
+    NIGHTSHIFT_INVESTIGATION_LOCATOR_ID
+  );
   const statusQueryKey = ['alertInvestigations', http.basePath.get?.() ?? '', alertId] as const;
   const queryClient = useQueryClient();
   const canInvestigate = Boolean(enabled && alertId && investigationsClient);
@@ -69,14 +73,12 @@ export const useInvestigateAlert = ({
   const hasOngoingInvestigation = latestStatus === 'pending' || latestStatus === 'running';
   const isInvestigating = isStarting || hasOngoingInvestigation;
   const showInvestigateAction = availability?.available === true;
-  const viewInvestigationUrl =
-    alertId && latestInvestigation
-      ? application.getUrlForApp(NIGHTSHIFT_APP_ID, {
-          path: `?${new URLSearchParams({
-            investigationId: latestInvestigation.investigation_id,
-          }).toString()}`,
-        })
-      : undefined;
+  const investigationId =
+    alertId && latestInvestigation ? latestInvestigation.investigation_id : '';
+  const viewInvestigationUrl = useMemo(
+    () => (investigationId ? investigationLocator?.getRedirectUrl({ investigationId }) : undefined),
+    [investigationId, investigationLocator]
+  );
   const viewInvestigationActionLabel = i18n.translate(
     'xpack.observability.alerts.viewInvestigationButtonLabel',
     {

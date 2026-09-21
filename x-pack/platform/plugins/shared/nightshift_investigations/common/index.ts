@@ -220,6 +220,16 @@ export {
 } from './cortex';
 
 export {
+  NIGHTSHIFT_INVESTIGATION_LOCATOR_ID,
+  NIGHTSHIFT_SEARCH_QUERY_PARAM,
+  NIGHTSHIFT_SEVERITY_QUERY_PARAM,
+  NIGHTSHIFT_INVESTIGATION_ID_QUERY_PARAM,
+  InvestigationLocatorDefinition,
+  type InvestigationLocatorParams,
+  type InvestigationLocator,
+} from './locators';
+
+export {
   INVESTIGATION_STARTED_TRIGGER_ID,
   INVESTIGATION_COMPLETED_TRIGGER_ID,
   INVESTIGATION_FAILED_TRIGGER_ID,
