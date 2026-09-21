@@ -19,6 +19,11 @@ export interface ConversationsActionsGroupProps {
   onClickAction: BaseActionsProps['onClickAction'];
   /** Opens this investigation's chat. Supplied by the caller, which owns the route. */
   onOpenChat: () => void;
+  /**
+   * URL the chat control points at, so it behaves as a link. Optional because the caller may not
+   * be able to resolve one; the control still works as a button without it.
+   */
+  chatHref?: string;
 }
 
 /**
@@ -27,7 +32,7 @@ export interface ConversationsActionsGroupProps {
  * action, so the card surfaces navigation rather than a decision.
  */
 export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
-  ({ investigation, onClickRecommendedAction, onClickAction, onOpenChat }) => {
+  ({ investigation, onClickRecommendedAction, onClickAction, onOpenChat, chatHref }) => {
     const { euiTheme } = useEuiTheme();
 
     return (
@@ -37,6 +42,8 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
             iconType="productAgent"
             tooltipContent={ACTIONS_TRANSLATIONS.tooltips.openInChat}
             onClick={onOpenChat}
+            href={chatHref}
+            data-test-subj="conversationCardOpenInChat"
           />
         </EuiFlexItem>
         <span
