@@ -70,6 +70,7 @@ import {
   convertErrors,
   toClientError,
   isPendingResumeConversation,
+  resolveTelemetryOrigin,
   persistExecutionInterruption,
   trackExecutionInterruption,
   type ConversationWithOperation,
@@ -239,6 +240,7 @@ const handleConversationExecution = async ({
   }
 
   const roundOrigin = origin ? { type: origin.type } : undefined;
+  const telemetryOrigin = resolveTelemetryOrigin({ conversation, requestOrigin: origin?.type });
 
   // From here on the receipt-time `user_message` is stored (fresh round) or a pending round is
   // being resumed: any rejection before the stream exists would leave it dangling, so the setup
@@ -444,7 +446,7 @@ const handleConversationExecution = async ({
             modelProvider: connectorProvider,
             conversationId: conversation.id,
             executionId: execution.executionId,
-            roundOrigin: roundOrigin?.type,
+            roundOrigin: telemetryOrigin,
           })
         );
       }
