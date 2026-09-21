@@ -32,13 +32,17 @@ const { createFailureIssue, updateFailureIssue } = jest.requireMock('./report_fa
 const { reportFailuresToEs } = jest.requireMock('./report_failures_to_es');
 const { reportFailuresToFile } = jest.requireMock('./report_failures_to_file');
 
-const makeFailure = (i: number): TestFailure => ({
+const makeFailure = (i: number, overrides: Partial<TestFailure> = {}): TestFailure => ({
   classname: `suite ${i}`,
   name: `test ${i}`,
   failure: `failure ${i}`,
   time: '1.0',
   likelyIrrelevant: false,
+  ...overrides,
 });
+
+const makeFtrFailure = (i: number, overrides: Partial<TestFailure> = {}): TestFailure =>
+  makeFailure(i, { testType: 'ftr', ...overrides });
 
 const createExistingIssue = (failure: TestFailure): ExistingFailedTestIssue => ({
   classname: failure.classname,
@@ -91,9 +95,9 @@ beforeEach(() => {
   updateFailureIssue.mockResolvedValue({ newBody: 'body', newCount: 2 });
 });
 
-describe('processJUnitReports one-failure-per-report (bail behavior)', () => {
-  it('reports the single failure to GitHub as a new issue', async () => {
-    getFailures.mockReturnValue([makeFailure(0)]);
+describe('processJUnitReports FTR one-new-issue cap', () => {
+  it('reports the single FTR failure to GitHub as a new issue', async () => {
+    getFailures.mockReturnValue([makeFtrFailure(0)]);
     const { params } = createParams();
 
     await processJUnitReports(['report.xml'], params);
@@ -102,15 +106,15 @@ describe('processJUnitReports one-failure-per-report (bail behavior)', () => {
     expect(updateFailureIssue).not.toHaveBeenCalled();
   });
 
-  it('reports only the first failure and skips the rest when a report has multiple failures', async () => {
-    const failures = [makeFailure(0), makeFailure(1)];
+  it('reports only the first new FTR failure and skips the rest in the same report', async () => {
+    const failures = [makeFtrFailure(0), makeFtrFailure(1)];
     getFailures.mockReturnValue(failures);
     const { params } = createParams();
 
     await processJUnitReports(['report.xml'], params);
 
-    // Only the first failure opens an issue, emulating `--bail`.
     expect(createFailureIssue).toHaveBeenCalledTimes(1);
+    expect(createFailureIssue.mock.calls[0][1]).toBe(failures[0]);
     // ES indexing and file reporting still run over every failure — that's real signal we keep.
     expect(reportFailuresToEs).toHaveBeenCalledTimes(1);
     expect(reportFailuresToEs.mock.calls[0][1]).toHaveLength(2);
@@ -118,11 +122,10 @@ describe('processJUnitReports one-failure-per-report (bail behavior)', () => {
     expect(reportFailuresToFile.mock.calls[0][1]).toHaveLength(2);
   });
 
-  it('updates a tracked failure and still creates an issue for the first new failure', async () => {
-    const failures = [makeFailure(0), makeFailure(1)];
+  it('updates a tracked FTR failure and still creates an issue for the first new failure', async () => {
+    const failures = [makeFtrFailure(0), makeFtrFailure(1)];
     getFailures.mockReturnValue(failures);
 
-    // failure-0 is tracked; failure-1 is the first new failure and should still open an issue.
     const { params } = createParams([createExistingIssue(failures[0])]);
 
     await processJUnitReports(['report.xml'], params);
@@ -131,11 +134,10 @@ describe('processJUnitReports one-failure-per-report (bail behavior)', () => {
     expect(createFailureIssue).toHaveBeenCalledTimes(1);
   });
 
-  it('updates a tracked failure even when a new issue was already created in the same report', async () => {
-    const failures = [makeFailure(0), makeFailure(1)];
+  it('updates a tracked FTR failure even when a new issue was already created in the same report', async () => {
+    const failures = [makeFtrFailure(0), makeFtrFailure(1)];
     getFailures.mockReturnValue(failures);
 
-    // failure-0 is new (creates an issue); failure-1 is tracked and must still be updated.
     const { params } = createParams([createExistingIssue(failures[1])]);
 
     await processJUnitReports(['report.xml'], params);
@@ -144,35 +146,33 @@ describe('processJUnitReports one-failure-per-report (bail behavior)', () => {
     expect(updateFailureIssue).toHaveBeenCalledTimes(1);
   });
 
-  it('does not count duplicate classname+name entries toward the new-issue cap', async () => {
+  it('does not count duplicate FTR classname+name entries toward the new-issue cap', async () => {
     const failures = [
-      makeFailure(0),
-      { ...makeFailure(0), failure: 'another failure entry for the same test' },
+      makeFtrFailure(0),
+      makeFtrFailure(0, { failure: 'another failure entry for the same test' }),
     ];
     getFailures.mockReturnValue(failures);
     const { params } = createParams();
 
     await processJUnitReports(['report.xml'], params);
 
-    // The second entry is a duplicate (same classname+name); it is silently skipped.
     expect(createFailureIssue).toHaveBeenCalledTimes(1);
     expect(updateFailureIssue).not.toHaveBeenCalled();
   });
 
-  it('does not consume the report slot on likely-irrelevant failures', async () => {
-    const failures = [makeFailure(0), makeFailure(1)];
-    // The first failure is irrelevant, so the second failure is the first one reported to GitHub.
-    failures[0].likelyIrrelevant = true;
+  it('does not consume the FTR report slot on likely-irrelevant failures', async () => {
+    const failures = [makeFtrFailure(0, { likelyIrrelevant: true }), makeFtrFailure(1)];
     getFailures.mockReturnValue(failures);
     const { params } = createParams();
 
     await processJUnitReports(['report.xml'], params);
 
     expect(createFailureIssue).toHaveBeenCalledTimes(1);
+    expect(createFailureIssue.mock.calls[0][1]).toBe(failures[1]);
   });
 
-  it('resets the one-failure budget for each report path', async () => {
-    getFailures.mockReturnValueOnce([makeFailure(0)]).mockReturnValueOnce([makeFailure(1)]);
+  it('resets the FTR one-failure budget for each report path', async () => {
+    getFailures.mockReturnValueOnce([makeFtrFailure(0)]).mockReturnValueOnce([makeFtrFailure(1)]);
     const { params } = createParams();
 
     await processJUnitReports(['report-1.xml', 'report-2.xml'], params);
@@ -181,12 +181,42 @@ describe('processJUnitReports one-failure-per-report (bail behavior)', () => {
   });
 });
 
+describe('processJUnitReports Jest and Cypress', () => {
+  it.each(['jest', 'cypress'] as const)(
+    'opens a GitHub issue for every distinct new %s failure in the same report',
+    async (testType) => {
+      const failures = [makeFailure(0, { testType }), makeFailure(1, { testType })];
+      getFailures.mockReturnValue(failures);
+      const { params } = createParams();
+
+      await processJUnitReports(['report.xml'], params);
+
+      expect(createFailureIssue).toHaveBeenCalledTimes(2);
+      expect(createFailureIssue.mock.calls[0][1]).toBe(failures[0]);
+      expect(createFailureIssue.mock.calls[1][1]).toBe(failures[1]);
+    }
+  );
+
+  it('still deduplicates retry artifacts for Jest', async () => {
+    const failures = [
+      makeFailure(0, { testType: 'jest' }),
+      makeFailure(0, { testType: 'jest', failure: 'retry of the same test' }),
+    ];
+    getFailures.mockReturnValue(failures);
+    const { params } = createParams();
+
+    await processJUnitReports(['report.xml'], params);
+
+    expect(createFailureIssue).toHaveBeenCalledTimes(1);
+  });
+});
+
 describe('processJUnitReports cascading failures', () => {
   const makeCascade = () => {
-    const rootCause = makeFailure(0);
+    const rootCause = makeFtrFailure(0);
     const cascading = [
-      { ...makeFailure(1), cascading: true },
-      { ...makeFailure(2), cascading: true },
+      makeFtrFailure(1, { cascading: true }),
+      makeFtrFailure(2, { cascading: true }),
     ];
     return { rootCause, cascading, failures: [rootCause, ...cascading] };
   };
@@ -213,16 +243,33 @@ describe('processJUnitReports cascading failures', () => {
     expect(updateFailureIssue).not.toHaveBeenCalled();
   });
 
-  it('does not consume the new-issue slot', async () => {
+  it('does not consume the FTR new-issue slot', async () => {
     const { cascading } = makeCascade();
-    const lateFailure = makeFailure(3);
-    getFailures.mockReturnValue([...cascading, lateFailure]);
+    const firstNew = makeFtrFailure(3);
+    const secondNew = makeFtrFailure(4);
+    getFailures.mockReturnValue([...cascading, firstNew, secondNew]);
     const { params } = createParams();
 
     await processJUnitReports(['report.xml'], params);
 
     expect(createFailureIssue).toHaveBeenCalledTimes(1);
-    expect(createFailureIssue.mock.calls[0][1]).toBe(lateFailure);
+    expect(createFailureIssue.mock.calls[0][1]).toBe(firstNew);
+  });
+
+  it('still skips cascading Jest entries without capping other Jest failures', async () => {
+    const failures = [
+      makeFailure(0, { testType: 'jest', cascading: true }),
+      makeFailure(1, { testType: 'jest' }),
+      makeFailure(2, { testType: 'jest' }),
+    ];
+    getFailures.mockReturnValue(failures);
+    const { params } = createParams();
+
+    await processJUnitReports(['report.xml'], params);
+
+    expect(createFailureIssue).toHaveBeenCalledTimes(2);
+    expect(createFailureIssue.mock.calls[0][1]).toBe(failures[1]);
+    expect(createFailureIssue.mock.calls[1][1]).toBe(failures[2]);
   });
 
   it('still indexes them and hands them to the file reporter', async () => {

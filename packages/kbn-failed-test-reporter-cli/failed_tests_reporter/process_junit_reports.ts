@@ -16,18 +16,20 @@ import { reportFailuresToFile } from './report_failures_to_file';
 import { getReportMessageIter } from './report_metadata';
 import { getRootMetadata, readTestReport } from './test_report';
 
-// At most one NEW GitHub issue is opened per report. `--bail` used to stop a config at its first
-// failure, so at most one new failure per run reached the reporter; removing it (behind
-// FTR_SMART_RETRY_ENABLED) let a broken config open an issue per test. Multiple distinct new
-// failures in one run usually indicate a systemic/environmental failure (e.g. out of disk space),
-// so we cap new issue creation at one per report. Existing tracked issues are always updated
-// regardless (cheap: just a counter bump and a build link, and they carry real signal). Duplicate
-// classname+name entries (e.g. retry artifacts) are deduplicated and do not consume the slot.
+// For FTR reports only, at most one NEW GitHub issue is opened per report. `--bail` used to stop a
+// config at its first failure, so at most one new failure per run reached the reporter; a broken
+// FTR config can otherwise open an issue per test. Multiple distinct new FTR failures in one run
+// usually indicate a systemic/environmental failure (e.g. out of disk space). Existing tracked
+// issues are always updated regardless. Duplicate classname+name entries (e.g. retry artifacts)
+// are deduplicated for every test type and do not consume the slot.
 // See https://github.com/elastic/kibana/issues/278308.
 //
-// Failures the FTR marked as cascading are excluded from all of this: they are the hooks that a
-// Mocha timeout forced to fail on its way out, so they all describe the same event. Only the
-// failure that caused the abort reaches GitHub, the rest are listed on its report.
+// Jest and Cypress keep one issue per distinct new failure: a single XML file can legitimately
+// contain several independent failures, and capping those would drop GitHub tracking.
+//
+// Failures the FTR marked as cascading are excluded from GitHub regardless of test type: they are
+// trailing Mocha timeouts that describe the same event. Only the failure that caused them reaches
+// GitHub; the rest are listed on its report.
 
 export async function processJUnitReports(
   reportPaths: string[],
@@ -119,17 +121,21 @@ export async function processJUnitReports(
         continue;
       }
 
-      if (newIssueCreated) {
+      // Cap new issues only for FTR. Jest/Cypress (and unrecognized types) keep one issue each.
+      const capNewIssues = failure.testType === 'ftr';
+      if (capNewIssues && newIssueCreated) {
         skippedNewFailures += 1;
         pushMessage(
-          'Skipped opening a new issue: only the first new failure in a report opens a GitHub ' +
+          'Skipped opening a new issue: only the first new FTR failure in a report opens a GitHub ' +
             'issue, multiple new failures in one run usually indicate a systemic failure'
         );
         failure.failureCount = 0;
         continue;
       }
 
-      newIssueCreated = true;
+      if (capNewIssues) {
+        newIssueCreated = true;
+      }
       const newIssue = await createFailureIssue(
         buildUrl,
         failure,
@@ -157,8 +163,8 @@ export async function processJUnitReports(
 
     if (skippedNewFailures > 0) {
       log.warning(
-        `Opened one new issue for the first new failure and skipped ${skippedNewFailures} ` +
-          `additional new failure(s) for ${reportPath}, likely a systemic failure. Existing ` +
+        `Opened one new issue for the first new FTR failure and skipped ${skippedNewFailures} ` +
+          `additional new FTR failure(s) for ${reportPath}, likely a systemic failure. Existing ` +
           `tracked issues were updated normally. All failures are still indexed to ES and ` +
           `written to the failure report.`
       );

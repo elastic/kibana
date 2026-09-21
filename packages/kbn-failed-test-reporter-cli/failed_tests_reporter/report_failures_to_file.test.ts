@@ -17,6 +17,13 @@ import type { BuildkiteMetadata } from './buildkite_metadata';
 import type { TestFailure } from './get_failures';
 import { partitionCascadingFailures, reportFailuresToFile } from './report_failures_to_file';
 
+// 9.5 `@kbn/journeys` re-exports Journey, which imports ESM `callsites`. Jest does not
+// transform that package, so loading report_failures_to_file.ts otherwise throws
+// `Unexpected token 'export'`. This test never loads journey screenshots (rootMeta is {}).
+jest.mock('@kbn/journeys', () => ({
+  JourneyScreenshots: { load: jest.fn() },
+}));
+
 const makeFailure = (name: string, overrides: Partial<TestFailure> = {}): TestFailure => ({
   classname: 'Serverless Search Functional Tests.x-pack/a·ts',
   name,
