@@ -46,7 +46,7 @@ export const ForceUpgradeToTargetModal = ({
       cancelButtonText={FORCE_UPGRADE_TO_TARGET_MODAL_CANCEL}
       confirmButtonText={FORCE_UPGRADE_TO_TARGET_MODAL_CONFIRM}
       buttonColor="danger"
-      defaultFocusedButton="confirm"
+      defaultFocusedButton="cancel"
       data-test-subj={dataTestSubj}
     >
       <p>
