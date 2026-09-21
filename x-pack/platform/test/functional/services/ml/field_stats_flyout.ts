@@ -12,6 +12,10 @@ import type { MlCommonUI } from './common_ui';
 
 export type MlCommonFieldStatsFlyout = ProvidedType<typeof MachineLearningFieldStatsFlyoutProvider>;
 
+// bounds each read so a single one cannot outlive the retry loop that owns it
+const CONTENT_READ_TIMEOUT = 2 * 1000;
+const CONTENT_TIMEOUT = 20 * 1000;
+
 export function MachineLearningFieldStatsFlyoutProvider(
   { getService }: FtrProviderContext,
   mlCommonUI: MlCommonUI
@@ -26,36 +30,47 @@ export function MachineLearningFieldStatsFlyoutProvider(
       fieldName: string,
       fieldType: 'keyword' | 'date' | 'number'
     ) {
-      await retry.tryForTime(2000, async () => {
+      await retry.tryForTime(CONTENT_TIMEOUT, async () => {
         if (fieldType === 'date') {
-          await testSubjects.existOrFail(`mlFieldStatsFlyoutContent ${fieldName}-histogram`);
+          await testSubjects.existOrFail(`mlFieldStatsFlyoutContent ${fieldName}-histogram`, {
+            timeout: CONTENT_READ_TIMEOUT,
+          });
         }
 
         if (fieldType === 'keyword') {
-          await testSubjects.existOrFail(`mlFieldStatsFlyoutContent ${fieldName}-topValues`);
+          await testSubjects.existOrFail(`mlFieldStatsFlyoutContent ${fieldName}-topValues`, {
+            timeout: CONTENT_READ_TIMEOUT,
+          });
         }
 
         // For numeric fields, we expect both the top values and the distribution chart
         if (fieldType === 'number') {
           // Assert top values exist
           await testSubjects.existOrFail(
-            `mlFieldStatsFlyoutContent ${fieldName}-buttonGroup-topValuesButton`
+            `mlFieldStatsFlyoutContent ${fieldName}-buttonGroup-topValuesButton`,
+            { timeout: CONTENT_READ_TIMEOUT }
           );
           await testSubjects.click(
             `mlFieldStatsFlyoutContent ${fieldName}-buttonGroup-topValuesButton`
           );
 
-          await testSubjects.existOrFail(`mlFieldStatsFlyoutContent ${fieldName}-topValues`);
+          await testSubjects.existOrFail(`mlFieldStatsFlyoutContent ${fieldName}-topValues`, {
+            timeout: CONTENT_READ_TIMEOUT,
+          });
 
           // Assert distribution chart exists
           await testSubjects.existOrFail(
-            `mlFieldStatsFlyoutContent ${fieldName}-buttonGroup-distributionButton`
+            `mlFieldStatsFlyoutContent ${fieldName}-buttonGroup-distributionButton`,
+            { timeout: CONTENT_READ_TIMEOUT }
           );
           await testSubjects.click(
             `mlFieldStatsFlyoutContent ${fieldName}-buttonGroup-distributionButton`
           );
           expect(
-            await find.existsByCssSelector('[data-test-subj="mlFieldStatsFlyout"] .echChart')
+            await find.existsByCssSelector(
+              '[data-test-subj="mlFieldStatsFlyout"] .echChart',
+              CONTENT_READ_TIMEOUT
+            )
           ).to.eql(true);
         }
       });
@@ -116,9 +131,11 @@ export function MachineLearningFieldStatsFlyoutProvider(
     },
 
     async assertTopValuesContent(fieldName: string, expectedValues: string[]) {
-      await retry.tryForTime(2000, async () => {
+      await retry.tryForTime(CONTENT_TIMEOUT, async () => {
         // check for top values rows
-        await testSubjects.existOrFail(`mlFieldStatsFlyoutContent ${fieldName}-topValues`);
+        await testSubjects.existOrFail(`mlFieldStatsFlyoutContent ${fieldName}-topValues`, {
+          timeout: CONTENT_READ_TIMEOUT,
+        });
         const topValuesRows = await testSubjects.findAll(
           `mlFieldStatsFlyoutContent ${fieldName}-topValues-formattedFieldValue`
         );
