@@ -6,7 +6,7 @@
  */
 
 import {
-  SYSTEM_SECURITY_WATCH_DARK_ID,
+  SYSTEM_SECURITY_WATCH_HUNT_ID,
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
   SYSTEM_SECURITY_WATCH_OFFICER_ID,
   TEMPLATE_ID_INVESTIGATION,
@@ -14,16 +14,17 @@ import {
 import type { Investigation } from '../schemas/components/investigation.gen';
 
 /**
- * A clean Floor run that classifies an alert as false_positive with high confidence
- * produces NO investigation row — the watch execution completes without materializing
- * a conversation. Only inconclusive or true_positive classifications spawn investigations.
+ * Sample investigations, kept as the set of incidents `MOCK_PROPOSALS` hangs off: a proposal's
+ * `conversationId` is an id from here, and its `conversationTitle` is derived from that link rather
+ * than restated, so the two sample sets can never disagree.
  *
- * Brief fixtures below track proposal queue groups (Respond / Investigate /
- * Configure) while staying on the Investigation → Proposal object model.
+ * A clean Floor run that classifies an alert as false_positive with high confidence produces NO
+ * investigation row — the watch execution completes without materializing a conversation. Only
+ * inconclusive or true_positive classifications spawn investigations.
+ *
+ * Fixtures track proposal queue groups (Respond / Investigate / Configure) while staying on the
+ * Investigation → Proposal object model.
  */
-export const MOCK_CLEAN_RUN_NOTE =
-  'Clean Floor runs (false_positive, confidence >= 0.9) do not create investigation rows.';
-
 const respondInvestigations: Investigation[] = [
   {
     id: 'inv-officer-impossible-travel-001',
@@ -219,14 +220,14 @@ const respondMoreInvestigations: Investigation[] = [
 
 const investigateInvestigations: Investigation[] = [
   {
-    id: 'inv-dark-beacon-corroborated-001',
+    id: 'inv-hunt-beacon-corroborated-001',
     template_id: TEMPLATE_ID_INVESTIGATION,
     title: 'Corroborated C2 beacon · host-srv-db02 + host-srv-app01',
     createdAt: new Date(Date.now() - 16.5 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 12 * 60 * 1000).toISOString(),
-    watch_id: SYSTEM_SECURITY_WATCH_DARK_ID,
-    watch_execution_id: 'exec-dark-20260720-0300',
-    watch_tier: 'dark',
+    watch_id: SYSTEM_SECURITY_WATCH_HUNT_ID,
+    watch_execution_id: 'exec-hunt-20260720-0300',
+    watch_tier: 'hunt',
     severity: 'critical',
     assignee: 'oncall.sec-team',
     status: 'in-progress',
@@ -234,7 +235,7 @@ const investigateInvestigations: Investigation[] = [
     recommendedAction: 'investigate',
     affectedSurface: 'host-srv-db02',
     summary:
-      'Dark Watch sweep corroborated a Floor beacon alert. Both hosts beaconing to the same C2 with a shared persistence mechanism — take over to deepen scope.',
+      'Hunt Watch sweep corroborated a Floor beacon alert. Both hosts beaconing to the same C2 with a shared persistence mechanism — take over to deepen scope.',
     priorityScore: 71,
     recordId: 'CASE-2054',
     primaryActionLabel: 'Take over',
@@ -243,15 +244,15 @@ const investigateInvestigations: Investigation[] = [
         id: 'evt-200',
         timestamp: new Date(Date.now() - 16.5 * 60 * 1000).toISOString(),
         type: 'sweep',
-        summary: 'Scheduled Dark Watch sweep started',
-        actor: SYSTEM_SECURITY_WATCH_DARK_ID,
+        summary: 'Scheduled Hunt Watch sweep started',
+        actor: SYSTEM_SECURITY_WATCH_HUNT_ID,
       },
       {
         id: 'evt-201',
         timestamp: new Date(Date.now() - 16.25 * 60 * 1000).toISOString(),
         type: 'corroboration',
         summary: 'Linked beacon hosts · confidence raised to 0.94',
-        actor: SYSTEM_SECURITY_WATCH_DARK_ID,
+        actor: SYSTEM_SECURITY_WATCH_HUNT_ID,
       },
     ],
   },
@@ -284,21 +285,21 @@ const configureInvestigations: Investigation[] = [
 /** Auto-resolved receipts — leave the Brief queue (closed) but keep fixtures for history demos. */
 const resolvedInvestigations: Investigation[] = [
   {
-    id: 'inv-dark-mailbox-auto-008',
+    id: 'inv-hunt-mailbox-auto-008',
     template_id: TEMPLATE_ID_INVESTIGATION,
     title: 'Mailbox forwarding rule removed — j.reyes',
     createdAt: new Date(Date.now() - 44 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 23 * 60 * 1000).toISOString(),
-    watch_id: SYSTEM_SECURITY_WATCH_DARK_ID,
-    watch_execution_id: 'exec-dark-20260720-0110',
-    watch_tier: 'dark',
+    watch_id: SYSTEM_SECURITY_WATCH_HUNT_ID,
+    watch_execution_id: 'exec-hunt-20260720-0110',
+    watch_tier: 'hunt',
     severity: 'medium',
     status: 'auto-resolved',
     pendingProposalCount: 0,
     recommendedAction: 'respond',
     affectedSurface: 'j.reyes@corp',
     summary:
-      'Dark Watch removed a mailbox exfil rule on j.reyes and closed the case — resolved autonomously, full evidence trail in the record.',
+      'Hunt Watch removed a mailbox exfil rule on j.reyes and closed the case — resolved autonomously, full evidence trail in the record.',
     priorityScore: 0,
     recordId: 'CASE-2043',
     primaryActionLabel: 'Reviewed — file it',
@@ -308,7 +309,7 @@ const resolvedInvestigations: Investigation[] = [
         timestamp: new Date(Date.now() - 44 * 60 * 60 * 1000).toISOString(),
         type: 'resolution',
         summary: 'Resolved autonomously · 0 messages forwarded',
-        actor: SYSTEM_SECURITY_WATCH_DARK_ID,
+        actor: SYSTEM_SECURITY_WATCH_HUNT_ID,
       },
     ],
   },
@@ -321,15 +322,3 @@ export const MOCK_INVESTIGATIONS: Investigation[] = [
   ...configureInvestigations,
   ...resolvedInvestigations,
 ];
-
-export const createMockInvestigation = (overrides: Partial<Investigation> = {}): Investigation => ({
-  ...respondInvestigations[0],
-  ...overrides,
-  events: overrides.events ?? respondInvestigations[0].events,
-});
-
-export const getMockInvestigationsByWatchId = (watchId: string): Investigation[] =>
-  MOCK_INVESTIGATIONS.filter((inv) => inv.watch_id === watchId);
-
-export const getMockInvestigationById = (id: string): Investigation | undefined =>
-  MOCK_INVESTIGATIONS.find((inv) => inv.id === id);

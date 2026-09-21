@@ -16,7 +16,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-export const TemplateId = lazySchema(() => z.enum(['investigation', 'proposal', 'incident']));
+export const TemplateId = lazySchema(() => z.enum(['investigation', 'proposal', 'escalation']));
 export type TemplateId = z.infer<typeof TemplateId>;
 export type TemplateIdEnum = typeof TemplateId.enum;
 export const TemplateIdEnum = TemplateId.enum;
@@ -39,7 +39,7 @@ export type ProposalStatusEnum = typeof ProposalStatus.enum;
 export const ProposalStatusEnum = ProposalStatus.enum;
 
 export const WatchTier = lazySchema(() =>
-  z.enum(['floor', 'officer', 'dark', 'deep', 'detection'])
+  z.enum(['floor', 'officer', 'hunt', 'deep', 'detection'])
 );
 export type WatchTier = z.infer<typeof WatchTier>;
 export type WatchTierEnum = typeof WatchTier.enum;
@@ -142,9 +142,9 @@ export const Proposal = lazySchema(() =>
      */
     parentConversationId: z.string().describe('Investigation id this proposal belongs to'),
     /**
-     * Proposal action type (e.g. contain, escalate, tune)
+     * Proposal action type (e.g. respond, investigate, configure)
      */
-    type: z.string().describe('Proposal action type (e.g. contain, escalate, tune)'),
+    type: z.string().describe('Proposal action type (e.g. respond, investigate, configure)'),
     confidence: z.number().min(0).max(1),
     reasoning: z.string(),
     evidenceRefs: z.array(EvidenceRef),
@@ -163,10 +163,10 @@ export const Proposal = lazySchema(() =>
 );
 export type Proposal = z.infer<typeof Proposal>;
 
-export const Incident = lazySchema(() =>
+export const Escalation = lazySchema(() =>
   z.object({
     id: z.string(),
-    template_id: z.literal('incident'),
+    template_id: z.literal('escalation'),
     forkedFromInvestigationId: z.string(),
     watch_id: z.string().optional(),
     status: z.string().optional(),
@@ -175,4 +175,4 @@ export const Incident = lazySchema(() =>
     events: z.array(TimelineEvent),
   })
 );
-export type Incident = z.infer<typeof Incident>;
+export type Escalation = z.infer<typeof Escalation>;
