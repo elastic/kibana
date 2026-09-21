@@ -6,181 +6,91 @@
  */
 
 import { css } from '@emotion/react';
-import React from 'react';
+import React, { forwardRef, useImperativeHandle } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import type { ListInvestigationItem, Severity } from '@kbn/nightshift-investigations-plugin/common';
+import { NO_INVESTIGATIONS_FOUND_MESSAGE } from '../common/messages';
+import type { InvestigationSectionState } from '../hooks/use_investigation_sections';
 import {
-  EuiBadge,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSkeletonText,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import type { ListInvestigationItem } from '@kbn/nightshift-investigations-plugin/common';
+  getInvestigationSectionAnchorId,
+  InvestigationSection,
+  isInvestigationSectionVisible,
+} from './investigation_section';
 
-import { InvestigationListItem } from './investigation_list_item';
-
-export const INVESTIGATION_LIST_PAGE_SIZES = [20, 50, 100] as const;
-export type InvestigationListPageSize = (typeof INVESTIGATION_LIST_PAGE_SIZES)[number];
-
-const getNextPageSize = (
-  current: InvestigationListPageSize
-): InvestigationListPageSize | undefined => {
-  const index = INVESTIGATION_LIST_PAGE_SIZES.indexOf(current);
-  const next = INVESTIGATION_LIST_PAGE_SIZES[index + 1];
-  // next is InvestigationListPageSize | undefined depending on whether index+1 is in range
-  return next;
-};
+export interface InvestigationListHandle {
+  /** Scrolls to a tier's section, reporting `false` when the list is not rendering one. */
+  scrollToSeverity: (severity: Severity) => boolean;
+}
 
 export interface InvestigationListProps {
-  investigations: ListInvestigationItem[];
-  total: number;
-  isInitialLoading?: boolean;
-  size: InvestigationListPageSize;
-  onSizeChange: (size: InvestigationListPageSize) => void;
+  sections: InvestigationSectionState[];
   selectedInvestigationId?: string;
   onInvestigationClick?: (investigation: ListInvestigationItem) => void;
 }
 
-export function InvestigationList({
-  investigations,
-  total,
-  isInitialLoading = false,
-  size,
-  onSizeChange,
-  selectedInvestigationId,
-  onInvestigationClick,
-}: InvestigationListProps): React.ReactElement {
-  const { euiTheme } = useEuiTheme();
+export const InvestigationList = forwardRef<InvestigationListHandle, InvestigationListProps>(
+  function InvestigationList(
+    { sections, selectedInvestigationId, onInvestigationClick },
+    ref
+  ): React.ReactElement {
+    const { euiTheme } = useEuiTheme();
+    const visibleSections = sections.filter(isInvestigationSectionVisible);
 
-  const roundedPanelCss = css`
-    box-sizing: border-box;
-    overflow: hidden;
-    border-radius: ${euiTheme.size.s};
-  `;
+    useImperativeHandle(ref, () => ({
+      scrollToSeverity: (severity: Severity) => {
+        const section = document.getElementById(getInvestigationSectionAnchorId(severity));
+        if (section == null) {
+          return false;
+        }
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Scrolling alone leaves keyboard and screen reader users where they were, so move focus
+        // to the section too. `preventScroll` keeps the smooth scroll above from being cut short.
+        section.focus({ preventScroll: true });
+        return true;
+      },
+    }));
 
-  const heading = (
-    <>
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiTitle
-            size="xs"
-            css={css`
-              font-weight: ${euiTheme.font.weight.medium};
-            `}
-          >
-            <h2>
-              {i18n.translate('xpack.nightshift.investigations.listTitle', {
-                defaultMessage: 'Investigations',
-              })}
-            </h2>
-          </EuiTitle>
-        </EuiFlexItem>
-        {!isInitialLoading && (
-          <EuiFlexItem grow={false}>
-            <EuiBadge data-test-subj="nightshiftInvestigationsCount">{total}</EuiBadge>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
-    </>
-  );
-
-  if (isInitialLoading) {
-    return (
-      <>
-        {heading}
-        <EuiPanel hasBorder hasShadow={false} paddingSize="l" css={roundedPanelCss}>
-          <div aria-hidden data-test-subj="nightshiftInvestigationListSkeleton">
-            <EuiSkeletonText lines={3} />
-          </div>
-        </EuiPanel>
-      </>
-    );
-  }
-
-  if (investigations.length === 0) {
-    return (
-      <>
-        {heading}
-        <EuiPanel hasBorder hasShadow={false} paddingSize="l" color="subdued" css={roundedPanelCss}>
-          <EuiText textAlign="center" color="subdued" size="s">
-            <p>
-              {i18n.translate('xpack.nightshift.investigations.emptyDescription', {
-                defaultMessage: 'No investigations found',
-              })}
-            </p>
-          </EuiText>
-        </EuiPanel>
-      </>
-    );
-  }
-
-  const nextPageSize = getNextPageSize(size);
-  const hasMore = investigations.length < total;
-
-  return (
-    <>
-      {heading}
-      <EuiPanel hasBorder hasShadow={false} paddingSize="none" css={roundedPanelCss}>
-        <ol
+    if (visibleSections.length === 0) {
+      return (
+        <EuiPanel
+          hasBorder
+          hasShadow={false}
+          paddingSize="l"
+          color="subdued"
+          data-test-subj="nightshiftInvestigationsEmpty"
           css={css`
-            list-style: none;
-            margin: 0;
-            padding: 0;
+            box-sizing: border-box;
+            overflow: hidden;
+            border-radius: ${euiTheme.size.s};
           `}
         >
-          {investigations.map((investigation, index) => (
-            <li
-              key={investigation.investigation_id}
-              css={
-                index < investigations.length - 1
-                  ? css`
-                      border-bottom: ${euiTheme.border.thin};
-                    `
-                  : undefined
-              }
-            >
-              <InvestigationListItem
-                investigation={investigation}
-                isSelected={investigation.investigation_id === selectedInvestigationId}
-                onClick={onInvestigationClick}
-              />
-            </li>
-          ))}
-        </ol>
-      </EuiPanel>
+          <EuiText textAlign="center" color="subdued" size="s">
+            {NO_INVESTIGATIONS_FOUND_MESSAGE}
+          </EuiText>
+        </EuiPanel>
+      );
+    }
 
-      {hasMore && nextPageSize !== undefined && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiFlexGroup alignItems="center" direction="column" gutterSize="xs" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                data-test-subj="nightshiftInvestigationsShowMoreButton"
-                size="s"
-                onClick={() => onSizeChange(nextPageSize)}
-              >
-                {i18n.translate('xpack.nightshift.investigations.showMoreButton', {
-                  defaultMessage: 'Show more',
-                })}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText color="subdued" size="xs">
-                {i18n.translate('xpack.nightshift.investigations.showingCount', {
-                  defaultMessage: 'Showing {shown} of {total}',
-                  values: { shown: investigations.length, total },
-                })}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
-      )}
-    </>
-  );
-}
+    return (
+      <EuiFlexGroup direction="column" gutterSize="l" responsive={false}>
+        {visibleSections.map((section) => (
+          <EuiFlexItem key={section.id} grow={false}>
+            <InvestigationSection
+              id={section.id}
+              investigations={section.investigations}
+              total={section.total}
+              hasMore={section.hasMore}
+              isInitialLoading={section.isInitialLoading}
+              isLoadingMore={section.isFetchingNextPage}
+              error={section.error}
+              onShowMore={section.fetchNextPage}
+              onRetry={section.refetch}
+              selectedInvestigationId={selectedInvestigationId}
+              onInvestigationClick={onInvestigationClick}
+            />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    );
+  }
+);

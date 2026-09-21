@@ -28,6 +28,7 @@ describe('createAiIndexAttachmentType', () => {
     dest: { type: 'data_stream' as const, value: 'ai-index-ds-my-ai-index' },
     sources: [{ type: 'esql' as const, value: 'FROM tickets' }],
     automations: [{ type: 'workflow' as const, value: 'wf-1' }],
+    traces: [],
   };
 
   it('registers the expected attachment type id', () => {
@@ -105,6 +106,9 @@ describe('createAiIndexAttachmentType', () => {
     );
     expect(description).toMatch(/naming the automation being replaced/);
     expect(description).toMatch(/Propose values rather than asking for them/);
+    // The plan belongs in chat: `ask_user_question` documents its own question and option
+    // lengths, and asking for the plan inside the question overrides it into a wall of text.
+    expect(description).toMatch(/Lay the plan out in chat before it/);
   });
 
   it('suppresses the workflow preview, which other attachments ask the agent to render', () => {
@@ -165,5 +169,77 @@ describe('createAiIndexAttachmentType', () => {
     expect(representation.value).toContain('Destination: data_stream "ai-index-ds-my-ai-index"');
     expect(representation.value).toContain('Sources: esql:FROM tickets');
     expect(representation.value).toContain('Existing automations (workflow ids): wf-1');
+    expect(representation.value).toContain('Traces: none configured');
+  });
+
+  it('validates attachment data with traces including derived query', async () => {
+    const traces = [
+      {
+        type: 'elastic_agent' as const,
+        value: 'support-agent',
+        query:
+          'FROM traces-agent_builder.otel-default | WHERE attributes.gen_ai.agent.id IN ("support-agent")',
+      },
+    ];
+    const result = await attachmentType.validate({ ...validData, traces });
+    expect(result).toEqual({ valid: true, data: { ...validData, traces } });
+  });
+
+  it('formats traces as type:value -> query when configured', async () => {
+    const formatted = await attachmentType.format(
+      {
+        id: 'attachment-1',
+        type: attachmentType.id,
+        data: {
+          ...validData,
+          traces: [
+            {
+              type: 'elastic_agent' as const,
+              value: 'support-agent',
+              query:
+                'FROM traces-agent_builder.otel-default\n| WHERE attributes.gen_ai.agent.id IN ("support-agent")',
+            },
+            { type: 'index' as const, value: 'logs-*', query: 'FROM logs-*' },
+          ],
+        },
+      },
+      formatContext
+    );
+    const representation = await formatted.getRepresentation?.();
+
+    if (representation?.type !== 'text') {
+      throw new Error('expected a text representation');
+    }
+    expect(representation.value).toContain(
+      '- elastic_agent:support-agent -> FROM traces-agent_builder.otel-default | WHERE attributes.gen_ai.agent.id IN ("support-agent")'
+    );
+    expect(representation.value).toContain('- index:logs-* -> FROM logs-*');
+  });
+
+  it('formats an esql trace as its query alone, without repeating the value', async () => {
+    const formatted = await attachmentType.format(
+      {
+        id: 'attachment-1',
+        type: attachmentType.id,
+        data: {
+          ...validData,
+          traces: [
+            {
+              type: 'esql' as const,
+              value: 'FROM traces-* | LIMIT 10',
+              query: 'FROM traces-* | LIMIT 10',
+            },
+          ],
+        },
+      },
+      formatContext
+    );
+    const representation = await formatted.getRepresentation?.();
+
+    if (representation?.type !== 'text') {
+      throw new Error('expected a text representation');
+    }
+    expect(representation.value).toContain('- esql: FROM traces-* | LIMIT 10');
+    expect(representation.value).not.toContain('esql:FROM traces-* | LIMIT 10 ->');
   });
 });

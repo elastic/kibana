@@ -14,6 +14,7 @@ import {
   SecurityRoleMappingsPage,
   SecurityRolesPage,
   SecurityUsersPage,
+  UserProfilePage,
 } from './page_objects';
 
 export interface ExtScoutTestFixtures extends ScoutTestFixtures {
@@ -23,6 +24,7 @@ export interface ExtScoutTestFixtures extends ScoutTestFixtures {
     securityRoles: SecurityRolesPage;
     securityRoleMappings: SecurityRoleMappingsPage;
     securityAccountSettings: SecurityAccountSettingsPage;
+    userProfile: UserProfilePage;
   };
 }
 
@@ -44,6 +46,7 @@ export const test = baseTest.extend<ExtScoutTestFixtures, ScoutWorkerFixtures>({
       securityRoles: createLazyPageObject(SecurityRolesPage, page),
       securityRoleMappings: createLazyPageObject(SecurityRoleMappingsPage, page),
       securityAccountSettings: createLazyPageObject(SecurityAccountSettingsPage, page),
+      userProfile: createLazyPageObject(UserProfilePage, page),
     };
 
     await use(extendedPageObjects);

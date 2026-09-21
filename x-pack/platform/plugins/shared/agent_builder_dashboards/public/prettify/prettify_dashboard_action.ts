@@ -13,18 +13,14 @@ import {
   DASHBOARD_ATTACHMENT_TYPE,
   dashboardStateToAttachmentData,
 } from '@kbn/agent-builder-dashboards-common';
-import type { CoreStart, ToastsStart } from '@kbn/core/public';
 import {
   PRETTIFY_DASHBOARD_ACTION_ID,
   type DashboardApi,
   type PrettifyDashboardActionContext,
 } from '@kbn/dashboard-plugin/public';
-import type { FilesStart } from '@kbn/files-plugin/public';
-import { apiPublishesEsqlUsage } from '@kbn/presentation-publishing';
+import { apiPublishesEsql } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
 import type { IdGenerator } from '../attachment_types';
-import { captureDashboardScreenshot } from './capture_dashboard_screenshot';
-import { showScreenshotOverlay } from './screenshot_overlay';
 
 export const PRETTIFY_DASHBOARD_PROMPT = '/dashboard-management prettify this dashboard';
 
@@ -33,9 +29,6 @@ export interface PrettifyDashboardActionDeps {
   getAgentBuilderAccess: AgentBuilderPluginStart['getAgentBuilderAccess'];
   canWriteDashboards: boolean;
   draftAttachmentId: IdGenerator;
-  files: FilesStart;
-  rendering: CoreStart['rendering'];
-  toasts: ToastsStart;
 }
 
 const isPrettifiable = (
@@ -50,8 +43,8 @@ const isPrettifiable = (
   Object.entries(dashboardApi.children$.getValue()).some(
     ([id, child]) =>
       Boolean(dashboardApi.layout$.getValue().panels[id]) &&
-      apiPublishesEsqlUsage(child) &&
-      child.usesEsql$.getValue()
+      apiPublishesEsql(child) &&
+      child.esql$.getValue().length > 0
   );
 
 export const createPrettifyDashboardAction = ({
@@ -59,9 +52,6 @@ export const createPrettifyDashboardAction = ({
   getAgentBuilderAccess,
   canWriteDashboards,
   draftAttachmentId,
-  files,
-  rendering,
-  toasts,
 }: PrettifyDashboardActionDeps): ActionDefinition<PrettifyDashboardActionContext> => {
   return {
     id: PRETTIFY_DASHBOARD_ACTION_ID,
@@ -85,10 +75,10 @@ export const createPrettifyDashboardAction = ({
         dashboardApi.children$.pipe(skip(1)),
         dashboardApi.children$.pipe(
           switchMap((children) => {
-            const esqlChildren = Object.values(children).filter(apiPublishesEsqlUsage);
+            const esqlChildren = Object.values(children).filter(apiPublishesEsql);
             return esqlChildren.length === 0
               ? EMPTY
-              : merge(...esqlChildren.map((child) => child.usesEsql$.pipe(skip(1))));
+              : merge(...esqlChildren.map((child) => child.esql$.pipe(skip(1))));
           })
         )
       ).pipe(map(() => undefined)),
@@ -104,24 +94,12 @@ export const createPrettifyDashboardAction = ({
         data: dashboardStateToAttachmentData(dashboardApi.getSerializedState().attributes),
       };
 
-      const hideScreenshotOverlay = showScreenshotOverlay(rendering);
-      const screenshot = await captureDashboardScreenshot({ dashboardApi, files })
-        .catch(() => {
-          toasts.addWarning(
-            i18n.translate('xpack.agentBuilderDashboards.prettifyDashboard.screenshotFailed', {
-              defaultMessage: 'Could not capture a dashboard screenshot. Continuing without it.',
-            })
-          );
-          return undefined;
-        })
-        .finally(hideScreenshotOverlay);
-
       openChat({
         newConversation: true,
         initialMessage: PRETTIFY_DASHBOARD_PROMPT,
         autoSendInitialMessage: true,
         sessionTag: 'dashboard',
-        attachments: screenshot ? [dashboardAttachment, screenshot] : [dashboardAttachment],
+        attachments: [dashboardAttachment],
       });
     },
   };

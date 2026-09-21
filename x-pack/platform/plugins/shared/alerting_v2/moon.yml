@@ -50,6 +50,7 @@ dependsOn:
   - '@kbn/safer-lodash-set'
   - '@kbn/core-di-internal'
   - '@kbn/i18n'
+  - '@kbn/ui-callout'
   - '@kbn/zod-helpers'
   - '@kbn/core-saved-objects-api-server-mocks'
   - '@kbn/apm-utils'
@@ -94,6 +95,7 @@ dependsOn:
   - '@kbn/expressions-plugin'
   - '@kbn/ui-actions-plugin'
   - '@kbn/field-formats-plugin'
+  - '@kbn/flyout-template'
   - '@kbn/charts-plugin'
   - '@kbn/unified-data-table'
   - '@kbn/unified-histogram'
@@ -135,6 +137,8 @@ dependsOn:
   - '@kbn/es-types'
   - '@kbn/announcement-banner'
   - '@kbn/app-header'
+  - '@kbn/flyout-template'
+  - '@kbn/flyout-sections'
   - '@kbn/core-chrome-browser-context-mocks'
   - '@kbn/change-history'
   - '@kbn/change-history-ui'
@@ -148,6 +152,7 @@ dependsOn:
   - '@kbn/security-plugin-types-server'
   - '@kbn/core-test-helpers-model-versions'
   - '@kbn/content-list-common'
+  - '@kbn/core-ui-settings-server'
 tags:
   - plugin
   - prod

@@ -262,6 +262,14 @@ describe('rule_details', () => {
       expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(rule.name);
     });
 
+    it('renders a host-relative back button href', () => {
+      const rule = mockRule();
+      renderPage(rule);
+      const backLink = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back);
+      expect(backLink).toBeInTheDocument();
+      expect(backLink.closest('a')).toHaveAttribute('href', '/');
+    });
+
     it('renders the rule execution status badge', () => {
       const rule = mockRule({
         executionStatus: {

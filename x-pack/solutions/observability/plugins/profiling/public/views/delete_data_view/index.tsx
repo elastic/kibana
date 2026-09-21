@@ -19,7 +19,7 @@ export function DeleteDataView() {
   } = useProfilingDependencies();
 
   return (
-    <ProfilingAppPageTemplate restrictWidth hideSearchBar>
+    <ProfilingAppPageTemplate hideSearchBar suppressMenu>
       <div style={{ display: 'flex', flexGrow: 1, justifyContent: 'center', alignItems: 'center' }}>
         <EuiCard
           style={{ flexGrow: 0, maxWidth: '500px' }}

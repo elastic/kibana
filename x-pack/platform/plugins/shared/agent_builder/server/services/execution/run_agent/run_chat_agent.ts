@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { filter, finalize, from, merge, ReplaySubject, shareReplay } from 'rxjs';
+import { filter, finalize, from, merge, ReplaySubject, shareReplay, tap } from 'rxjs';
 import { Command } from '@langchain/langgraph';
 import {
   isStreamEvent,
@@ -19,6 +19,7 @@ import type {
   ConversationRound,
   MetadataFieldValue,
   RoundInput,
+  SubagentEntry,
 } from '@kbn/agent-builder-common';
 import { ToolOrigin } from '@kbn/agent-builder-common';
 import {
@@ -42,6 +43,8 @@ import {
   getPendingRound,
   evictInternalEvents,
   estimatePerRoundTokens,
+  estimateFailedEntryTokens,
+  survivingFailedEntryTokens,
 } from './utils';
 import { registerInternalTools } from './tools/register_internal_tools';
 import {
@@ -56,7 +59,9 @@ import { computeContextBudget } from './utils/context_budget';
 import { DEFAULT_MAX_TOOL_RESULT_TOKENS } from './utils/tool_result_guardrail';
 import { compactConversation } from './utils/conversation_compactor';
 import { createAgentGraph } from './graph';
-import { convertGraphEvents } from './convert_graph_events';
+import { convertGraphEvents, type ConvertedEvents } from './convert_graph_events';
+import { buildRoundInterruptedEvent } from './utils/build_round_interrupted_event';
+import { emitRoundInterruptedOnError } from './utils/emit_round_interrupted_on_error';
 import type { RunAgentParams, RunAgentResponse } from './run_agent';
 import { steps } from './constants';
 import { createPromptFactory } from './prompts';
@@ -64,7 +69,12 @@ import { createImageResolver } from './utils/image_resolver';
 import { BackgroundExecutionService } from './background_execution_service';
 import { SubagentTracker } from './subagent_tracker';
 import type { StateType } from './state';
-import { eventsForContext, groupTimelineRounds, roundResponse } from './utils/context_timeline';
+import {
+  eventsForContext,
+  groupTimelineEntries,
+  isTimelineRound,
+  roundResponse,
+} from './utils/context_timeline';
 
 const chatAgentGraphName = 'default-agent-builder-agent';
 
@@ -101,7 +111,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     outputSchema,
     startTime = new Date(),
     configurationOverrides,
-    action,
     executionId,
     roundId: providedRoundId,
   },
@@ -131,9 +140,9 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   // source. Regenerate replaces the last round, so a paused one is never resumed.
   const timeline = conversation ? eventsForContext(conversation) : [];
 
-  ensureValidInput({ input: nextInput, timeline, action });
+  ensureValidInput({ input: nextInput, timeline });
 
-  const pendingRound = action === 'regenerate' ? undefined : getPendingRound(timeline);
+  const pendingRound = getPendingRound(timeline);
   // Capture todos before the round runs so they can be carried over if the agent doesn't write new todos
   const initialTodos = todoStateManager.get();
   const conversationTimestamp = pendingRound?.started_at ?? startTime.toISOString();
@@ -191,22 +200,24 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   toolManager.setEventEmitter(eventEmitter);
   toolManager.setMaxToolResultTokens(DEFAULT_MAX_TOOL_RESULT_TOKENS);
 
-  // Pass action so regenerate uses the last round's original input instead of request input
   let processedConversation = await prepareConversation({
     nextInput,
     timeline,
     nextInputAuthor: pendingRound?.author ?? author,
     context,
-    action,
     metadata: conversation?.metadata,
     templateId: conversation?.template_id,
   });
+  // Everything in the log at this point came from the incoming message's attachments; anything
+  // recorded from here on is made by tools during the round.
+  const chatInputChanges = context.attachmentStateManager.drainChanges();
 
   const beforeHookResult = await context.hooks.run(HookLifecycle.beforeAgent, {
     request,
     abortSignal,
     nextInput: processedConversation.nextInput,
     agentId,
+    conversationId: conversation?.id,
   });
   processedConversation.nextInput = beforeHookResult.nextInput ?? processedConversation.nextInput;
 
@@ -217,10 +228,11 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
           context: {
             userMessage: processedConversation.nextInput.message,
             recentContext: buildRecentContext(
-              groupTimelineRounds(processedConversation.timeline).map((round) => ({
-                input: round.userMessage.data,
-                response: roundResponse(round),
-              }))
+              groupTimelineEntries(processedConversation.timeline).map((entry) =>
+                isTimelineRound(entry)
+                  ? { input: entry.userMessage.data, response: roundResponse(entry) }
+                  : { input: entry.userMessage.data }
+              )
             ),
           },
           modelProvider,
@@ -236,6 +248,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     skills,
     toolProvider,
     agentConfiguration,
+    aiIndicesEnabled: experimentalFeatures.aiIndices,
     attachmentsService: attachments,
     request,
     spaceId: context.spaceId,
@@ -279,6 +292,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     parentConversationId: conversation?.id,
     subagentTracker,
     conversationExists: (id: string) => conversationClient.exists(id),
+    agentConfiguration,
   });
 
   // Then add dynamic tools
@@ -299,7 +313,10 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     toolManager,
     toolRegistry,
   });
-  const conversationTokenEstimate = perRoundTokenCounts.reduce((sum, count) => sum + count, 0);
+  const failedEntryTokenCounts = estimateFailedEntryTokens(processedConversation.timeline);
+  const conversationTokenEstimate =
+    perRoundTokenCounts.reduce((sum, count) => sum + count, 0) +
+    survivingFailedEntryTokens(processedConversation.timeline, 0, failedEntryTokenCounts);
 
   // Create unified result transformer for tool result optimization
   const resultTransformer = createResultTransformer({
@@ -320,6 +337,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     chatModel: model.chatModel,
     contextBudget,
     perRoundTokenCounts,
+    failedEntryTokenCounts,
     existingSummary: conversation?.state?.compaction_summary,
     logger,
     abortSignal,
@@ -448,8 +466,38 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   });
 
   const effectiveOverrides = configurationOverrides ?? pendingRound?.configuration_overrides;
+  const agentIdForEvents = agentId ?? conversation?.agent_id ?? 'unknown';
+
+  // Every event of the run, collected for the interruption path. `addRoundCompleteEvent` keeps its
+  // own `toArray()` as the completion signal for `round_complete`; this holds the same references.
+  const collectedEvents: ConvertedEvents[] = [];
+
+  const toRoundInterrupted = () =>
+    buildRoundInterruptedEvent({
+      events: collectedEvents,
+      roundId,
+      pendingRound,
+      startTime,
+      processedInput,
+      author,
+      origin,
+      agentId: agentIdForEvents,
+      conversation,
+      modelProvider,
+      mainConnectorId: model.connector.connectorId,
+      configurationOverrides: effectiveOverrides,
+      compactionResult,
+      relevantSkillsSelection,
+      initialTodos,
+      attachmentStateManager: context.attachmentStateManager,
+      chatInputChanges,
+      getWorkspaceId: () => context.bashService?.getWorkspaceId(),
+    });
 
   const events$ = merge(graphEvents$, manualEvents$).pipe(
+    tap((event) => {
+      collectedEvents.push(event);
+    }),
     addRoundCompleteEvent({
       userInput: processedInput,
       origin,
@@ -475,8 +523,13 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       initialTodos,
       relevantSkillsSelection,
       getWorkspaceId: () => context.bashService?.getWorkspaceId(),
+      chatInputChanges,
+      agentId: agentIdForEvents,
+      conversation,
     }),
     evictInternalEvents(),
+    // Placed after eviction so `round_interrupted` reaches the runner like any other chat event.
+    emitRoundInterruptedOnError({ buildEvent: toRoundInterrupted, logger }),
     shareReplay()
   );
 
@@ -529,7 +582,7 @@ const getConversationState = ({
   backgroundExecutionService: BackgroundExecutionService;
   compactionSummary?: CompactionSummary;
   todoStateManager: TodoStateManager;
-  subagents?: Record<string, string>;
+  subagents?: Record<string, SubagentEntry>;
 }): ConversationInternalState => {
   const bgState = backgroundExecutionService.getPendingState();
   const todos = todoStateManager.get();

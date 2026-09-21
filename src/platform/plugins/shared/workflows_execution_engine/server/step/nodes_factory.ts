@@ -35,7 +35,6 @@ import type {
   WaitGraphNode,
   WorkflowExecuteAsyncGraphNode,
   WorkflowExecuteGraphNode,
-  WorkflowGraph,
   WorkflowOutputGraphNode,
 } from '@kbn/workflows/graph';
 import {
@@ -95,6 +94,7 @@ import type { StepExecutionRuntimeFactory } from '../workflow_context_manager/st
 import type { StepIoService } from '../workflow_context_manager/step_io_service';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
+import type { WorkflowRuntimeGraph } from '../workflow_context_manager/workflow_runtime_graph';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 export class NodesFactory {
@@ -102,7 +102,7 @@ export class NodesFactory {
     private connectorExecutor: ConnectorExecutor, // this is temporary, we will remove it when we have a proper connector executor
     private workflowRuntime: WorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger, // Assuming you have a logger interface
-    private workflowGraph: WorkflowGraph,
+    private workflowGraph: WorkflowRuntimeGraph,
     private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory,
     private dependencies: ContextDependencies,
     private stepIoService: StepIoService

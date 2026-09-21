@@ -1,5 +1,5 @@
 {
-  "sha1": "c73be1ce85ab04fd35a8b79481ea897b83527960",
+  "sha1": "5cd5284b3eb195b0f23648a40ffb966b4e1562f8",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -212,6 +212,76 @@
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/api_keys_update.spec.ts",
         "line": 21,
         "column": 42
+      }
+    },
+    {
+      "id": "cb73557010fc86d-bff939b33db4d4f",
+      "title": "User Profile Page details: should set the full name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/user_profile.spec.ts",
+        "line": 45,
+        "column": 26
+      }
+    },
+    {
+      "id": "cb73557010fc86d-62b1eacc206ab18",
+      "title": "User Profile Page details: should set the email",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/user_profile.spec.ts",
+        "line": 52,
+        "column": 11
+      }
+    },
+    {
+      "id": "cb73557010fc86d-c72cf0a702f2089",
+      "title": "User Profile Page change password: should set the current password and enter a new password, then submit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/user_profile.spec.ts",
+        "line": 67,
+        "column": 68
+      }
+    },
+    {
+      "id": "cb73557010fc86d-994237d89fbc8e1",
+      "title": "User Profile Page theme: should change theme based on the User Profile Theme control with default Adv. Settings value (light)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/user_profile.spec.ts",
+        "line": 79,
+        "column": 24
+      }
+    },
+    {
+      "id": "cb73557010fc86d-35a62590c3b696a",
+      "title": "User Profile Page theme: should change theme based on the User Profile Theme control with default Adv. Settings value set to dark",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/user_profile.spec.ts",
+        "line": 94,
+        "column": 7
       }
     }
   ]
