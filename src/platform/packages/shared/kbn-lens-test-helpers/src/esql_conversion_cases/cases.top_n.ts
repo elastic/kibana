@@ -14,6 +14,20 @@ import { createEsqlConversionCaseContext } from './fixtures';
 export const buildTopNCases = (): EsqlConversionCase[] => {
   const { logs, logsFrom, logsWhere } = createEsqlConversionCaseContext();
 
+  // Restricts the query to the top values of an outer dimension, which `LIMIT n BY` cannot do.
+  const outerTopNFilter = ({
+    field,
+    score,
+    sort,
+    size,
+  }: {
+    field: string;
+    score: string;
+    sort: string;
+    size: number;
+  }) =>
+    `WHERE ${field} IN (${logsFrom} | ${logsWhere} | STATS ${score} BY ${field} | SORT ${sort} | LIMIT ${size} | KEEP ${field})`;
+
   return [
     {
       group: 'top_n',
@@ -118,6 +132,158 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
       },
       columnOrder: ['col1', 'col2', 'col3'],
       expected: { success: false, reason: 'terms_not_supported' },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'three terms dimensions are not convertible',
+      columns: {
+        col1: terms('geo.src', {}),
+        col2: terms('geo.dest', {}),
+        col3: terms('host.keyword', {}),
+        col4: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2', 'col3', 'col4'],
+      expected: { success: false, reason: 'terms_multi_level_not_supported' },
+    },
+    // Multi-terms parity has three parts: the outer dimension keeps only its top values,
+    // `LIMIT n BY` keeps the inner top values per outer value, and a second SORT applies the
+    // outer ordering that the leading SORT cannot express because `LIMIT BY` consumes it.
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'two terms both ranked by metric DESC',
+      columns: {
+        col1: terms('geo.src', {
+          size: 5,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+        }),
+        col2: terms('host.keyword', {
+          size: 3,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+        }),
+        col3: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | ${outerTopNFilter({
+          field: 'geo.src',
+          score: 'AVG(bytes)',
+          sort: '`AVG(bytes)` DESC',
+          size: 5,
+        })} | STATS AVG(bytes) BY geo.src, host.keyword | SORT \`AVG(bytes)\` DESC | LIMIT 3 BY geo.src | SORT \`AVG(bytes)\` DESC`,
+        columnNames: ['AVG(bytes)', 'geo.src', 'host.keyword'],
+        expectedSourceIds: {
+          'AVG(bytes)': ['col3'],
+          'geo.src': ['col1'],
+          'host.keyword': ['col2'],
+        },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'outer alphabetical, inner metric',
+      columns: {
+        col1: terms('geo.src', {
+          size: 5,
+          orderBy: { type: 'alphabetical' },
+          orderDirection: 'asc',
+        }),
+        col2: terms('host.keyword', {
+          size: 3,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+        }),
+        col3: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | ${outerTopNFilter({
+          field: 'geo.src',
+          score: 'COUNT(*)',
+          sort: 'geo.src ASC',
+          size: 5,
+        })} | STATS AVG(bytes) BY geo.src, host.keyword | SORT \`AVG(bytes)\` DESC | LIMIT 3 BY geo.src | SORT geo.src ASC, \`AVG(bytes)\` DESC`,
+        columnNames: ['AVG(bytes)', 'geo.src', 'host.keyword'],
+        expectedSourceIds: {
+          'AVG(bytes)': ['col3'],
+          'geo.src': ['col1'],
+          'host.keyword': ['col2'],
+        },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'both dimensions alphabetical',
+      columns: {
+        col1: terms('geo.src', {
+          orderBy: { type: 'alphabetical' },
+          orderDirection: 'asc',
+        }),
+        col2: terms('host.keyword', {
+          size: 4,
+          orderBy: { type: 'alphabetical' },
+          orderDirection: 'desc',
+        }),
+        col3: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | ${outerTopNFilter({
+          field: 'geo.src',
+          score: 'COUNT(*)',
+          sort: 'geo.src ASC',
+          size: 5,
+        })} | STATS AVG(bytes) BY geo.src, host.keyword | SORT host.keyword DESC | LIMIT 4 BY geo.src | SORT geo.src ASC, host.keyword DESC`,
+        columnNames: ['AVG(bytes)', 'geo.src', 'host.keyword'],
+        expectedSourceIds: {
+          'AVG(bytes)': ['col3'],
+          'geo.src': ['col1'],
+          'host.keyword': ['col2'],
+        },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description:
+        'both dimensions ranked by the same metric in opposite directions — outer direction wins',
+      columns: {
+        col1: terms('geo.src', {
+          size: 5,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'asc',
+        }),
+        col2: terms('host.keyword', {
+          size: 3,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+        }),
+        col3: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | ${outerTopNFilter({
+          field: 'geo.src',
+          score: 'AVG(bytes)',
+          sort: '`AVG(bytes)` ASC',
+          size: 5,
+        })} | STATS AVG(bytes) BY geo.src, host.keyword | SORT \`AVG(bytes)\` DESC | LIMIT 3 BY geo.src | SORT \`AVG(bytes)\` ASC`,
+        columnNames: ['AVG(bytes)', 'geo.src', 'host.keyword'],
+        expectedSourceIds: {
+          'AVG(bytes)': ['col3'],
+          'geo.src': ['col1'],
+          'host.keyword': ['col2'],
+        },
+      },
     },
   ];
 };

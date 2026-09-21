@@ -25,6 +25,7 @@ import { AUTO_TARGET_NUMBER_OF_BUCKETS, DEFAULT_STATIC_VALUE } from './constants
 import { convertToAbsoluteDateRange } from './date_range';
 import { resolveTimeShift } from './time_shift';
 import type { EsqlConversionFailureReason } from './to_esql_failure_reasons';
+import { buildOuterTopNFilter } from './build_outer_top_n_filter';
 import { createEsAggsIdMapEntry } from './create_es_aggs_id_map_entry';
 import { getTermsConversionFailure } from './get_terms_conversion_failure';
 import { getToEsqlFn, getEsqlOperationMeta } from './operations/registry';
@@ -148,6 +149,34 @@ const quoteEsqlSortField = (name: string): string => {
   return escapeEsqlColumnName(trimmed);
 };
 
+interface EsqlSortKey {
+  /** SORT expression, already escaped. */
+  expr: string;
+  direction: string;
+}
+
+/**
+ * `STATS` needs an aggregation, but an alphabetically ranked outer dimension only needs the
+ * grouping keys. `KEEP` drops this column before the values reach the enclosing query.
+ */
+const OUTER_TOP_N_GROUPING_ONLY_METRIC = 'COUNT(*)';
+
+/** Sorting twice by the same expression is redundant; the first direction wins. */
+const formatSortKeys = (keys: EsqlSortKey[]): string => {
+  const seenExprs = new Set<string>();
+  const clauses: string[] = [];
+
+  for (const { expr, direction } of keys) {
+    if (seenExprs.has(expr)) {
+      continue;
+    }
+    seenExprs.add(expr);
+    clauses.push(`${expr} ${direction}`);
+  }
+
+  return clauses.join(', ');
+};
+
 export function generateEsqlQuery(
   esAggEntries: Array<readonly [string, GenericIndexPatternColumn]>,
   layer: FormBasedLayer,
@@ -175,14 +204,15 @@ export function generateEsqlQuery(
 
   // indexPattern.title is the actual ES pattern
   // ES|QL Composer API docs: https://github.com/elastic/esql-js/blob/main/src/composer/README.md
-  const queryParts: string[] = [`FROM ${esql.src(indexPattern.title)}`];
+  const source = `${esql.src(indexPattern.title)}`;
+  const queryParts: string[] = [`FROM ${source}`];
 
+  let timeFilter: string | undefined;
   if (indexPattern.timeFieldName) {
     const [ESQL_TIME_RANGE_START, ESQL_TIME_RANGE_END] = TIME_SYSTEM_PARAMS;
     const timeField = `${esql.col(indexPattern.timeFieldName)}`;
-    queryParts.push(
-      `WHERE ${timeField} >= ${ESQL_TIME_RANGE_START} AND ${timeField} <= ${ESQL_TIME_RANGE_END}`
-    );
+    timeFilter = `WHERE ${timeField} >= ${ESQL_TIME_RANGE_START} AND ${timeField} <= ${ESQL_TIME_RANGE_END}`;
+    queryParts.push(timeFilter);
   }
 
   const histogramBarsTarget = uiSettings.get<number>(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
@@ -247,6 +277,8 @@ export function generateEsqlQuery(
   // Process metrics (excluding static_value which is handled above)
   // Maps metric column IDs to STATS output names (alias or bare expression) for terms orderBy.
   const metricOutputNamesByColId = new Map<string, string>();
+  // Same keys, but the whole STATS fragment, so outer top-N subqueries can re-aggregate it.
+  const metricFragmentsByColId = new Map<string, string>();
   const metricsResult: EsqlConversion[] = regularMetricEntries.map(([colId, col]) => {
     // Check for specific unsupported operations before general toESQL check
     if (col.operationType === 'formula') {
@@ -326,6 +358,7 @@ export function generateEsqlQuery(
     const esAggsIdMapKey = statsColumnAlias ? statsColumnAlias : fullStatsMetricExpression;
 
     metricOutputNamesByColId.set(colId, esAggsIdMapKey);
+    metricFragmentsByColId.set(colId, statsMetricFragment);
 
     esAggsIdMap[esAggsIdMapKey] = [
       ...(esAggsIdMap[esAggsIdMapKey] ?? []),
@@ -359,10 +392,13 @@ export function generateEsqlQuery(
   }
 
   // Process buckets
+  const termsBucketCount = bucketEsAggsEntries.filter(([, col]) =>
+    isColumnOfType<TermsIndexPatternColumn>('terms', col)
+  ).length;
   const resolvedBucketExprs = new Map<number, string>();
   const bucketsResult: EsqlConversion[] = bucketEsAggsEntries.map(([colId, col], index) => {
     if (isColumnOfType<TermsIndexPatternColumn>('terms', col)) {
-      const termsFailure = getTermsConversionFailure(col, { hasDateHistogram });
+      const termsFailure = getTermsConversionFailure(col, { hasDateHistogram, termsBucketCount });
       if (termsFailure) {
         return getEsqlQueryFailedResult(termsFailure);
       }
@@ -495,43 +531,104 @@ export function generateEsqlQuery(
     | undefined;
 
   if (validBuckets.length > 0) {
-    if (validMetrics.length > 0) {
-      const statsBody = `${validMetrics.join(', ')} BY ${validBuckets.join(', ')}`;
-      queryParts.push(`STATS ${statsBody}`);
-    }
+    const statsClause =
+      validMetrics.length > 0
+        ? `STATS ${validMetrics.join(', ')} BY ${validBuckets.join(', ')}`
+        : undefined;
 
     if (innerTermsBucket) {
-      const { orderBy, orderDirection, size } = innerTermsBucket.col.params;
-      let sortField: string | undefined;
+      // "Rank by" resolves either to the bucket's own field (alphabetical) or to the
+      // STATS output name of the metric it ranks by.
+      const resolveTermsSortKey = (
+        col: TermsIndexPatternColumn,
+        bucketIndex: number
+      ): EsqlSortKey | undefined => {
+        const { orderBy, orderDirection } = col.params;
+        let expr: string | undefined;
 
-      if (orderBy.type === 'alphabetical') {
-        sortField = resolvedBucketExprs.get(innerTermsBucket.index);
-      } else if (orderBy.type === 'column') {
-        sortField = metricOutputNamesByColId.get(orderBy.columnId);
-        if (!sortField) {
-          return getEsqlQueryFailedResult('terms_order_by_not_supported');
+        if (orderBy.type === 'alphabetical') {
+          expr = resolvedBucketExprs.get(bucketIndex);
+        } else if (orderBy.type === 'column') {
+          expr = metricOutputNamesByColId.get(orderBy.columnId);
         }
-      } else {
+
+        return expr
+          ? { expr: quoteEsqlSortField(expr), direction: orderDirection.toUpperCase() }
+          : undefined;
+      };
+
+      const { size } = innerTermsBucket.col.params;
+      const innerSortKey = resolveTermsSortKey(innerTermsBucket.col, innerTermsBucket.index);
+
+      if (!innerSortKey) {
         return getEsqlQueryFailedResult('terms_order_by_not_supported');
       }
 
-      if (!sortField) {
-        return getEsqlQueryFailedResult('terms_not_supported');
+      const outerBuckets = [...resolvedBucketExprs.entries()]
+        .filter(([index]) => index !== innerTermsBucket.index)
+        .sort(([a], [b]) => a - b);
+
+      const outerSortKeys: EsqlSortKey[] = [];
+      const outerTopNFilters: string[] = [];
+
+      for (const [index, bucketExpr] of outerBuckets) {
+        const [, col] = bucketEsAggsEntries[index];
+
+        if (!isColumnOfType<TermsIndexPatternColumn>('terms', col)) {
+          outerSortKeys.push({ expr: quoteEsqlSortField(bucketExpr), direction: 'ASC' });
+          continue;
+        }
+
+        const outerSortKey = resolveTermsSortKey(col, index);
+        if (!outerSortKey) {
+          return getEsqlQueryFailedResult('terms_order_by_not_supported');
+        }
+        outerSortKeys.push(outerSortKey);
+
+        const { orderBy: outerOrderBy, size: outerSize } = col.params;
+        const scoreFragment =
+          outerOrderBy.type === 'column'
+            ? metricFragmentsByColId.get(outerOrderBy.columnId)
+            : OUTER_TOP_N_GROUPING_ONLY_METRIC;
+
+        if (!scoreFragment) {
+          return getEsqlQueryFailedResult('terms_order_by_not_supported');
+        }
+
+        outerTopNFilters.push(
+          buildOuterTopNFilter({
+            source,
+            timeFilter,
+            groupExpr: bucketExpr,
+            scoreFragment,
+            sortClause: formatSortKeys([outerSortKey]),
+            size: outerSize,
+          })
+        );
       }
 
-      queryParts.push(`SORT ${quoteEsqlSortField(sortField)} ${orderDirection.toUpperCase()}`);
+      // Filters run before STATS so the aggregation only sees the kept outer values.
+      queryParts.push(...outerTopNFilters);
+      if (statsClause) {
+        queryParts.push(statsClause);
+      }
 
-      const outerGroupExprs = [...resolvedBucketExprs.entries()]
-        .filter(([index]) => index !== innerTermsBucket.index)
-        .sort(([a], [b]) => a - b)
-        .map(([, expr]) => expr);
+      // This SORT decides which rows survive LIMIT BY, so it carries the inner ranking only.
+      queryParts.push(`SORT ${formatSortKeys([innerSortKey])}`);
 
-      if (outerGroupExprs.length > 0) {
-        queryParts.push(`LIMIT ${size} BY ${outerGroupExprs.join(', ')}`);
-      } else {
+      if (outerBuckets.length === 0) {
         queryParts.push(`LIMIT ${size}`);
+      } else {
+        queryParts.push(`LIMIT ${size} BY ${outerBuckets.map(([, expr]) => expr).join(', ')}`);
+        // The ranking above is consumed by LIMIT BY, so outer dimensions are ordered
+        // afterwards; the inner key trails it to keep each group internally ranked.
+        queryParts.push(`SORT ${formatSortKeys([...outerSortKeys, innerSortKey])}`);
       }
     } else {
+      if (statsClause) {
+        queryParts.push(statsClause);
+      }
+
       // Build sort fields, excluding date fields (date_histogram columns).
       // Buckets that resolved to the same expression are a single ES|QL column, so sort once.
       const sortExprs: string[] = [];
