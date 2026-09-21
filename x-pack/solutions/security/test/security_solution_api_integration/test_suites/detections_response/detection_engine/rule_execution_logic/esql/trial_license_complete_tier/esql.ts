@@ -765,7 +765,7 @@ export default ({ getService }: FtrProviderContext) => {
             expect(alertsResponseFromFirstRuleExecution.hits.hits).toHaveLength(100);
 
             // re-trigger rule execution
-            await runSoonRule(supertest, createdRule.id);
+            await runSoonRule(supertest, log, createdRule.id);
 
             const alertsResponse = await getOpenAlerts(
               supertest,
@@ -1009,7 +1009,7 @@ export default ({ getService }: FtrProviderContext) => {
             expect(alertsResponseFromFirstRuleExecution.hits.hits).toHaveLength(100);
 
             // re-trigger rule execution
-            await runSoonRule(supertest, createdRule.id);
+            await runSoonRule(supertest, log, createdRule.id);
 
             const alertsResponse = await getOpenAlerts(
               supertest,
@@ -1088,7 +1088,7 @@ export default ({ getService }: FtrProviderContext) => {
             expect(alertsResponseFromFirstRuleExecution.hits.hits).toHaveLength(100);
 
             // re-trigger rule execution
-            await runSoonRule(supertest, createdRule.id);
+            await runSoonRule(supertest, log, createdRule.id);
 
             const alertsResponse = await getOpenAlerts(
               supertest,
@@ -1150,7 +1150,7 @@ export default ({ getService }: FtrProviderContext) => {
             expect(alertsResponseFromFirstRuleExecution.hits.hits).toHaveLength(100);
 
             // re-trigger rule execution
-            await runSoonRule(supertest, createdRule.id);
+            await runSoonRule(supertest, log, createdRule.id);
 
             const alertsResponse = await getOpenAlerts(
               supertest,
@@ -1770,7 +1770,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           const dateRestart = new Date();
 
-          await runSoonRule(supertest, createdRule.id);
+          await runSoonRule(supertest, log, createdRule.id);
 
           const alertsResponse = await getAlerts(
             supertest,
@@ -1831,7 +1831,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           const dateRestart = new Date();
 
-          await runSoonRule(supertest, createdRule.id);
+          await runSoonRule(supertest, log, createdRule.id);
 
           const alertsResponse = await getAlerts(
             supertest,
