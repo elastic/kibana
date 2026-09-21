@@ -45957,7 +45957,17 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Install a package by uploading a .zip or .tar.gz archive (max 100MB). Archives that contain Kibana assets requiring additional privileges are subject to a preflight authorization check before any install work begins. The following asset types require the corresponding Kibana API privilege: `security_rule` → `rules-all`; `security_rule` (ML subtype) → `rules-all` + `ml:canCreateJob`; `security_ai_prompt` → `elasticAssistant`. A 403 is returned when the caller lacks a required privilege; no assets are written in that case.<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
+        Install a package by uploading a .zip or .tar.gz archive (max 100MB).
+
+        Archives that contain Kibana assets requiring additional privileges are subject to a preflight authorization check before the package is installed. Privileges are checked in every space the package will be installed into.
+
+        The following asset types require the corresponding Kibana API privilege:
+
+        - `security_rule`: `rules-all`
+        - `security_rule` with type `machine_learning`: `rules-all` and `ml:canCreateJob`
+        - `security_ai_prompt`: `elasticAssistant`
+
+        If any required privilege is missing, the request returns 403 and no assets are written. To learn more, refer to [Upload an integration to Kibana](https://www.elastic.co/docs/extend/integrations/upload-new-integration).<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
       operationId: post-fleet-epm-packages
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -46062,13 +46072,6 @@ paths:
         '403':
           content:
             application/gzip; application/zip:
-              examples:
-                insufficientPrivilegesExample:
-                  description: Caller lacks rules-all in the destination Space
-                  value:
-                    error: Forbidden
-                    message: 'Insufficient privileges to upload this package in space(s) default. Missing: api:rules-all'
-                    statusCode: 403
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -46090,12 +46093,13 @@ paths:
             application/json:
               examples:
                 insufficientPrivilegesExample:
-                  description: Caller lacks rules-all in the destination Space
+                  description: Caller lacks rules-all in the destination space
+                  summary: Missing rules-all privilege
                   value:
                     error: Forbidden
                     message: 'Insufficient privileges to upload this package in space(s) default. Missing: api:rules-all'
                     statusCode: 403
-          description: Forbidden — the archive contains a gated asset type and the caller lacks the required Kibana API privilege. No assets are written.
+          description: Forbidden. The caller lacks a Kibana API privilege required by an asset in the archive. No assets are written.
       summary: Install a package by upload
       tags:
         - Elastic Package Manager (EPM)
