@@ -10,33 +10,30 @@ failing test. Run by `.buildkite/scripts/lifecycle/post_command.sh` after every 
 ## `node scripts/report_flaky_test_issues`
 
 Reads a flaky test report written by `node scripts/scout discover-flaky-tests`, groups the flaky
-tests by file and keeps one `failed-test` issue per flaky suite up to date. Run daily by the
-`kibana-report-flaky-tests` pipeline after the report is generated.
+tests by file and files one `failed-test` issue per flaky suite that has none yet. Run daily by
+the `kibana-report-flaky-tests` pipeline after the report is generated.
 
-For every suite in the report, worst first:
+For every suite in the report, worst first: when no issue is about it or one of its tests, a suite
+issue is filed, at most `--max-new-issues` (default 10) per run, titled
+`[<Module>] Flaky <Framework> test suite: <suite title>` and labelled `failed-test` plus the owning
+teams' labels (in `elastic/kibana` only). The body carries the per-test numbers with the branch
+each test qualified on, the suite details, the most frequent sampled failures and a collapsed
+breakdown by pipeline; issues that merely mention the file are linked as possibly related. A suite
+with an issue, open or closed, is skipped and the issue recorded; commenting on and reopening
+those issues is left to a later iteration, so is the stale `failed-test` sweep closing the issues
+of suites that drop out of the report.
 
-- no issue is about it: a suite issue is filed, at most `--max-new-issues` (default 10) per run,
-  titled `[<Module>] Flaky <Framework> test suite: <suite title>` and labelled `failed-test` plus
-  the owning teams' labels (in `elastic/kibana` only). The body carries the per-test numbers with a
-  14-day trend, the suite details, the most frequent sampled failures and a collapsed breakdown
-  by pipeline; issues that merely mention the file are linked as possibly related;
-- an open issue is about it, its own or a per-test issue filed by `report_failed_tests`: a
-  still-flaky comment with today's numbers is posted, at most once per
-  `--min-comment-interval-days` (default 3) per issue, on the strongest open match only, naming
-  the others. On suite issues only the hidden metadata of the body is updated, the visible text
-  stays as filed;
-- the strongest issue about it is closed: it is reopened with a comment when at least two builds
-  failed on the days after the closing (from the report's daily trend), otherwise nothing happens;
-- an issue labelled `skipped-test` (`/skip`) is left alone.
-
-Suites that drop out of the report are not touched; the stale `failed-test` sweep closes their
-issues. A GitHub write that fails is logged and recorded, the run goes on with the next suite and
-exits non-zero at the end. `--dry-run` reads the real issues and comments and logs what would be
-filed, commented on or reopened without writing anything.
+A GitHub write that fails is logged and recorded, the run goes on with the next suite and exits
+non-zero at the end. `--dry-run` reads the real issues and logs what would be filed without
+writing anything.
 
 Open and closed `failed-test` issues both count. The command lists every open `failed-test` issue
 and the closed ones updated in the last `--closed-since-days` (default 365) through the issues
-API, about a hundred requests against the core rate limit, and matches locally. It deliberately
+API, about a hundred requests against the core rate limit, and matches locally. With
+`--tracking-repo owner/name` (default `elastic/kibana`) the same listing runs against a second
+repository whose issues also count as tracking a suite but are never written to: while the issues
+are filed in a sandbox, a suite that `elastic/kibana` already has an issue for gets none there.
+Empty disables the check; it is skipped when it names `--github-repo` itself. It deliberately
 avoids the search API, whose 30-requests-a-minute limit is shared with every other CI job using the
 same token and whose 1000-result cap and 256-character queries lose issues silently. Issues are
 indexed by the file names they mention (after restoring JUnit's `path·ts` spelling), the Jest

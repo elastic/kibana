@@ -16,10 +16,12 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { ScoutFlakyTests } from '@kbn/scout-reporting';
 
 import { DEFAULT_GITHUB_REPO, GithubApi } from '../failed_tests_reporter/github_api';
-import { reportFlakySuiteIssues } from './reporter';
+import { reportFlakySuiteIssues, type IssueRepository } from './reporter';
 
 const DEFAULT_INPUT = 'target/flaky_tests/flaky_tests.json';
 const DEFAULT_SUMMARY_PATH = 'target/flaky_tests/github_issues.json';
+/** The repository whose `failed-test` issues count as tracking a suite wherever issues are filed. */
+const DEFAULT_TRACKING_REPO = DEFAULT_GITHUB_REPO;
 /**
  * A year covers the closed issues that could still be about a test in today's report; older ones
  * are mostly about tests since fixed, moved or removed, and fetching all of them would double the
@@ -27,8 +29,10 @@ const DEFAULT_SUMMARY_PATH = 'target/flaky_tests/github_issues.json';
  */
 const DEFAULT_CLOSED_SINCE_DAYS = 365;
 const DEFAULT_MAX_NEW_ISSUES = 10;
-const DEFAULT_MIN_COMMENT_INTERVAL_DAYS = 3;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+/** `owner/name`, as GitHub spells a repository. */
+const REPO_PATTERN = /^[\w.-]+\/[\w.-]+$/;
 
 export function runReportFlakyTestIssuesCli() {
   run(
@@ -42,8 +46,13 @@ export function runReportFlakyTestIssuesCli() {
         throw createFlagError('GITHUB_TOKEN must be set to read and write GitHub issues');
       }
       const githubRepo = flagsReader.requiredString('github-repo');
-      if (!/^[\w.-]+\/[\w.-]+$/.test(githubRepo)) {
+      if (!REPO_PATTERN.test(githubRepo)) {
         throw createFlagError('--github-repo must be of the form owner/name');
+      }
+      // Empty disables the check, e.g. to try the tool out against a sandbox on its own
+      const trackingRepo = flagsReader.string('tracking-repo') ?? '';
+      if (trackingRepo !== '' && !REPO_PATTERN.test(trackingRepo)) {
+        throw createFlagError('--tracking-repo must be of the form owner/name, or empty');
       }
       const closedSinceDays = flagsReader.requiredNumber('closed-since-days');
       if (!Number.isInteger(closedSinceDays) || closedSinceDays < 1) {
@@ -53,19 +62,25 @@ export function runReportFlakyTestIssuesCli() {
       if (!Number.isInteger(maxNewIssues) || maxNewIssues < 0) {
         throw createFlagError('--max-new-issues must be a non-negative integer');
       }
-      const minCommentIntervalDays = flagsReader.requiredNumber('min-comment-interval-days');
-      if (!(minCommentIntervalDays >= 0)) {
-        throw createFlagError('--min-comment-interval-days must be a non-negative number');
-      }
       const dashboardUrl = flagsReader.string('dashboard-url');
       const closedSince = new Date(Date.now() - closedSinceDays * MS_PER_DAY);
 
       log.info(`Reading flaky test report from ${inputPath}`);
       const { data: report } = ScoutFlakyTests.fromFile(inputPath);
+
+      // The tracking repository is only ever read, so its client is a dry-run one: listings
+      // still run, anything else would be logged rather than sent
+      const tracking: IssueRepository | undefined =
+        trackingRepo && trackingRepo !== githubRepo
+          ? {
+              github: new GithubApi({ log, token, dryRun: true, repo: trackingRepo }),
+              repo: trackingRepo,
+            }
+          : undefined;
       log.info(
-        `${dryRun ? 'Dry run against' : 'Reporting to'} ${githubRepo}: open failed-test issues ` +
-          `and those closed in the last ${closedSinceDays} days, at most ${maxNewIssues} new ` +
-          `issues, one comment per issue per ${minCommentIntervalDays} days`
+        `${dryRun ? 'Dry run against' : 'Filing issues in'} ${githubRepo}: open failed-test ` +
+          `issues and those closed in the last ${closedSinceDays} days count as tracking a ` +
+          `suite${tracking ? `, in ${tracking.repo} too` : ''}; at most ${maxNewIssues} new issues`
       );
 
       const summary = await reportFlakySuiteIssues({
@@ -73,9 +88,9 @@ export function runReportFlakyTestIssuesCli() {
         github: new GithubApi({ log, token, dryRun, repo: githubRepo }),
         log,
         githubRepo,
+        tracking,
         closedSince,
         maxNewIssues,
-        minCommentIntervalDays,
         dryRun,
         dashboardUrl,
       });
@@ -83,25 +98,24 @@ export function runReportFlakyTestIssuesCli() {
       Fs.mkdirSync(Path.dirname(summaryPath), { recursive: true });
       Fs.writeFileSync(summaryPath, JSON.stringify(summary, null, 2));
 
-      const { created, commented, reopened, skipped, failed } = summary.counts;
+      const { created, skipped, failed } = summary.counts;
       log.info(
-        `${summary.suites} flaky suites: ${created} issues created, ${commented} commented on, ` +
-          `${reopened} reopened, ${skipped} skipped, ${failed} failed` +
-          `${dryRun ? ' (dry run, nothing was written)' : ''} (summary in ${summaryPath})`
+        `${summary.suites} flaky suites: ${created} issues created, ${skipped} skipped, ` +
+          `${failed} failed${dryRun ? ' (dry run, nothing was written)' : ''} ` +
+          `(summary in ${summaryPath})`
       );
       log.success(`Finished in ${((performance.now() - startedAt) / 1000).toFixed(2)}s`);
       if (failed > 0) {
-        throw createFailError(`${failed} GitHub updates failed, see the log above`);
+        throw createFailError(`${failed} GitHub issues could not be created, see the log above`);
       }
     },
     {
       description: `
-        File, comment on or reopen GitHub failed-test issues for the flaky test suites of a report
-        written by \`node scripts/scout discover-flaky-tests\`: a suite without an issue gets one
-        (worst suites first, up to --max-new-issues), a suite with an open issue, its own or one
-        of its tests', gets a still-flaky comment at most every --min-comment-interval-days, a
-        suite whose issue was closed but that kept failing gets it reopened. Lists every open
-        failed-test issue and the recently closed ones, then matches locally.
+        File a GitHub failed-test issue for every flaky test suite of a report written by
+        \`node scripts/scout discover-flaky-tests\` that no issue is about yet, worst suites first
+        and up to --max-new-issues per run. Lists every open failed-test issue and the recently
+        closed ones in --github-repo and in --tracking-repo, then matches locally: a suite with an
+        issue in either, open or closed, about it or one of its tests gets none.
 
         Examples:
           GITHUB_TOKEN=... node scripts/report_flaky_test_issues --input .scout/flaky_tests.json --dry-run
@@ -112,9 +126,9 @@ export function runReportFlakyTestIssuesCli() {
           'input',
           'summary-path',
           'github-repo',
+          'tracking-repo',
           'closed-since-days',
           'max-new-issues',
-          'min-comment-interval-days',
           'dashboard-url',
         ],
         boolean: ['dry-run'],
@@ -122,20 +136,20 @@ export function runReportFlakyTestIssuesCli() {
           input: DEFAULT_INPUT,
           'summary-path': DEFAULT_SUMMARY_PATH,
           'github-repo': DEFAULT_GITHUB_REPO,
+          'tracking-repo': DEFAULT_TRACKING_REPO,
           'closed-since-days': String(DEFAULT_CLOSED_SINCE_DAYS),
           'max-new-issues': String(DEFAULT_MAX_NEW_ISSUES),
-          'min-comment-interval-days': String(DEFAULT_MIN_COMMENT_INTERVAL_DAYS),
           'dry-run': false,
         },
         help: `
-          --input                      Flaky test report to read [default: ${DEFAULT_INPUT}]
-          --summary-path               Where to write the JSON summary [default: ${DEFAULT_SUMMARY_PATH}]
-          --github-repo                owner/name of the repository whose issues are read and written [default: ${DEFAULT_GITHUB_REPO}]
-          --closed-since-days          Only closed issues updated within this many days count as tracking a suite [default: ${DEFAULT_CLOSED_SINCE_DAYS}]
-          --max-new-issues             Issues created per run, worst suites first [default: ${DEFAULT_MAX_NEW_ISSUES}]
-          --min-comment-interval-days  Days between two report comments on the same issue [default: ${DEFAULT_MIN_COMMENT_INTERVAL_DAYS}]
-          --dashboard-url              Dashboard with the live numbers, linked from new issues
-          --dry-run                    Read issues and log what would be filed, commented on or reopened without writing
+          --input               Flaky test report to read [default: ${DEFAULT_INPUT}]
+          --summary-path        Where to write the JSON summary [default: ${DEFAULT_SUMMARY_PATH}]
+          --github-repo         owner/name of the repository the issues are filed in [default: ${DEFAULT_GITHUB_REPO}]
+          --tracking-repo       owner/name whose failed-test issues also count as tracking a suite; never written to, empty disables [default: ${DEFAULT_TRACKING_REPO}]
+          --closed-since-days   Only closed issues updated within this many days count as tracking a suite [default: ${DEFAULT_CLOSED_SINCE_DAYS}]
+          --max-new-issues      Issues created per run, worst suites first [default: ${DEFAULT_MAX_NEW_ISSUES}]
+          --dashboard-url       Dashboard with the live numbers, linked from new issues
+          --dry-run             Read issues and log what would be filed without writing
         `,
       },
     }

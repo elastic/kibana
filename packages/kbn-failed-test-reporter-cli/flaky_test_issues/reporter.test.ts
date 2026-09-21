@@ -11,14 +11,11 @@ import { ToolingLog } from '@kbn/tooling-log';
 import type {
   GithubApi,
   GithubIssue,
-  GithubIssueComment,
   ListIssuesOptions,
 } from '../failed_tests_reporter/github_api';
 import { updateIssueMetadata } from '../failed_tests_reporter/issue_metadata';
 import { readFlakySuiteIssueMetadata, renderFlakySuiteIssueBody } from './issue_body';
-import { readFlakySuiteCommentMetadata } from './issue_comment';
 import {
-  failedBuildsSince,
   issueLabels,
   reportFlakySuiteIssues,
   type ReportFlakySuiteIssuesOptions,
@@ -28,18 +25,16 @@ import { flakyReport, flakyTest, GENERATED_AT, githubIssue, SUITE_PATH } from '.
 
 const log = new ToolingLog();
 const CLOSED_SINCE = new Date('2025-09-09T09:04:41.000Z');
+const TARGET_REPO = 'elastic/appex-qa-ai';
+const TRACKING_REPO = 'elastic/kibana';
 
-/** A fake API serving the listings from one set of issues and their comments. */
-const createGithubApi = (
-  issues: GithubIssue[] = [],
-  comments: Record<number, GithubIssueComment[]> = {}
-) => {
+/** A fake API serving the listings from one set of issues. */
+const createGithubApi = (issues: GithubIssue[] = []) => {
   const api = {
     getRequestCount: jest.fn(() => 0),
     listIssues: jest.fn(async ({ state }: ListIssuesOptions) =>
       issues.filter((issue) => state === 'all' || issue.state === state)
     ),
-    getIssueComments: jest.fn(async (number: number) => comments[number] ?? []),
     createIssue: jest.fn(async (title: string, body: string, _labels?: string[]) => ({
       number: 900,
       html_url: 'https://github.com/elastic/kibana/issues/900',
@@ -49,11 +44,15 @@ const createGithubApi = (
     })),
     addIssueComment: jest.fn(async (_number: number, _body: string) => {}),
     editIssueBodyAndEnsureOpen: jest.fn(async (_number: number, _body: string) => {}),
-    reopenIssue: jest.fn(async (_number: number) => {}),
-    addLabels: jest.fn(async (_number: number, _labels: string[]) => {}),
   };
   return api as typeof api & GithubApi;
 };
+
+/** The tracking repository's client, serving its own issues; it must never be written to. */
+const trackingRepo = (issues: GithubIssue[] = []) => ({
+  github: createGithubApi(issues),
+  repo: TRACKING_REPO,
+});
 
 const run = (
   github: ReturnType<typeof createGithubApi>,
@@ -62,31 +61,29 @@ const run = (
   reportFlakySuiteIssues({
     github,
     log,
-    githubRepo: 'elastic/appex-qa-ai',
+    githubRepo: TARGET_REPO,
     closedSince: CLOSED_SINCE,
     maxNewIssues: 10,
-    minCommentIntervalDays: 3,
     dryRun: false,
     moduleLabel: () => 'Synthetics',
     ...overrides,
   });
 
 /** A suite issue as this reporter files it, from an older report. */
-const suiteIssue = (
-  number: number,
-  overrides: Partial<GithubIssue> = {},
-  reportedAt = new Date('2026-09-01T09:00:00.000Z')
-) => {
+const suiteIssue = (number: number, overrides: Partial<GithubIssue> = {}) => {
   const report = flakyReport([flakyTest({ builds: 400, failedBuilds: 30 })]);
   const [suite] = groupIntoSuites(report.flaky);
   return githubIssue({
     number,
     title: '[Synthetics] Flaky Scout test suite: Default status alert',
-    body: renderFlakySuiteIssueBody(suite, { report: { ...report, generatedAt: reportedAt } }),
+    body: renderFlakySuiteIssueBody(suite, {
+      report: { ...report, generatedAt: new Date('2026-09-01T09:00:00.000Z') },
+    }),
     ...overrides,
   });
 };
 
+/** A per-test issue as `report_failed_tests` files it for a Scout test of the suite. */
 const scoutTestIssue = (number: number, testId: string, overrides: Partial<GithubIssue> = {}) =>
   githubIssue({
     number,
@@ -99,18 +96,23 @@ const scoutTestIssue = (number: number, testId: string, overrides: Partial<Githu
     ...overrides,
   });
 
+/** An issue about another test that happens to name the suite's file. */
+const fileMention = (number: number) =>
+  githubIssue({
+    number,
+    title: 'Failing test: other - test',
+    body: `| Location | ${SUITE_PATH} |`,
+  });
+
 /** The report entry the per-test issues are about. */
 const trackedTest = (overrides: Parameters<typeof flakyTest>[0] = {}) =>
   flakyTest({ testId: 'pw-1', ...overrides });
 
-const botComment = (generatedAt: string): GithubIssueComment => ({
-  body: updateIssueMetadata(
-    'Still flaky',
-    { 'report.generatedAt': generatedAt, 'report.builds': 300, 'report.failedBuilds': 20 },
-    'flaky-test-suite'
-  ),
-  created_at: generatedAt,
-});
+const expectNoWrites = (github: ReturnType<typeof createGithubApi>) => {
+  expect(github.createIssue).not.toHaveBeenCalled();
+  expect(github.addIssueComment).not.toHaveBeenCalled();
+  expect(github.editIssueBodyAndEnsureOpen).not.toHaveBeenCalled();
+};
 
 describe('reportFlakySuiteIssues', () => {
   it('lists every open failed-test issue and the closed ones updated since the horizon', async () => {
@@ -135,22 +137,17 @@ describe('reportFlakySuiteIssues', () => {
     expect(summary).toEqual({
       generatedAt: GENERATED_AT,
       dryRun: false,
-      githubRepo: 'elastic/appex-qa-ai',
+      githubRepo: TARGET_REPO,
       suites: 0,
       issues: { open: 1, closed: 1, closedSince: CLOSED_SINCE },
-      counts: { created: 0, commented: 0, reopened: 0, skipped: 0, failed: 0 },
+      counts: { created: 0, skipped: 0, failed: 0 },
       actions: [],
     });
   });
 
   describe('suites without an issue', () => {
     it('creates a suite issue, linking issues that only mention the file', async () => {
-      const related = githubIssue({
-        number: 7,
-        title: 'Failing test: other - test',
-        body: `| Location | ${SUITE_PATH} |`,
-      });
-      const github = createGithubApi([related]);
+      const github = createGithubApi([fileMention(7)]);
 
       const summary = await run(github, { report: flakyReport([flakyTest()]) });
 
@@ -214,206 +211,169 @@ describe('reportFlakySuiteIssues', () => {
     });
   });
 
-  describe('suites with an open issue', () => {
-    it('comments on a suite issue and bumps its metadata', async () => {
+  describe('suites with an issue in the target repository', () => {
+    it('skips a suite that has an open suite issue', async () => {
       const issue = suiteIssue(42);
       const github = createGithubApi([issue]);
 
       const summary = await run(github, { report: flakyReport([flakyTest()]) });
 
-      expect(github.createIssue).not.toHaveBeenCalled();
-      expect(github.getIssueComments).toHaveBeenCalledWith(42, { readInDryRun: true });
-      expect(github.editIssueBodyAndEnsureOpen).toHaveBeenCalledTimes(1);
-      const [, newBody] = github.editIssueBodyAndEnsureOpen.mock.calls[0];
-      expect(readFlakySuiteIssueMetadata(newBody)).toMatchObject({
-        'report.count': 2,
-        'report.generatedAt': GENERATED_AT.toISOString(),
-      });
-      expect(github.addIssueComment).toHaveBeenCalledTimes(1);
-      const [, comment] = github.addIssueComment.mock.calls[0];
-      expect(comment).toContain('Still flaky: **49 / 509 builds (10%)**');
-      // the previous numbers come from the issue's own history
-      expect(comment).toContain('Previous report (1 Sep): 30 / 400 (8%).');
-      expect(readFlakySuiteCommentMetadata(comment)?.failedBuilds).toBe(49);
+      expectNoWrites(github);
       expect(summary.actions).toEqual([
         {
-          action: 'commented',
+          action: 'skipped',
           filePath: SUITE_PATH,
+          reason: 'tracked',
           issue: { number: 42, url: issue.html_url, title: issue.title, state: 'open' },
           match: 'suite',
         },
       ]);
     });
 
-    it('comments on a per-test issue without creating a suite issue or editing its body', async () => {
+    it('skips a suite whose suite issue is closed rather than filing a second one', async () => {
+      const github = createGithubApi([suiteIssue(42, { state: 'closed' })]);
+
+      const summary = await run(github, { report: flakyReport([flakyTest()]) });
+
+      expectNoWrites(github);
+      expect(summary.actions[0]).toMatchObject({
+        action: 'skipped',
+        reason: 'tracked',
+        issue: { number: 42, state: 'closed' },
+        match: 'suite',
+      });
+    });
+
+    it('skips a suite one of whose tests has a per-test issue', async () => {
       const github = createGithubApi([scoutTestIssue(43, 'pw-1')]);
 
       const summary = await run(github, { report: flakyReport([trackedTest()]) });
 
-      expect(github.createIssue).not.toHaveBeenCalled();
-      expect(github.editIssueBodyAndEnsureOpen).not.toHaveBeenCalled();
-      expect(github.addIssueComment).toHaveBeenCalledWith(
-        43,
-        expect.stringContaining("This test is in today's flaky test report for its suite")
-      );
-      expect(summary.actions[0]).toMatchObject({ action: 'commented', match: 'test' });
+      expectNoWrites(github);
+      expect(summary.actions[0]).toMatchObject({
+        action: 'skipped',
+        reason: 'tracked',
+        issue: { number: 43 },
+        match: 'test',
+      });
     });
 
-    it('comments on the strongest open match only and names the others', async () => {
+    it('records the strongest open match over a stronger closed one', async () => {
       const github = createGithubApi([
-        suiteIssue(42, { state: 'closed', closed_at: '2026-09-08T00:00:00.000Z' }),
+        suiteIssue(42, { state: 'closed' }),
         scoutTestIssue(43, 'pw-1'),
       ]);
 
       const summary = await run(github, { report: flakyReport([trackedTest()]) });
 
-      expect(github.addIssueComment).toHaveBeenCalledTimes(1);
-      const [number, comment] = github.addIssueComment.mock.calls[0];
-      expect(number).toBe(43);
-      expect(comment).toContain('Also tracked by #42 (suite issue).');
-      expect(github.editIssueBodyAndEnsureOpen).not.toHaveBeenCalled();
-      expect(summary.counts).toMatchObject({ commented: 1, reopened: 0 });
-    });
-
-    it('skips an issue that got a report comment within the interval', async () => {
-      const github = createGithubApi(
-        [scoutTestIssue(43, 'pw-1')],
-        { 43: [botComment('2026-09-07T09:00:00.000Z')] }
-      );
-
-      const summary = await run(github, { report: flakyReport([trackedTest()]) });
-
-      expect(github.addIssueComment).not.toHaveBeenCalled();
       expect(summary.actions[0]).toMatchObject({
-        action: 'skipped',
-        reason: 'recently-commented',
-        issue: { number: 43 },
-      });
-    });
-
-    it('uses the last report comment as the previous numbers once the interval has passed', async () => {
-      const github = createGithubApi(
-        [scoutTestIssue(43, 'pw-1')],
-        { 43: [botComment('2026-09-05T09:00:00.000Z'), { body: 'New failure: build 1' }] }
-      );
-
-      await run(github, { report: flakyReport([trackedTest()]) });
-
-      const [, comment] = github.addIssueComment.mock.calls[0];
-      expect(comment).toContain('Previous report (5 Sep): 20 / 300 (7%).');
-    });
-
-    it('treats the filing of a suite issue as a report for the cadence', async () => {
-      const github = createGithubApi([suiteIssue(42, {}, new Date('2026-09-08T09:00:00.000Z'))]);
-
-      const summary = await run(github, { report: flakyReport([flakyTest()]) });
-
-      expect(summary.actions[0]).toMatchObject({ action: 'skipped', reason: 'recently-commented' });
-    });
-
-    it('skips an issue labelled skipped-test', async () => {
-      const github = createGithubApi([suiteIssue(42, { labels: [{ name: 'skipped-test' }] })]);
-
-      const summary = await run(github, { report: flakyReport([flakyTest()]) });
-
-      expect(github.getIssueComments).not.toHaveBeenCalled();
-      expect(summary.actions[0]).toMatchObject({ action: 'skipped', reason: 'skipped-test' });
-    });
-
-    it('records a failed comment and carries on', async () => {
-      const github = createGithubApi([suiteIssue(42)]);
-      github.addIssueComment.mockRejectedValueOnce(new Error('503'));
-
-      const summary = await run(github, { report: flakyReport([flakyTest()]) });
-
-      expect(summary.actions[0]).toMatchObject({
-        action: 'failed',
-        attempted: 'comment',
-        error: '503',
-        issue: { number: 42 },
+        reason: 'tracked',
+        issue: { number: 43, state: 'open' },
+        match: 'test',
       });
     });
   });
 
-  describe('suites with a closed issue', () => {
-    // the fixture trend fails 9, 7, 4 and 2 builds on 6, 7, 8 and 9 Sep
-    it('reopens a suite issue that failed at least twice since it was closed, with a comment', async () => {
-      const issue = suiteIssue(42, { state: 'closed', closed_at: '2026-09-06T12:00:00.000Z' });
-      const github = createGithubApi([issue]);
+  describe('suites tracked in the tracking repository', () => {
+    it('does not file an issue for a suite one of whose tests has an open issue there', async () => {
+      const github = createGithubApi();
+      const tracking = trackingRepo([scoutTestIssue(123, 'pw-1')]);
 
-      const summary = await run(github, { report: flakyReport([flakyTest()]) });
+      const summary = await run(github, { report: flakyReport([trackedTest()]), tracking });
 
-      expect(github.editIssueBodyAndEnsureOpen).toHaveBeenCalledTimes(1);
-      expect(github.reopenIssue).not.toHaveBeenCalled();
-      const [, comment] = github.addIssueComment.mock.calls[0];
-      expect(comment).toContain(
-        'Reopened: still flaky after 13 failed builds since it was closed on 6 Sep.'
-      );
+      expectNoWrites(github);
+      expectNoWrites(tracking.github);
       expect(summary.actions).toEqual([
         {
-          action: 'reopened',
+          action: 'skipped',
           filePath: SUITE_PATH,
-          issue: { number: 42, url: issue.html_url, title: issue.title, state: 'open' },
-          match: 'suite',
+          reason: 'tracked-upstream',
+          issue: {
+            number: 123,
+            url: 'https://github.com/elastic/kibana/issues/123',
+            title: 'Failing test: Suite - test pw-1',
+            state: 'open',
+            repo: TRACKING_REPO,
+          },
+          match: 'test',
         },
       ]);
     });
 
-    it('reopens a per-test issue without touching its body', async () => {
-      const github = createGithubApi([
-        scoutTestIssue(43, 'pw-1', {
-          state: 'closed',
-          closed_at: '2026-09-06T12:00:00.000Z',
-        }),
-      ]);
+    it('nor when that issue is closed', async () => {
+      const github = createGithubApi();
+      const tracking = trackingRepo([scoutTestIssue(123, 'pw-1', { state: 'closed' })]);
 
-      const summary = await run(github, { report: flakyReport([trackedTest()]) });
+      const summary = await run(github, { report: flakyReport([trackedTest()]), tracking });
 
-      expect(github.reopenIssue).toHaveBeenCalledWith(43);
-      expect(github.editIssueBodyAndEnsureOpen).not.toHaveBeenCalled();
-      expect(summary.actions[0]).toMatchObject({ action: 'reopened', match: 'test' });
-    });
-
-    it('leaves an issue closed when fewer than two builds failed since', async () => {
-      const github = createGithubApi([
-        suiteIssue(42, { state: 'closed', closed_at: '2026-09-09T01:00:00.000Z' }),
-      ]);
-
-      const summary = await run(github, { report: flakyReport([flakyTest()]) });
-
-      expect(github.editIssueBodyAndEnsureOpen).not.toHaveBeenCalled();
-      expect(github.addIssueComment).not.toHaveBeenCalled();
+      expect(github.createIssue).not.toHaveBeenCalled();
       expect(summary.actions[0]).toMatchObject({
-        action: 'skipped',
-        reason: 'closed-before-failures',
+        reason: 'tracked-upstream',
+        issue: { number: 123, state: 'closed', repo: TRACKING_REPO },
       });
     });
 
-    it('falls back to the last failure when the report has no trend', async () => {
-      const github = createGithubApi([
-        suiteIssue(42, { state: 'closed', closed_at: '2026-09-09T08:00:00.000Z' }),
-      ]);
+    it('files the issue when the tracking repository only mentions the file, without linking it', async () => {
+      const github = createGithubApi();
+      const tracking = trackingRepo([fileMention(7)]);
 
-      // last failed at 06:12 on 9 Sep, before the closing
-      const stale = await run(github, { report: flakyReport([flakyTest({ trend: undefined })]) });
-      expect(stale.actions[0]).toMatchObject({ action: 'skipped', reason: 'closed-before-failures' });
+      const summary = await run(github, { report: flakyReport([flakyTest()]), tracking });
 
-      const fresh = await run(createGithubApi([
-        suiteIssue(42, { state: 'closed', closed_at: '2026-09-09T06:00:00.000Z' }),
-      ]), { report: flakyReport([flakyTest({ trend: undefined })]) });
-      expect(fresh.actions[0]).toMatchObject({ action: 'reopened' });
+      expect(summary.actions[0]).toMatchObject({ action: 'created' });
+      const [, body] = github.createIssue.mock.calls[0];
+      // `#7` would point at the wrong issue in the target repository
+      expect(body).not.toContain('Possibly related');
     });
 
-    it('records a failed reopen and carries on', async () => {
-      const github = createGithubApi([
-        suiteIssue(42, { state: 'closed', closed_at: '2026-09-06T12:00:00.000Z' }),
+    it('does not spend a creation slot on a suite tracked there', async () => {
+      const github = createGithubApi();
+      const tracking = trackingRepo([scoutTestIssue(123, 'pw-1')]);
+      const report = flakyReport([
+        trackedTest({ failedBuilds: 49 }),
+        flakyTest({ testId: 'other', filePath: 'other.spec.ts', failedBuilds: 10 }),
       ]);
-      github.editIssueBodyAndEnsureOpen.mockRejectedValueOnce(new Error('403'));
 
-      const summary = await run(github, { report: flakyReport([flakyTest()]) });
+      const summary = await run(github, { report, tracking, maxNewIssues: 1 });
 
-      expect(github.addIssueComment).not.toHaveBeenCalled();
-      expect(summary.actions[0]).toMatchObject({ action: 'failed', attempted: 'reopen', error: '403' });
+      expect(summary.actions.map(({ action, filePath }) => [action, filePath])).toEqual([
+        ['skipped', SUITE_PATH],
+        ['created', 'other.spec.ts'],
+      ]);
+    });
+
+    it('reports a suite tracked in both repositories by its issue in the target one', async () => {
+      const github = createGithubApi([suiteIssue(42)]);
+      const tracking = trackingRepo([scoutTestIssue(123, 'pw-1')]);
+
+      const summary = await run(github, { report: flakyReport([trackedTest()]), tracking });
+
+      expect(summary.actions[0]).toMatchObject({ reason: 'tracked', issue: { number: 42 } });
+    });
+
+    it('lists the tracking repository with the same horizon and counts its issues', async () => {
+      const github = createGithubApi();
+      const tracking = trackingRepo([
+        scoutTestIssue(123, 'pw-1'),
+        githubIssue({ number: 124, state: 'closed' }),
+        githubIssue({ number: 125, state: 'closed' }),
+      ]);
+
+      const summary = await run(github, { report: flakyReport([]), tracking });
+
+      expect(tracking.github.listIssues).toHaveBeenCalledTimes(2);
+      expect(tracking.github.listIssues).toHaveBeenNthCalledWith(2, {
+        state: 'closed',
+        labels: ['failed-test'],
+        since: CLOSED_SINCE,
+        sort: 'updated',
+        direction: 'asc',
+      });
+      expect(summary.issues).toEqual({
+        open: 0,
+        closed: 0,
+        closedSince: CLOSED_SINCE,
+        tracking: { repo: TRACKING_REPO, open: 1, closed: 2 },
+      });
     });
   });
 
@@ -426,7 +386,7 @@ describe('reportFlakySuiteIssues', () => {
     });
 
     expect(summary.dryRun).toBe(true);
-    expect(summary.counts).toMatchObject({ created: 1, commented: 1 });
+    expect(summary.counts).toEqual({ created: 1, skipped: 1, failed: 0 });
   });
 });
 
@@ -436,32 +396,6 @@ describe('issueLabels', () => {
 
   it('adds the owning teams labels in the Kibana repository only', () => {
     expect(issueLabels(suite, 'elastic/kibana')).toEqual(['failed-test', 'Team:Core']);
-    expect(issueLabels(suite, 'elastic/appex-qa-ai')).toEqual(['failed-test']);
-  });
-});
-
-describe('failedBuildsSince', () => {
-  const trend = {
-    days: 4,
-    from: new Date('2026-09-01T00:00:00.000Z'),
-    buildsPerDay: [10, 10, 10, 10],
-    failedBuildsPerDay: [5, 1, 2, 3],
-  };
-  const report = flakyReport([
-    flakyTest({ testId: 'a', trend }),
-    flakyTest({ testId: 'b', trend: { ...trend, failedBuildsPerDay: [0, 4, 0, 1] } }),
-  ]);
-  const [suite] = groupIntoSuites(report.flaky);
-
-  it('sums the worst test per day over the days fully after the closing', () => {
-    // 2 Sep: max(1, 4) = 4; 3 Sep: 2; 4 Sep: 3
-    expect(failedBuildsSince(suite, new Date('2026-09-01T12:00:00.000Z'))).toBe(9);
-    expect(failedBuildsSince(suite, new Date('2026-09-02T00:00:00.000Z'))).toBe(9);
-    expect(failedBuildsSince(suite, new Date('2026-09-04T00:00:00.001Z'))).toBe(0);
-  });
-
-  it('is undefined without any trend', () => {
-    const [noTrend] = groupIntoSuites([flakyTest({ trend: undefined })]);
-    expect(failedBuildsSince(noTrend, new Date('2026-09-01T00:00:00.000Z'))).toBeUndefined();
+    expect(issueLabels(suite, TARGET_REPO)).toEqual(['failed-test']);
   });
 });

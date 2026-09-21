@@ -49,46 +49,25 @@ describe('GithubApi#getIssueComments()', () => {
     expect(comments[101]).toEqual({ body: '' });
   });
 
-  it('stops after a single page when it is not full and keeps the author and time', async () => {
-    const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue(
-      jsonResponse([
-        {
-          body: 'only comment',
-          created_at: '2026-09-09T09:00:00Z',
-          user: { login: 'kibanamachine' },
-        },
-        { body: 'ghost', user: null },
-      ])
-    );
+  it('stops after a single page when it is not full', async () => {
+    const fetchMock = jest
+      .spyOn(global, 'fetch')
+      .mockResolvedValue(jsonResponse([{ body: 'only comment' }]));
 
     const api = new GithubApi({ log, token: 'secret', dryRun: false });
     const comments = await api.getIssueComments(42);
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(comments).toEqual([
-      {
-        body: 'only comment',
-        created_at: '2026-09-09T09:00:00Z',
-        user: { login: 'kibanamachine' },
-      },
-      { body: 'ghost' },
-    ]);
+    expect(comments).toEqual([{ body: 'only comment' }]);
   });
 
-  it('returns an empty list without requests in dry-run mode, unless asked to read', async () => {
-    const fetchMock = jest
-      .spyOn(global, 'fetch')
-      .mockImplementation(async () => jsonResponse([{ body: 'real comment' }]));
+  it('returns an empty list without requests in dry-run mode', async () => {
+    const fetchMock = jest.spyOn(global, 'fetch');
 
     const api = new GithubApi({ log, token: undefined, dryRun: true });
 
     expect(await api.getIssueComments(42)).toEqual([]);
     expect(fetchMock).not.toHaveBeenCalled();
-
-    expect(await api.getIssueComments(42, { readInDryRun: true })).toEqual([
-      { body: 'real comment' },
-    ]);
-    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -98,40 +77,12 @@ describe('GithubApi writes', () => {
     jest.useRealTimers();
   });
 
-  it('adds labels, reopens and comments through the issue endpoints', async () => {
-    jest.useFakeTimers();
-    const fetchMock = jest.spyOn(global, 'fetch').mockImplementation(async () => jsonResponse({}));
-    const api = new GithubApi({ log, token: 'secret', dryRun: false });
-
-    const writes = (async () => {
-      await api.addLabels(7, ['failed-test', 'Team:Core']);
-      await api.addLabels(7, []);
-      await api.reopenIssue(7);
-      await api.addIssueComment(7, 'still flaky');
-    })();
-    await jest.advanceTimersByTimeAsync(3000);
-    await writes;
-
-    expect(fetchMock).toHaveBeenCalledTimes(3);
-    const calls = fetchMock.mock.calls.map(([url, init]) => [
-      init?.method,
-      String(url).replace(/^.*\/repos\/elastic\/kibana\//, ''),
-      init?.body,
-    ]);
-    expect(calls).toEqual([
-      ['POST', 'issues/7/labels', JSON.stringify({ labels: ['failed-test', 'Team:Core'] })],
-      ['PATCH', 'issues/7', JSON.stringify({ state: 'open' })],
-      ['POST', 'issues/7/comments', JSON.stringify({ body: 'still flaky' })],
-    ]);
-  });
-
   it('logs writes without sending them in dry-run mode', async () => {
     const fetchMock = jest.spyOn(global, 'fetch');
     const api = new GithubApi({ log, token: undefined, dryRun: true });
 
-    await api.addLabels(7, ['failed-test']);
-    await api.reopenIssue(7);
     await api.editIssueBodyAndEnsureOpen(7, 'body');
+    await api.addIssueComment(7, 'comment');
     expect((await api.createIssue('title', 'body')).html_url).toBe('https://dryrun');
 
     expect(fetchMock).not.toHaveBeenCalled();

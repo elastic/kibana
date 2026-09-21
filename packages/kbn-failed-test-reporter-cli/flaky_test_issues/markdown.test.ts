@@ -14,7 +14,7 @@ import {
   formatFailureMessage,
   formatFlakiestBranch,
   formatPercent,
-  sparkline,
+  qualifyingBranch,
   testsTable,
 } from './markdown';
 import { flakyTest } from './test_fixtures';
@@ -33,26 +33,7 @@ describe('formatDateRange', () => {
     const range = (from: string, to: string) => formatDateRange(new Date(from), new Date(to));
     expect(range('2026-09-03T10:00:00Z', '2026-09-10T10:00:00Z')).toBe('3–10 Sep 2026');
     expect(range('2026-08-28T10:00:00Z', '2026-09-04T10:00:00Z')).toBe('28 Aug – 4 Sep 2026');
-    expect(range('2025-12-28T10:00:00Z', '2026-01-04T10:00:00Z')).toBe(
-      '28 Dec 2025 – 4 Jan 2026'
-    );
-  });
-});
-
-describe('sparkline', () => {
-  it('scales failed builds to the worst day and marks days without builds', () => {
-    expect(
-      sparkline({
-        days: 5,
-        from: new Date('2026-09-01T00:00:00Z'),
-        buildsPerDay: [0, 10, 10, 10, 10],
-        failedBuildsPerDay: [0, 0, 2, 4, 8],
-      })
-    ).toBe('`·▁▃▅█`');
-    expect(sparkline(undefined)).toBeUndefined();
-    expect(
-      sparkline({ days: 0, from: new Date(), buildsPerDay: [], failedBuildsPerDay: [] })
-    ).toBeUndefined();
+    expect(range('2025-12-28T10:00:00Z', '2026-01-04T10:00:00Z')).toBe('28 Dec 2025 – 4 Jan 2026');
   });
 });
 
@@ -65,17 +46,29 @@ describe('branchesByFailedBuilds / formatFlakiestBranch', () => {
   });
 
   it('orders branches by failed builds, adding them up over several tests', () => {
-    expect(branchesByFailedBuilds([test, test]).map(({ branch, failedBuilds }) => [branch, failedBuilds]))
-      .toEqual([
-        ['9.2', 60],
-        ['main', 20],
-      ]);
+    expect(
+      branchesByFailedBuilds([test, test]).map(({ branch, failedBuilds }) => [branch, failedBuilds])
+    ).toEqual([
+      ['9.2', 60],
+      ['main', 20],
+    ]);
   });
 
-  it('shows the branch numbers only when the test ran on several branches', () => {
-    expect(formatFlakiestBranch(test)).toBe('`9.2` · 30 / 100');
+  it('names the branch the test qualified on, with its numbers when it ran on several', () => {
+    // the fixture qualified on `main`, which fails less than 9.2 here
+    expect(qualifyingBranch(test)).toEqual({
+      branch: 'main',
+      builds: 400,
+      failedBuilds: 10,
+      buildFailRate: 0.025,
+    });
+    expect(formatFlakiestBranch(test)).toBe('`main` · 10 / 400');
     expect(formatFlakiestBranch(flakyTest())).toBe('`main`');
-    expect(formatFlakiestBranch(flakyTest({ byBranch: [] }))).toBe('-');
+  });
+
+  it('falls back to the branch with the most failed builds for reports without a qualifying one', () => {
+    expect(formatFlakiestBranch({ ...test, flakiestBranch: undefined })).toBe('`9.2` · 30 / 100');
+    expect(formatFlakiestBranch(flakyTest({ byBranch: [], flakiestBranch: undefined }))).toBe('-');
   });
 });
 
@@ -113,7 +106,9 @@ describe('formatBuildLink', () => {
         'https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199',
         new Date('2026-09-09T06:12:00Z')
       )
-    ).toBe('[#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199) · 2026-09-09 06:12 UTC');
+    ).toBe(
+      '[#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199) · 2026-09-09 06:12 UTC'
+    );
     expect(formatBuildLink(undefined, new Date('2026-09-09T06:12:00Z'))).toBe(
       '2026-09-09 06:12 UTC'
     );

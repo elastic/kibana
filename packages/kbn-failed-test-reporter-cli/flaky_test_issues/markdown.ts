@@ -11,12 +11,11 @@ import type {
   FlakyTestBranchStats,
   FlakyTestEntry,
   FlakyTestReport,
-  FlakyTestTrend,
   TestFramework,
 } from '@kbn/scout-reporting';
 import { redactSensitiveGithubFailureText } from '../failed_tests_reporter/report_failure';
 
-/** Markdown building blocks shared by the flaky suite issue body and the still-flaky comment. */
+/** Markdown building blocks of the flaky suite issue body. */
 
 export const FRAMEWORK_LABELS: Record<TestFramework, { short: string; long: string }> = {
   playwright: { short: 'Scout', long: 'Scout (Playwright)' },
@@ -27,10 +26,6 @@ export const FRAMEWORK_LABELS: Record<TestFramework, { short: string; long: stri
 
 export const KIBANA_BLOB_URL = 'https://github.com/elastic/kibana/blob/main';
 export const BUILDKITE_ORG_URL = 'https://buildkite.com/elastic';
-
-const SPARKLINE_LEVELS = ['▁', '▂', '▃', '▄', '▅', '▆', '▇', '█'] as const;
-/** Days without any build of the test, e.g. before it existed or on a quiet weekend. */
-const SPARKLINE_NO_BUILDS = '·';
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -61,7 +56,9 @@ export const formatDateTime = (date: Date): string =>
 
 /** `8 Sep`, or `8 Sep 2026` with the year. */
 export const formatDay = (date: Date, withYear = false): string =>
-  `${date.getUTCDate()} ${MONTHS[date.getUTCMonth()]}${withYear ? ` ${date.getUTCFullYear()}` : ''}`;
+  `${date.getUTCDate()} ${MONTHS[date.getUTCMonth()]}${
+    withYear ? ` ${date.getUTCFullYear()}` : ''
+  }`;
 
 /** `3–10 Sep 2026`, `28 Aug – 4 Sep 2026` or `28 Dec 2025 – 4 Jan 2026`. */
 export const formatDateRange = (from: Date, to: Date): string => {
@@ -82,28 +79,6 @@ export const formatPipelines = (report: FlakyTestReport): string =>
 export const formatWindow = (report: FlakyTestReport): string =>
   `on ${formatPipelines(report)} in the last ${plural(report.window.lookbackDays, 'day')} ` +
   `(${formatDateRange(report.window.from, report.window.to)})`;
-
-/**
- * One character per day, failed builds scaled to the busiest day of the series; days without
- * builds are dots so a gap reads differently from a green day.
- */
-export const sparkline = (trend: FlakyTestTrend | undefined): string | undefined => {
-  if (!trend || trend.days === 0) {
-    return undefined;
-  }
-  const max = Math.max(...trend.failedBuildsPerDay, 1);
-  const chars = trend.failedBuildsPerDay.map((failed, day) => {
-    if ((trend.buildsPerDay[day] ?? 0) === 0) {
-      return SPARKLINE_NO_BUILDS;
-    }
-    const level = Math.min(
-      SPARKLINE_LEVELS.length - 1,
-      Math.ceil((failed / max) * (SPARKLINE_LEVELS.length - 1))
-    );
-    return SPARKLINE_LEVELS[level];
-  });
-  return inlineCode(chars.join(''));
-};
 
 export type BranchFailures = Pick<FlakyTestBranchStats, 'branch' | 'builds' | 'failedBuilds'>;
 
@@ -130,9 +105,24 @@ export const branchesByFailedBuilds = (
   );
 };
 
+/**
+ * The branch the test qualified on, which is what the report's thresholds were checked against,
+ * with the counts of its `byBranch` row. Reports written before `flakiestBranch` existed fall
+ * back to the branch with the most failed builds.
+ */
+export const qualifyingBranch = (
+  test: Pick<FlakyTestEntry, 'byBranch' | 'flakiestBranch'>
+): BranchFailures | undefined => {
+  const { flakiestBranch } = test;
+  if (!flakiestBranch) {
+    return branchesByFailedBuilds([test])[0];
+  }
+  return test.byBranch.find((stats) => stats.branch === flakiestBranch.branch) ?? flakiestBranch;
+};
+
 /** `` `main` · 98 / 505 ``, or just `` `main` `` when it is the only branch the test ran on. */
 export const formatFlakiestBranch = (test: FlakyTestEntry): string => {
-  const [flakiest] = branchesByFailedBuilds([test]);
+  const flakiest = qualifyingBranch(test);
   if (!flakiest) {
     return '-';
   }
@@ -146,14 +136,15 @@ export const testsTable = (
   tests: readonly FlakyTestEntry[],
   { withTestId, maxRows }: { withTestId: boolean; maxRows: number }
 ): string => {
-  const header = ['Test', 'Failed builds', 'Flakiest branch', 'Trend (14d)'];
-  const rows = tests.slice(0, maxRows).map((test) => [
-    test.title,
-    formatFailedBuilds(test.failedBuilds, test.builds),
-    formatFlakiestBranch(test),
-    sparkline(test.trend) ?? '-',
-    ...(withTestId ? [test.testId] : []),
-  ]);
+  const header = ['Test', 'Failed builds', 'Flakiest branch'];
+  const rows = tests
+    .slice(0, maxRows)
+    .map((test) => [
+      test.title,
+      formatFailedBuilds(test.failedBuilds, test.builds),
+      formatFlakiestBranch(test),
+      ...(withTestId ? [test.testId] : []),
+    ]);
   const rest = tests.length - maxRows;
   return [
     table(withTestId ? [...header, 'Test ID'] : header, rows),

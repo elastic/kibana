@@ -42,7 +42,6 @@ const HIGHLIGHTED_PIPELINES = new Set(['kibana-on-merge', 'kibana-pull-request']
 const RANK_TIERS = [5, 10, 20, 30, 50, 100];
 const MAX_TEST_ROWS = 15;
 const MAX_DISTINCT_FAILURES = 2;
-const MAX_HISTORY = 30;
 /** A branch is named in the headline when it fails at least this share of the flakiest one. */
 const HEADLINE_BRANCH_SHARE = 0.25;
 const MAX_HEADLINE_BRANCHES = 2;
@@ -72,7 +71,7 @@ export interface FlakySuiteIssueMetadata {
   'report.generatedAt': string;
   /** Reports that found the suite flaky, including the one that filed the issue. */
   'report.count': number;
-  /** Most recent `MAX_HISTORY` snapshots, oldest first. */
+  /** One snapshot per report that found the suite flaky, oldest first. */
   'report.history': FlakySuiteReportSnapshot[];
 }
 
@@ -98,8 +97,10 @@ const isSnapshot = (value: unknown): value is FlakySuiteReportSnapshot =>
 /** Suite metadata recorded in an issue body, if the body was written by this reporter. */
 export const readFlakySuiteIssueMetadata = (
   body: string
-): Pick<FlakySuiteIssueMetadata, 'suite.filePath' | 'report.history'> &
-  Partial<FlakySuiteIssueMetadata> | undefined => {
+):
+  | (Pick<FlakySuiteIssueMetadata, 'suite.filePath' | 'report.history'> &
+      Partial<FlakySuiteIssueMetadata>)
+  | undefined => {
   const filePath = metadataValue(body, 'suite.filePath');
   if (typeof filePath !== 'string') {
     return undefined;
@@ -140,28 +141,6 @@ export const flakySuiteIssueMetadata = (
   'report.history': [snapshot(suite, report)],
 });
 
-/**
- * Body of an existing suite issue with only its hidden metadata brought up to date: the visible
- * text stays as filed, comments carry the newer numbers.
- */
-export const bumpFlakySuiteIssueMetadata = (
-  body: string,
-  suite: FlakySuite,
-  report: FlakyTestReport
-): string => {
-  const previous = readFlakySuiteIssueMetadata(body);
-  const history = [...(previous?.['report.history'] ?? []), snapshot(suite, report)];
-  const metadata: FlakySuiteIssueMetadata = {
-    'suite.filePath': suite.filePath,
-    'suite.framework': suite.framework,
-    'suite.testIds': suite.tests.map((test) => test.testId),
-    'report.generatedAt': report.generatedAt.toISOString(),
-    'report.count': (previous?.['report.count'] ?? history.length - 1) + 1,
-    'report.history': history.slice(-MAX_HISTORY),
-  };
-  return updateIssueMetadata(body, metadata, FLAKY_TEST_SUITE_METADATA_PREFIX);
-};
-
 /** `[Lens] Flaky Scout test suite: Lens ESQL dashboard inline editing` */
 export const flakySuiteIssueTitle = (
   suite: Pick<FlakySuite, 'filePath' | 'framework' | 'suiteTitle'>,
@@ -188,7 +167,13 @@ export const rankTierLabel = (worst: FlakyTestEntry, report: FlakyTestReport): s
 
 /** `` `main` `` or `` `main` and `9.2` ``: the branches that fail materially. */
 const headlineBranches = (suite: FlakySuite): string | undefined => {
-  const ranked = branchesByFailedBuilds(suite.tests).filter((stats) => stats.failedBuilds > 0);
+  // Only the branches the report's thresholds were met on; every branch for reports without them
+  const qualifying = new Set(
+    suite.tests.flatMap((test) => (test.flakiestBranch ? [test.flakiestBranch.branch] : []))
+  );
+  const ranked = branchesByFailedBuilds(suite.tests).filter(
+    (stats) => stats.failedBuilds > 0 && (qualifying.size === 0 || qualifying.has(stats.branch))
+  );
   if (ranked.length === 0) {
     return undefined;
   }
@@ -231,7 +216,10 @@ const suiteDetails = (suite: FlakySuite): string => {
   const framework = FRAMEWORK_LABELS[suite.framework].long;
   const rows: string[][] = [
     ['**File**', blobLink(suite.filePath)],
-    ['**Framework**', suite.configPath ? `${framework} · ${blobLink(suite.configPath)}` : framework],
+    [
+      '**Framework**',
+      suite.configPath ? `${framework} · ${blobLink(suite.configPath)}` : framework,
+    ],
     ['**Owners**', suite.owners.length > 0 ? suite.owners.map(inlineCode).join(', ') : '-'],
   ];
   return table(['Field', 'Value'], rows);

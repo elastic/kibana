@@ -68,12 +68,6 @@ export const flakyTest = (overrides: Partial<FlakyTestEntry> = {}): FlakyTestEnt
     },
   ],
   suiteTitle: 'Default status alert',
-  trend: {
-    days: 14,
-    from: new Date('2026-08-27T00:00:00.000Z'),
-    buildsPerDay: [0, 0, 60, 70, 72, 68, 75, 71, 66, 74, 70, 69, 73, 41],
-    failedBuildsPerDay: [0, 0, 0, 2, 5, 3, 8, 6, 1, 2, 9, 7, 4, 2],
-  },
   ...overrides,
 });
 

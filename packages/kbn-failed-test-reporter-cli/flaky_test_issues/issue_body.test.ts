@@ -8,7 +8,6 @@
  */
 
 import {
-  bumpFlakySuiteIssueMetadata,
   flakySuiteIssueTitle,
   rankTierLabel,
   readFlakySuiteIssueMetadata,
@@ -87,7 +86,6 @@ const multiTestReport = () => {
           timestamp: new Date('2026-09-08T06:12:00.000Z'),
         },
       ],
-      trend: undefined,
     }),
     flakyTest({
       testId: 'b',
@@ -134,7 +132,11 @@ describe('flakySuiteIssueTitle', () => {
 
   it('falls back to the file name without a suite title and omits an unknown module', () => {
     expect(
-      flakySuiteIssueTitle({ filePath: 'x-pack/test/a/b.ts', framework: 'ftr', suiteTitle: undefined })
+      flakySuiteIssueTitle({
+        filePath: 'x-pack/test/a/b.ts',
+        framework: 'ftr',
+        suiteTitle: undefined,
+      })
     ).toBe('Flaky FTR test suite: b.ts');
   });
 });
@@ -197,49 +199,10 @@ describe('renderFlakySuiteIssueBody', () => {
       'suite.testIds': [suite.tests[0].testId],
       'report.generatedAt': '2026-09-09T09:04:41.000Z',
       'report.count': 1,
-      'report.history': [{ generatedAt: '2026-09-09T09:04:41.000Z', builds: 509, failedBuilds: 49 }],
-    });
-    expect(readFlakySuiteIssueMetadata('no metadata here')).toBeUndefined();
-  });
-});
-
-describe('bumpFlakySuiteIssueMetadata', () => {
-  it('appends a snapshot and bumps the count without touching the visible body', () => {
-    const { suite, report } = singleTestReport();
-    const body = renderFlakySuiteIssueBody(suite, { report });
-    const later = {
-      ...report,
-      generatedAt: new Date('2026-09-12T09:00:00.000Z'),
-      flaky: [{ ...suite.tests[0], builds: 600, failedBuilds: 70 }],
-    };
-    const [laterSuite] = groupIntoSuites(later.flaky, later.files);
-
-    const bumped = bumpFlakySuiteIssueMetadata(body, laterSuite, later);
-
-    const visible = (text: string) => text.replace(/\n\n<!-- kibanaCiData = .* -->$/, '');
-    expect(visible(bumped)).toBe(visible(body));
-    expect(readFlakySuiteIssueMetadata(bumped)).toMatchObject({
-      'report.generatedAt': '2026-09-12T09:00:00.000Z',
-      'report.count': 2,
       'report.history': [
         { generatedAt: '2026-09-09T09:04:41.000Z', builds: 509, failedBuilds: 49 },
-        { generatedAt: '2026-09-12T09:00:00.000Z', builds: 600, failedBuilds: 70 },
       ],
     });
-  });
-
-  it('keeps the last 30 snapshots and copes with a body without metadata', () => {
-    const { suite, report } = singleTestReport();
-    let body = 'hand-written issue';
-    for (let day = 1; day <= 32; day++) {
-      body = bumpFlakySuiteIssueMetadata(body, suite, {
-        ...report,
-        generatedAt: new Date(Date.UTC(2026, 8, day)),
-      });
-    }
-    const metadata = readFlakySuiteIssueMetadata(body);
-    expect(metadata?.['report.count']).toBe(32);
-    expect(metadata?.['report.history']).toHaveLength(30);
-    expect(metadata?.['report.history'][0].generatedAt).toBe('2026-09-03T00:00:00.000Z');
+    expect(readFlakySuiteIssueMetadata('no metadata here')).toBeUndefined();
   });
 });

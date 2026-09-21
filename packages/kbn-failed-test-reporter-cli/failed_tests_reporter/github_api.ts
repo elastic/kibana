@@ -29,25 +29,15 @@ export function nextPageUrl(linkHeader: string | null): string | undefined {
 
 export type GithubIssueState = 'open' | 'closed';
 
-export interface GithubIssueLabel {
-  name: string;
-}
-
 export interface GithubIssue {
   html_url: string;
   number: number;
   node_id: string;
   title: string;
-  labels: GithubIssueLabel[];
+  labels: unknown[];
   body: string;
   state: GithubIssueState;
-  /** ISO timestamp of the last closing, `null` while open. Absent in older callers' fixtures. */
-  closed_at?: string | null;
 }
-
-/** Names of the labels on an issue; GitHub returns objects, some fixtures plain strings. */
-export const issueLabelNames = (issue: Pick<GithubIssue, 'labels'>): string[] =>
-  issue.labels.map((label) => (typeof label === 'string' ? label : label.name));
 
 export interface ListIssuesOptions {
   state: GithubIssueState | 'all';
@@ -82,10 +72,6 @@ export interface GithubIssueMini {
 
 export interface GithubIssueComment {
   body: string;
-  /** ISO timestamp; absent in dry-run mode and in older fixtures. */
-  created_at?: string;
-  /** Login of the author; absent in dry-run mode and in older fixtures. */
-  user?: { login: string };
 }
 
 interface RequestOptions {
@@ -180,18 +166,6 @@ export class GithubApi {
     return this.requestCount;
   }
 
-  /** Reopens an issue without touching its body. */
-  async reopenIssue(issueNumber: number) {
-    await this.request(
-      {
-        method: 'PATCH',
-        url: Url.resolve(this.baseUrl, `issues/${encodeURIComponent(issueNumber)}`),
-        data: { state: 'open' },
-      },
-      undefined
-    );
-  }
-
   async editIssueBodyAndEnsureOpen(issueNumber: number, newBody: string) {
     await this.request(
       {
@@ -209,37 +183,27 @@ export class GithubApi {
   /**
    * Fetch all comments on an issue, following pagination. Returns an empty
    * list in dry-run mode so update flows behave sensibly without hitting the
-   * (rate limited) GitHub API, unless `readInDryRun` asks for the real comments.
+   * (rate limited) GitHub API.
    */
-  async getIssueComments(
-    issueNumber: number,
-    { readInDryRun = false }: { readInDryRun?: boolean } = {}
-  ): Promise<GithubIssueComment[]> {
+  async getIssueComments(issueNumber: number): Promise<GithubIssueComment[]> {
     const perPage = 100;
     const comments: GithubIssueComment[] = [];
 
     let page = 1;
     while (true) {
-      const resp = await this.request<
-        Array<{ body?: string; created_at?: string; user?: { login?: string } | null }>
-      >(
+      const resp = await this.request<Array<{ body?: string }>>(
         {
           method: 'GET',
           url: Url.resolve(
             this.baseUrl,
             `issues/${encodeURIComponent(issueNumber)}/comments?per_page=${perPage}&page=${page}`
           ),
-          safeForDryRun: readInDryRun,
         },
         []
       );
 
       for (const comment of resp.data) {
-        comments.push({
-          body: comment.body ?? '',
-          created_at: comment.created_at,
-          user: comment.user?.login ? { login: comment.user.login } : undefined,
-        });
+        comments.push({ body: comment.body ?? '' });
       }
 
       if (resp.data.length < perPage) {
@@ -313,21 +277,6 @@ export class GithubApi {
         data: {
           body: commentBody,
         },
-      },
-      undefined
-    );
-  }
-
-  /** Adds labels to an issue, keeping the ones it already has; unknown labels are created. */
-  async addLabels(issueNumber: number, labels: string[]) {
-    if (labels.length === 0) {
-      return;
-    }
-    await this.request(
-      {
-        method: 'POST',
-        url: Url.resolve(this.baseUrl, `issues/${encodeURIComponent(issueNumber)}/labels`),
-        data: { labels },
       },
       undefined
     );

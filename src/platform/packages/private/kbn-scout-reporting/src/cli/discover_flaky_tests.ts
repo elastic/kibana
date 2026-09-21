@@ -44,7 +44,6 @@ const DEFAULT_MIN_FAILED_BUILDS = defaults.thresholds.minFailedBuilds;
 const DEFAULT_MIN_FAIL_RATE = defaults.thresholds.minFailRate;
 const DEFAULT_MAX_TESTS = defaults.thresholds.maxTests;
 const DEFAULT_SAMPLES_PER_TEST = defaults.samplesPerTest;
-const DEFAULT_TREND_DAYS = defaults.trendDays;
 // Only affects the printed summary; the JSON report is bounded by --maxTests
 const DEFAULT_SUMMARY_LIMIT = 10;
 
@@ -123,7 +122,6 @@ export const discoverFlakyTests: Command<void> = {
       'minFailRate',
       'maxTests',
       'samplesPerTest',
-      'trendDays',
       'outputPath',
       'summaryLimit',
       'summaryWidth',
@@ -142,7 +140,6 @@ export const discoverFlakyTests: Command<void> = {
       minFailRate: String(DEFAULT_MIN_FAIL_RATE),
       maxTests: String(DEFAULT_MAX_TESTS),
       samplesPerTest: String(DEFAULT_SAMPLES_PER_TEST),
-      trendDays: String(DEFAULT_TREND_DAYS),
       outputPath: SCOUT_FLAKY_TESTS_PATH,
       summaryLimit: String(DEFAULT_SUMMARY_LIMIT),
     },
@@ -161,7 +158,6 @@ export const discoverFlakyTests: Command<void> = {
     --minFailRate        (optional)  Fraction (0-1) of its builds a branch must have failed the test in to qualify it; 0 disables [default: ${DEFAULT_MIN_FAIL_RATE}, i.e. 3%]
     --maxTests           (optional)  Maximum tests per list in the report [default: ${DEFAULT_MAX_TESTS}]
     --samplesPerTest     (optional)  Recent failure messages per test [default: ${DEFAULT_SAMPLES_PER_TEST}]
-    --trendDays          (optional)  Days of per-day build counts attached to each test; 0 disables [default: ${DEFAULT_TREND_DAYS}]
     --outputPath         (optional)  Where to write the flaky test report [default: ${SCOUT_FLAKY_TESTS_PATH}]
     --summaryLimit       (optional)  Tests shown in the summary table; 0 hides it [default: ${DEFAULT_SUMMARY_LIMIT}]
     --summaryWidth       (optional)  Columns the summary table may use [default: terminal width, or ${DEFAULT_TERMINAL_WIDTH} when not a terminal]
@@ -186,10 +182,6 @@ export const discoverFlakyTests: Command<void> = {
     const minFailRate = flagsReader.requiredNumber('minFailRate');
     if (!(minFailRate >= 0 && minFailRate <= 1)) {
       throw createFlagError('--minFailRate must be a number between 0 and 1');
-    }
-    const trendDays = flagsReader.requiredNumber('trendDays');
-    if (!Number.isInteger(trendDays) || trendDays < 0) {
-      throw createFlagError('--trendDays must be a non-negative integer');
     }
     const summaryLimit = flagsReader.requiredNumber('summaryLimit');
     if (!Number.isInteger(summaryLimit) || summaryLimit < 0) {
@@ -227,7 +219,6 @@ export const discoverFlakyTests: Command<void> = {
           maxTests: flagsReader.requiredNumber('maxTests'),
         },
         samplesPerTest: flagsReader.requiredNumber('samplesPerTest'),
-        trendDays,
       },
       log
     );

@@ -82,20 +82,6 @@ export const FlakyTestFlakiestBranchSchema = z.object({
 export type FlakyTestFlakiestBranch = z.infer<typeof FlakyTestFlakiestBranchSchema>;
 
 /**
- * Build counts of one test per UTC day over the last `days` days of the report scope, oldest
- * first; the last day is the one containing the window end and is usually partial. Days without
- * builds are 0.
- */
-export const FlakyTestTrendSchema = z.object({
-  days: z.int().min(1),
-  /** Start of the first day. */
-  from: z.coerce.date(),
-  buildsPerDay: z.array(z.int()),
-  failedBuildsPerDay: z.array(z.int()),
-});
-export type FlakyTestTrend = z.infer<typeof FlakyTestTrendSchema>;
-
-/**
  * One test aggregated over the report window. Counts are per execution (one per test run;
  * Playwright in-run retries collapse into a single execution) and per Buildkite build.
  */
@@ -137,8 +123,6 @@ export const FlakyTestEntrySchema = z.object({
   /** Absent only if the test emitted no execution events in the window (should not happen). */
   latestRun: z.optional(FlakyTestLatestRunSchema),
   sampleFailures: z.array(FlakyTestSampleFailureSchema),
-  /** Absent in reports written before trends existed or when `trendDays` is 0. */
-  trend: z.optional(FlakyTestTrendSchema),
 });
 export type FlakyTestEntry = z.infer<typeof FlakyTestEntrySchema>;
 
@@ -200,8 +184,6 @@ export interface FlakyTestReportOptions {
   classifications: FlakyTestClassification[];
   thresholds: FlakyTestReportThresholds;
   samplesPerTest: number;
-  /** Days of per-day build counts attached to each test; 0 disables the trend. */
-  trendDays: number;
   /** Upper bound of the window; defaults to the current time. */
   now?: Date;
 }
@@ -219,7 +201,6 @@ export const DEFAULT_FLAKY_TEST_REPORT_OPTIONS: Omit<FlakyTestReportOptions, 'no
     maxTests: 200,
   },
   samplesPerTest: 3,
-  trendDays: 14,
 };
 
 export const FlakyTestReportSchema = z.object({

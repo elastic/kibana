@@ -7,11 +7,11 @@ exports[`renderFlakySuiteIssueBody renders a multi-test suite with distinct fail
 
 #### Flaky tests
 
-| Test | Failed builds | Flakiest branch | Trend (14d) | Test ID |
-|---|---|---|---|---|
-| does not keep a hidden histogram after visiting Dashboard | 23 / 264 (9%) | \`main\` · 20 / 200 | - | a |
-| reverts breakdown, interval, and visibility on a saved session | 10 / 264 (4%) | \`main\` | \`··▁▃▅▄█▆▂▃█▇▅▃\` | b |
-| persists hide/show of the histogram on a saved session | 9 / 264 (3%) | \`main\` | \`··▁▃▅▄█▆▂▃█▇▅▃\` | c |
+| Test | Failed builds | Flakiest branch | Test ID |
+|---|---|---|---|
+| does not keep a hidden histogram after visiting Dashboard | 23 / 264 (9%) | \`main\` · 20 / 200 | a |
+| reverts breakdown, interval, and visibility on a saved session | 10 / 264 (4%) | \`main\` | b |
+| persists hide/show of the histogram on a saved session | 9 / 264 (3%) | \`main\` | c |
 
 #### Suite details
 
@@ -51,9 +51,9 @@ exports[`renderFlakySuiteIssueBody renders a single-test suite with a dashboard 
 
 #### Flaky tests
 
-| Test | Failed builds | Flakiest branch | Trend (14d) | Test ID |
-|---|---|---|---|---|
-| creates default alert, triggers on down status, and recovers | 49 / 509 (10%) | \`main\` | \`··▁▃▅▄█▆▂▃█▇▅▃\` | playwright:default_status_alert:creates default alert |
+| Test | Failed builds | Flakiest branch | Test ID |
+|---|---|---|---|
+| creates default alert, triggers on down status, and recovers | 49 / 509 (10%) | \`main\` | playwright:default_status_alert:creates default alert |
 
 #### Suite details
 

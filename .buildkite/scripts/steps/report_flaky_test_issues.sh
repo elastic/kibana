@@ -1,17 +1,18 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Files, comments on or reopens GitHub failed-test issues for the flaky suites in the report
-# produced by report_flaky_tests.sh, via `node scripts/report_flaky_test_issues`.
+# Files a GitHub failed-test issue for every flaky suite in the report produced by
+# report_flaky_tests.sh that has none yet, via `node scripts/report_flaky_test_issues`.
 #
 # FLAKY_TESTS_GITHUB_REPO selects the mode:
-#   - empty (default): dry run against elastic/kibana, the real issues are read and the would-be
-#     actions logged and annotated, nothing is written;
-#   - a sandbox such as elastic/appex-qa-ai: issues are written there;
+#   - empty: dry run against elastic/kibana, the real issues are read and the would-be actions
+#     logged and annotated, nothing is written;
+#   - a sandbox such as elastic/appex-qa-ai: issues are filed there, except for suites that a
+#     failed-test issue in FLAKY_TESTS_TRACKING_REPO (elastic/kibana) is already about;
 #   - elastic/kibana: live.
 # Every open failed-test issue is fetched, plus those closed in the last
-# FLAKY_TESTS_CLOSED_ISSUES_DAYS days. At most FLAKY_TESTS_MAX_NEW_ISSUES issues are created per
-# run and an issue gets a comment at most once per FLAKY_TESTS_MIN_COMMENT_INTERVAL_DAYS days.
+# FLAKY_TESTS_CLOSED_ISSUES_DAYS days; both count as tracking a suite. At most
+# FLAKY_TESTS_MAX_NEW_ISSUES issues are created per run.
 # GITHUB_TOKEN (kibanamachine) comes from Vault via .buildkite/scripts/common/setup_job_env.sh.
 
 source .buildkite/scripts/common/util.sh
@@ -22,7 +23,7 @@ cd "${KIBANA_DIR:-$(pwd)}"
 FLAKY_TESTS_GITHUB_REPO="${FLAKY_TESTS_GITHUB_REPO:-}"
 FLAKY_TESTS_CLOSED_ISSUES_DAYS="${FLAKY_TESTS_CLOSED_ISSUES_DAYS:-365}"
 FLAKY_TESTS_MAX_NEW_ISSUES="${FLAKY_TESTS_MAX_NEW_ISSUES:-10}"
-FLAKY_TESTS_MIN_COMMENT_INTERVAL_DAYS="${FLAKY_TESTS_MIN_COMMENT_INTERVAL_DAYS:-3}"
+FLAKY_TESTS_TRACKING_REPO="${FLAKY_TESTS_TRACKING_REPO:-elastic/kibana}"
 FLAKY_TESTS_DASHBOARD_URL="${FLAKY_TESTS_DASHBOARD_URL:-}"
 
 REPORT_DIR="target/flaky_tests"
@@ -56,7 +57,9 @@ echo "+++ Report flaky suites to GitHub ($MODE)"
 echo "    Repository          : $GITHUB_REPO"
 echo "    Closed issues since : $FLAKY_TESTS_CLOSED_ISSUES_DAYS days ago"
 echo "    Max new issues      : $FLAKY_TESTS_MAX_NEW_ISSUES"
-echo "    Comment interval    : $FLAKY_TESTS_MIN_COMMENT_INTERVAL_DAYS days"
+if [[ -n "$FLAKY_TESTS_TRACKING_REPO" && "$FLAKY_TESTS_TRACKING_REPO" != "$GITHUB_REPO" ]]; then
+  echo "    Also tracked in     : $FLAKY_TESTS_TRACKING_REPO (suites with an issue there get none)"
+fi
 
 args=(
   --input "$REPORT_PATH"
@@ -64,7 +67,7 @@ args=(
   --github-repo "$GITHUB_REPO"
   --closed-since-days "$FLAKY_TESTS_CLOSED_ISSUES_DAYS"
   --max-new-issues "$FLAKY_TESTS_MAX_NEW_ISSUES"
-  --min-comment-interval-days "$FLAKY_TESTS_MIN_COMMENT_INTERVAL_DAYS"
+  --tracking-repo "$FLAKY_TESTS_TRACKING_REPO"
 )
 if [[ -n "$FLAKY_TESTS_DASHBOARD_URL" ]]; then
   args+=(--dashboard-url "$FLAKY_TESTS_DASHBOARD_URL")
@@ -87,11 +90,13 @@ buildkite-agent artifact upload "$SUMMARY_PATH"
 
 echo "--- Annotate build"
 suites="$(jq -r '.suites' "$SUMMARY_PATH")"
-issues="$(jq -r '.issues | "\(.open) open and \(.closed) closed since \(.closedSince[:10])"' "$SUMMARY_PATH")"
-counts="$(jq -r '.counts | "**\(.created)** created, **\(.commented)** commented on, **\(.reopened)** reopened, \(.skipped) skipped, \(.failed) failed"' "$SUMMARY_PATH")"
+issues="$(jq -r '.issues | "\(.open) open and \(.closed) closed since \(.closedSince[:10])"
+  + (if .tracking then ", plus \(.tracking.open) open and \(.tracking.closed) closed in `\(.tracking.repo)`" else "" end)' "$SUMMARY_PATH")"
+counts="$(jq -r '.counts | "**\(.created)** created, \(.skipped) skipped, \(.failed) failed"' "$SUMMARY_PATH")"
 
-# Markdown section with one bullet per suite the given action applies to, linking the issue;
-# collapsed when it is likely to be long
+# Markdown section with one bullet per suite the given action applies to, linking the issue
+# (qualified by its repository when it is not the target one); collapsed when it is likely to
+# be long
 section() {
   local action="$1" title="$2" collapsed="$3"
   local count
@@ -108,7 +113,8 @@ section() {
   echo
   jq -r --arg action "$action" '.actions[] | select(.action == $action)
     | "- `\(.filePath)`"
-      + (if .issue then " [#\(.issue.number)](\(.issue.url))" else "" end)
+      + (if .issue then " [\(.issue.repo // "")#\(.issue.number)](\(.issue.url))" else "" end)
+      + (if .issue and .issue.state == "closed" then " (closed)" else "" end)
       + (if .match then " (\(.match))" else "" end)
       + (if .reason then ": \(.reason)" else "" end)
       + (if .error then ": \(.error)" else "" end)' "$SUMMARY_PATH"
@@ -122,7 +128,7 @@ if [[ "$MODE" == "dry run" ]]; then
   headline="Dry run: ${suites} flaky suites against the \`failed-test\` issues in \`${GITHUB_REPO}\` (${issues}), nothing was written. Would be: ${counts}."
   style="info"
 else
-  headline="Reported ${suites} flaky suites to the \`failed-test\` issues in \`${GITHUB_REPO}\` (${issues}): ${counts}."
+  headline="Checked ${suites} flaky suites against the \`failed-test\` issues in \`${GITHUB_REPO}\` (${issues}): ${counts}."
   style="success"
 fi
 if [[ "$exit_code" != "0" ]]; then
@@ -132,8 +138,6 @@ fi
 {
   echo "$headline"
   section created "Created" false
-  section commented "Commented on" true
-  section reopened "Reopened" false
   section failed "Failed" false
   section skipped "Skipped" true
   echo

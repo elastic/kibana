@@ -16,7 +16,6 @@ import type {
   FlakyTestPipelineStats,
   FlakyTestReportThresholds,
   FlakyTestSampleFailure,
-  FlakyTestTrend,
   TestFramework,
 } from './schema';
 
@@ -446,90 +445,6 @@ export const fetchBranchCounts = async (
   }
   for (const rows of byTest.values()) {
     rows.sort((a, b) => b.failedBuilds - a.failedBuilds || b.builds - a.builds);
-  }
-  return byTest;
-};
-
-const MS_PER_DAY = 24 * 60 * 60 * 1000;
-
-/** Midnight UTC of the day containing `date`. */
-export const startOfUtcDay = (date: Date): Date =>
-  new Date(Math.floor(date.getTime() / MS_PER_DAY) * MS_PER_DAY);
-
-/** Start of the first of the `days` UTC days ending with the one that contains `to`. */
-export const trendFrom = (to: Date, days: number): Date =>
-  new Date(startOfUtcDay(to).getTime() - (days - 1) * MS_PER_DAY);
-
-/**
- * Per-test, per-UTC-day build counts for the given tests of one execution model. Grouping by
- * `test.id` is affordable because of the `test.id` filter; days without executions produce no
- * row and are filled in by the caller.
- */
-export const buildDailyTrendQuery = (
-  scope: FlakyTestQueryScope,
-  frameworks: readonly TestFramework[],
-  testIds: readonly string[]
-): string => {
-  const [model] = buildExecutionModels(frameworks);
-
-  return [
-    `FROM ${SCOUT_TEST_EVENTS_INDEX_PATTERN}`,
-    `WHERE ${[
-      ...scopeClauses(scope),
-      model.executionFilter,
-      `test.id IN (${inList(testIds)})`,
-    ].join(' AND ')}`,
-    `EVAL failed = ${model.failedExpression}, day = DATE_TRUNC(1 day, @timestamp)`,
-    'STATS builds = COUNT_DISTINCT(buildkite.build.id),' +
-      ' failed_builds = COUNT_DISTINCT(CASE(failed == 1, buildkite.build.id, NULL))' +
-      ' BY test.id, day',
-    'RENAME test.id AS test_id',
-    `LIMIT ${ESQL_ROW_LIMIT}`,
-  ].join(' | ');
-};
-
-/**
- * Per-day build counts over the `days` UTC days ending with the one containing `scope.to`, in
- * the pipelines and branches of the scope. Every test gets an entry, with zeros for days it did
- * not run. The window end is respected, so the last day is partial when `to` is not midnight.
- */
-export const fetchDailyTrend = async (
-  es: ESClient,
-  scope: FlakyTestQueryScope,
-  tests: ReadonlyArray<{ testId: string; framework: TestFramework }>,
-  days: number
-): Promise<Map<string, FlakyTestTrend>> => {
-  if (tests.length === 0 || days <= 0) {
-    return new Map();
-  }
-
-  const from = trendFrom(scope.to, days);
-  const results = await Promise.all(
-    groupByExecutionModel(tests).map(({ frameworks, testIds }) =>
-      runEsql<{ test_id: string; day: string; builds: number; failed_builds: number }>(
-        es,
-        buildDailyTrendQuery({ ...scope, from }, frameworks, testIds)
-      )
-    )
-  );
-
-  const byTest = new Map<string, FlakyTestTrend>(
-    tests.map(({ testId }) => [
-      testId,
-      {
-        days,
-        from,
-        buildsPerDay: new Array<number>(days).fill(0),
-        failedBuildsPerDay: new Array<number>(days).fill(0),
-      },
-    ])
-  );
-  for (const record of results.flat()) {
-    const trend = byTest.get(record.test_id);
-    const index = Math.floor((new Date(record.day).getTime() - from.getTime()) / MS_PER_DAY);
-    if (!trend || index < 0 || index >= days) continue;
-    trend.buildsPerDay[index] = record.builds;
-    trend.failedBuildsPerDay[index] = record.failed_builds;
   }
   return byTest;
 };
