@@ -22,7 +22,7 @@ export interface ProposalItem extends ProposalWithMetadata {
    * User ids assigned to the investigation, from conversation metadata. Always an array —
    * empty when unset or the conversation is unreadable — so callers need no fallback.
    */
-  assignees: string[];
+  conversationAssignees: string[];
 }
 
 export interface ProposalsPageResponse {

@@ -180,7 +180,7 @@ describe('ConversationProposalsService', () => {
         from: 0,
       });
 
-      expect(result.proposals[0].assignees).toEqual(['user-1', 'user-2']);
+      expect(result.proposals[0].conversationAssignees).toEqual(['user-1', 'user-2']);
     });
 
     /**
@@ -203,7 +203,7 @@ describe('ConversationProposalsService', () => {
         from: 0,
       });
 
-      expect(result.proposals[0].assignees).toEqual(['sole.analyst']);
+      expect(result.proposals[0].conversationAssignees).toEqual(['sole.analyst']);
     });
 
     // Always an array, so no caller needs a fallback. Each of the three ways it can be
@@ -236,7 +236,7 @@ describe('ConversationProposalsService', () => {
         from: 0,
       });
 
-      expect(result.proposals[0].assignees).toEqual([]);
+      expect(result.proposals[0].conversationAssignees).toEqual([]);
     });
 
     it('runs a single bulkGet for deduplicated conversation ids', async () => {

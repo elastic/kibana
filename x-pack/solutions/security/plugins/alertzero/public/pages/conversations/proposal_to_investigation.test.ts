@@ -20,7 +20,7 @@ const baseProposal: ProposalItem = {
   origin: 'worker',
   createdAt: '2026-09-10T10:00:00.000Z',
   expired: false,
-  assignees: [],
+  conversationAssignees: [],
 };
 
 describe('proposalToInvestigation', () => {
@@ -146,13 +146,16 @@ describe('proposalToInvestigation', () => {
     it('takes the first assignee', () => {
       const result = proposalToInvestigation({
         ...baseProposal,
-        assignees: ['first.analyst', 'second.analyst'],
+        conversationAssignees: ['first.analyst', 'second.analyst'],
       });
       expect(result.assignee).toBe('first.analyst');
     });
 
     it('is null when nobody is assigned', () => {
-      const result = proposalToInvestigation({ ...baseProposal, assignees: [] });
+      const result = proposalToInvestigation({
+        ...baseProposal,
+        conversationAssignees: [],
+      });
       expect(result.assignee).toBeNull();
     });
   });

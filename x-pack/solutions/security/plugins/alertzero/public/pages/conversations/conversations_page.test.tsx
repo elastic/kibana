@@ -77,7 +77,7 @@ const proposal: ProposalItem = {
   origin: 'worker',
   createdAt: '2024-01-01T00:00:00Z',
   expired: false,
-  assignees: [],
+  conversationAssignees: [],
 };
 
 const renderPage = (initialEntry: string) => {

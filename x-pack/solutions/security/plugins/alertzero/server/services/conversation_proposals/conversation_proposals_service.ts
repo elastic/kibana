@@ -17,7 +17,7 @@ type ProposalsService = ReturnType<AgenticInvestigationsPluginStart['getProposal
 /** Conversation-derived fields merged onto a proposal on read. Absent when unreadable. */
 type ConversationDecoration = Pick<
   ProposalItem,
-  'conversationTitle' | 'conversationAgentId' | 'assignees'
+  'conversationTitle' | 'conversationAgentId' | 'conversationAssignees'
 >;
 
 /**
@@ -105,7 +105,7 @@ export class ConversationProposalsService {
           {
             ...(title ? { conversationTitle: title } : {}),
             ...(agentId ? { conversationAgentId: agentId } : {}),
-            assignees: readAssignees(metadata?.assignees),
+            conversationAssignees: readAssignees(metadata?.assignees),
           },
         ])
       );
@@ -121,7 +121,11 @@ export class ConversationProposalsService {
   ): ProposalItem[] {
     return proposals.map((proposal) => {
       const conversation = conversations.get(proposal.conversationId);
-      return { ...proposal, ...conversation, assignees: conversation?.assignees ?? [] };
+      return {
+        ...proposal,
+        ...conversation,
+        conversationAssignees: conversation?.conversationAssignees ?? [],
+      };
     });
   }
 }
