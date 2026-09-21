@@ -61,7 +61,7 @@ export const useScopedImprovementsHistory = ({
   const { improvements, isLoading } = useImprovements({
     aiIndexId,
     status: ['applied', 'rejected'],
-    size: 25,
+    size: MAX_IMPROVEMENTS_PAGE_SIZE,
     enabled: feedbackLoopEnabled && enabled,
   });
 

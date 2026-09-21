@@ -36,9 +36,12 @@ export const buildFeedbackContext = async (
   const aiIndex = await aiIndexService.get(aiIndexId, spaceId);
   const feedbackAnalysis = aiIndex.feedback_analysis;
 
-  const allowedActions: ImprovementAction[] = feedbackAnalysis?.allowed_actions ?? [
-    ...IMPROVEMENT_ACTIONS,
-  ];
+  // Managed indexes reject source writes and automation changes, so cap allowed actions to KI
+  // operations only — the ones that target the destination index rather than the config itself.
+  const managedSafeActions: ImprovementAction[] = ['add_ki', 'edit_ki', 'remove_ki'];
+  const allowedActions: ImprovementAction[] = (
+    feedbackAnalysis?.allowed_actions ?? [...IMPROVEMENT_ACTIONS]
+  ).filter((a) => !aiIndex.managed || managedSafeActions.includes(a));
   const agentId = feedbackAnalysis?.agent_id ?? agentBuilderDefaultAgentId;
 
   const [selection, kiList, history] = await Promise.all([
