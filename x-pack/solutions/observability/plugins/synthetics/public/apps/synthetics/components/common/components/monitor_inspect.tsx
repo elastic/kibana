@@ -34,6 +34,7 @@ import { stringify } from 'yaml';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useGetUrlParams } from '../../../hooks';
 import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
+import { useParameterValues } from '../../monitor_add_edit/form/parameter_values_context';
 import type {
   SyntheticsMonitor,
   SyntheticsMonitorWithId,
@@ -64,9 +65,27 @@ interface InspectorProps {
   isEditFlow?: boolean;
 }
 
+/** Uses fetched parameters only while the form still contains masked values. */
+export const getMonitorForInspection = ({
+  monitorFields,
+  monitorWithRevealedParams,
+  useRevealedParams,
+}: {
+  monitorFields: SyntheticsMonitor;
+  monitorWithRevealedParams?: SyntheticsMonitor;
+  useRevealedParams: boolean;
+}): SyntheticsMonitor =>
+  useRevealedParams && monitorWithRevealedParams
+    ? {
+        ...monitorFields,
+        [ConfigKey.PARAMS]: monitorWithRevealedParams[ConfigKey.PARAMS],
+      }
+    : monitorFields;
+
 export const MonitorInspect = ({ isValid, monitorFields, isEditFlow = false }: InspectorProps) => {
   const { isDev } = useSyntheticsSettingsContext();
   const { spaceId } = useGetUrlParams();
+  const { parametersAreMasked } = useParameterValues();
   const registerHeader = useRegisterInspectMonitorHeader();
   const { application } = useKibana().services;
   const canRevealParams = canRevealParameterValues({
@@ -107,7 +126,12 @@ export const MonitorInspect = ({ isValid, monitorFields, isEditFlow = false }: I
   }, [isValid, registerHeader]);
 
   const shouldFetchRevealedParams = Boolean(
-    isInspecting && isEditFlow && !hideParams && canRevealParams && monitorFields.config_id
+    isInspecting &&
+      isEditFlow &&
+      !hideParams &&
+      canRevealParams &&
+      parametersAreMasked &&
+      monitorFields.config_id
   );
 
   const {
@@ -124,12 +148,11 @@ export const MonitorInspect = ({ isValid, monitorFields, isEditFlow = false }: I
     }
   }, [shouldFetchRevealedParams, monitorFields.config_id, spaceId]);
 
-  const monitorForInspection = monitorWithRevealedParams
-    ? {
-        ...monitorFields,
-        [ConfigKey.PARAMS]: monitorWithRevealedParams[ConfigKey.PARAMS],
-      }
-    : monitorFields;
+  const monitorForInspection = getMonitorForInspection({
+    monitorFields,
+    monitorWithRevealedParams,
+    useRevealedParams: shouldFetchRevealedParams,
+  });
   const waitingForRevealedParams = shouldFetchRevealedParams && !monitorWithRevealedParams;
 
   const { data, loading, error } = useFetcher(() => {
