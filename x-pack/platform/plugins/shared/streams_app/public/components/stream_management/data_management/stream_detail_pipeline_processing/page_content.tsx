@@ -40,7 +40,10 @@ import { isFieldUncommitted } from '../schema_editor/utils';
 import { AddStepButtons } from './add_step_buttons';
 import { EditModeToggle } from './edit_mode_toggle';
 import { SimulationPlayground } from './simulation_playground';
-import { stepUnderEditSelector } from './state_management/interactive_mode_machine/selectors';
+import {
+  selectIsSuggestionVisible,
+  stepUnderEditSelector,
+} from './state_management/interactive_mode_machine/selectors';
 import { selectFieldsInSamples } from './state_management/simulation_state_machine/selectors';
 import {
   StreamEnrichmentContextProvider,
@@ -388,13 +391,7 @@ export function StreamDetailEnrichmentFooter() {
   );
   const hasChanges = useStreamEnrichmentSelector((state) => state.context.hasChanges);
   const streamType = useStreamEnrichmentSelector((snapshot) => selectStreamType(snapshot.context));
-  const isSuggestionVisible = useOptionalInteractiveModeSelector(
-    (snapshot) =>
-      snapshot.matches({ pipelineSuggestion: 'generatingSuggestion' }) ||
-      snapshot.matches({ pipelineSuggestion: 'viewingSuggestion' }) ||
-      snapshot.matches({ pipelineSuggestion: 'noSuggestionsFound' }),
-    false
-  );
+  const isSuggestionVisible = useOptionalInteractiveModeSelector(selectIsSuggestionVisible, false);
   const {
     isRequestPreviewFlyoutOpen,
     requestPreviewFlyoutCodeContent,

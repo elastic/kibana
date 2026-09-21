@@ -13,6 +13,7 @@ import {
   useOptionalInteractiveModeSelector,
   useStreamEnrichmentEvents,
 } from './state_management/stream_enrichment_state_machine';
+import { selectIsSuggestionVisible } from './state_management/interactive_mode_machine/selectors';
 
 const conditionLabel = i18n.translate(
   'xpack.streams.streamDetailView.managementTab.enrichment.addConditionButtonText',
@@ -49,8 +50,11 @@ export const AddStepButtons = () => {
     (state) => state.can({ type: 'step.addProcessor' }) || state.can({ type: 'step.addCondition' }),
     false
   );
+  const isSuggestionVisible = useOptionalInteractiveModeSelector(selectIsSuggestionVisible, false);
 
-  if (!canAddStep) {
+  // While a suggestion occupies the editor the steps list is unmounted, so a step added here would
+  // be created out of view and then discarded once the suggestion resolves or is dismissed.
+  if (!canAddStep || isSuggestionVisible) {
     return null;
   }
 
