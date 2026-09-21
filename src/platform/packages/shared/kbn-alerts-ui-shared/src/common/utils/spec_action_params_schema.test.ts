@@ -20,6 +20,7 @@ import {
 
 const EMPTY_SLACK_LIKE_ERRORS = {
   subAction: [],
+  subActionParams: [],
   query: [],
   channel: [],
   text: [],
@@ -197,6 +198,33 @@ describe('spec_action_params_schema', () => {
         subActionParams: { channel: 'C123', text: 'hello' },
       });
       expect(result.errors).toEqual(EMPTY_SLACK_LIKE_ERRORS);
+    });
+
+    it('ignores unknown keys when the serialized input forbids additional properties', async () => {
+      const spec = slackLikeSpec();
+      spec.actions.searchMessages.input.additionalProperties = false;
+
+      const result = await validateSpecActionParams(spec, {
+        subAction: 'searchMessages',
+        subActionParams: { channel: 'C123', text: 'left over from sendMessage' },
+      });
+
+      expect(result.errors).toEqual(EMPTY_SLACK_LIKE_ERRORS);
+    });
+
+    it('clears a stale subActionParams error once the params become valid', async () => {
+      const previous = await validateSpecActionParams(slackLikeSpec(), {
+        subAction: 'sendMessage',
+        subActionParams: {},
+      });
+      previous.errors.subActionParams = ['stale host error'];
+
+      const next = await validateSpecActionParams(slackLikeSpec(), {
+        subAction: 'searchMessages',
+        subActionParams: { query: 'hello' },
+      });
+
+      expect({ ...previous.errors, ...next.errors }).toEqual(EMPTY_SLACK_LIKE_ERRORS);
     });
   });
 });

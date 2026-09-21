@@ -10,6 +10,7 @@
 import React, { useState } from 'react';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { isEqual } from 'lodash';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { ConnectorSpecResponse } from '../apis/fetch_connector_spec';
 import type { SpecActionParams } from '../types/spec_action_params';
@@ -34,6 +35,7 @@ const multiActionSpec = (): ConnectorSpecResponse => ({
       input: {
         type: 'object',
         properties: { query: { type: 'string', description: 'Search query' } },
+        additionalProperties: false,
       },
       description: 'Search messages',
       scope: 'read',
@@ -47,6 +49,7 @@ const multiActionSpec = (): ConnectorSpecResponse => ({
           text: { type: 'string', minLength: 1, description: 'The message text to send' },
           unfurlLinks: { type: 'boolean', description: 'Unfurl text links' },
         },
+        additionalProperties: false,
       },
       description: 'Send a message',
       scope: 'write',
@@ -235,6 +238,55 @@ describe('SpecActionParamsFields', () => {
     expect(hasErrors((await validateSpecActionParams(multiActionSpec(), latest)).errors)).toBe(
       false
     );
+  });
+
+  it('leaves no stuck error after switching action and filling the new field', async () => {
+    const user = userEvent.setup();
+    const spec = multiActionSpec();
+    let latest: SpecActionParams = {};
+    const paramsHistory: SpecActionParams[] = [];
+
+    render(
+      <StatefulHost
+        spec={spec}
+        initialParams={{ subAction: 'sendMessage', subActionParams: { channel: 'C1', text: 'hi' } }}
+        onParams={(params) => {
+          latest = params;
+          if (!isEqual(paramsHistory[paramsHistory.length - 1], params)) {
+            paramsHistory.push(params);
+          }
+        }}
+      />,
+      { wrapper }
+    );
+
+    await user.click(screen.getByTestId('specActionParams-subAction'));
+    await user.click(await screen.findByRole('option', { name: /searchMessages/ }));
+    await waitFor(() => {
+      expect(latest).toEqual({ subAction: 'searchMessages', subActionParams: {} });
+    });
+
+    await user.type(screen.getByTestId('generator-field-query'), 'deploy');
+    await waitFor(() => {
+      expect(latest).toEqual({ subAction: 'searchMessages', subActionParams: { query: 'deploy' } });
+    });
+
+    // The host commits the new action before the inner form resets the params, so one snapshot
+    // carries the old sendMessage params under searchMessages. The rule form validates that too.
+    expect(paramsHistory).toContainEqual({
+      subAction: 'searchMessages',
+      subActionParams: { channel: 'C1', text: 'hi' },
+    });
+
+    let merged: Record<string, unknown> = {};
+    for (const params of paramsHistory) {
+      const { errors } = await validateSpecActionParams(spec, params);
+      merged = { ...merged, ...errors };
+    }
+    const finalResult = await validateSpecActionParams(spec, latest);
+    expect(finalResult.errors.subActionParams).toEqual([]);
+    expect(hasErrors(finalResult.errors)).toBe(false);
+    expect(hasErrors(merged)).toBe(false);
   });
 
   it('applies the default action, fills required fields, and ends with no validation errors', async () => {
