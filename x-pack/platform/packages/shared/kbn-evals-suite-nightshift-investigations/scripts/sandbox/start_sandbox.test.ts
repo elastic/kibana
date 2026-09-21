@@ -64,9 +64,14 @@ jest.mock('execa', () => {
         writeFileSync(join(options.cwd, file), 'synthetic');
       }
     }
-    const missing =
-      (command === 'docker' && args[1] === 'inspect') ||
-      (command === 'which' && args[0] === 'missing-tool');
+    if (command === 'docker' && args[0] === 'image' && args[1] === 'inspect') {
+      const built = calls.some(
+        ({ command: previous, args: previousArgs }) =>
+          previous === 'docker' && previousArgs[0] === 'build'
+      );
+      return Promise.resolve({ failed: !built, stdout: built ? 'sha256:synthetic-image' : '' });
+    }
+    const missing = command === 'docker' && args[1] === 'inspect';
     return Promise.resolve({ failed: missing, stdout: 'abc1234' });
   };
   execa.sync = (command: string, args: string[], options: Call['options'] = {}) => {
@@ -126,10 +131,18 @@ describe('startSandbox', () => {
       GIT_TERMINAL_PROMPT: '0',
     });
     expect(calls.some(({ args }) => args.join(' ') === `network create ${network}`)).toBe(true);
+    expect(
+      calls.find(({ command, args }) => command === 'docker' && args[0] === 'build')?.args
+    ).toContain('kibana-nightshift-sandbox:abc1234');
     const manager = calls.find(({ command }) => command.endsWith('container-manager-service'));
     expect(manager?.options).toMatchObject({
       cwd: dataDir,
-      env: { CONTAINERMANAGER_DOCKER_SANDBOX_NETWORK: network, CLUSTER_NAME: 'localhost' },
+      env: {
+        CONTAINERMANAGER_DOCKER_SANDBOX_NETWORK: network,
+        // The immutable ID, not the tag, so a later build under the same tag cannot swap it.
+        CONTAINERMANAGER_SANDBOX_IMAGE: 'sha256:synthetic-image',
+        CLUSTER_NAME: 'localhost',
+      },
     });
     const api = calls.find(({ command }) => command.endsWith('sandbox-api'));
     expect(api?.options.env).toMatchObject({
@@ -192,13 +205,14 @@ describe('startSandbox', () => {
     }
   );
 
-  it('builds an existing checkout as-is without needing git', async () => {
+  it('builds an existing checkout as-is without cloning', async () => {
     const repoDir = join(dataDir, 'checkout');
     mkdirSync(join(repoDir, 'cmd/sandbox-api'), { recursive: true });
     const running = start({ repoDir });
     await untilReady();
 
-    expect(calls.some(({ command }) => command === 'git')).toBe(false);
+    const gitArgs = calls.filter(({ command }) => command === 'git').map(({ args }) => args[0]);
+    expect(gitArgs).toEqual(['rev-parse']);
     expect(
       calls.filter(({ command }) => command === 'go').map(({ options }) => options.cwd)
     ).toEqual([repoDir, repoDir]);

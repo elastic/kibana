@@ -9,7 +9,7 @@ import { expect } from '@playwright/test';
 import { tags, selectEvaluators } from '@kbn/evals';
 import { getConnectorModel } from '@kbn/inference-common';
 import { evaluate } from '../../src/evaluate';
-import { goldenDataset } from './datasets';
+import { GOLDEN_EXAMPLE_COUNT, GOLDEN_SPLIT, goldenDataset } from './datasets';
 import { createGoldenEvaluators } from './evaluators';
 import { GOLDEN_ALERT_EVAL_CONSTRAINTS } from './prompts';
 import { runGoldenInvestigation } from './task';
@@ -80,18 +80,31 @@ evaluate.describe(
           },
           selected
         );
+        // The examples come from the cluster, so prove the run covered the approved lite slice
+        // before any per-run check, which would otherwise pass vacuously on an empty dataset.
+        const runs = Object.values(experiment.runs);
+        expect(new Set(runs.map(({ exampleIndex }) => exampleIndex)).size).toBe(
+          GOLDEN_EXAMPLE_COUNT
+        );
+        for (const run of runs) {
+          expect(run.metadata).toMatchObject({
+            dataset_split: expect.arrayContaining([GOLDEN_SPLIT]),
+            source_kbn_example_id: expect.any(String),
+          });
+          expect(run.metadata?.status).not.toBe('archived');
+        }
         await expect
           .poll(async () => (await evalsClient.getExperimentScores(experiment.id)).length, {
             timeout: 60_000,
           })
-          .toBe(Object.keys(experiment.runs).length * selected.length);
+          .toBe(runs.length * selected.length);
         // Bulk score summaries omit task output and metadata; the dataset detail route retains them.
         const detailedScores = await evalsClient.getExperimentDatasetExamples(
           experiment.id,
           experiment.datasetId
         );
         const scores = detailedScores.examples.flatMap((example) => example.scores);
-        for (const run of Object.values(experiment.runs)) {
+        for (const run of runs) {
           const output = run.output as GoldenTaskOutput;
           const exampleScores = scores.filter(
             (score) =>

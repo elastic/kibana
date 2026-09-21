@@ -95,21 +95,39 @@ const buildBinaries = async (
   return bin;
 };
 
+/**
+ * Builds the sandbox image under a tag keyed by the source commit, and passes the immutable image
+ * ID on, so a concurrent launcher building another ref cannot swap the image under this one.
+ */
 const ensureDockerResources = async (
   { log, rebuild, ports }: StartSandboxOptions,
   repository: string
-): Promise<void> => {
-  const image = await execa('docker', ['image', 'inspect', SANDBOX_IMAGE], { reject: false });
-  if (rebuild || image.failed) {
-    log.info(`Building the ${SANDBOX_IMAGE} image`);
-    await execa('docker', ['build', '-f', 'Dockerfile.sandbox', '-t', SANDBOX_IMAGE, '.'], {
+): Promise<string> => {
+  const { stdout: commit } = await execa('git', ['rev-parse', '--short', 'HEAD'], {
+    cwd: repository,
+  });
+  const tag = `${SANDBOX_IMAGE}:${commit}`;
+  const existing = await execa('docker', ['image', 'inspect', tag, '--format', '{{.Id}}'], {
+    reject: false,
+  });
+  if (rebuild || existing.failed) {
+    log.info(`Building the ${tag} image`);
+    await execa('docker', ['build', '-f', 'Dockerfile.sandbox', '-t', tag, '.'], {
       cwd: repository,
       stdio: 'inherit',
     });
   }
+  const { stdout: imageId } = await execa('docker', [
+    'image',
+    'inspect',
+    tag,
+    '--format',
+    '{{.Id}}',
+  ]);
   const network = getSandboxNetwork(ports);
-  const existing = await execa('docker', ['network', 'inspect', network], { reject: false });
-  if (existing.failed) await execa('docker', ['network', 'create', network]);
+  const networkExists = await execa('docker', ['network', 'inspect', network], { reject: false });
+  if (networkExists.failed) await execa('docker', ['network', 'create', network]);
+  return imageId;
 };
 
 /**
@@ -199,9 +217,7 @@ const waitUntil = async (
  */
 export const startSandbox = async (options: StartSandboxOptions): Promise<void> => {
   const { log, signal, dataDir, ports } = options;
-  await requireTools(
-    options.repoDir ? ['go', 'docker', 'openssl'] : ['git', 'go', 'docker', 'openssl']
-  );
+  await requireTools(['git', 'go', 'docker', 'openssl']);
   mkdirSync(dataDir, { recursive: true });
   // The directory holds the API key and private keys, so keep it owner-only even if it existed.
   chmodSync(dataDir, 0o700);
@@ -212,7 +228,7 @@ export const startSandbox = async (options: StartSandboxOptions): Promise<void> 
   // Never let git prompt: a missing credential should fail with a clear message instead.
   const repository = await ensureRepository(options, { ...process.env, GIT_TERMINAL_PROMPT: '0' });
   const bin = await buildBinaries(options, repository);
-  await ensureDockerResources(options, repository);
+  const imageId = await ensureDockerResources(options, repository);
   const ssl = await ensureCertificates(options);
   const apiKey = ensureApiKey(dataDir);
   const workspaces = join(dataDir, 'workspaces');
@@ -246,7 +262,7 @@ export const startSandbox = async (options: StartSandboxOptions): Promise<void> 
         CLUSTER_NAME: 'localhost',
         WORKSPACE_PVC_PATH: workspaces,
         CONTAINERMANAGER_LISTEN_PORT: String(ports.manager),
-        CONTAINERMANAGER_SANDBOX_IMAGE: SANDBOX_IMAGE,
+        CONTAINERMANAGER_SANDBOX_IMAGE: imageId,
         CONTAINERMANAGER_DOCKER_SANDBOX_NETWORK: network,
       },
     })

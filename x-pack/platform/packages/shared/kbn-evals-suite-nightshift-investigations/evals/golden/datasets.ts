@@ -12,6 +12,10 @@ import type { GoldenExample } from './types';
  * The Nightshift-owned lite slice. Its examples live on the evaluations cluster and are resolved
  * by name when the experiment starts, so none are committed or derived here.
  */
+export const GOLDEN_SPLIT = 'suite/investigate-lite';
+/** Size of the approved lite slice; the acceptance run must evaluate exactly these examples. */
+export const GOLDEN_EXAMPLE_COUNT = 4;
+
 export const goldenDataset: EvaluationDataset<GoldenExample> = {
   name: 'nightshift/investigate-lite',
   description:
