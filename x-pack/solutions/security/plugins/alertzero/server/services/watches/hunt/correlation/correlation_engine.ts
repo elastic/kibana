@@ -17,6 +17,18 @@ import type {
 
 const DISCRIMINATING_MIN = 1;
 
+/**
+ * Attachment-facing thresholds (`security.hunt_correlation`'s
+ * `anchor_match`/`diamond_vertex`, PR 1 kibana#291882). `anchor_match` is
+ * pinned to 1.0 here because this phase's gate is binary — the anchors
+ * search either returns discriminating matches or doesn't, there is no
+ * partial-credit anchor score yet. `diamond_vertex` is a placeholder until
+ * PR 3b's diamond leg actually produces `diamond_scores`; that phase should
+ * revisit this constant alongside its scoring, not invent a new field.
+ */
+const ANCHOR_MATCH_THRESHOLD = 1;
+const DIAMOND_VERTEX_THRESHOLD = 0.5;
+
 const buildAnchorItems = (anchors: AnchorSet): AnchorItem[] => {
   const items: AnchorItem[] = [];
   for (const ioc of anchors.iocs ?? []) {
@@ -64,7 +76,10 @@ export const runCorrelationEngine = async (
       toAttachmentData: () => ({
         anchors: [],
         diamond_scores: [],
-        thresholds: { discriminating_min: DISCRIMINATING_MIN },
+        thresholds: {
+          anchor_match: ANCHOR_MATCH_THRESHOLD,
+          diamond_vertex: DIAMOND_VERTEX_THRESHOLD,
+        },
         self_match_excluded: true,
         report_revision: reportRevision,
       }),
@@ -87,8 +102,11 @@ export const runCorrelationEngine = async (
     anchor_summary: searchResult.anchor_summary,
     toAttachmentData: (): HuntCorrelationAttachmentData => ({
       anchors: anchorItems,
-      diamond_scores: [],
-      thresholds: { discriminating_min: DISCRIMINATING_MIN },
+      diamond_scores: [], // Empty until PR 3b's diamond phase.
+      thresholds: {
+        anchor_match: ANCHOR_MATCH_THRESHOLD,
+        diamond_vertex: DIAMOND_VERTEX_THRESHOLD,
+      },
       self_match_excluded: true,
       report_revision: reportRevision,
     }),
