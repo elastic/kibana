@@ -7,14 +7,36 @@
 
 import { Readable } from 'stream';
 import { z } from '@kbn/zod/v4';
-import type { ContentPack, ContentPackStream } from '@kbn/content-packs-schema';
-import { contentPackIncludedObjectsSchema } from '@kbn/content-packs-schema';
+import type { ContentPack, ContentPackStream, ContentPackIncludedObjects } from '@kbn/content-packs-schema';
 import {
   MAX_STREAM_NAME_LENGTH,
   Streams,
   emptyAssets,
   getInheritedFieldsFromAncestors,
 } from '@kbn/streams-schema';
+
+const INCLUDE_DEPTH = 20;
+
+function buildBoundedIncludedObjects(depth: number): z.ZodType<ContentPackIncludedObjects> {
+  const includeAll = z.object({ objects: z.object({ all: z.strictObject({}) }) });
+  if (depth === 0) {
+    return includeAll as z.ZodType<ContentPackIncludedObjects>;
+  }
+  const inner = buildBoundedIncludedObjects(depth - 1);
+  return z.union([
+    includeAll,
+    z.object({
+      objects: z.strictObject({
+        mappings: z.boolean(),
+        routing: z
+          .array(inner.and(z.object({ destination: z.string().nonempty().max(MAX_STREAM_NAME_LENGTH) })))
+          .max(200),
+      }),
+    }),
+  ]) as z.ZodType<ContentPackIncludedObjects>;
+}
+
+const boundedIncludedObjectsSchema = buildBoundedIncludedObjects(INCLUDE_DEPTH);
 import { omit } from 'lodash';
 import { OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS } from '@kbn/management-settings-ids';
 import type { RequestHandlerContext } from '@kbn/core/server';
@@ -74,7 +96,7 @@ const exportContentRoute = createServerRoute({
       name: z.string().max(256),
       description: z.string().max(1000),
       version: z.string().max(100),
-      include: contentPackIncludedObjectsSchema,
+      include: boundedIncludedObjectsSchema,
     }),
   }),
   security: {
@@ -209,7 +231,7 @@ const importContentRoute = createServerRoute({
       include: z
         .string()
         .max(65535)
-        .transform((value) => contentPackIncludedObjectsSchema.parse(JSON.parse(value))),
+        .transform((value) => boundedIncludedObjectsSchema.parse(JSON.parse(value))),
       content: z.instanceof(Readable),
     }),
   }),

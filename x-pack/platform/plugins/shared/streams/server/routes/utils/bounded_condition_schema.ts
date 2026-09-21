@@ -60,9 +60,9 @@ function buildBoundedCondition(depth: number): z.ZodType<Condition> {
   const inner = buildBoundedCondition(depth - 1);
   return z.union([
     boundedFilterCondition,
-    z.object({ and: z.array(inner).max(COND_ARR_MAX) }),
-    z.object({ or: z.array(inner).max(COND_ARR_MAX) }),
-    z.object({ not: inner }),
+    z.strictObject({ and: z.array(inner).max(COND_ARR_MAX) }),
+    z.strictObject({ or: z.array(inner).max(COND_ARR_MAX) }),
+    z.strictObject({ not: inner }),
     boundedAlways,
     boundedNever,
   ]) as z.ZodType<Condition>;
