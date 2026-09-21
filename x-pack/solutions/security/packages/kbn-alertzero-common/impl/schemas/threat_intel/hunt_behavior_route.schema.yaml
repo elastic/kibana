@@ -1,0 +1,118 @@
+openapi: 3.0.0
+info:
+  title: Run AlertZero Hunt Tier 2 behavioral corroboration API endpoint
+  version: '1'
+paths:
+  /internal/alertzero/threat_intel/hunt_behavior:
+    post:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: HuntBehavior
+      description: >-
+        Runs Tier 2's LLM-backed behavioral extraction against a threat report's
+        text. Requires a GenAI connector; returns 503 when none is configured.
+      summary: Run Tier 2 behavioral corroboration
+      tags:
+        - AlertZero API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [text]
+              additionalProperties: false
+              properties:
+                text:
+                  type: string
+                  maxLength: 200000
+                report_id:
+                  type: string
+                llm_confidence_threshold:
+                  type: number
+                  minimum: 0
+                  maximum: 1
+                iocs:
+                  type: array
+                  items:
+                    type: object
+                    required: [type, value]
+                    properties:
+                      type:
+                        type: string
+                      value:
+                        type: string
+                article_context:
+                  type: object
+                  properties:
+                    matched_indices:
+                      type: array
+                      items:
+                        type: string
+                    affected_hosts:
+                      type: array
+                      items:
+                        type: string
+                    affected_users:
+                      type: array
+                      items:
+                        type: string
+                    sample_events:
+                      type: array
+                      items:
+                        type: string
+                    time_range:
+                      type: object
+                      required: [from, to]
+                      properties:
+                        from:
+                          type: string
+                        to:
+                          type: string
+                    proposed_atomic_rules:
+                      type: array
+                      items:
+                        type: object
+                        required: [rule_name, ioc_type, ioc_value]
+                        properties:
+                          rule_name:
+                            type: string
+                          ioc_type:
+                            type: string
+                          ioc_value:
+                            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, behaviors, indexed_behaviors, next_step, hasHit]
+                properties:
+                  status:
+                    type: string
+                    enum: [no_behaviors_found, no_behaviors_validated, behaviors_proposed]
+                  report_id:
+                    type: string
+                  behaviors:
+                    type: array
+                    items:
+                      type: object
+                  indexed_behaviors:
+                    type: array
+                    items:
+                      type: object
+                  dropped_unknown_ids:
+                    type: array
+                    items:
+                      type: string
+                  message:
+                    type: string
+                  next_step:
+                    type: string
+                  hasHit:
+                    type: boolean
+                    enum: [false]
+        '503':
+          description: No GenAI connector configured
