@@ -35,9 +35,9 @@ describe('PrincipalRow role selector', () => {
     expect(screen.getByRole('button', { name: 'Access level' })).toBeEnabled();
   });
 
-  it('is disabled for a legacy name-only entry, which the server refuses to re-role', () => {
+  it('is enabled for a legacy name-only entry, which stays editable', () => {
     renderRow({ type: 'user', name: 'alice', role: AgentAccessControlRole.User });
 
-    expect(screen.getByRole('button', { name: 'Access level' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Access level' })).toBeEnabled();
   });
 });

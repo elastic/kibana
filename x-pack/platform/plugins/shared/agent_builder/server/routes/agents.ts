@@ -192,7 +192,7 @@ const ACCESS_CONTROL_ENTRIES_SCHEMA = schema.arrayOf(
           maxLength: AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
           meta: {
             description:
-              'Deprecated. Case-sensitive Kibana username of the user to grant access to. Use `id` instead; `name` is only kept so existing entries can be sent back unchanged.',
+              'Case-sensitive Kibana username of the user to grant access to. Still supported, but `id` is preferred for new grants because a username cannot distinguish same-named users across authentication realms.',
           },
         })
       ),

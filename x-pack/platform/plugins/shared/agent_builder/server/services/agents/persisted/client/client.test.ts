@@ -723,7 +723,6 @@ describe('validateAccessControlEntries', () => {
           { type: 'user', name: 'alice', role: AgentAccessControlRole.User },
           entry({ id: 'u_bob' }),
         ],
-        currentEntries: [{ type: 'user', name: 'alice', role: AgentAccessControlRole.User }],
       })
     ).toEqual([
       expect.objectContaining({ name: 'alice' }),
@@ -731,32 +730,21 @@ describe('validateAccessControlEntries', () => {
     ]);
   });
 
-  test('rejects a name-only entry that does not already exist', () => {
-    expect(() =>
+  test('accepts a name-only entry that does not already exist', () => {
+    expect(
       validate({ entries: [{ type: 'user', name: 'alice', role: AgentAccessControlRole.User }] })
-    ).toThrow(/requires an id/);
+    ).toEqual([expect.objectContaining({ name: 'alice', role: AgentAccessControlRole.User })]);
   });
 
-  test('keeps a name-only entry sent back with its persisted role', () => {
+  test('accepts a role change on a name-only entry', () => {
     const current = [{ type: 'user' as const, name: 'alice', role: AgentAccessControlRole.User }];
 
     expect(
       validate({
-        entries: [{ type: 'user', name: 'alice', role: AgentAccessControlRole.User }],
-        currentEntries: current,
-      })
-    ).toEqual([expect.objectContaining({ name: 'alice', role: AgentAccessControlRole.User })]);
-  });
-
-  test('rejects a role change on a name-only entry', () => {
-    const current = [{ type: 'user' as const, name: 'alice', role: AgentAccessControlRole.User }];
-
-    expect(() =>
-      validate({
         entries: [{ type: 'user', name: 'alice', role: AgentAccessControlRole.Manager }],
         currentEntries: current,
       })
-    ).toThrow(/requires an id to change its role/);
+    ).toEqual([expect.objectContaining({ name: 'alice', role: AgentAccessControlRole.Manager })]);
   });
 
   test('rejects entries with neither id nor name', () => {
@@ -821,9 +809,8 @@ describe('validateAccessControlEntries', () => {
       validate({
         entries: [
           { type: 'user', name: 'alice', role: AgentAccessControlRole.User },
-          { type: 'user', name: 'alice', role: AgentAccessControlRole.User },
+          { type: 'user', name: 'alice', role: AgentAccessControlRole.Manager },
         ],
-        currentEntries: [{ type: 'user', name: 'alice', role: AgentAccessControlRole.User }],
       })
     ).toThrow(/Duplicate/);
   });

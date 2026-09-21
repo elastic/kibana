@@ -157,11 +157,3 @@ export const accessFlyoutCustomBadgeWithCount = (count: number) =>
       '{count, plural, one {# additional access entry} other {# additional access entries}}',
     values: { count },
   });
-
-export const accessFlyoutLegacyRoleLocked = i18n.translate(
-  'xpack.agentBuilder.acl.role.legacyLockedTooltip',
-  {
-    defaultMessage:
-      'This entry predates user profile ids, so its role cannot be changed. Remove it and add the user again to grant a different role.',
-  }
-);

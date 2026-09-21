@@ -760,19 +760,6 @@ export const validateAccessControlEntries = ({
     const key = getAccessControlEntryKey(entry);
 
     const current = currentByKey.get(key);
-
-    if (entry.id === undefined) {
-      if (current === undefined) {
-        throw createBadRequestError(
-          `ACL entry for "${entry.name}" requires an id. A name identifies a principal only for grants that already exist, because it cannot distinguish same-named users across realms.`
-        );
-      }
-      if (current.role !== entry.role) {
-        throw createBadRequestError(
-          `ACL entry for "${entry.name}" requires an id to change its role. A name matches every same-named user across realms, so an existing grant can only be sent back unchanged.`
-        );
-      }
-    }
     if (seen.has(key)) {
       throw createBadRequestError(
         `Duplicate ACL entry for ${entry.type} "${entry.id ?? entry.name}"`
