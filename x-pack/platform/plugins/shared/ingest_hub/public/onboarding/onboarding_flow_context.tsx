@@ -190,7 +190,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
   // callers update the same ref within the same event-loop tick. Same pattern as setDataFormat.
   const setAgentBasedDeployment = useCallback(
     (update: Partial<AgentBasedDeploymentState>) => {
-      setPersistedAuthenticateAndDeployStep({
+      const next = {
         ...persistedAuthStepRef.current,
         ...(update.agentHostsMode !== undefined ? { agentHostsMode: update.agentHostsMode } : {}),
         ...(update.agentPolicyId !== undefined ? { agentPolicyId: update.agentPolicyId } : {}),
@@ -213,7 +213,11 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         ...(update.withSysMonitoring !== undefined
           ? { withSysMonitoring: update.withSysMonitoring }
           : {}),
-      });
+      };
+      // Sync the ref so back-to-back calls in the same event-loop tick each see
+      // the accumulated state rather than spreading a stale pre-render snapshot.
+      persistedAuthStepRef.current = next;
+      setPersistedAuthenticateAndDeployStep(next);
     },
     [setPersistedAuthenticateAndDeployStep]
   );

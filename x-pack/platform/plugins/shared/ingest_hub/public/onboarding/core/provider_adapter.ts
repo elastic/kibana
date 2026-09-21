@@ -14,14 +14,17 @@ import type {
 import type { AwsServiceMatrixEntry, DeploymentMethod } from '../aws_service_matrix';
 
 /**
- * Contract that any cloud-provider adapter must satisfy to integrate with the
- * onboarding flow core.
+ * Contract for the AWS provider adapter within the onboarding flow.
+ *
+ * Scoped to AWS — the types here (`AwsServiceMatrixEntry`, `AwsStaticKeyCredentials`,
+ * etc.) are AWS-specific.  A provider-neutral base interface will be introduced in a
+ * subsequent PR once a second provider's requirements are known.
  *
  * PR 1 of the modularisation plan (https://github.com/elastic/ingest-dev/issues/9598)
  * scaffolds the interface without wiring it.  Subsequent PRs will extract the
  * AWS implementation and inject it into OnboardingFlowContext via this type.
  */
-export interface ProviderAdapter {
+export interface AwsProviderAdapter {
   // ---- read ----------------------------------------------------------------
 
   readonly authenticateAndDeployStep: AuthenticateAndDeployStepState;

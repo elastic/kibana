@@ -271,15 +271,12 @@ describe('OnboardingFlowProvider', () => {
       const { result, rerender } = renderHook(() => useOnboardingFlow(), { wrapper });
 
       act(() => {
+        // Two back-to-back partial updates in the same event-loop tick (no rerender between).
+        // The second call must spread the output of the first, not the pre-render snapshot.
         result.current.setAgentBasedDeployment({
           agentPolicyId: 'policy-1',
           agentPolicyName: 'My Policy',
         });
-      });
-      rerender();
-
-      act(() => {
-        // Update only agentHostsMode — other fields must survive.
         result.current.setAgentBasedDeployment({ agentHostsMode: 'existing' });
       });
       rerender();
