@@ -53,6 +53,9 @@
     "@kbn/proposals-plugin",
     "@kbn/react-kibana-mount",
     "@kbn/securitysolution-mitre-catalog",
+    "@kbn/inference-plugin",
+    "@kbn/management-settings-ids",
+    "@kbn/context-engine-plugin",
     "@kbn/ui-callout"
   ]
 }

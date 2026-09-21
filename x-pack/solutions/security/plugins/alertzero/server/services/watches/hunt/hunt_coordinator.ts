@@ -18,10 +18,7 @@ import type { HuntBehaviorResult, HuntBehaviorArticleContext } from './tier2/typ
 // NO findings persistence — per plan.md Phase 6, Task 6.5.
 // NO call to writeHuntFeedback — the coordinator returns completedSuccessfully for the caller.
 
-export type HuntCoordinatorStatus =
-  | 'tier1_only'
-  | 'tier1_and_tier2'
-  | 'tier2_only_skipped';
+export type HuntCoordinatorStatus = 'tier1_only' | 'tier1_and_tier2' | 'tier2_only_skipped';
 
 export type HuntCoordinatorTier2SkipReason =
   | 'configured_never'
@@ -111,9 +108,7 @@ const decideTier2Skip = (
   tier1: HuntForThreatResult
 ): HuntCoordinatorTier2SkipReason | null => {
   if (tier2When === 'never') return 'configured_never';
-  if (
-    tier1.status === 'no_searchable_terms'
-  ) {
+  if (tier1.status === 'no_searchable_terms') {
     if (tier2When === 'always') return null;
     return 'no_searchable_input';
   }
@@ -203,9 +198,10 @@ export const huntCoordinator = async (
       tier1,
       tier2_skipped_reason: skipReason,
       message: `Tier 1: ${tier1Raw.status}. Tier 2 skipped (${skipReason}).`,
-      next_step: tier1Raw.status === 'environment_hits_found'
-        ? 'Tier 1 matched. Re-run with tier2_when: "always" for behavioral rule proposals.'
-        : 'No environment matches. Consider widening time_range.',
+      next_step:
+        tier1Raw.status === 'environment_hits_found'
+          ? 'Tier 1 matched. Re-run with tier2_when: "always" for behavioral rule proposals.'
+          : 'No environment matches. Consider widening time_range.',
       completedSuccessfully: true,
     };
   }
@@ -241,13 +237,21 @@ export const huntCoordinator = async (
   const articleContext = buildArticleContext(tier1Raw, maxSamples);
   let tier2Raw: HuntBehaviorResult;
   try {
-    tier2Raw = await huntBehavior(model, logger, {
-      text,
-      report_id: reportId,
-      llm_confidence_threshold: llmThreshold,
-      iocs: iocs.map((ioc) => ({ type: ioc.type as import('./tier2/types').HuntBehaviorIocType, value: ioc.value })),
-      article_context: articleContext,
-    }, esClient);
+    tier2Raw = await huntBehavior(
+      model,
+      logger,
+      {
+        text,
+        report_id: reportId,
+        llm_confidence_threshold: llmThreshold,
+        iocs: iocs.map((ioc) => ({
+          type: ioc.type as import('./tier2/types').HuntBehaviorIocType,
+          value: ioc.value,
+        })),
+        article_context: articleContext,
+      },
+      esClient
+    );
   } catch (err) {
     logger.warn(`hunt_coordinator: tier2 huntBehavior failed — ${(err as Error).message}`);
     return {

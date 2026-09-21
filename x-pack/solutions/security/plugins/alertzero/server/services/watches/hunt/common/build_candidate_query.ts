@@ -14,7 +14,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { HUNT_REPORTS_INDEX } from '../../../../common/constants';
+import { HUNT_REPORTS_INDEX } from '../../../../../common/constants';
 import { buildHuntSpaceFilterTerms } from './space_filter';
 
 export interface CandidateQueryParams {
@@ -28,7 +28,10 @@ export interface CandidateQueryParams {
 
 export interface CandidateQueryResult {
   ids: string[];
-  skipped: Array<{ id: string; reason: 'open_proposal' | 'already_hunted' | 'not_found' | 'other_space' }>;
+  skipped: Array<{
+    id: string;
+    reason: 'open_proposal' | 'already_hunted' | 'not_found' | 'other_space';
+  }>;
   total: number;
   truncated: boolean;
 }

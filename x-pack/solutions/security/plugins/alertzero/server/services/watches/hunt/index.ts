@@ -12,10 +12,7 @@ export type {
   HuntCoordinatorStatus,
   HuntCoordinatorTier2SkipReason,
 } from './hunt_coordinator';
-export type {
-  CandidateQueryParams,
-  CandidateQueryResult,
-} from './common/build_candidate_query';
+export type { CandidateQueryParams, CandidateQueryResult } from './common/build_candidate_query';
 export type {
   HuntBehaviorParams,
   HuntBehaviorResult,

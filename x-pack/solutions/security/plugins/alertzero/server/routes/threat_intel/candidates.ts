@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  API_VERSIONS,
-  CandidatesRequestBody,
-  INTERNAL_API_ACCESS,
-} from '@kbn/alertzero-common';
+import { API_VERSIONS, CandidatesRequestBody, INTERNAL_API_ACCESS } from '@kbn/alertzero-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_READ, HUNT_INTERNAL_ROUTE_BASE } from '../../../common/constants';
 import { buildCandidateQuery } from '../../services/watches/hunt/common/build_candidate_query';
@@ -18,7 +14,11 @@ import type { RouteDependencies } from '../register_routes';
 export const CANDIDATES_URL = `${HUNT_INTERNAL_ROUTE_BASE}/candidates` as const;
 
 /** Returns the candidate report ids the next hunt fan-out will process. */
-export const registerCandidatesRoute = ({ router, logger, getSpaceId }: RouteDependencies): void => {
+export const registerCandidatesRoute = ({
+  router,
+  logger,
+  getSpaceId,
+}: RouteDependencies): void => {
   router.versioned
     .post({
       path: CANDIDATES_URL,
