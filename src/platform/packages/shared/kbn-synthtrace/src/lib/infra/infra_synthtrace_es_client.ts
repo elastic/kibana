@@ -26,6 +26,10 @@ import type { PackageManagement } from '../shared/types';
 
 export type InfraSynthtraceEsClientOptions = Omit<SynthtraceEsClientOptions, 'pipeline'>;
 
+const HOSTMETRICS_OTEL_TEMPLATE = 'metrics-hostmetricsreceiver.otel';
+const KUBELETSTATS_OTEL_TEMPLATE = 'metrics-kubeletstatsreceiver.otel';
+const OTEL_INDEX_TEMPLATE_NAMES = [HOSTMETRICS_OTEL_TEMPLATE, KUBELETSTATS_OTEL_TEMPLATE] as const;
+
 export interface InfraSynthtraceEsClient
   extends SynthtraceEsClient<InfraDocument>,
     PackageManagement {}
@@ -73,6 +77,18 @@ export class InfraSynthtraceEsClientImpl
     return super.index(streamOrGenerator, pipelineCallback);
   }
 
+  override async clean(): Promise<void> {
+    await super.clean();
+    // super.clean() deletes data streams only; index templates remain until deleted here.
+    await Promise.all(
+      OTEL_INDEX_TEMPLATE_NAMES.map(async (name) => {
+        await this.client.indices.deleteIndexTemplate({ name }, { ignore: [404] });
+        this.logger.info(`Deleted index template "${name}"`);
+      })
+    );
+    this.otelTemplateCreated = false;
+  }
+
   private async ensureOtelDataStreamTemplate() {
     const keyword = { type: 'keyword' as const, ignore_above: 1024 };
     const double = { type: 'double' as const };
@@ -94,8 +110,8 @@ export class InfraSynthtraceEsClientImpl
     };
 
     await this.putOtelDataStreamTemplate(
-      'metrics-hostmetricsreceiver.otel',
-      ['metrics-hostmetricsreceiver.otel-*'],
+      HOSTMETRICS_OTEL_TEMPLATE,
+      [`${HOSTMETRICS_OTEL_TEMPLATE}-*`],
       {
         '@timestamp': { type: 'date' },
         host: {
@@ -120,8 +136,8 @@ export class InfraSynthtraceEsClientImpl
     // Synthtrace writes both flat k8s.pod.uid and resource.attributes.k8s.pod.uid so
     // queries against either form hit, matching semconvHost's host.name approach.
     await this.putOtelDataStreamTemplate(
-      'metrics-kubeletstatsreceiver.otel',
-      ['metrics-kubeletstatsreceiver.otel-*'],
+      KUBELETSTATS_OTEL_TEMPLATE,
+      [`${KUBELETSTATS_OTEL_TEMPLATE}-*`],
       {
         '@timestamp': { type: 'date' },
         direction: keyword,
