@@ -202,14 +202,7 @@ const toTraceFilters = (spec: EvidenceMessageItemSpec | EvidenceToolCallsItemSpe
     value,
   }));
 
-const getMessageSearchParams = (
-  spec: EvidenceMessageItemSpec
-): {
-  filter: TraceFilter[];
-  fields: string[];
-  sort: Array<{ field: string; order: 'asc' | 'desc'; unmappedType?: 'keyword' }>;
-  size: number;
-} => {
+const getMessageSearchParams = (spec: EvidenceMessageItemSpec): TraceSearchParams => {
   const order = spec.select === 'last' ? 'desc' : 'asc';
   return {
     // Do not add an `exists` filter on contentField: long values under `flattened`
@@ -222,17 +215,30 @@ const getMessageSearchParams = (
       { field: 'span_id', order, unmappedType: 'keyword' },
     ],
     size: MESSAGE_CANDIDATE_LIMIT,
+    trackTotalHits: MESSAGE_CANDIDATE_LIMIT + 1,
   };
 };
 
-const getToolCallsSearchParams = (
-  spec: EvidenceToolCallsItemSpec
-): {
-  filter: TraceFilter[];
-  fields: string[];
-  sort: Array<{ field: string; order: 'asc' | 'desc'; unmappedType?: 'keyword' }>;
-  size: number;
-} => {
+const searchMessageCandidates = async (
+  runSearch: EvidenceSearch,
+  spec: EvidenceMessageItemSpec
+): Promise<TraceSearchResult> => {
+  const params = getMessageSearchParams(spec);
+  const initialResult = await runSearch(spec.source, params);
+  const total = initialResult.total ?? initialResult.documents.length;
+
+  if (total <= initialResult.documents.length) {
+    return initialResult;
+  }
+
+  return runSearch(spec.source, {
+    ...params,
+    size: MAX_EVIDENCE_DOCS,
+    trackTotalHits: false,
+  });
+};
+
+const getToolCallsSearchParams = (spec: EvidenceToolCallsItemSpec): TraceSearchParams => {
   const { tool_call_id, tool_id, arguments: toolArguments, result } = spec.fields;
   return {
     filter: toTraceFilters(spec),
@@ -460,14 +466,8 @@ const extractEvidenceWithSearch = async (
   mapping: InstrumentationProfileSpec
 ): Promise<EvidenceExtractionResult> => {
   const [userSearch, agentSearch, toolSearch] = await Promise.all([
-    runSearch(
-      mapping[EVIDENCE_ITEM_KEYS.userQuery].source,
-      getMessageSearchParams(mapping[EVIDENCE_ITEM_KEYS.userQuery])
-    ),
-    runSearch(
-      mapping[EVIDENCE_ITEM_KEYS.agentResponse].source,
-      getMessageSearchParams(mapping[EVIDENCE_ITEM_KEYS.agentResponse])
-    ),
+    searchMessageCandidates(runSearch, mapping[EVIDENCE_ITEM_KEYS.userQuery]),
+    searchMessageCandidates(runSearch, mapping[EVIDENCE_ITEM_KEYS.agentResponse]),
     runSearch(
       mapping[EVIDENCE_ITEM_KEYS.toolCalls].source,
       getToolCallsSearchParams(mapping[EVIDENCE_ITEM_KEYS.toolCalls])

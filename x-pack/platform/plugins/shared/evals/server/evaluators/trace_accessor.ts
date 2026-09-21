@@ -46,6 +46,7 @@ export interface TraceSearchParams {
   fields?: string[];
   sort?: TraceSearchSort | TraceSearchSort[];
   size?: number;
+  trackTotalHits?: boolean | number;
   aggs?: Record<string, AggregationsAggregationContainer>;
 }
 
@@ -58,6 +59,7 @@ export interface TraceSearchDocument {
 
 export interface TraceSearchResult<TAggregations = Record<string, AggregationsAggregate>> {
   documents: TraceSearchDocument[];
+  total?: number;
   aggregations?: TAggregations;
 }
 
@@ -79,7 +81,7 @@ export const createTraceAccessor = (traceAccessor: TraceAccessor): TraceAccessor
     }
 
     const { index, field } = TRACE_SOURCE[source];
-    const { filter = [], fields, sort, size, aggs } = params;
+    const { filter = [], fields, sort, size, trackTotalHits, aggs } = params;
     const sortFields = sort ? (Array.isArray(sort) ? sort : [sort]) : undefined;
 
     const filterClauses: QueryDslQueryContainer[] = [{ term: { [field]: traceAccessor.traceId } }];
@@ -99,6 +101,7 @@ export const createTraceAccessor = (traceAccessor: TraceAccessor): TraceAccessor
       ignore_unavailable: true,
       _source: fields,
       size,
+      ...(trackTotalHits !== undefined ? { track_total_hits: trackTotalHits } : {}),
       aggs,
       sort: sortFields?.map(({ field: sortField, order, unmappedType }) => ({
         [sortField]: {
@@ -114,6 +117,9 @@ export const createTraceAccessor = (traceAccessor: TraceAccessor): TraceAccessor
       },
     });
 
+    const total =
+      typeof response.hits.total === 'number' ? response.hits.total : response.hits.total?.value;
+
     return {
       documents: response.hits.hits.flatMap((hit) =>
         hit._source
@@ -127,6 +133,7 @@ export const createTraceAccessor = (traceAccessor: TraceAccessor): TraceAccessor
             ]
           : []
       ),
+      ...(total !== undefined ? { total } : {}),
       aggregations: response.aggregations as TAggregations | undefined,
     };
   },

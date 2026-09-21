@@ -178,6 +178,135 @@ describe('normalizeEvidence', () => {
     });
   });
 
+  it('expands beyond the initial candidate page before ordering equal-timestamp messages', async () => {
+    const mapping = getInstrumentationProfile('otel-genai-events');
+    const { esClient, searchMock } = createEsClient();
+    const traceAccessor = createTraceAccessor({ traceId, esClient });
+    const timestamp = '2026-07-14T09:24:14.340Z';
+    const sort = [1784021054340, null];
+
+    const createCandidates = (kind: 'user' | 'response') =>
+      Array.from({ length: 25 }, (_, index) => {
+        const suffix = String(index).padStart(2, '0');
+        return {
+          _id: `${kind}-${suffix}`,
+          _index: 'logs-generic.otel-default',
+          sort,
+          _source: {
+            '@timestamp': timestamp,
+            body: {
+              structured:
+                kind === 'user'
+                  ? { content: `question-${suffix}` }
+                  : { message: { content: `answer-${suffix}` } },
+            },
+          },
+        };
+      });
+
+    searchMock.mockImplementation(
+      ({
+        index,
+        query,
+        size,
+      }: {
+        index: string;
+        query: { bool: { filter: unknown[] } };
+        size: number;
+      }) => {
+        if (index === 'traces-*') {
+          return Promise.resolve({ hits: { total: { value: 0, relation: 'eq' }, hits: [] } });
+        }
+
+        const eventName = query.bool.filter
+          .map((filter) => (filter as { term?: Record<string, string> }).term?.event_name)
+          .find(Boolean);
+        const candidates = createCandidates(
+          eventName === 'gen_ai.user.message' ? 'user' : 'response'
+        );
+        const hits = size === 20 ? candidates.slice(2, 22).reverse() : candidates.reverse();
+        return Promise.resolve({
+          hits: { total: { value: candidates.length, relation: 'eq' }, hits },
+        });
+      }
+    );
+
+    await expect(normalizeEvidence(traceAccessor, mapping)).resolves.toEqual({
+      input: { message: 'question-00' },
+      response: { message: 'answer-24' },
+      steps: [],
+    });
+
+    const expandedMessageSearches = searchMock.mock.calls.filter(
+      ([request]) => request.index === 'logs-*' && request.size === 200
+    );
+    expect(expandedMessageSearches).toHaveLength(2);
+    expect(expandedMessageSearches.map(([request]) => request.track_total_hits)).toEqual([
+      false,
+      false,
+    ]);
+    expect(searchMock).toHaveBeenCalledWith(expect.objectContaining({ track_total_hits: 21 }));
+  });
+
+  it('keeps resolving evidence when more than 200 message candidates exist', async () => {
+    const mapping = getInstrumentationProfile('otel-genai-events');
+    const { esClient, searchMock } = createEsClient();
+    const traceAccessor = createTraceAccessor({ traceId, esClient });
+
+    searchMock.mockImplementation(
+      ({
+        index,
+        query,
+        size,
+      }: {
+        index: string;
+        query: { bool: { filter: unknown[] } };
+        size: number;
+      }) => {
+        if (index === 'traces-*') {
+          return Promise.resolve({ hits: { total: { value: 0, relation: 'eq' }, hits: [] } });
+        }
+
+        const eventName = query.bool.filter
+          .map((filter) => (filter as { term?: Record<string, string> }).term?.event_name)
+          .find(Boolean);
+        const isUserMessage = eventName === 'gen_ai.user.message';
+        const candidates = Array.from({ length: 201 }, (_, candidateIndex) => ({
+          _id: `${isUserMessage ? 'user' : 'response'}-${candidateIndex}`,
+          _index: 'logs-generic.otel-default',
+          sort: [candidateIndex, null],
+          _source: {
+            '@timestamp': new Date(candidateIndex).toISOString(),
+            body: {
+              structured: isUserMessage
+                ? { content: `question-${candidateIndex}` }
+                : { message: { content: `answer-${candidateIndex}` } },
+            },
+          },
+        }));
+        const orderedCandidates = isUserMessage ? candidates : candidates.reverse();
+        return Promise.resolve({
+          hits: {
+            total: { value: 21, relation: 'gte' },
+            hits: orderedCandidates.slice(0, size),
+          },
+        });
+      }
+    );
+
+    await expect(normalizeEvidence(traceAccessor, mapping)).resolves.toEqual({
+      input: { message: 'question-0' },
+      response: { message: 'answer-200' },
+      steps: [],
+    });
+
+    expect(
+      searchMock.mock.calls.filter(
+        ([request]) => request.index === 'logs-*' && request.size === 200
+      )
+    ).toHaveLength(2);
+  });
+
   it('uses the shared evidence gate and profile recommendation rules', () => {
     expect(hasResolvedEvidence({ ...EMPTY_ROUND, input: { message: 'hello' } })).toBe(true);
     expect(hasResolvedEvidence({ ...EMPTY_ROUND, response: { message: 'world' } })).toBe(true);

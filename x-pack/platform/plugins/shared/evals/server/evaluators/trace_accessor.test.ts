@@ -32,6 +32,7 @@ describe('createTraceAccessor', () => {
           { field: 'span_id', order: 'asc', unmappedType: 'keyword' },
         ],
         size: 10,
+        trackTotalHits: 21,
       });
 
       expect(searchMock).toHaveBeenCalledTimes(1);
@@ -40,6 +41,7 @@ describe('createTraceAccessor', () => {
         ignore_unavailable: true,
         _source: ['@timestamp', 'attributes.gen_ai.tool.name'],
         size: 10,
+        track_total_hits: 21,
         aggs: undefined,
         sort: [
           { '@timestamp': { order: 'asc' } },
@@ -120,6 +122,7 @@ describe('createTraceAccessor', () => {
       const { esClient, searchMock } = createEsClient();
       searchMock.mockResolvedValueOnce({
         hits: {
+          total: { value: 2, relation: 'eq' },
           hits: [
             {
               _id: 'doc-1',
@@ -145,6 +148,7 @@ describe('createTraceAccessor', () => {
             },
           },
         ],
+        total: 2,
         aggregations: undefined,
       });
     });
