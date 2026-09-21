@@ -11,7 +11,6 @@ import { buildOasOperation, invalidResponseExample } from '../oas_utils';
 import type { AlertingOasOperationObject } from '../oas_types';
 import {
   CREATE_RULE_REQUEST,
-  RULE_NOT_FOUND_RESPONSE,
   RULE_RESPONSE,
   ruleResponseExample,
 } from './rule_oas_shared_examples';
