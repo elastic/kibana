@@ -103,7 +103,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       );
     });
 
-    describe('via LOOKUP JOIN (v2)', () => {
+    // Failing: See https://github.com/elastic/kibana/issues/292388
+    describe.skip('via LOOKUP JOIN (v2)', () => {
       before(async () => {
         // Delete v2 manually since it's not being deleted by the v2 install/uninstall cycle
         try {
