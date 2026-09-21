@@ -30,7 +30,12 @@ import { mergeAttachmentRefs } from '../../../conversation/client/migrate_attach
 import { authorAndOrigin } from '../../../conversation/client/events_to_rounds';
 import { formatAttachmentsMetadata } from './attachment_presentation';
 import type { ProcessedTimelineEvent, ProcessedUserMessageEvent } from './context_timeline';
-import { groupTimelineRounds, groupTimelineEntries, isTimelineRound } from './context_timeline';
+import {
+  groupTimelineRounds,
+  groupTimelineEntries,
+  isTimelineFailedExecution,
+  isTimelineRound,
+} from './context_timeline';
 
 export interface ProcessedConversation {
   /**
@@ -117,7 +122,12 @@ export const prepareConversation = async ({
       ...round.userMessage,
       data: processedInput,
     };
-    const events = isTimelineRound(round) ? round.events : [round.userMessage];
+    // A round or a failed execution carries its user message and its run; a standalone message
+    // only itself.
+    const events =
+      isTimelineRound(round) || isTimelineFailedExecution(round)
+        ? round.events
+        : [round.userMessage];
 
     for (const event of events) {
       if (event.id === round.userMessage.id) {
