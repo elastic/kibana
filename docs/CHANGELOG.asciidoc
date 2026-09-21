@@ -164,15 +164,19 @@ Elastic Security solution::
 For the Elastic Security 8.19.22 release information, refer to {security-guide}/release-notes.html[_Elastic Security release notes_].
 Elasticsearch solution::
 * Add an **Expand role members** toggle to ServiceNow connectors for compact document-level security ({kibana-pull}288071[#288071]).
-% !!DEFERRED!! Not yet confirmed in build candidate 8.19.22-022cc937 (backport merged after BC cutoff). Re-verify against the next BC before publishing.
-% * Add an **Expand site group members** toggle to SharePoint Online connectors for compact document-level security ({kibana-pull}288070[#288070]).
+////
+!!DEFERRED!! Not yet confirmed in build candidate 8.19.22-022cc937 (backport merged after BC cutoff). Re-verify against the next BC before publishing.
+* Add an **Expand site group members** toggle to SharePoint Online connectors for compact document-level security ({kibana-pull}288070[#288070]).
+////
 Kibana platform::
 * Hide the **Activate user** action on deactivated users when you have read-only access ({kibana-pull}289801[#289801]).
 * Fix PKI authentication sessions being invalidated when in-flight HTTP/2 requests are canceled, which logged you out. This affects deployments with `server.protocol: http2` ({kibana-pull}285153[#285153]).
 * Fix {kib} failing to start when the file-based audit log appender cannot write. {kib} reports a degraded state instead ({kibana-pull}282347[#282347]).
 * Fix a failed audit log write after startup crashing {kib}. {kib} now reports a degraded state and turns the audit logger off instead ({kibana-pull}287360[#287360]).
-% !!DEFERRED!! Not yet confirmed in build candidate 8.19.22-022cc937 (backport merged after BC cutoff). Re-verify against the next BC before publishing.
-% * Fix {kib} shutting down when the product documentation installer downloads a corrupt or incomplete artifact ({kibana-pull}291142[#291142]).
+////
+!!DEFERRED!! Not yet confirmed in build candidate 8.19.22-022cc937 (backport merged after BC cutoff). Re-verify against the next BC before publishing.
+* Fix {kib} shutting down when the product documentation installer downloads a corrupt or incomplete artifact ({kibana-pull}291142[#291142]).
+////
 
 [[release-notes-8.19.21]]
 == {kib} 8.19.21
