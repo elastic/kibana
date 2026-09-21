@@ -386,11 +386,13 @@ describe('getFetchEventAnnotations', () => {
       expect(handleRequest).toHaveBeenCalledTimes(1);
       expect((handleRequest as jest.Mock).mock.calls[0][0]!.aggs).toMatchSnapshot();
     });
-    test('labels extra field columns with data-view display names', async () => {
+    test('labels extra field columns with data-view custom labels', async () => {
       (startServices[1].data.dataViews.create as jest.Mock).mockResolvedValueOnce({
         id: dataView1.value.id,
         getFieldByName: (name: string) =>
-          name === 'price' ? { displayName: 'Price' } : { displayName: name },
+          name === 'price'
+            ? { customLabel: 'Price', displayName: 'Price' }
+            : { displayName: 'c.currency' },
       });
       (handleRequest as jest.Mock).mockReturnValueOnce(
         mockOf({

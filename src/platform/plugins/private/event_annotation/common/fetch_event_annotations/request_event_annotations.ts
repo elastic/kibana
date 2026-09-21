@@ -304,7 +304,7 @@ const prepareEsaggsForQueryGroups = (
         ) || {},
       fieldDisplayNames:
         group.allFields?.reduce<Record<string, string>>((acc, fieldName) => {
-          acc[fieldName] = group.dataView?.getFieldByName?.(fieldName)?.displayName ?? fieldName;
+          acc[fieldName] = group.dataView?.getFieldByName?.(fieldName)?.customLabel || fieldName;
           return acc;
         }, {}) ?? {},
     };
