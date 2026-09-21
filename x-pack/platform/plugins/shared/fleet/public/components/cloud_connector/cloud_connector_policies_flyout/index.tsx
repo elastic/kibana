@@ -65,6 +65,7 @@ import {
   isAzureCloudConnectorVars,
   isCloudConnectorNameValid,
   isGcpCloudConnectorVars,
+  isIamRoleArnInvalid,
   isStackArnInvalid,
 } from '../utils';
 import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
@@ -72,6 +73,7 @@ import { AccountBadge } from '../components/account_badge';
 import { IacTemplateDetails } from '../components/iac_template_details';
 import { IacUpgradeCallout } from '../components/iac_upgrade_callout';
 import { LaunchCloudFormationButton } from '../components/launch_cloud_formation_button';
+import { RoleArnField } from '../components/role_arn_field';
 import { useGetPackageInfoByKeyQuery, useIacProvisioner, useStartServices } from '../../../hooks';
 
 interface CloudConnectorPoliciesFlyoutProps {
@@ -110,6 +112,13 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
   const [editedName, setEditedName] = useState(initialName);
   const [isNameValid, setIsNameValid] = useState(() => isCloudConnectorNameValid(initialName));
   const [editedIacDeploymentId, setEditedIacDeploymentId] = useState(iacDeploymentId ?? '');
+  const existingRoleArn = useMemo(() => {
+    if (isAwsCloudConnectorVars(cloudConnectorVars, provider)) {
+      return String(cloudConnectorVars.role_arn?.value ?? '');
+    }
+    return '';
+  }, [cloudConnectorVars, provider]);
+  const [editedRoleArn, setEditedRoleArn] = useState(existingRoleArn);
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
@@ -119,6 +128,13 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
   // (upgrade callout, Update, Redeploy, Launch) need the IaC Provisioner.
   const isAws = provider === AWS_PROVIDER;
   const showIac = isAws && isIacProvisionerEnabled;
+  const roleArnInvalid = isIamRoleArnInvalid(editedRoleArn);
+  const trimmedEditedRoleArn = editedRoleArn.trim();
+  const roleArnChanged = trimmedEditedRoleArn !== existingRoleArn.trim();
+  const roleArnToSave =
+    provider === AWS_PROVIDER && !roleArnInvalid && roleArnChanged && trimmedEditedRoleArn !== ''
+      ? trimmedEditedRoleArn
+      : undefined;
 
   // IacTemplateDetails trims on input, so the value judged here is the value that gets saved.
   const deploymentIdInvalid = isStackArnInvalid(editedIacDeploymentId);
@@ -359,11 +375,18 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
     updateConnector({
       ...(nameChanged && editedName ? { name: editedName } : {}),
       ...(iacDeploymentIdToSave !== undefined ? { iac_deployment_id: iacDeploymentIdToSave } : {}),
+      ...(roleArnToSave !== undefined
+        ? { vars: { role_arn: { type: 'text', value: roleArnToSave } } }
+        : {}),
     });
   };
 
   const isSaveDisabled =
-    !isNameValid || deploymentIdInvalid || (!nameChanged && !iacChanged) || isUpdating;
+    !isNameValid ||
+    deploymentIdInvalid ||
+    roleArnInvalid ||
+    (!nameChanged && !iacChanged && roleArnToSave === undefined) ||
+    isUpdating;
 
   const tableCaption = useMemo(
     () =>
@@ -515,6 +538,17 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
 
       <EuiFlyoutBody>
         {isAws && (
+          <>
+            <RoleArnField
+              value={editedRoleArn}
+              storedValue={existingRoleArn}
+              onChange={setEditedRoleArn}
+              affectedPackagePolicyCount={usageData?.total}
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
+        {showIac && (
           <>
             <IacTemplateDetails
               iacDeploymentId={editedIacDeploymentId}
