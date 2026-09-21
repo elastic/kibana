@@ -1093,7 +1093,6 @@ x-pack/platform/packages/shared/kbn-evals-extensions @elastic/nightshift-context
 x-pack/platform/packages/shared/kbn-evals-runner @elastic/nightshift-context-and-research-team
 x-pack/platform/packages/shared/kbn-evals-suite-alerting-v2 @elastic/rna-project-team
 x-pack/platform/packages/shared/kbn-evals-suite-nightshift-investigations @elastic/nightshift-context-and-research-team @elastic/nightshift-investigations-team
-x-pack/platform/packages/shared/kbn-evals-suite-significant-events @elastic/nightshift-sre-agent-team
 x-pack/platform/packages/shared/kbn-evals-suite-smoke-tests @elastic/nightshift-context-and-research-team
 x-pack/platform/packages/shared/kbn-evals-suite-streams @elastic/streams-ui
 x-pack/platform/packages/shared/kbn-event-stacktrace @elastic/obs-signals-traces-team @elastic/obs-signals-logs-team
@@ -1291,8 +1290,6 @@ x-pack/platform/plugins/shared/search_inference_endpoints @elastic/search-ml-ux
 x-pack/platform/plugins/shared/searchprofiler @elastic/kibana-management
 x-pack/platform/plugins/shared/security @elastic/kibana-security
 x-pack/platform/plugins/shared/serverless @elastic/appex-sharedux
-x-pack/platform/plugins/shared/significant_events @elastic/nightshift-sre-agent-team
-x-pack/platform/plugins/shared/significant_events_app @elastic/nightshift-sre-agent-team
 x-pack/platform/plugins/shared/slo_shared @elastic/nightshift-sre-agent-team
 x-pack/platform/plugins/shared/spaces @elastic/kibana-security
 x-pack/platform/plugins/shared/stack_alerts @elastic/response-ops
@@ -1348,6 +1345,7 @@ x-pack/solutions/observability/packages/get-padded-alert-time-range-util @elasti
 x-pack/solutions/observability/packages/kbn-alerts-grouping @elastic/response-ops
 x-pack/solutions/observability/packages/kbn-apm-embeddable-common @elastic/obs-signals-traces-team
 x-pack/solutions/observability/packages/kbn-evals-suite-observability-ai @elastic/nightshift-context-and-research-team
+x-pack/solutions/observability/packages/kbn-evals-suite-significant-events @elastic/nightshift-sre-agent-team
 x-pack/solutions/observability/packages/kbn-genai-cli @elastic/nightshift-context-and-research-team
 x-pack/solutions/observability/packages/kbn-observability-schema @elastic/obs-signals-traces-team
 x-pack/solutions/observability/packages/kbn-scout-oblt @elastic/appex-qa
@@ -1375,6 +1373,8 @@ x-pack/solutions/observability/plugins/observability_shared @elastic/observabili
 x-pack/solutions/observability/plugins/profiling @elastic/obs-signals-logs-team
 x-pack/solutions/observability/plugins/profiling_data_access @elastic/obs-signals-logs-team
 x-pack/solutions/observability/plugins/serverless_observability @elastic/observability-ui
+x-pack/solutions/observability/plugins/significant_events @elastic/nightshift-sre-agent-team
+x-pack/solutions/observability/plugins/significant_events_app @elastic/nightshift-sre-agent-team
 x-pack/solutions/observability/plugins/slo @elastic/nightshift-sre-agent-team
 x-pack/solutions/observability/plugins/synthetics @elastic/obs-signals-logs-team
 x-pack/solutions/observability/plugins/uptime @elastic/obs-signals-logs-team
@@ -1941,14 +1941,14 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/platform/plugins/shared/streams/server/lib/streams/lifecycle/global_retention.test.ts @elastic/kibana-management
 /x-pack/platform/test/api_integration_deployment_agnostic/apis/streams/failure_store.ts @elastic/kibana-management
 /x-pack/platform/test/api_integration_deployment_agnostic/apis/streams/lifecycle_retention.ts @elastic/kibana-management
-x-pack/platform/plugins/shared/significant_events/server/lib/slack_app @elastic/nightshift-context-and-research-team
-x-pack/platform/plugins/shared/significant_events/common/slack_app @elastic/nightshift-context-and-research-team
-x-pack/platform/plugins/shared/significant_events/server/routes/internal/apps/slack @elastic/nightshift-context-and-research-team
-x-pack/platform/plugins/shared/significant_events_app/public/pages/significant_events/components/settings/apps_section @elastic/nightshift-context-and-research-team
+x-pack/solutions/observability/plugins/significant_events/server/lib/slack_app @elastic/nightshift-context-and-research-team
+x-pack/solutions/observability/plugins/significant_events/common/slack_app @elastic/nightshift-context-and-research-team
+x-pack/solutions/observability/plugins/significant_events/server/routes/internal/apps/slack @elastic/nightshift-context-and-research-team
+x-pack/solutions/observability/plugins/significant_events_app/public/pages/significant_events/components/settings/apps_section @elastic/nightshift-context-and-research-team
 
 # Significant Events - Investigation features (owned by Nightshift context & research)
-x-pack/platform/plugins/shared/significant_events/server/agent_builder/skills/investigation_management @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
-x-pack/platform/plugins/shared/significant_events/server/agent_builder/tools/event_investigation_attach @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
+x-pack/solutions/observability/plugins/significant_events/server/agent_builder/skills/investigation_management @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
+x-pack/solutions/observability/plugins/significant_events/server/agent_builder/tools/event_investigation_attach @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
 
 # Streams - Data quality overrides (owned by Kibana Management)
 /x-pack/platform/plugins/shared/streams_app/public/components/stream_data_quality @elastic/kibana-management
@@ -1962,7 +1962,7 @@ x-pack/platform/packages/shared/kbn-streams-schema/src/inference_feature_ids.ts 
 x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/default_index_patterns.ts @elastic/nightshift-sre-agent-team
 x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/stream_matches_index_patterns.ts @elastic/nightshift-sre-agent-team
 # server
-x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significant_events @elastic/nightshift-sre-agent-team
+x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/significant_events @elastic/nightshift-sre-agent-team
 
 
 # Infra Monitoring tests
