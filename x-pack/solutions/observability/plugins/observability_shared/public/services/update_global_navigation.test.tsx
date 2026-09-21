@@ -9,10 +9,7 @@ import type { Subject } from 'rxjs';
 import type { App, AppDeepLink, ApplicationStart, AppUpdater } from '@kbn/core/public';
 import { AppStatus, type PricingServiceStart } from '@kbn/core/public';
 import { casesFeatureId } from '../../common';
-import {
-  hasObservabilityCapabilities,
-  updateGlobalNavigation,
-} from './update_global_navigation';
+import { hasObservabilityCapabilities, updateGlobalNavigation } from './update_global_navigation';
 
 // Used in updater callback
 const app = {} as unknown as App;
