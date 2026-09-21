@@ -8,7 +8,7 @@
 import { MAX_NAME_LENGTH } from '@kbn/alerting-v2-schemas';
 import type { QueryLink } from '@kbn/significant-events-schema';
 import type { IRulesManagementClient } from './rules/rules_management_client';
-import { installQueries, toRuleDefinition } from './rule_orchestration';
+import { installQueries, toRuleDefinition, uninstallQueries } from './rule_orchestration';
 import {
   METRIC_SERIES_EVERY,
   METRIC_SERIES_RULE_NAME_SUFFIX,
@@ -153,5 +153,17 @@ describe('installQueries', () => {
       createError
     );
     expect(client.updateRule).not.toHaveBeenCalled();
+  });
+});
+
+describe('uninstallQueries', () => {
+  it('chunks deletes at the bulk API limit', async () => {
+    const client = makeRulesClient();
+
+    await uninstallQueries(client, makeQueryLinks(201));
+
+    const chunks = client.bulkDeleteRules.mock.calls.map(([ids]) => ids);
+    expect(chunks.map((chunk) => chunk.length)).toEqual([100, 51, 50]);
+    expect(chunks.flat()).toEqual(Array.from({ length: 201 }, (_, index) => `rule-${index}`));
   });
 });

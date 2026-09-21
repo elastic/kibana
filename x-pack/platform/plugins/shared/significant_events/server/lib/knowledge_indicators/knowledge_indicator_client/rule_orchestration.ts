@@ -98,5 +98,7 @@ export async function uninstallQueries(
     return;
   }
 
-  await client.bulkDeleteRules(ruleIds);
+  for (const chunk of partitionForBulk(ruleIds, MAX_BULK_ITEMS)) {
+    await client.bulkDeleteRules(chunk);
+  }
 }
