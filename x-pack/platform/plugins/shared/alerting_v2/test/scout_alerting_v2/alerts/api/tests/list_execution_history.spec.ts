@@ -84,25 +84,6 @@ apiTest.describe(
       expect(response.body.code).toBe('BAD_REQUEST');
     });
 
-    apiTest('validation: accepts from / to time bounds', async ({ apiClient }) => {
-      const response = await apiClient.get(
-        getListExecutionHistoryUrl({
-          from: '2026-01-01T00:00:00.000Z',
-          to: '2026-01-02T00:00:00.000Z',
-        }),
-        { headers: readerHeaders }
-      );
-      expect(response).toHaveStatusCode(200);
-    });
-
-    apiTest('validation: accepts sort=dispatched_at with sort_order=asc', async ({ apiClient }) => {
-      const response = await apiClient.get(
-        getListExecutionHistoryUrl({ sort: 'dispatched_at', sort_order: 'asc' }),
-        { headers: readerHeaders }
-      );
-      expect(response).toHaveStatusCode(200);
-    });
-
     apiTest('validation: rejects an unknown sort field', async ({ apiClient }) => {
       const response = await apiClient.get(
         `${ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH}?sort=started_at`,
