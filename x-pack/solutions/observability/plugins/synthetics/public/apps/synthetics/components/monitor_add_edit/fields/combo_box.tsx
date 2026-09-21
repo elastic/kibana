@@ -40,9 +40,9 @@ export const FormattedComboBox = ({
   const [isInvalid, setInvalid] = useState(false);
 
   const onOptionsChange = useCallback(
-    (options: Array<EuiComboBoxOptionOption<string>>) => {
-      setSelectedOptions(options);
-      const formattedTags = options.map((option) => option.label);
+    (newOptions: Array<EuiComboBoxOptionOption<string>>) => {
+      setSelectedOptions(newOptions);
+      const formattedTags = newOptions.map((option) => option.label);
       onChange(formattedTags);
       setInvalid(false);
     },
