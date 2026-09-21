@@ -82,12 +82,14 @@ export const resolveEsqlForAuthoring = async ({
 }: ResolveEsqlForAuthoringParams): Promise<ResolvedEsqlForAuthoring> => {
   let query = providedQuery ?? '';
   let columns: EsqlEsqlColumnInfo[] | undefined;
+  let failedProvidedQueryContext: string | undefined;
 
   // A provided query is only trustworthy if it actually runs: the caller may
   // pass an LLM-invented query whose error (e.g. a type mismatch) AST
   // validation never catches. Execute it; if it throws, discard it and fall
   // through to self-correcting generation rather than author around a query
-  // that can never render.
+  // that can never render. Seed generation with the failed query and error so
+  // the model can correct it instead of starting from scratch.
   if (query) {
     logger.debug('Validating provided ES|QL query for visualization');
     try {
@@ -97,6 +99,7 @@ export const resolveEsqlForAuthoring = async ({
       logger.warn(
         `Provided ES|QL query failed to execute (${errorMessage}); regenerating a corrected query`
       );
+      failedProvidedQueryContext = `A provided ES|QL query failed to execute: "${query}" (error: ${errorMessage}). Avoid repeating this mistake.`;
       query = '';
     }
   }
@@ -107,6 +110,7 @@ export const resolveEsqlForAuthoring = async ({
       nlQuery,
       existingQueries,
       extraInstructions,
+      additionalContext: failedProvidedQueryContext,
       index,
       modelProvider,
       events,

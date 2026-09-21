@@ -95,6 +95,13 @@ describe('resolveEsqlForAuthoring', () => {
       columns: COLUMNS,
     });
     expect(mockedGenerate).toHaveBeenCalledTimes(1);
+    expect(mockedGenerate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        additionalContext: expect.stringMatching(
+          /FROM logs-\* \| STATS COUNT\(\*\) BY foo[\s\S]*unknown column foo/
+        ),
+      })
+    );
   });
 
   it('generates a query when none is provided', async () => {
