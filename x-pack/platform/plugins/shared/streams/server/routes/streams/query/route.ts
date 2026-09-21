@@ -145,7 +145,10 @@ const upsertQueryStreamRoute = createServerRoute({
         .record(z.string().max(1000), z.string().max(1000))
         .superRefine((val, ctx) => {
           if (Object.keys(val).length > 1000) {
-            ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'At most 1000 field descriptions allowed' });
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: 'At most 1000 field descriptions allowed',
+            });
           }
         })
         .optional(),
