@@ -93,6 +93,12 @@ export const viewWatchAriaLabel = (name: string) =>
     values: { name },
   });
 
+export const workerCountLabel = (count: number) =>
+  i18n.translate('xpack.alertzero.watches.header.workerCount', {
+    defaultMessage: '{count, plural, one {# Worker} other {# Workers}}',
+    values: { count },
+  });
+
 /* -------------------------------------------------------------------------- */
 /* Relative time and run state                                                */
 /* -------------------------------------------------------------------------- */

@@ -37,11 +37,13 @@ jest.mock('./components/watches_section_layout', () => ({
   WatchesSectionLayout: ({
     children,
     title,
+    badges,
     headerPrimaryActionItem,
     headerItems,
   }: {
     children: React.ReactNode;
     title: string;
+    badges?: Array<{ label: string; 'data-test-subj'?: string }>;
     headerPrimaryActionItem?: {
       label: string;
       testId?: string;
@@ -61,6 +63,11 @@ jest.mock('./components/watches_section_layout', () => ({
     return (
       <div>
         <h1>{title}</h1>
+        {badges?.map((badge) => (
+          <span key={badge.label} data-test-subj={badge['data-test-subj']}>
+            {badge.label}
+          </span>
+        ))}
         {headerItems?.map((item) => (
           <button
             key={item.testId}
@@ -406,6 +413,59 @@ describe('WatchDetailPage', () => {
     expect(screen.getByTestId('alertZeroWatchWorkersSection')).toBeInTheDocument();
     expect(screen.queryByTestId('alertZeroWatchWorkersLoadError')).not.toBeInTheDocument();
     expect(screen.queryByTestId(/alertZeroWatchWorkerSection-/)).not.toBeInTheDocument();
+    expect(screen.getByTestId('alertZeroWatchWorkerCount')).toHaveTextContent('0 Workers');
+  });
+
+  it('shows the Worker count in the header once members have loaded', () => {
+    renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, [
+      ...floorWorkers,
+      huntWorker,
+      ...detectionWorkers,
+    ]);
+
+    expect(screen.getByTestId('alertZeroWatchWorkerCount')).toHaveTextContent('2 Workers');
+  });
+
+  it('hides the Worker count while members are loading or failed', () => {
+    mockUseWatch.mockReturnValue({
+      data: { watch: createCatalogWatchPlaceholder(SYSTEM_SECURITY_WATCH_FLOOR_ID) },
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    } as never);
+    mockUseWorkers.mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      error: null,
+      refetch: jest.fn(),
+    } as never);
+    mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync: jest.fn() } as never);
+
+    const { rerender } = render(
+      <MemoryRouter initialEntries={[`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`]}>
+        <Route path="/watches/:watchId">
+          <WatchDetailPage />
+        </Route>
+      </MemoryRouter>
+    );
+
+    expect(screen.queryByTestId('alertZeroWatchWorkerCount')).not.toBeInTheDocument();
+
+    mockUseWorkers.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: new Error('workers unavailable'),
+      refetch: jest.fn(),
+    } as never);
+    rerender(
+      <MemoryRouter initialEntries={[`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`]}>
+        <Route path="/watches/:watchId">
+          <WatchDetailPage />
+        </Route>
+      </MemoryRouter>
+    );
+
+    expect(screen.queryByTestId('alertZeroWatchWorkerCount')).not.toBeInTheDocument();
   });
 
   it('shows Detection Workers with per-Worker enablement and autonomy', () => {

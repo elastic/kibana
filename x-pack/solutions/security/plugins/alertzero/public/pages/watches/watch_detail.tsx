@@ -198,6 +198,17 @@ export const WatchDetailPage: React.FC = () => {
     );
   }
 
+  const workerCountBadges =
+    !workersLoading && !workersError
+      ? [
+          {
+            label: i18n.workerCountLabel(members.length),
+            color: 'hollow' as const,
+            'data-test-subj': 'alertZeroWatchWorkerCount',
+          },
+        ]
+      : undefined;
+
   const renderWorkers = () => {
     if (workersError) {
       return (
@@ -266,6 +277,7 @@ export const WatchDetailPage: React.FC = () => {
     <WatchesSectionLayout
       active={watchId}
       title={watch.name}
+      badges={workerCountBadges}
       headerPrimaryActionItem={headerPrimaryActionItem}
       headerItems={headerItems}
     >
