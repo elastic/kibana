@@ -35,6 +35,11 @@ const entityRefSchema = z.object({
   value: z.string().min(1).max(2048),
 });
 
+const huntIocSchema = z.object({
+  type: z.enum(['ip', 'email', 'domain', 'url', 'hash']),
+  value: z.string().min(1).max(2048),
+});
+
 const alertRefSchema = z.object({
   alert_id: z.string().min(1).max(512),
   index: z.string().min(1).max(256),
@@ -44,20 +49,87 @@ const alertRefSchema = z.object({
 const eventRefSchema = z.object({
   event_id: z.string().min(1).max(512),
   source_index: z.string().min(1).max(256),
+  timestamp: z.string().datetime().optional(),
+  matched: z
+    .object({
+      ioc: huntIocSchema.optional(),
+      technique_id: z.string().min(1).max(32).optional(),
+      field: z.string().min(1).max(128),
+    })
+    .optional(),
 });
 
-const securityKnowledgeIndicatorSchema = z.object({
-  type: z.string().min(1).max(64),
-  value: z.string().min(1).max(2048),
-  confidence: z.number().min(0).max(1).optional(),
-});
+const securityKnowledgeIndicatorSchema = z
+  .object({
+    type: z.enum(['technology', 'threat', 'risk', 'technique', 'ioc']),
+    value: z.string().min(1).max(2048),
+    confidence: z.number().min(0).max(1).optional(),
+    technique_id: z.string().min(1).max(32).optional(),
+    ioc: huntIocSchema.optional(),
+  })
+  .superRefine((indicator, ctx) => {
+    if (indicator.type === 'technique' && !indicator.technique_id) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'technique_id is required when type is "technique"',
+        path: ['technique_id'],
+      });
+    }
+    if (indicator.type === 'ioc' && !indicator.ioc) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'ioc is required when type is "ioc"',
+        path: ['ioc'],
+      });
+    }
+  });
 
 const timelineEntrySchema = z.object({
-  at: z.string().min(1).max(64),
+  at: z.string().datetime(),
   what: z.string().min(1).max(2000),
 });
 
 const evidenceItemSchema = z.string().min(1).max(2000);
+
+const huntResultPerIndexSchema = z.object({
+  index: z.string().min(1).max(256),
+  hit_count: z.number().int().min(0),
+  required: z.boolean(),
+});
+
+const huntResultTier1Schema = z.object({
+  status: z.enum(['no_searchable_terms', 'no_environment_hits', 'environment_hits_found']),
+  counts: z.object({
+    total_hits: z.number().int().min(0),
+    returned_hits: z.number().int().min(0),
+    affected_hosts: z.number().int().min(0),
+    affected_users: z.number().int().min(0),
+  }),
+  per_index: z.array(huntResultPerIndexSchema).max(20),
+  resolved_iocs: z.array(huntIocSchema).max(50),
+});
+
+const huntResultTier2BehaviorSchema = z.object({
+  technique_id: z.string().min(1).max(32),
+  tactic_ids: z.array(z.string().min(1).max(32)).max(20),
+  confidence: z.number().min(0).max(1),
+  rule_name: z.string().min(1).max(256),
+});
+
+const huntResultTier2Schema = z.object({
+  status: z.enum(['no_behaviors_found', 'no_behaviors_validated', 'behaviors_proposed']),
+  behaviors: z.array(huntResultTier2BehaviorSchema).max(20),
+});
+
+const huntResultSchema = z.object({
+  has_confirmed_hit: z.boolean(),
+  time_range: z.object({
+    from: z.string().datetime(),
+    to: z.string().datetime(),
+  }),
+  tier1: huntResultTier1Schema,
+  tier2: huntResultTier2Schema.optional(),
+});
 
 /** Cap serialized actionInput so arbitrary JSON values cannot grow without limit. */
 const ACTION_INPUT_MAX_SERIALIZED_BYTES = 32_768;
@@ -107,12 +179,14 @@ export const significantSecurityEventAttachmentDataSchema = alertZeroAttachmentD
   source_watch: z.string().min(1).max(256),
   capability: z.string().min(1).max(256),
   run_id: z.string().min(1).max(256),
+  report_id: z.string().min(1).max(256),
   security_knowledge_indicators: z.array(securityKnowledgeIndicatorSchema).max(50),
   entities: z.array(entityRefSchema).max(50),
   alerts: z.array(alertRefSchema).max(50).optional(),
   events: z.array(eventRefSchema).max(50).optional(),
   timeline: z.array(timelineEntrySchema).max(50),
   hypothesis_tested: z.string().min(1).max(4000),
+  hunt_result: huntResultSchema.optional(),
   evidence_for: z.array(evidenceItemSchema).max(50),
   evidence_against: z.array(evidenceItemSchema).max(50),
   maps_to_proposal: mapsToProposalSchema,
@@ -148,6 +222,34 @@ const formatSignificantSecurityEventForAgent = (
     }
   }
 
+  if (data.hunt_result) {
+    const { tier1, tier2 } = data.hunt_result;
+    lines.push(
+      '',
+      `Hunt result: ${data.hunt_result.has_confirmed_hit ? 'confirmed hit' : 'no confirmed hit'} (${data.hunt_result.time_range.from} to ${data.hunt_result.time_range.to})`,
+      `Tier 1: ${tier1.status} — ${tier1.counts.total_hits} total hits, ${tier1.counts.affected_hosts} affected hosts, ${tier1.counts.affected_users} affected users`
+    );
+    for (const entry of tier1.per_index) {
+      lines.push(
+        `  ${entry.index}: ${entry.hit_count} hit(s)${entry.required ? ' (required)' : ''}`
+      );
+    }
+    if (tier1.resolved_iocs.length > 0) {
+      lines.push('  Resolved IOCs:');
+      for (const ioc of tier1.resolved_iocs) {
+        lines.push(`    ${ioc.type}: ${ioc.value}`);
+      }
+    }
+    if (tier2) {
+      lines.push(`Tier 2: ${tier2.status}`);
+      for (const behavior of tier2.behaviors) {
+        lines.push(
+          `  ${behavior.technique_id} (${behavior.tactic_ids.join(', ')}, confidence ${behavior.confidence}): ${behavior.rule_name}`
+        );
+      }
+    }
+  }
+
   lines.push('', 'Security knowledge indicators (taxonomy labels, not Discover IOCs):');
   if (data.security_knowledge_indicators.length === 0) {
     lines.push('  no indicators recorded');
@@ -155,7 +257,13 @@ const formatSignificantSecurityEventForAgent = (
     for (const indicator of data.security_knowledge_indicators) {
       const confidence =
         indicator.confidence != null ? ` (confidence ${indicator.confidence})` : '';
-      lines.push(`  ${indicator.type}: ${indicator.value}${confidence}`);
+      const detail =
+        indicator.type === 'technique' && indicator.technique_id
+          ? ` [${indicator.technique_id}]`
+          : indicator.type === 'ioc' && indicator.ioc
+          ? ` [${indicator.ioc.type}: ${indicator.ioc.value}]`
+          : '';
+      lines.push(`  ${indicator.type}: ${indicator.value}${detail}${confidence}`);
     }
   }
 
@@ -243,14 +351,15 @@ const getAgentDescription = (): string => `
 This attachment carries a Hunt-owned Significant Security Event.
 The payload contains:
 - title, severity, confidence, status: the headline classification of the event
-- source_watch, capability, run_id: provenance of the hunt run that produced this event
-- security_knowledge_indicators: threat-intel taxonomy labels (type/value/confidence).
-  These are NOT Discover IOCs. Do not invent logs-* field mappings from \`type\`.
+- source_watch, capability, run_id, report_id: provenance of the hunt run that produced this event; report_id names the triggering threat report
+- security_knowledge_indicators: typed taxonomy labels (technology/threat/risk/technique/ioc); technique entries carry technique_id, ioc entries carry a typed ioc value.
+  These are NOT Discover IOCs by default (technology/threat/risk labels). Do not invent logs-* field mappings from \`type\`.
 - entities: ECS \`{ field, value }\` refs (allowlisted entity fields only)
 - alerts: \`{ alert_id, index, timestamp? }\` — always include the concrete alerts index
-- events: \`{ event_id, source_index }\` — always include the concrete source index
+- events: \`{ event_id, source_index, timestamp?, matched? }\` — matched names the IOC or technique that produced the hit
 - timeline: an ordered sequence of (at, what) entries describing what happened
-- hypothesis_tested, evidence_for, evidence_against: the hunt's working hypothesis and its evidence
+- hunt_result: structured Tier 1 / Tier 2 findings (status, counts, per-index hit detail, resolved IOCs, Tier 2 behaviors). Prefer these numbers over evidence_for/evidence_against when both are present.
+- hypothesis_tested, evidence_for, evidence_against: the hunt's working hypothesis and its analyst narrative on top of hunt_result
 - maps_to_proposal, evaluation_record_ref: optional links into the proposal/evaluation subsystem
 
 Quote the \`what\` field of timeline entries verbatim rather than re-classifying or summarizing

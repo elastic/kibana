@@ -23,7 +23,10 @@ const validPayload = {
   source_watch: 'lateral-movement-watch',
   capability: 'lateral-movement-detection',
   run_id: 'run-123',
-  security_knowledge_indicators: [{ type: 'technique', value: 'T1021', confidence: 0.9 }],
+  report_id: 'tr-lateral-movement-2026-01',
+  security_knowledge_indicators: [
+    { type: 'technique', value: 'T1021', confidence: 0.9, technique_id: 'T1021' },
+  ],
   entities: [
     { field: 'host.name' as const, value: 'srv-01' },
     { field: 'user.name' as const, value: 'jdoe' },
@@ -201,6 +204,53 @@ describe('createSignificantSecurityEventAttachmentType', () => {
 
       expect(result.valid).toBe(false);
     });
+
+    it('rejects a technique indicator missing technique_id', async () => {
+      const result = await attachmentType.validate({
+        ...validPayload,
+        security_knowledge_indicators: [{ type: 'technique', value: 'T1021' }],
+      });
+
+      expect(result.valid).toBe(false);
+    });
+
+    it('rejects an ioc indicator missing ioc', async () => {
+      const result = await attachmentType.validate({
+        ...validPayload,
+        security_knowledge_indicators: [{ type: 'ioc', value: 'suspicious hash' }],
+      });
+
+      expect(result.valid).toBe(false);
+    });
+
+    it('accepts a well-formed hunt_result block', async () => {
+      const result = await attachmentType.validate({
+        ...validPayload,
+        hunt_result: {
+          has_confirmed_hit: true,
+          time_range: { from: '2026-01-01T00:00:00.000Z', to: '2026-01-01T02:00:00.000Z' },
+          tier1: {
+            status: 'environment_hits_found',
+            counts: { total_hits: 3, returned_hits: 3, affected_hosts: 1, affected_users: 1 },
+            per_index: [{ index: 'logs-aws.cloudtrail-default', hit_count: 3, required: true }],
+            resolved_iocs: [{ type: 'hash', value: 'abc123' }],
+          },
+          tier2: {
+            status: 'behaviors_proposed',
+            behaviors: [
+              {
+                technique_id: 'T1021',
+                tactic_ids: ['TA0008'],
+                confidence: 0.8,
+                rule_name: 'Lateral movement via RDP',
+              },
+            ],
+          },
+        },
+      });
+
+      expect(result.valid).toBe(true);
+    });
   });
 
   describe('format', () => {
@@ -236,7 +286,7 @@ describe('createSignificantSecurityEventAttachmentType', () => {
         : { type: 'text', value: '' };
 
       const value = (representation as TextAttachmentRepresentation).value;
-      expect(value).toContain('technique: T1021 (confidence 0.9)');
+      expect(value).toContain('technique: T1021 [T1021] (confidence 0.9)');
       expect(value).toContain('host.name: srv-01');
       expect(value).toContain('user.name: jdoe');
       expect(value).toContain('- RDP session from unusual host');
