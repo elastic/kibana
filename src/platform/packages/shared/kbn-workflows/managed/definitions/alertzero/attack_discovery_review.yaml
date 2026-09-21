@@ -1,0 +1,442 @@
+version: "1"
+name: Attack Discovery Review
+description: >
+  Reviews one Attack Discovery: opens an Investigation, attaches the discovery and
+  its alerts, runs FP/TP analysis, and applies the resulting verdict.
+
+  `open_investigation` and the attachments are real. `apply_verdict` is still the
+  four-arm console switch from the skeleton (#19214 replaces it). `run_fp_tp_analysis`
+  is still a console stub until #19211.
+enabled: true
+tags:
+  - security
+  - attack-discovery
+triggers:
+  # Manual only: this workflow is always launched by the Attack Discovery worker
+  # (or by hand for testing). It owns no schedule of its own.
+  - type: manual
+    inputs:
+      properties:
+        attack_discovery_id:
+          type: string
+          maxLength: 512
+          description: >-
+            Document id of the PERSISTED Attack Discovery, which equals its
+            `kibana.alert.uuid`. Keys the by-reference `security.attack_discovery`
+            attachment. The runner resolves it by reading back the documents its
+            generation wrote; it is not the run step's optional `id`, which is the
+            LLM UUID.
+        title:
+          type: string
+          maxLength: 1024
+          description: Title of the Attack Discovery under review.
+        alert_ids:
+          type: array
+          maxItems: 1000
+          items:
+            type: string
+            maxLength: 512
+          description: >-
+            Document ids of the DETECTION alerts the Attack Discovery correlated.
+            Not the Attack Discovery's own id — that is `attack_discovery_id`.
+        summary_markdown:
+          type: string
+          maxLength: 8000
+          description: Summary of the Attack Discovery, shown to the analyst and the analysis agent.
+        autonomy:
+          type: string
+          enum:
+            - manual
+            - assisted
+            - supervised
+          description: >-
+            Worker autonomy level, which decides how a true-positive or
+            inconclusive verdict is promoted: `manual` requires an analyst gate,
+            the others promote without one. Defaults to `manual`.
+        stub_verdict:
+          type: string
+          enum:
+            - false_positive
+            - true_positive
+            - inconclusive
+            - failed
+          description: >-
+            Stands in for the verdict the real FP/TP analysis workflow will return
+            (#19211). Defaults to
+            `inconclusive`, which #19214 routes to the same Promote-to-Incident
+            proposal as true_positive. Overridable by hand so every branch of the
+            switch below is reachable before the real analysis exists.
+        parent_run_id:
+          type: string
+          maxLength: 128
+          description: >-
+            Workflow execution id of the runner that launched this review, recorded
+            on the Investigation below. It is the only link back to the parent the
+            engine keeps. Empty on a standalone run.
+      # The attack's identity is required: without the persisted document id there
+      # is nothing to attach by reference. Everything else defaults from `consts`
+      # so the worker and this workflow can be upgraded independently without a
+      # one-sided input-validation failure.
+      required:
+        - attack_discovery_id
+        - title
+      additionalProperties: false
+outputs:
+  - name: title
+    type: string
+  - name: verdict
+    type: string
+  - name: investigation_opened
+    type: boolean
+  - name: investigation_id
+    type: string
+  - name: attack_discovery_id
+    type: string
+consts:
+  default_verdict: inconclusive
+  default_autonomy: manual
+  # Mirrors ALERTS_BATCH_MAX_SIZE in security_solution's common/constants, which is
+  # what the `security.alerts` attachment schema caps `alertIds` at. Duplicated
+  # rather than imported because this is YAML; if that constant moves, the
+  # attach_alerts batches start failing validation and the review says so.
+  alerts_per_attachment: 20
+  # Always-on Investigation journal. converse `trigger_mode: never` persists a
+  # user_message without running the agent (elastic/kibana#290223).
+  journal_note: system-alertzero-journal-note
+  # Liquid has no array literal, so `| default: []` yields undefined rather than an
+  # empty array. A const is the only way to spell an empty-array fallback, which is
+  # what keeps `| size` from erroring when `alert_ids` is omitted.
+  no_alert_ids: []
+steps:
+  # kibana-q0t5: the Investigation id is a pure function of the attack, so every
+  # execution that reviews this attack addresses the SAME Investigation — a hand
+  # re-run attaches to the first one rather than opening a rival, and the forensics
+  # handoff knowledge indicator, which is keyed per attack, can never be replaced
+  # with one naming a different Investigation than the analyst approved in.
+  #
+  # `conversation_id` is typed `z.uuid()`, which enforces the RFC 9562 version and
+  # variant nibbles, and `attack_discovery_id` is a SHA-256 hex — a raw 8-4-4-4-12
+  # slice of it satisfies that only about one time in eight. Both nibbles are forced
+  # instead, making this a UUIDv8: the version reserved for ids derived from custom
+  # data. 120 bits of the hash survive, so two attacks cannot collide.
+  #
+  # `{%- -%}` on the assign is what keeps the rendered value free of the surrounding
+  # newline; `z.uuid()` would reject the whitespace.
+  - name: resolve_investigation_id
+    type: data.set
+    with:
+      investigation_id: |-
+        {%- assign attack = inputs.attack_discovery_id -%}
+        {{ attack | slice: 0,8 }}-{{ attack | slice: 8,4 }}-8{{ attack | slice: 12,3 }}-8{{ attack | slice: 15,3 }}-{{ attack | slice: 18,12 }}
+
+  # One Investigation per attack, opened before the analysis runs so there is
+  # somewhere to attach evidence and somewhere to hang a proposal. `public` access
+  # so anyone in the space can pick it up — a Worker-private Investigation is
+  # invisible to the analysts it exists for.
+  #
+  # `on-failure: continue` because a 409 here is the EXPECTED outcome of a
+  # re-review, not an error: the id above is stable and the create indexes with
+  # `op_type: 'create'`, so the second attempt conflicts with the Investigation the
+  # first review opened, which is exactly the invariant being enforced. That also
+  # means nothing may read `conversation_id` back off this step — on a re-review it
+  # emits nothing. `verify_investigation` below is what keeps a create that failed
+  # for any other reason fatal.
+  #
+  # A re-review therefore does NOT refresh `metadata`: the first run's summary and
+  # Worker run id stand. That is deliberate — the first review is the one whose
+  # evidence and analyst decision the Investigation already holds.
+  #
+  # kibana-d7aa: still no pre-create lookup, and none is needed — the id is derived
+  # rather than discovered. Uniqueness across producers is the persist 409 on the
+  # attack hash; a regrouped alert set, and Kibana scheduled AD vs this Worker, are
+  # intentional producer splits. `generation_source` exists but is not passed yet.
+  - name: open_investigation
+    type: ai.conversation.create
+    with:
+      conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
+      title: "{{ inputs.title }}"
+      template_id: investigation
+      access_control:
+        access_mode: public
+      metadata:
+        status: open
+        summary: "{{ inputs.summary_markdown }}"
+        description: >-
+          Attack Discovery review of "{{ inputs.title }}" covering
+          {{ inputs.alert_ids | default: consts.no_alert_ids | size }} detection alert(s).
+        # The RUNNER's execution, not this one. This is the only record of which
+        # attacks came out of the same Worker run, which is what telemetry and
+        # evaluation group by; this review's own id is unique per attack and so
+        # would group nothing. Empty on a standalone run, which is accurate — such a
+        # run belongs to no Worker run.
+        workflow_execution_id: "{{ inputs.parent_run_id }}"
+    on-failure:
+      continue: true
+
+  # The hard stop `open_investigation` can no longer provide on its own. Without an
+  # Investigation there is nothing to attach to and nothing to propose against, so
+  # continuing would produce a run that silently did nothing — but the create has to
+  # tolerate the 409 a re-review raises. Reading the Investigation back separates the
+  # two: a 409 leaves it readable, any other failure leaves it absent and no
+  # `on-failure` here ends the run before anything tries to attach.
+  - name: verify_investigation
+    type: ai.conversation.metadata.read
+    with:
+      conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
+
+  # Always-on journal. `trigger_mode: never` (elastic/kibana#290223) persists a
+  # user_message without waking the Investigation agent. A user round or
+  # `ai.agent` against this conversation still would. A failed note must not
+  # fail the review.
+  - name: journal_review_started
+    type: workflow.execute
+    with:
+      workflow-id: "{{ consts.journal_note }}"
+      inputs:
+        conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
+        message: >-
+          Review started for "{{ inputs.title }}".
+          {{ inputs.alert_ids | default: consts.no_alert_ids | size }} correlated detection alert(s).
+          Autonomy: {{ inputs.autonomy | default: consts.default_autonomy }}.
+          Parent run: {{ inputs.parent_run_id }}.
+          This execution: {{ execution.id }}.
+    on-failure:
+      continue: true
+
+  # Evidence goes on as attachments. Chat messages that run the agent are still
+  # avoided; journal notes above use `trigger_mode: never` so they do not.
+  #
+  # Fixed attachment ids so a retry against the same conversation 409s rather than
+  # appending a second copy; `on-failure: continue` keeps the first snapshot. They
+  # do not replace — `ai.attachment.add` is create-or-409, not upsert. Now that the
+  # Investigation id is derived from the attack, a re-review lands on the SAME
+  # conversation, so those 409s are what keep the first review's evidence intact.
+  # Every add continues on failure — losing one piece of evidence is not a reason to
+  # abandon the review that produced it.
+
+  # By reference: `origin` is the persisted document id, and the attachment type
+  # resolves the discovery out of the ad-hoc index once, at add time.
+  - name: attach_discovery
+    type: ai.attachment.add
+    with:
+      conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
+      id: attack-discovery
+      type: security.attack_discovery
+      origin: "{{ inputs.attack_discovery_id }}"
+      description: The Attack Discovery under review
+      render_inline: true
+    on-failure:
+      continue: true
+
+  # By value: the ids of the DETECTION alerts the discovery correlated. The
+  # attachment type reads them from the alerts index at add time.
+  #
+  # Batched, because `security.alerts` caps `alertIds` at ALERTS_BATCH_MAX_SIZE
+  # (20) and an attack that correlates more than that is the normal case, not the
+  # edge one. One oversized attachment fails validation outright, and since the
+  # add continues on failure that loses the alert evidence ENTIRELY rather than
+  # truncating it. Chunking is what `security_solution`'s own callers do.
+  #
+  # The index suffix keeps each batch's id stable, so a retry against the SAME
+  # conversation 409s on the existing batch rather than appending a second copy.
+  # A discovery that correlates fewer alerts the second time leaves its surplus
+  # batches behind; that is preferable to non-deterministic ids. Replacement is
+  # kibana-q0t5: add is create-or-409, not upsert.
+  - name: attach_alerts
+    type: foreach
+    foreach: "{{ inputs.alert_ids | default: consts.no_alert_ids | chunk: consts.alerts_per_attachment }}"
+    steps:
+      - name: attach_alert_batch
+        type: ai.attachment.add
+        with:
+          conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
+          id: "correlated-alerts-{{ foreach.index }}"
+          type: security.alerts
+          data:
+            alertIds: "${{ foreach.item }}"
+          description: >-
+            Detection alerts correlated by this Attack Discovery
+            (batch {{ foreach.index | plus: 1 }} of {{ foreach.total }})
+        on-failure:
+          continue: true
+
+  # The hard stop the attaches above cannot provide on their own. Their 409 on a
+  # re-review is the EXPECTED outcome, so they have to continue — which also swallows a
+  # genuine failure, and a review that attached nothing would still journal that it
+  # attached evidence and then publish a verdict about evidence that is not there.
+  #
+  # Reading the discovery back separates the two, exactly as `verify_investigation`
+  # does for the create: a 409 leaves the attachment readable, any other failure leaves
+  # it absent. No `on-failure`, so absent ends the run here.
+  #
+  # Only the discovery is required. The alert batches stay best-effort for the reason
+  # the attaches give: losing one batch of correlated alert ids is not a reason to
+  # abandon the review, and the discovery already carries the full `alert_ids` set.
+  - name: verify_evidence
+    type: ai.attachment.read
+    with:
+      conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
+      attachment_id: attack-discovery
+
+  # Says what is VERIFIED and what was only attempted. The discovery is guaranteed by
+  # `verify_evidence` above; an individual alert batch can have failed its add and
+  # continued, so claiming the count outright would put a claim in the journal that
+  # nothing checked.
+  - name: journal_evidence_attached
+    type: workflow.execute
+    with:
+      workflow-id: "{{ consts.journal_note }}"
+      inputs:
+        conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
+        message: >-
+          Attached the Attack Discovery. Attempted attachment of
+          {{ inputs.alert_ids | default: consts.no_alert_ids | size }} correlated detection
+          alert(s); see the attachment list for the batches that landed.
+    on-failure:
+      continue: true
+
+  - name: journal_analysis_started
+    type: workflow.execute
+    with:
+      workflow-id: "{{ consts.journal_note }}"
+      inputs:
+        conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
+        message: Starting FP/TP analysis (stub until #19211).
+    on-failure:
+      continue: true
+
+  # STUB — #19211 replaces this
+  # with the real AlertZero FP/TP analysis workflow, which generates a
+  # corroborating-evidence report and returns the verdict this workflow switches
+  # on. Its own built-in retries live in that workflow, not here.
+  #
+  # When it is replaced it must NOT analyze against the Investigation conversation:
+  # posting there wakes the agent. Use `ai.agent` with `create-conversation: true`
+  # against a separate backing conversation and attach the result here.
+  - name: run_fp_tp_analysis
+    type: console
+    with:
+      message: >-
+        STUB run_fp_tp_analysis (#19211): would run the AlertZero FP/TP analysis
+        workflow for "{{ inputs.title }}" and return a verdict.
+        Summary under review: {{ inputs.summary_markdown }}
+
+  # The verdict and its narrative, as their own attachment rather than folded into
+  # the evidence above: written after the analysis so it reflects the result, and
+  # separate so an analyst can see the conclusion apart from what it was drawn from.
+  #
+  # A domain type, like the two evidence attachments above, so the verdict stays an
+  # enum a reader can branch on. The markdown an analyst sees is rendered by the type
+  # from these fields rather than assembled here. `rationale_markdown` is omitted
+  # until #19211 produces one; the type already accepts it.
+  - name: attach_verdict
+    type: ai.attachment.add
+    with:
+      conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
+      id: analysis-verdict
+      type: security.attack_discovery.verdict
+      data:
+        summary_markdown: "{{ inputs.summary_markdown }}"
+        verdict: "{{ inputs.stub_verdict | default: consts.default_verdict }}"
+      description: FP/TP analysis verdict and summary
+      # Same as the discovery above: the conclusion is what an analyst opens the
+      # Investigation to read, so it renders on open rather than waiting for the agent
+      # to reference it — which on this path never happens, because nothing wakes it.
+      render_inline: true
+    on-failure:
+      continue: true
+
+  - name: journal_analysis_finished
+    type: workflow.execute
+    with:
+      workflow-id: "{{ consts.journal_note }}"
+      inputs:
+        conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
+        message: >-
+          Analysis finished:
+          {{ inputs.stub_verdict | default: consts.default_verdict }}.
+    on-failure:
+      continue: true
+
+  - name: apply_verdict
+    type: switch
+    expression: "{{ inputs.stub_verdict | default: consts.default_verdict }}"
+    cases:
+      - match: false_positive
+        steps:
+          - name: close_as_false_positive
+            type: console
+            with:
+              message: >-
+                STUB false_positive (#19214): would close the Investigation for
+                "{{ inputs.title }}" and mark the Attack Discovery as false_positive.
+      - match: true_positive
+        steps:
+          # The workflow's Incident promotion decision. Under `manual` autonomy
+          # this becomes an analyst gate that can accept (promote) or reject
+          # (close); under the other levels it promotes without a gate. Both routes
+          # are one console line here.
+          - name: promote_per_autonomy
+            type: console
+            with:
+              message: >-
+                STUB true_positive (#19214): autonomy is
+                {{ inputs.autonomy | default: consts.default_autonomy }}, so this would
+                {% assign autonomy = inputs.autonomy | default: consts.default_autonomy %}
+                {% if autonomy == 'manual' %}present an
+                analyst gate that promotes the Investigation for "{{ inputs.title }}"
+                to an Incident on accept and closes it on reject{% else %}promote the
+                Investigation for "{{ inputs.title }}" to an Incident with no
+                gate{% endif %}.
+      - match: inconclusive
+        steps:
+          # Same Promote-to-Incident HITL as true_positive
+          - name: promote_inconclusive_per_autonomy
+            type: console
+            with:
+              message: >-
+                STUB inconclusive (#19214): would take the same Promote-to-Incident
+                path as true_positive. Autonomy is
+                {{ inputs.autonomy | default: consts.default_autonomy }}, so this would
+                {% assign autonomy = inputs.autonomy | default: consts.default_autonomy %}
+                {% if autonomy == 'manual' %}present an
+                analyst gate that promotes the Investigation for "{{ inputs.title }}"
+                to an Incident on accept and closes it on reject{% else %}promote the
+                Investigation for "{{ inputs.title }}" to an Incident with no
+                gate{% endif %}. Not handed to Forensics.
+      - match: failed
+        steps:
+          - name: record_analysis_failure
+            type: console
+            with:
+              message: >-
+                STUB failed (#19214): would record the failed verdict and its error
+                explanation on the Investigation for "{{ inputs.title }}" and leave
+                it open. No additional HITL gate.
+    default:
+      # Unreachable through the four cases above; only a verdict outside the enum
+      # lands here. Reported rather than ignored so a contract drift after #19211
+      # is visible instead of silent.
+      - name: report_unknown_verdict
+        type: console
+        with:
+          message: >-
+            Attack Discovery review for "{{ inputs.title }}" received an unexpected
+            verdict "{{ inputs.stub_verdict | default: consts.default_verdict }}" and took no action.
+
+  # The worker reads this payload back per branch, so the contract has to be
+  # explicit: `workflow.execute` resolves to the child's `context.output`, and a
+  # child without a `workflow.output` step hands its parent nothing.
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      title: "{{ inputs.title }}"
+      verdict: "{{ inputs.stub_verdict | default: consts.default_verdict }}"
+      attack_discovery_id: "{{ inputs.attack_discovery_id }}"
+      investigation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
+      # Sourced from the guard, not from the create: the create continues past the
+      # 409 a re-review raises, so its output is empty on exactly the runs where the
+      # Investigation does exist. `verify_investigation` has no `on-failure`, so
+      # reaching this step at all means the read succeeded.
+      investigation_opened: "${{ steps.verify_investigation.output.metadata != null }}"
