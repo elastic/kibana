@@ -154,7 +154,7 @@ export interface CheckUploadPackageAssetPrivilegesOptions {
   request: KibanaRequest;
   archiveSignals: ArchiveSignals;
   spaceId: string;
-  pkgName: string | undefined;
+  pkgName: string;
   installation: SavedObject<Installation> | undefined;
   savedObjectsClient: SavedObjectsClientContract;
 }
@@ -174,12 +174,18 @@ export async function checkUploadPackageAssetPrivileges({
     installation?.attributes?.installed_kibana_space_id ?? DEFAULT_SPACE_ID;
   const isAdditionalSpaceInstall = !!installation && effectivePrimarySpace !== spaceId;
 
+  // Streaming packages persist all Kibana asset refs in installed_kibana regardless of which
+  // Space triggered the install (saveKibanaAssetsRefs is called without saveAsAdditionnalSpace).
+  // cleanUpUnusedKibanaAssetsStep reads installed_kibana unconditionally for the same reason.
+  // Mirror that here so the preflight sees the same ref set as cleanup — otherwise a benign
+  // upload in an additional Space would find additional_spaces_installed_kibana[spaceId] empty,
+  // skip the privilege check, and let cleanup delete gated assets via the internal client.
+  const isStreamingPackage = PACKAGES_TO_INSTALL_WITH_STREAMING.includes(pkgName);
+
   // Streaming packages write only to the request Space regardless of primary/additional logic.
   // Mirror that here so we only check privileges for the Spaces that will actually be written.
   let destinationSpaces: string[];
-  if (pkgName && PACKAGES_TO_INSTALL_WITH_STREAMING.includes(pkgName)) {
-    destinationSpaces = [spaceId];
-  } else if (isAdditionalSpaceInstall) {
+  if (isStreamingPackage || isAdditionalSpaceInstall) {
     destinationSpaces = [spaceId];
   } else {
     destinationSpaces = [
@@ -189,15 +195,6 @@ export async function checkUploadPackageAssetPrivileges({
       ]),
     ];
   }
-
-  // Streaming packages persist all Kibana asset refs in installed_kibana regardless of which
-  // Space triggered the install (saveKibanaAssetsRefs is called without saveAsAdditionnalSpace).
-  // cleanUpUnusedKibanaAssetsStep reads installed_kibana unconditionally for the same reason.
-  // Mirror that here so the preflight sees the same ref set as cleanup — otherwise a benign
-  // upload in an additional Space would find additional_spaces_installed_kibana[spaceId] empty,
-  // skip the privilege check, and let cleanup delete gated assets via the internal client.
-  const isStreamingPackage =
-    pkgName != null && PACKAGES_TO_INSTALL_WITH_STREAMING.includes(pkgName);
 
   // Build per-Space data: gated asset types (archive types union existing ref types) and whether
   // any existing security rule in this Space is ML type (requires ml:canCreateJob).
