@@ -14,6 +14,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
+import { DeveloperToolbar } from '@kbn/developer-toolbar';
 import { i18n } from '@kbn/i18n';
 
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -38,6 +39,8 @@ import {
   AddDataService,
   WelcomeService,
 } from './services';
+
+void DeveloperToolbar;
 
 export interface HomePluginStartDependencies {
   dataViews: DataViewsPublicPluginStart;
