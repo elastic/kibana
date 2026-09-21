@@ -105,4 +105,10 @@ describe('TransactionDetailFlyout', () => {
       screen.queryByTestId('transactionDetailFlyoutStaleFiltersCallout')
     ).not.toBeInTheDocument();
   });
+
+  it('shows a spinner next to the title while filters are pending', () => {
+    render(<TransactionDetailFlyout {...BASE_PROPS} isFiltersPending />);
+
+    expect(screen.getByTestId('transactionDetailFlyoutFiltersPendingSpinner')).toBeInTheDocument();
+  });
 });

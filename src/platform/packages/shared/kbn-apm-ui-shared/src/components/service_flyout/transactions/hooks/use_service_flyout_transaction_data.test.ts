@@ -296,6 +296,8 @@ describe('useServiceFlyoutTransactionData', () => {
       expect(mainCallsAfter).toBe(mainCallsBefore);
       expect(result.current.items).toHaveLength(1);
       expect(result.current.items[0].name).toBe('POST /api/checkout');
+      expect(result.current.presenceItems).toHaveLength(2);
+      expect(result.current.isServerSearch).toBe(false);
     });
 
     it('re-fetches server-side when searchQuery changes and maxCountExceeded is true', async () => {
@@ -729,6 +731,26 @@ describe('useServiceFlyoutTransactionData', () => {
       );
 
       await waitFor(() => expect(result.current.error).toBe(fetchError));
+    });
+
+    it('exposes a main statistics failure separately from a successful settle', async () => {
+      const fetchError = new Error('main stats failed');
+      const http = {
+        get: jest.fn().mockImplementation((url: string) => {
+          if (url.includes('main_statistics')) {
+            return Promise.reject(fetchError);
+          }
+          return Promise.resolve(EMPTY_DETAILED_RESPONSE);
+        }),
+      } as unknown as HttpStart;
+
+      const { result } = renderHook(() =>
+        useServiceFlyoutTransactionData({ http, ...BASE_PARAMS })
+      );
+
+      await waitFor(() => expect(result.current.mainError).toBe(fetchError));
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current.error).toBeUndefined();
     });
 
     it('fires a danger toast when the data source fetch fails', async () => {

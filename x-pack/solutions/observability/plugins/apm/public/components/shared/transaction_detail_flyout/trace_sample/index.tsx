@@ -21,7 +21,6 @@ import {
 } from '@kbn/apm-ui-shared';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useTimeRange } from '../../../../hooks/use_time_range';
 import { isFailure, isPending, isSuccess } from '../../../../hooks/use_fetcher';
 import { useUnifiedWaterfallFetcher } from '../../../app/transaction_details/use_unified_waterfall_fetcher';
 import { MaybeViewTraceLink } from '../../../app/transaction_details/waterfall_with_summary/maybe_view_trace_link';
@@ -32,8 +31,7 @@ import { useTransactionDetailFlyoutTraceSamplesFetcher } from './use_transaction
 
 export function TransactionDetailFlyoutTraceSample() {
   const { filters, openFullTraceFlyout } = useTransactionDetailFlyoutContext();
-  const { serviceName, rangeFrom, rangeTo } = filters;
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  const { serviceName, start, end } = filters;
 
   const traceSamplesFetchResult = useTransactionDetailFlyoutTraceSamplesFetcher(filters);
   const traceSamples = traceSamplesFetchResult.data?.traceSamples;

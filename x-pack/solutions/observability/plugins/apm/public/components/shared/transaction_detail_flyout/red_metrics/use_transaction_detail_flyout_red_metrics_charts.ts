@@ -13,7 +13,6 @@ import type { LatencyAggregationType } from '../../../../../common/latency_aggre
 import { getLatencyChartSelector } from '../../../../selectors/latency_chart_selectors';
 import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
-import { useTimeRange } from '../../../../hooks/use_time_range';
 import { ChartType, getTimeSeriesColor } from '../../charts/helper/get_timeseries_color';
 import type { TransactionDetailFlyoutFilters } from '../types';
 
@@ -40,14 +39,13 @@ export function useTransactionDetailFlyoutRedMetricsCharts({
   transactionName,
   transactionType,
   environment,
-  rangeFrom,
-  rangeTo,
+  start,
+  end,
   latencyAggregationType,
 }: TransactionDetailFlyoutFilters & {
   latencyAggregationType: LatencyAggregationType;
 }) {
   const kuery = '';
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const preferred = usePreferredDataSourceAndBucketSize({
     start,

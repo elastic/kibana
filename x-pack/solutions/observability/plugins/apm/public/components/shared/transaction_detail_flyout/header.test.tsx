@@ -15,10 +15,14 @@ jest.mock('./hooks/use_transaction_detail_flyout_links', () => ({
   useTransactionDetailFlyoutLinks: () => mockUseTransactionDetailFlyoutLinks(),
 }));
 
-function renderHeader() {
+function renderHeader(isFiltersPending = false) {
   return render(
     <IntlProvider locale="en">
-      <TransactionDetailFlyoutHeader transactionName="GET /api/orders" titleId="title-id" />
+      <TransactionDetailFlyoutHeader
+        transactionName="GET /api/orders"
+        titleId="title-id"
+        isFiltersPending={isFiltersPending}
+      />
     </IntlProvider>
   );
 }
@@ -53,5 +57,17 @@ describe('TransactionDetailFlyoutHeader', () => {
 
     expect(screen.getByTestId('transactionDetailFlyoutTitle')).toHaveTextContent('GET /api/orders');
     expect(screen.queryByTestId('transactionDetailFlyoutTitleLink')).not.toBeInTheDocument();
+  });
+
+  it('shows a spinner next to the title while filters are pending', () => {
+    mockUseTransactionDetailFlyoutLinks.mockReturnValue({
+      loading: false,
+      apm: { transactionDetailsHref: undefined },
+      discover: { href: undefined, openInDiscoverTab: undefined },
+    });
+
+    renderHeader(true);
+
+    expect(screen.getByTestId('transactionDetailFlyoutFiltersPendingSpinner')).toBeInTheDocument();
   });
 });

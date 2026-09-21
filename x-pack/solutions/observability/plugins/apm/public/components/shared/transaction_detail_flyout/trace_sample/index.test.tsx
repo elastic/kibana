@@ -15,9 +15,6 @@ import { useTransactionDetailFlyoutTraceSamplesFetcher } from './use_transaction
 
 jest.mock('../transaction_detail_flyout_context');
 jest.mock('./use_transaction_detail_flyout_trace_samples_fetcher');
-jest.mock('../../../../hooks/use_time_range', () => ({
-  useTimeRange: () => ({ start: '2026-08-20T10:00:00.000Z', end: '2026-08-21T10:43:35.610Z' }),
-}));
 jest.mock('../../../app/transaction_details/use_unified_waterfall_fetcher', () => ({
   useUnifiedWaterfallFetcher: jest.fn(),
 }));

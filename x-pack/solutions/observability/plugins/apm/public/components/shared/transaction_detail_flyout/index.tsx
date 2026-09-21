@@ -46,6 +46,8 @@ export function TransactionDetailFlyout({
   onClose,
   historyKey = TRANSACTION_DETAIL_FLYOUT_HISTORY_KEY,
   isFiltersStale = false,
+  isFiltersPending = false,
+  refreshToken = 0,
   preferDocumentBasedCharts,
   schema,
   indices,
@@ -63,12 +65,22 @@ export function TransactionDetailFlyout({
       deps,
       contextActions,
       filters,
+      refreshToken,
       preferDocumentBasedCharts,
       schema,
       indices,
       openFullTraceFlyout,
     }),
-    [deps, contextActions, filters, preferDocumentBasedCharts, schema, indices, openFullTraceFlyout]
+    [
+      deps,
+      contextActions,
+      filters,
+      refreshToken,
+      preferDocumentBasedCharts,
+      schema,
+      indices,
+      openFullTraceFlyout,
+    ]
   );
 
   if (!isOpen) {
@@ -89,7 +101,11 @@ export function TransactionDetailFlyout({
         flyoutMenuProps={{ title: transactionName }}
         aria-labelledby={titleId}
       >
-        <TransactionDetailFlyoutHeader transactionName={transactionName} titleId={titleId} />
+        <TransactionDetailFlyoutHeader
+          transactionName={transactionName}
+          titleId={titleId}
+          isFiltersPending={isFiltersPending}
+        />
         <EuiFlyoutBody>
           {isFiltersStale ? (
             <>

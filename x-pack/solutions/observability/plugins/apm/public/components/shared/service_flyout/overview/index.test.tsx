@@ -157,6 +157,34 @@ function renderOverview({
   );
 }
 
+const PRODUCTION_LIST_FILTERS = {
+  environment: 'production',
+  start: '2026-09-11T00:00:00.000Z',
+  end: '2026-09-18T15:20:34.096Z',
+  transactionType: 'request',
+};
+
+const STAGING_LIST_FILTERS = {
+  environment: 'staging',
+  start: '2026-09-18T14:20:34.096Z',
+  end: '2026-09-18T15:15:34.096Z',
+  transactionType: 'request',
+};
+
+const MOBILE_LIST_FILTERS = {
+  ...PRODUCTION_LIST_FILTERS,
+  transactionType: 'mobile',
+};
+
+function listMeta(
+  isLoading: boolean,
+  filters: typeof PRODUCTION_LIST_FILTERS,
+  error?: Error,
+  isSearchFiltered = false
+) {
+  return { isLoading, error, filters, isSearchFiltered };
+}
+
 beforeEach(() => {
   jest.clearAllMocks();
   mockUseProjectRouting.mockReturnValue(undefined);
@@ -386,11 +414,25 @@ describe('ServiceFlyoutOverview transactions section props', () => {
     expect(transactionsSectionProps?.end).not.toBe('now');
   });
 
-  it('forwards refreshToken to ServiceFlyoutTransactionsSection', () => {
+  it('forwards refreshToken to the transactions table and the nested transaction flyout', () => {
     mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
     renderOverview({ refreshToken: 42 });
 
     expect(transactionsSectionProps?.refreshToken).toBe(42);
+
+    act(() => {
+      transactionsSectionProps!.onTransactionClick!({
+        name: 'GET /api/orders',
+        transactionType: 'request',
+        latency: { value: 1 },
+        throughput: { value: 1 },
+        errorRate: { value: 0 },
+      });
+    });
+
+    expect(mockTransactionDetailFlyoutProps).toHaveBeenLastCalledWith(
+      expect.objectContaining({ refreshToken: 42 })
+    );
   });
 
   it('opens TransactionDetailFlyout when a transaction name is clicked', () => {
@@ -539,16 +581,17 @@ describe('ServiceFlyoutOverview transactions section props', () => {
       </IntlProvider>
     );
 
-    // Surviving selections sync live filters immediately (do not wait for the table).
+    // Surviving selections stay on the confirmed snapshot until the list settles.
     expect(mockTransactionDetailFlyoutProps).toHaveBeenLastCalledWith(
       expect.objectContaining({
         isFiltersStale: false,
+        isFiltersPending: true,
         filters: expect.objectContaining({
-          environment: 'staging',
-          rangeFrom: 'now-1h',
-          rangeTo: 'now-5m',
-          start: '2026-09-18T14:20:34.096Z',
-          end: '2026-09-18T15:15:34.096Z',
+          environment: 'production',
+          rangeFrom: 'now-15m',
+          rangeTo: 'now',
+          start: '2026-09-11T00:00:00.000Z',
+          end: '2026-09-18T15:20:34.096Z',
         }),
       })
     );
@@ -565,7 +608,7 @@ describe('ServiceFlyoutOverview transactions section props', () => {
             errorRate: { value: 0 },
           },
         ],
-        { isLoading: false }
+        listMeta(false, STAGING_LIST_FILTERS)
       );
     });
 
@@ -580,7 +623,7 @@ describe('ServiceFlyoutOverview transactions section props', () => {
             errorRate: { value: 0 },
           },
         ],
-        { isLoading: true }
+        listMeta(true, STAGING_LIST_FILTERS)
       );
     });
 
@@ -595,13 +638,14 @@ describe('ServiceFlyoutOverview transactions section props', () => {
             errorRate: { value: 0 },
           },
         ],
-        { isLoading: false }
+        listMeta(false, STAGING_LIST_FILTERS)
       );
     });
 
     expect(mockTransactionDetailFlyoutProps).toHaveBeenLastCalledWith(
       expect.objectContaining({
         isFiltersStale: false,
+        isFiltersPending: false,
         filters: expect.objectContaining({
           transactionName: 'GET /api/orders',
           transactionType: 'request',
@@ -646,7 +690,7 @@ describe('ServiceFlyoutOverview transactions section props', () => {
       </IntlProvider>
     );
 
-    // Optimistic live sync first; freeze back to the confirmed snapshot after the list settles empty.
+    // Stay on the confirmed snapshot until the list settles; then freeze if missing.
     act(() => {
       transactionsSectionProps!.onTransactionsChange!(
         [
@@ -658,12 +702,25 @@ describe('ServiceFlyoutOverview transactions section props', () => {
             errorRate: { value: 0 },
           },
         ],
-        { isLoading: false }
+        listMeta(false, STAGING_LIST_FILTERS)
       );
     });
 
+    expect(mockTransactionDetailFlyoutProps).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        isFiltersStale: false,
+        filters: expect.objectContaining({
+          environment: 'production',
+          rangeFrom: 'now-15m',
+          rangeTo: 'now',
+          start: '2026-09-11T00:00:00.000Z',
+          end: '2026-09-18T15:20:34.096Z',
+        }),
+      })
+    );
+
     act(() => {
-      transactionsSectionProps!.onTransactionsChange!([], { isLoading: true });
+      transactionsSectionProps!.onTransactionsChange!([], listMeta(true, STAGING_LIST_FILTERS));
     });
 
     act(() => {
@@ -677,7 +734,7 @@ describe('ServiceFlyoutOverview transactions section props', () => {
             errorRate: { value: 0 },
           },
         ],
-        { isLoading: false }
+        listMeta(false, STAGING_LIST_FILTERS)
       );
     });
 
@@ -734,7 +791,7 @@ describe('ServiceFlyoutOverview transactions section props', () => {
             errorRate: { value: 0 },
           },
         ],
-        { isLoading: false }
+        listMeta(false, MOBILE_LIST_FILTERS)
       );
     });
 
@@ -745,7 +802,7 @@ describe('ServiceFlyoutOverview transactions section props', () => {
     );
 
     act(() => {
-      transactionsSectionProps!.onTransactionsChange!([], { isLoading: true });
+      transactionsSectionProps!.onTransactionsChange!([], listMeta(true, MOBILE_LIST_FILTERS));
     });
 
     act(() => {
@@ -759,7 +816,7 @@ describe('ServiceFlyoutOverview transactions section props', () => {
             errorRate: { value: 0 },
           },
         ],
-        { isLoading: false }
+        listMeta(false, MOBILE_LIST_FILTERS)
       );
     });
 
@@ -772,6 +829,477 @@ describe('ServiceFlyoutOverview transactions section props', () => {
           environment: 'production',
           rangeFrom: 'now-15m',
           rangeTo: 'now',
+        }),
+      })
+    );
+  });
+
+  it('does not freeze when typing in the transactions search hides the selection', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    renderOverview();
+
+    act(() => {
+      transactionsSectionProps!.onTransactionClick!({
+        name: 'GET /api/orders',
+        transactionType: 'request',
+        latency: { value: 1 },
+        throughput: { value: 1 },
+        errorRate: { value: 0 },
+      });
+    });
+
+    // Server-side search omits the selected row under the same parent filters.
+    act(() => {
+      transactionsSectionProps!.onTransactionsChange!(
+        [
+          {
+            name: 'POST /api/other',
+            transactionType: 'request',
+            latency: { value: 1 },
+            throughput: { value: 1 },
+            errorRate: { value: 0 },
+          },
+        ],
+        listMeta(false, PRODUCTION_LIST_FILTERS, undefined, true)
+      );
+    });
+
+    expect(mockTransactionDetailFlyoutProps).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        isFiltersStale: false,
+        filters: expect.objectContaining({
+          transactionName: 'GET /api/orders',
+          environment: 'production',
+          start: '2026-09-11T00:00:00.000Z',
+          end: '2026-09-18T15:20:34.096Z',
+        }),
+      })
+    );
+  });
+
+  it('does not freeze when search is active and a filter change still includes the selection', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    const { rerender } = renderOverview();
+
+    act(() => {
+      transactionsSectionProps!.onTransactionClick!({
+        name: 'GET /api/orders',
+        transactionType: 'request',
+        latency: { value: 1 },
+        throughput: { value: 1 },
+        errorRate: { value: 0 },
+      });
+    });
+
+    // Search hides the selection under the current filters.
+    act(() => {
+      transactionsSectionProps!.onTransactionsChange!(
+        [
+          {
+            name: 'POST /api/other',
+            transactionType: 'request',
+            latency: { value: 1 },
+            throughput: { value: 1 },
+            errorRate: { value: 0 },
+          },
+        ],
+        listMeta(false, PRODUCTION_LIST_FILTERS, undefined, true)
+      );
+    });
+
+    mockUseServiceFlyoutContext.mockReturnValue(
+      buildContextValue({
+        filters: {
+          environment: 'staging',
+          rangeFrom: 'now-1h',
+          rangeTo: 'now-5m',
+          start: '2026-09-18T14:20:34.096Z',
+          end: '2026-09-18T15:15:34.096Z',
+        },
+      })
+    );
+    rerender(
+      <IntlProvider locale="en">
+        <ServiceFlyoutOverview />
+      </IntlProvider>
+    );
+
+    act(() => {
+      transactionsSectionProps!.onTransactionsChange!([], listMeta(true, STAGING_LIST_FILTERS));
+    });
+
+    // Search-filtered settle under the new filters must not freeze.
+    act(() => {
+      transactionsSectionProps!.onTransactionsChange!(
+        [
+          {
+            name: 'POST /api/other',
+            transactionType: 'request',
+            latency: { value: 1 },
+            throughput: { value: 1 },
+            errorRate: { value: 0 },
+          },
+        ],
+        listMeta(false, STAGING_LIST_FILTERS, undefined, true)
+      );
+    });
+
+    expect(mockTransactionDetailFlyoutProps).toHaveBeenLastCalledWith(
+      expect.objectContaining({ isFiltersStale: false })
+    );
+
+    // Unsearched settle with the selection present confirms live filters.
+    act(() => {
+      transactionsSectionProps!.onTransactionsChange!(
+        [
+          {
+            name: 'GET /api/orders',
+            transactionType: 'request',
+            latency: { value: 1 },
+            throughput: { value: 1 },
+            errorRate: { value: 0 },
+          },
+        ],
+        listMeta(false, STAGING_LIST_FILTERS)
+      );
+    });
+
+    expect(mockTransactionDetailFlyoutProps).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        isFiltersStale: false,
+        filters: expect.objectContaining({
+          environment: 'staging',
+          start: '2026-09-18T14:20:34.096Z',
+          end: '2026-09-18T15:15:34.096Z',
+        }),
+      })
+    );
+  });
+
+  it('clears the stale callout and syncs live filters when the selection reappears', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    const { rerender } = renderOverview();
+
+    act(() => {
+      transactionsSectionProps!.onTransactionClick!({
+        name: 'GET /api/orders',
+        transactionType: 'request',
+        latency: { value: 1 },
+        throughput: { value: 1 },
+        errorRate: { value: 0 },
+      });
+    });
+
+    mockUseServiceFlyoutContext.mockReturnValue(
+      buildContextValue({
+        filters: {
+          environment: 'staging',
+          rangeFrom: 'now-1h',
+          rangeTo: 'now-5m',
+          start: '2026-09-18T14:20:34.096Z',
+          end: '2026-09-18T15:15:34.096Z',
+        },
+      })
+    );
+    rerender(
+      <IntlProvider locale="en">
+        <ServiceFlyoutOverview />
+      </IntlProvider>
+    );
+
+    act(() => {
+      transactionsSectionProps!.onTransactionsChange!([], listMeta(true, STAGING_LIST_FILTERS));
+    });
+    act(() => {
+      transactionsSectionProps!.onTransactionsChange!(
+        [
+          {
+            name: 'POST /api/other',
+            transactionType: 'request',
+            latency: { value: 1 },
+            throughput: { value: 1 },
+            errorRate: { value: 0 },
+          },
+        ],
+        listMeta(false, STAGING_LIST_FILTERS)
+      );
+    });
+
+    expect(mockTransactionDetailFlyoutProps).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        isFiltersStale: true,
+        filters: expect.objectContaining({
+          environment: 'production',
+          start: '2026-09-11T00:00:00.000Z',
+          end: '2026-09-18T15:20:34.096Z',
+        }),
+      })
+    );
+
+    // Selection comes back under the live filters — clear stale and sync.
+    act(() => {
+      transactionsSectionProps!.onTransactionsChange!(
+        [
+          {
+            name: 'GET /api/orders',
+            transactionType: 'request',
+            latency: { value: 1 },
+            throughput: { value: 1 },
+            errorRate: { value: 0 },
+          },
+        ],
+        listMeta(false, STAGING_LIST_FILTERS)
+      );
+    });
+
+    expect(mockTransactionDetailFlyoutProps).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        isFiltersStale: false,
+        filters: expect.objectContaining({
+          transactionName: 'GET /api/orders',
+          environment: 'staging',
+          rangeFrom: 'now-1h',
+          rangeTo: 'now-5m',
+          start: '2026-09-18T14:20:34.096Z',
+          end: '2026-09-18T15:15:34.096Z',
+        }),
+      })
+    );
+  });
+
+  it('does not confirm or mark stale when the transactions request fails', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    const { rerender } = renderOverview();
+
+    act(() => {
+      transactionsSectionProps!.onTransactionClick!({
+        name: 'GET /api/orders',
+        transactionType: 'request',
+        latency: { value: 1 },
+        throughput: { value: 1 },
+        errorRate: { value: 0 },
+      });
+    });
+
+    mockUseServiceFlyoutContext.mockReturnValue(
+      buildContextValue({
+        filters: {
+          environment: 'staging',
+          rangeFrom: 'now-1h',
+          rangeTo: 'now-5m',
+          start: '2026-09-18T14:20:34.096Z',
+          end: '2026-09-18T15:15:34.096Z',
+        },
+      })
+    );
+    rerender(
+      <IntlProvider locale="en">
+        <ServiceFlyoutOverview />
+      </IntlProvider>
+    );
+
+    act(() => {
+      transactionsSectionProps!.onTransactionsChange!([], listMeta(true, STAGING_LIST_FILTERS));
+    });
+
+    // Retained rows from the failed request must not confirm the new filters or freeze.
+    act(() => {
+      transactionsSectionProps!.onTransactionsChange!(
+        [
+          {
+            name: 'GET /api/orders',
+            transactionType: 'request',
+            latency: { value: 1 },
+            throughput: { value: 1 },
+            errorRate: { value: 0 },
+          },
+        ],
+        listMeta(false, STAGING_LIST_FILTERS, new Error('main stats failed'))
+      );
+    });
+
+    expect(mockTransactionDetailFlyoutProps).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        isFiltersStale: false,
+      })
+    );
+
+    act(() => {
+      transactionsSectionProps!.onTransactionsChange!(
+        [
+          {
+            name: 'POST /api/other',
+            transactionType: 'request',
+            latency: { value: 1 },
+            throughput: { value: 1 },
+            errorRate: { value: 0 },
+          },
+        ],
+        listMeta(false, STAGING_LIST_FILTERS)
+      );
+    });
+
+    expect(mockTransactionDetailFlyoutProps).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        isFiltersStale: true,
+        filters: expect.objectContaining({
+          environment: 'production',
+          start: '2026-09-11T00:00:00.000Z',
+          end: '2026-09-18T15:20:34.096Z',
+        }),
+      })
+    );
+  });
+
+  it('does not confirm live filters from a click on the stale list after a filter change', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    const { rerender } = renderOverview();
+
+    act(() => {
+      transactionsSectionProps!.onTransactionClick!({
+        name: 'GET /api/orders',
+        transactionType: 'request',
+        latency: { value: 1 },
+        throughput: { value: 1 },
+        errorRate: { value: 0 },
+      });
+    });
+
+    mockUseServiceFlyoutContext.mockReturnValue(
+      buildContextValue({
+        filters: {
+          environment: 'staging',
+          rangeFrom: 'now-1h',
+          rangeTo: 'now-5m',
+          start: '2026-09-18T14:20:34.096Z',
+          end: '2026-09-18T15:15:34.096Z',
+        },
+      })
+    );
+    rerender(
+      <IntlProvider locale="en">
+        <ServiceFlyoutOverview />
+      </IntlProvider>
+    );
+
+    // Stale list still on screen (loading not seen yet). A click must not promote live
+    // filters to confirmedFilters — otherwise a missing settle never marks stale.
+    act(() => {
+      transactionsSectionProps!.onTransactionClick!({
+        name: 'POST /api/other',
+        transactionType: 'request',
+        latency: { value: 1 },
+        throughput: { value: 1 },
+        errorRate: { value: 0 },
+      });
+    });
+
+    expect(screen.getByTestId('transactionDetailFlyoutMock')).toHaveTextContent('GET /api/orders');
+
+    act(() => {
+      transactionsSectionProps!.onTransactionsChange!(
+        [
+          {
+            name: 'GET /api/orders',
+            transactionType: 'request',
+            latency: { value: 1 },
+            throughput: { value: 1 },
+            errorRate: { value: 0 },
+          },
+        ],
+        listMeta(false, STAGING_LIST_FILTERS)
+      );
+    });
+    act(() => {
+      transactionsSectionProps!.onTransactionsChange!([], listMeta(true, STAGING_LIST_FILTERS));
+    });
+    act(() => {
+      transactionsSectionProps!.onTransactionsChange!(
+        [
+          {
+            name: 'POST /api/other',
+            transactionType: 'request',
+            latency: { value: 1 },
+            throughput: { value: 1 },
+            errorRate: { value: 0 },
+          },
+        ],
+        listMeta(false, STAGING_LIST_FILTERS)
+      );
+    });
+
+    expect(mockTransactionDetailFlyoutProps).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        isFiltersStale: true,
+        filters: expect.objectContaining({
+          transactionName: 'GET /api/orders',
+          transactionType: 'request',
+          environment: 'production',
+          rangeFrom: 'now-15m',
+          rangeTo: 'now',
+          start: '2026-09-11T00:00:00.000Z',
+          end: '2026-09-18T15:20:34.096Z',
+        }),
+      })
+    );
+  });
+
+  it('freezes the nested transaction flyout when the transactions section becomes unavailable', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    const { rerender } = renderOverview();
+
+    act(() => {
+      transactionsSectionProps!.onTransactionClick!({
+        name: 'GET /api/orders',
+        transactionType: 'request',
+        latency: { value: 1 },
+        throughput: { value: 1 },
+        errorRate: { value: 0 },
+      });
+    });
+
+    expect(screen.getByTestId('transactionDetailFlyoutMock')).toBeInTheDocument();
+    expect(transactionsSectionProps).not.toBeNull();
+
+    // Filters change and capabilities resolve to OTel — transactions table unmounts.
+    mockUseServiceFlyoutContext.mockReturnValue({
+      ...buildContextValue({
+        filters: {
+          environment: 'staging',
+          rangeFrom: 'now-1h',
+          rangeTo: 'now-5m',
+          start: '2026-09-18T14:20:34.096Z',
+          end: '2026-09-18T15:15:34.096Z',
+        },
+        schema: 'otel',
+      }),
+      capabilities: {
+        loading: false,
+        error: undefined,
+        schema: 'otel' as const,
+        header: { serviceNameLink: false, badges: false },
+        overview: { transactions: false, transactionTypeFilter: false, infraMetrics: false },
+        footer: { alerts: false, slos: false },
+      },
+    });
+    rerender(
+      <IntlProvider locale="en">
+        <ServiceFlyoutOverview />
+      </IntlProvider>
+    );
+
+    expect(screen.queryByTestId('serviceFlyoutSection-transactions')).not.toBeInTheDocument();
+    expect(mockTransactionDetailFlyoutProps).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        isFiltersStale: true,
+        filters: expect.objectContaining({
+          transactionName: 'GET /api/orders',
+          transactionType: 'request',
+          environment: 'production',
+          rangeFrom: 'now-15m',
+          rangeTo: 'now',
+          start: '2026-09-11T00:00:00.000Z',
+          end: '2026-09-18T15:20:34.096Z',
         }),
       })
     );

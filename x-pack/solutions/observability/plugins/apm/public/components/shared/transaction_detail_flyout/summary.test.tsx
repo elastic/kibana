@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { TransactionDetailFlyoutSummary } from './summary';
 
@@ -36,12 +36,16 @@ function renderSummary() {
 
 describe('TransactionDetailFlyoutSummary', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
     mockUseTransactionDetailFlyoutContext.mockReturnValue({
       deps: {
         core: {
           uiSettings: {
-            get: () => 'MMM D, YYYY @ HH:mm:ss.SSS',
+            get: (key: string) => {
+              if (key === 'dateFormat:tz') {
+                return 'UTC';
+              }
+              return 'MMM D, YYYY @ HH:mm:ss.SSS';
+            },
           },
         },
       },
@@ -51,14 +55,12 @@ describe('TransactionDetailFlyoutSummary', () => {
 
   afterEach(() => {
     cleanup();
-    jest.useRealTimers();
   });
 
   it('renders environment, type, and a combined date range', () => {
     renderSummary();
 
     const summary = screen.getByTestId('transactionDetailFlyoutSummary');
-    expect(summary).toHaveAttribute('data-loading', 'false');
     expect(summary).not.toHaveTextContent('Transaction ID');
     expect(summary).not.toHaveTextContent('Transaction name');
     expect(summary).not.toHaveTextContent('Start date');
@@ -68,19 +70,46 @@ describe('TransactionDetailFlyoutSummary', () => {
     expect(summary).toHaveTextContent('Transaction type');
     expect(summary).toHaveTextContent('request');
     expect(summary).toHaveTextContent('Date range');
-    expect(summary).toHaveTextContent(
-      /Sep 18, 2026 @ \d{2}:22:22\.094 → Sep 18, 2026 @ \d{2}:37:22\.094/
+    expect(summary).toHaveTextContent('Sep 18, 2026 @ 15:22:22.094 → Sep 18, 2026 @ 15:37:22.094');
+  });
+
+  it('formats the date range with the configured Kibana timezone', () => {
+    mockUseTransactionDetailFlyoutContext.mockReturnValue({
+      deps: {
+        core: {
+          uiSettings: {
+            get: (key: string) => {
+              if (key === 'dateFormat:tz') {
+                return 'America/New_York';
+              }
+              return 'MMM D, YYYY @ HH:mm:ss.SSS';
+            },
+          },
+        },
+      },
+      filters: FILTERS,
+    });
+
+    renderSummary();
+
+    expect(screen.getByTestId('transactionDetailFlyoutSummary')).toHaveTextContent(
+      'Sep 18, 2026 @ 11:22:22.094 → Sep 18, 2026 @ 11:37:22.094'
     );
   });
 
-  it('shows a loading state when service flyout filters change', () => {
+  it('updates immediately when service flyout filters change', () => {
     const { rerender } = renderSummary();
 
     mockUseTransactionDetailFlyoutContext.mockReturnValue({
       deps: {
         core: {
           uiSettings: {
-            get: () => 'MMM D, YYYY @ HH:mm:ss.SSS',
+            get: (key: string) => {
+              if (key === 'dateFormat:tz') {
+                return 'UTC';
+              }
+              return 'MMM D, YYYY @ HH:mm:ss.SSS';
+            },
           },
         },
       },
@@ -100,22 +129,9 @@ describe('TransactionDetailFlyoutSummary', () => {
       </IntlProvider>
     );
 
-    expect(screen.getByTestId('transactionDetailFlyoutSummary')).toHaveAttribute(
-      'data-loading',
-      'true'
-    );
-
-    act(() => {
-      jest.advanceTimersByTime(400);
-    });
-
-    expect(screen.getByTestId('transactionDetailFlyoutSummary')).toHaveAttribute(
-      'data-loading',
-      'false'
-    );
     expect(screen.getByTestId('transactionDetailFlyoutSummary')).toHaveTextContent('staging');
     expect(screen.getByTestId('transactionDetailFlyoutSummary')).toHaveTextContent(
-      /Sep 18, 2026 @ \d{2}:37:22\.094/
+      'Sep 18, 2026 @ 14:37:22.094'
     );
   });
 });

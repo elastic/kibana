@@ -124,7 +124,11 @@ export function useServiceFlyoutTransactionData({
 
   const serverSearchQuery = maxCountExceeded ? searchQuery : '';
 
-  const { value: mainResponse, loading: isMainLoading } = useAbortableAsync(
+  const {
+    value: mainResponse,
+    loading: isMainLoading,
+    error: mainStatsError,
+  } = useAbortableAsync(
     async ({ signal }) => {
       if (!enabled || !dataSource) return undefined;
       const result = await http.get<MainStatisticsResponse>(
@@ -167,13 +171,8 @@ export function useServiceFlyoutTransactionData({
     ]
   );
 
-  const items: TransactionGroup[] = useMemo(() => {
-    const groups = mainResponse?.transactionGroups ?? [];
-    const filtered =
-      !mainResponse?.maxCountExceeded && searchQuery
-        ? groups.filter((g) => g.name.toLowerCase().includes(searchQuery.toLowerCase()))
-        : groups;
-    return filtered.map((group) => ({
+  const allItems: TransactionGroup[] = useMemo(() => {
+    return (mainResponse?.transactionGroups ?? []).map((group) => ({
       name: group.name,
       transactionType: group.transactionType,
       latency: { value: group.latency ?? null },
@@ -182,7 +181,15 @@ export function useServiceFlyoutTransactionData({
       alertsCount: group.alertsCount,
       impact: group.impact != null ? { value: group.impact } : undefined,
     }));
-  }, [mainResponse, searchQuery]);
+  }, [mainResponse]);
+
+  const items: TransactionGroup[] = useMemo(() => {
+    if (!mainResponse?.maxCountExceeded && searchQuery) {
+      const query = searchQuery.toLowerCase();
+      return allItems.filter((group) => group.name.toLowerCase().includes(query));
+    }
+    return allItems;
+  }, [allItems, mainResponse?.maxCountExceeded, searchQuery]);
 
   const transactionNames = useMemo(() => items.map(({ name }) => name), [items]);
 
@@ -282,5 +289,10 @@ export function useServiceFlyoutTransactionData({
     maxCountExceeded,
     hasActiveAlerts: mainResponse?.hasActiveAlerts ?? false,
     error: dataSourceError,
+    mainError: mainStatsError,
+    /** Full list before client-side search. Server search still narrows this list. */
+    presenceItems: allItems,
+    isServerSearch:
+      Boolean(searchQuery) && (maxCountExceeded || Boolean(mainResponse?.maxCountExceeded)),
   };
 }

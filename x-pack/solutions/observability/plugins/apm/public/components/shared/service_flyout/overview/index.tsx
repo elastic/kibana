@@ -17,7 +17,11 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ServiceFlyoutTransactionsSection, type TransactionGroup } from '@kbn/apm-ui-shared';
+import {
+  ServiceFlyoutTransactionsSection,
+  type TransactionGroup,
+  type TransactionsListChangeMeta,
+} from '@kbn/apm-ui-shared';
 import { i18n } from '@kbn/i18n';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -29,19 +33,16 @@ import { LatencyAggregationTypeSelect } from '../../charts/latency_chart/latency
 import { useServiceHasSystemMetrics } from '../hooks/use_service_has_system_metrics';
 import { useProjectRouting } from '../hooks/use_project_routing';
 import { TransactionDetailFlyout } from '../../transaction_detail_flyout';
+import type { TransactionDetailFlyoutFilters } from '../../transaction_detail_flyout/types';
 import { ServiceFlyoutApmCharts } from './apm_charts';
 import { getEsqlKeyMetricCharts, getInfrastructureMetricCharts } from './chart_configs';
 import { ServiceFlyoutLensChart } from './lens_chart';
 import { ServiceFlyoutQueryControls } from './query_controls';
 
-interface AppliedTransactionFilters {
-  environment: string;
-  rangeFrom: string;
-  rangeTo: string;
-  start: string;
-  end: string;
-  transactionType: string;
-}
+type AppliedTransactionFilters = Omit<
+  TransactionDetailFlyoutFilters,
+  'serviceName' | 'transactionName'
+>;
 
 /** Selection + applied filters for the nested flyout (frozen when selection is stale). */
 interface SelectedTransactionDetail {
@@ -294,22 +295,35 @@ export function ServiceFlyoutOverview() {
     prevLiveFiltersKeyRef.current = liveFiltersKey;
   }
 
-  // Push live filters to the child immediately so surviving selections update without
-  // waiting for the transactions table. If the selection is already stale, stay frozen.
+  // When the transactions section unmounts (e.g. filters resolve to OTel), freeze on the
+  // last confirmed snapshot — there is no list callback to settle against.
+  // Keep filters on the confirmed snapshot until the list settles; do not push live
+  // filters optimistically (that flashes an empty/wrong window on the missing path).
+  const transactionsAvailable = Boolean(capabilities.overview?.transactions);
+
   useEffect(() => {
+    if (transactionsAvailable) {
+      return;
+    }
     setSelectedTransaction((prev) => {
       if (!prev || prev.isFiltersStale) {
         return prev;
       }
-      if (isSameAppliedFilters(prev.filters, liveTransactionFilters)) {
-        return prev;
-      }
+      pendingFilterReconcileRef.current = false;
+      seenLoadingSincePendingRef.current = false;
       return {
         ...prev,
-        filters: liveTransactionFilters,
+        filters: prev.confirmedFilters,
+        isFiltersStale: true,
       };
     });
-  }, [liveTransactionFilters]);
+  }, [transactionsAvailable]);
+
+  const isFiltersPending = Boolean(
+    selectedTransaction &&
+      !selectedTransaction.isFiltersStale &&
+      !isSameAppliedFilters(selectedTransaction.filters, liveTransactionFilters)
+  );
 
   const onTransactionClick = useCallback(
     (item: TransactionGroup) => {
@@ -325,6 +339,12 @@ export function ServiceFlyoutOverview() {
           prev.transactionType === resolvedTransactionType
         ) {
           return null;
+        }
+        // After a parent filter change the table can still paint the previous items with
+        // isLoading: false. Confirming live filters from that click would clear the pending
+        // generation and prevent a later missing-item settle from marking the child stale.
+        if (pendingFilterReconcileRef.current) {
+          return prev;
         }
         pendingFilterReconcileRef.current = false;
         seenLoadingSincePendingRef.current = false;
@@ -342,16 +362,32 @@ export function ServiceFlyoutOverview() {
   );
 
   const onTransactionsChange = useCallback(
-    (items: TransactionGroup[], { isLoading }: { isLoading: boolean }) => {
+    (items: TransactionGroup[], meta: TransactionsListChangeMeta) => {
       setSelectedTransaction((prev) => {
-        if (!prev) {
+        if (!prev || meta.error) {
           return prev;
         }
 
-        if (isLoading) {
+        const reportedFiltersMatch =
+          meta.filters.environment === liveTransactionFilters.environment &&
+          meta.filters.start === liveTransactionFilters.start &&
+          meta.filters.end === liveTransactionFilters.end &&
+          meta.filters.transactionType === liveTransactionFilters.transactionType;
+
+        // Ignore a result that belongs to a different filter generation.
+        if (!reportedFiltersMatch) {
+          return prev;
+        }
+
+        if (meta.isLoading) {
           if (pendingFilterReconcileRef.current) {
             seenLoadingSincePendingRef.current = true;
           }
+          return prev;
+        }
+
+        // A server-side table search omits rows that may still exist. Do not confirm or freeze from it.
+        if (meta.isSearchFiltered) {
           return prev;
         }
 
@@ -572,6 +608,8 @@ export function ServiceFlyoutOverview() {
             end: selectedTransaction.filters.end,
           }}
           isFiltersStale={selectedTransaction.isFiltersStale}
+          isFiltersPending={isFiltersPending}
+          refreshToken={refreshToken}
           onClose={() => setSelectedTransaction(null)}
           historyKey={flyoutHistoryKey}
           preferDocumentBasedCharts={preferDocumentBasedCharts}

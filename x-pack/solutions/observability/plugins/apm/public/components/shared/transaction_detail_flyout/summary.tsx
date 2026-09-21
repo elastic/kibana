@@ -5,72 +5,21 @@
  * 2.0.
  */
 
-import { EuiPanel, EuiSkeletonText, EuiText, useEuiFontSize, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiDescriptionList, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import moment from 'moment';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import moment from 'moment-timezone';
+import React, { useMemo } from 'react';
 import { getEnvironmentLabel } from '../../../../common/environment_filter_values';
+import { getTimeZone } from '../charts/helper/timezone';
 import { useTransactionDetailFlyoutContext } from './transaction_detail_flyout_context';
 
 const DEFAULT_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
 
-interface SummaryRow {
-  id: string;
-  label: string;
-  value: string;
-}
-
-function SummaryRowView({
-  label,
-  value,
-  isLoading,
-}: {
-  label: string;
-  value: string;
-  isLoading: boolean;
-}) {
-  const { euiTheme } = useEuiTheme();
-  const { fontSize } = useEuiFontSize('xs');
-
-  return (
-    <div
-      css={css`
-        display: grid;
-        grid-template-columns: minmax(120px, 35%) 1fr;
-        gap: ${euiTheme.size.m};
-        align-items: center;
-        padding: ${euiTheme.size.s} 0;
-        border-bottom: ${euiTheme.border.thin};
-        font-size: ${fontSize};
-
-        &:first-child {
-          padding-top: 0;
-        }
-
-        &:last-child {
-          padding-bottom: 0;
-          border-bottom: none;
-        }
-      `}
-    >
-      <EuiText
-        size="xs"
-        css={css`
-          font-weight: ${euiTheme.font.weight.semiBold};
-        `}
-      >
-        <span>{label}</span>
-      </EuiText>
-      <EuiText size="xs" color="subdued">
-        {isLoading ? (
-          <EuiSkeletonText lines={1} size="xs" />
-        ) : (
-          <span className="eui-textBreakWord">{value}</span>
-        )}
-      </EuiText>
-    </div>
-  );
+function formatInConfiguredTimezone(iso: string, dateFormat: string, timeZone: string): string {
+  if (timeZone === 'local') {
+    return moment(iso).format(dateFormat);
+  }
+  return moment.tz(iso, timeZone).format(dateFormat);
 }
 
 export function TransactionDetailFlyoutSummary() {
@@ -80,24 +29,10 @@ export function TransactionDetailFlyoutSummary() {
   } = useTransactionDetailFlyoutContext();
 
   const dateFormat = core.uiSettings?.get<string>('dateFormat') || DEFAULT_DATE_FORMAT;
+  const timeZone = getTimeZone(core.uiSettings);
 
-  const filterKey = `${environment}|${transactionType}|${start}|${end}`;
-  const [settledFilterKey, setSettledFilterKey] = useState(filterKey);
-  const isFirstRender = useRef(true);
-  const isUpdating = !isFirstRender.current && settledFilterKey !== filterKey;
-
-  useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      setSettledFilterKey(filterKey);
-      return;
-    }
-    const timeoutId = window.setTimeout(() => setSettledFilterKey(filterKey), 400);
-    return () => window.clearTimeout(timeoutId);
-  }, [filterKey]);
-
-  const startLabel = start ? moment(start).format(dateFormat) : rangeFrom;
-  const endLabel = end ? moment(end).format(dateFormat) : rangeTo;
+  const startLabel = start ? formatInConfiguredTimezone(start, dateFormat, timeZone) : rangeFrom;
+  const endLabel = end ? formatInConfiguredTimezone(end, dateFormat, timeZone) : rangeTo;
   const dateRangeLabel = i18n.translate(
     'xpack.apm.transactionDetailFlyout.summary.dateRangeValue',
     {
@@ -106,28 +41,25 @@ export function TransactionDetailFlyoutSummary() {
     }
   );
 
-  const rows = useMemo<SummaryRow[]>(
+  const listItems = useMemo(
     () => [
       {
-        id: 'environment',
-        label: i18n.translate('xpack.apm.transactionDetailFlyout.summary.environmentLabel', {
+        title: i18n.translate('xpack.apm.transactionDetailFlyout.summary.environmentLabel', {
           defaultMessage: 'Environment',
         }),
-        value: getEnvironmentLabel(environment),
+        description: getEnvironmentLabel(environment),
       },
       {
-        id: 'transactionType',
-        label: i18n.translate('xpack.apm.transactionDetailFlyout.summary.transactionTypeLabel', {
+        title: i18n.translate('xpack.apm.transactionDetailFlyout.summary.transactionTypeLabel', {
           defaultMessage: 'Transaction type',
         }),
-        value: transactionType,
+        description: transactionType,
       },
       {
-        id: 'dateRange',
-        label: i18n.translate('xpack.apm.transactionDetailFlyout.summary.dateRangeLabel', {
+        title: i18n.translate('xpack.apm.transactionDetailFlyout.summary.dateRangeLabel', {
           defaultMessage: 'Date range',
         }),
-        value: dateRangeLabel,
+        description: dateRangeLabel,
       },
     ],
     [environment, transactionType, dateRangeLabel]
@@ -139,11 +71,16 @@ export function TransactionDetailFlyoutSummary() {
       hasShadow={false}
       paddingSize="s"
       data-test-subj="transactionDetailFlyoutSummary"
-      data-loading={isUpdating ? 'true' : 'false'}
     >
-      {rows.map((row) => (
-        <SummaryRowView key={row.id} label={row.label} value={row.value} isLoading={isUpdating} />
-      ))}
+      <EuiDescriptionList
+        compressed
+        type="column"
+        columnGutterSize="m"
+        rowGutterSize="s"
+        align="left"
+        // columnWidths={['minmax(120px, 35%)', '1fr']}
+        listItems={listItems}
+      />
     </EuiPanel>
   );
 }
