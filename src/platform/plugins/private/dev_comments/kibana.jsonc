@@ -5,6 +5,7 @@
   "group": "platform",
   "description": "Development-only in-page comments for reviewing UI: pinned to elements, stored in Elasticsearch, launched from the developer toolbar.",
   "visibility": "private",
+  "devOnly": true,
   "plugin": {
     "id": "devComments",
     "browser": true,

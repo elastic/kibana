@@ -4,5 +4,6 @@
   "owner": "@elastic/appex-sharedux",
   "group": "platform",
   "visibility": "private",
-  "description": "Development-only in-page comment layer: comments anchored to DOM elements, with a screenshot and the author's clicks to get back to them."
+  "description": "Development-only in-page comment layer: comments anchored to DOM elements, with a screenshot and the author's clicks to get back to them.",
+  "devOnly": true
 }

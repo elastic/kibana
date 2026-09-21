@@ -1718,12 +1718,6 @@ importers:
       '@kbn/design-tools':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-design-tools
-      '@kbn/dev-comments':
-        specifier: workspace:*
-        version: link:src/platform/packages/private/kbn-dev-comments
-      '@kbn/dev-comments-plugin':
-        specifier: workspace:*
-        version: link:src/platform/plugins/private/dev_comments
       '@kbn/dev-tools-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/dev_tools

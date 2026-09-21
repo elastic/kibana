@@ -666,8 +666,6 @@
     "@kbn/delete-managed-asset-callout": "workspace:*",
     "@kbn/dependency-injection-example-plugin": "workspace:*",
     "@kbn/design-tools": "workspace:*",
-    "@kbn/dev-comments": "workspace:*",
-    "@kbn/dev-comments-plugin": "workspace:*",
     "@kbn/dev-tools-plugin": "workspace:*",
     "@kbn/developer-examples-plugin": "workspace:*",
     "@kbn/developer-toolbar": "workspace:*",
