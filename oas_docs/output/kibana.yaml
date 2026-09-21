@@ -45191,7 +45191,7 @@ paths:
               postCloudOnboardingDeploymentAgentBasedRequestExample:
                 description: Create a new AWS cloud onboarding deployment using an Elastic Agent (agent-based)
                 value:
-                  connectorId: cloud-connector-id-1
+                  authMethod: assume_role
                   mechanisms:
                     - agent_based
                   provider: aws
@@ -45241,10 +45241,13 @@ paths:
               type: object
               properties:
                 authMethod:
-                  description: Authentication method for managed integrations.
+                  description: 'Authentication method. managed_integration: identity_federation | static_keys. agent_based: static_keys (direct_access_keys) | temporary_keys | shared_credentials | assume_role.'
                   enum:
                     - identity_federation
                     - static_keys
+                    - temporary_keys
+                    - shared_credentials
+                    - assume_role
                   type: string
                 connectorId:
                   description: ID of the fleet-cloud-connector to associate with this deployment. Omit for static-keys deployments.
@@ -45304,12 +45307,13 @@ paths:
             application/json:
               examples:
                 postCloudOnboardingDeploymentAgentBasedExample:
-                  description: Agent-based deployment — agentPolicyId set after the agent policy is selected or created
+                  description: Agent-based deployment — agentPolicyIds set after the agent policy is selected or created
                   value:
                     item:
-                      agentPolicyId: agent-policy-id-1
+                      agentPolicyIds:
+                        - agent-policy-id-1
                       attemptCount: 1
-                      connectorId: cloud-connector-id-1
+                      authMethod: assume_role
                       id: onboarding-deployment-id-2
                       mechanisms:
                         - agent_based
@@ -45375,9 +45379,12 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
-                      agentPolicyId:
-                        description: Agent policy ID created for agent-based deployments. Present only when agent_based is in mechanisms.
-                        type: string
+                      agentPolicyIds:
+                        description: Agent policy IDs for agent_based deployments. Single-element for new-policy deploys; multiple for existing-policy deploys targeting several policies.
+                        items:
+                          type: string
+                        maxItems: 100
+                        type: array
                       apiKeyId:
                         description: Elasticsearch API key ID for push mechanisms (ecf). Set by the backend; used for key rotation/revocation.
                         type: string
@@ -45386,10 +45393,13 @@ paths:
                         minimum: 1
                         type: number
                       authMethod:
-                        description: Authentication method for managed integrations.
+                        description: 'Authentication method. managed_integration: identity_federation | static_keys. agent_based: static_keys (direct_access_keys) | temporary_keys | shared_credentials | assume_role.'
                         enum:
                           - identity_federation
                           - static_keys
+                          - temporary_keys
+                          - shared_credentials
+                          - assume_role
                         type: string
                       connectorId:
                         description: ID of the fleet-cloud-connector this deployment belongs to. Absent for static-keys deployments.
@@ -45691,9 +45701,12 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
-                      agentPolicyId:
-                        description: Agent policy ID created for agent-based deployments. Present only when agent_based is in mechanisms.
-                        type: string
+                      agentPolicyIds:
+                        description: Agent policy IDs for agent_based deployments. Single-element for new-policy deploys; multiple for existing-policy deploys targeting several policies.
+                        items:
+                          type: string
+                        maxItems: 100
+                        type: array
                       apiKeyId:
                         description: Elasticsearch API key ID for push mechanisms (ecf). Set by the backend; used for key rotation/revocation.
                         type: string
@@ -45702,10 +45715,13 @@ paths:
                         minimum: 1
                         type: number
                       authMethod:
-                        description: Authentication method for managed integrations.
+                        description: 'Authentication method. managed_integration: identity_federation | static_keys. agent_based: static_keys (direct_access_keys) | temporary_keys | shared_credentials | assume_role.'
                         enum:
                           - identity_federation
                           - static_keys
+                          - temporary_keys
+                          - shared_credentials
+                          - assume_role
                         type: string
                       connectorId:
                         description: ID of the fleet-cloud-connector this deployment belongs to. Absent for static-keys deployments.
@@ -45907,9 +45923,13 @@ paths:
               additionalProperties: false
               type: object
               properties:
-                agentPolicyId:
-                  maxLength: 255
-                  type: string
+                agentPolicyIds:
+                  description: Agent policy IDs for agent_based deployments. Single-element for new-policy deploys; multiple for existing-policy deploys targeting several policies.
+                  items:
+                    maxLength: 255
+                    type: string
+                  maxItems: 100
+                  type: array
                 apiKeyId:
                   maxLength: 255
                   type: string
@@ -46009,9 +46029,12 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
-                      agentPolicyId:
-                        description: Agent policy ID created for agent-based deployments. Present only when agent_based is in mechanisms.
-                        type: string
+                      agentPolicyIds:
+                        description: Agent policy IDs for agent_based deployments. Single-element for new-policy deploys; multiple for existing-policy deploys targeting several policies.
+                        items:
+                          type: string
+                        maxItems: 100
+                        type: array
                       apiKeyId:
                         description: Elasticsearch API key ID for push mechanisms (ecf). Set by the backend; used for key rotation/revocation.
                         type: string
@@ -46020,10 +46043,13 @@ paths:
                         minimum: 1
                         type: number
                       authMethod:
-                        description: Authentication method for managed integrations.
+                        description: 'Authentication method. managed_integration: identity_federation | static_keys. agent_based: static_keys (direct_access_keys) | temporary_keys | shared_credentials | assume_role.'
                         enum:
                           - identity_federation
                           - static_keys
+                          - temporary_keys
+                          - shared_credentials
+                          - assume_role
                         type: string
                       connectorId:
                         description: ID of the fleet-cloud-connector this deployment belongs to. Absent for static-keys deployments.
@@ -46251,9 +46277,12 @@ paths:
                       additionalProperties: false
                       type: object
                       properties:
-                        agentPolicyId:
-                          description: Agent policy ID created for agent-based deployments. Present only when agent_based is in mechanisms.
-                          type: string
+                        agentPolicyIds:
+                          description: Agent policy IDs for agent_based deployments. Single-element for new-policy deploys; multiple for existing-policy deploys targeting several policies.
+                          items:
+                            type: string
+                          maxItems: 100
+                          type: array
                         apiKeyId:
                           description: Elasticsearch API key ID for push mechanisms (ecf). Set by the backend; used for key rotation/revocation.
                           type: string
@@ -46262,10 +46291,13 @@ paths:
                           minimum: 1
                           type: number
                         authMethod:
-                          description: Authentication method for managed integrations.
+                          description: 'Authentication method. managed_integration: identity_federation | static_keys. agent_based: static_keys (direct_access_keys) | temporary_keys | shared_credentials | assume_role.'
                           enum:
                             - identity_federation
                             - static_keys
+                            - temporary_keys
+                            - shared_credentials
+                            - assume_role
                           type: string
                         connectorId:
                           description: ID of the fleet-cloud-connector this deployment belongs to. Absent for static-keys deployments.
