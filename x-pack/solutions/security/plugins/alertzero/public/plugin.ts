@@ -20,11 +20,8 @@ import {
   TEMPLATE_ID_INVESTIGATION,
 } from '@kbn/alertzero-common';
 import React from 'react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { registerAgenticInvestigationTemplateUI } from '@kbn/agentic-investigations-common';
 import { getAlertZeroDeepLinks } from './deep_links';
-import { ConnectedEscalationModal } from './pages/conversations/connected_escalation_modal';
 import type {
   AlertZeroClientConfig,
   AlertZeroPublicSetup,
@@ -95,16 +92,21 @@ export class AlertZeroPublicPlugin
       return {};
     }
 
-    // A dedicated QueryClient for the escalation modal when rendered from the flyout, which mounts
-    // outside alertzero's app tree and therefore outside its QueryClientProvider.
-    const flyoutQueryClient = new QueryClient();
+    // Lazy-load the entire escalation modal subtree — only resolved when the modal is first opened.
+    // This keeps KibanaContextProvider, QueryClient, and ConnectedEscalationModal (plus all their
+    // EUI and hook dependencies) out of alertzero's main chunk.
+    const LazyEscalationModal = React.lazy(async () => {
+      const [{ KibanaContextProvider }, { QueryClient, QueryClientProvider }, { ConnectedEscalationModal }] =
+        await Promise.all([
+          import('@kbn/kibana-react-plugin/public'),
+          import('@kbn/react-query'),
+          import('./pages/conversations/connected_escalation_modal'),
+        ]);
 
-    registerAgenticInvestigationTemplateUI({
-      conversationTemplates: startDeps.agentBuilder.conversationTemplates,
-      templateId: TEMPLATE_ID_INVESTIGATION,
-      name: INVESTIGATION_TEMPLATE_NAME,
-      icon: 'securitySignalDetected',
-      renderEscalationModal: (props) =>
+      // QueryClient is created once here (inside the lazy factory) so it is stable across renders.
+      const flyoutQueryClient = new QueryClient();
+
+      const WrappedModal: React.FC<React.ComponentProps<typeof ConnectedEscalationModal>> = (props) =>
         React.createElement(
           KibanaContextProvider,
           { services: { ...core, ...startDeps } },
@@ -113,7 +115,18 @@ export class AlertZeroPublicPlugin
             { client: flyoutQueryClient },
             React.createElement(ConnectedEscalationModal, props)
           )
-        ),
+        );
+
+      return { default: WrappedModal };
+    });
+
+    registerAgenticInvestigationTemplateUI({
+      conversationTemplates: startDeps.agentBuilder.conversationTemplates,
+      templateId: TEMPLATE_ID_INVESTIGATION,
+      name: INVESTIGATION_TEMPLATE_NAME,
+      icon: 'securitySignalDetected',
+      renderEscalationModal: (props) =>
+        React.createElement(React.Suspense, { fallback: null }, React.createElement(LazyEscalationModal, props)),
     });
 
     return {};
