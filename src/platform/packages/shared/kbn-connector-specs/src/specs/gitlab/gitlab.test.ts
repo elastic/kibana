@@ -252,12 +252,12 @@ describe('Gitlab connector', () => {
   });
 
   describe('getFile action', () => {
-    it('URL-encodes the file path and passes empty params when ref not provided', async () => {
+    it('URL-encodes the file path and defaults ref to HEAD when not provided', async () => {
       const input = parse('getFile', { projectId: '123', filePath: 'src/index.ts' });
       await Gitlab.actions.getFile.handler(mockContext, input);
 
       expect(mockGet).toHaveBeenCalledWith(`${BASE}/projects/123/repository/files/src%2Findex.ts`, {
-        params: {},
+        params: { ref: 'HEAD' },
       });
     });
 

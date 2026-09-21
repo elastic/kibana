@@ -26,6 +26,7 @@ const issueIidField = () =>
   z
     .string()
     .regex(/^\d+$/)
+    .max(20)
     .describe(
       'The issue IID as a string (project-internal number shown in the UI, e.g. "42"). Not the global issue ID.'
     );
@@ -34,6 +35,7 @@ const mrIidField = () =>
   z
     .string()
     .regex(/^\d+$/)
+    .max(20)
     .describe(
       'The merge request IID as a string (project-internal number shown in the UI, e.g. "15"). Not the global MR ID.'
     );
@@ -330,7 +332,9 @@ export const CreateMergeRequestInputSchema = lazySchema(() =>
       .array(z.number().int().positive())
       .max(20)
       .optional()
-      .describe('Array of user IDs to assign as reviewers. Use searchUsers to find user IDs.'),
+      .describe(
+        'Array of user IDs to assign to this merge request. Use searchUsers to find user IDs.'
+      ),
     labels: z
       .string()
       .max(2000)
@@ -563,7 +567,7 @@ export const CreateOrUpdateFileInputSchema = lazySchema(() =>
       .string()
       .max(10485760)
       .describe(
-        'File content, Base64-encoded. Use encoding: "base64" when passing binary or pre-encoded content.'
+        'File content as plain text by default, or Base64-encoded when encoding is "base64".'
       ),
     commitMessage: z.string().min(1).max(2000).describe('Commit message for this file change.'),
     encoding: z

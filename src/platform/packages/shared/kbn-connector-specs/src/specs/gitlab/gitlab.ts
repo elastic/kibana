@@ -322,8 +322,7 @@ export const Gitlab: ConnectorSpec = {
       input: GetFileInputSchema,
       handler: async (ctx, input: GetFileInput) => {
         const apiUrl = ctx.config?.apiUrl as string;
-        const params: Record<string, unknown> = {};
-        if (input.ref !== undefined) params.ref = input.ref;
+        const params: Record<string, unknown> = { ref: input.ref ?? 'HEAD' };
         const response = await ctx.client.get(
           `${apiUrl}/projects/${encodeProject(
             input.projectId
