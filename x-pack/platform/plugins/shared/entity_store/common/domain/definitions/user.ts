@@ -99,6 +99,7 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
           { sourceMatchesAny: ['azure', 'entityanalytics_entra_id'], then: 'entra_id' },
           { sourceMatchesAny: ['o365', 'o365_metrics'], then: 'microsoft_365' },
           { sourceMatchesAny: ['entityanalytics_ad'], then: 'active_directory' },
+          { sourceMatchesAny: ['workday'], then: 'workday' },
         ],
       },
     ],

@@ -97,6 +97,20 @@ describe('applyFieldEvaluations', () => {
     });
   });
 
+  it('should map workday to the workday namespace', () => {
+    expect(applyFieldEvaluations({ event: { module: 'workday' } }, userEvaluations)).toEqual({
+      'entity.namespace': 'workday',
+    });
+  });
+
+  it('should map a workday document identified only by data_stream.dataset', () => {
+    expect(
+      applyFieldEvaluations({ data_stream: { dataset: 'workday.user' } }, userEvaluations)
+    ).toEqual({
+      'entity.namespace': 'workday',
+    });
+  });
+
   it('should map azure and entityanalytics_entra_id to entra_id', () => {
     expect(applyFieldEvaluations({ event: { module: 'azure' } }, userEvaluations)).toEqual({
       'entity.namespace': 'entra_id',
