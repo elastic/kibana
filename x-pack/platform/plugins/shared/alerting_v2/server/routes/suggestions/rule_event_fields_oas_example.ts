@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type { MatcherDataFieldsResponse } from '@kbn/alerting-v2-schemas';
+import type { RuleEventFieldsResponse } from '@kbn/alerting-v2-schemas';
 import { buildOasOperation, invalidResponseExample } from '../oas_utils';
 import type { AlertingOasOperationObject } from '../oas_types';
 import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
 
-export const MATCHER_DATA_FIELDS_RESPONSE: MatcherDataFieldsResponse = [
+export const RULE_EVENT_FIELDS_RESPONSE: RuleEventFieldsResponse = [
   'host.name',
   'host.ip',
   'kibana.alert.rule.name',
 ];
 
-const INVALID_MATCHER_DATA_FIELDS_QUERY_RESPONSE = invalidResponseExample({
+const INVALID_RULE_EVENT_FIELDS_QUERY_RESPONSE = invalidResponseExample({
   summary: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
   message: 'matcher: Too small: expected string to have >=1 characters',
   details: {
@@ -29,14 +29,14 @@ const INVALID_MATCHER_DATA_FIELDS_QUERY_RESPONSE = invalidResponseExample({
   },
 });
 
-export const matcherDataFieldsOasExamples = (): AlertingOasOperationObject =>
+export const ruleEventFieldsOasExamples = (): AlertingOasOperationObject =>
   buildOasOperation({
     responses: {
       200: {
-        name: 'matcherDataFieldsResponse',
-        summary: 'Available matcher data fields',
-        value: MATCHER_DATA_FIELDS_RESPONSE,
+        name: 'ruleEventFieldsResponse',
+        summary: 'Available rule event fields',
+        value: RULE_EVENT_FIELDS_RESPONSE,
       },
-      400: INVALID_MATCHER_DATA_FIELDS_QUERY_RESPONSE,
+      400: INVALID_RULE_EVENT_FIELDS_QUERY_RESPONSE,
     },
   });

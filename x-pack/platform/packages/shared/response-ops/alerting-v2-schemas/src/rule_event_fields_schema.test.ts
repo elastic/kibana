@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import { matcherDataFieldsQuerySchema } from './matcher_data_fields_schema';
+import { ruleEventFieldsQuerySchema } from './rule_event_fields_schema';
 
-describe('matcherDataFieldsQuerySchema', () => {
+describe('ruleEventFieldsQuerySchema', () => {
   it('accepts an empty object', () => {
-    expect(matcherDataFieldsQuerySchema.parse({})).toEqual({});
+    expect(ruleEventFieldsQuerySchema.parse({})).toEqual({});
   });
 
   it('accepts a valid matcher', () => {
-    expect(matcherDataFieldsQuerySchema.parse({ matcher: 'kind: alert' })).toEqual({
+    expect(ruleEventFieldsQuerySchema.parse({ matcher: 'kind: alert' })).toEqual({
       matcher: 'kind: alert',
     });
   });
 
   it('rejects an empty matcher', () => {
-    expect(() => matcherDataFieldsQuerySchema.parse({ matcher: '' })).toThrow();
+    expect(() => ruleEventFieldsQuerySchema.parse({ matcher: '' })).toThrow();
   });
 
   it('rejects a matcher longer than 2048 characters', () => {
-    expect(() => matcherDataFieldsQuerySchema.parse({ matcher: 'a'.repeat(2049) })).toThrow();
+    expect(() => ruleEventFieldsQuerySchema.parse({ matcher: 'a'.repeat(2049) })).toThrow();
   });
 
   it('rejects unknown keys', () => {
-    expect(() => matcherDataFieldsQuerySchema.parse({ unknown_field: 'x' })).toThrow();
+    expect(() => ruleEventFieldsQuerySchema.parse({ unknown_field: 'x' })).toThrow();
   });
 });
