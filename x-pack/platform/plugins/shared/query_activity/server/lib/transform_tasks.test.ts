@@ -11,9 +11,10 @@ import {
   extractSource,
   getQueryType,
   capitalise,
-  isIncludedTask,
+  isQueryTaskCandidate,
   parseDslDescription,
   parseEsqlDescription,
+  transformTaskSummaries,
   transformTasks,
 } from './transform_tasks';
 
@@ -149,50 +150,64 @@ describe('parseEsqlDescription', () => {
   });
 });
 
-describe('isIncludedTask', () => {
-  it('includes a qualifying top-level search task', () => {
-    expect(isIncludedTask(baseTask, DEFAULT_THRESHOLD_NANOS)).toBe(true);
-  });
-
-  it('includes esql tasks', () => {
+describe('isQueryTaskCandidate', () => {
+  it('includes a qualifying task without detailed fields', () => {
     expect(
-      isIncludedTask({ ...baseTask, action: 'indices:data/read/esql[a]' }, DEFAULT_THRESHOLD_NANOS)
-    ).toBe(true);
-  });
-
-  it('includes eql tasks', () => {
-    expect(
-      isIncludedTask(
-        { ...baseTask, action: 'indices:data/read/eql/search' },
+      isQueryTaskCandidate(
+        { ...baseTask, cancellable: false, description: undefined },
         DEFAULT_THRESHOLD_NANOS
       )
     ).toBe(true);
   });
 
-  it('includes sql tasks', () => {
-    expect(
-      isIncludedTask({ ...baseTask, action: 'indices:data/read/sql' }, DEFAULT_THRESHOLD_NANOS)
-    ).toBe(true);
+  it('includes verified root action variants', () => {
+    const actions = [
+      'indices:data/read/esql[a]',
+      'indices:data/read/eql[a]',
+      'indices:data/read/eql/search',
+      'indices:data/read/eql/search[a]',
+      'indices:data/read/sql[a]',
+      'indices:data/read/async_search/submit',
+    ];
+
+    for (const action of actions) {
+      expect(isQueryTaskCandidate({ ...baseTask, action }, DEFAULT_THRESHOLD_NANOS)).toBe(true);
+    }
   });
 
-  it('includes msearch tasks', () => {
+  it('excludes internal child action variants even without a parent task id', () => {
     expect(
-      isIncludedTask({ ...baseTask, action: 'indices:data/read/msearch' }, DEFAULT_THRESHOLD_NANOS)
-    ).toBe(true);
-  });
-
-  it('includes async_search tasks', () => {
-    expect(
-      isIncludedTask(
-        { ...baseTask, action: 'indices:data/read/async_search/submit' },
+      isQueryTaskCandidate(
+        { ...baseTask, action: 'indices:data/read/search[phase/query]' },
         DEFAULT_THRESHOLD_NANOS
       )
-    ).toBe(true);
+    ).toBe(false);
+    expect(
+      isQueryTaskCandidate(
+        { ...baseTask, action: 'indices:data/read/esql/compute' },
+        DEFAULT_THRESHOLD_NANOS
+      )
+    ).toBe(false);
+  });
+
+  it('excludes non-cancellable template wrapper tasks hidden by the original implementation', () => {
+    expect(
+      isQueryTaskCandidate(
+        { ...baseTask, action: 'indices:data/read/search/template', cancellable: false },
+        DEFAULT_THRESHOLD_NANOS
+      )
+    ).toBe(false);
+    expect(
+      isQueryTaskCandidate(
+        { ...baseTask, action: 'indices:data/read/msearch/template', cancellable: false },
+        DEFAULT_THRESHOLD_NANOS
+      )
+    ).toBe(false);
   });
 
   it('excludes child tasks when their parent is still in the task list', () => {
     expect(
-      isIncludedTask(
+      isQueryTaskCandidate(
         { ...baseTask, parent_task_id: 'node1:99' },
         DEFAULT_THRESHOLD_NANOS,
         new Set(['node1:99'])
@@ -202,7 +217,7 @@ describe('isIncludedTask', () => {
 
   it('includes orphaned child tasks when their parent is no longer in the task list', () => {
     expect(
-      isIncludedTask(
+      isQueryTaskCandidate(
         { ...baseTask, parent_task_id: 'node1:99' },
         DEFAULT_THRESHOLD_NANOS,
         new Set(['node1:100'])
@@ -212,45 +227,50 @@ describe('isIncludedTask', () => {
 
   it('includes orphaned child tasks when the active task set is empty', () => {
     expect(
-      isIncludedTask(
+      isQueryTaskCandidate(
         { ...baseTask, parent_task_id: 'node1:99' },
         DEFAULT_THRESHOLD_NANOS,
         new Set()
       )
     ).toBe(true);
   });
+});
 
-  it('excludes tasks below the runtime threshold', () => {
-    expect(
-      isIncludedTask(
-        { ...baseTask, running_time_in_nanos: DEFAULT_THRESHOLD_NANOS - 1 },
-        DEFAULT_THRESHOLD_NANOS
-      )
-    ).toBe(false);
+describe('transformTaskSummaries', () => {
+  it('transforms lightweight task metadata without a description', () => {
+    const results = transformTaskSummaries(
+      [
+        {
+          ...baseTask,
+          description: undefined,
+          headers: {
+            'X-Opaque-Id': 'req1;kibana:application:discover:new',
+          },
+        },
+      ],
+      DEFAULT_THRESHOLD_NANOS
+    );
+
+    expect(results).toEqual([
+      {
+        taskId: 'node1:100',
+        queryType: 'DSL',
+        source: 'Discover',
+        startTime: 1000000,
+        runningTimeMs: QUERY_ACTIVITY_MIN_RUNNING_TIME_DEFAULT_MS,
+        cancellable: true,
+        cancelled: false,
+      },
+    ]);
   });
 
-  it('excludes non-search actions', () => {
+  it('omits tasks without a start time', () => {
     expect(
-      isIncludedTask({ ...baseTask, action: 'indices:data/write/bulk' }, DEFAULT_THRESHOLD_NANOS)
-    ).toBe(false);
-  });
-
-  it('excludes non-cancellable tasks with no description (background async tasks)', () => {
-    expect(
-      isIncludedTask(
-        { ...baseTask, cancellable: false, description: undefined },
+      transformTaskSummaries(
+        [{ ...baseTask, start_time_in_millis: undefined } as unknown as TasksTaskInfo],
         DEFAULT_THRESHOLD_NANOS
       )
-    ).toBe(false);
-  });
-
-  it('includes non-cancellable tasks that have a description', () => {
-    expect(
-      isIncludedTask(
-        { ...baseTask, cancellable: false, description: 'FROM logs-* | LIMIT 10' },
-        DEFAULT_THRESHOLD_NANOS
-      )
-    ).toBe(true);
+    ).toEqual([]);
   });
 });
 
