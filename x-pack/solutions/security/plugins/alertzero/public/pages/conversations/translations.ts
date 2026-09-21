@@ -113,6 +113,18 @@ export const ESCALATION_MODAL_TRANSLATIONS = Object.freeze({
       'xpack.alertzero.escalationModal.addToExistingForm.alreadyLinkedTooltip',
       { defaultMessage: 'This investigation is already part of this escalation.' }
     ),
+    notOwnerTooltip: i18n.translate(
+      'xpack.alertzero.escalationModal.addToExistingForm.notOwnerTooltip',
+      { defaultMessage: 'You can only add to escalations you own.' }
+    ),
+    loadErrorTitle: i18n.translate(
+      'xpack.alertzero.escalationModal.addToExistingForm.loadErrorTitle',
+      { defaultMessage: 'Failed to load escalations.' }
+    ),
+    retryButton: i18n.translate(
+      'xpack.alertzero.escalationModal.addToExistingForm.retryButton',
+      { defaultMessage: 'Retry' }
+    ),
   },
   cancelButton: i18n.translate('xpack.alertzero.escalationModal.cancelButton', {
     defaultMessage: 'Cancel',

@@ -92,6 +92,8 @@ beforeEach(() => {
   mockUseListEscalations.mockReturnValue({
     data: { results: [], pagination: { total: 0, page: 1, per_page: 20 } },
     isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
   } as unknown as ReturnType<typeof useListEscalations>);
 
   mockUseCreateEscalation.mockReturnValue({
@@ -193,17 +195,56 @@ describe('ConnectedEscalationModal', () => {
             id: 'esc-1',
             title: 'Existing escalation',
             metadata: { linked_investigations: ['conv-1'] },
+            permissions: { rename: true, delete: true, update_access_control: true },
           },
         ],
         pagination: { total: 1, page: 1, per_page: 20 },
       },
       isLoading: false,
+      isError: false,
+      refetch: jest.fn(),
     } as unknown as ReturnType<typeof useListEscalations>);
 
     renderModal({ mode: 'addToExisting' });
 
-    // The radio for the already-linked escalation should be disabled.
     const radio = document.getElementById('incident-esc-1') as HTMLInputElement;
     expect(radio).toBeDisabled();
+  });
+
+  it('disables non-owner escalations (canManage: false)', () => {
+    mockUseListEscalations.mockReturnValue({
+      data: {
+        results: [
+          {
+            id: 'esc-2',
+            title: 'Participant escalation',
+            metadata: { linked_investigations: [] },
+            permissions: { rename: false, delete: false, update_access_control: false },
+          },
+        ],
+        pagination: { total: 1, page: 1, per_page: 20 },
+      },
+      isLoading: false,
+      isError: false,
+      refetch: jest.fn(),
+    } as unknown as ReturnType<typeof useListEscalations>);
+
+    renderModal({ mode: 'addToExisting' });
+
+    const radio = document.getElementById('incident-esc-2') as HTMLInputElement;
+    expect(radio).toBeDisabled();
+  });
+
+  it('shows an error callout when the escalations query fails', () => {
+    mockUseListEscalations.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+      refetch: jest.fn(),
+    } as unknown as ReturnType<typeof useListEscalations>);
+
+    renderModal({ mode: 'addToExisting' });
+
+    expect(screen.getByTestId('escalationModalLoadError')).toBeInTheDocument();
   });
 });

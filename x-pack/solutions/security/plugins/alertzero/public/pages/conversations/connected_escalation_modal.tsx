@@ -59,8 +59,12 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
     const { data: currentUserProfile } = useCurrentUserProfile();
     const { data: suggestedCollaborators = [], isFetching: isSearchingCollaborators } =
       useSuggestUserProfiles(collaboratorSearch);
-    const { data: escalationsData, isLoading: isLoadingEscalations } =
-      useListEscalations(incidentSearch);
+    const {
+      data: escalationsData,
+      isLoading: isLoadingEscalations,
+      isError: isEscalationsError,
+      refetch: refetchEscalations,
+    } = useListEscalations(incidentSearch);
     const createEscalation = useCreateEscalation();
     const addToEscalation = useAddToEscalation();
 
@@ -74,6 +78,8 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
         title: e.title,
         linkedInvestigationCount: linked.length,
         alreadyLinked: linked.includes(conversationId),
+        // patchMetadata requires owner access; update_access_control uses the same gate.
+        canManage: e.permissions.update_access_control,
       };
     });
 
@@ -201,6 +207,8 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
           <AddToExistingEscalationForm
             incidents={incidents}
             isLoading={isLoadingEscalations}
+            isError={isEscalationsError}
+            onRetry={refetchEscalations}
             searchQuery={incidentSearch}
             onSearchChange={setIncidentSearch}
             onSubmit={(escalationId) =>

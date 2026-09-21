@@ -20,6 +20,7 @@ const freeIncident: EscalationIncidentSummary = {
   title: 'First escalation',
   linkedInvestigationCount: 2,
   alreadyLinked: false,
+  canManage: true,
 };
 
 const linkedIncident: EscalationIncidentSummary = {
@@ -27,11 +28,22 @@ const linkedIncident: EscalationIncidentSummary = {
   title: 'Already linked escalation',
   linkedInvestigationCount: 1,
   alreadyLinked: true,
+  canManage: true,
+};
+
+const nonOwnerIncident: EscalationIncidentSummary = {
+  id: 'esc-3',
+  title: 'Participant-only escalation',
+  linkedInvestigationCount: 0,
+  alreadyLinked: false,
+  canManage: false,
 };
 
 const defaultProps: AddToExistingEscalationFormProps = {
   incidents: [freeIncident],
   isLoading: false,
+  isError: false,
+  onRetry: jest.fn(),
   searchQuery: '',
   onSearchChange: jest.fn(),
   onSubmit: jest.fn(),
@@ -127,5 +139,43 @@ describe('AddToExistingEscalationForm', () => {
     });
 
     expect(onSearchChange).toHaveBeenCalledWith('critical');
+  });
+
+  it('clears selection when the search query changes', () => {
+    renderForm();
+
+    fireEvent.click(screen.getByTestId('escalationModalIncident-esc-1'));
+    expect(screen.getByTestId('escalationModalAddToIncident')).not.toBeDisabled();
+
+    fireEvent.change(screen.getByTestId('escalationModalIncidentSearch'), {
+      target: { value: 'new query' },
+    });
+
+    expect(screen.getByTestId('escalationModalAddToIncident')).toBeDisabled();
+  });
+
+  it('shows an error callout with a retry button when isError is true', () => {
+    const onRetry = jest.fn();
+    renderForm({ isError: true, incidents: [], onRetry });
+
+    expect(screen.getByTestId('escalationModalLoadError')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /retry/i }));
+    expect(onRetry).toHaveBeenCalled();
+  });
+
+  it('disables the radio for a non-owner escalation', () => {
+    renderForm({ incidents: [nonOwnerIncident] });
+
+    const radio = document.getElementById('incident-esc-3') as HTMLInputElement;
+    expect(radio).toBeDisabled();
+  });
+
+  it('ignores clicks on a non-owner escalation row', () => {
+    renderForm({ incidents: [nonOwnerIncident] });
+
+    fireEvent.click(screen.getByTestId('escalationModalIncident-esc-3'));
+
+    expect(screen.getByTestId('escalationModalAddToIncident')).toBeDisabled();
   });
 });

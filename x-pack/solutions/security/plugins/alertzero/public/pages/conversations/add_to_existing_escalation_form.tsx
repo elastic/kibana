@@ -10,6 +10,7 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
@@ -32,6 +33,8 @@ const T = ESCALATION_MODAL_TRANSLATIONS.addToExistingForm;
 export interface AddToExistingEscalationFormProps {
   incidents: EscalationIncidentSummary[];
   isLoading: boolean;
+  isError: boolean;
+  onRetry: () => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
   onSubmit: (incidentId: string) => void;
@@ -40,9 +43,28 @@ export interface AddToExistingEscalationFormProps {
 }
 
 export const AddToExistingEscalationForm = memo<AddToExistingEscalationFormProps>(
-  ({ incidents, isLoading, searchQuery, onSearchChange, onSubmit, isSubmitting, onCancel }) => {
+  ({
+    incidents,
+    isLoading,
+    isError,
+    onRetry,
+    searchQuery,
+    onSearchChange,
+    onSubmit,
+    isSubmitting,
+    onCancel,
+  }) => {
     const { euiTheme } = useEuiTheme();
     const [selectedId, setSelectedId] = useState<string | null>(null);
+
+    const isRowDisabled = (incident: EscalationIncidentSummary) =>
+      incident.alreadyLinked || !incident.canManage;
+
+    const rowTooltip = (incident: EscalationIncidentSummary) => {
+      if (incident.alreadyLinked) return T.alreadyLinkedTooltip;
+      if (!incident.canManage) return T.notOwnerTooltip;
+      return undefined;
+    };
 
     return (
       <>
@@ -51,7 +73,10 @@ export const AddToExistingEscalationForm = memo<AddToExistingEscalationFormProps
             fullWidth
             placeholder={T.searchPlaceholder}
             value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
+            onChange={(e) => {
+              setSelectedId(null);
+              onSearchChange(e.target.value);
+            }}
             data-test-subj="escalationModalIncidentSearch"
           />
 
@@ -63,6 +88,17 @@ export const AddToExistingEscalationForm = memo<AddToExistingEscalationFormProps
                 <EuiLoadingSpinner size="m" />
               </EuiFlexItem>
             </EuiFlexGroup>
+          ) : isError ? (
+            <EuiCallOut
+              title={T.loadErrorTitle}
+              color="danger"
+              iconType="error"
+              data-test-subj="escalationModalLoadError"
+            >
+              <EuiButton size="s" color="danger" onClick={onRetry}>
+                {T.retryButton}
+              </EuiButton>
+            </EuiCallOut>
           ) : incidents.length === 0 ? (
             <EuiText size="s" color="subdued" textAlign="center">
               <p>{T.emptyText}</p>
@@ -71,7 +107,7 @@ export const AddToExistingEscalationForm = memo<AddToExistingEscalationFormProps
             incidents.map((incident) => (
               <EuiToolTip
                 key={incident.id}
-                content={incident.alreadyLinked ? T.alreadyLinkedTooltip : undefined}
+                content={rowTooltip(incident)}
                 position="top"
                 display="block"
               >
@@ -80,12 +116,12 @@ export const AddToExistingEscalationForm = memo<AddToExistingEscalationFormProps
                   paddingSize="m"
                   css={css`
                     margin-bottom: ${euiTheme.size.s};
-                    ${incident.alreadyLinked
+                    ${isRowDisabled(incident)
                       ? `cursor: not-allowed; opacity: 0.6;`
                       : `cursor: pointer;`}
                     ${selectedId === incident.id ? `border-color: ${euiTheme.colors.primary};` : ''}
                   `}
-                  onClick={() => !incident.alreadyLinked && setSelectedId(incident.id)}
+                  onClick={() => !isRowDisabled(incident) && setSelectedId(incident.id)}
                   data-test-subj={`escalationModalIncident-${incident.id}`}
                 >
                   <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -94,8 +130,8 @@ export const AddToExistingEscalationForm = memo<AddToExistingEscalationFormProps
                         id={`incident-${incident.id}`}
                         name="escalation-incident"
                         checked={selectedId === incident.id}
-                        disabled={incident.alreadyLinked}
-                        onChange={() => !incident.alreadyLinked && setSelectedId(incident.id)}
+                        disabled={isRowDisabled(incident)}
+                        onChange={() => !isRowDisabled(incident) && setSelectedId(incident.id)}
                       />
                     </EuiFlexItem>
                     <EuiFlexItem>
