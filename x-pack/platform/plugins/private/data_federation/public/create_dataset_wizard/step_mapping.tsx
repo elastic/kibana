@@ -7,7 +7,7 @@
 
 import type { SetStateAction } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiAccordion, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiText } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Forms } from '@kbn/es-ui-shared-plugin/public';
 import { useController, useFormContext } from 'react-hook-form';
@@ -146,17 +146,13 @@ export function StepMapping() {
     <div data-test-subj="createDatasetWizardMappingStep">
       <MappingHeader docLinks={docLinks} />
 
-      <EuiAccordion
-        id="createDatasetWizardMappedFields"
-        data-test-subj="createDatasetWizardMappedFields"
-        buttonContent={
-          <h4 style={{ margin: 0, fontWeight: 'bold' }}>
-            {createDatasetWizardStrings.mappedFieldsSectionTitle}
-          </h4>
-        }
-        initialIsOpen
-        paddingSize="m"
-      >
+      <div data-test-subj="createDatasetWizardMappedFields">
+        <EuiText size="s" style={{ fontWeight: 'bold' }}>
+          {createDatasetWizardStrings.mappedFieldsSectionTitle}
+        </EuiText>
+        <EuiSpacer size="m" />
+
+        <EuiSpacer size="m" />
         <TimeseriesDataSection
           isEnabled={isTimeseriesEnabled}
           shouldShowValidation={shouldShowTimeseriesValidation}
@@ -174,7 +170,7 @@ export function StepMapping() {
           onChange={onEditorChange}
           docLinks={docLinks}
         />
-      </EuiAccordion>
+      </div>
     </div>
   );
 }
