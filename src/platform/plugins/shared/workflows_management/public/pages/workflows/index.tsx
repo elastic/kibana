@@ -142,8 +142,7 @@ export function WorkflowsPage() {
   const canImportWorkflows = Boolean(canCreateWorkflow && canUpdateWorkflow);
   const addConnectorsMenuItem = useMemo(() => getAddConnectorsMenuItem(application), [application]);
   const isExecutionStatsBarEnabled$ = useMemo(
-    () =>
-      featureFlags?.getBooleanValue$(WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID, false) ?? EMPTY,
+    () => featureFlags?.getBooleanValue$(WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID, false) ?? EMPTY,
     [featureFlags]
   );
   const isExecutionStatsBarEnabled = useObservable(isExecutionStatsBarEnabled$, false);
