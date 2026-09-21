@@ -9,9 +9,9 @@ import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { ALERTING_V2_ACTION_POLICIES_READ_ROLE, apiTest, testData } from '../fixtures';
 
-const MATCH_ACTION_POLICIES_FOR_RULE_URL = `${testData.INTERNAL_ACTION_POLICY_API_PATH}/_match_for_rule`;
+const MATCH_ACTION_POLICIES_URL = testData.INTERNAL_ACTION_POLICY_MATCH_API_PATH;
 
-apiTest.describe('Match action policies for rule API', { tag: '@local-stateful-classic' }, () => {
+apiTest.describe('Match action policies API', { tag: '@local-stateful-classic' }, () => {
   let readerCredentials: RoleApiCredentials;
   let readerHeaders: Record<string, string>;
 
@@ -25,7 +25,7 @@ apiTest.describe('Match action policies for rule API', { tag: '@local-stateful-c
   apiTest(
     'validation: rejects body with unknown top-level keys (strict schema)',
     async ({ apiClient }) => {
-      const response = await apiClient.post(MATCH_ACTION_POLICIES_FOR_RULE_URL, {
+      const response = await apiClient.post(MATCH_ACTION_POLICIES_URL, {
         headers: readerHeaders,
         body: {
           rule: { tags: ['prod'] },

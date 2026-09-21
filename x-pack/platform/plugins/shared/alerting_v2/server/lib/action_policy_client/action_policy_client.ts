@@ -11,7 +11,7 @@ import type {
   ActionPolicyResponse,
   BulkResponse,
   CreateActionPolicyDataInput,
-  MatchActionPoliciesForRuleResponse,
+  MatchActionPoliciesResponse,
   MatchedActionPolicy,
 } from '@kbn/alerting-v2-schemas';
 import {
@@ -57,7 +57,7 @@ import type {
   CreateActionPolicyParams,
   FindActionPoliciesArgs,
   FindActionPoliciesResponse,
-  MatchActionPoliciesForRuleParams,
+  MatchActionPoliciesParams,
   SnoozeActionPolicyParams,
   UpdateActionPolicyApiKeyParams,
   UpdateActionPolicyParams,
@@ -380,9 +380,9 @@ export class ActionPolicyClient {
     };
   }
 
-  public async matchActionPoliciesForRule(
-    params: MatchActionPoliciesForRuleParams
-  ): Promise<MatchActionPoliciesForRuleResponse> {
+  public async matchActionPolicies(
+    params: MatchActionPoliciesParams
+  ): Promise<MatchActionPoliciesResponse> {
     const { ruleTags = [] } = params;
 
     const items: MatchedActionPolicy[] = [];

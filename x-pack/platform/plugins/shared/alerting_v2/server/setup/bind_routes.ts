@@ -67,7 +67,7 @@ import { MatcherRuleEventFieldsRoute } from '../routes/suggestions/matcher_rule_
 import { SuggestUserProfilesRoute } from '../routes/suggestions/suggest_user_profiles_route';
 import { UpsertRuleRoute } from '../routes/rules/upsert_rule_route';
 import { UpsertActionPolicyRoute } from '../routes/action_policies/upsert_action_policy_route';
-import { MatchActionPoliciesForRuleRoute } from '../routes/action_policies/match_action_policies_for_rule_route';
+import { MatchActionPoliciesRoute } from '../routes/action_policies/match_action_policies_route';
 import { FindRuleTemplatesRoute } from '../routes/rule_templates/find_rule_templates_route';
 import { GetRuleTemplateRoute } from '../routes/rule_templates/get_rule_template_route';
 /**
@@ -141,7 +141,7 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(ResetResourcesRoute);
   bind(Route).toConstantValue(UpsertRuleRoute);
   bind(Route).toConstantValue(UpsertActionPolicyRoute);
-  bind(Route).toConstantValue(MatchActionPoliciesForRuleRoute);
+  bind(Route).toConstantValue(MatchActionPoliciesRoute);
   bind(Route).toConstantValue(FindRuleTemplatesRoute);
   bind(Route).toConstantValue(GetRuleTemplateRoute);
 }

@@ -12,8 +12,8 @@ import {
   bulkSnoozeActionPoliciesBodySchema,
   createActionPolicyDataSchema,
   findActionPoliciesResponseSchema,
-  matchActionPoliciesForRuleBodySchema,
-  matchActionPoliciesForRuleResponseSchema,
+  matchActionPoliciesBodySchema,
+  matchActionPoliciesResponseSchema,
   matcherDataFieldsResponseSchema,
   snoozeActionPolicyBodySchema,
   updateActionPolicyBodySchema,
@@ -29,9 +29,9 @@ import { LIST_ACTION_POLICIES_RESPONSE } from './list_action_policies_oas_exampl
 import { SNOOZE_ACTION_POLICY_REQUEST } from './snooze_action_policy_oas_example';
 import { BULK_SNOOZE_ACTION_POLICIES_REQUEST } from './bulk_snooze_action_policies_oas_example';
 import {
-  MATCH_ACTION_POLICIES_FOR_RULE_REQUEST,
-  MATCH_ACTION_POLICIES_FOR_RULE_RESPONSE,
-} from './match_action_policies_for_rule_oas_example';
+  MATCH_ACTION_POLICIES_REQUEST,
+  MATCH_ACTION_POLICIES_RESPONSE,
+} from './match_action_policies_oas_example';
 import { MATCHER_DATA_FIELDS_RESPONSE } from '../suggestions/matcher_data_fields_oas_example';
 
 describe('action policy OAS example payloads', () => {
@@ -71,16 +71,15 @@ describe('action policy OAS example payloads', () => {
     ).toBe(true);
   });
 
-  it('keeps match request example valid against matchActionPoliciesForRuleBodySchema', () => {
-    expect(
-      matchActionPoliciesForRuleBodySchema.safeParse(MATCH_ACTION_POLICIES_FOR_RULE_REQUEST).success
-    ).toBe(true);
+  it('keeps match request example valid against matchActionPoliciesBodySchema', () => {
+    expect(matchActionPoliciesBodySchema.safeParse(MATCH_ACTION_POLICIES_REQUEST).success).toBe(
+      true
+    );
   });
 
-  it('keeps match response example valid against matchActionPoliciesForRuleResponseSchema', () => {
+  it('keeps match response example valid against matchActionPoliciesResponseSchema', () => {
     expect(
-      matchActionPoliciesForRuleResponseSchema.safeParse(MATCH_ACTION_POLICIES_FOR_RULE_RESPONSE)
-        .success
+      matchActionPoliciesResponseSchema.safeParse(MATCH_ACTION_POLICIES_RESPONSE).success
     ).toBe(true);
   });
 

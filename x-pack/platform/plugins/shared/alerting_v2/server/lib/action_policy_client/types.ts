@@ -59,6 +59,6 @@ export interface FindActionPoliciesResponse {
   perPage: number;
 }
 
-export interface MatchActionPoliciesForRuleParams {
+export interface MatchActionPoliciesParams {
   ruleTags?: string[];
 }
