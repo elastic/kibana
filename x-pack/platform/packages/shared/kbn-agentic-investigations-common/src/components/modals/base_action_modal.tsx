@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export interface ActionModalPrimaryAction {
+interface ActionModalPrimaryAction {
   label: string;
   icon?: string;
   /** Called with the rationale text when the primary button is clicked */
@@ -29,7 +29,7 @@ export interface ActionModalPrimaryAction {
   color?: 'primary' | 'danger' | 'warning' | 'success' | 'text' | 'accent';
 }
 
-export interface BaseActionModalProps {
+interface BaseActionModalProps {
   type: 'assign' | 'dismiss';
   title: string;
   /** Case/record ID shown in the decision-history body sentence */

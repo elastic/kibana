@@ -12,6 +12,9 @@ import { isResponseError } from '@kbn/es-errors';
 /** The Elastic AI index. Kibana owns its creation; Elasticsearch owns its mappings. */
 export const smlIndexName = '.ai-index-idx-elastic-index';
 
+/** Field holding the ingestion method of the last write. */
+export const INGESTION_METHOD_FIELD = 'governance.provenance.updated_by.metadata.ingestion_method';
+
 /**
  * Elasticsearch-managed index template that owns the SML data index mappings (`ai-index@mappings`
  * plus `ai-index-managed@mappings`). SML has no template of its own.
