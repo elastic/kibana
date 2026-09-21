@@ -6,9 +6,7 @@
  */
 
 import {
-  EuiBadge,
   EuiButton,
-  EuiCheckableCard,
   EuiCode,
   EuiFieldText,
   EuiFlexGroup,
@@ -19,13 +17,11 @@ import {
   EuiText,
   EuiTextArea,
   EuiTitle,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import { MAX_AI_INDEX_DESCRIPTION_LENGTH } from '../../../common/constants';
-import type { AiIndexType } from '../../../common/http_api/ai_indices';
 import { TraceSelector, type EditableAiIndexTrace } from '../components/trace_selector';
 import { useCreateAiIndex } from '../hooks/use_create_ai_index';
 import { useNavigation } from '../hooks/use_navigation';
@@ -42,46 +38,14 @@ const cancelLabel = i18n.translate('xpack.contextEngine.createAiIndex.cancel', {
 });
 
 const createPageDescription = i18n.translate('xpack.contextEngine.createAiIndex.description', {
-  defaultMessage:
-    "Name your AI index and choose how it stores context. You'll add sources and automations next.",
+  defaultMessage: "Name your AI index. You'll add sources and automations next.",
 });
 
 const createPageTitle = i18n.translate('xpack.contextEngine.createAiIndex.title', {
   defaultMessage: 'Create AI index',
 });
 
-const STORAGE_TYPES: Array<{
-  type: AiIndexType;
-  badge: string;
-  title: string;
-  description: string;
-}> = [
-  {
-    type: 'index',
-    badge: 'idx',
-    title: i18n.translate('xpack.contextEngine.createAiIndex.storageType.index.title', {
-      defaultMessage: 'Index',
-    }),
-    description: i18n.translate('xpack.contextEngine.createAiIndex.storageType.index.description', {
-      defaultMessage:
-        "Enterprise data — docs, tickets, knowledge bases and other reference context that isn't time-based.",
-    }),
-  },
-  {
-    type: 'data_stream',
-    badge: 'ds',
-    title: i18n.translate('xpack.contextEngine.createAiIndex.storageType.dataStream.title', {
-      defaultMessage: 'Data stream',
-    }),
-    description: i18n.translate(
-      'xpack.contextEngine.createAiIndex.storageType.dataStream.description',
-      {
-        defaultMessage:
-          'Observability & security — time-based context for agents (logs, metrics, traces, alerts).',
-      }
-    ),
-  },
-];
+const DEFAULT_AI_INDEX_TYPE = 'index' as const;
 
 export const CreateAiIndexPage = () => {
   const { createContextEngineUrl, navigateToContextEngine } = useNavigation();
@@ -89,18 +53,15 @@ export const CreateAiIndexPage = () => {
   const [id, setId] = useState('');
   const [description, setDescription] = useState('');
   const [trace, setTrace] = useState<EditableAiIndexTrace | undefined>();
-  const [storageType, setStorageType] = useState<AiIndexType>('index');
-  const storageGroupName = useGeneratedHtmlId({ prefix: 'aiIndexStorageType' });
   const backHref = createContextEngineUrl(CONTEXT_ENGINE_PATHS.landing);
 
-  const { dest, error: nameError } = validateAiIndexId(storageType, id);
+  const { dest, error: nameError } = validateAiIndexId(DEFAULT_AI_INDEX_TYPE, id);
   const destValue = dest?.value;
 
   const createAndContinue = async () => {
     const created = await createAiIndex({
       id,
       description,
-      storageType,
       sources: [],
       trace,
     });
@@ -228,55 +189,6 @@ export const CreateAiIndexPage = () => {
           </EuiText>
           <EuiSpacer size="m" />
           <TraceSelector value={trace} onChange={setTrace} />
-        </EuiPanel>
-
-        <EuiSpacer size="l" />
-
-        <EuiPanel hasBorder paddingSize="l">
-          <EuiTitle size="s">
-            <h2>
-              {i18n.translate('xpack.contextEngine.createAiIndex.storageType.title', {
-                defaultMessage: 'Storage type',
-              })}
-            </h2>
-          </EuiTitle>
-          <EuiSpacer size="xs" />
-          <EuiText size="s" color="subdued">
-            <p>
-              {i18n.translate('xpack.contextEngine.createAiIndex.storageType.description', {
-                defaultMessage: 'Choose how this AI index stores pre-computed context.',
-              })}
-            </p>
-          </EuiText>
-          <EuiSpacer size="m" />
-          <EuiFlexGroup direction="column" gutterSize="m">
-            {STORAGE_TYPES.map((option) => (
-              <EuiFlexItem key={option.type}>
-                <EuiCheckableCard
-                  id={`${storageGroupName}-${option.type}`}
-                  name={storageGroupName}
-                  checkableType="radio"
-                  checked={storageType === option.type}
-                  onChange={() => setStorageType(option.type)}
-                  data-test-subj={`contextAiIndexStorageType-${option.type}`}
-                  label={
-                    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                      <EuiFlexItem grow={false}>
-                        <strong>{option.title}</strong>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiBadge color="hollow">{option.badge}</EuiBadge>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  }
-                >
-                  <EuiText size="s" color="subdued">
-                    {option.description}
-                  </EuiText>
-                </EuiCheckableCard>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
         </EuiPanel>
 
         <EuiSpacer size="l" />
