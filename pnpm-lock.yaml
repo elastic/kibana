@@ -5166,6 +5166,12 @@ importers:
       '@kbn/dev-cli-runner':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-dev-cli-runner
+      '@kbn/dev-comments':
+        specifier: workspace:*
+        version: link:src/platform/packages/private/kbn-dev-comments
+      '@kbn/dev-comments-plugin':
+        specifier: workspace:*
+        version: link:src/platform/plugins/private/dev_comments
       '@kbn/dev-proc-runner':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-dev-proc-runner

@@ -1817,6 +1817,8 @@
     "@kbn/dev": "workspace:*",
     "@kbn/dev-cli-errors": "workspace:*",
     "@kbn/dev-cli-runner": "workspace:*",
+    "@kbn/dev-comments": "workspace:*",
+    "@kbn/dev-comments-plugin": "workspace:*",
     "@kbn/dev-proc-runner": "workspace:*",
     "@kbn/dev-utils": "workspace:*",
     "@kbn/dev-validation-runner": "workspace:*",
