@@ -501,18 +501,29 @@ const CUSTOM_YARA_SIGNATURES_ADVANCED_FIELD = 'user_yara_rescan_interval_seconds
 type AdvancedSettings = Record<string, unknown>;
 
 /**
+ * `advanced` and everything under it is free-form, so a stored policy can hold any value where a
+ * settings namespace is expected. Narrowing before use keeps `in` from throwing on a primitive.
+ */
+const isAdvancedSettings = (value: unknown): value is AdvancedSettings =>
+  typeof value === 'object' && value !== null;
+
+/**
  * Whether the policy carries any of the Enterprise-gated custom YARA advanced settings.
  */
 export const hasCustomYaraSignaturesAdvancedSettings = (policy: PolicyConfig): boolean =>
   [...CUSTOM_YARA_SIGNATURES_ADVANCED_KEYS].some((key) => get(policy, key) !== undefined);
 
 const removeYaraAdvancedSettingsForOs = <T extends { advanced?: unknown }>(osPolicy: T): T => {
-  const advanced = osPolicy.advanced as AdvancedSettings | undefined;
-  const memoryProtection = advanced?.memory_protection as AdvancedSettings | undefined;
+  const { advanced } = osPolicy;
+
+  if (!isAdvancedSettings(advanced)) {
+    return osPolicy;
+  }
+
+  const memoryProtection = advanced.memory_protection;
 
   if (
-    !advanced ||
-    !memoryProtection ||
+    !isAdvancedSettings(memoryProtection) ||
     !(CUSTOM_YARA_SIGNATURES_ADVANCED_FIELD in memoryProtection)
   ) {
     return osPolicy;

@@ -605,6 +605,19 @@ describe('Policy Config helpers', () => {
       });
     });
 
+    it('leaves a non-object advanced.memory_protection untouched instead of throwing', () => {
+      const policy = policyFactory();
+      // `advanced` is free-form, so a policy written straight through the Fleet API can hold a
+      // primitive where a settings namespace is expected.
+      policy.windows.advanced = { memory_protection: 'legacy-value' };
+      policy.mac.advanced = { memory_protection: 42 };
+
+      const result = removeCustomYaraSignatures(policy);
+
+      expect(result.windows.advanced).toEqual({ memory_protection: 'legacy-value' });
+      expect(result.mac.advanced).toEqual({ memory_protection: 42 });
+    });
+
     it('clears an enabled custom_yara_signatures only for OSes in osList', () => {
       const policy = policyFactory();
 
