@@ -98,6 +98,7 @@ export const listPolicyExecutionHistoryRequestSchema = z
     sort_order: z.enum(['asc', 'desc']).default('desc').optional().describe('Sort direction.'),
     ...sharedFilterFields,
   })
+  .strict()
   .refine(
     ({ page = 1, per_page: perPage = EXECUTION_HISTORY_DEFAULT_PER_PAGE }) =>
       (perPage !== 0 && page * perPage <= EXECUTION_HISTORY_MAX_RESULT_WINDOW) || perPage === 0,

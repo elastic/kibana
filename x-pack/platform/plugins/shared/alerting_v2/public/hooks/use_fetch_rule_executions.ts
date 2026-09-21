@@ -26,6 +26,7 @@ export interface ListRuleExecutionsUiParams {
   to?: string;
   sort?: 'startedAt' | 'duration';
   sortOrder?: 'asc' | 'desc';
+  enabled?: boolean;
 }
 
 export const toListRuleExecutionsRequest = ({
@@ -39,7 +40,7 @@ export const toListRuleExecutionsRequest = ({
   sort,
   sortOrder,
   ...rest
-}: ListRuleExecutionsUiParams): Complete<Partial<ListRuleExecutionsRequest>> => {
+}: Omit<ListRuleExecutionsUiParams, 'enabled'>): Complete<Partial<ListRuleExecutionsRequest>> => {
   assertAllFieldsMapped(rest);
   return {
     page,
@@ -54,7 +55,10 @@ export const toListRuleExecutionsRequest = ({
   };
 };
 
-export const useFetchRuleExecutions = (params: ListRuleExecutionsUiParams) => {
+export const useFetchRuleExecutions = ({
+  enabled = true,
+  ...params
+}: ListRuleExecutionsUiParams) => {
   const api = useService(ExecutionHistoryApi);
 
   return useQuery<ListRuleExecutionsResponse, Error>({
@@ -62,5 +66,6 @@ export const useFetchRuleExecutions = (params: ListRuleExecutionsUiParams) => {
     queryFn: () => api.listRuleExecutions(toListRuleExecutionsRequest(params)),
     refetchOnWindowFocus: false,
     keepPreviousData: true,
+    enabled,
   });
 };

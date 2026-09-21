@@ -402,7 +402,6 @@ describe('policy_execution_history_schema', () => {
       });
 
       it('applies the default per_page (20) in the guard when per_page is omitted', () => {
-        // page * 20 must stay <= 10_000, so page 500 is the boundary.
         const boundaryPage =
           EXECUTION_HISTORY_MAX_RESULT_WINDOW / EXECUTION_HISTORY_DEFAULT_PER_PAGE;
         expect(
@@ -437,6 +436,12 @@ describe('policy_execution_history_schema', () => {
         outcome: ['dispatched', 'throttled'] as const,
       };
       expect(listPolicyExecutionHistoryRequestSchema.parse(input)).toEqual(input);
+    });
+
+    it('rejects unknown keys (strict mode)', () => {
+      expect(
+        listPolicyExecutionHistoryRequestSchema.safeParse({ page: 1, unknown_field: 'x' }).success
+      ).toBe(false);
     });
   });
 

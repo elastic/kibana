@@ -79,6 +79,7 @@ export const listRuleExecutionsRequestSchema = z
       .default(EXECUTION_HISTORY_DEFAULT_PER_PAGE)
       .describe(`Number of results per page. Pass 0 for a count-only read.`),
   })
+  .strict()
   .refine(
     ({ page, per_page: perPage }) =>
       (perPage !== 0 && page * perPage <= EXECUTION_HISTORY_MAX_RESULT_WINDOW) || perPage === 0,
