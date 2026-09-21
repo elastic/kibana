@@ -179,7 +179,7 @@ describe('CasesListAppHeader', () => {
 
       const configureItem = menu.items?.find((item) => item.id === 'configureCases');
       expect(configureItem).toBeDefined();
-      expect((configureItem as Record<string, unknown>).tooltipContent).toBeUndefined();
+      expect(configureItem?.tooltipContent).toBeUndefined();
     });
 
     it('sets license tooltip when enabledInLicense is false', () => {
@@ -196,9 +196,7 @@ describe('CasesListAppHeader', () => {
 
       const configureItem = menu.items?.find((item) => item.id === 'configureCases');
       expect(configureItem).toBeDefined();
-      expect((configureItem as Record<string, unknown>).tooltipContent).toBe(
-        listI18n.ACTION_LICENSE_REQUIRED
-      );
+      expect(configureItem?.tooltipContent).toBe(listI18n.ACTION_LICENSE_REQUIRED);
     });
 
     it('sets config tooltip when enabledInConfig is false', () => {
@@ -215,9 +213,7 @@ describe('CasesListAppHeader', () => {
 
       const configureItem = menu.items?.find((item) => item.id === 'configureCases');
       expect(configureItem).toBeDefined();
-      expect((configureItem as Record<string, unknown>).tooltipContent).toBe(
-        listI18n.ACTION_LICENSE_DISABLED_BY_CONFIG
-      );
+      expect(configureItem?.tooltipContent).toBe(listI18n.ACTION_LICENSE_DISABLED_BY_CONFIG);
     });
 
     it('does not set tooltipContent when actionLicense is null', () => {
@@ -225,7 +221,7 @@ describe('CasesListAppHeader', () => {
 
       const configureItem = menu.items?.find((item) => item.id === 'configureCases');
       expect(configureItem).toBeDefined();
-      expect((configureItem as Record<string, unknown>).tooltipContent).toBeUndefined();
+      expect(configureItem?.tooltipContent).toBeUndefined();
     });
   });
 });
