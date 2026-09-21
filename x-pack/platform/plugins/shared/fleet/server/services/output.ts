@@ -89,6 +89,7 @@ import type { OutputType } from '../types';
 
 import { agentPolicyService } from './agent_policy';
 import { getAgentCountForAgentPolicies } from './agent_policies/agent_policy_agent_count';
+import { buildAgentStatusRuntimeField } from './agents/build_status_runtime_field';
 import { packagePolicyService } from './package_policy';
 import { appContextService } from './app_context';
 import { escapeSearchQueryPhrase } from './saved_object';
@@ -1643,10 +1644,12 @@ class OutputService {
 
     let agentCount = 0;
     if (agentPolicyCount > 0) {
+      // Build once — getInactivityTimeouts() does an SO find, so avoid per-chunk calls.
+      const runtimeMappings = await buildAgentStatusRuntimeField();
       const chunks = _.chunk(uniqueIds, AGENT_COUNT_POLICY_ID_CHUNK_SIZE);
       const chunkResults = await pMap(
         chunks,
-        (chunk) => getAgentCountForAgentPolicies(esClient, chunk, { excludeInactive: true }),
+        (chunk) => getAgentCountForAgentPolicies(esClient, chunk, { runtimeMappings }),
         { concurrency: 5 }
       );
       agentCount = chunkResults

@@ -106,4 +106,38 @@ describe('When using `getAgentCountForAgentPolicies()`', () => {
       policy1: 150,
     });
   });
+
+  describe('with runtimeMappings (excludeInactive semantics)', () => {
+    const runtimeMappings = { status: { type: 'keyword', script: { source: 'emit("active")' } } };
+
+    it('includes runtime_mappings in the ES request', async () => {
+      await getAgentCountForAgentPolicies(esClientMock, agentPolicyIds, { runtimeMappings });
+
+      const searchCall = esClientMock.search.mock.calls[0][0] as Record<string, unknown>;
+      expect(searchCall).toHaveProperty('runtime_mappings', runtimeMappings);
+    });
+
+    it('adds must_not filters for status:inactive and status:unenrolled', async () => {
+      await getAgentCountForAgentPolicies(esClientMock, agentPolicyIds, { runtimeMappings });
+
+      const searchCall = esClientMock.search.mock.calls[0][0] as Record<string, unknown>;
+      const query = searchCall.query as { bool: { filter: unknown[] } };
+      expect(query.bool.filter).toEqual(
+        expect.arrayContaining([
+          {
+            bool: {
+              must_not: [{ term: { status: 'inactive' } }, { term: { status: 'unenrolled' } }],
+            },
+          },
+        ])
+      );
+    });
+
+    it('omits runtime_mappings when not provided', async () => {
+      await getAgentCountForAgentPolicies(esClientMock, agentPolicyIds);
+
+      const searchCall = esClientMock.search.mock.calls[0][0] as Record<string, unknown>;
+      expect(searchCall).not.toHaveProperty('runtime_mappings');
+    });
+  });
 });

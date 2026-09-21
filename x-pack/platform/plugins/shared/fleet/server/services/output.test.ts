@@ -33,6 +33,7 @@ import {
   isOutputSecretStorageEnabled,
 } from './secrets';
 import { getAgentCountForAgentPolicies } from './agent_policies/agent_policy_agent_count';
+import { buildAgentStatusRuntimeField } from './agents/build_status_runtime_field';
 
 jest.mock('./app_context');
 jest.mock('./agent_policy');
@@ -41,10 +42,14 @@ jest.mock('./audit_logging');
 jest.mock('./secrets');
 jest.mock('./outputs/helpers');
 jest.mock('./agent_policies/agent_policy_agent_count');
+jest.mock('./agents/build_status_runtime_field');
 
 const mockedGetAgentCountForAgentPolicies = getAgentCountForAgentPolicies as jest.MockedFunction<
   typeof getAgentCountForAgentPolicies
 >;
+
+const mockedBuildAgentStatusRuntimeField =
+  buildAgentStatusRuntimeField as jest.MockedFunction<typeof buildAgentStatusRuntimeField>;
 
 const mockedFindAgentlessPolicies = findAgentlessPolicies as jest.MockedFunction<
   typeof findAgentlessPolicies
@@ -4394,6 +4399,8 @@ describe('Output Service', () => {
       }
     }
 
+    const MOCK_RUNTIME_MAPPINGS = { status: { type: 'keyword', script: { source: '...' } } };
+
     beforeEach(() => {
       getMockedSoClient();
       mockedGetAgentCountForAgentPolicies.mockReset();
@@ -4402,6 +4409,8 @@ describe('Output Service', () => {
       mockedAgentPolicyService.fetchAllAgentPolicyIds.mockResolvedValue(makeIdPages([]));
       mockedPackagePolicyService.fetchAllItems.mockReset();
       mockedPackagePolicyService.fetchAllItems.mockResolvedValue(makePkgPages([]) as any);
+      mockedBuildAgentStatusRuntimeField.mockReset();
+      mockedBuildAgentStatusRuntimeField.mockResolvedValue(MOCK_RUNTIME_MAPPINGS as any);
     });
 
     it('returns zero counts when no policies reference the output', async () => {
@@ -4471,7 +4480,7 @@ describe('Output Service', () => {
       expect(mockedGetAgentCountForAgentPolicies).toHaveBeenCalledWith(
         esClient,
         expect.arrayContaining(['policy-from-pkg']),
-        { excludeInactive: true }
+        { runtimeMappings: MOCK_RUNTIME_MAPPINGS }
       );
       expect(result).toEqual({ agentPolicyCount: 1, agentCount: 2 });
     });
@@ -4512,7 +4521,7 @@ describe('Output Service', () => {
       expect(result).toEqual({ agentPolicyCount: 2, agentCount: 15 });
     });
 
-    it('passes excludeInactive:true to exclude stale-checkin agents from count', async () => {
+    it('passes prebuilt runtimeMappings to each chunk to exclude stale-checkin agents', async () => {
       mockedAgentPolicyService.fetchAllAgentPolicyIds.mockResolvedValue(makeIdPages(['p1']));
       mockedGetAgentCountForAgentPolicies.mockResolvedValue({ p1: 5 });
 
@@ -4521,10 +4530,11 @@ describe('Output Service', () => {
         is_default: false,
       } as any);
 
+      expect(mockedBuildAgentStatusRuntimeField).toHaveBeenCalledTimes(1);
       expect(mockedGetAgentCountForAgentPolicies).toHaveBeenCalledWith(
         esClient,
         expect.any(Array),
-        { excludeInactive: true }
+        { runtimeMappings: MOCK_RUNTIME_MAPPINGS }
       );
     });
 
