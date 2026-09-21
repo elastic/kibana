@@ -12,6 +12,7 @@ import type { ConcreteTaskInstance } from '../task';
 import { TaskStatus } from '../task';
 import { EsAndUiamApiKeyStrategy } from './es_and_uiam_api_key_strategy';
 import { taskManagerUiamTelemetry } from '../otel/uiam_telemetry';
+import { asSpaceId } from '@kbn/core-spaces-common';
 
 import {
   createApiKey,
@@ -110,7 +111,7 @@ describe('EsAndUiamApiKeyStrategy', () => {
       const { strategy } = createStrategy(ApiKeyType.UIAM);
       const task = mockTaskInstance({
         uiamApiKey: 'essu_uiam-key',
-        userScope: { apiKeyId: '', apiKeyCreatedByUser: true, spaceId: 'default' },
+        userScope: { apiKeyId: '', apiKeyCreatedByUser: true, spaceId: asSpaceId('default') },
       });
 
       expect(strategy.getApiKeyForFakeRequest(task)).toBe('essu_uiam-key');
@@ -134,7 +135,7 @@ describe('EsAndUiamApiKeyStrategy', () => {
         userScope: {
           apiKeyId: 'es-key-id',
           apiKeyCreatedByUser: false,
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
         },
       });
 
@@ -169,7 +170,7 @@ describe('EsAndUiamApiKeyStrategy', () => {
         userScope: {
           apiKeyId: 'es-key-id',
           apiKeyCreatedByUser: true,
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
         },
       });
 
@@ -202,7 +203,7 @@ describe('EsAndUiamApiKeyStrategy', () => {
         userScope: {
           apiKeyId: 'uiam-key-id',
           uiamApiKeyId: 'uiam-key-id',
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           apiKeyCreatedByUser: false,
         },
       });
@@ -223,7 +224,7 @@ describe('EsAndUiamApiKeyStrategy', () => {
         userScope: {
           apiKeyId: 'uiam-key-id',
           uiamApiKeyId: 'uiam-key-id',
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           apiKeyCreatedByUser: false,
         },
       });
@@ -246,7 +247,11 @@ describe('EsAndUiamApiKeyStrategy', () => {
     test('records a "none" task run when typeToUse is UIAM and a user-scoped task has no keys', () => {
       const { strategy } = createStrategy(ApiKeyType.UIAM);
       const task = mockTaskInstance({
-        userScope: { apiKeyId: 'es-key-id', apiKeyCreatedByUser: false, spaceId: 'default' },
+        userScope: {
+          apiKeyId: 'es-key-id',
+          apiKeyCreatedByUser: false,
+          spaceId: asSpaceId('default'),
+        },
       });
 
       expect(strategy.getApiKeyForFakeRequest(task)).toBeUndefined();
@@ -263,7 +268,7 @@ describe('EsAndUiamApiKeyStrategy', () => {
         userScope: {
           apiKeyId: 'es-key-id',
           uiamApiKeyId: 'uiam-key-id',
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           apiKeyCreatedByUser: false,
         },
       });
@@ -280,7 +285,7 @@ describe('EsAndUiamApiKeyStrategy', () => {
         apiKey: 'es-key',
         userScope: {
           apiKeyId: 'es-key-id',
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           apiKeyCreatedByUser: false,
         },
       });
@@ -303,7 +308,7 @@ describe('EsAndUiamApiKeyStrategy', () => {
         userScope: {
           apiKeyId: 'es-key-id',
           uiamApiKeyId: 'uiam-key-id',
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           apiKeyCreatedByUser: true,
         },
       });
@@ -318,7 +323,7 @@ describe('EsAndUiamApiKeyStrategy', () => {
         userScope: {
           apiKeyId: 'es-key-id',
           uiamApiKeyId: 'uiam-key-id',
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           apiKeyCreatedByUser: false,
         },
       });
@@ -335,7 +340,7 @@ describe('EsAndUiamApiKeyStrategy', () => {
           // as a bare ES invalidation target (ES-native invalidate cannot revoke a UIAM key).
           apiKeyId: 'uiam-key-id',
           uiamApiKeyId: 'uiam-key-id',
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           apiKeyCreatedByUser: false,
         },
       });

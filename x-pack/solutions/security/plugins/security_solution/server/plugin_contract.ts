@@ -57,8 +57,12 @@ import type {
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
 import type { EntityStoreSetupContract, EntityStoreStartContract } from '@kbn/entity-store/server';
-import type { SearchInferenceEndpointsPluginSetup } from '@kbn/search-inference-endpoints/server';
-import type { CPSServerSetup } from '@kbn/cps/server';
+import type {
+  SearchInferenceEndpointsPluginSetup,
+  SearchInferenceEndpointsPluginStart,
+} from '@kbn/search-inference-endpoints/server';
+import type { CPSServerSetup, CPSServerStart } from '@kbn/cps/server';
+import type { MitreAttackServerStart } from '@kbn/mitre-attack-plugin/server';
 import type { ProductFeaturesService } from './lib/product_features_service/product_features_service';
 import type { ExperimentalFeatures } from '../common';
 
@@ -107,6 +111,7 @@ export interface SecuritySolutionPluginStartDependencies {
   security: SecurityPluginStart;
   spaces?: SpacesPluginStart;
   taskManager?: TaskManagerPluginStart;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   telemetry: TelemetryPluginStart;
   share: SharePluginStart;
   actions: ActionsPluginStartContract;
@@ -114,8 +119,10 @@ export interface SecuritySolutionPluginStartDependencies {
   anonymization: AnonymizationPluginStart;
   llmTasks?: LlmTasksPluginStart;
   agentBuilder?: AgentBuilderPluginStart;
+  mitreAttack?: MitreAttackServerStart;
   workflowsManagement?: WorkflowsServerPluginStart;
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
+  cps?: CPSServerStart;
 }
 
 export interface SecuritySolutionPluginSetup {

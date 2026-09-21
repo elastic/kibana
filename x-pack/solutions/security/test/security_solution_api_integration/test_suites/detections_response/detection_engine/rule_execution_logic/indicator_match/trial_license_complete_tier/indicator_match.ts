@@ -12,14 +12,10 @@ import expect from 'expect';
 
 import {
   ALERT_REASON,
-  ALERT_RULE_UUID,
   ALERT_STATUS,
   ALERT_RULE_NAMESPACE,
-  ALERT_RULE_UPDATED_AT,
-  ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
   SPACE_IDS,
-  VERSION,
   ALERT_WORKFLOW_TAGS,
   ALERT_WORKFLOW_ASSIGNEE_IDS,
   ALERT_SUPPRESSION_DOCS_COUNT,
@@ -54,6 +50,7 @@ import {
   stopAllManualRuns,
   waitForBackfillExecuted,
   setAdvancedSettings,
+  removeRandomValuedPropertiesFromAlert,
 } from '../../../../utils';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
@@ -230,9 +227,9 @@ export default ({ getService }: FtrProviderContext) => {
       if (!fullAlert) {
         return expect(fullAlert).toBeTruthy();
       }
-      expect(fullAlert).toEqual({
-        ...fullAlert,
-        '@timestamp': fullAlert['@timestamp'],
+      const normalizedAlert = removeRandomValuedPropertiesFromAlert(fullAlert);
+      expect(normalizedAlert).toEqual({
+        ...normalizedAlert,
         agent: {
           ephemeral_id: '1b4978a0-48be-49b1-ac96-323425b389ab',
           hostname: 'zeek-sensor-amsterdam',
@@ -329,14 +326,11 @@ export default ({ getService }: FtrProviderContext) => {
         [ALERT_ORIGINAL_TIME]: fullAlert[ALERT_ORIGINAL_TIME],
         [ALERT_REASON]:
           'user-login event with source 46.101.47.213 by root on zeek-sensor-amsterdam created high alert Query with a rule id.',
-        [ALERT_RULE_UUID]: fullAlert[ALERT_RULE_UUID],
         [ALERT_STATUS]: 'active',
-        [ALERT_UUID]: fullAlert[ALERT_UUID],
         [ALERT_WORKFLOW_STATUS]: 'open',
         [ALERT_WORKFLOW_TAGS]: [],
         [ALERT_WORKFLOW_ASSIGNEE_IDS]: [],
         [SPACE_IDS]: ['default'],
-        [VERSION]: fullAlert[VERSION],
         threat: {
           enrichments: get(fullAlert, 'threat.enrichments'),
         },
@@ -366,9 +360,7 @@ export default ({ getService }: FtrProviderContext) => {
           threat: [],
           to: 'now',
           type: 'threat_match',
-          updated_at: fullAlert[ALERT_RULE_UPDATED_AT],
           updated_by: username,
-          uuid: fullAlert[ALERT_RULE_UUID],
           version: 1,
         }),
       });
@@ -412,9 +404,9 @@ export default ({ getService }: FtrProviderContext) => {
       if (!fullAlert) {
         return expect(fullAlert).toBeTruthy();
       }
-      expect(fullAlert).toEqual({
-        ...fullAlert,
-        '@timestamp': fullAlert['@timestamp'],
+      const normalizedAlert = removeRandomValuedPropertiesFromAlert(fullAlert);
+      expect(normalizedAlert).toEqual({
+        ...normalizedAlert,
         agent: {
           ephemeral_id: '1b4978a0-48be-49b1-ac96-323425b389ab',
           hostname: 'zeek-sensor-amsterdam',
@@ -511,12 +503,9 @@ export default ({ getService }: FtrProviderContext) => {
         [ALERT_ORIGINAL_TIME]: fullAlert[ALERT_ORIGINAL_TIME],
         [ALERT_REASON]:
           'user-login event with source 46.101.47.213 by root on zeek-sensor-amsterdam created high alert Query with a rule id.',
-        [ALERT_RULE_UUID]: fullAlert[ALERT_RULE_UUID],
         [ALERT_STATUS]: 'active',
-        [ALERT_UUID]: fullAlert[ALERT_UUID],
         [ALERT_WORKFLOW_STATUS]: 'open',
         [SPACE_IDS]: ['default'],
-        [VERSION]: fullAlert[VERSION],
         threat: {
           enrichments: get(fullAlert, 'threat.enrichments'),
         },
@@ -546,9 +535,7 @@ export default ({ getService }: FtrProviderContext) => {
           threat: [],
           to: 'now',
           type: 'threat_match',
-          updated_at: fullAlert[ALERT_RULE_UPDATED_AT],
           updated_by: username,
-          uuid: fullAlert[ALERT_RULE_UUID],
           version: 1,
         }),
       });

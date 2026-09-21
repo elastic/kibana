@@ -37,22 +37,25 @@ const createMockApi = (overrides: Partial<WorkflowsManagementApi> = {}) =>
     ...overrides,
   } as unknown as WorkflowsManagementApi);
 
-const createSmlDocument = (overrides: Partial<SmlDocument> = {}): SmlDocument => ({
-  id: 'chunk-1',
+const createSmlDocument = (originId = 'workflow-abc'): SmlDocument => ({
   type: 'workflow',
   title: 'My Workflow',
-  origin_id: 'workflow-abc',
-  origin: { uri: 'workflow://workflow-abc' },
   content: 'My Workflow\nA test workflow',
-  created_at: '2025-01-01T00:00:00.000Z',
-  updated_at: '2025-01-01T00:00:00.000Z',
   permissions: {
     kibana: {
       privileges: [{ space: 'default', name: [`ai_index:${WORKFLOW_KI_TYPE}/read`], count: 1 }],
     },
   },
-  ingestion_method: 'crawled',
-  ...overrides,
+  id: 'chunk-1',
+  '@timestamp': '2025-01-01T00:00:00.000Z',
+  updated_at: '2025-01-01T00:00:00.000Z',
+  references: [{ uri: `workflow://${originId}`, relation: 'derived_from' }],
+  governance: {
+    provenance: {
+      created_by: { uri: 'crawler://sml', metadata: { ingestion_method: 'crawled' } },
+      updated_by: { uri: 'crawler://sml', metadata: { ingestion_method: 'crawled' } },
+    },
+  },
 });
 
 describe('workflowSmlType', () => {
@@ -479,7 +482,7 @@ describe('workflowSmlType', () => {
 
       const smlType = createWorkflowSmlType(api);
 
-      await smlType.toAttachment(createSmlDocument({ origin_id: 'workflow-xyz' }), {
+      await smlType.toAttachment(createSmlDocument('workflow-xyz'), {
         savedObjectsClient: {} as never,
         request: {} as never,
         spaceId: 'my-space',

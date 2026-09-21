@@ -26,8 +26,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import { MAX_AI_INDEX_DESCRIPTION_LENGTH } from '../../../common/constants';
 import type { AiIndexType } from '../../../common/http_api/ai_indices';
-import { SourcePicker } from '../components/source_picker';
-import type { SelectedSource } from '../components/source_picker';
+import { TraceSelector, type EditableAiIndexTrace } from '../components/trace_selector';
 import { useCreateAiIndex } from '../hooks/use_create_ai_index';
 import { useNavigation } from '../hooks/use_navigation';
 import { ContextEngineSubPageHeader } from '../layout/context_engine_page_header';
@@ -44,7 +43,7 @@ const cancelLabel = i18n.translate('xpack.contextEngine.createAiIndex.cancel', {
 
 const createPageDescription = i18n.translate('xpack.contextEngine.createAiIndex.description', {
   defaultMessage:
-    'Start by picking a source to build context from — or skip and add sources later.',
+    "Name your AI index and choose how it stores context. You'll add sources and automations next.",
 });
 
 const createPageTitle = i18n.translate('xpack.contextEngine.createAiIndex.title', {
@@ -87,9 +86,9 @@ const STORAGE_TYPES: Array<{
 export const CreateAiIndexPage = () => {
   const { createContextEngineUrl, navigateToContextEngine } = useNavigation();
   const { createAiIndex, isCreating } = useCreateAiIndex();
-  const [selectedSources, setSelectedSources] = useState<SelectedSource[]>([]);
   const [id, setId] = useState('');
   const [description, setDescription] = useState('');
+  const [trace, setTrace] = useState<EditableAiIndexTrace | undefined>();
   const [storageType, setStorageType] = useState<AiIndexType>('index');
   const storageGroupName = useGeneratedHtmlId({ prefix: 'aiIndexStorageType' });
   const backHref = createContextEngineUrl(CONTEXT_ENGINE_PATHS.landing);
@@ -102,7 +101,8 @@ export const CreateAiIndexPage = () => {
       id,
       description,
       storageType,
-      sources: selectedSources,
+      sources: [],
+      trace,
     });
     if (created) {
       navigateToContextEngine(getAiIndexDetailPath(created.id));
@@ -208,16 +208,26 @@ export const CreateAiIndexPage = () => {
 
         <EuiSpacer size="l" />
 
-        <EuiPanel hasBorder paddingSize="l">
+        <EuiPanel hasBorder paddingSize="l" data-test-subj="contextCreateAiIndexTracesPanel">
           <EuiTitle size="s">
             <h2>
-              {i18n.translate('xpack.contextEngine.createAiIndex.addSource.title', {
-                defaultMessage: 'Sources',
-              })}
+              <FormattedMessage
+                id="xpack.contextEngine.createAiIndex.traces.title"
+                defaultMessage="Agent traces"
+              />
             </h2>
           </EuiTitle>
+          <EuiSpacer size="xs" />
+          <EuiText size="s" color="subdued">
+            <p>
+              <FormattedMessage
+                id="xpack.contextEngine.createAiIndex.traces.description"
+                defaultMessage="Traces this AI index learns from. Knowledge Indicators are tuned against the questions agents actually ask."
+              />
+            </p>
+          </EuiText>
           <EuiSpacer size="m" />
-          <SourcePicker selectedSources={selectedSources} onChange={setSelectedSources} />
+          <TraceSelector value={trace} onChange={setTrace} />
         </EuiPanel>
 
         <EuiSpacer size="l" />

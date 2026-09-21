@@ -17,6 +17,7 @@ import type { InvestigationAttributes } from './types';
 const TYPE = NIGHTSHIFT_INVESTIGATION_SO_TYPE;
 
 const attributes: InvestigationAttributes = {
+  title: 'Test rule',
   status: 'running',
   subject_type: 'alert',
   subject_id: 'alert-1',
@@ -222,6 +223,81 @@ describe('SavedObjectInvestigationRepository', () => {
         page: undefined,
         perPage: undefined,
       });
+    });
+
+    it('builds a subject-type OR filter', async () => {
+      const { repository, savedObjectsClient } = createRepository();
+      savedObjectsClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 20,
+      });
+
+      await repository.find({ subjectTypes: ['alert', 'significant_event'] });
+
+      expect(savedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter:
+            `(${TYPE}.attributes.subject_type: "alert"` +
+            ` OR ${TYPE}.attributes.subject_type: "significant_event")`,
+        })
+      );
+    });
+
+    it('builds a severity OR filter', async () => {
+      const { repository, savedObjectsClient } = createRepository();
+      savedObjectsClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 20,
+      });
+
+      await repository.find({ severities: ['80-critical', '60-high'] });
+
+      expect(savedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter:
+            `(${TYPE}.attributes.severity: "80-critical"` +
+            ` OR ${TYPE}.attributes.severity: "60-high")`,
+        })
+      );
+    });
+
+    it('passes free-text search across the four text-mapped attributes', async () => {
+      const { repository, savedObjectsClient } = createRepository();
+      savedObjectsClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 20,
+      });
+
+      await repository.find({ query: 'checkout latency' });
+
+      expect(savedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          search: 'checkout latency',
+          searchFields: ['title', 'subject_summary', 'summary', 'conclusion'],
+        })
+      );
+    });
+
+    it('omits searchFields when there is no query', async () => {
+      const { repository, savedObjectsClient } = createRepository();
+      savedObjectsClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 20,
+      });
+
+      await repository.find({ statuses: ['running'] });
+
+      expect(savedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({ search: undefined, searchFields: undefined })
+      );
     });
   });
 });

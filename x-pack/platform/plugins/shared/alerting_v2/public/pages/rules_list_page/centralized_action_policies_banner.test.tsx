@@ -12,7 +12,10 @@ import {
   CentralizedActionPoliciesBanner,
   CENTRALIZED_ACTION_POLICIES_BANNER_DISMISSED_STORAGE_KEY,
 } from './centralized_action_policies_banner';
+import { createMockLocators, MockLocatorProvider } from '../../test_utils/test_providers';
+import { AlertingV2ActionPoliciesLocatorDefinition } from '../../locators';
 
+const mockLocators = createMockLocators();
 const mockNavigateToUrl = jest.fn();
 const mockToursIsEnabled = jest.fn(() => true);
 const MOCK_ACTION_POLICIES_DOCS_URL = 'https://docs.test/action-policies';
@@ -52,9 +55,11 @@ jest.mock('@kbn/core-di-browser', () => {
 
 const renderBanner = () =>
   render(
-    <IntlProvider locale="en">
-      <CentralizedActionPoliciesBanner />
-    </IntlProvider>
+    <MockLocatorProvider locators={mockLocators}>
+      <IntlProvider locale="en">
+        <CentralizedActionPoliciesBanner />
+      </IntlProvider>
+    </MockLocatorProvider>
   );
 
 describe('CentralizedActionPoliciesBanner', () => {
@@ -86,14 +91,23 @@ describe('CentralizedActionPoliciesBanner', () => {
     renderBanner();
 
     const createBtn = screen.getByTestId('centralizedActionPoliciesCreate');
-    expect(createBtn).toHaveAttribute(
-      'href',
-      '/mock/app/management/alertingV2/action_policies/create'
-    );
+    expect(mockLocators.actionPolicyLocators.useUrl).toHaveBeenCalledWith({ page: 'create' });
+    expect(createBtn).toHaveAttribute('href', '/mock-locator-url');
     fireEvent.click(createBtn);
-    expect(mockNavigateToUrl).toHaveBeenCalledWith(
-      '/mock/app/management/alertingV2/action_policies/create'
-    );
+    expect(mockLocators.actionPolicyLocators.navigateSync).toHaveBeenCalledWith({ page: 'create' });
+  });
+
+  it('Create action policy CTA params resolve to management action policies create URL', async () => {
+    renderBanner();
+
+    fireEvent.click(screen.getByTestId('centralizedActionPoliciesCreate'));
+
+    const [params] = jest.mocked(mockLocators.actionPolicyLocators.navigateSync).mock.calls[0];
+    const location = await AlertingV2ActionPoliciesLocatorDefinition.getLocation(params);
+    expect(location).toMatchObject({
+      app: 'management',
+      path: '/alertingV2/action_policies/create',
+    });
   });
 
   it('Learn more CTA has correct href and opens in a new tab', () => {

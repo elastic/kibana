@@ -17,6 +17,8 @@ node_modules
 !/src/dev/notice/__fixtures__/node_modules
 !/src/platform/packages/private/kbn-import-resolver/src/__fixtures__/node_modules
 !/src/platform/packages/private/kbn-import-resolver/src/__fixtures__/packages/box/node_modules
+!/packages/kbn-check-prod-native-modules-cli/integration_tests/__fixtures__/*/node_modules
+!/packages/kbn-check-prod-native-modules-cli/integration_tests/__fixtures__/*/node_modules/**
 /node_modules.tar.zst
 trash
 /optimize
@@ -104,6 +106,7 @@ selenium
 *.out
 package-lock.json
 !/.buildkite/package-lock.json
+yarn.lock
 .yo-rc.json
 .vscode
 *.sublime-*
@@ -199,6 +202,10 @@ oas_docs/bundle.serverless.json
 src/platform/plugins/shared/console/packaging/react/translations
 
 .moon/cache
+
+# CI test run order artifacts (written by pick_test_group_run_order.ts)
+jest_run_order.json
+ftr_run_order.json
 
 # Batched commits marker, e.g.: from quick checks
 .collect_commits_marker

@@ -5,8 +5,10 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import { queryBoolean, optionalRouteId } from '../zod_query';
 import {
   legacySyntheticsMonitorTypeSingle,
   syntheticsMonitorSavedObjectType,
@@ -38,27 +40,16 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   validation: {
     request: {
       body: schema.any(),
-      query: schema.object({
-        id: schema.maybe(schema.string()),
-        preserve_namespace: schema.maybe(schema.boolean()),
-        gettingStarted: schema.maybe(schema.boolean()),
-        internal: schema.maybe(
-          schema.boolean({
-            defaultValue: false,
-          })
-        ),
+      query: z.strictObject({
+        id: optionalRouteId,
+        preserve_namespace: queryBoolean.optional(),
+        gettingStarted: queryBoolean.optional(),
+        internal: queryBoolean.optional().default(false),
         // primarily used for testing purposes, to specify the type of saved object
-        savedObjectType: schema.maybe(
-          schema.oneOf(
-            [
-              schema.literal(syntheticsMonitorSavedObjectType),
-              schema.literal(legacySyntheticsMonitorTypeSingle),
-            ],
-            {
-              defaultValue: syntheticsMonitorSavedObjectType,
-            }
-          )
-        ),
+        savedObjectType: z
+          .enum([syntheticsMonitorSavedObjectType, legacySyntheticsMonitorTypeSingle])
+          .optional()
+          .default(syntheticsMonitorSavedObjectType),
       }),
     },
   },
@@ -114,7 +105,11 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
         maintenanceWindows
       );
 
-      const validationResult = validateMonitor(monitorWithDefaults, spaceId);
+      const validationResult = validateMonitor(
+        monitorWithDefaults,
+        spaceId,
+        server.cloud?.isServerlessEnabled
+      );
 
       if (!validationResult.valid || !validationResult.decodedMonitor) {
         const { reason: message, details } = validationResult;

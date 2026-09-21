@@ -21,14 +21,8 @@ export interface PromoteResult {
 interface QueriesApi {
   promote: ({ queryIds }: { queryIds: string[] }) => Promise<PromoteResult>;
   demote: ({ queryIds }: { queryIds: string[] }) => Promise<{ demoted: number }>;
-  removeQuery: ({ queryId, streamName }: { queryId: string; streamName: string }) => Promise<void>;
-  deleteQueriesInBulk: ({
-    queryIds,
-    streamName,
-  }: {
-    queryIds: string[];
-    streamName: string;
-  }) => Promise<void>;
+  removeQuery: ({ queryId }: { queryId: string }) => Promise<void>;
+  deleteQueriesInBulk: ({ queryIds }: { queryIds: string[] }) => Promise<void>;
   setQueryDurability: (args: {
     query: StreamQuery;
     streamName: string;
@@ -57,7 +51,7 @@ export function useQueriesApi(): QueriesApi {
           signal: null,
         });
       },
-      removeQuery: async ({ queryId }: { queryId: string; streamName: string }) => {
+      removeQuery: async ({ queryId }: { queryId: string }) => {
         await significantEventsRepositoryClient.fetch(
           'POST /internal/streams/queries/_bulk_delete',
           {
@@ -70,7 +64,7 @@ export function useQueriesApi(): QueriesApi {
           }
         );
       },
-      deleteQueriesInBulk: async ({ queryIds }: { queryIds: string[]; streamName: string }) => {
+      deleteQueriesInBulk: async ({ queryIds }: { queryIds: string[] }) => {
         await significantEventsRepositoryClient.fetch(
           'POST /internal/streams/queries/_bulk_delete',
           {
@@ -93,11 +87,11 @@ export function useQueriesApi(): QueriesApi {
         expiresAt: string | undefined;
       }) => {
         await significantEventsRepositoryClient.fetch(
-          'PUT /api/streams/{name}/queries/{queryId} 2023-10-31',
+          'PUT /internal/significant_events/queries/{queryId}',
           {
             signal: null,
             params: {
-              path: { name: streamName, queryId: query.id },
+              path: { queryId: query.id },
               body: {
                 title: query.title,
                 esql: query.esql,
@@ -105,6 +99,7 @@ export function useQueriesApi(): QueriesApi {
                 evidence: query.evidence,
                 description: query.description,
                 expires_at: expiresAt,
+                target_name: streamName,
               },
             },
           }

@@ -21,6 +21,7 @@ import {
   getRuleChangesHistoryApiService,
   getRuleExecutionsApiService,
   getRulesApiService,
+  getRuleSavedObjectService,
   getRuleTemplatesApiService,
   getTaskManagerService,
   getTelemetryService,
@@ -33,6 +34,7 @@ import {
   type RuleChangesHistoryApiService,
   type RuleExecutionsApiService,
   type RulesApiService,
+  type RuleSavedObjectService,
   type RuleEventsApiService,
   type RuleTemplatesApiService,
   type TaskManagerService,
@@ -45,6 +47,7 @@ import { getSourceIndexApiService } from './services/source_index_api_service';
 
 export interface AlertingApiServices {
   rules: RulesApiService;
+  ruleSavedObject: RuleSavedObjectService;
   ruleTemplates: RuleTemplatesApiService;
   ruleChangesHistory: RuleChangesHistoryApiService;
   ruleEvents: RuleEventsApiService;
@@ -83,6 +86,7 @@ export const buildAlertingApiServices = ({
   const taskManager = getTaskManagerService({ kbnClient, log });
   return {
     rules: getRulesApiService({ kbnClient, log }),
+    ruleSavedObject: getRuleSavedObjectService({ esClient, log, config }),
     ruleTemplates: getRuleTemplatesApiService({ kbnClient, log }),
     ruleChangesHistory: getRuleChangesHistoryApiService({ esClient, log, config }),
     ruleEvents: getRuleEventsApiService({ esClient, log }),

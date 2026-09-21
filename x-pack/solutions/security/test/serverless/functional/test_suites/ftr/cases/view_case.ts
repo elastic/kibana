@@ -34,8 +34,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const comboBox = getService('comboBox');
   const svlCommonPage = getPageObject('svlCommonPage');
 
-  // Failing: See https://github.com/elastic/kibana/issues/287822
-  describe.skip('Case View', function () {
+  describe('Case View', function () {
     before(async () => {
       await svlCommonPage.loginWithPrivilegedRole();
     });
@@ -454,7 +453,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.casesFilesTable.emptyOrFail();
       });
 
-      describe('Files User Activity', () => {
+      describe('Files User Activity', function () {
+        this.tags(['failsOnMKI']);
+
         it('file user action is displayed correctly', async () => {
           await cases.casesFilesTable.addFile(require.resolve('./note.txt'));
 

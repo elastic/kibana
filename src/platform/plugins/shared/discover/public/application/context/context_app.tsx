@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Fragment, memo, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { Fragment, memo, useEffect, useRef, useMemo, useCallback, useState } from 'react';
 import { EuiPage, EuiPageBody } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { cloneDeep } from 'lodash';
@@ -74,6 +74,10 @@ export const ContextApp = ({
   });
   const prevAppState = useRef<AppState>();
   const prevGlobalState = useRef<GlobalState>({ filters: [] });
+  const [isWarningCalloutDismissed, setIsWarningCalloutDismissed] = useState(false);
+  const onDismissWarningCallout = useCallback(() => {
+    setIsWarningCalloutDismissed(true);
+  }, []);
 
   const setAppState = useCallback<UseColumnsProps['setAppState']>(
     ({ settings, ...rest }) => {
@@ -158,6 +162,7 @@ export const ContextApp = ({
 
       if (fetchType) {
         surroundingDocsFetchTracker.reportEvent({ meta: { fetchType } });
+        setIsWarningCalloutDismissed(false);
       }
     };
 
@@ -280,6 +285,8 @@ export const ContextApp = ({
                 predecessorsStatus={fetchedState.predecessorsStatus.value}
                 successorsStatus={fetchedState.successorsStatus.value}
                 interceptedWarnings={interceptedWarnings}
+                isWarningCalloutDismissed={isWarningCalloutDismissed}
+                onDismissWarningCallout={onDismissWarningCallout}
               />
             </EuiPageBody>
           </EuiPage>
