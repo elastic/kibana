@@ -120,7 +120,6 @@ export interface Props {
   timeFilters: TimeRange;
   isSaveDisabled: boolean;
   query: Query | undefined;
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   history: ScopedHistory;
   setExecutionContext: (executionContext: KibanaExecutionContext) => void;
 }

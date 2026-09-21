@@ -7,18 +7,25 @@
 
 export { createConversationUpdatedEvent, createConversationCreatedEvent } from './events';
 export { generateTitle } from './generate_title';
-export { handleCancellation } from './handle_cancellation';
+export { handleCancellation, createAbortedError } from './handle_cancellation';
 export { executeAgent$ } from './execute_agent';
 export {
   getConversation,
-  updateConversation$,
-  createConversation$,
   persistRoundInput,
   appendRoundTerminated$,
   appendResumeExecution$,
+  persistExecutionInterruption,
+  isPendingResumeConversation,
   placeholderConversation,
   type ConversationOperation,
   type ConversationWithOperation,
+  type PersistExecutionInterruptionParams,
 } from './conversations';
-export { convertErrors } from './convert_errors';
+export { convertErrors, toClientError } from './convert_errors';
+export { serializeExecutionError, getHttpStatusFromError } from './serialize_execution_error';
 export { resolveServices } from './resolve_services';
+export { executionStartedEvents$ } from './execution_started';
+export {
+  trackExecutionInterruption,
+  type PersistInterruptionFn,
+} from './track_execution_interruption';

@@ -236,7 +236,7 @@ export const externalReferenceAttachmentTransformer: AttachmentTypeTransformer<
     return isLegacyExternalReferenceAttachment(attachment);
   },
 
-  isUnifiedPayload(attachment: AttachmentRequestV2): boolean {
+  isUnifiedPayload(attachment: AttachmentRequestV2): attachment is UnifiedAttachmentPayload {
     return isUnifiedExternalReferenceAttachment(attachment);
   },
 
