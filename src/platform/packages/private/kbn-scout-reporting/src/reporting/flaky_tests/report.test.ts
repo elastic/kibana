@@ -285,9 +285,12 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
       flakyByBranch: { main: 1 },
     });
     // the excluded classification never reaches the per-branch check either
-    expect(fetchBranchCounts).toHaveBeenCalledWith(es, expect.anything(), [
-      expect.objectContaining({ testId: 'jest-flaky' }),
-    ]);
+    expect(fetchBranchCounts).toHaveBeenCalledWith(
+      es,
+      expect.anything(),
+      [expect.objectContaining({ testId: 'jest-flaky' })],
+      options.thresholds
+    );
     expect(fetchBranchStats).toHaveBeenCalledWith(es, expect.anything(), [
       expect.objectContaining({ testId: 'jest-flaky' }),
     ]);
@@ -478,7 +481,8 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
       expect.anything(),
       ['jest-flaky-low', 'jest-flaky-high', 'jest-broken', 'pw-flaky'].map((testId) =>
         expect.objectContaining({ testId })
-      )
+      ),
+      options.thresholds
     );
 
     // per-test lookups only run for admitted tests
@@ -550,7 +554,8 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
       expect.anything(),
       ['diluted', 'flaky-on-9.5', 'still-running'].map((testId) =>
         expect.objectContaining({ testId })
-      )
+      ),
+      { ...thresholds, minFailRate: 0.02, maxTests: 2 }
     );
     // `still-running` failed in more builds; `flaky-on-9.5` qualifies on 9.5 despite its 1% total
     expect(report.flaky.map((entry) => entry.testId)).toEqual(['still-running', 'flaky-on-9.5']);

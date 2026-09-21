@@ -255,7 +255,7 @@ const buildReport = async (
   const qualified: Array<{ row: TestStatsRow; flakiestBranch: FlakyTestFlakiestBranch }> = [];
   if (candidates.length > 0) {
     startedAt = performance.now();
-    const branchCounts = await fetchBranchCounts(es, scope, candidates);
+    const branchCounts = await fetchBranchCounts(es, scope, candidates, thresholds);
     let belowThresholds = 0;
     for (const row of candidates) {
       const flakiestBranch = flakiestQualifyingBranch(
