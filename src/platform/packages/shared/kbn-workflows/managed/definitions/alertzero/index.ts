@@ -8,6 +8,7 @@
  */
 
 import { ALERTZERO_ACTION_CREATE_RULE_WORKFLOW_ID } from './actions/action_create_detection_rule';
+import { ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID } from './actions/action_edit_detection_rule';
 import {
   ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID,
@@ -41,6 +42,10 @@ export {
   ALERTZERO_ACTION_CREATE_RULE_WORKFLOW,
   ALERTZERO_ACTION_CREATE_RULE_WORKFLOW_ID,
 } from './actions/action_create_detection_rule';
+export {
+  ALERTZERO_ACTION_EDIT_RULE_WORKFLOW,
+  ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID,
+} from './actions/action_edit_detection_rule';
 export {
   ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW,
   ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
@@ -98,4 +103,7 @@ export const ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS = [
  * Action workflows AlertZero may propose. Discovery is normally by the generic
  * `action` tag; this list is the install set and the fallback.
  */
-export const ALERTZERO_ACTION_WORKFLOW_IDS = [ALERTZERO_ACTION_CREATE_RULE_WORKFLOW_ID] as const;
+export const ALERTZERO_ACTION_WORKFLOW_IDS = [
+  ALERTZERO_ACTION_CREATE_RULE_WORKFLOW_ID,
+  ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID,
+] as const;
