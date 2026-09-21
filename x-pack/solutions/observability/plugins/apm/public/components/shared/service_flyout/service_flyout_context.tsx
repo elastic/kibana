@@ -57,6 +57,8 @@ export interface ServiceFlyoutContextValue {
   // APM index patterns — fetched once at the top level and shared to avoid duplicate requests
   // undefined = still loading, null = fetch failed or no indices, APMIndices = ready
   indices: APMIndices | null | undefined;
+  /** Shared EUI flyout history key for nested flyouts opened from this service flyout. */
+  flyoutHistoryKey: symbol;
   // Set by hosts whose surrounding UI is computed from raw documents (Discover):
   // the key metric charts then stay ES|QL over raw documents for every schema,
   // instead of the rollup-based APM chart components, so they agree with the host.
