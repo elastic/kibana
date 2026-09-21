@@ -8,6 +8,7 @@
 import type { CoreSetup } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import { hasContextEngineReadPrivilege } from './agent_builder/has_context_engine_read_privilege';
 import { registerAgentBuilderTools } from './agent_builder/tools';
 import { registerAttachmentTypes } from './attachment_types';
 import type {
@@ -31,6 +32,28 @@ export const registerContextEngineAgentBuilderIntegration = ({
 }): void => {
   registerAttachmentTypes(agentBuilder);
 
+  agentBuilder.agents.registerAiIndexResolver(async ({ ids, request }) => {
+    const [coreStart, startDeps] = await coreSetup.getStartServices();
+    const { contextEngine, security } = startDeps;
+
+    if (!(await hasContextEngineReadPrivilege({ security, request }))) {
+      return [];
+    }
+
+    // Same rule as the list route; only requested ids are probed.
+    const aiIndices = await contextEngine
+      .getAiIndexDataReadService({
+        esClient: coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
+        request,
+      })
+      .list(ids);
+    return aiIndices.map((aiIndex) => ({
+      id: aiIndex.id,
+      esqlTarget: aiIndex.dest.value,
+      description: aiIndex.description,
+    }));
+  });
+
   registerAgentBuilderTools({
     agentBuilder,
     getCoreStart: async () => {
@@ -42,9 +65,9 @@ export const registerContextEngineAgentBuilderIntegration = ({
       return startDeps.security;
     },
     getWorkflowsManagement: () => workflowsManagement,
-    getAiIndexService: async () => {
+    getContextEngineStart: async () => {
       const [, startDeps] = await coreSetup.getStartServices();
-      return startDeps.contextEngine.getAiIndexService();
+      return startDeps.contextEngine;
     },
   });
 };

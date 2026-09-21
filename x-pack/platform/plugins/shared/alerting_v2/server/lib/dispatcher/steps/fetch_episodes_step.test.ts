@@ -14,7 +14,7 @@ import {
   createStepLogger,
 } from '../fixtures/test_utils';
 import { EPISODE_QUERY_LIMIT } from '../queries';
-import type { AlertEventSeverity } from '../../../resources/datastreams/alert_events';
+import type { AlertEventSeverity } from '@kbn/alerting-v2-schemas';
 
 const logger = createStepLogger();
 
@@ -35,8 +35,8 @@ describe('FetchEpisodesStep', () => {
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.episodes).toHaveLength(2);
-    expect(result.data?.episodes?.[0].rule_id).toBe('r1');
+    expect(result.data?.scan?.episodes).toHaveLength(2);
+    expect(result.data?.scan?.episodes[0].rule_id).toBe('r1');
   });
 
   it('halts with no_episodes when none are found', async () => {
@@ -92,7 +92,7 @@ describe('FetchEpisodesStep', () => {
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.truncated).toBe(true);
+    expect(result.data?.scan?.truncated).toBe(true);
   });
 
   it('sets truncated: false when the query returns fewer than EPISODE_QUERY_LIMIT rows', async () => {
@@ -109,7 +109,7 @@ describe('FetchEpisodesStep', () => {
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.truncated).toBe(false);
+    expect(result.data?.scan?.truncated).toBe(false);
   });
 
   it('propagates query errors', async () => {

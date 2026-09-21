@@ -26,6 +26,8 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { SearchResponseWarningsCallout } from '@kbn/search-response-warnings';
 import type {
   DataGridDensity,
+  JsonModeSettings,
+  DocumentsDisplayMode,
   UnifiedDataTableProps,
   UnifiedDataTableRestorableState,
   UseColumnsProps,
@@ -57,6 +59,7 @@ import {
   selectTabCombinedFilters,
   useAppStateSelector,
   useCurrentTabRuntimeState,
+  type ExpandedDocCascadePath,
 } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FetchStatus } from '../../../types';
@@ -116,7 +119,7 @@ function DiscoverDocumentsComponent({
   const persistedDiscoverSession = useInternalStateSelector(
     (state) => state.persistedDiscoverSession
   );
-  const { dataViews, capabilities, uiSettings, uiActions, discoverFeatureFlags } = services;
+  const { dataViews, capabilities, uiSettings, uiActions } = services;
   const requestParams = useCurrentTabSelector((state) => state.dataRequestParams);
   const [
     dataSource,
@@ -129,6 +132,8 @@ function DiscoverDocumentsComponent({
     columns,
     sampleSizeState,
     density,
+    documentsDisplayMode,
+    jsonModeSettings,
   ] = useAppStateSelector((state) => {
     return [
       state.dataSource,
@@ -141,6 +146,8 @@ function DiscoverDocumentsComponent({
       state.columns,
       state.sampleSize,
       state.density,
+      state.documentsDisplayMode,
+      state.jsonModeSettings,
     ];
   });
   const expandedDoc = useCurrentTabSelector((state) => state.expandedDoc);
@@ -148,6 +155,15 @@ function DiscoverDocumentsComponent({
   const isEsqlMode = useIsEsqlMode();
   const dataStateContainer = useCurrentTabDataStateContainer();
   const documentState = useDataState(dataStateContainer.data$.documents$);
+  const isWarningCalloutDismissed = useCurrentTabSelector(
+    (state) => state.isWarningCalloutDismissed
+  );
+  const setIsWarningCalloutDismissed = useCurrentTabAction(
+    internalStateActions.setIsWarningCalloutDismissed
+  );
+  const dismissWarningCallout = useCallback(() => {
+    dispatch(setIsWarningCalloutDismissed({ isWarningCalloutDismissed: true }));
+  }, [dispatch, setIsWarningCalloutDismissed]);
   const isDataLoading =
     documentState.fetchStatus === FetchStatus.LOADING ||
     documentState.fetchStatus === FetchStatus.PARTIAL;
@@ -188,7 +204,10 @@ function DiscoverDocumentsComponent({
 
   const setExpandedDoc = useCurrentTabAction(internalStateActions.setExpandedDoc);
   const getExpandedDocSetter = useCallback(
-    (owner: string): NonNullable<UnifiedDataTableProps['setExpandedDoc']> =>
+    (
+        owner: string,
+        expandedDocCascadePath?: ExpandedDocCascadePath
+      ): NonNullable<UnifiedDataTableProps['setExpandedDoc']> =>
       (
         doc: DataTableRecord | undefined,
         options?: {
@@ -200,6 +219,7 @@ function DiscoverDocumentsComponent({
           setExpandedDoc({
             expandedDoc: doc,
             expandedDocOwner: doc ? owner : undefined,
+            expandedDocCascadePath: doc ? expandedDocCascadePath : undefined,
             initialDocViewerTabId: options?.initialTabId,
             initialDocViewerTabState: options?.initialTabState,
           })
@@ -285,6 +305,20 @@ function DiscoverDocumentsComponent({
     [dispatch, updateAppState]
   );
 
+  const onUpdateDocumentsDisplayMode = useCallback(
+    (newDocumentsDisplayMode: DocumentsDisplayMode) => {
+      dispatch(updateAppState({ appState: { documentsDisplayMode: newDocumentsDisplayMode } }));
+    },
+    [dispatch, updateAppState]
+  );
+
+  const onUpdateJsonModeSettings = useCallback(
+    (newJsonModeSettings: JsonModeSettings) => {
+      dispatch(updateAppState({ appState: { jsonModeSettings: newJsonModeSettings } }));
+    },
+    [dispatch, updateAppState]
+  );
+
   // should be aligned with embeddable `showTimeCol` prop
   const showTimeCol = useMemo(
     () => showTimeFieldColumn({ uiSettings, query }),
@@ -325,12 +359,6 @@ function DiscoverDocumentsComponent({
     [dispatch, setDataGridUiState]
   );
 
-  // This is temporary, sourceDisplayMode should be get from the app state.
-  const sourceDisplayMode = useMemo(
-    () => (discoverFeatureFlags.getDataTableJsonViewEnabled() ? 'json' : 'summary'),
-    [discoverFeatureFlags]
-  );
-
   const configRowHeight = uiSettings.get(ROW_HEIGHT_OPTION);
   const cellRendererDensity = useMemo(
     () => density ?? dataGridUiState?.density ?? getDataGridDensity(services.storage, 'discover'),
@@ -361,8 +389,14 @@ function DiscoverDocumentsComponent({
   }, [cellRendererParams, getCellRenderersAccessor]);
 
   const callouts = useMemo(
-    () => <SearchResponseWarningsCallout warnings={documentState.interceptedWarnings ?? []} />,
-    [documentState.interceptedWarnings]
+    () => (
+      <SearchResponseWarningsCallout
+        warnings={documentState.interceptedWarnings ?? []}
+        isDismissed={isWarningCalloutDismissed}
+        onDismiss={dismissWarningCallout}
+      />
+    ),
+    [dismissWarningCallout, documentState.interceptedWarnings, isWarningCalloutDismissed]
   );
 
   const loadingIndicator = useMemo(
@@ -575,7 +609,10 @@ function DiscoverDocumentsComponent({
             initialState={dataGridUiState}
             onInitialStateChange={onInitialStateChange}
             onFullScreenChange={setIsDataGridFullScreen}
-            sourceDisplayMode={sourceDisplayMode}
+            documentsDisplayModeState={documentsDisplayMode}
+            onUpdateDocumentsDisplayMode={onUpdateDocumentsDisplayMode}
+            jsonModeSettingsState={jsonModeSettings}
+            onUpdateJsonModeSettings={onUpdateJsonModeSettings}
           />
         </CellActionsProvider>
       </div>

@@ -7,6 +7,7 @@
 
 import { getSeverityType } from '@kbn/ml-anomaly-utils';
 import type { CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import { getProjectRoutingFromDatafeed } from '@kbn/ml-cps-common';
 import { getIndicesOptions } from '../../../../../common/util/datafeed_utils';
 import type { MlResultsService } from '../../../services/results_service';
 import type { Anomaly } from '../../../jobs/new_job/common/results_loader/results_loader';
@@ -25,6 +26,9 @@ export function chartLoaderProvider(mlResultsService: MlResultsService) {
       ),
       bucketSpanMs
     );
+
+    const projectRouting = getProjectRoutingFromDatafeed(job.datafeed_config);
+
     const resp = await mlResultsService.getEventRateData(
       job.datafeed_config.indices.join(),
       job.datafeed_config.query,
@@ -33,7 +37,8 @@ export function chartLoaderProvider(mlResultsService: MlResultsService) {
       job.data_counts.latest_record_timestamp!,
       intervalMs,
       job.datafeed_config.runtime_mappings,
-      getIndicesOptions(job.datafeed_config)
+      getIndicesOptions(job.datafeed_config),
+      projectRouting ?? undefined
     );
     if (resp.error !== undefined) {
       throw resp.error;

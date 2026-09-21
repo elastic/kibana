@@ -6,7 +6,11 @@
  */
 
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
-import type { AlertEpisodeEsqlRow, EpisodeGroupHashEsqlRow } from '@kbn/alerting-v2-common-queries';
+import type {
+  AlertEpisodeEsqlRow,
+  EpisodeEventRow,
+  EpisodeGroupHashEsqlRow,
+} from '@kbn/alerting-v2-common-queries';
 import type { QueryServiceContract } from '../services/query_service/query_service';
 import { EpisodesClient } from './episodes_client';
 
@@ -94,6 +98,60 @@ describe('EpisodesClient', () => {
       const { client } = createClient({ episodeRows: [createRow({ last_tags: null })] });
 
       await expect(client.get(EPISODE_ID)).resolves.toMatchObject({ last_tags: [] });
+    });
+  });
+
+  describe('getEvents', () => {
+    const eventRow: EpisodeEventRow = {
+      '@timestamp': '2026-08-03T00:00:00.000Z',
+      'episode.id': EPISODE_ID,
+      'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
+      'rule.id': 'rule-1',
+      group_hash: GROUP_HASH,
+      severity: 'high',
+      source: 'threshold',
+      data: { cpu: 90 },
+    };
+
+    it('returns event rows from the shared episode events query', async () => {
+      const queryService: jest.Mocked<Pick<QueryServiceContract, 'executeQueryRows'>> = {
+        executeQueryRows: jest.fn().mockResolvedValueOnce([eventRow]),
+      };
+      const client = new EpisodesClient(queryService as unknown as QueryServiceContract, SPACE_ID);
+
+      await expect(client.getEvents(EPISODE_ID)).resolves.toEqual([eventRow]);
+
+      expect(queryService.executeQueryRows).toHaveBeenCalledTimes(1);
+      const [{ query }] = queryService.executeQueryRows.mock.calls[0];
+      expect(query).toContain(`space_id == "${SPACE_ID}"`);
+      expect(query).toContain(`episode.id == "${EPISODE_ID}"`);
+      expect(query).toContain('type == "alert"');
+      expect(query).toContain(
+        'KEEP @timestamp, `episode.id`, `episode.status`, `rule.id`, group_hash, severity, source, data'
+      );
+      expect(query).toContain('SORT @timestamp ASC');
+    });
+
+    it('forwards time-range, status, and limit filters to the shared query', async () => {
+      const queryService: jest.Mocked<Pick<QueryServiceContract, 'executeQueryRows'>> = {
+        executeQueryRows: jest.fn().mockResolvedValueOnce([]),
+      };
+      const client = new EpisodesClient(queryService as unknown as QueryServiceContract, SPACE_ID);
+
+      await client.getEvents(EPISODE_ID, {
+        timeRange: {
+          start: '2026-08-03T00:00:00.000Z',
+          end: '2026-08-03T01:00:00.000Z',
+        },
+        status: ALERT_EPISODE_STATUS.ACTIVE,
+        limit: 1001,
+      });
+
+      const [{ query }] = queryService.executeQueryRows.mock.calls[0];
+      expect(query).toContain('@timestamp >= "2026-08-03T00:00:00.000Z"');
+      expect(query).toContain('@timestamp <= "2026-08-03T01:00:00.000Z"');
+      expect(query).toContain(`episode.status == "${ALERT_EPISODE_STATUS.ACTIVE}"`);
+      expect(query).toContain('LIMIT 1001');
     });
   });
 });

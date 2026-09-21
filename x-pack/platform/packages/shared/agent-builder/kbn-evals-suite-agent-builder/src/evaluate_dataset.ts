@@ -16,7 +16,11 @@ import {
   withEvaluatorSpan,
   createSpanLatencyEvaluator,
   createSkillInvocationEvaluator,
-  createRagEvaluators,
+  getEffectiveK,
+  createPrecisionAtKEvaluator,
+  createRecallAtKEvaluator,
+  createF1AtKEvaluator,
+  createHitRateAtKEvaluator,
   type GroundTruth,
   type ExperimentTask,
   type TaskOutput,
@@ -35,7 +39,7 @@ import {
 } from '@kbn/evals';
 import { isInternalTool } from '@kbn/agent-builder-common/tools';
 import type { AgentBuilderEvaluationChatClient } from './chat_client';
-import { extractSearchRetrievedDocs } from './rag_extractor';
+import { extractSearchRetrievedDocs } from './ir_extractor';
 
 interface DatasetExample extends Example {
   input: {
@@ -77,6 +81,7 @@ const createRequiredTermsEvaluator = ({
 }): Evaluator => ({
   name,
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({ output, metadata }) => {
     const raw = metadata?.[metadataKey];
     const required = Array.isArray(raw)
@@ -115,9 +120,13 @@ function configureExperiment({
 } {
   const task: ExperimentTask<DatasetExample, TaskOutput> = async ({ input, output, metadata }) => {
     const agentId = getStringMeta(metadata, 'agentId');
+    const autoConfirm = getBooleanMeta(metadata, 'autoConfirm');
     const response = await chatClient.converse({
       messages: [{ message: input.question }],
-      options: agentId ? { agentId } : undefined,
+      options: {
+        ...(agentId ? { agentId } : {}),
+        ...(autoConfirm ? { autoConfirm } : {}),
+      },
     });
 
     // Running correctness and groundedness evaluators as part of the task since their respective quantitative evaluators need their output
@@ -151,18 +160,26 @@ function configureExperiment({
     };
   };
 
-  const ragEvaluators = createRagEvaluators({
-    k: 10,
+  const irConfig = {
     relevanceThreshold: 1,
     extractRetrievedDocs: extractSearchRetrievedDocs,
     extractGroundTruth: (referenceOutput: DatasetExample['output']) =>
       referenceOutput?.groundTruth ?? {},
-  });
+  };
+  // MRR, NDCG, and MAP are excluded: multi-hop search concatenates results from multiple
+  // tool calls chronologically, not by relevance rank.
+  const irEvaluators = getEffectiveK([10]).flatMap((k) => [
+    createPrecisionAtKEvaluator(irConfig, k),
+    createRecallAtKEvaluator(irConfig, k),
+    createF1AtKEvaluator(irConfig, k),
+    createHitRateAtKEvaluator(irConfig, k),
+  ]);
 
   const selectedEvaluators = selectEvaluators([
     {
       name: 'ExpectedToolCalled',
       kind: 'CODE' as const,
+      direction: 'maximize',
       evaluate: async ({ output, metadata }) => {
         const expectedToolId = getStringMeta(metadata, 'expectedToolId');
         if (!expectedToolId) return { score: 1 };
@@ -187,6 +204,7 @@ function configureExperiment({
     {
       name: 'ShouldNotCallTool',
       kind: 'CODE' as const,
+      direction: 'maximize',
       evaluate: async ({ output, metadata }) => {
         const shouldNotCallToolId = getStringMeta(metadata, 'shouldNotCallToolId');
         if (!shouldNotCallToolId) return { score: 1 };
@@ -204,6 +222,7 @@ function configureExperiment({
     {
       name: 'ToolUsageOnly',
       kind: 'CODE' as const,
+      direction: 'maximize',
       evaluate: async ({ output, metadata }) => {
         const expectedOnlyToolId = getStringMeta(metadata, 'expectedOnlyToolId');
         if (!expectedOnlyToolId) return { score: 1 };
@@ -232,6 +251,7 @@ function configureExperiment({
     {
       name: 'DocVersionReleaseDate',
       kind: 'CODE' as const,
+      direction: 'maximize',
       evaluate: async ({ output, metadata }) => {
         if (!getBooleanMeta(metadata, 'requireVersionAndReleaseDate')) return { score: 1 };
 
@@ -275,13 +295,13 @@ function configureExperiment({
     createRequiredTermsEvaluator({ name: 'RequiredTermsInResponse', metadataKey: 'requiredTerms' }),
     ...createQuantitativeCorrectnessEvaluators(),
     createQuantitativeGroundednessEvaluator(),
-    ...ragEvaluators,
+    ...irEvaluators,
     ...Object.values({
       ...evaluators.traceBasedEvaluators,
       latency: createSpanLatencyEvaluator({
         traceEsClient,
         log,
-        spanName: 'Converse',
+        spanNamePattern: 'invoke_agent*',
       }),
     }),
     createSkillInvocationEvaluator({
@@ -292,6 +312,7 @@ function configureExperiment({
     {
       name: 'ExpectedSkillInvocation',
       kind: 'CODE' as const,
+      direction: 'maximize',
       evaluate: async ({ output, metadata }) => {
         const expectedSkill = getStringMeta(metadata, 'expectedSkill');
         const shouldNotActivate = getStringMeta(metadata, 'shouldNotActivateSkill');

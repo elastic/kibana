@@ -8,6 +8,7 @@
 import type { RouteDependencies } from './types';
 import { registerToolsRoutes } from './tools';
 import { registerInternalToolsRoutes } from './internal/tools';
+import { registerInternalConnectorRoutes } from './internal/connectors';
 import { registerInternalSkillsRoutes } from './internal/skills';
 import { registerInternalAgentRoutes } from './internal/agents';
 import { registerInternalConversationRoutes } from './internal/conversations';
@@ -16,6 +17,7 @@ import { registerInternalSmlRoutes } from './internal/sml';
 import { registerInternalInferenceEndpointsRoute } from './internal/inference_endpoints';
 import { registerAgentRoutes } from './agents';
 import { registerChatRoutes } from './chat';
+import { registerChatApiRoutes } from './chat_api';
 import { registerConversationRoutes } from './conversations';
 import { registerAttachmentRoutes } from './attachments';
 import { registerMCPRoutes } from './mcp';
@@ -30,6 +32,7 @@ import { registerSpaceSettingsRoutes } from './internal/space_settings';
 export const registerRoutes = (dependencies: RouteDependencies) => {
   registerToolsRoutes(dependencies);
   registerInternalToolsRoutes(dependencies);
+  registerInternalConnectorRoutes(dependencies);
   registerInternalSkillsRoutes(dependencies);
   registerInternalAgentRoutes(dependencies);
   registerInternalConversationRoutes(dependencies);
@@ -38,6 +41,7 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerInternalInferenceEndpointsRoute(dependencies);
   registerAgentRoutes(dependencies);
   registerChatRoutes(dependencies);
+  registerChatApiRoutes(dependencies);
   registerConversationRoutes(dependencies);
   registerAttachmentRoutes(dependencies);
   registerMCPRoutes(dependencies);

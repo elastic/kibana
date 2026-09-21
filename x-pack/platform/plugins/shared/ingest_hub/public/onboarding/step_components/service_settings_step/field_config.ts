@@ -79,18 +79,28 @@ export function resolveFieldMeta(
  * Convert a string draft value to the typed value Fleet's component and buildStreamVars expect.
  * bool → boolean, multi → string[], otherwise string.
  */
-export function toTyped(raw: string | undefined, meta: FieldMeta): string | boolean | string[] {
-  if (meta.isBool) return raw === undefined ? meta.def.default === true : raw === 'true';
-  if (meta.multi)
-    return raw
-      ? raw
-          .split(',')
-          .map((s) => s.trim())
-          .filter(Boolean)
-      : [];
-  // For unset text/duration/etc fields, surface the manifest default so the flyout pre-fills.
-  if (raw === undefined && typeof meta.def.default === 'string') return meta.def.default;
-  return raw ?? '';
+export function toTyped(
+  raw: string | string[] | undefined,
+  meta: FieldMeta
+): string | boolean | string[] {
+  if (meta.isBool) {
+    const s = Array.isArray(raw) ? raw[0] : raw;
+    return s === undefined ? meta.def.default === true : s === 'true';
+  }
+  if (meta.multi) {
+    if (Array.isArray(raw)) return raw;
+    if (raw)
+      return raw
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
+    if (raw === undefined && Array.isArray(meta.def.default)) return meta.def.default as string[];
+    return [];
+  }
+  const s = Array.isArray(raw) ? raw.join(',') : raw;
+  // For unset fields, surface the manifest default (string or number/duration) so the flyout pre-fills.
+  if (s === undefined && meta.def.default != null) return String(meta.def.default);
+  return s ?? '';
 }
 
 /**
@@ -111,6 +121,10 @@ export function getDefaultInput(service: AwsServiceMatrixEntry | undefined): str
   return service?.defaultEnabledInputs?.[0] ?? service?.inputs?.[0] ?? null;
 }
 
+// TODO: add the "Create dedicated index template for custom dataset (recommended)" switch
+// that Fleet shows in advanced options for input packages when data_stream.dataset is customised
+// (package_policy_input_stream.tsx, rendered after advancedVars when showPipelinesAndMappings is true).
+// It is a Fleet UI construct, not a manifest var — needs Fleet's useIndexTemplateExists hook.
 export function getFlyoutFields(
   service: AwsServiceMatrixEntry,
   activeInput: string | null
@@ -119,9 +133,10 @@ export function getFlyoutFields(
   return allFields.filter((f) => {
     const meta = resolveFieldMeta(service, activeInput, f);
     if (!meta) return false;
-    if (!meta.showUser) return false;
     // Bool fields are rendered as switches in their own section; exclude from text flyout fields.
     if (meta.isBool) return false;
+    // show_user:false vars intentionally surface here (under Advanced options via isAdvancedVar)
+    // to match the Integrations UI which shows all vars regardless of show_user.
     return true;
   });
 }
@@ -156,6 +171,7 @@ export function getRegionFieldName(
   if (activeInput === 'aws-s3' && rc.includes('region')) return 'region';
   if (activeInput === 'aws-cloudwatch' && rc.includes('region_name')) return 'region_name';
   if (rc.includes('aws_region')) return 'aws_region';
+  if (rc.includes('region')) return 'region'; // input packages (e.g. otelcol)
   return 'aws_region';
 }
 

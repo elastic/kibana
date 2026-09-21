@@ -41,6 +41,7 @@ import {
   AgentPolicySchemaV5,
   AgentPolicySchemaV6,
   AgentPolicySchemaV7,
+  AgentPolicySchemaV8,
   EpmPackagesSchemaV6,
   EpmPackagesSchemaV7,
   EpmPackagesSchemaV8,
@@ -52,10 +53,12 @@ import {
   SettingsSchemaV6,
   SettingsSchemaV7,
   SettingsSchemaV8,
+  SettingsSchemaV9,
   PackagePolicySchemaV22,
   PackagePolicySchemaV24,
   PackagePolicySchemaV25,
   CloudConnectorSchemaV4,
+  CloudConnectorSchemaV5,
   CloudOnboardingDeploymentSchemaV1,
 } from '../types';
 
@@ -130,6 +133,7 @@ import {
   migratePackagePolicySetRequiresRootToV8150,
 } from './migrations/to_v8_15_0';
 import { backfillAgentPolicyToV4 } from './model_versions/agent_policy_v4';
+import { backfillAgentPolicyDownloadSourceIds } from './model_versions/agent_policy_download_source_ids_backfill';
 import { backfillOutputPolicyToV7 } from './model_versions/outputs';
 import { packagePolicyV17AdvancedFieldsForEndpointV818 } from './model_versions/security_solution/v17_advanced_package_policy_fields';
 import { backfillPackagePolicyLatestRevision } from './model_versions/package_policy_latest_revision_backfill';
@@ -210,6 +214,7 @@ export const getSavedObjectTypes = (
           integration_knowledge_enabled: { type: 'boolean' },
           ssl_secret_storage_requirements_met: { type: 'boolean' },
           download_source_auth_secret_storage_requirements_met: { type: 'boolean' },
+          otlp_output_requirements_met: { type: 'boolean' },
         },
       },
       migrations: {
@@ -314,6 +319,20 @@ export const getSavedObjectTypes = (
             create: SettingsSchemaV8,
           },
         },
+        9: {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                otlp_output_requirements_met: { type: 'boolean' },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: SettingsSchemaV9.extends({}, { unknowns: 'ignore' }),
+            create: SettingsSchemaV9,
+          },
+        },
       },
     },
     [LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE]: {
@@ -345,6 +364,7 @@ export const getSavedObjectTypes = (
           data_output_id: { type: 'keyword' },
           monitoring_output_id: { type: 'keyword' },
           download_source_id: { type: 'keyword' },
+          download_source_ids: { type: 'keyword', ignore_above: 1024 },
           fleet_server_host_id: { type: 'keyword' },
           agent_features: {
             properties: {
@@ -524,6 +544,24 @@ export const getSavedObjectTypes = (
             create: AgentPolicySchemaV7.extends({}, { unknowns: 'ignore' }),
           },
         },
+        '13': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                download_source_ids: { type: 'keyword', ignore_above: 1024 },
+              },
+            },
+            {
+              type: 'data_backfill',
+              backfillFn: backfillAgentPolicyDownloadSourceIds,
+            },
+          ],
+          schemas: {
+            forwardCompatibility: AgentPolicySchemaV8.extends({}, { unknowns: 'ignore' }),
+            create: AgentPolicySchemaV8.extends({}, { unknowns: 'ignore' }),
+          },
+        },
       },
     },
     [AGENT_POLICY_SAVED_OBJECT_TYPE]: {
@@ -555,6 +593,7 @@ export const getSavedObjectTypes = (
           data_output_id: { type: 'keyword' },
           monitoring_output_id: { type: 'keyword' },
           download_source_id: { type: 'keyword' },
+          download_source_ids: { type: 'keyword', ignore_above: 1024 },
           fleet_server_host_id: { type: 'keyword' },
           agent_features: {
             properties: {
@@ -663,6 +702,24 @@ export const getSavedObjectTypes = (
           schemas: {
             forwardCompatibility: AgentPolicySchemaV7.extends({}, { unknowns: 'ignore' }),
             create: AgentPolicySchemaV7.extends({}, { unknowns: 'ignore' }),
+          },
+        },
+        '8': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                download_source_ids: { type: 'keyword', ignore_above: 1024 },
+              },
+            },
+            {
+              type: 'data_backfill',
+              backfillFn: backfillAgentPolicyDownloadSourceIds,
+            },
+          ],
+          schemas: {
+            forwardCompatibility: AgentPolicySchemaV8.extends({}, { unknowns: 'ignore' }),
+            create: AgentPolicySchemaV8.extends({}, { unknowns: 'ignore' }),
           },
         },
       },
@@ -1917,6 +1974,10 @@ export const getSavedObjectTypes = (
           verification_status: { type: 'keyword' },
           verification_started_at: { type: 'date' },
           verification_failed_at: { type: 'date' },
+          iac_key: { type: 'keyword', ignore_above: 1024 },
+          iac_deployment_id: { type: 'keyword', ignore_above: 1024 },
+          iac_upgrade_status: { type: 'keyword', ignore_above: 1024 },
+          iac_upgrade_checked_at: { type: 'date' },
         },
       },
       modelVersions: {
@@ -2030,6 +2091,23 @@ export const getSavedObjectTypes = (
           schemas: {
             forwardCompatibility: CloudConnectorSchemaV4.extends({}, { unknowns: 'ignore' }),
             create: CloudConnectorSchemaV4,
+          },
+        },
+        5: {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                iac_key: { type: 'keyword', ignore_above: 1024 },
+                iac_deployment_id: { type: 'keyword', ignore_above: 1024 },
+                iac_upgrade_status: { type: 'keyword', ignore_above: 1024 },
+                iac_upgrade_checked_at: { type: 'date' },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: CloudConnectorSchemaV5.extends({}, { unknowns: 'ignore' }),
+            create: CloudConnectorSchemaV5,
           },
         },
       },

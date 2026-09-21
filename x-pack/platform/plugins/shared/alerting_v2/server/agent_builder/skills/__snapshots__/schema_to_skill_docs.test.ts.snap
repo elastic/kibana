@@ -5,14 +5,13 @@ exports[`schema_to_skill_docs generateActionPolicyOperationsDoc matches the revi
 
 #### \`operation: \\"set_metadata\\"\`
 
-Use \`set_metadata\` to name the action policy and add a description or tags so the user can filter by it later.
+Use \`set_metadata\` to name the action policy and add a description.
 
 | Field | Type | Required | Description |
 |---|---|---|---|
 | \`operation\` | \\"set_metadata\\" | required |  |
 | \`name\` | string | optional | The action policy name. (min length: 1, max length: 256) |
 | \`description\` | string | optional | A description of the action policy. (max length: 1024) |
-| \`tags\` | string[] | optional | Tags for categorizing the action policy. (max items: 20) |
 
 #### \`operation: \\"set_destinations\\"\`
 
@@ -30,7 +29,7 @@ Use \`set_matcher\` to limit which alert episodes this policy notifies on. An em
 | Field | Type | Required | Description |
 |---|---|---|---|
 | \`operation\` | \\"set_matcher\\" | required |  |
-| \`matcher\` | string \\\\| null | required | A KQL query to match alert episodes, or null for a catch-all. |
+| \`matcher\` | object \\\\| null | required | Structured matcher for alert episodes, or null for a catch-all. |
 
 #### \`operation: \\"set_grouping\\"\`
 
@@ -50,7 +49,7 @@ Use \`set_throttle\` to limit how often notifications fire so the user is not fl
 |---|---|---|---|
 | \`operation\` | \\"set_throttle\\" | required |  |
 | \`strategy\` | \\"on_status_change\\" \\\\| \\"per_status_interval\\" \\\\| \\"time_interval\\" \\\\| \\"every_time\\" | optional | The throttle strategy. |
-| \`interval\` | string | optional | The throttle interval (e.g. 5m, 1h). |
+| \`interval\` | string | optional | The throttle interval (e.g. 5m, 1h). (max length: 32) |
 
 #### \`operation: \\"validate\\"\`
 
@@ -71,9 +70,8 @@ exports[`schema_to_skill_docs generateActionPolicySchemaDoc matches the reviewed
 | \`name\` | string | required | The name of the action policy. (min length: 1, max length: 256) |
 | \`description\` | string | required | A description of the action policy. (max length: 1024) |
 | \`destinations\` | { type: \\"workflow\\", ... }[] | required | The list of destinations. At least one is required. (min items: 1, max items: 10) |
-| \`matcher\` | string | optional | A KQL query string to match alerts. (max length: 4096) |
+| \`matcher\` | object | optional | Selects the alerts this policy applies to. Set \`tags\` to match alerts from rules with those tags. Set \`expression\` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both \`tags\` and \`expression\`, an alert must match the tags and the expression for the policy to apply. When \`matcher\` is \`null\`, or when both \`tags\` and \`expression\` are empty, the policy applies to all alerts. |
 | \`group_by\` | string[] | optional | The fields used to group alerts. (max items: 16) |
-| \`tags\` | string[] | optional | Tags for categorizing the action policy. (max items: 20) |
 | \`grouping_mode\` | \\"per_episode\\" \\\\| \\"all\\" \\\\| \\"per_field\\" | optional | The grouping mode for alert notifications. |
 | \`throttle\` | object | optional | The throttle configuration for notifications. |"
 `;
@@ -191,9 +189,27 @@ Throttle strategy must be compatible with the grouping mode — see [action-poli
 `;
 
 exports[`schema_to_skill_docs generateMatcherContextDoc matches the reviewed skill-doc snapshot 1`] = `
-"# Matcher Context Fields
+"# Action Policy Matchers
 
-When the dispatcher evaluates a policy's KQL matcher, these fields are available:
+A matcher selects which alert **episodes** a policy applies to.
+Policies are space-scoped; they are not bound to a rule object.
+
+\`\`\`
+matcher: { tags?: string[] | null, expression?: string | null }
+\`\`\`
+
+## \`tags\` — match by rule tag
+
+Matches if the episode's rule has **at least one** of the listed tags (OR / any-of).
+Exact string match: case-sensitive, no wildcards, no prefix matching.
+Max 50 tags, up to 256 characters each.
+
+> **Important**: \`matcher.tags\` is matched against the **rule**'s tags, not the
+> policy's own name or metadata.
+
+## \`expression\` — match by episode content (KQL)
+
+Max 4096 characters. Only the following fields are available in the KQL expression:
 
 | Field | Type | Description |
 |---|---|---|
@@ -202,36 +218,70 @@ When the dispatcher evaluates a policy's KQL matcher, these fields are available
 | \`group_hash\` | string | Hash of the grouping fields |
 | \`last_event_timestamp\` | string | Timestamp of the most recent event |
 | \`severity\` | \`info\`, \`low\`, \`medium\`, \`high\`, \`critical\` | Episode severity when present |
-| \`rule.id\` | string | The rule's saved object ID |
-| \`rule.name\` | string | The rule's display name |
-| \`rule.tags\` | string[] | The rule's tags array |
 | \`data\` | \`data.*\` object | Rule-specific ES\\\\|QL output columns (query as \`data.*\`, e.g. \`data.host.name\`, \`data.error_count\`) |
 
-An empty matcher is a catch-all that matches all episodes in the space. To scope a policy to a single rule, use \`rule.id: \\"<ruleId>\\"\`."
+> **Note**: \`rule.id\`, \`rule.name\`, and \`rule.tags\` are **not** available in the
+> KQL expression. Use \`matcher.tags\` to scope a policy by rule.
+
+## How \`tags\` and \`expression\` combine
+
+| \`tags\` | \`expression\` | Result |
+|---|---|---|
+| set | set | **AND** — rule must have a matching tag and KQL must pass |
+| set | absent/null | tag constraint only |
+| absent/null | set | no tag constraint; any rule's episodes may match if KQL passes |
+| absent/null | absent/null | **catch-all** — matches every alert episode in the space |
+
+If \`matcher\` itself is \`null\`, or both fields are empty, the policy is a **catch-all**.
+A rule with no tags never matches a policy that has \`matcher.tags\` set.
+
+## \`set_matcher\` replaces the whole matcher
+
+The \`set_matcher\` operation replaces the matcher object entirely.
+To add tags while keeping an existing KQL filter, resend the current \`expression\`:
+
+\`\`\`json
+{ \\"operation\\": \\"set_matcher\\", \\"matcher\\": { \\"tags\\": [\\"team-sre\\"], \\"expression\\": \\"severity: \\\\\\"critical\\\\\\"\\" } }
+\`\`\`
+
+## Examples
+
+\`\`\`json
+// one rule (via shared link tag):
+{ \\"tags\\": [\\"notify-high-cpu\\"] }
+
+// a family of rules by tag:
+{ \\"tags\\": [\\"production\\", \\"payments\\"] }
+
+// severity filter across all rules:
+{ \\"expression\\": \\"severity: \\\\\\"critical\\\\\\"\\" }
+
+// both (rule family AND severity):
+{ \\"tags\\": [\\"production\\"], \\"expression\\": \\"severity: \\\\\\"critical\\\\\\"\\" }
+\`\`\`"
 `;
 
 exports[`schema_to_skill_docs generateMultiRuleActionPolicyDoc matches the reviewed skill-doc snapshot 1`] = `
 "# Multi-rule Action Policies
 
 Use this path when the user wants **one policy across several rules**, a space-wide
-catch-all, or routing by tag/severity — not a policy tied to a single \`rule.id\`.
+catch-all, or routing by tag/severity.
 
 Create the policy with \`set_metadata\` (name by intent, not by one rule),
 \`set_destinations\` (same \`workflowId\` rule as the single-rule path), a matcher from
 the options below, then \`set_grouping\` / \`set_throttle\`.
 
 A policy matches **episodes**, not a rule object. Policies are space-scoped and are
-not bound to a single rule. The matcher is optional KQL over
+not bound to a single rule. The matcher supports a \`tags\` array (matched against rule
+tags) and an optional KQL \`expression\` over
 [matcher context fields](./action-policy-matchers.md).
 
 - **Catch-all**: omit \`set_matcher\` or set matcher to empty/\`null\`. Confirm with the
   user first — this notifies on every \`kind: alert\` episode in the space, including
   rules created later.
-- **Several specific rules**: \`rule.id: \\"<id1>\\" or rule.id: \\"<id2>\\"\`. Collect each
-  \`ruleId\` from \`manage_rule\` / \`sml_search\` (pre-assigned IDs work for unsaved drafts).
-- **A family of rules**: \`rule.tags: \\"production\\"\` or \`rule.name: \\"CPU*\\"\`. Prefer tags
-  when the set will grow.
-- **Route by severity across rules**: \`severity: \\"critical\\"\` (or combine with tags).
+- **A family of rules by tag**: \`matcher: { tags: [\\"production\\"] }\`. Matched against the rule's tags.
+  Prefer this when the set of rules will grow.
+- **Route by severity across rules**: \`matcher: { expression: \\"severity: \\\\\\"critical\\\\\\"\\" }\` (or combine with tags).
   Useful for a PagerDuty policy vs an email policy.
 - **Reuse destinations**: one workflow can serve many rules. Keep Liquid generic —
   \`inputs.payload.rules[ep.rule_id].name\`, \`ep.episode_status\`, and guarded
@@ -257,10 +307,10 @@ exports[`schema_to_skill_docs generateNoDataStrategyDoc matches the reviewed ski
 
 | Value | Behaviour |
 |---|---|
-| \`last_known_status\` | Holds the last known episode status when no data is present. |
-| \`emit\` | Emits a \`no_data\` alert event when no_data query returns no rows for the group. \\"emit\\" is not currently accepted by the create/update API. |
-| \`recover\` | Resolves the alert episode to inactive on the first no-data run. |
-| \`none\` | No-data situations are ignored (default). |
+| \`last_known_status\` | Keeps the alert's last status when the rule finds no data. |
+| \`emit\` | Not accepted when creating or updating rules. Do not send this value. |
+| \`recover\` | Marks the alert \`inactive\` the first time the rule finds no data for the alert. |
+| \`none\` | Ignores runs where the rule finds no data. |
 
 When setting \`no_data_strategy\` to anything other than \`'none'\`, add a \`no_data\` block to the standalone query:
 \`no_data: { query: 'FROM heartbeat-* | STATS count = COUNT(*) BY host.name | WHERE count >= 1' }\`. For composed query format, the \`base\` query is used as the data query.
@@ -292,9 +342,9 @@ exports[`schema_to_skill_docs generateRecoveryStrategyDoc matches the reviewed s
 
 \`recovery_strategy\` is a **top-level rule field** (not inside the query). It controls how episodes transition from active to recovering/inactive (see [episode-lifecycle reference](./episode-lifecycle.md)). Signal rules (\`kind: signal\`) cannot set \`recovery_strategy\` ([rule-kind reference](./rule-kind.md)).
 
-- \`no_breach\`: recovers groups that stop breaching (default).
-- \`query\`: uses a custom recovery query to detect recovery.
-- \`none\`: disables recovery entirely.
+- \`no_breach\`: Recovers an alert when the breach query no longer returns matches.
+- \`query\`: Recovers an alert when a separate recovery query matches. Requires \`query.recovery\`.
+- \`none\`: The rule never marks an alert as \`recovered\`, even after the breach query stops returning matches.
 
 When using \`recovery_strategy: 'query'\`, add a \`set_query\` operation that includes a \`recovery\` block alongside \`breach\`:
 - **Composed**: \`recovery: { segment: 'WHERE cpu < 0.5' }\`
@@ -307,12 +357,12 @@ exports[`schema_to_skill_docs generateRuleKindDoc matches the reviewed skill-doc
 Rules declare a \`kind\` of \`alert\` (Alerts) or \`signal\` (Events). This is the most important behavioral split in the system.
 
 ### Alerts (\`kind: alert\`)
-Default. Tracks each problem as an alert episode and its lifecycle, link it to workflows to notify your team. Use when the user wants to detect and respond.
+Creates an alert for each matching group and tracks it until it recovers. Use this when you want to detect a problem and notify or automate a response.
 Episode statuses: \`inactive\`, \`pending\`, \`active\`, \`recovering\`.
 State transition fields: \`pending_count\`, \`pending_timeframe\`, \`recovering_count\`, \`recovering_timeframe\`.
 
 ### Events (\`kind: signal\`)
-Matches are stored as queryable events. No alerts, no notifications - just data. Use when the user wants to collect evidence.
+Stores each match as a rule event you can query. Alerts are not created and notifications are not sent.
 
 ## Immutability
 \`kind\` is **immutable on persisted rules** — it can only be set at creation time. The update API rejects changes to \`kind\`. For draft (in-memory) rules, \`set_kind\` can change it freely."
@@ -340,7 +390,7 @@ Use \`set_kind\` to choose a rule kind matching the user's goal: detect and resp
 | Field | Type | Required | Description |
 |---|---|---|---|
 | \`operation\` | \\"set_kind\\" | required |  |
-| \`kind\` | \\"alert\\" \\\\| \\"signal\\" | required | The kind of the rule. |
+| \`kind\` | \\"alert\\" \\\\| \\"signal\\" | required | Whether the rule creates alerts (\`alert\`) or only stores matching events (\`signal\`). |
 
 #### \`operation: \\"set_schedule\\"\`
 
@@ -348,8 +398,8 @@ Use \`set_schedule\` to control how often the rule runs (\`every\`) and how far 
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| \`every\` | string | optional | Execution interval, e.g. 1m, 5m, 1h. |
-| \`lookback\` | string | optional | Lookback window for the query, e.g. 5m, 1h. Can also be expressed in ES\\\\|QL. |
+| \`every\` | string | optional | Execution interval, e.g. 1m, 5m, 1h. (max length: 32) |
+| \`lookback\` | string | optional | Lookback window for the query, e.g. 5m, 1h. Can also be expressed in ES\\\\|QL. (max length: 32) |
 | \`operation\` | \\"set_schedule\\" | required |  |
 
 #### \`operation: \\"set_query\\"\`
@@ -378,20 +428,29 @@ Use \`set_state_transition\` to delay alert firing until the threshold is breach
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| \`pending_count\` | integer | optional | Consecutive breaches before transitioning to active. (min: 0, max: 1000) |
-| \`pending_timeframe\` | string | optional | Time window for pending evaluation, e.g. 5m, 15m. |
-| \`recovering_count\` | integer | optional | Consecutive recoveries before transitioning to inactive. (min: 0, max: 1000) |
-| \`recovering_timeframe\` | string | optional | Time window for recovering evaluation, e.g. 5m, 15m. |
+| \`pending_count\` | integer | optional | Number of consecutive matches required before the alert becomes \`active\`. (min: 0, max: 1000) |
+| \`pending_timeframe\` | string | optional | Time window used with \`pending_count\`, for example \`5m\` or \`15m\`. (max length: 32) |
+| \`recovering_count\` | integer | optional | Number of consecutive recoveries required before the alert becomes \`inactive\`. (min: 0, max: 1000) |
+| \`recovering_timeframe\` | string | optional | Time window used with \`recovering_count\`, for example \`5m\` or \`15m\`. (max length: 32) |
 | \`operation\` | \\"set_state_transition\\" | required |  |
 
 #### \`operation: \\"set_dashboards\\"\`
 
-Use \`set_dashboards\` to link investigation dashboards to the rule by saved-object ID. Each ID is stored as a \`dashboard\` artifact (\`{ id, type: \\"dashboard\\", data: { dashboardId } }\`), matching the create/update API. Replaces any previously linked dashboards; other artifacts (e.g. runbooks) are preserved. Pass an empty array to unlink all dashboards.
+Use \`set_dashboards\` to link investigation dashboards to the rule by saved-object ID. Each ID is stored as a \`dashboard\` artifact (\`{ id, type: \\"dashboard\\", data: { dashboard_id } }\`), matching the create/update API. Replaces any previously linked dashboards; other artifacts (e.g. runbooks) are preserved. Pass an empty array to unlink all dashboards.
 
 | Field | Type | Required | Description |
 |---|---|---|---|
 | \`operation\` | \\"set_dashboards\\" | required |  |
 | \`dashboard_ids\` | string[] | required | Dashboard saved-object IDs to link as investigation artifacts on the rule. Each ID must be an existing dashboard the current user can read. Replaces previously linked dashboards. Pass an empty array to unlink all dashboards. (max items: 100) |
+
+#### \`operation: \\"set_runbook\\"\`
+
+Use \`set_runbook\` to attach investigation markdown to the rule. Stored as a \`runbook\` artifact (\`{ id, type: \\"runbook\\", data: { content } }\`), matching the create/update API. Replaces any previously attached runbook; other artifacts (e.g. dashboards) are preserved. Pass \`null\` or an empty string to unlink. Whitespace-only content is treated as unlink. Content longer than 50000 characters is rejected.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| \`operation\` | \\"set_runbook\\" | required |  |
+| \`content\` | string \\\\| null | required | Markdown investigation steps. Stored as a \`runbook\` artifact (\`{ id, type: \\"runbook\\", data: { content } }\`). Replaces any previously attached runbook; other artifacts (e.g. dashboards) are preserved. Pass \`null\` or an empty string to unlink. Whitespace-only content is treated as unlink. Max 50000 characters. |
 
 #### \`operation: \\"validate\\"\`
 
@@ -409,16 +468,16 @@ exports[`schema_to_skill_docs generateRuleSchemaDoc matches the snapshot 1`] = `
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| \`kind\` | \\"alert\\" \\\\| \\"signal\\" | required | The kind of the rule. |
+| \`kind\` | \\"alert\\" \\\\| \\"signal\\" | required | Whether the rule creates alerts (\`alert\`) or only stores matching events (\`signal\`). |
 | \`metadata\` | object | required | Rule metadata. |
-| \`time_field\` | string | required | Time field used for the lookback window range filter. (min length: 1, max length: 128, default: \\"@timestamp\\") |
+| \`time_field\` | string | required | Document field used as the event time when applying the lookback window. Defaults to \`@timestamp\`. (min length: 1, max length: 128, default: \\"@timestamp\\") |
 | \`schedule\` | object | required | Execution schedule configuration. |
 | \`query\` | { format: \\"composed\\", ... } \\\\| { format: \\"standalone\\", ... } | required | Detection query configuration. |
-| \`recovery_strategy\` | \\"no_breach\\" \\\\| \\"query\\" \\\\| \\"none\\" | optional | How recovery is detected. \\"no_breach\\" recovers groups that stop breaching; \\"query\\" uses a custom recovery query; \\"none\\" disables recovery. |
-| \`no_data_strategy\` | \\"last_known_status\\" \\\\| \\"emit\\" \\\\| \\"recover\\" \\\\| \\"none\\" | optional | How to handle no-data situations. \\"last_known_status\\" holds the last known status; \\"recover\\" forces recovery; \\"none\\" disables no-data detection. \\"emit\\" is not currently accepted by the create/update API. Standalone-format rules must provide a \`no_data\` query block when this is not \\"none\\"; composed-format rules use \`base\` as the data-presence query. |
+| \`recovery_strategy\` | \\"no_breach\\" \\\\| \\"query\\" \\\\| \\"none\\" | optional | The condition that marks an alert recovered. If omitted or set to \`none\`, recovery is disabled: the alert stays \`active\` even after the breach query stops returning matches, and \`state_transition.recovering_count\` / \`recovering_timeframe\` are not allowed. Set to \`no_breach\` to recover when the breach query stops returning matches. Set to \`query\` only when you also provide \`query.recovery\`. |
+| \`no_data_strategy\` | \\"last_known_status\\" \\\\| \\"emit\\" \\\\| \\"recover\\" \\\\| \\"none\\" | optional | How the rule behaves when it finds no data for a group. If you omit this field or set it to \`none\`, those runs are ignored. If you set \`last_known_status\` or \`recover\`, a standalone query (\`query.format: standalone\`) must include \`query.no_data\`. A composed query (\`query.format: composed\`) uses \`query.base\` to detect whether data is present. The \`emit\` value is not accepted when creating or updating rules. |
 | \`state_transition\` | object \\\\| null | optional |  |
 | \`grouping\` | object | optional | Grouping configuration. |
-| \`artifacts\` | object[] | optional | Artifacts attached to the rule, each shaped as \`{ id, type, data }\`. \`data\` carries type-specific fields: a \`runbook\` artifact requires \`data.content\` holding markdown, and a \`dashboard\` artifact requires \`data.dashboardId\` holding a dashboard saved object id. Artifacts of any other type may carry whatever fields they need in \`data\`. (max items: 100) |
+| \`artifacts\` | object[] | optional | Optional objects attached to the rule, such as a runbook or a dashboard. Each item has \`id\`, \`type\`, and \`data\`. The shape of \`data\` depends on \`type\`. For example, a \`runbook\` uses \`content\` and a \`dashboard\` uses \`dashboard_id\`. Known types are validated against that shape. Unknown types are stored when \`id\`, \`type\`, and \`data\` are present. (max items: 100) |
 
 ## Query Formats
 
@@ -474,19 +533,47 @@ Action policies only process alert episodes. If the rule is \`kind: signal\`, do
 proceed: ask the user (or the rule-management skill) to convert or recreate the
 rule as \`kind: alert\` first.
 
-Create the policy with these operations in order:
+## Scoping a policy to one rule
+
+A policy matches **episodes**, not a rule object. The only way to scope one policy
+to one rule is a **shared link tag on both sides**:
+
+- The rule must carry a tag that uniquely identifies it.
+- The policy's \`matcher.tags\` must contain that same tag.
+
+Use the convention \`notify-<rule-slug>\` (lowercase kebab of the rule name,
+for example \`notify-high-cpu-prod\`).
+
+## Steps
+
+### 1. Add the link tag to the rule
+
+Call \`manage_rule\` → \`set_metadata\` with \`tags: [<all existing tags>, \\"notify-<rule-slug>\\"]\`.
+
+> **Tags are replaced wholesale.** Read the current tags off the rule attachment first
+> and re-send them alongside the new link tag. The rule tag cap is 20; the
+> agent-builder provenance tag consumes one slot. If the rule is already at the cap,
+> ask the user which existing tag to drop.
+
+> **Save reminder**: \`manage_rule\` only updates the in-memory rule attachment.
+> The link tag only takes effect once the user saves the rule
+> (Rule → Workflow → Action Policy save order).
+
+### 2. Create the action policy
+
+Call \`manage_action_policy\` with these operations in order:
 
 1. \`set_metadata\`: name = \`\\"Notify on <rule-name>\\"\`, description = \`\\"Default notification for <rule-name>\\"\`
 2. \`set_destinations\`: \`[{ type: \\"workflow\\", id: \\"<workflowId>\\" }]\`
    - Use the \`workflowId\` passed to \`generate_workflow\`, **not** the workflow \`attachmentId\`.
-3. \`set_matcher\`: \`rule.id: \\"<ruleId>\\"\`
-   - \`ruleId\` comes from the \`manage_rule\` tool result. It is pre-assigned when the
-     rule attachment is created and becomes the saved-object ID when the user clicks
-     \\"Create rule\\".
-   - It is available even for unsaved/proposed rules — do not ask the user to save
-     the rule first.
+3. \`set_matcher\`: \`{ tags: [\\"notify-<rule-slug>\\"] }\` — **do not omit**.
+   An omitted or empty matcher is a space-wide catch-all, not \\"this rule\\".
 4. \`set_grouping\`: \`per_episode\`
 5. \`set_throttle\`: \`{ strategy: \\"on_status_change\\" }\`
+6. \`validate\`
+
+If the rule already has a tag that uniquely identifies it, you may reuse that tag
+instead of adding \`notify-<rule-slug>\` — but confirm it is not shared with other rules.
 
 If the user explicitly requests a cross-rule or shared policy, consult the
 [multi-rule action policies reference](./action-policy-multi-rule.md)."

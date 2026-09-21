@@ -18,7 +18,7 @@ import type { ConnectorsPluginsStart } from './plugin';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { experimentalFeaturesMock } from '../public/mocks';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
-import { connectorsSpecs } from '@kbn/connector-specs';
+import { connectorsSpecs, isInboundOnlyConnectorSpec } from '@kbn/connector-specs';
 
 jest.mock('../common/experimental_features');
 
@@ -43,13 +43,18 @@ describe('Stack Connectors Plugin', () => {
     it('should register built in connector types', () => {
       const actionsSetup = actionsMock.createSetup();
       const actionsConfigurationUtilities = actionsSetup.getActionsConfigurationUtilities();
+      actionsSetup.getActionsConfigurationUtilities.mockReturnValue(actionsConfigurationUtilities);
       (actionsConfigurationUtilities.getWebhookSettings as jest.Mock).mockReturnValue({
         ssl: { pfx: { enabled: true } },
       });
 
       plugin.setup(coreSetup, { actions: actionsSetup });
 
-      const specConnectorTypes = Object.values(connectorsSpecs);
+      const specConnectorTypes = Object.values(connectorsSpecs).filter(
+        (spec) =>
+          !isInboundOnlyConnectorSpec(spec) ||
+          Boolean(actionsConfigurationUtilities.isInboundEventsEnabled())
+      );
       const builtInConnectorTypesCount = 18;
 
       expect(actionsSetup.registerType).toHaveBeenCalledTimes(

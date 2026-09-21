@@ -11,7 +11,21 @@ import { tags } from '@kbn/scout';
 
 export const LOGS_EXPERIENCE_TAGS = [...tags.stateful.all, ...tags.serverless.observability.all];
 
+/**
+ * The doc viewer flyout is a push flyout only from EUI's `xl` breakpoint up; below it, EUI falls
+ * back to an overlay whose mask swallows clicks on the grid behind it. The doc-viewer specs click
+ * leading controls while the flyout is open, so they need the push layout.
+ */
+export const PUSH_FLYOUT_VIEWPORT = { width: 1600, height: 1200 };
+
 const SYNTH_LOGS_DATASET = 'synth.recommended';
+const SYNTH_LOGS_DATA_VIEW = `logs-${SYNTH_LOGS_DATASET}-*`;
+
+// A dataset of its own rather than extra documents in `synth.recommended`: the summary-column and
+// pagination specs assert on that dataset's rows, and stack traces plus oversized `log.level`
+// values would change what they see.
+const SYNTH_DOCVIEWER_DATASET = 'synth.docviewer';
+const SYNTH_DOCVIEWER_DATA_VIEW = `logs-${SYNTH_DOCVIEWER_DATASET}-*`;
 
 export const LOGS = {
   // Fixed rather than moment-relative: global setup seeds this range once, and each worker
@@ -21,9 +35,11 @@ export const LOGS = {
 
   SYNTH_LOGS_DATASET,
   SYNTH_LOGS_NAMESPACE: 'default',
+  SYNTH_LOGS_HOST: 'synth-host',
+  SYNTH_LOGS_MESSAGE: 'Test log message for the logs profile',
 
-  SYNTH_LOGS_DATA_VIEW: `logs-${SYNTH_LOGS_DATASET}-*`,
-  SYNTH_LOGS_ESQL_QUERY: `from logs-${SYNTH_LOGS_DATASET}-* | limit 100`,
+  SYNTH_LOGS_DATA_VIEW,
+  SYNTH_LOGS_ESQL_QUERY: `from ${SYNTH_LOGS_DATA_VIEW} | limit 100`,
 
   // A plain index, not a data stream: the `metrics-*` Fleet templates create TSDB data streams,
   // which reject writes outside a moving window around now and so cannot hold the fixed
@@ -31,4 +47,16 @@ export const LOGS = {
   NON_LOGS_INDEX: 'synth-metrics-2025',
   NON_LOGS_DATA_VIEW: 'synth-metrics*',
   NON_LOGS_HOST: 'synth-metrics-host-01',
+
+  SYNTH_DOCVIEWER_DATASET,
+  SYNTH_DOCVIEWER_DATA_VIEW,
+
+  // `log.level` is a keyword with `ignore_above: 1024`, so a longer value puts the document in
+  // `_ignored` — which is what renders the quality-issue control and fills its accordion.
+  OVERSIZED_LOG_LEVEL: 'x'.repeat(1025),
+  // Short on purpose. `getStacktraceFields` only needs a non-empty `error.stack_trace`, and a value
+  // long enough to be ignored itself would make the degraded-field count non-deterministic.
+  STACK_TRACE: 'Error: synthetic failure\n    at handler (index.js:1:1)',
+
+  JSON_TAB: 'doc_view_source',
 } as const;

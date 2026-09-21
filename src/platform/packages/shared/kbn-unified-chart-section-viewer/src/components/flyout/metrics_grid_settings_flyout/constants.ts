@@ -7,23 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FunctionNames } from '@kbn/esql-language';
-import type { HistogramPercentile, SimpleAggregation } from '@kbn/discover-utils';
+import {
+  METRICS_GRID_HISTOGRAM_PERCENTILES,
+  METRICS_GRID_SIMPLE_AGGREGATIONS,
+  type HistogramPercentile,
+  type MetricsGridSettings,
+} from '@kbn/discover-utils';
 
-export const SIMPLE_AGGREGATION_OPTIONS: SimpleAggregation[] = [
-  FunctionNames.AVG,
-  FunctionNames.SUM,
-  FunctionNames.MIN,
-  FunctionNames.MAX,
-];
+/** Settings owned by this flyout. */
+export const FLYOUT_SETTING_KEYS = [
+  'counterAggregation',
+  'gaugeAggregation',
+  'histogramPercentile',
+] as const satisfies ReadonlyArray<keyof MetricsGridSettings>;
 
-export const HISTOGRAM_PERCENTILE_OPTIONS: HistogramPercentile[] = [
-  'p50',
-  'p75',
-  'p90',
-  'p95',
-  'p99',
-];
+export const SIMPLE_AGGREGATION_OPTIONS = METRICS_GRID_SIMPLE_AGGREGATIONS;
+
+export const HISTOGRAM_PERCENTILE_OPTIONS = METRICS_GRID_HISTOGRAM_PERCENTILES;
 
 export const HISTOGRAM_PERCENTILE_VALUES: Record<HistogramPercentile, number> = {
   p50: 50,

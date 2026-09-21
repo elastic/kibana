@@ -93,6 +93,13 @@ export const FLYOUT_VIEW_DETAILS = i18n.translate(
   }
 );
 
+export const FLYOUT_TAKE_ACTION = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.flyout.takeAction',
+  {
+    defaultMessage: 'Take action',
+  }
+);
+
 export const FLYOUT_CLOSE = i18n.translate('xpack.alertingV2EpisodesUi.details.flyout.close', {
   defaultMessage: 'Close',
 });
@@ -267,7 +274,7 @@ export const METADATA_LIST_ASSIGNEE_LABEL = i18n.translate(
 export const METADATA_LIST_TAGS_LABEL = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.metadataList.tagsLabel',
   {
-    defaultMessage: 'Tags',
+    defaultMessage: 'Alert tags',
   }
 );
 

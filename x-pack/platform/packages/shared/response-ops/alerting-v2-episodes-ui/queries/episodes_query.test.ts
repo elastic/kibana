@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { buildEpisodesKpisQuery, buildEpisodesHistogramQuery } from './episodes_query';
+import {
+  buildEpisodesKpisQuery,
+  buildEpisodesHistogramQuery,
+  isSourceEpisode,
+  type AlertEpisode,
+} from './episodes_query';
 
 describe('buildEpisodesKpisQuery', () => {
   const SPACE = 'default';
@@ -82,9 +87,16 @@ describe('buildEpisodesKpisQuery', () => {
     expect(output).toMatch(/\| WHERE `episode\.status` == "active"/);
   });
 
-  it('applies ruleId filter when provided', () => {
+  it('applies ruleId filter on both rule.id and rule_id before the aggregations', () => {
     const output = buildEpisodesKpisQuery(SPACE, UID, { ruleId: 'rule-xyz' });
-    expect(output).toContain('WHERE rule.id == "rule-xyz"');
+    expect(output).toContain('WHERE rule.id == "rule-xyz" OR rule_id == "rule-xyz"');
+    expect(output.indexOf('WHERE rule.id ==')).toBeLessThan(output.indexOf('INLINE STATS'));
+  });
+
+  it('applies groupHash filter before the aggregations', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID, { groupHash: 'abc123' });
+    expect(output).toContain('WHERE group_hash == "abc123"');
+    expect(output.indexOf('WHERE group_hash ==')).toBeLessThan(output.indexOf('INLINE STATS'));
   });
 });
 
@@ -116,9 +128,16 @@ describe('buildEpisodesHistogramQuery', () => {
     expect(output).toMatch(/\| WHERE `episode\.status` == "active"/);
   });
 
-  it('includes the ruleId filter when filterState.ruleId is provided', () => {
+  it('includes the ruleId filter on both rule.id and rule_id before the aggregations', () => {
     const output = buildEpisodesHistogramQuery('default', { ruleId: 'rule-abc' }).print('basic');
-    expect(output).toContain('rule-abc');
+    expect(output).toContain('WHERE rule.id == "rule-abc" OR rule_id == "rule-abc"');
+    expect(output.indexOf('WHERE rule.id ==')).toBeLessThan(output.indexOf('INLINE STATS'));
+  });
+
+  it('includes the groupHash filter before the aggregations', () => {
+    const output = buildEpisodesHistogramQuery('default', { groupHash: 'abc123' }).print('basic');
+    expect(output).toContain('WHERE group_hash == "abc123"');
+    expect(output.indexOf('WHERE group_hash ==')).toBeLessThan(output.indexOf('INLINE STATS'));
   });
 
   it('includes the tags filter when filterState.tags is provided', () => {
@@ -134,5 +153,17 @@ describe('buildEpisodesHistogramQuery', () => {
       'basic'
     );
     expect(output).toContain('user-xyz');
+  });
+});
+
+describe('isSourceEpisode', () => {
+  const nativeEpisode = { 'episode.id': 'ep-1' } as AlertEpisode;
+
+  it('is true when source_id is set', () => {
+    expect(isSourceEpisode({ ...nativeEpisode, source_id: 'classic-alerts' })).toBe(true);
+  });
+
+  it('is false for native v2 episodes', () => {
+    expect(isSourceEpisode(nativeEpisode)).toBe(false);
   });
 });

@@ -31,7 +31,7 @@ describe('AppHeaderLoadingView', () => {
   });
 
   it('keeps the back button next to the title skeleton', () => {
-    render(<AppHeaderLoadingView back="/app/my-app" />);
+    render(<AppHeaderLoadingView back={{ href: '/app/my-app', label: 'My app' }} />);
 
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAttribute(
       'href',

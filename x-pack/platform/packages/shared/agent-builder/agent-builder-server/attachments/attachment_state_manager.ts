@@ -29,7 +29,11 @@ import {
   isAttachmentActive,
   isVersionedAttachmentWithOrigin,
 } from '@kbn/agent-builder-common/attachments';
-import type { AttachmentResolveContext, AttachmentTypeDefinition } from './type_definition';
+import type {
+  AttachmentResolveContext,
+  AttachmentTypeDefinition,
+  AttachmentValidateContext,
+} from './type_definition';
 
 /**
  * Best-effort message when `Promise.allSettled` reports `rejected` (rejection payloads vary by caller).
@@ -87,6 +91,21 @@ export interface AttachmentSnapshot {
 }
 
 /**
+ * A mutation recorded by the state manager since the last drain. Only mutations that
+ * produce a timeline event are recorded: metadata-only edits, restore and origin updates are not.
+ */
+export type AttachmentChange =
+  | { kind: 'added'; attachment_id: string; attachment_type: string; current_version: number }
+  | {
+      kind: 'updated';
+      attachment_id: string;
+      attachment_type: string;
+      previous_version: number;
+      current_version: number;
+    }
+  | { kind: 'deleted'; attachment_id: string; attachment_type: string; hard_delete: boolean };
+
+/**
  * Interface for managing conversation attachment state.
  * Provides CRUD operations with version tracking.
  */
@@ -112,13 +131,15 @@ export interface AttachmentStateManager {
   add<TType extends string>(
     input: AttachmentInput<TType>,
     actor?: AttachmentRefActor,
-    resolveContext?: AttachmentResolveContext
+    resolveContext?: AttachmentResolveContext,
+    validateContext?: AttachmentValidateContext
   ): Promise<VersionedAttachment<TType>>;
   /** Update an existing attachment (creates new version if content changed) */
   update(
     id: string,
     input: AttachmentUpdateInput,
-    actor?: AttachmentRefActor
+    actor?: AttachmentRefActor,
+    validateContext?: AttachmentValidateContext
   ): Promise<VersionedAttachment | undefined>;
   /** Soft delete an attachment (sets active=false) */
   delete(id: string, actor?: AttachmentRefActor): boolean;
@@ -139,6 +160,11 @@ export interface AttachmentStateManager {
   getAccessedRefs(): AttachmentVersionRef[];
   /** Clear the accessed refs tracking (call at start of new round) */
   clearAccessTracking(): void;
+
+  /** Return the mutations recorded since the last drain, and clear them. */
+  drainChanges(): AttachmentChange[];
+  /** Discard recorded mutations without returning them (e.g. after replaying legacy history). */
+  clearChanges(): void;
 
   /** Resolve attachment references to their actual data */
   resolveRefs(refs: AttachmentVersionRef[]): ResolvedAttachmentRef[];
@@ -166,6 +192,7 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
   private dirty: boolean = false;
   private readonly options: CreateAttachmentStateManagerOptions;
   private accessedRefs: Map<string, AttachmentVersionRef> = new Map();
+  private changes: AttachmentChange[] = [];
 
   constructor(
     initialAttachments: VersionedAttachment[] = [],
@@ -188,14 +215,18 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
     return definition?.isReadonly ?? false;
   }
 
-  private async validateAttachmentData(type: string, data: unknown): Promise<unknown> {
+  private async validateAttachmentData(
+    type: string,
+    data: unknown,
+    context?: AttachmentValidateContext
+  ): Promise<unknown> {
     const typeDefinition = this.options.getTypeDefinition(type);
     if (!typeDefinition) {
       throw new Error(`Unknown attachment type: ${type}`);
     }
 
     try {
-      const validationResult = await typeDefinition.validate(data);
+      const validationResult = await typeDefinition.validate(data, context);
       if (validationResult.valid) {
         return validationResult.data;
       }
@@ -297,7 +328,8 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
   async add<TType extends string>(
     input: AttachmentInput<TType>,
     actor?: AttachmentRefActor,
-    resolveContext?: AttachmentResolveContext
+    resolveContext?: AttachmentResolveContext,
+    validateContext?: AttachmentValidateContext
   ): Promise<VersionedAttachment<TType>> {
     const id = input.id || uuidv4();
     const now = new Date().toISOString();
@@ -305,7 +337,7 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
     let validatedData: unknown;
 
     if (input.data !== undefined) {
-      validatedData = await this.validateAttachmentData(input.type, input.data);
+      validatedData = await this.validateAttachmentData(input.type, input.data, validateContext);
     } else if (input.origin !== undefined) {
       const typeDefinition = this.options.getTypeDefinition(input.type);
       if (!typeDefinition) {
@@ -361,6 +393,12 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
 
     this.attachments.set(id, attachment);
     this.dirty = true;
+    this.recordChange(attachment, {
+      kind: 'added',
+      attachment_id: id,
+      attachment_type: attachment.type,
+      current_version: attachment.current_version,
+    });
     this.recordAccess(id, attachment.current_version, ATTACHMENT_REF_OPERATION.created, actor);
 
     return attachment as VersionedAttachment<TType>;
@@ -369,7 +407,8 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
   async update(
     id: string,
     input: AttachmentUpdateInput,
-    actor?: AttachmentRefActor
+    actor?: AttachmentRefActor,
+    validateContext?: AttachmentValidateContext
   ): Promise<VersionedAttachment | undefined> {
     const attachment = this.attachments.get(id);
     if (!attachment) {
@@ -394,7 +433,11 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
     }
 
     if (input.data !== undefined) {
-      const validatedData = await this.validateAttachmentData(attachment.type, input.data);
+      const validatedData = await this.validateAttachmentData(
+        attachment.type,
+        input.data,
+        validateContext
+      );
       const newHash = hashContent(validatedData);
       const currentVersion = getLatestVersion(attachment);
 
@@ -415,6 +458,13 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
         attachment.versions.push(newVersion);
         attachment.current_version = newVersionNum;
         this.dirty = true;
+        this.recordChange(attachment, {
+          kind: 'updated',
+          attachment_id: id,
+          attachment_type: attachment.type,
+          previous_version: newVersionNum - 1,
+          current_version: newVersionNum,
+        });
       }
     }
 
@@ -438,6 +488,12 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
 
     attachment.active = false;
     this.dirty = true;
+    this.recordChange(attachment, {
+      kind: 'deleted',
+      attachment_id: id,
+      attachment_type: attachment.type,
+      hard_delete: false,
+    });
     this.recordAccess(id, attachment.current_version, ATTACHMENT_REF_OPERATION.deleted, actor);
     return true;
   }
@@ -468,8 +524,17 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
       throw new Error(`Cannot delete screen_context attachment "${id}"`);
     }
 
+    const wasActive = isAttachmentActive(attachment);
     this.attachments.delete(id);
     this.dirty = true;
+    if (wasActive) {
+      this.recordChange(attachment, {
+        kind: 'deleted',
+        attachment_id: id,
+        attachment_type: attachment.type,
+        hard_delete: true,
+      });
+    }
     return true;
   }
 
@@ -509,6 +574,28 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
 
   clearAccessTracking(): void {
     this.accessedRefs.clear();
+  }
+
+  drainChanges(): AttachmentChange[] {
+    const drained = this.changes;
+    this.changes = [];
+    return drained;
+  }
+
+  clearChanges(): void {
+    this.changes = [];
+  }
+
+  /**
+   * Records a change unless the attachment is `hidden`. Hidden attachments are internal artefacts
+   * (e.g. `screen_context`) that users never see, so their lifecycle must not surface as
+   * user-visible timeline events or fire workflow triggers.
+   */
+  private recordChange(attachment: VersionedAttachment, change: AttachmentChange): void {
+    if (attachment.hidden) {
+      return;
+    }
+    this.changes.push(change);
   }
 
   resolveRefs(refs: AttachmentVersionRef[]): ResolvedAttachmentRef[] {

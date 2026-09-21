@@ -21,12 +21,12 @@ export const WatchlistEntityUnassignResponseItem = lazySchema(() =>
     /**
      * The EUID of the entity
      */
-    euid: z.string(),
+    euid: z.string().describe('The EUID of the entity'),
     status: z.enum(['success', 'failure', 'not_found']),
     /**
      * Error message if the entity failed to process
      */
-    error: z.string().optional(),
+    error: z.string().optional().describe('Error message if the entity failed to process'),
   })
 );
 export type WatchlistEntityUnassignResponseItem = z.infer<
@@ -38,7 +38,7 @@ export const UnassignWatchlistEntitiesRequestParams = lazySchema(() =>
     /**
      * The ID of the watchlist to remove entities from
      */
-    watchlist_id: z.string(),
+    watchlist_id: z.string().describe('The ID of the watchlist to remove entities from'),
   })
 );
 export type UnassignWatchlistEntitiesRequestParams = z.infer<
@@ -53,7 +53,7 @@ export const UnassignWatchlistEntitiesRequestBody = lazySchema(() =>
     /**
      * The EUIDs of the entities to unassign
      */
-    euids: z.array(z.string()),
+    euids: z.array(z.string()).describe('The EUIDs of the entities to unassign'),
   })
 );
 export type UnassignWatchlistEntitiesRequestBody = z.infer<
@@ -68,19 +68,22 @@ export const UnassignWatchlistEntitiesResponse = lazySchema(() =>
     /**
      * Number of entities successfully unassigned
      */
-    successful: z.number().int(),
+    successful: z.number().int().describe('Number of entities successfully unassigned'),
     /**
      * Number of entities that failed to process
      */
-    failed: z.number().int(),
+    failed: z.number().int().describe('Number of entities that failed to process'),
     /**
      * Number of entities not found in the manual watchlist assignment
      */
-    not_found: z.number().int(),
+    not_found: z
+      .number()
+      .int()
+      .describe('Number of entities not found in the manual watchlist assignment'),
     /**
      * Total number of entities processed
      */
-    total: z.number().int(),
+    total: z.number().int().describe('Total number of entities processed'),
     items: z.array(WatchlistEntityUnassignResponseItem),
   })
 );

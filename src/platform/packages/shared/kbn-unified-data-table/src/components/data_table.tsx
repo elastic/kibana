@@ -78,7 +78,8 @@ import type {
   DataGridPaginationMode,
   CustomBulkActions,
   DocMap,
-  SourceDisplayMode,
+  DocumentsDisplayMode,
+  JsonModeSettings,
 } from '../types';
 import {
   getDisplayedColumns,
@@ -111,6 +112,8 @@ import {
 } from '../constants';
 import { UnifiedDataTableFooter } from './data_table_footer';
 import { UnifiedDataTableAdditionalDisplaySettings } from './data_table_additional_display_settings';
+import { WithNewIndicator } from './custom_toolbar/with_new_indicator';
+import { useViewModeNewBadge } from '../hooks/use_view_mode_new_badge';
 import { RowHeightType, useRowHeight } from '../hooks/use_row_height';
 import { CompareDocuments } from './compare_documents';
 import { useFullScreenWatcher } from '../hooks/use_full_screen_watcher';
@@ -546,7 +549,19 @@ interface InternalUnifiedDataTableProps {
    * Set to 'json' to display a JSON representation of the source document
    * instead of the Summary column. Defualt is summary.
    */
-  sourceDisplayMode?: SourceDisplayMode;
+  documentsDisplayModeState?: DocumentsDisplayMode;
+  /**
+   * Update the source display mode state. When omitted, the view mode toggle is hidden.
+   */
+  onUpdateDocumentsDisplayMode?: (documentsDisplayMode: DocumentsDisplayMode) => void;
+  /**
+   * Settings that only apply while the source column is rendered in JSON mode.
+   */
+  jsonModeSettingsState?: JsonModeSettings;
+  /**
+   * Update the JSON mode settings state.
+   */
+  onUpdateJsonModeSettings?: (jsonModeSettings: JsonModeSettings) => void;
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -639,7 +654,10 @@ const InternalUnifiedDataTable = React.forwardRef<
       onFullScreenChange,
       hideFilteringOnComputedColumns,
       additionalDisplaySettingsContent,
-      sourceDisplayMode = 'summary',
+      documentsDisplayModeState,
+      onUpdateDocumentsDisplayMode,
+      jsonModeSettingsState,
+      onUpdateJsonModeSettings,
     },
     ref
   ) => {
@@ -652,9 +670,32 @@ const InternalUnifiedDataTable = React.forwardRef<
     const [isFilterActive, setIsFilterActive] = useRestorableState('isFilterActive', false);
     const [isCompareActive, setIsCompareActive] = useRestorableState('isCompareActive', false);
     const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
-    const displayedColumns = getDisplayedColumns(columns, dataView, sourceDisplayMode);
+
+    const documentsDisplayMode = documentsDisplayModeState ?? 'table';
+    const jsonModeSettings = useMemo<JsonModeSettings>(
+      () => jsonModeSettingsState ?? {},
+      [jsonModeSettingsState]
+    );
+
+    const displayedColumns = getDisplayedColumns(columns, dataView, documentsDisplayMode);
     const isSummaryOnlyColumn = getIsSummaryOnlyColumn(displayedColumns);
     const showSummaryColumn = getShowSummaryColumn(displayedColumns);
+
+    const { isNew: isViewModeNew, markAsSeen: markViewModeSeen } = useViewModeNewBadge(
+      storage,
+      Boolean(onUpdateDocumentsDisplayMode)
+    );
+
+    const onChangeDocumentsDisplayModeWithSeen = useMemo(
+      () =>
+        onUpdateDocumentsDisplayMode
+          ? (mode: DocumentsDisplayMode) => {
+              markViewModeSeen();
+              onUpdateDocumentsDisplayMode(mode);
+            }
+          : undefined,
+      [markViewModeSeen, onUpdateDocumentsDisplayMode]
+    );
 
     const docMap = useMemo<DocMap>(
       () => new Map(rows?.map((row, docIndex) => [row.id, { doc: row, docIndex }]) ?? []),
@@ -755,7 +796,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           fieldFormats,
           columnsMeta,
           options,
-          sourceDisplayMode,
+          documentsDisplayMode,
           shouldShowFieldHandler,
           selectedColumns: columns,
         });
@@ -765,7 +806,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         dataView,
         fieldFormats,
         columnsMeta,
-        sourceDisplayMode,
+        documentsDisplayMode,
         shouldShowFieldHandler,
         columns,
       ]
@@ -871,12 +912,13 @@ const InternalUnifiedDataTable = React.forwardRef<
         setExpanded: setExpandedDoc,
         getRowByIndex: (index: number) => displayedRows[index],
         onFilter,
+        hideFilteringOnComputedColumns,
         dataView,
         selectedDocsState,
         valueToStringConverter,
         componentsTourSteps,
         isPlainRecord,
-        sourceDisplayMode,
+        documentsDisplayMode,
         pageIndex: isPaginationEnabled ? paginationObj?.pageIndex : 0,
         pageSize: isPaginationEnabled ? paginationObj?.pageSize : displayedRows.length,
       }),
@@ -884,11 +926,12 @@ const InternalUnifiedDataTable = React.forwardRef<
         componentsTourSteps,
         dataView,
         isPlainRecord,
-        sourceDisplayMode,
+        documentsDisplayMode,
         isPaginationEnabled,
         displayedRows,
         expandedDoc,
         onFilter,
+        hideFilteringOnComputedColumns,
         setExpandedDoc,
         selectedDocsState,
         paginationObj,
@@ -929,7 +972,8 @@ const InternalUnifiedDataTable = React.forwardRef<
           isPlainRecord,
           isCompressed: dataGridDensity === DataGridDensity.COMPACT,
           columnsMeta,
-          sourceDisplayMode,
+          documentsDisplayMode,
+          jsonModeSettings,
           selectedColumns: columns,
         }),
       [
@@ -942,7 +986,8 @@ const InternalUnifiedDataTable = React.forwardRef<
         isPlainRecord,
         dataGridDensity,
         columnsMeta,
-        sourceDisplayMode,
+        documentsDisplayMode,
+        jsonModeSettings,
         columns,
       ]
     );
@@ -972,6 +1017,8 @@ const InternalUnifiedDataTable = React.forwardRef<
     const {
       inTableSearchTermCss,
       inTableSearchControl,
+      inTableSearchButton,
+      inTableSearchInput,
       cellContextWithInTableSearchSupport,
       renderCellValueWithInTableSearchSupport,
     } = useDataGridInTableSearch({
@@ -1117,7 +1164,7 @@ const InternalUnifiedDataTable = React.forwardRef<
 
     // In JSON mode the source cell renders a variable-height tree: force the body cell height to auto
     // and hide the "Body cell lines" setting.
-    const isJsonSourceMode = sourceDisplayMode === 'json';
+    const isJsonSourceMode = documentsDisplayMode === 'json';
     const rowHeightLines = isJsonSourceMode ? ROWS_HEIGHT_OPTIONS.auto : rowHeightLinesSetting;
     const onChangeRowHeight = isJsonSourceMode ? undefined : onChangeRowHeightSetting;
     const onChangeRowHeightLines = isJsonSourceMode ? undefined : onChangeRowHeightLinesSetting;
@@ -1153,7 +1200,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           disableCellActions,
           dataGridRef,
           hideFilteringOnComputedColumns,
-          sourceDisplayMode,
+          documentsDisplayMode,
         }),
       [
         cellActionsHandling,
@@ -1180,7 +1227,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         sortedColumns,
         disableCellActions,
         hideFilteringOnComputedColumns,
-        sourceDisplayMode,
+        documentsDisplayMode,
       ]
     );
 
@@ -1323,17 +1370,26 @@ const InternalUnifiedDataTable = React.forwardRef<
                   toolbarProps.columnControl
                 );
 
+              const displayControl =
+                isViewModeNew && toolbarProps.displayControl ? (
+                  <WithNewIndicator>{toolbarProps.displayControl}</WithNewIndicator>
+                ) : (
+                  toolbarProps.displayControl
+                );
+
               return renderCustomToolbar({
                 toolbarProps: {
                   ...toolbarProps,
                   columnControl,
+                  displayControl,
                 },
                 gridProps: {
                   additionalControls:
                     additionalControls && 'left' in additionalControls
                       ? additionalControls.left
                       : additionalControls,
-                  inTableSearchControl,
+                  inTableSearchButton,
+                  inTableSearchInput,
                 },
               });
             }
@@ -1342,10 +1398,12 @@ const InternalUnifiedDataTable = React.forwardRef<
         renderCustomToolbar,
         showSummaryColumnToggle,
         additionalControls,
-        inTableSearchControl,
+        inTableSearchButton,
+        inTableSearchInput,
         showSummaryColumn,
         isSummaryOnlyColumn,
         onChangeShowSummaryColumn,
+        isViewModeNew,
       ]
     );
 
@@ -1381,6 +1439,11 @@ const InternalUnifiedDataTable = React.forwardRef<
               headerLineCountInput={headerLineCountInput}
               densityControl={densityControl}
               additionalContent={additionalDisplaySettingsContent}
+              documentsDisplayMode={documentsDisplayMode}
+              onChangeDocumentsDisplayMode={onChangeDocumentsDisplayModeWithSeen}
+              jsonModeSettings={jsonModeSettings}
+              onChangeJsonModeSettings={onUpdateJsonModeSettings}
+              isViewModeNew={isViewModeNew}
             />
           </>
         ),
@@ -1401,18 +1464,25 @@ const InternalUnifiedDataTable = React.forwardRef<
       lineCountInput,
       headerLineCountInput,
       additionalDisplaySettingsContent,
+      documentsDisplayMode,
+      onChangeDocumentsDisplayModeWithSeen,
+      jsonModeSettings,
+      onUpdateJsonModeSettings,
+      isViewModeNew,
     ]);
 
     const toolbarVisibility = useMemo(
       () => ({
         ...toolbarVisibilityDefaults,
-        showSortSelector: isSortEnabled,
+        showSortSelector: isSortEnabled && !isJsonSourceMode,
+        showColumnSelector: isJsonSourceMode ? false : toolbarVisibilityDefaults.showColumnSelector,
         additionalControls,
         showDisplaySelector,
         showKeyboardShortcuts,
         showFullScreenSelector: showFullScreenButton,
       }),
       [
+        isJsonSourceMode,
         isSortEnabled,
         additionalControls,
         showDisplaySelector,
@@ -1478,7 +1548,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       };
     }, [showSummaryColumn, paginationMode, throttledHandleOnScroll]);
 
-    const isRenderComplete = loadingState !== DataLoadingState.loading;
+    const isLoaded = loadingState === DataLoadingState.loaded;
 
     if (!rowCount && loadingState === DataLoadingState.loading) {
       return (
@@ -1504,10 +1574,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         <div
           className="euiDataGrid__noResults"
           css={styles.emptyRow}
-          data-render-complete={isRenderComplete}
-          data-shared-item=""
-          data-title={searchTitle}
-          data-description={searchDescription}
+          data-table-loaded={isLoaded}
           data-document-number={0}
         >
           <EuiText size="xs" color="subdued" textAlign="center">
@@ -1530,11 +1597,7 @@ const InternalUnifiedDataTable = React.forwardRef<
             ref={setDataGridWrapper}
             key={isCompareActive ? 'comparisonTable' : 'docTable'}
             data-test-subj="discoverDocTable"
-            data-render-complete={isRenderComplete}
-            data-shared-item=""
-            data-rendering-count={1} // TODO: Fix this as part of https://github.com/elastic/kibana/issues/179376
-            data-title={searchTitle}
-            data-description={searchDescription}
+            data-table-loaded={isLoaded}
             data-document-number={displayedRows.length}
             className={classnames(className, 'unifiedDataTable__table')}
             css={[styles.dataTable, inTableSearchTermCss]}
@@ -1561,6 +1624,9 @@ const InternalUnifiedDataTable = React.forwardRef<
               />
             ) : (
               <EuiDataGridMemoized
+                // Remount on display-mode change to reset EuiDataGrid's auto-height cache; otherwise
+                // some rows stay stuck at the taller JSON height when switching back to table mode.
+                key={documentsDisplayMode}
                 id={dataGridId}
                 aria-describedby={randomId}
                 aria-labelledby={ariaLabelledBy}
@@ -1729,7 +1795,6 @@ const componentStyles = {
         },
       '.euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id="colorIndicator"] .euiDataGridRowCell__content':
         {
-          height: '100%',
           borderBottom: 0,
         },
       '.euiDataGrid__scrollOverlay .euiDataGrid__scrollBarOverlayRight': {

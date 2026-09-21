@@ -11,7 +11,6 @@ import type { BaseMessage } from '@langchain/core/messages';
 import type { Logger } from '@kbn/core/server';
 import type { ChatCompleteCacheControl } from '@kbn/inference-common';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import type { ResolvedAgentCapabilities } from '@kbn/agent-builder-common';
 import { AgentExecutionErrorCode as ErrCodes } from '@kbn/agent-builder-common/agents';
 import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import type { AgentEventEmitter } from '@kbn/agent-builder-server';
@@ -20,7 +19,11 @@ import {
   createToolCallMessage,
 } from '@kbn/agent-builder-genai-utils/langchain';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
-import { isSubagentRosterUpdatedStep, type SubagentRosterEntry } from '@kbn/agent-builder-common';
+import {
+  isSubagentRosterUpdatedStep,
+  TimelineEventType,
+  type SubagentRosterEntry,
+} from '@kbn/agent-builder-common';
 import type { ResolvedConfiguration } from './types';
 import type { ResearchAgentAction } from './actions';
 import { convertError, isRecoverableError } from './utils/errors';
@@ -53,7 +56,6 @@ export const createAgentGraph = ({
   chatModel,
   toolManager,
   configuration,
-  capabilities,
   logger,
   events,
   structuredOutput = false,
@@ -68,7 +70,6 @@ export const createAgentGraph = ({
 }: {
   chatModel: InferenceChatModel;
   toolManager: ToolManager;
-  capabilities: ResolvedAgentCapabilities;
   configuration: ResolvedConfiguration;
   logger: Logger;
   events: AgentEventEmitter;
@@ -347,8 +348,8 @@ export const createAgentGraph = ({
  * SubagentRosterUpdatedStep across previous rounds.
  */
 const getPriorPurposes = (processedConversation: ProcessedConversation): Record<string, string> => {
-  const step = processedConversation.previousRounds
-    .flatMap((round) => round.steps)
+  const step = processedConversation.timeline
+    .flatMap((event) => (event.type === TimelineEventType.executionStep ? [event.data.step] : []))
     .findLast(isSubagentRosterUpdatedStep);
 
   if (!step) return {};

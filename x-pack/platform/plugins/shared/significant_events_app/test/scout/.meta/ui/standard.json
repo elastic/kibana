@@ -1,8 +1,7 @@
 {
-  "sha1": "88c2e30b32184c7ae77b93a5f92c7066d6c5ad35",
+  "sha1": "9a79c159adbb03915d2ac5b6043d6c1296008a18",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -22,8 +21,8 @@
       }
     },
     {
-      "id": "618d200f59238fb-4d1a89accf972e9",
-      "title": "Significant Events app renders all 7 navigation tabs",
+      "id": "618d200f59238fb-cbe60da9252d791",
+      "title": "Significant Events app renders navigation tabs",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -49,8 +48,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events_app/test/scout/ui/tests/significant_events.spec.ts",
-        "line": 80,
-        "column": 54
+        "line": 79,
+        "column": 15
       }
     }
   ]

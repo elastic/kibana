@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
+import {
+  AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+  AS_CODE_ESQL_DATA_SOURCE_TYPE,
+} from '@kbn/as-code-data-views-schema';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { discoverServiceMock } from '../../__mocks__/services';
@@ -18,9 +21,12 @@ import type {
   DiscoverSessionEmbeddableByValueState,
 } from '../../../server';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
-import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
+import type {
+  DiscoverSessionTab,
+  DiscoverSessionTabTypeState,
+} from '@kbn/saved-search-plugin/common';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
-import { DataGridDensity } from '@kbn/discover-utils';
+import { DataGridDensity, DiscoverTabType } from '@kbn/discover-session-constants';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import type {
   SearchEmbeddableByReferenceState,
@@ -71,6 +77,7 @@ describe('Serialization utils', () => {
     description: 'description',
     tabs: [
       {
+        type: DiscoverTabType.Default,
         column_order: ['_source'],
         sort: [{ name: 'order_date', direction: 'desc' }],
         view_mode: VIEW_MODE.DOCUMENT_LEVEL,
@@ -84,6 +91,29 @@ describe('Serialization utils', () => {
         data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: dataViewId },
       },
     ],
+  };
+
+  const metricsTabTypeState: DiscoverSessionTabTypeState = {
+    type: DiscoverTabType.Metrics,
+    dimensions: ['host.name'],
+    searchTerm: 'cpu',
+    counterAggregation: 'max',
+    gaugeAggregation: 'avg',
+    histogramPercentile: 'p99',
+  };
+
+  const metricsByValueTab: DiscoverSessionEmbeddableByValueState['tabs'][0] = {
+    type: DiscoverTabType.Metrics,
+    dimensions: metricsTabTypeState.dimensions,
+    search_term: metricsTabTypeState.searchTerm,
+    counter_aggregation: metricsTabTypeState.counterAggregation,
+    gauge_aggregation: metricsTabTypeState.gaugeAggregation,
+    histogram_percentile: metricsTabTypeState.histogramPercentile,
+    sort: [],
+    data_source: {
+      type: AS_CODE_ESQL_DATA_SOURCE_TYPE,
+      query: 'TS metrics-*',
+    },
   };
 
   const mockTab = (
@@ -113,6 +143,18 @@ describe('Serialization utils', () => {
       tabs: sessionTabs,
     });
 
+  const getSessionTabsWithMetrics = (): DiscoverSessionTab[] => [
+    {
+      ...mockTab('metrics-tab', 'Metrics tab'),
+      serializedSearchSource: { query: { esql: 'TS metrics-*' } },
+      tabTypeState: metricsTabTypeState,
+    },
+    {
+      ...mockTab('default-tab', 'Default tab'),
+      serializedSearchSource: { query: { esql: 'FROM logs-*' } },
+    },
+  ];
+
   describe('deserialize state', () => {
     test('by value', async () => {
       const deserializedState = await deserializeState({
@@ -141,6 +183,25 @@ describe('Serialization utils', () => {
 
       expect(Object.keys(deserializedState)).toContain('serializedSearchSource');
       expect(deserializedState.title).toEqual('test panel title');
+    });
+
+    test('by value restores Metrics profile state from the saved search', async () => {
+      jest.mocked(discoverServiceMock.savedSearch.byValueToSavedSearch).mockResolvedValueOnce({
+        title: 'Metrics panel',
+        serializedSearchSource: { query: { esql: 'TS metrics-*' } },
+        tabTypeState: metricsTabTypeState,
+        managed: false,
+      });
+
+      const deserializedState = await deserializeState({
+        serializedState: {
+          title: 'Metrics panel',
+          tabs: [metricsByValueTab],
+        },
+        discoverServices: discoverServiceMock,
+      });
+
+      expect(deserializedState.tabTypeState).toEqual(metricsTabTypeState);
     });
 
     test('by reference - default tab (no selectedTabId)', async () => {
@@ -204,11 +265,15 @@ describe('Serialization utils', () => {
     test('by reference - valid selectedTabId', async () => {
       const sessionTabs = [
         mockTab('tab-1', 'Tab 1'),
-        mockTab('tab-2', 'Tab 2', {
-          columns: ['col-a', 'col-b'],
-          sort: [['timestamp', 'asc']],
-          sampleSize: 200,
-        }),
+        {
+          ...mockTab('tab-2', 'Tab 2', {
+            columns: ['col-a', 'col-b'],
+            sort: [['timestamp', 'asc']],
+            sampleSize: 200,
+          }),
+          serializedSearchSource: { query: { esql: 'TS metrics-*' } },
+          tabTypeState: metricsTabTypeState,
+        },
       ];
       discoverServiceMock.savedSearch.getDiscoverSession = jest
         .fn()
@@ -231,6 +296,7 @@ describe('Serialization utils', () => {
       expect(deserializedState.columns).toEqual(['col-a', 'col-b']);
       expect(deserializedState.sort).toEqual([['timestamp', 'asc']]);
       expect(deserializedState.sampleSize).toEqual(200);
+      expect(deserializedState.tabTypeState).toEqual(metricsTabTypeState);
     });
 
     test('by reference - deleted selectedTabId discards stale dashboard overrides', async () => {
@@ -291,6 +357,58 @@ describe('Serialization utils', () => {
       expect(deserializedState.columns).toEqual(['custom-col']);
       expect(deserializedState.sort).toEqual([['timestamp', 'asc']]);
     });
+
+    test('by reference - partial jsonModeSettings override deep-merges with the source', async () => {
+      const sessionTabs = [
+        mockTab('tab-1', 'Tab 1', { jsonModeSettings: { hideNulls: true, wrapLines: true } }),
+      ];
+      discoverServiceMock.savedSearch.getDiscoverSession = jest
+        .fn()
+        .mockResolvedValue(mockDiscoverSession(sessionTabs));
+
+      const serializedState: DiscoverSessionEmbeddableByReferenceState = {
+        title: 'test panel title',
+        ref_id: 'savedSearch',
+        selected_tab_id: undefined,
+        overrides: { wrap_lines: false },
+      };
+
+      const deserializedState = await deserializeState({
+        serializedState,
+        discoverServices: discoverServiceMock,
+      });
+
+      // jsonModeSettings partial-merges: wrap_lines is overridden while hide_nulls is preserved
+      // from the source (a shallow replace dropped it).
+      expect(deserializedState.jsonModeSettings).toEqual({ hideNulls: true, wrapLines: false });
+    });
+
+    test('by reference - grid override replaces wholesale so removed columns are not resurrected', async () => {
+      const sessionTabs = [
+        mockTab('tab-1', 'Tab 1', {
+          grid: { columns: { A: { width: 100 }, B: { width: 200 } } },
+        }),
+      ];
+      discoverServiceMock.savedSearch.getDiscoverSession = jest
+        .fn()
+        .mockResolvedValue(mockDiscoverSession(sessionTabs));
+
+      const serializedState: DiscoverSessionEmbeddableByReferenceState = {
+        title: 'test panel title',
+        ref_id: 'savedSearch',
+        selected_tab_id: undefined,
+        // Column B's width was reset, so the stored override only carries A.
+        overrides: { column_settings: { A: { width: 100 } } },
+      };
+
+      const deserializedState = await deserializeState({
+        serializedState,
+        discoverServices: discoverServiceMock,
+      });
+
+      // Unlike jsonModeSettings, grid must replace wholesale: B stays dropped, not merged back in.
+      expect(deserializedState.grid).toEqual({ columns: { A: { width: 100 } } });
+    });
   });
 
   describe('serialize state', () => {
@@ -339,6 +457,79 @@ describe('Serialization utils', () => {
       });
       expect(serializedState).not.toHaveProperty('attributes');
     });
+
+    test.each([
+      {
+        name: 'a by-value panel with updated Metrics settings',
+        initialState: {
+          tabTypeState: { ...metricsTabTypeState, dimensions: ['initial.dimension'] },
+          serializedSearchSource: { query: { esql: 'TS metrics-*' } },
+        },
+        tabTypeState: metricsTabTypeState,
+        selectedTabId: undefined,
+        expectedTab: metricsByValueTab,
+      },
+      {
+        name: 'a panel converted to by-value after switching from Metrics to Default',
+        initialState: {
+          tabs: getSessionTabsWithMetrics(),
+          tabTypeState: metricsTabTypeState,
+          serializedSearchSource: { query: { esql: 'TS metrics-*' } },
+        },
+        tabTypeState: undefined,
+        selectedTabId: 'default-tab',
+        expectedTab: {
+          type: DiscoverTabType.Default,
+          sort: [],
+          data_source: {
+            type: AS_CODE_ESQL_DATA_SOURCE_TYPE,
+            query: 'FROM logs-*',
+          },
+        },
+      },
+      {
+        name: 'a panel converted to by-value after switching from Default to Metrics',
+        initialState: {
+          tabs: getSessionTabsWithMetrics(),
+          serializedSearchSource: { query: { esql: 'FROM logs-*' } },
+        },
+        tabTypeState: metricsTabTypeState,
+        selectedTabId: 'metrics-tab',
+        expectedTab: metricsByValueTab,
+      },
+    ])(
+      'serializes the current profile state for $name',
+      ({ initialState, tabTypeState, selectedTabId, expectedTab }) => {
+        const searchSource = createSearchSourceMock({
+          query: { esql: expectedTab.data_source.query },
+        });
+
+        const serializedState = serializeState({
+          uuid,
+          initialState,
+          savedSearch: {
+            title: 'Test panel',
+            tabTypeState,
+            description: '',
+            columns: [],
+            sort: [],
+            grid: {},
+            hideChart: false,
+            isTextBasedQuery: true,
+            managed: false,
+            searchSource,
+          },
+          serializeTitles: jest.fn().mockReturnValue({ title: 'Test panel' }),
+          serializeTimeRange: jest.fn(),
+          serializeDynamicActions: jest.fn(),
+          selectedTabId,
+        });
+
+        expect(serializedState).toEqual(
+          expect.objectContaining({ tabs: [{ column_order: [], ...expectedTab }] })
+        );
+      }
+    );
 
     describe('by reference', () => {
       const sort: SortOrder[] = [['order_date', 'desc']];

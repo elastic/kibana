@@ -38,6 +38,7 @@ import type {
 
 export type AvailableMetricIcon = $Values<typeof AvailableMetricIcons>;
 export type MetricDensity = 'compact' | 'default';
+export type SecondaryNameVisibility = 'hidden' | NonNullable<SecondaryMetricProps['labelPosition']>;
 
 export interface MetricArguments {
   metric: ExpressionValueVisDimension | string;
@@ -66,7 +67,7 @@ export interface MetricArguments {
   maxCols: number;
   minTiles?: number;
   inspectorTableId: string;
-  secondaryLabelPosition: SecondaryMetricProps['labelPosition'];
+  secondaryNameVisibility: SecondaryNameVisibility;
   applyColorTo?: 'background' | 'value';
 }
 

@@ -6,22 +6,13 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import {
-  SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID,
-} from '@kbn/workflows/managed';
-import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
+import { SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import { createManagedWorkflowsInstaller } from './managed_workflows_installer';
 
 // Significant events is gated solely by the availability flag now, so the installer always writes
-// the full set: 9 base workflows + 4 memory workflows (both via `installWorkflows`).
-const BASE_WORKFLOW_COUNT = 8;
-const MEMORY_WORKFLOW_COUNT = 4;
-const TOTAL_WORKFLOW_COUNT = BASE_WORKFLOW_COUNT + MEMORY_WORKFLOW_COUNT;
+// the full set: 9 base workflows (via `installWorkflows`).
+const TOTAL_WORKFLOW_COUNT = 9;
 
 const createClientMock = () => {
   const client = {
@@ -97,28 +88,8 @@ describe('createManagedWorkflowsInstaller', () => {
 
     await installer.install();
 
-    // base + memory, all installed before ready() closes the window.
     expect(client.install).toHaveBeenCalledTimes(TOTAL_WORKFLOW_COUNT);
     expect(installCountAtReady).toBe(TOTAL_WORKFLOW_COUNT);
-  });
-
-  it('installs memory workflows globally when available', async () => {
-    const { client, installer } = createInstaller();
-
-    await installer.install();
-
-    const memoryWorkflowIds = [
-      SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID,
-      SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
-      SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
-      SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
-    ];
-
-    for (const workflowId of memoryWorkflowIds) {
-      expect(client.install).toHaveBeenCalledWith(workflowId, {
-        spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-      });
-    }
   });
 
   it('re-installs on later calls but reconciles (ready) only once', async () => {
