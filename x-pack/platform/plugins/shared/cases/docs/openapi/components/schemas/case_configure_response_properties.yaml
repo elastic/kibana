@@ -58,6 +58,12 @@ observableTypes:
         type: string
         description: The observable type label.
         example: My observable type
+extractObservables:
+  type: boolean
+  description: >
+    Indicates whether observables are automatically extracted from alerts when
+    they are added to new cases. Defaults to `true`.
+  example: true
 owner:
   $ref: 'owner.yaml'
 templates:
