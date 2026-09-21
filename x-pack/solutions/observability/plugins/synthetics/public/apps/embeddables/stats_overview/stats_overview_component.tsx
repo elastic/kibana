@@ -17,15 +17,18 @@ import { SyntheticsEmbeddableContext } from '../synthetics_embeddable_context';
 import { useOverviewStatus } from '../../synthetics/components/monitors_page/hooks/use_overview_status';
 import { OverviewStatus } from '../../synthetics/components/monitors_page/overview/overview/overview_status';
 import type { MonitorFilters } from '../../../../common/types';
+import type { RequestCancellationManager } from '../../synthetics/state/request_cancellation_manager';
 
 export const StatsOverviewComponent = ({
   reload$,
   filters,
+  requestCancellationManager,
 }: {
   reload$: Subject<boolean>;
   filters: MonitorFilters;
+  requestCancellationManager: RequestCancellationManager;
 }) => {
-  const statsOverviewStore = useRef(getStatsOverviewStore());
+  const statsOverviewStore = useRef(getStatsOverviewStore(requestCancellationManager));
 
   return (
     <SyntheticsEmbeddableContext reload$={reload$} reduxStore={statsOverviewStore.current}>

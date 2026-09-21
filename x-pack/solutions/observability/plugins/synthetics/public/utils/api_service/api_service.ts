@@ -154,7 +154,13 @@ class ApiService {
     return this.parseResponse(response, apiUrl, decodeType);
   }
 
-  public async post<T>(apiUrl: string, data?: any, decodeType?: any, params: Params = {}) {
+  public async post<T>(
+    apiUrl: string,
+    data?: any,
+    decodeType?: any,
+    params: Params = {},
+    options?: FetchOptions
+  ) {
     const { version, spaceId, ...queryParams } = params;
 
     const response = await this._http!.post<T>(this.parseApiUrl(apiUrl, spaceId), {
@@ -162,7 +168,7 @@ class ApiService {
       body: JSON.stringify(data),
       query: queryParams,
       version,
-      ...this.withCpsHeaders(),
+      ...this.withCpsHeaders(options),
       ...(this.shouldSkipBasePath(spaceId) ? { prependBasePath: false } : {}),
     });
 

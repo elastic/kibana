@@ -54,8 +54,11 @@ import { fetchOverviewTrendStats, refreshOverviewTrendStats } from './overview/e
 import { fetchAgentPoliciesEffect } from './agent_policies';
 import { fetchAgentStatsEffect } from './agent_stats';
 import { fetchMonitorHealthEffect } from './monitor_health';
+import type { RequestCancellationManager } from './request_cancellation_manager';
 
-export const rootEffect = function* root(): Generator {
+export const rootEffect = function* root(
+  requestCancellationManager?: RequestCancellationManager
+): Generator {
   yield all([
     fork(fetchSyntheticsEnablementEffect),
     fork(upsertMonitorEffect),
@@ -64,9 +67,9 @@ export const rootEffect = function* root(): Generator {
     fork(fetchMonitorListEffect),
     fork(fetchSyntheticsMonitorEffect),
     fork(browserJourneyEffects),
-    fork(fetchOverviewStatusEffect),
-    fork(appendOverviewStatusEffect),
-    fork(fetchStaleStatusEffect),
+    fork(fetchOverviewStatusEffect, requestCancellationManager),
+    fork(appendOverviewStatusEffect, requestCancellationManager),
+    fork(fetchStaleStatusEffect, requestCancellationManager),
     fork(augmentStaleStatusEffect),
     fork(refreshRemainingCardWindowEffect),
     fork(fetchNetworkEventsEffect),
@@ -91,8 +94,8 @@ export const rootEffect = function* root(): Generator {
     fork(enableDefaultAlertingSilentlyEffect),
     fork(fetchMonitorStatusHeatmap),
     fork(quietFetchMonitorStatusHeatmap),
-    fork(fetchOverviewTrendStats),
-    fork(refreshOverviewTrendStats),
+    fork(fetchOverviewTrendStats, requestCancellationManager),
+    fork(refreshOverviewTrendStats, requestCancellationManager),
     fork(inspectStatusRuleEffect),
     fork(inspectTLSRuleEffect),
     ...privateLocationsEffects.map((effect) => fork(effect)),
