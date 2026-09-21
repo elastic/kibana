@@ -63,7 +63,6 @@ describe('buildActionResultsQuery', () => {
                           should: [
                             { term: { space_id: 'default' } },
                             { bool: { must_not: { exists: { field: 'space_id' } } } },
-                            { term: { 'action_data.space_id': 'default' } },
                           ],
                         },
                       },
@@ -341,7 +340,6 @@ describe('buildActionResultsQuery', () => {
                           should: [
                             { term: { space_id: 'default' } },
                             { bool: { must_not: { exists: { field: 'space_id' } } } },
-                            { term: { 'action_data.space_id': 'default' } },
                           ],
                         },
                       },
@@ -648,7 +646,11 @@ describe('buildActionResultsQuery', () => {
       result.aggs.aggs.aggs.responses_by_action_id.filter.bool.must;
 
     it('scopes the aggregation to default space OR missing space_id when spaceId is "default"', () => {
-      const result = buildActionResultsQuery({ ...baseOptions, spaceId: 'default' });
+      const result = buildActionResultsQuery({
+        ...baseOptions,
+        spaceId: 'default',
+        matchActionDataSpaceId: true,
+      });
       const defaultClause = {
         bool: {
           should: [
@@ -663,7 +665,11 @@ describe('buildActionResultsQuery', () => {
     });
 
     it('scopes the aggregation to the space exactly in a named space', () => {
-      const result = buildActionResultsQuery({ ...baseOptions, spaceId: 'my-space' });
+      const result = buildActionResultsQuery({
+        ...baseOptions,
+        spaceId: 'my-space',
+        matchActionDataSpaceId: true,
+      });
       // Id-bound read: also matches the agent-carried action_data.space_id.
       expect(getAggFilterMust(result)).toContainEqual({
         bool: {
@@ -680,6 +686,7 @@ describe('buildActionResultsQuery', () => {
         ...baseOptions,
         spaceId: 'default',
         matchMissingSpaceId: false,
+        matchActionDataSpaceId: true,
       });
 
       // The action_data fallback is orthogonal to matchMissingSpaceId: it is a
@@ -694,6 +701,23 @@ describe('buildActionResultsQuery', () => {
         },
       });
       expect(JSON.stringify(getAggFilterMust(result))).not.toContain('exists');
+    });
+
+    it('omits action_data.space_id from aggregations when matchActionDataSpaceId is omitted', () => {
+      const result = buildActionResultsQuery({
+        ...baseOptions,
+        spaceId: 'my-space',
+      });
+
+      expect(getAggFilterMust(result)).toContainEqual({ term: { space_id: 'my-space' } });
+      expect(getAggFilterMust(result)).not.toContainEqual({
+        bool: {
+          should: [
+            { term: { space_id: 'my-space' } },
+            { term: { 'action_data.space_id': 'my-space' } },
+          ],
+        },
+      });
     });
 
     it('omits action_data.space_id from aggregations when matchActionDataSpaceId is false', () => {

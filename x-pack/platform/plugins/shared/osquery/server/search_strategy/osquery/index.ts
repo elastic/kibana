@@ -24,7 +24,7 @@ import type {
 } from '../../../common/search_strategy/osquery';
 import { OsqueryQueries } from '../../../common/search_strategy/osquery';
 import { osqueryFactory } from './factory';
-import type { OsqueryFactory } from './factory/types';
+import type { OsqueryFactory, OsqueryFactoryRequest } from './factory/types';
 import { hasConnectedRemoteClusters } from '../../utils/ccs_utils';
 import { shouldUseInternalSearchClient } from '../../utils/cps_read_routing';
 
@@ -38,9 +38,11 @@ import { shouldUseInternalSearchClient } from '../../utils/cps_read_routing';
  * document. Do not add a query type here unless its builder unconditionally
  * filters on one of those ids.
  *
- * Types not allowlisted for `action_data.space_id`: `actions` and `exportResults`
- * enumerate across actions; `actionDetails` is an id-bound lookup of
- * Kibana-written action metadata on `ACTIONS_INDEX`, not agent `action_data`.
+ * Types not allowlisted for `action_data.space_id`: `actions` enumerates across
+ * actions; `exportResults` is not unconditionally id-bound in the factory
+ * (opaque `baseFilter` KQL), so named-space live-query export remains a known
+ * gap; `actionDetails` is an id-bound lookup of Kibana-written action metadata
+ * on `ACTIONS_INDEX`, not agent `action_data`.
  */
 export const ID_BOUND_FACTORY_QUERY_TYPES: readonly FactoryQueryTypes[] = [
   OsqueryQueries.results,
@@ -97,8 +99,7 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
           }) => {
             // Single decision for hit-level enforceSpaceScope and for any
             // global-agg builder that cannot inherit the top-level query.
-            const matchActionDataSpaceId =
-              ID_BOUND_FACTORY_QUERY_TYPES.includes(factoryQueryType);
+            const matchActionDataSpaceId = ID_BOUND_FACTORY_QUERY_TYPES.includes(factoryQueryType);
 
             const strictRequest = {
               factoryQueryType,
@@ -119,7 +120,6 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
               ...('matchMissingSpaceId' in request
                 ? { matchMissingSpaceId: request.matchMissingSpaceId }
                 : {}),
-              matchActionDataSpaceId,
               // exportResults factory fields — baseFilter is required and unique to this
               // factory type, so its presence is a reliable discriminator for all six fields.
               ...('baseFilter' in request
@@ -144,13 +144,16 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
               matchActionDataSpaceId,
             };
 
+            const factoryRequest = {
+              ...strictRequest,
+              spaceId,
+              componentTemplateExists: actionsIndexExists,
+              ccsEnabled,
+              matchActionDataSpaceId,
+            } as OsqueryFactoryRequest<T>;
+
             const dsl = enforceSpaceScope(
-              queryFactory.buildDsl({
-                ...strictRequest,
-                spaceId,
-                componentTemplateExists: actionsIndexExists,
-                ccsEnabled,
-              } as StrategyRequestType<T>),
+              queryFactory.buildDsl(factoryRequest),
               spaceId,
               spaceScopeOptions
             );
@@ -212,12 +215,9 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
                 ) {
                   const dataStreamDsl = enforceSpaceScope(
                     queryFactory.buildDsl({
-                      ...strictRequest,
-                      spaceId,
-                      componentTemplateExists: actionsIndexExists,
-                      ccsEnabled,
+                      ...factoryRequest,
                       useNewDataStream: true,
-                    } as StrategyRequestType<T>),
+                    } as OsqueryFactoryRequest<T>),
                     spaceId,
                     spaceScopeOptions
                   );
@@ -255,7 +255,7 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
                 },
                 total: response.rawResponse.hits.total as number,
               })),
-              mergeMap((esSearchRes) => queryFactory.parse(request, esSearchRes))
+              mergeMap((esSearchRes) => queryFactory.parse(factoryRequest, esSearchRes))
             );
           }
         )

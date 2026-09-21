@@ -34,7 +34,7 @@ export const buildActionResultsQuery = ({
   spaceId,
   matchMissingSpaceId,
   matchActionDataSpaceId,
-}: ActionResultsRequestOptions): ISearchRequestParams => {
+}: ActionResultsRequestOptions & { matchActionDataSpaceId?: boolean }): ISearchRequestParams => {
   const kueryFilter = kuery ? [getQueryFilter({ filter: kuery })] : [];
 
   const timeRangeFilter: estypes.QueryDslQueryContainer[] =
@@ -75,11 +75,11 @@ export const buildActionResultsQuery = ({
   // the authorization gate that makes honouring the agent-carried
   // `action_data.space_id` safe here — see buildSpaceIdFilter. The strategy
   // passes `matchActionDataSpaceId` from ID_BOUND_FACTORY_QUERY_TYPES so this
-  // aggregation cannot drift from the hit filter; default true because this
-  // builder is id-bound.
+  // aggregation cannot drift from the hit filter. Default off: omitting the
+  // flag must not enable the less-trusted field in aggregations only.
   const spaceIdFilter = buildSpaceIdFilter(spaceId, {
     matchMissingSpaceId: matchMissingSpaceId ?? true,
-    matchActionDataSpaceId: matchActionDataSpaceId ?? true,
+    matchActionDataSpaceId: matchActionDataSpaceId ?? false,
   }) as estypes.QueryDslQueryContainer;
 
   const filterQuery: estypes.QueryDslQueryContainer[] = [

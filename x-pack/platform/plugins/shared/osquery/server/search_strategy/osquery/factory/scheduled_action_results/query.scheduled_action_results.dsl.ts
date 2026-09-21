@@ -25,7 +25,9 @@ export const buildScheduledActionResultsQuery = ({
   ccsEnabled,
   matchMissingSpaceId,
   matchActionDataSpaceId,
-}: ScheduledActionResultsRequestOptions): ISearchRequestParams => {
+}: ScheduledActionResultsRequestOptions & {
+  matchActionDataSpaceId?: boolean;
+}): ISearchRequestParams => {
   // Top-level hit scoping is enforced centrally in the search strategy
   // (enforceSpaceScope). The aggregation below is a separate filter context that
   // the top-level query does not constrain, so it is scoped explicitly here.
@@ -34,13 +36,13 @@ export const buildScheduledActionResultsQuery = ({
   // a space-stamped action document, so it may also honour the agent-carried
   // `action_data.space_id`. The strategy passes that flag from
   // ID_BOUND_FACTORY_QUERY_TYPES so this aggregation cannot drift from the hit
-  // filter; default true because this builder is id-bound. The flag is orthogonal
-  // to `matchMissingSpaceId`: `action_data.space_id` is a present, exact-valued
-  // term, so it stays safe under CPS fan-out even when the missing-field
-  // allowance is dropped.
+  // filter. Default off: omitting the flag must not enable the less-trusted field
+  // in aggregations only. The flag is orthogonal to `matchMissingSpaceId`:
+  // `action_data.space_id` is a present, exact-valued term, so it stays safe
+  // under CPS fan-out even when the missing-field allowance is dropped.
   const spaceIdFilter = buildSpaceIdFilter(spaceId, {
     matchMissingSpaceId: matchMissingSpaceId ?? true,
-    matchActionDataSpaceId: matchActionDataSpaceId ?? true,
+    matchActionDataSpaceId: matchActionDataSpaceId ?? false,
   });
 
   const filterQuery: Array<Record<string, unknown>> = [

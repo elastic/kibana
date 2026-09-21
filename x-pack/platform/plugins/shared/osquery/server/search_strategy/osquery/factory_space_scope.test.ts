@@ -191,6 +191,9 @@ describe('osquery search strategy space scoping invariant', () => {
       const request = {
         ...baseRequest(factoryQueryType),
         spaceId: 'my-space',
+        ...(ID_BOUND_FACTORY_QUERY_TYPES.includes(factoryQueryType)
+          ? { matchActionDataSpaceId: true }
+          : {}),
       } as StrategyRequestType<FactoryQueryTypes>;
 
       const dsl = osqueryFactory[factoryQueryType].buildDsl(request);
@@ -202,9 +205,12 @@ describe('osquery search strategy space scoping invariant', () => {
         const mustClauses = globalAggMustClauses(globalAgg);
 
         expect(mustClauses.length).toBeGreaterThan(0);
-        // Current global-agg builders are id-bound, so counts must honour
-        // action_data.space_id the same way hits do.
-        expect(mustClauses).toContainEqual(namedSpaceActionDataFilter);
+        if (ID_BOUND_FACTORY_QUERY_TYPES.includes(factoryQueryType)) {
+          expect(mustClauses).toContainEqual(namedSpaceActionDataFilter);
+        } else {
+          expect(mustClauses).toContainEqual({ term: { space_id: 'my-space' } });
+          expect(mustClauses).not.toContainEqual(namedSpaceActionDataFilter);
+        }
       }
     }
   );
@@ -218,6 +224,14 @@ describe('osquery search strategy space scoping invariant', () => {
   // Hit-level enablement is asserted through osquerySearchStrategyProvider in
   // index.test.ts so this file does not re-implement the allowlist decision.
   describe('action_data.space_id fallback is confined to id-bound reads', () => {
+    it('pins ID_BOUND_FACTORY_QUERY_TYPES to the three id-bound agent-doc factory types', () => {
+      expect([...ID_BOUND_FACTORY_QUERY_TYPES]).toEqual([
+        OsqueryQueries.results,
+        OsqueryQueries.actionResults,
+        OsqueryQueries.scheduledActionResults,
+      ]);
+    });
+
     it('only allowlists factory types whose builder always filters on an action or schedule id', () => {
       expect(ID_BOUND_FACTORY_QUERY_TYPES.length).toBeGreaterThan(0);
 

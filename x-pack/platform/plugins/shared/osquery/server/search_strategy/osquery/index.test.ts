@@ -643,9 +643,13 @@ describe('osquerySearchStrategyProvider space scoping', () => {
       });
 
       await lastValueFrom(
-        provider.search(factoryRequest(OsqueryQueries.actionResults), {} as never, {
-          request: {},
-        } as never)
+        provider.search(
+          factoryRequest(OsqueryQueries.actionResults),
+          {} as never,
+          {
+            request: {},
+          } as never
+        )
       );
 
       expect(searchMock.mock.calls.length).toBeGreaterThanOrEqual(2);
@@ -678,6 +682,45 @@ describe('osquerySearchStrategyProvider space scoping', () => {
           ],
         },
       });
+    });
+
+    it('ignores a client-supplied matchActionDataSpaceId on enumerating types', async () => {
+      const { provider, searchMock } = setup({ activeSpaceId: 'my-space' });
+
+      await lastValueFrom(
+        provider.search(
+          {
+            ...factoryRequest(OsqueryQueries.actions),
+            matchActionDataSpaceId: true,
+          } as unknown as StrategyRequestType<FactoryQueryTypes>,
+          {} as never,
+          { request: {} } as never
+        )
+      );
+
+      const filter = searchMock.mock.calls[0][0].params.query.bool.filter as unknown[];
+
+      expect(filter).toContainEqual({ term: { space_id: 'my-space' } });
+      expect(filter).not.toContainEqual(namedSpaceActionDataFilter);
+    });
+
+    it('ignores a client-supplied matchActionDataSpaceId: false on id-bound types', async () => {
+      const { provider, searchMock } = setup({ activeSpaceId: 'my-space' });
+
+      await lastValueFrom(
+        provider.search(
+          {
+            ...factoryRequest(OsqueryQueries.results),
+            matchActionDataSpaceId: false,
+          } as unknown as StrategyRequestType<FactoryQueryTypes>,
+          {} as never,
+          { request: {} } as never
+        )
+      );
+
+      const filter = searchMock.mock.calls[0][0].params.query.bool.filter as unknown[];
+
+      expect(filter).toContainEqual(namedSpaceActionDataFilter);
     });
   });
 });

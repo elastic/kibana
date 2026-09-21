@@ -33,6 +33,17 @@ export const actionResponsesMapping: MappingTypeMapping = {
           type: 'keyword',
           ignore_above: 1024,
         },
+        // Kibana's top-level `space_id` on the Fleet action never reaches the
+        // agent, so it is also written inside the action's opaque `data` blob,
+        // which osquerybeat copies onto this document as `action_data`. Reads
+        // fall back to it via `matchActionDataSpaceId` (see buildSpaceIdFilter),
+        // so it gates a space-isolation boundary and must not depend on dynamic
+        // mapping staying enabled. Mirrors elastic/integrations#21368 for the
+        // package-managed data streams.
+        space_id: {
+          type: 'keyword',
+          ignore_above: 1024,
+        },
         version: {
           type: 'keyword',
           ignore_above: 1024,

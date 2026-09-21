@@ -130,9 +130,10 @@ describe('buildScheduledActionResultsQuery', () => {
   });
 
   it('scopes the aggregation by space_id when spaceId is provided', () => {
-    const options: ScheduledActionResultsRequestOptions = {
+    const options: ScheduledActionResultsRequestOptions & { matchActionDataSpaceId?: boolean } = {
       ...defaultOptions,
       spaceId: 'my-space',
+      matchActionDataSpaceId: true,
     };
 
     const result = buildScheduledActionResultsQuery(options);
@@ -167,9 +168,10 @@ describe('buildScheduledActionResultsQuery', () => {
     // osquerybeat-written scheduled responses may not carry a space_id field;
     // in the default space we must match those legacy docs too (mirrors the
     // history aggregation in buildScheduledResponsesQuery).
-    const options: ScheduledActionResultsRequestOptions = {
+    const options: ScheduledActionResultsRequestOptions & { matchActionDataSpaceId?: boolean } = {
       ...defaultOptions,
       spaceId: 'default',
+      matchActionDataSpaceId: true,
     };
 
     const result = buildScheduledActionResultsQuery(options);
@@ -206,6 +208,7 @@ describe('buildScheduledActionResultsQuery', () => {
       ...defaultOptions,
       spaceId: 'default',
       matchMissingSpaceId: false,
+      matchActionDataSpaceId: true,
     });
 
     const aggs = result.aggs as Record<string, Record<string, unknown>>;

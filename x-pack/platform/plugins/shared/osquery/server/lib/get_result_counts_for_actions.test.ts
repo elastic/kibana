@@ -269,7 +269,7 @@ describe('getResultCountsForActions', () => {
   });
 
   describe('space scoping', () => {
-    it('scopes the query to a named space with an exact space_id term', async () => {
+    it('scopes the query to a named space with space_id OR action_data.space_id', async () => {
       const esClient = createMockEsClient({
         aggregations: { action_ids: { buckets: [] } },
       });
@@ -278,10 +278,17 @@ describe('getResultCountsForActions', () => {
 
       const query = (esClient.search as jest.Mock).mock.calls[0][0].query;
       expect(query.bool.filter).toContainEqual({ terms: { action_id: ['action-1'] } });
-      expect(query.bool.filter).toContainEqual({ term: { space_id: 'my-space' } });
+      expect(query.bool.filter).toContainEqual({
+        bool: {
+          should: [
+            { term: { space_id: 'my-space' } },
+            { term: { 'action_data.space_id': 'my-space' } },
+          ],
+        },
+      });
     });
 
-    it('matches default space OR missing space_id when spaceId is "default"', async () => {
+    it('matches default space, missing space_id, or action_data.space_id when spaceId is "default"', async () => {
       const esClient = createMockEsClient({
         aggregations: { action_ids: { buckets: [] } },
       });
@@ -294,6 +301,7 @@ describe('getResultCountsForActions', () => {
           should: [
             { term: { space_id: 'default' } },
             { bool: { must_not: { exists: { field: 'space_id' } } } },
+            { term: { 'action_data.space_id': 'default' } },
           ],
         },
       });
