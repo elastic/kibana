@@ -64,6 +64,10 @@ export const createManagementFooterItemsTree = (
             },
             {
               breadcrumbStatus: 'hidden',
+              link: 'management:esql_views',
+            },
+            {
+              breadcrumbStatus: 'hidden',
               link: 'management:transform',
             },
             {
