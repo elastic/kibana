@@ -7,14 +7,29 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { MetadataFieldValue } from '@kbn/agent-builder-common';
 import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
 import type { ProposalWithMetadata } from '@kbn/agentic-investigations-plugin/common';
 import type { ProposalItem, ProposalsPageResponse } from '../../../common/proposals/list';
 
 type ProposalsService = ReturnType<AgenticInvestigationsPluginStart['getProposalsService']>;
 
-/** Conversation-derived fields merged onto a proposal on read. Both absent when unreadable. */
-type ConversationDecoration = Pick<ProposalItem, 'conversationTitle' | 'conversationAgentId'>;
+/** Conversation-derived fields merged onto a proposal on read. Absent when unreadable. */
+type ConversationDecoration = Pick<
+  ProposalItem,
+  'conversationTitle' | 'conversationAgentId' | 'assignees'
+>;
+
+/**
+ * A `TEXT_ARRAY` is only deserialized back to `string[]` when the conversation's template
+ * resolves; otherwise it arrives serialized, where a single entry is a bare string.
+ */
+const readAssignees = (value: MetadataFieldValue | undefined): string[] => {
+  if (Array.isArray(value)) {
+    return value.filter((entry): entry is string => typeof entry === 'string' && entry !== '');
+  }
+  return typeof value === 'string' && value !== '' ? [value] : [];
+};
 
 /** Fixed window for the closed-proposals queue: decisions older than this are not shown. */
 const CLOSED_DECIDED_WITHIN_HOURS = 72;
@@ -86,11 +101,12 @@ export class ConversationProposalsService {
     try {
       const conversations = await client.bulkGet(uniqueIds);
       return new Map(
-        [...conversations].map(([id, { title, agent_id: agentId }]) => [
+        [...conversations].map(([id, { title, agent_id: agentId, metadata }]) => [
           id,
           {
             ...(title ? { conversationTitle: title } : {}),
             ...(agentId ? { conversationAgentId: agentId } : {}),
+            assignees: readAssignees(metadata?.assignees),
           },
         ])
       );
@@ -104,9 +120,11 @@ export class ConversationProposalsService {
     proposals: ProposalWithMetadata[],
     conversations: Map<string, ConversationDecoration>
   ): ProposalItem[] {
-    return proposals.map((proposal) => ({
-      ...proposal,
-      ...conversations.get(proposal.conversationId),
-    }));
+    return proposals.map((proposal) => {
+      const conversation = conversations.get(proposal.conversationId);
+      // `assignees` is spelled out because the spread contributes nothing when the
+      // conversation was unreadable, and the field is not optional.
+      return { ...proposal, ...conversation, assignees: conversation?.assignees ?? [] };
+    });
   }
 }

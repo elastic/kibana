@@ -8,8 +8,8 @@
 import type { ProposalWithMetadata } from '@kbn/agentic-investigations-plugin/common';
 import { MOCK_INVESTIGATIONS } from './investigations';
 
-/** A proposal as the list API returns it: the conversation's title resolved on read. */
-type MockProposal = ProposalWithMetadata & { conversationTitle?: string };
+/** A proposal as the list API returns it: conversation title and assignees resolved on read. */
+type MockProposal = ProposalWithMetadata & { conversationTitle?: string; assignees: string[] };
 
 const INVESTIGATION_TITLES = new Map(MOCK_INVESTIGATIONS.map(({ id, title }) => [id, title]));
 
@@ -185,5 +185,6 @@ const PROPOSALS: ProposalWithMetadata[] = [
 
 export const MOCK_PROPOSALS: MockProposal[] = PROPOSALS.map((proposal) => ({
   ...proposal,
+  assignees: [],
   conversationTitle: INVESTIGATION_TITLES.get(proposal.conversationId),
 }));

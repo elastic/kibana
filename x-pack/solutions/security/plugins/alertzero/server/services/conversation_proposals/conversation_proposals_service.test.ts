@@ -46,22 +46,30 @@ const makeProposalsService = (
  *   Defaults to returning `Title for ${id}` for every requested id.
  * @param agentIdsById - Agent id per conversation. Defaults to `elastic-ai-agent` for every id
  *   present in the response, matching what `bulkGet`'s `_source` allowlist always returns.
+ * @param assigneesById - Raw `metadata.assignees` per conversation. Omitted entries carry no
+ *   `metadata` at all, which is the shape an unassigned conversation comes back as.
  */
 const makeAgentBuilder = (
   titlesById?: Record<string, string>,
-  agentIdsById?: Record<string, string>
+  agentIdsById?: Record<string, string>,
+  assigneesById?: Record<string, unknown>
 ): AgentBuilderPluginStart =>
   ({
     conversations: {
       getScopedClient: jest.fn().mockResolvedValue({
         bulkGet: jest.fn().mockImplementation(async (ids: string[]) => {
-          const result = new Map<string, { title: string; agent_id?: string }>();
+          const result = new Map<
+            string,
+            { title: string; agent_id?: string; metadata?: Record<string, unknown> }
+          >();
           for (const id of ids) {
             const title = titlesById ? titlesById[id] : `Title for ${id}`;
             if (title !== undefined) {
+              const assignees = assigneesById?.[id];
               result.set(id, {
                 title,
                 agent_id: agentIdsById ? agentIdsById[id] : 'elastic-ai-agent',
+                ...(assignees !== undefined ? { metadata: { assignees } } : {}),
               });
             }
           }
@@ -154,6 +162,81 @@ describe('ConversationProposalsService', () => {
       });
 
       expect(result.proposals[0]).not.toHaveProperty('conversationAgentId');
+    });
+
+    it('attaches assignees from conversation metadata', async () => {
+      const proposals = [makeProposal({ conversationId: 'conv-assigned' })];
+
+      const service = new ConversationProposalsService(
+        makeProposalsService(proposals),
+        makeAgentBuilder({ 'conv-assigned': 'Assigned investigation' }, undefined, {
+          'conv-assigned': ['user-1', 'user-2'],
+        }),
+        logger
+      );
+
+      const result = await service.listByCategory('investigate', request, spaceId, {
+        size: 10,
+        from: 0,
+      });
+
+      expect(result.proposals[0].assignees).toEqual(['user-1', 'user-2']);
+    });
+
+    /**
+     * A TEXT_ARRAY only deserializes back to an array when the conversation's template
+     * resolves; otherwise a single assignee arrives as a bare string.
+     */
+    it('reads a single assignee that arrived unserialized as a bare string', async () => {
+      const proposals = [makeProposal({ conversationId: 'conv-flat' })];
+
+      const service = new ConversationProposalsService(
+        makeProposalsService(proposals),
+        makeAgentBuilder({ 'conv-flat': 'Flat metadata' }, undefined, {
+          'conv-flat': 'sole.analyst',
+        }),
+        logger
+      );
+
+      const result = await service.listByCategory('investigate', request, spaceId, {
+        size: 10,
+        from: 0,
+      });
+
+      expect(result.proposals[0].assignees).toEqual(['sole.analyst']);
+    });
+
+    // Always an array, so no caller needs a fallback. Each of the three ways it can be
+    // absent has its own path through the enrichment.
+    it.each([
+      ['the metadata key is absent', () => makeAgentBuilder({ 'conv-1': 'Unassigned' })],
+      ['the conversation is unresolvable', () => makeAgentBuilder({})],
+      [
+        'the bulk fetch fails',
+        () =>
+          ({
+            conversations: {
+              getScopedClient: jest.fn().mockResolvedValue({
+                bulkGet: jest.fn().mockRejectedValue(new Error('access denied')),
+              }),
+            },
+          } as unknown as AgentBuilderPluginStart),
+      ],
+    ])('defaults assignees to an empty array when %s', async (_label, buildAgentBuilder) => {
+      const proposals = [makeProposal({ conversationId: 'conv-1' })];
+
+      const service = new ConversationProposalsService(
+        makeProposalsService(proposals),
+        buildAgentBuilder(),
+        logger
+      );
+
+      const result = await service.listByCategory('investigate', request, spaceId, {
+        size: 10,
+        from: 0,
+      });
+
+      expect(result.proposals[0].assignees).toEqual([]);
     });
 
     it('runs a single bulkGet for deduplicated conversation ids', async () => {
