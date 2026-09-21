@@ -15,7 +15,7 @@ jest.mock('../common/resolve_index_scope', () => ({
     technology: 'aws_iam',
     status: 'ok',
     // A wildcard pattern, matching what resolveIndexScope actually returns in
-    // production (`logs-aws.*`), not a concrete `_index` bucket name — the
+    // production (`logs-aws.*`), not a concrete `_index` bucket name. The
     // review's must-fix #1: the old fixture used a concrete index name here,
     // which made `matchesRequired`'s regex-vs-exact-string bug invisible.
     required: ['logs-aws.*'],
@@ -208,14 +208,14 @@ describe('buildSseData', () => {
     expect(iocIndicator?.ioc).toEqual({ type: 'hash', value: '9f2b1e7c4a6d8e0f1b3c5d7e9f0a1b2c' });
 
     // Per-technique filtering (review must-fix #2): the first entry is scoped
-    // to T1078.004 alone — the second technique's behavior/rule name must not
+    // to T1078.004 alone. The second technique's behavior/rule name must not
     // leak onto it, since the SSE is meant to be 1:1 with a Proposal.
     const techniqueIndicators = entry.data.security_knowledge_indicators.filter(
       (i) => i.type === 'technique'
     );
     expect(techniqueIndicators.map((i) => i.technique_id)).toEqual(['T1078.004']);
 
-    // The second entry (T1552.001) is scoped the other way — confirms
+    // The second entry (T1552.001) is scoped the other way: confirms
     // filtering isn't a no-op that happens to pass on the first entry alone.
     const [, secondEntry] = entries;
     const secondTechniqueIndicators = secondEntry.data.security_knowledge_indicators.filter(
@@ -223,7 +223,6 @@ describe('buildSseData', () => {
     );
     expect(secondTechniqueIndicators.map((i) => i.technique_id)).toEqual(['T1552.001']);
     expect(secondEntry.data.hunt_result.tier2?.behaviors.map((b) => b.technique_id)).toEqual([
-      'T1078.004',
       'T1552.001',
     ]);
   });
@@ -346,7 +345,11 @@ describe('buildSseData output parses against the SSE attachment schema', () => {
     if (parsed.success) {
       expect(parsed.data.report_id).toBe('tr-aws-iam-assumerole-2026-07-28');
       expect(parsed.data.hunt_result?.has_confirmed_hit).toBe(true);
-      expect(parsed.data.hunt_result?.tier2?.behaviors).toHaveLength(2);
+      // `entry` is the first of two technique-scoped SSEs (HIT_TIER2_RESULT_TWO_BEHAVIORS
+      // confirms T1078.004 and T1552.001). hunt_result.tier2.behaviors is filtered to this
+      // entry's own technique alone, so length 1, not 2 (plan 7, SSE durability review fix).
+      expect(parsed.data.hunt_result?.tier2?.behaviors).toHaveLength(1);
+      expect(parsed.data.hunt_result?.tier2?.behaviors?.[0]?.technique_id).toBe('T1078.004');
     }
   });
 });
