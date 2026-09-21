@@ -17,10 +17,10 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo } from 'react';
+import React from 'react';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
-import { useAgentBuilderAgents } from '../../hooks/use_agent_builder_agents';
 import { useTracesEditor } from '../../hooks/use_traces_editor';
+import { TraceDisplay } from '../trace_display';
 import { TraceSelector } from '../trace_selector';
 
 interface TracesPanelProps {
@@ -31,37 +31,10 @@ interface TracesPanelProps {
 }
 
 export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPanelProps) => {
-  const { agents } = useAgentBuilderAgents();
   const { currentTrace, startEditing, editing } = useTracesEditor({
     aiIndex,
     onSaved,
   });
-
-  const readOnlyContent = useMemo(() => {
-    if (!currentTrace) {
-      return null;
-    }
-
-    if (currentTrace.type === 'elastic_agent') {
-      const agentName =
-        agents.find(({ id }) => id === currentTrace.value)?.name ?? currentTrace.value;
-      return (
-        <FormattedMessage
-          id="xpack.contextEngine.aiIndexDetail.traces.agentValueLabel"
-          defaultMessage="Elastic agent: {agentName}"
-          values={{ agentName }}
-        />
-      );
-    }
-
-    return (
-      <FormattedMessage
-        id="xpack.contextEngine.aiIndexDetail.traces.dataStreamValueLabel"
-        defaultMessage="Data stream: {value}"
-        values={{ value: currentTrace.value }}
-      />
-    );
-  }, [agents, currentTrace]);
 
   return (
     <EuiPanel hasBorder paddingSize="l" data-test-subj="contextTracesPanel">
@@ -138,21 +111,22 @@ export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPa
             </EuiFlexItem>
           </EuiFlexGroup>
         </>
+      ) : currentTrace ? (
+        <TraceDisplay trace={currentTrace} />
       ) : (
-        <EuiText size="s" color={readOnlyContent ? undefined : 'subdued'}>
+        <EuiText size="s" color="subdued">
           <p data-test-subj="contextTracesReadOnlyValue">
-            {readOnlyContent ??
-              (isManaged ? (
-                <FormattedMessage
-                  id="xpack.contextEngine.aiIndexDetail.traces.emptyManaged"
-                  defaultMessage="No agent traces configured."
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.contextEngine.aiIndexDetail.traces.empty"
-                  defaultMessage="No agent traces configured. Point this index at an Elastic agent from Agent Builder, or a data stream carrying OTel GenAI spans."
-                />
-              ))}
+            {isManaged ? (
+              <FormattedMessage
+                id="xpack.contextEngine.aiIndexDetail.traces.emptyManaged"
+                defaultMessage="No agent traces configured."
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.contextEngine.aiIndexDetail.traces.empty"
+                defaultMessage="No agent traces configured. Point this index at an Elastic agent from Agent Builder, or a data stream carrying OTel GenAI spans."
+              />
+            )}
           </p>
         </EuiText>
       )}

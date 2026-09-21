@@ -7,7 +7,6 @@
 
 import { EuiProvider } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -15,19 +14,22 @@ import React from 'react';
 import { TraceSelector } from './trace_selector';
 
 const mockUseAgentBuilderAgents = jest.fn();
+const mockUseSearchDataStreams = jest.fn();
 
 jest.mock('../../hooks/use_agent_builder_agents', () => ({
   useAgentBuilderAgents: () => mockUseAgentBuilderAgents(),
 }));
 
+jest.mock('../../hooks/use_search_data_streams', () => ({
+  useSearchDataStreams: () => mockUseSearchDataStreams(),
+}));
+
 const renderSelector = (props: React.ComponentProps<typeof TraceSelector>) => {
   const services = coreMock.createStart();
-  const data = dataPluginMock.createStartContract();
-  data.dataViews.getIndices = jest.fn().mockResolvedValue([]);
   return render(
     <I18nProvider>
       <EuiProvider>
-        <KibanaContextProvider services={{ ...services, data }}>
+        <KibanaContextProvider services={services}>
           <TraceSelector {...props} />
         </KibanaContextProvider>
       </EuiProvider>
@@ -41,6 +43,12 @@ describe('TraceSelector', () => {
       agents: [{ id: 'agent-1', name: 'Loyalty Support Agent' }],
       isLoading: false,
       error: undefined,
+    });
+    mockUseSearchDataStreams.mockReturnValue({
+      dataStreams: ['logs-genai-default'],
+      hasMore: false,
+      isLoading: false,
+      isError: false,
     });
   });
 
@@ -79,42 +87,17 @@ describe('TraceSelector', () => {
     expect(screen.queryByTestId('contextTraceAgentComboBox')).not.toBeInTheDocument();
   });
 
-  it('selecting a data stream calls onChange with an index trace', async () => {
-    const services = coreMock.createStart();
-    const data = dataPluginMock.createStartContract();
-    data.dataViews.getIndices = jest.fn().mockResolvedValue([
-      {
-        name: 'logs-genai-default',
-        tags: [{ key: 'data_stream', name: 'Data stream', color: 'default' }],
-        item: { name: 'logs-genai-default' },
-      },
-    ]);
+  it('selecting a data stream calls onChange with an index trace', () => {
     const onChange = jest.fn();
-
-    render(
-      <I18nProvider>
-        <EuiProvider>
-          <KibanaContextProvider services={{ ...services, data }}>
-            <TraceSelector
-              value={{ type: 'index', value: 'logs-genai-default' }}
-              onChange={onChange}
-            />
-          </KibanaContextProvider>
-        </EuiProvider>
-      </I18nProvider>
-    );
-
-    expect(data.dataViews.getIndices).not.toHaveBeenCalled();
+    renderSelector({
+      value: { type: 'index', value: 'logs-original' },
+      onChange,
+    });
 
     const comboBox = screen.getByTestId('contextTraceDataStreamComboBox');
     const input = comboBox.querySelector('input')!;
     fireEvent.focus(input);
     fireEvent.change(input, { target: { value: 'logs' } });
-
-    await waitFor(() => {
-      expect(screen.getByText('logs-genai-default')).toBeInTheDocument();
-    });
-
     fireEvent.click(screen.getByText('logs-genai-default'));
 
     expect(onChange).toHaveBeenCalledWith({ type: 'index', value: 'logs-genai-default' });

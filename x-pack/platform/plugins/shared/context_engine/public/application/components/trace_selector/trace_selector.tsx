@@ -26,6 +26,16 @@ export const TraceSelector = ({ value, onChange }: TraceSelectorProps) => {
     }
   }, [value]);
 
+  const selectMode = (id: string) => {
+    if (id !== 'elastic_agent' && id !== 'index') {
+      return;
+    }
+    setMode(id);
+    if (value?.type !== id) {
+      onChange(undefined);
+    }
+  };
+
   return (
     <>
       <EuiButtonGroup
@@ -36,7 +46,7 @@ export const TraceSelector = ({ value, onChange }: TraceSelectorProps) => {
         type="single"
         buttonSize="s"
         idSelected={mode}
-        onChange={(id) => setMode(id as EditableTraceType)}
+        onChange={selectMode}
         data-test-subj="contextTraceToggle"
       >
         <EuiButton

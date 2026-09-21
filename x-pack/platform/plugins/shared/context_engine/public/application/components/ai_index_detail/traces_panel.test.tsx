@@ -7,7 +7,6 @@
 
 import { EuiProvider } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -17,9 +16,14 @@ import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices'
 import { TracesPanel } from './traces_panel';
 
 const mockUseAgentBuilderAgents = jest.fn();
+const mockUseSearchDataStreams = jest.fn();
 
 jest.mock('../../hooks/use_agent_builder_agents', () => ({
   useAgentBuilderAgents: () => mockUseAgentBuilderAgents(),
+}));
+
+jest.mock('../../hooks/use_search_data_streams', () => ({
+  useSearchDataStreams: () => mockUseSearchDataStreams(),
 }));
 
 const aiIndex: GetAiIndexResponse = {
@@ -33,26 +37,15 @@ const aiIndex: GetAiIndexResponse = {
   date_modified: '2026-01-01T00:00:00.000Z',
 };
 
-const defaultIndices = [
-  {
-    name: 'logs-genai-default',
-    tags: [{ key: 'data_stream', name: 'Data stream', color: 'default' }],
-    item: { name: 'logs-genai-default' },
-  },
-];
-
 const renderWithProviders = (
   ui: React.ReactElement,
-  coreServices: ReturnType<typeof coreMock.createStart> = coreMock.createStart(),
-  getIndices = jest.fn().mockResolvedValue(defaultIndices)
+  coreServices: ReturnType<typeof coreMock.createStart> = coreMock.createStart()
 ) => {
-  const data = dataPluginMock.createStartContract();
-  data.dataViews.getIndices = getIndices;
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <I18nProvider>
       <EuiProvider>
-        <KibanaContextProvider services={{ ...coreServices, data }}>
+        <KibanaContextProvider services={coreServices}>
           <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
         </KibanaContextProvider>
       </EuiProvider>
@@ -70,6 +63,12 @@ describe('TracesPanel', () => {
       agents: [{ id: 'agent-1', name: 'Loyalty Support Agent' }],
       isLoading: false,
       error: undefined,
+    });
+    mockUseSearchDataStreams.mockReturnValue({
+      dataStreams: ['logs-genai-default'],
+      hasMore: false,
+      isLoading: false,
+      isError: false,
     });
   });
 
@@ -109,8 +108,9 @@ describe('TracesPanel', () => {
     );
 
     expect(screen.getByTestId('contextTracesReadOnlyValue')).toHaveTextContent(
-      'Elastic agent: Loyalty Support Agent'
+      'Loyalty Support Agent'
     );
+    expect(screen.getByTestId('contextSourceTypeBadge')).toHaveTextContent('Elastic agent');
   });
 
   it('renders the configured data stream trace in read-only mode', () => {
@@ -127,8 +127,9 @@ describe('TracesPanel', () => {
     );
 
     expect(screen.getByTestId('contextTracesReadOnlyValue')).toHaveTextContent(
-      'Data stream: logs-genai-default'
+      'logs-genai-default'
     );
+    expect(screen.getByTestId('contextSourceTypeBadge')).toHaveTextContent('Data stream');
   });
 
   it('does not render the edit button while loading', () => {
@@ -368,8 +369,9 @@ describe('TracesPanel', () => {
     expect(screen.queryByTestId('contextTraceDataStreamComboBox')).not.toBeInTheDocument();
     expect(testServices.http.put).not.toHaveBeenCalled();
     expect(screen.getByTestId('contextTracesReadOnlyValue')).toHaveTextContent(
-      'Elastic agent: Loyalty Support Agent'
+      'Loyalty Support Agent'
     );
+    expect(screen.getByTestId('contextSourceTypeBadge')).toHaveTextContent('Elastic agent');
   });
 
   it('re-opens the editor with the original trace after cancel', async () => {
@@ -509,8 +511,9 @@ describe('TracesPanel', () => {
     await waitFor(() => {
       expect(screen.queryByTestId('contextTraceAgentComboBox')).not.toBeInTheDocument();
       expect(screen.getByTestId('contextTracesReadOnlyValue')).toHaveTextContent(
-        'Elastic agent: Loyalty Support Agent'
+        'Loyalty Support Agent'
       );
+      expect(screen.getByTestId('contextSourceTypeBadge')).toHaveTextContent('Elastic agent');
     });
   });
 });
