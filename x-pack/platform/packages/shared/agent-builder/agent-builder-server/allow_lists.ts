@@ -9,6 +9,7 @@ import {
   platformCoreTools,
   platformCoreCasesTools,
   platformSignificantEventsTools,
+  contextEngineAiIndexTools,
 } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import { chatAgentTypeId } from '@kbn/agent-builder-common';
@@ -114,6 +115,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
 
   // Platform – Context Engine
   `${internalNamespaces.platformContextEngine}.save_automation`,
+  ...Object.values(contextEngineAiIndexTools),
 
   // Nightshift – Sandbox
   'nightshift_sandbox_bash',
@@ -357,6 +359,8 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   // Security Solution – Attack Discovery (discoveries plugin)
   // gated behind the workflows feature flag
   'diagnostic_report',
+  'security.attack_discovery',
+  'security.attack_discovery.verdict',
 
   // Observability
   'observability.ai_insight',
