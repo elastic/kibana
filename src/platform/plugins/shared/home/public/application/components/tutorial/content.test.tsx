@@ -19,30 +19,30 @@ describe('Content component', () => {
       />
     );
     expect(container).toMatchInlineSnapshot(`
-    <div>
-      <div
-        class="euiText euiMarkdownFormat emotion-euiText-m-euiTextColor-default-euiMarkdownFormat-m-default"
-      >
-        <p>
-          I am 
-          <em>
-            some
-          </em>
-           
-          <a
-            class="euiLink emotion-euiLink-primary"
-            href="https://en.wikipedia.org/wiki/Content"
-            rel="noreferrer"
-          >
-            content
-          </a>
-           with 
-          <code>
-            markdown
-          </code>
-        </p>
+      <div>
+        <div
+          class="euiText euiMarkdownFormat emotion-euiText-m-euiTextColor-default-euiMarkdownFormat-m-default"
+        >
+          <p>
+            I am 
+            <em>
+              some
+            </em>
+             
+            <a
+              class="euiLink emotion-euiLink-text"
+              href="https://en.wikipedia.org/wiki/Content"
+              rel="noreferrer"
+            >
+              content
+            </a>
+             with 
+            <code>
+              markdown
+            </code>
+          </p>
+        </div>
       </div>
-    </div>
     `);
   });
 });
