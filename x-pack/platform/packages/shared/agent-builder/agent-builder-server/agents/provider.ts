@@ -167,8 +167,8 @@ export interface ExperimentalFeatures {
   askUserQuestion: boolean;
   /** Whether the bash tool (and the just-bash runtime) is enabled */
   bash: boolean;
-  /** Whether the HTTP API introspection tools (discover/describe/execute) are enabled */
-  apiTools: boolean;
+  /** Whether the `discover_apis` tool is enabled. */
+  apiDiscovery: boolean;
 }
 
 export interface AgentHandlerContext {
