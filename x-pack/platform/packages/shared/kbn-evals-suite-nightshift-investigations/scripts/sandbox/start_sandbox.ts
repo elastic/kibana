@@ -203,8 +203,8 @@ const waitUntil = async (
   signal: AbortSignal
 ): Promise<void> => {
   const deadline = Date.now() + READY_TIMEOUT_MS;
-  while (!(await check())) {
-    if (signal.aborted) throw new Error('Aborted before the sandbox was ready');
+  // Check the signal first: an abort must stop the launcher even once the service is ready.
+  while (!signal.aborted && !(await check())) {
     if (service.exitCode !== null) throw new Error(`${description} exited before it was ready`);
     if (Date.now() > deadline) throw new Error(`Timed out waiting for ${description}`);
     await sleep(500);
@@ -234,13 +234,17 @@ export const startSandbox = async (options: StartSandboxOptions): Promise<void> 
   const workspaces = join(dataDir, 'workspaces');
   mkdirSync(workspaces, { recursive: true });
 
+  if (signal.aborted) return;
+
   const forward = (name: string, service: execa.ExecaChildProcess) => {
     for (const stream of [service.stdout, service.stderr]) {
       stream?.on('data', (chunk: Buffer) => {
         for (const line of chunk.toString().split('\n')) if (line) log.debug(`[${name}] ${line}`);
       });
     }
-    signal.addEventListener('abort', () => service.kill('SIGTERM'), { once: true });
+    // An abort during the clone or build has already fired; the listener alone would miss it.
+    if (signal.aborted) service.kill('SIGTERM');
+    else signal.addEventListener('abort', () => service.kill('SIGTERM'), { once: true });
     service.catch((error) => {
       if (!signal.aborted) log.error(`[${name}] exited: ${error.shortMessage ?? error.message}`);
     });
@@ -268,6 +272,7 @@ export const startSandbox = async (options: StartSandboxOptions): Promise<void> 
     })
   );
   await waitUntil('container-manager', () => isListening(ports.manager), manager, signal);
+  if (signal.aborted) return;
 
   // The API key travels in the environment, never in arguments. Leaving WORKSPACE_SNAPSHOT_*
   // unset keeps every conversation independent.
@@ -292,6 +297,7 @@ export const startSandbox = async (options: StartSandboxOptions): Promise<void> 
     return response?.ok ?? false;
   };
   await waitUntil('sandbox-api', isReady, api, signal);
+  if (signal.aborted) return;
 
   const envFile = join(dataDir, 'sandbox.env');
   writeFileSync(

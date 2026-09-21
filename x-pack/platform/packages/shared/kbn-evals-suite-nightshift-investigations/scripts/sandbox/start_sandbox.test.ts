@@ -185,6 +185,30 @@ describe('startSandbox', () => {
     await running;
   });
 
+  it('starts no service when aborted while provisioning', async () => {
+    const running = start();
+    // The port check is the first async step; abort while it is still in flight.
+    controller.abort();
+
+    await expect(running).resolves.toBeUndefined();
+    expect(services.size).toBe(0);
+    expect(cleanupTasks).toEqual([]);
+  });
+
+  it('stops a service that started after an abort it could not observe', async () => {
+    const running = start();
+    while (!services.has('container-manager-service')) {
+      await new Promise((resolve) => setImmediate(resolve));
+    }
+    controller.abort();
+    const manager = services.get('container-manager-service');
+    manager?.fail(new Error('killed'));
+
+    await expect(running).resolves.toBeUndefined();
+    expect(manager?.kill).toHaveBeenCalledWith('SIGTERM');
+    expect(services.has('sandbox-api')).toBe(false);
+  });
+
   it('leaves a running launcher alone when its ports are already taken', async () => {
     listeningPorts.add(ports.grpc);
 

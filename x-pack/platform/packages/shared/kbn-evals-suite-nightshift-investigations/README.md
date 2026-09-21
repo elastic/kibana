@@ -334,8 +334,8 @@ PR and weekly CI retain the existing `synthetic-smoke` coverage with `evals_trac
 needs no sandbox. The suite declares both as CI defaults in its `ci` block in
 [`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json); the CI runner
 applies them before startup and forwards the selection to model jobs and baseline refreshes.
-**Golden CI sandbox provisioning is deferred to a separate change**; the credentialed local
-acceptance run is the golden baseline. This PR adds no sandbox launcher. A provisioned job
+**Wiring the sandbox launcher into CI is deferred to a separate change**; the credentialed local
+acceptance run is the golden baseline. A provisioned job
 can explicitly select `NIGHTSHIFT_DATASETS=investigate-lite` and
 `EVAL_SERVER_CONFIG_SET=evals_nightshift_investigations` with the private dataset and sandbox
 configuration above. Use `--judge` explicitly for the reference comparison.
