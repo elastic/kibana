@@ -207,7 +207,9 @@ describe('parsePackageAndCollectSignals — signal collection parity with collec
   });
 
   it('detects security_rule and collects incomingRuleIds', async () => {
-    const ruleBuffer = Buffer.from(JSON.stringify({ id: 'rule-abc', attributes: { type: 'query' } }));
+    const ruleBuffer = Buffer.from(
+      JSON.stringify({ id: 'rule-abc', attributes: { type: 'query' } })
+    );
     mockTraverseEntries([
       { path: 'mypackage-1.0.0/kibana/security_rule/my-rule.json', buffer: ruleBuffer },
     ]);
@@ -223,7 +225,10 @@ describe('parsePackageAndCollectSignals — signal collection parity with collec
   });
 
   it('sets hasMlSecurityRules for ML security_rule', async () => {
-    const mlBuffer = makeAssetBuffer({ type: 'machine_learning', machine_learning_job_id: 'job-1' });
+    const mlBuffer = makeAssetBuffer({
+      type: 'machine_learning',
+      machine_learning_job_id: 'job-1',
+    });
     mockTraverseEntries([
       { path: 'mypackage-1.0.0/kibana/security_rule/ml-rule.json', buffer: mlBuffer },
     ]);

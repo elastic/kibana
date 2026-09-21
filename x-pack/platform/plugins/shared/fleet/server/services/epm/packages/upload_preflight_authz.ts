@@ -47,7 +47,11 @@ export interface ArchiveSignals {
 function collectSignalFromEntry(
   path: string,
   buffer: Buffer | undefined,
-  out: { gatedTypesFound: Set<KibanaAssetType>; incomingRuleIds: string[]; hasMlSecurityRules: boolean }
+  out: {
+    gatedTypesFound: Set<KibanaAssetType>;
+    incomingRuleIds: string[];
+    hasMlSecurityRules: boolean;
+  }
 ): void {
   const parts = getPathParts(path);
   if (parts.service !== 'kibana') return;
