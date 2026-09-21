@@ -446,6 +446,13 @@ export class QueryRuleOrchestrator {
     const orphans = ownedRuleIds.filter((id) => !keepSet.has(id));
     let orphanRulesDeleted = 0;
     if (orphans.length > 0) {
+      if (hits.length === 0 && links.length === 0) {
+        this.logger.warn(
+          `reconcileStream("${sourceId}"): deleting ${orphans.length} orphan rule(s) with zero ` +
+            `visible KIs in this space. If these rules backed pre-migration documents (no ` +
+            `kibana.space_ids), re-onboard the source to recreate them.`
+        );
+      }
       await this.rulesManagementClient.bulkDeleteRules(orphans);
       orphanRulesDeleted = orphans.length;
     }
