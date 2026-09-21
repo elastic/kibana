@@ -89,11 +89,20 @@ export const OverviewStatusCodec = z.looseObject({
   allIds: z.array(z.string()),
 });
 
+export const OverviewStatusFilterIdCodec = z.looseObject({
+  monitorQueryId: z.string(),
+  remoteName: z.string().optional(),
+});
+
 export const PaginatedOverviewStatusCodec = OverviewStatusCodec.extend({
   configs: z.array(OverviewStatusMetaDataCodec).optional(),
   total: z.number().optional(),
   page: z.number().optional(),
   perPage: z.number().optional(),
+  upIds: z.array(OverviewStatusFilterIdCodec).optional(),
+  downIds: z.array(OverviewStatusFilterIdCodec).optional(),
+  pendingIds: z.array(OverviewStatusFilterIdCodec).optional(),
+  staleIds: z.array(OverviewStatusFilterIdCodec).optional(),
 });
 
 export const OverviewStalePriorRunCodec = z.looseObject({

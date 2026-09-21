@@ -567,10 +567,12 @@ describe('current status route', () => {
 
       const result = await overviewStatusService.getOverviewStatus();
 
-      expect(result.upIds).toEqual(['query-up']);
-      expect(result.downIds).toEqual(['query-down']);
-      expect(result.upIds).not.toContain('config-up');
-      expect(result.downIds).not.toContain('config-down');
+      expect(result.upIds).toEqual([{ monitorQueryId: 'query-up' }]);
+      expect(result.downIds).toEqual([{ monitorQueryId: 'query-down' }]);
+      expect(result.upIds?.map(({ monitorQueryId }) => monitorQueryId)).not.toContain('config-up');
+      expect(result.downIds?.map(({ monitorQueryId }) => monitorQueryId)).not.toContain(
+        'config-down'
+      );
     });
   });
 
@@ -1788,6 +1790,81 @@ describe('current status route', () => {
       });
       expect(result.down).toBe(1);
       expect(result.up).toBe(1);
+    });
+
+    it('keeps remoteName on status id lists so two CCS copies of the same id can differ in status', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            {
+              key: {
+                monitorId: 'shared-remote-monitor',
+                locationId: 'us-east-1',
+              },
+              status: {
+                key: 'us-east-1',
+                top: [
+                  {
+                    metrics: {
+                      'monitor.status': 'down',
+                      kibanaUrl: 'https://east.kibana.example.com',
+                      'monitor.name': 'Shared Remote Check',
+                      'monitor.type': 'http',
+                      config_id: 'shared-config',
+                      _index: 'cluster-east:synthetics-http-default',
+                    },
+                    sort: ['2022-09-15T16:20:00.000Z'],
+                  },
+                ],
+              },
+            },
+            {
+              key: {
+                monitorId: 'shared-remote-monitor',
+                locationId: 'us-east-1',
+              },
+              status: {
+                key: 'us-east-1',
+                top: [
+                  {
+                    metrics: {
+                      'monitor.status': 'up',
+                      kibanaUrl: 'https://west.kibana.example.com',
+                      'monitor.name': 'Shared Remote Check',
+                      'monitor.type': 'http',
+                      config_id: 'shared-config',
+                      _index: 'cluster-west:synthetics-http-default',
+                    },
+                    sort: ['2022-09-15T16:21:00.000Z'],
+                  },
+                ],
+              },
+            },
+          ],
+        })
+      );
+
+      const routeContext: any = {
+        request: { query: { page: 1, perPage: 10 } },
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: false,
+        },
+      };
+
+      const overviewStatusService = new OverviewStatusService(routeContext);
+      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+
+      const result = await overviewStatusService.getOverviewStatus();
+
+      expect(result.downIds).toEqual([
+        { monitorQueryId: 'shared-remote-monitor', remoteName: 'cluster-east' },
+      ]);
+      expect(result.upIds).toEqual([
+        { monitorQueryId: 'shared-remote-monitor', remoteName: 'cluster-west' },
+      ]);
     });
 
     it('does not place a local no-saved-object ping into the remote branch', async () => {

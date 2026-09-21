@@ -184,7 +184,7 @@ describe('overviewStatusReducer', () => {
               mon1: makeMeta({ configId: 'mon1' }),
               mon2: makeMeta({ configId: 'mon2' }),
             },
-            pendingIds: ['mon1', 'mon2'],
+            pendingIds: [{ monitorQueryId: 'mon1' }, { monitorQueryId: 'mon2' }],
             staleIds: [],
           })
         )
@@ -195,8 +195,8 @@ describe('overviewStatusReducer', () => {
         fetchStaleStatusAction.success({ priorRuns: [stalePriorRun({ monitorQueryId: 'mon1' })] })
       );
 
-      expect(next.status?.pendingIds).toEqual(['mon2']);
-      expect(next.status?.staleIds).toEqual(['mon1']);
+      expect(next.status?.pendingIds).toEqual([{ monitorQueryId: 'mon2' }]);
+      expect(next.status?.staleIds).toEqual([{ monitorQueryId: 'mon1' }]);
     });
 
     it('rebuilds allConfigs so consumers see the promoted (stale) metadata', () => {

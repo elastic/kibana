@@ -223,10 +223,22 @@ const applyStaleBeforeWindow = (state: OverviewStatusStateReducer) => {
     // promotion, or a monitor moved here would still be excluded when
     // filtering to "Stale" and wrongly included when filtering to "Pending".
     if (status.pendingIds) {
-      status.pendingIds = status.pendingIds.filter((id) => id !== meta.monitorQueryId);
+      status.pendingIds = status.pendingIds.filter(
+        (id) =>
+          id.monitorQueryId !== meta.monitorQueryId || id.remoteName !== meta.remote?.remoteName
+      );
     }
-    if (status.staleIds && !status.staleIds.includes(meta.monitorQueryId)) {
-      status.staleIds.push(meta.monitorQueryId);
+    if (
+      status.staleIds &&
+      !status.staleIds.some(
+        (id) =>
+          id.monitorQueryId === meta.monitorQueryId && id.remoteName === meta.remote?.remoteName
+      )
+    ) {
+      status.staleIds.push({
+        monitorQueryId: meta.monitorQueryId,
+        ...(meta.remote?.remoteName ? { remoteName: meta.remote.remoteName } : {}),
+      });
     }
     changed = true;
   }

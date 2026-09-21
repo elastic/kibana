@@ -11,6 +11,7 @@ import { useSelector } from 'react-redux-v7';
 import { isEmpty } from 'lodash';
 import { useGetUrlParams } from '../../../hooks/use_url_params';
 import type { OverviewStatusFilter } from '../../../../../../common/constants/monitor_management';
+import type { OverviewStatusFilterId } from '../../../../../../common/runtime_types';
 import { useKibanaSpace } from '../../../../../hooks/use_kibana_space';
 import { selectOverviewStatus } from '../../../state/overview_status';
 
@@ -52,7 +53,7 @@ const createFiltersForField = ({
 const idsForStatusFilter = (
   overviewStatus: ReturnType<typeof selectOverviewStatus>['status'],
   statusFilter?: OverviewStatusFilter | string
-): string[] | undefined => {
+): OverviewStatusFilterId[] | undefined => {
   switch (statusFilter) {
     case 'up':
       return overviewStatus?.upIds ?? [];
@@ -63,10 +64,53 @@ const idsForStatusFilter = (
     case 'stale':
       return overviewStatus?.staleIds ?? [];
     case 'disabled':
-      return overviewStatus?.disabledMonitorQueryIds ?? [];
+      return (overviewStatus?.disabledMonitorQueryIds ?? []).map((monitorQueryId) => ({
+        monitorQueryId,
+      }));
     default:
       return undefined;
   }
+};
+
+const monitorIdQuery = (ids: OverviewStatusFilterId[]): estypes.QueryDslQueryContainer => {
+  if (!ids.length) {
+    return { terms: { 'monitor.id': [NO_MATCHING_MONITOR_ID] } };
+  }
+
+  const localIds: string[] = [];
+  const remoteIds = new Map<string, string[]>();
+  for (const { monitorQueryId, remoteName } of ids) {
+    if (remoteName) {
+      const existing = remoteIds.get(remoteName);
+      if (existing) {
+        existing.push(monitorQueryId);
+      } else {
+        remoteIds.set(remoteName, [monitorQueryId]);
+      }
+    } else {
+      localIds.push(monitorQueryId);
+    }
+  }
+
+  const clauses: estypes.QueryDslQueryContainer[] = [];
+  if (localIds.length) {
+    clauses.push({ terms: { 'monitor.id': localIds } });
+  }
+  for (const [remoteName, queryIds] of remoteIds) {
+    clauses.push({
+      bool: {
+        filter: [
+          { terms: { 'monitor.id': queryIds } },
+          { wildcard: { _index: `${remoteName}:*` } },
+        ],
+      },
+    });
+  }
+
+  if (clauses.length === 1) {
+    return clauses[0];
+  }
+  return { bool: { should: clauses, minimum_should_match: 1 } };
 };
 
 // The `monitor.id` scoping (status filter, or the schedules/AND-locations
@@ -86,7 +130,7 @@ export const useMonitorIdFilter = (): estypes.QueryDslQueryContainer | undefined
   // overview-status API applies the same search), so a `terms` clause on it
   // scopes pings *and* alerts without the ping-only `query_string` that
   // `getQueryFilters` would otherwise AND onto the annotation layer.
-  const statusIdSet = statusIds ? new Set(statusIds) : undefined;
+  const allIdSet = new Set(allIds);
 
   // since schedule isn't available in heartbeat data, in that case we rely on monitor.id
   // We need to rely on monitor.id also for locations, because each heartbeat data only contains one location
@@ -98,13 +142,14 @@ export const useMonitorIdFilter = (): estypes.QueryDslQueryContainer | undefined
     // Intersect with the status filter (if any) rather than ignoring it —
     // otherwise selecting e.g. "Down" would stop narrowing anything once a
     // schedule or (AND-ed) location filter is also active.
-    const ids = statusIdSet ? allIds.filter((id) => statusIdSet.has(id)) : allIds;
-    // If ids is empty we return a fixed non-matching id just to not get any result.
-    return { terms: { 'monitor.id': ids.length ? ids : [NO_MATCHING_MONITOR_ID] } };
+    const ids = statusIds
+      ? statusIds.filter((id) => allIdSet.has(id.monitorQueryId))
+      : allIds.map((monitorQueryId) => ({ monitorQueryId }));
+    return monitorIdQuery(ids);
   }
 
   if (statusIds) {
-    return { terms: { 'monitor.id': statusIds.length ? statusIds : [NO_MATCHING_MONITOR_ID] } };
+    return monitorIdQuery(statusIds);
   }
 
   return undefined;

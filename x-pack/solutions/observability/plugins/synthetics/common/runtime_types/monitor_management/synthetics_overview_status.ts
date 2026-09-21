@@ -36,6 +36,15 @@ export const OverviewPingCodec = t.intersection([
   }),
 ]);
 
+export const OverviewStatusFilterIdCodec = t.intersection([
+  t.interface({
+    monitorQueryId: t.string,
+  }),
+  t.partial({
+    remoteName: t.string,
+  }),
+]);
+
 export const OverviewStatusMetaDataCodec = t.intersection([
   t.interface({
     monitorQueryId: t.string,
@@ -124,11 +133,14 @@ export const PaginatedOverviewStatusCodec = t.intersection([
     // (or down/pending/stale)" — e.g. to scope another query to the active
     // `statusFilter` — can't get it from those. Mirrors `allIds`, which
     // already does this for the (status-independent) location/tag/schedule
-    // filters.
-    upIds: t.array(t.string),
-    downIds: t.array(t.string),
-    pendingIds: t.array(t.string),
-    staleIds: t.array(t.string),
+    // filters. `remoteName` keeps two CCS/CPS copies of the same
+    // `monitorQueryId` distinguishable — a string id list cannot, and a
+    // `monitor.id` terms query would then mix an Up copy into a Down-filtered
+    // chart (and vice versa).
+    upIds: t.array(OverviewStatusFilterIdCodec),
+    downIds: t.array(OverviewStatusFilterIdCodec),
+    pendingIds: t.array(OverviewStatusFilterIdCodec),
+    staleIds: t.array(OverviewStatusFilterIdCodec),
   }),
 ]);
 
@@ -156,6 +168,7 @@ export const OverviewStaleStatusCodec = t.interface({
 });
 
 export type OverviewPing = t.TypeOf<typeof OverviewPingCodec>;
+export type OverviewStatusFilterId = t.TypeOf<typeof OverviewStatusFilterIdCodec>;
 export type OverviewStatus = t.TypeOf<typeof OverviewStatusCodec>;
 export type OverviewStatusState = t.TypeOf<typeof OverviewStatusCodec>;
 export type PaginatedOverviewStatus = t.TypeOf<typeof PaginatedOverviewStatusCodec>;

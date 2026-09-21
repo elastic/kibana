@@ -71,6 +71,14 @@ const allIdsIncludingStatusBuckets = (
   return [...ids];
 };
 
+const toStatusFilterIds = (
+  configs: Record<string, OverviewStatusMetaData>
+): Array<{ monitorQueryId: string; remoteName?: string }> =>
+  Object.values(configs).map(({ monitorQueryId, remote }) => ({
+    monitorQueryId,
+    ...(remote?.remoteName ? { remoteName: remote.remoteName } : {}),
+  }));
+
 interface LocationStatusEntry {
   status: string;
   locationId: string;
@@ -280,10 +288,12 @@ export class OverviewStatusService {
       // result as a `monitor.id` filter, which matches on `monitorQueryId` —
       // the two differ for e.g. project monitors with multiple locations, so
       // map to `monitorQueryId` rather than using the map's keys directly.
-      upIds: Object.values(upConfigs).map(({ monitorQueryId }) => monitorQueryId),
-      downIds: Object.values(downConfigs).map(({ monitorQueryId }) => monitorQueryId),
-      pendingIds: Object.values(pendingConfigs).map(({ monitorQueryId }) => monitorQueryId),
-      staleIds: Object.values(staleConfigs).map(({ monitorQueryId }) => monitorQueryId),
+      // `remoteName` is required when two CCS/CPS clusters host the same
+      // query id: a bare id list cannot tell an Up copy from a Down copy.
+      upIds: toStatusFilterIds(upConfigs),
+      downIds: toStatusFilterIds(downConfigs),
+      pendingIds: toStatusFilterIds(pendingConfigs),
+      staleIds: toStatusFilterIds(staleConfigs),
       configs,
       total,
       page,
