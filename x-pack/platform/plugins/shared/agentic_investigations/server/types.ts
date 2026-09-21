@@ -6,6 +6,7 @@
  */
 
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type {
   WorkflowsExtensionsServerPluginSetup,
@@ -23,6 +24,12 @@ export interface AgenticInvestigationsSetupDependencies {
 }
 
 export interface AgenticInvestigationsStartDependencies {
+  /**
+   * Needed to authorize a principal that did not arrive through a route — a
+   * workflow execution deciding or writing a proposal. Optional because Kibana
+   * can run without it; the privilege checks fail closed when it is absent.
+   */
+  security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
 }
