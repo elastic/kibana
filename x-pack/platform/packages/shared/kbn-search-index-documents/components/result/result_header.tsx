@@ -54,7 +54,7 @@ const MetadataPopover: React.FC<MetaDataProps> = ({ id, onDocumentDelete }) => {
   const popoverTitleId = useGeneratedHtmlId();
   const metaDataLabel = i18n.translate(
     'xpack.searchIndexDocuments.result.header.metadata.icon.ariaLabel',
-    { defaultMessage: 'Document: {id}', values: { id } }
+    { defaultMessage: 'Document metadata for {id}', values: { id } }
   );
 
   const metaDataIcon = (
