@@ -14,11 +14,11 @@ Three declarative parts add secondary content to the header. Declare them as `He
 </FlyoutTemplate.Header>
 ```
 
-- **`Header.MetaBlock`** — a compact key/value pair, rendered through `@kbn/flyout-meta-blocks`. Takes `title` (the key, rendered bold) and `children` (the value, which accepts rich content such as links), plus the rest of `MetaBlock` props. Use these for provenance: timestamps, owners, authors.
-- **`Header.Badge`** — a status label, rendered through `EuiBadge`. Takes `children` (the label) plus the rest of `EuiBadgeProps`, except the control props (`onClick`, `onClickAriaLabel`, `iconOnClick`, `iconOnClickAriaLabel`, `href`, `target`, `rel`) — badges label the subject and are not controls. Labels wider than 200px ellipsize.
-- **`Header.InfoBlock`** — a titled value in a responsive grid, rendered through `@kbn/flyout-info-blocks`. Takes `title` (a plain string label) and `children` (the value), plus the rest of `InfoBlockItem` props including `size` and `color` for emphasizing a headline figure. The column count is derived from the number of blocks.
+- **`Header.MetaBlock`** — a compact key/value pair, rendered through `@kbn/flyout-meta-blocks`. Accepts a `title` (the key, rendered bold), `children` (the value, which accepts rich content such as links), and the rest of the `MetaBlock` props. Use these for provenance (e.g., timestamps, owners, authors).
+- **`Header.Badge`** — a status label, rendered through `EuiBadge`. Accepts `children` (the label) and the rest of the `EuiBadgeProps`, excluding control props (`onClick`, `onClickAriaLabel`, `iconOnClick`, `iconOnClickAriaLabel`, `href`, `target`, `rel`) because badges serve as subject labels rather than controls. Labels wider than 200px are ellipsized.
+- **`Header.InfoBlock`** — a titled value in a responsive grid, rendered through `@kbn/flyout-info-blocks`. Accepts a `title` (a plain string label), `children` (the value), and the rest of the `InfoBlockItem` props (including `size` and `color` to emphasize a headline figure). The column count is derived from the number of blocks.
 
-All three also take an optional `id` — an explicit instance identity, auto-generated when omitted — that keys the part internally and is not rendered as a DOM id. `data-test-subj` and any `data-*` attribute pass through to the rendered element.
+All three also take an optional `id` (an explicit instance identity, auto-generated when omitted) that keys the part internally and is not rendered as a DOM id. `data-test-subj` and any `data-*` attributes are passed through to the rendered element.
 
 **Badge overflow.** Up to five badges render inline. Past that, the first four render inline and the rest collapse behind a `+N more` badge that opens them in a popover.
 

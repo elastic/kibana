@@ -517,7 +517,7 @@ describe('FlyoutTemplate tabs', () => {
     const tab = screen.getByRole('tab', { name: 'Overview' });
     expect(tab).toHaveAttribute('data-foo', 'overviewTab');
     expect(tab).toHaveClass('myTab');
-    // The entry's `id` stays the logical tab id; the template still owns the DOM id and the panel link.
+    // The entry's `id` remains the logical tab id; the template still owns the DOM id and the link to the panel.
     expect(tab.id).not.toBe('overview');
     expect(tab).toHaveAttribute('aria-controls', `${tab.id}-panel`);
   });

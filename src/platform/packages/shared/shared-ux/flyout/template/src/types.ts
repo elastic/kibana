@@ -87,12 +87,12 @@ export type FlyoutHeaderMetaBlockProps = Omit<MetaBlock, BlockPartOwnedProps> &
     children: ReactNode;
   };
 
-/** Props the template owns; `children` is the badge label and `id` identifies the part instance. */
+/** Props owned by the template. `children` is the badge label and `id` identifies the part instance. */
 type BadgePartOwnedProps = 'children' | 'id';
 
 /**
- * Props that would turn the badge into a control. Badges in a flyout header label the
- * subject; they are not controls.
+ * Props that would turn the badge into a control. Badges in a flyout header are meant to label the
+ * subject, not act as controls.
  */
 type BadgeControlProps =
   | 'onClick'
@@ -143,7 +143,7 @@ export interface FlyoutBodyProps {
   children?: ReactNode;
 }
 
-/** Props shared by the declarative footer action parts; both render a button, never an anchor. */
+/** Props shared by the declarative footer action parts. Both render a button and never an anchor. */
 interface FlyoutFooterActionBaseProps extends DataAttributeProps {
   /** HTML id forwarded to the button element. */
   id?: string;
@@ -171,15 +171,15 @@ export interface FlyoutFooterProps {
 }
 
 /**
- * `children` names the declarative zones rather than free-form flyout content, the menu is
- * always display-mode `auto`, and `ref` has nowhere to go because the template does not
- * forward one.
+ * `children` represents the declarative zones rather than free-form flyout content. 
+ * `flyoutMenuDisplayMode` is always set to `auto`. 
+ * `ref` is omitted because the template does not forward it.
  */
 type TemplateOwnedFlyoutProps = 'children' | 'flyoutMenuDisplayMode' | 'ref';
 
 /**
- * Props for the root `FlyoutTemplate` component. Everything the template does not name
- * itself reaches the underlying `EuiFlyout`, plus any `data-*` attribute.
+ * Props for the root `FlyoutTemplate` component. Any props not explicitly named by the template,
+ * as well as any `data-*` attributes, are passed to the underlying `EuiFlyout`.
  */
 export type FlyoutTemplateProps = Omit<EuiFlyoutProps, TemplateOwnedFlyoutProps> &
   DataAttributeProps & {
