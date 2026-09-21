@@ -41,7 +41,14 @@ export const LogEntryRatePageProviders: FC<PropsWithChildren<unknown>> = ({ chil
   // This is a rather crude way of guarding the dependent providers against
   // arguments that are only made available asynchronously. Ideally, we'd use
   // React concurrent mode and Suspense in order to handle that more gracefully.
-  if (
+  if (hasFailedLoadingLogSources || hasFailedLoadingLogAnalysisIdFormats) {
+    return (
+      <LogSourceErrorPage
+        errors={logSourcesError !== undefined ? [logSourcesError] : []}
+        header={<LogsAppHeader title={logsAnomaliesPageTitle} />}
+      />
+    );
+  } else if (
     space == null ||
     isLoadingLogSources ||
     isUninitialized ||
@@ -49,13 +56,6 @@ export const LogEntryRatePageProviders: FC<PropsWithChildren<unknown>> = ({ chil
     !idFormats
   ) {
     return <LogEntryRateSourceLoadingPage />;
-  } else if (hasFailedLoadingLogSources || hasFailedLoadingLogAnalysisIdFormats) {
-    return (
-      <LogSourceErrorPage
-        errors={logSourcesError !== undefined ? [logSourcesError] : []}
-        header={<LogsAppHeader title={logsAnomaliesPageTitle} />}
-      />
-    );
   } else if (logSources.length > 0) {
     return (
       <LogEntryFlyoutProvider>
