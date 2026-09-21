@@ -42,4 +42,25 @@ describe('dev/precommit_hook/get_files_for_commit', () => {
 
     expect(mockDiff).toHaveBeenCalledWith(['--name-status', '--cached']);
   });
+
+  it('emits the rename source as deleted alongside the destination', async () => {
+    mockDiff.mockResolvedValue('R100\tpkg/moon.yml\tpkg/renamed.yml\n');
+
+    const files = await getFilesForCommit();
+
+    expect(files.map((file) => [file.getRelativePath(), file.getGitStatus()])).toEqual([
+      ['pkg/moon.yml', 'deleted'],
+      ['pkg/renamed.yml', 'renamed'],
+    ]);
+  });
+
+  it('does not treat a copy source as deleted', async () => {
+    mockDiff.mockResolvedValue('C100\tpkg/a.ts\tpkg/b.ts\n');
+
+    const files = await getFilesForCommit();
+
+    expect(files.map((file) => [file.getRelativePath(), file.getGitStatus()])).toEqual([
+      ['pkg/b.ts', 'copied'],
+    ]);
+  });
 });
