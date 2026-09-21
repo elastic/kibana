@@ -16,14 +16,11 @@ import {
 } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import { i18n } from '@kbn/i18n';
 import {
-  ALERTZERO_API_PRIVILEGE_MANAGE_ESCALATIONS,
   ALERTZERO_API_PRIVILEGE_READ,
   ALERTZERO_API_PRIVILEGE_WRITE,
   ALERTZERO_FEATURE_ID,
   ALERTZERO_PLUGIN_NAME,
-  ALERTZERO_UI_CAPABILITY_MANAGE_ESCALATIONS,
 } from '../common/constants';
 import type { AlertZeroConfig } from './config';
 import type {
@@ -123,30 +120,6 @@ export class AlertZeroPlugin
           ui: ['show'],
         },
       },
-      subFeatures: [
-        {
-          name: i18n.translate('xpack.alertzero.feature.incidentsTitle', {
-            defaultMessage: 'Incidents',
-          }),
-          privilegeGroups: [
-            {
-              groupType: 'independent',
-              privileges: [
-                {
-                  id: 'manage_escalations',
-                  name: i18n.translate('xpack.alertzero.feature.manageEscalationsLabel', {
-                    defaultMessage: 'Create and link incidents',
-                  }),
-                  includeIn: 'all',
-                  savedObject: { all: [], read: [] },
-                  api: [ALERTZERO_API_PRIVILEGE_MANAGE_ESCALATIONS],
-                  ui: [ALERTZERO_UI_CAPABILITY_MANAGE_ESCALATIONS],
-                },
-              ],
-            },
-          ],
-        },
-      ],
     });
 
     const router = coreSetup.http.createRouter();

@@ -219,10 +219,9 @@ apiTest.describe(
     });
 
     apiTest(
-      'viewer (escalations_read via includeIn: read) can list escalations',
+      'viewer (escalations_read) can list escalations',
       async ({ apiClient }) => {
-        // With the mutually_exclusive sub-feature, viewer holds escalations_read.
-        // They should be able to list but not create or update.
+        // Viewer holds escalations_read explicitly. They can list but not create or update.
         const response = await apiClient.get(LIST_ESCALATIONS_PATH, {
           headers: { ...INTERNAL_HEADERS, ...viewerCookieHeader },
           responseType: 'json',

@@ -39,9 +39,7 @@ One Kibana feature, `agenticInvestigations`, shown in the Roles and Spaces picke
 | `all`             | `read_proposals`, `manage_proposals` | `showProposals`, `decideProposals`   |
 | `read`            | `read_proposals`                     | `showProposals`                      |
 
-So `read` can see the queue but cannot decide it. The feature carries `minimumLicense: 'enterprise'`.
-
-**Note:** `minimal_all` and `minimal_read` are **not** equivalent to `all` and `read`. Incidents landed as a sub-feature (see below), and sub-feature privileges are included in the base privilege levels through `includeIn: 'all'` / `includeIn: 'read'` — but `minimal_all` and `minimal_read` only grant sub-features marked `groupType: 'independent'` when the user holds them explicitly. Any new entity should follow the same pattern: put its capabilities in a sub-feature with `includeIn` rather than in additional inline privileges.
+So `read` can see the queue but cannot decide it. The feature carries `minimumLicense: 'enterprise'`. Escalations are a separate sub-feature with `includeIn: 'none'`, so `all` and `read` do not grant them.
 
 ### Three questions, three places
 
@@ -460,8 +458,8 @@ The `escalations` sub-feature uses a `mutually_exclusive` privilege group, so a 
 
 | Sub-feature privilege | API | UI |
 | --- | --- | --- |
-| `escalations_all` (included in `all`) | `read_escalations`, `manage_escalations` | `showEscalations`, `manageEscalations` |
-| `escalations_read` (included in `read`) | `read_escalations` | `showEscalations` |
+| `escalations_all` (`includeIn: 'none'`) | `read_escalations`, `manage_escalations` | `showEscalations`, `manageEscalations` |
+| `escalations_read` (`includeIn: 'none'`) | `read_escalations` | `showEscalations` |
 
 ### API
 
