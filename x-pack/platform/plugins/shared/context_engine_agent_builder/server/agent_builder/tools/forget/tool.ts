@@ -19,7 +19,7 @@ import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import { CONTEXT_ENGINE_FORGET_TOOL_ID } from '../../../../common/agent_builder_tools';
 import { assertContextEngineWriteAccess } from '../../assert_context_engine_write_access';
-import { aiIndexToolsAvailability } from '../ai_index_tools_availability';
+import { createMemoryToolsAvailability } from '../ai_index_tools_availability';
 import {
   createMemoryWriter,
   type StoredMemoryDocument,
@@ -44,7 +44,7 @@ export const createForgetTool = ({
 }): BuiltinToolDefinition<typeof forgetSchema> => ({
   id: CONTEXT_ENGINE_FORGET_TOOL_ID,
   type: ToolType.builtin,
-  availability: aiIndexToolsAvailability,
+  availability: createMemoryToolsAvailability(getCoreStart),
   tags: ['context_engine', 'memory'],
   annotations: {
     title: 'Forget',
@@ -68,6 +68,7 @@ export const createForgetTool = ({
         spaceId,
         getCoreStart,
         getSecurityStart,
+        requireMemoryEnabled: true,
       });
 
       const aiIndex = await (await getAiIndexService()).get(params.aiIndexId, spaceId);
