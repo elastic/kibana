@@ -57,6 +57,17 @@ const PROFILE_RESULT = {
   evidence: EVIDENCE,
 };
 
+type ResponseErrorArgs = ConstructorParameters<typeof errors.ResponseError>[0];
+
+const buildResponseError = (statusCode: number): errors.ResponseError =>
+  new errors.ResponseError({
+    statusCode,
+    body: {},
+    headers: {},
+    warnings: [],
+    meta: {} as ResponseErrorArgs['meta'],
+  });
+
 describe('GET /internal/evals/traces/{traceId}/evidence', () => {
   const hasTraceDocumentsMock = evidenceServiceModule.hasTraceDocuments as jest.Mock;
   const hasResolvedEvidenceMock = evidenceServiceModule.hasResolvedEvidence as jest.Mock;
@@ -289,6 +300,40 @@ describe('GET /internal/evals/traces/{traceId}/evidence', () => {
     expect(result.status).toBe(400);
     expect(result.payload.message).toContain('The response is too large to process');
     expect(logger.warn).toHaveBeenCalled();
+  });
+
+  it('returns an actionable 403 when Elasticsearch rejects the current user', async () => {
+    hasTraceDocumentsMock.mockRejectedValue(buildResponseError(403));
+    const { handler, context } = setup();
+
+    const result = await handler(context, request(), kibanaResponseFactory);
+
+    expect(result.status).toBe(403);
+    expect(result.payload).toEqual({
+      message:
+        'Insufficient Elasticsearch privileges to read trace evidence. Grant read access to traces-* and logs-*.',
+    });
+  });
+
+  it('maps an exhausted transient Elasticsearch failure to 503 for an immediate read', async () => {
+    hasTraceDocumentsMock.mockRejectedValue(buildResponseError(429));
+    const { handler, context, logger } = setup();
+
+    const result = await handler(context, request(), kibanaResponseFactory);
+
+    expect(result.status).toBe(503);
+    expect(result.payload).toEqual({ message: 'Trace evidence is temporarily unavailable' });
+    expect(logger.warn).toHaveBeenCalled();
+  });
+
+  it('maps an exhausted transient Elasticsearch failure to 503 for a waited read', async () => {
+    awaitTraceReadyMock.mockRejectedValue(buildResponseError(503));
+    const { handler, context } = setup();
+
+    const result = await handler(context, request({ wait: 'stable' }), kibanaResponseFactory);
+
+    expect(result.status).toBe(503);
+    expect(result.payload).toEqual({ message: 'Trace evidence is temporarily unavailable' });
   });
 
   it('maps unexpected failures to a generic 500', async () => {

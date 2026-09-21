@@ -6,7 +6,7 @@
  */
 
 import { errors as EsErrors } from '@elastic/elasticsearch';
-import { isResponseError } from '@kbn/es-errors';
+import { isRetryableEsClientError } from '@kbn/core-elasticsearch-server-utils';
 import type { Logger } from '@kbn/logging';
 import { isEqual } from 'lodash';
 import pRetry from 'p-retry';
@@ -29,6 +29,7 @@ import { getNoTraceDocumentsMessage, TraceReadinessError } from './trace_readine
 export { TraceReadinessError } from './trace_readiness_errors';
 
 export const STABILITY_WINDOW_MS = 5000;
+const DIAGNOSTIC_RETRIES = 2;
 
 export type TraceWaitMode = 'stable' | 'complete';
 export type AchievedTraceReadiness = TraceWaitMode | 'best_effort';
@@ -72,23 +73,39 @@ const summarizeProfiles = (profiles: InstrumentationProfileProbeResult[]): strin
 const profileRequiresStabilityWindow = (profile: InstrumentationProfile): boolean =>
   Object.values(INSTRUMENTATION_PROFILES[profile]).some(({ source }) => source === 'logs');
 
-const isRetryableSearchError = (error: unknown): error is Error => {
-  if (isResponseError(error)) {
-    const { statusCode } = error;
-    return statusCode === 429 || (statusCode !== undefined && statusCode >= 500);
-  }
+const isRetryableSearchError = (error: unknown): error is EsErrors.ElasticsearchClientError =>
+  error instanceof EsErrors.ElasticsearchClientError && isRetryableEsClientError(error);
 
-  return error instanceof EsErrors.ConnectionError || error instanceof EsErrors.TimeoutError;
-};
-
-const abortRetryOnUnexpectedError = async <T>(operation: () => Promise<T>): Promise<T> => {
+const abortRetryOnUnexpectedError = async <T>(
+  operation: () => Promise<T>,
+  onError?: (error: unknown) => void
+): Promise<T> => {
   try {
     return await operation();
   } catch (error) {
+    onError?.(error);
     if (error instanceof TraceReadinessError || isRetryableSearchError(error)) {
       throw error;
     }
     throw new pRetry.AbortError(error instanceof Error ? error : new Error(String(error)));
+  }
+};
+
+const retryWithLastError = async <T>(
+  operation: () => Promise<T>,
+  options: pRetry.Options
+): Promise<T> => {
+  let lastError: unknown;
+  try {
+    return await pRetry(
+      () =>
+        abortRetryOnUnexpectedError(operation, (error) => {
+          lastError = error;
+        }),
+      options
+    );
+  } catch (error) {
+    throw lastError ?? error;
   }
 };
 
@@ -180,7 +197,7 @@ export const awaitTraceReady = async (
   };
 
   try {
-    return await pRetry(() => abortRetryOnUnexpectedError(attemptReadiness), {
+    return await retryWithLastError(attemptReadiness, {
       retries,
       factor,
       minTimeout,
@@ -209,7 +226,19 @@ export const awaitTraceReady = async (
     }
 
     if (sawDocuments) {
-      const profiles = latestProfiles ?? (await extractProfilesEvidence(traceAccessor));
+      const profiles =
+        latestProfiles ??
+        (await retryWithLastError(() => extractProfilesEvidence(traceAccessor), {
+          retries: Math.min(DIAGNOSTIC_RETRIES, retries),
+          factor,
+          minTimeout,
+          maxTimeout,
+          onFailedAttempt: (diagnosticError) => {
+            log.debug(
+              `Trace ${traceAccessor.traceId} diagnostics failed on attempt ${diagnosticError.attemptNumber}; retrying`
+            );
+          },
+        }));
       const probes = toInstrumentationProfileProbes(profiles);
       const requestedProfile = request.profile ? ` for profile "${request.profile}"` : '';
       throw new TraceReadinessError(

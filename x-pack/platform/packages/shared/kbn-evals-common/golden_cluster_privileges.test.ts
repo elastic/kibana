@@ -19,12 +19,17 @@ describe('goldenClusterPrivileges', () => {
     expect(logsPrivileges).toEqual(
       expect.objectContaining({
         privileges: expect.arrayContaining(['read', 'view_index_metadata']),
-        query: {
-          terms: {
-            event_name: Object.values(EVALS_EVIDENCE_LOG_EVENT_NAMES),
-          },
-        },
+        query: expect.any(String),
       })
     );
+    if (!logsPrivileges || !('query' in logsPrivileges)) {
+      throw new Error('Expected logs privileges to include a DLS query');
+    }
+
+    expect(JSON.parse(logsPrivileges.query)).toEqual({
+      terms: {
+        event_name: Object.values(EVALS_EVIDENCE_LOG_EVENT_NAMES),
+      },
+    });
   });
 });

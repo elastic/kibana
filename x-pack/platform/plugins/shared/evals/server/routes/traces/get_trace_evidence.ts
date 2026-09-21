@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import { errors as EsErrors } from '@elastic/elasticsearch';
 import { isValidTraceId } from '@opentelemetry/api';
+import { isRetryableEsClientError } from '@kbn/core-elasticsearch-server-utils';
+import { isResponseError } from '@kbn/es-errors';
 import {
   API_VERSIONS,
   EVALS_TRACE_EVIDENCE_URL,
@@ -170,6 +173,26 @@ export const registerGetTraceEvidenceRoute = ({ router, logger }: RouteDependenc
           });
           if (tooLarge) {
             return tooLarge;
+          }
+
+          if (isResponseError(error) && error.statusCode === 403) {
+            return response.forbidden({
+              body: {
+                message:
+                  'Insufficient Elasticsearch privileges to read trace evidence. Grant read access to traces-* and logs-*.',
+              },
+            });
+          }
+
+          if (
+            error instanceof EsErrors.ElasticsearchClientError &&
+            isRetryableEsClientError(error)
+          ) {
+            logger.warn(`Get trace evidence temporarily unavailable: ${error.message}`);
+            return response.customError({
+              statusCode: 503,
+              body: { message: 'Trace evidence is temporarily unavailable' },
+            });
           }
 
           logger.error(`Failed to get trace evidence: ${error}`);

@@ -150,6 +150,35 @@ describe('awaitTraceReady', () => {
     expect(hasRootSpanMock).toHaveBeenCalledTimes(2);
   });
 
+  it('waits for a changed response to settle before completing', async () => {
+    const intermediateRound: EvidenceRound = {
+      ...READY_ROUND,
+      response: { message: 'intermediate response' },
+    };
+    const finalRound: EvidenceRound = {
+      ...READY_ROUND,
+      response: { message: 'final response' },
+    };
+    extractEvidenceMock
+      .mockResolvedValueOnce(buildExtraction(intermediateRound))
+      .mockResolvedValue(buildExtraction(finalRound));
+
+    await expect(run()).resolves.toEqual(
+      expect.objectContaining({ round: finalRound, readiness: 'complete' })
+    );
+    expect(extractEvidenceMock).toHaveBeenCalledTimes(3);
+  });
+
+  it('continues polling when documents appear after the first attempt', async () => {
+    hasTraceDocumentsMock.mockResolvedValueOnce(false).mockResolvedValueOnce(true);
+
+    await expect(run()).resolves.toEqual(
+      expect.objectContaining({ round: READY_ROUND, readiness: 'complete' })
+    );
+    expect(hasTraceDocumentsMock).toHaveBeenCalledTimes(2);
+    expect(extractEvidenceMock).toHaveBeenCalledTimes(2);
+  });
+
   it('requires stable evidence to span the configured window', async () => {
     jest.spyOn(Date, 'now').mockReturnValueOnce(0).mockReturnValueOnce(5).mockReturnValue(10);
 
@@ -316,6 +345,14 @@ describe('awaitTraceReady', () => {
     expect(extractEvidenceMock).toHaveBeenCalledTimes(1);
   });
 
+  it('does not retry a non-transient Elasticsearch 500 response', async () => {
+    const searchFailure = buildResponseError(500);
+    extractEvidenceMock.mockRejectedValue(searchFailure);
+
+    await expect(run()).rejects.toBe(searchFailure);
+    expect(extractEvidenceMock).toHaveBeenCalledTimes(1);
+  });
+
   it.each([429, 503])('retries a transient Elasticsearch %s response', async (statusCode) => {
     extractEvidenceMock
       .mockRejectedValueOnce(buildResponseError(statusCode))
@@ -346,6 +383,30 @@ describe('awaitTraceReady', () => {
 
     await expect(run()).rejects.toBe(searchFailure);
     expect(extractEvidenceMock).toHaveBeenCalledTimes((FAST_BUDGET.retries ?? 0) + 1);
+  });
+
+  it('classifies exhaustion using the last attempt instead of the most frequent error', async () => {
+    hasTraceDocumentsMock
+      .mockRejectedValueOnce(buildResponseError(503))
+      .mockRejectedValueOnce(buildResponseError(503))
+      .mockRejectedValueOnce(buildResponseError(503))
+      .mockRejectedValueOnce(buildResponseError(503))
+      .mockResolvedValue(false);
+
+    await expect(run()).rejects.toEqual(expect.objectContaining({ kind: 'not_ready' }));
+    expect(hasTraceDocumentsMock).toHaveBeenCalledTimes((FAST_BUDGET.retries ?? 0) + 1);
+  });
+
+  it('retries the final all-profile diagnostics extraction', async () => {
+    extractEvidenceMock.mockResolvedValue(buildExtraction(EMPTY_ROUND));
+    extractProfilesEvidenceMock
+      .mockRejectedValueOnce(buildResponseError(503))
+      .mockResolvedValue([buildProfileExtraction('elastic-inference', EMPTY_ROUND)]);
+
+    await expect(run()).rejects.toEqual(
+      expect.objectContaining({ kind: 'unresolvable', profiles: expect.any(Array) })
+    );
+    expect(extractProfilesEvidenceMock).toHaveBeenCalledTimes(2);
   });
 
   it('returns best-effort after a late baseline reset', async () => {

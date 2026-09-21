@@ -224,7 +224,7 @@ Profile definitions live in [`server/evaluators/evidence/profiles.ts`](server/ev
 
 `_evaluate` uses the same whole-round `complete` readiness check.
 
-The endpoint requires `read_evals` and current-user read access to `traces-*` and `logs-*`; missing index privileges can appear as `404`. It returns full message and tool content, does not persist it, and supports one turn only.
+The endpoint requires `read_evals` and current-user read access to `traces-*` and `logs-*`. Explicit authorization failures return `403`; wildcard searches silently narrowed to authorized indices can still appear as `404`. Exhausted transient Elasticsearch failures return `503`. The endpoint returns full message and tool content, does not persist it, and supports one turn only.
 
 ## UI pages
 

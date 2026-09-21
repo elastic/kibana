@@ -48,11 +48,13 @@ export const goldenClusterPrivileges = {
           {
             names: [LOGS_INDEX_PATTERN],
             privileges: ['read', 'view_index_metadata'],
-            query: {
+            // Kibana's API-key route accepts DLS queries as JSON strings. API-key role
+            // descriptors are immutable, so changes to this allowlist require key rotation.
+            query: JSON.stringify({
               terms: {
                 event_name: Object.values(EVALS_EVIDENCE_LOG_EVENT_NAMES),
               },
-            },
+            }),
           },
           {
             names: [
