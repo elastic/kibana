@@ -118,26 +118,36 @@ export class AlertZeroPublicPlugin
     // we register on the first `true` and cannot remove the entry if the setting is later
     // disabled. `loadInvestigation` re-checks the live setting so that slots opened while
     // AlertZero is disabled surface an error instead of issuing a 404.
+    //
+    // Errors from registerAgenticInvestigationTemplateUI are re-raised as unhandled rejections
+    // so they surface in the browser console and unhandledrejection listeners, rather than
+    // being silently swallowed by RxJS's global error handler.
     this.templateRegistration = core.uiSettings
       .get$<boolean>(ALERTZERO_ENABLED_SETTING_ID, false)
       .pipe(filter(Boolean), take(1))
-      .subscribe(() => {
-        registerAgenticInvestigationTemplateUI({
-          conversationTemplates: startDeps.agentBuilder.conversationTemplates,
-          templateId: TEMPLATE_ID_INVESTIGATION,
-          name: INVESTIGATION_TEMPLATE_NAME,
-          icon: 'securitySignalDetected',
-          loadInvestigation: async (conversationId) => {
-            if (!core.uiSettings.get<boolean>(ALERTZERO_ENABLED_SETTING_ID, false)) {
-              throw new Error('AlertZero is disabled for this space');
-            }
-            const { investigation } = await core.http.get<GetInvestigationResponse>(
-              buildInvestigationUrl(conversationId),
-              { version: API_VERSIONS.internal.v1 }
-            );
-            return investigation;
-          },
-        });
+      .subscribe({
+        next: () => {
+          try {
+            registerAgenticInvestigationTemplateUI({
+              conversationTemplates: startDeps.agentBuilder.conversationTemplates,
+              templateId: TEMPLATE_ID_INVESTIGATION,
+              name: INVESTIGATION_TEMPLATE_NAME,
+              icon: 'securitySignalDetected',
+              loadInvestigation: async (conversationId) => {
+                if (!core.uiSettings.get<boolean>(ALERTZERO_ENABLED_SETTING_ID, false)) {
+                  throw new Error('AlertZero is disabled for this space');
+                }
+                const { investigation } = await core.http.get<GetInvestigationResponse>(
+                  buildInvestigationUrl(conversationId),
+                  { version: API_VERSIONS.internal.v1 }
+                );
+                return investigation;
+              },
+            });
+          } catch (err) {
+            Promise.reject(err);
+          }
+        },
       });
 
     return {};
