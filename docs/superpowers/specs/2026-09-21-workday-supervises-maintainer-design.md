@@ -198,7 +198,8 @@ Notes:
   relationshipKey: 'supervises',
   // Step 1 buckets MANAGERS, not reports.
   customActor: { fields: ['workday.user.Manager_Email', 'workday.user.Manager_ID'] },
-  // @timestamp is Hire_Date; the 30d lookback would drop most of the org chart.
+  // @timestamp is Hire_Date, so the default 30d lookback would select only
+  // new hires rather than recently-synced workers. See D5.
   disableLookbackWindow: true,
   validateTargetIds: true,
   compositeAggAdditionalFilters: [
@@ -216,12 +217,55 @@ and low-cardinality relative to the workforce (managers ⊂ employees), so compo
 bucketing is safe — contrast the `system_auth` bucket-explosion caused by including
 a per-host-varying `user.id` (PR #278471).
 
-**Watermark:** the maintainer's `lastProcessedTimestamp` is per-maintainer, shared
-with the Okta and Entra configs, and keys off `entity.lifecycle.last_seen` — a
-field that does not exist on log documents. This config therefore performs a full
-scan of the inventory each run, which the ticket explicitly accepts ("a full scan
-of the inventory is fine"). No watermark clause is added to the ES|QL. The
-maintainer already declares `timeout: '1h'`.
+### D5 — `disableLookbackWindow: true` with no replacement time filter
+
+This is the one place the design deliberately diverges from the Entra ID `owns`
+precedent, so the reasoning is recorded in full.
+
+The engine's 30d lookback is applied as an **ES|QL `filter` parameter**
+(`run_relationship_maintainer.ts:138`), not as text in the query body, so it
+reaches `kind: 'override'` configs too — an override cannot sidestep it. Entra ID
+`owns` simply omits `disableLookbackWindow` and therefore runs with the default
+30d window on `@timestamp`.
+
+That default is wrong for Workday. `default.yml:201-205` sets `@timestamp` from
+`Hire_Date`, so a 30d `@timestamp` window selects workers **hired** in the last 30
+days — not workers *synced* in the last 30 days. A tenured employee is re-ingested
+every 24h but keeps a years-old `@timestamp`, so they fall outside the window
+permanently. All five documents in the integration's own test fixture
+(`@timestamp` 2024-03-19 / 2024-04-15) would be excluded. The result would be an
+org chart containing only new hires.
+
+Three options were evaluated:
+
+| Option | Verdict |
+|---|---|
+| Engine default 30d on `@timestamp` (Entra ID parity) | **Rejected** — selects only new hires; the standing org chart is never built |
+| 30d on `event.ingested` | **Rejected** — not available (below) |
+| `disableLookbackWindow: true`, full scan | **Chosen** — correct; heaviest; sanctioned by the ticket |
+
+`event.ingested` would be the natural incremental field and is what the ticket
+gestures at ("watermark on `event.ingested` if needed"). It is **not usable**:
+Workday's `data_stream/user/fields/base-fields.yml` declares only
+`data_stream.*`, `event.dataset`, `event.module`, and `@timestamp`, and its
+`ecs.yml` declares a single field — `event.ingested` is mapped nowhere in the
+package (109 other packages declare it explicitly when they depend on it). Fleet's
+managed final pipeline still sets a value, but building an incremental window on
+an undeclared, dynamically-mapped field is fragile and would silently select
+nothing if the mapping is absent. Adding the mapping is a **Workday ingest
+change, explicitly out of scope**.
+
+The engine watermark does not help either: `lastProcessedTimestamp` is
+per-maintainer (shared with the Okta and Entra configs) and gates on
+`entity.lifecycle.last_seen`, which does not exist on log documents.
+
+So this config performs a full scan of the inventory each run — which the ticket
+explicitly accepts ("a full scan of the inventory is fine"). No watermark clause
+is added to the ES|QL. The maintainer already declares `timeout: '1h'`.
+
+If inventory size later makes this tight, the fix is to declare `event.ingested`
+in the Workday package and add a range filter here — a follow-up spanning both
+repos.
 
 ## Files to change
 
@@ -282,6 +326,9 @@ Additionally: actor-side EUID pre-validation (D3), and chunking
   `max_terms_count` on large stores — a pre-existing, documented engine risk for
   any `validateTargetIds: true` maintainer, not introduced here, but Workday
   org-scale full scans will exercise it.
-- **Full scan every run.** No watermark applies (see Config). Acceptable per the
-  ticket; revisit if inventory size makes the 1h timeout tight.
+- **Full scan every run.** No usable time filter or watermark exists (see D5).
+  Acceptable per the ticket; revisit if inventory size makes the 1h timeout
+  tight. This is the main divergence from the Entra ID `owns` precedent and the
+  most likely thing a reviewer will question — D5 records why each alternative
+  was rejected.
 - **`user.ts` re-keying.** See D4 blast radius.
