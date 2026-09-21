@@ -1754,6 +1754,28 @@ describe('ProposalsService', () => {
       );
     });
 
+    it('should bound the closed queue to the requested recency window', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      await service.list(listQuery({ decidedWithinHours: 72 }), SPACE_ID);
+
+      const [[searchArgs]] = storage.search.mock.calls;
+      expect(searchArgs.query.bool.filter).toEqual(
+        expect.arrayContaining([{ range: { decidedAt: { gte: 'now-72h' } } }])
+      );
+    });
+
+    it('should not bound on decidedAt when no window is requested', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      await service.list(listQuery(), SPACE_ID);
+
+      const [[searchArgs]] = storage.search.mock.calls;
+      expect(JSON.stringify(searchArgs.query.bool.filter)).not.toContain('decidedAt');
+    });
+
     it('should not filter on decision or supersession by default', async () => {
       const storage = createStorage(baseDocument());
       const { service } = createService(storage);
@@ -1775,114 +1797,6 @@ describe('ProposalsService', () => {
       expect(proposals[0]).not.toHaveProperty('impactRank');
       expect(proposals[0]).not.toHaveProperty('confidenceRank');
     });
-  });
-
-  describe('listByWindow', () => {
-    const activityQuery = (decidedWithinHours = 24) => ({
-      decidedWithinHours,
-      excludeSuperseded: true,
-      excludeExpired: false,
-    });
-
-    it('includes proposals awaiting a decision regardless of age', async () => {
-      const storage = createStorage(baseDocument({ status: 'pending' }));
-      const { service } = createService(storage);
-
-      const { proposals } = await service.listByWindow(activityQuery(), SPACE_ID);
-
-      expect(proposals).toHaveLength(1);
-    });
-
-    it('unions awaiting with decided-within-window', async () => {
-      const storage = createStorage(baseDocument());
-      const { service } = createService(storage);
-
-      await service.listByWindow(activityQuery(48), SPACE_ID);
-
-      const [[searchArgs]] = storage.search.mock.calls;
-      const { bool } = searchArgs.query;
-      expect(bool.minimum_should_match).toBe(1);
-      // `pending` is only ever valid while undecided, so the status is the
-      // whole awaiting condition.
-      expect(bool.should).toEqual([
-        { term: { status: 'pending' } },
-        { range: { decidedAt: { gte: 'now-48h' } } },
-      ]);
-    });
-
-    it('applies the shared filters exactly as list does', async () => {
-      const storage = createStorage(baseDocument());
-      const { service } = createService(storage);
-
-      await service.listByWindow(
-        { ...activityQuery(), conversationId: 'conv-1', excludeExpired: true },
-        SPACE_ID
-      );
-      await service.list(
-        listQuery({ conversationId: 'conv-1', excludeExpired: true, excludeSuperseded: true }),
-        SPACE_ID
-      );
-
-      // Both reads translate the vocabulary through the same builder, so a
-      // filter cannot come to mean one thing here and another there.
-      const [[windowArgs], [listArgs]] = storage.search.mock.calls;
-      expect(windowArgs.query.bool.filter).toEqual(listArgs.query.bool.filter);
-    });
-
-    it('drops superseded proposals so a retried chain appears once', async () => {
-      const storage = createStorage(baseDocument());
-      const { service } = createService(storage);
-
-      await service.listByWindow(activityQuery(), SPACE_ID);
-
-      const [[searchArgs]] = storage.search.mock.calls;
-      expect(searchArgs.query.bool.filter).toEqual(
-        expect.arrayContaining([{ bool: { must_not: { exists: { field: 'supersededBy' } } } }])
-      );
-    });
-
-    it('reaches a recently expired proposal through the decided leg, not the awaiting one', async () => {
-      // `update` stamps `decidedAt` when it settles a proposal nobody decided,
-      // so an expired one does match the decided-recently leg — deliberately,
-      // because "you missed this" is activity worth surfacing. It carries no
-      // decision, so a consumer has to classify on the status rather than the
-      // decision or it lands back in the open queue.
-      const storage = createStorage(baseDocument());
-      const { service } = createService(storage);
-
-      await service.listByWindow(activityQuery(), SPACE_ID);
-
-      const [[searchArgs]] = storage.search.mock.calls;
-      expect(searchArgs.query.bool.should).toEqual([
-        { term: { status: 'pending' } },
-        { range: { decidedAt: { gte: 'now-24h' } } },
-      ]);
-    });
-
-    it('returns truncated=true when total exceeds the cap', async () => {
-      const doc = baseDocument();
-      const storage = {
-        ...createStorage(doc),
-        search: jest.fn().mockResolvedValue({
-          hits: { hits: [searchHit(doc)], total: { value: 9999 } },
-        }),
-      } as unknown as ReturnType<typeof createStorage>;
-      const { service } = createService(storage);
-
-      const { truncated, total } = await service.listByWindow(activityQuery(), SPACE_ID);
-
-      expect(truncated).toBe(true);
-      expect(total).toBe(9999);
-    });
-
-    it('returns truncated=false when total is within the cap', async () => {
-      const storage = createStorage(baseDocument());
-      const { service } = createService(storage);
-
-      const { truncated } = await service.listByWindow(activityQuery(), SPACE_ID);
-
-      expect(truncated).toBe(false);
-    });
 
     it('fetches action metadata only once for proposals sharing an actionWorkflowId', async () => {
       const doc = baseDocument({ actionWorkflowId: 'shared-action' });
@@ -1898,20 +1812,9 @@ describe('ProposalsService', () => {
       const workflowsApi = createWorkflowsApi();
       const { service } = createService(storage, workflowsApi);
 
-      await service.listByWindow(activityQuery(), SPACE_ID);
+      await service.list(listQuery(), SPACE_ID);
 
       expect(workflowsApi.getWorkflow).toHaveBeenCalledTimes(1);
-    });
-
-    it('does not leak sort ranks into the response', async () => {
-      const storage = createStorage(baseDocument());
-      const { service } = createService(storage);
-
-      const { proposals } = await service.listByWindow(activityQuery(), SPACE_ID);
-
-      expect(proposals[0]).not.toHaveProperty('categoryRank');
-      expect(proposals[0]).not.toHaveProperty('impactRank');
-      expect(proposals[0]).not.toHaveProperty('confidenceRank');
     });
   });
 
@@ -1936,6 +1839,11 @@ describe('ProposalsService', () => {
       values: rows.map(([idx, category, count]) => [count, idx, category]),
     });
 
+    const scalar = (field: string, count: number) => ({
+      columns: [{ name: field }],
+      values: [[count]],
+    });
+
     /** The four queries resolve in the order the service issues them. */
     const mockEsql = (
       storage: ReturnType<typeof createStorage>,
@@ -1943,23 +1851,27 @@ describe('ProposalsService', () => {
         anchor,
         opens,
         closes,
-        expiries,
+        currentOpen,
       }: {
         anchor?: object;
         opens?: object;
         closes?: object;
-        expiries?: object;
+        currentOpen?: object;
       }
     ) => {
       storage.esql
         .mockResolvedValueOnce(anchor ?? emptyEsql())
         .mockResolvedValueOnce(opens ?? emptyEsql())
         .mockResolvedValueOnce(closes ?? emptyEsql())
-        .mockResolvedValueOnce(expiries ?? emptyEsql());
+        .mockResolvedValueOnce(currentOpen ?? emptyEsql());
     };
 
     const issuedQueries = (storage: ReturnType<typeof createStorage>): string[] =>
       storage.esql.mock.calls.map(([args]) => args.pipeline.toRequest().query as string);
+
+    /** Excludes the `currentOpen` scalar, which has neither a COALESCE(category) nor a LIMIT. */
+    const bucketQueries = (storage: ReturnType<typeof createStorage>): string[] =>
+      issuedQueries(storage).slice(0, 3);
 
     const esqlError = (type: string, reason: string) =>
       Object.assign(new Error(reason), { meta: { body: { error: { type, reason } } } });
@@ -1983,7 +1895,8 @@ describe('ProposalsService', () => {
 
       const { buckets } = await service.chartsSummary(chartsQuery, SPACE_ID);
 
-      expect(buckets.map((b) => b.counts.contain)).toEqual([2, 5, 5, 4, 4]);
+      // Bucket 3 holds the close and still counts it; the decrement lands in bucket 4.
+      expect(buckets.map((b) => b.counts.contain)).toEqual([2, 5, 5, 5, 4]);
     });
 
     it('should include the current partial bucket', async () => {
@@ -2008,39 +1921,87 @@ describe('ProposalsService', () => {
       expect(buckets.map((b) => b.counts.contain)).toEqual([0, 0, 0, 0, 0]);
     });
 
-    it('should close a proposal at the bucket it expired in', async () => {
+    // An expiry reaches the running sum through `closes`, keyed on COALESCE(decidedAt,
+    // expiresAt), so it needs no stream of its own.
+    it('should keep a proposal counted in the bucket it closed in, and drop it after', async () => {
       const storage = createStorage();
       mockEsql(storage, {
         anchor: byCategory('anchor', [['contain', 1]]),
-        expiries: byIdxAndCategory('expiries', [[2, 'contain', 1]]),
+        closes: byIdxAndCategory('closes', [[2, 'contain', 1]]),
       });
       const { service } = createService(storage);
 
       const { buckets } = await service.chartsSummary(chartsQuery, SPACE_ID);
 
-      expect(buckets.map((b) => b.counts.contain)).toEqual([1, 1, 0, 0, 0]);
+      expect(buckets.map((b) => b.counts.contain)).toEqual([1, 1, 1, 0, 0]);
+    });
+
+    // Netted +1 −1 = 0 under the old end-of-bucket snapshot, so it never appeared.
+    it('should count a proposal that opened and closed within the same bucket', async () => {
+      const storage = createStorage();
+      mockEsql(storage, {
+        opens: byIdxAndCategory('opens', [[2, 'contain', 1]]),
+        closes: byIdxAndCategory('closes', [[2, 'contain', 1]]),
+      });
+      const { service } = createService(storage);
+
+      const { buckets } = await service.chartsSummary(chartsQuery, SPACE_ID);
+
+      // Normalised: a category carries no key until its first event.
+      expect(buckets.map((b) => b.counts.contain ?? 0)).toEqual([0, 0, 1, 0, 0]);
+    });
+
+    it('should report currentOpen from the scalar query', async () => {
+      const storage = createStorage();
+      mockEsql(storage, { currentOpen: scalar('currentOpen', 7) });
+      const { service } = createService(storage);
+
+      const { currentOpen } = await service.chartsSummary(chartsQuery, SPACE_ID);
+
+      expect(currentOpen).toBe(7);
+    });
+
+    it('should report currentOpen as zero when the scalar query comes back empty', async () => {
+      const storage = createStorage();
+      const { service } = createService(storage);
+
+      const { currentOpen } = await service.chartsSummary(chartsQuery, SPACE_ID);
+
+      expect(currentOpen).toBe(0);
+    });
+
+    it('should count only pending, non-superseded proposals as currently open', async () => {
+      const storage = createStorage();
+      const { service } = createService(storage);
+
+      await service.chartsSummary(chartsQuery, SPACE_ID);
+
+      const currentOpenQuery = issuedQueries(storage)[3];
+      expect(currentOpenQuery).toContain('status == "pending"');
+      expect(currentOpenQuery).toContain('supersededBy IS NULL');
     });
 
     /**
-     * The regression this guards: a request-time `expiresAt > NOW()` filter would
-     * erase an expired proposal from the buckets in which it was genuinely open,
-     * so the same past bucket would answer differently on every refetch.
+     * Openness is read from `status`, never from comparing a deadline to the clock.
+     * A request-time predicate would erase an expired proposal from the buckets in
+     * which it was genuinely open, so a past bucket would answer differently on
+     * every refetch.
      */
-    it('should not filter any query on request-time expiry', async () => {
+    it('should not compare a deadline against the clock in any query', async () => {
       const storage = createStorage();
       const { service } = createService(storage);
 
       await service.chartsSummary(chartsQuery, SPACE_ID);
 
       for (const query of issuedQueries(storage)) {
-        expect(query).not.toMatch(/expiresAt\s*>\s*NOW\(\)/i);
+        expect(query).not.toMatch(/NOW\(\)/i);
       }
     });
 
     /**
      * The regression this guards: a superseded proposal has no `decidedAt` —
      * being revised is not a decision — and inherits its predecessor's
-     * `expiresAt`, so without this term the anchor, opens and expiries queries
+     * `expiresAt`, so without this term the anchor, opens and closes queries
      * all count it as still open alongside the revision that replaced it.
      */
     it('should exclude superseded proposals from every query', async () => {
@@ -2056,6 +2017,21 @@ describe('ProposalsService', () => {
       }
     });
 
+    /**
+     * The whole reason `expiries` is no longer a stream of its own: a decision and a
+     * deadline are the same event, so one column expresses both close moments.
+     */
+    it('should close on decidedAt, falling back to expiresAt', async () => {
+      const storage = createStorage();
+      const { service } = createService(storage);
+
+      await service.chartsSummary(chartsQuery, SPACE_ID);
+
+      const closes = issuedQueries(storage)[2];
+      expect(closes).toContain('COALESCE(decidedAt, expiresAt)');
+      expect(closes).toContain('status != "pending"');
+    });
+
     it('should give action-less proposals a category so they are counted', async () => {
       const storage = createStorage();
       mockEsql(storage, { anchor: byCategory('anchor', [['uncategorized', 4]]) });
@@ -2063,7 +2039,7 @@ describe('ProposalsService', () => {
 
       const { buckets } = await service.chartsSummary(chartsQuery, SPACE_ID);
 
-      for (const query of issuedQueries(storage)) {
+      for (const query of bucketQueries(storage)) {
         expect(query).toContain('COALESCE(category');
       }
       expect(buckets.at(-1)?.counts).toEqual({ uncategorized: 4 });
@@ -2077,7 +2053,7 @@ describe('ProposalsService', () => {
 
       // A larger LIMIT is capped to the truncation max rather than honoured, so
       // asking for one only hides that the newest buckets were dropped.
-      for (const query of issuedQueries(storage)) {
+      for (const query of bucketQueries(storage)) {
         const limit = Number(query.match(/LIMIT\s+(\d+)\s*$/)?.[1]);
         expect(limit).toBeLessThanOrEqual(10000);
       }
