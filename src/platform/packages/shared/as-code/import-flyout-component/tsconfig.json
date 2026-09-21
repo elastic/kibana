@@ -1,0 +1,18 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/as-code-shared-schemas",
+    "@kbn/core-application-browser",
+    "@kbn/core-application-browser-mocks",
+    "@kbn/core-notifications-browser",
+    "@kbn/core-notifications-browser-mocks",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/ui-callout"
+  ]
+}
