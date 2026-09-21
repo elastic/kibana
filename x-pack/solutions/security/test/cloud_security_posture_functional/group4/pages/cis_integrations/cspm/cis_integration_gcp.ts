@@ -237,6 +237,8 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
+        });
+        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           await cisIntegration.navigateToIntegrationCspList();
           await cisIntegration.clickFirstElementOnIntegrationTable();
           expect(await cisIntegration.showCredentialJsonSecretPanel()).to.be(true);
@@ -374,6 +376,8 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
+        });
+        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           await cisIntegration.navigateToIntegrationCspList();
           await pageObjects.header.waitUntilLoadingHasFinished();
           await cisIntegration.clickFirstElementOnIntegrationTable();

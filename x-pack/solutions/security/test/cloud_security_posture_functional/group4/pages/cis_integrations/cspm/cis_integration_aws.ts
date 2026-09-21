@@ -142,6 +142,8 @@ export default function (providerContext: FtrProviderContext) {
             logger.debug('Post install modal not found');
           }
           expect(modal !== undefined).to.be(true);
+        });
+        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           await cisIntegration.navigateToIntegrationCspList();
           expect(
             (await cisIntegration.getFieldValueInEditPage(AWS_INPUT_TEST_SUBJECTS.ROLE_ARN)) ===
@@ -176,6 +178,8 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
+        });
+        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           await cisIntegration.navigateToIntegrationCspList();
           expect(
             (await cisIntegration.getFieldValueInEditPage(
@@ -214,6 +218,8 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
+        });
+        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           await cisIntegration.navigateToIntegrationCspList();
           await cisIntegration.clickFirstElementOnIntegrationTable();
           expect(
@@ -256,6 +262,8 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
+        });
+        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           await cisIntegration.navigateToIntegrationCspList();
           await cisIntegration.clickFirstElementOnIntegrationTable();
           expect(
@@ -283,6 +291,8 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
+        });
+        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           await cisIntegration.navigateToIntegrationCspList();
           expect(
             (await cisIntegration.getFieldValueInEditPage(AWS_INPUT_TEST_SUBJECTS.ROLE_ARN)) ===
@@ -318,6 +328,8 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
+        });
+        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           await cisIntegration.navigateToIntegrationCspList();
           expect(
             (await cisIntegration.getFieldValueInEditPage(
@@ -357,6 +369,8 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
+        });
+        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           await cisIntegration.navigateToIntegrationCspList();
           await cisIntegration.clickFirstElementOnIntegrationTable();
           expect(
@@ -400,6 +414,8 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
+        });
+        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           await cisIntegration.navigateToIntegrationCspList();
           await cisIntegration.clickFirstElementOnIntegrationTable();
           expect(
