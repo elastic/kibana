@@ -29,7 +29,7 @@ import {
   OBSERVABILITY_ALERTING_RULES_V1_PATH,
   OBSERVABILITY_ALERTING_RULES_V2_PATH,
 } from '../constants';
-import { hasObservabilityAlertingPrivilege } from './has_observability_alerting_privilege';
+import { hasObservabilityAlertingCapabilities } from './has_observability_alerting_privilege';
 
 const LegacyInboxRedirect = () => {
   const { pathname, search, hash } = useLocation();
@@ -157,8 +157,13 @@ export const ObservabilityAlertingApp = ({
   const rulesV2Tabs = useObservabilityRulesTabs(prepend, 'v2');
 
   const privilegeCheck: PrivilegeCheck = useCallback(
-    (features, capability) =>
-      hasObservabilityAlertingPrivilege(coreStart.application.capabilities, features, capability),
+    (features, _capability) => {
+      const { v1, v2 } = hasObservabilityAlertingCapabilities(
+        coreStart.application.capabilities,
+        features[0]
+      );
+      return v1 || v2;
+    },
     [coreStart]
   );
 
@@ -170,6 +175,7 @@ export const ObservabilityAlertingApp = ({
       <Route path={OBSERVABILITY_ALERTING_LEGACY_INBOX_PATH}>
         <LegacyInboxRedirect />
       </Route>
+      {/* Serves both v1 and v2 users, so privilegeCheck grants access via either path */}
       <Route path={OBSERVABILITY_ALERTING_ALERTS_PATH}>
         <EuiPageSection paddingSize="m">
           <EpisodesPage
@@ -197,11 +203,11 @@ export const ObservabilityAlertingApp = ({
             coreStart={coreStart}
             setBreadcrumbs={setBreadcrumbs}
             hostApp={hostApp}
-            privilegeCheck={privilegeCheck}
             tabs={rulesV2Tabs}
           />
         </EuiPageSection>
       </Route>
+      {/* Serves both v1 and v2 users, so privilegeCheck grants access via either path */}
       <Route path={OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH}>
         <EuiPageSection paddingSize="m">
           <RuleLibraryPage
@@ -218,7 +224,6 @@ export const ObservabilityAlertingApp = ({
             coreStart={coreStart}
             setBreadcrumbs={setBreadcrumbs}
             hostApp={hostApp}
-            privilegeCheck={privilegeCheck}
           />
         </EuiPageSection>
       </Route>
@@ -228,7 +233,6 @@ export const ObservabilityAlertingApp = ({
             coreStart={coreStart}
             setBreadcrumbs={setBreadcrumbs}
             hostApp={hostApp}
-            privilegeCheck={privilegeCheck}
           />
         </EuiPageSection>
       </Route>

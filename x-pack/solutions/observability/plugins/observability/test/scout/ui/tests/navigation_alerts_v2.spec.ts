@@ -509,6 +509,19 @@ test.describe(
       );
     });
 
+    test('shows Alerts and classic Rules in the panel when the user has v1 synthetics all', async ({
+      browserAuth,
+      pageObjects,
+      kbnClient,
+      scoutSpace,
+    }) => {
+      await expectPanelForRole(
+        { browserAuth, pageObjects, kbnClient, scoutSpace },
+        observabilityAlertingNavRole({ synthetics: ['all'] }),
+        [PANEL_LINKS.alerts, PANEL_LINKS.rulesV1]
+      );
+    });
+
     test('shows Alerts and Alerts V1 when the user has v1 observability alerts read and the classic table is on', async ({
       browserAuth,
       pageObjects,

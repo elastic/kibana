@@ -7,7 +7,7 @@
 
 import type { AppDeepLink, AppDeepLinkLocations, Capabilities } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { hasObservabilityAlertingPrivilege } from './application/has_observability_alerting_privilege';
+import { hasObservabilityAlertingCapabilities } from './application/has_observability_alerting_privilege';
 import {
   OBSERVABILITY_ALERTING_ACTION_POLICIES_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
@@ -27,17 +27,30 @@ const SEARCHABLE_VISIBLE_IN: AppDeepLinkLocations[] = ['globalSearch', 'projectS
 
 const canAccessDeepLink = (id: string, capabilities: Capabilities): boolean => {
   switch (id) {
-    case OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID:
-      return hasObservabilityAlertingPrivilege(capabilities, ['alerts'], 'read');
-    case OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID:
-    case OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID:
-      return hasObservabilityAlertingPrivilege(capabilities, ['rules'], 'read');
-    case OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID:
-      return hasObservabilityAlertingPrivilege(capabilities, ['rules'], 'all');
-    case OBSERVABILITY_ALERTING_ACTION_POLICIES_DEEP_LINK_ID:
-      return hasObservabilityAlertingPrivilege(capabilities, ['actionPolicies'], 'read');
-    case OBSERVABILITY_ALERTING_EXECUTION_HISTORY_DEEP_LINK_ID:
-      return hasObservabilityAlertingPrivilege(capabilities, ['executionHistory'], 'read');
+    case OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID: {
+      const { v1, v2 } = hasObservabilityAlertingCapabilities(capabilities, 'alerts');
+      return v1 || v2;
+    }
+    case OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID: {
+      const { v1 } = hasObservabilityAlertingCapabilities(capabilities, 'rules');
+      return v1;
+    }
+    case OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID: {
+      const { v2 } = hasObservabilityAlertingCapabilities(capabilities, 'rules');
+      return v2;
+    }
+    case OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID: {
+      const { v1, v2 } = hasObservabilityAlertingCapabilities(capabilities, 'rules');
+      return v1 || v2;
+    }
+    case OBSERVABILITY_ALERTING_ACTION_POLICIES_DEEP_LINK_ID: {
+      const { v2 } = hasObservabilityAlertingCapabilities(capabilities, 'actionPolicies');
+      return v2;
+    }
+    case OBSERVABILITY_ALERTING_EXECUTION_HISTORY_DEEP_LINK_ID: {
+      const { v2 } = hasObservabilityAlertingCapabilities(capabilities, 'executionHistory');
+      return v2;
+    }
     default:
       return false;
   }
