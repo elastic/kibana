@@ -35,6 +35,8 @@ export const createConversationActions = ({
 }: UseConversationActionsParams): ConversationActions => {
   const queryKey = queryKeys.conversations.byId(conversationId ?? '');
 
+  // `fetchQuery` rather than `invalidateQueries`: it fetches whether or not an observer is mounted
+  // and resolves with the response, which the completion release needs.
   const fetchConversation = () => {
     if (!conversationId) {
       return Promise.reject(new Error('Invalid conversation id'));
@@ -61,6 +63,8 @@ export const createConversationActions = ({
       refreshConversationList();
     },
 
+    // A request already in flight was sent before the execution was persisted and would be
+    // returned by `fetchQuery` as-is; cancel it so the response reflects the completed execution.
     refetchConversation: () => queryClient.cancelQueries({ queryKey }).then(fetchConversation),
 
     deleteConversation: async (id: string) => {
