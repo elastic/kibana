@@ -240,7 +240,7 @@ export default function (providerContext: FtrProviderContext) {
       };
       const buf = await buildPackageZipWithAssetType('security_rule', mlRuleAsset);
 
-      // fleet_all_int_all_siem_all has rules-all (via siemV2:all) but not ml:canCreateJob
+      // fleet_all_int_all_siem_all has rules-all (via siemV5:all) but not ml:canCreateJob
       await supertestWithoutAuth
         .post(`/api/fleet/epm/packages`)
         .auth(

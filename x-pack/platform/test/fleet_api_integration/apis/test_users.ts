@@ -209,7 +209,7 @@ export const testUsers: {
       feature: {
         fleetv2: ['all'],
         fleet: ['all'],
-        siemV2: ['all'],
+        siemV5: ['all'],
       },
       spaces: ['*'],
     },
@@ -233,7 +233,7 @@ export const testUsers: {
       feature: {
         fleetv2: ['all'],
         fleet: ['all'],
-        siemV2: ['all'],
+        siemV5: ['all'],
         ml: ['all'],
       },
       spaces: ['*'],
