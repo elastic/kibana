@@ -9,17 +9,10 @@ import { createHash } from 'crypto';
 import { stableStringify } from '@kbn/std';
 
 import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { RuleResponse } from '@kbn/alerting-v2-schemas';
-import type {
-  AlertEventDocument,
-  AlertEventSeverity,
-  AlertEventType,
-} from '../../resources/datastreams/alert_events';
-import {
-  alertEventSeverity,
-  alertEventType,
-  buildRuleEventDocument,
-} from '../../resources/datastreams/alert_events';
+import type { AlertEventSeverity, RuleResponse } from '@kbn/alerting-v2-schemas';
+import { alertEventSeverity } from '@kbn/alerting-v2-schemas';
+import type { AlertEventDocument, AlertEventType } from '../../resources/datastreams/alert_events';
+import { alertEventType, buildRuleEventDocument } from '../../resources/datastreams/alert_events';
 import type { ActiveAlertGroupHash } from './queries';
 
 /**
