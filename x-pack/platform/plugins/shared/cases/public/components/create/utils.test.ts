@@ -79,11 +79,11 @@ describe('utils', () => {
       );
     });
 
-    it('merges settings.extractObservables from the space configuration over the owner default', () => {
+    it('replaces settings when the caller passes a complete settings object', () => {
       expect(
         getInitialCaseValue({
           owner: 'securitySolution',
-          settings: { extractObservables: false },
+          settings: { syncAlerts: true, extractObservables: false },
         })
       ).toEqual(
         expect.objectContaining({

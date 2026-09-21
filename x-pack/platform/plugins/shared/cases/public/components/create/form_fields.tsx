@@ -79,7 +79,7 @@ const DEFAULT_EMPTY_TEMPLATE_KEY = 'defaultEmptyTemplateKey';
 
 export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.memo(
   ({ configuration, selectedOwner, connectors, isLoading, withSteps, draftStorageKey }) => {
-    const { reset, updateFieldValues, isSubmitting, setFieldValue } = useFormContext();
+    const { reset, updateFieldValues, isSubmitting, setFieldValue, getFields } = useFormContext();
 
     const caseOwner = selectedOwner || configuration.owner;
     const {
@@ -104,12 +104,20 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
 
     /**
      * Form defaultValue is fixed at mount. While configurations load,
-     * getConfigurationByOwner returns initialConfiguration (extractObservables: true).
-     * Re-apply the space default when the real configuration arrives or changes.
+     * getConfigurationByOwner returns initialConfiguration (id: '', extractObservables: true).
+     * Re-apply the space default when a real configuration arrives, but only while the field
+     * is still pristine so a user or template choice made during load is not overwritten.
      */
     useEffect(() => {
+      if (configuration.id === '') {
+        return;
+      }
+      const field = getFields().extractObservables;
+      if (field && !field.isPristine) {
+        return;
+      }
       setFieldValue('extractObservables', configuration.extractObservables ?? true);
-    }, [configuration.extractObservables, configuration.id, setFieldValue]);
+    }, [configuration.extractObservables, configuration.id, getFields, setFieldValue]);
 
     const defaultTemplate = useMemo(
       () => ({
