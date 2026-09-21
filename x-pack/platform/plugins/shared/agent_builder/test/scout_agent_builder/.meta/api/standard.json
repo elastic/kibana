@@ -1,5 +1,5 @@
 {
-  "sha1": "89a2416d4e84bc624a8ef18a2c7f2505f82af1de",
+  "sha1": "1ad0732d27c72e6bd019a4d2e4335c5977715046",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -2334,6 +2334,54 @@
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_error_api.spec.ts",
         "line": 98,
         "column": 31
+      }
+    },
+    {
+      "id": "8b991b0ed7656e4-7187a78038f0967",
+      "title": "Agent Builder — interrupted executions are persisted on the conversation [local] persists a failed execution and surfaces it to the next round",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_interrupted_executions_api.spec.ts",
+        "line": 188,
+        "column": 6
+      }
+    },
+    {
+      "id": "8b991b0ed7656e4-dcd3f2158684356",
+      "title": "Agent Builder — interrupted executions are persisted on the conversation [task_manager] persists a failed execution and surfaces it to the next round",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_interrupted_executions_api.spec.ts",
+        "line": 188,
+        "column": 6
+      }
+    },
+    {
+      "id": "8b991b0ed7656e4-d37f24cd256eef5",
+      "title": "Agent Builder — interrupted executions are persisted on the conversation aborted execution (callback / task manager) is persisted, reports aborted, and is hidden from the next round",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_interrupted_executions_api.spec.ts",
+        "line": 300,
+        "column": 27
       }
     },
     {
