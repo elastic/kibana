@@ -59,7 +59,7 @@ describe('DashboardEnhanceButton', () => {
 
     fireEvent.mouseOver(screen.getByRole('button', { name: 'Enhance' }));
 
-    expect(await screen.findByText(TOOLTIP)).toBeInTheDocument();
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(TOOLTIP);
   });
 
   it('shows the tooltip on the icon-only button', async () => {
@@ -68,6 +68,6 @@ describe('DashboardEnhanceButton', () => {
 
     fireEvent.mouseOver(screen.getByRole('button', { name: 'Enhance' }));
 
-    expect(await screen.findByText(TOOLTIP)).toBeInTheDocument();
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(TOOLTIP);
   });
 });

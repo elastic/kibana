@@ -269,7 +269,7 @@ describe('AppHeaderView', () => {
 
     fireEvent.mouseOver(screen.getByRole('button', { name: 'Enhance' }));
 
-    expect(await screen.findByText(ENHANCE_TOOLTIP)).toBeInTheDocument();
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(ENHANCE_TOOLTIP);
   });
 
   it('shows the enhance tooltip on the icon-only button', async () => {
@@ -284,7 +284,7 @@ describe('AppHeaderView', () => {
 
     fireEvent.mouseOver(screen.getByRole('button', { name: 'Enhance' }));
 
-    expect(await screen.findByText(ENHANCE_TOOLTIP)).toBeInTheDocument();
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(ENHANCE_TOOLTIP);
   });
 
   it('renders a description with a Learn more link', () => {
