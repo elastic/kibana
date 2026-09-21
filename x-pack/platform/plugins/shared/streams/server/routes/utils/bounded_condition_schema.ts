@@ -47,8 +47,8 @@ const boundedFilterCondition = z.union([
   z.strictObject({
     field: z.string().nonempty().max(COND_STR_MAX),
     exists: z.boolean().optional(),
-  }),
-]);
+const boundedAlways = z.strictObject({ always: z.strictObject({}) });
+const boundedNever = z.strictObject({ never: z.strictObject({}) });
 
 const boundedAlways = z.object({ always: z.object({}) });
 const boundedNever = z.object({ never: z.object({}) });
