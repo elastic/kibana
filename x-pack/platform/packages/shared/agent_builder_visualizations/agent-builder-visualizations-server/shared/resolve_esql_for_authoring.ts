@@ -25,7 +25,7 @@ interface ResolvedEsqlError {
 
 type ResolvedEsqlForAuthoring = ResolvedEsqlQuery | ResolvedEsqlError;
 
-interface ResolveEsqlForAuthoringParams {
+export interface ResolveEsqlForAuthoringParams {
   /** Caller-provided query to try first. Empty/undefined falls through to generation. */
   providedQuery: string | undefined;
   nlQuery: string;

@@ -11,7 +11,7 @@ import type { Logger } from '@kbn/logging';
 import { type IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { extractTextFromMessage } from '../utils/extract_text_from_message';
-import { resolveEsqlForAuthoring } from '../shared/resolve_esql_for_authoring';
+import { runResolveEsqlNode } from '../shared/run_resolve_esql_node';
 import { chartTypeRegistry } from './chart_type_registry';
 import type { VisualizationConfig } from './chart_type_registry';
 import {
@@ -20,7 +20,6 @@ import {
   VALIDATE_CONFIG_NODE,
   MAX_RETRY_ATTEMPTS,
   type Action,
-  type GenerateEsqlAction,
   type GenerateConfigAction,
   type ValidateConfigAction,
   isGenerateEsqlAction,
@@ -137,67 +136,21 @@ export const createVisualizationGraph = async (
 ) => {
   const defaultModel = await modelProvider.getDefaultModel();
 
-  // Resolve the ES|QL query and its result columns. A query may reference
-  // time-picker params (?_tstart/?_tend); bind a default range so it runs
-  // server-side. Kibana binds the live range at render time.
-  const resolveEsqlNode = async (state: VisualizationState) => {
-    if (state.preserveESQL) {
-      // Appearance-only: keep the stored query and skip the schema probe so a
-      // restyle cannot fail or regenerate because the probe could not run.
-      return {
-        esqlQuery: state.esqlQuery,
-        actions: [
-          { type: 'generate_esql', success: true, preserved: true, query: state.esqlQuery },
-        ],
-      };
-    }
-
-    let action: GenerateEsqlAction;
-    try {
-      const resolved = await resolveEsqlForAuthoring({
-        providedQuery: state.esqlQuery,
-        nlQuery: state.nlQuery,
-        // On edit, seed generation with the existing per-layer queries so a
-        // query-changing edit can modify them instead of being stuck with the
-        // original columns.
-        existingQueries: getExistingEsqlQueries(state.parsedExistingConfig),
-        index: state.index,
-        modelProvider,
-        events,
-        logger,
-        esClient,
-      });
-
-      if ('error' in resolved) {
-        action = {
-          type: 'generate_esql',
-          success: false,
-          error: resolved.error,
-        };
-      } else {
-        action = {
-          type: 'generate_esql',
-          success: true,
-          query: resolved.query,
-          columns: resolved.columns,
-        };
-      }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error(`Failed to generate ES|QL query: ${errorMessage}`);
-      action = {
-        type: 'generate_esql',
-        success: false,
-        error: errorMessage,
-      };
-    }
-
-    return {
-      esqlQuery: action.query ?? state.esqlQuery,
-      columns: action.columns,
-      actions: [action],
-    };
-  };
+  const resolveEsqlNode = (state: VisualizationState) =>
+    runResolveEsqlNode({
+      preserveESQL: state.preserveESQL,
+      esqlQuery: state.esqlQuery,
+      nlQuery: state.nlQuery,
+      // On edit, seed generation with the existing per-layer queries so a
+      // query-changing edit can modify them instead of being stuck with the
+      // original columns.
+      existingQueries: getExistingEsqlQueries(state.parsedExistingConfig),
+      index: state.index,
+      modelProvider,
+      events,
+      logger,
+      esClient,
+    });
 
   // Node: Generate configuration
   const generateConfigNode = async (state: VisualizationState) => {

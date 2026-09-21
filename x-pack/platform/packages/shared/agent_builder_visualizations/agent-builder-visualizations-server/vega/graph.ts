@@ -12,7 +12,7 @@ import type { Logger } from '@kbn/logging';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { extractTextFromMessage } from '../utils/extract_text_from_message';
-import { resolveEsqlForAuthoring } from '../shared/resolve_esql_for_authoring';
+import { runResolveEsqlNode } from '../shared/run_resolve_esql_node';
 import { normalizeVegaSpec } from './normalize_spec';
 import { createAuthorVegaSpecPrompt, vegaEsqlAdditionalInstructions } from './prompts';
 import { buildReferenceExamplesBlock } from './reference_examples';
@@ -27,7 +27,6 @@ import {
   isAuthorSpecAction,
   isValidateSpecAction,
   type VegaAction,
-  type GenerateEsqlAction,
   type AuthorSpecAction,
   type ValidateSpecAction,
 } from './actions';
@@ -130,63 +129,22 @@ export const createVegaGraph = async (
 ) => {
   const defaultModel = await modelProvider.getDefaultModel();
 
-  // Resolve the ES|QL query and its result columns. A query may reference
-  // time-picker params (?_tstart/?_tend); bind a default range so it runs
-  // server-side. Kibana binds the live range at render time.
-  const resolveEsqlNode = async (state: VegaState) => {
-    if (state.preserveESQL) {
-      // Appearance-only: keep the stored query and skip the schema probe so a
-      // restyle cannot fail or regenerate because the probe could not run.
-      return {
-        esqlQuery: state.esqlQuery,
-        actions: [
-          { type: 'generate_esql', success: true, preserved: true, query: state.esqlQuery },
-        ],
-      };
-    }
-
-    let action: GenerateEsqlAction;
-
-    try {
-      const resolved = await resolveEsqlForAuthoring({
-        providedQuery: state.esqlQuery,
-        nlQuery: state.nlQuery,
-        // On edit, seed generation with the query recovered from the existing
-        // spec so a data-shape edit (e.g. a new breakdown) can modify it
-        // instead of being stuck with the original columns.
-        existingQueries: state.existingEsql ? [state.existingEsql] : undefined,
-        index: state.index,
-        modelProvider,
-        events,
-        logger,
-        esClient,
-        // Vega must filter rows on the raw source time field itself (Kibana
-        // does not do it for us as with Lens); see vegaEsqlAdditionalInstructions.
-        extraInstructions: vegaEsqlAdditionalInstructions,
-      });
-
-      if ('error' in resolved) {
-        action = { type: 'generate_esql', success: false, error: resolved.error };
-      } else {
-        action = {
-          type: 'generate_esql',
-          success: true,
-          query: resolved.query,
-          columns: resolved.columns,
-        };
-      }
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      logger.error(`Failed to resolve ES|QL query for Vega: ${message}`);
-      action = { type: 'generate_esql', success: false, error: message };
-    }
-
-    return {
-      esqlQuery: action.query ?? state.esqlQuery,
-      columns: action.columns,
-      actions: [action],
-    };
-  };
+  const resolveEsqlNode = (state: VegaState) =>
+    runResolveEsqlNode({
+      preserveESQL: state.preserveESQL,
+      esqlQuery: state.esqlQuery,
+      nlQuery: state.nlQuery,
+      // On edit, seed generation with the query recovered from the existing
+      // spec so a data-shape edit (e.g. a new breakdown) can modify it
+      // instead of being stuck with the original columns.
+      existingQueries: state.existingEsql ? [state.existingEsql] : undefined,
+      index: state.index,
+      modelProvider,
+      events,
+      logger,
+      esClient,
+      extraInstructions: vegaEsqlAdditionalInstructions,
+    });
 
   // Runs once before the authoring retry loop; the model picks which examples fit.
   const selectExamplesNode = async (state: VegaState) => {
