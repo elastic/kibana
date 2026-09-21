@@ -418,7 +418,7 @@ export const AlertsDetailsTable = memo(
 
     return (
       <>
-        <EuiPanel hasShadow={false}>
+        <EuiPanel hasShadow={false} hasBorder={false}>
           <EuiLink onClick={() => openAlertsInAlertsPage()}>
             <h1 data-test-subj={'securitySolutionFlyoutInsightsAlertsCount'}>
               {i18n.translate('xpack.securitySolution.flyout.left.insights.alerts.tableTitle', {
