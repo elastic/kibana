@@ -91,7 +91,7 @@ export const CASE_ALERTS_URL = `${CASES_URL}/alerts/{alert_id}` as const;
 export const CASE_DETAILS_ALERTS_URL = `${CASE_DETAILS_URL}/alerts` as const;
 
 export const CASE_ATTACHMENTS_URL = `${CASE_DETAILS_URL}/attachments` as const;
-export const CASE_ATTACHMENT_DETAILS_URL = `${CASE_ATTACHMENTS_URL}/{attachment_id}` as const;
+export const CASE_ATTACHMENT_DETAILS_URL = `${CASE_ATTACHMENTS_URL}/{id}` as const;
 
 export const CASE_FILES_URL = `${CASE_DETAILS_URL}/files` as const;
 
