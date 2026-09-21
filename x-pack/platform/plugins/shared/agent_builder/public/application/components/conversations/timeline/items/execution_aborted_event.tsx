@@ -18,7 +18,7 @@ interface ExecutionAbortedEventProps {
 export const ExecutionAbortedEvent: React.FC<ExecutionAbortedEventProps> = ({ event }) => {
   const { aborted_by: abortedBy } = event.data;
 
-  const label = abortedBy?.username ?? abortedBy?.full_name ?? abortedBy?.id;
+  const label = abortedBy?.actor?.username ?? abortedBy?.actor?.id;
 
   return (
     <EuiText color="subdued" size="s">

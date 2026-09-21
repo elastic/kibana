@@ -20,7 +20,7 @@ import { queryKeys } from '../../query_keys';
 import { useResumeRoundMutation } from './use_resume_round_mutation';
 
 const mockResume = jest.fn();
-const mockAbort = jest.fn().mockResolvedValue(undefined);
+const mockAbort = jest.fn().mockResolvedValue({ acknowledged: true, terminal_persisted: true });
 const mockGet = jest.fn();
 
 jest.mock('../../hooks/use_agent_builder_service', () => ({
@@ -40,7 +40,11 @@ const terminated = createExecutionTerminatedEvent({ execution_id: 'round-1::exec
 const setup = () => {
   const eventsService = new EventsService();
   const conversationStreamService = new ConversationStreamService(eventsService);
-  const bindings = { conversationStreamService, clearActiveStream: jest.fn() };
+  const bindings = {
+    conversationStreamService,
+    clearActiveStream: jest.fn(),
+    markStreamStarted: jest.fn(),
+  };
   const source = new Subject<ChatEvent>();
   mockResume.mockReturnValue(source.pipe(propagateEvents({ eventsService, conversationId })));
 

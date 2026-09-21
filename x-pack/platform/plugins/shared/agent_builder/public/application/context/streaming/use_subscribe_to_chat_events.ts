@@ -6,7 +6,7 @@
  */
 
 import type { ChatEvent } from '@kbn/agent-builder-common';
-import { isExecutionStartedEvent, isExecutionTerminatedEvent } from '@kbn/agent-builder-common';
+import { isExecutionStartedEvent, isExecutionTerminalEvent } from '@kbn/agent-builder-common';
 import { finalize, type Observable } from 'rxjs';
 import { isBrowserToolCallEvent } from '@kbn/agent-builder-common/chat/events';
 import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
@@ -37,7 +37,7 @@ export const subscribeToChatEvents = ({
   const nextChatEvent = (event: ChatEvent) => {
     if (isExecutionStartedEvent(event)) {
       conversationActions.onExecutionStarted();
-    } else if (isExecutionTerminatedEvent(event)) {
+    } else if (isExecutionTerminalEvent(event)) {
       conversationActions.onExecutionTerminated();
     } else if (isBrowserToolCallEvent(event)) {
       const toolId = event.data.tool_id;
