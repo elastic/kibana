@@ -54,6 +54,15 @@ import { buildPerPolicyTag } from '../../../../../common/endpoint/service/artifa
 import { getIsEndpointExceptionsPerPolicyEnabled } from '../../../lib/reference_data';
 
 jest.mock('../../../lib/reference_data');
+jest.mock('../../../lib/libyara', () => ({
+  validateYaraRule: jest.fn(async () => ({
+    errors: [],
+    warnings: [],
+    errorCount: 0,
+    warningCount: 0,
+    rules: [{ identifier: 'test', meta: {}, duplicateMeta: [] }],
+  })),
+}));
 
 const mockedGetIsEndpointExceptionsPerPolicyEnabled =
   getIsEndpointExceptionsPerPolicyEnabled as jest.MockedFunction<

@@ -260,7 +260,7 @@ export class ManifestManager {
     }
 
     if (listId === ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id) {
-      return convertYaraRulesToEndpointFormat(exceptions, schemaVersion);
+      return await convertYaraRulesToEndpointFormat(exceptions, schemaVersion, this.logger);
     }
 
     return convertExceptionsToEndpointFormat(exceptions, schemaVersion, this.experimentalFeatures);
