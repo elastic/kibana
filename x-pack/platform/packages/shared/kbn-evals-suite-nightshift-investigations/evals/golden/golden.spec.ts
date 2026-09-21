@@ -9,18 +9,11 @@ import { expect } from '@playwright/test';
 import { tags, selectEvaluators } from '@kbn/evals';
 import { getConnectorModel } from '@kbn/inference-common';
 import { evaluate } from '../../src/evaluate';
-import { getGoldenSourceDatasetName, readGoldenDataset } from './datasets';
+import { goldenDataset } from './datasets';
 import { createGoldenEvaluators } from './evaluators';
 import { GOLDEN_ALERT_EVAL_CONSTRAINTS } from './prompts';
 import { runGoldenInvestigation } from './task';
-import type { GoldenExample, GoldenTaskOutput } from './types';
-
-const snapshot = process.env.NIGHTSHIFT_GOLDEN_SNAPSHOT;
-if (!snapshot)
-  throw new Error(
-    'Golden dataset setup did not produce NIGHTSHIFT_GOLDEN_SNAPSHOT. Run through scripts/evals.'
-  );
-const dataset = readGoldenDataset(snapshot, getGoldenSourceDatasetName());
+import { goldenExampleSchema, type GoldenExample, type GoldenTaskOutput } from './types';
 
 evaluate.describe(
   'Nightshift investigations: golden Harness Parity',
@@ -57,7 +50,7 @@ evaluate.describe(
           target_agent_id: 'significant-events.deductive-investigation',
           cortex_enabled: false,
           workspace_persistence: false,
-          dataset: dataset.name,
+          dataset: goldenDataset.name,
           comparison: 'Harness Parity',
         };
         const selected = selectEvaluators<GoldenExample, GoldenTaskOutput>([
@@ -78,10 +71,12 @@ evaluate.describe(
         const [experiment] = await executorClient.runExperiment(
           {
             name: 'Nightshift golden Harness Parity',
-            datasets: [dataset],
+            datasets: [goldenDataset],
+            // The examples are read from the owned dataset on the evaluations cluster.
+            trustUpstreamDataset: true,
             concurrency: 2,
             metadata: experimentMetadata,
-            task: (example) => runGoldenInvestigation(fetch, example),
+            task: (example) => runGoldenInvestigation(fetch, goldenExampleSchema.parse(example)),
           },
           selected
         );

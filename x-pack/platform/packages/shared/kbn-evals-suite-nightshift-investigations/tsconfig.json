@@ -14,7 +14,6 @@
     "@kbn/evals",
     "@kbn/inference-common",
     "@kbn/kibana-api-cli",
-    "@kbn/kbn-client",
     "@kbn/nightshift-investigations-plugin",
     "@kbn/scout",
     "@kbn/tooling-log",

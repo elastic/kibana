@@ -1,8 +1,8 @@
 # @kbn/evals-suite-nightshift-investigations
 
 Native evaluation suite for [Nightshift investigations](../../../plugins/shared/nightshift_investigations).
-The default eval runs the approved `suite/investigate-lite` examples from a privately configured source dataset
-through the manual investigation route and grades the Nightshift Deductive Investigator.
+The default eval runs the approved `suite/investigate-lite` examples, held in the Nightshift-owned
+`nightshift/investigate-lite` dataset on the evaluations cluster, through the manual investigation route and grades the Nightshift Deductive Investigator.
 
 This is **Harness Parity**: the target has no source telemetry access. Low scores measure the
 behavior of this setup and are not claims about investigation capability. Cortex and workspace
@@ -18,8 +18,8 @@ a configured model connector, and credentials for the golden evaluations cluster
    Its ignored `kbn-evals/scripts/vault/config.golden.json` needs `evaluationsKbn`,
    `evaluationsEs`, `tracingEs`, `tracingExporters`, and the model provider configuration.
    Use the existing access credentials; keep the file local. Golden examples do not need
-   `gcsDatasetAccessCredentials`. Set `NIGHTSHIFT_GOLDEN_SOURCE_DATASET` to the approved source
-   dataset name in your private environment; do not commit or publish that value.
+   `gcsDatasetAccessCredentials`. The `nightshift/investigate-lite` dataset must already exist on
+   that cluster; see [Dataset procurement contract](#dataset-procurement-contract).
 2. Start the native sandbox services as described below and export the same `SANDBOX_API_KEY`
    in the terminal running evals.
 3. Run the standard entry point:
@@ -130,13 +130,40 @@ The committed [example schema](evals/golden/example.schema.json) describes one e
 [`types.ts`](evals/golden/types.ts) validates it at runtime. Upload approved examples to the source
 dataset through the owning team's reviewed workflow. No source examples are stored in this repo.
 
-Global setup reads `NIGHTSHIFT_GOLDEN_SOURCE_DATASET` by name from the selected cluster into a temporary
-file with owner-only access. Collection reads it synchronously, excludes archived examples,
-and intersects all requested `metadata.dataset_split` tags (AND semantics). Only
-`suite/investigate-lite` is currently registered, under **`nightshift/investigate-lite`**.
-The source is read-only; the native runner upserts only the derived nightshift-owned dataset.
-Temporary source data is removed after the run. Source lookup and detailed score reads use
-the first Space selected by `--space-ids`, matching the native executor.
+The eval names **`nightshift/investigate-lite`** and sets `trustUpstreamDataset`, so the native
+executor resolves the examples from the selected cluster when the experiment starts. Nothing is
+read from the approved source at run time, and no example is written to disk. Each resolved example
+is validated against the schema before its investigation starts. Dataset lookup and detailed score
+reads use the first Space selected by `--space-ids`, matching the native executor.
+
+The owned dataset is derived from the approved source once, and again whenever the source's lite
+examples change: exclude archived examples, keep those tagged `suite/investigate-lite`, preserve
+every source field, and record the source example's persisted ID as
+`metadata.source_kbn_example_id`. The upsert is keyed by content, so repeating it with unchanged
+examples keeps their IDs. Keep the source dataset name in your private environment; do not commit
+or publish it. To seed a named Space, put `/s/<space-id>` before `/internal`.
+
+```bash
+# Needs EVAL_KBN_URL, EVAL_KBN_API_KEY and the privately held SOURCE_DATASET name.
+kbn() {
+  curl -sS --fail-with-body -H "Authorization: ApiKey $EVAL_KBN_API_KEY" -H 'kbn-xsrf: true' \
+    -H 'x-elastic-internal-origin: kibana' -H 'elastic-api-version: 1' \
+    -H 'Content-Type: application/json' "$@"
+}
+source_id="$(kbn -G "$EVAL_KBN_URL/internal/evals/datasets/_resolve" \
+  --data-urlencode "name=$SOURCE_DATASET" | jq -r .id)"
+kbn "$EVAL_KBN_URL/internal/evals/datasets/$source_id" | jq '{
+  name: "nightshift/investigate-lite",
+  description: "Harness Parity: approved investigate-lite inputs against the Nightshift Deductive Investigator without source telemetry access.",
+  tags: ["nightshift", "harness-parity", "investigate-lite"],
+  examples: [
+    .examples[]
+    | select(.metadata.status != "archived")
+    | select(.metadata.dataset_split | index("suite/investigate-lite"))
+    | {input, output, metadata: (.metadata + {source_kbn_example_id: .id})}
+  ]
+}' | kbn -X POST "$EVAL_KBN_URL/internal/evals/datasets/_upsert" --data-binary @-
+```
 
 | Field | Requirement and meaning |
 | --- | --- |
@@ -144,7 +171,7 @@ the first Space selected by `--space-ids`, matching the native executor.
 | `output.reference_answer` | Expected answer for the RCA graders, up to 100,000 characters. Supply this for new examples. |
 | `output.answer` | Legacy goal-grader fallback when `reference_answer` is absent. At least one answer must be nonempty. RCA graders use `reference_answer`. |
 | `metadata.langsmith_example_id` | Required source LangSmith example ID, retained for comparison joins. |
-| `metadata.source_kbn_example_id` | Added by derivation from the source example's persisted ID, for Phase C joins. |
+| `metadata.source_kbn_example_id` | Set when the owned dataset is derived, from the source example's persisted ID, for Phase C joins. |
 | `metadata.max_latency_seconds` | Required positive budget in seconds. Existing numeric strings are preserved in metadata and read numerically by the task. No budget uplift. |
 | `metadata.dataset_split` | Required array of split tags, including `suite/investigate-lite` to enter this run. |
 | `metadata.case_id` | Optional stable test identifier; otherwise the LangSmith example ID is used. |
@@ -219,8 +246,8 @@ These are the ten surfaces in the Phase C design contract.
 
 | Surface | Kibana status |
 | --- | --- |
-| Dataset | Source read by name; original fields preserved; AND splits; archived rows excluded; source kbn and LangSmith IDs retained. Only the lite dataset is registered. |
-| Upload | Approved golden source is never upserted. Native upsert owns only `nightshift/investigate-lite`; no public example snapshot or allowlist upload is introduced. |
+| Dataset | Owned lite dataset resolved by name at run time. It is derived from the source out of band: original fields preserved; AND splits; archived rows excluded; source kbn and LangSmith IDs retained. |
+| Upload | The eval never reads or upserts the approved golden source. The native executor re-upserts only `nightshift/investigate-lite` with the examples it resolved, which changes nothing; no public example snapshot or allowlist upload is introduced. |
 | Target input | Manual investigation with question plus verbatim golden constraints suffix. Expected answers remain grader-only. Cortex and persistence are off. |
 | Target output | Original 16 fields plus investigation evidence; deterministic report and 2,000-character tool outputs. The unused healthcheck fields stay null. |
 | Evaluator input | Original output/reference shapes and prompt text; one shared semantic judge cache. No new server-side evaluator registration. |
@@ -235,8 +262,8 @@ batches, and the unpaginated 100 MiB dataset read. This lite run stays below tho
 
 ## Suite layout and synthetic smoke eval
 
-`evals/golden/` follows the suite's types/datasets/task/evaluators/spec pattern and adds prompts,
-global setup and pure-module Jest tests. `src/evaluate.ts` provides the shared Playwright fixture.
+`evals/golden/` follows the suite's types/datasets/task/evaluators/spec pattern and adds prompts
+and pure-module Jest tests. `src/evaluate.ts` provides the shared Playwright fixture.
 `evals/smoke/` checks seed loading and score ingestion using `src/seed_data/` utilities.
 
 ```bash
@@ -311,14 +338,12 @@ against.
 
 | Variable | Effect |
 | --- | --- |
-| `NIGHTSHIFT_GOLDEN_SOURCE_DATASET` | Required for golden evals: approved source dataset name, supplied through private local/CI configuration. No default is committed. |
 | `NIGHTSHIFT_DATASETS` | Unset, `all` or `investigate-lite` selects the lite golden eval. `synthetic-smoke` selects the seed smoke eval. Unknown values fail early. |
 | `SANDBOX_API_KEY` | Required local sandbox-api key, shared by Scout and sandbox-api. |
 | `SANDBOX_CLIENT_CERT_PATH`, `SANDBOX_CLIENT_KEY_PATH` | Required PEM client certificate and key paths for sandbox-api mTLS. |
 | `SANDBOX_CA_CERT_PATH` | PEM server CA path; required for the local self-signed setup, optional with a publicly trusted server certificate. |
 | `SANDBOX_API_HOST`, `SANDBOX_API_PORT` | Override `localhost:9090`. |
 | `NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL` | Elasticsearch URL reachable inside the sandbox; default `http://host.docker.internal:9220`. |
-| `NIGHTSHIFT_GOLDEN_SNAPSHOT` | Managed by global setup; temporary source snapshot path. |
 | `SELECTED_EVALUATORS` | Standard native filter by evaluator name. Acceptance evidence uses all 23. |
 | `GCS_CREDENTIALS` | Needed only for seed snapshots; supplied through profile `gcsDatasetAccessCredentials`. |
 

@@ -15,19 +15,9 @@ if (selection && !['all', 'investigate-lite', 'synthetic-smoke'].includes(select
   );
 }
 
-const config = createPlaywrightEvalsConfig({
+export default createPlaywrightEvalsConfig({
   testDir: Path.resolve(__dirname, './evals'),
   timeout: 55 * 60_000,
   testIgnore:
     process.env.NIGHTSHIFT_DATASETS === 'synthetic-smoke' ? '**/golden/**' : '**/smoke/**',
 });
-
-const goldenConfig: typeof config = {
-  ...config,
-  globalSetup: [
-    ...(typeof config.globalSetup === 'string' ? [config.globalSetup] : config.globalSetup ?? []),
-    require.resolve('./evals/golden/global_setup'),
-  ],
-};
-
-export default goldenConfig;
