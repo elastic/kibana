@@ -20,7 +20,6 @@ import type {
   ServerStepDefinition,
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
-import type { RegisteredStepOutput } from '@kbn/workflows-yaml';
 
 export type WorkflowsExtensions =
   | WorkflowsExtensionsPublicPluginStart
@@ -60,22 +59,6 @@ class StepSchemas {
     stepTypeId: string
   ): PublicStepDefinition | ServerStepDefinition | undefined {
     return this.workflowsExtensions?.getStepDefinition(stepTypeId);
-  }
-
-  /**
-   * Output schema of a registered step, including the editor-only dynamic schema handler.
-   */
-  public getStepOutput(stepTypeId: string): RegisteredStepOutput | undefined {
-    const stepDefinition = this.getStepDefinition(stepTypeId);
-    if (!stepDefinition) {
-      return undefined;
-    }
-    const dynamicSchema =
-      'editorHandlers' in stepDefinition ? stepDefinition.editorHandlers?.dynamicSchema : undefined;
-    return {
-      outputSchema: stepDefinition.outputSchema,
-      getDynamicOutputSchema: dynamicSchema?.getOutputSchema?.bind(dynamicSchema),
-    };
   }
 
   // Cache getters and setters

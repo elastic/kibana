@@ -24,6 +24,9 @@ const makeDeps = (
     deps: {
       workflowsExtensions: {
         getAllTriggerDefinitions: () => listedTriggers as any,
+        getTriggerDefinition: (triggerType: string) =>
+          listedTriggers.find(({ id }) => id === triggerType) as any,
+        getStepDefinition: () => undefined,
       } as any,
       getActionsClient: jest.fn().mockResolvedValue(actionsClient) as any,
       getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest) as any,
@@ -44,12 +47,9 @@ describe('WorkflowValidationService', () => {
       ]);
     });
 
-    it('returns an empty array when workflows extensions is not available', () => {
+    it('returns an empty array when no triggers are registered', () => {
       const { deps } = makeDeps();
-      const service = new WorkflowValidationService({
-        ...deps,
-        workflowsExtensions: undefined,
-      });
+      const service = new WorkflowValidationService(deps);
 
       expect(service.getRegisteredCustomTriggerDefinitions()).toEqual([]);
     });
@@ -116,6 +116,56 @@ describe('WorkflowValidationService', () => {
       const result = await service.validateWorkflow(yaml, 'default', request);
 
       expect(result.valid).toBe(true);
+    });
+
+    it('reports variable diagnostics for an unresolvable reference', async () => {
+      const { deps } = makeDeps();
+      const service = new WorkflowValidationService(deps);
+      const request = {} as any;
+
+      const yaml = [
+        'name: bad-reference',
+        'enabled: true',
+        'triggers:',
+        '  - type: manual',
+        'consts:',
+        '  greeting: hello',
+        'steps:',
+        '  - name: step-one',
+        '    type: console',
+        '    with:',
+        '      message: "{{ consts.missing }}"',
+        '',
+      ].join('\n');
+
+      const result = await service.validateWorkflow(yaml, 'default', request);
+
+      expect(result.diagnostics.some(({ source }) => source === 'variable')).toBe(true);
+    });
+
+    it('reports no variable diagnostics for a reference that resolves', async () => {
+      const { deps } = makeDeps();
+      const service = new WorkflowValidationService(deps);
+      const request = {} as any;
+
+      const yaml = [
+        'name: good-reference',
+        'enabled: true',
+        'triggers:',
+        '  - type: manual',
+        'consts:',
+        '  greeting: hello',
+        'steps:',
+        '  - name: step-one',
+        '    type: console',
+        '    with:',
+        '      message: "{{ consts.greeting }}"',
+        '',
+      ].join('\n');
+
+      const result = await service.validateWorkflow(yaml, 'default', request);
+
+      expect(result.diagnostics.filter(({ source }) => source === 'variable')).toEqual([]);
     });
 
     it('fails save when a requiresConnectorId trigger is missing connector-id', async () => {
