@@ -136,12 +136,13 @@ export function SignificantEventsTuningConfigEditor({
         languageId="yaml"
         value={value}
         onChange={handleChange}
-        height={350}
+        fitToContent={{ minLines: 1 }}
         options={{
           readOnly: isReadOnly,
           minimap: { enabled: false },
           scrollBeyondLastLine: false,
           wordWrap: 'off',
+          scrollbar: { vertical: 'hidden' },
         }}
       />
       {errors.length > 0 && (
