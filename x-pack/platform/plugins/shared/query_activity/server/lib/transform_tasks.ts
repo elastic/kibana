@@ -112,10 +112,18 @@ export function parseEsqlDescription(description: string): { indices: number; qu
 }
 
 /**
- * Returns true for top-level search/esql tasks that exceed the runtime threshold.
+ * Returns true for search/esql tasks that exceed the runtime threshold.
+ *
+ * Child tasks are hidden only while their parent is still present in the current
+ * `_tasks` response. Once the parent finishes (e.g. an async search wrapper), the
+ * orphaned child remains visible so long-running queries keep showing in the UI.
  */
-export function isIncludedTask(task: TasksTaskInfo, thresholdNanos: number): boolean {
-  if (task.parent_task_id !== undefined && task.parent_task_id !== null) {
+export function isIncludedTask(
+  task: TasksTaskInfo,
+  thresholdNanos: number,
+  activeTaskIds: ReadonlySet<string> = new Set()
+): boolean {
+  if (task.parent_task_id != null && activeTaskIds.has(task.parent_task_id)) {
     return false;
   }
 
@@ -152,9 +160,10 @@ export function isIncludedTask(task: TasksTaskInfo, thresholdNanos: number): boo
  */
 export function transformTasks(tasks: TasksTaskInfo[], thresholdNanos: number): RunningQuery[] {
   const results: RunningQuery[] = [];
+  const activeTaskIds = new Set(tasks.map((task) => `${task.node}:${task.id}`));
 
   for (const task of tasks) {
-    if (!isIncludedTask(task, thresholdNanos)) {
+    if (!isIncludedTask(task, thresholdNanos, activeTaskIds)) {
       continue;
     }
 
