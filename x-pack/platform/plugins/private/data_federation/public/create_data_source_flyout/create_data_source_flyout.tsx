@@ -49,6 +49,7 @@ import { CreateDataSourceFlyoutAuthenticationFields } from './create_data_source
 import { CreateDataSourceFlyoutAuthenticationSelect } from './create_data_source_flyout_authentication_select';
 import { CreateDataSourceFlyoutTypeSettingsBlock } from './create_data_source_flyout_type_settings';
 import { CreateDataSourceFlyoutTypeSettingsS3Region } from './create_data_source_flyout_type_settings_s3';
+import { FlyoutErrorBanner } from './flyout_error_banner';
 import {
   authenticationModeFromDataSource,
   dataSourceToFlyoutFormValues,
@@ -262,14 +263,6 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiForm component="form" id="createDataSourceForm" onSubmit={handleSubmit(onSubmit)}>
-          {saveError ? (
-            <>
-              <EuiText color="danger" size="s" data-test-subj="createDataSourceFlyoutSaveError">
-                {saveError}
-              </EuiText>
-              <EuiSpacer size="m" />
-            </>
-          ) : null}
           <EuiFormRow label={createDataSourceFlyoutStrings.typeLabel()} fullWidth>
             <EuiSuperSelect
               options={dataSourceTypeOptions}
@@ -344,7 +337,18 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
           />
         </EuiForm>
       </EuiFlyoutBody>
-      <EuiFlyoutFooter>
+      <EuiFlyoutFooter data-test-subj="createDataSourceFlyoutFooter">
+        {saveError ? (
+          <FlyoutErrorBanner
+            title={
+              isEditMode
+                ? createDataSourceFlyoutStrings.saveErrorTitle()
+                : createDataSourceFlyoutStrings.connectErrorTitle()
+            }
+            message={saveError}
+            data-test-subj="createDataSourceFlyoutSaveError"
+          />
+        ) : null}
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty data-test-subj="createDataSourceFlyoutCancel" onClick={() => onClose()}>
