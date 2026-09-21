@@ -223,27 +223,25 @@ export const namedFieldDefinitionConfigSchema: z.Schema<NamedFieldDefinitionConf
 // body schemas. The persisted schemas remain permissive for backward compatibility; these cap
 // advanced parameter nesting, array sizes, and record entry counts so HTTP callers cannot
 // overflow simulation handlers.
-export const boundedFieldDefinitionConfigSchema = (
-  z.intersection(
-    boundedJsonValue as z.ZodType<RecursiveRecord>,
-    z.union([
-      z.object({
-        type: z.enum(FIELD_DEFINITION_TYPES),
-        format: z.optional(NonEmptyString),
-        description: z.optional(z.string().max(1000)),
-      }),
-      z.object({
-        description: z.string().max(1000),
-        type: z.never().optional(),
-        format: z.never().optional(),
-      }),
-      z.object({
-        type: z.literal('system'),
-        description: z.optional(z.string().max(1000)),
-      }),
-    ])
-  ) as z.ZodType<FieldDefinitionConfig>
-);
+export const boundedFieldDefinitionConfigSchema = z.intersection(
+  boundedJsonValue as z.ZodType<RecursiveRecord>,
+  z.union([
+    z.object({
+      type: z.enum(FIELD_DEFINITION_TYPES),
+      format: z.optional(NonEmptyString),
+      description: z.optional(z.string().max(1000)),
+    }),
+    z.object({
+      description: z.string().max(1000),
+      type: z.never().optional(),
+      format: z.never().optional(),
+    }),
+    z.object({
+      type: z.literal('system'),
+      description: z.optional(z.string().max(1000)),
+    }),
+  ])
+) as z.ZodType<FieldDefinitionConfig>;
 
 export const boundedNamedFieldDefinitionSchema: z.ZodType<NamedFieldDefinitionConfig> =
   z.intersection(
