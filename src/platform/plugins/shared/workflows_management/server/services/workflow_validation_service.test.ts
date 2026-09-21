@@ -138,7 +138,7 @@ describe('WorkflowValidationService', () => {
         '',
       ].join('\n');
 
-      const result = await service.validateWorkflow(yaml, 'default', request);
+      const result = await service.validateWorkflowDiagnostics(yaml, 'default', request);
 
       expect(result.diagnostics.some(({ source }) => source === 'variable')).toBe(true);
     });
@@ -163,9 +163,39 @@ describe('WorkflowValidationService', () => {
         '',
       ].join('\n');
 
-      const result = await service.validateWorkflow(yaml, 'default', request);
+      const result = await service.validateWorkflowDiagnostics(yaml, 'default', request);
 
       expect(result.diagnostics.filter(({ source }) => source === 'variable')).toEqual([]);
+    });
+
+    it('does not apply variable rules, so a run is not blocked by them', async () => {
+      const { deps } = makeDeps();
+      const service = new WorkflowValidationService(deps);
+      const request = {} as any;
+
+      // `invalidVariableReference` is an error, and inline execution, workflow
+      // test and step test all throw when the result is invalid.
+      const yaml = [
+        'name: bad-reference',
+        'enabled: true',
+        'triggers:',
+        '  - type: manual',
+        'consts:',
+        '  greeting: hello',
+        'steps:',
+        '  - name: step-one',
+        '    type: console',
+        '    with:',
+        '      message: "{{ consts.missing }}"',
+        '',
+      ].join('\n');
+
+      const gate = await service.validateWorkflow(yaml, 'default', request);
+      const diagnostics = await service.validateWorkflowDiagnostics(yaml, 'default', request);
+
+      expect(gate.diagnostics.filter(({ source }) => source === 'variable')).toEqual([]);
+      expect(gate.valid).toBe(true);
+      expect(diagnostics.diagnostics.some(({ source }) => source === 'variable')).toBe(true);
     });
 
     it('fails save when a requiresConnectorId trigger is missing connector-id', async () => {

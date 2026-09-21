@@ -1216,12 +1216,13 @@ export class WorkflowsManagementApi {
     return getWorkflowJsonSchema(zodSchema);
   }
 
+  /** Backs `POST /api/workflows/validate`, which reports and does not gate. */
   public async validateWorkflow(
     yaml: string,
     spaceId: string,
     request: KibanaRequest
   ): Promise<ValidateWorkflowResponseDto> {
-    return this.workflowsService.validateWorkflow(yaml, spaceId, request);
+    return this.workflowsService.validateWorkflowDiagnostics(yaml, spaceId, request);
   }
 
   private isStepExecution(params: StepLogsParams | ExecutionLogsParams): params is StepLogsParams {

@@ -60,25 +60,30 @@ export class WorkflowValidationService {
     return this.createContextRegistry(await this.resolveConnectors(spaceId, request));
   }
 
+  /**
+   * Pre-run gate: inline execution, workflow test and step test all refuse to
+   * run when the result is invalid, so it asks only for the rules that already
+   * blocked a run.
+   */
   async validateWorkflow(
     yaml: string,
     spaceId: string,
     request: KibanaRequest
   ): Promise<ValidateWorkflowResponseDto> {
-    // Resolved once, so the schema and the registry cannot disagree about a
-    // connector and the contracts are not built twice per request.
-    const allConnectors = await this.resolveConnectors(spaceId, request);
-    const triggerDefinitions = this.getRegisteredCustomTriggerDefinitions();
-    const zodSchema = getWorkflowZodSchemaFromConnectors(
-      allConnectors,
-      toCustomTriggerSchemaConfigs(triggerDefinitions)
-    );
-    // `/validate` reports diagnostics, it does not gate storage, so it asks for
-    // the full rule set the editor runs — including the variable rules.
-    return validateWorkflowYaml(yaml, zodSchema, {
-      triggerDefinitions,
-      variableValidationRegistry: this.createContextRegistry(allConnectors),
-    });
+    return this.runValidation(yaml, spaceId, request, { includeVariableRules: false });
+  }
+
+  /**
+   * Diagnostics for `POST /api/workflows/validate`: the full rule set the
+   * editor runs, variable rules included. Four of those are errors, so gating a
+   * run on this result would block workflows that run today.
+   */
+  async validateWorkflowDiagnostics(
+    yaml: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<ValidateWorkflowResponseDto> {
+    return this.runValidation(yaml, spaceId, request, { includeVariableRules: true });
   }
 
   async getWorkflowZodSchema(
@@ -90,6 +95,28 @@ export class WorkflowValidationService {
       await this.resolveConnectors(spaceId, request),
       toCustomTriggerSchemaConfigs(this.getRegisteredCustomTriggerDefinitions())
     );
+  }
+
+  private async runValidation(
+    yaml: string,
+    spaceId: string,
+    request: KibanaRequest,
+    { includeVariableRules }: { includeVariableRules: boolean }
+  ): Promise<ValidateWorkflowResponseDto> {
+    // Resolved once, so the schema and the registry cannot disagree about a
+    // connector and the contracts are not built twice per request.
+    const allConnectors = await this.resolveConnectors(spaceId, request);
+    const triggerDefinitions = this.getRegisteredCustomTriggerDefinitions();
+    const zodSchema = getWorkflowZodSchemaFromConnectors(
+      allConnectors,
+      toCustomTriggerSchemaConfigs(triggerDefinitions)
+    );
+    return validateWorkflowYaml(yaml, zodSchema, {
+      triggerDefinitions,
+      ...(includeVariableRules && {
+        variableValidationRegistry: this.createContextRegistry(allConnectors),
+      }),
+    });
   }
 
   private async resolveConnectors(

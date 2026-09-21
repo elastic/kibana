@@ -85,6 +85,7 @@ describe('WorkflowsManagementApi', () => {
       disableAllWorkflows: jest.fn(),
       getHistoryForWorkflow: jest.fn(),
       validateWorkflow: jest.fn(),
+      validateWorkflowDiagnostics: jest.fn(),
       getWorkflowExecution: jest.fn(),
       markStepAsResponded: jest.fn(),
       getWaitingStepExecutionId: jest.fn(),
@@ -1027,17 +1028,19 @@ steps:
   });
 
   describe('validateWorkflow', () => {
-    it('should delegate to workflowsService.validateWorkflow', async () => {
+    it('should delegate to workflowsService.validateWorkflowDiagnostics', async () => {
       const expectedResult = { valid: true, diagnostics: [] };
-      mockWorkflowsService.validateWorkflow.mockResolvedValue(expectedResult);
+      mockWorkflowsService.validateWorkflowDiagnostics.mockResolvedValue(expectedResult);
 
       const result = await api.validateWorkflow('name: Test', 'default', mockRequest);
 
-      expect(mockWorkflowsService.validateWorkflow).toHaveBeenCalledWith(
+      expect(mockWorkflowsService.validateWorkflowDiagnostics).toHaveBeenCalledWith(
         'name: Test',
         'default',
         mockRequest
       );
+      // The pre-run gate must stay out of the reporting endpoint.
+      expect(mockWorkflowsService.validateWorkflow).not.toHaveBeenCalled();
       expect(result).toBe(expectedResult);
     });
 
@@ -1054,11 +1057,11 @@ steps:
           },
         ],
       };
-      mockWorkflowsService.validateWorkflow.mockResolvedValue(expectedResult);
+      mockWorkflowsService.validateWorkflowDiagnostics.mockResolvedValue(expectedResult);
 
       const result = await api.validateWorkflow('invalid: yaml', 'my-space', mockRequest);
 
-      expect(mockWorkflowsService.validateWorkflow).toHaveBeenCalledWith(
+      expect(mockWorkflowsService.validateWorkflowDiagnostics).toHaveBeenCalledWith(
         'invalid: yaml',
         'my-space',
         mockRequest
