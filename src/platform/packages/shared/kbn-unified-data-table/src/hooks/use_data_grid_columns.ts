@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 
 import type { Capabilities } from '@kbn/core/public';
@@ -41,26 +41,62 @@ export const useColumns = ({
   settings,
 }: UseColumnsProps) => {
   const [usedColumns, setUsedColumns] = useState(getColumns(columns));
+  // The column actions derive the next column list from the current one, so they must read it
+  // through a ref: several actions can be dispatched before the updated `columns` prop has made
+  // its way back down, and a captured render value would make each one discard the previous.
+  const latestColumnsRef = useRef(usedColumns);
+
   useEffect(() => {
     const nextColumns = getColumns(columns);
     if (isEqual(usedColumns, nextColumns)) {
       return;
     }
+    latestColumnsRef.current = nextColumns;
     setUsedColumns(nextColumns);
   }, [columns, usedColumns]);
-  const { onAddColumn, onRemoveColumn, onSetColumns, onMoveColumn } = useMemo(
+
+  const onAppStateChange = useCallback<UseColumnsProps['setAppState']>(
+    (state) => {
+      latestColumnsRef.current = state.columns;
+      setAppState(state);
+    },
+    [setAppState]
+  );
+
+  const getColumnActions = useCallback(
     () =>
       getStateColumnActions({
         capabilities,
         dataView,
         dataViews,
-        setAppState,
-        columns: usedColumns,
+        setAppState: onAppStateChange,
+        columns: latestColumnsRef.current,
         sort,
         defaultOrder,
         settings,
       }),
-    [capabilities, dataView, dataViews, defaultOrder, setAppState, settings, sort, usedColumns]
+    [capabilities, dataView, dataViews, defaultOrder, onAppStateChange, settings, sort]
+  );
+
+  const onAddColumn = useCallback(
+    (columnName: string) => getColumnActions().onAddColumn(columnName),
+    [getColumnActions]
+  );
+
+  const onRemoveColumn = useCallback(
+    (columnName: string) => getColumnActions().onRemoveColumn(columnName),
+    [getColumnActions]
+  );
+
+  const onMoveColumn = useCallback(
+    (columnName: string, newIndex: number) => getColumnActions().onMoveColumn(columnName, newIndex),
+    [getColumnActions]
+  );
+
+  const onSetColumns = useCallback(
+    (nextColumns: string[], hideTimeColumn: boolean) =>
+      getColumnActions().onSetColumns(nextColumns, hideTimeColumn),
+    [getColumnActions]
   );
 
   return {
