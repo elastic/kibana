@@ -188,7 +188,9 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
     () =>
       initialDataSource
         ? authenticationModeFromDataSource(initialDataSource)
-        : getDefaultAuthenticationMode(dataSourceType)
+        : getDefaultAuthenticationMode(dataSourceType, {
+            enableFederatedIdentity: enableFederatedIdentityAuth,
+          })
   );
 
   // runs when data source type changes
@@ -204,9 +206,13 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
   // could likely be merged with above
   useEffect(() => {
     if (!isEditMode) {
-      setAuthenticationMode(getDefaultAuthenticationMode(dataSourceType));
+      setAuthenticationMode(
+        getDefaultAuthenticationMode(dataSourceType, {
+          enableFederatedIdentity: enableFederatedIdentityAuth,
+        })
+      );
     }
-  }, [dataSourceType, isEditMode]);
+  }, [dataSourceType, isEditMode, enableFederatedIdentityAuth]);
 
   const handleSave = (data: CreateDataSourceFlyoutFormValues) =>
     onSave(
@@ -321,7 +327,6 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
             dataSourceType={dataSourceType}
             enableFederatedIdentity={enableFederatedIdentityAuth}
             onAuthenticationModeChange={setAuthenticationMode}
-            authenticationDocsUrl={dataFederationLinks.authentication}
           />
           <CreateDataSourceFlyoutAuthenticationFields
             authenticationMode={authenticationMode}
