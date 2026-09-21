@@ -81,6 +81,13 @@ export const SYSTEM_SECURITY_WATCH_IDS = [
 export const WATCH_AUTONOMY_LEVELS = ['manual', 'assisted', 'supervised'] as const;
 
 /**
+ * The review-gated subset of the dial: every action passes a human review gate, so the Worker
+ * offers no unattended (supervised) level. Declared once here so narrowing the shared scale can
+ * never leave these declarations behind.
+ */
+export const WATCH_AUTONOMY_REVIEW_GATED = ['manual', 'assisted'] as const;
+
+/**
  * Presentation metadata for the managed watch catalog.
  *
  * The managed five are compile-time constants, so consumers that must not wait for an HTTP round
