@@ -108,7 +108,9 @@ describe('When using `getAgentCountForAgentPolicies()`', () => {
   });
 
   describe('with runtimeMappings (excludeInactive semantics)', () => {
-    const runtimeMappings = { status: { type: 'keyword', script: { source: 'emit("active")' } } };
+    const runtimeMappings = {
+      status: { type: 'keyword' as const, script: { source: 'emit("active")' } },
+    };
 
     it('includes runtime_mappings in the ES request', async () => {
       await getAgentCountForAgentPolicies(esClientMock, agentPolicyIds, { runtimeMappings });
