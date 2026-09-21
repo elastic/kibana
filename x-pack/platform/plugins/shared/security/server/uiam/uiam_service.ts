@@ -283,10 +283,13 @@ export interface UiamServicePublic {
   ): Promise<UiamServiceAccount>;
 
   /**
-   * Lists service accounts via the UIAM service.
+   * Lists service accounts via the UIAM service, one page at a time.
    *
-   * Authenticated as Kibana itself (shared secret and, when configured, mTLS) with no user
-   * credential: UIAM returns accounts whose `assumable_by` policy includes this Kibana.
+   * Authenticated as Kibana itself: the mTLS client certificate the dispatcher presents is the
+   * only credential, and UIAM returns the accounts whose `assumable_by` policy names this Kibana's
+   * project. No user credential or shared secret is sent. UIAM skips certificate authentication
+   * when an `Authorization` header is present, and the shared secret on its own identifies
+   * nobody.
    */
   listServiceAccounts(params?: {
     limit?: number;
@@ -296,8 +299,8 @@ export interface UiamServicePublic {
   /**
    * Fetches one service account via the UIAM service.
    *
-   * Authenticated as Kibana itself (shared secret and, when configured, mTLS) with no user
-   * credential: UIAM authorizes against `assumable_by`.
+   * Authenticated as Kibana itself over mTLS, exactly like {@link listServiceAccounts}, and
+   * authorized by UIAM against the account's `assumable_by`.
    */
   getServiceAccount(serviceAccountId: string): Promise<UiamServiceAccountDetails>;
 
@@ -840,12 +843,9 @@ export class UiamService implements UiamServicePublic {
       const response = await UiamService.#parseUiamResponse(
         await fetch(url.toString(), {
           method: 'GET',
-          headers: {
-            'User-Agent': this.#userAgentHeader,
-            // Kibana's own client authentication is the credential for this request: no user
-            // `Authorization` header is sent, and UIAM authorizes against `assumable_by`.
-            [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
-          },
+          // No credential headers on purpose: the certificate identifies Kibana's project for the
+          // `assumable_by` policy, and any `Authorization` header would switch that off.
+          headers: { 'User-Agent': this.#userAgentHeader },
           // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
           dispatcher: this.#dispatcher,
         })
@@ -874,12 +874,8 @@ export class UiamService implements UiamServicePublic {
           )}`,
           {
             method: 'GET',
-            headers: {
-              'User-Agent': this.#userAgentHeader,
-              // Kibana's own client authentication is the credential for this request: no user
-              // `Authorization` header is sent, and UIAM authorizes against `assumable_by`.
-              [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
-            },
+            // No credential headers on purpose, for the same reason as `listServiceAccounts`.
+            headers: { 'User-Agent': this.#userAgentHeader },
             // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
             dispatcher: this.#dispatcher,
           }

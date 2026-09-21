@@ -1445,7 +1445,7 @@ describe('UiamService', () => {
       ],
     };
 
-    it('authenticates with client authentication only, without a user credential', async () => {
+    it('authenticates with the mTLS client certificate only, sending no credential headers', async () => {
       fetchSpy.mockResolvedValue({ ok: true, json: async () => mockResponse });
 
       await expect(uiamService.listServiceAccounts()).resolves.toEqual(mockResponse);
@@ -1453,16 +1453,14 @@ describe('UiamService', () => {
       expect(fetchSpy).toHaveBeenCalledTimes(1);
       expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/service-accounts', {
         method: 'GET',
-        headers: {
-          'User-Agent': 'Kibana/9.0.0',
-          [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
-        },
+        headers: { 'User-Agent': 'Kibana/9.0.0' },
         dispatcher: AGENT_MOCK,
       });
 
       const [, { headers }] = fetchSpy.mock.calls[0];
       expect(headers).not.toHaveProperty('Authorization');
       expect(headers).not.toHaveProperty('authorization');
+      expect(headers).not.toHaveProperty(ES_CLIENT_AUTHENTICATION_HEADER);
     });
 
     it('forwards limit and after as query parameters', async () => {
@@ -1554,7 +1552,7 @@ describe('UiamService', () => {
       creator: { type: 'user', id: 'user-id', first_name: 'Ada', last_name: 'Lovelace' },
     };
 
-    it('authenticates with client authentication only, without a user credential', async () => {
+    it('authenticates with the mTLS client certificate only, sending no credential headers', async () => {
       fetchSpy.mockResolvedValue({ ok: true, json: async () => mockResponse });
 
       await expect(uiamService.getServiceAccount('service-account-id')).resolves.toEqual(
@@ -1566,10 +1564,7 @@ describe('UiamService', () => {
         'https://uiam.service/uiam/api/v1/service-accounts/service-account-id',
         {
           method: 'GET',
-          headers: {
-            'User-Agent': 'Kibana/9.0.0',
-            [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
-          },
+          headers: { 'User-Agent': 'Kibana/9.0.0' },
           dispatcher: AGENT_MOCK,
         }
       );
@@ -1577,6 +1572,7 @@ describe('UiamService', () => {
       const [, { headers }] = fetchSpy.mock.calls[0];
       expect(headers).not.toHaveProperty('Authorization');
       expect(headers).not.toHaveProperty('authorization');
+      expect(headers).not.toHaveProperty(ES_CLIENT_AUTHENTICATION_HEADER);
     });
 
     it('URL-encodes the service account id', async () => {
