@@ -115,7 +115,7 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
   const closePopover = () => setPopoverIsOpen(false);
   const metaDataLabel = i18n.translate(
-    'xpack.searchIndexDocuments.result.header.metadata.icon.ariaLabel',
+    'xpack.searchIndexDocuments.result.richHeader.metadata.icon.ariaLabel',
     { defaultMessage: 'Document: {id}', values: { id } }
   );
 

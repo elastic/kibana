@@ -10,10 +10,6 @@
 import { css } from '@emotion/react';
 import { type EuiThemeComputed } from '@elastic/eui';
 
-export const codeBoxCodeBlock = css({
-  wordBreak: 'break-all',
-});
-
 export const searchSelectClientPanelSelectedBorder = (euiTheme: EuiThemeComputed<{}>) =>
   css({
     '&::before': {

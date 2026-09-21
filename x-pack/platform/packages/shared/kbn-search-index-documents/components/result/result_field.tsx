@@ -76,7 +76,7 @@ const TypeLine: React.FC<{ iconType: IconType; label: string; fieldTypeLabel: st
       </EuiToolTip>
     </EuiFlexItem>
     <EuiFlexItem>
-      <EuiText size="s" color="default">
+      <EuiText size="xs" color="default">
         {label}
       </EuiText>
     </EuiFlexItem>
@@ -112,7 +112,7 @@ export const ResultField: React.FC<ResultFieldProps> = ({
               label={fieldName}
               fieldTypeLabel={fieldTypeLabel}
             />
-            <EuiText size="s" color="default">
+            <EuiText size="xs" color="default">
               {fieldValue}
             </EuiText>
             <TypeLine
@@ -143,7 +143,7 @@ export const ResultField: React.FC<ResultFieldProps> = ({
         valign="top"
         truncateText={!isExpanded}
         setScopeRow
-        width={euiTheme.base * 10}
+        width="20%"
       >
         <TypeLine iconType={resolvedIconType} label={fieldName} fieldTypeLabel={fieldTypeLabel} />
       </EuiTableRowCell>
