@@ -15,6 +15,8 @@ export interface SecurityKnowledgeIndicator {
   type: string;
   value: string;
   confidence?: number;
+  technique_id?: string;
+  ioc?: { type: string; value: string };
 }
 
 export interface TimelineEntry {
@@ -124,6 +126,7 @@ export interface ParsedSignificantSecurityEvent {
   sourceWatch?: string;
   capability?: string;
   runId?: string;
+  reportId?: string;
   hypothesisTested?: string;
   timeline: TimelineEntry[];
   entities: AttachmentEntityRef[];
@@ -160,6 +163,7 @@ export const parseSignificantSecurityEventData = (
     sourceWatch: typeof record.source_watch === 'string' ? record.source_watch : undefined,
     capability: typeof record.capability === 'string' ? record.capability : undefined,
     runId: typeof record.run_id === 'string' ? record.run_id : undefined,
+    reportId: typeof record.report_id === 'string' ? record.report_id : undefined,
     hypothesisTested:
       typeof record.hypothesis_tested === 'string' ? record.hypothesis_tested : undefined,
     timeline: Array.isArray(record.timeline) ? record.timeline.filter(isValidTimelineEntry) : [],

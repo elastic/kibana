@@ -25,6 +25,7 @@ import {
   buildAlertDetailsUrl,
   buildDiscoverEsqlUrl,
   buildEventLookupEsql,
+  buildThreatReportLookupEsql,
   DiscoverLink,
 } from '../navigation';
 import { EntityChip } from '../entity_chip';
@@ -163,7 +164,19 @@ const AlertList: React.FC<{
   );
 };
 
-/** Taxonomy labels only. Not Discover IOCs; do not invent logs-* field mappings. */
+/**
+ * Taxonomy labels only, per `significant_security_event_schema.ts`: not
+ * Discover IOCs, so this never links into `logs-*` (do not invent field
+ * mappings from `type`). Split by type instead of one flat bulleted list:
+ * `ioc` and `technique` are what the hunt coordinator actually emits today
+ * (`sse_mapper.ts`'s `buildSecurityKnowledgeIndicators`), and each has a
+ * distinct shape worth a distinct treatment (badges grouped by IOC type;
+ * technique badges with confidence and an external MITRE ATT&CK reference,
+ * which is a public documentation link, not a Discover query, so the
+ * taxonomy-only contract above still holds). Any other schema-valid type
+ * (`technology`, `risk`) falls into a plain fallback list so a future
+ * indicator type still renders instead of disappearing silently.
+ */
 const IndicatorList: React.FC<{
   indicators: SecurityKnowledgeIndicator[];
 }> = ({ indicators }) => {
@@ -179,22 +192,119 @@ const IndicatorList: React.FC<{
     );
   }
 
+  const iocIndicators = indicators.filter((indicator) => indicator.type === 'ioc');
+  const techniqueIndicators = indicators.filter((indicator) => indicator.type === 'technique');
+  const otherIndicators = indicators.filter(
+    (indicator) => indicator.type !== 'ioc' && indicator.type !== 'technique'
+  );
+
+  const iocsByType = new Map<string, SecurityKnowledgeIndicator[]>();
+  for (const indicator of iocIndicators) {
+    const iocType = indicator.ioc?.type ?? 'unknown';
+    const bucket = iocsByType.get(iocType) ?? [];
+    bucket.push(indicator);
+    iocsByType.set(iocType, bucket);
+  }
+
   return (
-    <EuiText size="s">
-      <ul>
-        {indicators.map((indicator, index) => (
-          <li
-            key={`${indicator.type}-${indicator.value}-${index}`}
-            data-test-subj={`alertzeroSignificantSecurityEventIndicator-${indicator.type}-${index}`}
-          >
-            <span css={cellStyles}>
-              {indicator.type}: {indicator.value}
-              {indicator.confidence != null ? ` (${indicator.confidence})` : ''}
-            </span>
-          </li>
-        ))}
-      </ul>
-    </EuiText>
+    <>
+      {iocIndicators.length > 0 && (
+        <div data-test-subj="alertzeroSignificantSecurityEventIndicatorIocs" css={{ marginBottom: 8 }}>
+          <EuiText size="xs" color="subdued">
+            {i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.indicatorsIocs', {
+              defaultMessage: 'IOCs',
+            })}
+          </EuiText>
+          {[...iocsByType.entries()].map(([iocType, group]) => (
+            <div key={iocType} css={{ marginBottom: 4 }}>
+              <EuiText size="xs" color="subdued" css={cellStyles}>
+                {iocType}
+              </EuiText>
+              <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
+                {group.map((indicator, index) => (
+                  <EuiFlexItem
+                    grow={false}
+                    key={`${indicator.type}-${indicator.value}-${index}`}
+                  >
+                    <EuiBadge
+                      color="hollow"
+                      data-test-subj={`alertzeroSignificantSecurityEventIndicator-ioc-${index}`}
+                    >
+                      <span css={cellStyles}>{indicator.value}</span>
+                    </EuiBadge>
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {techniqueIndicators.length > 0 && (
+        <div
+          data-test-subj="alertzeroSignificantSecurityEventIndicatorTechniques"
+          css={{ marginBottom: 8 }}
+        >
+          <EuiText size="xs" color="subdued">
+            {i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.indicatorsTechniques', {
+              defaultMessage: 'Techniques',
+            })}
+          </EuiText>
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
+            {techniqueIndicators.map((indicator, index) => {
+              const mitreUrl = indicator.technique_id
+                ? `https://attack.mitre.org/techniques/${indicator.technique_id.replace('.', '/')}/`
+                : undefined;
+              const badge = (
+                <EuiBadge
+                  color="hollow"
+                  data-test-subj={`alertzeroSignificantSecurityEventIndicator-technique-${index}`}
+                >
+                  <span css={cellStyles}>
+                    {indicator.value}
+                    {indicator.confidence != null ? ` (${indicator.confidence})` : ''}
+                  </span>
+                </EuiBadge>
+              );
+              return (
+                <EuiFlexItem grow={false} key={`${indicator.type}-${indicator.value}-${index}`}>
+                  {mitreUrl ? (
+                    <a
+                      href={mitreUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      data-test-subj={`alertzeroSignificantSecurityEventIndicatorMitreLink-${index}`}
+                    >
+                      {badge}
+                    </a>
+                  ) : (
+                    badge
+                  )}
+                </EuiFlexItem>
+              );
+            })}
+          </EuiFlexGroup>
+        </div>
+      )}
+
+      {otherIndicators.length > 0 && (
+        <EuiText size="s">
+          <ul>
+            {otherIndicators.map((indicator, index) => (
+              <li
+                key={`${indicator.type}-${indicator.value}-${index}`}
+                data-test-subj={`alertzeroSignificantSecurityEventIndicator-${indicator.type}-${index}`}
+              >
+                <span css={cellStyles}>
+                  {indicator.type}: {indicator.value}
+                  {indicator.confidence != null ? ` (${indicator.confidence})` : ''}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </EuiText>
+      )}
+    </>
   );
 };
 
@@ -333,6 +443,26 @@ export const SignificantSecurityEventInlineContent: React.FC<
           <EuiSpacer size="xs" />
           <EuiText size="xs" color="subdued">
             <span css={cellStyles}>{provenance}</span>
+          </EuiText>
+        </>
+      )}
+
+      {parsed.reportId && (
+        <>
+          <EuiSpacer size="xs" />
+          <EuiText size="xs" color="subdued">
+            {i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.sourceReport', {
+              defaultMessage: 'Source report: ',
+            })}
+            <DiscoverLink
+              href={buildDiscoverEsqlUrl({
+                share: navigation.share,
+                esql: buildThreatReportLookupEsql({ reportId: parsed.reportId }),
+              })}
+              testSubj="alertzeroSignificantSecurityEventReportLink"
+            >
+              <span css={cellStyles}>{parsed.reportId}</span>
+            </DiscoverLink>
           </EuiText>
         </>
       )}

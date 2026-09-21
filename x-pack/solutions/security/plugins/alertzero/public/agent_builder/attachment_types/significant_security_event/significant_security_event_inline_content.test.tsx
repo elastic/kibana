@@ -62,7 +62,10 @@ const baseData = {
   source_watch: 'watch-1',
   capability: 'lateral-movement-detector',
   run_id: 'run-1',
-  security_knowledge_indicators: [{ type: 'technique', value: 'T1021', confidence: 0.9 }],
+  security_knowledge_indicators: [
+    { type: 'technique', value: 'T1021', confidence: 0.9, technique_id: 'T1021' },
+  ],
+  report_id: 'ti-report-1',
   entities: [
     { field: 'host.name' as const, value: 'host-1' },
     { field: 'user.name' as const, value: 'user-1' },
@@ -174,15 +177,48 @@ describe('SignificantSecurityEventInlineContent', () => {
     expect(hostLink).toHaveTextContent('ci-deploy-runner-07');
   });
 
-  it('renders knowledge indicators as plain taxonomy text, not Discover links', () => {
+  it('renders knowledge indicators grouped by type, not Discover links', () => {
     render(<SignificantSecurityEventInlineContent {...renderProps(buildAttachment(baseData))} />);
 
     expect(
       screen.getByTestId('alertzeroSignificantSecurityEventIndicator-technique-0')
-    ).toHaveTextContent('technique: T1021 (0.9)');
+    ).toHaveTextContent('T1021 (0.9)');
     expect(
       screen.queryByTestId('alertzeroSignificantSecurityEventIocLink-technique-0')
     ).not.toBeInTheDocument();
+  });
+
+  it('links a technique indicator to its MITRE ATT&CK reference', () => {
+    render(<SignificantSecurityEventInlineContent {...renderProps(buildAttachment(baseData))} />);
+
+    const mitreLink = screen.getByTestId('alertzeroSignificantSecurityEventIndicatorMitreLink-0');
+    expect(mitreLink).toHaveAttribute('href', 'https://attack.mitre.org/techniques/T1021/');
+    expect(mitreLink).toHaveAttribute('target', '_blank');
+  });
+
+  it('groups IOC indicators by IOC type', () => {
+    const data = {
+      ...baseData,
+      security_knowledge_indicators: [
+        ...baseData.security_knowledge_indicators,
+        { type: 'ioc', value: '203.0.113.4', ioc: { type: 'ip', value: '203.0.113.4' } },
+      ],
+    };
+    render(<SignificantSecurityEventInlineContent {...renderProps(buildAttachment(data))} />);
+
+    expect(screen.getByTestId('alertzeroSignificantSecurityEventIndicatorIocs')).toHaveTextContent(
+      '203.0.113.4'
+    );
+    expect(
+      screen.getByTestId('alertzeroSignificantSecurityEventIndicatorTechniques')
+    ).toHaveTextContent('T1021');
+  });
+
+  it('links the SSE back to its source report', () => {
+    render(<SignificantSecurityEventInlineContent {...renderProps(buildAttachment(baseData))} />);
+
+    const reportLink = screen.getByTestId('alertzeroSignificantSecurityEventReportLink');
+    expect(reportLink).toHaveTextContent('ti-report-1');
   });
 
   it('renders a Discover link for an event when share returns a URL', () => {
