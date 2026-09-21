@@ -13,9 +13,10 @@ import { i18n } from '@kbn/i18n';
 export interface MappingActionsProps {
   onEdit: () => void;
   onRemove: () => void;
+  isDisabled?: boolean;
 }
 
-export const MappingActions = ({ onEdit, onRemove }: MappingActionsProps) => {
+export const MappingActions = ({ onEdit, onRemove, isDisabled = false }: MappingActionsProps) => {
   return (
     <EuiFlexItem grow={false}>
       <EuiFlexGroup gutterSize="s" direction="row" alignItems="center" responsive={false}>
@@ -36,6 +37,7 @@ export const MappingActions = ({ onEdit, onRemove }: MappingActionsProps) => {
                     }
                   )}
                   type="button"
+                  disabled={isDisabled}
                   onClick={(e: MouseEvent<HTMLButtonElement>) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -59,6 +61,7 @@ export const MappingActions = ({ onEdit, onRemove }: MappingActionsProps) => {
                     { defaultMessage: 'Remove field' }
                   )}
                   type="button"
+                  disabled={isDisabled}
                   onClick={(e: MouseEvent<HTMLButtonElement>) => {
                     e.preventDefault();
                     e.stopPropagation();

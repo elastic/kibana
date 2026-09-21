@@ -60,6 +60,17 @@ describe('validateMappingEditorValue', () => {
     expect(result.fieldErrorsById['2']?.name).toBe('Names must be unique.');
   });
 
+  it('does not require original field name (path)', () => {
+    const value: MappingEditorValue = {
+      dynamic: true,
+      fields: [{ id: '1', name: 'status_code', path: '', type: 'integer', format: '' }],
+    };
+
+    const result = validateMappingEditorValue(value);
+    expect(result.isValid).toBe(true);
+    expect(result.hasAnyDeclaredMappings).toBe(true);
+  });
+
   it('disallows format for non-date types', () => {
     const value: MappingEditorValue = {
       dynamic: true,

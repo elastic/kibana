@@ -6,25 +6,38 @@
  */
 
 import type { SetStateAction } from 'react';
-import React, { useCallback } from 'react';
-import { EuiAccordion, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { EuiAccordion, EuiSpacer } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { Forms } from '@kbn/es-ui-shared-plugin/public';
 import { useController, useFormContext } from 'react-hook-form';
 
 import type { CreateDatasetFormValues } from './create_dataset_form_state';
 import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
+import { InferSchemaToggle } from './infer_schema_toggle';
+import { MappingHeader } from './mapping_header';
+import { TimeseriesDataSection } from './timeseries_data_section';
 import type { DataFederationKibanaServices } from '../types';
 import { MappingEditor, type MappingEditorValue } from '../components/mapping_editor';
+import type { DatasetWizardContent } from './types';
+
+const TIMESTAMP_LOGICAL_FIELD_NAME = '@timestamp';
+const TIMESTAMP_FIELD_ID = '__timestamp__';
+
+const isTimestampField = (f: MappingEditorValue['fields'][number]): boolean => {
+  return f.id === TIMESTAMP_FIELD_ID || f.name.trim() === TIMESTAMP_LOGICAL_FIELD_NAME;
+};
 
 export function StepMapping() {
   const {
     services: { docLinks },
   } = useKibana<DataFederationKibanaServices>();
-  const { control } = useFormContext<CreateDatasetFormValues>();
+  const { control, getValues } = useFormContext<CreateDatasetFormValues>();
+  const { updateContent } = Forms.useContent<DatasetWizardContent, 'mapping'>('mapping');
   const { field } = useController({ name: 'mappings', control });
+  const [shouldShowTimeseriesValidation, setShouldShowTimeseriesValidation] = useState(false);
 
-  const onChange = useCallback(
+  const setMappings = useCallback(
     (next: SetStateAction<MappingEditorValue>) => {
       const resolved =
         typeof next === 'function'
@@ -35,25 +48,103 @@ export function StepMapping() {
     [field]
   );
 
+  const splitFields = useMemo(() => {
+    const allFields = field.value.fields ?? [];
+    const timestampField = allFields.find(isTimestampField);
+    const otherFields = allFields.filter((f) => !isTimestampField(f));
+    return { timestampField, otherFields };
+  }, [field.value.fields]);
+
+  const isTimeseriesEnabled = Boolean(splitFields.timestampField);
+  const dynamicMode = field.value.dynamic;
+  const isTimeseriesFieldValid =
+    !splitFields.timestampField || splitFields.timestampField.path.trim() !== '';
+
+  const onTimeseriesToggle = useCallback(
+    (checked: boolean) => {
+      setMappings((prev) => {
+        const otherFields = prev.fields.filter((f) => !isTimestampField(f));
+        if (!checked) return { ...prev, fields: otherFields };
+
+        const existing = prev.fields.find(isTimestampField);
+        const timestampField = existing ?? {
+          id: TIMESTAMP_FIELD_ID,
+          name: TIMESTAMP_LOGICAL_FIELD_NAME,
+          path: '',
+          type: 'date' as const,
+          format: '',
+        };
+
+        return { ...prev, fields: [timestampField, ...otherFields] };
+      });
+    },
+    [setMappings]
+  );
+
+  const updateTimestampField = useCallback(
+    (patch: Partial<MappingEditorValue['fields'][number]>) => {
+      setMappings((prev) => {
+        const otherFields = prev.fields.filter((f) => !isTimestampField(f));
+        const existing = prev.fields.find(isTimestampField);
+        if (!existing) return prev;
+
+        const nextTimestamp = {
+          ...existing,
+          ...patch,
+          id: TIMESTAMP_FIELD_ID,
+          name: TIMESTAMP_LOGICAL_FIELD_NAME,
+        };
+
+        return { ...prev, fields: [nextTimestamp, ...otherFields] };
+      });
+    },
+    [setMappings]
+  );
+
+  const onDynamicModeChange = useCallback(
+    (nextDynamic: boolean) => {
+      setMappings((prev) => ({ ...prev, dynamic: nextDynamic }));
+    },
+    [setMappings]
+  );
+
+  const onEditorChange = useCallback(
+    (next: SetStateAction<MappingEditorValue>) => {
+      setMappings((prev) => {
+        const otherFields = prev.fields.filter((f) => !isTimestampField(f));
+        const timestamp = prev.fields.find(isTimestampField);
+
+        const resolved =
+          typeof next === 'function'
+            ? (next as (p: MappingEditorValue) => MappingEditorValue)({
+                ...prev,
+                fields: otherFields,
+              })
+            : next;
+
+        return {
+          ...prev,
+          fields: [...(timestamp ? [timestamp] : []), ...resolved.fields],
+        };
+      });
+    },
+    [setMappings]
+  );
+
+  useEffect(() => {
+    updateContent({
+      isValid: isTimeseriesFieldValid,
+      validate: async () => {
+        setShouldShowTimeseriesValidation(true);
+        return isTimeseriesFieldValid;
+      },
+      getData: () => getValues().mappings,
+    });
+  }, [getValues, isTimeseriesFieldValid, updateContent]);
+
   return (
     <div data-test-subj="createDatasetWizardMappingStep">
-      <EuiTitle size="s">
-        <h3>
-          {i18n.translate('xpack.dataFederation.createDatasetWizard.schemaMappingsTitle', {
-            defaultMessage: 'Schema mappings',
-          })}
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiText size="s" color="subdued">
-        <p>
-          {i18n.translate('xpack.dataFederation.createDatasetWizard.schemaMappingsDescription', {
-            defaultMessage:
-              "Optional definition of how documents should be indexed. Elastic infers the schema at query time by default. You can manually map desired fields below, and we'll infer the rest of the schema.",
-          })}
-        </p>
-      </EuiText>
-      <EuiSpacer size="m" />
+      <MappingHeader docLinks={docLinks} />
 
       <EuiAccordion
         id="createDatasetWizardMappedFields"
@@ -66,14 +157,23 @@ export function StepMapping() {
         initialIsOpen
         paddingSize="m"
       >
-        <EuiText size="s" color="subdued">
-          {i18n.translate('xpack.dataFederation.createDatasetWizard.timestampRecommendation', {
-            defaultMessage:
-              'Mapping your timestamp field and renaming it to @timestamp is recommended.',
-          })}
-        </EuiText>
+        <TimeseriesDataSection
+          isEnabled={isTimeseriesEnabled}
+          shouldShowValidation={shouldShowTimeseriesValidation}
+          timestampField={splitFields.timestampField}
+          onToggle={onTimeseriesToggle}
+          onChangeTimestampField={updateTimestampField}
+        />
+
         <EuiSpacer size="m" />
-        <MappingEditor value={field.value} onChange={onChange} docLinks={docLinks} />
+        <InferSchemaToggle dynamicMode={dynamicMode} onDynamicModeChange={onDynamicModeChange} />
+
+        <EuiSpacer size="m" />
+        <MappingEditor
+          value={{ ...field.value, fields: splitFields.otherFields }}
+          onChange={onEditorChange}
+          docLinks={docLinks}
+        />
       </EuiAccordion>
     </div>
   );

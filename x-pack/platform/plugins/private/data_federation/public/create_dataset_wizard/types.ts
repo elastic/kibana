@@ -6,6 +6,7 @@
  */
 
 import type { CreateDatasetSettingsFormValues } from './create_dataset_form_state';
+import type { MappingEditorValue } from '../components/mapping_editor';
 
 export interface DatasetWizardDatasetStep {
   name: string;
@@ -18,6 +19,7 @@ export interface DatasetWizardDatasetStep {
 export interface DatasetWizardContent {
   dataset: DatasetWizardDatasetStep;
   settings: CreateDatasetSettingsFormValues;
+  mapping: MappingEditorValue;
 }
 
 export type DatasetWizardSection = keyof DatasetWizardContent | 'mapping' | 'review';

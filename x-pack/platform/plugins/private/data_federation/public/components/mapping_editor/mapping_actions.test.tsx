@@ -50,5 +50,22 @@ describe('MappingActions', () => {
     expect(onRemove).toHaveBeenCalledTimes(1);
   });
 
+  it('does not call onEdit or onRemove when disabled', () => {
+    const onEdit = jest.fn();
+    const onRemove = jest.fn();
+
+    const { getByTestId } = renderComponent({
+      onEdit,
+      onRemove,
+      isDisabled: true,
+    });
+
+    fireEvent.click(getByTestId('dataFederationMappingEditorEditField'));
+    fireEvent.click(getByTestId('dataFederationMappingEditorRemoveField'));
+
+    expect(onEdit).toHaveBeenCalledTimes(0);
+    expect(onRemove).toHaveBeenCalledTimes(0);
+  });
+
   // Copy button intentionally removed
 });

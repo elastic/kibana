@@ -17,6 +17,7 @@ export interface FieldMappingDisplayModeProps {
   typeLabel?: string;
   onEdit: () => void;
   onRemove: () => void;
+  areActionsDisabled?: boolean;
 }
 
 export const FieldMappingDisplayMode = ({
@@ -24,6 +25,7 @@ export const FieldMappingDisplayMode = ({
   typeLabel,
   onEdit,
   onRemove,
+  areActionsDisabled = false,
 }: FieldMappingDisplayModeProps) => {
   const name = field.name.trim();
   const path = field.path.trim();
@@ -51,7 +53,7 @@ export const FieldMappingDisplayMode = ({
           <span aria-hidden="true">&nbsp;</span>
         )}
       </EuiFlexItem>
-      <MappingActions onEdit={onEdit} onRemove={onRemove} />
+    <MappingActions onEdit={onEdit} onRemove={onRemove} isDisabled={areActionsDisabled} />
     </>
   );
 };

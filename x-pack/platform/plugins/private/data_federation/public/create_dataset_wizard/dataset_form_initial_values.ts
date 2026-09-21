@@ -46,13 +46,27 @@ const mappingsToEditorValue = (mappings: DatasetMappings | undefined): MappingEd
   };
 };
 
+const TIMESTAMP_LOGICAL_FIELD_NAME = '@timestamp';
+const TIMESTAMP_FIELD_ID = '__timestamp__';
+
 export const emptyDatasetFormValues = (): CreateDatasetFormValues => ({
   name: '',
   description: '',
   data_source: '',
   resource: '',
   settings: emptyCreateDatasetSettingsFormValues(),
-  mappings: { ...emptyMappingEditorValue },
+  mappings: {
+    ...emptyMappingEditorValue,
+    fields: [
+      {
+        id: TIMESTAMP_FIELD_ID,
+        name: TIMESTAMP_LOGICAL_FIELD_NAME,
+        path: '',
+        type: 'date',
+        format: '',
+      },
+    ],
+  },
 });
 
 /** Maps a list-table row to form initial state (no extra GET). */

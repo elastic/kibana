@@ -40,6 +40,7 @@ export interface FieldMappingFormProps {
   errors?: FieldMappingFormErrors;
   mode: 'create' | 'edit';
   onSubmit: () => void;
+  onCancel?: () => void;
 }
 
 const isDateLikeType = (type: DatasetMappingFieldType): boolean => {
@@ -74,22 +75,33 @@ const CreateButton = ({ onClick }: { onClick: () => void }) => {
   );
 };
 
-const EditButton = ({ onClick }: { onClick: () => void }) => {
+const CancelButton = ({ onClick }: { onClick: () => void }) => {
   return (
-    <EuiFlexGroup gutterSize="s" direction="row" alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          iconType="check"
-          size="s"
-          onClick={onClick}
-          data-test-subj="dataFederationMappingEditorDoneField"
-        >
-          {i18n.translate('xpack.dataFederation.mappingEditor.doneField', {
-            defaultMessage: 'Done',
-          })}
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiButtonEmpty
+      size="s"
+      onClick={onClick}
+      data-test-subj="dataFederationMappingEditorCancelField"
+    >
+      {i18n.translate('xpack.dataFederation.mappingEditor.cancelField', {
+        defaultMessage: 'Cancel',
+      })}
+    </EuiButtonEmpty>
+  );
+};
+
+const UpdateButton = ({ onClick }: { onClick: () => void }) => {
+  return (
+    <EuiButton
+      size="s"
+      color="primary"
+      fill
+      onClick={onClick}
+      data-test-subj="dataFederationMappingEditorUpdateField"
+    >
+      {i18n.translate('xpack.dataFederation.mappingEditor.updateField', {
+        defaultMessage: 'Update',
+      })}
+    </EuiButton>
   );
 };
 
@@ -117,6 +129,7 @@ export function FieldMappingForm({
   errors,
   mode,
   onSubmit,
+  onCancel,
 }: FieldMappingFormProps) {
   const isDateType = Boolean(value.type) && isDateLikeType(value.type as DatasetMappingFieldType);
 
@@ -174,7 +187,7 @@ export function FieldMappingForm({
           <EuiFlexItem>
             <EuiFormRow
               label={i18n.translate('xpack.dataFederation.mappingEditor.physicalPath', {
-                defaultMessage: 'Source file path (optional)',
+                defaultMessage: 'Original field name (optional)',
               })}
               helpText={i18n.translate('xpack.dataFederation.mappingEditor.physicalPathHelp', {
                 defaultMessage: 'Physical column name, if differs from field name.',
@@ -226,11 +239,16 @@ export function FieldMappingForm({
 
       <EuiFlexItem grow={false}>
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
+          {onCancel ? (
+            <EuiFlexItem grow={false}>
+              <CancelButton onClick={onCancel} />
+            </EuiFlexItem>
+          ) : null}
           <EuiFlexItem grow={false}>
             {mode === 'create' ? (
               <CreateButton onClick={onSubmit} />
             ) : (
-              <EditButton onClick={onSubmit} />
+              <UpdateButton onClick={onSubmit} />
             )}
           </EuiFlexItem>
         </EuiFlexGroup>

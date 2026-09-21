@@ -9,6 +9,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { EuiPageSection, EuiSpacer, EuiText } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import { Forms } from '@kbn/es-ui-shared-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -32,6 +33,9 @@ import type { DatasetWizardContent, DatasetWizardSection } from './types';
 
 const { FormWizard, FormWizardStep } = Forms;
 
+const TIMESTAMP_LOGICAL_FIELD_NAME = '@timestamp';
+const TIMESTAMP_FIELD_ID = '__timestamp__';
+
 const wizardContentFromFormValues = (values: CreateDatasetFormValues): DatasetWizardContent => ({
   dataset: {
     name: values.name,
@@ -41,6 +45,7 @@ const wizardContentFromFormValues = (values: CreateDatasetFormValues): DatasetWi
     format: values.settings.format,
   },
   settings: values.settings,
+  mapping: values.mappings,
 });
 
 export function CreateDatasetWizardPage({
@@ -84,6 +89,18 @@ export function CreateDatasetWizardPage({
     const formatValid = await methods.trigger('settings.format');
     if (!formatValid) {
       setSaveError(createDatasetWizardStrings.settingsFormatRequired);
+      return;
+    }
+
+    const timestampField = values.mappings.fields.find(
+      (f) => f.id === TIMESTAMP_FIELD_ID || f.name.trim() === TIMESTAMP_LOGICAL_FIELD_NAME
+    );
+    if (timestampField && timestampField.path.trim() === '') {
+      setSaveError(
+        i18n.translate('xpack.dataFederation.createDatasetWizard.timestampFieldPathRequiredSave', {
+          defaultMessage: 'When timeseries data is enabled, Field name is required.',
+        })
+      );
       return;
     }
 

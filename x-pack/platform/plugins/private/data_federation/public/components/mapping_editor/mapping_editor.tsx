@@ -94,8 +94,10 @@ export const MappingEditor: FC<MappingEditorProps> = ({ value, onChange, docLink
   const { euiTheme } = useEuiTheme();
   const typeInfoByValue = useMemo(() => getTypeInfoByValue(docLinks), [docLinks]);
   const nextId = useRef(0);
+  const originalFieldById = useRef<Record<string, MappingEditorField>>({});
   const validation = useMemo(() => validateMappingEditorValue(value), [value]);
   const [editingFieldId, setEditingFieldId] = useState<string | null>(null);
+  const [creatingFieldIds, setCreatingFieldIds] = useState<readonly string[]>([]);
   const [draftField, setDraftField] = useState<MappingEditorField>(() => ({
     id: 'draft',
     name: '',
@@ -132,6 +134,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({ value, onChange, docLink
       ],
     }));
     setEditingFieldId(id);
+    setCreatingFieldIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
   }, [onChange]);
 
   const removeField = useCallback(
@@ -142,6 +145,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({ value, onChange, docLink
       }));
       setEditingFieldId((current) => (current === id ? null : current));
       setValidatedFieldIds((prev) => prev.filter((v) => v !== id));
+      setCreatingFieldIds((prev) => prev.filter((v) => v !== id));
     },
     [onChange]
   );
@@ -154,6 +158,39 @@ export const MappingEditor: FC<MappingEditorProps> = ({ value, onChange, docLink
       }));
     },
     [onChange]
+  );
+
+  const replaceField = useCallback(
+    (id: string, next: MappingEditorField) => {
+      onChange((prev) => ({
+        ...prev,
+        fields: prev.fields.map((f) => (f.id === id ? next : f)),
+      }));
+    },
+    [onChange]
+  );
+
+  const startEditingField = useCallback(
+    (id: string) => {
+      const current = value.fields.find((f) => f.id === id);
+      if (current && originalFieldById.current[id] === undefined) {
+        originalFieldById.current[id] = current;
+      }
+      setEditingFieldId(id);
+    },
+    [value.fields]
+  );
+
+  const cancelEditingField = useCallback(
+    (id: string) => {
+      const original = originalFieldById.current[id];
+      if (original) {
+        replaceField(id, original);
+      }
+      delete originalFieldById.current[id];
+      setEditingFieldId(null);
+    },
+    [replaceField]
   );
 
   const draftFieldErrors = useMemo(() => {
@@ -235,7 +272,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({ value, onChange, docLink
   }, [draftField, onChange, value.fields]);
 
   return (
-    <EuiPanel paddingSize="m" hasBorder data-test-subj="dataFederationMappingEditor">
+    <div data-test-subj="dataFederationMappingEditor" style={{ padding: euiTheme.size.m }}>
       {!validation.isValid && shouldShowValidationCallout ? (
         <>
           <KbnDangerCallout
@@ -290,6 +327,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({ value, onChange, docLink
                 typeInfoByValue as Record<string, { label: string; docs: string } | undefined>
               )[f.type];
               const isEditing = editingFieldId === f.id;
+              const isCreating = creatingFieldIds.includes(f.id);
               const shouldShowRowValidation = validatedFieldIds.includes(f.id);
               const rowErrors = shouldShowRowValidation
                 ? validation.fieldErrorsById[f.id]
@@ -320,21 +358,27 @@ export const MappingEditor: FC<MappingEditorProps> = ({ value, onChange, docLink
                             f.type ? getFieldTypeDocsHelpText(f.type, typeInfoByValue) : undefined
                           }
                           errors={rowErrors}
-                          mode="edit"
+                          mode={isCreating ? 'create' : 'edit'}
+                          onCancel={
+                            isCreating ? () => removeField(f.id) : () => cancelEditingField(f.id)
+                          }
                           onSubmit={() => {
                             const nextValidation = validateMappingEditorValue(value);
                             const fieldErrors = nextValidation.fieldErrorsById[f.id];
                             markFieldValidated(f.id);
                             if (fieldErrors) return;
                             setEditingFieldId(null);
+                            setCreatingFieldIds((prev) => prev.filter((v) => v !== f.id));
+                            delete originalFieldById.current[f.id];
                           }}
                         />
                       ) : (
                         <FieldMappingDisplayMode
                           field={f}
                           typeLabel={typeInfo?.label}
-                          onEdit={() => setEditingFieldId(f.id)}
+                          onEdit={() => startEditingField(f.id)}
                           onRemove={() => removeField(f.id)}
+                          areActionsDisabled={editingFieldId !== null}
                         />
                       )}
                     </EuiFlexGroup>
@@ -344,15 +388,9 @@ export const MappingEditor: FC<MappingEditorProps> = ({ value, onChange, docLink
             })}
           </EuiFlexGroup>
           <EuiSpacer size="m" />
-          <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <div
-                style={{
-                  width: 'fit-content',
-                  visibility: editingFieldId === null ? 'visible' : 'hidden',
-                }}
-                aria-hidden={editingFieldId !== null}
-              >
+          {editingFieldId === null ? (
+            <EuiFlexGroup justifyContent="flexStart" responsive={false}>
+              <EuiFlexItem grow={false}>
                 <EuiButton
                   size="s"
                   color="primary"
@@ -364,11 +402,11 @@ export const MappingEditor: FC<MappingEditorProps> = ({ value, onChange, docLink
                     defaultMessage: 'Add field',
                   })}
                 </EuiButton>
-              </div>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ) : null}
         </>
       )}
-    </EuiPanel>
+    </div>
   );
 };
