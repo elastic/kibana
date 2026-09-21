@@ -7,7 +7,11 @@
 
 import { Readable } from 'stream';
 import { z } from '@kbn/zod/v4';
-import type { ContentPack, ContentPackStream, ContentPackIncludedObjects } from '@kbn/content-packs-schema';
+import type {
+  ContentPack,
+  ContentPackStream,
+  ContentPackIncludedObjects,
+} from '@kbn/content-packs-schema';
 import {
   MAX_STREAM_NAME_LENGTH,
   Streams,
@@ -29,7 +33,9 @@ function buildBoundedIncludedObjects(depth: number): z.ZodType<ContentPackInclud
       objects: z.strictObject({
         mappings: z.boolean(),
         routing: z
-          .array(inner.and(z.object({ destination: z.string().nonempty().max(MAX_STREAM_NAME_LENGTH) })))
+          .array(
+            inner.and(z.object({ destination: z.string().nonempty().max(MAX_STREAM_NAME_LENGTH) }))
+          )
           .max(200),
       }),
     }),

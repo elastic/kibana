@@ -49,7 +49,10 @@ const boundedFilter = z.union([
     range: boundedRange.optional(),
     includes: boundedSNB.optional(),
   }),
-  z.strictObject({ field: z.string().nonempty().max(COND_STR_MAX), exists: z.boolean().optional() }),
+  z.strictObject({
+    field: z.string().nonempty().max(COND_STR_MAX),
+    exists: z.boolean().optional(),
+  }),
 ]);
 const boundedAlways = z.object({ always: z.object({}) });
 const boundedNever = z.object({ never: z.object({}) });
@@ -78,7 +81,8 @@ export const routingDefinitionSchema: z.Schema<RoutingDefinition> = z.object({
   draft: z.boolean().optional(),
 });
 
-export const routingDefinitionListSchema: z.Schema<RoutingDefinition[]> =
-  z.array(routingDefinitionSchema).max(200);
+export const routingDefinitionListSchema: z.Schema<RoutingDefinition[]> = z
+  .array(routingDefinitionSchema)
+  .max(200);
 
 export const isRoutingEnabled = createIsNarrowSchema(routingStatus, z.literal('enabled'));
