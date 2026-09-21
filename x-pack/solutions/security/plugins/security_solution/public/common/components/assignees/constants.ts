@@ -8,12 +8,19 @@
 export const ASSIGNEES_PANEL_WIDTH = 400;
 
 /**
- * `UserProfilesSelectable` applies this as a max-height over its search field, selection status
- * and option list together, so the list scrolls past roughly three of its 48px rows rather than
- * growing with the number of suggested users. 240px plus the 32px Apply button rendered below it
- * keeps the popover inside the 288px available beneath an anchor at the midpoint of a 576px-tall
- * window, which is the height Scout runs at.
+ * Space the assignees selectable reserves up front, so the popover is the same size while the
+ * user profiles are loading as it is once they arrive.
+ *
+ * `EuiPopover` chooses which side of its anchor to open on when the panel first mounts, and from
+ * then on re-pins that side whenever the content changes. A panel that is short while loading is
+ * therefore measured as fitting below the button, and stays anchored there when the profiles
+ * arrive and it grows — running off the bottom of the viewport. Reserving the loaded size from
+ * the first render means the popover is measured at its final size and opens above or beside the
+ * button when there is no room below.
+ *
+ * The value is the tallest the selectable gets: its search field, selection status and the
+ * option list at the 6.5 rows of 48px that `EuiSelectable` caps an unbounded list to.
  */
-export const ASSIGNEES_SELECTABLE_MAX_HEIGHT = 240;
+export const ASSIGNEES_SELECTABLE_MIN_HEIGHT = 416;
 
 export const NO_ASSIGNEES_VALUE = null;

@@ -15,7 +15,7 @@ import { isEmpty } from 'lodash';
 import { useGetCurrentUserProfile } from '../user_profiles/use_get_current_user_profile';
 import * as i18n from './translations';
 import type { AssigneesIdsSelection, AssigneesProfilesSelection } from './types';
-import { ASSIGNEES_SELECTABLE_MAX_HEIGHT, NO_ASSIGNEES_VALUE } from './constants';
+import { ASSIGNEES_SELECTABLE_MIN_HEIGHT, NO_ASSIGNEES_VALUE } from './constants';
 import { useSuggestUsers } from '../user_profiles/use_suggest_users';
 import { useBulkGetUserProfiles } from '../user_profiles/use_bulk_get_user_profiles';
 import { bringCurrentUserToFrontAndSort, removeNoAssigneesSelection } from './utils';
@@ -110,7 +110,10 @@ export const AssigneesSelectable: FC<AssigneesSelectableProps> = memo(
     const isLoading = isLoadingUserProfiles || isLoadingSuggestedUsers;
 
     return (
-      <div data-test-subj={ASSIGNEES_SELECTABLE_TEST_ID}>
+      <div
+        data-test-subj={ASSIGNEES_SELECTABLE_TEST_ID}
+        css={{ minBlockSize: ASSIGNEES_SELECTABLE_MIN_HEIGHT }}
+      >
         <UserProfilesSelectable
           searchInputId={searchInputId}
           onSearchChange={(term: string) => {
@@ -121,7 +124,6 @@ export const AssigneesSelectable: FC<AssigneesSelectableProps> = memo(
           options={searchResultProfiles}
           selectedOptions={selectedUserProfiles}
           isLoading={isLoading}
-          height={ASSIGNEES_SELECTABLE_MAX_HEIGHT}
           singleSelection={false}
           searchPlaceholder={i18n.ASSIGNEES_SEARCH_USERS}
           clearButtonLabel={i18n.ASSIGNEES_CLEAR_FILTERS}
