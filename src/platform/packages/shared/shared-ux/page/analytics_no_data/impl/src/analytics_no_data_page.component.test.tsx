@@ -22,7 +22,7 @@ describe('AnalyticsNoDataPageComponent', () => {
   const services = {
     ...getAnalyticsNoDataPageServicesMock(),
     hasESData: async () => false,
-    hasUserDataView: async () => false,
+    hasDataView: async () => false,
     kibanaGuideDocLink: 'http://www.test.com',
   };
   const onDataViewCreated = jest.fn();

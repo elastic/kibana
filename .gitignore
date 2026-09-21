@@ -106,6 +106,7 @@ selenium
 *.out
 package-lock.json
 !/.buildkite/package-lock.json
+yarn.lock
 .yo-rc.json
 .vscode
 *.sublime-*
@@ -201,6 +202,10 @@ oas_docs/bundle.serverless.json
 src/platform/plugins/shared/console/packaging/react/translations
 
 .moon/cache
+
+# CI test run order artifacts (written by pick_test_group_run_order.ts)
+jest_run_order.json
+ftr_run_order.json
 
 # Batched commits marker, e.g.: from quick checks
 .collect_commits_marker

@@ -15,7 +15,6 @@ import * as React from 'react';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
-import { triggersActionsRoute } from '@kbn/rule-data-utils';
 import { ALERTING_V2_RULES_BASE_PATH } from '@kbn/alerting-v2-constants';
 import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
 import RulesPage from './rules_page_container';
@@ -25,6 +24,12 @@ import { useKibana } from '../../../common/lib/kibana';
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/get_experimental_features');
 jest.mock('../../lib/capabilities');
+jest.mock('../../locator_context', () => ({
+  useLocators: () => ({
+    rules: { useUrl: () => '/bound-rules' },
+    ruleDetails: { useUrl: () => '/bound-rules' },
+  }),
+}));
 
 jest.mock('../rules_list/components/rules_list', () => {
   return () => <div data-test-subj="rulesListComponents">{'Render Rule list component'}</div>;
@@ -63,6 +68,7 @@ const { useGetRuleTypesPermissions } = jest.requireMock(
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 const MOCK_BASE_PATH = '/mock-base';
+const BOUND_RULES_HREF = '/bound-rules';
 
 const renderRulesPage = (history = createMemoryHistory({ initialEntries: ['/'] })) =>
   render(
@@ -85,10 +91,11 @@ describe('rulesPage', () => {
       authorizedToReadAnyRules: true,
       authorizedToCreateAnyRules: true,
     });
-    // Non-empty so the href assertions prove each tab is run through `basePath.prepend`.
+    // Non-empty so the V2 tab href assertion proves it is run through `basePath.prepend`.
     useKibanaMock().services.http.basePath.prepend = jest.fn(
       (path: string) => `${MOCK_BASE_PATH}${path}`
     );
+    useKibanaMock().services.hideListBackButton = undefined;
     useKibanaMock().services.tabs = undefined;
   });
 
@@ -124,6 +131,15 @@ describe('rulesPage', () => {
     renderRulesPage(history);
 
     expect(await screen.findAllByRole('tab')).toHaveLength(1);
+  });
+
+  it('omits the list back button when hideListBackButton is set', async () => {
+    useKibanaMock().services.hideListBackButton = true;
+    const history = createMemoryHistory({ initialEntries: ['/'] });
+    renderRulesPage(history);
+
+    expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Rules');
+    expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.back)).not.toBeInTheDocument();
   });
 
   it('points the back button at Alerts on the rules list', async () => {
@@ -270,10 +286,7 @@ describe('rulesPage', () => {
         const history = createMemoryHistory({ initialEntries: ['/'] });
         renderRulesPage(history);
 
-        expect(await screen.findByTestId('v1RulesTab')).toHaveAttribute(
-          'href',
-          `${MOCK_BASE_PATH}${triggersActionsRoute}`
-        );
+        expect(await screen.findByTestId('v1RulesTab')).toHaveAttribute('href', BOUND_RULES_HREF);
         expect(await screen.findByTestId('v2RulesTab')).toHaveAttribute(
           'href',
           `${MOCK_BASE_PATH}${ALERTING_V2_RULES_BASE_PATH}`
@@ -315,7 +328,7 @@ describe('rulesPage', () => {
         expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Logs');
         const back = await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.back);
         expect(back).toHaveAccessibleName('Back to Rules');
-        expect(back).toHaveAttribute('href', expect.stringContaining('triggersActions'));
+        expect(back).toHaveAttribute('href', BOUND_RULES_HREF);
         expect(screen.queryByTestId('v1RulesTab')).not.toBeInTheDocument();
         expect(screen.queryByTestId('v2RulesTab')).not.toBeInTheDocument();
         expect(screen.queryByTestId('createRuleButton')).not.toBeInTheDocument();
