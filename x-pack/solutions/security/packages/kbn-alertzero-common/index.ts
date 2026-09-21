@@ -56,6 +56,7 @@ export {
   TEMPLATE_ID_INVESTIGATION,
   TEMPLATE_ID_PROPOSAL,
   WATCH_AUTONOMY_LEVELS,
+  WATCH_AUTONOMY_REVIEW_GATED,
   WORKER_SCHEDULE_UNITS,
   WATCH_HUNT_TAG,
   WATCH_DEEP_TAG,
@@ -168,6 +169,7 @@ export {
   getAllowedAutonomyLevels,
   getCompleteWorkerSettingsSchema,
   getWorkerSettingsDeclaration,
+  projectStoredAutonomyLevel,
   touchesWorkerSettings,
 } from './impl/worker_settings';
 export type { WorkerSettingsDeclaration } from './impl/worker_settings';
