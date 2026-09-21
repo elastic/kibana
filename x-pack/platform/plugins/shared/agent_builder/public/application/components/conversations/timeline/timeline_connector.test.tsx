@@ -38,6 +38,9 @@ jest.mock('../../../context/streaming/streaming_context', () => ({
 jest.mock('../conversation_rounds/rounds_screen_reader_status', () => ({
   RoundsScreenReaderStatus: () => null,
 }));
+jest.mock('../../../hooks/use_conversation_stream', () => ({
+  useConversationStream: () => ({ isResuming: false }),
+}));
 jest.mock('./timeline', () => ({
   Timeline: ({ items }: { items: TimelineItem[] }) => (
     <ul>

@@ -37,6 +37,8 @@ interface AgentTurnProps {
   agent?: AgentDefinition | null;
   conversationAttachments?: VersionedAttachment[];
   showHeader?: boolean;
+  /** Spins the shared avatar while a later turn of this turn's visual group is running. */
+  isGroupLoading?: boolean;
 }
 
 // One `AgentResponse` at the same position for running, awaiting-prompt and completed turns, so
@@ -115,11 +117,12 @@ export const AgentTurn: React.FC<AgentTurnProps> = ({
   agent,
   conversationAttachments,
   showHeader = true,
+  isGroupLoading,
 }) => {
   const { euiTheme } = useEuiTheme();
   const conversationId = useConversationId();
   const { status, startedAt, origin } = item;
-  const isLoading = status === 'running';
+  const isLoading = isGroupLoading ?? status === 'running';
 
   const avatarColumnStyles = css`
     min-inline-size: ${euiTheme.size.l};
@@ -135,11 +138,12 @@ export const AgentTurn: React.FC<AgentTurnProps> = ({
         css={avatarColumnStyles}
         data-test-subj="agentBuilderTimelineAvatar"
       >
-        {isLoading ? (
-          <EuiLoadingElastic size="l" aria-label={loadingLabel} />
-        ) : (
-          showHeader && agent && <AgentAvatar agent={agent} size="s" iconSize="l" />
-        )}
+        {showHeader &&
+          (isLoading ? (
+            <EuiLoadingElastic size="l" aria-label={loadingLabel} />
+          ) : (
+            agent && <AgentAvatar agent={agent} size="s" iconSize="l" />
+          ))}
       </EuiFlexItem>
       <EuiFlexItem grow={true}>
         <EuiFlexGroup direction="column" gutterSize="s">

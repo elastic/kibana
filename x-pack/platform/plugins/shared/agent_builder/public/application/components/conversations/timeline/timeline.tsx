@@ -18,12 +18,34 @@ interface TimelineProps {
   items: TimelineItem[];
   agent?: AgentDefinition | null;
   conversationAttachments?: VersionedAttachment[];
+  /** True while an answered prompt's resume is in flight; spins the last group's avatar. */
+  isResuming?: boolean;
 }
 
 const itemDate = (item: TimelineItem): string =>
   item.kind === 'agentTurn' ? item.startedAt : item.event.created_at;
 
-export const Timeline: React.FC<TimelineProps> = ({ items, agent, conversationAttachments }) => {
+export const Timeline: React.FC<TimelineProps> = ({
+  items,
+  agent,
+  conversationAttachments,
+  isResuming = false,
+}) => {
+  // After user resumed, make the previous turn to show the loader
+  const isGroupLoading = (start: number): boolean => {
+    let index = start;
+    let running = false;
+    while (index < items.length) {
+      const entry = items[index];
+      if (entry.kind !== 'agentTurn') {
+        return running;
+      }
+      running = running || entry.status === 'running';
+      index++;
+    }
+    return running || isResuming;
+  };
+
   return (
     <>
       <EuiFlexGroup direction="column" gutterSize="l">
@@ -51,6 +73,7 @@ export const Timeline: React.FC<TimelineProps> = ({ items, agent, conversationAt
                   agent={agent}
                   conversationAttachments={conversationAttachments}
                   showHeader={showHeader}
+                  isGroupLoading={showHeader ? isGroupLoading(index) : false}
                 />
               );
               break;
