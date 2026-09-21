@@ -32,7 +32,7 @@ import {
   useNodeFillColor,
 } from './styles';
 import { NodeExpandButton } from './node_expand_button';
-import { NODE_HEIGHT, NODE_WIDTH } from '../constants';
+import { ENTITY_CARD_HEADER_HEIGHT, NODE_HEIGHT, NODE_WIDTH } from '../constants';
 import {
   GRAPH_ENTITY_NODE_ID,
   GRAPH_ENTITY_NODE_RISK_BADGE_ID,
@@ -100,7 +100,7 @@ const EntityCardHeader = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
-  height: ${NODE_HEIGHT}px;
+  height: ${ENTITY_CARD_HEADER_HEIGHT}px;
   padding: 0 8px;
   gap: 8px;
 `;
@@ -232,7 +232,7 @@ const StackedCard = styled.div<{
 }>`
   position: absolute;
   width: ${NODE_WIDTH}px;
-  height: ${NODE_HEIGHT}px;
+  height: ${ENTITY_CARD_HEADER_HEIGHT}px;
   left: 0;
   bottom: ${({ bottomOffset }) => -bottomOffset}px;
   background: ${({ bgColor }) => bgColor};
@@ -956,7 +956,7 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
               color={color}
               onClick={(e, unToggleCallback) => expandButtonClick?.(e, props, unToggleCallback)}
               x={`${NODE_WIDTH - NodeExpandButton.ExpandButtonSize}px`}
-              y={`${(NODE_HEIGHT - NodeExpandButton.ExpandButtonSize) / 2}px`}
+              y={`${(ENTITY_CARD_HEADER_HEIGHT - NodeExpandButton.ExpandButtonSize) / 2}px`}
               style={toolbarItems.length > 0 ? { display: 'none' } : undefined}
             />
           </>

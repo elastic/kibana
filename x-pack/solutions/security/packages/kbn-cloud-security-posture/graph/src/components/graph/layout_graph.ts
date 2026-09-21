@@ -15,7 +15,7 @@ import {
   STACK_NODE_VERTICAL_PADDING,
   STACK_NODE_HORIZONTAL_PADDING,
   NODE_HEIGHT,
-  ENTITY_NODE_LAYOUT_HEIGHT,
+  ENTITY_NODE_TOTAL_HEIGHT,
   NODE_LABEL_TOTAL_HEIGHT,
   NODE_WIDTH,
   NODE_LABEL_WIDTH,
@@ -84,7 +84,7 @@ export const layoutGraph = (
     } else if (isEntityNode(node.data)) {
       // Reserve the full expanded height so nodes never overlap neighbours
       // once the metadata panel (always visible) is taken into account.
-      size.height = ENTITY_NODE_LAYOUT_HEIGHT;
+      size.height = ENTITY_NODE_TOTAL_HEIGHT;
     }
 
     if (!nodesById[node.id]) {

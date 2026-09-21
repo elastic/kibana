@@ -27,24 +27,16 @@ import type { EntityNodeViewModel, LabelNodeViewModel } from '..';
 import { GRAPH_ENTITY_NODE_BUTTON_ID } from '../test_ids';
 
 /**
- * The total height of an entity node in pixels. With the card design the node
- * is self-contained (no details rendered below the card), so this equals NODE_HEIGHT.
- * Required to calculate total node height in layout_graph.ts
- * Must be a multiple of `GRID_SIZE * 2`.
- */
-export const ENTITY_NODE_TOTAL_HEIGHT = 60;
-
-/**
- * The height Dagre reserves per entity node in the layout, set to the fully-expanded
- * card height (header + all metadata rows visible). Pre-reserving this space prevents
- * nodes from overlapping their neighbours.
+ * The total height Dagre reserves per entity node in the layout, set to the
+ * fully-expanded card height (header + all metadata rows visible + hover actions).
+ * Pre-reserving this space prevents nodes from overlapping their neighbours.
  *
  * Calculation (worst-case: grouped node, 5 metadata rows):
  *   60px (header) + 1px (metadata border-top) + 5 × 56px (rows) = 341px → 360px (snapped to GRID_SIZE×2=20).
  *
  * Must be a multiple of `GRID_SIZE * 2`.
  */
-export const ENTITY_NODE_LAYOUT_HEIGHT = 360;
+export const ENTITY_NODE_TOTAL_HEIGHT = 360;
 
 /**
  * The width of an entity card node in the graph, in pixels.
@@ -53,10 +45,20 @@ export const ENTITY_NODE_LAYOUT_HEIGHT = 360;
 export const NODE_WIDTH = 300;
 
 /**
- * The height of an entity card node in the graph, in pixels.
+ * The visual height of the entity card node body (header + metadata rows, excluding
+ * hover-only action buttons). Used to anchor the node's Y position in the Dagre layout.
+ * A bit less than ENTITY_NODE_TOTAL_HEIGHT so the card sits with a small top margin
+ * within its reserved space.
  * Must be a multiple of `GRID_SIZE * 2`.
  */
-export const NODE_HEIGHT = 60;
+export const NODE_HEIGHT = 300;
+
+/**
+ * The height of the entity card's fixed header row (icon | name+tag | risk badge), in pixels.
+ * Used for all visual 60px elements: header, stacked card decoration, expand button centering.
+ * Must be a multiple of `GRID_SIZE * 2`.
+ */
+export const ENTITY_CARD_HEADER_HEIGHT = 60;
 
 /**
  * The width of a node label in the graph, in pixels.
