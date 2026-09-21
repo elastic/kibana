@@ -16,8 +16,6 @@
   ],
   "kbn_references": [
     "@kbn/scout",
-    "@kbn/es",
-    "@kbn/test-es-server",
     "@kbn/security-plugin",
     "@kbn/es-ui-shared-plugin",
     "@kbn/licensing-plugin",
