@@ -321,6 +321,10 @@ describe('rule_execution_history_schema', () => {
       };
       expect(listRuleExecutionsRequestSchema.parse(input)).toEqual(input);
     });
+
+    it('rejects unknown keys (strict mode)', () => {
+      expect(listRuleExecutionsRequestSchema.safeParse({ unknown_field: 'x' }).success).toBe(false);
+    });
   });
 
   describe('ruleExecutionViewSchema', () => {

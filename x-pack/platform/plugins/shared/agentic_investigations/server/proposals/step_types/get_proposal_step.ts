@@ -34,6 +34,7 @@ export const getGetProposalStepDefinition = ({
           output: {
             status: proposal.status,
             decision: proposal.decision,
+            decidedBy: proposal.decidedBy,
             supersededBy: proposal.supersededBy,
             expiresAt: proposal.expiresAt,
             actionWorkflowId: proposal.actionWorkflowId,

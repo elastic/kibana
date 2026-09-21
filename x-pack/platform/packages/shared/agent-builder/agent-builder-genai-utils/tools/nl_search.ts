@@ -54,7 +54,7 @@ export const naturalLanguageSearch = async ({
   const queryGenResponse = await generateEsql({
     nlQuery,
     index: target,
-    executeQuery: true,
+    execute: 'data',
     modelProvider,
     esClient,
     logger,

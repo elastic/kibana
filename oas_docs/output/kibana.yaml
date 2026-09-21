@@ -2499,6 +2499,131 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/agent_builder/conversations/{conversation_id}/_add_events:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/conversations/{conversation_id}/_add_events</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Append custom events to a conversation's timeline. The caller must be the owner, a member, or the conversation must be public. Server assigns id, created_at, and actor for each event; the body provides type and data. Only registered custom event types are accepted — built-in lifecycle types are rejected. To learn more about agent conversations, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
+      operationId: post-agent-builder-conversations-conversation-id-add-events
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The unique identifier of the conversation.
+          in: path
+          name: conversation_id
+          required: true
+          schema:
+            maxLength: 256
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              addEventsRequestExample:
+                description: Example request appending two custom events to a conversation
+                value:
+                  events:
+                    - data:
+                        text: First note on this conversation
+                      type: text_note
+                    - data:
+                        text: Second note on this conversation
+                      type: text_note
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                events:
+                  description: Events to append. Between 1 and 10.
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      data:
+                        additionalProperties: true
+                        description: The event payload. Its shape is defined by the event type.
+                        type: object
+                        properties: {}
+                      type:
+                        description: The registered custom event type.
+                        maxLength: 256
+                        minLength: 1
+                        type: string
+                    required:
+                      - type
+                      - data
+                  maxItems: 10
+                  minItems: 1
+                  type: array
+              required:
+                - events
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                addEventsResponseExample:
+                  description: Example response returning the materialized events with server-assigned fields
+                  value:
+                    events:
+                      - actor:
+                          id: u_abc123_uid
+                          type: user
+                          username: elastic
+                        created_at: '2026-09-14T10:00:00.000Z'
+                        data:
+                          text: First note on this conversation
+                        id: 7d3f1a2b-4c5e-6f7a-8b9c-0d1e2f3a4b5c
+                        type: text_note
+                      - actor:
+                          id: u_abc123_uid
+                          type: user
+                          username: elastic
+                        created_at: '2026-09-14T10:00:00.000Z'
+                        data:
+                          text: Second note on this conversation
+                        id: 8e4f2b3c-5d6f-7a8b-9c0d-1e2f3a4b5c6d
+                        type: text_note
+          description: Indicates a successful response
+      summary: Add events to a conversation
+      tags:
+        - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/agent_builder/conversations/${CONVERSATION_ID}/_add_events" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "elastic-api-version: 2023-10-31" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "events": [
+                  { "type": "text_note", "data": { "text": "A note on this conversation" } }
+                ]
+              }'
+        - lang: Console
+          source: |
+            POST kbn://api/agent_builder/conversations/${CONVERSATION_ID}/_add_events
+            {
+              "events": [
+                { "type": "text_note", "data": { "text": "A note on this conversation" } }
+              ]
+            }
+      x-state: Experimental; added in 9.6.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/agent_builder/conversations/{conversation_id}/access_control:
     put:
       description: |-
@@ -9729,7 +9854,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The ID of the action policy to delete. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
+        - description: The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -9845,7 +9970,7 @@ paths:
         Get an action policy by identifier.<br/><br/>[Required authorization] Route required privileges: read_alerting-v2-action-policies.
       operationId: get-alerting-v2-action-policies-id
       parameters:
-        - description: The ID of the action policy to get. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
+        - description: The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -10000,7 +10125,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The ID of the action policy to update. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
+        - description: The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -10183,7 +10308,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The identifier for the action policy.
+        - description: The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -10409,7 +10534,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The ID of the action policy to disable. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
+        - description: The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -10580,7 +10705,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The ID of the action policy to enable. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
+        - description: The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -10751,7 +10876,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The ID of the action policy to snooze. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
+        - description: The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -10932,7 +11057,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The ID of the action policy to unsnooze. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
+        - description: The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -11103,7 +11228,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The ID of the action policy of the API key to update. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
+        - description: The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -47511,7 +47636,17 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Install a package by uploading a .zip or .tar.gz archive (max 100MB).<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
+        Install a package by uploading a .zip or .tar.gz archive (max 100MB).
+
+        Archives that contain Kibana assets requiring additional privileges are subject to a preflight authorization check before the package is installed. Privileges are checked in every space the package will be installed into.
+
+        The following asset types require the corresponding Kibana API privilege:
+
+        - `security_rule`: `rules-all`
+        - `security_rule` with type `machine_learning`: `rules-all` and `ml:canCreateJob`
+        - `security_ai_prompt`: `elasticAssistant`
+
+        If any required privilege is missing, the request returns 403 and no assets are written. To learn more, refer to [Upload an integration to Kibana](https://www.elastic.co/docs/extend/integrations/upload-new-integration).<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
       operationId: post-fleet-epm-packages
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -47613,6 +47748,45 @@ paths:
                     message: An error message describing what went wrong
                     statusCode: 400
           description: Bad Request
+        '403':
+          content:
+            application/gzip; application/zip:
+              examples:
+                insufficientPrivilegesExample:
+                  description: Caller lacks a privilege required by a gated asset type in the archive
+                  summary: Missing rules-all privilege
+                  value:
+                    error: Forbidden
+                    message: Insufficient privileges to upload this package
+                    statusCode: 403
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+            application/json:
+              examples:
+                insufficientPrivilegesExample:
+                  description: Caller lacks a privilege required by a gated asset type in the archive
+                  summary: Missing rules-all privilege
+                  value:
+                    error: Forbidden
+                    message: Insufficient privileges to upload this package
+                    statusCode: 403
+          description: Forbidden. The caller lacks a Kibana API privilege required by an asset in the archive. No assets are written.
       summary: Install a package by upload
       tags:
         - Elastic Package Manager (EPM)
@@ -81550,6 +81724,151 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/synthetics/monitors/_bulk_update:
+    put:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/synthetics/monitors/_bulk_update</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Partially update multiple monitors in a single request.
+        Each `updates` entry has its own `id` and `attributes` patch, so one request can apply a different change per monitor. Unspecified fields are left unchanged. Patches use the same merge, validate, and encrypt path as `PUT /api/synthetics/monitors/{id}`.
+        For private-location monitors, Fleet is synced once for the batch instead of once per monitor.
+        You must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
+        This is a versioned public API (`elastic-api-version: 2023-10-31`).
+      operationId: put-synthetic-monitors-bulk-update
+      requestBody:
+        content:
+          application/json:
+            examples:
+              bulkUpdateRequestExample1:
+                description: |
+                  Run `PUT /api/synthetics/monitors/_bulk_update` to apply a different partial update to each monitor.
+                summary: Mixed patches
+                value: |-
+                  {
+                    "updates": [
+                      {
+                        "id": "monitor1-id",
+                        "attributes": {
+                          "enabled": false
+                        }
+                      },
+                      {
+                        "id": "monitor2-id",
+                        "attributes": {
+                          "tags": ["bulk-patched"]
+                        }
+                      },
+                      {
+                        "id": "monitor3-id",
+                        "attributes": {
+                          "schedule": {
+                            "number": "15",
+                            "unit": "m"
+                          }
+                        }
+                      }
+                    ]
+                  }
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                updates:
+                  description: |
+                    Monitors to update. Minimum 1 entry, maximum 1000. Each `id` may appear at most once. `attributes` must contain at least one field.
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      attributes:
+                        additionalProperties: true
+                        description: |
+                          Attributes to update for the monitor. You can specify the same fields as in `PUT /api/synthetics/monitors/{id}`. An empty object is rejected.
+                        minProperties: 1
+                        type: object
+                      id:
+                        description: The monitor config ID to update.
+                        maxLength: 1024
+                        minLength: 1
+                        type: string
+                    required:
+                      - id
+                      - attributes
+                  maxItems: 1000
+                  minItems: 1
+                  type: array
+              required:
+                - updates
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                bulkUpdateResponseExample1:
+                  description: A response from a bulk update with one failure.
+                  value: |-
+                    {
+                      "result": [
+                        {
+                          "id": "monitor1-id",
+                          "updated": true
+                        },
+                        {
+                          "id": "missing-id",
+                          "updated": false,
+                          "error": "Monitor id missing-id not found!"
+                        },
+                        {
+                          "id": "monitor3-id",
+                          "updated": true
+                        }
+                      ]
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    description: Optional service-level errors from the bulk sync.
+                    items:
+                      description: A service-level error from the bulk sync.
+                    type: array
+                  result:
+                    items:
+                      type: object
+                      properties:
+                        error:
+                          description: Present when `updated` is `false`.
+                          type: string
+                        id:
+                          description: The monitor config ID from the request.
+                          type: string
+                        updated:
+                          description: |
+                            If `true`, the monitor was updated. If `false`, see `error`.
+                          type: boolean
+                      required:
+                        - id
+                        - updated
+                    type: array
+                required:
+                  - result
+          description: |
+            A successful response. The `result` array is in request order. Per-id failures (not found, validation, Fleet sync) set `updated: false` and `error` without failing the whole batch. `errors` is present only when there are service-level sync errors.
+        '400':
+          description: |
+            Bad request. Returned when `updates` is missing or empty, an `attributes` object is empty, or the same `id` appears more than once.
+      summary: Bulk update monitors
+      tags:
+        - synthetics
+      x-state: added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/synthetics/monitors/{id}:
     delete:
       description: |
@@ -97978,8 +98297,17 @@ components:
         description:
           type: string
         download_source_id:
+          deprecated: true
+          description: Use `download_source_ids` instead
           nullable: true
           type: string
+        download_source_ids:
+          items:
+            description: A download source ID, or the reserved value 'default' to dynamically reference whichever source is currently set as default.
+            maxLength: 500
+            type: string
+          maxItems: 3
+          type: array
         fips_agents:
           type: number
         fleet_server_host_id:
@@ -105017,6 +105345,11 @@ components:
                               type: string
                       required:
                         - key
+                sources:
+                  items:
+                    type: string
+                  maxItems: 3
+                  type: array
                 sourceURI:
                   type: string
                 ssl:
@@ -115095,8 +115428,17 @@ components:
         description:
           type: string
         download_source_id:
+          deprecated: true
+          description: Use `download_source_ids` instead
           nullable: true
           type: string
+        download_source_ids:
+          items:
+            description: A download source ID, or the reserved value 'default' to dynamically reference whichever source is currently set as default.
+            maxLength: 500
+            type: string
+          maxItems: 3
+          type: array
         fleet_server_host_id:
           nullable: true
           type: string
@@ -123145,8 +123487,17 @@ components:
         description:
           type: string
         download_source_id:
+          deprecated: true
+          description: Use `download_source_ids` instead
           nullable: true
           type: string
+        download_source_ids:
+          items:
+            description: A download source ID, or the reserved value 'default' to dynamically reference whichever source is currently set as default.
+            maxLength: 500
+            type: string
+          maxItems: 3
+          type: array
         fleet_server_host_id:
           nullable: true
           type: string
