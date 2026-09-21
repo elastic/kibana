@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type {
   ContextEnginePluginSetup,
   ContextEnginePluginStart,
@@ -29,6 +29,7 @@ export interface ContextEngineAgentBuilderSetupDependencies {
 }
 
 export interface ContextEngineAgentBuilderStartDependencies {
+  agentBuilder?: AgentBuilderPluginStart;
   contextEngine: ContextEnginePluginStart;
   security: SecurityPluginStart;
   spaces?: SpacesPluginStart;
