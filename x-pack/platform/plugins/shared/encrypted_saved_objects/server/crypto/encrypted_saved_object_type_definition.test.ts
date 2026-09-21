@@ -131,6 +131,27 @@ it('throws when the same attributes are included in AAD and encrypted', () => {
   );
 });
 
+it('does not observe mutations made to the registration sets after construction', () => {
+  const attributesToEncrypt = new Set(['secrets']);
+  const attributesToIncludeInAAD = new Set(['name']);
+  const typeDefinition = new EncryptedSavedObjectAttributesDefinition({
+    type: 'some-type',
+    attributesToEncrypt,
+    attributesToIncludeInAAD,
+  });
+  const definitionHash = typeDefinition.getDefinitionHash('some-type');
+
+  attributesToEncrypt.add('apiKey');
+  attributesToIncludeInAAD.add('ssl.key');
+
+  expect(typeDefinition.shouldBeEncrypted('apiKey')).toBe(false);
+  expect(typeDefinition.shouldBeIncludedInAAD('ssl.key')).toBe(false);
+  expect(typeDefinition.collectAttributesForAAD({ name: 'a-name', 'ssl.key': 'a-key' })).toEqual({
+    name: 'a-name',
+  });
+  expect(typeDefinition.getDefinitionHash('some-type')).toBe(definitionHash);
+});
+
 describe('dotted attribute keys', () => {
   const dottedKeysError = (type: string, { encrypt, aad }: { encrypt?: string; aad?: string }) => {
     const failures = [

@@ -195,7 +195,11 @@ export class EncryptedSavedObjectAttributesDefinition {
 
     this.attributesToEncrypt = attributesToEncrypt;
     this.attributesToStrip = attributesToStrip;
-    this.attributesToIncludeInAAD = typeRegistration.attributesToIncludeInAAD;
+    // Defensive copy: the caller keeps a mutable handle on the set it passed in, and the
+    // validation above only holds if a later mutation cannot reach this definition.
+    this.attributesToIncludeInAAD = typeRegistration.attributesToIncludeInAAD
+      ? new Set(typeRegistration.attributesToIncludeInAAD)
+      : undefined;
   }
 
   /**
