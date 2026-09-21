@@ -1020,7 +1020,6 @@ async function installPackageByUpload({
       ignoreMappingUpdateErrors,
       skipDataStreamRollover,
       useStreaming,
-      authorizedSpaces: authorizedSpaces.length > 0 ? authorizedSpaces : undefined,
     });
   } catch (e) {
     return {
