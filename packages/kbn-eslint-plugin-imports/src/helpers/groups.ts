@@ -47,7 +47,15 @@ export function isDevOnlyPackage(module: { manifest?: ModuleId['manifest'] }): b
  * packages, test/mock files, and tooling can.
  */
 export function mayImportDevOnlyPackage(from: ModuleId): boolean {
-  return isDevOnly(from) || from.type === 'tests or mocks' || from.type === 'tooling';
+  return (
+    isDevOnly(from) ||
+    from.type === 'tests or mocks' ||
+    from.type === 'tooling' ||
+    // Repo/dev Node bootstrap. Dist uses dist.js and omits this file. It must
+    // stay a common package so CLI and worker wrappers can import it; those
+    // cannot import tooling, so this file cannot live under scripts/.
+    from.repoRel === 'src/setup_node_env/index.js'
+  );
 }
 
 /**
