@@ -23,6 +23,8 @@ export interface UseMatchedActionPoliciesResult {
   error: Error | null;
   items: MatchedActionPolicy[];
   total: number;
+  evaluatedCount: number;
+  isTruncated: boolean;
 }
 
 export const useMatchedActionPolicies = ({
@@ -47,5 +49,7 @@ export const useMatchedActionPolicies = ({
     error: error instanceof Error ? error : error != null ? new Error(String(error)) : null,
     items: data?.items ?? [],
     total: data?.total ?? 0,
+    evaluatedCount: data?.evaluated_count ?? 0,
+    isTruncated: data?.is_truncated ?? false,
   };
 };
