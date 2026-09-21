@@ -20,7 +20,7 @@ export const withAlertZeroEnabled =
   <P, Q, B>(handler: RequestHandler<P, Q, B>): RequestHandler<P, Q, B> =>
   async (context, request, response) => {
     const { uiSettings } = await context.core;
-    const isEnabled = await uiSettings.client.get<boolean>(ALERTZERO_ENABLED_SETTING_ID);
+    const isEnabled = await uiSettings.client.get<boolean>(ALERTZERO_ENABLED_SETTING_ID, false);
     if (!isEnabled) {
       return response.notFound();
     }
