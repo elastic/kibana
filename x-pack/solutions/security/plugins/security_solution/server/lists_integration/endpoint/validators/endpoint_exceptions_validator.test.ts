@@ -49,12 +49,14 @@ describe('Endpoint Exceptions API validations', () => {
         ],
       } as unknown as CreateExceptionListItemOptions);
 
-    it('trims edge whitespace on create', async () => {
+    it('preserves edge whitespace on create', async () => {
+      // Endpoint Exceptions let the user pick any field from the events index, where edge
+      // whitespace can be part of a legitimate value, so values are stored verbatim.
       const item = buildItem(' C:\\Windows\\notepad.exe ');
 
       await expect(validator.validatePreCreateItem(item)).resolves.toBeDefined();
       expect(item.entries[0]).toEqual(
-        expect.objectContaining({ value: 'C:\\Windows\\notepad.exe' })
+        expect.objectContaining({ value: ' C:\\Windows\\notepad.exe ' })
       );
     });
 

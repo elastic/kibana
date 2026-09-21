@@ -308,6 +308,7 @@ export class TrustedAppValidator extends BaseValidator {
   }
 
   private async validateTrustedAppData(item: ExceptionItemLikeOptions): Promise<void> {
+    this.trimEntryValues(item);
     this.validateEntryValueCharacters(item);
     await this.validateBasicData(item);
 

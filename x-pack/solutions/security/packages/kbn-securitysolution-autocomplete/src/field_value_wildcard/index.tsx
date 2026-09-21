@@ -41,6 +41,8 @@ interface AutocompleteFieldWildcardProps {
   onError: (arg: boolean) => void;
   onWarning: (arg: boolean) => void;
   warning?: Warning;
+  /** Error supplied by the parent. Takes precedence over internally derived errors. */
+  externalError?: string;
   'aria-label'?: string;
 }
 
@@ -61,11 +63,19 @@ export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildc
     onError,
     onWarning,
     warning,
+    externalError,
     'aria-label': ariaLabel,
   }): JSX.Element => {
     const [searchQuery, setSearchQuery] = useState('');
     const [touched, setIsTouched] = useState(false);
-    const [error, setError] = useState<string | undefined>(undefined);
+    const [internalError, setError] = useState<string | undefined>(undefined);
+    const error = externalError ?? internalError;
+
+    // Keep the parent's notion of "this row has an error" in sync with the combined state,
+    // so an error handed down via `externalError` also gates submission.
+    useEffect(() => {
+      onError?.(error != null);
+    }, [error, onError]);
     const [showSpacesWarning, setShowSpacesWarning] = useState<boolean>(false);
     const [isLoadingSuggestions, , suggestions] = useFieldValueAutocomplete({
       autocompleteService,
@@ -94,19 +104,13 @@ export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildc
       },
       [setShowSpacesWarning]
     );
+    // Reporting upward is handled by the effect that watches the combined error state,
+    // so this only has to record the internally derived error.
     const handleError = useCallback(
       (err: string | undefined): void => {
-        setError((existingErr): string | undefined => {
-          const oldErr = existingErr != null;
-          const newErr = err != null;
-          if (oldErr !== newErr && onError != null) {
-            onError(newErr);
-          }
-
-          return err;
-        });
+        setError(err);
       },
-      [setError, onError]
+      [setError]
     );
 
     const handleWarning = useCallback(
@@ -236,13 +240,10 @@ export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildc
 
     useEffect((): void => {
       setError(undefined);
-      if (onError != null) {
-        onError(false);
-      }
       handleSpacesWarning(selectedValue);
 
       onWarning(false);
-    }, [selectedField, selectedValue, onError, onWarning, handleSpacesWarning]);
+    }, [selectedField, selectedValue, onWarning, handleSpacesWarning]);
 
     const defaultInput = useMemo((): JSX.Element => {
       return (

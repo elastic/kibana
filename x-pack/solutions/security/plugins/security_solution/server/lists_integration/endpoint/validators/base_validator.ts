@@ -199,12 +199,13 @@ export class BaseValidator {
   }
 
   /**
-   * Trims edge whitespace from `match`/`match_any`/`wildcard` entry values in place (the Endpoint
-   * matches these literally) and rejects values that still contain control characters.
+   * Walks `match`/`match_any`/`wildcard` entry values (the ones the Endpoint matches literally),
+   * applying `callback` to each.
    */
-  protected validateEntryValueCharacters(item: ExceptionItemLikeOptions): void {
-    const controlCharacterFields = new Set<string>();
-
+  private forEachLiteralEntry(
+    item: ExceptionItemLikeOptions,
+    callback: (entry: EndpointArtifactEntryValue) => void
+  ): void {
     const inspectEntries = (entries: EndpointArtifactEntryValue[]): void => {
       entries.forEach((entry) => {
         if (entry.type === 'nested') {
@@ -216,15 +217,41 @@ export class BaseValidator {
           return;
         }
 
-        entry.value = trimInputValues(entry.value);
-
-        if (hasControlCharacters(entry.value)) {
-          controlCharacterFields.add(entry.field);
-        }
+        callback(entry);
       });
     };
 
     inspectEntries(item.entries as EndpointArtifactEntryValue[]);
+  }
+
+  /**
+   * Trims edge whitespace from entry values in place.
+   *
+   * Only artifacts whose fields are a fixed, known set of paths/hashes/signers (Trusted Apps and
+   * Blocklist) should call this. Artifacts that let the user pick any field from the events index
+   * (Event Filters, Endpoint Exceptions) must not, because edge whitespace can be part of a
+   * legitimate value there — a Linux file name or a registry value name, for example.
+   */
+  protected trimEntryValues(item: ExceptionItemLikeOptions): void {
+    this.forEachLiteralEntry(item, (entry) => {
+      if (entry.value !== undefined) {
+        entry.value = trimInputValues(entry.value);
+      }
+    });
+  }
+
+  /**
+   * Rejects entry values containing control characters. These prevent the Endpoint from matching
+   * the value and are never legitimate, so this applies to every artifact type.
+   */
+  protected validateEntryValueCharacters(item: ExceptionItemLikeOptions): void {
+    const controlCharacterFields = new Set<string>();
+
+    this.forEachLiteralEntry(item, (entry) => {
+      if (hasControlCharacters(entry.value)) {
+        controlCharacterFields.add(entry.field);
+      }
+    });
 
     if (controlCharacterFields.size) {
       throw new EndpointArtifactExceptionValidationError(

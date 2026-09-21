@@ -241,11 +241,13 @@ describe('Endpoint Trusted Device API validations', () => {
       ).rejects.toThrow(/maximum length of \[4096\]/);
     });
 
-    it('trims edge whitespace on create', async () => {
+    it('preserves edge whitespace on create', async () => {
+      // Device descriptor strings reported by the Endpoint can be space padded by the hardware
+      // itself, so trimming here would stop a legitimate entry from matching.
       const item = buildItem(' DESKTOP-1 ');
 
       await expect(trustedDeviceValidator.validatePreCreateItem(item)).resolves.toBeDefined();
-      expect(item.entries[0]).toEqual(expect.objectContaining({ value: 'DESKTOP-1' }));
+      expect(item.entries[0]).toEqual(expect.objectContaining({ value: ' DESKTOP-1 ' }));
     });
 
     it('rejects a control character on create', async () => {

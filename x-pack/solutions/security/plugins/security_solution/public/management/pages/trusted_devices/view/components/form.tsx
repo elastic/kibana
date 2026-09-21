@@ -794,7 +794,7 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
 
     const handleEntryValueChange = useCallback(
       (index: number, options: Array<EuiComboBoxOptionOption<string>>) => {
-        const value = options.length > 0 ? options[0].label.trim() : '';
+        const value = options.length > 0 ? options[0].label : '';
         updateEntryAtIndex(index, { value });
       },
       [updateEntryAtIndex]
@@ -804,16 +804,8 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
       (index: number) => {
         setHasVisitedAnyEntry(true);
         updateVisitedFields({ ...visitedFields, entries: true });
-
-        const entry = currentItem.entries?.[index];
-        if (entry && 'value' in entry && typeof entry.value === 'string') {
-          const trimmedValue = entry.value.trim();
-          if (trimmedValue !== entry.value) {
-            updateEntryAtIndex(index, { value: trimmedValue });
-          }
-        }
       },
-      [currentItem.entries, updateEntryAtIndex, updateVisitedFields, visitedFields]
+      [visitedFields, updateVisitedFields]
     );
 
     const handleAddEntry = useCallback(() => {

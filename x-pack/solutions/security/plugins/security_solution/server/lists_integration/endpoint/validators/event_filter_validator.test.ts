@@ -60,7 +60,9 @@ describe('Endpoint Exceptions API validations', () => {
       );
     });
 
-    it('trims edge whitespace on create', async () => {
+    it('preserves edge whitespace on create', async () => {
+      // Event Filters let the user pick any field from the events index, where edge whitespace
+      // can be part of a legitimate value, so values are stored verbatim.
       const item = buildItem('process.executable');
       item.entries = [
         {
@@ -72,7 +74,7 @@ describe('Endpoint Exceptions API validations', () => {
       ];
 
       await expect(validator.validatePreCreateItem(item)).resolves.toBeDefined();
-      expect(item.entries[0]).toEqual(expect.objectContaining({ value: '/opt/Elastic/*' }));
+      expect(item.entries[0]).toEqual(expect.objectContaining({ value: '/opt/Elastic/*\u00A0' }));
     });
 
     it('rejects a control character in a nested entry on update', async () => {
