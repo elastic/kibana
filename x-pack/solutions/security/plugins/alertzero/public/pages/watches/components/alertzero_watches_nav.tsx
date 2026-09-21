@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { EuiListGroup, EuiListGroupItem, EuiSkeletonText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import {
   compareWatchesForDisplay,
@@ -58,42 +58,53 @@ export const AlertZeroWatchesNav: React.FC<AlertZeroWatchesNavProps> = ({ active
         <h2>{i18n.PAGE_TITLE}</h2>
       </EuiTitle>
 
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="xs"
-        responsive={false}
+      <div
         css={css`
           margin-top: ${euiTheme.size.m};
         `}
       >
         {isLoading && watches.length === 0 ? (
-          <EuiFlexItem grow={false}>
-            <EuiSkeletonText
-              lines={5}
-              size="s"
-              isLoading
-              announceLoadedStatus={false}
-              aria-label={i18n.LOADING_WATCHES}
-              data-test-subj="alertZeroWatchesSubnavLoading"
-            />
-          </EuiFlexItem>
+          <EuiSkeletonText
+            lines={5}
+            size="s"
+            isLoading
+            announceLoadedStatus={false}
+            aria-label={i18n.LOADING_WATCHES}
+            data-test-subj="alertZeroWatchesSubnavLoading"
+          />
         ) : (
-          watches.map((watch) => (
-            <EuiFlexItem key={watch.id} grow={false}>
-              <WatchNavItem watch={watch} isActive={watch.id === active} />
-            </EuiFlexItem>
-          ))
+          <EuiListGroup
+            maxWidth={false}
+            css={css`
+              display: flex;
+              flex-direction: column;
+              gap: 2px;
+            `}
+          >
+            {watches.map((watch) => (
+              <WatchNavItem key={watch.id} watch={watch} isActive={watch.id === active} />
+            ))}
+          </EuiListGroup>
         )}
-      </EuiFlexGroup>
+      </div>
     </aside>
   );
 };
 
 const WatchNavItem: React.FC<{ watch: Watch; isActive: boolean }> = ({ watch, isActive }) => {
   const { euiTheme } = useEuiTheme();
+  const history = useHistory();
+  const path = `/watches/${encodeURIComponent(watch.id)}`;
 
-  return (
-    <NavButton id={watch.id} path={`/watches/${encodeURIComponent(watch.id)}`} isActive={isActive}>
+  const label = (
+    <span
+      css={css`
+        display: inline-flex;
+        align-items: center;
+        gap: ${euiTheme.size.s};
+        min-width: 0;
+      `}
+    >
       <span
         aria-hidden={true}
         css={css`
@@ -106,8 +117,6 @@ const WatchNavItem: React.FC<{ watch: Watch; isActive: boolean }> = ({ watch, is
       />
       <span
         css={css`
-          flex: 1;
-          min-width: 0;
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
@@ -115,61 +124,16 @@ const WatchNavItem: React.FC<{ watch: Watch; isActive: boolean }> = ({ watch, is
       >
         {watch.name}
       </span>
-    </NavButton>
+    </span>
   );
-};
-
-interface NavButtonProps {
-  id: WatchesSectionId;
-  path: string;
-  isActive: boolean;
-  children: React.ReactNode;
-}
-
-const NavButton: React.FC<NavButtonProps> = ({ id, path, isActive, children }) => {
-  const { euiTheme } = useEuiTheme();
-  const history = useHistory();
 
   return (
-    <button
-      type="button"
-      aria-current={isActive ? 'page' : undefined}
+    <EuiListGroupItem
+      label={label}
+      isActive={isActive}
       onClick={() => history.push(path)}
-      data-test-subj={`alertZeroWatchesSubnav-${id}`}
-      css={css`
-        position: relative;
-        display: flex;
-        align-items: center;
-        gap: ${euiTheme.size.s};
-        width: 100%;
-        padding: ${euiTheme.size.s} ${euiTheme.size.m};
-        border: none;
-        border-radius: ${euiTheme.border.radius.medium};
-        background: ${isActive ? euiTheme.colors.lightShade : 'transparent'};
-        color: ${isActive ? euiTheme.colors.textParagraph : euiTheme.colors.textSubdued};
-        cursor: pointer;
-        font-size: ${euiTheme.size.m};
-        font-weight: ${isActive ? 600 : 500};
-        text-align: left;
-
-        &::before {
-          content: '';
-          position: absolute;
-          left: 0;
-          top: 8px;
-          bottom: 8px;
-          width: 3px;
-          border-radius: 0 2px 2px 0;
-          background: ${isActive ? euiTheme.colors.primary : 'transparent'};
-        }
-
-        &:hover {
-          background: ${euiTheme.colors.lightestShade};
-          color: ${euiTheme.colors.textParagraph};
-        }
-      `}
-    >
-      {children}
-    </button>
+      data-test-subj={`alertZeroWatchesSubnav-${watch.id}`}
+      aria-current={isActive ? 'page' : undefined}
+    />
   );
 };
