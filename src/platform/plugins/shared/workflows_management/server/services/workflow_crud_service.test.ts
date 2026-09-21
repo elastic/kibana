@@ -9,9 +9,12 @@
 
 import { errors } from '@elastic/elasticsearch';
 import type { CoreStart } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { EsWorkflow } from '@kbn/workflows';
+import type {
+  StepExecutionsDataClient,
+  WorkflowExecutionsDataClient,
+} from '@kbn/workflows-execution-engine/server';
 
 import type { WorkflowCrudDeps } from './types';
 import { WorkflowCrudService } from './workflow_crud_service';
@@ -96,9 +99,14 @@ const makeDeps = (
       safeParse: (v: unknown) => ({ success: true, data: v }),
     }),
   } as unknown as WorkflowValidationService;
+  const workflowExecutionsDataClient = {
+    deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
+  } as unknown as WorkflowExecutionsDataClient;
+  const stepExecutionsDataClient = {
+    deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
+  } as unknown as StepExecutionsDataClient;
   const deps: WorkflowCrudDeps = {
     logger: loggerMock.create(),
-    esClient: elasticsearchServiceMock.createElasticsearchClient(),
     workflowStorage: { getClient: () => client } as any,
     getSecurity: () => makeSecurityMock('alice'),
     workflowsExtensions: undefined,
@@ -111,6 +119,8 @@ const makeDeps = (
       asScoped: jest.fn(),
       asSystemUser: jest.fn(),
     } as any,
+    workflowExecutionsDataClient,
+    stepExecutionsDataClient,
     ...depsOverrides,
   };
   return { deps, client };
@@ -2479,6 +2489,53 @@ describe('WorkflowCrudService', () => {
             valid: false,
             enabled: false,
           }),
+        })
+      );
+
+      jest.restoreAllMocks();
+    });
+
+    it('spreads the name from the yaml patch into the stored document', async () => {
+      // `applyYamlUpdate` is mocked, so this asserts that `updateWorkflow` spreads the
+      // returned patch (including `name`) into the indexed document — not that the name
+      // is recovered from the raw YAML (that parsing is covered in workflow_prepare.test.ts).
+      jest.spyOn(workflowPrepare, 'applyYamlUpdate').mockReturnValue({
+        updatedDataPatch: {
+          definition: null,
+          enabled: false,
+          valid: false,
+          triggerTypes: [],
+          name: 'Renamed Invalid Workflow',
+        },
+        validationErrors: ['YAML schema error'],
+        shouldUpdateScheduler: true,
+      });
+
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'wf-1',
+              _source: makeSource({ name: 'Old Name', valid: false }),
+              _seq_no: 2,
+              _primary_term: 1,
+            },
+          ],
+        },
+      });
+
+      const service = new WorkflowCrudService(deps);
+      await service.updateWorkflow(
+        'wf-1',
+        { yaml: 'name: Renamed Invalid Workflow' } as any,
+        'default',
+        request
+      );
+
+      expect(client.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({ name: 'Renamed Invalid Workflow' }),
         })
       );
 

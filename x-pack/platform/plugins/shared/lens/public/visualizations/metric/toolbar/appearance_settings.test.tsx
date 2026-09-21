@@ -20,9 +20,18 @@ const palette: PaletteOutput<CustomPaletteParams> = {
   },
 };
 
-// Remove legacy state properties as they should be removed in the initialize method
+// Current-state fixture. Initialize consumes secondaryPrefix, valuesTextAlign,
+// titleWeight, and secondaryLabelPosition. secondaryLabel is omitted because it
+// is optional leftover (kept as a render fallback), not because initialize deletes it.
 const fullState: Required<
-  Omit<MetricVisualizationState, 'secondaryPrefix' | 'valuesTextAlign' | 'titleWeight'>
+  Omit<
+    MetricVisualizationState,
+    | 'secondaryPrefix'
+    | 'valuesTextAlign'
+    | 'titleWeight'
+    | 'secondaryLabel'
+    | 'secondaryLabelPosition'
+  >
 > = {
   layerId: 'first',
   layerType: 'data',
@@ -32,7 +41,6 @@ const fullState: Required<
   breakdownByAccessor: 'breakdown-col-id',
   collapseFn: 'sum',
   subtitle: 'subtitle',
-  secondaryLabel: 'extra-text',
   progressDirection: 'vertical',
   maxCols: 5,
   color: 'static-color',
@@ -53,7 +61,7 @@ const fullState: Required<
   valueFontMode: 'default',
   density: 'default',
   secondaryTrend: { type: 'none' },
-  secondaryLabelPosition: 'before',
+  secondaryNameVisibility: 'before',
   applyColorTo: 'background',
 };
 

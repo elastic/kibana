@@ -62,7 +62,7 @@ export const StepActions = React.memo<StepActionsProps>(({ onStepRun }) => {
           aria-label={i18n.translate('console.requestOptionsButtonAriaLabel', {
             defaultMessage: 'Request options',
           })}
-          iconType="boxesVertical"
+          iconType="ellipsis"
           iconSize="s"
         />
       </EuiToolTip>

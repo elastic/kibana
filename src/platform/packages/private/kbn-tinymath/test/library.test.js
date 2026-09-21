@@ -12,7 +12,7 @@
   Need tests for spacing, etc
 */
 
-import { evaluate, parse } from '../src';
+import { evaluate, getUnquoted, MAX_EXPRESSION_LENGTH, parse } from '../src';
 
 function variableEqual(value) {
   return expect.objectContaining({ type: 'variable', value });
@@ -340,9 +340,22 @@ describe('Parser', () => {
     expect(() => parse(3)).toThrow('Expression must be a string');
   });
 
-  it('rejects expressions exceeding max length', () => {
-    const longExpr = 'a' + ' + a'.repeat(300);
+  it('rejects expressions exceeding max unquoted length', () => {
+    const longExpr = 'a' + ' + a'.repeat(MAX_EXPRESSION_LENGTH);
+    expect(getUnquoted(longExpr).length).toBeGreaterThan(MAX_EXPRESSION_LENGTH);
     expect(() => parse(longExpr)).toThrow('exceeds maximum length');
+  });
+
+  it('does not count quoted filters toward the expression length limit', () => {
+    const longFilter = 'host.name: server AND status: error AND '.repeat(10) + `foo\\'s`;
+    const formula = Array.from(
+      { length: 100 },
+      (_, i) => `count(lucene='${longFilter} id:${i}')`
+    ).join(' + ');
+
+    expect(formula.length).toBeGreaterThan(MAX_EXPRESSION_LENGTH);
+    expect(getUnquoted(formula).length).toBeLessThanOrEqual(MAX_EXPRESSION_LENGTH);
+    expect(() => parse(formula)).not.toThrow();
   });
 
   it('rejects expressions exceeding max nesting depth', () => {

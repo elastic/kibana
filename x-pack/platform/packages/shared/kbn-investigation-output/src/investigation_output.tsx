@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import type { InvestigationOutputProps } from './types';
 import { FinalResults } from './final_results';
 import { HypothesisRow } from './hypothesis_row';
-import { SignificantEventUpdates } from './significant_event_updates';
+import { TriggerFeedback } from './trigger_feedback';
 import { buildHeader } from './utils';
 
 /**
@@ -144,11 +144,8 @@ export const InvestigationOutput: React.FC<InvestigationOutputProps> = ({
        */}
       {status === 'complete' && state && <FinalResults state={state} />}
 
-      {status === 'complete' && state?.significant_event_updates?.length ? (
-        <SignificantEventUpdates
-          updates={state.significant_event_updates}
-          getQueryHref={getQueryHref}
-        />
+      {status === 'complete' && state?.trigger_feedback?.length ? (
+        <TriggerFeedback updates={state.trigger_feedback} getQueryHref={getQueryHref} />
       ) : null}
     </EuiPanel>
   );

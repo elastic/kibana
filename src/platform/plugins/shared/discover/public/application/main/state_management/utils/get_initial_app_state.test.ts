@@ -79,6 +79,7 @@ describe('getInitialAppState', () => {
       }),
       services,
       currentDataView: undefined,
+      tabType: undefined,
     });
     const appState = getInitialAppState({
       hasGlobalState: false,
@@ -126,6 +127,7 @@ describe('getInitialAppState', () => {
       }),
       services,
       currentDataView: undefined,
+      tabType: undefined,
     });
     const appState = getInitialAppState({
       hasGlobalState: false,
@@ -175,6 +177,7 @@ describe('getInitialAppState', () => {
           "type": "dataView",
         },
         "density": undefined,
+        "documentsDisplayMode": undefined,
         "filters": undefined,
         "grid": undefined,
         "headerRowHeight": undefined,
@@ -183,6 +186,7 @@ describe('getInitialAppState', () => {
         "hideSidebar": undefined,
         "hideTable": undefined,
         "interval": "auto",
+        "jsonModeSettings": undefined,
         "query": Object {
           "language": "kuery",
           "query": "",
@@ -222,6 +226,7 @@ describe('getInitialAppState', () => {
           "type": "dataView",
         },
         "density": undefined,
+        "documentsDisplayMode": undefined,
         "filters": undefined,
         "grid": undefined,
         "headerRowHeight": undefined,
@@ -230,6 +235,7 @@ describe('getInitialAppState', () => {
         "hideSidebar": undefined,
         "hideTable": undefined,
         "interval": "auto",
+        "jsonModeSettings": undefined,
         "query": Object {
           "language": "kuery",
           "query": "",
@@ -266,6 +272,7 @@ describe('getInitialAppState', () => {
       tab: getTabStateMock({ id: 'mock-tab' }),
       services,
       currentDataView: undefined,
+      tabType: undefined,
     });
 
   test('should set view mode correctly', () => {

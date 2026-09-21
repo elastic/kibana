@@ -12,11 +12,11 @@ import type {
   RouteConfigOptions,
   RouteMethod,
 } from '@kbn/core-http-server';
-import type { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/core/server';
 import { errorResponseSchema } from '@kbn/alerting-v2-schemas';
 import { z } from '@kbn/zod/v4';
 import { BaseAlertingRoute, type AlertingRouteSchemas } from './base_alerting_route';
-import { ALERTING_ERROR_CODES } from '../lib/errors/error_codes';
+import { ALERTING_ERROR_CODES, ALERTING_LOG_CODES } from '../lib/errors/error_codes';
 import type { MockUiSettingsClient } from '../lib/services/settings_service/settings_service.mock';
 import { deriveErrorCodeFromStatus } from './derive_error_code';
 import { createRouteDependencies } from './test_utils';
@@ -65,14 +65,14 @@ class TestRoute extends BaseAlertingRoute {
 
 describe('BaseAlertingRoute', () => {
   let response: jest.Mocked<KibanaResponseFactory>;
-  let logger: jest.Mocked<Logger>;
+  let mockLogger: jest.Mocked<Logger>;
   let mockUiSettingsClient: MockUiSettingsClient;
   let route: TestRoute;
 
   beforeEach(() => {
     const deps = createRouteDependencies();
     response = deps.response;
-    logger = deps.logger;
+    mockLogger = deps.mockLogger;
     mockUiSettingsClient = deps.mockUiSettingsClient;
     route = new TestRoute(deps.ctx);
   });
@@ -264,10 +264,11 @@ describe('BaseAlertingRoute', () => {
 
       await route.handle();
 
-      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('test route error'), {
-        error: cause,
+      expect(mockLogger.error).toHaveBeenCalledWith('boom', {
+        labels: { code: ALERTING_LOG_CODES.ROUTES_HANDLER_FAILED },
+        error: expect.objectContaining({ message: 'boom', type: 'TypeError' }),
       });
-      expect(logger.debug).not.toHaveBeenCalled();
+      expect(mockLogger.debug).not.toHaveBeenCalled();
     });
 
     it('logs 4xx errors at debug level only', async () => {
@@ -275,8 +276,10 @@ describe('BaseAlertingRoute', () => {
 
       await route.handle();
 
-      expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('test route error'));
-      expect(logger.error).not.toHaveBeenCalled();
+      expect(mockLogger.debug).toHaveBeenCalledWith('Route handler returned client error', {
+        labels: { resource: 'test route' },
+      });
+      expect(mockLogger.error).not.toHaveBeenCalled();
     });
   });
 
@@ -288,7 +291,7 @@ describe('BaseAlertingRoute', () => {
     it('returns default options when no routeOptions are declared', () => {
       expect(TestRoute.options).toEqual(
         expect.objectContaining({
-          access: 'public',
+          access: 'internal',
           tags: ['oas-tag:alerting-v2'],
           availability: { stability: 'experimental', since: '9.5.0' },
           oasOperationObject: expect.any(Function),
@@ -301,7 +304,7 @@ describe('BaseAlertingRoute', () => {
 
       expect(TestRoute.options).toEqual(
         expect.objectContaining({
-          access: 'public',
+          access: 'internal',
           tags: ['oas-tag:alerting-v2'],
           availability: { stability: 'experimental', since: '9.5.0' },
           summary: 'Get a rule',
@@ -311,11 +314,11 @@ describe('BaseAlertingRoute', () => {
     });
 
     it('overrides defaults with child values', () => {
-      TestRoute.routeOptions = { access: 'internal' };
+      TestRoute.routeOptions = { access: 'public' };
 
       expect(TestRoute.options).toEqual(
         expect.objectContaining({
-          access: 'internal',
+          access: 'public',
           tags: ['oas-tag:alerting-v2'],
           availability: { stability: 'experimental', since: '9.5.0' },
           oasOperationObject: expect.any(Function),
@@ -328,7 +331,7 @@ describe('BaseAlertingRoute', () => {
 
       expect(TestRoute.options).toEqual(
         expect.objectContaining({
-          access: 'public',
+          access: 'internal',
           tags: ['oas-tag:alerting-v2', 'extra-tag'],
           availability: { stability: 'experimental', since: '9.5.0' },
           oasOperationObject: expect.any(Function),
@@ -341,7 +344,7 @@ describe('BaseAlertingRoute', () => {
 
       expect(TestRoute.options).toEqual(
         expect.objectContaining({
-          access: 'public',
+          access: 'internal',
           tags: ['oas-tag:alerting-v2'],
           availability: { stability: 'experimental', since: '1.0' },
           oasOperationObject: expect.any(Function),

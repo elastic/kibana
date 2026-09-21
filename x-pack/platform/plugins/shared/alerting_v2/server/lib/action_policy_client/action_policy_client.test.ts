@@ -19,8 +19,6 @@ import {
   createMockEncryptedSavedObjects,
   createActionPolicySavedObjectService,
 } from '../services/action_policy_saved_object_service/action_policy_saved_object_service.mock';
-import type { RulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service';
-import { createRulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service.mock';
 import type { UserService } from '../services/user_service/user_service';
 import { createUserService } from '../services/user_service/user_service.mock';
 import type { LoggerService } from '../services/logger_service/logger_service';
@@ -28,17 +26,10 @@ import { createLoggerService } from '../services/logger_service/logger_service.m
 import { ALERTING_LOG_CODES } from '../errors/error_codes';
 import { ActionPolicyClient } from './action_policy_client';
 
-jest.mock('@kbn/eval-kql', () => ({
-  evaluateKql: jest.fn(),
-}));
-
-import { evaluateKql } from '@kbn/eval-kql';
-
 describe('ActionPolicyClient', () => {
   let client: ActionPolicyClient;
   let actionPolicySavedObjectService: ActionPolicySavedObjectService;
   let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
-  let rulesSavedObjectService: RulesSavedObjectService;
   let userService: UserService;
   let userProfileService: jest.Mocked<UserProfileServiceStart>;
   let apiKeyService: jest.Mocked<ApiKeyServiceContract>;
@@ -56,13 +47,6 @@ describe('ActionPolicyClient', () => {
 
     ({ actionPolicySavedObjectService, mockSavedObjectsClient } =
       createActionPolicySavedObjectService());
-    ({ rulesSavedObjectService } = createRulesSavedObjectService());
-    // Default: every rule lookup succeeds so happy-path tests don't need to wire it up.
-    jest.spyOn(rulesSavedObjectService, 'get').mockResolvedValue({
-      id: 'rule-default',
-      attributes: {} as never,
-      version: 'v1',
-    });
     ({ userService, userProfileService } = createUserService());
     apiKeyService = createMockApiKeyService();
     ({ loggerService, mockLogger } = createLoggerService());
@@ -78,7 +62,6 @@ describe('ActionPolicyClient', () => {
 
     client = new ActionPolicyClient(
       actionPolicySavedObjectService,
-      rulesSavedObjectService,
       userService,
       apiKeyService,
       mockEsoClient as any,
@@ -158,7 +141,6 @@ describe('ActionPolicyClient', () => {
           destinations: [{ type: 'workflow', id: 'my-workflow' }],
           matcher: null,
           group_by: null,
-          tags: null,
           throttle: null,
           snoozed_until: null,
           auth: {
@@ -220,35 +202,7 @@ describe('ActionPolicyClient', () => {
       expect(res.auth).not.toHaveProperty('apiKey');
     });
 
-    it('creates a action policy with tags', async () => {
-      mockSavedObjectsClient.create.mockResolvedValueOnce({
-        id: 'policy-with-tags',
-        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
-        attributes: {} as ActionPolicySavedObjectAttributes,
-        references: [],
-        version: 'WzEsMV0=',
-      });
-
-      await client.createActionPolicy({
-        data: {
-          name: 'tagged-policy',
-          description: 'policy with tags',
-          destinations: [{ type: 'workflow', id: 'my-workflow' }],
-          tags: ['production', 'critical'],
-        },
-        options: { id: 'policy-with-tags' },
-      });
-
-      expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
-        ACTION_POLICY_SAVED_OBJECT_TYPE,
-        expect.objectContaining({
-          tags: ['production', 'critical'],
-        }),
-        expect.anything()
-      );
-    });
-
-    it('stores tags as null when not provided', async () => {
+    it('stores tags as null on create', async () => {
       mockSavedObjectsClient.create.mockResolvedValueOnce({
         id: 'policy-no-tags',
         type: ACTION_POLICY_SAVED_OBJECT_TYPE,
@@ -742,42 +696,6 @@ describe('ActionPolicyClient', () => {
       );
     });
 
-    it('builds KQL filter for tags', async () => {
-      mockSavedObjectsClient.find.mockResolvedValueOnce(makeFindResponse([]));
-
-      await client.findActionPolicies({ tags: ['production', 'critical'] });
-
-      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
-        expect.objectContaining({
-          filter: expect.objectContaining({ type: 'function' }),
-        })
-      );
-    });
-
-    it('builds KQL filter for a single tag', async () => {
-      mockSavedObjectsClient.find.mockResolvedValueOnce(makeFindResponse([]));
-
-      await client.findActionPolicies({ tags: ['production'] });
-
-      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
-        expect.objectContaining({
-          filter: expect.objectContaining({ type: 'function' }),
-        })
-      );
-    });
-
-    it('does not build a filter for empty tags array', async () => {
-      mockSavedObjectsClient.find.mockResolvedValueOnce(makeFindResponse([]));
-
-      await client.findActionPolicies({ tags: [] });
-
-      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
-        expect.objectContaining({
-          filter: undefined,
-        })
-      );
-    });
-
     it('builds KQL filter for enabled=false', async () => {
       mockSavedObjectsClient.find.mockResolvedValueOnce(makeFindResponse([]));
 
@@ -872,7 +790,7 @@ describe('ActionPolicyClient', () => {
         description: 'original-policy description',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'original-workflow' }],
-        matcher: 'event.severity: critical',
+        matcher: { expression: 'event.severity: critical' },
         groupBy: ['host.name'],
         throttle: { interval: '1h' },
         apiKey: 'old-api-key',
@@ -902,7 +820,6 @@ describe('ActionPolicyClient', () => {
         data: {
           matcher: null,
           group_by: null,
-          tags: null,
           throttle: null,
         },
         options: { id: 'policy-id-update-1', version: 'WzEsMV0=' },
@@ -918,7 +835,6 @@ describe('ActionPolicyClient', () => {
           destinations: [{ type: 'workflow', id: 'original-workflow' }],
           matcher: null,
           groupBy: null,
-          tags: null,
           throttle: null,
         }),
         { version: 'WzEsMV0=' }
@@ -1260,51 +1176,6 @@ describe('ActionPolicyClient', () => {
       );
     });
 
-    it('replaces tags when tags is provided in update', async () => {
-      const existingAttributes: ActionPolicySavedObjectAttributes = {
-        name: 'tagged-policy',
-        description: 'a policy with tags',
-        enabled: true,
-        destinations: [{ type: 'workflow', id: 'wf-1' }],
-        tags: ['production'],
-        apiKey: 'old-api-key',
-        apiKeyOwner: 'old-user',
-        apiKeyCreatedByUser: false,
-        createdBy: 'creator_profile_uid',
-        createdAt: '2024-12-01T00:00:00.000Z',
-        updatedBy: 'updater_profile_uid',
-        updatedAt: '2024-12-01T00:00:00.000Z',
-      };
-      mockSavedObjectsClient.get.mockResolvedValueOnce({
-        id: 'policy-id-update-1',
-        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
-        references: [],
-        version: 'WzEsMV0=',
-        attributes: existingAttributes,
-      });
-      mockSavedObjectsClient.update.mockResolvedValueOnce({
-        id: 'policy-id-update-1',
-        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
-        attributes: {} as ActionPolicySavedObjectAttributes,
-        references: [],
-        version: 'WzIsMV0=',
-      });
-
-      await client.updateActionPolicy({
-        data: { tags: ['staging', 'low-priority'] },
-        options: { id: 'policy-id-update-1', version: 'WzEsMV0=' },
-      });
-
-      expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
-        ACTION_POLICY_SAVED_OBJECT_TYPE,
-        'policy-id-update-1',
-        expect.objectContaining({
-          tags: ['staging', 'low-priority'],
-        }),
-        expect.anything()
-      );
-    });
-
     it('does not call invalidation for old key when decrypted policy has createdByUser: true', async () => {
       const existingAttributes: ActionPolicySavedObjectAttributes = {
         name: 'original-policy',
@@ -1612,7 +1483,7 @@ describe('ActionPolicyClient', () => {
         description: 'before description',
         enabled: false,
         destinations: [{ type: 'workflow', id: 'wf-before' }],
-        matcher: 'env: production',
+        matcher: { expression: 'env: production' },
         groupBy: ['host.name'],
         snoozedUntil: '2099-01-01T00:00:00.000Z',
         apiKey: 'old-api-key',
@@ -1709,6 +1580,57 @@ describe('ActionPolicyClient', () => {
         ]);
         expect(apiKeyService.markApiKeysForInvalidation).not.toHaveBeenCalledWith(['old-api-key']);
       });
+    });
+
+    it('preserves stored tags through a PUT upsert', async () => {
+      const existingDocWithTags = {
+        id: 'policy-id-upsert-tags',
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        version: 'WzEsMV0=',
+        attributes: {
+          name: 'tagged-policy',
+          description: 'desc',
+          enabled: true,
+          destinations: [{ type: 'workflow', id: 'wf-1' }],
+          tags: ['production', 'critical'],
+          apiKey: 'old-api-key',
+          apiKeyOwner: 'old-user',
+          apiKeyCreatedByUser: false,
+          createdBy: 'creator_uid',
+          createdAt: '2024-01-01T00:00:00.000Z',
+          updatedBy: 'creator_uid',
+          updatedAt: '2024-01-01T00:00:00.000Z',
+        } as ActionPolicySavedObjectAttributes,
+      };
+      mockSavedObjectsClient.get
+        .mockResolvedValueOnce(existingDocWithTags)
+        .mockResolvedValueOnce(existingDocWithTags);
+      mockSavedObjectsClient.update.mockResolvedValueOnce({
+        id: 'policy-id-upsert-tags',
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: {} as ActionPolicySavedObjectAttributes,
+        references: [],
+        version: 'WzIsMV0=',
+      });
+
+      await client.upsertActionPolicy({
+        id: 'policy-id-upsert-tags',
+        data: {
+          name: 'renamed-policy',
+          description: 'new desc',
+          destinations: [{ type: 'workflow', id: 'wf-1' }],
+        },
+      });
+
+      expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+        ACTION_POLICY_SAVED_OBJECT_TYPE,
+        'policy-id-upsert-tags',
+        expect.objectContaining({
+          tags: ['production', 'critical'],
+        }),
+        expect.anything()
+      );
     });
 
     it('rethrows non-not-found errors from the existing-policy lookup', async () => {
@@ -2681,70 +2603,6 @@ describe('ActionPolicyClient', () => {
     });
   });
 
-  describe('getTags', () => {
-    const makeFindAggResponse = (buckets: Array<{ key: string }>) => ({
-      saved_objects: [],
-      total: 0,
-      per_page: 0,
-      page: 1,
-      aggregations: {
-        tags: { buckets },
-      },
-    });
-
-    it('returns tags from aggregation buckets', async () => {
-      mockSavedObjectsClient.find.mockResolvedValueOnce(
-        makeFindAggResponse([{ key: 'critical' }, { key: 'production' }, { key: 'staging' }])
-      );
-
-      const result = await client.getTags();
-
-      expect(result).toEqual(['critical', 'production', 'staging']);
-      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
-        expect.objectContaining({
-          type: ACTION_POLICY_SAVED_OBJECT_TYPE,
-          perPage: 0,
-          aggs: expect.objectContaining({
-            tags: expect.objectContaining({
-              terms: expect.objectContaining({
-                field: `${ACTION_POLICY_SAVED_OBJECT_TYPE}.attributes.tags`,
-              }),
-            }),
-          }),
-        })
-      );
-    });
-
-    it('passes search parameter as include prefix pattern', async () => {
-      mockSavedObjectsClient.find.mockResolvedValueOnce(
-        makeFindAggResponse([{ key: 'production' }])
-      );
-
-      const result = await client.getTags({ search: 'prod' });
-
-      expect(result).toEqual(['production']);
-      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
-        expect.objectContaining({
-          aggs: expect.objectContaining({
-            tags: expect.objectContaining({
-              terms: expect.objectContaining({
-                include: 'prod.*',
-              }),
-            }),
-          }),
-        })
-      );
-    });
-
-    it('returns empty array when no tags exist', async () => {
-      mockSavedObjectsClient.find.mockResolvedValueOnce(makeFindAggResponse([]));
-
-      const result = await client.getTags();
-
-      expect(result).toEqual([]);
-    });
-  });
-
   describe('deleteActionPolicy', () => {
     it('deletes a action policy successfully', async () => {
       const existingAttributes: ActionPolicySavedObjectAttributes = {
@@ -3119,37 +2977,7 @@ describe('ActionPolicyClient', () => {
       updatedAt: '2025-01-01T00:00:00.000Z',
     };
 
-    const ruleAttributes = {
-      metadata: {
-        name: 'my-rule',
-        tags: ['prod'],
-      },
-    };
-
-    beforeEach(() => {
-      (evaluateKql as jest.Mock).mockReset();
-    });
-
-    it('returns empty list when ruleId is provided and rule is not found', async () => {
-      jest
-        .spyOn(rulesSavedObjectService, 'get')
-        .mockRejectedValueOnce(
-          SavedObjectsErrorHelpers.createGenericNotFoundError('rule', 'missing-rule')
-        );
-
-      const result = await client.matchActionPoliciesForRule({ ruleId: 'missing-rule' });
-
-      expect(result.items).toHaveLength(0);
-      expect(result.total).toBe(0);
-    });
-
-    it('returns global APs for policies with no matcher, along with the space-scoped total', async () => {
-      jest.spyOn(rulesSavedObjectService, 'get').mockResolvedValueOnce({
-        id: 'rule-1',
-        attributes: ruleAttributes as never,
-        version: 'v1',
-      });
-
+    it('returns catch-all APs for policies with no matcher, along with the space-scoped total', async () => {
       mockSavedObjectsClient.find.mockResolvedValueOnce(
         makeFindResponse(
           [{ id: 'ap-catchall', attributes: { ...baseAttributes, matcher: null } }],
@@ -3157,119 +2985,139 @@ describe('ActionPolicyClient', () => {
         )
       );
 
-      const result = await client.matchActionPoliciesForRule({ ruleId: 'rule-1' });
+      const result = await client.matchActionPoliciesForRule({ ruleTags: ['prod'] });
 
       expect(result.items).toHaveLength(1);
-      expect(result.items[0].category).toBe('global');
-      expect(result.items[0].actionPolicy.id).toBe('ap-catchall');
+      expect(result.items[0].category).toBe('catch-all');
+      expect(result.items[0].action_policy.id).toBe('ap-catchall');
       expect(result.total).toBe(150);
+      expect(result.evaluated_count).toBe(1);
+      expect(result.is_truncated).toBe(true);
     });
 
-    it('returns global-filtered APs for policies where evaluateKql returns true', async () => {
-      jest.spyOn(rulesSavedObjectService, 'get').mockResolvedValueOnce({
-        id: 'rule-1',
-        attributes: ruleAttributes as never,
-        version: 'v1',
-      });
+    it('returns metadata for evaluated policies', async () => {
+      const { total, evaluatedCount, isTruncated } = {
+        total: 250,
+        evaluatedCount: 100,
+        isTruncated: true,
+      };
+      mockSavedObjectsClient.find.mockResolvedValueOnce(
+        makeFindResponse(
+          Array.from({ length: evaluatedCount }, (_, index) => ({
+            id: `ap-${index}`,
+            attributes: {
+              ...baseAttributes,
+              matcher: { tags: ['prod'] },
+            },
+          })),
+          total
+        )
+      );
 
+      const result = await client.matchActionPoliciesForRule({ ruleTags: ['prod'] });
+
+      expect(result.items).toHaveLength(evaluatedCount);
+      expect(result).toMatchObject({
+        total,
+        evaluated_count: evaluatedCount,
+        is_truncated: isTruncated,
+      });
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledTimes(1);
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({ perPage: 100 })
+      );
+    });
+
+    it('returns catch-all APs for policies whose matcher has neither tags nor an expression', async () => {
       const matcherAttr: ActionPolicySavedObjectAttributes = {
         ...baseAttributes,
-        matcher: 'rule.id : "rule-1"',
+        matcher: { tags: [], expression: '  ' },
+      };
+
+      mockSavedObjectsClient.find.mockResolvedValueOnce(
+        makeFindResponse([{ id: 'ap-empty-matcher', attributes: matcherAttr }])
+      );
+
+      const result = await client.matchActionPoliciesForRule({ ruleTags: ['prod'] });
+
+      expect(result.items).toHaveLength(1);
+      expect(result.items[0].category).toBe('catch-all');
+      expect(result.items[0].action_policy.id).toBe('ap-empty-matcher');
+    });
+
+    it('returns catch-all APs even when the rule has no tags', async () => {
+      mockSavedObjectsClient.find.mockResolvedValueOnce(
+        makeFindResponse([{ id: 'ap-catchall', attributes: { ...baseAttributes, matcher: null } }])
+      );
+
+      const result = await client.matchActionPoliciesForRule({});
+
+      expect(result.items).toHaveLength(1);
+      expect(result.items[0].category).toBe('catch-all');
+    });
+
+    it('returns tags APs when the rule tags intersect the matcher tag clause', async () => {
+      const matcherAttr: ActionPolicySavedObjectAttributes = {
+        ...baseAttributes,
+        matcher: { tags: ['prod', 'infra'] },
       };
 
       mockSavedObjectsClient.find.mockResolvedValueOnce(
         makeFindResponse([{ id: 'ap-matcher', attributes: matcherAttr }])
       );
 
-      (evaluateKql as jest.Mock).mockReturnValue(true);
-
-      const result = await client.matchActionPoliciesForRule({ ruleId: 'rule-1' });
+      const result = await client.matchActionPoliciesForRule({ ruleTags: ['prod'] });
 
       expect(result.items).toHaveLength(1);
-      expect(result.items[0].category).toBe('global-filtered');
-      expect(result.items[0].actionPolicy.id).toBe('ap-matcher');
+      expect(result.items[0].category).toBe('tags');
+      expect(result.items[0].action_policy.id).toBe('ap-matcher');
     });
 
-    it('skips APs where evaluateKql returns false', async () => {
-      jest.spyOn(rulesSavedObjectService, 'get').mockResolvedValueOnce({
-        id: 'rule-1',
-        attributes: ruleAttributes as never,
-        version: 'v1',
-      });
-
+    it('skips APs whose tag clause does not intersect the rule tags', async () => {
       const matcherAttr: ActionPolicySavedObjectAttributes = {
         ...baseAttributes,
-        matcher: 'rule.tags : "staging"',
+        matcher: { tags: ['staging'] },
       };
 
       mockSavedObjectsClient.find.mockResolvedValueOnce(
         makeFindResponse([{ id: 'ap-no-match', attributes: matcherAttr }])
       );
 
-      (evaluateKql as jest.Mock).mockReturnValue(false);
-
-      const result = await client.matchActionPoliciesForRule({ ruleId: 'rule-1' });
+      const result = await client.matchActionPoliciesForRule({ ruleTags: ['prod'] });
 
       expect(result.items).toHaveLength(0);
     });
 
-    it('skips APs where evaluateKql throws and does not re-throw', async () => {
-      jest.spyOn(rulesSavedObjectService, 'get').mockResolvedValueOnce({
-        id: 'rule-1',
-        attributes: ruleAttributes as never,
-        version: 'v1',
-      });
-
+    it('skips expression-only matchers that cannot be resolved from rule tags', async () => {
       const matcherAttr: ActionPolicySavedObjectAttributes = {
         ...baseAttributes,
-        matcher: 'invalid kql !!!',
+        matcher: { expression: 'episode_status: "active"' },
       };
 
       mockSavedObjectsClient.find.mockResolvedValueOnce(
-        makeFindResponse([{ id: 'ap-err', attributes: matcherAttr }])
+        makeFindResponse([{ id: 'ap-expression', attributes: matcherAttr }])
       );
 
-      (evaluateKql as jest.Mock).mockImplementation(() => {
-        throw new Error('KQL parse error: invalid kql !!!');
-      });
-
-      const result = await client.matchActionPoliciesForRule({ ruleId: 'rule-1' });
+      const result = await client.matchActionPoliciesForRule({ ruleTags: ['prod'] });
 
       expect(result.items).toHaveLength(0);
-      expect(mockLogger.warn).toHaveBeenCalledWith(
-        'Policy matcher failed to evaluate; treating as no-match',
-        expect.objectContaining({
-          labels: expect.objectContaining({
-            policy_id: 'ap-err',
-            code: ALERTING_LOG_CODES.POLICY_MATCHER_KQL_INVALID,
-          }),
-        })
-      );
-      const warnMessage = (mockLogger.warn as jest.Mock).mock.calls[0][0] as string;
-      expect(warnMessage).not.toContain('invalid kql !!!');
-      expect(warnMessage).not.toContain('KQL parse error');
     });
 
-    it('uses provided ruleName and ruleTags to evaluate matchers without fetching from DB', async () => {
+    it('returns tags APs when a matcher has both tags and an expression and the tags intersect', async () => {
       const matcherAttr: ActionPolicySavedObjectAttributes = {
         ...baseAttributes,
-        matcher: 'rule.tags : "prod"',
+        matcher: { tags: ['prod'], expression: 'data.error_count > 0' },
       };
 
       mockSavedObjectsClient.find.mockResolvedValueOnce(
-        makeFindResponse([{ id: 'ap-matcher', attributes: matcherAttr }])
+        makeFindResponse([{ id: 'ap-combined', attributes: matcherAttr }])
       );
 
-      (evaluateKql as jest.Mock).mockReturnValue(true);
+      const result = await client.matchActionPoliciesForRule({ ruleTags: ['prod', 'infra'] });
 
-      const result = await client.matchActionPoliciesForRule({
-        ruleName: 'my-rule',
-        ruleTags: ['prod'],
-      });
-
-      expect(rulesSavedObjectService.get).not.toHaveBeenCalled();
       expect(result.items).toHaveLength(1);
-      expect(result.items[0].category).toBe('global-filtered');
+      expect(result.items[0].category).toBe('tags');
+      expect(result.items[0].action_policy.id).toBe('ap-combined');
     });
   });
 });

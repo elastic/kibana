@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers, SPACES_EXTENSION_ID } from '@kbn/core/server';
 import { API_KEY_PENDING_INVALIDATION_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { ErrorWithReason } from '../../lib/error_with_reason';
 import { RuleExecutionStatusErrorReasons } from '../../types';
@@ -204,6 +204,7 @@ describe('repairUiamApiKey()', () => {
     expect(context.uiamConvert).toHaveBeenCalledWith([rawRule.apiKey]);
     expect(savedObjects.getUnsafeInternalClient).toHaveBeenCalledWith({
       includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE, API_KEY_PENDING_INVALIDATION_TYPE],
+      excludedExtensions: [SPACES_EXTENSION_ID],
     });
     expect(unsafeClient.update).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,
@@ -213,12 +214,92 @@ describe('repairUiamApiKey()', () => {
     );
   });
 
+  test('honours a non-default space on both the re-grant and leak-removal writes', async () => {
+    // The Spaces extension rejects a caller-supplied namespace on `update`. Excluding it is
+    // what makes this write target `my-space` instead of throwing (or silently hitting
+    // `default`). The default space is unaffected either way: `spaceIdToNamespace('default')`
+    // is undefined, which is falsy and slips past the extension.
+    const { context: regrantContext, unsafeClient: regrantClient } = setup();
+    await repairUiamApiKey({
+      context: regrantContext,
+      logger,
+      ruleId: 'rule-1',
+      spaceId: 'my-space',
+    });
+    expect(regrantClient.update).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      'rule-1',
+      expect.any(Object),
+      expect.objectContaining({ namespace: 'my-space' })
+    );
+
+    const { context: leakContext, unsafeClient: leakClient } = setup({
+      rawRule: getRawRule({ apiKeyCreatedByUser: true }),
+    });
+    await repairUiamApiKey({
+      context: leakContext,
+      logger,
+      ruleId: 'rule-1',
+      spaceId: 'my-space',
+    });
+    expect(leakClient.update).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      'rule-1',
+      expect.any(Object),
+      expect.objectContaining({ namespace: 'my-space' })
+    );
+  });
+
+  test('removes the leaked UIAM API key from a user-keyed rule instead of re-granting', async () => {
+    // A rule holding both a user-created Elasticsearch key and a UIAM key is a state the rules
+    // client refuses to create: it can only be the residue of the historical clone/update leak.
+    const rawRule = getRawRule({ apiKeyCreatedByUser: true, uiamApiKeyExternal: false });
+    const { context, unsafeClient } = setup({ rawRule });
+
+    await repairUiamApiKey({ context, logger, ruleId: 'rule-1', spaceId: 'space-a' });
+
+    expect(context.uiamConvert).not.toHaveBeenCalled();
+    expect(unsafeClient.update).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      'rule-1',
+      { ...rawRule, uiamApiKey: null, uiamApiKeyExternal: null },
+      { mergeAttributes: false, version: 'WzQyLDFd', namespace: 'space-a' }
+    );
+    // The leaked key may be a clone's source rule's key, still in live use there — not Kibana's to
+    // revoke on this rule's behalf.
+    expect(unsafeClient.bulkCreate).not.toHaveBeenCalled();
+    expect(logger.info).toHaveBeenCalledWith(
+      expect.stringContaining('Removed the leaked UIAM API key'),
+      expect.anything()
+    );
+  });
+
+  test('reports a failed leak removal as a removal, not a re-grant', async () => {
+    const { context, unsafeClient } = setup({
+      rawRule: getRawRule({ apiKeyCreatedByUser: true }),
+    });
+    unsafeClient.update = jest
+      .fn()
+      .mockRejectedValue(
+        SavedObjectsErrorHelpers.createConflictError(RULE_SAVED_OBJECT_TYPE, 'rule-1')
+      );
+
+    await callRepair(context);
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to remove the leaked UIAM API key from the rule'),
+      expect.anything()
+    );
+    // No key was minted, so there is nothing to queue for invalidation.
+    expect(unsafeClient.bulkCreate).not.toHaveBeenCalled();
+  });
+
   // Every skip logs a distinct reason: these lines are how an operator tells which check left a
   // broken rule alone, so identical messages would make the log useless.
   test.each([
     [
-      'the key was created by the user',
-      { apiKeyCreatedByUser: true },
+      'the key was created by the user and there is no leaked key to remove',
+      { apiKeyCreatedByUser: true, apiKey: null },
       'it was created by the user, who manages its lifecycle',
     ],
     ['the rule has no UIAM API key', { uiamApiKey: null }, 'the rule does not have one'],
@@ -259,7 +340,7 @@ describe('repairUiamApiKey()', () => {
     const messages = new Set<string>();
 
     for (const overrides of [
-      { apiKeyCreatedByUser: true },
+      { apiKeyCreatedByUser: true, apiKey: null },
       { uiamApiKey: null },
       { apiKey: null },
     ]) {
@@ -341,6 +422,10 @@ describe('repairUiamApiKey()', () => {
     [
       'the rule was deleted while the run was in flight',
       SavedObjectsErrorHelpers.createGenericNotFoundError(RULE_SAVED_OBJECT_TYPE, 'rule-1'),
+    ],
+    [
+      'Saved Objects rejects the write as a client-side validation error',
+      SavedObjectsErrorHelpers.createBadRequestError('invalid attributes'),
     ],
   ])('queues the minted key for invalidation when %s', async (_, writeError) => {
     const { context, unsafeClient } = setup();

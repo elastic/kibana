@@ -27,15 +27,6 @@ export const mapArtifacts = (
       artifacts.map(({ id, type, data }) => ({ id, type, data }))
     : undefined;
 
-const createArtifactId = (type: string): string =>
-  `${type}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-
-/**
- * Returns `existingId` when it holds a real value, otherwise a fresh id.
- */
-export const resolveArtifactId = (type: string, existingId?: string): string =>
-  existingId?.trim() ? existingId : createArtifactId(type);
-
 export const splitArtifactsByType = (
   artifacts: RuleArtifactPayload | undefined
 ): RuleArtifactSlices => {

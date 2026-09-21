@@ -12,6 +12,7 @@ import {
   actionPolicyDestinationSchema,
   throttleStrategySchema,
 } from './action_policy_data_schema';
+import { POLICY_MATCHER_DESCRIPTION, policyMatcherSchema } from './policy_matcher_schema';
 
 export const actionPolicyResponseSchema = z
   .object({
@@ -24,12 +25,11 @@ export const actionPolicyResponseSchema = z
     description: z.string().describe('A description of the action policy.'),
     enabled: z.boolean().describe('Whether the action policy is enabled.'),
     destinations: z.array(actionPolicyDestinationSchema).describe('The list of destinations.'),
-    matcher: z.string().nullable().describe('A KQL query to match alerts, or null to match all.'),
+    matcher: policyMatcherSchema.nullable().describe(POLICY_MATCHER_DESCRIPTION),
     group_by: z
       .array(z.string())
       .nullable()
       .describe('The fields used to group alerts, or null for no grouping.'),
-    tags: z.array(z.string()).nullable().describe('Tags associated with the action policy.'),
     grouping_mode: groupingModeSchema
       .nullable()
       .describe('The grouping mode for alert notifications.'),

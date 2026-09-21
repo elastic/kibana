@@ -44,8 +44,8 @@ export class GlobalNavService extends FtrService {
   }
 
   /**
-   * True when next-project chrome is active (feature flag on + project chrome style). It renders the
-   * new global header and, unlike the classic/project headers, no breadcrumb trail. Chrome style can
+   * True when next-project chrome is active (project chrome style). It renders the
+   * new global header and, unlike the classic header, no breadcrumb trail. Chrome style can
    * flip mid-session (e.g. entering a solution view), so this is probed per call.
    *
    * The active header can be briefly absent while navigating, so we wait until a known header is
@@ -56,10 +56,7 @@ export class GlobalNavService extends FtrService {
       if (await this.testSubjects.exists('chromeNextGlobalHeader', { timeout: 0 })) {
         return true;
       }
-      if (
-        (await this.testSubjects.exists('headerGlobalNav', { timeout: 0 })) ||
-        (await this.testSubjects.exists('kibanaProjectHeader', { timeout: 0 }))
-      ) {
+      if (await this.testSubjects.exists('headerGlobalNav', { timeout: 0 })) {
         return false;
       }
       return undefined;
@@ -109,10 +106,10 @@ export class GlobalNavService extends FtrService {
   }
 
   public async clickNewsfeed(): Promise<void> {
-    if (await this.isNextProjectChrome()) {
-      return unsupportedInNextChrome('clickNewsfeed');
+    if (!(await this.testSubjects.exists('helpMenuWhatsNewButton', { timeout: 0 }))) {
+      await this.testSubjects.click('chromeNextGlobalHeaderHelpButton');
     }
-    return await this.testSubjects.click('headerGlobalNav > ^newsfeed');
+    await this.testSubjects.click('helpMenuWhatsNewButton');
   }
 
   public async getFirstBreadcrumb(): Promise<string> {

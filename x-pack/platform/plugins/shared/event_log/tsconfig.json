@@ -12,6 +12,7 @@
     "common/**/*"
   ],
   "kbn_references": [
+    "@kbn/core-spaces-common",
     "@kbn/core",
     "@kbn/spaces-plugin",
     "@kbn/es-query",

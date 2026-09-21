@@ -1,7 +1,14 @@
 {
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "outDir": "target/types"
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "react",
+      "@testing-library/jest-dom",
+      "@testing-library/react"
+    ]
   },
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["target/**/*"],
@@ -22,5 +29,7 @@
     "@kbn/core-http-server-utils",
     "@kbn/i18n",
     "@kbn/core",
+    "@kbn/developer-toolbar-plugin",
+    "@kbn/test-jest-helpers",
   ]
 }

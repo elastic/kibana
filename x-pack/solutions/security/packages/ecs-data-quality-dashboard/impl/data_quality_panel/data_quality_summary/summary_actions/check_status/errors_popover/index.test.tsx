@@ -81,7 +81,7 @@ describe('ErrorsPopover', () => {
       const copyToClipboardButton = screen.getByTestId('copyToClipboard');
       await userEvent.click(copyToClipboardButton, { pointerEventsCheck: 0 });
 
-      expect(addSuccessToast).toBeCalledWith({ title: 'Copied errors to the clipboard' });
+      expect(addSuccessToast).toHaveBeenCalledWith({ title: 'Copied errors to the clipboard' });
     });
 
     test('it renders the expected error summary text in the errors viewer', () => {

@@ -113,6 +113,12 @@ export const ConnectorIconsMap: Map<
     ),
   ],
   [
+    '.google_docs',
+    lazy(
+      () => import(/* webpackChunkName: "connectorIconGoogleDocs" */ './specs/google_docs/icon')
+    ),
+  ],
+  [
     '.google_drive',
     lazy(
       () => import(/* webpackChunkName: "connectorIconGoogleDrive" */ './specs/google_drive/icon')
@@ -126,6 +132,8 @@ export const ConnectorIconsMap: Map<
     '.slack2',
     lazy(() => import(/* webpackChunkName: "connectorIconSlack2" */ './specs/slack/icon')),
   ],
+
+  ['.mysql', lazy(() => import(/* webpackChunkName: "connectorIconMysql" */ './specs/mysql/icon'))],
   ['.gmail', lazy(() => import(/* webpackChunkName: "connectorIconGmail" */ './specs/gmail/icon'))],
   [
     '.azure-blob',
@@ -230,6 +238,10 @@ export const ConnectorIconsMap: Map<
   [
     '.one_drive',
     lazy(() => import(/* webpackChunkName: "connectorIconOneDrive" */ './specs/one_drive/icon')),
+  ],
+  [
+    '.mongodb',
+    lazy(() => import(/* webpackChunkName: "connectorIconMongodb" */ './specs/mongodb/icon')),
   ],
   [
     '.ansible_controller',
@@ -370,5 +382,16 @@ export const ConnectorIconsMap: Map<
   [
     '.urlscan_io',
     lazy(() => import(/* webpackChunkName: "connectorIconUrlscanIo" */ './specs/urlscan_io/icon')),
+  ],
+  ['.misp', lazy(() => import(/* webpackChunkName: "connectorIconMisp" */ './specs/misp/icon'))],
+
+  [
+    '.google_threat_intelligence',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconGoogleThreatIntelligence" */ './specs/google_threat_intelligence/icon'
+        )
+    ),
   ],
 ]);

@@ -41,7 +41,7 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
       this.buildAggregations(slo, slo.indicator),
       this.buildSettings(slo, '@timestamp'),
       slo,
-      this.isServerless && this.isCpsEnabled
+      this.getProjectRouting(slo)
     );
   }
 

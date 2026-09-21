@@ -7,6 +7,8 @@
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FAILED_TESTS_LABEL } from './failed_tests';
 import type { ClientPluginsStart } from '../../../../../plugin';
 import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
@@ -16,6 +18,7 @@ export const FailedTestsCount = ({ from, to, id }: { to: string; from: string; i
   const {
     exploratoryView: { ExploratoryViewEmbeddable },
   } = useKibana<ClientPluginsStart>().services;
+  const { euiTheme } = useEuiTheme();
 
   const { queryIdFilter, locationFilter } = useMonitorQueryFilters();
 
@@ -26,20 +29,36 @@ export const FailedTestsCount = ({ from, to, id }: { to: string; from: string; i
   }
 
   return (
-    <ExploratoryViewEmbeddable
-      id={id}
-      reportType="single-metric"
-      dataTypesIndexPatterns={dataTypesIndexPatterns}
-      attributes={[
-        {
-          time: { from, to },
-          reportDefinitions: queryIdFilter,
-          filters: locationFilter,
-          dataType: 'synthetics',
-          selectedMetricField: 'monitor_failed_tests',
-          name: FAILED_TESTS_LABEL,
-        },
-      ]}
-    />
+    <EuiFlexGroup gutterSize="xs" alignItems="flexEnd" responsive={false} wrap={false}>
+      <EuiFlexItem grow={false}>
+        <ExploratoryViewEmbeddable
+          id={id}
+          align="left"
+          customHeight="70px"
+          reportType="single-metric"
+          dataTypesIndexPatterns={dataTypesIndexPatterns}
+          attributes={[
+            {
+              time: { from, to },
+              reportDefinitions: queryIdFilter,
+              filters: locationFilter,
+              dataType: 'synthetics',
+              selectedMetricField: 'monitor_failed_tests',
+              name: FAILED_TESTS_LABEL,
+            },
+          ]}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} css={{ paddingBottom: euiTheme.size.s }}>
+        <EuiIconTip type="question" content={FAILED_TESTS_TOOLTIP} position="top" />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
+
+const FAILED_TESTS_TOOLTIP = i18n.translate(
+  'xpack.synthetics.monitorDetails.summary.failedTestsTooltip',
+  {
+    defaultMessage: 'Each individual failed test run in the selected time range.',
+  }
+);

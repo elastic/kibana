@@ -35,6 +35,7 @@ import {
   ExecutionHistoryClientToken,
 } from '../lib/execution_history_client';
 import { RulesClient } from '../lib/rules_client';
+import { ArtifactTypeRegistry } from '../lib/artifact_types';
 import {
   RuleTemplatesClient,
   RuleTemplateSavedObjectsClientToken,
@@ -115,12 +116,14 @@ import { MatcherSuggestionsService } from '../lib/services/matcher_suggestions_s
 import { PrivilegeChecker } from '../lib/services/privilege_checker/privilege_checker';
 import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
 import type { PluginConfig } from '../config';
+import { SpaceUiSettingsClientToken } from '../settings/tokens';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(AlertActionsClient).toSelf().inRequestScope();
   bind(AlertEventsClient).toSelf().inRequestScope();
   bind(EpisodesClient).toSelf().inRequestScope();
   bind(RulesClient).toSelf().inRequestScope();
+  bind(ArtifactTypeRegistry).toSelf().inSingletonScope();
   bind(RequestSpaceIdToken)
     .toDynamicValue(({ get }) => {
       const request = get(Request);
@@ -169,8 +172,16 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       return uiSettings.globalAsScopedToClient(internalSoClient);
     })
     .inSingletonScope();
-  bind(SettingsService).toSelf().inSingletonScope();
+  bind(SettingsService).toSelf().inRequestScope();
   bind(SettingsServiceToken).toService(SettingsService);
+
+  bind(SpaceUiSettingsClientToken)
+    .toResolvedValue(
+      async (savedObjectsClientFactory, uiSettings) =>
+        uiSettings.asScopedToClient(await savedObjectsClientFactory()),
+      [SavedObjectsClientFactory, CoreStart('uiSettings')]
+    )
+    .inRequestScope();
 
   bind(EventLogService).toSelf().inSingletonScope();
   bind(EventLogServiceToken).toService(EventLogService);

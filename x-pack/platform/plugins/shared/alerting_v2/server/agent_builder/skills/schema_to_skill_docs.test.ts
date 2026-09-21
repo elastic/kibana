@@ -6,13 +6,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { groupingModeSchema, MATCHER_CONTEXT_FIELDS } from '@kbn/alerting-v2-schemas';
+import {
+  groupingModeSchema,
+  MATCHER_CONTEXT_FIELDS,
+  POLICY_MATCHER_TAGS_MAX,
+} from '@kbn/alerting-v2-schemas';
 import type { ActionPolicyWorkflowPayload, AlertEpisode } from '../../lib/dispatcher/types';
 import {
   generateApiSchemaDoc,
   generateOperationsDoc,
+  generateOperationsUsageList,
   generateRuleSchemaDoc,
   generateRuleOperationsDoc,
+  generateRuleOperationsUsageList,
   generateRuleKindDoc,
   generateEpisodeLifecycleDoc,
   generateStateTransitionDoc,
@@ -190,6 +196,52 @@ describe('schema_to_skill_docs', () => {
     });
   });
 
+  describe('generateOperationsUsageList', () => {
+    const exampleOperationSchema = z.discriminatedUnion('operation', [
+      z
+        .object({
+          operation: z.literal('set_name'),
+          name: z.string(),
+        })
+        .describe('Use `set_name` to name the resource.'),
+      z
+        .object({
+          operation: z.literal('validate'),
+        })
+        .describe('Use `validate` as the last operation to confirm the resource is ready to save.'),
+    ]);
+
+    it('renders each operation .describe() as a bullet', () => {
+      const doc = generateOperationsUsageList({
+        title: 'Example Operations',
+        schema: exampleOperationSchema,
+      });
+
+      expect(doc).toBe(
+        [
+          '- Use `set_name` to name the resource.',
+          '- Use `validate` as the last operation to confirm the resource is ready to save.',
+        ].join('\n')
+      );
+    });
+
+    it('throws when an operation variant is missing a top-level describe', () => {
+      const schema = z.discriminatedUnion('operation', [
+        z.object({
+          operation: z.literal('set_name'),
+          name: z.string(),
+        }),
+      ]);
+
+      expect(() =>
+        generateOperationsUsageList({
+          title: 'Missing Describe',
+          schema,
+        })
+      ).toThrow(/Missing \.describe\(\) on operation variant\(s\): set_name/);
+    });
+  });
+
   describe('getDescribedEnumValues', () => {
     it('returns each literal value with its .describe() copy', () => {
       const schema = z.union([
@@ -240,6 +292,8 @@ describe('schema_to_skill_docs', () => {
       expect(doc).toContain('set_query');
       expect(doc).toContain('set_grouping');
       expect(doc).toContain('set_state_transition');
+      expect(doc).toContain('set_dashboards');
+      expect(doc).toContain('set_runbook');
       expect(doc).toContain('validate');
     });
 
@@ -255,6 +309,21 @@ describe('schema_to_skill_docs', () => {
         'Use `set_state_transition` to delay alert firing until the threshold is breached N times in a row. This reduces noise from transient spikes. State transition is only allowed on `kind: alert` rules.'
       );
       expect(doc).toContain("Use `set_kind` to choose a rule kind matching the user's goal");
+    });
+  });
+
+  describe('generateRuleOperationsUsageList', () => {
+    it('includes every manage_rule operation describe', () => {
+      const doc = generateRuleOperationsUsageList();
+      expect(doc).toContain('Use `set_metadata`');
+      expect(doc).toContain('Use `set_kind`');
+      expect(doc).toContain('Use `set_schedule`');
+      expect(doc).toContain('Use `set_query`');
+      expect(doc).toContain('Use `set_grouping`');
+      expect(doc).toContain('Use `set_state_transition`');
+      expect(doc).toContain('Use `set_dashboards`');
+      expect(doc).toContain('Use `set_runbook`');
+      expect(doc).toContain('Use `validate`');
     });
   });
 
@@ -343,7 +412,7 @@ describe('schema_to_skill_docs', () => {
 
     it('renders arrays whose items are referenced schemas', () => {
       expect(generateRuleSchemaDoc()).toContain(
-        '| `artifacts` | object[] | optional | Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` carries type-specific fields: a `runbook` artifact requires `data.content` holding markdown, and a `dashboard` artifact requires `data.dashboardId` holding a dashboard saved object id. Artifacts of any other type may carry whatever fields they need in `data`. (max items: 100) |'
+        '| `artifacts` | object[] | optional | Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present. (max items: 100) |'
       );
       expect(generateActionPolicySchemaDoc()).toContain(
         '| `destinations` | { type: "workflow", ... }[] | required | The list of destinations. At least one is required. (min items: 1, max items: 10) |'
@@ -514,6 +583,42 @@ describe('schema_to_skill_docs', () => {
       expect(doc).toContain('`active`');
       expect(doc).toContain('`critical`');
     });
+
+    it('documents the matcher shape with tags and expression fields', () => {
+      const doc = generateMatcherContextDoc();
+      // The intro code block shows `matcher: { tags?: ..., expression?: ... }`
+      expect(doc).toContain('matcher.tags');
+      expect(doc).toContain('expression');
+      expect(doc).toContain('at least one');
+    });
+
+    it('explains AND combination and catch-all semantics', () => {
+      const doc = generateMatcherContextDoc();
+      expect(doc).toContain('AND');
+      expect(doc).toContain('catch-all');
+    });
+
+    it('documents that set_matcher replaces the whole matcher', () => {
+      const doc = generateMatcherContextDoc();
+      expect(doc).toContain('set_matcher');
+      expect(doc).toContain('replaces');
+    });
+
+    it('states that rule.id and rule.tags are not available as KQL expression fields', () => {
+      const doc = generateMatcherContextDoc();
+      // The doc mentions rule.id/rule.tags explicitly to say they are excluded;
+      // confirm they appear in an exclusion context and not as usable KQL operators.
+      expect(doc).toContain('rule.id');
+      expect(doc).toContain('**not** available');
+      // No KQL filter syntax using rule.* (colon = field: value syntax in KQL)
+      expect(doc).not.toContain('rule.id:');
+      expect(doc).not.toContain('rule.tags:');
+    });
+
+    it('renders the max-tags limit from the schema constant', () => {
+      const doc = generateMatcherContextDoc();
+      expect(doc).toContain(`Max ${POLICY_MATCHER_TAGS_MAX} tags`);
+    });
   });
 
   describe('generateThrottleGroupingCompatibilityDoc', () => {
@@ -567,15 +672,26 @@ describe('schema_to_skill_docs', () => {
       expect(generateSingleRuleActionPolicyDoc()).toMatchSnapshot();
     });
 
-    it('scopes with rule.id and defers shared policies to the multi-rule reference', () => {
+    it('instructs the link-tag flow and defers shared policies to the multi-rule reference', () => {
       const doc = generateSingleRuleActionPolicyDoc();
       expect(doc).toContain('# Single-rule Action Policies');
+      expect(doc).toContain('manage_rule');
       expect(doc).toContain('set_metadata');
       expect(doc).toContain('set_destinations');
-      expect(doc).toContain('rule.id:');
+      expect(doc).toContain('set_matcher');
+      expect(doc).toContain('notify-');
+      expect(doc).not.toContain('rule.id:');
       expect(doc).toContain('kind: signal');
       expect(doc).toContain('(./action-policy-multi-rule.md)');
       expect(doc).not.toContain('./references/');
+    });
+
+    it('never tells the agent to omit the matcher or leave it as catch-all', () => {
+      const doc = generateSingleRuleActionPolicyDoc();
+      // Historically the doc said "omit (leave as catch-all)" — that is wrong
+      expect(doc).not.toContain('leave as catch-all');
+      expect(doc).not.toContain('omit set_matcher');
+      expect(doc).not.toContain('omit `set_matcher`');
     });
   });
 
@@ -588,7 +704,9 @@ describe('schema_to_skill_docs', () => {
       const doc = generateMultiRuleActionPolicyDoc();
       expect(doc).toContain('# Multi-rule Action Policies');
       expect(doc).toContain('Catch-all');
-      expect(doc).toContain('rule.tags');
+      expect(doc).not.toContain('rule.tags');
+      expect(doc).not.toContain('rule.id');
+      expect(doc).toContain('matcher: { tags: [');
       expect(doc).toContain('(./action-policy-matchers.md)');
       expect(doc).toContain('(./action-policy-single-rule.md)');
       expect(doc).not.toContain('./references/');
@@ -652,6 +770,7 @@ describe('schema_to_skill_docs', () => {
       ['zodToJsonSchema via generateRuleSchemaDoc', generateRuleSchemaDoc],
       ['zodToJsonSchema via generateActionPolicySchemaDoc', generateActionPolicySchemaDoc],
       ['manage_rule operation .describe()', generateRuleOperationsDoc],
+      ['manage_rule operation usage list', generateRuleOperationsUsageList],
       ['manage_action_policy operation .describe()', generateActionPolicyOperationsDoc],
       ['generateEnumTable (episode status from spec)', generateEpisodeLifecycleDoc],
       ['generateEnumTable (no-data strategy from spec)', generateNoDataStrategyDoc],

@@ -14,7 +14,12 @@ import { MatchActionPoliciesForRuleRoute } from './match_action_policies_for_rul
 const createMocks = () => {
   const deps = createRouteDependencies();
   const actionPolicyClient: jest.Mocked<Pick<ActionPolicyClient, 'matchActionPoliciesForRule'>> = {
-    matchActionPoliciesForRule: jest.fn().mockResolvedValue({ items: [] }),
+    matchActionPoliciesForRule: jest.fn().mockResolvedValue({
+      items: [],
+      total: 0,
+      evaluated_count: 0,
+      is_truncated: false,
+    }),
   };
   return { deps, actionPolicyClient };
 };
@@ -27,40 +32,39 @@ const buildRoute = (request: KibanaRequest, mocks: ReturnType<typeof createMocks
   );
 
 describe('MatchActionPoliciesForRuleRoute', () => {
-  it('forwards rule.id from body to the client', async () => {
+  it('forwards rule.tags from body to the client', async () => {
     const mocks = createMocks();
-    const request = httpServerMock.createKibanaRequest({ body: { rule: { id: 'rule-abc' } } });
+    const request = httpServerMock.createKibanaRequest({
+      body: { rule: { tags: ['prod', 'infra'] } },
+    });
     const route = buildRoute(request as unknown as KibanaRequest, mocks);
 
     await route.handle();
 
     expect(mocks.actionPolicyClient.matchActionPoliciesForRule).toHaveBeenCalledWith({
-      ruleId: 'rule-abc',
-      ruleName: undefined,
-      ruleTags: undefined,
+      ruleTags: ['prod', 'infra'],
     });
   });
 
-  it('forwards rule.name and rule.tags from body to the client', async () => {
+  it('forwards undefined tags when the body omits rule tags', async () => {
     const mocks = createMocks();
-    const request = httpServerMock.createKibanaRequest({
-      body: { rule: { name: 'My Rule', tags: ['prod', 'infra'] } },
-    });
+    const request = httpServerMock.createKibanaRequest({ body: { rule: {} } });
     const route = buildRoute(request as unknown as KibanaRequest, mocks);
 
     await route.handle();
 
     expect(mocks.actionPolicyClient.matchActionPoliciesForRule).toHaveBeenCalledWith({
-      ruleId: undefined,
-      ruleName: 'My Rule',
-      ruleTags: ['prod', 'infra'],
+      ruleTags: undefined,
     });
   });
 
   it('returns client result in the response body', async () => {
     const mocks = createMocks();
     const clientResult = {
-      items: [{ actionPolicy: { id: 'ap-1', name: 'AP 1' }, category: 'global' }],
+      items: [{ action_policy: { id: 'ap-1', name: 'AP 1' }, category: 'catch-all' }],
+      total: 250,
+      evaluated_count: 100,
+      is_truncated: true,
     };
     mocks.actionPolicyClient.matchActionPoliciesForRule.mockResolvedValue(clientResult as any);
 

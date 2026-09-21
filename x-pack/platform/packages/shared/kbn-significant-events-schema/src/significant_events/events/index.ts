@@ -20,9 +20,9 @@ export const SIGNIFICANT_EVENT_STATUS_OPTIONS = ['open', 'closed', 'dismissed'] 
 
 export const significantEventStatusSchema = z.enum(SIGNIFICANT_EVENT_STATUS_OPTIONS)
   .describe(dedent`
-    "open" = a current failure, material degradation, or sensitive-data exposure is confirmed or remains plausibly unverified;
+    "open" = a current failure, material degradation, or sensitive-data exposure is confirmed or remains plausibly unverified. A mechanism found at an unchanged background rate (rate-flat inconclusive) is verified as not newly elevated — it is not "plausibly unverified" and must not open a new event;
     "closed" = a failure condition is confirmed recovered;
-    "dismissed" = the proposed incident is a false alarm, benign/positive change, unrelated finding, or is not confirmed by evidence, with no plausible failure, degradation, or exposure left unverified.
+    "dismissed" = the proposed incident is a false alarm, benign/positive change, unrelated finding, a background pattern at its usual rate, or is not confirmed by evidence, with no plausible failure, degradation, or exposure left unverified.
   `);
 
 export type SignificantEventStatus = z.infer<typeof significantEventStatusSchema>;
@@ -72,9 +72,9 @@ export const significantEventSchema = significantEventBaseSchema.extend({
     .optional()
     .describe(
       dedent`
-        Concise operator-facing rationale for this assessment. Max ${MAX_ASSESSMENT_NOTE_LENGTH} chars.
+        Concise rationale for this assessment. Max ${MAX_ASSESSMENT_NOTE_LENGTH} chars.
         ${ASSESSMENT_NOTE_ROLE_RULE}
-        Record the reasoning, ambiguity, or caveat that is not already in the title, symptom_hypothesis, summary, or signal descriptions. Do not restate the observed condition, error signature, impact, query steps, detection artifacts, or memory-page presence.
+        Record the reasoning, ambiguity, or caveat that is not already in the title, symptom_hypothesis, summary, or signal descriptions. Do not restate the observed condition, error signature, impact, query steps, or detection artifacts.
 
         ${NO_RAW_SENSITIVE_VALUES_RULE}
       `
