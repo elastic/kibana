@@ -23,7 +23,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isActionable, isIgnored, resolveAnchor } from '../lib/anchor';
+import { isActionable, isCovered, isIgnored, resolveAnchor } from '../lib/anchor';
 import { isTrailControl } from '../lib/trail';
 import type { Comment } from '../types';
 import { useComments, useCommentsState } from './comments_context';
@@ -39,33 +39,54 @@ interface GuideStep {
   label: string;
 }
 
+interface StepSearch {
+  /** The click to ask for: the latest one not repeated yet whose element can be clicked right now. */
+  step: GuideStep | null;
+  /** Failing that, the latest such click whose element is there but under other UI, for the message to name. */
+  covered: GuideStep | null;
+}
+
+const NO_STEP: StepSearch = { step: null, covered: null };
+
 /**
- * Latest click of the trail that has not been repeated yet and whose element can
- * be clicked right now. Trails are stored data, so each step is held to the
- * same standard as when recording: a disclosure control on the page itself,
- * and the recorded one. An element that only stands where it stood, with other
- * content, may be any control, so the guide does not ask for a click on it.
+ * The click to ask for next, latest first: the one closest to the comment that
+ * can be made is the likeliest to bring its element up, and clicks before it
+ * that opened and closed other things are left alone. Trails are stored data,
+ * so each step is held to the same standard as when recording: a disclosure
+ * control on the page itself, and the recorded one. An element that only stands
+ * where it stood, with other content, may be any control, so the guide does not
+ * ask for a click on it.
  */
 const findStep = (
   comment: Comment,
   done: ReadonlySet<number>,
   ignoreSelectors: readonly string[]
-): GuideStep | null => {
+): StepSearch => {
+  let covered: GuideStep | null = null;
   for (let index = comment.trail.length - 1; index >= 0; index -= 1) {
     const { anchor, label } = comment.trail[index];
     const resolved = done.has(index) ? null : resolveAnchor(anchor);
     const element = resolved?.exact ? resolved.element : undefined;
-    if (
-      element &&
-      isTrailControl(element) &&
-      !isIgnored(element, ignoreSelectors) &&
-      isActionable(element)
-    ) {
-      return { index, element, label };
+    if (!element || !isTrailControl(element) || isIgnored(element, ignoreSelectors)) {
+      continue;
     }
+    if (isActionable(element)) {
+      return { step: { index, element, label }, covered };
+    }
+    covered ??= isCovered(element) ? { index, element, label } : null;
   }
-  return null;
+  return { step: null, covered };
 };
+
+/**
+ * The steps done once `index` is: it and the ones before it that were, not the
+ * ones after it. A click made before an earlier one is asked for again after
+ * that one, as what it brought up may have depended on the state the earlier
+ * click put the page in (a flyout showing the selected tab's content) — the
+ * author made them in that order.
+ */
+const completing = (done: ReadonlySet<number>, index: number): ReadonlySet<number> =>
+  new Set([...done].filter((earlier) => earlier < index).concat(index));
 
 const pulse = keyframes`
   from {
@@ -76,7 +97,11 @@ const pulse = keyframes`
   }
 `;
 
-/** Highlights the author's clicks one at a time, most recent first, until the commented element shows, then opens the comment. */
+/**
+ * Highlights the author's clicks one at a time, most recent first, until the
+ * commented element shows, then opens the comment. A click that turns out to
+ * need an earlier one is asked for again after it, see `completing`.
+ */
 export const GuideOverlay = ({ comment }: { comment: Comment }) => {
   const controller = useComments();
   const { euiTheme } = useEuiTheme();
@@ -97,7 +122,8 @@ export const GuideOverlay = ({ comment }: { comment: Comment }) => {
   // The element, once on the page, and once it shows: a dialog or menu over it has to go first.
   const found = onPage ? placed : null;
   const target = found?.exposed ? found.element : null;
-  const step = onPage && !target ? findStep(comment, done, controller.ignoreSelectors) : null;
+  const { step, covered: coveredStep } =
+    onPage && !target ? findStep(comment, done, controller.ignoreSelectors) : NO_STEP;
   const stepElement = step?.element ?? null;
   const stepRef = useRef(step);
   stepRef.current = step;
@@ -140,7 +166,7 @@ export const GuideOverlay = ({ comment }: { comment: Comment }) => {
     const onClick = ({ target: activated }: MouseEvent) => {
       const current = stepRef.current;
       if (current && activated instanceof Node && current.element.contains(activated)) {
-        setDone((previous) => new Set([...previous, current.index]));
+        setDone((previous) => completing(previous, current.index));
       }
     };
     document.addEventListener('click', onClick, true);
@@ -152,9 +178,35 @@ export const GuideOverlay = ({ comment }: { comment: Comment }) => {
   }
 
   const searching = navigating || (!step && !settled);
-  const covered = !searching && !step && found !== null;
+  // The element, or the way to it, is under other UI.
+  const covered = !searching && !step && (found !== null || coveredStep !== null);
   const rect = stepElement?.getBoundingClientRect();
   const padding = parseInt(euiTheme.size.xs, 10);
+
+  const message = step
+    ? i18n.translate('devComments.guide.clickStep', {
+        defaultMessage: 'Click “{label}” to get to the comment',
+        values: { label: step.label },
+      })
+    : searching
+    ? i18n.translate('devComments.guide.searching', {
+        defaultMessage: 'Looking for the comment…',
+      })
+    : found
+    ? i18n.translate('devComments.guide.covered', {
+        defaultMessage:
+          'The commented element is behind other UI, like a dialog or menu: close it to get to the comment.',
+      })
+    : coveredStep
+    ? i18n.translate('devComments.guide.stepCovered', {
+        defaultMessage:
+          '“{label}” is behind other UI, like a dialog or menu: close it to get to the comment.',
+        values: { label: coveredStep.label },
+      })
+    : i18n.translate('devComments.guide.lost', {
+        defaultMessage:
+          'The commented element cannot be found: the UI may have changed since the comment was made.',
+      });
 
   return createPortal(
     <>
@@ -205,24 +257,7 @@ export const GuideOverlay = ({ comment }: { comment: Comment }) => {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText size="s" id={messageId} role="status">
-              {step
-                ? i18n.translate('devComments.guide.clickStep', {
-                    defaultMessage: 'Click “{label}” to get to the comment',
-                    values: { label: step.label },
-                  })
-                : searching
-                ? i18n.translate('devComments.guide.searching', {
-                    defaultMessage: 'Looking for the comment…',
-                  })
-                : covered
-                ? i18n.translate('devComments.guide.covered', {
-                    defaultMessage:
-                      'The commented element is behind other UI, like a dialog or menu: close it to get to the comment.',
-                  })
-                : i18n.translate('devComments.guide.lost', {
-                    defaultMessage:
-                      'The commented element cannot be found: the UI may have changed since the comment was made.',
-                  })}
+              {message}
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

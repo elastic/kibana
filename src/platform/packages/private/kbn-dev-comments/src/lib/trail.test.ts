@@ -8,7 +8,7 @@
  */
 
 import { IGNORE_ATTR } from '../constants';
-import { createLocation, mockLayout, query, renderPage } from '../test_helpers';
+import { createLocation, flush, mockLayout, query, renderPage } from '../test_helpers';
 import { createTrailRecorder, isTrailControl, type TrailRecorder } from './trail';
 
 describe('trail', () => {
@@ -221,6 +221,39 @@ describe('trail', () => {
     expect(labels()).toEqual(['Second']);
 
     navigate('/app/two');
+    expect(labels()).toEqual([]);
+  });
+
+  it('does not start the next page with the click that led there, even as its link stays, marked current', async () => {
+    renderPage(`
+      <button type="button" id="menu">Menu</button>
+      <a href="/app/current" id="current">Current</a>
+      <a href="/app/plain" id="plain">Plain</a>
+    `);
+    expandOnClick('#menu');
+    // A navigation link's handler changes the page before the click bubbles up to the recorder.
+    const navigateOnClick = (selector: string, to: string, current: boolean) => {
+      const link = query(selector);
+      link.addEventListener('click', (event) => {
+        event.preventDefault();
+        if (current) {
+          link.setAttribute('aria-current', 'page');
+        }
+        navigate(to);
+      });
+    };
+    navigateOnClick('#current', '/app/current', true);
+    navigateOnClick('#plain', '/app/plain', false);
+
+    query('#menu').click();
+    expect(labels()).toEqual(['Menu']);
+    query('#current').click();
+    expect(labels()).toEqual([]);
+
+    // Nor is what the next page shows the doing of a link that disclosed nothing itself.
+    query('#plain').click();
+    openDialog();
+    await flush();
     expect(labels()).toEqual([]);
   });
 

@@ -198,23 +198,31 @@ export const createCommentsController = (services: CommentsHostServices): Commen
 
   // The screenshot shows the page the comment is about, in the state it was picked
   // in: not what the page became under a draft handed back by a failed save, or
-  // under browser navigation within the same page.
+  // under browser navigation within the same page. The page is checked after the
+  // capture as well as before: it takes a while, and a page that changed under it
+  // may be what the image shows.
   const takeScreenshot = async (
     draft: PendingComment,
     captureViewport: () => Promise<HTMLCanvasElement>
   ): Promise<NewSnapshot> => {
-    if (location.getPath() !== draft.route.path) {
-      throw new ScreenshotError(
-        i18n.translate('devComments.snapshot.pageChanged', {
-          defaultMessage: 'The page has changed since the comment was started',
-        })
-      );
-    }
+    const checkPage = () => {
+      if (location.getPath() !== draft.route.path) {
+        throw new ScreenshotError(
+          i18n.translate('devComments.snapshot.pageChanged', {
+            defaultMessage: 'The page has changed since the comment was started',
+          })
+        );
+      }
+    };
+    checkPage();
+    let snapshot: NewSnapshot;
     try {
-      return await createSnapshot(captureViewport);
+      snapshot = await createSnapshot(captureViewport);
     } catch (error) {
       throw new ScreenshotError(errorMessage(error));
     }
+    checkPage();
+    return snapshot;
   };
 
   const store = createStore<CommentsState>({

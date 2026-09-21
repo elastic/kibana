@@ -357,6 +357,40 @@ describe('createCommentsController', () => {
         expect(api.create).not.toHaveBeenCalled();
         expect(controller.store.getState().notice?.message).toContain('The page has changed');
       });
+
+      it('does not attach a screenshot the page changed under: what it shows is not known', async () => {
+        const { api, services } = createHost();
+        const controller = createCommentsController({ ...services, captureViewport });
+        controller.start();
+        controller.pick(target(), { x: 5, y: 5 });
+
+        const capture = deferred<HTMLCanvasElement>();
+        captureViewport.mockReturnValueOnce(capture.promise);
+        const saving = controller.save('Hello', {
+          attachScreenshot: true,
+          displayName: 'Capybara',
+        });
+        await flush();
+        expect(captureViewport).toHaveBeenCalledTimes(1);
+        await services.navigateToPath('/app/one?x=2');
+        const canvas = document.createElement('canvas');
+        canvas.width = 800;
+        canvas.height = 600;
+        capture.resolve(canvas);
+        await saving;
+
+        expect(api.create).not.toHaveBeenCalled();
+        expect(controller.store.getState()).toEqual(
+          expect.objectContaining({
+            pending: expect.objectContaining({ element: target(), saving: false }),
+            notice: {
+              type: 'error',
+              message:
+                'Could not take the screenshot - The page has changed since the comment was started. Turn off "Attach screenshot" to post without one.',
+            },
+          })
+        );
+      });
     });
 
     it('opens the new comment with its pin focused, and reports failures while keeping the draft', async () => {

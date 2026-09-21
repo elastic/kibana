@@ -137,17 +137,24 @@ export const isExposed = (element: Element, point: Point): boolean => {
   return hit === undefined || hit.contains(element) || element.contains(hit);
 };
 
-export const isActionable = (element: Element): boolean => {
-  if (
-    !isVisible(element) ||
-    matches(element, ':disabled') ||
-    element.closest('[aria-disabled="true"], [inert]') !== null
-  ) {
-    return false;
-  }
+/** Whether the element takes input, leaving aside what may be drawn over it. */
+const isEnabled = (element: Element): boolean =>
+  isVisible(element) &&
+  !matches(element, ':disabled') &&
+  element.closest('[aria-disabled="true"], [inert]') === null;
+
+const isExposedAtCenter = (element: Element): boolean => {
   const rect = element.getBoundingClientRect();
   return isExposed(element, { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 });
 };
+
+/** Whether the element can be clicked right now. */
+export const isActionable = (element: Element): boolean =>
+  isEnabled(element) && isExposedAtCenter(element);
+
+/** Whether the element could be clicked, were it not for other UI drawn over it. */
+export const isCovered = (element: Element): boolean =>
+  isEnabled(element) && !isExposedAtCenter(element);
 
 const isTooLarge = (element: Element): boolean => {
   const { width, height } = element.getBoundingClientRect();

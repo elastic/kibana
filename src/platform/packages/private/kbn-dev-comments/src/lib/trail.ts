@@ -192,11 +192,16 @@ export const createTrailRecorder = ({
     }
   };
 
+  // The trail is the page's: a click that led off it is not a step on the next
+  // one, whether it is still awaiting its UI or its handler is what navigated,
+  // which happens between the two looks at it (a navigation link stays on the
+  // page and gets `aria-current`, so the bubbling look would take it).
   const onLocationChange = () => {
     const next = location.getPageKey();
     if (next !== pageKey) {
       pageKey = next;
       steps = [];
+      candidate = undefined;
       settleAwaited({ finalLook: false });
     }
   };

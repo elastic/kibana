@@ -549,6 +549,67 @@ describe('CommentsLayer', () => {
     expect(screen.getByTestId('devCommentsGuide')).toHaveTextContent('Looking for the comment…');
   });
 
+  it('asks again for a click that turned out to need an earlier one, in the order the author made them', async () => {
+    // The author selected a tab and opened a flyout with the selected tab's
+    // content, where the comment is. The flyout button can be clicked right away,
+    // so the guide asks for it first, as the click closest to the comment; the
+    // flyout then shows the other tab's content, over the tabs.
+    renderPage(`
+      <button id="tab-a" role="tab" aria-selected="true" data-rect="0,0,50,20">Tab A</button>
+      <button id="tab-b" role="tab" aria-selected="false" data-rect="60,0,50,20">Tab B</button>
+      <button id="open" type="button" aria-expanded="false" data-rect="200,0,50,20">Open</button>
+    `);
+    const tabB = query('#tab-b');
+    tabB.addEventListener('click', () => {
+      query('#tab-a').setAttribute('aria-selected', 'false');
+      tabB.setAttribute('aria-selected', 'true');
+    });
+    query('#open').addEventListener('click', () => {
+      const content =
+        tabB.getAttribute('aria-selected') === 'true'
+          ? `<button id="detail" data-rect="520,20,100,20">Detail</button>`
+          : `<p data-rect="520,20,100,20">Nothing for Tab A</p>`;
+      document.body.append(
+        parse(`<div id="mask" data-rect="0,0,2000,2000"></div>`),
+        parse(`<div id="flyout" role="dialog" data-rect="500,0,300,600">${content}</div>`)
+      );
+    });
+    const closeFlyout = () =>
+      document.querySelectorAll('#mask, #flyout').forEach((element) => element.remove());
+    const guided = createComment('guided', {
+      anchor: anchorById('detail'),
+      trail: [
+        { label: 'Tab B', anchor: anchorById('tab-b') },
+        { label: 'Open', anchor: anchorById('open') },
+      ],
+    });
+    const controller = await renderLayer({ api: createInMemoryCommentsApi([guided]) });
+    act(() => controller.setActive(true));
+    const guide = () => screen.getByTestId('devCommentsGuide');
+
+    jest.useFakeTimers();
+    try {
+      await act(() => controller.guideTo(guided));
+      expect(guide()).toHaveTextContent('Click “Open” to get to the comment');
+
+      await act(async () => fireEvent.click(query('#open')));
+      act(() => jest.advanceTimersByTime(SETTLE_MS));
+      expect(guide()).toHaveTextContent(
+        '“Tab B” is behind other UI, like a dialog or menu: close it to get to the comment.'
+      );
+
+      await act(async () => closeFlyout());
+      await waitFor(() => expect(guide()).toHaveTextContent('Click “Tab B” to get to the comment'));
+      await act(async () => fireEvent.click(tabB));
+      await waitFor(() => expect(guide()).toHaveTextContent('Click “Open” to get to the comment'));
+      await act(async () => fireEvent.click(query('#open')));
+      await waitFor(() => expect(controller.store.getState().activeThreadId).toBe('guided'));
+      expect(screen.queryByTestId('devCommentsGuide')).not.toBeInTheDocument();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it('waits for the host to open the comment page before looking for it, even on the same page in another state', async () => {
     // The page key does not tell the two states apart, and the element is already there.
     const { location, navigate } = createLocation('/page?state=1');
