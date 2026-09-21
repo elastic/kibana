@@ -34,7 +34,7 @@ export const MESSAGE_FIELD_HELP = i18n.translate(
   'xpack.stackConnectors.components.jiraServiceManagement.messageFieldHelpText',
   {
     defaultMessage:
-      'Jira Service Management limits this field to 130 characters. Longer messages are truncated when the action runs.',
+      'Jira Service Management limits this field to 130 characters. Messages up to 15,000 characters are truncated when the action runs; longer messages are rejected.',
   }
 );
 
