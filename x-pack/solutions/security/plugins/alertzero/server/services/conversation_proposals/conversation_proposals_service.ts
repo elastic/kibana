@@ -21,14 +21,13 @@ type ConversationDecoration = Pick<
 >;
 
 /**
- * A `TEXT_ARRAY` is only deserialized back to `string[]` when the conversation's template
- * resolves; otherwise it arrives serialized, where a single entry is a bare string.
+ * Metadata is only deserialized to a `TEXT_ARRAY`'s declared `string[]` when the
+ * conversation's template resolves; otherwise it stays in storage form, where a
+ * single entry is a bare string.
  */
 const readAssignees = (value: MetadataFieldValue | undefined): string[] => {
-  if (Array.isArray(value)) {
-    return value.filter((entry): entry is string => typeof entry === 'string' && entry !== '');
-  }
-  return typeof value === 'string' && value !== '' ? [value] : [];
+  if (Array.isArray(value)) return value;
+  return typeof value === 'string' ? [value] : [];
 };
 
 /** Fixed window for the closed-proposals queue: decisions older than this are not shown. */
@@ -122,8 +121,6 @@ export class ConversationProposalsService {
   ): ProposalItem[] {
     return proposals.map((proposal) => {
       const conversation = conversations.get(proposal.conversationId);
-      // `assignees` is spelled out because the spread contributes nothing when the
-      // conversation was unreadable, and the field is not optional.
       return { ...proposal, ...conversation, assignees: conversation?.assignees ?? [] };
     });
   }
