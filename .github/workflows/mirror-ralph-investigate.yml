@@ -80,21 +80,21 @@ jobs:
           # Same reason as .github/workflows/failed-test-investigator.md:140-142.
           GH_TOKEN: ${{ secrets.KIBANAMACHINE_TOKEN }}
           TARGET_REPO: elastic/observability-error-backlog
-          # Passed as env, never interpolated into the script: an issue body is authorable by
-          # anyone on the internet, and `${{ github.event.issue.body }}` inline in `run:` is a
-          # script-injection hole.
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           ISSUE_TITLE: ${{ github.event.issue.title }}
-          ISSUE_BODY: ${{ github.event.issue.body }}
           ISSUE_URL: ${{ github.event.issue.html_url }}
         run: |
           set -euo pipefail
+
+          # Keep the mirror body minimal — just a pointer to the source issue. Detective Ralph
+          # has GitHub API access and elastic/kibana is public, so it can read the full content
+          # from the source URL. This avoids copying user-authored content into the workflow,
+          # eliminates the body-size limit problem, and keeps the mirror always up to date.
           {
-            printf '> Mirrored from %s\n>\n' "$ISSUE_URL"
-            printf '> Human-reported Kibana issue, so there is no telemetry log pattern attached\n'
-            printf '> and no ES|QL log-category data exists for it.\n\n### Original report\n\n'
-            printf '%s\n' "$ISSUE_BODY"
-            printf '\n<!--kibana-mirror %s-->\n' "$ISSUE_NUMBER"
+            printf 'This issue was mirrored from elastic/kibana for Ralph investigation.\n'
+            printf 'Read the source issue at the link below for the full bug report.\n\n'
+            printf '**Source:** %s\n\n' "$ISSUE_URL"
+            printf '<!--kibana-mirror %s-->\n' "$ISSUE_NUMBER"
           } > "$RUNNER_TEMP/body.md"
 
           MIRROR_URL=$(gh issue create --repo "$TARGET_REPO" \
