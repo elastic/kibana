@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/security-solution-fixtures-plugin",
-  "owner": "@elastic/kibana-cases",
+  "owner": "@elastic/security-investigations",
   "group": "platform",
   "visibility": "private",
   "plugin": {
