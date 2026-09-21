@@ -49,7 +49,7 @@ describe('useCasePermission', () => {
 
   it('calls canUseCases scoped to the securitySolution owner', () => {
     const ProviderComponent = getProviderComponent(
-      getMockedServices({ createComment: true, update: true })
+      getMockedServices({ createComment: true, read: true })
     );
     renderHook(() => useCaseDisabled('abc'), { wrapper: ProviderComponent });
     expect(mockCanUseCases).toHaveBeenCalledWith([APP_ID]);
@@ -57,7 +57,7 @@ describe('useCasePermission', () => {
 
   it('should return false if user has correct permissions and indicator has a name', () => {
     const ProviderComponent = getProviderComponent(
-      getMockedServices({ createComment: true, update: true })
+      getMockedServices({ createComment: true, read: true })
     );
 
     hookResult = renderHook(() => useCaseDisabled('abc'), { wrapper: ProviderComponent });
@@ -66,7 +66,7 @@ describe('useCasePermission', () => {
 
   it(`should return true if user doesn't have correct permissions`, () => {
     const ProviderComponent = getProviderComponent(
-      getMockedServices({ createComment: false, update: true })
+      getMockedServices({ createComment: false, read: true })
     );
 
     hookResult = renderHook(() => useCaseDisabled('abc'), { wrapper: ProviderComponent });
@@ -75,7 +75,7 @@ describe('useCasePermission', () => {
 
   it('should return true if indicator name is missing or empty', () => {
     const ProviderComponent = getProviderComponent(
-      getMockedServices({ createComment: true, update: true })
+      getMockedServices({ createComment: true, read: true })
     );
 
     hookResult = renderHook(() => useCaseDisabled(EMPTY_VALUE), { wrapper: ProviderComponent });

@@ -12,15 +12,11 @@ import { getCurrentTraceId } from '@kbn/evals';
 import type { Detection, SignificantEvent } from '@kbn/significant-events-schema';
 import type { GcsConfig } from '../../src/data_generators/replay';
 import {
-  replayIntoManagedStream,
-  SIGEVENTS_SNAPSHOT_RUN,
   SIGEVENTS_WIRED_ROOTS,
   cleanSignificantEventsDataStreams,
   ensureStreamsEnabled,
   deleteTemporaryReplayIndices,
   canonicalDetectionsFromGroundTruth,
-  resetMemoryPages,
-  replayIntoMemoryPages,
   shiftSnapshotTimestamp,
   type ReplayShift,
 } from '../../src/data_generators/replay';
@@ -29,9 +25,9 @@ import { seedChronicBackground } from '../../src/data_generators/seed_chronic_ba
 import { evaluate } from '../../src/evaluate';
 import {
   getActiveDatasets,
+  hasExplicitDatasetSelection,
   MANAGED_STREAM_SEARCH_PATTERN,
   resolveScenarioSnapshotSource,
-  snapshotCatalogKey,
   snapshotSourceKey,
 } from '../../src/datasets';
 import type { DiscoveryScenario } from '../../src/datasets';
@@ -39,7 +35,11 @@ import {
   createDiscoveryEvaluators,
   createContinuationEvaluators,
 } from '../../src/evaluators/discovery';
-import { buildAvailableSnapshotsBySource } from '../shared';
+import {
+  buildAvailableSnapshotsBySource,
+  hasAvailableSnapshot,
+  replayDatasetIntoManagedStream,
+} from '../shared';
 import {
   extractDiscoveriesFromToolCall,
   extractSignificantEventsFromToolCall,
@@ -59,6 +59,7 @@ evaluate.describe(
   { tag: tags.serverless.observability.complete },
   () => {
     const activeDatasets = getActiveDatasets();
+    const failOnMissingSnapshot = hasExplicitDatasetSelection(process.env.SIGEVENTS_DATASET);
     const availableSnapshotsBySource = new Map<string, Set<string>>();
 
     evaluate.beforeAll(async ({ esClient, kbnClient, log }) => {
@@ -119,14 +120,15 @@ evaluate.describe(
             });
             const key = snapshotSourceKey(snapshotSource);
 
-            const availableSnapshots =
-              availableSnapshotsBySource.get(snapshotCatalogKey(snapshotSource.gcs)) ?? new Set();
-
-            if (!availableSnapshots.has(snapshotSource.snapshotName)) {
-              log.info(
-                `Snapshot "${snapshotSource.snapshotName}" not found in run "${SIGEVENTS_SNAPSHOT_RUN}" ` +
-                  `(source: ${snapshotSource.gcs.bucket}/${snapshotSource.gcs.basePathPrefix}) — skipping scenario "${scenario.input.scenario_id}"`
-              );
+            if (
+              !hasAvailableSnapshot({
+                availableSnapshotsBySource,
+                source: snapshotSource,
+                datasetId: dataset.id,
+                failOnMissingSnapshot,
+                log,
+              })
+            ) {
               continue;
             }
 
@@ -141,12 +143,12 @@ evaluate.describe(
               }
               await ensureStreamsEnabled({ esClient, apiServices, log });
 
-              const stats = await replayIntoManagedStream(
+              const stats = await replayDatasetIntoManagedStream({
                 esClient,
                 log,
-                snapshotSource.snapshotName,
-                snapshotSource.gcs
-              );
+                dataset,
+                source: snapshotSource,
+              });
 
               if (stats.created === 0) {
                 log.info(
@@ -185,7 +187,6 @@ evaluate.describe(
             executorClient,
             evaluators,
             esClient,
-            kbnClient,
             agentBuilderClient,
             apiServices,
             log,
@@ -198,49 +199,34 @@ evaluate.describe(
             const detectionsByScenario = new Map(
               collectedExamples.map(({ scenario, detections, snapshotKey }) => [
                 scenario.input.scenario_id,
-                { detections, snapshotKey, memoryPages: scenario.memoryPages },
+                { detections, snapshotKey },
               ])
-            );
-            const discoveryExamples = collectedExamples.filter(
-              ({ scenario }) => !scenario.memoryPages?.length
-            );
-            const memoryExamples = collectedExamples.filter(
-              ({ scenario }) => scenario.memoryPages?.length
             );
 
             await executorClient.runExperiment(
               {
                 datasets: [
-                  ...[
-                    {
-                      name: `sigevents: Discovery (${dataset.id})`,
-                      description: `[${dataset.id}] discovery agent across scenarios`,
-                      examples: discoveryExamples,
+                  {
+                    name: `sigevents: Discovery (${dataset.id})`,
+                    description: `[${dataset.id}] discovery agent across scenarios`,
+                    examples: collectedExamples,
+                  },
+                ].map(({ name, description, examples }) => ({
+                  name,
+                  description,
+                  examples: examples.map(({ scenario }) => ({
+                    id: scenario.input.scenario_id,
+                    input: {
+                      ...scenario.input,
+                      snapshot_source: scenario.snapshot_source,
                     },
-                    {
-                      name: `sigevents: Discovery memory (${dataset.id})`,
-                      description: `[${dataset.id}] discovery agent memory-aware scenarios`,
-                      examples: memoryExamples,
+                    output: { ...scenario.output, criteria: scenario.output.criteria },
+                    metadata: {
+                      ...scenario.metadata,
+                      test_index: MANAGED_STREAM_SEARCH_PATTERN,
                     },
-                  ]
-                    .filter(({ examples }) => examples.length > 0)
-                    .map(({ name, description, examples }) => ({
-                      name,
-                      description,
-                      examples: examples.map(({ scenario }) => ({
-                        id: scenario.input.scenario_id,
-                        input: {
-                          ...scenario.input,
-                          snapshot_source: scenario.snapshot_source,
-                        },
-                        output: { ...scenario.output, criteria: scenario.output.criteria },
-                        metadata: {
-                          ...scenario.metadata,
-                          test_index: MANAGED_STREAM_SEARCH_PATTERN,
-                        },
-                      })),
-                    })),
-                ],
+                  })),
+                })),
                 concurrency: 1,
                 trustUpstreamDataset: TRUST_UPSTREAM,
                 task: async ({ input }: { input: DiscoveryScenario['input'] }) => {
@@ -249,7 +235,7 @@ evaluate.describe(
                     throw new Error(`No pre-collected data for scenario "${input.scenario_id}"`);
                   }
 
-                  const { detections, snapshotKey, memoryPages } = data;
+                  const { detections, snapshotKey } = data;
                   const snapshotSource = snapshotSources.get(input.scenario_id);
                   if (!snapshotSource) {
                     throw new Error(`No snapshot source found for scenario "${input.scenario_id}"`);
@@ -258,18 +244,6 @@ evaluate.describe(
                   // Each scenario must start with an empty events index. Scenarios that share a
                   // snapshot (e.g. ledger-db-disconnect-misgrouped-auth) are independent episodes.
                   await cleanSignificantEventsDataStreams(esClient, log, { includeLogs: false });
-
-                  // Memory must be hermetic per scenario: prior scenarios may have seeded pages or
-                  // the agent may have created first-sight chronic pages — either would leak a
-                  // severity cap (or its absence) into this scenario's grading.
-                  await resetMemoryPages({ esClient, log });
-                  if (memoryPages && memoryPages.length > 0) {
-                    await replayIntoMemoryPages({
-                      log,
-                      kbnClient,
-                      memoryPages,
-                    });
-                  }
 
                   if (snapshotKey !== lastReplayedSnapshotKey) {
                     await cleanSignificantEventsDataStreams(esClient, log);
@@ -280,12 +254,12 @@ evaluate.describe(
                         .catch(() => {});
                     }
                     await ensureStreamsEnabled({ esClient, apiServices, log });
-                    const stats = await replayIntoManagedStream(
+                    const stats = await replayDatasetIntoManagedStream({
                       esClient,
                       log,
-                      snapshotSource.snapshotName,
-                      snapshotSource.gcs
-                    );
+                      dataset,
+                      source: snapshotSource,
+                    });
                     if (stats.created === 0) {
                       throw new Error(
                         `No documents indexed after replaying snapshot "${snapshotSource.snapshotName}"`
@@ -407,9 +381,7 @@ evaluate.describe(
               // establishing + one gradable follow-up).
               const runs = collectedExamples.flatMap(({ scenario, detections, snapshotKey }) => {
                 if (detections.length === 0) return [];
-                if (scenario.memoryPages?.length) return [];
-                // Chronic-seeded scenarios grade the rate gate only; continuation policy for
-                // known-chronic patterns is owned by the memory-usage work.
+                // Chronic-seeded scenarios grade the rate gate only; continuation is out of scope.
                 if (scenario.input.chronic_seed) return [];
                 const byRuleName = new Map(detections.map((d) => [d.rule_name, d]));
                 const continuationChains = Object.entries(scenario.continuationChains ?? {});
@@ -503,10 +475,6 @@ evaluate.describe(
                     // The cycles within this task still share state.
                     await cleanSignificantEventsDataStreams(esClient, log, { includeLogs: false });
 
-                    // Wipe memory pages so first-sight chronic pages created by earlier runs do
-                    // not cap this run's severity reasoning.
-                    await resetMemoryPages({ esClient, log });
-
                     const snapshotSource = snapshotSources.get(input.scenario_id);
                     if (!snapshotSource) {
                       throw new Error(
@@ -524,12 +492,12 @@ evaluate.describe(
                       }
 
                       await ensureStreamsEnabled({ esClient, apiServices, log });
-                      const stats = await replayIntoManagedStream(
+                      const stats = await replayDatasetIntoManagedStream({
                         esClient,
                         log,
-                        snapshotSource.snapshotName,
-                        snapshotSource.gcs
-                      );
+                        dataset,
+                        source: snapshotSource,
+                      });
                       if (stats.created === 0) {
                         throw new Error(
                           `No documents indexed after replaying snapshot "${snapshotSource.snapshotName}"`
@@ -678,7 +646,6 @@ evaluate.describe(
           await deleteTemporaryReplayIndices(esClient, log);
           await apiServices.streams.disable().catch(() => {});
           await cleanSignificantEventsDataStreams(esClient, log);
-          await resetMemoryPages({ esClient, log });
         });
       });
     }

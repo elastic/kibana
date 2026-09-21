@@ -11,9 +11,6 @@ import { css } from '@emotion/react';
 import { transparentize, useEuiTheme } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
 
-/** Routes that render a fixed-height layout of their own and must not be scrolled as one block. */
-const FIXED_HEIGHT_ROUTES = ['/chats'];
-
 /**
  * Routes that rely on the chrome's application scroll container (`#kbnChromeLayoutApplication`).
  *
@@ -41,11 +38,7 @@ export const AppChromeLayout: React.FC<AppChromeLayoutProps> = ({ children }) =>
   const { euiTheme } = useEuiTheme();
   const { pathname } = useLocation();
 
-  const overflow = matchesRoute(pathname, FIXED_HEIGHT_ROUTES)
-    ? 'hidden'
-    : matchesRoute(pathname, CHROME_SCROLLED_ROUTES)
-      ? 'visible'
-      : 'auto';
+  const overflow = matchesRoute(pathname, CHROME_SCROLLED_ROUTES) ? 'visible' : 'auto';
 
   return (
     <>

@@ -8,7 +8,9 @@
 import {
   ChatEventType,
   AgentBuilderErrorCode,
+  TimelineEventType,
   isAgentBuilderError,
+  isRequestAbortedError,
 } from '@kbn/agent-builder-common';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import type { AgentExecutionClient, ExecutionPeek } from './persistence';
@@ -41,6 +43,19 @@ const roundCompleteEvent = (): ChatEvent =>
     type: ChatEventType.roundComplete,
     data: { round: { id: 'round-1' } },
   }) as unknown as ChatEvent;
+
+const terminalEvent = (
+  type: TimelineEventType.executionFailed | TimelineEventType.executionAborted
+): ChatEvent =>
+  ({
+    id: `round-1::${type}`,
+    type,
+    created_at: '2024-01-01T00:00:01.000Z',
+    actor: { type: 'agent', id: 'agent-1' },
+    execution_id: 'round-1::execution',
+    trigger_event_id: 'round-1::user_message',
+    data: { time_to_last_token: 1 },
+  } as unknown as ChatEvent);
 
 /**
  * Helper to build the return value of `executionClient.peek`.
@@ -211,16 +226,18 @@ describe('followExecution$', () => {
         message: 'something went wrong',
       })
     );
+    executionClient.readEvents.mockResolvedValue(readEventsResult([], ExecutionStatus.failed));
 
-    const result = await collectEvents(
-      followExecution$({ executionId: EXECUTION_ID, executionClient })
+    const promise = collectEvents(followExecution$({ executionId: EXECUTION_ID, executionClient }));
+    await jest.advanceTimersByTimeAsync(
+      constants.FOLLOW_TERMINAL_READ_MAX_RETRIES * constants.FOLLOW_TERMINAL_READ_RETRY_DELAY_MS
     );
+    const result = await promise;
 
     expect(result.error).toBeDefined();
     expect(isAgentBuilderError(result.error!)).toBe(true);
     expect(result.error!.message).toBe('something went wrong');
-    // Should NOT have called readEvents (no new events)
-    expect(executionClient.readEvents).not.toHaveBeenCalled();
+    expect(result.events).toEqual([]);
   });
 
   it('errors with internal error on failed execution without error details', async () => {
@@ -228,29 +245,241 @@ describe('followExecution$', () => {
 
     // peek: failed without error, no events
     executionClient.peek.mockResolvedValueOnce(peekResult(ExecutionStatus.failed, 0));
+    executionClient.readEvents.mockResolvedValue(readEventsResult([], ExecutionStatus.failed));
 
-    const result = await collectEvents(
-      followExecution$({ executionId: EXECUTION_ID, executionClient })
+    const promise = collectEvents(followExecution$({ executionId: EXECUTION_ID, executionClient }));
+    await jest.advanceTimersByTimeAsync(
+      constants.FOLLOW_TERMINAL_READ_MAX_RETRIES * constants.FOLLOW_TERMINAL_READ_RETRY_DELAY_MS
     );
+    const result = await promise;
 
     expect(result.error).toBeDefined();
     expect(isAgentBuilderError(result.error!)).toBe(true);
     expect(result.error!.message).toContain('failed');
   });
 
-  it('errors on aborted execution', async () => {
+  it('errors on aborted execution once the drain window elapses without a terminal event', async () => {
     const executionClient = createMockExecutionClient();
 
-    // peek: aborted, no events
+    // peek: aborted, no events; the worker never writes execution_aborted (worker lost)
     executionClient.peek.mockResolvedValueOnce(peekResult(ExecutionStatus.aborted, 0));
+    executionClient.readEvents.mockResolvedValue(readEventsResult([], ExecutionStatus.aborted));
 
-    const result = await collectEvents(
-      followExecution$({ executionId: EXECUTION_ID, executionClient })
-    );
+    const promise = collectEvents(followExecution$({ executionId: EXECUTION_ID, executionClient }));
+    await jest.advanceTimersByTimeAsync(constants.FOLLOW_ABORT_DRAIN_TIMEOUT_MS + 1000);
+    const result = await promise;
 
     expect(result.error).toBeDefined();
-    expect(isAgentBuilderError(result.error!)).toBe(true);
+    expect(isRequestAbortedError(result.error!)).toBe(true);
     expect(result.error!.message).toContain('aborted');
+    expect(result.events).toEqual([]);
+  });
+
+  it('rebuilds the execution error with its cause chain on failed', async () => {
+    const executionClient = createMockExecutionClient();
+    executionClient.peek.mockResolvedValueOnce({
+      status: ExecutionStatus.failed,
+      eventCount: 0,
+      error: {
+        code: AgentBuilderErrorCode.internalError,
+        message: 'Error executing agent',
+        causes: [{ name: 'Error', message: 'Error calling connector', code: 'connector_error' }],
+      } as never,
+    });
+    executionClient.readEvents.mockResolvedValue(readEventsResult([], ExecutionStatus.failed));
+
+    const promise = collectEvents(followExecution$({ executionId: EXECUTION_ID, executionClient }));
+    await jest.advanceTimersByTimeAsync(
+      constants.FOLLOW_TERMINAL_READ_MAX_RETRIES * constants.FOLLOW_TERMINAL_READ_RETRY_DELAY_MS
+    );
+    const result = await promise;
+
+    const cause = (result.error as Error & { cause?: Error & { code?: string } }).cause;
+    expect(cause?.message).toBe('Error calling connector');
+    expect(cause?.code).toBe('connector_error');
+  });
+
+  describe('terminal timeline events on failed / aborted', () => {
+    it('failed: the terminal read in the same poll is yielded and no drain read follows', async () => {
+      const executionClient = createMockExecutionClient();
+      const chunk = messageChunkEvent('partial');
+      const failed = terminalEvent(TimelineEventType.executionFailed);
+
+      executionClient.peek.mockResolvedValueOnce(
+        peekResult(ExecutionStatus.failed, 2, {
+          code: AgentBuilderErrorCode.internalError,
+          message: 'boom',
+        })
+      );
+      executionClient.readEvents.mockResolvedValueOnce(
+        readEventsResult([chunk, failed], ExecutionStatus.failed)
+      );
+
+      const result = await collectEvents(
+        followExecution$({ executionId: EXECUTION_ID, executionClient })
+      );
+
+      expect(result.events).toEqual([chunk, failed]);
+      expect(result.error!.message).toBe('boom');
+      expect(executionClient.readEvents).toHaveBeenCalledTimes(1);
+    });
+
+    it('failed: a terminal not yet readable is drained on the next read, then the error is thrown', async () => {
+      const executionClient = createMockExecutionClient();
+      const failed = terminalEvent(TimelineEventType.executionFailed);
+
+      executionClient.peek.mockResolvedValueOnce(
+        peekResult(ExecutionStatus.failed, 0, {
+          code: AgentBuilderErrorCode.internalError,
+          message: 'boom',
+        })
+      );
+      executionClient.readEvents.mockResolvedValueOnce(
+        readEventsResult([failed], ExecutionStatus.failed)
+      );
+
+      const result = await collectEvents(
+        followExecution$({ executionId: EXECUTION_ID, executionClient })
+      );
+
+      expect(result.events).toEqual([failed]);
+      expect(result.error!.message).toBe('boom');
+      expect(executionClient.readEvents).toHaveBeenCalledTimes(1);
+    });
+
+    it('failed: a terminal read while still running is latched, so no drain read happens later', async () => {
+      const executionClient = createMockExecutionClient();
+      const failed = terminalEvent(TimelineEventType.executionFailed);
+
+      // poll 1: running, the event batch (incl. the terminal) landed before the status update
+      executionClient.peek.mockResolvedValueOnce(peekResult(ExecutionStatus.running, 1));
+      executionClient.readEvents.mockResolvedValueOnce(
+        readEventsResult([failed], ExecutionStatus.running)
+      );
+      // poll 2: failed, nothing new
+      executionClient.peek.mockResolvedValueOnce(
+        peekResult(ExecutionStatus.failed, 1, {
+          code: AgentBuilderErrorCode.internalError,
+          message: 'boom',
+        })
+      );
+
+      const promise = collectEvents(
+        followExecution$({ executionId: EXECUTION_ID, executionClient })
+      );
+      await jest.advanceTimersByTimeAsync(constants.FOLLOW_POLL_INTERVAL_MS);
+      const result = await promise;
+
+      expect(result.events).toEqual([failed]);
+      expect(result.error!.message).toBe('boom');
+      expect(executionClient.readEvents).toHaveBeenCalledTimes(1);
+    });
+
+    it('aborted: rebuilds the persisted abort error, with its abort_reason, once the worker recorded it', async () => {
+      const executionClient = createMockExecutionClient();
+      const aborted = terminalEvent(TimelineEventType.executionAborted);
+      const persistedError = {
+        code: AgentBuilderErrorCode.requestAborted,
+        message: 'Converse request was aborted',
+        meta: { abort_reason: { source: 'api', actor: { id: 'u1' } } },
+      };
+
+      // first poll: aborted, error not recorded yet; the peek after the drain has it
+      executionClient.peek
+        .mockResolvedValueOnce(peekResult(ExecutionStatus.aborted, 0))
+        .mockResolvedValueOnce({
+          status: ExecutionStatus.aborted,
+          eventCount: 1,
+          error: persistedError as never,
+        });
+      executionClient.readEvents.mockResolvedValueOnce(
+        readEventsResult([aborted], ExecutionStatus.aborted)
+      );
+
+      const result = await collectEvents(
+        followExecution$({ executionId: EXECUTION_ID, executionClient })
+      );
+
+      expect(result.events).toEqual([aborted]);
+      expect(isRequestAbortedError(result.error!)).toBe(true);
+      expect(
+        (result.error as unknown as { meta: Record<string, unknown> }).meta.abort_reason
+      ).toEqual({
+        source: 'api',
+        actor: { id: 'u1' },
+      });
+    });
+
+    it('aborted: derives abort_reason from the drained execution_aborted when no error is recorded yet', async () => {
+      const executionClient = createMockExecutionClient();
+      const aborted = {
+        ...terminalEvent(TimelineEventType.executionAborted),
+        data: { time_to_last_token: 1, aborted_by: { source: 'task_manager' } },
+      } as ChatEvent;
+
+      executionClient.peek.mockResolvedValue(peekResult(ExecutionStatus.aborted, 0));
+      executionClient.readEvents.mockResolvedValueOnce(
+        readEventsResult([aborted], ExecutionStatus.aborted)
+      );
+
+      const result = await collectEvents(
+        followExecution$({ executionId: EXECUTION_ID, executionClient })
+      );
+
+      expect(isRequestAbortedError(result.error!)).toBe(true);
+      expect(
+        (result.error as unknown as { meta: Record<string, unknown> }).meta.abort_reason
+      ).toEqual({
+        source: 'task_manager',
+      });
+    });
+
+    it('aborted: drains until execution_aborted arrives, yields it, then throws RequestAbortedError', async () => {
+      const executionClient = createMockExecutionClient();
+      const aborted = terminalEvent(TimelineEventType.executionAborted);
+
+      executionClient.peek.mockResolvedValueOnce(peekResult(ExecutionStatus.aborted, 0));
+      // first drain read: the worker has not persisted the terminal yet; second: it has
+      executionClient.readEvents
+        .mockResolvedValueOnce(readEventsResult([], ExecutionStatus.aborted))
+        .mockResolvedValueOnce(readEventsResult([aborted], ExecutionStatus.aborted));
+
+      const promise = collectEvents(
+        followExecution$({ executionId: EXECUTION_ID, executionClient })
+      );
+      await jest.advanceTimersByTimeAsync(constants.FOLLOW_POLL_INTERVAL_MS);
+      const result = await promise;
+
+      expect(result.events).toEqual([aborted]);
+      expect(isRequestAbortedError(result.error!)).toBe(true);
+      expect(executionClient.readEvents).toHaveBeenCalledTimes(2);
+    });
+
+    it('aborted: a terminal written late in the worker chain is still drained (the bound covers detection latency)', async () => {
+      const executionClient = createMockExecutionClient();
+      const aborted = terminalEvent(TimelineEventType.executionAborted);
+      const writtenAt =
+        Date.now() +
+        constants.ABORT_POLL_INTERVAL_MS +
+        constants.CANCELLATION_DEADLINE_MS +
+        constants.EVENT_BATCH_INTERVAL_MS;
+
+      executionClient.peek.mockResolvedValueOnce(peekResult(ExecutionStatus.aborted, 0));
+      executionClient.readEvents.mockImplementation(async () =>
+        Date.now() >= writtenAt
+          ? readEventsResult([aborted], ExecutionStatus.aborted)
+          : readEventsResult([], ExecutionStatus.aborted)
+      );
+
+      const promise = collectEvents(
+        followExecution$({ executionId: EXECUTION_ID, executionClient })
+      );
+      await jest.advanceTimersByTimeAsync(constants.FOLLOW_ABORT_DRAIN_TIMEOUT_MS);
+      const result = await promise;
+
+      expect(result.events).toEqual([aborted]);
+      expect(isRequestAbortedError(result.error!)).toBe(true);
+    });
   });
 
   it('errors when execution is not found', async () => {

@@ -20,6 +20,7 @@ import {
 } from '@kbn/es-query';
 import { appendWhereClauseToESQLQuery } from '@kbn/esql-utils';
 import {
+  buildExistsFilter,
   buildSimpleExistFilter,
   buildSimpleNumberRangeFilter,
   buildPhraseFilter,
@@ -141,7 +142,7 @@ export const createFilter = async (
 
 const createFilterFromRawColumnsESQL = async (
   column: DatatableColumn,
-  value: string | number | boolean | (string | number | boolean)[]
+  value: string | number | boolean | (string | number | boolean)[] | null | undefined
 ) => {
   const indexPattern = column?.meta?.sourceParams?.indexPattern as string | undefined;
 
@@ -176,6 +177,15 @@ const createFilterFromRawColumnsESQL = async (
     return [];
   }
 
+  // Only null/undefined mean "no value" here. ES|QL rows never contain the MISSING_TOKEN
+  // sentinel (it is injected by the DSL terms agg), so a literal "__missing__" string is a
+  // real document value and must produce a phrase filter, not a negated exists filter.
+  if (value == null) {
+    const existsFilter = buildExistsFilter(field, dataView);
+    existsFilter.meta.negate = true;
+    return [existsFilter];
+  }
+
   // Match phrase or phrases filter based on whether value is an array
   // The advantage of match_phrase is that you get a term query when it's not a text and
   // match phrase if it is a text. So you don't have to worry about the field type.
@@ -204,9 +214,12 @@ export const createFilterESQL = async (
   }
   const { indexPattern, sourceField, operationType, interval } = sourceParams;
 
-  const value = rowIndex > -1 ? table.rows[rowIndex][column.id] : null;
-  if (value == null) {
+  if (rowIndex === -1) {
     return [];
+  }
+  const value = table.rows[rowIndex][column.id];
+  if (value == null) {
+    return !operationType ? await createFilterFromRawColumnsESQL(column, value) : [];
   }
 
   const filters: Filter[] = [];

@@ -9,7 +9,7 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import {
   OPEN_DASHBOARD_CHAT_ACTION_ID,
-  PRETTIFY_DASHBOARD_ACTION_ID,
+  ENHANCE_DASHBOARD_ACTION_ID,
 } from '@kbn/dashboard-plugin/public';
 import type {
   AgentBuilderDashboardsPluginPublicSetup,
@@ -19,7 +19,7 @@ import type {
 } from './types';
 import { createIdGenerator, registerDashboardAttachmentUiDefinition } from './attachment_types';
 
-const PRETTIFY_DASHBOARD_ENABLED = false;
+const ENHANCE_DASHBOARD_ENABLED = false;
 
 export class AgentBuilderDashboardsPlugin implements Plugin<
   AgentBuilderDashboardsPluginPublicSetup,
@@ -67,18 +67,15 @@ export class AgentBuilderDashboardsPlugin implements Plugin<
         return createOpenDashboardChatAction(plugins.agentBuilder.openChat);
       });
 
-      if (PRETTIFY_DASHBOARD_ENABLED) {
-        plugins.uiActions.registerActionAsync(PRETTIFY_DASHBOARD_ACTION_ID, async () => {
-          const { createPrettifyDashboardAction } =
-            await import('./prettify/prettify_dashboard_action');
-          return createPrettifyDashboardAction({
+      if (ENHANCE_DASHBOARD_ENABLED) {
+        plugins.uiActions.registerActionAsync(ENHANCE_DASHBOARD_ACTION_ID, async () => {
+          const { createEnhanceDashboardAction } =
+            await import('./enhance/enhance_dashboard_action');
+          return createEnhanceDashboardAction({
             openChat: plugins.agentBuilder.openChat,
             getAgentBuilderAccess: plugins.agentBuilder.getAgentBuilderAccess,
             canWriteDashboards,
             draftAttachmentId,
-            files: plugins.files,
-            rendering: core.rendering,
-            toasts: core.notifications.toasts,
           });
         });
       }

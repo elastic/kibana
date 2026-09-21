@@ -29,6 +29,7 @@ import type {
   AlertZeroSetupDependencies,
   AlertZeroStartDependencies,
 } from './types';
+import { registerAlertZeroInferenceFeatures } from './inference_features';
 import { registerRoutes } from './routes/register_routes';
 import { registerOwner } from './managed_workflows/register_owner';
 import { initializeManagedWorkflows } from './managed_workflows/initialize_managed_workflows';
@@ -68,6 +69,7 @@ export class AlertZeroPlugin implements Plugin<
       agentBuilder,
       agenticInvestigations: _agenticInvestigationsSetup,
       features,
+      searchInferenceEndpoints,
       workflowsExtensions,
       workflowsManagement,
     }: AlertZeroSetupDependencies
@@ -83,6 +85,7 @@ export class AlertZeroPlugin implements Plugin<
 
     registerOwner({ workflowsExtensions });
     registerAgentType(agentBuilder);
+    registerAlertZeroInferenceFeatures(searchInferenceEndpoints, this.logger.get('inference'));
     // Registered in setup so the builtin tool is available to Agent Builder before
     // the first agent run; the handler resolves the service lazily like the routes do.
     agentBuilder.tools.register({

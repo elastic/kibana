@@ -11,17 +11,6 @@ export type { WatchWorkerSeed } from './workers';
 export { SKILLS_SEED } from './skills';
 export type { WatchSkillSeed } from './skills';
 
-export {
-  MOCK_INVESTIGATIONS,
-  MOCK_CLEAN_RUN_NOTE,
-  createMockInvestigation,
-  getMockInvestigationById,
-  getMockInvestigationsByWatchId,
-} from './investigations';
-
-export {
-  MOCK_PROPOSALS,
-  createMockProposal,
-  getMockProposalById,
-  getMockProposalsByInvestigationId,
-} from './proposals';
+// `MOCK_INVESTIGATIONS` is deliberately not re-exported: no route serves investigations, so it
+// exists only as the incident set `MOCK_PROPOSALS` derives its conversation titles from.
+export { MOCK_PROPOSALS } from './proposals';

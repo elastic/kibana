@@ -17,6 +17,17 @@ import { productDocInstallStatusSavedObjectTypeName as typeName } from '../../..
 import type { ProductDocInstallStatusAttributes as TypeAttributes } from '../../saved_objects';
 import type { SecurityLabsStatusResponse } from '../doc_manager/types';
 
+const installStatusQuery = { type: typeName, perPage: 100 };
+
+const allUninstalled = (): Record<ProductName, ProductInstallState> =>
+  Object.values(DocumentationProduct).reduce(
+    (memo, product) => {
+      memo[product] = { status: 'uninstalled' };
+      return memo;
+    },
+    {} as Record<ProductName, ProductInstallState>
+  );
+
 export class ProductDocInstallClient {
   private soClient: SavedObjectsClientContract;
   private log: Logger;
@@ -64,57 +75,61 @@ export class ProductDocInstallClient {
     return Array.from(inferenceIds);
   }
 
+  /**
+   * Returns the per-product installation status, reporting every product as uninstalled when the
+   * saved objects cannot be read. Use `getInstallationStatusOrThrow` when a read failure must not
+   * be mistaken for an uninstalled product.
+   */
   async getInstallationStatus({
     inferenceId,
   }: {
     inferenceId: string;
   }): Promise<Record<ProductName, ProductInstallState>> {
-    const query = {
-      type: typeName,
-      perPage: 100,
-    };
-    const installStatus = Object.values(DocumentationProduct).reduce(
-      (memo, product) => {
-        memo[product] = { status: 'uninstalled' };
-        return memo;
-      },
-      {} as Record<ProductName, ProductInstallState>
-    );
     try {
-      const response = await this.soClient.find<TypeAttributes>(query);
-      const savedObjects = isImpliedDefaultElserInferenceId(inferenceId)
-        ? response?.saved_objects.filter((so) =>
-            isImpliedDefaultElserInferenceId(so.attributes.inference_id)
-          )
-        : response?.saved_objects.filter((so) => so.attributes.inference_id === inferenceId);
-
-      // Filter out Security Labs records (stored in the same SO type) so they don't overwrite
-      // the product docs "security" product status.
-      const productDocsSavedObjects = savedObjects?.filter((so) => {
-        // Treat missing resource_type as product_doc for backwards compatibility.
-        const resourceType = so.attributes?.resource_type ?? ResourceTypes.productDoc;
-        return resourceType === ResourceTypes.productDoc;
-      });
-
-      productDocsSavedObjects?.forEach(({ attributes }) => {
-        installStatus[attributes.product_name as ProductName] = {
-          status: attributes.installation_status,
-          version: attributes.product_version,
-          ...(attributes.last_installation_failure_reason
-            ? { failureReason: attributes.last_installation_failure_reason }
-            : {}),
-        };
-      });
-
-      return installStatus;
+      return await this.getInstallationStatusOrThrow({ inferenceId });
     } catch (error) {
       this.log.error(
         `An error occurred getting installation status saved object for inferenceId [${inferenceId}]
-        Query: ${JSON.stringify(query, null, 2)}`,
+        Query: ${JSON.stringify(installStatusQuery, null, 2)}`,
         error
       );
-      return installStatus;
+      return allUninstalled();
     }
+  }
+
+  async getInstallationStatusOrThrow({
+    inferenceId,
+  }: {
+    inferenceId: string;
+  }): Promise<Record<ProductName, ProductInstallState>> {
+    const installStatus = allUninstalled();
+    const response = await this.soClient.find<TypeAttributes>(installStatusQuery);
+    const savedObjects = isImpliedDefaultElserInferenceId(inferenceId)
+      ? response?.saved_objects.filter((so) =>
+          isImpliedDefaultElserInferenceId(so.attributes.inference_id)
+        )
+      : response?.saved_objects.filter((so) => so.attributes.inference_id === inferenceId);
+
+    // Filter out Security Labs records (stored in the same SO type) so they don't overwrite
+    // the product docs "security" product status.
+    const productDocsSavedObjects = savedObjects?.filter((so) => {
+      // Treat missing resource_type as product_doc for backwards compatibility.
+      const resourceType = so.attributes?.resource_type ?? ResourceTypes.productDoc;
+      return resourceType === ResourceTypes.productDoc;
+    });
+
+    productDocsSavedObjects?.forEach(({ attributes, updated_at: updatedAt }) => {
+      installStatus[attributes.product_name as ProductName] = {
+        status: attributes.installation_status,
+        version: attributes.product_version,
+        ...(attributes.last_installation_failure_reason
+          ? { failureReason: attributes.last_installation_failure_reason }
+          : {}),
+        ...(updatedAt ? { updatedAt } : {}),
+      };
+    });
+
+    return installStatus;
   }
 
   async setInstallationStarted(fields: {
@@ -166,11 +181,15 @@ export class ProductDocInstallClient {
     inferenceId: string | undefined
   ) {
     const objectId = getObjectIdFromProductName(productName, inferenceId);
-    await this.soClient.update<TypeAttributes>(typeName, objectId, {
-      installation_status: 'error',
+    const attributes = {
+      installation_status: 'error' as const,
       last_installation_failure_reason: failureReason,
       inference_id: inferenceId,
       resource_type: ResourceTypes.productDoc,
+    };
+    // The install may fail before any status was written for this product
+    await this.soClient.update<TypeAttributes>(typeName, objectId, attributes, {
+      upsert: { ...attributes, product_name: productName, product_version: '' },
     });
   }
 
@@ -256,12 +275,16 @@ export class ProductDocInstallClient {
   }) {
     const { version, failureReason, inferenceId } = fields;
     const objectId = getSecurityLabsObjectId(inferenceId);
-    await this.soClient.update<TypeAttributes>(typeName, objectId, {
+    const attributes = {
       ...(version ? { product_version: version } : {}),
-      installation_status: 'error',
+      installation_status: 'error' as const,
       last_installation_failure_reason: failureReason,
       inference_id: inferenceId,
       resource_type: ResourceTypes.securityLabs,
+    };
+    // The install may fail before any status was written
+    await this.soClient.update<TypeAttributes>(typeName, objectId, attributes, {
+      upsert: { ...attributes, product_name: 'security', product_version: version ?? '' },
     });
   }
 
@@ -297,6 +320,7 @@ export class ProductDocInstallClient {
         ...(so.attributes.last_installation_failure_reason
           ? { failureReason: so.attributes.last_installation_failure_reason }
           : {}),
+        ...(so.updated_at ? { updatedAt: so.updated_at } : {}),
       };
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
@@ -352,13 +376,17 @@ export class ProductDocInstallClient {
   }) {
     const { productName, productVersion, failureReason, inferenceId } = fields;
     const objectId = getOpenAPISpecObjectId(inferenceId);
-    await this.soClient.update<TypeAttributes>(typeName, objectId, {
+    const attributes: TypeAttributes = {
       installation_status: 'error',
       last_installation_failure_reason: failureReason,
       inference_id: inferenceId,
       resource_type: ResourceTypes.openapiSpec,
       product_name: productName,
       product_version: productVersion,
+    };
+    // The install may fail before any status was written
+    await this.soClient.update<TypeAttributes>(typeName, objectId, attributes, {
+      upsert: attributes,
     });
   }
 

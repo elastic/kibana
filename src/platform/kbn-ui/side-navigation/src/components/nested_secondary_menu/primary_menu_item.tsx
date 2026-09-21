@@ -9,8 +9,6 @@
 
 import React, { useCallback } from 'react';
 import type { ComponentProps, FC, ReactNode } from 'react';
-import { EuiIcon, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
 
 import { useNestedMenu } from './use_nested_menu';
 import { SecondaryMenu } from '../secondary_menu';
@@ -36,7 +34,6 @@ export const PrimaryMenuItem: FC<PrimaryMenuItemProps> = ({
   ...props
 }) => {
   const { goToPanel } = useNestedMenu();
-  const { euiTheme } = useEuiTheme();
 
   const handleClick = useCallback(() => {
     if (hasSubmenu) {
@@ -46,41 +43,16 @@ export const PrimaryMenuItem: FC<PrimaryMenuItemProps> = ({
     }
   }, [hasSubmenu, id, goToPanel, onClick]);
 
-  const arrowStyle = css`
-    opacity: 0.6;
-    position: absolute;
-    right: ${euiTheme.size.s};
-    top: 50%;
-    transform: translateY(-50%);
-  `;
-
-  const wrapperStyle = css`
-    display: block;
-    position: relative;
-    width: 100%;
-  `;
-
   return (
-    <div css={wrapperStyle}>
-      <SecondaryMenu.Item
-        id={id}
-        isHighlighted={isHighlighted}
-        isCurrent={isCurrent}
-        onClick={handleClick}
-        hasSubmenu={hasSubmenu}
-        {...props}
-      >
-        {children}
-        {hasSubmenu && (
-          <EuiIcon
-            color="textDisabled"
-            css={arrowStyle}
-            type="chevronSingleRight"
-            size="m"
-            aria-hidden={true}
-          />
-        )}
-      </SecondaryMenu.Item>
-    </div>
+    <SecondaryMenu.Item
+      id={id}
+      isHighlighted={isHighlighted}
+      isCurrent={isCurrent}
+      onClick={handleClick}
+      hasSubmenu={hasSubmenu}
+      {...props}
+    >
+      {children}
+    </SecondaryMenu.Item>
   );
 };

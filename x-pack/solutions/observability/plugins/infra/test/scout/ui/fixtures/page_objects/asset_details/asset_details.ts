@@ -52,7 +52,7 @@ export class AssetDetailsPage {
 
     this.openAsPageButton = this.page.getByTestId('infraAssetDetailsOpenAsPageButton');
     this.returnButton = this.page
-      .getByTestId('infraAssetDetailsReturnButton')
-      .or(this.page.getByTestId('appHeaderBack'));
+      .getByTestId('appHeaderBack')
+      .or(this.page.getByTestId('infraAssetDetailsReturnButton'));
   }
 }

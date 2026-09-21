@@ -22,6 +22,8 @@ import {
   isFailedBeforeSteps,
   isInProgressStatus,
   isTerminalStatus,
+  isValidDuration,
+  parseDuration,
 } from '@kbn/workflows';
 import type { StepExecutionTreeItem } from './build_step_executions_tree';
 import { buildStepExecutionsTree, injectChildWorkflowSteps } from './build_step_executions_tree';
@@ -41,6 +43,7 @@ import {
   buildOverviewStepExecutionFromContext,
   buildTriggerStepExecutionFromContext,
 } from './workflow_pseudo_step_context';
+import { areStepExecutionsUnavailable } from '../../../../common';
 import { buildDiagnosisContextPackage } from '../lib/build_diagnosis_context_package';
 import { buildIterationVirtualId } from '../lib/build_iteration_pseudo_step';
 import type { ErrorPanelDiagnoseState } from '../lib/derive_error_panel_diagnose_availability';
@@ -58,7 +61,6 @@ import {
 } from '../lib/iteration_pins';
 import { mergeDefinitionStepsIntoTree } from '../lib/merge_definition_steps_into_tree';
 import { normalizeStepAi, stepAiToTokenUsage } from '../lib/normalize_step_ai';
-import { parseWorkflowDurationMs } from '../lib/parse_workflow_duration';
 import { rollupTokenUsage, type TokenRollupNode, tokenRollupToUsage } from '../lib/token_rollup';
 import { useErrorPanelDiagnoseAvailability } from '../lib/use_error_panel_diagnose_availability';
 import type { ChildWorkflowExecutionsMap } from '../model/use_child_workflow_executions';
@@ -616,9 +618,8 @@ function convertTreeToOpenNodes(
         // Wait annotations between attempts. Attempt lists that exceed the
         // iteration collapse threshold can reuse pin-and-gap unchanged later —
         // do not special-case attempts out of that model.
-        const configuredDelayMs = parseWorkflowDurationMs(
-          findStepRetryConfig(options?.definition, stepId)?.delay
-        );
+        const delay = findStepRetryConfig(options?.definition, stepId)?.delay?.trim();
+        const configuredDelayMs = isValidDuration(delay) ? parseDuration(delay) : null;
         const nodes: OpenTreeNode[] = [];
         for (let i = 0; i < item.children.length; i++) {
           if (i > 0) {
@@ -1124,6 +1125,8 @@ const emptyPromptCommonProps: EuiEmptyPromptProps = { titleSize: 'xs', paddingSi
 
 export interface WorkflowStepExecutionTreeProps {
   execution: WorkflowExecutionDto | null;
+  /** Paginated steps-list `total`; empty truncated state when a finished run loaded no rows. */
+  stepExecutionsTotal?: number;
   definition: WorkflowYaml | null;
   error: Error | null;
   onStepExecutionClick: (stepExecutionId: string) => void;
@@ -1145,6 +1148,7 @@ export interface WorkflowStepExecutionTreeProps {
 export const WorkflowStepExecutionTree = ({
   error,
   execution,
+  stepExecutionsTotal = 0,
   definition,
   onStepExecutionClick,
   selectedId,
@@ -1211,9 +1215,19 @@ export const WorkflowStepExecutionTree = ({
 
   const failedBeforeSteps =
     execution != null && isFailedBeforeSteps(execution.status, execution.stepExecutions);
+  const stepExecutionsUnavailable =
+    execution != null &&
+    areStepExecutionsUnavailable({
+      stepExecutionsTotal,
+      loadedCount: execution.stepExecutions.length,
+      isInProgress: isInProgressStatus(execution.status),
+    });
 
   const openNodes = useMemo(() => {
     if (!execution || !definition || error) return [] as OpenTreeNode[];
+    if (stepExecutionsUnavailable) {
+      return [] as OpenTreeNode[];
+    }
     if (
       execution.stepExecutions?.length === 0 &&
       !isInProgressStatus(execution.status) &&
@@ -1324,6 +1338,7 @@ export const WorkflowStepExecutionTree = ({
     onStepExecutionClick,
     onToggleGap,
     selectedId,
+    stepExecutionsUnavailable,
   ]);
 
   const defaultExpandedIds = useMemo(() => {
@@ -1381,6 +1396,34 @@ export const WorkflowStepExecutionTree = ({
           </h2>
         }
         body={<EuiText>{error.message}</EuiText>}
+      />
+    );
+  }
+
+  if (stepExecutionsUnavailable) {
+    const omittedCount = stepExecutionsTotal;
+    return (
+      <EuiEmptyPrompt
+        {...emptyPromptCommonProps}
+        data-test-subj="workflowStepExecutionTreeTruncatedEmpty"
+        icon={<EuiIcon type="warning" size="l" aria-hidden={true} />}
+        title={
+          <h2>
+            <FormattedMessage
+              id="workflows.WorkflowStepExecutionTree.stepExecutionsTooLargeTitle"
+              defaultMessage="Unable to show step executions"
+            />
+          </h2>
+        }
+        body={
+          <EuiText>
+            <FormattedMessage
+              id="workflows.WorkflowStepExecutionTree.stepExecutionsTooLargeDescription"
+              defaultMessage="This execution has too much step data to load at once. {count, plural, one {# step execution was not loaded} other {# step executions were not loaded}}."
+              values={{ count: omittedCount }}
+            />
+          </EuiText>
+        }
       />
     );
   }

@@ -38,7 +38,10 @@ import {
 } from '../common';
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import { getConnectorType } from './fixtures';
-import { USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE } from './constants/saved_objects';
+import {
+  CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
+  USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+} from './constants/saved_objects';
 import { LeasePool } from './lib';
 
 function getConfig(overrides = {}) {
@@ -181,6 +184,16 @@ describe('Actions Plugin', () => {
       );
       expect(pluginsSetup.encryptedSavedObjects.registerType).toHaveBeenCalledWith(
         expect.objectContaining({ type: USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE })
+      );
+    });
+
+    it('should always register connector_ingress_credential without encryption', async () => {
+      await plugin.setup(coreSetup, pluginsSetup);
+      expect(coreSetup.savedObjects.registerType).toHaveBeenCalledWith(
+        expect.objectContaining({ name: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE })
+      );
+      expect(pluginsSetup.encryptedSavedObjects.registerType).not.toHaveBeenCalledWith(
+        expect.objectContaining({ type: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE })
       );
     });
 

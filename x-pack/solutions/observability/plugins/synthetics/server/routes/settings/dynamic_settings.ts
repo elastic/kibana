@@ -6,8 +6,9 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import type { IntervalSchedule } from '@kbn/task-manager-plugin/server';
+import { MAX_ROUTE_STRING_LENGTH } from '../zod_query';
 import {
   getSyntheticsDynamicSettings,
   setSyntheticsDynamicSettings,
@@ -176,38 +177,26 @@ export const fromSettingsAttribute = (
   };
 };
 
-export const VALUE_MUST_BE_AN_INTEGER = i18n.translate(
-  'xpack.synthetics.settings.invalid.nanError',
-  {
-    defaultMessage: 'Value must be an integer.',
-  }
-);
+const emailList = z.array(z.string().max(MAX_ROUTE_STRING_LENGTH)).max(1000);
 
-export const validateInteger = (value: number): string | undefined => {
-  if (value % 1) {
-    return VALUE_MUST_BE_AN_INTEGER;
-  }
-};
-
-export const DynamicSettingsSchema = schema.object({
-  certAgeThreshold: schema.maybe(schema.number({ min: 1, validate: validateInteger })),
-  certExpirationThreshold: schema.maybe(schema.number({ min: 1, validate: validateInteger })),
-  defaultConnectors: schema.maybe(schema.arrayOf(schema.string())),
-  defaultStatusRuleEnabled: schema.maybe(schema.boolean()),
-  defaultTLSRuleEnabled: schema.maybe(schema.boolean()),
-  rebalancePrivateLocationShardsEnabled: schema.maybe(schema.boolean()),
-  defaultEmail: schema.maybe(
-    schema.object({
-      to: schema.arrayOf(schema.string()),
-      cc: schema.maybe(schema.arrayOf(schema.string())),
-      bcc: schema.maybe(schema.arrayOf(schema.string())),
+export const DynamicSettingsSchema = z.strictObject({
+  certAgeThreshold: z.number().int().min(1).optional(),
+  certExpirationThreshold: z.number().int().min(1).optional(),
+  defaultConnectors: z.array(z.string().max(MAX_ROUTE_STRING_LENGTH)).max(1000).optional(),
+  defaultStatusRuleEnabled: z.boolean().optional(),
+  defaultTLSRuleEnabled: z.boolean().optional(),
+  rebalancePrivateLocationShardsEnabled: z.boolean().optional(),
+  defaultEmail: z
+    .strictObject({
+      to: emailList,
+      cc: emailList.optional(),
+      bcc: emailList.optional(),
     })
-  ),
-  privateLocationsSyncInterval: schema.maybe(
-    schema.number({
-      min: MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL,
-      max: MAX_PRIVATE_LOCATIONS_SYNC_INTERVAL,
-      validate: validateInteger,
-    })
-  ),
+    .optional(),
+  privateLocationsSyncInterval: z
+    .number()
+    .int()
+    .min(MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL)
+    .max(MAX_PRIVATE_LOCATIONS_SYNC_INTERVAL)
+    .optional(),
 });

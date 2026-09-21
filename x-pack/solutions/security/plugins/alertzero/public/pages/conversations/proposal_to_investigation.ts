@@ -5,16 +5,20 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+import type { ProposalConfidence, ProposalImpact } from '@kbn/agentic-investigations-plugin/common';
 import type { Investigation, RecommendedAction } from '@kbn/agentic-investigations-common';
 import type { ProposalItem } from '../../../common/proposals/list';
 import { CLOSED_GROUP_KEY } from '../../../common/proposals/list';
 
 /**
- * Category an action declares → queue bucket.
+ * Category an action declares → queue bucket. Keyed loosely because a category is an
+ * arbitrary keyword (`actionCategorySchema` is a bounded string, not an enum), so an
+ * action can declare one this page has never heard of.
  *
- * `tune` is the only category the action catalog ships today
- * (`action_create_detection_rule.yaml`). It maps to `configure` here; drop the
- * entry once the catalog declares `configure` directly.
+ * `tune` is retained for back-compatibility only: the shipped catalog now declares
+ * `configure` directly, but proposals created before that snapshot their category at
+ * creation and are never re-scored.
  */
 const CATEGORY_TO_BUCKET: Record<string, RecommendedAction> = {
   respond: 'respond',
@@ -31,7 +35,7 @@ const CATEGORY_TO_BUCKET: Record<string, RecommendedAction> = {
 const FALLBACK_BUCKET: RecommendedAction = 'investigate';
 
 /** Impact levels → numeric rank for `priorityScore` (max 80 from impact). */
-const IMPACT_RANK: Record<string, number> = {
+const IMPACT_RANK: Record<ProposalImpact, number> = {
   critical: 4,
   high: 3,
   medium: 2,
@@ -39,13 +43,17 @@ const IMPACT_RANK: Record<string, number> = {
 };
 
 /** Confidence levels → numeric rank for `priorityScore` (max 15 from confidence). */
-const CONFIDENCE_RANK: Record<string, number> = {
+const CONFIDENCE_RANK: Record<ProposalConfidence, number> = {
   high: 3,
   medium: 2,
   low: 1,
 };
 
-const NO_ACTION_TITLE = 'No automated action';
+/** Shown when the server could not read the proposal's conversation to get its title. */
+const UNTITLED_INVESTIGATION = i18n.translate(
+  'xpack.alertzero.conversationQueue.untitledInvestigationTitle',
+  { defaultMessage: 'Untitled investigation' }
+);
 
 /**
  * Data gaps — fields that cannot be faithfully mapped from a ProposalItem:
@@ -56,10 +64,10 @@ const NO_ACTION_TITLE = 'No automated action';
  * - `events`           `[]`; proposals have no timeline. The flyout renders an empty list.
  * - `affectedSurface`  `undefined`; BlastRadius self-hides (returns null) with no surfaces.
  * - `assignee`         `null`; `decidedBy` is the decider, not an owner.
- * - `status`           deliberately `undefined`. `isQueueRow` gates on
- *                      `QUEUE_STATUSES.has(status ?? 'open')` — mapping `proposal.status`
- *                      (`'pending'`) would cause every card to vanish. Leaving it undefined
- *                      defaults to `'open'`, which passes the gate.
+ * - `status`           deliberately `undefined`. A proposal's own statuses (`'pending'`,
+ *                      `'succeeded'`, …) are not investigation statuses, and mapping them
+ *                      across would be inventing a meaning. The bucket carries the part
+ *                      the queue actually needs: decided proposals land in `closed`.
  * - `severity`         lossy 4→3 collapse: `critical` → `'high'` so the danger icon fires.
  * - `updatedAt`        approximated as `decidedAt ?? createdAt`; proposals have no mtime.
  * - `recordId`         repurposed as the proposal id; the page gates dismiss/assign modals
@@ -76,17 +84,16 @@ export const proposalToInvestigation = (proposal: ProposalItem): Investigation =
     ? CLOSED_GROUP_KEY
     : (CATEGORY_TO_BUCKET[proposal.category ?? ''] ?? FALLBACK_BUCKET);
 
-  const impactRank = IMPACT_RANK[proposal.impact] ?? 1;
-  const confidenceRank = CONFIDENCE_RANK[proposal.confidence] ?? 1;
+  const impactRank = IMPACT_RANK[proposal.impact];
+  const confidenceRank = CONFIDENCE_RANK[proposal.confidence];
 
   return {
     id: proposal.id,
     template_id: 'investigation',
-    title:
-      proposal.conversationTitle ??
-      proposal.action?.name ??
-      proposal.actionWorkflowId ??
-      NO_ACTION_TITLE,
+    // A card is titled by the investigation it belongs to, never by its action: the
+    // action name is already the call to action, and repeating it as the title loses
+    // the only thing that says which incident this decision is about.
+    title: proposal.conversationTitle ?? UNTITLED_INVESTIGATION,
     createdAt: proposal.createdAt,
     // Proposals have no modification timestamp; decidedAt is the closest event.
     updatedAt: proposal.decidedAt ?? proposal.createdAt,
@@ -94,9 +101,7 @@ export const proposalToInvestigation = (proposal: ProposalItem): Investigation =
     // equivalent on a proposal — fabricated as empty strings.
     watch_id: '',
     watch_execution_id: '',
-    // Deliberately omit status so isQueueRow() defaults status to 'open' and
-    // keeps the card in the queue. Mapping proposal.status ('pending') would
-    // cause isQueueRow to return false and the entire queue would be empty.
+    // status is deliberately omitted — see the data-gap note above.
     pendingProposalCount: proposal.decidedAt ? 0 : 1,
     recommendedAction: bucket,
     // severity collapse: 4-level impact → 3-level severity string.

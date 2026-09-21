@@ -290,13 +290,12 @@ export class APIKeys implements NativeAPIKeysType {
       );
     }
 
-    // If API key is granted for UIAM credentials, we need to pass UIAM client authentication and ignore any other
-    // client credentials that might have been provided. Otherwise, try to extract optional Elasticsearch client
-    // credentials from `es-client-authentication` HTTP header (currently only used by JWT).
+    // Preserve UIAM client authentication paired with the granting credential. Other credentials
+    // use `es-client-authentication` (currently only used by JWT).
     let clientAuthentication: ClientAuthentication | undefined;
 
     if (this.uiam && isUiamCredential(authorizationHeader)) {
-      clientAuthentication = this.uiam.getClientAuthentication();
+      clientAuthentication = this.uiam.getClientAuthentication(request);
     } else {
       const clientAuthorizationHeader = HTTPAuthorizationHeader.parseFromRequest(
         request,

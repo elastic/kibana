@@ -4,33 +4,36 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ScoutPage, ScoutTestConfig } from '@kbn/scout-oblt';
-import { ObservabilityNavigation } from '@kbn/scout-oblt';
+import {
+  AppMenu,
+  ObservabilityNavigation,
+  type ScoutPage,
+  type ScoutTestConfig,
+} from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 
 export class SLOApp {
+  private readonly appMenu: AppMenu;
   private readonly nav: ObservabilityNavigation;
 
   constructor(
     private readonly page: ScoutPage,
     private readonly config: ScoutTestConfig
   ) {
+    this.appMenu = new AppMenu(page);
     this.nav = new ObservabilityNavigation(page);
   }
 
-  /** Navigate to SLO app (main list). Waits for "Manage SLOs" header link. */
+  /** Navigate to SLO app (main list). Waits for the Manage SLOs header item. */
   async goto() {
     await this.page.gotoApp('slo');
-    await expect(this.page.getByText('Manage SLOs')).toBeVisible();
+    await this.appMenu.revealItem('sloHeaderManageLink');
   }
 
-  /** Navigate to SLO Management page (Actions > Health scan). Clicks "Manage SLOs" link from the list view. */
+  /** Navigate to SLO Management page (Actions > Health scan). Clicks Manage SLOs from the list view. */
   async gotoManagement() {
     await this.page.gotoApp('slo');
-    await expect(this.page.getByRole('link', { name: 'Manage SLOs' })).toBeVisible({
-      timeout: 15000,
-    });
-    await this.page.getByRole('link', { name: 'Manage SLOs' }).click();
+    await this.appMenu.clickItem('sloHeaderManageLink');
     await expect(this.page.getByTestId('headerControlActionsButton')).toBeVisible({
       timeout: 15000,
     });

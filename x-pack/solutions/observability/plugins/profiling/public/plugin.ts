@@ -124,7 +124,7 @@ export class ProfilingPlugin implements Plugin<
       category: DEFAULT_APP_CATEGORIES.observability,
       deepLinks: links,
       updater$: appUpdater$,
-      async mount({ element, history, theme$, setHeaderActionMenu }: AppMountParameters) {
+      async mount({ element, history }: AppMountParameters) {
         const [coreStart, pluginsStart] = await coreSetup.getStartServices();
 
         const { renderApp } = await import('./app');
@@ -146,8 +146,6 @@ export class ProfilingPlugin implements Plugin<
             pluginsStart,
             pluginsSetup,
             history,
-            theme$,
-            setHeaderActionMenu,
           },
           element
         );

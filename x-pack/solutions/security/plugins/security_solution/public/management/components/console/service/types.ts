@@ -13,10 +13,17 @@ export type ParsedArgData<T = PossibleArgDataTypes> = Array<
 >;
 
 export interface ParsedCommandInput<TArgs extends object = any> {
+  /** Command name */
   name: string;
+  /** Named arguments */
   args: {
     [key in keyof TArgs]: ParsedArgData<Required<TArgs>[key]>;
   };
+  /**
+   * Positional parameters (not currently supported).
+   * May contain entries if user entered un-prefixed argument right after the command name
+   */
+  params: string[];
 }
 
 export interface ParsedCommandInterface<
@@ -31,7 +38,7 @@ export interface ParsedCommandInterface<
   hasArg(argName: string): boolean;
 
   /**
-   * if any argument was entered
+   * if any named argument was entered
    */
   hasArgs: boolean;
 }

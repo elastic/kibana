@@ -36,6 +36,7 @@ import type {
   BrushTriggerEvent,
   ChartsPluginSetup,
   ClickTriggerEvent,
+  AnnotationClickTriggerEvent,
 } from '@kbn/charts-plugin/public';
 import type { ChartSizeEvent } from '@kbn/chart-expressions-common';
 import type { MutableRefObject, ReactElement } from 'react';
@@ -1340,6 +1341,7 @@ export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandle
     event:
       | ClickTriggerEvent
       | BrushTriggerEvent
+      | AnnotationClickTriggerEvent
       | LensEditEvent<LensEditSupportedActions>
       | LensTableRowContextMenuEvent
       | ChartSizeEvent

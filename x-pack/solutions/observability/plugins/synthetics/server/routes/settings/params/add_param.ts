@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type {
@@ -14,6 +14,7 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core-saved-objects-api-server';
 import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-server';
+import { MAX_PARAM_BULK_SIZE, MAX_PARAM_VALUE_LENGTH, MAX_ROUTE_ID_LENGTH } from '../../zod_query';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import type {
   SyntheticsParamRequest,
@@ -24,16 +25,12 @@ import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
 
-const ParamsObjectSchema = schema.object({
-  key: schema.string({
-    minLength: 1,
-  }),
-  value: schema.string({
-    minLength: 1,
-  }),
-  description: schema.maybe(schema.string()),
-  tags: schema.maybe(schema.arrayOf(schema.string())),
-  share_across_spaces: schema.maybe(schema.boolean()),
+export const ParamsObjectSchema = z.strictObject({
+  key: z.string().min(1).max(MAX_ROUTE_ID_LENGTH),
+  value: z.string().min(1).max(MAX_PARAM_VALUE_LENGTH),
+  description: z.string().max(4096).optional(),
+  tags: z.array(z.string().max(256)).max(100).optional(),
+  share_across_spaces: z.boolean().optional(),
 });
 
 export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
@@ -44,7 +41,7 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
   validate: {},
   validation: {
     request: {
-      body: schema.oneOf([ParamsObjectSchema, schema.arrayOf(ParamsObjectSchema)]),
+      body: z.union([ParamsObjectSchema, z.array(ParamsObjectSchema).max(MAX_PARAM_BULK_SIZE)]),
     },
   },
   handler: async ({ request, response, server, savedObjectsClient }) => {

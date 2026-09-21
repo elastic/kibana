@@ -181,12 +181,12 @@ export function createActionPolicy(overrides: Partial<ActionPolicy> = {}): Actio
 }
 
 export function createRuleScopedActionPolicy(
-  ruleId: string,
+  tag: string,
   overrides: Partial<ActionPolicy> = {}
 ): ActionPolicy {
   return createActionPolicy({
     name: 'Test rule-scoped policy',
-    matcher: { expression: `rule.id: "${ruleId}"` },
+    matcher: { tags: [tag] },
     ...overrides,
   });
 }

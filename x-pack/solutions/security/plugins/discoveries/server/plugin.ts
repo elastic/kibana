@@ -40,6 +40,8 @@ import { DEFAULT_CONNECTOR_TIMEOUT_MS } from '.';
 import { logStartupHealthCheck } from './lib/startup_health_check';
 import { workflowExecutor } from './lib/schedules/workflow_executor';
 import { registerRoutes } from './routes';
+import { createAttackDiscoveryAttachmentType } from './agent_builder/attachments/attack_discovery';
+import { createAttackDiscoveryVerdictAttachmentType } from './agent_builder/attachments/attack_discovery_verdict';
 import { createDiagnosticReportAttachmentType } from './agent_builder/attachments/diagnostic_report';
 import { registerSkills } from './agent_builder/skills/register_skills';
 import type {
@@ -251,6 +253,7 @@ export class DiscoveriesPlugin implements Plugin<
       const agentBuilder = plugins.agentBuilder;
       const logger = this.logger;
       const workflowsManagementApi = this.workflowsManagementApi;
+      const adhocAttackDiscoveryDataClient = this.adhocAttackDiscoveryDataClient;
 
       void getStartServices()
         .then(async ({ coreStart }) => {
@@ -263,6 +266,18 @@ export class DiscoveriesPlugin implements Plugin<
           }
 
           agentBuilder.attachments.registerType(createDiagnosticReportAttachmentType());
+
+          // The data client is assigned unconditionally in `setup()` above; the guard
+          // narrows the optional field rather than describing a reachable state.
+          if (adhocAttackDiscoveryDataClient != null) {
+            agentBuilder.attachments.registerType(
+              createAttackDiscoveryAttachmentType({ adhocAttackDiscoveryDataClient, logger })
+            );
+          }
+
+          // By value, so unlike the discovery itself it needs no data client to
+          // resolve against.
+          agentBuilder.attachments.registerType(createAttackDiscoveryVerdictAttachmentType());
 
           await registerSkills(agentBuilder, logger, {
             getEventLogIndex,

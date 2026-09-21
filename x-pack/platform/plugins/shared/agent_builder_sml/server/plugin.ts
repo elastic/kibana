@@ -95,6 +95,7 @@ export class AgentBuilderSmlPlugin implements Plugin<
       dest: { type: 'index', value: smlIndexName },
       automations: [],
       sources: [],
+      traces: [],
     });
 
     return {

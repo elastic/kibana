@@ -35,6 +35,7 @@ import type {
 } from './saved_objects/schemas/types';
 import type { AddSamplesToDataStreamParams as SamplesToDataStreamParams } from './samples_index/index_service';
 import { AutomaticImportSamplesIndexService } from './samples_index/index_service';
+import type { IntegrationName } from './saved_objects/saved_objects_service';
 import { AutomaticImportSavedObjectService } from './saved_objects/saved_objects_service';
 import { integrationSavedObjectType } from './saved_objects/integration';
 import { dataStreamSavedObjectType } from './saved_objects/data_stream';
@@ -263,6 +264,13 @@ export class AutomaticImportService {
       categories: integrationSO.metadata.categories,
     };
     return integrationResponse;
+  }
+
+  public async getAllIntegrationNames(): Promise<IntegrationName[]> {
+    if (!this.savedObjectService) {
+      throw new Error('Saved Objects service not initialized.');
+    }
+    return this.savedObjectService.getAllIntegrationNames();
   }
 
   public async getAllIntegrations(): Promise<IntegrationResponse[]> {

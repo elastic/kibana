@@ -17,6 +17,7 @@ import {
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
   AGENT_BUILDER_BASH_SUPPORT_SETTING_ID,
   ALERTING_V2_ENABLED_SETTING_ID,
+  ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID,
 } from '@kbn/management-settings-ids';
 import { SECURITY_PROJECT_SETTINGS } from '@kbn/serverless-security-settings';
 import {
@@ -109,6 +110,7 @@ export class SecuritySolutionServerlessPlugin implements Plugin<
     // of Alerting V2. Avoid allowlisting a setting that is not registered there.
     if (!isSearchAiLakeTier) {
       projectSettings.push(ALERTING_V2_ENABLED_SETTING_ID);
+      projectSettings.push(ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID);
     }
 
     // Registered unconditionally in ESS (`security_solution/server/ui_settings.ts`), so it

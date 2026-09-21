@@ -46,6 +46,12 @@ import type { ProfileStateMap } from '../../../../../common/context_awareness';
 import type { DefaultEsqlQueryConfig } from '../../../../context_awareness';
 import type { CascadedDocumentsDataGridUiStateMap } from '../../components/layout/cascaded_documents';
 
+/** Group path used to reconstruct a cascade leaf query for a nested-grid flyout. */
+export interface ExpandedDocCascadePath {
+  nodePath: string[];
+  nodePathMap: Record<string, string>;
+}
+
 export interface InternalStateDataRequestParams {
   timeRangeAbsolute: TimeRange | undefined;
   timeRangeRelative: TimeRange | undefined;
@@ -215,6 +221,9 @@ export interface TabState extends TabItem {
     | { initializationStatus: Exclude<TabInitializationStatus, TabInitializationStatus.Error> }
     | { initializationStatus: TabInitializationStatus.Error; error: Error | SerializedError };
 
+  // Indicates the tab was created via "+" and should not auto-fetch on init.
+  skipInitialFetch?: boolean;
+
   // Initial state for the tab (provided before the tab is initialized).
   initialInternalState?: {
     serializedSearchSource?: SerializedSearchSourceFields;
@@ -256,6 +265,7 @@ export interface TabState extends TabItem {
   };
   expandedDoc: DataTableRecord | undefined;
   expandedDocOwner: string | undefined;
+  expandedDocCascadePath: ExpandedDocCascadePath | undefined;
   renderDocumentViewMeta: RenderDocumentViewMeta | undefined;
   initialDocViewerTabId?: string;
 }

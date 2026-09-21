@@ -100,6 +100,7 @@ import { connectorFromInMemoryConnector } from '../application/connector/lib/con
 import { getAxiosInstance } from '../application/connector/methods/get_axios_instance';
 import type { GetAxiosInstanceWithAuthFnOpts } from '../lib/get_axios_instance';
 import { invalidateInboundConnectorEventIdentity } from '../inbound/event_identity';
+import { deleteIngressCredentialForConnector } from '../inbound/ingress_credential';
 
 export interface ConstructorOptions {
   logger: Logger;
@@ -612,6 +613,12 @@ export class ActionsClient {
     await this.deleteConnectorAuthTokens(id, authMode);
 
     await invalidateInboundConnectorEventIdentity(this.context, id, actionTypeId);
+
+    await deleteIngressCredentialForConnector({
+      unsecuredSavedObjectsClient: this.context.unsecuredSavedObjectsClient,
+      connectorId: id,
+      logger: this.context.logger,
+    });
 
     const result = await this.context.unsecuredSavedObjectsClient.delete('action', id);
 

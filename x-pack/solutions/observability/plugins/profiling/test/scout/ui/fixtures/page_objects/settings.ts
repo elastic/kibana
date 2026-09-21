@@ -6,6 +6,7 @@
  */
 
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { EXTENDED_TIMEOUT } from '..';
 
 export class ProfilingSettingsPage {
@@ -16,7 +17,10 @@ export class ProfilingSettingsPage {
 
   async goto() {
     await this.page.goto(`${this.kbnUrl.app('profiling')}/settings`);
-    await this.page.getByTestId('profilingPageTemplate').waitFor({ timeout: EXTENDED_TIMEOUT });
+    await this.page
+      .getByTestId(APP_HEADER_TEST_SUBJECTS.title)
+      .getByText('Settings')
+      .waitFor({ timeout: EXTENDED_TIMEOUT });
   }
 
   // Settings Form methods
