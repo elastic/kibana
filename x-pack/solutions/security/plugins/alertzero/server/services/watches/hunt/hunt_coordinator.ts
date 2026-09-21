@@ -66,6 +66,12 @@ export interface HuntCoordinatorResult {
    * writes feedback (plan.md Phase 6, Task 6.6).
    */
   completedSuccessfully: boolean;
+  /**
+   * Every index pattern the resolved technology's index scope marked
+   * `required`, so `sse_mapper.ts` can flag `hunt_result.tier1.per_index[].required`
+   * without re-resolving the scope (plan 7, SSE durability).
+   */
+  requiredIndexPatterns: string[];
 }
 
 const DEFAULT_TIER2_SAMPLE_EVENTS = 5;
@@ -175,6 +181,7 @@ export const huntCoordinator = async (
       message: `Scope resolution failed: ${(err as Error).message}`,
       next_step: 'Verify the technology index patterns are configured correctly.',
       completedSuccessfully: false,
+      requiredIndexPatterns: [],
     };
   }
 
@@ -203,6 +210,7 @@ export const huntCoordinator = async (
           ? 'Tier 1 matched. Re-run with tier2_when: "always" for behavioral rule proposals.'
           : 'No environment matches. Consider widening time_range.',
       completedSuccessfully: true,
+      requiredIndexPatterns: scope.required,
     };
   }
 
@@ -217,6 +225,7 @@ export const huntCoordinator = async (
       next_step:
         'Tier 2 requires a GenAI connector. Configure one via Stack Management → Connectors.',
       completedSuccessfully: true,
+      requiredIndexPatterns: scope.required,
     };
   }
 
@@ -231,6 +240,7 @@ export const huntCoordinator = async (
       next_step:
         'Tier 2 needs report text. Pass `text` explicitly or use a `report_id` whose `content.body_text` has been ingested.',
       completedSuccessfully: true,
+      requiredIndexPatterns: scope.required,
     };
   }
 
@@ -263,6 +273,7 @@ export const huntCoordinator = async (
       message: `Tier 1: ${tier1Raw.status}. Tier 2 failed: ${(err as Error).message}`,
       next_step: 'Tier 2 LLM call failed. Check connector configuration and retry.',
       completedSuccessfully: false,
+      requiredIndexPatterns: scope.required,
     };
   }
 
@@ -280,5 +291,6 @@ export const huntCoordinator = async (
         ? 'Behaviors proposed for Investigation staging.'
         : 'No behavioral candidates survived catalog validation.',
     completedSuccessfully: true,
+    requiredIndexPatterns: scope.required,
   };
 };
