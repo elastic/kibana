@@ -598,6 +598,115 @@ describe('identifyTestLoads', () => {
         expect(loads).toHaveLength(1);
       });
     });
+
+    describe('kind: "targetAttributes" (test limit scope)', () => {
+      const createConfigWithTests = (
+        configPath: string,
+        tests: Array<{ id: string; tags: string[] }>
+      ) =>
+        createMockConfig({
+          path: configPath,
+          manifest: {
+            path: `${configPath}.meta.json`,
+            exists: true,
+            sha1: 'abc',
+            testChannels: [],
+            tests: tests.map(({ id, tags }) => ({
+              id,
+              title: id,
+              expectedStatus: 'passed',
+              tags,
+              location: { file: 'test.spec.ts', line: 1, column: 1 },
+            })),
+          },
+        });
+
+      it('excludes configs whose only tests for the target are limited out', () => {
+        mockTestConfigs = [
+          createConfigWithTests('plugin-a/config.ts', [
+            { id: 'fips-only', tags: ['@local-stateful-classic', '@limit/only-fips'] },
+          ]),
+        ];
+
+        expect(
+          identifyTestLoads(
+            ciConfig,
+            stats,
+            testTarget,
+            [{ kind: 'targetAttributes', attributes: new Set() }],
+            log
+          )
+        ).toHaveLength(0);
+
+        expect(
+          identifyTestLoads(
+            ciConfig,
+            stats,
+            testTarget,
+            [{ kind: 'targetAttributes', attributes: new Set(['fips'] as const) }],
+            log
+          )
+        ).toHaveLength(1);
+      });
+
+      it('keeps configs that still have an unlimited test for the target', () => {
+        mockTestConfigs = [
+          createConfigWithTests('plugin-a/config.ts', [
+            { id: 'fips-only', tags: ['@local-stateful-classic', '@limit/only-fips'] },
+            { id: 'agnostic', tags: ['@local-stateful-classic'] },
+          ]),
+        ];
+
+        expect(
+          identifyTestLoads(
+            ciConfig,
+            stats,
+            testTarget,
+            [{ kind: 'targetAttributes', attributes: new Set() }],
+            log
+          )
+        ).toHaveLength(1);
+      });
+
+      it('evaluates limits against the same test that carries the target tag', () => {
+        // The only test for the requested target is limited out; the unlimited test
+        // belongs to a different target and must not keep the config alive.
+        mockTestConfigs = [
+          createConfigWithTests('plugin-a/config.ts', [
+            { id: 'fips-only', tags: ['@local-stateful-classic', '@limit/only-fips'] },
+            { id: 'other-target', tags: ['@local-serverless-search'] },
+          ]),
+        ];
+
+        expect(
+          identifyTestLoads(
+            ciConfig,
+            stats,
+            testTarget,
+            [{ kind: 'targetAttributes', attributes: new Set() }],
+            log
+          )
+        ).toHaveLength(0);
+      });
+
+      it('excludes except-fips-only configs when fips is declared', () => {
+        mockTestConfigs = [
+          createConfigWithTests('plugin-a/config.ts', [
+            { id: 'non-fips', tags: ['@local-stateful-classic', '@limit/except-fips'] },
+          ]),
+        ];
+
+        expect(
+          identifyTestLoads(
+            ciConfig,
+            stats,
+            testTarget,
+            [{ kind: 'targetAttributes', attributes: new Set(['fips'] as const) }],
+            log
+          )
+        ).toHaveLength(0);
+      });
+    });
   });
 
   it('returns empty array and logs warning when no configs match', () => {

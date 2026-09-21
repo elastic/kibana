@@ -14,12 +14,13 @@ import { findPackageForPath } from '@kbn/repo-packages';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Command } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
-import type { ScoutTestChannel } from '@kbn/scout-info';
+import type { ScoutTargetAttribute, ScoutTestChannel } from '@kbn/scout-info';
 import {
   ScoutTestTarget,
   SCOUT_CI_CONFIG_PATH,
   SCOUT_OUTPUT_ROOT,
   SCOUT_TEST_CONFIG_STATS_PATH,
+  targetAttributes,
   testTargets,
   testChannel,
   testChannels,
@@ -32,6 +33,10 @@ import type { TestTrackLoad } from '../execution/test_track';
 import { TestTrack } from '../execution/test_track';
 import type { SerializedScoutTestingScope } from '../tests_discovery/testing_scope';
 import { readScoutTestingScope } from '../tests_discovery/testing_scope';
+import {
+  isTestAllowedForTargetAttributes,
+  resolveTargetAttributes,
+} from '../tests_discovery/tag_utils';
 
 /**
  * Selects which Scout test configs are eligible for distribution into lanes.
@@ -39,11 +44,14 @@ import { readScoutTestingScope } from '../tests_discovery/testing_scope';
  * - `kind: 'modules'` → keep configs whose owning @kbn/ module ID is in `ids`
  * - `kind: 'configs'` → keep configs whose repo-relative path is in `paths`
  * - `kind: 'channels'` → keep configs that match any of the test channels in `channels`
+ * - `kind: 'targetAttributes'` → keep configs with at least one test for the target that
+ *   isn't limited out by the declared attributes
  */
 export type TestLoadFilter =
   | { kind: 'modules'; ids: ReadonlySet<string> }
   | { kind: 'configs'; paths: ReadonlySet<string> }
-  | { kind: 'channels'; channels: ReadonlySet<ScoutTestChannel> };
+  | { kind: 'channels'; channels: ReadonlySet<ScoutTestChannel> }
+  | { kind: 'targetAttributes'; attributes: ReadonlySet<ScoutTargetAttribute> };
 
 export interface ScoutCIConfig {
   plugins: {
@@ -111,6 +119,15 @@ export function identifyTestLoads(
               return filter.channels
                 .values()
                 .some((channel) => config.manifest.testChannels.includes(channel));
+            case 'targetAttributes':
+              // Limits are evaluated together with the target tag on the *same* test: a
+              // config may well hold a limited test for one target and an unlimited test
+              // for another, and only the former must be able to disqualify it.
+              return config.manifest.tests.some(
+                (test) =>
+                  test.tags.includes(testTarget.playwrightTag) &&
+                  isTestAllowedForTargetAttributes(test, filter.attributes)
+              );
           }
         })
     )
@@ -452,6 +469,7 @@ export const createTestTracks: Command<void> = {
     string: [
       'testTarget',
       'testChannel',
+      'targetAttribute',
       'serverConfigSet',
       'targetRuntimeMinutes',
       'minRuntimeMinutes',
@@ -466,6 +484,13 @@ export const createTestTracks: Command<void> = {
     --testTarget                    (required)  One or more test target in the {location}-{arch}-{domain} format
     --testChannel                   (optional)  Limit the test selection to one or more test channels
                                                 Valid channels: ${testChannels.all.join(', ')}
+    --targetAttribute               (optional)  Attribute(s) of the test target the tests will run against;
+                                                defaults to SCOUT_TARGET_ATTRIBUTES. Tests carrying an
+                                                unsatisfied '@limit/<selection-method>-<target-attr>' tag are
+                                                excluded, and configs left without a runnable test are not
+                                                distributed. Valid attributes: ${targetAttributes.all.join(
+                                                  ', '
+                                                )}
     --outputPath                    (optional)  Where to write the test track specification [default: ${SCOUT_OUTPUT_ROOT}/test_tracks/{timestamp}.json]
     --targetRuntimeMinutes          (optional)  How long the test track should run [default: longest estimated load runtime]
     --minRuntimeMinutes             (optional)  Target runtime minutes shouldn't be lower than this
@@ -542,6 +567,24 @@ export const createTestTracks: Command<void> = {
         `${Array.from(selectedTestChannels).join(', ')}`
     );
     filters.push({ kind: 'channels', channels: selectedTestChannels });
+
+    let selectedTargetAttributes: Set<ScoutTargetAttribute>;
+    try {
+      selectedTargetAttributes = new Set(
+        resolveTargetAttributes(flagsReader.arrayOfStrings('targetAttribute'))
+      );
+    } catch (e) {
+      throw createFlagError(String(e));
+    }
+
+    log.info(
+      selectedTargetAttributes.size > 0
+        ? `Test targets are assumed to have the following attributes: ${Array.from(
+            selectedTargetAttributes
+          ).join(', ')}`
+        : 'Test targets are assumed to have no attributes'
+    );
+    filters.push({ kind: 'targetAttributes', attributes: selectedTargetAttributes });
 
     const testConfigStats = loadTestConfigStats();
     const scoutCIConfig = loadScoutCIConfig();
