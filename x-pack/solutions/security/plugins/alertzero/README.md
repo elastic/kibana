@@ -26,10 +26,10 @@ It controls four things. Enabling takes effect live, but **disabling takes full 
 
 ### `xpack.alertzero.enabled` — the deployment kill switch
 
-A plugin config flag, defaulting to `false`. It is *not* the user-facing toggle; it exists to stop AlertZero's startup side effects on a deployment, and turning it on or off requires a restart:
+A plugin config flag, defaulting to `false`. It is *not* the user-facing toggle; it is a deployment-level gate that must be on for AlertZero to register anything. Turning it on or off requires a restart:
 
 ```yaml
-xpack.alertzero.enabled: false
+xpack.alertzero.enabled: true
 ```
 
 Everything in the table below is skipped when it is off — including registration of the advanced setting itself, which is why `withAlertZeroEnabled` can never read an unregistered key.
