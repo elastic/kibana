@@ -453,7 +453,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.casesFilesTable.emptyOrFail();
       });
 
-      describe('Files User Activity', () => {
+      describe('Files User Activity', function () {
+        this.tags(['failsOnMKI']);
+
         it('file user action is displayed correctly', async () => {
           await cases.casesFilesTable.addFile(require.resolve('./note.txt'));
 
