@@ -18,11 +18,8 @@ import {
   type VisualizationAttachmentData,
   type VisualizationRenderer,
 } from '@kbn/agent-builder-visualizations-common';
-import {
-  classifyCustomContentMode,
-  createCustomContentTemplateResolver,
-  type CustomContentMode,
-} from '@kbn/custom-content-server';
+import { resolveEsqlQueryEdit } from '@kbn/custom-content-common';
+import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
 import {
   ToolResultType,
   SupportedChartType,
@@ -104,9 +101,10 @@ const createVisualizationSchema = z
     esql: z
       .string()
       .max(4096)
+      .nullable()
       .optional()
       .describe(
-        '(optional) An ES|QL query. The tool generates one when this is omitted. Only pass ES|QL queries from reliable sources (other tool calls or the user) and NEVER invent queries directly.'
+        '(optional) An ES|QL query. Omit to generate one on create, or to keep the stored query on update. Pass null only for custom_content that has no data (a banner, legend, or note) or to clear a stored query on update. Lens and Vega ignore null and generate. Only pass ES|QL from reliable sources (other tool calls or the user) and NEVER invent queries directly.'
       ),
     time_range: z
       .object({
@@ -173,15 +171,15 @@ You choose how to render the request via the "renderer" parameter:
       SupportedChartType
     ).join(', ')}).
 - "vega" for a custom Vega-Lite specification when no Lens chart type can express the request, e.g. small multiples / faceting, layered or combination charts (bars plus an overlaid line), scatter / bubble plots with an encoded size dimension, or custom tooltips/encodings. "chartType" is optional for Vega and acts only as a styling hint.
-- "custom_content" for an HTML/CSS layout neither chart grammar can express — a KPI scorecard with status badges, a health or status board, a panel mixing narrative text with live values. "chartType" does not apply. The HTML is generated server-side from your natural-language "query"; never author markup yourself.
+- "custom_content" for an HTML/CSS layout neither chart grammar can express — a KPI scorecard with status badges, a health or status board, a panel mixing narrative text with live values. "chartType" does not apply. The HTML is generated server-side from your natural-language "query"; never author markup yourself. Omit "esql" to generate a query; pass "esql": null when the panel has no data.
 
-When updating via "attachment_id", omit "renderer" because the existing visualization determines it. "chartType" is optional on updates.
+When updating via "attachment_id", omit "renderer" because the existing visualization determines it. "chartType" is optional on updates. Omit "esql" to keep the current query (or lack of one); pass "esql": null to clear a stored query.
 
 Only pass "time_range" when the user explicitly named a time window (e.g. "last 7 days", "May 20–24"). Do not set it otherwise: create applies a data-aware default, and edits keep the existing range.
 
 This tool will:
 1. If attachment_id is provided, read the existing visualization from that attachment (edits keep the same renderer)
-2. Generate an ES|QL query if not provided
+2. Generate an ES|QL query if not provided, unless custom_content passed "esql": null
 3. Generate and validate the visualization (Lens config, Vega-Lite spec, or custom content HTML template) for the chosen renderer
 4. Store the result as an attachment (creating new or updating existing) for future modifications
 
@@ -240,6 +238,8 @@ Ground first: make sure the target index exists and every field you reference is
         let visualizationData: VisualizationAttachmentData;
         let selectedChartTypeForResult: SupportedChartType | undefined;
 
+        const chartEsql = esql ?? undefined;
+
         if (renderer === 'custom_content') {
           // The model supplies intent, never markup. Same resolver the dashboard uses.
           const resolveTemplate = createCustomContentTemplateResolver({
@@ -249,48 +249,31 @@ Ground first: make sure the target index exists and every field you reference is
           });
           const existingTemplate = getExistingTemplate(existingData);
           const existingEsql = existingData?.esql;
-          // Sampling costs a round trip, so only when the query actually changes.
-          let isQueryChanging = esql !== undefined && esql !== existingEsql;
-          let mergedEsql = esql ?? existingEsql;
 
-          // No query on hand: a new panel, or a stored static panel. Custom content
-          // internals decide whether this prompt needs data; the agent does not.
-          if (!mergedEsql) {
-            let mode: CustomContentMode;
-            try {
-              mode = await classifyCustomContentMode({ prompt: nlQuery, modelProvider });
-            } catch (err) {
-              // New panels fail open to data so a timeout cannot persist an empty panel.
-              // An established static panel stays static so a wording tweak cannot invent a query.
-              mode = existingData ? 'static' : 'data';
-              const message = err instanceof Error ? err.message : String(err);
-              logger.warn(
-                `custom_content mode classification failed (${message}); treating panel as ${mode}`
+          const { query: mergedFromEdit, isChanging } = resolveEsqlQueryEdit(esql, existingEsql);
+          let mergedEsql = mergedFromEdit;
+          let isQueryChanging = isChanging;
+
+          if (!existingData && esql === undefined) {
+            const generated = await generateVisualizationEsql({
+              nlQuery,
+              index,
+              modelProvider,
+              events,
+              logger,
+              esClient,
+              ...(requestedTimeRange ? { timeRange: requestedTimeRange } : {}),
+              extraInstructions: CUSTOM_CONTENT_ESQL_INSTRUCTIONS,
+            });
+            if (!generated.query) {
+              throw new Error(
+                `Could not generate an ES|QL query for this panel: ${
+                  generated.error ?? 'no query was produced'
+                }. Pass an explicit "esql" if you already have a validated query, or pass esql: null if the panel needs no data.`
               );
             }
-            if (mode === 'static') {
-              isQueryChanging = false;
-            } else {
-              const generated = await generateVisualizationEsql({
-                nlQuery,
-                index,
-                modelProvider,
-                events,
-                logger,
-                esClient,
-                ...(requestedTimeRange ? { timeRange: requestedTimeRange } : {}),
-                extraInstructions: CUSTOM_CONTENT_ESQL_INSTRUCTIONS,
-              });
-              if (!generated.query) {
-                throw new Error(
-                  `Could not generate an ES|QL query for this panel: ${
-                    generated.error ?? 'no query was produced'
-                  }. Pass an explicit "esql" if you already have a validated query.`
-                );
-              }
-              mergedEsql = generated.query;
-              isQueryChanging = true;
-            }
+            mergedEsql = generated.query;
+            isQueryChanging = true;
           }
 
           const { template, height } = await resolveTemplate({
@@ -311,7 +294,7 @@ Ground first: make sure the target index exists and every field you reference is
           const { spec, title, esqlQuery } = await buildVegaConfig({
             nlQuery,
             index,
-            esql,
+            esql: chartEsql,
             existingSpec,
             chartType,
             modelProvider,
@@ -334,7 +317,7 @@ Ground first: make sure the target index exists and every field you reference is
             nlQuery,
             index,
             chartType,
-            esql,
+            esql: chartEsql,
             existingConfig,
             parsedExistingConfig,
             modelProvider,

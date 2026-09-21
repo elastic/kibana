@@ -79,7 +79,7 @@ Do **not** use this skill when:
      - \`index\` (strongly recommended — pass the grounded index; omitting it forces auto-discovery, which fails for ungrounded/invented fields)
      - \`renderer\` (new visualizations only; \`lens\`, \`vega\` or \`custom_content\`; omit to default to Lens)
      - \`chartType\` (required for a new Lens visualization; optional hint for a new Vega visualization; optional on updates)
-     - \`esql\` (optional, when you already have a validated ES|QL — generated for you otherwise)
+     - \`esql\` (optional; omit to generate on create or keep the stored query on update. Pass \`null\` only for \`custom_content\` that has no data, or to clear a stored query)
      - \`attachment_id\` (optional, only when updating an existing visualization)
      - \`time_range\` (optional; **only** when the user explicitly named a time window, e.g. "last 7 days", "May 20–24". Do not invent a range. Omit it otherwise — create applies a data-aware default, and edits keep the existing range.)
    - For multi-panel requests, resolve the index (and validate the fields) ONCE up front, then call ${
@@ -140,7 +140,7 @@ ${
 
 ### Custom content
 
-Pass \`renderer: "custom_content"\` and describe the panel in \`query\` — layout, copy, and any values or fields to show. Omit \`chartType\`. Do not write HTML, and never pass a template: the markup is generated server-side. To change an existing panel, call this tool again with its \`attachment_id\` and describe the update — do not read the attachment to edit the HTML. If the generated query is rejected, correct \`query\` (or pass a validated \`esql\`) and retry; do not fall back to writing markup yourself.
+Pass \`renderer: "custom_content"\` and describe the panel in \`query\` — layout, copy, and any values or fields to show. Omit \`chartType\`. Do not write HTML, and never pass a template: the markup is generated server-side. For a panel with live values, omit \`esql\` so the tool generates a query (or pass a validated \`esql\`). For a panel with no data — a banner, legend, or explanatory note — pass \`esql: null\`. To change an existing panel, call this tool again with its \`attachment_id\` and describe the update — do not read the attachment to edit the HTML. Omit \`esql\` on an update to keep the current data-or-static state; pass \`esql: null\` to remove a stored query. If the generated query is rejected, correct \`query\` (or pass a validated \`esql\`, or \`esql: null\` if the panel needs no data) and retry; do not fall back to writing markup yourself.
 
 **Scope — "Vega" here means Vega-Lite, not full Vega.** The Vega renderer only supports the Vega-Lite grammar. It cannot do full Vega features such as custom signals / imperative interactivity, arbitrary data transforms or expressions, or bespoke rendering. If a request fits neither a Lens chart type nor the Vega-Lite grammar, do **not** force a broken or misleading chart. Be honest with the user: explain that the requested chart is not supported in Vega-Lite and that full Vega is not available yet, then offer alternatives — the closest Vega-Lite approximation, a standard Lens chart, or splitting the request into multiple charts — and ask how they would like to proceed.
 
@@ -204,6 +204,16 @@ For every new Lens visualization, choose and pass \`chartType\`; it is required.
   "query": "A status board with one card per host showing its log count and a colored badge",
   "index": "logs-*",
   "renderer": "custom_content"
+}
+\`\`\`
+
+## Create a static custom content panel
+
+\`\`\`json
+{
+  "query": "A header banner reading Production overview with a short subtitle",
+  "renderer": "custom_content",
+  "esql": null
 }
 \`\`\`
 
