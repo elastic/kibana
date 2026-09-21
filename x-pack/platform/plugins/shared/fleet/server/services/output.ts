@@ -240,43 +240,9 @@ async function validateLogstashOutputNotUsedInAPMPolicy(outputId?: string, isDef
   }
 }
 
-const OTLP_SCAN_POLICY_ID_CHUNK_SIZE = 100;
 // ES filters aggregation creates one bucket per ID; stay well under search.max_buckets (default 65536).
 const AGENT_COUNT_POLICY_ID_CHUNK_SIZE = 1000;
 
-async function validateOtlpOutputOnlyUsedInOtelPolicies(
-  outputId: string,
-  mergedIsDefault: boolean
-) {
-  const agentPolicies = await getAgentPoliciesPerOutput(outputId, mergedIsDefault, {
-    fields: ['name'],
-  });
-  if (!agentPolicies?.length) return;
-
-  const policyNamesById = new Map(agentPolicies.map((p) => [p.id, p.name]));
-  const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
-
-  for (const ids of _.chunk([...policyNamesById.keys()], OTLP_SCAN_POLICY_ID_CHUNK_SIZE)) {
-    const kuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.policy_ids:(${ids
-      .map((id) => `"${escapeQuotes(id)}"`)
-      .join(' or ')})`;
-
-    for await (const packagePolicies of await packagePolicyService.fetchAllItems(soClient, {
-      kuery,
-      fields: ['policy_ids', 'inputs.type', 'inputs.enabled'],
-      spaceIds: ['*'],
-    })) {
-      for (const packagePolicy of packagePolicies) {
-        if (packagePolicyHasOnlyOtelInputs(packagePolicy.inputs)) continue;
-        const conflictingId = packagePolicy.policy_ids.find((id) => policyNamesById.has(id));
-        throw new OutputInvalidError(
-          `OTLP output cannot be used with agent policy "${policyNamesById.get(conflictingId!)}" ` +
-            `because it contains non-OTel inputs.`
-        );
-      }
-    }
-  }
-}
 async function findPoliciesWithFleetServerOrSynthetics(outputId?: string, isDefault?: boolean) {
   const internalSoClientWithoutSpaceExtension =
     appContextService.getInternalUserSOClientWithoutSpaceExtension();
@@ -1426,7 +1392,6 @@ class OutputService {
     const pkgDerivedIdSet = new Set<string>();
     for await (const pkgPolicies of await packagePolicyService.fetchAllItems(internalSoClient, {
       kuery: packagePoliciesKuery,
-      fields: ['policy_ids'],
       spaceIds: ['*'],
     })) {
       for (const pp of pkgPolicies) {
