@@ -10,12 +10,15 @@ import {
   MAX_STREAM_NAME_LENGTH,
   boundedFlattenRecord,
   boundedJsonValue,
+  boundedNamedFieldDefinitionSchema,
   isEnabledFailureStore,
-  namedFieldDefinitionConfigSchema,
 } from '@kbn/streams-schema';
 import type { DataStreamWithFailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import { z } from '@kbn/zod/v4';
-import { streamlangDSLSchema } from '@kbn/streamlang';
+import { streamlangDSLSchema, isConditionBlock } from '@kbn/streamlang';
+import type { StreamlangDSL } from '@kbn/streamlang';
+
+type StreamlangStep = StreamlangDSL['steps'][number];
 import { from, map } from 'rxjs';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
 import type { Observable } from 'rxjs';
@@ -45,17 +48,38 @@ import { isNoLLMSuggestionsError } from './no_llm_suggestions_error';
 
 const simulationBaseBodySchema = {
   documents: z.array(boundedFlattenRecord).max(1000),
-  detected_fields: z.array(namedFieldDefinitionConfigSchema).max(1000).optional(),
+  detected_fields: z.array(boundedNamedFieldDefinitionSchema).max(1000).optional(),
 };
 
 const PROCESSOR_TYPE_NAME_MAX_LENGTH = 128;
+const MAX_DSL_STEPS_TOTAL = 500;
+
+function countDSLSteps(steps: StreamlangStep[], acc: number): number {
+  for (const step of steps) {
+    if (++acc > MAX_DSL_STEPS_TOTAL) return acc;
+    if (isConditionBlock(step)) {
+      acc = countDSLSteps(step.condition.steps, acc);
+      if (step.condition.else) acc = countDSLSteps(step.condition.else, acc);
+    }
+  }
+  return acc;
+}
+
+const boundedStreamlangDSLSchema = streamlangDSLSchema.superRefine((val, ctx) => {
+  if (countDSLSteps(val.steps, 0) > MAX_DSL_STEPS_TOTAL) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `Processing DSL exceeds maximum of ${MAX_DSL_STEPS_TOTAL} total steps`,
+    });
+  }
+});
 
 const paramsSchema = z.object({
   path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
   body: z.union([
     z.object({
       ...simulationBaseBodySchema,
-      processing: streamlangDSLSchema,
+      processing: boundedStreamlangDSLSchema,
     }),
     z.object({
       ...simulationBaseBodySchema,
@@ -64,6 +88,13 @@ const paramsSchema = z.object({
           z
             .record(z.string().max(PROCESSOR_TYPE_NAME_MAX_LENGTH), z.any())
             .superRefine((val, ctx) => {
+              // Ingest processor objects normally have exactly one key (the processor type).
+              if (Object.keys(val).length > 1) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  message: 'A processor object must have exactly one key (the processor type)',
+                });
+              }
               for (const [key, value] of Object.entries(val)) {
                 const result = boundedJsonValue.safeParse(value);
                 if (!result.success) {

@@ -216,3 +216,9 @@ export const namedFieldDefinitionConfigSchema: z.Schema<NamedFieldDefinitionConf
       name: NonEmptyString,
     })
   );
+
+// Request-scoped version: adds .max(256) to the field name for HTTP validation.
+// Use this instead of namedFieldDefinitionConfigSchema in route body schemas.
+export const boundedNamedFieldDefinitionSchema = namedFieldDefinitionConfigSchema.and(
+  z.object({ name: z.string().nonempty().max(256) })
+) as z.ZodType<NamedFieldDefinitionConfig>;
