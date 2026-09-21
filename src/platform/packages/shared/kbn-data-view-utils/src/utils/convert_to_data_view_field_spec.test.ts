@@ -30,9 +30,24 @@ describe('convertDatatableColumnToDataViewFieldSpec', () => {
         searchable: true,
         aggregatable: false,
         isNull: false,
+        isComputedColumn: false,
         timeSeriesMetric: 'counter',
       })
     );
+  });
+
+  it('sets isComputedColumn from the datatable column', () => {
+    const column = {
+      id: 'avg_bytes',
+      name: 'avg_bytes',
+      meta: {
+        esType: 'double',
+        type: 'number' as DatatableColumnType,
+      },
+      isComputedColumn: true,
+    };
+    const result = convertDatatableColumnToDataViewFieldSpec(column);
+    expect(result.isComputedColumn).toBe(true);
   });
 
   it('should return a DataViewField object with timeSeriesMetric undefined if esType does not start with counter_', () => {
@@ -55,6 +70,7 @@ describe('convertDatatableColumnToDataViewFieldSpec', () => {
         searchable: true,
         aggregatable: false,
         isNull: false,
+        isComputedColumn: false,
       })
     );
   });

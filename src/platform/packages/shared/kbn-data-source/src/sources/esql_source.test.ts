@@ -25,6 +25,8 @@ function makeColumn(
 }
 
 describe('EsqlSource', () => {
+  beforeEach(() => EsqlSource.clearCache());
+
   describe('create', () => {
     it('extracts the title from the FROM clause', async () => {
       const source = await EsqlSource.create({
@@ -43,7 +45,21 @@ describe('EsqlSource', () => {
       expect(source.id).toMatch(/^esql-[0-9a-f]{64}$/);
     });
 
-    it('is deterministic — same title and timeFieldName produce the same id', async () => {
+    it('is deterministic — same query and timeFieldName produce the same id', async () => {
+      const a = await EsqlSource.create({
+        query: 'FROM logs-* | LIMIT 10',
+        resultColumns: [],
+        timeFieldName: '@timestamp',
+      });
+      const b = await EsqlSource.create({
+        query: 'FROM logs-* | LIMIT 10',
+        resultColumns: [makeColumn('message', 'string')],
+        timeFieldName: '@timestamp',
+      });
+      expect(a.id).toBe(b.id);
+    });
+
+    it('produces a different id when the query differs but title is the same', async () => {
       const a = await EsqlSource.create({
         query: 'FROM logs-* | LIMIT 10',
         resultColumns: [],
@@ -51,10 +67,10 @@ describe('EsqlSource', () => {
       });
       const b = await EsqlSource.create({
         query: 'FROM logs-* | KEEP message',
-        resultColumns: [makeColumn('message', 'string')],
+        resultColumns: [],
         timeFieldName: '@timestamp',
       });
-      expect(a.id).toBe(b.id);
+      expect(a.id).not.toBe(b.id);
     });
 
     it('produces a different id when the timeFieldName differs', async () => {
@@ -81,6 +97,48 @@ describe('EsqlSource', () => {
         resultColumns: [],
       });
       expect(a.id).not.toBe(b.id);
+    });
+
+    it('keeps the same datasetKey when the query changes but FROM and time field do not', async () => {
+      const sort = await EsqlSource.create({
+        query: 'FROM logs-* | SORT @timestamp DESC',
+        resultColumns: [],
+        timeFieldName: '@timestamp',
+      });
+      const where = await EsqlSource.create({
+        query: 'FROM logs-* | WHERE bytes > 0',
+        resultColumns: [],
+        timeFieldName: '@timestamp',
+      });
+      const evalQuery = await EsqlSource.create({
+        query: 'FROM logs-* | EVAL extra = 1',
+        resultColumns: [],
+        timeFieldName: '@timestamp',
+      });
+      expect(sort.id).not.toBe(where.id);
+      expect(sort.datasetKey).toBe('esql:logs-*:@timestamp');
+      expect(sort.datasetKey).toBe(where.datasetKey);
+      expect(sort.datasetKey).toBe(evalQuery.datasetKey);
+    });
+
+    it('uses a different datasetKey when the FROM or time field changes', async () => {
+      const logs = await EsqlSource.create({
+        query: 'FROM logs-*',
+        resultColumns: [],
+        timeFieldName: '@timestamp',
+      });
+      const metrics = await EsqlSource.create({
+        query: 'FROM metrics-*',
+        resultColumns: [],
+        timeFieldName: '@timestamp',
+      });
+      const otherTime = await EsqlSource.create({
+        query: 'FROM logs-*',
+        resultColumns: [],
+        timeFieldName: 'event.created',
+      });
+      expect(logs.datasetKey).not.toBe(metrics.datasetKey);
+      expect(logs.datasetKey).not.toBe(otherTime.datasetKey);
     });
 
     it('produces a different id when projectRouting differs', async () => {
@@ -268,6 +326,30 @@ describe('EsqlSource', () => {
         timeFieldName: '@timestamp',
       });
       expect(source.isPersisted()).toBe(false);
+    });
+  });
+
+  describe('withColumns', () => {
+    it('returns a new instance with the same identity and updated result columns', async () => {
+      const originalCols = [makeColumn('message', 'string')];
+      const original = await EsqlSource.create({
+        query: 'FROM logs-*',
+        resultColumns: originalCols,
+        timeFieldName: '@timestamp',
+      });
+      const updatedCols = [
+        { ...makeColumn('message', 'string'), isNull: true },
+        makeColumn('bytes', 'number', 'long'),
+      ];
+      const updated = original.withColumns(updatedCols);
+
+      expect(updated).not.toBe(original);
+      expect(updated.id).toBe(original.id);
+      expect(updated.query).toBe(original.query);
+      expect(updated.timeFieldName).toBe('@timestamp');
+      expect(updated.resultColumns).toEqual(updatedCols);
+      expect(original.resultColumns).toEqual(originalCols);
+      expect(updated.getColumns().map((column) => column.name)).toEqual(['message', 'bytes']);
     });
   });
 
