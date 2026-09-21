@@ -22,6 +22,11 @@ export const IMPACT_UI_CAPABILITY_MANAGE = 'manageImpact' as const;
 /** Ceiling on `listByConversationIds` so a caller cannot ask for an unbounded terms query. */
 export const MAX_IMPACT_CONVERSATION_IDS = 1000;
 
-/** Opaque entity ids (users, hosts, services). Hydrated labels are a follow-up. */
+/**
+ * Stable entity id (Entity Store id, or a Knowledge Indicator `feature_id` when
+ * that is the only identity). Display name is separate and optional.
+ */
 export const MAX_ENTITY_ID_LENGTH = 256;
+/** Matches the title bound on Nightshift's investigation impact entity name. */
+export const MAX_ENTITY_NAME_LENGTH = 512;
 export const MAX_ENTITY_IDS = 100;

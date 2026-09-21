@@ -12,15 +12,16 @@ export {
   IMPACT_UI_CAPABILITY_SHOW,
   MAX_ENTITY_ID_LENGTH,
   MAX_ENTITY_IDS,
+  MAX_ENTITY_NAME_LENGTH,
   MAX_IMPACT_CONVERSATION_IDS,
 } from './constants';
 
 export {
   attachImpactRequestSchema,
   getImpactQuerySchema,
-  impactEntityIdSchema,
-  impactEntityIdsSchema,
+  impactEntitiesSchema,
+  impactEntitySchema,
   impactSchema,
 } from './impact';
 
-export type { AttachImpactRequest, GetImpactQuery, Impact } from './impact';
+export type { AttachImpactRequest, GetImpactQuery, Impact, ImpactEntity } from './impact';

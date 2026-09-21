@@ -8,7 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { ProposalUser } from '../../../common/proposals/proposal';
 import { MAX_ENTITY_IDS, MAX_IMPACT_CONVERSATION_IDS } from '../../../common/impact/constants';
-import type { AttachImpactRequest, Impact } from '../../../common/impact/impact';
+import type { AttachImpactRequest, Impact, ImpactEntity } from '../../../common/impact/impact';
 import { ImpactInvalidRequestError, ImpactNotFoundError } from './errors';
 import type { ImpactDocument, ImpactStorageClient } from '../storage/impact_storage';
 
@@ -19,8 +19,8 @@ interface ImpactServiceDeps {
 /**
  * Owns every write to the impact index. One document per conversation: attaching
  * more entities unions them onto the existing record rather than appending a
- * new one, which is what hydrate-by-conversationId plus `entityIds.includes`
- * requires.
+ * new one, which is what hydrate-by-conversationId plus filtering on
+ * `entities.id` requires.
  */
 export class ImpactService {
   constructor(private readonly deps: ImpactServiceDeps) {}
@@ -29,9 +29,9 @@ export class ImpactService {
     params: AttachImpactRequest,
     { spaceId, user }: { spaceId: string; user?: ProposalUser }
   ): Promise<Impact> {
-    const entityIds = uniqueIds(params.entityIds);
-    if (entityIds.length === 0) {
-      throw new ImpactInvalidRequestError('entityIds must contain at least one id');
+    const entities = unionEntities(params.entities);
+    if (entities.length === 0) {
+      throw new ImpactInvalidRequestError('entities must contain at least one entity');
     }
 
     const existing = await this.findByConversationId(params.conversationId, spaceId);
@@ -40,7 +40,7 @@ export class ImpactService {
       const document: ImpactDocument = {
         spaceId,
         conversationId: params.conversationId,
-        entityIds,
+        entities,
         createdAt: new Date().toISOString(),
         createdBy: user,
       };
@@ -48,15 +48,15 @@ export class ImpactService {
       return toImpact(id, document);
     }
 
-    const merged = uniqueIds([...existing.entityIds, ...entityIds]);
+    const merged = unionEntities([...existing.entities, ...entities]);
     if (merged.length > MAX_ENTITY_IDS) {
       throw new ImpactInvalidRequestError(
-        `entityIds may not exceed ${MAX_ENTITY_IDS} unique ids for a conversation`
+        `entities may not exceed ${MAX_ENTITY_IDS} unique ids for a conversation`
       );
     }
 
     const { id, ...stored } = existing;
-    const document: ImpactDocument = { ...stored, entityIds: merged };
+    const document: ImpactDocument = { ...stored, entities: merged };
     await this.deps.storage.index({ id, document });
     return toImpact(id, document);
   }
@@ -143,6 +143,38 @@ const uniqueIds = (ids: string[]): string[] => {
     unique.push(id);
   }
   return unique;
+};
+
+const definedEntity = (entity: ImpactEntity): ImpactEntity => {
+  const stored: ImpactEntity = { id: entity.id };
+  if (entity.name !== undefined) stored.name = entity.name;
+  if (entity.type !== undefined) stored.type = entity.type;
+  if (entity.featureId !== undefined) stored.featureId = entity.featureId;
+  if (entity.streamName !== undefined) stored.streamName = entity.streamName;
+  return stored;
+};
+
+/** First write wins the id. A later write fills only the fields it actually sends. */
+const unionEntities = (entities: ImpactEntity[]): ImpactEntity[] => {
+  const byId = new Map<string, ImpactEntity>();
+  for (const entity of entities) {
+    const current = byId.get(entity.id);
+    if (!current) {
+      byId.set(entity.id, definedEntity(entity));
+      continue;
+    }
+    byId.set(
+      entity.id,
+      definedEntity({
+        id: current.id,
+        name: entity.name ?? current.name,
+        type: entity.type ?? current.type,
+        featureId: entity.featureId ?? current.featureId,
+        streamName: entity.streamName ?? current.streamName,
+      })
+    );
+  }
+  return [...byId.values()];
 };
 
 const toImpact = (id: string, document: ImpactDocument): Impact => ({ id, ...document });

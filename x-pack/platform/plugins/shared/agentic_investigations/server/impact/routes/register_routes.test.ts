@@ -74,20 +74,20 @@ describe('investigation impact routes', () => {
   });
 
   it('attaches through the service with the space and the resolved user, never a body actor', async () => {
-    const attach = jest.fn().mockResolvedValue({ id: 'impact-1', entityIds: ['user-1'] });
+    const attach = jest.fn().mockResolvedValue({ id: 'impact-1', entities: [{ id: 'user-1' }] });
     const { posts } = registerAndCollect({ attach });
     const response = httpServerMock.createResponseFactory();
 
     await posts[0].handler(
       {},
       httpServerMock.createKibanaRequest({
-        body: { conversationId: 'conv-1', entityIds: ['user-1'] },
+        body: { conversationId: 'conv-1', entities: [{ id: 'user-1' }] },
       }),
       response
     );
 
     expect(attach).toHaveBeenCalledWith(
-      { conversationId: 'conv-1', entityIds: ['user-1'] },
+      { conversationId: 'conv-1', entities: [{ id: 'user-1' }] },
       { spaceId: 'default', user: ANALYST }
     );
     expect(response.ok).toHaveBeenCalled();
@@ -115,7 +115,7 @@ describe('investigation impact routes', () => {
     await posts[0].handler(
       {},
       httpServerMock.createKibanaRequest({
-        body: { conversationId: 'conv-1', entityIds: ['user-1'] },
+        body: { conversationId: 'conv-1', entities: [{ id: 'user-1' }] },
       }),
       response
     );

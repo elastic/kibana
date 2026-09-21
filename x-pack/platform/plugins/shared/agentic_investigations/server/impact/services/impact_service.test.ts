@@ -23,7 +23,7 @@ const analyst = {
 const baseDocument = (overrides: Partial<ImpactDocument> = {}): ImpactDocument => ({
   spaceId: SPACE_ID,
   conversationId: CONVERSATION_ID,
-  entityIds: ['user-1'],
+  entities: [{ id: 'user-1' }],
   createdAt: '2026-09-01T00:00:00.000Z',
   createdBy: analyst,
   ...overrides,
@@ -60,7 +60,7 @@ describe('ImpactService', () => {
       const service = createService(storage);
 
       const impact = await service.attach(
-        { conversationId: CONVERSATION_ID, entityIds: ['user-1', 'host-1'] },
+        { conversationId: CONVERSATION_ID, entities: [{ id: 'user-1' }, { id: 'host-1' }] },
         { spaceId: SPACE_ID, user: analyst }
       );
 
@@ -70,45 +70,76 @@ describe('ImpactService', () => {
           document: expect.objectContaining({
             spaceId: SPACE_ID,
             conversationId: CONVERSATION_ID,
-            entityIds: ['user-1', 'host-1'],
+            entities: [{ id: 'user-1' }, { id: 'host-1' }],
             createdBy: analyst,
           }),
         })
       );
-      expect(impact.entityIds).toEqual(['user-1', 'host-1']);
+      expect(impact.entities).toEqual([{ id: 'user-1' }, { id: 'host-1' }]);
       expect(impact.id).toEqual(expect.any(String));
     });
 
-    it('unions entity ids onto the existing document instead of appending another', async () => {
-      const storage = createStorage(baseDocument({ entityIds: ['user-1'] }));
+    it('unions entities onto the existing document and fills fields a later attach adds', async () => {
+      const storage = createStorage(
+        baseDocument({ entities: [{ id: 'checkout-api', name: 'checkout-api' }] })
+      );
       const service = createService(storage);
 
       const impact = await service.attach(
-        { conversationId: CONVERSATION_ID, entityIds: ['host-1', 'user-1'] },
+        {
+          conversationId: CONVERSATION_ID,
+          entities: [
+            { id: 'host-1' },
+            {
+              id: 'checkout-api',
+              type: 'service',
+              featureId: 'feat-checkout',
+              streamName: 'logs.checkout-api',
+            },
+          ],
+        },
         { spaceId: SPACE_ID, user: analyst }
       );
 
       expect(storage.index).toHaveBeenCalledWith({
         id: 'impact-1',
         document: expect.objectContaining({
-          entityIds: ['user-1', 'host-1'],
+          entities: [
+            {
+              id: 'checkout-api',
+              name: 'checkout-api',
+              type: 'service',
+              featureId: 'feat-checkout',
+              streamName: 'logs.checkout-api',
+            },
+            { id: 'host-1' },
+          ],
           createdAt: '2026-09-01T00:00:00.000Z',
           createdBy: analyst,
         }),
       });
       expect(storage.index.mock.calls[0][0]).not.toHaveProperty('op_type');
       expect(impact.id).toBe('impact-1');
-      expect(impact.entityIds).toEqual(['user-1', 'host-1']);
+      expect(impact.entities).toEqual([
+        {
+          id: 'checkout-api',
+          name: 'checkout-api',
+          type: 'service',
+          featureId: 'feat-checkout',
+          streamName: 'logs.checkout-api',
+        },
+        { id: 'host-1' },
+      ]);
     });
 
     it('refuses a merge that would exceed the entity id ceiling', async () => {
-      const existing = Array.from({ length: MAX_ENTITY_IDS }, (_, i) => `entity-${i}`);
-      const storage = createStorage(baseDocument({ entityIds: existing }));
+      const existing = Array.from({ length: MAX_ENTITY_IDS }, (_, i) => ({ id: `entity-${i}` }));
+      const storage = createStorage(baseDocument({ entities: existing }));
       const service = createService(storage);
 
       await expect(
         service.attach(
-          { conversationId: CONVERSATION_ID, entityIds: ['extra'] },
+          { conversationId: CONVERSATION_ID, entities: [{ id: 'extra' }] },
           { spaceId: SPACE_ID }
         )
       ).rejects.toBeInstanceOf(ImpactInvalidRequestError);
@@ -151,7 +182,7 @@ describe('ImpactService', () => {
   describe('listByConversationIds', () => {
     it('returns one document per conversation and omits missing ones', async () => {
       const first = baseDocument();
-      const second = baseDocument({ conversationId: 'conv-2', entityIds: ['host-9'] });
+      const second = baseDocument({ conversationId: 'conv-2', entities: [{ id: 'host-9' }] });
       const storage = createStorage();
       storage.search.mockResolvedValue({
         hits: { hits: [searchHit(first, 'impact-1'), searchHit(second, 'impact-2')] },

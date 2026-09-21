@@ -69,10 +69,11 @@ All checks **fail closed**, including when the `security` plugin is absent entir
 
 ## Impact
 
-An **Impact** record is the set of entities (users, hosts, services) an investigation is about. It lives in `.kibana-investigation-impact`, one document per conversation, and is the source for both the AlertZero landing-page pills and the investigation flyout.
+An **Impact** record is the set of entities (users, hosts, services) an investigation is about. It lives in `.kibana-investigation-impact`, one document per conversation, and is the source for both the AlertZero landing-page pills and the investigation flyout. Nightshift writes the same document: `id` is the filter key, and `name`, `type`, `featureId`, and `streamName` carry the fields on its existing `InvestigationImpactEntity`.
 
-- `entityIds` are opaque ids. Labels from the Entity Store are a follow-up.
-- Writes are **upsert/merge**: attaching more entities unions them onto the existing document rather than appending a new one. That is load-bearing for hydrate-by-conversationId plus `entityIds.includes`.
+- AlertZero may attach `{ id }` only. The pill label stays the id until Entity Store hydration. Nightshift attaches `{ id, name, type?, featureId?, streamName? }`.
+- Writes are **upsert/merge**: attaching more entities unions them by `id` onto the existing document rather than appending a new one. A later attach fills in fields the first write omitted. That is load-bearing for hydrate-by-conversationId plus filtering on `entities.id`.
+- Evidence is not on this document. Nightshift's current evidence shape cannot represent non-local data, and that format is still open.
 - HTTP: `POST /internal/investigations/impact` (`manage_impact`) and `GET ...?conversationId=` (`read_impact`). Bulk hydrate is in-process via `getImpactService().listByConversationIds()`.
 
 ## Proposals
@@ -451,7 +452,7 @@ The point of the exercise is the identity behaviour: a rule created by an approv
 - **Deep paging stops at 10,000.** The list pages with `from`/`size` inside Elasticsearch's default result window. Going past that needs `search_after`, which the list does not expose yet.
 - **`.kibana-*` index naming** buys us out of a system index registration, at the cost of living in a namespace we do not own.
 - **No Scout API coverage yet.** The HTTP surface is covered by Jest only, as `anonymization` shipped.
-- **Impact has no workflow steps or Agent Builder attachment yet.** The index, service, and HTTP surface land first so AlertZero can hydrate `entityIds` in-process; `investigations.attachImpact` / `investigations.getImpact` and `investigation_impact` follow.
+- **Impact has no workflow steps or Agent Builder attachment yet.** The index, service, and HTTP surface land first so AlertZero can hydrate `entities` in-process; `investigations.attachImpact` / `investigations.getImpact` and `investigation_impact` follow.
 
 ## Escalations
 
