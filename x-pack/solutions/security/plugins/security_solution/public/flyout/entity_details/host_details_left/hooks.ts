@@ -114,6 +114,7 @@ export const useTabs = ({
       ? [
           getAnomaliesTab({
             entityId: entityStoreEntityId,
+            entityName: hostName,
             entityType: EntityType.host,
           }),
         ]

@@ -156,7 +156,7 @@ components:
           description: Investigation id this proposal belongs to
         type:
           type: string
-          description: Proposal action type (e.g. contain, escalate, tune)
+          description: Proposal action type (e.g. respond, investigate, configure)
         confidence:
           type: number
           minimum: 0
