@@ -40,7 +40,7 @@ Task progress:
 - [ ] 3. Read the registration for key, type, default, category, and availability
 - [ ] 4. Copy the nearest valid sibling
 - [ ] 5. Tag applies_to from the docs-builder settings page
-- [ ] 6. Check ech with node scripts/check_kibana_settings.js
+- [ ] 6. Check kibana.yml ech against the Cloud user-settings allowlist
 - [ ] 7. Preview the Supported on line
 - [ ] 8. If users need instructions, open a docs-content issue or PR
 ```
@@ -92,7 +92,8 @@ Copy the nearest sibling. Change only what this setting needs. Include `datatype
 
 Read the docs-builder settings page, then fill Kibana-only values from source:
 
-- **`ech`:** run `node scripts/check_kibana_settings.js`. That CLI compares Kibana keys to the Elastic Cloud Hosted user-settings allowlist in the `cloud` repository. Write `ech: ga` if the key is on the list. Write `ech: unavailable` if it is not. Do not infer support from the published Cloud settings page. That page is generated from this YAML.
+- **`kibana.yml` `ech`:** grep the Elastic Cloud Hosted user-settings allowlist in a local `elastic/cloud` clone, under `scala-services/adminconsole/src/main/resources/settings/kibana/`. Write `ech: ga` if the key is listed. Write `ech: unavailable` if it is not. Do not use `node scripts/check_kibana_settings.js` for this. That CLI only lists Kibana config keys. It does not read the Cloud allowlist. Do not infer support from the published Cloud settings page. That page is generated from this YAML.
+- **Advanced Settings `ech`:** those keys are not on the Cloud user-settings allowlist. Follow the docs-builder deployment keys. The allowlist grep is for `kibana.yml` only.
 - If Elastic Cloud Hosted should list the setting, include the YAML from `docs/reference/cloud/elastic-cloud-kibana-settings.md` with `:deployment: ech`. That filter shows a setting only when the entry has `ech: ga`.
 - **Advanced Settings `serverless`:** start at `src/platform/packages/shared/serverless/settings/common/index.ts`. If the ID is there, write `serverless: ga`. If it is not, grep `observability_project`, `security_project`, `search_project`, and `vectordb_project` in that folder. Ignore `workplace_ai_project`. Follow each allowlist's imports to resolve the constant to the runtime key, including IDs exported from packages other than `kbn-management/settings/setting_ids`. Map `observability_project` to `observability`, `security_project` to `security`, `search_project` to `elasticsearch`, and `vectordb_project` to `vectordb`. If the ID is only on some of those four lists, nest those keys. If it is on none, write `serverless: unavailable`.
 - **`kibana.yml` `serverless`:** use `offeringBasedSchema` or `schema.contextRef('serverless')`. Write a scalar `serverless: ga` or `serverless: unavailable`.
@@ -122,6 +123,6 @@ Skip this when the reference entry is enough.
 - [ ] YAML file matches kibana.yml vs space vs global
 - [ ] `setting` matches the runtime key at HEAD
 - [ ] Description, `default`, `applies_to`, and lifecycle follow the docs-builder settings page
-- [ ] `ech` matches `node scripts/check_kibana_settings.js`
+- [ ] kibana.yml `ech` matches the Cloud user-settings allowlist in `elastic/cloud`
 - [ ] Advanced Settings `serverless` matches `common/index.ts` or the nested project allowlists, following each file's imports
 - [ ] No UI label, test ID, or component name used as the YAML `setting` key
