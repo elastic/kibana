@@ -67,10 +67,10 @@ import {
   bulkDeactivateEpisodeActionBodySchema,
 } from './alert_action_schema';
 import {
-  matchActionPoliciesForRuleBodySchema,
+  matchActionPoliciesBodySchema,
   matchedActionPolicySchema,
-  matchActionPoliciesForRuleResponseSchema,
-} from './matched_action_policies_response_schema';
+  matchActionPoliciesResponseSchema,
+} from './match_action_policies_schema';
 import {
   ruleExecutionViewSchema,
   listRuleExecutionsResponseSchema,
@@ -157,9 +157,9 @@ const EXPECTED_IDS: ReadonlyArray<readonly [z.ZodType, string]> = [
   [bulkDeactivateEpisodeActionItemSchema, 'alerting_bulk_deactivate_episodes_item'],
   [bulkDeactivateEpisodeActionBodySchema, 'alerting_bulk_deactivate_episodes_request'],
   // matched policies
-  [matchActionPoliciesForRuleBodySchema, 'alerting_match_action_policies_for_rule_request'],
+  [matchActionPoliciesBodySchema, 'alerting_match_action_policies_request'],
   [matchedActionPolicySchema, 'alerting_matched_action_policy'],
-  [matchActionPoliciesForRuleResponseSchema, 'alerting_match_action_policies_for_rule_response'],
+  [matchActionPoliciesResponseSchema, 'alerting_match_action_policies_response'],
   // execution history
   [ruleExecutionViewSchema, 'alerting_rule_execution'],
   [listRuleExecutionsResponseSchema, 'alerting_rule_executions_response'],
