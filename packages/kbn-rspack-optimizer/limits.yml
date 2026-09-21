@@ -7,13 +7,13 @@ pageLoadAssetSize:
   agentBuilderSml: 597
   agentBuilderVisualizations: 1551
   agentBuilderWorkflows: 1029
-  agenticInvestigations: 9299
+  agenticInvestigations: 13459
   aiAssistantManagementSelection: 355
   aiops: 586
   alerting: 8789
   alertingVTwo: 24358
-  alertzero: 4489
-  apm: 31419
+  alertzero: 10276
+  apm: 35746
   apmShared: 1896
   apmSourcesAccess: 1174
   automaticImport: 13257
@@ -29,7 +29,7 @@ pageLoadAssetSize:
   cloudExperiments: 67356
   cloudFullStory: 1642
   cloudLinks: 21894
-  cloudSecurityPosture: 12224
+  cloudSecurityPosture: 14802
   console: 24516
   contentConnectors: 3166
   contentManagement: 6737
@@ -88,7 +88,7 @@ pageLoadAssetSize:
   files: 3954
   filesManagement: 940
   fileUpload: 480
-  fleet: 6546
+  fleet: 7307
   genAiSettings: 1795
   globalSearch: 5447
   globalSearchBar: 21704
