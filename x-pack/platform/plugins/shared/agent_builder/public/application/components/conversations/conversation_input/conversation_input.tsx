@@ -101,7 +101,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
 }) => {
   const [hoveredImageName, setHoveredImageName] = useState<string | null>(null);
 
-  const { pendingMessage, isResuming, isResponseLoading } = useConversationStream();
+  const { isResuming, isResponseLoading } = useConversationStream();
   const { isFetched } = useAgentBuilderAgents();
   const agentId = useAgentId();
   const conversationId = useConversationId();
@@ -279,11 +279,6 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
           onSubmit={handleSubmit}
           isSubmitDisabled={isSubmitDisabled}
           isSubmitting={isCreatingConversation}
-          resetToPendingMessage={() => {
-            if (pendingMessage) {
-              messageEditorController.setContent(pendingMessage);
-            }
-          }}
           showTriggerModeToggle={!isNewConversation && isExperimentalEnabled}
           triggerMode={triggerMode}
           onTriggerModeChange={setTriggerMode}

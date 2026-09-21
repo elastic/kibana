@@ -213,49 +213,31 @@ describe('useConversation polling', () => {
     });
   };
 
-  it('fetches a streaming conversation like any other', async () => {
+  it('does not fetch a conversation while this client streams into it', async () => {
     setStreaming();
     mockGet.mockResolvedValue(createFetchedConversation(publicAcl));
     const { queryClient, Wrapper } = createWrapper();
 
     renderHook(() => useConversation(), { wrapper: Wrapper });
-
-    await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1));
-
-    queryClient.clear();
-  });
-
-  it('keeps fetching a streaming conversation once it is in the cache', async () => {
-    setStreaming();
-    mockGet.mockResolvedValue(createFetchedConversation(publicAcl));
-    const { queryClient, Wrapper } = createWrapper();
-    queryClient.setQueryData(
-      queryKeys.conversations.byId(conversationId),
-      createFetchedConversation(publicAcl)
-    );
-
-    renderHook(() => useConversation(), { wrapper: Wrapper });
-
-    await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1));
-
-    queryClient.clear();
-  });
-
-  it('does not poll a shared conversation while this client streams into it', async () => {
-    setStreaming();
-    mockGet.mockResolvedValue(createFetchedConversation(publicAcl));
-    const { queryClient, Wrapper } = createWrapper();
-    queryClient.setQueryData(
-      queryKeys.conversations.byId(conversationId),
-      createFetchedConversation(publicAcl)
-    );
-
-    renderHook(() => useConversation(), { wrapper: Wrapper });
-
-    await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1));
     await advance(10_000);
 
-    expect(mockGet).toHaveBeenCalledTimes(1);
+    expect(mockGet).not.toHaveBeenCalled();
+
+    queryClient.clear();
+  });
+
+  it('renders the cached copy of a streaming conversation without refetching or polling it', async () => {
+    setStreaming();
+    mockGet.mockResolvedValue(createFetchedConversation(publicAcl));
+    const { queryClient, Wrapper } = createWrapper();
+    const cached = createFetchedConversation(publicAcl);
+    queryClient.setQueryData(queryKeys.conversations.byId(conversationId), cached);
+
+    const { result } = renderHook(() => useConversation(), { wrapper: Wrapper });
+    await advance(10_000);
+
+    expect(result.current.conversation).toBe(cached);
+    expect(mockGet).not.toHaveBeenCalled();
 
     queryClient.clear();
   });

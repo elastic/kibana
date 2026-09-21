@@ -17,12 +17,13 @@ import { ConversationStreamService } from '../../../services/events/conversation
 import { propagateEvents } from '../../../services/chat/propagate_events';
 import { createExecutionStartedEvent } from '../../components/conversations/timeline/items/execution_started.factory';
 import { createExecutionTerminatedEvent } from '../../components/conversations/timeline/items/execution_terminated_event.factory';
+import { createExecutionAbortedEvent } from '../../components/conversations/timeline/items/execution_aborted_event.factory';
 import { createUserMessageEvent } from '../../components/conversations/timeline/items/user_message_event.factory';
 import { queryKeys } from '../../query_keys';
 import { useSendMessageMutation } from './use_send_message_mutation';
 
 const mockChat = jest.fn();
-const mockAbort = jest.fn().mockResolvedValue(undefined);
+const mockAbort = jest.fn().mockResolvedValue({ acknowledged: true, terminal_persisted: true });
 const mockGet = jest.fn();
 
 jest.mock('../../hooks/use_agent_builder_service', () => ({
@@ -52,6 +53,10 @@ const terminated = createExecutionTerminatedEvent({
   trigger_event_id: 'round-1::user_message',
 });
 const savedUserMessage = createUserMessageEvent({ id: 'round-1::user_message' });
+const aborted = createExecutionAbortedEvent({
+  execution_id: 'round-1::execution',
+  trigger_event_id: 'round-1::user_message',
+});
 
 const savedConversation = (events: Conversation['events']) =>
   ({ id: conversationId, rounds: [], events } as unknown as Conversation);
@@ -64,6 +69,7 @@ const setup = () => {
     setPendingMessage: jest.fn(),
     clearPendingMessage: jest.fn(),
     clearActiveStream: jest.fn(),
+    markStreamStarted: jest.fn(),
   };
   const source = new Subject<ChatEvent>();
   mockChat.mockReturnValue(source.pipe(propagateEvents({ eventsService, conversationId })));
@@ -151,6 +157,82 @@ describe('useSendMessageMutation', () => {
     act(() => streamToCompletion(source));
 
     await waitFor(() => expect(bindings.clearPendingMessage).toHaveBeenCalledWith(conversationId));
+  });
+
+  it('Stop asks the server to abort and keeps the fetch open while the run winds down', async () => {
+    const { bindings, source, result, conversationStreamService } = setup();
+    mockGet.mockResolvedValue(savedConversation([savedUserMessage, started, aborted]));
+
+    act(() => result.current.mutate(vars));
+    await waitFor(() => expect(mockChat).toHaveBeenCalled());
+    const { signal, executionId } = mockChat.mock.calls[0][0];
+
+    act(() => {
+      source.next(started as ChatEvent);
+      result.current.cancel(conversationId);
+    });
+
+    await waitFor(() => expect(mockAbort).toHaveBeenCalledWith(executionId));
+    expect(signal.aborted).toBe(false);
+    expect(bindings.markStreamStarted).toHaveBeenCalledWith(conversationId);
+
+    act(() => {
+      source.next(aborted as ChatEvent);
+      source.error(new Error('Converse request was aborted'));
+    });
+
+    await waitFor(() => expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId));
+    expect(mockGet).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(conversationStreamService.getSnapshot(conversationId)).toEqual([]));
+  });
+
+  it('drops the fetch when the server could not record the aborted terminal', async () => {
+    mockAbort.mockResolvedValueOnce({ acknowledged: false, terminal_persisted: false });
+    const { source, result } = setup();
+    mockGet.mockResolvedValue(savedConversation([savedUserMessage]));
+
+    act(() => result.current.mutate(vars));
+    await waitFor(() => expect(mockChat).toHaveBeenCalled());
+    const { signal } = mockChat.mock.calls[0][0];
+
+    act(() => {
+      source.next(started as ChatEvent);
+      result.current.cancel(conversationId);
+    });
+
+    await waitFor(() => expect(signal.aborted).toBe(true));
+  });
+
+  it('keeps the live events when nobody is looking at the conversation before the run starts', async () => {
+    const { source, result, conversationStreamService, observer } = setup();
+    mockGet.mockResolvedValue(savedConversation([savedUserMessage, started, terminated]));
+
+    act(() => result.current.mutate(vars));
+    await waitFor(() => expect(mockChat).toHaveBeenCalled());
+    // The user switches conversation before the first event arrives.
+    observer.unsubscribe();
+
+    act(() => {
+      source.next(started as ChatEvent);
+      source.next({
+        type: ChatEventType.messageChunk,
+        data: { message_id: 'm', text_chunk: 'Hi' },
+      } as ChatEvent);
+    });
+
+    // Coming back finds the run's events, not an empty stream.
+    let seen: unknown[] = [];
+    const back = conversationStreamService
+      .getActiveStream$(conversationId)
+      .subscribe((events) => (seen = events));
+    expect(seen).toHaveLength(2);
+    back.unsubscribe();
+
+    act(() => {
+      source.next(terminated as ChatEvent);
+      source.complete();
+    });
+    await waitFor(() => expect(conversationStreamService.getSnapshot(conversationId)).toEqual([]));
   });
 
   it('ends a stream that errors like a completed one: refetch, then release', async () => {

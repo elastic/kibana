@@ -14,12 +14,13 @@ import type { ChatEvent, Conversation } from '@kbn/agent-builder-common';
 import { EventsService } from '../../../services/events/events_service';
 import { ConversationStreamService } from '../../../services/events/conversation_stream_service';
 import { propagateEvents } from '../../../services/chat/propagate_events';
+import { createExecutionStartedEvent } from '../../components/conversations/timeline/items/execution_started.factory';
 import { createExecutionTerminatedEvent } from '../../components/conversations/timeline/items/execution_terminated_event.factory';
 import { queryKeys } from '../../query_keys';
 import { useResumeRoundMutation } from './use_resume_round_mutation';
 
 const mockResume = jest.fn();
-const mockAbort = jest.fn().mockResolvedValue(undefined);
+const mockAbort = jest.fn().mockResolvedValue({ acknowledged: true, terminal_persisted: true });
 const mockGet = jest.fn();
 
 jest.mock('../../hooks/use_agent_builder_service', () => ({
@@ -46,7 +47,11 @@ const terminated = createExecutionTerminatedEvent({ execution_id: 'round-1::exec
 const setup = () => {
   const eventsService = new EventsService();
   const conversationStreamService = new ConversationStreamService(eventsService);
-  const bindings = { conversationStreamService, clearActiveStream: jest.fn() };
+  const bindings = {
+    conversationStreamService,
+    clearActiveStream: jest.fn(),
+    markStreamStarted: jest.fn(),
+  };
   const source = new Subject<ChatEvent>();
   mockResume.mockReturnValue(source.pipe(propagateEvents({ eventsService, conversationId })));
 
@@ -61,9 +66,9 @@ const setup = () => {
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
   const { result } = renderHook(() => useResumeRoundMutation(bindings), { wrapper: Wrapper });
-  conversationStreamService.getActiveStream$(conversationId).subscribe();
+  const observer = conversationStreamService.getActiveStream$(conversationId).subscribe();
 
-  return { bindings, source, result, conversationStreamService };
+  return { bindings, source, result, conversationStreamService, observer };
 };
 
 describe('useResumeRoundMutation', () => {
@@ -84,6 +89,39 @@ describe('useResumeRoundMutation', () => {
 
     await waitFor(() => expect(conversationStreamService.getSnapshot(conversationId)).toEqual([]));
     expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId);
+  });
+
+  it('keeps the live events when nobody is looking at the conversation before the resume starts', async () => {
+    const { source, result, conversationStreamService, observer } = setup();
+    mockGet.mockResolvedValue({ id: conversationId, rounds: [], events: [terminated] });
+
+    act(() => result.current.mutate(vars));
+    await waitFor(() => expect(mockResume).toHaveBeenCalled());
+    observer.unsubscribe();
+
+    act(() => {
+      source.next(
+        createExecutionStartedEvent({
+          id: 'round-1::execution::1::execution_started',
+          execution_id: 'round-1::execution::1',
+          trigger_event_id: 'round-1::prompt_response::1',
+        }) as ChatEvent
+      );
+    });
+
+    let seen: Array<{ type: string }> = [];
+    const back = conversationStreamService
+      .getActiveStream$(conversationId)
+      .subscribe((events) => (seen = events));
+    // The optimistic prompt_response plus the resume's execution_started.
+    expect(seen.map((event) => event.type)).toEqual(['prompt_response', 'execution_started']);
+    back.unsubscribe();
+
+    act(() => {
+      source.next(terminated as ChatEvent);
+      source.complete();
+    });
+    await waitFor(() => expect(conversationStreamService.getSnapshot(conversationId)).toEqual([]));
   });
 
   it('ends a stream that errors like a completed one: refetch, then release', async () => {

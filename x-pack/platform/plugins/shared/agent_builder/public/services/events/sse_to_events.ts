@@ -27,6 +27,7 @@ import {
   isCompactionStartedEvent,
   isCompactionStep,
   isExecutionStartedEvent,
+  isExecutionTerminalEvent,
   isExecutionTerminatedEvent,
   isMessageChunkEvent,
   isMessageCompleteEvent,
@@ -194,6 +195,14 @@ const withStreamingEvent = (state: LiveEventsState): LiveEventsState => {
   return { ...state, events: upsertEvent(state.events, streaming) };
 };
 
+const withoutStreamingPlaceholder = (
+  events: TimelineDisplayEvent[],
+  executionId: string | undefined
+): TimelineDisplayEvent[] =>
+  events.filter(
+    (event) => !(isExecutionStreamingEvent(event) && event.execution_id === executionId)
+  );
+
 /**
  * Folds one raw SSE event into the list of timeline events the run has produced so far.
  * Pure: the same state and event always give the same result.
@@ -221,14 +230,20 @@ export const sseToEvents = (state: LiveEventsState, event: ChatEvent): LiveEvent
     };
   }
 
-  if (isExecutionTerminatedEvent(event)) {
+  if (isExecutionTerminalEvent(event)) {
+    // The streaming placeholder carries the `execution_terminated` id, so a terminated event
+    // overwrites it on upsert. A failed or aborted event has a different id and would be added
+    // next to the placeholder instead, so remove the placeholder first.
+    const events = isExecutionTerminatedEvent(event)
+      ? state.events
+      : withoutStreamingPlaceholder(state.events, event.execution_id);
     return {
       ...state,
       cursor: undefined,
       steps: [],
       message: '',
       timeToFirstToken: undefined,
-      events: upsertEvent(state.events, event),
+      events: upsertEvent(events, event),
     };
   }
 

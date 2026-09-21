@@ -9,7 +9,10 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import {
+  AgentBuilderErrorCode,
+  AgentExecutionErrorCode,
   createHooksExecutionError,
+  deserializeExecutionError,
   HookExecutionMode,
   HookLifecycle,
 } from '@kbn/agent-builder-common';
@@ -19,6 +22,12 @@ import {
   createWorkflowExecutionError,
 } from '@kbn/agent-builder-common/base/errors';
 import { RoundError } from './round_error';
+
+jest.mock('../../../../hooks/use_agent_builder_service', () => ({
+  useAgentBuilderServices: () => ({
+    docLinksService: { limitationsKnownIssuesConversationLengthExceeded: 'https://docs' },
+  }),
+}));
 
 jest.mock('./reasoning_error_panel', () => ({
   ReasoningErrorPanel: ({ children }: { children: React.ReactNode }) => (
@@ -83,5 +92,66 @@ describe('RoundError', () => {
 
     expect(screen.getByTestId('agentBuilderGenericRoundError')).toBeInTheDocument();
     expect(screen.getByTestId('reasoningErrorPanel')).toBeInTheDocument();
+  });
+
+  describe('from a persisted execution_failed error', () => {
+    it('classifies a context length exceeded error', () => {
+      const error = deserializeExecutionError({
+        code: AgentBuilderErrorCode.agentExecutionError,
+        message: 'too long',
+        meta: { errCode: AgentExecutionErrorCode.contextLengthExceeded },
+      });
+
+      renderWithIntl(<RoundError error={error} onRetry={onRetry} />);
+
+      expect(screen.getByTestId('agentBuilderRoundErrorContextExceeded')).toBeInTheDocument();
+    });
+
+    it('classifies a hook error', () => {
+      const error = deserializeExecutionError({
+        code: AgentBuilderErrorCode.hookExecutionError,
+        message: 'hook crashed',
+        meta: {
+          hookLifecycle: HookLifecycle.afterToolCall,
+          hookId: 'hook-1',
+          hookMode: HookExecutionMode.blocking,
+        },
+      });
+
+      renderWithIntl(<RoundError error={error} onRetry={onRetry} />);
+
+      expect(screen.getByTestId('agentBuilderErrorHookExecution')).toBeInTheDocument();
+    });
+
+    it('classifies a workflow error', () => {
+      const error = deserializeExecutionError({
+        code: AgentBuilderErrorCode.workflowExecutionFailed,
+        message: 'step failed',
+        meta: { workflow: 'wf-1' },
+      });
+
+      renderWithIntl(<RoundError error={error} onRetry={onRetry} />);
+
+      expect(screen.getByTestId('agentBuilderErrorWorkflow')).toBeInTheDocument();
+    });
+
+    it('shows the message and the cause chain for a generic error', () => {
+      const error = deserializeExecutionError({
+        code: AgentBuilderErrorCode.internalError,
+        message: 'Error executing agent: boom',
+        meta: { statusCode: 500 },
+        causes: [
+          { name: 'Error', message: 'boom' },
+          { name: 'Error', message: 'ECONNREFUSED', code: 'ECONNREFUSED' },
+        ],
+      });
+
+      renderWithIntl(<RoundError error={error} onRetry={onRetry} />);
+
+      const details = screen.getByTestId('agentBuilderGenericRoundError').textContent;
+      expect(details).toContain('Error executing agent: boom');
+      expect(details).toContain('Caused by: Error: boom');
+      expect(details).toContain('Caused by: Error: ECONNREFUSED');
+    });
   });
 });

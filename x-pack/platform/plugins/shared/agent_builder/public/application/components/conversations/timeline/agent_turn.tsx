@@ -14,6 +14,8 @@ import { parseExecutionId } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { AgentAvatar } from '../../common/agent_avatar';
 import { RoundAuthorHeader } from '../conversation_rounds/round_author_header';
+import { useConversationId } from '../../../context/conversation/use_conversation_id';
+import { RoundEvents } from '../conversation_rounds/round_events/round_events';
 import { AgentResponse } from './agent_response';
 import { executionTerminatedToResponse } from './items/execution_terminated_event';
 import { ExecutionFailedEvent } from './items/execution_failed_event';
@@ -44,13 +46,31 @@ interface AgentTurnProps {
 // answers.
 const renderContent = (
   item: AgentTurnItem,
+  conversationId: string | undefined,
   conversationAttachments?: VersionedAttachment[]
 ): React.ReactNode => {
-  if (isFailedTurn(item)) {
-    return <ExecutionFailedEvent event={item.terminal} />;
-  }
-  if (isAbortedTurn(item)) {
-    return <ExecutionAbortedEvent event={item.terminal} />;
+  if (isFailedTurn(item) || isAbortedTurn(item)) {
+    return (
+      <EuiFlexGroup direction="column" gutterSize="s">
+        {item.steps.length > 0 && (
+          <EuiFlexItem grow={false}>
+            <RoundEvents
+              steps={item.steps}
+              conversationAttachments={conversationAttachments}
+              attachmentRefs={item.attachmentRefs}
+              conversationId={conversationId}
+            />
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem grow={false}>
+          {isFailedTurn(item) ? (
+            <ExecutionFailedEvent event={item.terminal} />
+          ) : (
+            <ExecutionAbortedEvent event={item.terminal} />
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
   }
 
   const completedTerminal = isCompletedTurn(item) ? item.terminal : undefined;
@@ -100,6 +120,7 @@ export const AgentTurn: React.FC<AgentTurnProps> = ({
   showHeader = true,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const conversationId = useConversationId();
   const { status, startedAt, origin } = item;
   const isLoading = status === 'running';
 
@@ -107,7 +128,7 @@ export const AgentTurn: React.FC<AgentTurnProps> = ({
     min-inline-size: ${euiTheme.size.l};
   `;
 
-  const content = renderContent(item, conversationAttachments);
+  const content = renderContent(item, conversationId, conversationAttachments);
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>

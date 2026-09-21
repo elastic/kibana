@@ -50,6 +50,28 @@ const executionTerminated = (executionId = EXECUTION_ID): ChatEvent =>
     },
   } as ChatEvent);
 
+const executionFailed = (): ChatEvent =>
+  ({
+    type: TimelineEventType.executionFailed,
+    id: `${ROUND_ID}::execution_failed`,
+    created_at: '2026-01-01T00:00:09.000Z',
+    actor: AGENT_ACTOR,
+    execution_id: EXECUTION_ID,
+    trigger_event_id: `${ROUND_ID}::user_message`,
+    data: { error: { code: 'internalError', message: 'boom' }, time_to_last_token: 20 },
+  } as ChatEvent);
+
+const executionAborted = (): ChatEvent =>
+  ({
+    type: TimelineEventType.executionAborted,
+    id: `${ROUND_ID}::execution_aborted`,
+    created_at: '2026-01-01T00:00:09.000Z',
+    actor: AGENT_ACTOR,
+    execution_id: EXECUTION_ID,
+    trigger_event_id: `${ROUND_ID}::user_message`,
+    data: { aborted_by: { source: 'api' }, time_to_last_token: 20 },
+  } as ChatEvent);
+
 const chunk = (text: string): ChatEvent =>
   ({ type: ChatEventType.messageChunk, data: { message_id: 'm1', text_chunk: text } } as ChatEvent);
 
@@ -145,6 +167,17 @@ describe('sseToEvents', () => {
     // A chunk arriving after the terminal must not overwrite it - they share an id.
     const afterTerminal = sseToEvents(state, chunk(' more'));
     expect(afterTerminal.events).toEqual(state.events);
+  });
+
+  it.each([
+    ['failed', executionFailed(), `${ROUND_ID}::execution_failed`],
+    ['aborted', executionAborted(), `${ROUND_ID}::execution_aborted`],
+  ])('a %s terminal seals the run and drops the half-written answer', (_, terminal, id) => {
+    const state = fold(executionStarted(), chunk('par'), terminal);
+
+    expect(ids(state)).toEqual([`${EXECUTION_ID}::execution_started`, id]);
+    expect(streamingEvent(state)).toBeUndefined();
+    expect(state.cursor).toBeUndefined();
   });
 
   it('puts time_to_first_token on the streaming event', () => {

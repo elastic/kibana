@@ -36,7 +36,10 @@ export const useConversation = () => {
     error,
   } = useQuery({
     queryKey,
-    enabled: Boolean(conversationId),
+    // While this client streams into the conversation the live events are the source of truth and
+    // the saved document lags behind them by design; reading it mid-run only produces disagreements
+    // (a second copy of the pending message before `execution_started` for example).
+    enabled: Boolean(conversationId) && !isThisConversationStreaming,
     queryFn: () => {
       if (!conversationId) {
         return Promise.reject(new Error('Invalid conversation id'));
@@ -54,12 +57,8 @@ export const useConversation = () => {
     // which would clear `errorType` and flip `Conversation`'s conditional rendering. Resulting in a loop of unmounts/remounts.
     retryOnMount: false,
     // Shared conversations can be written to by other participants, so poll for their rounds.
-    // Do not poll while this client streams: the poll would show the saved copy of the pending
-    // message before `execution_started` supplies the id that lets the timeline match the two.
     refetchInterval: (data) =>
-      isSharedConversation(data?.access_control) && !isThisConversationStreaming
-        ? POLL_INTERVAL_MS
-        : false,
+      isSharedConversation(data?.access_control) ? POLL_INTERVAL_MS : false,
   });
 
   return { conversation, isLoading, isFetching, isFetched, isError, error };

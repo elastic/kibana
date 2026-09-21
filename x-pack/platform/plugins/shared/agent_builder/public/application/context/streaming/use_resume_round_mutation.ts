@@ -12,7 +12,7 @@ import { toToolMetadata } from '@kbn/agent-builder-browser/tools/browser_api_too
 import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import {
   isExecutionStartedEvent,
-  isExecutionTerminatedEvent,
+  isExecutionTerminalEvent,
   EventActorType,
   TimelineEventType,
   promptResponseEventId,
@@ -31,6 +31,7 @@ import type { ConversationStreamService } from '../../../services/events';
 import { releaseLocalContent } from './release_local_content';
 import { mergeEventsById } from '../../components/conversations/timeline/merge_events';
 import { queryKeys } from '../../query_keys';
+import { isStreamCancelled, requestAbort, type StreamHandle } from './stream_handle';
 
 export interface ResumeRoundVars {
   prompts: Record<string, PromptResponse>;
@@ -45,6 +46,7 @@ export interface ResumeRoundVars {
 export interface ResumeRoundMutationBindings {
   conversationStreamService: ConversationStreamService;
   clearActiveStream: (conversationId: string) => void;
+  markStreamStarted: (conversationId: string) => void;
 }
 
 type UseResumeRoundMutationProps = ResumeRoundMutationBindings;
@@ -56,6 +58,7 @@ type UseResumeRoundMutationProps = ResumeRoundMutationBindings;
 export const useResumeRoundMutation = ({
   conversationStreamService,
   clearActiveStream,
+  markStreamStarted,
 }: UseResumeRoundMutationProps) => {
   const { chatService, conversationsService } = useAgentBuilderServices();
   const { services } = useKibana();
@@ -63,9 +66,7 @@ export const useResumeRoundMutation = ({
   // One controller + executionId per in-flight conversation. Concurrent streams need
   // independent cancel; the executionId is what the abort endpoint uses to stop server-side.
   // `useResumeRoundMutation` is called exactly once — by the `StreamingProvider`.
-  const controllersRef = useRef<Map<string, { controller: AbortController; executionId: string }>>(
-    new Map()
-  );
+  const controllersRef = useRef<Map<string, StreamHandle>>(new Map());
 
   const browserToolExecutor = useMemo(() => {
     return new BrowserToolExecutor(services.notifications?.toasts);
@@ -87,7 +88,8 @@ export const useResumeRoundMutation = ({
       }
       const controller = new AbortController();
       const executionId = uuidv4();
-      controllersRef.current.set(vars.conversationId, { controller, executionId });
+      const handle: StreamHandle = { controller, executionId, abortRequested: false };
+      controllersRef.current.set(vars.conversationId, handle);
 
       // The optimistic answer takes the id the server will write, so the saved twin replaces it
       // after the refetch. The index counts the round's stored executions, same as the server.
@@ -111,6 +113,11 @@ export const useResumeRoundMutation = ({
       };
       conversationStreamService.recordPromptResponse(vars.conversationId, optimisticResponse);
 
+      // The run owns its live events: hold the stream for its whole lifetime so it is not reclaimed
+      // while the user is looking at another conversation, before or after `execution_started`.
+      const retainedStream = conversationStreamService
+        .getActiveStream$(vars.conversationId)
+        .subscribe();
       let timelineExecutionId: string | undefined;
       let streamEventArrived = false;
 
@@ -130,7 +137,10 @@ export const useResumeRoundMutation = ({
 
         const events$ = rawEvents$.pipe(
           tap((event) => {
-            if (isExecutionStartedEvent(event) || isExecutionTerminatedEvent(event)) {
+            if (isExecutionStartedEvent(event)) {
+              markStreamStarted(vars.conversationId);
+            }
+            if (isExecutionStartedEvent(event) || isExecutionTerminalEvent(event)) {
               streamEventArrived = true;
               timelineExecutionId ??= event.execution_id;
             }
@@ -144,7 +154,7 @@ export const useResumeRoundMutation = ({
           conversationActions: streamActions,
           browserApiTools: vars.browserApiTools,
           browserToolExecutor,
-          isAborted: () => controller.signal.aborted,
+          isAborted: () => isStreamCancelled(handle),
         }).catch(() => {
           if (!streamEventArrived) {
             conversationStreamService.clearPromptResponse(vars.conversationId, predictedId);
@@ -167,6 +177,7 @@ export const useResumeRoundMutation = ({
         }
         throw err;
       } finally {
+        retainedStream.unsubscribe();
         clearActiveStream(vars.conversationId);
         if (controllersRef.current.get(vars.conversationId)?.controller === controller) {
           controllersRef.current.delete(vars.conversationId);
@@ -177,10 +188,9 @@ export const useResumeRoundMutation = ({
 
   const cancel = useCallback(
     (conversationId: string) => {
-      const entry = controllersRef.current.get(conversationId);
-      if (entry) {
-        chatService.abort(entry.executionId).catch(() => {});
-        entry.controller.abort();
+      const handle = controllersRef.current.get(conversationId);
+      if (handle) {
+        requestAbort(handle, chatService);
       }
     },
     [chatService]

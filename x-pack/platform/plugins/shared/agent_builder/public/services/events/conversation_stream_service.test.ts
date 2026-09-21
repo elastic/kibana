@@ -273,6 +273,28 @@ describe('ConversationStreamService', () => {
     expect(hasTerminal(state ?? [])).toBe(true);
   });
 
+  it('a failed terminal seals the live events too', () => {
+    const { source, getSubject, endRun } = makeFakeSource();
+    const service = new ConversationStreamService(source);
+
+    let state: TimelineDisplayEvent[] | undefined;
+    service.getActiveStream$('A').subscribe((next) => (state = next));
+
+    getSubject('A').next(executionStartedEvent());
+    getSubject('A').next({
+      type: TimelineEventType.executionFailed,
+      id: `${ROUND_ID}::execution_failed`,
+      created_at: '2026-01-01T00:00:09.000Z',
+      actor: { type: EventActorType.agent, id: 'agent-1' },
+      execution_id: EXECUTION_ID,
+      trigger_event_id: TRIGGER_EVENT_ID,
+      data: { error: { code: 'internalError', message: 'boom' }, time_to_last_token: 20 },
+    } as ChatEvent);
+
+    endRun('A');
+    expect(state?.some((event) => event.type === TimelineEventType.executionFailed)).toBe(true);
+  });
+
   it('unsealed live events are still cleared on streamEnded', () => {
     const { source, getSubject, endRun } = makeFakeSource();
     const service = new ConversationStreamService(source);

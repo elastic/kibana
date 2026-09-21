@@ -199,6 +199,7 @@ const ebtAction = {
     OPEN_ROUND_METADATA: 'open_round_metadata',
     EXPAND_TOOL_CALL_STEP: 'expand_tool_call_step',
     EXPAND_TOOL_CALL_GROUP: 'expand_tool_call_group',
+    EXPAND_EXECUTION_ERROR: 'expand_execution_error',
     VIEW_TOOL_RESPONSE: 'view_tool_response',
     VIEW_SUB_AGENT_EXECUTION: 'view_sub_agent_execution',
     OPEN_ESQL_IN_DISCOVER: 'open_esql_in_discover',
