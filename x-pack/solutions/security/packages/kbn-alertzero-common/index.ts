@@ -19,10 +19,12 @@ export {
   ALERTZERO_APP_ID,
   ALERTZERO_APP_PATH,
   ALERTZERO_FEATURE_ID,
+  ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID,
+  ALERTZERO_FAST_INFERENCE_FEATURE_ID,
+  ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
   ALERTZERO_INTERNAL_URL,
-  ALERTZERO_INVESTIGATIONS_URL,
-  ALERTZERO_INVESTIGATION_URL_TEMPLATE,
   ALERTZERO_PLUGIN_NAME,
+  ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
   ALERTZERO_ACTIONS_URL,
   ALERTZERO_ACTIONS_LIST_TOOL_ID,
   ALERTZERO_PROPOSALS_URL,
@@ -47,10 +49,11 @@ export {
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
   SYSTEM_SECURITY_WORKER_IDS,
-  TEMPLATE_ID_INCIDENT,
+  TEMPLATE_ID_ESCALATION,
   TEMPLATE_ID_INVESTIGATION,
   TEMPLATE_ID_PROPOSAL,
   WATCH_AUTONOMY_LEVELS,
+  WATCH_AUTONOMY_REVIEW_GATED,
   WORKER_SCHEDULE_UNITS,
   WATCH_HUNT_TAG,
   WATCH_DEEP_TAG,
@@ -59,7 +62,6 @@ export {
   WATCH_OFFICER_TAG,
   WATCH_TAG,
   WATCH_TIER_TAGS,
-  buildInvestigationUrl,
   buildSkillUrl,
   buildWatchUrl,
   buildWorkerUrl,
@@ -70,17 +72,15 @@ export type {
   ActionCategory,
   ActionCatalogEntry,
   ActionImpact,
+  JsonSchema,
   ListActionsResponse,
 } from './action_catalog_types';
 
 export {
   ApprovalRequirement,
-  GetInvestigationResponse,
   GetWatchResponse,
   Investigation,
   Lifecycle,
-  ListInvestigationProposalsResponse,
-  ListInvestigationsResponse,
   ListSkillsResponse,
   ListWatchesResponse,
   ListWorkersResponse,
@@ -137,20 +137,7 @@ export type {
   WatchScheduleCoverageInput,
 } from './impl/watches/watch_helpers';
 
-export {
-  MOCK_CLEAN_RUN_NOTE,
-  MOCK_INVESTIGATIONS,
-  MOCK_PROPOSALS,
-  SKILLS_SEED,
-  WATCHES_SEED,
-  WORKERS_SEED,
-  createMockInvestigation,
-  createMockProposal,
-  getMockInvestigationById,
-  getMockInvestigationsByWatchId,
-  getMockProposalById,
-  getMockProposalsByInvestigationId,
-} from './impl/samples';
+export { MOCK_PROPOSALS, SKILLS_SEED, WATCHES_SEED, WORKERS_SEED } from './impl/samples';
 export {
   ANALYSIS_WINDOW_DAYS_DEFAULT,
   ANALYSIS_WINDOW_DAYS_MAX,
@@ -164,6 +151,7 @@ export {
   getAllowedAutonomyLevels,
   getCompleteWorkerSettingsSchema,
   getWorkerSettingsDeclaration,
+  projectStoredAutonomyLevel,
   touchesWorkerSettings,
 } from './impl/worker_settings';
 export type { WorkerSettingsDeclaration } from './impl/worker_settings';
