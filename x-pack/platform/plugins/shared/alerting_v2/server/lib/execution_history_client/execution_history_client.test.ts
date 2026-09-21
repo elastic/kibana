@@ -75,14 +75,14 @@ describe('ExecutionHistoryClient', () => {
       );
     });
 
-    it('passes through sort, sortOrder, from, to, paging unchanged', async () => {
+    it('passes through sort, sortOrder, startTime, endTime, paging unchanged', async () => {
       const { client, findRuleExecutions } = createMocks();
       await client.listRuleExecutions(
         baseArgs({
           sort: 'duration',
           sortOrder: 'asc',
-          from: '2026-06-01T00:00:00Z',
-          to: '2026-06-02T00:00:00Z',
+          startTime: '2026-06-01T00:00:00Z',
+          endTime: '2026-06-02T00:00:00Z',
           page: 4,
           perPage: 25,
         })
@@ -91,8 +91,8 @@ describe('ExecutionHistoryClient', () => {
         expect.objectContaining({
           sort: 'duration',
           sortOrder: 'asc',
-          from: '2026-06-01T00:00:00Z',
-          to: '2026-06-02T00:00:00Z',
+          startTime: '2026-06-01T00:00:00Z',
+          endTime: '2026-06-02T00:00:00Z',
           page: 4,
           perPage: 25,
         })

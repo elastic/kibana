@@ -55,7 +55,8 @@ describe('ListActionPolicyExecutionsRoute', () => {
       ruleIds: undefined,
       outcome: ['throttled'],
       episodeIds: undefined,
-      startDate: undefined,
+      startTime: undefined,
+      endTime: undefined,
     });
   });
 
@@ -73,17 +74,31 @@ describe('ListActionPolicyExecutionsRoute', () => {
     );
   });
 
-  it('forwards start_date from the query to the client', async () => {
+  it('forwards start_time from the query to the client', async () => {
     const mocks = createMocks();
     const request = httpServerMock.createKibanaRequest({
-      query: { start_date: '2026-01-01T00:00:00.000Z' },
+      query: { start_time: '2026-01-01T00:00:00.000Z' },
     });
     const route = buildRoute(request as unknown as KibanaRequest, mocks);
 
     await route.handle();
 
     expect(mocks.executionHistoryClient.listExecutionHistory).toHaveBeenCalledWith(
-      expect.objectContaining({ startDate: '2026-01-01T00:00:00.000Z' })
+      expect.objectContaining({ startTime: '2026-01-01T00:00:00.000Z' })
+    );
+  });
+
+  it('forwards end_time from the query to the client', async () => {
+    const mocks = createMocks();
+    const request = httpServerMock.createKibanaRequest({
+      query: { end_time: '2026-01-02T00:00:00.000Z' },
+    });
+    const route = buildRoute(request as unknown as KibanaRequest, mocks);
+
+    await route.handle();
+
+    expect(mocks.executionHistoryClient.listExecutionHistory).toHaveBeenCalledWith(
+      expect.objectContaining({ endTime: '2026-01-02T00:00:00.000Z' })
     );
   });
 
@@ -102,7 +117,8 @@ describe('ListActionPolicyExecutionsRoute', () => {
       ruleIds: undefined,
       outcome: undefined,
       episodeIds: undefined,
-      startDate: undefined,
+      startTime: undefined,
+      endTime: undefined,
     });
   });
 
@@ -155,7 +171,8 @@ describe('toListExecutionHistoryArgs', () => {
         rule_ids: ['rule-1', 'rule-2'],
         outcome: ['dispatched'],
         episode_ids: ['ep-1'],
-        start_date: '2026-01-01T00:00:00.000Z',
+        start_time: '2026-01-01T00:00:00.000Z',
+        end_time: '2026-01-02T00:00:00.000Z',
       })
     ).toEqual({
       page: 1,
@@ -164,7 +181,8 @@ describe('toListExecutionHistoryArgs', () => {
       ruleIds: ['rule-1', 'rule-2'],
       outcome: ['dispatched'],
       episodeIds: ['ep-1'],
-      startDate: '2026-01-01T00:00:00.000Z',
+      startTime: '2026-01-01T00:00:00.000Z',
+      endTime: '2026-01-02T00:00:00.000Z',
     });
   });
 });

@@ -31,7 +31,7 @@ describe('ExecutionHistoryApi', () => {
     );
   });
 
-  it('forwards page, perPage, search, outcome and start_date as query params', async () => {
+  it('forwards page, perPage, search, outcome, start_time and end_time as query params', async () => {
     const { api, http } = buildApi();
 
     await api.listActionPolicyExecutions({
@@ -39,7 +39,8 @@ describe('ExecutionHistoryApi', () => {
       per_page: 25,
       search: 'foo',
       outcome: ['throttled'],
-      start_date: '2026-01-01T00:00:00.000Z',
+      start_time: '2026-01-01T00:00:00.000Z',
+      end_time: '2026-01-02T00:00:00.000Z',
     });
 
     expect(http.get).toHaveBeenCalledWith(ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH, {
@@ -50,7 +51,8 @@ describe('ExecutionHistoryApi', () => {
         rule_ids: undefined,
         outcome: ['throttled'],
         episode_ids: undefined,
-        start_date: '2026-01-01T00:00:00.000Z',
+        start_time: '2026-01-01T00:00:00.000Z',
+        end_time: '2026-01-02T00:00:00.000Z',
       },
     });
   });
@@ -68,20 +70,21 @@ describe('ExecutionHistoryApi', () => {
         rule_ids: undefined,
         outcome: undefined,
         episode_ids: undefined,
-        start_date: undefined,
+        start_time: undefined,
+        end_time: undefined,
       },
     });
   });
 
-  it('supports a count-only read via perPage=0 and start_date', async () => {
+  it('supports a count-only read via perPage=0 and start_time', async () => {
     const { api, http } = buildApi();
 
-    await api.listActionPolicyExecutions({ start_date: '2026-01-01T00:00:00.000Z', per_page: 0 });
+    await api.listActionPolicyExecutions({ start_time: '2026-01-01T00:00:00.000Z', per_page: 0 });
 
     expect(http.get).toHaveBeenCalledWith(
       ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH,
       expect.objectContaining({
-        query: expect.objectContaining({ per_page: 0, start_date: '2026-01-01T00:00:00.000Z' }),
+        query: expect.objectContaining({ per_page: 0, start_time: '2026-01-01T00:00:00.000Z' }),
       })
     );
   });
@@ -125,8 +128,8 @@ describe('ExecutionHistoryApi', () => {
     const params = {
       rule_ids: ['r1', 'r2'],
       outcome: ['failure' as const],
-      from: '2026-01-01T00:00:00Z',
-      to: '2026-01-02T00:00:00Z',
+      start_time: '2026-01-01T00:00:00Z',
+      end_time: '2026-01-02T00:00:00Z',
       sort: 'duration' as const,
       sort_order: 'asc' as const,
       page: 3,

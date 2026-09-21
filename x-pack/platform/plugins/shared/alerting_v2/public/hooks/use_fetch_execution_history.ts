@@ -23,7 +23,8 @@ export interface ListExecutionHistoryUiParams {
   ruleIds?: string[];
   outcome?: PolicyExecutionOutcomeFilter;
   episodeIds?: string[];
-  startDate?: string;
+  startTime?: string;
+  endTime?: string;
 }
 
 export const toListExecutionHistoryRequest = ({
@@ -33,7 +34,8 @@ export const toListExecutionHistoryRequest = ({
   ruleIds,
   outcome,
   episodeIds,
-  startDate,
+  startTime,
+  endTime,
   ...rest
 }: ListExecutionHistoryUiParams): Complete<ListPolicyExecutionHistoryRequest> => {
   assertAllFieldsMapped(rest);
@@ -44,7 +46,8 @@ export const toListExecutionHistoryRequest = ({
     rule_ids: ruleIds,
     outcome,
     episode_ids: episodeIds,
-    start_date: startDate,
+    start_time: startTime,
+    end_time: endTime,
   };
 };
 
@@ -55,7 +58,8 @@ interface UseFetchExecutionHistoryParams {
   ruleIds?: string[];
   outcome?: PolicyExecutionOutcomeFilter;
   episodeIds?: string[];
-  startDate?: string;
+  startTime?: string;
+  endTime?: string;
 }
 
 export const useFetchExecutionHistory = ({
@@ -65,7 +69,8 @@ export const useFetchExecutionHistory = ({
   ruleIds,
   outcome,
   episodeIds,
-  startDate,
+  startTime,
+  endTime,
 }: UseFetchExecutionHistoryParams) => {
   const executionHistoryApi = useService(ExecutionHistoryApi);
 
@@ -77,7 +82,8 @@ export const useFetchExecutionHistory = ({
       ruleIds,
       outcome,
       episodeIds,
-      startDate,
+      startTime,
+      endTime,
     }),
     queryFn: () =>
       executionHistoryApi.listActionPolicyExecutions(
@@ -88,7 +94,8 @@ export const useFetchExecutionHistory = ({
           ruleIds,
           outcome,
           episodeIds,
-          startDate,
+          startTime,
+          endTime,
         })
       ),
     refetchOnWindowFocus: false,

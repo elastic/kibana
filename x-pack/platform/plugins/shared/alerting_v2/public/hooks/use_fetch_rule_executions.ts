@@ -21,8 +21,8 @@ export interface ListRuleExecutionsUiParams {
   perPage?: number;
   ruleIds?: string[];
   outcome?: RuleExecutionOutcome[];
-  from?: string;
-  to?: string;
+  startTime?: string;
+  endTime?: string;
   sort?: 'startedAt' | 'duration';
   sortOrder?: 'asc' | 'desc';
   enabled?: boolean;
@@ -33,8 +33,8 @@ export const toListRuleExecutionsRequest = ({
   perPage,
   ruleIds,
   outcome,
-  from,
-  to,
+  startTime,
+  endTime,
   sort,
   sortOrder,
   ...rest
@@ -45,8 +45,8 @@ export const toListRuleExecutionsRequest = ({
     per_page: perPage,
     rule_ids: ruleIds,
     outcome,
-    from,
-    to,
+    start_time: startTime,
+    end_time: endTime,
     sort: sort === 'startedAt' ? 'started_at' : sort,
     sort_order: sortOrder,
   };

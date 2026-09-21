@@ -42,7 +42,8 @@ export class ExecutionHistoryApi {
           rule_ids: params.rule_ids,
           outcome: params.outcome,
           episode_ids: params.episode_ids,
-          start_date: params.start_date,
+          start_time: params.start_time,
+          end_time: params.end_time,
         },
       }
     );

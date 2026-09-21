@@ -59,7 +59,7 @@ describe('EventLogService', () => {
 
       await eventLogService.findActionPolicyExecutionEvents({
         spaceId: 'default',
-        startDate: SINCE,
+        startTime: SINCE,
       });
 
       expect(mockEventLogSetup.getIndexPattern).toHaveBeenCalled();
@@ -68,13 +68,13 @@ describe('EventLogService', () => {
       );
     });
 
-    it('filters by provider, space and start date and orders by @timestamp desc', async () => {
+    it('filters by provider, space and start time and orders by @timestamp desc', async () => {
       const { eventLogService, mockEsClient } = createEventLogService();
       mockEsClient.search.mockResolvedValue(buildSearchResponse());
 
       await eventLogService.findActionPolicyExecutionEvents({
         spaceId: 'my-space',
-        startDate: SINCE,
+        startTime: SINCE,
       });
 
       const [args] = mockEsClient.search.mock.calls[0] as [any];
@@ -95,7 +95,7 @@ describe('EventLogService', () => {
 
       await eventLogService.findActionPolicyExecutionEvents({
         spaceId: 'default',
-        startDate: SINCE,
+        startTime: SINCE,
       });
 
       const [args] = mockEsClient.search.mock.calls[0] as [any];
@@ -120,7 +120,7 @@ describe('EventLogService', () => {
 
       await eventLogService.findActionPolicyExecutionEvents({
         spaceId: 'default',
-        startDate: SINCE,
+        startTime: SINCE,
         outcomes: ['dispatched'],
       });
 
@@ -136,7 +136,7 @@ describe('EventLogService', () => {
 
       await eventLogService.findActionPolicyExecutionEvents({
         spaceId: 'default',
-        startDate: SINCE,
+        startTime: SINCE,
         policyIds: ['p1'],
         ruleIds: ['r1'],
       });
@@ -184,7 +184,7 @@ describe('EventLogService', () => {
 
       await eventLogService.findActionPolicyExecutionEvents({
         spaceId: 'default',
-        startDate: SINCE,
+        startTime: SINCE,
         episodeIds: ['ep-1', 'ep-2'],
       });
 
@@ -202,7 +202,7 @@ describe('EventLogService', () => {
 
       await eventLogService.findActionPolicyExecutionEvents({
         spaceId: 'default',
-        startDate: SINCE,
+        startTime: SINCE,
         page: 3,
         perPage: 25,
       });
@@ -218,7 +218,7 @@ describe('EventLogService', () => {
 
       await eventLogService.findActionPolicyExecutionEvents({
         spaceId: 'default',
-        startDate: SINCE,
+        startTime: SINCE,
       });
 
       const [args] = mockEsClient.search.mock.calls[0] as [any];
@@ -233,7 +233,7 @@ describe('EventLogService', () => {
 
       const result = await eventLogService.findActionPolicyExecutionEvents({
         spaceId: 'default',
-        startDate: SINCE,
+        startTime: SINCE,
         page: 2,
         perPage: 25,
       });
@@ -252,7 +252,7 @@ describe('EventLogService', () => {
 
       const result = await eventLogService.findActionPolicyExecutionEvents({
         spaceId: 'default',
-        startDate: SINCE,
+        startTime: SINCE,
       });
       expect(result.total).toBe(42);
     });
@@ -264,7 +264,7 @@ describe('EventLogService', () => {
       await expect(
         eventLogService.findActionPolicyExecutionEvents({
           spaceId: 'default',
-          startDate: SINCE,
+          startTime: SINCE,
         })
       ).rejects.toThrow('boom');
     });

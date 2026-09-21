@@ -84,8 +84,8 @@ export interface FindRuleExecutionsQuery {
   spaceId: string;
   ruleIds?: string[];
   outcomes?: RuleExecutionOutcome[];
-  from?: string;
-  to?: string;
+  startTime?: string;
+  endTime?: string;
   sort?: RuleExecutionSortField;
   sortOrder?: RuleExecutionSortOrder;
   page: number;

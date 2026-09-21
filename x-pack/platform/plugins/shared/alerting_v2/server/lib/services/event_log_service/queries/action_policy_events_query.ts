@@ -31,7 +31,9 @@ import {
 export interface BuildActionPolicyEventsQueryParams {
   spaceId: string;
   /** Inclusive lower bound applied to `@timestamp`. */
-  startDate: string;
+  startTime: string;
+  /** Inclusive upper bound applied to `@timestamp`. */
+  endTime?: string;
   outcomes?: PolicyExecutionOutcome[];
   policyIds?: string[];
   ruleIds?: string[];
@@ -102,7 +104,14 @@ const buildBaseActionPolicyEventsQuery = (
   const filters: QueryDslQueryContainer[] = [
     { term: { 'event.provider': ACTION_POLICY_EVENT_PROVIDER } },
     { term: { 'kibana.space_ids': params.spaceId } },
-    { range: { '@timestamp': { gte: params.startDate } } },
+    {
+      range: {
+        '@timestamp': {
+          gte: params.startTime,
+          ...(params.endTime ? { lte: params.endTime } : {}),
+        },
+      },
+    },
     actionFilter(params.outcomes),
   ];
 

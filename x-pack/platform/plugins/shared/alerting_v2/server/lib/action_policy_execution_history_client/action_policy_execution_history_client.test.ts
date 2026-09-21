@@ -106,7 +106,7 @@ const createMocks = () => {
 
 describe('ActionPolicyExecutionHistoryClient', () => {
   describe('listExecutionHistory', () => {
-    it('forwards page, perPage and a default 24h startDate to the event log service', async () => {
+    it('forwards page, perPage and a default 24h startTime to the event log service', async () => {
       jest.useFakeTimers().setSystemTime(new Date('2026-10-11T11:00:00.000Z'));
       const { client, eventLogService } = createMocks();
       const request = httpServerMock.createKibanaRequest();
@@ -115,7 +115,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
 
       expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith({
         spaceId: 'default',
-        startDate: '2026-10-10T11:00:00.000Z',
+        startTime: '2026-10-10T11:00:00.000Z',
         page: 2,
         perPage: 25,
         outcomes: undefined,
@@ -126,15 +126,15 @@ describe('ActionPolicyExecutionHistoryClient', () => {
       jest.useRealTimers();
     });
 
-    it('uses the provided startDate as the startDate lower bound', async () => {
+    it('uses the provided startTime as the startTime lower bound', async () => {
       const { client, eventLogService } = createMocks();
       const request = httpServerMock.createKibanaRequest();
-      const startDate = '2026-05-05T10:00:00.000Z';
+      const startTime = '2026-05-05T10:00:00.000Z';
 
-      await client.listExecutionHistory({ request, startDate });
+      await client.listExecutionHistory({ request, startTime });
 
       expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
-        expect.objectContaining({ startDate })
+        expect.objectContaining({ startTime })
       );
     });
 
@@ -298,20 +298,20 @@ describe('ActionPolicyExecutionHistoryClient', () => {
       });
     });
 
-    describe('startDate override', () => {
-      it('uses the provided startDate instead of the default 24h window', async () => {
+    describe('startTime override', () => {
+      it('uses the provided startTime instead of the default 24h window', async () => {
         const { client, eventLogService } = createMocks();
         const request = httpServerMock.createKibanaRequest();
-        const startDate = '2026-01-01T00:00:00.000Z';
+        const startTime = '2026-01-01T00:00:00.000Z';
 
-        await client.listExecutionHistory({ request, episodeIds: ['ep-1'], startDate });
+        await client.listExecutionHistory({ request, episodeIds: ['ep-1'], startTime });
 
         expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
-          expect.objectContaining({ startDate, episodeIds: ['ep-1'] })
+          expect.objectContaining({ startTime, episodeIds: ['ep-1'] })
         );
       });
 
-      it('falls back to the default 24h window when startDate is not provided', async () => {
+      it('falls back to the default 24h window when startTime is not provided', async () => {
         jest.useFakeTimers().setSystemTime(new Date('2026-10-11T11:00:00.000Z'));
         const { client, eventLogService } = createMocks();
         const request = httpServerMock.createKibanaRequest();
@@ -319,10 +319,35 @@ describe('ActionPolicyExecutionHistoryClient', () => {
         await client.listExecutionHistory({ request });
 
         expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
-          expect.objectContaining({ startDate: '2026-10-10T11:00:00.000Z' })
+          expect.objectContaining({ startTime: '2026-10-10T11:00:00.000Z' })
         );
 
         jest.useRealTimers();
+      });
+    });
+
+    describe('endTime', () => {
+      it('forwards the provided endTime to the event log service', async () => {
+        const { client, eventLogService } = createMocks();
+        const request = httpServerMock.createKibanaRequest();
+        const endTime = '2026-01-02T00:00:00.000Z';
+
+        await client.listExecutionHistory({ request, endTime });
+
+        expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
+          expect.objectContaining({ endTime })
+        );
+      });
+
+      it('forwards endTime as undefined when not provided', async () => {
+        const { client, eventLogService } = createMocks();
+        const request = httpServerMock.createKibanaRequest();
+
+        await client.listExecutionHistory({ request });
+
+        expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
+          expect.objectContaining({ endTime: undefined })
+        );
       });
     });
 

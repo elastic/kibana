@@ -67,12 +67,12 @@ describe('rule_execution_history_schema', () => {
         });
       });
 
-      it('does not inject rule_ids / outcome / from / to when missing', () => {
+      it('does not inject rule_ids / outcome / start_time / end_time when missing', () => {
         const parsed = listRuleExecutionsRequestSchema.parse({});
         expect(parsed).not.toHaveProperty('rule_ids');
         expect(parsed).not.toHaveProperty('outcome');
-        expect(parsed).not.toHaveProperty('from');
-        expect(parsed).not.toHaveProperty('to');
+        expect(parsed).not.toHaveProperty('start_time');
+        expect(parsed).not.toHaveProperty('end_time');
       });
     });
 
@@ -179,27 +179,27 @@ describe('rule_execution_history_schema', () => {
       });
     });
 
-    describe('from / to (ISO datetime)', () => {
+    describe('start_time / end_time (ISO datetime)', () => {
       it('accepts a Z-suffixed ISO datetime', () => {
         const parsed = listRuleExecutionsRequestSchema.parse({
-          from: '2026-06-01T00:00:00Z',
-          to: '2026-06-02T00:00:00Z',
+          start_time: '2026-06-01T00:00:00Z',
+          end_time: '2026-06-02T00:00:00Z',
         });
-        expect(parsed.from).toBe('2026-06-01T00:00:00Z');
-        expect(parsed.to).toBe('2026-06-02T00:00:00Z');
+        expect(parsed.start_time).toBe('2026-06-01T00:00:00Z');
+        expect(parsed.end_time).toBe('2026-06-02T00:00:00Z');
       });
 
       it('rejects free-form date expressions', () => {
-        expect(listRuleExecutionsRequestSchema.safeParse({ from: 'yesterday' }).success).toBe(
+        expect(listRuleExecutionsRequestSchema.safeParse({ start_time: 'yesterday' }).success).toBe(
           false
         );
-        expect(listRuleExecutionsRequestSchema.safeParse({ to: 'now' }).success).toBe(false);
+        expect(listRuleExecutionsRequestSchema.safeParse({ end_time: 'now' }).success).toBe(false);
       });
 
       it('rejects date-only strings without a time component', () => {
-        expect(listRuleExecutionsRequestSchema.safeParse({ from: '2026-06-01' }).success).toBe(
-          false
-        );
+        expect(
+          listRuleExecutionsRequestSchema.safeParse({ start_time: '2026-06-01' }).success
+        ).toBe(false);
       });
     });
 
@@ -312,8 +312,8 @@ describe('rule_execution_history_schema', () => {
       const input = {
         rule_ids: ['rule-x', 'rule-y'],
         outcome: ['success', 'failure'] as const,
-        from: '2026-06-01T00:00:00Z',
-        to: '2026-06-02T00:00:00Z',
+        start_time: '2026-06-01T00:00:00Z',
+        end_time: '2026-06-02T00:00:00Z',
         sort: 'duration' as const,
         sort_order: 'asc' as const,
         page: 2,

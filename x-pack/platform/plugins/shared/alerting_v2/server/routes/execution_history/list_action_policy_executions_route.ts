@@ -36,7 +36,8 @@ export const toListExecutionHistoryArgs = ({
   rule_ids: ruleIds,
   outcome,
   episode_ids: episodeIds,
-  start_date: startDate,
+  start_time: startTime,
+  end_time: endTime,
   ...rest
 }: ListPolicyExecutionHistoryRequest): Complete<Omit<ListExecutionHistoryArgs, 'request'>> => {
   assertAllFieldsMapped(rest);
@@ -47,7 +48,8 @@ export const toListExecutionHistoryArgs = ({
     ruleIds,
     outcome,
     episodeIds,
-    startDate,
+    startTime,
+    endTime,
   };
 };
 

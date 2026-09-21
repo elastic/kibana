@@ -24,7 +24,7 @@ const filtersOf = (body: SearchRequest) =>
 const hasBoolShould = (filter: QueryDslQueryContainer | undefined) =>
   Boolean(filter?.bool && Array.isArray(filter.bool.should));
 
-const baseParams = { spaceId: 'default', startDate: SINCE } as const;
+const baseParams = { spaceId: 'default', startTime: SINCE } as const;
 
 /**
  * The shared filter and sort logic (see `buildBaseActionPolicyEventsQuery`) is
@@ -53,10 +53,18 @@ describe('action policy events queries', () => {
       );
     });
 
-    it('applies @timestamp >= startDate as a range filter', () => {
+    it('applies @timestamp >= startTime as a range filter', () => {
       const filters = filtersOf(buildShared());
       expect(filters).toEqual(
         expect.arrayContaining([{ range: { '@timestamp': { gte: SINCE } } }])
+      );
+    });
+
+    it('applies @timestamp <= endTime as well when provided', () => {
+      const until = '2026-05-05T00:00:00Z';
+      const filters = filtersOf(buildShared({ endTime: until }));
+      expect(filters).toEqual(
+        expect.arrayContaining([{ range: { '@timestamp': { gte: SINCE, lte: until } } }])
       );
     });
 

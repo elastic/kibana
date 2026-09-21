@@ -178,7 +178,7 @@ describe('EpisodeActionPolicyHistoryTab', () => {
       perPage: 10,
       outcome: undefined,
       episodeIds: [EPISODE_ID],
-      startDate: '2026-01-01T00:00:00.000Z',
+      startTime: '2026-01-01T00:00:00.000Z',
     });
   });
 

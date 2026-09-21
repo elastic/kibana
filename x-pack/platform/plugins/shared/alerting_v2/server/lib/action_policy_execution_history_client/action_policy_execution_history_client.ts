@@ -37,7 +37,7 @@ import {
 } from './build_execution_history_item';
 
 // Default lower bound on the event timestamp when the caller does not pass an
-// explicit `start_date`.
+// explicit `start_time`.
 const DEFAULT_TIME_WINDOW_HOURS = 24;
 
 // Pagination defaults applied when the caller omits them
@@ -60,7 +60,9 @@ export interface ListExecutionHistoryArgs {
    * Inclusive ISO timestamp lower bound for `@timestamp`. When provided it
    * replaces the default rolling {@link DEFAULT_TIME_WINDOW_HOURS}-hour window.
    */
-  startDate?: string;
+  startTime?: string;
+  /** Inclusive ISO timestamp upper bound for `@timestamp`. */
+  endTime?: string;
 }
 
 export interface ListExecutionHistoryResult {
@@ -96,10 +98,11 @@ export class ActionPolicyExecutionHistoryClient {
     ruleIds,
     outcome,
     episodeIds,
-    startDate,
+    startTime,
+    endTime,
   }: ListExecutionHistoryArgs): Promise<ListExecutionHistoryResult> {
-    const effectiveStartDate =
-      startDate ?? new Date(Date.now() - DEFAULT_TIME_WINDOW_HOURS * 60 * 60 * 1000).toISOString();
+    const effectiveStartTime =
+      startTime ?? new Date(Date.now() - DEFAULT_TIME_WINDOW_HOURS * 60 * 60 * 1000).toISOString();
     const spaceId = this.spaces.spacesService.getSpaceId(request);
     const searchIsActive = search !== undefined && search.trim() !== '';
 
@@ -117,7 +120,8 @@ export class ActionPolicyExecutionHistoryClient {
 
     const result = await this.eventLogService.findActionPolicyExecutionEvents({
       spaceId,
-      startDate: effectiveStartDate,
+      startTime: effectiveStartTime,
+      endTime,
       page,
       perPage,
       outcomes: outcome,

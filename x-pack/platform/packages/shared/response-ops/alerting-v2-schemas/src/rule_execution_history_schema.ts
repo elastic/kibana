@@ -53,11 +53,14 @@ export const listRuleExecutionsRequestSchema = z
   .object({
     rule_ids: ruleIdArraySchema.optional().describe(`Rule id filter. `),
     outcome: outcomeArraySchema.optional().describe('Outcome filter. '),
-    from: z.iso
+    start_time: z.iso
       .datetime()
       .optional()
       .describe('Inclusive ISO datetime lower bound on event.start.'),
-    to: z.iso.datetime().optional().describe('Inclusive ISO datetime upper bound on event.start.'),
+    end_time: z.iso
+      .datetime()
+      .optional()
+      .describe('Inclusive ISO datetime upper bound on event.start.'),
     sort: z
       .enum(['started_at', 'duration'])
       .default('started_at')

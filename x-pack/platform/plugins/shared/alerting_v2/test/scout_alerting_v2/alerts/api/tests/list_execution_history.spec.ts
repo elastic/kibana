@@ -83,9 +83,17 @@ apiTest.describe(
       expect(response.body.code).toBe('BAD_REQUEST');
     });
 
-    apiTest('validation: accepts a start_date lower bound', async ({ apiClient }) => {
+    apiTest('validation: accepts a start_time lower bound', async ({ apiClient }) => {
       const response = await apiClient.get(
-        getListExecutionHistoryUrl({ start_date: '2026-01-01T00:00:00.000Z' }),
+        getListExecutionHistoryUrl({ start_time: '2026-01-01T00:00:00.000Z' }),
+        { headers: readerHeaders }
+      );
+      expect(response).toHaveStatusCode(200);
+    });
+
+    apiTest('validation: accepts an end_time upper bound', async ({ apiClient }) => {
+      const response = await apiClient.get(
+        getListExecutionHistoryUrl({ end_time: '2026-01-02T00:00:00.000Z' }),
         { headers: readerHeaders }
       );
       expect(response).toHaveStatusCode(200);

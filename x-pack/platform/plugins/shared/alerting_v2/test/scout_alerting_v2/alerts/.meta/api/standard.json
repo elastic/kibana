@@ -1760,7 +1760,7 @@
     },
     {
       "id": "becd8b2cff5d550-17c2dac57d3d987",
-      "title": "List action policy execution history API validation: accepts a start_date lower bound",
+      "title": "List action policy execution history API validation: accepts a start_time lower bound",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -1942,7 +1942,7 @@
     },
     {
       "id": "f825e947215b0f4-c69da1a84fa65de",
-      "title": "List rule executions API validation: rejects malformed datetimes for from",
+      "title": "List rule executions API validation: rejects malformed datetimes for start_time",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"

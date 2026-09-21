@@ -73,12 +73,16 @@ export const listPolicyExecutionHistoryRequestSchema = z
       .describe(
         `Number of events per page. Defaults to ${EXECUTION_HISTORY_DEFAULT_PER_PAGE}. Pass 0 for a count-only read.`
       ),
-    start_date: z.iso
+    start_time: z.iso
       .datetime()
       .optional()
       .describe(
         'Inclusive ISO datetime lower bound on the event timestamp; overrides the default 24-hour window. Independent of episode_ids — e.g. set it to an episode’s start time to scope results to that episode’s lifetime.'
       ),
+    end_time: z.iso
+      .datetime()
+      .optional()
+      .describe('Inclusive ISO datetime upper bound on the event timestamp.'),
     episode_ids: idFilterArraySchema
       .optional()
       .describe(

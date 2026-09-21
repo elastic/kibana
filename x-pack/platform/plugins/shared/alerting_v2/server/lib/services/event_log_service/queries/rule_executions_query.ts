@@ -83,8 +83,8 @@ export const buildRuleExecutionsQuery = (query: FindRuleExecutionsQuery): Search
     spaceId,
     ruleIds,
     outcomes,
-    from,
-    to,
+    startTime,
+    endTime,
     sort = 'startedAt',
     sortOrder = 'desc',
     page,
@@ -114,12 +114,12 @@ export const buildRuleExecutionsQuery = (query: FindRuleExecutionsQuery): Search
     },
   });
 
-  if (from || to) {
+  if (startTime || endTime) {
     filters.push({
       range: {
         'event.start': {
-          ...(from ? { gte: from } : {}),
-          ...(to ? { lte: to } : {}),
+          ...(startTime ? { gte: startTime } : {}),
+          ...(endTime ? { lte: endTime } : {}),
         },
       },
     });

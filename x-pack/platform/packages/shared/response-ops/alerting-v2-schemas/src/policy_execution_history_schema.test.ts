@@ -107,7 +107,8 @@ describe('policy_execution_history_schema', () => {
         expect(parsed).not.toHaveProperty('rule_ids');
         expect(parsed).not.toHaveProperty('episode_ids');
         expect(parsed).not.toHaveProperty('outcome');
-        expect(parsed).not.toHaveProperty('start_date');
+        expect(parsed).not.toHaveProperty('start_time');
+        expect(parsed).not.toHaveProperty('end_time');
       });
     });
 
@@ -269,26 +270,28 @@ describe('policy_execution_history_schema', () => {
       });
     });
 
-    describe('start_date (ISO datetime)', () => {
+    describe('start_time / end_time (ISO datetime)', () => {
       it('accepts a Z-suffixed ISO datetime', () => {
         const parsed = listPolicyExecutionHistoryRequestSchema.parse({
-          start_date: '2026-06-01T00:00:00Z',
+          start_time: '2026-06-01T00:00:00Z',
+          end_time: '2026-06-02T00:00:00Z',
         });
-        expect(parsed.start_date).toBe('2026-06-01T00:00:00Z');
+        expect(parsed.start_time).toBe('2026-06-01T00:00:00Z');
+        expect(parsed.end_time).toBe('2026-06-02T00:00:00Z');
       });
 
       it('rejects free-form date expressions', () => {
         expect(
-          listPolicyExecutionHistoryRequestSchema.safeParse({ start_date: 'yesterday' }).success
+          listPolicyExecutionHistoryRequestSchema.safeParse({ start_time: 'yesterday' }).success
         ).toBe(false);
-        expect(
-          listPolicyExecutionHistoryRequestSchema.safeParse({ start_date: 'now' }).success
-        ).toBe(false);
+        expect(listPolicyExecutionHistoryRequestSchema.safeParse({ end_time: 'now' }).success).toBe(
+          false
+        );
       });
 
       it('rejects a date-only string without a time component', () => {
         expect(
-          listPolicyExecutionHistoryRequestSchema.safeParse({ start_date: '2026-06-01' }).success
+          listPolicyExecutionHistoryRequestSchema.safeParse({ start_time: '2026-06-01' }).success
         ).toBe(false);
       });
     });
@@ -384,7 +387,8 @@ describe('policy_execution_history_schema', () => {
       const input = {
         page: 2,
         per_page: 25,
-        start_date: '2026-06-01T00:00:00Z',
+        start_time: '2026-06-01T00:00:00Z',
+        end_time: '2026-06-02T00:00:00Z',
         episode_ids: ['episode-x', 'episode-y'],
         search: 'db outage',
         rule_ids: ['rule-x', 'rule-y'],

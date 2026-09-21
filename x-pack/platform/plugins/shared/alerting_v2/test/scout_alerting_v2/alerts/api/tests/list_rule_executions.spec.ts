@@ -156,8 +156,8 @@ apiTest.describe('List rule executions API', { tag: '@local-stateful-classic' },
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
-  apiTest('validation: rejects malformed datetimes for from', async ({ apiClient }) => {
-    const response = await apiClient.get(`${listRuleExecutionsUrl()}?from=yesterday`, {
+  apiTest('validation: rejects malformed datetimes for start_time', async ({ apiClient }) => {
+    const response = await apiClient.get(`${listRuleExecutionsUrl()}?start_time=yesterday`, {
       headers: readerHeaders,
     });
     expect(response).toHaveStatusCode(400);
