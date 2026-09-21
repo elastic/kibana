@@ -19,7 +19,6 @@ import { Route, Routes } from '@kbn/shared-ux-router';
 import React, { useCallback, useMemo } from 'react';
 import { Redirect } from 'react-router-dom';
 import { EuiPageSection } from '@elastic/eui';
-import { useInvestigationAvailability } from '@kbn/observability-plugin/public';
 import {
   OBSERVABILITY_ALERTING_BASE_PATH,
   OBSERVABILITY_ALERTING_INBOX_PATH,
@@ -155,8 +154,6 @@ export const ObservabilityAlertingApp = ({
       hasObservabilityAlertingPrivilege(coreStart.application.capabilities, features, capability),
     [coreStart]
   );
-
-  useInvestigationAvailability();
 
   return (
     <Routes>

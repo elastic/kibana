@@ -26,11 +26,12 @@ const getStatusQuery = (alertId: string) => ({
 });
 
 export const useInvestigationAvailability = () => {
-  const { http } = useKibana().services;
+  const kibana = useKibana();
+  const basePath = kibana?.services?.http?.basePath?.get?.() ?? '';
   const investigationsClient = getInvestigationsClient();
 
   return useQuery({
-    queryKey: ['investigationAvailability', http.basePath.get?.() ?? ''],
+    queryKey: ['investigationAvailability', basePath],
     queryFn: ({ signal }) =>
       investigationsClient!.fetch('GET /internal/nightshift/investigations/availability', {
         signal: signal ?? null,
@@ -50,9 +51,11 @@ export const useInvestigateAlert = ({
   enabled?: boolean;
   onInvestigate?: () => void;
 }) => {
-  const { application, http, notifications } = useKibana().services;
+  const kibana = useKibana();
+  const services = kibana?.services;
   const investigationsClient = getInvestigationsClient();
-  const statusQueryKey = ['alertInvestigations', http.basePath.get?.() ?? '', alertId] as const;
+  const basePath = services?.http?.basePath?.get?.() ?? '';
+  const statusQueryKey = ['alertInvestigations', basePath, alertId] as const;
   const queryClient = useQueryClient();
   const { data: availability } = useInvestigationAvailability();
   const canInvestigate = Boolean(enabled && alertId && investigationsClient);
@@ -77,8 +80,8 @@ export const useInvestigateAlert = ({
   const isInvestigating = isStarting || hasOngoingInvestigation;
   const showInvestigateAction = availability?.available === true;
   const viewInvestigationUrl =
-    alertId && latestInvestigation
-      ? application.getUrlForApp(NIGHTSHIFT_APP_ID, {
+    alertId && latestInvestigation && services?.application
+      ? services.application.getUrlForApp(NIGHTSHIFT_APP_ID, {
           path: `?${new URLSearchParams({
             investigationId: latestInvestigation.investigation_id,
           }).toString()}`,
@@ -114,14 +117,14 @@ export const useInvestigateAlert = ({
           body: { subject: { type: 'alert', id: alertId }, concurrency_key: alertId },
         },
       });
-      notifications.toasts.addSuccess({
+      services?.notifications?.toasts?.addSuccess({
         title: i18n.translate('xpack.observability.alerts.investigationStarted', {
           defaultMessage: 'Investigation started',
         }),
       });
       await queryClient.invalidateQueries(statusQueryKey);
     } catch (error) {
-      notifications.toasts.addDanger({
+      services?.notifications?.toasts?.addDanger({
         title: i18n.translate('xpack.observability.alerts.investigationFailed', {
           defaultMessage: 'Failed to start investigation',
         }),
