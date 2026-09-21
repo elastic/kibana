@@ -69,9 +69,7 @@ describe('Discover embeddable inline Data View IDs', () => {
       'an existing inline ID',
       {
         index: { title: 'logs-*', id: 'legacy-inline-id' },
-        filter: [
-          { meta: { index: 'legacy-inline-id' }, query: { match_phrase: { bytes: 100 } } },
-        ],
+        filter: [{ meta: { index: 'legacy-inline-id' }, query: { match_phrase: { bytes: 100 } } }],
       },
     ],
     ['a saved Data View reference', { index: 'saved-data-view' }],
