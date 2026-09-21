@@ -77316,6 +77316,156 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/security/entity_store/history_snapshot/disable:
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/entity_store/history_snapshot/disable</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Disable the Entity Store history snapshot task for this space so it no longer creates snapshot indices. Existing snapshot indices remain unless you set `clearHistorySnapshots` to `true`. Returns 404 if the Entity Store is not installed in the current space.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+      operationId: put-security-entity-store-history-snapshot-disable
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              disableAndClear:
+                summary: Disable and clear snapshot indices
+                value:
+                  clearHistorySnapshots: true
+              disableOnly:
+                summary: Disable without clearing
+                value: {}
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                clearHistorySnapshots:
+                  default: false
+                  description: When `true`, deletes existing history snapshot indices for this space in the background after the task is disabled. The response returns immediately and does not wait for deletion to finish. Deletion failures are logged and are not returned to the caller. If the task is already disabled, the request succeeds and does not delete indices. Defaults to `false`.
+                  type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                disableSuccessExample:
+                  description: The Entity Store history snapshot task was disabled.
+                  summary: History snapshot task disabled
+                  value:
+                    ok: true
+          description: Indicates a successful response.
+        '404':
+          content:
+            application/json:
+              examples:
+                notInstalledExample:
+                  description: The Entity Store history snapshot task cannot be disabled because the entity store is not installed.
+                  summary: Entity store not installed
+                  value:
+                    error: Not Found
+                    message: Entity store is not installed
+                    statusCode: 404
+          description: Entity store is not installed.
+      summary: Disable the history snapshot task
+      tags:
+        - Security entity store
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl -X PUT -H "kbn-xsrf: true" -H "Content-Type: application/json" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -d '{}' \
+              "${KIBANA_URL}/api/security/entity_store/history_snapshot/disable"
+        - label: Disable and clear indices
+          lang: curl
+          source: |
+            curl -X PUT -H "kbn-xsrf: true" -H "Content-Type: application/json" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -d '{"clearHistorySnapshots":true}' \
+              "${KIBANA_URL}/api/security/entity_store/history_snapshot/disable"
+        - lang: Console
+          source: |
+            PUT kbn://api/security/entity_store/history_snapshot/disable
+            {}
+        - label: Disable and clear indices
+          lang: Console
+          source: |
+            PUT kbn://api/security/entity_store/history_snapshot/disable
+            {
+              "clearHistorySnapshots": true
+            }
+      x-state: Generally available; added in 9.6.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/security/entity_store/history_snapshot/enable:
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/entity_store/history_snapshot/enable</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Enable the Entity Store history snapshot task for this space. After a successful enable, Kibana schedules an immediate snapshot run. If that immediate run fails, the response is still 200 and the task remains enabled for the next scheduled interval. If the task is already enabled, the request succeeds and does not start an extra run. Returns 404 if the Entity Store is not installed in the current space.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+      operationId: put-security-entity-store-history-snapshot-enable
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                enableSuccessExample:
+                  description: The Entity Store history snapshot task was enabled.
+                  summary: History snapshot task enabled
+                  value:
+                    ok: true
+          description: Indicates a successful response.
+        '404':
+          content:
+            application/json:
+              examples:
+                notInstalledExample:
+                  description: The Entity Store history snapshot task cannot be enabled because the entity store is not installed.
+                  summary: Entity store not installed
+                  value:
+                    error: Not Found
+                    message: Entity store is not installed
+                    statusCode: 404
+          description: Entity store is not installed.
+      summary: Enable the history snapshot task
+      tags:
+        - Security entity store
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl -X PUT -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
+              "${KIBANA_URL}/api/security/entity_store/history_snapshot/enable"
+        - lang: Console
+          source: |
+            PUT kbn://api/security/entity_store/history_snapshot/enable
+      x-state: Generally available; added in 9.6.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/security/entity_store/install:
     post:
       description: |-
