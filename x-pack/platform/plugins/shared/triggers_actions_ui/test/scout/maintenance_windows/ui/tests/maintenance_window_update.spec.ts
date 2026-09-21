@@ -135,7 +135,6 @@ test.describe('Maintenance window update form', { tag: tags.stateful.classic }, 
     await page.testSubj.locator('recurringScheduleRepeatSelect').selectOption(dailyValue);
 
     await page.testSubj.click(SUBMIT_BUTTON);
-    await page.testSubj.click('confirmModalConfirmButton');
 
     await expect(page.testSubj.locator(TOAST_TITLE)).toContainText(
       `Updated maintenance window '${updatedName}'`
