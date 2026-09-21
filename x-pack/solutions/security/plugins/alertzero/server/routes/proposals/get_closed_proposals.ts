@@ -6,11 +6,15 @@
  */
 
 import { ApiPrivileges } from '@kbn/core-security-server';
-import type { z } from '@kbn/zod/v4';
-import { API_VERSIONS, ALERTZERO_PROPOSALS_URL, INTERNAL_API_ACCESS } from '@kbn/alertzero-common';
-import { proposalsQuerySchema } from '@kbn/agentic-investigations-plugin/common';
+import { z } from '@kbn/zod/v4';
+import {
+  API_VERSIONS,
+  ALERTZERO_PROPOSALS_CLOSED_URL,
+  INTERNAL_API_ACCESS,
+} from '@kbn/alertzero-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_READ } from '../../../common/constants';
+import type { ProposalsPageResponse } from '../../../common/proposals/list';
 import type { RouteDependencies } from '../register_routes';
 
 // PROPOSALS_API_PRIVILEGE_READ cannot be imported from agentic_investigations/server (cross-plugin
@@ -18,10 +22,12 @@ import type { RouteDependencies } from '../register_routes';
 // ProposalsService reads as asInternalUser, so authz is enforced only at this layer.
 const PROPOSALS_API_PRIVILEGE_READ = ApiPrivileges.read('proposals');
 
-const GetProposalsRequestQuery = proposalsQuerySchema;
-type GetProposalsRequestQuery = z.infer<typeof GetProposalsRequestQuery>;
+const GetClosedProposalsQuery = z.object({
+  size: z.coerce.number().int().min(1).max(100).default(25),
+  from: z.coerce.number().int().min(0).max(9900).default(0),
+});
 
-export const registerGetProposalsRoute = ({
+export const registerGetClosedProposalsRoute = ({
   router,
   logger,
   getSpaceId,
@@ -29,37 +35,42 @@ export const registerGetProposalsRoute = ({
 }: RouteDependencies) => {
   router.versioned
     .get({
-      path: ALERTZERO_PROPOSALS_URL,
+      path: ALERTZERO_PROPOSALS_CLOSED_URL,
       access: INTERNAL_API_ACCESS,
       security: {
         authz: {
           requiredPrivileges: [ALERTZERO_API_PRIVILEGE_READ, PROPOSALS_API_PRIVILEGE_READ],
         },
       },
-      summary: 'Get proposals grouped by category',
+      summary: 'Get proposals decided in the last 72 hours',
       description:
-        'Returns all pending proposals plus proposals decided within the window, grouped by action category.',
+        'Returns proposals that stopped awaiting a human decision in the last 72 h, including expired ones. Sorted by decidedAt desc.',
     })
     .addVersion(
       {
         version: API_VERSIONS.internal.v1,
         validate: {
-          request: { query: buildRouteValidationWithZod(GetProposalsRequestQuery) },
+          request: {
+            query: buildRouteValidationWithZod(GetClosedProposalsQuery),
+          },
         },
       },
       async (_context, request, response) => {
         try {
-          const body = await getConversationProposalsService().list(
-            request.query,
+          const { size, from } = request.query;
+
+          const body: ProposalsPageResponse = await getConversationProposalsService().listClosed(
             request,
-            getSpaceId(request)
+            getSpaceId(request),
+            { size, from }
           );
+
           return response.ok({ body });
         } catch (error) {
-          logger.error(error instanceof Error ? error : `Failed to get proposals: ${error}`);
+          logger.error(error instanceof Error ? error : `Failed to get closed proposals: ${error}`);
           return response.customError({
             statusCode: 500,
-            body: { message: 'Failed to get proposals' },
+            body: { message: 'Failed to get closed proposals' },
           });
         }
       }

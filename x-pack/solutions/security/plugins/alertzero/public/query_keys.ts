@@ -14,10 +14,13 @@ export const queryKeys = {
    * on approve/dismiss sweeps these up without AlertZero needing its own mutations.
    */
   proposals: {
-    grouped: (windowHours: number) =>
-      [...platformQueryKeys.proposals.all, 'grouped', windowHours] as const,
     chartsSummary: (windowHours: number, bucketMinutes: number) =>
       [...platformQueryKeys.proposals.all, 'charts-summary', windowHours, bucketMinutes] as const,
+    /** Pending proposals for one action category — drives a queue accordion. */
+    byCategory: (category: string) =>
+      [...platformQueryKeys.proposals.all, 'by-category', category] as const,
+    /** Proposals decided in the last 72 h — drives the closed queue accordion. */
+    closed: () => [...platformQueryKeys.proposals.all, 'closed'] as const,
   },
   watches: {
     all: ['alertzero', 'watches'] as const,

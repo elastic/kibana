@@ -248,6 +248,10 @@ export const proposalFiltersSchema = z.object({
 export type ProposalFilters = z.infer<typeof proposalFiltersSchema>;
 
 export const listProposalsQuerySchema = proposalFiltersSchema.extend({
+  /** Filters to proposals in the given action category. */
+  category: proposalCategorySchema.optional(),
+  /** Bounds the closed queue to a recency window rather than all decided history. */
+  decidedWithinHours: z.coerce.number().int().min(1).max(168).optional(),
   size: z.coerce.number().int().min(1).max(MAX_PROPOSALS_PAGE_SIZE).default(50),
   from: z.coerce.number().int().min(0).max(MAX_PROPOSALS_PAGE_OFFSET).default(0),
 });
@@ -256,28 +260,6 @@ export type ListProposalsQuery = z.infer<typeof listProposalsQuerySchema>;
 export interface ListProposalsResponse {
   proposals: ProposalWithMetadata[];
   total: number;
-}
-
-export const MAX_PROPOSALS_SIZE = 500;
-
-export const proposalsQuerySchema = z.object({
-  windowHours: z.coerce.number().int().min(1).max(168).default(24),
-});
-export type ProposalsQuery = z.infer<typeof proposalsQuerySchema>;
-
-export interface ProposalsListResponse {
-  proposals: ProposalWithMetadata[];
-  total: number;
-  truncated: boolean;
-}
-
-/**
- * Parameters for `listByWindow`: the shared filters, plus how far back to reach
- * for decisions. The union of "awaiting" and "recently decided" is what the
- * shape *is*, so it is not a flag.
- */
-export interface ListByWindowQuery extends ProposalFilters {
-  decidedWithinHours: number;
 }
 
 export const proposalChartsSummaryQuerySchema = z
@@ -307,13 +289,15 @@ export type ProposalChartsSummaryQuery = z.infer<typeof proposalChartsSummaryQue
 export interface ProposalChartsSummaryBucket {
   /** Unix ms, start of the bucket. */
   timestamp: number;
-  /** Per category, how many proposals were created but not yet decided at the bucket end. */
+  /** Per category, how many proposals were open at any point during the bucket. */
   counts: Record<string, number>;
 }
 
 export interface ProposalChartsSummaryResponse {
   /** One entry per slot, zero-filled, oldest first. */
   buckets: ProposalChartsSummaryBucket[];
+  /** Proposals in this space still awaiting a decision right now, across all categories. */
+  currentOpen: number;
 }
 
 /**

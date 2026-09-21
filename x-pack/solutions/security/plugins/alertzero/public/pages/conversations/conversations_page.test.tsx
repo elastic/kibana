@@ -15,7 +15,8 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/public/mocks';
 import { useApproveProposal, useDismissProposal } from '@kbn/agentic-investigations-plugin/public';
-import { useProposalsList } from '../../hooks/use_proposals_api';
+import { useProposalsByCategory, useClosedProposals } from '../../hooks/use_proposals_api';
+import { useProposalChartsSummary } from '../../hooks/use_proposal_charts_summary';
 import type { ProposalItem } from '../../../common/proposals/list';
 import { ConversationsPage } from './conversations_page';
 
@@ -27,13 +28,38 @@ jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
   useDismissProposal: jest.fn(),
 }));
 jest.mock('../../hooks/use_proposals_api');
+jest.mock('../../hooks/use_proposal_charts_summary');
 jest.mock('../../components/proposals_trend_chart', () => ({
   ProposalsTrendChartRow: () => null,
 }));
 
-const mockUseProposalsList = useProposalsList as jest.Mock;
+const mockUseProposalsByCategory = useProposalsByCategory as jest.Mock;
+const mockUseClosedProposals = useClosedProposals as jest.Mock;
+const mockUseProposalChartsSummary = useProposalChartsSummary as jest.Mock;
 const mockUseApproveProposal = useApproveProposal as jest.Mock;
 const mockUseDismissProposal = useDismissProposal as jest.Mock;
+
+/** Fans a category→proposals map across the per-category and closed page hooks. */
+const mockProposals = (groups: Record<string, ProposalItem[]>) => {
+  mockUseProposalsByCategory.mockImplementation((category: string) => {
+    const proposals = groups[category] ?? [];
+    return { data: { proposals, total: proposals.length }, isLoading: false, error: undefined };
+  });
+  const closed = groups.closed ?? [];
+  mockUseClosedProposals.mockReturnValue({
+    data: { proposals: closed, total: closed.length },
+    isLoading: false,
+    error: undefined,
+  });
+};
+
+/** The header count comes from the charts-summary scalar, not from the pages above. */
+const mockOpenCount = (currentOpen: number) =>
+  mockUseProposalChartsSummary.mockReturnValue({
+    data: { currentOpen, buckets: [] },
+    isLoading: false,
+    error: undefined,
+  });
 
 // Cards are proposals; the flyout and the chat both address the conversation they belong to, so
 // each carries `conversationId` and its agent, never the proposal id.
@@ -51,6 +77,7 @@ const proposal: ProposalItem = {
   origin: 'worker',
   createdAt: '2024-01-01T00:00:00Z',
   expired: false,
+  conversationAssignees: [],
 };
 
 const renderPage = (initialEntry: string) => {
@@ -86,15 +113,12 @@ const dismissMutate = jest.fn();
 beforeEach(() => {
   mockUseApproveProposal.mockReturnValue({ mutate: approveMutate });
   mockUseDismissProposal.mockReturnValue({ mutate: dismissMutate });
+  mockOpenCount(0);
 });
 
 describe('ConversationsPage details flyout', () => {
   beforeEach(() => {
-    mockUseProposalsList.mockReturnValue({
-      data: { groups: { investigate: [proposal] }, total: 1, truncated: false },
-      isLoading: false,
-      error: undefined,
-    });
+    mockProposals({ investigate: [proposal] });
   });
 
   afterEach(() => jest.clearAllMocks());
@@ -155,11 +179,7 @@ describe('ConversationsPage details flyout', () => {
 
   it('marks the cards of the open conversation, not just the clicked one', async () => {
     const sibling: ProposalItem = { ...proposal, id: 'prop-2', comment: 'Second proposal.' };
-    mockUseProposalsList.mockReturnValue({
-      data: { groups: { investigate: [proposal, sibling] }, total: 2, truncated: false },
-      isLoading: false,
-      error: undefined,
-    });
+    mockProposals({ investigate: [proposal, sibling] });
 
     renderPage('/?selectedConversationId=inv-1');
 
@@ -185,11 +205,7 @@ describe('ConversationsPage details flyout', () => {
 
 describe('ConversationsPage open in chat', () => {
   beforeEach(() => {
-    mockUseProposalsList.mockReturnValue({
-      data: { groups: { investigate: [proposal] }, total: 1, truncated: false },
-      isLoading: false,
-      error: undefined,
-    });
+    mockProposals({ investigate: [proposal] });
   });
 
   afterEach(() => jest.clearAllMocks());
@@ -223,15 +239,7 @@ describe('ConversationsPage open in chat', () => {
   it("falls back to Agent Builder's own redirect when the agent is unknown", () => {
     // The agent id is decoration from a conversation read that can fail; the legacy route
     // resolves the agent server-side rather than dropping the link.
-    mockUseProposalsList.mockReturnValue({
-      data: {
-        groups: { investigate: [{ ...proposal, conversationAgentId: undefined }] },
-        total: 1,
-        truncated: false,
-      },
-      isLoading: false,
-      error: undefined,
-    });
+    mockProposals({ investigate: [{ ...proposal, conversationAgentId: undefined }] });
     const { core } = renderPage('/');
 
     fireEvent.click(chatControl());
@@ -264,11 +272,7 @@ describe('ConversationsPage decisions', () => {
   };
 
   beforeEach(() => {
-    mockUseProposalsList.mockReturnValue({
-      data: { groups: { respond: [actionProposal] }, total: 1, truncated: false },
-      isLoading: false,
-      error: undefined,
-    });
+    mockProposals({ respond: [actionProposal] });
   });
 
   afterEach(() => jest.clearAllMocks());
@@ -336,15 +340,7 @@ describe('ConversationsPage decisions', () => {
   });
 
   it('offers no decision on a proposal that was already decided', () => {
-    mockUseProposalsList.mockReturnValue({
-      data: {
-        groups: { closed: [{ ...actionProposal, decidedAt: '2024-01-02T00:00:00Z' }] },
-        total: 1,
-        truncated: false,
-      },
-      isLoading: false,
-      error: undefined,
-    });
+    mockProposals({ closed: [{ ...actionProposal, decidedAt: '2024-01-02T00:00:00Z' }] });
 
     renderPage('/');
     fireEvent.click(screen.getByRole('button', { name: 'Open actions menu' }));
@@ -355,19 +351,13 @@ describe('ConversationsPage decisions', () => {
     expect(screen.queryByText('Dismiss')).not.toBeInTheDocument();
   });
 
+  // That the scalar itself excludes decided proposals is covered in the service tests.
   it('counts only undecided proposals as work needing attention', () => {
-    mockUseProposalsList.mockReturnValue({
-      data: {
-        groups: {
-          respond: [actionProposal],
-          closed: [{ ...actionProposal, id: 'prop-2', decidedAt: '2024-01-02T00:00:00Z' }],
-        },
-        total: 2,
-        truncated: false,
-      },
-      isLoading: false,
-      error: undefined,
+    mockProposals({
+      respond: [actionProposal],
+      closed: [{ ...actionProposal, id: 'prop-2', decidedAt: '2024-01-02T00:00:00Z' }],
     });
+    mockOpenCount(1);
 
     renderPage('/');
 
@@ -375,15 +365,8 @@ describe('ConversationsPage decisions', () => {
   });
 
   it('reads as an empty queue when the window holds only decisions already made', () => {
-    mockUseProposalsList.mockReturnValue({
-      data: {
-        groups: { closed: [{ ...actionProposal, decidedAt: '2024-01-02T00:00:00Z' }] },
-        total: 1,
-        truncated: false,
-      },
-      isLoading: false,
-      error: undefined,
-    });
+    mockProposals({ closed: [{ ...actionProposal, decidedAt: '2024-01-02T00:00:00Z' }] });
+    mockOpenCount(0);
 
     renderPage('/');
 
