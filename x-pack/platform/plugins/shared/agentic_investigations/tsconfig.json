@@ -8,7 +8,6 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "test/scout*/**/*",
     "integration_tests/**/*",
     "../../../../../typings/**/*"
   ],
@@ -39,8 +38,7 @@
     "@kbn/ui-callout",
     "@kbn/std",
     "@kbn/react-query",
-    "@kbn/kibana-react-plugin",
-    "@kbn/scout"
+    "@kbn/kibana-react-plugin"
   ],
   "exclude": ["target/**/*"]
 }

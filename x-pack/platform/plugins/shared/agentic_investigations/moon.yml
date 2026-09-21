@@ -44,7 +44,6 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/react-query'
   - '@kbn/kibana-react-plugin'
-  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -57,7 +56,6 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
-    - test/scout*/**/*
     - integration_tests/**/*
     - '!target/**/*'
   jest-config:
