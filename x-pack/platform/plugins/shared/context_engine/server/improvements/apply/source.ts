@@ -43,6 +43,7 @@ const writeSources = async (
     dest: aiIndex.dest,
     automations: aiIndex.automations,
     sources,
+    traces: aiIndex.traces,
   });
 };
 
