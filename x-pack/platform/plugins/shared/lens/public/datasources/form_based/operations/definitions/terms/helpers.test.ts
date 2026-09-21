@@ -15,15 +15,24 @@ import type {
   ReferenceBasedIndexPatternColumn,
   GenericIndexPatternColumn,
   MovingAverageIndexPatternColumn,
+  LastValueIndexPatternColumn,
 } from '@kbn/lens-common';
-import { createMockedIndexPattern } from '../../../mocks';
+import { createMockedIndexPattern, createMockedIndexPatternWithoutType } from '../../../mocks';
 import {
   getDisallowedTermsMessage,
   getMultiTermsScriptedFieldErrorMessage,
   isSortableByColumn,
   getOtherBucketSwitchDefault,
+  isCustomLastValueOrderAgg,
+  getOrderAggLastValueSortFieldStatus,
+  getOrderAggErrorMessages,
 } from './helpers';
 import { MULTI_KEY_VISUAL_SEPARATOR } from './constants';
+import {
+  TERMS_CUSTOM_RANK_LAST_VALUE_NO_DATE_FIELD,
+  TERMS_CUSTOM_RANK_LAST_VALUE_SORT_FIELD_INVALID_TYPE,
+  TERMS_CUSTOM_RANK_LAST_VALUE_SORT_FIELD_NOT_FOUND,
+} from '../../../../../user_messages_ids';
 
 jest.mock('@kbn/unified-field-list/src/services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({
@@ -90,6 +99,31 @@ function getCountOperationColumn(
     sourceField: '___records___',
     operationType: 'count',
     ...params,
+  };
+}
+
+function getTermsWithLastValueOrderAgg(
+  orderAggParams?: Partial<LastValueIndexPatternColumn['params']>
+): TermsIndexPatternColumn {
+  return {
+    label: 'Top values of source',
+    dataType: 'string',
+    isBucketed: true,
+    operationType: 'terms',
+    sourceField: 'source',
+    params: {
+      orderBy: { type: 'custom' },
+      size: 3,
+      orderDirection: 'desc',
+      orderAgg: {
+        label: 'Last value of bytes',
+        dataType: 'number',
+        isBucketed: false,
+        operationType: 'last_value',
+        sourceField: 'bytes',
+        ...(orderAggParams ? { params: orderAggParams } : {}),
+      },
+    },
   };
 }
 
@@ -688,5 +722,136 @@ describe('isSortableByColumn()', () => {
       } as TermsIndexPatternColumn;
       expect(getOtherBucketSwitchDefault(column, 6)).toBeFalsy();
     });
+  });
+});
+
+describe('isCustomLastValueOrderAgg()', () => {
+  it('should return true for a terms column ranked by a custom last_value order-agg', () => {
+    expect(
+      isCustomLastValueOrderAgg(getTermsWithLastValueOrderAgg({ sortField: 'timestamp' }))
+    ).toBe(true);
+  });
+
+  it('should return false for undefined', () => {
+    expect(isCustomLastValueOrderAgg(undefined)).toBe(false);
+  });
+
+  it('should return false for a non-terms column', () => {
+    expect(isCustomLastValueOrderAgg(getCountOperationColumn())).toBe(false);
+  });
+
+  it('should return false for a terms column ranked alphabetically', () => {
+    expect(isCustomLastValueOrderAgg(getStringBasedOperationColumn())).toBe(false);
+  });
+
+  it('should return false for a terms column with a custom non-last_value order-agg', () => {
+    const column = getStringBasedOperationColumn('source', {
+      orderBy: { type: 'custom' },
+      orderAgg: {
+        label: 'Maximum of bytes',
+        dataType: 'number',
+        isBucketed: false,
+        operationType: 'max',
+        sourceField: 'bytes',
+      },
+    });
+    expect(isCustomLastValueOrderAgg(column)).toBe(false);
+  });
+});
+
+describe('getOrderAggLastValueSortFieldStatus()', () => {
+  it('should return "ok" when the column is not ranked by a custom last_value order-agg', () => {
+    expect(getOrderAggLastValueSortFieldStatus(getLayer(), 'col1', indexPattern)).toEqual({
+      status: 'ok',
+    });
+  });
+
+  it('should return "ok" when the sortField is a valid date field', () => {
+    const layer = getLayer(getTermsWithLastValueOrderAgg({ sortField: 'timestamp' }));
+    expect(getOrderAggLastValueSortFieldStatus(layer, 'col1', indexPattern)).toEqual({
+      status: 'ok',
+    });
+  });
+
+  it('should return "missing-with-default" with the default date field when sortField is missing', () => {
+    const layer = getLayer(getTermsWithLastValueOrderAgg({ sortField: undefined }));
+    expect(getOrderAggLastValueSortFieldStatus(layer, 'col1', indexPattern)).toEqual({
+      status: 'missing-with-default',
+      defaultField: 'timestamp',
+    });
+  });
+
+  it('should return "missing-with-default" when the orderAgg has no params object at all', () => {
+    const layer = getLayer(getTermsWithLastValueOrderAgg());
+    expect(getOrderAggLastValueSortFieldStatus(layer, 'col1', indexPattern)).toEqual({
+      status: 'missing-with-default',
+      defaultField: 'timestamp',
+    });
+  });
+
+  it('should return "missing-no-default" when sortField is missing and the data view has no date field', () => {
+    const indexPatternWithoutDates = createMockedIndexPatternWithoutType('date');
+    const layer = getLayer(getTermsWithLastValueOrderAgg({ sortField: undefined }));
+    expect(getOrderAggLastValueSortFieldStatus(layer, 'col1', indexPatternWithoutDates)).toEqual({
+      status: 'missing-no-default',
+    });
+  });
+
+  it('should return "not-found" when the sortField does not exist in the data view', () => {
+    const layer = getLayer(getTermsWithLastValueOrderAgg({ sortField: 'nonexistent' }));
+    expect(getOrderAggLastValueSortFieldStatus(layer, 'col1', indexPattern)).toEqual({
+      status: 'not-found',
+    });
+  });
+
+  it('should return "wrong-type" when the sortField exists but is not a date field', () => {
+    const layer = getLayer(getTermsWithLastValueOrderAgg({ sortField: 'bytes' }));
+    expect(getOrderAggLastValueSortFieldStatus(layer, 'col1', indexPattern)).toEqual({
+      status: 'wrong-type',
+    });
+  });
+});
+
+describe('getOrderAggErrorMessages()', () => {
+  it('should return no error when the column is not ranked by a custom last_value order-agg', () => {
+    expect(getOrderAggErrorMessages(getLayer(), 'col1', indexPattern)).toHaveLength(0);
+  });
+
+  it('should return no error when the sortField is a valid date field', () => {
+    const layer = getLayer(getTermsWithLastValueOrderAgg({ sortField: 'timestamp' }));
+    expect(getOrderAggErrorMessages(layer, 'col1', indexPattern)).toHaveLength(0);
+  });
+
+  it('should NOT block (no error) for the missing-with-default case, which is a non-blocking warning', () => {
+    const layer = getLayer(getTermsWithLastValueOrderAgg({ sortField: undefined }));
+    expect(getOrderAggErrorMessages(layer, 'col1', indexPattern)).toHaveLength(0);
+  });
+
+  it('should return a blocking error when sortField is missing and the data view has no date field', () => {
+    const indexPatternWithoutDates = createMockedIndexPatternWithoutType('date');
+    const layer = getLayer(getTermsWithLastValueOrderAgg({ sortField: undefined }));
+    const errors = getOrderAggErrorMessages(layer, 'col1', indexPatternWithoutDates);
+    expect(errors).toHaveLength(1);
+    expect(errors[0]).toEqual(
+      expect.objectContaining({ uniqueId: TERMS_CUSTOM_RANK_LAST_VALUE_NO_DATE_FIELD })
+    );
+  });
+
+  it('should return a blocking error when the sortField does not exist', () => {
+    const layer = getLayer(getTermsWithLastValueOrderAgg({ sortField: 'nonexistent' }));
+    const errors = getOrderAggErrorMessages(layer, 'col1', indexPattern);
+    expect(errors).toHaveLength(1);
+    expect(errors[0]).toEqual(
+      expect.objectContaining({ uniqueId: TERMS_CUSTOM_RANK_LAST_VALUE_SORT_FIELD_NOT_FOUND })
+    );
+  });
+
+  it('should return a blocking error when the sortField is not a date field', () => {
+    const layer = getLayer(getTermsWithLastValueOrderAgg({ sortField: 'bytes' }));
+    const errors = getOrderAggErrorMessages(layer, 'col1', indexPattern);
+    expect(errors).toHaveLength(1);
+    expect(errors[0]).toEqual(
+      expect.objectContaining({ uniqueId: TERMS_CUSTOM_RANK_LAST_VALUE_SORT_FIELD_INVALID_TYPE })
+    );
   });
 });
