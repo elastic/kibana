@@ -8,7 +8,10 @@
  */
 
 import Path from 'path';
+import Os from 'os';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { promisify } from 'util';
+import * as Sass from 'sass-embedded';
 import type { ThemeTag } from '../types';
 import {
   getSharedResolveConfig,
@@ -17,6 +20,7 @@ import {
   getBabelLoaderRule,
   getSharedModuleRules,
   getSharedIgnoreWarnings,
+  getSassOptions,
 } from './shared_config';
 
 describe('shared_config', () => {
@@ -122,6 +126,27 @@ describe('shared_config', () => {
       expect(fallback['node:tls']).toBe(false);
       expect(fallback['node:dns']).toBe(false);
     });
+  });
+
+  describe('getSassOptions', () => {
+    it('compiles the theme globals when the process cwd is not the repo root', async () => {
+      // Dart Sass's legacy `render` API implicitly searches the cwd. In-repo
+      // builds run from the repo root and are masked by that; external plugin
+      // builds run from the plugin directory and must not depend on it.
+      const globals = Path.resolve(
+        REPO_ROOT,
+        'src/core/public/styles/core_app/_globals_borealislight.scss'
+      );
+      const originalCwd = process.cwd();
+      process.chdir(Os.tmpdir());
+      try {
+        await expect(
+          promisify(Sass.render)({ ...getSassOptions(REPO_ROOT, true), file: globals })
+        ).resolves.toBeDefined();
+      } finally {
+        process.chdir(originalCwd);
+      }
+    }, 30_000);
   });
 
   describe('getSwcLoaderRules', () => {

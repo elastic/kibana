@@ -10,6 +10,7 @@
 import Path from 'path';
 import Fs from 'fs';
 import type { RuleSetRule, Configuration, RspackPluginInstance } from '@rspack/core';
+import type { LegacySharedOptions } from 'sass-embedded';
 import { getSharedConfig } from '@kbn/transpiler-config';
 import { DEFAULT_THEME_TAGS } from '@kbn/core-ui-settings-common';
 import { rspack } from '../rspack_runtime';
@@ -266,6 +267,29 @@ export function getCssLoaderRule(dist: boolean): RuleSetRule {
 }
 
 /**
+ * Sass options shared by every SCSS rule.
+ *
+ * `repoRoot` must be an include path: `@elastic/eui-theme-borealis` imports
+ * `node_modules/@elastic/eui-theme-common/...` relative to the repo root. Dart
+ * Sass's legacy `render` API (used by sass-loader 10) also searches the process
+ * cwd, which masked this for in-repo builds; external plugin builds run from
+ * the plugin directory and need it explicitly.
+ */
+export function getSassOptions(repoRoot: string, dist: boolean): LegacySharedOptions<'async'> {
+  return {
+    outputStyle: dist ? 'compressed' : 'expanded',
+    includePaths: [
+      repoRoot,
+      Path.resolve(repoRoot, 'node_modules'),
+      Path.resolve(repoRoot, 'src/core/public/styles'),
+      Path.resolve(repoRoot, 'packages'),
+    ],
+    quietDeps: true,
+    silenceDeprecations: ['color-functions', 'import', 'global-builtin', 'legacy-js-api'],
+  };
+}
+
+/**
  * Get the sass-loader chain for a specific theme.
  * Each theme uses different globals (light vs dark colors/shadows).
  */
@@ -274,7 +298,6 @@ function getSassLoaderChain(
   theme: ThemeTag,
   dist: boolean
 ): NonNullable<RuleSetRule['use']> {
-  const nodeModulesPath = Path.resolve(repoRoot, 'node_modules');
   const globalsPath = Path.resolve(
     repoRoot,
     `src/core/public/styles/core_app/_globals_${theme}.scss`
@@ -291,17 +314,7 @@ function getSassLoaderChain(
       options: {
         additionalData: `@import "${globalsPath}";\n`,
         implementation: require('sass-embedded'),
-        sassOptions: {
-          outputStyle: dist ? 'compressed' : 'expanded',
-          includePaths: [
-            nodeModulesPath,
-            Path.resolve(repoRoot, 'src/core/public/styles'),
-            Path.resolve(repoRoot, 'packages'),
-          ],
-          loadPaths: [nodeModulesPath, Path.resolve(repoRoot, 'src/core/public/styles')],
-          quietDeps: true,
-          silenceDeprecations: ['color-functions', 'import', 'global-builtin', 'legacy-js-api'],
-        },
+        sassOptions: getSassOptions(repoRoot, dist),
       },
     },
   ];
@@ -353,8 +366,6 @@ export function getScssLoaderRule(
  * Node modules SCSS is compiled with light theme globals only.
  */
 export function getNodeModulesScssLoaderRule(repoRoot: string, dist: boolean): RuleSetRule {
-  const nodeModulesPath = Path.resolve(repoRoot, 'node_modules');
-
   return {
     test: /\.scss$/,
     include: /node_modules/,
@@ -373,17 +384,7 @@ export function getNodeModulesScssLoaderRule(repoRoot: string, dist: boolean): R
             'src/core/public/styles/core_app/_globals_borealislight.scss'
           ).replace(/\\/g, '/')}";\n`,
           implementation: require('sass-embedded'),
-          sassOptions: {
-            outputStyle: dist ? 'compressed' : 'expanded',
-            includePaths: [
-              nodeModulesPath,
-              Path.resolve(repoRoot, 'src/core/public/styles'),
-              Path.resolve(repoRoot, 'packages'),
-            ],
-            loadPaths: [nodeModulesPath, Path.resolve(repoRoot, 'src/core/public/styles')],
-            quietDeps: true,
-            silenceDeprecations: ['color-functions', 'import', 'global-builtin', 'legacy-js-api'],
-          },
+          sassOptions: getSassOptions(repoRoot, dist),
         },
       },
     ],

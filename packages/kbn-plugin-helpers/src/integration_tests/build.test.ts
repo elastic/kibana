@@ -147,6 +147,15 @@ describe('scripts/generate_plugin', () => {
       all: true,
     });
 
+    // Third-party plugins commonly ship stylesheets. Every plugin .scss pulls in
+    // Kibana's theme globals, which must resolve when built from the plugin dir.
+    Fs.writeFileSync(
+      Path.resolve(PLUGIN_DIR, 'public/styles.scss'),
+      '.fooTestPlugin { color: $euiColorPrimary; }\n'
+    );
+    const entryPath = Path.resolve(PLUGIN_DIR, 'public/index.ts');
+    Fs.writeFileSync(entryPath, `import './styles.scss';\n${Fs.readFileSync(entryPath, 'utf8')}`);
+
     const filterLogs = (logs: string | undefined) => {
       return logs
         ?.split('\n')
@@ -180,10 +189,9 @@ describe('scripts/generate_plugin', () => {
     const publicFiles = files.filter((f) => f.includes('target/public/'));
     expect(publicFiles.length).toBeGreaterThanOrEqual(1);
 
-    const mainBundle = publicFiles.find(
-      (f) => f.endsWith('.plugin.js') || f.endsWith('.plugin.js.br')
-    );
+    const mainBundle = publicFiles.find((f) => f.endsWith('.plugin.js'));
     expect(mainBundle).toBeDefined();
+    expect(Fs.readFileSync(Path.resolve(TMP_DIR, mainBundle!), 'utf8')).toContain('.fooTestPlugin');
 
     const serverFiles = files.filter((f) => f.includes('server/'));
     expect(serverFiles.length).toBeGreaterThan(0);
