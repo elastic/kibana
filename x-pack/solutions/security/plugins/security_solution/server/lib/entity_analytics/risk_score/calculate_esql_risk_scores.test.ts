@@ -25,28 +25,28 @@ describe('Calculate risk scores with ESQL', () => {
       expect(q).toMatchSnapshot();
     });
 
-    it('builds resolution composite query for lookup index pagination', () => {
-      const query = getResolutionCompositeQuery(
-        '.entity_analytics.risk_score.lookup-default',
-        1000,
-        {
-          resolution_target_id: 'user:foo',
-        }
-      );
+    it('builds resolution composite query against entities-latest for pagination', () => {
+      const query = getResolutionCompositeQuery('.entities.v1.latest.security_default', 1000, {
+        resolution_target_id: 'user:foo',
+      });
 
       expect(query).toEqual({
-        index: '.entity_analytics.risk_score.lookup-default',
+        index: '.entities.v1.latest.security_default',
         size: 0,
         query: {
-          term: {
-            relationship_type: 'entity.relationships.resolution.resolved_to',
-          },
+          exists: { field: 'entity.relationships.resolution.resolved_to' },
         },
         aggs: {
           by_resolution_target: {
             composite: {
               size: 1000,
-              sources: [{ resolution_target_id: { terms: { field: 'resolution_target_id' } } }],
+              sources: [
+                {
+                  resolution_target_id: {
+                    terms: { field: 'entity.relationships.resolution.resolved_to' },
+                  },
+                },
+              ],
               after: { resolution_target_id: 'user:foo' },
             },
           },
@@ -56,25 +56,24 @@ describe('Calculate risk scores with ESQL', () => {
 
     it('scopes query to targetEntityIds when they are provided', () => {
       const query = getResolutionCompositeQuery(
-        '.entity_analytics.risk_score.lookup-default',
+        '.entities.v1.latest.security_default',
         1000,
         undefined,
         ['user:target-1', 'user:target-2']
       );
 
       expect(query.query).toEqual({
-        terms: { resolution_target_id: ['user:target-1', 'user:target-2'] },
+        terms: {
+          'entity.relationships.resolution.resolved_to': ['user:target-1', 'user:target-2'],
+        },
       });
     });
 
-    it('falls back to relationship_type term query when targetEntityIds is undefined', () => {
-      const query = getResolutionCompositeQuery(
-        '.entity_analytics.risk_score.lookup-default',
-        1000
-      );
+    it('falls back to exists query when targetEntityIds is undefined', () => {
+      const query = getResolutionCompositeQuery('.entities.v1.latest.security_default', 1000);
 
       expect(query.query).toEqual({
-        term: { relationship_type: 'entity.relationships.resolution.resolved_to' },
+        exists: { field: 'entity.relationships.resolution.resolved_to' },
       });
     });
 
@@ -85,12 +84,12 @@ describe('Calculate risk scores with ESQL', () => {
         5000,
         1000,
         '.alerts-security.alerts-default',
-        '.entity_analytics.risk_score.lookup-default'
+        '.entities.v1.latest.security_default'
       );
 
-      expect(query).toContain(
-        'LOOKUP JOIN .entity_analytics.risk_score.lookup-default ON entity_id'
-      );
+      expect(query).toContain('EVAL entity.id = entity_id');
+      expect(query).toContain('LOOKUP JOIN .entities.v1.latest.security_default ON entity.id');
+      expect(query).toContain('COALESCE(entity.relationships.resolution.resolved_to, entity_id)');
       expect(query).toContain('resolution_target_id IN ("user:target-a", "user:target-z")');
       expect(query).toContain('BY resolution_target_id');
       expect(query).toContain('contributing_entities_raw = VALUES(entity_with_rel)');
@@ -103,7 +102,7 @@ describe('Calculate risk scores with ESQL', () => {
         5000,
         1000,
         '.alerts-security.alerts-default',
-        '.entity_analytics.risk_score.lookup-default'
+        '.entities.v1.latest.security_default'
       );
 
       expect(query).toContain('"user:target-a"');
@@ -124,7 +123,7 @@ describe('Calculate risk scores with ESQL', () => {
           5000,
           1000,
           '.alerts-security.alerts-default',
-          '.entity_analytics.risk_score.lookup-default'
+          '.entities.v1.latest.security_default'
         )
       ).toThrow('Entity ID contains an unsupported control character');
     });
@@ -231,7 +230,7 @@ describe('Calculate risk scores with ESQL', () => {
           5000,
           1000,
           '.alerts-security.alerts-default',
-          '.entity_analytics.risk_score.lookup-default'
+          '.entities.v1.latest.security_default'
         );
         expect(hostQuery).toContain(
           'STARTS_WITH(MV_FIRST(MV_SLICE(kibana.alert.entity.id, 0, 0)), "host:")'
@@ -243,7 +242,7 @@ describe('Calculate risk scores with ESQL', () => {
           5000,
           1000,
           '.alerts-security.alerts-default',
-          '.entity_analytics.risk_score.lookup-default'
+          '.entities.v1.latest.security_default'
         );
         expect(userQuery).toContain(
           'STARTS_WITH(MV_FIRST(MV_SLICE(kibana.alert.entity.id, 0, 0)), "user:")'

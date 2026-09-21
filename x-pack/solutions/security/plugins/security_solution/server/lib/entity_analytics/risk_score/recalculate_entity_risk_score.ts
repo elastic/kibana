@@ -15,7 +15,6 @@ import type { EntityType } from '../../../../common/entity_analytics/types';
 import { getConfiguration } from '../risk_engine/utils/saved_object_configuration';
 import { getRiskInputsIndex } from './get_risk_inputs_index';
 import { buildAlertFilters } from './maintainer/steps/build_alert_filters';
-import { getLookupIndexName } from './maintainer/lookup/lookup_index';
 import { persistZeroBaseScore, scoreBaseEntities } from './maintainer/steps/score_base_entities';
 import { runResolutionScoringStep } from './maintainer/steps/run_resolution_scoring_step';
 import { fetchWatchlistConfigs } from './maintainer/utils/fetch_watchlist_configs';
@@ -94,7 +93,7 @@ export const recalculateEntityRiskScore = async ({
   const { index: alertsIndex } = await getRiskInputsIndex({ dataViewId, logger, soClient });
   const writer = await getWriter(namespace);
   const watchlistConfigs = await fetchWatchlistConfigs({ soClient, esClient, namespace, logger });
-  const lookupIndex = getLookupIndexName(namespace);
+  const entityStoreIndex = await crudClient.latestIndexName();
   const calculationRunId = uuidv4();
   const now = new Date().toISOString();
 
@@ -147,7 +146,7 @@ export const recalculateEntityRiskScore = async ({
     logger,
     entityType: identifierType as EntityType,
     alertsIndex,
-    lookupIndex,
+    entityStoreIndex,
     pageSize,
     sampleSize,
     now,

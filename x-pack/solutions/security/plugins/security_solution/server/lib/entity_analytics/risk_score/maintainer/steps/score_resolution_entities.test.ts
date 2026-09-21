@@ -60,7 +60,7 @@ describe('score_resolution_entities', () => {
         logger,
         entityType: EntityType.user,
         alertsIndex: '.alerts-security.alerts-default',
-        lookupIndex: '.entity_analytics.risk_score.lookup-default',
+        entityStoreIndex: '.entities.v1.latest.security_default',
         pageSize: 10_000,
         sampleSize: 1000,
         now: '2026-01-01T00:00:00.000Z',
@@ -87,7 +87,7 @@ describe('score_resolution_entities', () => {
       fetchResolutionGroupMemberIds({
         esClient,
         logger,
-        lookupIndex: '.entity_analytics.risk_score.lookup-default',
+        entityStoreIndex: '.entities.v1.latest.security_default',
         resolutionTargetIds: Array.from(
           { length: MAX_RESOLUTION_TARGETS_PER_PAGE + 1 },
           (_, i) => `user:target-${i}`
@@ -96,11 +96,11 @@ describe('score_resolution_entities', () => {
     ).rejects.toThrow('exceeding cap');
   });
 
-  // Regression: a hit with entity_id === '' previously caused an infinite loop —
+  // Regression: a hit with entity.id === '' previously caused an infinite loop —
   // the truthy check on searchAfter folded '' to undefined for ES (returning
   // the same first page) while the loop termination kept treating '' as a
   // valid cursor. The fix swapped to a strict undefined check.
-  it('terminates pagination when an entity_id is the empty string', async () => {
+  it('terminates pagination when entity.id is the empty string', async () => {
     let callCount = 0;
     (esClient.search as jest.Mock).mockImplementation(async () => {
       callCount += 1;
@@ -108,8 +108,8 @@ describe('score_resolution_entities', () => {
         return {
           hits: {
             hits: [
-              { _source: { entity_id: '' }, sort: [''] },
-              { _source: { entity_id: 'user:b' }, sort: ['user:b'] },
+              { fields: { 'entity.id': [''] }, sort: [''] },
+              { fields: { 'entity.id': ['user:b'] }, sort: ['user:b'] },
             ],
           },
         };
@@ -120,7 +120,7 @@ describe('score_resolution_entities', () => {
     const memberIds = await fetchResolutionGroupMemberIds({
       esClient,
       logger,
-      lookupIndex: '.entity_analytics.risk_score.lookup-default',
+      entityStoreIndex: '.entities.v1.latest.security_default',
       resolutionTargetIds: ['user:target-1'],
     });
 

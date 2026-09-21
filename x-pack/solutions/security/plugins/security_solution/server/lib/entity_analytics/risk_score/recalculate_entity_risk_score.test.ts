@@ -32,10 +32,6 @@ jest.mock('./maintainer/steps/build_alert_filters', () => ({
   buildAlertFilters: () => [],
 }));
 
-jest.mock('./maintainer/lookup/lookup_index', () => ({
-  getLookupIndexName: () => '.risk-score-lookup-default',
-}));
-
 jest.mock('./maintainer/utils/fetch_watchlist_configs', () => ({
   fetchWatchlistConfigs: async () => new Map(),
 }));
@@ -87,7 +83,10 @@ describe('recalculateEntityRiskScore', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    crudClient = { listEntities: jest.fn() } as unknown as EntityStoreCRUDClient;
+    crudClient = {
+      listEntities: jest.fn(),
+      latestIndexName: jest.fn().mockResolvedValue('.entities.v1.latest.security_default'),
+    } as unknown as EntityStoreCRUDClient;
     writer = {} as RiskEngineDataWriter;
     mockGetConfiguration.mockResolvedValue({ dataViewId: 'security-dv', pageSize: 100 });
     mockScoreBaseEntities.mockResolvedValue({
