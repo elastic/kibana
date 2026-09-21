@@ -43,6 +43,30 @@ const buildWorkflow = (stepCount: number, varsPerStep: number): string => {
   return lines.join('\n');
 };
 
+/** A single step holding `tagCount` Liquid for-loop tags and no `{{ ... }}` references. */
+const buildTagWorkflow = (tagCount: number): string => {
+  const tags = Array.from(
+    { length: tagCount },
+    () => '{% for item in consts.items %}x{% endfor %}'
+  ).join(' ');
+  return [
+    "version: '1'",
+    'name: tag-fixture',
+    'enabled: true',
+    'triggers:',
+    '  - type: manual',
+    'consts:',
+    '  items:',
+    '    - a',
+    'steps:',
+    '  - name: step_0',
+    '    type: console',
+    '    with:',
+    '      message: >-',
+    `        ${tags}`,
+  ].join('\n');
+};
+
 const validate = (yaml: string) =>
   validateWorkflowYaml(yaml, schema, {
     variableValidationRegistry: createMockWorkflowContextRegistry(),
@@ -71,8 +95,26 @@ describe('variable validation budgets', () => {
 
     expect(result.diagnostics.filter(({ source }) => source === 'variable')).toEqual([]);
     expect(result.validationNotRun).toEqual([
-      `Variable validation skipped: the workflow has ${varsPerStep} variable references, above the limit of ${MAX_VARIABLES_FOR_VARIABLE_VALIDATION}.`,
+      `Variable validation skipped: the workflow has ${varsPerStep} template references, above the limit of ${MAX_VARIABLES_FOR_VARIABLE_VALIDATION}.`,
     ]);
+  });
+
+  it('skips and reports when Liquid tags alone are over the limit', () => {
+    const tagCount = MAX_VARIABLES_FOR_VARIABLE_VALIDATION;
+    // `{% for %}` and `{% endfor %}` each open a tag.
+    const openings = tagCount * 2;
+    const result = validate(buildTagWorkflow(tagCount));
+
+    expect(result.diagnostics.filter(({ source }) => source === 'variable')).toEqual([]);
+    expect(result.validationNotRun).toEqual([
+      `Variable validation skipped: the workflow has ${openings} template references, above the limit of ${MAX_VARIABLES_FOR_VARIABLE_VALIDATION}.`,
+    ]);
+  });
+
+  it('validates a workflow at the tag limit', () => {
+    const result = validate(buildTagWorkflow(MAX_VARIABLES_FOR_VARIABLE_VALIDATION / 2));
+
+    expect(result.validationNotRun).toBeUndefined();
   });
 
   it('does not exhaust the heap on a workflow at the route body limit', () => {

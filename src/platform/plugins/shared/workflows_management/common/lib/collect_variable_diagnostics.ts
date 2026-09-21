@@ -36,6 +36,9 @@ export const MAX_STEPS_FOR_VARIABLE_VALIDATION = 250;
 /**
  * Reference budget, the other cost dimension, and the steeper one at scale:
  * 20,000 references measures ~800 ms / ~440 MiB regardless of step count.
+ *
+ * Liquid tags count against it too: they carry no `{{ ... }}` reference, and
+ * 250 steps of 90 tags each — 1 MiB, zero references — measures ~710 ms.
  */
 export const MAX_VARIABLES_FOR_VARIABLE_VALIDATION = 1000;
 
@@ -48,6 +51,15 @@ export interface VariableDiagnosticsResult {
    */
   notRunReason?: string;
 }
+
+/** Counts the `{%` delimiter, so the budget holds for tags the validator does not know. */
+const countLiquidTags = (yaml: string): number => {
+  let count = 0;
+  for (let index = yaml.indexOf('{%'); index !== -1; index = yaml.indexOf('{%', index + 2)) {
+    count++;
+  }
+  return count;
+};
 
 /**
  * Runs the `variable-validation` rule group the editor runs, so
@@ -78,10 +90,11 @@ export function collectVariableDiagnostics(
   const yamlDocument = parseDocument(yaml, { lineCounter, keepSourceTokens: true });
 
   const variableItems = collectAllVariables(yaml, yamlDocument, lineCounter, workflowGraph);
-  if (variableItems.length > MAX_VARIABLES_FOR_VARIABLE_VALIDATION) {
+  const referenceCount = variableItems.length + countLiquidTags(yaml);
+  if (referenceCount > MAX_VARIABLES_FOR_VARIABLE_VALIDATION) {
     return {
       diagnostics: [],
-      notRunReason: `Variable validation skipped: the workflow has ${variableItems.length} variable references, above the limit of ${MAX_VARIABLES_FOR_VARIABLE_VALIDATION}.`,
+      notRunReason: `Variable validation skipped: the workflow has ${referenceCount} template references, above the limit of ${MAX_VARIABLES_FOR_VARIABLE_VALIDATION}.`,
     };
   }
 
