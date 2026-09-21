@@ -37,6 +37,9 @@ const SO_TYPE_TO_ASSET_TYPE = new Map<KibanaSavedObjectType, KibanaAssetType>([
 export interface ArchiveSignals {
   gatedTypesFound: Set<KibanaAssetType>;
   hasMlSecurityRules: boolean;
+  // SO ids of every security_rule entry in the archive, used to detect whether the upload would
+  // overwrite an existing ML rule whose id collides with an incoming non-ML rule.
+  incomingRuleIds?: string[];
 }
 
 export async function collectArchiveSignals(
@@ -44,6 +47,7 @@ export async function collectArchiveSignals(
   contentType: string
 ): Promise<ArchiveSignals> {
   const gatedTypesFound = new Set<KibanaAssetType>();
+  const incomingRuleIds: string[] = [];
   let hasMlSecurityRules = false;
 
   await traverseArchiveEntries(
@@ -61,6 +65,7 @@ export async function collectArchiveSignals(
       if (assetType === KibanaAssetType.securityRule && entry.buffer) {
         try {
           const asset = JSON.parse(entry.buffer.toString('utf8'));
+          if (typeof asset?.id === 'string') incomingRuleIds.push(asset.id);
           if (asset?.attributes?.type === 'machine_learning') {
             hasMlSecurityRules = true;
           }
@@ -75,7 +80,7 @@ export async function collectArchiveSignals(
     }
   );
 
-  return { gatedTypesFound, hasMlSecurityRules };
+  return { gatedTypesFound, hasMlSecurityRules, incomingRuleIds };
 }
 
 export async function parsePackageAndCollectSignals(
@@ -85,6 +90,7 @@ export async function parsePackageAndCollectSignals(
   const assetsMap: Record<string, Buffer> = {};
   const paths: string[] = [];
   const gatedTypesFound = new Set<KibanaAssetType>();
+  const incomingRuleIds: string[] = [];
   let hasMlSecurityRules = false;
 
   await traverseArchiveEntries(
@@ -102,6 +108,7 @@ export async function parsePackageAndCollectSignals(
           if (assetType === KibanaAssetType.securityRule && entry.buffer) {
             try {
               const asset = JSON.parse(entry.buffer.toString('utf8'));
+              if (typeof asset?.id === 'string') incomingRuleIds.push(asset.id);
               if (asset?.attributes?.type === 'machine_learning') {
                 hasMlSecurityRules = true;
               }
@@ -123,7 +130,7 @@ export async function parsePackageAndCollectSignals(
 
   return {
     packageInfo: parseAndVerifyArchive(paths, assetsMap),
-    archiveSignals: { gatedTypesFound, hasMlSecurityRules },
+    archiveSignals: { gatedTypesFound, hasMlSecurityRules, incomingRuleIds },
   };
 }
 
@@ -216,10 +223,17 @@ export async function checkUploadPackageAssetPrivileges({
     // Only probe existing rule SOs when the archive scan didn't already confirm ML presence.
     // Process in bounded chunks and stop as soon as one ML rule (or any read error) is found —
     // avoids materialising the full ref list for large packages like security_detection_engine.
-    if (installation && !hasMlRules) {
-      const ruleIds = (refs ?? [])
+    //
+    // Also include the incoming archive's rule IDs for the request Space: Fleet uses overwrite
+    // semantics, so an incoming non-ML rule whose id collides with an existing ML rule would
+    // silently replace it. By checking incoming ids here we require ml:canCreateJob whenever
+    // the upload would clobber an ML rule, even on a first install.
+    if (!hasMlRules) {
+      const refRuleIds = (refs ?? [])
         .filter((ref) => ref.type === KibanaSavedObjectType.securityRule)
         .map((ref) => ref.id);
+      const archiveRuleIds = space === spaceId ? (signals.incomingRuleIds ?? []) : [];
+      const ruleIds = [...new Set([...refRuleIds, ...archiveRuleIds])];
       if (ruleIds.length > 0) {
         const clientForSpace = usePrimaryRefs
           ? savedObjectsClient
@@ -232,7 +246,14 @@ export async function checkUploadPackageAssetPrivileges({
               chunk.map((id) => ({ type: KibanaSavedObjectType.securityRule, id }))
             );
             for (const so of bulkResult.saved_objects) {
-              if (isSavedObjectErrorResult(so) || so.attributes?.type === 'machine_learning') {
+              if (isSavedObjectErrorResult(so)) {
+                if (so.error.statusCode !== 404) {
+                  // Unexpected error — fail closed.
+                  hasMlRules = true;
+                  break outer;
+                }
+                // 404: rule doesn't exist yet, not ML — continue.
+              } else if (so.attributes?.type === 'machine_learning') {
                 hasMlRules = true;
                 break outer;
               }

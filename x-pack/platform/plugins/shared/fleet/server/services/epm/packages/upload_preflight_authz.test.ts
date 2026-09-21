@@ -963,9 +963,8 @@ describe('checkUploadPackageAssetPrivileges', () => {
     expect(result).toEqual(expect.arrayContaining([mockSpaceId, 'space-a']));
   });
 
-  it('fails closed (requires ml:canCreateJob) when bulkGet returns a per-object error for an existing security rule', async () => {
-    // isSavedObjectErrorResult(so) === true when bulkGet resolves but the individual SO has an
-    // error (e.g. not found, unauthorized). Treat as ML rule present — fail closed.
+  it('fails closed (requires ml:canCreateJob) when bulkGet returns a non-404 per-object error for an existing security rule', async () => {
+    // Non-404 errors (e.g. 403 Forbidden) are unexpected — fail closed.
     const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
@@ -993,6 +992,81 @@ describe('checkUploadPackageAssetPrivileges', () => {
       spaceId: mockSpaceId,
       pkgName: 'mypackage',
       installation,
+      savedObjectsClient: mockSavedObjectsClient,
+    });
+
+    const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
+    expect(atSpaces).toHaveBeenCalledWith(
+      [mockSpaceId],
+      expect.objectContaining({
+        kibana: expect.arrayContaining(['api:rules-all', 'api:ml:canCreateJob']),
+      })
+    );
+  });
+
+  it('does not require ml:canCreateJob when bulkGet returns 404 for an incoming rule ID (rule does not exist yet)', async () => {
+    // 404 = rule doesn't exist — not ML, no ml:canCreateJob needed.
+    const security = makeSecurity(true);
+    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+
+    mockSavedObjectsClient.bulkGet.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'incoming-new-rule',
+          type: 'security-rule',
+          error: { statusCode: 404, error: 'Not Found', message: 'Saved object not found' },
+        },
+      ],
+    });
+
+    await checkUploadPackageAssetPrivileges({
+      request: mockRequest,
+      archiveSignals: {
+        gatedTypesFound: new Set([KibanaAssetType.securityRule]),
+        hasMlSecurityRules: false,
+        incomingRuleIds: ['incoming-new-rule'],
+      },
+      spaceId: mockSpaceId,
+      pkgName: 'mypackage',
+      installation: undefined,
+      savedObjectsClient: mockSavedObjectsClient,
+    });
+
+    const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
+    // rules-all required (security_rule in archive), but NOT ml:canCreateJob (rule is new, not ML).
+    expect(atSpaces).toHaveBeenCalledWith(
+      [mockSpaceId],
+      expect.objectContaining({ kibana: ['api:rules-all'] })
+    );
+  });
+
+  it('requires ml:canCreateJob when incoming archive rule ID collides with an existing ML rule (first install)', async () => {
+    // An incoming non-ML rule whose SO id matches an existing ML rule would overwrite it via
+    // Fleet's overwrite semantics. Detect this during preflight and require ml:canCreateJob.
+    const security = makeSecurity(true);
+    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+
+    mockSavedObjectsClient.bulkGet.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'colliding-rule-id',
+          type: 'security-rule',
+          references: [],
+          attributes: { type: 'machine_learning' },
+        },
+      ],
+    });
+
+    await checkUploadPackageAssetPrivileges({
+      request: mockRequest,
+      archiveSignals: {
+        gatedTypesFound: new Set([KibanaAssetType.securityRule]),
+        hasMlSecurityRules: false, // incoming rule is non-ML, but collides with existing ML rule
+        incomingRuleIds: ['colliding-rule-id'],
+      },
+      spaceId: mockSpaceId,
+      pkgName: 'mypackage',
+      installation: undefined, // first install — no tracked refs
       savedObjectsClient: mockSavedObjectsClient,
     });
 
