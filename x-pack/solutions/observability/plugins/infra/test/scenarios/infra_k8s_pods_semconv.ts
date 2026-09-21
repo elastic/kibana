@@ -22,9 +22,9 @@ const scenario: Scenario<InfraDocument> = async ({ logger, scenarioOpts }) => {
   return {
     generate: ({ range, clients: { infraEsClient } }) => {
       const podList = times(numPods).map((index) => {
-        const uid = `semconv-pod-${index}`;
+        const uid = index === 1 ? 'semconv-pod-1-uid' : `semconv-pod-${index}`;
         const nodeName = `semconv-host-${index % numNodes}`;
-        const name = index === 1 ? `semconv-pod-${index}-name` : uid;
+        const name = index === 1 ? 'semconv-pod-1' : uid;
         return {
           entity: infra.semconvPod(uid, nodeName, { name }),
           omitLimits: withoutLimits && index % 2 === 1,
