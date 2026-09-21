@@ -342,28 +342,6 @@ steps:
               approveLabel: Approve
               rejectLabel: Dismiss
 
-          # Adopted before anything below writes, not after the branch: the
-          # timeout handler writes `expired` on the carried id, and `resolve_gate`
-          # hands it to the release route, which refuses a row that is already
-          # `superseded` — so a gate that answered (or timed out) after a revision
-          # landed would settle the wrong row, or fail outright. The gate belongs
-          # to the chain, so the answer belongs to the chain's live head.
-          - name: adopt_live_head_after_wait_branch
-            type: if
-            condition: '${{ variables.current_proposal_id != blank }}'
-            steps:
-              - name: resolve_live_head_after_wait
-                type: proposals.getLatestRevision
-                with:
-                  proposalId: '{{ variables.current_proposal_id }}'
-              - name: adopt_live_head_after_wait
-                type: data.set
-                with:
-                  current_proposal_id: '{{ steps.resolve_live_head_after_wait.output.proposalId }}'
-                  # The revision's own input, not the trigger's: an analyst who
-                  # approved a corrected revision approved those parameters.
-                  action_input: '${{ steps.resolve_live_head_after_wait.output.actionInput }}'
-
           # Before anything reads the gate's answer, because a timed-out gate
           # has no answer to read: `response.approved` comes back blank, which
           # `resolve_gate` below would record as a dismissal — a decision
@@ -372,6 +350,24 @@ steps:
             type: if
             condition: '${{ steps.await_decision.error != blank }}'
             steps:
+              # The timeout write lands on the carried id, which a revision
+              # arriving during the park would have superseded — and
+              # `updateProposal` refuses a superseded row. Resolved here
+              # rather than before the gate's answer is read, so the
+              # authorization below still precedes every chain read on the
+              # answered path. This path runs as the workflow runner.
+              - name: adopt_live_head_on_timeout_branch
+                type: if
+                condition: '${{ variables.current_proposal_id != blank }}'
+                steps:
+                  - name: resolve_live_head_on_timeout
+                    type: proposals.getLatestRevision
+                    with:
+                      proposalId: '{{ variables.current_proposal_id }}'
+                  - name: adopt_live_head_on_timeout
+                    type: data.set
+                    with:
+                      current_proposal_id: '{{ steps.resolve_live_head_on_timeout.output.proposalId }}'
               # `expired` rather than `failed`: the gate's timeout and the
               # deadline on the record are the same literal, and the gate
               # starts marginally after the proposal is created, so a gate that
@@ -497,6 +493,29 @@ steps:
               # exactly as a privileged approver will find it.
               - name: park_for_privileged
                 type: loop.continue
+
+      # Resolved after the authorization above and before every write below:
+      # `resolve_gate` hands the carried id to the release route, which
+      # refuses a row that is already `superseded` — so a gate answered
+      # after a revision landed would settle the wrong row, or fail
+      # outright. The gate belongs to the chain, so the answer belongs to
+      # the chain's live head. The timeout path adopts separately, since it
+      # writes without reaching this point.
+      - name: adopt_live_head_after_wait_branch
+        type: if
+        condition: '${{ variables.current_proposal_id != blank }}'
+        steps:
+          - name: resolve_live_head_after_wait
+            type: proposals.getLatestRevision
+            with:
+              proposalId: '{{ variables.current_proposal_id }}'
+          - name: adopt_live_head_after_wait
+            type: data.set
+            with:
+              current_proposal_id: '{{ steps.resolve_live_head_after_wait.output.proposalId }}'
+              # The revision's own input, not the trigger's: an analyst who
+              # approved a corrected revision approved those parameters.
+              action_input: '${{ steps.resolve_live_head_after_wait.output.actionInput }}'
 
       - name: handle_dismissal
         type: if

@@ -402,6 +402,10 @@ describe('create-investigation-proposal workflow', () => {
       for (const branch of ['handle_dismissal', 'approve_without_action', 'approve_with_action']) {
         expect(body.indexOf(branch)).toBeGreaterThan(checkIndex);
       }
+      // The chain resolve reads the proposal, so it waits for the check too:
+      // an unauthorized resumer is re-parked before anything reads on its
+      // behalf.
+      expect(body.indexOf('adopt_live_head_after_wait_branch')).toBeGreaterThan(checkIndex);
     });
 
     it('only checks when a human answered, since the auto path has no decider', () => {
@@ -476,16 +480,17 @@ describe('create-investigation-proposal workflow', () => {
       const gateBranchOrder = (findStep(workflow.steps, 'gate_branch')?.steps ?? []).map(
         ({ name }) => name
       );
-      expect(gateBranchOrder).toEqual([
-        'await_decision',
-        // The adoption sits between the wait and everything that reads or
-        // writes on the carried id: a revision that landed during the park
-        // makes that id a superseded row, which the timeout write and the
-        // release route both refuse.
-        'adopt_live_head_after_wait_branch',
-        'handle_gate_timeout',
-        'resolve_gate',
-      ]);
+      expect(gateBranchOrder).toEqual(['await_decision', 'handle_gate_timeout', 'resolve_gate']);
+      // The adoption used to sit here, between the wait and everything that
+      // reads or writes the carried id. It now happens on each path that
+      // needs it: the timeout handler adopts before its own write, and the
+      // answered path adopts after the privilege check. Same guarantee - a
+      // revision that landed during the park makes the carried id a
+      // superseded row, which the timeout write and the release route both
+      // refuse - without reading the chain before the resumer is authorized.
+      expect((handle?.steps ?? []).map(({ name }) => name)[0]).toBe(
+        'adopt_live_head_on_timeout_branch'
+      );
 
       expect(handle?.condition).toContain('steps.await_decision.error != blank');
       expect(record?.with?.status).toBe('expired');
@@ -529,19 +534,27 @@ describe('create-investigation-proposal workflow', () => {
       );
     });
 
-    it('adopts inside the gate branch, before the timeout write and the release call', () => {
+    it('adopts on each path that writes, before the timeout write and the release call', () => {
       // A timed-out gate writes `expired` on the carried id, and `resolve_gate`
       // hands that id to the release route, which refuses a row that is already
-      // `superseded`. Adopting after the branch would therefore settle the
-      // superseded predecessor — or fail the resume outright.
-      const gateSteps = (findStep(workflow.steps, 'gate_branch')?.steps ?? []).map(
+      // `superseded`. Adopting after either would settle the superseded
+      // predecessor — or fail the resume outright. The timeout path adopts
+      // inside its own handler; the answered path adopts in the loop body,
+      // after the privilege check, so no chain read happens on behalf of a
+      // resumer who has not been authorized yet.
+      const timeoutSteps = (findStep(workflow.steps, 'handle_gate_timeout')?.steps ?? []).map(
         ({ name }) => name
       );
-      const adoptIndex = gateSteps.indexOf('adopt_live_head_after_wait_branch');
+      const timeoutAdopt = timeoutSteps.indexOf('adopt_live_head_on_timeout_branch');
+      expect(timeoutAdopt).toBeGreaterThanOrEqual(0);
+      expect(timeoutAdopt).toBeLessThan(timeoutSteps.indexOf('record_gate_expiry'));
 
-      expect(adoptIndex).toBeGreaterThan(gateSteps.indexOf('await_decision'));
-      expect(adoptIndex).toBeLessThan(gateSteps.indexOf('handle_gate_timeout'));
-      expect(adoptIndex).toBeLessThan(gateSteps.indexOf('resolve_gate'));
+      const body = (loop().steps ?? []).map(({ name }) => name);
+      const answeredAdopt = body.indexOf('adopt_live_head_after_wait_branch');
+      expect(answeredAdopt).toBeGreaterThan(body.indexOf('authorize_decision'));
+      for (const write of ['handle_dismissal', 'approve_without_action', 'approve_with_action']) {
+        expect(body.indexOf(write)).toBeGreaterThan(answeredAdopt);
+      }
 
       const expiry = findStep(workflow.steps, 'record_gate_expiry');
       expect(String(expiry?.with?.proposalId)).toBe('{{ variables.current_proposal_id }}');
