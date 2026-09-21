@@ -118,6 +118,29 @@ apiTest.describe(
       }
     });
 
+    apiTest('returns only ECS pods when schema is omitted on mixed data', async ({ apiClient }) => {
+      const response = await apiClient.post('api/metrics/snapshot', {
+        headers,
+        responseType: 'json',
+        body: {
+          sourceId: 'default',
+          timerange: { from, to, interval: '1m' },
+          metrics: [{ type: 'cpu' }],
+          nodeType: 'pod',
+          groupBy: [],
+          includeTimeseries: false,
+        },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      const snapshot = response.body as SnapshotNodeResponse;
+      const uids = snapshot.nodes.map((node) => lastPath(node)?.value);
+
+      expect(snapshot.nodes).toHaveLength(ECS_POD_COUNT);
+      expect(uids.sort()).toStrictEqual([...ECS_POD_UIDS].sort());
+      expect(uids.some((uid) => semconvUids.includes(uid ?? ''))).toBe(false);
+    });
+
     apiTest('returns only ECS pods when schema=ecs on mixed data', async ({ apiClient }) => {
       const response = await apiClient.post('api/metrics/snapshot', {
         headers,
