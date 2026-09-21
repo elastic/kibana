@@ -5,16 +5,17 @@
  * 2.0.
  */
 
+import { ADD_TO_CASE } from '@kbn/response-ops-alerts-table';
 import { useCallback, useMemo } from 'react';
 import { SECURITY_ALERT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { APP_ID } from '../../../../../common';
 import { useKibana } from '../../../../common/lib/kibana';
+import { useCanAttachToCase } from '../../../../cases/attachments/hooks/use_can_attach_to_case';
 import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
-import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from '../translations';
 import type { AlertTableContextMenuItem } from '../types';
 import { generateEventAttachmentWithoutOwner } from '../../../../cases/attachments/event/utils';
+import { ADD_TO_CASE_ACTION_IDS } from '../../../../common/constants/action_ids';
 
 export interface UseAddToCaseActions {
   onMenuItemClick: () => void;
@@ -22,6 +23,7 @@ export interface UseAddToCaseActions {
   ecsData: Ecs;
   nonEcsData: TimelineNonEcsData[];
   onSuccess?: () => Promise<void>;
+  onActionClick?: (actionId: typeof ADD_TO_CASE_ACTION_IDS.addToCase) => void;
   refetch?: (() => void) | undefined;
 }
 
@@ -31,10 +33,11 @@ export const useAddToCaseActions = ({
   ecsData,
   nonEcsData,
   onSuccess,
+  onActionClick,
   refetch,
 }: UseAddToCaseActions) => {
   const { cases: casesUi } = useKibana().services;
-  const userCasesPermissions = casesUi.helpers.canUseCases([APP_ID]);
+  const canAttach = useCanAttachToCase();
 
   const isAlert = useMemo(() => {
     return ecsData?.event?.kind?.includes('signal');
@@ -73,15 +76,6 @@ export const useAddToCaseActions = ({
     }
   }, [onSuccess, refetch]);
 
-  const createCaseArgs = useMemo(() => {
-    return {
-      onClose: onMenuItemClick,
-      onSuccess: onCaseSuccess,
-    };
-  }, [onMenuItemClick, onCaseSuccess]);
-
-  const createCaseFlyout = casesUi.hooks.useCasesAddToNewCaseFlyout(createCaseArgs);
-
   const selectCaseArgs = useMemo(() => {
     return {
       onClose: onMenuItemClick,
@@ -91,55 +85,33 @@ export const useAddToCaseActions = ({
 
   const selectCaseModal = casesUi.hooks.useCasesAddToExistingCaseModal(selectCaseArgs);
 
-  const handleAddToNewCaseClick = useCallback(() => {
+  const handleAddToCaseClick = useCallback(() => {
     // TODO rename this, this is really `closePopover()`
     onMenuItemClick();
-    createCaseFlyout.open({
-      attachments: caseAttachments,
-    });
-  }, [onMenuItemClick, createCaseFlyout, caseAttachments]);
-
-  const handleAddToExistingCaseClick = useCallback(() => {
-    // TODO rename this, this is really `closePopover()`
-    onMenuItemClick();
+    onActionClick?.(ADD_TO_CASE_ACTION_IDS.addToCase);
     selectCaseModal.open({
       getAttachments: () => caseAttachments,
     });
-  }, [caseAttachments, onMenuItemClick, selectCaseModal]);
+  }, [caseAttachments, onActionClick, onMenuItemClick, selectCaseModal]);
 
   const addToCaseActionItems: AlertTableContextMenuItem[] = useMemo(() => {
-    if (userCasesPermissions.createComment && userCasesPermissions.read) {
-      return [
-        // add to existing case menu item
-        {
-          'aria-label': ariaLabel,
-          'data-test-subj': 'add-to-existing-case-action',
-          key: 'add-to-existing-case-action',
-          onClick: handleAddToExistingCaseClick,
-          name: ADD_TO_EXISTING_CASE,
-        },
-        // add to new case menu item
-        {
-          'aria-label': ariaLabel,
-          'data-test-subj': 'add-to-new-case-action',
-          key: 'add-to-new-case-action',
-          onClick: handleAddToNewCaseClick,
-          name: ADD_TO_NEW_CASE,
-        },
-      ];
+    if (!canAttach) {
+      return [];
     }
-    return [];
-  }, [
-    userCasesPermissions.createComment,
-    userCasesPermissions.read,
-    ariaLabel,
-    handleAddToExistingCaseClick,
-    handleAddToNewCaseClick,
-  ]);
+
+    return [
+      {
+        'aria-label': ariaLabel,
+        'data-test-subj': ADD_TO_CASE_ACTION_IDS.addToCase,
+        key: ADD_TO_CASE_ACTION_IDS.addToCase,
+        onClick: handleAddToCaseClick,
+        name: ADD_TO_CASE,
+      },
+    ];
+  }, [ariaLabel, handleAddToCaseClick, canAttach]);
 
   return {
     addToCaseActionItems,
-    handleAddToNewCaseClick,
-    handleAddToExistingCaseClick,
+    handleAddToCaseClick,
   };
 };
