@@ -17,7 +17,7 @@ import {
   DEFAULT_EIS_DISPLAY_OPTIONS,
   filterGroupedModels,
   getProviderOptions,
-  TASK_TYPE_FILTERS,
+  MODEL_TYPE_FILTERS,
   type EisDisplayOptions,
   type GroupedModel,
   type TaskTypeCategory,
@@ -129,14 +129,13 @@ export const createEisFieldDefinitions = (models: GroupedModel[]): FieldDefiniti
     },
     {
       fieldName: EIS_CATEGORY_FILTER_ID,
-      resolveIdToDisplay: (id) =>
-        TASK_TYPE_FILTERS.find(({ category }) => category === id)?.label ?? id,
+      resolveIdToDisplay: (id) => MODEL_TYPE_FILTERS.find(({ key }) => key === id)?.label ?? id,
       resolveDisplayToId: (displayValue) =>
-        TASK_TYPE_FILTERS.find(({ label }) => label.toLowerCase() === displayValue.toLowerCase())
-          ?.category,
+        MODEL_TYPE_FILTERS.find(({ label }) => label.toLowerCase() === displayValue.toLowerCase())
+          ?.key,
       resolveFuzzyDisplayToIds: (displayValue) =>
-        TASK_TYPE_FILTERS.filter(({ label }) => matchesPartial(label, displayValue)).map(
-          ({ category }) => category
+        MODEL_TYPE_FILTERS.filter(({ label }) => matchesPartial(label, displayValue)).map(
+          ({ key }) => key
         ),
     },
   ];

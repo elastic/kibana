@@ -16,17 +16,23 @@ import {
 } from '../common/proposals/constants';
 import { IMPACT_API_PRIVILEGE_MANAGE, IMPACT_API_PRIVILEGE_READ } from './impact/constants';
 import {
+  ESCALATIONS_UI_CAPABILITY_MANAGE,
+  ESCALATIONS_UI_CAPABILITY_SHOW,
+} from '../common/escalations/constants';
+import {
   PROPOSALS_API_PRIVILEGE_MANAGE,
   PROPOSALS_API_PRIVILEGE_READ,
 } from './proposals/constants';
+import {
+  ESCALATIONS_API_PRIVILEGE_MANAGE,
+  ESCALATIONS_API_PRIVILEGE_READ,
+} from './escalations/constants';
 
 export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }) => {
   features.registerKibanaFeature({
     id: AGENTIC_INVESTIGATIONS_PLUGIN_ID,
-    // Named for proposals because action proposals move to their own plugin
-    // in a follow-up; Impact is grantable on its own via the sub-feature below.
     name: i18n.translate('xpack.agenticInvestigations.featureName', {
-      defaultMessage: 'Proposed Actions',
+      defaultMessage: 'Agentic Investigations',
     }),
     minimumLicense: 'enterprise',
     // Sits just after Workflows (3000), whose platform it builds on, and after
@@ -78,6 +84,38 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
                 api: [IMPACT_API_PRIVILEGE_READ],
                 savedObject: { all: [], read: [] },
                 ui: [IMPACT_UI_CAPABILITY_SHOW],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: i18n.translate('xpack.agenticInvestigations.escalationsSubFeatureName', {
+          defaultMessage: 'Escalations',
+        }),
+        privilegeGroups: [
+          {
+            groupType: 'mutually_exclusive',
+            privileges: [
+              {
+                id: 'escalations_all',
+                name: i18n.translate('xpack.agenticInvestigations.escalationsAllPrivilegeName', {
+                  defaultMessage: 'Create, update, and view escalations',
+                }),
+                includeIn: 'all',
+                api: [ESCALATIONS_API_PRIVILEGE_READ, ESCALATIONS_API_PRIVILEGE_MANAGE],
+                savedObject: { all: [], read: [] },
+                ui: [ESCALATIONS_UI_CAPABILITY_SHOW, ESCALATIONS_UI_CAPABILITY_MANAGE],
+              },
+              {
+                id: 'escalations_read',
+                name: i18n.translate('xpack.agenticInvestigations.escalationsReadPrivilegeName', {
+                  defaultMessage: 'View escalations',
+                }),
+                includeIn: 'read',
+                api: [ESCALATIONS_API_PRIVILEGE_READ],
+                savedObject: { all: [], read: [] },
+                ui: [ESCALATIONS_UI_CAPABILITY_SHOW],
               },
             ],
           },

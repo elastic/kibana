@@ -2,7 +2,7 @@
 
 Solution-agnostic base layer for the entities an agent and a human collaborate on. It owns their storage, their API, and their workflow steps, so a Worker in any solution can create them and any solution's UI can act on them.
 
-Today it holds **proposals** and **impact**. **Investigations** and **incidents** are next, which is why the plugin is an umbrella rather than one plugin per entity.
+Today it holds **proposals**, **impact**, and **escalations**. **Investigations** are next, which is why the plugin is an umbrella rather than one plugin per entity.
 
 Consumed by AlertZero (Security) and intended for Nightshift (Observability). Nothing in this plugin is solution-specific.
 
@@ -20,11 +20,13 @@ common/
   index.ts               umbrella barrel, re-exports each entity barrel
   proposals/             constants, schemas, step definitions shared with the browser
   impact/                constants and schemas
+  escalations/           constants and schemas
 server/
   plugin.ts config.ts types.ts
   features.ts            umbrella feature and its privileges
   proposals/             routes, services, step handlers, storage, managed workflows
   impact/                routes, service, storage
+  escalations/           routes and service
 public/
   plugin.ts index.ts types.ts
   proposals/             browser step definitions for the YAML editor
@@ -34,14 +36,16 @@ Adding an entity means adding a directory in each of the three, an entity barrel
 
 ## Privileges
 
-One Kibana feature, `agenticInvestigations`, shown in the Roles and Spaces pickers as **Proposed Actions** — named for proposals alone because action proposals move to their own plugin in a follow-up. Both privileges are declared inline on the feature:
+One Kibana feature, `agenticInvestigations`, shown in the Roles and Spaces pickers as **Agentic Investigations**. Proposal privileges are declared inline on the feature:
 
 | Feature privilege | API | UI |
 | ----------------- | ------------------------------------ | ------------------------------------ |
 | `all`             | `read_proposals`, `manage_proposals` | `showProposals`, `decideProposals`   |
 | `read`            | `read_proposals`                     | `showProposals`                      |
 
-So `read` can see the queue but cannot decide it. **Impact** is a sub-feature pulled up through `includeIn` rather than more inline privileges: `all` includes Impact All (`read_impact`, `manage_impact`, `showImpact`, `manageImpact`) and `read` includes Impact Read. `minimal_all` / `minimal_read` therefore grant proposals without Impact; a role can also grant the Impact sub-feature on its own. The feature carries `minimumLicense: 'enterprise'`.
+So `read` can see the queue but cannot decide it. **Impact** and **Escalations** are sub-features pulled up through `includeIn` rather than more inline privileges. `all` includes Impact All (`read_impact`, `manage_impact`, `showImpact`, `manageImpact`) and Escalations All (`read_escalations`, `manage_escalations`, `showEscalations`, `manageEscalations`); `read` includes Impact Read and Escalations Read. A role can also grant either sub-feature on its own. The feature carries `minimumLicense: 'enterprise'`.
+
+**Note:** `minimal_all` and `minimal_read` are **not** equivalent to `all` and `read`. Sub-feature privileges are included in the base privilege levels through `includeIn: 'all'` / `includeIn: 'read'` — but `minimal_all` and `minimal_read` only grant sub-features marked `groupType: 'independent'` when the user holds them explicitly. Any new entity should follow the same pattern: put its capabilities in a sub-feature with `includeIn` rather than in additional inline privileges.
 
 ### Three questions, three places
 
@@ -57,7 +61,7 @@ Conflating these is how proposal authorization goes wrong, so each is enforced s
 
 All checks **fail closed**, including when the `security` plugin is absent entirely: without it there is no principal to evaluate, and a workflow that cannot be attributed must not write. Workflows cannot execute steps without an identity, so an absent principal is a bug rather than a normal path.
 
-**Not in the service.** The service is reached from routes (already gated declaratively), from steps (principal is an execution), and from other plugins through the start contract — in-process and trusted, which is how AlertZero's `ConversationProposalsService` calls `listByWindow`. Request-based authz there would mean threading a request through every call and standing up a second mechanism beside the routes'. The service stays the invariant layer instead: terminal guards, decision immutability, valid-pair enforcement, action-input validation.
+**Not in the service.** The service is reached from routes (already gated declaratively), from steps (principal is an execution), and from other plugins through the start contract — in-process and trusted, which is how AlertZero's `ConversationProposalsService` calls `list`. Request-based authz there would mean threading a request through every call and standing up a second mechanism beside the routes'. The service stays the invariant layer instead: terminal guards, decision immutability, valid-pair enforcement, action-input validation.
 
 **The principal differs by surface, and one of them cannot be checked.** An authenticated resume runs the post-gate steps under a clone of the resumer's API key, so the check evaluates the human. An **external-token resume carries no request**, so the engine wakes the pre-scheduled task under the *workflow runner's* key instead — and that identity necessarily holds `manage_proposals`, because it had to in order to create the proposal. Checking it would therefore authorize every click on a magic link, as the Worker, and record the Worker as the decider.
 
@@ -78,7 +82,7 @@ An **Impact** record is the set of entities (users, hosts, services) an investig
 - A **proposal** is a recommendation awaiting a human decision. It lives in `.kibana-investigation-proposals` and points at the conversation it belongs to.
 - An **action proposal** additionally references a managed **action workflow** (`actionWorkflowId`) plus its `actionInput`. Approving it runs that workflow.
 - A **non-action proposal** carries only its `comment` — instructions the analyst carries out themselves before approving. It is always gated: autonomy governs whether an action may run unattended, and there is no action here to govern, so `autoApprove` is ignored.
-- Proposals are immutable once decided, and are never tuned: changing an action means dismissing the proposal and creating a new one.
+- Proposals are immutable once **decided**. An undecided proposal can still be **revised**: `revise()` supersedes the current head with a new revision that carries the correction, and the gate decides whichever revision is live when the analyst answers. The predecessor is marked `superseded` and hidden from the queue by `excludeSuperseded`, so a chain shows one live row at a time.
 
 ### Decision and status are two axes
 
@@ -121,6 +125,27 @@ Re-writing the *same* terminal status is deliberately allowed, so settling stays
 **`expired` is persisted but expiry is also computed.** Between the deadline passing and the loop settling the record there is task lag during which it still reads `pending`. The computed `expired` flag on the read model is for the UI; persisted `status: expired` is the durable settlement.
 
 `supersededBy` points at the proposal that replaced this one — written when a failed action is re-offered as a fresh proposal. The queue filters superseded records out so a chain of retries appears once rather than per attempt.
+
+### The revision chain
+
+A proposal that is still undecided can be corrected rather than dismissed and
+re-offered. `revise()` writes a new revision, points the predecessor at it with
+`supersededBy`, and marks that predecessor `superseded`; both rows carry the same
+`rootProposalId`, so the chain is one query rather than a pointer walk. Only the
+head is live: `excludeSuperseded` hides the rest from the queue, and `revise()`
+refuses a proposal that is already superseded, decided, or expired, so a chain
+cannot fork and cannot be extended past its deadline.
+
+The gate does not re-park on a revision. It stays parked on the *original*
+execution, and the decision is applied to whichever revision is live when the
+analyst answers — `proposals.getLatestRevision`, called after the resumer is
+authorized and before any write, resolves the carried id to the chain head. An
+approval therefore carries the `actionInput` of the revision the approver was
+shown, not the one the Worker first proposed.
+
+Chains predating this field have `rootProposalId` on neither row; the term query
+misses and the fallback returns the row asked about, which is the correct answer
+for a chain of one. The plugin is unshipped, so there is nothing to migrate.
 
 ### Architecture
 
@@ -188,7 +213,9 @@ sequenceDiagram
     S->>G: resume(approved: true), as the analyst
 
     G->>S: proposals.checkDecidePrivileges
-    Note over G,S: Before any write. A denial re-parks<br/>rather than spending the gate.
+    Note over G,S: Before any read or write. A denial re-parks<br/>rather than spending the gate.
+    G->>S: proposals.getLatestRevision
+    Note over G,S: A revision may have landed during the park,<br/>so the decision settles the chain's live head.
     G->>S: proposals.updateProposal(approved + executing)
     S->>I: decision=approved, decidedBy=<analyst>
     G->>AW: workflow.execute(actionInput)
@@ -297,21 +324,20 @@ All routes are internal and versioned (`/internal/investigations/proposals`, ver
 - `GET /internal/investigations/proposals/{id}` — read one, with action metadata resolved
 - `POST /internal/investigations/proposals/{id}/approve` — release the gate positively
 - `POST /internal/investigations/proposals/{id}/dismiss` — annotate the reason, then release the gate negatively
+- `POST /internal/investigations/proposals/{proposalId}/revisions` — supersede the current head with a corrected revision, which becomes the proposal the gate decides
+- `GET /internal/investigations/proposals/charts-summary` — aggregate counts for the queue's charts
 
-Reads need `read_proposals`; both decisions need `manage_proposals`.
+Reads and the chart summary need `read_proposals`; both decisions and a revision need `manage_proposals`.
 
 Two routes are deliberately absent. There is **no update route**: `status` is a consequence of deciding and executing, never something a caller sets. And there is **no create route**: a decision is written behind the proposal's gate, so a proposal created without a gate execution could never be decided — approving it would annotate the record and report success while nothing settled it. `proposals.createProposal` is the only way to make one, and the only caller that knows the execution id to stamp.
 
 ### Reads share one filter vocabulary
 
-`ProposalFilters` — `status`, `decision`, `conversationId`, `excludeSuperseded`, `excludeExpired` — is translated by a single builder, so a filter cannot come to mean one thing on the HTTP list and another on the in-process one. Two reads consume it:
+`ProposalFilters` — `status`, `decision`, `conversationId`, `excludeSuperseded`, `excludeExpired` — is translated by a single builder, so a filter cannot come to mean one thing on the HTTP list and another on the in-process one. `list()` is the only read that consumes it: it applies the filters as a conjunction, then sorts and pages in Elasticsearch. `decidedWithinHours` goes through the same builder, bounding a closed queue to a recency window rather than all decided history.
 
-- **`list()`** applies the filters as a conjunction, then sorts and pages in Elasticsearch.
-- **`listByWindow()`** applies the same filters, then unions two sets on top: everything still awaiting at any age, plus everything decided within the last N hours. That union is what the shape *is*, not a flag — "still awaiting" and "decided recently" are unrelated conditions, so neither can be expressed as one more filter. It is capped rather than paged, which is why it has no HTTP route; in-process callers reach it through the start contract.
+An open queue filters on `status: 'pending'`, which is the whole "awaiting" condition. `excludeExpired` is still worth passing alongside it, because it filters on the deadline *date* rather than the status: between the deadline passing and the gate workflow settling the record there is task lag during which it still reads `pending`.
 
-A decision queue filters on `status: 'pending'`, which is the whole "awaiting" condition. `excludeExpired` is still worth passing alongside it, because it filters on the deadline *date* rather than the status: between the deadline passing and the gate workflow settling the record there is task lag during which it still reads `pending`.
-
-A recently expired proposal *does* reach `listByWindow`, through the decided half: `update` stamps `decidedAt` whenever it settles a proposal, including one nobody decided, so "you missed this" surfaces as activity. It carries no `decision`, though — which is why a consumer must classify on the status. `isAwaitingDecision()` exists for exactly that, and classifying on the decision instead puts an unanswerable proposal back in the open queue.
+A recently expired proposal *does* reach a closed queue, through `decidedWithinHours`: `update` stamps `decidedAt` whenever it settles a proposal, including one nobody decided, so "you missed this" surfaces as activity. It carries no `decision`, though — which is why a consumer must classify on the status. `isAwaitingDecision()` exists for exactly that, and classifying on the decision instead puts an unanswerable proposal back in the open queue.
 
 **The two decision routes are privilege-checked bridges to the gate, not writers.** Each loads the proposal, asserts no decision exists yet, asserts the deadline has not passed, compares the submitted `actionInput` against the record on an approval, and resumes. The workflow behind the gate records the decision.
 
@@ -337,6 +363,7 @@ The service surface follows from that: `releaseGate()` makes at most that one an
 
 - **The decision is written behind the gate, by the workflow.** Every resume surface funnels through the gate, so one write there covers them all; a write in the approve route would only ever cover that route.
 - **Nothing durable is written before the resume**, so a failed resume needs no rollback. The sole exception is the dismiss reason, which the gate cannot carry.
+- **The privilege check precedes every read and write in the loop.** The chain resolve reads the proposal on the resumer's behalf, so it waits for the check too; an unauthorized resumer is re-parked before anything is read for it. The timeout path resolves the chain separately, inside its own handler, because it writes without ever reaching that check.
 - **The privilege check precedes every write in the loop.** A write that failed first would leave the gate spent and the proposal stranded.
 - **A settled status cannot move and a decision cannot be overwritten.** Two independent guards, because the two axes settle independently.
 - **The gate step is resolved explicitly.** The platform's waiting-step lookup only matches `waitForInput`; for a `waitForApproval` gate it returns nothing and would resume *without* claiming the step or stamping the audit envelope. `resumeGate` finds the step itself and passes `stepExecutionId`.
@@ -355,7 +382,7 @@ Registering the owner is not optional. The startup sweep `cleanupUnregisteredOrp
 
 ## Index naming
 
-`.kibana-investigation-proposals` is permanent. `.kibana*` is already granted to the `kibana_system` role, so the index needs no Elasticsearch-side system index registration — a dedicated prefix such as `.investigation-proposals` would. `anonymization` ships `.kibana-anonymization-profiles` on the same reasoning. Each entity gets its own index rather than one index discriminated by a type field.
+`.kibana-investigation-proposals` is permanent. `.kibana*` is already granted to the `kibana_system` role, so the index needs no Elasticsearch-side system index registration — a dedicated prefix such as `.investigation-proposals` would. `anonymization` ships `.kibana-anonymization-profiles` on the same reasoning. Each entity gets its own index rather than one index discriminated by a type field. **Escalations are the documented exception:** they live in Agent Builder's `.chat-conversations` index (a conversation with `template_id: 'escalation'`), and this plugin owns no storage for them. The reasons are: (a) Agent Builder's conversation model already provides everything an escalation needs — metadata, access control, space scoping, OCC writes; (b) adding an escalations index would duplicate that infrastructure for no benefit; (c) the visibility and collaborator model that agents and investigations already use must apply to escalations for free. Any future entity that fits the conversation model should do the same rather than adding an index by default.
 
 ## Testing the gate workflow
 
@@ -425,4 +452,74 @@ The point of the exercise is the identity behaviour: a rule created by an approv
 - **`.kibana-*` index naming** buys us out of a system index registration, at the cost of living in a namespace we do not own.
 - **No Scout API coverage yet.** The HTTP surface is covered by Jest only, as `anonymization` shipped.
 - **Impact has no workflow steps or Agent Builder attachment yet.** The index, service, and HTTP surface land first so AlertZero can hydrate `entityIds` in-process; `investigations.attachImpact` / `investigations.getImpact` and `investigation_impact` follow.
-- **Investigations and incidents still do not exist.** The directory convention now holds a second entity (Impact), but those two remain the reason the plugin is an umbrella.
+
+## Escalations
+
+### Model
+
+An **escalation** is a durable, shareable record that an analyst creates when a collection of investigations warrants formal escalation. Unlike proposals — which live in a bespoke index — escalations live in Agent Builder's `.chat-conversations` index as conversations with `template_id: 'escalation'`. That choice buys the full conversation stack: OCC-safe metadata writes, access control, space scoping, and Agent Builder's conversation template validation.
+
+`EscalationsService` is a thin orchestration façade over `agentBuilder.conversations.getScopedClient({ request })`. It owns no Elasticsearch client and no index.
+
+### Privileges
+
+Escalations use an `escalations` sub-feature on the `agenticInvestigations` Kibana feature:
+
+The `escalations` sub-feature uses a `mutually_exclusive` privilege group, so a user receives exactly one of:
+
+| Sub-feature privilege | API | UI |
+| --- | --- | --- |
+| `escalations_all` (included in `all`) | `read_escalations`, `manage_escalations` | `showEscalations`, `manageEscalations` |
+| `escalations_read` (included in `read`) | `read_escalations` | `showEscalations` |
+
+### API
+
+All routes are internal and versioned (`/internal/investigations/escalations`, version `1`):
+
+- `GET /internal/investigations/escalations` — list non-closed escalations the caller can access; needs `read_escalations`
+- `POST /internal/investigations/escalations` — create an escalation from a linked investigation; needs `manage_escalations`
+- `PATCH /internal/investigations/escalations/{id}` — update title or append linked investigations; needs `manage_escalations`
+
+### Create behaviour
+
+`POST` takes `{ linked_investigation_id, visibility, collaborators? }`. The handler:
+
+1. Fetches the investigation through the caller's scoped client — this enforces that the caller can see the investigation they are escalating.
+2. Validates that the target is an `investigation` conversation (throws a `400` otherwise).
+3. Resolves the escalation template's declared fields at runtime via `agentBuilder.conversationTemplates.get('escalation')`.
+4. Copies the intersection of the investigation's metadata and those declared fields, **excluding `status`** (so the escalation opens with `status: 'open'` from the template default) and **excluding `linked_investigations`** (set separately to `[linked_investigation_id]`). This filter is what prevents a `400` from `workflow_execution_id`, which is declared on the investigation template but not on the escalation template.
+5. Creates the conversation with `templateId: 'escalation'` and no explicit `agentId` — the default agent is used, so collaborators can always see the escalation regardless of their access to the investigation's agent.
+
+### List behaviour
+
+`GET` accepts optional `page` and `per_page` query parameters (defaults: `page=1`, `per_page=50`; maximum `per_page=50`; `page * per_page` must not exceed `10,000`). It returns:
+
+```json
+{
+  "pagination": { "total": 42, "page": 1, "per_page": 50 },
+  "results": [ /* ConversationWithoutRoundsWithPermissions */ ]
+}
+```
+
+The filter is **fixed and server-side**: `template_id: "escalation" and not metadata.status: "closed"`. A few things to note:
+
+- The filter uses `metadata.status`, not the bare `status` field. The bare `status` maps to the
+  conversation-level `ConversationRoundStatus` (`in_progress`/`completed`/…); the escalation
+  open/closed state lives in the template metadata.
+- `not metadata.status: "closed"` keeps documents where the field is absent, so a freshly created
+  escalation (whose metadata carries `status: "open"` from the template default) always appears.
+- Access filtering is inherited from Agent Builder's `buildReadAccessFilter`: a caller sees public
+  escalations, their own escalations, and private escalations they are listed in. No access control needs
+  to be written in this plugin.
+- Results are sorted `updated_at desc` (newest-first) with a `created_at` tiebreaker, which is the
+  `client.search()` default when no explicit sort is requested.
+- Results include no round data (`_source` is `CONVERSATION_LIST_SOURCE_FIELDS`). The response type
+  is `EscalationConversationSummary` (`ConversationWithoutRoundsWithPermissions`), which is distinct
+  from `EscalationConversation` (the create/update response that includes rounds).
+
+### MVP limitations
+
+- **Owner-only writes.** `patchMetadata` and `update` in Agent Builder are `access: 'owner'`. This conflicts with the epic requirement that participants can link further investigations. A follow-up is needed to widen the access check in Agent Builder's authorization layer.
+- **Last-write-wins on concurrent appends.** The array union for `linked_investigations` is computed in the service (outside the OCC write callback), so two concurrent `PATCH` requests can each read stale state and one link can be silently lost. The fix is to move the union computation into `writeConversation`'s `fields` callback. Accepted for MVP; follow-up filed.
+- **List caps at 10,000 results.** Offset pagination cannot go beyond Elasticsearch's default result window. Escalations beyond that threshold are unreachable through this API. `search_after` would be needed for deeper paging.
+- **Closed escalations are never returned.** The `status: "closed"` filter is not toggleable. A separate endpoint or a future filter parameter would be needed to retrieve closed escalations.

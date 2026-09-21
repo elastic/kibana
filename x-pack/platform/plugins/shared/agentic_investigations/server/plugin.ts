@@ -23,11 +23,14 @@ import { initializeManagedWorkflows } from './proposals/managed_workflows/initia
 import { registerRoutes } from './proposals/routes/register_routes';
 import { ProposalsService } from './proposals/services/proposals_service';
 import { createProposalPrivilegesChecker } from './proposals/services/check_proposal_privileges';
+import type { ProposalPrivilegesChecker } from './proposals/services/check_proposal_privileges';
 import { createProposalUserResolver } from './proposals/services/resolve_proposal_user';
 import type { ResolveProposalUser } from './proposals/services/resolve_proposal_user';
 import { registerProposalAttachment } from './proposals/attachments';
 import { registerStepDefinitions } from './proposals/step_types';
 import { createProposalsStorageClient } from './proposals/storage/proposals_storage';
+import { EscalationsService } from './escalations/services/escalations_service';
+import { registerEscalationRoutes } from './escalations/routes/register_routes';
 import type {
   AgenticInvestigationsPluginSetup,
   AgenticInvestigationsPluginStart,
@@ -50,6 +53,8 @@ export class AgenticInvestigationsPlugin
   // read only from start() onwards; the getter asserts that ordering.
   private proposalsService?: ProposalsService;
   private impactService?: ImpactService;
+  private proposalPrivileges?: ProposalPrivilegesChecker;
+  private escalationsService?: EscalationsService;
   private spaces?: AgenticInvestigationsStartDependencies['spaces'];
   private resolveUser?: ResolveProposalUser;
 
@@ -71,9 +76,7 @@ export class AgenticInvestigationsPlugin
 
     registerFeatures({ features });
 
-    if (agentBuilder) {
-      registerProposalAttachment(agentBuilder);
-    }
+    registerProposalAttachment(agentBuilder);
 
     // Declares ownership of this plugin's managed workflows. Without it the
     // startup orphan sweep treats every workflow we installed as owned by an
@@ -89,10 +92,7 @@ export class AgenticInvestigationsPlugin
       // Steps register during setup but only run once Kibana has started, so
       // the authorization service is resolved per call rather than captured
       // here — `security.authz` does not exist yet.
-      privileges: createProposalPrivilegesChecker({
-        getSecurity: async () => (await coreSetup.getStartServices())[1].security,
-        logger: this.logger,
-      }),
+      privileges: this.getProposalPrivilegesChecker(coreSetup),
     });
 
     const router = coreSetup.http.createRouter();
@@ -111,6 +111,12 @@ export class AgenticInvestigationsPlugin
       getImpactService: () => this.requireImpactService(),
       getSpaceId: (request) => this.getSpaceId(request),
       resolveUser: (request) => this.requireUserResolver()(request),
+    });
+
+    registerEscalationRoutes({
+      router,
+      logger: this.logger,
+      getEscalationsService: () => this.requireEscalationsService(),
     });
 
     return {};
@@ -147,6 +153,13 @@ export class AgenticInvestigationsPlugin
       }),
     });
 
+    this.escalationsService = new EscalationsService({
+      logger: this.logger,
+      getConversationClient: (request) =>
+        plugins.agentBuilder.conversations.getScopedClient({ request }),
+      conversationTemplates: plugins.agentBuilder.conversationTemplates,
+    });
+
     void initializeManagedWorkflows({
       workflowsExtensions: plugins.workflowsExtensions,
       logger: this.logger,
@@ -161,6 +174,8 @@ export class AgenticInvestigationsPlugin
     return {
       getProposalsService: () => this.requireProposalsService(),
       getImpactService: () => this.requireImpactService(),
+      getProposalPrivileges: () => this.requireProposalPrivileges(),
+      getEscalationsService: () => this.requireEscalationsService(),
     };
   }
 
@@ -189,6 +204,37 @@ export class AgenticInvestigationsPlugin
       );
     }
     return this.impactService;
+  }
+
+  // Resolves security lazily per call, so step registration can use it during setup.
+  private getProposalPrivilegesChecker(
+    coreSetup: CoreSetup<AgenticInvestigationsStartDependencies>
+  ): ProposalPrivilegesChecker {
+    if (!this.proposalPrivileges) {
+      this.proposalPrivileges = createProposalPrivilegesChecker({
+        getSecurity: async () => (await coreSetup.getStartServices())[1].security,
+        logger: this.logger,
+      });
+    }
+    return this.proposalPrivileges;
+  }
+
+  private requireProposalPrivileges(): ProposalPrivilegesChecker {
+    if (!this.proposalPrivileges) {
+      throw new Error(
+        'Proposal privileges checker is not available until the agenticInvestigations plugin has been set up'
+      );
+    }
+    return this.proposalPrivileges;
+  }
+
+  private requireEscalationsService(): EscalationsService {
+    if (!this.escalationsService) {
+      throw new Error(
+        'Escalations service is not available until the agenticInvestigations plugin has started'
+      );
+    }
+    return this.escalationsService;
   }
 
   private getSpaceId(request: KibanaRequest): string {
