@@ -22,7 +22,7 @@ import { apiPublishesEsql } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
 import type { IdGenerator } from '../attachment_types';
 
-export const ENHANCE_DASHBOARD_PROMPT = '/dashboard-management enhance this dashboard';
+export const ENHANCE_DASHBOARD_PROMPT = '/dashboard-management Enhance this dashboard';
 
 export interface EnhanceDashboardActionDeps {
   openChat: AgentBuilderPluginStart['openChat'];
