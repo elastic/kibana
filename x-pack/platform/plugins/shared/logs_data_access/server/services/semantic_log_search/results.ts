@@ -28,11 +28,12 @@ export const unavailableResult = (reason: UnavailableReason): SemanticLogSearchR
   reason,
 });
 
-/** Which stage of the search pipeline failed. Only `PROBE` treats a timeout as actionable. */
+/** Which stage of the search pipeline failed. `PROBE` and `RERANK` treat a timeout as actionable. */
 export const SEARCH_PHASE = {
   CAPABILITIES: 'capabilities',
   PROBE: 'probe',
   SEARCH: 'search',
+  RERANK: 'rerank',
 } as const;
 
 type SearchPhase = (typeof SEARCH_PHASE)[keyof typeof SEARCH_PHASE];
@@ -58,7 +59,9 @@ function isTimeoutError(error: unknown): boolean {
 }
 
 // A probe timeout is actionable — the scope is too broad to categorize within the budget and a
-// narrower one may succeed. A timeout in any other phase is not.
+// narrower one may succeed. A rerank timeout is actionable in a different way: the model is likely
+// still loading, so retrying shortly may succeed while narrowing the scope will not. A timeout in
+// any other phase is not actionable.
 const PHASE_FAILURE: Record<
   SearchPhase,
   { timeoutReason: ErrorReason; timeoutText: string; failedText: string }
@@ -77,6 +80,11 @@ const PHASE_FAILURE: Record<
     timeoutReason: ERROR_REASON.TIMEOUT,
     timeoutText: 'timed out',
     failedText: 'failed',
+  },
+  rerank: {
+    timeoutReason: ERROR_REASON.INFERENCE_NOT_READY,
+    timeoutText: 'rerank timed out: the inference endpoint may still be loading its model',
+    failedText: 'rerank failed',
   },
 };
 

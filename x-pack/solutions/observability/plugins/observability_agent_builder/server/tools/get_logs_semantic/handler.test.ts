@@ -305,6 +305,7 @@ describe('getLogsSemanticHandler', () => {
     ['execution', 'Do not retry automatically or fall back silently'],
     ['invalid_params', 'Correct them and retry once'],
     ['scope_too_large', 'Narrow the time range or add a KQL filter, then retry once'],
+    ['inference_not_ready', 'Wait about 30 seconds and retry the same query once'],
   ] as const)('maps %s errors to actionable warnings', async (reason, warning) => {
     const search = jest.fn().mockResolvedValue({ status: 'error', reason });
 
@@ -316,6 +317,24 @@ describe('getLogsSemanticHandler', () => {
 
     expect(result.patterns).toEqual([]);
     expect(result.warnings[0]).toContain(warning);
+  });
+
+  it('regression: does not advise narrowing scope when the reranker is not ready', async () => {
+    // A cold rerank model previously surfaced as `timeout`, whose warning says to narrow the time
+    // range. Agents complied, the narrowed retry succeeded only because the model had warmed, and
+    // the wrong cause was reinforced. The warning must not mention narrowing or KQL filters.
+    const search = jest.fn().mockResolvedValue({ status: 'error', reason: 'inference_not_ready' });
+
+    const result = await getLogsSemanticHandler({
+      esClient: mockEsClient,
+      params: baseParams,
+      semanticLogSearch: { search } as SemanticLogSearchService,
+    });
+
+    expect(result.warnings[0]).toMatch(/still loading/i);
+    // Explicitly counter-instructs rather than merely omitting the scope advice.
+    expect(result.warnings[0]).toMatch(/do not narrow/i);
+    expect(result.warnings[0]).not.toMatch(/add a KQL filter/i);
   });
 
   it('rejects an invalid date range before calling the service', async () => {

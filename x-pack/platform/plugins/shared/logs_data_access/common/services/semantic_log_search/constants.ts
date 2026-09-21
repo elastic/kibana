@@ -32,6 +32,11 @@ export const ERROR_REASON = {
    * Unlike `TIMEOUT`, this is actionable — a narrower time range or KQL filter may succeed.
    */
   SCOPE_TOO_LARGE: 'scope_too_large',
+  /**
+   * The rerank endpoint did not respond in time, typically because its model is still loading.
+   * Retrying shortly may succeed; narrowing the query will not, since the cause is not query cost.
+   */
+  INFERENCE_NOT_READY: 'inference_not_ready',
 } as const;
 
 export type SearchStatus = (typeof SEARCH_STATUS)[keyof typeof SEARCH_STATUS];

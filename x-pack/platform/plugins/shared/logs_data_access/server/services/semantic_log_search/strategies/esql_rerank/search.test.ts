@@ -11,7 +11,11 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { errors } from '@elastic/elasticsearch';
 import type { SemanticLogSearchParams } from '../../../../../common/services/semantic_log_search/types';
 import { searchWithEsqlRerank } from './search';
-import { DEFAULT_RANK_WINDOW, MAX_RERANK_INPUT_LENGTH } from '../../constants';
+import {
+  DEFAULT_RANK_WINDOW,
+  MAX_RERANK_INPUT_LENGTH,
+  RERANK_REQUEST_TIMEOUT_MS,
+} from '../../constants';
 
 // ---------------------------------------------------------------------------
 // Test helpers
@@ -459,7 +463,7 @@ describe('searchWithEsqlRerank', () => {
       expect(result).toEqual({ status: 'error', reason: 'timeout' });
     });
 
-    it('returns timeout when the inference rerank call times out', async () => {
+    it('returns inference_not_ready when the inference rerank call times out', async () => {
       const timeoutError = new Error('request timed out');
       timeoutError.name = 'TimeoutError';
 
@@ -476,7 +480,7 @@ describe('searchWithEsqlRerank', () => {
 
       const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, loggerMock.create());
 
-      expect(result).toEqual({ status: 'error', reason: 'timeout' });
+      expect(result).toEqual({ status: 'error', reason: 'inference_not_ready' });
     });
 
     it('returns cancelled for a RequestAbortedError in the categorize phase', async () => {
@@ -553,6 +557,7 @@ describe('searchWithEsqlRerank', () => {
         expect.objectContaining({ signal: abortController.signal })
       );
     });
+  });
 
   // ---------------------------------------------------------------------------
   // rerank call: candidate cap, top_n / return_documents, input truncation
@@ -605,10 +610,7 @@ describe('searchWithEsqlRerank', () => {
         rerankResult: [{ index: 0, relevance_score: 1.0 }],
       });
 
-      await searchWithEsqlRerank(
-        { esClient, ...BASE_PARAMS, maxPatterns: 3 },
-        loggerMock.create()
-      );
+      await searchWithEsqlRerank({ esClient, ...BASE_PARAMS, maxPatterns: 3 }, loggerMock.create());
 
       const rerankArgs = rerank.mock.calls[0][0];
       expect(rerankArgs.top_n).toBe(3);
@@ -640,13 +642,59 @@ describe('searchWithEsqlRerank', () => {
       const rerankArgs = rerank.mock.calls[0][0];
       expect(rerankArgs.input[0].length).toBeLessThanOrEqual(MAX_RERANK_INPUT_LENGTH);
     });
-  });
 
-      it('uses a short timeout on the probe and the full timeout on categorize passes', async () => {
-      const { esClient, esqlQuery } = buildMockClient({ totalDocs: 0 });
+    it('gives the rerank call its own longer timeout, not the ES|QL one', async () => {
+      const headResponse = makePatternResponse([{ pattern: 'Error A', count: 100 }]);
+      const { esClient, rerank } = buildMockClient({
+        totalDocs: 10_000,
+        headResponse,
+        rerankResult: [{ index: 0, relevance_score: 1.0 }],
+      });
 
       await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, loggerMock.create());
 
+      expect(rerank.mock.calls[0][1]).toEqual(
+        expect.objectContaining({ requestTimeout: RERANK_REQUEST_TIMEOUT_MS })
+      );
+    });
+
+    it('regression: a rerank timeout is inference_not_ready, not timeout', async () => {
+      // The reranker is gated on ML model allocation, not query cost. Classifying its timeout as
+      // `timeout` made the tool advise narrowing the scope, which cannot fix a loading model.
+      const headResponse = makePatternResponse([{ pattern: 'Error A', count: 100 }]);
+      const { esClient } = buildMockClient({ totalDocs: 10_000, headResponse });
+      const timeoutError = new Error('Request timed out');
+      timeoutError.name = 'TimeoutError';
+      esClient.inference.rerank = jest.fn().mockRejectedValue(timeoutError);
+
+      const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, loggerMock.create());
+
+      expect(result).toEqual({ status: 'error', reason: 'inference_not_ready' });
+    });
+
+    it('still reports a categorize timeout as timeout, not inference_not_ready', async () => {
+      // The phase split must not swallow the case where narrowing the scope IS the right advice.
+      const timeoutError = new Error('Request timed out');
+      timeoutError.name = 'TimeoutError';
+      const esqlQuery = jest
+        .fn()
+        .mockResolvedValueOnce(makeCountResponse(10_000)) // probe succeeds
+        .mockRejectedValue(timeoutError); // categorize pass times out
+      const esClient = {
+        esql: { query: esqlQuery },
+        inference: { rerank: jest.fn() },
+      } as unknown as ElasticsearchClient;
+
+      const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, loggerMock.create());
+
+      expect(result).toEqual({ status: 'error', reason: 'timeout' });
+    });
+  });
+
+  it('uses a short timeout on the probe and the full timeout on categorize passes', () => {
+    const { esClient, esqlQuery } = buildMockClient({ totalDocs: 0 });
+
+    return searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, loggerMock.create()).then(() => {
       // Probe uses PROBE_TIMEOUT_MS (5_000).
       expect(esqlQuery.mock.calls[0][1]).toEqual(
         expect.objectContaining({ requestTimeout: 5_000 })

@@ -46,10 +46,7 @@ const MESSAGE_CLASSES = {
    * Templates: `log_catalog/message_queue.ts` (kafka error.unavailable) and
    * `log_catalog/outbound.ts` (kafka error.unavailable go/node).
    */
-  kafkaBrokerFailure: [
-    'unable to reach Kafka broker',
-    'No live ISR replicas for partition',
-  ],
+  kafkaBrokerFailure: ['unable to reach Kafka broker', 'No live ISR replicas for partition'],
 
   /**
    * Pool saturation warnings — degraded but not yet failed.
@@ -111,8 +108,7 @@ const QUERIES: readonly EvalQuery[] = [
       { grade: 1, matches: MESSAGE_CLASSES.connectionPoolWarning },
     ],
     traps: MESSAGE_CLASSES.connectionHealthy,
-    note:
-      'Six of the eight grade-2 labels never use the word "connection". Grade-1 pool warnings share vocabulary but are not failures.',
+    note: 'Six of the eight grade-2 labels never use the word "connection". Grade-1 pool warnings share vocabulary but are not failures.',
   },
 
   {
@@ -159,8 +155,7 @@ const QUERIES: readonly EvalQuery[] = [
       { grade: 1, matches: MESSAGE_CLASSES.postgresPoolFailure },
     ],
     traps: MESSAGE_CLASSES.connectionHealthy,
-    note:
-      'Pool saturation warnings are grade 2 (the right answer); pool exhaustion is grade 1 (too late — exceeded, not approaching). Healthy pool stats are the trap.',
+    note: 'Pool saturation warnings are grade 2 (the right answer); pool exhaustion is grade 1 (too late — exceeded, not approaching). Healthy pool stats are the trap.',
   },
 
   {
@@ -171,12 +166,8 @@ const QUERIES: readonly EvalQuery[] = [
       { grade: 2, matches: MESSAGE_CLASSES.postgresPoolFailure },
       { grade: 1, matches: MESSAGE_CLASSES.connectionPoolWarning },
     ],
-    traps: [
-      ...MESSAGE_CLASSES.kafkaBrokerFailure,
-      ...MESSAGE_CLASSES.networkConnectivityFailure,
-    ],
-    note:
-      'Kafka and generic network failures are traps — they are connectivity failures but not Postgres-specific. Tests whether the ranker separates DB-pool errors from other connectivity failures.',
+    traps: [...MESSAGE_CLASSES.kafkaBrokerFailure, ...MESSAGE_CLASSES.networkConnectivityFailure],
+    note: 'Kafka and generic network failures are traps — they are connectivity failures but not Postgres-specific. Tests whether the ranker separates DB-pool errors from other connectivity failures.',
   },
 
   {
@@ -185,8 +176,7 @@ const QUERIES: readonly EvalQuery[] = [
     question: 'messages failing to reach the message broker',
     graded: [{ grade: 2, matches: MESSAGE_CLASSES.kafkaBrokerFailure }],
     traps: [...MESSAGE_CLASSES.postgresPoolFailure, ...MESSAGE_CLASSES.connectionHealthy],
-    note:
-      'Tests whether the ranker separates Kafka messaging failures from Postgres pool failures. Postgres failures and healthy connection logs are traps.',
+    note: 'Tests whether the ranker separates Kafka messaging failures from Postgres pool failures. Postgres failures and healthy connection logs are traps.',
   },
 
   // --- Literal non-regression queries ---

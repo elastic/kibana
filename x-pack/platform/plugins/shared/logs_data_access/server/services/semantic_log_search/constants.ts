@@ -52,8 +52,15 @@ export const MAX_RERANK_INPUT_LENGTH = 2000;
  */
 export const PROBE_TIMEOUT_MS = 5_000;
 
-/** Transport timeout for the ES|QL categorization passes and the inference rerank call. */
+/** Transport timeout for the ES|QL categorization passes. */
 export const ESQL_REQUEST_TIMEOUT_MS = 30_000;
+
+/**
+ * Transport timeout for the inference rerank call, which is gated on ML model allocation rather
+ * than query cost. A cold `.rerank-v1-elasticsearch` was measured importing its model for 21 s
+ * before deployment even began, so it needs a larger budget than the ES|QL passes.
+ */
+export const RERANK_REQUEST_TIMEOUT_MS = 60_000;
 
 /**
  * Noise exclusion threshold: patterns whose sampled count falls below `NOISE_FRACTION_DEFAULT × total × p` are excluded.

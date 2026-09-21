@@ -40,6 +40,8 @@ const WARNINGS = {
     'Semantic log search rejected the request arguments. Correct them and retry once — check that the time range is not inverted and that the index is a plain index pattern (letters, digits, and . _ - : , * + only).',
   scopeTooLarge:
     'Semantic log search could not complete over this scope. Narrow the time range or add a KQL filter, then retry once.',
+  inferenceNotReady:
+    'Semantic log search could not rank results because the reranking model is still loading. Wait about 30 seconds and retry the same query once — do not narrow the time range, the scope is not the problem.',
   serviceUnavailable: 'Semantic log search is not registered. Do not retry.',
   missingTarget: 'No log indices are available to search. Do not retry with this tool.',
   noPatterns:
@@ -60,6 +62,7 @@ const ERROR_REASON_WARNINGS: Record<ErrorReason, string> = {
   execution: WARNINGS.execution,
   invalid_params: WARNINGS.invalidParams,
   scope_too_large: WARNINGS.scopeTooLarge,
+  inference_not_ready: WARNINGS.inferenceNotReady,
 };
 
 interface GetLogsSemanticParams {

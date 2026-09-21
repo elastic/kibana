@@ -14,9 +14,9 @@ import type {
 import {
   DEFAULT_MAX_PATTERNS,
   DEFAULT_RANK_WINDOW,
-  ESQL_REQUEST_TIMEOUT_MS,
   MAX_RERANK_INPUT_LENGTH,
   RERANK_ENDPOINT,
+  RERANK_REQUEST_TIMEOUT_MS,
 } from '../../constants';
 import { ERROR_REASON } from '../../../../../common/services/semantic_log_search/constants';
 import { errorResult, SEARCH_PHASE, toFailureResult } from '../../results';
@@ -78,19 +78,25 @@ export async function searchWithEsqlRerank(
     return { status: 'success', patterns: [] };
   }
 
-  // Step 2: CATEGORIZE with adaptive sampling, then rerank via the inference API.
+  // Step 2: CATEGORIZE with adaptive sampling.
+  let candidates: LogPattern[];
   try {
-    const candidates = await collectCandidates({ scope, total, esClient, abortSignal });
+    candidates = await collectCandidates({ scope, total, esClient, abortSignal });
+  } catch (error) {
+    return toFailureResult(error, { logger, target, phase: SEARCH_PHASE.SEARCH });
+  }
 
-    if (candidates.length === 0) {
-      return { status: 'success', patterns: [] };
-    }
+  if (candidates.length === 0) {
+    return { status: 'success', patterns: [] };
+  }
 
-    const capped = selectRerankCandidates(candidates, DEFAULT_RANK_WINDOW);
+  const capped = selectRerankCandidates(candidates, DEFAULT_RANK_WINDOW);
 
-    // Step 3: rerank over the full candidate set via the inference API.
-    // RERANK runs outside ES|QL because the two passes produce separate result sets that
-    // ES|QL cannot union in a single statement.
+  // Step 3: rerank the candidate set via the inference API, in its own phase so that a model that
+  // is still loading is reported as `inference_not_ready` rather than as an oversized scope.
+  // RERANK runs outside ES|QL because the two passes produce separate result sets that
+  // ES|QL cannot union in a single statement.
+  try {
     const rerankResponse = await esClient.inference.rerank(
       {
         inference_id: RERANK_ENDPOINT,
@@ -100,7 +106,7 @@ export async function searchWithEsqlRerank(
         // We never read the echoed text; suppress it to avoid transferring the full input back.
         return_documents: false,
       },
-      { signal: abortSignal, requestTimeout: ESQL_REQUEST_TIMEOUT_MS }
+      { signal: abortSignal, requestTimeout: RERANK_REQUEST_TIMEOUT_MS }
     );
 
     // TODO: derive a "nothing relevant matched" signal from the top relevance_score and surface it
@@ -117,6 +123,6 @@ export async function searchWithEsqlRerank(
 
     return { status: 'success', patterns: ranked };
   } catch (error) {
-    return toFailureResult(error, { logger, target, phase: SEARCH_PHASE.SEARCH });
+    return toFailureResult(error, { logger, target, phase: SEARCH_PHASE.RERANK });
   }
 }

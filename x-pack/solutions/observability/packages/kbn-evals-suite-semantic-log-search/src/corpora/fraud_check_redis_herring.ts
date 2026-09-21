@@ -77,8 +77,7 @@ const QUERIES: readonly EvalQuery[] = [
       { grade: 1, matches: MESSAGE_CLASSES.circuitBreakerWarning },
     ],
     traps: MESSAGE_CLASSES.ghostNoise,
-    note:
-      'Ghost mentions look like infrastructure failures (Redis timeout, Kafka lag) but are noise unrelated to the actual incident.',
+    note: 'Ghost mentions look like infrastructure failures (Redis timeout, Kafka lag) but are noise unrelated to the actual incident.',
   },
 
   {
@@ -90,8 +89,7 @@ const QUERIES: readonly EvalQuery[] = [
       { grade: 1, matches: MESSAGE_CLASSES.circuitBreakerWarning },
     ],
     traps: MESSAGE_CLASSES.ghostNoise,
-    note:
-      'Paraphrase of fraud_check_timed_out with no vocabulary overlap with the log lines. Tests vocabulary-independent ranking across both query phrasing dimensions.',
+    note: 'Paraphrase of fraud_check_timed_out with no vocabulary overlap with the log lines. Tests vocabulary-independent ranking across both query phrasing dimensions.',
   },
 
   {
@@ -103,8 +101,7 @@ const QUERIES: readonly EvalQuery[] = [
       { grade: 1, matches: MESSAGE_CLASSES.gatewayTimeout },
     ],
     traps: MESSAGE_CLASSES.ghostNoise,
-    note:
-      'Warnings are grade 2 here; full timeouts are grade 1 (exceeded threshold, not approaching it). Tests whether the ranker prefers early-warning signals for early-warning questions.',
+    note: 'Warnings are grade 2 here; full timeouts are grade 1 (exceeded threshold, not approaching it). Tests whether the ranker prefers early-warning signals for early-warning questions.',
   },
 ];
 

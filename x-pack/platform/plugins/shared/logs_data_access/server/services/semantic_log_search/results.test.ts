@@ -89,6 +89,30 @@ describe('toFailureResult — timeout', () => {
     expect(result).toEqual({ status: 'error', reason: 'timeout' });
   });
 
+  it('classifies a real TimeoutError as inference_not_ready in the rerank phase', () => {
+    // A cold rerank model can spend longer loading than the whole query budget. Reporting that as
+    // `timeout` told callers to narrow the scope, which never helps — the scope is not the cause.
+    const logger = loggerMock.create();
+    const timeout = new errors.TimeoutError('timed out', {} as any);
+    const result = toFailureResult(timeout, {
+      logger,
+      target: 'logs-*',
+      phase: SEARCH_PHASE.RERANK,
+    });
+    expect(result).toEqual({ status: 'error', reason: 'inference_not_ready' });
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('still be loading its model'));
+  });
+
+  it('classifies a non-timeout rerank failure as execution, not inference_not_ready', () => {
+    const logger = loggerMock.create();
+    const result = toFailureResult(new Error('inference blew up'), {
+      logger,
+      target: 'logs-*',
+      phase: SEARCH_PHASE.RERANK,
+    });
+    expect(result).toEqual({ status: 'error', reason: 'execution' });
+  });
+
   it('classifies a real TimeoutError as timeout in the capabilities phase', () => {
     const logger = loggerMock.create();
     const timeout = new errors.TimeoutError('timed out', {} as any);
