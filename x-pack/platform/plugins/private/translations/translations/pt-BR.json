@@ -38130,7 +38130,6 @@
     "xpack.profiling.functionsView.samplesColumnLabel.hint": "Valores estimados",
     "xpack.profiling.functionsView.totalSampleCountLabel": "Estimativa total da amostra:",
     "xpack.profiling.header.betaBadgeTooltip": "Este módulo não está disponível ao público. Ajude-nos reportando bugs.",
-    "xpack.profiling.header.storageExplorerLink.tooltip": "Este módulo não está em disponibilidade geral (GA). Ajude-nos a reportar quaisquer bugs.",
     "xpack.profiling.headerActionMenu.addData": "Adicionar dados",
     "xpack.profiling.headerActionMenu.settings": "Configurações",
     "xpack.profiling.headerActionMenu.storageExplorer": "Explorador de armazenamento",
