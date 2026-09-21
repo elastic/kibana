@@ -37,6 +37,7 @@ import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { pagePathGetters } from '../../../constants';
 import type {
+  AwsCloudConnectorVars,
   CloudConnectorVar,
   CloudConnectorVars,
   AccountType,
@@ -135,6 +136,15 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
     provider === AWS_PROVIDER && !roleArnInvalid && roleArnChanged && trimmedEditedRoleArn !== ''
       ? trimmedEditedRoleArn
       : undefined;
+  // The API replaces `vars` wholesale (the package-policy save path depends on that), so the
+  // edited ARN has to travel with the connector's other vars. Dropping `external_id` here would
+  // orphan its secret in `.fleet-secrets` and leave every later read without an external ID.
+  const varsToSave = useMemo<AwsCloudConnectorVars | undefined>(() => {
+    if (roleArnToSave === undefined || !isAwsCloudConnectorVars(cloudConnectorVars, provider)) {
+      return undefined;
+    }
+    return { ...cloudConnectorVars, role_arn: { type: 'text', value: roleArnToSave } };
+  }, [cloudConnectorVars, provider, roleArnToSave]);
 
   // IacTemplateDetails trims on input, so the value judged here is the value that gets saved.
   const deploymentIdInvalid = isStackArnInvalid(editedIacDeploymentId);
@@ -375,9 +385,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
     updateConnector({
       ...(nameChanged && editedName ? { name: editedName } : {}),
       ...(iacDeploymentIdToSave !== undefined ? { iac_deployment_id: iacDeploymentIdToSave } : {}),
-      ...(roleArnToSave !== undefined
-        ? { vars: { role_arn: { type: 'text', value: roleArnToSave } } }
-        : {}),
+      ...(varsToSave !== undefined ? { vars: varsToSave } : {}),
     });
   };
 
@@ -385,7 +393,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
     !isNameValid ||
     deploymentIdInvalid ||
     roleArnInvalid ||
-    (!nameChanged && !iacChanged && roleArnToSave === undefined) ||
+    (!nameChanged && !iacChanged && varsToSave === undefined) ||
     isUpdating;
 
   const tableCaption = useMemo(

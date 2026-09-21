@@ -12,6 +12,11 @@ import type { FtrProviderContext } from '../../../api_integration/ftr_provider_c
 
 const OLD_ARN = 'arn:aws:iam::123456789012:role/Old';
 const NEW_ARN = 'arn:aws:iam::123456789012:role/New';
+/** Fleet secret reference ids are 20 characters; the connector stores the reference, not the value. */
+const EXTERNAL_ID_SECRET = {
+  type: 'password',
+  value: { id: 'EXTERNALID1234567890', isSecretRef: true },
+} as const;
 
 /**
  * Test fixture package mounted into the FTR package registry from
@@ -71,10 +76,11 @@ export default function (providerContext: FtrProviderContext) {
         .post('/api/fleet/cloud_connectors')
         .set('kbn-xsrf', 'xxxx')
         .send({
-          name: `arn:aws:iam::123456789012:role/fan-out-test-${Date.now()}`,
+          name: `edit_role_arn E2E ${Date.now()}`,
           cloudProvider: 'aws',
           vars: {
             role_arn: { type: 'text', value: OLD_ARN },
+            external_id: EXTERNAL_ID_SECRET,
           },
         })
         .expect(200);
@@ -135,7 +141,11 @@ export default function (providerContext: FtrProviderContext) {
       await supertest
         .put(`/api/fleet/cloud_connectors/${connectorId}`)
         .set('kbn-xsrf', 'xxxx')
-        .send({ vars: { role_arn: { type: 'text', value: NEW_ARN } } })
+        // The browser merges the edited ARN into the stored vars because PUT replaces `vars`
+        // wholesale; sending role_arn alone would drop the external_id secret reference.
+        .send({
+          vars: { role_arn: { type: 'text', value: NEW_ARN }, external_id: EXTERNAL_ID_SECRET },
+        })
         .expect(200);
 
       await expectRoleArnEverywhere(NEW_ARN);
@@ -145,6 +155,7 @@ export default function (providerContext: FtrProviderContext) {
         .get(`/api/fleet/cloud_connectors/${connectorId}`)
         .expect(200);
       expect(connector.item.vars.role_arn.value).to.eql(NEW_ARN);
+      expect(connector.item.vars.external_id).to.eql(EXTERNAL_ID_SECRET);
       expect(connector.item.verification_status).to.eql('pending');
     });
 
@@ -154,7 +165,9 @@ export default function (providerContext: FtrProviderContext) {
       await supertest
         .put(`/api/fleet/cloud_connectors/${connectorId}`)
         .set('kbn-xsrf', 'xxxx')
-        .send({ vars: { role_arn: { type: 'text', value: NEW_ARN } } })
+        .send({
+          vars: { role_arn: { type: 'text', value: NEW_ARN }, external_id: EXTERNAL_ID_SECRET },
+        })
         .expect(200);
 
       expect(await getAgentPolicyRevision()).to.eql(revisionBefore);
@@ -167,7 +180,12 @@ export default function (providerContext: FtrProviderContext) {
       await supertest
         .put(`/api/fleet/cloud_connectors/${connectorId}`)
         .set('kbn-xsrf', 'xxxx')
-        .send({ vars: { role_arn: { type: 'text', value: 'not-an-arn' } } })
+        .send({
+          vars: {
+            role_arn: { type: 'text', value: 'not-an-arn' },
+            external_id: EXTERNAL_ID_SECRET,
+          },
+        })
         .expect(400);
 
       expect(await getAgentPolicyRevision()).to.eql(revisionBefore);

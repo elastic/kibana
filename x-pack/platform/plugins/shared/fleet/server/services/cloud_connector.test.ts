@@ -1412,6 +1412,63 @@ describe('CloudConnectorService', () => {
         );
       });
 
+      // `external_id` is a Fleet secret reference that only lives on the connector; nothing
+      // re-derives it. These two tests pin the contract the browser's merge depends on.
+      describe('vars replacement', () => {
+        const externalId = {
+          type: 'password' as const,
+          value: { id: 'EXTERNALID1234567890', isSecretRef: true },
+        };
+
+        beforeEach(() => {
+          mockSoClient.get.mockResolvedValue({
+            id: connectorId,
+            attributes: {
+              name: 'Test',
+              namespace: '*',
+              cloudProvider: 'aws',
+              vars: { role_arn: { type: 'text', value: oldArn }, external_id: externalId },
+              created_at: '2026-01-01T00:00:00Z',
+              updated_at: '2026-01-01T00:00:00Z',
+            },
+          } as SavedObject);
+        });
+
+        it('keeps external_id when the caller sends the merged vars', async () => {
+          await service.update(
+            mockSoClient,
+            connectorId,
+            { vars: { role_arn: { type: 'text', value: newArn }, external_id: externalId } },
+            { esClient: mockEsClient }
+          );
+
+          expect(mockSoClient.update).toHaveBeenCalledWith(
+            CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+            connectorId,
+            expect.objectContaining({
+              vars: { role_arn: { type: 'text', value: newArn }, external_id: externalId },
+            })
+          );
+        });
+
+        it('replaces vars wholesale, so a partial payload drops external_id', async () => {
+          // Deliberate: the package-policy save path relies on PUT vars being a full replacement.
+          // Callers that only mean to change the ARN have to merge first.
+          await service.update(
+            mockSoClient,
+            connectorId,
+            { vars: { role_arn: { type: 'text', value: newArn } } },
+            { esClient: mockEsClient }
+          );
+
+          expect(mockSoClient.update).toHaveBeenCalledWith(
+            CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+            connectorId,
+            expect.objectContaining({ vars: { role_arn: { type: 'text', value: newArn } } })
+          );
+        });
+      });
+
       it('reverts policies when the connector write fails after successful fan-out', async () => {
         mockSoClient.update.mockRejectedValueOnce(new Error('write-failed'));
 

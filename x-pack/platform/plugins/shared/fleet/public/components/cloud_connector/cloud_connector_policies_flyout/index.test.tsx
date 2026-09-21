@@ -744,6 +744,41 @@ describe('CloudConnectorPoliciesFlyout', () => {
         },
       });
     });
+
+    it('keeps the external_id secret reference in the vars it sends on Save', () => {
+      // The API replaces `vars` wholesale, so the edited ARN has to travel with the connector's
+      // other vars or the secret reference is dropped and orphaned in `.fleet-secrets`.
+      const externalId = {
+        type: 'password',
+        value: { isSecretRef: true, id: 'EXTERNALID1234567890' },
+      };
+      const mockMutate = jest.fn();
+      mockUseUpdateCloudConnector.mockReturnValue({
+        mutate: mockMutate,
+        isLoading: false,
+      } as unknown as ReturnType<typeof useUpdateCloudConnector>);
+      renderFlyout({
+        provider: 'aws',
+        cloudConnectorVars: {
+          role_arn: { type: 'text', value: 'arn:aws:iam::123456789012:role/Existing' },
+          external_id: externalId,
+        },
+      });
+
+      fireEvent.change(screen.getByTestId(ROLE_ARN_FIELD_TEST_SUBJECTS.INPUT), {
+        target: { value: 'arn:aws:iam::123456789012:role/NewRole' },
+      });
+      fireEvent.click(
+        screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.FOOTER_SAVE_BUTTON)
+      );
+
+      expect(mockMutate).toHaveBeenCalledWith({
+        vars: {
+          role_arn: { type: 'text', value: 'arn:aws:iam::123456789012:role/NewRole' },
+          external_id: externalId,
+        },
+      });
+    });
   });
 
   describe('delete cloud connector', () => {
