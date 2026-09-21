@@ -21,6 +21,7 @@ export default function (providerContext: FtrProviderContext) {
   const fleetAndAgents = getService('fleetAndAgents');
   const retry = getService('retry');
   const security = getService('security');
+  const kibanaServer = getService('kibanaServer');
 
   const privilegeTestPkgName = 'preflight_authz_test';
   const privilegeTestPkgVersion = '1.0.0';
@@ -251,6 +252,89 @@ export default function (providerContext: FtrProviderContext) {
         .type('application/zip')
         .send(buf)
         .expect(403);
+    });
+
+    // Verifies the multi-Space destination boundary: when a package was previously installed in
+    // additional Spaces, uploading in the primary Space must check gated-asset privileges for all
+    // destination Spaces, not just the request Space.
+    describe('multi-Space destination authz', () => {
+      const extraSpace = 'preflight-authz-extra';
+
+      const securityRuleAsset = {
+        id: 'test-rule-multispace',
+        type: 'security-rule',
+        attributes: {
+          rule_id: 'test-rule-multispace',
+          name: 'Test Rule Multispace',
+          type: 'query',
+          query: 'event.action: *',
+          language: 'kuery',
+          enabled: false,
+          risk_score: 50,
+          severity: 'medium',
+          version: 1,
+        },
+      };
+
+      beforeEach(async () => {
+        // Pre-seed an install record that already has a security_rule ref in an additional Space.
+        // This simulates a package previously installed into both default and the extra Space so
+        // the preflight check must verify privileges for both destination Spaces.
+        await kibanaServer.savedObjects.create({
+          type: 'epm-packages',
+          id: privilegeTestPkgName,
+          overwrite: true,
+          attributes: {
+            name: privilegeTestPkgName,
+            version: privilegeTestPkgVersion,
+            install_status: 'installed',
+            install_version: privilegeTestPkgVersion,
+            install_started_at: new Date().toISOString(),
+            install_source: 'upload',
+            verification_status: 'unknown',
+            installed_kibana_space_id: 'default',
+            installed_kibana: [],
+            installed_es: [],
+            package_assets: [],
+            additional_spaces_installed_kibana: {
+              [extraSpace]: [{ id: 'pre-existing-rule', type: 'security-rule' }],
+            },
+          },
+        });
+      });
+
+      it('rejects upload when caller lacks rules-all in destination additional Space — 403', async () => {
+        const buf = await buildPackageZipWithAssetType('security_rule', securityRuleAsset);
+
+        // fleet_all_int_all_siem_default_only has siemV5:all scoped to [default] only,
+        // so it lacks rules-all in the extra Space where the existing rule ref lives.
+        await supertestWithoutAuth
+          .post('/api/fleet/epm/packages')
+          .auth(
+            testUsers.fleet_all_int_all_siem_default_only.username,
+            testUsers.fleet_all_int_all_siem_default_only.password
+          )
+          .set('kbn-xsrf', 'xxxx')
+          .type('application/zip')
+          .send(buf)
+          .expect(403);
+      });
+
+      it('allows upload when caller has rules-all in all destination Spaces — 200', async () => {
+        const buf = await buildPackageZipWithAssetType('security_rule', securityRuleAsset);
+
+        // fleet_all_int_all_siem_all has siemV5:all in spaces: ['*'] — covers the extra Space too.
+        await supertestWithoutAuth
+          .post('/api/fleet/epm/packages')
+          .auth(
+            testUsers.fleet_all_int_all_siem_all.username,
+            testUsers.fleet_all_int_all_siem_all.password
+          )
+          .set('kbn-xsrf', 'xxxx')
+          .type('application/zip')
+          .send(buf)
+          .expect(200);
+      });
     });
   });
 }
