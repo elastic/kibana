@@ -97,33 +97,53 @@ const TYPES_WITH_DOTTED_ATTRIBUTE_KEYS: Readonly<Record<string, ReadonlySet<stri
  * Rejects attribute keys containing a dot.
  *
  * Attributes are looked up by flat key (`attributes[key]`), so `'ssl.key'` names a top-level
- * attribute literally called `ssl.key` — it does not reach the nested path `attributes.ssl.key`.
+ * attribute literally called `ssl.key` - it does not reach the nested path `attributes.ssl.key`.
  * A dotted key that was meant as a path therefore fails silently in the worst possible way: the
  * value is never encrypted, or it quietly drops out of the AAD.
  *
  * Failing registration is deliberate. There is no way to express "encrypt a nested field", so a
- * dotted key is either a genuine flat attribute name — in which case it belongs in the map above
- * — or a bug that would otherwise ship unnoticed.
+ * dotted key is either a genuine flat attribute name - in which case it belongs in the map above
+ * - or a bug that would otherwise ship unnoticed.
  */
 function assertNoUnexpectedDottedKeys(typeRegistration: EncryptedSavedObjectTypeRegistration) {
   const allowed = TYPES_WITH_DOTTED_ATTRIBUTE_KEYS[typeRegistration.type];
+  const isUnexpectedDottedKey = (key: string) => key.includes('.') && !allowed?.has(key);
 
-  const dottedKeys = [
-    ...Array.from(typeRegistration.attributesToEncrypt, (attribute) =>
+  const dottedKeysToEncrypt = new Set(
+    Array.from(typeRegistration.attributesToEncrypt, (attribute) =>
       typeof attribute === 'string' ? attribute : attribute.key
-    ),
-    ...(typeRegistration.attributesToIncludeInAAD ?? []),
-  ].filter((key) => key.includes('.') && !allowed?.has(key));
+    ).filter(isUnexpectedDottedKey)
+  );
+  const dottedKeysInAAD = new Set(
+    Array.from(typeRegistration.attributesToIncludeInAAD ?? []).filter(isUnexpectedDottedKey)
+  );
 
-  if (dottedKeys.length > 0) {
-    throw new Error(
-      `Invalid EncryptedSavedObjectTypeRegistration for type '${typeRegistration.type}'. ` +
-        `Attribute keys are matched as flat top-level attribute names, not as nested paths, ` +
-        `so these keys would not encrypt the nested values they appear to name: ${[
-          ...new Set(dottedKeys),
-        ].join(', ')}`
+  if (dottedKeysToEncrypt.size === 0 && dottedKeysInAAD.size === 0) {
+    return;
+  }
+
+  // One sentence per offending set, so the error names the set the caller has to fix.
+  const failures: string[] = [];
+  if (dottedKeysToEncrypt.size > 0) {
+    failures.push(
+      `These dotted attributesToEncrypt keys are not permitted to prevent misuse: ${[
+        ...dottedKeysToEncrypt,
+      ].join(', ')}.`
     );
   }
+  if (dottedKeysInAAD.size > 0) {
+    failures.push(
+      `These dotted attributesToIncludeInAAD keys are not permitted to prevent misuse: ${[
+        ...dottedKeysInAAD,
+      ].join(', ')}.`
+    );
+  }
+
+  throw new Error(
+    `Invalid EncryptedSavedObjectTypeRegistration for type '${typeRegistration.type}'. ` +
+      `Attribute keys are matched as flat top-level attribute names, not as nested paths. ` +
+      failures.join(' ')
+  );
 }
 
 /**

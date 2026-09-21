@@ -132,12 +132,24 @@ it('throws when the same attributes are included in AAD and encrypted', () => {
 });
 
 describe('dotted attribute keys', () => {
-  const dottedKeysError = (type: string, keys: string) =>
-    new Error(
-      `Invalid EncryptedSavedObjectTypeRegistration for type '${type}'. Attribute keys are matched ` +
-        `as flat top-level attribute names, not as nested paths, so these keys would not encrypt ` +
-        `the nested values they appear to name: ${keys}`
+  const dottedKeysError = (type: string, { encrypt, aad }: { encrypt?: string; aad?: string }) => {
+    const failures = [
+      ...(encrypt
+        ? [`These dotted attributesToEncrypt keys are not permitted to prevent misuse: ${encrypt}.`]
+        : []),
+      ...(aad
+        ? [
+            `These dotted attributesToIncludeInAAD keys are not permitted to prevent misuse: ` +
+              `${aad}.`,
+          ]
+        : []),
+    ];
+
+    return new Error(
+      `Invalid EncryptedSavedObjectTypeRegistration for type '${type}'. Attribute keys are ` +
+        `matched as flat top-level attribute names, not as nested paths. ${failures.join(' ')}`
     );
+  };
 
   it('throws when attributesToEncrypt contains a dotted key', () => {
     expect(() => {
@@ -145,7 +157,7 @@ describe('dotted attribute keys', () => {
         type: 'some-type',
         attributesToEncrypt: new Set(['attr#1', 'ssl.key']),
       });
-    }).toThrow(dottedKeysError('some-type', 'ssl.key'));
+    }).toThrow(dottedKeysError('some-type', { encrypt: 'ssl.key' }));
   });
 
   it('throws when attributesToIncludeInAAD contains a dotted key', () => {
@@ -155,17 +167,22 @@ describe('dotted attribute keys', () => {
         attributesToEncrypt: new Set(['attr#1']),
         attributesToIncludeInAAD: new Set(['ssl.certificate']),
       });
-    }).toThrow(dottedKeysError('some-type', 'ssl.certificate'));
+    }).toThrow(dottedKeysError('some-type', { aad: 'ssl.certificate' }));
   });
 
-  it('reports every offending key at once, across both sets', () => {
+  it('reports every offending key at once, one message per failing set', () => {
     expect(() => {
       new EncryptedSavedObjectAttributesDefinition({
         type: 'some-type',
         attributesToEncrypt: new Set(['ssl.key', { key: 'source.inline.script' }]),
-        attributesToIncludeInAAD: new Set(['url.port']),
+        attributesToIncludeInAAD: new Set(['url.port', 'check.response.status']),
       });
-    }).toThrow(dottedKeysError('some-type', 'ssl.key, source.inline.script, url.port'));
+    }).toThrow(
+      dottedKeysError('some-type', {
+        encrypt: 'ssl.key, source.inline.script',
+        aad: 'url.port, check.response.status',
+      })
+    );
   });
 
   it('does not throw for flat keys', () => {
@@ -198,7 +215,7 @@ describe('dotted attribute keys', () => {
         type: 'synthetics-monitor',
         attributesToEncrypt: new Set(['ssl.key', 'attributes.nested.thing']),
       });
-    }).toThrow(dottedKeysError('synthetics-monitor', 'attributes.nested.thing'));
+    }).toThrow(dottedKeysError('synthetics-monitor', { encrypt: 'attributes.nested.thing' }));
   });
 
   it('rejects a new key sharing a prefix with a grandfathered one', () => {
@@ -207,7 +224,7 @@ describe('dotted attribute keys', () => {
         type: 'synthetics-monitor',
         attributesToEncrypt: new Set(['ssl.key', 'ssl.brand_new_secret']),
       });
-    }).toThrow(dottedKeysError('synthetics-monitor', 'ssl.brand_new_secret'));
+    }).toThrow(dottedKeysError('synthetics-monitor', { encrypt: 'ssl.brand_new_secret' }));
   });
 
   it('does not extend the legacy type allowance to the multi-space type', () => {
@@ -217,7 +234,7 @@ describe('dotted attribute keys', () => {
         attributesToEncrypt: new Set(['ssl.key']),
         attributesToIncludeInAAD: new Set(['throttling.config']),
       });
-    }).toThrow(dottedKeysError('synthetics-monitor-multi-space', 'throttling.config'));
+    }).toThrow(dottedKeysError('synthetics-monitor-multi-space', { aad: 'throttling.config' }));
   });
 
   it('does not extend a grandfathered allowance to another type', () => {
@@ -226,6 +243,6 @@ describe('dotted attribute keys', () => {
         type: 'some-other-type',
         attributesToEncrypt: new Set(['ssl.key']),
       });
-    }).toThrow(dottedKeysError('some-other-type', 'ssl.key'));
+    }).toThrow(dottedKeysError('some-other-type', { encrypt: 'ssl.key' }));
   });
 });
