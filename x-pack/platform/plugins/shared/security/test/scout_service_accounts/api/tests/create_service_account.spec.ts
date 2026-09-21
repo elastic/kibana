@@ -139,11 +139,14 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
     const name = uniqueName('scoped');
     created.push(name);
 
-    await apiClient.post(CREATE_ENDPOINT, {
+    const response = await apiClient.post(CREATE_ENDPOINT, {
       headers: { ...cookieHeader, 'kbn-xsrf': 'true' },
       responseType: 'json',
       body: { name, roles: ['viewer'] },
     });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toStrictEqual({ id: `${NAMESPACE}/${name}`, name });
 
     const account = await esClient.transport.request<Record<string, unknown>>({
       method: 'GET',
@@ -269,10 +272,15 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
         elasticsearch: { cluster: ['read_security'] },
       });
 
+      // Registered up front even though the request is expected to fail: if the authorization
+      // check ever regresses, the account it creates has to be cleaned up like any other.
+      const name = uniqueName('unauthorized-key');
+      created.push(name);
+
       const response = await apiClient.post(CREATE_ENDPOINT, {
         headers: { ...apiKeyHeader, 'kbn-xsrf': 'true' },
         responseType: 'json',
-        body: { name: uniqueName('unauthorized-key'), roles: ['viewer'] },
+        body: { name, roles: ['viewer'] },
       });
 
       expect(response.statusCode).toBe(403);
@@ -281,11 +289,13 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
 
   apiTest('refuses a caller without `manage_security`', async ({ apiClient, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
+    const name = uniqueName('unauthorized');
+    created.push(name);
 
     const response = await apiClient.post(CREATE_ENDPOINT, {
       headers: { ...cookieHeader, 'kbn-xsrf': 'true' },
       responseType: 'json',
-      body: { name: uniqueName('unauthorized') },
+      body: { name },
     });
 
     expect(response.statusCode).toBe(403);
