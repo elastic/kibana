@@ -144,6 +144,7 @@ dependsOn:
   - '@kbn/cps-server-utils'
   - '@kbn/app-header'
   - '@kbn/ui-callout'
+  - '@kbn/use-observable'
 tags:
   - plugin
   - prod

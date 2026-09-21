@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
 import type { FeatureFlagsStart, KibanaRequest, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
@@ -39,9 +40,8 @@ export const isInvestigationAvailable = async ({
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
   workflowsManagement?: WorkflowsServerPluginSetup;
 }): Promise<boolean> => {
-  const isFlagEnabled = await featureFlags.getBooleanValue(
-    STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG,
-    false
+  const isFlagEnabled = await firstValueFrom(
+    featureFlags.getBooleanValue$(STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG, false)
   );
   if (!isFlagEnabled) {
     return false;

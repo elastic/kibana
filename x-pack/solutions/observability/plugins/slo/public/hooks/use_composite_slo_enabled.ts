@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
+import { useObservable } from '@kbn/use-observable';
 import { SLO_COMPOSITE_ENABLED } from '../../common/feature_flags';
 import { useKibana } from './use_kibana';
 
@@ -13,5 +15,10 @@ export function useCompositeSloEnabled(): boolean {
     services: { featureFlags },
   } = useKibana();
 
-  return featureFlags.getBooleanValue(SLO_COMPOSITE_ENABLED, false);
+  const isCompositeSloEnabled$ = useMemo(
+    () => featureFlags.getBooleanValue$(SLO_COMPOSITE_ENABLED, false),
+    [featureFlags]
+  );
+
+  return useObservable(isCompositeSloEnabled$, false);
 }

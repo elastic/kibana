@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
@@ -86,9 +87,11 @@ export class SlackAppService {
     if (!relayClient || !agentBuilder) {
       return undefined;
     }
-    const enabled = await this.server.core.featureFlags.getBooleanValue(
-      STREAMS_SIGNIFICANT_EVENTS_APPS_ENABLED_FLAG,
-      false
+    const enabled = await firstValueFrom(
+      this.server.core.featureFlags.getBooleanValue$(
+        STREAMS_SIGNIFICANT_EVENTS_APPS_ENABLED_FLAG,
+        false
+      )
     );
     return enabled ? relayClient : undefined;
   }
