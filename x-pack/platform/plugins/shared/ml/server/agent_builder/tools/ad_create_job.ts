@@ -410,7 +410,7 @@ export const createAdCreateJobTool = (
           }
 
           const combinedJob = { ...jobConfig, datafeed_config: datafeedConfig };
-          const { valid, documentsFound, error } = await validateDatafeedPreview(
+          const { valid, error } = await validateDatafeedPreview(
             mlClient,
             combinedJob as any,
             duration?.start,
