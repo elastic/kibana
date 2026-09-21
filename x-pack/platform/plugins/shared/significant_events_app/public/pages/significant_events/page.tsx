@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiCallOut, EuiLoadingElastic, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import type { AppHeaderMenu } from '@kbn/app-header';
 import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
@@ -21,6 +21,7 @@ import { RedirectTo } from '../../components/redirect_to';
 import { SignificantEventsNotEnabledPrompt } from '../../components/not_enabled_prompt';
 import {
   SignificantEventsAppHeader,
+  SignificantEventsAppLoading,
   SignificantEventsAppPageTemplate,
 } from '../../components/page_template';
 import {
@@ -181,15 +182,7 @@ export function SignificantEventsPage() {
   );
 
   if (isAvailabilityLoading) {
-    return (
-      <SignificantEventsAppPageTemplate.Body
-        grow
-        alignment="center"
-        style={{ minBlockSize: 'var(--kbn-application--content-height, 100vh)' }}
-      >
-        <EuiLoadingElastic size="xxl" />
-      </SignificantEventsAppPageTemplate.Body>
-    );
+    return <SignificantEventsAppLoading />;
   }
 
   if (!availability || !availability.available) {

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiLoadingElastic } from '@elastic/eui';
 import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import React, { useEffect } from 'react';
 import {
   SignificantEventsAppHeader,
+  SignificantEventsAppLoading,
   SignificantEventsAppPageTemplate,
 } from '../../components/page_template';
 import { SignificantEventsNotEnabledPrompt } from '../../components/not_enabled_prompt';
@@ -65,15 +65,7 @@ export function SettingsPage() {
   }
 
   if (isAvailabilityLoading) {
-    return (
-      <SignificantEventsAppPageTemplate.Body
-        grow
-        alignment="center"
-        style={{ minBlockSize: 'var(--kbn-application--content-height, 100vh)' }}
-      >
-        <EuiLoadingElastic size="xxl" />
-      </SignificantEventsAppPageTemplate.Body>
-    );
+    return <SignificantEventsAppLoading />;
   }
 
   if (!availability || !availability.available) {
