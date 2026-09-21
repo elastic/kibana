@@ -1,5 +1,5 @@
 {
-  "sha1": "4f3c8a01e79c0d5694376f6eed9aa74379786a60",
+  "sha1": "50fbae70d9a322f1f4b4da1c3a293cce97160179",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -327,8 +327,8 @@
       }
     },
     {
-      "id": "ec1ea961b0a61a1-c4dd85537aaad56",
-      "title": "context engine AI indices API rejects a system index as an index dest",
+      "id": "ec1ea961b0a61a1-8cd2c7dc67c855d",
+      "title": "context engine AI indices API rejects an index dest outside the ai-index-idx- prefix",
       "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
