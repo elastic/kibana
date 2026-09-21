@@ -244,7 +244,7 @@ describe('LinkedActionPoliciesStep', () => {
     expect(mockUseActionPolicyConnectorTypes).toHaveBeenCalledWith([
       expect.objectContaining({ id: 'ap-1' }),
     ]);
-    expect(screen.getByTestId('workflowConnectorIcons')).toBeInTheDocument();
+    expect(screen.getByTestId('linkedActionPolicyConnectorIcons-ap-1')).toBeInTheDocument();
   });
 
   it('does not render a connector-icons row when the policy has no connector types', () => {
@@ -264,7 +264,7 @@ describe('LinkedActionPoliciesStep', () => {
 
     renderComponent();
 
-    expect(screen.queryByTestId('workflowConnectorIcons')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('linkedActionPolicyConnectorIcons-ap-1')).not.toBeInTheDocument();
   });
 
   it('shows an error callout when the fetch fails', () => {

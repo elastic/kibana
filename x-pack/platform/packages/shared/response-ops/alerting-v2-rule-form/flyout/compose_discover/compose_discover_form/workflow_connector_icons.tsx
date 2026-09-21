@@ -13,13 +13,18 @@ const MAX_VISIBLE_CONNECTOR_ICONS = 4;
 
 interface WorkflowConnectorIconsProps {
   types: string[];
+  /** Overrides the row's `data-test-subj` so callers can scope it (e.g. per policy). */
+  'data-test-subj'?: string;
 }
 
 /**
  * Renders a deduplicated row of connector-type icons for an action policy's
  * workflow destinations.
  */
-export const WorkflowConnectorIcons = ({ types }: WorkflowConnectorIconsProps) => {
+export const WorkflowConnectorIcons = ({
+  types,
+  'data-test-subj': dataTestSubj = 'workflowConnectorIcons',
+}: WorkflowConnectorIconsProps) => {
   if (types.length === 0) {
     return null;
   }
@@ -31,7 +36,7 @@ export const WorkflowConnectorIcons = ({ types }: WorkflowConnectorIconsProps) =
       gutterSize="xs"
       alignItems="center"
       responsive={false}
-      data-test-subj="workflowConnectorIcons"
+      data-test-subj={dataTestSubj}
     >
       {visible.map((type) => (
         <EuiFlexItem grow={false} key={`connector-${type}`}>

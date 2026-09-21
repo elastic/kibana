@@ -130,7 +130,10 @@ export const LinkedActionPoliciesStep = ({ http }: Props) => {
                         </EuiLink>
                       </EuiFlexItem>
                       <EuiFlexItem grow>
-                        <WorkflowConnectorIcons types={connectorTypes} />
+                        <WorkflowConnectorIcons
+                          types={connectorTypes}
+                          data-test-subj={`linkedActionPolicyConnectorIcons-${actionPolicy.id}`}
+                        />
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <MatchedPolicyReason

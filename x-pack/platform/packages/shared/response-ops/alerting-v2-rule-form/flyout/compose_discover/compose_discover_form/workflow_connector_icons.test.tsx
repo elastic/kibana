@@ -10,10 +10,10 @@ import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { WorkflowConnectorIcons } from './workflow_connector_icons';
 
-const renderIcons = (types: string[]) =>
+const renderIcons = (types: string[], dataTestSubj?: string) =>
   render(
     <I18nProvider>
-      <WorkflowConnectorIcons types={types} />
+      <WorkflowConnectorIcons types={types} data-test-subj={dataTestSubj} />
     </I18nProvider>
   );
 
@@ -38,5 +38,12 @@ describe('WorkflowConnectorIcons', () => {
   it('renders nothing when types is empty', () => {
     const { container } = renderIcons([]);
     expect(container).toBeEmptyDOMElement();
+  });
+
+  it('honors a custom data-test-subj', () => {
+    renderIcons(['email'], 'linkedActionPolicyConnectorIcons-ap-1');
+
+    expect(screen.getByTestId('linkedActionPolicyConnectorIcons-ap-1')).toBeInTheDocument();
+    expect(screen.queryByTestId('workflowConnectorIcons')).not.toBeInTheDocument();
   });
 });
