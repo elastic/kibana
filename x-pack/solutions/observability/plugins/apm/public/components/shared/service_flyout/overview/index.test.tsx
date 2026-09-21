@@ -539,21 +539,21 @@ describe('ServiceFlyoutOverview transactions section props', () => {
       </IntlProvider>
     );
 
-    // Until the transactions list settles, keep the previous filter snapshot.
+    // Surviving selections sync live filters immediately (do not wait for the table).
     expect(mockTransactionDetailFlyoutProps).toHaveBeenLastCalledWith(
       expect.objectContaining({
         isFiltersStale: false,
         filters: expect.objectContaining({
-          environment: 'production',
-          rangeFrom: 'now-15m',
-          rangeTo: 'now',
-          start: '2026-09-11T00:00:00.000Z',
-          end: '2026-09-18T15:20:34.096Z',
+          environment: 'staging',
+          rangeFrom: 'now-1h',
+          rangeTo: 'now-5m',
+          start: '2026-09-18T14:20:34.096Z',
+          end: '2026-09-18T15:15:34.096Z',
         }),
       })
     );
 
-    // A settle with the previous list (before loading starts) must not sync filters yet.
+    // A settle with the previous list (before loading starts) must not confirm yet.
     act(() => {
       transactionsSectionProps!.onTransactionsChange!(
         [
@@ -568,17 +568,6 @@ describe('ServiceFlyoutOverview transactions section props', () => {
         { isLoading: false }
       );
     });
-
-    expect(mockTransactionDetailFlyoutProps).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        isFiltersStale: false,
-        filters: expect.objectContaining({
-          environment: 'production',
-          rangeFrom: 'now-15m',
-          rangeTo: 'now',
-        }),
-      })
-    );
 
     act(() => {
       transactionsSectionProps!.onTransactionsChange!(
@@ -657,19 +646,24 @@ describe('ServiceFlyoutOverview transactions section props', () => {
       </IntlProvider>
     );
 
+    // Optimistic live sync first; freeze back to the confirmed snapshot after the list settles empty.
     act(() => {
       transactionsSectionProps!.onTransactionsChange!(
         [
           {
-            name: 'POST /api/other',
+            name: 'GET /api/orders',
             transactionType: 'request',
             latency: { value: 1 },
             throughput: { value: 1 },
             errorRate: { value: 0 },
           },
         ],
-        { isLoading: true }
+        { isLoading: false }
       );
+    });
+
+    act(() => {
+      transactionsSectionProps!.onTransactionsChange!([], { isLoading: true });
     });
 
     act(() => {
@@ -728,19 +722,30 @@ describe('ServiceFlyoutOverview transactions section props', () => {
       </IntlProvider>
     );
 
+    // Previous list still includes the selection — must not confirm the new type filter.
     act(() => {
       transactionsSectionProps!.onTransactionsChange!(
         [
           {
-            name: 'POST /api/mobile',
-            transactionType: 'mobile',
+            name: 'GET /api/orders',
+            transactionType: 'request',
             latency: { value: 1 },
             throughput: { value: 1 },
             errorRate: { value: 0 },
           },
         ],
-        { isLoading: true }
+        { isLoading: false }
       );
+    });
+
+    expect(mockTransactionDetailFlyoutProps).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        isFiltersStale: false,
+      })
+    );
+
+    act(() => {
+      transactionsSectionProps!.onTransactionsChange!([], { isLoading: true });
     });
 
     act(() => {

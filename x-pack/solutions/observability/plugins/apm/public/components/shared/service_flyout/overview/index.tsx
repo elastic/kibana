@@ -20,7 +20,7 @@ import { css } from '@emotion/react';
 import { ServiceFlyoutTransactionsSection, type TransactionGroup } from '@kbn/apm-ui-shared';
 import { i18n } from '@kbn/i18n';
 import { KbnWarningCallout } from '@kbn/ui-callout';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { SERVICE_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
 import type { LensESQLConfig } from './types';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
@@ -34,25 +34,27 @@ import { getEsqlKeyMetricCharts, getInfrastructureMetricCharts } from './chart_c
 import { ServiceFlyoutLensChart } from './lens_chart';
 import { ServiceFlyoutQueryControls } from './query_controls';
 
+interface AppliedTransactionFilters {
+  environment: string;
+  rangeFrom: string;
+  rangeTo: string;
+  start: string;
+  end: string
+  transactionType: string;
+}
+
 /** Selection + applied filters for the nested flyout (frozen when selection is stale). */
 interface SelectedTransactionDetail {
   transactionName: string;
   transactionType: string;
-  filters: {
-    environment: string;
-    rangeFrom: string;
-    rangeTo: string;
-    start: string;
-    end: string;
-    transactionType: string;
-  };
+  /** Filters currently driving the child flyout. */
+  filters: AppliedTransactionFilters;
+  /** Last filters under which the selection was confirmed present in the list. */
+  confirmedFilters: AppliedTransactionFilters;
   isFiltersStale: boolean;
 }
 
-function isSameAppliedFilters(
-  a: SelectedTransactionDetail['filters'],
-  b: SelectedTransactionDetail['filters']
-): boolean {
+function isSameAppliedFilters(a: AppliedTransactionFilters, b: AppliedTransactionFilters): boolean {
   return (
     a.environment === b.environment &&
     a.rangeFrom === b.rangeFrom &&
@@ -61,6 +63,17 @@ function isSameAppliedFilters(
     a.end === b.end &&
     a.transactionType === b.transactionType
   );
+}
+
+function toFiltersKey(filters: AppliedTransactionFilters): string {
+  return [
+    filters.environment,
+    filters.rangeFrom,
+    filters.rangeTo,
+    filters.start,
+    filters.end,
+    filters.transactionType,
+  ].join('|');
 }
 
 const KEY_METRICS_SECTION_TITLE = i18n.translate('xpack.apm.serviceFlyout.keyMetricsSectionTitle', {
@@ -260,20 +273,13 @@ export function ServiceFlyoutOverview() {
   );
 
   const liveFiltersKey = useMemo(
-    () =>
-      [
-        liveTransactionFilters.environment,
-        liveTransactionFilters.rangeFrom,
-        liveTransactionFilters.rangeTo,
-        liveTransactionFilters.start,
-        liveTransactionFilters.end,
-        liveTransactionFilters.transactionType,
-      ].join('|'),
+    () => toFiltersKey(liveTransactionFilters),
     [liveTransactionFilters]
   );
 
-  // Track filter changes during render so child effects cannot reconcile against a
-  // stale transactions list before we mark reconciliation as pending.
+  // After a parent filter change, ignore list settles until we've seen loading for
+  // the new filters — the previous list can still report the selection as present
+  // for one paint (useAbortableAsync keeps the old value with loading=false).
   const pendingFilterReconcileRef = useRef(false);
   const seenLoadingSincePendingRef = useRef(false);
   const prevLiveFiltersKeyRef = useRef(liveFiltersKey);
@@ -287,6 +293,23 @@ export function ServiceFlyoutOverview() {
     seenLoadingSincePendingRef.current = false;
     prevLiveFiltersKeyRef.current = liveFiltersKey;
   }
+
+  // Push live filters to the child immediately so surviving selections update without
+  // waiting for the transactions table. If the selection is already stale, stay frozen.
+  useEffect(() => {
+    setSelectedTransaction((prev) => {
+      if (!prev || prev.isFiltersStale) {
+        return prev;
+      }
+      if (isSameAppliedFilters(prev.filters, liveTransactionFilters)) {
+        return prev;
+      }
+      return {
+        ...prev,
+        filters: liveTransactionFilters,
+      };
+    });
+  }, [liveTransactionFilters]);
 
   const onTransactionClick = useCallback(
     (item: TransactionGroup) => {
@@ -310,6 +333,7 @@ export function ServiceFlyoutOverview() {
           transactionName: item.name,
           transactionType: resolvedTransactionType,
           filters: liveTransactionFilters,
+          confirmedFilters: liveTransactionFilters,
           isFiltersStale: false,
         };
       });
@@ -324,20 +348,18 @@ export function ServiceFlyoutOverview() {
           return prev;
         }
 
-        if (pendingFilterReconcileRef.current) {
-          if (isLoading) {
+        if (isLoading) {
+          if (pendingFilterReconcileRef.current) {
             seenLoadingSincePendingRef.current = true;
-            return prev;
           }
-          // Ignore settles that arrive before a loading cycle for the new filters
-          // (previous list still on screen with loading=false for one paint).
-          if (!seenLoadingSincePendingRef.current) {
-            return prev;
-          }
-          pendingFilterReconcileRef.current = false;
-        } else if (isLoading) {
           return prev;
         }
+
+        if (pendingFilterReconcileRef.current && !seenLoadingSincePendingRef.current) {
+          // Previous list still on screen — do not confirm presence or mark stale yet.
+          return prev;
+        }
+        pendingFilterReconcileRef.current = false;
 
         const isPresent = items.some((item) => {
           const resolvedType = item.transactionType || transactionType;
@@ -345,24 +367,40 @@ export function ServiceFlyoutOverview() {
         });
 
         if (isPresent) {
-          if (!prev.isFiltersStale && isSameAppliedFilters(prev.filters, liveTransactionFilters)) {
+          if (
+            !prev.isFiltersStale &&
+            isSameAppliedFilters(prev.filters, liveTransactionFilters) &&
+            isSameAppliedFilters(prev.confirmedFilters, liveTransactionFilters)
+          ) {
             return prev;
           }
           return {
             ...prev,
             filters: liveTransactionFilters,
+            confirmedFilters: liveTransactionFilters,
             isFiltersStale: false,
           };
         }
 
-        // Missing under the current live filters. Ignore when applied filters already match
-        // live (e.g. table search hid the row) so we don't falsely freeze.
-        if (isSameAppliedFilters(prev.filters, liveTransactionFilters) || prev.isFiltersStale) {
+        // Missing under live filters. If live still matches the last confirmed snapshot
+        // (e.g. table search hid the row), do not freeze.
+        if (isSameAppliedFilters(prev.confirmedFilters, liveTransactionFilters)) {
+          if (prev.isFiltersStale || isSameAppliedFilters(prev.filters, prev.confirmedFilters)) {
+            return prev;
+          }
+          return {
+            ...prev,
+            filters: prev.confirmedFilters,
+          };
+        }
+
+        if (prev.isFiltersStale && isSameAppliedFilters(prev.filters, prev.confirmedFilters)) {
           return prev;
         }
 
         return {
           ...prev,
+          filters: prev.confirmedFilters,
           isFiltersStale: true,
         };
       });
