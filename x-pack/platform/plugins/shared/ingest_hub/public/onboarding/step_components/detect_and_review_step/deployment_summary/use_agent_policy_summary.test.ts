@@ -193,7 +193,11 @@ describe('useAgentPolicySummary', () => {
 
   describe('edge cases', () => {
     it('returns undefined enrollmentToken when enrollment key list is empty', () => {
-      setupMocks({ agentPolicyId: POLICY_ID, agentPolicyName: POLICY_NAME, enrollmentKeyItems: [] });
+      setupMocks({
+        agentPolicyId: POLICY_ID,
+        agentPolicyName: POLICY_NAME,
+        enrollmentKeyItems: [],
+      });
       const { result } = renderHook(() => useAgentPolicySummary());
       expect(result.current.enrollmentToken).toBeUndefined();
     });
