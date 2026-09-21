@@ -6,3 +6,4 @@
  */
 
 export { DataRecognizer } from './data_recognizer';
+export type { DataRecognizerResults } from './data_recognizer';

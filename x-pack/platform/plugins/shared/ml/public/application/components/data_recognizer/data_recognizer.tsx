@@ -51,13 +51,21 @@ export const DataRecognizer: FC<Props> = ({ indexPattern, savedSearch, results }
           />
         ));
 
+        // Render the results before reporting them, so consumers observing completion never
+        // see the signal ahead of the layout it describes.
+        setRecognizedResults(elements);
+
         results.count = elements.length;
         results.onChange?.();
-
-        setRecognizedResults(elements);
       })
       .catch(() => {
-        // Recognition failed; leave results empty.
+        if (cancelled) {
+          return;
+        }
+
+        // Recognition failed; leave results empty but still report that it settled.
+        results.count = 0;
+        results.onChange?.();
       });
 
     return () => {

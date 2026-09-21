@@ -22,6 +22,7 @@ import {
 
 import { useDataSource } from '../../../../contexts/ml';
 import { getUrlParams } from '../../utils/get_url_params';
+import type { DataRecognizerResults } from '../../../../components/data_recognizer';
 import { DataRecognizer } from '../../../../components/data_recognizer';
 import { addItemToRecentlyAccessed } from '../../../../util/recently_accessed';
 import { LinkCard } from '../../../../components/link_card';
@@ -47,6 +48,7 @@ export const Page: FC = () => {
   });
 
   const [recognizerResultsCount, setRecognizerResultsCount] = useState(0);
+  const [isRecognizerComplete, setIsRecognizerComplete] = useState(false);
 
   const { selectedDataView, selectedSavedSearch, projectRouting } = useDataSource();
 
@@ -115,12 +117,16 @@ export const Page: FC = () => {
         values: { dataViewName: selectedDataView.getName() },
       });
 
-  const recognizerResults = {
-    count: 0,
-    onChange() {
-      setRecognizerResultsCount(recognizerResults.count);
-    },
-  };
+  const recognizerResults = useMemo<DataRecognizerResults>(() => {
+    const results: DataRecognizerResults = {
+      count: 0,
+      onChange: () => {
+        setRecognizerResultsCount(results.count);
+        setIsRecognizerComplete(true);
+      },
+    };
+    return results;
+  }, []);
 
   const getJobTypeUrlParams = () =>
     getUrlParams({
@@ -280,7 +286,10 @@ export const Page: FC = () => {
   }
 
   return (
-    <div data-test-subj="mlPageJobTypeSelection">
+    <div
+      data-test-subj="mlPageJobTypeSelection"
+      data-recognizer-status={isRecognizerComplete ? 'complete' : 'loading'}
+    >
       <MlAppHeader
         title={i18n.translate('xpack.ml.newJob.wizard.jobType.createJobFromTitle', {
           defaultMessage: 'Create a job from the {pageTitleLabel}',
