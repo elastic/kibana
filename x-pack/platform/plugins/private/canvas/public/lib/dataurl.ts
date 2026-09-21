@@ -6,9 +6,7 @@
  */
 
 import { fromByteArray } from 'base64-js';
-
-// @ts-expect-error @types/mime doesn't resolve mime/lite for some reason.
-import mime from 'mime/lite';
+import mime from 'mime-types';
 
 const dataurlRegex = /^data:([a-z]+\/[a-z0-9-+.]+)(;[a-z-]+=[a-z0-9-]+)?(;([a-z0-9]+))?,/;
 
@@ -39,7 +37,7 @@ export function parseDataUrl(str: string, withData = false) {
     charset: charset && charset.split('=')[1],
     data: !withData ? null : str.split(',')[1],
     isImage: imageTypeIndex >= 0,
-    extension: mime.getExtension(mimetype),
+    extension: mime.extension(mimetype) || null,
   };
 }
 
