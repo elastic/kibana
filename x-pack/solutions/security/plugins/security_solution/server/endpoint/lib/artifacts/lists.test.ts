@@ -9,7 +9,11 @@ import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { listMock } from '@kbn/lists-plugin/server/mocks';
 import { getFoundExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/found_exception_list_item_schema.mock';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
-import type { EntriesArray, EntryList } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  EntriesArray,
+  EntryList,
+  ExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import {
   buildArtifact,
   getAllItemsFromEndpointExceptionList,
@@ -28,6 +32,41 @@ import {
 } from '../../../../common/endpoint/service/artifacts/constants';
 import type { ExperimentalFeatures } from '../../../../common';
 import { allowedExperimentalValues } from '../../../../common';
+import type { YaraValidateResult } from '../libyara';
+import { validateYaraRule } from '../libyara';
+
+jest.mock('../libyara', () => ({
+  validateYaraRule: jest.fn(),
+}));
+
+const mockValidateYaraRule = validateYaraRule as jest.MockedFunction<typeof validateYaraRule>;
+
+const createYaraValidateResult = (
+  rules: Array<{ identifier?: string }> = [{}]
+): YaraValidateResult => ({
+  errors: [],
+  warnings: [],
+  errorCount: 0,
+  warningCount: 0,
+  rules: rules.map((rule, index) => ({
+    identifier: rule.identifier ?? `rule${index}`,
+    meta: {},
+    duplicateMeta: [],
+  })),
+});
+
+const getCustomYaraExceptionItem = (ruleText: string): ExceptionListItemSchema =>
+  getExceptionListItemSchemaMock({
+    list_id: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
+    entries: [
+      {
+        field: CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
+        operator: 'included',
+        type: 'match',
+        value: ruleText,
+      },
+    ],
+  });
 
 describe('artifacts lists', () => {
   let mockExceptionClient: ExceptionListClient;
@@ -37,6 +76,7 @@ describe('artifacts lists', () => {
     jest.clearAllMocks();
     mockExceptionClient = listMock.getExceptionListClient();
     defaultFeatures = allowedExperimentalValues;
+    mockValidateYaraRule.mockResolvedValue(createYaraValidateResult());
   });
 
   describe('getFilteredEndpointExceptionListRaw + convertExceptionsToEndpointFormat', () => {
@@ -430,39 +470,24 @@ describe('artifacts lists', () => {
         filter: TEST_FILTER,
         listId: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
       });
-      const translated = convertYaraRulesToEndpointFormat(resp, 'v1');
+      const translated = await convertYaraRulesToEndpointFormat(resp, 'v1');
 
       expect(translated).toEqual({
-        entries: [{ yara_rule_data: yaraRuleText }],
+        entries: [
+          {
+            yara_rule_data: yaraRuleText,
+          },
+        ],
       });
+      expect(mockValidateYaraRule).toHaveBeenCalledWith(yaraRuleText);
     });
 
     test('it should convert multiple Custom YARA Signatures', async () => {
       const firstRule = 'rule First { condition: true }';
       const secondRule = 'rule Second { condition: true }';
       const exceptionMock = getFoundExceptionListItemSchemaMock(2);
-      exceptionMock.data[0] = getExceptionListItemSchemaMock({
-        list_id: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
-        entries: [
-          {
-            field: CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
-            operator: 'included',
-            type: 'match',
-            value: firstRule,
-          },
-        ],
-      });
-      exceptionMock.data[1] = getExceptionListItemSchemaMock({
-        list_id: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
-        entries: [
-          {
-            field: CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
-            operator: 'included',
-            type: 'match',
-            value: secondRule,
-          },
-        ],
-      });
+      exceptionMock.data[0] = getCustomYaraExceptionItem(firstRule);
+      exceptionMock.data[1] = getCustomYaraExceptionItem(secondRule);
       mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(exceptionMock);
 
       const resp = await getFilteredEndpointExceptionListRaw({
@@ -470,10 +495,17 @@ describe('artifacts lists', () => {
         filter: TEST_FILTER,
         listId: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
       });
-      const translated = convertYaraRulesToEndpointFormat(resp, 'v1');
+      const translated = await convertYaraRulesToEndpointFormat(resp, 'v1');
 
       expect(translated).toEqual({
-        entries: [{ yara_rule_data: firstRule }, { yara_rule_data: secondRule }],
+        entries: [
+          {
+            yara_rule_data: firstRule,
+          },
+          {
+            yara_rule_data: secondRule,
+          },
+        ],
       });
     });
 
@@ -493,17 +525,7 @@ describe('artifacts lists', () => {
           },
         ],
       });
-      exceptionMock.data[1] = getExceptionListItemSchemaMock({
-        list_id: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
-        entries: [
-          {
-            field: CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
-            operator: 'included',
-            type: 'match',
-            value: enabledRule,
-          },
-        ],
-      });
+      exceptionMock.data[1] = getCustomYaraExceptionItem(enabledRule);
       mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(exceptionMock);
 
       const resp = await getFilteredEndpointExceptionListRaw({
@@ -511,11 +533,17 @@ describe('artifacts lists', () => {
         filter: TEST_FILTER,
         listId: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
       });
-      const translated = convertYaraRulesToEndpointFormat(resp, 'v1');
+      const translated = await convertYaraRulesToEndpointFormat(resp, 'v1');
 
       expect(translated).toEqual({
-        entries: [{ yara_rule_data: enabledRule }],
+        entries: [
+          {
+            yara_rule_data: enabledRule,
+          },
+        ],
       });
+      expect(mockValidateYaraRule).toHaveBeenCalledTimes(1);
+      expect(mockValidateYaraRule).toHaveBeenCalledWith(enabledRule);
     });
 
     test('it should skip Custom YARA Signatures without a match entry value', async () => {
@@ -535,17 +563,72 @@ describe('artifacts lists', () => {
         filter: TEST_FILTER,
         listId: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
       });
-      const translated = convertYaraRulesToEndpointFormat(resp, 'v1');
+      const translated = await convertYaraRulesToEndpointFormat(resp, 'v1');
 
       expect(translated).toEqual({ entries: [] });
+      expect(mockValidateYaraRule).not.toHaveBeenCalled();
     });
 
-    test('it should convert an empty Custom YARA Signature list', () => {
-      expect(convertYaraRulesToEndpointFormat([], 'v1')).toEqual({ entries: [] });
+    test('it should convert an empty Custom YARA Signature list', async () => {
+      await expect(convertYaraRulesToEndpointFormat([], 'v1')).resolves.toEqual({ entries: [] });
+      expect(mockValidateYaraRule).not.toHaveBeenCalled();
     });
 
-    test('it should throw for an unsupported Custom YARA Signature schema version', () => {
-      expect(() => convertYaraRulesToEndpointFormat([], 'v2')).toThrow('unsupported schemaVersion');
+    test('it should throw for an unsupported Custom YARA Signature schema version', async () => {
+      await expect(convertYaraRulesToEndpointFormat([], 'v2')).rejects.toThrow(
+        'unsupported schemaVersion'
+      );
+    });
+
+    test('it should skip an entry when libyara returns no compiled rules', async () => {
+      mockValidateYaraRule.mockResolvedValue(createYaraValidateResult([]));
+
+      await expect(
+        convertYaraRulesToEndpointFormat(
+          [getCustomYaraExceptionItem('rule Example { condition: true }')],
+          'v1'
+        )
+      ).resolves.toEqual({ entries: [] });
+    });
+
+    test('it should skip an entry when libyara reports compile errors', async () => {
+      mockValidateYaraRule.mockResolvedValue({
+        errors: [{ severity: 'error', message: 'syntax error', line: 1 }],
+        warnings: [],
+        errorCount: 1,
+        warningCount: 0,
+        rules: [],
+      });
+
+      await expect(
+        convertYaraRulesToEndpointFormat(
+          [getCustomYaraExceptionItem('rule Broken { condition: not_a_thing }')],
+          'v1'
+        )
+      ).resolves.toEqual({ entries: [] });
+    });
+
+    test('it should skip an entry when libyara throws and still include valid entries', async () => {
+      const validRule = 'rule Valid { condition: true }';
+      mockValidateYaraRule
+        .mockRejectedValueOnce(new Error('libyara WASM trap'))
+        .mockResolvedValueOnce(createYaraValidateResult());
+
+      await expect(
+        convertYaraRulesToEndpointFormat(
+          [
+            getCustomYaraExceptionItem('rule Broken { condition: true }'),
+            getCustomYaraExceptionItem(validRule),
+          ],
+          'v1'
+        )
+      ).resolves.toEqual({
+        entries: [
+          {
+            yara_rule_data: validRule,
+          },
+        ],
+      });
     });
 
     test('it should return a stable hash regardless of order of entries', async () => {
@@ -1318,10 +1401,14 @@ describe('artifacts lists', () => {
         os: 'linux',
         listId: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
       });
-      const translated = convertYaraRulesToEndpointFormat(resp, 'v1');
+      const translated = await convertYaraRulesToEndpointFormat(resp, 'v1');
 
       expect(translated).toEqual({
-        entries: [{ yara_rule_data: yaraRuleText }],
+        entries: [
+          {
+            yara_rule_data: yaraRuleText,
+          },
+        ],
       });
 
       expect(mockExceptionClient.findExceptionListItem).toHaveBeenCalledWith({

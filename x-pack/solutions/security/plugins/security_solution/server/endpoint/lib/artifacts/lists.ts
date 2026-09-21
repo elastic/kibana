@@ -17,6 +17,7 @@ import { EntryFieldType } from '@kbn/securitysolution-utils';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
+import type { Logger } from '@kbn/logging';
 import {
   DISABLED_ARTIFACT_TAG,
   PROCESS_DESCENDANT_EXTRA_ENTRY,
@@ -24,6 +25,7 @@ import {
 } from '../../../../common/endpoint/service/artifacts/constants';
 import type { ExperimentalFeatures } from '../../../../common';
 import { isProcessDescendantsEnabled } from '../../../../common/endpoint/service/artifacts/utils';
+import { validateYaraRule } from '../libyara';
 import type {
   InternalArtifactCompleteSchema,
   TranslatedEntry,
@@ -97,12 +99,13 @@ export function convertExceptionsToEndpointFormat(
   return validated as WrappedTranslatedExceptionList;
 }
 
-export function convertYaraRulesToEndpointFormat(
+export async function convertYaraRulesToEndpointFormat(
   exceptions: ExceptionListItemSchema[],
-  schemaVersion: string
-): WrappedTranslatedYaraRulesList {
+  schemaVersion: string,
+  logger?: Logger
+): Promise<WrappedTranslatedYaraRulesList> {
   const translatedYaraRules = {
-    entries: translateToYaraRules(exceptions, schemaVersion),
+    entries: await translateToYaraRules(exceptions, schemaVersion, logger),
   };
   const [validated, errors] = validate(translatedYaraRules, wrappedTranslatedYaraRulesList);
   if (errors != null) {
@@ -168,32 +171,75 @@ export async function getAllItemsFromEndpointExceptionList({
   });
 }
 
-/**
- * Translates Custom YARA Signature exception items into the endpoint YARA artifact format.
- * @param exceptions
- * @param schemaVersion
- */
-function translateToYaraRules(
-  exceptions: ExceptionListItemSchema[],
-  schemaVersion: string
-): TranslatedYaraRule[] {
-  if (schemaVersion === 'v1') {
-    const translatedItems: TranslatedYaraRule[] = [];
+const skipYaraItem = (logger: Logger | undefined, itemId: string, reason: string): void => {
+  logger?.warn(
+    `Skipping Custom YARA Signature [${itemId}] while building the endpoint artifact: ${reason}`
+  );
+};
 
-    for (const exception of exceptions) {
-      if (!(exception.tags ?? []).includes(DISABLED_ARTIFACT_TAG)) {
-        const [entry] = exception.entries;
+async function translateOneYaraException(
+  exception: ExceptionListItemSchema,
+  logger?: Logger
+): Promise<TranslatedYaraRule | undefined> {
+  if ((exception.tags ?? []).includes(DISABLED_ARTIFACT_TAG)) {
+    return undefined;
+  }
 
-        if (entry?.type === 'match' && typeof entry.value === 'string') {
-          translatedItems.push({ yara_rule_data: entry.value });
-        }
-      }
+  const [entry] = exception.entries;
+  if (entry?.type !== 'match' || typeof entry.value !== 'string') {
+    return undefined;
+  }
+
+  try {
+    // Sequential: libyara WASM is a process singleton and is not safe for concurrent ccall.
+    const result = await validateYaraRule(entry.value);
+
+    if (result.errorCount > 0) {
+      skipYaraItem(
+        logger,
+        exception.item_id,
+        `libyara reported ${result.errorCount} compile error(s)`
+      );
+      return undefined;
     }
 
-    return translatedItems;
-  } else {
+    if (result.rules.length === 0) {
+      skipYaraItem(logger, exception.item_id, 'no compiled rules');
+      return undefined;
+    }
+
+    return {
+      yara_rule_data: entry.value,
+    };
+  } catch {
+    skipYaraItem(logger, exception.item_id, 'libyara validation failed');
+    return undefined;
+  }
+}
+
+/**
+ * Translates Custom YARA Signature exception items into the endpoint YARA artifact format.
+ * Invalid items are omitted so one bad entry cannot fail the packager.
+ */
+async function translateToYaraRules(
+  exceptions: ExceptionListItemSchema[],
+  schemaVersion: string,
+  logger?: Logger
+): Promise<TranslatedYaraRule[]> {
+  if (schemaVersion !== 'v1') {
     throw new Error('unsupported schemaVersion');
   }
+
+  const translatedItems: TranslatedYaraRule[] = [];
+
+  for (const exception of exceptions) {
+    const translatedItem = await translateOneYaraException(exception, logger);
+    if (translatedItem !== undefined) {
+      translatedItems.push(translatedItem);
+    }
+  }
+
+  return translatedItems;
 }
 
 /**
