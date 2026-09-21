@@ -13,6 +13,7 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { PluginStartContract as AlertingStartContract } from '@kbn/alerting-plugin/public';
 import type { ObservabilityServiceFlyoutFeatureRenderDeps } from '@kbn/discover-shared-plugin/public';
+import { createCallApmApi } from '../../../services/rest/create_call_apm_api';
 import type { ServiceFlyoutTelemetry, ServiceFlyoutService } from '.';
 
 const LazyServiceFlyout = dynamic(() => import('.').then((m) => ({ default: m.ServiceFlyout })));
@@ -32,6 +33,10 @@ export function createServiceFlyoutRenderer({
   alerting?: AlertingStartContract;
   telemetryClient: ServiceFlyoutTelemetry['client'];
 }) {
+  // Discover (and other off-app hosts) never mount the APM application, so the
+  // legacy module-level callApmApi is uninitialized. Same pattern as embeddables.
+  createCallApmApi(core);
+
   return (deps: ObservabilityServiceFlyoutFeatureRenderDeps): React.ReactNode => (
     <LazyServiceFlyout
       deps={{
@@ -47,6 +52,10 @@ export function createServiceFlyoutRenderer({
       telemetry={{ client: telemetryClient, source: deps.source }}
       historyKey={deps.flyoutHistoryKey}
       onClose={deps.onClose}
+      // Discover computes its RED metric charts from the raw documents matching
+      // the query, so the flyout charts stay document-based there to agree with
+      // them (the rollup-based APM chart APIs diverge under sampling).
+      preferDocumentBasedCharts
     />
   );
 }

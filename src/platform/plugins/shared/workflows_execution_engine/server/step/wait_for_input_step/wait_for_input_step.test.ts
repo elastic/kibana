@@ -84,6 +84,7 @@ describe('WaitForInputStepImpl', () => {
       tryEnterWaitUntil: jest.fn().mockReturnValue(true),
       finishStep: jest.fn(),
       setInput: jest.fn(),
+      setCurrentStepState: jest.fn(),
       updateWorkflowExecution: jest.fn(),
       stepExecutionId: 'test-step-exec-id',
       abortController: new AbortController(),
@@ -211,6 +212,45 @@ describe('WaitForInputStepImpl', () => {
       expect(persisted.schema.properties.reason.default).toBe('looks good');
     });
 
+    it('persists the rendered timeout on wait-entry', async () => {
+      node.configuration = {
+        ...node.configuration,
+        timeout: "{{ inputs.expiresIn | default: '72h' }}",
+      } as WaitForInputStep;
+      (
+        mockStepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
+      ).mockImplementation((value: unknown) =>
+        value === node.configuration.timeout ? '1h' : value
+      );
+
+      await underTest.run();
+
+      expect(mockStepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith(
+        expect.objectContaining({ dynamicTimeout: '1h' })
+      );
+    });
+
+    it('fails wait-entry before notifications when the rendered timeout is invalid', async () => {
+      mockHasExternalHitlChannels.mockReturnValue(true);
+      node.configuration = {
+        ...node.configuration,
+        timeout: '{{ inputs.expiresIn }}',
+        with: {
+          ...node.configuration.with,
+          channels: { slack: { 'connector-id': 'slack-1' } },
+        },
+      } as WaitForInputStep;
+      (
+        mockStepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
+      ).mockImplementation((value: unknown) =>
+        value === node.configuration.timeout ? 'soon' : value
+      );
+
+      await expect(underTest.run()).rejects.toThrow('Invalid duration format: soon');
+      expect(mockSendWaitForInputNotifications).not.toHaveBeenCalled();
+      expect(mockMintHitlExternalResumeToken).not.toHaveBeenCalled();
+    });
+
     it('should not call setInput when the with block is absent', async () => {
       node.configuration = {
         name: 'wait-for-input-step',
@@ -257,7 +297,9 @@ describe('WaitForInputStepImpl', () => {
 
       await underTest.run();
 
-      expect(mockMintHitlExternalResumeToken).toHaveBeenCalled();
+      expect(mockMintHitlExternalResumeToken).toHaveBeenCalledWith(
+        expect.objectContaining({ timeout: '72h' })
+      );
       expect(mockStepExecutionRuntime.setInput).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({
@@ -379,7 +421,7 @@ describe('WaitForInputStepImpl', () => {
     it('should clear resumeInput from context while preserving other keys', async () => {
       await underTest.run();
       expect(mockStepExecutionRuntime.updateWorkflowExecution).toHaveBeenCalledWith({
-        context: { resumedBy: 'jane.doe', otherKey: 'preserved' },
+        context: { resumedBy: 'jane.doe', otherKey: 'preserved', resumeInput: null },
       });
     });
 

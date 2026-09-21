@@ -1,5 +1,5 @@
 {
-  "sha1": "034ef3cdef2d0c8e6a83aae435e9b38e99cdfe39",
+  "sha1": "9279c2b0797f919ec7661d92da2e36e84f1e67f6",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -227,7 +227,7 @@
     {
       "id": "ab141bdc9191bd5-5cb9a65537172d2",
       "title": "Data streams index mode allows to downgrade data stream from logsdb to time series index mode",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -240,8 +240,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/data_streams/data_streams_index_mode.spec.ts",
-        "line": 158,
-        "column": 5
+        "line": 156,
+        "column": 9
       }
     },
     {
@@ -380,8 +380,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/enrich_policies/create_enrich_policy.spec.ts",
-        "line": 39,
-        "column": 8
+        "line": 37,
+        "column": 5
       }
     },
     {
@@ -684,8 +684,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_details_page.spec.ts",
-        "line": 23,
-        "column": 63
+        "line": 28,
+        "column": 20
       }
     },
     {
@@ -702,8 +702,26 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_details_page.spec.ts",
-        "line": 30,
-        "column": 86
+        "line": 31,
+        "column": 98
+      }
+    },
+    {
+      "id": "8b2302c844751d9-57ef077c07b8c42",
+      "title": "Index details page Stats tab has no a11y violations for a fresh index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_details_page.spec.ts",
+        "line": 89,
+        "column": 13
       }
     },
     {
