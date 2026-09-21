@@ -12,7 +12,7 @@ import { merge } from 'lodash';
 
 import type { ExperimentalIndexingFeature } from '../../../common/types';
 import { getRegistryDataStreamAssetBaseName, isColumnarEligible } from '../../../common/services';
-import { PackageNotFoundError } from '../../errors';
+import { FleetErrorWithStatusCode, PackageNotFoundError } from '../../errors';
 import type {
   NewPackagePolicy,
   PackagePolicy,
@@ -111,8 +111,9 @@ export async function handleExperimentalDatastreamFeatureOptIn({
     // Reject mutually exclusive combination before any ES write: a data stream cannot be both
     // TSDB and columnar.
     if (featureMapEntry.features.tsdb && featureMapEntry.features.columnar) {
-      throw new Error(
-        `data stream ${featureMapEntry.data_stream} cannot have both tsdb and columnar enabled simultaneously`
+      throw new FleetErrorWithStatusCode(
+        `data stream ${featureMapEntry.data_stream} cannot have both tsdb and columnar enabled simultaneously`,
+        400
       );
     }
 
@@ -142,8 +143,9 @@ export async function handleExperimentalDatastreamFeatureOptIn({
       isColumnarOptInChanged &&
       !columnarEligibleDataStreams.has(featureMapEntry.data_stream)
     ) {
-      throw new Error(
-        `data stream ${featureMapEntry.data_stream} is not columnar-ready: the package does not declare elasticsearch.columnar.supported`
+      throw new FleetErrorWithStatusCode(
+        `data stream ${featureMapEntry.data_stream} is not columnar-ready: the package does not declare elasticsearch.columnar.supported`,
+        400
       );
     }
 
@@ -384,8 +386,9 @@ function enrichColumnarIndexTemplateError(err: any, dataStream: string) {
     return err;
   }
 
-  return new Error(
+  return new FleetErrorWithStatusCode(
     `Elasticsearch rejected the columnar index template for ${dataStream}: ${reason}. ` +
-      `Fields with doc_values: false need a columnar.doc_values: true override in the package.`
+      `Fields with doc_values: false need a columnar.doc_values: true override in the package.`,
+    400
   );
 }
