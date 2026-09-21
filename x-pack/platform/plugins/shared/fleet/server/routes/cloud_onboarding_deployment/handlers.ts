@@ -24,6 +24,32 @@ function toResponseItem(deployment: CloudOnboardingDeployment) {
   return deployment;
 }
 
+const AGENT_BASED_AUTH_METHODS = new Set([
+  'static_keys',
+  'temporary_keys',
+  'shared_credentials',
+  'assume_role',
+]);
+const MANAGED_INTEGRATION_AUTH_METHODS = new Set(['identity_federation', 'static_keys']);
+
+function validateAuthMethod(
+  mechanisms: string[],
+  authMethod: string | undefined
+): string | undefined {
+  if (!authMethod) return undefined;
+  if (mechanisms.includes('agent_based') && !AGENT_BASED_AUTH_METHODS.has(authMethod)) {
+    return `authMethod '${authMethod}' is not valid for agent_based deployments. Allowed: ${[...AGENT_BASED_AUTH_METHODS].join(', ')}`;
+  }
+  if (
+    (mechanisms.includes('managed_integration') || mechanisms.includes('ecf')) &&
+    !mechanisms.includes('agent_based') &&
+    !MANAGED_INTEGRATION_AUTH_METHODS.has(authMethod)
+  ) {
+    return `authMethod '${authMethod}' is not valid for managed_integration/ecf deployments. Allowed: ${[...MANAGED_INTEGRATION_AUTH_METHODS].join(', ')}`;
+  }
+  return undefined;
+}
+
 export const createCloudOnboardingDeploymentHandler: FleetRequestHandler<
   undefined,
   undefined,
@@ -31,6 +57,14 @@ export const createCloudOnboardingDeploymentHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
   const { internalSoClient } = fleetContext;
+
+  const authMethodError = validateAuthMethod(
+    request.body.mechanisms ?? [],
+    request.body.authMethod
+  );
+  if (authMethodError) {
+    return response.badRequest({ body: { message: authMethodError } });
+  }
 
   try {
     const deployment = await cloudOnboardingDeploymentService.create(

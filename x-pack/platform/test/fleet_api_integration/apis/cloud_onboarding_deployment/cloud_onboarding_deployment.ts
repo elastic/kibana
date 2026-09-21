@@ -257,6 +257,33 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(400);
       });
+
+      it('should return 400 when agent_based deployment uses identity_federation authMethod', async () => {
+        await supertest
+          .post(BASE_URL)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            provider: 'aws',
+            mechanisms: ['agent_based'],
+            services: ['ec2_otel'],
+            authMethod: 'identity_federation',
+          })
+          .expect(400);
+      });
+
+      it('should return 400 when managed_integration deployment uses assume_role authMethod', async () => {
+        await supertest
+          .post(BASE_URL)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            provider: 'aws',
+            connectorId: primaryConnectorId,
+            mechanisms: ['managed_integration'],
+            services: ['cloudtrail'],
+            authMethod: 'assume_role',
+          })
+          .expect(400);
+      });
     });
 
     describe('GET /api/fleet/cloud_onboarding_deployments/{id}', () => {
