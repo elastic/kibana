@@ -6,11 +6,14 @@
  */
 
 import Boom from '@hapi/boom';
-import { AgentBuilderErrorCode, createBadRequestError } from '@kbn/agent-builder-common';
+import {
+  AgentBuilderErrorCode,
+  createBadRequestError,
+  deserializeExecutionError,
+} from '@kbn/agent-builder-common';
 import {
   MAX_SERIALIZED_CAUSES,
   MAX_SERIALIZED_CAUSE_MESSAGE_LENGTH,
-  deserializeExecutionError,
   serializeExecutionError,
 } from './serialize_execution_error';
 
