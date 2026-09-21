@@ -81,13 +81,11 @@ export const buildConnectorEnv = ({
   // HTTP ES connectors store `Authorization: ApiKey …` in secretHeaders, not `password`.
   const authorization = (secrets.secretHeaders as { Authorization?: string } | undefined)
     ?.Authorization;
-  if (
-    typeof authorization === 'string' &&
-    authorization.startsWith('ApiKey ') &&
-    env.CONNECTOR_SECRET_PASSWORD === undefined
-  ) {
+  if (typeof authorization === 'string' && authorization.startsWith('ApiKey ')) {
     const apiKey = authorization.slice('ApiKey '.length);
-    env.CONNECTOR_SECRET_PASSWORD = apiKey;
+    if (env.CONNECTOR_SECRET_PASSWORD === undefined) {
+      env.CONNECTOR_SECRET_PASSWORD = apiKey;
+    }
     if (apiKey.length >= MIN_REDACTABLE_SECRET_LENGTH) secretValues.push(apiKey);
   }
 

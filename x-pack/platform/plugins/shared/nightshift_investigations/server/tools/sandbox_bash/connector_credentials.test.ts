@@ -117,7 +117,7 @@ describe('buildConnectorEnv', () => {
 
     expect(env.CONNECTOR_SECRET_PASSWORD).toBe(password);
     expect(secretValues).toContain(password);
-    expect(secretValues).not.toContain('unused-api-key-value');
+    expect(secretValues).toContain('unused-api-key-value');
   });
 });
 
