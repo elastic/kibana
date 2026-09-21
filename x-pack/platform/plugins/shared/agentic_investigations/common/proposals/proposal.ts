@@ -235,13 +235,15 @@ export type ProposalChartsSummaryQuery = z.infer<typeof proposalChartsSummaryQue
 export interface ProposalChartsSummaryBucket {
   /** Unix ms, start of the bucket. */
   timestamp: number;
-  /** Per category, how many proposals were created but not yet decided at the bucket end. */
+  /** Per category, how many proposals were open at any point during the bucket. */
   counts: Record<string, number>;
 }
 
 export interface ProposalChartsSummaryResponse {
   /** One entry per slot, zero-filled, oldest first. */
   buckets: ProposalChartsSummaryBucket[];
+  /** Proposals in this space still awaiting a decision right now, across all categories. */
+  currentOpen: number;
 }
 
 /** Terminal states: a decided or executed proposal can no longer be acted on. */

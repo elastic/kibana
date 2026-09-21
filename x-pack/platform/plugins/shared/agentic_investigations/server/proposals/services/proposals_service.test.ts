@@ -879,7 +879,7 @@ describe('ProposalsService', () => {
       values: rows.map(([idx, category, count]) => [count, idx, category]),
     });
 
-    /** The four queries resolve in the order the service issues them. */
+    /** The five queries resolve in the order the service issues them. */
     const mockEsql = (
       storage: ReturnType<typeof createStorage>,
       {
@@ -887,22 +887,34 @@ describe('ProposalsService', () => {
         opens,
         closes,
         expiries,
+        currentOpen,
       }: {
         anchor?: object;
         opens?: object;
         closes?: object;
         expiries?: object;
+        currentOpen?: object;
       }
     ) => {
       storage.esql
         .mockResolvedValueOnce(anchor ?? emptyEsql())
         .mockResolvedValueOnce(opens ?? emptyEsql())
         .mockResolvedValueOnce(closes ?? emptyEsql())
-        .mockResolvedValueOnce(expiries ?? emptyEsql());
+        .mockResolvedValueOnce(expiries ?? emptyEsql())
+        .mockResolvedValueOnce(currentOpen ?? emptyEsql());
     };
 
     const issuedQueries = (storage: ReturnType<typeof createStorage>): string[] =>
       storage.esql.mock.calls.map(([args]) => args.pipeline.toRequest().query as string);
+
+    /**
+     * The four bucket queries (anchor, opens, closes, expiries) have constraints
+     * that do not apply to the scalar `currentOpen` query: no COALESCE, no
+     * trailing LIMIT, and it legitimately uses `expiresAt > NOW()`.
+     * Narrow to these four when asserting those properties.
+     */
+    const bucketQueries = (storage: ReturnType<typeof createStorage>): string[] =>
+      issuedQueries(storage).slice(0, 4);
 
     const esqlError = (type: string, reason: string) =>
       Object.assign(new Error(reason), { meta: { body: { error: { type, reason } } } });
@@ -926,7 +938,24 @@ describe('ProposalsService', () => {
 
       const { buckets } = await service.chartsSummary(chartsQuery, SPACE_ID);
 
-      expect(buckets.map((b) => b.counts.contain)).toEqual([2, 5, 5, 4, 4]);
+      // Bucket 3 has a close — with the snapshot taken before closes land, that
+      // bucket still shows the proposal as open (it was open during the bucket).
+      expect(buckets.map((b) => b.counts.contain)).toEqual([2, 5, 5, 5, 4]);
+    });
+
+    it('should count a proposal that opened and closed within the same bucket', async () => {
+      const storage = createStorage();
+      mockEsql(storage, {
+        opens: byIdxAndCategory('opens', [[2, 'contain', 1]]),
+        closes: byIdxAndCategory('closes', [[2, 'contain', 1]]),
+      });
+      const { service } = createService(storage);
+
+      const { buckets } = await service.chartsSummary(chartsQuery, SPACE_ID);
+
+      // Open during bucket 2 even though it settled inside the same bucket.
+      // Buckets before the first event have no key for the category — `?? 0` normalises them.
+      expect(buckets.map((b) => b.counts.contain ?? 0)).toEqual([0, 0, 1, 0, 0]);
     });
 
     it('should include the current partial bucket', async () => {
@@ -948,6 +977,8 @@ describe('ProposalsService', () => {
 
       const { buckets } = await service.chartsSummary(chartsQuery, SPACE_ID);
 
+      // The close-only bucket still reads zero: no open was recorded, so the
+      // key-set backfill adds an explicit 0 rather than leaving the key absent.
       expect(buckets.map((b) => b.counts.contain)).toEqual([0, 0, 0, 0, 0]);
     });
 
@@ -961,15 +992,15 @@ describe('ProposalsService', () => {
 
       const { buckets } = await service.chartsSummary(chartsQuery, SPACE_ID);
 
-      expect(buckets.map((b) => b.counts.contain)).toEqual([1, 1, 0, 0, 0]);
+      // Bucket 2 carries the expiry — proposal was still open during that bucket.
+      expect(buckets.map((b) => b.counts.contain)).toEqual([1, 1, 1, 0, 0]);
     });
 
     /**
-     * The regression this guards: a request-time `expiresAt > NOW()` filter would
-     * erase an expired proposal from the buckets in which it was genuinely open,
-     * so the same past bucket would answer differently on every refetch.
+     * `supersededBy IS NULL` must appear in all five queries — a superseded
+     * proposal must not count towards `currentOpen` either.
      */
-    it('should filter superseded proposals from all four queries', async () => {
+    it('should filter superseded proposals from all five queries', async () => {
       const storage = createStorage();
       const { service } = createService(storage);
 
@@ -980,13 +1011,20 @@ describe('ProposalsService', () => {
       }
     });
 
-    it('should not filter any query on request-time expiry', async () => {
+    /**
+     * The regression this guards: a request-time `expiresAt > NOW()` filter on
+     * a bucket query would erase an expired proposal from the buckets in which
+     * it was genuinely open, so the same past bucket would answer differently on
+     * every refetch. The scalar `currentOpen` query is exempt — it legitimately
+     * needs a request-time predicate.
+     */
+    it('should not filter the four bucket queries on request-time expiry', async () => {
       const storage = createStorage();
       const { service } = createService(storage);
 
       await service.chartsSummary(chartsQuery, SPACE_ID);
 
-      for (const query of issuedQueries(storage)) {
+      for (const query of bucketQueries(storage)) {
         expect(query).not.toMatch(/expiresAt\s*>\s*NOW\(\)/i);
       }
     });
@@ -998,7 +1036,7 @@ describe('ProposalsService', () => {
 
       const { buckets } = await service.chartsSummary(chartsQuery, SPACE_ID);
 
-      for (const query of issuedQueries(storage)) {
+      for (const query of bucketQueries(storage)) {
         expect(query).toContain('COALESCE(category');
       }
       expect(buckets.at(-1)?.counts).toEqual({ uncategorized: 4 });
@@ -1012,10 +1050,35 @@ describe('ProposalsService', () => {
 
       // A larger LIMIT is capped to the truncation max rather than honoured, so
       // asking for one only hides that the newest buckets were dropped.
-      for (const query of issuedQueries(storage)) {
+      // The scalar currentOpen query has no LIMIT — only the four bucket queries.
+      for (const query of bucketQueries(storage)) {
         const limit = Number(query.match(/LIMIT\s+(\d+)\s*$/)?.[1]);
         expect(limit).toBeLessThanOrEqual(10000);
       }
+    });
+
+    it('should return currentOpen from the fifth query', async () => {
+      const storage = createStorage();
+      mockEsql(storage, {
+        currentOpen: {
+          columns: [{ name: 'currentOpen' }],
+          values: [[7]],
+        },
+      });
+      const { service } = createService(storage);
+
+      const { currentOpen } = await service.chartsSummary(chartsQuery, SPACE_ID);
+
+      expect(currentOpen).toBe(7);
+    });
+
+    it('should default currentOpen to 0 when the query returns no rows', async () => {
+      const storage = createStorage();
+      const { service } = createService(storage);
+
+      const { currentOpen } = await service.chartsSummary(chartsQuery, SPACE_ID);
+
+      expect(currentOpen).toBe(0);
     });
 
     it('should warn when a query comes back at the truncation ceiling', async () => {
@@ -1040,10 +1103,11 @@ describe('ProposalsService', () => {
       );
       const { service, logger } = createService(storage);
 
-      const { buckets } = await service.chartsSummary(chartsQuery, SPACE_ID);
+      const { buckets, currentOpen } = await service.chartsSummary(chartsQuery, SPACE_ID);
 
       expect(buckets).toHaveLength(5);
       expect(buckets.every((b) => Object.keys(b.counts).length === 0)).toBe(true);
+      expect(currentOpen).toBe(0);
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('unknown column'));
     });
 

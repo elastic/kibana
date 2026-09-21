@@ -229,18 +229,25 @@ export class ProposalsService {
   }
 
   /**
-   * Open-proposal counts per bucket. A proposal counts as open at bucket T if it
-   * was created at or before the end of T and had neither been decided nor
-   * expired by the start of T+1.
+   * Per-bucket proposal counts over a sliding window, plus a live total.
    *
-   * An anchor count seeds a running sum that opens, closes and expiries then
-   * move, which is what keeps this to four queries instead of one per bucket.
+   * Each bucket's `counts` record answers "how many proposals were open at
+   * *any* point during this interval" — not just at the end of it.
+   * A proposal that opened and closed within the same bucket is counted once
+   * in that bucket and never appears in the neighbouring ones.
    *
-   * Expiry is treated as a fourth event stream rather than as a `WHERE` filter.
-   * Filtering on `expiresAt > NOW()` would evaluate a *request-time* predicate
-   * against every historical bucket, so a proposal that has since expired would
-   * be erased from its own past — the same past bucket would return a different
-   * value on each refetch.
+   * `currentOpen` answers "how many are still awaiting a decision right now".
+   *
+   * An anchor count seeds a running sum that opens, closes, and expiries then
+   * move, which is what keeps this to four bucket queries instead of one per
+   * bucket.
+   *
+   * Expiry is treated as a fourth event stream rather than a `WHERE` filter on
+   * the bucket queries. Filtering on `expiresAt > NOW()` would evaluate a
+   * *request-time* predicate against every historical bucket, so a proposal
+   * that has since expired would be erased from its own past — the same past
+   * bucket would return a different value on every refetch. `currentOpen` is
+   * exempt: "what is open right now" genuinely needs a request-time predicate.
    */
   async chartsSummary(
     { windowHours, bucketMinutes }: ProposalChartsSummaryQuery,
@@ -254,6 +261,7 @@ export class ProposalsService {
     const bucketCount = Math.floor((now - windowStartMs) / bucketMs) + 1;
 
     const zeroBuckets = (): ProposalChartsSummaryResponse => ({
+      currentOpen: 0,
       buckets: Array.from({ length: bucketCount }, (_, i) => ({
         timestamp: windowStartMs + i * bucketMs,
         counts: {},
@@ -264,17 +272,19 @@ export class ProposalsService {
     let opensResponse;
     let closesResponse;
     let expiriesResponse;
+    let currentOpenResponse;
     try {
-      [anchorResponse, opensResponse, closesResponse, expiriesResponse] = await Promise.all([
-        // `COALESCE(category, …)` in every query: a proposal with no action has no
-        // category, and a bare `BY category` would drop it from the aggregation —
-        // and, under `drop_null_columns`, drop the column outright when no row has
-        // one, zeroing the whole chart.
-        //
-        // `supersededBy IS NULL` in every query: a proposal that was superseded by a
-        // retry clone should not appear alongside its replacement in the chart counts.
-        this.deps.storage.esql({
-          pipeline: esql`WHERE spaceId == ${{ spaceId }}
+      [anchorResponse, opensResponse, closesResponse, expiriesResponse, currentOpenResponse] =
+        await Promise.all([
+          // `COALESCE(category, …)` in every query: a proposal with no action has no
+          // category, and a bare `BY category` would drop it from the aggregation —
+          // and, under `drop_null_columns`, drop the column outright when no row has
+          // one, zeroing the whole chart.
+          //
+          // `supersededBy IS NULL` in every query: a proposal that was superseded by a
+          // retry clone should not appear alongside its replacement in the chart counts.
+          this.deps.storage.esql({
+            pipeline: esql`WHERE spaceId == ${{ spaceId }}
           AND supersededBy IS NULL
           AND createdAt < TO_DATETIME(${{ wsAnchorCreated: windowStartIso }})
           AND (decidedAt IS NULL OR decidedAt >= TO_DATETIME(${{
@@ -286,10 +296,10 @@ export class ProposalsService {
         | EVAL category = COALESCE(category, ${{ anchorUncategorized: PROPOSAL_UNCATEGORIZED }})
         | STATS anchor = COUNT(*) BY category
         | LIMIT ${ESQL_CATEGORY_ROW_LIMIT}`,
-        }),
+          }),
 
-        this.deps.storage.esql({
-          pipeline: esql`WHERE spaceId == ${{ spaceId }}
+          this.deps.storage.esql({
+            pipeline: esql`WHERE spaceId == ${{ spaceId }}
           AND supersededBy IS NULL
           AND createdAt >= TO_DATETIME(${{ wsOpensFilter: windowStartIso }})
         | EVAL idx = FLOOR(DATE_DIFF("minutes", TO_DATETIME(${{
@@ -299,10 +309,10 @@ export class ProposalsService {
         | STATS opens = COUNT(*) BY idx, category
         | SORT idx ASC
         | LIMIT ${ESQL_RESULT_TRUNCATION_MAX_SIZE}`,
-        }),
+          }),
 
-        this.deps.storage.esql({
-          pipeline: esql`WHERE spaceId == ${{ spaceId }}
+          this.deps.storage.esql({
+            pipeline: esql`WHERE spaceId == ${{ spaceId }}
           AND supersededBy IS NULL
           AND decidedAt IS NOT NULL
           AND decidedAt >= TO_DATETIME(${{ wsClosesFilter: windowStartIso }})
@@ -313,12 +323,12 @@ export class ProposalsService {
         | STATS closes = COUNT(*) BY idx, category
         | SORT idx ASC
         | LIMIT ${ESQL_RESULT_TRUNCATION_MAX_SIZE}`,
-        }),
+          }),
 
-        // `decidedAt IS NULL` so a proposal that expired and was later decided is
-        // decremented once, by the closes query, rather than by both.
-        this.deps.storage.esql({
-          pipeline: esql`WHERE spaceId == ${{ spaceId }}
+          // `decidedAt IS NULL` so a proposal that expired and was later decided is
+          // decremented once, by the closes query, rather than by both.
+          this.deps.storage.esql({
+            pipeline: esql`WHERE spaceId == ${{ spaceId }}
           AND supersededBy IS NULL
           AND decidedAt IS NULL
           AND expiresAt IS NOT NULL
@@ -331,8 +341,20 @@ export class ProposalsService {
         | STATS expiries = COUNT(*) BY idx, category
         | SORT idx ASC
         | LIMIT ${ESQL_RESULT_TRUNCATION_MAX_SIZE}`,
-        }),
-      ]);
+          }),
+
+          // `expiresAt > NOW()` is correct here — unlike the bucket queries, this
+          // count has no history and genuinely needs a request-time predicate.
+          // The ban on request-time expiry in the four bucket queries protects
+          // historical data; it does not apply to a live scalar.
+          this.deps.storage.esql({
+            pipeline: esql`WHERE spaceId == ${{ spaceId }}
+          AND supersededBy IS NULL
+          AND decidedAt IS NULL
+          AND (expiresAt IS NULL OR expiresAt > NOW())
+        | STATS currentOpen = COUNT(*)`,
+          }),
+        ]);
     } catch (error) {
       // An index created outside the storage adapter can be missing a field this
       // queries, which ES|QL rejects rather than treating as null. Read *that*
@@ -357,6 +379,7 @@ export class ProposalsService {
     const opensByIdxAndCat = parseEsqlCountByIdxAndCategory(opensResponse, 'opens');
     const closesByIdxAndCat = parseEsqlCountByIdxAndCategory(closesResponse, 'closes');
     const expiriesByIdxAndCat = parseEsqlCountByIdxAndCategory(expiriesResponse, 'expiries');
+    const currentOpen = parseEsqlScalarCount(currentOpenResponse, 'currentOpen');
 
     const runningSums: Record<string, number> = { ...anchorByCat };
     const buckets: ProposalChartsSummaryBucket[] = [];
@@ -364,9 +387,17 @@ export class ProposalsService {
     for (let i = 0; i < bucketCount; i++) {
       const timestamp = windowStartMs + i * bucketMinutes * 60_000;
 
+      // Opens land first: a proposal that opened in this bucket was open during
+      // it, even if it also closed here.
       for (const [cat, count] of Object.entries(opensByIdxAndCat[i] ?? {})) {
         runningSums[cat] = (runningSums[cat] ?? 0) + count;
       }
+
+      // Snapshot before closes/expiries land. Proposals open at the bucket
+      // start and proposals opened during it are disjoint sets, so this sum is
+      // exactly the number that were open at some point in the bucket.
+      const openDuring: Record<string, number> = { ...runningSums };
+
       for (const [cat, count] of Object.entries(closesByIdxAndCat[i] ?? {})) {
         // Clamped because a close whose open the anchor missed would drive this
         // negative, and a negative open count is worse than an undercount.
@@ -376,10 +407,17 @@ export class ProposalsService {
         runningSums[cat] = Math.max(0, (runningSums[cat] ?? 0) - count);
       }
 
-      buckets.push({ timestamp, counts: { ...runningSums } });
+      // A category whose only event this bucket was a close has no key in the
+      // pre-close snapshot; add an explicit zero so the key set is stable across
+      // the series rather than appearing and disappearing mid-sequence.
+      for (const cat of Object.keys(runningSums)) {
+        openDuring[cat] ??= 0;
+      }
+
+      buckets.push({ timestamp, counts: openDuring });
     }
 
-    return { buckets };
+    return { currentOpen, buckets };
   }
 
   /**
@@ -837,6 +875,20 @@ const isVersionConflict = (error: unknown): boolean => {
   const status = (error as { statusCode?: number; meta?: { statusCode?: number } })?.statusCode;
   const metaStatus = (error as { meta?: { statusCode?: number } })?.meta?.statusCode;
   return status === 409 || metaStatus === 409;
+};
+
+/**
+ * Reads a single scalar count from a bare `STATS field = COUNT(*)` result.
+ * Column is looked up by name (same convention as the other parsers) and
+ * defaults to 0 when `values` is empty — e.g. when the index has no docs.
+ */
+const parseEsqlScalarCount = (
+  response: { columns: Array<{ name: string }>; values: Array<unknown[]> },
+  countField: string
+): number => {
+  const colIdx = response.columns.findIndex((c) => c.name === countField);
+  if (colIdx === -1 || response.values.length === 0) return 0;
+  return (response.values[0][colIdx] as number | null) ?? 0;
 };
 
 /**

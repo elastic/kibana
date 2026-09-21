@@ -29,6 +29,7 @@ import { useApproveProposal, useDismissProposal } from '@kbn/agentic-investigati
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
+import { useProposalChartsSummary } from '../../hooks/use_proposal_charts_summary';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { AlertZeroPageHeader } from '../../components/alertzero_page_header';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
@@ -104,15 +105,12 @@ export const ConversationsPage: React.FC = () => {
     [proposalsById]
   );
 
-  // Header count: pending categories only — closed proposals are excluded.
-  // "3 actions need you" must not count decisions already made.
-  const openCount = useMemo(
-    () =>
-      (respond.data?.proposals.length ?? 0) +
-      (investigate.data?.proposals.length ?? 0) +
-      (configure.data?.proposals.length ?? 0),
-    [respond.data, investigate.data, configure.data]
-  );
+  // Header count: authoritative total of pending proposals in this space.
+  // Uses `currentOpen` from chartsSummary — no page-size cap, covers all
+  // categories, excludes expired. React Query dedupes with the chart row
+  // (same query key and defaults), so this adds no extra request.
+  const chartsSummary = useProposalChartsSummary();
+  const openCount = chartsSummary.data?.currentOpen ?? 0;
 
   const onClickAction: BaseActionsProps['onClickAction'] = useCallback((action, recordId) => {
     setModalState({ type: action, recordId });
