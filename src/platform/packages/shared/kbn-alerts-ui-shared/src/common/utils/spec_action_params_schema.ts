@@ -61,39 +61,63 @@ export function getSpecActionInputSchema(
   return derived;
 }
 
+/**
+ * Returns the union of input field names across all spec actions, so validation results carry a
+ * key for every field a host may have stored an error under.
+ */
+export function getSpecActionInputFieldKeys(spec: ConnectorSpecResponse): string[] {
+  const keys = new Set<string>();
+  for (const action of Object.values(spec.actions)) {
+    const properties = (action.input.properties ?? {}) as Record<string, unknown>;
+    for (const key of Object.keys(properties)) {
+      keys.add(key);
+    }
+  }
+  return Array.from(keys);
+}
+
+const getEmptyErrors = (spec: ConnectorSpecResponse): Record<string, string[]> => {
+  const errors: Record<string, string[]> = { subAction: [] };
+  for (const key of getSpecActionInputFieldKeys(spec)) {
+    errors[key] = [];
+  }
+  return errors;
+};
+
+/**
+ * Validates spec action params. Every known field key is always present (as an empty array when
+ * valid) because rule form hosts merge results per key and only overwrite keys that are returned.
+ */
 export async function validateSpecActionParams(
   spec: ConnectorSpecResponse,
   actionParams: SpecActionParams
 ): Promise<GenericValidationResult<Record<string, string[]>>> {
   const { subAction, subActionParams } = actionParams;
+  const errors = getEmptyErrors(spec);
 
   if (subAction === TEST_CONNECTOR_SUB_ACTION) {
-    return { errors: {} };
+    return { errors };
   }
 
   if (!subAction || spec.actions[subAction] === undefined) {
-    return {
-      errors: {
-        subAction: [
-          i18n.translate('alertsUIShared.specActionParams.unknownSubActionError', {
-            defaultMessage: 'Select a valid action.',
-          }),
-        ],
-      },
-    };
+    errors.subAction.push(
+      i18n.translate('alertsUIShared.specActionParams.unknownSubActionError', {
+        defaultMessage: 'Select a valid action.',
+      })
+    );
+    return { errors };
   }
 
   const schema = getSpecActionInputSchema(spec, subAction);
   if (!schema) {
-    return { errors: {} };
+    return { errors };
   }
 
   const result = schema.safeParse(subActionParams ?? {});
   if (result.success) {
-    return { errors: {} };
+    return { errors };
   }
 
-  const errors: Record<string, string[]> = {};
   for (const issue of result.error.issues) {
     const field = String(issue.path[0] ?? 'subActionParams');
     if (!errors[field]) {

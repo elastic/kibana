@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { EuiFormRow, EuiSuperSelect } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { EuiFormRow, EuiSuperSelect, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -35,6 +35,8 @@ const SpecActionParamsForm: React.FC<{
   defaultMessage?: string;
   useDefaultMessage?: boolean;
   messageVariables?: ActionVariable[];
+  /** Emit the initial form value on mount so the host replaces params left over from another action. */
+  emitInitialValue?: boolean;
 }> = ({
   schema,
   defaultValue,
@@ -45,9 +47,10 @@ const SpecActionParamsForm: React.FC<{
   defaultMessage,
   useDefaultMessage,
   messageVariables,
+  emitInitialValue = false,
 }) => {
   const { form } = useForm({ defaultValue });
-  const lastEmittedRef = useRef<unknown>(defaultValue);
+  const lastEmittedRef = useRef<unknown>(emitInitialValue ? undefined : defaultValue);
 
   useEffect(() => {
     const subscription = form.subscribe(({ data }) => {
@@ -129,27 +132,63 @@ export const SpecActionParamsFields: React.FC<
 }) => {
   const actionNames = Object.keys(spec.actions);
   const defaultSubAction = getSpecDefaultSubAction(spec);
-  const subAction = actionParams.subAction ?? defaultSubAction;
+  const { subAction } = actionParams;
+  // Tracks the action picked in the selector until the host has committed it, so the inner form
+  // mounts with empty params and emits them in a later render. Emitting `subAction` and
+  // `subActionParams` in the same tick would let one call overwrite the other in hosts that merge
+  // params from a captured value.
+  const [pendingReset, setPendingReset] = useState<string | undefined>();
+  const isResetting = pendingReset !== undefined && pendingReset === subAction;
   const schema = useMemo(
     () => (subAction ? getSpecActionInputSchema(spec, subAction) : undefined),
     [spec, subAction]
   );
 
   useEffect(() => {
-    if (!actionParams.subAction && defaultSubAction) {
+    if (!subAction && defaultSubAction) {
       editAction('subAction', defaultSubAction, index);
     }
-  }, [actionParams.subAction, defaultSubAction, editAction, index]);
+  }, [subAction, defaultSubAction, editAction, index]);
+
+  useEffect(() => {
+    if (isResetting) {
+      setPendingReset(undefined);
+    }
+  }, [isResetting]);
 
   const actionOptions = useMemo(
     () =>
-      actionNames.map((name) => ({
-        value: name,
-        inputDisplay: spec.actions[name].description
-          ? `${name} — ${spec.actions[name].description}`
-          : name,
-      })),
+      actionNames.map((name) => {
+        const { description } = spec.actions[name];
+        return {
+          value: name,
+          inputDisplay: name,
+          dropdownDisplay: (
+            <>
+              <strong>{name}</strong>
+              {description && (
+                <EuiText size="s" color="subdued">
+                  <p>{description}</p>
+                </EuiText>
+              )}
+            </>
+          ),
+        };
+      }),
     [actionNames, spec.actions]
+  );
+
+  const selectedDescription = subAction ? spec.actions[subAction]?.description : undefined;
+
+  const onSubActionChange = useCallback(
+    (value: string) => {
+      if (value === subAction) {
+        return;
+      }
+      setPendingReset(value);
+      editAction('subAction', value, index);
+    },
+    [editAction, index, subAction]
   );
 
   return (
@@ -160,17 +199,15 @@ export const SpecActionParamsFields: React.FC<
           label={i18n.translate('alertsUIShared.specActionParams.actionLabel', {
             defaultMessage: 'Action',
           })}
+          helpText={selectedDescription}
         >
           <EuiSuperSelect
             fullWidth
             options={actionOptions}
-            valueOfSelected={subAction}
+            valueOfSelected={subAction ?? defaultSubAction}
             disabled={isDisabled}
             data-test-subj="specActionParams-subAction"
-            onChange={(value) => {
-              editAction('subAction', value, index);
-              editAction('subActionParams', {}, index);
-            }}
+            onChange={onSubActionChange}
           />
         </EuiFormRow>
       )}
@@ -178,7 +215,8 @@ export const SpecActionParamsFields: React.FC<
         <SpecActionParamsForm
           key={subAction}
           schema={schema}
-          defaultValue={actionParams.subActionParams ?? {}}
+          defaultValue={isResetting ? {} : actionParams.subActionParams ?? {}}
+          emitInitialValue={isResetting}
           disabled={isDisabled}
           editAction={editAction}
           index={index}

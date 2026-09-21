@@ -128,12 +128,15 @@ describe('action_type_model_utils', () => {
           errors: expect.objectContaining({ text: expect.any(Array) }),
         })
       );
+      const valid = await model.validateParams(
+        { subAction: 'sendMessage', subActionParams: { text: 'hello' } },
+        null
+      );
       expect(
-        await model.validateParams(
-          { subAction: 'sendMessage', subActionParams: { text: 'hello' } },
-          null
+        Object.values(valid.errors).every(
+          (messages) => Array.isArray(messages) && messages.length === 0
         )
-      ).toEqual({ errors: {} });
+      ).toBe(true);
     });
 
     it('sets isTestable from the spec response', () => {

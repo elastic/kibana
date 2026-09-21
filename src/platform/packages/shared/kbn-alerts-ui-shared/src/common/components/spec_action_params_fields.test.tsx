@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import React, { useState } from 'react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { ConnectorSpecResponse } from '../apis/fetch_connector_spec';
+import type { SpecActionParams } from '../types/spec_action_params';
+import { validateSpecActionParams } from '../utils/spec_action_params_schema';
 import { SpecActionParamsFields } from './spec_action_params_fields';
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -61,6 +63,41 @@ const singleActionSpec = (): ConnectorSpecResponse => {
     actions: { sendMessage: spec.actions.sendMessage },
   };
 };
+
+/**
+ * Mirrors the rule form host: `editAction` spreads the params captured by the current render, so
+ * two calls in the same tick overwrite each other. Exposes the latest params through `onParams`.
+ */
+const StatefulHost = ({
+  spec,
+  initialParams,
+  onParams,
+  defaultMessage,
+}: {
+  spec: ConnectorSpecResponse;
+  initialParams: SpecActionParams;
+  onParams: (params: SpecActionParams) => void;
+  defaultMessage?: string;
+}) => {
+  const [params, setParams] = useState<SpecActionParams>(initialParams);
+  onParams(params);
+  const editAction = (key: string, value: unknown) => {
+    setParams({ ...params, [key]: value });
+  };
+  return (
+    <SpecActionParamsFields
+      spec={spec}
+      actionParams={params}
+      editAction={editAction}
+      index={0}
+      errors={{}}
+      defaultMessage={defaultMessage}
+    />
+  );
+};
+
+const hasErrors = (errors: Record<string, unknown>) =>
+  Object.values(errors).some((messages) => Array.isArray(messages) && messages.length > 0);
 
 describe('SpecActionParamsFields', () => {
   it('renders an action selector for multi-action specs', () => {
@@ -134,15 +171,32 @@ describe('SpecActionParamsFields', () => {
     });
   });
 
-  it('resets subActionParams when the selected action changes', async () => {
-    const user = userEvent.setup();
-    const editAction = jest.fn();
+  it('shows the action name as the selected value and its description as help text', () => {
+    const spec = multiActionSpec();
+    render(
+      <SpecActionParamsFields
+        spec={spec}
+        actionParams={{ subAction: 'sendMessage', subActionParams: {} }}
+        editAction={jest.fn()}
+        index={0}
+        errors={{}}
+      />,
+      { wrapper }
+    );
 
+    const select = screen.getByTestId('specActionParams-subAction');
+    expect(within(select).getByText('sendMessage')).toBeInTheDocument();
+    expect(within(select).queryByText(/Send a message/)).not.toBeInTheDocument();
+    expect(screen.getByText('Send a message')).toBeInTheDocument();
+  });
+
+  it('lists action names with their descriptions in the dropdown', async () => {
+    const user = userEvent.setup();
     render(
       <SpecActionParamsFields
         spec={multiActionSpec()}
-        actionParams={{ subAction: 'sendMessage', subActionParams: { text: 'hi' } }}
-        editAction={editAction}
+        actionParams={{ subAction: 'sendMessage', subActionParams: {} }}
+        editAction={jest.fn()}
         index={0}
         errors={{}}
       />,
@@ -150,10 +204,70 @@ describe('SpecActionParamsFields', () => {
     );
 
     await user.click(screen.getByTestId('specActionParams-subAction'));
-    await user.click(await screen.findByText(/searchMessages/));
 
-    expect(editAction).toHaveBeenCalledWith('subAction', 'searchMessages', 0);
-    expect(editAction).toHaveBeenCalledWith('subActionParams', {}, 0);
+    const option = await screen.findByRole('option', { name: /searchMessages/ });
+    expect(within(option).getByText('searchMessages')).toBeInTheDocument();
+    expect(within(option).getByText('Search messages')).toBeInTheDocument();
+  });
+
+  it('resets subActionParams when the selected action changes', async () => {
+    const user = userEvent.setup();
+    let latest: SpecActionParams = {};
+
+    render(
+      <StatefulHost
+        spec={multiActionSpec()}
+        initialParams={{ subAction: 'sendMessage', subActionParams: { channel: 'C1', text: 'hi' } }}
+        onParams={(params) => {
+          latest = params;
+        }}
+      />,
+      { wrapper }
+    );
+
+    await user.click(screen.getByTestId('specActionParams-subAction'));
+    await user.click(await screen.findByRole('option', { name: /searchMessages/ }));
+
+    await waitFor(() => {
+      expect(latest).toEqual({ subAction: 'searchMessages', subActionParams: {} });
+    });
+    expect(screen.getByTestId('generator-field-query')).toHaveValue('');
+    expect(hasErrors((await validateSpecActionParams(multiActionSpec(), latest)).errors)).toBe(
+      false
+    );
+  });
+
+  it('applies the default action, fills required fields, and ends with no validation errors', async () => {
+    const user = userEvent.setup();
+    const spec = multiActionSpec();
+    let latest: SpecActionParams = {};
+
+    render(
+      <StatefulHost
+        spec={spec}
+        initialParams={{}}
+        defaultMessage="Rule fired"
+        onParams={(params) => {
+          latest = params;
+        }}
+      />,
+      { wrapper }
+    );
+
+    await waitFor(() => {
+      expect(latest.subAction).toBe('sendMessage');
+    });
+    expect(hasErrors((await validateSpecActionParams(spec, latest)).errors)).toBe(true);
+
+    await user.type(screen.getByTestId('generator-field-channel'), 'C123');
+
+    await waitFor(() => {
+      expect(latest).toEqual({
+        subAction: 'sendMessage',
+        subActionParams: { channel: 'C123', text: 'Rule fired' },
+      });
+    });
+    expect(hasErrors((await validateSpecActionParams(spec, latest)).errors)).toBe(false);
   });
 
   it('shows the add-variable button for string fields and inserts a variable', async () => {
