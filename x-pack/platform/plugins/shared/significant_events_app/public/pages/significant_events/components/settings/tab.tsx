@@ -830,7 +830,7 @@ export function SettingsTab() {
         <EuiPanel hasShadow={false} color="subdued">
           <EuiText size="s">
             <h3>
-              {i18n.translate('xpack.significantEventsApp.settings.developerModeTitle', {
+              {i18n.translate('xpack.nightshift.settings.developerModeTitle', {
                 defaultMessage: 'Nightshift developer mode',
               })}
             </h3>
@@ -840,7 +840,7 @@ export function SettingsTab() {
           <EuiFlexGroup alignItems="flexStart" gutterSize="l">
             <EuiFlexItem grow={2}>
               <EuiText color="subdued" size="s">
-                {i18n.translate('xpack.significantEventsApp.settings.developerModeHelpText', {
+                {i18n.translate('xpack.nightshift.settings.developerModeHelpText', {
                   defaultMessage:
                     'Show extra details and configurations options for expert users.',
                 })}
@@ -852,7 +852,7 @@ export function SettingsTab() {
                   <EuiSwitch
                     data-test-subj="nightshiftDeveloperModeSwitch"
                     label={i18n.translate(
-                      'xpack.significantEventsApp.settings.developerModeToggleSwitch',
+                      'xpack.nightshift.settings.developerModeToggleSwitch',
                       { defaultMessage: 'Enable Nightshift developer mode' }
                     )}
                     checked={isDeveloperMode}

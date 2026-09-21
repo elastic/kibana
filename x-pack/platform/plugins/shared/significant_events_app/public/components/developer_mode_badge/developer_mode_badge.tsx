@@ -10,12 +10,12 @@ import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export const DEVELOPER_MODE_BADGE_LABEL = i18n.translate(
-  'xpack.significantEventsApp.developerModeBadge.label',
+  'xpack.nightshift.developerModeBadge.label',
   { defaultMessage: 'Dev' }
 );
 
 export const DEVELOPER_MODE_BADGE_TOOLTIP = i18n.translate(
-  'xpack.significantEventsApp.developerModeBadge.tooltip',
+  'xpack.nightshift.developerModeBadge.tooltip',
   { defaultMessage: 'Only visible in Nightshift developer mode' }
 );
 
