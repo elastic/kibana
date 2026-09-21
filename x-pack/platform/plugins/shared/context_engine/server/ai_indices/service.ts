@@ -33,6 +33,7 @@ import {
 } from './errors';
 import type { AiIndexDocument, AiIndexStorageClient, StoredAiIndexDocument } from './storage';
 import { buildManagedAiIndexDocId, createAiIndexStorageClient } from './storage';
+import { buildTraceQueries } from './trace_queries';
 import { createAiIndexIdentityDslFilter } from '../utils/ai_index_identity_filter';
 
 /** Resolves the identity a pre-upgrade document carries implicitly, in its `_id` and its absence of a space. */
@@ -52,6 +53,7 @@ const toAiIndexItem = (document: AiIndexDocument): AiIndexHttpItem => ({
   dest: document.dest,
   automations: document.automations,
   sources: document.sources,
+  traces: buildTraceQueries(document.traces ?? [], document.space),
   date_created: document.date_created,
   date_modified: document.date_modified,
 });

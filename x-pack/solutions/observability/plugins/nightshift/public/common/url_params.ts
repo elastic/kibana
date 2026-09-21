@@ -8,7 +8,7 @@
 /** Query param for the investigations search box — shareable, restored on load. */
 export const NIGHTSHIFT_SEARCH_QUERY_PARAM = 'q';
 
-/** Query param for the active severity filter — shareable, restored on load. */
+/** Query param that scrolls to a severity section on load or from a shared link. */
 export const NIGHTSHIFT_SEVERITY_QUERY_PARAM = 'severity';
 
 /** Query param that restores the open event flyout on load or from a shared link. */
@@ -50,10 +50,6 @@ export const getNightshiftSeverityFromSearch = (search: string): string | undefi
 
 export const setNightshiftSeverityParam = (params: URLSearchParams, severity: string): void => {
   params.set(NIGHTSHIFT_SEVERITY_QUERY_PARAM, severity);
-};
-
-export const clearNightshiftSeverityParam = (params: URLSearchParams): void => {
-  params.delete(NIGHTSHIFT_SEVERITY_QUERY_PARAM);
 };
 export const getNightshiftInvestigationIdFromSearch = (search: string): string | undefined =>
   new URLSearchParams(search).get(NIGHTSHIFT_INVESTIGATION_ID_QUERY_PARAM) ?? undefined;
