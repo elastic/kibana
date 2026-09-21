@@ -509,7 +509,7 @@ test.describe(
       );
     });
 
-    test('shows Alerts and classic Rules in the panel when the user has v1 synthetics all', async ({
+    test('shows Alerts and classic Rules in the panel when the user has v1 uptime all', async ({
       browserAuth,
       pageObjects,
       kbnClient,
@@ -517,7 +517,7 @@ test.describe(
     }) => {
       await expectPanelForRole(
         { browserAuth, pageObjects, kbnClient, scoutSpace },
-        observabilityAlertingNavRole({ synthetics: ['all'] }),
+        observabilityAlertingNavRole({ uptime: ['all'] }),
         [PANEL_LINKS.alerts, PANEL_LINKS.rulesV1]
       );
     });
