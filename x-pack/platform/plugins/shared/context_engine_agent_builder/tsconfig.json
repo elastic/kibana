@@ -29,6 +29,7 @@
     "@kbn/workflows-yaml",
     "@kbn/agent-builder-plugin",
     "@kbn/spaces-plugin",
+    "@kbn/core-spaces-common",
     "@kbn/scout"
   ]
 }
