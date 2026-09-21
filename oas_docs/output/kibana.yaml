@@ -113375,7 +113375,7 @@ components:
         selected_entities:
           additionalProperties:
             anyOf:
-              - maxLength: 2048
+              - maxLength: 10000
                 type: string
               - type: number
           description: Values of the partition, by, or over fields that identify the single time series to display.
