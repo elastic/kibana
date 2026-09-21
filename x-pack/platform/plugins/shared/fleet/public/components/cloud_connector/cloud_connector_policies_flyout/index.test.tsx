@@ -834,13 +834,24 @@ describe('CloudConnectorPoliciesFlyout', () => {
       ).not.toBeInTheDocument();
     });
 
-    it('(c) hides IaC section when isIacProvisionerEnabled is false', () => {
+    it('(c) shows the stack details but no stack action when the provisioner is off', () => {
+      // The Deployment ID is a fact about the deployed stack whichever template created it; only
+      // the actions need the provisioner.
       mockUseIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: false });
 
-      renderFlyout({ provider: 'aws' });
+      renderFlyout({ provider: 'aws', iacUpgradeStatus: 'upgrade_available' });
 
       expect(
-        screen.queryByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_SECTION)
+        screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_DEPLOYMENT_ID_INPUT)
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_UPGRADE_CALLOUT)
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_REDEPLOY_BUTTON)
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_LAUNCH_BUTTON)
       ).not.toBeInTheDocument();
     });
 

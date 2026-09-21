@@ -632,7 +632,7 @@ export const STACK_ARN_LABEL = i18n.translate('xpack.fleet.cloudConnector.aws.st
 
 export const STACK_ARN_HELP_TEXT = i18n.translate('xpack.fleet.cloudConnector.aws.stackArnHelp', {
   defaultMessage:
-    'Copy the StackId output of the stack you just created so Kibana can link straight to it when its template needs an update.',
+    'Copy the StackId output of the stack you just created so Kibana can link straight to it.',
 });
 
 /** Shared by the wizard's stack ARN field and the flyout's Deployment ID field. */

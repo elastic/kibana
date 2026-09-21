@@ -271,18 +271,7 @@ describe('AwsIdentityFederationSetup', () => {
       mockGetConnectors({ data: [] });
     });
 
-    it('does not render the stack ARN field while the provisioner is off', () => {
-      renderSetup({ cloud });
-
-      expect(screen.queryByTestId('awsIdentityFederationSetup-stackArn')).not.toBeInTheDocument();
-    });
-
-    it('renders the stack ARN field when the provisioner is on, even without integrations', () => {
-      // The field is gated on the flag alone: the hook's missing-context fallback still opens a
-      // CloudFormation console the user can copy a StackId from.
-      mockUseIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: true });
-      mockUseCloudConnectorTemplate.mockReturnValue(provisionerHookResult(mockLaunchOnClick));
-
+    it('renders the stack ARN field with the provisioner off: the static stack has an ARN too', () => {
       renderSetup({ cloud });
 
       expect(screen.getByTestId('awsIdentityFederationSetup-stackArn')).toBeInTheDocument();

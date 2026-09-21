@@ -114,14 +114,18 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
   const [pageSize, setPageSize] = useState(10);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
 
-  const showIac = provider === AWS_PROVIDER && isIacProvisionerEnabled;
+  // The stack details (Deployment ID, View stack) belong to every AWS identity: the ARN is a
+  // fact about the deployed stack whichever template created it. Only the stack actions
+  // (upgrade callout, Update, Redeploy, Launch) need the IaC Provisioner.
+  const isAws = provider === AWS_PROVIDER;
+  const showIac = isAws && isIacProvisionerEnabled;
 
   // IacTemplateDetails trims on input, so the value judged here is the value that gets saved.
   const deploymentIdInvalid = isStackArnInvalid(editedIacDeploymentId);
   // Never a malformed ARN: Launch is offered exactly while the field is invalid, and its render
   // writes this alongside the key.
   const iacDeploymentIdToSave =
-    showIac &&
+    isAws &&
     editedIacDeploymentId &&
     !deploymentIdInvalid &&
     editedIacDeploymentId !== (iacDeploymentId ?? '')
@@ -510,7 +514,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        {showIac && (
+        {isAws && (
           <>
             <IacTemplateDetails
               iacDeploymentId={editedIacDeploymentId}

@@ -286,16 +286,14 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
             data-test-subj="awsIdentityFederationSetup-launchCloudFormation"
             errorCalloutTestSubj="awsIdentityFederationSetup-templateError"
           />
-          {isIacProvisionerEnabled && (
-            <>
-              <EuiSpacer size="m" />
-              <StackArnField
-                value={stackArn}
-                onChange={setStackArn}
-                data-test-subj="awsIdentityFederationSetup-stackArn"
-              />
-            </>
-          )}
+          {/* Whichever template Launch opened, the stack it creates has an ARN worth recording:
+              it is what the identity's details link to and what a later update targets. */}
+          <EuiSpacer size="m" />
+          <StackArnField
+            value={stackArn}
+            onChange={setStackArn}
+            data-test-subj="awsIdentityFederationSetup-stackArn"
+          />
           <EuiSpacer size="m" />
           <EuiFormRow
             label={i18n.translate('xpack.fleet.awsIdentityFederationSetup.roleArnLabel', {
