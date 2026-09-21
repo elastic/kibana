@@ -18,18 +18,22 @@ describe('maskMonitorParams', () => {
     );
   });
 
-  it.each(['{invalid JSON}', '["secret"]', '"secret"', '42', 'false', 'null'])(
+  it.each(['{invalid JSON}', '"secret"', '42', 'false', 'null'])(
     'fails closed for parameter values that cannot retain parameter names: %s',
     (params) => {
       expect(maskMonitorParams(params)).toBe(MASKED_PARAM_VALUE);
     }
   );
 
-  it('restores an opaque masked parameter value unchanged', () => {
+  it('masks top-level arrays as valid JSON', () => {
+    expect(maskMonitorParams('["secret"]')).toBe(JSON.stringify([MASKED_PARAM_VALUE]));
+  });
+
+  it('restores a masked top-level parameter array', () => {
     expect(
       restoreMaskedMonitorParams({
         previousParams: '["secret"]',
-        submittedParams: MASKED_PARAM_VALUE,
+        submittedParams: JSON.stringify([MASKED_PARAM_VALUE]),
       })
     ).toBe('["secret"]');
   });
