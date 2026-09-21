@@ -8,8 +8,14 @@
 /** Severity level for a proposed behavioral rule. */
 export type SeverityLevel = 'critical' | 'high' | 'medium' | 'low';
 
-/** IOC type used in the behavioral extraction params (mirrors Tier 1 IocType). */
-export type HuntBehaviorIocType = 'ip' | 'email' | 'domain' | 'url' | 'hash';
+/**
+ * IOC type used in the behavioral extraction params (mirrors Tier 1's
+ * `HuntIocType`). Kept as `string` rather than that literal union: these
+ * IOCs are threaded through from the route body (`hunt_behavior_route.gen.ts`,
+ * generated from a plain `type: string` schema) as verbatim context for the
+ * grounded ES|QL prompt, not re-validated against Tier 1's ECS field map.
+ */
+export type HuntBehaviorIocType = string;
 
 export interface HuntBehaviorIoc {
   type: HuntBehaviorIocType;

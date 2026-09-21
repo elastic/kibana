@@ -52,6 +52,9 @@
     "@kbn/proposals-common",
     "@kbn/proposals-plugin",
     "@kbn/react-kibana-mount",
-    "@kbn/securitysolution-mitre-catalog"
+    "@kbn/securitysolution-mitre-catalog",
+    "@kbn/inference-plugin",
+    "@kbn/management-settings-ids",
+    "@kbn/context-engine-plugin"
   ]
 }
