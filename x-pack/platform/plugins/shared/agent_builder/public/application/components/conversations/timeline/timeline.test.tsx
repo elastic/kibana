@@ -56,11 +56,15 @@ describe('Timeline', () => {
       key: id,
       event: createUserMessageEvent({ id, created_at: '2025-01-01T09:00:00.000Z' }),
     });
-    const turn = (key: string, status: 'completed' | 'running'): TimelineItem => ({
+    const turn = (
+      key: string,
+      status: 'completed' | 'running',
+      startedAt = '2025-01-01T09:00:10.000Z'
+    ): TimelineItem => ({
       kind: 'agentTurn',
       key,
       status,
-      startedAt: '2025-01-01T09:00:10.000Z',
+      startedAt,
       steps: [],
     });
 
@@ -76,6 +80,23 @@ describe('Timeline', () => {
       expect(turnFlags()).toEqual([
         { header: 'true', loading: 'true' },
         { header: 'false', loading: 'false' },
+      ]);
+    });
+
+    it('does not spin an earlier day group when a later day turn runs', () => {
+      render(
+        <Timeline
+          items={[
+            turn('t1', 'completed', '2025-01-01T09:00:10.000Z'),
+            turn('t2', 'running', '2025-01-02T09:00:10.000Z'),
+          ]}
+        />
+      );
+
+      // Different days render two headers; the scan must not cross the day boundary.
+      expect(turnFlags()).toEqual([
+        { header: 'true', loading: 'false' },
+        { header: 'true', loading: 'true' },
       ]);
     });
 

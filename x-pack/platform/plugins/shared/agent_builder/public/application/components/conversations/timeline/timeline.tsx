@@ -31,6 +31,11 @@ export const Timeline: React.FC<TimelineProps> = ({
   conversationAttachments,
   isResuming = false,
 }) => {
+  const startsNewDateGroup = (index: number): boolean => {
+    const previous = items[index - 1];
+    return !previous || !moment(itemDate(items[index])).isSame(moment(itemDate(previous)), 'day');
+  };
+
   // After user resumed, make the previous turn to show the loader
   const isGroupLoading = (start: number): boolean => {
     let index = start;
@@ -38,6 +43,9 @@ export const Timeline: React.FC<TimelineProps> = ({
     while (index < items.length) {
       const entry = items[index];
       if (entry.kind !== 'agentTurn') {
+        return running;
+      }
+      if (index > start && startsNewDateGroup(index)) {
         return running;
       }
       running = running || entry.status === 'running';
@@ -51,8 +59,7 @@ export const Timeline: React.FC<TimelineProps> = ({
       <EuiFlexGroup direction="column" gutterSize="l">
         {items.map((item, index) => {
           const previous = items[index - 1];
-          const showDivider =
-            !previous || !moment(itemDate(item)).isSame(moment(itemDate(previous)), 'day');
+          const showDivider = startsNewDateGroup(index);
           const showHeader =
             showDivider || !(item.kind === 'agentTurn' && previous?.kind === 'agentTurn');
           let content: React.ReactNode;
