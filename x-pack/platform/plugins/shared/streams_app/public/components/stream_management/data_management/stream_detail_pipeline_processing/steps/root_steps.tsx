@@ -70,7 +70,7 @@ export const RootSteps = ({
         css={css`
           overflow: auto;
           background: none;
-          padding: ${euiTheme.size.xs};
+          padding: ${euiTheme.size.xxs};
           // Root panels and draggable wrappers
           > .euiPanel,
           > [data-draggable-step] {
