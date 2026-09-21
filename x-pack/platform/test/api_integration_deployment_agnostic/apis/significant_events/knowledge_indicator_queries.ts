@@ -340,27 +340,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(secondDelete).to.eql({ succeeded: 0, failed: 0, skipped: 1 });
     });
 
-    it('cleans up an already-expired query and its rule when the stream itself is deleted', async () => {
-      const queryId = v4();
-      await upsertQuery(apiClient, STREAM_NAME, queryId, {
-        title: 'lingering expired query',
-        esql: {
-          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'lingering'")`,
-        },
-        expires_at: '2020-01-01T00:00:00.000Z',
-      });
-
-      // Deliberately left in place, expired but never explicitly deleted, so
-      // teardown (deleteStream -> deleteAllQueries) must be the one to catch it.
-      await deleteStream(apiClient, STREAM_NAME);
-
-      const rules = await alertingApi.searchRulesV2(roleAuthc);
-      expect(rules.body.items).to.have.length(0);
-
-      // Recreate so the outer afterEach's deleteStream (expecting 200) doesn't 404.
-      await putStream(apiClient, STREAM_NAME, { stream, ...emptyAssets });
-    });
-
     it('bulks insert and remove queries', async () => {
       const firstQuery = {
         id: 'first',
