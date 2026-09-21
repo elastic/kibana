@@ -13,9 +13,9 @@ import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory, type MemoryHistory } from 'history';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
+import { agentBuilderMocks } from '@kbn/agent-builder-plugin/public/mocks';
 import { useApproveProposal, useDismissProposal } from '@kbn/agentic-investigations-plugin/public';
 import { useProposalsList } from '../../hooks/use_proposals_api';
-import { useInvestigation } from '../../hooks/use_investigations_api';
 import type { ProposalItem } from '../../../common/proposals/list';
 import { ConversationsPage } from './conversations_page';
 
@@ -27,7 +27,6 @@ jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
   useDismissProposal: jest.fn(),
 }));
 jest.mock('../../hooks/use_proposals_api');
-jest.mock('../../hooks/use_investigations_api');
 jest.mock('../../components/proposals_trend_chart', () => ({
   ProposalsTrendChartRow: () => null,
 }));
@@ -35,15 +34,15 @@ jest.mock('../../components/proposals_trend_chart', () => ({
 const mockUseProposalsList = useProposalsList as jest.Mock;
 const mockUseApproveProposal = useApproveProposal as jest.Mock;
 const mockUseDismissProposal = useDismissProposal as jest.Mock;
-const mockUseInvestigation = useInvestigation as jest.Mock;
 
-// Cards are proposals; the flyout addresses the investigation they belong to, so the URL
-// carries `conversationId`, not the proposal id.
+// Cards are proposals; the flyout and the chat both address the conversation they belong to, so
+// each carries `conversationId` and its agent, never the proposal id.
 const proposal: ProposalItem = {
   id: 'prop-1',
   spaceId: 'default',
   conversationId: 'inv-1',
   conversationTitle: 'Impossible travel — exec account',
+  conversationAgentId: 'elastic-ai-agent',
   comment: 'MFA satisfied from two countries in 40 minutes.',
   status: 'pending',
   impact: 'high',
@@ -54,28 +53,22 @@ const proposal: ProposalItem = {
   expired: false,
 };
 
-// Deliberately titled differently from the proposal card, so assertions can tell whether
-// the flyout rendered the investigation or just re-rendered the proposal.
-const investigation = {
-  id: 'inv-1',
-  template_id: 'investigation' as const,
-  title: 'Impossible travel — full investigation',
-  createdAt: '2024-01-01T00:00:00Z',
-  updatedAt: '2024-01-01T00:00:00Z',
-  watch_id: 'watch-1',
-  watch_execution_id: 'exec-1',
-  pendingProposalCount: 1,
-  events: [],
-};
-
 const renderPage = (initialEntry: string) => {
   const core = coreMock.createStart();
+  // The real service returns a URL; the mock returns undefined, which would silently drop the
+  // chat control's href and make the link assertions vacuous.
+  core.application.getUrlForApp.mockImplementation(
+    (appId, options) => `/app/${appId}${options?.path ?? ''}`
+  );
+  const agentBuilder = agentBuilderMocks.createStart();
+  const closeFlyout = jest.fn();
+  (agentBuilder.openConversationDetails as jest.Mock).mockResolvedValue(closeFlyout);
   const history: MemoryHistory = createMemoryHistory({ initialEntries: [initialEntry] });
 
   render(
     <I18nProvider>
       <EuiProvider>
-        <KibanaContextProvider services={core}>
+        <KibanaContextProvider services={{ ...core, agentBuilder }}>
           <Router history={history}>
             <ConversationsPage />
           </Router>
@@ -84,7 +77,7 @@ const renderPage = (initialEntry: string) => {
     </I18nProvider>
   );
 
-  return { core, history };
+  return { core, agentBuilder, closeFlyout, history };
 };
 
 const approveMutate = jest.fn();
@@ -93,14 +86,9 @@ const dismissMutate = jest.fn();
 beforeEach(() => {
   mockUseApproveProposal.mockReturnValue({ mutate: approveMutate });
   mockUseDismissProposal.mockReturnValue({ mutate: dismissMutate });
-  mockUseInvestigation.mockImplementation((id?: string) => ({
-    data: id === investigation.id ? { investigation } : undefined,
-    isLoading: false,
-    error: undefined,
-  }));
 });
 
-describe('ConversationsPage details flyout URL state', () => {
+describe('ConversationsPage details flyout', () => {
   beforeEach(() => {
     mockUseProposalsList.mockReturnValue({
       data: { groups: { investigate: [proposal] }, total: 1, truncated: false },
@@ -111,65 +99,61 @@ describe('ConversationsPage details flyout URL state', () => {
 
   afterEach(() => jest.clearAllMocks());
 
-  it('opens the flyout for a conversation named in the URL', async () => {
-    renderPage('/?selectedConversationId=inv-1&show=overview');
+  it("opens Agent Builder's flyout for a conversation named in the URL", async () => {
+    const { agentBuilder } = renderPage('/?selectedConversationId=inv-1');
 
-    const flyout = await screen.findByTestId('investigationDetailsFlyout');
-
-    expect(within(flyout).getByText('Impossible travel — full investigation')).toBeInTheDocument();
+    // An investigation is a templated conversation, so Agent Builder owns the flyout: it loads the
+    // conversation and renders the slots this solution registered. Nothing here fetches it.
+    await waitFor(() => {
+      expect(agentBuilder.openConversationDetails).toHaveBeenCalledWith(
+        expect.objectContaining({ conversationId: 'inv-1' })
+      );
+    });
   });
 
-  it('opens the same chat session from the card as from its flyout', () => {
-    const { history } = renderPage('/');
+  it('opens nothing with no conversation in the URL', () => {
+    const { agentBuilder } = renderPage('/');
 
-    fireEvent.click(screen.getByRole('button', { name: 'Open in chat' }));
-
-    // The chats page tags the session by whatever id it is given, so the card has to
-    // resolve its proposal to a conversation or the two entry points fork two threads.
-    expect(history.location.search).toContain('inv-1');
-    expect(history.location.search).not.toContain('prop-1');
+    expect(agentBuilder.openConversationDetails).not.toHaveBeenCalled();
   });
 
-  it('opens the linked investigation when a proposal card is clicked', async () => {
-    const { history } = renderPage('/');
+  it("puts the card's conversation in the URL rather than the proposal id", async () => {
+    const { agentBuilder, history } = renderPage('/');
 
     fireEvent.click(screen.getByRole('button', { name: 'Impossible travel — exec account' }));
 
     // Cards are keyed by proposal id, so the click has to resolve through the proposal's
     // conversation: the URL must carry `inv-1`, never the `prop-1` that was clicked.
-    expect(history.location.search).toBe('?selectedConversationId=inv-1&show=overview');
-
-    const flyout = await screen.findByTestId('investigationDetailsFlyout');
-    expect(within(flyout).getByText('Impossible travel — full investigation')).toBeInTheDocument();
+    expect(history.location.search).toBe('?selectedConversationId=inv-1');
+    await waitFor(() => {
+      expect(agentBuilder.openConversationDetails).toHaveBeenCalledWith(
+        expect.objectContaining({ conversationId: 'inv-1' })
+      );
+    });
   });
 
-  it('stops marking the card as current once the flyout closes', async () => {
-    renderPage('/');
-    const card = screen.getByRole('button', { name: 'Impossible travel — exec account' });
+  it('closes the flyout it opened once the conversation leaves the URL', async () => {
+    const { closeFlyout, history } = renderPage('/?selectedConversationId=inv-1');
+    await waitFor(() => expect(closeFlyout).not.toHaveBeenCalled());
 
-    fireEvent.click(card);
-    await screen.findByTestId('investigationDetailsFlyout');
-    expect(card).toHaveAttribute('aria-current', 'true');
+    act(() => history.push('/'));
 
-    fireEvent.click(screen.getByTestId('investigationDetailsFlyoutClose'));
-
-    // A card left marked current with nothing open announces a selection that is not there.
-    expect(screen.queryByTestId('investigationDetailsFlyout')).not.toBeInTheDocument();
-    expect(card).not.toHaveAttribute('aria-current');
+    // The URL is the single source of truth, so clearing it has to take the flyout with it.
+    await waitFor(() => expect(closeFlyout).toHaveBeenCalled());
   });
 
-  it('marks the card as current on a fresh mount, so Back out of the chat keeps context', async () => {
-    // Opening a chat unmounts the page, so this is the state it comes back to: the URL
-    // still names the conversation. Deriving the highlight from it is what survives.
-    renderPage('/?selectedConversationId=inv-1&show=overview');
-    await screen.findByTestId('investigationDetailsFlyout');
+  it('clears the URL when the analyst dismisses the flyout', async () => {
+    const { agentBuilder, history } = renderPage('/?selectedConversationId=inv-1');
+    await waitFor(() => expect(agentBuilder.openConversationDetails).toHaveBeenCalled());
 
-    expect(
-      screen.getByRole('button', { name: 'Impossible travel — exec account' })
-    ).toHaveAttribute('aria-current', 'true');
+    const { onClose } = (agentBuilder.openConversationDetails as jest.Mock).mock.calls[0][0];
+    act(() => onClose());
+
+    // Otherwise the id would linger and reopen the flyout on the next render.
+    expect(history.location.search).toBe('');
   });
 
-  it('marks every card of the open investigation, not just the clicked one', async () => {
+  it('marks the cards of the open conversation, not just the clicked one', async () => {
     const sibling: ProposalItem = { ...proposal, id: 'prop-2', comment: 'Second proposal.' };
     mockUseProposalsList.mockReturnValue({
       data: { groups: { investigate: [proposal, sibling] }, total: 2, truncated: false },
@@ -177,89 +161,94 @@ describe('ConversationsPage details flyout URL state', () => {
       error: undefined,
     });
 
-    renderPage('/?selectedConversationId=inv-1&show=overview');
-    await screen.findByTestId('investigationDetailsFlyout');
+    renderPage('/?selectedConversationId=inv-1');
 
-    // Both rows belong to the investigation the flyout is showing.
+    // Both rows belong to the conversation the flyout is showing.
     const cards = screen.getAllByRole('button', { name: 'Impossible travel — exec account' });
     expect(cards).toHaveLength(2);
     cards.forEach((card) => expect(card).toHaveAttribute('aria-current', 'true'));
   });
 
-  it('shows the investigation in the flyout rather than repeating the proposal', async () => {
-    renderPage('/?selectedConversationId=inv-1&show=overview');
+  it('stops marking the card as current once the conversation leaves the URL', async () => {
+    const { history } = renderPage('/');
+    const card = screen.getByRole('button', { name: 'Impossible travel — exec account' });
 
-    const flyout = await screen.findByTestId('investigationDetailsFlyout');
+    fireEvent.click(card);
+    expect(card).toHaveAttribute('aria-current', 'true');
 
-    // A proposal has no timeline, watch or assignee, so rendering the adapted card here
-    // would show the card again with every detail field blank.
-    expect(within(flyout).queryByText('Impossible travel — exec account')).not.toBeInTheDocument();
-    expect(mockUseInvestigation).toHaveBeenCalledWith('inv-1');
+    act(() => history.push('/'));
+
+    // A card left marked current with nothing open announces a selection that is not there.
+    expect(card).not.toHaveAttribute('aria-current');
   });
+});
 
-  it('keeps the flyout closed with no conversation in the URL', () => {
-    renderPage('/');
-
-    expect(screen.queryByTestId('investigationDetailsFlyout')).not.toBeInTheDocument();
-  });
-
-  it('ignores an unrecognized tab, leaving the URL untouched', () => {
-    const { core, history } = renderPage('/?selectedConversationId=inv-1&show=nonsense');
-
-    expect(screen.queryByTestId('investigationDetailsFlyout')).not.toBeInTheDocument();
-    expect(core.notifications.toasts.addDanger).not.toHaveBeenCalled();
-    expect(history.location.search).toBe('?selectedConversationId=inv-1&show=nonsense');
-  });
-
-  it('completes a bare conversation id and opens the flyout', async () => {
-    const { history } = renderPage('/?selectedConversationId=inv-1');
-
-    expect(await screen.findByTestId('investigationDetailsFlyout')).toBeInTheDocument();
-    expect(history.location.search).toBe('?selectedConversationId=inv-1&show=overview');
-  });
-
-  it('shows skeleton content until the investigation resolves', () => {
-    // The flyout's content is the investigation, so it skeletons on that query, not on
-    // the proposals list that populates the queue behind it.
-    mockUseInvestigation.mockReturnValue({ data: undefined, isLoading: true, error: undefined });
-
-    renderPage('/?selectedConversationId=inv-1&show=overview');
-
-    expect(screen.getByTestId('investigationDetailsFlyoutBodySkeleton')).toBeInTheDocument();
-  });
-
-  it('closes the flyout and warns when no investigation matches the id', async () => {
-    const { core, history } = renderPage('/?selectedConversationId=missing&show=overview');
-
-    await waitFor(() => {
-      expect(core.notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
+describe('ConversationsPage open in chat', () => {
+  beforeEach(() => {
+    mockUseProposalsList.mockReturnValue({
+      data: { groups: { investigate: [proposal] }, total: 1, truncated: false },
+      isLoading: false,
+      error: undefined,
     });
-    expect(core.notifications.toasts.addDanger).toHaveBeenCalledWith(
-      expect.stringContaining('missing')
+  });
+
+  afterEach(() => jest.clearAllMocks());
+
+  const chatControl = () => screen.getByTestId('conversationCardOpenInChat');
+
+  it("navigates to the conversation's Agent Builder page", () => {
+    const { core } = renderPage('/');
+
+    fireEvent.click(chatControl());
+
+    // The chat is the investigation's own Agent Builder conversation, so the card resolves its
+    // proposal to that conversation and its agent — the route is scoped to the agent.
+    expect(core.application.navigateToApp).toHaveBeenCalledWith('agent_builder', {
+      path: '/agents/elastic-ai-agent/conversations/inv-1',
+    });
+  });
+
+  it('renders the control as a link so it can be opened in a new tab', () => {
+    const { core } = renderPage('/');
+
+    expect(core.application.getUrlForApp).toHaveBeenCalledWith('agent_builder', {
+      path: '/agents/elastic-ai-agent/conversations/inv-1',
+    });
+    expect(chatControl()).toHaveAttribute(
+      'href',
+      '/app/agent_builder/agents/elastic-ai-agent/conversations/inv-1'
     );
+  });
+
+  it("falls back to Agent Builder's own redirect when the agent is unknown", () => {
+    // The agent id is decoration from a conversation read that can fail; the legacy route
+    // resolves the agent server-side rather than dropping the link.
+    mockUseProposalsList.mockReturnValue({
+      data: {
+        groups: { investigate: [{ ...proposal, conversationAgentId: undefined }] },
+        total: 1,
+        truncated: false,
+      },
+      isLoading: false,
+      error: undefined,
+    });
+    const { core } = renderPage('/');
+
+    fireEvent.click(chatControl());
+
+    expect(core.application.navigateToApp).toHaveBeenCalledWith('agent_builder', {
+      path: '/conversations/inv-1',
+    });
+  });
+
+  it('does not open the details flyout when the chat control is clicked', () => {
+    const { agentBuilder, history } = renderPage('/');
+
+    fireEvent.click(chatControl());
+
+    // The control sits inside a clickable card, so the event must not reach it.
     expect(history.location.search).toBe('');
-    expect(screen.queryByTestId('investigationDetailsFlyout')).not.toBeInTheDocument();
-  });
-
-  it('leaves no history entry pointing at the missing conversation', async () => {
-    const { core, history } = renderPage('/?selectedConversationId=missing&show=overview');
-
-    await waitFor(() => {
-      expect(core.notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
-    });
-
-    // Going back must not land on the bad id and warn all over again.
-    expect(history.entries.map((entry) => entry.search)).not.toContain(
-      '?selectedConversationId=missing&show=overview'
-    );
-  });
-
-  it('does not warn while the investigation is still loading', () => {
-    mockUseInvestigation.mockReturnValue({ data: undefined, isLoading: true, error: undefined });
-
-    const { core } = renderPage('/?selectedConversationId=missing&show=overview');
-
-    expect(core.notifications.toasts.addDanger).not.toHaveBeenCalled();
+    expect(agentBuilder.openConversationDetails).not.toHaveBeenCalled();
   });
 });
 
