@@ -25,7 +25,7 @@ export function TransactionDetailFlyoutFooter() {
     : i18n.translate('xpack.apm.transactionDetailFlyout.openTracesInDiscoverAction', {
         defaultMessage: 'Open traces in Discover',
       });
-// tab callback wins when present; otherwise use the href; otherwise leave the button with no action props until loading finishes
+  // tab callback wins when present; otherwise use the href; otherwise leave the button with no action props until loading finishes
   const discoverButtonProps = openInDiscoverTab
     ? { onClick: openInDiscoverTab }
     : discoverHref

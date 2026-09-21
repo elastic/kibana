@@ -20,7 +20,7 @@ import { css } from '@emotion/react';
 import { ServiceFlyoutTransactionsSection, type TransactionGroup } from '@kbn/apm-ui-shared';
 import { i18n } from '@kbn/i18n';
 import { KbnWarningCallout } from '@kbn/ui-callout';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { SERVICE_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
 import type { LensESQLConfig } from './types';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
@@ -34,11 +34,35 @@ import { getEsqlKeyMetricCharts, getInfrastructureMetricCharts } from './chart_c
 import { ServiceFlyoutLensChart } from './lens_chart';
 import { ServiceFlyoutQueryControls } from './query_controls';
 
-/** Selection only — env / time range stay live from service flyout context. */
+/** Selection + applied filters for the nested flyout (frozen when selection is stale). */
 interface SelectedTransactionDetail {
   transactionName: string;
   transactionType: string;
+  filters: {
+    environment: string;
+    rangeFrom: string;
+    rangeTo: string;
+    start: string;
+    end: string;
+    transactionType: string;
+  };
+  isFiltersStale: boolean;
 }
+
+function isSameAppliedFilters(
+  a: SelectedTransactionDetail['filters'],
+  b: SelectedTransactionDetail['filters']
+): boolean {
+  return (
+    a.environment === b.environment &&
+    a.rangeFrom === b.rangeFrom &&
+    a.rangeTo === b.rangeTo &&
+    a.start === b.start &&
+    a.end === b.end &&
+    a.transactionType === b.transactionType
+  );
+}
+
 const KEY_METRICS_SECTION_TITLE = i18n.translate('xpack.apm.serviceFlyout.keyMetricsSectionTitle', {
   defaultMessage: 'Key metrics',
 });
@@ -223,6 +247,47 @@ export function ServiceFlyoutOverview() {
   // so they query the same projects as APM APIs (`x-project-routing`).
   const projectRouting = useProjectRouting();
 
+  const liveTransactionFilters = useMemo(
+    () => ({
+      environment,
+      rangeFrom,
+      rangeTo,
+      start,
+      end,
+      transactionType: transactionType ?? '',
+    }),
+    [environment, rangeFrom, rangeTo, start, end, transactionType]
+  );
+
+  const liveFiltersKey = useMemo(
+    () =>
+      [
+        liveTransactionFilters.environment,
+        liveTransactionFilters.rangeFrom,
+        liveTransactionFilters.rangeTo,
+        liveTransactionFilters.start,
+        liveTransactionFilters.end,
+        liveTransactionFilters.transactionType,
+      ].join('|'),
+    [liveTransactionFilters]
+  );
+
+  // Track filter changes during render so child effects cannot reconcile against a
+  // stale transactions list before we mark reconciliation as pending.
+  const pendingFilterReconcileRef = useRef(false);
+  const seenLoadingSincePendingRef = useRef(false);
+  const prevLiveFiltersKeyRef = useRef(liveFiltersKey);
+
+  if (!selectedTransaction) {
+    pendingFilterReconcileRef.current = false;
+    seenLoadingSincePendingRef.current = false;
+    prevLiveFiltersKeyRef.current = liveFiltersKey;
+  } else if (prevLiveFiltersKeyRef.current !== liveFiltersKey) {
+    pendingFilterReconcileRef.current = true;
+    seenLoadingSincePendingRef.current = false;
+    prevLiveFiltersKeyRef.current = liveFiltersKey;
+  }
+
   const onTransactionClick = useCallback(
     (item: TransactionGroup) => {
       const resolvedTransactionType = item.transactionType || transactionType;
@@ -238,13 +303,71 @@ export function ServiceFlyoutOverview() {
         ) {
           return null;
         }
+        pendingFilterReconcileRef.current = false;
+        seenLoadingSincePendingRef.current = false;
+        prevLiveFiltersKeyRef.current = liveFiltersKey;
         return {
           transactionName: item.name,
           transactionType: resolvedTransactionType,
+          filters: liveTransactionFilters,
+          isFiltersStale: false,
         };
       });
     },
-    [transactionType]
+    [transactionType, liveTransactionFilters, liveFiltersKey]
+  );
+
+  const onTransactionsChange = useCallback(
+    (items: TransactionGroup[], { isLoading }: { isLoading: boolean }) => {
+      setSelectedTransaction((prev) => {
+        if (!prev) {
+          return prev;
+        }
+
+        if (pendingFilterReconcileRef.current) {
+          if (isLoading) {
+            seenLoadingSincePendingRef.current = true;
+            return prev;
+          }
+          // Ignore settles that arrive before a loading cycle for the new filters
+          // (previous list still on screen with loading=false for one paint).
+          if (!seenLoadingSincePendingRef.current) {
+            return prev;
+          }
+          pendingFilterReconcileRef.current = false;
+        } else if (isLoading) {
+          return prev;
+        }
+
+        const isPresent = items.some((item) => {
+          const resolvedType = item.transactionType || transactionType;
+          return item.name === prev.transactionName && resolvedType === prev.transactionType;
+        });
+
+        if (isPresent) {
+          if (!prev.isFiltersStale && isSameAppliedFilters(prev.filters, liveTransactionFilters)) {
+            return prev;
+          }
+          return {
+            ...prev,
+            filters: liveTransactionFilters,
+            isFiltersStale: false,
+          };
+        }
+
+        // Missing under the current live filters. Ignore when applied filters already match
+        // live (e.g. table search hid the row) so we don't falsely freeze.
+        if (isSameAppliedFilters(prev.filters, liveTransactionFilters) || prev.isFiltersStale) {
+          return prev;
+        }
+
+        return {
+          ...prev,
+          isFiltersStale: true,
+        };
+      });
+    },
+    [liveTransactionFilters, transactionType]
   );
 
   const isTransactionExpanded = useCallback(
@@ -389,6 +512,7 @@ export function ServiceFlyoutOverview() {
               refreshToken={refreshToken}
               onTransactionClick={onTransactionClick}
               isTransactionExpanded={isTransactionExpanded}
+              onTransactionsChange={onTransactionsChange}
               projectRouting={projectRouting}
             />
           </EuiFlexItem>
@@ -401,14 +525,15 @@ export function ServiceFlyoutOverview() {
           filters={{
             serviceName: service.name,
             transactionName: selectedTransaction.transactionName,
+            // Selection type for child fetches — not the parent type filter snapshot.
             transactionType: selectedTransaction.transactionType,
-            // Live from service flyout
-            environment,
-            rangeFrom,
-            rangeTo,
-            start,
-            end,
+            environment: selectedTransaction.filters.environment,
+            rangeFrom: selectedTransaction.filters.rangeFrom,
+            rangeTo: selectedTransaction.filters.rangeTo,
+            start: selectedTransaction.filters.start,
+            end: selectedTransaction.filters.end,
           }}
+          isFiltersStale={selectedTransaction.isFiltersStale}
           onClose={() => setSelectedTransaction(null)}
           historyKey={flyoutHistoryKey}
           preferDocumentBasedCharts={preferDocumentBasedCharts}

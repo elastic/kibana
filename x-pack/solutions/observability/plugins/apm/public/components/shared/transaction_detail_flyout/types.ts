@@ -26,6 +26,11 @@ export interface TransactionDetailFlyoutProps {
   onClose: () => void;
   historyKey?: symbol;
   /**
+   * When the host’s filters changed and this transaction is no longer in the
+   * filtered set, keep showing the previous filter snapshot and surface a banner.
+   */
+  isFiltersStale?: boolean;
+  /**
    * Set by hosts whose surrounding UI is computed from raw documents (Discover):
    * RED charts then stay ES|QL so they agree with the host.
    */

@@ -89,4 +89,20 @@ describe('TransactionDetailFlyout', () => {
 
     expect(screen.queryByTestId('transactionDetailFlyout')).not.toBeInTheDocument();
   });
+
+  it('shows a stale-filters callout when isFiltersStale is true', () => {
+    render(<TransactionDetailFlyout {...BASE_PROPS} isFiltersStale />);
+
+    expect(screen.getByTestId('transactionDetailFlyoutStaleFiltersCallout')).toHaveTextContent(
+      "This transaction isn't available with the current filters. Showing previous data."
+    );
+  });
+
+  it('hides the stale-filters callout when isFiltersStale is false', () => {
+    render(<TransactionDetailFlyout {...BASE_PROPS} />);
+
+    expect(
+      screen.queryByTestId('transactionDetailFlyoutStaleFiltersCallout')
+    ).not.toBeInTheDocument();
+  });
 });

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiLink, EuiText } from '@elastic/eui';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { DocLinksStart, NotificationsStart } from '@kbn/core/public';
@@ -62,6 +62,11 @@ interface ServiceFlyoutTransactionsSectionProps {
   onTransactionClick?: (item: TransactionGroup) => void;
   /** When set with onTransactionClick, drives the expand/collapse icon state. */
   isTransactionExpanded?: (item: TransactionGroup) => boolean;
+  /**
+   * Notifies the host when the transactions list settles so it can decide whether a
+   * nested selection still exists under the current filters.
+   */
+  onTransactionsChange?: (items: TransactionGroup[], meta: { isLoading: boolean }) => void;
   projectRouting?: string;
 }
 
@@ -79,6 +84,7 @@ export function ServiceFlyoutTransactionsSection({
   refreshToken,
   onTransactionClick,
   isTransactionExpanded,
+  onTransactionsChange,
   projectRouting,
 }: ServiceFlyoutTransactionsSectionProps) {
   const [searchQuery, setSearchQuery] = useState('');
@@ -97,6 +103,56 @@ export function ServiceFlyoutTransactionsSection({
       refreshToken,
       projectRouting,
     });
+
+  // useAbortableAsync keeps the previous value with loading=false for one paint after
+  // filter deps change. Don't treat that frame as a settled list for the new filters.
+  const requestKey = useMemo(
+    () =>
+      [
+        serviceName,
+        environment,
+        start,
+        end,
+        transactionType ?? '',
+        latencyAggregationType ?? '',
+        refreshToken ?? 0,
+        projectRouting ?? '',
+      ].join('|'),
+    [
+      serviceName,
+      environment,
+      start,
+      end,
+      transactionType,
+      latencyAggregationType,
+      refreshToken,
+      projectRouting,
+    ]
+  );
+  const loadingSeenForKeyRef = useRef<string | null>(null);
+  const lastSettledKeyRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!onTransactionsChange) {
+      return;
+    }
+
+    if (isLoading) {
+      loadingSeenForKeyRef.current = requestKey;
+      onTransactionsChange(items, { isLoading: true });
+      return;
+    }
+
+    const hasSeenLoadingForKey = loadingSeenForKeyRef.current === requestKey;
+    if (!hasSeenLoadingForKey && lastSettledKeyRef.current !== null) {
+      // Filter key changed; fetch hasn't flipped to loading yet — report pending.
+      onTransactionsChange(items, { isLoading: true });
+      return;
+    }
+
+    lastSettledKeyRef.current = requestKey;
+    onTransactionsChange(items, { isLoading: false });
+  }, [items, isLoading, onTransactionsChange, requestKey]);
 
   const openInTransactionsLocator = locators?.get<ServiceTransactionsLocatorParams>(
     SERVICE_TRANSACTIONS_LOCATOR_ID

@@ -493,7 +493,7 @@ describe('ServiceFlyoutOverview transactions section props', () => {
     expect(queryByTestId('transactionDetailFlyoutMock')).not.toBeInTheDocument();
   });
 
-  it('keeps nested transaction flyout filters live with the service flyout time range and environment', () => {
+  it('keeps nested transaction flyout filters live when the selection remains after a filter change', () => {
     mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
     const { rerender } = renderOverview();
 
@@ -509,6 +509,7 @@ describe('ServiceFlyoutOverview transactions section props', () => {
 
     expect(mockTransactionDetailFlyoutProps).toHaveBeenLastCalledWith(
       expect.objectContaining({
+        isFiltersStale: false,
         filters: expect.objectContaining({
           transactionName: 'GET /api/orders',
           transactionType: 'request',
@@ -538,8 +539,80 @@ describe('ServiceFlyoutOverview transactions section props', () => {
       </IntlProvider>
     );
 
+    // Until the transactions list settles, keep the previous filter snapshot.
     expect(mockTransactionDetailFlyoutProps).toHaveBeenLastCalledWith(
       expect.objectContaining({
+        isFiltersStale: false,
+        filters: expect.objectContaining({
+          environment: 'production',
+          rangeFrom: 'now-15m',
+          rangeTo: 'now',
+          start: '2026-09-11T00:00:00.000Z',
+          end: '2026-09-18T15:20:34.096Z',
+        }),
+      })
+    );
+
+    // A settle with the previous list (before loading starts) must not sync filters yet.
+    act(() => {
+      transactionsSectionProps!.onTransactionsChange!(
+        [
+          {
+            name: 'GET /api/orders',
+            transactionType: 'request',
+            latency: { value: 1 },
+            throughput: { value: 1 },
+            errorRate: { value: 0 },
+          },
+        ],
+        { isLoading: false }
+      );
+    });
+
+    expect(mockTransactionDetailFlyoutProps).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        isFiltersStale: false,
+        filters: expect.objectContaining({
+          environment: 'production',
+          rangeFrom: 'now-15m',
+          rangeTo: 'now',
+        }),
+      })
+    );
+
+    act(() => {
+      transactionsSectionProps!.onTransactionsChange!(
+        [
+          {
+            name: 'GET /api/orders',
+            transactionType: 'request',
+            latency: { value: 1 },
+            throughput: { value: 1 },
+            errorRate: { value: 0 },
+          },
+        ],
+        { isLoading: true }
+      );
+    });
+
+    act(() => {
+      transactionsSectionProps!.onTransactionsChange!(
+        [
+          {
+            name: 'GET /api/orders',
+            transactionType: 'request',
+            latency: { value: 1 },
+            throughput: { value: 1 },
+            errorRate: { value: 0 },
+          },
+        ],
+        { isLoading: false }
+      );
+    });
+
+    expect(mockTransactionDetailFlyoutProps).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        isFiltersStale: false,
         filters: expect.objectContaining({
           transactionName: 'GET /api/orders',
           transactionType: 'request',
@@ -552,6 +625,153 @@ describe('ServiceFlyoutOverview transactions section props', () => {
       })
     );
   });
+
+  it('freezes nested transaction flyout filters when the selection is missing after a filter change', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    const { rerender } = renderOverview();
+
+    act(() => {
+      transactionsSectionProps!.onTransactionClick!({
+        name: 'GET /api/orders',
+        transactionType: 'request',
+        latency: { value: 1 },
+        throughput: { value: 1 },
+        errorRate: { value: 0 },
+      });
+    });
+
+    mockUseServiceFlyoutContext.mockReturnValue(
+      buildContextValue({
+        filters: {
+          environment: 'staging',
+          rangeFrom: 'now-1h',
+          rangeTo: 'now-5m',
+          start: '2026-09-18T14:20:34.096Z',
+          end: '2026-09-18T15:15:34.096Z',
+        },
+      })
+    );
+    rerender(
+      <IntlProvider locale="en">
+        <ServiceFlyoutOverview />
+      </IntlProvider>
+    );
+
+    act(() => {
+      transactionsSectionProps!.onTransactionsChange!(
+        [
+          {
+            name: 'POST /api/other',
+            transactionType: 'request',
+            latency: { value: 1 },
+            throughput: { value: 1 },
+            errorRate: { value: 0 },
+          },
+        ],
+        { isLoading: true }
+      );
+    });
+
+    act(() => {
+      transactionsSectionProps!.onTransactionsChange!(
+        [
+          {
+            name: 'POST /api/other',
+            transactionType: 'request',
+            latency: { value: 1 },
+            throughput: { value: 1 },
+            errorRate: { value: 0 },
+          },
+        ],
+        { isLoading: false }
+      );
+    });
+
+    expect(mockTransactionDetailFlyoutProps).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        isFiltersStale: true,
+        filters: expect.objectContaining({
+          transactionName: 'GET /api/orders',
+          transactionType: 'request',
+          environment: 'production',
+          rangeFrom: 'now-15m',
+          rangeTo: 'now',
+          start: '2026-09-11T00:00:00.000Z',
+          end: '2026-09-18T15:20:34.096Z',
+        }),
+      })
+    );
+  });
+
+  it('freezes nested transaction flyout filters when the selection is missing after a transaction type change', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    const { rerender } = renderOverview();
+
+    act(() => {
+      transactionsSectionProps!.onTransactionClick!({
+        name: 'GET /api/orders',
+        transactionType: 'request',
+        latency: { value: 1 },
+        throughput: { value: 1 },
+        errorRate: { value: 0 },
+      });
+    });
+
+    mockUseServiceFlyoutContext.mockReturnValue(
+      buildContextValue({
+        transactionType: 'mobile',
+      })
+    );
+    rerender(
+      <IntlProvider locale="en">
+        <ServiceFlyoutOverview />
+      </IntlProvider>
+    );
+
+    act(() => {
+      transactionsSectionProps!.onTransactionsChange!(
+        [
+          {
+            name: 'POST /api/mobile',
+            transactionType: 'mobile',
+            latency: { value: 1 },
+            throughput: { value: 1 },
+            errorRate: { value: 0 },
+          },
+        ],
+        { isLoading: true }
+      );
+    });
+
+    act(() => {
+      transactionsSectionProps!.onTransactionsChange!(
+        [
+          {
+            name: 'POST /api/mobile',
+            transactionType: 'mobile',
+            latency: { value: 1 },
+            throughput: { value: 1 },
+            errorRate: { value: 0 },
+          },
+        ],
+        { isLoading: false }
+      );
+    });
+
+    expect(mockTransactionDetailFlyoutProps).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        isFiltersStale: true,
+        filters: expect.objectContaining({
+          transactionName: 'GET /api/orders',
+          transactionType: 'request',
+          environment: 'production',
+          rangeFrom: 'now-15m',
+          rangeTo: 'now',
+        }),
+      })
+    );
+  });
+
   it('forwards projectRouting to ServiceFlyoutTransactionsSection', () => {
     mockUseProjectRouting.mockReturnValue('_alias:*');
     mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });

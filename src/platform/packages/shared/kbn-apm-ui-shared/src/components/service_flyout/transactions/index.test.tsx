@@ -112,6 +112,92 @@ describe('ServiceFlyoutTransactionsSection', () => {
     );
   });
 
+  it('notifies onTransactionsChange when items settle', () => {
+    const onTransactionsChange = jest.fn();
+    render(
+      <ServiceFlyoutTransactionsSection
+        {...BASE_PROPS}
+        onTransactionsChange={onTransactionsChange}
+      />
+    );
+
+    expect(onTransactionsChange).toHaveBeenCalledWith(FIXTURE_ITEMS, { isLoading: false });
+  });
+
+  it('notifies onTransactionsChange while loading', () => {
+    mockedUseServiceFlyoutTransactionData.mockReturnValue({
+      ...DEFAULT_HOOK_RESULT,
+      isLoading: true,
+      items: [],
+    });
+    const onTransactionsChange = jest.fn();
+    render(
+      <ServiceFlyoutTransactionsSection
+        {...BASE_PROPS}
+        onTransactionsChange={onTransactionsChange}
+      />
+    );
+
+    expect(onTransactionsChange).toHaveBeenCalledWith([], { isLoading: true });
+  });
+
+  it('reports pending after a filter change until a loading cycle completes', () => {
+    const onTransactionsChange = jest.fn();
+    const { rerender } = render(
+      <ServiceFlyoutTransactionsSection
+        {...BASE_PROPS}
+        onTransactionsChange={onTransactionsChange}
+      />
+    );
+
+    expect(onTransactionsChange).toHaveBeenLastCalledWith(FIXTURE_ITEMS, { isLoading: false });
+    onTransactionsChange.mockClear();
+
+    // First paint after filter change: hook still exposes previous items with loading=false.
+    rerender(
+      <ServiceFlyoutTransactionsSection
+        {...BASE_PROPS}
+        environment="staging"
+        onTransactionsChange={onTransactionsChange}
+      />
+    );
+
+    expect(onTransactionsChange).toHaveBeenLastCalledWith(FIXTURE_ITEMS, { isLoading: true });
+    onTransactionsChange.mockClear();
+
+    mockedUseServiceFlyoutTransactionData.mockReturnValue({
+      ...DEFAULT_HOOK_RESULT,
+      isLoading: true,
+      items: [],
+    });
+    rerender(
+      <ServiceFlyoutTransactionsSection
+        {...BASE_PROPS}
+        environment="staging"
+        onTransactionsChange={onTransactionsChange}
+      />
+    );
+
+    expect(onTransactionsChange).toHaveBeenLastCalledWith([], { isLoading: true });
+    onTransactionsChange.mockClear();
+
+    mockedUseServiceFlyoutTransactionData.mockReturnValue({
+      ...DEFAULT_HOOK_RESULT,
+      items: [FIXTURE_ITEMS[1]],
+    });
+    rerender(
+      <ServiceFlyoutTransactionsSection
+        {...BASE_PROPS}
+        environment="staging"
+        onTransactionsChange={onTransactionsChange}
+      />
+    );
+
+    expect(onTransactionsChange).toHaveBeenLastCalledWith([FIXTURE_ITEMS[1]], {
+      isLoading: false,
+    });
+  });
+
   it('renders the Open in APM header link when locators are provided', () => {
     render(<ServiceFlyoutTransactionsSection {...BASE_PROPS} />);
 
