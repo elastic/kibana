@@ -8,10 +8,12 @@
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
+import { FleetErrorWithStatusCode } from '../../errors';
 import type { NewPackagePolicy } from '../../types';
 import { appContextService } from '../app_context';
 import * as templateModule from '../epm/elasticsearch/template/template';
 import { getInstalledPackageWithAssets } from '../epm/packages/get';
+import { updateDatastreamExperimentalFeatures } from '../epm/packages/update';
 
 import { handleExperimentalDatastreamFeatureOptIn } from './experimental_datastream_features';
 
@@ -51,6 +53,21 @@ const FIELDS_YAML = `
     index: true
 `;
 
+/**
+ * The mappings and `_meta` the @package component template was installed with. A rejected
+ * columnar opt-in has to put exactly these back.
+ */
+const ORIGINAL_PROPERTIES = {
+  '@timestamp': { type: 'date' },
+  event: {
+    properties: {
+      original: { type: 'keyword', doc_values: false, index: false },
+    },
+  },
+};
+
+const ORIGINAL_META = { package: { name: 'test' }, managed_by: 'fleet', managed: true };
+
 const PACKAGE_INFO = {
   name: PKG_NAME,
   version: PKG_VERSION,
@@ -64,6 +81,32 @@ const PACKAGE_INFO = {
       elasticsearch: { columnar: { supported: true } },
     },
   ],
+};
+
+/**
+ * Elasticsearch reports a rejected columnar composition as a generic "template after composition
+ * ... is invalid" at the top level and only names the offending field two `caused_by` levels down.
+ */
+const nestedCausedByError = () => {
+  const esError: any = new Error('illegal_argument_exception');
+  esError.statusCode = 400;
+  esError.body = {
+    error: {
+      type: 'illegal_argument_exception',
+      reason: `composable template [${DATA_STREAM}] template after composition with component templates [${COMPONENT_TEMPLATE}] is invalid`,
+      caused_by: {
+        type: 'illegal_argument_exception',
+        reason: `invalid composite mappings for [${DATA_STREAM}]`,
+        caused_by: {
+          type: 'illegal_argument_exception',
+          reason:
+            'field [event.original] cannot reconstruct _source from doc values; every field must be reconstructable from doc values in index using [logsdb_columnar] index mode',
+        },
+      },
+    },
+    status: 400,
+  };
+  return esError;
 };
 
 describe('handleExperimentalDatastreamFeatureOptIn columnar field overrides', () => {
@@ -132,16 +175,11 @@ describe('handleExperimentalDatastreamFeatureOptIn columnar field overrides', ()
             template: {
               settings: {},
               mappings: {
-                properties: {
-                  '@timestamp': { type: 'date' },
-                  event: {
-                    properties: {
-                      original: { type: 'keyword', doc_values: false, index: false },
-                    },
-                  },
-                },
+                properties: ORIGINAL_PROPERTIES,
               },
             },
+            _meta: ORIGINAL_META,
+            version: 3,
           },
         },
       ],
@@ -218,6 +256,54 @@ describe('handleExperimentalDatastreamFeatureOptIn columnar field overrides', ()
     ).rejects.toThrow(
       /Elasticsearch rejected the columnar index template for metrics-test\.test: .*Fields with doc_values: false need a columnar\.doc_values: true override in the package\./
     );
+  });
+
+  it('enriches the error when the mapping cause is nested under caused_by', async () => {
+    mockInstalledPackage(false);
+    esClient.indices.putIndexTemplate.mockRejectedValueOnce(nestedCausedByError());
+
+    const error = await handleExperimentalDatastreamFeatureOptIn({
+      soClient,
+      esClient,
+      packagePolicy: getPolicy(true),
+    }).catch((err) => err);
+
+    // The deepest reason is the actionable one, the top-level one only says "composition failed".
+    expect(error.message).toContain('field [event.original] cannot reconstruct _source');
+    expect(error.message).toContain('columnar.doc_values: true');
+    expect(error).toBeInstanceOf(FleetErrorWithStatusCode);
+    expect(error.statusCode).toEqual(400);
+  });
+
+  it('restores the @package component template when the index template PUT is rejected', async () => {
+    mockInstalledPackage(false);
+    esClient.indices.putIndexTemplate.mockRejectedValueOnce(nestedCausedByError());
+
+    await expect(
+      handleExperimentalDatastreamFeatureOptIn({
+        soClient,
+        esClient,
+        packagePolicy: getPolicy(true),
+      })
+    ).rejects.toThrow(FleetErrorWithStatusCode);
+
+    expect(esClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(2);
+
+    // First the columnar overrides are written...
+    const [optInCall, rollbackCall] = esClient.cluster.putComponentTemplate.mock.calls.map(
+      (call) => call[0] as any
+    );
+    expect(optInCall.template.mappings.properties.event.properties.original).toEqual({
+      type: 'keyword',
+      doc_values: true,
+      index: true,
+    });
+    // ...then the original template body and _meta are put back verbatim.
+    expect(rollbackCall.name).toEqual(COMPONENT_TEMPLATE);
+    expect(rollbackCall.template.mappings.properties).toEqual(ORIGINAL_PROPERTIES);
+    expect(rollbackCall._meta).toEqual(ORIGINAL_META);
+
+    expect(updateDatastreamExperimentalFeatures).not.toHaveBeenCalled();
   });
 
   it('rethrows unrelated index template errors unchanged', async () => {
