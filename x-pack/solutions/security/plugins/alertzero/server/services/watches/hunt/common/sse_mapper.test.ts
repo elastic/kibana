@@ -347,7 +347,7 @@ describe('buildSseData output parses against the SSE attachment schema', () => {
       expect(parsed.data.hunt_result?.has_confirmed_hit).toBe(true);
       // `entry` is the first of two technique-scoped SSEs (HIT_TIER2_RESULT_TWO_BEHAVIORS
       // confirms T1078.004 and T1552.001). hunt_result.tier2.behaviors is filtered to this
-      // entry's own technique alone, so length 1, not 2 (plan 7, SSE durability review fix).
+      // entry's own technique alone, so length 1, not 2.
       expect(parsed.data.hunt_result?.tier2?.behaviors).toHaveLength(1);
       expect(parsed.data.hunt_result?.tier2?.behaviors?.[0]?.technique_id).toBe('T1078.004');
     }

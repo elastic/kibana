@@ -112,7 +112,7 @@ components:
             a per-IOC query) that Tier 1's current single combined `should`
             query doesn't provide. Declared here so the SSE mapper's
             `events[].matched` has a stable contract to fill in once Tier 1
-            adds attribution (plan 7 follow-up, SSE durability review).
+            adds attribution.
           properties:
             ioc:
               type: object
@@ -213,6 +213,6 @@ components:
                   Regex match of this concrete `_index` bucket against the
                   resolved technology's required index patterns (e.g.
                   `logs-aws.*`), computed once by Tier 1, not re-derived
-                  downstream (plan 7, SSE durability review fix).
+                  downstream.
         message:
           type: string

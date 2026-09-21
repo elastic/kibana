@@ -10,7 +10,7 @@
  * `security.significant_security_event` attachment data shape (PR 1,
  * `hunt-watch-attachment-types`, `significant_security_event.ts`).
  *
- * This is the schema lock for hunt-plans plan 7 (SSE durability): once PR 1
+ * This is the schema lock for the SSE attachment contract: once PR 1
  * lands, `SseAttachmentData` below is replaced by an import of
  * `significantSecurityEventAttachmentDataSchema`'s inferred type from
  * `alertzero/common/`, and `sse_mapper.test.ts` runs the coordinator's real
@@ -19,7 +19,7 @@
  * is integration-branched, this file defines a local mirror of that contract
  * so PR 3 has something concrete to build and test against.
  *
- * Amended 2026-09-21 (plan 7, report-to-Investigation join revision): the
+ * Amended 2026-09-21: the
  * report-to-Investigation-to-SSE join uses deterministic ids only
  * (`hunt:report:{reportId}`, `trigger-{sha256(space|reportId)}`,
  * `sse-{sha256(space|reportId[|technique])}`). Nothing is written to the
@@ -139,7 +139,7 @@ export const buildSseAttachmentId = ({
 /**
  * Options the caller (the hunt child workflow) supplies: everything the
  * mapper needs beyond the coordinator's own result. `requiredIndices` was
- * removed (plan 7, SSE durability review fix): `hunt_result.tier1.per_index[].required`
+ * removed: `hunt_result.tier1.per_index[].required`
  * now comes straight from `HuntCoordinatorResult.tier1.perIndex[].required`,
  * which Tier 1 already computes via pattern matching. The mapper no longer
  * re-derives it from a raw index list (that re-derivation compared concrete
@@ -154,8 +154,7 @@ export interface SseMapperOptions {
  * Builds `security_knowledge_indicators`. When `onlyTechniqueId` is set, the
  * output is scoped to that one technique. The SSE is meant to be 1:1 with a
  * Proposal (mvp-slice.md worked example), so a two-technique hit run must
- * not put both techniques' behaviors/rule names on either SSE (plan 7, SSE
- * durability review fix).
+ * not put both techniques' behaviors/rule names on either SSE.
  */
 const buildSecurityKnowledgeIndicators = (
   result: HuntCoordinatorResult,
@@ -198,9 +197,9 @@ const buildEntities = (result: HuntCoordinatorResult): SseEntityRef[] => [
   ),
 ];
 
-// Tier 1 doesn't attribute a hit to a specific IOC/technique today (plan 7
-// flagged this as a follow-up: `events[].matched` needs Tier 1 to tag which
-// IOC produced each hit, e.g. via `highlight` or a per-IOC query (deferred,
+// Tier 1 doesn't attribute a hit to a specific IOC/technique today.
+// `events[].matched` needs Tier 1 to tag which IOC produced each hit, e.g.
+// via `highlight` or a per-IOC query (deferred,
 // not silently dropped). Events therefore stay shared across every SSE for a
 // hit run, unlike `security_knowledge_indicators` which IS attributable.
 const buildEvents = (result: HuntCoordinatorResult): SseEventRef[] =>
@@ -219,12 +218,12 @@ const buildEvents = (result: HuntCoordinatorResult): SseEventRef[] =>
  * Tier 1 already pattern-matches concrete `_index` bucket names against the
  * resolved technology's required index *patterns*; redoing that with a raw
  * index list and exact string equality was the bug this function used to
- * have (plan 7, SSE durability review fix).
+ * have.
  *
  * When `onlyTechniqueId` is set, `tier2.behaviors` is filtered to that one
  * technique for the same reason `buildSecurityKnowledgeIndicators` is: the
  * SSE is 1:1 with a Proposal, so a technique-scoped entry must not carry a
- * sibling technique's behavior/rule name (plan 7, SSE durability review fix).
+ * sibling technique's behavior/rule name.
  */
 const buildHuntResult = (
   result: HuntCoordinatorResult,
@@ -275,9 +274,9 @@ const buildHuntResult = (
  * Each technique-scoped entry's `security_knowledge_indicators` AND
  * `hunt_result.tier2.behaviors` are filtered to that technique alone. The
  * SSE is 1:1 with a Proposal, so the T1078.004 entry must not carry
- * T1552.001's behavior/rule name in either place (plan 7, SSE durability
- * review fix). `events`/`entities`/`hunt_result.tier1` stay shared: Tier 1
- * doesn't attribute hits to a specific technique (see `buildEvents`).
+ * T1552.001's behavior/rule name in either place. `events`/`entities`/
+ * `hunt_result.tier1` stay shared: Tier 1 doesn't attribute hits to a
+ * specific technique (see `buildEvents`).
  */
 export const buildSseData = (
   result: HuntCoordinatorResult,

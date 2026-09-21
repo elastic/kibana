@@ -15,7 +15,7 @@ import { alertZeroAttachmentDataSchema } from './attachment_data_schema';
  * Lives in `alertzero/common/` (not `server/agent_builder/attachments/`) so
  * PR 3's `sse_mapper.ts` (in `alertzero/server/services/watches/hunt/common/`)
  * can import it directly across the plugin boundary, without an HTTP
- * round-trip. This is the schema lock for hunt-plans plan 7 (SSE durability):
+ * round-trip. This is the schema lock for the SSE attachment contract:
  * `sse_mapper.test.ts` runs `buildSseData`'s output through this schema
  * directly, so a drift between the mapper and the schema fails a test
  * instead of surfacing at demo time.
