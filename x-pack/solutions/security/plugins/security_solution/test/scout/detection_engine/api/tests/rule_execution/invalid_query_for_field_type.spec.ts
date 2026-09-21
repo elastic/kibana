@@ -15,10 +15,10 @@ import { PUBLIC_HEADERS } from '../../fixtures/constants';
 /**
  * Verifies that a detection rule whose KQL query is semantically invalid for the target
  * field's ES mapping (e.g. a wildcard on an ip field, or a non-IP literal against an ip
- * field) surfaces the Elasticsearch query_shard_exception message in the rule's execution
- * summary and is counted as a USER error — not a framework error — in task manager
- * metrics. This covers the USER_ERROR_REASON_SUBSTRINGS classifier in
- * `check_error_details.ts`.
+ * field) fails with the Elasticsearch query_shard_exception reason surfaced in the rule's
+ * execution summary. These are the message shapes classified as user errors by
+ * `USER_ERROR_REASON_SUBSTRINGS` in `check_error_details.ts`; the classification itself is
+ * covered by unit tests, this suite proves ES emits the strings the classifier matches.
  */
 
 interface RuleResponse {
@@ -32,23 +32,6 @@ interface RuleResponse {
   };
 }
 
-interface TaskManagerQueryRuleMetrics {
-  user_errors: number;
-}
-
-interface TaskManagerMetricsResponse {
-  metrics?: {
-    task_run?: {
-      value: {
-        by_type: Record<string, TaskManagerQueryRuleMetrics>;
-      };
-    };
-  };
-}
-
-const QUERY_RULE_TYPE_KEY = 'alerting:siem__queryRule';
-const TASK_MANAGER_METRICS_PATH = '/api/task_manager/metrics?reset=false';
-
 apiTest.describe(
   'Detection rules with invalid queries for the target field type',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
@@ -57,8 +40,7 @@ apiTest.describe(
     const sourceIndex = `scout-invalid-query-${runId}`;
     const createdRuleIds: string[] = [];
 
-    let adminHeaders: Record<string, string>;
-    let baselineUserErrors: number;
+    let requestHeaders: Record<string, string>;
     let prefixQueryRuleId: string;
     let ipLiteralRuleId: string;
 
@@ -80,7 +62,7 @@ apiTest.describe(
       overrides: Record<string, unknown>
     ): Promise<string> => {
       const response = await apiClient.post(DETECTION_ENGINE_RULES_URL, {
-        headers: adminHeaders,
+        headers: requestHeaders,
         responseType: 'json',
         body: { ...baseRule(), ...overrides },
       });
@@ -103,7 +85,7 @@ apiTest.describe(
         .poll(
           async () => {
             const response = await apiClient.get(`${DETECTION_ENGINE_RULES_URL}?id=${ruleId}`, {
-              headers: adminHeaders,
+              headers: requestHeaders,
               responseType: 'json',
             });
             // Throwing inside expect.poll aborts polling instead of retrying, so a non-200
@@ -123,26 +105,6 @@ apiTest.describe(
       return lastExecution;
     };
 
-    const readQueryRuleMetrics = async (
-      apiClient: ApiClientFixture,
-      { assertSuccess = true }: { assertSuccess?: boolean } = {}
-    ): Promise<TaskManagerQueryRuleMetrics | undefined> => {
-      const response = await apiClient.get(TASK_MANAGER_METRICS_PATH, {
-        headers: adminHeaders,
-        responseType: 'json',
-      });
-      // Callers inside expect.poll pass assertSuccess: false because a throw there aborts
-      // polling instead of retrying; they treat undefined as a failed attempt instead.
-      if (assertSuccess) {
-        expect(response.statusCode, JSON.stringify(response.body)).toBe(200);
-      }
-      if (response.statusCode !== 200) {
-        return undefined;
-      }
-      const body = response.body as TaskManagerMetricsResponse;
-      return body.metrics?.task_run?.value.by_type[QUERY_RULE_TYPE_KEY];
-    };
-
     apiTest.beforeAll(async ({ esClient, apiClient, requestAuth }) => {
       await esClient.indices.create({
         index: sourceIndex,
@@ -159,12 +121,8 @@ apiTest.describe(
         document: { '@timestamp': new Date().toISOString(), 'destination.ip': '10.0.0.1' },
       });
 
-      const { apiKeyHeader } = await requestAuth.getApiKeyForAdmin();
-      adminHeaders = { ...apiKeyHeader, ...PUBLIC_HEADERS };
-
-      // Capture baseline BEFORE creating any rules so the metrics delta is clean.
-      const metrics = await readQueryRuleMetrics(apiClient);
-      baselineUserErrors = metrics?.user_errors ?? 0;
+      const { apiKeyHeader } = await requestAuth.getApiKeyForPrivilegedUser();
+      requestHeaders = { ...apiKeyHeader, ...PUBLIC_HEADERS };
 
       prefixQueryRuleId = await createRule(apiClient, { query: 'destination.ip: 10.*' });
       ipLiteralRuleId = await createRule(apiClient, { query: 'destination.ip: exists' });
@@ -190,56 +148,30 @@ apiTest.describe(
       expect(failures, failures.join('\n')).toHaveLength(0);
     });
 
-    apiTest('prefix query on an ip field fails as a user error', async ({ apiClient }) => {
-      // The default Scout test timeout is shorter than the execution poll window.
-      apiTest.setTimeout(150_000);
-      const executionSummary = await waitForFailedExecution(apiClient, prefixQueryRuleId);
+    apiTest(
+      'prefix query on an ip field fails with query_shard_exception',
+      async ({ apiClient }) => {
+        // The default Scout test timeout is shorter than the execution poll window.
+        apiTest.setTimeout(150_000);
+        const executionSummary = await waitForFailedExecution(apiClient, prefixQueryRuleId);
 
-      expect(executionSummary?.last_execution.status).toBe('failed');
-      expect(executionSummary?.last_execution.message).toContain(
-        'Can only use prefix queries on keyword, text and wildcard fields'
-      );
-      expect(executionSummary?.last_execution.message).toContain('[destination.ip]');
-    });
-
-    apiTest('IP literal query on an ip field fails as a user error', async ({ apiClient }) => {
-      // The default Scout test timeout is shorter than the execution poll window.
-      apiTest.setTimeout(150_000);
-      const executionSummary = await waitForFailedExecution(apiClient, ipLiteralRuleId);
-
-      expect(executionSummary?.last_execution.status).toBe('failed');
-      expect(executionSummary?.last_execution.message).toContain('is not an IP string literal');
-    });
+        expect(executionSummary?.last_execution.status).toBe('failed');
+        expect(executionSummary?.last_execution.message).toContain(
+          'Can only use prefix queries on keyword, text and wildcard fields'
+        );
+        expect(executionSummary?.last_execution.message).toContain('[destination.ip]');
+      }
+    );
 
     apiTest(
-      'failed rules with query_shard_exception are counted as user errors in task manager metrics',
-      async ({ apiClient, config }) => {
-        // Task manager metrics are per Kibana process and can be reset by any caller of the
-        // metrics endpoint, so behind a load balancer or a metrics scraper (cloud deployments)
-        // the counters cannot be compared against a baseline read earlier.
-        apiTest.skip(config.isCloud, 'task manager metrics are not comparable across processes');
-        // This test needs up to three execution poll windows.
-        apiTest.setTimeout(420_000);
+      'IP literal query on an ip field fails with "is not an IP string literal"',
+      async ({ apiClient }) => {
+        // The default Scout test timeout is shorter than the execution poll window.
+        apiTest.setTimeout(150_000);
+        const executionSummary = await waitForFailedExecution(apiClient, ipLiteralRuleId);
 
-        // The per-execution user-error classification is only observable in the process-wide
-        // task manager counters (it is not written to the event log or any rule API), so this
-        // test asserts a delta on the `alerting:siem__queryRule` counter after confirming both
-        // rules have failed. Waiting for both failures here is idempotent — if the earlier
-        // tests already drove them to `failed`, this returns immediately. If the classifier
-        // missed these errors they would land in `framework_errors` and the `user_errors`
-        // counter would never move above the baseline captured before the rules were created.
-        await waitForFailedExecution(apiClient, prefixQueryRuleId);
-        await waitForFailedExecution(apiClient, ipLiteralRuleId);
-
-        await expect
-          .poll(
-            async () => {
-              const metrics = await readQueryRuleMetrics(apiClient, { assertSuccess: false });
-              return metrics?.user_errors ?? -1;
-            },
-            { timeout: 120_000, intervals: [2_000] }
-          )
-          .toBeGreaterThanOrEqual(baselineUserErrors + 1);
+        expect(executionSummary?.last_execution.status).toBe('failed');
+        expect(executionSummary?.last_execution.message).toContain('is not an IP string literal');
       }
     );
   }
