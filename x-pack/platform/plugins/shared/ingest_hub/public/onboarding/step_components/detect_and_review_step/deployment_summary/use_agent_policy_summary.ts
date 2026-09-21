@@ -49,8 +49,10 @@ export function useAgentPolicySummary(): AgentPolicySummaryData {
     {}
   );
 
-  const agentPolicyId = authStep?.agentPolicyId;
   const policyIds = authStep?.selectedAgentPolicyIds ?? [];
+  // On resume, agentPolicyId may be absent if hydration didn't seed it (pre-fix sessions).
+  // Fall back to the first selected id so enrollment-token and agent-count queries still fire.
+  const agentPolicyId = authStep?.agentPolicyId ?? policyIds[0];
 
   // Fetch policy names when the denormalised name is missing (resume path) but ids are present.
   // On a fresh deploy, agentPolicyName is always populated from the deploy result, so this

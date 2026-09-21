@@ -98,6 +98,8 @@ export async function hydrateOnboardingSession(
             // 'existing' mode — otherwise the hook's new-policy route would create another.
             agentHostsMode: policyIds.length ? 'existing' : 'new',
             selectedAgentPolicyIds: policyIds,
+            // First id drives single-policy queries (enrollment token, agent count) in step 4.
+            agentPolicyId: policyIds[0],
             // Secrets are never persisted; restoring the method puts the right form in front of the user.
             agentCredentialMethod: fromSOAuthMethod(item.authMethod),
           })
@@ -105,11 +107,26 @@ export async function hydrateOnboardingSession(
         ? JSON.stringify({ connectorId: item.connectorId, authMethod: 'identity_federation' })
         : JSON.stringify({ authMethod: 'static_keys' })
     );
+    // Seed policyIdsByInstance from packagePolicyIds so isAlreadyDeployed evaluates correctly
+    // on resume. Without this, Back→Next would re-run deployToExistingAgentPolicies and create
+    // duplicate package policies for every service instance.
+    // packagePolicyIds is a flat list — we don't know which id maps to which instance, but any
+    // truthy value per instance is enough to satisfy the isAlreadyDeployed check. Use the first
+    // id as a placeholder for all services in the SO's services list.
+    const policyIdsByInstance: Record<string, string> =
+      item.packagePolicyIds?.length && item.services?.length
+        ? Object.fromEntries(
+            item.services.map((svc, i) => [
+              svc,
+              item.packagePolicyIds![i] ?? item.packagePolicyIds![0],
+            ])
+          )
+        : {};
     sessionStorage.setItem(
       getOnboardingSessionKey(integrationId, 'detectAndReviewStep'),
       JSON.stringify({
         serviceStatuses: {},
-        policyIdsByInstance: {},
+        policyIdsByInstance,
         failedInstances: [],
         deployErrors: {},
         onboardingDeploymentId: item.id,

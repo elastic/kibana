@@ -117,6 +117,9 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
       setIsDeploying(true);
       updateDetectAndReviewStep({ isDeploying: true });
 
+      // Hoisted so the catch block can best-effort update the SO to 'failed' on unexpected errors.
+      let onboardingDeploymentId = detectAndReviewStep.onboardingDeploymentId;
+
       try {
         const { agentHostsMode, agentPolicyId, selectedAgentPolicyIds, agentCredentialMethod } =
           agentBasedDeployment;
@@ -136,7 +139,6 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         // ── SO create (initial deploy only, best-effort) ──────────────────────
         // Mirror the managed-integration guard: !isRetry && !onboardingDeploymentId avoids
         // creating a second SO on Back→Next re-entry and on retry.
-        let onboardingDeploymentId = detectAndReviewStep.onboardingDeploymentId;
         if (!isRetry && !onboardingDeploymentId) {
           onboardingDeploymentId =
             (await createDeployment({
@@ -206,6 +208,12 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         const allTargetIds = targetsToDeploy.flatMap((g) => g.instanceIds);
         const statuses = buildAgentBasedInstanceStatuses(targetsToDeploy, failed);
 
+        // On retry, merge current failures with previously failed instances that were not retried,
+        // so the SO status reflects the full deployment state — not just the retried subset.
+        const mergedFailed = isRetry
+          ? [...getLatestFailedInstances().filter((id) => !allTargetIds.includes(id)), ...failed]
+          : failed;
+
         // ── SO update (best-effort) ───────────────────────────────────────────
         if (onboardingDeploymentId) {
           await updateDeployment(onboardingDeploymentId, {
@@ -218,7 +226,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
                 })
               ),
             ],
-            status: failed.length === 0 ? 'succeeded' : 'failed',
+            status: mergedFailed.length === 0 ? 'succeeded' : 'failed',
           });
         }
 
@@ -227,10 +235,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           isDeploying: false,
           serviceStatuses: statuses,
           policyIdsByInstance,
-          // On retry, merge with latest to preserve statuses for non-retried instances.
-          failedInstances: isRetry
-            ? [...getLatestFailedInstances().filter((id) => !allTargetIds.includes(id)), ...failed]
-            : failed,
+          failedInstances: mergedFailed,
           deployErrors: errorsByInstance,
         });
         return { failed: failed.length > 0 };
@@ -246,6 +251,10 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           failedInstances: allIds,
           deployErrors: Object.fromEntries(allIds.map((id) => [id, msg])),
         });
+        // Best-effort: mark the SO as failed so resume doesn't see a stale 'pending' record.
+        if (onboardingDeploymentId) {
+          await updateDeployment(onboardingDeploymentId, { status: 'failed' });
+        }
         return { failed: true };
       } finally {
         setIsDeploying(false);

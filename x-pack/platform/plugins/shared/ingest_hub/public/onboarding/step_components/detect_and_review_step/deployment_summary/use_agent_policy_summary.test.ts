@@ -149,26 +149,45 @@ describe('useAgentPolicySummary', () => {
   });
 
   describe('on resume — agentPolicyName absent but selectedAgentPolicyIds present', () => {
-    it('calls useBulkGetAgentPoliciesQuery with enabled: true and returns fetched name', () => {
+    // The actual hydrated shape from hydrateOnboardingSession writes only selectedAgentPolicyIds
+    // (no agentPolicyId). The hook falls back to policyIds[0] for single-policy queries.
+    // Tests deliberately omit agentPolicyId to match the real hydrated payload.
+
+    it('fetches policy name via bulk-get and enables enrollment-key + agent-count queries using policyIds[0]', () => {
       setupMocks({
-        agentPolicyId: POLICY_ID,
+        agentPolicyId: undefined, // not set by hydrateOnboardingSession
         agentPolicyName: undefined,
         selectedAgentPolicyIds: [POLICY_ID],
         bulkPoliciesItems: [{ name: POLICY_NAME }],
+        enrollmentKeyItems: [{ name: 'Default' }],
+        agentStatusResults: { all: 5 },
       });
 
       const { result } = renderHook(() => useAgentPolicySummary());
 
+      // Bulk-get fires to resolve the name.
       expect(mockUseBulkGetAgentPoliciesQuery).toHaveBeenCalledWith(
         [POLICY_ID],
         expect.objectContaining({ enabled: true, ignoreMissing: true })
       );
       expect(result.current.agentPolicyName).toBe(POLICY_NAME);
+
+      // policyIds[0] fallback drives single-policy queries — they must be enabled.
+      expect(mockUseGetEnrollmentAPIKeysQuery).toHaveBeenCalledWith(
+        { kuery: `policy_id:"${POLICY_ID}"` },
+        expect.objectContaining({ enabled: true })
+      );
+      expect(mockUseGetAgentStatusQuery).toHaveBeenCalledWith(
+        { policyId: POLICY_ID },
+        expect.objectContaining({ enabled: true })
+      );
+      expect(result.current.enrollmentToken).toBe('Default');
+      expect(result.current.agentCount).toBe(5);
     });
 
     it('joins multiple policy names with ", " for multi-policy existing-mode deploys', () => {
       setupMocks({
-        agentPolicyId: 'policy-1',
+        agentPolicyId: undefined,
         agentPolicyName: undefined,
         selectedAgentPolicyIds: ['policy-1', 'policy-2'],
         bulkPoliciesItems: [{ name: 'Policy A' }, { name: 'Policy B' }],
@@ -176,11 +195,16 @@ describe('useAgentPolicySummary', () => {
 
       const { result } = renderHook(() => useAgentPolicySummary());
       expect(result.current.agentPolicyName).toBe('Policy A, Policy B');
+      // Single-policy queries use the first id.
+      expect(mockUseGetAgentStatusQuery).toHaveBeenCalledWith(
+        { policyId: 'policy-1' },
+        expect.objectContaining({ enabled: true })
+      );
     });
 
     it('returns undefined agentPolicyName when bulk fetch returns empty (policy deleted)', () => {
       setupMocks({
-        agentPolicyId: POLICY_ID,
+        agentPolicyId: undefined,
         agentPolicyName: undefined,
         selectedAgentPolicyIds: [POLICY_ID],
         bulkPoliciesItems: [],
