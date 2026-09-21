@@ -244,9 +244,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
       const legacyName = currentConfiguration.templates.find((t) => t.key === templateId)?.name;
       if (legacyName) {
         const normalizedName = legacyName.trim().toLocaleLowerCase();
-        v2Template = v2Templates.find(
-          (t) => t.name.trim().toLocaleLowerCase() === normalizedName
-        );
+        v2Template = v2Templates.find((t) => t.name.trim().toLocaleLowerCase() === normalizedName);
       }
     }
     if (!v2Template?.definition) return false;
