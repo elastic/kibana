@@ -12,9 +12,7 @@ import { getDateHistogramSerializedFormat } from './date_histogram_to_esql';
 jest.mock('@kbn/data-plugin/common', () => ({
   ...jest.requireActual('@kbn/data-plugin/common'),
   // Return a fixed 20-minute duration so the PT1M rule selects 'HH:mm' (a time-only format).
-  getCalculateAutoTimeExpression:
-    () =>
-    () => ({ asMilliseconds: () => 20 * 60 * 1000 }),
+  getCalculateAutoTimeExpression: () => () => ({ asMilliseconds: () => 20 * 60 * 1000 }),
 }));
 
 const scaledRules: Array<[string, string]> = [
