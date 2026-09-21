@@ -88,6 +88,66 @@ describe('transformInternalMaintenanceWindowToExternal', () => {
     });
   });
 
+  it('defaults query.kql to empty string when scope.alerting has no kql', () => {
+    expect(
+      transformInternalMaintenanceWindowToExternal({
+        title: 'test-maintenance-window',
+        id: 'foobar',
+        status: 'running',
+        createdAt: '2021-03-07T00:00:00.000Z',
+        createdBy: 'me',
+        updatedAt: '2021-03-07T00:00:00.000Z',
+        updatedBy: 'me',
+        enabled: true,
+        scope: {
+          alerting: {
+            enabled: true,
+            filters: [],
+            kql: undefined,
+          },
+        },
+        categoryIds: undefined,
+        duration: 864000000,
+        rRule: {
+          dtstart: '2021-03-07T00:00:00.000Z',
+          tzid: 'UTC',
+          byweekday: ['MO', 'FR'],
+          freq: 3,
+          interval: 1,
+          until: '2022-05-17T05:05:00.000Z',
+          bymonth: undefined,
+          count: undefined,
+          bymonthday: undefined,
+        },
+        schedule: {
+          custom: {
+            duration: '10d',
+            start: '2021-03-07T00:00:00.000Z',
+            timezone: 'UTC',
+            recurring: {
+              every: '1d',
+              end: '2022-05-17T05:05:00.000Z',
+              onWeekDay: ['MO', 'FR'],
+            },
+          },
+        },
+        events: [],
+        eventStartTime: '',
+        eventEndTime: '',
+        expirationDate: '',
+      })
+    ).toEqual(
+      expect.objectContaining({
+        scope: {
+          alerting: {
+            enabled: true,
+            query: { kql: '' },
+          },
+        },
+      })
+    );
+  });
+
   it('transforms does not return scope if scope is missing', () => {
     expect(
       transformInternalMaintenanceWindowToExternal({

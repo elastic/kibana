@@ -18,10 +18,12 @@ export const transformInternalMaintenanceWindowToExternal = (
   const { scope } = maintenanceWindow;
 
   // External API is lossy (kql only, filters/dsl dropped). Selection is reflected via `enabled`.
-  //   scope.alerting.enabled=true + kql → { alerting: { enabled: true, query: { kql } } }
-  //   scope.alerting.enabled=true, no kql → { alerting: { enabled: true } }
-  //   scope.alerting.enabled=false → { alerting: { enabled: false } }
-  //   scope.alerting absent → alerting key absent (not selected)
+  // `query` is always emitted when `alerting` is present to preserve the GA API contract:
+  // the v1 response schema requires `alerting.query` to be present. When no kql filter was
+  // configured (apply to all alerts), an empty string is used as the default.
+  //   scope.alerting present + kql  → { alerting: { enabled, query: { kql } } }
+  //   scope.alerting present, no kql → { alerting: { enabled, query: { kql: '' } } }
+  //   scope.alerting absent          → alerting key absent (not selected)
   const externalScope =
     scope !== undefined
       ? {
@@ -29,7 +31,7 @@ export const transformInternalMaintenanceWindowToExternal = (
             ? {
                 alerting: {
                   enabled: scope.alerting.enabled,
-                  ...(scope.alerting.kql ? { query: { kql: scope.alerting.kql } } : {}),
+                  query: { kql: scope.alerting.kql ?? '' },
                 },
               }
             : {}),
