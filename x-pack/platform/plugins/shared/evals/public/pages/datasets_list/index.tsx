@@ -425,7 +425,7 @@ export const DatasetsListPage: React.FC = () => {
           />
         ) : showNoDatasetsYet ? (
           <EuiEmptyPrompt
-            iconType="indexOpen"
+            iconType="tablePlus"
             title={<h2>{i18n.NO_DATASETS_TITLE}</h2>}
             body={<p>{i18n.NO_DATASETS_BODY}</p>}
             actions={

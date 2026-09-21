@@ -225,7 +225,7 @@ export const OnlineEvalsListPage: React.FC = () => {
             }
             actions={[
               <EuiButtonEmpty
-                iconType="visLine"
+                iconType="chartLine"
                 onClick={() => history.push(TRACING_PAGE_PATH)}
                 data-test-subj="onlineEvalsUnavailableTracingButton"
               >
@@ -272,7 +272,7 @@ export const OnlineEvalsListPage: React.FC = () => {
           />
         ) : noWorkflows ? (
           <EuiEmptyPrompt
-            iconType="visLine"
+            iconType="chartLine"
             title={
               <h2>
                 {i18n.translate('xpack.evals.onlineEvaluations.list.empty.title', {
@@ -329,7 +329,7 @@ export const OnlineEvalsListPage: React.FC = () => {
             }
             actions={[
               <EuiButtonEmpty
-                iconType="visLine"
+                iconType="chartLine"
                 onClick={() => history.push(TRACING_PAGE_PATH)}
                 data-test-subj="onlineEvalsEmptyStateTracingButton"
               >
