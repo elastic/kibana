@@ -63,7 +63,10 @@ const createYaraValidateResult = (
   })),
 });
 
-const getCustomYaraExceptionItem = (ruleText: string): ExceptionListItemSchema =>
+const getCustomYaraExceptionItem = (
+  ruleText: string,
+  overrides?: Partial<ExceptionListItemSchema>
+): ExceptionListItemSchema =>
   getExceptionListItemSchemaMock({
     list_id: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
     entries: [
@@ -74,7 +77,11 @@ const getCustomYaraExceptionItem = (ruleText: string): ExceptionListItemSchema =
         value: ruleText,
       },
     ],
+    ...overrides,
   });
+
+const MOCK_YARA_ENTRY_ID = '1';
+const MOCK_YARA_ENTRY_NAME = 'some name';
 
 describe('artifacts lists', () => {
   let mockExceptionClient: ExceptionListClient;
@@ -486,6 +493,8 @@ describe('artifacts lists', () => {
             yara_rule_data: yaraRuleText,
             arch_context: [MetaArchValue.X86, MetaArchValue.ARM64],
             scan_context: [EndpointArtifactScanContext.MEMORY],
+            entry_id: MOCK_YARA_ENTRY_ID,
+            entry_name: MOCK_YARA_ENTRY_NAME,
           },
         ],
       });
@@ -496,8 +505,14 @@ describe('artifacts lists', () => {
       const firstRule = 'rule First { condition: true }';
       const secondRule = 'rule Second { condition: true }';
       const exceptionMock = getFoundExceptionListItemSchemaMock(2);
-      exceptionMock.data[0] = getCustomYaraExceptionItem(firstRule);
-      exceptionMock.data[1] = getCustomYaraExceptionItem(secondRule);
+      exceptionMock.data[0] = getCustomYaraExceptionItem(firstRule, {
+        id: 'entry-1',
+        name: 'First signature',
+      });
+      exceptionMock.data[1] = getCustomYaraExceptionItem(secondRule, {
+        id: 'entry-2',
+        name: 'Second signature',
+      });
       mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(exceptionMock);
 
       const resp = await getFilteredEndpointExceptionListRaw({
@@ -513,11 +528,15 @@ describe('artifacts lists', () => {
             yara_rule_data: firstRule,
             arch_context: [MetaArchValue.X86, MetaArchValue.ARM64],
             scan_context: [EndpointArtifactScanContext.MEMORY],
+            entry_id: 'entry-1',
+            entry_name: 'First signature',
           },
           {
             yara_rule_data: secondRule,
             arch_context: [MetaArchValue.X86, MetaArchValue.ARM64],
             scan_context: [EndpointArtifactScanContext.MEMORY],
+            entry_id: 'entry-2',
+            entry_name: 'Second signature',
           },
         ],
       });
@@ -555,6 +574,8 @@ describe('artifacts lists', () => {
             yara_rule_data: enabledRule,
             arch_context: [MetaArchValue.X86, MetaArchValue.ARM64],
             scan_context: [EndpointArtifactScanContext.MEMORY],
+            entry_id: MOCK_YARA_ENTRY_ID,
+            entry_name: MOCK_YARA_ENTRY_NAME,
           },
         ],
       });
@@ -612,6 +633,8 @@ describe('artifacts lists', () => {
             yara_rule_data: 'rule X86Only { condition: true }',
             arch_context: [MetaArchValue.X86],
             scan_context: [EndpointArtifactScanContext.MEMORY],
+            entry_id: MOCK_YARA_ENTRY_ID,
+            entry_name: MOCK_YARA_ENTRY_NAME,
           },
         ],
       });
@@ -633,6 +656,8 @@ describe('artifacts lists', () => {
             yara_rule_data: 'rule BothArch { condition: true }',
             arch_context: [MetaArchValue.ARM64, MetaArchValue.X86],
             scan_context: [EndpointArtifactScanContext.MEMORY],
+            entry_id: MOCK_YARA_ENTRY_ID,
+            entry_name: MOCK_YARA_ENTRY_NAME,
           },
         ],
       });
@@ -661,6 +686,8 @@ describe('artifacts lists', () => {
             yara_rule_data: 'rule First { condition: true } rule Second { condition: true }',
             arch_context: [MetaArchValue.X86, MetaArchValue.ARM64],
             scan_context: [EndpointArtifactScanContext.MEMORY],
+            entry_id: MOCK_YARA_ENTRY_ID,
+            entry_name: MOCK_YARA_ENTRY_NAME,
           },
         ],
       });
@@ -731,6 +758,8 @@ describe('artifacts lists', () => {
             yara_rule_data: 'rule Example { condition: true }',
             arch_context: [MetaArchValue.X86, MetaArchValue.ARM64],
             scan_context: [EndpointArtifactScanContext.MEMORY],
+            entry_id: MOCK_YARA_ENTRY_ID,
+            entry_name: MOCK_YARA_ENTRY_NAME,
           },
         ],
       });
@@ -752,6 +781,8 @@ describe('artifacts lists', () => {
             yara_rule_data: 'rule Example { condition: true }',
             arch_context: [MetaArchValue.X86, MetaArchValue.ARM64],
             scan_context: [EndpointArtifactScanContext.MEMORY],
+            entry_id: MOCK_YARA_ENTRY_ID,
+            entry_name: MOCK_YARA_ENTRY_NAME,
           },
         ],
       });
@@ -780,6 +811,8 @@ describe('artifacts lists', () => {
             yara_rule_data: 'rule First { condition: true } rule Second { condition: true }',
             arch_context: [MetaArchValue.X86, MetaArchValue.ARM64],
             scan_context: [EndpointArtifactScanContext.MEMORY],
+            entry_id: MOCK_YARA_ENTRY_ID,
+            entry_name: MOCK_YARA_ENTRY_NAME,
           },
         ],
       });
@@ -833,6 +866,8 @@ describe('artifacts lists', () => {
             yara_rule_data: validRule,
             arch_context: [MetaArchValue.X86, MetaArchValue.ARM64],
             scan_context: [EndpointArtifactScanContext.MEMORY],
+            entry_id: MOCK_YARA_ENTRY_ID,
+            entry_name: MOCK_YARA_ENTRY_NAME,
           },
         ],
       });
@@ -1616,6 +1651,8 @@ describe('artifacts lists', () => {
             yara_rule_data: yaraRuleText,
             arch_context: [MetaArchValue.X86, MetaArchValue.ARM64],
             scan_context: [EndpointArtifactScanContext.MEMORY],
+            entry_id: MOCK_YARA_ENTRY_ID,
+            entry_name: MOCK_YARA_ENTRY_NAME,
           },
         ],
       });

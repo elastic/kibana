@@ -281,6 +281,8 @@ async function translateOneYaraException(
       yara_rule_data: entry.value,
       arch_context: archContext,
       scan_context: scanContext,
+      entry_id: exception.id,
+      entry_name: exception.name,
     };
   } catch {
     skipYaraItem(logger, exception.item_id, 'libyara validation failed');
