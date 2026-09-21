@@ -589,7 +589,11 @@ export class DashboardPageControls extends FtrService {
         buttonGroup
       );
       await button.click();
-      expect(await button.getAttribute('aria-pressed')).to.be('true');
+      const updatedButtonGroup = await this.testSubjects.find(
+        'optionsList__includeExcludeButtonGroup'
+      );
+      const selectedButton = await updatedButtonGroup.findByCssSelector('[aria-pressed=true]');
+      expect(await selectedButton.getVisibleText()).to.be(include ? 'Include' : 'Exclude');
     });
   }
 
