@@ -17,6 +17,7 @@ import {
   useWorkflowsCapabilities,
   useWorkflowsUIEnabledSetting,
 } from '@kbn/workflows-ui';
+import { RUN_DOCUMENT_WORKFLOW_ACTION_ID } from '../../../../common/constants/action_ids';
 import * as i18n from '../translations';
 
 // Sort manual-trigger workflows to the top. Module-scoped so the reference is stable across renders.
@@ -62,8 +63,6 @@ export const DocumentWorkflowsPanel = ({
 
 export const RUN_DOCUMENT_WORKFLOW_PANEL_ID = 'RUN_DOCUMENT_WORKFLOW_PANEL_ID';
 export const RUN_DOCUMENT_WORKFLOWS_PANEL_WIDTH = 400;
-export const RUN_DOCUMENT_WORKFLOW_ACTION_ID = 'run-document-workflow-action';
-
 export interface UseRunDocumentWorkflowPanelProps {
   /** Full documents including _id, _index, and all source fields */
   documents: Array<{ _id: string; _index: string } & Record<string, unknown>>;
