@@ -8,11 +8,12 @@
   "plugin": {
     "id": "nightshift",
     "browser": true,
-    "server": false,
+    "server": true,
     "requiredPlugins": [
       "charts",
       "data",
       "dataViews",
+      "features",
       "lens",
       "observabilityShared",
       "share",

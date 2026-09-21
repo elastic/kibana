@@ -16,7 +16,10 @@
     "optionalPlugins": [
       "actions",
       "agentBuilder",
+      "contextEngine",
+      "inference",
       "ruleRegistry",
+      "sandbox",
       "searchInferenceEndpoints",
       "spaces",
       "workflowsExtensions",

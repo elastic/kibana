@@ -18,14 +18,20 @@ import {
   type Watch,
 } from '@kbn/alertzero-common';
 import { useEnableOnboarding, useOnboardingState } from './use_onboarding_state';
-import { usePendingProposals } from './use_proposals_api';
+import { useProposalsList } from './use_proposals_api';
 import { useWatches } from './use_watches_api';
 
-jest.mock('./use_watches_api', () => ({ useWatches: jest.fn() }));
-jest.mock('./use_proposals_api', () => ({ usePendingProposals: jest.fn() }));
+jest.mock('./use_watches_api', () => ({
+  useWatches: jest.fn(),
+  retryOnceOnTransientError: jest.fn(),
+}));
+jest.mock('./use_proposals_api', () => ({
+  useProposalsList: jest.fn(),
+  DEFAULT_PROPOSALS_WINDOW_HOURS: 24,
+}));
 
 const mockUseWatches = jest.mocked(useWatches);
-const mockUsePendingProposals = jest.mocked(usePendingProposals);
+const mockUseProposalsList = jest.mocked(useProposalsList);
 
 type Services = ReturnType<typeof createServices>;
 
@@ -72,8 +78,8 @@ const renderOnboarding = (fixtures: OnboardingFixtures) => {
     error: fixtures.watchesError ?? null,
     refetch: jest.fn(),
   } as never);
-  mockUsePendingProposals.mockReturnValue({
-    data: { proposals: Array.from({ length: fixtures.proposalsCount ?? 0 }) },
+  mockUseProposalsList.mockReturnValue({
+    data: { groups: {}, total: fixtures.proposalsCount ?? 0, truncated: false },
     isLoading: fixtures.proposalsLoading ?? false,
     refetch: jest.fn(),
   } as never);
@@ -186,8 +192,8 @@ describe('useEnableOnboarding', () => {
       error: null,
       refetch: jest.fn(),
     } as never);
-    mockUsePendingProposals.mockReturnValue({
-      data: { proposals: [] },
+    mockUseProposalsList.mockReturnValue({
+      data: { groups: {}, total: 0, truncated: false },
       isLoading: false,
       refetch: jest.fn(),
     } as never);

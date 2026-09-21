@@ -6,28 +6,20 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { API_VERSIONS, ALERTZERO_WATCHES_URL, buildWatchUrl } from '@kbn/alertzero-common';
 import type { GetWatchResponse, ListWatchesResponse } from '@kbn/alertzero-common';
+import { retryOnTransientError } from '@kbn/agentic-investigations-plugin/public';
 import { queryKeys } from '../query_keys';
 
-export const retryOnTransientError = (failureCount: number, error: unknown): boolean => {
-  // Retry a transient (5xx) error exactly once. A second consecutive failure means the
-  // backend is not going to recover in the time a user is looking at the page, so we
-  // surface the empty state instead of leaving the onboarding gate stuck on a spinner.
-  if (failureCount >= 1) {
-    return false;
-  }
-  if (isHttpFetchError(error)) {
-    const status = error.response?.status;
-    if (status === 501) {
-      return false;
-    }
-    return !status || status >= 500;
-  }
-  return true;
-};
+/**
+ * Bounds the shared transient-error retry to a single retry. The onboarding gate
+ * blocks routing on these queries, so a persistently-failing backend must surface
+ * the empty state in about a second instead of holding a spinner through the full
+ * three-attempt backoff (~11s).
+ */
+export const retryOnceOnTransientError = (failureCount: number, error: unknown): boolean =>
+  failureCount < 1 && retryOnTransientError(failureCount, error);
 
 export const useWatches = (options?: { enabled?: boolean }) => {
   const { services } = useKibana();
@@ -40,7 +32,7 @@ export const useWatches = (options?: { enabled?: boolean }) => {
       }),
     enabled: options?.enabled,
     keepPreviousData: true,
-    retry: retryOnTransientError,
+    retry: retryOnceOnTransientError,
   });
 };
 
@@ -53,11 +45,12 @@ export const useWatch = (watchId: string | undefined) => {
       if (!watchId) {
         throw new Error('watchId is required');
       }
+
       return services.http!.get<GetWatchResponse>(buildWatchUrl(watchId), {
         version: API_VERSIONS.internal.v1,
       });
     },
     enabled: Boolean(watchId),
-    retry: retryOnTransientError,
+    retry: retryOnceOnTransientError,
   });
 };

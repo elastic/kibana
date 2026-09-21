@@ -4,12 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. See the Elastic License 2.0 (ELv2)
- * or the Server Side Public License (SSPLv1) for more details.
- */
 import type { Logger } from '@kbn/core/server';
 import {
   OnboardingService,
@@ -78,7 +72,11 @@ describe('OnboardingService', () => {
       expect(result.outcome).toBe('failed');
       expect(result.error).toMatch(/es write failed|did not persist/);
       if (ids.length >= 2) {
-        expect(client.uninstall).toHaveBeenCalledWith(ids[0], { spaceId: 'default' });
+        // The rollback must target the same suffixed instance that enable installed.
+        expect(client.uninstall).toHaveBeenCalledWith(ids[0], {
+          spaceId: 'default',
+          workflowIdSuffix: 'default',
+        });
       }
     });
   });
@@ -90,6 +88,11 @@ describe('OnboardingService', () => {
       const result = await service.disable('default');
       expect(result.outcome).toBe('disabled');
       expect(client.uninstall.mock.calls.length).toBeGreaterThan(0);
+      // Uninstall targets the same space-suffixed instance that enable installed;
+      // without the suffix the call removes nothing and the worker keeps running.
+      for (const [, options] of client.uninstall.mock.calls) {
+        expect(options).toEqual({ spaceId: 'default', workflowIdSuffix: 'default' });
+      }
     });
 
     it('skips workers that are not installed', async () => {

@@ -4,12 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. See the Elastic License 2.0 (ELv2)
- * or the Server Side Public License (SSPLv1) for more details.
- */
 import type { Logger } from '@kbn/core/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import { workerRegistry, installRegisteredWorker } from '../../managed_workflows/worker_registry';
@@ -86,6 +80,10 @@ export class OnboardingService {
             workerId as Parameters<typeof managedWorkflows.uninstall>[0],
             {
               spaceId,
+              // Installed with workflowIdSuffix=spaceId, so the rollback must name the
+              // same suffixed instance — without it the uninstall removes nothing and
+              // a partially-enabled space keeps running workers it never committed to.
+              workflowIdSuffix: spaceId,
             }
           );
         } catch (rollbackError) {
@@ -118,7 +116,11 @@ export class OnboardingService {
           workflowIdSuffix: spaceId,
         });
         if (status.installed) {
-          await managedWorkflows.uninstall(registration.id, { spaceId });
+          // Target the same suffixed instance that enable() installed.
+          await managedWorkflows.uninstall(registration.id, {
+            spaceId,
+            workflowIdSuffix: spaceId,
+          });
           removed.push(registration.id);
         }
       } catch (workerError) {

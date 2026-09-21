@@ -12,9 +12,10 @@ import {
   ALERTZERO_ONBOARDING_ENABLE_URL,
   API_VERSIONS,
 } from '@kbn/alertzero-common';
+import { queryKeys as platformQueryKeys } from '@kbn/agentic-investigations-plugin/public';
 import { queryKeys } from '../query_keys';
-import { usePendingProposals } from './use_proposals_api';
-import { useWatches } from './use_watches_api';
+import { DEFAULT_PROPOSALS_WINDOW_HOURS, useProposalsList } from './use_proposals_api';
+import { retryOnceOnTransientError, useWatches } from './use_watches_api';
 import {
   ENABLE_SUCCESS_TOAST_BODY,
   ENABLE_SUCCESS_TOAST_TITLE,
@@ -66,14 +67,20 @@ export const useOnboardingState = (): UseOnboardingStateResult => {
   const canToggle = services.application?.capabilities?.advancedSettings?.save === true;
 
   const { data: watchesData, isLoading: watchesLoading, error: watchesError } = useWatches();
-  const { data: proposalsData, isLoading: proposalsLoading } = usePendingProposals();
+  // The gate blocks routing on this query, so it uses the bounded retry policy: a
+  // persistently-failing backend must reach the empty state fast, not after ~11s of spinner.
+  const { data: proposalsData, isLoading: proposalsLoading } = useProposalsList(
+    DEFAULT_PROPOSALS_WINDOW_HOURS,
+    { retry: retryOnceOnTransientError }
+  );
 
   const watches = watchesData?.watches ?? [];
-  const proposals = proposalsData?.proposals ?? [];
+  // Any proposal inside the window — open or closed — is proof a run produced output.
+  const proposalCount = proposalsData?.total ?? 0;
 
   const hasWatches = watches.length > 0;
   const hasRun =
-    proposals.length > 0 ||
+    proposalCount > 0 ||
     watches.some((watch) => (watch.recentRuns?.length ?? 0) > 0 || watch.metrics?.lastRun != null);
 
   const state: OnboardingState = !enabled
@@ -123,7 +130,8 @@ export const useEnableOnboarding = () => {
       // Celebration burst — imperative overlay, survives the gate's route transition.
       fireConfetti();
       void queryClient.invalidateQueries({ queryKey: queryKeys.watches.all });
-      void queryClient.invalidateQueries({ queryKey: queryKeys.proposals.all });
+      // Grouped proposal queries hang off the shared platform proposals root.
+      void queryClient.invalidateQueries({ queryKey: platformQueryKeys.proposals.all });
     },
   });
 };

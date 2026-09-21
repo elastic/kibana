@@ -118,6 +118,9 @@ export class FeatureFlagsService {
               transaction.end();
             }
           });
+
+        // Emit a context change event when the provider is ready to force the reevaluation of the subscribed flags.
+        OpenFeature.addHandler(ClientProviderEvents.Ready, () => this.contextChanged$.next());
       },
       appendContext: (contextToAppend) => this.appendContext(contextToAppend),
     };
