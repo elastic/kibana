@@ -4,7 +4,6 @@ description: Reviews Agent Builder tool registrations for availability scoping, 
 apply_to:
   - "x-pack/platform/packages/shared/agent-builder/agent-builder-server/allow_lists.ts"
   - "x-pack/**/agent_builder*/**/tools/**"
-  - "x-pack/**/agent_builder/**/tools/**"
   - "x-pack/**/register_tools.ts"
 can_block: false
 ---
@@ -20,7 +19,7 @@ Review Agent Builder tool registration changes for correctness, safety, and qual
 - Tool handler implementations and their direct imports (schema, types, utilities)
 - The registering plugin's `kibana.jsonc` and feature registration (for availability verification)
 - If no in-scope tool registration code remains after applying these rules, finish without findings.
-- Do not review backport pull requests. Use a version-prefixed title such as `[9.x]` as the available backport signal.
+- Do not review backport pull requests. Use a version-prefixed title such as `[9.x]` or the `backport` label as the available backport signal.
 
 ## Canonical guidance
 

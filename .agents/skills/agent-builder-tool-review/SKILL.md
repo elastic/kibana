@@ -18,7 +18,7 @@ Review Agent Builder tool registrations and allowlist changes against this check
 - Changed tool registration files and their direct imports (handler, schema, types)
 - The tool's entry in `allow_lists.ts`
 - The registering plugin's `kibana.jsonc` and feature registration (for availability checks)
-- Do not review backport PRs (version-prefixed title such as `[9.x]`)
+- Do not review backport PRs (version-prefixed title such as `[9.x]` or `backport` label)
 
 ## Canonical References
 

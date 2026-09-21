@@ -3849,6 +3849,9 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.agents/skills/kibana-privilege-deprecation/** @elastic/kibana-security
 /.agents/skills/encrypted-saved-objects/** @elastic/kibana-security
 
+# Agent Builder tool review
+/.agents/skills/agent-builder-tool-review/** @elastic/workchat-eng
+
 # Kibana accessibility
 /.agents/skills/accessibility/** @elastic/kibana-accessibility
 

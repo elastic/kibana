@@ -31,7 +31,7 @@ On PR updates, review only the new changes and stay high-signal — not nitpicky
 
 ## Review process
 
-1. Start with the workflow-provided PR context artifacts under `/tmp/gh-aw/agent/`, especially `pr-diff.txt`, `pr-files.json`, `pr-metadata.json`, `pr-review-comments.json`, and `pr-reviews.json`.
+1. Start with the workflow-provided PR context artifacts under `/tmp/gh-aw/agent/`, especially `pr-diff.txt`, `pr-files.json`, `pr-metadata.json`, `pr-issue-comments.json`, `pr-review-comments.json`, and `pr-reviews.json`.
 2. From `pr-files.json` (or `pr-diff.txt`), determine whether any in-scope files changed. If none changed, stop and call `noop` with `No Agent Builder tool files changed`.
 3. From `pr-metadata.json`, check the PR title prefix and labels. If this is a backport (label `backport` or title prefix like `[9.x]`), stop and call `noop` with `Backport PR — skipping`.
 4. If artifacts are missing or insufficient, use GitHub tools to gather the extra context needed.
@@ -67,7 +67,7 @@ Post detailed findings as inline PR comments on the offending line. Each inline 
 
 <Full explanation, verification steps taken, concrete fix suggestion.>
 
-<sup>Share feedback in the #one-workflow Slack channel.</sup>
+<sup>Share feedback in the #chat-eng Slack channel.</sup>
 
 </details>
 ```
@@ -94,4 +94,4 @@ Do not duplicate inline comments on unchanged lines.
 - If at least one inline comment: `submit-pull-request-review` with event `COMMENT` and empty body.
 - If no findings: `noop` with `No issues found`.
 - Never use `REQUEST_CHANGES` or `APPROVE`.
-- For follow-up runs with `REVIEWER_COMMENT_ID`: respond to the triggering comment only, do not create new inline comments.
+- For dispatched follow-up runs (`workflow_dispatch` with a non-empty `REVIEWER_COMMENT_ID`), respond to the triggering comment only. When `REVIEWER_COMMENT_TYPE` is set, use it to select the artifact: for `issue_comment`, find `REVIEWER_COMMENT_ID` in `pr-issue-comments.json`; for `pull_request_review_comment`, find it in `pr-review-comments.json`; treat any other non-empty value as invalid. If the importing workflow does not expose `REVIEWER_COMMENT_TYPE`, match `REVIEWER_COMMENT_ID` across both files. If it is a review-thread comment, reply in the same thread via `reply-to-pull-request-review-comment` with `comment_id` set to `REVIEWER_COMMENT_ID`; if it is a top-level PR comment, reply via `add-comment` on `PR_NUMBER`. Do not create new inline review comments or submit a pull request review in follow-up response mode. If the request is not actionable, call `noop` with a brief reason.
