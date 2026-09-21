@@ -180,9 +180,10 @@ export type {
   ListAttachmentsArgs,
 } from './attachments';
 export type {
-  ConversationAddEventsRequest,
-  ConversationCreatePublicRequest,
   ConversationPublicClient,
+  ConversationCreatePublicRequest,
+  ConversationUpdatePublicRequest,
+  ConversationAddEventsRequest,
 } from './conversations';
 export { describeZodSchema, formatSchemaForLlm } from './tools';
 export type {

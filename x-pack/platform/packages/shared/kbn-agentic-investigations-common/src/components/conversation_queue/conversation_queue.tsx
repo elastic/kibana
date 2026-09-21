@@ -31,6 +31,11 @@ interface ConversationQueueProps {
   onClickCard: (id: Investigation['id']) => void;
   onOpenChat: (id: Investigation['id']) => void;
   onClickRecommendedAction: ConversationsActionsGroupProps['onClickRecommendedAction'];
+  /**
+   * Resolves the chat URL for a card, so its chat control renders as a link. A function rather
+   * than a value because the URL is per-card and only the caller can resolve it.
+   */
+  getChatHref?: (id: Investigation['id']) => string | undefined;
   isFiltered?: boolean;
   /**
    * Ids of the cards belonging to the open details flyout, highlighted in the list. A
@@ -63,6 +68,7 @@ export const ConversationQueue = memo<ConversationQueueProps>(
     onClickCard,
     onClickRecommendedAction,
     onOpenChat,
+    getChatHref,
     selectedIds,
   }) => {
     const { euiTheme } = useEuiTheme();
@@ -120,6 +126,7 @@ export const ConversationQueue = memo<ConversationQueueProps>(
                     onClickCard={onClickCard}
                     onOpenChat={onOpenChat}
                     onClickRecommendedAction={onClickRecommendedAction}
+                    chatHref={getChatHref?.(investigation.id)}
                   />
                 </EuiFlexItem>
               ))}
