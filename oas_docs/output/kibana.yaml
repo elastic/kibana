@@ -8951,7 +8951,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Creates an action policy with a server-generated identifier. To create or replace an action policy with a client-supplied identifier, use PUT /api/alerting/v2/action_policies/.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-action-policies AND read_alerting-v2-rules.
+        Creates an action policy with a server-generated identifier. To create or replace an action policy with a client-supplied identifier, use PUT /api/alerting/v2/action_policies/{id}/.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-action-policies AND read_alerting-v2-rules.
       operationId: post-alerting-v2-action-policies
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -10464,9 +10464,6 @@ paths:
                       action_policy_id: action-policy-1
                     error: Not Found
                     message: Action policy with ID "action-policy-1" not found
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates an action policy with the given ID does not exist.
         '409':
           content:
             application/json:
@@ -11238,7 +11235,7 @@ paths:
             type: string
       responses:
         '204':
-          description: Returns the action policy with the updated API key.
+          description: The API key of the action policy was updated successfully.
         '400':
           content:
             application/json:
@@ -13443,7 +13440,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Creates a rule with a server-generated identifier. To create or replace a rule with a client-supplied identifier, use PUT /api/alerting/v2/rules/.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-rules.
+        Creates a rule with a server-generated identifier. To create or replace a rule with a client-supplied identifier, use PUT /api/alerting/v2/rules/{id}/.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-rules.
       operationId: post-alerting-v2-rules
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -15612,9 +15609,6 @@ paths:
                       rule_id: rule-1
                     error: Not Found
                     message: Rule with id "rule-1" not found
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates a rule with the given ID does not exist.
         '409':
           content:
             application/json:
@@ -16041,7 +16035,7 @@ paths:
             minLength: 1
             type: string
       responses:
-        '204':
+        '202':
           description: The rule run was triggered successfully.
         '400':
           content:
