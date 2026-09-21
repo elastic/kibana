@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { maintenanceWindowStatus as maintenanceWindowStatusV1 } from '../constants/v1';
 import { scheduleResponseSchemaV1 } from '../../../../schedule';
+import { maintenanceWindowScopeSchemaV1 } from '../../scope_schema_v1';
 
 export const maintenanceWindowResponseSchema = schema.object(
   {
@@ -67,53 +68,7 @@ export const maintenanceWindowResponseSchema = schema.object(
       }
     ),
 
-    scope: schema.maybe(
-      schema.object(
-        {
-          // `alerting` is optional at the scope level to support alerting_v2-only maintenance
-          // windows (new). When present, `query` remains required to preserve the GA contract.
-          alerting: schema.maybe(
-            schema.object({
-              enabled: schema.maybe(
-                schema.boolean({
-                  meta: {
-                    description: 'Whether the maintenance window applies to alerting v1 alerts.',
-                  },
-                })
-              ),
-              query: schema.object({
-                kql: schema.string({
-                  meta: {
-                    description:
-                      'A filter written in Kibana Query Language (KQL). Only alerts matching this query will be suppressed by the maintenance window.',
-                  },
-                }),
-              }),
-            })
-          ),
-          alerting_v2: schema.maybe(
-            schema.object({
-              enabled: schema.boolean({
-                meta: {
-                  description: 'Whether the maintenance window applies to alerting v2 episodes.',
-                },
-              }),
-              query: schema.maybe(
-                schema.object({
-                  kql: schema.string({
-                    meta: {
-                      description:
-                        'A filter written in Kibana Query Language (KQL). Evaluated in memory against the alerting v2 episode context.',
-                    },
-                  }),
-                })
-              ),
-            })
-          ),
-        },
-        { meta: { id: 'maintenance_window_scope' } }
-      )
-    ),
+    scope: schema.maybe(maintenanceWindowScopeSchemaV1),
 
     schedule: schema.object({
       custom: scheduleResponseSchemaV1,
