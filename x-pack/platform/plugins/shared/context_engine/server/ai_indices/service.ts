@@ -33,7 +33,7 @@ import {
 } from './errors';
 import type { AiIndexDocument, AiIndexStorageClient, StoredAiIndexDocument } from './storage';
 import { buildManagedAiIndexDocId, createAiIndexStorageClient } from './storage';
-import { deleteKiView, putKiView } from './ki_view';
+import { putKiView } from './ki_view';
 import { buildTraceQueries } from './trace_queries';
 import { createAiIndexIdentityDslFilter } from '../utils/ai_index_identity_filter';
 import { AI_INDEX_DEST_VALUE_PATTERN } from '../../common/validation';
@@ -409,7 +409,6 @@ export class AiIndexService {
     if (result === 'not_found') {
       throw new AiIndexNotFoundError(aiIndexId);
     }
-    await deleteKiView({ esClient: this.esClient, logger: this.logger, aiIndexId });
   }
 
   private putView(aiIndexId: string, dest: AiIndexDest): Promise<void> {

@@ -1171,18 +1171,6 @@ describe('AiIndexService', () => {
   });
 
   describe('delete', () => {
-    it('deletes the retrieval view with the AI index', async () => {
-      mockSearchHits(storedHit(aiIndexDocument, { id: 'auto-gen-1' }));
-      storageClient.delete.mockResolvedValue({ acknowledged: true, result: 'deleted' });
-
-      await service.delete('customer_support', DEFAULT_SPACE);
-
-      expect(esClient.esql.deleteView).toHaveBeenCalledWith(
-        { name: 'v-ai-index-customer_support' },
-        { ignore: [404] }
-      );
-    });
-
     it('resolves when the AI index is deleted', async () => {
       mockSearchHits(storedHit(aiIndexDocument, { id: 'auto-gen-1' }));
       storageClient.delete.mockResolvedValue({ acknowledged: true, result: 'deleted' });

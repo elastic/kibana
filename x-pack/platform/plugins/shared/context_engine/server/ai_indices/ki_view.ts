@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
+import { formatErrorMessage } from '../utils/format_es_error';
 
 const kiViewName = (aiIndexId: string): string => `v-ai-index-${aiIndexId}`;
 
@@ -45,7 +46,7 @@ export const putKiView = async ({
   await esClient.esql.putView({ name: kiViewName(aiIndexId), query: kiViewQuery(dest) });
 };
 
-/** Deletes the view for an AI index. A missing view is not an error. */
+/** Best-effort view delete. Returns an error string on failure, null on success or 404. */
 export const deleteKiView = async ({
   esClient,
   logger,
@@ -54,11 +55,16 @@ export const deleteKiView = async ({
   esClient: ElasticsearchClient;
   logger: Logger;
   aiIndexId: string;
-}): Promise<void> => {
+}): Promise<string | null> => {
   const name = kiViewName(aiIndexId);
   try {
     await esClient.esql.deleteView({ name }, { ignore: [404] });
+    return null;
   } catch (error) {
-    logger.warn(`Failed to delete ES|QL view '${name}' for AI index '${aiIndexId}': ${error}`);
+    const message = formatErrorMessage(error);
+    logger.warn(
+      `Deleted AI index '${aiIndexId}', but failed to delete its view '${name}': ${message}`
+    );
+    return `Failed to delete the view '${name}': ${message}`;
   }
 };

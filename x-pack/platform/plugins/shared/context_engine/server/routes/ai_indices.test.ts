@@ -137,6 +137,7 @@ describe('ai indices routes', () => {
   let esDeleteDataStream: jest.Mock;
   let esDeleteIndex: jest.Mock;
   let esInternalSearch: jest.Mock;
+  let esDeleteView: jest.Mock;
   let spacesStart: ReturnType<typeof spacesMock.createStart>;
   let improvementsClients: unknown[];
   let improvementsSpaceIds: string[];
@@ -167,6 +168,7 @@ describe('ai indices routes', () => {
             },
             asInternalUser: {
               search: esInternalSearch,
+              esql: { deleteView: esDeleteView },
             },
           },
         },
@@ -200,6 +202,7 @@ describe('ai indices routes', () => {
       data_streams: [],
     });
     esInternalSearch = jest.fn().mockResolvedValue({ hits: { hits: [] } });
+    esDeleteView = jest.fn().mockResolvedValue({ acknowledged: true });
     spacesStart = spacesMock.createStart();
     aiIndexService = {
       create: jest.fn(),
@@ -1126,6 +1129,42 @@ describe('ai indices routes', () => {
 
       expect(aiIndexService.delete).toHaveBeenCalledWith('customer_support', defaultSpaceId);
       expect(response.ok).toHaveBeenCalledWith({ body: { acknowledged: true, errors: [] } });
+    });
+
+    it('deletes the retrieval view with the AI index', async () => {
+      aiIndexService.delete.mockResolvedValue(undefined);
+
+      await callRoute('DELETE', aiIndexByIdPath, {
+        params: { aiIndexId: 'customer_support' },
+      });
+
+      expect(esDeleteView).toHaveBeenCalledWith(
+        { name: 'v-ai-index-customer_support' },
+        { ignore: [404] }
+      );
+    });
+
+    it('returns a partial-failure error when the view deletion fails', async () => {
+      aiIndexService.delete.mockResolvedValue(undefined);
+      esDeleteView.mockRejectedValue(new Error('security_exception'));
+
+      await callRoute('DELETE', aiIndexByIdPath, {
+        params: { aiIndexId: 'customer_support' },
+      });
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: {
+          acknowledged: true,
+          errors: [expect.stringContaining('security_exception')],
+        },
+      });
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          error: expect.objectContaining({
+            message: expect.stringContaining('security_exception'),
+          }),
+        })
+      );
     });
 
     it('returns 409 when the AI index is managed and does not delete related resources', async () => {
