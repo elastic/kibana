@@ -17,7 +17,6 @@ export {
 export {
   ACTION_WORKFLOW_TAG,
   PROPOSAL_ATTACHMENT_TYPE,
-  PROPOSAL_WITHOUT_ACTION,
   MAX_CHARTS_SUMMARY_BUCKETS,
   PROPOSALS_INDEX_NAME,
   PROPOSALS_INTERNAL_URL,
@@ -31,16 +30,19 @@ export {
   PROPOSAL_CHARTS_SUMMARY_URL,
   actionMetadataSchema,
   approveProposalRequestSchema,
+  boundedActionInput,
   createProposalRequestSchema,
   dismissProposalRequestSchema,
   dismissReasonSchema,
-  isDecided,
+  isAwaitingDecision,
   isExpired,
   listProposalsQuerySchema,
   MAX_PROPOSALS_SIZE,
+  proposalFiltersSchema,
   proposalsQuerySchema,
   proposalCategorySchema,
   proposalConfidenceSchema,
+  proposalDecisionSchema,
   proposalImpactSchema,
   proposalOriginSchema,
   proposalSchema,
@@ -63,6 +65,8 @@ export type {
   ProposalsListResponse,
   ProposalCategory,
   ProposalConfidence,
+  ProposalDecision,
+  ProposalFilters,
   ProposalImpact,
   ProposalOrigin,
   ProposalChartsSummaryBucket,
@@ -72,3 +76,23 @@ export type {
   ProposalUser,
   ProposalWithMetadata,
 } from './proposals';
+
+export {
+  ESCALATION_BY_ID_URL,
+  ESCALATION_LINKED_INVESTIGATIONS_FIELD,
+  ESCALATION_TEMPLATE_ID,
+  ESCALATIONS_INTERNAL_URL,
+  ESCALATIONS_UI_CAPABILITY_MANAGE,
+  INVESTIGATION_TEMPLATE_ID,
+  MAX_ESCALATION_LINKED_INVESTIGATIONS,
+  createEscalationRequestSchema,
+  escalationVisibilitySchema,
+  updateEscalationRequestSchema,
+} from './escalations';
+
+export type {
+  CreateEscalationRequest,
+  EscalationConversation,
+  EscalationVisibility,
+  UpdateEscalationRequest,
+} from './escalations';

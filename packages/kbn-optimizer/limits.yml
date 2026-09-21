@@ -7,12 +7,12 @@ pageLoadAssetSize:
   agentBuilderSml: 2103
   agentBuilderVisualizations: 7356
   agentBuilderWorkflows: 4955
-  agenticInvestigations: 13459
+  agenticInvestigations: 18018
   aiAssistantManagementSelection: 11569
   aiops: 15227
   alerting: 22371
   alertingVTwo: 29788
-  alertzero: 13291
+  alertzero: 20079
   apm: 53172
   apmShared: 5852
   apmSourcesAccess: 2747
@@ -68,6 +68,7 @@ pageLoadAssetSize:
   entityStore: 15562
   esql: 29469
   esqlDataGrid: 10209
+  esqlViews: 4666
   esUiShared: 101220
   evals: 9654
   eventAnnotation: 22334
