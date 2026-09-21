@@ -85,6 +85,11 @@ export const useResumeRoundMutation = ({
       // Drop pending prompts from the round — the user has answered, the round is back in progress.
       streamActions.clearPendingPrompts();
 
+      // The run owns its live events: hold the stream for its whole lifetime so it is not reclaimed
+      // while the user is looking at another conversation, before or after `execution_started`.
+      const retainedStream = conversationStreamService
+        .getActiveStream$(vars.conversationId)
+        .subscribe();
       let timelineExecutionId: string | undefined;
 
       try {
@@ -132,6 +137,7 @@ export const useResumeRoundMutation = ({
             ),
         });
       } finally {
+        retainedStream.unsubscribe();
         clearActiveStream(vars.conversationId);
         if (controllersRef.current.get(vars.conversationId)?.controller === controller) {
           controllersRef.current.delete(vars.conversationId);

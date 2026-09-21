@@ -24,18 +24,29 @@ export const useAnchoredItemKey = (): string | undefined => {
   const isPosting =
     useIsMutating({ mutationKey: mutationKeys.sendUserMessage(conversationId) }) > 0;
   const isActive = isStreaming || isPosting;
-  const wasActive = useRef(false);
+  const observed = useRef<{ conversationId?: string; active: boolean }>({ active: false });
   const lastKey = useRef<string>();
-  const [anchor, setAnchor] = useState<{ conversationId?: string; index: number }>();
+  const [anchor, setAnchor] = useState<{ index: number }>();
 
   useEffect(() => {
-    if (isActive && !wasActive.current) {
-      setAnchor({ conversationId, index: items.length });
+    const previous = observed.current;
+    observed.current = { conversationId, active: isActive };
+    // An anchor belongs to the send that created it. Moving to another conversation drops it and
+    // never latches on entry, even if that conversation is streaming: the view sticks to the
+    // bottom instead. Arriving from the new-conversation page is the first send landing, not
+    // navigation, so it may latch.
+    const navigated =
+      previous.conversationId !== undefined && previous.conversationId !== conversationId;
+    if (navigated) {
+      setAnchor(undefined);
+      return;
     }
-    wasActive.current = isActive;
+    if (isActive && !previous.active) {
+      setAnchor({ index: items.length });
+    }
   }, [isActive, conversationId, items.length]);
 
-  if (!anchor || anchor.conversationId !== conversationId) {
+  if (!anchor) {
     lastKey.current = undefined;
     return undefined;
   }
