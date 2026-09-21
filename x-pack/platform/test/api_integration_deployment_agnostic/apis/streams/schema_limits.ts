@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { emptyAssets, MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
+import { OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS } from '@kbn/management-settings-ids';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
@@ -32,6 +33,7 @@ const wiredStreamBody = {
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
+  const kibanaServer = getService('kibanaServer');
 
   let apiClient: StreamsSupertestRepositoryClient;
 
@@ -149,6 +151,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     describe('PUT /api/streams/{name}/_query', () => {
+      before(async () => {
+        await kibanaServer.uiSettings.update({
+          [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: true,
+        });
+        await kibanaServer.uiSettings.waitForEventualCacheRefresh();
+      });
+
+      after(async () => {
+        await kibanaServer.uiSettings.update({
+          [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: false,
+        });
+        await kibanaServer.uiSettings.waitForEventualCacheRefresh();
+      });
+
       it('rejects name longer than MAX_STREAM_NAME_LENGTH with 400', async () => {
         await apiClient
           .fetch('PUT /api/streams/{name}/_query 2023-10-31', {
