@@ -6,11 +6,13 @@
  */
 
 import type { ExecutionTerminatedEvent } from '@kbn/agent-builder-common';
-import type { PromptRequest } from '@kbn/agent-builder-common/agents';
+import type { ConfirmationPrompt } from '@kbn/agent-builder-common/agents';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents';
 import { createExecutionTerminatedEvent } from './execution_terminated_event.factory';
 
-export const createConfirmationPrompt = (overrides?: Partial<PromptRequest>): PromptRequest => ({
+export const createConfirmationPrompt = (
+  overrides?: Partial<ConfirmationPrompt>
+): ConfirmationPrompt => ({
   type: AgentPromptType.confirmation,
   id: 'prompt-1',
   title: 'Confirm action',

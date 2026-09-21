@@ -10,7 +10,12 @@ import { of } from 'rxjs';
 import type { Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import type { UserMessageEvent } from '@kbn/agent-builder-common';
-import { TimelineEventType, EventActorType, TimelineTriggerType } from '@kbn/agent-builder-common';
+import {
+  TimelineEventType,
+  EventActorType,
+  TimelineTriggerType,
+  isTimelineEvent,
+} from '@kbn/agent-builder-common';
 import type { TimelineDisplayEvent } from '../../../../services/events';
 import type { OptimisticAttachments } from '../../../utils/build_optimistic_attachments';
 import { useConversation } from '../../../hooks/use_conversation';
@@ -94,7 +99,7 @@ export const useTimelineItems = (): TimelineItem[] => {
     [pendingMessage, pendingAttachments, pendingUserMessageId]
   );
 
-  const docEvents = conversation?.events;
+  const docEvents = conversation?.events?.filter(isTimelineEvent);
   // Once the saved twin is in the cache the message is no longer pending, even though the local
   // copy still exists.
   const isPendingUnsaved =

@@ -9,6 +9,7 @@ import { useMemo } from 'react';
 import { of } from 'rxjs';
 import type { Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
+import { isTimelineEvent } from '@kbn/agent-builder-common';
 import type { TimelineDisplayEvent } from '../../services/events';
 import { useConversationId } from '../context/conversation/use_conversation_id';
 import { useConversationStreamService } from '../context/streaming/streaming_context';
@@ -36,7 +37,7 @@ export const useOutstandingPrompt = (): OutstandingPrompt | undefined => {
     [conversationStreamService, conversationId]
   );
   const liveEvents = useObservable(activeStream$, EMPTY_EVENTS);
-  const savedEvents = conversation?.events;
+  const savedEvents = conversation?.events?.filter(isTimelineEvent);
 
   return useMemo(
     () => findOutstandingPrompt(mergeEventsById(savedEvents ?? [], liveEvents)),

@@ -70,11 +70,13 @@ describe('ResponseActions', () => {
       />
     );
 
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
+
     expect(screen.getByTestId('executionMetadataPopoverTrigger')).toHaveTextContent('4s');
-    await userEvent.click(screen.getByTestId('executionMetadataPopoverTrigger'));
+    await user.click(screen.getByTestId('executionMetadataPopoverTrigger'));
     expect(screen.getByText('100')).toBeInTheDocument();
 
-    await userEvent.click(screen.getByTestId('executionMetadataViewJsonButton'));
+    await user.click(screen.getByTestId('executionMetadataViewJsonButton'));
     expect(screen.getByText(/"execution_id": "execution-1"/)).toBeInTheDocument();
     expect(screen.getByText(/"reasoning": "thinking"/)).toBeInTheDocument();
   });
