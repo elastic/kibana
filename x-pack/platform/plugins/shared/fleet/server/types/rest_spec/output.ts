@@ -82,7 +82,7 @@ export const GetOutputAgentPolicyCountRequestSchema = {
     isDefaultMonitoring: schema.maybe(
       schema.boolean({
         meta: {
-          description: 'Pending is_default_monitoring value from the flyout (before save)',
+          description: 'If true, count policies as if this output is the default monitoring output, including policies with no `monitoring_output_id`. If omitted, uses the output\'s saved `is_default_monitoring` value.',
         },
       })
     ),
