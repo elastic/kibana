@@ -20,6 +20,7 @@ import {
   fetchSampleFailures,
   fetchTestMetadata,
   fetchTestStats,
+  fileStatsKey,
   type BranchCountsRow,
   type FlakyTestQueryScope,
   type TestFailureSamples,
@@ -332,12 +333,12 @@ const buildReport = async (
   // One file entry per (path, framework) over the tests of both lists, in ranking order
   const files = new Map<string, FlakyTestFileStats>();
   for (const { filePath, framework, testId } of admitted) {
-    const key = `${framework}\n${filePath}`;
+    const key = fileStatsKey(framework, filePath);
     const file = files.get(key) ?? {
       filePath,
       framework,
       testIds: [],
-      byPipeline: pipelineStats.get(filePath) ?? [],
+      byPipeline: pipelineStats.get(key) ?? [],
     };
     file.testIds.push(testId);
     files.set(key, file);

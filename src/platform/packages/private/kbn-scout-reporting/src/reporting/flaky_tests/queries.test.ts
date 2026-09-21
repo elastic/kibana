@@ -23,6 +23,7 @@ import {
   fetchSampleFailures,
   fetchTestMetadata,
   fetchTestStats,
+  fileStatsKey,
   type FlakyTestQueryScope,
 } from './queries';
 
@@ -646,11 +647,11 @@ describe('buildFilePipelineStatsQuery', () => {
       'failed_branches = COUNT_DISTINCT(CASE(failed == 1, buildkite.branch, NULL)), ' +
         'last_failed_at = MAX(CASE(failed == 1, @timestamp, NULL)), ' +
         'last_failed_build_number = MAX(CASE(failed == 1, buildkite.build.number, NULL)) ' +
-        'BY test.file.path, buildkite.pipeline.slug'
+        'BY test.file.path, reporter.type, buildkite.pipeline.slug'
     );
     expect(query).toContain('WHERE failed_builds > 0');
     expect(query).toContain(
-      'RENAME test.file.path AS file_path, buildkite.pipeline.slug AS pipeline'
+      'RENAME test.file.path AS file_path, reporter.type AS framework, buildkite.pipeline.slug AS pipeline'
     );
   });
 });
@@ -663,10 +664,11 @@ describe('fetchFilePipelineStats', () => {
     expect(esql).not.toHaveBeenCalled();
   });
 
-  it('keys pipeline rows by file, most failed builds first, rebuilding the last failed build URL', async () => {
+  it('keys pipeline rows by framework and file, most failed builds first, rebuilding the last failed build URL', async () => {
     const { client } = mockEs([
       {
         file_path: 'a.test.ts',
+        framework: 'jest',
         pipeline: 'kibana-pull-request',
         builds: 700,
         failed_builds: 140,
@@ -676,6 +678,7 @@ describe('fetchFilePipelineStats', () => {
       },
       {
         file_path: 'a.test.ts',
+        framework: 'jest',
         pipeline: 'kibana-on-merge',
         builds: 500,
         failed_builds: 98,
@@ -683,15 +686,22 @@ describe('fetchFilePipelineStats', () => {
         last_failed_at: '2026-09-06T09:00:00.000Z',
         last_failed_build_number: null,
       },
-      { file_path: null, pipeline: 'x', builds: 1, failed_builds: 1, failed_branches: 1 },
+      {
+        file_path: null,
+        framework: 'jest',
+        pipeline: 'x',
+        builds: 1,
+        failed_builds: 1,
+        failed_branches: 1,
+      },
     ]);
 
     const stats = await fetchFilePipelineStats(client, scope, [
       { testId: 'j1', framework: 'jest' },
     ]);
 
-    expect([...stats.keys()]).toEqual(['a.test.ts']);
-    expect(stats.get('a.test.ts')).toEqual([
+    expect([...stats.keys()]).toEqual([fileStatsKey('jest', 'a.test.ts')]);
+    expect(stats.get(fileStatsKey('jest', 'a.test.ts'))).toEqual([
       {
         pipeline: 'kibana-pull-request',
         builds: 700,
@@ -710,6 +720,45 @@ describe('fetchFilePipelineStats', () => {
         lastFailedAt: new Date('2026-09-06T09:00:00.000Z'),
         lastFailedBuildUrl: undefined,
       },
+    ]);
+  });
+
+  it('keeps the frameworks apart when they share a file path, within and across execution models', async () => {
+    const row = (framework: string, failedBuilds: number) => ({
+      file_path: 'shared.ts',
+      framework,
+      pipeline: 'kibana-on-merge',
+      builds: 100,
+      failed_builds: failedBuilds,
+      failed_branches: 1,
+      last_failed_at: null,
+      last_failed_build_number: null,
+    });
+    const { client, esql } = mockEs([]);
+    esql
+      // jest and ftr share one query; each gets its own row for the path
+      .mockReturnValueOnce({
+        toRecords: jest.fn().mockResolvedValue({ records: [row('jest', 5), row('ftr', 7)] }),
+      })
+      .mockReturnValueOnce({
+        toRecords: jest.fn().mockResolvedValue({ records: [row('playwright', 9)] }),
+      });
+
+    const stats = await fetchFilePipelineStats(client, scope, [
+      { testId: 'j1', framework: 'jest' },
+      { testId: 'f1', framework: 'ftr' },
+      { testId: 'p1', framework: 'playwright' },
+    ]);
+
+    expect([...stats.keys()]).toEqual([
+      fileStatsKey('jest', 'shared.ts'),
+      fileStatsKey('ftr', 'shared.ts'),
+      fileStatsKey('playwright', 'shared.ts'),
+    ]);
+    expect(stats.get(fileStatsKey('jest', 'shared.ts'))?.map((s) => s.failedBuilds)).toEqual([5]);
+    expect(stats.get(fileStatsKey('ftr', 'shared.ts'))?.map((s) => s.failedBuilds)).toEqual([7]);
+    expect(stats.get(fileStatsKey('playwright', 'shared.ts'))?.map((s) => s.failedBuilds)).toEqual([
+      9,
     ]);
   });
 });

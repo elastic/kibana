@@ -471,7 +471,9 @@ const BUILDKITE_ORG_URL = 'https://buildkite.com/elastic';
 /**
  * Per-file, per-pipeline build counts for the given tests of one execution model, across every
  * pipeline and branch in the window: the report scope narrows which tests qualify, this shows
- * where else they hurt. A build counts once however many of the file's tests failed in it.
+ * where else they hurt. A build counts once however many of the file's tests failed in it. The
+ * framework is part of the grouping as a file is reported per framework, and one path may be
+ * run by more than one within the window.
  */
 export const buildFilePipelineStatsQuery = (
   window: Pick<FlakyTestQueryScope, 'from' | 'to'>,
@@ -493,14 +495,18 @@ export const buildFilePipelineStatsQuery = (
       ' failed_branches = COUNT_DISTINCT(CASE(failed == 1, buildkite.branch, NULL)),' +
       ' last_failed_at = MAX(CASE(failed == 1, @timestamp, NULL)),' +
       ' last_failed_build_number = MAX(CASE(failed == 1, buildkite.build.number, NULL))' +
-      ' BY test.file.path, buildkite.pipeline.slug',
+      ' BY test.file.path, reporter.type, buildkite.pipeline.slug',
     'WHERE failed_builds > 0',
-    'RENAME test.file.path AS file_path, buildkite.pipeline.slug AS pipeline',
+    'RENAME test.file.path AS file_path, reporter.type AS framework, buildkite.pipeline.slug AS pipeline',
     `LIMIT ${ESQL_ROW_LIMIT}`,
   ].join(' | ');
 };
 
-/** Per-pipeline stats keyed by file path, most failed builds first. */
+/** Key of a file's stats: the report has one file entry per framework and path. */
+export const fileStatsKey = (framework: TestFramework, filePath: string): string =>
+  `${framework}\n${filePath}`;
+
+/** Per-pipeline stats keyed by `fileStatsKey`, most failed builds first. */
 export const fetchFilePipelineStats = async (
   es: ESClient,
   window: Pick<FlakyTestQueryScope, 'from' | 'to'>,
@@ -514,6 +520,7 @@ export const fetchFilePipelineStats = async (
     groupByExecutionModel(tests).map(({ frameworks, testIds }) =>
       runEsql<{
         file_path: string | null;
+        framework: TestFramework;
         pipeline: string | null;
         builds: number;
         failed_builds: number;
@@ -527,7 +534,8 @@ export const fetchFilePipelineStats = async (
   const byFile = new Map<string, FlakyTestPipelineStats[]>();
   for (const record of results.flat()) {
     if (record.file_path === null || record.pipeline === null) continue;
-    const stats = byFile.get(record.file_path) ?? [];
+    const key = fileStatsKey(record.framework, record.file_path);
+    const stats = byFile.get(key) ?? [];
     stats.push({
       pipeline: record.pipeline,
       builds: record.builds,
@@ -540,7 +548,7 @@ export const fetchFilePipelineStats = async (
           ? `${BUILDKITE_ORG_URL}/${record.pipeline}/builds/${record.last_failed_build_number}`
           : undefined,
     });
-    byFile.set(record.file_path, stats);
+    byFile.set(key, stats);
   }
   for (const stats of byFile.values()) {
     stats.sort((a, b) => b.failedBuilds - a.failedBuilds || b.builds - a.builds);

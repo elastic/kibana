@@ -407,7 +407,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
     ];
     const fetchFilePipelineStats = jest
       .spyOn(queries, 'fetchFilePipelineStats')
-      .mockResolvedValue(new Map([['a.test.ts', pipelineStats]]));
+      .mockResolvedValue(new Map([[queries.fileStatsKey('jest', 'a.test.ts'), pipelineStats]]));
 
     const { data: report } = await ScoutFlakyTests.fromElasticsearch(es, options, log);
 
