@@ -313,9 +313,17 @@ stops emitting their row; their `event.ingested` freezes and they age out of the
 window. Because writes are additive, their manager's `supervises.ids` retains
 them indefinitely. This is **not** introduced by the `event.ingested` window — an
 unconditional full scan behaves identically, since a departed worker's document
-is simply absent from the index either way. Retraction would require a
-framework-level capability (diffing previous against current target sets) that
-no maintainer has today. Out of scope; flagged for the epic.
+is simply absent from the index either way.
+
+Retraction requires a framework capability no maintainer has today, tracked in
+[kibana#292358](https://github.com/elastic/kibana/issues/292358). Worth noting
+why Workday is unusually well suited to it: the integration re-emits **every
+active worker on every 24h poll**, so absence from a complete snapshot is itself
+meaningful evidence that the worker has left. That does not generalise — for an
+event-stream source (`accesses` on `logs-system.auth`), a user who stops using
+an access path has not lost it, so non-observation carries no information.
+Retraction must therefore be opt-in per source, which is why it cannot be solved
+inside this config. Out of scope here.
 
 | Option | Verdict |
 |---|---|
