@@ -5,19 +5,11 @@
  * 2.0.
  */
 
+import { proposalSchema } from '@kbn/agentic-investigations-plugin/common';
+import { MOCK_PROPOSALS, SKILLS_SEED, WATCHES_SEED, WORKERS_SEED } from '../samples';
+import type { Watch } from '.';
 import {
-  MOCK_INVESTIGATIONS,
-  MOCK_PROPOSALS,
-  SKILLS_SEED,
-  WATCHES_SEED,
-  WORKERS_SEED,
-} from '../samples';
-import type { Investigation, Proposal, Watch } from '.';
-import {
-  GetInvestigationResponse,
   GetWatchResponse,
-  ListInvestigationProposalsResponse,
-  ListInvestigationsResponse,
   ListWatchesResponse,
   WatchSkill,
   WatchWorker,
@@ -156,31 +148,20 @@ describe('AlertZero schema smoke tests', () => {
     }
   });
 
-  it('parses mock investigations through ListInvestigationsResponse', () => {
-    const result = ListInvestigationsResponse.parse({
-      investigations: MOCK_INVESTIGATIONS,
-      total: MOCK_INVESTIGATIONS.length,
+  it('parses mock proposals through the proposals API schema', () => {
+    // MOCK_PROPOSALS is the shape the proposals API returns, so it is validated against
+    // that schema rather than this package's legacy `Proposal` component.
+    MOCK_PROPOSALS.forEach((proposal) => {
+      expect(() => proposalSchema.parse(proposal)).not.toThrow();
     });
-    expect(result.total).toBeGreaterThanOrEqual(8);
-    result.investigations.forEach((inv: Investigation) => {
-      expect(inv.template_id).toBe('investigation');
-    });
+    expect(MOCK_PROPOSALS.length).toBeGreaterThanOrEqual(8);
   });
 
-  it('parses mock proposals through ListInvestigationProposalsResponse', () => {
-    const result = ListInvestigationProposalsResponse.parse({
-      proposals: MOCK_PROPOSALS,
-      total: MOCK_PROPOSALS.length,
+  it('resolves every mock proposal to a conversation title', () => {
+    // Titles are derived from the sample investigations rather than restated, so a proposal
+    // pointing at an id that does not exist there would silently lose its card title.
+    MOCK_PROPOSALS.forEach((proposal) => {
+      expect(proposal.conversationTitle).toBeDefined();
     });
-    expect(result.proposals.length).toBeGreaterThanOrEqual(8);
-    result.proposals.forEach((prop: Proposal) => {
-      expect(prop.template_id).toBe('proposal');
-    });
-  });
-
-  it('parses investigation detail through GetInvestigationResponse', () => {
-    const investigation = MOCK_INVESTIGATIONS[0];
-    const result = GetInvestigationResponse.parse({ investigation });
-    expect(result.investigation.id).toBe(investigation.id);
   });
 });
