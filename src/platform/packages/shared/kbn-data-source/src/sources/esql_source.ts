@@ -86,8 +86,9 @@ interface EsqlSourceConstructorArgs {
 /**
  * `DataSource` implementation for ES|QL queries.
  *
- * Does not require or create a `DataView`. Identity is derived from the query,
- * optional project routing, and time field name. When `http` is provided,
+ * Does not require or create a `DataView`. Identity is derived from the trimmed
+ * query, optional project routing, control variables, and time field name. When
+ * `http` is provided, `http` is provided,
  * {@link EsqlSource.create} resolves the time field and LIMIT 0 schema in
  * parallel unless `timeFieldName` / `resultColumns` are already set.
  * Source-info failures are ignored and `resultColumns` (or `[]`) is used.
@@ -140,14 +141,15 @@ export class EsqlSource implements DataSourceBase {
   }
 
   /**
-   * Async factory. Identity (and the LRU cache key) is the query, project
-   * routing, and time field — not columns. The first successful `create` for a
-   * key wins; later calls return that instance. Use {@link withColumns} to
-   * attach fetch-result columns without changing `id`.
+   * Async factory. Identity (and the LRU cache key) is the trimmed query, project
+   * routing, control variables, and time field — not columns. The first successful
+   * `create` for a key wins; later calls return that instance. Use {@link withColumns}
+   * to attach fetch-result columns without changing `id`.
    */
   public static async create(args: EsqlSourceArgs): Promise<EsqlSource> {
+    const query = args.query.trim();
     const { cacheKey: baseKey, cleanVariables } = buildEsqlSourceCacheKey(
-      args.query,
+      query,
       args.projectRouting,
       args.esqlVariables
     );
@@ -159,7 +161,7 @@ export class EsqlSource implements DataSourceBase {
     const cached = EsqlSource.instanceCache.get(instanceKey);
     if (cached) return cached;
 
-    const title = getIndexPatternFromESQLQuery(args.query);
+    const title = getIndexPatternFromESQLQuery(query);
 
     let timeFieldName: string | undefined = args.timeFieldName;
     let resultColumns: readonly DatatableColumn[] = args.resultColumns ?? [];
@@ -172,14 +174,14 @@ export class EsqlSource implements DataSourceBase {
       const [resolvedTimeField, info] = await Promise.all([
         shouldResolveTimeField
           ? getESQLTimeField({
-              query: args.query,
+              query,
               http,
               projectRouting: args.projectRouting,
             })
           : Promise.resolve(timeFieldName),
         shouldResolveSchema
           ? getESQLSourceInfo({
-              query: args.query,
+              query,
               http,
               projectRouting: args.projectRouting,
               timeRange: args.timeRange,
@@ -191,20 +193,21 @@ export class EsqlSource implements DataSourceBase {
 
       timeFieldName = resolvedTimeField;
       if (info) {
-        resultColumns = columnsFromSourceInfo(info.columns, args.query);
+        resultColumns = columnsFromSourceInfo(info.columns, query);
       }
     }
 
     const hashInput = JSON.stringify([
       'esql',
-      args.query,
+      query,
       args.projectRouting ?? null,
+      cleanVariables ?? null,
       timeFieldName ?? null,
     ]);
     const hash = await sha256(hashInput);
     const instance = new EsqlSource({
       id: `esql-${hash}`,
-      query: args.query,
+      query,
       title,
       timeFieldName,
       resultColumns,

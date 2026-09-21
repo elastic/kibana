@@ -28,7 +28,7 @@ Both implementations satisfy `DataViewBase` from `@kbn/es-query`, so filter util
 
 | Key | Shape | Changes when | Use for |
 | --- | --- | --- | --- |
-| `id` | `esql-{sha256(query, projectRouting, timeFieldName)}` | Full query, routing, or time field | Schema / columns, filter `meta.index`, cache keys |
+| `id` | `esql-{sha256(trimmed query, projectRouting, esqlVariables, timeFieldName)}` | Query, routing, control values, or time field | Schema / columns, filter `meta.index`, cache keys |
 | `datasetKey` | `esql:{FROM}:{timeField}` | FROM target or time field | Pin, histogram vis keep/drop (`isSameDataset`) |
 
 `SORT` / `WHERE` / `EVAL` keep the same `datasetKey` and a different `id`. Classic and mixed switches compare `id` via `isSameDataset`.

@@ -9,7 +9,7 @@
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { HttpStart } from '@kbn/core/public';
-import { SOURCE_INFO_ROUTE, TIMEFIELD_ROUTE } from '@kbn/esql-types';
+import { ESQLVariableType, SOURCE_INFO_ROUTE, TIMEFIELD_ROUTE } from '@kbn/esql-types';
 import { clearESQLSourceInfoCache } from '@kbn/esql-utils';
 import { EsqlSource } from './esql_source';
 
@@ -187,6 +187,53 @@ describe('EsqlSource', () => {
       });
       expect(second).toBe(first);
       expect(second.getColumns()).toEqual([]);
+    });
+
+    it('produces a different id when control variable values differ', async () => {
+      const query = 'FROM logs-* | KEEP ??field';
+      const a = await EsqlSource.create({
+        query,
+        resultColumns: [],
+        esqlVariables: [{ key: 'field', value: 'message', type: ESQLVariableType.FIELDS }],
+      });
+      const b = await EsqlSource.create({
+        query,
+        resultColumns: [],
+        esqlVariables: [{ key: 'field', value: 'host.name', type: ESQLVariableType.FIELDS }],
+      });
+      expect(a.id).not.toBe(b.id);
+    });
+
+    it('produces the same id when control variable values match', async () => {
+      const query = 'FROM logs-* | KEEP ??field';
+      const variables = [{ key: 'field', value: 'message', type: ESQLVariableType.FIELDS }];
+      const a = await EsqlSource.create({
+        query,
+        resultColumns: [],
+        esqlVariables: variables,
+      });
+      const b = await EsqlSource.create({
+        query,
+        resultColumns: [],
+        esqlVariables: [...variables],
+      });
+      expect(a.id).toBe(b.id);
+    });
+
+    it('trims the query for identity so padding does not create a new id', async () => {
+      const padded = await EsqlSource.create({
+        query: '  FROM logs-*  ',
+        resultColumns: [],
+        timeFieldName: '@timestamp',
+      });
+      const trimmed = await EsqlSource.create({
+        query: 'FROM logs-*',
+        resultColumns: [],
+        timeFieldName: '@timestamp',
+      });
+      expect(padded.query).toBe('FROM logs-*');
+      expect(trimmed).toBe(padded);
+      expect(trimmed.id).toBe(padded.id);
     });
   });
 

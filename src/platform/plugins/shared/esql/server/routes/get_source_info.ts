@@ -104,7 +104,7 @@ export const registerGetSourceInfoRoute = (
         let columnsResult: Pick<ESQLSearchResponse, 'columns' | 'all_columns'>;
         try {
           columnsResult = (await client.esql.query({
-            query: `${fixedQuery} | LIMIT 0`,
+            query: `${fixedQuery}\n| LIMIT 0`,
             ...(namedParams.length ? { params: namedParams } : {}),
             ...(projectRouting ? { project_routing: projectRouting } : {}),
             ...(filter ? { filter } : {}),

@@ -100,7 +100,7 @@ describe('registerGetSourceInfoRoute', () => {
 
     expect(esqlQuery).toHaveBeenCalledWith(
       expect.objectContaining({
-        query: 'FROM logs-* | LIMIT 0',
+        query: 'FROM logs-*\n| LIMIT 0',
         project_routing: '_alias:*',
         time_zone: 'UTC',
         drop_null_columns: true,
@@ -110,6 +110,23 @@ describe('registerGetSourceInfoRoute', () => {
     expect(response.ok).toHaveBeenCalledWith({
       body: { columns: [{ name: 'message', esType: 'keyword' }] },
     });
+  });
+
+  it('appends LIMIT 0 on a new line so a trailing // comment cannot swallow it', async () => {
+    const { router, handler, requestHandlerContext, response, context, esqlQuery } = buildMocks();
+    registerGetSourceInfoRoute(router, context);
+
+    await handler(
+      requestHandlerContext,
+      { body: { query: 'FROM logs-* // latest events' } },
+      response
+    );
+
+    expect(esqlQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: 'FROM logs-* // latest events\n| LIMIT 0',
+      })
+    );
   });
 
   it('returns 400 for a query whose parenthesis nesting depth exceeds the limit', async () => {
