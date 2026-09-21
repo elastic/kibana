@@ -26506,7 +26506,6 @@
     "xpack.infra.alerting.customThresholdDropdownMenu": "Criar regra de limiar personalizada",
     "xpack.infra.alerting.infrastructureDropdownMenu": "Infraestrutura",
     "xpack.infra.alerting.infrastructureDropdownTitle": "Regras de infraestrutura",
-    "xpack.infra.alerting.logs.alertDropdownAriaLabel": "Alertas e regras",
     "xpack.infra.alerting.logs.alertsButton": "Alertas",
     "xpack.infra.alerting.logs.createAlertButton": "Criar regra",
     "xpack.infra.alerting.logs.manageAlerts": "Gerenciar regras",

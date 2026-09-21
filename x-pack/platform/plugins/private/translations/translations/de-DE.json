@@ -26434,7 +26434,6 @@
     "xpack.infra.alerting.customThresholdDropdownMenu": "Benutzerdefinierte Schwellenwertregel erstellen",
     "xpack.infra.alerting.infrastructureDropdownMenu": "Infrastruktur",
     "xpack.infra.alerting.infrastructureDropdownTitle": "Infrastrukturregeln",
-    "xpack.infra.alerting.logs.alertDropdownAriaLabel": "Alerts und Regeln",
     "xpack.infra.alerting.logs.alertsButton": "Alerts",
     "xpack.infra.alerting.logs.createAlertButton": "Regel erstellen",
     "xpack.infra.alerting.logs.manageAlerts": "Regeln verwalten",

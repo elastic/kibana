@@ -26522,7 +26522,6 @@
     "xpack.infra.alerting.customThresholdDropdownMenu": "创建定制阈值规则",
     "xpack.infra.alerting.infrastructureDropdownMenu": "基础设施",
     "xpack.infra.alerting.infrastructureDropdownTitle": "基础设施规则",
-    "xpack.infra.alerting.logs.alertDropdownAriaLabel": "告警和规则",
     "xpack.infra.alerting.logs.alertsButton": "告警",
     "xpack.infra.alerting.logs.createAlertButton": "创建规则",
     "xpack.infra.alerting.logs.manageAlerts": "管理规则",
