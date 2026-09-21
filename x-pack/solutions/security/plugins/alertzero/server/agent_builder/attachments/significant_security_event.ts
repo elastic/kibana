@@ -50,7 +50,9 @@ const formatSignificantSecurityEventForAgent = (
     const { tier1, tier2 } = data.hunt_result;
     lines.push(
       '',
-      `Hunt result: ${data.hunt_result.has_confirmed_hit ? 'confirmed hit' : 'no confirmed hit'} (${data.hunt_result.time_range.from} to ${data.hunt_result.time_range.to})`,
+      `Hunt result: ${data.hunt_result.has_confirmed_hit ? 'confirmed hit' : 'no confirmed hit'} (${
+        data.hunt_result.time_range.from
+      } to ${data.hunt_result.time_range.to})`,
       `Tier 1: ${tier1.status} — ${tier1.counts.total_hits} total hits, ${tier1.counts.affected_hosts} affected hosts, ${tier1.counts.affected_users} affected users`
     );
     for (const entry of tier1.per_index) {
@@ -68,7 +70,9 @@ const formatSignificantSecurityEventForAgent = (
       lines.push(`Tier 2: ${tier2.status}`);
       for (const behavior of tier2.behaviors) {
         lines.push(
-          `  ${behavior.technique_id} (${behavior.tactic_ids.join(', ')}, confidence ${behavior.confidence}): ${behavior.rule_name}`
+          `  ${behavior.technique_id} (${behavior.tactic_ids.join(', ')}, confidence ${
+            behavior.confidence
+          }): ${behavior.rule_name}`
         );
       }
     }

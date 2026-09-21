@@ -53,6 +53,9 @@ dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/app-menu'
   - '@kbn/search-inference-endpoints'
+  - '@kbn/share-plugin'
+  - '@kbn/utility-types'
+  - '@kbn/es-query'
 tags:
   - plugin
   - prod
