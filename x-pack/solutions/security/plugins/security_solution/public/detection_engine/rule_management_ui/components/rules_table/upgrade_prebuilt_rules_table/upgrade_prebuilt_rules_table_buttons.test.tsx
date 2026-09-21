@@ -115,7 +115,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
       await openSelectedRulesToTargetAction(user);
 
       const modal = await screen.findByTestId('forceUpgradeSelectedRulesToTargetConfirmModal');
-      expect(modal).toHaveTextContent('changes that will be overwritten');
+      expect(modal).toHaveTextContent('customizations that will be overwritten');
       expect(modal).toHaveTextContent('2');
       expect(modal).toHaveTextContent('1');
       expect(modal).not.toHaveTextContent('rule type change');
@@ -145,7 +145,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
       const warning = within(modal).getByTestId('forceUpgradeToTargetModalRuleTypeChangeWarning');
       expect(warning).toHaveTextContent('1 of 2 has a rule type change');
       expect(warning).toHaveTextContent('review your actions and exceptions');
-      expect(modal).not.toHaveTextContent('changes that will be overwritten');
+      expect(modal).not.toHaveTextContent('customizations that will be overwritten');
       expect(upgradeRulesToTarget).not.toHaveBeenCalled();
 
       await user.click(within(modal).getByTestId('confirmModalConfirmButton'));
@@ -385,7 +385,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
       const modal = await screen.findByTestId('forceUpgradeAllRulesToTargetConfirmModal');
       expect(modal).toHaveTextContent('12');
       expect(modal).toHaveTextContent('4');
-      expect(modal).toHaveTextContent('changes that will be overwritten');
+      expect(modal).toHaveTextContent('customizations that will be overwritten');
       await user.click(within(modal).getByTestId('confirmModalConfirmButton'));
 
       await waitFor(() => {
@@ -415,7 +415,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
       const warning = within(modal).getByTestId('forceUpgradeToTargetModalRuleTypeChangeWarning');
       expect(warning).toHaveTextContent('changes the rule type will be updated as well');
       expect(warning).toHaveTextContent('review your actions and exceptions');
-      expect(modal).not.toHaveTextContent('changes that will be overwritten');
+      expect(modal).not.toHaveTextContent('customizations that will be overwritten');
       expect(upgradeAllRulesToTarget).not.toHaveBeenCalled();
 
       await user.click(within(modal).getByTestId('confirmModalConfirmButton'));
