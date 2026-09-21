@@ -62,7 +62,9 @@ const compile = (glob: string) => new Minimatch(glob, { dot: true });
  */
 const includeMatcher = (include: string): ((rel: string) => boolean) => {
   if (include.startsWith('../')) {
-    // files outside the project directory can never match a project-relative rule glob
+    // files outside the project directory can never match a project-relative rule glob. In this
+    // repo every such include resolves to `typings/**/*` (declaration files, ignored below), to
+    // `.json`, or to sources a sibling project already covers, so nothing lintable is lost
     return () => false;
   }
   if (HAS_MAGIC.test(include)) {

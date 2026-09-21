@@ -47,15 +47,18 @@ export function runLintWithTypes() {
       }
 
       const files = [...(await getRepoRels(REPO_ROOT, ['*.ts', '*.tsx']))];
+      // `getRepoRels` and the generated globs are POSIX; `TsProject.repoRelDir` is OS-native
+      const lintProjects = (target ? [target] : projects).map((project) => ({
+        repoRelDir: project.repoRelDir.split(Path.sep).join('/'),
+        include: project.config.include ?? [],
+        exclude: project.config.exclude ?? [],
+      }));
       // the positional path below limits the walk to the target directory, so the config only
       // needs to know about the files under it
-      const prefix = target && target.repoRelDir !== '.' ? `${target.repoRelDir}/` : '';
+      const prefix =
+        target && lintProjects[0].repoRelDir !== '.' ? `${lintProjects[0].repoRelDir}/` : '';
       const config = generateOxlintConfig(
-        (target ? [target] : projects).map((project) => ({
-          repoRelDir: project.repoRelDir,
-          include: project.config.include ?? [],
-          exclude: project.config.exclude ?? [],
-        })),
+        lintProjects,
         prefix ? files.filter((file) => file.startsWith(prefix)) : files
       );
       Fs.writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2));

@@ -888,7 +888,7 @@
     },
     {
       "groupName": "typescript",
-      "matchDepNames": ["typescript", "typescript-7"],
+      "matchDepNames": ["typescript", "typescript-7", "oxlint-tsgolint"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -2424,7 +2424,7 @@
     },
     {
       "groupName": "oxlint",
-      "matchDepNames": ["oxlint", "oxlint-tsgolint"],
+      "matchDepNames": ["oxlint"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
