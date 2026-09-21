@@ -31,10 +31,24 @@ const parseMonitorParams = (params: string): MonitorParams | undefined => {
   }
 };
 
+const parseMonitorParamArray = (params: string): ParameterValue[] | undefined => {
+  try {
+    const parsedParams = JSON.parse(params) as ParameterValue;
+    return Array.isArray(parsedParams) ? parsedParams : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
 /** Masks every monitor parameter value while retaining the parameter names. */
 export const maskMonitorParams = (params?: string): string | undefined => {
   if (!params) {
     return params;
+  }
+
+  const parsedParamArray = parseMonitorParamArray(params);
+  if (parsedParamArray) {
+    return JSON.stringify(parsedParamArray.map(() => MASKED_PARAM_VALUE));
   }
 
   const parsedParams = parseMonitorParams(params);
@@ -60,6 +74,11 @@ export const restoreMaskedMonitorParams = ({
   }
 
   if (submittedParams === MASKED_PARAM_VALUE) {
+    return previousParams;
+  }
+
+  const parsedSubmittedParamArray = parseMonitorParamArray(submittedParams);
+  if (parsedSubmittedParamArray?.every((value) => value === MASKED_PARAM_VALUE)) {
     return previousParams;
   }
 
