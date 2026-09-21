@@ -1,0 +1,37 @@
+{
+  "10.7.0": [
+    {
+      "id": "id",
+      "name": "Policy 1",
+      "namespace": "default",
+      "inactivity_timeout": 0,
+      "is_verifier": false,
+      "download_source_id": "download-source-1"
+    },
+    {
+      "id": "id-2",
+      "name": "Policy 2",
+      "namespace": "default",
+      "inactivity_timeout": 0,
+      "is_verifier": false
+    }
+  ],
+  "10.8.0": [
+    {
+      "id": "id",
+      "name": "Policy 1",
+      "namespace": "default",
+      "inactivity_timeout": 0,
+      "is_verifier": false,
+      "download_source_id": "download-source-1",
+      "download_source_ids": ["download-source-1"]
+    },
+    {
+      "id": "id-2",
+      "name": "Policy 2",
+      "namespace": "default",
+      "inactivity_timeout": 0,
+      "is_verifier": false
+    }
+  ]
+}
