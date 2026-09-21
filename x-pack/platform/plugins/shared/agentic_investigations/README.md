@@ -2,7 +2,7 @@
 
 Solution-agnostic base layer for the entities an agent and a human collaborate on. It owns their storage, their API, and their workflow steps, so a Worker in any solution can create them and any solution's UI can act on them.
 
-Today it holds one entity, **proposals**. **Investigations** and **incidents** are next, which is why the plugin is an umbrella rather than one plugin per entity.
+Today it holds two entities: **proposals** and **escalations**. **Investigations** are next, which is why the plugin is an umbrella rather than one plugin per entity.
 
 Consumed by AlertZero (Security) and intended for Nightshift (Observability). Nothing in this plugin is solution-specific.
 
@@ -39,9 +39,9 @@ One Kibana feature, `agenticInvestigations`, shown in the Roles and Spaces picke
 | `all`             | `read_proposals`, `manage_proposals` | `showProposals`, `decideProposals`   |
 | `read`            | `read_proposals`                     | `showProposals`                      |
 
-So `read` can see the queue but cannot decide it. Because there are no sub-feature privileges to withhold, `minimal_all` and `minimal_read` grant the same as `all` and `read`. The feature carries `minimumLicense: 'enterprise'`.
+So `read` can see the queue but cannot decide it. The feature carries `minimumLicense: 'enterprise'`.
 
-When a second entity lands and needs to be grantable on its own, its capabilities belong in a sub-feature pulled up through `includeIn` rather than in more inline privileges.
+**Note:** `minimal_all` and `minimal_read` are **not** equivalent to `all` and `read`. Incidents landed as a sub-feature (see below), and sub-feature privileges are included in the base privilege levels through `includeIn: 'all'` / `includeIn: 'read'` — but `minimal_all` and `minimal_read` only grant sub-features marked `groupType: 'independent'` when the user holds them explicitly. Any new entity should follow the same pattern: put its capabilities in a sub-feature with `includeIn` rather than in additional inline privileges.
 
 ### Three questions, three places
 
@@ -347,7 +347,7 @@ Registering the owner is not optional. The startup sweep `cleanupUnregisteredOrp
 
 ## Index naming
 
-`.kibana-investigation-proposals` is permanent. `.kibana*` is already granted to the `kibana_system` role, so the index needs no Elasticsearch-side system index registration — a dedicated prefix such as `.investigation-proposals` would. `anonymization` ships `.kibana-anonymization-profiles` on the same reasoning. Each entity gets its own index rather than one index discriminated by a type field.
+`.kibana-investigation-proposals` is permanent. `.kibana*` is already granted to the `kibana_system` role, so the index needs no Elasticsearch-side system index registration — a dedicated prefix such as `.investigation-proposals` would. `anonymization` ships `.kibana-anonymization-profiles` on the same reasoning. Each entity gets its own index rather than one index discriminated by a type field. **Escalations are the documented exception:** they live in Agent Builder's `.chat-conversations` index (a conversation with `template_id: 'escalation'`), and this plugin owns no storage for them. The reasons are: (a) Agent Builder's conversation model already provides everything an escalation needs — metadata, access control, space scoping, OCC writes; (b) adding an escalations index would duplicate that infrastructure for no benefit; (c) the visibility and collaborator model that agents and investigations already use must apply to escalations for free. Any future entity that fits the conversation model should do the same rather than adding an index by default.
 
 ## Testing the gate workflow
 
@@ -416,4 +416,75 @@ The point of the exercise is the identity behaviour: a rule created by an approv
 - **Deep paging stops at 10,000.** The list pages with `from`/`size` inside Elasticsearch's default result window. Going past that needs `search_after`, which the list does not expose yet.
 - **`.kibana-*` index naming** buys us out of a system index registration, at the cost of living in a namespace we do not own.
 - **No Scout API coverage yet.** The HTTP surface is covered by Jest only, as `anonymization` shipped.
-- **Only one entity so far.** The directory convention is designed for investigations and incidents, but neither exists yet, so the umbrella's seams are unproven.
+- **Two entities, umbrella seams exercised.** Proposals and escalations both exist. The directory convention holds across both.
+
+## Escalations
+
+### Model
+
+An **escalation** is a durable, shareable record that an analyst creates when a collection of investigations warrants formal escalation. Unlike proposals — which live in a bespoke index — escalations live in Agent Builder's `.chat-conversations` index as conversations with `template_id: 'escalation'`. That choice buys the full conversation stack: OCC-safe metadata writes, access control, space scoping, and Agent Builder's conversation template validation.
+
+`EscalationsService` is a thin orchestration façade over `agentBuilder.conversations.getScopedClient({ request })`. It owns no Elasticsearch client and no index.
+
+### Privileges
+
+Escalations use an `escalations` sub-feature on the `agenticInvestigations` Kibana feature:
+
+The `escalations` sub-feature uses a `mutually_exclusive` privilege group, so a user receives exactly one of:
+
+| Sub-feature privilege | API | UI |
+| --- | --- | --- |
+| `escalations_all` (included in `all`) | `read_escalations`, `manage_escalations` | `showEscalations`, `manageEscalations` |
+| `escalations_read` (included in `read`) | `read_escalations` | `showEscalations` |
+
+### API
+
+All routes are internal and versioned (`/internal/investigations/escalations`, version `1`):
+
+- `GET /internal/investigations/escalations` — list non-closed escalations the caller can access; needs `read_escalations`
+- `POST /internal/investigations/escalations` — create an escalation from a linked investigation; needs `manage_escalations`
+- `PATCH /internal/investigations/escalations/{id}` — update title or append linked investigations; needs `manage_escalations`
+
+### Create behaviour
+
+`POST` takes `{ linked_investigation_id, visibility, collaborators? }`. The handler:
+
+1. Fetches the investigation through the caller's scoped client — this enforces that the caller can see the investigation they are escalating.
+2. Validates that the target is an `investigation` conversation (throws a `400` otherwise).
+3. Resolves the escalation template's declared fields at runtime via `agentBuilder.conversationTemplates.get('escalation')`.
+4. Copies the intersection of the investigation's metadata and those declared fields, **excluding `status`** (so the escalation opens with `status: 'open'` from the template default) and **excluding `linked_investigations`** (set separately to `[linked_investigation_id]`). This filter is what prevents a `400` from `workflow_execution_id`, which is declared on the investigation template but not on the escalation template.
+5. Creates the conversation with `templateId: 'escalation'` and no explicit `agentId` — the default agent is used, so collaborators can always see the escalation regardless of their access to the investigation's agent.
+
+### List behaviour
+
+`GET` accepts optional `page` and `per_page` query parameters (defaults: `page=1`, `per_page=50`; maximum `per_page=50`; `page * per_page` must not exceed `10,000`). It returns:
+
+```json
+{
+  "pagination": { "total": 42, "page": 1, "per_page": 50 },
+  "results": [ /* ConversationWithoutRoundsWithPermissions */ ]
+}
+```
+
+The filter is **fixed and server-side**: `template_id: "escalation" and not metadata.status: "closed"`. A few things to note:
+
+- The filter uses `metadata.status`, not the bare `status` field. The bare `status` maps to the
+  conversation-level `ConversationRoundStatus` (`in_progress`/`completed`/…); the escalation
+  open/closed state lives in the template metadata.
+- `not metadata.status: "closed"` keeps documents where the field is absent, so a freshly created
+  escalation (whose metadata carries `status: "open"` from the template default) always appears.
+- Access filtering is inherited from Agent Builder's `buildReadAccessFilter`: a caller sees public
+  escalations, their own escalations, and private escalations they are listed in. No access control needs
+  to be written in this plugin.
+- Results are sorted `updated_at desc` (newest-first) with a `created_at` tiebreaker, which is the
+  `client.search()` default when no explicit sort is requested.
+- Results include no round data (`_source` is `CONVERSATION_LIST_SOURCE_FIELDS`). The response type
+  is `EscalationConversationSummary` (`ConversationWithoutRoundsWithPermissions`), which is distinct
+  from `EscalationConversation` (the create/update response that includes rounds).
+
+### MVP limitations
+
+- **Owner-only writes.** `patchMetadata` and `update` in Agent Builder are `access: 'owner'`. This conflicts with the epic requirement that participants can link further investigations. A follow-up is needed to widen the access check in Agent Builder's authorization layer.
+- **Last-write-wins on concurrent appends.** The array union for `linked_investigations` is computed in the service (outside the OCC write callback), so two concurrent `PATCH` requests can each read stale state and one link can be silently lost. The fix is to move the union computation into `writeConversation`'s `fields` callback. Accepted for MVP; follow-up filed.
+- **List caps at 10,000 results.** Offset pagination cannot go beyond Elasticsearch's default result window. Escalations beyond that threshold are unreachable through this API. `search_after` would be needed for deeper paging.
+- **Closed escalations are never returned.** The `status: "closed"` filter is not toggleable. A separate endpoint or a future filter parameter would be needed to retrieve closed escalations.

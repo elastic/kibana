@@ -245,7 +245,7 @@ export const ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID = 'alertzero_agentic' as con
 
 export const TEMPLATE_ID_INVESTIGATION = 'investigation' as const;
 export const TEMPLATE_ID_PROPOSAL = 'proposal' as const;
-export const TEMPLATE_ID_INCIDENT = 'incident' as const;
+export const TEMPLATE_ID_ESCALATION = 'escalation' as const;
 
 export const API_VERSIONS = {
   internal: {

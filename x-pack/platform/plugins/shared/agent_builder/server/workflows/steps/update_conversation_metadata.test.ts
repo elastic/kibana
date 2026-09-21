@@ -35,14 +35,14 @@ describe('updateConversationMetadataStepDefinition', () => {
   });
 
   it('calls patchMetadata and returns the changed fields and updated metadata', async () => {
+    const conversation = {
+      id: 'conv-1',
+      metadata: { status: 'resolved', severity: 'low', priority: 'high' },
+    };
     const { patchMetadata, getConversationClient } = createWorkflowStepConversationClientMock({
-      patchMetadata: jest.fn().mockResolvedValue({
-        conversation: {
-          id: 'conv-1',
-          metadata: { status: 'resolved', severity: 'low', priority: 'high' },
-        },
-        changedFields: ['status', 'severity'],
-      }),
+      patchMetadata: jest
+        .fn()
+        .mockResolvedValue({ changedFields: ['status', 'severity'], conversation }),
     });
 
     const definition = updateConversationMetadataStepDefinition({
@@ -70,8 +70,8 @@ describe('updateConversationMetadataStepDefinition', () => {
   it('returns empty changed_fields when the patch is a no-op', async () => {
     const { getConversationClient } = createWorkflowStepConversationClientMock({
       patchMetadata: jest.fn().mockResolvedValue({
-        conversation: { id: 'conv-1', metadata: { status: 'open' } },
         changedFields: [],
+        conversation: { id: 'conv-1', metadata: { status: 'open' } },
       }),
     });
 

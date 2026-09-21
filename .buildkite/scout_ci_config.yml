@@ -4,6 +4,7 @@ plugins:
     - advanced_settings
     - agent_builder
     - agent_builder_dashboards
+    - agentic_investigations
     - alerting
     - alerting_v2
     - apm

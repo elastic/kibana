@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-export type {
-  ConversationCreatePublicRequest,
-  ConversationPublicClient,
-  ConversationUpdatePublicRequest,
-  ConversationAddEventsRequest,
-} from './types';
+import { CONVERSATION_ID_MAX_LENGTH } from '@kbn/agent-builder-common';
+import { z } from '@kbn/zod/v4';
+
+export const escalationIdParamsSchema = z.object({
+  id: z.string().min(1).max(CONVERSATION_ID_MAX_LENGTH),
+});

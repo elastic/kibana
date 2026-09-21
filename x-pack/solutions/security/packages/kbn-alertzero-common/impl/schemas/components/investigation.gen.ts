@@ -16,7 +16,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-export const TemplateId = lazySchema(() => z.enum(['investigation', 'proposal', 'incident']));
+export const TemplateId = lazySchema(() => z.enum(['investigation', 'proposal', 'escalation']));
 export type TemplateId = z.infer<typeof TemplateId>;
 export type TemplateIdEnum = typeof TemplateId.enum;
 export const TemplateIdEnum = TemplateId.enum;
@@ -163,10 +163,10 @@ export const Proposal = lazySchema(() =>
 );
 export type Proposal = z.infer<typeof Proposal>;
 
-export const Incident = lazySchema(() =>
+export const Escalation = lazySchema(() =>
   z.object({
     id: z.string(),
-    template_id: z.literal('incident'),
+    template_id: z.literal('escalation'),
     forkedFromInvestigationId: z.string(),
     watch_id: z.string().optional(),
     status: z.string().optional(),
@@ -175,4 +175,4 @@ export const Incident = lazySchema(() =>
     events: z.array(TimelineEvent),
   })
 );
-export type Incident = z.infer<typeof Incident>;
+export type Escalation = z.infer<typeof Escalation>;
