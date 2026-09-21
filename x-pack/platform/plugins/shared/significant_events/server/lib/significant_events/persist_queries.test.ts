@@ -36,7 +36,7 @@ const makeLink = (
     esql: { query: overrides.esql ?? 'FROM logs | WHERE body.text:"error"' },
     severity_score: overrides.severity_score ?? 60,
   },
-  source_id: 'logs.test',
+  stream_name: 'logs.test',
   rule_backed: overrides.ruleBacked ?? false,
   rule_id: `rule-${overrides.id ?? 'q1'}`,
   ...(overrides.expiresAt ? { expires_at: overrides.expiresAt } : {}),
@@ -58,11 +58,11 @@ const MOCK_DEFAULT_EXPIRES_AT = '2099-01-01T00:00:00.000Z';
 
 const createMocks = (existingLinks: QueryLink[] = []) => {
   const kiClient = {
-    getSourceToQueryLinksMap: jest.fn().mockResolvedValue({ 'logs.test': existingLinks }),
+    getStreamToQueryLinksMap: jest.fn().mockResolvedValue({ 'logs.test': existingLinks }),
     getDefaultExpiresAt: jest.fn().mockReturnValue(MOCK_DEFAULT_EXPIRES_AT),
     bulk: jest.fn().mockResolvedValue({ applied: 1, skipped: 0 }),
     syncQueries: jest.fn().mockResolvedValue(undefined),
-    replaceSourceQueries: jest.fn(
+    replaceStreamQueries: jest.fn(
       async (sourceId: string, getNextQueries: (links: QueryLink[]) => StreamQuery[]) => {
         await kiClient.syncQueries(sourceId, getNextQueries(existingLinks));
       }

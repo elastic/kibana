@@ -12,7 +12,7 @@ function makeFeature(overrides: Partial<Feature> = {}): Feature {
   return {
     id: 'feature-id',
     uuid: 'feature-uuid',
-    source_id: 'logs.test',
+    stream_name: 'logs.test',
     type: 'dataset_analysis',
     description: 'Feature description',
     properties: {},
@@ -43,7 +43,7 @@ describe('searchKnowledgeIndicators', () => {
           query: makeStreamQuery({ id: 'q1', severity_score: 50 }),
           rule_backed: true,
           rule_id: 'rule-1',
-          source_id: 'logs.test',
+          stream_name: 'logs.test',
         },
       ],
     });
@@ -62,7 +62,7 @@ describe('searchKnowledgeIndicators', () => {
           query: makeStreamQuery({ id: 'q1' }),
           rule_backed: false,
           rule_id: 'rule-1',
-          source_id: 'logs.test',
+          stream_name: 'logs.test',
         },
       ]
     );
@@ -144,13 +144,13 @@ describe('searchKnowledgeIndicators', () => {
             query: makeStreamQuery({ id: 'q1' }),
             rule_backed: true,
             rule_id: 'rule-1',
-            source_id: 'logs.test',
+            stream_name: 'logs.test',
           },
           {
             query: makeStreamQuery({ id: 'q2' }),
             rule_backed: true,
             rule_id: 'rule-2',
-            source_id: 'logs.test',
+            stream_name: 'logs.test',
           },
         ] as QueryLink[],
     });
@@ -228,13 +228,13 @@ describe('searchKnowledgeIndicators', () => {
           query: makeStreamQuery({ id: 'matching', type: 'match' }),
           rule_backed: true,
           rule_id: 'rule-1',
-          source_id: 'logs.test',
+          stream_name: 'logs.test',
         },
         {
           query: makeStreamQuery({ id: 'wrong-rule', type: 'match' }),
           rule_backed: true,
           rule_id: 'rule-2',
-          source_id: 'logs.test',
+          stream_name: 'logs.test',
         },
       ]
     );

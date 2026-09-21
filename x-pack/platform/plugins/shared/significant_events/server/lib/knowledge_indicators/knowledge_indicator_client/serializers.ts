@@ -70,7 +70,7 @@ export function toStoredFeature({
   const slug = normalizeFeatureSlug(feature.id);
   return {
     '@timestamp': timestamp,
-    id: computeFeatureUuid({ id: slug, source_id: sourceId }),
+    id: computeFeatureUuid({ id: slug, stream_name: sourceId }),
     type: KI_TYPE_FEATURE,
     title: feature.title,
     description: feature.description,
@@ -159,7 +159,7 @@ export function fromStoredFeature(doc: StoredFeatureKnowledgeIndicator): Feature
   return {
     id: doc.feature.slug,
     uuid: doc.id,
-    source_id: doc['source.id'],
+    stream_name: doc['source.id'],
     type: doc.feature.type,
     description: doc.description,
     properties: doc.feature.properties,
@@ -190,7 +190,7 @@ export function fromStoredQuery(doc: StoredQueryKnowledgeIndicator): QueryLink {
   const ruleBacked = rule_backed;
 
   return {
-    source_id: doc['source.id'],
+    stream_name: doc['source.id'],
     rule_backed: ruleBacked,
     rule_id,
     updated_at: doc['@timestamp'],

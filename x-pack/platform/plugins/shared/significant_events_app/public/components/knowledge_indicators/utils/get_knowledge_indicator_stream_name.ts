@@ -7,11 +7,7 @@
 
 import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 
-/**
- * Nightshift source the indicator belongs to. Until sources replace streams as the
- * onboarding unit, the id is the stream name, which is why it is shown as-is.
- */
-export const getKnowledgeIndicatorSourceId = (knowledgeIndicator: KnowledgeIndicator): string =>
+export const getKnowledgeIndicatorStreamName = (knowledgeIndicator: KnowledgeIndicator): string =>
   knowledgeIndicator.kind === 'feature'
-    ? knowledgeIndicator.feature.source_id
-    : knowledgeIndicator.source_id;
+    ? knowledgeIndicator.feature.stream_name
+    : knowledgeIndicator.stream_name;

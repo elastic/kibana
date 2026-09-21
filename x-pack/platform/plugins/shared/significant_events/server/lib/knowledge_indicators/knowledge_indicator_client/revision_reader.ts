@@ -79,7 +79,7 @@ export class RevisionReader {
    * `REVISION_SIZE_LIMIT` cap bounds distinct sources rather than distinct KIs;
    * warns if the cap is hit so partial coverage isn't silent.
    */
-  async fetchDistinctSourceIds(
+  async fetchDistinctStreamNames(
     where?: LatestSourceWhereCondition,
     postGroupingWhere?: LatestSourceWhereCondition
   ): Promise<string[]> {

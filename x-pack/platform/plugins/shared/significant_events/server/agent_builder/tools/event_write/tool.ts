@@ -212,13 +212,11 @@ const enrichCausalFeatures = async (
       ])
     ).flatMap(({ hits: featureHits }) => featureHits);
     // Both lookups can return the same indicator; keep one entry per uuid.
-    // Event references still carry `stream_name`; it matches the feature's `source_id`
-    // while streams are the source universe (nightshift-program#1307).
     const uniqueHits = [...new Map(hits.map((feature) => [feature.uuid, feature])).values()];
     const featuresByReference = new Map(
       uniqueHits.flatMap((feature) => [
-        [`${feature.source_id}:${feature.id}`, feature] as const,
-        [`${feature.source_id}:${feature.uuid}`, feature] as const,
+        [`${feature.stream_name}:${feature.id}`, feature] as const,
+        [`${feature.stream_name}:${feature.uuid}`, feature] as const,
       ])
     );
 
@@ -231,10 +229,10 @@ const enrichCausalFeatures = async (
         return featuresByReference.get(`${explicitStream}:${featureId}`);
       }
       // Without an explicit stream: an unambiguous match wins; otherwise restrict to the
-      // event's own streams so a shared slug on another source cannot stamp the wrong
+      // event's own streams so a shared slug on another stream cannot stamp the wrong
       // classification.
       const matches = uniqueHits.filter(({ id, uuid }) => id === featureId || uuid === featureId);
-      const scoped = matches.filter(({ source_id }) => itemStreamNames.includes(source_id));
+      const scoped = matches.filter(({ stream_name }) => itemStreamNames.includes(stream_name));
       return (scoped.length === 1 ? scoped : matches.length === 1 ? matches : [])[0];
     };
 

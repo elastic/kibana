@@ -17,7 +17,7 @@ function makeFeature(overrides: Partial<Feature> = {}): Feature {
   return {
     id: 'feature-id',
     uuid: 'feature-uuid',
-    source_id: 'logs.test',
+    stream_name: 'logs.test',
     type: 'entity',
     description: 'A feature',
     properties: {},
@@ -33,7 +33,7 @@ function makeFeatureKI(overrides: Partial<Feature> = {}): KnowledgeIndicator {
 
 function makeQueryKI(
   queryOverrides: Partial<StreamQuery> = {},
-  extra: { source_id?: string; backed?: boolean } = {}
+  extra: { stream_name?: string; backed?: boolean } = {}
 ): KnowledgeIndicator {
   return {
     kind: 'query',
@@ -46,7 +46,7 @@ function makeQueryKI(
       ...queryOverrides,
     },
     rule: { backed: extra.backed ?? false, id: 'rule-1' },
-    source_id: extra.source_id ?? 'logs.test',
+    stream_name: extra.stream_name ?? 'logs.test',
   };
 }
 

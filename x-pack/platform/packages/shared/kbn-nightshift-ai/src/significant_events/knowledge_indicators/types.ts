@@ -72,5 +72,5 @@ export interface KnowledgeIndicatorQuery {
     backed: boolean;
     id: string;
   };
-  source_id: string;
+  stream_name: string;
 }

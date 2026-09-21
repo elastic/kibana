@@ -25,7 +25,7 @@ jest.mock('../../../../lib/significant_events/fetch_query_occurrences_from_alert
   getQueryOccurrences: (...args: unknown[]) => mockGetQueryOccurrences(...args),
   toQueryWithOccurrences: ({ queryLink }: { queryLink: QueryLink }) => ({
     ...queryLink.query,
-    source_id: queryLink.source_id,
+    stream_name: queryLink.stream_name,
     rule_backed: queryLink.rule_backed,
     occurrences: [],
     change_points: {},
@@ -72,7 +72,7 @@ const makeQueryLink = (id: string, severityScore: number, streamName = 'logs.tes
     esql: { query: `FROM logs-* | WHERE id == "${id}"` },
     severity_score: severityScore,
   },
-  source_id: streamName,
+  stream_name: streamName,
   rule_backed: true,
   rule_id: `rule-${id}`,
 });
@@ -110,9 +110,9 @@ describe('reconcileQueriesRoute', () => {
     expect(route.params.safeParse({ body: { streamNames: ['logs.test'] } }).success).toBe(true);
   });
 
-  it('replays current stream queries through replaceSourceQueries', async () => {
+  it('replays current stream queries through replaceStreamQueries', async () => {
     const currentLinks = [makeQueryLink('critical', 80), makeQueryLink('default', 60)];
-    const replaceSourceQueries = jest.fn().mockImplementation(async (_sourceId, getNextQueries) => {
+    const replaceStreamQueries = jest.fn().mockImplementation(async (_sourceId, getNextQueries) => {
       expect(getNextQueries(currentLinks)).toEqual(currentLinks.map((link) => link.query));
     });
     const handlerParams = {
@@ -124,7 +124,7 @@ describe('reconcileQueriesRoute', () => {
         },
         licensing: {},
         uiSettingsClient: {},
-        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ replaceSourceQueries }),
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ replaceStreamQueries }),
       }),
       server: makeServer(),
       maintenanceService: makeMaintenanceService(),
@@ -133,7 +133,7 @@ describe('reconcileQueriesRoute', () => {
 
     const result = await route.handler(handlerParams);
 
-    expect(replaceSourceQueries).toHaveBeenCalledWith('logs.test', expect.any(Function));
+    expect(replaceStreamQueries).toHaveBeenCalledWith('logs.test', expect.any(Function));
     expect(result).toEqual({
       reconciled: 1,
       failed: 0,
@@ -142,7 +142,7 @@ describe('reconcileQueriesRoute', () => {
   });
 
   it('continues when one stream fails to reconcile', async () => {
-    const replaceSourceQueries = jest
+    const replaceStreamQueries = jest
       .fn()
       .mockResolvedValueOnce(undefined)
       .mockRejectedValueOnce(new Error('rules unavailable'));
@@ -155,7 +155,7 @@ describe('reconcileQueriesRoute', () => {
         },
         licensing: {},
         uiSettingsClient: {},
-        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ replaceSourceQueries }),
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ replaceStreamQueries }),
       }),
       server: makeServer(),
       maintenanceService: makeMaintenanceService(),

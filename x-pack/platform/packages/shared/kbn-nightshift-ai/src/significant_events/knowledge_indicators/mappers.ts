@@ -18,7 +18,7 @@ export const featureToKnowledgeIndicatorFeature = (feature: Feature): KnowledgeI
 export const queryLinkToKnowledgeIndicatorQuery = (
   queryLink: QueryLink
 ): KnowledgeIndicatorQuery => {
-  const { query, rule_backed, rule_id, source_id } = queryLink;
+  const { query, rule_backed, rule_id, stream_name } = queryLink;
 
   return {
     kind: 'query',
@@ -27,6 +27,6 @@ export const queryLinkToKnowledgeIndicatorQuery = (
       backed: rule_backed,
       id: rule_id,
     },
-    source_id,
+    stream_name,
   };
 };

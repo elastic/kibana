@@ -38,7 +38,7 @@ const reconcileKnowledgeIndicatorsRoute = createServerRoute({
     // privilege, and it never materialises a stream definition as a side effect.
     await streamsClient.getStream(params.path.streamName);
     const kiClient = await getKnowledgeIndicatorClient();
-    return kiClient.reconcileSource(params.path.streamName);
+    return kiClient.reconcileStream(params.path.streamName);
   },
 });
 

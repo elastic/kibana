@@ -79,7 +79,7 @@ describe('toStoredQuery', () => {
   });
 
   it('round-trips the source id onto the query link', () => {
-    expect(fromStoredQuery(storeQuery(makeQuery())).source_id).toBe(SOURCE_ID);
+    expect(fromStoredQuery(storeQuery(makeQuery())).stream_name).toBe(SOURCE_ID);
   });
 });
 
@@ -93,7 +93,7 @@ describe('toStoredFeature', () => {
 
     expect(stored['source.id']).toBe(SOURCE_ID);
     expect(stored.feature.slug).toBe('svc-checkout');
-    expect(stored.id).toBe(computeFeatureUuid({ id: 'svc-checkout', source_id: SOURCE_ID }));
+    expect(stored.id).toBe(computeFeatureUuid({ id: 'svc-checkout', stream_name: SOURCE_ID }));
     expect(stored).not.toHaveProperty('stream.name');
   });
 
@@ -114,6 +114,6 @@ describe('toStoredFeature', () => {
       includeEmbedding: false,
     });
 
-    expect(fromStoredFeature(stored).source_id).toBe(SOURCE_ID);
+    expect(fromStoredFeature(stored).stream_name).toBe(SOURCE_ID);
   });
 });

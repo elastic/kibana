@@ -30,7 +30,7 @@ import { LoadingPanel } from '../../../../components/loading_panel';
 import { KnowledgeIndicatorDetailsFlyout } from '../../../../components/knowledge_indicators/knowledge_indicator_details_flyout';
 import { DeleteTableItemsModal } from '../../../../components/knowledge_indicators/delete_table_items_modal';
 import { getKnowledgeIndicatorItemId } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_item_id';
-import { getKnowledgeIndicatorSourceId } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_source_id';
+import { getKnowledgeIndicatorStreamName } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_stream_name';
 import { GenerateSplitButton } from '../shared/generate_split_button';
 import { getGenerateDisabledTooltip } from '../shared/translations';
 import { StreamPicker } from '../shared/stream_picker';
@@ -384,7 +384,7 @@ export function KnowledgeIndicatorsTable() {
           occurrencesByQueryId={occurrencesByQueryId}
           onClose={closeFlyout}
           features={features}
-          stream={streamsByName.get(getKnowledgeIndicatorSourceId(selectedKnowledgeIndicator))}
+          stream={streamsByName.get(getKnowledgeIndicatorStreamName(selectedKnowledgeIndicator))}
           pageIndex={currentIndex}
           pageCount={filteredKnowledgeIndicators.length}
           onSelectPage={(nextIndex) => {

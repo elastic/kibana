@@ -22,7 +22,7 @@ const makeQueryLink = (severityScore?: number, title = 'Error logs'): QueryLink 
     esql: { query: 'FROM logs-* | WHERE level == "error"' },
     severity_score: severityScore,
   },
-  source_id: 'logs.test',
+  stream_name: 'logs.test',
   rule_backed: true,
   rule_id: 'rule-1',
 });

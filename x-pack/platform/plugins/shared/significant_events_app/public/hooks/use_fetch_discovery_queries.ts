@@ -19,7 +19,7 @@ import { useFetchErrorToast } from './use_fetch_error_toast';
 
 export interface SignificantEventQueryRow {
   query: StreamQuery;
-  source_id: string;
+  stream_name: string;
   occurrences: Array<{ x: number; y: number }>;
   change_points: QueryWithOccurrences['change_points'];
   rule_backed: boolean;
@@ -94,13 +94,13 @@ export const useFetchDiscoveryQueries = (
           occurrences,
           change_points,
           rule_uuid: _ruleUuid,
-          source_id,
+          stream_name,
           rule_backed,
           ...rest
         } = series;
         return {
           query: rest,
-          source_id,
+          stream_name,
           change_points,
           occurrences: occurrences.map(
             (occurrence: QueryWithOccurrences['occurrences'][number]) => ({

@@ -16,42 +16,42 @@ const route = syncRoutes['GET /internal/streams/_knowledge_indicators/_streams_w
 
 type HandlerParams = Parameters<typeof route.handler>[0];
 
-const makeHandlerParams = ({ sourceIds }: { sourceIds: string[] }): HandlerParams =>
+const makeHandlerParams = ({ streamNames }: { streamNames: string[] }): HandlerParams =>
   ({
     params: {},
     request: {},
     getScopedClients: jest.fn().mockResolvedValue({
       licensing: {},
       getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
-        getSourceIdsToReconcile: jest.fn().mockResolvedValue(sourceIds),
+        getStreamNamesToReconcile: jest.fn().mockResolvedValue(streamNames),
       }),
     }),
     server: {} as HandlerParams['server'],
   } as unknown as HandlerParams);
 
-describe('sourcesWithIndicatorsRoute', () => {
+describe('streamsWithIndicatorsRoute', () => {
   beforeEach(() => {
     (assertSignificantEventsAccess as jest.Mock).mockClear();
   });
 
-  it('maps source ids to the foreach item shape consumed by sync.yaml', async () => {
+  it('maps stream names to the foreach item shape', async () => {
     const result = await route.handler(
-      makeHandlerParams({ sourceIds: ['logs.nginx', 'logs.app'] })
+      makeHandlerParams({ streamNames: ['logs.nginx', 'logs.app'] })
     );
 
     expect(result).toEqual({
-      sources: [{ sourceId: 'logs.nginx' }, { sourceId: 'logs.app' }],
+      streams: [{ streamName: 'logs.nginx' }, { streamName: 'logs.app' }],
     });
   });
 
   it('returns an empty list when there is nothing to reconcile', async () => {
-    const result = await route.handler(makeHandlerParams({ sourceIds: [] }));
+    const result = await route.handler(makeHandlerParams({ streamNames: [] }));
 
-    expect(result).toEqual({ sources: [] });
+    expect(result).toEqual({ streams: [] });
   });
 
   it('enforces significant events access', async () => {
-    await route.handler(makeHandlerParams({ sourceIds: [] }));
+    await route.handler(makeHandlerParams({ streamNames: [] }));
 
     expect(assertSignificantEventsAccess).toHaveBeenCalledTimes(1);
   });

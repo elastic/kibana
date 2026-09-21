@@ -157,11 +157,11 @@ export class KnowledgeIndicatorClient {
     return this.reader.getQueryLinks(sourceIds, filters);
   }
 
-  getSourceToQueryLinksMap(
+  getStreamToQueryLinksMap(
     sourceIds: string[],
     options?: { includeExpired?: boolean }
   ): Promise<Record<string, QueryLink[]>> {
-    return this.reader.getSourceToQueryLinksMap(sourceIds, options);
+    return this.reader.getStreamToQueryLinksMap(sourceIds, options);
   }
 
   bulkGetQueriesByIds(
@@ -180,12 +180,12 @@ export class KnowledgeIndicatorClient {
     return this.reader.getRuleBackedQueryLinks();
   }
 
-  findFeaturesByIds(ids: string[]): Promise<Array<{ id: string; source_id: string }>> {
+  findFeaturesByIds(ids: string[]): Promise<Array<{ id: string; stream_name: string }>> {
     return this.reader.findFeaturesByIds(ids);
   }
 
-  getSourceIdsWithKnowledgeIndicators(): Promise<string[]> {
-    return this.reader.getSourceIdsWithKnowledgeIndicators();
+  getStreamNamesWithKnowledgeIndicators(): Promise<string[]> {
+    return this.reader.getStreamNamesWithKnowledgeIndicators();
   }
 
   /**
@@ -194,10 +194,10 @@ export class KnowledgeIndicatorClient {
    * set alone misses sources whose rules outlived all of their KIs — the very
    * orphan-rule case the sweep exists to catch.
    */
-  async getSourceIdsToReconcile(): Promise<string[]> {
+  async getStreamNamesToReconcile(): Promise<string[]> {
     const [withIndicators, withOwnedRules] = await Promise.all([
-      this.reader.getSourceIdsWithKnowledgeIndicators(),
-      this.orchestrator.findSourceIdsWithOwnedRules(),
+      this.reader.getStreamNamesWithKnowledgeIndicators(),
+      this.orchestrator.findStreamNamesWithOwnedRules(),
     ]);
     return [...new Set([...withIndicators, ...withOwnedRules])];
   }
@@ -257,11 +257,11 @@ export class KnowledgeIndicatorClient {
     return this.orchestrator.syncQueries(sourceId, queries, options);
   }
 
-  async replaceSourceQueries(
+  async replaceStreamQueries(
     sourceId: string,
     getNextQueries: (currentLinks: QueryLink[]) => StreamQuery[]
   ): Promise<void> {
-    const { [sourceId]: currentLinks } = await this.getSourceToQueryLinksMap([sourceId]);
+    const { [sourceId]: currentLinks } = await this.getStreamToQueryLinksMap([sourceId]);
     await this.syncQueries(sourceId, getNextQueries(currentLinks), { currentLinks });
   }
 
@@ -297,7 +297,7 @@ export class KnowledgeIndicatorClient {
     return this.orchestrator.demoteQueries(sourceId, queryIds);
   }
 
-  reconcileSource(sourceId: string): Promise<{ tombstoned: number; orphanRulesDeleted: number }> {
-    return this.orchestrator.reconcileSource(sourceId);
+  reconcileStream(sourceId: string): Promise<{ tombstoned: number; orphanRulesDeleted: number }> {
+    return this.orchestrator.reconcileStream(sourceId);
   }
 }

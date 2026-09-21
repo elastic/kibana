@@ -34,7 +34,7 @@ export const STATS_QUERY_TYPE_LABEL = i18n.translate(
 
 export const STREAM_COLUMN_LABEL = i18n.translate(
   'xpack.significantEventsApp.knowledgeIndicators.columns.streamLabel',
-  { defaultMessage: 'Source' }
+  { defaultMessage: 'Stream' }
 );
 
 export const DURABILITY_COLUMN_LABEL = i18n.translate(

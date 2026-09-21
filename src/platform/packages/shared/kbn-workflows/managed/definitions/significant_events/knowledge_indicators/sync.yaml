@@ -1,12 +1,12 @@
 # Knowledge Indicator (KI) sync (groundedness) sweep workflow.
 #
 # Runs on its own schedule, independent of the continuous-extraction toggle, and
-# reconciles every source that has knowledge indicators:
-#   1. Fetches all sources with KIs from the _streams_with_indicators endpoint.
-#   2. For each source, calls the per-source _reconcile route (groundedness check,
-#      expiry-driven tombstoning, orphan Nightshift-owned rule cleanup).
+# reconciles every stream that has knowledge indicators:
+#   1. Fetches all streams with KIs from the _streams_with_indicators endpoint.
+#   2. For each stream, calls the per-stream _reconcile route (groundedness check,
+#      expiry-driven tombstoning, orphan Streams-owned rule cleanup).
 #
-# Per-source failures do not abort the sweep (iteration-on-failure: continue),
+# Per-stream failures do not abort the sweep (iteration-on-failure: continue),
 # and each _reconcile call retries transient failures on its own.
 #
 # This is a managed workflow installed by the significant_events plugin. It is
@@ -38,8 +38,8 @@ triggers:
       every: '24h'
   - type: manual
 steps:
-  # Step 1: Fetch every source that has knowledge indicators.
-  - name: get_sources
+  # Step 1: Fetch every stream that has knowledge indicators.
+  - name: get_streams
     type: kibana.request
     with:
       method: GET
@@ -52,14 +52,14 @@ steps:
         delay: '5s'
         strategy: exponential
 
-  # Step 2: Only proceed if there are sources to reconcile.
+  # Step 2: Only proceed if there are streams to reconcile.
   - name: has_candidates
     type: if
-    condition: 'steps.get_sources.output.sources[0].sourceId:*'
+    condition: 'steps.get_streams.output.streams[0].streamName:*'
     steps:
       - name: reconcile_all
         type: foreach
-        foreach: '${{ steps.get_sources.output.sources }}'
+        foreach: '${{ steps.get_streams.output.streams }}'
         iteration-on-failure:
           continue: true
         steps:
@@ -67,7 +67,7 @@ steps:
             type: kibana.request
             with:
               method: POST
-              path: '/internal/streams/{{ foreach.item.sourceId }}/knowledge_indicators/_reconcile'
+              path: '/internal/streams/{{ foreach.item.streamName }}/knowledge_indicators/_reconcile'
               headers:
                 x-elastic-internal-origin: 'kibana'
             on-failure:

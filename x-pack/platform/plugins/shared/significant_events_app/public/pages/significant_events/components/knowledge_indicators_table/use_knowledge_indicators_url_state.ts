@@ -14,7 +14,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSignificantEventsAppParams } from '../../../../hooks/use_significant_events_app_params';
 import { useSignificantEventsAppRouter } from '../../../../hooks/use_significant_events_app_router';
 import { getKnowledgeIndicatorItemId } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_item_id';
-import { getKnowledgeIndicatorSourceId } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_source_id';
+import { getKnowledgeIndicatorStreamName } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_stream_name';
 import { getKnowledgeIndicatorSubtype } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_subtype';
 import { matchesKnowledgeIndicatorFilters } from '../../../../components/knowledge_indicators/utils/matches_knowledge_indicator_filters';
 import { getKnowledgeIndicatorType } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_type';
@@ -133,7 +133,7 @@ export function useKnowledgeIndicatorsUrlState({
           hideComputedTypes,
         })
       ) {
-        availableStreams.add(getKnowledgeIndicatorSourceId(ki));
+        availableStreams.add(getKnowledgeIndicatorStreamName(ki));
       }
     }
 

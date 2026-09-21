@@ -174,7 +174,7 @@ const LIST_QUERIES_RANGE = {
 } as const;
 
 function toListedQuery(query: QueryWithOccurrences): StreamQuery {
-  return omit(query, ['occurrences', 'change_points', 'rule_backed', 'rule_uuid', 'source_id']);
+  return omit(query, ['occurrences', 'change_points', 'rule_backed', 'rule_uuid', 'stream_name']);
 }
 
 /**

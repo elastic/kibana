@@ -209,7 +209,7 @@ export const getComputedKIFeaturesFromDocs = ({
     buildErrorLogs(flatDocs),
   ].map((feature) => ({
     ...feature,
-    source_id: streamName,
-    uuid: computeFeatureUuid({ id: feature.id, source_id: streamName }),
+    stream_name: streamName,
+    uuid: computeFeatureUuid({ id: feature.id, stream_name: streamName }),
   }));
 };

@@ -50,7 +50,7 @@ export async function persistQueries(
   const targetSources = getSourcesForStream(definition);
   const dedupKey = (esql: string) => normalizeEsqlSafe(replaceFromSources(esql, targetSources));
 
-  const { [streamName]: existingLinks } = await kiClient.getSourceToQueryLinksMap([streamName]);
+  const { [streamName]: existingLinks } = await kiClient.getStreamToQueryLinksMap([streamName]);
   const existingById = new Map(existingLinks.map((link) => [link.query.id, link]));
   const existingEsqls = new Set(existingLinks.map((link) => dedupKey(link.query.esql.query)));
   const ruleBackedIds = new Set(
@@ -120,7 +120,7 @@ export async function persistQueries(
 
   if (ruleEligibleQueries.length > 0) {
     const ruleEligibleIds = new Set(ruleEligibleQueries.map((q) => q.id));
-    await kiClient.replaceSourceQueries(streamName, (currentLinks) => [
+    await kiClient.replaceStreamQueries(streamName, (currentLinks) => [
       ...currentLinks.filter((l) => !ruleEligibleIds.has(l.query.id)).map(queryFromLink),
       ...ruleEligibleQueries.map(({ replaces: _replaces, ...q }) => ({
         ...q,

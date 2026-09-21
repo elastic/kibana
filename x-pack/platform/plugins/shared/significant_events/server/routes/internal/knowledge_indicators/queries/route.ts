@@ -179,7 +179,7 @@ const demoteBackedQueriesRoute = createServerRoute({
     });
 
     const bySource = toDemote.reduce<Record<string, string[]>>((acc, link) => {
-      const sourceId = link.source_id;
+      const sourceId = link.stream_name;
 
       if (!acc[sourceId]) {
         acc[sourceId] = [];
@@ -260,12 +260,12 @@ const bulkDeleteQueriesRoute = createServerRoute({
     // Capture backed rule IDs per source to log on mid-flight failure.
     const bySource = new Map<string, { queryIds: string[]; backedRuleIds: string[] }>();
     for (const link of queryLinks) {
-      const bucket = bySource.get(link.source_id) ?? { queryIds: [], backedRuleIds: [] };
+      const bucket = bySource.get(link.stream_name) ?? { queryIds: [], backedRuleIds: [] };
       bucket.queryIds.push(link.query.id);
       if (link.rule_backed && link.rule_id) {
         bucket.backedRuleIds.push(link.rule_id);
       }
-      bySource.set(link.source_id, bucket);
+      bySource.set(link.stream_name, bucket);
     }
 
     // Check only the sources we actually need. A source that no longer exists
@@ -396,7 +396,7 @@ const reconcileQueriesRoute = createServerRoute({
 
           let reconciledQueries = 0;
           try {
-            await kiClient.replaceSourceQueries(streamName, (currentLinks) => {
+            await kiClient.replaceStreamQueries(streamName, (currentLinks) => {
               reconciledQueries = currentLinks.filter((link) => link.rule_backed).length;
               return currentLinks.map(queryFromLink);
             });
@@ -836,7 +836,7 @@ async function resolveExistingQuerySourceId(
   if (!existing) {
     throw new QueryNotFoundError(`Query [${queryId}] not found`);
   }
-  return existing.source_id;
+  return existing.stream_name;
 }
 
 export const internalKIQueriesRoutes = {

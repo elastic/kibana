@@ -100,7 +100,7 @@ export async function identifyKIQueries(
     systemPrompt
   );
 
-  const { [definition.name]: existingLinks } = await kiClient.getSourceToQueryLinksMap([
+  const { [definition.name]: existingLinks } = await kiClient.getStreamToQueryLinksMap([
     definition.name,
   ]);
 

@@ -63,7 +63,7 @@ export class QueryRuleOrchestrator {
 
     const currentLinks =
       options?.currentLinks ??
-      (await this.reader.getSourceToQueryLinksMap([sourceId], { includeExpired: true }))[sourceId];
+      (await this.reader.getStreamToQueryLinksMap([sourceId], { includeExpired: true }))[sourceId];
     const currentByQueryId = new Map(currentLinks.map((link) => [link.query.id, link]));
     const nextIds = new Set(queries.map((q) => q.id));
 
@@ -80,7 +80,7 @@ export class QueryRuleOrchestrator {
       const ruleBacked = canQueryBeRuleBacked({ type: queryType, esql: query.esql });
       if (!current) {
         const link: QueryLink = {
-          source_id: sourceId,
+          stream_name: sourceId,
           rule_backed: ruleBacked,
           rule_id: ruleId,
           query: typedQuery,
@@ -101,7 +101,7 @@ export class QueryRuleOrchestrator {
         allNext.push({ query: typedQuery, rule_backed: false, rule_id: current.rule_id });
       } else if (!hasSameEsql(current.query.esql.query, query.esql.query)) {
         const link: QueryLink = {
-          source_id: sourceId,
+          stream_name: sourceId,
           rule_backed: true,
           rule_id: ruleId,
           query: typedQuery,
@@ -188,7 +188,7 @@ export class QueryRuleOrchestrator {
       return;
     }
 
-    const { [sourceId]: currentLinks } = await this.reader.getSourceToQueryLinksMap([sourceId], {
+    const { [sourceId]: currentLinks } = await this.reader.getStreamToQueryLinksMap([sourceId], {
       includeExpired: true,
     });
     const currentByQueryId = new Map(currentLinks.map((link) => [link.query.id, link]));
@@ -220,7 +220,7 @@ export class QueryRuleOrchestrator {
       return;
     }
 
-    const { [sourceId]: currentLinks } = await this.reader.getSourceToQueryLinksMap([sourceId], {
+    const { [sourceId]: currentLinks } = await this.reader.getStreamToQueryLinksMap([sourceId], {
       includeExpired: true,
     });
     const target = currentLinks.find((link) => link.query.id === queryId);
@@ -242,7 +242,7 @@ export class QueryRuleOrchestrator {
       return;
     }
 
-    const { [sourceId]: currentLinks } = await this.reader.getSourceToQueryLinksMap([sourceId], {
+    const { [sourceId]: currentLinks } = await this.reader.getStreamToQueryLinksMap([sourceId], {
       includeExpired: true,
     });
     const ruleBacked = currentLinks.filter((link) => link.rule_backed);
@@ -266,7 +266,7 @@ export class QueryRuleOrchestrator {
       return EMPTY_PROMOTE_RESULT;
     }
 
-    const { [sourceId]: links } = await this.reader.getSourceToQueryLinksMap([sourceId]);
+    const { [sourceId]: links } = await this.reader.getStreamToQueryLinksMap([sourceId]);
     const idSet = new Set(queryIds);
     const candidates = links.filter((link) => idSet.has(link.query.id) && !link.rule_backed);
 
@@ -364,9 +364,9 @@ export class QueryRuleOrchestrator {
 
     const bySource = new Map<string, string[]>();
     for (const link of toPromote) {
-      const group = bySource.get(link.source_id) ?? [];
+      const group = bySource.get(link.stream_name) ?? [];
       group.push(link.query.id);
-      bySource.set(link.source_id, group);
+      bySource.set(link.stream_name, group);
     }
 
     const knownSourceIds = new Set(sourceIds);
@@ -393,7 +393,7 @@ export class QueryRuleOrchestrator {
     if (queryIds.length === 0) return { deleted: 0 };
     const currentLinks =
       options?.currentLinks ??
-      (await this.reader.getSourceToQueryLinksMap([sourceId], { includeExpired: true }))[sourceId];
+      (await this.reader.getStreamToQueryLinksMap([sourceId], { includeExpired: true }))[sourceId];
     const idSet = new Set(queryIds);
     const targets = currentLinks.filter((link) => idSet.has(link.query.id));
     if (targets.length === 0) return { deleted: 0 };
@@ -408,16 +408,16 @@ export class QueryRuleOrchestrator {
     return { deleted: targets.length };
   }
 
-  findSourceIdsWithOwnedRules(): Promise<string[]> {
-    return this.rulesManagementClient.findSourceIdsWithOwnedRules();
+  findStreamNamesWithOwnedRules(): Promise<string[]> {
+    return this.rulesManagementClient.findStreamNamesWithOwnedRules();
   }
 
-  async reconcileSource(
+  async reconcileStream(
     sourceId: string
   ): Promise<{ tombstoned: number; orphanRulesDeleted: number }> {
     if (!this.isSignificantEventsEnabled) {
       this.logger.debug(
-        `Skipping reconcileSource for source "${sourceId}" because significant events feature is disabled.`
+        `Skipping reconcileStream for source "${sourceId}" because significant events feature is disabled.`
       );
       return { tombstoned: 0, orphanRulesDeleted: 0 };
     }
@@ -468,7 +468,7 @@ export class QueryRuleOrchestrator {
       return { demoted: 0 };
     }
 
-    const { [sourceId]: links } = await this.reader.getSourceToQueryLinksMap([sourceId], {
+    const { [sourceId]: links } = await this.reader.getStreamToQueryLinksMap([sourceId], {
       includeExpired: true,
     });
     const idSet = new Set(queryIds);

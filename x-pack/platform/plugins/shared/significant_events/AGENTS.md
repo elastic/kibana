@@ -29,19 +29,6 @@ sampling live in `@kbn/nightshift-ai`
 plugin adapts stream definitions through `streamToAnalysisTarget` before calling
 into that package.
 
-## Knowledge indicator storage
-
-KIs are keyed by Nightshift **source id** (`source.id` in the data stream, `source_id` on the
-wire) and scoped to the Kibana space they were written from (`kibana.space_ids`, stamped by the
-data-stream client). `KnowledgeIndicatorClient` is built per request with `request.spaceId`;
-every read filters on that space and never falls back to unscoped documents. Alerting v2 rules
-for a KI live in the same space and carry the `nightshift:source:<sourceId>` tag.
-
-Until the sources catalog replaces streams as the onboarding unit, callers pass the stream name
-as the source id, so route paths still say `{streamName}` while the storage says `source.id`.
-Documents written before this keying (`stream.name`, no space) are invisible to every reader;
-`POST /internal/significant_events/knowledge_indicators/_reset` is the only path that removes them.
-
 ## Keeping this file current
 
 Update this file when you make a change that would mislead an agent reading it: cross-package ownership changes, pipeline restructuring, addition or removal of concepts relevant to the pipeline, or naming convention updates. Do not update it for type field additions or directory reorganisations within a package — those are discoverable from the code.

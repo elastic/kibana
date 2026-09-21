@@ -164,7 +164,7 @@ export function EntityFlyout({
         {
           id: feature.uuid,
           type: KI_FEATURE_ATTACHMENT_TYPE,
-          origin: encodeFeatureAttachmentOrigin(feature.source_id, feature.id),
+          origin: encodeFeatureAttachmentOrigin(feature.stream_name, feature.id),
           description: formatChatAttachmentDescription('Entity', title),
           data: feature,
         },
@@ -219,7 +219,7 @@ export function EntityFlyout({
           )}
           <EuiFlexItem grow={false}>
             <EuiBadge color="hollow" iconType="productStreamsClassic" iconSide="left">
-              {feature.source_id}
+              {feature.stream_name}
             </EuiBadge>
           </EuiFlexItem>
         </EuiFlexGroup>

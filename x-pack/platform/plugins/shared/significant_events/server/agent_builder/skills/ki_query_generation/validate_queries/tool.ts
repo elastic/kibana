@@ -112,7 +112,7 @@ export const createValidateQueriesTool = ({
             id: featureIds,
             excludedType: [...QUERY_GENERATION_EXCLUDED_FEATURE_TYPES],
           }),
-          kiClient.getSourceToQueryLinksMap([target.id]),
+          kiClient.getStreamToQueryLinksMap([target.id]),
         ]);
         const existingQueries = existingLinks.map(({ query }) => ({
           id: query.id,

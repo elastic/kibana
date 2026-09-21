@@ -57,9 +57,9 @@ const upsertFeatureRoute = createServerRoute({
     if (id) {
       const { hits } = await kiClient.getFeatures(params.path.name, { id: [id] });
       const [resolved] = hits;
-      if (resolved && resolved.source_id !== params.path.name) {
+      if (resolved && resolved.stream_name !== params.path.name) {
         throw new StatusError(
-          `Feature ${id} belongs to source '${resolved.source_id}', not '${params.path.name}'`,
+          `Feature ${id} belongs to source '${resolved.stream_name}', not '${params.path.name}'`,
           400
         );
       }
@@ -117,10 +117,10 @@ const deleteFeatureRoute = createServerRoute({
     await kiClient.bulk(params.path.name, [{ delete: { type: 'feature', id: params.path.id } }]);
 
     try {
-      await kiClient.reconcileSource(params.path.name);
+      await kiClient.reconcileStream(params.path.name);
     } catch (err) {
       logger.warn(
-        `reconcileSource after feature delete failed for source "${params.path.name}": ${
+        `reconcileStream after feature delete failed for source "${params.path.name}": ${
           err instanceof Error ? err.message : String(err)
         }`
       );
@@ -306,10 +306,10 @@ const bulkFeaturesRoute = createServerRoute({
     const hasShrinkingOp = operations.some((op) => 'delete' in op || 'exclude' in op);
     if (hasShrinkingOp) {
       try {
-        await kiClient.reconcileSource(name);
+        await kiClient.reconcileStream(name);
       } catch (err) {
         logger.warn(
-          `reconcileSource after bulk feature ops failed for source "${name}": ${
+          `reconcileStream after bulk feature ops failed for source "${name}": ${
             err instanceof Error ? err.message : String(err)
           }`
         );
@@ -378,7 +378,7 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
 
     // Group resolved ops by source.
     const bySource = resolved.reduce<Record<string, KIBulkOperation[]>>(
-      (acc, { id: featureId, source_id: sourceId }) => {
+      (acc, { id: featureId, stream_name: sourceId }) => {
         const op = opsByUuid.get(featureId);
         if (!op) {
           return acc;
@@ -425,10 +425,10 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
         // Source ids are stream names until nightshift-program#1307; `getStream` keeps the
         // existence and read-privilege check that gated this reconcile before.
         await streamsClient.getStream(sourceId);
-        await kiClient.reconcileSource(sourceId);
+        await kiClient.reconcileStream(sourceId);
       } catch (err) {
         logger.warn(
-          `reconcileSource after bulk cross-source feature ops failed for source "${sourceId}": ${
+          `reconcileStream after bulk cross-source feature ops failed for source "${sourceId}": ${
             err instanceof Error ? err.message : String(err)
           }`
         );

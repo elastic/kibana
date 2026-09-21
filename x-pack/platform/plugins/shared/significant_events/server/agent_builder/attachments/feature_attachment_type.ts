@@ -25,7 +25,7 @@ export const formatFeatureAsText = (feature: Feature): string => {
   return [
     `Knowledge Indicator feature "${title}"`,
     `Feature ID: ${feature.id}`,
-    `Source: ${feature.source_id}`,
+    `Stream: ${feature.stream_name}`,
     `Type: ${feature.type}${feature.subtype ? ` (${feature.subtype})` : ''}`,
     feature.confidence > 0 ? `Confidence: ${feature.confidence}%` : undefined,
     feature.description ? `Description: ${feature.description}` : undefined,
@@ -54,7 +54,7 @@ export const createSignificantEventFeatureAttachmentType = ({
     const kiClient = await getKnowledgeIndicatorClient();
 
     try {
-      return await kiClient.getFeature(decoded.sourceId, decoded.featureId);
+      return await kiClient.getFeature(decoded.streamName, decoded.featureId);
     } catch (error) {
       logger.warn(`Failed to resolve feature attachment for origin "${origin}": ${String(error)}`);
       return undefined;

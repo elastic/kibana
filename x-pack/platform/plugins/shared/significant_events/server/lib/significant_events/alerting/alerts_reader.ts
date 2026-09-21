@@ -91,7 +91,7 @@ export function buildRuleMetadataMap(queryLinks: QueryLink[]): Map<string, RuleM
   for (const link of queryLinks) {
     map.set(link.rule_id, {
       ruleName: link.query.title,
-      sourceId: link.source_id,
+      sourceId: link.stream_name,
       severityScore: link.query.severity_score ?? 0,
     });
   }

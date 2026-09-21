@@ -141,7 +141,7 @@ export const canonicalKIFeaturesFromExpectedGroundTruth = ({
   // Canonical features are keyed by the stream they describe, matching what the server stamps.
   return features.map((feature) => ({
     ...feature,
-    source_id: streamName,
-    uuid: computeFeatureUuid({ id: feature.id, source_id: streamName }),
+    stream_name: streamName,
+    uuid: computeFeatureUuid({ id: feature.id, stream_name: streamName }),
   }));
 };

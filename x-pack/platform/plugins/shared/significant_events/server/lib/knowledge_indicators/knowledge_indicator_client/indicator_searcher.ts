@@ -138,7 +138,7 @@ export class IndicatorSearcher {
 
     return searchWithKeywordFallback(
       this.logger,
-      { searchMode: options.searchMode, label: 'KnowledgeIndicator', sourceIds },
+      { searchMode: options.searchMode, label: 'KnowledgeIndicator', streamNames: sourceIds },
       (mode) => this.executeFindIndicators(mode, sourceIds, query, options)
     );
   }

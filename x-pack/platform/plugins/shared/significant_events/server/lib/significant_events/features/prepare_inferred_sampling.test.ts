@@ -26,7 +26,7 @@ const createFeature = (runId: string): FeatureWithFilter =>
   ({
     id: 'feature-1',
     uuid: 'feature-uuid-1',
-    source_id: 'logs.test-default',
+    stream_name: 'logs.test-default',
     type: 'system',
     description: 'A test feature',
     properties: {},

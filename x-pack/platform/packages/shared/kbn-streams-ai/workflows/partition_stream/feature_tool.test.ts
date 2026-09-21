@@ -23,7 +23,7 @@ describe('partitionStream features_tool', () => {
     {
       id: 'feature-1',
       uuid: 'feature-1-uuid',
-      source_id: 'logs',
+      stream_name: 'logs',
       type: 'technology',
       title: 'Node.js',
       description: 'Node.js application framework detected',
@@ -36,7 +36,7 @@ describe('partitionStream features_tool', () => {
     {
       id: 'feature-2',
       uuid: 'feature-2-uuid',
-      source_id: 'logs',
+      stream_name: 'logs',
       type: 'entity',
       title: 'API Gateway',
       description: 'API Gateway service identified',
@@ -63,7 +63,7 @@ describe('partitionStream features_tool', () => {
       expect(result).toHaveProperty('meta');
 
       expect(result).not.toHaveProperty('uuid');
-      expect(result).not.toHaveProperty('source_id');
+      expect(result).not.toHaveProperty('stream_name');
       expect(result).not.toHaveProperty('status');
       expect(result).not.toHaveProperty('last_seen');
       expect(result).not.toHaveProperty('expires_at');
@@ -73,7 +73,7 @@ describe('partitionStream features_tool', () => {
       const featureWithComplexProperties: Feature = {
         id: 'feature-3',
         uuid: 'feature-3-uuid',
-        source_id: 'logs',
+        stream_name: 'logs',
         type: 'infrastructure',
         title: 'PostgreSQL',
         description: 'PostgreSQL database detected',

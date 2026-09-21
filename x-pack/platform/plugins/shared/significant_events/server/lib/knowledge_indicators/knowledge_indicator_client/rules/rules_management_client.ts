@@ -12,7 +12,7 @@ export const NIGHTSHIFT_RULE_SOURCE_TAG_PREFIX = 'nightshift:source:' as const;
  * Ownership tag written before knowledge indicators were keyed by source
  * (`sigevents:stream:<streamName>`). Those rules are still "owned": the
  * documents that backed them are invisible after the re-keying, so the
- * routine orphan sweep (`reconcileSource`) retires them, and the cluster-wide
+ * routine orphan sweep (`reconcileStream`) retires them, and the cluster-wide
  * `POST /internal/significant_events/knowledge_indicators/_reset` deletes them
  * outright. A source id equals the stream name while streams are the source
  * universe, which is what lets the two tags be matched per source.
@@ -67,7 +67,7 @@ export interface IRulesManagementClient {
    * orphan-rule cleanup can reach sources whose rules outlived all of their
    * knowledge indicators.
    */
-  findSourceIdsWithOwnedRules(): Promise<string[]>;
+  findStreamNamesWithOwnedRules(): Promise<string[]>;
 
   /**
    * Every rule id carrying a tag that starts with `prefix`, in the space the

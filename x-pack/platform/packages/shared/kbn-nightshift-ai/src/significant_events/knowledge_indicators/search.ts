@@ -85,9 +85,9 @@ const compareFeatures = (
   if (byConfidence !== 0) {
     return byConfidence;
   }
-  const bySource = current.feature.source_id.localeCompare(next.feature.source_id);
-  if (bySource !== 0) {
-    return bySource;
+  const byStream = current.feature.stream_name.localeCompare(next.feature.stream_name);
+  if (byStream !== 0) {
+    return byStream;
   }
 
   const byId = current.feature.id.localeCompare(next.feature.id);
@@ -102,9 +102,9 @@ const compareQueries = (
   if (byScore !== 0) {
     return byScore;
   }
-  const bySource = current.source_id.localeCompare(next.source_id);
-  if (bySource !== 0) {
-    return bySource;
+  const byStream = current.stream_name.localeCompare(next.stream_name);
+  if (byStream !== 0) {
+    return byStream;
   }
 
   const byId = current.query.id.localeCompare(next.query.id);

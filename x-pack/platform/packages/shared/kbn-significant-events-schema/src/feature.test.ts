@@ -73,8 +73,8 @@ describe('normalizeFeatureSlugForMatching', () => {
   });
 
   it('keeps matching normalization out of UUID generation', () => {
-    const canonical = { id: 'okta', source_id: 'logs.test' };
-    const versioned = { id: 'okta-3.15.0', source_id: 'logs.test' };
+    const canonical = { id: 'okta', stream_name: 'logs.test' };
+    const versioned = { id: 'okta-3.15.0', stream_name: 'logs.test' };
 
     expect(normalizeFeatureSlugForMatching(versioned.id)).toBe(canonical.id);
     expect(computeFeatureUuid(versioned)).not.toBe(computeFeatureUuid(canonical));
@@ -82,15 +82,15 @@ describe('normalizeFeatureSlugForMatching', () => {
 });
 
 describe('computeFeatureUuid', () => {
-  it('derives the uuid from the source id and the normalized slug', () => {
-    expect(computeFeatureUuid({ id: '  Okta ', source_id: 'logs.test' })).toBe(
-      computeFeatureUuid({ id: 'okta', source_id: 'logs.test' })
+  it('derives the uuid from the stream name and the normalized slug', () => {
+    expect(computeFeatureUuid({ id: '  Okta ', stream_name: 'logs.test' })).toBe(
+      computeFeatureUuid({ id: 'okta', stream_name: 'logs.test' })
     );
   });
 
-  it('gives the same slug a different uuid per source', () => {
-    expect(computeFeatureUuid({ id: 'okta', source_id: 'logs.test' })).not.toBe(
-      computeFeatureUuid({ id: 'okta', source_id: 'logs.other' })
+  it('gives the same slug a different uuid per stream', () => {
+    expect(computeFeatureUuid({ id: 'okta', stream_name: 'logs.test' })).not.toBe(
+      computeFeatureUuid({ id: 'okta', stream_name: 'logs.other' })
     );
   });
 });

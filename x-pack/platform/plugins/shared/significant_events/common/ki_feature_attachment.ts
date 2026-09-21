@@ -14,20 +14,19 @@ export type KiFeatureAttachment = Attachment<typeof KI_FEATURE_ATTACHMENT_TYPE, 
 
 const FEATURE_ATTACHMENT_ORIGIN_SEPARATOR = '::';
 
-/** Origin is `<sourceId>::<featureId>`; the source id owns the feature the attachment points at. */
-export const encodeFeatureAttachmentOrigin = (sourceId: string, featureId: string): string =>
-  `${sourceId}${FEATURE_ATTACHMENT_ORIGIN_SEPARATOR}${featureId}`;
+export const encodeFeatureAttachmentOrigin = (streamName: string, featureId: string): string =>
+  `${streamName}${FEATURE_ATTACHMENT_ORIGIN_SEPARATOR}${featureId}`;
 
 export const decodeFeatureAttachmentOrigin = (
   origin: string
-): { sourceId: string; featureId: string } | undefined => {
+): { streamName: string; featureId: string } | undefined => {
   const separatorIndex = origin.indexOf(FEATURE_ATTACHMENT_ORIGIN_SEPARATOR);
   if (separatorIndex <= 0 || separatorIndex === origin.length - 1) {
     return undefined;
   }
 
   return {
-    sourceId: origin.slice(0, separatorIndex),
+    streamName: origin.slice(0, separatorIndex),
     featureId: origin.slice(separatorIndex + FEATURE_ATTACHMENT_ORIGIN_SEPARATOR.length),
   };
 };
