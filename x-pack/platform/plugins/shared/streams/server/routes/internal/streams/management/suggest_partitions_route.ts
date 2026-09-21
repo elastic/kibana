@@ -50,9 +50,9 @@ const boundedFilterCondition = z.union([
     gte: boundedStringOrNumberOrBoolean.optional(),
     contains: boundedStringOrNumberOrBoolean.optional(),
     startsWith: boundedStringOrNumberOrBoolean.optional(),
-  z.strictObject({
-    field: z.string().nonempty().max(COND_STR_MAX),
-    exists: z.boolean().optional(),
+    endsWith: boundedStringOrNumberOrBoolean.optional(),
+    range: boundedRangeCondition.optional(),
+    includes: boundedStringOrNumberOrBoolean.optional(),
   }),
   z.object({
     field: z.string().nonempty().max(COND_STR_MAX),
