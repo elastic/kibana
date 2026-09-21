@@ -22,9 +22,7 @@ const capabilities = (features: Record<string, Record<string, boolean>>): Capabi
 
 describe('hasObservabilityRulesV1Capability', () => {
   it('returns true for apm navLink', () => {
-    expect(hasObservabilityRulesV1Capability(capabilities({ navLinks: { apm: true } }))).toBe(
-      true
-    );
+    expect(hasObservabilityRulesV1Capability(capabilities({ navLinks: { apm: true } }))).toBe(true);
   });
 
   it('returns true for metrics navLink', () => {
@@ -46,9 +44,7 @@ describe('hasObservabilityRulesV1Capability', () => {
   });
 
   it('returns true for slo navLink', () => {
-    expect(hasObservabilityRulesV1Capability(capabilities({ navLinks: { slo: true } }))).toBe(
-      true
-    );
+    expect(hasObservabilityRulesV1Capability(capabilities({ navLinks: { slo: true } }))).toBe(true);
   });
 
   it('returns true for logs.show', () => {
@@ -68,9 +64,9 @@ describe('hasObservabilityAlertsV1Capability', () => {
   });
 
   it('returns true when rules v1 capability is present', () => {
-    expect(
-      hasObservabilityAlertsV1Capability(capabilities({ navLinks: { apm: true } }))
-    ).toBe(true);
+    expect(hasObservabilityAlertsV1Capability(capabilities({ navLinks: { apm: true } }))).toBe(
+      true
+    );
   });
 
   it('returns false without any observability capability', () => {
