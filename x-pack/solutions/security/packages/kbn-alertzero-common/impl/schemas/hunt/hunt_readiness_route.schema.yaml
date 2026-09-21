@@ -3,7 +3,7 @@ info:
   title: AlertZero Hunt readiness API endpoint
   version: '1'
 paths:
-  /internal/alertzero/threat_intel/readiness:
+  /internal/alertzero/hunt/readiness:
     get:
       x-codegen-enabled: true
       x-labels: [ess, serverless]
@@ -21,7 +21,7 @@ paths:
           in: query
           required: false
           schema:
-            $ref: '../components/threat_intel.schema.yaml#/components/schemas/HuntTechnology'
+            $ref: '../components/hunt.schema.yaml#/components/schemas/HuntTechnology'
           description: Limit the readiness check to a single technology
       responses:
         '200':
@@ -31,4 +31,4 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '../components/threat_intel.schema.yaml#/components/schemas/ResolvedIndexScope'
+                  $ref: '../components/hunt.schema.yaml#/components/schemas/ResolvedIndexScope'

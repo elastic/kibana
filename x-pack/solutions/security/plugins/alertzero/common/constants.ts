@@ -43,7 +43,7 @@ export const ALERTZERO_ATTACHMENT_TYPES = {
 // --- Hunt services (PR 3: hunt-watch-services-lift) ---
 
 /** Internal route namespace for the hunt services PR 4's Worker calls through `kibana.request`. */
-export const HUNT_INTERNAL_ROUTE_BASE = '/internal/alertzero/threat_intel' as const;
+export const HUNT_INTERNAL_ROUTE_BASE = '/internal/alertzero/hunt' as const;
 
 /** Reports index the hunt services read candidates from and write feedback to. */
 export const HUNT_REPORTS_INDEX = '.kibana-threat-reports' as const;
