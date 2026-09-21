@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MAX_NAME_LENGTH } from '@kbn/alerting-v2-schemas';
+import { MAX_BULK_ITEMS, MAX_NAME_LENGTH } from '@kbn/alerting-v2-schemas';
 import type { QueryLink } from '@kbn/significant-events-schema';
 import pLimit from 'p-limit';
 import {
@@ -20,10 +20,9 @@ const RULE_INSTALL_CONCURRENCY = 10;
 
 /**
  * KI titles are uncapped but Alerting v2 rejects a `metadata.name` over
- * {@link MAX_NAME_LENGTH}, so a long title would 400 on rule creation — and
- * {@link installQueries} runs as a `Promise.all`, taking the rest of the batch
- * with it. Trim the title, never the suffix: the suffix is how these rules are
- * recognised as metric-series rules.
+ * {@link MAX_NAME_LENGTH}, so a long title would fail rule creation. Trim the
+ * title, never the suffix: the suffix is how these rules are recognised as
+ * metric-series rules.
  */
 function toRuleName(title: string): string {
   const maxTitleLength = MAX_NAME_LENGTH - METRIC_SERIES_RULE_NAME_SUFFIX.length;
@@ -44,21 +43,46 @@ export function toRuleDefinition(queryLink: QueryLink): SignificantEventsRuleDef
   };
 }
 
+function partitionForBulk<T>(items: T[], maxItems: number): T[][] {
+  const chunks: T[][] = [];
+  for (let index = 0; index < items.length; index += maxItems) {
+    chunks.push(items.slice(index, index + maxItems));
+  }
+
+  if (chunks.length < 2 || chunks[chunks.length - 1]?.length !== 1) {
+    return chunks;
+  }
+
+  const tailStart = (chunks.length - 2) * maxItems;
+  const tail = items.slice(tailStart);
+  const midpoint = Math.ceil(tail.length / 2);
+  chunks.splice(chunks.length - 2, 2, tail.slice(0, midpoint), tail.slice(midpoint));
+  return chunks;
+}
+
 export async function installQueries(
   client: IRulesManagementClient,
   queriesToCreate: QueryLink[],
   queriesToUpdate: QueryLink[]
-) {
-  const limiter = pLimit(RULE_INSTALL_CONCURRENCY);
+): Promise<void> {
+  if (queriesToCreate.length > 0) {
+    const rules = queriesToCreate.map((queryLink) => ({
+      id: queryLink.rule_id,
+      definition: toRuleDefinition(queryLink),
+    }));
+    for (const chunk of partitionForBulk(rules, MAX_BULK_ITEMS)) {
+      await client.bulkCreateRules(chunk);
+    }
+  }
 
-  await Promise.all([
-    ...queriesToCreate.map((queryLink) =>
-      limiter(() => client.createRule(queryLink.rule_id, toRuleDefinition(queryLink)))
-    ),
-    ...queriesToUpdate.map((queryLink) =>
-      limiter(() => client.updateRule(queryLink.rule_id, toRuleDefinition(queryLink)))
-    ),
-  ]);
+  if (queriesToUpdate.length > 0) {
+    const limiter = pLimit(RULE_INSTALL_CONCURRENCY);
+    await Promise.all(
+      queriesToUpdate.map((queryLink) =>
+        limiter(() => client.updateRule(queryLink.rule_id, toRuleDefinition(queryLink)))
+      )
+    );
+  }
 }
 
 export async function uninstallQueries(

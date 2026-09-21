@@ -25,11 +25,18 @@ import {
 
 const FIND_PAGE_SIZE = 500;
 const RULE_EXISTS_CONCURRENCY = 10;
+const CONFLICT_UPDATE_CONCURRENCY = 10;
 
 export interface RulesAdapterV2Params {
   rulesClient: Pick<
     RulesClientApi,
-    'createRule' | 'updateRule' | 'bulkDeleteRules' | 'findRules' | 'getTags' | 'ruleExists'
+    | 'createRule'
+    | 'bulkCreateRules'
+    | 'updateRule'
+    | 'bulkDeleteRules'
+    | 'findRules'
+    | 'getTags'
+    | 'ruleExists'
   >;
   isServerless: boolean;
 }
@@ -70,6 +77,45 @@ export class RulesAdapterV2 implements IRulesManagementClient {
         }
         throw error;
       });
+  }
+
+  async bulkCreateRules(
+    rules: Array<{ id: string; definition: SignificantEventsRuleDefinition }>
+  ): Promise<void> {
+    const definitionsById = new Map(rules.map(({ id, definition }) => [id, definition]));
+    const { errors } = await this.rulesClient.bulkCreateRules({
+      rules: rules.map(({ id, definition }) => ({
+        ...toV2CreateBody({ definition, isServerless: this.isServerless }),
+        id,
+        enabled: true,
+      })),
+    });
+
+    const conflicts = errors.filter(
+      ({ error }) => error.code === ALERTING_ERROR_CODES.RULE_ALREADY_EXISTS
+    );
+    const limit = pLimit(CONFLICT_UPDATE_CONCURRENCY);
+    await Promise.all(
+      conflicts.map(({ id }) =>
+        limit(async () => {
+          const definition = definitionsById.get(id);
+          if (!definition) {
+            throw new Error(`V2 bulk create returned a conflict for unknown rule "${id}"`);
+          }
+          await this.updateRule(id, definition);
+        })
+      )
+    );
+
+    const fatal = errors.filter(
+      ({ error }) => error.code !== ALERTING_ERROR_CODES.RULE_ALREADY_EXISTS
+    );
+    if (fatal.length > 0) {
+      const detail = fatal
+        .map(({ id, error }) => `${id} [${error.code}]: ${error.message}`)
+        .join('; ');
+      throw new Error(`V2 bulk create failed for ${fatal.length} rule(s): ${detail}`);
+    }
   }
 
   async updateRule(id: string, definition: SignificantEventsRuleDefinition): Promise<void> {

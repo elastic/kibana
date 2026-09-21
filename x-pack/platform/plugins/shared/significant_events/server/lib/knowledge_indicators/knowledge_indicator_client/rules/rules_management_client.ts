@@ -22,6 +22,11 @@ export interface IRulesManagementClient {
   /** Idempotent create: implementations should handle 409 by updating in place. */
   createRule(id: string, definition: SignificantEventsRuleDefinition): Promise<void>;
 
+  /** Idempotent bulk create: implementations should handle per-rule 409s by updating in place. */
+  bulkCreateRules(
+    rules: Array<{ id: string; definition: SignificantEventsRuleDefinition }>
+  ): Promise<void>;
+
   /** Non-breaking patch: implementations should handle 404 by creating instead. */
   updateRule(id: string, definition: SignificantEventsRuleDefinition): Promise<void>;
 

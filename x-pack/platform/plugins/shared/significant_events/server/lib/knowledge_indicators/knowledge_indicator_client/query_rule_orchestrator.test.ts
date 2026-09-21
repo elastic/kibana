@@ -45,6 +45,7 @@ function createOrchestrator({
 } = {}) {
   const rulesManagementClient = {
     createRule: jest.fn().mockResolvedValue(undefined),
+    bulkCreateRules: jest.fn().mockResolvedValue(undefined),
     updateRule: jest.fn().mockResolvedValue(undefined),
     bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
   } as unknown as jest.Mocked<IRulesManagementClient>;
@@ -80,7 +81,26 @@ describe('QueryRuleOrchestrator', () => {
 
       await orchestrator.syncQueries(definition, [newQuery]);
 
-      expect(rulesManagementClient.createRule).toHaveBeenCalledTimes(1);
+      expect(rulesManagementClient.bulkCreateRules).toHaveBeenCalledTimes(1);
+    });
+
+    it('compensates created rule ids when bulk create fails', async () => {
+      const { orchestrator, rulesManagementClient, writer } = createOrchestrator();
+      const createError = new Error('bulk create failed');
+      rulesManagementClient.bulkCreateRules.mockRejectedValueOnce(createError);
+      const newQuery = makeQuery({
+        id: 'new-high',
+        severity_score: 80,
+        esql: { query: 'FROM logs | WHERE body.text:"critical"' },
+      });
+
+      await expect(orchestrator.syncQueries(definition, [newQuery])).rejects.toBe(createError);
+
+      const [createdRules] = rulesManagementClient.bulkCreateRules.mock.calls[0];
+      expect(rulesManagementClient.bulkDeleteRules).toHaveBeenCalledWith(
+        createdRules.map(({ id }) => id)
+      );
+      expect(writer.bulk).not.toHaveBeenCalled();
     });
 
     it('does not promote existing unbacked low-severity MATCH queries when syncing a new high-severity query', async () => {
@@ -104,11 +124,13 @@ describe('QueryRuleOrchestrator', () => {
         currentLinks: [existingLow],
       });
 
-      expect(rulesManagementClient.createRule).toHaveBeenCalledTimes(1);
-      expect(rulesManagementClient.createRule).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({ name: 'OOM errors (match count)' })
-      );
+      expect(rulesManagementClient.bulkCreateRules).toHaveBeenCalledTimes(1);
+      expect(rulesManagementClient.bulkCreateRules).toHaveBeenCalledWith([
+        expect.objectContaining({
+          id: expect.any(String),
+          definition: expect.objectContaining({ name: 'OOM errors (match count)' }),
+        }),
+      ]);
 
       const bulkOps = (writer.bulk as jest.Mock).mock.calls[0][1];
       const lowSevOp = bulkOps.find(
@@ -129,7 +151,7 @@ describe('QueryRuleOrchestrator', () => {
 
       await orchestrator.promoteQueries(definition, ['low-sev']);
 
-      expect(rulesManagementClient.createRule).toHaveBeenCalledTimes(1);
+      expect(rulesManagementClient.bulkCreateRules).toHaveBeenCalledTimes(1);
       const bulkOps = (writer.bulk as jest.Mock).mock.calls[0][1];
       expect(bulkOps[0].index.query.rule_backed).toBe(true);
     });
@@ -144,7 +166,7 @@ describe('QueryRuleOrchestrator', () => {
 
       await orchestrator.syncQueries(definition, [unsupported]);
 
-      expect(rulesManagementClient.createRule).not.toHaveBeenCalled();
+      expect(rulesManagementClient.bulkCreateRules).not.toHaveBeenCalled();
       const bulkOps = (writer.bulk as jest.Mock).mock.calls[0][1];
       expect(bulkOps[0].index.query.rule_backed).toBe(false);
       expect(bulkOps[0].index.query.id).toBe('keep-before-where');
@@ -168,7 +190,7 @@ describe('QueryRuleOrchestrator', () => {
 
       await orchestrator.syncQueries(definition, [next], { currentLinks: [existing] });
 
-      expect(rulesManagementClient.createRule).not.toHaveBeenCalled();
+      expect(rulesManagementClient.bulkCreateRules).not.toHaveBeenCalled();
       expect(rulesManagementClient.bulkDeleteRules).toHaveBeenCalledWith(['rule-was-backed']);
       const bulkOps = (writer.bulk as jest.Mock).mock.calls[0][1];
       expect(bulkOps[0].index.query.rule_backed).toBe(false);
@@ -189,7 +211,7 @@ describe('QueryRuleOrchestrator', () => {
 
       // Counted apart from STATS: the user's remedy is to rewrite the query.
       expect(result).toEqual({ promoted: 0, skipped_stats: 0, skipped_ineligible: 1 });
-      expect(rulesManagementClient.createRule).not.toHaveBeenCalled();
+      expect(rulesManagementClient.bulkCreateRules).not.toHaveBeenCalled();
     });
 
     it('counts skipped STATS queries under their own reason', async () => {
@@ -209,7 +231,7 @@ describe('QueryRuleOrchestrator', () => {
       const result = await orchestrator.promoteQueries(definition, ['stats-ki']);
 
       expect(result).toEqual({ promoted: 0, skipped_stats: 1, skipped_ineligible: 0 });
-      expect(rulesManagementClient.createRule).not.toHaveBeenCalled();
+      expect(rulesManagementClient.bulkCreateRules).not.toHaveBeenCalled();
     });
   });
 
@@ -309,6 +331,7 @@ describe('QueryRuleOrchestrator', () => {
     function makeReconcileRulesClient(): jest.Mocked<IRulesManagementClient> {
       return {
         createRule: jest.fn().mockResolvedValue(undefined),
+        bulkCreateRules: jest.fn().mockResolvedValue(undefined),
         updateRule: jest.fn().mockResolvedValue(undefined),
         bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
         findExistingRuleIds: jest.fn().mockResolvedValue([]),
