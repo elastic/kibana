@@ -249,7 +249,7 @@ editor:
         - feature_workflowsManagement.all
         - feature_alertzero.all
         - feature_agenticInvestigations.all
-        - feature_agenticInvestigations.escalations_all
+        - feature_agenticInvestigations.escalations_read
         - feature_workflowsManagement.workflow_update_managed
       resources: '*'
   run_as: []
