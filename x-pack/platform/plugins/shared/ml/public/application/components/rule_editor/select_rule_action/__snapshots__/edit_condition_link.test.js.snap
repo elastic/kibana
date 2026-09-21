@@ -37,7 +37,7 @@ exports[`EditConditionLink renders for a condition using actual 1`] = `
     class="euiFlexItem emotion-euiFlexItem-growZero"
   >
     <button
-      class="euiLink emotion-euiLink-primary"
+      class="euiLink emotion-euiLink-text"
       type="button"
     >
       Update
@@ -83,7 +83,7 @@ exports[`EditConditionLink renders for a condition using diff from typical 1`] =
     class="euiFlexItem emotion-euiFlexItem-growZero"
   >
     <button
-      class="euiLink emotion-euiLink-primary"
+      class="euiLink emotion-euiLink-text"
       type="button"
     >
       Update
@@ -129,7 +129,7 @@ exports[`EditConditionLink renders for a condition using typical 1`] = `
     class="euiFlexItem emotion-euiFlexItem-growZero"
   >
     <button
-      class="euiLink emotion-euiLink-primary"
+      class="euiLink emotion-euiLink-text"
       type="button"
     >
       Update
