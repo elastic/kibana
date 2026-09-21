@@ -7,6 +7,8 @@
 
 import {
   SYSTEM_SECURITY_WATCH_CATALOG,
+  SYSTEM_SECURITY_WATCH_DEEP_ID,
+  SYSTEM_SECURITY_WATCH_DETECTION_ID,
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
   SYSTEM_SECURITY_WATCH_HUNT_ID,
 } from '../../constants';
@@ -15,6 +17,7 @@ import {
   coverageFromSchedule,
   createCatalogWatchPlaceholder,
   isOnDutyNow,
+  resolveWatchAccent,
 } from './watch_helpers';
 import type { WatchScheduleCoverageInput } from './watch_helpers';
 
@@ -132,5 +135,27 @@ describe('createCatalogWatchPlaceholder', () => {
 
   it('does not mark catalog Watches as beta', () => {
     expect(createCatalogWatchPlaceholder(SYSTEM_SECURITY_WATCH_HUNT_ID).lifecycle).toBeUndefined();
+  });
+
+  it('orders Detection before Forensics', () => {
+    const detection = createCatalogWatchPlaceholder(SYSTEM_SECURITY_WATCH_DETECTION_ID);
+    const forensics = createCatalogWatchPlaceholder(SYSTEM_SECURITY_WATCH_DEEP_ID);
+    expect(detection.sortOrder).toBeLessThan(forensics.sortOrder);
+  });
+});
+
+describe('resolveWatchAccent', () => {
+  const colors = {
+    vis: { euiColorVis0: 'rgb(vis-0)', euiColorVis8: 'rgb(vis-8)' },
+    textAssistance: 'rgb(assistance)',
+  };
+
+  it('resolves vis tokens and textAssistance', () => {
+    expect(resolveWatchAccent(colors, 'euiColorVis0')).toBe('rgb(vis-0)');
+    expect(resolveWatchAccent(colors, 'textAssistance')).toBe('rgb(assistance)');
+  });
+
+  it('passes through an already-resolved CSS color', () => {
+    expect(resolveWatchAccent(colors, '#16b3a6')).toBe('#16b3a6');
   });
 });

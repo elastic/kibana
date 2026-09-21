@@ -11,6 +11,7 @@ import { EuiListGroup, EuiListGroupItem, EuiSkeletonText, EuiTitle, useEuiTheme 
 import { useHistory } from 'react-router-dom';
 import {
   compareWatchesForDisplay,
+  resolveWatchAccent,
   SYSTEM_SECURITY_WATCH_OFFICER_ID,
   type Watch,
 } from '@kbn/alertzero-common';
@@ -94,6 +95,7 @@ export const AlertZeroWatchesNav: React.FC<AlertZeroWatchesNavProps> = ({ active
 const WatchNavItem: React.FC<{ watch: Watch; isActive: boolean }> = ({ watch, isActive }) => {
   const { euiTheme } = useEuiTheme();
   const history = useHistory();
+  const accent = resolveWatchAccent(euiTheme.colors, watch.color);
   const path = `/watches/${encodeURIComponent(watch.id)}`;
 
   const label = (
@@ -112,7 +114,7 @@ const WatchNavItem: React.FC<{ watch: Watch; isActive: boolean }> = ({ watch, is
           width: ${euiTheme.size.s};
           height: ${euiTheme.size.s};
           border-radius: 50%;
-          background: ${watch.color};
+          background: ${accent};
         `}
       />
       <span

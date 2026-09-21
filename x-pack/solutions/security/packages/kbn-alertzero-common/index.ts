@@ -109,11 +109,14 @@ export {
   coverageFromSchedule,
   createCatalogWatchPlaceholder,
   isOnDutyNow,
+  resolveWatchAccent,
 } from './impl/watches/watch_helpers';
 export type {
   CatalogWatchId,
+  WatchAccentKey,
   WatchDisplaySortable,
   WatchScheduleCoverageInput,
+  WatchVisColorKey,
 } from './impl/watches/watch_helpers';
 
 export {
