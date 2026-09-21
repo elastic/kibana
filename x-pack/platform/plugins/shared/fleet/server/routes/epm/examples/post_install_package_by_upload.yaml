@@ -59,7 +59,8 @@ responses:
       application/json:
         examples:
           insufficientPrivilegesExample:
-            description: 'Caller lacks rules-all in the destination Space'
+            summary: 'Missing rules-all privilege'
+            description: 'Caller lacks rules-all in the destination space'
             value:
               statusCode: 403
               error: 'Forbidden'
