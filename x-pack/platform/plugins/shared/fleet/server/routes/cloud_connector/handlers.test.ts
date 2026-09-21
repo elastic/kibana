@@ -8,14 +8,18 @@
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
+import { CloudConnectorRoleArnPropagationError } from '../../errors';
 import { appContextService } from '../../services/app_context';
+import { cloudConnectorService } from '../../services';
 import { verifyCloudConnectorIacKey } from '../../services/cloud_connectors';
 
-import { verifyCloudConnectorIacKeyHandler } from './handlers';
+import { updateCloudConnectorHandler, verifyCloudConnectorIacKeyHandler } from './handlers';
 
 jest.mock('../../services/app_context');
 jest.mock('../../services', () => ({
-  cloudConnectorService: {},
+  cloudConnectorService: {
+    update: jest.fn(),
+  },
   packagePolicyService: {},
 }));
 jest.mock('../../services/cloud_connectors', () => ({
@@ -23,8 +27,21 @@ jest.mock('../../services/cloud_connectors', () => ({
 }));
 
 const mockedVerify = jest.mocked(verifyCloudConnectorIacKey);
+const mockedUpdate = jest.mocked(cloudConnectorService.update);
 
 const buildContext = () => ({ fleet: Promise.resolve({ internalSoClient: {} }) } as any);
+
+const buildUpdateContext = () =>
+  ({
+    fleet: Promise.resolve({ internalSoClient: {} }),
+    core: Promise.resolve({
+      elasticsearch: {
+        client: {
+          asInternalUser: {},
+        },
+      },
+    }),
+  } as any);
 
 describe('verifyCloudConnectorIacKeyHandler', () => {
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
@@ -114,6 +131,61 @@ describe('verifyCloudConnectorIacKeyHandler', () => {
     expect(response.customError).toHaveBeenCalledWith({
       statusCode: 500,
       body: { message: 'An unexpected error occurred while verifying the IaC key' },
+    });
+  });
+});
+
+describe('updateCloudConnectorHandler', () => {
+  let response: ReturnType<typeof httpServerMock.createResponseFactory>;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    response = httpServerMock.createResponseFactory();
+    jest.spyOn(appContextService, 'getLogger').mockReturnValue(loggingSystemMock.createLogger());
+  });
+
+  it('surfaces CloudConnectorRoleArnPropagationError as 500 with detail', async () => {
+    const propagationMessage =
+      'Failed to update role ARN on 1 policy (ids: p1). All previously updated policies were reverted successfully; the connector is unchanged.';
+    mockedUpdate.mockRejectedValueOnce(
+      new CloudConnectorRoleArnPropagationError(propagationMessage, {
+        updateFailed: ['p1'],
+        revertFailed: [],
+      })
+    );
+    const request = httpServerMock.createKibanaRequest({
+      params: { cloudConnectorId: 'cc-1' },
+      body: {
+        vars: { role_arn: { type: 'text', value: 'arn:aws:iam::123456789012:role/New' } },
+      },
+    });
+
+    await updateCloudConnectorHandler(buildUpdateContext(), request, response);
+
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 500,
+      body: {
+        message: propagationMessage,
+        attributes: {
+          updateFailed: ['p1'],
+          revertFailed: [],
+        },
+      },
+    });
+  });
+
+  it('surfaces other errors as 400', async () => {
+    mockedUpdate.mockRejectedValueOnce(new Error('boom'));
+    const request = httpServerMock.createKibanaRequest({
+      params: { cloudConnectorId: 'cc-1' },
+      body: { vars: {} },
+    });
+
+    await updateCloudConnectorHandler(buildUpdateContext(), request, response);
+
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 400,
+      body: { message: 'boom' },
     });
   });
 });
