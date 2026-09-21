@@ -19,8 +19,7 @@ import {
 import { css } from '@emotion/react';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { IconChartHeatmap } from '@kbn/chart-icons';
-import { tacticOrder as mitreTacticOrder } from '../../../../common/detection_engine/mitre/mitre_tactics_order';
-import { tactics as mitreTactics } from '../../../../common/detection_engine/mitre/mitre_tactics_techniques';
+import { useMitreConfiguration } from '../../../common/hooks/mitre/use_mitre_configuration';
 import { AnomaliesSwimlane } from './anomalies_swimlane';
 import {
   ENTITY_ANOMALY_TIMELINE_TITLE,
@@ -31,10 +30,6 @@ import { useAnomalyBands } from '../recent_anomalies/anomaly_bands';
 import { getAnomalyChartStyling } from '../recent_anomalies';
 import { AnomaliesBorderedVisPanel } from './anomalies_bordered_vis_panel';
 import { MitreAttackChainPlaceholder } from './mitre/components/mitre_attack_chain_placeholder';
-
-const tacticNames = [...mitreTactics]
-  .sort((a, b) => mitreTacticOrder.indexOf(a.id) - mitreTacticOrder.indexOf(b.id))
-  .map(({ name }) => name);
 
 const TACTIC_ACCESSOR = 'mitre_tactic';
 
@@ -66,9 +61,22 @@ export const AnomalyTabTimelineSection: React.FC<AnomalyTabTimelineProps> = ({
   isEmpty = false,
   isLoading = false,
 }) => {
+  const {
+    tactics,
+    isLoading: isMitreLoading,
+    isError: isMitreError,
+  } = useMitreConfiguration({ types: ['tactic'] });
+  const tacticNames = useMemo(
+    () => [...tactics].sort((a, b) => a.position - b.position).map(({ name }) => name),
+    [tactics]
+  );
+
   const { bands } = useAnomalyBands();
   const styling = getAnomalyChartStyling(true);
-  const showPlaceholderPanel = isEmpty || isLoading;
+  // Gate on MITRE loading or error so the chart never renders with zero tactic rows.
+  // A failed MITRE fetch falls through to the empty-state placeholder rather than
+  // producing a swimlane with no Y-axis entries.
+  const showPlaceholderPanel = isEmpty || isLoading || isMitreLoading || isMitreError;
 
   const mitreTacticNames = useMemo(() => {
     if (selectedTactic && tacticNames.includes(selectedTactic)) {
@@ -76,7 +84,7 @@ export const AnomalyTabTimelineSection: React.FC<AnomalyTabTimelineProps> = ({
     }
     const tacticsWithAnomalies = new Set(anomalies.flatMap((a) => a.threatTactics ?? []));
     return tacticNames.filter((t) => tacticsWithAnomalies.has(t));
-  }, [selectedTactic, anomalies]);
+  }, [selectedTactic, anomalies, tacticNames]);
   const mitreTacticLabels = useMemo(
     () =>
       mitreTacticNames.map((mitreTacticName) => ({ id: mitreTacticName, label: mitreTacticName })),
@@ -126,7 +134,7 @@ export const AnomalyTabTimelineSection: React.FC<AnomalyTabTimelineProps> = ({
         {showPlaceholderPanel ? (
           <AnomaliesBorderedVisPanel>
             <MitreAttackChainPlaceholder>
-              {isLoading ? (
+              {isLoading || isMitreLoading ? (
                 <EuiLoadingChart size="l" />
               ) : (
                 <EmptyPlaceholder icon={IconChartHeatmap} />
