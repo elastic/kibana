@@ -12,6 +12,7 @@ import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/
 import { FieldsAccordion } from './fields_accordion';
 import { FieldsGroupNames } from '../../types';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EuiNotificationBadge } from '@elastic/eui';
 
@@ -140,6 +141,66 @@ describe('UnifiedFieldList <FieldsAccordion />', () => {
       setup({ extraAction });
 
       expect(screen.getByTestId('extra-action')).toBeVisible();
+    });
+  });
+
+  describe('deselect selected fields button', () => {
+    it('should render next to the selected fields count', () => {
+      setup({
+        groupName: FieldsGroupNames.SelectedFields,
+        id: 'fieldListGroupedSelectedFields',
+        label: 'Selected fields',
+        fieldsCount: 2,
+        paginatedFields: dataView.fields.slice(0, 2),
+      });
+
+      expect(
+        screen.getByTestId('fieldListGroupedSelectedFields-deselectSelectedFields')
+      ).toBeVisible();
+      expect(screen.getByTestId('fieldListGroupedSelectedFields-count')).toBeVisible();
+    });
+
+    it('should not render for other field groups', () => {
+      setup({
+        groupName: FieldsGroupNames.AvailableFields,
+        id: 'fieldListGroupedAvailableFields',
+      });
+
+      expect(
+        screen.queryByTestId('fieldListGroupedAvailableFields-deselectSelectedFields')
+      ).not.toBeInTheDocument();
+    });
+
+    it('should not render when there are no selected fields', () => {
+      setup({
+        groupName: FieldsGroupNames.SelectedFields,
+        id: 'fieldListGroupedSelectedFields',
+        fieldsCount: 0,
+        paginatedFields: [],
+      });
+
+      expect(
+        screen.queryByTestId('fieldListGroupedSelectedFields-deselectSelectedFields')
+      ).not.toBeInTheDocument();
+    });
+
+    it('should call onDeselectSelectedFields when clicked', async () => {
+      const onDeselectSelectedFields = jest.fn();
+
+      setup({
+        groupName: FieldsGroupNames.SelectedFields,
+        id: 'fieldListGroupedSelectedFields',
+        label: 'Selected fields',
+        fieldsCount: 2,
+        paginatedFields: dataView.fields.slice(0, 2),
+        onDeselectSelectedFields,
+      });
+
+      await userEvent.click(
+        screen.getByTestId('fieldListGroupedSelectedFields-deselectSelectedFields')
+      );
+
+      expect(onDeselectSelectedFields).toHaveBeenCalledTimes(1);
     });
   });
 });

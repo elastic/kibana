@@ -56,6 +56,7 @@ export interface FieldListGroupedProps<T extends FieldListItem> {
   localStorageKeyPrefix?: string; // Your app name: "discover", "lens", etc. If not provided, sections state would not be persisted.
   muteScreenReader?: boolean; // Changes aria-live from "polite" to "off" - it's useful when the numbers change due to something not directly related to the field list and we want to avoid announcing it.
   'data-test-subj'?: string;
+  onDeselectSelectedFields?: () => void;
 }
 
 function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
@@ -68,6 +69,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
   muteScreenReader,
   localStorageKeyPrefix,
   'data-test-subj': dataTestSubject = 'fieldListGrouped',
+  onDeselectSelectedFields,
 }: FieldListGroupedProps<T>) {
   const styles = useMemoCss(componentStyles);
 
@@ -369,6 +371,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
                       </EuiSkipLink>
                     ) : null
                   }
+                  onDeselectSelectedFields={onDeselectSelectedFields}
                 />
                 <EuiSpacer size="m" />
               </Fragment>
