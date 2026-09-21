@@ -47,19 +47,20 @@ const MATCH_CORE_GUIDELINE_BULLETS = [
 const MATCH_CRITERIA = `<match_criteria>
 A candidate covers almost the same use case when all of these hold:
 - Same security objective: it detects the same threat behaviour, not merely a related one.
-- Same defining trigger: the condition that fires the rule is the same (e.g. repeated authentication failures, audit log clearing, port enumeration).
-- Same grouping and direction: it aggregates over the same entity in the same direction (e.g. many failures against one account, not one account against many hosts) and preserves any required sequence.
+- Similar grouping and direction: it aggregates over the similar entity( broadly representing same concept) in the same direction (e.g. many failures against one account, not one account against many hosts) and preserves any required sequence.
 - Compatible platform and technology: the candidate targets the same OS platform, product, or vendor as the source rule, or a subset of it. A candidate scoped to a different platform or product is never a match, even when the attack technique is identical.
 
 These may differ and do not disqualify a candidate:
+- Technique of the detection. For example, a threshold rule can match a Machine learning rule if security objective is broadly same.
 - Threshold values and time windows.
 - The specific integration or telemetry source, as long as it stays within the platform the source rule targets.
 - How narrowly the candidate is scoped, as long as it stays inside the source rule's scope.
 
 These disqualify a candidate even when the topic looks similar:
 - It reverses the grouping direction.
-- It replaces the measured quantity with a different one (e.g. aggregate traffic volume instead of distinct destination ports).
-- It restricts the trigger to a different condition.
+- It replaces the measured quantity with a different kind/concept which changes the objective of the rule.
+  - e.g. counting distinct destination ports instead of counting bytes or packets transferred
+- It restricts the trigger to a different condition that changes the security objective.
 </match_criteria>`;
 
 const MATCH_GUIDELINES = `${MATCH_CRITERIA}
@@ -94,7 +95,7 @@ A: Please find the resulting JSON response below:
 \`\`\`json
 {{
   "match": "Linux User Account Creation",
-  "summary": "## Prebuilt Rule Matching Summary\\nThe source rule matches Elastic prebuilt rule \\"Linux User Account Creation\\": same security objective, same defining trigger, and the same Linux platform. The prebuilt rule is narrower, relying on Elastic Defend process events rather than the source rule's syslog data, which the criteria permit."
+  "summary": "## Prebuilt Rule Matching Summary\\nThe source rule matches Elastic prebuilt rule \`<Rule Name>\`: same security objective, same defining trigger, and the same Linux platform. The prebuilt rule is narrower, relying on Elastic Defend process events rather than the source rule's syslog data, which the criteria permit. \n\n ### Candidates Considered : \n - \`<Rule Name>\`: <Rule one line Description> "
 }}
 \`\`\`
 </example_response_match>
@@ -104,7 +105,7 @@ A: Please find the resulting JSON response below:
 \`\`\`json
 {{
   "match": "",
-  "summary": "## Prebuilt Rule Matching Summary\\nThe closest candidate, \\"Spike in Network Traffic\\", measures aggregate traffic volume, while the source rule counts distinct destination ports per host. The measured quantity is replaced rather than narrowed, so no Elastic pre-built rule covers this source rule."
+  "summary": "## Prebuilt Rule Matching Summary\\nThe closest candidate, \`<Rule Name>\`, measures aggregate traffic volume, while the source rule counts distinct destination ports per host. The measured quantity is replaced rather than narrowed, so no Elastic pre-built rule covers this source rule.\n\n ### Canidates Considered: \n - \`<Rule Name>\`: <Rule one line Description> "
 }}
 \`\`\`
 </example_response_no_match>`;
