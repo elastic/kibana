@@ -10,6 +10,11 @@ import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { waitFor } from '../wait_for';
 
+interface LaunchTaskResult {
+  taskRunThreshold: Date;
+  eventQueryStart: Date;
+}
+
 export const taskHasRun = async (taskId: string, kbn: KbnClient, after: Date): Promise<boolean> => {
   const task = await kbn.savedObjects.get({
     type: 'task',
@@ -26,12 +31,14 @@ export const launchTask = async (
   taskId: string,
   kbn: KbnClient,
   logger: ToolingLog
-): Promise<Date> => {
+): Promise<LaunchTaskResult> => {
   logger.info(`Launching task ${taskId}`);
-  let after = new Date();
+  let eventQueryStart = new Date();
+  let taskRunThreshold = new Date();
 
   await waitFor(
     async () => {
+      const attemptStartedAt = new Date();
       const { data } = await kbn.request<{ error?: string; conflict?: boolean }>({
         method: 'POST',
         path: `/internal/ftr/task_manager/${taskId}/run_soon`,
@@ -43,8 +50,9 @@ export const launchTask = async (
       if (data.error) {
         throw new Error(`Failed to launch task ${taskId}: ${data.error}`);
       }
+      eventQueryStart = attemptStartedAt;
       // runSoon sets runAt to now, so capture the threshold after it returns: taskHasRun then stays false until the post-run reschedule.
-      after = new Date();
+      taskRunThreshold = new Date();
       return true;
     },
     'launchTask',
@@ -53,5 +61,5 @@ export const launchTask = async (
 
   logger.info(`Task ${taskId} launched`);
 
-  return after;
+  return { taskRunThreshold, eventQueryStart };
 };

@@ -276,11 +276,11 @@ export default ({ getService }: FtrProviderContext) => {
       const index = params.index;
       const policy = params.policyName;
 
-      const runAt = await launchTask(TASK_ID, kibanaServer, logger);
+      const { taskRunThreshold, eventQueryStart } = await launchTask(TASK_ID, kibanaServer, logger);
       const opts = {
         eventTypes: params.eventTypes,
         withTimeoutMs: 1000,
-        fromTimestamp: runAt.toISOString(),
+        fromTimestamp: eventQueryStart.toISOString(),
       };
 
       // .ds-<ds-name>-YYYY.MM.DD-NNNNNN
@@ -311,7 +311,7 @@ export default ({ getService }: FtrProviderContext) => {
               })
             );
 
-          const hasRun = await taskHasRun(TASK_ID, kibanaServer, runAt);
+          const hasRun = await taskHasRun(TASK_ID, kibanaServer, taskRunThreshold);
 
           return hasRun && events.length > 0;
         },
