@@ -8,21 +8,22 @@
 import { isEqual } from 'lodash';
 import type {
   Conversation,
+  ConversationEvent,
   ConversationRound,
   RoundInput,
-  TimelineEvent,
 } from '@kbn/agent-builder-common';
 import {
   CONVERSATION_EVENT_ID_DELIMITER,
   createAttachmentPermanentDeleteBlockedError,
+  parseExecutionId,
 } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { isAttachmentReferencedInRounds } from '../../attachments/attachment_guards';
 import { eventsToRounds } from './events_to_rounds';
-import { isRoundDerivedEventId, parseExecutionId, roundToEvents } from './rounds_to_events';
+import { isRoundDerivedEventId, roundToEvents } from './rounds_to_events';
 
 /** True when a round's stored timeline spans more than one execution (a HITL resume). */
-const hasResumeExecution = (roundId: string, storedEvents: TimelineEvent[]): boolean =>
+const hasResumeExecution = (roundId: string, storedEvents: ConversationEvent[]): boolean =>
   storedEvents.some((event) => {
     const execution = event.execution_id ? parseExecutionId(event.execution_id) : undefined;
     return execution?.roundId === roundId && execution.index > 0;
@@ -32,8 +33,8 @@ const hasResumeExecution = (roundId: string, storedEvents: TimelineEvent[]): boo
 const roundIdOfDerivedEvent = (id: string): string => id.split(CONVERSATION_EVENT_ID_DELIMITER)[0];
 
 /** Stored round-derived events grouped by round id, in order of first stored position. */
-const storedRoundBlocks = (stored: TimelineEvent[]): Map<string, TimelineEvent[]> => {
-  const blocks = new Map<string, TimelineEvent[]>();
+const storedRoundBlocks = (stored: ConversationEvent[]): Map<string, ConversationEvent[]> => {
+  const blocks = new Map<string, ConversationEvent[]>();
   for (const event of stored) {
     if (!isRoundDerivedEventId(event.id)) {
       continue;
@@ -56,9 +57,9 @@ const storedRoundBlocks = (stored: TimelineEvent[]): Map<string, TimelineEvent[]
  */
 const eventsForKnownRound = (
   round: ConversationRound,
-  storedForRound: TimelineEvent[],
+  storedForRound: ConversationEvent[],
   conversation: Conversation
-): TimelineEvent[] => {
+): ConversationEvent[] => {
   if (!hasResumeExecution(round.id, storedForRound)) {
     return roundToEvents(round, conversation);
   }
@@ -71,7 +72,7 @@ const eventsForKnownRound = (
     return {
       ...event,
       data: { ...data, attachment_refs: round.input.attachment_refs },
-    } as TimelineEvent;
+    };
   });
 };
 
@@ -86,12 +87,12 @@ const eventsForKnownRound = (
  * `rounds` is authoritative for rounds it deliberately removed. Rounds with no stored block yet
  * are appended in `rounds` order. Additive events are re-inserted by `created_at`.
  */
-export const reconcileEvents = (merged: Conversation): TimelineEvent[] => {
+export const reconcileEvents = (merged: Conversation): ConversationEvent[] => {
   const stored = merged.events ?? [];
   const additive = stored.filter((event) => !isRoundDerivedEventId(event.id));
   const roundsById = new Map(merged.rounds.map((round) => [round.id, round]));
 
-  const roundDerived: TimelineEvent[] = [];
+  const roundDerived: ConversationEvent[] = [];
   const blocks = storedRoundBlocks(stored);
   for (const [roundId, block] of blocks) {
     const round = roundsById.get(roundId);
