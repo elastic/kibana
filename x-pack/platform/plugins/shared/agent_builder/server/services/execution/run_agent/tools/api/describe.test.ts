@@ -62,7 +62,7 @@ describe('createDescribeApiTool', () => {
   });
 
   it('has the correct id', () => {
-    const tool = createDescribeApiTool();
+    const tool = createDescribeApiTool({ discoveryEnabled: true });
     expect(tool.id).toBe(internalTools.describeApi);
   });
 
@@ -84,7 +84,7 @@ describe('createDescribeApiTool', () => {
       })
     );
 
-    const tool = createDescribeApiTool();
+    const tool = createDescribeApiTool({ discoveryEnabled: true });
     const result = (await tool.handler(
       { target: 'elasticsearch', api: 'indices.create' },
       agentBuilderMocks.tools.createHandlerContext()
@@ -114,7 +114,7 @@ describe('createDescribeApiTool', () => {
       })
     );
 
-    const tool = createDescribeApiTool();
+    const tool = createDescribeApiTool({ discoveryEnabled: true });
     const result = (await tool.handler(
       { target: 'elasticsearch', api: 'search' },
       agentBuilderMocks.tools.createHandlerContext()
@@ -146,7 +146,7 @@ describe('createDescribeApiTool', () => {
       })
     );
 
-    const tool = createDescribeApiTool();
+    const tool = createDescribeApiTool({ discoveryEnabled: true });
     const result = (await tool.handler(
       { target: 'elasticsearch', api: 'indices.create' },
       agentBuilderMocks.tools.createHandlerContext()
@@ -183,7 +183,7 @@ describe('createDescribeApiTool', () => {
       })
     );
 
-    const tool = createDescribeApiTool();
+    const tool = createDescribeApiTool({ discoveryEnabled: true });
     const result = (await tool.handler(
       { target: 'elasticsearch', api: 'bulk' },
       agentBuilderMocks.tools.createHandlerContext()
@@ -212,7 +212,7 @@ describe('createDescribeApiTool', () => {
     );
 
     const context = agentBuilderMocks.tools.createHandlerContext();
-    const tool = createDescribeApiTool();
+    const tool = createDescribeApiTool({ discoveryEnabled: true });
     const result = (await tool.handler(
       { target: 'elasticsearch', api: 'indices.create' },
       context
@@ -237,7 +237,7 @@ describe('createDescribeApiTool', () => {
       })
     );
 
-    const tool = createDescribeApiTool();
+    const tool = createDescribeApiTool({ discoveryEnabled: true });
     const result = (await tool.handler(
       { target: 'elasticsearch', api: 'indices.delete' },
       agentBuilderMocks.tools.createHandlerContext()
@@ -259,7 +259,7 @@ describe('createDescribeApiTool', () => {
       })
     );
 
-    const tool = createDescribeApiTool();
+    const tool = createDescribeApiTool({ discoveryEnabled: true });
     const result = (await tool.handler(
       { target: 'elasticsearch', api: 'info' },
       agentBuilderMocks.tools.createHandlerContext()
@@ -272,7 +272,7 @@ describe('createDescribeApiTool', () => {
   it('returns a helpful error for an unknown API identifier', async () => {
     loadApi.mockRejectedValue(new UnknownApiError('does.not.exist'));
 
-    const tool = createDescribeApiTool();
+    const tool = createDescribeApiTool({ discoveryEnabled: true });
     const result = (await tool.handler(
       { target: 'elasticsearch', api: 'does.not.exist' },
       agentBuilderMocks.tools.createHandlerContext()
@@ -281,12 +281,38 @@ describe('createDescribeApiTool', () => {
     expect(result.results[0].type).toBe(ToolResultType.error);
     const data = result.results[0].data as ErrorResultData;
     expect(data.message).toContain('Unknown API identifier');
+    expect(data.message).toContain(internalTools.discoverApis);
+  });
+
+  describe('when API discovery is disabled', () => {
+    it('never points the model at the discovery tool from its description', () => {
+      const tool = createDescribeApiTool({ discoveryEnabled: false });
+
+      expect(tool.description).not.toContain(internalTools.discoverApis);
+      expect(tool.description).toContain(internalTools.executeApi);
+    });
+
+    it('spells out the identifier format instead of the discovery tool on an unknown API', async () => {
+      loadApi.mockRejectedValue(new UnknownApiError('does.not.exist'));
+
+      const tool = createDescribeApiTool({ discoveryEnabled: false });
+      const result = (await tool.handler(
+        { target: 'elasticsearch', api: 'does.not.exist' },
+        agentBuilderMocks.tools.createHandlerContext()
+      )) as ToolHandlerStandardReturn;
+
+      expect(result.results[0].type).toBe(ToolResultType.error);
+      const data = result.results[0].data as ErrorResultData;
+      expect(data.message).not.toContain(internalTools.discoverApis);
+      expect(data.message).toContain('no API named "does.not.exist"');
+      expect(data.message).toContain('namespace.name');
+    });
   });
 
   it('returns an error result when loading fails for another reason', async () => {
     loadApi.mockRejectedValue(new Error('network down'));
 
-    const tool = createDescribeApiTool();
+    const tool = createDescribeApiTool({ discoveryEnabled: true });
     const result = (await tool.handler(
       { target: 'elasticsearch', api: 'indices.create' },
       agentBuilderMocks.tools.createHandlerContext()

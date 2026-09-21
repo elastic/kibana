@@ -14,8 +14,7 @@ import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { defineCreateServiceAccountRoute } from './create';
 import { createServiceAccountBodySchema } from './schemas';
 import { SERVICE_ACCOUNT_NAME_MAX_LENGTH } from '../../../common/service_accounts';
-import { EsServiceAccounts, type ServiceAccountsServiceStart } from '../../service_accounts';
-import { createNotImplementedWorkloadBindings } from '../../service_accounts/bindings';
+import type { ServiceAccountsServiceStart } from '../../service_accounts';
 import { serviceAccountsServiceMock } from '../../service_accounts/service_accounts_service.mock';
 import { routeDefinitionParamsMock } from '../index.mock';
 
@@ -23,14 +22,7 @@ const enabledConfig = { serviceAccounts: { enabled: true } };
 
 const requestBody = { name: 'nightshift-relay' };
 
-const serviceAccount = {
-  id: 'service-account-id',
-  type: 'project' as const,
-  name: 'nightshift-relay',
-  organization_id: 'mock-organization-id',
-  role_assignments: { limit: { access: ['application'], resource: ['project'] } },
-  assumable_by: [],
-};
+const serviceAccount = { id: 'service-account-id', name: 'nightshift-relay' };
 
 describe('Create service account route', () => {
   function getMockContext(
@@ -93,7 +85,8 @@ describe('Create service account route', () => {
       expect(routeConfig.security?.authz).toEqual({
         enabled: false,
         reason:
-          'This route delegates authorization to the upstream UIAM service via the forwarded access token',
+          'This route delegates authorization to the service account provider: UIAM via the ' +
+          "forwarded access token, or Elasticsearch via the caller's `manage_security` cluster privilege",
       });
     });
 
@@ -140,15 +133,14 @@ describe('Create service account route', () => {
     });
   });
 
-  it('reaches the Elasticsearch backend without serverless context', async () => {
-    const { routeHandler } = setup({
-      serviceAccounts: {
-        backend: new EsServiceAccounts(),
-        workloads: createNotImplementedWorkloadBindings(),
-      },
-      serverless: false,
-    });
-    expect((await callRoute(routeHandler)).status).toBe(501);
+  it('delegates to whichever backend is selected outside serverless', async () => {
+    const { routeHandler, serviceAccounts } = setup({ serverless: false });
+    serviceAccounts.backend.create.mockResolvedValue(serviceAccount);
+
+    const response = await callRoute(routeHandler);
+
+    expect(response.status).toBe(200);
+    expect(response.payload).toEqual(serviceAccount);
   });
 
   it.each([400, 401, 403, 501])('preserves backend status %s', async (statusCode) => {
