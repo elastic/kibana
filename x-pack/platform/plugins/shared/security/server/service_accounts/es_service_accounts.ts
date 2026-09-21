@@ -19,13 +19,13 @@ import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-serv
 import { z } from '@kbn/zod';
 
 import { bestEffortUserProfileIdResolver, resolveWorkloadBinder } from './bindings';
+import { ensureClusterPrivilege } from './cluster_privilege';
 import { parseCreateServiceAccountParams } from './create_params';
 import type {
   ServiceAccountCredentialMetadata,
   ServiceAccountCredentialStore,
 } from './credentials';
 import { parseEsServiceAccountId } from './es_service_account_id';
-import { ensureManageSecurityPrivilege } from './manage_security_privilege';
 import type { ListServiceAccountsParams, ServiceAccountsBackend } from './types';
 import type { SecurityLicense } from '../../common';
 import type {
@@ -193,10 +193,11 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       );
     }
 
-    await ensureManageSecurityPrivilege({
+    await ensureClusterPrivilege({
       request,
       checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
       logger: this.logger,
+      privilege: 'manage_security',
       action: 'create a service account',
     });
 
@@ -311,10 +312,11 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       );
     }
 
-    await ensureManageSecurityPrivilege({
+    await ensureClusterPrivilege({
       request,
       checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
       logger: this.logger,
+      privilege: 'read_security',
       action: 'list service accounts',
     });
 
@@ -384,10 +386,11 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       );
     }
 
-    await ensureManageSecurityPrivilege({
+    await ensureClusterPrivilege({
       request,
       checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
       logger: this.logger,
+      privilege: 'read_security',
       action: 'get a service account',
     });
 

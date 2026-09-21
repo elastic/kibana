@@ -88,7 +88,7 @@ describe('List service accounts route', () => {
       expect(routeConfig.security?.authz).toEqual({
         enabled: false,
         reason:
-          'This route delegates authorization to the service accounts backend, which requires the `manage_security` cluster privilege',
+          'This route delegates authorization to the service accounts backend, which requires the `read_security` cluster privilege',
       });
     });
   });

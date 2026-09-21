@@ -17,10 +17,10 @@ import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-serv
 import { z } from '@kbn/zod';
 
 import { buildAssumableBy } from './assumable_by';
+import { ensureClusterPrivilege } from './cluster_privilege';
 import { parseCreateServiceAccountParams } from './create_params';
 import type { CreateServiceAccountFakeRequestParams } from './fake_requests';
 import { SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS, ServiceAccountFakeRequests } from './fake_requests';
-import { ensureManageSecurityPrivilege } from './manage_security_privilege';
 import { SERVICE_ACCOUNT_ROLE_ASSIGNMENTS } from './role_assignments';
 import { ServiceAccountTokenExchangeError } from './token_exchange_error';
 import type {
@@ -214,10 +214,11 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
 
     const authorization = getUiamAuthorizationHeaderFromRequest(request);
 
-    await ensureManageSecurityPrivilege({
+    await ensureClusterPrivilege({
       request,
       checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
       logger: this.logger,
+      privilege: 'manage_security',
       action: 'create a service account',
     });
 
@@ -270,10 +271,11 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       );
     }
 
-    await ensureManageSecurityPrivilege({
+    await ensureClusterPrivilege({
       request,
       checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
       logger: this.logger,
+      privilege: 'read_security',
       action: 'list service accounts',
     });
 
@@ -307,10 +309,11 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       );
     }
 
-    await ensureManageSecurityPrivilege({
+    await ensureClusterPrivilege({
       request,
       checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
       logger: this.logger,
+      privilege: 'read_security',
       action: 'get a service account',
     });
 
