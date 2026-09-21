@@ -15,13 +15,10 @@ import { monacoPositionToOffset } from '../shared/utils';
 
 export function getDocumentHighlightProvider(): monaco.languages.DocumentHighlightProvider {
   return {
-    provideDocumentHighlights(
-      model: monaco.editor.ITextModel,
-      position: monaco.Position,
-      _token: monaco.CancellationToken
-    ) {
+    provideDocumentHighlights: ((model, position, token) => {
       return createMonacoProvider({
         model,
+        cancellationToken: token,
         run: (safeModel) => {
           const fullText = safeModel.getValue();
           const offset = monacoPositionToOffset(fullText, position);
@@ -43,6 +40,6 @@ export function getDocumentHighlightProvider(): monaco.languages.DocumentHighlig
         },
         emptyResult: [],
       });
-    },
+    }) satisfies monaco.languages.DocumentHighlightProvider['provideDocumentHighlights'],
   };
 }

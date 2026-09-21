@@ -35,6 +35,14 @@ const sharedEsqlCodeActionProvider = ESQLLang.getCodeActionProvider?.({
   getModelDependencies,
 });
 
+// This provider depends on isSuggestFixEnabled, which resolves asynchronously (a license
+// check) after the editor mounts. `monaco.languages.onLanguage` — used to register this
+// provider — only fires once per language, so a value closed over at registration time can
+// never pick up a later change; it must be resolved per-model, at call time, instead.
+const sharedEsqlHoverProvider = ESQLLang.getHoverProvider?.({
+  getModelDependencies,
+});
+
 interface UseEditorConfigParams {
   editorRef: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
   editorModel: React.MutableRefObject<monaco.editor.ITextModel | undefined>;
@@ -71,6 +79,7 @@ export const useEditorConfig = ({
 }: UseEditorConfigParams) => {
   const suggestionProvider = sharedEsqlSuggestionProvider;
   const codeActionsProvider = sharedEsqlCodeActionProvider;
+  const codeEditorHoverProvider = sharedEsqlHoverProvider;
 
   useEffect(() => {
     const modelUri = editorModelUriRef.current;
@@ -90,16 +99,6 @@ export const useEditorConfig = ({
     editorMessagesRef,
   ]);
 
-  const hoverProvider = useMemo(
-    () =>
-      ESQLLang.getHoverProvider?.({
-        ...esqlCallbacks,
-        telemetry: telemetryCallbacks,
-        isSuggestFixEnabled,
-      }),
-    [esqlCallbacks, telemetryCallbacks, isSuggestFixEnabled]
-  );
-
   const signatureProvider = useMemo(() => {
     return ESQLLang.getSignatureProvider?.(esqlCallbacks);
   }, [esqlCallbacks]);
@@ -109,17 +108,6 @@ export const useEditorConfig = ({
   }, [esqlCallbacks]);
 
   const documentHighlightProvider = useMemo(() => ESQLLang.getDocumentHighlightProvider?.(), []);
-
-  const codeEditorHoverProvider = useMemo(
-    () => ({
-      provideHover: (
-        model: monaco.editor.ITextModel,
-        position: monaco.Position,
-        token: monaco.CancellationToken
-      ) => hoverProvider?.provideHover?.(model, position, token) ?? { contents: [] },
-    }),
-    [hoverProvider]
-  );
 
   const onErrorClick = useCallback(
     ({ startLineNumber, startColumn }: MonacoMessage) => {

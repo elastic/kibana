@@ -10,6 +10,57 @@
 import { monaco } from '../monaco_imports';
 import type { LangModuleType, CustomLangModuleType } from '../types';
 
+/**
+ * Rejects when Monaco cancels the token.
+ * Disposal settles the promise when cancellation does not win the race.
+ */
+function listenForCancellation(token: monaco.CancellationToken): {
+  promise: Promise<never>;
+  dispose: () => void;
+} {
+  let rejectCancellation = (_error: Error) => {};
+  let resolveCancellation = () => {};
+
+  const promise = new Promise<never>((resolve, reject) => {
+    rejectCancellation = reject;
+    // Settle quietly so a lost race does not stay pending. The race result is unchanged.
+    resolveCancellation = () => {
+      resolve(undefined as never);
+    };
+  });
+
+  // A rejection that loses the race must not surface as unhandled.
+  void promise.catch(() => {});
+
+  const listener = token.onCancellationRequested(() => {
+    rejectCancellation(new Error('AbortedDueToCancellationRequest'));
+  });
+
+  return {
+    promise,
+    dispose: () => {
+      listener.dispose();
+      resolveCancellation();
+    },
+  };
+}
+
+/**
+ * Runs a provider and rejects when Monaco cancels the token.
+ */
+export async function createInterruptibleLanguageProvider<T>(
+  provider: () => T | PromiseLike<T>,
+  cancellationToken: monaco.CancellationToken
+): Promise<T> {
+  const cancellation = listenForCancellation(cancellationToken);
+
+  try {
+    return await Promise.race([cancellation.promise, Promise.resolve(provider())]);
+  } finally {
+    cancellation.dispose();
+  }
+}
+
 export function registerLanguage(language: LangModuleType | CustomLangModuleType, force = false) {
   const { ID, lexerRules, languageConfiguration, foldingRangeProvider } = language;
 

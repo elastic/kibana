@@ -19,14 +19,14 @@ export function getHoverProvider(deps?: ESQLDependencies): monaco.languages.Hove
   let lastHoveredWord: string;
 
   return {
-    async provideHover(
-      model: monaco.editor.ITextModel,
-      position: monaco.Position,
-      token: monaco.CancellationToken
-    ) {
+    provideHover: (async (model, position, token) => {
       return createMonacoProvider({
         model,
+        cancellationToken: token,
         run: async (safeModel) => {
+          const modelDeps = deps?.getModelDependencies?.(model);
+          const resolvedDeps = modelDeps ? ({ ...deps, ...modelDeps } as ESQLDependencies) : deps;
+
           const fullText = safeModel.getValue();
           const offset = monacoPositionToOffset(fullText, position);
           const hoveredWord = safeModel.getWordAtPosition(position);
@@ -35,20 +35,20 @@ export function getHoverProvider(deps?: ESQLDependencies): monaco.languages.Hove
           if (
             hoveredWord &&
             hoveredWord.word !== lastHoveredWord &&
-            deps?.telemetry?.onDecorationHoverShown
+            resolvedDeps?.telemetry?.onDecorationHoverShown
           ) {
             lastHoveredWord = hoveredWord.word;
 
             const hoverMessages = getDecorationHoveredMessages(hoveredWord, position, safeModel);
             if (hoverMessages.length) {
-              deps?.telemetry?.onDecorationHoverShown(hoverMessages.join(', '));
+              resolvedDeps?.telemetry?.onDecorationHoverShown(hoverMessages.join(', '));
             }
           }
 
-          const cancellableCallbacks = createCancellableCallbacks(deps, token);
+          const cancellableCallbacks = createCancellableCallbacks(resolvedDeps, token);
           const hoverResult = await getHoverItem(fullText, offset, cancellableCallbacks);
 
-          if (!deps?.isSuggestFixEnabled) {
+          if (!resolvedDeps?.isSuggestFixEnabled) {
             return hoverResult;
           }
 
@@ -94,6 +94,6 @@ export function getHoverProvider(deps?: ESQLDependencies): monaco.languages.Hove
         },
         emptyResult: null,
       });
-    },
+    }) satisfies monaco.languages.HoverProvider['provideHover'],
   };
 }

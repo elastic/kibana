@@ -20,7 +20,7 @@ describe('hover_provider', () => {
     mockModel = createTextModel({ value: 'FROM index | EVAL field = 1' });
 
     mockPosition = new monaco.Position(1, 10);
-    mockToken = {} as monaco.CancellationToken;
+    mockToken = new monaco.CancellationTokenSource().token;
   });
 
   afterEach(() => {
