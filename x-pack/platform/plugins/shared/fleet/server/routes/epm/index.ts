@@ -1344,7 +1344,7 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       },
       security: INSTALL_PACKAGES_SECURITY,
       summary: `Install a package by upload`,
-      description: `Install a package by uploading a .zip or .tar.gz archive (max 100MB).`,
+      description: `Install a package by uploading a .zip or .tar.gz archive (max 100MB). Archives that contain Kibana assets requiring additional privileges are subject to a preflight authorization check before any install work begins. The following asset types require the corresponding Kibana API privilege: \`security_rule\` → \`rules-all\`; \`security_rule\` (ML subtype) → \`rules-all\` + \`ml:canCreateJob\`; \`security_ai_prompt\` → \`elasticAssistant\`. A 403 is returned when the caller lacks a required privilege; no assets are written in that case.`,
     })
     .addVersion(
       {
@@ -1362,6 +1362,10 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
             },
             400: {
               description: 'A bad request.',
+              body: genericErrorResponse,
+            },
+            403: {
+              description: 'Forbidden. The caller lacks a privilege required by one of the gated asset types in the archive.',
               body: genericErrorResponse,
             },
           },

@@ -44,18 +44,6 @@ function makeAssetBuffer(attributes: Record<string, unknown>): Buffer {
   return Buffer.from(JSON.stringify({ type: 'security-rule', attributes }));
 }
 
-function makeIterator(entries: Array<{ path: string; buffer?: Buffer }>) {
-  return {
-    traverseEntries: jest.fn(async (onEntry: any, readBuffer?: (path: string) => boolean) => {
-      for (const entry of entries) {
-        const shouldRead = readBuffer ? readBuffer(entry.path) : false;
-        await onEntry({ path: entry.path, buffer: shouldRead ? entry.buffer : undefined });
-      }
-    }),
-    getPaths: jest.fn().mockResolvedValue(entries.map((e) => e.path)),
-  };
-}
-
 function mockTraverseEntries(entries: Array<{ path: string; buffer?: Buffer }>) {
   (traverseArchiveEntries as jest.Mock).mockImplementation(
     async (_buf: Buffer, _type: string, onEntry: any, readBuffer?: (path: string) => boolean) => {
