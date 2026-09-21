@@ -15,6 +15,8 @@ import {
   createDefaultWorkerSettings,
   formatWorkerSettingsIssues,
   getCompleteWorkerSettingsSchema,
+  getWorkerSettingsDeclaration,
+  projectStoredAutonomyLevel,
   type WorkerSettings,
 } from '@kbn/alertzero-common';
 import type { ManagedWorkflowTemplateValues } from '@kbn/workflows/managed';
@@ -52,9 +54,9 @@ const toTemplateValues = (
 });
 
 /**
- * Reads persisted template values back into complete settings, exactly as stored: nothing is
- * defaulted or merged in, and a document from an older development shape fails here so the
- * Worker projects as unavailable until that state is reset.
+ * Reads persisted template values back as stored — nothing defaulted or merged, so an older
+ * document fails here and the Worker projects as unavailable. Autonomy is the exception: a level
+ * the Worker no longer offers is projected rather than failing the read.
  */
 const parseWorkerValues = (
   workerId: RegisteredWorkerId,
@@ -78,7 +80,7 @@ const parseWorkerValues = (
 
   const candidate = {
     workerId,
-    autonomy: autonomyLevel,
+    autonomy: projectStoredAutonomyLevel(getWorkerSettingsDeclaration(workerId), autonomyLevel),
     ...(scheduleInterval === undefined ? {} : { scheduleInterval }),
     ...(extras === undefined ? {} : { extras }),
   };
