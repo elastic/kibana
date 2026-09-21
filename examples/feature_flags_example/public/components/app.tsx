@@ -12,11 +12,7 @@ import { EuiHorizontalRule, EuiPageTemplate, EuiTitle, EuiText, EuiLink } from '
 import type { CoreStart, FeatureFlagsStart } from '@kbn/core/public';
 
 import { PLUGIN_NAME } from '../../common';
-import {
-  FeatureFlagsFullList,
-  FeatureFlagsReactiveList,
-  FeatureFlagsStaticList,
-} from './feature_flags_list';
+import { FeatureFlagsReactiveList } from './feature_flags_list';
 
 interface FeatureFlagsExampleAppDeps {
   featureFlags: FeatureFlagsStart;
@@ -48,20 +44,7 @@ export const FeatureFlagsExampleApp = ({ featureFlags }: FeatureFlagsExampleAppD
               .
             </p>
             <EuiHorizontalRule />
-            <h3>Rendered separately</h3>
-            <p>
-              Each list are 2 different components, so only the reactive one is re-rendered when the
-              feature flag is updated and the static one keeps the value until the next refresh.
-            </p>
-            <FeatureFlagsStaticList featureFlags={featureFlags} />
             <FeatureFlagsReactiveList featureFlags={featureFlags} />
-            <EuiHorizontalRule />
-            <h3>Rendered together</h3>
-            <p>
-              `useObservable` causes a full re-render of the component, updating the{' '}
-              <i>statically</i> evaluated flags as well.
-            </p>
-            <FeatureFlagsFullList featureFlags={featureFlags} />
           </EuiText>
         </EuiPageTemplate.Section>
       </EuiPageTemplate>
