@@ -56,7 +56,7 @@ describe('useListAiIndices', () => {
 
     await waitFor(() => {
       expect(mockAddErrorToast).toHaveBeenCalledWith({
-        title: 'Failed to fetch AI indices',
+        title: 'Failed to fetch AI Indices',
         text: 'boom',
       });
     });
