@@ -72,3 +72,36 @@ export const GetLatestOutputHealthResponseSchema = schema.object({
     },
   }),
 });
+
+export const GetOutputAgentPolicyCountRequestSchema = {
+  params: schema.object({
+    outputId: schema.string({ maxLength: 500, meta: { description: 'The ID of the output' } }),
+  }),
+  query: schema.object({
+    isDefault: schema.maybe(
+      schema.boolean({
+        meta: {
+          description:
+            "If true, count policies as if this output is the default data output, including policies with no `data_output_id`. If omitted, uses the output's saved `is_default` value.",
+        },
+      })
+    ),
+    isDefaultMonitoring: schema.maybe(
+      schema.boolean({
+        meta: {
+          description:
+            "If true, count policies as if this output is the default monitoring output, including policies with no `monitoring_output_id`. If omitted, uses the output's saved `is_default_monitoring` value.",
+        },
+      })
+    ),
+  }),
+};
+
+export const GetOutputAgentPolicyCountResponseSchema = schema.object({
+  agentPolicyCount: schema.number({
+    meta: { description: 'Number of agent policies using this output' },
+  }),
+  agentCount: schema.number({
+    meta: { description: 'Number of active agents assigned to those policies' },
+  }),
+});
