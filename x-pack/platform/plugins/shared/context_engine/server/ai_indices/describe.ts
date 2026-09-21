@@ -18,6 +18,7 @@ export interface DescribeAiIndexParams {
   esClient: ElasticsearchClient;
   aiIndex: AiIndexHttpItem;
   spaceId: string;
+  includeMemory: boolean;
 }
 
 const fieldLine = ({ path, type, searchable, aggregatable }: AiIndexField): string =>
@@ -132,6 +133,7 @@ export const describeAiIndex = async ({
   esClient,
   aiIndex,
   spaceId,
+  includeMemory,
 }: DescribeAiIndexParams): Promise<string> => {
   const target = aiIndex.dest.value;
   const { fields, allFields, semanticFields, omittedFieldCount } = await describeAiIndexFields({
@@ -151,7 +153,7 @@ export const describeAiIndex = async ({
     semanticFieldsSection(semanticFields),
     kiTypeCountsSection(kiTypeCounts),
     tagCountsSection(tagCounts),
-    memorySection(aiIndex, target),
+    includeMemory ? memorySection(aiIndex, target) : [],
     exampleQueriesSection(target),
   ]);
 };

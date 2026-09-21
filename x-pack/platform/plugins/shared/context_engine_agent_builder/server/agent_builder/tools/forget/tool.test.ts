@@ -11,7 +11,6 @@ import type { ToolHandlerContext } from '@kbn/agent-builder-server';
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
 import { CONTEXT_ENGINE_FORGET_TOOL_ID } from '../../../../common/agent_builder_tools';
 import { assertContextEngineWriteAccess } from '../../assert_context_engine_write_access';
-import { aiIndexToolsAvailability } from '../ai_index_tools_availability';
 import { createForgetTool } from './tool';
 
 jest.mock('../../assert_context_engine_write_access', () => ({
@@ -121,7 +120,7 @@ describe('forget tool', () => {
     const tool = createTool();
 
     expect(tool.id).toBe(CONTEXT_ENGINE_FORGET_TOOL_ID);
-    expect(tool.availability).toBe(aiIndexToolsAvailability);
+    expect(tool.availability?.cacheMode).toBe('space');
     expect(tool.schema.safeParse(params).success).toBe(true);
     expect(tool.schema.safeParse({ aiIndexId: 'support' }).success).toBe(false);
     expect(tool.schema.shape.aiIndexId.description).toContain(

@@ -281,10 +281,13 @@ const aiIndexPropertiesSchema = {
       meta: { description: 'Human-readable description of the AI Index.' },
     })
   ),
-  memory_enabled: schema.boolean({
-    defaultValue: true,
-    meta: { description: 'Whether this AI index accepts memory writes.' },
-  }),
+  memory_enabled: schema.maybe(
+    schema.boolean({
+      meta: {
+        description: 'Whether this AI index accepts memory writes. Defaults to true when omitted.',
+      },
+    })
+  ),
   feedback_analysis: schema.maybe(feedbackAnalysisSchema),
   dest: schema.object({
     type: schema.oneOf([schema.literal('data_stream'), schema.literal('index')], {
@@ -423,8 +426,11 @@ const queryAiIndicesBodySchema = schema.object({
   ),
 });
 
+class MemoryFeatureDisabledError extends Error {}
+
 const handleAiIndexError = (error: unknown, response: KibanaResponseFactory, logger: Logger) => {
   if (
+    error instanceof MemoryFeatureDisabledError ||
     error instanceof InvalidAiIndexDestError ||
     error instanceof InvalidConnectorSourceError ||
     error instanceof InvalidAiIndexTraceError ||
@@ -487,6 +493,7 @@ export const registerAiIndexRoutes = ({
   getAiIndexDataReadService,
   getImprovementsService,
   getScheduleService,
+  isMemoryEnabled,
   getActions,
   getAgentBuilder,
   getWorkflowsManagementApi,
@@ -501,6 +508,7 @@ export const registerAiIndexRoutes = ({
     spaceId: string
   ) => ImprovementsServiceApi;
   getScheduleService: () => FeedbackAnalysisScheduleService;
+  isMemoryEnabled: (request: KibanaRequest) => Promise<boolean>;
   getActions: () => Promise<ActionsPluginStart>;
   getAgentBuilder: () => Promise<AgentBuilderPluginStart | undefined>;
   getWorkflowsManagementApi: () => Promise<DeleteWorkflowsApi | undefined>;
@@ -551,6 +559,11 @@ export const registerAiIndexRoutes = ({
         const auditLogger = security.audit.logger;
         const { id, ...properties } = request.body;
         try {
+          if (properties.memory_enabled === true && !(await isMemoryEnabled(request))) {
+            throw new MemoryFeatureDisabledError(
+              'Context Engine memory is disabled. Enable the global memory feature flag before setting memory_enabled to true.'
+            );
+          }
           await validateConnectorSources({
             sources: properties.sources,
             actions: await getActions(),
@@ -603,6 +616,11 @@ export const registerAiIndexRoutes = ({
         const auditLogger = security.audit.logger;
         const { aiIndexId } = request.params;
         try {
+          if (request.body.memory_enabled === true && !(await isMemoryEnabled(request))) {
+            throw new MemoryFeatureDisabledError(
+              'Context Engine memory is disabled. Enable the global memory feature flag before setting memory_enabled to true.'
+            );
+          }
           await validateConnectorSources({
             sources: request.body.sources,
             actions: await getActions(),

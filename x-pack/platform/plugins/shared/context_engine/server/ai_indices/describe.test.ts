@@ -45,7 +45,7 @@ const exampleQueriesBlock = [
 
 describe('describeAiIndex', () => {
   const esClient = {} as ElasticsearchClient;
-  const params = { esClient, aiIndex, spaceId: 'marketing' };
+  const params = { esClient, aiIndex, spaceId: 'marketing', includeMemory: false };
 
   beforeEach(() => {
     describeAiIndexFieldsMock.mockReset();
@@ -178,6 +178,7 @@ describe('describeAiIndex', () => {
     const response = await describeAiIndex({
       ...params,
       aiIndex: { ...aiIndex, memory_enabled: true },
+      includeMemory: true,
     });
 
     expect(response).toContain('\nMemory\nMemory writes are enabled');
@@ -224,6 +225,16 @@ describe('describeAiIndex', () => {
 
   it('omits memory capability when memory writes are disabled', async () => {
     const response = await describeAiIndex(params);
+
+    expect(response).not.toContain('\nMemory\n');
+    expect(response).not.toContain('platform.context_engine.remember');
+  });
+
+  it('omits memory capability when the memory feature flag is disabled', async () => {
+    const response = await describeAiIndex({
+      ...params,
+      aiIndex: { ...aiIndex, memory_enabled: true },
+    });
 
     expect(response).not.toContain('\nMemory\n');
     expect(response).not.toContain('platform.context_engine.remember');

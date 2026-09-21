@@ -40,6 +40,7 @@ export class AiIndexDataReadService implements AiIndexDataReadServiceApi {
       auditLogger: AuditLogger;
       aiIndexService: Pick<AiIndexService, 'get' | 'list'>;
       logger: Logger;
+      isMemoryEnabled: () => Promise<boolean>;
     }
   ) {}
 
@@ -56,10 +57,13 @@ export class AiIndexDataReadService implements AiIndexDataReadServiceApi {
   }
 
   async describe(id: string): Promise<DescribeAiIndexResponse> {
-    const { esClient, spaceId, auditLogger, aiIndexService } = this.deps;
+    const { esClient, spaceId, auditLogger, aiIndexService, isMemoryEnabled } = this.deps;
     try {
-      const aiIndex = await aiIndexService.get(id, spaceId);
-      const response = await describeAiIndex({ esClient, aiIndex, spaceId });
+      const [aiIndex, includeMemory] = await Promise.all([
+        aiIndexService.get(id, spaceId),
+        isMemoryEnabled(),
+      ]);
+      const response = await describeAiIndex({ esClient, aiIndex, spaceId, includeMemory });
       auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.DESCRIBE, id }));
       return { response };
     } catch (error) {
