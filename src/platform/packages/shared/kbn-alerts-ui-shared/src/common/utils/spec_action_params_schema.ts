@@ -76,8 +76,11 @@ export function getSpecActionInputFieldKeys(spec: ConnectorSpecResponse): string
   return Array.from(keys);
 }
 
+/** Key used for issues that are not attached to a specific input field (`path` is empty). */
+const SUB_ACTION_PARAMS_ERROR_KEY = 'subActionParams';
+
 const getEmptyErrors = (spec: ConnectorSpecResponse): Record<string, string[]> => {
-  const errors: Record<string, string[]> = { subAction: [] };
+  const errors: Record<string, string[]> = { subAction: [], [SUB_ACTION_PARAMS_ERROR_KEY]: [] };
   for (const key of getSpecActionInputFieldKeys(spec)) {
     errors[key] = [];
   }
@@ -119,7 +122,15 @@ export async function validateSpecActionParams(
   }
 
   for (const issue of result.error.issues) {
-    const field = String(issue.path[0] ?? 'subActionParams');
+    // The serialized JSON Schema marks action inputs as `additionalProperties: false`, so the
+    // derived schema is strict. The server validates `subActionParams` with the spec's own Zod
+    // object, which strips unknown keys, and the generated form only writes known keys. Unknown
+    // keys therefore only appear transiently (e.g. params left over while switching actions) and
+    // no field could display the error, so they are not reported.
+    if (issue.code === 'unrecognized_keys') {
+      continue;
+    }
+    const field = String(issue.path[0] ?? SUB_ACTION_PARAMS_ERROR_KEY);
     if (!errors[field]) {
       errors[field] = [];
     }
