@@ -575,6 +575,22 @@ describe('create-investigation-proposal workflow', () => {
         'inputs.actionWorkflowId'
       );
     });
+
+    it('always gates an action that declares always-gate, whatever the caller resolved', () => {
+      // The action's own policy has to outrank the flag, or a Worker could
+      // auto-approve an action whose author declared it must never be.
+      expect(String(findStep(workflow.steps, 'init_state')?.with?.needs_gate)).toContain(
+        'steps.create_proposal.output.alwaysGate'
+      );
+    });
+
+    it('combines the gating reasons with or alone, since Liquid cannot bind a mixed expression', () => {
+      // No parentheses and no operator precedence: one `and` among the `or`s
+      // would silently gate the wrong proposals.
+      const needsGate = String(findStep(workflow.steps, 'init_state')?.with?.needs_gate);
+
+      expect(needsGate).not.toContain(' and ');
+    });
   });
 
   describe('workflow-level failure handling', () => {

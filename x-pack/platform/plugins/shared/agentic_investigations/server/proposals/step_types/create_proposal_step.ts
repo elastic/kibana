@@ -82,6 +82,7 @@ export const getCreateProposalStepDefinition = ({
             status: proposal.status,
             category: proposal.category,
             requiresDecision: proposal.decision == null,
+            alwaysGate: proposal.action?.approvalPolicy === 'always-gate',
             expiresAt: proposal.expiresAt,
           },
         };

@@ -57,6 +57,14 @@ export const createProposalStepOutputSchema = z.object({
   /** True when no human has decided yet. */
   requiresDecision: z.boolean(),
   /**
+   * The action declares `approvalPolicy: always-gate`, so it must never be
+   * auto-approved however the caller's autonomy resolved. Emitted already
+   * reduced to a boolean rather than as the policy itself: the gating
+   * workflow combines it with two other terms in a Liquid condition, and
+   * Liquid has neither operator precedence nor parentheses.
+   */
+  alwaysGate: z.boolean(),
+  /**
    * The absolute deadline the caller's `expiresIn` resolved to. Emitted so a
    * gating workflow can derive each attempt's remaining time from one fixed
    * point rather than restarting the clock on every retry.

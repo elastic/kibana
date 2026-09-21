@@ -227,8 +227,45 @@ describe('proposals.createProposal step', () => {
       status: 'pending',
       category: 'tune',
       requiresDecision: true,
+      alwaysGate: false,
       expiresAt: '2026-09-04T00:00:00.000Z',
     });
+  });
+
+  it('should report alwaysGate when the action refuses to be auto-approved', async () => {
+    const create = jest.fn().mockResolvedValue({
+      id: 'p',
+      status: 'pending',
+      action: { name: 'Isolate host', approvalPolicy: 'always-gate' },
+    });
+    const { definition } = createDefinition(create);
+
+    const result = await definition.handler(
+      createContext({
+        conversationId: 'conv-1',
+        comment: 'Isolate the host',
+        actionWorkflowId: 'system-alertzero-action-isolate-host',
+      })
+    );
+
+    expect(result.output?.alwaysGate).toBe(true);
+  });
+
+  it.each([
+    ['autonomy-dependent', { name: 'Create rule', approvalPolicy: 'autonomy-dependent' }],
+    ['no declared policy', { name: 'Create rule' }],
+    ['no action at all', undefined],
+  ])('should leave alwaysGate false for %s', async (_label, action) => {
+    // Only `always-gate` overrides the caller; everything else leaves the
+    // decision to the autonomy the caller already resolved.
+    const create = jest.fn().mockResolvedValue({ id: 'p', status: 'pending', action });
+    const { definition } = createDefinition(create);
+
+    const result = await definition.handler(
+      createContext({ conversationId: 'conv-1', comment: 'Tune the noisy rule' })
+    );
+
+    expect(result.output?.alwaysGate).toBe(false);
   });
 
   it('should pass a blank optional input to the service as an omission', async () => {

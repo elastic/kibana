@@ -234,6 +234,58 @@ describe('ProposalsService', () => {
       expect(workflowsApi.getWorkflow).toHaveBeenCalledTimes(1);
     });
 
+    it('should return the action metadata it resolved, so a caller need not fetch it again', async () => {
+      const storage = createStorage();
+      const workflowsApi = createWorkflowsApi();
+      workflowsApi.getWorkflow.mockResolvedValue({
+        definition: {
+          consts: {
+            actionMetadata: {
+              name: 'Isolate host',
+              category: 'contain',
+              approvalPolicy: 'always-gate',
+            },
+          },
+        },
+      });
+      const { service } = createService(storage, workflowsApi);
+
+      // The gate workflow has to honour `always-gate`, and the creation path
+      // already read the definition that declares it.
+      const proposal = await service.create(
+        {
+          conversationId: 'conv-1',
+          comment: 'Isolate the host',
+          actionWorkflowId: 'system-alertzero-action-create-rule',
+          confidence: 'high',
+          origin: 'worker',
+        },
+        { spaceId: SPACE_ID }
+      );
+
+      expect(proposal.action?.approvalPolicy).toBe('always-gate');
+      expect(workflowsApi.getWorkflow).toHaveBeenCalledTimes(1);
+    });
+
+    it('should leave the action metadata unset for a proposal with no action', async () => {
+      const storage = createStorage();
+      const { service, workflowsApi } = createService(storage);
+
+      const proposal = await service.create(
+        {
+          conversationId: 'conv-1',
+          comment: 'Rotate the credentials by hand, then approve',
+          category: 'respond',
+          confidence: 'medium',
+          origin: 'worker',
+        },
+        { spaceId: SPACE_ID }
+      );
+
+      expect(proposal.action).toBeUndefined();
+      expect(workflowsApi.getWorkflow).not.toHaveBeenCalled();
+    });
+
     it('should write the sort ranks so Elasticsearch can order the queue', async () => {
       const storage = createStorage();
       const workflowsApi = createWorkflowsApi();

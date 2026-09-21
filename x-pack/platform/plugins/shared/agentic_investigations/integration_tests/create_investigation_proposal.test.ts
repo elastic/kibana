@@ -324,5 +324,34 @@ describe('create-investigation-proposal workflow execution', () => {
       expect(fixture.executionStatus()).toBe(ExecutionStatus.WAITING_FOR_INPUT);
       expect(fixture.onlyProposal().decision).toBeUndefined();
     });
+
+    it('should still gate an always-gate action the caller tried to authorise', async () => {
+      fixture.setActionMetadata({
+        name: 'Create rule',
+        category: 'tune',
+        approvalPolicy: 'always-gate',
+      });
+
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID, autoApprove: true });
+
+      // The action's own declaration outranks whatever autonomy the caller
+      // resolved, so a Worker cannot auto-approve it by mistake.
+      expect(fixture.executionStatus()).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+      expect(fixture.onlyProposal().decision).toBeUndefined();
+    });
+
+    it('should skip the gate for an autonomy-dependent action', async () => {
+      fixture.setActionMetadata({
+        name: 'Create rule',
+        category: 'tune',
+        approvalPolicy: 'autonomy-dependent',
+      });
+
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID, autoApprove: true });
+
+      // Declaring the policy explicitly must behave like declaring nothing;
+      // only `always-gate` overrides the caller.
+      expect(fixture.proposals()[0].decision).toBe('approved');
+    });
   });
 });

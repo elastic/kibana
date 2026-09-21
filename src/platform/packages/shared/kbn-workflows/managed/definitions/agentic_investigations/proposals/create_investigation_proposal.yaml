@@ -179,11 +179,20 @@ steps:
       has_deadline: '${{ steps.create_proposal.output.expiresAt != blank }}'
       action_workflow_id: '{{ inputs.actionWorkflowId }}'
       decided_by: ''
-      # `autoApprove` is only meaningful for an action proposal: autonomy
-      # governs whether an action may run without a human, and a non-action
-      # proposal has no action to govern. Approval is its entire lifecycle, so
-      # it is always gated and the flag is deliberately ignored.
-      needs_gate: '${{ inputs.autoApprove != true or inputs.actionWorkflowId == blank }}'
+      # Three independent reasons to hold the decision for a human, any one of
+      # which is enough on its own:
+      #
+      #   1. the caller's autonomy did not permit running unattended;
+      #   2. there is no action to run — autonomy governs whether an *action*
+      #      may run without a human, and approval is a non-action proposal's
+      #      entire lifecycle, so the flag is deliberately ignored;
+      #   3. the action declares `approvalPolicy: always-gate`, which outranks
+      #      whatever autonomy the caller resolved.
+      #
+      # Every term is `or`, never mixed with `and`: Liquid has no operator
+      # precedence and no parentheses, so a mixed expression would not bind the
+      # way it reads.
+      needs_gate: '${{ inputs.autoApprove != true or inputs.actionWorkflowId == blank or steps.create_proposal.output.alwaysGate == true }}'
 
   - name: decision_loop
     type: while
