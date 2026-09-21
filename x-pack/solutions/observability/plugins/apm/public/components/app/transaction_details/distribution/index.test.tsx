@@ -32,11 +32,11 @@ interface CapturedWaterfallProps {
   traceSamples?: Array<{ traceId: string; transactionId: string }>;
 }
 
-const waterfallWithSummarySpy = jest.fn<void, [CapturedWaterfallProps]>();
+const mockWaterfallWithSummarySpy = jest.fn<void, [CapturedWaterfallProps]>();
 
 jest.mock('../waterfall_with_summary', () => ({
   WaterfallWithSummary: (props: CapturedWaterfallProps) => {
-    waterfallWithSummarySpy(props);
+    mockWaterfallWithSummarySpy(props);
     return null;
   },
 }));
@@ -101,7 +101,7 @@ function Wrapper({
 
 describe('transaction_details/distribution', () => {
   beforeEach(() => {
-    waterfallWithSummarySpy.mockClear();
+    mockWaterfallWithSummarySpy.mockClear();
   });
 
   describe('TransactionDistribution', () => {
@@ -228,10 +228,10 @@ describe('transaction_details/distribution', () => {
         );
 
         await waitFor(() => {
-          expect(waterfallWithSummarySpy).toHaveBeenCalled();
+          expect(mockWaterfallWithSummarySpy).toHaveBeenCalled();
         });
 
-        const lastProps = waterfallWithSummarySpy.mock.calls.at(-1)?.[0];
+        const lastProps = mockWaterfallWithSummarySpy.mock.calls.at(-1)?.[0];
         expect(lastProps?.selectedSample).toEqual(traceSamples[1]);
         // The same reference from traceSamples must be passed so indexOf resolves.
         expect(lastProps?.selectedSample).toBe(lastProps?.traceSamples?.[1]);
@@ -258,10 +258,10 @@ describe('transaction_details/distribution', () => {
         );
 
         await waitFor(() => {
-          expect(waterfallWithSummarySpy).toHaveBeenCalled();
+          expect(mockWaterfallWithSummarySpy).toHaveBeenCalled();
         });
 
-        const lastProps = waterfallWithSummarySpy.mock.calls.at(-1)?.[0];
+        const lastProps = mockWaterfallWithSummarySpy.mock.calls.at(-1)?.[0];
         // Passing `null` (not `undefined`) keeps WaterfallWithSummary in the
         // controlled code path that derives the index from the URL.
         expect(lastProps?.selectedSample).toBeNull();
