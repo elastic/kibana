@@ -153,7 +153,10 @@ describe('LinkedActionPoliciesStep', () => {
     renderComponent();
 
     expect(screen.getByTestId('matchedPolicyReasonTags')).toBeInTheDocument();
-    expect(screen.getByText('Tags (1)')).toBeInTheDocument();
+    expect(screen.getByTestId('matchedPolicyReasonTags')).toHaveAttribute(
+      'aria-label',
+      'Matching rule tags: env:prod'
+    );
     expect(screen.queryByTestId('matchedPolicyReasonCatchAll')).not.toBeInTheDocument();
   });
 
