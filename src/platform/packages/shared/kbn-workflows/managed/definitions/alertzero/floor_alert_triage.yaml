@@ -162,6 +162,27 @@ steps:
   # ---------------------------------------------------------------------------
   - name: classify_alerts
     type: workflow.execute
+    on-failure:
+      fallback:
+        - name: post_comment_classify_failed
+          type: kibana.request
+          on-failure:
+            continue: true
+          with:
+            method: POST
+            path: "/s/{{ workflow.spaceId }}/api/chat/converse"
+            headers:
+              kbn-xsrf: string
+              Content-Type: application/json
+              elastic-api-version: "2023-10-31"
+            body:
+              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+              trigger_mode: "never"
+              input: >-
+                🤖 **Alert Triage** ⚠️ — Classification step failed for {{ event.alerts | size }} alert(s).
+                Verify the Alert Analysis workflow is enabled in this space and the `alertzero_alert_triage`
+                Model Management feature is configured with a connector.
+                Alerts have NOT been tagged or closed.
     with:
       workflow-id: system-security-alert-analysis
       inputs:
@@ -203,6 +224,33 @@ steps:
     type: data.set
     with:
       fp_candidate_count: "${{ variables.fp_candidate_ids | size }}"
+
+  # Guard: if the sub-workflow returned 0 verdicts for a non-empty alert batch, the Alert
+  # Analysis workflow is likely disabled or its connector is misconfigured. Surface this
+  # explicitly rather than completing silently with zero results.
+  - name: guard_classification_nonempty
+    type: if
+    condition: "${{ event.alerts | size > 0 and steps.classify_alerts.output.verdicts | size == 0 }}"
+    steps:
+      - name: post_comment_classification_empty
+        type: kibana.request
+        on-failure:
+          continue: true
+        with:
+          method: POST
+          path: "/s/{{ workflow.spaceId }}/api/chat/converse"
+          headers:
+            kbn-xsrf: string
+            Content-Type: application/json
+            elastic-api-version: "2023-10-31"
+          body:
+            conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+            trigger_mode: "never"
+            input: >-
+              🤖 **Alert Triage** ⚠️ — Alert Analysis returned no verdicts for {{ event.alerts | size }} alert(s).
+              Verify the Alert Analysis workflow is enabled in this space and the `alertzero_alert_triage`
+              Model Management feature is configured with a connector.
+              Alerts have NOT been tagged or closed.
 
   # ---------------------------------------------------------------------------
   # Comment 2 — classification results
