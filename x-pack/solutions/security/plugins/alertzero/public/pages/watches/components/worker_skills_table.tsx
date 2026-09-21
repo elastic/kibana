@@ -29,7 +29,6 @@ const tableNoOuterBordersCss = css`
 import type { WatchCallableRef } from '@kbn/alertzero-common';
 import * as i18n from '../settings_translations';
 import { SettingsSection } from './settings_section';
-import * as skillI18n from '../skills_table_translations';
 import * as settingsI18n from '../settings_translations';
 
 interface WorkerSkillsTableProps {
@@ -49,7 +48,7 @@ export const WorkerSkillsTable: React.FC<WorkerSkillsTableProps> = ({ skills }) 
                 <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
                   <EuiFlexItem grow={false}>
                     <EuiText size="s">
-                      <strong>{row.name || skillI18n.skillName(id)}</strong>
+                      <strong>{row.name || id}</strong>
                     </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>

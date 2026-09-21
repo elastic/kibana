@@ -31,10 +31,7 @@ const makeConversationProposalsService = (
 describe('registerGetProposalsRoute', () => {
   const logger = loggingSystemMock.createLogger();
 
-  const setup = (
-    service: ConversationProposalsService = makeConversationProposalsService(),
-    useMockData = false
-  ) => {
+  const setup = (service: ConversationProposalsService = makeConversationProposalsService()) => {
     const router = httpServiceMock.createRouter();
     const addVersion = jest.fn();
     (router.versioned.get as jest.Mock).mockReturnValue({ addVersion });
@@ -42,7 +39,6 @@ describe('registerGetProposalsRoute', () => {
     const deps: Partial<RouteDependencies> = {
       router,
       logger,
-      config: { enabled: true, ui: { useMockData } } as RouteDependencies['config'],
       getSpaceId: () => 'default',
       getConversationProposalsService: () => service,
     };
@@ -94,58 +90,5 @@ describe('registerGetProposalsRoute', () => {
     await handler({}, httpServerMock.createKibanaRequest({ query: { windowHours: 24 } }), response);
 
     expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 500 }));
-  });
-
-  describe('with useMockData enabled', () => {
-    const listMocks = async () => {
-      const service = makeConversationProposalsService();
-      const { handler } = setup(service, true);
-      const response = httpServerMock.createResponseFactory();
-
-      await handler(
-        {},
-        httpServerMock.createKibanaRequest({ query: { windowHours: 24 } }),
-        response
-      );
-
-      const [call] = (response.ok as jest.Mock).mock.calls;
-      return { body: call[0].body as GetProposalsListResponse, service };
-    };
-
-    it('serves the sample proposals without reading the proposals index', async () => {
-      const { body, service } = await listMocks();
-
-      expect(service.list).not.toHaveBeenCalled();
-      expect(body.total).toBeGreaterThan(0);
-    });
-
-    it('groups the samples into every catalog category plus closed', async () => {
-      const { body } = await listMocks();
-
-      expect(Object.keys(body.groups).sort()).toEqual([
-        'closed',
-        'configure',
-        'investigate',
-        'respond',
-      ]);
-      for (const items of Object.values(body.groups)) {
-        expect(items.length).toBeGreaterThan(0);
-      }
-    });
-
-    it('carries the conversation title the queue titles its cards with', async () => {
-      const { body } = await listMocks();
-      const items = Object.values(body.groups).flat();
-
-      expect(items.every(({ conversationTitle }) => Boolean(conversationTitle))).toBe(true);
-    });
-
-    it('reports total as the number of grouped items, never more', async () => {
-      const { body } = await listMocks();
-      const grouped = Object.values(body.groups).flat().length;
-
-      expect(body.total).toBe(grouped);
-      expect(body.truncated).toBe(false);
-    });
   });
 });

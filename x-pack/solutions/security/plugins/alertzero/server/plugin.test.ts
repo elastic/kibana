@@ -41,7 +41,6 @@ jest.mock('./routes/register_routes', () => ({
 
 const createConfig = (overrides: Partial<AlertZeroConfig> = {}): AlertZeroConfig => ({
   enabled: false,
-  ui: { useMockData: true },
   ...overrides,
 });
 
