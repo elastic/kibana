@@ -30,8 +30,9 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ESQL_LANG_ID, monaco } from '@kbn/code-editor';
 import { DataSourceBrowser, FieldsBrowser } from '@kbn/esql-resource-browser';
 import { useStableCallback } from '@kbn/react-hooks';
+import type { RestorableStateProviderApi } from '@kbn/restorable-state';
 import type { ComponentProps } from 'react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { createPortal } from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
@@ -77,7 +78,10 @@ import {
   type StarredQueryMetadata,
 } from './editor_footer/esql_starred_queries_service';
 import type { ESQLEditorDeps, ESQLEditorProps as ESQLEditorPropsInternal } from './types';
-import { EsqlEditorActionsProvider } from './editor_actions_context';
+import {
+  EsqlEditorActionsProvider,
+  useHasEsqlEditorActionsProvider,
+} from './editor_actions_context';
 import {
   registerCustomCommands,
   addEditorKeyBindings,
@@ -914,6 +918,16 @@ const ESQLEditorInternal = function ESQLEditor({
                     onLayoutChangeRef.current(layoutInfoEvent);
                   });
 
+                  const tabKeyDisposable = editor.onKeyDown((e) => {
+                    if (
+                      e.keyCode === monaco.KeyCode.Tab &&
+                      !e.shiftKey &&
+                      !isSuggestionPopupOpenRef.current
+                    ) {
+                      suppressSuggestionsRef.current = true;
+                    }
+                  });
+
                   const modelContentDisposable = editor.onDidChangeModelContent(async () => {
                     trackInputLatencyOnKeystroke(editor.getValue() ?? '');
                     await addLookupIndicesDecorator();
@@ -927,6 +941,7 @@ const ESQLEditorInternal = function ESQLEditor({
                     mouseDownDisposable,
                     focusDisposable,
                     layoutChangeDisposable,
+                    tabKeyDisposable,
                     modelContentDisposable,
                     suggestionPopupDisposable,
                     commentLineDisposable,
@@ -1117,11 +1132,22 @@ const ESQLEditorInternal = function ESQLEditor({
   return editorPanel;
 };
 
-const ESQLEditorWithState = withRestorableState(ESQLEditorInternal);
+const ESQLEditorWithActionsProvider = forwardRef<
+  RestorableStateProviderApi,
+  ESQLEditorPropsInternal
+>(function ESQLEditorWithActionsProvider(props, _ref) {
+  const hasProvider = useHasEsqlEditorActionsProvider();
 
-export const ESQLEditor = (props: ComponentProps<typeof ESQLEditorWithState>) => (
-  <EsqlEditorActionsProvider>
-    <ESQLEditorWithState {...props} />
-  </EsqlEditorActionsProvider>
-);
+  if (hasProvider) {
+    return <ESQLEditorInternal {...props} />;
+  }
+
+  return (
+    <EsqlEditorActionsProvider>
+      <ESQLEditorInternal {...props} />
+    </EsqlEditorActionsProvider>
+  );
+});
+
+export const ESQLEditor = withRestorableState(ESQLEditorWithActionsProvider);
 export type ESQLEditorProps = ComponentProps<typeof ESQLEditor>;

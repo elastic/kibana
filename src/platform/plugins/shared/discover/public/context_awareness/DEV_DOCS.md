@@ -240,6 +240,9 @@ existing payload:
 5. Return both `tabType` and the URL-synced `profileState` definition, when applicable, from the matching
    [data source profile context](./profiles/data_source_profile.ts). A tab with no registered transform has no saved
    `tabTypeState`.
+6. Update the [Discover session API schema](/src/platform/plugins/shared/discover/server/api/schema.ts) and
+   [tab type state conversion](/src/platform/plugins/shared/discover/common/session/tab_type_state.ts).
+   Map every saved field in both directions and test the Saved Object to API to Saved Object round trip.
 
 #### End-to-end example
 
@@ -531,7 +534,7 @@ The `ScopedDiscoverEBTManager` is injected at scoped manager creation time.
 - **Mocks** are in `__mocks__/`. Use these when testing components that depend on the framework.
 - **When modifying framework internals**, run the existing test suite to catch regressions:
   ```
-  yarn test:jest src/platform/plugins/shared/discover/public/context_awareness/
+  pnpm test:jest src/platform/plugins/shared/discover/public/context_awareness/
   ```
 - **When adding extension points**, add consumption tests in the relevant Discover component tests, not in the framework tests. The framework tests verify the generic merging and resolution mechanics — extension point behavior is tested at the call site.
 

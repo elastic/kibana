@@ -9,7 +9,6 @@
 
 import { BehaviorSubject } from 'rxjs';
 import moment from 'moment';
-import type { SidebarAppId } from '@kbn/core-chrome-sidebar';
 import { sidebarServiceMock } from '@kbn/core-chrome-sidebar-mocks';
 import type { NewsfeedApi } from '../lib/api';
 import type { FetchResult, NewsfeedItem } from '../types';
@@ -38,12 +37,11 @@ const setup = (fetchResult: FetchResult | null = createFetchResult()) => {
   const markAsRead = jest.fn();
   const newsfeedApi: NewsfeedApi = { fetchResults$, markAsRead };
 
-  // Drive which app is showing from a subject the tests control.
-  const currentAppId$ = new BehaviorSubject<SidebarAppId | null>(null);
+  const isOpen$ = new BehaviorSubject(false);
   const app = sidebarServiceMock.createAppMock();
+  app.isOpen$.mockReturnValue(isOpen$);
+  app.isOpen.mockImplementation(() => isOpen$.getValue());
   const sidebar = sidebarServiceMock.createStartContract();
-  sidebar.getCurrentAppId$.mockReturnValue(currentAppId$);
-  sidebar.getCurrentAppId.mockImplementation(() => currentAppId$.getValue());
   sidebar.getApp.mockReturnValue(app);
 
   const controller = createNewsfeedSidebarController({ sidebar, newsfeedApi });
@@ -52,7 +50,7 @@ const setup = (fetchResult: FetchResult | null = createFetchResult()) => {
     controller,
     markAsRead,
     fetchResults$,
-    currentAppId$,
+    isOpen$,
     open: app.open,
     close: app.close,
   };
@@ -86,47 +84,33 @@ describe('createNewsfeedSidebarController', () => {
     expect(open).toHaveBeenCalledTimes(1);
   });
 
-  test('toggle() opens when another app is showing', () => {
-    const { controller, open, close, currentAppId$ } = setup();
-
-    currentAppId$.next('agentBuilder');
+  test('toggle() opens the app and marks items as read when closed', () => {
+    const { controller, markAsRead, open } = setup();
     controller.toggle();
 
+    expect(markAsRead).toHaveBeenCalledWith(['test-hash-1', 'test-hash-2']);
     expect(open).toHaveBeenCalledTimes(1);
-    expect(close).not.toHaveBeenCalled();
   });
 
-  test('toggle() closes when the newsfeed is already showing', () => {
-    const { controller, open, close, currentAppId$ } = setup();
+  test('toggle() closes the app when open', () => {
+    const { controller, isOpen$, markAsRead, close } = setup();
+    isOpen$.next(true);
 
-    currentAppId$.next('newsfeed');
     controller.toggle();
 
     expect(close).toHaveBeenCalledTimes(1);
-    expect(open).not.toHaveBeenCalled();
+    expect(markAsRead).not.toHaveBeenCalled();
   });
 
   test('isOpen$ tracks whether the newsfeed is the current app', () => {
-    const { controller, currentAppId$ } = setup();
+    const { controller, isOpen$ } = setup();
     const emitted: boolean[] = [];
     const sub = controller.isOpen$.subscribe((isOpen) => emitted.push(isOpen));
 
-    currentAppId$.next('newsfeed');
-    currentAppId$.next('agentBuilder');
+    isOpen$.next(true);
+    isOpen$.next(false);
 
     expect(emitted).toEqual([false, true, false]);
-    sub.unsubscribe();
-  });
-
-  test('isOpen$ does not re-emit when switching between other apps', () => {
-    const { controller, currentAppId$ } = setup();
-    const emitted: boolean[] = [];
-    const sub = controller.isOpen$.subscribe((isOpen) => emitted.push(isOpen));
-
-    currentAppId$.next('agentBuilder');
-    currentAppId$.next(null);
-
-    expect(emitted).toEqual([false]);
     sub.unsubscribe();
   });
 });

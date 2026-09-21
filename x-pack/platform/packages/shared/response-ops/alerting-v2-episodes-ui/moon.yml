@@ -65,7 +65,12 @@ dependsOn:
   - '@kbn/charts-plugin'
   - '@kbn/core-ui-settings-browser'
   - '@kbn/unified-doc-viewer-plugin'
+  - '@kbn/rule-data-utils'
+  - '@kbn/rule-registry-plugin'
+  - '@kbn/tooling-log'
+  - '@kbn/test'
   - '@kbn/ui-callout'
+  - '@kbn/response-ops-alerts-apis'
 tags:
   - shared-browser
   - package

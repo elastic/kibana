@@ -6,18 +6,24 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { durationSchema, tagsSchema } from './common';
+import { durationSchema, queryIntSchema } from './common';
 import { bulkByIdsSchema } from './bulk_operation_schema';
 import {
   ACTION_POLICY_MAX_DESTINATIONS,
+  FIND_DEFAULT_PER_PAGE,
+  FIND_MAX_RESULT_WINDOW,
   VERSION_MAX_LENGTH,
   ID_MAX_LENGTH,
   MAX_DESCRIPTION_LENGTH,
   MAX_FIELD_NAME_LENGTH,
   MAX_GROUPING_FIELDS,
-  MAX_KQL_LENGTH,
   MAX_NAME_LENGTH,
 } from './constants';
+import {
+  POLICY_MATCHER_DESCRIPTION,
+  POLICY_MATCHER_UPDATE_DESCRIPTION,
+  policyMatcherSchema,
+} from './policy_matcher_schema';
 
 /**
  * The set of supported action policy destination types. Single source of truth
@@ -183,17 +189,12 @@ const createActionPolicyDataBaseSchema = z
       .min(1, 'At least one destination must be provided')
       .max(ACTION_POLICY_MAX_DESTINATIONS)
       .describe('The list of destinations. At least one is required.'),
-    matcher: z
-      .string()
-      .max(MAX_KQL_LENGTH)
-      .optional()
-      .describe('A KQL query string to match alerts.'),
+    matcher: policyMatcherSchema.optional().describe(POLICY_MATCHER_DESCRIPTION),
     group_by: z
       .array(z.string().min(1).max(MAX_FIELD_NAME_LENGTH))
       .max(MAX_GROUPING_FIELDS)
       .optional()
       .describe('The fields used to group alerts.'),
-    tags: tagsSchema.optional().describe('Tags for categorizing the action policy.'),
     grouping_mode: groupingModeSchema
       .optional()
       .describe('The grouping mode for alert notifications.'),
@@ -227,19 +228,13 @@ export const updateActionPolicyDataSchema = z
       .max(ACTION_POLICY_MAX_DESTINATIONS)
       .optional()
       .describe('The list of destinations. At least one is required.'),
-    matcher: z
-      .string()
-      .max(MAX_KQL_LENGTH)
-      .optional()
-      .nullable()
-      .describe('A KQL query string to match alerts.'),
+    matcher: policyMatcherSchema.nullable().optional().describe(POLICY_MATCHER_UPDATE_DESCRIPTION),
     group_by: z
       .array(z.string().min(1).max(MAX_FIELD_NAME_LENGTH))
       .max(MAX_GROUPING_FIELDS)
       .optional()
       .nullable()
       .describe('The fields used to group alerts.'),
-    tags: tagsSchema.optional().nullable().describe('Tags for categorizing the action policy.'),
     grouping_mode: groupingModeSchema
       .optional()
       .nullable()
@@ -281,38 +276,35 @@ export const findActionPoliciesSortFieldSchema = z
   .describe('The available fields to sort action policies by.');
 export type FindActionPoliciesSortField = z.infer<typeof findActionPoliciesSortFieldSchema>;
 
-const actionPolicyTagFilterItemSchema = z.string().min(1).max(128);
-
 /** Query parameters for the find action policies (list) API. */
-export const findActionPoliciesRequestSchema = z.object({
-  page: z.coerce.number().min(1).optional().describe('The page number to return. Defaults to 1.'),
-  per_page: z.coerce
-    .number()
-    .min(1)
-    .max(100)
-    .optional()
-    .describe('The number of action policies to return per page. Defaults to 20.'),
-  search: z
-    .string()
-    .min(1)
-    .max(256)
-    .optional()
-    .describe('A text string to search across action policy fields.'),
-  tags: z
-    .union([actionPolicyTagFilterItemSchema, z.array(actionPolicyTagFilterItemSchema)])
-    .transform((v) => (Array.isArray(v) ? v : [v]).map((t) => t.trim()).filter(Boolean))
-    .pipe(z.array(actionPolicyTagFilterItemSchema).max(10))
-    .optional()
-    .describe('Filter by tags. Accepts a single string or an array.'),
-  enabled: z
-    .enum(['true', 'false'])
-    .transform((v) => v === 'true')
-    .optional()
-    .describe('Filter by enabled status. Accepts the strings true or false.'),
-  sort_field: findActionPoliciesSortFieldSchema
-    .optional()
-    .describe('The field to sort action policies by.'),
-  sort_order: z.enum(['asc', 'desc']).optional().describe('The sort direction.'),
-});
+export const findActionPoliciesRequestSchema = z
+  .object({
+    page: queryIntSchema({ min: 1, max: FIND_MAX_RESULT_WINDOW })
+      .optional()
+      .describe('The page number to return. Defaults to 1.'),
+    per_page: queryIntSchema({ min: 1, max: 100 })
+      .optional()
+      .describe('The number of action policies to return per page. Defaults to 20.'),
+    search: z
+      .string()
+      .min(1)
+      .max(256)
+      .optional()
+      .describe('A text string to search across action policy fields.'),
+    enabled: z
+      .enum(['true', 'false'])
+      .transform((v) => v === 'true')
+      .optional()
+      .describe('Filter by enabled status. Accepts the strings true or false.'),
+    sort_field: findActionPoliciesSortFieldSchema
+      .optional()
+      .describe('The field to sort action policies by.'),
+    sort_order: z.enum(['asc', 'desc']).optional().describe('The sort direction.'),
+  })
+  .strict()
+  .refine(
+    ({ page = 1, per_page = FIND_DEFAULT_PER_PAGE }) => page * per_page <= FIND_MAX_RESULT_WINDOW,
+    { message: `page * per_page cannot exceed ${FIND_MAX_RESULT_WINDOW}.`, path: ['page'] }
+  );
 
 export type FindActionPoliciesRequest = z.infer<typeof findActionPoliciesRequestSchema>;

@@ -8,6 +8,7 @@
  */
 import React, { Suspense, useRef, useState } from 'react';
 import { EuiButtonIcon, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import type { EuiFlyoutProps } from '@elastic/eui';
 import { StardustWrapper } from '@kbn/content-management-favorites-public';
 import { useEsqlEditorActions } from '../editor_actions_context';
 import { useNlToEsqlCheck } from '../hooks/use_nl_to_esql_check';
@@ -34,10 +35,13 @@ export function ESQLMenu({
   hideHistory,
   onESQLDocsFlyoutVisibilityChanged,
   onPrettifyQuery,
+  docsFlyoutSize,
 }: {
   hideHistory?: boolean;
   onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
   onPrettifyQuery?: () => void;
+  /** Size for the docs flyout. Pass a named size when embedding the menu in another flyout. */
+  docsFlyoutSize?: EuiFlyoutProps['size'];
 } = {}) {
   const editorActions = useEsqlEditorActions();
   const isNlToEsqlEnabled = useNlToEsqlCheck();
@@ -114,7 +118,10 @@ export function ESQLMenu({
             </EuiToolTip>
           }
         >
-          <LazyHelpPopover onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged} />
+          <LazyHelpPopover
+            onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
+            docsFlyoutSize={docsFlyoutSize}
+          />
         </Suspense>
       </EuiFlexItem>
       {isInline && (

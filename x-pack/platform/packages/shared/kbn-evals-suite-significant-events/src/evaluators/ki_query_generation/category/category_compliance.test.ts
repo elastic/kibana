@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SignificantEventType } from '@kbn/streams-ai/src/significant_events/types';
+import type { SignificantEventType } from '@kbn/nightshift-ai';
 import { categoryComplianceEvaluator } from './category_compliance';
 
 describe('category_compliance evaluator', () => {

@@ -13,7 +13,12 @@ import { EsqlPlugin, type EsqlPluginSetup, type EsqlPluginStart } from './plugin
 export { ESQLLangEditor } from './create_editor';
 export { QuickSearchVisor } from './lazy_quick_search_visor';
 export { useESQLQueryStats } from './hooks/use_esql_query_stats';
-export type { ESQLEditorProps, DataErrorsControl, QuickSearchVisorProps } from '@kbn/esql-editor';
+export type {
+  ESQLEditorProps,
+  DataErrorsControl,
+  QuickSearchVisorProps,
+  RestorableStateProviderApi,
+} from '@kbn/esql-editor';
 export type { EsqlPluginSetup, EsqlPluginStart };
 
 export function plugin(initContext: PluginInitializerContext) {
