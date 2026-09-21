@@ -11,6 +11,8 @@ import type { ConversationRound } from '@kbn/agent-builder-common';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import { RoundResponseActions } from './round_response_actions';
 import { RoundResponse } from './round_response';
+import { ChatMessageText } from './chat_message_text';
+import { JsonCodeBlock } from '../round_events/json_code_block';
 
 jest.mock('./chat_message_text', () => ({
   ChatMessageText: jest.fn(() => null),
@@ -24,7 +26,13 @@ jest.mock('./round_response_actions', () => ({
   RoundResponseActions: jest.fn(() => null),
 }));
 
+jest.mock('../round_events/json_code_block', () => ({
+  JsonCodeBlock: jest.fn(() => null),
+}));
+
 const roundResponseActionsMock = jest.mocked(RoundResponseActions);
+const chatMessageTextMock = jest.mocked(ChatMessageText);
+const jsonCodeBlockMock = jest.mocked(JsonCodeBlock);
 
 const createRound = (): ConversationRound =>
   ({
@@ -51,6 +59,8 @@ const createRound = (): ConversationRound =>
 describe('RoundResponse', () => {
   beforeEach(() => {
     roundResponseActionsMock.mockClear();
+    chatMessageTextMock.mockClear();
+    jsonCodeBlockMock.mockClear();
   });
 
   it('renders response actions after a completed response', () => {
@@ -90,5 +100,73 @@ describe('RoundResponse', () => {
     );
 
     expect(roundResponseActionsMock).not.toHaveBeenCalled();
+  });
+
+  it('renders ChatMessageText when there is no structured_output', () => {
+    const round = createRound();
+
+    render(
+      <RoundResponse
+        hasError={false}
+        response={round.response}
+        steps={round.steps}
+        isLoading={false}
+        rawRound={round}
+      />
+    );
+
+    expect(chatMessageTextMock).toHaveBeenCalled();
+    expect(jsonCodeBlockMock).not.toHaveBeenCalled();
+  });
+
+  it('renders JsonCodeBlock instead of ChatMessageText when structured_output is present', () => {
+    const round = createRound();
+    const structuredOutput = { verdict: 'covered_enabled', rule_id: 'abc-123' };
+    round.response = {
+      message: JSON.stringify(structuredOutput),
+      structured_output: structuredOutput,
+    };
+
+    render(
+      <RoundResponse
+        hasError={false}
+        response={round.response}
+        steps={round.steps}
+        isLoading={false}
+        rawRound={round}
+      />
+    );
+
+    expect(jsonCodeBlockMock).toHaveBeenCalledWith(
+      expect.objectContaining({ data: structuredOutput }),
+      expect.anything()
+    );
+    expect(chatMessageTextMock).not.toHaveBeenCalled();
+  });
+
+  it('passes formatted JSON to copy action when structured_output is present', () => {
+    const round = createRound();
+    const structuredOutput = { verdict: 'no_coverage' };
+    round.response = {
+      message: JSON.stringify(structuredOutput),
+      structured_output: structuredOutput,
+    };
+
+    render(
+      <RoundResponse
+        hasError={false}
+        response={round.response}
+        steps={round.steps}
+        isLoading={false}
+        rawRound={round}
+      />
+    );
+
+    expect(roundResponseActionsMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        content: JSON.stringify(structuredOutput, null, 2),
+      }),
+      expect.anything()
+    );
   });
 });
