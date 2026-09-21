@@ -67,7 +67,6 @@ export class PolicyArtifactsPage {
   readonly confirmModalConfirmButton: Locator;
   readonly perPolicyRadio: Locator;
   readonly blocklistFieldSelect: Locator;
-  readonly blocklistSignatureFieldOption: Locator;
   readonly blocklistOperatorSelect: Locator;
   readonly blocklistValueInput: Locator;
   readonly blocklistValuesInput: Locator;
@@ -98,9 +97,6 @@ export class PolicyArtifactsPage {
     // Forms prefix this id (`*-form-effectedPolicies-perPolicy`).
     this.perPolicyRadio = this.page.getByTestId(/-perPolicy$/);
     this.blocklistFieldSelect = this.page.testSubj.locator('blocklist-form-field-select');
-    this.blocklistSignatureFieldOption = this.page.testSubj.locator(
-      'blocklist-form-file.Ext.code_signature'
-    );
     this.blocklistOperatorSelect = this.page.testSubj.locator(
       'blocklist-form-operator-select-multi'
     );
@@ -275,8 +271,12 @@ export class PolicyArtifactsPage {
   }
 
   private async selectBlocklistSignatureField() {
-    await this.blocklistFieldSelect.click();
-    await this.blocklistSignatureFieldOption.click();
+    // SuperSelect's listbox is page-global and `open()` no-ops if any listbox
+    // is still visible. Selecting via the helper waits for this dropdown to
+    // detach so the operator SuperSelect can open afterward.
+    await this.page.components
+      .superSelect('blocklist-form-field-select')
+      .selectOptionByValue('file.Ext.code_signature');
     await this.blocklistOperatorSelect.waitFor({ state: 'visible' });
   }
 
