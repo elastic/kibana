@@ -125,6 +125,18 @@ export class SemconvPod extends Entity<SemconvPodDocument> {
     ];
   }
 
+  memoryWithoutLimit(): SemconvPodMetrics[] {
+    return [
+      new SemconvPodMetrics({
+        ...this.fields,
+        'metricset.name': 'memory',
+        [SEMCONV_K8S_POD_MEMORY_NODE_UTILIZATION]: MEMORY_NODE_UTILIZATION,
+        [SEMCONV_K8S_POD_MEMORY_WORKING_SET]: MEMORY_WORKING_SET_BYTES,
+        [SEMCONV_K8S_POD_MEMORY_USAGE]: MEMORY_USAGE_BYTES,
+      }),
+    ];
+  }
+
   network(opts?: SemconvPodNetworkOptions): SemconvPodMetrics[] {
     const interfaces = opts?.interfaces ?? ['eth0'];
     const directions: SemconvNetworkDirection[] = ['receive', 'transmit'];

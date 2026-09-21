@@ -27,7 +27,7 @@ const scenario: Scenario<InfraDocument> = async ({ logger, scenarioOpts }) => {
         const name = index === 1 ? `semconv-pod-${index}-name` : uid;
         return {
           entity: infra.semconvPod(uid, nodeName, { name }),
-          omitCpuLimit: withoutLimits && index % 2 === 1,
+          omitLimits: withoutLimits && index % 2 === 1,
           interfaces: index === 2 ? ['eth0', 'net1'] : ['eth0'],
         };
       });
@@ -39,10 +39,10 @@ const scenario: Scenario<InfraDocument> = async ({ logger, scenarioOpts }) => {
           podList.flatMap((pod) => {
             // Stagger by 1 ms per doc — TSDB derives _id from dimensions that exclude
             // `direction` / `interface`, so identical @timestamp + metricset = duplicate _id.
-            const docs = pod.omitCpuLimit
+            const docs = pod.omitLimits
               ? [
                   ...pod.entity.cpuWithoutLimit(),
-                  ...pod.entity.memory(),
+                  ...pod.entity.memoryWithoutLimit(),
                   ...pod.entity.network({ interfaces: pod.interfaces }),
                 ]
               : pod.entity.metrics({ interfaces: pod.interfaces });

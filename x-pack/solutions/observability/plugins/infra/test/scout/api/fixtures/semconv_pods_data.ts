@@ -70,7 +70,7 @@ export function generateSemconvPodsData({
         const docs = pod.withoutLimits
           ? [
               ...pod.entity.cpuWithoutLimit(),
-              ...pod.entity.memory(),
+              ...pod.entity.memoryWithoutLimit(),
               ...pod.entity.network({ interfaces: pod.interfaces }),
             ]
           : pod.entity.metrics({ interfaces: pod.interfaces });

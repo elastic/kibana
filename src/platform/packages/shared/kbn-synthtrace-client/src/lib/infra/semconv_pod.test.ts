@@ -15,6 +15,9 @@ import {
   KUBELETSTATS_DATASET,
   SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION,
   SEMCONV_K8S_POD_CPU_NODE_UTILIZATION,
+  SEMCONV_K8S_POD_MEMORY_LIMIT_UTILIZATION,
+  SEMCONV_K8S_POD_MEMORY_NODE_UTILIZATION,
+  SEMCONV_K8S_POD_MEMORY_WORKING_SET,
   SEMCONV_K8S_POD_NETWORK_IO,
   semconvPod,
 } from './semconv_pod';
@@ -55,6 +58,19 @@ describe('semconvPod', () => {
     expect(withLimit.fields[SEMCONV_K8S_POD_CPU_NODE_UTILIZATION]).toBe(0.32);
     expect(withoutLimit.fields[SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION]).toBeUndefined();
     expect(withoutLimit.fields[SEMCONV_K8S_POD_CPU_NODE_UTILIZATION]).toBe(0.32);
+  });
+
+  it('emits limit utilization on memory() and omits it on memoryWithoutLimit()', () => {
+    const pod = semconvPod('semconv-pod-0', 'semconv-host-0');
+    const [withLimit] = pod.memory();
+    const [withoutLimit] = pod.memoryWithoutLimit();
+
+    expect(withLimit.fields[SEMCONV_K8S_POD_MEMORY_LIMIT_UTILIZATION]).toBe(0.55);
+    expect(withLimit.fields[SEMCONV_K8S_POD_MEMORY_NODE_UTILIZATION]).toBe(0.4);
+    expect(withLimit.fields[SEMCONV_K8S_POD_MEMORY_WORKING_SET]).toBe(512 * 1024 * 1024);
+    expect(withoutLimit.fields[SEMCONV_K8S_POD_MEMORY_LIMIT_UTILIZATION]).toBeUndefined();
+    expect(withoutLimit.fields[SEMCONV_K8S_POD_MEMORY_NODE_UTILIZATION]).toBe(0.4);
+    expect(withoutLimit.fields[SEMCONV_K8S_POD_MEMORY_WORKING_SET]).toBe(512 * 1024 * 1024);
   });
 
   it('emits a monotonically increasing network counter per direction and interface', () => {
