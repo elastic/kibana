@@ -81,8 +81,10 @@ describe('createWorkerSettingsRegistration', () => {
 
     it('rejects stored values missing the declared schedule interval', () => {
       // No defaulting of older development state: the document has to be reset.
+      // The autonomy level has to be one this worker allows, or the throw could be
+      // attributed to the wrong field.
       expect(() =>
-        registration.toSettings({ settingsVersion: 1, autonomyLevel: 'assisted' })
+        registration.toSettings({ settingsVersion: 1, autonomyLevel: 'manual' })
       ).toThrow(/scheduleInterval/);
     });
 
@@ -170,6 +172,9 @@ describe('createWorkerSettingsRegistration', () => {
       });
     });
 
+    // `supervised` rather than `assisted`: this worker gates exactly one thing, so it
+    // allows only `manual` and `supervised`. The interval is what is under test here,
+    // but the patch still has to be one the worker would accept.
     it('leaves the interval untouched when only autonomy is patched', () => {
       const applied = registration.applyPatch(
         { settingsVersion: 1, autonomyLevel: 'manual', scheduleInterval: '15m' },

@@ -6,7 +6,6 @@
  */
 
 import type { IRouter, Logger } from '@kbn/core/server';
-import type { AlertZeroConfig } from '../config';
 import type { AlertZeroSpaceIdResolver } from '../types';
 import type { WatchesService } from '../services/watches/watches_service';
 import type { WorkersService } from '../services/workers/workers_service';
@@ -23,7 +22,6 @@ import { registerListActionsRoute } from './actions/list_actions';
 export interface RouteDependencies {
   router: IRouter;
   logger: Logger;
-  config: AlertZeroConfig;
   getSpaceId: AlertZeroSpaceIdResolver;
   getWatchesService: () => WatchesService;
   getWorkersService: () => WorkersService;
