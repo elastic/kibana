@@ -8,6 +8,7 @@
  */
 
 import Fs from 'fs';
+import { execFile } from 'child_process';
 import { join } from 'path';
 import http from 'http';
 
@@ -330,25 +331,24 @@ describe('kibana cli', function () {
       });
 
       it('should use https_proxy for secure URLs', async function () {
-        nock.restore();
-        process.env.https_proxy = proxyUrl;
-        settings.urls = ['https://example.com/plugin.zip'];
-
-        try {
-          await download(settings, logger).then(
-            () => {
-              // If the proxy is hit, the request should fail, since our test proxy
-              // doesn't actually forward HTTPS requests.
-              expect().fail('Should not succeed a HTTPS proxy request.');
+        await new Promise((resolve, reject) => {
+          execFile(
+            process.execPath,
+            [
+              '--require',
+              require.resolve('@kbn/setup-node-env'),
+              require.resolve('./__fixtures__/https_proxy_download'),
+              tempArchiveFilePath,
+            ],
+            {
+              env: { ...process.env, https_proxy: proxyUrl },
+              timeout: 10000,
             },
-            () => {
-              // Check if the proxy was actually hit before the failure.
-              expect(proxyConnectHit).toBe(true);
-            }
+            (error) => (error ? reject(error) : resolve())
           );
-        } finally {
-          nock.activate();
-        }
+        });
+
+        expect(proxyConnectHit).toBe(true);
       });
 
       it('should not use http_proxy for HTTPS urls', function () {
