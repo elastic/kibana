@@ -77,7 +77,6 @@ describe('fetchLatestVersions', () => {
   describe('tag filtering', () => {
     const RULE_ID = 'aws-s3-bucket-public';
     const OLD_TAG = 'Data Source: AWS';
-    const NEW_TAG = 'Platform: AWS';
 
     beforeEach(() => {
       searchMock
