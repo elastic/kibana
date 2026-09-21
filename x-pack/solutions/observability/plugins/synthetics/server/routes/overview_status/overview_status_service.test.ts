@@ -148,8 +148,12 @@ describe('current status route', () => {
       expect(await overviewStatusService.getOverviewStatus()).toMatchInlineSnapshot(`
         Object {
           "allIds": Array [
-            "id1",
-            "id2",
+            Object {
+              "monitorQueryId": "id1",
+            },
+            Object {
+              "monitorQueryId": "id2",
+            },
           ],
           "allMonitorsCount": 2,
           "disabledConfigs": Object {},
@@ -313,8 +317,12 @@ describe('current status route', () => {
       expect(await overviewStatusService.getOverviewStatus()).toMatchInlineSnapshot(`
         Object {
           "allIds": Array [
-            "id1",
-            "id2",
+            Object {
+              "monitorQueryId": "id1",
+            },
+            Object {
+              "monitorQueryId": "id2",
+            },
           ],
           "allMonitorsCount": 2,
           "disabledConfigs": Object {},
@@ -422,8 +430,12 @@ describe('current status route', () => {
       expect(await overviewStatusService.getOverviewStatus()).toMatchInlineSnapshot(`
         Object {
           "allIds": Array [
-            "id1",
-            "id2",
+            Object {
+              "monitorQueryId": "id1",
+            },
+            Object {
+              "monitorQueryId": "id2",
+            },
           ],
           "allMonitorsCount": 2,
           "disabledConfigs": Object {},
@@ -1520,7 +1532,18 @@ describe('current status route', () => {
       // Counts should include the remote monitor
       expect(result.down).toBe(1);
       expect(result.up).toBe(1);
-      expect(result.allIds).toContain('remote-monitor-1');
+      expect(result.allIds.map(({ monitorQueryId }) => monitorQueryId)).toContain(
+        'remote-monitor-1'
+      );
+      expect(result.allIds).toEqual(
+        expect.arrayContaining([
+          {
+            monitorQueryId: 'remote-monitor-1',
+            remoteName: 'cluster-east',
+            locationId: 'us-east-1',
+          },
+        ])
+      );
     });
 
     it('does not put remote-only monitor ids into allIds when a schedule filter is active', async () => {
@@ -1586,8 +1609,12 @@ describe('current status route', () => {
       const result = await overviewStatusService.getOverviewStatus();
 
       expect(result.downConfigs['cluster-east-remote-config-1-us-east-1']).toBeDefined();
-      expect(result.allIds).not.toContain('remote-monitor-1');
-      expect(result.allIds).toEqual(expect.arrayContaining(['id1', 'id2']));
+      expect(result.allIds.map(({ monitorQueryId }) => monitorQueryId)).not.toContain(
+        'remote-monitor-1'
+      );
+      expect(result.allIds.map(({ monitorQueryId }) => monitorQueryId)).toEqual(
+        expect.arrayContaining(['id1', 'id2'])
+      );
     });
 
     it('discovers CPS linked-project monitors that have no local saved object', async () => {
@@ -1860,11 +1887,33 @@ describe('current status route', () => {
       const result = await overviewStatusService.getOverviewStatus();
 
       expect(result.downIds).toEqual([
-        { monitorQueryId: 'shared-remote-monitor', remoteName: 'cluster-east' },
+        {
+          monitorQueryId: 'shared-remote-monitor',
+          remoteName: 'cluster-east',
+          locationId: 'us-east-1',
+        },
       ]);
       expect(result.upIds).toEqual([
-        { monitorQueryId: 'shared-remote-monitor', remoteName: 'cluster-west' },
+        {
+          monitorQueryId: 'shared-remote-monitor',
+          remoteName: 'cluster-west',
+          locationId: 'us-east-1',
+        },
       ]);
+      expect(result.allIds).toEqual(
+        expect.arrayContaining([
+          {
+            monitorQueryId: 'shared-remote-monitor',
+            remoteName: 'cluster-east',
+            locationId: 'us-east-1',
+          },
+          {
+            monitorQueryId: 'shared-remote-monitor',
+            remoteName: 'cluster-west',
+            locationId: 'us-east-1',
+          },
+        ])
+      );
     });
 
     it('does not place a local no-saved-object ping into the remote branch', async () => {
@@ -2451,7 +2500,9 @@ describe('current status route', () => {
         // id2 never reported in the window, so it stays in the list as pending
         // rather than being dropped — the overview never hides a configured monitor.
         expect(result.allMonitorsCount).toBe(2);
-        expect(result.allIds).toEqual(expect.arrayContaining(['id1', 'id2']));
+        expect(result.allIds.map(({ monitorQueryId }) => monitorQueryId)).toEqual(
+          expect.arrayContaining(['id1', 'id2'])
+        );
         expect(result.upConfigs.id1).toBeDefined();
         expect(result.pendingConfigs.id2).toBeDefined();
       });
@@ -2468,7 +2519,9 @@ describe('current status route', () => {
         const result = await overviewStatusService.getOverviewStatus();
 
         expect(result.allMonitorsCount).toBe(2);
-        expect(result.allIds).toEqual(expect.arrayContaining(['id1', 'id2']));
+        expect(result.allIds.map(({ monitorQueryId }) => monitorQueryId)).toEqual(
+          expect.arrayContaining(['id1', 'id2'])
+        );
         expect(result.pendingConfigs.id2).toBeDefined();
       });
 
@@ -2803,26 +2856,34 @@ describe('current status route', () => {
     // A genuine autodiscovery ping carries neither `config_id` nor
     // `meta.space_id` — its identity is `monitor.id`. Tests that want to model a
     // Kibana-pushed (deleted) monitor add those markers explicitly.
-    const heartbeatBucket = (overrides: { monitorId: string; status: string; metrics?: any }) => ({
-      key: { monitorId: overrides.monitorId, locationId: japanLoc.id },
-      status: {
-        key: japanLoc.id,
-        top: [
-          {
-            metrics: {
-              'monitor.status': overrides.status,
-              'monitor.name': 'k8s autodiscovered monitor',
-              'monitor.type': 'http',
-              'monitor.interval': 600,
-              tags: ['kube-system'],
-              ...overrides.metrics,
+    const heartbeatBucket = (overrides: {
+      monitorId: string;
+      status: string;
+      metrics?: any;
+      locationId?: string;
+    }) => {
+      const locationId = overrides.locationId ?? japanLoc.id;
+      return {
+        key: { monitorId: overrides.monitorId, locationId },
+        status: {
+          key: locationId,
+          top: [
+            {
+              metrics: {
+                'monitor.status': overrides.status,
+                'monitor.name': 'k8s autodiscovered monitor',
+                'monitor.type': 'http',
+                'monitor.interval': 600,
+                tags: ['kube-system'],
+                ...overrides.metrics,
+              },
+              sort: ['2025-05-28T10:00:00.000Z'],
             },
-            sort: ['2025-05-28T10:00:00.000Z'],
-          },
-        ],
-      },
-      location_name: { buckets: [{ key: 'My K8s Cluster', doc_count: 1 }] },
-    });
+          ],
+        },
+        location_name: { buckets: [{ key: 'My K8s Cluster', doc_count: 1 }] },
+      };
+    };
 
     it('surfaces a local monitor with no saved object as origin: heartbeat', async () => {
       const { esClient, syntheticsEsClient } = getUptimeESMockClient();
@@ -2848,7 +2909,9 @@ describe('current status route', () => {
       const entry = result.upConfigs['heartbeat-hb-1-asia_japan'];
       expect(entry).toBeDefined();
       expect(entry.origin).toBe('heartbeat');
-      expect(result.allIds).toContain('hb-1');
+      expect(result.allIds).toEqual(
+        expect.arrayContaining([{ monitorQueryId: 'hb-1', locationId: japanLoc.id }])
+      );
       expect(entry.remote).toBeUndefined();
       expect(entry.isEnabled).toBe(true);
       expect(entry.isStatusAlertEnabled).toBe(false);
@@ -2886,7 +2949,45 @@ describe('current status route', () => {
       const result = await service.getOverviewStatus();
 
       expect(result.upConfigs['heartbeat-hb-1-asia_japan']).toBeDefined();
-      expect(result.allIds).not.toContain('hb-1');
+      expect(result.allIds.map(({ monitorQueryId }) => monitorQueryId)).not.toContain('hb-1');
+    });
+
+    it('keeps locationId on Heartbeat status ids so two locations of the same monitor can differ in status', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            heartbeatBucket({ monitorId: 'hb-1', status: 'down' }),
+            heartbeatBucket({
+              monitorId: 'hb-1',
+              status: 'up',
+              locationId: germanyLoc.id,
+            }),
+          ],
+        })
+      );
+
+      const routeContext: any = {
+        request: { query: { page: 1, perPage: 10 } },
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: false,
+          config: { experimental: { ccs: { enabled: false } } },
+        },
+      };
+      const service = new OverviewStatusService(routeContext);
+      service.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+
+      const result = await service.getOverviewStatus();
+
+      expect(result.downIds).toEqual([{ monitorQueryId: 'hb-1', locationId: japanLoc.id }]);
+      expect(result.upIds).toEqual([{ monitorQueryId: 'hb-1', locationId: germanyLoc.id }]);
+      expect(result.allIds).toEqual(
+        expect.arrayContaining([
+          { monitorQueryId: 'hb-1', locationId: japanLoc.id },
+          { monitorQueryId: 'hb-1', locationId: germanyLoc.id },
+        ])
+      );
     });
 
     const runWithBuckets = async (buckets: any[]) => {

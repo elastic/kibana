@@ -8,7 +8,6 @@
 import { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { escapeQuotes } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { ObservabilityDataViews } from '@kbn/exploratory-view-plugin/public';
@@ -21,13 +20,8 @@ import {
 import type { ClientPluginsStart } from '../../../../../plugin';
 import { useGetUrlParams } from '../../../hooks';
 import { useKibanaSpace } from '../../../../../hooks/use_kibana_space';
+import { kqlValuesClause } from '../../../utils/kql_values_clause';
 import { useMonitorFilters } from './use_monitor_filters';
-
-// A single value's KQL clause, e.g. `field: ("a" or "b")`.
-const kqlValuesClause = (field: string, values: Array<string | number>): string => {
-  const quoted = values.map((v) => `"${escapeQuotes(String(v))}"`);
-  return quoted.length === 1 ? `${field}: ${quoted[0]}` : `${field}: (${quoted.join(' or ')})`;
-};
 
 /**
  * Vertical markers for alert start times, drawn on top of the "Pings over

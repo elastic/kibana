@@ -9,7 +9,11 @@ import { renderHook } from '@testing-library/react';
 import * as spaceHook from '../../../../../hooks/use_kibana_space';
 import * as paramHook from '../../../hooks/use_url_params';
 import * as redux from 'react-redux-v7';
-import { useMonitorFilters, useMonitorIdFilter } from './use_monitor_filters';
+import {
+  useMonitorFilters,
+  useMonitorIdFilter,
+  useOverviewAlertsKuery,
+} from './use_monitor_filters';
 import { WrappedHelper } from '../../../utils/testing';
 
 describe('useMonitorFilters', () => {
@@ -30,7 +34,9 @@ describe('useMonitorFilters', () => {
   it('should return an empty array for schedules alone (monitor.id scoping now comes from useMonitorIdFilter)', () => {
     spaceSpy.mockReturnValue({} as any);
     paramSpy.mockReturnValue({ schedules: 'daily' } as any);
-    selSPy.mockReturnValue({ status: { allIds: ['id1', 'id2'] } });
+    selSPy.mockReturnValue({
+      status: { allIds: [{ monitorQueryId: 'id1' }, { monitorQueryId: 'id2' }] },
+    });
 
     const { result } = renderHook(() => useMonitorFilters({}), { wrapper: WrappedHelper });
 
@@ -91,7 +97,10 @@ describe('useMonitorFilters', () => {
     spaceSpy.mockReturnValue({} as any);
     paramSpy.mockReturnValue({ statusFilter: 'down' } as any);
     selSPy.mockReturnValue({
-      status: { allIds: ['id1', 'id2'], downIds: [{ monitorQueryId: 'id2' }] },
+      status: {
+        allIds: [{ monitorQueryId: 'id1' }, { monitorQueryId: 'id2' }],
+        downIds: [{ monitorQueryId: 'id2' }],
+      },
     });
 
     const { result } = renderHook(() => useMonitorFilters({}), { wrapper: WrappedHelper });
@@ -103,7 +112,10 @@ describe('useMonitorFilters', () => {
     spaceSpy.mockReturnValue({ space: null } as any);
     paramSpy.mockReturnValue({ statusFilter: 'pending', projects: ['projectA'] } as any);
     selSPy.mockReturnValue({
-      status: { allIds: ['id1', 'id2'], pendingIds: [{ monitorQueryId: 'id1' }] },
+      status: {
+        allIds: [{ monitorQueryId: 'id1' }, { monitorQueryId: 'id2' }],
+        pendingIds: [{ monitorQueryId: 'id1' }],
+      },
     });
 
     const { result } = renderHook(() => useMonitorFilters({}), { wrapper: WrappedHelper });
@@ -119,13 +131,32 @@ describe('useMonitorFilters', () => {
     // active.
     spaceSpy.mockReturnValue({ space: { id: 'space1' } } as any);
     paramSpy.mockReturnValue({ schedules: 'daily' } as any);
-    selSPy.mockReturnValue({ status: { allIds: ['id1', 'id2'] } });
+    selSPy.mockReturnValue({
+      status: { allIds: [{ monitorQueryId: 'id1' }, { monitorQueryId: 'id2' }] },
+    });
 
     const { result } = renderHook(() => useMonitorFilters({ forAlerts: true }), {
       wrapper: WrappedHelper,
     });
 
     expect(result.current).toEqual([{ field: 'kibana.space_ids', values: ['space1'] }]);
+  });
+
+  it('still applies location filters in the schedules/AND-locations branch', () => {
+    // Local saved-object rows group locations under one monitor.id, so dropping
+    // the geo filter here would let pings from unselected locations through.
+    spaceSpy.mockReturnValue({ space: null } as any);
+    paramSpy.mockReturnValue({
+      locations: ['location1'],
+      useLogicalAndFor: ['locations'],
+    } as any);
+    selSPy.mockReturnValue({
+      status: { allIds: [{ monitorQueryId: 'id1' }] },
+    });
+
+    const { result } = renderHook(() => useMonitorFilters({}), { wrapper: WrappedHelper });
+
+    expect(result.current).toEqual([{ field: 'observer.geo.name', values: ['location1'] }]);
   });
 
   it('should handle a combination of parameters', () => {
@@ -170,7 +201,9 @@ describe('useMonitorIdFilter', () => {
 
   it('returns a terms query (not KQL-expandable UrlFilter values) for allIds under a schedules filter', () => {
     paramSpy.mockReturnValue({ schedules: 'daily' } as any);
-    selSPy.mockReturnValue({ status: { allIds: ['id1', 'id2'] } });
+    selSPy.mockReturnValue({
+      status: { allIds: [{ monitorQueryId: 'id1' }, { monitorQueryId: 'id2' }] },
+    });
 
     const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: WrappedHelper });
 
@@ -180,7 +213,10 @@ describe('useMonitorIdFilter', () => {
   it('returns a terms query scoped to a status filter', () => {
     paramSpy.mockReturnValue({ statusFilter: 'down' } as any);
     selSPy.mockReturnValue({
-      status: { allIds: ['id1', 'id2'], downIds: [{ monitorQueryId: 'id2' }] },
+      status: {
+        allIds: [{ monitorQueryId: 'id1' }, { monitorQueryId: 'id2' }],
+        downIds: [{ monitorQueryId: 'id2' }],
+      },
     });
 
     const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: WrappedHelper });
@@ -192,7 +228,7 @@ describe('useMonitorIdFilter', () => {
     paramSpy.mockReturnValue({ schedules: 'daily', statusFilter: 'up' } as any);
     selSPy.mockReturnValue({
       status: {
-        allIds: ['id1', 'id2', 'id3'],
+        allIds: [{ monitorQueryId: 'id1' }, { monitorQueryId: 'id2' }, { monitorQueryId: 'id3' }],
         upIds: [{ monitorQueryId: 'id2' }, { monitorQueryId: 'id3' }, { monitorQueryId: 'id4' }],
       },
     });
@@ -209,7 +245,9 @@ describe('useMonitorIdFilter', () => {
     // scopes pings and alerts without the ping-only `query_string` that would
     // wipe the annotation layer.
     paramSpy.mockReturnValue({ query: 'checkout' } as any);
-    selSPy.mockReturnValue({ status: { allIds: ['id1', 'id3'] } });
+    selSPy.mockReturnValue({
+      status: { allIds: [{ monitorQueryId: 'id1' }, { monitorQueryId: 'id3' }] },
+    });
 
     const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: WrappedHelper });
 
@@ -220,7 +258,7 @@ describe('useMonitorIdFilter', () => {
     paramSpy.mockReturnValue({ query: 'checkout', statusFilter: 'down' } as any);
     selSPy.mockReturnValue({
       status: {
-        allIds: ['id1', 'id2', 'id3'],
+        allIds: [{ monitorQueryId: 'id1' }, { monitorQueryId: 'id2' }, { monitorQueryId: 'id3' }],
         downIds: [{ monitorQueryId: 'id2' }, { monitorQueryId: 'id4' }],
       },
     });
@@ -233,7 +271,10 @@ describe('useMonitorIdFilter', () => {
   it('scopes to disabledMonitorQueryIds for the disabled status filter', () => {
     paramSpy.mockReturnValue({ statusFilter: 'disabled' } as any);
     selSPy.mockReturnValue({
-      status: { allIds: ['id1', 'id2'], disabledMonitorQueryIds: ['id2'] },
+      status: {
+        allIds: [{ monitorQueryId: 'id1' }, { monitorQueryId: 'id2' }],
+        disabledMonitorQueryIds: ['id2'],
+      },
     });
 
     const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: WrappedHelper });
@@ -243,7 +284,7 @@ describe('useMonitorIdFilter', () => {
 
   it('falls back to a non-matching id when the status filter matches nothing', () => {
     paramSpy.mockReturnValue({ statusFilter: 'stale' } as any);
-    selSPy.mockReturnValue({ status: { allIds: ['id1'], staleIds: [] } });
+    selSPy.mockReturnValue({ status: { allIds: [{ monitorQueryId: 'id1' }], staleIds: [] } });
 
     const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: WrappedHelper });
 
@@ -258,7 +299,7 @@ describe('useMonitorIdFilter', () => {
     // (e.g. via `JSON.stringify`) would see as a perpetually-changing
     // dependency — refetching, re-rendering, and never settling.
     paramSpy.mockReturnValue({ statusFilter: 'stale' } as any);
-    selSPy.mockReturnValue({ status: { allIds: ['id1'], staleIds: [] } });
+    selSPy.mockReturnValue({ status: { allIds: [{ monitorQueryId: 'id1' }], staleIds: [] } });
 
     const { result, rerender } = renderHook(() => useMonitorIdFilter(), {
       wrapper: WrappedHelper,
@@ -269,13 +310,36 @@ describe('useMonitorIdFilter', () => {
     expect(result.current?.terms?.['monitor.id']).toEqual(firstIds);
   });
 
-  it('scopes a remote-only Down status filter by cluster, not a shared monitor.id', () => {
+  it('scopes a remote-only Down status filter by cluster and location, not a shared monitor.id', () => {
     paramSpy.mockReturnValue({ statusFilter: 'down' } as any);
     selSPy.mockReturnValue({
       status: {
-        allIds: ['shared-id'],
-        downIds: [{ monitorQueryId: 'shared-id', remoteName: 'cluster-east' }],
-        upIds: [{ monitorQueryId: 'shared-id', remoteName: 'cluster-west' }],
+        allIds: [
+          {
+            monitorQueryId: 'shared-id',
+            remoteName: 'cluster-east',
+            locationId: 'us-east-1',
+          },
+          {
+            monitorQueryId: 'shared-id',
+            remoteName: 'cluster-west',
+            locationId: 'us-east-1',
+          },
+        ],
+        downIds: [
+          {
+            monitorQueryId: 'shared-id',
+            remoteName: 'cluster-east',
+            locationId: 'us-east-1',
+          },
+        ],
+        upIds: [
+          {
+            monitorQueryId: 'shared-id',
+            remoteName: 'cluster-west',
+            locationId: 'us-east-1',
+          },
+        ],
       },
     });
 
@@ -286,8 +350,162 @@ describe('useMonitorIdFilter', () => {
         filter: [
           { terms: { 'monitor.id': ['shared-id'] } },
           { wildcard: { _index: 'cluster-east:*' } },
+          { term: { 'observer.name': 'us-east-1' } },
         ],
       },
     });
+  });
+
+  it('scopes a Heartbeat Down status filter by location, not a shared monitor.id', () => {
+    paramSpy.mockReturnValue({ statusFilter: 'down' } as any);
+    selSPy.mockReturnValue({
+      status: {
+        allIds: [
+          { monitorQueryId: 'hb-1', locationId: 'asia_japan' },
+          { monitorQueryId: 'hb-1', locationId: 'europe_germany' },
+        ],
+        downIds: [{ monitorQueryId: 'hb-1', locationId: 'asia_japan' }],
+        upIds: [{ monitorQueryId: 'hb-1', locationId: 'europe_germany' }],
+      },
+    });
+
+    const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: WrappedHelper });
+
+    expect(result.current).toEqual({
+      bool: {
+        filter: [
+          { terms: { 'monitor.id': ['hb-1'] } },
+          { term: { 'observer.name': 'asia_japan' } },
+        ],
+      },
+    });
+  });
+
+  it('matches location-less Heartbeat pings via a missing observer.name, not the placeholder id', () => {
+    paramSpy.mockReturnValue({ statusFilter: 'down' } as any);
+    selSPy.mockReturnValue({
+      status: {
+        allIds: [{ monitorQueryId: 'hb-1', locationId: 'heartbeat' }],
+        downIds: [{ monitorQueryId: 'hb-1', locationId: 'heartbeat' }],
+      },
+    });
+
+    const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: WrappedHelper });
+
+    expect(result.current).toEqual({
+      bool: {
+        filter: [
+          { terms: { 'monitor.id': ['hb-1'] } },
+          { bool: { must_not: { exists: { field: 'observer.name' } } } },
+        ],
+      },
+    });
+  });
+
+  it('scopes a search-filtered allIds by cluster and location, not a shared monitor.id', () => {
+    paramSpy.mockReturnValue({ query: 'shared' } as any);
+    selSPy.mockReturnValue({
+      status: {
+        allIds: [
+          {
+            monitorQueryId: 'shared-id',
+            remoteName: 'cluster-east',
+            locationId: 'us-east-1',
+          },
+          {
+            monitorQueryId: 'shared-id',
+            remoteName: 'cluster-west',
+            locationId: 'us-east-1',
+          },
+        ],
+      },
+    });
+
+    const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: WrappedHelper });
+
+    expect(result.current).toEqual({
+      bool: {
+        should: [
+          {
+            bool: {
+              filter: [
+                { terms: { 'monitor.id': ['shared-id'] } },
+                { wildcard: { _index: 'cluster-east:*' } },
+                { term: { 'observer.name': 'us-east-1' } },
+              ],
+            },
+          },
+          {
+            bool: {
+              filter: [
+                { terms: { 'monitor.id': ['shared-id'] } },
+                { wildcard: { _index: 'cluster-west:*' } },
+                { term: { 'observer.name': 'us-east-1' } },
+              ],
+            },
+          },
+        ],
+        minimum_should_match: 1,
+      },
+    });
+  });
+});
+
+describe('useOverviewAlertsKuery', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const spaceSpy = jest.spyOn(spaceHook, 'useKibanaSpace');
+  const paramSpy = jest.spyOn(paramHook, 'useGetUrlParams');
+  const selSPy = jest.spyOn(redux, 'useSelector');
+
+  it('includes space, location, and Down-status monitor identity', () => {
+    spaceSpy.mockReturnValue({ space: { id: 'space1' } } as any);
+    paramSpy.mockReturnValue({
+      statusFilter: 'down',
+      locations: ['Japan'],
+    } as any);
+    selSPy.mockReturnValue({
+      status: {
+        allIds: [{ monitorQueryId: 'id1' }, { monitorQueryId: 'id2' }],
+        downIds: [{ monitorQueryId: 'id2' }],
+      },
+    });
+
+    const { result } = renderHook(() => useOverviewAlertsKuery(), { wrapper: WrappedHelper });
+
+    expect(result.current).toEqual(
+      'observer.geo.name: "Japan" and kibana.space_ids: "space1" and monitor.id: "id2"'
+    );
+  });
+
+  it('scopes a remote Down filter by cluster and location in KQL', () => {
+    spaceSpy.mockReturnValue({} as any);
+    paramSpy.mockReturnValue({ statusFilter: 'down' } as any);
+    selSPy.mockReturnValue({
+      status: {
+        allIds: [
+          {
+            monitorQueryId: 'shared-id',
+            remoteName: 'cluster-east',
+            locationId: 'us-east-1',
+          },
+        ],
+        downIds: [
+          {
+            monitorQueryId: 'shared-id',
+            remoteName: 'cluster-east',
+            locationId: 'us-east-1',
+          },
+        ],
+      },
+    });
+
+    const { result } = renderHook(() => useOverviewAlertsKuery(), { wrapper: WrappedHelper });
+
+    expect(result.current).toEqual(
+      '(monitor.id: "shared-id" and _index: cluster-east\\:* and observer.name: "us-east-1")'
+    );
   });
 });

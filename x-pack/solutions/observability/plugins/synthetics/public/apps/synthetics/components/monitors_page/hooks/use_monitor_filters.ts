@@ -6,12 +6,20 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import { escapeKuery } from '@kbn/es-query';
 import type { UrlFilter } from '@kbn/exploratory-view-plugin/public';
 import { useSelector } from 'react-redux-v7';
 import { isEmpty } from 'lodash';
 import { useGetUrlParams } from '../../../hooks/use_url_params';
 import type { OverviewStatusFilter } from '../../../../../../common/constants/monitor_management';
+import {
+  getHeartbeatLocationFilter,
+  groupOverviewStatusFilterIds,
+  isUnmappedHeartbeatLocation,
+  overviewStatusFilterIdKey,
+} from '../../../../../../common/lib';
 import type { OverviewStatusFilterId } from '../../../../../../common/runtime_types';
+import { kqlValuesClause } from '../../../utils/kql_values_clause';
 import { useKibanaSpace } from '../../../../../hooks/use_kibana_space';
 import { selectOverviewStatus } from '../../../state/overview_status';
 
@@ -72,45 +80,62 @@ const idsForStatusFilter = (
   }
 };
 
+const groupFilterClause = ({
+  remoteName,
+  locationId,
+  queryIds,
+}: {
+  remoteName?: string;
+  locationId?: string;
+  queryIds: string[];
+}): estypes.QueryDslQueryContainer => {
+  const filter: estypes.QueryDslQueryContainer[] = [{ terms: { 'monitor.id': queryIds } }];
+  if (remoteName) {
+    filter.push({ wildcard: { _index: `${remoteName}:*` } });
+  }
+  filter.push(...getHeartbeatLocationFilter({ field: 'observer.name', value: locationId }));
+  return filter.length === 1 ? filter[0] : { bool: { filter } };
+};
+
 const monitorIdQuery = (ids: OverviewStatusFilterId[]): estypes.QueryDslQueryContainer => {
   if (!ids.length) {
     return { terms: { 'monitor.id': [NO_MATCHING_MONITOR_ID] } };
   }
 
-  const localIds: string[] = [];
-  const remoteIds = new Map<string, string[]>();
-  for (const { monitorQueryId, remoteName } of ids) {
-    if (remoteName) {
-      const existing = remoteIds.get(remoteName);
-      if (existing) {
-        existing.push(monitorQueryId);
-      } else {
-        remoteIds.set(remoteName, [monitorQueryId]);
-      }
-    } else {
-      localIds.push(monitorQueryId);
-    }
-  }
-
-  const clauses: estypes.QueryDslQueryContainer[] = [];
-  if (localIds.length) {
-    clauses.push({ terms: { 'monitor.id': localIds } });
-  }
-  for (const [remoteName, queryIds] of remoteIds) {
-    clauses.push({
-      bool: {
-        filter: [
-          { terms: { 'monitor.id': queryIds } },
-          { wildcard: { _index: `${remoteName}:*` } },
-        ],
-      },
-    });
-  }
+  const clauses = groupOverviewStatusFilterIds(ids).map(groupFilterClause);
 
   if (clauses.length === 1) {
     return clauses[0];
   }
   return { bool: { should: clauses, minimum_should_match: 1 } };
+};
+
+const locationKuery = (locationId: string): string =>
+  isUnmappedHeartbeatLocation(locationId)
+    ? 'not observer.name: *'
+    : kqlValuesClause('observer.name', [locationId]);
+
+const monitorFilterIdsToKuery = (ids: OverviewStatusFilterId[]): string => {
+  if (!ids.length) {
+    return kqlValuesClause('monitor.id', [NO_MATCHING_MONITOR_ID]);
+  }
+
+  const groupClauses = groupOverviewStatusFilterIds(ids).map(
+    ({ remoteName, locationId, queryIds }) => {
+      const parts = [kqlValuesClause('monitor.id', queryIds)];
+      if (remoteName) {
+        // `escapeKuery` would escape `*` / `:`, so only the cluster name is
+        // escaped; `\:*` keeps the CCS `cluster:index` wildcard.
+        parts.push(`_index: ${escapeKuery(remoteName)}\\:*`);
+      }
+      if (locationId) {
+        parts.push(locationKuery(locationId));
+      }
+      return parts.length === 1 ? parts[0] : `(${parts.join(' and ')})`;
+    }
+  );
+
+  return groupClauses.length === 1 ? groupClauses[0] : `(${groupClauses.join(' or ')})`;
 };
 
 // The `monitor.id` scoping (status filter, or the schedules/AND-locations
@@ -121,7 +146,7 @@ const monitorIdQuery = (ids: OverviewStatusFilterId[]): estypes.QueryDslQueryCon
 // `bool.should` clause *per value* — for a status covering more monitors than
 // Elasticsearch's boolean-clause limit (commonly 1024), that errors instead of
 // rendering. A `terms` query has no such per-value clause cost.
-export const useMonitorIdFilter = (): estypes.QueryDslQueryContainer | undefined => {
+export const useOverviewMonitorFilterIds = (): OverviewStatusFilterId[] | undefined => {
   const { locations, schedules, statusFilter, useLogicalAndFor, query } = useGetUrlParams();
   const { status: overviewStatus } = useSelector(selectOverviewStatus);
   const allIds = overviewStatus?.allIds ?? [];
@@ -130,7 +155,7 @@ export const useMonitorIdFilter = (): estypes.QueryDslQueryContainer | undefined
   // overview-status API applies the same search), so a `terms` clause on it
   // scopes pings *and* alerts without the ping-only `query_string` that
   // `getQueryFilters` would otherwise AND onto the annotation layer.
-  const allIdSet = new Set(allIds);
+  const allIdKeys = new Set(allIds.map(overviewStatusFilterIdKey));
 
   // since schedule isn't available in heartbeat data, in that case we rely on monitor.id
   // We need to rely on monitor.id also for locations, because each heartbeat data only contains one location
@@ -141,18 +166,53 @@ export const useMonitorIdFilter = (): estypes.QueryDslQueryContainer | undefined
   ) {
     // Intersect with the status filter (if any) rather than ignoring it —
     // otherwise selecting e.g. "Down" would stop narrowing anything once a
-    // schedule or (AND-ed) location filter is also active.
-    const ids = statusIds
-      ? statusIds.filter((id) => allIdSet.has(id.monitorQueryId))
-      : allIds.map((monitorQueryId) => ({ monitorQueryId }));
-    return monitorIdQuery(ids);
+    // schedule or (AND-ed) location filter is also active. Match on the full
+    // filter identity so two CCS/Heartbeat copies of the same query id are
+    // not collapsed into one `monitor.id`.
+    return statusIds
+      ? statusIds.filter((id) => allIdKeys.has(overviewStatusFilterIdKey(id)))
+      : allIds;
   }
 
   if (statusIds) {
-    return monitorIdQuery(statusIds);
+    return statusIds;
   }
 
   return undefined;
+};
+
+export const useMonitorIdFilter = (): estypes.QueryDslQueryContainer | undefined => {
+  const ids = useOverviewMonitorFilterIds();
+  return ids ? monitorIdQuery(ids) : undefined;
+};
+
+/**
+ * Alert-compatible KQL for the overview Alerts count destination. Mirrors
+ * `useOverviewAlertsCount` (UrlFilters + locations + monitor-id identity)
+ * because the observability alerts URL can only take kuery, not a `terms`
+ * query.
+ */
+export const useOverviewAlertsKuery = (): string | undefined => {
+  const { locations } = useGetUrlParams();
+  const alertsFilters = useMonitorFilters({ forAlerts: true });
+  const ids = useOverviewMonitorFilterIds();
+
+  const clauses: string[] = [];
+  for (const filter of alertsFilters) {
+    if (filter.values?.length) {
+      clauses.push(kqlValuesClause(filter.field, filter.values));
+    }
+  }
+  if (locations?.length && !alertsFilters.some((filter) => filter.field === 'observer.geo.name')) {
+    clauses.push(kqlValuesClause('observer.geo.name', getValues(locations)));
+  }
+  if (ids) {
+    clauses.push(monitorFilterIdsToKuery(ids));
+  }
+  if (!clauses.length) {
+    return undefined;
+  }
+  return clauses.join(' and ');
 };
 
 export const useMonitorFilters = ({ forAlerts }: { forAlerts?: boolean }): UrlFilter[] => {
@@ -166,13 +226,18 @@ export const useMonitorFilters = ({ forAlerts }: { forAlerts?: boolean }): UrlFi
   const spaceFilter: UrlFilter[] = space
     ? [{ field: forAlerts ? 'kibana.space_ids' : 'meta.space_id', values: [space.id] }]
     : [];
+  const locationFilter: UrlFilter[] = locations?.length
+    ? [{ field: 'observer.geo.name', values: getValues(locations) }]
+    : [];
 
   // The schedules/AND-locations branch previously replaced every other filter
   // with a `monitor.id`-only one (`allIds` already reflects those constraints
-  // server-side); that scoping now comes from `useMonitorIdFilter` instead, so
-  // this branch only has the space filter left to contribute.
+  // server-side); that scoping now comes from `useMonitorIdFilter` instead.
+  // Location still has to apply to ping/alert docs: local saved-object rows
+  // group locations under one config, so a monitor.id terms query would
+  // otherwise include pings from unselected locations.
   if (!isEmpty(schedules) || (!isEmpty(locations) && useLogicalAndFor?.includes('locations'))) {
-    return spaceFilter;
+    return [...locationFilter, ...spaceFilter];
   }
 
   return [
@@ -183,7 +248,7 @@ export const useMonitorFilters = ({ forAlerts }: { forAlerts?: boolean }): UrlFi
       field: 'tags',
       values: tags,
     }),
-    ...(locations?.length ? [{ field: 'observer.geo.name', values: getValues(locations) }] : []),
+    ...locationFilter,
     ...spaceFilter,
   ];
 };

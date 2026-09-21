@@ -36,4 +36,19 @@ describe('useAlertsUrl', () => {
     expect(kuery).toContain('Synthetics monitor status');
     expect(kuery).toContain('Synthetics TLS certificate');
   });
+
+  it('ANDs extra overview filters onto the destination kuery', () => {
+    const { result } = renderHook(() =>
+      useAlertsUrl({
+        ...range,
+        includeTls: true,
+        extraKuery: 'kibana.space_ids: "default" and monitor.id: "id2"',
+      })
+    );
+
+    const kuery = decodeKuery(result.current);
+    expect(kuery).toContain('Synthetics TLS certificate');
+    expect(kuery).toContain('kibana.space_ids: "default"');
+    expect(kuery).toContain('monitor.id: "id2"');
+  });
 });

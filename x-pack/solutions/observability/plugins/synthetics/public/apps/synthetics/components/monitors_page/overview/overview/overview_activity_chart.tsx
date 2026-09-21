@@ -16,7 +16,11 @@ import { useUrlParams } from '../../../../hooks';
 import { useOverviewRefreshedRange } from '../../common/use_overview_date_range';
 import { useAlertsUrl } from '../../../monitor_details/monitor_summary/alert_actions';
 import { ERRORS_LABEL } from '../../../monitor_details/monitor_summary/monitor_errors_count';
-import { useMonitorFilters, useMonitorIdFilter } from '../../hooks/use_monitor_filters';
+import {
+  useMonitorFilters,
+  useMonitorIdFilter,
+  useOverviewAlertsKuery,
+} from '../../hooks/use_monitor_filters';
 import { useOverviewAlertsAnnotations } from '../../hooks/use_overview_alerts_annotations';
 import { useOverviewAlertsCount } from '../../hooks/use_overview_alerts_count';
 import { useOverviewDataViewIndexPatterns } from '../../hooks/use_overview_data_view_index_patterns';
@@ -39,8 +43,16 @@ export const useOverviewActivityStats = (): MonitorStatProps[] => {
   // Same range the count above is scoped to — otherwise the count and the
   // destination page's own filter can disagree (e.g. after changing the date
   // picker, or brushing the chart to a different window).
-  // Count includes status and TLS rules; the destination list must too.
-  const alertsUrl = useAlertsUrl({ rangeFrom: from, rangeTo: to, includeTls: true });
+  // Count includes status and TLS rules; the destination list must too, and
+  // must apply the same overview filters (space / tags / locations / monitor
+  // identity) or the count and the alerts page disagree.
+  const extraKuery = useOverviewAlertsKuery();
+  const alertsUrl = useAlertsUrl({
+    rangeFrom: from,
+    rangeTo: to,
+    includeTls: true,
+    extraKuery,
+  });
 
   return [
     {

@@ -70,6 +70,12 @@ export const OverviewStatusMetaDataCodec = z.looseObject({
   origin: MonitorOriginCodec.optional(),
 });
 
+export const OverviewStatusFilterIdCodec = z.looseObject({
+  monitorQueryId: z.string(),
+  remoteName: z.string().optional(),
+  locationId: z.string().optional(),
+});
+
 export const OverviewStatusCodec = z.looseObject({
   allMonitorsCount: z.number(),
   disabledMonitorsCount: z.number(),
@@ -86,12 +92,7 @@ export const OverviewStatusCodec = z.looseObject({
   disabledConfigs: z.record(z.string(), OverviewStatusMetaDataCodec),
   enabledMonitorQueryIds: z.array(z.string()),
   disabledMonitorQueryIds: z.array(z.string()),
-  allIds: z.array(z.string()),
-});
-
-export const OverviewStatusFilterIdCodec = z.looseObject({
-  monitorQueryId: z.string(),
-  remoteName: z.string().optional(),
+  allIds: z.array(OverviewStatusFilterIdCodec),
 });
 
 export const PaginatedOverviewStatusCodec = OverviewStatusCodec.extend({

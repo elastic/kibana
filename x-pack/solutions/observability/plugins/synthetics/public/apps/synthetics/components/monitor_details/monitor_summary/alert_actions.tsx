@@ -115,11 +115,13 @@ export const useAlertsUrl = ({
   rangeTo,
   monitorId,
   includeTls,
+  extraKuery,
 }: {
   monitorId?: string;
   rangeFrom: string;
   rangeTo: string;
   includeTls?: boolean;
+  extraKuery?: string;
 }) => {
   const { basePath } = useSyntheticsSettingsContext();
 
@@ -129,6 +131,10 @@ export const useAlertsUrl = ({
 
   if (monitorId) {
     kuery += `AND monitor.id : "${monitorId}"`;
+  }
+
+  if (extraKuery) {
+    kuery += `AND (${extraKuery})`;
   }
 
   return `${basePath}/app/observability/alerts?_a=${rison.encode({

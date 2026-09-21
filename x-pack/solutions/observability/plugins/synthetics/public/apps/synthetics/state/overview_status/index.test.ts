@@ -199,6 +199,49 @@ describe('overviewStatusReducer', () => {
       expect(next.status?.staleIds).toEqual([{ monitorQueryId: 'mon1' }]);
     });
 
+    it('promotes only the matching Heartbeat location on pendingIds/staleIds', () => {
+      const japan = makeMeta({
+        configId: 'hb-1',
+        monitorQueryId: 'hb-1',
+        origin: 'heartbeat',
+        locations: [{ id: 'asia_japan', label: 'Japan', status: 'pending' }],
+      });
+      const germany = makeMeta({
+        configId: 'hb-1',
+        monitorQueryId: 'hb-1',
+        origin: 'heartbeat',
+        locations: [{ id: 'europe_germany', label: 'Germany', status: 'pending' }],
+      });
+      const initial = overviewStatusReducer(
+        undefined,
+        fetchOverviewStatusAction.success(
+          makePaginated([], {
+            pendingConfigs: {
+              'heartbeat-hb-1-asia_japan': japan,
+              'heartbeat-hb-1-europe_germany': germany,
+            },
+            pendingIds: [
+              { monitorQueryId: 'hb-1', locationId: 'asia_japan' },
+              { monitorQueryId: 'hb-1', locationId: 'europe_germany' },
+            ],
+            staleIds: [],
+          })
+        )
+      );
+
+      const next = overviewStatusReducer(
+        initial,
+        fetchStaleStatusAction.success({
+          priorRuns: [stalePriorRun({ monitorQueryId: 'hb-1', locationId: 'asia_japan' })],
+        })
+      );
+
+      expect(next.status?.pendingIds).toEqual([
+        { monitorQueryId: 'hb-1', locationId: 'europe_germany' },
+      ]);
+      expect(next.status?.staleIds).toEqual([{ monitorQueryId: 'hb-1', locationId: 'asia_japan' }]);
+    });
+
     it('rebuilds allConfigs so consumers see the promoted (stale) metadata', () => {
       const initial = loadedState();
 

@@ -42,6 +42,10 @@ export const OverviewStatusFilterIdCodec = t.intersection([
   }),
   t.partial({
     remoteName: t.string,
+    // Heartbeat / CCS rows are one location each. Without this, a Down
+    // filter on one location of a shared `monitorQueryId` would also match
+    // that monitor's Up pings at another location (and vice versa).
+    locationId: t.string,
   }),
 ]);
 
@@ -117,7 +121,11 @@ export const OverviewStatusCodec = t.interface({
   disabledConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
   enabledMonitorQueryIds: t.array(t.string),
   disabledMonitorQueryIds: t.array(t.string),
-  allIds: t.array(t.string),
+  // Same identity as `upIds`/`downIds`/etc — `monitorQueryId` plus `remoteName`
+  // / `locationId` when the row is a one-location CCS or Heartbeat monitor.
+  // A string list cannot tell two copies of the same query id apart, and the
+  // activity chart's search / AND-location `terms` query is built from this.
+  allIds: t.array(OverviewStatusFilterIdCodec),
 });
 
 export const PaginatedOverviewStatusCodec = t.intersection([
@@ -133,10 +141,10 @@ export const PaginatedOverviewStatusCodec = t.intersection([
     // (or down/pending/stale)" — e.g. to scope another query to the active
     // `statusFilter` — can't get it from those. Mirrors `allIds`, which
     // already does this for the (status-independent) location/tag/schedule
-    // filters. `remoteName` keeps two CCS/CPS copies of the same
-    // `monitorQueryId` distinguishable — a string id list cannot, and a
-    // `monitor.id` terms query would then mix an Up copy into a Down-filtered
-    // chart (and vice versa).
+    // filters. `remoteName` and `locationId` keep two CCS/Heartbeat copies
+    // of the same `monitorQueryId` distinguishable — a string id list cannot,
+    // and a `monitor.id` terms query would then mix an Up copy into a
+    // Down-filtered chart (and vice versa).
     upIds: t.array(OverviewStatusFilterIdCodec),
     downIds: t.array(OverviewStatusFilterIdCodec),
     pendingIds: t.array(OverviewStatusFilterIdCodec),

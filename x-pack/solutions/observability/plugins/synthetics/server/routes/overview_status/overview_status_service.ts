@@ -26,13 +26,19 @@ import type {
   EncryptedSyntheticsMonitorAttributes,
   OverviewStaleStatus,
   OverviewStalePriorRun,
+  OverviewStatusFilterId,
   OverviewStatusMetaData,
 } from '../../../common/runtime_types';
 import {
   HEARTBEAT_UNMAPPED_LOCATION_ID,
   HEARTBEAT_UNMAPPED_LOCATION_LABEL,
 } from '../../../common/runtime_types';
-import { getOverviewConfigKey, isRunStale } from '../../../common/lib';
+import {
+  getOverviewConfigKey,
+  isRunStale,
+  overviewStatusFilterIdKey,
+  toOverviewStatusFilterId,
+} from '../../../common/lib';
 import { isStatusEnabled } from '../../../common/runtime_types/monitor_management/alert_config';
 import {
   FINAL_SUMMARY_FILTER,
@@ -53,31 +59,35 @@ const STATUS_RANK: Record<string, number> = {
 };
 
 // `processMonitors` only sees saved-object configs. Heartbeat/remote monitors
-// are synthesized later into the status buckets, so union those query IDs
+// are synthesized later into the status buckets, so union those filter IDs
 // into `allIds` or a free-text search would drop them from the activity chart.
 // Skip the union when a schedule filter is active: schedules only apply to
 // saved-object configs, and ping-synthesized monitors would otherwise leak
-// onto the activity chart.
+// onto the activity chart. Identity must include cluster + location for
+// one-location external rows — a string `monitorQueryId` list cannot tell two
+// CCS/Heartbeat copies of the same id apart.
 const allIdsIncludingStatusBuckets = (
   savedObjectIds: string[],
-  buckets: Array<Record<string, Pick<OverviewStatusMetaData, 'monitorQueryId'>>>
-): string[] => {
-  const ids = new Set(savedObjectIds);
+  buckets: Array<Record<string, OverviewStatusMetaData>>
+): OverviewStatusFilterId[] => {
+  const ids = new Map<string, OverviewStatusFilterId>();
+  const add = (id: OverviewStatusFilterId) => {
+    ids.set(overviewStatusFilterIdKey(id), id);
+  };
+  for (const monitorQueryId of savedObjectIds) {
+    add({ monitorQueryId });
+  }
   for (const bucket of buckets) {
-    for (const { monitorQueryId } of Object.values(bucket)) {
-      ids.add(monitorQueryId);
+    for (const config of Object.values(bucket)) {
+      add(toOverviewStatusFilterId(config));
     }
   }
-  return [...ids];
+  return [...ids.values()];
 };
 
 const toStatusFilterIds = (
   configs: Record<string, OverviewStatusMetaData>
-): Array<{ monitorQueryId: string; remoteName?: string }> =>
-  Object.values(configs).map(({ monitorQueryId, remote }) => ({
-    monitorQueryId,
-    ...(remote?.remoteName ? { remoteName: remote.remoteName } : {}),
-  }));
+): OverviewStatusFilterId[] => Object.values(configs).map(toOverviewStatusFilterId);
 
 interface LocationStatusEntry {
   status: string;
@@ -226,7 +236,7 @@ export class OverviewStatusService {
           staleConfigs,
           disabledConfigs,
         ])
-      : savedObjectIds;
+      : savedObjectIds.map((monitorQueryId) => ({ monitorQueryId }));
 
     if (!isPaginated) {
       return {
@@ -288,8 +298,9 @@ export class OverviewStatusService {
       // result as a `monitor.id` filter, which matches on `monitorQueryId` —
       // the two differ for e.g. project monitors with multiple locations, so
       // map to `monitorQueryId` rather than using the map's keys directly.
-      // `remoteName` is required when two CCS/CPS clusters host the same
-      // query id: a bare id list cannot tell an Up copy from a Down copy.
+      // `remoteName` and `locationId` are required when two CCS/Heartbeat
+      // copies share a query id: a bare id list cannot tell an Up copy from
+      // a Down copy, or one location from another.
       upIds: toStatusFilterIds(upConfigs),
       downIds: toStatusFilterIds(downConfigs),
       pendingIds: toStatusFilterIds(pendingConfigs),

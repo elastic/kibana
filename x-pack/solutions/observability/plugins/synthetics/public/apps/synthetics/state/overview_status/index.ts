@@ -14,7 +14,12 @@ import type {
   PaginatedOverviewStatus,
 } from '../../../../../common/runtime_types';
 import { MONITOR_STATUS_ENUM } from '../../../../../common/constants/monitor_management';
-import { getOverviewConfigKey, isRunStale } from '../../../../../common/lib';
+import {
+  getOverviewConfigKey,
+  isRunStale,
+  overviewStatusFilterIdKey,
+  toOverviewStatusFilterId,
+} from '../../../../../common/lib';
 import type { IHttpSerializedFetchError } from '..';
 import {
   appendOverviewStatusAction,
@@ -223,22 +228,17 @@ const applyStaleBeforeWindow = (state: OverviewStatusStateReducer) => {
     // promotion, or a monitor moved here would still be excluded when
     // filtering to "Stale" and wrongly included when filtering to "Pending".
     if (status.pendingIds) {
+      const promotedKey = overviewStatusFilterIdKey(toOverviewStatusFilterId(meta));
       status.pendingIds = status.pendingIds.filter(
-        (id) =>
-          id.monitorQueryId !== meta.monitorQueryId || id.remoteName !== meta.remote?.remoteName
+        (id) => overviewStatusFilterIdKey(id) !== promotedKey
       );
     }
-    if (
-      status.staleIds &&
-      !status.staleIds.some(
-        (id) =>
-          id.monitorQueryId === meta.monitorQueryId && id.remoteName === meta.remote?.remoteName
-      )
-    ) {
-      status.staleIds.push({
-        monitorQueryId: meta.monitorQueryId,
-        ...(meta.remote?.remoteName ? { remoteName: meta.remote.remoteName } : {}),
-      });
+    if (status.staleIds) {
+      const promotedId = toOverviewStatusFilterId(meta);
+      const promotedKey = overviewStatusFilterIdKey(promotedId);
+      if (!status.staleIds.some((id) => overviewStatusFilterIdKey(id) === promotedKey)) {
+        status.staleIds.push(promotedId);
+      }
     }
     changed = true;
   }
