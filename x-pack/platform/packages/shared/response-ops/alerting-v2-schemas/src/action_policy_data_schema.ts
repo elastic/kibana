@@ -179,9 +179,9 @@ export type BulkSnoozeActionPoliciesBody = z.infer<typeof bulkSnoozeActionPolici
 
 const actionPolicyNameSchema = z
   .string()
+  .max(MAX_NAME_LENGTH)
   .trim()
   .min(1)
-  .max(MAX_NAME_LENGTH)
   .describe('The name of the action policy.');
 
 const createActionPolicyDataBaseSchema = z
