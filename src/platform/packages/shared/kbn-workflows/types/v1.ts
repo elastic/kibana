@@ -905,12 +905,12 @@ export interface ValidateWorkflowResponseDto {
   diagnostics: WorkflowDiagnostic[];
   parsedWorkflow?: WorkflowYaml;
   /**
-   * Checks that did not run for this request, each with the reason. Reported
-   * separately from `diagnostics` because the absence of a diagnostic from these
-   * checks means "not checked", not "nothing wrong", and because a prerequisite
-   * failing is not a defect in the YAML.
+   * What the checks did not cover, each with the reason: a check either never
+   * ran or stopped at a budget part-way through. Reported separately from
+   * `diagnostics` because the absence of a diagnostic here means "not checked",
+   * not "nothing wrong".
    */
-  validationNotRun?: string[];
+  notChecked?: string[];
 }
 
 export interface GetAvailableConnectorsResponse {

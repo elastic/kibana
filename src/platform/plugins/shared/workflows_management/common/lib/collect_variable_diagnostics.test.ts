@@ -77,7 +77,7 @@ describe('variable validation budgets', () => {
   it('validates a workflow at the step limit', () => {
     const result = validate(buildWorkflow(MAX_STEPS_FOR_VARIABLE_VALIDATION, 1));
 
-    expect(result.validationNotRun).toBeUndefined();
+    expect(result.notChecked).toBeUndefined();
   });
 
   it('skips and reports when the step count is over the limit', () => {
@@ -85,7 +85,7 @@ describe('variable validation budgets', () => {
     const result = validate(buildWorkflow(stepCount, 1));
 
     expect(result.diagnostics.filter(({ source }) => source === 'variable')).toEqual([]);
-    expect(result.validationNotRun).toEqual([
+    expect(result.notChecked).toEqual([
       `Variable validation skipped: the workflow has ${stepCount} steps, above the limit of ${MAX_STEPS_FOR_VARIABLE_VALIDATION}.`,
     ]);
   });
@@ -93,7 +93,7 @@ describe('variable validation budgets', () => {
   it('reports a partial result when the variable count is over the limit', () => {
     const result = validate(buildWorkflow(1, MAX_VARIABLES_FOR_VARIABLE_VALIDATION + 1));
 
-    expect(result.validationNotRun).toEqual([
+    expect(result.notChecked).toEqual([
       `Variable validation is partial: the workflow has more than ${MAX_VARIABLES_FOR_VARIABLE_VALIDATION} variable references, so the rest of it was not checked.`,
     ]);
   });
@@ -106,14 +106,14 @@ describe('variable validation budgets', () => {
     const yaml = buildWorkflow(1, count);
 
     expect(yaml.length).toBeLessThanOrEqual(MAX_WORKFLOW_YAML_LENGTH);
-    expect(validate(yaml).validationNotRun).toHaveLength(1);
+    expect(validate(yaml).notChecked).toHaveLength(1);
   });
 
   it('reports a partial result when Liquid for-loops are over the limit', () => {
     // Zero `{{ ... }}` references, so only the for-loop budget can stop this.
     const result = validate(buildTagWorkflow(MAX_FOR_LOOP_SCOPES_FOR_VARIABLE_VALIDATION + 1));
 
-    expect(result.validationNotRun).toEqual([
+    expect(result.notChecked).toEqual([
       `Variable validation is partial: the workflow has more than ${MAX_FOR_LOOP_SCOPES_FOR_VARIABLE_VALIDATION} Liquid for-loops, so the rest of it was not checked.`,
     ]);
   });
@@ -121,7 +121,7 @@ describe('variable validation budgets', () => {
   it('validates a workflow at the for-loop limit', () => {
     const result = validate(buildTagWorkflow(MAX_FOR_LOOP_SCOPES_FOR_VARIABLE_VALIDATION));
 
-    expect(result.validationNotRun).toBeUndefined();
+    expect(result.notChecked).toBeUndefined();
   });
 
   it('does not exhaust the heap on a workflow at the route body limit', () => {
@@ -130,6 +130,6 @@ describe('variable validation budgets', () => {
 
     const result = validate(yaml);
 
-    expect(result.validationNotRun).toHaveLength(1);
+    expect(result.notChecked).toHaveLength(1);
   });
 });

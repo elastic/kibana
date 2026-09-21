@@ -54,12 +54,10 @@ export const MAX_FOR_LOOP_SCOPES_FOR_VARIABLE_VALIDATION = 1000;
 export interface VariableDiagnosticsResult {
   diagnostics: WorkflowDiagnostic[];
   /**
-   * Set when a budget ran out. Whatever was checked is reported, but the rest
-   * of the workflow was not, so the absence of a diagnostic past that point
-   * means "not checked" and callers must say so instead of implying a clean
-   * result.
+   * Set when a budget ran out. Whatever was reached is reported, the rest was
+   * not, so callers must surface this instead of implying a clean result.
    */
-  notRunReason?: string;
+  notCheckedReason?: string;
 }
 
 /**
@@ -80,7 +78,7 @@ export function collectVariableDiagnostics(
   if (stepCount > MAX_STEPS_FOR_VARIABLE_VALIDATION) {
     return {
       diagnostics: [],
-      notRunReason: `Variable validation skipped: the workflow has ${stepCount} steps, above the limit of ${MAX_STEPS_FOR_VARIABLE_VALIDATION}.`,
+      notCheckedReason: `Variable validation skipped: the workflow has ${stepCount} steps, above the limit of ${MAX_STEPS_FOR_VARIABLE_VALIDATION}.`,
     };
   }
 
@@ -152,7 +150,7 @@ export function collectVariableDiagnostics(
   if (overBudget.length > 0) {
     return {
       diagnostics,
-      notRunReason: `Variable validation is partial: the workflow has ${overBudget.join(
+      notCheckedReason: `Variable validation is partial: the workflow has ${overBudget.join(
         ' and '
       )}, so the rest of it was not checked.`,
     };

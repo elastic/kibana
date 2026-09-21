@@ -49,7 +49,7 @@ export function validateWorkflowYaml(
   options?: ValidateWorkflowYamlOptions
 ): ValidateWorkflowResponseDto {
   const diagnostics: WorkflowDiagnostic[] = [];
-  const validationNotRun: string[] = [];
+  const notChecked: string[] = [];
   let parsedWorkflow: WorkflowYaml | undefined;
 
   const parseResult = parseWorkflowYamlToJSON(yaml, zodSchema, {
@@ -152,8 +152,8 @@ export function validateWorkflowYaml(
         workflowGraph
       );
       diagnostics.push(...variableValidation.diagnostics);
-      if (variableValidation.notRunReason) {
-        validationNotRun.push(variableValidation.notRunReason);
+      if (variableValidation.notCheckedReason) {
+        notChecked.push(variableValidation.notCheckedReason);
       }
     }
   }
@@ -172,6 +172,6 @@ export function validateWorkflowYaml(
     valid: diagnostics.filter((d) => d.severity === 'error').length === 0,
     diagnostics,
     parsedWorkflow,
-    ...(validationNotRun.length > 0 ? { validationNotRun } : {}),
+    ...(notChecked.length > 0 ? { notChecked } : {}),
   };
 }
