@@ -31,7 +31,6 @@ fileGroups:
   src:
     - harden/**/*
     - root/**/*
-    - scripts/**/*
     - '*.js'
     - '*.ts'
     - '!target/**/*'
