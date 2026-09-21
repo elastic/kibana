@@ -28,7 +28,6 @@ type ToolScopedClients = Pick<
   | 'scopedClusterClient'
   | 'uiSettingsClient'
   | 'attachmentClient'
-  | 'uiSettingsClient'
 >;
 
 /**
