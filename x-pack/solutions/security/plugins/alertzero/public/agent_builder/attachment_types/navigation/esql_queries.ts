@@ -38,6 +38,59 @@ export const buildEventLookupEsql = ({
   )} METADATA _id | WHERE event.id == "${escapedEventId}" OR _id == "${escapedEventId}"`;
 };
 
+const uniqueNonEmpty = (values: string[]): string[] => [
+  ...new Set(values.map((value) => value.trim()).filter(Boolean)),
+];
+
+const quoteEsqlList = (values: string[]): string =>
+  values.map((value) => `"${escapeEsqlString(value)}"`).join(', ');
+
+/**
+ * One Discover exit for a whole set of document refs, each carrying its own index.
+ * ES|QL `FROM` accepts a comma-separated source list, so refs spread across several
+ * indices still open as a single query.
+ */
+const buildDocRefsLookupEsql = ({
+  refs,
+  idField,
+}: {
+  refs: Array<{ id: string; index: string }>;
+  idField: string;
+}): string | undefined => {
+  const ids = uniqueNonEmpty(refs.map((ref) => ref.id));
+  const indices = uniqueNonEmpty(refs.map((ref) => ref.index));
+  if (ids.length === 0 || indices.length === 0) {
+    return undefined;
+  }
+
+  const quotedIds = quoteEsqlList(ids);
+  return `FROM ${indices
+    .map(quoteEsqlIdentifier)
+    .join(', ')} METADATA _id | WHERE ${idField} IN (${quotedIds}) OR _id IN (${quotedIds})`;
+};
+
+/** Discover exit for all of an SSE's `events[]` refs at once. */
+export const buildEventsLookupEsql = ({
+  events,
+}: {
+  events: Array<{ event_id: string; source_index: string }>;
+}): string | undefined =>
+  buildDocRefsLookupEsql({
+    refs: events.map((event) => ({ id: event.event_id, index: event.source_index })),
+    idField: 'event.id',
+  });
+
+/** Discover exit for all of an SSE's `alerts[]` refs at once. */
+export const buildAlertsLookupEsql = ({
+  alerts,
+}: {
+  alerts: Array<{ alert_id: string; index: string }>;
+}): string | undefined =>
+  buildDocRefsLookupEsql({
+    refs: alerts.map((alert) => ({ id: alert.alert_id, index: alert.index })),
+    idField: 'kibana.alert.uuid',
+  });
+
 export const buildAlertLookupEsql = ({
   spaceId,
   alertId,

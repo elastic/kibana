@@ -38,9 +38,6 @@ export const createHuntCorrelationAttachmentDefinition = ({
 }): AttachmentUIDefinition<HuntCorrelationAttachment> => ({
   getLabel: (attachment) => attachment?.data?.attachmentLabel ?? DEFAULT_LABEL,
   getIcon: () => 'link',
-  // getActionButtons returns [] when there are no related reports, and the card still
-  // needs its title in that case.
-  alwaysShowHeader: true,
   renderInlineContent: (props) => (
     <React.Suspense fallback={<EuiSkeletonText lines={3} />}>
       <LazyHuntCorrelationInlineContent {...props} navigation={navigation} />

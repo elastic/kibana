@@ -23,9 +23,11 @@ export { DiscoverLink } from './discover_link';
 export type { DiscoverLinkProps } from './discover_link';
 export {
   buildAlertLookupEsql,
+  buildAlertsLookupEsql,
   buildActorLookupEsql,
   buildEntityLookupEsql,
   buildEventLookupEsql,
+  buildEventsLookupEsql,
   buildThreatReportIocSetHashLookupEsql,
   buildThreatReportLookupEsql,
   buildThreatReportsInEsql,

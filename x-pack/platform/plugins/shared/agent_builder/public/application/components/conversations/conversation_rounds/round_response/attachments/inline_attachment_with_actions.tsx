@@ -176,7 +176,6 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
         previewBadgeState={resolvedPreviewBadgeState}
         onClosePreview={closeCanvas}
         isHeaderOnly={isHeaderOnly}
-        alwaysShowHeader={uiDefinition.alwaysShowHeader}
       />
       {!isHeaderOnly && (
         <EuiSplitPanel.Inner

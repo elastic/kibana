@@ -44,9 +44,6 @@ export const createThreatAttachmentDefinition = ({
 }): AttachmentUIDefinition<ThreatAttachment> => ({
   getLabel: (attachment) => attachment?.data?.attachmentLabel ?? DEFAULT_LABEL,
   getIcon: () => 'warning',
-  // getActionButtons returns [] when share is unavailable or the payload is stale, and the
-  // card still needs its title in that case.
-  alwaysShowHeader: true,
   renderInlineContent: (props) => (
     <React.Suspense fallback={<EuiSkeletonText lines={2} />}>
       <LazyThreatAttachmentInlineContent {...props} http={http} navigation={navigation} />

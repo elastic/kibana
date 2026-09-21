@@ -78,24 +78,63 @@ describe('createSignificantSecurityEventAttachmentDefinition', () => {
   });
 
   describe('getActionButtons', () => {
-    it('returns no header action buttons (SSE is attachment-only)', () => {
+    const getButtonsWithShare = (data: unknown, share?: SharePluginStart) => {
       const definition = createSignificantSecurityEventAttachmentDefinition({
-        navigation: { ...navigation, share: mockShare },
+        navigation: { ...navigation, share },
       });
-      const attachment = {
-        data: {
-          ...baseData,
-          events: [
-            {
-              event_id: 'evt-1',
-              source_index: 'logs-endpoint.events.process-default',
-            },
-          ],
-          alerts: ['alert-1'],
-        },
-      } as unknown as SignificantSecurityEventAttachment;
+      return definition.getActionButtons?.({
+        attachment: { data } as unknown as SignificantSecurityEventAttachment,
+      } as never);
+    };
 
-      expect(definition.getActionButtons?.({ attachment } as never)).toEqual([]);
+    const getButtons = (data: unknown) => getButtonsWithShare(data, mockShare);
+
+    it('opens every event across its indices in one Discover query', () => {
+      const buttons = getButtons({
+        ...baseData,
+        events: [
+          { event_id: 'evt-1', source_index: 'logs-endpoint.events.process-default' },
+          { event_id: 'evt-2', source_index: 'logs-endpoint.events.network-default' },
+          { event_id: 'evt-1', source_index: 'logs-endpoint.events.process-default' },
+        ],
+      });
+
+      expect(buttons).toHaveLength(1);
+      expect(buttons?.[0].label).toBe('Open events in Discover');
+      expect(decodeURIComponent(buttons?.[0].href ?? '')).toContain(
+        'FROM "logs-endpoint.events.process-default", "logs-endpoint.events.network-default" ' +
+          'METADATA _id | WHERE event.id IN ("evt-1", "evt-2") OR _id IN ("evt-1", "evt-2")'
+      );
+    });
+
+    it('falls back to the alerts exit when the event carries no events', () => {
+      const buttons = getButtons({
+        ...baseData,
+        alerts: [{ alert_id: 'alert-1', index: '.alerts-security.alerts-default' }],
+      });
+
+      expect(buttons).toHaveLength(1);
+      expect(buttons?.[0].label).toBe('Open alerts in Discover');
+      expect(decodeURIComponent(buttons?.[0].href ?? '')).toContain(
+        'kibana.alert.uuid IN ("alert-1")'
+      );
+    });
+
+    it('returns no buttons when the event references neither events nor alerts', () => {
+      expect(getButtons(baseData)).toEqual([]);
+    });
+
+    it('returns no buttons when share is unavailable', () => {
+      const buttons = getButtonsWithShare({
+        ...baseData,
+        events: [{ event_id: 'evt-1', source_index: 'logs-default' }],
+      });
+
+      expect(buttons).toEqual([]);
+    });
+
+    it('returns no buttons for a malformed payload', () => {
+      expect(getButtons({ severity: 'high' })).toEqual([]);
     });
   });
 });

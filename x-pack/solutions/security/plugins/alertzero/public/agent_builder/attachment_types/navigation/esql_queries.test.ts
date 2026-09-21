@@ -7,9 +7,11 @@
 
 import {
   buildAlertLookupEsql,
+  buildAlertsLookupEsql,
   buildActorLookupEsql,
   buildEntityLookupEsql,
   buildEventLookupEsql,
+  buildEventsLookupEsql,
   buildThreatReportIocSetHashLookupEsql,
   buildThreatReportLookupEsql,
   buildThreatReportsInEsql,
@@ -31,6 +33,52 @@ describe('esql_queries', () => {
     ).toBe(
       'FROM "logs-endpoint.events.process-default" METADATA _id | WHERE event.id == "abc\\"def" OR _id == "abc\\"def"'
     );
+  });
+
+  it('builds one multi-index events lookup and de-dupes ids and indices', () => {
+    expect(
+      buildEventsLookupEsql({
+        events: [
+          { event_id: 'evt-1', source_index: 'logs-a-default' },
+          { event_id: 'evt-2', source_index: 'logs-b-default' },
+          { event_id: 'evt-1', source_index: 'logs-a-default' },
+        ],
+      })
+    ).toBe(
+      'FROM "logs-a-default", "logs-b-default" METADATA _id | ' +
+        'WHERE event.id IN ("evt-1", "evt-2") OR _id IN ("evt-1", "evt-2")'
+    );
+  });
+
+  it('escapes quotes in event ids and indices', () => {
+    expect(buildEventsLookupEsql({ events: [{ event_id: 'a"b', source_index: 'logs-"x"' }] })).toBe(
+      'FROM "logs-\\"x\\"" METADATA _id | WHERE event.id IN ("a\\"b") OR _id IN ("a\\"b")'
+    );
+  });
+
+  it('returns undefined when events are empty or blank', () => {
+    expect(buildEventsLookupEsql({ events: [] })).toBeUndefined();
+    expect(
+      buildEventsLookupEsql({ events: [{ event_id: '  ', source_index: 'logs-a' }] })
+    ).toBeUndefined();
+    expect(
+      buildEventsLookupEsql({ events: [{ event_id: 'evt-1', source_index: '  ' }] })
+    ).toBeUndefined();
+  });
+
+  it('builds an alerts lookup from the indices on the refs', () => {
+    expect(
+      buildAlertsLookupEsql({
+        alerts: [
+          { alert_id: 'alert-1', index: '.alerts-security.alerts-soc' },
+          { alert_id: 'alert-2', index: '.alerts-security.alerts-soc' },
+        ],
+      })
+    ).toBe(
+      'FROM ".alerts-security.alerts-soc" METADATA _id | ' +
+        'WHERE kibana.alert.uuid IN ("alert-1", "alert-2") OR _id IN ("alert-1", "alert-2")'
+    );
+    expect(buildAlertsLookupEsql({ alerts: [] })).toBeUndefined();
   });
 
   it('builds alert lookup ES|QL against space alerts index', () => {

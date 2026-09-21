@@ -64,12 +64,6 @@ interface AttachmentHeaderProps {
   isCanvas?: boolean;
   /** When true, rounds all corners and omits the bottom border (no body content). */
   isHeaderOnly?: boolean;
-  /**
-   * When true, render the header even with no action or close buttons. Opted into per
-   * attachment type via `AttachmentUIDefinition.alwaysShowHeader`, so content-only
-   * attachments keep their chrome title without changing types that never had a header.
-   */
-  alwaysShowHeader?: boolean;
 }
 
 export const COMPACT_WIDTH_THRESHOLD = 560;
@@ -85,7 +79,6 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
   previewBadgeState = 'none',
   isCanvas = false,
   isHeaderOnly = false,
-  alwaysShowHeader = false,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -135,13 +128,8 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
 
   const hasCloseButton = Boolean(onClose);
   const hasActionButtons = actionButtons && actionButtons.length > 0;
-  const showPreviewClose = previewBadgeState === 'previewing' && Boolean(onClosePreview);
-  const hasTrailingActions = hasActionButtons || showPreviewClose || hasCloseButton;
 
-  // Types that opt in keep the title/icon row so content-only attachments still get the
-  // chrome title from getLabel; everything else keeps the original no-buttons-no-header
-  // behavior.
-  if (!alwaysShowHeader && !hasCloseButton && !hasActionButtons) {
+  if (!hasCloseButton && !hasActionButtons) {
     return null;
   }
 
@@ -223,42 +211,40 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
             </EuiFlexGroup>
           </EuiFlexItem>
           {/* End: action buttons + close button */}
-          {hasTrailingActions && (
-            <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
-              <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                {previewBadgeState !== 'previewing' && hasActionButtons && (
-                  <EuiFlexItem grow={false}>
-                    <AttachmentActions buttons={actionButtons} iconOnly={isCompact} />
-                  </EuiFlexItem>
-                )}
-                {showPreviewClose && (
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty color="text" size="s" iconType="cross" onClick={onClosePreview}>
-                      {CLOSE_PREVIEW_LABEL}
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                )}
-                {onClose && (
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip content={CLOSE_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
-                      <EuiButtonIcon
-                        aria-label={CLOSE_BUTTON_ARIA_LABEL}
-                        iconType="cross"
-                        onClick={onClose}
-                        size="s"
-                        color="text"
-                        {...getEbtProps({
-                          element: AGENT_BUILDER_UI_EBT.element.pageContent,
-                          action: AGENT_BUILDER_UI_EBT.action.conversation.ATTACHMENT_CLOSE,
-                          detail: 'attachment',
-                        })}
-                      />
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+              {previewBadgeState !== 'previewing' && hasActionButtons && (
+                <EuiFlexItem grow={false}>
+                  <AttachmentActions buttons={actionButtons} iconOnly={isCompact} />
+                </EuiFlexItem>
+              )}
+              {previewBadgeState === 'previewing' && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty color="text" size="s" iconType="cross" onClick={onClosePreview}>
+                    {CLOSE_PREVIEW_LABEL}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              )}
+              {onClose && (
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip content={CLOSE_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      aria-label={CLOSE_BUTTON_ARIA_LABEL}
+                      iconType="cross"
+                      onClick={onClose}
+                      size="s"
+                      color="text"
+                      {...getEbtProps({
+                        element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                        action: AGENT_BUILDER_UI_EBT.action.conversation.ATTACHMENT_CLOSE,
+                        detail: 'attachment',
+                      })}
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiSplitPanel.Inner>
     </div>
