@@ -66,7 +66,7 @@ import {
 } from './operations/definitions/terms/helpers';
 import { hasField } from './pure_utils';
 import { mergeLayer } from './state_helpers';
-import { supportsRarityRanking } from './operations/definitions/terms';
+import { supportsRarityRanking, termsOperation } from './operations/definitions/terms';
 import { DEFAULT_MAX_DOC_COUNT } from './operations/definitions/terms/constants';
 import { ReducedSamplingSectionEntries } from './info_badges';
 import { IgnoredGlobalFiltersEntries } from '../../shared_components/ignore_global_filter';
@@ -646,11 +646,7 @@ export function getCustomRankLastValueSortFieldWarningMessages(
       // label (and finally the source field) to avoid an empty {name} in the message.
       const columnName =
         (column.customLabel && column.label) ||
-        operationDefinitionMap[column.operationType]?.getDefaultLabel?.(
-          column,
-          layer.columns,
-          indexPattern
-        );
+        termsOperation.getDefaultLabel?.(column, layer.columns, indexPattern);
 
       warningMessages.push({
         uniqueId: TERMS_CUSTOM_RANK_LAST_VALUE_MISSING_SORT_FIELD,
