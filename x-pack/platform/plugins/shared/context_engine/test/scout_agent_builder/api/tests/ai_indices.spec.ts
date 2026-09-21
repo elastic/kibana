@@ -43,7 +43,7 @@ const AI_INDEX = {
   sharedA: 'scout_shared_dest_a',
   sharedB: 'scout_shared_dest_b',
   crossSpace: 'scout_cross_space_shared_dest',
-  pattern: 'scout_pattern_dest_ai_index',
+  rejectedDest: 'scout_rejected_dest_ai_index',
   traceIndexDataStream: 'scout_traces_index_ds',
   traceIndexWildcard: 'scout_traces_index_wildcard',
   traceIndexComma: 'scout_traces_index_comma',
@@ -246,11 +246,11 @@ apiTest.describe.skip('context engine AI indices API', { tag: tags.stateful.clas
     expect(getResponse.body).toMatchObject({ id: AI_INDEX.index, dest });
   });
 
-  apiTest('rejects a system index as an index dest', async ({ apiClient }) => {
+  apiTest('rejects an index dest outside the ai-index-idx- prefix', async ({ apiClient }) => {
     const response = await apiClient.put(aiIndexPath(AI_INDEX.lifecycle), {
       headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
       responseType: 'json',
-      body: { ...aiIndexBody, dest: { type: 'index', value: '.kibana*' } },
+      body: { ...aiIndexBody, dest: { type: 'index', value: '.kibana' } },
     });
 
     expect(response).toHaveStatusCode(400);
@@ -443,7 +443,7 @@ apiTest.describe.skip('context engine AI indices API', { tag: tags.stateful.clas
   );
 
   apiTest('rejects a wildcard dest', async ({ apiClient }) => {
-    const response = await apiClient.put(aiIndexPath(AI_INDEX.pattern), {
+    const response = await apiClient.put(aiIndexPath(AI_INDEX.rejectedDest), {
       headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
       responseType: 'json',
       body: emptyAiIndex('ai-index-ds-scout-pattern*'),
@@ -456,7 +456,7 @@ apiTest.describe.skip('context engine AI indices API', { tag: tags.stateful.clas
   });
 
   apiTest('rejects a comma-separated dest', async ({ apiClient }) => {
-    const response = await apiClient.put(aiIndexPath(AI_INDEX.pattern), {
+    const response = await apiClient.put(aiIndexPath(AI_INDEX.rejectedDest), {
       headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
       responseType: 'json',
       body: emptyAiIndex(`${DEST.dataStream},${DEST.shared}`),

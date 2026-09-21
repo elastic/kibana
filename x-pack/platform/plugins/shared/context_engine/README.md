@@ -165,10 +165,7 @@ target broad enough to exceed it returns 400.
 privileges. Callers also need, on every backing index (`ai-index-*`):
 
 - `read` to be listed. Without it the AI Index is left out of the list; there
-  is no error. (The one case that looks different is a wildcard `dest.value`
-  matching nothing the caller can read: Elasticsearch reports it as
-  "no such index", so it shows up as an empty AI Index. See
-  [Listing AI Indices](#listing-ai-indices));
+  is no error;
 - `read` to query, or Elasticsearch returns 403;
 - `view_index_metadata` to describe (`_mapping` and `_field_caps`), or
   Elasticsearch returns 403. The counts aggregation also needs `read`; without
