@@ -283,11 +283,10 @@ export class ProposalsService {
   }
 
   /**
-   * Per bucket, how many proposals were open at any point during it.
-   *
-   * An anchor count seeds a running sum that opens, closes and expiries then
-   * move, which is what keeps this to a fixed number of queries rather than one
-   * per bucket. See `./esql` for the queries and why expiry is an event stream.
+   * Per bucket, how many proposals were open at any point during it. Open means
+   * `status: 'pending'`, so an expiry closes a proposal the same way a decision
+   * does. An anchor count seeds a running sum that opens and closes then move,
+   * keeping this to four queries rather than one per bucket.
    */
   async chartsSummary(
     { windowHours, bucketMinutes }: ProposalChartsSummaryQuery,
@@ -313,17 +312,14 @@ export class ProposalsService {
     let anchorResponse;
     let opensResponse;
     let closesResponse;
-    let expiriesResponse;
     let currentOpenResponse;
     try {
-      [anchorResponse, opensResponse, closesResponse, expiriesResponse, currentOpenResponse] =
-        await Promise.all([
-          this.deps.storage.esql({ pipeline: anchorQuery(window) }),
-          this.deps.storage.esql({ pipeline: bucketedEventQuery('opens', window) }),
-          this.deps.storage.esql({ pipeline: bucketedEventQuery('closes', window) }),
-          this.deps.storage.esql({ pipeline: bucketedEventQuery('expiries', window) }),
-          this.deps.storage.esql({ pipeline: currentOpenQuery(window) }),
-        ]);
+      [anchorResponse, opensResponse, closesResponse, currentOpenResponse] = await Promise.all([
+        this.deps.storage.esql({ pipeline: anchorQuery(window) }),
+        this.deps.storage.esql({ pipeline: bucketedEventQuery('opens', window) }),
+        this.deps.storage.esql({ pipeline: bucketedEventQuery('closes', window) }),
+        this.deps.storage.esql({ pipeline: currentOpenQuery(window) }),
+      ]);
     } catch (error) {
       // An index created outside the storage adapter can be missing a field this
       // queries, which ES|QL rejects rather than treating as null. Read *that*
@@ -341,12 +337,10 @@ export class ProposalsService {
 
     this.warnIfTruncated(opensResponse, 'opens');
     this.warnIfTruncated(closesResponse, 'closes');
-    this.warnIfTruncated(expiriesResponse, 'expiries');
 
     const anchorByCat = parseEsqlCountByCategory(anchorResponse, 'anchor');
     const opensByIdxAndCat = parseEsqlCountByIdxAndCategory(opensResponse, 'opens');
     const closesByIdxAndCat = parseEsqlCountByIdxAndCategory(closesResponse, 'closes');
-    const expiriesByIdxAndCat = parseEsqlCountByIdxAndCategory(expiriesResponse, 'expiries');
 
     const runningSums: Record<string, number> = { ...anchorByCat };
     const buckets: ProposalChartsSummaryBucket[] = [];
@@ -366,9 +360,6 @@ export class ProposalsService {
 
       for (const [cat, count] of Object.entries(closesByIdxAndCat[i] ?? {})) {
         // Clamped because a close whose open the anchor missed would go negative.
-        runningSums[cat] = Math.max(0, (runningSums[cat] ?? 0) - count);
-      }
-      for (const [cat, count] of Object.entries(expiriesByIdxAndCat[i] ?? {})) {
         runningSums[cat] = Math.max(0, (runningSums[cat] ?? 0) - count);
       }
 

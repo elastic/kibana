@@ -8,6 +8,7 @@
 import type { ESQLAstExpression } from '@elastic/esql';
 import { esql, exp } from '@elastic/esql';
 import { PROPOSAL_UNCATEGORIZED } from '../../../common/proposals/constants';
+import type { ProposalStatus } from '../../../common/proposals/proposal';
 
 /**
  * Elasticsearch's `esql.query.result_truncation_max_size` default. A LIMIT above
@@ -23,22 +24,31 @@ export interface ChartsWindow {
   bucketMinutes: number;
 }
 
+/** Open is exactly `pending`: every other status is a settled proposal. */
+const PENDING: ProposalStatus = 'pending';
+
 /** A superseded proposal is represented by its replacement; counting both double-counts a retry. */
 const NOT_SUPERSEDED: ESQLAstExpression = exp`supersededBy IS NULL`;
 
-export type EventStream = 'opens' | 'closes' | 'expiries';
+/**
+ * When a proposal stopped being open. A decision sets `decidedAt`; a deadline
+ * nobody answered leaves it null and settles the status to `expired`, where
+ * `expiresAt` is the moment. Non-null for anything not `pending`.
+ */
+const CLOSED_AT: ESQLAstExpression = exp`COALESCE(decidedAt, expiresAt)`;
+
+export type EventStream = 'opens' | 'closes';
 
 /**
- * The streams that move the running sum, differing only in the timestamp they
- * bucket on and how they qualify it. `expiries` excludes anything decided so a
- * proposal that expired and was later decided is decremented once, by `closes`.
+ * The streams that move the running sum. Every proposal was open when created,
+ * so `opens` needs no status filter; `closes` takes decisions and expiries
+ * together, because both are just a status leaving `pending`.
  */
-const EVENT_STREAMS: Record<EventStream, { field: string; where: ESQLAstExpression }> = {
-  opens: { field: 'createdAt', where: NOT_SUPERSEDED },
-  closes: { field: 'decidedAt', where: exp`${NOT_SUPERSEDED} AND decidedAt IS NOT NULL` },
-  expiries: {
-    field: 'expiresAt',
-    where: exp`${NOT_SUPERSEDED} AND decidedAt IS NULL AND expiresAt IS NOT NULL AND expiresAt <= NOW()`,
+const EVENT_STREAMS: Record<EventStream, { at: ESQLAstExpression; where: ESQLAstExpression }> = {
+  opens: { at: exp`createdAt`, where: NOT_SUPERSEDED },
+  closes: {
+    at: CLOSED_AT,
+    where: exp`${NOT_SUPERSEDED} AND status != ${PENDING}`,
   },
 };
 
@@ -52,13 +62,13 @@ export const bucketedEventQuery = (
   stream: EventStream,
   { spaceId, windowStartIso, bucketMinutes }: ChartsWindow
 ) => {
-  const { field, where } = EVENT_STREAMS[stream];
+  const { at, where } = EVENT_STREAMS[stream];
   return esql`WHERE spaceId == ${{ spaceId }}
       AND ${where}
-      AND ${[field]} >= TO_DATETIME(${{ from: windowStartIso }})
-    | EVAL idx = FLOOR(DATE_DIFF("minutes", TO_DATETIME(${{ origin: windowStartIso }}), ${[
-    field,
-  ]}) / ${{ bucketMinutes }})
+      AND ${at} >= TO_DATETIME(${{ from: windowStartIso }})
+    | EVAL idx = FLOOR(DATE_DIFF("minutes", TO_DATETIME(${{
+      origin: windowStartIso,
+    }}), ${at}) / ${{ bucketMinutes }})
     | EVAL category = COALESCE(category, ${{ uncategorized: PROPOSAL_UNCATEGORIZED }})
     | STATS ${[stream]} = COUNT(*) BY idx, category
     | SORT idx ASC
@@ -70,21 +80,14 @@ export const anchorQuery = ({ spaceId, windowStartIso }: ChartsWindow) =>
   esql`WHERE spaceId == ${{ spaceId }}
       AND ${NOT_SUPERSEDED}
       AND createdAt < TO_DATETIME(${{ created: windowStartIso }})
-      AND (decidedAt IS NULL OR decidedAt >= TO_DATETIME(${{ decided: windowStartIso }}))
-      AND (expiresAt IS NULL OR expiresAt >= TO_DATETIME(${{ expires: windowStartIso }}))
+      AND (status == ${PENDING} OR ${CLOSED_AT} >= TO_DATETIME(${{ closed: windowStartIso }}))
     | EVAL category = COALESCE(category, ${{ uncategorized: PROPOSAL_UNCATEGORIZED }})
     | STATS anchor = COUNT(*) BY category
     | LIMIT ${ESQL_CATEGORY_ROW_LIMIT}`;
 
-/**
- * `expiresAt > NOW()` is a request-time predicate, which the bucketed queries
- * must never use: filtering there would erase a since-expired proposal from its
- * own past, so the same historical bucket would answer differently on every
- * refetch. This query has no history, so it is the one place that is correct.
- */
+/** Open right now, across every category. */
 export const currentOpenQuery = ({ spaceId }: ChartsWindow) =>
   esql`WHERE spaceId == ${{ spaceId }}
       AND ${NOT_SUPERSEDED}
-      AND decidedAt IS NULL
-      AND (expiresAt IS NULL OR expiresAt > NOW())
+      AND status == ${PENDING}
     | STATS currentOpen = COUNT(*)`;

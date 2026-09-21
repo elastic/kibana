@@ -1480,20 +1480,18 @@ describe('ProposalsService', () => {
       values: [[count]],
     });
 
-    /** The five queries resolve in the order the service issues them. */
+    /** The four queries resolve in the order the service issues them. */
     const mockEsql = (
       storage: ReturnType<typeof createStorage>,
       {
         anchor,
         opens,
         closes,
-        expiries,
         currentOpen,
       }: {
         anchor?: object;
         opens?: object;
         closes?: object;
-        expiries?: object;
         currentOpen?: object;
       }
     ) => {
@@ -1501,16 +1499,15 @@ describe('ProposalsService', () => {
         .mockResolvedValueOnce(anchor ?? emptyEsql())
         .mockResolvedValueOnce(opens ?? emptyEsql())
         .mockResolvedValueOnce(closes ?? emptyEsql())
-        .mockResolvedValueOnce(expiries ?? emptyEsql())
         .mockResolvedValueOnce(currentOpen ?? emptyEsql());
     };
 
     const issuedQueries = (storage: ReturnType<typeof createStorage>): string[] =>
       storage.esql.mock.calls.map(([args]) => args.pipeline.toRequest().query as string);
 
-    /** Excludes the `currentOpen` scalar, which has no COALESCE or LIMIT and filters on NOW(). */
+    /** Excludes the `currentOpen` scalar, which has neither a COALESCE(category) nor a LIMIT. */
     const bucketQueries = (storage: ReturnType<typeof createStorage>): string[] =>
-      issuedQueries(storage).slice(0, 4);
+      issuedQueries(storage).slice(0, 3);
 
     const esqlError = (type: string, reason: string) =>
       Object.assign(new Error(reason), { meta: { body: { error: { type, reason } } } });
@@ -1560,11 +1557,13 @@ describe('ProposalsService', () => {
       expect(buckets.map((b) => b.counts.contain)).toEqual([0, 0, 0, 0, 0]);
     });
 
-    it('should keep a proposal counted in the bucket it expired in, and drop it after', async () => {
+    // An expiry reaches the running sum through `closes`, keyed on COALESCE(decidedAt,
+    // expiresAt), so it needs no stream of its own.
+    it('should keep a proposal counted in the bucket it closed in, and drop it after', async () => {
       const storage = createStorage();
       mockEsql(storage, {
         anchor: byCategory('anchor', [['contain', 1]]),
-        expiries: byIdxAndCategory('expiries', [[2, 'contain', 1]]),
+        closes: byIdxAndCategory('closes', [[2, 'contain', 1]]),
       });
       const { service } = createService(storage);
 
@@ -1607,41 +1606,47 @@ describe('ProposalsService', () => {
       expect(currentOpen).toBe(0);
     });
 
-    it('should exclude decided and superseded proposals from currentOpen', async () => {
+    it('should count only pending, non-superseded proposals as currently open', async () => {
       const storage = createStorage();
       const { service } = createService(storage);
 
       await service.chartsSummary(chartsQuery, SPACE_ID);
 
-      const currentOpenQuery = issuedQueries(storage)[4];
-      expect(currentOpenQuery).toContain('decidedAt IS NULL');
+      const currentOpenQuery = issuedQueries(storage)[3];
+      expect(currentOpenQuery).toContain('status == "pending"');
       expect(currentOpenQuery).toContain('supersededBy IS NULL');
     });
 
     /**
-     * The regression this guards: a request-time `expiresAt > NOW()` filter would
-     * erase an expired proposal from the buckets in which it was genuinely open,
-     * so the same past bucket would answer differently on every refetch.
+     * Openness is read from `status`, never from comparing a deadline to the clock.
+     * A request-time predicate would erase an expired proposal from the buckets in
+     * which it was genuinely open, so a past bucket would answer differently on
+     * every refetch.
      */
-    it('should not filter any bucketed query on request-time expiry', async () => {
+    it('should not compare a deadline against the clock in any query', async () => {
       const storage = createStorage();
       const { service } = createService(storage);
 
       await service.chartsSummary(chartsQuery, SPACE_ID);
 
-      for (const query of bucketQueries(storage)) {
-        expect(query).not.toMatch(/expiresAt\s*>\s*NOW\(\)/i);
+      for (const query of issuedQueries(storage)) {
+        expect(query).not.toMatch(/NOW\(\)/i);
       }
     });
 
-    // The exemption to the rule above, asserted so narrowing the ban stays deliberate.
-    it('should filter the currentOpen query on request-time expiry', async () => {
+    /**
+     * The whole reason `expiries` is no longer a stream of its own: a decision and a
+     * deadline are the same event, so one column expresses both close moments.
+     */
+    it('should close on decidedAt, falling back to expiresAt', async () => {
       const storage = createStorage();
       const { service } = createService(storage);
 
       await service.chartsSummary(chartsQuery, SPACE_ID);
 
-      expect(issuedQueries(storage)[4]).toMatch(/expiresAt\s*>\s*NOW\(\)/i);
+      const closes = issuedQueries(storage)[2];
+      expect(closes).toContain('COALESCE(decidedAt, expiresAt)');
+      expect(closes).toContain('status != "pending"');
     });
 
     it('should give action-less proposals a category so they are counted', async () => {
