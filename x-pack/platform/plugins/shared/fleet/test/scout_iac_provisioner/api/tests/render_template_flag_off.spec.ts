@@ -50,5 +50,25 @@ apiTest.describe(
         expect(response.body.message).toBe('IaC Provisioner is not enabled');
       }
     );
+
+    apiTest(
+      'returns 404 with IaC Provisioner is not enabled for an authorized resolve request',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser(testData.FLEET_READ_ROLE);
+
+        const response = await apiClient.post(testData.RESOLVE_BLUEPRINTS_PATH, {
+          headers: { ...testData.COMMON_HEADERS, ...cookieHeader },
+          body: {
+            provider: 'aws',
+            flow: 'cloud_connector',
+            integrations: testData.VALID_RENDER_BODY.integrations,
+          },
+          responseType: 'json',
+        });
+
+        expect(response).toHaveStatusCode(404);
+        expect(response.body.message).toBe('IaC Provisioner is not enabled');
+      }
+    );
   }
 );

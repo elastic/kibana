@@ -13,9 +13,12 @@ import apm from 'elastic-apm-node';
 
 import type { AWS_CLOUD_PROVIDER } from '../../common/types/models/cloud_connector';
 import type {
+  IacBlueprintCoverage,
+  IacNotCoveredReason,
   IacPolicyTemplateSelection,
   IAC_FEDERATED_IDENTITY_WORKFLOW,
 } from '../../common/types/rest_spec/iac_provisioner';
+import { IAC_NOT_COVERED_REASONS } from '../../common/types/rest_spec/iac_provisioner';
 
 import {
   IacProvisionerConfigError,
@@ -28,6 +31,7 @@ import type { IacProvisionerConfig } from './utils/iac_provisioner';
 import { isIacProvisionerEnabled } from './utils/iac_provisioner';
 
 const RENDER_ENDPOINT = '/api/v1/render';
+const RESOLVE_ENDPOINT = '/api/v1/resolve';
 const REQUEST_TIMEOUT_MS = 30_000;
 
 /** undici reports TLS failures as `TypeError: fetch failed` with the OpenSSL reason on `cause`. */
@@ -70,6 +74,15 @@ export interface IacProvisionerRenderResponse {
   blueprint: { id: string; version: string };
 }
 
+export interface IacProvisionerResolveRequest {
+  provider: typeof AWS_CLOUD_PROVIDER;
+  integrations: IacProvisionerRenderIntegration[];
+}
+
+export interface IacProvisionerResolveResponse {
+  blueprints: IacBlueprintCoverage[];
+}
+
 interface IacProvisionerErrorBody {
   code?: string;
   message?: string;
@@ -78,6 +91,7 @@ interface IacProvisionerErrorBody {
 
 export interface IacProvisionerService {
   renderTemplate(request: IacProvisionerRenderRequest): Promise<IacProvisionerRenderResponse>;
+  resolveBlueprints(request: IacProvisionerResolveRequest): Promise<IacProvisionerResolveResponse>;
 }
 
 const isIacProvisionerRenderResponse = (value: unknown): value is IacProvisionerRenderResponse => {
@@ -94,6 +108,50 @@ const isIacProvisionerRenderResponse = (value: unknown): value is IacProvisioner
     typeof (blueprint as { id?: unknown }).id === 'string' &&
     typeof (blueprint as { version?: unknown }).version === 'string'
   );
+};
+
+const isOptionalString = (value: unknown): value is string | undefined =>
+  value === undefined || typeof value === 'string';
+
+const isIacNotCoveredReason = (value: unknown): value is IacNotCoveredReason => {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+  const { integration, reason, policyTemplate, input, supportFloor, installedVersion } =
+    value as Record<string, unknown>;
+  return (
+    typeof integration === 'string' &&
+    typeof reason === 'string' &&
+    (IAC_NOT_COVERED_REASONS as readonly string[]).includes(reason) &&
+    isOptionalString(policyTemplate) &&
+    isOptionalString(input) &&
+    isOptionalString(supportFloor) &&
+    isOptionalString(installedVersion)
+  );
+};
+
+const isIacBlueprintCoverage = (value: unknown): value is IacBlueprintCoverage => {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+  const { workflow, resolvedVersion, deployable, notCovered } = value as Record<string, unknown>;
+  return (
+    typeof workflow === 'string' &&
+    (resolvedVersion === null || typeof resolvedVersion === 'string') &&
+    typeof deployable === 'boolean' &&
+    Array.isArray(notCovered) &&
+    notCovered.every(isIacNotCoveredReason)
+  );
+};
+
+const isIacProvisionerResolveResponse = (
+  value: unknown
+): value is IacProvisionerResolveResponse => {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+  const { blueprints } = value as Record<string, unknown>;
+  return Array.isArray(blueprints) && blueprints.every(isIacBlueprintCoverage);
 };
 
 /**
@@ -116,6 +174,28 @@ export const parseIacProvisionerErrors = (
   }
   return [];
 };
+
+/**
+ * Resolve's request schema nests each enabled input in an object (`{ name }`,
+ * optionally with `enabledDataStreams`), unlike render's bare input-name
+ * strings — the two endpoints' specs diverged in the provisioner. Kibana
+ * keeps the render shape internally and translates on the wire.
+ */
+const toResolveWireIntegrations = (
+  integrations: IacProvisionerRenderIntegration[]
+): Array<{
+  name: string;
+  version: string;
+  policyTemplates: Array<{ name: string; enabledInputs: Array<{ name: string }> }>;
+}> =>
+  integrations.map(({ name, version, policyTemplates }) => ({
+    name,
+    version,
+    policyTemplates: policyTemplates.map(({ name: templateName, enabledInputs }) => ({
+      name: templateName,
+      enabledInputs: enabledInputs.map((inputName) => ({ name: inputName })),
+    })),
+  }));
 
 class IacProvisionerServiceImpl implements IacProvisionerService {
   public async renderTemplate(
@@ -145,6 +225,32 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
       `[IaC Provisioner] Render response: blueprint ${rendered.blueprint.id}@${rendered.blueprint.version}${expiry}`
     );
     return rendered;
+  }
+
+  public async resolveBlueprints(
+    request: IacProvisionerResolveRequest
+  ): Promise<IacProvisionerResolveResponse> {
+    const logger = appContextService.getLogger().get('IacProvisionerService');
+    logger.info(
+      `[IaC Provisioner] Resolving blueprints for provider ${
+        request.provider
+      }, integrations: ${JSON.stringify(request.integrations)}`
+    );
+
+    const resolved = await this.request<IacProvisionerResolveResponse>(
+      RESOLVE_ENDPOINT,
+      {
+        provider: request.provider,
+        integrations: toResolveWireIntegrations(request.integrations),
+      },
+      logger
+    );
+    if (!isIacProvisionerResolveResponse(resolved)) {
+      throw new IacProvisionerUnavailableError('provider returned an invalid resolve body');
+    }
+    // Unlike render, every field of the resolve response is safe to log.
+    logger.debug(`[IaC Provisioner] Resolve response: ${JSON.stringify(resolved)}`);
+    return resolved;
   }
 
   /**
@@ -231,17 +337,29 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
   }
 
   private async responseToError(
-    response: { status: number; json: () => Promise<unknown> },
+    response: { status: number; text: () => Promise<string> },
     logger: Logger,
     latencyMs: number,
     traceId?: string
   ): Promise<Error> {
     const status = response.status;
-    const providerErrors = parseIacProvisionerErrors(await response.json().catch(() => undefined));
+    const rawBody = await response.text().catch(() => '');
+    let parsedBody: unknown;
+    try {
+      parsedBody = JSON.parse(rawBody);
+    } catch {
+      parsedBody = undefined;
+    }
+    const providerErrors = parseIacProvisionerErrors(parsedBody);
     const codes = providerErrors.map(({ code }) => code);
     const details = providerErrors.map(({ code, message }) => `${code}: ${message}`).join('; ');
+    // Request-validation rejections (e.g. the OpenAPI middleware's 400s)
+    // don't use the MultiErrorResponse shape — log a bounded raw-body
+    // snippet so contract mismatches are diagnosable, but keep the thrown
+    // (client-facing) message to parsed errors only.
+    const logDetails = details || rawBody.slice(0, 500);
     logger.error(
-      `[IaC Provisioner] Request failed with status ${status} after ${latencyMs}ms, errors: [${details}] [Request Id: ${traceId}]`
+      `[IaC Provisioner] Request failed with status ${status} after ${latencyMs}ms, errors: [${logDetails}] [Request Id: ${traceId}]`
     );
     if (status >= 500) {
       return new IacProvisionerUnavailableError(`request failed with status ${status}`, status);

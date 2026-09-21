@@ -12,6 +12,7 @@ import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { makeDsView } from '../../aws_service_matrix';
 import { getOnboardingSessionKey } from '../../onboarding_session_storage';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
+import { useResolveIacBlueprints } from '../../use_resolve_iac_blueprints';
 import { getRequiredTextFields, resolveFieldMeta, toTyped } from './field_config';
 import type { SignalFilter } from '../services_step/use_services_step';
 
@@ -77,8 +78,11 @@ function baseInstances(
  * - Keep instances whose serviceId is still selected.
  * - Add a base instance for any newly-selected service with no existing instance.
  * - Drop instances for deselected services.
+ * Also used by the Authenticate & Deploy step: the step indicator lets users
+ * change the selection and skip Service Settings, so a stored instance list
+ * must never be trusted as-is.
  */
-function reconcileInstances(
+export function reconcileInstances(
   selectedServiceIds: string[],
   persisted: ServiceInstance[] | undefined,
   awsServicesMap: Map<string, AwsServiceMatrixEntry> | undefined
@@ -124,7 +128,8 @@ function mergeVarsByDataStream(
 }
 
 export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
-  const { servicesStep, removeDeployInstance, awsServicesMap } = useOnboardingFlow();
+  const { servicesStep, removeDeployInstance, awsServicesMap, invalidateIacBlueprintCoverage } =
+    useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
 
   const [persisted, setPersisted] = useSessionStorage<ServiceSettingsPersistedState>(
@@ -187,8 +192,12 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
           [instanceId]: { enabledDataStreams, varsByDataStream: merged },
         },
       });
+      // Enabled inputs feed the resolve payload; coverage computed from the
+      // previous values is stale (the step indicator can bypass the next
+      // Next-click resolve).
+      invalidateIacBlueprintCoverage();
     },
-    [persisted, setPersisted, getServiceVars, instances]
+    [persisted, setPersisted, getServiceVars, instances, invalidateIacBlueprintCoverage]
   );
 
   const addDuplicate = useCallback(
@@ -231,8 +240,11 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
           },
         },
       });
+      // The new instance's inputs join the resolve payload, so coverage
+      // resolved before the duplicate existed no longer applies.
+      invalidateIacBlueprintCoverage();
     },
-    [persisted, setPersisted, instances, getServiceVars]
+    [persisted, setPersisted, instances, getServiceVars, invalidateIacBlueprintCoverage]
   );
 
   const removeInstance = useCallback(
@@ -248,8 +260,11 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       // Prune deploy state so removed instances don't leave orphaned chips,
       // stale failedInstances entries, or undismissable error callouts in step 4.
       removeDeployInstance(instanceId);
+      // Removing an instance can change which inputs the resolve payload
+      // carries, so previously resolved coverage no longer applies.
+      invalidateIacBlueprintCoverage();
     },
-    [persisted, setPersisted, instances, removeDeployInstance]
+    [persisted, setPersisted, instances, removeDeployInstance, invalidateIacBlueprintCoverage]
   );
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -313,14 +328,19 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
 
   const [globalRegionTouched, setGlobalRegionTouched] = useState(false);
 
+  const resolveIacBlueprints = useResolveIacBlueprints();
+
   const handleNext = useCallback(() => {
     // Flush instances to session storage so step 4 can read them without going through step 2 again.
     setPersisted({
       ...(persisted ?? { globalRegion: '', serviceVars: {} }),
       instances,
     });
+    // Ask the IaC Provisioner which identity workflows are deployable for the
+    // configured instances. Fire-and-forget: navigation never waits on it.
+    resolveIacBlueprints(instances, persisted?.serviceVars ?? {});
     onContinue();
-  }, [onContinue, persisted, setPersisted, instances]);
+  }, [onContinue, persisted, setPersisted, instances, resolveIacBlueprints]);
 
   // All instance display names — used by the duplicate modal for collision detection.
   const allInstanceNames = useMemo(() => instances.map((i) => i.name), [instances]);

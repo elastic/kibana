@@ -19,19 +19,22 @@ import { isIacProvisionerEnabled } from '../../services/utils/iac_provisioner';
 import {
   reportIacProvisionerRenderCompleted,
   reportIacProvisionerRenderRequested,
+  reportIacProvisionerResolveCompleted,
+  reportIacProvisionerResolveRequested,
 } from '../../services/telemetry/iac_provisioner_telemetry';
 
-import { renderIacTemplateHandler } from './handlers';
+import { renderIacTemplateHandler, resolveIacBlueprintsHandler } from './handlers';
 
 jest.mock('../../services/app_context');
 jest.mock('../../services', () => ({
-  iacProvisionerService: { renderTemplate: jest.fn() },
+  iacProvisionerService: { renderTemplate: jest.fn(), resolveBlueprints: jest.fn() },
 }));
 jest.mock('../../services/epm/packages');
 jest.mock('../../services/utils/iac_provisioner');
 jest.mock('../../services/telemetry/iac_provisioner_telemetry');
 
 const mockedRenderTemplate = jest.mocked(iacProvisionerService.renderTemplate);
+const mockedResolveBlueprints = jest.mocked(iacProvisionerService.resolveBlueprints);
 const mockedGetPackageInfo = jest.mocked(getPackageInfo);
 const mockedIsEnabled = jest.mocked(isIacProvisionerEnabled);
 
@@ -498,5 +501,168 @@ describe('renderIacTemplateHandler', () => {
     await renderIacTemplateHandler(buildContext(), buildRequest(renderBody()), response);
 
     expect(response.ok).toHaveBeenCalledWith({ body: alreadyCurrent });
+  });
+});
+
+describe('resolveIacBlueprintsHandler', () => {
+  let response: ReturnType<typeof httpServerMock.createResponseFactory>;
+
+  const resolveBody = (overrides: Record<string, unknown> = {}) => ({
+    provider: 'aws',
+    flow: 'cloud_connector',
+    integrations: [cspmSelection],
+    ...overrides,
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    response = httpServerMock.createResponseFactory();
+    mockedIsEnabled.mockResolvedValue(true);
+    const logger = { info: jest.fn(), error: jest.fn(), get: jest.fn() };
+    logger.get.mockReturnValue(logger);
+    jest.spyOn(appContextService, 'getLogger').mockReturnValue(logger as any);
+  });
+
+  it('returns 404 when the IaC Provisioner is not enabled', async () => {
+    mockedIsEnabled.mockResolvedValue(false);
+
+    await resolveIacBlueprintsHandler(buildContext(), buildRequest(resolveBody()), response);
+
+    expect(response.notFound).toHaveBeenCalled();
+    expect(mockedResolveBlueprints).not.toHaveBeenCalled();
+  });
+
+  it('forwards caller-supplied inputs and returns blueprint coverage', async () => {
+    mockedGetPackageInfo.mockResolvedValue(CSPM_PACKAGE_INFO as any);
+    mockedResolveBlueprints.mockResolvedValue({
+      blueprints: [
+        {
+          workflow: 'federated_identity',
+          resolvedVersion: 'v1',
+          deployable: true,
+          notCovered: [],
+        },
+      ],
+    });
+
+    await resolveIacBlueprintsHandler(buildContext(), buildRequest(resolveBody()), response);
+
+    expect(mockedResolveBlueprints).toHaveBeenCalledWith({
+      provider: 'aws',
+      integrations: [
+        {
+          name: 'cloud_security_posture',
+          version: '3.5.0',
+          policyTemplates: [{ name: 'cspm', enabledInputs: ['cloudbeat/cis_aws'] }],
+        },
+      ],
+    });
+    expect(response.ok).toHaveBeenCalledWith({
+      body: {
+        blueprints: [
+          {
+            workflow: 'federated_identity',
+            resolvedVersion: 'v1',
+            deployable: true,
+            notCovered: [],
+          },
+        ],
+      },
+    });
+    expect(reportIacProvisionerResolveRequested).toHaveBeenCalledWith(
+      expect.objectContaining({ flow: 'cloud_connector', integrationCount: 1 })
+    );
+    expect(reportIacProvisionerResolveCompleted).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: true,
+        httpStatus: 200,
+        blueprintCount: 1,
+        deployableCount: 1,
+      })
+    );
+  });
+
+  it('reports distinct not-covered reasons for non-deployable blueprints', async () => {
+    mockedGetPackageInfo.mockResolvedValue(CSPM_PACKAGE_INFO as any);
+    mockedResolveBlueprints.mockResolvedValue({
+      blueprints: [
+        {
+          workflow: 'federated_identity',
+          resolvedVersion: null,
+          deployable: false,
+          notCovered: [
+            {
+              integration: 'cloud_security_posture',
+              reason: 'below_support_floor',
+              supportFloor: '>=4.0.0',
+              installedVersion: '3.5.0',
+            },
+            { integration: 'cloud_security_posture', reason: 'below_support_floor' },
+          ],
+        },
+      ],
+    });
+
+    await resolveIacBlueprintsHandler(buildContext(), buildRequest(resolveBody()), response);
+
+    expect(reportIacProvisionerResolveCompleted).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: true,
+        blueprintCount: 1,
+        deployableCount: 0,
+        notCoveredReasons: ['below_support_floor'],
+      })
+    );
+  });
+
+  it('maps provider unavailability to 502', async () => {
+    mockedGetPackageInfo.mockResolvedValue(CSPM_PACKAGE_INFO as any);
+    mockedResolveBlueprints.mockRejectedValue(new IacProvisionerUnavailableError('timeout', 504));
+
+    await resolveIacBlueprintsHandler(buildContext(), buildRequest(resolveBody()), response);
+
+    expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 502 }));
+    expect(reportIacProvisionerResolveCompleted).toHaveBeenCalledWith(
+      expect.objectContaining({ success: false, httpStatus: 504 })
+    );
+  });
+
+  it('passes provider error codes to resolve telemetry on request errors', async () => {
+    mockedGetPackageInfo.mockResolvedValue(CSPM_PACKAGE_INFO as any);
+    mockedResolveBlueprints.mockRejectedValue(
+      new IacProvisionerRequestError('rejected', 422, ['resolve.duplicate_integration'])
+    );
+
+    await resolveIacBlueprintsHandler(buildContext(), buildRequest(resolveBody()), response);
+
+    expect(reportIacProvisionerResolveCompleted).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        httpStatus: 422,
+        errorCodes: ['resolve.duplicate_integration'],
+      })
+    );
+  });
+
+  it('returns 400 when a requested policy template does not exist on the package', async () => {
+    mockedGetPackageInfo.mockResolvedValue(CSPM_PACKAGE_INFO as any);
+
+    await resolveIacBlueprintsHandler(
+      buildContext(),
+      buildRequest(
+        resolveBody({
+          integrations: [
+            {
+              name: 'cloud_security_posture',
+              policyTemplates: [{ name: 'nope', enabledInputs: ['cloudbeat/cis_aws'] }],
+            },
+          ],
+        })
+      ),
+      response
+    );
+
+    expect(response.badRequest).toHaveBeenCalled();
+    expect(mockedResolveBlueprints).not.toHaveBeenCalled();
   });
 });

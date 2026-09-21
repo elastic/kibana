@@ -71,6 +71,15 @@ const jsonResponse = (status: number, body: unknown) =>
     ok: status >= 200 && status < 300,
     status,
     json: async () => body,
+    text: async () => JSON.stringify(body),
+  } as any);
+
+const textResponse = (status: number, body: string) =>
+  ({
+    ok: status >= 200 && status < 300,
+    status,
+    json: async () => JSON.parse(body),
+    text: async () => body,
   } as any);
 
 function mockFeatureFlag(enabled = true) {
@@ -449,6 +458,153 @@ describe('IacProvisionerService', () => {
     await expect(iacProvisionerService.renderTemplate(RENDER_REQUEST)).rejects.toThrow(
       /invalid render body/
     );
+  });
+
+  it('POSTs the resolve request and returns blueprint coverage', async () => {
+    mockConfig();
+    const logger = mockLogger();
+    const resolveResponse = {
+      blueprints: [
+        {
+          workflow: 'federated_identity',
+          resolvedVersion: 'v1',
+          deployable: true,
+          notCovered: [],
+        },
+      ],
+    };
+    mockedFetch.mockResolvedValueOnce(jsonResponse(200, resolveResponse));
+
+    const result = await iacProvisionerService.resolveBlueprints({
+      provider: 'aws',
+      integrations: RENDER_REQUEST.integrations,
+    });
+
+    expect(result).toEqual(resolveResponse);
+    expect(mockedFetch).toHaveBeenCalledWith(
+      'https://iac-provisioner.example/api/v1/resolve',
+      expect.objectContaining({ method: 'POST' })
+    );
+    // Resolve's request schema nests inputs in objects, unlike render's
+    // bare strings — the translation must happen on the wire.
+    expect(mockedFetch).toHaveBeenLastCalledWith(
+      'https://iac-provisioner.example/api/v1/resolve',
+      expect.objectContaining({
+        body: JSON.stringify({
+          provider: 'aws',
+          integrations: [
+            {
+              name: 'cloud_security_posture',
+              version: '3.5.0',
+              policyTemplates: [{ name: 'cspm', enabledInputs: [{ name: 'cloudbeat/cis_aws' }] }],
+            },
+          ],
+        }),
+      })
+    );
+    const debugLogged = logger.debug.mock.calls.flat().map(String).join(' ');
+    expect(debugLogged).toContain('federated_identity');
+    expect(debugLogged).not.toContain('X-Amz-Signature');
+  });
+
+  it('maps a 501 resolve response to IacProvisionerUnavailableError', async () => {
+    mockConfig();
+    mockLogger();
+    mockedFetch.mockResolvedValueOnce(jsonResponse(501, { code: 'resolve.not_implemented' }));
+
+    const promise = iacProvisionerService.resolveBlueprints({
+      provider: 'aws',
+      integrations: RENDER_REQUEST.integrations,
+    });
+    await expect(promise).rejects.toThrow(IacProvisionerUnavailableError);
+    await promise.catch((error: IacProvisionerUnavailableError) => {
+      expect(error.statusCode).toBe(501);
+    });
+  });
+
+  it('logs a raw-body snippet when a 400 has no MultiErrorResponse shape', async () => {
+    mockConfig();
+    const logger = mockLogger();
+    mockedFetch.mockResolvedValueOnce(
+      textResponse(400, "request body has an error: doesn't match schema")
+    );
+
+    const promise = iacProvisionerService.resolveBlueprints({
+      provider: 'aws',
+      integrations: RENDER_REQUEST.integrations,
+    });
+    await expect(promise).rejects.toThrow(IacProvisionerRequestError);
+
+    const errorLogged = logger.error.mock.calls.flat().map(String).join(' ');
+    expect(errorLogged).toContain("doesn't match schema");
+    // The client-facing message stays generic — the snippet is log-only.
+    await promise.catch((error: IacProvisionerRequestError) => {
+      expect(error.message).toBe('Error calling IaC Provisioner, request rejected with status 400');
+      expect(error.errorCodes).toEqual([]);
+    });
+  });
+
+  it('rejects a 200 resolve body with malformed notCovered entries', async () => {
+    mockConfig();
+    mockLogger();
+    mockedFetch.mockResolvedValueOnce(
+      jsonResponse(200, {
+        blueprints: [
+          {
+            workflow: 'federated_identity',
+            resolvedVersion: null,
+            deployable: false,
+            notCovered: [null],
+          },
+        ],
+      })
+    );
+
+    await expect(
+      iacProvisionerService.resolveBlueprints({
+        provider: 'aws',
+        integrations: RENDER_REQUEST.integrations,
+      })
+    ).rejects.toThrow(/invalid resolve body/);
+  });
+
+  it('rejects a 200 resolve body with an unknown notCovered reason code', async () => {
+    mockConfig();
+    mockLogger();
+    mockedFetch.mockResolvedValueOnce(
+      jsonResponse(200, {
+        blueprints: [
+          {
+            workflow: 'federated_identity',
+            resolvedVersion: null,
+            deployable: false,
+            notCovered: [{ integration: 'aws', reason: 'not_a_reason' }],
+          },
+        ],
+      })
+    );
+
+    await expect(
+      iacProvisionerService.resolveBlueprints({
+        provider: 'aws',
+        integrations: RENDER_REQUEST.integrations,
+      })
+    ).rejects.toThrow(/invalid resolve body/);
+  });
+
+  it('rejects a 200 resolve body whose blueprints are malformed', async () => {
+    mockConfig();
+    mockLogger();
+    mockedFetch.mockResolvedValueOnce(
+      jsonResponse(200, { blueprints: [{ deployable: true, notCovered: [] }] })
+    );
+
+    await expect(
+      iacProvisionerService.resolveBlueprints({
+        provider: 'aws',
+        integrations: RENDER_REQUEST.integrations,
+      })
+    ).rejects.toThrow(/invalid resolve body/);
   });
 });
 

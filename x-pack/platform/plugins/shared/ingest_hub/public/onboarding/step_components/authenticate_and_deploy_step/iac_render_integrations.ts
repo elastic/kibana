@@ -14,18 +14,19 @@ const getActiveInputs = (
   service: AwsServiceMatrixEntry,
   stored: ServiceVars | undefined
 ): string[] => {
+  // A stored empty selection is the user explicitly disabling every data
+  // stream (see useServiceSettings) — contribute no inputs. Only an absent
+  // value falls back to the service defaults.
+  if (stored && stored.enabledDataStreams.length === 0) {
+    return [];
+  }
   const serviceVars: ServiceVars = stored ?? {
     enabledDataStreams: service.dataStreams.length > 0 ? service.dataStreams : [service.id],
     varsByDataStream: {},
   };
 
   const inputs = new Set<string>();
-  const activeDataStreams =
-    serviceVars.enabledDataStreams.length > 0
-      ? serviceVars.enabledDataStreams
-      : service.dataStreams.length > 0
-      ? service.dataStreams
-      : [service.id];
+  const activeDataStreams = serviceVars.enabledDataStreams;
 
   for (const dsId of activeDataStreams) {
     const dsInfo = service.varDefsByDataStream?.[dsId];
@@ -51,25 +52,34 @@ const getActiveInputs = (
   return [...inputs];
 };
 
+export interface IacInstanceSelection {
+  /** Service Settings row identity; the key into `serviceVars`. */
+  instanceId: string;
+  /** Service matrix / policy-template key. Duplicates share it. */
+  serviceId: string;
+}
+
 /**
  * Builds the IaC Provisioner `integrations` payload for Ingest Hub's Launch
- * CloudFormation button: one entry per package, with each selected managed
- * integration's policy template and the inputs the user actually enabled.
+ * CloudFormation button and resolve call: one entry per package, with each
+ * selected managed integration's policy template and the inputs the user
+ * actually enabled. Callers pass instances (not service ids) so inputs
+ * enabled only on a duplicated instance are unioned in too.
  */
 export const getIacRenderIntegrations = (
-  serviceIds: string[],
+  instances: IacInstanceSelection[],
   awsServicesMap: Map<string, AwsServiceMatrixEntry> | undefined,
   serviceVars: Record<string, ServiceVars>
 ): RenderIacTemplateIntegration[] => {
   const templatesByPackage = new Map<string, Map<string, Set<string>>>();
 
-  for (const serviceId of serviceIds) {
+  for (const { instanceId, serviceId } of instances) {
     const service = awsServicesMap?.get(serviceId);
     if (!service || service.identityFederationSupported === false) {
       continue;
     }
 
-    const enabledInputs = getActiveInputs(service, serviceVars[serviceId]);
+    const enabledInputs = getActiveInputs(service, serviceVars[instanceId]);
     if (enabledInputs.length === 0) {
       continue;
     }

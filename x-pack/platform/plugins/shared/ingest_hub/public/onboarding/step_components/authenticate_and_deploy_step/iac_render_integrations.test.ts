@@ -36,7 +36,11 @@ const securityhub = {
 describe('getIacRenderIntegrations', () => {
   it('groups selected managed services by package and unions enabled inputs', () => {
     const result = getIacRenderIntegrations(
-      ['guardduty', 'inspector', 'aws_securityhub'],
+      [
+        { instanceId: 'guardduty', serviceId: 'guardduty' },
+        { instanceId: 'inspector', serviceId: 'inspector' },
+        { instanceId: 'aws_securityhub', serviceId: 'aws_securityhub' },
+      ],
       new Map([
         ['guardduty', guardduty],
         ['inspector', inspector],
@@ -69,7 +73,7 @@ describe('getIacRenderIntegrations', () => {
 
   it('skips services that do not support identity federation', () => {
     const result = getIacRenderIntegrations(
-      ['config'],
+      [{ instanceId: 'config', serviceId: 'config' }],
       new Map([
         [
           'config',
@@ -86,5 +90,62 @@ describe('getIacRenderIntegrations', () => {
     );
 
     expect(result).toEqual([]);
+  });
+
+  it('contributes no inputs for an explicitly emptied data-stream selection', () => {
+    // A stored empty enabledDataStreams array means the user disabled every
+    // data stream (useServiceSettings semantics) — it must not fall back to
+    // the service defaults.
+    const result = getIacRenderIntegrations(
+      [
+        { instanceId: 'guardduty', serviceId: 'guardduty' },
+        { instanceId: 'inspector', serviceId: 'inspector' },
+      ],
+      new Map([
+        ['guardduty', guardduty],
+        ['inspector', inspector],
+      ]),
+      {
+        guardduty: { enabledDataStreams: [], varsByDataStream: {} },
+      }
+    );
+
+    expect(result).toEqual([
+      {
+        name: 'aws',
+        policyTemplates: [{ name: 'inspector', enabledInputs: ['httpjson'] }],
+      },
+    ]);
+  });
+
+  it('unions inputs enabled only on a duplicated instance into the base template', () => {
+    const result = getIacRenderIntegrations(
+      [
+        { instanceId: 'guardduty', serviceId: 'guardduty' },
+        { instanceId: 'guardduty__dup-1', serviceId: 'guardduty' },
+      ],
+      new Map([['guardduty', guardduty]]),
+      {
+        guardduty: {
+          enabledDataStreams: ['guardduty'],
+          varsByDataStream: {
+            guardduty: { enabledInputs: ['aws-s3'], varsByInput: {} },
+          },
+        },
+        'guardduty__dup-1': {
+          enabledDataStreams: ['guardduty'],
+          varsByDataStream: {
+            guardduty: { enabledInputs: ['httpjson'], varsByInput: {} },
+          },
+        },
+      }
+    );
+
+    expect(result).toEqual([
+      {
+        name: 'aws',
+        policyTemplates: [{ name: 'guardduty', enabledInputs: ['aws-s3', 'httpjson'] }],
+      },
+    ]);
   });
 });
