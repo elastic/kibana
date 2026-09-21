@@ -14,6 +14,18 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock, notificationServiceMock } from '@kbn/core/public/mocks';
 import { ESQLMenu } from '.';
 
+jest.mock('./help_popover', () => {
+  const ReactActual = jest.requireActual('react');
+  return {
+    HelpPopover: (props: { hideRecommendedQueries?: boolean }) =>
+      ReactActual.createElement('button', {
+        type: 'button',
+        'data-test-subj': 'esql-help-popover-button',
+        'data-hide-recommended': String(Boolean(props.hideRecommendedQueries)),
+      }),
+  };
+});
+
 const startMock = coreMock.createStart();
 startMock.chrome.getActiveSolutionNavId$.mockReturnValue(new BehaviorSubject('oblt'));
 startMock.http.get = jest.fn().mockResolvedValue({ recommendedQueries: [] });
@@ -40,5 +52,21 @@ describe('ESQLMenu', () => {
     await renderMenu({ hideVisor: true });
     expect(screen.queryByTestId('esql-menu-button')).not.toBeInTheDocument();
     expect(screen.getByTestId('esql-help-popover-button')).toBeInTheDocument();
+  });
+
+  it('forwards hideRecommendedQueries to the help popover', async () => {
+    await renderMenu({ hideRecommendedQueries: true });
+    expect(screen.getByTestId('esql-help-popover-button')).toHaveAttribute(
+      'data-hide-recommended',
+      'true'
+    );
+  });
+
+  it('does not hide recommended queries by default', async () => {
+    await renderMenu();
+    expect(screen.getByTestId('esql-help-popover-button')).toHaveAttribute(
+      'data-hide-recommended',
+      'false'
+    );
   });
 });

@@ -141,6 +141,7 @@ export function ESQLMenu({
         <LazyHelpPopover
           onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
           docsFlyoutSize={docsFlyoutSize}
+          hideRecommendedQueries={hideRecommendedQueries}
         />
       </Suspense>
     </EuiButtonGroup>
