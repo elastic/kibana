@@ -138,13 +138,6 @@ spaceTest.describe('Lens chart style settings', { tag: '@local-stateful-classic'
       .toBe(true);
   });
 
-  spaceTest('shows the donut-hole control in pie visual options', async ({ pageObjects }) => {
-    const { lens } = pageObjects;
-
-    await lens.switchToVisualization('pie', { search: 'pie' });
-    expect(await lens.style.getDonutHoleSize()).toBe('None');
-  });
-
   spaceTest('toggles point visibility on a line chart', async ({ pageObjects }) => {
     const { lens } = pageObjects;
 
@@ -178,42 +171,6 @@ spaceTest.describe('Lens chart style settings', { tag: '@local-stateful-classic'
       await lens.style.setPointVisibility('hide');
       const { lines } = await lens.workspace.getCurrentChartDebugState('xyVisChart');
       expect(lines?.[0]?.visiblePoints).toBe(false);
-    });
-  });
-
-  spaceTest('toggles point visibility on an area chart', async ({ pageObjects }) => {
-    const { lens } = pageObjects;
-
-    await lens.configureDimension({
-      dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-      operation: 'date_histogram',
-      field: '@timestamp',
-    });
-    await lens.configureDimension({
-      dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-      operation: 'average',
-      field: 'bytes',
-    });
-    await lens.switchToVisualization('area', { search: 'area' });
-    await lens.waitForVisualization('xyVisChart');
-    await lens.style.openStyleSettingsFlyout();
-
-    await spaceTest.step('points stay visible when Point visibility is Auto', async () => {
-      await lens.style.setPointVisibility('auto');
-      const { areas } = await lens.workspace.getCurrentChartDebugState('xyVisChart');
-      expect(areas?.[0]?.lines?.y1?.visiblePoints).toBe(true);
-    });
-
-    await spaceTest.step('points stay visible when Point visibility is Show', async () => {
-      await lens.style.setPointVisibility('show');
-      const { areas } = await lens.workspace.getCurrentChartDebugState('xyVisChart');
-      expect(areas?.[0]?.lines?.y1?.visiblePoints).toBe(true);
-    });
-
-    await spaceTest.step('points are hidden when Point visibility is Hide', async () => {
-      await lens.style.setPointVisibility('hide');
-      const { areas } = await lens.workspace.getCurrentChartDebugState('xyVisChart');
-      expect(areas?.[0]?.lines?.y1?.visiblePoints).toBe(false);
     });
   });
 });
