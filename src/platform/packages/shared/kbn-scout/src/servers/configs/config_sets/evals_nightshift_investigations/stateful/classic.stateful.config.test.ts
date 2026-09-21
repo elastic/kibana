@@ -32,10 +32,13 @@ describe('Nightshift sandbox configuration', () => {
   const originalEnv = process.env;
   let fixtureDirectory: string;
   let exitListeners: Array<(code: number) => void>;
+  let signalListeners: Map<NodeJS.Signals, NodeJS.SignalsListener[]>;
+  const signals = ['SIGINT', 'SIGTERM', 'SIGHUP'] as const;
 
   beforeEach(() => {
     jest.resetModules();
     exitListeners = process.listeners('exit');
+    signalListeners = new Map(signals.map((signal) => [signal, process.listeners(signal)]));
     fixtureDirectory = mkdtempSync(join(tmpdir(), 'nightshift-config-test-'));
     writeFileSync(join(fixtureDirectory, 'client.crt'), 'synthetic certificate');
     writeFileSync(join(fixtureDirectory, 'client.key'), 'synthetic private key\nsecond line');
@@ -54,8 +57,35 @@ describe('Nightshift sandbox configuration', () => {
         listener(0);
       }
     }
+    for (const [signal, existing] of signalListeners) {
+      for (const listener of process.listeners(signal)) {
+        if (!existing.includes(listener)) process.removeListener(signal, listener);
+      }
+    }
+    jest.restoreAllMocks();
     rmSync(fixtureDirectory, { recursive: true, force: true });
     process.env = originalEnv;
+  });
+
+  it.each([
+    ['re-raises the signal when nothing else handles it', 0, 1],
+    ['leaves termination to the remaining handlers', 1, 0],
+  ])('removes the private config on SIGTERM and %s', async (_, otherListeners, kills) => {
+    const kill = jest.spyOn(process, 'kill').mockReturnValue(true);
+    const { servers } = await import('./classic.stateful.config');
+    const configArg = servers.kbnTestServer.serverArgs.find((arg) => arg.startsWith('--config='));
+    const configDirectory = dirname(String(configArg).slice('--config='.length));
+    expect(existsSync(configDirectory)).toBe(true);
+
+    const [onSignal] = process
+      .listeners('SIGTERM')
+      .filter((listener) => !signalListeners.get('SIGTERM')?.includes(listener));
+    jest.spyOn(process, 'listenerCount').mockReturnValue(otherListeners);
+    onSignal('SIGTERM');
+
+    expect(existsSync(configDirectory)).toBe(false);
+    expect(kill).toHaveBeenCalledTimes(kills);
+    if (kills) expect(kill).toHaveBeenCalledWith(process.pid, 'SIGTERM');
   });
 
   it.each([false, true])('loads mTLS secrets privately (custom CA: %s)', async (customCa) => {

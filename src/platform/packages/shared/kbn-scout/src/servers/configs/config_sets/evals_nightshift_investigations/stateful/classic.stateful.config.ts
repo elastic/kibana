@@ -38,7 +38,17 @@ const exporters: Array<{ http?: { url: string; headers?: Record<string, string> 
 
 // Keep sandbox, connector, and trace-exporter credentials out of process arguments and logs.
 const configDirectory = mkdtempSync(join(tmpdir(), 'nightshift-evals-'));
-process.once('exit', () => rmSync(configDirectory, { recursive: true, force: true }));
+const removeConfigDirectory = () => rmSync(configDirectory, { recursive: true, force: true });
+process.once('exit', removeConfigDirectory);
+// A termination signal can end the process without an `exit` event: `signal-exit`, loaded through
+// the process runner, re-raises the signal when it is the only listener. Listening here both
+// cleans up and keeps it from doing that, so the CLI's own handler exits normally.
+for (const signal of ['SIGINT', 'SIGTERM', 'SIGHUP'] as const) {
+  process.once(signal, () => {
+    removeConfigDirectory();
+    if (process.listenerCount(signal) === 0) process.kill(process.pid, signal);
+  });
+}
 const telemetry = createTelemetryIdentity(configDirectory, tracing.esTestCluster.files);
 const sandboxConfig = {
   ...(exporterArg ? { 'telemetry.tracing.exporters': exporters } : {}),
