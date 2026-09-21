@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react';
+import { render, fireEvent, waitFor, within } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { Router } from '@kbn/shared-ux-router';
 import { contentListQueryClient } from '@kbn/content-list-provider';
@@ -121,24 +121,36 @@ describe('ElasticInferenceServiceModelsPage', () => {
     expect(queryByTestId('eisModelCard-Jina Reranker v2')).toBeInTheDocument();
   });
 
-  it('filters models by task type toggle buttons', async () => {
+  it('renders the model type filter and removes the old task type buttons', async () => {
+    const { getByTestId, queryByTestId } = await renderPopulatedPage();
+    expect(getByTestId('modelTypeFilterMultiselect')).toBeInTheDocument();
+    expect(queryByTestId('eisTaskTypeFilter-LLM')).not.toBeInTheDocument();
+    expect(queryByTestId('eisTaskTypeFilter-Embedding')).not.toBeInTheDocument();
+    expect(queryByTestId('eisTaskTypeFilter-Rerank')).not.toBeInTheDocument();
+  });
+
+  it('filters models by model type', async () => {
     const { container, getByTestId } = await renderPopulatedPage();
     const allCards = countCards(container);
 
-    fireEvent.click(getByTestId('eisTaskTypeFilter-Rerank'));
+    fireEvent.click(getByTestId('modelTypeFilterMultiselect'));
+    const list = await waitFor(() => getByTestId('modelTypeFilterMultiselect-list'));
+    fireEvent.click(within(list).getByText('Rerank'));
 
     await waitFor(() => expect(countCards(container)).toBeLessThan(allCards));
     expect(countCards(container)).toBeGreaterThan(0);
   });
 
-  it('toggles task type filter off when clicked again', async () => {
+  it('clears the model type filter when the option is clicked again', async () => {
     const { container, getByTestId } = await renderPopulatedPage();
     const allCards = countCards(container);
 
-    fireEvent.click(getByTestId('eisTaskTypeFilter-Rerank'));
+    fireEvent.click(getByTestId('modelTypeFilterMultiselect'));
+    const list = await waitFor(() => getByTestId('modelTypeFilterMultiselect-list'));
+    fireEvent.click(within(list).getByText('Rerank'));
     await waitFor(() => expect(countCards(container)).toBeLessThan(allCards));
 
-    fireEvent.click(getByTestId('eisTaskTypeFilter-Rerank'));
+    fireEvent.click(within(list).getByText('Rerank'));
     await waitFor(() => expect(countCards(container)).toBe(allCards));
   });
 

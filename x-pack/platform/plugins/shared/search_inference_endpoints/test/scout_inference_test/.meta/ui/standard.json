@@ -61,20 +61,6 @@
       }
     },
     {
-      "id": "42293a2b206815f-b38677823af138c",
-      "title": "EIS Models Page task type filter buttons filter model cards",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@local-serverless-search"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 49,
-        "column": 65
-      }
-    },
-    {
       "id": "42293a2b206815f-92c0688ca2cd666",
       "title": "EIS Models Page model family filter filters cards by provider",
       "expectedStatus": "passed",

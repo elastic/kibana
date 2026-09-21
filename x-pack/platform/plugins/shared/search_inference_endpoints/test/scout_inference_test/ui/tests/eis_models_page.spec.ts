@@ -65,25 +65,6 @@ test.describe('EIS Models Page', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
     });
   });
 
-  test('task type filter buttons filter model cards', async ({ pageObjects }) => {
-    const { eisModels } = pageObjects;
-
-    await test.step('all model cards visible before filtering', async () => {
-      await expect(eisModels.allModelCards).toHaveCount(5);
-    });
-
-    await test.step('clicking LLM filter excludes embedding-only model', async () => {
-      await eisModels.taskTypeFilter('LLM').click();
-      await expect(eisModels.allModelCards).toHaveCount(4);
-      await expect(eisModels.modelCard('Elastic ELSER v2')).toBeHidden();
-    });
-
-    await test.step('clicking LLM filter again deselects and restores all cards', async () => {
-      await eisModels.taskTypeFilter('LLM').click();
-      await expect(eisModels.allModelCards).toHaveCount(5);
-    });
-  });
-
   test('model family filter filters cards by provider', async ({ page, pageObjects }) => {
     const { eisModels } = pageObjects;
 
