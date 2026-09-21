@@ -64,12 +64,13 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should not delete attachments from a case in a different space', async () => {
       const postedCase = await createCase(supertestWithoutAuth, postCaseReq, 200, authSpace1);
-      await createComment({
+      const patchedCase = await createComment({
         supertest: supertestWithoutAuth,
         caseId: postedCase.id,
         params: postCommentUserReq,
         auth: authSpace1,
       });
+      const attachmentId = patchedCase.comments![0].id;
 
       await deleteAllAttachmentsV2({
         supertest: supertestWithoutAuth,
@@ -77,6 +78,14 @@ export default ({ getService }: FtrProviderContext): void => {
         expectedHttpCode: 404,
         auth: getAuthWithSuperUser('space2'),
       });
+
+      const remaining = await getAllComments({
+        supertest: supertestWithoutAuth,
+        caseId: postedCase.id,
+        auth: authSpace1,
+      });
+      expect(remaining.length).to.eql(1);
+      expect(remaining[0].id).to.eql(attachmentId);
     });
   });
 };

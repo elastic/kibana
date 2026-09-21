@@ -14,7 +14,7 @@ import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 /**
  * Deletes every attachment from a case.
  */
-export const deleteAttachmentsRoute = createCasesRoute({
+export const deleteAllAttachmentsRoute = createCasesRoute({
   method: 'delete',
   path: CASE_ATTACHMENTS_URL,
   security: DEFAULT_CASES_ROUTE_SECURITY,

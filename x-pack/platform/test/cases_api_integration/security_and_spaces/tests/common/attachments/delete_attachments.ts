@@ -78,6 +78,13 @@ export default ({ getService }: FtrProviderContext): void => {
             caseId: caseInfo.id,
             auth: { user, space: 'space1' },
           });
+
+          const remaining = await getAllComments({
+            supertest: supertestWithoutAuth,
+            caseId: caseInfo.id,
+            auth: superUserSpace1Auth,
+          });
+          expect(remaining.length).to.eql(0);
         }
       });
 
@@ -89,12 +96,13 @@ export default ({ getService }: FtrProviderContext): void => {
           superUserSpace1Auth
         );
 
-        await createComment({
+        const patchedCase = await createComment({
           supertest: supertestWithoutAuth,
           caseId: caseInfo.id,
           params: postCommentUserReq,
           auth: superUserSpace1Auth,
         });
+        const attachmentId = patchedCase.comments![0].id;
 
         for (const user of [noKibanaPrivileges, obsOnly, obsOnlyRead, globalRead]) {
           await deleteAllAttachmentsV2({
@@ -104,6 +112,14 @@ export default ({ getService }: FtrProviderContext): void => {
             expectedHttpCode: 403,
           });
         }
+
+        const remaining = await getAllComments({
+          supertest: supertestWithoutAuth,
+          caseId: caseInfo.id,
+          auth: superUserSpace1Auth,
+        });
+        expect(remaining.length).to.eql(1);
+        expect(remaining[0].id).to.eql(attachmentId);
       });
     });
   });

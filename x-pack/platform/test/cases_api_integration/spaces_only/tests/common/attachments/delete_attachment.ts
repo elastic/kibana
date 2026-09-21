@@ -16,6 +16,7 @@ import {
   createCase,
   createComment,
   deleteAttachmentV2,
+  getAllComments,
   getAuthWithSuperUser,
 } from '../../../../common/lib/api';
 
@@ -33,21 +34,37 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should delete an attachment from space1', async () => {
       const postedCase = await createCase(supertestWithoutAuth, postCaseReq, 200, authSpace1);
-      const patchedCase = await createComment({
+      const withFirst = await createComment({
         supertest: supertestWithoutAuth,
         caseId: postedCase.id,
         params: postCommentUserReq,
         auth: authSpace1,
       });
+      const toDeleteId = withFirst.comments![0].id;
+      const withSecond = await createComment({
+        supertest: supertestWithoutAuth,
+        caseId: postedCase.id,
+        params: postCommentUserReq,
+        auth: authSpace1,
+      });
+      const toKeepId = withSecond.comments!.find((comment) => comment.id !== toDeleteId)!.id;
 
       const res = await deleteAttachmentV2({
         supertest: supertestWithoutAuth,
         caseId: postedCase.id,
-        attachmentId: patchedCase.comments![0].id,
+        attachmentId: toDeleteId,
         auth: authSpace1,
       });
 
       expect(res).to.eql({});
+
+      const remaining = await getAllComments({
+        supertest: supertestWithoutAuth,
+        caseId: postedCase.id,
+        auth: authSpace1,
+      });
+      expect(remaining.length).to.eql(1);
+      expect(remaining[0].id).to.eql(toKeepId);
     });
 
     it('should not delete an attachment from a different space', async () => {
@@ -58,14 +75,23 @@ export default ({ getService }: FtrProviderContext): void => {
         params: postCommentUserReq,
         auth: authSpace1,
       });
+      const attachmentId = patchedCase.comments![0].id;
 
       await deleteAttachmentV2({
         supertest: supertestWithoutAuth,
         caseId: postedCase.id,
-        attachmentId: patchedCase.comments![0].id,
+        attachmentId,
         expectedHttpCode: 404,
         auth: getAuthWithSuperUser('space2'),
       });
+
+      const remaining = await getAllComments({
+        supertest: supertestWithoutAuth,
+        caseId: postedCase.id,
+        auth: authSpace1,
+      });
+      expect(remaining.length).to.eql(1);
+      expect(remaining[0].id).to.eql(attachmentId);
     });
   });
 };
