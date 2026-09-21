@@ -28,7 +28,11 @@ interface WorkflowStep {
   condition?: string;
   if?: string;
   timeout?: string;
-  'on-failure'?: { continue?: boolean | string; fallback?: WorkflowStep[] };
+  'on-failure'?: {
+    continue?: boolean | string;
+    fallback?: WorkflowStep[];
+    retry?: { 'max-attempts'?: number; delay?: string; condition?: string };
+  };
   'max-iterations'?: number | { limit?: number; 'on-limit'?: string };
   'iteration-timeout'?: string;
   with?: Record<string, unknown>;
