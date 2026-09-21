@@ -4470,7 +4470,8 @@ describe('Output Service', () => {
 
       expect(mockedGetAgentCountForAgentPolicies).toHaveBeenCalledWith(
         esClient,
-        expect.arrayContaining(['policy-from-pkg'])
+        expect.arrayContaining(['policy-from-pkg']),
+        { excludeInactive: true }
       );
       expect(result).toEqual({ agentPolicyCount: 1, agentCount: 2 });
     });
@@ -4509,6 +4510,22 @@ describe('Output Service', () => {
       } as any);
 
       expect(result).toEqual({ agentPolicyCount: 2, agentCount: 15 });
+    });
+
+    it('passes excludeInactive:true to exclude stale-checkin agents from count', async () => {
+      mockedAgentPolicyService.fetchAllAgentPolicyIds.mockResolvedValue(makeIdPages(['p1']));
+      mockedGetAgentCountForAgentPolicies.mockResolvedValue({ p1: 5 });
+
+      await outputService.getAgentAndPolicyCountForOutput(esClient, {
+        id: 'output-test',
+        is_default: false,
+      } as any);
+
+      expect(mockedGetAgentCountForAgentPolicies).toHaveBeenCalledWith(
+        esClient,
+        expect.any(Array),
+        { excludeInactive: true }
+      );
     });
 
     it('chunks IDs into batches of 1000 to avoid ES max_buckets limit', async () => {

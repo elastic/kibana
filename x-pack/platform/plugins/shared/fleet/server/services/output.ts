@@ -1646,7 +1646,7 @@ class OutputService {
       const chunks = _.chunk(uniqueIds, AGENT_COUNT_POLICY_ID_CHUNK_SIZE);
       const chunkResults = await pMap(
         chunks,
-        (chunk) => getAgentCountForAgentPolicies(esClient, chunk),
+        (chunk) => getAgentCountForAgentPolicies(esClient, chunk, { excludeInactive: true }),
         { concurrency: 5 }
       );
       agentCount = chunkResults
