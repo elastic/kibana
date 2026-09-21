@@ -13,10 +13,7 @@ import { FormattedComboBox } from './combo_box';
 
 export const MonitorTagsComboBox = (props: FormattedComboBoxProps) => {
   const { data: suggestions, loading } = useFetcher(() => fetchTagSuggestions(), []);
-  const options = useMemo(
-    () => (suggestions ?? []).map((tag) => ({ label: tag })),
-    [suggestions]
-  );
+  const options = useMemo(() => (suggestions ?? []).map((tag) => ({ label: tag })), [suggestions]);
 
   return <FormattedComboBox {...props} options={options} isLoading={Boolean(loading)} />;
 };
