@@ -179,6 +179,8 @@ export const translatedYaraRule = t.exact(
     yara_rule_data: t.string,
     arch_context: NonEmptyArray(translatedYaraArchContext),
     scan_context: NonEmptyArray(translatedYaraScanContext),
+    entry_id: t.string,
+    entry_name: t.string,
   })
 );
 export type TranslatedYaraRule = t.TypeOf<typeof translatedYaraRule>;

@@ -1373,6 +1373,8 @@ describe('ManifestManager', () => {
             yara_rule_data: yaraRuleText,
             arch_context: [MetaArchValue.X86, MetaArchValue.ARM64],
             scan_context: [EndpointArtifactScanContext.MEMORY],
+            entry_id: yaraListItem.id,
+            entry_name: yaraListItem.name,
           },
         ],
       });
