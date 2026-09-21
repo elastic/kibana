@@ -93,15 +93,6 @@ export const suggestPartitionsRoute = createServerRoute({
       signal: getRequestAbortSignal(request),
       userPrompt: params.body.user_prompt,
       existingPartitions: params.body.existing_partitions,
-      getFeatures: async (filters) => {
-        const { getKnowledgeIndicatorClient } = scopedClients;
-        if (!getKnowledgeIndicatorClient) {
-          return [];
-        }
-        const kiClient = await getKnowledgeIndicatorClient();
-        const { hits } = await kiClient.getFeatures(params.path.name, filters);
-        return hits;
-      },
     });
 
     // Turn our promise into an Observable ServerSideEvent. The only reason we're streaming the

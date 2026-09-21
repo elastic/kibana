@@ -26,7 +26,6 @@ type ToolScopedClients = Pick<
   RouteHandlerScopedClients,
   | 'streamsClient'
   | 'scopedClusterClient'
-  | 'getKnowledgeIndicatorClient'
   | 'uiSettingsClient'
   | 'attachmentClient'
   | 'uiSettingsClient'
@@ -95,7 +94,6 @@ export const createMockGetScopedClients = () => {
     scopedClusterClient,
     uiSettingsClient,
     attachmentClient,
-    getKnowledgeIndicatorClient: jest.fn().mockRejectedValue(new Error('Not implemented')),
   };
 
   const getScopedClients = jest

@@ -83,10 +83,8 @@ export class DraftStream extends WiredStream {
     return [
       { type: 'delete_dot_streams_document', request: { name: this._definition.name } },
       { type: 'delete_esql_view', request: { name: getEsqlViewName(this._definition.name) } },
-      { type: 'delete_queries', request: { definition: this._definition } },
       { type: 'unlink_assets', request: { name: this._definition.name } },
       { type: 'unlink_systems', request: { name: this._definition.name } },
-      { type: 'unlink_features', request: { name: this._definition.name } },
     ];
   }
 
