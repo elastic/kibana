@@ -153,7 +153,9 @@ const toggleImportedEnabled = async ({
   const failedIds = new Set<string>();
 
   if (enableIds.length > 0) {
-    const { errors: enableErrors } = await rulesClient.bulkEnableRules({ ids: enableIds });
+    const { errors: enableErrors, taskIdsFailedToBeEnabled } = await rulesClient.bulkEnableRules({
+      ids: enableIds,
+    });
     for (const err of enableErrors) {
       failedIds.add(err.rule.id);
       const source = pending.get(err.rule.id);
@@ -164,6 +166,21 @@ const toggleImportedEnabled = async ({
             message: err.message,
           })
         );
+      }
+    }
+    // Track tasks that failed to enable from TM.bulkEnable().
+    for (const id of taskIdsFailedToBeEnabled) {
+      if (!failedIds.has(id)) {
+        failedIds.add(id);
+        const source = pending.get(id);
+        if (source != null) {
+          errors.push(
+            createRuleImportErrorObject({
+              ruleId: source.rule_id,
+              message: 'Failed to enable task',
+            })
+          );
+        }
       }
     }
   }
