@@ -7,16 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
-import {
-  EuiBadge,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSkeletonText,
-  EuiTitle,
-  useEuiTheme,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSkeletonText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import {
   compareWatchesForDisplay,
@@ -41,10 +32,9 @@ const LIFECYCLE_LABEL: Record<Exclude<Lifecycle, 'ga'>, string> = {
 };
 interface AlertZeroWatchesNavProps {
   active: WatchesSectionId;
-  onCollapse: () => void;
 }
 
-export const AlertZeroWatchesNav: React.FC<AlertZeroWatchesNavProps> = ({ active, onCollapse }) => {
+export const AlertZeroWatchesNav: React.FC<AlertZeroWatchesNavProps> = ({ active }) => {
   const { euiTheme } = useEuiTheme();
   const { data, isLoading } = useWatches();
 
@@ -69,30 +59,9 @@ export const AlertZeroWatchesNav: React.FC<AlertZeroWatchesNavProps> = ({ active
         background: ${euiTheme.colors.emptyShade};
       `}
     >
-      <EuiFlexGroup
-        alignItems="center"
-        justifyContent="spaceBetween"
-        gutterSize="s"
-        responsive={false}
-      >
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h2>{i18n.PAGE_TITLE}</h2>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiToolTip content={i18n.SUBNAV_COLLAPSE} disableScreenReaderOutput>
-            <EuiButtonIcon
-              iconType="menuLeft"
-              aria-label={i18n.SUBNAV_COLLAPSE}
-              color="text"
-              display="base"
-              data-test-subj="alertZeroWatchesSubnavCollapse"
-              onClick={onCollapse}
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiTitle size="xs">
+        <h2>{i18n.PAGE_TITLE}</h2>
+      </EuiTitle>
 
       <EuiFlexGroup
         direction="column"

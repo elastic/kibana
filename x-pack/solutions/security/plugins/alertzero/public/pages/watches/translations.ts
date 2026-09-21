@@ -81,14 +81,6 @@ export const SUBNAV_ARIA_LABEL = i18n.translate('xpack.alertzero.watches.subnav.
   defaultMessage: 'Watches section',
 });
 
-export const SUBNAV_COLLAPSE = i18n.translate('xpack.alertzero.watches.subnav.collapse', {
-  defaultMessage: 'Collapse Watches navigation',
-});
-
-export const SUBNAV_EXPAND = i18n.translate('xpack.alertzero.watches.subnav.expand', {
-  defaultMessage: 'Expand Watches navigation',
-});
-
 /**
  * `SUBNAV_WORKERS` and `SUBNAV_SKILLS` deliberately live in
  * `components/app_chrome/translations.ts`: `deep_links.ts` needs them and is page-load critical, so
