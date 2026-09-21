@@ -68,7 +68,7 @@ import { getFullEditPath } from '../utils/urls';
 import { DashboardFavoritesProvider } from './dashboard_favorite_button';
 import { LegacyDashboardHeader } from './legacy_dashboard_header';
 import { DashboardControlsRenderer } from '../dashboard_controls_renderer';
-import { usePrettifyDashboardAction } from '../dashboard_app/prettify/use_prettify_dashboard_action';
+import { useEnhanceDashboardAction } from '../dashboard_app/enhance/use_enhance_dashboard_action';
 
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumb[];
@@ -381,17 +381,17 @@ export function InternalDashboardTopNav({
   }, [visibilityProps.showDatePicker, allDataViews]);
 
   const shareAction = useDashboardShareAction({ redirectTo });
-  const prettifyAction = usePrettifyDashboardAction(dashboardApi);
+  const enhanceAction = useEnhanceDashboardAction(dashboardApi);
   const experimentalDashboardAiAction = useMemo(
     () =>
-      viewMode === 'edit' && prettifyAction
+      viewMode === 'edit' && enhanceAction
         ? {
             onClick: () => {
-              void prettifyAction.execute();
+              void enhanceAction.execute();
             },
           }
         : undefined,
-    [viewMode, prettifyAction]
+    [viewMode, enhanceAction]
   );
 
   const { viewModeTopNavConfig, editModeTopNavConfig } = useDashboardMenuItems({

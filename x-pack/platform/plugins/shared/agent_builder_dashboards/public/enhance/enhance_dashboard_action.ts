@@ -14,24 +14,24 @@ import {
   dashboardStateToAttachmentData,
 } from '@kbn/agent-builder-dashboards-common';
 import {
-  PRETTIFY_DASHBOARD_ACTION_ID,
+  ENHANCE_DASHBOARD_ACTION_ID,
   type DashboardApi,
-  type PrettifyDashboardActionContext,
+  type EnhanceDashboardActionContext,
 } from '@kbn/dashboard-plugin/public';
 import { apiPublishesEsql } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
 import type { IdGenerator } from '../attachment_types';
 
-export const PRETTIFY_DASHBOARD_PROMPT = '/dashboard-management prettify this dashboard';
+export const ENHANCE_DASHBOARD_PROMPT = '/dashboard-management enhance this dashboard';
 
-export interface PrettifyDashboardActionDeps {
+export interface EnhanceDashboardActionDeps {
   openChat: AgentBuilderPluginStart['openChat'];
   getAgentBuilderAccess: AgentBuilderPluginStart['getAgentBuilderAccess'];
   canWriteDashboards: boolean;
   draftAttachmentId: IdGenerator;
 }
 
-const isPrettifiable = (
+const isEnhanceable = (
   dashboardApi: DashboardApi,
   access: EmbeddableChatAccess,
   canWrite: boolean
@@ -47,23 +47,23 @@ const isPrettifiable = (
       child.esql$.getValue().length > 0
   );
 
-export const createPrettifyDashboardAction = ({
+export const createEnhanceDashboardAction = ({
   openChat,
   getAgentBuilderAccess,
   canWriteDashboards,
   draftAttachmentId,
-}: PrettifyDashboardActionDeps): ActionDefinition<PrettifyDashboardActionContext> => {
+}: EnhanceDashboardActionDeps): ActionDefinition<EnhanceDashboardActionContext> => {
   return {
-    id: PRETTIFY_DASHBOARD_ACTION_ID,
-    type: PRETTIFY_DASHBOARD_ACTION_ID,
+    id: ENHANCE_DASHBOARD_ACTION_ID,
+    type: ENHANCE_DASHBOARD_ACTION_ID,
     order: 0,
     getDisplayName: () =>
-      i18n.translate('xpack.agentBuilderDashboards.prettifyDashboard.buttonLabel', {
+      i18n.translate('xpack.agentBuilderDashboards.enhanceDashboard.buttonLabel', {
         defaultMessage: 'Enhance this dashboard',
       }),
     getIconType: () => 'sparkles',
     isCompatible: async ({ dashboardApi }) =>
-      isPrettifiable(dashboardApi, await getAgentBuilderAccess(), canWriteDashboards),
+      isEnhanceable(dashboardApi, await getAgentBuilderAccess(), canWriteDashboards),
     getCompatibilityChangesSubject: ({ dashboardApi }): Observable<undefined> =>
       merge(
         dashboardApi.viewMode$.pipe(skip(1)),
@@ -83,7 +83,7 @@ export const createPrettifyDashboardAction = ({
         )
       ).pipe(map(() => undefined)),
     execute: async ({ dashboardApi }) => {
-      if (!isPrettifiable(dashboardApi, await getAgentBuilderAccess(), canWriteDashboards)) {
+      if (!isEnhanceable(dashboardApi, await getAgentBuilderAccess(), canWriteDashboards)) {
         return;
       }
 
@@ -96,7 +96,7 @@ export const createPrettifyDashboardAction = ({
 
       openChat({
         newConversation: true,
-        initialMessage: PRETTIFY_DASHBOARD_PROMPT,
+        initialMessage: ENHANCE_DASHBOARD_PROMPT,
         autoSendInitialMessage: true,
         sessionTag: 'dashboard',
         attachments: [dashboardAttachment],
