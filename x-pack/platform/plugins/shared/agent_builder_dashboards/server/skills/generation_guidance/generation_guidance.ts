@@ -13,7 +13,7 @@ import {
 import { dashboardTools } from '../../../common';
 import type { DashboardGuidanceModule } from '../guidance_module';
 import { dashboardDesignGuidancePrompt } from './design';
-import { prettifyGuidancePrompt } from './prettify_guidance';
+import { enhanceGuidancePrompt } from './enhance_guidance';
 
 const chartTypeSelectionGuidance = getChartTypeSelectionPromptContent();
 
@@ -21,7 +21,7 @@ const guidance = `## Dashboard Operations
 
 The ${dashboardTools.generateDashboard} tool builds the resulting dashboard from the current dashboard (if any) plus an ordered \`operations\` array. This section describes the \`operations\` vocabulary; see the environment workflow below for how the current dashboard is referenced and how the result is surfaced.
 
-${prettifyGuidancePrompt}
+${enhanceGuidancePrompt}
 
 ## Using Dashboard Operations
 

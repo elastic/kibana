@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Component } from 'react';
+import React, { Component, type ReactNode } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButtonIcon,
@@ -44,13 +44,14 @@ interface DataTableFormatProps {
   fieldFormats: FieldFormatsStart;
   uiActions: UiActionsStart;
   isFilterable: (column: DatatableColumn) => boolean;
+  missingValueDisplay?: 'text' | 'table';
 }
 
 interface RenderCellArguments {
   table: Datatable;
   columnIndex: number;
   rowIndex: number;
-  formattedValue: string;
+  formattedValue: ReactNode;
   uiActions: UiActionsStart;
   isFilterable: boolean;
 }
@@ -150,6 +151,7 @@ class DataTableFormatClass extends Component<
     uiActions,
     fieldFormats,
     isFilterable,
+    missingValueDisplay,
   }: DataTableFormatProps) {
     if (!data) {
       return {
@@ -167,7 +169,17 @@ class DataTableFormatClass extends Component<
         field: dataColumn.id,
         sortable: true,
         render: (value: any) => {
-          const formattedValue = fieldFormatter.convertToText(value);
+          // Cells are rendered directly inside `EuiFlexItem` (not inside an anchor/img), so
+          // `convertToReact` is safe for every value — no risk of wrapping a formatter's own
+          // anchor in another one. In `'table'` mode we therefore use React for all values so
+          // URL/color/etc. formatters render richly and missing values pick up the accessible
+          // dash + tooltip that `convertToReact` produces. Other consumers stay on
+          // `convertToText` to preserve the plain `(null)` label chart inspectors have always
+          // shown.
+          const formattedValue =
+            missingValueDisplay === 'table'
+              ? fieldFormatter.convertToReact(value)
+              : fieldFormatter.convertToText(value);
           const rowIndex = data.rows.findIndex((row) => row[dataColumn.id] === value) || 0;
 
           return DataTableFormatClass.renderCell({
