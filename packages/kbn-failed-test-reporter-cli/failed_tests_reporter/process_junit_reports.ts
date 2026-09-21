@@ -59,8 +59,8 @@ export async function processJUnitReports(
     }
 
     const seenNewIssueKeys = new Set<string>();
-    const newIssueCreated = false;
-    const skippedNewFailures = 0;
+    let newIssueCreated = false;
+    let skippedNewFailures = 0;
     let cascadingFailures = 0;
 
     for (const failure of failures) {
@@ -119,6 +119,17 @@ export async function processJUnitReports(
         continue;
       }
 
+      if (newIssueCreated) {
+        skippedNewFailures += 1;
+        pushMessage(
+          'Skipped opening a new issue: only the first new failure in a report opens a GitHub ' +
+            'issue, multiple new failures in one run usually indicate a systemic failure'
+        );
+        failure.failureCount = 0;
+        continue;
+      }
+
+      newIssueCreated = true;
       const newIssue = await createFailureIssue(
         buildUrl,
         failure,

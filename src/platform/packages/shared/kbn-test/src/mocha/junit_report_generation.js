@@ -34,9 +34,8 @@ export function setupJUnitReportGeneration(runner, options = {}) {
   const stats = {};
   const results = [];
 
-  // The first Mocha timeout aborts the config run (see `registerAbortOnTimeout`) and every remaining
-  // runnable is then forced to fail with a 1ms timeout. Tagging those trailing failures lets
-  // reporters fold them into the timeout that caused them.
+  // Failures after the first Mocha timeout (remaining hooks/tests that then time out too) are
+  // tagged so reporters can fold them into the timeout that caused them.
   // See https://github.com/elastic/apps-dx/issues/37.
   let sawMochaTimeout = false;
 
