@@ -79,6 +79,13 @@ export interface HuntForThreatResult {
   };
   hits: HuntForThreatHit[];
   affectedAssets: { hosts: AffectedAsset[]; users: AffectedAsset[] };
-  perIndex: Array<{ index: string; hitCount: number }>;
+  /**
+   * `required` reflects a regex match against the resolved technology's
+   * required index *patterns* (e.g. `logs-aws.*`), not a set-membership
+   * check against a concrete `_index` bucket — the two are never the same
+   * string. Computed once here so downstream consumers (the SSE mapper)
+   * never need to re-derive it (plan 7, SSE durability review fix).
+   */
+  perIndex: Array<{ index: string; hitCount: number; required: boolean }>;
   message?: string;
 }

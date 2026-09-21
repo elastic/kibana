@@ -14,7 +14,11 @@ jest.mock('../common/resolve_index_scope', () => ({
   resolveIndexScope: jest.fn().mockResolvedValue({
     technology: 'aws_iam',
     status: 'ok',
-    required: ['logs-aws.cloudtrail-default'],
+    // A wildcard pattern, matching what resolveIndexScope actually returns in
+    // production (`logs-aws.*`), not a concrete `_index` bucket name — the
+    // review's must-fix #1: the old fixture used a concrete index name here,
+    // which made `matchesRequired`'s regex-vs-exact-string bug invisible.
+    required: ['logs-aws.*'],
     optional: ['.alerts-security.alerts-default'],
     missing: [],
     window: { from: 'now-24h', to: 'now' },
@@ -32,16 +36,16 @@ const HIT_TIER1_RESULT = {
   timeRange: { from: '2026-07-30T13:00:00.000Z', to: '2026-07-30T15:00:00.000Z' },
   counts: { totalHits: 4, returnedHits: 4, affectedHosts: 1, affectedUsers: 1 },
   hits: [
-    { index: 'logs-aws.cloudtrail-default', id: 'evt-1', score: 1.2 },
-    { index: '.alerts-security.alerts-default', id: 'evt-2', score: 0.9 },
+    { index: 'logs-aws.cloudtrail-default', id: 'evt-1', score: 1.2, '@timestamp': '2026-07-30T13:05:00.000Z' },
+    { index: '.alerts-security.alerts-default', id: 'evt-2', score: 0.9, '@timestamp': '2026-07-30T13:06:00.000Z' },
   ],
   affectedAssets: {
     hosts: [{ name: 'ci-deploy-runner-07', hitCount: 1 }],
     users: [{ name: 'svc-deploy-bot', hitCount: 3 }],
   },
   perIndex: [
-    { index: 'logs-aws.cloudtrail-default', hitCount: 3 },
-    { index: '.alerts-security.alerts-default', hitCount: 1 },
+    { index: 'logs-aws.cloudtrail-default', hitCount: 3, required: true },
+    { index: '.alerts-security.alerts-default', hitCount: 1, required: false },
   ],
 };
 
@@ -137,10 +141,7 @@ describe('buildSseData', () => {
 
     expect(coordinatorResult.status).toBe('tier1_and_tier2');
 
-    const entries = buildSseData(coordinatorResult, 'tr-aws-iam-assumerole-2026-07-28', {
-      spaceId: 'default',
-      requiredIndices: ['logs-aws.cloudtrail-default'],
-    });
+    const entries = buildSseData(coordinatorResult, 'tr-aws-iam-assumerole-2026-07-28', { spaceId: 'default' });
 
     // One entry per confirmed technique (Tier 2 produced two behaviors here).
     expect(entries).toHaveLength(2);
@@ -186,8 +187,16 @@ describe('buildSseData', () => {
     );
 
     expect(entry.data.events).toEqual([
-      { event_id: 'evt-1', source_index: 'logs-aws.cloudtrail-default' },
-      { event_id: 'evt-2', source_index: '.alerts-security.alerts-default' },
+      {
+        event_id: 'evt-1',
+        source_index: 'logs-aws.cloudtrail-default',
+        timestamp: '2026-07-30T13:05:00.000Z',
+      },
+      {
+        event_id: 'evt-2',
+        source_index: '.alerts-security.alerts-default',
+        timestamp: '2026-07-30T13:06:00.000Z',
+      },
     ]);
 
     const threatIndicator = entry.data.security_knowledge_indicators.find(
@@ -198,10 +207,25 @@ describe('buildSseData', () => {
     const iocIndicator = entry.data.security_knowledge_indicators.find((i) => i.type === 'ioc');
     expect(iocIndicator?.ioc).toEqual({ type: 'hash', value: '9f2b1e7c4a6d8e0f1b3c5d7e9f0a1b2c' });
 
+    // Per-technique filtering (review must-fix #2): the first entry is scoped
+    // to T1078.004 alone — the second technique's behavior/rule name must not
+    // leak onto it, since the SSE is meant to be 1:1 with a Proposal.
     const techniqueIndicators = entry.data.security_knowledge_indicators.filter(
       (i) => i.type === 'technique'
     );
-    expect(techniqueIndicators.map((i) => i.technique_id)).toEqual(['T1078.004', 'T1552.001']);
+    expect(techniqueIndicators.map((i) => i.technique_id)).toEqual(['T1078.004']);
+
+    // The second entry (T1552.001) is scoped the other way — confirms
+    // filtering isn't a no-op that happens to pass on the first entry alone.
+    const [, secondEntry] = entries;
+    const secondTechniqueIndicators = secondEntry.data.security_knowledge_indicators.filter(
+      (i) => i.type === 'technique'
+    );
+    expect(secondTechniqueIndicators.map((i) => i.technique_id)).toEqual(['T1552.001']);
+    expect(secondEntry.data.hunt_result.tier2?.behaviors.map((b) => b.technique_id)).toEqual([
+      'T1078.004',
+      'T1552.001',
+    ]);
   });
 
   it('returns a single report-scoped entry when Tier 2 produced no behaviors', async () => {
@@ -225,10 +249,7 @@ describe('buildSseData', () => {
       tier2_when: 'on_hits',
     });
 
-    const entries = buildSseData(coordinatorResult, 'tr-hit-no-behaviors', {
-      spaceId: 'default',
-      requiredIndices: ['logs-aws.cloudtrail-default'],
-    });
+    const entries = buildSseData(coordinatorResult, 'tr-hit-no-behaviors', { spaceId: 'default' });
 
     expect(entries).toHaveLength(1);
     expect(entries[0].attachment_id).toEqual(
@@ -270,10 +291,7 @@ describe('buildSseData', () => {
       tier2_when: 'on_hits',
     });
 
-    const entries = buildSseData(coordinatorResult, 'tr-clean-2026-07-28', {
-      spaceId: 'default',
-      requiredIndices: ['logs-aws.cloudtrail-default'],
-    });
+    const entries = buildSseData(coordinatorResult, 'tr-clean-2026-07-28', { spaceId: 'default' });
 
     expect(entries).toHaveLength(1);
     expect(entries[0].data.hunt_result.has_confirmed_hit).toBe(false);
@@ -299,10 +317,7 @@ describe('buildSseData output parses against the SSE attachment schema', () => {
       tier2_when: 'on_hits',
     });
 
-    const [entry] = buildSseData(coordinatorResult, 'tr-aws-iam-assumerole-2026-07-28', {
-      spaceId: 'default',
-      requiredIndices: ['logs-aws.cloudtrail-default'],
-    });
+    const [entry] = buildSseData(coordinatorResult, 'tr-aws-iam-assumerole-2026-07-28', { spaceId: 'default' });
 
     // PR 1 owns title/severity/status/hypothesis_tested/evidence_for/evidence_against/
     // evaluation_record_ref; the hunt child's packaging step fills these in before
