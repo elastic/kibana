@@ -1942,7 +1942,7 @@
     "storybook": "8.6.18",
     "string-replace-loader": "3.1.0",
     "style-loader": "4.0.0",
-    "stylelint": "17.14.1",
+    "stylelint": "17.15.0",
     "stylelint-scss": "7.2.0",
     "superagent": "10.2.1",
     "supertest": "7.1.1",
