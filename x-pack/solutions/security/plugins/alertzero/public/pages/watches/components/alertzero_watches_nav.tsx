@@ -7,7 +7,13 @@
 
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
-import { EuiListGroup, EuiListGroupItem, EuiSkeletonText, EuiTitle, useEuiTheme } from '@elastic/eui';
+import {
+  EuiListGroup,
+  EuiListGroupItem,
+  EuiSkeletonText,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import {
   compareWatchesForDisplay,
@@ -25,6 +31,8 @@ import * as i18n from '../translations';
  * data, so the nav cannot know the ids ahead of time.
  */
 export type WatchesSectionId = string;
+
+const NAV_HEADER_HEIGHT_PX = 48;
 
 interface AlertZeroWatchesNavProps {
   active: WatchesSectionId;
@@ -47,21 +55,36 @@ export const AlertZeroWatchesNav: React.FC<AlertZeroWatchesNavProps> = ({ active
       aria-label={i18n.SUBNAV_ARIA_LABEL}
       data-test-subj="alertZeroWatchesSubnav"
       css={css`
+        display: flex;
+        flex-direction: column;
         width: ${ALERTZERO_WATCHES_SUBNAV_WIDTH}px;
         flex-shrink: 0;
         height: 100%;
-        padding: ${euiTheme.size.m};
         border-right: 1px solid ${euiTheme.border.color};
-        background: ${euiTheme.colors.emptyShade};
+        background: ${euiTheme.colors.backgroundBaseSubdued};
       `}
     >
-      <EuiTitle size="xs">
-        <h2>{i18n.PAGE_TITLE}</h2>
-      </EuiTitle>
+      <div
+        css={css`
+          display: flex;
+          align-items: center;
+          min-height: ${NAV_HEADER_HEIGHT_PX}px;
+          padding: 0 ${euiTheme.size.m};
+          border-bottom: ${euiTheme.border.thin};
+          flex-shrink: 0;
+        `}
+      >
+        <EuiTitle size="xs">
+          <h2>{i18n.PAGE_TITLE}</h2>
+        </EuiTitle>
+      </div>
 
       <div
         css={css`
-          margin-top: ${euiTheme.size.m};
+          flex: 1;
+          min-height: 0;
+          overflow: auto;
+          padding: ${euiTheme.size.s};
         `}
       >
         {isLoading && watches.length === 0 ? (

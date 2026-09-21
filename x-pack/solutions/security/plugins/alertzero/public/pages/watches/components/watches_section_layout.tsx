@@ -105,7 +105,13 @@ export const WatchesSectionLayout: React.FC<WatchesSectionLayoutProps> = ({
       >
         <AlertZeroWatchesNav active={active} />
       </EuiPageTemplate.Sidebar>
-      <AppHeader title={title} description={description} badges={badges} menu={menu} />
+      <AppHeader
+        title={title}
+        description={description}
+        badges={badges}
+        menu={menu}
+        spacing="compact"
+      />
       <EuiPageTemplate.Section paddingSize="l" grow>
         {children}
       </EuiPageTemplate.Section>
