@@ -16,6 +16,9 @@ export interface NodeExpandButtonProps {
   y?: string;
   color?: EntityNodeViewModel['color'] | LabelNodeViewModel['color'];
   onClick?: (e: React.MouseEvent<HTMLElement>, unToggleCallback: () => void) => void;
+  /** Allows callers to hide the button via inline style (e.g. `display: 'none'`) while keeping it
+   * in the DOM so tests can still find and interact with it. */
+  style?: React.CSSProperties;
 }
 
 export const NodeExpandButton = ({ x, y, color, onClick, ...props }: NodeExpandButtonProps) => {
