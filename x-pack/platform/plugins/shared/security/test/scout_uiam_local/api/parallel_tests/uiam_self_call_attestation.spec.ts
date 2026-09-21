@@ -14,7 +14,7 @@ import {
   MOCK_IDP_UIAM_SERVICE_URL,
   MOCK_IDP_UIAM_SHARED_SECRET,
 } from '@kbn/mock-idp-utils';
-import { apiTest, tags } from '@kbn/scout';
+import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../../../common/constants';
@@ -24,7 +24,18 @@ const OAUTH_SELF_CALL_TARGET = '/internal/test_endpoints/self_client/oauth_me';
 
 apiTest.describe(
   '[NON-MKI] Genuine Kibana self-call UIAM attestation',
-  { tag: tags.serverless.all },
+  {
+    tag: [
+      '@local-serverless-search',
+      '@local-serverless-observability_complete',
+      '@local-serverless-observability_logs_essentials',
+      '@local-serverless-security_complete',
+      '@local-serverless-security_essentials',
+      '@local-serverless-security_ease',
+      '@local-serverless-workplaceai',
+      '@local-serverless-vectordb',
+    ],
+  },
   () => {
     let userSessionCookieFactory: () => Promise<[string, { accessToken: string }]>;
 
@@ -132,6 +143,7 @@ const grantUiamApiKey = async (accessToken: string) => {
         role_assignments: { limit: { access: ['application'], resource: ['project'] } },
       }),
       dispatcher,
+      signal: AbortSignal.timeout(30_000),
     });
     const body = (await response.json()) as { id: string; key: string };
     return { status: response.status, body };

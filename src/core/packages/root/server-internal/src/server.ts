@@ -65,6 +65,7 @@ import {
   HTTPAuthorizationHeader,
   isUiamCredential,
   isExternalUiamCredential,
+  UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
 } from '@kbn/core-security-server';
 import { UserProfileService } from '@kbn/core-user-profile-server-internal';
 import { PricingService } from '@kbn/core-pricing-server-internal';
@@ -614,10 +615,9 @@ export class Server {
     );
     const uiam = securityStart.authc.apiKeys.uiam;
     if (uiam) {
-      httpStart.setSelfClientAuthHeaderAugmenter((request, outboundHeaders) => {
-        const authorization = outboundHeaders.get('authorization');
-        const credential = authorization
-          ? HTTPAuthorizationHeader.parseFromValue(authorization)
+      httpStart.setSelfClientUiamAttestationGetter((request, outboundAuthorization) => {
+        const credential = outboundAuthorization
+          ? HTTPAuthorizationHeader.parseFromValue(outboundAuthorization)
           : null;
         if (!credential || !isUiamCredential(credential)) {
           return undefined;
@@ -640,7 +640,9 @@ export class Server {
           return undefined;
         }
 
-        return uiam.getInternalCallerAttestationHeaders(credential);
+        return uiam.getInternalCallerAttestationHeaders(credential)[
+          UIAM_INTERNAL_CALLER_ATTESTATION_HEADER
+        ];
       });
     }
     const coreUsageDataStart = this.coreUsageData.start({

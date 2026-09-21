@@ -6,7 +6,6 @@
  */
 
 import { createUiamOAuthAccessToken, MOCK_IDP_GATEWAY_SHARED_SECRET } from '@kbn/mock-idp-utils';
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../../../common/constants';
@@ -18,7 +17,7 @@ const OAUTH_SELF_CALL_TARGET = '/internal/test_endpoints/self_client/oauth_me';
 
 apiTest.describe(
   '[NON-MKI] Genuine Kibana self-call UIAM attestation after OAuth swap and relay',
-  { tag: tags.serverless.security.complete },
+  { tag: ['@local-serverless-security_complete'] },
   () => {
     apiTest(
       'OAuth ephemeral self-call stamp survives the token swap so the acceptUiamOAuth receiver skips a second exchange',

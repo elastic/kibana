@@ -58,7 +58,7 @@ import { externalUrlConfig, ExternalUrlConfig } from './external_url';
 import {
   createInternalHttpSelfClient,
   type InternalHttpSelfService,
-  type SelfClientAuthHeaderAugmenter,
+  type SelfClientUiamAttestationGetter,
 } from './self_client';
 
 export interface PrebootDeps {
@@ -85,7 +85,7 @@ export class HttpService
   private configSubscription?: Subscription;
   private currentConfig?: HttpConfig;
   private selfClient?: InternalHttpSelfService;
-  private selfClientAuthHeaderAugmenter?: SelfClientAuthHeaderAugmenter;
+  private selfClientUiamAttestationGetter?: SelfClientUiamAttestationGetter;
 
   private readonly log: Logger;
   private readonly env: Env;
@@ -262,13 +262,13 @@ export class HttpService
         kibanaVersion: this.env.packageInfo.version,
         log: this.log.get('self-client'),
         target: internalSetup.config.selfHttp.target,
-        getAuthHeaderAugmenter: () => this.selfClientAuthHeaderAugmenter,
+        getUiamAttestationGetter: () => this.selfClientUiamAttestationGetter,
       })),
       setRedactedSessionIdGetter: (getter) => {
         this.httpServer.setRedactedSessionIdGetter(getter);
       },
-      setSelfClientAuthHeaderAugmenter: (augmenter) => {
-        this.selfClientAuthHeaderAugmenter = augmenter;
+      setSelfClientUiamAttestationGetter: (getter) => {
+        this.selfClientUiamAttestationGetter = getter;
       },
     };
   }

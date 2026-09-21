@@ -36,14 +36,13 @@ const DEFAULT_TIMEOUT_MS = 60_000;
 const KIBANA_VERSION_HEADER = 'kbn-version';
 
 /**
- * Supplies request-scoped authentication headers that only Core may stamp. Called last, with the
- * fully built outbound headers.
+ * Returns the UIAM internal-caller attestation for `outboundAuthorization`, or nothing.
  * @internal
  */
-export type SelfClientAuthHeaderAugmenter = (
+export type SelfClientUiamAttestationGetter = (
   request: KibanaRequest,
-  outboundHeaders: Headers
-) => Record<string, string> | undefined;
+  outboundAuthorization: string | null
+) => string | undefined;
 
 export const SELF_CALL_RECURSION_ERROR =
   'Refusing Kibana self HTTP call because a self call cannot issue another self call.';
@@ -70,7 +69,7 @@ interface HttpSelfClientParams {
   readonly kibanaVersion: string;
   readonly log: Logger;
   readonly target: 'auto' | 'local';
-  readonly getAuthHeaderAugmenter?: () => SelfClientAuthHeaderAugmenter | undefined;
+  readonly getUiamAttestationGetter?: () => SelfClientUiamAttestationGetter | undefined;
 }
 
 interface SelfFetchInit extends RequestInit {
@@ -268,13 +267,11 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
       headers.set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'Kibana');
     }
 
-    const augmenter = this.params.getAuthHeaderAugmenter?.();
-    if (augmenter) {
-      const augmented = augmenter(this.request, headers);
-      if (augmented) {
-        for (const [name, value] of Object.entries(augmented)) {
-          headers.set(name, value);
-        }
+    const getAttestation = this.params.getUiamAttestationGetter?.();
+    if (getAttestation) {
+      const attestation = getAttestation(this.request, headers.get('authorization'));
+      if (attestation) {
+        headers.set(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER, attestation);
       }
     }
 

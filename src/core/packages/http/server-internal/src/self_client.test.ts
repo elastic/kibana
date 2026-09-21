@@ -18,7 +18,7 @@ import {
   createInternalHttpSelfClient,
   SELF_CALL_MTLS_ERROR,
   SELF_CALL_RECURSION_ERROR,
-  type SelfClientAuthHeaderAugmenter,
+  type SelfClientUiamAttestationGetter,
 } from './self_client';
 
 const originalFetch = global.fetch;
@@ -53,7 +53,7 @@ const createClient = ({
     selfHttp: { ssl: { verificationMode: 'full' } },
   } as HttpConfig),
   serverProtocol = 'http',
-  getAuthHeaderAugmenter,
+  getUiamAttestationGetter,
 }: {
   publicBaseUrl?: string | null;
   authHeaders?: Record<string, string>;
@@ -61,7 +61,7 @@ const createClient = ({
   target?: 'auto' | 'local';
   getHttpConfig?: jest.MockedFunction<() => HttpConfig>;
   serverProtocol?: 'http' | 'https';
-  getAuthHeaderAugmenter?: () => SelfClientAuthHeaderAugmenter | undefined;
+  getUiamAttestationGetter?: () => SelfClientUiamAttestationGetter | undefined;
 } = {}) => {
   const authRequestHeaders =
     suppliedAuthRequestHeaders ??
@@ -90,7 +90,7 @@ const createClient = ({
     kibanaVersion: '9.9.9',
     log,
     target,
-    getAuthHeaderAugmenter,
+    getUiamAttestationGetter,
   });
 
   return { authRequestHeaders, getHttpConfig, log, self };
@@ -430,52 +430,38 @@ describe('InternalHttpSelfScopedClient', () => {
     expect(outboundRequest.headers.get('user-agent')).toBe('KibanaSelfHttpClient/9.9.9');
   });
 
-  describe('auth header augmenter', () => {
-    it('adds headers returned by the augmenter to the outbound request', async () => {
-      const augmenter = jest
-        .fn()
-        .mockReturnValue({ 'x-kbn-uiam-internal-caller-attestation': 'sig-123' });
-      const { self } = createClient({ getAuthHeaderAugmenter: () => augmenter });
+  describe('UIAM attestation getter', () => {
+    it('sets the attestation header from the string the getter returns', async () => {
+      const getter = jest.fn().mockReturnValue('sig-123');
+      const { self } = createClient({ getUiamAttestationGetter: () => getter });
       const request = createRequest();
 
       await self.asScoped(request).fetch('/api/status');
 
       const outboundRequest = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
       expect(outboundRequest.headers.get('x-kbn-uiam-internal-caller-attestation')).toBe('sig-123');
-      expect(augmenter).toHaveBeenCalledWith(request, expect.any(Headers));
+      expect(outboundRequest.headers.get('x-kbn-self-call')).toBe('true');
+      expect(getter).toHaveBeenCalledWith(request, 'test-auth-token');
     });
 
-    it('passes effective headers to augmenter so it can inspect auth state', async () => {
-      let capturedHeaders: Headers | undefined;
-      const augmenter = jest.fn().mockImplementation((_req: KibanaRequest, headers: Headers) => {
-        capturedHeaders = headers;
-        return undefined;
-      });
-      const { self } = createClient({ getAuthHeaderAugmenter: () => augmenter });
+    it('leaves headers unchanged when the getter returns nothing', async () => {
+      const getter = jest.fn().mockReturnValue(undefined);
+      const { self } = createClient({ getUiamAttestationGetter: () => getter });
 
       await self.asScoped(createRequest()).fetch('/api/status');
 
-      expect(capturedHeaders!.get('authorization')).toBe('test-auth-token');
-    });
-
-    it('consults the augmenter but leaves headers unchanged when it returns undefined', async () => {
-      const augmenter = jest.fn().mockReturnValue(undefined);
-      const { self } = createClient({ getAuthHeaderAugmenter: () => augmenter });
-
-      await self.asScoped(createRequest()).fetch('/api/status');
-
-      expect(augmenter).toHaveBeenCalledTimes(1);
+      expect(getter).toHaveBeenCalledTimes(1);
       const outboundRequest = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
       expect(outboundRequest.headers.get('x-kbn-uiam-internal-caller-attestation')).toBeNull();
       expect(outboundRequest.headers.get('x-kbn-self-call')).toBe('true');
       expect(outboundRequest.headers.get('authorization')).toBe('test-auth-token');
     });
 
-    it('does not augment when no augmenter is available (getter absent or returns undefined)', async () => {
-      const getAuthHeaderAugmenter = jest.fn().mockReturnValue(undefined);
-      const withGetter = createClient({ getAuthHeaderAugmenter });
+    it('does not set the attestation header when no getter is available', async () => {
+      const getUiamAttestationGetter = jest.fn().mockReturnValue(undefined);
+      const withGetter = createClient({ getUiamAttestationGetter });
       await withGetter.self.asScoped(createRequest()).fetch('/api/status');
-      expect(getAuthHeaderAugmenter).toHaveBeenCalledTimes(1);
+      expect(getUiamAttestationGetter).toHaveBeenCalledTimes(1);
       const requestWithGetter = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
       expect(requestWithGetter.headers.get('x-kbn-uiam-internal-caller-attestation')).toBeNull();
 
