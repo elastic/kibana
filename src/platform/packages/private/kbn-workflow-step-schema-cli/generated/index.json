@@ -599,6 +599,8 @@
     "new_relic.runNrqlQuery",
     "new_relic.unacknowledgeIssue",
     "new_relic.updateMutingRule",
+    "nightshift.ensureInvestigationAgent",
+    "nightshift.triggerInvestigation",
     "notion.getDataSource",
     "notion.getPage",
     "notion.queryDataSource",
@@ -743,14 +745,28 @@
     "servicenow-sir.getFields",
     "servicenow-sir.getIncident",
     "servicenow-sir.pushToService",
+    "servicenow_search.addComment",
+    "servicenow_search.addWorkNote",
+    "servicenow_search.closeIncident",
+    "servicenow_search.createEvent",
+    "servicenow_search.createIncident",
+    "servicenow_search.createRecord",
+    "servicenow_search.createSecurityIncident",
+    "servicenow_search.deleteRecord",
     "servicenow_search.describeTable",
     "servicenow_search.getAttachment",
+    "servicenow_search.getChoices",
     "servicenow_search.getComments",
     "servicenow_search.getRecord",
     "servicenow_search.listKnowledgeBases",
     "servicenow_search.listRecords",
     "servicenow_search.listTables",
+    "servicenow_search.queryUsers",
     "servicenow_search.search",
+    "servicenow_search.updateIncident",
+    "servicenow_search.updateRecord",
+    "servicenow_search.uploadAttachment",
+    "servicenow_search.whoAmI",
     "sharepoint-online.callGraphAPI",
     "sharepoint-online.downloadDriveItem",
     "sharepoint-online.downloadItemFromURL",
@@ -894,6 +910,9 @@
     "zoom.whoAmI"
   ],
   "triggerTypes": [
+    "ai.attachmentAdded",
+    "ai.attachmentDeleted",
+    "ai.attachmentUpdated",
     "ai.conversation.metadataUpdated",
     "alert",
     "alerting.episodeAcked",
@@ -922,6 +941,9 @@
     "entityStore.entityAssetCriticalityUpdated",
     "entityStore.entityRiskScoreChanged",
     "manual",
+    "nightshift-investigations.completed",
+    "nightshift-investigations.failed",
+    "nightshift-investigations.started",
     "scheduled",
     "security.alertAssigneesChanged",
     "security.alertStatusChanged",
@@ -938,11 +960,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "ee2d43fa0463fa137246afd2f8dd1c60e8ba50bc6ae71daa85c35dfdb522a00d"
+      "sha256": "b8fe804691280f7a3f40794418b906ee5fde615a5683701445bad8cb11fdc14e"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "8733ed3f95e72c915caf1b74b8ac255a6057beae6b1ca87a4197eef0523b5f5e"
+      "sha256": "db1742a9166e2d28bc10e8c4635266f50e689cf31d5cbbb4aa454e06b5c153af"
     }
   }
 }
