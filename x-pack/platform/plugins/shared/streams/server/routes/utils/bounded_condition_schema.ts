@@ -55,11 +55,7 @@ const boundedNever = z.object({ never: z.object({}) });
 
 function buildBoundedCondition(depth: number): z.ZodType<Condition> {
   if (depth === 0) {
-    return z.union([
-      boundedFilterCondition,
-      boundedAlways,
-      boundedNever,
-    ]) as z.ZodType<Condition>;
+    return z.union([boundedFilterCondition, boundedAlways, boundedNever]) as z.ZodType<Condition>;
   }
   const inner = buildBoundedCondition(depth - 1);
   return z.union([

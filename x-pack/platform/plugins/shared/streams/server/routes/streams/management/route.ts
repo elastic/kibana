@@ -7,8 +7,8 @@
 
 import { z } from '@kbn/zod/v4';
 import { isNeverCondition } from '@kbn/streamlang';
-import { boundedConditionSchema } from '../../utils/bounded_condition_schema';
 import { MAX_STREAM_NAME_LENGTH, routingStatus } from '@kbn/streams-schema';
+import { boundedConditionSchema } from '../../utils/bounded_condition_schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import type { ResyncStreamsResponse } from '../../../lib/streams/client';
 import { createServerRoute } from '../../create_server_route';
