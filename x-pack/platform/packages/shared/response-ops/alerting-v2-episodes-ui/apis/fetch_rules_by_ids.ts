@@ -8,7 +8,7 @@
 import { take } from 'lodash';
 import { nodeBuilder, nodeTypes, toKqlExpression } from '@kbn/es-query';
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { FindRulesResponse, RuleResponse } from '@kbn/alerting-v2-schemas';
+import type { FindRulesRequest, FindRulesResponse, RuleResponse } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
 import { ALERT_EPISODES_LIST_PAGE_SIZE } from '../constants';
 
@@ -35,12 +35,13 @@ export const fetchRulesByIds = async ({
     return [];
   }
 
+  const requestBody: FindRulesRequest = {
+    filter: buildRuleIdsFilter(idsToFetch),
+    per_page: ALERT_EPISODES_LIST_PAGE_SIZE,
+    page: 1,
+  };
   const response = await http.get<FindRulesResponse>(ALERTING_V2_RULE_API_PATH, {
-    query: {
-      filter: buildRuleIdsFilter(idsToFetch),
-      per_page: ALERT_EPISODES_LIST_PAGE_SIZE,
-      page: 1,
-    },
+    query: requestBody,
   });
 
   return response.items;
