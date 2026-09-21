@@ -50900,7 +50900,6 @@
     "xpack.significantEventsApp.settings.scheduledDiscoveryTitle": "スケジュールされた検出",
     "xpack.significantEventsApp.settings.tuningInfo": "これらは機能の検出方法やクエリの検索方法を制御する高度な設定です。誤った値はオンボーディングの品質を低下させたり、予期せぬ動作を引き起こす可能性があります。変更は次の実行時に有効になります。",
     "xpack.significantEventsApp.settings.tuningTitle": "重要イベントの調整",
-    "xpack.significantEventsApp.settingsTab": "設定",
     "xpack.significantEventsApp.significantEventAttachment.fallbackLabel": "重要なイベント",
     "xpack.significantEventsApp.significantEventAttachment.openButton": "プレビューを開く",
     "xpack.significantEventsApp.significantEvents.emptyStateImage": "重要なイベントビューの空の状態イラスト",

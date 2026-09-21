@@ -50501,7 +50501,6 @@
     "xpack.significantEventsApp.settings.scheduledDiscoveryTitle": "Détection planifiée",
     "xpack.significantEventsApp.settings.tuningInfo": "Il s'agit de paramètres avancés qui contrôlent la manière dont les caractéristiques sont découvertes et les requêtes sont recherchées. Des valeurs incorrectes peuvent dégrader la qualité de l'intégration ou provoquer un comportement inattendu. Les modifications prendront effet lors de la prochaine exécution.",
     "xpack.significantEventsApp.settings.tuningTitle": "Paramétrage des événements importants",
-    "xpack.significantEventsApp.settingsTab": "Paramètres",
     "xpack.significantEventsApp.significantEventAttachment.fallbackLabel": "Événement important",
     "xpack.significantEventsApp.significantEventAttachment.openButton": "Ouvrir l'aperçu",
     "xpack.significantEventsApp.significantEvents.emptyStateImage": "Illustration d'état vide pour la vue des événements significatifs",
