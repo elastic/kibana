@@ -76,7 +76,7 @@ export const GetOutputAgentPolicyCountRequestSchema = {
   query: schema.object({
     isDefault: schema.maybe(
       schema.boolean({
-        meta: { description: 'Pending is_default value from the flyout (before save)' },
+        meta: { description: 'If true, count policies as if this output is the default data output, including policies with no `data_output_id`. If omitted, uses the output\'s saved `is_default` value.' },
       })
     ),
     isDefaultMonitoring: schema.maybe(
