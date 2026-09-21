@@ -200,3 +200,38 @@ describe('floor_alert_triage — post_comment_triage_started', () => {
     expect(comment).toContain('and 40 more');
   });
 });
+
+// ---------------------------------------------------------------------------
+// Early abort when Alert Analysis is disabled
+// ---------------------------------------------------------------------------
+
+describe('floor_alert_triage — require_analysis_enabled', () => {
+  const topLevelNames = parsed.steps.map((step) => step.name);
+
+  it('runs before create_investigation so a disabled-analysis run opens no Investigation', () => {
+    expect(topLevelNames.indexOf('fetch_analysis_runtime_config')).toBeLessThan(
+      topLevelNames.indexOf('create_investigation')
+    );
+    expect(topLevelNames.indexOf('require_analysis_enabled')).toBeLessThan(
+      topLevelNames.indexOf('create_investigation')
+    );
+  });
+
+  it('reads the same runtime_config endpoint the analysis workflow uses', () => {
+    const fetchStep = stepByName('fetch_analysis_runtime_config');
+    expect(fetchStep?.type).toBe('kibana.request');
+    expect(fetchStep?.with?.path).toBe(
+      '/s/{{ workflow.spaceId }}/internal/security_solution/alert_analysis_workflow/runtime_config'
+    );
+  });
+
+  it('fails the run when workflowEnabled is false', () => {
+    const guard = stepByName('require_analysis_enabled');
+    const abort = stepByName('abort_analysis_disabled');
+    expect(guard?.condition).toBe(
+      '${{ steps.fetch_analysis_runtime_config.output.workflowEnabled == false }}'
+    );
+    expect(abort?.type).toBe('workflow.fail');
+    expect(abort?.with?.message).toContain('Alert Analysis');
+  });
+});

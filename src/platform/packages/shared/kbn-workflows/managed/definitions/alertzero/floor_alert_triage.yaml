@@ -44,6 +44,8 @@ consts:
 # after it is invisible to the analyst until a decision arrives.
 #
 # Pipeline:
+#   0. require_analysis_enabled  — fail the run before create_investigation when
+#                                  the space has Alert Analysis turned off
 #   1. create_investigation      — open an Investigation conversation
 #   2. attach_alerts             — attach the alert batch by value
 #   3. classify_alerts           — run the classification sub-workflow
@@ -59,6 +61,42 @@ consts:
 # TODO: replace kibana.request comment posts with ai.conversation.message.add once kibana#291688 merges.
 
 steps:
+  # ---------------------------------------------------------------------------
+  # 0. Abort before opening an Investigation when Alert Analysis is off in this
+  #    space. Enablement is checked at Worker turn-on; this is the runtime
+  #    complement for the case where the operator later turns analysis off and
+  #    leaves the Worker running. Empty verdicts are not a substitute — the
+  #    sub-workflow also returns [] when every alert is already tagged.
+  #
+  #    Same runtime_config endpoint the analysis workflow reads. Fail-closed: a
+  #    failed fetch after retries fails the run rather than creating a hollow
+  #    Investigation.
+  # ---------------------------------------------------------------------------
+  - name: fetch_analysis_runtime_config
+    type: kibana.request
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/internal/security_solution/alert_analysis_workflow/runtime_config"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "1"
+        Content-Type: application/json
+
+  - name: require_analysis_enabled
+    type: if
+    condition: "${{ steps.fetch_analysis_runtime_config.output.workflowEnabled == false }}"
+    steps:
+      - name: abort_analysis_disabled
+        type: workflow.fail
+        with:
+          message: >-
+            Alert Triage requires Alert Analysis to be enabled in this space.
+            Turn it on under Alert analysis settings, or turn this Worker off.
+
   # ---------------------------------------------------------------------------
   # 1. Open an Investigation conversation seeded from the `investigation`
   #    template. Seeds status, severity, and the workflow_execution_id so a
