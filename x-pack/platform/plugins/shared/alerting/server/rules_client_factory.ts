@@ -95,7 +95,6 @@ export interface RulesClientFactoryOpts {
   shouldGrantUiam: boolean;
   apiKeyType: ApiKeyType;
   isServerless: boolean;
-  featureFlags: CoreStart['featureFlags'];
   analytics: CoreStart['analytics'];
 }
 
@@ -127,7 +126,6 @@ export class RulesClientFactory {
   private shouldGrantUiam: boolean = false;
   private apiKeyType: ApiKeyType = ApiKeyType.ES;
   private isServerless: boolean = false;
-  private featureFlags!: CoreStart['featureFlags'];
   private analytics!: CoreStart['analytics'];
 
   public initialize(options: RulesClientFactoryOpts) {
@@ -161,7 +159,6 @@ export class RulesClientFactory {
     this.shouldGrantUiam = options.shouldGrantUiam;
     this.apiKeyType = options.apiKeyType;
     this.isServerless = options.isServerless;
-    this.featureFlags = options.featureFlags;
     this.analytics = options.analytics;
   }
 
@@ -443,7 +440,6 @@ export class RulesClientFactory {
       shouldGrantUiam: this.shouldGrantUiam,
       apiKeyType: this.apiKeyType,
       isServerless: this.isServerless,
-      featureFlags: this.featureFlags,
       analytics: this.analytics,
 
       async getUserName() {
