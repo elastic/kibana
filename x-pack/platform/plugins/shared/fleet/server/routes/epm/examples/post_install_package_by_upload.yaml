@@ -64,11 +64,3 @@ responses:
               statusCode: 403
               error: 'Forbidden'
               message: 'Insufficient privileges to upload this package in space(s) default. Missing: api:rules-all'
-      application/gzip; application/zip:
-        examples:
-          insufficientPrivilegesExample:
-            description: 'Caller lacks rules-all in the destination Space'
-            value:
-              statusCode: 403
-              error: 'Forbidden'
-              message: 'Insufficient privileges to upload this package in space(s) default. Missing: api:rules-all'
