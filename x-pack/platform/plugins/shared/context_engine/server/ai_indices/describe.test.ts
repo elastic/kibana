@@ -23,6 +23,7 @@ const aiIndex: AiIndexHttpItem = {
   description: 'Support KIs',
   dest: { type: 'index', value: 'ai-index-idx-support*' },
   managed: false,
+  memory_enabled: true,
   automations: [],
   sources: [],
   traces: [],
