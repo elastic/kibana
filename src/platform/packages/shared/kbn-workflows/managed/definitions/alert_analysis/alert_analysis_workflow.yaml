@@ -303,9 +303,12 @@ steps:
           auto_close_confidence_score_max_threshold: 1
           agent_id: "{{ inputs.agentId | default: variables.agent_id }}"
           tag_prefix: "{{ inputs.tagPrefix | default: variables.tag_prefix }}"
+          # When called by the Worker the ai.agent output is machine-readable JSON
+          # posted into the Investigation conversation (R3). Showing a separate Agent
+          # Builder chat entry in the Chats UI would be confusing and redundant.
+          create_conversation: false
           # When the Worker passes investigationConversationId, store it for progress
-          # comment steps guarded by calledByWorker. The ai.agent step no longer reads
-          # this — create_conversation follows the uiSettings value on all paths.
+          # comment steps guarded by calledByWorker.
           investigation_conversation_id: "{{ inputs.investigationConversationId }}"
 
       # autoCloseEnabled cannot use `| default:`: Liquid treats false as falsy, so
