@@ -30,22 +30,22 @@ test.describe(
     });
 
     test('filters the alerts table by status', async ({ pageObjects }) => {
-      const { alertsTablePage, alertControls } = pageObjects;
+      const { alertsTablePage, controls } = pageObjects;
 
       await test.step('is filtered to only show active alerts by default', async () => {
         await expect.poll(() => alertsTablePage.getRowCount()).toBe(ALERT_COUNTS.ACTIVE);
       });
 
       await test.step('shows all alerts once the status filter is cleared', async () => {
-        await alertControls.clearControlSelections(ALERT_STATUS_CONTROL_ID);
+        await controls.clearSelections(ALERT_STATUS_CONTROL_ID);
         await alertsTablePage.waitForTableToLoad();
         await expect.poll(() => alertsTablePage.getRowCount()).toBe(ALERT_COUNTS.ALL);
       });
 
       await test.step('shows only recovered alerts when selected via the filter', async () => {
-        await alertControls.openOptionsListPopover(ALERT_STATUS_CONTROL_ID);
-        await alertControls.selectOption('recovered');
-        await alertControls.ensurePopoverIsClosed(ALERT_STATUS_CONTROL_ID);
+        await controls.optionsList.openPopover(ALERT_STATUS_CONTROL_ID);
+        await controls.optionsList.selectOption('recovered');
+        await controls.optionsList.ensurePopoverIsClosed();
         await alertsTablePage.waitForTableToLoad();
         await expect.poll(() => alertsTablePage.getRowCount()).toBe(ALERT_COUNTS.RECOVERED);
       });
