@@ -14,16 +14,17 @@ import {
 import type { Investigation } from '../schemas/components/investigation.gen';
 
 /**
- * A clean Floor run that classifies an alert as false_positive with high confidence
- * produces NO investigation row — the watch execution completes without materializing
- * a conversation. Only inconclusive or true_positive classifications spawn investigations.
+ * Sample investigations, kept as the set of incidents `MOCK_PROPOSALS` hangs off: a proposal's
+ * `conversationId` is an id from here, and its `conversationTitle` is derived from that link rather
+ * than restated, so the two sample sets can never disagree.
  *
- * Brief fixtures below track proposal queue groups (Respond / Investigate /
- * Configure) while staying on the Investigation → Proposal object model.
+ * A clean Floor run that classifies an alert as false_positive with high confidence produces NO
+ * investigation row — the watch execution completes without materializing a conversation. Only
+ * inconclusive or true_positive classifications spawn investigations.
+ *
+ * Fixtures track proposal queue groups (Respond / Investigate / Configure) while staying on the
+ * Investigation → Proposal object model.
  */
-export const MOCK_CLEAN_RUN_NOTE =
-  'Clean Floor runs (false_positive, confidence >= 0.9) do not create investigation rows.';
-
 const respondInvestigations: Investigation[] = [
   {
     id: 'inv-officer-impossible-travel-001',
@@ -321,15 +322,3 @@ export const MOCK_INVESTIGATIONS: Investigation[] = [
   ...configureInvestigations,
   ...resolvedInvestigations,
 ];
-
-export const createMockInvestigation = (overrides: Partial<Investigation> = {}): Investigation => ({
-  ...respondInvestigations[0],
-  ...overrides,
-  events: overrides.events ?? respondInvestigations[0].events,
-});
-
-export const getMockInvestigationsByWatchId = (watchId: string): Investigation[] =>
-  MOCK_INVESTIGATIONS.filter((inv) => inv.watch_id === watchId);
-
-export const getMockInvestigationById = (id: string): Investigation | undefined =>
-  MOCK_INVESTIGATIONS.find((inv) => inv.id === id);

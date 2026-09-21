@@ -69,33 +69,32 @@ AlertZero is a **standalone Security-category app** (`/app/alertzero`) that **us
 - Platform footer stays as on Security `main`: Launchpad, Developer tools, Settings / stack management, collapse
 - **Discover** uses the platform `{ link: 'discover' }` destination (real `/app/discover`)
 - **Dashboards** uses Security’s real dashboards destination (same Throughline slot; no AlertZero stub)
-- **Chats** stays in-app and embeds Agent Builder
+- **Chat** is Agent Builder's own conversation page; AlertZero links out to it rather than hosting it
 - Watches keeps a **content-area** secondary nav (Workflows / Skills / … stubs)
-- Ask AlertZero FAB routes to Chats (hidden on `/chats`)
 
 ## Routes
 
 | UI route | Purpose |
 |----------|---------|
 | `/app/alertzero` | Brief — Investigation queue |
-| `/app/alertzero/chats` | Agent Builder embed (`sessionTag: alertzero`) |
 | `/app/discover` | Real Discover (via Security / AlertZero nav Discover item) |
 | `/app/security/dashboards` | Real Security dashboards (via Throughline Dashboards item) |
 | `/app/alertzero/alerts` | Placeholder — coming soon |
 | `/app/alertzero/attacks` | Placeholder — coming soon |
-| `/app/alertzero/records` | Placeholder — coming soon |
 | `/app/alertzero/threat-hunt` | Placeholder — coming soon |
 | `/app/alertzero/streams` | Placeholder — coming soon |
 | `/app/alertzero/watches` | Watch catalog (`system-security-watch-*`) |
 | `/app/alertzero/watches/:watchId` | Watch detail |
 | `/app/alertzero/watches/workflows` … `/guardrails` | Watches section stubs |
-| `/app/alertzero/investigations/:id` | Investigation inspector shell |
-| `/app/alertzero/investigations/:id/proposals/:proposalId` | Proposal detail shell |
 | `/app/alertzero/settings` | Settings stub (no dedicated nav item) |
+
+An investigation has no route of its own: it is a templated Agent Builder conversation, so its
+details open in Agent Builder's conversation flyout (`?selectedConversationId=` on the queue) and
+its chat opens at `/app/agent_builder/agents/{agentId}/conversations/{id}`.
 
 ### Security left-rail order (when AlertZero enabled)
 
-**AlertZero → Chats → Discover → Dashboards → Alerts → Attacks → Records → Threat hunt → Streams → Watches**, then the rest of Security’s existing destinations (including the platform **More** overflow — not an AlertZero stub).
+**AlertZero → Discover → Dashboards → Alerts → Attacks → Threat hunt → Streams → Watches**, then the rest of Security’s existing destinations (including the platform **More** overflow — not an AlertZero stub).
 
 ### Internal API (`/internal/alertzero/*`)
 
@@ -106,9 +105,6 @@ AlertZero is a **standalone Security-category app** (`/app/alertzero`) that **us
 | GET | `/internal/alertzero/workers` |
 | PATCH | `/internal/alertzero/workers/{workerId}` |
 | GET | `/internal/alertzero/skills` |
-| GET | `/internal/alertzero/investigations` |
-| GET | `/internal/alertzero/investigations/{id}` |
-| GET | `/internal/alertzero/investigations/{id}/proposals` |
 
 OpenAPI → Zod schemas live in `@kbn/alertzero-common`. Regenerate with:
 
@@ -250,8 +246,8 @@ AlertZero is not live. Declarations, schemas and template values may change with
 
 - Platform chrome (header + Security footer utilities)
 - Throughline body order in Security nav; Discover → real Discover; Dashboards → real Security dashboards
-- Brief queue, Watches catalog/detail, Chats Agent Builder embed
-- Investigation shells + mock internal APIs
+- Brief queue, Watches catalog/detail
+- Investigation details and chat hosted by Agent Builder
 
 ## Non-goals (this PR)
 

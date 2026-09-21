@@ -187,6 +187,3 @@ export const MOCK_PROPOSALS: MockProposal[] = PROPOSALS.map((proposal) => ({
   ...proposal,
   conversationTitle: INVESTIGATION_TITLES.get(proposal.conversationId),
 }));
-
-export const getMockProposalsByConversationId = (conversationId: string): MockProposal[] =>
-  MOCK_PROPOSALS.filter((proposal) => proposal.conversationId === conversationId);

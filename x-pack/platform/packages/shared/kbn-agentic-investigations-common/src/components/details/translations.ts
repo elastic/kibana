@@ -22,17 +22,6 @@ export const DETAILS_FLYOUT_LABELS = Object.freeze({
       defaultMessage: 'Timeline',
     }),
   },
-  flyoutMenu: {
-    share: i18n.translate('xpack.alertzero.detailsFlyout.flyoutMenu.share', {
-      defaultMessage: 'Copy link',
-    }),
-    shareCopied: i18n.translate('xpack.alertzero.detailsFlyout.flyoutMenu.shareCopied', {
-      defaultMessage: 'Link copied',
-    }),
-    close: i18n.translate('xpack.alertzero.detailsFlyout.flyoutMenu.close', {
-      defaultMessage: 'Close',
-    }),
-  },
   sections: {
     overview: i18n.translate('xpack.alertzero.detailsFlyout.sections.situation', {
       defaultMessage: "What's happened",

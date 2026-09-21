@@ -22,6 +22,9 @@ import {
 
 type ProposalsService = ReturnType<AgenticInvestigationsPluginStart['getProposalsService']>;
 
+/** Conversation-derived fields merged onto a proposal on read. Both absent when unreadable. */
+type ConversationDecoration = Pick<ProposalItem, 'conversationTitle' | 'conversationAgentId'>;
+
 export class ConversationProposalsService {
   constructor(
     private readonly proposalsService: ProposalsService,
@@ -45,28 +48,26 @@ export class ConversationProposalsService {
       spaceId
     );
 
-    const titles = await this.getTitles(
+    const conversations = await this.getConversations(
       proposals.map((p) => p.conversationId),
       request
     );
 
-    const groups = this.groupProposals(proposals, titles);
+    const groups = this.groupProposals(proposals, conversations);
     const total = Object.values(groups).reduce((sum, items) => sum + items.length, 0);
     return { groups, total, truncated };
   }
 
   private groupProposals(
     proposals: ProposalWithMetadata[],
-    titles: Map<string, string>
+    conversations: Map<string, ConversationDecoration>
   ): ProposalGroups {
     const groups: ProposalGroups = { [CLOSED_GROUP_KEY]: [] };
 
     for (const proposal of proposals) {
       const item: ProposalItem = {
         ...proposal,
-        ...(titles.has(proposal.conversationId)
-          ? { conversationTitle: titles.get(proposal.conversationId) }
-          : {}),
+        ...conversations.get(proposal.conversationId),
       };
 
       // Anything not awaiting is closed, including a proposal that expired
@@ -91,21 +92,27 @@ export class ConversationProposalsService {
     return groups;
   }
 
-  private async getTitles(
+  private async getConversations(
     conversationIds: string[],
     request: KibanaRequest
-  ): Promise<Map<string, string>> {
+  ): Promise<Map<string, ConversationDecoration>> {
     const uniqueIds = [...new Set(conversationIds)];
     const client = await this.agentBuilder.conversations.getScopedClient({ request });
 
-    // Titles are decoration: if the bulk read fails, still return the proposals list without them.
+    // Decoration only: if the bulk read fails, still return the proposals list without it.
     try {
       const conversations = await client.bulkGet(uniqueIds);
       return new Map(
-        [...conversations].flatMap(([id, { title }]) => (title ? [[id, title] as const] : []))
+        [...conversations].map(([id, { title, agent_id: agentId }]) => [
+          id,
+          {
+            ...(title ? { conversationTitle: title } : {}),
+            ...(agentId ? { conversationAgentId: agentId } : {}),
+          },
+        ])
       );
     } catch (err) {
-      this.logger.debug(`Could not resolve conversation titles: ${err}`);
+      this.logger.debug(`Could not resolve conversations: ${err}`);
       return new Map();
     }
   }

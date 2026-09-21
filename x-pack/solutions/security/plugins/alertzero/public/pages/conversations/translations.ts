@@ -20,11 +20,6 @@ export const QUEUE_PAGE_INFO = Object.freeze({
   emptyQueue: i18n.translate('xpack.alertzero.queue.emptyQueue', {
     defaultMessage: 'No items in the queue.',
   }),
-  conversationNotFound: (conversationId: string) =>
-    i18n.translate('xpack.alertzero.queue.conversationNotFound', {
-      defaultMessage: 'No investigation exists for conversation id {conversationId}.',
-      values: { conversationId },
-    }),
 });
 
 /** Keyed by the HTTP status the proposals route returns for a refused decision. */

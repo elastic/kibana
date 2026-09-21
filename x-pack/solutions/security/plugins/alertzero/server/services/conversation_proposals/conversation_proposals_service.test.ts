@@ -46,17 +46,25 @@ const makeProposalsService = (
  * @param titlesById - A map from conversation id to title. Ids absent from the map are omitted
  *   from the returned `Map`, mirroring the real bulk-get behaviour for inaccessible conversations.
  *   Defaults to returning `Title for ${id}` for every requested id.
+ * @param agentIdsById - Agent id per conversation. Defaults to `elastic-ai-agent` for every id
+ *   present in the response, matching what `bulkGet`'s `_source` allowlist always returns.
  */
-const makeAgentBuilder = (titlesById?: Record<string, string>): AgentBuilderPluginStart =>
+const makeAgentBuilder = (
+  titlesById?: Record<string, string>,
+  agentIdsById?: Record<string, string>
+): AgentBuilderPluginStart =>
   ({
     conversations: {
       getScopedClient: jest.fn().mockResolvedValue({
         bulkGet: jest.fn().mockImplementation(async (ids: string[]) => {
-          const result = new Map<string, { title: string }>();
+          const result = new Map<string, { title: string; agent_id?: string }>();
           for (const id of ids) {
             const title = titlesById ? titlesById[id] : `Title for ${id}`;
             if (title !== undefined) {
-              result.set(id, { title });
+              result.set(id, {
+                title,
+                agent_id: agentIdsById ? agentIdsById[id] : 'elastic-ai-agent',
+              });
             }
           }
           return result;
@@ -155,7 +163,9 @@ describe('ConversationProposalsService', () => {
 
     expect(result.groups.investigate).toHaveLength(2);
     expect(result.groups.investigate[0]).not.toHaveProperty('conversationTitle');
+    expect(result.groups.investigate[0]).not.toHaveProperty('conversationAgentId');
     expect(result.groups.investigate[1]).not.toHaveProperty('conversationTitle');
+    expect(result.groups.investigate[1]).not.toHaveProperty('conversationAgentId');
   });
 
   it('derives total from grouped items; passes truncated through from listByWindow', async () => {
@@ -185,6 +195,38 @@ describe('ConversationProposalsService', () => {
     const result = await service.list(query, request, spaceId);
 
     expect(result.groups.investigate[0].conversationTitle).toBe('My investigation');
+  });
+
+  it("attaches the conversation's agent id so the client can build its Agent Builder URL", async () => {
+    const proposals = [makeProposal({ conversationId: 'conv-xyz' })];
+    const agentBuilder = makeAgentBuilder(
+      { 'conv-xyz': 'My investigation' },
+      { 'conv-xyz': 'custom-agent' }
+    );
+
+    const service = new ConversationProposalsService(
+      makeProposalsService(proposals),
+      agentBuilder,
+      logger
+    );
+    const result = await service.list(query, request, spaceId);
+
+    expect(result.groups.investigate[0].conversationAgentId).toBe('custom-agent');
+  });
+
+  it('omits the agent id for ids absent from the bulk response', async () => {
+    const proposals = [makeProposal({ id: 'p1', conversationId: 'bad' })];
+    // 'bad' is not in the returned map (inaccessible / not found)
+    const agentBuilder = makeAgentBuilder({});
+
+    const service = new ConversationProposalsService(
+      makeProposalsService(proposals),
+      agentBuilder,
+      logger
+    );
+    const result = await service.list(query, request, spaceId);
+
+    expect(result.groups.investigate[0]).not.toHaveProperty('conversationAgentId');
   });
 
   it('places a pending proposal under its category, not under closed', async () => {

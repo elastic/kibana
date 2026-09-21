@@ -28,12 +28,6 @@ export {
   type ConversationDetailsFlyoutFooterProps,
 } from './src/components/details/flyout_footer';
 export {
-  InvestigationDetailsFlyout,
-  type InvestigationDetailsFlyoutProps,
-  INVESTIGATION_FLYOUT_TABS,
-  type InvestigationFlyoutTab,
-} from './src/components/details/investigation_details_flyout';
-export {
   InvestigationHeaderBlocks,
   type InvestigationHeaderBlocksProps,
 } from './src/components/details/header_blocks';
@@ -52,7 +46,7 @@ export {
   type RegisterAgenticInvestigationTemplateUIOptions,
   getInvestigationTabIds,
 } from './src/template_ui/register';
-export type { InvestigationLoader } from './src/template_ui/investigation_slot';
+export { conversationToInvestigation } from './src/template_ui/conversation_to_investigation';
 
 export { getEmptyValue, getActionButtonIconProps, isDecided } from './src/components/helpers';
 

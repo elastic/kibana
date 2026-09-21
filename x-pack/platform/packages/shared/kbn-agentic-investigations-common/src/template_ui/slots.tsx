@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSkeletonRectangle, EuiSkeletonTitle } from '@elastic/eui';
 import type { Conversation } from '@kbn/agent-builder-common';
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import {
@@ -16,28 +15,25 @@ import {
   OverviewTab,
   TimelineTab,
 } from '../components/details';
-import { ConversationTitle } from './conversation_title';
-import { InvestigationSlot, type InvestigationLoader } from './investigation_slot';
+import { conversationToInvestigation } from './conversation_to_investigation';
 
 /**
  * The investigation flyout's slot contents, kept in one module so `register` can pull them in a
  * single lazy chunk instead of shipping them in each consuming plugin's page load bundle.
+ *
+ * Every slot derives its investigation from the conversation Agent Builder passes in. The
+ * derivation is synchronous, so no slot loads, fails, or renders a skeleton.
  */
 interface InvestigationSlotProps {
   conversation: Conversation;
-  loadInvestigation: InvestigationLoader;
 }
 
-export const OverviewSlot = ({ conversation, loadInvestigation }: InvestigationSlotProps) => (
-  <InvestigationSlot conversation={conversation} loadInvestigation={loadInvestigation}>
-    {(investigation) => <OverviewTab investigation={investigation} />}
-  </InvestigationSlot>
+export const OverviewSlot = ({ conversation }: InvestigationSlotProps) => (
+  <OverviewTab investigation={conversationToInvestigation(conversation)} />
 );
 
-export const TimelineSlot = ({ conversation, loadInvestigation }: InvestigationSlotProps) => (
-  <InvestigationSlot conversation={conversation} loadInvestigation={loadInvestigation}>
-    {(investigation) => <TimelineTab events={investigation.events} />}
-  </InvestigationSlot>
+export const TimelineSlot = ({ conversation }: InvestigationSlotProps) => (
+  <TimelineTab events={conversationToInvestigation(conversation).events} />
 );
 
 export interface AttachmentsSlotProps {
@@ -49,39 +45,17 @@ export const AttachmentsSlot = ({ conversation, attachmentsService }: Attachment
   <AttachmentsTab conversation={conversation} attachmentsService={attachmentsService} />
 );
 
-export const HeaderSlot = ({ conversation, loadInvestigation }: InvestigationSlotProps) => (
-  <InvestigationSlot
-    conversation={conversation}
-    loadInvestigation={loadInvestigation}
-    // Agent Builder points the flyout's `aria-labelledby` at the header, so it must not collapse
-    // to nothing when the investigation is unavailable.
-    fallback={<ConversationTitle title={conversation.title} />}
-    loadingContent={<EuiSkeletonTitle size="s" />}
-  >
-    {(investigation) => <ConversationDetailsFlyoutHeader investigation={investigation} />}
-  </InvestigationSlot>
+export const HeaderSlot = ({ conversation }: InvestigationSlotProps) => (
+  <ConversationDetailsFlyoutHeader investigation={conversationToInvestigation(conversation)} />
 );
 
 export interface FooterSlotProps extends InvestigationSlotProps {
   onOpenChat: () => void;
 }
 
-export const FooterSlot = ({ conversation, loadInvestigation, onOpenChat }: FooterSlotProps) => (
-  <InvestigationSlot
-    conversation={conversation}
-    loadInvestigation={loadInvestigation}
-    fallback={null}
-    // The footer is a right-aligned row of buttons, so it skeletons as one button-sized block.
-    loadingContent={
-      <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiSkeletonRectangle width={110} height={32} borderRadius="m" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    }
-  >
-    {(investigation) => (
-      <ConversationDetailsFlyoutFooter investigation={investigation} onOpenChat={onOpenChat} />
-    )}
-  </InvestigationSlot>
+export const FooterSlot = ({ conversation, onOpenChat }: FooterSlotProps) => (
+  <ConversationDetailsFlyoutFooter
+    investigation={conversationToInvestigation(conversation)}
+    onOpenChat={onOpenChat}
+  />
 );
