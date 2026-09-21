@@ -345,7 +345,6 @@ interface PavaBlock {
   pinnedValue?: number;
 }
 
-
 /**
  * Resolve overlaps among a set of same-rank node centers on the cross axis,
  * preserving their left-to-right order.
