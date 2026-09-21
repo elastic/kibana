@@ -8,7 +8,6 @@
 import { randomUUID } from 'crypto';
 
 import { expect } from '@kbn/scout/api';
-import { tags } from '@kbn/scout';
 import {
   apiTest,
   cleanupProposalFixtures,
@@ -22,7 +21,10 @@ import {
 
 apiTest.describe(
   'POST /internal/investigations/proposals/{proposalId}/revisions',
-  { tag: [...tags.stateful.classic] },
+  // `agenticInvestigations.enabled` defaults to false and is turned on only by
+  // this suite's local custom server config, so the cloud half of
+  // `stateful.classic` would exercise an unregistered route and still pass.
+  { tag: ['@local-stateful-classic'] },
   () => {
     // Every seed and every revision this file creates is removed again, so a
     // rerun starts from the same state as the first run instead of inheriting
@@ -46,9 +48,12 @@ apiTest.describe(
           impact: 'high',
           confidence: 'high',
         });
+        // Tracked before the assertions: this service writes the child before
+        // updating its predecessor and keeps it on an ambiguous failure, so an
+        // id can exist even when the request did not return 200.
+        trackProposal(reviseResponse.body?.proposalId);
         expect(reviseResponse).toHaveStatusCode(200);
         const { proposalId: newProposalId, revision } = reviseResponse.body;
-        trackProposal(newProposalId);
         expect(typeof newProposalId).toBe('string');
         expect(newProposalId).not.toBe(originalId);
         expect(revision).toBe(2);
@@ -59,6 +64,9 @@ apiTest.describe(
         expect(replacementResponse.body.comment).toBe('Revised comment');
         expect(replacementResponse.body.impact).toBe('high');
         expect(replacementResponse.body.confidence).toBe('high');
+        // Inherited from the predecessor rather than re-resolved, so a revision
+        // cannot silently relabel who a proposal came from.
+        expect(replacementResponse.body.origin).toBe('worker');
         expect(replacementResponse.body.revision).toBe(2);
         expect(replacementResponse.body.rootProposalId).toBe(originalId);
         expect(replacementResponse.body.supersedes).toBe(originalId);
@@ -88,15 +96,17 @@ apiTest.describe(
         const firstRevise = await reviseProposal(apiClient, cookieHeader, rootId, {
           comment: 'revision 2',
         });
+        trackProposal(firstRevise.body?.proposalId);
         expect(firstRevise).toHaveStatusCode(200);
-        const secondId = trackProposal(firstRevise.body.proposalId);
+        const secondId: string = firstRevise.body.proposalId;
         expect(firstRevise.body.revision).toBe(2);
 
         const secondRevise = await reviseProposal(apiClient, cookieHeader, secondId, {
           comment: 'revision 3',
         });
+        trackProposal(secondRevise.body?.proposalId);
         expect(secondRevise).toHaveStatusCode(200);
-        const thirdId = trackProposal(secondRevise.body.proposalId);
+        const thirdId: string = secondRevise.body.proposalId;
         expect(secondRevise.body.revision).toBe(3);
 
         const thirdProposal = await getProposal(apiClient, cookieHeader, thirdId);
@@ -138,8 +148,8 @@ apiTest.describe(
         const firstRevise = await reviseProposal(apiClient, cookieHeader, id, {
           comment: 'first',
         });
+        trackProposal(firstRevise.body?.proposalId);
         expect(firstRevise).toHaveStatusCode(200);
-        trackProposal(firstRevise.body.proposalId);
 
         // The original is now superseded; a second revise attempt on it must
         // fail even though it was never explicitly dismissed.

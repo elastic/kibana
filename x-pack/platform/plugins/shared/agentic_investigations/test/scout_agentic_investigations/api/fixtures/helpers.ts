@@ -124,7 +124,7 @@ const ensureProposalsIndex = (esClient: Client): Promise<void> => {
             (error: {
               statusCode?: number;
               body?: { error?: { type?: string } };
-              meta?: { body?: { error?: { type?: string } } };
+              meta?: { statusCode?: number; body?: { error?: { type?: string } } };
             }) => {
               // Only the concurrent-create race is benign. Every other 400 here
               // means the write target is not what this seed assumes —
@@ -132,7 +132,12 @@ const ensureProposalsIndex = (esClient: Client): Promise<void> => {
               // failure this helper exists to prevent — and carrying on would
               // run the suite against a stale plain index instead of the alias.
               const type = error?.body?.error?.type ?? error?.meta?.body?.error?.type;
-              if (error?.statusCode === 400 && type === 'resource_already_exists_exception') {
+              // Read the status from both locations for the same reason
+              // `isNotFound` below does: the client surfaces it at `meta.statusCode`
+              // on a `ResponseError`, so checking only the top level would rethrow
+              // the benign race and make this suite flaky on a shared server.
+              const statusCode = error?.statusCode ?? error?.meta?.statusCode;
+              if (statusCode === 400 && type === 'resource_already_exists_exception') {
                 return;
               }
               throw error;
@@ -152,8 +157,12 @@ const ensureProposalsIndex = (esClient: Client): Promise<void> => {
  */
 const trackedProposalIds = new Set<string>();
 
-export const trackProposal = (id: string): string => {
-  trackedProposalIds.add(id);
+export const trackProposal = (id?: string): string | undefined => {
+  // Tolerates an absent id so a caller can track before asserting the status
+  // that would guarantee one: a revision can exist even when the request failed.
+  if (typeof id === 'string' && id.length > 0) {
+    trackedProposalIds.add(id);
+  }
   return id;
 };
 
@@ -208,6 +217,7 @@ export interface SeedProposalOptions {
   comment?: string;
   impact?: string;
   confidence?: string;
+  origin?: 'worker' | 'analyst';
   /** Overrides the seeded status away from `pending` — e.g. to prove a route
    * rejects revising something already settled, without needing a real
    * workflow execution to transition it there. */
@@ -247,6 +257,9 @@ export const seedProposal = async (
       impactRank: IMPACT_RANK[impact],
       confidenceRank: CONFIDENCE_RANK[confidence],
       category: 'tune',
+      // Required by `proposalSchema` and always stamped by `create()`, so a seed
+      // without it is a shape this plugin never writes in production.
+      origin: options.origin ?? 'worker',
       expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
       workflowExecutionId: `scout-fake-execution-${Date.now()}`,
       createdAt: now,
