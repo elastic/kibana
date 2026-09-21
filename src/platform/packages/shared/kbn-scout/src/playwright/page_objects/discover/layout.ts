@@ -1024,10 +1024,14 @@ export abstract class LayoutMixin extends SaveMixin {
     }
   }
 
+  /** Switches to the Field statistics view and waits for its content to mount. */
   async selectFieldStatisticsView() {
     await this.page.testSubj.click('dscViewModeToggleButton');
     await this.page.testSubj.locator('dscViewModeToggleSelectable').waitFor({ state: 'visible' });
     await this.page.testSubj.click('dscViewModeFieldStatsOption');
+    // The Documents view stays mounted until the stats table renders, so callers
+    // need this gate to avoid acting on the previous view.
+    await this.page.testSubj.locator('dscFieldStatsEmbeddedContent').waitFor({ state: 'visible' });
   }
 
   async getFirstViewLensButtonFromFieldStatistics(): Promise<Locator> {

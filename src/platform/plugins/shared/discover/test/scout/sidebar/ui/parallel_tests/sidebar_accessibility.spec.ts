@@ -51,6 +51,10 @@ spaceTest.describe('Discover sidebar - accessibility', { tag: '@local-stateful-c
       await unifiedFieldList.waitUntilSidebarHasLoaded();
       await unifiedFieldList.openFieldTypeFilter();
 
+      // axe only errors when every scan root is missing, so an absent panel
+      // would quietly narrow this back to a sidebar-only scan.
+      await expect(page.locator(FIELD_TYPE_FILTER_PANEL_TEST_SUBJ)).toBeVisible();
+
       const { violations } = await page.checkA11y({
         include: [SIDEBAR_TEST_SUBJ, FIELD_TYPE_FILTER_PANEL_TEST_SUBJ],
       });
