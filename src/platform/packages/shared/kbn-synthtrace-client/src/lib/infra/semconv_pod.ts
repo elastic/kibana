@@ -155,6 +155,7 @@ export class SemconvPod extends Entity<SemconvPodDocument> {
     );
   }
 
+  // Callers must set staggered @timestamp values; TSDB _id is derived from dimensions that exclude `direction` / `interface`.
   metrics(opts?: SemconvPodNetworkOptions): Serializable<SemconvPodMetricsDocument>[] {
     return [...this.cpu(), ...this.memory(), ...this.network(opts)];
   }
