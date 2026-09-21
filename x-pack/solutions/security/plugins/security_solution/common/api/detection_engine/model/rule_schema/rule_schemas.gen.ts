@@ -192,24 +192,24 @@ export const ResponseFields = lazySchema(() =>
     updated_at: z.string().datetime(),
     updated_by: z.string(),
     /**
-     * The user profile uid of the user who last updated the rule. Only present when the rule was updated through an authenticated Kibana session. Resolve it to a display name with the user profiles API.
+     * The user profile UID of the user who last updated the rule. Only present when the rule was updated through an authenticated Kibana session. Resolve it to a display name with the user profiles API.
      */
     updated_by_profile_uid: z
       .string()
       .optional()
       .describe(
-        'The user profile uid of the user who last updated the rule. Only present when the rule was updated through an authenticated Kibana session. Resolve it to a display name with the user profiles API.'
+        'The user profile UID of the user who last updated the rule. Only present when the rule was updated through an authenticated Kibana session. Resolve it to a display name with the user profiles API.'
       ),
     created_at: z.string().datetime(),
     created_by: z.string(),
     /**
-     * The user profile uid of the user who created the rule. Only present when the rule was created through an authenticated Kibana session. Resolve it to a display name with the user profiles API.
+     * The user profile UID of the user who created the rule. Only present when the rule was created through an authenticated Kibana session. Resolve it to a display name with the user profiles API.
      */
     created_by_profile_uid: z
       .string()
       .optional()
       .describe(
-        'The user profile uid of the user who created the rule. Only present when the rule was created through an authenticated Kibana session. Resolve it to a display name with the user profiles API.'
+        'The user profile UID of the user who created the rule. Only present when the rule was created through an authenticated Kibana session. Resolve it to a display name with the user profiles API.'
       ),
     revision: RuleRevision,
     required_fields: RequiredFieldArray,
