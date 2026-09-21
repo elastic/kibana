@@ -4780,40 +4780,84 @@ export const buildKindTemplate = (
   entityName: string,
   kind: EntityKind | undefined,
   health: EntityHealthVariant = 'healthy',
-  typeLabel?: string
+  typeLabel?: string,
+  alertsActiveOverride?: number
 ): { overview: EntityOverview; tabs: EntityTabsData } | undefined => {
   if (!kind) return undefined;
+  let result: { overview: EntityOverview; tabs: EntityTabsData } | undefined;
   switch (kind) {
     case 'service':
-      return buildServiceTemplate(entityName, health);
+      result = buildServiceTemplate(entityName, health);
+      break;
     case 'host':
       // typeLabel drives the Bare-metal vs VM secondary tag.
-      return buildHostTemplate(entityName, health, typeLabel);
+      result = buildHostTemplate(entityName, health, typeLabel);
+      break;
     case 'node':
-      return buildNodeTemplate(entityName, health);
+      result = buildNodeTemplate(entityName, health);
+      break;
     case 'pod':
     case 'container':
     case 'deployment':
       // typeLabel drives the kubernetes.{pod,container,deployment}
       // header tag so the three sub-kinds keep their own identity
       // even though they share this builder.
-      return buildPodTemplate(entityName, health, typeLabel);
+      result = buildPodTemplate(entityName, health, typeLabel);
+      break;
     case 'cluster':
-      return buildClusterTemplate(entityName, health);
+      result = buildClusterTemplate(entityName, health);
+      break;
     case 'namespace':
-      return buildNamespaceTemplate(entityName, health);
+      result = buildNamespaceTemplate(entityName, health);
+      break;
     case 'database':
       // typeLabel drives the engine tag (Postgres / MySQL / Mongo / …).
-      return buildDatabaseTemplate(entityName, health, typeLabel);
+      result = buildDatabaseTemplate(entityName, health, typeLabel);
+      break;
     case 'cloud':
-      return buildCloudTemplate(entityName, health, typeLabel);
+      result = buildCloudTemplate(entityName, health, typeLabel);
+      break;
     case 'middleware':
       // typeLabel disambiguates Kafka vs RabbitMQ ahead of the name
       // sniff used as a legacy fallback.
-      return buildMiddlewareTemplate(entityName, health, typeLabel);
+      result = buildMiddlewareTemplate(entityName, health, typeLabel);
+      break;
     case 'llm':
       // typeLabel disambiguates OpenAI vs Anthropic ahead of the name
       // sniff used as a legacy fallback.
-      return buildLlmTemplate(entityName, health, typeLabel);
+      result = buildLlmTemplate(entityName, health, typeLabel);
+      break;
   }
+  if (result && alertsActiveOverride !== undefined) {
+    const alerts = result.tabs.alerts;
+    const rules = ALERT_RULES_BY_KIND[kind];
+    const details: AlertRow[] = [];
+    const triggeredTemplates = [
+      `${today} @ 02:47:18.221`,
+      `${today} @ 02:47:09.084`,
+      `${today} @ 02:46:58.421`,
+      `${today} @ 02:46:42.012`,
+      `${today} @ 02:46:38.118`,
+      `${today} @ 02:46:21.337`,
+      `${today} @ 02:46:12.509`,
+    ];
+    for (let i = 0; i < alertsActiveOverride; i++) {
+      const rule = rules[i % rules.length];
+      details.push({
+        id: `alert-${i + 1}`,
+        status: 'Active',
+        triggeredAt: triggeredTemplates[i % triggeredTemplates.length],
+        ruleName: rule.ruleName,
+        reason: rule.reason(entityName),
+      });
+    }
+    const totalCount = alertsActiveOverride + Math.max(alerts.totalCount - alerts.activeCount, 0);
+    result.tabs.alerts = {
+      ...alerts,
+      activeCount: alertsActiveOverride,
+      totalCount: Math.max(totalCount, alertsActiveOverride),
+      details,
+    };
+  }
+  return result;
 };

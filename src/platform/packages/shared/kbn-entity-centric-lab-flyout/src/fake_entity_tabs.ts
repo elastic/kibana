@@ -269,7 +269,8 @@ const series = (id: string, label: string, ys: readonly number[]) => ({
 export const buildFakeEntityTabsData = (
   entityName: string,
   entityType?: string,
-  entityHealth?: string
+  entityHealth?: string,
+  alertsActiveOverride?: number
 ): EntityTabsData => {
   const storyTabs = getStoryTabsData(entityName);
   if (storyTabs) {
@@ -284,7 +285,7 @@ export const buildFakeEntityTabsData = (
     normalizeEntityHealth(entityHealth),
     getChaosModeEnabled()
   );
-  const kindTemplate = buildKindTemplate(entityName, kind, effectiveHealth, entityType);
+  const kindTemplate = buildKindTemplate(entityName, kind, effectiveHealth, entityType, alertsActiveOverride);
   if (kindTemplate) {
     return kindTemplate.tabs;
   }

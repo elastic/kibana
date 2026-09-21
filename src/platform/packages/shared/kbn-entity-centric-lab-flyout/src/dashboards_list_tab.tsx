@@ -22,7 +22,6 @@ import {
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLink,
   EuiPopover,
   EuiSelectable,
@@ -129,30 +128,6 @@ const saveCustomDashboards = (kind: string, dashboards: StoredCustomDashboard[])
 };
 
 // ---------------------------------------------------------------------------
-// Placeholder thumbnail
-// ---------------------------------------------------------------------------
-
-const DashboardThumbnail = () => {
-  const { euiTheme } = useEuiTheme();
-  return (
-    <div
-      css={css`
-        width: 80px;
-        height: 50px;
-        border-radius: ${euiTheme.border.radius.small};
-        background: ${euiTheme.colors.backgroundBaseSubdued};
-        border: 1px solid ${euiTheme.colors.borderBaseSubdued};
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      `}
-    >
-      <EuiIcon type="dashboardApp" size="l" color="subdued" />
-    </div>
-  );
-};
-
-// ---------------------------------------------------------------------------
 // Managed dashboards description mapping
 // ---------------------------------------------------------------------------
 
@@ -230,14 +205,6 @@ export const DashboardsListTab: React.FC<DashboardsListTabProps> = ({
   const managedColumns = useMemo<Array<EuiBasicTableColumn<DashboardDescriptor>>>(
     () => [
       {
-        field: 'id',
-        name: i18n.translate('entityCentricLabFlyout.dashboardsList.managed.screenshot', {
-          defaultMessage: 'Screenshot',
-        }),
-        width: '100px',
-        render: () => <DashboardThumbnail />,
-      },
-      {
         field: 'title',
         name: i18n.translate('entityCentricLabFlyout.dashboardsList.managed.name', {
           defaultMessage: 'Name',
@@ -270,14 +237,6 @@ export const DashboardsListTab: React.FC<DashboardsListTabProps> = ({
   // --- Custom table columns ---
   const customColumns = useMemo<Array<EuiBasicTableColumn<StoredCustomDashboard>>>(
     () => [
-      {
-        field: 'id',
-        name: i18n.translate('entityCentricLabFlyout.dashboardsList.custom.screenshot', {
-          defaultMessage: 'Screenshot',
-        }),
-        width: '100px',
-        render: () => <DashboardThumbnail />,
-      },
       {
         field: 'title',
         name: i18n.translate('entityCentricLabFlyout.dashboardsList.custom.name', {

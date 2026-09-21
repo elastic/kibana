@@ -369,8 +369,8 @@ export const EntityFlyout = ({
     return [overview.tags[healthIndex], ...rest];
   }, [overview.tags, hideHealthBadge, alertsBadge]);
   const tabsData = useMemo(
-    () => buildFakeEntityTabsData(entityName, entityType, effectiveHealth),
-    [entityName, entityType, effectiveHealth]
+    () => buildFakeEntityTabsData(entityName, entityType, effectiveHealth, alertsActiveCount),
+    [entityName, entityType, effectiveHealth, alertsActiveCount]
   );
 
   // Resolved label honoured everywhere the entity reads as text. The

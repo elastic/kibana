@@ -295,9 +295,10 @@ const EntityDetailPageInner = () => {
     () => buildFakeEntityOverview(entityName, entityType, entityHealth, entityRegion),
     [entityName, entityType, entityHealth, entityRegion]
   );
+  const alertsActiveCount = entity?.alerts?.active;
   const tabsData = useMemo(
-    () => buildFakeEntityTabsData(entityName, entityType, entityHealth),
-    [entityName, entityType, entityHealth]
+    () => buildFakeEntityTabsData(entityName, entityType, entityHealth, alertsActiveCount),
+    [entityName, entityType, entityHealth, alertsActiveCount]
   );
 
   const displayName = useEntityDisplayName(entityName, entityType);
