@@ -15,6 +15,7 @@
     "@kbn/workflows",
     "@kbn/core",
     "@kbn/zod",
-    "@kbn/inbox-common"
+    "@kbn/inbox-common",
+    "@kbn/agent-builder-common"
   ]
 }
