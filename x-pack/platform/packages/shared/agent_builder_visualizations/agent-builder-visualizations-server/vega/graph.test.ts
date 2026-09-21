@@ -80,7 +80,12 @@ describe('createVegaGraph', () => {
   });
 
   const run = async (
-    input: { esqlQuery?: string; existingSpec?: string; existingEsql?: string } = {}
+    input: {
+      esqlQuery?: string;
+      existingSpec?: string;
+      existingEsql?: string;
+      preserveESQL?: boolean;
+    } = {}
   ) => {
     const graph = await createVegaGraph(modelProvider, logger, events, esClient);
     return graph.invoke({
@@ -88,6 +93,7 @@ describe('createVegaGraph', () => {
       index: undefined,
       existingSpec: input.existingSpec,
       existingEsql: input.existingEsql,
+      preserveESQL: input.preserveESQL,
       esqlQuery: input.esqlQuery ?? '',
       currentAttempt: 0,
       actions: [],
@@ -392,5 +398,20 @@ describe('createVegaGraph', () => {
     expect(state.spec).toBeNull();
     expect(state.error).toEqual(expect.any(String));
     expect(invoke).toHaveBeenCalledTimes(3);
+  });
+
+  it('authors an appearance-only edit without resolving ES|QL', async () => {
+    mockedExecuteEsql.mockRejectedValue(new Error('verification_exception'));
+    mockedGenerateEsql.mockResolvedValue({
+      error: 'verification_exception',
+    } as Awaited<ReturnType<typeof generateEsql>>);
+    invoke.mockResolvedValue(asCodeBlock({ mark: 'bar' }));
+
+    const state = await run({ esqlQuery: PROVIDED_ESQL, preserveESQL: true });
+
+    expect(mockedExecuteEsql).not.toHaveBeenCalled();
+    expect(mockedGenerateEsql).not.toHaveBeenCalled();
+    expect(state.error).toBeNull();
+    expect(JSON.parse(state.spec!).data.url.query).toBe(PROVIDED_ESQL);
   });
 });

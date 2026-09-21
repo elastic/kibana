@@ -141,6 +141,15 @@ export const createVisualizationGraph = async (
   // time-picker params (?_tstart/?_tend); bind a default range so it runs
   // server-side. Kibana binds the live range at render time.
   const resolveEsqlNode = async (state: VisualizationState) => {
+    if (state.preserveESQL) {
+      // Appearance-only: keep the stored query and skip the schema probe so a
+      // restyle cannot fail or regenerate because the probe could not run.
+      return {
+        esqlQuery: state.esqlQuery,
+        actions: [{ type: 'generate_esql', success: true, query: state.esqlQuery }],
+      };
+    }
+
     let action: GenerateEsqlAction;
     try {
       const resolved = await resolveEsqlForAuthoring({

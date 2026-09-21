@@ -208,6 +208,7 @@ describe('buildVegaConfig', () => {
       expect(invoke.mock.calls[0][0]).toMatchObject({
         esqlQuery: PROVIDED_ESQL,
         existingEsql: PROVIDED_ESQL,
+        preserveESQL: true,
       });
     });
 

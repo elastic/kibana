@@ -108,8 +108,9 @@ export const buildVegaConfig = async ({
     existingSpec,
     existingEsql,
     chartType,
+    preserveESQL,
     // Preserving ES|QL reuses the recovered query as the trusted query,
-    // so the graph skips regeneration and only re-authors the spec around it.
+    // so the graph skips the schema probe and only re-authors the spec around it.
     esqlQuery: providedEsql || (preserveESQL ? existingEsql : '') || '',
     currentAttempt: 0,
     actions: [],

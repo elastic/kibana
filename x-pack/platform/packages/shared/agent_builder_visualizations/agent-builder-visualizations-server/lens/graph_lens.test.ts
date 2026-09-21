@@ -496,4 +496,56 @@ describe('createVisualizationGraph', () => {
       ])
     );
   });
+
+  it('authors an appearance-only edit without resolving ES|QL', async () => {
+    mockedExecuteEsql.mockRejectedValue(new Error('verification_exception'));
+    mockedGenerateEsql.mockResolvedValue({
+      error: 'verification_exception',
+    } as Awaited<ReturnType<typeof generateEsql>>);
+
+    const existingQuery = 'FROM logs-* | STATS count = COUNT(*)';
+    const parsedExistingConfig = {
+      type: 'metric',
+      data_source: { type: 'esql', query: existingQuery },
+      metrics: [{ type: 'primary', column: 'count' }],
+    } as unknown as VisualizationConfig;
+
+    const graph = await createVisualizationGraph(
+      createMockModel(
+        asAuthoringResponse({
+          type: 'metric',
+          title: 'Log count',
+          metrics: [{ type: 'primary', column: 'count' }],
+        })
+      ) as never,
+      logger,
+      events,
+      esClient
+    );
+
+    const finalState = await graph.invoke({
+      nlQuery: 'Apply presentation defaults.',
+      index: 'logs-*',
+      chartType: SupportedChartType.Metric,
+      schema: {},
+      existingConfig: JSON.stringify(parsedExistingConfig),
+      parsedExistingConfig,
+      preserveESQL: true,
+      esqlQuery: existingQuery,
+      currentAttempt: 0,
+      actions: [],
+      validatedConfig: null,
+      error: null,
+    });
+
+    expect(mockedExecuteEsql).not.toHaveBeenCalled();
+    expect(mockedGenerateEsql).not.toHaveBeenCalled();
+    expect(finalState.error).toBeNull();
+    expect(finalState.validatedConfig).toEqual({
+      type: 'metric',
+      title: 'Log count',
+      metrics: [{ type: 'primary', column: 'count' }],
+      data_source: { type: 'esql', query: existingQuery },
+    });
+  });
 });

@@ -96,6 +96,7 @@ const VegaStateAnnotation = Annotation.Root({
   existingSpec: Annotation<string | undefined>(),
   /** Query recovered from the spec being edited, used as context to (re)generate. */
   existingEsql: Annotation<string | undefined>(),
+  preserveESQL: Annotation<boolean>(),
   chartType: Annotation<SupportedChartType | undefined>(),
   // internal
   esqlQuery: Annotation<string>(),
@@ -133,6 +134,15 @@ export const createVegaGraph = async (
   // time-picker params (?_tstart/?_tend); bind a default range so it runs
   // server-side. Kibana binds the live range at render time.
   const resolveEsqlNode = async (state: VegaState) => {
+    if (state.preserveESQL) {
+      // Appearance-only: keep the stored query and skip the schema probe so a
+      // restyle cannot fail or regenerate because the probe could not run.
+      return {
+        esqlQuery: state.esqlQuery,
+        actions: [{ type: 'generate_esql', success: true, query: state.esqlQuery }],
+      };
+    }
+
     let action: GenerateEsqlAction;
 
     try {
