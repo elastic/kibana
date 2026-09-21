@@ -7,8 +7,8 @@ set -euo pipefail
 # FLAKY_TESTS_GITHUB_REPO selects the mode:
 #   - empty: dry run against elastic/kibana, the real issues are read and the would-be actions
 #     logged and annotated, nothing is written;
-#   - a sandbox such as elastic/appex-qa-ai: issues are filed there, except for suites that a
-#     failed-test issue in FLAKY_TESTS_TRACKING_REPO (elastic/kibana) is already about;
+#   - a sandbox such as elastic/appex-qa-ai: issues are filed there, except for suites whose
+#     every flaky test already has a failed-test issue in FLAKY_TESTS_TRACKING_REPO (elastic/kibana);
 #   - elastic/kibana: live.
 # Every open failed-test issue is fetched, plus those closed in the last
 # FLAKY_TESTS_CLOSED_ISSUES_DAYS days; both count as tracking a suite. At most
@@ -58,7 +58,7 @@ echo "    Repository          : $GITHUB_REPO"
 echo "    Closed issues since : $FLAKY_TESTS_CLOSED_ISSUES_DAYS days ago"
 echo "    Max new issues      : $FLAKY_TESTS_MAX_NEW_ISSUES"
 if [[ -n "$FLAKY_TESTS_TRACKING_REPO" && "$FLAKY_TESTS_TRACKING_REPO" != "$GITHUB_REPO" ]]; then
-  echo "    Also tracked in     : $FLAKY_TESTS_TRACKING_REPO (suites with an issue there get none)"
+  echo "    Also tracked in     : $FLAKY_TESTS_TRACKING_REPO (suites whose every test has an issue there get none)"
 fi
 
 args=(
@@ -113,6 +113,7 @@ section() {
   echo
   jq -r --arg action "$action" '.actions[] | select(.action == $action)
     | "- `\(.filePath)`"
+      + (if .suiteTitle then " · \(.suiteTitle)" else "" end)
       + (if .issue then " [\(.issue.repo // "")#\(.issue.number)](\(.issue.url))" else "" end)
       + (if .issue and .issue.state == "closed" then " (closed)" else "" end)
       + (if .match then " (\(.match))" else "" end)

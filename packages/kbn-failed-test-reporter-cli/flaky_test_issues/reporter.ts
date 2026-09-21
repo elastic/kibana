@@ -19,9 +19,11 @@ import {
 import { flakySuiteIssueTitle, renderFlakySuiteIssueBody } from './issue_body';
 import {
   candidateIssues,
+  compareMatches,
   describeIssue,
   findMatchingIssues,
   indexIssues,
+  type IssueIndex,
   type IssueMatch,
   type MatchedIssue,
 } from './match_issues';
@@ -80,19 +82,24 @@ export type SkipReason =
   | 'max-new-issues'
   /** An issue in `githubRepo`, open or closed, is already about the suite or one of its tests. */
   | 'tracked'
-  /** An issue in the tracking repository is already about the suite or one of its tests. */
+  /**
+   * Every test of the suite has an issue in the tracking repository: a per-test issue about it, or
+   * an issue about the suite or its file. A single test without one gets the suite its issue.
+   */
   | 'tracked-upstream';
 
-export type FlakySuiteAction =
-  | { action: 'created'; filePath: string; issue: IssueRef }
-  | {
-      action: 'skipped';
-      filePath: string;
-      reason: SkipReason;
-      issue?: IssueRef;
-      match?: IssueMatch;
-    }
-  | { action: 'failed'; filePath: string; attempted: 'create'; error: string };
+/** The suite an action is about; several suites of one file are told apart by their title. */
+export interface SuiteRef {
+  filePath: string;
+  suiteTitle?: string;
+}
+
+export type FlakySuiteAction = SuiteRef &
+  (
+    | { action: 'created'; issue: IssueRef }
+    | { action: 'skipped'; reason: SkipReason; issue?: IssueRef; match?: IssueMatch }
+    | { action: 'failed'; attempted: 'create'; error: string }
+  );
 
 export interface IssueCounts {
   open: number;
@@ -122,6 +129,34 @@ const strongestTracking = (matches: readonly MatchedIssue[]): MatchedIssue | und
   const tracking = matches.filter(isTracking);
   return tracking.find(({ issue }) => issue.state === 'open') ?? tracking[0];
 };
+
+/**
+ * The issue standing in for the suite when every one of its tests has one in the index: an issue
+ * about the suite or its file covers them all, a per-test issue only its own test. Undefined as
+ * soon as a test has none, that test deserves the suite issue.
+ */
+const coveringIssue = (suite: FlakySuite, index: IssueIndex): MatchedIssue | undefined => {
+  const covering: MatchedIssue[] = [];
+  for (const test of suite.tests) {
+    const single = { ...suite, tests: [test] };
+    const covered = strongestTracking(findMatchingIssues(single, candidateIssues(single, index)));
+    if (!covered) {
+      return undefined;
+    }
+    covering.push(covered);
+  }
+  const distinct = [...new Map(covering.map((match) => [match.issue.number, match])).values()];
+  return strongestTracking(distinct.sort(compareMatches));
+};
+
+const suiteRef = ({ filePath, suiteTitle }: FlakySuite): SuiteRef => ({
+  filePath,
+  ...(suiteTitle ? { suiteTitle } : {}),
+});
+
+/** `path/to/file.spec.ts (suite title)` for the log. */
+const describeSuite = ({ filePath, suiteTitle }: FlakySuite): string =>
+  suiteTitle ? `${filePath} (${suiteTitle})` : filePath;
 
 const issueRef = (
   { number, html_url: url, title, state }: GithubIssue,
@@ -207,8 +242,7 @@ export const reportFlakySuiteIssues = async (
     const fetched = await fetchFailedTestIssues(upstream, closedSince, log);
     const upstreamIndex = indexIssues(fetched.issues.map(describeIssue));
     tracking = { repo: upstream.repo, open: fetched.open, closed: fetched.closed };
-    trackedUpstream = (suite) =>
-      strongestTracking(findMatchingIssues(suite, candidateIssues(suite, upstreamIndex)));
+    trackedUpstream = (suite) => coveringIssue(suite, upstreamIndex);
   }
 
   const actions: FlakySuiteAction[] = [];
@@ -219,13 +253,13 @@ export const reportFlakySuiteIssues = async (
   };
 
   const create = async (suite: FlakySuite, related: MatchedIssue[]) => {
-    const { filePath } = suite;
+    const ref = suiteRef(suite);
     if (counts.created >= maxNewIssues) {
-      log.info(`skip, ${maxNewIssues} issues already created this run: ${filePath}`);
-      record({ action: 'skipped', filePath, reason: 'max-new-issues' });
+      log.info(`skip, ${maxNewIssues} issues already created this run: ${describeSuite(suite)}`);
+      record({ action: 'skipped', ...ref, reason: 'max-new-issues' });
       return;
     }
-    const title = flakySuiteIssueTitle(suite, moduleLabel(filePath));
+    const title = flakySuiteIssueTitle(suite, moduleLabel(suite.filePath));
     const body = renderFlakySuiteIssueBody(suite, {
       report,
       dashboardUrl: options.dashboardUrl,
@@ -233,37 +267,40 @@ export const reportFlakySuiteIssues = async (
     });
     try {
       const created = await github.createIssue(title, body, issueLabels(suite, githubRepo));
-      log.info(`created #${created.number} ${created.html_url}: ${filePath}`);
+      log.info(`created #${created.number} ${created.html_url}: ${describeSuite(suite)}`);
       record({
         action: 'created',
-        filePath,
+        ...ref,
         issue: { number: created.number, url: created.html_url, title, state: 'open' },
       });
     } catch (error) {
-      log.error(`failed to create an issue for ${filePath}: ${errorMessage(error)}`);
-      record({ action: 'failed', filePath, attempted: 'create', error: errorMessage(error) });
+      log.error(`failed to create an issue for ${describeSuite(suite)}: ${errorMessage(error)}`);
+      record({ action: 'failed', ...ref, attempted: 'create', error: errorMessage(error) });
     }
   };
 
   for (const suite of suites) {
-    const { filePath } = suite;
+    const ref = suiteRef(suite);
     const matches = findMatchingIssues(suite, candidateIssues(suite, index));
     const tracked = strongestTracking(matches);
     if (tracked) {
       const { issue, match } = tracked;
-      log.info(`skip, #${issue.number} (${match}, ${issue.state}) is about it: ${filePath}`);
-      record({ action: 'skipped', filePath, reason: 'tracked', issue: issueRef(issue), match });
+      log.info(
+        `skip, #${issue.number} (${match}, ${issue.state}) is about it: ${describeSuite(suite)}`
+      );
+      record({ action: 'skipped', ...ref, reason: 'tracked', issue: issueRef(issue), match });
       continue;
     }
     const upstream = trackedUpstream(suite);
     if (upstream && tracking) {
       const { issue, match } = upstream;
       log.info(
-        `skip, ${tracking.repo}#${issue.number} (${match}, ${issue.state}) is about it: ${filePath}`
+        `skip, ${tracking.repo}#${issue.number} (${match}, ${issue.state}) covers every test: ` +
+          describeSuite(suite)
       );
       record({
         action: 'skipped',
-        filePath,
+        ...ref,
         reason: 'tracked-upstream',
         issue: issueRef(issue, tracking.repo),
         match,

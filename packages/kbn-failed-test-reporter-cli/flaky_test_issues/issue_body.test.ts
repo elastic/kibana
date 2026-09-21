@@ -195,6 +195,7 @@ describe('renderFlakySuiteIssueBody', () => {
 
     expect(readFlakySuiteIssueMetadata(body)).toEqual({
       'suite.filePath': SUITE_PATH,
+      'suite.title': 'Default status alert',
       'suite.framework': 'playwright',
       'suite.testIds': [suite.tests[0].testId],
       'report.generatedAt': '2026-09-09T09:04:41.000Z',

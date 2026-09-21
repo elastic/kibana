@@ -23,6 +23,8 @@ export interface IssueDetails {
   issue: GithubIssue;
   /** File a suite issue is about: from its `flaky-test-suite` metadata or a legacy title. */
   suiteFilePath?: string;
+  /** Suite of that file the issue is about; absent for issues about a whole file. */
+  suiteTitle?: string;
   /** Scout test id from the `Test ID` row; the same id `discover-flaky-tests` reports. */
   scoutTestId?: string;
   /** File the issue names: the Scout `Location` row or the `<path>·ts` ending an FTR classname. */
@@ -69,11 +71,11 @@ export const describeIssue = (issue: GithubIssue): IssueDetails => {
   // FTR classnames end in the file (`<report>.<path>·ts`), Jest ones in the directory
   const classLocation = getLocationFromClassname(className);
   const location = issue.body.match(LOCATION_ROW)?.[1];
+  const suiteMetadata = readFlakySuiteIssueMetadata(issue.body);
   return {
     issue,
-    suiteFilePath:
-      readFlakySuiteIssueMetadata(issue.body)?.['suite.filePath'] ??
-      readSuiteFilePathFromTitle(issue.title),
+    suiteFilePath: suiteMetadata?.['suite.filePath'] ?? readSuiteFilePathFromTitle(issue.title),
+    suiteTitle: suiteMetadata?.['suite.title'],
     scoutTestId: issue.body.match(SCOUT_TEST_ID_ROW)?.[1],
     filePath: location
       ? undot(location)
@@ -158,13 +160,14 @@ const namesTest = (testName: string, titles: readonly string[]): boolean =>
   titles.some((title) => testName === title || testName.endsWith(` ${title}`));
 
 /** Suite issues first, then strongest match, open before closed, newest first. */
-const compareMatches = (a: MatchedIssue, b: MatchedIssue): number =>
+export const compareMatches = (a: MatchedIssue, b: MatchedIssue): number =>
   MATCH_STRENGTH[a.match] - MATCH_STRENGTH[b.match] ||
   (a.issue.state === b.issue.state ? 0 : a.issue.state === 'open' ? -1 : 1) ||
   b.issue.number - a.issue.number;
 
 /**
- * Issues about the suite, strongest evidence first: a suite issue, then the Scout test id, then
+ * Issues about the suite, strongest evidence first: a suite issue (about this suite, or about the
+ * whole file, as issues filed before suites were split by title are), then the Scout test id, then
  * the test name together with the file (or, for Jest, the directory), then the test name together
  * with the file name alone (the file was moved), then any mention of the file.
  */
@@ -179,11 +182,17 @@ export const findMatchingIssues = (
 
   const matches: MatchedIssue[] = [];
   for (const details of issues) {
-    const { issue, suiteFilePath, scoutTestId, filePath, jestDirectory, testName, text } = details;
+    const { issue, suiteFilePath, suiteTitle, scoutTestId, filePath, jestDirectory, testName } =
+      details;
+    const { text } = details;
     const mentionsFile = text.includes(suite.filePath);
     const namesFlakyTest = testName !== undefined && namesTest(testName, titles);
 
-    if (suiteFilePath === suite.filePath) {
+    // An issue about the whole file is about each of its suites
+    const aboutSuite =
+      suiteFilePath === suite.filePath &&
+      (suiteTitle === undefined || suiteTitle === suite.suiteTitle);
+    if (aboutSuite) {
       matches.push({ issue, match: 'suite' });
     } else if (scoutTestId !== undefined && testIds.has(scoutTestId)) {
       matches.push({ issue, match: 'test' });

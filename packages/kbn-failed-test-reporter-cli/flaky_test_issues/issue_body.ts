@@ -65,6 +65,8 @@ export interface FlakySuiteReportSnapshot {
 
 export interface FlakySuiteIssueMetadata {
   'suite.filePath': string;
+  /** Absent when the report knows no suite title, the issue is then about the whole file. */
+  'suite.title'?: string;
   'suite.framework': string;
   'suite.testIds': string[];
   /** Newest report that found the suite flaky. */
@@ -105,6 +107,7 @@ export const readFlakySuiteIssueMetadata = (
   if (typeof filePath !== 'string') {
     return undefined;
   }
+  const title = metadataValue(body, 'suite.title');
   const framework = metadataValue(body, 'suite.framework');
   const testIds = metadataValue(body, 'suite.testIds');
   const generatedAt = metadataValue(body, 'report.generatedAt');
@@ -112,6 +115,7 @@ export const readFlakySuiteIssueMetadata = (
   const history = metadataValue(body, 'report.history');
   return {
     'suite.filePath': filePath,
+    'suite.title': typeof title === 'string' ? title : undefined,
     'suite.framework': typeof framework === 'string' ? framework : undefined,
     'suite.testIds': Array.isArray(testIds)
       ? testIds.filter((id): id is string => typeof id === 'string')
@@ -134,6 +138,7 @@ export const flakySuiteIssueMetadata = (
   report: FlakyTestReport
 ): FlakySuiteIssueMetadata => ({
   'suite.filePath': suite.filePath,
+  ...(suite.suiteTitle ? { 'suite.title': suite.suiteTitle } : {}),
   'suite.framework': suite.framework,
   'suite.testIds': suite.tests.map((test) => test.testId),
   'report.generatedAt': report.generatedAt.toISOString(),

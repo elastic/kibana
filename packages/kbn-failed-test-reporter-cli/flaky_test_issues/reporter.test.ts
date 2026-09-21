@@ -162,6 +162,7 @@ describe('reportFlakySuiteIssues', () => {
         {
           action: 'created',
           filePath: SUITE_PATH,
+          suiteTitle: 'Default status alert',
           issue: {
             number: 900,
             url: 'https://github.com/elastic/kibana/issues/900',
@@ -169,6 +170,26 @@ describe('reportFlakySuiteIssues', () => {
             state: 'open',
           },
         },
+      ]);
+    });
+
+    it('files one issue per describe block of a file', async () => {
+      const github = createGithubApi();
+      const report = flakyReport([
+        flakyTest({ testId: 'a', suiteTitle: 'first describe', failedBuilds: 9 }),
+        flakyTest({ testId: 'b', suiteTitle: 'second describe', failedBuilds: 40 }),
+      ]);
+
+      const summary = await run(github, { report });
+
+      expect(github.createIssue).toHaveBeenCalledTimes(2);
+      expect(github.createIssue.mock.calls.map(([title]) => title)).toEqual([
+        '[Synthetics] Flaky Scout test suite: second describe',
+        '[Synthetics] Flaky Scout test suite: first describe',
+      ]);
+      expect(summary.actions.map(({ suiteTitle }) => suiteTitle)).toEqual([
+        'second describe',
+        'first describe',
       ]);
     });
 
@@ -205,6 +226,7 @@ describe('reportFlakySuiteIssues', () => {
       expect(summary.actions[0]).toEqual({
         action: 'failed',
         filePath: 'a.spec.ts',
+        suiteTitle: 'Default status alert',
         attempted: 'create',
         error: '422 Validation Failed',
       });
@@ -223,6 +245,7 @@ describe('reportFlakySuiteIssues', () => {
         {
           action: 'skipped',
           filePath: SUITE_PATH,
+          suiteTitle: 'Default status alert',
           reason: 'tracked',
           issue: { number: 42, url: issue.html_url, title: issue.title, state: 'open' },
           match: 'suite',
@@ -242,6 +265,33 @@ describe('reportFlakySuiteIssues', () => {
         issue: { number: 42, state: 'closed' },
         match: 'suite',
       });
+    });
+
+    it('skips only the describe block a suite issue is about, unless it is about the whole file', async () => {
+      // `suiteIssue` is about the fixture's `Default status alert` describe
+      const fileWide = githubIssue({
+        number: 44,
+        title: `Flaky Scout test suite: ${SUITE_PATH}`,
+        state: 'closed',
+      });
+      const github = createGithubApi([suiteIssue(42), fileWide]);
+      const report = flakyReport([
+        flakyTest({ testId: 'a', failedBuilds: 40 }),
+        flakyTest({ testId: 'b', suiteTitle: 'another describe', failedBuilds: 9 }),
+      ]);
+
+      const summary = await run(github, { report });
+
+      expect(github.createIssue).not.toHaveBeenCalled();
+      expect(
+        summary.actions.map((action) => [
+          action.suiteTitle,
+          action.action === 'skipped' ? action.issue?.number : undefined,
+        ])
+      ).toEqual([
+        ['Default status alert', 42],
+        ['another describe', 44],
+      ]);
     });
 
     it('skips a suite one of whose tests has a per-test issue', async () => {
@@ -275,7 +325,7 @@ describe('reportFlakySuiteIssues', () => {
   });
 
   describe('suites tracked in the tracking repository', () => {
-    it('does not file an issue for a suite one of whose tests has an open issue there', async () => {
+    it('does not file an issue for a single-test suite whose test has an open issue there', async () => {
       const github = createGithubApi();
       const tracking = trackingRepo([scoutTestIssue(123, 'pw-1')]);
 
@@ -287,6 +337,7 @@ describe('reportFlakySuiteIssues', () => {
         {
           action: 'skipped',
           filePath: SUITE_PATH,
+          suiteTitle: 'Default status alert',
           reason: 'tracked-upstream',
           issue: {
             number: 123,
@@ -348,6 +399,65 @@ describe('reportFlakySuiteIssues', () => {
       const summary = await run(github, { report: flakyReport([trackedTest()]), tracking });
 
       expect(summary.actions[0]).toMatchObject({ reason: 'tracked', issue: { number: 42 } });
+    });
+
+    it('files the issue when one test has no issue there, even if the others do', async () => {
+      const github = createGithubApi();
+      const tracking = trackingRepo([scoutTestIssue(123, 'pw-1')]);
+      const report = flakyReport([
+        trackedTest(),
+        flakyTest({ testId: 'pw-2', title: 'another test' }),
+      ]);
+
+      const summary = await run(github, { report, tracking });
+
+      expect(github.createIssue).toHaveBeenCalledTimes(1);
+      expect(summary.actions[0]).toMatchObject({ action: 'created' });
+    });
+
+    it('skips a suite once every test has an issue there, recording the strongest open one', async () => {
+      const github = createGithubApi();
+      const tracking = trackingRepo([
+        scoutTestIssue(123, 'pw-1', { state: 'closed' }),
+        scoutTestIssue(124, 'pw-2'),
+      ]);
+      const report = flakyReport([
+        trackedTest(),
+        flakyTest({ testId: 'pw-2', title: 'another test' }),
+      ]);
+
+      const summary = await run(github, { report, tracking });
+
+      expect(github.createIssue).not.toHaveBeenCalled();
+      expect(summary.actions[0]).toMatchObject({
+        reason: 'tracked-upstream',
+        issue: { number: 124, state: 'open', repo: TRACKING_REPO },
+        match: 'test',
+      });
+    });
+
+    it('treats an issue about the whole file as covering every test', async () => {
+      const github = createGithubApi();
+      const tracking = trackingRepo([
+        githubIssue({
+          number: 125,
+          title: `Flaky Scout test suite: ${SUITE_PATH}`,
+          state: 'closed',
+        }),
+      ]);
+      const report = flakyReport([
+        trackedTest(),
+        flakyTest({ testId: 'pw-2', title: 'another test' }),
+      ]);
+
+      const summary = await run(github, { report, tracking });
+
+      expect(github.createIssue).not.toHaveBeenCalled();
+      expect(summary.actions[0]).toMatchObject({
+        reason: 'tracked-upstream',
+        issue: { number: 125, state: 'closed' },
+        match: 'suite',
+      });
     });
 
     it('lists the tracking repository with the same horizon and counts its issues', async () => {

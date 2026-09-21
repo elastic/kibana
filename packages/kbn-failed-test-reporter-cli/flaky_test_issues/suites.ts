@@ -17,13 +17,14 @@ import {
 } from '@kbn/scout-reporting';
 
 /**
- * All flaky tests of one test file. Issues are tracked per suite rather than per test: the tests
- * of a file usually share a fixture, a page object or a setup hook, and that is what gets fixed.
+ * The flaky tests of one `describe` block of a test file. Issues are tracked per suite rather
+ * than per test: the tests of a block share its fixtures and hooks, and that is what gets fixed.
+ * Tests the report knows no suite title for form one suite per file.
  */
 export interface FlakySuite {
   filePath: string;
   framework: TestFramework;
-  /** Title of the outermost `describe`, when the report knows it. */
+  /** Titles of the enclosing `describe` blocks joined by spaces, when the report knows them. */
   suiteTitle?: string;
   configPath?: string;
   /** Code owners of every test in the suite, in first-seen order. */
@@ -34,35 +35,38 @@ export interface FlakySuite {
   byPipeline: FlakyTestPipelineStats[];
 }
 
-const suiteKey = (framework: string, filePath: string): string => `${framework}\n${filePath}`;
+const fileKey = (framework: string, filePath: string): string => `${framework}\n${filePath}`;
+const suiteKey = (framework: string, filePath: string, suiteTitle: string | undefined): string =>
+  `${fileKey(framework, filePath)}\n${suiteTitle ?? ''}`;
 
 const unique = <T>(values: readonly T[]): T[] => [...new Set(values)];
 
-/** Groups entries by framework and file and ranks suites by their worst test. */
+/** Groups entries by framework, file and suite title and ranks suites by their worst test. */
 export const groupIntoSuites = (
   entries: readonly FlakyTestEntry[],
   files: readonly FlakyTestFileStats[] = []
 ): FlakySuite[] => {
   const byKey = new Map<string, FlakyTestEntry[]>();
   for (const entry of entries) {
-    const key = suiteKey(entry.framework, entry.filePath);
+    const key = suiteKey(entry.framework, entry.filePath, entry.suiteTitle);
     byKey.set(key, [...(byKey.get(key) ?? []), entry]);
   }
-  const pipelinesByKey = new Map(
-    files.map((file) => [suiteKey(file.framework, file.filePath), file.byPipeline])
+  // The per-pipeline stats are per file; the suites of one file share them
+  const pipelinesByFile = new Map(
+    files.map((file) => [fileKey(file.framework, file.filePath), file.byPipeline])
   );
 
-  const suites = [...byKey.entries()].map(([key, unranked]): FlakySuite => {
+  const suites = [...byKey.values()].map((unranked): FlakySuite => {
     const tests = rankTests(unranked);
     const [worst] = tests;
     return {
       filePath: worst.filePath,
       framework: worst.framework,
-      suiteTitle: tests.find((test) => test.suiteTitle)?.suiteTitle,
+      suiteTitle: worst.suiteTitle,
       configPath: tests.find((test) => test.configPath)?.configPath,
       owners: unique(tests.flatMap((test) => test.owners)),
       tests,
-      byPipeline: pipelinesByKey.get(key) ?? [],
+      byPipeline: pipelinesByFile.get(fileKey(worst.framework, worst.filePath)) ?? [],
     };
   });
 

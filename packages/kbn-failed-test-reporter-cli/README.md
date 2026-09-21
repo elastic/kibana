@@ -10,7 +10,9 @@ failing test. Run by `.buildkite/scripts/lifecycle/post_command.sh` after every 
 ## `node scripts/report_flaky_test_issues`
 
 Reads a flaky test report written by `node scripts/scout discover-flaky-tests`, groups the flaky
-tests by file and files one `failed-test` issue per flaky suite that has none yet. Run daily by
+tests into suites, one per framework, file and `describe` block (tests the report knows no suite
+title for form one suite per file), and files one `failed-test` issue per flaky suite that has
+none yet. Run daily by
 the `kibana-report-flaky-tests` pipeline after the report is generated.
 
 For every suite in the report, worst first: when no issue is about it or one of its tests, a suite
@@ -31,9 +33,11 @@ Open and closed `failed-test` issues both count. The command lists every open `f
 and the closed ones updated in the last `--closed-since-days` (default 365) through the issues
 API, about a hundred requests against the core rate limit, and matches locally. With
 `--tracking-repo owner/name` (default `elastic/kibana`) the same listing runs against a second
-repository whose issues also count as tracking a suite but are never written to: while the issues
-are filed in a sandbox, a suite that `elastic/kibana` already has an issue for gets none there.
-Empty disables the check; it is skipped when it names `--github-repo` itself. It deliberately
+repository that is never written to: while the issues are filed in a sandbox, a suite gets none
+there when every one of its flaky tests already has an issue in `elastic/kibana`, a per-test issue
+about that test or an issue about the suite or its file. One test without an issue is enough for
+the suite issue to be filed. Empty disables the check; it is skipped when it names `--github-repo`
+itself. It deliberately
 avoids the search API, whose 30-requests-a-minute limit is shared with every other CI job using the
 same token and whose 1000-result cap and 256-character queries lose issues silently. Issues are
 indexed by the file names they mention (after restoring JUnit's `path·ts` spelling), the Jest

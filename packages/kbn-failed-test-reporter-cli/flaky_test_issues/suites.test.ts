@@ -11,7 +11,7 @@ import { groupIntoSuites } from './suites';
 import { flakyTest } from './test_fixtures';
 
 describe('groupIntoSuites', () => {
-  it('groups tests by file, ranks tests within a suite and suites by their worst test', () => {
+  it('groups tests by file and suite, ranks tests within a suite and suites by their worst test', () => {
     const suites = groupIntoSuites([
       flakyTest({ testId: 'a1', filePath: 'a.spec.ts', failedBuilds: 2 }),
       flakyTest({ testId: 'b1', filePath: 'b.spec.ts', failedBuilds: 5 }),
@@ -20,6 +20,26 @@ describe('groupIntoSuites', () => {
 
     expect(suites.map((suite) => suite.filePath)).toEqual(['a.spec.ts', 'b.spec.ts']);
     expect(suites[0].tests.map((test) => test.testId)).toEqual(['a2', 'a1']);
+  });
+
+  it('splits a file into one suite per describe block, the untitled tests forming one', () => {
+    const suites = groupIntoSuites([
+      flakyTest({ testId: 'a1', filePath: 'a.spec.ts', suiteTitle: 'first', failedBuilds: 2 }),
+      flakyTest({ testId: 'a2', filePath: 'a.spec.ts', suiteTitle: 'second', failedBuilds: 9 }),
+      flakyTest({ testId: 'a3', filePath: 'a.spec.ts', suiteTitle: 'first', failedBuilds: 5 }),
+      flakyTest({ testId: 'a4', filePath: 'a.spec.ts', suiteTitle: undefined, failedBuilds: 1 }),
+      // the same describe title in another file is another suite
+      flakyTest({ testId: 'b1', filePath: 'b.spec.ts', suiteTitle: 'first', failedBuilds: 3 }),
+    ]);
+
+    expect(
+      suites.map((suite) => [suite.filePath, suite.suiteTitle, suite.tests.map((t) => t.testId)])
+    ).toEqual([
+      ['a.spec.ts', 'second', ['a2']],
+      ['a.spec.ts', 'first', ['a3', 'a1']],
+      ['b.spec.ts', 'first', ['b1']],
+      ['a.spec.ts', undefined, ['a4']],
+    ]);
   });
 
   it('describes a suite from its tests and picks up the per-pipeline stats of its file', () => {
