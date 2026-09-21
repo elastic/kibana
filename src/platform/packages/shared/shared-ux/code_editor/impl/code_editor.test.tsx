@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { screen, fireEvent } from '@testing-library/react';
+import { screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { monaco } from '@kbn/monaco';
 
@@ -16,7 +16,7 @@ import { keys } from '@elastic/eui';
 
 import { MockedMonacoEditor, mockedEditorInstance } from '@kbn/code-editor-mock/monaco_mock';
 
-import { CodeEditor } from './code_editor';
+import { CodeEditor, KBN_A11Y_HANDLE_ESCAPE_ACTION_ID } from './code_editor';
 
 jest.mock('./react_monaco_editor', () => {
   return { MonacoEditor: MockedMonacoEditor };
@@ -210,6 +210,70 @@ describe('<CodeEditor />', () => {
       });
 
       expect(getHint().getAttribute('data-code-hint-status')).toBe('active');
+    });
+  });
+
+  // Monaco 0.54+ defaults to Chrome's native EditContext API when available: the real
+  // focusable input becomes a `.native-edit-context` element and the plain <textarea>
+  // is demoted to a readonly/aria-hidden IME fallback that's never part of the tab
+  // order. See https://github.com/elastic/kibana/pull/290850#discussion_r4060528709.
+  describe('EditContext input surface (Monaco 0.54+ / Chrome)', () => {
+    const getHint = () => screen.getByTestId('codeEditorHint');
+    const getNativeEditContext = () => document.querySelector<HTMLElement>('.native-edit-context')!;
+
+    beforeEach(() => {
+      mockedEditorInstance?.__helpers__.enableEditContext();
+      renderWithI18n(
+        <CodeEditor
+          languageId="loglang"
+          height={250}
+          value={logs}
+          onChange={() => {}}
+          aria-describedby="codeEditorDescription"
+        />
+      );
+    });
+
+    afterEach(() => {
+      mockedEditorInstance?.__helpers__.disableEditContext();
+    });
+
+    test('locks the real input surface out of the tab order and describes it, not the legacy textarea', () => {
+      const nativeEditContext = getNativeEditContext();
+      expect(nativeEditContext.tabIndex).toBe(-1);
+      expect(nativeEditContext.getAttribute('aria-describedby')).toBe('codeEditorDescription');
+      expect(
+        screen.getByTestId('monacoEditorTextarea').getAttribute('aria-describedby')
+      ).toBeNull();
+    });
+
+    test('re-locks the tab index if Monaco resets it on the real input surface', async () => {
+      const nativeEditContext = getNativeEditContext();
+      // Simulate Monaco resetting the attribute, which the MutationObserver must undo.
+      nativeEditContext.tabIndex = 0;
+      await waitFor(() => expect(nativeEditContext.tabIndex).toBe(-1));
+    });
+
+    test('Tab -> Enter -> Escape keeps focus trapped between the hint and the real input surface', () => {
+      // Tab: keyboard users land on the hint, never directly on the real input surface.
+      getHint().focus();
+      expect(document.activeElement).toBe(getHint());
+
+      // Enter: starts editing, moving real focus onto the EditContext surface.
+      fireEvent.keyDown(getHint(), { key: keys.ENTER });
+      expect(getHint().getAttribute('data-code-hint-status')).toBe('inactive');
+      expect(mockedEditorInstance?.focus).toHaveBeenCalled();
+      expect(document.activeElement).toBe(getNativeEditContext());
+
+      // Escape: real keydown events aren't reliably routed through Monaco's onKeyDown
+      // handler in EditContext mode, so this is exercised the same way our own code
+      // works around that for tests/automation: via `editor.trigger()`.
+      act(() => {
+        mockedEditorInstance?.trigger('keyboard', KBN_A11Y_HANDLE_ESCAPE_ACTION_ID, {});
+      });
+      expect(getHint().getAttribute('data-code-hint-status')).toBe('active');
+      expect(document.activeElement).toBe(getHint());
+      expect(getNativeEditContext().tabIndex).toBe(-1);
     });
   });
 });

@@ -18,15 +18,24 @@ function createEditorInstance() {
   const keyDownListeners: Array<(e?: unknown) => void> = [];
   const didShowListeners: Array<(e?: unknown) => void> = [];
   const didHideListeners: Array<(e?: unknown) => void> = [];
+  const registeredActions: Record<string, () => void> = {};
   let placeholderDiv: undefined | HTMLDivElement;
+  let editorDomNode: HTMLDivElement | undefined;
+  let nativeEditContextNode: HTMLElement | undefined;
+  let textareaNode: HTMLTextAreaElement | undefined;
   let areSuggestionsVisible = false;
   let isInspectTokensWidgetVisible = false;
+  let isEditContextEnabled = false;
 
   /**
    * Mocks for monaco editor API
    */
   const editorInstanceMethods = {
-    focus: jest.fn(),
+    // Mirrors real Monaco: focus() moves real DOM focus to whichever surface is
+    // currently live, so EditContext-vs-legacy focus transitions are observable in jsdom.
+    focus: jest.fn(() => {
+      (isEditContextEnabled ? nativeEditContextNode : textareaNode)?.focus();
+    }),
     layout: jest.fn(),
     applyFontInfo: jest.fn(),
     executeEdits: jest.fn(),
@@ -35,7 +44,7 @@ function createEditorInstance() {
     }),
     getValue: jest.fn(),
     getModel: jest.fn(),
-    getDomNode: jest.fn(),
+    getDomNode: jest.fn(() => editorDomNode ?? null),
     getPosition: jest.fn(),
     getSelection: jest.fn(),
     getContentHeight: jest.fn(),
@@ -55,7 +64,15 @@ function createEditorInstance() {
         };
       }
     }),
-    addAction: jest.fn(() => ({ dispose: jest.fn() })),
+    addAction: jest.fn(({ id, run }: { id: string; run: () => void }) => {
+      registeredActions[id] = run;
+      return { dispose: jest.fn() };
+    }),
+    // Mirrors real Monaco's `editor.trigger(source, handlerId)` for the subset of
+    // handlers our own code invokes: actions registered via `addAction` above.
+    trigger: jest.fn((_source: string, handlerId: string, _payload?: unknown) => {
+      registeredActions[handlerId]?.();
+    }),
     addCommand: jest.fn(),
     addContentWidget: jest.fn((widget: monaco.editor.IContentWidget) => {
       placeholderDiv?.appendChild(widget.getDomNode());
@@ -83,6 +100,25 @@ function createEditorInstance() {
       getPlaceholderRef: (div: HTMLDivElement) => {
         placeholderDiv = div;
       },
+      getEditorDomNodeRef: (div: HTMLDivElement) => {
+        editorDomNode = div;
+      },
+      getNativeEditContextRef: (div: HTMLElement | null) => {
+        nativeEditContextNode = div ?? undefined;
+      },
+      getTextareaRef: (textarea: HTMLTextAreaElement | null) => {
+        textareaNode = textarea ?? undefined;
+      },
+      // Simulates Chrome's native EditContext being live (Monaco 0.54+): the real
+      // focusable input becomes `.native-edit-context`, and the fallback `<textarea>`
+      // is demoted to readonly/aria-hidden, same as in a real browser.
+      enableEditContext: () => {
+        isEditContextEnabled = true;
+      },
+      disableEditContext: () => {
+        isEditContextEnabled = false;
+      },
+      isEditContextEnabled: () => isEditContextEnabled,
       onTextareaKeyDown: ((e) => {
         // Let all our listener know that a key has been pressed on the textarea
         keyDownListeners.forEach((listener) => listener(e));
@@ -141,11 +177,26 @@ export const MockedMonacoEditor = ({
     );
   }, [editorDidMount]);
 
+  const editContextEnabled = mockedEditorInstance?.__helpers__.isEditContextEnabled();
+
   return (
-    <div>
+    <div ref={mockedEditorInstance?.__helpers__.getEditorDomNodeRef}>
       <div ref={mockedEditorInstance?.__helpers__.getPlaceholderRef} />
+      {editContextEnabled && (
+        // Mirrors Chrome's native EditContext surface in Monaco 0.54+: this is the
+        // real focusable input, demoting the <textarea> below to an IME-only fallback.
+        <div
+          className="native-edit-context"
+          role="textbox"
+          aria-roledescription="editor"
+          aria-label="Editor content"
+          ref={mockedEditorInstance?.__helpers__.getNativeEditContextRef}
+        />
+      )}
       <textarea
         value={value ?? ''}
+        readOnly={editContextEnabled}
+        aria-hidden={editContextEnabled}
         onKeyDown={mockedEditorInstance?.__helpers__.onTextareaKeyDown}
         onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
           onChange?.(e.target.value, {} as unknown as monaco.editor.IModelContentChangedEvent);
@@ -155,6 +206,7 @@ export const MockedMonacoEditor = ({
          * place this after spreading props, so the fallback value is set
          */
         data-test-subj={rest['data-test-subj'] || 'monacoEditorTextarea'}
+        ref={mockedEditorInstance?.__helpers__.getTextareaRef}
       />
     </div>
   );
