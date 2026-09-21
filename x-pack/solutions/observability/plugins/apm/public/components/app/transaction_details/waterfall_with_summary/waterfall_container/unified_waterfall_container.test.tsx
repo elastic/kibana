@@ -68,6 +68,26 @@ jest.mock('../../../../../hooks/use_time_range', () => ({
   }),
 }));
 
+jest.mock('../../../../../hooks/use_adhoc_apm_data_view', () => ({
+  useAdHocApmDataView: () => ({
+    dataView: { id: 'apm-static-data-view' },
+    apmIndices: { transaction: 'traces-apm*', error: 'logs-apm.error-*' },
+  }),
+}));
+
+jest.mock('../../../../../hooks/use_logs_index_pattern', () => ({
+  useLogsIndexPattern: () => ({ logsIndexPattern: 'logs-*' }),
+}));
+
+const mockDocFlyout = jest.fn();
+
+jest.mock('@kbn/unified-doc-viewer-plugin/public', () => ({
+  UnifiedDocViewerObservabilityTraceDocFlyout: (props: any) => {
+    mockDocFlyout(props);
+    return null;
+  },
+}));
+
 const mockUnifiedWaterfallFlyout = jest.fn((props: any) => (
   <div data-test-subj="mock-unified-waterfall-flyout" />
 ));
@@ -113,6 +133,7 @@ interface RenderOptions {
   maxTraceItems?: number;
   discoverHref?: string;
   showCriticalPath?: boolean;
+  traceId?: string;
 }
 
 function renderUnifiedWaterfallContainer(options: RenderOptions = {}) {
@@ -124,6 +145,7 @@ function renderUnifiedWaterfallContainer(options: RenderOptions = {}) {
     maxTraceItems,
     discoverHref,
     showCriticalPath = false,
+    traceId,
   } = options;
 
   const history = createMemoryHistory({ initialEntries: [initialPath] });
@@ -145,6 +167,7 @@ function renderUnifiedWaterfallContainer(options: RenderOptions = {}) {
           traceDocsTotal={traceDocsTotal}
           maxTraceItems={maxTraceItems}
           discoverHref={discoverHref}
+          traceId={traceId}
         />
       </Router>
     </IntlProvider>
@@ -271,6 +294,62 @@ describe('UnifiedWaterfallContainer', () => {
       });
 
       expect(mockNavigateToUrl).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('document flyout for unprocessed OTel errors', () => {
+    it('opens the log doc flyout for a single unprocessed OTel error', () => {
+      renderUnifiedWaterfallContainer({ traceId: 'trace-123' });
+
+      act(() => {
+        capturedTraceWaterfallProps.onErrorClick({
+          traceId: 'trace-123',
+          docId: 'span-1',
+          errorCount: 1,
+          errorDocId: 'otel-error-1',
+          docIndex: 'logs-generic.otel-default',
+          errorSource: 'unprocessedOtel',
+        });
+      });
+
+      expect(mockNavigateToUrl).not.toHaveBeenCalled();
+      expect(mockDocFlyout).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'log',
+          docId: 'otel-error-1',
+          docIndex: 'logs-generic.otel-default',
+          traceId: 'trace-123',
+          activeSection: undefined,
+        })
+      );
+    });
+
+    it('opens the span flyout on the errors table for a pure-OTel row with several errors', () => {
+      renderUnifiedWaterfallContainer({ traceId: 'trace-123' });
+
+      act(() => {
+        capturedTraceWaterfallProps.onErrorClick({
+          traceId: 'trace-123',
+          docId: 'span-1',
+          errorCount: 3,
+          errorSource: 'unprocessedOtel',
+        });
+      });
+
+      expect(mockNavigateToUrl).not.toHaveBeenCalled();
+      expect(mockDocFlyout).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'span',
+          docId: 'span-1',
+          activeSection: 'errors-table',
+        })
+      );
+    });
+
+    it('does not render the flyout before an error is selected', () => {
+      renderUnifiedWaterfallContainer({ traceId: 'trace-123' });
+
+      expect(mockDocFlyout).not.toHaveBeenCalled();
     });
   });
 

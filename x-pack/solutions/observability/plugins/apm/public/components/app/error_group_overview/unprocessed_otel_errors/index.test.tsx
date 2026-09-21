@@ -160,4 +160,16 @@ describe('UnprocessedOtelErrors', () => {
 
     expect(screen.getByTestId('apmUnprocessedOtelErrorsCallout')).toBeInTheDocument();
   });
+
+  it('renders a failure callout instead of a zero-count panel when the request fails', () => {
+    // A backend failure must not be presented as a genuine "no OTel errors" result: every
+    // waterfall click supplies these route params, so a silent (0) would be misleading.
+    mockUseFetcher.mockReturnValue({ data: undefined, status: FETCH_STATUS.FAILURE });
+
+    renderComponent({ traceId: 't1', spanId: 's1' });
+
+    expect(screen.getByTestId('apmUnprocessedOtelErrorsFetchErrorCallout')).toBeInTheDocument();
+    expect(screen.queryByText('Errors from logs (0)')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('apmUnprocessedOtelErrorsCallout')).not.toBeInTheDocument();
+  });
 });

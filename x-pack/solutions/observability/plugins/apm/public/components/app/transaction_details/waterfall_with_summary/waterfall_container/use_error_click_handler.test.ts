@@ -298,7 +298,7 @@ describe('useErrorClickHandler', () => {
         timestampUs: 1000000,
         traceId: 'trace-123',
         duration: 1000000,
-        errors: [{ errorDocId: 'error-1' }],
+        errors: [{ errorDocId: 'error-1', source: 'apm' }],
         serviceName: 'otel-service',
         agentName: 'otlp/nodejs',
         spanLinksCount: { incoming: 0, outgoing: 0 },

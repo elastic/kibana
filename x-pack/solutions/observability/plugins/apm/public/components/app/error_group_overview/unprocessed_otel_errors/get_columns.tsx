@@ -59,7 +59,9 @@ export function getColumns({
                   traceId,
                   spanId,
                   exceptionsOnly: true,
-                  exceptionMessage: item.error?.exception?.message,
+                  // Narrow by `_id`: exception.message and exception.type are both optional on
+                  // these documents, so neither can reliably identify a single row.
+                  documentId: item.id,
                   sortDirection: 'DESC',
                 }}
                 ebt={{ element: ERROR_GROUP_OVERVIEW_EBT_ELEMENTS.UNPROCESSED_OTEL_ERROR_ROW }}

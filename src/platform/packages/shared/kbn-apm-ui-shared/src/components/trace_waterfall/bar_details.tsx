@@ -181,8 +181,8 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
                 onClick={(e: React.MouseEvent | React.KeyboardEvent) => {
                   if (onErrorClick) {
                     e.preventDefault();
-                    const hasApm = item.errors.some((e) => e.source === 'apm');
-                    const hasOtel = item.errors.some((e) => e.source === 'unprocessedOtel');
+                    const hasApm = item.errors.some((error) => error.source === 'apm');
+                    const hasOtel = item.errors.some((error) => error.source === 'unprocessedOtel');
                     onErrorClick({
                       traceId: item.traceId,
                       docId: item.id,

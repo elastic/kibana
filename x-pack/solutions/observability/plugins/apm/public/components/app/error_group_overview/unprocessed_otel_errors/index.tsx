@@ -70,8 +70,27 @@ export function UnprocessedOtelErrors({ traceId, spanId }: Props) {
     return null;
   }
 
+  // A failed request must not be presented as a genuine zero-count result: without this the
+  // panel would render "Errors from logs (0)" together with the reconciling callout.
+  if (status === FETCH_STATUS.FAILURE) {
+    return (
+      <EuiPanel hasBorder={true} data-test-subj="apmUnprocessedOtelErrorsPanel">
+        <EuiCallOut
+          announceOnMount
+          data-test-subj="apmUnprocessedOtelErrorsFetchErrorCallout"
+          color="warning"
+          iconType="warning"
+          size="s"
+          title={i18n.translate('xpack.apm.unprocessedOtelErrors.fetchError.title', {
+            defaultMessage: "Couldn't load errors from logs for this span. Please try again later.",
+          })}
+        />
+      </EuiPanel>
+    );
+  }
+
   // Nothing to show: the span has no unprocessed OTel exception logs.
-  if (status !== FETCH_STATUS.FAILURE && otelErrors.length === 0) {
+  if (otelErrors.length === 0) {
     return null;
   }
 
@@ -138,6 +157,10 @@ export function UnprocessedOtelErrors({ traceId, spanId }: Props) {
         <EuiFlexItem>
           <EuiSpacer size="s" />
           <EuiInMemoryTable
+            tableCaption={i18n.translate('xpack.apm.unprocessedOtelErrors.tableCaption', {
+              defaultMessage:
+                'Unprocessed OpenTelemetry exception logs recorded on the selected span',
+            })}
             items={otelErrors}
             columns={columns}
             sorting={{ sort: { field: 'timestamp.us', direction: 'desc' } }}

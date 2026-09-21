@@ -13,6 +13,7 @@ import {
   ERROR_ID,
   EXCEPTION_MESSAGE,
   EXCEPTION_TYPE,
+  ID,
   OTEL_EVENT_NAME,
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
@@ -67,16 +68,16 @@ export interface ESQLQueryParams {
   sortDirection?: 'ASC' | 'DESC';
   /**
    * When true, appends a KQL WHERE clause that matches unprocessed OTel exception logs:
-   * event_name == "exception" OR exception.type exists, AND not processor.event exists.
-   * Use for log-source links — never for APM index types.
+   * event_name == "exception" OR exception.type exists OR exception.message exists,
+   * AND not processor.event exists. Use for log-source links — never for APM index types.
    */
   exceptionsOnly?: boolean;
   /**
-   * When provided alongside exceptionsOnly, further narrows the query to a single
-   * exception document by its message field. Omit to match all exceptions for the
-   * trace+span scope.
+   * Narrows the query to a single document by its Elasticsearch `_id`. Adds `METADATA _id`
+   * to the FROM command. Use for per-row links, where the row's own fields (message, type)
+   * are optional and therefore cannot reliably identify the document.
    */
-  exceptionMessage?: string;
+  documentId?: string;
 }
 
 /**
@@ -84,15 +85,16 @@ export interface ESQLQueryParams {
  *
  * Uses OTEL_EVENT_NAME ('event_name', the flattened field), NOT EVENT_NAME ('event.name') which
  * is for the OTel-native data stream and would produce no results in generic log streams.
- * The two discriminators are ORed so a doc that merely has exception.type but no event_name
- * still matches (some SDKs omit the discriminator field).
+ * The three discriminators are ORed to mirror the `should` clauses of getUnprocessedOtelErrors,
+ * so a doc that carries only exception.type or only exception.message still matches (some SDKs
+ * omit the event_name discriminator).
  * `not processor.event : *` mirrors the server-side `must_not exists processor.event` filter.
  *
  * Expressed as KQL rather than ES|QL column comparisons because these fields are not mapped in
  * every data stream covered by the log-sources pattern. An unresolvable ES|QL column aborts the
  * whole query, whereas KQL on an unmapped field simply matches nothing.
  */
-const UNPROCESSED_OTEL_EXCEPTION_KQL = `(${OTEL_EVENT_NAME} : "exception" or ${EXCEPTION_TYPE} : *) and not ${PROCESSOR_EVENT} : *`;
+const UNPROCESSED_OTEL_EXCEPTION_KQL = `(${OTEL_EVENT_NAME} : "exception" or ${EXCEPTION_TYPE} : * or ${EXCEPTION_MESSAGE} : *) and not ${PROCESSOR_EVENT} : *`;
 
 /**
  * Resolves the APM FROM index pattern from apmIndexSettings.
@@ -143,10 +145,15 @@ export const getESQLQueryFromIndexPattern = ({
     errorId,
     sortDirection,
     exceptionsOnly,
-    exceptionMessage,
+    documentId,
   } = params;
 
-  let query = esql.from(indexPattern);
+  // `_id` is only addressable in ES|QL when requested as a METADATA field on FROM.
+  let query = documentId ? esql.from([indexPattern], [ID]) : esql.from(indexPattern);
+
+  if (documentId) {
+    query = query.where`${esql.col(ID)} == ${documentId}`;
+  }
 
   if (errorGroupId) {
     query = query.where`${esql.col(ERROR_GROUP_ID)} == ${errorGroupId}`;
@@ -195,10 +202,6 @@ export const getESQLQueryFromIndexPattern = ({
     query = query.where`${esql.col(durationField)} >= ${sampleRangeFrom} AND ${esql.col(
       durationField
     )} <= ${sampleRangeTo}`;
-  }
-
-  if (exceptionMessage) {
-    query = query.where`${esql.col(EXCEPTION_MESSAGE)} == ${exceptionMessage}`;
   }
 
   if (exceptionsOnly) {

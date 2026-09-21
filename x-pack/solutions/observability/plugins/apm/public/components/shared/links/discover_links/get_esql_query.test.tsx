@@ -527,7 +527,7 @@ describe('getESQLQueryFromIndexPattern', () => {
       expect(result).not.toContain(EVENT_NAME); // 'event.name'
     });
 
-    it('ORs the event_name and exception.type discriminators (not ANDs them)', () => {
+    it('ORs the event_name, exception.type and exception.message discriminators (not ANDs them)', () => {
       // A doc with exception.type but no event_name must still match. If they were ANDed,
       // such docs would be silently excluded.
       const result = getESQLQueryFromIndexPattern({
@@ -535,9 +535,12 @@ describe('getESQLQueryFromIndexPattern', () => {
         params: { exceptionsOnly: true },
       });
 
-      // Both discriminators must be present.
+      // All three discriminators must be present — they mirror the `should` clauses of the
+      // server-side getUnprocessedOtelErrors query. A narrower predicate here means rows the
+      // endpoint returns have a Discover link that resolves to nothing.
       expect(result).toContain(OTEL_EVENT_NAME); // 'event_name'
       expect(result).toContain(EXCEPTION_TYPE); // 'exception.type'
+      expect(result).toContain(`${EXCEPTION_MESSAGE} : *`); // 'exception.message : *'
 
       // They must be connected by OR, not AND.
       // Find the KQL clause. The esql composer may format as KQL("...") on one line or
@@ -560,19 +563,31 @@ describe('getESQLQueryFromIndexPattern', () => {
       expect(result).toContain(`not ${PROCESSOR_EVENT} : *`);
     });
 
-    it('narrows to a single exception document by message when exceptionMessage is set', () => {
+    it('narrows to a single document by _id when documentId is set', () => {
+      // exception.message and exception.type are both optional on these documents, so `_id` is
+      // the only field that reliably identifies one row.
       const result = getESQLQueryFromIndexPattern({
         indexPattern: 'logs-*',
         params: {
           traceId: 't1',
           spanId: 's1',
           exceptionsOnly: true,
-          exceptionMessage: 'Payment gateway timeout',
+          documentId: 'doc-abc',
         },
       });
 
-      expect(result).toContain(EXCEPTION_MESSAGE);
-      expect(result).toContain('Payment gateway timeout');
+      // `_id` is only addressable when requested as a METADATA field on FROM.
+      expect(result).toContain('METADATA _id');
+      expect(result).toContain('_id == "doc-abc"');
+    });
+
+    it('does not request the _id metadata field when documentId is absent', () => {
+      const result = getESQLQueryFromIndexPattern({
+        indexPattern: 'logs-*',
+        params: { traceId: 't1', spanId: 's1', exceptionsOnly: true },
+      });
+
+      expect(result).not.toContain('METADATA');
     });
 
     it('does not include the exception clause when exceptionsOnly is false or absent', () => {
@@ -606,20 +621,21 @@ describe('getESQLQueryFromIndexPattern', () => {
       expect(sortIndex).toBeGreaterThan(kqlIndex);
     });
 
-    it('two rows with different exceptionMessage produce two distinct hrefs', () => {
-      // This guards against a regression where all rows share the same non-narrowed query.
+    it('two rows with different documentId produce two distinct queries', () => {
+      // This guards against a regression where all rows share the same non-narrowed query —
+      // including rows that carry no exception.message at all.
       const result1 = getESQLQueryFromIndexPattern({
         indexPattern: 'logs-*',
-        params: { traceId: 't1', spanId: 's1', exceptionsOnly: true, exceptionMessage: 'Error A' },
+        params: { traceId: 't1', spanId: 's1', exceptionsOnly: true, documentId: 'doc-a' },
       });
       const result2 = getESQLQueryFromIndexPattern({
         indexPattern: 'logs-*',
-        params: { traceId: 't1', spanId: 's1', exceptionsOnly: true, exceptionMessage: 'Error B' },
+        params: { traceId: 't1', spanId: 's1', exceptionsOnly: true, documentId: 'doc-b' },
       });
 
       expect(result1).not.toBe(result2);
-      expect(result1).toContain('Error A');
-      expect(result2).toContain('Error B');
+      expect(result1).toContain('doc-a');
+      expect(result2).toContain('doc-b');
     });
   });
 });
