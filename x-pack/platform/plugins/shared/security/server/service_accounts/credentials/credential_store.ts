@@ -8,10 +8,13 @@
 import Boom from '@hapi/boom';
 
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { isSavedObjectErrorResult, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 
-import type { ServiceAccountCredentialAttributes } from './credential_saved_object';
+import type {
+  ServiceAccountCredentialAttributes,
+  ServiceAccountCredentialMetadata,
+} from './credential_saved_object';
 import { getCredentialId, SERVICE_ACCOUNT_CREDENTIAL_TYPE } from './credential_saved_object';
 import { getDetailedErrorMessage } from '../../errors';
 
@@ -77,6 +80,50 @@ export class ServiceAccountCredentialStore {
       }
       throw e;
     }
+  }
+
+  /**
+   * Reads the metadata of the credentials held for the given accounts, keyed by service account
+   * id. Accounts with no credential are simply absent from the result.
+   *
+   * Reads the plain documents rather than decrypting them, so the answer is cheap for a whole
+   * page but also unverified: use it to describe an account, never to decide what it may do.
+   */
+  async getMetadata(
+    serviceAccountIds: string[]
+  ): Promise<Map<string, ServiceAccountCredentialMetadata>> {
+    const metadata = new Map<string, ServiceAccountCredentialMetadata>();
+    if (serviceAccountIds.length === 0) {
+      return metadata;
+    }
+
+    const { saved_objects: savedObjects } =
+      await this.client.bulkGet<ServiceAccountCredentialMetadata>(
+        serviceAccountIds.map((serviceAccountId) => ({
+          type: SERVICE_ACCOUNT_CREDENTIAL_TYPE,
+          id: getCredentialId(serviceAccountId),
+          // The token is ciphertext and nothing here needs it, so it is left out of the read.
+          fields: ['createdAt', 'createdBy'],
+        }))
+      );
+
+    savedObjects.forEach((result, index) => {
+      const serviceAccountId = serviceAccountIds[index];
+      if (isSavedObjectErrorResult(result)) {
+        if (result.error.statusCode === 404) {
+          return;
+        }
+        throw new Error(
+          `Failed to read the credential metadata of service account [${serviceAccountId}] ` +
+            `(credential [${result.id}]): ${result.error.message}`
+        );
+      }
+
+      const { createdAt, createdBy } = result.attributes;
+      metadata.set(serviceAccountId, { createdAt, createdBy });
+    });
+
+    return metadata;
   }
 
   /**

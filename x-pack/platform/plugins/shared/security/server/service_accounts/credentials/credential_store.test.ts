@@ -98,6 +98,115 @@ describe('ServiceAccountCredentialStore', () => {
     });
   });
 
+  describe('#getMetadata', () => {
+    const OTHER_ACCOUNT_ID = 'kibana/other';
+
+    it('reads the plain documents without the token and keys them by service account id', async () => {
+      client.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            type: SERVICE_ACCOUNT_CREDENTIAL_TYPE,
+            id: getCredentialId(SERVICE_ACCOUNT_ID),
+            references: [],
+            attributes: {
+              createdAt: '2026-09-14T00:00:00.000Z',
+              createdBy: { type: 'user', username: 'elastic' },
+            },
+          },
+          {
+            type: SERVICE_ACCOUNT_CREDENTIAL_TYPE,
+            id: getCredentialId(OTHER_ACCOUNT_ID),
+            references: [],
+            attributes: {
+              createdAt: '2026-09-15T00:00:00.000Z',
+              createdBy: { type: 'api_key', apiKeyId: 'key-id', variant: 'stack' },
+            },
+          },
+        ],
+      });
+
+      const metadata = await store.getMetadata([SERVICE_ACCOUNT_ID, OTHER_ACCOUNT_ID]);
+
+      expect(client.bulkGet).toHaveBeenCalledWith([
+        {
+          type: SERVICE_ACCOUNT_CREDENTIAL_TYPE,
+          id: getCredentialId(SERVICE_ACCOUNT_ID),
+          fields: ['createdAt', 'createdBy'],
+        },
+        {
+          type: SERVICE_ACCOUNT_CREDENTIAL_TYPE,
+          id: getCredentialId(OTHER_ACCOUNT_ID),
+          fields: ['createdAt', 'createdBy'],
+        },
+      ]);
+      expect(encryptedClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
+      expect([...metadata.entries()]).toEqual([
+        [
+          SERVICE_ACCOUNT_ID,
+          {
+            createdAt: '2026-09-14T00:00:00.000Z',
+            createdBy: { type: 'user', username: 'elastic' },
+          },
+        ],
+        [
+          OTHER_ACCOUNT_ID,
+          {
+            createdAt: '2026-09-15T00:00:00.000Z',
+            createdBy: { type: 'api_key', apiKeyId: 'key-id', variant: 'stack' },
+          },
+        ],
+      ]);
+    });
+
+    it('leaves out accounts that have no credential', async () => {
+      client.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            type: SERVICE_ACCOUNT_CREDENTIAL_TYPE,
+            id: getCredentialId(SERVICE_ACCOUNT_ID),
+            error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
+          },
+          {
+            type: SERVICE_ACCOUNT_CREDENTIAL_TYPE,
+            id: getCredentialId(OTHER_ACCOUNT_ID),
+            references: [],
+            attributes: {
+              createdAt: '2026-09-15T00:00:00.000Z',
+              createdBy: { type: 'user', username: 'elastic' },
+            },
+          },
+        ],
+      });
+
+      const metadata = await store.getMetadata([SERVICE_ACCOUNT_ID, OTHER_ACCOUNT_ID]);
+
+      expect(metadata.has(SERVICE_ACCOUNT_ID)).toBe(false);
+      expect(metadata.has(OTHER_ACCOUNT_ID)).toBe(true);
+    });
+
+    it('does not touch the client for an empty page', async () => {
+      await expect(store.getMetadata([])).resolves.toEqual(new Map());
+
+      expect(client.bulkGet).not.toHaveBeenCalled();
+    });
+
+    it('rejects when a document fails to read for any other reason', async () => {
+      client.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            type: SERVICE_ACCOUNT_CREDENTIAL_TYPE,
+            id: getCredentialId(SERVICE_ACCOUNT_ID),
+            error: { statusCode: 500, error: 'Internal Server Error', message: 'shard failure' },
+          },
+        ],
+      });
+
+      await expect(store.getMetadata([SERVICE_ACCOUNT_ID])).rejects.toThrow(
+        /credential metadata of service account \[kibana\/nightshift-relay\].*shard failure/
+      );
+    });
+  });
+
   describe('#getDecrypted', () => {
     it('returns the decrypted attributes', async () => {
       encryptedClient.getDecryptedAsInternalUser.mockResolvedValue({

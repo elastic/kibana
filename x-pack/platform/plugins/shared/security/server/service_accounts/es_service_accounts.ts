@@ -20,16 +20,26 @@ import { z } from '@kbn/zod';
 
 import { bestEffortUserProfileIdResolver, resolveWorkloadBinder } from './bindings';
 import { parseCreateServiceAccountParams } from './create_params';
-import type { ServiceAccountCredentialStore } from './credentials';
+import type {
+  ServiceAccountCredentialMetadata,
+  ServiceAccountCredentialStore,
+} from './credentials';
+import { parseEsServiceAccountId } from './es_service_account_id';
 import { ensureManageSecurityPrivilege } from './manage_security_privilege';
-import type { ServiceAccountsBackend } from './types';
+import type { ListServiceAccountsParams, ServiceAccountsBackend } from './types';
 import type { SecurityLicense } from '../../common';
+import type {
+  ListServiceAccountsResponse,
+  ServiceAccountDirectoryEntry,
+} from '../../common/service_accounts';
 import {
   ES_SERVICE_ACCOUNT_FALLBACK_ROLE,
   ES_SERVICE_ACCOUNT_NAMESPACE,
   ES_SERVICE_ACCOUNT_TOKEN_MAX_LENGTH,
   ES_SERVICE_ACCOUNT_TOKEN_NAME,
+  SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE,
   SERVICE_ACCOUNT_MAX_ROLES,
+  SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
   serviceAccountRoleNameSchema,
   serviceAccountRolesSchema,
 } from '../../common/service_accounts';
@@ -58,6 +68,19 @@ const createTokenResponseSchema = z.object({
   }),
 });
 
+/**
+ * One account as the query API reports it. Unlike the keyed GET response, the principal is a
+ * `username` field on each item. The API only ever returns user-managed accounts.
+ */
+const queriedAccountSchema = accountEntrySchema.extend({
+  username: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH),
+  type: z.literal('user_managed'),
+});
+
+const queryServiceAccountsResponseSchema = z.object({
+  service_accounts: z.array(queriedAccountSchema),
+});
+
 /** An Elasticsearch user-managed service account, as Elasticsearch reports it. */
 interface ElasticsearchServiceAccount {
   id: string;
@@ -66,6 +89,23 @@ interface ElasticsearchServiceAccount {
   roles: string[];
   enabled: boolean;
 }
+
+/**
+ * Joins an account with the credential Kibana holds for it, if any. An account created straight
+ * through the Elasticsearch API has no credential here, and so nothing Kibana can bind it with:
+ * `hasCredential` is what lets the UI say so instead of failing at bind time.
+ */
+const toDirectoryEntry = (
+  { id, name, roles, enabled }: ElasticsearchServiceAccount,
+  credential: ServiceAccountCredentialMetadata | undefined
+): ServiceAccountDirectoryEntry => ({
+  id,
+  name,
+  roles,
+  enabled,
+  hasCredential: credential !== undefined,
+  ...(credential ? { createdBy: credential.createdBy, createdAt: credential.createdAt } : {}),
+});
 
 export interface EsServiceAccountsOptions {
   logger: Logger;
@@ -257,14 +297,120 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     return parsed.data;
   }
 
-  async list(): Promise<never> {
-    throw Boom.notImplemented('Listing Elasticsearch service accounts is not yet implemented');
+  /**
+   * Lists every user-managed account in the cluster, whichever namespace it lives in, sorted by
+   * principal. The cursor is the last principal on the page, which `search_after` resumes from.
+   */
+  async list(
+    request: KibanaRequest,
+    { limit = SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE, after }: ListServiceAccountsParams = {}
+  ): Promise<ListServiceAccountsResponse> {
+    if (!this.license.isEnabled()) {
+      throw Boom.forbidden(
+        'Cannot list service accounts: security features are disabled in Elasticsearch'
+      );
+    }
+
+    await ensureManageSecurityPrivilege({
+      request,
+      checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
+      logger: this.logger,
+      action: 'list service accounts',
+    });
+
+    // Cursors are principals this backend handed out. Anything else is refused up front rather
+    // than sent to Elasticsearch as a `search_after` value.
+    if (after !== undefined && parseEsServiceAccountId(after) === undefined) {
+      throw Boom.badRequest(
+        'Cannot list service accounts: the `after` cursor was not issued by this deployment'
+      );
+    }
+
+    const esClient = this.clusterClient.asScoped(request).asCurrentUser;
+
+    // One more than the page, so that "is there another page" is answered by the same query
+    // without trusting a total that a concurrent create could shift.
+    const response = await esClient.transport.request<unknown>({
+      method: 'POST',
+      path: '/_security/_query/service',
+      body: {
+        size: limit + 1,
+        sort: ['username'],
+        ...(after !== undefined ? { search_after: [after] } : {}),
+      },
+    });
+
+    const parsed = queryServiceAccountsResponseSchema.safeParse(response);
+    if (!parsed.success) {
+      this.logger.error(
+        `Elasticsearch reported service accounts in an unrecognized shape: ${parsed.error.message}`
+      );
+      throw Boom.badGateway(
+        'Cannot list service accounts: Elasticsearch reported them in an unrecognized shape.'
+      );
+    }
+
+    const accounts = parsed.data.service_accounts
+      .slice(0, limit)
+      .map(({ username, roles, enabled }) => {
+        const principal = parseEsServiceAccountId(username);
+        if (!principal) {
+          // Elasticsearch enforces the same naming rules, so this is a contract change, not data.
+          this.logger.error(
+            `Elasticsearch reported service account [${username}] with an unrecognized principal`
+          );
+          throw Boom.badGateway(
+            'Cannot list service accounts: Elasticsearch reported an unrecognized principal.'
+          );
+        }
+        return { id: username, ...principal, roles, enabled };
+      });
+
+    const credentials = await this.credentialStore.getMetadata(accounts.map(({ id }) => id));
+
+    const hasMore = parsed.data.service_accounts.length > limit;
+    return {
+      service_accounts: accounts.map((account) =>
+        toDirectoryEntry(account, credentials.get(account.id))
+      ),
+      ...(hasMore ? { next_page: accounts[accounts.length - 1].id } : {}),
+    };
   }
 
-  async get(): Promise<never> {
-    throw Boom.notImplemented(
-      'Getting Elasticsearch service accounts by id is not yet implemented'
-    );
+  async get(request: KibanaRequest, id: string): Promise<ServiceAccountDirectoryEntry> {
+    if (!this.license.isEnabled()) {
+      throw Boom.forbidden(
+        'Cannot get a service account: security features are disabled in Elasticsearch'
+      );
+    }
+
+    await ensureManageSecurityPrivilege({
+      request,
+      checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
+      logger: this.logger,
+      action: 'get a service account',
+    });
+
+    // Refused before it can reach a URL path: an id this backend would never issue is malformed,
+    // not merely missing.
+    const principal = parseEsServiceAccountId(id);
+    if (!principal) {
+      throw Boom.badRequest(
+        'Cannot get a service account: the id is not an Elasticsearch service account principal'
+      );
+    }
+
+    const esClient = this.clusterClient.asScoped(request).asCurrentUser;
+
+    // Built-in accounts resolve to `undefined` here too, so `elastic/kibana` is a 404 rather
+    // than a directory entry: they are not Kibana's to list or bind.
+    const account = await this.readAccount(esClient, principal.namespace, principal.name);
+    if (!account) {
+      throw Boom.notFound(`Service account [${id}] was not found`);
+    }
+
+    const credentials = await this.credentialStore.getMetadata([id]);
+    return toDirectoryEntry(account, credentials.get(id));
   }
 
   // See https://github.com/elastic/kibana/issues/284466.

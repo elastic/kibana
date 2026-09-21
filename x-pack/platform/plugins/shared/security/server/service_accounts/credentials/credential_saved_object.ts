@@ -52,6 +52,15 @@ export interface ServiceAccountCredentialAttributes {
   token: string;
 }
 
+/**
+ * The attributes of a credential that describe it without revealing it. Read without decrypting,
+ * so they are not integrity-verified: fine for display, never for an authorization decision.
+ */
+export type ServiceAccountCredentialMetadata = Pick<
+  ServiceAccountCredentialAttributes,
+  'createdAt' | 'createdBy'
+>;
+
 const creatorSchemaV1 = schema.oneOf([
   schema.object({
     type: schema.literal('user'),

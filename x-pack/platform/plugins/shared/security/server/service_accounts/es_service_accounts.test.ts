@@ -103,6 +103,7 @@ describe('EsServiceAccounts', () => {
       set: jest.fn().mockResolvedValue(undefined),
       delete: jest.fn().mockResolvedValue(true),
       getDecrypted: jest.fn().mockResolvedValue(null),
+      getMetadata: jest.fn().mockResolvedValue(new Map()),
     } as unknown as jest.Mocked<ServiceAccountCredentialStore>;
 
     mockCheckPrivileges = { globally: jest.fn() } as unknown as jest.Mocked<CheckPrivileges>;
@@ -649,20 +650,271 @@ describe('EsServiceAccounts', () => {
   });
 
   describe('#list', () => {
-    it('rejects with a 501 so callers surface a clear "not implemented" response', async () => {
-      await expect(serviceAccounts.list()).rejects.toMatchObject({
-        message: 'Listing Elasticsearch service accounts is not yet implemented',
-        output: { statusCode: 501 },
+    const QUERY_PATH = '/_security/_query/service';
+    /** One item as the query API reports it. */
+    const queried = (username: string, overrides = {}) => ({
+      username,
+      type: 'user_managed',
+      roles: ['viewer'],
+      enabled: true,
+      ...overrides,
+    });
+    const credential = (createdAt: string) => ({
+      createdAt,
+      createdBy: { type: 'user' as const, username: 'elastic' },
+    });
+
+    it('queries one page of user-managed accounts sorted by principal and joins the credentials', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+        total: 2,
+        count: 2,
+        service_accounts: [
+          queried('acme/billing', { enabled: false, roles: ['billing_read'] }),
+          queried('kibana/nightshift-relay'),
+        ],
       });
+      credentialStore.getMetadata.mockResolvedValue(
+        new Map([['kibana/nightshift-relay', credential('2026-09-21T00:00:00.000Z')]])
+      );
+
+      const result = await serviceAccounts.list(request);
+
+      expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledTimes(1);
+      expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
+        method: 'POST',
+        path: QUERY_PATH,
+        body: { size: 101, sort: ['username'] },
+      });
+      expect(credentialStore.getMetadata).toHaveBeenCalledWith([
+        'acme/billing',
+        'kibana/nightshift-relay',
+      ]);
+      expect(result).toEqual({
+        service_accounts: [
+          {
+            id: 'acme/billing',
+            name: 'billing',
+            roles: ['billing_read'],
+            enabled: false,
+            hasCredential: false,
+          },
+          {
+            id: 'kibana/nightshift-relay',
+            name: 'nightshift-relay',
+            roles: ['viewer'],
+            enabled: true,
+            hasCredential: true,
+            createdAt: '2026-09-21T00:00:00.000Z',
+            createdBy: { type: 'user', username: 'elastic' },
+          },
+        ],
+      });
+      expect(result).not.toHaveProperty('next_page');
+    });
+
+    it('asks for one more than the page and reports the last principal as the cursor when it arrives', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+        total: 3,
+        count: 3,
+        service_accounts: [queried('kibana/a'), queried('kibana/b'), queried('kibana/c')],
+      });
+
+      const result = await serviceAccounts.list(request, { limit: 2 });
+
+      expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
+        method: 'POST',
+        path: QUERY_PATH,
+        body: { size: 3, sort: ['username'] },
+      });
+      expect(result.service_accounts.map(({ id }) => id)).toEqual(['kibana/a', 'kibana/b']);
+      expect(result.next_page).toBe('kibana/b');
+      // The extra row is never reported, so its credential is never looked up either.
+      expect(credentialStore.getMetadata).toHaveBeenCalledWith(['kibana/a', 'kibana/b']);
+    });
+
+    it('resumes from the cursor with search_after', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+        total: 3,
+        count: 1,
+        service_accounts: [queried('kibana/c')],
+      });
+
+      await serviceAccounts.list(request, { limit: 2, after: 'kibana/b' });
+
+      expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
+        method: 'POST',
+        path: QUERY_PATH,
+        body: { size: 3, sort: ['username'], search_after: ['kibana/b'] },
+      });
+    });
+
+    it('returns an empty page without consulting the credential store', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+        total: 0,
+        count: 0,
+        service_accounts: [],
+      });
+
+      await expect(serviceAccounts.list(request)).resolves.toEqual({ service_accounts: [] });
+
+      expect(credentialStore.getMetadata).toHaveBeenCalledWith([]);
+    });
+
+    it('rejects a cursor this backend could not have issued with a 400', async () => {
+      await expect(
+        serviceAccounts.list(request, { after: 'not-a-principal' })
+      ).rejects.toMatchObject({ output: { statusCode: 400 } });
+
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
+    });
+
+    it('rejects with a 502 when Elasticsearch reports an unrecognized shape', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+        service_accounts: [{ username: 'kibana/a', type: 'user_managed' }],
+      });
+
+      await expect(serviceAccounts.list(request)).rejects.toMatchObject({
+        output: { statusCode: 502 },
+      });
+      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('unrecognized shape'));
+    });
+
+    it('rejects with a 502 when Elasticsearch reports a principal that is not namespace/service', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+        service_accounts: [queried('no-namespace')],
+      });
+
+      await expect(serviceAccounts.list(request)).rejects.toMatchObject({
+        output: { statusCode: 502 },
+      });
+    });
+
+    it('rejects with a 403 when security features are disabled in Elasticsearch', async () => {
+      license.isEnabled.mockReturnValue(false);
+
+      await expect(serviceAccounts.list(request)).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
+    });
+
+    it('rejects with a 403 when the caller lacks the `manage_security` cluster privilege', async () => {
+      mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(false));
+
+      await expect(serviceAccounts.list(request)).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
+    });
+
+    it('rethrows Elasticsearch failures', async () => {
+      esClient.asCurrentUser.transport.request.mockRejectedValueOnce(new Error('socket hang up'));
+
+      await expect(serviceAccounts.list(request)).rejects.toThrow('socket hang up');
     });
   });
 
   describe('#get', () => {
-    it('rejects with a 501 so callers surface a clear "not implemented" response', async () => {
-      await expect(serviceAccounts.get()).rejects.toMatchObject({
-        message: 'Getting Elasticsearch service accounts by id is not yet implemented',
-        output: { statusCode: 501 },
+    const ACCOUNT_ID = 'kibana/nightshift-relay';
+
+    it('reads the user-managed account and joins its credential', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce(
+        accountEntry({ roles: ['viewer'] })
+      );
+      credentialStore.getMetadata.mockResolvedValue(
+        new Map([
+          [
+            ACCOUNT_ID,
+            {
+              createdAt: '2026-09-21T00:00:00.000Z',
+              createdBy: { type: 'user' as const, username: 'elastic' },
+            },
+          ],
+        ])
+      );
+
+      await expect(serviceAccounts.get(request, ACCOUNT_ID)).resolves.toEqual({
+        id: ACCOUNT_ID,
+        name: 'nightshift-relay',
+        roles: ['viewer'],
+        enabled: true,
+        hasCredential: true,
+        createdAt: '2026-09-21T00:00:00.000Z',
+        createdBy: { type: 'user', username: 'elastic' },
       });
+
+      expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledWith(READ_ACCOUNT, {
+        ignore: [404],
+      });
+      expect(credentialStore.getMetadata).toHaveBeenCalledWith([ACCOUNT_ID]);
+    });
+
+    it('reports an account Kibana holds no credential for', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce(accountEntry());
+
+      await expect(serviceAccounts.get(request, ACCOUNT_ID)).resolves.toEqual({
+        id: ACCOUNT_ID,
+        name: 'nightshift-relay',
+        roles: ['superuser'],
+        enabled: true,
+        hasCredential: false,
+      });
+    });
+
+    it('rejects with a 404 when there is no such account', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce({});
+
+      await expect(serviceAccounts.get(request, ACCOUNT_ID)).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
+      expect(credentialStore.getMetadata).not.toHaveBeenCalled();
+    });
+
+    it('rejects with a 404 for a built-in account, which is not Kibana to list', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+        'elastic/kibana': { type: 'built_in', role_descriptor: {} },
+      });
+
+      await expect(serviceAccounts.get(request, 'elastic/kibana')).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
+    });
+
+    it('rejects an id that is not namespace/service with a 400 before reaching Elasticsearch', async () => {
+      for (const id of ['nightshift-relay', 'kibana/../_cluster', 'a/b/c', '']) {
+        await expect(serviceAccounts.get(request, id)).rejects.toMatchObject({
+          output: { statusCode: 400 },
+        });
+      }
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
+    });
+
+    it('rejects with a 502 when the account is reported in an unrecognized shape', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce(
+        accountEntry({ roles: 'viewer' })
+      );
+
+      await expect(serviceAccounts.get(request, ACCOUNT_ID)).rejects.toMatchObject({
+        output: { statusCode: 502 },
+      });
+    });
+
+    it('rejects with a 403 when security features are disabled in Elasticsearch', async () => {
+      license.isEnabled.mockReturnValue(false);
+
+      await expect(serviceAccounts.get(request, ACCOUNT_ID)).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
+    });
+
+    it('rejects with a 403 when the caller lacks the `manage_security` cluster privilege', async () => {
+      mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(false));
+
+      await expect(serviceAccounts.get(request, ACCOUNT_ID)).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
     });
   });
 
