@@ -174,7 +174,10 @@ export const buildStateSubscribe =
       // reset() uses getInitialFetchStatus() for the new language. After refresh,
       // skipInitialFetch is gone and empty ES|QL is no longer the current query,
       // so reset() can flip UNINITIALIZED → LOADING without starting a fetch.
-      if (dataState.data$.main$.getValue().fetchStatus !== FetchStatus.UNINITIALIZED) {
+      // Re-read after await resolveEsqlSource: do not overwrite COMPLETE/ERROR
+      // that landed while the source was resolving.
+      const currentStatus = dataState.data$.main$.getValue().fetchStatus;
+      if (currentStatus === FetchStatus.LOADING) {
         sendResetMsg(dataState.data$, FetchStatus.UNINITIALIZED);
       }
       return;
