@@ -75,7 +75,7 @@
   },
   "engines": {
     "node": "24.21.0",
-    "pnpm": "~11.21.0",
+    "pnpm": "~11.27.0",
     "yarn": "1.22.22"
   },
   "resolutions": {
@@ -2102,7 +2102,7 @@
     "cache-manager-fs-hash": "2.0.0",
     "callsites": "4.2.0",
     "chance": "1.1.13",
-    "chromedriver": "152.0.2",
+    "chromedriver": "152.0.3",
     "clarify": "2.2.0",
     "clean-webpack-plugin": "4.0.0",
     "cli-progress": "3.12.0",
