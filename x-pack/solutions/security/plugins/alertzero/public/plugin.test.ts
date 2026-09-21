@@ -13,7 +13,6 @@ import { AlertZeroPublicPlugin } from './plugin';
 
 const createConfig = (overrides: Partial<AlertZeroClientConfig> = {}): AlertZeroClientConfig => ({
   enabled: false,
-  ui: { useMockData: true },
   ...overrides,
 });
 
