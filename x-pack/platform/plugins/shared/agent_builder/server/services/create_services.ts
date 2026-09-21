@@ -214,6 +214,7 @@ export class ServiceManager {
       agents,
       attachments,
       eventBus: conversationEventBus,
+      conversationEvents,
     });
 
     const runnerFactory = new RunnerFactoryImpl({
