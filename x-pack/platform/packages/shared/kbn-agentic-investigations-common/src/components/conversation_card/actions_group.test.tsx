@@ -127,7 +127,7 @@ describe('ConversationsActionsGroup', () => {
       renderGroup(makeInvestigation({ recommendedAction: 'closed' }));
       openMenu();
 
-      expect(screen.getByText('Open an incident')).toBeInTheDocument();
+      expect(screen.getByText('Open an escalation')).toBeInTheDocument();
     });
 
     it('keeps assign and close while the decision is open', () => {
