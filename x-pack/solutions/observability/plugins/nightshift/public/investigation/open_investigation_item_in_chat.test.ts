@@ -17,6 +17,7 @@ describe('open_investigation_item_in_chat', () => {
       buildBlindSpotChatOptions(
         {
           title: 'Missing trace coverage',
+          confidence: 0.8,
           description: 'No spans for payment gateway calls.',
         },
         'blind-spot-1'
@@ -43,6 +44,7 @@ describe('open_investigation_item_in_chat', () => {
       buildRecommendationChatOptions(
         {
           title: 'Roll back checkout deployment',
+          confidence: 0.9,
           description: 'Revert commit abc123 and monitor error rate.',
         },
         'recommendation-1'

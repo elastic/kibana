@@ -7,15 +7,19 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
-import type { MemoryToolsOptions } from '../../memory_and_investigation/tools/memory';
 import type { EbtTelemetryClient } from '../../lib/telemetry/ebt';
 import type { SignificantEventsKIsOnboardingClient } from '../../lib/workflows/onboarding_workflow_client';
 import type { SignificantEventsMaintenanceService } from '../../lib/maintenance/maintenance_service';
-import { streamsInvestigationManagementSkill } from '../../memory_and_investigation/skills/investigation_management';
+import { streamsInvestigationManagementSkill } from './investigation_management';
 import { registerSignificantEventsSkills } from './register_skills';
+import { KI_QUERY_GENERATION_SKILL_ID } from './ki_query_generation';
 import { knowledgeIndicatorsManagementSkill } from './knowledge_indicators_management';
 import { significantEventsManagementSkill } from './significant_events_management';
 import { significantEventsKIGroundingSkill } from './significant_events_ki_grounding';
+import {
+  FEATURE_IDENTIFICATION_SKILL_ID,
+  FINALIZE_FEATURES_TOOL_ID,
+} from './feature_identification';
 
 const KI_IDENTIFICATION_SKILL_ID = 'ki-identification-management';
 const INVESTIGATION_SKILL_ID = streamsInvestigationManagementSkill.id;
@@ -24,15 +28,14 @@ const INVESTIGATION_SKILL_ID = streamsInvestigationManagementSkill.id;
 // `ki-identification-management` is only added when a KI onboarding client is present.
 const CORE_SKILL_IDS = [
   knowledgeIndicatorsManagementSkill.id,
+  KI_QUERY_GENERATION_SKILL_ID,
   significantEventsKIGroundingSkill.id,
   significantEventsManagementSkill.id,
-  'significant-events-onboarding',
-  'streams-gap-detection',
+  FEATURE_IDENTIFICATION_SKILL_ID,
   INVESTIGATION_SKILL_ID,
 ];
 
 const telemetry = {} as EbtTelemetryClient;
-const memoryToolsOptions = {} as MemoryToolsOptions;
 const streamsKIsOnboardingClient = {} as SignificantEventsKIsOnboardingClient;
 const maintenanceService = {} as SignificantEventsMaintenanceService;
 
@@ -43,7 +46,7 @@ const createOptions = (
   const options = {
     agentBuilder,
     telemetry,
-    memoryToolsOptions,
+    getScopedClients: jest.fn(),
     maintenanceService,
     logger: loggerMock.create(),
     isAvailable: jest.fn().mockResolvedValue(true),
@@ -77,22 +80,22 @@ describe('registerSignificantEventsSkills', () => {
     expect(registeredIds).toHaveLength(CORE_SKILL_IDS.length);
   });
 
-  it('hides the inline tools of a registered skill once the feature becomes unavailable', async () => {
+  it('keeps feature-identification tools private and gates them by availability', async () => {
     const isAvailable = jest.fn().mockResolvedValue(true);
-    const { agentBuilder, options } = createOptions({
-      streamsKIsOnboardingClient,
-      maintenanceService,
-      isAvailable,
-    });
+    const { agentBuilder, options } = createOptions({ isAvailable });
 
     await registerSignificantEventsSkills(options);
-    const { getInlineTools } = agentBuilder.skills.register.mock.calls.find(
-      ([skill]) => skill.id === KI_IDENTIFICATION_SKILL_ID
+    const featureIdentificationSkill = agentBuilder.skills.register.mock.calls.find(
+      ([skill]) => skill.id === FEATURE_IDENTIFICATION_SKILL_ID
     )![0];
-    await expect(getInlineTools!()).resolves.not.toHaveLength(0);
+    expect(featureIdentificationSkill.experimental).toBe(true);
+    await expect(featureIdentificationSkill.getInlineTools!()).resolves.toEqual(
+      expect.arrayContaining([expect.objectContaining({ id: FINALIZE_FEATURES_TOOL_ID })])
+    );
+    expect(featureIdentificationSkill.getRegistryTools).toBeUndefined();
 
     isAvailable.mockResolvedValue(false);
-    await expect(getInlineTools!()).resolves.toEqual([]);
+    await expect(featureIdentificationSkill.getInlineTools!()).resolves.toEqual([]);
   });
 
   it('registers the investigation skill as part of core skills when available', async () => {
@@ -155,7 +158,7 @@ describe('registerSignificantEventsSkills', () => {
   it('does not latch on partial failure and retries on the next call', async () => {
     const { agentBuilder, options } = createOptions();
     agentBuilder.skills.register.mockImplementation(async (skill) => {
-      if (skill.id === 'streams-gap-detection') {
+      if (skill.id === INVESTIGATION_SKILL_ID) {
         throw new Error('boom');
       }
     });
@@ -172,14 +175,14 @@ describe('registerSignificantEventsSkills', () => {
   it('retries only the failed skill and never re-attempts already-registered ones', async () => {
     const { agentBuilder, options } = createOptions();
     agentBuilder.skills.register.mockImplementation(async (skill) => {
-      if (skill.id === 'streams-gap-detection') {
+      if (skill.id === INVESTIGATION_SKILL_ID) {
         throw new Error('boom');
       }
     });
 
     const { ensureRegistered } = await registerSignificantEventsSkills(options);
     // The failed attempt still appears in mock.calls even though registration did not stick.
-    expect(getRegisteredIds(agentBuilder)).toContain('streams-gap-detection');
+    expect(getRegisteredIds(agentBuilder)).toContain(INVESTIGATION_SKILL_ID);
     agentBuilder.skills.register.mockClear();
     agentBuilder.skills.register.mockImplementation(async () => undefined);
 
@@ -187,20 +190,20 @@ describe('registerSignificantEventsSkills', () => {
 
     // Only the previously failed skill is retried; the ones that succeeded are not re-registered
     // (a second register() of the same id would throw "already registered").
-    expect(getRegisteredIds(agentBuilder)).toEqual(['streams-gap-detection']);
+    expect(getRegisteredIds(agentBuilder)).toEqual([INVESTIGATION_SKILL_ID]);
   });
 
   it('registers all skills once a transient failure recovers on a later call', async () => {
-    let failGapDetection = true;
+    let failInvestigation = true;
     const { agentBuilder, options } = createOptions();
     agentBuilder.skills.register.mockImplementation(async (skill) => {
-      if (skill.id === 'streams-gap-detection' && failGapDetection) {
+      if (skill.id === INVESTIGATION_SKILL_ID && failInvestigation) {
         throw new Error('boom');
       }
     });
 
     const { ensureRegistered } = await registerSignificantEventsSkills(options);
-    failGapDetection = false;
+    failInvestigation = false;
 
     await ensureRegistered();
 

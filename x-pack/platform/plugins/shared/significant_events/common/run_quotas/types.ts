@@ -14,9 +14,9 @@ export const MAX_RUN_LIMIT = 10_000;
 export const DEFAULT_RUN_QUOTA_TIME_ZONE = 'UTC';
 
 export const DEFAULT_RUN_LIMITS: Readonly<Record<RunQuotaGroup, number>> = {
-  detection: 100,
-  investigation: 30,
-  ki_extraction: 20,
+  detection: 15,
+  investigation: 3,
+  ki_extraction: 3,
 };
 
 export interface RunQuotaSettings {
@@ -25,7 +25,7 @@ export interface RunQuotaSettings {
 }
 
 export const DEFAULT_RUN_QUOTA_SETTINGS: Readonly<RunQuotaSettings> = {
-  enabled: false,
+  enabled: true,
   limits: DEFAULT_RUN_LIMITS,
 };
 
@@ -51,7 +51,7 @@ export interface RunQuotaSettingsUpdate {
 export type RunQuotaConsumeRequest =
   | { group: 'detection' }
   | { group: 'ki_extraction' }
-  | { group: 'investigation'; critical: boolean };
+  | { group: 'investigation' };
 
 export interface RunQuotaConsumeResponse {
   allowed: boolean;

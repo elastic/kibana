@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KnowledgeIndicator } from '@kbn/streams-ai';
+import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 import { isComputedFeature } from '@kbn/significant-events-schema';
 import { getKnowledgeIndicatorStreamName } from './get_knowledge_indicator_stream_name';
 import { getKnowledgeIndicatorSubtype } from './get_knowledge_indicator_subtype';

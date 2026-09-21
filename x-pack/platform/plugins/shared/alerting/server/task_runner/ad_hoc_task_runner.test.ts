@@ -793,6 +793,7 @@ describe('Ad Hoc Task Runner', () => {
       attributes: {
         ...mockedAdHocRunSO.attributes,
         uiamApiKey,
+        uiamApiKeyId: 'uiamId',
         rule: {
           ...mockedAdHocRunSO.attributes.rule,
           id: '1',
@@ -838,16 +839,93 @@ describe('Ad Hoc Task Runner', () => {
     await taskRunner.run();
     await taskRunner.cleanup();
 
-    // The scheduled action must be enqueued with the decoded UIAM secret, not the ES API key.
+    // The scheduled action must be enqueued with the decoded UIAM secret, not the ES API key,
+    // and must carry the UIAM key id so the API key invalidation task's in-use guard can see
+    // that this pending connector execution still needs the key.
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledWith([
-      expect.objectContaining({ apiKey: 'essu_secret', apiKeyId: 'apiKeyId' }),
+      expect.objectContaining({
+        apiKey: 'essu_secret',
+        apiKeyId: 'apiKeyId',
+        uiamApiKeyId: 'uiamId',
+      }),
     ]);
     // No fallback warning should be logged because the UIAM key is present.
     expect(logger.warn).not.toHaveBeenCalledWith(
       'UIAM API key is not provided to create a fake request, falling back to regular API key.',
       expect.anything()
     );
+  });
+
+  test('should not enqueue the UIAM API key id when the run falls back to the ES API key', async () => {
+    const uiamContext = {
+      ...taskRunnerFactoryInitializerParams,
+      alertsService: mockAlertsService,
+      shouldGrantUiam: true,
+      apiKeyType: ApiKeyType.UIAM,
+    };
+
+    // The ad hoc run snapshotted a UIAM key id, but the key material itself is gone, so
+    // `getFakeKibanaRequest` falls back to the ES key.
+    const mockedAdHocRunSOWithActions = {
+      ...mockedAdHocRunSO,
+      attributes: {
+        ...mockedAdHocRunSO.attributes,
+        uiamApiKeyId: 'uiamId',
+        rule: {
+          ...mockedAdHocRunSO.attributes.rule,
+          id: '1',
+          actions: [
+            {
+              uuid: '123abc',
+              group: 'default',
+              actionRef: 'action_0',
+              actionTypeId: 'action',
+              params: { foo: true },
+              frequency: {
+                notifyWhen: 'onActiveAlert' as const,
+                summary: true,
+                throttle: null,
+              },
+            },
+          ],
+        },
+      },
+      references: [
+        { type: RULE_SAVED_OBJECT_TYPE, name: 'rule', id: '1' },
+        { id: '4', name: 'action_0', type: 'action' },
+      ],
+    };
+
+    alertsClient.getProcessedAlerts.mockReturnValue({});
+    alertsClient.getSummarizedAlerts.mockResolvedValue({
+      new: { count: 1, data: [mockAAD] },
+      ongoing: { count: 0, data: [] },
+      recovered: { count: 0, data: [] },
+    });
+    mockAlertsService.createAlertsClient.mockImplementation(() => alertsClient);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(
+      mockedAdHocRunSOWithActions
+    );
+
+    const taskRunner = new AdHocTaskRunner({
+      context: uiamContext,
+      internalSavedObjectsRepository,
+      taskInstance: mockedTaskInstance,
+      executionUuid: UUID,
+    });
+
+    await taskRunner.run();
+    await taskRunner.cleanup();
+
+    // Recording the id here would claim a UIAM key the connector task never presents, keeping
+    // an unused key alive.
+    expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
+    const [[[enqueuedAction]]] = actionsClient.bulkEnqueueExecution.mock.calls;
+    expect(enqueuedAction).toEqual(
+      expect.objectContaining({ apiKey: 'MTIzOmFiYw==', apiKeyId: 'apiKeyId' })
+    );
+    expect(enqueuedAction).not.toHaveProperty('uiamApiKeyId');
   });
 
   test('should run with the next pending schedule', async () => {

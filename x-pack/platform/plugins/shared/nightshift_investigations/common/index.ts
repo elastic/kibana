@@ -13,7 +13,7 @@ import type {
   Severity,
   TriggerFeedback,
 } from '@kbn/significant-events-schema';
-import type { InvestigationTriggerType } from './workflows/triggers';
+import type { InvestigationSubjectType, InvestigationTriggerType } from './workflows/triggers';
 
 /**
  * Re-exported so consumers of these responses do not need their own dependency on
@@ -60,9 +60,13 @@ import type {
 export interface StartInvestigationRequest {
   subject: InvestigationSubject;
   /**
-   * What initiated the investigation. Defaults to "manual" when omitted.
+   * Human-readable headline shown in the investigations list and the details flyout from the
+   * moment the record exists. Seeded by the caller (significant event title, alert rule name,
+   * chat-supplied headline) and refined by the agent's structured output on completion.
    */
-  trigger_type?: InvestigationTriggerType;
+  title: string;
+  /** What initiated the investigation. */
+  trigger_type: InvestigationTriggerType;
   /**
    * Caller-supplied prompt for the investigation agent. Falls back to a generic
    * message derived from the subject when omitted.
@@ -88,6 +92,9 @@ export interface StartInvestigationResponse {
 
 /** Bound for investigation ids, concurrency keys, and other keyword-sized strings. */
 export const MAX_KEYWORD_LENGTH = 500;
+
+/** Subject id a manual investigation persists under when the caller supplies none. */
+export const DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID = 'manual';
 
 export const INVESTIGATION_STATUSES = [
   'pending',
@@ -120,12 +127,15 @@ export interface InvestigationStructuredOutput {
 /** Body of PATCH /internal/nightshift/investigations/{id}. */
 export interface UpdateInvestigationRequest extends InvestigationStructuredOutput {
   status: UpdatableInvestigationStatus;
+  /** Agent-refined headline; leaves the seeded title in place when omitted. */
+  title?: string;
   error?: string;
   conversation_id?: string;
 }
 
 export interface GetInvestigationResponse extends InvestigationStructuredOutput {
   investigation_id: string;
+  title: string;
   subject: InvestigationSubject;
   trigger_type?: InvestigationTriggerType;
   status: InvestigationStatus;
@@ -147,13 +157,20 @@ export interface InvestigationStatusEvent {
 
 export interface ListInvestigationsRequest {
   statuses?: InvestigationStatus[];
+  severities?: Severity[];
+  subject_types?: InvestigationSubjectType[];
+  /**
+   * Full-text query matched against title, subject_summary, summary, and conclusion.
+   */
+  query?: string;
+  concurrency_key?: string;
   created_after?: string;
   created_before?: string;
   started_after?: string;
   started_before?: string;
   completed_after?: string;
   completed_before?: string;
-  sort_field?: 'created_at' | 'completed_at';
+  sort_field?: 'created_at' | 'completed_at' | 'severity';
   sort_order?: 'asc' | 'desc';
   page?: number;
   size?: number;
@@ -162,6 +179,7 @@ export interface ListInvestigationsRequest {
 export type ListInvestigationItem = Pick<
   GetInvestigationResponse,
   | 'investigation_id'
+  | 'title'
   | 'status'
   | 'created_at'
   | 'started_at'
@@ -170,6 +188,8 @@ export type ListInvestigationItem = Pick<
   | 'concurrency_key'
   | 'executed_by'
   | 'subject'
+  | 'summary'
+  | 'impact'
 >;
 
 export interface PaginatedResponse<T> {
@@ -180,6 +200,24 @@ export interface PaginatedResponse<T> {
 }
 
 export type ListInvestigationsResponse = PaginatedResponse<ListInvestigationItem>;
+
+/** Counts of investigations at each severity tier, zero-filled for all four tiers. */
+export type SeverityCounts = Record<Severity, number>;
+
+export {
+  CORTEX_AI_INDEX_ID,
+  CORTEX_AI_INDEX_DEST,
+  CORTEX_ENTITY_TYPES,
+  CORTEX_PAGE_STATUSES,
+  CORTEX_ENTITY_TYPE_BUCKETS,
+  type CortexEntityType,
+  type CortexPageStatus,
+  type CortexPageSummary,
+  type CortexPage,
+  type CortexStats,
+  type ListCortexPagesResponse,
+  type GetCortexPageResponse,
+} from './cortex';
 
 export {
   INVESTIGATION_STARTED_TRIGGER_ID,

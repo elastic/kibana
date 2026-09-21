@@ -196,35 +196,28 @@ describe('run quota admission behavior', () => {
     await expect(repository.count('2026-08-31', 'detection')).resolves.toBe(2);
   });
 
-  it('allows and counts a caller-designated over-limit attempt', async () => {
+  it('denies investigations at a finite limit without incrementing', async () => {
     jest.useFakeTimers().setSystemTime(new Date('2026-08-31T12:00:00.000Z'));
     const repository = createRepository();
     await patchRunQuotaSettings(repository.client, {
       enabled: true,
-      limits: { detection: 1 },
+      limits: { investigation: 1 },
     });
 
     await expect(
       consumeRunQuota({
         internalRepository: repository.client,
-        group: 'detection',
+        group: 'investigation',
       })
     ).resolves.toEqual({ allowed: true });
     await expect(
       consumeRunQuota({
         internalRepository: repository.client,
-        group: 'detection',
+        group: 'investigation',
       })
     ).resolves.toEqual({ allowed: false });
-    await expect(
-      consumeRunQuota({
-        internalRepository: repository.client,
-        group: 'detection',
-        allowOverLimit: true,
-      })
-    ).resolves.toEqual({ allowed: true });
 
-    await expect(repository.count('2026-08-31', 'detection')).resolves.toBe(2);
+    await expect(repository.count('2026-08-31', 'investigation')).resolves.toBe(1);
   });
 
   it('never over-grants concurrent attempts competing for the final slot', async () => {

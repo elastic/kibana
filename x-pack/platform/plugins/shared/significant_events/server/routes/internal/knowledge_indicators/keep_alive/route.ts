@@ -7,9 +7,9 @@
 
 import { z } from '@kbn/zod/v4';
 import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
+import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
-import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 
 const keepAlivePersistentIndicatorsRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{streamName}/knowledge_indicators/_keep_alive',
@@ -19,7 +19,7 @@ const keepAlivePersistentIndicatorsRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -27,11 +27,12 @@ const keepAlivePersistentIndicatorsRoute = createServerRoute({
     body: z.object({ lastRefreshedBefore: z.iso.datetime() }),
   }),
   handler: async ({ params, request, getScopedClients, server }) => {
-    const { getKnowledgeIndicatorClient, licensing } = await getScopedClients({
+    const { getKnowledgeIndicatorClient, licensing, streamsClient } = await getScopedClients({
       request,
     });
 
     await assertSignificantEventsAccess({ server, licensing });
+    await streamsClient.ensureStream(params.path.streamName);
 
     const kiClient = await getKnowledgeIndicatorClient();
     const { refreshed } = await kiClient.keepAlivePersistentIndicators(params.path.streamName, {
