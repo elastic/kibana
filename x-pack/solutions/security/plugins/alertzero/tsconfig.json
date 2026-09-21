@@ -51,5 +51,7 @@
     "@kbn/shared-ux-error-boundary",
     "@kbn/proposals-common",
     "@kbn/proposals-plugin",
+    "@kbn/react-kibana-mount",
+    "@kbn/securitysolution-mitre-catalog"
   ]
 }
