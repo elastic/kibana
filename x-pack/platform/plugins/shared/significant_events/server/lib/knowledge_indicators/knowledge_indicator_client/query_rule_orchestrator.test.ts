@@ -9,7 +9,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { Logger } from '@kbn/core/server';
 import type { Streams } from '@kbn/streams-schema';
 import type { Feature, QueryLink, StreamQuery } from '@kbn/significant-events-schema';
-import type { IRulesManagementClient } from './rules/rules_management_client';
+import { BulkCreateRulesError, type IRulesManagementClient } from './rules/rules_management_client';
 import type { IndicatorReader } from './indicator_reader';
 import type { IndicatorWriter } from './indicator_writer';
 import { QueryRuleOrchestrator } from './query_rule_orchestrator';
@@ -62,15 +62,16 @@ function createOrchestrator({
     getStreamToQueryLinksMap: jest.fn().mockResolvedValue({ [STREAM]: currentLinks }),
   } as unknown as jest.Mocked<IndicatorReader>;
 
+  const logger = loggerMock.create();
   const orchestrator = new QueryRuleOrchestrator(
     rulesManagementClient,
-    loggerMock.create(),
+    logger,
     true,
     writer,
     reader
   );
 
-  return { orchestrator, rulesManagementClient, writer, reader };
+  return { orchestrator, rulesManagementClient, writer, reader, logger };
 }
 
 describe('QueryRuleOrchestrator', () => {
@@ -107,11 +108,16 @@ describe('QueryRuleOrchestrator', () => {
     it('compensates only actually created ids when a later chunk fails', async () => {
       const { orchestrator, rulesManagementClient, writer } = createOrchestrator();
       const createError = new Error('chunk 2 failed');
-      rulesManagementClient.bulkCreateRules
-        .mockResolvedValueOnce({ createdIds: ['rule-chunk1'] })
-        .mockRejectedValueOnce(createError);
+      let callCount = 0;
+      rulesManagementClient.bulkCreateRules.mockImplementation(async (rules) => {
+        callCount += 1;
+        if (callCount === 3) {
+          throw createError;
+        }
+        return { createdIds: rules.map(({ id }) => id) };
+      });
 
-      const queries = Array.from({ length: 101 }, (_, index) =>
+      const queries = Array.from({ length: 201 }, (_, index) =>
         makeQuery({
           id: `q-${index}`,
           severity_score: 80,
@@ -121,8 +127,61 @@ describe('QueryRuleOrchestrator', () => {
 
       await expect(orchestrator.syncQueries(definition, queries)).rejects.toBe(createError);
 
-      expect(rulesManagementClient.bulkDeleteRules).toHaveBeenCalledWith(['rule-chunk1']);
+      const createdChunks = rulesManagementClient.bulkCreateRules.mock.calls
+        .slice(0, 2)
+        .map(([rules]) => rules.map(({ id }) => id));
+      const deletedChunks = rulesManagementClient.bulkDeleteRules.mock.calls.map(([ids]) => ids);
+      expect(deletedChunks.map((ids) => ids.length)).toEqual([100, 51]);
+      expect(deletedChunks.flat()).toEqual(createdChunks.flat());
       expect(writer.bulk).not.toHaveBeenCalled();
+    });
+
+    it('compensates and logs same-batch partial results', async () => {
+      const { orchestrator, rulesManagementClient, writer, logger } = createOrchestrator();
+      const createError = new Error('one item failed');
+      rulesManagementClient.bulkCreateRules.mockRejectedValueOnce(
+        new BulkCreateRulesError(createError, ['rule-created'], ['rule-conflict'], ['rule-failed'])
+      );
+
+      await expect(
+        orchestrator.syncQueries(definition, [
+          makeQuery({
+            id: 'new-high',
+            severity_score: 80,
+            esql: { query: 'FROM logs | WHERE body.text:"critical"' },
+          }),
+        ])
+      ).rejects.toBe(createError);
+
+      expect(rulesManagementClient.bulkDeleteRules).toHaveBeenCalledWith(['rule-created']);
+      expect(writer.bulk).not.toHaveBeenCalled();
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Created IDs: ["rule-created"]. Conflict IDs: ["rule-conflict"]. Failed IDs: ["rule-failed"]. Error: one item failed'
+        )
+      );
+    });
+
+    it('chunks created-rule compensation when storage fails', async () => {
+      const { orchestrator, rulesManagementClient, writer } = createOrchestrator();
+      const storageError = new Error('storage failed');
+      writer.bulk.mockRejectedValueOnce(storageError);
+      const queries = Array.from({ length: 201 }, (_, index) =>
+        makeQuery({
+          id: `q-${index}`,
+          severity_score: 80,
+          esql: { query: `FROM logs | WHERE body.text:"error-${index}"` },
+        })
+      );
+
+      await expect(orchestrator.syncQueries(definition, queries)).rejects.toBe(storageError);
+
+      const createdIds = rulesManagementClient.bulkCreateRules.mock.calls.flatMap(([rules]) =>
+        rules.map(({ id }) => id)
+      );
+      const deletedChunks = rulesManagementClient.bulkDeleteRules.mock.calls.map(([ids]) => ids);
+      expect(deletedChunks.map((ids) => ids.length)).toEqual([100, 51, 50]);
+      expect(deletedChunks.flat()).toEqual(createdIds);
     });
 
     it('does not promote existing unbacked low-severity MATCH queries when syncing a new high-severity query', async () => {
@@ -176,6 +235,44 @@ describe('QueryRuleOrchestrator', () => {
       expect(rulesManagementClient.bulkCreateRules).toHaveBeenCalledTimes(1);
       const bulkOps = (writer.bulk as jest.Mock).mock.calls[0][1];
       expect(bulkOps[0].index.query.rule_backed).toBe(true);
+    });
+
+    it('chunks compensation when a later promotion chunk fails', async () => {
+      const links = Array.from({ length: 201 }, (_, index) =>
+        makeLink({
+          id: `promote-${index}`,
+          severity_score: 80,
+          esql: { query: `FROM logs | WHERE body.text:"error-${index}"` },
+          ruleBacked: false,
+        })
+      );
+      const { orchestrator, rulesManagementClient, writer } = createOrchestrator({
+        currentLinks: links,
+      });
+      const createError = new Error('promotion chunk failed');
+      let callCount = 0;
+      rulesManagementClient.bulkCreateRules.mockImplementation(async (rules) => {
+        callCount += 1;
+        if (callCount === 3) {
+          throw createError;
+        }
+        return { createdIds: rules.map(({ id }) => id) };
+      });
+
+      await expect(
+        orchestrator.promoteQueries(
+          definition,
+          links.map(({ query }) => query.id)
+        )
+      ).rejects.toBe(createError);
+
+      const createdChunks = rulesManagementClient.bulkCreateRules.mock.calls
+        .slice(0, 2)
+        .map(([rules]) => rules.map(({ id }) => id));
+      const deletedChunks = rulesManagementClient.bulkDeleteRules.mock.calls.map(([ids]) => ids);
+      expect(deletedChunks.map((ids) => ids.length)).toEqual([100, 51]);
+      expect(deletedChunks.flat()).toEqual(createdChunks.flat());
+      expect(writer.bulk).not.toHaveBeenCalled();
     });
 
     it('stores unsupported MATCH queries as unbacked instead of failing install', async () => {

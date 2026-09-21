@@ -16,6 +16,7 @@ import {
 } from '../../../significant_events/rules/metric_series_contract';
 import { getMetricSeriesRuleSchedule } from '../../../significant_events/rules/schedule';
 import {
+  BulkCreateRulesError,
   STREAMS_RULE_STREAM_TAG_PREFIX,
   streamNameFromTag,
   toStreamTag,
@@ -91,6 +92,11 @@ export class RulesAdapterV2 implements IRulesManagementClient {
       })),
     });
 
+    const createdIds = created.map(({ id }) => id);
+    const conflicts = errors.filter(
+      ({ error }) => error.code === ALERTING_ERROR_CODES.RULE_ALREADY_EXISTS
+    );
+    const conflictIds = conflicts.map(({ id }) => id);
     const fatal = errors.filter(
       ({ error }) => error.code !== ALERTING_ERROR_CODES.RULE_ALREADY_EXISTS
     );
@@ -98,14 +104,16 @@ export class RulesAdapterV2 implements IRulesManagementClient {
       const detail = fatal
         .map(({ id, error }) => `${id} [${error.code}]: ${error.message}`)
         .join('; ');
-      throw new Error(`V2 bulk create failed for ${fatal.length} rule(s): ${detail}`);
+      throw new BulkCreateRulesError(
+        new Error(`V2 bulk create failed for ${fatal.length} rule(s): ${detail}`),
+        createdIds,
+        conflictIds,
+        fatal.map(({ id }) => id)
+      );
     }
 
-    const conflicts = errors.filter(
-      ({ error }) => error.code === ALERTING_ERROR_CODES.RULE_ALREADY_EXISTS
-    );
     const limit = pLimit(CONFLICT_UPDATE_CONCURRENCY);
-    await Promise.all(
+    const updateResults = await Promise.allSettled(
       conflicts.map(({ id }) =>
         limit(async () => {
           const definition = definitionsById.get(id);
@@ -117,7 +125,30 @@ export class RulesAdapterV2 implements IRulesManagementClient {
       )
     );
 
-    return { createdIds: created.map(({ id }) => id) };
+    const updateFailures: Array<{ id: string; cause: Error }> = [];
+    for (const [index, result] of updateResults.entries()) {
+      if (result.status === 'rejected') {
+        const id = conflictIds[index];
+        if (!id) {
+          continue;
+        }
+        updateFailures.push({
+          id,
+          cause: result.reason instanceof Error ? result.reason : new Error(String(result.reason)),
+        });
+      }
+    }
+    const [firstUpdateFailure] = updateFailures;
+    if (firstUpdateFailure) {
+      throw new BulkCreateRulesError(
+        firstUpdateFailure.cause,
+        createdIds,
+        conflictIds,
+        updateFailures.map(({ id }) => id)
+      );
+    }
+
+    return { createdIds };
   }
 
   async updateRule(id: string, definition: SignificantEventsRuleDefinition): Promise<void> {

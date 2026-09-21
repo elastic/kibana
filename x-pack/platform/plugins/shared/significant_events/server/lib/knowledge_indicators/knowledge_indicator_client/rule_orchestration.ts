@@ -9,6 +9,7 @@ import { MAX_BULK_ITEMS, MAX_NAME_LENGTH } from '@kbn/alerting-v2-schemas';
 import type { QueryLink } from '@kbn/significant-events-schema';
 import pLimit from 'p-limit';
 import {
+  BulkCreateRulesError,
   type IRulesManagementClient,
   type SignificantEventsRuleDefinition,
 } from './rules/rules_management_client';
@@ -19,7 +20,12 @@ import { getMetricSeriesRuleSchedule } from '../../significant_events/rules/sche
 const RULE_INSTALL_CONCURRENCY = 10;
 
 export class InstallQueriesError extends Error {
-  constructor(public readonly cause: Error, public readonly createdIds: string[]) {
+  constructor(
+    public readonly cause: Error,
+    public readonly createdIds: string[],
+    public readonly conflictIds: string[],
+    public readonly failedIds: string[]
+  ) {
     super(cause.message);
     this.name = 'InstallQueriesError';
   }
@@ -50,7 +56,7 @@ export function toRuleDefinition(queryLink: QueryLink): SignificantEventsRuleDef
   };
 }
 
-// Splits into chunks of up to maxItems, rebalancing the last two to avoid a singleton tail (which gets no jitter from bulkSchedule).
+// Rebalances the last two chunks to avoid a singleton tail, which gets no bulkSchedule jitter.
 function partitionForBulk<T>(items: T[], maxItems: number): T[][] {
   const chunks: T[][] = [];
   for (let index = 0; index < items.length; index += maxItems) {
@@ -72,37 +78,80 @@ export async function installQueries(
   client: IRulesManagementClient,
   queriesToCreate: QueryLink[],
   queriesToUpdate: QueryLink[]
-): Promise<{ createdIds: string[] }> {
+): Promise<{ createdIds: string[]; conflictIds: string[] }> {
   const createdIds: string[] = [];
+  const conflictIds: string[] = [];
+  let attemptedIds: string[] = [];
 
-  if (queriesToCreate.length > 0) {
-    const rules = queriesToCreate.map((queryLink) => ({
-      id: queryLink.rule_id,
-      definition: toRuleDefinition(queryLink),
-    }));
-    try {
+  try {
+    if (queriesToCreate.length > 0) {
+      const rules = queriesToCreate.map((queryLink) => ({
+        id: queryLink.rule_id,
+        definition: toRuleDefinition(queryLink),
+      }));
       for (const chunk of partitionForBulk(rules, MAX_BULK_ITEMS)) {
+        attemptedIds = chunk.map(({ id }) => id);
         const { createdIds: chunkIds } = await client.bulkCreateRules(chunk);
         createdIds.push(...chunkIds);
+        const chunkCreatedIds = new Set(chunkIds);
+        conflictIds.push(...attemptedIds.filter((id) => !chunkCreatedIds.has(id)));
       }
-    } catch (error) {
+    }
+
+    attemptedIds = [];
+    if (queriesToUpdate.length > 0) {
+      const limiter = pLimit(RULE_INSTALL_CONCURRENCY);
+      const updateIds = queriesToUpdate.map(({ rule_id: ruleId }) => ruleId);
+      const updateResults = await Promise.allSettled(
+        queriesToUpdate.map((queryLink) =>
+          limiter(() => client.updateRule(queryLink.rule_id, toRuleDefinition(queryLink)))
+        )
+      );
+      const updateFailures: Array<{ id: string; cause: Error }> = [];
+      for (const [index, result] of updateResults.entries()) {
+        if (result.status === 'rejected') {
+          const id = updateIds[index];
+          if (!id) {
+            continue;
+          }
+          updateFailures.push({
+            id,
+            cause:
+              result.reason instanceof Error ? result.reason : new Error(String(result.reason)),
+          });
+        }
+      }
+      const [firstUpdateFailure] = updateFailures;
+      if (firstUpdateFailure) {
+        throw new InstallQueriesError(
+          firstUpdateFailure.cause,
+          createdIds,
+          conflictIds,
+          updateFailures.map(({ id }) => id)
+        );
+      }
+    }
+  } catch (error) {
+    if (error instanceof InstallQueriesError) {
+      throw error;
+    }
+    if (error instanceof BulkCreateRulesError) {
       throw new InstallQueriesError(
-        error instanceof Error ? error : new Error(String(error)),
-        createdIds
+        error.cause,
+        [...createdIds, ...error.createdIds],
+        [...conflictIds, ...error.conflictIds],
+        error.failedIds
       );
     }
-  }
-
-  if (queriesToUpdate.length > 0) {
-    const limiter = pLimit(RULE_INSTALL_CONCURRENCY);
-    await Promise.all(
-      queriesToUpdate.map((queryLink) =>
-        limiter(() => client.updateRule(queryLink.rule_id, toRuleDefinition(queryLink)))
-      )
+    throw new InstallQueriesError(
+      error instanceof Error ? error : new Error(String(error)),
+      createdIds,
+      conflictIds,
+      attemptedIds
     );
   }
 
-  return { createdIds };
+  return { createdIds, conflictIds };
 }
 
 export async function uninstallQueries(
@@ -114,6 +163,13 @@ export async function uninstallQueries(
   }
 
   const ruleIds = queries.map((q) => q.rule_id);
+  await uninstallRuleIds(client, ruleIds);
+}
+
+export async function uninstallRuleIds(
+  client: IRulesManagementClient,
+  ruleIds: string[]
+): Promise<void> {
   if (ruleIds.length === 0) {
     return;
   }

@@ -11,6 +11,7 @@ import { ALERTING_ERROR_CODES } from '@kbn/alerting-v2-plugin/server';
 import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
 import { RulesAdapterV2, type RulesAdapterV2Params } from './v2_rules_adapter';
 import {
+  BulkCreateRulesError,
   STREAMS_RULE_STREAM_TAG_PREFIX,
   type SignificantEventsRuleDefinition,
 } from './rules_management_client';
@@ -307,7 +308,7 @@ describe('RulesAdapterV2', () => {
     it('skips conflict updates and throws when fatal errors are present', async () => {
       const mock = makeRulesClientMock();
       mock.bulkCreateRules.mockResolvedValue({
-        rules: [],
+        rules: [{ id: 'rule-created' }],
         errors: [
           {
             id: 'rule-conflict',
@@ -327,20 +328,32 @@ describe('RulesAdapterV2', () => {
       } as never);
       const adapter = makeAdapter(mock);
 
-      await expect(
-        adapter.bulkCreateRules([
+      const thrown = await adapter
+        .bulkCreateRules([
+          { id: 'rule-created', definition: createDefinition },
           { id: 'rule-conflict', definition: createDefinition },
           { id: 'rule-failed', definition: updateDefinition },
         ])
-      ).rejects.toThrow('rule-failed [INTERNAL_SERVER_ERROR]: storage unavailable');
+        .catch((error) => error);
+
+      expect(thrown).toBeInstanceOf(BulkCreateRulesError);
+      expect(thrown).toMatchObject({
+        createdIds: ['rule-created'],
+        conflictIds: ['rule-conflict'],
+        failedIds: ['rule-failed'],
+      });
+      expect(thrown.cause).toHaveProperty(
+        'message',
+        expect.stringContaining('rule-failed [INTERNAL_SERVER_ERROR]: storage unavailable')
+      );
       expect(mock.updateRule).not.toHaveBeenCalled();
     });
 
-    it('propagates a failed conflict update', async () => {
+    it('preserves created and conflict ids when a conflict update fails', async () => {
       const mock = makeRulesClientMock();
       const updateError = Boom.serverUnavailable('update failed');
       mock.bulkCreateRules.mockResolvedValue({
-        rules: [],
+        rules: [{ id: 'rule-created' }],
         errors: [
           {
             id: 'rule-1',
@@ -354,9 +367,20 @@ describe('RulesAdapterV2', () => {
       mock.updateRule.mockRejectedValue(updateError);
       const adapter = makeAdapter(mock);
 
-      await expect(
-        adapter.bulkCreateRules([{ id: 'rule-1', definition: createDefinition }])
-      ).rejects.toBe(updateError);
+      const thrown = await adapter
+        .bulkCreateRules([
+          { id: 'rule-created', definition: createDefinition },
+          { id: 'rule-1', definition: createDefinition },
+        ])
+        .catch((error) => error);
+
+      expect(thrown).toBeInstanceOf(BulkCreateRulesError);
+      expect(thrown).toMatchObject({
+        cause: updateError,
+        createdIds: ['rule-created'],
+        conflictIds: ['rule-1'],
+        failedIds: ['rule-1'],
+      });
     });
 
     it('propagates whole-request failures unchanged', async () => {

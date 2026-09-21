@@ -15,6 +15,18 @@ export const streamNameFromTag = (tag: string): string | undefined =>
     ? tag.slice(STREAMS_RULE_STREAM_TAG_PREFIX.length)
     : undefined;
 
+export class BulkCreateRulesError extends Error {
+  constructor(
+    public readonly cause: Error,
+    public readonly createdIds: string[],
+    public readonly conflictIds: string[],
+    public readonly failedIds: string[]
+  ) {
+    super(cause.message);
+    this.name = 'BulkCreateRulesError';
+  }
+}
+
 /**
  * Narrow interface that decouples QueryClient from the Alerting v2 client.
  */
