@@ -23,6 +23,7 @@ export const getConfigurationTelemetryData = async ({
     { customFields: ConfigurationPersistedAttributes['customFields']; owner: Owner },
     {
       closureType: Buckets;
+      extractObservables: Buckets;
     }
   >({
     page: 1,
@@ -33,10 +34,17 @@ export const getConfigurationTelemetryData = async ({
       closureType: {
         terms: { field: `${CASE_CONFIGURE_SAVED_OBJECT}.attributes.closure_type` },
       },
+      extractObservables: {
+        terms: { field: `${CASE_CONFIGURE_SAVED_OBJECT}.attributes.extractObservables` },
+      },
     },
   });
 
   const closureBuckets = res.aggregations?.closureType?.buckets ?? [];
+  const extractObservablesBuckets = res.aggregations?.extractObservables?.buckets ?? [];
+
+  const extractObservablesDefaultOff = findValueInBuckets(extractObservablesBuckets, 0);
+  const extractObservablesDefaultOn = res.total - extractObservablesDefaultOff;
 
   const allCustomFields = res.saved_objects
     .map((sObj) => sObj.attributes.customFields)
@@ -58,6 +66,8 @@ export const getConfigurationTelemetryData = async ({
         manually: findValueInBuckets(closureBuckets, 'close-by-user'),
         automatic: findValueInBuckets(closureBuckets, 'close-by-pushing'),
       },
+      extractObservablesDefaultOn,
+      extractObservablesDefaultOff,
       customFields: getCustomFieldsTelemetry(
         allCustomFields as ConfigurationPersistedAttributes['customFields']
       ),
