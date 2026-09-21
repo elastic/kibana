@@ -107,8 +107,8 @@ const WORKDAY_MANAGER_ID_FIELD = 'workday.user.Manager_ID';
 const WORKDAY_NAMESPACE = 'workday';
 /**
  * Generous against a 24h poll: tolerates sync outages and backfills without
- * losing edges. Declared once as a day count so the DSL and ES|QL forms of the
- * same window cannot drift — Step 1 and Step 2 must narrow identically.
+ * losing relationships. Declared once as a day count so the DSL and ES|QL forms
+ * of the same window cannot drift — Step 1 and Step 2 must narrow identically.
  */
 const WORKDAY_INGESTED_LOOKBACK_DAYS = 30;
 const WORKDAY_INGESTED_LOOKBACK_DSL = `now-${WORKDAY_INGESTED_LOOKBACK_DAYS}d`;

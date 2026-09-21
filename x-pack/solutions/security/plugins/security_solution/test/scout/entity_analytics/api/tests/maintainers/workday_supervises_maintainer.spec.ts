@@ -227,7 +227,7 @@ apiTest.describe(
     );
 
     apiTest(
-      'drops the edge when the manager is not in the entity store',
+      'drops the relationship when the manager is not in the entity store',
       async ({ apiClient, esClient }) => {
         const runId = randomUUID().slice(0, 8);
         const reportEmail = `orphan.${runId}@example.com`;
@@ -263,8 +263,8 @@ apiTest.describe(
       'resolves a worker whose Hire_Date is years old but whose event.ingested is recent',
       async ({ apiClient, esClient }) => {
         // Regression guard for the Hire_Date trap: if the config ever falls back
-        // to the engine's @timestamp lookback, this row is excluded and no edge
-        // is written.
+        // to the engine's @timestamp lookback, this row is excluded and no
+        // relationship is written.
         const runId = randomUUID().slice(0, 8);
         const managerEmail = `tenured.mgr.${runId}@example.com`;
         const reportEmail = `tenured.${runId}@example.com`;
@@ -298,9 +298,10 @@ apiTest.describe(
         // Covers the production-dominant shape: real Workday rows populate both
         // Manager_Email and Manager_ID, so the managerKey CASE takes the
         // MV_APPEND branch and expands two actor EUIDs per report. The email-
-        // keyed actor matches the entity in the store and receives the edge; the
-        // id-keyed actor (user:<managerId>@workday) 404s because no entity with
-        // that EUID was seeded — that 404 is the intended drop path, not a bug.
+        // keyed actor matches the entity in the store and receives the
+        // relationship; the id-keyed actor (user:<managerId>@workday) 404s
+        // because no entity with that EUID was seeded — that 404 is the
+        // intended drop path, not a bug.
         const runId = randomUUID().slice(0, 8);
         const managerEmail = `dual.mgr.${runId}@example.com`;
         const managerId = `000687-${runId}`;
@@ -326,12 +327,12 @@ apiTest.describe(
 
         await triggerMaintainerRun(apiClient, internalHeaders, MAINTAINER_ID, { sync: true });
 
-        // The email-keyed actor has an entity and must receive the supervises edge.
+        // The email-keyed actor has an entity and must receive the supervises target.
         await waitForRelationshipIds(esClient, RELATIONSHIP_KEY, managerEntityId, reportEntityId);
         const ids = await getRelationshipIds(esClient, RELATIONSHIP_KEY, managerEntityId);
         expect(ids).toStrictEqual([reportEntityId]);
 
-        // The id-keyed actor has no entity; its write 404s and must produce no edge.
+        // The id-keyed actor has no entity; its write 404s and must produce nothing.
         await assertNoRelationshipId(esClient, RELATIONSHIP_KEY, managerIdEntityId, reportEntityId);
       }
     );
