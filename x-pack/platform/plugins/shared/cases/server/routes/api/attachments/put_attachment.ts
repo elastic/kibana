@@ -22,7 +22,7 @@ import { createIoTsRouteValidation } from '../utils';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 
 export const putAttachmentRoute = createCasesRoute<
-  { case_id: string; attachment_id: string },
+  { case_id: string; id: string },
   unknown,
   UnifiedAttachmentPutRequest
 >({
@@ -32,7 +32,7 @@ export const putAttachmentRoute = createCasesRoute<
   params: {
     params: schema.object({
       case_id: schema.string({ maxLength: MAX_CASE_ID_LENGTH }),
-      attachment_id: schema.string({ maxLength: MAX_ATTACHMENT_ID_LENGTH }),
+      id: schema.string({ maxLength: MAX_ATTACHMENT_ID_LENGTH }),
     }),
     body: createIoTsRouteValidation(UnifiedAttachmentPutRequestRt),
   },
@@ -47,12 +47,11 @@ export const putAttachmentRoute = createCasesRoute<
     try {
       const caseContext = await context.cases;
       const client = await caseContext.getCasesClient();
-      const caseID = request.params.case_id;
-      const attachmentId = request.params.attachment_id;
+      const { case_id: caseID, id } = request.params;
 
       const attachment: attachmentDomainV2.UnifiedAttachment = await client.attachments.update({
         caseID,
-        updateRequest: { ...request.body, id: attachmentId },
+        updateRequest: { ...request.body, id },
       });
 
       return response.ok({
@@ -60,7 +59,7 @@ export const putAttachmentRoute = createCasesRoute<
       });
     } catch (error) {
       throw createCaseError({
-        message: `Failed to replace attachment in route case id: ${request.params.case_id} attachment id: ${request.params.attachment_id}: ${error}`,
+        message: `Failed to replace attachment in route case id: ${request.params.case_id} id: ${request.params.id}: ${error}`,
         error,
       });
     }
