@@ -7,7 +7,11 @@
 
 import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
 import type { SeverityThreshold } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
-import { getSeverityThresholdMax, resolveSeverityFormat } from './severity_threshold';
+import {
+  getCanonicalBandsOverlappingFloor,
+  getSeverityThresholdMax,
+  resolveSeverityFormat,
+} from './severity_threshold';
 
 describe('getSeverityThresholdMax', () => {
   it('returns the upper bound for a ranged threshold', () => {
@@ -73,5 +77,33 @@ describe('resolveSeverityFormat', () => {
     const result = resolveSeverityFormat(oldFormatValue);
 
     expect(result).toEqual([]);
+  });
+});
+
+describe('getCanonicalBandsOverlappingFloor', () => {
+  const canonicalBands: SeverityThreshold[] = [
+    { min: ML_ANOMALY_THRESHOLD.LOW, max: ML_ANOMALY_THRESHOLD.WARNING },
+    { min: ML_ANOMALY_THRESHOLD.WARNING, max: ML_ANOMALY_THRESHOLD.MINOR },
+    { min: ML_ANOMALY_THRESHOLD.MINOR, max: ML_ANOMALY_THRESHOLD.MAJOR },
+    { min: ML_ANOMALY_THRESHOLD.MAJOR, max: ML_ANOMALY_THRESHOLD.CRITICAL },
+    { min: ML_ANOMALY_THRESHOLD.CRITICAL },
+  ];
+
+  it('selects minor and above for a custom floor of 30', () => {
+    expect(getCanonicalBandsOverlappingFloor(30, canonicalBands)).toEqual([
+      { min: ML_ANOMALY_THRESHOLD.MINOR, max: ML_ANOMALY_THRESHOLD.MAJOR },
+      { min: ML_ANOMALY_THRESHOLD.MAJOR, max: ML_ANOMALY_THRESHOLD.CRITICAL },
+      { min: ML_ANOMALY_THRESHOLD.CRITICAL },
+    ]);
+  });
+
+  it('selects only critical for a floor of 75', () => {
+    expect(getCanonicalBandsOverlappingFloor(75, canonicalBands)).toEqual([
+      { min: ML_ANOMALY_THRESHOLD.CRITICAL },
+    ]);
+  });
+
+  it('selects every band for a floor of 0', () => {
+    expect(getCanonicalBandsOverlappingFloor(0, canonicalBands)).toEqual(canonicalBands);
   });
 });

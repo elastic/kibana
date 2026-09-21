@@ -21,9 +21,9 @@ const createMlMock = () => ({
   putDatafeed: jest.fn().mockResolvedValue({ datafeed_id: 'datafeed-test-job' }),
 });
 
-const createContext = (mlMock = createMlMock()) =>
+const createContext = (mlMock = createMlMock(), search = jest.fn()) =>
   ({
-    esClient: { asCurrentUser: { ml: mlMock } },
+    esClient: { asCurrentUser: { ml: mlMock, search } },
     request: {},
   } as any);
 
@@ -126,8 +126,71 @@ describe('adCreateJobTool', () => {
 
       expect(ml.putDatafeed).toHaveBeenCalledWith({
         datafeed_id: 'datafeed-my-job',
-        body: { job_id: 'my-job', ...datafeedConfig },
+        body: { ...datafeedConfig, job_id: 'my-job' },
       });
+    });
+
+    it('operation=create_datafeed uses the explicit job_id over datafeed_config.job_id', async () => {
+      const ml = createMlMock();
+      const datafeedConfig = { indices: ['logs-*'], job_id: 'stale-job' };
+
+      await adCreateJobTool.handler(
+        { operation: 'create_datafeed', job_id: 'my-job', datafeed_config: datafeedConfig },
+        createContext(ml)
+      );
+
+      expect(ml.putDatafeed).toHaveBeenCalledWith({
+        datafeed_id: 'datafeed-my-job',
+        body: { indices: ['logs-*'], job_id: 'my-job' },
+      });
+    });
+
+    it('operation=estimate_memory returns an error when cardinality lookup fails', async () => {
+      const ml = createMlMock();
+      const search = jest.fn().mockRejectedValue(new Error('index_not_found_exception'));
+      const result = await adCreateJobTool.handler(
+        {
+          operation: 'estimate_memory',
+          job_config: {
+            analysis_config: { detectors: [{ function: 'mean', partition_field_name: 'host' }] },
+          },
+          datafeed_config: { indices: ['logs-*'] },
+        },
+        createContext(ml, search)
+      );
+
+      expect(ml.estimateModelMemory).not.toHaveBeenCalled();
+      const standardResult = result as {
+        results: Array<{ type: string; data: { message: string } }>;
+      };
+      expect(standardResult.results[0].type).toBe(ToolResultType.error);
+      expect(standardResult.results[0].data.message).toMatch(
+        'Cannot estimate memory: failed to look up cardinality for field "host"'
+      );
+    });
+
+    it('operation=estimate_memory returns an error when the cardinality aggregation is missing', async () => {
+      const ml = createMlMock();
+      const search = jest.fn().mockResolvedValue({ aggregations: {} });
+      const result = await adCreateJobTool.handler(
+        {
+          operation: 'estimate_memory',
+          job_config: {
+            analysis_config: { detectors: [{ function: 'mean', by_field_name: 'host' }] },
+          },
+          datafeed_config: { indices: ['logs-*'] },
+        },
+        createContext(ml, search)
+      );
+
+      expect(ml.estimateModelMemory).not.toHaveBeenCalled();
+      const standardResult = result as {
+        results: Array<{ type: string; data: { message: string } }>;
+      };
+      expect(standardResult.results[0].type).toBe(ToolResultType.error);
+      expect(standardResult.results[0].data.message).toMatch(
+        'cardinality aggregation for field "host" was missing'
+      );
     });
 
     it('returns error result when ML client throws', async () => {

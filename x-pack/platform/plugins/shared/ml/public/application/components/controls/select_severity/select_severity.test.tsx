@@ -7,7 +7,7 @@
 import React, { useState } from 'react';
 import { render, act, fireEvent, waitFor } from '@testing-library/react';
 
-import { SelectSeverity } from './select_severity';
+import { SelectSeverity, SelectSeverityUI } from './select_severity';
 import type { SeverityOption } from '../../../explorer/hooks/use_severity_options';
 
 // Mock severity options that match the structure from useSeverityOptions
@@ -198,5 +198,43 @@ describe('SelectSeverity', () => {
     const control = getByTestId('mlAnomalySeverityThresholdControls');
 
     expect(control).toHaveTextContent('25-50');
+  });
+});
+
+describe('SelectSeverityUI', () => {
+  it('displays a custom open-ended floor as N-100 and checks overlapping bands', async () => {
+    const { getByTestId, getByRole } = render(
+      <SelectSeverityUI severity={[{ min: 30 }]} onChange={jest.fn()} />
+    );
+
+    const control = getByTestId('mlAnomalySeverityThresholdControls');
+    expect(control).toHaveTextContent('30-100');
+    expect(control).not.toHaveTextContent('Multiple');
+
+    const button = control.querySelector('button');
+    expect(button).toBeInTheDocument();
+    act(() => {
+      fireEvent.click(button!);
+    });
+
+    await waitFor(() => {
+      expect(getByRole('option', { name: '25-50' })).toBeInTheDocument();
+    });
+
+    expect(getByRole('option', { name: '0-3' })).toHaveAttribute('aria-checked', 'false');
+    expect(getByRole('option', { name: '3-25' })).toHaveAttribute('aria-checked', 'false');
+    expect(getByRole('option', { name: '25-50' })).toHaveAttribute('aria-checked', 'true');
+    expect(getByRole('option', { name: '50-75' })).toHaveAttribute('aria-checked', 'true');
+    expect(getByRole('option', { name: '75-100' })).toHaveAttribute('aria-checked', 'true');
+  });
+
+  it('displays the canonical critical band as 75-100', () => {
+    const { getByTestId } = render(
+      <SelectSeverityUI severity={[{ min: 75 }]} onChange={jest.fn()} />
+    );
+
+    const control = getByTestId('mlAnomalySeverityThresholdControls');
+    expect(control).toHaveTextContent('75-100');
+    expect(control).not.toHaveTextContent('Multiple');
   });
 });

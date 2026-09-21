@@ -50,9 +50,17 @@ export const createAnomalyDetectionSkill = (
     getRegistryTools: () => [
       // Source-data ES|QL (RCA evidence, ingest latency) still needs the current-user tool.
       'platform.core.execute_esql',
+      // Batch / go-live workflows generate anomaly swim lane, charts, and SMV panels.
+      'platform.dashboard.generate_dashboard',
     ],
     getInlineTools: () => [
-      createAdGetJobInfoTool(resolveMlCapabilities, authorization, mlLicense, enabledFeatures),
+      createAdGetJobInfoTool(
+        resolveMlCapabilities,
+        authorization,
+        mlLicense,
+        enabledFeatures,
+        buildMlClient
+      ),
       createAdCreateJobTool(
         resolveMlCapabilities,
         authorization,

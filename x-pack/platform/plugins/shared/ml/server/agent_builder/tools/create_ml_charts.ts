@@ -10,6 +10,8 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { createErrorResult, getToolResultId } from '@kbn/agent-builder-server';
+import { mlEntityFieldValueSchema } from '@kbn/ml-anomaly-utils/schemas';
+import { MAX_STRING_LENGTH } from '@kbn/ml-server-schemas/constants';
 import type { SeverityThreshold } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
 import type { ResolveMlCapabilities } from '@kbn/ml-common-types/capabilities';
 import type { MlLicense } from '../../../common/license';
@@ -70,7 +72,7 @@ const schema = z.object({
       '(single_metric_viewer only) Zero-based index of the detector within the job. Use the detector_index from the anomaly record. Defaults to 0.'
     ),
   selected_entities: z
-    .record(z.string().max(1000), z.union([z.string(), z.number(), z.boolean()]).optional())
+    .record(z.string().max(MAX_STRING_LENGTH), mlEntityFieldValueSchema.optional())
     .optional()
     .describe(
       '(single_metric_viewer only) Key-value map of partition/by/over field → value (e.g. {"host.name": "web-01"}). Populate from anomaly record fields (partition_field_value, by_field_value, over_field_value) from prior RCA results.'

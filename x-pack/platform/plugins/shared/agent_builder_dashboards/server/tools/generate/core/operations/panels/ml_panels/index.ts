@@ -57,7 +57,9 @@ export const anomalyChartsPanelConfigSchema = z.object({
         .number()
         .min(0)
         .max(100)
-        .describe('Minimum anomaly score (0–100) to display. Defaults to 25 when omitted.'),
+        .describe(
+          'Minimum anomaly score (0–100) to display. Omit to show all scores. Typical values: 25 (minor+), 50 (major+), 75 (critical only).'
+        ),
       z.array(severityThresholdSchema).max(5),
     ])
     .optional()

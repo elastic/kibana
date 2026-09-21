@@ -148,4 +148,24 @@ describe('createMlChartsTool', () => {
     expect(mlClient.getJobs).toHaveBeenCalledWith({ job_id: 'job-1' });
     expect(asCurrentUserGetJobs).not.toHaveBeenCalled();
   });
+
+  it('rejects boolean selected_entities values that the attachment schema cannot render', () => {
+    expect(() =>
+      createMlChartsToolInstance.schema.parse({
+        chart_type: 'single_metric_viewer',
+        job_ids: ['job-1'],
+        selected_entities: { 'host.name': true },
+      })
+    ).toThrow();
+  });
+
+  it('accepts selected_entities values that match the embeddable schema', () => {
+    expect(
+      createMlChartsToolInstance.schema.parse({
+        chart_type: 'single_metric_viewer',
+        job_ids: ['job-1'],
+        selected_entities: { 'host.name': 'web-01', bytes: 1024 },
+      }).selected_entities
+    ).toEqual({ 'host.name': 'web-01', bytes: 1024 });
+  });
 });

@@ -405,7 +405,7 @@ Revise the first-pass config from Phase 1 based on answers. Return to this phase
 **Entry:** triggered automatically at the end of Phase 4 step 5 (or immediately after rendering the dashboard if the user requested it manually). Do not wait for the user to prompt this. Ask: *"Do these results look right to you?"*
 
 **If yes:**
-1. Create a new job set with the same configuration but without a historical `end` — running from now onwards. Use a distinct `job_id` (append `-realtime` or similar).
+1. Create a new job set with the same configuration but without a historical `end` — running from now onwards. Use a distinct `job_id` (append `-realtime` or similar). **Remove `ml-agent-scratch` from the realtime job's `groups`** — that group marks the batch job as temporary and must not be copied onto the permanent job.
 2. **Update the dashboard** — regenerate the inline dashboard (from Phase 4) replacing the batch job IDs with the new realtime job IDs. Keep the same three-panel layout but omit `time_range` on each panel so they track the live time range.
 3. **Offer batch job cleanup** — the batch/historical jobs created during this session are now superseded. Ask the user to confirm before deleting them, naming each job ID explicitly. This is a destructive action — do not delete without explicit approval. If approved, `ml.ad_manage_job_state` (`stop_datafeed`) → `ml.ad_manage_job_state` (`close_job`) → `ml.ad_manage_job_state` (`delete_job`) for each batch job. Batch jobs are tagged `ml-agent-scratch` (set in Phase 3) so no special flags are needed for deletion.
 4. **Offer alerting** — ask: *"Would you like to set up alerting rules so you're notified when anomaly scores exceed a threshold on the new jobs?"*
@@ -630,7 +630,7 @@ Multi-series time series — one chart per anomalous entity/series — showing a
 | --- | --- |
 | `title` | Optional. Descriptive panel title. Use the pattern `"Anomaly charts of <job-id>"`, appending `" with severity > <N>"` when a threshold is set. |
 | `job_ids` | Required. One or more existing job or group IDs. |
-| `severity_threshold` | Optional. Minimum anomaly score (0–100) to surface. Default 25; raise to 50 or 75 to focus on high-severity series. |
+| `severity_threshold` | Optional. Minimum anomaly score (0–100) to surface. Omit to show all anomalies. Typical values: `25` (minor and above), `50` (major and above), `75` (critical only). |
 | `time_range` | Set to the analysis window (`{"from": "...", "to": "..."}`) for historical/batch jobs — omitting it defaults the panel to "last 15 minutes" which shows no data. Omit only for realtime jobs that should track the current time range. |
 
 ### `ml_single_metric_viewer`

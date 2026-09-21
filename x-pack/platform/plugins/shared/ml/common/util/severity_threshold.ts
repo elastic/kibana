@@ -39,6 +39,25 @@ export const getSeverityRangeDisplay = (val: number): string => {
 export const getSeverityThresholdMax = (threshold: SeverityThreshold): number | undefined =>
   'max' in threshold ? threshold.max : undefined;
 
+export const isOpenEndedSeverityThreshold = (
+  threshold: SeverityThreshold
+): threshold is { min: number } => !('max' in threshold);
+
+/**
+ * Canonical bands whose score range overlaps `[floor, 100]`.
+ * Agent-builder charts persist a single open-ended `{ min }` filter; the severity
+ * selector only understands canonical min/max bands, so this mapping is used to
+ * represent that floor in the control without changing the fetch threshold.
+ */
+export const getCanonicalBandsOverlappingFloor = (
+  floor: number,
+  canonicalBands: SeverityThreshold[]
+): SeverityThreshold[] =>
+  canonicalBands.filter((band) => {
+    const max = getSeverityThresholdMax(band);
+    return max === undefined || max > floor;
+  });
+
 /**
  * Utility function to resolve severity format from old to new format
  * @param value - The severity value which could be in old (number) or new (array) format

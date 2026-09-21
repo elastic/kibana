@@ -20,8 +20,10 @@ import type { SeverityThreshold } from '@kbn/ml-server-schemas/embeddables/anoma
 import { MultiSuperSelect } from '../../multi_super_select/multi_super_select';
 import { useSeverityOptions } from '../../../explorer/hooks/use_severity_options';
 import {
+  getCanonicalBandsOverlappingFloor,
   getSeverityRangeDisplay,
   getSeverityThresholdMax,
+  isOpenEndedSeverityThreshold,
   resolveSeverityFormat,
 } from '../../../../../common/util/severity_threshold';
 
@@ -130,28 +132,63 @@ export const SelectSeverityUI: FC<
 > = ({ classNames = '', severity, onChange }) => {
   const { euiTheme } = useEuiTheme();
   const allSeverityOptions = useSeverityOptions();
-  const selectedSeverities = useMemo(
-    () =>
-      allSeverityOptions.filter((option) =>
-        severity.some(
-          (threshold) =>
-            threshold.min === option.threshold.min &&
-            getSeverityThresholdMax(threshold) === getSeverityThresholdMax(option.threshold)
+  const selectedSeverities = useMemo(() => {
+    if (severity.length === 1 && isOpenEndedSeverityThreshold(severity[0])) {
+      const floor = severity[0].min;
+      const exactCanonical = allSeverityOptions.find(
+        (option) =>
+          option.threshold.min === floor && getSeverityThresholdMax(option.threshold) === undefined
+      );
+      if (exactCanonical) {
+        return [exactCanonical];
+      }
+      const overlapping = getCanonicalBandsOverlappingFloor(
+        floor,
+        allSeverityOptions.map((option) => option.threshold)
+      );
+      return allSeverityOptions.filter((option) =>
+        overlapping.some(
+          (band) =>
+            band.min === option.threshold.min &&
+            getSeverityThresholdMax(band) === getSeverityThresholdMax(option.threshold)
         )
-      ),
-    [allSeverityOptions, severity]
-  );
+      );
+    }
+
+    return allSeverityOptions.filter((option) =>
+      severity.some(
+        (threshold) =>
+          threshold.min === option.threshold.min &&
+          getSeverityThresholdMax(threshold) === getSeverityThresholdMax(option.threshold)
+      )
+    );
+  }, [allSeverityOptions, severity]);
 
   // Create a display string for the selected severities
   const inputDisplay = useMemo(() => {
     if (severity.length === 1) {
-      const selectedSeverity = selectedSeverities[0];
-      if (selectedSeverity && typeof selectedSeverity.val === 'number') {
-        const rangeDisplay = getSeverityRangeDisplay(selectedSeverity.val);
+      const [threshold] = severity;
+      const exactSelected = selectedSeverities.find(
+        (selectedSeverity) =>
+          selectedSeverity.threshold.min === threshold.min &&
+          getSeverityThresholdMax(selectedSeverity.threshold) === getSeverityThresholdMax(threshold)
+      );
+      if (exactSelected && typeof exactSelected.val === 'number') {
+        const rangeDisplay = getSeverityRangeDisplay(exactSelected.val);
         return (
           <Fragment>
-            <EuiHealth color={selectedSeverity.color} css={{ lineHeight: 'inherit' }}>
+            <EuiHealth color={exactSelected.color} css={{ lineHeight: 'inherit' }}>
               {rangeDisplay}
+            </EuiHealth>
+          </Fragment>
+        );
+      }
+      if (isOpenEndedSeverityThreshold(threshold)) {
+        const color = selectedSeverities[0]?.color;
+        return (
+          <Fragment>
+            <EuiHealth color={color} css={{ lineHeight: 'inherit' }}>
+              {`${threshold.min}-100`}
             </EuiHealth>
           </Fragment>
         );
@@ -193,7 +230,7 @@ export const SelectSeverityUI: FC<
         </EuiFlexGroup>
       </Fragment>
     );
-  }, [euiTheme.border.radius.medium, euiTheme.size.s, selectedSeverities, severity.length]);
+  }, [euiTheme.border.radius.medium, euiTheme.size.s, selectedSeverities, severity]);
 
   // Get the options for the multi-select component
   const multiSelectOptions = useFormattedSeverityOptions(selectedSeverities);
