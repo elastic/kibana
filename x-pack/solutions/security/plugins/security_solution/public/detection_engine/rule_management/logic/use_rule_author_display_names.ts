@@ -24,7 +24,7 @@ interface RuleAuthorDisplayNames {
 
 /**
  * Resolves rule authorship to human-readable names, falling back to the raw `created_by` /
- * `updated_by` values when no profile uid is set or the profile cannot be resolved.
+ * `updated_by` values when no profile UID is set or the profile cannot be resolved.
  */
 export const useRuleAuthorDisplayNames = ({
   createdBy,
@@ -32,7 +32,7 @@ export const useRuleAuthorDisplayNames = ({
   updatedBy,
   updatedByProfileUid,
 }: UseRuleAuthorDisplayNamesArgs): RuleAuthorDisplayNames => {
-  // Both uids go into a single bulkGet request instead of one request per author.
+  // Both UIDs go into a single bulkGet request instead of one request per author.
   const uids = useMemo(
     () => new Set(compact([createdByProfileUid, updatedByProfileUid])),
     [createdByProfileUid, updatedByProfileUid]

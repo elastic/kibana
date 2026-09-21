@@ -18,7 +18,7 @@ export interface UseBulkGetUserProfilesParams {
 export type UseBulkGetUserProfilesResult = UseQueryResult<Map<string, string>>;
 
 /**
- * Resolves a list of Elasticsearch user profile UIDs to display names, keyed by uid.
+ * Resolves a list of Elasticsearch user profile UIDs to display names, keyed by UID.
  */
 export const useBulkGetUserProfiles = ({
   uids,
