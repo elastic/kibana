@@ -81,8 +81,11 @@ export const MemoryProtectionCard = memo<MemoryProtectionCardProps>(
     const isCustomYaraSignaturesEnabled = useIsExperimentalFeatureEnabled(
       'customYaraSignaturesEnabled'
     );
-    const { isAvailable: isCustomYaraSignaturesAvailable, upsellMessage } =
-      useIsCustomYaraSignaturesAvailable();
+    const {
+      isAvailable: isCustomYaraSignaturesAvailable,
+      upsellMessage,
+      isGatedByLicenseOnly,
+    } = useIsCustomYaraSignaturesAvailable();
     const getTestId = useTestIdGenerator(dataTestSubj);
     const isProtectionsAllowed = !useGetProtectionsUnavailableComponent();
     const protection = 'memory_protection';
@@ -91,18 +94,23 @@ export const MemoryProtectionCard = memo<MemoryProtectionCardProps>(
     // Custom YARA signatures follow the Memory threat switch, but only while the feature is
     // available: writing `true` when it is not would be rejected by license validation, and
     // writing `false` would manufacture an opt-out for a user who never had the toggle.
+    //
+    // A leftover `true` only needs proactive clearing when license is the sole blocker: the
+    // server rejects that combination with a 403 on save. When the flag or product feature is
+    // off, the server already strips a leftover `true` to absent by itself, so leaving the field
+    // untouched here avoids manufacturing a `false` the sanitizer would otherwise never write.
     const adjustCustomYaraSignaturesOnProtectionSwitch =
       useCallback<AdjustSubfeatureOnProtectionSwitch>(
         ({ value, policyConfigData, protectionOsList }) => {
           if (isCustomYaraSignaturesAvailable) {
             setCustomYaraSignatures(policyConfigData, value, protectionOsList);
-          } else {
+          } else if (isGatedByLicenseOnly) {
             clearCustomYaraSignaturesIfEnabled(policyConfigData, protectionOsList);
           }
 
           return policyConfigData;
         },
-        [isCustomYaraSignaturesAvailable]
+        [isCustomYaraSignaturesAvailable, isGatedByLicenseOnly]
       );
 
     const protectionLabel = i18n.translate(

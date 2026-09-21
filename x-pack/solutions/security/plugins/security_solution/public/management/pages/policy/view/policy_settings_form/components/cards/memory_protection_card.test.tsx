@@ -79,16 +79,18 @@ describe('Policy Memory Protections Card', () => {
     expect(renderResult.queryByTestId(testSubj.customYaraSignaturesEnableDisableSwitch)).toBeNull();
   });
 
-  it('should leave custom YARA signatures disabled when memory protection is turned on and the experimental flag is off', async () => {
+  it('should leave custom YARA signatures untouched when memory protection is turned on and the experimental flag is off', async () => {
     turnMemoryProtectionOff();
     render();
 
     await userEvent.click(renderResult.getByTestId(testSubj.enableDisableSwitch));
 
+    // The server strips a leftover `true` to absent when the flag is off; the client must not
+    // pre-emptively clear it to `false`, which the server would otherwise never touch again.
     const updatedPolicy = (formProps.onChange as jest.Mock).mock.calls[0][0].updatedPolicy;
-    expect(updatedPolicy.windows.memory_protection.custom_yara_signatures).toBe(false);
-    expect(updatedPolicy.mac.memory_protection.custom_yara_signatures).toBe(false);
-    expect(updatedPolicy.linux.memory_protection.custom_yara_signatures).toBe(false);
+    expect(updatedPolicy.windows.memory_protection.custom_yara_signatures).toBe(true);
+    expect(updatedPolicy.mac.memory_protection.custom_yara_signatures).toBe(true);
+    expect(updatedPolicy.linux.memory_protection.custom_yara_signatures).toBe(true);
   });
 
   describe('and license is lower than Platinum', () => {
@@ -364,16 +366,18 @@ describe('Policy Memory Protections Card', () => {
         expect(await renderResult.findByText(pliUpsellMessage)).toBeInTheDocument();
       });
 
-      it('should leave custom YARA signatures disabled when memory protection is turned on', async () => {
+      it('should leave custom YARA signatures untouched when memory protection is turned on', async () => {
         turnMemoryProtectionOff();
         render();
 
         await userEvent.click(renderResult.getByTestId(testSubj.enableDisableSwitch));
 
+        // Same rationale as the flag-off case: the product-feature gate is absorbed server-side
+        // without ever reaching license validation, so the client must leave the field alone.
         const updatedPolicy = (formProps.onChange as jest.Mock).mock.calls[0][0].updatedPolicy;
-        expect(updatedPolicy.windows.memory_protection.custom_yara_signatures).toBe(false);
-        expect(updatedPolicy.mac.memory_protection.custom_yara_signatures).toBe(false);
-        expect(updatedPolicy.linux.memory_protection.custom_yara_signatures).toBe(false);
+        expect(updatedPolicy.windows.memory_protection.custom_yara_signatures).toBe(true);
+        expect(updatedPolicy.mac.memory_protection.custom_yara_signatures).toBe(true);
+        expect(updatedPolicy.linux.memory_protection.custom_yara_signatures).toBe(true);
       });
     });
 
