@@ -24,7 +24,7 @@ import {
   MAX_STREAM_NAME_LENGTH,
   Streams,
   type FlattenRecord,
-  flattenRecord,
+  boundedFlattenRecord,
   getStreamTypeFromDefinition,
   isOtelStream,
 } from '@kbn/streams-schema';
@@ -75,7 +75,7 @@ export const suggestIngestPipelineSchema = z.object({
   path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
   body: z.object({
     connector_id: z.string().max(256),
-    documents: z.array(flattenRecord),
+    documents: z.array(boundedFlattenRecord).max(1000),
     response_format: z.enum(['streamlang', 'ingest_pipeline']).optional(),
   }),
 }) satisfies z.Schema<SuggestIngestPipelineParams>;

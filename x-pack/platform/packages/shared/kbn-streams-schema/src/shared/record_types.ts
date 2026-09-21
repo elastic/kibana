@@ -21,50 +21,80 @@ export interface RecursiveRecord {
   [key: PropertyKey]: Primitive | Primitive[] | unknown[] | RecursiveRecord;
 }
 
-// Maximum combined nesting depth for arrays and records. Both consume from the
-// same budget so alternating {a:[{a:[...]}]} patterns cannot bypass the limit.
+// Persisted-definition schema — unbounded for backward compatibility with stored data.
+// Streams/units written before this change may have arbitrary nesting, array sizes,
+// or field counts; bounding this schema would make them unreadable.
+export const recursiveRecord: z.ZodType<RecursiveRecord> = z
+  .lazy(() =>
+    z.record(
+      z.string().max(1000),
+      z.union([
+        primitive,
+        z.array(primitive),
+        z.array(z.union([primitive, recursiveRecord])),
+        recursiveRecord,
+      ])
+    )
+  )
+  .meta({ id: 'RecursiveRecord' });
+
+export type FlattenRecord = Record<PropertyKey, Primitive | Primitive[] | unknown[]>;
+
+// Persisted-definition schema — unbounded for the same backward-compat reason.
+export const flattenRecord: z.ZodType<FlattenRecord> = z.record(
+  z.string().max(1000),
+  z.union([primitive, z.array(primitive), z.array(z.union([primitive, recursiveRecord]))])
+);
+
+export const sampleDocument = recursiveRecord;
+
+export type SampleDocument = RecursiveRecord;
+
+// ─── HTTP-request-scoped bounded schemas ─────────────────────────────────────
+// These cap nesting depth, array size, and record entry count so that HTTP
+// callers cannot make Zod validation or downstream simulation work scale
+// without bound. They must NOT be used for stored-definition parsing.
+
 const MAX_NESTING_DEPTH = 10;
+const MAX_RECORD_KEYS = 200;
 
 // Build a fixed-depth schema DAG at module load time. Each level reuses the
-// same inner schema for both the array and record branches, so the total number
-// of schema objects is O(MAX_NESTING_DEPTH) — no exponential blowup. At
-// depth 0 only primitives are accepted, preventing unbounded Zod recursion.
+// same inner schema for both the array and record branches so the total number
+// of schema objects is O(MAX_NESTING_DEPTH) — no exponential blowup.
 function buildBoundedValue(depth: number): z.ZodType<unknown> {
   if (depth === 0) {
     return primitive as z.ZodType<unknown>;
   }
   const inner = buildBoundedValue(depth - 1);
-  return z.union([
-    primitive,
-    z.array(inner).max(1000),
-    z.record(z.string().max(1000), inner),
-  ]) as z.ZodType<unknown>;
+  const boundedRecord = z
+    .record(z.string().max(1000), inner)
+    .superRefine((val, ctx) => {
+      if (Object.keys(val).length > MAX_RECORD_KEYS) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `Record may have at most ${MAX_RECORD_KEYS} keys`,
+        });
+      }
+    });
+  return z.union([primitive, z.array(inner).max(1000), boundedRecord]) as z.ZodType<unknown>;
 }
 
 const boundedValue = buildBoundedValue(MAX_NESTING_DEPTH);
 
-export const recursiveRecord: z.ZodType<RecursiveRecord> = z
-  .record(z.string().max(1000), boundedValue)
-  .meta({ id: 'RecursiveRecord' }) as unknown as z.ZodType<RecursiveRecord>;
-
-export type FlattenRecord = Record<PropertyKey, Primitive | Primitive[] | unknown[]>;
-
-// FlattenRecord field values must NOT be direct records (per the type contract).
-// Array items may still be objects (unknown[] is broader than Primitive[]), so
-// boundedValue is reused for item validation while the top-level union excludes
-// the record branch.
-const flattenFieldValue: z.ZodType<unknown> = z.union([
-  primitive,
-  z.array(boundedValue).max(1000),
-]) as z.ZodType<unknown>;
-
-export const flattenRecord: z.ZodType<FlattenRecord> = z
-  .record(z.string().max(1000), flattenFieldValue)
-  .meta({ id: 'FlattenRecord' }) as unknown as z.ZodType<FlattenRecord>;
-
-export const sampleDocument = recursiveRecord;
-
-export type SampleDocument = RecursiveRecord;
+// Bounded top-level record for HTTP request bodies that receive sample documents.
+export const boundedFlattenRecord: z.ZodType<FlattenRecord> = z
+  .record(
+    z.string().max(1000),
+    z.union([primitive, z.array(boundedValue).max(1000)]) as z.ZodType<unknown>
+  )
+  .superRefine((val, ctx) => {
+    if (Object.keys(val).length > MAX_RECORD_KEYS) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `Record may have at most ${MAX_RECORD_KEYS} keys`,
+      });
+    }
+  }) as unknown as z.ZodType<FlattenRecord>;
 
 export interface IgnoredField {
   field: string;

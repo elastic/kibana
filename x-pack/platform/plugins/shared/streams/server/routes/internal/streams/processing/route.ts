@@ -8,7 +8,7 @@
 import type { FlattenRecord } from '@kbn/streams-schema';
 import {
   MAX_STREAM_NAME_LENGTH,
-  flattenRecord,
+  boundedFlattenRecord,
   isEnabledFailureStore,
   namedFieldDefinitionConfigSchema,
 } from '@kbn/streams-schema';
@@ -43,7 +43,7 @@ import { getFailureStoreSamples } from './failure_store_samples_handler';
 import { isNoLLMSuggestionsError } from './no_llm_suggestions_error';
 
 const simulationBaseBodySchema = {
-  documents: z.array(flattenRecord),
+  documents: z.array(boundedFlattenRecord).max(1000),
   detected_fields: z.array(namedFieldDefinitionConfigSchema).optional(),
 };
 
