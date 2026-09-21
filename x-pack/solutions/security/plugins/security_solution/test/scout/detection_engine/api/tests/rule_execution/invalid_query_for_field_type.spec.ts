@@ -37,7 +37,12 @@ apiTest.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
     const runId = randomUUID().slice(0, 8);
-    const sourceIndex = `scout-invalid-query-${runId}`;
+    // The index name must match a pattern the serverless security `editor` role (the privileged
+    // user) can read, e.g. `filebeat-*` — arbitrary index names resolve to zero readable shards
+    // for the rule owner on serverless and the rule ends in `partial failure` instead of
+    // reaching the invalid-query failure. `logs-*` is unsuitable because the built-in data
+    // stream template rejects explicit index creation.
+    const sourceIndex = `filebeat-scout-invalid-query-${runId}`;
     const createdRuleIds: string[] = [];
 
     let requestHeaders: Record<string, string>;
