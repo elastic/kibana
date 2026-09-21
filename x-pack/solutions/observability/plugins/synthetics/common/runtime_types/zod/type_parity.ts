@@ -6,12 +6,18 @@
  */
 
 /**
- * Compile-time check that each leaf twin's `z.output` is mutually assignable
- * to `t.TypeOf` of the io-ts original (after dropping `z.looseObject`'s
- * catchall index signature).
+ * Compile-time check that each twin's `z.output` is mutually assignable to
+ * `t.TypeOf` of the io-ts original (after dropping `z.looseObject`'s catchall
+ * index signature). Covers Phase 1 leaf codecs, Phase 2 monitor field codecs,
+ * and Phase 3 decode-site twins.
  *
  * `ServiceLocationsApiResponseCodec` is omitted: io-ts types `throttling` as
  * required `| undefined` while decode (and the twin) accept a missing key.
+ * `ProjectMonitorCodec` (and the request wrappers that nest it) is omitted:
+ * io-ts types `schedule` as `string | number` while decode (and the twin) only
+ * accept `number | '10s' | '30s'`.
+ * `PrivateLocationAttributesCodec` is omitted: the io-ts original was replaced
+ * by the zod twin (server re-exports it).
  */
 import type { z } from '@kbn/zod';
 import type * as t from 'io-ts';
@@ -67,6 +73,58 @@ import type * as zodRemote from './remote';
 import type * as zodAlerts from './alerts';
 import type * as zodLocations from './locations';
 import type * as zodPing from './ping';
+import type {
+  APIFieldsCodec,
+  BrowserFieldsCodec,
+  CommonFieldsCodec,
+  EncryptedAPIFieldsCodec,
+  EncryptedBrowserFieldsCodec,
+  EncryptedHTTPFieldsCodec,
+  EncryptedSyntheticsMonitorCodec,
+  EncryptedSyntheticsSavedMonitorCodec,
+  EncryptedTCPFieldsCodec,
+  HeartbeatConfigCodec,
+  HTTPFieldsCodec,
+  ICMPFieldsCodec,
+  ICMPSimpleFieldsCodec,
+  SyntheticsMonitorCodec,
+  SyntheticsMonitorWithIdCodec,
+  TCPFieldsCodec,
+  TLSCodec,
+  TLSFieldsCodec,
+} from '../monitor_management/monitor_types';
+import type * as zodMonitor from './monitor_types';
+import type {
+  ProjectMonitorMetaDataCodec,
+  ProjectMonitorThrottlingConfigCodec,
+  ProjectMonitorsResponseCodec,
+} from '../monitor_management/monitor_types_project';
+import type * as zodProject from './monitor_types_project';
+import type {
+  SyntheticsCommonStateCodec,
+  SyntheticsMonitorStatusAlertStateCodec,
+} from '../alert_rules/common';
+import type * as zodAlertRules from './alert_rules_common';
+import type { MonitorOriginCodec } from '../heartbeat_monitor';
+import type * as zodHeartbeat from './heartbeat_monitor';
+import type { MonitorManagementEnablementResultCodec } from '../monitor_management/state';
+import type * as zodState from './state';
+import type {
+  OverviewPingCodec,
+  OverviewStalePriorRunCodec,
+  OverviewStaleStatusCodec,
+  OverviewStatusCodec,
+  OverviewStatusMetaDataCodec,
+  PaginatedOverviewStatusCodec,
+} from '../monitor_management/synthetics_overview_status';
+import type * as zodOverview from './synthetics_overview_status';
+import type {
+  DeleteParamsResponseCodec,
+  SyntheticsParamRequestCodec,
+  SyntheticsParamsCodec,
+  SyntheticsParamsReadonlyCodec,
+} from '../monitor_management/synthetics_params';
+import type * as zodParams from './synthetics_params';
 
 type Pair<I extends t.Mixed, Z extends z.ZodType> = MutuallyAssignable<
   t.TypeOf<I>,
@@ -137,6 +195,101 @@ interface Parity {
   >;
   ErrorGroups: Pair<typeof ErrorGroupsResponseType, typeof zodPing.ErrorGroupsResponseType>;
   ErrorStats: Pair<typeof ErrorStatsType, typeof zodPing.ErrorStatsType>;
+  TLSFields: Pair<typeof TLSFieldsCodec, typeof zodMonitor.TLSFieldsCodec>;
+  TLS: Pair<typeof TLSCodec, typeof zodMonitor.TLSCodec>;
+  CommonFields: Pair<typeof CommonFieldsCodec, typeof zodMonitor.CommonFieldsCodec>;
+  TCPFields: Pair<typeof TCPFieldsCodec, typeof zodMonitor.TCPFieldsCodec>;
+  EncryptedTCPFields: Pair<
+    typeof EncryptedTCPFieldsCodec,
+    typeof zodMonitor.EncryptedTCPFieldsCodec
+  >;
+  ICMPSimpleFields: Pair<typeof ICMPSimpleFieldsCodec, typeof zodMonitor.ICMPSimpleFieldsCodec>;
+  ICMPFields: Pair<typeof ICMPFieldsCodec, typeof zodMonitor.ICMPFieldsCodec>;
+  HTTPFields: Pair<typeof HTTPFieldsCodec, typeof zodMonitor.HTTPFieldsCodec>;
+  EncryptedHTTPFields: Pair<
+    typeof EncryptedHTTPFieldsCodec,
+    typeof zodMonitor.EncryptedHTTPFieldsCodec
+  >;
+  BrowserFields: Pair<typeof BrowserFieldsCodec, typeof zodMonitor.BrowserFieldsCodec>;
+  EncryptedBrowserFields: Pair<
+    typeof EncryptedBrowserFieldsCodec,
+    typeof zodMonitor.EncryptedBrowserFieldsCodec
+  >;
+  APIFields: Pair<typeof APIFieldsCodec, typeof zodMonitor.APIFieldsCodec>;
+  EncryptedAPIFields: Pair<
+    typeof EncryptedAPIFieldsCodec,
+    typeof zodMonitor.EncryptedAPIFieldsCodec
+  >;
+  // MonitorFieldsCodec is a mega-intersection of every type's fields; io-ts and
+  // the flat zod twin drift on a few optional/required merges — covered by the
+  // characterization corpus instead of compile-time Pair.
+  SyntheticsMonitor: Pair<typeof SyntheticsMonitorCodec, typeof zodMonitor.SyntheticsMonitorCodec>;
+  EncryptedSyntheticsMonitor: Pair<
+    typeof EncryptedSyntheticsMonitorCodec,
+    typeof zodMonitor.EncryptedSyntheticsMonitorCodec
+  >;
+  SyntheticsMonitorWithId: Pair<
+    typeof SyntheticsMonitorWithIdCodec,
+    typeof zodMonitor.SyntheticsMonitorWithIdCodec
+  >;
+  HeartbeatConfig: Pair<typeof HeartbeatConfigCodec, typeof zodMonitor.HeartbeatConfigCodec>;
+  EncryptedSyntheticsSavedMonitor: Pair<
+    typeof EncryptedSyntheticsSavedMonitorCodec,
+    typeof zodMonitor.EncryptedSyntheticsSavedMonitorCodec
+  >;
+  ProjectMonitorThrottling: Pair<
+    typeof ProjectMonitorThrottlingConfigCodec,
+    typeof zodProject.ProjectMonitorThrottlingConfigCodec
+  >;
+  ProjectMonitorMetaData: Pair<
+    typeof ProjectMonitorMetaDataCodec,
+    typeof zodProject.ProjectMonitorMetaDataCodec
+  >;
+  ProjectMonitorsResponse: Pair<
+    typeof ProjectMonitorsResponseCodec,
+    typeof zodProject.ProjectMonitorsResponseCodec
+  >;
+  SyntheticsCommonState: Pair<
+    typeof SyntheticsCommonStateCodec,
+    typeof zodAlertRules.SyntheticsCommonStateCodec
+  >;
+  SyntheticsMonitorStatusAlertState: Pair<
+    typeof SyntheticsMonitorStatusAlertStateCodec,
+    typeof zodAlertRules.SyntheticsMonitorStatusAlertStateCodec
+  >;
+  MonitorOrigin: Pair<typeof MonitorOriginCodec, typeof zodHeartbeat.MonitorOriginCodec>;
+  Enablement: Pair<
+    typeof MonitorManagementEnablementResultCodec,
+    typeof zodState.MonitorManagementEnablementResultCodec
+  >;
+  OverviewPing: Pair<typeof OverviewPingCodec, typeof zodOverview.OverviewPingCodec>;
+  OverviewStatusMetaData: Pair<
+    typeof OverviewStatusMetaDataCodec,
+    typeof zodOverview.OverviewStatusMetaDataCodec
+  >;
+  OverviewStatus: Pair<typeof OverviewStatusCodec, typeof zodOverview.OverviewStatusCodec>;
+  PaginatedOverviewStatus: Pair<
+    typeof PaginatedOverviewStatusCodec,
+    typeof zodOverview.PaginatedOverviewStatusCodec
+  >;
+  OverviewStalePriorRun: Pair<
+    typeof OverviewStalePriorRunCodec,
+    typeof zodOverview.OverviewStalePriorRunCodec
+  >;
+  OverviewStaleStatus: Pair<
+    typeof OverviewStaleStatusCodec,
+    typeof zodOverview.OverviewStaleStatusCodec
+  >;
+  ParamsReadonly: Pair<
+    typeof SyntheticsParamsReadonlyCodec,
+    typeof zodParams.SyntheticsParamsReadonlyCodec
+  >;
+  Params: Pair<typeof SyntheticsParamsCodec, typeof zodParams.SyntheticsParamsCodec>;
+  DeleteParams: Pair<typeof DeleteParamsResponseCodec, typeof zodParams.DeleteParamsResponseCodec>;
+  ParamRequest: Pair<
+    typeof SyntheticsParamRequestCodec,
+    typeof zodParams.SyntheticsParamRequestCodec
+  >;
 }
 
 export type LeafTypeParity = ExpectAllTrue<Parity>;

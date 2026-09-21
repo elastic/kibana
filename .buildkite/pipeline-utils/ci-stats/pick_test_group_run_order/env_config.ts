@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MAX_MINUTES, RETRIES, PREVENT_SELECTIVE_TESTS_LABEL } from './const';
+import { MAX_MINUTES, RETRIES, PREVENT_SELECTIVE_TESTS_LABEL } from './const.ts';
 import { collectEnvFromLabels, getRequiredEnv } from '#pipeline-utils';
 import {
   ftrTestChannel,

@@ -9,15 +9,10 @@ import Boom from '@hapi/boom';
 import { connectorTypeHasInboundEvents } from '@kbn/connector-specs';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { i18n } from '@kbn/i18n';
-import { isUndefined, omitBy } from 'lodash';
 
 import type { RawAction } from '../../../../types';
-import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
-import { tryCatch } from '../../../../lib';
-import {
-  applyInboundIngressCredentialsIfNeeded,
-  resolveInboundEventsSpaceId,
-} from '../../../../inbound/ensure_connector_ingress_credentials';
+import { resolveInboundEventsSpaceId } from '../../../../inbound/resolve_inbound_events_space_id';
+import { mintIngressCredential } from '../../../../inbound/ingress_credential';
 import type { RotateInboundIngressParams, RotateInboundIngressResult } from './types';
 
 export async function rotateInboundIngress({
@@ -42,66 +37,13 @@ export async function rotateInboundIngress({
     );
   }
 
-  const storedConfig = (rawAction.attributes.config ?? {}) as Record<string, unknown>;
-  const { config, ingestToken } = applyInboundIngressCredentialsIfNeeded({
-    actionTypeId,
+  const { ingestToken } = await mintIngressCredential({
+    unsecuredSavedObjectsClient: context.unsecuredSavedObjectsClient,
     connectorId: id,
     spaceId,
-    config: storedConfig,
-    storedConfig,
-    forceMint: true,
+    auditLogger: context.auditLogger,
+    logger: context.logger,
   });
-
-  if (ingestToken === undefined) {
-    throw Boom.badImplementation(
-      i18n.translate('xpack.actions.rotateInboundIngress.missingMintedToken', {
-        defaultMessage: 'Rotate did not return an ingest token.',
-      })
-    );
-  }
-
-  context.auditLogger?.log(
-    connectorAuditEvent({
-      action: ConnectorAuditAction.UPDATE,
-      savedObject: { type: 'action', id },
-      outcome: 'unknown',
-    })
-  );
-
-  const { references, version } = rawAction;
-  const result = await tryCatch(
-    async () =>
-      await context.unsecuredSavedObjectsClient.create<RawAction>(
-        'action',
-        {
-          ...rawAction.attributes,
-          config,
-          secrets: rawAction.attributes.secrets,
-        },
-        omitBy(
-          {
-            id,
-            overwrite: true,
-            references,
-            version,
-          },
-          isUndefined
-        )
-      )
-  );
-
-  if (result instanceof Error) {
-    context.auditLogger?.log(
-      connectorAuditEvent({
-        action: ConnectorAuditAction.UPDATE,
-        savedObject: { type: 'action', id },
-        error: result,
-      })
-    );
-    throw result;
-  }
-
-  await context.evictClientPool?.(id);
 
   return { ingestToken };
 }
