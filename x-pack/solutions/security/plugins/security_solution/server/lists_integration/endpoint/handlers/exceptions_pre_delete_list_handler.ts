@@ -16,7 +16,7 @@ import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_c
 import { EndpointHttpError } from '../../../endpoint/errors';
 import { findRules } from '../../../lib/detection_engine/rule_management/logic/search/find_rules';
 
-const MAX_REFERENCING_RULES = 10000;
+const MAX_REFERENCING_RULES = 1000;
 
 // Every list type goes through the rule reference check, including endpoint artifact
 // lists (trusted apps, blocklists, etc.). Artifact lists are never referenced by

@@ -50,7 +50,7 @@ describe('Exceptions pre delete list handler', () => {
   beforeEach(() => {
     endpointAppContextService = createMockEndpointAppContextService();
     rulesClient = rulesClientMock.create();
-    rulesClient.find.mockResolvedValue({ data: [], page: 1, perPage: 10000, total: 0 });
+    rulesClient.find.mockResolvedValue({ data: [], page: 1, perPage: 1000, total: 0 });
     (endpointAppContextService.getRulesClient as jest.Mock).mockResolvedValue(rulesClient);
     alertingAuthorization = alertingAuthorizationMock.create();
     alertingAuthorization.getAllAuthorizedRuleTypesFindOperation.mockResolvedValue(
@@ -182,7 +182,7 @@ describe('Exceptions pre delete list handler', () => {
         ruleFindResult({ id: 'rule-so-2', name: 'Rule B', ruleId: 'rule-2' }),
       ],
       page: 1,
-      perPage: 10000,
+      perPage: 1000,
       total: 2,
     } as never);
     const data = { blockedBy: [], list: getListMock(), namespaceType: 'single' as const };
@@ -200,7 +200,7 @@ describe('Exceptions pre delete list handler', () => {
     rulesClient.find.mockResolvedValue({
       data: [ruleFindResult({ id: 'rule-so-2', name: 'Rule B', ruleId: 'rule-2' })],
       page: 1,
-      perPage: 10000,
+      perPage: 1000,
       total: 1,
     } as never);
     const existingBlocker = { id: 'rule-so-1', name: 'Rule A', rule_id: 'rule-1' };
