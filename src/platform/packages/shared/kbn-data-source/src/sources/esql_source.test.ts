@@ -8,6 +8,9 @@
  */
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { HttpStart } from '@kbn/core/public';
+import { SOURCE_INFO_ROUTE, TIMEFIELD_ROUTE } from '@kbn/esql-types';
+import { clearESQLSourceInfoCache } from '@kbn/esql-utils';
 import { EsqlSource } from './esql_source';
 
 function makeColumn(
@@ -25,7 +28,10 @@ function makeColumn(
 }
 
 describe('EsqlSource', () => {
-  beforeEach(() => EsqlSource.clearCache());
+  beforeEach(() => {
+    EsqlSource.clearCache();
+    clearESQLSourceInfoCache();
+  });
 
   describe('create', () => {
     it('extracts the title from the FROM clause', async () => {
@@ -166,6 +172,21 @@ describe('EsqlSource', () => {
         resultColumns: [],
       });
       expect(withRouting.id).not.toBe(withoutRouting.id);
+    });
+
+    it('returns the cached instance on a later create for the same query identity', async () => {
+      const first = await EsqlSource.create({
+        query: 'FROM logs-* | LIMIT 10',
+        resultColumns: [],
+        timeFieldName: '@timestamp',
+      });
+      const second = await EsqlSource.create({
+        query: 'FROM logs-* | LIMIT 10',
+        resultColumns: [makeColumn('message', 'string')],
+        timeFieldName: '@timestamp',
+      });
+      expect(second).toBe(first);
+      expect(second.getColumns()).toEqual([]);
     });
   });
 
@@ -329,6 +350,16 @@ describe('EsqlSource', () => {
     });
   });
 
+  describe('isRollup', () => {
+    it('always returns false', async () => {
+      const source = await EsqlSource.create({
+        query: 'FROM logs-*',
+        resultColumns: [],
+      });
+      expect(source.isRollup()).toBe(false);
+    });
+  });
+
   describe('withColumns', () => {
     it('returns a new instance with the same identity and updated result columns', async () => {
       const originalCols = [makeColumn('message', 'string')];
@@ -377,6 +408,124 @@ describe('EsqlSource', () => {
       const serialized = source.serialize();
       expect(serialized).not.toHaveProperty('fields');
       expect(serialized).not.toHaveProperty('columns');
+    });
+  });
+
+  describe('create with http', () => {
+    const postedPaths = (http: HttpStart) =>
+      (http.post as jest.Mock).mock.calls.map((call) => call[0] as string);
+
+    const createHttp = (overrides?: {
+      sourceInfo?: { columns: Array<{ name: string; esType: string }> };
+      timeField?: string;
+      sourceInfoError?: Error;
+    }): HttpStart => {
+      return {
+        post: jest.fn(async (path: string) => {
+          if (path === SOURCE_INFO_ROUTE) {
+            if (overrides?.sourceInfoError) {
+              throw overrides.sourceInfoError;
+            }
+            return overrides?.sourceInfo ?? { columns: [] };
+          }
+          if (path === TIMEFIELD_ROUTE) {
+            return { timeField: overrides?.timeField };
+          }
+          throw new Error(`unexpected path ${path}`);
+        }),
+      } as unknown as HttpStart;
+    };
+
+    it('resolves time field and LIMIT 0 schema in parallel', async () => {
+      const http = createHttp({
+        timeField: '@timestamp',
+        sourceInfo: {
+          columns: [
+            { name: 'message', esType: 'keyword' },
+            { name: 'bytes', esType: 'long' },
+          ],
+        },
+      });
+
+      const source = await EsqlSource.create({
+        query: 'FROM logs-http-parallel-*',
+        http,
+      });
+
+      expect(postedPaths(http).sort()).toEqual([SOURCE_INFO_ROUTE, TIMEFIELD_ROUTE].sort());
+      expect(source.timeFieldName).toBe('@timestamp');
+      expect(source.getColumns()).toEqual([
+        { name: 'message', type: 'string', esType: 'keyword', source: 'index' },
+        { name: 'bytes', type: 'number', esType: 'long', source: 'index' },
+      ]);
+    });
+
+    it('marks STATS/EVAL columns as computed', async () => {
+      const http = createHttp({
+        timeField: '@timestamp',
+        sourceInfo: { columns: [{ name: 'avg_bytes', esType: 'double' }] },
+      });
+
+      const source = await EsqlSource.create({
+        query: 'FROM logs-http-computed-* | STATS avg_bytes = AVG(bytes)',
+        http,
+        timeFieldName: '@timestamp',
+      });
+
+      expect(source.getColumns()).toEqual([
+        { name: 'avg_bytes', type: 'number', esType: 'double', source: 'esql-result' },
+      ]);
+    });
+
+    it('skips source_info when resultColumns is already provided', async () => {
+      const http = createHttp({
+        timeField: '@timestamp',
+        sourceInfo: { columns: [{ name: 'ignored', esType: 'keyword' }] },
+      });
+
+      const source = await EsqlSource.create({
+        query: 'FROM logs-http-skip-*',
+        http,
+        timeFieldName: '@timestamp',
+        resultColumns: [makeColumn('message', 'string', 'keyword')],
+      });
+
+      expect(postedPaths(http)).not.toContain(SOURCE_INFO_ROUTE);
+      expect(postedPaths(http)).not.toContain(TIMEFIELD_ROUTE);
+      expect(source.getColumns()).toEqual([
+        { name: 'message', type: 'string', esType: 'keyword', source: 'index' },
+      ]);
+    });
+
+    it('falls back to empty columns when source_info fails', async () => {
+      const http = createHttp({
+        timeField: '@timestamp',
+        sourceInfoError: new Error('source_info failed'),
+      });
+
+      const source = await EsqlSource.create({
+        query: 'FROM logs-http-fail-*',
+        http,
+        timeFieldName: '@timestamp',
+      });
+
+      expect(source.getColumns()).toEqual([]);
+      expect(source.timeFieldName).toBe('@timestamp');
+    });
+
+    it('skips a second HTTP round-trip on cache hit', async () => {
+      const http = createHttp({
+        timeField: '@timestamp',
+        sourceInfo: { columns: [{ name: 'message', esType: 'keyword' }] },
+      });
+      const query = 'FROM logs-http-cache-*';
+
+      const first = await EsqlSource.create({ query, http });
+      const second = await EsqlSource.create({ query, http });
+
+      expect(second).toBe(first);
+      expect(postedPaths(http).filter((path) => path === SOURCE_INFO_ROUTE)).toHaveLength(1);
+      expect(postedPaths(http).filter((path) => path === TIMEFIELD_ROUTE)).toHaveLength(1);
     });
   });
 });

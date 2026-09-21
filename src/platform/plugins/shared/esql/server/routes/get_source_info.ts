@@ -9,8 +9,7 @@
 import { schema } from '@kbn/config-schema';
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
 import { getNamedParams, fixESQLQueryWithVariables } from '@kbn/esql-utils';
-import { SOURCE_INFO_ROUTE } from '@kbn/esql-types';
-import type { ESQLControlVariable } from '@kbn/esql-types';
+import { ESQLVariableType, SOURCE_INFO_ROUTE } from '@kbn/esql-types';
 import { buildEsQuery, getTimeZoneFromSettings } from '@kbn/es-query';
 import { getTime, getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { ESQLColumn, ESQLSearchResponse } from '@kbn/es-types';
@@ -18,6 +17,22 @@ import { esqlRouteRequestCounter, getErrorStatusCode } from '../metrics';
 import { getMaxNestingDepth, MAX_NESTING_DEPTH } from './get_timefield';
 
 const DATE_FORMAT_TZ_SETTING = 'dateFormat:tz';
+
+const esqlVariableValueSchema = schema.oneOf([
+  schema.string({ maxLength: 10000 }),
+  schema.number(),
+  schema.arrayOf(schema.oneOf([schema.string({ maxLength: 10000 }), schema.number()]), {
+    maxSize: 1000,
+  }),
+]);
+
+const esqlVariableTypeSchema = schema.oneOf([
+  schema.literal(ESQLVariableType.TIME_LITERAL),
+  schema.literal(ESQLVariableType.FIELDS),
+  schema.literal(ESQLVariableType.VALUES),
+  schema.literal(ESQLVariableType.MULTI_VALUES),
+  schema.literal(ESQLVariableType.FUNCTIONS),
+]);
 
 export const registerGetSourceInfoRoute = (
   router: IRouter,
@@ -47,8 +62,8 @@ export const registerGetSourceInfoRoute = (
             schema.arrayOf(
               schema.object({
                 key: schema.string({ maxLength: 1000 }),
-                value: schema.any(),
-                type: schema.string({ maxLength: 100 }),
+                value: esqlVariableValueSchema,
+                type: esqlVariableTypeSchema,
               }),
               { maxSize: 1000 }
             )
@@ -68,16 +83,9 @@ export const registerGetSourceInfoRoute = (
       const core = await requestHandlerContext.core;
       const client = core.elasticsearch.client.asCurrentUser;
       try {
-        const fixedQuery = fixESQLQueryWithVariables(
-          query,
-          (esqlVariables as ESQLControlVariable[] | undefined) ?? []
-        );
+        const fixedQuery = fixESQLQueryWithVariables(query, esqlVariables ?? []);
 
-        const namedParams = getNamedParams(
-          fixedQuery,
-          timeRange,
-          esqlVariables as ESQLControlVariable[] | undefined
-        );
+        const namedParams = getNamedParams(fixedQuery, timeRange, esqlVariables);
 
         const esQueryConfigs = getEsQueryConfig(
           core.uiSettings.client as Parameters<typeof getEsQueryConfig>[0]
@@ -93,8 +101,9 @@ export const registerGetSourceInfoRoute = (
           ? buildEsQuery(undefined, [], [timeFilter], esQueryConfigs)
           : undefined;
 
-        const columnsResult = await client.esql
-          .query({
+        let columnsResult: Pick<ESQLSearchResponse, 'columns' | 'all_columns'>;
+        try {
+          columnsResult = (await client.esql.query({
             query: `${fixedQuery} | LIMIT 0`,
             ...(namedParams.length ? { params: namedParams } : {}),
             ...(projectRouting ? { project_routing: projectRouting } : {}),
@@ -102,14 +111,20 @@ export const registerGetSourceInfoRoute = (
             time_zone: timeZone,
             drop_null_columns: true,
             settings: { column_metadata: true },
-          })
-          .catch(() => ({
-            columns: [] as Array<{ name: string; type: string }>,
-            all_columns: undefined,
-          }));
+          })) as unknown as ESQLSearchResponse;
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error);
+          logger.get().error(`Failed to fetch ES|QL source info columns: ${message}`, {
+            tags: ['esql', 'source_info'],
+            error: {
+              stack_trace: error instanceof Error ? error.stack : undefined,
+            },
+          });
+          columnsResult = { columns: [], all_columns: undefined };
+        }
 
-        const result = columnsResult as unknown as ESQLSearchResponse;
-        const allColumnsRaw: ESQLColumn[] = result.all_columns ?? result.columns ?? [];
+        const allColumnsRaw: ESQLColumn[] =
+          columnsResult.all_columns ?? columnsResult.columns ?? [];
 
         const columns = allColumnsRaw.map(({ name, type, original_types, _meta }) => ({
           name,

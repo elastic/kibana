@@ -19,6 +19,7 @@ import {
   buildEsqlSourceCacheKey,
   isComputedColumn,
   getQuerySummary,
+  type ESQLSourceInfoColumn,
 } from '@kbn/esql-utils';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
@@ -28,6 +29,12 @@ import { sha256 } from '../sha256';
 
 export interface EsqlSourceArgs {
   query: string;
+  /**
+   * When provided, skips `getESQLSourceInfo` even if `http` is set.
+   * Use after a real fetch, or in tests. The instance cache is keyed by query
+   * identity, not columns — later `create` calls ignore a new `resultColumns`.
+   * Use {@link EsqlSource.withColumns} to replace columns on an existing id.
+   */
   resultColumns?: readonly DatatableColumn[];
   timeFieldName?: string;
   /**
@@ -38,7 +45,8 @@ export interface EsqlSourceArgs {
   projectRouting?: string;
   /**
    * When provided, the factory resolves the time field (`getESQLTimeField`) and
-   * the result schema (`getESQLSourceInfo` / LIMIT 0) in parallel.
+   * the result schema (`getESQLSourceInfo` / LIMIT 0) in parallel, unless
+   * `timeFieldName` / `resultColumns` are already set.
    */
   http?: HttpStart;
   /**
@@ -51,6 +59,20 @@ export interface EsqlSourceArgs {
    * variables (`?variable_name`) can be executed for schema discovery.
    */
   esqlVariables?: ESQLControlVariable[];
+}
+
+function columnsFromSourceInfo(columns: ESQLSourceInfoColumn[], query: string): DatatableColumn[] {
+  const querySummary = getQuerySummary(query);
+  return columns.map(({ name, esType }) => ({
+    id: name,
+    name,
+    meta: {
+      type: esFieldTypeToKibanaFieldType(esType) as DatatableColumn['meta']['type'],
+      esType,
+    },
+    isNull: false,
+    isComputedColumn: isComputedColumn(name, querySummary),
+  }));
 }
 
 interface EsqlSourceConstructorArgs {
@@ -67,8 +89,11 @@ interface EsqlSourceConstructorArgs {
  * Does not require or create a `DataView`. Identity is derived from the query,
  * optional project routing, and time field name. When `http` is provided,
  * {@link EsqlSource.create} resolves the time field and LIMIT 0 schema in
- * parallel; `resultColumns` can still be supplied to skip or override schema
- * discovery.
+ * parallel unless `timeFieldName` / `resultColumns` are already set.
+ * Source-info failures are ignored and `resultColumns` (or `[]`) is used.
+ *
+ * Instances are cached by query identity. The first `create` for a key wins;
+ * use {@link withColumns} to attach fetch-result columns without changing `id`.
  *
  * Construct via the async {@link EsqlSource.create} factory; the constructor
  * is private because id derivation uses `crypto.subtle.digest` (async).
@@ -114,7 +139,12 @@ export class EsqlSource implements DataSourceBase {
     this.fields = this.columns.map(columnToFieldBase);
   }
 
-  /** Async factory — id derivation via `crypto.subtle` requires async. */
+  /**
+   * Async factory. Identity (and the LRU cache key) is the query, project
+   * routing, and time field — not columns. The first successful `create` for a
+   * key wins; later calls return that instance. Use {@link withColumns} to
+   * attach fetch-result columns without changing `id`.
+   */
   public static async create(args: EsqlSourceArgs): Promise<EsqlSource> {
     const { cacheKey: baseKey, cleanVariables } = buildEsqlSourceCacheKey(
       args.query,
@@ -134,38 +164,34 @@ export class EsqlSource implements DataSourceBase {
     let timeFieldName: string | undefined = args.timeFieldName;
     let resultColumns: readonly DatatableColumn[] = args.resultColumns ?? [];
 
-    if (args.http) {
-      const querySummary = getQuerySummary(args.query);
+    const { http } = args;
+    const shouldResolveTimeField = Boolean(http) && timeFieldName === undefined;
+    const shouldResolveSchema = Boolean(http) && args.resultColumns === undefined;
+
+    if (http && (shouldResolveTimeField || shouldResolveSchema)) {
       const [resolvedTimeField, info] = await Promise.all([
-        timeFieldName === undefined
+        shouldResolveTimeField
           ? getESQLTimeField({
               query: args.query,
-              http: args.http,
+              http,
               projectRouting: args.projectRouting,
             })
           : Promise.resolve(timeFieldName),
-        getESQLSourceInfo({
-          query: args.query,
-          http: args.http,
-          projectRouting: args.projectRouting,
-          timeRange: args.timeRange,
-          timeFieldName: args.timeFieldName,
-          esqlVariables: cleanVariables,
-        }).catch(() => null),
+        shouldResolveSchema
+          ? getESQLSourceInfo({
+              query: args.query,
+              http,
+              projectRouting: args.projectRouting,
+              timeRange: args.timeRange,
+              timeFieldName: args.timeFieldName,
+              esqlVariables: cleanVariables,
+            }).catch(() => null)
+          : Promise.resolve(null),
       ]);
 
       timeFieldName = resolvedTimeField;
       if (info) {
-        resultColumns = info.columns.map(({ name, esType }) => {
-          const kibanaFieldType = esFieldTypeToKibanaFieldType(esType);
-          return {
-            id: name,
-            name,
-            meta: { type: kibanaFieldType, esType },
-            isNull: false,
-            isComputedColumn: isComputedColumn(name, querySummary),
-          } as DatatableColumn;
-        });
+        resultColumns = columnsFromSourceInfo(info.columns, args.query);
       }
     }
 

@@ -34,6 +34,7 @@ export const createMockEsqlSource = (
     getColumn: (name: string) => columns.find((c) => c.name === name) as Column | undefined,
     isTimeBased: () => !!timeFieldName,
     isPersisted: () => false,
+    isRollup: () => false,
     withColumns: (cols: DatatableColumn[]) => createMockEsqlSource(columns, cols, timeFieldName),
     serialize: () => ({
       kind: 'esql',
