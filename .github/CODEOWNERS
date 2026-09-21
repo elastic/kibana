@@ -1455,6 +1455,7 @@ x-pack/solutions/security/packages/kbn-securitysolution-list-constants @elastic/
 x-pack/solutions/security/packages/kbn-securitysolution-list-hooks @elastic/security-detection-engineering
 x-pack/solutions/security/packages/kbn-securitysolution-list-utils @elastic/security-detection-engineering
 x-pack/solutions/security/packages/kbn-securitysolution-lists-common @elastic/security-detection-engineering
+x-pack/solutions/security/packages/kbn-securitysolution-mitre-catalog @elastic/security-detection-engine
 x-pack/solutions/security/packages/kbn-securitysolution-t-grid @elastic/security-detection-engineering
 x-pack/solutions/security/packages/kbn-securitysolution-utils @elastic/security-detection-engineering
 x-pack/solutions/security/packages/navigation @elastic/security-investigations
