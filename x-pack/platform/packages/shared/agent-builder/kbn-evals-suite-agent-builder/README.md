@@ -27,26 +27,11 @@ telemetry.tracing.exporters:
 
 ### Configure AI Connectors
 
-Configure your AI connectors in `kibana.dev.yml` or via the `KIBANA_TESTING_AI_CONNECTORS` environment variable:
+Define the models to evaluate as inference endpoint definitions in the `KIBANA_TESTING_INFERENCE_ENDPOINTS` environment variable (raw or base64-encoded JSON; `node scripts/evals init` can generate it for EIS and OpenRouter):
 
-```yaml
-# In kibana.dev.yml
-xpack.actions.preconfigured:
-  my-connector:
-    name: My Test Connector
-    actionTypeId: .inference
-    config:
-      provider: openai
-      taskType: completion
-    secrets:
-      apiKey: <your-api-key>
-```
+Alternatively, declare a preconfigured `.inference` connector in `kibana.dev.yml`.
 
-Or via environment variable:
-
-```bash
-export KIBANA_TESTING_AI_CONNECTORS='{"my-connector":{"name":"My Test Connector","actionTypeId":".inference","config":{"provider":"openai","taskType":"completion"},"secrets":{"apiKey":"your-api-key"}}}'
-```
+See [Connector definitions and inference endpoints](../../kbn-evals/README.md#connector-definitions-and-inference-endpoints) for the full shape.
 
 ## Running AgentBuilder Evaluations
 
