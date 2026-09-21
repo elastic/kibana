@@ -7,15 +7,11 @@
 
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { EuiEmptyPrompt } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
+import { createEsqlViewsClient } from '@kbn/esql-utils';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { PLUGIN_NAME } from '../common';
-
-const description = i18n.translate('xpack.esqlViews.managementPage.description', {
-  defaultMessage: 'Create and manage ES|QL views.',
-});
+import { ManagementApp } from './management_app';
 
 export const mountManagementSection = (
   coreStart: CoreStart,
@@ -25,14 +21,13 @@ export const mountManagementSection = (
   docTitle.change(PLUGIN_NAME);
   setBreadcrumbs([{ text: PLUGIN_NAME }]);
 
+  const client = createEsqlViewsClient(coreStart.http);
   const root = createRoot(element);
   root.render(
     coreStart.rendering.addContext(
-      <EuiEmptyPrompt
-        data-test-subj="esqlViewsManagementPage"
-        iconType="inspect"
-        title={<h1>{PLUGIN_NAME}</h1>}
-        body={<p>{description}</p>}
+      <ManagementApp
+        client={client}
+        documentationUrl={coreStart.docLinks.links.query.queryESQLViews}
       />
     )
   );

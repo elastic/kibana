@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { schema } from '@kbn/config-schema';
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
 import { VIEWS_ROUTE } from '@kbn/esql-types';
 import { EsqlService } from '@kbn/esql-server-utils';
@@ -16,7 +17,11 @@ export const registerGetViewsRoute = (router: IRouter, { logger }: PluginInitial
   router.get(
     {
       path: VIEWS_ROUTE,
-      validate: {},
+      validate: {
+        query: schema.object({
+          strict: schema.boolean({ defaultValue: false }),
+        }),
+      },
       security: {
         authz: {
           enabled: false,
@@ -50,6 +55,12 @@ export const registerGetViewsRoute = (router: IRouter, { logger }: PluginInitial
           tags: ['esql', 'views'],
           error: { stack_trace: error instanceof Error ? error.stack : undefined },
         });
+        if (request.query.strict) {
+          return response.customError({
+            statusCode,
+            body: { message },
+          });
+        }
         return response.ok({
           body: { views: [] },
         });

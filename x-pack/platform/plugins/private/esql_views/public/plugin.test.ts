@@ -11,6 +11,16 @@ import { managementPluginMock } from '@kbn/management-plugin/public/mocks';
 import { MANAGEMENT_APP_ID, PLUGIN_NAME } from '../common';
 import { EsqlViewsPlugin } from './plugin';
 
+jest.mock('@kbn/app-header', () => ({
+  AppHeader: () => null,
+}));
+
+jest.mock('@kbn/esql-utils', () => ({
+  createEsqlViewsClient: () => ({
+    getViews: jest.fn().mockResolvedValue({ views: [] }),
+  }),
+}));
+
 const createPlugin = (enabled: boolean) =>
   new EsqlViewsPlugin(
     coreMock.createPluginInitializerContext({

@@ -111,8 +111,8 @@ describe('ESQL routes', () => {
     );
   });
 
-  it('can load ES|QL views (GET /internal/esql/views)', async () => {
-    const url = '/internal/esql/views';
+  it('can strictly load ES|QL views for management (GET /internal/esql/views)', async () => {
+    const url = '/internal/esql/views?strict=true';
     const result = await testbed.GET(url).send().expect(200);
 
     expect(result.body).toHaveProperty('views');

@@ -44,7 +44,10 @@ describe('createEsqlViewsClient', () => {
     get.mockResolvedValue(response);
 
     await expect(createEsqlViewsClient(http).getViews()).resolves.toEqual(response);
-    expect(get).toHaveBeenCalledWith(VIEWS_ROUTE, { signal: undefined });
+    expect(get).toHaveBeenCalledWith(VIEWS_ROUTE, {
+      query: { strict: true },
+      signal: undefined,
+    });
   });
 
   it('gets a view using an encoded name', async () => {
