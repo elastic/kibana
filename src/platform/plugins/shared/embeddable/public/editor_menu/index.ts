@@ -8,8 +8,6 @@
  */
 
 export { EDITOR_MENU_EDIT_FILTERS_ACTION } from './constants';
-export { EditorFiltersFlyout } from './editor_filters_flyout';
-export type { EditorFiltersFlyoutProps } from './editor_filters_flyout';
 export { initializeEditorMenuManager } from './editor_menu_manager';
 export type {
   ActiveEditorMenu,

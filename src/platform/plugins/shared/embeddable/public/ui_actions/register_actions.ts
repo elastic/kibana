@@ -24,12 +24,13 @@ import {
 import { ACTION_SHOW_CONFIG_PANEL } from './show_config_panel_action/constants';
 import { OPEN_FLYOUT_ADD_DRILLDOWN, OPEN_FLYOUT_EDIT_DRILLDOWN } from './constants';
 import { EDITOR_MENU_EDIT_FILTERS_ACTION } from '../editor_menu/constants';
+import { getEditFiltersAction } from '../editor_menu/edit_filters_action';
 
 export const registerActions = (uiActions: UiActionsSetup) => {
-  uiActions.registerActionAsync(EDITOR_MENU_EDIT_FILTERS_ACTION, async () => {
-    const { getEditFiltersAction } = await import('../async_module');
-    return getEditFiltersAction();
-  });
+  // Keep editor menu actions in the startup bundle so they resolve before lazy editor content.
+  uiActions.registerActionAsync(EDITOR_MENU_EDIT_FILTERS_ACTION, async () =>
+    getEditFiltersAction()
+  );
   uiActions.attachAction(EMBEDDABLE_EDITOR_MENU_TRIGGER, EDITOR_MENU_EDIT_FILTERS_ACTION);
 
   uiActions.registerActionAsync(ACTION_REMOVE_PANEL, async () => {

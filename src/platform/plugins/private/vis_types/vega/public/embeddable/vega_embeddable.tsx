@@ -207,15 +207,16 @@ export const vegaEmbeddableFactory = (
         const initialSpec = spec$.getValue();
         let menuManager;
         try {
+          const flyoutType = (tracksOverlays(parentApi) && parentApi.panelFlyoutType) || 'push';
           menuManager = await initializeEditorMenuManager({
             editorType: VEGA_EMBEDDABLE_TYPE,
+            flyoutType,
             title: 'Vega',
             supportedMenus: ['options', 'help', 'filters'],
           });
         } catch {
           return;
         }
-        const flyoutType = (tracksOverlays(parentApi) && parentApi.panelFlyoutType) || 'push';
         const flyoutRef = openLazySystemFlyout({
           core,
           parentApi,
@@ -232,7 +233,6 @@ export const vegaEmbeddableFactory = (
             return (
               <VegaEditorFlyout
                 menuManager={menuManager}
-                flyoutType={flyoutType}
                 ariaLabelledBy={ariaLabelledBy}
                 closeFlyout={closeFlyout}
                 initialSpec={initialSpec}

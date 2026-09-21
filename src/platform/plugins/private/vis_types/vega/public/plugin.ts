@@ -52,6 +52,10 @@ import {
   VEGA_EDITOR_HELP_ACTION,
   VEGA_EDITOR_OPTIONS_ACTION,
 } from './constants';
+import {
+  getVegaEditorHelpAction,
+  getVegaEditorOptionsAction,
+} from './embeddable/editor_menu_actions';
 
 /** @internal */
 export interface VegaVisualizationDependencies {
@@ -145,14 +149,13 @@ export class VegaPlugin implements Plugin<void, void> {
       return getAddVegaPanelAction(deps);
     });
 
-    deps.uiActions.registerActionAsync(VEGA_EDITOR_OPTIONS_ACTION, async () => {
-      const { getVegaEditorOptionsAction } = await import('./async_module');
-      return getVegaEditorOptionsAction();
-    });
-    deps.uiActions.registerActionAsync(VEGA_EDITOR_HELP_ACTION, async () => {
-      const { getVegaEditorHelpAction } = await import('./async_module');
-      return getVegaEditorHelpAction();
-    });
+    // Keep editor menu actions in the startup bundle so the loading flyout opens without a chunk fetch.
+    deps.uiActions.registerActionAsync(VEGA_EDITOR_OPTIONS_ACTION, async () =>
+      getVegaEditorOptionsAction()
+    );
+    deps.uiActions.registerActionAsync(VEGA_EDITOR_HELP_ACTION, async () =>
+      getVegaEditorHelpAction()
+    );
     deps.uiActions.attachAction(EMBEDDABLE_EDITOR_MENU_TRIGGER, VEGA_EDITOR_OPTIONS_ACTION);
     deps.uiActions.attachAction(EMBEDDABLE_EDITOR_MENU_TRIGGER, VEGA_EDITOR_HELP_ACTION);
 

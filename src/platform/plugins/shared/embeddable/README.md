@@ -124,9 +124,9 @@ Embeddable editors can create a transient editor-menu session with
 actions. Create one manager for each editor flyout and call `dispose` when the flyout closes.
 
 Embeddable registers `EDITOR_MENU_EDIT_FILTERS_ACTION` on this trigger. The action is compatible
-with editors that include `filters` in `supportedMenus` and opens `EditorFiltersFlyout`. Editor-owning
-plugins can register additional actions against the same trigger, such as Vega's Options and Help
-actions.
+with editors that include `filters` in `supportedMenus`; the manager opens the shared filters
+flyout in the editor's flyout session. Editor-owning plugins can register additional actions against
+the same trigger, such as Vega's Options and Help actions.
 
 The embeddable panel passes the embeddable API to UiActions. Each UiAction uses its `isCompatable` method to exclude embeddable API's that do not implement the required shared interfaces. An action is not displayed when `isCompatable` returns false.
 

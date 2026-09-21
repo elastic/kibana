@@ -55,10 +55,9 @@ export type { PresentationPanelProps } from './react_embeddable_system/panel_com
 
 export type { DrilldownsManager, HasDrilldowns } from './drilldowns/types';
 
-export { EditorFiltersFlyout, initializeEditorMenuManager } from './editor_menu';
+export { initializeEditorMenuManager } from './editor_menu';
 export type {
   ActiveEditorMenu,
-  EditorFiltersFlyoutProps,
   EditorMenuActionContext,
   EditorMenuDescriptor,
   EditorMenuItem,

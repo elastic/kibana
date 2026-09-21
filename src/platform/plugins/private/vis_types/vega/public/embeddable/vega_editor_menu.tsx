@@ -22,7 +22,7 @@ export const VegaEditorMenu = ({
   formatJson,
 }: VegaActionsMenuProps & { menuManager: EditorMenuManager }): React.ReactElement | null => {
   const [activeMenu] = useBatchedPublishingSubjects(menuManager.activeMenu$);
-  if (!activeMenu || activeMenu.menu === 'filters') return null;
+  if (!activeMenu) return null;
 
   const { menu, button, isOpen } = activeMenu;
   const closePopover = () => menuManager.close(activeMenu);

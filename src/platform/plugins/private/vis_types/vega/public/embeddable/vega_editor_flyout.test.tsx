@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EuiFlyout, EuiProvider } from '@elastic/eui';
@@ -16,7 +17,10 @@ import {
   initializeEditorMenuManager,
   type EditorMenuActionContext,
 } from '@kbn/embeddable-plugin/public';
-import { uiActions as embeddableUiActions } from '@kbn/embeddable-plugin/public/kibana_services';
+import {
+  core as embeddableCore,
+  uiActions as embeddableUiActions,
+} from '@kbn/embeddable-plugin/public/kibana_services';
 import { createAction, type Action } from '@kbn/ui-actions-plugin/public';
 import hjson from 'hjson';
 import { VegaSpecEditor } from '../components/vega_vis_editor';
@@ -30,7 +34,10 @@ jest.mock('@elastic/eui', () =>
 );
 jest.mock('@kbn/monaco', () => ({ XJsonLang: { ID: 'json' } }));
 jest.mock('@kbn/embeddable-plugin/public/kibana_services', () => ({
-  core: { notifications: { toasts: { addError: jest.fn() } } },
+  core: {
+    notifications: { toasts: { addError: jest.fn() } },
+    overlays: { openSystemFlyout: jest.fn() },
+  },
   uiActions: {
     getTrigger: jest.fn(() => ({ id: 'EMBEDDABLE_EDITOR_MENU_TRIGGER' })),
     getTriggerCompatibleActions: jest.fn(),
@@ -61,9 +68,60 @@ jest.mock('@kbn/code-editor', () => ({
 }));
 
 describe('VegaEditorFlyout', () => {
+  type SystemFlyoutOptions = NonNullable<
+    Parameters<typeof embeddableCore.overlays.openSystemFlyout>[1]
+  >;
+
+  interface MockSystemFlyout {
+    close: () => Promise<void>;
+    content: React.ReactElement;
+    onClose: Promise<void>;
+    options: SystemFlyoutOptions;
+  }
+
+  let setSystemFlyout: React.Dispatch<React.SetStateAction<MockSystemFlyout | null>> = () => {};
+  const SystemFlyoutHost = () => {
+    const [systemFlyout, setFlyout] = React.useState<MockSystemFlyout | null>(null);
+    setSystemFlyout = setFlyout;
+    if (!systemFlyout) return null;
+    const { close, content, onClose, options } = systemFlyout;
+    const { onClose: onSystemFlyoutClose, ...flyoutProps } = options;
+    return createPortal(
+      <EuiFlyout
+        {...flyoutProps}
+        onClose={() => {
+          onSystemFlyoutClose?.({ close, onClose });
+          void close();
+        }}
+      >
+        {content}
+      </EuiFlyout>,
+      document.body
+    );
+  };
+
+  const mockOpenSystemFlyout = jest.mocked(embeddableCore.overlays.openSystemFlyout);
   const mockGetTriggerCompatibleActions = jest.mocked(
     embeddableUiActions.getTriggerCompatibleActions
   );
+
+  beforeEach(() => {
+    mockOpenSystemFlyout.mockImplementation((content, options) => {
+      let resolveClose = () => {};
+      let isClosed = false;
+      const onClose = new Promise<void>((resolve) => {
+        resolveClose = resolve;
+      });
+      const close = jest.fn(async () => {
+        if (isClosed) return;
+        isClosed = true;
+        setSystemFlyout(null);
+        resolveClose();
+      });
+      setSystemFlyout({ close, content, onClose, options: options ?? {} });
+      return { close, onClose };
+    });
+  });
 
   const renderFlyout = async ({
     isNewPanel = false,
@@ -90,12 +148,14 @@ describe('VegaEditorFlyout', () => {
     mockGetTriggerCompatibleActions.mockResolvedValue(actions);
     const menuManager = await initializeEditorMenuManager({
       editorType: 'vega',
+      flyoutType: type,
       title: 'Vega',
       supportedMenus: ['options', 'help', 'filters'],
     });
     const { unmount } = render(
       <I18nProvider>
         <EuiProvider>
+          <SystemFlyoutHost />
           <EuiFlyout
             id={menuManager.flyoutId}
             historyKey={menuManager.historyKey}
@@ -109,7 +169,6 @@ describe('VegaEditorFlyout', () => {
           >
             <VegaEditorFlyout
               menuManager={menuManager}
-              flyoutType={type}
               ariaLabelledBy="vega-flyout-title"
               closeFlyout={closeFlyout}
               initialSpec={{ format: 'hjson', value: '{ mark: point }' }}

@@ -13,28 +13,21 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
-  getFlyoutManagerStore,
 } from '@elastic/eui';
-import type { EuiFlyoutProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EditorMenuManager } from './types';
 
-export interface EditorFiltersFlyoutProps {
+interface EditorFiltersFlyoutProps {
+  closeFlyout: () => void;
   menuManager: EditorMenuManager;
-  flyoutProps: Pick<
-    EuiFlyoutProps,
-    'maxWidth' | 'ownFocus' | 'paddingSize' | 'resizable' | 'size' | 'type'
-  >;
 }
 
 export const EditorFiltersFlyout = ({
+  closeFlyout,
   menuManager,
-  flyoutProps,
 }: EditorFiltersFlyoutProps): React.ReactElement => {
-  const { goBack } = getFlyoutManagerStore();
   useEffect(() => {
     const editor = document.getElementById(menuManager.flyoutId);
     editor?.setAttribute('inert', '');
@@ -43,7 +36,7 @@ export const EditorFiltersFlyout = ({
       if (event.key === 'Escape') {
         event.preventDefault();
         event.stopImmediatePropagation();
-        goBack();
+        closeFlyout();
       }
     };
     const onOutsidePointer = (event: Event) => {
@@ -62,56 +55,22 @@ export const EditorFiltersFlyout = ({
       editor?.removeAttribute('aria-hidden');
       menuManager.returnToEditor();
     };
-  }, [menuManager, goBack]);
+  }, [closeFlyout, menuManager]);
 
-  const title = i18n.translate('embeddableApi.editorMenu.panelLevelFiltersTitle', {
-    defaultMessage: 'Panel level filters',
-  });
   return (
-    <EuiFlyout
-      {...flyoutProps}
-      id={`${menuManager.flyoutId}-filters`}
-      session="start"
-      historyKey={menuManager.historyKey}
-      outsideClickCloses={false}
-      hideCloseButton
-      data-test-subj="editorFiltersFlyout"
-      aria-label={title}
-      onActive={() => {
-        requestAnimationFrame(() => {
-          document
-            .querySelector<HTMLButtonElement>(`#${menuManager.flyoutId}-filters button`)
-            ?.focus();
-        });
-      }}
-      onClose={menuManager.returnToEditor}
-      flyoutMenuProps={{
-        title,
-        hideTitle: false,
-        hideCloseButton: true,
-        trailingActions: [
-          {
-            iconType: 'cross',
-            'aria-label': i18n.translate('embeddableApi.editorMenu.closeFiltersButtonAriaLabel', {
-              defaultMessage: 'Close filters',
-            }),
-            onClick: () => goBack(),
-          },
-        ],
-      }}
-    >
+    <>
       <EuiFlyoutBody data-test-subj="editorFiltersFlyoutBody" />
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={goBack}>
+            <EuiButtonEmpty onClick={closeFlyout}>
               {i18n.translate('embeddableApi.editorMenu.cancelFiltersButtonLabel', {
                 defaultMessage: 'Cancel',
               })}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton fill onClick={goBack}>
+            <EuiButton fill onClick={closeFlyout}>
               {i18n.translate('embeddableApi.editorMenu.applyFiltersButtonLabel', {
                 defaultMessage: 'Apply',
               })}
@@ -119,6 +78,6 @@ export const EditorFiltersFlyout = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
-    </EuiFlyout>
+    </>
   );
 };

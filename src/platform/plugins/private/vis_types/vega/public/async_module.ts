@@ -12,7 +12,3 @@ export { createVegaFn } from './vega_fn';
 export { getVegaVisRenderer } from './vega_vis_renderer';
 export { getAddVegaPanelAction } from './add_vega_panel_action';
 export { getAddVegaEmbeddableAction } from './embeddable/add_vega_embeddable_action';
-export {
-  getVegaEditorHelpAction,
-  getVegaEditorOptionsAction,
-} from './embeddable/editor_menu_actions';

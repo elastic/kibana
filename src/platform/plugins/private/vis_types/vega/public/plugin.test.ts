@@ -36,15 +36,11 @@ const mockCreateVegaFn = jest.fn();
 const mockGetVegaVisRenderer = jest.fn();
 const mockGetAddVegaPanelAction = jest.fn(() => ({ id: ADD_VEGA_PANEL_ACTION_ID }));
 const mockGetAddVegaEmbeddableAction = jest.fn(() => ({ id: ADD_VEGA_EMBEDDABLE_ACTION_ID }));
-const mockGetVegaEditorOptionsAction = jest.fn(() => ({ id: VEGA_EDITOR_OPTIONS_ACTION }));
-const mockGetVegaEditorHelpAction = jest.fn(() => ({ id: VEGA_EDITOR_HELP_ACTION }));
 
 jest.mock('./async_module', () => ({
   createVegaFn: mockCreateVegaFn,
   getAddVegaEmbeddableAction: mockGetAddVegaEmbeddableAction,
   getAddVegaPanelAction: mockGetAddVegaPanelAction,
-  getVegaEditorHelpAction: mockGetVegaEditorHelpAction,
-  getVegaEditorOptionsAction: mockGetVegaEditorOptionsAction,
   getVegaVisRenderer: mockGetVegaVisRenderer,
   vegaVisType: {},
 }));

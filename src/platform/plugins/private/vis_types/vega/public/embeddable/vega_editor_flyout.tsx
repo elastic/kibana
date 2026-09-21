@@ -8,7 +8,6 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -21,8 +20,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { EditorFiltersFlyout, type EditorMenuManager } from '@kbn/embeddable-plugin/public';
+import type { EditorMenuManager } from '@kbn/embeddable-plugin/public';
 import { VegaEditorMenu } from './vega_editor_menu';
 import { VegaSpecEditor } from '../components/vega_vis_editor';
 import type { VegaByValueState } from '../../server';
@@ -53,14 +51,12 @@ export const VegaEditorFlyout = ({
   ariaLabelledBy,
   closeFlyout,
   initialSpec,
-  flyoutType = 'push',
   menuManager,
   isNewPanel = false,
   onPreview,
   onRevert,
   onSave,
 }: {
-  flyoutType?: 'push' | 'overlay';
   menuManager: EditorMenuManager;
   ariaLabelledBy: string;
   closeFlyout: () => void;
@@ -71,7 +67,6 @@ export const VegaEditorFlyout = ({
   onRevert: () => void;
   onSave: (spec: VegaByValueState['spec']) => void;
 }) => {
-  const [activeMenu] = useBatchedPublishingSubjects(menuManager.activeMenu$);
   const initialEditorValue =
     initialSpec.format === 'json' ? JSON.stringify(initialSpec.value, null, 2) : initialSpec.value;
   const [spec, setSpec] = useState(initialEditorValue);
@@ -105,22 +100,6 @@ export const VegaEditorFlyout = ({
   };
   return (
     <>
-      {activeMenu?.menu === 'filters' &&
-        activeMenu.isOpen &&
-        createPortal(
-          <EditorFiltersFlyout
-            menuManager={menuManager}
-            flyoutProps={{
-              size: 'm',
-              maxWidth: 800,
-              paddingSize: 'm',
-              type: flyoutType,
-              ownFocus: flyoutType !== 'overlay',
-              resizable: true,
-            }}
-          />,
-          document.body
-        )}
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id={ariaLabelledBy}>Vega</h2>

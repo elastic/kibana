@@ -11,10 +11,11 @@ import type { EuiFlyoutProps } from '@elastic/eui';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 
 export type EditorMenuItem = 'options' | 'help' | 'filters';
+type EditorPopoverMenu = Exclude<EditorMenuItem, 'filters'>;
 
 export interface ActiveEditorMenu {
   isOpen: boolean;
-  menu: EditorMenuItem;
+  menu: EditorPopoverMenu;
   button: HTMLElement;
 }
 
@@ -44,4 +45,5 @@ export interface InitializeEditorMenuManagerParams {
   readonly editorType: string;
   readonly title: string;
   readonly supportedMenus: ReadonlyArray<EditorMenuItem>;
+  readonly flyoutType?: 'push' | 'overlay';
 }
