@@ -21,7 +21,6 @@ export const truncateMessage = (message: string, maxLength: number): TruncateMes
   return {
     originalLength,
     truncated: true,
-    // Trim only when over the limit so in-limit messages are forwarded unchanged.
-    value: Array.from(message.trim()).slice(0, maxLength).join(''),
+    value: Array.from(message).slice(0, maxLength).join(''),
   };
 };

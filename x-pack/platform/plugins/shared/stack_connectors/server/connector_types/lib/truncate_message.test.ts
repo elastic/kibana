@@ -50,19 +50,20 @@ describe('truncateMessage', () => {
     });
   });
 
-  it('trims leading whitespace from an over-limit message', () => {
-    expect(truncateMessage(`${' '.repeat(130)}alert`, 130)).toEqual({
-      originalLength: 135,
+  it('preserves the original prefix when truncating an over-limit message', () => {
+    const message = `\n${'a'.repeat(130)}`;
+    expect(truncateMessage(message, 130)).toEqual({
+      originalLength: 131,
       truncated: true,
-      value: 'alert',
+      value: `\n${'a'.repeat(129)}`,
     });
   });
 
-  it('truncates to maxLength after trimming leading whitespace from long content', () => {
+  it('does not shift later characters into the payload by trimming first', () => {
     expect(truncateMessage(`${' '.repeat(10)}${'a'.repeat(131)}`, 130)).toEqual({
       originalLength: 141,
       truncated: true,
-      value: 'a'.repeat(130),
+      value: `${' '.repeat(10)}${'a'.repeat(120)}`,
     });
   });
 });
