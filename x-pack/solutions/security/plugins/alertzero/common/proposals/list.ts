@@ -20,10 +20,7 @@ export interface ProposalItem extends ProposalWithMetadata {
   conversationAgentId?: string;
 }
 
-export type ProposalGroups = Record<string, ProposalItem[]>;
-
-export interface GetProposalsListResponse {
-  groups: ProposalGroups;
+export interface ProposalsPageResponse {
+  proposals: ProposalItem[];
   total: number;
-  truncated: boolean;
 }

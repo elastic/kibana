@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { PROPOSAL_ATTACHMENT_TYPE } from './attachment';
+export { PROPOSAL_ATTACHMENT_TYPE, PROPOSAL_WITHOUT_ACTION } from './attachment';
 
 export {
   MAX_CHARTS_SUMMARY_BUCKETS,
@@ -31,15 +31,11 @@ export {
   createProposalRequestSchema,
   dismissProposalRequestSchema,
   dismissReasonSchema,
-  isAwaitingDecision,
+  isDecided,
   isExpired,
   listProposalsQuerySchema,
-  MAX_PROPOSALS_SIZE,
-  proposalFiltersSchema,
-  proposalsQuerySchema,
   proposalCategorySchema,
   proposalConfidenceSchema,
-  proposalDecisionSchema,
   proposalImpactSchema,
   proposalOriginSchema,
   proposalSchema,
@@ -53,16 +49,11 @@ export type {
   CreateProposalRequest,
   DismissProposalRequest,
   DismissReason,
-  ListByWindowQuery,
   ListProposalsQuery,
   ListProposalsResponse,
   Proposal,
-  ProposalsQuery,
-  ProposalsListResponse,
   ProposalCategory,
   ProposalConfidence,
-  ProposalDecision,
-  ProposalFilters,
   ProposalImpact,
   ProposalOrigin,
   ProposalChartsSummaryBucket,

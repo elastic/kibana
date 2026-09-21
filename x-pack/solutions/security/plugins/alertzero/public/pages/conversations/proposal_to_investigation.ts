@@ -107,8 +107,8 @@ export const proposalToInvestigation = (proposal: ProposalItem): Investigation =
     // severity collapse: 4-level impact → 3-level severity string.
     // 'critical' maps to 'high' so helpers.tsx's === 'high' check still fires.
     severity: proposal.impact === 'critical' ? 'high' : proposal.impact,
-    // Synthetic priority score restores impact ranking that listByWindow's
-    // createdAt-asc sort loses. Max: 4*20 + 3*5 = 95.
+    // Synthetic priority score drives impact-first ordering in the queue.
+    // The server sorts by createdAt, so this re-ranks client-side. Max: 4*20 + 3*5 = 95.
     priorityScore: impactRank * 20 + confidenceRank * 5,
     // recordId is repurposed to carry the proposal id into the ⋮ modal system.
     // The page renders dismiss/assign modals only if modalState.recordId is set.

@@ -6,9 +6,9 @@
  */
 
 import { esql } from '@elastic/esql';
+import type { Sort } from '@elastic/elasticsearch/lib/api/types';
 import { isEqual } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import { asyncMapWithLimit } from '@kbn/std';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { JSONSchema7 } from 'json-schema';
 import {
@@ -25,23 +25,20 @@ import {
   PROPOSAL_UNCATEGORIZED,
 } from '../../../common/proposals/constants';
 import type {
+  ApproveProposalRequest,
   CreateProposalRequest,
-  DismissReason,
-  ListByWindowQuery,
+  DismissProposalRequest,
   ListProposalsQuery,
   ListProposalsResponse,
   Proposal,
   ProposalChartsSummaryBucket,
   ProposalChartsSummaryQuery,
   ProposalChartsSummaryResponse,
-  ProposalDecision,
-  ProposalFilters,
-  ProposalsListResponse,
   ProposalStatus,
   ProposalUser,
   ProposalWithMetadata,
 } from '../../../common/proposals/proposal';
-import { isExpired, MAX_PROPOSALS_SIZE } from '../../../common/proposals/proposal';
+import { isExpired } from '../../../common/proposals/proposal';
 import type { ProposalDocument, ProposalsStorageClient } from '../storage/proposals_storage';
 import { toSortRanks } from '../storage/sort_ranks';
 import {
@@ -81,18 +78,9 @@ interface StoredProposal {
   primaryTerm?: number;
 }
 
-/**
- * Every field the gate workflow can advance. All optional: a call may move the
- * status, record the decision, or annotate, and the guards in `update` decide
- * whether the resulting pair is legal.
- */
 export interface UpdateProposalParams {
   id: string;
-  status?: ProposalStatus;
-  decision?: ProposalDecision;
-  decidedBy?: ProposalUser;
-  dismissReason?: DismissReason;
-  rationale?: string;
+  status: Extract<ProposalStatus, 'executing' | 'succeeded' | 'failed' | 'dismissed'>;
   executionError?: string;
 }
 
@@ -103,14 +91,9 @@ export interface ProposalsServiceDeps {
 }
 
 /**
- * Owns every write to the proposals index, and the invariants that go with it:
- * a settled status cannot move, a decision cannot be overwritten, and only the
- * legal decision/status pairs can be stored.
- *
- * The decision itself is written by the gate workflow rather than here, because
- * every resume surface funnels through the gate — so a single write behind it
- * covers the API, the workflows resume route, the Inbox and Agent Builder at
- * once. The routes only release the gate.
+ * Owns every write to the proposals index. Decisions are recorded before the
+ * gating workflow is resumed, so the record — not the resume payload — is the
+ * durable channel for what was decided.
  */
 export class ProposalsService {
   constructor(private readonly deps: ProposalsServiceDeps) {}
@@ -134,22 +117,10 @@ export class ProposalsService {
       ? await this.resolveAndValidateAction(actionWorkflowId, params.actionInput, spaceId)
       : undefined;
 
-    // Caller first in both: it knows the situation the proposal came out of,
-    // which the action's own metadata cannot. A category can end up absent —
-    // the vocabulary belongs to the solution that authored the action — but
-    // impact cannot, because it is the queue's primary sort key.
-    //
-    // Blanked first, and not defensively: `??` treats the `''` that Liquid
-    // renders for an absent workflow input as a value, so without this the
-    // caller always "wins" with an empty string, the action's own metadata is
-    // never consulted, and the queue silently drops a proposal it cannot group.
-    const category = blankToUndefined(params.category) ?? metadata?.category;
-    const impact = blankToUndefined(params.impact) ?? metadata?.impact ?? 'low';
-    // Both are required on the stored document, so a blank has to resolve to
-    // something rather than to an omission: `confidence` feeds the queue's
-    // secondary sort rank, and `origin` says who proposed it.
-    const confidence = blankToUndefined(params.confidence) ?? 'medium';
-    const origin = blankToUndefined(params.origin) ?? 'worker';
+    // Absent for a proposal with no action: the category vocabulary belongs to
+    // the solution that authored the action, so there is no default to invent.
+    const category = metadata?.category;
+    const impact = metadata?.impact ?? params.impact;
 
     const document: ProposalDocument = {
       spaceId,
@@ -159,10 +130,10 @@ export class ProposalsService {
       actionInput: params.actionInput,
       status: 'pending',
       impact,
-      confidence,
+      confidence: params.confidence,
       category,
-      origin,
-      ...toSortRanks({ impact, confidence }),
+      origin: params.origin,
+      ...toSortRanks({ impact, confidence: params.confidence }),
       expiresAt: blankToUndefined(params.expiresAt),
       workflowExecutionId: blankToUndefined(params.workflowExecutionId),
       createdAt: new Date().toISOString(),
@@ -187,20 +158,57 @@ export class ProposalsService {
    * pageable instead of capped at a single fetch. Category is not part of the
    * order: a UI groups by it and decides for itself which group leads.
    */
-  async list(query: ListProposalsQuery, spaceId: string): Promise<ListProposalsResponse> {
+  async list(
+    query: ListProposalsQuery,
+    spaceId: string,
+    sort?: Sort
+  ): Promise<ListProposalsResponse> {
+    const filter: QueryFilterList = [{ term: { spaceId } }];
+
+    if (query.status) {
+      filter.push({ term: { status: query.status } });
+    }
+    if (query.conversationId) {
+      filter.push({ term: { conversationId: query.conversationId } });
+    }
+    if (query.excludeExpired) {
+      // A proposal with no deadline never expires, so it has to survive the
+      // filter alongside those whose deadline is still ahead.
+      filter.push({
+        bool: {
+          should: [
+            { bool: { must_not: { exists: { field: 'expiresAt' } } } },
+            { range: { expiresAt: { gt: 'now' } } },
+          ],
+          minimum_should_match: 1,
+        },
+      });
+    }
+    if (query.category) {
+      filter.push({ term: { category: query.category } });
+    }
+    if (query.decidedWithinHours) {
+      filter.push({ range: { decidedAt: { gte: `now-${query.decidedWithinHours}h` } } });
+    }
+    if (query.excludeSuperseded) {
+      filter.push({ bool: { must_not: [{ exists: { field: 'supersededBy' } }] } });
+    }
+
+    const resolvedSort: Sort = sort ?? [
+      { impactRank: { order: 'asc' } },
+      { confidenceRank: { order: 'asc' } },
+      // Soonest deadline first; proposals without one come after those with.
+      { expiresAt: { order: 'asc', missing: '_last' } },
+      // Final tiebreak, so paging over equally-ranked proposals is stable.
+      { createdAt: { order: 'desc' } },
+    ];
+
     const response = await this.deps.storage.search({
       track_total_hits: true,
       size: query.size,
       from: query.from,
-      query: { bool: { filter: toFilterClauses(query, spaceId) } },
-      sort: [
-        { impactRank: { order: 'asc' } },
-        { confidenceRank: { order: 'asc' } },
-        // Soonest deadline first; proposals without one come after those with.
-        { expiresAt: { order: 'asc', missing: '_last' } },
-        // Final tiebreak, so paging over equally-ranked proposals is stable.
-        { createdAt: { order: 'desc' } },
-      ],
+      query: { bool: { filter } },
+      sort: resolvedSort,
     });
 
     const proposals = await Promise.all(
@@ -218,61 +226,6 @@ export class ProposalsService {
           ? response.hits.total
           : response.hits.total?.value ?? proposals.length,
     };
-  }
-
-  /**
-   * An activity view: everything still awaiting a decision, at any age, plus
-   * everything decided within the last N hours. In creation order, capped
-   * rather than paged.
-   *
-   * It is a separate method because the two halves are a disjunction — "still
-   * awaiting" and "decided recently" are unrelated conditions, so neither can
-   * be expressed as one more filter on top of `list()`. The shared filters in
-   * `ProposalFilters` apply to both halves and mean exactly what they mean in
-   * `list()`; only the union and the paging differ.
-   *
-   * Expired proposals fall out of both halves on their own: the awaiting half
-   * matches on `status: 'pending'`, and the decided half needs a `decidedAt`
-   * that a proposal nobody answered never got.
-   *
-   * No HTTP route, because a capped read with no paging is not a contract worth
-   * exposing; in-process callers reach it through the start contract.
-   *
-   * Action-metadata resolution is memoised per `actionWorkflowId` across the
-   * entire result set to avoid a `getWorkflow` fetch per proposal.
-   */
-  async listByWindow(query: ListByWindowQuery, spaceId: string): Promise<ProposalsListResponse> {
-    const response = await this.deps.storage.search({
-      track_total_hits: true,
-      size: MAX_PROPOSALS_SIZE,
-      query: {
-        bool: {
-          filter: toFilterClauses(query, spaceId),
-          should: [
-            // `pending` is only ever valid while undecided, so the status is
-            // the whole condition.
-            { term: { status: 'pending' } },
-            { range: { decidedAt: { gte: `now-${query.decidedWithinHours}h` } } },
-          ],
-          minimum_should_match: 1,
-        },
-      },
-      sort: [{ createdAt: { order: 'asc' } }],
-    });
-
-    const hits = response.hits.hits.filter(
-      (hit): hit is typeof hit & { _id: string } => hit._id !== undefined
-    );
-    const rawProposals = hits.map((hit) => toProposal(hit._id, hit._source as ProposalDocument));
-
-    const proposals = await this.withMetadataBatch(rawProposals, spaceId);
-
-    const total =
-      typeof response.hits.total === 'number'
-        ? response.hits.total
-        : response.hits.total?.value ?? proposals.length;
-
-    return { proposals, total, truncated: total > proposals.length };
   }
 
   /**
@@ -443,219 +396,117 @@ export class ProposalsService {
   }
 
   /**
-   * Releases the parked gate so the workflow can record the decision behind it.
-   * Writes nothing but the annotations below, and only once every refusal has
-   * passed — so there is nothing to roll back when a resume fails, and the
-   * decision reaches the record by exactly one path regardless of which surface
-   * released the gate.
-   *
-   * The caller is expected to have been authorized already — the routes do it
-   * declaratively, and the workflow re-checks the resumer behind the gate.
+   * Records the approval and then releases the gating workflow. Order matters:
+   * the workflow only ever receives a boolean, so anything durable has to be
+   * written first.
    */
-  async releaseGate(
+  async approve(
     id: string,
-    { approved, actionInput, dismissReason, rationale, spaceId, request }: ReleaseGateParams
+    params: ApproveProposalRequest,
+    { spaceId, request, user }: DecisionContext
   ): Promise<Proposal> {
     const { proposal, seqNo, primaryTerm } = await this.load(id, spaceId);
 
-    // Every refusal comes first, so a rejected release leaves the record
-    // exactly as it found it. Ordering matters more than it looks: an
-    // annotation written ahead of a conflict would leave a dismiss reason on a
-    // proposal that was never dismissed, and a later approval would land on top
-    // of it.
     this.assertDecidable(proposal);
 
-    if (approved && actionInput !== undefined && !sameInput(actionInput, proposal.actionInput)) {
+    if (params.actionInput !== undefined && !sameInput(params.actionInput, proposal.actionInput)) {
       throw new ProposalConflictError(
         `Proposal [${id}] was modified since it was rendered; re-read it before approving`
       );
     }
 
-    const annotated = await this.annotate(
-      proposal,
-      { dismissReason, rationale },
-      { seqNo, primaryTerm }
+    const decided = await this.writeDecision(
+      { ...proposal, status: 'approved', rationale: params.rationale },
+      { seqNo, primaryTerm, user }
     );
 
-    await this.resumeGate(annotated, { spaceId, request, approved });
-
-    return stripRanks(annotated);
-  }
-
-  /**
-   * Writes the decision's free-text annotations and nothing else.
-   *
-   * This is the one thing a route still writes, and it exists because
-   * `waitForApproval` reconstructs its resume payload as
-   * `{ approved: approved === true }` and discards the rest — so a dismiss
-   * reason or a rationale cannot reach the workflow through the gate. The line
-   * is "the route annotates, the workflow decides". A dismissal arriving
-   * through the platform's own resume API simply carries no reason, which is
-   * fine because both fields are optional.
-   *
-   * A resume that fails after this point does leave the annotation behind on an
-   * undecided proposal. That window cannot be closed without a transaction, and
-   * it is the better trade: annotating after the resume would race the
-   * workflow's own decision write and lose the reason outright.
-   */
-  private async annotate(
-    proposal: StoredProposalRecord,
-    { dismissReason, rationale }: Pick<ReleaseGateParams, 'dismissReason' | 'rationale'>,
-    { seqNo, primaryTerm }: { seqNo?: number; primaryTerm?: number }
-  ): Promise<StoredProposalRecord> {
-    if (dismissReason === undefined && rationale === undefined) {
-      return proposal;
+    try {
+      await this.resumeGate(decided, { spaceId, request, approved: true });
+    } catch (error) {
+      // The decision is durable but the gate is still parked, so record why
+      // before surfacing the failure rather than reporting a clean approval.
+      await this.markResumeFailed(id, spaceId, error);
+      throw error;
     }
 
-    const annotated: StoredProposalRecord = {
-      ...proposal,
-      ...(dismissReason !== undefined ? { dismissReason } : {}),
-      ...(rationale !== undefined ? { rationale } : {}),
-    };
-    const { id, ...document } = annotated;
-
-    await this.writeDocument(id, document, { seqNo, primaryTerm });
-
-    return annotated;
+    return stripRanks(decided);
   }
 
-  /**
-   * Called by the gate workflow to advance a proposal it owns. Two independent
-   * guards, because the two axes settle independently: a status cannot leave a
-   * terminal state, so a late `on-failure` handler firing after the action
-   * succeeded cannot rewrite the outcome; and a decision cannot be overwritten,
-   * so a second approver cannot reattribute the first one's call. Both live
-   * here rather than in the workflow YAML so they hold for every caller.
-   */
-  async update(params: UpdateProposalParams, spaceId: string): Promise<Proposal> {
-    const { id } = params;
+  /** Same shape as `approve`, but releases the workflow down its negative branch. */
+  async dismiss(
+    id: string,
+    params: DismissProposalRequest,
+    { spaceId, request, user }: DecisionContext
+  ): Promise<Proposal> {
     const { proposal, seqNo, primaryTerm } = await this.load(id, spaceId);
 
-    // Re-writing the same terminal status is allowed, so a settled proposal
-    // stays idempotent: the workflow's failure handler writes `failed` onto a
-    // record the loop may have already failed, and refusing that would replace
-    // the real error with a conflict about recording it.
-    if (
-      params.status !== undefined &&
-      params.status !== proposal.status &&
-      isTerminal(proposal.status)
-    ) {
-      throw new ProposalConflictError(
-        `Proposal [${id}] already settled as ${proposal.status} and cannot be moved to ${params.status}`
+    this.assertDecidable(proposal);
+
+    const decided = await this.writeDecision(
+      {
+        ...proposal,
+        status: 'dismissed',
+        dismissReason: params.dismissReason,
+        rationale: params.rationale,
+      },
+      { seqNo, primaryTerm, user }
+    );
+
+    try {
+      await this.resumeGate(decided, { spaceId, request, approved: false });
+    } catch (error) {
+      // A dismissal cannot be recorded as failed — `dismissed` is already
+      // terminal — so the parked gate only survives in the log. The workflow's
+      // own HITL timeout is what eventually releases it.
+      this.deps.logger.error(
+        `Proposal [${id}] was dismissed but its gate could not be released: ${
+          error instanceof Error ? error.message : String(error)
+        }`
       );
-    }
-    if (params.decision !== undefined && proposal.decision !== undefined) {
-      throw new ProposalConflictError(
-        `Proposal [${id}] was already decided as ${proposal.decision}`
-      );
+      throw error;
     }
 
-    const decision = params.decision ?? proposal.decision;
-    const status = params.status ?? proposal.status;
-    assertValidPair(id, decision, status);
+    return stripRanks(decided);
+  }
 
-    /**
-     * Stamped the moment the proposal stops awaiting, by either route: a human
-     * deciding, or the workflow settling it without one. Server-derived rather
-     * than a parameter, so the recorded moment is always the moment it was
-     * written, and write-once so a later annotation cannot move it.
-     *
-     * The second half is what `chartsSummary` needs: it reads `decidedAt` as the
-     * "closed" event, and a proposal the workflow terminated early — a
-     * malfunction settling it `expired` while its deadline is still in the
-     * future — would otherwise read as open until that deadline arrived.
-     */
-    const settledAt =
-      proposal.decidedAt ??
-      (params.decision !== undefined || isTerminal(status) ? new Date().toISOString() : undefined);
+  /**
+   * Called by the gate workflow to advance a proposal it owns. Refuses to move
+   * a proposal that already settled, so a late failure — an `on-failure`
+   * handler firing after the action succeeded, say — cannot rewrite the
+   * outcome. Enforced here rather than in the workflow YAML so it holds for
+   * every caller.
+   */
+  async update(
+    { id, status, executionError }: UpdateProposalParams,
+    spaceId: string
+  ): Promise<Proposal> {
+    const { proposal, seqNo, primaryTerm } = await this.load(id, spaceId);
+
+    if (isTerminal(proposal.status)) {
+      throw new ProposalConflictError(
+        `Proposal [${id}] already settled as ${proposal.status} and cannot be moved to ${status}`
+      );
+    }
 
     const updated: StoredProposalRecord = {
       ...proposal,
       status,
-      decision,
-      ...(settledAt !== undefined ? { decidedAt: settledAt } : {}),
-      ...(params.decision !== undefined
-        ? { decidedBy: params.decidedBy ?? proposal.decidedBy }
-        : {}),
-      ...(params.dismissReason !== undefined ? { dismissReason: params.dismissReason } : {}),
-      ...(params.rationale !== undefined ? { rationale: params.rationale } : {}),
-      ...(params.executionError !== undefined ? { executionError: params.executionError } : {}),
+      executionError,
+      // Only writeDecision stamps decidedAt otherwise, so a proposal a workflow
+      // terminated would read as open forever.
+      ...(isTerminal(status) && !proposal.decidedAt ? { decidedAt: new Date().toISOString() } : {}),
     };
     const { id: _id, ...document } = updated;
 
-    await this.writeDocument(id, document, { seqNo, primaryTerm });
+    await this.deps.storage.index({
+      id,
+      document,
+      ...(seqNo !== undefined && primaryTerm !== undefined
+        ? { if_seq_no: seqNo, if_primary_term: primaryTerm }
+        : {}),
+    });
 
     return stripRanks(updated);
-  }
-
-  /**
-   * Creates a fresh proposal for the same subject and marks the original as
-   * superseded by it, so a failed action can be re-offered to a human without
-   * reusing a record that already settled as `failed`.
-   *
-   * `createdAt` and `expiresAt` are inherited rather than restarted. The
-   * deadline is the analyst's, not the attempt's: letting each retry reset it
-   * would make a chain of failures outlive any deadline the queue ever showed.
-   * Inheriting `createdAt` keeps the chain sorting where the original sat.
-   *
-   * `workflowExecutionId` is the original's, because the gate execution is
-   * still running and parked — approving the clone resumes that same execution.
-   */
-  async clone({ id, executionError }: CloneProposalParams, spaceId: string): Promise<string> {
-    const { proposal, seqNo, primaryTerm } = await this.load(id, spaceId);
-
-    // Asserted here rather than left to the caller, because this is reachable
-    // as a registered step: any workflow could otherwise re-open a succeeded
-    // or dismissed proposal as `pending` and hide the real one behind
-    // `supersededBy`. A failed action is the only thing there is to re-offer.
-    if (proposal.decision !== 'approved' || proposal.status !== 'failed') {
-      throw new ProposalConflictError(
-        `Proposal [${id}] cannot be cloned: only an approved proposal whose action failed can be ` +
-          `re-offered, and this one is ${proposal.decision ?? 'undecided'}/${proposal.status}`
-      );
-    }
-
-    if (proposal.supersededBy !== undefined) {
-      // Overwriting the pointer would orphan the first clone: it would stay
-      // live and undecided with nothing referring to it.
-      throw new ProposalConflictError(
-        `Proposal [${id}] was already superseded by ${proposal.supersededBy}`
-      );
-    }
-
-    const cloneId = uuidv4();
-    const { id: _id, ...original } = proposal;
-
-    const document: ProposalDocument = {
-      ...original,
-      status: 'pending',
-      decision: undefined,
-      supersededBy: undefined,
-      decidedBy: undefined,
-      decidedAt: undefined,
-      dismissReason: undefined,
-      rationale: undefined,
-      executionError: undefined,
-    };
-
-    // The clone is created before the original is marked, deliberately. The
-    // two writes cannot be atomic, and if the second one loses its race the
-    // queue shows both records — whereas marking first would leave a pointer
-    // to a clone that does not exist, hiding the original behind
-    // `excludeSuperseded` with nothing live in its place.
-    await this.deps.storage.index({ id: cloneId, document, op_type: 'create' });
-
-    // Allowed even though the original sits at a terminal status: only status
-    // transitions and the decision are guarded, and neither moves here.
-    const superseded: ProposalDocument = {
-      ...original,
-      supersededBy: cloneId,
-      ...(executionError !== undefined ? { executionError } : {}),
-    };
-
-    await this.writeDocument(id, superseded, { seqNo, primaryTerm });
-
-    return cloneId;
   }
 
   /**
@@ -784,47 +635,29 @@ export class ProposalsService {
     };
   }
 
-  /**
-   * Whether a decision can still be made. Both axes have to be checked, for
-   * different reasons.
-   *
-   * The decision catches the window the status cannot: an approved proposal
-   * stays at `pending` for as long as the gate workflow's post-gate steps take
-   * to run, so a status check alone would let a second approver through.
-   *
-   * The status catches what the decision cannot: the workflow settles an
-   * unanswered proposal as `expired` on attempt exhaustion or a failure before
-   * anyone decided, which leaves no decision behind and can happen well before
-   * the wall-clock deadline. The date check below would still read it as live.
-   *
-   * `pending` is the only status that is valid while undecided, so anything
-   * else is already settled.
-   */
   private assertDecidable(proposal: StoredProposalRecord): void {
-    if (proposal.decision !== undefined) {
-      throw new ProposalConflictError(
-        `Proposal [${proposal.id}] was already decided as ${proposal.decision}`
-      );
-    }
     if (proposal.status !== 'pending') {
       throw new ProposalConflictError(
-        `Proposal [${proposal.id}] has settled as ${proposal.status}`
+        `Proposal [${proposal.id}] was already decided (status: ${proposal.status})`
       );
     }
-    // Kept alongside the status check for the lag between a deadline passing
-    // and the workflow settling the record, during which it still reads
-    // `pending`.
     if (isExpired(proposal)) {
       throw new ProposalExpiredError(proposal.id);
     }
   }
 
-  /** Optimistically-concurrent write, with the lost race reported as a conflict. */
-  private async writeDocument(
-    id: string,
-    document: ProposalDocument,
-    { seqNo, primaryTerm }: { seqNo?: number; primaryTerm?: number }
-  ): Promise<void> {
+  private async writeDecision(
+    proposal: StoredProposalRecord,
+    { seqNo, primaryTerm, user }: { seqNo?: number; primaryTerm?: number; user?: ProposalUser }
+  ): Promise<StoredProposalRecord> {
+    const decided: StoredProposalRecord = {
+      ...proposal,
+      // Server-derived; never accepted from the caller.
+      decidedBy: user,
+      decidedAt: new Date().toISOString(),
+    };
+    const { id, ...document } = decided;
+
     try {
       await this.deps.storage.index({
         id,
@@ -835,10 +668,12 @@ export class ProposalsService {
       });
     } catch (error) {
       if (isVersionConflict(error)) {
-        throw new ProposalConflictError(`Proposal [${id}] was modified by another actor first`);
+        throw new ProposalConflictError(`Proposal [${id}] was decided by another actor first`);
       }
       throw error;
     }
+
+    return decided;
   }
 
   /**
@@ -852,14 +687,8 @@ export class ProposalsService {
     { spaceId, request, approved }: { spaceId: string; request: KibanaRequest; approved: boolean }
   ): Promise<void> {
     if (!proposal.workflowExecutionId) {
-      // Unreachable by construction — the gate workflow's create step is the
-      // only way to make a proposal, and it stamps its own execution id. Kept
-      // as a refusal rather than an early return because the decision is
-      // written behind the gate: returning would answer the caller with a 200
-      // for a record that nothing will ever decide.
-      throw new ProposalConflictError(
-        `Proposal [${proposal.id}] has no gate execution, so its decision cannot be recorded`
-      );
+      // Standalone proposal: nothing is waiting on the decision.
+      return;
     }
 
     const api = this.deps.getWorkflowsApi();
@@ -886,6 +715,26 @@ export class ProposalsService {
     );
   }
 
+  /**
+   * Records why an approved proposal never reached its action. Deliberately
+   * swallows its own failure: the resume error is the one worth propagating,
+   * and this write can legitimately lose — a gate released elsewhere may have
+   * already settled the proposal, which `update` refuses to move.
+   */
+  private async markResumeFailed(id: string, spaceId: string, cause: unknown): Promise<void> {
+    const message = cause instanceof Error ? cause.message : String(cause);
+
+    try {
+      await this.update({ id, status: 'failed', executionError: message }, spaceId);
+    } catch (error) {
+      this.deps.logger.error(
+        `Failed to record the resume failure for proposal [${id}]: ${
+          error instanceof Error ? error.message : String(error)
+        } (original failure: ${message})`
+      );
+    }
+  }
+
   private async withMetadata(proposal: Proposal, spaceId: string): Promise<ProposalWithMetadata> {
     const action = proposal.actionWorkflowId
       ? await this.resolveActionMetadata(proposal.actionWorkflowId, spaceId)
@@ -893,102 +742,15 @@ export class ProposalsService {
 
     return { ...proposal, action, expired: isExpired(proposal) };
   }
-
-  /**
-   * Resolves action metadata for a collection of proposals with a concurrency
-   * cap. Unique workflow IDs are fetched once each (deduplicated up front) and
-   * results are collected into a Map before the proposals are assembled, so a
-   * single failure for one workflow ID never affects proposals backed by a
-   * different one.
-   */
-  private async withMetadataBatch(
-    proposals: Proposal[],
-    spaceId: string
-  ): Promise<ProposalWithMetadata[]> {
-    const uniqueWorkflowIds = [
-      ...new Set(
-        proposals.map((p) => p.actionWorkflowId).filter((id): id is string => id !== undefined)
-      ),
-    ];
-
-    const metaEntries = await asyncMapWithLimit(uniqueWorkflowIds, 10, async (id) => {
-      const meta = await this.resolveActionMetadata(id, spaceId);
-      return [id, meta] as [string, ActionMetadata | undefined];
-    });
-
-    const metaMap = new Map<string, ActionMetadata | undefined>(metaEntries);
-
-    return proposals.map((proposal) => ({
-      ...proposal,
-      action:
-        proposal.actionWorkflowId !== undefined
-          ? metaMap.get(proposal.actionWorkflowId)
-          : undefined,
-      expired: isExpired(proposal),
-    }));
-  }
 }
 
-export interface ReleaseGateParams {
-  approved: boolean;
-  /**
-   * The action input the approver was shown. Rejected with a conflict when it
-   * no longer matches the record, so an approval can never apply to values the
-   * decider never saw.
-   */
-  actionInput?: Record<string, unknown>;
-  /** Annotations the gate cannot carry; written only once every check passes. */
-  dismissReason?: DismissReason;
-  rationale?: string;
+interface DecisionContext {
   spaceId: string;
   request: KibanaRequest;
-}
-
-export interface CloneProposalParams {
-  id: string;
-  /** Why the original failed, recorded alongside the supersession. */
-  executionError?: string;
+  user?: ProposalUser;
 }
 
 type QueryFilterList = Array<Record<string, unknown>>;
-
-/**
- * Translates the shared filter vocabulary once, so every read applies it
- * identically. The space term is always present: no read crosses a space.
- */
-const toFilterClauses = (filters: ProposalFilters, spaceId: string): QueryFilterList => {
-  const filter: QueryFilterList = [{ term: { spaceId } }];
-
-  if (filters.status) {
-    filter.push({ term: { status: filters.status } });
-  }
-  if (filters.decision) {
-    filter.push({ term: { decision: filters.decision } });
-  }
-  if (filters.conversationId) {
-    filter.push({ term: { conversationId: filters.conversationId } });
-  }
-  if (filters.excludeSuperseded) {
-    // A superseded proposal is represented by its successor, so showing both
-    // would put every retry of the same subject in the queue.
-    filter.push({ bool: { must_not: { exists: { field: 'supersededBy' } } } });
-  }
-  if (filters.excludeExpired) {
-    // A proposal with no deadline never expires, so it has to survive the
-    // filter alongside those whose deadline is still ahead.
-    filter.push({
-      bool: {
-        should: [
-          { bool: { must_not: { exists: { field: 'expiresAt' } } } },
-          { range: { expiresAt: { gt: 'now' } } },
-        ],
-        minimum_should_match: 1,
-      },
-    });
-  }
-
-  return filter;
-};
 
 /**
  * Drops the storage-only sort ranks, so they never reach the API contract.
@@ -1001,53 +763,19 @@ const toProposal = (id: string, document: ProposalDocument): Proposal =>
   stripRanks({ id, ...document });
 
 /**
- * A status that has settled. `pending` and `executing` are the only two a
- * proposal can still be moved out of.
+ * A proposal that has settled. `approved` is not terminal: an action proposal
+ * still has to execute and report back.
  */
 const isTerminal = (status: ProposalStatus): boolean =>
-  status === 'succeeded' || status === 'failed' || status === 'expired' || status === 'no_action';
-
-/**
- * The only legal decision/status pairs. Exhaustive on purpose: the two axes are
- * independent, but not every combination means anything, and a pair like
- * `dismissed` + `executing` would say an action is running for a proposal that
- * was declined.
- *
- * `no_action` reads as "no action was executed" under both decisions — a
- * dismissal, or an approval of a proposal that carries nothing to run.
- */
-const VALID_STATUSES: Record<'undecided' | ProposalDecision, readonly ProposalStatus[]> = {
-  undecided: ['pending', 'expired'],
-  dismissed: ['no_action'],
-  approved: ['no_action', 'executing', 'succeeded', 'failed'],
-};
-
-const assertValidPair = (
-  id: string,
-  decision: ProposalDecision | undefined,
-  status: ProposalStatus
-): void => {
-  const allowed = VALID_STATUSES[decision ?? 'undecided'];
-  if (!allowed.includes(status)) {
-    throw new ProposalConflictError(
-      `Proposal [${id}] cannot be ${
-        decision ? `decided as ${decision}` : 'left undecided'
-      } with status ${status}; expected one of ${allowed.join(', ')}`
-    );
-  }
-};
+  status === 'succeeded' || status === 'failed' || status === 'dismissed';
 
 /**
  * Treats an empty or whitespace-only string as absent. Liquid renders a missing
- * workflow input as `''`, which is not the same thing as a value — and `??`
- * cannot tell them apart, so every default behind one of these would be skipped.
- *
- * Generic so an enum-typed field keeps its type: trimming cannot move a value
- * off its union, since none of the members carry surrounding whitespace.
+ * workflow input as `''`, which is not the same thing as a value.
  */
-const blankToUndefined = <Value extends string>(value: Value | undefined): Value | undefined => {
+const blankToUndefined = (value: string | undefined): string | undefined => {
   const trimmed = value?.trim();
-  return trimmed === undefined || trimmed === '' ? undefined : (trimmed as Value);
+  return trimmed === undefined || trimmed === '' ? undefined : trimmed;
 };
 
 /**
