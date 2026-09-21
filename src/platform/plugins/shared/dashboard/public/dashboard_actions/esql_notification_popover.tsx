@@ -14,7 +14,10 @@ import { EuiButtonIcon, EuiCodeBlock, EuiFormLabel, EuiPopover, EuiToolTip } fro
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { apiCanLockHoverActions, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import {
+  apiCanLockHoverActions,
+  useStateFromPublishingSubject,
+} from '@kbn/presentation-publishing';
 
 import type { EsqlNotificationActionApi } from './esql_notification_action';
 
@@ -31,7 +34,7 @@ export function EsqlNotificationPopover({ api }: { api: EsqlNotificationActionAp
   }, [api]);
 
   const esqlQueries = useStateFromPublishingSubject(api.esql$);
-  
+
   return (
     <EuiPopover
       button={
