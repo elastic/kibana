@@ -179,9 +179,10 @@ export const buildBranchStatsQuery = (
 /**
  * Per-branch execution and build counts for the given tests of one execution model. This is
  * what the thresholds are checked against, branch by branch; it runs for every test that
- * clears the thresholds on its totals, before ranking. Counts only, so it stays cheap; the
- * expensive latest-run lookup is left to `buildBranchStatsQuery`, which only runs for the tests
- * that make the report.
+ * clears the thresholds on its totals, before ranking, so `fetchBranchCounts` batches the tests
+ * to keep each result under the row limit. Counts only, so it stays cheap; the expensive
+ * latest-run lookup is left to `buildBranchStatsQuery`, which only runs for the tests that make
+ * the report.
  */
 export const buildBranchCountsQuery = (
   scope: FlakyTestQueryScope,
@@ -227,10 +228,7 @@ export const buildTestMetadataQuery = (
     `LIMIT ${ESQL_ROW_LIMIT}`,
   ].join(' | ');
 
-const runEsql = async <T extends Record<string, unknown>>(
-  es: ESClient,
-  query: string
-): Promise<T[]> => {
+const runEsql = async <T extends object>(es: ESClient, query: string): Promise<T[]> => {
   const { records } = await es.helpers.esql({ query }).toRecords<T>();
   return records;
 };
@@ -378,6 +376,60 @@ export interface BranchCountsRow {
   failedBuilds: number;
 }
 
+/**
+ * Tests per branch counts query. A row comes back per test and branch, so this keeps a batch
+ * well under `ESQL_ROW_LIMIT` on the pipelines the report is meant for; the candidates it runs
+ * for are not capped the way the tests of the other per-test lookups are.
+ */
+export const BRANCH_COUNTS_BATCH_SIZE = 500;
+
+const chunk = <T>(items: readonly T[], size: number): T[][] => {
+  const chunks: T[][] = [];
+  for (let start = 0; start < items.length; start += size) {
+    chunks.push(items.slice(start, start + size));
+  }
+  return chunks;
+};
+
+interface BranchCountsRecord {
+  test_id: string;
+  branch: string | null;
+  builds: number;
+  failed_builds: number;
+}
+
+/**
+ * Rows for one batch of tests. ES|QL silently cuts the result at the row limit and a test whose
+ * rows were cut would be taken for one that qualifies on no branch, so a batch that hits the
+ * limit is split in two and fetched again rather than used as is.
+ */
+const fetchBranchCountsBatch = async (
+  es: ESClient,
+  scope: FlakyTestQueryScope,
+  frameworks: readonly TestFramework[],
+  testIds: readonly string[]
+): Promise<BranchCountsRecord[]> => {
+  const records = await runEsql<BranchCountsRecord>(
+    es,
+    buildBranchCountsQuery(scope, frameworks, testIds)
+  );
+  if (records.length < ESQL_ROW_LIMIT) {
+    return records;
+  }
+  if (testIds.length === 1) {
+    throw new Error(
+      `Branch counts for test ${testIds[0]} hit the ${ESQL_ROW_LIMIT} row limit; ` +
+        'narrow the scope with --branches'
+    );
+  }
+  const half = Math.ceil(testIds.length / 2);
+  const halves = await Promise.all([
+    fetchBranchCountsBatch(es, scope, frameworks, testIds.slice(0, half)),
+    fetchBranchCountsBatch(es, scope, frameworks, testIds.slice(half)),
+  ]);
+  return halves.flat();
+};
+
 /** Per-branch build counts keyed by test id, most failed builds first. */
 export const fetchBranchCounts = async (
   es: ESClient,
@@ -389,13 +441,10 @@ export const fetchBranchCounts = async (
   }
 
   const results = await Promise.all(
-    groupByExecutionModel(tests).map(({ frameworks, testIds }) =>
-      runEsql<{
-        test_id: string;
-        branch: string | null;
-        builds: number;
-        failed_builds: number;
-      }>(es, buildBranchCountsQuery(scope, frameworks, testIds))
+    groupByExecutionModel(tests).flatMap(({ frameworks, testIds }) =>
+      chunk(testIds, BRANCH_COUNTS_BATCH_SIZE).map((batch) =>
+        fetchBranchCountsBatch(es, scope, frameworks, batch)
+      )
     )
   );
 

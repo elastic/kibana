@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ESQL_ROW_LIMIT } from './esql';
 import {
+  BRANCH_COUNTS_BATCH_SIZE,
   buildBranchStatsQuery,
   buildFailingFilesQuery,
   buildBranchCountsQuery,
@@ -356,6 +358,65 @@ describe('fetchBranchCounts', () => {
     ]);
     // a test without any row is absent
     expect(counts.has('p1')).toBe(false);
+  });
+
+  const jestTests = (count: number) =>
+    Array.from({ length: count }, (_, index) => ({
+      testId: `j${index + 1}`,
+      framework: 'jest' as const,
+    }));
+  const testIdsIn = (query: string): string[] =>
+    [...(query.match(/test\.id IN \(([^)]*)\)/)?.[1] ?? '').matchAll(/"([^"]+)"/g)].map(
+      ([, id]) => id
+    );
+  const result = (records: unknown[]) => ({
+    toRecords: jest.fn().mockResolvedValue({ records }),
+  });
+  const row = (testId: string) => ({
+    test_id: testId,
+    branch: 'main',
+    builds: 20,
+    failed_builds: 2,
+  });
+  const truncated = Array.from({ length: ESQL_ROW_LIMIT }, () => row('j1'));
+
+  it('queries the tests of one model in batches', async () => {
+    const { client, esql } = mockEs([]);
+
+    await fetchBranchCounts(client, scope, jestTests(BRANCH_COUNTS_BATCH_SIZE + 1));
+
+    expect(esql).toHaveBeenCalledTimes(2);
+    const queries = esql.mock.calls.map(([{ query }]) => query as string);
+    expect(testIdsIn(queries[0])).toHaveLength(BRANCH_COUNTS_BATCH_SIZE);
+    expect(testIdsIn(queries[1])).toEqual([`j${BRANCH_COUNTS_BATCH_SIZE + 1}`]);
+  });
+
+  it('splits a batch that hits the row limit rather than treating the missing rows as no builds', async () => {
+    const { client, esql } = mockEs([]);
+    esql
+      .mockReturnValueOnce(result(truncated))
+      .mockReturnValueOnce(result([row('j1'), row('j2')]))
+      .mockReturnValueOnce(result([row('j3'), row('j4')]));
+
+    const counts = await fetchBranchCounts(client, scope, jestTests(4));
+
+    expect(esql).toHaveBeenCalledTimes(3);
+    const queries = esql.mock.calls.map(([{ query }]) => query as string);
+    expect(testIdsIn(queries[0])).toEqual(['j1', 'j2', 'j3', 'j4']);
+    expect(testIdsIn(queries[1])).toEqual(['j1', 'j2']);
+    expect(testIdsIn(queries[2])).toEqual(['j3', 'j4']);
+    expect([...counts.keys()]).toEqual(['j1', 'j2', 'j3', 'j4']);
+    expect(counts.get('j4')).toEqual([{ branch: 'main', builds: 20, failedBuilds: 2 }]);
+  });
+
+  it('fails when a single test alone hits the row limit, so no test is silently disqualified', async () => {
+    const { client, esql } = mockEs([]);
+    esql.mockReturnValueOnce(result(truncated));
+
+    await expect(fetchBranchCounts(client, scope, jestTests(1))).rejects.toThrow(
+      `Branch counts for test j1 hit the ${ESQL_ROW_LIMIT} row limit`
+    );
+    expect(esql).toHaveBeenCalledTimes(1);
   });
 });
 
