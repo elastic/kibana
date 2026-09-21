@@ -27,9 +27,9 @@ import { FlyoutTemplate } from '@kbn/flyout-template';
 
 ## Root props
 
-The root forwards a fixed subset of `EuiFlyoutProps` — `id`, `hasChildBackground`, `onClose`, `size`, `minWidth`, `maxWidth`, `type`, `paddingSize`, `ownFocus`, `resizable`, `onResize`, `outsideClickCloses`, `focusTrapProps`, `closeButtonProps`, `session`, `historyKey`, `onActive`, `flyoutMenuProps` — plus `aria-label`, `aria-labelledby`, and `data-test-subj`. Anything not in that list is not accepted. `size` defaults to `m` and `session` defaults to `start`; `flyoutMenuDisplayMode` is fixed to `auto` and is not configurable.
+The root accepts all of `EuiFlyoutProps` except `children`, `flyoutMenuDisplayMode`, and `ref`, plus any `data-*` attribute. `size` defaults to `m` and `session` defaults to `start`. `flyoutMenuDisplayMode` is always `auto` and cannot be overridden. When `flyoutMenuProps` is set, the template merges a `title` derived from a string `FlyoutTemplate.Header` title before forwarding it; an explicit `flyoutMenuProps.title` wins. `aria-label` and `aria-labelledby` are both accepted, but the template resolves them against the header title rather than forwarding them untouched — see [Behavior](#behavior).
 
-Tab selection props also live on the root: `selectedTabId` (controlled), `defaultSelectedTabId` (uncontrolled initial), and `onTabChange` (called on every tab click either way). See [`src/header/tab/README.md`](src/header/tab/README.md).
+Tab selection props also live on the root: `selectedTabId` (controlled), `defaultSelectedTabId` (uncontrolled initial), and `onTabChange` (called on every tab click either way). See [Tabs](#tabs) below.
 
 ## Zones
 
@@ -49,7 +49,7 @@ Tab selection props also live on the root: `selectedTabId` (controlled), `defaul
 - `FlyoutTemplate.Footer.PrimaryAction` — rendered as an `EuiButton`, filled.
 - `FlyoutTemplate.Footer.SecondaryAction` — rendered as an `EuiButtonEmpty`.
 
-Both actions take `label`, `onClick`, and optional `id`, `iconType`, `isLoading`, `isDisabled`, `data-test-subj`. The `id` is forwarded to the button element.
+Both actions take `label`, `onClick`, and optional `id`, plus the rest of their underlying EUI button props and any `data-*` attribute. The `PrimaryAction` accepts the full `EuiButtonProps` except `children` and `fill` (it is always filled). The `SecondaryAction` accepts `EuiButtonEmptyProps` except `children`, `href`, `target`, `rel`, and `buttonRef` — it always renders a button, never an anchor. The `id` is forwarded to the button element.
 
 ## Behavior
 
@@ -62,7 +62,7 @@ Both actions take `label`, `onClick`, and optional `id`, `iconType`, `isLoading`
 
 ## Tabs
 
-Pass `tabs` to the root to render a tab bar at the bottom of the header. Each entry takes `id`, `label`, and optional `disabled`, `prepend`, `append`, and `data-test-subj`. Declare a `Body.TabPanel` for each tab id; the template wires the `tab`/`tabpanel` accessibility relationship and mounts only the selected panel.
+Pass `tabs` to the root to render a tab bar at the bottom of the header. Each entry takes `id` (the logical tab id used to match a `Body.TabPanel`, distinct from the DOM `id` the template generates), `label`, and the rest of `EuiTabProps` (`disabled`, `prepend`, `append`, `className`, `css`, `aria-label`, `data-test-subj`) plus any `data-*` attribute. `isSelected` is not accepted; selection is derived from the root. Declare a `Body.TabPanel` for each tab id; the template wires the `tab`/`tabpanel` accessibility relationship and mounts only the selected panel.
 
 ```tsx
 <FlyoutTemplate
