@@ -119,12 +119,15 @@ describe('useOverviewAlertsAnnotations', () => {
     expect(getQuery(result)).toContain('kibana.space_ids: "default"');
   });
 
-  it('adds a monitor.name wildcard clause for the free-text search box', () => {
+  it('does not add a monitor.name wildcard for free-text search', () => {
+    // Search is already in `useMonitorIdFilter`'s `monitor.id` terms (the
+    // overview API's full-field result). ANDing `monitor.name` here would
+    // drop alerts for monitors matched by tag/URL/location.
     paramSpy.mockReturnValue({ query: 'checkout' } as any);
 
     const { result } = renderHook(() => useOverviewAlertsAnnotations());
 
-    expect(getQuery(result)).toContain('monitor.name: *checkout*');
+    expect(getQuery(result)).not.toContain('monitor.name:');
   });
 
   it('escapes double quotes and backslashes in a quoted filter value', () => {
@@ -137,13 +140,5 @@ describe('useOverviewAlertsAnnotations', () => {
     const { result } = renderHook(() => useOverviewAlertsAnnotations());
 
     expect(getQuery(result)).toContain('tags: "a\\" or monitor.name: \\"b\\\\"');
-  });
-
-  it('escapes KQL operators and grouping characters in the free-text search clause', () => {
-    paramSpy.mockReturnValue({ query: 'a) or monitor.name: (b' } as any);
-
-    const { result } = renderHook(() => useOverviewAlertsAnnotations());
-
-    expect(getQuery(result)).toContain('monitor.name: *a\\) \\or monitor.name\\: \\(b*');
   });
 });

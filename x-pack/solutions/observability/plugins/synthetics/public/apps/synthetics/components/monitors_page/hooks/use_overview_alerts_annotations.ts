@@ -8,7 +8,7 @@
 import { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { escapeKuery, escapeQuotes } from '@kbn/es-query';
+import { escapeQuotes } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { ObservabilityDataViews } from '@kbn/exploratory-view-plugin/public';
@@ -29,18 +29,6 @@ const kqlValuesClause = (field: string, values: Array<string | number>): string 
   return quoted.length === 1 ? `${field}: ${quoted[0]}` : `${field}: (${quoted.join(' or ')})`;
 };
 
-// The search box's free-text query scopes ping series and this layer via a
-// `terms` clause on `monitor.id` (`useMonitorIdFilter` uses the
-// already-search-filtered `allIds`). That field exists on alert docs, unlike
-// the ping-only `query_string` in `getQueryFilters` (`urls`, `hosts`, …),
-// which Lens would AND onto this layer because `ignoreGlobalFilters` is
-// false. This clause is this layer's *own* free-text scoping on
-// `monitor.name` — alert docs don't carry the full multi-field set. Left
-// unquoted (with `escapeKuery`, not `escapeQuotes`) so the `*` wildcards
-// still work as substring matches — a quoted KQL literal treats `*` as a
-// literal character rather than a wildcard.
-const kqlSearchClause = (query: string): string => `monitor.name: *${escapeKuery(query)}*`;
-
 /**
  * Vertical markers for alert start times, drawn on top of the "Pings over
  * time" chart via a Lens query-driven annotation layer. This layer resolves
@@ -50,7 +38,7 @@ const kqlSearchClause = (query: string): string => `monitor.name: *${escapeKuery
 export function useOverviewAlertsAnnotations(): AnnotationLayerConfig[] | undefined {
   const { dataViews } = useKibana<ClientPluginsStart>().services;
   const { euiTheme } = useEuiTheme();
-  const { locations, query } = useGetUrlParams();
+  const { locations } = useGetUrlParams();
   const alertsFilters = useMonitorFilters({ forAlerts: true });
   // Spaces are a security boundary for alert data. `useKibanaSpace` reports
   // `loading: false` with `space: undefined` both before the first resolve
@@ -74,10 +62,9 @@ export function useOverviewAlertsAnnotations(): AnnotationLayerConfig[] | undefi
       kqlValuesClause('kibana.alert.status', ['active', 'recovered']),
       ...alertsFilters.map((filter) => kqlValuesClause(filter.field, filter.values ?? [])),
       ...(locations?.length ? [kqlValuesClause('observer.geo.name', locations)] : []),
-      ...(query ? [kqlSearchClause(query)] : []),
     ];
     return clauses.join(' and ');
-  }, [alertsFilters, locations, query]);
+  }, [alertsFilters, locations]);
 
   return useMemo(() => {
     if (!alertsDataView || !spaceReady) {
@@ -125,8 +112,10 @@ export function useOverviewAlertsAnnotations(): AnnotationLayerConfig[] | undefi
         // layer too, instead of the default `ignoreGlobalFilters: true`.
         // Ping-only search (`getQueryFilters`' `urls`/`hosts` `query_string`)
         // is deliberately *not* in those `dslFilters`; it would match nothing
-        // on this data view and wipe the markers. This layer's own
-        // `kqlSearchClause` scopes free text for alerts by `monitor.name`.
+        // on this data view and wipe the markers. Free-text search is already
+        // in that `monitor.id` terms clause (the overview API's full-field
+        // result), so this layer must not AND a `monitor.name` wildcard on
+        // top or tag/URL/location matches lose their markers.
         ignoreGlobalFilters: false,
       },
     ];

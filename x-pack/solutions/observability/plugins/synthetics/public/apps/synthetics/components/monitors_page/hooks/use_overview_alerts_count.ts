@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import type { estypes } from '@elastic/elasticsearch';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -22,13 +22,6 @@ import { useKibanaSpace } from '../../../../../hooks/use_kibana_space';
 import { useMonitorFilters, useMonitorIdFilter } from './use_monitor_filters';
 
 const ALERT_STATUS_FIELD = 'kibana.alert.status';
-// See the matching `escapeKuery`-based clause in `use_overview_alerts_annotations.ts`
-// for why this mirrors the annotation layer's `monitor.name: *value*` KQL
-// wildcard exactly: a `wildcard` query, not `query_string`, so a literal `*`/`?`
-// in the search text can be escaped without also having to defend against
-// Lucene query syntax (booleans, field qualifiers, grouping) the way a raw
-// `query_string` value would require.
-const escapeWildcardValue = (value: string): string => value.replace(/[\\*?]/g, '\\$&');
 
 interface Props {
   from: string;
@@ -37,11 +30,13 @@ interface Props {
 
 export function useOverviewAlertsCount({ from, to }: Props) {
   const { http } = useKibana<ClientPluginsStart>().services;
-  const { locations, query: searchQuery } = useGetUrlParams();
+  const { locations } = useGetUrlParams();
   const alertsFilters = useMonitorFilters({ forAlerts: true });
   // A `terms` query, same as the `alertsFilters` conversion below — see
   // `useMonitorIdFilter` for why this can't just be another `UrlFilter` KQL
-  // clause the way the rest of `alertsFilters` is handled.
+  // clause the way the rest of `alertsFilters` is handled. Free-text search
+  // is already in this `monitor.id` terms clause (overview API all-field
+  // match); a `monitor.name` wildcard on top would drop tag/URL/location hits.
   const monitorIdFilter = useMonitorIdFilter();
   // Spaces are a security boundary for alert data. `useKibanaSpace` reports
   // `loading: false` with `space: undefined` both before the first resolve
@@ -53,41 +48,44 @@ export function useOverviewAlertsCount({ from, to }: Props) {
 
   const abortCtrlRef = useRef(new AbortController());
 
-  const query: estypes.QueryDslQueryContainer = {
-    bool: {
-      filter: [
-        // Anchored on the alert's onset, matching the annotation markers this
-        // count should agree with — `@timestamp` is the last write (e.g. the
-        // recovery check), which can land outside the window a `kibana.alert.start`
-        // inside it would still be counted for by the markers.
-        { range: { 'kibana.alert.start': { gte: from, lte: to } } },
-        ...(monitorIdFilter ? [monitorIdFilter] : []),
-        ...alertsFilters.map(
-          (filter): estypes.QueryDslQueryContainer => ({
-            terms: { [filter.field]: (filter.values ?? []).map(String) },
-          })
-        ),
-        ...(locations?.length
-          ? [{ terms: { 'observer.geo.name': locations } } as estypes.QueryDslQueryContainer]
-          : []),
-        // Same free-text search box the ping chart and monitor grid already
-        // scope to — see the KQL clause in `use_overview_alerts_annotations.ts`
-        // for why this only matches `monitor.name` rather than the ping
-        // index's full field set. A `wildcard` (not `query_string`) query, and
-        // deliberately not `case_insensitive`, to match that clause's `*value*`
-        // KQL wildcard semantics against the same keyword field exactly.
-        ...(searchQuery
-          ? [
-              {
-                wildcard: {
-                  'monitor.name': { value: `*${escapeWildcardValue(searchQuery)}*` },
-                },
-              } as estypes.QueryDslQueryContainer,
-            ]
-          : []),
-      ],
-    },
-  };
+  // Filter objects are rebuilt each render; stringify is value equality so
+  // this memo (and the fetch below) only invalidate when the contents change.
+  // `?? null` so `undefined` serializes to `"null"` (JSON.stringify(undefined)
+  // is the value undefined, which cannot be parsed back).
+  const alertsFiltersKey = JSON.stringify(alertsFilters);
+  const monitorIdFilterKey = JSON.stringify(monitorIdFilter ?? null);
+  const locationsKey = JSON.stringify(locations ?? null);
+
+  const query = useMemo((): estypes.QueryDslQueryContainer => {
+    const parsedFilters: typeof alertsFilters = JSON.parse(alertsFiltersKey);
+    const parsedMonitorIdFilter: typeof monitorIdFilter = JSON.parse(monitorIdFilterKey);
+    const parsedLocations: typeof locations = JSON.parse(locationsKey);
+
+    return {
+      bool: {
+        filter: [
+          // Anchored on the alert's onset, matching the annotation markers this
+          // count should agree with — `@timestamp` is the last write (e.g. the
+          // recovery check), which can land outside the window a `kibana.alert.start`
+          // inside it would still be counted for by the markers.
+          { range: { 'kibana.alert.start': { gte: from, lte: to } } },
+          ...(parsedMonitorIdFilter ? [parsedMonitorIdFilter] : []),
+          ...parsedFilters.map(
+            (filter): estypes.QueryDslQueryContainer => ({
+              terms: { [filter.field]: (filter.values ?? []).map(String) },
+            })
+          ),
+          ...(parsedLocations?.length
+            ? [
+                {
+                  terms: { 'observer.geo.name': parsedLocations },
+                } as estypes.QueryDslQueryContainer,
+              ]
+            : []),
+        ],
+      },
+    };
+  }, [from, to, alertsFiltersKey, monitorIdFilterKey, locationsKey]);
 
   const [state, refetch] = useAsyncFn(
     () => {
@@ -95,16 +93,7 @@ export function useOverviewAlertsCount({ from, to }: Props) {
       abortCtrlRef.current = new AbortController();
       return fetchAlertsCount({ http, query, signal: abortCtrlRef.current.signal });
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      http,
-      from,
-      to,
-      JSON.stringify(alertsFilters),
-      JSON.stringify(monitorIdFilter),
-      JSON.stringify(locations),
-      searchQuery,
-    ],
+    [http, query],
     { loading: true }
   );
 

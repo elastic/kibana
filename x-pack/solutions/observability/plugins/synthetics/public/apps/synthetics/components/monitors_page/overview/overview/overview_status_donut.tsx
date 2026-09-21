@@ -177,11 +177,7 @@ const OverviewStatusDonutLegendItem = ({ slice }: { slice: OverviewStatusDonutSl
     return item;
   }
 
-  return (
-    <EuiToolTip content={slice.tooltipContent} disableScreenReaderOutput>
-      {item}
-    </EuiToolTip>
-  );
+  return <EuiToolTip content={slice.tooltipContent}>{item}</EuiToolTip>;
 };
 
 const totalLabel = i18n.translate('xpack.synthetics.overview.status.donut.total', {

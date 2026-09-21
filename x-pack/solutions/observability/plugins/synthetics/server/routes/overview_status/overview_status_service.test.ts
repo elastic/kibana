@@ -1518,6 +1518,7 @@ describe('current status route', () => {
       // Counts should include the remote monitor
       expect(result.down).toBe(1);
       expect(result.up).toBe(1);
+      expect(result.allIds).toContain('remote-monitor-1');
     });
 
     it('discovers CPS linked-project monitors that have no local saved object', async () => {
@@ -2703,6 +2704,7 @@ describe('current status route', () => {
       const entry = result.upConfigs['heartbeat-hb-1-asia_japan'];
       expect(entry).toBeDefined();
       expect(entry.origin).toBe('heartbeat');
+      expect(result.allIds).toContain('hb-1');
       expect(entry.remote).toBeUndefined();
       expect(entry.isEnabled).toBe(true);
       expect(entry.isStatusAlertEnabled).toBe(false);

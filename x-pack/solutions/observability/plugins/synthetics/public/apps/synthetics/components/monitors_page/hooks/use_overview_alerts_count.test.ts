@@ -144,7 +144,8 @@ describe('useOverviewAlertsCount', () => {
     expect(mockHttpPost).not.toHaveBeenCalled();
   });
 
-  it('matches monitor.name as a case-sensitive substring, the same as the annotation clause', async () => {
+  it('does not add a monitor.name wildcard for free-text search', async () => {
+    // Search is already in `useMonitorIdFilter`'s `monitor.id` terms.
     paramSpy.mockReturnValue({ query: 'checkout' } as any);
 
     renderHook(() => useOverviewAlertsCount(props));
@@ -154,23 +155,8 @@ describe('useOverviewAlertsCount', () => {
     const [, requestArgs] = mockHttpPost.mock.calls[0];
     const body = JSON.parse(requestArgs.body);
 
-    expect(body.query.bool.filter).toEqual(
-      expect.arrayContaining([{ wildcard: { 'monitor.name': { value: '*checkout*' } } }])
-    );
-  });
-
-  it('escapes literal wildcard characters in the free-text search so they cannot widen the match', async () => {
-    paramSpy.mockReturnValue({ query: 'a*b?c\\d' } as any);
-
-    renderHook(() => useOverviewAlertsCount(props));
-
-    await waitFor(() => expect(mockHttpPost).toHaveBeenCalled());
-
-    const [, requestArgs] = mockHttpPost.mock.calls[0];
-    const body = JSON.parse(requestArgs.body);
-
-    expect(body.query.bool.filter).toEqual(
-      expect.arrayContaining([{ wildcard: { 'monitor.name': { value: '*a\\*b\\?c\\\\d*' } } }])
+    expect(body.query.bool.filter).not.toEqual(
+      expect.arrayContaining([expect.objectContaining({ wildcard: expect.anything() })])
     );
   });
 });

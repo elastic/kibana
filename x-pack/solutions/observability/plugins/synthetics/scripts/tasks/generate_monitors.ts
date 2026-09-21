@@ -160,6 +160,15 @@ const redactEsNode = (node: string): string => {
   }
 };
 
+const nodeHasUserinfo = (node: string): boolean => {
+  try {
+    const parsed = new URL(node);
+    return Boolean(parsed.username || parsed.password);
+  } catch {
+    return /\/\/[^/@]+@/.test(node);
+  }
+};
+
 const buildEsClient = () => {
   const config = (() => {
     try {
@@ -168,26 +177,36 @@ const buildEsClient = () => {
       return {} as Record<string, any>;
     }
   })();
-  const node =
-    process.env.ES_URL ??
-    config.elasticsearch?.hosts ??
-    config['elasticsearch.hosts'] ??
-    'http://localhost:9200';
-  const resolvedNode = Array.isArray(node) ? node[0] : node;
+  const nodeFromEnvOrConfig =
+    process.env.ES_URL ?? config.elasticsearch?.hosts ?? config['elasticsearch.hosts'];
+  const resolvedNode = Array.isArray(nodeFromEnvOrConfig)
+    ? nodeFromEnvOrConfig[0]
+    : nodeFromEnvOrConfig ?? 'http://localhost:9200';
+  const usingLocalFallback = nodeFromEnvOrConfig == null;
   const rawUser =
     process.env.ES_USERNAME ?? config.elasticsearch?.username ?? config['elasticsearch.username'];
-  const esUsername = isKibanaSystemUser(rawUser) || !rawUser ? 'elastic' : rawUser;
-  const esPassword =
-    process.env.ES_PASSWORD ??
-    config.elasticsearch?.password ??
-    config['elasticsearch.password'] ??
-    'changeme';
+  const rawPassword =
+    process.env.ES_PASSWORD ?? config.elasticsearch?.password ?? config['elasticsearch.password'];
   const verificationMode =
     config.elasticsearch?.ssl?.verificationMode ?? config['elasticsearch.ssl.verificationMode'];
   console.log(`  ES: ${redactEsNode(resolvedNode)}`);
+
+  let esAuth: { username: string; password: string } | undefined;
+  if (nodeHasUserinfo(resolvedNode)) {
+    // Credentials are already in the URL; an explicit auth object would override them.
+    esAuth = undefined;
+  } else if (rawUser || rawPassword) {
+    esAuth = {
+      username: isKibanaSystemUser(rawUser) || !rawUser ? 'elastic' : rawUser,
+      password: rawPassword ?? 'changeme',
+    };
+  } else if (usingLocalFallback) {
+    esAuth = { username: 'elastic', password: 'changeme' };
+  }
+
   return new Client({
     node: resolvedNode,
-    auth: { username: esUsername, password: esPassword },
+    auth: esAuth,
     tls: verificationMode === 'none' ? { rejectUnauthorized: false } : undefined,
   });
 };

@@ -52,6 +52,22 @@ const STATUS_RANK: Record<string, number> = {
   [MONITOR_STATUS_ENUM.STALE]: 4,
 };
 
+// `processMonitors` only sees saved-object configs. Heartbeat/remote monitors
+// are synthesized later into the status buckets, so union those query IDs
+// into `allIds` or a free-text search would drop them from the activity chart.
+const allIdsIncludingStatusBuckets = (
+  savedObjectIds: string[],
+  buckets: Array<Record<string, Pick<OverviewStatusMetaData, 'monitorQueryId'>>>
+): string[] => {
+  const ids = new Set(savedObjectIds);
+  for (const bucket of buckets) {
+    for (const { monitorQueryId } of Object.values(bucket)) {
+      ids.add(monitorQueryId);
+    }
+  }
+  return [...ids];
+};
+
 interface LocationStatusEntry {
   status: string;
   locationId: string;
@@ -185,11 +201,19 @@ export class OverviewStatusService {
     const {
       enabledMonitorQueryIds,
       disabledMonitorQueryIds,
-      allIds,
+      allIds: savedObjectIds,
       disabledCount,
       disabledMonitorsCount,
       projectMonitorsCount,
     } = processMonitors(allConfigs, this.filterData?.locationIds);
+
+    const allIds = allIdsIncludingStatusBuckets(savedObjectIds, [
+      upConfigs,
+      downConfigs,
+      pendingConfigs,
+      staleConfigs,
+      disabledConfigs,
+    ]);
 
     if (!isPaginated) {
       return {

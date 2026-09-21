@@ -10,6 +10,7 @@ import type { UrlFilter } from '@kbn/exploratory-view-plugin/public';
 import { useSelector } from 'react-redux-v7';
 import { isEmpty } from 'lodash';
 import { useGetUrlParams } from '../../../hooks/use_url_params';
+import type { OverviewStatusFilter } from '../../../../../../common/constants/monitor_management';
 import { useKibanaSpace } from '../../../../../hooks/use_kibana_space';
 import { selectOverviewStatus } from '../../../state/overview_status';
 
@@ -45,9 +46,12 @@ const createFiltersForField = ({
 // `staleIds` are the unpaginated equivalents (mirroring `allIds`), added
 // specifically so callers like this one can scope to "every monitor currently
 // in status X", not just the page currently on screen.
+// `undefined` means no status filter (do not narrow). `[]` means this status
+// is selected but currently has no monitors (narrow to nothing). Those are
+// not interchangeable — collapsing them would drop the empty-status sentinel.
 const idsForStatusFilter = (
   overviewStatus: ReturnType<typeof selectOverviewStatus>['status'],
-  statusFilter?: string
+  statusFilter?: OverviewStatusFilter | string
 ): string[] | undefined => {
   switch (statusFilter) {
     case 'up':

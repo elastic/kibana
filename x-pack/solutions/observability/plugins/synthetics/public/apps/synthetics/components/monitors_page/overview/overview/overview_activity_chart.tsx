@@ -29,6 +29,7 @@ import type { MonitorStatProps } from './overview_status';
 // line, and `Down` already covers current status, so a separate count would just
 // restate the chart.
 export const useOverviewActivityStats = (): MonitorStatProps[] => {
+  const { application } = useKibana<ClientPluginsStart>().services;
   const { from, to } = useOverviewRefreshedRange();
   const {
     count: alertsCount,
@@ -52,7 +53,7 @@ export const useOverviewActivityStats = (): MonitorStatProps[] => {
       numberColor: 'danger',
       isClickable: true,
       onClickStat: () => {
-        window.location.href = alertsUrl;
+        void application.navigateToUrl(alertsUrl);
       },
     },
   ];
