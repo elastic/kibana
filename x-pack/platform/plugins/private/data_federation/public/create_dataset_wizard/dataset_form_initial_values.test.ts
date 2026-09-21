@@ -8,13 +8,13 @@
 import type { DataSetWithName } from '../../common/dataset_types';
 import {
   dataSetFromListItem,
-  dataSetToFlyoutFormValues,
-  emptyDatasetFlyoutFormValues,
-} from './dataset_flyout_initial_values';
+  dataSetToFormValues,
+  emptyDatasetFormValues,
+} from './dataset_form_initial_values';
 
-describe('dataset_flyout_initial_values', () => {
-  it('creates empty flyout form values', () => {
-    const values = emptyDatasetFlyoutFormValues();
+describe('dataset_form_initial_values', () => {
+  it('creates empty form values', () => {
+    const values = emptyDatasetFormValues();
     expect(values.name).toBe('');
     expect(values.description).toBe('');
     expect(values.data_source).toBe('');
@@ -24,10 +24,20 @@ describe('dataset_flyout_initial_values', () => {
     expect(values.settings.partition_detection).toBe('');
     expect(values.settings.schema_resolution).toBe('');
     expect(values.settings.partition_path).toBe('');
+    expect(values.settings.file_exclusions).toEqual([
+      '**/_*',
+      '**/.*',
+      '**/_temporary/**',
+      '**/_delta_log/**',
+    ]);
     expect(values.settings.hive_partitioning).toBe('');
     expect(values.settings.schema_sample_size).toBe('');
     expect(values.settings.delimiter).toBe('');
     expect(values.settings.header_row).toBe('');
+    expect(values.settings.skip_rows).toBe('');
+    expect(values.settings.encoding).toBe('UTF-8');
+    expect(values.settings.column_prefix).toBe('col');
+    expect(values.settings.trim_spaces).toBe(false);
   });
 
   it('maps list-table item and defaults description to empty string', () => {
@@ -35,7 +45,7 @@ describe('dataset_flyout_initial_values', () => {
     expect(dataSetFromListItem(item)).toEqual({ ...item, description: '' });
   });
 
-  it('maps dataset to flyout values and defaults missing description/settings', () => {
+  it('maps dataset to form values and defaults missing description/settings', () => {
     const data: DataSetWithName = {
       name: 'id',
       data_source: 'source',
@@ -43,7 +53,7 @@ describe('dataset_flyout_initial_values', () => {
       settings: { error_mode: 'skip_row' },
     };
 
-    const result = dataSetToFlyoutFormValues(data);
+    const result = dataSetToFormValues(data);
     expect(result.name).toBe('id');
     expect(result.description).toBe('');
     expect(result.data_source).toBe('source');
@@ -65,7 +75,7 @@ describe('dataset_flyout_initial_values', () => {
       },
     };
 
-    const result = dataSetToFlyoutFormValues(data);
+    const result = dataSetToFormValues(data);
     expect(result.settings.header_row).toBe('false');
     expect(result.settings.hive_partitioning).toBe('true');
   });
@@ -80,14 +90,16 @@ describe('dataset_flyout_initial_values', () => {
         max_errors: 10,
         max_error_ratio: 0.1,
         max_field_size: 0,
+        skip_rows: 12,
       },
     };
 
-    const result = dataSetToFlyoutFormValues(data);
+    const result = dataSetToFormValues(data);
     expect(result.settings.schema_sample_size).toBe('5000');
     expect(result.settings.max_errors).toBe('10');
     expect(result.settings.max_error_ratio).toBe('0.1');
     expect(result.settings.max_field_size).toBe('0');
+    expect(result.settings.skip_rows).toBe('12');
   });
 
   it('maps new universal settings', () => {
@@ -99,12 +111,14 @@ describe('dataset_flyout_initial_values', () => {
         schema_resolution: 'union_by_name',
         partition_path: '/year={year}/',
         hive_partitioning: false,
+        file_exclusions: ['**/tmp/**'],
       },
     };
 
-    const result = dataSetToFlyoutFormValues(data);
+    const result = dataSetToFormValues(data);
     expect(result.settings.schema_resolution).toBe('union_by_name');
     expect(result.settings.partition_path).toBe('/year={year}/');
     expect(result.settings.hive_partitioning).toBe('false');
+    expect(result.settings.file_exclusions).toEqual(['**/tmp/**']);
   });
 });

@@ -12,6 +12,9 @@ import type {
 } from '../../common/dataset_types';
 import {
   emptyCreateDatasetSettingsFormValues,
+  DEFAULT_COLUMN_PREFIX,
+  DEFAULT_ENCODING,
+  DEFAULT_FILE_EXCLUSIONS,
   type CreateDatasetFormValues,
   type CreateDatasetSettingsFormValues,
   type DatasetBooleanFormValue,
@@ -21,9 +24,9 @@ import {
   type DatasetMultiValueSyntaxFormValue,
   type DatasetPartitionDetectionFormValue,
   type DatasetSchemaResolutionFormValue,
-} from './create_dataset_flyout_form_state';
+} from './create_dataset_form_state';
 
-export const emptyDatasetFlyoutFormValues = (): CreateDatasetFormValues => ({
+export const emptyDatasetFormValues = (): CreateDatasetFormValues => ({
   name: '',
   description: '',
   data_source: '',
@@ -31,7 +34,7 @@ export const emptyDatasetFlyoutFormValues = (): CreateDatasetFormValues => ({
   settings: emptyCreateDatasetSettingsFormValues(),
 });
 
-/** Maps a list-table row to flyout initial state (no extra GET). */
+/** Maps a list-table row to form initial state (no extra GET). */
 export const dataSetFromListItem = (item: DataSetWithName): DataSetWithName => ({
   ...item,
   description: item.description ?? '',
@@ -43,7 +46,7 @@ const boolToFormValue = (value: boolean | undefined): DatasetBooleanFormValue =>
   return '';
 };
 
-const settingsToFlyoutFormValues = (
+const settingsToFormValues = (
   settings: DatasetSettings | undefined
 ): CreateDatasetSettingsFormValues => {
   const defaults = emptyCreateDatasetSettingsFormValues();
@@ -57,39 +60,42 @@ const settingsToFlyoutFormValues = (
     ...defaults,
     format: (s.format ?? '') as DatasetFormatFormValue,
     // Universal
+    file_exclusions: s.file_exclusions ? [...s.file_exclusions] : [...DEFAULT_FILE_EXCLUSIONS],
     partition_detection: (s.partition_detection ?? '') as DatasetPartitionDetectionFormValue,
     schema_resolution: (s.schema_resolution ?? '') as DatasetSchemaResolutionFormValue,
     partition_path: s.partition_path ?? '',
     hive_partitioning: boolToFormValue(s.hive_partitioning),
+    optimized_reader: boolToFormValue(s.optimized_reader),
+    late_materialization: boolToFormValue(s.late_materialization),
     // CSV/TSV + NDJSON
     schema_sample_size: s.schema_sample_size !== undefined ? String(s.schema_sample_size) : '',
     // CSV/TSV core
     delimiter: s.delimiter ?? '',
     mode: (s.mode ?? '') as DatasetModeFormValue,
     header_row: boolToFormValue(s.header_row),
-    // CSV/TSV advanced
+    skip_rows: s.skip_rows !== undefined ? String(s.skip_rows) : '',
+    datetime_format: s.datetime_format ?? '',
     null_value: s.null_value ?? '',
-    encoding: s.encoding ?? '',
+    encoding: s.encoding ?? DEFAULT_ENCODING,
+    column_prefix: s.column_prefix ?? DEFAULT_COLUMN_PREFIX,
     quote: s.quote ?? '',
     escape: s.escape ?? '',
     comment: s.comment ?? '',
-    column_prefix: s.column_prefix ?? '',
-    datetime_format: s.datetime_format ?? '',
+    trim_spaces: s.trim_spaces ?? false,
     multi_value_syntax: (s.multi_value_syntax ?? '') as DatasetMultiValueSyntaxFormValue,
     max_field_size: s.max_field_size !== undefined ? String(s.max_field_size) : '',
     // CSV/TSV error handling
     error_mode: (s.error_mode ?? '') as DatasetErrorModeFormValue,
     max_errors: s.max_errors !== undefined ? String(s.max_errors) : '',
     max_error_ratio: s.max_error_ratio !== undefined ? String(s.max_error_ratio) : '',
-    // API-only fields (segment_size, optimized_reader, late_materialization) are not in the
-    // form; they're passed through by the API as-is and not shown in the edit UI.
+    // API-only fields (segment_size) are not in the form.
   };
 };
 
-export const dataSetToFlyoutFormValues = (data: DataSetWithName): CreateDatasetFormValues => ({
+export const dataSetToFormValues = (data: DataSetWithName): CreateDatasetFormValues => ({
   name: data.name,
   description: data.description ?? '',
   data_source: data.data_source,
   resource: data.resource,
-  settings: settingsToFlyoutFormValues(data.settings),
+  settings: settingsToFormValues(data.settings),
 });

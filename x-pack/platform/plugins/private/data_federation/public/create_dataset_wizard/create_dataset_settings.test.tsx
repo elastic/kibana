@@ -1,0 +1,273 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { EuiProvider } from '@elastic/eui';
+import { fireEvent, render } from '@testing-library/react';
+import { useForm, useWatch } from 'react-hook-form';
+
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { CreateDatasetAdditionalSettings, CreateDatasetSettings } from './create_dataset_settings';
+import type { CreateDatasetFormValues, DatasetFormatFormValue } from './create_dataset_form_state';
+import { emptyCreateDatasetSettingsFormValues } from './create_dataset_form_state';
+
+const docLinksMock = {
+  links: {
+    dataFederation: {
+      overview: '',
+      quickstart: '',
+      dataSources: '',
+      datasets: '',
+      datasetSettings: '',
+      authentication: '',
+      staticCredentials: '',
+      federatedIdentity: '',
+      querying: '',
+      security: '',
+    },
+  },
+};
+
+const renderSettings = () => {
+  const Wrapper = () => {
+    const { control } = useForm<CreateDatasetFormValues>({
+      defaultValues: {
+        name: '',
+        description: '',
+        data_source: '',
+        resource: '',
+        settings: emptyCreateDatasetSettingsFormValues(),
+      },
+    });
+
+    const settings = useWatch({ control, name: 'settings' });
+
+    return (
+      <EuiProvider>
+        <KibanaContextProvider services={{ docLinks: docLinksMock }}>
+          <CreateDatasetSettings control={control} />
+          <div data-test-subj="settingsValue">{JSON.stringify(settings)}</div>
+        </KibanaContextProvider>
+      </EuiProvider>
+    );
+  };
+
+  return render(<Wrapper />);
+};
+
+const getSettingsValue = (getByTestId: ReturnType<typeof render>['getByTestId']) =>
+  JSON.parse(getByTestId('settingsValue').textContent ?? '{}');
+
+describe('CreateDatasetSettings', () => {
+  const selectFormat = (getByTestId: ReturnType<typeof render>['getByTestId'], format: string) => {
+    fireEvent.click(getByTestId('createDatasetSettingsFormat'));
+    fireEvent.click(getByTestId(`createDatasetSettingsFormatOption-${format}`));
+  };
+
+  it('shows the format select', () => {
+    const { getByTestId } = renderSettings();
+    expect(getByTestId('createDatasetSettingsFormat')).toBeVisible();
+  });
+
+  it('shows additional settings without a hide/show toggle', () => {
+    const { getByTestId, queryByTestId } = renderSettings();
+
+    expect(queryByTestId('createDatasetAdditionalSettingsToggle')).toBeNull();
+    expect(getByTestId('createDatasetSettingsPartitionDetection')).toBeVisible();
+  });
+
+  it('updates format in form state', () => {
+    const { getByTestId } = renderSettings();
+
+    selectFormat(getByTestId, 'parquet');
+
+    expect(getSettingsValue(getByTestId)).toMatchObject({ format: 'parquet' });
+  });
+
+  it('updates partition_detection in form state', () => {
+    const { getByTestId } = renderSettings();
+
+    fireEvent.change(getByTestId('createDatasetSettingsPartitionDetection'), {
+      target: { value: 'hive' },
+    });
+
+    expect(getSettingsValue(getByTestId)).toMatchObject({ partition_detection: 'hive' });
+  });
+
+  it('shows schema_resolution and hive_partitioning', () => {
+    const { getByTestId } = renderSettings();
+
+    expect(getByTestId('createDatasetSettingsSchemaResolution')).toBeVisible();
+    expect(getByTestId('createDatasetSettingsHivePartitioning')).toBeVisible();
+  });
+
+  it('shows no format-specific fields when no format is selected', () => {
+    const { queryByTestId } = renderSettings();
+    // format-specific fields are not in the DOM until a format is chosen
+    expect(queryByTestId('createDatasetSettingsSchemaSampleSize')).toBeNull();
+    // API-only fields are never in the DOM
+    expect(queryByTestId('createDatasetSettingsOptimizedReader')).toBeNull();
+    expect(queryByTestId('createDatasetSettingsSegmentSize')).toBeNull();
+  });
+
+  describe('CSV format', () => {
+    it('shows delimiter, mode, and header_row at the top level (core)', () => {
+      const { getByTestId } = renderSettings();
+
+      selectFormat(getByTestId, 'csv');
+
+      expect(getByTestId('createDatasetSettingsDelimiter')).toBeVisible();
+      expect(getByTestId('createDatasetSettingsMode')).toBeVisible();
+      expect(getByTestId('createDatasetSettingsHeaderRow')).toBeVisible();
+    });
+
+    it('shows CSV advanced fields when CSV is selected', () => {
+      const { getByTestId } = renderSettings();
+
+      selectFormat(getByTestId, 'csv');
+
+      expect(getByTestId('createDatasetSettingsSchemaSampleSize')).toBeVisible();
+    });
+
+    it('updates a CSV core field in form state', () => {
+      const { getByTestId } = renderSettings();
+
+      selectFormat(getByTestId, 'csv');
+      fireEvent.change(getByTestId('createDatasetSettingsDelimiter'), {
+        target: { value: '|' },
+      });
+
+      expect(getSettingsValue(getByTestId)).toMatchObject({ delimiter: '|' });
+    });
+  });
+
+  describe('NDJSON format', () => {
+    it('shows datetime_format when NDJSON is selected', () => {
+      const { getByTestId } = renderSettings();
+
+      selectFormat(getByTestId, 'ndjson');
+
+      expect(getByTestId('createDatasetSettingsDatetimeFormat')).toBeVisible();
+    });
+
+    it('does not show segment_size (API-only)', () => {
+      const { queryByTestId, getByTestId } = renderSettings();
+      selectFormat(getByTestId, 'ndjson');
+
+      expect(queryByTestId('createDatasetSettingsSegmentSize')).toBeNull();
+    });
+  });
+
+  describe('Parquet format', () => {
+    it('shows parquet advanced fields when parquet is selected', () => {
+      const { getByTestId } = renderSettings();
+      selectFormat(getByTestId, 'parquet');
+
+      expect(getByTestId('createDatasetSettingsOptimizedReader')).toBeVisible();
+      expect(getByTestId('createDatasetSettingsLateMaterialization')).toBeVisible();
+    });
+  });
+});
+
+const renderAdditionalSettings = (format: DatasetFormatFormValue = '') => {
+  const Wrapper = () => {
+    const { control } = useForm<CreateDatasetFormValues>({
+      defaultValues: {
+        name: '',
+        description: '',
+        data_source: '',
+        resource: '',
+        settings: { ...emptyCreateDatasetSettingsFormValues(), format },
+      },
+    });
+
+    return (
+      <EuiProvider>
+        <KibanaContextProvider services={{ docLinks: docLinksMock }}>
+          <CreateDatasetAdditionalSettings control={control} />
+        </KibanaContextProvider>
+      </EuiProvider>
+    );
+  };
+
+  return render(<Wrapper />);
+};
+
+describe('CreateDatasetAdditionalSettings', () => {
+  it('shows shared common and advanced settings when no format is selected', () => {
+    const { getByTestId, queryByTestId } = renderAdditionalSettings();
+
+    expect(getByTestId('createDatasetWizardCommonSettings')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSharedCommonSettings')).toBeInTheDocument();
+
+    expect(getByTestId('createDatasetWizardAdvancedSettings')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSharedAdvancedSettings')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSettingsFileExclusions')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSettingsPartitionDetection')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSettingsPartitionPath')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSettingsErrorMode')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSettingsMaxErrors')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSettingsMaxErrorRatio')).toBeInTheDocument();
+    expect(queryByTestId('createDatasetParquetAdvancedSettings')).toBeNull();
+  });
+
+  it('shows parquet common and advanced settings when parquet is selected', () => {
+    const { getByTestId, queryByTestId } = renderAdditionalSettings('parquet');
+
+    expect(queryByTestId('createDatasetWizardCommonSettings')).toBeNull();
+    expect(queryByTestId('createDatasetSharedCommonSettings')).toBeNull();
+    expect(queryByTestId('createDatasetParquetCommonSettings')).toBeNull();
+
+    expect(getByTestId('createDatasetWizardAdvancedSettings')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSharedAdvancedSettings')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSettingsErrorMode')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSettingsMaxErrors')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSettingsMaxErrorRatio')).toBeInTheDocument();
+    expect(getByTestId('createDatasetParquetAdvancedSettings')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSettingsOptimizedReader')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSettingsLateMaterialization')).toBeInTheDocument();
+  });
+
+  it('shows csv/tsv common and advanced settings when csv is selected', () => {
+    const { getByTestId, queryByTestId } = renderAdditionalSettings('csv');
+
+    expect(getByTestId('createDatasetSharedCommonSettings')).toBeInTheDocument();
+    expect(getByTestId('createDatasetCsvTsvCommonSettings')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSettingsDelimiter')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSettingsMode')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSettingsHeaderRow')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSettingsSkipRows')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSettingsDatetimeFormat')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSettingsNullValue')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSettingsEncoding')).toBeInTheDocument();
+    expect(queryByTestId('createDatasetParquetCommonSettings')).toBeNull();
+
+    expect(getByTestId('createDatasetCsvTsvAdvancedSettings')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSharedAdvancedSettings')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSettingsErrorMode')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSettingsTrimSpaces')).toBeInTheDocument();
+    expect(queryByTestId('createDatasetParquetAdvancedSettings')).toBeNull();
+  });
+
+  it('shows csv/tsv common and advanced settings when tsv is selected', () => {
+    const { getByTestId } = renderAdditionalSettings('tsv');
+    expect(getByTestId('createDatasetCsvTsvCommonSettings')).toBeInTheDocument();
+    expect(getByTestId('createDatasetCsvTsvAdvancedSettings')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSettingsNullValue')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSettingsSkipRows')).toBeInTheDocument();
+  });
+
+  it('shows ndjson common settings and no ndjson advanced settings when ndjson is selected', () => {
+    const { getByTestId, queryByTestId } = renderAdditionalSettings('ndjson');
+    expect(getByTestId('createDatasetNdjsonCommonSettings')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSettingsDatetimeFormat')).toBeInTheDocument();
+    expect(queryByTestId('createDatasetNdjsonAdvancedSettings')).toBeNull();
+    expect(queryByTestId('createDatasetSettingsSchemaSampleSize')).toBeNull();
+  });
+
+  // ORC is intentionally disabled in the format selection UI.
+});

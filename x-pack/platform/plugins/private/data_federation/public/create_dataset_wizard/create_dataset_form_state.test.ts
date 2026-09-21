@@ -7,34 +7,40 @@
 
 import {
   buildDatasetSettingsFromFormValues,
+  DEFAULT_FILE_EXCLUSIONS,
   emptyCreateDatasetSettingsFormValues,
-} from './create_dataset_flyout_form_state';
+} from './create_dataset_form_state';
 
 const empty = () => emptyCreateDatasetSettingsFormValues();
 
-describe('create_dataset_flyout_form_state', () => {
+describe('create_dataset_form_state', () => {
   describe('emptyCreateDatasetSettingsFormValues', () => {
     it('returns empty-string defaults for all fields', () => {
       expect(empty()).toEqual({
         format: '',
+        file_exclusions: [...DEFAULT_FILE_EXCLUSIONS],
         partition_detection: '',
         schema_resolution: '',
         partition_path: '',
         hive_partitioning: '',
+        optimized_reader: '',
+        late_materialization: '',
         schema_sample_size: '',
         delimiter: '',
         mode: '',
         header_row: '',
+        skip_rows: '',
+        datetime_format: '',
         null_value: '',
-        encoding: '',
+        encoding: 'UTF-8',
         error_mode: '',
         max_errors: '',
         max_error_ratio: '',
         quote: '',
         escape: '',
         comment: '',
-        column_prefix: '',
-        datetime_format: '',
+        column_prefix: 'col',
+        trim_spaces: false,
         multi_value_syntax: '',
         max_field_size: '',
       });
@@ -64,6 +70,16 @@ describe('create_dataset_flyout_form_state', () => {
       ).toEqual({ partition_path: '/year={year}/' });
     });
 
+    it('omits default file_exclusions and includes custom values', () => {
+      expect(buildDatasetSettingsFromFormValues(empty())).toBeUndefined();
+      expect(
+        buildDatasetSettingsFromFormValues({
+          ...empty(),
+          file_exclusions: ['**/tmp/**'],
+        })
+      ).toEqual({ file_exclusions: ['**/tmp/**'] });
+    });
+
     it('converts hive_partitioning boolean form values correctly', () => {
       expect(
         buildDatasetSettingsFromFormValues({ ...empty(), hive_partitioning: 'false' })
@@ -77,9 +93,9 @@ describe('create_dataset_flyout_form_state', () => {
     });
 
     it('ignores format-specific fields when no format is selected', () => {
-      expect(
-        buildDatasetSettingsFromFormValues({ ...empty(), error_mode: 'skip_row' })
-      ).toBeUndefined();
+      expect(buildDatasetSettingsFromFormValues({ ...empty(), error_mode: 'skip_row' })).toEqual({
+        error_mode: 'skip_row',
+      });
       expect(
         buildDatasetSettingsFromFormValues({ ...empty(), delimiter: ',', schema_sample_size: '10' })
       ).toBeUndefined();
@@ -135,6 +151,79 @@ describe('create_dataset_flyout_form_state', () => {
       ).toEqual({ format: 'csv', max_error_ratio: 0.5 });
     });
 
+    it('includes skip_rows for csv when in range', () => {
+      expect(
+        buildDatasetSettingsFromFormValues({ ...empty(), format: 'csv', skip_rows: '0' })
+      ).toEqual({ format: 'csv', skip_rows: 0 });
+      expect(
+        buildDatasetSettingsFromFormValues({ ...empty(), format: 'csv', skip_rows: '1000' })
+      ).toEqual({ format: 'csv', skip_rows: 1000 });
+    });
+
+    it('omits skip_rows when out of range', () => {
+      expect(
+        buildDatasetSettingsFromFormValues({ ...empty(), format: 'csv', skip_rows: '1001' })
+      ).toEqual({ format: 'csv' });
+    });
+
+    it('omits default UTF-8 encoding and includes other encodings', () => {
+      expect(
+        buildDatasetSettingsFromFormValues({ ...empty(), format: 'csv', encoding: 'UTF-8' })
+      ).toEqual({ format: 'csv' });
+      expect(
+        buildDatasetSettingsFromFormValues({ ...empty(), format: 'csv', encoding: 'UTF-16' })
+      ).toEqual({ format: 'csv', encoding: 'UTF-16' });
+    });
+
+    it('omits default ISO-8601 datetime_format', () => {
+      expect(
+        buildDatasetSettingsFromFormValues({
+          ...empty(),
+          format: 'csv',
+          datetime_format: 'ISO-8601',
+        })
+      ).toEqual({ format: 'csv' });
+    });
+
+    it('omits default CSV quote and escape characters', () => {
+      expect(
+        buildDatasetSettingsFromFormValues({
+          ...empty(),
+          format: 'csv',
+          quote: '"',
+          escape: '\\',
+        })
+      ).toEqual({ format: 'csv' });
+    });
+
+    it('includes non-default CSV quote and escape characters', () => {
+      expect(
+        buildDatasetSettingsFromFormValues({
+          ...empty(),
+          format: 'csv',
+          quote: "'",
+          escape: '"',
+        })
+      ).toEqual({ format: 'csv', quote: "'", escape: '"' });
+    });
+
+    it('includes trim_spaces when enabled', () => {
+      expect(
+        buildDatasetSettingsFromFormValues({
+          ...empty(),
+          format: 'csv',
+          trim_spaces: true,
+        })
+      ).toEqual({ format: 'csv', trim_spaces: true });
+      expect(
+        buildDatasetSettingsFromFormValues({
+          ...empty(),
+          format: 'csv',
+          trim_spaces: false,
+        })
+      ).toEqual({ format: 'csv' });
+    });
+
     it('includes format and CSV fields together', () => {
       expect(
         buildDatasetSettingsFromFormValues({
@@ -147,7 +236,6 @@ describe('create_dataset_flyout_form_state', () => {
     });
 
     it('excludes CSV-only fields when format is parquet', () => {
-      // parquet has no format-specific fields in the form (API-only)
       const result = buildDatasetSettingsFromFormValues({
         ...empty(),
         format: 'parquet',
@@ -159,7 +247,7 @@ describe('create_dataset_flyout_form_state', () => {
         max_errors: '5',
         schema_sample_size: '100',
       });
-      expect(result).toEqual({ format: 'parquet' });
+      expect(result).toEqual({ format: 'parquet', error_mode: 'skip_row', max_errors: 5 });
     });
 
     it('excludes CSV-only fields when format is ndjson', () => {

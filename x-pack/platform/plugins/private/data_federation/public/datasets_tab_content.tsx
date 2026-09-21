@@ -12,17 +12,10 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataSetWithName, DataSource } from '../common';
 import { ConfirmDeleteDataSetModal } from './confirm_delete_data_set_modal';
 import { ConfirmDeleteDataSetsModal } from './confirm_delete_data_sets_modal';
-import { CreateDatasetFlyout } from './create_dataset_flyout';
-import { dataSetFromListItem } from './create_dataset_flyout/dataset_flyout_initial_values';
 import { DatasetsTable, type DataSetListRow } from './datasets_table';
 import { getFlyoutSaveErrorMessage } from './get_flyout_save_error_message';
 import { mainTranslations } from './main_i18n';
 import type { DataFederationKibanaServices } from './types';
-
-type DataSetFlyoutState =
-  | { mode: 'closed' }
-  | { mode: 'create' }
-  | { mode: 'edit'; dataSet: DataSetWithName };
 
 export interface DatasetsTabContentProps {
   dataSources: DataSource[];
@@ -39,7 +32,6 @@ export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
     services: { datasetsClient, toasts },
   } = useKibana<DataFederationKibanaServices>();
 
-  const [flyout, setFlyout] = useState<DataSetFlyoutState>({ mode: 'closed' });
   const [selectedDataSets, setSelectedDataSets] = useState<DataSetListRow[]>([]);
   const [dataSourceFilter, setDataSourceFilter] = useState<string>('');
   const [pendingDeleteDataSet, setPendingDeleteDataSet] = useState<DataSetListRow | null>(null);
@@ -86,8 +78,6 @@ export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
     }
     return dataSetItems.filter((ds) => ds.data_source === dataSourceFilter);
   }, [dataSetItems, dataSourceFilter]);
-
-  const existingDataSetNames = useMemo(() => dataSets.map((ds) => ds.name), [dataSets]);
 
   const handleDeleteDataSet = useCallback((item: DataSetListRow) => {
     setPendingDeleteDataSet(item);
@@ -162,44 +152,6 @@ export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
     }
   }, [datasetsClient, loadDataSets, pendingDeleteDataSets, toasts]);
 
-  const handleFlyoutClose = useCallback(
-    (result?: { savedChanges?: boolean }) => {
-      setFlyout({ mode: 'closed' });
-      if (result?.savedChanges) {
-        void loadDataSets();
-      }
-    },
-    [loadDataSets]
-  );
-
-  const onSave = useCallback(
-    async (dataSet: DataSetWithName, previousId?: string): Promise<string | null> => {
-      try {
-        const nextId = dataSet.name.trim();
-        const prevIdTrimmed = previousId?.trim();
-
-        await datasetsClient.add(dataSet);
-
-        if (prevIdTrimmed && prevIdTrimmed !== nextId) {
-          await datasetsClient.delete(prevIdTrimmed);
-        }
-
-        handleFlyoutClose({ savedChanges: true });
-        return null;
-      } catch (e) {
-        return getFlyoutSaveErrorMessage(e);
-      }
-    },
-    [datasetsClient, handleFlyoutClose]
-  );
-
-  const handleEdit = useCallback((item: DataSetListRow) => {
-    setFlyout({
-      mode: 'edit',
-      dataSet: dataSetFromListItem(item),
-    });
-  }, []);
-
   return (
     <>
       <DatasetsTable
@@ -210,21 +162,9 @@ export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
         isCreateDisabled={dataSources.length === 0}
         onSelectionChange={setSelectedDataSets}
         onDataSourceFilterChange={setDataSourceFilter}
-        onCreate={() => setFlyout({ mode: 'create' })}
-        onEdit={handleEdit}
         onDelete={handleDeleteDataSet}
         onDeleteSelected={handleDeleteSelectedDataSets}
       />
-      {flyout.mode !== 'closed' ? (
-        <CreateDatasetFlyout
-          key={flyout.mode === 'edit' ? flyout.dataSet.name : 'create'}
-          initialDataSet={flyout.mode === 'edit' ? flyout.dataSet : undefined}
-          existingDataSetNames={existingDataSetNames}
-          dataSources={dataSources}
-          onClose={() => handleFlyoutClose()}
-          onSave={onSave}
-        />
-      ) : null}
       {pendingDeleteDataSet ? (
         <ConfirmDeleteDataSetModal
           dataSetName={pendingDeleteDataSet.name}
