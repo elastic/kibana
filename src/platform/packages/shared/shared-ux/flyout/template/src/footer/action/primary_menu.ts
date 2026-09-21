@@ -15,8 +15,9 @@ import { PrimaryActionMenuButton } from './menu_button';
 /** Declarative `FlyoutTemplate.Footer.PrimaryActionMenu`. */
 export const PrimaryActionMenu =
   primaryActionMenuPart.createComponent<FlyoutFooterPrimaryActionMenuProps>({
-    // 'resolve' is a plain function, not a React component, so we can't use hooks here.
-    // The popover's open/close state must be handled inside PrimaryActionMenuButton instead.
+    // Resolvers run inline in the parent's render, and only when the part is present, so they
+    // cannot hold hook state. Returning an element mounts PrimaryActionMenuButton as a real
+    // component, which owns the popover's open/close state.
     resolve: (attributes) => React.createElement(PrimaryActionMenuButton, attributes),
   });
 
