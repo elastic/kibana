@@ -96,7 +96,7 @@ const useObservabilityRulesTabs = (
       });
     }
 
-    return tabs;
+    return tabs.length > 1 ? tabs : [];
   }, [prepend, selected, showV1, showV2]);
 
 const ClassicRulesV1Route = ({
