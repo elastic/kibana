@@ -23,6 +23,7 @@ describe('renderElasticManifest', () => {
     const content = renderElasticManifest('elasticsearch-telemetry');
 
     expect(content).toContain('`logs-*`, `metrics-*`, `traces-*`');
+    expect(content).toContain('"$CONNECTOR_CONFIG_URL/_remote/info"');
     expect(content).toContain('"$CONNECTOR_CONFIG_URL/_query"');
   });
 });
