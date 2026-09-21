@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import copy from 'copy-to-clipboard';
 import React, { useCallback, useMemo } from 'react';
@@ -55,6 +55,7 @@ export const ResponseActions: React.FC<ResponseActionsProps> = ({
   copyTarget = 'response',
 }) => {
   const { addSuccessToast } = useToasts();
+  const { euiTheme } = useEuiTheme();
   const isTracingEnabled = useTracingEnabled();
 
   const { action: copyLabel, success: copySuccessLabel } = copyLabels[copyTarget];
@@ -86,6 +87,10 @@ export const ResponseActions: React.FC<ResponseActionsProps> = ({
       css={css`
         opacity: ${isVisible ? 1 : 0};
         transition: opacity 0.2s ease;
+        .euiButtonIcon,
+        .euiButtonEmpty {
+          color: ${euiTheme.colors.textDisabled};
+        }
       `}
     >
       <EuiFlexItem grow={false}>
