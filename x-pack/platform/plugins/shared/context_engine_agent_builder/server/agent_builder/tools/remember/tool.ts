@@ -27,6 +27,7 @@ import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import { CONTEXT_ENGINE_REMEMBER_TOOL_ID } from '../../../../common/agent_builder_tools';
 import { assertContextEngineWriteAccess } from '../../assert_context_engine_write_access';
+import { aiIndexToolsAvailability } from '../ai_index_tools_availability';
 import {
   addConversationReference,
   createMemoryWriter,
@@ -84,6 +85,7 @@ export const createRememberTool = ({
 }): BuiltinToolDefinition<typeof rememberSchema> => ({
   id: CONTEXT_ENGINE_REMEMBER_TOOL_ID,
   type: ToolType.builtin,
+  availability: aiIndexToolsAvailability,
   tags: ['context_engine', 'memory'],
   annotations: {
     title: 'Remember',
@@ -94,6 +96,9 @@ export const createRememberTool = ({
   },
   description: dedent`
     Write a memory to a memory-enabled Context Engine AI index.
+    Memory is shared with users and agents that can access this AI index. Only record findings
+    useful to others working in this context, such as discovered patterns, effective approaches,
+    or domain knowledge. Do not record personal details or individual user preferences.
     Use memory.session_fact for a granular fact discovered during a session.
     Use memory.session for a synthesis of what was tried, what worked, and what should be done
     differently. Omit id to create a memory; provide an id returned by an earlier call only when
@@ -125,7 +130,7 @@ export const createRememberTool = ({
         getSecurityStart,
       });
 
-      const aiIndex = await (await getAiIndexService()).get(params.aiIndexId);
+      const aiIndex = await (await getAiIndexService()).get(params.aiIndexId, spaceId);
       if (!aiIndex.memory_enabled) {
         throw new Error(`AI index '${params.aiIndexId}' does not have memory enabled.`);
       }
