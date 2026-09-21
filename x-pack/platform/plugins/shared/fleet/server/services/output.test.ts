@@ -48,8 +48,9 @@ const mockedGetAgentCountForAgentPolicies = getAgentCountForAgentPolicies as jes
   typeof getAgentCountForAgentPolicies
 >;
 
-const mockedBuildAgentStatusRuntimeField =
-  buildAgentStatusRuntimeField as jest.MockedFunction<typeof buildAgentStatusRuntimeField>;
+const mockedBuildAgentStatusRuntimeField = buildAgentStatusRuntimeField as jest.MockedFunction<
+  typeof buildAgentStatusRuntimeField
+>;
 
 const mockedFindAgentlessPolicies = findAgentlessPolicies as jest.MockedFunction<
   typeof findAgentlessPolicies
