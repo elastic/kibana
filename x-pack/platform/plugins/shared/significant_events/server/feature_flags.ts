@@ -410,13 +410,10 @@ export function registerFeatureFlags(
               defaultMessage: 'Nightshift developer mode',
             }) as string,
             value: false,
-            description: i18n.translate(
-              'xpack.nightshift.developerModeDescription',
-              {
-                defaultMessage:
-                  'When enabled, Nightshift shows extra developer-only UI and configuration options in this Kibana space.',
-              }
-            ),
+            description: i18n.translate('xpack.nightshift.developerModeDescription', {
+              defaultMessage:
+                'When enabled, Nightshift shows extra developer-only UI and configuration options in this Kibana space.',
+            }),
             type: 'boolean',
             schema: schema.boolean(),
             requiresPageReload: false,

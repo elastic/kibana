@@ -841,8 +841,7 @@ export function SettingsTab() {
             <EuiFlexItem grow={2}>
               <EuiText color="subdued" size="s">
                 {i18n.translate('xpack.nightshift.settings.developerModeHelpText', {
-                  defaultMessage:
-                    'Show extra details and configurations options for expert users.',
+                  defaultMessage: 'Show extra details and configurations options for expert users.',
                 })}
               </EuiText>
             </EuiFlexItem>
@@ -851,10 +850,9 @@ export function SettingsTab() {
                 <EuiFormRow>
                   <EuiSwitch
                     data-test-subj="nightshiftDeveloperModeSwitch"
-                    label={i18n.translate(
-                      'xpack.nightshift.settings.developerModeToggleSwitch',
-                      { defaultMessage: 'Enable Nightshift developer mode' }
-                    )}
+                    label={i18n.translate('xpack.nightshift.settings.developerModeToggleSwitch', {
+                      defaultMessage: 'Enable Nightshift developer mode',
+                    })}
                     checked={isDeveloperMode}
                     onChange={(e) => {
                       void setDeveloperMode(e.target.checked);
