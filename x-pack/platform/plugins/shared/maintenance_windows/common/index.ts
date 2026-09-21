@@ -40,6 +40,12 @@ export type MaintenanceWindowUI = Omit<MaintenanceWindow, 'schedule'>;
 export {
   getScopedQueryErrorMessage,
   isScopedQueryError,
+  getScopedQueryErrorAttributes,
+  isScopedQueryErrorAttributes,
+} from './maintenance_window_scoped_query_error_message';
+export type {
+  MaintenanceWindowScopeName,
+  ScopedQueryErrorAttributes,
 } from './maintenance_window_scoped_query_error_message';
 
 export type { MaintenanceWindowAttributes } from '../server/data/types/maintenance_window_attributes';

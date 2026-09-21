@@ -182,6 +182,13 @@ export const CREATE_FORM_ALERTING_V2_QUERY_EMPTY_ERROR_MESSAGE = i18n.translate(
   }
 );
 
+export const CREATE_FORM_ALERTING_V2_QUERY_INVALID_ERROR_MESSAGE = i18n.translate(
+  'xpack.maintenanceWindows.createForm.alertingV2Query.invalidErrorMessage',
+  {
+    defaultMessage: 'Invalid episode filter.',
+  }
+);
+
 export const TECHNICAL_PREVIEW_LABEL = i18n.translate(
   'xpack.maintenanceWindows.technicalPreviewLabel',
   {

@@ -28,6 +28,9 @@ jest.mock('../hooks/use_create_maintenance_window', () => ({
 jest.mock('../hooks/use_update_maintenance_window', () => ({
   useUpdateMaintenanceWindow: jest.fn(),
 }));
+jest.mock('./episode_matcher_input', () => ({
+  EpisodeMatcherInput: () => <div data-test-subj="mockEpisodeMatcherInput" />,
+}));
 
 const { getRuleTypes } = jest.requireMock('@kbn/response-ops-rules-apis/apis/get_rule_types');
 const { useKibana, useUiSetting } = jest.requireMock('../utils/kibana_react');
@@ -315,6 +318,89 @@ describe('CreateMaintenanceWindowForm', () => {
 
       await waitFor(() => expect(updateMutate).toHaveBeenCalledTimes(1));
       expect(screen.queryByTestId('saveWithoutFiltersConfirmModal')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('onCreateOrUpdateError — scope-aware error routing', () => {
+    let capturedOnError: ((error: unknown) => void) | undefined;
+
+    beforeEach(() => {
+      // Switch to mockImplementation so we can capture the onError callback.
+      useCreateMaintenanceWindow.mockImplementation((props?: { onError?: (e: unknown) => void }) => {
+        capturedOnError = props?.onError;
+        return { mutate: createMutate, isLoading: false };
+      });
+    });
+
+    const buildError = (scopeErrors: Array<{ scope: string; message: string }>) => ({
+      body: {
+        statusCode: 400,
+        message: `Error validating create maintenance window data - invalid scope - parse error`,
+        attributes: { scopeErrors },
+      },
+    });
+
+    const buildFallbackError = (message: string) => ({
+      body: { statusCode: 400, message },
+    });
+
+    it('shows "Invalid episode filter." under the Episodes field (v2) when attributes name alertingV2', async () => {
+      appMockRenderer.render(
+        <CreateMaintenanceWindowForm
+          {...formProps}
+          initialValue={{
+            title: 'test',
+            startDate: '2023-03-24',
+            endDate: '2023-03-26',
+            recurring: false,
+            scope: {
+              alerting: { kql: 'kibana.alert.rule.name : "x"', filters: [], dsl: '{}' },
+              alertingV2: { kql: 'bad_kql:' },
+            },
+          }}
+          maintenanceWindowId="fake_mw_id"
+        />
+      );
+
+      // Trigger onError from the hook with a structured attributes payload.
+      expect(capturedOnError).toBeDefined();
+      capturedOnError!(buildError([{ scope: 'alertingV2', message: 'parse error' }]));
+
+      await waitFor(() => {
+        expect(screen.getByText('Invalid episode filter.')).toBeInTheDocument();
+      });
+      // v1 field must NOT show an error.
+      expect(screen.queryByText('Invalid scoped query.')).not.toBeInTheDocument();
+    });
+
+    it('shows "Invalid scoped query." under the alerts (v1) field when attributes name alerting', async () => {
+      appMockRenderer.render(
+        <CreateMaintenanceWindowForm
+          {...formPropsForEditMode}
+        />
+      );
+
+      expect(capturedOnError).toBeDefined();
+      capturedOnError!(buildError([{ scope: 'alerting', message: 'parse error' }]));
+
+      await waitFor(() => {
+        expect(screen.getByText('Invalid scoped query.')).toBeInTheDocument();
+      });
+      expect(screen.queryByText('Invalid episode filter.')).not.toBeInTheDocument();
+    });
+
+    it('does not show any inline error when attributes are absent', async () => {
+      appMockRenderer.render(<CreateMaintenanceWindowForm {...formPropsForEditMode} />);
+
+      expect(capturedOnError).toBeDefined();
+      // Error without structured attributes — no inline field error should appear.
+      capturedOnError!(buildFallbackError('Failed to create maintenance window'));
+
+      // Give React a tick to settle; neither error string should be rendered.
+      await waitFor(() => {
+        expect(screen.queryByText('Invalid scoped query.')).not.toBeInTheDocument();
+        expect(screen.queryByText('Invalid episode filter.')).not.toBeInTheDocument();
+      });
     });
   });
 });

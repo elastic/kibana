@@ -353,6 +353,68 @@ describe('MaintenanceWindowClient - create', () => {
     `);
   });
 
+  it('should include attributes.scopeErrors with scope "alerting" for invalid alerting kql', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
+    const mockMaintenanceWindow = getMockMaintenanceWindow({
+      expirationDate: moment(new Date()).tz('UTC').add(1, 'year').toISOString(),
+    });
+
+    let thrown: unknown;
+    try {
+      await createMaintenanceWindow(mockContext, {
+        data: {
+          title: mockMaintenanceWindow.title,
+          duration: mockMaintenanceWindow.duration,
+          rRule: mockMaintenanceWindow.rRule as CreateMaintenanceWindowParams['data']['rRule'],
+          schedule: mockMaintenanceWindow.schedule,
+          scope: { alerting: { enabled: true, kql: 'invalid: ', filters: [] } },
+        },
+      });
+    } catch (e) {
+      thrown = e;
+    }
+    expect(thrown).toMatchObject({
+      isBoom: true,
+      output: {
+        statusCode: 400,
+        payload: {
+          attributes: { scopeErrors: [expect.objectContaining({ scope: 'alerting' })] },
+        },
+      },
+    });
+  });
+
+  it('should include attributes.scopeErrors with scope "alertingV2" for invalid alertingV2 kql', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
+    const mockMaintenanceWindow = getMockMaintenanceWindow({
+      expirationDate: moment(new Date()).tz('UTC').add(1, 'year').toISOString(),
+    });
+
+    let thrown: unknown;
+    try {
+      await createMaintenanceWindow(mockContext, {
+        data: {
+          title: mockMaintenanceWindow.title,
+          duration: mockMaintenanceWindow.duration,
+          rRule: mockMaintenanceWindow.rRule as CreateMaintenanceWindowParams['data']['rRule'],
+          schedule: mockMaintenanceWindow.schedule,
+          scope: { alertingV2: { enabled: true, kql: 'invalid: ' } },
+        },
+      });
+    } catch (e) {
+      thrown = e;
+    }
+    expect(thrown).toMatchObject({
+      isBoom: true,
+      output: {
+        statusCode: 400,
+        payload: {
+          attributes: { scopeErrors: [expect.objectContaining({ scope: 'alertingV2' })] },
+        },
+      },
+    });
+  });
+
   it('should throw if trying to create a maintenance window with invalid category ids', async () => {
     jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
 

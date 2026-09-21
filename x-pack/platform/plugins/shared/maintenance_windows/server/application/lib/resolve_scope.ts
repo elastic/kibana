@@ -8,7 +8,11 @@
 import Boom from '@hapi/boom';
 import type { DataViewBase, EsQueryConfig, Filter } from '@kbn/es-query';
 import { buildEsQuery, fromKueryExpression } from '@kbn/es-query';
-import { getScopedQueryErrorMessage } from '../../../common';
+import {
+  getScopedQueryErrorAttributes,
+  getScopedQueryErrorMessage,
+  type MaintenanceWindowScopeName,
+} from '../../../common';
 import type { AlertsFilterQueryAttributes, AlertingV2ScopeAttributes } from '../../data/types';
 
 export interface ScopeInput {
@@ -25,6 +29,16 @@ export interface ResolvedScope {
   alerting?: AlertsFilterQueryAttributes;
   alertingV2?: AlertingV2ScopeAttributes;
 }
+
+const throwScopedQueryError = (
+  scope: MaintenanceWindowScopeName,
+  errorPrefix: string,
+  error: Error
+): never => {
+  const boomError = Boom.badRequest(`${errorPrefix} - ${getScopedQueryErrorMessage(error.message)}`);
+  boomError.output.payload.attributes = getScopedQueryErrorAttributes(scope, error.message);
+  throw boomError;
+};
 
 /**
  * Resolves a requested scope into storage-ready attributes. For alerting v1, compiles the KQL
@@ -68,7 +82,7 @@ export const resolveScope = ({
           dsl,
         };
       } catch (error) {
-        throw Boom.badRequest(`${errorPrefix} - ${getScopedQueryErrorMessage(error.message)}`);
+        throwScopedQueryError('alerting', errorPrefix, error);
       }
     }
   }
@@ -83,7 +97,7 @@ export const resolveScope = ({
       try {
         fromKueryExpression(scope.alertingV2.kql);
       } catch (error) {
-        throw Boom.badRequest(`${errorPrefix} - ${getScopedQueryErrorMessage(error.message)}`);
+        throwScopedQueryError('alertingV2', errorPrefix, error);
       }
       resolved.alertingV2 = { enabled: true, kql: scope.alertingV2.kql };
     }

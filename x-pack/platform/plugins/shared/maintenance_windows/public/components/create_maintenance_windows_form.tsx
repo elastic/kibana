@@ -39,7 +39,7 @@ import { convertToRRule } from '@kbn/response-ops-recurring-schedule-form/utils/
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import moment from 'moment';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { isScopedQueryError } from '../../common';
+import { isScopedQueryErrorAttributes } from '../../common';
 import { useArchiveMaintenanceWindow } from '../hooks/use_archive_maintenance_window';
 import { useCreateMaintenanceWindow } from '../hooks/use_create_maintenance_window';
 import { useGetRuleTypes } from '../hooks/use_get_rule_types';
@@ -109,18 +109,25 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
 
   const isEditMode = initialValue !== undefined && maintenanceWindowId !== undefined;
 
+  // Destructure stable setter references so the callback doesn't rebuild on every keystroke.
+  const { setErrors: setAlertingV1Errors } = alertingV1;
+  const { setErrors: setAlertingV2Errors } = alertingV2;
+
   const onCreateOrUpdateError = useCallback(
     (error: IHttpFetchError<KibanaServerError>) => {
-      if (!error.body?.message) return;
-      if (isScopedQueryError(error.body.message)) {
-        if (alertingV2.enabled && !alertingV1.enabled) {
-          alertingV2.setErrors([i18n.CREATE_FORM_SCOPED_QUERY_INVALID_ERROR_MESSAGE]);
-        } else {
-          alertingV1.setErrors([i18n.CREATE_FORM_SCOPED_QUERY_INVALID_ERROR_MESSAGE]);
+      const { attributes } = error.body ?? {};
+
+      if (isScopedQueryErrorAttributes(attributes)) {
+        for (const { scope } of attributes.scopeErrors) {
+          if (scope === 'alertingV2') {
+            setAlertingV2Errors([i18n.CREATE_FORM_ALERTING_V2_QUERY_INVALID_ERROR_MESSAGE]);
+          } else {
+            setAlertingV1Errors([i18n.CREATE_FORM_SCOPED_QUERY_INVALID_ERROR_MESSAGE]);
+          }
         }
       }
     },
-    [alertingV1, alertingV2]
+    [setAlertingV1Errors, setAlertingV2Errors]
   );
 
   const { mutate: createMaintenanceWindow, isLoading: isCreateLoading } =

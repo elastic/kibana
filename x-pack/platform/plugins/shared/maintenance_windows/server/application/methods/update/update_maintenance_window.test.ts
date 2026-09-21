@@ -592,6 +592,70 @@ describe('MaintenanceWindowClient - update', () => {
     `);
   });
 
+  it('should include attributes.scopeErrors with scope "alerting" when alerting kql is invalid', async () => {
+    jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
+    const mockMaintenanceWindow = getMockMaintenanceWindow({
+      expirationDate: moment(new Date(firstTimestamp)).tz('UTC').subtract(1, 'year').toISOString(),
+    });
+
+    savedObjectsClient.get.mockResolvedValueOnce({
+      attributes: mockMaintenanceWindow,
+      version: '123',
+      id: 'test-id',
+    } as unknown as SavedObject);
+
+    let thrown: unknown;
+    try {
+      await updateMaintenanceWindow(mockContext, {
+        id: 'test-id',
+        data: { scope: { alerting: { enabled: true, kql: 'invalid: ', filters: [] } } },
+      });
+    } catch (e) {
+      thrown = e;
+    }
+    expect(thrown).toMatchObject({
+      isBoom: true,
+      output: {
+        statusCode: 400,
+        payload: {
+          attributes: { scopeErrors: [expect.objectContaining({ scope: 'alerting' })] },
+        },
+      },
+    });
+  });
+
+  it('should include attributes.scopeErrors with scope "alertingV2" when alertingV2 kql is invalid', async () => {
+    jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
+    const mockMaintenanceWindow = getMockMaintenanceWindow({
+      expirationDate: moment(new Date(firstTimestamp)).tz('UTC').subtract(1, 'year').toISOString(),
+    });
+
+    savedObjectsClient.get.mockResolvedValueOnce({
+      attributes: mockMaintenanceWindow,
+      version: '123',
+      id: 'test-id',
+    } as unknown as SavedObject);
+
+    let thrown: unknown;
+    try {
+      await updateMaintenanceWindow(mockContext, {
+        id: 'test-id',
+        data: { scope: { alertingV2: { enabled: true, kql: 'invalid: ' } } },
+      });
+    } catch (e) {
+      thrown = e;
+    }
+    expect(thrown).toMatchObject({
+      isBoom: true,
+      output: {
+        statusCode: 400,
+        payload: {
+          attributes: { scopeErrors: [expect.objectContaining({ scope: 'alertingV2' })] },
+        },
+      },
+    });
+  });
+
   it('should throw if updating a maintenance window that has expired', async () => {
     jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
     const mockMaintenanceWindow = getMockMaintenanceWindow({
