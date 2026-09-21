@@ -38,7 +38,7 @@ export class CreateActionPolicyRoute extends BaseAlertingRoute {
     access: 'public' as const,
     summary: 'Create an action policy',
     description:
-      'Creates an action policy with a server-generated identifier. To create or replace an action policy with a client-supplied identifier, use PUT /api/alerting/v2/action_policies/.',
+      'Creates an action policy with a server-generated identifier. To create or replace an action policy with a client-supplied identifier, use PUT /api/alerting/v2/action_policies/{id}/.',
     oasOperationObject: createActionPolicyOasExamples,
   } as const;
   static schemas = {
