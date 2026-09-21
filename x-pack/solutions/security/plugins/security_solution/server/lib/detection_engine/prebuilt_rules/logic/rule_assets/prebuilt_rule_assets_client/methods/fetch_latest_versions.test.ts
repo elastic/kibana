@@ -7,6 +7,7 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../prebuilt_rule_assets_type';
+import { prepareQueryDslFilter } from '../utils';
 import { fetchLatestVersions } from './fetch_latest_versions';
 
 const aggResponse = (ruleId: string, version: number) => ({
@@ -93,20 +94,15 @@ describe('fetchLatestVersions', () => {
     });
 
     it('applies the tag filter only to the asset fetch, not the latest-version aggregation', async () => {
-      await fetchLatestVersions(savedObjectsClient, {
-        filter: `${PREBUILT_RULE_ASSETS_SO_TYPE}.tags: "${OLD_TAG}"`,
-      });
+      const kqlFilter = `${PREBUILT_RULE_ASSETS_SO_TYPE}.tags: "${OLD_TAG}"`;
+      const [expectedFilterClause] = prepareQueryDslFilter({ filter: kqlFilter }).filter;
+
+      await fetchLatestVersions(savedObjectsClient, { filter: kqlFilter });
 
       const [aggCall, assetFetchCall] = searchMock.mock.calls;
 
-      expect(aggCall[0].query).not.toMatchObject({
-        bool: expect.objectContaining({
-          filter: expect.arrayContaining([expect.objectContaining({ match: expect.anything() })]),
-        }),
-      });
-      expect(assetFetchCall[0].query.bool.filter).toEqual(
-        expect.arrayContaining([expect.objectContaining({ terms: { _id: expect.any(Array) } })])
-      );
+      expect(aggCall[0].query.bool.filter).not.toContainEqual(expectedFilterClause);
+      expect(assetFetchCall[0].query.bool.filter).toContainEqual(expectedFilterClause);
     });
   });
 
