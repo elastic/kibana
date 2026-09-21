@@ -79,6 +79,7 @@ describe('EsServiceAccounts', () => {
   let request: KibanaRequest;
   let getCurrentUser: jest.Mock;
   let getCurrentUserProfileId: jest.Mock;
+  let userProfiles: { bulkGet: jest.Mock };
   let mockCheckPrivileges: jest.Mocked<CheckPrivileges>;
 
   /** Queues the transport responses for the happy path: pre-flight miss, PUT, token. */
@@ -112,6 +113,7 @@ describe('EsServiceAccounts', () => {
     request = httpServerMock.createKibanaRequest();
     getCurrentUser = jest.fn().mockReturnValue(mockAuthenticatedUser({ roles: ['superuser'] }));
     getCurrentUserProfileId = jest.fn().mockResolvedValue(null);
+    userProfiles = { bulkGet: jest.fn().mockResolvedValue([]) };
 
     serviceAccounts = new EsServiceAccounts({
       logger,
@@ -122,6 +124,7 @@ describe('EsServiceAccounts', () => {
       canEncrypt: true,
       getCurrentUser,
       getCurrentUserProfileId,
+      userProfiles,
     });
   });
 
@@ -315,6 +318,7 @@ describe('EsServiceAccounts', () => {
         canEncrypt: false,
         getCurrentUser,
         getCurrentUserProfileId: jest.fn().mockResolvedValue(null),
+        userProfiles,
       });
 
       await expect(serviceAccounts.create(request, createParams)).rejects.toMatchObject({
@@ -659,9 +663,13 @@ describe('EsServiceAccounts', () => {
       enabled: true,
       ...overrides,
     });
-    const credential = (createdAt: string) => ({
+    const credential = (createdAt: string, userProfileId?: string) => ({
       createdAt,
-      createdBy: { type: 'user' as const, username: 'elastic' },
+      createdBy: {
+        type: 'user' as const,
+        username: 'elastic',
+        ...(userProfileId ? { userProfileId } : {}),
+      },
     });
 
     it('queries one page of user-managed accounts sorted by principal and joins the credentials', async () => {
@@ -693,7 +701,7 @@ describe('EsServiceAccounts', () => {
         'kibana/nightshift-relay',
       ]);
       expect(result).toEqual({
-        service_accounts: [
+        serviceAccounts: [
           {
             id: 'acme/billing',
             name: 'billing',
@@ -712,7 +720,82 @@ describe('EsServiceAccounts', () => {
           },
         ],
       });
-      expect(result).not.toHaveProperty('next_page');
+      expect(result).not.toHaveProperty('nextPage');
+      // No creator carries a profile id, so the profile index is never consulted.
+      expect(userProfiles.bulkGet).not.toHaveBeenCalled();
+    });
+
+    it('resolves the creator display name from the user profile', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+        service_accounts: [queried('kibana/nightshift-relay')],
+      });
+      credentialStore.getMetadata.mockResolvedValue(
+        new Map([
+          ['kibana/nightshift-relay', credential('2026-09-21T00:00:00.000Z', 'profile-uid')],
+        ])
+      );
+      userProfiles.bulkGet.mockResolvedValue([
+        { uid: 'profile-uid', user: { username: 'elastic', full_name: 'Ada Lovelace' } },
+      ]);
+
+      const result = await serviceAccounts.list(request);
+
+      expect(userProfiles.bulkGet).toHaveBeenCalledWith({ uids: new Set(['profile-uid']) });
+      expect(result.serviceAccounts[0].createdBy).toEqual({
+        type: 'user',
+        username: 'elastic',
+        userProfileId: 'profile-uid',
+        displayName: 'Ada Lovelace',
+      });
+    });
+
+    it('reports the page without names when the profile lookup fails', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+        service_accounts: [queried('kibana/nightshift-relay')],
+      });
+      credentialStore.getMetadata.mockResolvedValue(
+        new Map([
+          ['kibana/nightshift-relay', credential('2026-09-21T00:00:00.000Z', 'profile-uid')],
+        ])
+      );
+      userProfiles.bulkGet.mockRejectedValue(new Error('profile index unavailable'));
+
+      const result = await serviceAccounts.list(request);
+
+      // A directory read must not fail because the profile index is down.
+      expect(result.serviceAccounts[0].createdBy).toEqual({
+        type: 'user',
+        username: 'elastic',
+        userProfileId: 'profile-uid',
+      });
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Could not resolve the creators of the listed service accounts')
+      );
+    });
+
+    it('reports only the binder fields, dropping anything else the credential carries', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+        service_accounts: [queried('kibana/nightshift-relay')],
+      });
+      credentialStore.getMetadata.mockResolvedValue(
+        new Map([
+          [
+            'kibana/nightshift-relay',
+            {
+              createdAt: '2026-09-21T00:00:00.000Z',
+              createdBy: {
+                type: 'user' as const,
+                username: 'elastic',
+                token: 'AAEAAWtpYmFuYS9...',
+              },
+            },
+          ],
+        ])
+      );
+
+      const result = await serviceAccounts.list(request);
+
+      expect(result.serviceAccounts[0].createdBy).toEqual({ type: 'user', username: 'elastic' });
     });
 
     it('asks for one more than the page and reports the last principal as the cursor when it arrives', async () => {
@@ -729,8 +812,8 @@ describe('EsServiceAccounts', () => {
         path: QUERY_PATH,
         body: { size: 3, sort: ['username'] },
       });
-      expect(result.service_accounts.map(({ id }) => id)).toEqual(['kibana/a', 'kibana/b']);
-      expect(result.next_page).toBe('kibana/b');
+      expect(result.serviceAccounts.map(({ id }) => id)).toEqual(['kibana/a', 'kibana/b']);
+      expect(result.nextPage).toBe('kibana/b');
       // The extra row is never reported, so its credential is never looked up either.
       expect(credentialStore.getMetadata).toHaveBeenCalledWith(['kibana/a', 'kibana/b']);
     });
@@ -758,7 +841,7 @@ describe('EsServiceAccounts', () => {
         service_accounts: [],
       });
 
-      await expect(serviceAccounts.list(request)).resolves.toEqual({ service_accounts: [] });
+      await expect(serviceAccounts.list(request)).resolves.toEqual({ serviceAccounts: [] });
 
       expect(credentialStore.getMetadata).toHaveBeenCalledWith([]);
     });
@@ -771,10 +854,10 @@ describe('EsServiceAccounts', () => {
       expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
     });
 
-    it('rejects with a 502 when Elasticsearch reports an unrecognized shape', async () => {
-      esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
-        service_accounts: [{ username: 'kibana/a', type: 'user_managed' }],
-      });
+    it('rejects with a 502 when the envelope itself is unrecognized', async () => {
+      // A broken envelope is the one shape there is no page to salvage from, unlike a single
+      // account Kibana cannot read.
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce({ accounts: [] });
 
       await expect(serviceAccounts.list(request)).rejects.toMatchObject({
         output: { statusCode: 502 },
@@ -782,14 +865,72 @@ describe('EsServiceAccounts', () => {
       expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('unrecognized shape'));
     });
 
-    it('rejects with a 502 when Elasticsearch reports a principal that is not namespace/service', async () => {
+    it('skips an account it cannot read and still reports the rest of the page', async () => {
       esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
-        service_accounts: [queried('no-namespace')],
+        service_accounts: [
+          queried('no-namespace'),
+          { username: 'kibana/no-roles', type: 'user_managed' },
+          queried('kibana/nightshift-relay'),
+        ],
       });
 
-      await expect(serviceAccounts.list(request)).rejects.toMatchObject({
+      const result = await serviceAccounts.list(request);
+
+      // Two unreadable accounts cost those accounts, not the directory.
+      expect(result.serviceAccounts.map(({ id }) => id)).toEqual(['kibana/nightshift-relay']);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Skipping service account [no-namespace]')
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Skipping a service account Elasticsearch reported in an unrecognized shape'
+        )
+      );
+      // The credential join only ever sees the accounts that survived.
+      expect(credentialStore.getMetadata).toHaveBeenCalledWith(['kibana/nightshift-relay']);
+    });
+
+    it('takes the cursor from the raw page, so a skipped entry does not rewind paging', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+        service_accounts: [
+          queried('kibana/a'),
+          // Unreadable, and the last account of the page: the cursor still has to step over it.
+          { username: 'kibana/b', type: 'user_managed' },
+          queried('kibana/c'),
+        ],
+      });
+
+      const result = await serviceAccounts.list(request, { limit: 2 });
+
+      expect(result.serviceAccounts.map(({ id }) => id)).toEqual(['kibana/a']);
+      expect(result.nextPage).toBe('kibana/b');
+    });
+
+    it.each([
+      ['no username at all', { type: 'user_managed' }],
+      ['a username this backend would refuse back', queried('no-namespace')],
+    ])('rejects with a 502 when the last account of the page has %s', async (_, lastAccount) => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+        service_accounts: [queried('kibana/a'), lastAccount, queried('kibana/c')],
+      });
+
+      // Every cursor this backend hands out has to be one it will accept back, and silently
+      // ending the directory here would hide every account after this one.
+      await expect(serviceAccounts.list(request, { limit: 2 })).rejects.toMatchObject({
         output: { statusCode: 502 },
       });
+    });
+
+    it('hands out a cursor its own `after` guard accepts', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValue({
+        service_accounts: [queried('kibana/a'), queried('kibana/b')],
+      });
+
+      const { nextPage } = await serviceAccounts.list(request, { limit: 1 });
+
+      await expect(serviceAccounts.list(request, { limit: 1, after: nextPage })).resolves.toEqual(
+        expect.objectContaining({ serviceAccounts: expect.any(Array) })
+      );
     });
 
     it('rejects with a 403 when security features are disabled in Elasticsearch', async () => {
@@ -830,11 +971,18 @@ describe('EsServiceAccounts', () => {
             ACCOUNT_ID,
             {
               createdAt: '2026-09-21T00:00:00.000Z',
-              createdBy: { type: 'user' as const, username: 'elastic' },
+              createdBy: {
+                type: 'user' as const,
+                username: 'elastic',
+                userProfileId: 'profile-uid',
+              },
             },
           ],
         ])
       );
+      userProfiles.bulkGet.mockResolvedValue([
+        { uid: 'profile-uid', user: { username: 'elastic', full_name: 'Ada Lovelace' } },
+      ]);
 
       await expect(serviceAccounts.get(request, ACCOUNT_ID)).resolves.toEqual({
         id: ACCOUNT_ID,
@@ -843,7 +991,12 @@ describe('EsServiceAccounts', () => {
         enabled: true,
         hasCredential: true,
         createdAt: '2026-09-21T00:00:00.000Z',
-        createdBy: { type: 'user', username: 'elastic' },
+        createdBy: {
+          type: 'user',
+          username: 'elastic',
+          userProfileId: 'profile-uid',
+          displayName: 'Ada Lovelace',
+        },
       });
 
       expect(mockCheckPrivileges.globally).toHaveBeenCalledWith({

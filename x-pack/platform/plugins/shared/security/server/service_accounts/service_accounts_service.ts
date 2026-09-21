@@ -28,6 +28,7 @@ import { UiamServiceAccounts } from './uiam_service_accounts';
 import type { SecurityLicense } from '../../common';
 import type { ConfigType } from '../config';
 import type { UiamServicePublic } from '../uiam';
+import type { UserProfileServiceStartInternal } from '../user_profile';
 
 export interface ServiceAccountsServiceStartParams {
   config: ConfigType;
@@ -45,6 +46,8 @@ export interface ServiceAccountsServiceStartParams {
   canEncrypt: boolean;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
   getCurrentUserProfileId: (request: KibanaRequest) => Promise<string | null>;
+  /** Resolves the creators the Elasticsearch directory reports names for. */
+  userProfiles: Pick<UserProfileServiceStartInternal, 'bulkGet'>;
   getSpaceId: (request: KibanaRequest) => string;
 }
 
@@ -68,6 +71,7 @@ export class ServiceAccountsService {
     canEncrypt,
     getCurrentUser,
     getCurrentUserProfileId,
+    userProfiles,
     getSpaceId,
   }: ServiceAccountsServiceStartParams): ServiceAccountsServiceStart | null {
     if (!config.serviceAccounts.enabled) {
@@ -157,6 +161,7 @@ export class ServiceAccountsService {
         canEncrypt,
         getCurrentUser,
         getCurrentUserProfileId,
+        userProfiles,
       }),
       // Workload binding is a UIAM-only capability until the Elasticsearch token exchange
       // lands; see https://github.com/elastic/kibana/issues/284466.

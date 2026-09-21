@@ -8,6 +8,15 @@
 import type { ServiceAccountWorkloadBinder } from '@kbn/core-security-common';
 
 /**
+ * The principal that created an account. The binder's fields identify it durably; `displayName`
+ * is what to show, when the backend can say. `userProfileId` is included so the UI can link to
+ * the person where a profile exists.
+ */
+export type ServiceAccountDirectoryCreator = ServiceAccountWorkloadBinder & {
+  displayName?: string;
+};
+
+/**
  * A service account as the directory routes report it, in one shape for every backend. Where a
  * backend cannot answer a question, the field holds a constant rather than going missing, so the
  * UI renders the same way on both.
@@ -30,16 +39,16 @@ export interface ServiceAccountDirectoryEntry {
    */
   hasCredential: boolean;
   /** The principal that created the account, when the backend records one. */
-  createdBy?: ServiceAccountWorkloadBinder;
+  createdBy?: ServiceAccountDirectoryCreator;
   /** ISO-8601 creation time, when the backend records one. */
   createdAt?: string;
 }
 
 /**
- * One page of the directory. `next_page` is the cursor to send back as `after` for the next
- * page, and is absent on the last one.
+ * One page of the directory. `nextPage` is the cursor to send back as `after` for the next page,
+ * and is absent on the last one.
  */
 export interface ListServiceAccountsResponse {
-  service_accounts: ServiceAccountDirectoryEntry[];
-  next_page?: string;
+  serviceAccounts: ServiceAccountDirectoryEntry[];
+  nextPage?: string;
 }

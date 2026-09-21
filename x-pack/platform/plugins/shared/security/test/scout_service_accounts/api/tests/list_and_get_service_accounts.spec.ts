@@ -8,6 +8,7 @@
 import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
+import { ES_SERVICE_ACCOUNT_NAMESPACE } from '../../../../common/service_accounts';
 import {
   deleteServiceAccounts,
   type ServiceAccountPrincipal,
@@ -26,8 +27,6 @@ const SERVICE_ACCOUNT_ENDPOINT = 'internal/security/service_account';
  * server config ever stop disabling `server.restrictInternalApis`.
  */
 const REQUEST_HEADERS = { 'kbn-xsrf': 'true', 'x-elastic-internal-origin': 'kibana' };
-/** The namespace Kibana creates accounts under, `ES_SERVICE_ACCOUNT_NAMESPACE`. */
-const KIBANA_NAMESPACE = 'kibana';
 /** A namespace Kibana never writes to, for accounts created straight through Elasticsearch. */
 const FOREIGN_NAMESPACE = 'scout';
 /** Enough pages to walk every account a shared cluster could plausibly hold, and no more. */
@@ -38,19 +37,24 @@ const uniqueName = (prefix: string) => `${prefix}-${Date.now()}-${Math.floor(Mat
 
 const getPath = (id: string) => `${SERVICE_ACCOUNT_ENDPOINT}/${encodeURIComponent(id)}`;
 
+interface DirectoryCreator {
+  type: string;
+  displayName?: string;
+}
+
 interface DirectoryEntry {
   id: string;
   name: string;
   roles: string[];
   enabled: boolean;
   hasCredential: boolean;
-  createdBy?: unknown;
+  createdBy?: DirectoryCreator;
   createdAt?: string;
 }
 
 interface ListResponse {
-  service_accounts: DirectoryEntry[];
-  next_page?: string;
+  serviceAccounts: DirectoryEntry[];
+  nextPage?: string;
 }
 
 apiTest.describe('List and get Elasticsearch service accounts', { tag: LOCAL_ONLY }, () => {
@@ -80,6 +84,9 @@ apiTest.describe('List and get Elasticsearch service accounts', { tag: LOCAL_ONL
       hasCredential: true,
     });
     expect(createdBy).toMatchObject({ type: 'user' });
+    // The SAML admin has a user profile, so Kibana resolves the creator's name server-side
+    // rather than handing the UI an id to look up.
+    expect(typeof createdBy?.displayName).toBe('string');
     expect(typeof createdAt).toBe('string');
   };
 
@@ -87,7 +94,7 @@ apiTest.describe('List and get Elasticsearch service accounts', { tag: LOCAL_ONL
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
     adminHeaders = { ...cookieHeader, ...REQUEST_HEADERS };
 
-    kibanaManaged = { namespace: KIBANA_NAMESPACE, name: uniqueName('directory') };
+    kibanaManaged = { namespace: ES_SERVICE_ACCOUNT_NAMESPACE, name: uniqueName('directory') };
     created.push(kibanaManaged);
     const response = await apiClient.post(SERVICE_ACCOUNT_ENDPOINT, {
       headers: adminHeaders,
@@ -119,7 +126,7 @@ apiTest.describe('List and get Elasticsearch service accounts', { tag: LOCAL_ONL
       });
 
       expect(response.statusCode).toBe(200);
-      const { service_accounts: accounts } = response.body as ListResponse;
+      const { serviceAccounts: accounts } = response.body as ListResponse;
 
       const managed = accounts.find(({ id }) => id === idOf(kibanaManaged));
       expectKibanaManagedEntry(managed);
@@ -153,15 +160,15 @@ apiTest.describe('List and get Elasticsearch service accounts', { tag: LOCAL_ONL
 
       expect(response.statusCode).toBe(200);
       const body = response.body as ListResponse;
-      expect(body.service_accounts.length).toBeLessThanOrEqual(1);
-      seen.push(...body.service_accounts.map(({ id }) => id));
+      expect(body.serviceAccounts.length).toBeLessThanOrEqual(1);
+      seen.push(...body.serviceAccounts.map(({ id }) => id));
 
-      if (body.next_page === undefined) {
+      if (body.nextPage === undefined) {
         break;
       }
       // The cursor is the last principal on the page, and the pages are sorted by principal.
-      expect(body.next_page).toBe(body.service_accounts[0].id);
-      after = body.next_page;
+      expect(body.nextPage).toBe(body.serviceAccounts[0].id);
+      after = body.nextPage;
     }
 
     expect(seen.filter((id) => id === idOf(kibanaManaged))).toHaveLength(1);
@@ -196,7 +203,10 @@ apiTest.describe('List and get Elasticsearch service accounts', { tag: LOCAL_ONL
   });
 
   apiTest('answers 404 for an unknown account and for a built-in one', async ({ apiClient }) => {
-    for (const id of [`${KIBANA_NAMESPACE}/${uniqueName('missing')}`, 'elastic/kibana']) {
+    for (const id of [
+      `${ES_SERVICE_ACCOUNT_NAMESPACE}/${uniqueName('missing')}`,
+      'elastic/kibana',
+    ]) {
       const response = await apiClient.get(getPath(id), {
         headers: adminHeaders,
         responseType: 'json',
@@ -215,6 +225,9 @@ apiTest.describe('List and get Elasticsearch service accounts', { tag: LOCAL_ONL
     }
   });
 
+  // Stateful only: the `after` case is the Elasticsearch backend refusing a cursor it could not
+  // have issued. UIAM validates its own cursors and answers a bad one itself, so this assertion
+  // does not carry over to a serverless deployment.
   apiTest('rejects a page size outside 1 to 100 and a foreign cursor', async ({ apiClient }) => {
     for (const query of ['?limit=0', '?limit=101', '?after=not-a-principal']) {
       const response = await apiClient.get(`${SERVICE_ACCOUNT_ENDPOINT}${query}`, {
@@ -248,7 +261,7 @@ apiTest.describe('List and get Elasticsearch service accounts', { tag: LOCAL_ONL
       // Registered up front even though the request is expected to fail: if the authorization
       // check ever regresses, the account it creates has to be cleaned up like any other.
       const name = uniqueName('read-only');
-      created.push({ namespace: KIBANA_NAMESPACE, name });
+      created.push({ namespace: ES_SERVICE_ACCOUNT_NAMESPACE, name });
       const create = await apiClient.post(SERVICE_ACCOUNT_ENDPOINT, {
         headers,
         responseType: 'json',

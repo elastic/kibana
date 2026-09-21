@@ -20,7 +20,14 @@ export const createServiceAccountBodySchema = createServiceAccountParamsSchema
   .strict();
 
 export const listServiceAccountsQuerySchema = z.object({
-  limit: z.coerce.number().int().min(1).max(SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE).optional(),
+  // Defaulted rather than left optional, so the page size a caller gets is decided here and not
+  // again in each backend.
+  limit: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE)
+    .default(SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE),
   after: z.string().min(1).max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH).optional(),
 });
 

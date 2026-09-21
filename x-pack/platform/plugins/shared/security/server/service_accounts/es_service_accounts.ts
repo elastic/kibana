@@ -14,7 +14,11 @@ import type {
   KibanaRequest,
   Logger,
 } from '@kbn/core/server';
-import type { CreateServiceAccountParams, ServiceAccount } from '@kbn/core-security-server';
+import type {
+  CreateServiceAccountParams,
+  ServiceAccount,
+  ServiceAccountWorkloadBinder,
+} from '@kbn/core-security-server';
 import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
 import { z } from '@kbn/zod';
 
@@ -28,8 +32,10 @@ import type {
 import { parseEsServiceAccountId } from './es_service_account_id';
 import type { ListServiceAccountsParams, ServiceAccountsBackend } from './types';
 import type { SecurityLicense } from '../../common';
+import { getUserDisplayName } from '../../common';
 import type {
   ListServiceAccountsResponse,
+  ServiceAccountDirectoryCreator,
   ServiceAccountDirectoryEntry,
 } from '../../common/service_accounts';
 import {
@@ -45,6 +51,7 @@ import {
 } from '../../common/service_accounts';
 import { getDetailedErrorMessage } from '../errors';
 import { securityTelemetry } from '../otel/instrumentation';
+import type { UserProfileServiceStartInternal } from '../user_profile';
 
 /**
  * The discriminator on an account Elasticsearch reports, which decides whether the account is one
@@ -77,8 +84,22 @@ const queriedAccountSchema = accountEntrySchema.extend({
   type: z.literal('user_managed'),
 });
 
+/**
+ * The envelope only. Its entries are deliberately `unknown` here and parsed one at a time in
+ * {@link EsServiceAccounts.list}, so that one account Elasticsearch reports oddly cannot make the
+ * whole directory unreadable. One more than the page is allowed through, for the row that answers
+ * "is there another page".
+ */
 const queryServiceAccountsResponseSchema = z.object({
-  service_accounts: z.array(queriedAccountSchema),
+  service_accounts: z.array(z.unknown()).max(SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE + 1),
+});
+
+/**
+ * The one field of a raw row the cursor is taken from, read without the rest of the account:
+ * paging has to continue over an entry the page itself skipped.
+ */
+const cursorSchema = z.object({
+  username: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH),
 });
 
 /** An Elasticsearch user-managed service account, as Elasticsearch reports it. */
@@ -91,20 +112,51 @@ interface ElasticsearchServiceAccount {
 }
 
 /**
+ * Projects the stored binder onto the creator the directory reports, field by field rather than
+ * by spreading it: the binder comes off a saved object, and only the fields named here belong in
+ * an API response.
+ */
+const toDirectoryCreator = (
+  binder: ServiceAccountWorkloadBinder,
+  displayNames: Map<string, string>
+): ServiceAccountDirectoryCreator => {
+  if (binder.type === 'service_account') {
+    return { type: 'service_account', serviceAccountId: binder.serviceAccountId };
+  }
+
+  const { userProfileId } = binder;
+  const displayName = userProfileId === undefined ? undefined : displayNames.get(userProfileId);
+  const resolved = {
+    ...(userProfileId !== undefined ? { userProfileId } : {}),
+    ...(displayName !== undefined ? { displayName } : {}),
+  };
+
+  return binder.type === 'user'
+    ? { type: 'user', username: binder.username, ...resolved }
+    : { type: 'api_key', apiKeyId: binder.apiKeyId, variant: binder.variant, ...resolved };
+};
+
+/**
  * Joins an account with the credential Kibana holds for it, if any. An account created straight
  * through the Elasticsearch API has no credential here, and so nothing Kibana can bind it with:
  * `hasCredential` is what lets the UI say so instead of failing at bind time.
  */
 const toDirectoryEntry = (
   { id, name, roles, enabled }: ElasticsearchServiceAccount,
-  credential: ServiceAccountCredentialMetadata | undefined
+  credential: ServiceAccountCredentialMetadata | undefined,
+  displayNames: Map<string, string>
 ): ServiceAccountDirectoryEntry => ({
   id,
   name,
   roles,
   enabled,
   hasCredential: credential !== undefined,
-  ...(credential ? { createdBy: credential.createdBy, createdAt: credential.createdAt } : {}),
+  ...(credential
+    ? {
+        createdBy: toDirectoryCreator(credential.createdBy, displayNames),
+        createdAt: credential.createdAt,
+      }
+    : {}),
 });
 
 export interface EsServiceAccountsOptions {
@@ -117,6 +169,8 @@ export interface EsServiceAccountsOptions {
   canEncrypt: boolean;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
   getCurrentUserProfileId: (request: KibanaRequest) => Promise<string | null>;
+  /** Resolves the creators the directory reports names for. Only ever read from, never written. */
+  userProfiles: Pick<UserProfileServiceStartInternal, 'bulkGet'>;
 }
 
 /**
@@ -135,6 +189,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
   private readonly canEncrypt: boolean;
   private readonly getCurrentUser: EsServiceAccountsOptions['getCurrentUser'];
   private readonly getCurrentUserProfileId: EsServiceAccountsOptions['getCurrentUserProfileId'];
+  private readonly userProfiles: EsServiceAccountsOptions['userProfiles'];
 
   constructor({
     logger,
@@ -145,6 +200,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     canEncrypt,
     getCurrentUser,
     getCurrentUserProfileId,
+    userProfiles,
   }: EsServiceAccountsOptions) {
     this.logger = logger;
     this.license = license;
@@ -154,6 +210,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     this.canEncrypt = canEncrypt;
     this.getCurrentUser = getCurrentUser;
     this.getCurrentUserProfileId = getCurrentUserProfileId;
+    this.userProfiles = userProfiles;
   }
 
   async create(
@@ -300,7 +357,9 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
 
   /**
    * Lists every user-managed account in the cluster, whichever namespace it lives in, sorted by
-   * principal. The cursor is the last principal on the page, which `search_after` resumes from.
+   * principal. The cursor is the principal of the last account Elasticsearch reported for the
+   * page, which `search_after` resumes from — the last one reported, not the last one returned,
+   * so that an account this page skipped is stepped over rather than served again.
    */
   async list(
     request: KibanaRequest,
@@ -352,31 +411,98 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       );
     }
 
-    const accounts = parsed.data.service_accounts
-      .slice(0, limit)
-      .map(({ username, roles, enabled }) => {
-        const principal = parseEsServiceAccountId(username);
-        if (!principal) {
-          // Elasticsearch enforces the same naming rules, so this is a contract change, not data.
-          this.logger.error(
-            `Elasticsearch reported service account [${username}] with an unrecognized principal`
-          );
-          throw Boom.badGateway(
-            'Cannot list service accounts: Elasticsearch reported an unrecognized principal.'
-          );
-        }
-        return { id: username, ...principal, roles, enabled };
-      });
+    const rawAccounts = parsed.data.service_accounts;
+
+    // Each account is parsed on its own, and one Kibana cannot read is skipped rather than taken
+    // as a reason to refuse the page. Same call `readAccount` makes for a single account, where
+    // an account type Kibana does not know resolves to `undefined`: an oddity in one account must
+    // not make the whole directory unreadable.
+    const accounts = rawAccounts.slice(0, limit).flatMap((rawAccount) => {
+      const account = queriedAccountSchema.safeParse(rawAccount);
+      if (!account.success) {
+        this.logger.warn(
+          `Skipping a service account Elasticsearch reported in an unrecognized shape: ${account.error.message}`
+        );
+        return [];
+      }
+
+      const { username, roles, enabled } = account.data;
+      const principal = parseEsServiceAccountId(username);
+      if (!principal) {
+        // Elasticsearch enforces the same naming rules, so this is a contract change, not data.
+        this.logger.warn(
+          `Skipping service account [${username}], which Elasticsearch reported with an unrecognized principal`
+        );
+        return [];
+      }
+
+      return [{ id: username, ...principal, roles, enabled }];
+    });
 
     const credentials = await this.credentialStore.getMetadata(accounts.map(({ id }) => id));
+    const displayNames = await this.resolveCreatorNames(credentials.values());
 
-    const hasMore = parsed.data.service_accounts.length > limit;
-    return {
-      service_accounts: accounts.map((account) =>
-        toDirectoryEntry(account, credentials.get(account.id))
-      ),
-      ...(hasMore ? { next_page: accounts[accounts.length - 1].id } : {}),
-    };
+    const serviceAccounts = accounts.map((account) =>
+      toDirectoryEntry(account, credentials.get(account.id), displayNames)
+    );
+
+    if (rawAccounts.length <= limit) {
+      return { serviceAccounts };
+    }
+
+    // The cursor comes off the raw page rather than the entries above, so that skipping an entry
+    // cannot rewind paging over everything that followed it. It is held to the rule the `after`
+    // guard above applies, because this is the value that comes back through it: every cursor
+    // this backend hands out has to be one it will accept.
+    const cursor = cursorSchema.safeParse(rawAccounts[limit - 1]);
+    if (!cursor.success || parseEsServiceAccountId(cursor.data.username) === undefined) {
+      this.logger.error(
+        `Elasticsearch reported the last service account of the page without a usable cursor: ` +
+          `${JSON.stringify(rawAccounts[limit - 1])}`
+      );
+      throw Boom.badGateway(
+        'Cannot list service accounts: Elasticsearch reported a page that cannot be continued.'
+      );
+    }
+
+    return { serviceAccounts, nextPage: cursor.data.username };
+  }
+
+  /**
+   * Resolves the display names of the profiles behind a page of credentials, keyed by profile id.
+   *
+   * Best effort: a directory read must not fail because the profile index is unavailable, so a
+   * lookup that throws is logged and the page goes out with the ids alone. Profiles that do not
+   * come back are simply absent from the map.
+   */
+  private async resolveCreatorNames(
+    credentials: Iterable<ServiceAccountCredentialMetadata>
+  ): Promise<Map<string, string>> {
+    const uids = new Set<string>();
+    for (const { createdBy } of credentials) {
+      if (createdBy.type !== 'service_account' && createdBy.userProfileId !== undefined) {
+        uids.add(createdBy.userProfileId);
+      }
+    }
+
+    const displayNames = new Map<string, string>();
+    if (uids.size === 0) {
+      return displayNames;
+    }
+
+    try {
+      for (const { uid, user } of await this.userProfiles.bulkGet({ uids })) {
+        displayNames.set(uid, getUserDisplayName(user));
+      }
+    } catch (e) {
+      this.logger.warn(
+        `Could not resolve the creators of the listed service accounts: ${getDetailedErrorMessage(
+          e
+        )}`
+      );
+    }
+
+    return displayNames;
   }
 
   async get(request: KibanaRequest, id: string): Promise<ServiceAccountDirectoryEntry> {
@@ -413,7 +539,8 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     }
 
     const credentials = await this.credentialStore.getMetadata([id]);
-    return toDirectoryEntry(account, credentials.get(id));
+    const displayNames = await this.resolveCreatorNames(credentials.values());
+    return toDirectoryEntry(account, credentials.get(id), displayNames);
   }
 
   // See https://github.com/elastic/kibana/issues/284466.

@@ -23,7 +23,10 @@ import { ServiceAccountTokenExchangeError } from './token_exchange_error';
 import { UiamServiceAccounts } from './uiam_service_accounts';
 import type { SecurityLicense } from '../../common';
 import { licenseMock } from '../../common/licensing/index.mock';
-import { SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH } from '../../common/service_accounts';
+import {
+  SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE,
+  SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
+} from '../../common/service_accounts';
 import type { UiamServiceAccount, UiamServicePublic } from '../uiam';
 import { uiamServiceMock } from '../uiam/uiam_service.mock';
 
@@ -318,7 +321,7 @@ describe('UiamServiceAccounts', () => {
       roles: [],
       enabled: true,
       hasCredential: true,
-      createdBy: { type: 'user' as const, username: 'user-id' },
+      createdBy: { type: 'user' as const, username: 'user-id', displayName: 'Ada Lovelace' },
     };
 
     it('calls UIAM as Kibana, not as the user, and maps the page onto directory entries', async () => {
@@ -326,13 +329,17 @@ describe('UiamServiceAccounts', () => {
 
       const result = await serviceAccounts.list(createMockRequest('Bearer essu_my_token'));
 
-      expect(result).toEqual({ service_accounts: [expectedEntry] });
-      expect(result).not.toHaveProperty('next_page');
+      expect(result).toEqual({ serviceAccounts: [expectedEntry] });
+      expect(result).not.toHaveProperty('nextPage');
       expect(mockUiam.listServiceAccounts).toHaveBeenCalledTimes(1);
-      expect(mockUiam.listServiceAccounts).toHaveBeenCalledWith({});
+      // The page size is defaulted here as well as at the route, so a programmatic caller and an
+      // HTTP one ask UIAM for the same page.
+      expect(mockUiam.listServiceAccounts).toHaveBeenCalledWith({
+        limit: SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE,
+      });
     });
 
-    it('forwards limit and after, and passes through the next_page cursor', async () => {
+    it('forwards limit and after, and passes through the nextPage cursor', async () => {
       mockUiam.listServiceAccounts.mockResolvedValue({
         service_accounts: [listedAccount],
         next_page: 'next',
@@ -341,9 +348,19 @@ describe('UiamServiceAccounts', () => {
 
       await expect(
         serviceAccounts.list(createMockRequest('Bearer essu_my_token'), params)
-      ).resolves.toEqual({ service_accounts: [expectedEntry], next_page: 'next' });
+      ).resolves.toEqual({ serviceAccounts: [expectedEntry], nextPage: 'next' });
 
       expect(mockUiam.listServiceAccounts).toHaveBeenCalledWith(params);
+    });
+
+    it('omits the display name when UIAM reports the creator without a name', async () => {
+      mockUiam.listServiceAccounts.mockResolvedValue({
+        service_accounts: [{ ...validResponse, creator: { type: 'user' as const, id: 'user-id' } }],
+      });
+
+      const result = await serviceAccounts.list(createMockRequest('Bearer essu_my_token'));
+
+      expect(result.serviceAccounts[0].createdBy).toEqual({ type: 'user', username: 'user-id' });
     });
 
     it('maps an api-key creator onto an api_key binder', async () => {
@@ -358,10 +375,11 @@ describe('UiamServiceAccounts', () => {
 
       const result = await serviceAccounts.list(createMockRequest('Bearer essu_my_token'));
 
-      expect(result.service_accounts[0].createdBy).toEqual({
+      expect(result.serviceAccounts[0].createdBy).toEqual({
         type: 'api_key',
         apiKeyId: 'api-key-id',
         variant: 'uiam',
+        displayName: 'nightshift key',
       });
     });
 
@@ -405,14 +423,19 @@ describe('UiamServiceAccounts', () => {
       ).rejects.toThrowError('Error occurred during service account listing');
     });
 
-    it('rejects when an account is missing creator', async () => {
+    it('skips an account missing its creator and still reports the rest of the page', async () => {
       mockUiam.listServiceAccounts.mockResolvedValue({
-        service_accounts: [validResponse],
+        service_accounts: [validResponse, listedAccount],
+        next_page: 'next',
       } as never);
 
-      await expect(
-        serviceAccounts.list(createMockRequest('Bearer essu_my_token'))
-      ).rejects.toThrowError('Error occurred during service account listing');
+      const result = await serviceAccounts.list(createMockRequest('Bearer essu_my_token'));
+
+      // One unreadable account costs that account, not the directory.
+      expect(result).toEqual({ serviceAccounts: [expectedEntry], nextPage: 'next' });
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Skipping a service account UIAM reported in an unrecognized shape')
+      );
     });
 
     it("propagates a 403 when UIAM refuses Kibana's assumable_by", async () => {
@@ -456,7 +479,7 @@ describe('UiamServiceAccounts', () => {
         roles: [],
         enabled: true,
         hasCredential: true,
-        createdBy: { type: 'user', username: 'user-id' },
+        createdBy: { type: 'user', username: 'user-id', displayName: 'Ada Lovelace' },
       });
 
       expect(mockUiam.getServiceAccount).toHaveBeenCalledTimes(1);
@@ -483,6 +506,7 @@ describe('UiamServiceAccounts', () => {
         type: 'api_key',
         apiKeyId: 'api-key-id',
         variant: 'uiam',
+        displayName: 'nightshift key',
       });
     });
 

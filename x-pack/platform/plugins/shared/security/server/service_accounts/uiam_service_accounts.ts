@@ -8,11 +8,7 @@
 import Boom from '@hapi/boom';
 
 import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
-import type {
-  CreateServiceAccountParams,
-  ServiceAccount,
-  ServiceAccountWorkloadBinder,
-} from '@kbn/core-security-server';
+import type { CreateServiceAccountParams, ServiceAccount } from '@kbn/core-security-server';
 import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
 import { z } from '@kbn/zod';
 
@@ -31,9 +27,11 @@ import type {
 import type { SecurityLicense } from '../../common';
 import type {
   ListServiceAccountsResponse,
+  ServiceAccountDirectoryCreator,
   ServiceAccountDirectoryEntry,
 } from '../../common/service_accounts';
 import {
+  SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE,
   SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
   SERVICE_ACCOUNT_TOKEN_MAX_LENGTH,
   serviceAccountIdSchema,
@@ -78,19 +76,35 @@ const serviceAccountDetailsSchema = serviceAccountSchema.extend({
   creator: serviceAccountCreatorSchema,
 });
 
+/**
+ * The envelope only. Its entries are deliberately `unknown` here and parsed one at a time in
+ * {@link UiamServiceAccounts.list}, so that one account UIAM reports oddly cannot make the whole
+ * directory unreadable.
+ */
 const listServiceAccountsResponseSchema = z.object({
-  service_accounts: z.array(serviceAccountDetailsSchema),
+  service_accounts: z.array(z.unknown()).max(SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE),
   next_page: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH).optional(),
 });
 
 /**
  * UIAM identifies a user by the numeric id that is also their Kibana username on serverless, so
- * the id maps straight onto the binder's `username`.
+ * the id maps straight onto the binder's `username`. That id is all the binder can say, which is
+ * why the creator's own name comes along as `displayName`: nothing downstream could resolve it
+ * from the id.
  */
-const toCreatedBy = (creator: UiamServiceAccountCreator): ServiceAccountWorkloadBinder =>
-  creator.type === 'user'
-    ? { type: 'user', username: creator.id }
-    : { type: 'api_key', apiKeyId: creator.id, variant: 'uiam' };
+const toCreatedBy = (creator: UiamServiceAccountCreator): ServiceAccountDirectoryCreator => {
+  if (creator.type === 'user') {
+    const displayName = [creator.first_name, creator.last_name].filter(Boolean).join(' ');
+    return { type: 'user', username: creator.id, ...(displayName ? { displayName } : {}) };
+  }
+
+  return {
+    type: 'api_key',
+    apiKeyId: creator.id,
+    variant: 'uiam',
+    ...(creator.description ? { displayName: creator.description } : {}),
+  };
+};
 
 /**
  * Narrows a UIAM account to the directory entry. UIAM has no disabled state and reports no role
@@ -263,7 +277,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
 
   async list(
     request: KibanaRequest,
-    params: ListServiceAccountsParams = {}
+    { limit = SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE, after }: ListServiceAccountsParams = {}
   ): Promise<ListServiceAccountsResponse> {
     if (!this.license.isEnabled()) {
       throw Boom.forbidden(
@@ -282,19 +296,42 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     this.logger.debug('Attempting to list service accounts');
 
     try {
-      const result = await this.uiam.listServiceAccounts(params);
+      const result = await this.uiam.listServiceAccounts({
+        limit,
+        // Forwarded unchecked: the cursor's shape is UIAM's, not Kibana's. UIAM validates it as
+        // an id of 1 to 100 characters and answers a bad one with its own 400, which
+        // `#parseUiamResponse` turns into the Boom this method propagates.
+        ...(after !== undefined ? { after } : {}),
+      });
       const parsed = listServiceAccountsResponseSchema.safeParse(result);
       if (!parsed.success) {
         this.logger.error(
           `Service account list payload from UIAM failed validation: ${parsed.error.message}`
         );
-        throw new Error('Error occurred during service account listing.');
+        throw Boom.badGateway('Error occurred during service account listing.');
       }
 
-      const { service_accounts: serviceAccounts, next_page: nextPage } = parsed.data;
+      const { service_accounts: rawAccounts, next_page: nextPage } = parsed.data;
+
+      // Each account is parsed on its own, and one Kibana cannot read is skipped rather than
+      // taken as a reason to refuse the page. Same call `readAccount` makes on the Elasticsearch
+      // backend, which answers `undefined` for an account type it does not know: an oddity in one
+      // account must not make the whole directory unreadable.
+      const serviceAccounts = rawAccounts.flatMap((account) => {
+        const details = serviceAccountDetailsSchema.safeParse(account);
+        if (!details.success) {
+          this.logger.warn(
+            `Skipping a service account UIAM reported in an unrecognized shape: ${details.error.message}`
+          );
+          return [];
+        }
+
+        return [toDirectoryEntry(details.data)];
+      });
+
       return {
-        service_accounts: serviceAccounts.map(toDirectoryEntry),
-        ...(nextPage !== undefined ? { next_page: nextPage } : {}),
+        serviceAccounts,
+        ...(nextPage !== undefined ? { nextPage } : {}),
       };
     } catch (e) {
       this.logger.error(`Failed to list service accounts: ${getDetailedErrorMessage(e)}`);
@@ -326,7 +363,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
         this.logger.error(
           `Service account payload from UIAM failed validation: ${parsed.error.message}`
         );
-        throw new Error('Error occurred during service account retrieval.');
+        throw Boom.badGateway('Error occurred during service account retrieval.');
       }
 
       return toDirectoryEntry(parsed.data);

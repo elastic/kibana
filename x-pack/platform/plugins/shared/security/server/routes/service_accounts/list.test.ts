@@ -107,21 +107,29 @@ describe('List service accounts route', () => {
 
   it('lists service accounts assumable by this Kibana', async () => {
     const { routeHandler, serviceAccounts } = setup();
-    serviceAccounts.backend.list.mockResolvedValue({ service_accounts: [serviceAccount] });
+    serviceAccounts.backend.list.mockResolvedValue({ serviceAccounts: [serviceAccount] });
 
-    const response = await callRoute(routeHandler);
+    // The query is run through the schema the way core would, so the defaulted page size the
+    // backend actually receives is what is asserted below.
+    const response = await routeHandler(
+      getMockContext(),
+      httpServerMock.createKibanaRequest({ query: listServiceAccountsQuerySchema.parse({}) }),
+      kibanaResponseFactory
+    );
 
     expect(response.status).toBe(200);
-    expect(response.payload).toEqual({ service_accounts: [serviceAccount] });
+    expect(response.payload).toEqual({ serviceAccounts: [serviceAccount] });
     expect(serviceAccounts.backend.list).toHaveBeenCalledTimes(1);
-    expect(serviceAccounts.backend.list).toHaveBeenCalledWith(expect.anything(), {});
+    expect(serviceAccounts.backend.list).toHaveBeenCalledWith(expect.anything(), {
+      limit: SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE,
+    });
   });
 
-  it('forwards limit and after to the backend and returns its next_page cursor', async () => {
+  it('forwards limit and after to the backend and returns its nextPage cursor', async () => {
     const { routeHandler, serviceAccounts } = setup();
     serviceAccounts.backend.list.mockResolvedValue({
-      service_accounts: [serviceAccount],
-      next_page: 'next-page',
+      serviceAccounts: [serviceAccount],
+      nextPage: 'next-page',
     });
 
     const response = await routeHandler(
@@ -134,8 +142,8 @@ describe('List service accounts route', () => {
 
     expect(response.status).toBe(200);
     expect(response.payload).toEqual({
-      service_accounts: [serviceAccount],
-      next_page: 'next-page',
+      serviceAccounts: [serviceAccount],
+      nextPage: 'next-page',
     });
     expect(serviceAccounts.backend.list).toHaveBeenCalledWith(expect.anything(), {
       limit: 10,
@@ -175,8 +183,10 @@ describe('List service accounts route', () => {
   });
 
   describe('query schema', () => {
-    it('accepts omitted pagination fields', () => {
-      expect(listServiceAccountsQuerySchema.parse({})).toEqual({});
+    it('defaults the page size when it is omitted', () => {
+      expect(listServiceAccountsQuerySchema.parse({})).toEqual({
+        limit: SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE,
+      });
     });
 
     it('coerces limit from a query string', () => {
@@ -196,7 +206,9 @@ describe('List service accounts route', () => {
     });
 
     it('drops unknown query parameters such as q', () => {
-      expect(listServiceAccountsQuerySchema.parse({ q: 'name:nightshift' })).toEqual({});
+      expect(listServiceAccountsQuerySchema.parse({ q: 'name:nightshift' })).toEqual({
+        limit: SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE,
+      });
     });
   });
 });

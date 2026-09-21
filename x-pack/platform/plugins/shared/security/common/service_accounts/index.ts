@@ -25,4 +25,8 @@ export {
   serviceAccountRoleNameSchema,
   serviceAccountRolesSchema,
 } from './schemas';
-export type { ListServiceAccountsResponse, ServiceAccountDirectoryEntry } from './types';
+export type {
+  ListServiceAccountsResponse,
+  ServiceAccountDirectoryCreator,
+  ServiceAccountDirectoryEntry,
+} from './types';

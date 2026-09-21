@@ -10,14 +10,13 @@ import type { Client } from '@elastic/elasticsearch';
 import type { ScoutTestConfig } from '@kbn/scout';
 
 import { createSystemIndicesEsClient, SYSTEM_INDICES_HEADERS } from './system_indices_es_client';
+import { ES_SERVICE_ACCOUNT_TOKEN_NAME } from '../../../../common/service_accounts';
+import { SERVICE_ACCOUNT_CREDENTIAL_TYPE } from '../../../../server/service_accounts/credentials';
 
-/** The single token Kibana mints per account, named in `ES_SERVICE_ACCOUNT_TOKEN_NAME`. */
-const TOKEN_NAME = 'kibana-managed';
-const CREDENTIAL_TYPE = 'service-account-credential';
 /** Alias of the main saved objects index, which the credential type lands in. */
 const KIBANA_INDEX = '.kibana';
 /** Raw field path of an attribute on a saved object document, which nests them under the type. */
-const CREDENTIAL_ACCOUNT_FIELD = `${CREDENTIAL_TYPE}.serviceAccountId`;
+const CREDENTIAL_ACCOUNT_FIELD = `${SERVICE_ACCOUNT_CREDENTIAL_TYPE}.serviceAccountId`;
 
 export interface ServiceAccountPrincipal {
   namespace: string;
@@ -46,12 +45,14 @@ export const deleteServiceAccounts = async (
       await esClient.transport.request(
         {
           method: 'DELETE',
-          path: `/_security/service/${namespace}/${name}/credential/token/${TOKEN_NAME}`,
+          path: `/_security/service/${namespace}/${name}/credential/token/${ES_SERVICE_ACCOUNT_TOKEN_NAME}`,
         },
         { ignore: [404] }
       );
     } catch (err) {
-      failures.push(`service account token [${namespace}/${name}/${TOKEN_NAME}]: ${err.message}`);
+      failures.push(
+        `service account token [${namespace}/${name}/${ES_SERVICE_ACCOUNT_TOKEN_NAME}]: ${err.message}`
+      );
     }
 
     try {
@@ -90,7 +91,7 @@ export const deleteServiceAccounts = async (
           query: {
             bool: {
               filter: [
-                { term: { type: CREDENTIAL_TYPE } },
+                { term: { type: SERVICE_ACCOUNT_CREDENTIAL_TYPE } },
                 {
                   terms: {
                     [CREDENTIAL_ACCOUNT_FIELD]: principals.map(
