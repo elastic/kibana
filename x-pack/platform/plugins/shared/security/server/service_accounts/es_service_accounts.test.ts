@@ -129,7 +129,7 @@ describe('EsServiceAccounts', () => {
 
       expect(securityTelemetry.recordServiceAccountCreationAttempt).toHaveBeenCalledWith({
         outcome: 'success',
-        serviceAccountBackend: 'es',
+        serviceAccountBackend: 'stack',
       });
 
       expect(credentialStore.set).toHaveBeenCalledWith(
@@ -435,7 +435,7 @@ describe('EsServiceAccounts', () => {
       });
       expect(securityTelemetry.recordServiceAccountCreationAttempt).toHaveBeenCalledWith({
         outcome: 'failure',
-        serviceAccountBackend: 'es',
+        serviceAccountBackend: 'stack',
       });
     });
 
@@ -472,7 +472,7 @@ describe('EsServiceAccounts', () => {
         'illegal_argument_exception'
       );
       expect(logger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to create service account')
+        expect.stringContaining('Failed to create service account [kibana/nightshift-relay]')
       );
       expect(credentialStore.set).not.toHaveBeenCalled();
     });

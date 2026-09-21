@@ -282,6 +282,14 @@ export class SecurityPlugin
     });
 
     const config = this.getConfig();
+
+    if (
+      this.initializerContext.env.packageInfo.buildFlavor === 'serverless' &&
+      !config.uiam?.enabled
+    ) {
+      throw new Error('`xpack.security.uiam.enabled` must be `true` on serverless deployments.');
+    }
+
     const kibanaIndexName = this.getKibanaIndexName();
 
     // A subset of `start` services we need during `setup`.

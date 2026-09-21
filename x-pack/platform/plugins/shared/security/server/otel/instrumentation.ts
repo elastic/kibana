@@ -39,7 +39,7 @@ interface OAuthTokenExchangeAttributes extends BasicAttributes {
 
 interface ServiceAccountCreationAttributes extends BasicAttributes {
   /** Which backend served the request, since the two are mutually exclusive per deployment. */
-  serviceAccountBackend: 'es' | 'uiam';
+  serviceAccountBackend: 'stack' | 'uiam';
 }
 
 /**

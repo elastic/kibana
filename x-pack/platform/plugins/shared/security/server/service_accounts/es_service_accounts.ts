@@ -53,7 +53,6 @@ const accountEntrySchema = z.object({
 
 const createTokenResponseSchema = z.object({
   token: z.object({
-    // codeql[js/kibana/unbounded-string-in-schema] upstream response — not caller-controlled input
     value: z.string().min(1).max(ES_SERVICE_ACCOUNT_TOKEN_MAX_LENGTH),
   }),
 });
@@ -124,13 +123,13 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       const account = await this.createAccount(request, params);
       securityTelemetry.recordServiceAccountCreationAttempt({
         outcome: 'success',
-        serviceAccountBackend: 'es',
+        serviceAccountBackend: 'stack',
       });
       return account;
     } catch (e) {
       securityTelemetry.recordServiceAccountCreationAttempt({
         outcome: 'failure',
-        serviceAccountBackend: 'es',
+        serviceAccountBackend: 'stack',
       });
       throw e;
     }
@@ -197,7 +196,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     try {
       await esClient.transport.request({
         method: 'PUT',
-        path: accountPath(namespace, name),
+        path: `/_security/service/${encodeURIComponent(namespace)}/${encodeURIComponent(name)}`,
         body: { roles },
         querystring: { refresh: 'wait_for' },
       });
@@ -228,13 +227,15 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       // The account and any token it already has are Kibana's to clean up: leaving behind a
       // credential Kibana cannot reach would be worse than the failure that got us here.
       await this.rollback(esClient, namespace, name);
-      this.logger.error(`Failed to create service account: ${getDetailedErrorMessage(e)}`);
+      this.logger.error(
+        `Failed to create service account [${serviceAccountId}]: ${getDetailedErrorMessage(e)}`
+      );
       throw e;
     }
     return { id: serviceAccountId, name };
   }
 
-  // See https://github.com/elastic/kibana/issues/284465.
+  // See https://github.com/elastic/kibana/issues/284466.
   async createFakeRequest(): Promise<KibanaRequest> {
     throw Boom.notImplemented(
       'Creating requests for Elasticsearch service accounts is not yet implemented'
@@ -270,7 +271,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     const response = await esClient.transport.request<Record<string, unknown>>(
       {
         method: 'GET',
-        path: accountPath(namespace, name),
+        path: `/_security/service/${encodeURIComponent(namespace)}/${encodeURIComponent(name)}`,
         // Asked for explicitly, because the API's default depends on the shape of the path.
         // Kibana only ever manages user-managed accounts.
         querystring: { type: 'user_managed' },
@@ -321,9 +322,9 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
   ): Promise<string> {
     const response = await esClient.transport.request({
       method: 'POST',
-      path: `${accountPath(namespace, name)}/credential/token/${encodeURIComponent(
-        ES_SERVICE_ACCOUNT_TOKEN_NAME
-      )}`,
+      path:
+        `/_security/service/${encodeURIComponent(namespace)}/${encodeURIComponent(name)}` +
+        `/credential/token/${encodeURIComponent(ES_SERVICE_ACCOUNT_TOKEN_NAME)}`,
     });
 
     return createTokenResponseSchema.parse(response).token.value;
@@ -398,9 +399,9 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       await esClient.transport.request(
         {
           method: 'DELETE',
-          path: `${accountPath(namespace, name)}/credential/token/${encodeURIComponent(
-            ES_SERVICE_ACCOUNT_TOKEN_NAME
-          )}`,
+          path:
+            `/_security/service/${encodeURIComponent(namespace)}/${encodeURIComponent(name)}` +
+            `/credential/token/${encodeURIComponent(ES_SERVICE_ACCOUNT_TOKEN_NAME)}`,
         },
         { ignore: [404] }
       );
@@ -421,7 +422,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       await esClient.transport.request(
         {
           method: 'DELETE',
-          path: accountPath(namespace, name),
+          path: `/_security/service/${encodeURIComponent(namespace)}/${encodeURIComponent(name)}`,
           querystring: { force: 'true' },
         },
         { ignore: [404] }
@@ -458,6 +459,3 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     }
   }
 }
-
-const accountPath = (namespace: string, name: string) =>
-  `/_security/service/${encodeURIComponent(namespace)}/${encodeURIComponent(name)}`;

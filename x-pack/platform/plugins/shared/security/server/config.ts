@@ -214,19 +214,6 @@ const providersConfigSchema = schema.object(
   }
 );
 
-const serviceAccountsSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: false }),
-  requestLifetime: schema.duration({
-    defaultValue: '10m',
-    validate(value) {
-      const milliseconds = value.asMilliseconds();
-      if (!Number.isFinite(milliseconds) || milliseconds <= 0) {
-        return 'the value must be a positive, finite duration.';
-      }
-    },
-  }),
-});
-
 export const ConfigSchema = schema.object({
   loginAssistanceMessage: schema.string({ defaultValue: '' }),
   showInsecureClusterWarning: schema.boolean({ defaultValue: true }),
@@ -335,10 +322,18 @@ export const ConfigSchema = schema.object({
     serverless: schema.boolean({ defaultValue: true }),
   }),
 
-  // Offering-independent: the setting is the same everywhere, and the backend behind it is chosen
-  // at runtime. UIAM on Serverless, Elasticsearch's user-managed service accounts everywhere
-  // else. See `ServiceAccountsService#start`.
-  serviceAccounts: serviceAccountsSchema,
+  serviceAccounts: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+    requestLifetime: schema.duration({
+      defaultValue: '10m',
+      validate(value) {
+        const milliseconds = value.asMilliseconds();
+        if (!Number.isFinite(milliseconds) || milliseconds <= 0) {
+          return 'the value must be a positive, finite duration.';
+        }
+      },
+    }),
+  }),
 
   // Setting only allowed in the Serverless offering
   ui: offeringBasedSchema({

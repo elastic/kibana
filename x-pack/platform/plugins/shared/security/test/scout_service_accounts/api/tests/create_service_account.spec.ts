@@ -16,6 +16,8 @@ const LOCAL_ONLY = ['@local-stateful-classic'];
 
 const CREATE_ENDPOINT = 'internal/security/service_account';
 const NAMESPACE = 'kibana';
+/** The single token Kibana mints per account, named in `ES_SERVICE_ACCOUNT_TOKEN_NAME`. */
+const TOKEN_NAME = 'kibana-managed';
 const CREDENTIAL_TYPE = 'service-account-credential';
 /** Raw field path of an attribute on a saved object document, which nests them under the type. */
 const CREDENTIAL_ACCOUNT_FIELD = `${CREDENTIAL_TYPE}.serviceAccountId`;
@@ -30,9 +32,25 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
     const failures: string[] = [];
 
     for (const name of created) {
+      // Token first, then the account, the same order `EsServiceAccounts.rollback` uses: a forced
+      // account delete can leave the token behind, and a lingering token blocks recreating the
+      // name on the next run. A 404 is the expected answer for a name a failing test registered
+      // but never got created.
       try {
-        // `force`, since the account still holds the token Kibana minted for it. A 404 is the
-        // expected answer for a name a failing test registered but never got created.
+        await esClient.transport.request(
+          {
+            method: 'DELETE',
+            path: `/_security/service/${NAMESPACE}/${name}/credential/token/${TOKEN_NAME}`,
+          },
+          { ignore: [404] }
+        );
+      } catch (err) {
+        failures.push(`service account token [${NAMESPACE}/${name}/${TOKEN_NAME}]: ${err.message}`);
+      }
+
+      try {
+        // `force`, in case the token delete above did not land: Elasticsearch refuses an unforced
+        // delete while any token remains.
         await esClient.transport.request(
           {
             method: 'DELETE',
@@ -112,7 +130,7 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
         method: 'GET',
         path: `/_security/service/${NAMESPACE}/${name}/credential`,
       });
-      expect(Object.keys(credentials.tokens)).toContain('kibana-managed');
+      expect(Object.keys(credentials.tokens)).toContain(TOKEN_NAME);
     }
   );
 
@@ -161,14 +179,18 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
     async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
 
-      const response = await apiClient.post(CREATE_ENDPOINT, {
-        headers: { ...cookieHeader, 'kbn-xsrf': 'true' },
-        responseType: 'json',
-        body: { name: '../_cluster/settings' },
-      });
+      // All three fail on the same rule: `SERVICE_ACCOUNT_NAME_REGEX` rejects `/` outright, so a
+      // bare separator and a name pointing at another namespace are refused alongside traversal.
+      for (const name of ['../_cluster/settings', 'elastic/', '/']) {
+        const response = await apiClient.post(CREATE_ENDPOINT, {
+          headers: { ...cookieHeader, 'kbn-xsrf': 'true' },
+          responseType: 'json',
+          body: { name },
+        });
 
-      // Rejected by Kibana's own validation, before anything reaches Elasticsearch.
-      expect(response.statusCode).toBe(400);
+        // Rejected by Kibana's own validation, before anything reaches Elasticsearch.
+        expect(response.statusCode, `name [${name}] should be rejected`).toBe(400);
+      }
     }
   );
 

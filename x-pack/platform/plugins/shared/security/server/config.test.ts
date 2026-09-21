@@ -1736,8 +1736,6 @@ describe('config schema', () => {
   });
 
   describe('serviceAccounts', () => {
-    // Available in both offerings: Serverless runs the UIAM backend and everything else runs
-    // Elasticsearch's user-managed service accounts.
     it('should allow xpack.security.serviceAccounts.enabled to be configured outside of the serverless context', () => {
       expect(
         ConfigSchema.validate(

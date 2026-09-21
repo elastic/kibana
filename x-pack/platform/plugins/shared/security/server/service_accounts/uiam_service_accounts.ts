@@ -174,7 +174,9 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
         isExternalApiKey(this.getCurrentUser(request)) ? null : undefined
       );
     } catch (e) {
-      this.logger.error(`Failed to create service account: ${getDetailedErrorMessage(e)}`);
+      this.logger.error(
+        `Failed to create service account [${name}]: ${getDetailedErrorMessage(e)}`
+      );
       throw e;
     }
 

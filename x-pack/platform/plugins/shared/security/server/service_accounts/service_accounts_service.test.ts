@@ -98,15 +98,16 @@ describe('ServiceAccountsService', () => {
       expect(params.uiam.createServiceAccount).not.toHaveBeenCalled();
     });
 
-    it.each([{ uiam: undefined }, { cloudProjectContext: undefined }])(
-      'reports the feature as unavailable on serverless when UIAM is not available (%j)',
-      (overrides) => {
+    it.each([
+      ['the UIAM service was never constructed', { uiam: undefined }],
+      ['the cloud project context is missing', { cloudProjectContext: undefined }],
+    ] as const)(
+      'reports the feature as unavailable on serverless when %s',
+      (expectedCause, overrides) => {
         expect(
           service.start(startParams({ serviceAccounts: { enabled: true } }, overrides))
         ).toBeNull();
-        expect(logger.error).toHaveBeenCalledWith(
-          expect.stringContaining('Service accounts are enabled but UIAM is not available')
-        );
+        expect(logger.error).toHaveBeenCalledWith(expect.stringContaining(expectedCause));
       }
     );
 

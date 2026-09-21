@@ -75,16 +75,26 @@ export class ServiceAccountsService {
       return null;
     }
 
-    // UIAM and Elasticsearch are mutually exclusive, and the offering decides which one runs:
-    // serverless runs UIAM, every other offering runs Elasticsearch's user-managed service
-    // accounts. Deliberately not keyed off UIAM availability. A serverless deployment whose
-    // UIAM configuration is incomplete has to report the feature as unavailable, rather than
-    // fall through to creating Elasticsearch accounts the control plane knows nothing about.
     if (isServerless) {
-      if (!uiam || !cloudProjectContext) {
+      // `SecurityPlugin#setup` rejects a serverless deployment without `uiam.enabled`, and the
+      // service is only ever constructed from that same config, so this is unreachable in
+      // practice. It stays as a guard because the parameter is optional, and the alternative is
+      // a non-null assertion further down.
+      if (!uiam) {
         this.logger.error(
-          'Service accounts are enabled but UIAM is not available, so they cannot be offered on ' +
-            'this deployment. Elasticsearch-backed service accounts are not supported on serverless.'
+          'Service accounts are enabled but the UIAM service was never constructed, so they ' +
+            'cannot be offered on this deployment.'
+        );
+        return null;
+      }
+
+      // Reachable, unlike the guard above: the project context comes from the `cloud` plugin at
+      // setup time, which the config-level check in `SecurityPlugin#setup` cannot speak for. Any
+      // of the organization, the project or the project type being absent lands here.
+      if (!cloudProjectContext) {
+        this.logger.error(
+          'Service accounts are enabled but the cloud project context is missing, so they ' +
+            'cannot be offered on this deployment.'
         );
         return null;
       }
@@ -149,7 +159,7 @@ export class ServiceAccountsService {
         getCurrentUserProfileId,
       }),
       // Workload binding is a UIAM-only capability until the Elasticsearch token exchange
-      // lands; see https://github.com/elastic/kibana/issues/284465.
+      // lands; see https://github.com/elastic/kibana/issues/284466.
       workloads: createNotImplementedWorkloadBindings(),
     };
   }
