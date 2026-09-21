@@ -49,7 +49,9 @@ Path prefix for Scout files: `x-pack/solutions/security/plugins/security_solutio
 
 ## Task 1: Map the `workday` entity namespace
 
-Prerequisite. Without this, Workday user entities key as `user:<id>@unknown` while the maintainer emits `@workday` EUIDs — nothing matches, every target fails validation, every actor 404s, and the maintainer writes zero relationships while appearing to succeed.
+Hardening, done first. **Correction (verified after Task 1 ran):** Workday already resolves `entity.namespace` to `workday` *without* this clause, via source pass-through — `resolveFinalFieldValue` (`euid/field_evaluations.ts:148`) returns the raw source value whenever one exists, and `fallbackValue: 'unknown'` applies only when no source value is found. An earlier revision of this plan claimed the maintainer would write zero relationships without this task; that was wrong.
+
+The clause is still worth adding: it pins the namespace explicitly instead of depending on an implicit pass-through that a future change to source precedence or `fallbackValue` semantics would silently break, it matches the convention every other IdP namespace follows, and it makes the generated ES|QL emit a dedicated `workday` arm. Cheap, and it removes a silent dependency.
 
 **Files:**
 - Modify: `x-pack/platform/plugins/shared/entity_store/common/domain/definitions/user.ts:98-101`
@@ -99,7 +101,11 @@ Run:
 node scripts/jest x-pack/platform/plugins/shared/entity_store/common/domain/euid/field_evaluations.test.ts -t workday
 ```
 
-Expected: FAIL — received `"unknown"` instead of `"workday"` (no `whenClause` matches `workday`, so `fallbackValue: 'unknown'` applies).
+**These tests PASS without the change** — verified empirically by reverting `user.ts` and re-running them. `applyFieldEvaluations` returns `'workday'` either way via source pass-through; the file already carries a test named *"should use event.module as-is when no whenClause matches (fallback to source)"* documenting exactly this.
+
+So this is not a red-green cycle: the tests characterize and lock existing behaviour rather than drive new behaviour. That is the honest framing, and it is why Task 1 is hardening rather than a functional prerequisite. Do not contort the tests to fail artificially. The regression value is real — they pin `workday → workday` so a future change to source precedence or `fallbackValue` semantics breaks a test instead of silently re-keying entities.
+
+The change that *is* observable is in the generated Painless/ES|QL: a dedicated `workday` arm appears ahead of the generic pass-through. Step 6's snapshot sweep is what captures it.
 
 - [ ] **Step 4: Add the mapping**
 
@@ -194,7 +200,7 @@ _src_entity_namespace0 = MV_FIRST(TO_STRING(event.module)),
 
 Three consequences that drive the implementation:
 
-1. **The namespace is derived from the document**, ending in a `_src_entity_namespace` pass-through. For a Workday row `data_stream.dataset: workday.user` → first chunk `workday`. This is why Task 1 is a hard prerequisite rather than cosmetic: the pass-through yields the literal `workday` only once the mapping exists; before Task 1 the explicit `"unknown"` arm is what fires for a source with no matching clause.
+1. **The namespace is derived from the document**, ending in a `_src_entity_namespace` pass-through. For a Workday row `data_stream.dataset: workday.user` → first chunk `workday`. Note the `"unknown"` arm fires only when the source value is NULL or empty — a non-empty unmatched source (like `workday` pre-Task 1) passes straight through. Task 1 makes this explicit rather than implicit; it is not what makes the target EUID resolve.
 2. **The `local` branch outranks everything** and fires when `user.name` AND `host.id` are both present, producing `user:<name>@<host.id>@local`. Workday user rows carry no `host.id`, so branch 1 wins — but the test in Step 1 asserts this, because a future pipeline change adding `host.id` would silently re-key every Workday target.
 3. **~25 EVAL columns per row.** This is the cost the domain doc flags (`hostScopedUsersOnly` exists to cut ~35 columns to ~2, measured ~26× faster on a 700M-doc log store). Accepted here: the Workday user inventory is one row per employee (tens of thousands), not a high-volume log stream, and correctness of the EUID ranking outweighs column count at that scale. Do **not** hand-roll a cheaper CONCAT to avoid this — that reintroduces the drift the helper prevents.
 - Produces:
@@ -1073,7 +1079,7 @@ node scripts/scout run-tests --arch stateful --domain classic \
 Expected: 5 passing tests.
 
 Debugging notes if tests fail:
-- **All tests write no relationships** → most likely the `workday` namespace mapping (Task 1) is not in effect, so seeded entities key as `@unknown` while the maintainer emits `@workday`. Verify by querying a seeded entity's `entity.id` in the latest index.
+- **All tests write no relationships** → compare the actor/target EUIDs the maintainer computes against the `entity.id` values actually in the latest index. Query a seeded entity and check its `entity.namespace` really is `workday` (Task 1 makes this explicit, but it resolves via pass-through regardless, so a mismatch here points at the seeded `data_stream.dataset` / `event.module` fields instead).
 - **The Hire_Date test alone fails** → the `@timestamp` lookback is being applied; confirm `disableLookbackWindow: true` is on the Workday config.
 - **`index_not_found_exception` on the log index** → the first `seedLogDocument` creates the data stream; ensure `beforeAll` used `ignore_unavailable: true` on the pre-clean.
 

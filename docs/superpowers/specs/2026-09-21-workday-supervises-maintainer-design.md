@@ -132,25 +132,35 @@ tests it against `whenClauses`. None match:
 - The `asset_discovery` clause requires `event.module: asset_discovery`.
 - `okta` / `azure` / `o365` / `entityanalytics_ad` do not list `workday`.
 
-So it falls through to `fallbackValue: 'unknown'` and every Workday user entity is
-keyed `user:<id>@unknown`.
+With no clause matching, the resolved value is the **source value itself**:
+`resolveFinalFieldValue` (`euid/field_evaluations.ts:148`) returns
+`rawValueFromSources` whenever a source value exists, and applies
+`fallbackValue: 'unknown'` only when *no* source value is found at all. The
+generated ES|QL mirrors this, ending
+`CASE(_src_entity_namespace IS NULL OR _src_entity_namespace == "", "unknown"), _src_entity_namespace`.
 
-> Note: the ticket states Workday "currently falls through to raw `workday` from
-> `data_stream.dataset`". That is inaccurate — `data_stream.dataset` supplies only
-> the *match* input, not the result; there is no pass-through for an unmatched
-> source. The fallback is `'unknown'`.
+So a Workday document already resolves `entity.namespace` to `workday` via
+pass-through, and the ticket's original wording ("falls through to raw `workday`
+from `data_stream.dataset`") is correct.
 
-Without this mapping the maintainer emits `@workday` EUIDs on both ends, nothing
-matches, every target fails validation and every actor 404s — the maintainer runs
-cleanly and writes zero relationships. Hence: prerequisite, not tidy-up.
+**This mapping is therefore hardening, not a functional prerequisite.** An
+earlier revision of this spec claimed Workday resolved to `'unknown'` and that
+the maintainer would write zero relationships without the clause; that was wrong,
+and the code above is the authority. The clause is still worth adding: it pins the
+namespace explicitly rather than depending on an implicit pass-through that a
+future change to source precedence or `fallbackValue` semantics would silently
+break, it matches the convention every other IdP namespace follows, and it makes
+the generated ES|QL emit a dedicated `workday` arm. It is cheap and it removes a
+silent dependency — but the maintainer would function without it.
 
 **Blast radius.** `user.ts` is a shared definition. This re-keys *every*
-Workday-sourced user entity from `@unknown` to `@workday`, not only those touched
-by this maintainer. Workday entities already ingested under `@unknown` keep those
-EUIDs and would sit alongside new `@workday` ones. The Workday integration is
-still landing (integrations#20753 is recent), so this is expected to be a
-non-issue; if Workday data is already flowing in a real deployment, the
-re-keying needs a deliberate call.
+Workday-sourced user entity. In practice the resolved namespace is `workday`
+either way (pass-through before, explicit clause after), so no re-keying is
+expected — this is the main reason the correction above matters: an earlier
+revision of this spec overstated the blast radius as an `@unknown` → `@workday`
+migration. The residual risk is limited to entities whose documents carried *no*
+resolvable source value and so genuinely keyed `@unknown`; those are unaffected by
+this clause, since it only fires when the source value is `workday`.
 
 ## Step 2 ES|QL
 
