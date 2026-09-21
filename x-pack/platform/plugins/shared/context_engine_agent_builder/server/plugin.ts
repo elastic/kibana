@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type {
   ContextEngineAgentBuilderPluginSetup,
@@ -47,7 +53,10 @@ export class ContextEngineAgentBuilderPlugin
     return {};
   }
 
-  start(_coreStart: CoreStart, startDeps: ContextEngineAgentBuilderStartDependencies): ContextEngineAgentBuilderPluginStart {
+  start(
+    _coreStart: CoreStart,
+    startDeps: ContextEngineAgentBuilderStartDependencies
+  ): ContextEngineAgentBuilderPluginStart {
     if (startDeps.agentBuilder) {
       void installContextEngineAgent({
         agentBuilder: startDeps.agentBuilder,
