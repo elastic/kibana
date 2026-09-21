@@ -166,6 +166,7 @@ export async function handleExperimentalDatastreamFeatureOptIn({
     });
 
     const componentTemplate = componentTemplateRes.component_templates[0].component_template;
+    let componentTemplateUpdated = false;
 
     const mappings = componentTemplate.template.mappings;
     const componentTemplateChanged =
@@ -258,9 +259,11 @@ export async function handleExperimentalDatastreamFeatureOptIn({
         name: componentTemplateName,
         ...body,
         _meta: {
+          ...(componentTemplate._meta ?? {}),
           has_experimental_data_stream_indexing_features: hasExperimentalDataStreamIndexingFeatures,
         },
       });
+      componentTemplateUpdated = true;
     }
 
     const rawIndexTemplate = indexTemplateRes.index_templates[0].index_template;
@@ -319,8 +322,10 @@ export async function handleExperimentalDatastreamFeatureOptIn({
           name: featureMapEntry.data_stream,
           ...indexTemplateBody,
           _meta: {
-            has_experimental_data_stream_indexing_features:
-              featureMapEntry.features.tsdb || featureMapEntry.features.columnar,
+            ...(indexTemplateBody._meta ?? {}),
+            has_experimental_data_stream_indexing_features: Boolean(
+              featureMapEntry.features.tsdb || featureMapEntry.features.columnar
+            ),
           },
           // GET brings string | string[] | undefined but this PUT expects string[]
           ignore_missing_component_templates: indexTemplateBody.ignore_missing_component_templates
@@ -328,6 +333,17 @@ export async function handleExperimentalDatastreamFeatureOptIn({
             : undefined,
         });
       } catch (err) {
+        // ES only validates the composed mappings on the index template PUT, which runs after
+        // the @package component template was already rewritten. Restore it so a rejected
+        // opt-in does not leave the data stream half-migrated.
+        if (componentTemplateUpdated) {
+          await esClient.cluster.putComponentTemplate({
+            name: componentTemplateName,
+            template: componentTemplate.template,
+            _meta: componentTemplate._meta,
+            version: componentTemplate.version,
+          });
+        }
         throw enrichColumnarIndexTemplateError(err, featureMapEntry.data_stream);
       }
     }
@@ -344,7 +360,10 @@ export async function handleExperimentalDatastreamFeatureOptIn({
       await updateCurrentWriteIndices(
         esClient,
         appContextService.getLogger(),
-        updatedIndexTemplates
+        updatedIndexTemplates,
+        // Opting out of tsdb/columnar resets the template mode to the default; the write index
+        // keeps the old mode until it is rolled over.
+        { rolloverOnIndexModeReset: true }
       );
     } catch (err) {
       if (isTotalFieldsLimitError(err)) {
@@ -377,10 +396,19 @@ export async function handleExperimentalDatastreamFeatureOptIn({
  * error is hard to act on, so point at the package-level fix (`columnar.doc_values: true`).
  */
 function enrichColumnarIndexTemplateError(err: any, dataStream: string) {
-  const reason: string = err?.body?.error?.reason ?? err?.meta?.body?.error?.reason ?? '';
+  // ES reports the composition failure at the top level and the actual mapping problem in the
+  // caused_by chain, so collect every reason along the chain.
+  const reasons: string[] = [];
+  let cause = err?.body?.error ?? err?.meta?.body?.error;
+  while (cause && reasons.length < 10) {
+    if (typeof cause.reason === 'string') reasons.push(cause.reason);
+    cause = cause.caused_by;
+  }
+  const reason = reasons.at(-1) ?? '';
   const statusCode = err?.statusCode ?? err?.meta?.statusCode;
   const isColumnarMappingRejection =
-    statusCode === 400 && /doc_values|synthetic source|not reconstructable/i.test(reason);
+    statusCode === 400 &&
+    /doc_values|synthetic source|not reconstructable|columnar/i.test(reasons.join(' '));
 
   if (!isColumnarMappingRejection) {
     return err;

@@ -706,6 +706,38 @@ describe('experimental_datastream_features', () => {
           mockedUpdateCurrentWriteIndices.mock.calls[0][2].map(({ templateName }) => templateName)
         ).toEqual(['metrics-test.test']);
       });
+
+      it('should ask updateCurrentWriteIndices to rollover when the index mode is reset', async () => {
+        const packagePolicy = getExistingTestPackagePolicy({
+          isSyntheticSourceEnabled: false,
+          isTSDBEnabled: true,
+          isDocValueOnlyNumeric: false,
+          isDocValueOnlyOther: false,
+        });
+
+        esClient.indices.getIndexTemplate.mockResolvedValueOnce({
+          index_templates: [
+            {
+              name: 'metrics-test.test',
+              index_template: {
+                template: {
+                  settings: {},
+                  mappings: {},
+                },
+                composed_of: [],
+                index_patterns: '',
+              },
+            },
+          ],
+        });
+
+        await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
+
+        expect(mockedUpdateCurrentWriteIndices).toHaveBeenCalledTimes(1);
+        expect(mockedUpdateCurrentWriteIndices.mock.calls[0][3]).toEqual({
+          rolloverOnIndexModeReset: true,
+        });
+      });
     });
   });
 
@@ -1032,6 +1064,189 @@ describe('experimental_datastream_features', () => {
       });
 
       expect(putIndexSettings()).toEqual({ mode: 'logsdb_columnar' });
+    });
+  });
+
+  describe('_meta preservation on Fleet managed templates', () => {
+    // Fleet stamps its own `_meta` on the templates it installs; the opt-in PUTs must not drop it.
+    const EXISTING_META = {
+      package: { name: 'test' },
+      managed_by: 'fleet',
+      managed: true,
+    };
+
+    beforeEach(() => {
+      // The outer beforeEach queues templates without `_meta`, these tests supply their own.
+      esClient.cluster.getComponentTemplate.mockReset();
+      esClient.cluster.putComponentTemplate.mockClear();
+      esClient.indices.getIndexTemplate.mockReset();
+      esClient.indices.putIndexTemplate.mockClear();
+    });
+
+    function mockComponentTemplate(_meta?: Record<string, unknown>) {
+      esClient.cluster.getComponentTemplate.mockResolvedValueOnce({
+        component_templates: [
+          {
+            name: 'metrics-test.test@package',
+            component_template: {
+              template: {
+                settings: {},
+                mappings: {
+                  properties: {
+                    sequence: { type: 'long' },
+                    name: { type: 'keyword' },
+                  },
+                },
+              },
+              ...(_meta ? { _meta } : {}),
+            },
+          },
+        ],
+      } as any);
+    }
+
+    function mockIndexTemplate(_meta?: Record<string, unknown>) {
+      esClient.indices.getIndexTemplate.mockResolvedValueOnce({
+        index_templates: [
+          {
+            name: 'metrics-test.test',
+            index_template: {
+              template: { settings: { index: {} }, mappings: {} },
+              composed_of: [],
+              index_patterns: '',
+              ...(_meta ? { _meta } : {}),
+            },
+          },
+        ],
+      } as any);
+    }
+
+    function getColumnarPolicy(columnar: boolean): NewPackagePolicy {
+      return {
+        name: 'Test policy',
+        policy_id: 'agent-policy',
+        policy_ids: ['agent-policy'],
+        description: 'Test policy description',
+        namespace: 'default',
+        enabled: true,
+        inputs: [],
+        package: {
+          name: 'test',
+          title: 'Test',
+          version: '0.0.1',
+          experimental_data_stream_features: [
+            {
+              data_stream: 'metrics-test.test',
+              features: {
+                synthetic_source: false,
+                tsdb: false,
+                doc_value_only_numeric: false,
+                doc_value_only_other: false,
+                columnar,
+              },
+            },
+          ],
+        },
+      };
+    }
+
+    it('preserves the existing component template _meta when updating it', async () => {
+      mockGetInstalledPackageWithAssets({
+        experimental_data_stream_features: [
+          {
+            data_stream: 'metrics-test.test',
+            features: {
+              synthetic_source: false,
+              tsdb: false,
+              doc_value_only_numeric: false,
+              doc_value_only_other: false,
+            },
+          },
+        ],
+      });
+      mockComponentTemplate(EXISTING_META);
+      mockIndexTemplate();
+
+      await handleExperimentalDatastreamFeatureOptIn({
+        soClient,
+        esClient,
+        packagePolicy: getNewTestPackagePolicy({
+          isSyntheticSourceEnabled: true,
+          isTSDBEnabled: false,
+          isDocValueOnlyNumeric: false,
+          isDocValueOnlyOther: false,
+        }),
+      });
+
+      expect(esClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(1);
+      expect((esClient.cluster.putComponentTemplate.mock.calls[0][0] as any)._meta).toEqual({
+        ...EXISTING_META,
+        has_experimental_data_stream_indexing_features: true,
+      });
+    });
+
+    it('preserves the existing index template _meta when opting in to columnar', async () => {
+      mockGetInstalledPackageWithAssets({
+        experimental_data_stream_features: [
+          {
+            data_stream: 'metrics-test.test',
+            features: {
+              synthetic_source: false,
+              tsdb: false,
+              doc_value_only_numeric: false,
+              doc_value_only_other: false,
+              columnar: false,
+            },
+          },
+        ],
+      });
+      mockComponentTemplate(EXISTING_META);
+      mockIndexTemplate(EXISTING_META);
+
+      await handleExperimentalDatastreamFeatureOptIn({
+        soClient,
+        esClient,
+        packagePolicy: getColumnarPolicy(true),
+      });
+
+      expect(esClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
+      const putCall = esClient.indices.putIndexTemplate.mock.calls[0][0] as any;
+      expect(putCall.template.settings.index).toEqual({ mode: 'columnar' });
+      expect(putCall._meta).toEqual({
+        ...EXISTING_META,
+        has_experimental_data_stream_indexing_features: true,
+      });
+    });
+
+    it('preserves the existing index template _meta when opting out of columnar', async () => {
+      mockGetInstalledPackageWithAssets({
+        experimental_data_stream_features: [
+          {
+            data_stream: 'metrics-test.test',
+            features: {
+              synthetic_source: false,
+              tsdb: false,
+              doc_value_only_numeric: false,
+              doc_value_only_other: false,
+              columnar: true,
+            },
+          },
+        ],
+      });
+      mockComponentTemplate(EXISTING_META);
+      mockIndexTemplate(EXISTING_META);
+
+      await handleExperimentalDatastreamFeatureOptIn({
+        soClient,
+        esClient,
+        packagePolicy: getColumnarPolicy(false),
+      });
+
+      expect(esClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
+      expect((esClient.indices.putIndexTemplate.mock.calls[0][0] as any)._meta).toEqual({
+        ...EXISTING_META,
+        has_experimental_data_stream_indexing_features: false,
+      });
     });
   });
 });
