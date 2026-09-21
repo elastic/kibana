@@ -1896,8 +1896,8 @@ describe('ai indices routes', () => {
       expect(() => validateBody(validBody)).not.toThrow();
     });
 
-    it('defaults memory_enabled to false', () => {
-      expect(validateBody(validBody)).toMatchObject({ memory_enabled: false });
+    it('defaults memory_enabled to true', () => {
+      expect(validateBody(validBody)).toMatchObject({ memory_enabled: true });
     });
 
     it('accepts memory_enabled', () => {
@@ -2044,8 +2044,8 @@ describe('ai indices routes', () => {
       expect(() => validateBody(validBody)).not.toThrow();
     });
 
-    it('defaults memory_enabled to false', () => {
-      expect(validateBody(validBody)).toMatchObject({ memory_enabled: false });
+    it('defaults memory_enabled to true', () => {
+      expect(validateBody(validBody)).toMatchObject({ memory_enabled: true });
     });
 
     it('accepts memory_enabled', () => {
