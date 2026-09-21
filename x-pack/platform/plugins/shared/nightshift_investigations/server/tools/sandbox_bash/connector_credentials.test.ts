@@ -89,6 +89,36 @@ describe('buildConnectorEnv', () => {
     // Very short values are not redacted: they would produce false positives in output.
     expect(secretValues).toEqual([TOKEN]);
   });
+
+  it('copies an ApiKey Authorization header into CONNECTOR_SECRET_PASSWORD', () => {
+    const apiKey = 'IYMYxKABgjRzD6vCgZ3Ktestkey';
+    const { env, secretValues } = buildConnectorEnv({
+      connectorId: 'elasticsearch-telemetry',
+      actionTypeId: '.http',
+      config: { url: 'https://es.example.com' },
+      secrets: { secretHeaders: { Authorization: `ApiKey ${apiKey}` } },
+    });
+
+    expect(env.CONNECTOR_SECRET_PASSWORD).toBe(apiKey);
+    expect(secretValues).toContain(apiKey);
+  });
+
+  it('does not overwrite an existing CONNECTOR_SECRET_PASSWORD', () => {
+    const password = 'existing-password-value';
+    const { env, secretValues } = buildConnectorEnv({
+      connectorId: 'elasticsearch-telemetry',
+      actionTypeId: '.webhook',
+      config: { url: 'https://es.example.com' },
+      secrets: {
+        password,
+        secretHeaders: { Authorization: 'ApiKey unused-api-key-value' },
+      },
+    });
+
+    expect(env.CONNECTOR_SECRET_PASSWORD).toBe(password);
+    expect(secretValues).toContain(password);
+    expect(secretValues).not.toContain('unused-api-key-value');
+  });
 });
 
 describe('redactSecrets', () => {
