@@ -14,5 +14,5 @@ export {
   LOGS_APP_MENU_ORDER,
 } from './menu_items';
 export { logCategoriesPageTitle, logsAnomaliesPageTitle } from './page_titles';
-export { useLogsAppHeaderMenu } from './use_logs_app_header_menu';
+export { getCreateRuleBlocker, useLogsAppHeaderMenu } from './use_logs_app_header_menu';
 export type { LogsAppHeaderMenuOptions, LogsAppHeaderMenuResult } from './use_logs_app_header_menu';

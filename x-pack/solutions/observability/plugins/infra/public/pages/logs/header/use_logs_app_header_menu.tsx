@@ -12,7 +12,7 @@ import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
 import React, { useMemo, useState } from 'react';
-import { AlertFlyout } from '../../../alerting/log_threshold/components/alert_flyout';
+import { LazyAlertFlyout } from '../../../alerting/log_threshold/components/lazy_alert_flyout';
 import { INFRA_EBT_ACTIONS, INFRA_EBT_DETAILS } from '../../../common/ebt_constants';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { LOGS_APP_MENU_ORDER } from './menu_items';
@@ -33,33 +33,39 @@ const MANAGE_RULES_LABEL = i18n.translate('xpack.infra.alerting.logs.manageAlert
   defaultMessage: 'Manage rules',
 });
 
-const READ_ONLY_CREATE_ALERT_TITLE = i18n.translate(
-  'xpack.infra.logs.alertDropdown.readOnlyCreateAlertTitle',
-  {
-    defaultMessage: 'Read only',
-  }
-);
+const CREATE_RULE_BLOCKERS = {
+  readOnly: {
+    title: i18n.translate('xpack.infra.logs.alertDropdown.readOnlyCreateAlertTitle', {
+      defaultMessage: 'Read only',
+    }),
+    content: i18n.translate('xpack.infra.logs.alertDropdown.readOnlyCreateAlertContent', {
+      defaultMessage: 'Creating alerts requires more permissions in this application.',
+    }),
+  },
+  inlineLogView: {
+    title: i18n.translate('xpack.infra.logs.alertDropdown.inlineLogViewCreateAlertTitle', {
+      defaultMessage: 'Inline Log View',
+    }),
+    content: i18n.translate('xpack.infra.logs.alertDropdown.inlineLogViewCreateAlertContent', {
+      defaultMessage: 'Creating alerts is not supported with inline Log Views',
+    }),
+  },
+} as const;
 
-const READ_ONLY_CREATE_ALERT_CONTENT = i18n.translate(
-  'xpack.infra.logs.alertDropdown.readOnlyCreateAlertContent',
-  {
-    defaultMessage: 'Creating alerts requires more permissions in this application.',
+export const getCreateRuleBlocker = ({
+  readOnly,
+  isPersistedLogView,
+}: {
+  readOnly: boolean;
+  isPersistedLogView: boolean;
+}): (typeof CREATE_RULE_BLOCKERS)[keyof typeof CREATE_RULE_BLOCKERS] | undefined => {
+  if (readOnly) {
+    return CREATE_RULE_BLOCKERS.readOnly;
   }
-);
-
-const INLINE_LOG_VIEW_CREATE_ALERT_TITLE = i18n.translate(
-  'xpack.infra.logs.alertDropdown.inlineLogViewCreateAlertTitle',
-  {
-    defaultMessage: 'Inline Log View',
+  if (!isPersistedLogView) {
+    return CREATE_RULE_BLOCKERS.inlineLogView;
   }
-);
-
-const INLINE_LOG_VIEW_CREATE_ALERT_CONTENT = i18n.translate(
-  'xpack.infra.logs.alertDropdown.inlineLogViewCreateAlertContent',
-  {
-    defaultMessage: 'Creating alerts is not supported with inline Log Views',
-  }
-);
+};
 
 export interface LogsAppHeaderMenuOptions {
   extraItems?: AppHeaderMenu['items'];
@@ -86,7 +92,7 @@ export function useLogsAppHeaderMenu(
   const [isAlertFlyoutVisible, setIsAlertFlyoutVisible] = useState(false);
 
   const readOnly = !application?.capabilities?.logs?.save;
-  const canCreateAlerts = (!readOnly && isPersistedLogView) ?? false;
+  const createRuleBlocker = getCreateRuleBlocker({ readOnly, isPersistedLogView });
   const manageRulesLinkProps = observability.useRulesLink({
     hrefOnly: true,
   });
@@ -102,17 +108,9 @@ export function useLogsAppHeaderMenu(
         id: 'createRule',
         label: CREATE_RULE_LABEL,
         iconType: 'bell',
-        disableButton: !canCreateAlerts,
-        tooltipTitle: !canCreateAlerts
-          ? readOnly
-            ? READ_ONLY_CREATE_ALERT_TITLE
-            : INLINE_LOG_VIEW_CREATE_ALERT_TITLE
-          : undefined,
-        tooltipContent: !canCreateAlerts
-          ? readOnly
-            ? READ_ONLY_CREATE_ALERT_CONTENT
-            : INLINE_LOG_VIEW_CREATE_ALERT_CONTENT
-          : undefined,
+        disableButton: Boolean(createRuleBlocker),
+        tooltipTitle: createRuleBlocker?.title,
+        tooltipContent: createRuleBlocker?.content,
         ebt: { action: INFRA_EBT_ACTIONS.CREATE_LOG_THRESHOLD_RULE },
         run: () => {
           setIsAlertFlyoutVisible(true);
@@ -120,12 +118,16 @@ export function useLogsAppHeaderMenu(
       },
     ];
 
-    if (manageRulesLinkProps.href) {
+    const manageRulesHref = manageRulesLinkProps.href;
+    if (manageRulesHref) {
       alertItems.push({
         id: 'manageRules',
         label: MANAGE_RULES_LABEL,
         iconType: 'tableOfContents',
-        href: manageRulesLinkProps.href,
+        href: manageRulesHref,
+        run: () => {
+          void application.navigateToUrl(manageRulesHref);
+        },
         ebt: { action: INFRA_EBT_ACTIONS.MANAGE_RULES },
       });
     }
@@ -147,6 +149,9 @@ export function useLogsAppHeaderMenu(
         label: ADD_DATA_LABEL,
         iconType: 'plusCircle',
         href: addDataHref,
+        run: () => {
+          void application.navigateToUrl(addDataHref);
+        },
         order: LOGS_APP_MENU_ORDER.addData,
         ebt: {
           action: INFRA_EBT_ACTIONS.ADD_DATA,
@@ -160,16 +165,16 @@ export function useLogsAppHeaderMenu(
       primaryActionItem,
     };
   }, [
-    canCreateAlerts,
+    application,
+    createRuleBlocker,
     extraItems,
     manageRulesLinkProps.href,
     onboardingLocator,
     primaryActionItem,
-    readOnly,
   ]);
 
   const flyouts = (
-    <AlertFlyout setVisible={setIsAlertFlyoutVisible} visible={isAlertFlyoutVisible} />
+    <LazyAlertFlyout setVisible={setIsAlertFlyoutVisible} visible={isAlertFlyoutVisible} />
   );
 
   return { menu, flyouts };

@@ -53,7 +53,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_results', delay: 15000 });
 
   const {
-    services: { ml, http },
+    services: { application, ml, http },
   } = useKibanaContextForPlugin();
 
   const { logViewStatus } = useLogViewContext();
@@ -226,8 +226,16 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<
     [hasLogAnalysisSetupCapabilities, onOpenSetup]
   );
   const analyzeInMlItem = useMemo(
-    () => (analyzeInMlLink ? [getAnalyzeInMlMenuItem(analyzeInMlLink)] : undefined),
-    [analyzeInMlLink]
+    () =>
+      analyzeInMlLink
+        ? [
+            getAnalyzeInMlMenuItem({
+              href: analyzeInMlLink,
+              navigateToUrl: application.navigateToUrl,
+            }),
+          ]
+        : undefined,
+    [analyzeInMlLink, application.navigateToUrl]
   );
 
   return (

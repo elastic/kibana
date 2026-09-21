@@ -99,20 +99,19 @@ export const LogsPageTemplate: React.FC<LogsPageTemplateProps> = ({
         },
       };
 
+  const hasHeader = Boolean(header);
   // Template noDataConfig replaces children. When AppHeader is mounted, render the
   // onboarding card as body instead so Alerts and Add data stay available.
-  const showOnboarding = Boolean(header) && !hasData && !isDataLoading && noDataConfig;
-  const pinHeaderOnEmpty = Boolean(header) && Boolean(isEmptyState) && !showOnboarding;
-  const pinHeader = Boolean(header);
+  const showOnboarding = hasHeader && !hasData && !isDataLoading && Boolean(noDataConfig);
 
   return (
     <PageTemplate
       data-test-subj={hasData ? _dataTestSubj : 'noDataPage'}
-      noDataConfig={header ? undefined : noDataConfig}
+      noDataConfig={hasHeader ? undefined : noDataConfig}
       isPageDataLoaded={isDataLoading === false}
-      isEmptyState={pinHeader ? undefined : isEmptyState}
+      isEmptyState={hasHeader ? undefined : isEmptyState}
       pageSectionProps={
-        pinHeader
+        hasHeader
           ? {
               paddingSize: 'none',
               contentProps: {
@@ -125,23 +124,49 @@ export const LogsPageTemplate: React.FC<LogsPageTemplateProps> = ({
       {...pageTemplateProps}
     >
       {header}
-      {showOnboarding && noDataConfig ? (
-        <NoDataPage {...noDataConfig} />
-      ) : pinHeaderOnEmpty ? (
-        <EuiPageSection alignment="center" grow>
-          {children}
-        </EuiPageSection>
-      ) : pinHeader ? (
-        <EuiPageSection
-          paddingSize="l"
-          restrictWidth={false}
-          contentProps={{ css: headerPageBodyCss }}
-        >
-          {children}
-        </EuiPageSection>
-      ) : (
-        children
-      )}
+      {renderHeaderAwareBody({
+        children,
+        hasHeader,
+        isEmptyState,
+        noDataConfig,
+        showOnboarding,
+      })}
     </PageTemplate>
+  );
+};
+
+const renderHeaderAwareBody = ({
+  children,
+  hasHeader,
+  isEmptyState,
+  noDataConfig,
+  showOnboarding,
+}: {
+  children: React.ReactNode;
+  hasHeader: boolean;
+  isEmptyState?: boolean;
+  noDataConfig?: NoDataConfig;
+  showOnboarding: boolean;
+}): React.ReactNode => {
+  if (!hasHeader) {
+    return children;
+  }
+
+  if (showOnboarding && noDataConfig) {
+    return <NoDataPage {...noDataConfig} />;
+  }
+
+  if (isEmptyState) {
+    return (
+      <EuiPageSection alignment="center" grow>
+        {children}
+      </EuiPageSection>
+    );
+  }
+
+  return (
+    <EuiPageSection paddingSize="l" restrictWidth={false} contentProps={{ css: headerPageBodyCss }}>
+      {children}
+    </EuiPageSection>
   );
 };

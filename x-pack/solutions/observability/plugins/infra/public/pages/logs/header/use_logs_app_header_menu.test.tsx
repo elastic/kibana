@@ -46,6 +46,7 @@ function collectEbt(
 }
 
 const mockGetRedirectUrl = jest.fn(() => '/app/observabilityOnboarding');
+const mockNavigateToUrl = jest.fn();
 const mockCapabilities = {
   logs: { save: true },
 };
@@ -56,7 +57,7 @@ const mockLogView = {
 jest.mock('../../../hooks/use_kibana', () => ({
   useKibanaContextForPlugin: () => ({
     services: {
-      application: { capabilities: mockCapabilities },
+      application: { capabilities: mockCapabilities, navigateToUrl: mockNavigateToUrl },
       observability: {
         useRulesLink: () => ({ href: '/app/observability/alerts/rules' }),
       },
@@ -90,6 +91,7 @@ function findItem(
 describe('useLogsAppHeaderMenu', () => {
   beforeEach(() => {
     mockGetRedirectUrl.mockClear();
+    mockNavigateToUrl.mockClear();
     mockCapabilities.logs.save = true;
     mockLogView.isPersistedLogView = true;
   });
@@ -111,6 +113,7 @@ describe('useLogsAppHeaderMenu', () => {
       expect.objectContaining({
         id: 'addData',
         href: '/app/observabilityOnboarding',
+        run: expect.any(Function),
         order: LOGS_APP_MENU_ORDER.addData,
         ebt: {
           action: INFRA_EBT_ACTIONS.ADD_DATA,
@@ -123,7 +126,9 @@ describe('useLogsAppHeaderMenu', () => {
   });
 
   it('keeps Analyze in ML ahead of Alerts and Add data', () => {
-    const extraItems = [getAnalyzeInMlMenuItem('/app/ml')];
+    const extraItems = [
+      getAnalyzeInMlMenuItem({ href: '/app/ml', navigateToUrl: mockNavigateToUrl }),
+    ];
     const { result } = renderHook(() => useLogsAppHeaderMenu({ extraItems }));
     const { menu } = result.current;
 
@@ -131,11 +136,17 @@ describe('useLogsAppHeaderMenu', () => {
       expect.objectContaining({
         id: 'analyzeInMl',
         href: '/app/ml',
+        run: expect.any(Function),
         testId: 'infraAnalyzeInMlButtonAnalyzeInMlButton',
         order: LOGS_APP_MENU_ORDER.analyzeInMl,
         ebt: { action: INFRA_EBT_ACTIONS.ANALYZE_IN_ML },
       })
     );
+    const analyzeInMl = findItem(menu.items, 'analyzeInMl');
+    const analyzeInMlRun = analyzeInMl && 'run' in analyzeInMl ? analyzeInMl.run : undefined;
+    analyzeInMlRun?.();
+    expect(mockNavigateToUrl).toHaveBeenCalledWith('/app/ml');
+
     expect(findItem(menu.items, 'analyzeInMl')?.order).toBeLessThan(
       findItem(menu.items, 'alerts')?.order ?? Number.POSITIVE_INFINITY
     );
@@ -213,7 +224,7 @@ describe('useLogsAppHeaderMenu', () => {
     );
   });
 
-  it('opens the log threshold flyout from create rule', () => {
+  it('opens the log threshold flyout from create rule', async () => {
     const { result, rerender } = renderHook(() => useLogsAppHeaderMenu());
     const alerts = findItem(result.current.menu.items, 'alerts');
     const createRule = alerts && 'items' in alerts ? alerts.items?.[0] : undefined;
@@ -225,7 +236,9 @@ describe('useLogsAppHeaderMenu', () => {
     });
     rerender();
 
-    expect(render(result.current.flyouts).getByTestId('logsAlertFlyout')).toBeInTheDocument();
+    expect(
+      await render(result.current.flyouts).findByTestId('logsAlertFlyout')
+    ).toBeInTheDocument();
   });
 
   it('sets ebt.action on every default menu item', () => {

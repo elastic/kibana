@@ -64,12 +64,22 @@ export function getRecreateMlJobPrimaryAction({
   };
 }
 
-export function getAnalyzeInMlMenuItem(href: string): NonNullable<AppHeaderMenu['items']>[number] {
+export function getAnalyzeInMlMenuItem({
+  href,
+  navigateToUrl,
+}: {
+  href: string;
+  navigateToUrl: (url: string) => void | Promise<void>;
+}): NonNullable<AppHeaderMenu['items']>[number] {
   return {
     id: 'analyzeInMl',
     label: ANALYZE_IN_ML_LABEL,
     iconType: 'machineLearningApp',
     href,
+    // href + run lets AppMenu use getLinkProps so left-click is SPA navigation.
+    run: () => {
+      void navigateToUrl(href);
+    },
     testId: 'infraAnalyzeInMlButtonAnalyzeInMlButton',
     order: LOGS_APP_MENU_ORDER.analyzeInMl,
     ebt: { action: INFRA_EBT_ACTIONS.ANALYZE_IN_ML },
