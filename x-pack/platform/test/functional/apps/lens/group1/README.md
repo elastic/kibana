@@ -29,14 +29,7 @@ They remain here because Scout cannot reproduce the cross-cluster-search run yet
 
 ## Running Locally
 
-Stateful coverage is in Scout:
-
-```bash
-node scripts/scout.js start-server --arch stateful --domain classic
-
-node scripts/playwright test --project local \
-  --config x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel.playwright.config.ts
-```
+Stateful coverage is in Scout: `x-pack/platform/plugins/shared/lens/test/scout/smokescreen`
 
 The files left in this directory only run in the cross-cluster-search config, so there is no
 group-specific FTR config anymore. Run them through `config.ccs.ts`:
