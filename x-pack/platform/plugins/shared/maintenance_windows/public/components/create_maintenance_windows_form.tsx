@@ -104,10 +104,13 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
   const userConfirmedSaveWithoutScopeRef = useRef(false);
   const { defaultTimezone } = useDefaultTimezone();
 
-  const alertingV1 = useMaintenanceWindowScope(initialValue?.scope?.alerting);
-  const alertingV2 = useMaintenanceWindowScope(initialValue?.scope?.alertingV2);
-
   const isEditMode = initialValue !== undefined && maintenanceWindowId !== undefined;
+
+  // Create mode preselects the Alerts scope with no filter so an untouched form matches the
+  // API default (`scope ?? { alerting: { enabled: true } }`) and the MV5 saved-object backfill.
+  // Edit mode reads from `initialValue` as before. `null` = selected with no filter (hook contract).
+  const alertingV1 = useMaintenanceWindowScope(isEditMode ? initialValue?.scope?.alerting : null);
+  const alertingV2 = useMaintenanceWindowScope(initialValue?.scope?.alertingV2);
 
   // Destructure stable setter references so the callback doesn't rebuild on every keystroke.
   const { setErrors: setAlertingV1Errors } = alertingV1;
@@ -196,7 +199,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
           recurringSchedule: formData.recurringSchedule,
         }),
         // Always send scope so an explicit "no scope" ({}) reaches the server instead of
-        // triggering the server default { alerting: null } which suppresses all v1 alerts.
+        // falling through to the server default `scope ?? { alerting: { enabled: true } }`.
         scope,
         ...(showMultipleSolutionsWarning || v1Payload ? { categoryIds: null } : {}),
       } as Parameters<typeof createMaintenanceWindow>[0];

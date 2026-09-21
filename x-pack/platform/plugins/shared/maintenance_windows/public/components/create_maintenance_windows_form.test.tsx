@@ -169,7 +169,7 @@ describe('CreateMaintenanceWindowForm', () => {
     expect(timezoneInput).toHaveValue('America/Los_Angeles');
   });
 
-  it('should initialize the form when no initialValue provided', () => {
+  it('should initialize the form when no initialValue provided', async () => {
     const result = appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
 
     const titleInput = within(result.getByTestId('title-field')).getByTestId(
@@ -188,6 +188,12 @@ describe('CreateMaintenanceWindowForm', () => {
     expect(dateInputs[0]).not.toHaveValue('');
     expect(dateInputs[1]).not.toHaveValue('');
     expect(recurringInput).not.toBeChecked();
+
+    // Alerts (v1) defaults ON; Episodes (v2) stays OFF.
+    await waitFor(() => {
+      expect(result.getByTestId('maintenanceWindowScopedQuerySwitch')).toBeChecked();
+    });
+    expect(result.getByTestId('alertingV2ScopedQuerySwitch')).not.toBeChecked();
   });
 
   it('should prefill the form when provided with initialValue', async () => {
@@ -272,17 +278,37 @@ describe('CreateMaintenanceWindowForm', () => {
   describe('confirmation modal for saving without filters', () => {
     const user = userEvent.setup({ delay: null });
 
-    const fillTitleAndSubmit = async () => {
+    const fillTitle = async () => {
       const titleInput = await screen.findByTestId('createMaintenanceWindowFormNameInput');
       await user.click(titleInput);
       await user.paste('My window');
-      await user.click(screen.getByTestId('create-submit'));
     };
 
-    it('calls create when user confirms save without filters modal', async () => {
+    it('does not show the modal and creates with default scope when Alerts is on', async () => {
+      // Alerts defaults ON — submitting without touching toggles must skip the modal.
       appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
 
-      await fillTitleAndSubmit();
+      await fillTitle();
+      await user.click(screen.getByTestId('create-submit'));
+
+      await waitFor(() => {
+        expect(createMutate).toHaveBeenCalledTimes(1);
+        expect(createMutate.mock.calls[0][0]).toMatchObject({
+          title: 'My window',
+          scope: { alerting: { enabled: true } },
+        });
+      });
+      expect(screen.queryByTestId('saveWithoutFiltersConfirmModal')).not.toBeInTheDocument();
+    });
+
+    it('calls create when user toggles Alerts off then confirms save without filters modal', async () => {
+      appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
+
+      await fillTitle();
+      // Turn v1 off so the "no scope" path is reached.
+      await user.click(await screen.findByTestId('maintenanceWindowScopedQuerySwitch'));
+
+      await user.click(screen.getByTestId('create-submit'));
 
       const modal = await screen.findByTestId('saveWithoutFiltersConfirmModal');
       await user.click(within(modal).getByRole('button', { name: 'Save without scope' }));
@@ -300,7 +326,10 @@ describe('CreateMaintenanceWindowForm', () => {
     it('does not call create when user cancels save without filters modal', async () => {
       appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
 
-      await fillTitleAndSubmit();
+      await fillTitle();
+      // Turn v1 off first so the modal appears.
+      await user.click(await screen.findByTestId('maintenanceWindowScopedQuerySwitch'));
+      await user.click(screen.getByTestId('create-submit'));
 
       const modal = await screen.findByTestId('saveWithoutFiltersConfirmModal');
       await user.click(within(modal).getByRole('button', { name: 'Cancel' }));
@@ -326,10 +355,12 @@ describe('CreateMaintenanceWindowForm', () => {
 
     beforeEach(() => {
       // Switch to mockImplementation so we can capture the onError callback.
-      useCreateMaintenanceWindow.mockImplementation((props?: { onError?: (e: unknown) => void }) => {
-        capturedOnError = props?.onError;
-        return { mutate: createMutate, isLoading: false };
-      });
+      useCreateMaintenanceWindow.mockImplementation(
+        (props?: { onError?: (e: unknown) => void }) => {
+          capturedOnError = props?.onError;
+          return { mutate: createMutate, isLoading: false };
+        }
+      );
     });
 
     const buildError = (scopeErrors: Array<{ scope: string; message: string }>) => ({
@@ -355,7 +386,7 @@ describe('CreateMaintenanceWindowForm', () => {
             recurring: false,
             scope: {
               alerting: { kql: 'kibana.alert.rule.name : "x"', filters: [], dsl: '{}' },
-              alertingV2: { kql: 'bad_kql:' },
+              alertingV2: { enabled: true, kql: 'bad_kql:' },
             },
           }}
           maintenanceWindowId="fake_mw_id"
@@ -374,11 +405,7 @@ describe('CreateMaintenanceWindowForm', () => {
     });
 
     it('shows "Invalid scoped query." under the alerts (v1) field when attributes name alerting', async () => {
-      appMockRenderer.render(
-        <CreateMaintenanceWindowForm
-          {...formPropsForEditMode}
-        />
-      );
+      appMockRenderer.render(<CreateMaintenanceWindowForm {...formPropsForEditMode} />);
 
       expect(capturedOnError).toBeDefined();
       capturedOnError!(buildError([{ scope: 'alerting', message: 'parse error' }]));

@@ -127,6 +127,28 @@ test.describe('Maintenance window create form', { tag: tags.stateful.classic }, 
     await page.testSubj.locator('recurringScheduleAfterXOccurenceInput').fill('5');
 
     await page.testSubj.click(SUBMIT_BUTTON);
+    // Alerts defaults ON so the MW is created immediately without the confirmation modal.
+
+    await expect(page.testSubj.locator(TOAST_TITLE)).toContainText(
+      `Created maintenance window '${name}'`
+    );
+  });
+
+  test('shows confirmation modal when Alerts is toggled off before submitting', async ({
+    page,
+  }) => {
+    const name = getUniqueMaintenanceWindowName('No Scope Maintenance Window');
+    createdMaintenanceWindowTitles.push(name);
+
+    await page.testSubj.click(CREATE_BUTTON);
+    await expect(page.testSubj.locator(CREATE_FORM)).toBeVisible();
+
+    await page.testSubj.locator(NAME_INPUT).fill(name);
+
+    // Turn Alerts off so there is no scope selected.
+    await page.testSubj.click('maintenanceWindowScopedQuerySwitch');
+
+    await page.testSubj.click(SUBMIT_BUTTON);
     // No scope is selected, so the "save without scope" confirmation modal appears.
     await page.testSubj.click('confirmModalConfirmButton');
 
@@ -144,7 +166,7 @@ test.describe('Maintenance window create form', { tag: tags.stateful.classic }, 
 
     await page.testSubj.locator(NAME_INPUT).fill(name);
 
-    await page.testSubj.click('maintenanceWindowScopedQuerySwitch');
+    // Alerts toggle is ON by default — the filter panel is already expanded.
     await expect(page.testSubj.locator('maintenanceWindowScopeQuery')).toBeVisible();
 
     // Without a scope query, the multi-solution warning callout is not shown.
