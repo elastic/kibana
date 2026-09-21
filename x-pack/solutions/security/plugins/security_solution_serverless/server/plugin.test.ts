@@ -69,9 +69,9 @@ jest.mock('./cloud_security/cloud_security_metering_task_config', () => ({
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-const createMinimalSetupDeps = (
-  alertzero?: { isEnabled: boolean }
-): SecuritySolutionServerlessPluginSetupDeps =>
+const createMinimalSetupDeps = (alertzero?: {
+  isEnabled: boolean;
+}): SecuritySolutionServerlessPluginSetupDeps =>
   ({
     security: {} as SecuritySolutionServerlessPluginSetupDeps['security'],
     securitySolution: {
