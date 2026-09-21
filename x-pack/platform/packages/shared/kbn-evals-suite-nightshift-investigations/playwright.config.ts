@@ -17,7 +17,8 @@ if (selection && !['all', 'investigate-lite', 'synthetic-smoke'].includes(select
 
 export default createPlaywrightEvalsConfig({
   testDir: Path.resolve(__dirname, './evals'),
-  timeout: 55 * 60_000,
+  // The smoke eval keeps its original fail-fast timeout; only the golden run needs the long one.
+  timeout: selection === 'synthetic-smoke' ? 10 * 60_000 : 55 * 60_000,
   testIgnore:
     process.env.NIGHTSHIFT_DATASETS === 'synthetic-smoke' ? '**/golden/**' : '**/smoke/**',
 });
