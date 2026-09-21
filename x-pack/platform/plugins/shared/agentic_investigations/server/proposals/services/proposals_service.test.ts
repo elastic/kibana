@@ -969,6 +969,17 @@ describe('ProposalsService', () => {
      * erase an expired proposal from the buckets in which it was genuinely open,
      * so the same past bucket would answer differently on every refetch.
      */
+    it('should filter superseded proposals from all four queries', async () => {
+      const storage = createStorage();
+      const { service } = createService(storage);
+
+      await service.chartsSummary(chartsQuery, SPACE_ID);
+
+      for (const query of issuedQueries(storage)) {
+        expect(query).toContain('supersededBy IS NULL');
+      }
+    });
+
     it('should not filter any query on request-time expiry', async () => {
       const storage = createStorage();
       const { service } = createService(storage);

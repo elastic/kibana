@@ -266,16 +266,16 @@ export class ProposalsService {
     let expiriesResponse;
     try {
       [anchorResponse, opensResponse, closesResponse, expiriesResponse] = await Promise.all([
-        // TODO(#19258): once `supersededBy` exists, add `AND supersededBy IS NULL`
-        // to all four queries, so a superseded proposal is not counted alongside
-        // its replacement.
-        //
         // `COALESCE(category, …)` in every query: a proposal with no action has no
         // category, and a bare `BY category` would drop it from the aggregation —
         // and, under `drop_null_columns`, drop the column outright when no row has
         // one, zeroing the whole chart.
+        //
+        // `supersededBy IS NULL` in every query: a proposal that was superseded by a
+        // retry clone should not appear alongside its replacement in the chart counts.
         this.deps.storage.esql({
           pipeline: esql`WHERE spaceId == ${{ spaceId }}
+          AND supersededBy IS NULL
           AND createdAt < TO_DATETIME(${{ wsAnchorCreated: windowStartIso }})
           AND (decidedAt IS NULL OR decidedAt >= TO_DATETIME(${{
             wsAnchorDecided: windowStartIso,
@@ -290,6 +290,7 @@ export class ProposalsService {
 
         this.deps.storage.esql({
           pipeline: esql`WHERE spaceId == ${{ spaceId }}
+          AND supersededBy IS NULL
           AND createdAt >= TO_DATETIME(${{ wsOpensFilter: windowStartIso }})
         | EVAL idx = FLOOR(DATE_DIFF("minutes", TO_DATETIME(${{
           wsOpensDiff: windowStartIso,
@@ -302,6 +303,7 @@ export class ProposalsService {
 
         this.deps.storage.esql({
           pipeline: esql`WHERE spaceId == ${{ spaceId }}
+          AND supersededBy IS NULL
           AND decidedAt IS NOT NULL
           AND decidedAt >= TO_DATETIME(${{ wsClosesFilter: windowStartIso }})
         | EVAL idx = FLOOR(DATE_DIFF("minutes", TO_DATETIME(${{
@@ -317,6 +319,7 @@ export class ProposalsService {
         // decremented once, by the closes query, rather than by both.
         this.deps.storage.esql({
           pipeline: esql`WHERE spaceId == ${{ spaceId }}
+          AND supersededBy IS NULL
           AND decidedAt IS NULL
           AND expiresAt IS NOT NULL
           AND expiresAt >= TO_DATETIME(${{ wsExpiriesFilter: windowStartIso }})
