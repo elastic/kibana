@@ -186,10 +186,10 @@ function getCustomOrderAgg(
   }
 
   if (rankBy.operation === 'last_value') {
-    // `time_field` maps to the state `sortField` (the date field the last value is sorted by), which
-    // IS read at render (`last_value.tsx` `toEsAggsFn` passes it to `aggTopMetrics`/`aggTopHit`). It is
-    // optional on the API: when omitted the order-agg has no `sortField` and the panel cannot render
-    // until re-saved from the editor. This solution was needed to avoid a breaking change in the API.
+    // `time_field` maps to the state `sortField` (the date field the last value is sorted by) and is
+    // read at render. It is optional on the API: when omitted, the render path falls back to the data
+    // view's default time field to sort, and the editor prompts the user to re-save to persist it.
+    // This solution was needed to avoid a breaking change in the API.
     const orderAgg: FieldBasedIndexPatternColumn & { params?: { sortField?: string } } = {
       operationType: rankBy.operation,
       sourceField: rankBy.field,
