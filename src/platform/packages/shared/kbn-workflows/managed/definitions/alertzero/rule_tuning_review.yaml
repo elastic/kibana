@@ -626,9 +626,10 @@ steps:
         Proposed query preview errors: {{ steps.record_preview_outcome.output.proposed_error_text }}
         {% endif %}
         {% else %}
-        This rule is not a query rule, or uses a data view, timestamp override, or
-        alert suppression, so the proposed query is not previewed or applied automatically.
-        Approving marks these alerts acknowledged; apply the change manually in the Detection Rules UI.
+        No backtest: this rule is not a query rule, or uses a data view, timestamp
+        override, or alert suppression, which the preview API cannot reproduce.
+        Approving still applies the proposed query, so judge it on the query itself
+        and the false positives above rather than on a simulated alert count.
         {% endif %}
         {% endif %}
 
@@ -811,8 +812,10 @@ steps:
 
   # An approved change the pipeline does not apply itself is the analyst's to act
   # on. Tagging retires these alerts so later sweeps do not re-open the same gate;
-  # the rule returns once new false positives accumulate past the watermark. The
-  # auto-apply path stays untagged when its apply fell through, so a later sweep can retry with current data.
+  # the rule returns once new false positives accumulate past the watermark. An
+  # action path whose apply fell through stays untagged instead, so a later sweep
+  # can retry it with current data. A query change with no backtest is not this
+  # case: it carries the edit-rule action like any other and is tagged applied.
   # Keyed on the proposal rather than on the change type: `propose_manual` is the
   # switch's default arm, so it is the one that ran for `manual` and for any value
   # the three action arms did not match. Testing the change type here would leave

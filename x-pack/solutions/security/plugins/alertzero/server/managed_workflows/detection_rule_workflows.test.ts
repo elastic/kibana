@@ -759,7 +759,12 @@ describe('detection rule workflows', () => {
         expect(String(action.if)).not.toContain('record_preview_outcome');
         expect(comment).toContain('{% if steps.can_preview_query_change.output.supported %}');
         expect(comment).toContain('inconclusive');
-        expect(comment).toContain('not previewed or applied automatically');
+        // The unbacktested branch must not promise a manual handoff. The query arm
+        // carries the edit-rule action whether or not the preview ran, so approving
+        // applies the change and the alerts are tagged applied, not acknowledged.
+        expect(comment).toContain('Approving still applies the proposed query');
+        expect(comment).not.toContain('not previewed or applied automatically');
+        expect(comment).not.toContain('marks these alerts acknowledged');
       });
 
       // A skipped step renders as nil, so `nil == 'succeeded'` is false and the
