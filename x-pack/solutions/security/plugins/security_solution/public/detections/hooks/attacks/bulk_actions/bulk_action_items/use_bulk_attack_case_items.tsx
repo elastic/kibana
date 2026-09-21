@@ -49,9 +49,22 @@ export const useBulkAttackCaseItems = ({
     [canCreateAndReadCases]
   );
 
+  const onAddToCaseSuccess = useCallback(
+    (isNewCase: boolean) => {
+      if (telemetrySource) {
+        telemetry.reportEvent(AttacksEventTypes.ActionAddedToCase, {
+          source: telemetrySource,
+          action: isNewCase ? 'add_to_new_case' : 'add_to_existing_case',
+        });
+      }
+    },
+    [telemetry, telemetrySource]
+  );
+
   const { onAddToCase, disabled } = useAddToCase({
     canUserCreateAndReadCases,
     onClick: onCasesAdd,
+    onSuccess: onAddToCaseSuccess,
     title,
   });
 
@@ -70,17 +83,10 @@ export const useBulkAttackCaseItems = ({
         })
         .filter((comment): comment is string => comment != null);
 
-      if (telemetrySource) {
-        telemetry.reportEvent(AttacksEventTypes.ActionAddedToCase, {
-          source: telemetrySource,
-          action: 'add_to_case',
-        });
-      }
-
       onAddToCase({ alertIds, markdownComments });
       closePopover?.();
     },
-    [closePopover, onAddToCase, telemetry, telemetrySource]
+    [closePopover, onAddToCase]
   );
 
   const items = useMemo<BulkActionsConfig[]>(

@@ -128,21 +128,31 @@ describe('useBulkAttackCaseItems', () => {
     expect(closePopover).toHaveBeenCalled();
   });
 
-  it('reports the singular add-to-case telemetry action', async () => {
-    const { result } = renderHook(() =>
-      useBulkAttackCaseItems({
-        telemetrySource: 'attacks_page_group_take_action',
-        title,
-      })
-    );
+  it.each([
+    { isNewCase: true, action: 'add_to_new_case' },
+    { isNewCase: false, action: 'add_to_existing_case' },
+  ] as const)(
+    'reports $action telemetry after the case is added',
+    async ({ isNewCase, action }) => {
+      const { result } = renderHook(() =>
+        useBulkAttackCaseItems({
+          telemetrySource: 'attacks_page_group_take_action',
+          title,
+        })
+      );
 
-    await act(async () => {
-      await result.current.items[0].onClick?.(alertItems, false, jest.fn(), jest.fn(), jest.fn());
-    });
+      await act(async () => {
+        await result.current.items[0].onClick?.(alertItems, false, jest.fn(), jest.fn(), jest.fn());
+      });
+      expect(reportEvent).not.toHaveBeenCalled();
 
-    expect(reportEvent).toHaveBeenCalledWith(AttacksEventTypes.ActionAddedToCase, {
-      source: 'attacks_page_group_take_action',
-      action: 'add_to_case',
-    });
-  });
+      const { onSuccess } = useAddToCase.mock.calls[0][0];
+      onSuccess(isNewCase);
+
+      expect(reportEvent).toHaveBeenCalledWith(AttacksEventTypes.ActionAddedToCase, {
+        source: 'attacks_page_group_take_action',
+        action,
+      });
+    }
+  );
 });

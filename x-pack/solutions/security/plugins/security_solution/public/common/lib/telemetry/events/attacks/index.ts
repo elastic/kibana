@@ -101,7 +101,7 @@ export const attacksActionAddedToCaseEvent: AttacksTelemetryEvent = {
     action: {
       type: 'keyword',
       _meta: {
-        description: 'The case action (add_to_case)',
+        description: 'The case action (add_to_new_case/add_to_existing_case)',
         optional: false,
       },
     },

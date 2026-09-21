@@ -109,6 +109,37 @@ describe('useAddToCase', () => {
     ]);
   });
 
+  it.each([true, false])('forwards the case path on success when isNewCase is %s', (isNewCase) => {
+    const onSuccess = jest.fn();
+    const useCasesAddToExistingCaseModal = jest.fn().mockReturnValue({
+      open: jest.fn(),
+    });
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        cases: {
+          hooks: {
+            useCasesAddToExistingCaseModal,
+          },
+        },
+      },
+    });
+
+    renderHook(
+      () =>
+        useAddToCase({
+          canUserCreateAndReadCases: mockCanUserCreateAndReadCases,
+          onSuccess,
+          title: mockTitle,
+        }),
+      { wrapper: TestProviders }
+    );
+
+    const { onSuccess: onCaseSelectorSuccess } = useCasesAddToExistingCaseModal.mock.calls[0][0];
+    onCaseSelectorSuccess({}, isNewCase);
+
+    expect(onSuccess).toHaveBeenCalledWith(isNewCase);
+  });
+
   it('preserves the create-case prefill in the selector modal', () => {
     const useCasesAddToExistingCaseModal = jest.fn().mockReturnValue({
       open: jest.fn(),

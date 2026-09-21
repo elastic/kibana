@@ -17,7 +17,7 @@ import * as i18n from './translations';
 interface Props {
   canUserCreateAndReadCases: () => boolean;
   onClick?: () => void;
-  onSuccess?: () => void;
+  onSuccess?: (isNewCase: boolean) => void;
   title: string;
 }
 
@@ -54,7 +54,7 @@ export const useAddToCase = ({
       },
     },
     onClose: onClick,
-    onSuccess,
+    onSuccess: (_theCase, isNewCase) => onSuccess?.(isNewCase),
     successToaster: {
       content: i18n.ADD_TO_CASE_SUCCESS,
     },
