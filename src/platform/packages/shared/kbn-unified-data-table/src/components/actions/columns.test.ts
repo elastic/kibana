@@ -71,6 +71,12 @@ describe('Test column actions', () => {
       sort: [],
     });
     setAppState.mockClear();
+    actions.onRemoveColumns(['first', 'second']);
+    expect(setAppState).toHaveBeenCalledWith({
+      columns: [],
+      sort: [],
+    });
+    setAppState.mockClear();
     actions.onSetColumns(['first', 'second', 'third'], true);
     expect(setAppState).toHaveBeenCalledWith({
       columns: ['first', 'second', 'third'],

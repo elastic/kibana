@@ -130,6 +130,10 @@ export interface DiscoverSidebarResponsiveProps {
    */
   onRemoveField: (fieldName: string) => void;
   /**
+   * Callback to remove multiple field columns from the table in a single update
+   */
+  onRemoveFields?: (fieldNames: string[]) => void;
+  /**
    * Currently selected data view
    */
   selectedDataView?: DataView;
@@ -187,6 +191,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     onChangeDataView,
     onAddField,
     onRemoveField,
+    onRemoveFields,
     sidebarToggleState$,
     additionalFilters,
   } = props;
@@ -369,6 +374,22 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     [onRemoveField]
   );
 
+  const onRemoveFieldsFromWorkspace = useCallback(
+    (fields: DataViewField[]) => {
+      const fieldNames = fields.map((field) => field.name);
+
+      if (onRemoveFields) {
+        onRemoveFields(fieldNames);
+        return;
+      }
+
+      fieldNames.forEach((fieldName) => {
+        onRemoveField(fieldName);
+      });
+    },
+    [onRemoveField, onRemoveFields]
+  );
+
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const isSidebarCollapsed = useObservable(
     unifiedFieldListSidebarContainerApi?.sidebarVisibility.isCollapsed$ ?? of(false),
@@ -448,6 +469,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             onAddFilter={onAddFilter}
             onFieldEdited={onFieldEdited}
             onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
+            onRemoveFieldsFromWorkspace={onRemoveFieldsFromWorkspace}
             prependInFlyout={prependDataViewPickerForMobile}
             ref={initializeUnifiedFieldListSidebarContainerApi}
             services={services}

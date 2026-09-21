@@ -82,6 +82,10 @@ export type UnifiedFieldListSidebarCustomizableProps = Pick<
    * Prop to pass additional field groups to the field list
    */
   additionalFieldGroups?: AdditionalFieldGroups;
+  /**
+   * Remove multiple selected fields from the workspace in a single update
+   */
+  onRemoveFieldsFromWorkspace?: (fields: DataViewField[]) => void;
 };
 
 interface UnifiedFieldListSidebarInternalProps {
@@ -165,6 +169,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   onAddBreakdownField,
   onAddFieldToWorkspace,
   onRemoveFieldFromWorkspace,
+  onRemoveFieldsFromWorkspace,
   onAddFilter,
   onSelectedFieldFilter,
   onEditField,
@@ -315,6 +320,25 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
     ]
   );
 
+  const onDeselectSelectedFields = useCallback(() => {
+    const fieldsToRemove = selectedFieldsState.selectedFields.filter(
+      (field) => field.name !== '_source'
+    );
+
+    if (!fieldsToRemove.length) {
+      return;
+    }
+
+    if (onRemoveFieldsFromWorkspace) {
+      onRemoveFieldsFromWorkspace(fieldsToRemove);
+      return;
+    }
+
+    fieldsToRemove.forEach((field) => {
+      onRemoveFieldFromWorkspace?.(field);
+    });
+  }, [onRemoveFieldFromWorkspace, onRemoveFieldsFromWorkspace, selectedFieldsState.selectedFields]);
+
   if (!dataView) {
     return null;
   }
@@ -415,6 +439,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
                 renderFieldItem={renderFieldItem}
                 localStorageKeyPrefix={stateService.creationOptions.localStorageKeyPrefix}
                 muteScreenReader={!isFieldNameSearchFocused}
+                onDeselectSelectedFields={onDeselectSelectedFields}
               />
             ) : (
               <EuiFlexItem grow />

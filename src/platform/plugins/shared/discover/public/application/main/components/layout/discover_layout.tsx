@@ -166,6 +166,7 @@ export function DiscoverLayout() {
     columns: currentColumns,
     onAddColumn,
     onRemoveColumn,
+    onRemoveColumns,
   } = useColumns({
     capabilities,
     defaultOrder: uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
@@ -196,6 +197,16 @@ export function DiscoverLayout() {
       void scopedEBTManager.trackDataTableRemoval({ fieldName: columnName, fieldsMetadata });
     },
     [onRemoveColumn, scopedEBTManager, fieldsMetadata]
+  );
+
+  const onRemoveColumnsWithTracking = useCallback(
+    (columnNames: string[]) => {
+      onRemoveColumns(columnNames);
+      columnNames.forEach((columnName) => {
+        void scopedEBTManager.trackDataTableRemoval({ fieldName: columnName, fieldsMetadata });
+      });
+    },
+    [onRemoveColumns, scopedEBTManager, fieldsMetadata]
   );
 
   // The assistant is getting the state from the url correctly
@@ -429,6 +440,7 @@ export function DiscoverLayout() {
                 onDataViewCreated={onDataViewCreated}
                 onFieldEdited={onFieldEdited}
                 onRemoveField={onRemoveColumnWithTracking}
+                onRemoveFields={onRemoveColumnsWithTracking}
                 selectedDataView={dataView}
                 sidebarToggleState$={sidebarToggleState$}
                 trackUiMetric={trackUiMetric}

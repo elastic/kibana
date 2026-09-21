@@ -48,7 +48,7 @@ export const useColumns = ({
     }
     setUsedColumns(nextColumns);
   }, [columns, usedColumns]);
-  const { onAddColumn, onRemoveColumn, onSetColumns, onMoveColumn } = useMemo(
+  const { onAddColumn, onRemoveColumn, onRemoveColumns, onSetColumns, onMoveColumn } = useMemo(
     () =>
       getStateColumnActions({
         capabilities,
@@ -67,6 +67,7 @@ export const useColumns = ({
     columns: usedColumns,
     onAddColumn,
     onRemoveColumn,
+    onRemoveColumns,
     onMoveColumn,
     onSetColumns,
   };
