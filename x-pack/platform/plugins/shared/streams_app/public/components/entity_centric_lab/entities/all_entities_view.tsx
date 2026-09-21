@@ -648,6 +648,7 @@ const AllEntitiesViewInner = ({
   const phaseVariation = useVariation('phase');
   const isPhase1 = phaseVariation === 'phase1';
   const tableStyleVariation = useVariation('tableStyle') as TableStyleVariation;
+  const dashboardStyleVariation = useVariation('dashboardStyle') as 'embedded' | 'list';
   const scenarioVariation = useVariation('scenario');
   const variationCtx = useVariationContext();
 
@@ -678,8 +679,11 @@ const AllEntitiesViewInner = ({
     setTourStep(0);
   }, []);
 
-  const [transitionCompleted, setTransitionCompleted] = useState(false);
+  const [transitionCompleted, setTransitionCompleted] = useState(
+    () => sessionStorage.getItem('elasticOn_transitionCompleted') === 'true'
+  );
   const handleTransitionSwitch = useCallback(() => {
+    sessionStorage.setItem('elasticOn_transitionCompleted', 'true');
     setTransitionCompleted(true);
   }, []);
 
@@ -708,9 +712,14 @@ const AllEntitiesViewInner = ({
     scenarioVariation === 'banner-user';
   const [bannerDismissed, setBannerDismissed] = useState(false);
 
+  const prevScenarioRef = useRef(scenarioVariation);
   useEffect(() => {
-    setBannerDismissed(false);
-    setTransitionCompleted(false);
+    if (prevScenarioRef.current !== scenarioVariation) {
+      prevScenarioRef.current = scenarioVariation;
+      setBannerDismissed(false);
+      sessionStorage.removeItem('elasticOn_transitionCompleted');
+      setTransitionCompleted(false);
+    }
   }, [scenarioVariation]);
 
   const flyoutSize = detailVariation === 'largeFlyout' ? 'l' : 'm';
@@ -2354,6 +2363,7 @@ const AllEntitiesViewInner = ({
             hideOwnership={isPhase1}
             hideEvents={isPhase1}
             hiddenTabIds={isPhase1 ? ['custom', 'relationships'] : undefined}
+            dashboardStyle={dashboardStyleVariation}
           />
           {childEntityName ? (
             <EntityFlyout
@@ -2377,6 +2387,7 @@ const AllEntitiesViewInner = ({
               hideOwnership={isPhase1}
               hideEvents={isPhase1}
               hiddenTabIds={isPhase1 ? ['custom', 'relationships'] : undefined}
+              dashboardStyle={dashboardStyleVariation}
             />
           ) : null}
         </EntityFlyoutServicesProvider>

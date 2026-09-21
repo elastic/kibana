@@ -7,22 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiBasicTable,
+  EuiButtonEmpty,
   EuiButtonIcon,
+  EuiCheckbox,
+  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiTitle,
   EuiToolTip,
+  useEuiTheme,
   type EuiBasicTableColumn,
   type Criteria,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { LogRow, LogSeverity } from './fake_entity_tabs';
 
@@ -32,120 +34,195 @@ interface LogsTabProps {
 }
 
 export const LogsTab = ({ entityName, logs }: LogsTabProps) => {
+  const { euiTheme } = useEuiTheme();
   const [{ pageIndex, pageSize }, setPagination] = useState({ pageIndex: 0, pageSize: 100 });
+  const [searchText, setSearchText] = useState('');
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  const handleSearchChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setSearchText(e.target.value);
+      setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+    },
+    []
+  );
+
+  const filteredLogs = useMemo(() => {
+    if (!searchText.trim()) return logs;
+    const lower = searchText.toLowerCase();
+    return logs.filter(
+      (row) =>
+        row.summary.toLowerCase().includes(lower) ||
+        row.attribute.toLowerCase().includes(lower) ||
+        row.severity.toLowerCase().includes(lower)
+    );
+  }, [logs, searchText]);
 
   const pageOfItems = useMemo(
-    () => logs.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize),
-    [logs, pageIndex, pageSize]
+    () => filteredLogs.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize),
+    [filteredLogs, pageIndex, pageSize]
   );
+
+  const allPageSelected = pageOfItems.length > 0 && pageOfItems.every((r) => selectedIds.has(r.id));
+
+  const toggleSelectAll = useCallback(() => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (allPageSelected) {
+        for (const row of pageOfItems) next.delete(row.id);
+      } else {
+        for (const row of pageOfItems) next.add(row.id);
+      }
+      return next;
+    });
+  }, [allPageSelected, pageOfItems]);
+
+  const toggleRow = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
 
   const columns = useMemo<Array<EuiBasicTableColumn<LogRow>>>(
     () => [
       {
         field: 'id',
-        name: <EuiIcon type="info" aria-hidden />,
+        name: (
+          <EuiCheckbox
+            id="logs-select-all"
+            checked={allPageSelected}
+            onChange={toggleSelectAll}
+            aria-label="Select all"
+          />
+        ),
         width: '32px',
-        render: () => (
-          <EuiButtonIcon
-            iconType="expand"
-            color="text"
-            aria-label={i18n.translate('entityCentricLabFlyout.flyout.logs.expandRowAriaLabel', {
-              defaultMessage: 'Expand row',
-            })}
+        render: (id: string) => (
+          <EuiCheckbox
+            id={`logs-select-${id}`}
+            checked={selectedIds.has(id)}
+            onChange={() => toggleRow(id)}
+            aria-label={`Select row ${id}`}
           />
         ),
       },
       {
-        field: 'timestamp',
-        name: (
-          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              {i18n.translate('entityCentricLabFlyout.flyout.logs.columns.timestamp', {
-                defaultMessage: '@timestamp',
-              })}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="clock" color="subdued" aria-hidden />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ),
-        width: '230px',
-        sortable: true,
-        render: (timestamp: string) => (
-          <EuiText size="s">
-            <strong>@timestamp</strong> {timestamp}
-          </EuiText>
-        ),
-      },
-      {
-        field: 'severity',
-        name: i18n.translate('entityCentricLabFlyout.flyout.logs.columns.severity', {
-          defaultMessage: 'Severity',
+        field: 'id',
+        name: i18n.translate('entityCentricLabFlyout.flyout.logs.columns.actions', {
+          defaultMessage: 'Actions',
         }),
-        width: '110px',
-        sortable: true,
-        render: (severity: LogSeverity) => (
-          <EuiBadge
-            color={severityBadgeColor(severity)}
-            data-test-subj={`entityCentricLabLogsSeverityBadge-${severity}`}
-          >
-            {severity}
-          </EuiBadge>
-        ),
-      },
-      {
-        field: 'summary',
-        name: (
+        width: '80px',
+        render: () => (
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
-              {i18n.translate('entityCentricLabFlyout.flyout.logs.columns.summary', {
-                defaultMessage: 'Summary',
-              })}
+              <EuiToolTip content="Expand document">
+                <EuiButtonIcon iconType="expand" color="text" size="xs" aria-label="Expand" />
+              </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiToolTip
-                content={i18n.translate(
-                  'entityCentricLabFlyout.flyout.logs.columns.summaryTooltip',
-                  {
-                    defaultMessage:
-                      'A condensed view of the structured log entry — attributes and body text.',
-                  }
-                )}
-                position="top"
-                delay="long"
-              >
-                <EuiButtonIcon
-                  iconType="question"
-                  color="text"
-                  aria-label={i18n.translate(
-                    'entityCentricLabFlyout.flyout.logs.columns.summaryTooltipAriaLabel',
-                    { defaultMessage: 'Show summary column description' }
-                  )}
-                />
+              <EuiToolTip content="Filter for value">
+                <EuiButtonIcon iconType="plusInCircle" color="text" size="xs" aria-label="Filter for" />
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content="Filter out value">
+                <EuiButtonIcon iconType="minusInCircle" color="text" size="xs" aria-label="Filter out" />
               </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
-        render: (summary: string, row: LogRow) => (
+      },
+      {
+        field: 'timestamp',
+        name: i18n.translate('entityCentricLabFlyout.flyout.logs.columns.timestamp', {
+          defaultMessage: '@timestamp',
+        }),
+        width: '200px',
+        sortable: true,
+        render: (timestamp: string) => (
+          <EuiText size="s">{timestamp}</EuiText>
+        ),
+      },
+      {
+        field: 'summary',
+        name: i18n.translate('entityCentricLabFlyout.flyout.logs.columns.summary', {
+          defaultMessage: 'Summary',
+        }),
+        render: (_summary: string, row: LogRow) => (
           <EuiText size="s">
-            <strong>{row.attribute}</strong> {summary}
+            <span
+              css={css`
+                color: ${euiTheme.colors.textSubdued};
+              `}
+            >
+              {row.attribute}
+            </span>
+            {' '}
+            <SeverityInline severity={row.severity} />
+            {' '}
+            {row.summary}
           </EuiText>
         ),
       },
     ],
-    []
+    [euiTheme.colors.textSubdued, allPageSelected, toggleSelectAll, selectedIds, toggleRow]
   );
 
   return (
-    <EuiPanel hasBorder hasShadow={false} paddingSize="m">
-      <EuiTitle size="xs">
-        <h3>
-          {i18n.translate('entityCentricLabFlyout.flyout.logs.panelTitle', {
-            defaultMessage: 'Logs emitted by {entityName}',
-            values: { entityName },
-          })}
-        </h3>
-      </EuiTitle>
+    <>
+      <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+        <EuiFlexItem>
+          <EuiFieldSearch
+            fullWidth
+            placeholder={i18n.translate('entityCentricLabFlyout.flyout.logs.searchPlaceholder', {
+              defaultMessage: 'Search for log entries…',
+            })}
+            value={searchText}
+            isClearable
+            onChange={handleSearchChange}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty size="s" iconType="popout" iconSide="right" flush="both">
+            {i18n.translate('entityCentricLabFlyout.flyout.logs.openInDiscover', {
+              defaultMessage: 'Open in Discover',
+            })}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            {i18n.translate('entityCentricLabFlyout.flyout.logs.documentCount', {
+              defaultMessage: '{count} {count, plural, one {document} other {documents}}',
+              values: { count: filteredLogs.length },
+            })}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty size="xs" iconType="tableDensityExpanded">
+                {i18n.translate('entityCentricLabFlyout.flyout.logs.columns', {
+                  defaultMessage: 'Columns {count}',
+                  values: { count: 2 },
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty size="xs" iconType="sortable">
+                {i18n.translate('entityCentricLabFlyout.flyout.logs.sortFields', {
+                  defaultMessage: 'Sort fields {count}',
+                  values: { count: 1 },
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="s" />
       <EuiBasicTable<LogRow>
         items={pageOfItems as LogRow[]}
@@ -157,7 +234,7 @@ export const LogsTab = ({ entityName, logs }: LogsTabProps) => {
         pagination={{
           pageIndex,
           pageSize,
-          totalItemCount: logs.length,
+          totalItemCount: filteredLogs.length,
           pageSizeOptions: [25, 50, 100],
         }}
         onChange={({ page }: Criteria<LogRow>) => {
@@ -167,20 +244,26 @@ export const LogsTab = ({ entityName, logs }: LogsTabProps) => {
         }}
         data-test-subj="entityCentricLabLogsTable"
       />
-    </EuiPanel>
+    </>
   );
 };
 
-// Per design: Info = green, Warning = yellow, Error = red — mapped to the EUI
-// semantic badge colours so the palette stays aligned with the rest of the
-// flyout (e.g. dependency health badges).
-const severityBadgeColor = (severity: LogSeverity): 'success' | 'warning' | 'danger' => {
-  switch (severity) {
-    case 'Info':
-      return 'success';
-    case 'Warning':
-      return 'warning';
-    case 'Error':
-      return 'danger';
-  }
+const SEVERITY_BADGE_COLOR: Record<LogSeverity, string> = {
+  Info: 'primary',
+  Warning: 'warning',
+  Error: 'danger',
 };
+
+const SeverityInline = ({ severity }: { readonly severity: LogSeverity }) => (
+  <EuiBadge
+    color={SEVERITY_BADGE_COLOR[severity]}
+    css={css`
+      font-size: 10px;
+      line-height: 1;
+      padding: 1px 4px;
+      vertical-align: middle;
+    `}
+  >
+    {severity.toLowerCase()}
+  </EuiBadge>
+);

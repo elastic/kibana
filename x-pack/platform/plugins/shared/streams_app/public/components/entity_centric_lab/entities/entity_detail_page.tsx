@@ -52,7 +52,12 @@ import {
   TracesTab,
   ProfilingTab,
   DashboardsTab,
+  DashboardsListTab,
+  ServicesTab,
+  ProcessesTab,
   labThing,
+  entityTypeToKind,
+  inferEntityKind,
   type EntitySelectionContext,
   type OnSelectEntity,
   type FlyoutCustomLink,
@@ -99,6 +104,8 @@ type BuiltInTabId =
   | 'logs'
   | 'traces'
   | 'alerts'
+  | 'services'
+  | 'processes'
   | 'relationships'
   | 'dashboards'
   | 'custom'
@@ -112,6 +119,8 @@ const BUILT_IN_TAB_IDS: readonly BuiltInTabId[] = [
   'logs',
   'traces',
   'alerts',
+  'services',
+  'processes',
   'relationships',
   'dashboards',
   'custom',
@@ -138,6 +147,9 @@ const PageTabContent = ({
   linkedDashboards,
   onSelectEntity,
   hideAiSummary = false,
+  hideOwnership = false,
+  hideEvents = false,
+  dashboardStyle = 'embedded',
 }: {
   readonly activeTab: TabId;
   readonly activeTabLabel: string;
@@ -149,6 +161,9 @@ const PageTabContent = ({
   readonly linkedDashboards?: readonly LinkedDashboardOverride[];
   readonly onSelectEntity?: OnSelectEntity;
   readonly hideAiSummary?: boolean;
+  readonly hideOwnership?: boolean;
+  readonly hideEvents?: boolean;
+  readonly dashboardStyle?: 'embedded' | 'list';
 }) => {
   const { resourceCopy = false, renderTabDashboard: renderDash } = useEntityFlyoutServices();
 
@@ -175,15 +190,19 @@ const PageTabContent = ({
 
   switch (activeTab) {
     case 'overview':
-      return <OverviewTab overview={overview} hideAiSummary={hideAiSummary} />;
+      return <OverviewTab overview={overview} hideAiSummary={hideAiSummary} hideOwnership={hideOwnership} />;
     case 'metrics':
-      return <MetricsTab metrics={tabsData.metrics} />;
+      return <MetricsTab metrics={tabsData.metrics} hideEvents={hideEvents} />;
     case 'logs':
       return <LogsTab entityName={entityName} logs={tabsData.logs} />;
     case 'traces':
       return tabsData.traces ? <TracesTab traces={tabsData.traces} /> : placeholder;
     case 'alerts':
       return <AlertsTab alerts={tabsData.alerts} />;
+    case 'services':
+      return <ServicesTab entityName={entityName} />;
+    case 'processes':
+      return <ProcessesTab entityName={entityName} />;
     case 'relationships':
       return (
         <RelationshipsTab
@@ -192,7 +211,9 @@ const PageTabContent = ({
         />
       );
     case 'dashboards':
-      return (
+      return dashboardStyle === 'list' ? (
+        <DashboardsListTab entityName={entityName} entityType={entityType} />
+      ) : (
         <DashboardsTab
           entityName={entityName}
           entityType={entityType}
@@ -241,6 +262,7 @@ const EntityDetailPageInner = () => {
   const detailVariation = useVariation('detail');
   const dataVariation = useVariation('data') as DataVariation;
   const phaseVariation = useVariation('phase');
+  const dashboardStyleVariation = useVariation('dashboardStyle') as 'embedded' | 'list';
   const isPhase1 = phaseVariation === 'phase1';
   // Track whether we arrived via in-app navigation (expandable flyout) so
   // we can use history.goBack() to restore the flyout on "Back".
@@ -262,6 +284,11 @@ const EntityDetailPageInner = () => {
   const entityType = entity?.type;
   const entityHealth = entity?.health;
   const entityRegion = entity?.tags.region;
+
+  const kind = useMemo(
+    () => entityTypeToKind(entityType) ?? inferEntityKind(entityName),
+    [entityType, entityName]
+  );
 
   // Fake data builders
   const overview = useMemo(
@@ -346,7 +373,27 @@ const EntityDetailPageInner = () => {
         label: i18n.translate('xpack.streams.entityCentricLab.detailPage.tabs.alerts', {
           defaultMessage: 'Alerts',
         }),
+        appendBadge: (() => {
+          const count = entity?.alerts?.active;
+          return count && count > 0 ? count : undefined;
+        })(),
       },
+      ...(kind === 'host'
+        ? [
+            {
+              id: 'services' as TabId,
+              label: i18n.translate('xpack.streams.entityCentricLab.detailPage.tabs.services', {
+                defaultMessage: 'Services',
+              }),
+            },
+            {
+              id: 'processes' as TabId,
+              label: i18n.translate('xpack.streams.entityCentricLab.detailPage.tabs.processes', {
+                defaultMessage: 'Processes',
+              }),
+            },
+          ]
+        : []),
       {
         id: 'relationships',
         label: i18n.translate('xpack.streams.entityCentricLab.detailPage.tabs.relationships', {
@@ -388,7 +435,7 @@ const EntityDetailPageInner = () => {
     }
 
     return overrideTabs;
-  }, [templateOverride, tabsData.traces]);
+  }, [templateOverride, tabsData.traces, entity?.alerts?.active, kind]);
 
   // Phase-1 exclusion: drop Custom and Relationships tabs.
   const visibleTabs = useMemo(
@@ -819,6 +866,9 @@ const EntityDetailPageInner = () => {
               linkedDashboards={templateOverride?.linkedDashboards}
               onSelectEntity={openChildEntity}
               hideAiSummary={isPhase1}
+              hideOwnership={isPhase1}
+              hideEvents={isPhase1}
+              dashboardStyle={dashboardStyleVariation}
             />
           </EuiPanel>
         </StreamsAppPageTemplate.Body>
@@ -838,8 +888,12 @@ const EntityDetailPageInner = () => {
           onNavigateEntity={openChildEntity}
           hideHealthBadge={isPhase1}
           alertsBadge={isPhase1 ? computeChildAlertsBadge(childEntity) : undefined}
+          alertsActiveCount={childEntity?.alerts?.active}
           hideAiSummary={isPhase1}
+          hideOwnership={isPhase1}
+          hideEvents={isPhase1}
           hiddenTabIds={isPhase1 ? ['custom', 'relationships'] : undefined}
+          dashboardStyle={dashboardStyleVariation}
         />
       ) : null}
     </EntityFlyoutServicesProvider>

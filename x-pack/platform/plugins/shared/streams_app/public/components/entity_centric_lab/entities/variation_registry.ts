@@ -139,6 +139,26 @@ export const TABLE_STYLE_DIMENSION: VariationDimension = {
   ],
 };
 
+export type DashboardStyleVariation = 'embedded' | 'list';
+
+export const DASHBOARD_STYLE_DIMENSION: VariationDimension = {
+  id: 'dashboardStyle',
+  label: 'Dashboard style',
+  defaultOption: 'embedded',
+  options: [
+    {
+      id: 'embedded',
+      label: 'Embedded',
+      description: 'Live dashboard panels embedded in the flyout',
+    },
+    {
+      id: 'list',
+      label: 'List',
+      description: 'Dashboard links with managed + custom sections',
+    },
+  ],
+};
+
 /** All registered dimensions, in display order. */
 export const VARIATION_DIMENSIONS: readonly VariationDimension[] = [
   PHASE_DIMENSION,
@@ -146,4 +166,5 @@ export const VARIATION_DIMENSIONS: readonly VariationDimension[] = [
   DATA_DIMENSION,
   DETAIL_DIMENSION,
   TABLE_STYLE_DIMENSION,
+  DASHBOARD_STYLE_DIMENSION,
 ];

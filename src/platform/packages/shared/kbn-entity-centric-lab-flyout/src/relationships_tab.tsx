@@ -139,6 +139,7 @@ const DependencyGroupPanel = ({
           values: { thing: labThingLabel(resourceCopy) },
         }),
         width: '180px',
+        render: (type: string) => <EuiText size="s">{type}</EuiText>,
       },
       {
         field: 'relation',

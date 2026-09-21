@@ -13,11 +13,11 @@ import {
   EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiLink,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  useEuiTheme,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -134,7 +134,6 @@ const generateHostedServices = (hostName: string): readonly HostedService[] => {
 };
 
 export const ServicesTab = ({ entityName }: ServicesTabProps) => {
-  const { euiTheme } = useEuiTheme();
   const services = useMemo(() => generateHostedServices(entityName), [entityName]);
 
   const columns = useMemo<Array<EuiBasicTableColumn<HostedService>>>(
@@ -146,7 +145,7 @@ export const ServicesTab = ({ entityName }: ServicesTabProps) => {
         }),
         render: (name: string) => (
           <EuiLink onClick={() => {}}>
-            {name}
+            {name} <EuiIcon type="popout" size="s" />
           </EuiLink>
         ),
       },
@@ -171,7 +170,7 @@ export const ServicesTab = ({ entityName }: ServicesTabProps) => {
             </EuiFlexItem>
             {item.sloValue !== '—' ? (
               <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued">{item.sloValue}</EuiText>
+                <EuiText size="s" color="subdued">{item.sloValue}</EuiText>
               </EuiFlexItem>
             ) : null}
           </EuiFlexGroup>
@@ -183,7 +182,7 @@ export const ServicesTab = ({ entityName }: ServicesTabProps) => {
           defaultMessage: 'TPM',
         }),
         render: (tpm: number) => (
-          <EuiText size="xs">{tpm.toLocaleString()}</EuiText>
+          <EuiText size="s">{tpm.toLocaleString()}</EuiText>
         ),
         align: 'right' as const,
       },
@@ -193,25 +192,11 @@ export const ServicesTab = ({ entityName }: ServicesTabProps) => {
           defaultMessage: 'Error rate',
         }),
         render: (rate: number) => (
-          <EuiText size="xs" color={rate > 1 ? 'danger' : 'subdued'}>
+          <EuiText size="s" color={rate > 1 ? 'danger' : 'subdued'}>
             {rate.toFixed(2)}%
           </EuiText>
         ),
         align: 'right' as const,
-      },
-      {
-        name: '',
-        actions: [
-          {
-            name: i18n.translate('entityCentricLabFlyout.flyout.services.viewInApm', {
-              defaultMessage: 'View in APM',
-            }),
-            description: 'View in APM',
-            icon: 'popout',
-            type: 'icon' as const,
-            onClick: () => {},
-          },
-        ],
       },
     ],
     []
@@ -244,7 +229,7 @@ export const ServicesTab = ({ entityName }: ServicesTabProps) => {
         items={services as HostedService[]}
         columns={columns}
         tableLayout="auto"
-        css={{ '.euiTableCellContent': { fontSize: euiTheme.size.m } }}
+        tableLayout="auto"
       />
       <EuiSpacer size="m" />
       <EuiLink onClick={() => {}} external>

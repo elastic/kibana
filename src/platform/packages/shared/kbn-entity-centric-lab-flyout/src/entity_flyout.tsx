@@ -43,6 +43,7 @@ import type {
   EuiFlyoutSize,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { useEntityFlyoutServices } from './services_context';
 import { labThing } from './lab_terminology';
 import { OverviewTab } from './overview_tab';
@@ -51,9 +52,11 @@ import { LogsTab } from './logs_tab';
 import { AlertsTab } from './alerts_tab';
 import { RelationshipsTab } from './relationships_tab';
 import { ServicesTab } from './services_tab';
+import { ProcessesTab } from './processes_tab';
 import { TracesTab } from './traces_tab';
 import { ProfilingTab } from './profiling_tab';
 import { DashboardsTab } from './dashboards_tab';
+import { DashboardsListTab } from './dashboards_list_tab';
 import { buildFakeEntityOverview } from './fake_entity_overview';
 import { buildFakeEntityTabsData } from './fake_entity_tabs';
 import type { OnSelectEntity } from './fake_entity_tabs';
@@ -195,6 +198,12 @@ interface EntityFlyoutProps {
    * template-override logic so it always wins.
    */
   readonly hiddenTabIds?: readonly string[];
+  /**
+   * Dashboard rendering style. `'embedded'` (default) embeds live dashboard
+   * panels inline; `'list'` shows a link-based list with managed + custom
+   * dashboard sections.
+   */
+  readonly dashboardStyle?: 'embedded' | 'list';
 }
 
 type BuiltInTabId =
@@ -204,6 +213,7 @@ type BuiltInTabId =
   | 'traces'
   | 'alerts'
   | 'services'
+  | 'processes'
   | 'relationships'
   | 'dashboards'
   | 'custom'
@@ -225,6 +235,7 @@ const BUILT_IN_TAB_IDS: readonly BuiltInTabId[] = [
   'traces',
   'alerts',
   'services',
+  'processes',
   'relationships',
   'custom',
   'profiling',
@@ -249,6 +260,7 @@ const CORE_TAB_IDS: readonly string[] = [
   'traces',
   'alerts',
   'services',
+  'processes',
   'dashboards',
   'custom',
   'profiling',
@@ -290,6 +302,7 @@ export const EntityFlyout = ({
   hideOwnership = false,
   hideEvents = false,
   hiddenTabIds,
+  dashboardStyle = 'embedded',
 }: EntityFlyoutProps) => {
   const titleId = useGeneratedHtmlId({ prefix: 'entityCentricLabFlyoutTitle' });
   // Default tab is the leftmost one in the (possibly reordered) tab list.
@@ -659,6 +672,12 @@ export const EntityFlyout = ({
                 defaultMessage: 'Services',
               }),
             },
+            {
+              id: 'processes' as TabId,
+              label: i18n.translate('entityCentricLabFlyout.flyout.tabs.processes', {
+                defaultMessage: 'Processes',
+              }),
+            },
           ]
         : []),
       // Relationships (the topology map) only surfaces in the long-term
@@ -778,7 +797,7 @@ export const EntityFlyout = ({
       aria-labelledby={titleId}
       data-test-subj="entityCentricLabFlyout"
     >
-      <EuiFlyoutHeader hasBorder>
+      <EuiFlyoutHeader css={css`padding-bottom: 0;`}>
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiTitle size="l">
@@ -858,7 +877,7 @@ export const EntityFlyout = ({
           ) : null}
         </EuiFlexGroup>
         <EuiSpacer size="m" />
-        <EuiTabs bottomBorder={false}>
+        <EuiTabs bottomBorder>
           {visibleTabs.map((tab) => (
             <EuiTab
               key={tab.id}
@@ -879,20 +898,24 @@ export const EntityFlyout = ({
         </EuiTabs>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiSuperDatePicker
-              start={dateStart}
-              end={dateEnd}
-              onTimeChange={handleTimeChange}
-              isAutoRefreshOnly={false}
-              compressed
-              width="auto"
-              updateButtonProps={{ iconOnly: true, fill: false, color: 'text' }}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
+        {activeTab === 'dashboards' && dashboardStyle === 'list' ? null : (
+          <>
+            <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiSuperDatePicker
+                  start={dateStart}
+                  end={dateEnd}
+                  onTimeChange={handleTimeChange}
+                  isAutoRefreshOnly={false}
+                  compressed
+                  width="auto"
+                  updateButtonProps={{ iconOnly: true, fill: false, color: 'text' }}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
+          </>
+        )}
         <TabContent
           activeTab={activeTab}
           activeTabLabel={visibleTabs.find((tab) => tab.id === activeTab)?.label ?? activeTab}
@@ -906,6 +929,7 @@ export const EntityFlyout = ({
           hideAiSummary={hideAiSummary}
           hideOwnership={hideOwnership}
           hideEvents={hideEvents}
+          dashboardStyle={dashboardStyle}
         />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -1008,6 +1032,7 @@ const TabContent = ({
   hideAiSummary = false,
   hideOwnership = false,
   hideEvents = false,
+  dashboardStyle = 'embedded',
 }: {
   readonly activeTab: TabId;
   readonly activeTabLabel: string;
@@ -1021,6 +1046,7 @@ const TabContent = ({
   readonly hideAiSummary?: boolean;
   readonly hideOwnership?: boolean;
   readonly hideEvents?: boolean;
+  readonly dashboardStyle?: 'embedded' | 'list';
 }) => {
   const { resourceCopy = false, renderTabDashboard } = useEntityFlyoutServices();
 
@@ -1063,12 +1089,16 @@ const TabContent = ({
       return <AlertsTab alerts={tabsData.alerts} />;
     case 'services':
       return <ServicesTab entityName={entityName} />;
+    case 'processes':
+      return <ProcessesTab entityName={entityName} />;
     case 'relationships':
       return (
         <RelationshipsTab relationships={tabsData.relationships} onSelectEntity={onSelectEntity} />
       );
     case 'dashboards':
-      return (
+      return dashboardStyle === 'list' ? (
+        <DashboardsListTab entityName={entityName} entityType={entityType} />
+      ) : (
         <DashboardsTab
           entityName={entityName}
           entityType={entityType}
