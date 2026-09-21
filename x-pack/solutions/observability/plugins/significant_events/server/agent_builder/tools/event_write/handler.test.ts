@@ -90,7 +90,12 @@ const makeAlertEventsClient = (
   } as jest.Mocked<AlertEventsClientApi>);
 
 const makeLogger = (): jest.Mocked<Logger> =>
-  ({ error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() } as unknown as jest.Mocked<Logger>);
+  ({
+    error: jest.fn(),
+    warn: jest.fn(),
+    info: jest.fn(),
+    debug: jest.fn(),
+  } as unknown as jest.Mocked<Logger>);
 
 describe('eventsWriteHandler', () => {
   it('writes a new event', async () => {
@@ -1238,7 +1243,9 @@ describe('eventsWriteBulkHandler — dual-write to .rule-events (Writer 1)', () 
           : { create: { status: 201, result: 'created' } }
       ),
     });
-    const eventClient = makeEventClient({ bulkCreate: jest.fn().mockImplementation(errorBulkCreate) });
+    const eventClient = makeEventClient({
+      bulkCreate: jest.fn().mockImplementation(errorBulkCreate),
+    });
     const alertEventsClient = makeAlertEventsClient();
 
     await eventsWriteBulkHandler({
@@ -1273,8 +1280,6 @@ describe('eventsWriteBulkHandler — dual-write to .rule-events (Writer 1)', () 
     expect(results[0].written).toBe(true);
     // Give the fire-and-forget promise a chance to settle (flush full microtask queue)
     await new Promise(setImmediate);
-    expect(logger.error).toHaveBeenCalledWith(
-      expect.stringContaining('rule-events unavailable')
-    );
+    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('rule-events unavailable'));
   });
 });

@@ -30,7 +30,12 @@ const makeAlertEventsClient = (
   } as jest.Mocked<AlertEventsClientApi>);
 
 const makeLogger = (): jest.Mocked<Logger> =>
-  ({ error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() } as unknown as jest.Mocked<Logger>);
+  ({
+    error: jest.fn(),
+    warn: jest.fn(),
+    info: jest.fn(),
+    debug: jest.fn(),
+  } as unknown as jest.Mocked<Logger>);
 
 const createEvent = (eventUuid: string, ruleIds: string[]): SignificantEventResponse =>
   ({

@@ -73,7 +73,12 @@ describe('createEventToolHandler', () => {
     const alertEventsClient = { createAlertEvent: jest.fn() } as never;
     const logger = { error: jest.fn() } as never;
 
-    await createEventToolHandler({ eventClient: {} as never, eventInput: baseInput, alertEventsClient, logger });
+    await createEventToolHandler({
+      eventClient: {} as never,
+      eventInput: baseInput,
+      alertEventsClient,
+      logger,
+    });
 
     expect(eventsWriteHandler).toHaveBeenCalledWith(
       expect.objectContaining({ alertEventsClient, logger })
