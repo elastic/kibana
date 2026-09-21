@@ -1,0 +1,274 @@
+{
+  "sha1": "d8c8128e4b5d79e95276771e3e649548302028d9",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "9be9aa64608f4bb-da9ef034bd40e8c",
+      "title": "Vector DB home page by role offers the data management action to a privileged user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/home_roles.spec.ts",
+        "line": 15,
+        "column": 72
+      }
+    },
+    {
+      "id": "9be9aa64608f4bb-ad9693de2d92c23",
+      "title": "Vector DB home page by role withholds the data management action from a viewer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/home_roles.spec.ts",
+        "line": 21,
+        "column": 25
+      }
+    },
+    {
+      "id": "9be9aa64608f4bb-09b7351a7118c4a",
+      "title": "Vector DB home page by role still walks a viewer through the setup guide",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/home_roles.spec.ts",
+        "line": 29,
+        "column": 3
+      }
+    },
+    {
+      "id": "5e800d3dd5cbcb7-c651882e9a3989b",
+      "title": "Vector DB home page lays out the welcome header, stat cards and documentation link",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/home.spec.ts",
+        "line": 13,
+        "column": 57
+      }
+    },
+    {
+      "id": "5e800d3dd5cbcb7-50d4ded00dd00bd",
+      "title": "Vector DB home page renders the stats returned for the project",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/home.spec.ts",
+        "line": 24,
+        "column": 15
+      }
+    },
+    {
+      "id": "5e800d3dd5cbcb7-e7006f0fbf3ac22",
+      "title": "Vector DB home page directs an empty project into the setup guide from the banner",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/home.spec.ts",
+        "line": 40,
+        "column": 22
+      }
+    },
+    {
+      "id": "5e800d3dd5cbcb7-88a5b46bec4753d",
+      "title": "Vector DB home page drops the setup banner once the project holds data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/home.spec.ts",
+        "line": 49,
+        "column": 18
+      }
+    },
+    {
+      "id": "5e800d3dd5cbcb7-6a072b81b2d752f",
+      "title": "Vector DB home page surfaces the most recently created index until it is dismissed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/home.spec.ts",
+        "line": 59,
+        "column": 56
+      }
+    },
+    {
+      "id": "5e800d3dd5cbcb7-6f7097d2b74dc29",
+      "title": "Vector DB home page opens the setup guide from the add data links",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/home.spec.ts",
+        "line": 76,
+        "column": 18
+      }
+    },
+    {
+      "id": "5e800d3dd5cbcb7-9020bb1c8a3eef3",
+      "title": "Vector DB home page shows the agent skills prompt for building in an IDE",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/home.spec.ts",
+        "line": 88,
+        "column": 31
+      }
+    },
+    {
+      "id": "b95eaf634048f07-cdd96736f1802c3",
+      "title": "Vector DB onboarding sends a first-time user from the app root into the setup guide",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/onboarding.spec.ts",
+        "line": 13,
+        "column": 51
+      }
+    },
+    {
+      "id": "b95eaf634048f07-5ba2197632bd9ed",
+      "title": "Vector DB onboarding offers both embedding paths alongside the project connection details",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/onboarding.spec.ts",
+        "line": 19,
+        "column": 20
+      }
+    },
+    {
+      "id": "b95eaf634048f07-fda8d78cfef2fbe",
+      "title": "Vector DB onboarding walks the generate embeddings path through to the home page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/onboarding.spec.ts",
+        "line": 30,
+        "column": 25
+      }
+    },
+    {
+      "id": "b95eaf634048f07-4f2abcb81d425da",
+      "title": "Vector DB onboarding walks the bring your own embeddings path through to the home page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/onboarding.spec.ts",
+        "line": 54,
+        "column": 22
+      }
+    },
+    {
+      "id": "b95eaf634048f07-eb9baa8c098827b",
+      "title": "Vector DB onboarding steps back from the search step to the ingest step",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/onboarding.spec.ts",
+        "line": 81,
+        "column": 27
+      }
+    },
+    {
+      "id": "b95eaf634048f07-985c19fc368a58a",
+      "title": "Vector DB onboarding skipping the setup guide lands on the home page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/onboarding.spec.ts",
+        "line": 89,
+        "column": 22
+      }
+    },
+    {
+      "id": "b95eaf634048f07-97cfc7bd7ccfce0",
+      "title": "Vector DB onboarding returns a wizard step opened without a path to path selection",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/onboarding.spec.ts",
+        "line": 96,
+        "column": 22
+      }
+    },
+    {
+      "id": "b95eaf634048f07-75016b3beb70056",
+      "title": "Vector DB onboarding carries the chosen snippet language across steps",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/onboarding.spec.ts",
+        "line": 101,
+        "column": 9
+      }
+    },
+    {
+      "id": "b95eaf634048f07-667e8707c4077df",
+      "title": "Vector DB onboarding explains a concept when its pill is opened",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/onboarding.spec.ts",
+        "line": 113,
+        "column": 11
+      }
+    }
+  ]
+}
