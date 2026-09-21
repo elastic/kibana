@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-import { apiTest, tags } from '@kbn/scout';
+import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+
+/**
+ * Local only: this suite needs the `service_accounts` custom server config set, and custom config
+ * sets are not available on Elastic Cloud.
+ */
+const LOCAL_ONLY = ['@local-stateful-classic'];
 
 const CREATE_ENDPOINT = 'internal/security/service_account';
 const NAMESPACE = 'kibana';
@@ -17,7 +23,7 @@ const CREDENTIAL_ACCOUNT_FIELD = `${CREDENTIAL_TYPE}.serviceAccountId`;
 /** Unique per run, so a failed cleanup cannot make the next run collide. */
 const uniqueName = (prefix: string) => `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
 
-apiTest.describe('Create Elasticsearch service accounts', { tag: tags.stateful.classic }, () => {
+apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, () => {
   const created: string[] = [];
 
   apiTest.afterAll(async ({ esClient }) => {

@@ -202,7 +202,10 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
         querystring: { refresh: 'wait_for' },
       });
     } catch (e) {
-      this.logger.error(`Failed to create service account: ${getDetailedErrorMessage(e)}`);
+      await this.reconcileFailedAccountWrite(esClient, namespace, name);
+      this.logger.error(
+        `Failed to create service account [${serviceAccountId}]: ${getDetailedErrorMessage(e)}`
+      );
       throw e;
     }
 
@@ -324,6 +327,54 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     });
 
     return createTokenResponseSchema.parse(response).token.value;
+  }
+
+  /**
+   * A rejected account write is not proof that Elasticsearch never committed it: the write can
+   * land and its response be lost. Left alone, that strands an enabled account with no token and
+   * no credential, and the pre-flight check then refuses that name on every retry until an
+   * operator removes the account by hand.
+   *
+   * Ownership is inferred, not proven, because Elasticsearch records no owner on a user-managed
+   * account. The pre-flight found the name free moments earlier, so an account here is either the
+   * one this call wrote or one a concurrent create landed in between. A stored credential means
+   * that other create already finished and owns the account, so it is left alone. The window that
+   * remains, a concurrent create that has not stored its credential yet, is the same narrow race
+   * the pre-flight already accepts, and that create rolls itself back on its own failure path.
+   *
+   * Best effort throughout: the caller needs the error that got us here, not this one.
+   */
+  private async reconcileFailedAccountWrite(
+    esClient: ElasticsearchClient,
+    namespace: string,
+    name: string
+  ): Promise<void> {
+    const principal = `${namespace}/${name}`;
+
+    try {
+      if (!(await this.readAccount(esClient, namespace, name))) {
+        return;
+      }
+
+      if (await this.credentialStore.getDecrypted(principal)) {
+        this.logger.warn(
+          `Service account [${principal}] is present after a failed create, but a credential for ` +
+            `it is already stored, so it was left in place.`
+        );
+        return;
+      }
+    } catch (e) {
+      securityTelemetry.recordServiceAccountRollbackFailure({
+        serviceAccountRollbackResource: 'account',
+      });
+      this.logger.error(
+        `Could not determine whether the failed create of service account [${principal}] left an ` +
+          `account behind. It may need to be removed manually: ${getDetailedErrorMessage(e)}`
+      );
+      return;
+    }
+
+    await this.rollback(esClient, namespace, name);
   }
 
   /**

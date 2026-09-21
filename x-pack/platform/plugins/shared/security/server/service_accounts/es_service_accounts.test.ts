@@ -465,7 +465,8 @@ describe('EsServiceAccounts', () => {
     it('logs and rethrows an Elasticsearch failure on the account write', async () => {
       esClient.asCurrentUser.transport.request
         .mockResolvedValueOnce({})
-        .mockRejectedValueOnce(new Error('illegal_argument_exception'));
+        .mockRejectedValueOnce(new Error('illegal_argument_exception'))
+        .mockResolvedValueOnce({}); // reconciliation read-back: nothing was committed
 
       await expect(serviceAccounts.create(request, createParams)).rejects.toThrow(
         'illegal_argument_exception'
@@ -474,6 +475,85 @@ describe('EsServiceAccounts', () => {
         expect.stringContaining('Failed to create service account')
       );
       expect(credentialStore.set).not.toHaveBeenCalled();
+    });
+
+    // A rejected PUT does not prove Elasticsearch never committed it. Without the read-back the
+    // account would survive with no token and no credential, and the pre-flight check would then
+    // refuse that name on every retry.
+    it('removes the account when an ambiguous account write turns out to have committed', async () => {
+      esClient.asCurrentUser.transport.request
+        .mockResolvedValueOnce({})
+        .mockRejectedValueOnce(new Error('socket hang up'))
+        .mockResolvedValueOnce(accountEntry())
+        .mockResolvedValue({});
+
+      await expect(serviceAccounts.create(request, createParams)).rejects.toThrow('socket hang up');
+
+      const calls = esClient.asCurrentUser.transport.request.mock.calls;
+      expect(calls[2][0]).toEqual(READ_ACCOUNT);
+      expect(calls[3][0]).toEqual({ method: 'DELETE', path: TOKEN_PATH });
+      expect(calls[4][0]).toEqual({
+        method: 'DELETE',
+        path: ACCOUNT_PATH,
+        querystring: { force: 'true' },
+      });
+      expect(credentialStore.set).not.toHaveBeenCalled();
+    });
+
+    it('deletes nothing when the failed account write never committed', async () => {
+      esClient.asCurrentUser.transport.request
+        .mockResolvedValueOnce({})
+        .mockRejectedValueOnce(new Error('socket hang up'))
+        .mockResolvedValueOnce({});
+
+      await expect(serviceAccounts.create(request, createParams)).rejects.toThrow('socket hang up');
+
+      expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledTimes(3);
+      expect(credentialStore.delete).not.toHaveBeenCalled();
+    });
+
+    // A credential at the same principal means a concurrent create already finished and owns the
+    // account, so it is not this call's to remove.
+    it('leaves the account alone when a credential for it is already stored', async () => {
+      esClient.asCurrentUser.transport.request
+        .mockResolvedValueOnce({})
+        .mockRejectedValueOnce(new Error('socket hang up'))
+        .mockResolvedValueOnce(accountEntry());
+      credentialStore.getDecrypted.mockResolvedValue({
+        serviceAccountId: 'kibana/nightshift-relay',
+        namespace: 'kibana',
+        name: 'nightshift-relay',
+        tokenName: 'kibana-managed',
+        createdAt: '2026-09-21T00:00:00.000Z',
+        createdBy: { type: 'user', username: 'user' },
+        token: 'AAEAAWtpYmFuYS9...',
+      });
+
+      await expect(serviceAccounts.create(request, createParams)).rejects.toThrow('socket hang up');
+
+      expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledTimes(3);
+      expect(credentialStore.delete).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('a credential for it is already stored')
+      );
+    });
+
+    it('surfaces the original failure when the reconciliation read itself fails', async () => {
+      esClient.asCurrentUser.transport.request
+        .mockResolvedValueOnce({})
+        .mockRejectedValueOnce(new Error('socket hang up'))
+        .mockRejectedValueOnce(new Error('cluster unreachable'));
+
+      await expect(serviceAccounts.create(request, createParams)).rejects.toThrow('socket hang up');
+
+      expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledTimes(3);
+      expect(credentialStore.delete).not.toHaveBeenCalled();
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Could not determine whether the failed create')
+      );
+      expect(securityTelemetry.recordServiceAccountRollbackFailure).toHaveBeenCalledWith({
+        serviceAccountRollbackResource: 'account',
+      });
     });
   });
 
