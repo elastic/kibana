@@ -8,7 +8,7 @@
  */
 
 import { esql } from '@elastic/esql';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { TIME_SYSTEM_PARAMS } from '@kbn/esql-language';
 import { getCalculateAutoTimeExpression } from '@kbn/data-plugin/common';
 import type { DateHistogramIndexPatternColumn } from '../../datasources/operations';
@@ -50,12 +50,14 @@ export const getDateHistogramSerializedFormat: GetSerializedFormatFn<
   }
 
   const absDateRange = convertToAbsoluteDateRange(dateRange, new Date());
-  const spansCalendarDay = !moment.utc(absDateRange.fromDate).isSame(
-    moment.utc(absDateRange.toDate),
-    'day'
-  );
-  if (spansCalendarDay && /[Hh]/.test(pattern) && !/D/.test(pattern)) {
-    pattern = `YYYY-MM-DD ${pattern}`;
+  if (/[Hh]/.test(pattern) && !/D/.test(pattern)) {
+    const rawTz = uiSettings?.get<string>('dateFormat:tz');
+    const tz = !rawTz || rawTz === 'Browser' ? moment.tz.guess() : rawTz;
+    const fromInTz = moment.tz(absDateRange.fromDate, tz);
+    const toInTz = moment.tz(absDateRange.toDate, tz);
+    if (!fromInTz.isSame(toInTz, 'day')) {
+      pattern = `YYYY-MM-DD ${pattern}`;
+    }
   }
 
   return { id: 'date', params: { pattern } };
