@@ -11,7 +11,8 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 
 // follows the same logic with vega auto_date function
-const barTarget = 50; // same as vega
+const barTarget = 200;
+
 const roundInterval = (interval: number) => {
   {
     switch (true) {
