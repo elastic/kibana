@@ -6,6 +6,7 @@
  */
 
 import type {
+  ConversationEvent,
   ConversationRound,
   ConversationRoundAuthor,
   ConversationRoundStep,
@@ -13,18 +14,17 @@ import type {
   ExecutionTerminatedEvent,
   PromptResponseEvent,
   RoundInput,
-  TimelineEvent,
   UserMessageEvent,
 } from '@kbn/agent-builder-common';
 import {
   ConversationRoundStatus,
   EventActorType,
   TimelineEventType,
+  parseExecutionId,
 } from '@kbn/agent-builder-common';
 import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
 import type { AskUserQuestionAnswer } from '@kbn/agent-builder-common/agents/prompts';
 import { isAskUserQuestionPromptResponse } from '@kbn/agent-builder-common/agents/prompts';
-import { parseExecutionId } from './rounds_to_events';
 import { applyResumeResolution } from './merge_rounds';
 
 /** A single execution reconstructed into a partial round, awaiting the fold. */
@@ -41,11 +41,11 @@ interface ExecutionPartial {
 /**
  * Reconstructs rounds from a timeline.
  */
-export const eventsToRounds = (events: TimelineEvent[]): ConversationRound[] => {
+export const eventsToRounds = (events: ConversationEvent[]): ConversationRound[] => {
   const byId = new Map(events.map((event) => [event.id, event]));
 
   // Lifecycle events grouped by execution, in first-seen order.
-  const executions = new Map<string, TimelineEvent[]>();
+  const executions = new Map<string, ConversationEvent[]>();
   for (const event of events) {
     if (!event.execution_id) {
       continue;
