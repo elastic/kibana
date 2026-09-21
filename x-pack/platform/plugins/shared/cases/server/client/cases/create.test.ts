@@ -2424,7 +2424,7 @@ describe('create', () => {
       expect(createCaseCall.settings.extractObservables).toBe(false);
     });
 
-    it('falls back to false when no space configuration exists', async () => {
+    it('falls back to true when no space configuration exists', async () => {
       const clientArgs = createCasesClientMockArgs();
       clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
       extractObservablesCasesClient.configure.get = jest.fn().mockResolvedValue([]);
@@ -2432,7 +2432,7 @@ describe('create', () => {
       await create(theCase, clientArgs, extractObservablesCasesClient);
 
       const createCaseCall = clientArgs.services.caseService.createCase.mock.calls[0][0].attributes;
-      expect(createCaseCall.settings.extractObservables).toBe(false);
+      expect(createCaseCall.settings.extractObservables).toBe(true);
     });
   });
 });

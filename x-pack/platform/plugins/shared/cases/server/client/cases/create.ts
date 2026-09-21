@@ -164,13 +164,13 @@ export const create = async (
 
     // Default extractObservables from the space configuration when the caller omitted it
     // and template expansion did not fill it. Precedence:
-    // caller-explicit > template definition > space config default > false.
+    // caller-explicit > template definition > space config default > true.
     if (query.settings.extractObservables === undefined) {
       query = {
         ...query,
         settings: {
           ...query.settings,
-          extractObservables: configurations[0]?.extractObservables ?? false,
+          extractObservables: configurations[0]?.extractObservables ?? true,
         },
       };
     }

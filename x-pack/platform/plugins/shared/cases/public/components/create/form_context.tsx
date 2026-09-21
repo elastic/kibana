@@ -13,7 +13,7 @@ import type { CasesConfigurationUI } from '../../containers/types';
 import type { CasePostRequest } from '../../../common/types/api';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { getInitialCaseValue } from '../../../common/utils/get_initial_case_value';
-import { createFormSerializer, createFormDeserializer } from './utils';
+import { createFormSerializer, createFormDeserializer, getInitialCreateCaseSettings } from './utils';
 import type { CaseFormFieldsSchemaProps } from '../case_form_fields/schema';
 import { type UseSubmitCaseValue } from './use_submit_case';
 import { KibanaServices } from '../../common/lib/kibana';
@@ -65,6 +65,7 @@ export const FormContext: React.FC<FormContextProps> = ({
       ...getInitialCaseValue({
         owner: selectedOwner,
         connector: currentConfiguration.connector,
+        settings: getInitialCreateCaseSettings(selectedOwner, currentConfiguration),
       }),
       ...initialValue,
     },

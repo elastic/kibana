@@ -2284,7 +2284,7 @@ fields: []
             });
           });
 
-          it('falls back to false when no space configuration exists', async () => {
+          it('falls back to true when no space configuration exists', async () => {
             mockCaseNotFound();
             casesClientMock.configure.get = jest.fn().mockResolvedValue([]);
 
@@ -2296,7 +2296,7 @@ fields: []
 
             expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
               syncAlerts: false,
-              extractObservables: false,
+              extractObservables: true,
             });
           });
 

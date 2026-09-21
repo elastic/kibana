@@ -22,6 +22,7 @@ export const initialConfiguration: CasesConfigurationUI = {
   id: '',
   owner: '',
   observableTypes: [],
+  extractObservables: true,
 };
 
 export const getConfigurationByOwner = ({

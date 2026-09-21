@@ -544,13 +544,13 @@ const createBulkCreateCaseRequest = async ({
   // only sees the latter and rejects the former as missing.
 
   // Default extractObservables from the space configuration when the caller omitted it.
-  // Precedence: caller-explicit > space config default > false.
+  // Precedence: caller-explicit > space config default > true (matches configure client / Settings UI).
   if (caseWithoutId.settings.extractObservables === undefined) {
     caseWithoutId = {
       ...caseWithoutId,
       settings: {
         ...caseWithoutId.settings,
-        extractObservables: spaceExtractObservables ?? false,
+        extractObservables: spaceExtractObservables ?? true,
       },
     };
   }

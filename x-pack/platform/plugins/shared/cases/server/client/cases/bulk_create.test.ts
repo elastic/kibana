@@ -2300,7 +2300,7 @@ describe('bulkCreate', () => {
       expect(bulkCreateCall.settings.extractObservables).toBe(false);
     });
 
-    it('falls back to false when no space configuration exists', async () => {
+    it('falls back to true when no space configuration exists', async () => {
       const clientArgs = createCasesClientMockArgs();
       clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
         saved_objects: [caseSoForDefaults],
@@ -2312,7 +2312,7 @@ describe('bulkCreate', () => {
 
       const bulkCreateCall =
         clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases[0];
-      expect(bulkCreateCall.settings.extractObservables).toBe(false);
+      expect(bulkCreateCall.settings.extractObservables).toBe(true);
     });
   });
 });
