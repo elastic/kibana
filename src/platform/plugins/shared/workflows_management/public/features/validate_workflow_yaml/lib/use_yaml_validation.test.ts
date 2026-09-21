@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { Provider } from 'react-redux-v7';
 import { monaco } from '@kbn/monaco';
@@ -19,8 +19,9 @@ jest.mock('../../../widgets/workflow_yaml_editor/lib/esql_validation/validate_es
 }));
 
 jest.mock('./use_workflow_yaml_validation_context', () => {
+  const actual = jest.requireActual('./use_workflow_yaml_validation_context');
   const mockValidationContext = {
-    connectorTypes: {},
+    connectorTypes: { status: 'ready', value: {} },
     connectorsManagementUrl: 'http://test/connectors',
     workflows: { workflows: {}, totalWorkflows: 0 },
     getPropertyHandler: () => undefined,
@@ -28,6 +29,7 @@ jest.mock('./use_workflow_yaml_validation_context', () => {
   };
 
   return {
+    ...actual,
     useWorkflowYamlValidationContext: jest.fn(() => mockValidationContext),
   };
 });
@@ -40,6 +42,8 @@ jest.mock(
 );
 
 import type { WorkflowLookup } from '@kbn/workflows-yaml';
+import type { WorkflowYamlValidationContext } from './collect_full_workflow_yaml_validation_results';
+import { useWorkflowYamlValidationContext } from './use_workflow_yaml_validation_context';
 import { useYamlValidation } from './use_yaml_validation';
 import { WorkflowsContextProvider } from '../../../common/context';
 import { selectDetail } from '../../../entities/workflows/store';
@@ -52,6 +56,13 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { createStartServicesMock, createUseKibanaMockValue } from '../../../mocks';
 
 const mockKibanaValue = createUseKibanaMockValue();
+const readyValidationContext: WorkflowYamlValidationContext = {
+  connectorTypes: { status: 'ready', value: {} },
+  connectorsManagementUrl: 'http://test/connectors',
+  workflows: { workflows: {}, totalWorkflows: 0 },
+  getPropertyHandler: () => null,
+  esqlCallbacks: {},
+};
 
 jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: jest.fn(() => mockKibanaValue),
@@ -153,6 +164,7 @@ describe('useYamlValidation - Step Name Uniqueness', () => {
     jest.clearAllMocks();
     jest.useFakeTimers();
     jest.mocked(useKibana).mockReturnValue(mockKibanaValue);
+    jest.mocked(useWorkflowYamlValidationContext).mockReturnValue(readyValidationContext);
   });
 
   afterEach(() => {
@@ -408,6 +420,7 @@ describe('useYamlValidation - Marker Batching', () => {
     jest.clearAllMocks();
     jest.useFakeTimers();
     jest.mocked(useKibana).mockReturnValue(mockKibanaValue);
+    jest.mocked(useWorkflowYamlValidationContext).mockReturnValue(readyValidationContext);
   });
 
   afterEach(() => {
@@ -482,11 +495,108 @@ steps:
     );
     expect(individualOwnerCalls).toHaveLength(0);
   });
+
+  it('surfaces unexpected validation failures outside diagnostic results', async () => {
+    const yamlContent = `
+version: "1"
+name: "Test Workflow"
+steps: []
+`;
+    const mockEditor = createMockEditor(yamlContent);
+    jest.spyOn(mockEditor.getModel(), 'getValue').mockImplementation(() => {
+      throw new Error('Validation pipeline failed');
+    });
+
+    const { result } = renderHookWithProviders(mockEditor as any, yamlContent);
+    await act(async () => {
+      jest.advanceTimersByTime(500);
+      await Promise.resolve();
+    });
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current.error?.message).toBe('Validation pipeline failed');
+    });
+    expect(result.current.validationResults).toEqual([]);
+  });
+
+  it('clears stale results when connector metadata goes back to loading', async () => {
+    const yamlContent = `
+version: "1"
+name: "Test Workflow"
+enabled: true
+triggers:
+  - type: manual
+    enabled: true
+steps:
+  - name: duplicate
+    type: console
+  - name: duplicate
+    type: console
+`;
+    const mockEditor = createMockEditor(yamlContent);
+    const { result, rerender } = renderHookWithProviders(mockEditor as any, yamlContent);
+
+    await act(async () => {
+      jest.advanceTimersByTime(500);
+      await Promise.resolve();
+    });
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current.validationResults.length).toBeGreaterThan(0);
+    });
+
+    // A connector refresh puts the store back into `loading`.
+    jest.mocked(useWorkflowYamlValidationContext).mockReturnValue({
+      ...readyValidationContext,
+      connectorTypes: { status: 'loading' },
+    });
+    await act(async () => {
+      rerender();
+      jest.advanceTimersByTime(500);
+      await Promise.resolve();
+    });
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(true);
+    });
+    expect(result.current.validationResults).toEqual([]);
+    expect(getLastBatchedMarkers()).toEqual([]);
+  });
+
+  it('reports failed connector metadata as a prerequisite error, not a diagnostic', async () => {
+    jest.mocked(useWorkflowYamlValidationContext).mockReturnValue({
+      ...readyValidationContext,
+      connectorTypes: { status: 'failed', error: 'Connector request failed' },
+    });
+    const yamlContent = `
+version: "1"
+name: "Test Workflow"
+steps: []
+`;
+    const mockEditor = createMockEditor(yamlContent);
+
+    const { result } = renderHookWithProviders(mockEditor as any, yamlContent);
+    await act(async () => {
+      jest.advanceTimersByTime(500);
+      await Promise.resolve();
+    });
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current.error?.message).toContain('connectors failed to load');
+      expect(result.current.error?.cause).toBe('Connector request failed');
+    });
+    expect(result.current.validationResults).not.toEqual(
+      expect.arrayContaining([expect.objectContaining({ owner: 'connector-id-validation' })])
+    );
+  });
 });
 
 describe('useYamlValidation - ES|QL step wiring', () => {
   beforeEach(() => {
     jest.mocked(useKibana).mockReturnValue(mockKibanaValue);
+    jest.mocked(useWorkflowYamlValidationContext).mockReturnValue(readyValidationContext);
     mockValidateEsqlSteps.mockReset();
     mockValidateEsqlSteps.mockResolvedValue([]);
   });

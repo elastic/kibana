@@ -10,6 +10,7 @@ import { EuiProvider } from '@elastic/eui';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 
 import type { ToastsStart } from '@kbn/core/public';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DataSourcesClient } from '../data_sources_client';
 import type { DatasetsClient } from '../datasets_client';
@@ -37,6 +38,24 @@ const createDatasetsClientMock = (): DatasetsClient =>
     delete: jest.fn().mockResolvedValue(undefined),
   } as unknown as DatasetsClient);
 
+const createDocLinksMock = (): DocLinksStart =>
+  ({
+    links: {
+      dataFederation: {
+        overview: 'https://example.com/data-federation',
+        quickstart: 'https://example.com/data-federation-quickstart',
+        dataSources: 'https://example.com/data-federation-sources',
+        datasets: 'https://example.com/data-federation-datasets',
+        datasetSettings: 'https://example.com/data-federation-datasets#dataset-settings',
+        authentication: 'https://example.com/data-federation-sources#authentication',
+        staticCredentials: 'https://example.com/data-federation-static-credentials',
+        federatedIdentity: 'https://example.com/data-federation-federated-identity',
+        querying: 'https://example.com/data-federation-querying',
+        security: 'https://example.com/data-federation-security',
+      },
+    },
+  } as unknown as DocLinksStart);
+
 describe('CreateDataSourceFlyout', () => {
   it('renders core actions and disables save while saving', async () => {
     const toasts = createToastsMock();
@@ -45,6 +64,7 @@ describe('CreateDataSourceFlyout', () => {
       dataSourcesClient: client,
       datasetsClient: createDatasetsClientMock(),
       toasts,
+      docLinks: createDocLinksMock(),
       featureFlags: {},
     };
     let resolveSave: (value: string | null) => void;
@@ -99,6 +119,7 @@ describe('CreateDataSourceFlyout', () => {
       dataSourcesClient: client,
       datasetsClient: createDatasetsClientMock(),
       toasts,
+      docLinks: createDocLinksMock(),
       featureFlags: {},
     };
     const onSave = jest.fn().mockResolvedValue(null);
@@ -133,5 +154,45 @@ describe('CreateDataSourceFlyout', () => {
     await waitFor(() => {
       expect(queryByText('Region is required.')).not.toBeInTheDocument();
     });
+  });
+
+  it('shows an error', async () => {
+    const services: DataFederationKibanaServices = {
+      dataSourcesClient: createClientMock(),
+      datasetsClient: createDatasetsClientMock(),
+      toasts: createToastsMock(),
+      docLinks: createDocLinksMock(),
+      featureFlags: {},
+    };
+    const onSave = jest.fn().mockResolvedValue('validation_exception: something went wrong');
+
+    const initialDataSource: DataSource = {
+      type: 's3',
+      name: 'ds',
+      description: '',
+      settings: {
+        region: 'us-east-1',
+      } as any,
+    } as any;
+
+    const { findByTestId } = render(
+      <EuiProvider>
+        <KibanaContextProvider services={services}>
+          <CreateDataSourceFlyout
+            onClose={jest.fn()}
+            onSave={onSave}
+            existingDataSourceNames={[]}
+            initialDataSource={initialDataSource}
+          />
+        </KibanaContextProvider>
+      </EuiProvider>
+    );
+
+    fireEvent.click(await findByTestId('createDataSourceFlyoutSubmit'));
+
+    const banner = await findByTestId('createDataSourceFlyoutSaveError');
+    expect(banner).toHaveTextContent('Could not save the data source');
+    expect(banner).toHaveTextContent('validation_exception: something went wrong');
+    expect(await findByTestId('createDataSourceFlyoutFooter')).toContainElement(banner);
   });
 });

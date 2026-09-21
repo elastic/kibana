@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -16,7 +16,11 @@ import { useBatchedPublishingSubjects, type FetchContext } from '@kbn/presentati
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
-import type { DataGridDensity } from '@kbn/unified-data-table';
+import type {
+  DataGridDensity,
+  JsonModeSettings,
+  DocumentsDisplayMode,
+} from '@kbn/unified-data-table';
 import { DataLoadingState, useColumns } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
@@ -39,6 +43,13 @@ import { useAdditionalCellActions } from '../../context_awareness';
 import { getTimeRangeFromFetchContext } from '../utils/update_search_source';
 import { createDataSource } from '../../../common/data_sources';
 import { replaceColumnsWithVariableDriven } from '../utils/replace_columns_with_variable_driven';
+import type { DiscoverAppLocatorParams } from '../../../common';
+import { getExpandedDocLinkability } from '../../application/main/utils/expanded_doc';
+import { getExpandedDocLocatorParams } from '../utils/get_discover_locator_params';
+import {
+  useCopyLocatorLink,
+  useShareDirectLinkAction,
+} from '../../components/discover_grid_flyout';
 
 interface SavedSearchEmbeddableComponentProps {
   api: SearchEmbeddableApi & {
@@ -166,6 +177,61 @@ export function SearchEmbeddableGridComponent({
     [fetchContext]
   );
 
+  const expandedDocLinkability = useMemo(
+    () => getExpandedDocLinkability(savedSearchQuery, expandedDoc),
+    [savedSearchQuery, expandedDoc]
+  );
+
+  const buildExpandedDocLocatorParams = useCallback(
+    (): DiscoverAppLocatorParams =>
+      getExpandedDocLocatorParams({
+        api,
+        savedSearch,
+        dataView,
+        query: savedSearchQuery,
+        panelFilters: savedSearchFilters,
+        dashboardFilters: fetchContext?.filters,
+        columns,
+        sort,
+        grid,
+        isEsql,
+        esqlVariables,
+        expandedDoc,
+        timeRange,
+        timefilter: discoverServices.timefilter,
+      }),
+    [
+      api,
+      dataView,
+      savedSearchQuery,
+      savedSearchFilters,
+      fetchContext,
+      columns,
+      sort,
+      grid,
+      savedSearch,
+      isEsql,
+      esqlVariables,
+      expandedDoc,
+      timeRange,
+      discoverServices.timefilter,
+    ]
+  );
+
+  const copyExpandedDocLink = useCopyLocatorLink(buildExpandedDocLocatorParams);
+  const shareDirectLinkActions = useShareDirectLinkAction({
+    copyLink: copyExpandedDocLink,
+    linkability: expandedDocLinkability,
+    query: savedSearchQuery,
+  });
+  const canShareExpandedDocLink =
+    Boolean(discoverServices.capabilities.discover_v2.show) ||
+    Boolean(discoverServices.capabilities.discover_v2.save);
+  const flyoutMenuTrailingActions = useMemo(
+    () => (canShareExpandedDocLink && expandedDoc ? shareDirectLinkActions : undefined),
+    [canShareExpandedDocLink, expandedDoc, shareDirectLinkActions]
+  );
+
   const cellActionsMetadata = useAdditionalCellActions({
     dataSource,
     dataView,
@@ -207,6 +273,12 @@ export function SearchEmbeddableGridComponent({
       onUpdateDataGridDensity: (newDensity: DataGridDensity | undefined) => {
         stateManager.density.next(newDensity);
       },
+      onUpdateDocumentsDisplayMode: (newDocumentsDisplayMode: DocumentsDisplayMode) => {
+        stateManager.documentsDisplayMode.next(newDocumentsDisplayMode);
+      },
+      onUpdateJsonModeSettings: (newJsonModeSettings: JsonModeSettings) => {
+        stateManager.jsonModeSettings.next(newJsonModeSettings);
+      },
       onResize: (newGridSettings: { columnId: string; width: number | undefined }) => {
         stateManager.grid.next(onResizeGridColumn(newGridSettings, grid));
       },
@@ -222,6 +294,8 @@ export function SearchEmbeddableGridComponent({
       stateManager.sort,
       stateManager.sampleSize,
       stateManager.density,
+      stateManager.documentsDisplayMode,
+      stateManager.jsonModeSettings,
       stateManager.grid,
       grid,
     ]
@@ -277,12 +351,17 @@ export function SearchEmbeddableGridComponent({
       services={discoverServices}
       showTimeCol={showTimeCol}
       dataGridDensityState={savedSearch.density}
+      documentsDisplayModeState={savedSearch.documentsDisplayMode}
+      onUpdateDocumentsDisplayMode={onStateEditedProps.onUpdateDocumentsDisplayMode}
+      jsonModeSettingsState={savedSearch.jsonModeSettings}
+      onUpdateJsonModeSettings={onStateEditedProps.onUpdateJsonModeSettings}
       enableDocumentViewer={enableDocumentViewer}
       inlineEditing={inlineEditing}
       expandedDoc={expandedDoc}
       initialDocViewerTabId={initialDocViewerTabId}
       docViewerRef={docViewerRef}
       setExpandedDoc={setExpandedDoc}
+      flyoutMenuTrailingActions={flyoutMenuTrailingActions}
     />
   );
 }

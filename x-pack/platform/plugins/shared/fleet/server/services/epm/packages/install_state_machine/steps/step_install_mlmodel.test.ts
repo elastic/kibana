@@ -244,7 +244,7 @@ describe('cleanUpMlModelStep', () => {
       initialState: 'install_ml_model' as any,
     });
 
-    expect(mockDeletePrerequisiteAssets).toBeCalledWith(
+    expect(mockDeletePrerequisiteAssets).toHaveBeenCalledWith(
       {
         indexAssets: [
           {
@@ -276,7 +276,7 @@ describe('cleanUpMlModelStep', () => {
       },
       esClient
     );
-    expect(mockDeleteMLModels).toBeCalledWith(installedEs, esClient);
+    expect(mockDeleteMLModels).toHaveBeenCalledWith(installedEs, esClient);
   });
 
   it('should not clean up assets if force is passed', async () => {
@@ -303,8 +303,8 @@ describe('cleanUpMlModelStep', () => {
       initialState: 'install_ml_model' as any,
     });
 
-    expect(mockDeleteMLModels).not.toBeCalled();
-    expect(mockDeletePrerequisiteAssets).not.toBeCalled();
+    expect(mockDeleteMLModels).not.toHaveBeenCalled();
+    expect(mockDeletePrerequisiteAssets).not.toHaveBeenCalled();
   });
 
   it('should not clean up assets if retryFromLastState is not passed', async () => {
@@ -329,8 +329,8 @@ describe('cleanUpMlModelStep', () => {
       initialState: 'install_ml_model' as any,
     });
 
-    expect(mockDeleteMLModels).not.toBeCalled();
-    expect(mockDeletePrerequisiteAssets).not.toBeCalled();
+    expect(mockDeleteMLModels).not.toHaveBeenCalled();
+    expect(mockDeletePrerequisiteAssets).not.toHaveBeenCalled();
   });
 
   it('should not clean up assets if initialState != install_ml_model', async () => {
@@ -356,8 +356,8 @@ describe('cleanUpMlModelStep', () => {
       initialState: 'create_restart_install' as any,
     });
 
-    expect(mockDeleteMLModels).not.toBeCalled();
-    expect(mockDeletePrerequisiteAssets).not.toBeCalled();
+    expect(mockDeleteMLModels).not.toHaveBeenCalled();
+    expect(mockDeletePrerequisiteAssets).not.toHaveBeenCalled();
   });
 
   it('should not clean up assets if attributes are not present', async () => {
@@ -378,7 +378,7 @@ describe('cleanUpMlModelStep', () => {
       initialState: 'install_ml_model' as any,
     });
 
-    expect(mockDeleteMLModels).not.toBeCalled();
-    expect(mockDeletePrerequisiteAssets).not.toBeCalled();
+    expect(mockDeleteMLModels).not.toHaveBeenCalled();
+    expect(mockDeletePrerequisiteAssets).not.toHaveBeenCalled();
   });
 });

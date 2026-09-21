@@ -22,7 +22,6 @@ import type {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import { setupApp } from './app/setup_app';
 import { ADD_DATA_TABLE_ACTION_ID, DATA_TABLE_ID } from './react_embeddables/data_table/constants';
 import { FIELD_LIST_ID } from './react_embeddables/field_list/constants';
@@ -50,7 +49,6 @@ export interface StartDeps {
   charts: ChartsPluginStart;
   fieldFormats: FieldFormatsStart;
   dashboard: DashboardStart;
-  presentationUtil: PresentationUtilPluginStart;
 }
 
 export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, StartDeps> {

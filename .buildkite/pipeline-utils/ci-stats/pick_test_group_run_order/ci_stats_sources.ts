@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CI_STATS_DEFAULTS, PIPELINES } from './const';
-import type { RunOrderConfig } from './env_config';
+import { CI_STATS_DEFAULTS, PIPELINES } from './const.ts';
+import type { RunOrderConfig } from './env_config.ts';
 import type { FTRManifestEntry } from '#pipeline-utils/ci-stats/pick_test_group_run_order/ftr_manifests';
 
 type CiStatsSource =
@@ -38,18 +38,16 @@ export function buildCiStatsSources(args: {
   ownBranch: string;
   pipelineSlug: string;
   prNumber: string | undefined;
-  prMergeBase: string | undefined;
-  mergeQueueMergeBase: string | undefined;
+  selectiveMergeBase: string | undefined;
 }): CiStatsSource[] {
-  const { trackedBranch, ownBranch, pipelineSlug, prNumber, prMergeBase, mergeQueueMergeBase } =
-    args;
+  const { trackedBranch, ownBranch, pipelineSlug, prNumber, selectiveMergeBase } = args;
 
   const isMergeQueue = pipelineSlug === PIPELINES.MERGE_QUEUE;
 
   return [
     // try to get times from a recent successful job on this PR
     ...(prNumber ? [{ prId: prNumber, jobName: PIPELINES.PULL_REQUEST }] : []),
-    // if we are running on a external job, like kibana-code-coverage-main, try finding times that are specific to that job
+    // if we are running on an external job, try finding times that are specific to that job
     // kibana-elasticsearch-serverless-verify-and-promote is not necessarily run in commit order -
     // using kibana-on-merge groups will provide a closer approximation, with a failure mode -
     // of too many ftr groups instead of potential timeouts.
@@ -64,19 +62,12 @@ export function buildCiStatsSources(args: {
           { branch: trackedBranch, jobName: pipelineSlug },
         ]
       : []),
-    // try to get times from the merge-queue group's merge-base commit
-    ...(mergeQueueMergeBase
+    // try to get times from the merge-base commit; for merge-queue builds this is
+    // MERGE_QUEUE_MERGE_BASE, which may only have been built by kibana-merge-queue
+    ...(selectiveMergeBase
       ? [
-          { commit: mergeQueueMergeBase, jobName: PIPELINES.ON_MERGE },
-          { commit: mergeQueueMergeBase, jobName: PIPELINES.MERGE_QUEUE },
-        ]
-      : []),
-    // try to get times from the mergeBase commit; with a merge queue enabled the
-    // merge base may only have been built by the merge-queue pipeline
-    ...(prMergeBase
-      ? [
-          { commit: prMergeBase, jobName: PIPELINES.ON_MERGE },
-          { commit: prMergeBase, jobName: PIPELINES.MERGE_QUEUE },
+          { commit: selectiveMergeBase, jobName: PIPELINES.ON_MERGE },
+          { commit: selectiveMergeBase, jobName: PIPELINES.MERGE_QUEUE },
         ]
       : []),
     // merge-queue builds report the target branch as their branch, so recent queue

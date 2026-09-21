@@ -34,6 +34,7 @@ import type {
 } from '@kbn/expression-xy-plugin/common';
 
 import {
+  AreaFillOptions,
   LayerTypes,
   FittingFunctions,
   PointVisibilityOptions,
@@ -346,6 +347,7 @@ export const buildXYExpression = (
     minBarHeight: state.minBarHeight ?? 1,
     fillOpacity: state.fillOpacity ?? 0.3,
     pointVisibility: state.pointVisibility ?? PointVisibilityOptions.AUTO,
+    areaFill: state.areaFill ?? AreaFillOptions.SOLID,
     valueLabels: state.valueLabels ?? 'hide',
     hideEndzones: state.hideEndzones ?? false,
     addTimeMarker:

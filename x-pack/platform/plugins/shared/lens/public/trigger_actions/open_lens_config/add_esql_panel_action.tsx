@@ -42,7 +42,7 @@ export class AddESQLPanelAction implements Action<EmbeddableApiContext> {
 
   public getIconType() {
     // need to create a new one
-    return 'editorCodeBlock';
+    return 'code';
   }
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
@@ -76,7 +76,7 @@ export class AddESQLPanelAction implements Action<EmbeddableApiContext> {
           closeFlyout,
         });
       },
-      options: { uuid, returnFocus },
+      options: { uuid, returnFocus, isEsql: true },
     });
   }
 }

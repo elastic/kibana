@@ -103,7 +103,7 @@ export const registerIngestScoresRoute = ({
           if (explicitSpaceIds?.includes(ALL_SPACES_ID)) {
             return response.badRequest({
               body: {
-                message: `Assigning scores to all spaces ("${ALL_SPACES_ID}") is not supported yet; provide explicit space ids.`,
+                message: `All spaces ("${ALL_SPACES_ID}") is not a space id; name each space the scores belong to.`,
               },
             });
           }

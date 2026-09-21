@@ -23,6 +23,9 @@ import {
   MAX_CATEGORY_FILTER_LENGTH,
   MAX_ASSIGNEES_PER_CASE,
   MAX_CUSTOM_FIELDS_PER_CASE,
+  MAX_EXTENDED_FIELD_FILTER_VALUE_LENGTH,
+  MAX_EXTENDED_FIELD_FILTERS,
+  MAX_TEMPLATE_DEFINITION_LENGTH,
   CASE_EXTENDED_FIELDS,
 } from '../../../constants';
 import {
@@ -457,8 +460,16 @@ export const CasesSearchRequestSearchFieldsRt = rt.keyof({
 });
 
 const ExtendedFieldFilterRt = rt.strict({
-  label: rt.string,
-  value: rt.string,
+  label: limitedStringSchema({
+    fieldName: 'extendedFieldFilters.label',
+    min: 1,
+    max: MAX_TEMPLATE_DEFINITION_LENGTH,
+  }),
+  value: limitedStringSchema({
+    fieldName: 'extendedFieldFilters.value',
+    min: 1,
+    max: MAX_EXTENDED_FIELD_FILTER_VALUE_LENGTH,
+  }),
 });
 
 export const CasesSearchRequestRt = rt.intersection([
@@ -489,8 +500,14 @@ export const CasesSearchRequestRt = rt.intersection([
     rt.partial({
       /**
        * Extended field filters parsed from label:value syntax in the search bar.
+       * Same-label values are OR'd; distinct labels are AND'd.
        */
-      extendedFieldFilters: rt.array(ExtendedFieldFilterRt),
+      extendedFieldFilters: limitedArraySchema({
+        codec: ExtendedFieldFilterRt,
+        fieldName: 'extendedFieldFilters',
+        min: 0,
+        max: MAX_EXTENDED_FIELD_FILTERS,
+      }),
     })
   ),
 ]);

@@ -20,7 +20,7 @@ import type { EncryptedSavedObjectsService } from '../../server/crypto';
 import * as EncryptedSavedObjectsModule from '../../server/saved_objects';
 
 // This will only change if new ESOs are introduced. This number should never get smaller.
-export const ESO_TYPES_COUNT = 24 as const;
+export const ESO_TYPES_COUNT = 26 as const;
 
 describe('checking changes on all registered encrypted SO types', () => {
   let esServer: TestElasticsearchUtils;
@@ -64,11 +64,11 @@ describe('checking changes on all registered encrypted SO types', () => {
 
     expect(hashMap).toMatchInlineSnapshot(`
       Object {
-        "action": "1246557bd7101a6f8f732c6fe2fcebb582b2dfb6154816c43cce224ceaee4239",
+        "action": "c2291acc23b540b16a7e33ca80289a18d7b26663e268d290f943929e047ffc75",
         "action_task_params": "06aa563283bdcd5c07ec433a7d0b8425019ad11d75595ee1431691667ecd2cec",
         "ad_hoc_run_params": "492d390fb70fba457acb3b33ce76d4ea027625b3a7d7e9dd76c5c3255655c544",
         "alert": "878a3b83179bbf2ad9d3862fcba539b7066429869b14c120a1dc7a8d39f4a7fa",
-        "alerting_action_policy": "539c465f3bf4d062e394acbbb9184f995f48127f701e40ba6f601dc5a20300fd",
+        "alerting_action_policy": "de4278b8fbb8dc1a77e57ead6c88570c3bffb7d4ba590ddf1c0f84e96b1c405f",
         "anonymization-salt": "1e5ff6ba241b27bbfc6901898b0ece9327ba63fdaea1f2f6cba6344d4a425b43",
         "api_key_pending_invalidation": "4dafadadaaca2f2f3f6038ee8363b71b2d101371ca98c34d2b6aa2a96f7e71c5",
         "api_key_to_invalidate": "d7a3423a74032bb5ecce9a0975e8ea1d5d5171348f99173df54b2fa0dfd3de43",
@@ -81,6 +81,8 @@ describe('checking changes on all registered encrypted SO types', () => {
         "ingest-outputs": "d66716d5333484a25c57f7917bead5ac2576ec57a4b9eb61701b573f35ab62ad",
         "oauth_state": "b01289e5c133db9d4d802a2b838e43cce4a8399566dedb21de551da57c88894a",
         "privmon-api-key": "7d7b76b3bc5287a784518731ba66d4f761052177fc04b1a85e5605846ab9de42",
+        "service-account-credential": "5d9f328d92718249b324fbd5d01332bcef80be980003d510a3bd24af230244ff",
+        "service-account-workload-binding": "bdac5e0e6513a9644fcd9e2195d0fe3a105629dd798f2b23fe7d8b33d2d41d2b",
         "synthetics-monitor": "f1c060b7be3b30187c4adcb35d74f1fa8a4290bd7faf04fec869de2aa387e21b",
         "synthetics-monitor-multi-space": "39c4c6abd28c4173f77c1c89306e92b6b92492c0029274e10620a170be4d4a67",
         "synthetics-param": "747ba9d1b7addf5b131713abe7868bd767af6ce0cf8b6b0f335f4ef34b280c7e",
@@ -114,10 +116,15 @@ describe('checking changes on all registered encrypted SO types', () => {
 
     expect(modelVersionMap).toMatchInlineSnapshot(`
       Array [
+        "action|3",
         "action|2",
         "action|1",
+        "action_task_params|4",
+        "action_task_params|3",
         "action_task_params|2",
         "action_task_params|1",
+        "ad_hoc_run_params|6",
+        "ad_hoc_run_params|5",
         "ad_hoc_run_params|4",
         "ad_hoc_run_params|3",
         "ad_hoc_run_params|2",
@@ -130,12 +137,15 @@ describe('checking changes on all registered encrypted SO types', () => {
         "alert|4",
         "alert|3",
         "alert|2",
+        "alert|15",
         "alert|14",
         "alert|13",
         "alert|12",
         "alert|11",
         "alert|10",
         "alert|1",
+        "alerting_action_policy|3",
+        "alerting_action_policy|2",
         "alerting_action_policy|1",
         "anonymization-salt|1",
         "api_key_pending_invalidation|2",
@@ -148,6 +158,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "fleet-fleet-server-host|2",
         "fleet-fleet-server-host|1",
         "fleet-uninstall-tokens|1",
+        "ingest-download-sources|2",
         "ingest-download-sources|1",
         "ingest-outputs|9",
         "ingest-outputs|8",
@@ -157,9 +168,12 @@ describe('checking changes on all registered encrypted SO types', () => {
         "ingest-outputs|4",
         "ingest-outputs|3",
         "ingest-outputs|2",
+        "ingest-outputs|11",
         "ingest-outputs|10",
         "ingest-outputs|1",
         "oauth_state|1",
+        "service-account-credential|1",
+        "service-account-workload-binding|1",
         "synthetics-monitor|2",
         "synthetics-monitor|1",
         "task|9",
@@ -170,6 +184,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "task|4",
         "task|3",
         "task|2",
+        "task|13",
         "task|12",
         "task|11",
         "task|10",

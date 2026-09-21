@@ -6,14 +6,17 @@
  */
 
 import { isBoom } from '@hapi/boom';
-import { ALERTING_V2_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
+import { ALERTING_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
+import pLimit from 'p-limit';
 import { compileMatchCountBreachQuery } from '../../../significant_events/rules/match_count_query_compiler';
+import { withAllProjectsRouting } from '../../../significant_events/rules/project_routing';
 import {
   METRIC_SERIES_GROUPING_FIELDS,
   METRIC_SERIES_RULE_TAG,
 } from '../../../significant_events/rules/metric_series_contract';
 import { getMetricSeriesRuleSchedule } from '../../../significant_events/rules/schedule';
 import {
+  BulkCreateRulesError,
   STREAMS_RULE_STREAM_TAG_PREFIX,
   streamNameFromTag,
   toStreamTag,
@@ -22,6 +25,36 @@ import {
 } from './rules_management_client';
 
 const FIND_PAGE_SIZE = 500;
+const RULE_EXISTS_CONCURRENCY = 10;
+const CONFLICT_UPDATE_CONCURRENCY = 10;
+
+const isScheduleLimitError = (error: unknown): boolean =>
+  isBoom(error) &&
+  error.output.statusCode === 400 &&
+  typeof error.data === 'object' &&
+  error.data !== null &&
+  'code' in error.data &&
+  error.data.code === ALERTING_ERROR_CODES.MAX_SCHEDULES_PER_MINUTE_EXCEEDED;
+
+export interface RulesAdapterV2Params {
+  rulesClient: Pick<
+    RulesClientApi,
+    | 'createRule'
+    | 'bulkCreateRules'
+    | 'updateRule'
+    | 'bulkDeleteRules'
+    | 'findRules'
+    | 'getTags'
+    | 'ruleExists'
+  >;
+  isServerless: boolean;
+}
+
+/**
+ * Internal getTags size for ownership-tag enumeration. The HTTP tags route stays
+ * capped at 20 for typeahead; server-side consumers may request up to 10000.
+ */
+const OWNED_STREAM_TAGS_SIZE = 10000;
 
 /**
  * Wraps alerting_v2 `RulesClientApi` to implement IRulesManagementClient.
@@ -33,11 +66,20 @@ const FIND_PAGE_SIZE = 500;
  * (SigEvents uses default space), matching the former HTTP client behavior.
  */
 export class RulesAdapterV2 implements IRulesManagementClient {
-  constructor(private readonly rulesClient: RulesClientApi) {}
+  private readonly rulesClient: RulesAdapterV2Params['rulesClient'];
+  private readonly isServerless: boolean;
+
+  constructor({ rulesClient, isServerless }: RulesAdapterV2Params) {
+    this.rulesClient = rulesClient;
+    this.isServerless = isServerless;
+  }
 
   async createRule(id: string, definition: SignificantEventsRuleDefinition): Promise<void> {
     await this.rulesClient
-      .createRule({ data: toV2CreateBody(definition), options: { id } })
+      .createRule({
+        data: toV2CreateBody({ definition, isServerless: this.isServerless }),
+        options: { id },
+      })
       .catch((error) => {
         if (isBoom(error) && error.output.statusCode === 409) {
           return this.updateRule(id, definition);
@@ -46,8 +88,41 @@ export class RulesAdapterV2 implements IRulesManagementClient {
       });
   }
 
+  async bulkCreateRules(
+    rules: Array<{ id: string; definition: SignificantEventsRuleDefinition }>
+  ): Promise<{ createdIds: string[] }> {
+    try {
+      return await this.createRulesAndUpdateConflicts(rules, []);
+    } catch (error) {
+      if (!isScheduleLimitError(error)) {
+        throw error;
+      }
+
+      const existingIds = new Set(await this.findExistingRuleIds(rules.map(({ id }) => id)));
+      if (existingIds.size === 0) {
+        throw error;
+      }
+
+      const rulesToCreate = rules.filter(({ id }) => !existingIds.has(id));
+      const rulesToUpdate = rules.filter(({ id }) => existingIds.has(id));
+      try {
+        return await this.createRulesAndUpdateConflicts(rulesToCreate, rulesToUpdate);
+      } catch (retryError) {
+        if (retryError instanceof BulkCreateRulesError) {
+          throw retryError;
+        }
+        throw new BulkCreateRulesError(
+          retryError instanceof Error ? retryError : new Error(String(retryError)),
+          [],
+          rulesToUpdate.map(({ id }) => id),
+          rulesToCreate.map(({ id }) => id)
+        );
+      }
+    }
+  }
+
   async updateRule(id: string, definition: SignificantEventsRuleDefinition): Promise<void> {
-    await this.rulesClient.updateRule({ id, data: toV2UpdateBody(definition) }).catch((error) => {
+    await this.updateRuleWithoutFallback(id, definition).catch((error) => {
       if (isBoom(error) && error.output.statusCode === 404) {
         return this.createRuleWithoutFallback(id, definition);
       }
@@ -58,11 +133,22 @@ export class RulesAdapterV2 implements IRulesManagementClient {
   async bulkDeleteRules(ids: string[]): Promise<void> {
     if (ids.length === 0) return;
     const { errors } = await this.rulesClient.bulkDeleteRules({ ids });
-    const fatal = errors.filter((e) => e.error.code !== ALERTING_V2_ERROR_CODES.RULE_NOT_FOUND);
+    const fatal = errors.filter((e) => e.error.code !== ALERTING_ERROR_CODES.RULE_NOT_FOUND);
     if (fatal.length > 0) {
       const detail = fatal.map((e) => `${e.id}: ${e.error.message}`).join('; ');
       throw new Error(`V2 bulk delete failed for ${fatal.length} rule(s): ${detail}`);
     }
+  }
+
+  async findExistingRuleIds(ids: string[]): Promise<string[]> {
+    const limit = pLimit(RULE_EXISTS_CONCURRENCY);
+    const results = await Promise.all(
+      ids.map((id) =>
+        limit(async () => ({ id, exists: await this.rulesClient.ruleExists({ id }) }))
+      )
+    );
+
+    return results.filter(({ exists }) => exists).map(({ id }) => id);
   }
 
   async findOwnedRuleIds(streamName: string): Promise<string[]> {
@@ -84,9 +170,13 @@ export class RulesAdapterV2 implements IRulesManagementClient {
   }
 
   async findStreamNamesWithOwnedRules(): Promise<string[]> {
-    // Filters rules, not tags: matched rules return all their tags, so drop non-ownership ones below.
-    const escapedPrefix = STREAMS_RULE_STREAM_TAG_PREFIX.replace(/[\\:]/g, '\\$&');
-    const tags = await this.rulesClient.getTags({ filter: `metadata.tags: ${escapedPrefix}*` });
+    // Prefix-search returns matching tag buckets (not rule documents). Non-ownership
+    // tags are still filtered client-side in case the include pattern is broadened.
+    const tags = await this.rulesClient.getTags({
+      search: STREAMS_RULE_STREAM_TAG_PREFIX,
+      kind: 'signal',
+      size: OWNED_STREAM_TAGS_SIZE,
+    });
     const streamNames = new Set<string>();
     for (const tag of tags) {
       const streamName = streamNameFromTag(tag);
@@ -95,6 +185,93 @@ export class RulesAdapterV2 implements IRulesManagementClient {
       }
     }
     return [...streamNames];
+  }
+
+  private async createRulesAndUpdateConflicts(
+    rulesToCreate: Array<{ id: string; definition: SignificantEventsRuleDefinition }>,
+    knownConflicts: Array<{ id: string; definition: SignificantEventsRuleDefinition }>
+  ): Promise<{ createdIds: string[] }> {
+    const definitionsById = new Map(
+      [...rulesToCreate, ...knownConflicts].map(({ id, definition }) => [id, definition])
+    );
+    const { rules: created, errors } =
+      rulesToCreate.length === 0
+        ? { rules: [], errors: [] }
+        : await this.rulesClient.bulkCreateRules({
+            rules: rulesToCreate.map(({ id, definition }) => ({
+              ...toV2CreateBody({ definition, isServerless: this.isServerless }),
+              id,
+              enabled: true,
+            })),
+          });
+
+    const createdIds = created.map(({ id }) => id);
+    const conflicts = errors.filter(
+      ({ error }) => error.code === ALERTING_ERROR_CODES.RULE_ALREADY_EXISTS
+    );
+    const conflictIds = [...knownConflicts.map(({ id }) => id), ...conflicts.map(({ id }) => id)];
+    const fatal = errors.filter(
+      ({ error }) => error.code !== ALERTING_ERROR_CODES.RULE_ALREADY_EXISTS
+    );
+    if (fatal.length > 0) {
+      const detail = fatal
+        .map(({ id, error }) => `${id} [${error.code}]: ${error.message}`)
+        .join('; ');
+      throw new BulkCreateRulesError(
+        new Error(`V2 bulk create failed for ${fatal.length} rule(s): ${detail}`),
+        createdIds,
+        conflictIds,
+        fatal.map(({ id }) => id)
+      );
+    }
+
+    const limit = pLimit(CONFLICT_UPDATE_CONCURRENCY);
+    const updateResults = await Promise.allSettled(
+      conflictIds.map((id) =>
+        limit(async () => {
+          const definition = definitionsById.get(id);
+          if (!definition) {
+            throw new Error(`V2 bulk create returned a conflict for unknown rule "${id}"`);
+          }
+          await this.updateRuleWithoutFallback(id, definition);
+        })
+      )
+    );
+
+    const updateFailures: Array<{ id: string; cause: Error }> = [];
+    for (const [index, result] of updateResults.entries()) {
+      if (result.status === 'rejected') {
+        const id = conflictIds[index];
+        if (!id) {
+          continue;
+        }
+        updateFailures.push({
+          id,
+          cause: result.reason instanceof Error ? result.reason : new Error(String(result.reason)),
+        });
+      }
+    }
+    const [firstUpdateFailure] = updateFailures;
+    if (firstUpdateFailure) {
+      throw new BulkCreateRulesError(
+        firstUpdateFailure.cause,
+        createdIds,
+        conflictIds,
+        updateFailures.map(({ id }) => id)
+      );
+    }
+
+    return { createdIds };
+  }
+
+  private async updateRuleWithoutFallback(
+    id: string,
+    definition: SignificantEventsRuleDefinition
+  ): Promise<void> {
+    await this.rulesClient.updateRule({
+      id,
+      data: toV2UpdateBody({ definition, isServerless: this.isServerless }),
+    });
   }
 
   /**
@@ -108,7 +285,10 @@ export class RulesAdapterV2 implements IRulesManagementClient {
     definition: SignificantEventsRuleDefinition
   ): Promise<void> {
     await this.rulesClient
-      .createRule({ data: toV2CreateBody(definition), options: { id } })
+      .createRule({
+        data: toV2CreateBody({ definition, isServerless: this.isServerless }),
+        options: { id },
+      })
       .catch((error) => {
         if (isBoom(error) && error.output.statusCode === 409) {
           return;
@@ -118,11 +298,25 @@ export class RulesAdapterV2 implements IRulesManagementClient {
   }
 }
 
-function toV2BreachQuery(esqlQuery: string, timestampField: string): string {
-  return compileMatchCountBreachQuery(esqlQuery, timestampField);
+interface ToV2BodyParams {
+  definition: SignificantEventsRuleDefinition;
+  isServerless: boolean;
 }
 
-function toV2CommonBody(definition: SignificantEventsRuleDefinition) {
+function toV2BreachQuery({
+  esqlQuery,
+  timestampField,
+  isServerless,
+}: {
+  esqlQuery: string;
+  timestampField: string;
+  isServerless: boolean;
+}): string {
+  const compiled = compileMatchCountBreachQuery(esqlQuery, timestampField);
+  return isServerless ? withAllProjectsRouting(compiled) : compiled;
+}
+
+function toV2CommonBody({ definition, isServerless }: ToV2BodyParams) {
   const { every, lookback } = getMetricSeriesRuleSchedule();
   return {
     metadata: {
@@ -137,15 +331,21 @@ function toV2CommonBody(definition: SignificantEventsRuleDefinition) {
     grouping: { fields: [...METRIC_SERIES_GROUPING_FIELDS] },
     query: {
       format: 'standalone' as const,
-      breach: { query: toV2BreachQuery(definition.esqlQuery, definition.timestampField) },
+      breach: {
+        query: toV2BreachQuery({
+          esqlQuery: definition.esqlQuery,
+          timestampField: definition.timestampField,
+          isServerless,
+        }),
+      },
     },
   };
 }
 
-function toV2CreateBody(definition: SignificantEventsRuleDefinition) {
+function toV2CreateBody({ definition, isServerless }: ToV2BodyParams) {
   return {
     kind: 'signal' as const,
-    ...toV2CommonBody(definition),
+    ...toV2CommonBody({ definition, isServerless }),
   };
 }
 

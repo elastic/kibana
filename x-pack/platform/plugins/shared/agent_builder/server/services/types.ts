@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
+import type { HttpServiceStart } from '@kbn/core-http-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
@@ -33,6 +34,10 @@ import type { ConversationService } from './conversation';
 import type { WorkspaceService } from './workspaces';
 import type { AttachmentServiceSetup, AttachmentServiceStart } from './attachments';
 import type { RendererServiceSetup, RendererServiceStart } from './renderers';
+import type {
+  ConversationEventsServiceSetup,
+  ConversationEventsServiceStart,
+} from './conversation_events';
 import type { SkillServiceSetup, SkillServiceStart } from './skills';
 import type { TrackingService } from '../telemetry/tracking_service';
 import type { AnalyticsService } from '../telemetry';
@@ -41,16 +46,23 @@ import type { TaskHandler } from './execution';
 import type { MeteringService, ConsumptionServiceStart } from './metering';
 import type { PluginsServiceSetup, PluginsServiceStart } from './plugins';
 import type { CallbackDeliveryService } from './execution/callback';
+import type { SpaceSettingsService } from './space_settings';
+import type {
+  ConversationTemplatesServiceSetup,
+  ConversationTemplatesServiceStart,
+} from './conversation/templates';
 
 export interface InternalSetupServices {
   tools: ToolsServiceSetup;
   agents: AgentsServiceSetup;
   attachments: AttachmentServiceSetup;
   renderers: RendererServiceSetup;
+  conversationEvents: ConversationEventsServiceSetup;
   hooks: HooksServiceSetup;
   skills: SkillServiceSetup;
   plugins: PluginsServiceSetup;
   metering: MeteringService;
+  conversationTemplates: ConversationTemplatesServiceSetup;
 }
 
 export interface InternalStartServices {
@@ -58,6 +70,7 @@ export interface InternalStartServices {
   agents: AgentsServiceStart;
   attachments: AttachmentServiceStart;
   renderers: RendererServiceStart;
+  conversationEvents: ConversationEventsServiceStart;
   skills: SkillServiceStart;
   conversations: ConversationService;
   workspaces: WorkspaceService;
@@ -74,6 +87,8 @@ export interface InternalStartServices {
   consumption: ConsumptionServiceStart;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
   callbackDeliveryService: CallbackDeliveryService;
+  spaceSettings: SpaceSettingsService;
+  conversationTemplates: ConversationTemplatesServiceStart;
 }
 
 export interface ServiceSetupDeps {
@@ -89,6 +104,7 @@ export interface ServicesStartDeps {
   // core services
   logger: Logger;
   elasticsearch: ElasticsearchServiceStart;
+  http: HttpServiceStart;
   security: SecurityServiceStart;
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
@@ -103,4 +119,6 @@ export interface ServicesStartDeps {
   trackingService?: TrackingService;
   analyticsService?: AnalyticsService;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
+  /** `xpack.agentBuilder.deductive.register` for this deployment. */
+  deductiveRegister: boolean;
 }

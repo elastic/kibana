@@ -81,6 +81,7 @@ const defaultProps: RulesListTableProps = {
   onBulkEnable: jest.fn(),
   onBulkDisable: jest.fn(),
   onBulkDelete: jest.fn(),
+  onBulkUpdateApiKey: jest.fn(),
   onNavigateToDetails: jest.fn(),
   onExpand: jest.fn(),
   onQuickEdit: jest.fn(),
@@ -88,6 +89,7 @@ const defaultProps: RulesListTableProps = {
   onClone: jest.fn(),
   onDelete: jest.fn(),
   onToggleEnabled: jest.fn(),
+  onUpdateApiKey: jest.fn(),
   onRun: jest.fn(),
   onTableChange: jest.fn(),
 };
@@ -166,17 +168,17 @@ describe('RulesListTable', () => {
       );
     });
 
-    it('renders Mode column with Alert and Signal', () => {
+    it('renders Outcome column with Alerts and Events', () => {
       renderTable();
 
-      expect(screen.getByText('Alert')).toBeInTheDocument();
-      expect(screen.getByText('Signal')).toBeInTheDocument();
+      expect(screen.getByText('Alerts')).toBeInTheDocument();
+      expect(screen.getByText('Events')).toBeInTheDocument();
     });
 
-    it('renders kind-specific tooltip for Alert mode badge', async () => {
+    it('renders kind-specific tooltip for Alerts kind badge', async () => {
       renderTable();
 
-      fireEvent.mouseOver(screen.getByText('Alert'));
+      fireEvent.mouseOver(screen.getByText('Alerts'));
 
       expect(await screen.findByText(RULE_KIND_TOOLTIPS.alert)).toBeInTheDocument();
       expect(
@@ -184,10 +186,10 @@ describe('RulesListTable', () => {
       ).not.toBeInTheDocument();
     });
 
-    it('renders kind-specific tooltip for Signal mode badge', async () => {
+    it('renders kind-specific tooltip for Events kind badge', async () => {
       renderTable();
 
-      fireEvent.mouseOver(screen.getByText('Signal'));
+      fireEvent.mouseOver(screen.getByText('Events'));
 
       expect(await screen.findByText(RULE_KIND_TOOLTIPS.signal)).toBeInTheDocument();
     });
@@ -393,6 +395,21 @@ describe('RulesListTable', () => {
       expect(onBulkDelete).toHaveBeenCalledTimes(1);
     });
 
+    it('opens bulk actions popover and calls onBulkUpdateApiKey', async () => {
+      const onBulkUpdateApiKey = jest.fn();
+      renderTable({ selectedCount: 1, onBulkUpdateApiKey });
+
+      fireEvent.click(screen.getByTestId('bulkActionsButton'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('bulkUpdateRuleApiKey')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('bulkUpdateRuleApiKey'));
+
+      expect(onBulkUpdateApiKey).toHaveBeenCalledTimes(1);
+    });
+
     it('closes the popover after clicking a bulk action', async () => {
       renderTable({ selectedCount: 1 });
 
@@ -446,6 +463,27 @@ describe('RulesListTable', () => {
       fireEvent.click(screen.getByTestId('deleteRule-rule-1'));
 
       expect(onDelete).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
+    });
+
+    it('calls onViewChangeHistory when view change history action is clicked', async () => {
+      const onViewChangeHistory = jest.fn();
+      renderTable({ onViewChangeHistory });
+
+      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+
+      expect(await screen.findByTestId('viewChangeHistoryRule-rule-1')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('viewChangeHistoryRule-rule-1'));
+
+      expect(onViewChangeHistory).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
+    });
+
+    it('hides view change history when onViewChangeHistory is omitted', () => {
+      renderTable();
+
+      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+
+      expect(screen.queryByTestId('viewChangeHistoryRule-rule-1')).not.toBeInTheDocument();
     });
 
     it('does not render a toggle enabled action, since that is handled by the Enabled switch', () => {
@@ -554,6 +592,20 @@ describe('RulesListTable', () => {
 
       expect(screen.queryByTestId('quickEditRule-rule-1')).not.toBeInTheDocument();
       expect(screen.queryByTestId('ruleActionsButton-rule-1')).not.toBeInTheDocument();
+    });
+
+    it('still shows View change history (a read action) without write actions', async () => {
+      const onViewChangeHistory = jest.fn();
+      renderTable({ canWrite: false, onViewChangeHistory });
+
+      // No quick edit shortcut for read-only, but the actions menu is available.
+      expect(screen.queryByTestId('quickEditRule-rule-1')).not.toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+
+      expect(await screen.findByTestId('viewChangeHistoryRule-rule-1')).toBeInTheDocument();
+      expect(screen.queryByTestId('editRule-rule-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('cloneRule-rule-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('deleteRule-rule-1')).not.toBeInTheDocument();
     });
 
     it('does not show the bulk action toolbar even when selectedCount > 0', () => {

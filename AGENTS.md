@@ -2,7 +2,7 @@
 
 ## Setup
 - Use the Node version pinned in `.nvmrc` (matches `engines.node` in `package.json`).
-- Run `yarn kbn bootstrap` for initial setup, after switching branches, or when encountering dependency errors
+- Run `node scripts/kbn bootstrap` for initial setup, after switching branches, or when encountering dependency errors
 
 ## Overview
 - Kibana is organized into modules, each defined by a `kibana.jsonc`: core, packages, and plugin packages. Aside from tooling and testing, most code lives in these modules.
@@ -45,7 +45,7 @@ Follow existing patterns in the target area first; below are common defaults.
 - Without `--project` it checks **all** projects (very slow). Always scope to a single project:
   `node scripts/type_check --project src/core/packages/http/server-internal/tsconfig.json`
 - Only one `--project` per run. To check multiple packages, run separate commands.
-- `.buildkite/` is **not** a valid target for `scripts/type_check`. Buildkite scripts live in a separate workspace; typecheck them with `npm run typecheck` (or `yarn typecheck`) from inside `.buildkite/`.
+- `.buildkite/` is **not** a valid target for `scripts/type_check`. Buildkite scripts live in a separate workspace; typecheck them with `npm run typecheck` from inside `.buildkite/`.
 
 ### TypeScript & Types
 - Use TypeScript for all new code; avoid `any` and `unknown`.
@@ -78,11 +78,12 @@ Follow existing patterns in the target area first; below are common defaults.
 - Handle errors explicitly; return typed errors from APIs when possible.
 - Keep async logic linear; avoid nested `try` blocks when possible.
 
-### React / UI Conventions
-- Use functional components; type props explicitly.
-- Keep hooks at the top level; avoid conditional hooks.
-- Avoid inline styles unless consistent with the file’s conventions.
-- Use `@elastic/eui` components with Emotion (`@emotion/react`) for styling.
+### UI Component Selection and Styling
+- Reuse existing components from the target module and shared packages it can depend on. Prefer `@kbn/ui-*` packages under `src/platform/kbn-ui` over equivalent `@elastic/eui` components — they encode Kibana-specific behavior and conventions.
+- Treat every component you consume as encapsulated; customize it through its public props and supported composition points.
+- Do not target a component's internal DOM, internal or generated class names, or use `!important` to override its appearance. Existing instances of these patterns are not precedent.
+- When the public API cannot meet the requirement: if changing the component is in scope, extend its public API; otherwise implement the closest supported result and recommend consulting its owning team (`owner` in `kibana.jsonc`; `@elastic/eui-team` for EUI). Treat duplicating a component as a last resort.
+- Style with Emotion (`@emotion/react`) and EUI design tokens; reserve inline styles for runtime-computed values.
 
 ### Schema validation
 - When adding `schema.string()` / `schema.arrayOf()` (`@kbn/config-schema`) or `z.string()` / `z.array()` (`zod`) for HTTP request input, always bound them (`maxLength` / `maxSize` / `.max()`) to prevent unbounded-input DoS.
@@ -100,3 +101,4 @@ Follow existing patterns in the target area first; below are common defaults.
 - Make focused changes; avoid unrelated refactors.
 - Update docs and tests when behavior or usage changes.
 - Never remove, skip, or comment out tests to make them pass; fix the underlying code.
+- Only comment exported functions with one concise sentence and non-trivial code paths.

@@ -15,7 +15,11 @@ import {
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES,
+  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_RULE_DETECTION_THRESHOLD,
+  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_RULE_PROBE_AFTER_MINUTES,
+  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_RULE_EXEMPT_SEVERITY_SCORE,
 } from '@kbn/management-settings-ids';
+import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 import { assertNotPaused } from '../../utils/assert_not_paused';
@@ -23,7 +27,6 @@ import { FeatureNotEnabledError } from '../../../lib/errors/feature_not_enabled_
 import { StatusError } from '../../../lib/errors/status_error';
 import { installDiscoveryAgents } from '../../../agent_builder/agents/discovery';
 import {
-  STREAMS_API_PRIVILEGES,
   DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_BUCKET_INTERVAL_MINUTES,
   DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_INTERVAL_MINUTES,
   DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_LOOKBACK_MINUTES,
@@ -31,16 +34,25 @@ import {
   DEFAULT_SIG_EVENTS_SCHEDULED_MAX_REVIEW_PASSES,
   DEFAULT_SIG_EVENTS_SCHEDULED_REVIEW_INTERVAL_MINUTES,
   DEFAULT_SIG_EVENTS_TARGET_COVERAGE_MINUTES,
+  DEFAULT_SIG_EVENTS_FLAKY_RULE_DETECTION_THRESHOLD,
+  DEFAULT_SIG_EVENTS_FLAKY_RULE_PROBE_AFTER_MINUTES,
+  DEFAULT_SIG_EVENTS_FLAKY_RULE_EXEMPT_SEVERITY_SCORE,
   MAX_SIG_EVENTS_CHANGE_POINT_BUCKETS,
   MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
   MAX_SIG_EVENTS_SCHEDULED_DETECTION_BUCKET_INTERVAL_MINUTES,
   MAX_SIG_EVENTS_SCHEDULED_REVIEW_PASSES,
+  MAX_SIG_EVENTS_FLAKY_RULE_DETECTION_THRESHOLD,
+  MAX_SIG_EVENTS_FLAKY_RULE_PROBE_AFTER_MINUTES,
+  MAX_SIG_EVENTS_FLAKY_RULE_EXEMPT_SEVERITY_SCORE,
   MIN_SIG_EVENTS_CHANGE_POINT_BUCKETS,
   MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
   MIN_SIG_EVENTS_SCHEDULED_DETECTION_BUCKET_INTERVAL_MINUTES,
   MIN_SIG_EVENTS_SCHEDULED_DETECTION_LOOKBACK_MINUTES,
   MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES,
   MIN_SIG_EVENTS_SCHEDULED_REVIEW_PASSES,
+  MIN_SIG_EVENTS_FLAKY_RULE_DETECTION_THRESHOLD,
+  MIN_SIG_EVENTS_FLAKY_RULE_PROBE_AFTER_MINUTES,
+  MIN_SIG_EVENTS_FLAKY_RULE_EXEMPT_SEVERITY_SCORE,
 } from '../../../../common/constants';
 
 const scheduledDiscoverySettingsSchema = z.object({
@@ -66,6 +78,21 @@ const scheduledDiscoverySettingsSchema = z.object({
     .number()
     .min(MIN_SIG_EVENTS_SCHEDULED_REVIEW_PASSES)
     .max(MAX_SIG_EVENTS_SCHEDULED_REVIEW_PASSES)
+    .optional(),
+  flakyRuleDetectionThreshold: z
+    .number()
+    .min(MIN_SIG_EVENTS_FLAKY_RULE_DETECTION_THRESHOLD)
+    .max(MAX_SIG_EVENTS_FLAKY_RULE_DETECTION_THRESHOLD)
+    .optional(),
+  flakyRuleProbeAfterMinutes: z
+    .number()
+    .min(MIN_SIG_EVENTS_FLAKY_RULE_PROBE_AFTER_MINUTES)
+    .max(MAX_SIG_EVENTS_FLAKY_RULE_PROBE_AFTER_MINUTES)
+    .optional(),
+  flakyRuleExemptSeverityScore: z
+    .number()
+    .min(MIN_SIG_EVENTS_FLAKY_RULE_EXEMPT_SEVERITY_SCORE)
+    .max(MAX_SIG_EVENTS_FLAKY_RULE_EXEMPT_SEVERITY_SCORE)
     .optional(),
 });
 
@@ -109,6 +136,21 @@ const SCHEDULED_DISCOVERY_NUMERIC_SETTINGS = {
     settingId: OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES,
     defaultValue: DEFAULT_SIG_EVENTS_SCHEDULED_MAX_REVIEW_PASSES,
   },
+  flakyRuleDetectionThreshold: {
+    settingId:
+      OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_RULE_DETECTION_THRESHOLD,
+    defaultValue: DEFAULT_SIG_EVENTS_FLAKY_RULE_DETECTION_THRESHOLD,
+  },
+  flakyRuleProbeAfterMinutes: {
+    settingId:
+      OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_RULE_PROBE_AFTER_MINUTES,
+    defaultValue: DEFAULT_SIG_EVENTS_FLAKY_RULE_PROBE_AFTER_MINUTES,
+  },
+  flakyRuleExemptSeverityScore: {
+    settingId:
+      OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_RULE_EXEMPT_SEVERITY_SCORE,
+    defaultValue: DEFAULT_SIG_EVENTS_FLAKY_RULE_EXEMPT_SEVERITY_SCORE,
+  },
 } as const;
 
 type ScheduledDiscoveryNumericField = keyof typeof SCHEDULED_DISCOVERY_NUMERIC_SETTINGS;
@@ -123,7 +165,7 @@ const putScheduledDiscoverySettingsRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage, NIGHTSHIFT_API_PRIVILEGES.configure],
     },
   },
   params: z.object({
@@ -270,6 +312,11 @@ const putScheduledDiscoverySettingsRoute = createServerRoute({
             reviewIntervalMinutes: resolveScheduledConfigValue('reviewIntervalMinutes'),
             discoveryBatchSize: resolveScheduledConfigValue('discoveryBatchSize'),
             maxReviewPasses: resolveScheduledConfigValue('maxReviewPasses'),
+            flakyRuleDetectionThreshold: resolveScheduledConfigValue('flakyRuleDetectionThreshold'),
+            flakyRuleProbeAfterMinutes: resolveScheduledConfigValue('flakyRuleProbeAfterMinutes'),
+            flakyRuleExemptSeverityScore: resolveScheduledConfigValue(
+              'flakyRuleExemptSeverityScore'
+            ),
           },
         });
       }

@@ -23,7 +23,7 @@ export const UpdatePrivMonUserRequestParams = lazySchema(() =>
     /**
      * The document ID of the monitored user to update
      */
-    id: z.string(),
+    id: z.string().describe('The document ID of the monitored user to update'),
   })
 );
 export type UpdatePrivMonUserRequestParams = z.infer<typeof UpdatePrivMonUserRequestParams>;

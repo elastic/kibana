@@ -33,62 +33,90 @@ import type { EcsServiceScope, FlyoutLensChartConfigDefinition, ServiceScope } f
 
 export { getLatencyChartType };
 
-export function getChartDefinitions({
+// ES|QL/Lens charts over raw documents. Used for `otel` schema services in every
+// host (the APM chart APIs cannot see unprocessed OTel documents — no
+// `processor.event`, no `transaction.*` fields) and for ALL services in
+// document-based hosts such as Discover, where the surrounding RED metric charts
+// are computed from the raw documents and the rollup-based APM chart APIs would
+// disagree with them whenever sampling is in play. Other hosts render the shared
+// APM chart components instead (see ../apm_charts.tsx).
+export function getEsqlKeyMetricCharts({
   indices,
   schema,
   serviceName,
   environment,
   transactionType,
+  transactionName,
   latencyAggregationType,
   latencyTitleAction,
+  projectRouting,
 }: {
   indices: APMIndices | undefined;
   schema: ServiceSchemaType | undefined;
   serviceName: string;
   environment: string;
   transactionType: string;
+  /** When set, scopes RED charts to this transaction / entry span. */
+  transactionName?: string;
   latencyAggregationType: LatencyAggregationType;
   latencyTitleAction?: ReactNode;
-}): {
-  keyMetrics: FlyoutLensChartConfigDefinition[];
-  infrastructureMetrics: FlyoutLensChartConfigDefinition[];
-} {
+  projectRouting?: string;
+}): FlyoutLensChartConfigDefinition[] {
   const transactionIndexes = indices?.transaction;
   const otelIndexes = [indices?.transaction, indices?.span].filter(Boolean).join(',') || undefined;
-  const metricIndexes = indices?.metric;
-  const ecsScope: EcsServiceScope = { serviceName, environment, transactionType };
-  const otelScope: ServiceScope = { serviceName, environment };
-  const metricScope: ServiceScope = { serviceName, environment };
+  const ecsScope: EcsServiceScope = {
+    serviceName,
+    environment,
+    transactionType,
+    transactionName,
+  };
+  const otelScope: ServiceScope = { serviceName, environment, transactionName };
   const isOtel = schema === 'otel';
   const chartIndices = isOtel ? otelIndexes : transactionIndexes;
 
-  return {
-    keyMetrics: [
-      getLatencyChart({
-        indices: chartIndices,
-        latencyAggregationType,
-        titleAction: latencyTitleAction,
-        buildQuery: isOtel
-          ? (idx, agg) => buildOtelLatencyQuery(idx, otelScope, agg)
-          : (idx, agg) => buildApmLatencyQuery(idx, ecsScope, agg),
-      }),
-      getErrorRateChart({
-        indices: chartIndices,
-        title: isOtel ? OTEL_ERROR_RATE_TITLE : APM_ERROR_RATE_TITLE,
-        buildQuery: isOtel
-          ? (idx) => buildOtelErrorRateQuery(idx, otelScope)
-          : (idx) => buildApmErrorRateQuery(idx, ecsScope),
-      }),
-      getThroughputChart({
-        indices: chartIndices,
-        buildQuery: isOtel
-          ? (idx) => buildOtelThroughputQuery(idx, otelScope)
-          : (idx) => buildApmThroughputQuery(idx, ecsScope),
-      }),
-    ],
-    infrastructureMetrics: [
-      getCpuUsageChart(metricIndexes, metricScope),
-      getMemoryUsageChart(metricIndexes, metricScope),
-    ],
-  };
+  return [
+    getLatencyChart({
+      indices: chartIndices,
+      latencyAggregationType,
+      titleAction: latencyTitleAction,
+      buildQuery: isOtel
+        ? (idx, agg) => buildOtelLatencyQuery(idx, otelScope, agg)
+        : (idx, agg) => buildApmLatencyQuery(idx, ecsScope, agg),
+      projectRouting,
+    }),
+    getErrorRateChart({
+      indices: chartIndices,
+      title: isOtel ? OTEL_ERROR_RATE_TITLE : APM_ERROR_RATE_TITLE,
+      buildQuery: isOtel
+        ? (idx) => buildOtelErrorRateQuery(idx, otelScope)
+        : (idx) => buildApmErrorRateQuery(idx, ecsScope),
+      projectRouting,
+    }),
+    getThroughputChart({
+      indices: chartIndices,
+      buildQuery: isOtel
+        ? (idx) => buildOtelThroughputQuery(idx, otelScope)
+        : (idx) => buildApmThroughputQuery(idx, ecsScope),
+      projectRouting,
+    }),
+  ];
+}
+
+export function getInfrastructureMetricCharts({
+  indices,
+  serviceName,
+  environment,
+  projectRouting,
+}: {
+  indices: APMIndices | undefined;
+  serviceName: string;
+  environment: string;
+  projectRouting?: string;
+}): FlyoutLensChartConfigDefinition[] {
+  const metricScope: ServiceScope = { serviceName, environment };
+
+  return [
+    getCpuUsageChart(indices?.metric, metricScope, projectRouting),
+    getMemoryUsageChart(indices?.metric, metricScope, projectRouting),
+  ];
 }

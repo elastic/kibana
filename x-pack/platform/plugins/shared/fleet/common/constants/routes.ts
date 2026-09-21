@@ -65,13 +65,22 @@ export const EPM_API_ROUTES = {
   REAUTHORIZE_TRANSFORMS: `${EPM_PACKAGES_ONE}/transforms/authorize`,
   REVIEW_UPGRADE_PATTERN: `${EPM_PACKAGES_MANY}/{pkgName}/review_upgrade`,
   ILM_POLICIES_PATTERN: `${INTERNAL_ROOT}/epm/ilm_policies`,
+  NAMESPACE_PREFLIGHT_CHECK_PATTERN: `${INTERNAL_ROOT}/epm/packages/{pkgName}/namespace_customization/_preflight_check`,
 };
 
 // Data stream API routes
 export const DATA_STREAM_API_ROUTES = {
   LIST_PATTERN: `${DATA_STREAM_API_ROOT}`,
+  HAS_DATA_PATTERN: `${DATA_STREAM_API_ROOT}/data`,
   DEPRECATED_ILM_CHECK_PATTERN: `${INTERNAL_ROOT}/data_streams/deprecated_ilm_check`,
 };
+
+/**
+ * Validates a `logs-<dataset>-*` or `metrics-<dataset>-*` wildcard index pattern, as accepted by
+ * the `dataStreams` query param of `DATA_STREAM_API_ROUTES.HAS_DATA_PATTERN`. Callers should use
+ * this to drop patterns the route would reject before making the request.
+ */
+export const DATA_STREAM_INDEX_PATTERN_REGEX = /^(logs|metrics)-[a-z0-9_.]+-\*$/;
 
 // Package policy API routes
 export const PACKAGE_POLICY_API_ROUTES = {
@@ -124,6 +133,11 @@ export const CLOUD_ONBOARDING_DEPLOYMENT_API_ROUTES = {
   DELETE_PATTERN: `${CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT}/{id}`,
 };
 
+// IaC Provisioner API routes
+export const IAC_PROVISIONER_API_ROUTES = {
+  RENDER_TEMPLATE_PATTERN: `${INTERNAL_ROOT}/iac_provisioner/render_template`,
+};
+
 // Kubernetes Manifest API routes
 export const K8S_API_ROUTES = {
   K8S_DOWNLOAD_PATTERN: `${K8S_API_ROOT}/download`,
@@ -138,6 +152,7 @@ export const OUTPUT_API_ROUTES = {
   DELETE_PATTERN: `${API_ROOT}/outputs/{outputId}`,
   CREATE_PATTERN: `${API_ROOT}/outputs`,
   GET_OUTPUT_HEALTH_PATTERN: `${API_ROOT}/outputs/{outputId}/health`,
+  GET_OUTPUT_AGENT_POLICY_COUNT_PATTERN: `${INTERNAL_ROOT}/outputs/{outputId}/agent_policy_count`,
   LOGSTASH_API_KEY_PATTERN: `${API_ROOT}/logstash_api_keys`,
 };
 

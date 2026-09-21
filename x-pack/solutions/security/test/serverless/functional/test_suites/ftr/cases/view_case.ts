@@ -153,8 +153,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('deletes a tag from a case', async () => {
         if (await cases.common.isRedesignEnabled()) {
+          // Clearing the combo box persists the removal immediately; there is no confirm step.
           await comboBox.clear('case-tags');
-          await testSubjects.click('template-field-confirm-tags');
           await header.waitUntilLoadingHasFinished();
         } else {
           await testSubjects.click('tag-list-edit-button');
@@ -301,7 +301,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY
+    // FLAKY: https://github.com/elastic/kibana/issues/288565
     describe.skip('Lens visualization', () => {
       before(async () => {
         await cases.testResources.installKibanaSampleData('logs');
@@ -453,7 +453,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.casesFilesTable.emptyOrFail();
       });
 
-      describe('Files User Activity', () => {
+      describe('Files User Activity', function () {
+        this.tags(['failsOnMKI']);
+
         it('file user action is displayed correctly', async () => {
           await cases.casesFilesTable.addFile(require.resolve('./note.txt'));
 

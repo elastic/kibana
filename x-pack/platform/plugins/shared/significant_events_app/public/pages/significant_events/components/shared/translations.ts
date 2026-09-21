@@ -62,6 +62,34 @@ export const getActivityBlockTooltip = ({
   return undefined;
 };
 
+/** Tooltip when Generate is disabled because no stream has been selected. */
+export const GENERATE_NO_STREAM_SELECTED_TOOLTIP = i18n.translate(
+  'xpack.significantEventsApp.generateNoStreamSelectedTooltip',
+  {
+    defaultMessage: 'Select at least one stream to generate knowledge indicators.',
+  }
+);
+
+/**
+ * Tooltip for the Generate split button when it is disabled.
+ * Pause/status always wins, since generation cannot run in that state even with a stream selected.
+ */
+export const getGenerateDisabledTooltip = ({
+  activityBlockTooltip,
+  hasSelectedStreams,
+}: {
+  activityBlockTooltip: string | undefined;
+  hasSelectedStreams: boolean;
+}): string | undefined => {
+  if (activityBlockTooltip) {
+    return activityBlockTooltip;
+  }
+  if (!hasSelectedStreams) {
+    return GENERATE_NO_STREAM_SELECTED_TOOLTIP;
+  }
+  return undefined;
+};
+
 export const CANCEL_DISCOVERY_LABEL = i18n.translate(
   'xpack.significantEventsApp.cancelDiscoveryLabel',
   {
@@ -137,6 +165,15 @@ export const GENERATE_QUERIES_TOOLTIP = i18n.translate(
   'xpack.significantEventsApp.streamsView.generateQueriesTooltip',
   {
     defaultMessage: 'Runs only query generation on selected streams using the configured model.',
+  }
+);
+
+/** Disclosure shown next to generation triggers when cross-project search is live. */
+export const CROSS_PROJECT_GENERATION_DISCLOSURE = i18n.translate(
+  'xpack.significantEventsApp.streamsView.crossProjectGenerationDisclosure',
+  {
+    defaultMessage:
+      'Generation analyzes data from all projects linked through cross-project search, regardless of the project scope configured for this space.',
   }
 );
 

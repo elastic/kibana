@@ -159,9 +159,7 @@ export function usePackagePolicyWithRelatedData(
             })
           );
         }
-        const { enableVarGroups } = ExperimentalFeaturesService.get();
-        const varGroups =
-          enableVarGroups && packageInfo?.var_groups ? packageInfo.var_groups : undefined;
+        const varGroups = packageInfo?.var_groups;
         const { item } = await sendUpdateAgentlessPolicy(
           packagePolicyId,
           // Pass `packageInfo` so the write-side input/stream allow-check matches the read path

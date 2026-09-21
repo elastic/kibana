@@ -41,7 +41,7 @@ if [[ -z "$TEST_RUN_ID" ]]; then
   exit 0
 fi
 
-KIBANA_URL="${EVALUATIONS_KBN_URL:-}"
+KIBANA_URL="${EVAL_KBN_URL:-}"
 
 EVAL_SUITE_IDS="${EVAL_SUITE_IDS:-}"
 if [[ -z "$EVAL_SUITE_IDS" ]]; then
@@ -164,4 +164,4 @@ export GITHUB_PR_NUMBER
 # Always delete-and-recreate so the comment surfaces at the bottom of the PR
 # thread after each build run, keeping it visible alongside newer activity.
 export EVAL_COMMENT_CLEAR_PREVIOUS=1
-ts-node .buildkite/scripts/steps/evals/post_eval_pr_comment.ts < "$MARKDOWN_FILE"
+node .buildkite/scripts/steps/evals/post_eval_pr_comment.ts < "$MARKDOWN_FILE"

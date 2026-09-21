@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { v4 as uuidV4 } from 'uuid';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
@@ -18,22 +17,25 @@ import { migrateLegacyPrivateLocations } from './migrate_legacy_private_location
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { toClientContract, toSavedObjectContract } from './helpers';
+import { assertCanEnableAgentSharding } from './agent_sharding_license';
+import { MAX_ROUTE_ID_LENGTH } from '../../zod_query';
 import type { PrivateLocation } from '../../../../common/runtime_types';
 
-export const PrivateLocationSchema = schema.object({
-  label: schema.string(),
-  agentPolicyId: schema.string(),
-  tags: schema.maybe(schema.arrayOf(schema.string())),
-  geo: schema.maybe(
-    schema.object({
-      lat: schema.number(),
-      lon: schema.number(),
+export const PrivateLocationSchema = z.strictObject({
+  label: z.string().min(1).max(MAX_ROUTE_ID_LENGTH),
+  agentPolicyId: z.string().min(1).max(MAX_ROUTE_ID_LENGTH),
+  tags: z.array(z.string().max(256)).max(100).optional(),
+  geo: z
+    .strictObject({
+      lat: z.number(),
+      lon: z.number(),
     })
-  ),
-  spaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+    .optional(),
+  spaces: z.array(z.string().max(256)).max(100).optional(),
+  isAgentSharding: z.boolean().optional(),
 });
 
-export type PrivateLocationObject = TypeOf<typeof PrivateLocationSchema>;
+export type PrivateLocationObject = z.infer<typeof PrivateLocationSchema>;
 
 export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocation> = () => ({
   method: 'POST',
@@ -46,9 +48,17 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
   },
   requiredPrivileges: [PRIVATE_LOCATION_WRITE_API],
   handler: async (routeContext) => {
-    const { response, request, server, spaceId } = routeContext;
-    const internalSOClient = server.coreStart.savedObjects.createInternalRepository();
+    const { response, request, server, spaceId, context } = routeContext;
     const location = request.body as PrivateLocationObject;
+    const licenseError = assertCanEnableAgentSharding(
+      (await context.licensing).license,
+      location.isAgentSharding
+    );
+    if (licenseError) {
+      return response.forbidden({ body: { message: licenseError } });
+    }
+
+    const internalSOClient = server.coreStart.savedObjects.createInternalRepository();
     const { agentPolicy, validationError } = await validateAgentPolicy(
       server,
       location.agentPolicyId,

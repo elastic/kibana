@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/discover-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/kibana-data-discovery'
+  defaultOwner: '@elastic/kibana-discover'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/discover-plugin'
   description: Moon project for @kbn/discover-plugin
   channel: ''
-  owner: '@elastic/kibana-data-discovery'
+  owner: '@elastic/kibana-discover'
   sourceRoot: src/platform/plugins/shared/discover
 dependsOn:
   - '@kbn/core'
@@ -60,6 +60,7 @@ dependsOn:
   - '@kbn/shared-ux-router'
   - '@kbn/dom-drag-drop'
   - '@kbn/ebt-tools'
+  - '@kbn/ebt-click'
   - '@kbn/unified-field-list'
   - '@kbn/cell-actions'
   - '@kbn/shared-ux-utility'
@@ -76,8 +77,11 @@ dependsOn:
   - '@kbn/resizable-layout'
   - '@kbn/rule-data-utils'
   - '@kbn/core-chrome-browser'
+  - '@kbn/recently-accessed'
   - '@kbn/core-plugins-server'
   - '@kbn/shared-ux-button-toolbar'
+  - '@kbn/shared-ux-toolbar-selector'
+  - '@kbn/calculate-width-from-char-count'
   - '@kbn/deeplinks-observability'
   - '@kbn/esql-utils'
   - '@kbn/managed-content-badge'
@@ -97,6 +101,7 @@ dependsOn:
   - '@kbn/discover-contextual-components'
   - '@kbn/logs-data-access-plugin'
   - '@kbn/apm-sources-access-plugin'
+  - '@kbn/apm-ui-shared'
   - '@kbn/core-lifecycle-browser'
   - '@kbn/discover-shared-plugin'
   - '@kbn/response-ops-rule-form'
@@ -119,6 +124,7 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/shared-ux-document-data-cascade'
   - '@kbn/zod'
+  - '@kbn/zod-helpers'
   - '@kbn/cps'
   - '@kbn/core-chrome-app-menu-components'
   - '@kbn/shared-ux-error-boundary'
@@ -129,7 +135,7 @@ dependsOn:
   - '@kbn/controls-schemas'
   - '@kbn/as-code-data-views-schema'
   - '@kbn/as-code-data-views-transforms'
-  - '@kbn/as-code-filters-schema'
+  - '@kbn/as-code-export-flyout-component'
   - '@kbn/as-code-filters-transforms'
   - '@kbn/as-code-shared-schemas'
   - '@kbn/as-code-shared-telemetry'
@@ -148,8 +154,6 @@ dependsOn:
   - '@kbn/presentation-util-plugin'
   - '@kbn/core-saved-objects-common'
   - '@kbn/as-code-filters-constants'
-  - '@kbn/data-service-server'
-  - '@kbn/es-query-server'
   - '@kbn/core-analytics-browser-mocks'
   - '@kbn/core-http-server-mocks'
   - '@kbn/reporting-public'
@@ -162,6 +166,12 @@ dependsOn:
   - '@kbn/core-security-server'
   - '@kbn/core-http-server'
   - '@kbn/ui-callout'
+  - '@kbn/field-formats-common'
+  - '@kbn/discover-session-constants'
+  - '@kbn/as-code-discover-schema'
+  - '@kbn/core-http-browser'
+  - '@kbn/core-http-browser-mocks'
+  - '@kbn/discover-session-constants'
 tags:
   - plugin
   - prod

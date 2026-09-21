@@ -36,7 +36,7 @@ describe('useAlertingRulesCache', () => {
       items: [fetchedRule],
       total: 1,
       page: 1,
-      perPage: 1,
+      per_page: 1,
     } as FindRulesResponse);
 
     const { result, rerender } = renderHook(
@@ -66,7 +66,7 @@ describe('useAlertingRulesCache', () => {
       items: [fetchedRule],
       total: 1,
       page: 1,
-      perPage: 1,
+      per_page: 1,
     } as FindRulesResponse);
 
     const { result } = renderHook(() =>
@@ -80,7 +80,7 @@ describe('useAlertingRulesCache', () => {
       expect(mockHttp.get).toHaveBeenCalledWith(ALERTING_V2_RULE_API_PATH, {
         query: {
           filter: `id: "${ruleId}"`,
-          perPage: 1000,
+          per_page: 1000,
           page: 1,
         },
       })
@@ -115,7 +115,7 @@ describe('useAlertingRulesCache', () => {
       items: [fetchedRule],
       total: 1,
       page: 1,
-      perPage: 1000,
+      per_page: 1000,
     } as FindRulesResponse);
 
     const { result, rerender } = renderHook(
@@ -132,13 +132,14 @@ describe('useAlertingRulesCache', () => {
     expect(mockHttp.get).toHaveBeenCalledWith(ALERTING_V2_RULE_API_PATH, {
       query: {
         filter: `(id: "${presentRuleId}" OR id: "${missingRuleId}")`,
-        perPage: 1000,
+        per_page: 1000,
         page: 1,
       },
     });
 
+    const callsAfterFirstFetch = mockHttp.get.mock.calls.length;
     rerender({ ruleIds: [presentRuleId, missingRuleId] });
 
-    expect(mockHttp.get).toHaveBeenCalledTimes(1);
+    expect(mockHttp.get).toHaveBeenCalledTimes(callsAfterFirstFetch);
   });
 });

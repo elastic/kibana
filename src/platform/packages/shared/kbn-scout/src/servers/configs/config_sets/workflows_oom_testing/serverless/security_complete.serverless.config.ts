@@ -8,7 +8,7 @@
  */
 
 import type { ScoutServerConfig } from '../../../../../types';
-import { servers as workflowsUiConfig } from '../../workflows_ui/serverless/security_complete.serverless.config';
+import { servers as baseConfig } from '../../default/serverless/security_complete.serverless.config';
 
 /**
  * Scout server configuration for Workflow Schema OOM prevention tests (serverless security).
@@ -16,12 +16,12 @@ import { servers as workflowsUiConfig } from '../../workflows_ui/serverless/secu
  * workflow schema (connectors whitelist, Zod schema, YAML validation).
  */
 export const servers: ScoutServerConfig = {
-  ...workflowsUiConfig,
+  ...baseConfig,
   kbnTestServer: {
-    ...workflowsUiConfig.kbnTestServer,
+    ...baseConfig.kbnTestServer,
     env: {
-      ...workflowsUiConfig.kbnTestServer.env,
-      NODE_OPTIONS: [workflowsUiConfig.kbnTestServer.env?.NODE_OPTIONS, '--max-old-space-size=1024']
+      ...baseConfig.kbnTestServer.env,
+      NODE_OPTIONS: [baseConfig.kbnTestServer.env?.NODE_OPTIONS, '--max-old-space-size=1024']
         .filter(Boolean)
         .join(' '),
     },

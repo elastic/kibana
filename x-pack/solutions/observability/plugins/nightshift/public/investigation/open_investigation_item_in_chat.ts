@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { OpenSignificantEventChatOptions } from '../chat/open_significant_event_in_chat';
 import { formatChatAttachmentDescription } from '../chat/chat_attachment_description';
-import type { BlindSpotItem, InvestigationRecommendation } from './investigation_presentation';
+import type { BlindSpotItem, RecommendationItem } from './investigation_presentation';
 
 const formatInvestigationItemContent = (title: string, description?: string): string =>
   description ? `${title} · ${description}` : title;
@@ -18,7 +18,7 @@ export const buildBlindSpotChatOptions = (
   attachmentId: string
 ): OpenSignificantEventChatOptions => ({
   newConversation: true,
-  autoSendInitialMessage: true,
+  autoSendInitialMessage: false,
   initialMessage: i18n.translate('xpack.nightshift.investigation.blindSpotChatPrompt', {
     defaultMessage: 'Tell me about this blind spot: {title}',
     values: { title: blindSpot.title },
@@ -40,7 +40,7 @@ export const buildHypothesisChatOptions = (
   attachmentId: string
 ): OpenSignificantEventChatOptions => ({
   newConversation: true,
-  autoSendInitialMessage: true,
+  autoSendInitialMessage: false,
   initialMessage: i18n.translate('xpack.nightshift.investigation.hypothesisChatPrompt', {
     defaultMessage: 'Tell me about this hypothesis: {candidate}',
     values: { candidate: hypothesis.candidate },
@@ -58,11 +58,11 @@ export const buildHypothesisChatOptions = (
 });
 
 export const buildRecommendationChatOptions = (
-  recommendation: InvestigationRecommendation,
+  recommendation: RecommendationItem,
   attachmentId: string
 ): OpenSignificantEventChatOptions => ({
   newConversation: true,
-  autoSendInitialMessage: true,
+  autoSendInitialMessage: false,
   initialMessage: i18n.translate('xpack.nightshift.investigation.recommendationChatPrompt', {
     defaultMessage: 'Tell me about this recommendation: {title}',
     values: { title: recommendation.title },

@@ -277,12 +277,16 @@ export class ESQLSource
     );
     requestResponder.json(params);
 
+    const abortController = new AbortController();
+    registerCancelCallback(() => abortController.abort());
+
     const { rawResponse, requestParams } = await lastValueFrom(
       getData()
         .search.search(
           { params },
           {
             strategy: 'esql',
+            abortSignal: abortController.signal,
             projectRouting: requestMeta.projectRouting,
           }
         )
@@ -304,6 +308,7 @@ export class ESQLSource
     return {
       data: convertToGeoJson(esqlSearchResponse),
       meta: {
+        approximationApplied: esqlSearchResponse.approximation_applied,
         resultsCount,
         areResultsTrimmed: resultsCount >= limit,
       },

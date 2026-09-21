@@ -189,16 +189,15 @@ describe('AlienVaultOTXConnector', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = AlienVaultOTXConnector.test;
+
     it('should return success when API is accessible', async () => {
       const mockResponse = {
         data: { count: 1, results: [] },
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!AlienVaultOTXConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await AlienVaultOTXConnector.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://otx.alienvault.com/api/v1/pulses/subscribed',
@@ -206,22 +205,13 @@ describe('AlienVaultOTXConnector', () => {
           params: { limit: 1 },
         }
       );
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to AlienVault OTX API',
-      });
+      expect(result).toEqual({});
     });
 
-    it('should return failure when API is not accessible', async () => {
+    it('should throw on error', async () => {
       mockClient.get.mockRejectedValue(new Error('Network error'));
 
-      if (!AlienVaultOTXConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await AlienVaultOTXConnector.test.handler(mockContext);
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toContain('Failed to connect');
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
 });

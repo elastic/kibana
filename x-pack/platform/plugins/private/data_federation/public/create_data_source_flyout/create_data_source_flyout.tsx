@@ -21,6 +21,7 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiIcon,
+  EuiLink,
   EuiSpacer,
   EuiSuperSelect,
   EuiText,
@@ -48,6 +49,7 @@ import { CreateDataSourceFlyoutAuthenticationFields } from './create_data_source
 import { CreateDataSourceFlyoutAuthenticationSelect } from './create_data_source_flyout_authentication_select';
 import { CreateDataSourceFlyoutTypeSettingsBlock } from './create_data_source_flyout_type_settings';
 import { CreateDataSourceFlyoutTypeSettingsS3Region } from './create_data_source_flyout_type_settings_s3';
+import { FlyoutErrorBanner } from './flyout_error_banner';
 import {
   authenticationModeFromDataSource,
   dataSourceToFlyoutFormValues,
@@ -76,8 +78,10 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
   onSave,
 }) => {
   const {
-    services: { cloudInfo, featureFlags },
+    services: { cloudInfo, featureFlags, docLinks },
   } = useKibana<DataFederationKibanaServices>();
+
+  const dataFederationLinks = docLinks.links.dataFederation;
 
   const enableFederatedIdentityAuth = featureFlags?.enableFederatedIdentityAuth;
   const enableGoogleCloudStorageDataSourceType =
@@ -184,7 +188,9 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
     () =>
       initialDataSource
         ? authenticationModeFromDataSource(initialDataSource)
-        : getDefaultAuthenticationMode(dataSourceType)
+        : getDefaultAuthenticationMode(dataSourceType, {
+            enableFederatedIdentity: enableFederatedIdentityAuth,
+          })
   );
 
   // runs when data source type changes
@@ -200,9 +206,13 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
   // could likely be merged with above
   useEffect(() => {
     if (!isEditMode) {
-      setAuthenticationMode(getDefaultAuthenticationMode(dataSourceType));
+      setAuthenticationMode(
+        getDefaultAuthenticationMode(dataSourceType, {
+          enableFederatedIdentity: enableFederatedIdentityAuth,
+        })
+      );
     }
-  }, [dataSourceType, isEditMode]);
+  }, [dataSourceType, isEditMode, enableFederatedIdentityAuth]);
 
   const handleSave = (data: CreateDataSourceFlyoutFormValues) =>
     onSave(
@@ -247,21 +257,18 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
           <>
             <EuiSpacer size="s" />
             <EuiText size="s" color="subdued">
-              <p>{createDataSourceFlyoutStrings.createDescription()}</p>
+              <p>
+                {createDataSourceFlyoutStrings.createDescription()}{' '}
+                <EuiLink href={dataFederationLinks.dataSources} target="_blank">
+                  {createDataSourceFlyoutStrings.learnMore()}
+                </EuiLink>
+              </p>
             </EuiText>
           </>
         )}
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiForm component="form" id="createDataSourceForm" onSubmit={handleSubmit(onSubmit)}>
-          {saveError ? (
-            <>
-              <EuiText color="danger" size="s" data-test-subj="createDataSourceFlyoutSaveError">
-                {saveError}
-              </EuiText>
-              <EuiSpacer size="m" />
-            </>
-          ) : null}
           <EuiFormRow label={createDataSourceFlyoutStrings.typeLabel()} fullWidth>
             <EuiSuperSelect
               options={dataSourceTypeOptions}
@@ -335,7 +342,18 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
           />
         </EuiForm>
       </EuiFlyoutBody>
-      <EuiFlyoutFooter>
+      <EuiFlyoutFooter data-test-subj="createDataSourceFlyoutFooter">
+        {saveError ? (
+          <FlyoutErrorBanner
+            title={
+              isEditMode
+                ? createDataSourceFlyoutStrings.saveErrorTitle()
+                : createDataSourceFlyoutStrings.connectErrorTitle()
+            }
+            message={saveError}
+            data-test-subj="createDataSourceFlyoutSaveError"
+          />
+        ) : null}
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty data-test-subj="createDataSourceFlyoutCancel" onClick={() => onClose()}>

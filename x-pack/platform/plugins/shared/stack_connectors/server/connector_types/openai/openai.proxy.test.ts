@@ -119,7 +119,7 @@ describe('OpenAI with proxy config', () => {
       { body: JSON.stringify(sampleOpenAiBody) },
       connectorUsageCollector
     );
-    expect(mockProxiedRequest).toBeCalledTimes(1);
+    expect(mockProxiedRequest).toHaveBeenCalledTimes(1);
     expect(mockProxiedRequest).toHaveBeenCalledWith(
       {
         ...mockDefaults,

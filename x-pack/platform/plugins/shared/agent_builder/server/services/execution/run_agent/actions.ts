@@ -8,7 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { AgentBuilderAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
-import type { BackgroundExecutionState } from '@kbn/agent-builder-common/chat';
+import type { BackgroundExecutionState, SubagentRosterEntry } from '@kbn/agent-builder-common/chat';
 import type { ToolCallWithReasoning } from '@kbn/agent-builder-genai-utils/langchain';
 
 export enum AgentActionType {
@@ -19,6 +19,7 @@ export enum AgentActionType {
   HandOver = 'hand_over',
   StructuredAnswer = 'structured_answer',
   BackgroundExecutionComplete = 'background_execution_complete',
+  SubagentRosterUpdated = 'subagent_roster_updated',
 }
 
 export interface ToolCallResult {
@@ -71,13 +72,19 @@ export interface BackgroundExecutionCompleteAction {
   execution: BackgroundExecutionState;
 }
 
+export interface SubagentRosterUpdatedAction {
+  type: AgentActionType.SubagentRosterUpdated;
+  roster: SubagentRosterEntry[];
+}
+
 export type ResearchAgentAction =
   | ToolCallAction
   | ExecuteToolAction
   | ToolPromptAction
   | HandoverAction
   | AgentErrorAction
-  | BackgroundExecutionCompleteAction;
+  | BackgroundExecutionCompleteAction
+  | SubagentRosterUpdatedAction;
 
 // answer phase actions
 
@@ -122,6 +129,12 @@ export function isBackgroundExecutionCompleteAction(
   action: AgentAction
 ): action is BackgroundExecutionCompleteAction {
   return action.type === AgentActionType.BackgroundExecutionComplete;
+}
+
+export function isSubagentRosterUpdatedAction(
+  action: AgentAction
+): action is SubagentRosterUpdatedAction {
+  return action.type === AgentActionType.SubagentRosterUpdated;
 }
 
 // creation helpers
@@ -193,5 +206,14 @@ export function backgroundExecutionCompleteAction(
   return {
     type: AgentActionType.BackgroundExecutionComplete,
     execution,
+  };
+}
+
+export function subagentRosterUpdatedAction(
+  roster: SubagentRosterEntry[]
+): SubagentRosterUpdatedAction {
+  return {
+    type: AgentActionType.SubagentRosterUpdated,
+    roster,
   };
 }

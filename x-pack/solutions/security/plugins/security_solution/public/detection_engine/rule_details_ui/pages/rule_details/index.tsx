@@ -156,7 +156,6 @@ import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_ex
 import { useRuleUpdateCallout } from '../../../rule_management/hooks/use_rule_update_callout';
 import { useDeprecatedRuleDetailsCallout } from '../../../rule_management/components/rule_deprecation';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { CpsMlRuleCallout } from '../../../rule_management_ui/components/cps_ml_rule_callout/callout';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { FiltersGlobal } from '../../../../common/components/filters_global';
 
@@ -677,7 +676,6 @@ export const RuleDetailsPage = connector(
       <>
         <NeedAdminForUpdateRulesCallOut />
         <MissingDetectionsPrivilegesCallOut />
-        {isMlRule(rule?.type) && <CpsMlRuleCallout />}
         {upgradeCallout}
         {deprecationCallout}
         {isBulkDuplicateConfirmationVisible && (

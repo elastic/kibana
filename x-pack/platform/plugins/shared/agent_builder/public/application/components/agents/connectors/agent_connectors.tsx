@@ -171,7 +171,7 @@ export const AgentConnectors = ({ agentId }: AgentConnectorsProps) => {
                         button={
                           <EuiButton
                             fill
-                            iconType="plusInCircle"
+                            iconType="plusCircle"
                             iconSide="left"
                             onClick={() => setIsAddMenuOpen((prev) => !prev)}
                             data-test-subj="agentBuilderAddConnectorButton"
@@ -188,7 +188,7 @@ export const AgentConnectors = ({ agentId }: AgentConnectorsProps) => {
                           items={[
                             <EuiContextMenuItem
                               key="from-library"
-                              icon="importAction"
+                              icon="download"
                               disabled={isAddDisabled}
                               onClick={() => {
                                 setIsAddMenuOpen(false);
@@ -199,7 +199,7 @@ export const AgentConnectors = ({ agentId }: AgentConnectorsProps) => {
                             </EuiContextMenuItem>,
                             <EuiContextMenuItem
                               key="create-new"
-                              icon="plusInCircle"
+                              icon="plusCircle"
                               onClick={() => {
                                 setIsAddMenuOpen(false);
                                 openCreateFlyout();

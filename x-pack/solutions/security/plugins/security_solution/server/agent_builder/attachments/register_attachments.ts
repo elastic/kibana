@@ -15,6 +15,10 @@ import { createBulkAlertsAttachmentType } from './alerts';
 import { createEntityAttachmentType } from './entity';
 import { createEntityAnalyticsDashboardAttachmentType } from './entity_analytics_dashboard';
 import { createEntityGraphAttachmentType } from './entity_graph';
+import { createEntityRiskScoreHistoryAttachmentType } from './entity_risk_score_history';
+import { createExceptionAttachmentType } from './exception';
+import { createInvestigationIocsAttachmentType } from './investigation_iocs';
+import { createInvestigationTimelineAttachmentType } from './investigation_timeline';
 import { createSiemReadinessAttachmentType } from './siem_readiness';
 import { createRulePreviewAttachmentType, getRulePreviewAlertCount } from './rule_preview';
 import { SIEM_READINESS_AGENT_BUILDER_ENABLED } from '../siem_readiness_feature_flag';
@@ -37,6 +41,14 @@ export const registerAttachments = async (
   agentBuilder.attachments.registerType(createEntityAttachmentType());
   agentBuilder.attachments.registerType(createEntityAnalyticsDashboardAttachmentType());
   agentBuilder.attachments.registerType(createEntityGraphAttachmentType());
+  if (experimentalFeatures.riskScoreHistoryEnabled) {
+    agentBuilder.attachments.registerType(createEntityRiskScoreHistoryAttachmentType());
+  }
+  agentBuilder.attachments.registerType(createExceptionAttachmentType());
+  if (experimentalFeatures.endpointForensicAnalysisSkill) {
+    agentBuilder.attachments.registerType(createInvestigationTimelineAttachmentType());
+    agentBuilder.attachments.registerType(createInvestigationIocsAttachmentType());
+  }
   agentBuilder.attachments.registerType(createRuleAttachmentType(core, logger));
   if (SIEM_READINESS_AGENT_BUILDER_ENABLED) {
     agentBuilder.attachments.registerType(createSiemReadinessAttachmentType());

@@ -13,13 +13,15 @@ import type {
 import { alertEpisodeStatus, alertEventStatus } from '../../../resources/datastreams/alert_events';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { createRuleResponse } from '../../test_utils';
+import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { buildLatestAlertEvent, buildStrategyStateTransitionContext } from '../test_utils';
 
 describe('CountTimeframeStrategy', () => {
   let strategy: CountTimeframeStrategy;
 
   beforeEach(() => {
-    strategy = new CountTimeframeStrategy();
+    const { loggerService } = createLoggerService();
+    strategy = new CountTimeframeStrategy(loggerService);
   });
 
   const getNextState = (...args: Parameters<typeof buildStrategyStateTransitionContext>) =>
@@ -475,6 +477,55 @@ describe('CountTimeframeStrategy', () => {
       ],
     ])('stays %s', (_label, from, on, to) => {
       expectTransition({ from, on, to, stateTransition });
+    });
+  });
+
+  describe("no_data event with no_data_strategy: 'recover'", () => {
+    const stateTransition: RuleResponse['state_transition'] = {
+      pending_count: 3,
+      recovering_count: 3,
+    };
+
+    it('transitions inactive → inactive immediately, ignoring pending gating', () => {
+      expectTransition({
+        from: alertEpisodeStatus.inactive,
+        on: alertEventStatus.no_data,
+        to: alertEpisodeStatus.inactive,
+        stateTransition,
+        noDataStrategy: 'recover',
+      });
+    });
+
+    it('transitions pending → inactive immediately, ignoring pending gating', () => {
+      expectTransition({
+        from: alertEpisodeStatus.pending,
+        on: alertEventStatus.no_data,
+        to: alertEpisodeStatus.inactive,
+        stateTransition,
+        noDataStrategy: 'recover',
+        statusCount: 1,
+      });
+    });
+
+    it('transitions active → inactive immediately, ignoring recovery delay', () => {
+      expectTransition({
+        from: alertEpisodeStatus.active,
+        on: alertEventStatus.no_data,
+        to: alertEpisodeStatus.inactive,
+        stateTransition,
+        noDataStrategy: 'recover',
+      });
+    });
+
+    it('transitions recovering → inactive immediately, ignoring recovery delay', () => {
+      expectTransition({
+        from: alertEpisodeStatus.recovering,
+        on: alertEventStatus.no_data,
+        to: alertEpisodeStatus.inactive,
+        stateTransition,
+        noDataStrategy: 'recover',
+        statusCount: 1,
+      });
     });
   });
 

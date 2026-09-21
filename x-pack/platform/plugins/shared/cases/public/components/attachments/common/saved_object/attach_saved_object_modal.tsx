@@ -167,7 +167,7 @@ export const AttachSavedObjectModal: React.FC<AttachSavedObjectModalProps> = ({
       // Fall back to the raw soType when the attachment type isn't registered
       const attachmentTypeId = SO_TYPE_TO_ATTACHMENT_TYPE[soType];
       if (!unifiedAttachmentTypeRegistry.has(attachmentTypeId)) return soType;
-      return unifiedAttachmentTypeRegistry.get(attachmentTypeId).displayName;
+      return unifiedAttachmentTypeRegistry.get(attachmentTypeId).getLabel();
     },
     [unifiedAttachmentTypeRegistry]
   );
@@ -301,7 +301,7 @@ export const AttachSavedObjectModal: React.FC<AttachSavedObjectModalProps> = ({
             </EuiFlexGroup>
           ) : items.length === 0 ? (
             <EuiEmptyPrompt
-              iconType="search"
+              iconType="magnify"
               titleSize="xs"
               body={<p>{i18n.NO_ITEMS_FOUND}</p>}
               css={EMPTY_PROMPT_CSS}

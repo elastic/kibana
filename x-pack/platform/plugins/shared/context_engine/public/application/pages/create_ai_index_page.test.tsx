@@ -6,30 +6,19 @@
  */
 
 import { EuiProvider } from '@elastic/eui';
-import { coreMock } from '@kbn/core/public/mocks';
+import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
+import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
+import { createAppChromeMock } from '../test_utils/app_chrome_mock';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { CONTEXT_ENGINE_APP_ID } from '../../../common/features';
+import { searchDataStreams } from '../api/data_streams';
+import { CONTEXT_ENGINE_PATHS } from '../paths';
+import { CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ } from '../layout/context_engine_page_header';
 import { CreateAiIndexPage } from './create_ai_index_page';
-
-jest.mock('@kbn/esql/public', () => ({
-  ESQLLangEditor: ({
-    query,
-    onTextLangQueryChange,
-  }: {
-    query: { esql: string };
-    onTextLangQueryChange: (query: { esql: string }) => void;
-  }) => (
-    <textarea
-      data-test-subj="mockEsqlEditor"
-      value={query.esql}
-      onChange={(event) => onTextLangQueryChange({ esql: event.target.value })}
-    />
-  ),
-}));
 
 jest.mock('../hooks/use_data_connectors', () => ({
   useDataConnectors: () => ({
@@ -40,24 +29,38 @@ jest.mock('../hooks/use_data_connectors', () => ({
   }),
 }));
 
+jest.mock('../hooks/use_agent_builder_agents', () => ({
+  useAgentBuilderAgents: () => ({
+    agents: [{ id: 'agent-1', name: 'Loyalty Support Agent' }],
+    isLoading: false,
+    error: undefined,
+  }),
+}));
+
+jest.mock('../api/data_streams');
+const mockedSearchDataStreams = jest.mocked(searchDataStreams);
+
 const renderWithProviders = (services: ReturnType<typeof coreMock.createStart>) => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
-    <I18nProvider>
-      <EuiProvider>
-        <KibanaContextProvider services={services}>
-          <QueryClientProvider client={queryClient}>
-            <CreateAiIndexPage />
-          </QueryClientProvider>
-        </KibanaContextProvider>
-      </EuiProvider>
-    </I18nProvider>
+    <ChromeServiceProvider value={{ chrome: services.chrome }}>
+      <I18nProvider>
+        <EuiProvider>
+          <KibanaContextProvider
+            services={{
+              ...services,
+              history: scopedHistoryMock.create(),
+              appChrome: createAppChromeMock(),
+            }}
+          >
+            <QueryClientProvider client={queryClient}>
+              <CreateAiIndexPage />
+            </QueryClientProvider>
+          </KibanaContextProvider>
+        </EuiProvider>
+      </I18nProvider>
+    </ChromeServiceProvider>
   );
-};
-
-const addEsqlSource = (query: string) => {
-  fireEvent.change(screen.getByTestId('mockEsqlEditor'), { target: { value: query } });
-  fireEvent.click(screen.getByTestId('contextAddEsqlSourceButton'));
 };
 
 const typeId = (id: string) => {
@@ -73,8 +76,47 @@ const typeDescription = (description: string) => {
 const VALID_ID = 'support-ticket-triage';
 
 describe('CreateAiIndexPage', () => {
+  beforeEach(() => {
+    mockedSearchDataStreams.mockResolvedValue({ dataStreams: [] });
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('renders a back button linking to the AI indexes landing page', () => {
+    const services = coreMock.createStart();
+    services.application.getUrlForApp.mockImplementation(
+      (appId, options) => `/app/${appId}${options?.path ?? ''}`
+    );
+
+    renderWithProviders(services);
+
+    expect(services.application.getUrlForApp).toHaveBeenCalledWith(
+      CONTEXT_ENGINE_APP_ID,
+      expect.objectContaining({ path: CONTEXT_ENGINE_PATHS.landing })
+    );
+    expect(screen.getByTestId(CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ)).toHaveAttribute(
+      'href',
+      '/app/context_engine/'
+    );
+  });
+
+  it('navigates to the landing page and prevents the anchor default navigation on back click', () => {
+    const services = coreMock.createStart();
+    services.application.getUrlForApp.mockImplementation(
+      (appId, options) => `/app/${appId}${options?.path ?? ''}`
+    );
+
+    renderWithProviders(services);
+
+    const backButton = screen.getByTestId(CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ);
+    fireEvent.click(backButton);
+
+    expect(services.application.navigateToApp).toHaveBeenCalledWith(
+      CONTEXT_ENGINE_APP_ID,
+      expect.objectContaining({ path: CONTEXT_ENGINE_PATHS.landing })
+    );
   });
 
   it('keeps the create button disabled until a valid id is provided, without requiring a source', () => {
@@ -104,6 +146,7 @@ describe('CreateAiIndexPage', () => {
             dest: { type: 'index', value: 'ai-index-idx-support-ticket-triage' },
             automations: [],
             sources: [],
+            traces: [],
           }),
         })
       );
@@ -130,6 +173,87 @@ describe('CreateAiIndexPage', () => {
             dest: { type: 'index', value: 'ai-index-idx-support-ticket-triage' },
             automations: [],
             sources: [],
+            traces: [],
+          }),
+        })
+      );
+    });
+  });
+
+  it('includes a selected trace in the create request', async () => {
+    const services = coreMock.createStart();
+    services.http.post.mockResolvedValue({});
+
+    renderWithProviders(services);
+
+    typeId(VALID_ID);
+    fireEvent.change(screen.getByTestId('contextTraceAgentComboBox').querySelector('input')!, {
+      target: { value: 'Loyalty' },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Loyalty Support Agent')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText('Loyalty Support Agent'));
+    fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
+
+    await waitFor(() => {
+      expect(services.http.post).toHaveBeenCalledWith(
+        '/api/context_engine/ai_index',
+        expect.objectContaining({
+          body: JSON.stringify({
+            id: VALID_ID,
+            dest: { type: 'index', value: 'ai-index-idx-support-ticket-triage' },
+            automations: [],
+            sources: [],
+            traces: [{ type: 'elastic_agent', value: 'agent-1' }],
+          }),
+        })
+      );
+    });
+  });
+
+  it('includes a selected data stream trace in the create request', async () => {
+    const services = coreMock.createStart();
+    services.http.post.mockResolvedValue({});
+    mockedSearchDataStreams.mockResolvedValue({ dataStreams: ['logs-genai-default'] });
+
+    renderWithProviders(services);
+
+    typeId(VALID_ID);
+    fireEvent.click(screen.getByTestId('contextTraceToggle-index'));
+
+    const comboBox = screen.getByTestId('contextTraceDataStreamComboBox');
+    const input = comboBox.querySelector('input')!;
+    fireEvent.click(comboBox);
+    fireEvent.focus(input);
+    fireEvent.change(input, { target: { value: 'lo' } });
+
+    await waitFor(() => {
+      expect(mockedSearchDataStreams).toHaveBeenCalledWith(
+        services.http,
+        expect.objectContaining({ search: 'lo' })
+      );
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('logs-genai-default')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText('logs-genai-default'));
+    fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
+
+    await waitFor(() => {
+      expect(services.http.post).toHaveBeenCalledWith(
+        '/api/context_engine/ai_index',
+        expect.objectContaining({
+          body: JSON.stringify({
+            id: VALID_ID,
+            dest: { type: 'index', value: 'ai-index-idx-support-ticket-triage' },
+            automations: [],
+            sources: [],
+            traces: [{ type: 'index', value: 'logs-genai-default' }],
           }),
         })
       );
@@ -143,7 +267,6 @@ describe('CreateAiIndexPage', () => {
     renderWithProviders(services);
 
     typeId(VALID_ID);
-    addEsqlSource('FROM logs-* | LIMIT 10');
     fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
 
     await waitFor(() => {
@@ -154,7 +277,8 @@ describe('CreateAiIndexPage', () => {
             id: VALID_ID,
             dest: { type: 'index', value: 'ai-index-idx-support-ticket-triage' },
             automations: [],
-            sources: [{ type: 'esql', value: 'FROM logs-* | LIMIT 10' }],
+            sources: [],
+            traces: [],
           }),
         })
       );
@@ -172,7 +296,6 @@ describe('CreateAiIndexPage', () => {
     renderWithProviders(services);
 
     typeId(VALID_ID);
-    addEsqlSource('FROM logs-* | LIMIT 10');
     fireEvent.click(screen.getByTestId('contextAiIndexStorageType-data_stream'));
     fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
 
@@ -184,7 +307,8 @@ describe('CreateAiIndexPage', () => {
             id: VALID_ID,
             dest: { type: 'data_stream', value: 'ai-index-ds-support-ticket-triage' },
             automations: [],
-            sources: [{ type: 'esql', value: 'FROM logs-* | LIMIT 10' }],
+            sources: [],
+            traces: [],
           }),
         })
       );
@@ -198,7 +322,6 @@ describe('CreateAiIndexPage', () => {
     renderWithProviders(services);
 
     typeId(VALID_ID);
-    addEsqlSource('FROM logs-* | LIMIT 10');
     fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
 
     await waitFor(() => {

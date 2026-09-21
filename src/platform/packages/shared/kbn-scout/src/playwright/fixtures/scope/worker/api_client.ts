@@ -9,7 +9,7 @@
 
 import supertest from 'supertest';
 import { format as formatUrl } from 'url';
-import { coreWorkerFixtures } from '.';
+import { samlAuthFixture as coreWorkerFixtures } from './saml_auth';
 
 /**
  * Strips leading slashes from a URL path so that supertest concatenates it

@@ -24,7 +24,8 @@ import type { ActionsClientContext } from '../../../../actions_client';
 import { actionExecutorMock } from '../../../../lib/action_executor.mock';
 import { connectorTokenClientMock } from '../../../../lib/connector_token_client.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-
+import { securityServiceMock } from '@kbn/core/server/mocks';
+import { encodeApiKey } from '../../../../inbound/event_identity/encode_api_key';
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
 const authorization = actionsAuthorizationMock.create();
@@ -256,6 +257,33 @@ describe('update()', () => {
       });
 
       expect(result.authMode).toBe('per-user');
+    });
+  });
+
+  describe('Kibana managed auth types', () => {
+    test('rejects switching an existing connector to a Kibana managed auth type', async () => {
+      const soResult = makeSavedObjectResult({
+        actionTypeId: '.slack2',
+        authMode: 'shared',
+        secrets: { authType: 'bearer' },
+      });
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(soResult);
+
+      await expect(
+        update({
+          context: mockContext,
+          id: '1',
+          action: {
+            name: 'Test Connector',
+            config: {},
+            secrets: { authType: 'relay', tenantKey: 'tenant-A' },
+          },
+        })
+      ).rejects.toMatchInlineSnapshot(
+        `[Error: Authentication type relay is set by Kibana and cannot be configured on a connector. Action type: .slack2.]`
+      );
+
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     });
   });
 
@@ -734,6 +762,31 @@ describe('update()', () => {
         expect.objectContaining({ connectorId: 'connector-id', skipRevocation: true })
       );
     });
+
+    test('evicts clients before deleting connector tokens', async () => {
+      const callOrder: string[] = [];
+      const evictClientPool = jest.fn().mockImplementation(async () => {
+        callOrder.push('evictClientPoolStarted');
+        await Promise.resolve();
+        callOrder.push('evictClientPoolFinished');
+      });
+      connectorTokenClient.deleteConnectorTokens.mockImplementationOnce(async () => {
+        callOrder.push('deleteConnectorTokens');
+      });
+
+      await update({
+        context: { ...mockContext, evictClientPool },
+        id: 'connector-id',
+        action: { name: 'new name', config: {}, secrets: {} },
+      });
+
+      expect(evictClientPool).toHaveBeenCalledWith('connector-id');
+      expect(callOrder).toEqual([
+        'evictClientPoolStarted',
+        'evictClientPoolFinished',
+        'deleteConnectorTokens',
+      ]);
+    });
   });
 
   describe('auditLogger', () => {
@@ -847,6 +900,128 @@ describe('update()', () => {
           wasSuccessful: true,
         })
       );
+    });
+  });
+
+  describe('inbound ingress credentials', () => {
+    const securityService = securityServiceMock.createStart();
+    const inboundContext: ActionsClientContext = {
+      ...mockContext,
+      spaceId: 'default',
+      securityService,
+    };
+
+    const previousApiKey = encodeApiKey('old-id', 'old-secret');
+    const nextApiKey = encodeApiKey('es-id', 'es-secret');
+
+    beforeEach(() => {
+      (securityService.authc.apiKeys as { uiam?: unknown }).uiam = undefined;
+      securityService.authc.apiKeys.grantAsInternalUser.mockResolvedValue({
+        id: 'es-id',
+        name: 'Actions: connector event identity connector-id',
+        api_key: 'es-secret',
+      });
+      securityService.authc.apiKeys.invalidateAsInternalUser.mockResolvedValue({
+        invalidated_api_keys: ['old-id'],
+        previously_invalidated_api_keys: [],
+        error_count: 0,
+      });
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+        ...existingRawAction,
+        attributes: {
+          ...existingRawAction.attributes,
+          actionTypeId: '.inboundWebhook',
+          config: {},
+          apiKey: previousApiKey,
+        },
+      } as never);
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+        getConnectorType({
+          id: '.inboundWebhook',
+          source: ACTION_TYPE_SOURCES.spec,
+          validate: {
+            config: { schema: z.any() },
+            secrets: { schema: z.any() },
+            params: { schema: z.object({}) },
+          },
+        })
+      );
+      unsecuredSavedObjectsClient.create.mockImplementation(async (_type, attributes) => ({
+        id: 'connector-id',
+        type: 'action',
+        attributes,
+        references: [],
+      }));
+    });
+
+    test('remints the last-saver API key and invalidates the previous framework key', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        ...existingRawAction,
+        attributes: {
+          ...existingRawAction.attributes,
+          actionTypeId: '.inboundWebhook',
+          config: {},
+        },
+      } as never);
+
+      await update({
+        context: inboundContext,
+        id: 'connector-id',
+        action: { name: 'renamed', config: {}, secrets: {} },
+      });
+
+      const saved = unsecuredSavedObjectsClient.create.mock.calls[0][1] as {
+        apiKey?: string;
+        secrets: Record<string, unknown>;
+      };
+      expect(saved.apiKey).toBe(nextApiKey);
+      expect(saved.secrets).toEqual({});
+      expect(securityService.authc.apiKeys.invalidateAsInternalUser).toHaveBeenCalledWith({
+        ids: ['old-id'],
+      });
+    });
+
+    test('ignores a client-supplied apiKey on update', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        ...existingRawAction,
+        attributes: {
+          ...existingRawAction.attributes,
+          actionTypeId: '.inboundWebhook',
+          config: {},
+          apiKey: 'from-client',
+        },
+      } as never);
+
+      await update({
+        context: inboundContext,
+        id: 'connector-id',
+        action: { name: 'renamed', config: {}, secrets: {} },
+      });
+
+      const saved = unsecuredSavedObjectsClient.create.mock.calls[0][1] as {
+        apiKey?: string;
+      };
+      expect(saved.apiKey).toBe(nextApiKey);
+    });
+
+    test('returns 400 when encryption is unavailable', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        ...existingRawAction,
+        attributes: {
+          ...existingRawAction.attributes,
+          actionTypeId: '.inboundWebhook',
+          config: {},
+        },
+      } as never);
+
+      await expect(
+        update({
+          context: { ...inboundContext, isESOCanEncrypt: false },
+          id: 'connector-id',
+          action: { name: 'renamed', config: {}, secrets: {} },
+        })
+      ).rejects.toThrow('encrypted saved objects are not available');
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     });
   });
 });

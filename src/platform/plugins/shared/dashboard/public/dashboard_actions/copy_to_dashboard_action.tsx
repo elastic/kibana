@@ -72,7 +72,7 @@ export class CopyToDashboardAction implements Action<EmbeddableApiContext> {
 
   public getIconType({ embeddable }: EmbeddableApiContext) {
     if (!apiIsCompatible(embeddable)) throw new IncompatibleActionError();
-    return 'exit';
+    return 'logOut';
   }
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {

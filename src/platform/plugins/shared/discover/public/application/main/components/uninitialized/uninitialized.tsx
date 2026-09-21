@@ -7,17 +7,46 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiDescriptionList,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+  EuiTextColor,
+  EuiTitle,
+  euiFontSize,
+  useEuiTheme,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import { esqlKeyboardShortcuts } from '@kbn/esql-editor';
+import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
+import { useCurrentDataView } from '../../state_management/redux';
+import { useCurrentTabMenuActions } from '../../hooks/use_current_tab_menu_actions';
 
 interface Props {
   onRefresh: () => void;
 }
 
 export const DiscoverUninitialized = ({ onRefresh }: Props) => {
-  return (
+  const isEsqlMode = useIsEsqlMode();
+  const currentDataView = useCurrentDataView();
+  const { canSwitchLanguageMode, isDataViewMode, switchLanguageMode } = useCurrentTabMenuActions({
+    currentDataView,
+    switchToEsqlMetric: 'esql:uninitialized_query_in_esql_clicked',
+  });
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
+  const shortcutsLabelId = useGeneratedHtmlId();
+
+  const startSearchingPrompt = (
     <EuiEmptyPrompt
+      data-test-subj="discoverUninitialized"
       iconType="discoverApp"
       title={
         <h2>
@@ -25,21 +54,108 @@ export const DiscoverUninitialized = ({ onRefresh }: Props) => {
         </h2>
       }
       body={
-        <p>
-          <FormattedMessage
-            id="discover.uninitializedText"
-            defaultMessage="Write a query, add some filters, or simply hit Refresh to retrieve results for the current query."
-          />
-        </p>
+        <EuiText size="s" color="subdued">
+          <p>
+            <FormattedMessage
+              id="discover.uninitializedText"
+              defaultMessage="Write a query, add some filters, or simply hit Refresh to retrieve results for the current query."
+            />
+          </p>
+        </EuiText>
       }
       actions={
-        <EuiButton color="primary" fill onClick={onRefresh} data-test-subj="refreshDataButton">
-          <FormattedMessage
-            id="discover.uninitializedRefreshButtonText"
-            defaultMessage="Refresh data"
-          />
-        </EuiButton>
+        <EuiFlexGroup responsive={false} alignItems="center" justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiButton color="primary" fill onClick={onRefresh} data-test-subj="refreshDataButton">
+              <FormattedMessage
+                id="discover.uninitializedRefreshButtonText"
+                defaultMessage="Refresh data"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+          {canSwitchLanguageMode && isDataViewMode && (
+            <>
+              <EuiFlexItem grow={false}>
+                <EuiText component="span" size="s" color="subdued">
+                  <FormattedMessage id="discover.uninitializedActionsOrText" defaultMessage="or" />
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  color="primary"
+                  iconType="code"
+                  onClick={switchLanguageMode}
+                  data-test-subj="queryInEsqlButton"
+                >
+                  <FormattedMessage
+                    id="discover.uninitializedQueryInEsqlButtonText"
+                    defaultMessage="Query in ES|QL"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            </>
+          )}
+        </EuiFlexGroup>
       }
     />
+  );
+
+  if (!isEsqlMode) {
+    return startSearchingPrompt;
+  }
+
+  return (
+    <div data-test-subj="discoverUninitialized">
+      <EuiTitle size="xxs">
+        <h3 id={shortcutsLabelId} data-test-subj="discoverUninitializedKeyboardShortcuts">
+          <EuiTextColor color="subdued">
+            <FormattedMessage
+              id="discover.uninitialized.editorKeyboardShortcutsTitle"
+              defaultMessage="Editor keyboard shortcuts"
+            />
+          </EuiTextColor>
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="m" />
+      <EuiText size="xs" color="subdued">
+        <EuiDescriptionList
+          aria-labelledby={shortcutsLabelId}
+          type="column"
+          columnWidths={['auto', 'auto']}
+          columnGutterSize="m"
+          rowGutterSize="s"
+          compressed
+          titleProps={{
+            css: css`
+              font-weight: ${euiTheme.font.weight.regular};
+            `,
+          }}
+          descriptionProps={{
+            css: css`
+              font-weight: ${euiTheme.font.weight.regular};
+            `,
+          }}
+          listItems={esqlKeyboardShortcuts.map(({ keys, label }) => ({
+            title: label,
+            description: keys.map((key, index) => (
+              <Fragment key={`${key}-${index}`}>
+                {index > 0 ? ' ' : null}
+                <kbd
+                  css={css`
+                    font-size: ${euiFontSize(euiThemeContext, 's').fontSize};
+                    font-weight: ${euiTheme.font.weight.medium};
+                    line-height: 1;
+                    padding-block: ${euiTheme.size.xxs};
+                    padding-inline: ${euiTheme.size.xs};
+                  `}
+                >
+                  {key}
+                </kbd>
+              </Fragment>
+            )),
+          }))}
+        />
+      </EuiText>
+    </div>
   );
 };

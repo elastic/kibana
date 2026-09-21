@@ -76,3 +76,28 @@ describe('useMessageEditor handleCommandSelect', () => {
     expect(stripZeroWidthSpaces(div.textContent ?? '')).toBe(`@connector/workday${NBSP}`);
   });
 });
+
+describe('useMessageEditor setContent', () => {
+  let div: HTMLDivElement;
+
+  beforeEach(() => {
+    div = document.createElement('div');
+    div.contentEditable = 'true';
+    document.body.appendChild(div);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(div);
+  });
+
+  it('restores a serialized image placeholder', () => {
+    const { result } = renderHook(() => useMessageEditor());
+    attachRef(result.current.messageEditor, div);
+
+    act(() => {
+      result.current.controller.setContent('[photo.png](image://photo.png)');
+    });
+
+    expect(result.current.controller.getPlaceholderNames()).toEqual(['photo.png']);
+  });
+});

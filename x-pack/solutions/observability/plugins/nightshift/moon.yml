@@ -18,11 +18,13 @@ project:
   sourceRoot: x-pack/solutions/observability/plugins/nightshift
 dependsOn:
   - '@kbn/agent-builder-browser'
+  - '@kbn/agent-builder-elastic-ai-index-ki-types'
   - '@kbn/agent-builder-plugin'
   - '@kbn/app-header'
   - '@kbn/charts-plugin'
   - '@kbn/core'
   - '@kbn/core-chrome-app-menu-components'
+  - '@kbn/core-http-browser'
   - '@kbn/data-plugin'
   - '@kbn/data-views-plugin'
   - '@kbn/deeplinks-analytics'
@@ -30,16 +32,19 @@ dependsOn:
   - '@kbn/discover-plugin'
   - '@kbn/ebt-click'
   - '@kbn/ebt-tools'
+  - '@kbn/features-plugin'
   - '@kbn/i18n'
   - '@kbn/i18n-react'
   - '@kbn/investigation-output'
   - '@kbn/kibana-react-plugin'
   - '@kbn/lens-embeddable-utils'
   - '@kbn/lens-plugin'
+  - '@kbn/nightshift-investigations-plugin'
+  - '@kbn/nightshift-shared'
   - '@kbn/observability-shared-plugin'
+  - '@kbn/react-hooks'
   - '@kbn/react-query'
   - '@kbn/scout-oblt'
-  - '@kbn/server-route-repository'
   - '@kbn/serverless'
   - '@kbn/share-plugin'
   - '@kbn/shared-ux-ai-components'
@@ -48,7 +53,7 @@ dependsOn:
   - '@kbn/significant-events-plugin'
   - '@kbn/significant-events-schema'
   - '@kbn/spaces-plugin'
-  - '@kbn/streams-plugin'
+  - '@kbn/ui-callout'
   - '@kbn/unified-search-plugin'
 tags:
   - plugin
@@ -60,6 +65,7 @@ fileGroups:
   src:
     - common/**/*
     - public/**/*
+    - server/**/*
     - test/scout/**/*
     - '!target/**/*'
   jest-config:

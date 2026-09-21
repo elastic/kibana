@@ -20,7 +20,7 @@ describe('GetPolicyResponseSchema', () => {
 
   it('should reject agentId longer than 256 characters', () => {
     const longId = 'a'.repeat(257);
-    expect(() => query.validate({ agentId: longId })).toThrowError();
+    expect(() => query.validate({ agentId: longId })).toThrow();
   });
 
   it('should accept agentId exactly 256 characters long', () => {
@@ -40,7 +40,7 @@ describe('GetProtectionUpdatesNoteSchema', () => {
 
   it('should reject package_policy_id longer than 256 characters', () => {
     const longId = 'a'.repeat(257);
-    expect(() => params.validate({ package_policy_id: longId })).toThrowError();
+    expect(() => params.validate({ package_policy_id: longId })).toThrow();
   });
 
   it('should accept package_policy_id exactly 256 characters long', () => {
@@ -57,12 +57,12 @@ describe('CreateUpdateProtectionUpdatesNoteSchema', () => {
   });
 
   it('should reject body missing note', () => {
-    expect(() => body.validate({})).toThrowError();
+    expect(() => body.validate({})).toThrow();
   });
 
   it('should reject note longer than 10000 characters', () => {
     const longNote = 'a'.repeat(10001);
-    expect(() => body.validate({ note: longNote })).toThrowError();
+    expect(() => body.validate({ note: longNote })).toThrow();
   });
 
   it('should accept note exactly 10000 characters long', () => {
@@ -72,7 +72,7 @@ describe('CreateUpdateProtectionUpdatesNoteSchema', () => {
 
   it('should reject package_policy_id longer than 256 characters', () => {
     const longId = 'a'.repeat(257);
-    expect(() => params.validate({ package_policy_id: longId })).toThrowError();
+    expect(() => params.validate({ package_policy_id: longId })).toThrow();
   });
 
   it('should accept package_policy_id exactly 256 characters long', () => {

@@ -11,6 +11,10 @@ export const AZURE_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ = 'azure-cloud-connect
 export const GCP_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ = 'gcp-cloud-connector-super-select';
 export const CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ = 'cloudConnectorNameInput';
 export const CLOUD_CONNECTOR_EDIT_ICON_TEST_SUBJ = 'cloudConnectorEditIcon';
+export const CLOUD_CONNECTOR_TEMPLATE_GENERATION_ERROR_CALLOUT_TEST_SUBJ =
+  'cloudConnectorTemplateGenerationErrorCallout';
+export const CLOUD_CONNECTOR_TEMPLATE_UP_TO_DATE_CALLOUT_TEST_SUBJ =
+  'cloudConnectorTemplateUpToDateCallout';
 export const getCloudConnectorEditIconTestSubj = (connectorId: string) =>
   `${CLOUD_CONNECTOR_EDIT_ICON_TEST_SUBJ}-${connectorId}`;
 

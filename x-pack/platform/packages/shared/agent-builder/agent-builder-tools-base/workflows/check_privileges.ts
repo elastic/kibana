@@ -7,7 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
-import { WorkflowsManagementApiActions } from '@kbn/workflows';
+import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
 
 export interface CheckWorkflowPrivilegeParams {
   security: SecurityPluginStart | undefined;
@@ -28,7 +28,7 @@ const hasAllApiPrivileges = async ({
   spaceId,
   actions,
 }: CheckWorkflowPrivilegeParams & {
-  actions: string[];
+  actions: readonly string[];
 }): Promise<boolean> => {
   if (!security) {
     return true;
@@ -43,22 +43,28 @@ const hasAllApiPrivileges = async ({
 };
 
 /**
- * Verifies the caller holds the `workflowsManagement:read` privilege before a
- * workflow is referenced (e.g. wrapped in a tool or listed) through Agent Builder.
+ * Verifies the caller holds the privileges required to read a workflow before it
+ * is referenced (e.g. wrapped in a tool or listed) through Agent Builder.
  */
 export const hasWorkflowReadPrivilege = (params: CheckWorkflowPrivilegeParams): Promise<boolean> =>
-  hasAllApiPrivileges({ ...params, actions: [WorkflowsManagementApiActions.read] });
+  hasAllApiPrivileges({ ...params, actions: WorkflowsManagementOperationPrivileges.read });
 
 /**
- * Verifies the caller holds the `workflowsManagement:execute` and
- * `workflowsManagement:read` privileges before a workflow is executed through
- * Agent Builder. Mirrors the privileges required by the direct Workflows
- * `.../run` HTTP route.
+ * Verifies the caller holds the privileges required to execute a workflow through
+ * Agent Builder. Executing does not require reading the definition: the workflow
+ * document is loaded to run it, but is never exposed to the caller.
  */
 export const hasWorkflowExecutePrivilege = (
   params: CheckWorkflowPrivilegeParams
 ): Promise<boolean> =>
-  hasAllApiPrivileges({
-    ...params,
-    actions: [WorkflowsManagementApiActions.execute, WorkflowsManagementApiActions.read],
-  });
+  hasAllApiPrivileges({ ...params, actions: WorkflowsManagementOperationPrivileges.execute });
+
+export const hasWorkflowCreatePrivilege = (
+  params: CheckWorkflowPrivilegeParams
+): Promise<boolean> =>
+  hasAllApiPrivileges({ ...params, actions: WorkflowsManagementOperationPrivileges.create });
+
+export const hasWorkflowUpdatePrivilege = (
+  params: CheckWorkflowPrivilegeParams
+): Promise<boolean> =>
+  hasAllApiPrivileges({ ...params, actions: WorkflowsManagementOperationPrivileges.update });

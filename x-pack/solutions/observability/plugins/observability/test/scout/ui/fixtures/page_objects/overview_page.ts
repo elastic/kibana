@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiDataGridWrapper, type Locator, type ScoutPage } from '@kbn/scout-oblt';
+import type { EuiDataGridObject, Locator, ScoutPage } from '@kbn/scout-oblt';
 import { ALERTS_TABLE_TEST_SUBJECTS as SUBJ } from '../constants';
 
 /**
@@ -40,14 +40,14 @@ export class OverviewPage {
   public readonly addDataButton: Locator;
   public readonly alertsSection: Locator;
   public readonly alertsTable: Locator;
-  public readonly alertsDataGrid: EuiDataGridWrapper;
+  public readonly alertsDataGrid: EuiDataGridObject;
 
   constructor(private readonly page: ScoutPage) {
     this.noDataPrompt = this.page.testSubj.locator('obltOverviewNoDataPrompt');
     this.addDataButton = this.page.testSubj.locator('o11yOverviewPageAddDataButton');
     this.alertsSection = this.page.testSubj.locator('accordion-Alerts');
     this.alertsTable = this.page.testSubj.locator(SUBJ.TABLE_LOADED);
-    this.alertsDataGrid = new EuiDataGridWrapper(this.page, SUBJ.TABLE_LOADED);
+    this.alertsDataGrid = this.page.components.dataGrid(SUBJ.TABLE_LOADED);
   }
 
   /** Navigates to the overview using the time window that contains alerts. */
@@ -69,7 +69,7 @@ export class OverviewPage {
 
   /** Returns the number of alert rows rendered in the overview alerts table. */
   async getAlertsRowCount(): Promise<number> {
-    return this.alertsDataGrid.getRowsCount();
+    return this.alertsDataGrid.rows.count();
   }
 
   /** Clicks the empty-state "Add data" CTA that links to onboarding. */

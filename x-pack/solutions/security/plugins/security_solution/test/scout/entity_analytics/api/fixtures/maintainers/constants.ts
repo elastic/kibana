@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout-security';
+import { ELASTIC_INTERNAL_ORIGIN_HEADER, PUBLIC_API_HEADERS, tags } from '@kbn/scout-security';
 import {
   ENTITY_LATEST,
   ENTITY_UPDATES,
@@ -19,17 +19,17 @@ import {
 
 const BASE_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
-  'x-elastic-internal-origin': 'kibana',
   'Content-Type': 'application/json;charset=UTF-8',
 };
 
 export const PUBLIC_HEADERS = {
   ...BASE_HEADERS,
-  'elastic-api-version': '2023-10-31',
+  ...PUBLIC_API_HEADERS,
 };
 
 export const INTERNAL_HEADERS = {
   ...BASE_HEADERS,
+  ...ELASTIC_INTERNAL_ORIGIN_HEADER,
   'elastic-api-version': '2',
 };
 
@@ -49,6 +49,8 @@ export const ENTITY_STORE_ROUTES = {
     STATUS: r(COMMON_ROUTES.public.STATUS),
     START: r(COMMON_ROUTES.public.START),
     STOP: r(COMMON_ROUTES.public.STOP),
+    ENABLE_HISTORY_SNAPSHOT: r(COMMON_ROUTES.public.ENABLE_HISTORY_SNAPSHOT),
+    DISABLE_HISTORY_SNAPSHOT: r(COMMON_ROUTES.public.DISABLE_HISTORY_SNAPSHOT),
     UNINSTALL: r(COMMON_ROUTES.public.UNINSTALL),
     CRUD_CREATE: (entityType: string) =>
       withEntityType(COMMON_ROUTES.public.CRUD_CREATE, entityType),
@@ -65,8 +67,6 @@ export const ENTITY_STORE_ROUTES = {
     CHECK_PRIVILEGES: r(COMMON_ROUTES.internal.CHECK_PRIVILEGES),
     FORCE_LOG_EXTRACTION: (entityType: string) =>
       withEntityType(COMMON_ROUTES.internal.FORCE_LOG_EXTRACTION, entityType),
-    FORCE_CCS_EXTRACT_TO_UPDATES: (entityType: string) =>
-      withEntityType(COMMON_ROUTES.internal.FORCE_REMOTE_EXTRACT_TO_UPDATES, entityType),
     FORCE_HISTORY_SNAPSHOT: r(COMMON_ROUTES.internal.FORCE_HISTORY_SNAPSHOT),
     ENTITY_MAINTAINERS_INIT: r(COMMON_ROUTES.internal.ENTITY_MAINTAINERS_INIT),
     ENTITY_MAINTAINERS_GET: r(COMMON_ROUTES.internal.ENTITY_MAINTAINERS_GET),

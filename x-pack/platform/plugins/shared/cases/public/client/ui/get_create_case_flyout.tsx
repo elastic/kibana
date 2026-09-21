@@ -14,18 +14,13 @@ import { CasesProvider } from '../../components/cases_context';
 type GetCreateCaseFlyoutPropsInternal = CreateCaseFlyoutProps & CasesContextProps;
 export type GetCreateCaseFlyoutProps = Omit<
   GetCreateCaseFlyoutPropsInternal,
-  | 'externalReferenceAttachmentTypeRegistry'
-  | 'persistableStateAttachmentTypeRegistry'
-  | 'unifiedAttachmentTypeRegistry'
-  | 'getFilesClient'
+  'unifiedAttachmentTypeRegistry' | 'getFilesClient'
 >;
 
 export const CreateCaseFlyoutLazy: React.FC<CreateCaseFlyoutProps> = lazy(
   () => import('../../components/create/flyout')
 );
 export const getCreateCaseFlyoutLazy = ({
-  externalReferenceAttachmentTypeRegistry,
-  persistableStateAttachmentTypeRegistry,
   unifiedAttachmentTypeRegistry,
   getFilesClient,
   owner,
@@ -38,8 +33,6 @@ export const getCreateCaseFlyoutLazy = ({
 }: GetCreateCaseFlyoutPropsInternal) => (
   <CasesProvider
     value={{
-      externalReferenceAttachmentTypeRegistry,
-      persistableStateAttachmentTypeRegistry,
       unifiedAttachmentTypeRegistry,
       getFilesClient,
       owner,

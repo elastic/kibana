@@ -11,6 +11,7 @@ import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { Redirect } from 'react-router-dom';
 import { DisabledCallout } from '../management/disabled_callout';
 import { FilterGroup } from '../common/monitor_filters/filter_group';
+import { SelectedFilterPills } from '../common/monitor_filters/selected_filter_pills';
 import { OverviewAlerts } from './overview/overview_alerts';
 import { useEnablement } from '../../../hooks';
 import {
@@ -21,6 +22,8 @@ import {
 import { getServiceLocations } from '../../../state/service_locations';
 import { isExternalOverviewMonitor } from '../../../state/overview_status';
 import { GETTING_STARTED_ROUTE, MONITORS_ROUTE } from '../../../../../../common/constants';
+import { useCpsLinkedProjects } from '../../../hooks/use_cps_linked_projects';
+import { shouldRedirectToGettingStarted } from '../hooks/should_redirect_to_getting_started';
 
 import { useMonitorList } from '../hooks/use_monitor_list';
 import { useOverviewStatus } from '../hooks/use_overview_status';
@@ -34,6 +37,15 @@ import { NoMonitorsFound } from '../common/no_monitors_found';
 import { OverviewErrors } from './overview/overview_errors/overview_errors';
 import { AlertingCallout } from '../../common/alerting_callout/alerting_callout';
 import { useSyntheticsPageReady } from '../../../hooks/use_synthetics_page_ready';
+import { CLIENT_DEFAULTS_SYNTHETICS } from '../../../../../../common/constants/synthetics/client_defaults';
+import { LastRefreshed } from '../../common/components/last_refreshed';
+import { SyntheticsDatePicker } from '../../common/date_picker/synthetics_date_picker';
+import { MonitorsListingPage, SyntheticsHeaderToolbar } from '../../common/app_header';
+
+const OVERVIEW_DEFAULT_DATE_RANGE = {
+  from: CLIENT_DEFAULTS_SYNTHETICS.OVERVIEW_DATE_RANGE_START,
+  to: CLIENT_DEFAULTS_SYNTHETICS.DATE_RANGE_END,
+};
 
 export const OverviewPage: React.FC = () => {
   useTrackPageview({ app: 'synthetics', path: 'overview' });
@@ -67,9 +79,11 @@ export const OverviewPage: React.FC = () => {
     allConfigs,
     loaded: overviewLoaded,
     settled: overviewSettled,
+    error: overviewError,
   } = useOverviewStatus({
     scopeStatusByLocation: true,
   });
+  const { cpsReady, hasLinkedProjects } = useCpsLinkedProjects();
 
   const pageState = useSelector(selectOverviewPageState);
 
@@ -101,11 +115,8 @@ export const OverviewPage: React.FC = () => {
   // holds such monitors, so we don't redirect to Getting Started (and flash the grid)
   // when the only monitors are ping-driven.
   //
-  // `overviewSettled` is true once the status request has completed, success OR failure.
-  // A failed request must still count as settled: the reducer never flips `loaded` on
-  // error (and the `error` flag is cleared by the OverviewStatus toast effect), so gating
-  // on those alone would strand a truly empty deployment on an empty overview whenever the
-  // status request fails.
+  // A failed status fetch must not look like an empty install — that onboarded
+  // users away from CPS linked-project remotes when the first request was origin-only.
   //
   // We suppress the redirect while a monitor filter is active: because `allConfigs` is
   // filtered, an empty result there doesn't prove the deployment has no monitors — a
@@ -117,10 +128,15 @@ export const OverviewPage: React.FC = () => {
   const hasNoMonitors =
     !enablementLoading &&
     monitorsLoaded &&
-    absoluteTotal === 0 &&
-    overviewSettled &&
-    !hasActiveOverviewFilter &&
-    !allConfigs.some(isExternalOverviewMonitor);
+    shouldRedirectToGettingStarted({
+      absoluteTotal,
+      overviewSettled,
+      overviewError: Boolean(overviewError),
+      hasActiveFilter: hasActiveOverviewFilter,
+      hasExternalMonitors: allConfigs.some(isExternalOverviewMonitor),
+      cpsReady,
+      hasLinkedProjects,
+    });
 
   if (hasNoMonitors && !monitorsLoading && isEnabled) {
     return <Redirect to={GETTING_STARTED_ROUTE} />;
@@ -133,7 +149,15 @@ export const OverviewPage: React.FC = () => {
   const hasMonitors = !(monitorsLoaded && overviewLoaded && allConfigs?.length === 0);
 
   return (
-    <>
+    <MonitorsListingPage
+      selectedTab="overview"
+      toolbar={
+        <SyntheticsHeaderToolbar>
+          <LastRefreshed />
+          <SyntheticsDatePicker defaultDateRange={OVERVIEW_DEFAULT_DATE_RANGE} />
+        </SyntheticsHeaderToolbar>
+      }
+    >
       <DisabledCallout total={absoluteTotal} />
       <AlertingCallout />
       <EuiFlexGroup gutterSize="s" wrap={true}>
@@ -147,6 +171,7 @@ export const OverviewPage: React.FC = () => {
           <FilterGroup handleFilterChange={handleFilterChange} showRemoteClusterFilter />
         </EuiFlexItem>
       </EuiFlexGroup>
+      <SelectedFilterPills handleFilterChange={handleFilterChange} />
       <EuiSpacer />
       {hasMonitors ? (
         <>
@@ -167,6 +192,6 @@ export const OverviewPage: React.FC = () => {
       ) : (
         <NoMonitorsFound />
       )}
-    </>
+    </MonitorsListingPage>
   );
 };

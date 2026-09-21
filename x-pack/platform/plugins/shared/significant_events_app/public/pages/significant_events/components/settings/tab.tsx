@@ -49,9 +49,10 @@ import {
   MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES,
   MIN_SIG_EVENTS_SCHEDULED_REVIEW_PASSES,
 } from '@kbn/significant-events-plugin/common';
+import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { useDeveloperMode } from '../../../../hooks/use_developer_mode';
 import { useModelSettingsUrl } from '../../../../hooks/use_model_settings_url';
-import { useSignificantEventsPrivileges } from '../../../../hooks/use_significant_events_privileges';
 import { getFormattedError } from '../../../../util/errors';
 import { useBlocksNewActivity } from '../../../../hooks/use_significant_events_maintenance';
 import { useFetchStreams } from '../../hooks/use_fetch_streams';
@@ -64,6 +65,9 @@ import {
 } from './significant_events_tuning_config_editor';
 import { AppsSection } from './apps_section';
 import { MaintenanceSection } from './maintenance_section';
+import { StaleEventCleanupSection } from './stale_event_cleanup_section';
+import { RunLimitsSection } from './run_limits_section';
+import { CostEstimate } from './cost_estimate';
 
 const clampNumber = (value: string, min: number, max: number) => {
   const parsed = Number(value);
@@ -77,15 +81,20 @@ export function SettingsTab() {
   const { core } = useKibana();
   const modelSettingsUrl = useModelSettingsUrl();
 
-  // Saving these settings hits two routes with different privileges: the streams
-  // settings route (requires the streams `manage` privilege) and core's UI
-  // settings routes used by `core.settings.client`/`globalClient` (require
-  // `advancedSettings.save`). Gate the whole form on both so the user never
-  // triggers a partial save that 403s halfway through.
-  const { ui: streamsUiPrivileges } = useSignificantEventsPrivileges();
-  const canManageStreams = streamsUiPrivileges.manage;
+  // Saving these settings hits Nightshift engine routes and core's UI settings
+  // routes used by `core.settings.client` / `globalClient` (require
+  // `advancedSettings.save`). Gate each section on the engine that owns it so
+  // the user never triggers a partial save that 403s halfway through.
+  const nightshiftCapabilities = getNightshiftCapabilities(
+    core.application.capabilities.nightshift
+  );
+  const { canManage, canConfigure } = nightshiftCapabilities;
   const canSaveAdvancedSettings = core.application.capabilities.advancedSettings?.save === true;
-  const canEditSettings = canManageStreams && canSaveAdvancedSettings;
+  const canConfigureEngines = canManage && canConfigure;
+  const canEditSettings = canConfigureEngines && canSaveAdvancedSettings;
+  const { isDeveloperMode, setDeveloperMode, isSaving: isDeveloperModeSaving } = useDeveloperMode();
+  // Slack app routes are gated on the Streams feature privilege, not Nightshift.
+  const canManageSlack = core.application.capabilities.streams?.manage === true;
 
   // Pause turns these Settings toggles off (and Resume restores only those that
   // were previously on). While paused, the toggles are not editable.
@@ -144,11 +153,10 @@ export function SettingsTab() {
     enabledFromStatus: maintenanceStatus?.featureSettings?.scheduledDiscoveryEnabled,
   });
 
-  // Any dirty continuous/scheduled change is blocked while paused (server 409).
-  // Disable while status is loading too; pause tooltip copy only when actually paused.
-  const activitySettingsDirty = scheduledDiscovery.hasChanged || continuousExtraction.hasChanged;
+  // Dirty continuous/scheduled changes are blocked while paused (server 409).
+  const activitySettingsDirty =
+    canEditSettings && (scheduledDiscovery.hasChanged || continuousExtraction.hasChanged);
   const saveBlockedByPause = blocksActivity && activitySettingsDirty;
-  const showPausedSaveTooltip = blocksActivity && activitySettingsDirty;
 
   const savedConfigYaml = useMemo(() => {
     try {
@@ -178,10 +186,11 @@ export function SettingsTab() {
 
   const hasTuningConfigChanges = draftConfigYaml !== savedConfigYamlState;
   const hasChanges =
-    indexPatterns !== savedIndexPatterns ||
-    continuousExtraction.hasChanged ||
-    scheduledDiscovery.hasChanged ||
-    hasTuningConfigChanges;
+    canEditSettings &&
+    (indexPatterns !== savedIndexPatterns ||
+      continuousExtraction.hasChanged ||
+      hasTuningConfigChanges ||
+      scheduledDiscovery.hasChanged);
 
   const handleCancel = useCallback(() => {
     setIndexPatterns(savedIndexPatterns);
@@ -196,7 +205,7 @@ export function SettingsTab() {
     try {
       const normalizedIndexPatterns = parseIndexPatterns(indexPatterns).join(', ');
       setIndexPatterns(normalizedIndexPatterns);
-      if (normalizedIndexPatterns !== savedIndexPatterns) {
+      if (canEditSettings && normalizedIndexPatterns !== savedIndexPatterns) {
         await core.settings.client.set(
           OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_INDEX_PATTERNS,
           normalizedIndexPatterns
@@ -204,15 +213,15 @@ export function SettingsTab() {
         setSavedIndexPatterns(normalizedIndexPatterns);
       }
 
-      if (continuousExtraction.hasChanged) {
+      if (canEditSettings && continuousExtraction.hasChanged) {
         await continuousExtraction.save();
       }
 
-      if (scheduledDiscovery.hasChanged) {
+      if (canEditSettings && scheduledDiscovery.hasChanged) {
         await scheduledDiscovery.save();
       }
 
-      if (hasTuningConfigChanges && parsedTuningConfig) {
+      if (canEditSettings && hasTuningConfigChanges && parsedTuningConfig) {
         const fullConfig = { ...DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG, ...parsedTuningConfig };
         await core.settings.globalClient.set(
           OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG,
@@ -243,6 +252,7 @@ export function SettingsTab() {
     scheduledDiscovery,
     hasTuningConfigChanges,
     parsedTuningConfig,
+    canEditSettings,
   ]);
 
   const handleSave = useCallback(() => {
@@ -290,7 +300,7 @@ export function SettingsTab() {
                 'xpack.significantEventsApp.settings.noPermissionCalloutDescription',
                 {
                   defaultMessage:
-                    'Editing these settings requires both the Streams "Manage" privilege and the Advanced Settings "All" privilege. Contact your administrator if you need to make changes.',
+                    'Editing these settings requires the Nightshift "Manage engines" privilege and the Advanced Settings "All" privilege. Contact your administrator if you need to make changes.',
                 }
               )}
             </p>
@@ -298,7 +308,17 @@ export function SettingsTab() {
           <EuiSpacer />
         </>
       )}
-      <MaintenanceSection canManage={canManageStreams} />
+      <MaintenanceSection canManage={canConfigureEngines} />
+
+      <EuiSpacer />
+
+      <StaleEventCleanupSection canManage={canManage} />
+
+      <CostEstimate />
+
+      <EuiSpacer />
+
+      <RunLimitsSection />
 
       <EuiSpacer />
 
@@ -783,6 +803,56 @@ export function SettingsTab() {
 
       <EuiSpacer />
 
+      <EuiPanel
+        hasBorder={true}
+        hasShadow={false}
+        paddingSize="none"
+        grow={false}
+        data-test-subj="nightshiftDeveloperModeSection"
+      >
+        <EuiPanel hasShadow={false} color="subdued">
+          <EuiText size="s">
+            <h3>
+              {i18n.translate('xpack.significantEventsApp.settings.developerModeTitle', {
+                defaultMessage: 'Developer mode',
+              })}
+            </h3>
+          </EuiText>
+        </EuiPanel>
+        <EuiPanel hasShadow={false} hasBorder={false}>
+          <EuiFlexGroup alignItems="flexStart" gutterSize="l">
+            <EuiFlexItem grow={2}>
+              <EuiText color="subdued" size="s">
+                {i18n.translate('xpack.significantEventsApp.settings.developerModeHelpText', {
+                  defaultMessage:
+                    'Unlocks extra Nightshift Management surfaces in this Kibana space. Changes take effect immediately.',
+                })}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={5}>
+              <EuiForm component="div">
+                <EuiFormRow>
+                  <EuiSwitch
+                    data-test-subj="nightshiftDeveloperModeSwitch"
+                    label={i18n.translate(
+                      'xpack.significantEventsApp.settings.developerModeToggleSwitch',
+                      { defaultMessage: 'Enable developer mode' }
+                    )}
+                    checked={isDeveloperMode}
+                    onChange={(e) => {
+                      void setDeveloperMode(e.target.checked);
+                    }}
+                    disabled={!canSaveAdvancedSettings || isDeveloperModeSaving}
+                  />
+                </EuiFormRow>
+              </EuiForm>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      </EuiPanel>
+
+      <EuiSpacer />
+
       <EuiPanel hasBorder={true} hasShadow={false} paddingSize="none" grow={false}>
         <EuiPanel hasShadow={false} color="subdued">
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -837,7 +907,7 @@ export function SettingsTab() {
         </EuiPanel>
       </EuiPanel>
 
-      {isAppsEnabled && <AppsSection canEdit={canEditSettings} />}
+      {isAppsEnabled && <AppsSection canEdit={canManageSlack} />}
 
       {isConfirmingZeroMatch && (
         <EuiConfirmModal
@@ -887,7 +957,7 @@ export function SettingsTab() {
                   </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiToolTip content={showPausedSaveTooltip ? activityBlockTooltip : undefined}>
+                  <EuiToolTip content={saveBlockedByPause ? activityBlockTooltip : undefined}>
                     <EuiButton
                       data-test-subj="streams-settings-save-button"
                       color="primary"

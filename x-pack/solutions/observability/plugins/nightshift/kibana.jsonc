@@ -8,18 +8,19 @@
   "plugin": {
     "id": "nightshift",
     "browser": true,
-    "server": false,
+    "server": true,
     "requiredPlugins": [
       "charts",
       "data",
       "dataViews",
+      "features",
       "lens",
       "observabilityShared",
       "share",
-      "streams",
+      "significantEvents",
       "unifiedSearch"
     ],
-    "optionalPlugins": ["agentBuilder", "serverless", "spaces"],
-    "requiredBundles": ["kibanaReact", "significantEvents"]
+    "optionalPlugins": ["agentBuilder", "nightshiftInvestigations", "serverless", "spaces"],
+    "requiredBundles": ["kibanaReact", "nightshiftInvestigations"]
   }
 }

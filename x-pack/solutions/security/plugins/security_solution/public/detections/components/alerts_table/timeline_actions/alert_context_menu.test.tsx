@@ -58,7 +58,7 @@ const props = {
   ariaRowindex: 26,
   columnValues:
     '2021-08-12T11:07:10.552Z Malware Prevention Alert high 73  siem-windows-endpoint SYSTEM powershell.exe mimikatz.exe  ',
-  disabled: false,
+  isRemoteDocument: false,
   ecsRowData,
   refetch: jest.fn(),
   timelineId: 'alerts-page',
@@ -131,8 +131,7 @@ jest.mock('./use_add_to_chat_action', () => ({
 }));
 
 const actionMenuButton = 'timeline-context-menu-button';
-const addToExistingCaseButton = 'add-to-existing-case-action';
-const addToNewCaseButton = 'add-to-new-case-action';
+const addToCaseButton = 'add-to-case-action';
 const markAsOpenButton = 'open-alert-status';
 const markAsAcknowledgedButton = 'acknowledged-alert-status';
 const markAsClosedButton = 'alert-close-context-menu-item';
@@ -191,8 +190,7 @@ describe('Alert table context menu', () => {
 
       fireEvent.click(wrapper.getByTestId(actionMenuButton));
 
-      expect(wrapper.getByTestId(addToExistingCaseButton)).toBeTruthy();
-      expect(wrapper.getByTestId(addToNewCaseButton)).toBeTruthy();
+      expect(wrapper.getByTestId(addToCaseButton)).toBeTruthy();
     });
 
     test('it render AddToCase context menu item if timelineId === TimelineId.detectionsRulesDetailsPage', () => {
@@ -204,8 +202,7 @@ describe('Alert table context menu', () => {
 
       fireEvent.click(wrapper.getByTestId(actionMenuButton));
 
-      expect(wrapper.getByTestId(addToExistingCaseButton)).toBeTruthy();
-      expect(wrapper.getByTestId(addToNewCaseButton)).toBeTruthy();
+      expect(wrapper.getByTestId(addToCaseButton)).toBeTruthy();
     });
 
     test('it render AddToCase context menu item if timelineId === TimelineId.active', () => {
@@ -217,8 +214,7 @@ describe('Alert table context menu', () => {
 
       fireEvent.click(wrapper.getByTestId(actionMenuButton));
 
-      expect(wrapper.getByTestId(addToExistingCaseButton)).toBeTruthy();
-      expect(wrapper.getByTestId(addToNewCaseButton)).toBeTruthy();
+      expect(wrapper.getByTestId(addToCaseButton)).toBeTruthy();
     });
   });
 
@@ -590,6 +586,78 @@ describe('Alert table context menu', () => {
 
     afterEach(() => {
       mockUseAddToChatAction.mockReturnValue({ addToChatActionItems: [] });
+    });
+  });
+
+  describe('more actions button', () => {
+    const originalCanUseCases = mockUseKibanaReturnValue.services.cases.helpers.canUseCases;
+
+    afterEach(() => {
+      mockUseKibanaReturnValue.services.cases.helpers.canUseCases = originalCanUseCases;
+      mockUseRunDocumentWorkflowPanel.mockReturnValue({
+        runWorkflowMenuItem: [],
+        runDocumentWorkflowPanel: [],
+      });
+      (useUserPrivileges as jest.Mock).mockReturnValue(mockInitialUserPrivilegesState());
+    });
+
+    test('it disables the button and shows the remote tooltip for remote documents', async () => {
+      const wrapper = render(
+        <TestProviders>
+          <AlertContextMenu {...props} isRemoteDocument={true} scopeId={TimelineId.active} />
+        </TestProviders>
+      );
+
+      const button = wrapper.getByTestId(actionMenuButton);
+      expect(button).toBeDisabled();
+
+      fireEvent.mouseOver(button.parentElement!);
+      await waitFor(() => {
+        expect(wrapper.getByText('Unavailable for remote documents')).toBeInTheDocument();
+      });
+    });
+
+    test('it disables the button and shows insufficient privileges when there are no actions', async () => {
+      mockUseKibanaReturnValue.services.cases.helpers.canUseCases = jest.fn().mockReturnValue({
+        all: false,
+        create: false,
+        read: false,
+        update: false,
+        delete: false,
+        push: false,
+        createComment: false,
+      });
+      mockUseRunDocumentWorkflowPanel.mockReturnValue({
+        runWorkflowMenuItem: [],
+        runDocumentWorkflowPanel: [],
+      });
+      (useUserPrivileges as jest.Mock).mockReturnValue({
+        ...mockInitialUserPrivilegesState(),
+        endpointPrivileges: { loading: false, canWriteEventFilters: false },
+      });
+
+      const eventOnlyProps = {
+        ...props,
+        ecsRowData: {
+          _id: '1',
+          agent: { type: ['blah'] },
+          event: { kind: ['event'] },
+        } as Ecs,
+      };
+
+      const wrapper = render(
+        <TestProviders>
+          <AlertContextMenu {...eventOnlyProps} scopeId={TableId.hostsPageEvents} />
+        </TestProviders>
+      );
+
+      const button = wrapper.getByTestId(actionMenuButton);
+      expect(button).toBeDisabled();
+
+      fireEvent.mouseOver(button.parentElement!);
+      await waitFor(() => {
+        expect(wrapper.getByText('Insufficient privileges')).toBeInTheDocument();
+      });
     });
   });
 });

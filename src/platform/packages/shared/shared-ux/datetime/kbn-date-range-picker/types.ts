@@ -53,6 +53,12 @@ export interface TimeRangeBounds {
 /** Used for presets and recent options */
 export interface TimeRangeBoundsOption extends TimeRangeBounds {
   label?: string;
+  /**
+   * Whether the option belongs to the user. Options owned by configuration set
+   * this to `false` so they cannot be removed from the UI.
+   * @default true
+   */
+  isEditable?: boolean;
 }
 
 /** Calendar-specific configuration options. */
@@ -69,11 +75,11 @@ export interface TimeRangeTransformOptions {
   /** Additional accepted delimiter (on top of the built-in `'to'`, `'until'`, and `'-'`) */
   delimiter?: string;
   /**
-   * Additional format string for parsing absolute dates.
-   * Prepended to built-in formats so the parser recognises custom-formatted input.
-   * Does not affect how dates are displayed.
+   * Additional moment format strings accepted when parsing absolute dates typed
+   * by the user. Tried before the built-in formats. Display always uses the
+   * picker's own format, see {@link TimeRangeFormatOptions}.
    */
-  dateFormat?: string;
+  inputDateFormats?: string[];
   /**
    * Controls rounding of relative time range bounds (strings containing
    * `now`); bare `now` bounds are unaffected.
@@ -86,7 +92,8 @@ export interface TimeRangeTransformOptions {
    */
   roundRelativeTime?: boolean;
   /**
-   * Sub-minute precision applied when formatting absolute timestamps.
+   * Sub-minute precision applied when formatting absolute timestamps for display.
+   * Never affects the resolved range bounds.
    * @default 's'
    */
   timePrecision?: TimePrecision;
@@ -99,6 +106,17 @@ export interface TimeRangeTransformOptions {
    */
   locale?: string;
 }
+
+/**
+ * Options accepted by the display formatters. Deliberately excludes
+ * `inputDateFormats` and `roundRelativeTime`: those only shape parsing, and
+ * the button, presets list, and tooltip must never pick up a consumer's input
+ * format (the part-level display parser only understands the built-in one).
+ */
+export type TimeRangeFormatOptions = Omit<
+  TimeRangeTransformOptions,
+  'inputDateFormats' | 'roundRelativeTime'
+>;
 
 /** Time unit for the auto-refresh interval. */
 export type AutoRefreshIntervalUnit = 's' | 'm' | 'h';
@@ -142,6 +160,9 @@ export interface DateRangePickerSettings {
    *
    * When set, a toggle is shown in the Settings panel. When omitted the
    * toggle is hidden and seconds are shown by default.
+   *
+   * Display only: the resolved range bounds always keep full millisecond
+   * precision, so selecting a day in the calendar still ends at `23:59:59.999`.
    */
   timePrecision?: TimePrecision;
   /**
