@@ -15,7 +15,7 @@
 import {
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
-  WATCH_AUTONOMY_LEVELS,
+  WATCH_AUTONOMY_REVIEW_GATED,
 } from '../../constants';
 import { RuleTuningWorkerExtras } from '../schemas';
 import type { WorkerSettingsDeclaration } from './types';
@@ -31,12 +31,12 @@ export const RULE_TUNING_DEFAULT_EXTRAS: RuleTuningWorkerExtras = {
 
 export const RULE_TUNING_SETTINGS: WorkerSettingsDeclaration<RuleTuningWorkerExtras> = {
   workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
-  allowedAutonomyLevels: WATCH_AUTONOMY_LEVELS,
+  allowedAutonomyLevels: WATCH_AUTONOMY_REVIEW_GATED,
   scheduleInterval: { defaultValue: '2h' },
   extras: { schema: RuleTuningWorkerExtras, defaultValue: RULE_TUNING_DEFAULT_EXTRAS },
 };
 
 export const RULE_CREATION_SETTINGS: WorkerSettingsDeclaration = {
   workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
-  allowedAutonomyLevels: WATCH_AUTONOMY_LEVELS,
+  allowedAutonomyLevels: WATCH_AUTONOMY_REVIEW_GATED,
 };

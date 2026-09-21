@@ -15,6 +15,7 @@ import type {
   AppHeaderMenu,
   AppHeaderTitle,
 } from '@kbn/app-header';
+import type { AppMenuItemType, AppMenuPrimaryActionItem } from '@kbn/app-menu';
 import { ALERTZERO_WATCHES_SUBNAV_WIDTH } from '../../../components/layout/constants';
 import { AlertZeroWatchesNav, type WatchesSectionId } from './alertzero_watches_nav';
 import * as i18n from '../translations';
@@ -36,6 +37,10 @@ interface WatchesSectionLayoutProps {
   badges?: AppHeaderBadge[];
   /** Rendered to the left of the header's overflow menu, e.g. a watch's Enabled toggle. */
   headerSwitch?: AppHeaderMenu['switch'];
+  /** Primary action button pinned to the sticky header, e.g. a page's Save action. */
+  headerPrimaryActionItem?: AppMenuPrimaryActionItem;
+  /** Secondary header buttons rendered ahead of the overflow menu, e.g. a page's Discard action. */
+  headerItems?: AppMenuItemType[];
   children: React.ReactNode;
 }
 
@@ -53,6 +58,8 @@ export const WatchesSectionLayout: React.FC<WatchesSectionLayoutProps> = ({
   description,
   badges,
   headerSwitch,
+  headerPrimaryActionItem,
+  headerItems,
   children,
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(readCollapsed);
@@ -68,12 +75,14 @@ export const WatchesSectionLayout: React.FC<WatchesSectionLayoutProps> = ({
 
   const menu = useMemo<AppHeaderMenu | undefined>(
     () =>
-      headerSwitch || isCollapsed
+      headerSwitch || headerPrimaryActionItem || headerItems || isCollapsed
         ? {
             switch: headerSwitch,
-            ...(isCollapsed
-              ? {
-                  items: [
+            primaryActionItem: headerPrimaryActionItem,
+            items: [
+              ...(headerItems ?? []),
+              ...(isCollapsed
+                ? [
                     {
                       id: 'alertZeroExpandSubnav',
                       label: i18n.SUBNAV_EXPAND,
@@ -81,12 +90,12 @@ export const WatchesSectionLayout: React.FC<WatchesSectionLayoutProps> = ({
                       run: () => setCollapsed(false),
                       testId: 'alertZeroWatchesSubnavExpand',
                     },
-                  ],
-                }
-              : {}),
+                  ]
+                : []),
+            ],
           }
         : undefined,
-    [headerSwitch, isCollapsed, setCollapsed]
+    [headerSwitch, headerPrimaryActionItem, headerItems, isCollapsed, setCollapsed]
   );
 
   return (

@@ -19,7 +19,9 @@ export const ALERT_TRIAGE_SETTINGS: WorkerSettingsDeclaration = {
 
 export const ATTACK_DISCOVERY_SETTINGS: WorkerSettingsDeclaration = {
   workerId: SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
-  allowedAutonomyLevels: WATCH_AUTONOMY_LEVELS,
+  // Attack Discovery has no assisted gate: a run either waits for an analyst (manual) or
+  // generates on its own schedule with review after the fact (supervised).
+  allowedAutonomyLevels: ['manual', 'supervised'],
   // Matches the Attack Discovery schedule form default.
   scheduleInterval: { defaultValue: '24h' },
 };
