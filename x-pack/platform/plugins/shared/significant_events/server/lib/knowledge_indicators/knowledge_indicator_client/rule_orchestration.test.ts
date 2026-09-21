@@ -242,4 +242,25 @@ describe('uninstallQueries', () => {
     expect(chunks.map((chunk) => chunk.length)).toEqual([100, 51, 50]);
     expect(chunks.flat()).toEqual(ruleIds);
   });
+
+  it('attempts every delete chunk and aggregates failures', async () => {
+    const client = makeRulesClient();
+    const firstError = new Error('first chunk failed');
+    const thirdError = new Error('third chunk failed');
+    const ruleIds = Array.from({ length: 201 }, (_, index) => `rule-${index}`);
+    client.bulkDeleteRules
+      .mockRejectedValueOnce(firstError)
+      .mockResolvedValueOnce(undefined)
+      .mockRejectedValueOnce(thirdError);
+
+    const thrown = await uninstallRuleIds(client, ruleIds).catch((error) => error);
+
+    expect(thrown).toBeInstanceOf(AggregateError);
+    expect(thrown.errors).toEqual([firstError, thirdError]);
+    expect(thrown.message).toContain('first chunk failed');
+    expect(thrown.message).toContain('third chunk failed');
+    const chunks = client.bulkDeleteRules.mock.calls.map(([ids]) => ids);
+    expect(chunks.map((chunk) => chunk.length)).toEqual([100, 51, 50]);
+    expect(chunks.flat()).toEqual(ruleIds);
+  });
 });

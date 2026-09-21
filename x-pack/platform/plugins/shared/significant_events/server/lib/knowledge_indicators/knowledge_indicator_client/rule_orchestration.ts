@@ -174,7 +174,25 @@ export async function uninstallRuleIds(
     return;
   }
 
+  const failures: Array<{ ids: string[]; error: unknown }> = [];
   for (const chunk of partitionForBulk(ruleIds, MAX_BULK_ITEMS)) {
-    await client.bulkDeleteRules(chunk);
+    try {
+      await client.bulkDeleteRules(chunk);
+    } catch (error) {
+      failures.push({ ids: chunk, error });
+    }
+  }
+
+  if (failures.length > 0) {
+    const detail = failures
+      .map(
+        ({ ids, error }) =>
+          `[${ids.join(', ')}]: ${error instanceof Error ? error.message : String(error)}`
+      )
+      .join('; ');
+    throw new AggregateError(
+      failures.map(({ error }) => error),
+      `Failed to uninstall ${failures.length} rule chunk(s): ${detail}`
+    );
   }
 }
