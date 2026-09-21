@@ -152,7 +152,7 @@ export const OUTPUT_API_ROUTES = {
   DELETE_PATTERN: `${API_ROOT}/outputs/{outputId}`,
   CREATE_PATTERN: `${API_ROOT}/outputs`,
   GET_OUTPUT_HEALTH_PATTERN: `${API_ROOT}/outputs/{outputId}/health`,
-  GET_OUTPUT_AGENT_POLICY_COUNT_PATTERN: `${API_ROOT}/outputs/{outputId}/agent_policy_count`,
+  GET_OUTPUT_AGENT_POLICY_COUNT_PATTERN: `${INTERNAL_ROOT}/outputs/{outputId}/agent_policy_count`,
   LOGSTASH_API_KEY_PATTERN: `${API_ROOT}/logstash_api_keys`,
 };
 

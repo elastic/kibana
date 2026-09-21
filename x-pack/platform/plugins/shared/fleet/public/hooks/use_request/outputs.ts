@@ -114,7 +114,7 @@ export function sendGetOutputAgentPolicyCount(
   return sendRequest<GetOutputAgentPolicyCountResponse>({
     method: 'get',
     path: outputRoutesService.getOutputAgentPolicyCountPath(outputId),
-    version: API_VERSIONS.public.v1,
+    version: API_VERSIONS.internal.v1,
     query,
   });
 }
