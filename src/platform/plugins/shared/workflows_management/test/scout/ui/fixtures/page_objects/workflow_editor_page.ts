@@ -368,6 +368,7 @@ export class WorkflowEditorPage {
    * such as autocomplete suggestions are triggered.
    */
   async typeInYamlEditor(text: string): Promise<void> {
+    await this.waitForEditorToLoad();
     await this.page.evaluate((textToType: string) => {
       const container = document.querySelector('[data-test-subj="workflowYamlEditor"]');
       const editor = window.MonacoEnvironment?.monaco?.editor

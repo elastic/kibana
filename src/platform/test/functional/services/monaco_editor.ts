@@ -140,6 +140,7 @@ export class MonacoEditorService extends FtrService {
   }
 
   public async clearCodeEditorValue(testSubjId: string) {
+    await this.waitCodeEditorReady(testSubjId);
     await this.browser.execute((id: string) => {
       const container = document.querySelector(`[data-test-subj="${id}"]`);
       const editor = window
@@ -151,6 +152,7 @@ export class MonacoEditorService extends FtrService {
   }
 
   public async getCodeEditorValueByTestSubj(testSubjId: string): Promise<string> {
+    await this.waitCodeEditorReady(testSubjId);
     return await this.browser.execute((id: string) => {
       const container = document.querySelector(`[data-test-subj="${id}"]`);
       const editor = window
@@ -161,6 +163,7 @@ export class MonacoEditorService extends FtrService {
   }
 
   public async selectAllCodeEditorValue(testSubjId: string) {
+    await this.waitCodeEditorReady(testSubjId);
     await this.browser.execute((id: string) => {
       const container = document.querySelector(`[data-test-subj="${id}"]`);
       const editor = window

@@ -130,6 +130,8 @@ export class KibanaCodeEditorWrapper {
   async getCodeEditorValueByTestSubj(dataTestSubjId: string): Promise<string> {
     let result = '';
 
+    await this.waitCodeEditorReady(dataTestSubjId);
+
     await expect(async () => {
       result = await this.page.evaluate((id) => {
         const monacoEnv = window.MonacoEnvironment;
@@ -169,6 +171,8 @@ export class KibanaCodeEditorWrapper {
    * for why this doesn't use `data-uri`), and verifies that the value was applied.
    */
   async setCodeEditorValueByTestSubj(dataTestSubjId: string, value: string): Promise<string> {
+    await this.waitCodeEditorReady(dataTestSubjId);
+
     await this.page.evaluate(
       ({ id, editorValue }) => {
         const monacoEnv = window.MonacoEnvironment;
