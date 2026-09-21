@@ -44,11 +44,11 @@ describe('generateVisualizationEsql', () => {
     getDefaultModel.mockReset().mockResolvedValue(defaultModel);
   });
 
-  it('returns the query and result columns when generation succeeds with rows', async () => {
+  it('returns the query and result columns when generation succeeds', async () => {
     const columns = [{ name: 'status', type: 'keyword' }];
     mockedGenerateEsql.mockResolvedValue({
       query: 'FROM logs-* | STATS c = COUNT() BY status',
-      results: { columns },
+      results: { columns, values: [] },
     } as Awaited<ReturnType<typeof generateEsql>>);
 
     const result = await generateVisualizationEsql(params);

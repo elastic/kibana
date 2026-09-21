@@ -108,6 +108,7 @@ describe('createVegaGraph', () => {
     const state = await run();
 
     expect(mockedGenerateEsql).toHaveBeenCalledTimes(1);
+    expect(mockedExecuteEsql).not.toHaveBeenCalled();
     expect(state.error).toBeNull();
     expect(state.title).toBe('Counts by status');
     expect(state.authoringNote).toBe(authoringNote);
@@ -118,6 +119,20 @@ describe('createVegaGraph', () => {
     });
     expect(spec.mark).toBe('bar');
     expect(state.esqlQuery).toBe(GENERATED_ESQL);
+  });
+
+  it('reuses schema-probe columns from generation even when no rows matched', async () => {
+    const columns = [{ name: 'status', type: 'keyword' }];
+    invoke.mockResolvedValue(asCodeBlock({ mark: 'bar' }));
+    mockedGenerateEsql.mockResolvedValue({
+      query: GENERATED_ESQL,
+      results: { columns, values: [] },
+    } as Awaited<ReturnType<typeof generateEsql>>);
+
+    const state = await run();
+
+    expect(mockedExecuteEsql).not.toHaveBeenCalled();
+    expect(state.columns).toEqual(columns);
   });
 
   it('accepts a valid spec when the authoring note is missing', async () => {
@@ -281,19 +296,22 @@ describe('createVegaGraph', () => {
 
   it('regenerates a corrected query when the provided ES|QL fails to execute', async () => {
     invoke.mockResolvedValue(asCodeBlock({ mark: 'bar' }));
-    // The provided query throws (an invalid, agent-invented query); the
-    // regenerated query then executes cleanly.
-    mockedExecuteEsql
-      .mockRejectedValueOnce(
-        new Error('verification_exception: second argument of [half_ms * 1ms] must be [numeric]')
-      )
-      .mockResolvedValue({ columns: [], values: [] } as Awaited<ReturnType<typeof executeEsql>>);
+    // The provided query throws (an invalid, agent-invented query); generation
+    // then supplies a runnable query and its schema-probe columns.
+    mockedExecuteEsql.mockRejectedValueOnce(
+      new Error('verification_exception: second argument of [half_ms * 1ms] must be [numeric]')
+    );
+    mockedGenerateEsql.mockResolvedValue({
+      query: GENERATED_ESQL,
+      results: { columns: [{ name: 'count', type: 'long' }], values: [] },
+    } as Awaited<ReturnType<typeof generateEsql>>);
 
     const state = await run({ esqlQuery: PROVIDED_ESQL });
 
     // A bad provided query is routed through the self-correcting generator
     // instead of aborting, so we still produce a working chart.
     expect(mockedGenerateEsql).toHaveBeenCalledTimes(1);
+    expect(mockedExecuteEsql).toHaveBeenCalledTimes(1);
     expect(state.error).toBeNull();
     expect(JSON.parse(state.spec!).data.url.query).toBe(GENERATED_ESQL);
   });
@@ -302,6 +320,9 @@ describe('createVegaGraph', () => {
     mockedExecuteEsql.mockRejectedValue(
       new Error('verification_exception: second argument of [half_ms * 1ms] must be [numeric]')
     );
+    mockedGenerateEsql.mockResolvedValue({
+      error: 'verification_exception: second argument of [half_ms * 1ms] must be [numeric]',
+    } as Awaited<ReturnType<typeof generateEsql>>);
 
     const state = await run({ esqlQuery: PROVIDED_ESQL });
 
