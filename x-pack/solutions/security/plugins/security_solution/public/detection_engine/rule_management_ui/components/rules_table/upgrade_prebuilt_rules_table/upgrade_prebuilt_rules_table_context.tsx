@@ -111,6 +111,10 @@ export interface UpgradePrebuiltRulesTableActions {
   getSelectedRulesCustomizationCounts: (
     ruleIds: RuleSignatureId[]
   ) => RuleUpgradeCustomizationCounts;
+  /**
+   * Re-fetches the upgrade review and returns up-to-date counts for the whole filtered set.
+   */
+  fetchAllRulesCustomizationCounts: () => Promise<RuleUpgradeCustomizationCounts | null>;
   setFilterOptions: Dispatch<SetStateAction<PrebuiltRulesFilter>>;
   setPagination: Dispatch<SetStateAction<{ page: number; perPage: number }>>;
   setSortingOptions: Dispatch<SetStateAction<UpgradePrebuiltRulesSortingOptions>>;
@@ -191,6 +195,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     upgradeAllRulesToTarget,
     getSelectedRulesCustomizationCounts,
     allRulesCustomizationCounts,
+    fetchAllRulesCustomizationCounts,
   } = usePrebuiltRulesUpgrade({
     pagination,
     sort: {
@@ -213,6 +218,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
       upgradeRulesToTarget,
       upgradeAllRulesToTarget,
       getSelectedRulesCustomizationCounts,
+      fetchAllRulesCustomizationCounts,
       setFilterOptions,
       openRulePreview,
       setPagination,
@@ -225,6 +231,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
       upgradeRulesToTarget,
       upgradeAllRulesToTarget,
       getSelectedRulesCustomizationCounts,
+      fetchAllRulesCustomizationCounts,
       openRulePreview,
     ]
   );

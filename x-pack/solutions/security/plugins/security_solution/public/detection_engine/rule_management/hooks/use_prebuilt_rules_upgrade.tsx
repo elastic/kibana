@@ -29,6 +29,7 @@ import {
   type RuleSignatureId,
   type RuleUpgradeSpecifier,
   type PerformRuleUpgradeRequestBody,
+  type ReviewRuleUpgradeResponseBody,
   type UpgradeConflictSkipReason,
   ThreeWayDiffConflict,
   SkipRuleUpgradeReasonEnum,
@@ -343,8 +344,10 @@ export function usePrebuiltRulesUpgrade({
         customizedCount: selectedRuleUpgradeStates.filter((state) =>
           isRuleCustomized(state.current_rule)
         ).length,
+        // Compare the versions TARGET actually swaps rather than `has_update`, which is false for
+        // `CustomizedValueNoUpdate` (BASE=A, CURRENT=B, TARGET=A) even though the type is reset.
         ruleTypeChangeCount: selectedRuleUpgradeStates.filter(
-          (state) => state.diff.fields.type?.has_update ?? false
+          (state) => state.current_rule.type !== state.target_rule.type
         ).length,
       };
     },
@@ -354,18 +357,19 @@ export function usePrebuiltRulesUpgrade({
   // Stays `null` until the upgrade review has loaded so that callers fail closed: a missing or
   // failed review must never be mistaken for "no customized rules" when confirming a force upgrade.
   const allRulesCustomizationCounts = useMemo<RuleUpgradeCustomizationCounts | null>(
-    () =>
-      upgradeReviewResponse
-        ? {
-            total: upgradeReviewResponse.total,
-            customizedCount: upgradeReviewResponse.counts?.isCustomized?.true ?? 0,
-            // Rule type changes are a current-vs-target diff, not a stored attribute, so they cannot
-            // be counted for the whole filtered set without a dry run.
-            ruleTypeChangeCount: undefined,
-          }
-        : null,
+    () => toAllRulesCustomizationCounts(upgradeReviewResponse),
     [upgradeReviewResponse]
   );
+
+  /**
+   * Re-fetches the upgrade review and derives the counts from the fresh response so that the
+   * "Update all" confirmation reflects customizations made since the cached review loaded.
+   */
+  const fetchAllRulesCustomizationCounts = useCallback(async () => {
+    const { data } = await refetch();
+
+    return toAllRulesCustomizationCounts(data);
+  }, [refetch]);
 
   const subHeaderFactory = useCallback(
     (rule: RuleResponse) =>
@@ -561,6 +565,23 @@ export function usePrebuiltRulesUpgrade({
     upgradeAllRulesToTarget,
     getSelectedRulesCustomizationCounts,
     allRulesCustomizationCounts,
+    fetchAllRulesCustomizationCounts,
+  };
+}
+
+function toAllRulesCustomizationCounts(
+  upgradeReviewResponse: ReviewRuleUpgradeResponseBody | undefined
+): RuleUpgradeCustomizationCounts | null {
+  if (!upgradeReviewResponse) {
+    return null;
+  }
+
+  return {
+    total: upgradeReviewResponse.total,
+    customizedCount: upgradeReviewResponse.counts?.isCustomized?.true ?? 0,
+    // Rule type changes are a current-vs-target diff, not a stored attribute, so they cannot
+    // be counted for the whole filtered set without a dry run.
+    ruleTypeChangeCount: undefined,
   };
 }
 

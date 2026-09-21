@@ -47,6 +47,7 @@ export const UpgradePrebuiltRulesTableButtons = ({
       upgradeRulesToTarget,
       upgradeAllRulesToTarget,
       getSelectedRulesCustomizationCounts,
+      fetchAllRulesCustomizationCounts,
     },
   } = useUpgradePrebuiltRulesTableContext();
   const { isRulesCustomizationEnabled } = usePrebuiltRulesCustomizationStatus();
@@ -128,19 +129,24 @@ export const UpgradePrebuiltRulesTableButtons = ({
   const onUpdateAllRulesToTarget = useCallback(async () => {
     closeAllPopover();
 
-    if (!allRulesCustomizationCounts) {
+    // The cached review may be minutes old, so confirm against freshly fetched counts. This does
+    // not close the window between confirmation and the server resolving the ALL_RULES set, which
+    // needs server-side revision binding.
+    const counts = await fetchAllRulesCustomizationCounts();
+
+    if (!counts) {
       return;
     }
 
-    if (!(await confirmForceUpgradeAllRulesToTarget(allRulesCustomizationCounts))) {
+    if (!(await confirmForceUpgradeAllRulesToTarget(counts))) {
       return;
     }
 
     await upgradeAllRulesToTarget();
   }, [
-    allRulesCustomizationCounts,
     closeAllPopover,
     confirmForceUpgradeAllRulesToTarget,
+    fetchAllRulesCustomizationCounts,
     upgradeAllRulesToTarget,
   ]);
 

@@ -535,6 +535,8 @@ describe('usePrebuiltRulesUpgrade', () => {
             rule_id: 'rule-a',
             revision: 1,
             targetVersion: 1,
+            currentRuleOverrides: { type: 'query' },
+            targetRuleOverrides: { type: 'esql' },
             diffOverrides: {
               num_fields_with_updates: 1,
               fields: {
@@ -565,6 +567,93 @@ describe('usePrebuiltRulesUpgrade', () => {
         customizedCount: 0,
         ruleTypeChangeCount: 1,
       });
+    });
+
+    it('counts a type reset to the target (CustomizedValueNoUpdate) as a rule type change even though has_update is false', () => {
+      mockUsePrebuiltRulesUpgradeReview.mockReturnValue(
+        buildReviewResult([
+          createRuleUpgradeInfoMock({
+            rule_id: 'rule-a',
+            revision: 2,
+            targetVersion: 2,
+            currentRuleOverrides: {
+              type: 'esql',
+              rule_source: {
+                type: 'external',
+                is_customized: true,
+                has_base_version: true,
+                customized_fields: [],
+              },
+            },
+            targetRuleOverrides: { type: 'query' },
+            diffOverrides: {
+              fields: {
+                type: {
+                  base_version: 'query',
+                  current_version: 'esql',
+                  target_version: 'query',
+                  merged_version: 'query',
+                  diff_outcome: ThreeWayDiffOutcome.CustomizedValueNoUpdate,
+                  merge_outcome: ThreeWayMergeOutcome.Target,
+                  has_base_version: true,
+                  has_update: false,
+                  conflict: ThreeWayDiffConflict.NONE,
+                },
+              },
+            },
+          }),
+        ])
+      );
+
+      const { result } = renderHook(() => usePrebuiltRulesUpgrade({}), {
+        wrapper: TestProviders,
+      });
+
+      expect(result.current.getSelectedRulesCustomizationCounts(['rule-a'])).toEqual({
+        total: 1,
+        customizedCount: 1,
+        ruleTypeChangeCount: 1,
+      });
+    });
+
+    it('fetchAllRulesCustomizationCounts re-fetches the review and derives counts from the fresh response', async () => {
+      const refetch = jest.fn().mockResolvedValue({
+        data: buildReviewResult([], { total: 7, counts: { isCustomized: { true: 3, false: 4 } } })
+          .data,
+      });
+      mockUsePrebuiltRulesUpgradeReview.mockReturnValue({
+        ...buildReviewResult([], { total: 5, counts: { isCustomized: { true: 0, false: 5 } } }),
+        refetch,
+      });
+
+      const { result } = renderHook(
+        () => usePrebuiltRulesUpgrade({ withCustomizationCounts: true }),
+        { wrapper: TestProviders }
+      );
+
+      expect(result.current.allRulesCustomizationCounts).toEqual({
+        total: 5,
+        customizedCount: 0,
+        ruleTypeChangeCount: undefined,
+      });
+
+      await expect(result.current.fetchAllRulesCustomizationCounts()).resolves.toEqual({
+        total: 7,
+        customizedCount: 3,
+        ruleTypeChangeCount: undefined,
+      });
+      expect(refetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('fetchAllRulesCustomizationCounts resolves to null when the re-fetch yields no data', async () => {
+      const refetch = jest.fn().mockResolvedValue({ data: undefined });
+      mockUsePrebuiltRulesUpgradeReview.mockReturnValue({ ...buildReviewResult([]), refetch });
+
+      const { result } = renderHook(() => usePrebuiltRulesUpgrade({}), {
+        wrapper: TestProviders,
+      });
+
+      await expect(result.current.fetchAllRulesCustomizationCounts()).resolves.toBeNull();
     });
 
     it('counts a non-external rule toward total but not toward customizedCount', () => {
@@ -645,12 +734,14 @@ function createRuleUpgradeInfoMock({
   revision,
   targetVersion,
   currentRuleOverrides,
+  targetRuleOverrides,
   diffOverrides,
 }: {
   rule_id: string;
   revision: number;
   targetVersion: number;
   currentRuleOverrides?: Partial<RuleResponse>;
+  targetRuleOverrides?: Partial<RuleResponse>;
   // `fields` is a per-rule-type union, so a cross-type change (e.g. query -> esql) is only
   // representable loosely here.
   diffOverrides?: Partial<Omit<RuleUpgradeInfoForReview['diff'], 'fields'>> & {
@@ -663,7 +754,7 @@ function createRuleUpgradeInfoMock({
     version: targetVersion,
     revision,
     current_rule: createRuleResponseMock({ revision, ...currentRuleOverrides }),
-    target_rule: createRuleResponseMock({ version: targetVersion }),
+    target_rule: createRuleResponseMock({ version: targetVersion, ...targetRuleOverrides }),
     diff: {
       num_fields_with_updates: 0,
       num_fields_with_conflicts: 0,

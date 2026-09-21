@@ -395,6 +395,58 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
       expect(upgradeRulesToTarget).not.toHaveBeenCalled();
     });
 
+    it('confirms against freshly fetched counts rather than the cached review', async () => {
+      const user = userEvent.setup();
+      const upgradeAllRulesToTarget = jest.fn();
+      const fetchAllRulesCustomizationCounts = jest
+        .fn()
+        .mockResolvedValue({ total: 4, customizedCount: 2, ruleTypeChangeCount: undefined });
+
+      mockContext({
+        upgradeAllRulesToTarget,
+        fetchAllRulesCustomizationCounts,
+        allRulesCustomizationCounts: {
+          total: 3,
+          customizedCount: 0,
+          ruleTypeChangeCount: undefined,
+        },
+      });
+      renderButtons([]);
+
+      await openAllRulesToTargetAction(user);
+
+      const modal = await screen.findByTestId('forceUpgradeAllRulesToTargetConfirmModal');
+      expect(fetchAllRulesCustomizationCounts).toHaveBeenCalledTimes(1);
+      expect(modal).toHaveTextContent('2 of 4 have customizations that will be overwritten');
+      expect(upgradeAllRulesToTarget).not.toHaveBeenCalled();
+    });
+
+    it('does not force-upgrade when the fresh review fetch returns no data', async () => {
+      const user = userEvent.setup();
+      const upgradeAllRulesToTarget = jest.fn();
+
+      mockContext({
+        upgradeAllRulesToTarget,
+        fetchAllRulesCustomizationCounts: jest.fn().mockResolvedValue(null),
+        allRulesCustomizationCounts: {
+          total: 3,
+          customizedCount: 0,
+          ruleTypeChangeCount: undefined,
+        },
+      });
+      renderButtons([]);
+
+      await openAllRulesToTargetAction(user);
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('upgradeAllRulesToTargetAction')).not.toBeInTheDocument();
+      });
+      expect(
+        screen.queryByTestId('forceUpgradeAllRulesToTargetConfirmModal')
+      ).not.toBeInTheDocument();
+      expect(upgradeAllRulesToTarget).not.toHaveBeenCalled();
+    });
+
     it('still confirms a zero-customized target set because rule type changes cannot be ruled out for the whole set', async () => {
       const user = userEvent.setup();
       const upgradeAllRulesToTarget = jest.fn();
@@ -851,6 +903,7 @@ function mockContext({
   getSelectedRulesCustomizationCounts = jest
     .fn()
     .mockReturnValue({ total: 0, customizedCount: 0, ruleTypeChangeCount: 0 }),
+  fetchAllRulesCustomizationCounts = jest.fn().mockResolvedValue(allRulesCustomizationCounts),
 }: {
   hasRulesToUpgrade?: boolean;
   loadingRules?: string[];
@@ -862,6 +915,7 @@ function mockContext({
   upgradeRulesToTarget?: jest.Mock;
   upgradeAllRulesToTarget?: jest.Mock;
   getSelectedRulesCustomizationCounts?: jest.Mock;
+  fetchAllRulesCustomizationCounts?: jest.Mock;
 } = {}) {
   mockUseUpgradePrebuiltRulesTableContext.mockReturnValue({
     state: {
@@ -877,6 +931,7 @@ function mockContext({
       upgradeRulesToTarget,
       upgradeAllRulesToTarget,
       getSelectedRulesCustomizationCounts,
+      fetchAllRulesCustomizationCounts,
     },
   });
 }
