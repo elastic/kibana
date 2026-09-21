@@ -100,6 +100,7 @@ describe('getEpisodeHeaderBadges', () => {
         lastAckAction: ALERT_EPISODE_ACTION_TYPE.ACK,
         lastAssigneeUid: null,
         lastAckActor: null,
+        lastDeactivateActor: null,
       },
       groupAction: {
         groupHash: 'group-1',

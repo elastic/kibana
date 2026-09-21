@@ -66,6 +66,7 @@ describe('CopyableShortId', () => {
       </a>
     );
 
+    expect(screen.getByTestId('shortId')).toHaveAttribute('title', `Full ID: ${FULL_ID}`);
     expect(screen.getByTestId('shortId')).not.toHaveAttribute('tabindex');
     expect(screen.getByRole('link')).toHaveAccessibleName(`abcdefg ${FULL_ID}`);
   });

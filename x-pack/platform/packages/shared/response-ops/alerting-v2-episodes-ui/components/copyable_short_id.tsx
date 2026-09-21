@@ -60,7 +60,7 @@ export const CopyableShortId = ({
 
   if (disableCopy) {
     return (
-      <span data-test-subj={dataTestSubj}>
+      <span title={copyTooltip} data-test-subj={dataTestSubj}>
         {chip}
         <EuiScreenReaderOnly>
           <span>{id}</span>
