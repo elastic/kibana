@@ -30,6 +30,9 @@ type ProposalAttachmentData = z.infer<typeof proposalAttachmentDataSchema>;
  * only action the agent can request — it cannot run the action itself.
  */
 const formatProposalForAgent = (data: ProposalAttachmentData): string => {
+  // Deliberately NOT `PROPOSAL_WITHOUT_ACTION_LABEL`: this string is LLM prompt input
+  // and must stay untranslated and carry the analyst-directive clause. The UI badge
+  // ("No automated action") lives in public/proposals/translations.ts.
   const label =
     data.action?.name ??
     data.actionWorkflowId ??

@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { queryBoolean, routeId } from '../zod_query';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import { isStatusEnabled } from '../../../common/runtime_types/monitor_management/alert_config';
 import type { EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
@@ -20,15 +21,11 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   validate: {},
   validation: {
     request: {
-      params: schema.object({
-        monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
+      params: z.strictObject({
+        monitorId: routeId,
       }),
-      query: schema.object({
-        internal: schema.maybe(
-          schema.boolean({
-            defaultValue: false,
-          })
-        ),
+      query: z.strictObject({
+        internal: queryBoolean.optional().default(false),
       }),
     },
   },
