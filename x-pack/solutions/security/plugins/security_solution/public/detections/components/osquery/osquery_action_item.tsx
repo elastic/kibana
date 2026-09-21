@@ -6,13 +6,12 @@
  */
 
 import type { AlertTableContextMenuItem } from '../alerts_table/types';
+import { OSQUERY_ACTION_ID } from '../../../common/constants/action_ids';
 import { ACTION_OSQUERY } from './translations';
 
 interface IProps {
   handleClick: () => void;
 }
-
-export const OSQUERY_ACTION_ID = 'osquery-action-item';
 
 export const getOsqueryActionItem = ({ handleClick }: IProps): AlertTableContextMenuItem => ({
   key: OSQUERY_ACTION_ID,
