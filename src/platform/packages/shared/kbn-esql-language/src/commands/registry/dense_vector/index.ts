@@ -32,10 +32,14 @@ export const denseVectorCommand: ICommand = {
       defaultMessage:
         'Generates an embedding per row for each listed text field, appending a <field>_dense_vector column.',
     }),
-    declaration: 'DENSE_VECTOR field1 [, field2, ...] [WITH { <options> }]',
+    declaration:
+      'DENSE_VECTOR field1 [, field2, ...] [WITH { <options> }]\n' +
+      'DENSE_VECTOR target = field [WITH { <options> }]\n' +
+      'DENSE_VECTOR suffix = "<suffix>" ON field1 [, field2, ...] [WITH { <options> }]',
     examples: [
-      'FROM books | DENSE_VECTOR description',
       'FROM books | DENSE_VECTOR title, description',
+      'FROM books | DENSE_VECTOR embedding = description',
+      'FROM books | DENSE_VECTOR suffix = "_dv" ON title, description',
       'FROM books | DENSE_VECTOR description WITH { "inference_id": "my-endpoint", "timeout": "10s" }',
     ],
     preview: true,
