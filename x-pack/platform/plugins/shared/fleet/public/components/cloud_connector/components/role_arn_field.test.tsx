@@ -6,14 +6,13 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { RoleArnField, ROLE_ARN_FIELD_TEST_SUBJECTS } from './role_arn_field';
 
 const noop = () => {};
-
-const renderWithI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
 describe('RoleArnField', () => {
   it('renders the stored value', () => {
@@ -90,6 +89,24 @@ describe('RoleArnField', () => {
     expect(screen.getByTestId(ROLE_ARN_FIELD_TEST_SUBJECTS.CALLOUT).textContent).toMatch(
       /other integrations/i
     );
+  });
+
+  it('flags a cleared value: the role cannot be removed, and silently discarding it is worse', () => {
+    renderWithI18n(
+      <RoleArnField
+        value=""
+        storedValue="arn:aws:iam::123456789012:role/Old"
+        onChange={noop}
+        affectedPackagePolicyCount={2}
+      />
+    );
+    expect(screen.getByTestId(ROLE_ARN_FIELD_TEST_SUBJECTS.ERROR).textContent).toMatch(/required/i);
+    expect(screen.queryByTestId(ROLE_ARN_FIELD_TEST_SUBJECTS.CALLOUT)).toBeNull();
+  });
+
+  it('does not flag an empty field on an identity that has no stored role', () => {
+    renderWithI18n(<RoleArnField value="" onChange={noop} affectedPackagePolicyCount={0} />);
+    expect(screen.queryByTestId(ROLE_ARN_FIELD_TEST_SUBJECTS.ERROR)).toBeNull();
   });
 
   it('does not render the callout when the edited value is invalid', () => {

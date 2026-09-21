@@ -373,6 +373,34 @@ describe('propagateRoleArnToPackagePolicies', () => {
     expect(caught?.detail.revertFailed).toEqual(['a']);
   });
 
+  it('reports failed ids in a stable order, capped in the message but complete in the detail', async () => {
+    // `pMap` resolves out of order, so the same failure must not produce a different message
+    // each time; a connector with hundreds of policies must not produce an unreadable one.
+    const ids = Array.from({ length: 25 }, (_, index) => `p${String(index).padStart(2, '0')}`);
+    (packagePolicyService.list as jest.Mock).mockResolvedValue({
+      items: ids.map((id) => makePolicy(id)),
+      total: ids.length,
+      page: 1,
+      perPage: 10000,
+    });
+    (packagePolicyService.update as jest.Mock).mockRejectedValue(new Error('boom'));
+
+    let caught: CloudConnectorRoleArnPropagationError | undefined;
+    try {
+      await propagateRoleArnToPackagePolicies({
+        esClient,
+        connectorId: CONNECTOR_ID,
+        newRoleArn: NEW_ARN,
+      });
+    } catch (err) {
+      caught = err as CloudConnectorRoleArnPropagationError;
+    }
+
+    expect(caught?.detail.updateFailed).toEqual(ids);
+    expect(caught?.message).toContain(`(ids: ${ids.slice(0, 20).join(', ')}, +5 more)`);
+    expect(caught?.message).not.toContain('p20');
+  });
+
   it('captures the per-policy pre-update value for revert (not the connector old value)', async () => {
     const drifted = makePolicy('drifted', 'arn:aws:iam::123456789012:role/Drifted');
     (packagePolicyService.list as jest.Mock).mockResolvedValue({

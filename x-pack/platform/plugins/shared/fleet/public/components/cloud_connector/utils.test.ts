@@ -28,7 +28,9 @@ import {
   hasTemplateUrlParam,
   isStackArnInvalid,
   isIamRoleArnInvalid,
+  CLEARED_IAM_ROLE_ARN_MESSAGE,
   INVALID_IAM_ROLE_ARN_MESSAGE,
+  isIamRoleArnCleared,
 } from './utils';
 import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT } from './constants';
 import type { CloudConnectorCredentials } from './types';
@@ -1218,5 +1220,29 @@ describe('isIamRoleArnInvalid', () => {
 
   it('exports a human-readable error message', () => {
     expect(INVALID_IAM_ROLE_ARN_MESSAGE).toMatch(/IAM role ARN/i);
+  });
+});
+
+describe('isIamRoleArnCleared', () => {
+  const STORED = 'arn:aws:iam::123456789012:role/MyRole';
+
+  it('returns true when a stored ARN has been emptied', () => {
+    expect(isIamRoleArnCleared('', STORED)).toBe(true);
+    expect(isIamRoleArnCleared('   ', STORED)).toBe(true);
+    expect(isIamRoleArnCleared(undefined, STORED)).toBe(true);
+  });
+
+  it('returns false while the field still holds something', () => {
+    expect(isIamRoleArnCleared(STORED, STORED)).toBe(false);
+    expect(isIamRoleArnCleared('not-an-arn', STORED)).toBe(false);
+  });
+
+  it('returns false when there was no stored ARN to clear', () => {
+    expect(isIamRoleArnCleared('', '')).toBe(false);
+    expect(isIamRoleArnCleared('', undefined)).toBe(false);
+  });
+
+  it('exports a human-readable error message', () => {
+    expect(CLEARED_IAM_ROLE_ARN_MESSAGE).toMatch(/required/i);
   });
 });

@@ -648,6 +648,9 @@ describe('CloudConnectorPoliciesFlyout', () => {
 
   describe('Role ARN editing (AWS)', () => {
     it('renders the RoleArnField for AWS connectors above the Deployment ID field', () => {
+      // The Deployment ID field only renders with the provisioner on, which is what makes the
+      // ordering assertion meaningful.
+      mockUseIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: true });
       renderFlyout({
         provider: 'aws',
         cloudConnectorVars: {
@@ -656,16 +659,13 @@ describe('CloudConnectorPoliciesFlyout', () => {
       });
 
       const roleArnInput = screen.getByTestId(ROLE_ARN_FIELD_TEST_SUBJECTS.INPUT);
-      const deploymentIdInput = screen.queryByTestId(
+      const deploymentIdInput = screen.getByTestId(
         CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_DEPLOYMENT_ID_INPUT
       );
 
-      expect(roleArnInput).toBeInTheDocument();
-      if (deploymentIdInput) {
-        expect(roleArnInput.compareDocumentPosition(deploymentIdInput)).toBe(
-          Node.DOCUMENT_POSITION_FOLLOWING
-        );
-      }
+      expect(roleArnInput.compareDocumentPosition(deploymentIdInput)).toBe(
+        Node.DOCUMENT_POSITION_FOLLOWING
+      );
     });
 
     it('does not render RoleArnField for non-AWS connectors', () => {
@@ -696,6 +696,34 @@ describe('CloudConnectorPoliciesFlyout', () => {
       expect(
         screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.FOOTER_SAVE_BUTTON)
       ).toBeDisabled();
+    });
+
+    it('disables Save when the Role ARN is cleared, even if another field changed', () => {
+      // The API cannot remove a role from an identity, so an empty field would be dropped from
+      // the payload and the clear would be saved as a silent no-op.
+      renderFlyout({
+        provider: 'aws',
+        cloudConnectorVars: {
+          role_arn: { value: 'arn:aws:iam::123456789012:role/Existing' },
+        },
+      });
+
+      fireEvent.change(
+        screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.NAME_INPUT),
+        {
+          target: { value: 'New Name' },
+        }
+      );
+      fireEvent.change(screen.getByTestId(ROLE_ARN_FIELD_TEST_SUBJECTS.INPUT), {
+        target: { value: '' },
+      });
+
+      expect(
+        screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.FOOTER_SAVE_BUTTON)
+      ).toBeDisabled();
+      expect(screen.getByTestId(ROLE_ARN_FIELD_TEST_SUBJECTS.ERROR).textContent).toMatch(
+        /required/i
+      );
     });
 
     it('enables Save once the ARN is a valid new value', () => {

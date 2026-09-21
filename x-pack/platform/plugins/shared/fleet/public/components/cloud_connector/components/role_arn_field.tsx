@@ -11,7 +11,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 
-import { INVALID_IAM_ROLE_ARN_MESSAGE, isIamRoleArnInvalid } from '../utils';
+import {
+  CLEARED_IAM_ROLE_ARN_MESSAGE,
+  INVALID_IAM_ROLE_ARN_MESSAGE,
+  isIamRoleArnCleared,
+  isIamRoleArnInvalid,
+} from '../utils';
 
 export const ROLE_ARN_FIELD_TEST_SUBJECTS = {
   INPUT: 'cloudConnectorFlyoutRoleArnInput',
@@ -50,20 +55,26 @@ export const RoleArnField: React.FC<RoleArnFieldProps> = ({
   affectedPackagePolicyCount,
 }) => {
   const isInvalid = useMemo(() => isIamRoleArnInvalid(value), [value]);
+  // An identity cannot give up its role, so an emptied field is an error rather than "unchanged":
+  // without it the clear is dropped from the payload and silently discarded on save.
+  const isCleared = useMemo(() => isIamRoleArnCleared(value, storedValue), [value, storedValue]);
+  const errorMessage = isInvalid
+    ? INVALID_IAM_ROLE_ARN_MESSAGE
+    : isCleared
+    ? CLEARED_IAM_ROLE_ARN_MESSAGE
+    : undefined;
   const isEdited = storedValue !== undefined && value.trim() !== storedValue.trim();
-  const showCallout = isEdited && !isInvalid;
+  const showCallout = isEdited && errorMessage === undefined;
 
   return (
     <>
       <EuiFormRow
         label={FIELD_LABEL}
         helpText={FIELD_HELP}
-        isInvalid={isInvalid}
+        isInvalid={errorMessage !== undefined}
         error={
-          isInvalid ? (
-            <span data-test-subj={ROLE_ARN_FIELD_TEST_SUBJECTS.ERROR}>
-              {INVALID_IAM_ROLE_ARN_MESSAGE}
-            </span>
+          errorMessage ? (
+            <span data-test-subj={ROLE_ARN_FIELD_TEST_SUBJECTS.ERROR}>{errorMessage}</span>
           ) : undefined
         }
         fullWidth
@@ -72,7 +83,7 @@ export const RoleArnField: React.FC<RoleArnFieldProps> = ({
           data-test-subj={ROLE_ARN_FIELD_TEST_SUBJECTS.INPUT}
           value={value}
           onChange={(event) => onChange(event.target.value)}
-          isInvalid={isInvalid}
+          isInvalid={errorMessage !== undefined}
           fullWidth
         />
       </EuiFormRow>

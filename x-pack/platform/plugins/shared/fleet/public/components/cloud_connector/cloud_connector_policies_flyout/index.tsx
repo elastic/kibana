@@ -66,6 +66,7 @@ import {
   isAzureCloudConnectorVars,
   isCloudConnectorNameValid,
   isGcpCloudConnectorVars,
+  isIamRoleArnCleared,
   isIamRoleArnInvalid,
   isStackArnInvalid,
 } from '../utils';
@@ -130,6 +131,9 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
   const isAws = provider === AWS_PROVIDER;
   const showIac = isAws && isIacProvisionerEnabled;
   const roleArnInvalid = isIamRoleArnInvalid(editedRoleArn);
+  // Clearing the field is not a way to remove the role: RoleArnField says so and Save blocks on
+  // it, rather than dropping the empty value from the payload and discarding the edit in silence.
+  const roleArnCleared = isIamRoleArnCleared(editedRoleArn, existingRoleArn);
   const trimmedEditedRoleArn = editedRoleArn.trim();
   const roleArnChanged = trimmedEditedRoleArn !== existingRoleArn.trim();
   const roleArnToSave =
@@ -393,6 +397,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
     !isNameValid ||
     deploymentIdInvalid ||
     roleArnInvalid ||
+    roleArnCleared ||
     (!nameChanged && !iacChanged && varsToSave === undefined) ||
     isUpdating;
 
