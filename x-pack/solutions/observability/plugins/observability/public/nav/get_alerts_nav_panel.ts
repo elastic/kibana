@@ -17,12 +17,11 @@ import {
   OBSERVABILITY_ALERTING_APP_ID,
   type ObservabilityAlertingLinkId,
 } from '@kbn/deeplinks-observability';
-import { observabilityAlertsFeatureId } from '../../common';
+import { hasObservabilityCapabilities } from '@kbn/observability-shared-plugin/public';
 
 const PANEL_ID = 'alerting';
 const ALERTS_LINK = 'observability-overview:alerts' as const;
 const ALERTS_ICON = 'warning';
-const V1_ALERTS_MANAGEMENT_ID = 'triggersActionsAlerts';
 const V1_RULES_MANAGEMENT_ID = 'triggersActionsRules';
 const MAINTENANCE_WINDOWS_MANAGEMENT_ID = 'maintenanceWindows';
 
@@ -39,9 +38,12 @@ const getAlertsIsActive: NonNullable<RootNodeDefinition['getIsActive']> = ({
 const hasManagementCapability = (core: CoreStart, capabilityId: string): boolean =>
   core.application.capabilities.management?.insightsAndAlerting?.[capabilityId] === true;
 
+/**
+ * Same gate as classic nav (`updateGlobalNavigation` / `hasObservabilityCapabilities`):
+ * any Observability app capability, not alerting-specific privileges.
+ */
 const canReadV1Alerts = (core: CoreStart): boolean =>
-  core.application.capabilities[observabilityAlertsFeatureId]?.show === true ||
-  hasManagementCapability(core, V1_ALERTS_MANAGEMENT_ID);
+  hasObservabilityCapabilities(core.application.capabilities);
 
 const canReadV1Rules = (core: CoreStart): boolean =>
   hasManagementCapability(core, V1_RULES_MANAGEMENT_ID);

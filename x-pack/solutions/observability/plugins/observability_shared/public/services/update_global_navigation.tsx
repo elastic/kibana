@@ -18,7 +18,7 @@ import { CasesDeepLinkId } from '@kbn/cases-plugin/public';
 import { casesFeatureId } from '../../common';
 
 /** Capability-based Observability access — pricing tiers do not affect this. */
-function hasObservabilityCapabilities(capabilities: Capabilities): boolean {
+export function hasObservabilityCapabilities(capabilities: Capabilities): boolean {
   const { apm, metrics, uptime, synthetics, slo } = capabilities.navLinks;
   /* logs is a special case.
    * It is not a nav link but still exists as a

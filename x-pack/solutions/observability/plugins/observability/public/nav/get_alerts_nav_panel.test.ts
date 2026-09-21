@@ -33,10 +33,15 @@ const setCapabilities = (core: CoreStart, capabilities: Record<string, unknown>)
   const management = capabilities.management as
     | { insightsAndAlerting?: Record<string, boolean> }
     | undefined;
+  const navLinks = capabilities.navLinks as Record<string, boolean> | undefined;
 
   core.application.capabilities = {
     ...core.application.capabilities,
     ...capabilities,
+    navLinks: {
+      ...core.application.capabilities.navLinks,
+      ...navLinks,
+    },
     management: {
       ...core.application.capabilities.management,
       ...management,
@@ -181,6 +186,30 @@ describe('getAlertsNavPanel', () => {
       ]);
     });
 
+    it('shows Alerts when the user has logs.show, matching classic nav', () => {
+      setCapabilities(core, { logs: { show: true } });
+
+      expect(getSectionByTitle(core)?.children).toEqual([
+        expect.objectContaining({ link: 'observabilityAlerting:alerts' }),
+      ]);
+    });
+
+    it('shows Alerts when the user has an Observability navLinks capability, matching classic nav', () => {
+      setCapabilities(core, { navLinks: { apm: true } });
+
+      expect(getSectionByTitle(core)?.children).toEqual([
+        expect.objectContaining({ link: 'observabilityAlerting:alerts' }),
+      ]);
+    });
+
+    it('does not treat Stack Management alerts access as v1 Observability access', () => {
+      setCapabilities(core, {
+        management: { insightsAndAlerting: { triggersActionsAlerts: true } },
+      });
+
+      expect(getAlertsNavPanel(core)).toEqual([]);
+    });
+
     it('shows Alerts and Alerts V1 when the user has v1 alerts read and the classic table setting is on', () => {
       core.settings.client.get = <T>(_key: string) => true as T;
       setCapabilities(core, { observabilityAlerts: { show: true } });
@@ -191,18 +220,6 @@ describe('getAlertsNavPanel', () => {
           link: 'observability-overview:alerts',
           title: 'Alerts V1',
         }),
-      ]);
-    });
-
-    it('shows Alerts and Alerts V1 when the user has the v1 alerts management capability', () => {
-      core.settings.client.get = <T>(_key: string) => true as T;
-      setCapabilities(core, {
-        management: { insightsAndAlerting: { triggersActionsAlerts: true } },
-      });
-
-      expect(getSectionByTitle(core)?.children).toEqual([
-        expect.objectContaining({ link: 'observabilityAlerting:alerts' }),
-        expect.objectContaining({ link: 'observability-overview:alerts' }),
       ]);
     });
 

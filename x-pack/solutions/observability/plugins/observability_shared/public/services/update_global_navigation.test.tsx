@@ -9,7 +9,10 @@ import type { Subject } from 'rxjs';
 import type { App, AppDeepLink, ApplicationStart, AppUpdater } from '@kbn/core/public';
 import { AppStatus, type PricingServiceStart } from '@kbn/core/public';
 import { casesFeatureId } from '../../common';
-import { updateGlobalNavigation } from './update_global_navigation';
+import {
+  hasObservabilityCapabilities,
+  updateGlobalNavigation,
+} from './update_global_navigation';
 
 // Used in updater callback
 const app = {} as unknown as App;
@@ -27,6 +30,52 @@ const noObservabilityCapabilities = {
   observabilityAlerts: { show: false },
   navLinks: { apm: false, logs: false, metrics: false, uptime: false },
 } as unknown as ApplicationStart['capabilities'];
+
+describe('hasObservabilityCapabilities', () => {
+  it('is true for logs.show, observabilityAlerts.show, and Observability navLinks', () => {
+    expect(
+      hasObservabilityCapabilities({
+        logs: { show: true },
+        navLinks: {},
+      } as unknown as ApplicationStart['capabilities'])
+    ).toBe(true);
+    expect(
+      hasObservabilityCapabilities({
+        observabilityAlerts: { show: true },
+        navLinks: {},
+      } as unknown as ApplicationStart['capabilities'])
+    ).toBe(true);
+    expect(
+      hasObservabilityCapabilities({
+        navLinks: { apm: true },
+      } as unknown as ApplicationStart['capabilities'])
+    ).toBe(true);
+    expect(
+      hasObservabilityCapabilities({
+        navLinks: { metrics: true },
+      } as unknown as ApplicationStart['capabilities'])
+    ).toBe(true);
+    expect(
+      hasObservabilityCapabilities({
+        navLinks: { uptime: true },
+      } as unknown as ApplicationStart['capabilities'])
+    ).toBe(true);
+    expect(
+      hasObservabilityCapabilities({
+        navLinks: { synthetics: true },
+      } as unknown as ApplicationStart['capabilities'])
+    ).toBe(true);
+    expect(
+      hasObservabilityCapabilities({
+        navLinks: { slo: true },
+      } as unknown as ApplicationStart['capabilities'])
+    ).toBe(true);
+  });
+
+  it('is false without Observability app capabilities', () => {
+    expect(hasObservabilityCapabilities(noObservabilityCapabilities)).toBe(false);
+  });
+});
 
 describe('updateGlobalNavigation', () => {
   describe('when no observability apps are enabled', () => {
