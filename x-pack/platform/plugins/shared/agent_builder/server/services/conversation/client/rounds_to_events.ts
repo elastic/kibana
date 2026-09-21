@@ -27,8 +27,6 @@ import {
   TimelineTriggerType,
   executionTerminatedEventId,
   parseExecutionId,
-  promptResponseEventId,
-  nextResumeIndexFromEvents,
   resumeExecutionId,
   roundStepEventId,
 } from '@kbn/agent-builder-common';
@@ -229,15 +227,25 @@ export const executionStartedEventId = (roundId: string, executionIndex: number)
       }`;
 
 /**
- * The index of the next execution to append to a round. Thin wrapper over the common helper so
- * the server can pass its `conversation` object directly.
+ * The index of the next execution to append to a round. Counts distinct executions already stored
+ * for the round on `conversation.events`. Returns 0 when the round has no prior executions.
  */
 export const nextResumeIndex = (
   conversation: Pick<Conversation, 'events'>,
   roundId: string
-): number => nextResumeIndexFromEvents(conversation.events ?? [], roundId);
+): number => {
+  const storedEvents = conversation.events ?? [];
+  const roundExecutionIds = new Set(
+    storedEvents
+      .map((event) => event.execution_id)
+      .filter((id): id is string => id !== undefined && parseExecutionId(id)?.roundId === roundId)
+  );
+  return roundExecutionIds.size;
+};
 
-export { promptResponseEventId };
+/** The `prompt_response` link event id written for the k-th resume of a round. */
+export const promptResponseEventId = (roundId: string, executionIndex: number): string =>
+  `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.promptResponse}::${executionIndex}`;
 
 /** Records a human answering a paused round, resuming a specific run. */
 export const promptResponseEvent = ({

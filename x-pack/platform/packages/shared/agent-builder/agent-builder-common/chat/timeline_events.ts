@@ -435,26 +435,6 @@ export const executionStepEventId = (
         ROUND_DERIVED_EVENT_ID_SUFFIXES.stepPrefix
       }${sequence}`;
 
-/** ID for the `prompt_response` link event written for the k-th resume of a round. */
-export const promptResponseEventId = (roundId: string, executionIndex: number): string =>
-  `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.promptResponse}::${executionIndex}`;
-
-/**
- * The index of the next execution to append to a round. Takes the stored event list directly
- * so it can be called on both saved and merged event lists.
- */
-export const nextResumeIndexFromEvents = (
-  events: Array<{ execution_id?: string }>,
-  roundId: string
-): number => {
-  const roundExecutionIds = new Set(
-    events
-      .map((event) => event.execution_id)
-      .filter((id): id is string => id !== undefined && parseExecutionId(id)?.roundId === roundId)
-  );
-  return roundExecutionIds.size;
-};
-
 /**
  * Type names that are not covered by a `TimelineEventType` member but would still
  * produce ids colliding with round-derived ones.

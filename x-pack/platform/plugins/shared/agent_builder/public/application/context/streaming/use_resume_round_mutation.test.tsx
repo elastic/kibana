@@ -34,13 +34,11 @@ jest.mock('../../hooks/use_kibana', () => ({
 }));
 
 const conversationId = 'conv-1';
-const roundId = 'round-1';
 const vars = {
   prompts: {},
   conversationId,
   agentId: 'agent-1',
-  promptRequestedEventId: `${roundId}::execution_terminated`,
-  roundId,
+  promptRequestedEventId: 'round-1::execution_terminated',
 };
 const terminated = createExecutionTerminatedEvent({ execution_id: 'round-1::execution::1' });
 
@@ -109,12 +107,16 @@ describe('useResumeRoundMutation', () => {
       );
     });
 
-    let seen: Array<{ type: string }> = [];
+    let seen: Array<{ id: string; type: string }> = [];
     const back = conversationStreamService
       .getActiveStream$(conversationId)
       .subscribe((events) => (seen = events));
-    // The optimistic prompt_response plus the resume's execution_started.
-    expect(seen.map((event) => event.type)).toEqual(['prompt_response', 'execution_started']);
+    // The resume's execution_started plus the optimistic prompt_response, renamed to the saved id
+    // the execution_started announced in trigger_event_id.
+    expect(seen.map(({ id, type }) => ({ id, type }))).toEqual([
+      { id: 'round-1::execution::1::execution_started', type: 'execution_started' },
+      { id: 'round-1::prompt_response::1', type: 'prompt_response' },
+    ]);
     back.unsubscribe();
 
     act(() => {

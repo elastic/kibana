@@ -85,11 +85,9 @@ export const useConversationStream = () => {
     ({
       prompts,
       promptRequestedEventId,
-      roundId,
     }: {
       prompts: Record<string, PromptResponse>;
       promptRequestedEventId: string;
-      roundId: string;
     }) => {
       if (!conversationId) {
         throw new Error('Cannot resume without a conversation id');
@@ -104,7 +102,6 @@ export const useConversationStream = () => {
         connectorId,
         browserApiTools,
         promptRequestedEventId,
-        roundId,
       });
     },
     [mutateResumeRound, conversationId, agentId, connectorId, browserApiTools]

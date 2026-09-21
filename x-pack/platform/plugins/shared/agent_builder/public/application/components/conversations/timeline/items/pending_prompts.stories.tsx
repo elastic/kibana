@@ -13,12 +13,11 @@ import { PendingPrompts } from './pending_prompts';
 import { createConfirmationPrompt } from './execution_paused_event.factory';
 
 const promptRequestedEventId = 'round-1::execution_terminated';
-const roundId = 'round-1';
 
 const meta: Meta<typeof PendingPrompts> = {
   title: 'Conversations/Timeline/Pending Prompts',
   component: PendingPrompts,
-  args: { promptRequestedEventId, roundId },
+  args: { promptRequestedEventId },
   decorators: [
     (Story) => (
       <AgentBuilderStorybookProvider conversationId="story-conversation-1">

@@ -15,10 +15,8 @@ import {
   isExecutionTerminalEvent,
   EventActorType,
   TimelineEventType,
-  promptResponseEventId,
-  nextResumeIndexFromEvents,
 } from '@kbn/agent-builder-common';
-import type { Conversation, PromptResponseEvent } from '@kbn/agent-builder-common';
+import type { PromptResponseEvent } from '@kbn/agent-builder-common';
 import { tap } from 'rxjs';
 import type { PromptResponse } from '@kbn/agent-builder-common/agents';
 import { useKibana } from '../../hooks/use_kibana';
@@ -29,9 +27,10 @@ import { BrowserToolExecutor } from '../../services/browser_tool_executor';
 import { createConversationActions } from '../conversation/use_conversation_actions';
 import type { ConversationStreamService } from '../../../services/events';
 import { releaseLocalContent } from './release_local_content';
-import { mergeEventsById } from '../../components/conversations/timeline/merge_events';
-import { queryKeys } from '../../query_keys';
 import { isStreamCancelled, requestAbort, type StreamHandle } from './stream_handle';
+
+/** Placeholder id of the answer until `execution_started` reveals the saved one. */
+const PENDING_PROMPT_RESPONSE_ID = 'pending::prompt_response';
 
 export interface ResumeRoundVars {
   prompts: Record<string, PromptResponse>;
@@ -40,7 +39,6 @@ export interface ResumeRoundVars {
   connectorId?: string;
   browserApiTools?: Array<BrowserApiToolDefinition<any>>;
   promptRequestedEventId: string;
-  roundId: string;
 }
 
 export interface ResumeRoundMutationBindings {
@@ -91,18 +89,11 @@ export const useResumeRoundMutation = ({
       const handle: StreamHandle = { controller, executionId, abortRequested: false };
       controllersRef.current.set(vars.conversationId, handle);
 
-      // The optimistic answer takes the id the server will write, so the saved twin replaces it
-      // after the refetch. The index counts the round's stored executions, same as the server.
-      const cachedConversation = queryClient.getQueryData<Conversation>(
-        queryKeys.conversations.byId(vars.conversationId)
-      );
-      const liveEvents = conversationStreamService.getSnapshot(vars.conversationId);
-      const mergedEvents = mergeEventsById(cachedConversation?.events ?? [], liveEvents);
-      const executionIndex = nextResumeIndexFromEvents(mergedEvents, vars.roundId);
-      const predictedId = promptResponseEventId(vars.roundId, executionIndex);
-
+      // The optimistic answer starts under a placeholder id; `execution_started` renames it to the
+      // saved one (its `trigger_event_id`), so the saved twin replaces it after the refetch.
+      let optimisticId = PENDING_PROMPT_RESPONSE_ID;
       const optimisticResponse: PromptResponseEvent = {
-        id: predictedId,
+        id: optimisticId,
         type: TimelineEventType.promptResponse,
         created_at: new Date().toISOString(),
         actor: { type: EventActorType.user, id: 'optimistic' },
@@ -139,6 +130,16 @@ export const useResumeRoundMutation = ({
           tap((event) => {
             if (isExecutionStartedEvent(event)) {
               markStreamStarted(vars.conversationId);
+              // The resume's trigger is the saved prompt_response: rename the optimistic copy to
+              // that id so the saved twin replaces it, like the pending user message.
+              if (event.trigger_event_id && optimisticId === PENDING_PROMPT_RESPONSE_ID) {
+                conversationStreamService.clearPromptResponse(vars.conversationId, optimisticId);
+                optimisticId = event.trigger_event_id;
+                conversationStreamService.recordPromptResponse(vars.conversationId, {
+                  ...optimisticResponse,
+                  id: optimisticId,
+                });
+              }
             }
             if (isExecutionStartedEvent(event) || isExecutionTerminalEvent(event)) {
               streamEventArrived = true;
@@ -157,7 +158,7 @@ export const useResumeRoundMutation = ({
           isAborted: () => isStreamCancelled(handle),
         }).catch(() => {
           if (!streamEventArrived) {
-            conversationStreamService.clearPromptResponse(vars.conversationId, predictedId);
+            conversationStreamService.clearPromptResponse(vars.conversationId, optimisticId);
           }
         });
 
@@ -173,7 +174,7 @@ export const useResumeRoundMutation = ({
         });
       } catch (err) {
         if (!streamEventArrived) {
-          conversationStreamService.clearPromptResponse(vars.conversationId, predictedId);
+          conversationStreamService.clearPromptResponse(vars.conversationId, optimisticId);
         }
         throw err;
       } finally {

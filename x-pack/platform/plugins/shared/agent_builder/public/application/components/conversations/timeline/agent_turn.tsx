@@ -10,7 +10,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, useEuiTheme } from '@elas
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { AgentDefinition } from '@kbn/agent-builder-common';
-import { parseExecutionId } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { AgentAvatar } from '../../common/agent_avatar';
 import { RoundAuthorHeader } from '../conversation_rounds/round_author_header';
@@ -86,7 +85,6 @@ const renderContent = (
     return null;
   }
 
-  const roundId = item.executionId ? parseExecutionId(item.executionId)?.roundId : undefined;
   const promptRequestedEventId = item.terminal?.id;
 
   return (
@@ -102,11 +100,10 @@ const renderContent = (
           triggerAttachmentRefs={completed ? item.triggerAttachmentRefs : undefined}
         />
       )}
-      {isAwaiting && roundId && promptRequestedEventId && (
+      {isAwaiting && promptRequestedEventId && (
         <PendingPrompts
           prompts={item.pendingPrompts}
           promptRequestedEventId={promptRequestedEventId}
-          roundId={roundId}
         />
       )}
     </>

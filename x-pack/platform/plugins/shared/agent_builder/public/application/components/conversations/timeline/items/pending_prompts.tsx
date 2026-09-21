@@ -20,15 +20,12 @@ export interface PendingPromptsProps {
   prompts: PromptRequest[];
   /** The `execution_terminated` event the answer joins back to. */
   promptRequestedEventId: string;
-  /** The round the resume will be appended to. */
-  roundId: string;
 }
 
 /** Renders the prompts a paused run is waiting on, and resumes it once all of them are answered. */
 export const PendingPrompts: React.FC<PendingPromptsProps> = ({
   prompts,
   promptRequestedEventId,
-  roundId,
 }) => {
   const { resumeRound, isResuming } = useConversationStream();
   const [answers, setAnswers] = useState<Record<string, PromptResponse>>({});
@@ -45,11 +42,10 @@ export const PendingPrompts: React.FC<PendingPromptsProps> = ({
         resumeRound({
           prompts: nextAnswers,
           promptRequestedEventId,
-          roundId,
         });
       }
     },
-    [answers, prompts, promptRequestedEventId, roundId, resumeRound]
+    [answers, prompts, promptRequestedEventId, resumeRound]
   );
 
   return (
