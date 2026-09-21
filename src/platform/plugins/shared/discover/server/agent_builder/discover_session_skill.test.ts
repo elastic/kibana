@@ -18,6 +18,7 @@ describe('discoverSessionSkill', () => {
     expect(discoverSessionSkill.id).toBe(DISCOVER_SESSION_SKILL_ID);
     expect(discoverSessionSkill.name).toBe('discover-session');
     expect(discoverSessionSkill.basePath).toBe('skills/platform/discover');
+    expect(discoverSessionSkill.experimental).toBe(true);
   });
 
   it('is registered in the agent-builder built-in skills allowlist', () => {

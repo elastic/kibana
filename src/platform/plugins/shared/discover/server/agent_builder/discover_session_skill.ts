@@ -17,6 +17,7 @@ export const discoverSessionSkill = defineSkillType({
   id: DISCOVER_SESSION_SKILL_ID,
   name: 'discover-session',
   basePath: 'skills/platform/discover',
+  experimental: true,
   description:
     'Shows Elasticsearch documents and events as a live Discover table in chat. Use when the user wants to see rows, hits, or logs — not charts or aggregations.',
   content: `## When to Use This Skill
