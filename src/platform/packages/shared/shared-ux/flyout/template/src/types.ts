@@ -26,8 +26,7 @@ import type {
   FlyoutAccordionProps,
 } from '@kbn/flyout-sections';
 
-/** Selection state is derived from the root `selectedTabId`, so a tab entry cannot set it. */
-type TabBarOwnedProps = 'isSelected';
+type TabBarOwnedProps = 'aria-controls' | 'children' | 'id' | 'isSelected' | 'onClick';
 
 /**
  * Props for a single tab entry in the root `tabs` array. Everything besides `id` and `label`
