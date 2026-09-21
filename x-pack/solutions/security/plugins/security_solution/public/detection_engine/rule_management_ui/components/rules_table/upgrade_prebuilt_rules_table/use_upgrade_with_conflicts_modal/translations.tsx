@@ -8,8 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiLink } from '@elastic/eui';
-import { KbnWarningCallout } from '@kbn/ui-callout';
+import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { useKibana } from '../../../../../../common/lib/kibana';
 
 export const UPGRADE_CONFLICTS_MODAL_TITLE = i18n.translate(
@@ -178,26 +177,27 @@ export const RULES_WITH_AUTO_RESOLVED_CONFLICTS_GUIDANCE = ({
               }}
             />
           </li>
-          <KbnWarningCallout
+          <EuiCallOut
             title={ACCEPT_SOLVABLE_CONFLICTS_WARNING}
+            color="warning"
+            iconType="warning"
             data-test-subj="upgradeConflictsModalSolvableConflictsWarning"
-            text={
-              numOfRulesWithRuleTypeChange > 0 ? (
-                <p data-test-subj="upgradeConflictsModalRuleTypeChangeWarning">
-                  <FormattedMessage
-                    id="xpack.securitySolution.detectionEngine.upgradeConflictsModal.rulesWithRuleTypeChangeWarning"
-                    defaultMessage="Auto-resolved conflicts include a rule type change for {numOfRulesWithRuleTypeChangeStrong} unmodified {numOfRulesWithRuleTypeChange, plural, =1 {rule} other {rules}}. A rule type change can affect how the rule’s actions and exceptions are executed."
-                    values={{
-                      numOfRulesWithRuleTypeChange,
-                      numOfRulesWithRuleTypeChangeStrong: (
-                        <strong>{numOfRulesWithRuleTypeChange}</strong>
-                      ),
-                    }}
-                  />
-                </p>
-              ) : undefined
-            }
-          />
+          >
+            {numOfRulesWithRuleTypeChange > 0 && (
+              <p data-test-subj="upgradeConflictsModalRuleTypeChangeWarning">
+                <FormattedMessage
+                  id="xpack.securitySolution.detectionEngine.upgradeConflictsModal.rulesWithRuleTypeChangeWarning"
+                  defaultMessage="Auto-resolved conflicts include a rule type change for {numOfRulesWithRuleTypeChangeStrong} unmodified {numOfRulesWithRuleTypeChange, plural, =1 {rule} other {rules}}. A rule type change can affect how the rule’s actions and exceptions are executed."
+                  values={{
+                    numOfRulesWithRuleTypeChange,
+                    numOfRulesWithRuleTypeChangeStrong: (
+                      <strong>{numOfRulesWithRuleTypeChange}</strong>
+                    ),
+                  }}
+                />
+              </p>
+            )}
+          </EuiCallOut>
         </ul>
       </div>
       <br />
