@@ -42,13 +42,7 @@ export interface AgenticInvestigationsStartDependencies {
  */
 export interface AgenticInvestigationsPluginStart {
   getProposalsService: () => ProposalsService;
-  /**
-   * Exposed so an in-process caller that never arrives through a route or a
-   * workflow step — an Agent Builder tool handler — can still enforce the
-   * same write/read gate the HTTP API declares. See `proposals.revise`'s tool
-   * (elastic/security-team#19289): it calls `ProposalsService.revise()`
-   * directly, so it must check `assertCanManage` itself first.
-   */
+  /** For in-process callers (Agent Builder tools) that bypass the route's `security.authz`. */
   getProposalPrivileges: () => ProposalPrivilegesChecker;
 }
 

@@ -160,12 +160,7 @@ export class AgenticInvestigationsPlugin
     return this.proposalsService;
   }
 
-  /**
-   * Built once, at setup — `createProposalPrivilegesChecker` resolves security
-   * lazily via `coreSetup.getStartServices()` on every call, so it works
-   * before `start()` runs (step registration needs it during setup) without
-   * capturing a stale reference.
-   */
+  // Resolves security lazily per call, so step registration can use it during setup.
   private getProposalPrivilegesChecker(
     coreSetup: CoreSetup<AgenticInvestigationsStartDependencies>
   ): ProposalPrivilegesChecker {

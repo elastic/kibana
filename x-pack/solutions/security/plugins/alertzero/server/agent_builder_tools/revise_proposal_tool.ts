@@ -43,23 +43,12 @@ const reviseProposalSchema = z.object({
 });
 
 /**
- * `security.alertzero.proposals.revise` — lets an agent replace a pending
- * proposal with a modified copy per an analyst's request, per
- * https://github.com/elastic/security-team/issues/19289.
+ * Replaces a pending proposal with a modified copy at an analyst's request.
+ * A revision-chain append, distinct from the service's `clone()` retry.
  *
- * This is a revision-chain append, NOT the same mechanism as the service's
- * `clone()` (an action-failure retry triggered by the workflow itself, not an
- * analyst). The two coexist deliberately — see the PR description.
- *
- * Never resumes the original's `waitForApproval` gate — that execution is
- * left waiting on its own step-level `timeout`, not on this proposal's
- * `expiresAt` (see `hasHitlWaitExpired` in the workflows execution engine).
- * It will time out and fail on the engine's own clock regardless of whether
- * this proposal is ever revised. The privilege check is done
- * here, not inside `ProposalsService.revise()`, because this tool bypasses
- * both the HTTP route (which declares it via `security.authz`) and the
- * workflow step wrapper (which calls `privileges.assertCanManage` itself) —
- * a direct in-process call is the one path with no other enforcement point.
+ * Never resumes the original's `waitForApproval` gate: that execution times
+ * out on its own step-level clock. Privileges are checked here because a
+ * direct in-process call bypasses both the route and the step wrapper.
  */
 export const reviseProposalTool = (
   getAgenticInvestigations: () => AgenticInvestigationsPluginStart
@@ -84,11 +73,8 @@ export const reviseProposalTool = (
 
       const service = agenticInvestigations.getProposalsService();
 
-      // Any id in the chain is accepted, as the schema promises: `revise()`
-      // refuses a superseded predecessor, so the live head has to be resolved
-      // here first. Without this, a follow-up revision addressed to the
-      // original — the id the model was given when the proposal was created —
-      // would fail after the first revision.
+      // The schema accepts any id in the chain, but `revise()` refuses a
+      // superseded one, so a model holding the original id needs the head.
       const { proposalId: liveProposalId } = await service.getLatestRevision(proposalId, spaceId);
 
       const { proposalId: newProposalId, revision } = await service.revise(
@@ -100,10 +86,7 @@ export const reviseProposalTool = (
         results: [
           {
             type: ToolResultType.other,
-            // `status` is part of the documented tool output contract
-            // (elastic/security-team#19289) — a revision is always created
-            // pending — and `supersedes` names the revision this one replaced,
-            // which is the live head rather than whatever id was passed in.
+            // `supersedes` names the resolved head, not the id that was passed in.
             data: {
               proposalId: newProposalId,
               revision,

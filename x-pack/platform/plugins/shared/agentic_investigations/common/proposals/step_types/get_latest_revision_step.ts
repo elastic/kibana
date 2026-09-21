@@ -33,12 +33,9 @@ export const getLatestRevisionStepOutputSchema = z.object({
 });
 
 /**
- * Resolves the live revision of a chain, per
- * https://github.com/elastic/security-team/issues/19289. The gate workflow's
- * loop carries a proposal id in a variable that a revision inserted while the
- * gate is parked invalidates; resolving through this step before writing a
- * decision keeps the write from landing on a stale, already-superseded
- * pointer.
+ * Resolves the live revision of a chain. The gate workflow's loop carries a
+ * proposal id that a revision inserted while the gate is parked invalidates,
+ * so decisions resolve through this step rather than writing to a stale id.
  */
 export const getLatestRevisionStepCommonDefinition: BaseStepDefinition<
   typeof getLatestRevisionStepInputSchema,

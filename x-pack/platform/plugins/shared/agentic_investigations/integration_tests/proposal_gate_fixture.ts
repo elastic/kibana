@@ -52,9 +52,8 @@ const createInMemoryStorage = () => {
 
   type Clause = Record<string, any>;
 
-  /** Evaluates the handful of clause shapes the service's queries actually use
-   *  against one document — enough for `load`, `getLatestRevision`, and any
-   *  future query built the same way, not a general ES query engine. */
+  /** Evaluates only the clause shapes the service's queries use, against one
+   *  document — enough for `load` and `getLatestRevision`, not a query engine. */
   const matchesClause = (id: string, document: ProposalDocument, clause: Clause): boolean => {
     if (clause.ids) {
       return (clause.ids.values as string[]).includes(id);
@@ -123,10 +122,7 @@ export interface ProposalGateFixture {
   start: (inputs?: Record<string, unknown>) => Promise<void>;
   /** Answers the parked gate as a human would through a resume surface. */
   resume: (approved: boolean, respondedBy?: string) => Promise<void>;
-  /**
-   * Revises the current live proposal through the real `ProposalsService`,
-   * while the gate is still parked on the predecessor.
-   */
+  /** Revises the live proposal through the real service while the gate is parked. */
   revise: (overrides: { comment?: string; actionInput?: Record<string, unknown> }) => Promise<void>;
   /**
    * Wakes the parked gate past its deadline with no answer, which is what the
@@ -217,11 +213,9 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
       await engine.resumeWorkflow();
     },
     /**
-     * Revises the current live proposal through the real service, the same
-     * path the `revise_proposal_tool`/HTTP route take — not a direct storage
-     * write. Lets a test park a gate, revise the proposal under it, then
-     * resume, and check the revision (not the trigger's original input) is
-     * what actually reaches `execute_action`.
+     * Goes through the real service, the same path the tool and HTTP route take,
+     * so a test can park a gate, revise under it, resume, and assert the revision
+     * rather than the trigger's original input reaches `execute_action`.
      */
     revise: async (overrides: { comment?: string; actionInput?: Record<string, unknown> }) => {
       const [live] = proposals().filter((proposal) => proposal.supersededBy === undefined);

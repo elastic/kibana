@@ -169,8 +169,7 @@ export class ProposalsService {
       createdAt: new Date().toISOString(),
       createdBy: user,
       // A fresh proposal is a single-member revision chain rooted at itself.
-      // `revise()` extends this chain later; `clone()`'s retries deliberately
-      // do NOT touch it, because a retry is not a revision.
+      // `clone()` retries deliberately do not touch it: a retry is not a revision.
       rootProposalId: id,
       revision: 1,
     };
@@ -319,16 +318,8 @@ export class ProposalsService {
     let expiriesResponse;
     try {
       [anchorResponse, opensResponse, closesResponse, expiriesResponse] = await Promise.all([
-        // `AND supersededBy IS NULL` in all four: a superseded proposal is
-        // represented by its successor, and counting both would make every
-        // revision double-count in the open line. Nothing else drops the
-        // predecessor — being revised is not a decision, so it carries no
-        // `decidedAt`, and its `expiresAt` is inherited unchanged.
-        //
-        // `COALESCE(category, …)` in every query: a proposal with no action has no
-        // category, and a bare `BY category` would drop it from the aggregation —
-        // and, under `drop_null_columns`, drop the column outright when no row has
-        // one, zeroing the whole chart.
+        // `AND supersededBy IS NULL` in all four: a superseded proposal is represented
+        // by its successor, so counting both would double-count every revision.
         this.deps.storage.esql({
           pipeline: esql`WHERE spaceId == ${{ spaceId }}
           AND supersededBy IS NULL
@@ -543,11 +534,8 @@ export class ProposalsService {
     const { id } = params;
     const { proposal, seqNo, primaryTerm } = await this.load(id, spaceId);
 
-    // `superseded` is in this vocabulary because the undecided status pair
-    // admits it, but it is only ever correct alongside the successor that
-    // replaced the row — which only `revise()` establishes. Allowed through, a
-    // direct caller could write a terminal record that the latest-revision
-    // query still counts as live, breaking the chain's single-head invariant.
+    // The status vocabulary admits `superseded`, but it is only correct alongside
+    // the successor that replaced the row, which only `revise()` establishes.
     if (params.status === 'superseded') {
       throw new ProposalConflictError(
         `Proposal [${id}] cannot be moved to superseded: only revise() establishes that ` +
@@ -683,16 +671,12 @@ export class ProposalsService {
   }
 
   /**
-   * Appends a new revision carrying the caller's overrides and retires the
-   * addressed one, per https://github.com/elastic/security-team/issues/19289.
+   * Appends a revision carrying the caller's overrides and retires the addressed
+   * proposal.
    *
-   * `createdAt`, `expiresAt` and `workflowExecutionId` are inherited rather
-   * than restarted — the deadline and the gate execution both belong to the
-   * chain, not to any single revision. This mirrors `clone()`'s inheritance
-   * of the same three fields for the same reason: the deadline belongs to
-   * the analyst, not the attempt, and resetting it on revision would let a
-   * near-expired proposal be extended indefinitely (issue #19289,
-   * "Previously open, now decided").
+   * `createdAt`, `expiresAt` and `workflowExecutionId` are inherited rather than
+   * restarted — the deadline and the gate execution belong to the chain, not to
+   * any single revision — mirroring `clone()`'s inheritance of the same fields.
    */
   async revise(
     { id, comment, actionInput, impact, confidence }: ReviseProposalParams,
@@ -700,10 +684,8 @@ export class ProposalsService {
   ): Promise<{ proposalId: string; revision: number }> {
     const { proposal, seqNo, primaryTerm } = await this.load(id, spaceId);
 
-    // Only the live revision may be revised. A revision that already has a
-    // decision, is not `pending`, or was already superseded is not the head
-    // of the chain, and revising it would fork the chain in the same way two
-    // concurrent revisions from the same predecessor would.
+    // Only the live revision may be revised: anything decided, settled or already
+    // superseded is not the head, and revising it would fork the chain.
     if (proposal.decision !== undefined) {
       throw new ProposalConflictError(
         `Proposal [${id}] was already decided as ${proposal.decision} and cannot be revised`
@@ -721,24 +703,17 @@ export class ProposalsService {
         `Proposal [${id}] was already superseded by ${proposal.supersededBy}`
       );
     }
-    // Mirrors the check in `assertDecidable`, for the same lag: a deadline can
-    // pass before the workflow settles the record to `expired`, during which
-    // it still reads `pending`. `createdAt`/`expiresAt` are inherited
-    // unchanged by design (issue #19289 — the deadline belongs to the
-    // analyst, not the attempt), so a revision created in that window would
-    // be born already past a deadline it can never be decided against.
+    // Mirrors `assertDecidable`, for the same lag: a deadline can pass before the
+    // workflow settles the record, so a revision cut here would be born expired.
     if (isExpired(proposal)) {
       throw new ProposalExpiredError(id);
     }
 
     const { id: _id, ...original } = proposal;
 
-    // An override is merged over the predecessor's input rather than replacing
-    // it, and the merged object is the one validated: the action's contract
-    // describes the whole input, so a caller changing a single key would
-    // otherwise silently drop every other required one — and an unvalidated
-    // revision would put an input the action cannot accept in front of an
-    // analyst, failing only after they approve it.
+    // The override is merged over the predecessor's input and the merged object is
+    // what gets validated: the action's contract describes the whole input, so
+    // changing one key must not silently drop the other required ones.
     const mergedActionInput =
       actionInput === undefined
         ? original.actionInput
@@ -754,12 +729,8 @@ export class ProposalsService {
 
     const revisionId = uuidv4();
     const rootProposalId = original.rootProposalId ?? id;
-    // `?? 1` covers proposals created before this field existed: absent in
-    // storage reads as revision 1, the same value the root schema default
-    // gives a freshly created proposal. Bound to its own `number` local so it
-    // does not get widened back to `number | undefined` once spread into
-    // `document` below — `ProposalDocument['revision']` is optional for that
-    // pre-existing-record case, but this call site always produces one.
+    // `?? 1` covers records created before this field existed. Bound to a `number`
+    // local so the spread below does not widen it back to `number | undefined`.
     const revision: number = (original.revision ?? 1) + 1;
 
     const document: ProposalDocument = {

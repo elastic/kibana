@@ -33,13 +33,7 @@ export const proposalStatusSchema = z.enum([
   'failed',
   'expired',
   'no_action',
-  /**
-   * A revision chain's non-live proposal: replaced by an analyst-requested
-   * revision (`ProposalsService.revise`), never a human rejection. Kept
-   * distinct from `dismissed`/`no_action` for exactly that reason — being
-   * revised says nothing about whether the original was a good proposal.
-   * Terminal: see `isTerminal` in `proposals_service.ts`.
-   */
+  /** Replaced by a revision, not rejected — distinct from `dismissed`/`no_action`. */
   'superseded',
 ]);
 export type ProposalStatus = z.infer<typeof proposalStatusSchema>;
@@ -139,26 +133,11 @@ export const proposalSchema = z.object({
    * show one live proposal per subject rather than every attempt.
    */
   supersededBy: z.string().max(MAX_ID_LENGTH).optional(),
-  /**
-   * The first proposal in this revision chain. Equal to `id` on the root
-   * itself, and unchanged by every revision after it — a revision never starts
-   * a new chain, it only extends the one it was cut from. Present on every
-   * proposal `ProposalsService.create` writes (a fresh proposal is a
-   * single-member chain rooted at itself); a `clone()`-created retry inherits
-   * the original's, same as it inherits `createdAt`.
-   */
+  /** First proposal in the chain; equal to `id` on the root and never rewritten. */
   rootProposalId: z.string().max(MAX_ID_LENGTH).optional(),
-  /**
-   * The specific proposal this one revises, i.e. the previous link in the
-   * chain. Absent on the root. Distinct from `rootProposalId`: `supersedes`
-   * is always exactly one hop back, `rootProposalId` is always the first hop.
-   */
+  /** Exactly one hop back, where `rootProposalId` is the first hop. Absent on the root. */
   supersedes: z.string().max(MAX_ID_LENGTH).optional(),
-  /**
-   * 1-based position in the revision chain. The root is `1`; each
-   * `ProposalsService.revise` call increments it by one from whatever it
-   * revised. Not reset by `clone()` — a retry is not a revision.
-   */
+  /** 1-based position in the chain. Not incremented by `clone()`: a retry is not a revision. */
   revision: z.number().int().min(1).optional(),
   /** Snapshotted from the triggering context at creation; never re-scored. */
   impact: proposalImpactSchema,

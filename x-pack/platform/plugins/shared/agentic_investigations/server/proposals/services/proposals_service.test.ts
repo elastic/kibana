@@ -1440,9 +1440,8 @@ describe('ProposalsService', () => {
         .mockResolvedValueOnce({ _id: 'revision-1' })
         .mockRejectedValueOnce(new Error('connection reset'));
 
-      // A non-conflict failure does not prove the predecessor write did not
-      // land, so deleting the revision could orphan the predecessor's pointer
-      // instead — the ambiguous case keeps both rows.
+      // A non-conflict failure does not prove the predecessor write did not land,
+      // so the ambiguous case keeps both rows rather than risk orphaning it.
       await expect(service.revise({ id: 'proposal-1' }, SPACE_ID)).rejects.toThrow(
         'connection reset'
       );
@@ -1467,9 +1466,8 @@ describe('ProposalsService', () => {
     });
 
     it('resolves to the current live revision when asked about an older, superseded one', async () => {
-      // The document keyed by the id in storage.search's hit determines the
-      // "live" answer, independent of which id in the chain was asked about —
-      // this is what makes the query O(1) instead of a supersededBy walk.
+      // The hit's document determines the "live" answer regardless of which id in
+      // the chain was asked about — this is what makes the query O(1).
       const rootDocument = baseDocument({
         rootProposalId: 'proposal-1',
         supersededBy: 'proposal-2',
@@ -1479,18 +1477,14 @@ describe('ProposalsService', () => {
         supersedes: 'proposal-1',
         revision: 2,
         status: 'pending',
-        // Deliberately different from the root's: a caller that resolves the
-        // head in order to execute the action has to run these parameters, and
-        // returning the asked-about row's input would run the ones the analyst
-        // revised away.
+        // Deliberately different from the root's: a caller resolving the head has to
+        // run these parameters, not the ones the analyst revised away.
         actionInput: { name: 'Revised PowerShell' },
       });
       const storage = createStorage(rootDocument);
-      // Dispatch on the query, not on call order, so the asked-about row and
-      // the chain's head are genuinely different documents here: `load` reads
-      // the superseded root by id while the root-term query answers with the
-      // live head. Answering both with the head would let a read of the wrong
-      // document pass unnoticed.
+      // Dispatch on the query, not call order, so the asked-about row and the head
+      // are genuinely different documents: answering both with the head would let a
+      // read of the wrong document pass unnoticed.
       storage.search.mockImplementation(async (request: { query?: unknown }) => {
         const filter =
           (
@@ -1570,13 +1564,9 @@ describe('ProposalsService', () => {
         actionInput: { name: 'Revised PowerShell' },
       });
       const storage = createStorage(legacyRoot);
-      // Dispatch on the query, not on call order. The chain query filters on
-      // `rootProposalId`, which a legacy row does not carry, so it answers
-      // empty — the answer Elasticsearch gives. Both `load` reads go by id,
-      // and answering either of them in the chain query's place would let this
-      // test pass without the pointer walk ever running.
-      // The request is a union of every query container, so the shape is
-      // narrowed once here rather than asserted at each call site.
+      // Dispatch on the query, not call order. A legacy row carries no
+      // `rootProposalId`, so the chain query answers empty and the pointer walk is
+      // forced; answering it elsewhere would pass without the walk ever running.
       interface QueryClause {
         term?: Record<string, unknown>;
         ids?: { values: string[] };

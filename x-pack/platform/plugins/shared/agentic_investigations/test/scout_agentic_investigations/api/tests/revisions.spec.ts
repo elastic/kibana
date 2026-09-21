@@ -22,8 +22,8 @@ import {
 apiTest.describe(
   'POST /internal/investigations/proposals/{proposalId}/revisions',
   // `agenticInvestigations.enabled` defaults to false and is turned on only by
-  // this suite's local custom server config, so the cloud half of
-  // `stateful.classic` would exercise an unregistered route and still pass.
+  // this suite's local config, so the cloud half of `stateful.classic` would
+  // exercise an unregistered route and still pass.
   { tag: ['@local-stateful-classic'] },
   () => {
     // Every seed and every revision this file creates is removed again, so a
@@ -48,9 +48,8 @@ apiTest.describe(
           impact: 'high',
           confidence: 'high',
         });
-        // Tracked before the assertions: this service writes the child before
-        // updating its predecessor and keeps it on an ambiguous failure, so an
-        // id can exist even when the request did not return 200.
+        // Tracked before the assertions: the child is written before its predecessor
+        // is updated and kept on an ambiguous failure, so the id can exist on non-200.
         trackProposal(reviseResponse.body?.proposalId);
         expect(reviseResponse).toHaveStatusCode(200);
         const { proposalId: newProposalId, revision } = reviseResponse.body;
@@ -80,10 +79,9 @@ apiTest.describe(
         expect(originalResponse.body.status).toBe('superseded');
         expect(originalResponse.body.supersededBy).toBe(newProposalId);
 
-        // Deliberately NOT asserted: workflow resumption. Per elastic/security-team#19289,
-        // revising must not release the parked `waitForApproval` gate — there is no
-        // workflow side effect to observe here; that omission is covered by unit tests
-        // on `ProposalsService.revise()` rather than this end-to-end path.
+        // Deliberately NOT asserted: workflow resumption. Revising must not release
+        // the parked gate, and there is no observable side effect here — that is
+        // covered by unit tests on `ProposalsService.revise()`.
       }
     );
 
@@ -128,10 +126,9 @@ apiTest.describe(
       'returns 409 when the proposal is no longer pending',
       async ({ apiClient, esClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser(PROPOSALS_MANAGE_ROLE);
-        // Seeded directly as settled: there is no real workflow execution
-        // behind this proposal for the dismiss/approve routes to resume, so
-        // going through them here would 409 on the resume itself rather than
-        // exercising what this test actually checks.
+        // Seeded settled: with no real workflow execution behind it, the
+        // dismiss/approve routes would 409 on the resume rather than on what is
+        // being tested here.
         const { id } = await seedProposal(esClient, { status: 'no_action' });
 
         const response = await reviseProposal(apiClient, cookieHeader, id, { comment: 'too late' });
@@ -198,9 +195,8 @@ apiTest.describe(
     apiTest(
       'does not revise a proposal from another space',
       async ({ apiClient, esClient, kbnClient, samlAuth }) => {
-        // Unique per run. Fixed ids collide with the Spaces an interrupted run
-        // left behind, and the create below then fails with a duplicate before
-        // a single assertion has run.
+        // Unique per run: fixed ids collide with Spaces an interrupted run left
+        // behind, failing the create before a single assertion runs.
         const SPACE_A = `agentic-investigations-a-${randomUUID()}`;
         const SPACE_B = `agentic-investigations-b-${randomUUID()}`;
         const created: string[] = [];

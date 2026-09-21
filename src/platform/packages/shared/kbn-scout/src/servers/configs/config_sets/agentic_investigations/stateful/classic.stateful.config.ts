@@ -10,11 +10,9 @@
 import type { ScoutServerConfig } from '../../../../../types';
 import { defaultConfig } from '../../default/stateful/base.config';
 
-// The plugin is disabled by default (xpack.agenticInvestigations.enabled),
-// so its API tests run against a config set that turns it on (same pattern
-// as `nightshift_investigations`). Nothing else is overridden: the default
-// config already carries every port-bearing argument, and re-deriving them
-// here would silently drop any the default config gains later.
+// The plugin is disabled by default, so its API tests need a config set that
+// turns it on (same pattern as `nightshift_investigations`). Nothing else is
+// overridden: re-deriving the default config's args would drop later additions.
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
   kbnTestServer: {

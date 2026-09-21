@@ -15,18 +15,10 @@ import {
 } from './proposal';
 
 /**
- * Fields an analyst may override when revising a proposal. Deliberately
- * excludes `actionWorkflowId`: swapping the action wholesale is a new
- * proposal, not a revision of this one, because the original `actionInput`
- * was validated against the original action's schema and would silently
- * become meaningless.
- *
- * `expiresAt` and `createdAt` are also excluded, both inherited unchanged
- * from the proposal being revised rather than tunable — see
- * `ProposalsService.revise`. The deadline belongs to the analyst, not the
- * attempt: resetting it on revision would let a near-expired proposal be
- * extended indefinitely by repeated revisions (issue #19289, "Previously
- * open, now decided").
+ * Fields an analyst may override when revising. Excludes `actionWorkflowId`
+ * (the existing `actionInput` was validated against the original action's
+ * schema) and `expiresAt`/`createdAt`, so repeated revisions cannot extend a
+ * near-expired proposal indefinitely.
  */
 export const reviseProposalRequestSchema = z.object({
   /** Updated rationale, rendered as markdown. */
@@ -37,11 +29,7 @@ export const reviseProposalRequestSchema = z.object({
 });
 export type ReviseProposalRequest = z.infer<typeof reviseProposalRequestSchema>;
 
-/**
- * Matches the Agent Builder tool's output contract from
- * elastic/security-team#19289 ("proposalId, revision, status") — the route
- * response carries the same three fields.
- */
+/** Shared by the route response and the Agent Builder tool's output contract. */
 export const reviseProposalResponseSchema = z.object({
   proposalId: z.string(),
   revision: z.number().int().min(1),

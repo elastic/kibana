@@ -24,21 +24,13 @@ export const spaceUrl = (url: string, spaceId: string): string =>
   spaceId && spaceId !== 'default' ? `/s/${spaceId}/${url}` : `/${url}`;
 
 /**
- * Guards against the same race every seed in this suite would otherwise hit:
- * an `esClient.index()`/`update()` call against an alias that does not exist
- * yet either auto-creates a *plain* index with that literal name (colliding
- * with the alias the plugin's own `StorageIndexAdapter` tries to create on
- * its first real write — `invalid_alias_name_exception`) or, if it does hit
- * the adapter first, writes with no explicit mapping at all under
- * `dynamic: 'strict'`'s absence. Installing the same index template the
- * adapter installs (see `proposals_storage.ts` for the mapping this mirrors)
- * before any write sidesteps both: idempotent (`create: false`), and later
- * calls from the plugin itself just find it already there and no-op.
+ * Installs the same index template the plugin's `StorageIndexAdapter` does
+ * (mapping mirrors `proposals_storage.ts`). Without it, seeding against a
+ * not-yet-created alias auto-creates a plain index of that name, which then
+ * collides with the adapter's alias (`invalid_alias_name_exception`).
  *
- * Whatever this suite installs it also removes again (see
- * `cleanupProposalFixtures`): `create: false` overwrites an application-owned
- * template rather than making an isolated test resource, so leaving it behind
- * would leak into every later suite sharing this stack.
+ * Removed again by `cleanupProposalFixtures`: `create: false` overwrites an
+ * application-owned template, so leaving it behind leaks into later suites.
  */
 let indexReady: Promise<void> | undefined;
 let templateExistedBeforeSuite = false;
@@ -126,11 +118,8 @@ const ensureProposalsIndex = (esClient: Client): Promise<void> => {
               body?: { error?: { type?: string } };
               meta?: { statusCode?: number; body?: { error?: { type?: string } } };
             }) => {
-              // Only the concurrent-create race is benign. Every other 400 here
-              // means the write target is not what this seed assumes —
-              // `invalid_alias_name_exception` above all, which is the exact
-              // failure this helper exists to prevent — and carrying on would
-              // run the suite against a stale plain index instead of the alias.
+              // Only the concurrent-create race is benign; any other 400 means the
+              // write target is not the alias this seed assumes.
               const type = error?.body?.error?.type ?? error?.meta?.body?.error?.type;
               // Read the status from both locations for the same reason
               // `isNotFound` below does: the client surfaces it at `meta.statusCode`
@@ -150,10 +139,8 @@ const ensureProposalsIndex = (esClient: Client): Promise<void> => {
 };
 
 /**
- * Ids this suite is responsible for: the seeded roots plus every revision the
- * routes created for them. `revise()` mints ids server-side, so a caller that
- * revises has to hand the returned id back through `trackProposal` or the
- * document outlives the run.
+ * Seeded roots plus every revision the routes minted from them: `revise()`
+ * creates ids server-side, so callers must hand them back via `trackProposal`.
  */
 const trackedProposalIds = new Set<string>();
 
@@ -234,15 +221,10 @@ export const seedProposal = async (
   const confidence = options.confidence ?? 'medium';
   const now = new Date().toISOString();
 
-  // There is no create-via-HTTP route on purpose (see `register_routes.ts`):
-  // a proposal's decision is written behind its gate, so one created
-  // without a gate execution could never be decided — only the workflow's
-  // `proposals.createProposal` step, which knows the execution id to stamp,
-  // is allowed to make one. A Scout suite has no workflow execution to
-  // drive, so it seeds the one thing an HTTP-only test double genuinely
-  // cannot get any other way: a document shaped exactly like `create()`
-  // would write, indexed directly through the same alias the storage
-  // adapter reads and writes (`.kibana-investigation-proposals`).
+  // There is no create-via-HTTP route on purpose: only the workflow's
+  // `proposals.createProposal` step, which knows the execution id to stamp, may
+  // make one. With no workflow to drive, this seeds a document shaped exactly
+  // like `create()` writes, through the same alias the storage adapter uses.
   const response = await esClient.index({
     index: PROPOSALS_INDEX_ALIAS,
     document: {

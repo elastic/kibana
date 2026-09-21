@@ -15,15 +15,9 @@ import { handleRouteError } from './handle_route_error';
 import { INTERNAL_ACCESS, reviseProposalParamsSchema } from './shared';
 
 /**
- * Named as sub-resource creation ("POST .../revisions") rather than a verb,
- * because the result is a new resource and because "tune" collides with rule
- * tuning terminology elsewhere in the codebase. See
- * https://github.com/elastic/security-team/issues/19289.
- *
- * Unlike approve/dismiss this route DOES write: it is the only way to append
- * a revision, and there is no gate to defer to for that write — the gate
- * belongs to the chain, not to any single revision, and stays parked
- * regardless of how many revisions are appended while it waits.
+ * Sub-resource creation rather than a verb: the result is a new proposal.
+ * Unlike approve/dismiss this route writes directly — the gate belongs to the
+ * chain, so it stays parked however many revisions are appended under it.
  */
 export const registerReviseProposalRoute = ({
   router,

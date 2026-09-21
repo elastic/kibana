@@ -11,11 +11,9 @@ import { FakeConnectors } from '../mocks/actions_plugin_mock';
 import { WorkflowRunFixture } from '../workflow_run_fixture';
 
 // The revision-settle path relies on this: wrapping an `if` step in
-// `on-failure.retry` re-runs the block's *children* on each attempt, so a
-// resolve step placed inside the block re-executes before the write that
-// depends on it. If the engine ever retried only the leaf, this ordering
-// (resolve -> write, both inside the retried scope) would silently stop
-// re-resolving and a conflict would leave the stale id in place.
+// `on-failure.retry` re-runs the block's children, so the resolve step inside
+// re-executes before the write that depends on it. If the engine retried only
+// the leaf, a conflict would leave the stale id in place.
 describe('retry of a flow-control step re-runs its children', () => {
   let workflowRunFixture: WorkflowRunFixture;
   beforeAll(() => {
