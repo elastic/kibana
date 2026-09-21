@@ -135,8 +135,10 @@ steps:
         conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
         trigger_mode: "never"
         input: >-
-          🤖 **Alert Triage** — Triage started for rule "{{ event.rule.name }}".
-          Analysing {{ event.alerts | size }} alert(s).
+          🤖 **Alert Triage** — Triage started for rule "{{ event.rule.name }}"
+          ({{ event.alerts | size }} alert(s)).
+          Model routed via Model Management feature `alertzero_alert_triage`.
+          Alerts: {% for a in event.alerts limit: 10 %}`{{ a._id }}`{% unless forloop.last %}, {% endunless %}{% endfor %}{% if event.alerts.size > 10 %} and {{ event.alerts.size | minus: 10 }} more{% endif %}.
           Execution: {{ execution.url }}
 
   # ---------------------------------------------------------------------------
@@ -226,6 +228,8 @@ steps:
           {{ steps.classify_alerts.output.false_positive_count }} false positive,
           {{ steps.classify_alerts.output.inconclusive_count }} inconclusive.
           {{ steps.classify_alerts.output.grouped_counts_summary }}
+          {{ steps.classify_alerts.output.generated_summary }}
+          {% if steps.classify_alerts.output.connector_id != '' %}Connector: {{ steps.classify_alerts.output.connector_id }}. Agent: {{ steps.classify_alerts.output.agent_id }}.{% endif %}
 
   # ---------------------------------------------------------------------------
   # 5. Apply static AZ classification tags to every analysed alert (R5).

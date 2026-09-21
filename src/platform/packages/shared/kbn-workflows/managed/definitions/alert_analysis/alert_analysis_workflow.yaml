@@ -143,6 +143,8 @@ outputs:
       type: string
     connector_id:
       type: string
+    agent_id:
+      type: string
     impacted_entities:
       type: array
       items:
@@ -1752,5 +1754,7 @@ steps:
       generated_summary: "{{ variables.generated_summary }}"
       # Connector ID used by the first successful batch call, for Worker attribution.
       connector_id: "{{ variables.resolved_connector_id }}"
+      # Agent / model id resolved at run time, passed through for Worker attribution.
+      agent_id: "{{ variables.agent_id }}"
       # Structured entity × verdict array for the security.impact attachment.
       impacted_entities: "${{ variables.impacted_entities }}"
