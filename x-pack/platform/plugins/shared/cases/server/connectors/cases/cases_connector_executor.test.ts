@@ -2322,6 +2322,78 @@ fields: []
               extractObservables: false,
             });
           });
+
+          it('per-rule extractObservables override wins over space config default', async () => {
+            mockCaseNotFound();
+            casesClientMock.configure.get = jest.fn().mockResolvedValue([
+              {
+                owner: SECURITY_SOLUTION_OWNER,
+                customFields: [],
+                templates: [],
+                extractObservables: true,
+              },
+            ]);
+
+            await connectorExecutor.execute({
+              ...params,
+              owner: SECURITY_SOLUTION_OWNER,
+              templateId: null,
+              extractObservables: false,
+            });
+
+            expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
+              syncAlerts: true,
+              extractObservables: false,
+            });
+          });
+
+          it('per-rule extractObservables: true overrides space config false', async () => {
+            mockCaseNotFound();
+            casesClientMock.configure.get = jest.fn().mockResolvedValue([
+              {
+                owner: SECURITY_SOLUTION_OWNER,
+                customFields: [],
+                templates: [],
+                extractObservables: false,
+              },
+            ]);
+
+            await connectorExecutor.execute({
+              ...params,
+              owner: SECURITY_SOLUTION_OWNER,
+              templateId: null,
+              extractObservables: true,
+            });
+
+            expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
+              syncAlerts: true,
+              extractObservables: true,
+            });
+          });
+
+          it('per-rule extractObservables: null inherits space config', async () => {
+            mockCaseNotFound();
+            casesClientMock.configure.get = jest.fn().mockResolvedValue([
+              {
+                owner: SECURITY_SOLUTION_OWNER,
+                customFields: [],
+                templates: [],
+                extractObservables: true,
+              },
+            ]);
+
+            await connectorExecutor.execute({
+              ...params,
+              owner: SECURITY_SOLUTION_OWNER,
+              templateId: null,
+              extractObservables: null,
+            });
+
+            expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
+              syncAlerts: true,
+              extractObservables: true,
+            });
+          });
         });
 
         describe('Custom Fields', () => {

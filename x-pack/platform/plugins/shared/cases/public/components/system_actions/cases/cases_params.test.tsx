@@ -575,6 +575,57 @@ describe('CasesParamsFields renders', () => {
 
       expect(editAction.mock.calls[0][1].reopenClosedCases).toEqual(true);
     });
+
+    it('renders the extract observables select', async () => {
+      render(<CasesParamsFields {...defaultProps} />);
+
+      expect(await screen.findByTestId('extract-observables-select')).toBeInTheDocument();
+    });
+
+    it('defaults extract observables to "Use space default"', async () => {
+      render(<CasesParamsFields {...defaultProps} />);
+
+      const select = await screen.findByTestId('extract-observables-select');
+      expect((select as HTMLSelectElement).value).toBe('inherit');
+    });
+
+    it('updates extractObservables to true when "On" is selected', async () => {
+      render(<CasesParamsFields {...defaultProps} />);
+
+      const select = await screen.findByTestId('extract-observables-select');
+      await user.selectOptions(select, 'on');
+
+      expect(editAction.mock.calls[0][1].extractObservables).toEqual(true);
+    });
+
+    it('updates extractObservables to false when "Off" is selected', async () => {
+      render(<CasesParamsFields {...defaultProps} />);
+
+      const select = await screen.findByTestId('extract-observables-select');
+      await user.selectOptions(select, 'off');
+
+      expect(editAction.mock.calls[0][1].extractObservables).toEqual(false);
+    });
+
+    it('updates extractObservables to null when "Use space default" is selected', async () => {
+      const propsWithOverride = {
+        ...defaultProps,
+        actionParams: {
+          ...defaultProps.actionParams,
+          subActionParams: {
+            ...defaultProps.actionParams.subActionParams,
+            extractObservables: true,
+          },
+        },
+      };
+
+      render(<CasesParamsFields {...propsWithOverride} />);
+
+      const select = await screen.findByTestId('extract-observables-select');
+      await user.selectOptions(select, 'inherit');
+
+      expect(editAction.mock.calls[0][1].extractObservables).toEqual(null);
+    });
   });
 
   describe('Attack Discovery', () => {

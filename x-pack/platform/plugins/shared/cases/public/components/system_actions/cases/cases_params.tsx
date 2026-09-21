@@ -264,6 +264,33 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
     [editSubActionProperty]
   );
 
+  const extractObservablesOptions = useMemo(
+    () => [
+      { value: 'inherit', text: i18n.EXTRACT_OBSERVABLES_INHERIT },
+      { value: 'on', text: i18n.EXTRACT_OBSERVABLES_ON },
+      { value: 'off', text: i18n.EXTRACT_OBSERVABLES_OFF },
+    ],
+    []
+  );
+
+  const extractObservablesValue = useMemo(() => {
+    const raw = actionParams.subActionParams?.extractObservables;
+    if (raw === true) return 'on';
+    if (raw === false) return 'off';
+    return 'inherit';
+  }, [actionParams.subActionParams?.extractObservables]);
+
+  const onExtractObservablesChange = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      const val = e.target.value;
+      editSubActionProperty(
+        'extractObservables',
+        val === 'on' ? true : val === 'off' ? false : null
+      );
+    },
+    [editSubActionProperty]
+  );
+
   if (isAttackDiscoveryRuleType) {
     return (
       <EuiToolTip
@@ -438,6 +465,20 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
               editSubActionProperty('reopenClosedCases', e.target.checked);
             }}
           />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiFormRow fullWidth label={i18n.EXTRACT_OBSERVABLES_LABEL}>
+            <EuiSelect
+              fullWidth
+              data-test-subj="extract-observables-select"
+              value={extractObservablesValue}
+              options={extractObservablesOptions}
+              onChange={onExtractObservablesChange}
+            />
+          </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

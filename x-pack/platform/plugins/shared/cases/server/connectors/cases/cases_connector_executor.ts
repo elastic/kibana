@@ -893,8 +893,14 @@ export class CasesConnectorExecutor {
       tags: this.getCaseTags(params, flattenGrouping, v2Template.tags),
       title: title ?? this.getCasesTitle(params, flattenGrouping, oracleRecord.counter),
       connector: resolvedConnector ?? { ...NONE_CASE_CONNECTOR },
-      // Template settings keys are individually optional; merge over owner defaults so syncAlerts is always set.
-      settings: { syncAlerts, extractObservables, ...v2Template.settings },
+      settings: {
+        syncAlerts,
+        extractObservables,
+        ...v2Template.settings,
+        ...(params.extractObservables != null
+          ? { extractObservables: params.extractObservables }
+          : {}),
+      },
       ...getAssigneesFromTemplate(v2Template.assignees, hasPlatinumLicenseOrGreater),
       owner: params.owner,
       customFields: builtCustomFields,
@@ -976,6 +982,11 @@ export class CasesConnectorExecutor {
 
     const { syncAlerts } = getCaseSettings(params.owner);
     const extractObservables = spaceExtractObservables ?? false;
+    const baseSettings = caseFieldsFromTemplate?.settings ?? { syncAlerts, extractObservables };
+    const resolvedSettings =
+      params.extractObservables != null
+        ? { ...baseSettings, extractObservables: params.extractObservables }
+        : baseSettings;
 
     return {
       id: caseId,
@@ -987,7 +998,7 @@ export class CasesConnectorExecutor {
         caseFieldsFromTemplate?.title ??
         this.getCasesTitle(params, flattenGrouping, oracleRecord.counter),
       connector: caseFieldsFromTemplate?.connector ?? { ...NONE_CASE_CONNECTOR },
-      settings: caseFieldsFromTemplate?.settings ?? { syncAlerts, extractObservables },
+      settings: resolvedSettings,
       ...getAssigneesFromTemplate(caseFieldsFromTemplate?.assignees, hasPlatinumLicenseOrGreater),
       ...(caseFieldsFromTemplate?.severity ? { severity: caseFieldsFromTemplate?.severity } : {}),
       ...(caseFieldsFromTemplate?.category ? { category: caseFieldsFromTemplate?.category } : null),
