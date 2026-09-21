@@ -299,16 +299,7 @@ export async function checkUploadPackageAssetPrivileges({
       .checkPrivilegesWithRequest(request)
       .atSpaces(spaces, { kibana: actions });
     if (!checkResult.hasAllRequested) {
-      const missingPrivileges = [
-        ...new Set(
-          checkResult.privileges.kibana.filter((p) => !p.authorized).map((p) => p.privilege)
-        ),
-      ];
-      throw new FleetUnauthorizedError(
-        `Insufficient privileges to upload this package in space(s) ${spaces.join(
-          ', '
-        )}. Missing: ${missingPrivileges.join(', ')}`
-      );
+      throw new FleetUnauthorizedError('Insufficient privileges to upload this package');
     }
   }
 

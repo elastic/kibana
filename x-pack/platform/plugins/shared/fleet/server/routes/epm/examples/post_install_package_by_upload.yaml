@@ -60,8 +60,17 @@ responses:
         examples:
           insufficientPrivilegesExample:
             summary: 'Missing rules-all privilege'
-            description: 'Caller lacks rules-all in the destination space'
+            description: 'Caller lacks a privilege required by a gated asset type in the archive'
             value:
               statusCode: 403
               error: 'Forbidden'
-              message: 'Insufficient privileges to upload this package in space(s) default. Missing: api:rules-all'
+              message: 'Insufficient privileges to upload this package'
+      application/gzip; application/zip:
+        examples:
+          insufficientPrivilegesExample:
+            summary: 'Missing rules-all privilege'
+            description: 'Caller lacks a privilege required by a gated asset type in the archive'
+            value:
+              statusCode: 403
+              error: 'Forbidden'
+              message: 'Insufficient privileges to upload this package'
