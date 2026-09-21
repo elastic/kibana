@@ -58,6 +58,18 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(data).to.eql({ ...getConfigurationOutput(true), closure_type: 'close-by-pushing' });
     });
 
+    it('should patch extractObservables from true to false', async () => {
+      const configuration = await createConfiguration(supertest);
+      expect(configuration.extractObservables).to.be(true);
+
+      const updated = await updateConfiguration(supertest, configuration.id, {
+        extractObservables: false,
+        version: configuration.version,
+      });
+
+      expect(updated.extractObservables).to.be(false);
+    });
+
     it('should patch a configuration with customFields', async () => {
       const customFields = [
         {

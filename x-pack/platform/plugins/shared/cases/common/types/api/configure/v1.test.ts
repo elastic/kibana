@@ -130,6 +130,32 @@ describe('configure', () => {
       });
     });
 
+    it('has expected attributes in request with extractObservables', () => {
+      const request = {
+        ...defaultRequest,
+        extractObservables: true,
+      };
+      const query = ConfigurationRequestRt.decode(request);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: request,
+      });
+    });
+
+    it('has expected attributes in request with extractObservables set to false', () => {
+      const request = {
+        ...defaultRequest,
+        extractObservables: false,
+      };
+      const query = ConfigurationRequestRt.decode(request);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: request,
+      });
+    });
+
     it(`limits customFields to ${MAX_CUSTOM_FIELDS_PER_CASE}`, () => {
       const customFields = new Array(MAX_CUSTOM_FIELDS_PER_CASE + 1).fill({
         key: 'text_custom_field',
@@ -325,6 +351,19 @@ describe('configure', () => {
             label: 'Example Label',
           },
         ],
+      };
+      const query = ConfigurationPatchRequestRt.decode(request);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: request,
+      });
+    });
+
+    it('has expected attributes in request with extractObservables', () => {
+      const request = {
+        ...defaultRequest,
+        extractObservables: false,
       };
       const query = ConfigurationPatchRequestRt.decode(request);
 
