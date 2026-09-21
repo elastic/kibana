@@ -89,7 +89,7 @@ export interface SemconvPodNetworkOptions {
 export class SemconvPod extends Entity<SemconvPodDocument> {
   private readonly networkIoBySeries = new Map<string, number>();
 
-  cpu(): SemconvPodMetrics[] {
+  cpu(): Serializable<SemconvPodMetricsDocument>[] {
     return [
       new SemconvPodMetrics({
         ...this.fields,
@@ -101,7 +101,7 @@ export class SemconvPod extends Entity<SemconvPodDocument> {
     ];
   }
 
-  cpuWithoutLimit(): SemconvPodMetrics[] {
+  cpuWithoutLimit(): Serializable<SemconvPodMetricsDocument>[] {
     return [
       new SemconvPodMetrics({
         ...this.fields,
@@ -112,7 +112,7 @@ export class SemconvPod extends Entity<SemconvPodDocument> {
     ];
   }
 
-  memory(): SemconvPodMetrics[] {
+  memory(): Serializable<SemconvPodMetricsDocument>[] {
     return [
       new SemconvPodMetrics({
         ...this.fields,
@@ -125,7 +125,7 @@ export class SemconvPod extends Entity<SemconvPodDocument> {
     ];
   }
 
-  memoryWithoutLimit(): SemconvPodMetrics[] {
+  memoryWithoutLimit(): Serializable<SemconvPodMetricsDocument>[] {
     return [
       new SemconvPodMetrics({
         ...this.fields,
@@ -137,7 +137,7 @@ export class SemconvPod extends Entity<SemconvPodDocument> {
     ];
   }
 
-  network(opts?: SemconvPodNetworkOptions): SemconvPodMetrics[] {
+  network(opts?: SemconvPodNetworkOptions): Serializable<SemconvPodMetricsDocument>[] {
     const interfaces = opts?.interfaces ?? ['eth0'];
     const directions: SemconvNetworkDirection[] = ['receive', 'transmit'];
 
@@ -155,7 +155,7 @@ export class SemconvPod extends Entity<SemconvPodDocument> {
     );
   }
 
-  metrics(opts?: SemconvPodNetworkOptions): SemconvPodMetrics[] {
+  metrics(opts?: SemconvPodNetworkOptions): Serializable<SemconvPodMetricsDocument>[] {
     return [...this.cpu(), ...this.memory(), ...this.network(opts)];
   }
 
