@@ -10,6 +10,8 @@ import {
   getOwnerDefaultValue,
   createFormDeserializer,
   createFormSerializer,
+  getInitialCreateCaseSettings,
+  getSpaceExtractObservables,
 } from './utils';
 import { getInitialCaseValue } from '../../../common/utils/get_initial_case_value';
 import { ConnectorTypes, CaseSeverity, CustomFieldTypes } from '../../../common/types/domain';
@@ -77,6 +79,19 @@ describe('utils', () => {
       );
     });
 
+    it('merges settings.extractObservables from the space configuration over the owner default', () => {
+      expect(
+        getInitialCaseValue({
+          owner: 'securitySolution',
+          settings: { extractObservables: false },
+        })
+      ).toEqual(
+        expect.objectContaining({
+          settings: { syncAlerts: true, extractObservables: false },
+        })
+      );
+    });
+
     it('returns extra fields', () => {
       const extraFields = {
         owner: 'foobar',
@@ -103,6 +118,31 @@ describe('utils', () => {
         },
         ...extraFields,
       });
+    });
+  });
+
+  describe('getSpaceExtractObservables', () => {
+    it('returns the configuration value when present', () => {
+      expect(
+        getSpaceExtractObservables({ ...casesConfigurationsMock, extractObservables: false })
+      ).toBe(false);
+    });
+
+    it('defaults to true when the configuration omits the field', () => {
+      const { extractObservables: _omit, ...withoutField } = casesConfigurationsMock;
+      // @ts-expect-error testing omitted extractObservables
+      expect(getSpaceExtractObservables(withoutField)).toBe(true);
+    });
+  });
+
+  describe('getInitialCreateCaseSettings', () => {
+    it('keeps owner syncAlerts and uses the space extractObservables default', () => {
+      expect(
+        getInitialCreateCaseSettings('securitySolution', {
+          ...casesConfigurationsMock,
+          extractObservables: false,
+        })
+      ).toEqual({ syncAlerts: true, extractObservables: false });
     });
   });
 
@@ -197,6 +237,25 @@ describe('utils', () => {
         title: '',
         connector: casesConfigurationsMock.connector,
         owner: casesConfigurationsMock.owner,
+      });
+    });
+
+    it('inherits extractObservables from the space configuration when the form value is undefined', () => {
+      const { extractObservables: _omit, ...dataWithoutExtract } = dataToSerialize;
+
+      expect(
+        createFormSerializer(
+          [],
+          { ...casesConfigurationsMock, extractObservables: false },
+          // @ts-expect-error testing omitted extractObservables
+          dataWithoutExtract
+        )
+      ).toEqual({
+        ...serializedFormData,
+        settings: {
+          syncAlerts: false,
+          extractObservables: false,
+        },
       });
     });
 

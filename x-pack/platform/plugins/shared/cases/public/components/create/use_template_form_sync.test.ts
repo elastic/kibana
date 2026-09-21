@@ -38,6 +38,11 @@ jest.mock('../../containers/configure/use_get_supported_action_connectors', () =
   useGetSupportedActionConnectors: () => mockUseGetSupportedActionConnectors(),
 }));
 
+const mockUseGetAllCaseConfigurations = jest.fn();
+jest.mock('../../containers/configure/use_get_all_case_configurations', () => ({
+  useGetAllCaseConfigurations: () => mockUseGetAllCaseConfigurations(),
+}));
+
 const jiraConnector = { id: 'jira-1', actionTypeId: '.jira', name: 'My Jira' };
 
 const mockTemplate = {
@@ -125,6 +130,8 @@ describe('useTemplateFormSync', () => {
       isLoading: false,
     });
     mockUseGetSupportedActionConnectors.mockReturnValue({ data: [], isLoading: false });
+    // Empty configs fall back to initialConfiguration.extractObservables === true.
+    mockUseGetAllCaseConfigurations.mockReturnValue({ data: [], isLoading: false });
   });
 
   it('returns the template and loading state', () => {
@@ -999,11 +1006,11 @@ describe('useTemplateFormSync', () => {
       renderHook(() => useTemplateFormSync(innerForm, new Set()));
 
       expect(mockSetFieldValue).toHaveBeenCalledWith('syncAlerts', false);
-      // extractObservables is omitted by the template, so it resets to its default (not inherited).
-      expect(mockSetFieldValue).toHaveBeenCalledWith('extractObservables', false);
+      // extractObservables omitted by the template inherits the space configuration default (on).
+      expect(mockSetFieldValue).toHaveBeenCalledWith('extractObservables', true);
     });
 
-    it('reverts settings to off (the template default) when a settings-bearing template is cleared', () => {
+    it('reverts settings to space defaults when a settings-bearing template is cleared', () => {
       mockUseFormData.mockReturnValue([{ templateId: 'template-settings' }]);
       mockUseGetTemplate.mockReturnValue({ data: templateWithSettings, isLoading: false });
 
@@ -1016,10 +1023,10 @@ describe('useTemplateFormSync', () => {
       rerender();
 
       expect(mockSetFieldValue).toHaveBeenCalledWith('syncAlerts', false);
-      expect(mockSetFieldValue).toHaveBeenCalledWith('extractObservables', false);
+      expect(mockSetFieldValue).toHaveBeenCalledWith('extractObservables', true);
     });
 
-    it('reverts settings to off when switching to a template that declares no settings', () => {
+    it('reverts extractObservables to the space default when switching to a template that declares no settings', () => {
       // Direct A -> B switch: templateId goes straight from A's id to B's id (never through '').
       mockUseFormData.mockReturnValue([{ templateId: 'template-settings' }]);
       mockUseGetTemplate.mockReturnValue({ data: templateWithSettings, isLoading: false });
@@ -1040,12 +1047,12 @@ describe('useTemplateFormSync', () => {
       rerender();
 
       expect(mockSetFieldValue).toHaveBeenCalledWith('syncAlerts', false);
-      expect(mockSetFieldValue).toHaveBeenCalledWith('extractObservables', false);
+      expect(mockSetFieldValue).toHaveBeenCalledWith('extractObservables', true);
     });
 
     it('resets undeclared settings keys when switching to a template with a partial settings block', () => {
       // A declares both `true`; B declares only `syncAlerts`. B's omitted `extractObservables` must
-      // reset to its default rather than inheriting A's `true`.
+      // reset to the space default rather than inheriting A's value.
       mockUseFormData.mockReturnValue([{ templateId: 'template-a' }]);
       mockUseGetTemplate.mockReturnValue({
         data: {
@@ -1076,7 +1083,7 @@ describe('useTemplateFormSync', () => {
       rerender();
 
       expect(mockSetFieldValue).toHaveBeenCalledWith('syncAlerts', false);
-      expect(mockSetFieldValue).toHaveBeenCalledWith('extractObservables', false);
+      expect(mockSetFieldValue).toHaveBeenCalledWith('extractObservables', true);
     });
   });
 });

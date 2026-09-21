@@ -16,9 +16,10 @@ export type GetInitialCaseValueArgs = Partial<Omit<CasePostRequest, 'owner'>> &
 export const getInitialCaseValue = ({
   owner,
   connector,
+  settings: settingsOverride,
   ...restFields
 }: GetInitialCaseValueArgs): CasePostRequest => {
-  const { syncAlerts, extractObservables } = getCaseSettings(owner);
+  const ownerSettings = getCaseSettings(owner);
 
   return {
     title: '',
@@ -27,7 +28,11 @@ export const getInitialCaseValue = ({
     category: undefined,
     severity: CaseSeverity.LOW as const,
     description: '',
-    settings: { syncAlerts, extractObservables },
+    settings: {
+      syncAlerts: ownerSettings.syncAlerts,
+      extractObservables: ownerSettings.extractObservables,
+      ...settingsOverride,
+    },
     customFields: [],
     ...restFields,
     connector: connector ?? getNoneConnector(),

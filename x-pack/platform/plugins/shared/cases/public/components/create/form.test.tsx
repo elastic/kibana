@@ -150,6 +150,28 @@ describe('CreateCaseForm', () => {
     expect(await screen.findByTestId('caseObservablesToggle')).toBeInTheDocument();
   });
 
+  it('seeds the extract observables toggle from the space configuration', async () => {
+    useGetAllCaseConfigurationsMock.mockImplementation(() => ({
+      ...useGetAllCaseConfigurationsResponse,
+      data: [
+        {
+          ...useGetAllCaseConfigurationsResponse.data[0],
+          id: 'config-1',
+          owner: 'securitySolution',
+          extractObservables: false,
+        },
+      ],
+    }));
+    const license = licensingMock.createLicense({ license: { type: 'platinum' } });
+
+    renderWithTestingProviders(<CreateCaseForm {...casesFormProps} />, {
+      wrapperProps: { owner: ['securitySolution'], license },
+    });
+
+    const toggle = await screen.findByTestId('caseObservablesToggle');
+    expect(within(toggle).getByTestId('input')).not.toBeChecked();
+  });
+
   describe('case settings for a host with no pinned owner (e.g. ML)', () => {
     const observabilityConfiguration = {
       ...useGetAllCaseConfigurationsResponse.data[0],
