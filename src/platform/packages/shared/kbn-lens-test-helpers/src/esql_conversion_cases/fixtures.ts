@@ -89,7 +89,7 @@ export const createEsqlConversionInput = (conversionCase: EsqlConversionCase) =>
     },
     dateRange: conversionCase.omitDateRange
       ? { fromDate: undefined, toDate: undefined }
-      : (conversionCase.dateRangeOverride ?? ESQL_CONVERSION_DATE_RANGE),
+      : conversionCase.dateRangeOverride ?? ESQL_CONVERSION_DATE_RANGE,
     now: ESQL_CONVERSION_NOW,
     columnRoles: conversionCase.columnRoles ? { ...conversionCase.columnRoles } : undefined,
   };

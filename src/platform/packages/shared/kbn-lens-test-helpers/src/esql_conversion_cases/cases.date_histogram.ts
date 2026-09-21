@@ -159,7 +159,8 @@ export const buildDateHistogramCases = (): EsqlConversionCase[] => {
     {
       group: 'date_histogram',
       dataset: ecommerce,
-      description: 'date histogram does not prepend YYYY-MM-DD to time-only format when range <= 24h',
+      description:
+        'date histogram does not prepend YYYY-MM-DD to time-only format when range <= 24h',
       columns: {
         col1: dateHistogram('order_date', { interval: 'auto' }),
         col2: count(),
