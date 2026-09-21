@@ -74,18 +74,27 @@ const idsForStatusFilter = (
 // Elasticsearch's boolean-clause limit (commonly 1024), that errors instead of
 // rendering. A `terms` query has no such per-value clause cost.
 export const useMonitorIdFilter = (): estypes.QueryDslQueryContainer | undefined => {
-  const { locations, schedules, statusFilter, useLogicalAndFor } = useGetUrlParams();
+  const { locations, schedules, statusFilter, useLogicalAndFor, query } = useGetUrlParams();
   const { status: overviewStatus } = useSelector(selectOverviewStatus);
   const allIds = overviewStatus?.allIds ?? [];
   const statusIds = idsForStatusFilter(overviewStatus, statusFilter);
+  // `allIds` is already the search-filtered set when `query` is set (the
+  // overview-status API applies the same search), so a `terms` clause on it
+  // scopes pings *and* alerts without the ping-only `query_string` that
+  // `getQueryFilters` would otherwise AND onto the annotation layer.
+  const statusIdSet = statusIds ? new Set(statusIds) : undefined;
 
   // since schedule isn't available in heartbeat data, in that case we rely on monitor.id
   // We need to rely on monitor.id also for locations, because each heartbeat data only contains one location
-  if (!isEmpty(schedules) || (!isEmpty(locations) && useLogicalAndFor?.includes('locations'))) {
+  if (
+    !isEmpty(schedules) ||
+    (!isEmpty(locations) && useLogicalAndFor?.includes('locations')) ||
+    Boolean(query)
+  ) {
     // Intersect with the status filter (if any) rather than ignoring it —
     // otherwise selecting e.g. "Down" would stop narrowing anything once a
     // schedule or (AND-ed) location filter is also active.
-    const ids = statusIds ? allIds.filter((id) => statusIds.includes(id)) : allIds;
+    const ids = statusIdSet ? allIds.filter((id) => statusIdSet.has(id)) : allIds;
     // If ids is empty we return a fixed non-matching id just to not get any result.
     return { terms: { 'monitor.id': ids.length ? ids : [NO_MATCHING_MONITOR_ID] } };
   }

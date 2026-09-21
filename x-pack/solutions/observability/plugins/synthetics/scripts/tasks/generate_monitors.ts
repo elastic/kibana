@@ -147,6 +147,19 @@ const request = async (method: string, path: string, data?: any) => {
   }
 };
 
+const redactEsNode = (node: string): string => {
+  try {
+    const parsed = new URL(node);
+    if (parsed.username || parsed.password) {
+      parsed.username = parsed.username ? '***' : '';
+      parsed.password = parsed.password ? '***' : '';
+    }
+    return parsed.toString();
+  } catch {
+    return node.replace(/\/\/[^/@]+@/g, '//***@');
+  }
+};
+
 const buildEsClient = () => {
   const config = (() => {
     try {
@@ -171,7 +184,7 @@ const buildEsClient = () => {
     'changeme';
   const verificationMode =
     config.elasticsearch?.ssl?.verificationMode ?? config['elasticsearch.ssl.verificationMode'];
-  console.log(`  ES: ${resolvedNode}`);
+  console.log(`  ES: ${redactEsNode(resolvedNode)}`);
   return new Client({
     node: resolvedNode,
     auth: { username: esUsername, password: esPassword },

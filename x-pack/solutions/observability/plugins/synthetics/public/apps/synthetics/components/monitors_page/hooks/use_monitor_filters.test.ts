@@ -155,7 +155,7 @@ describe('useMonitorIdFilter', () => {
   const paramSpy = jest.spyOn(paramHook, 'useGetUrlParams');
   const selSPy = jest.spyOn(redux, 'useSelector');
 
-  it('returns undefined when no schedules or status filter are active', () => {
+  it('returns undefined when no schedules, search, or status filter are active', () => {
     paramSpy.mockReturnValue({} as any);
     selSPy.mockReturnValue({ status: { allIds: [] } });
 
@@ -193,6 +193,29 @@ describe('useMonitorIdFilter', () => {
     // id4 is up but not in allIds (e.g. excluded by a schedule filter); id1 is
     // in allIds but not up — only the intersection should come through.
     expect(result.current).toEqual({ terms: { 'monitor.id': ['id2', 'id3'] } });
+  });
+
+  it('returns a terms query of allIds when a free-text search is active', () => {
+    // `allIds` is already search-filtered by the overview-status API, so this
+    // scopes pings and alerts without the ping-only `query_string` that would
+    // wipe the annotation layer.
+    paramSpy.mockReturnValue({ query: 'checkout' } as any);
+    selSPy.mockReturnValue({ status: { allIds: ['id1', 'id3'] } });
+
+    const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: WrappedHelper });
+
+    expect(result.current).toEqual({ terms: { 'monitor.id': ['id1', 'id3'] } });
+  });
+
+  it('intersects a free-text search with a status filter', () => {
+    paramSpy.mockReturnValue({ query: 'checkout', statusFilter: 'down' } as any);
+    selSPy.mockReturnValue({
+      status: { allIds: ['id1', 'id2', 'id3'], downIds: ['id2', 'id4'] },
+    });
+
+    const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: WrappedHelper });
+
+    expect(result.current).toEqual({ terms: { 'monitor.id': ['id2'] } });
   });
 
   it('scopes to disabledMonitorQueryIds for the disabled status filter', () => {

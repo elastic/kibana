@@ -29,17 +29,16 @@ const kqlValuesClause = (field: string, values: Array<string | number>): string 
   return quoted.length === 1 ? `${field}: ${quoted[0]}` : `${field}: (${quoted.join(' or ')})`;
 };
 
-// The search box's free-text query already scopes the ping/error series (via
-// `useMonitorQueryFilters`'s DSL `dslFilters`), and although this layer now
-// also receives that same `dslFilters` (see `ignoreGlobalFilters: false`
-// below), its `query_string` clause searches ping-only fields (`hosts`,
-// `urls`, etc.) that don't exist on the alerts data view — a harmless no-op
-// there rather than a real scope. This clause is this layer's *own* free-text
-// scoping, matching on `monitor.name` alone since alert docs don't carry the
-// full multi-field set `getQueryFilters` searches. Left unquoted (with
-// `escapeKuery`, not `escapeQuotes`) so the `*` wildcards still work as
-// substring matches — a quoted KQL literal treats `*` as a literal character
-// rather than a wildcard.
+// The search box's free-text query scopes ping series and this layer via a
+// `terms` clause on `monitor.id` (`useMonitorIdFilter` uses the
+// already-search-filtered `allIds`). That field exists on alert docs, unlike
+// the ping-only `query_string` in `getQueryFilters` (`urls`, `hosts`, …),
+// which Lens would AND onto this layer because `ignoreGlobalFilters` is
+// false. This clause is this layer's *own* free-text scoping on
+// `monitor.name` — alert docs don't carry the full multi-field set. Left
+// unquoted (with `escapeKuery`, not `escapeQuotes`) so the `*` wildcards
+// still work as substring matches — a quoted KQL literal treats `*` as a
+// literal character rather than a wildcard.
 const kqlSearchClause = (query: string): string => `monitor.name: *${escapeKuery(query)}*`;
 
 /**
@@ -121,14 +120,13 @@ export function useOverviewAlertsAnnotations(): AnnotationLayerConfig[] | undefi
       {
         dataView: alertsDataView,
         annotations: [annotation],
-        // Lets the chart's `dslFilters` (notably the `statusFilter`'s
-        // `terms` clause on `monitor.id` — see `useMonitorIdFilter`) reach
-        // this layer too, instead of the default `ignoreGlobalFilters: true`.
-        // The free-text search clause also included there targets ping-only
-        // fields (`hosts`, `urls`, etc.) that don't exist on this data view;
-        // `query_string` treats an unmapped field as a non-match rather than
-        // erroring, so it's a harmless no-op here — this layer's own
-        // `kqlSearchClause` above already scopes free text for alerts.
+        // Lets the chart's `dslFilters` (the `terms` clause on `monitor.id`
+        // from `useMonitorIdFilter` — status, search, schedules) reach this
+        // layer too, instead of the default `ignoreGlobalFilters: true`.
+        // Ping-only search (`getQueryFilters`' `urls`/`hosts` `query_string`)
+        // is deliberately *not* in those `dslFilters`; it would match nothing
+        // on this data view and wipe the markers. This layer's own
+        // `kqlSearchClause` scopes free text for alerts by `monitor.name`.
         ignoreGlobalFilters: false,
       },
     ];

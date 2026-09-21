@@ -90,11 +90,22 @@ describe('OverviewStatus', () => {
     expect(queryByTestId('syntheticsOverviewUp')).not.toBeInTheDocument();
     expect(getByTestId('syntheticsOverviewUpLegend')).toBeInTheDocument();
     expect(getByTestId('syntheticsOverviewDownLegend')).toBeInTheDocument();
+    expect(window.localStorage.getItem('synthetics.overview.statusView')).toBe('donut');
 
     fireEvent.click(getByTestId('syntheticsOverviewStatusViewToggle'));
 
     expect(queryByTestId('syntheticsOverviewStatusDonut')).not.toBeInTheDocument();
     expect(getByTestId('syntheticsOverviewUp')).toBeInTheDocument();
+    expect(window.localStorage.getItem('synthetics.overview.statusView')).toBe('stats');
+  });
+
+  it('restores the donut view from localStorage on mount', () => {
+    window.localStorage.setItem('synthetics.overview.statusView', 'donut');
+
+    const { getByTestId, queryByTestId } = render(<OverviewStatus areStatsClickable />);
+
+    expect(getByTestId('syntheticsOverviewStatusDonut')).toBeInTheDocument();
+    expect(queryByTestId('syntheticsOverviewUp')).not.toBeInTheDocument();
   });
 
   it('keeps the Pending tooltip icon outside the clickable button', () => {

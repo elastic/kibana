@@ -85,11 +85,11 @@ describe('useOverviewAlertsAnnotations', () => {
     expect(result.current).toBeUndefined();
   });
 
-  it('does not ignore global filters, so the chart-level statusFilter DSL clause reaches this layer', () => {
-    // The main chart merges the `statusFilter`'s `terms` clause into
-    // `dslFilters` (see `useMonitorIdFilter`) rather than a `UrlFilter`, so
-    // this layer needs `ignoreGlobalFilters: false` (the default is `true`)
-    // to still be scoped by it.
+  it('does not ignore global filters, so the chart-level monitor.id terms clause reaches this layer', () => {
+    // The main chart merges status/search/schedule scoping into `dslFilters`
+    // as a `terms` query (see `useMonitorIdFilter`), so this layer needs
+    // `ignoreGlobalFilters: false` (the default is `true`) to still be
+    // scoped by it. Ping-only `query_string` is not in those `dslFilters`.
     const { result } = renderHook(() => useOverviewAlertsAnnotations());
 
     expect(result.current?.[0].ignoreGlobalFilters).toBe(false);

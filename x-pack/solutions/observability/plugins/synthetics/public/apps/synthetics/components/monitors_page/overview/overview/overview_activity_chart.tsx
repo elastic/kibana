@@ -17,7 +17,6 @@ import { useOverviewRefreshedRange } from '../../common/use_overview_date_range'
 import { useAlertsUrl } from '../../../monitor_details/monitor_summary/alert_actions';
 import { ERRORS_LABEL } from '../../../monitor_details/monitor_summary/monitor_errors_count';
 import { useMonitorFilters, useMonitorIdFilter } from '../../hooks/use_monitor_filters';
-import { useMonitorQueryFilters } from '../../hooks/use_monitor_query_filters';
 import { useOverviewAlertsAnnotations } from '../../hooks/use_overview_alerts_annotations';
 import { useOverviewAlertsCount } from '../../hooks/use_overview_alerts_count';
 import { useOverviewDataViewIndexPatterns } from '../../hooks/use_overview_data_view_index_patterns';
@@ -39,7 +38,8 @@ export const useOverviewActivityStats = (): MonitorStatProps[] => {
   // Same range the count above is scoped to — otherwise the count and the
   // destination page's own filter can disagree (e.g. after changing the date
   // picker, or brushing the chart to a different window).
-  const alertsUrl = useAlertsUrl({ rangeFrom: from, rangeTo: to });
+  // Count includes status and TLS rules; the destination list must too.
+  const alertsUrl = useAlertsUrl({ rangeFrom: from, rangeTo: to, includeTls: true });
 
   return [
     {
@@ -73,16 +73,19 @@ export const OverviewActivityChart = () => {
   const { euiTheme } = useEuiTheme();
 
   const filters = useMonitorFilters({});
-  const queryFilters = useMonitorQueryFilters();
-  // A `statusFilter` (or the schedules/AND-locations id-scoping) is expressed
-  // as DSL, not a `UrlFilter`/KQL clause — see `useMonitorIdFilter` — so it's
-  // merged into `dslFilters` (a `terms` query, unlike KQL's `field: (a or b or
-  // ...)`, doesn't add a boolean clause per matched monitor). This also
-  // reaches the alerts annotation layer, which doesn't ignore global filters.
+  // A `statusFilter`, schedules/AND-locations scoping, or the search box is
+  // expressed as DSL, not a `UrlFilter`/KQL clause — see `useMonitorIdFilter`
+  // — so it's merged into `dslFilters` (a `terms` query, unlike KQL's
+  // `field: (a or b or ...)`, doesn't add a boolean clause per matched
+  // monitor). Search is included here as `monitor.id` terms on the
+  // already-search-filtered `allIds`, not `getQueryFilters`' ping-only
+  // `query_string` (`urls`, `hosts`, …): that clause is ANDed onto the
+  // alerts annotation layer (`ignoreGlobalFilters: false`) and matches
+  // nothing there. `monitor.id` exists on both pings and alerts.
   const monitorIdFilter = useMonitorIdFilter();
   const dslFilters = useMemo(
-    () => (monitorIdFilter ? [...(queryFilters ?? []), monitorIdFilter] : queryFilters),
-    [queryFilters, monitorIdFilter]
+    () => (monitorIdFilter ? [monitorIdFilter] : undefined),
+    [monitorIdFilter]
   );
   const time = useMemo(() => ({ from, to }), [from, to]);
   const { dataTypesIndexPatterns, loading } = useOverviewDataViewIndexPatterns();

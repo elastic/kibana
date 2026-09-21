@@ -114,14 +114,18 @@ export const useAlertsUrl = ({
   rangeFrom,
   rangeTo,
   monitorId,
+  includeTls,
 }: {
   monitorId?: string;
   rangeFrom: string;
   rangeTo: string;
+  includeTls?: boolean;
 }) => {
   const { basePath } = useSyntheticsSettingsContext();
 
-  let kuery = 'kibana.alert.rule.category : "Synthetics monitor status" ';
+  let kuery = includeTls
+    ? 'kibana.alert.rule.category : ("Synthetics monitor status" or "Synthetics TLS certificate") '
+    : 'kibana.alert.rule.category : "Synthetics monitor status" ';
 
   if (monitorId) {
     kuery += `AND monitor.id : "${monitorId}"`;
