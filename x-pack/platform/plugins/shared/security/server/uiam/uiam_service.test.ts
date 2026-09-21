@@ -1465,17 +1465,16 @@ describe('UiamService', () => {
       expect(headers).not.toHaveProperty('authorization');
     });
 
-    it('forwards limit, after, and q as query parameters', async () => {
+    it('forwards limit and after as query parameters', async () => {
       fetchSpy.mockResolvedValue({ ok: true, json: async () => mockResponse });
 
       await uiamService.listServiceAccounts({
         limit: 25,
         after: 'cursor',
-        q: 'name:nightshift',
       });
 
       expect(fetchSpy).toHaveBeenCalledWith(
-        'https://uiam.service/uiam/api/v1/service-accounts?limit=25&after=cursor&q=name%3Anightshift',
+        'https://uiam.service/uiam/api/v1/service-accounts?limit=25&after=cursor',
         expect.anything()
       );
     });

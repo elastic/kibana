@@ -17,8 +17,7 @@ import {
   SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE,
   SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
 } from '../../../common/service_accounts';
-import { EsServiceAccounts, type ServiceAccountsServiceStart } from '../../service_accounts';
-import { createNotImplementedWorkloadBindings } from '../../service_accounts/bindings';
+import type { ServiceAccountsServiceStart } from '../../service_accounts';
 import { serviceAccountsServiceMock } from '../../service_accounts/service_accounts_service.mock';
 import { routeDefinitionParamsMock } from '../index.mock';
 
@@ -26,12 +25,11 @@ const enabledConfig = { serviceAccounts: { enabled: true } };
 
 const serviceAccount = {
   id: 'service-account-id',
-  type: 'project' as const,
   name: 'nightshift-relay',
-  organization_id: 'mock-organization-id',
-  role_assignments: {},
-  assumable_by: [],
-  creator: { type: 'user' as const, id: 'user-id', first_name: 'Ada', last_name: 'Lovelace' },
+  roles: [],
+  enabled: true,
+  hasCredential: true,
+  createdBy: { type: 'user' as const, username: 'user-id' },
 };
 
 describe('List service accounts route', () => {
@@ -119,17 +117,17 @@ describe('List service accounts route', () => {
     expect(serviceAccounts.backend.list).toHaveBeenCalledWith(expect.anything(), {});
   });
 
-  it('forwards limit, after, and q to the backend', async () => {
+  it('forwards limit and after to the backend and returns its next_page cursor', async () => {
     const { routeHandler, serviceAccounts } = setup();
     serviceAccounts.backend.list.mockResolvedValue({
       service_accounts: [serviceAccount],
-      after: 'next-page',
+      next_page: 'next-page',
     });
 
     const response = await routeHandler(
       getMockContext(),
       httpServerMock.createKibanaRequest({
-        query: { limit: 10, after: 'cursor', q: 'name:nightshift' },
+        query: { limit: 10, after: 'cursor' },
       }),
       kibanaResponseFactory
     );
@@ -137,12 +135,11 @@ describe('List service accounts route', () => {
     expect(response.status).toBe(200);
     expect(response.payload).toEqual({
       service_accounts: [serviceAccount],
-      after: 'next-page',
+      next_page: 'next-page',
     });
     expect(serviceAccounts.backend.list).toHaveBeenCalledWith(expect.anything(), {
       limit: 10,
       after: 'cursor',
-      q: 'name:nightshift',
     });
   });
 
@@ -155,18 +152,6 @@ describe('List service accounts route', () => {
     expect(response.payload).toEqual({
       message: 'Service accounts are not available: the feature is disabled',
     });
-  });
-
-  it('reaches the Elasticsearch backend without serverless context', async () => {
-    const { routeHandler } = setup({
-      serviceAccounts: {
-        backend: new EsServiceAccounts(),
-        workloads: createNotImplementedWorkloadBindings(),
-      },
-      serverless: false,
-    });
-
-    expect((await callRoute(routeHandler)).status).toBe(501);
   });
 
   it('reproduces the upstream status code when listing is unsupported', async () => {
@@ -205,10 +190,13 @@ describe('List service accounts route', () => {
       ).toBe(false);
     });
 
-    it('rejects unbounded after and q strings', () => {
+    it('rejects an unbounded after cursor', () => {
       const tooLong = 'x'.repeat(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH + 1);
       expect(listServiceAccountsQuerySchema.safeParse({ after: tooLong }).success).toBe(false);
-      expect(listServiceAccountsQuerySchema.safeParse({ q: tooLong }).success).toBe(false);
+    });
+
+    it('drops unknown query parameters such as q', () => {
+      expect(listServiceAccountsQuerySchema.parse({ q: 'name:nightshift' })).toEqual({});
     });
   });
 });

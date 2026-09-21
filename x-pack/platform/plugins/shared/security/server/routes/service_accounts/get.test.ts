@@ -14,28 +14,19 @@ import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { defineGetServiceAccountRoute } from './get';
 import { getServiceAccountParamsSchema } from './schemas';
 import { SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH } from '../../../common/service_accounts';
-import { EsServiceAccounts, type ServiceAccountsServiceStart } from '../../service_accounts';
-import { createNotImplementedWorkloadBindings } from '../../service_accounts/bindings';
+import type { ServiceAccountsServiceStart } from '../../service_accounts';
 import { serviceAccountsServiceMock } from '../../service_accounts/service_accounts_service.mock';
 import { routeDefinitionParamsMock } from '../index.mock';
 
 const enabledConfig = { serviceAccounts: { enabled: true } };
 
-const userCreator = {
-  type: 'user' as const,
-  id: 'user-id',
-  first_name: 'Ada',
-  last_name: 'Lovelace',
-};
-
 const serviceAccount = {
   id: 'service-account-id',
-  type: 'project' as const,
   name: 'nightshift-relay',
-  organization_id: 'mock-organization-id',
-  role_assignments: {},
-  assumable_by: [],
-  creator: userCreator,
+  roles: [],
+  enabled: true,
+  hasCredential: true,
+  createdBy: { type: 'user' as const, username: 'user-id' },
 };
 
 describe('Get service account route', () => {
@@ -136,18 +127,6 @@ describe('Get service account route', () => {
     expect(response.payload).toEqual({
       message: 'Service accounts are not available: the feature is disabled',
     });
-  });
-
-  it('reaches the Elasticsearch backend without serverless context', async () => {
-    const { routeHandler } = setup({
-      serviceAccounts: {
-        backend: new EsServiceAccounts(),
-        workloads: createNotImplementedWorkloadBindings(),
-      },
-      serverless: false,
-    });
-
-    expect((await callRoute(routeHandler)).status).toBe(501);
   });
 
   it('reproduces a 404 when UIAM has no such account', async () => {

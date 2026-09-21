@@ -312,38 +312,57 @@ describe('UiamServiceAccounts', () => {
         last_name: 'Lovelace',
       },
     };
+    const expectedEntry = {
+      id: validResponse.id,
+      name: validResponse.name,
+      roles: [],
+      enabled: true,
+      hasCredential: true,
+      createdBy: { type: 'user' as const, username: 'user-id' },
+    };
 
-    it('calls UIAM as Kibana, not as the user, and returns the `service_accounts` page', async () => {
-      mockUiam.listServiceAccounts.mockResolvedValue({ service_accounts: [listedAccount] });
-
-      await expect(
-        serviceAccounts.list(createMockRequest('Bearer essu_my_token'))
-      ).resolves.toEqual({ service_accounts: [listedAccount] });
-
-      expect(mockUiam.listServiceAccounts).toHaveBeenCalledTimes(1);
-      expect(mockUiam.listServiceAccounts).toHaveBeenCalledWith({});
-    });
-
-    it('forwards limit, after, and q', async () => {
-      mockUiam.listServiceAccounts.mockResolvedValue({
-        service_accounts: [listedAccount],
-        after: 'next',
-      });
-      const params = { limit: 25, after: 'cursor', q: 'name:nightshift' };
-
-      await expect(
-        serviceAccounts.list(createMockRequest('Bearer essu_my_token'), params)
-      ).resolves.toEqual({ service_accounts: [listedAccount], after: 'next' });
-
-      expect(mockUiam.listServiceAccounts).toHaveBeenCalledWith(params);
-    });
-
-    it('keeps the creator returned by UIAM', async () => {
+    it('calls UIAM as Kibana, not as the user, and maps the page onto directory entries', async () => {
       mockUiam.listServiceAccounts.mockResolvedValue({ service_accounts: [listedAccount] });
 
       const result = await serviceAccounts.list(createMockRequest('Bearer essu_my_token'));
 
-      expect(result.service_accounts[0].creator).toEqual(listedAccount.creator);
+      expect(result).toEqual({ service_accounts: [expectedEntry] });
+      expect(result).not.toHaveProperty('next_page');
+      expect(mockUiam.listServiceAccounts).toHaveBeenCalledTimes(1);
+      expect(mockUiam.listServiceAccounts).toHaveBeenCalledWith({});
+    });
+
+    it('forwards limit and after, and passes through the next_page cursor', async () => {
+      mockUiam.listServiceAccounts.mockResolvedValue({
+        service_accounts: [listedAccount],
+        next_page: 'next',
+      });
+      const params = { limit: 25, after: 'cursor' };
+
+      await expect(
+        serviceAccounts.list(createMockRequest('Bearer essu_my_token'), params)
+      ).resolves.toEqual({ service_accounts: [expectedEntry], next_page: 'next' });
+
+      expect(mockUiam.listServiceAccounts).toHaveBeenCalledWith(params);
+    });
+
+    it('maps an api-key creator onto an api_key binder', async () => {
+      mockUiam.listServiceAccounts.mockResolvedValue({
+        service_accounts: [
+          {
+            ...validResponse,
+            creator: { type: 'api-key' as const, id: 'api-key-id', description: 'nightshift key' },
+          },
+        ],
+      });
+
+      const result = await serviceAccounts.list(createMockRequest('Bearer essu_my_token'));
+
+      expect(result.service_accounts[0].createdBy).toEqual({
+        type: 'api_key',
+        apiKeyId: 'api-key-id',
+        variant: 'uiam',
+      });
     });
 
     it('rejects with a 403 when security features are disabled in Elasticsearch', async () => {
@@ -387,7 +406,9 @@ describe('UiamServiceAccounts', () => {
     });
 
     it('rejects when an account is missing creator', async () => {
-      mockUiam.listServiceAccounts.mockResolvedValue({ service_accounts: [validResponse] });
+      mockUiam.listServiceAccounts.mockResolvedValue({
+        service_accounts: [validResponse],
+      } as never);
 
       await expect(
         serviceAccounts.list(createMockRequest('Bearer essu_my_token'))
@@ -424,18 +445,25 @@ describe('UiamServiceAccounts', () => {
       },
     };
 
-    it('calls UIAM as Kibana, not as the user, and returns the account including creator', async () => {
+    it('calls UIAM as Kibana, not as the user, and maps the account onto a directory entry', async () => {
       mockUiam.getServiceAccount.mockResolvedValue(retrievedAccount);
 
       await expect(
         serviceAccounts.get(createMockRequest('Bearer essu_my_token'), 'service-account-id')
-      ).resolves.toEqual(retrievedAccount);
+      ).resolves.toEqual({
+        id: validResponse.id,
+        name: validResponse.name,
+        roles: [],
+        enabled: true,
+        hasCredential: true,
+        createdBy: { type: 'user', username: 'user-id' },
+      });
 
       expect(mockUiam.getServiceAccount).toHaveBeenCalledTimes(1);
       expect(mockUiam.getServiceAccount).toHaveBeenCalledWith('service-account-id');
     });
 
-    it('accepts an api-key creator', async () => {
+    it('maps an api-key creator onto an api_key binder', async () => {
       const withApiKeyCreator = {
         ...validResponse,
         creator: {
@@ -446,13 +474,20 @@ describe('UiamServiceAccounts', () => {
       };
       mockUiam.getServiceAccount.mockResolvedValue(withApiKeyCreator);
 
-      await expect(
-        serviceAccounts.get(createMockRequest('Bearer essu_my_token'), 'service-account-id')
-      ).resolves.toEqual(withApiKeyCreator);
+      const result = await serviceAccounts.get(
+        createMockRequest('Bearer essu_my_token'),
+        'service-account-id'
+      );
+
+      expect(result.createdBy).toEqual({
+        type: 'api_key',
+        apiKeyId: 'api-key-id',
+        variant: 'uiam',
+      });
     });
 
     it('rejects when creator is missing', async () => {
-      mockUiam.getServiceAccount.mockResolvedValue(validResponse);
+      mockUiam.getServiceAccount.mockResolvedValue(validResponse as never);
 
       await expect(
         serviceAccounts.get(createMockRequest('Bearer essu_my_token'), 'service-account-id')

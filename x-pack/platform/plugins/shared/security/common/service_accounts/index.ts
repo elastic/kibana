@@ -25,3 +25,4 @@ export {
   serviceAccountRoleNameSchema,
   serviceAccountRolesSchema,
 } from './schemas';
+export type { ListServiceAccountsResponse, ServiceAccountDirectoryEntry } from './types';

@@ -650,7 +650,7 @@ describe('EsServiceAccounts', () => {
 
   describe('#list', () => {
     it('rejects with a 501 so callers surface a clear "not implemented" response', async () => {
-      await expect(new EsServiceAccounts().list()).rejects.toMatchObject({
+      await expect(serviceAccounts.list()).rejects.toMatchObject({
         message: 'Listing Elasticsearch service accounts is not yet implemented',
         output: { statusCode: 501 },
       });
@@ -659,7 +659,7 @@ describe('EsServiceAccounts', () => {
 
   describe('#get', () => {
     it('rejects with a 501 so callers surface a clear "not implemented" response', async () => {
-      await expect(new EsServiceAccounts().get()).rejects.toMatchObject({
+      await expect(serviceAccounts.get()).rejects.toMatchObject({
         message: 'Getting Elasticsearch service accounts by id is not yet implemented',
         output: { statusCode: 501 },
       });

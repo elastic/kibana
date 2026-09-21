@@ -39,7 +39,9 @@ import { getUiamCredentialsFromRequest } from './get_uiam_credentials';
 import type {
   ServiceAccountAssumableBy,
   ServiceAccountRoleAssignments,
+  UiamListServiceAccountsResponse,
   UiamServiceAccount,
+  UiamServiceAccountDetails,
 } from './service_account_types';
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../common/constants';
 import type { UiamConfigType } from '../config';
@@ -286,7 +288,10 @@ export interface UiamServicePublic {
    * Authenticated as Kibana itself (shared secret and, when configured, mTLS) with no user
    * credential: UIAM returns accounts whose `assumable_by` policy includes this Kibana.
    */
-  listServiceAccounts(params?: { limit?: number; after?: string; q?: string }): Promise<unknown>;
+  listServiceAccounts(params?: {
+    limit?: number;
+    after?: string;
+  }): Promise<UiamListServiceAccountsResponse>;
 
   /**
    * Fetches one service account via the UIAM service.
@@ -294,7 +299,7 @@ export interface UiamServicePublic {
    * Authenticated as Kibana itself (shared secret and, when configured, mTLS) with no user
    * credential: UIAM authorizes against `assumable_by`.
    */
-  getServiceAccount(serviceAccountId: string): Promise<unknown>;
+  getServiceAccount(serviceAccountId: string): Promise<UiamServiceAccountDetails>;
 
   /**
    * Exchanges a service account ID for an ephemeral access token via the UIAM service.
@@ -820,8 +825,7 @@ export class UiamService implements UiamServicePublic {
   async listServiceAccounts(params?: {
     limit?: number;
     after?: string;
-    q?: string;
-  }): Promise<unknown> {
+  }): Promise<UiamListServiceAccountsResponse> {
     try {
       this.#logger.debug('Attempting to list service accounts.');
 
@@ -831,9 +835,6 @@ export class UiamService implements UiamServicePublic {
       }
       if (params?.after) {
         url.searchParams.set('after', params.after);
-      }
-      if (params?.q) {
-        url.searchParams.set('q', params.q);
       }
 
       const response = await UiamService.#parseUiamResponse(
@@ -862,7 +863,7 @@ export class UiamService implements UiamServicePublic {
   /**
    * See {@link UiamServicePublic.getServiceAccount}.
    */
-  async getServiceAccount(serviceAccountId: string): Promise<unknown> {
+  async getServiceAccount(serviceAccountId: string): Promise<UiamServiceAccountDetails> {
     try {
       this.#logger.debug(`Attempting to get service account ${serviceAccountId}.`);
 

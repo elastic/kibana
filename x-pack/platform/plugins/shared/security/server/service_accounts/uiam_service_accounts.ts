@@ -8,7 +8,11 @@
 import Boom from '@hapi/boom';
 
 import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
-import type { CreateServiceAccountParams, ServiceAccount } from '@kbn/core-security-server';
+import type {
+  CreateServiceAccountParams,
+  ServiceAccount,
+  ServiceAccountWorkloadBinder,
+} from '@kbn/core-security-server';
 import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
 import { z } from '@kbn/zod';
 
@@ -21,12 +25,14 @@ import { SERVICE_ACCOUNT_ROLE_ASSIGNMENTS } from './role_assignments';
 import { ServiceAccountTokenExchangeError } from './token_exchange_error';
 import type {
   CloudProjectContext,
-  ListedServiceAccount,
   ListServiceAccountsParams,
-  ListServiceAccountsResult,
   ServiceAccountsBackend,
 } from './types';
 import type { SecurityLicense } from '../../common';
+import type {
+  ListServiceAccountsResponse,
+  ServiceAccountDirectoryEntry,
+} from '../../common/service_accounts';
 import {
   SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
   SERVICE_ACCOUNT_TOKEN_MAX_LENGTH,
@@ -39,6 +45,7 @@ import {
   getUiamAuthorizationHeaderFromRequest,
   isExternalApiKey,
   type UiamServiceAccount,
+  type UiamServiceAccountCreator,
   type UiamServicePublic,
 } from '../uiam';
 
@@ -66,13 +73,41 @@ const serviceAccountCreatorSchema = z.discriminatedUnion('type', [
   }),
 ]);
 
-const listedServiceAccountSchema = serviceAccountSchema.extend({
+/** What get and list report on top of the create payload. */
+const serviceAccountDetailsSchema = serviceAccountSchema.extend({
   creator: serviceAccountCreatorSchema,
 });
 
 const listServiceAccountsResponseSchema = z.object({
-  service_accounts: z.array(listedServiceAccountSchema),
-  after: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH).optional(),
+  service_accounts: z.array(serviceAccountDetailsSchema),
+  next_page: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH).optional(),
+});
+
+/**
+ * UIAM identifies a user by the numeric id that is also their Kibana username on serverless, so
+ * the id maps straight onto the binder's `username`.
+ */
+const toCreatedBy = (creator: UiamServiceAccountCreator): ServiceAccountWorkloadBinder =>
+  creator.type === 'user'
+    ? { type: 'user', username: creator.id }
+    : { type: 'api_key', apiKeyId: creator.id, variant: 'uiam' };
+
+/**
+ * Narrows a UIAM account to the directory entry. UIAM has no disabled state and reports no role
+ * names yet, and Kibana exchanges for a token rather than holding one, so those three answers
+ * are constants here.
+ */
+const toDirectoryEntry = ({
+  id,
+  name,
+  creator,
+}: z.infer<typeof serviceAccountDetailsSchema>): ServiceAccountDirectoryEntry => ({
+  id,
+  name,
+  roles: [],
+  enabled: true,
+  hasCredential: true,
+  createdBy: toCreatedBy(creator),
 });
 
 /**
@@ -228,7 +263,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
   async list(
     request: KibanaRequest,
     params: ListServiceAccountsParams = {}
-  ): Promise<ListServiceAccountsResult> {
+  ): Promise<ListServiceAccountsResponse> {
     if (!this.license.isEnabled()) {
       throw Boom.forbidden(
         'Cannot list service accounts: security features are disabled in Elasticsearch'
@@ -254,14 +289,18 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
         throw new Error('Error occurred during service account listing.');
       }
 
-      return parsed.data;
+      const { service_accounts: serviceAccounts, next_page: nextPage } = parsed.data;
+      return {
+        service_accounts: serviceAccounts.map(toDirectoryEntry),
+        ...(nextPage !== undefined ? { next_page: nextPage } : {}),
+      };
     } catch (e) {
       this.logger.error(`Failed to list service accounts: ${getDetailedErrorMessage(e)}`);
       throw e;
     }
   }
 
-  async get(request: KibanaRequest, id: string): Promise<ListedServiceAccount> {
+  async get(request: KibanaRequest, id: string): Promise<ServiceAccountDirectoryEntry> {
     if (!this.license.isEnabled()) {
       throw Boom.forbidden(
         'Cannot get a service account: security features are disabled in Elasticsearch'
@@ -279,7 +318,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
 
     try {
       const result = await this.uiam.getServiceAccount(id);
-      const parsed = listedServiceAccountSchema.safeParse(result);
+      const parsed = serviceAccountDetailsSchema.safeParse(result);
       if (!parsed.success) {
         this.logger.error(
           `Service account payload from UIAM failed validation: ${parsed.error.message}`
@@ -287,7 +326,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
         throw new Error('Error occurred during service account retrieval.');
       }
 
-      return parsed.data;
+      return toDirectoryEntry(parsed.data);
     } catch (e) {
       this.logger.error(`Failed to get service account: ${getDetailedErrorMessage(e)}`);
       throw e;

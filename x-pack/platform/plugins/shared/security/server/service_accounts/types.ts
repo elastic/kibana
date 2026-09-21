@@ -14,46 +14,17 @@ import type {
 
 import type { ServiceAccountWorkloadBindingsApi } from './bindings';
 import type { CreateServiceAccountFakeRequestParams } from './fake_requests';
+import type {
+  ListServiceAccountsResponse,
+  ServiceAccountDirectoryEntry,
+} from '../../common/service_accounts';
 
 /**
- * Query parameters for listing service accounts.
+ * Paging parameters for listing service accounts. `after` is the `next_page` cursor of the
+ * previous page, opaque to the caller and specific to the backend that issued it.
  */
 export interface ListServiceAccountsParams {
   limit?: number;
-  after?: string;
-  q?: string;
-}
-
-/**
- * The principal that created a service account.
- */
-export type ServiceAccountCreator =
-  | {
-      type: 'user';
-      id: string;
-      first_name?: string;
-      last_name?: string;
-    }
-  | {
-      type: 'api-key';
-      id: string;
-      description?: string;
-    };
-
-/**
- * A service account as returned by UIAM get and list. Richer than Core's create payload: UIAM
- * includes `creator`.
- */
-export interface ListedServiceAccount extends ServiceAccount {
-  creator: ServiceAccountCreator;
-}
-
-/**
- * Page of service accounts assumable by this Kibana. `after` is the continuation token when UIAM
- * has more results.
- */
-export interface ListServiceAccountsResult {
-  service_accounts: ListedServiceAccount[];
   after?: string;
 }
 
@@ -67,26 +38,22 @@ export interface ServiceAccountsBackend {
   create(request: KibanaRequest, params: CreateServiceAccountParams): Promise<ServiceAccount>;
 
   /**
-   * Lists service accounts assumable by this Kibana. Not part of Core's consumer contract — Core
-   * stays create-only; this exists so the security plugin can expose a directory over HTTP.
+   * Lists the service accounts this Kibana can see, one page at a time. Not part of Core's
+   * consumer contract: Core stays create-only, and the directory exists for the security plugin's
+   * own HTTP routes.
    *
-   * The Kibana caller must hold `manage_security`. The UIAM call itself is authenticated as
-   * Kibana (mTLS / shared secret), not as the user.
+   * Authorizes the Kibana caller first. On UIAM the outbound call is then authenticated as Kibana
+   * over mTLS, not as the user.
    */
   list(
     request: KibanaRequest,
     params?: ListServiceAccountsParams
-  ): Promise<ListServiceAccountsResult>;
+  ): Promise<ListServiceAccountsResponse>;
 
   /**
-   * Fetches one service account by id. Not part of Core's consumer contract — Core stays
-   * create-only; this exists so the security plugin can look up an account when list is
-   * unavailable.
-   *
-   * The Kibana caller must hold `manage_security`. The UIAM call itself is authenticated as
-   * Kibana (mTLS / shared secret), not as the user.
+   * Fetches one service account by id, with the same authorization model as {@link list}.
    */
-  get(request: KibanaRequest, id: string): Promise<ListedServiceAccount>;
+  get(request: KibanaRequest, id: string): Promise<ServiceAccountDirectoryEntry>;
 
   /**
    * Mints a fake `KibanaRequest` bound to the given service account, for use with `asScoped(...)`

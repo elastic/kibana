@@ -20,10 +20,7 @@ export { ServiceAccountsService } from './service_accounts_service';
 export type { ServiceAccountsServiceStartParams } from './service_accounts_service';
 export type {
   CloudProjectContext,
-  ListedServiceAccount,
   ListServiceAccountsParams,
-  ListServiceAccountsResult,
-  ServiceAccountCreator,
   ServiceAccountsBackend,
   ServiceAccountsServiceStart,
 } from './types';
