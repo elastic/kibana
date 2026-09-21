@@ -29,17 +29,17 @@ import { useApproveProposal, useDismissProposal } from '@kbn/agentic-investigati
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
+import { useProposalChartsSummary } from '../../hooks/use_proposal_charts_summary';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { AlertZeroPageHeader } from '../../components/alertzero_page_header';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
-import { useProposalsList } from '../../hooks/use_proposals_api';
+import { useProposalsByCategory, useClosedProposals } from '../../hooks/use_proposals_api';
 import { useOpenInChat } from '../../hooks/use_open_in_chat';
 import { useConversationsUrlParams } from './conversations_url_params';
 import { useInvestigationDetails } from './use_investigation_details';
 import { QUEUE_PAGE_INFO, DECISION_ERRORS } from './translations';
 import { ProposalsTrendChartRow } from '../../components/proposals_trend_chart';
 import { DismissProposalModal } from '../../components/pending_proposals/dismiss_proposal_modal';
-import { CLOSED_GROUP_KEY } from '../../../common/proposals/list';
 import type { ProposalItem } from '../../../common/proposals/list';
 import { proposalToInvestigation } from './proposal_to_investigation';
 
@@ -56,7 +56,19 @@ const decisionErrorMessage = (error: unknown): string => {
 
 export const ConversationsPage: React.FC = () => {
   const { euiTheme } = useEuiTheme();
-  const { data, isLoading, error } = useProposalsList();
+  const respond = useProposalsByCategory('respond');
+  const investigate = useProposalsByCategory('investigate');
+  const configure = useProposalsByCategory('configure');
+  const closed = useClosedProposals();
+
+  // An error only counts once nothing is cached, so a failed refetch does not
+  // blank a queue that is still readable.
+  const isLoading =
+    respond.isLoading || investigate.isLoading || configure.isLoading || closed.isLoading;
+  const hasAnyData = respond.data ?? investigate.data ?? configure.data ?? closed.data;
+  const anyError = respond.error ?? investigate.error ?? configure.error ?? closed.error;
+  const error = anyError && !hasAnyData ? anyError : null;
+
   const approve = useApproveProposal();
   const dismiss = useDismissProposal();
   const [surfaceFilter, setSurfaceFilter] = useState<string | null>(null);
@@ -76,9 +88,14 @@ export const ConversationsPage: React.FC = () => {
   // Raw proposals indexed by id so that approve can submit the original
   // actionInput without it needing a field on Investigation.
   const proposalsById = useMemo((): Map<string, ProposalItem> => {
-    const all: ProposalItem[] = Object.values(data?.groups ?? {}).flat();
+    const all: ProposalItem[] = [
+      ...(respond.data?.proposals ?? []),
+      ...(investigate.data?.proposals ?? []),
+      ...(configure.data?.proposals ?? []),
+      ...(closed.data?.proposals ?? []),
+    ];
     return new Map(all.map((p) => [p.id, p]));
-  }, [data?.groups]);
+  }, [respond.data, investigate.data, configure.data, closed.data]);
 
   // Adapt all proposals (including closed) into Investigation shape. The
   // adapter sets recommendedAction: 'closed' for decided ones, which routes
@@ -88,16 +105,10 @@ export const ConversationsPage: React.FC = () => {
     [proposalsById]
   );
 
-  // Header count: pending groups only — closed proposals are excluded.
-  // "3 actions need you" must not count decisions already made.
-  const openCount = useMemo(
-    () =>
-      Object.entries(data?.groups ?? {}).reduce(
-        (sum, [key, items]) => (key === CLOSED_GROUP_KEY ? sum : sum + items.length),
-        0
-      ),
-    [data?.groups]
-  );
+  // From chartsSummary rather than the pages: no page-size cap, and every
+  // category. Shares the chart row's query key, so it costs no extra request.
+  const chartsSummary = useProposalChartsSummary();
+  const openCount = chartsSummary.data?.currentOpen ?? 0;
 
   const onClickAction: BaseActionsProps['onClickAction'] = useCallback((action, recordId) => {
     setModalState({ type: action, recordId });
@@ -223,8 +234,8 @@ export const ConversationsPage: React.FC = () => {
     [conversations, selectedIdForRecommendedAction]
   );
 
-  // `listByWindow` sorts createdAt-ascending, which buries the proposals that matter;
-  // the adapter's synthetic priorityScore is what restores an impact-first ordering.
+  // Each category pages by its own recency, so the merged list has no single
+  // order; priorityScore is what restores an impact-first one.
   const sortedConversations = useMemo(
     () =>
       conversations.toSorted((a, b) => {
@@ -286,7 +297,7 @@ export const ConversationsPage: React.FC = () => {
             isLoading={isLoading}
             // Keep the count visible during a background refetch: only hide it
             // when there is an error AND no previously-loaded data to show.
-            hasError={Boolean(error) && !data}
+            hasError={Boolean(error)}
             // Closed proposals are rows but not work: a window holding only decisions
             // already made is an empty queue, and must not read as "0 actions need you"
             // beside a populated header.
@@ -315,13 +326,13 @@ export const ConversationsPage: React.FC = () => {
           </EuiFlexItem>
         ) : null}
 
-        {error && !data ? (
+        {error ? (
           <EuiFlexItem grow={false}>
             <EuiEmptyPrompt iconType="warning" title={<h2>{QUEUE_PAGE_INFO.loadError}</h2>} />
           </EuiFlexItem>
         ) : null}
 
-        {!isLoading && !(error && !data) && filteredQueueItems.length === 0 ? (
+        {!isLoading && !error && filteredQueueItems.length === 0 ? (
           <EuiFlexItem grow={false}>
             <EuiEmptyPrompt
               iconType="chartTagCloud"
@@ -330,7 +341,7 @@ export const ConversationsPage: React.FC = () => {
           </EuiFlexItem>
         ) : null}
 
-        {!isLoading && !(error && !data)
+        {!isLoading && !error
           ? groupedBriefingItems.map((group) => (
               <EuiFlexItem key={group.id} grow={false}>
                 <ConversationQueue
