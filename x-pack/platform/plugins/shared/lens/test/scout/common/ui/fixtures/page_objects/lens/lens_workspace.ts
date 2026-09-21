@@ -359,6 +359,14 @@ export class LensWorkspace {
     return JSON.parse(debugJson) as DebugState;
   }
 
+  /**
+   * Filters the visualization in from an elastic-charts legend item (e.g. `jpg`).
+   */
+  async filterLegend(value: string) {
+    await this.page.testSubj.click(`legend-${value}`);
+    await this.page.testSubj.click(`legend-${value}-filterIn`);
+  }
+
   async openMessageList() {
     await this.messageListTrigger.click();
   }
