@@ -15176,10 +15176,6 @@ packages:
     resolution: {integrity: sha512-A6p/pu/6fyBcA1TRz/GqWYPViplrftcW2gZC9q79ngNCKAeR/X3gcEdXQHl4KNXV+3wgIJ1CPkJQ3IHM6lcsyA==}
     engines: {node: '>=18'}
 
-  default-browser@5.2.1:
-    resolution: {integrity: sha512-WY/3TUME0x3KPYdRRxEJJvXRHV4PyPoUsxtZa78lwItwRQRHhd2U9xOscaT/YTf8uCXIAjeJOFBVEh/7FtD8Xg==}
-    engines: {node: '>=18'}
-
   default-browser@5.5.1:
     resolution: {integrity: sha512-m1pAzaJgZ/gssEqlOhJkPJp8Xly7QyW6xcrkUa2KKcDeDSEMP7X8xipU3snUcfisTQx0w1AGae+9UtJSfVnXGw==}
     engines: {node: '>=18'}
@@ -21922,10 +21918,6 @@ packages:
 
   tinycolor2@1.4.1:
     resolution: {integrity: sha512-5gQXogvRKAhJChgQPSAXaXbrQVq+w2Ckl/5jeno5N9eMcYbz0docSS3n0YNywAyDQBsUFokmHzNM8yvX2+eLVg==}
-
-  tinyglobby@0.2.15:
-    resolution: {integrity: sha512-j2Zq4NyQYG5XMST4cbs02Ak8iJUdxRM0XI5QyxXuZOzKOINmWurp3smXu3y5wDcJrptwpSjgXHzIQxR0omXljQ==}
-    engines: {node: '>=12.0.0'}
 
   tinyglobby@0.2.17:
     resolution: {integrity: sha512-wXR/dYpcqKmfWpEdZjiKJOwCNFndD0DMnrW/cYjVGttEkBfVgcLFHoNrlj47mjOVic9yyNu65alsgF4NQyTa2g==}
@@ -32084,11 +32076,6 @@ snapshots:
 
   default-browser-id@5.0.0: {}
 
-  default-browser@5.2.1:
-    dependencies:
-      bundle-name: 4.1.0
-      default-browser-id: 5.0.0
-
   default-browser@5.5.1:
     dependencies:
       bundle-name: 4.1.0
@@ -33481,7 +33468,7 @@ snapshots:
       require-and-forget: 1.0.1(supports-color@8.1.1)
       shelljs: 0.10.0
       spec-change: 1.11.21(supports-color@8.1.1)
-      tinyglobby: 0.2.15
+      tinyglobby: 0.2.17
       tsx: 4.21.0
     transitivePeerDependencies:
       - '@babel/core'
@@ -33500,7 +33487,7 @@ snapshots:
       acorn-walk: 8.3.4
       debug: 4.4.3(supports-color@8.1.1)
       simple-bin-help: 1.8.0
-      tinyglobby: 0.2.15
+      tinyglobby: 0.2.17
     transitivePeerDependencies:
       - '@babel/core'
       - supports-color
@@ -36932,7 +36919,7 @@ snapshots:
 
   open@10.1.0:
     dependencies:
-      default-browser: 5.2.1
+      default-browser: 5.5.1
       define-lazy-prop: 3.0.0
       is-inside-container: 1.0.0
       is-wsl: 3.1.0
@@ -39379,7 +39366,7 @@ snapshots:
       is-plain-obj: 4.1.0
       semver: 7.8.0
       sort-object-keys: 1.1.3
-      tinyglobby: 0.2.15
+      tinyglobby: 0.2.17
 
   source-map-generator@0.8.0: {}
 
@@ -39492,7 +39479,7 @@ snapshots:
       deep-equal: 2.2.3
       dependency-tree: 11.4.0(supports-color@8.1.1)
       lazy-ass: 2.0.3
-      tinyglobby: 0.2.15
+      tinyglobby: 0.2.17
     transitivePeerDependencies:
       - supports-color
 
@@ -40108,11 +40095,6 @@ snapshots:
   tiny-warning@1.0.3: {}
 
   tinycolor2@1.4.1: {}
-
-  tinyglobby@0.2.15:
-    dependencies:
-      fdir: 6.5.0(picomatch@4.0.4)
-      picomatch: 4.0.4
 
   tinyglobby@0.2.17:
     dependencies:
