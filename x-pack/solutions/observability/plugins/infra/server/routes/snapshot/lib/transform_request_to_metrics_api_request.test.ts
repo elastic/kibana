@@ -56,6 +56,7 @@ const snapshotRequest: SnapshotRequest = {
   accountId: '',
   region: '',
   includeTimeseries: true,
+  schema: 'ecs',
 };
 
 const metricsApiRequest: MetricsAPIRequest = {
@@ -182,6 +183,47 @@ describe('transformRequestToMetricsAPIRequest', () => {
       },
     });
     expect(result.groupBy).toContain('host.name');
+  });
+
+  test('returns a MetricsApiRequest for pods with semconv identity and kubeletstats filter', async () => {
+    const compositeSize = 3000;
+    const semconvPodRequest: SnapshotRequest = {
+      ...snapshotRequest,
+      nodeType: 'pod',
+      schema: 'semconv',
+      groupBy: [{ field: 'k8s.namespace.name' }],
+    };
+
+    const result = await transformRequestToMetricsAPIRequest({
+      client: {} as ESSearchClient,
+      source,
+      snapshotRequest: semconvPodRequest,
+      compositeSize,
+    });
+
+    expect(result.groupBy).toEqual(['k8s.namespace.name', 'k8s.pod.uid']);
+    expect(result.filters).toEqual({
+      bool: {
+        filter: [
+          {
+            term: {
+              'data_stream.dataset': 'kubeletstatsreceiver.otel',
+            },
+          },
+        ],
+      },
+    });
+
+    const metadataMetric = result.metrics.find((metric) => metric.id === '__metadata__');
+    expect(metadataMetric?.aggregations).toEqual({
+      __metadata__: {
+        top_metrics: {
+          metrics: [{ field: 'k8s.pod.name' }],
+          size: 1,
+          sort: { '@timestamp': 'desc' },
+        },
+      },
+    });
   });
 
   test('returns a MetricsApiRequest for containers with multiple module filters', async () => {
