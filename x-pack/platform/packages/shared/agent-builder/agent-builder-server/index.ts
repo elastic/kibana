@@ -131,6 +131,8 @@ export type {
   ExecuteAgentResult,
   FindExecutionsFilter,
   FindExecutionsOptions,
+  AbortExecutionOptions,
+  AbortExecutionResult,
   AgentExecutionService,
 } from './execution';
 export type {
@@ -143,6 +145,10 @@ export type {
 export type { SkillRegistry } from './skills';
 export type { RendererTypeDefinition } from './renderers';
 export type {
+  ConversationEventTypeDefinition,
+  ConversationEventPayloadOf,
+} from './conversation_events';
+export type {
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,
   TopSnippetsConfig,
@@ -150,6 +156,7 @@ export type {
   ToolsStart,
   AttachmentsSetup,
   RenderersSetup,
+  ConversationEventsSetup,
   SkillsSetup,
   SkillsStart,
   AgentsSetup,
@@ -172,7 +179,11 @@ export type {
   DeleteAttachmentArgs,
   ListAttachmentsArgs,
 } from './attachments';
-export type { ConversationPublicClient, ConversationCreatePublicRequest } from './conversations';
+export type {
+  ConversationAddEventsRequest,
+  ConversationCreatePublicRequest,
+  ConversationPublicClient,
+} from './conversations';
 export { describeZodSchema, formatSchemaForLlm } from './tools';
 export type {
   AvailabilityContext,
@@ -180,3 +191,9 @@ export type {
   AvailabilityHandler,
   AvailabilityConfig,
 } from './availability';
+export type {
+  ConnectorSummary,
+  ConnectorSubActionDetail,
+  ConnectorDetail,
+} from './agent_connectors';
+export { listAgentConnectors, getAgentConnectorDetail } from './agent_connectors';
