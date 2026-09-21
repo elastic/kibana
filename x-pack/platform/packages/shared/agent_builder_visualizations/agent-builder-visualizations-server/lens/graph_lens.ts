@@ -206,13 +206,7 @@ export const createVisualizationGraph = async (
       `Generating visualization configuration (attempt ${attempt}/${MAX_RETRY_ATTEMPTS})`
     );
 
-    // Extract ES|QL query from previous actions
-    const lastGenerateEsqlAction = state.actions
-      .filter((action): action is GenerateEsqlAction => action.type === 'generate_esql')
-      .filter((action) => action.success && action.query)
-      .pop();
-    const esqlQuery = lastGenerateEsqlAction?.query || state.esqlQuery;
-    const columns = lastGenerateEsqlAction?.columns ?? state.columns;
+    const { esqlQuery, columns } = state;
 
     // Build context from previous actions for retry attempts
     const previousActionContext = state.actions
