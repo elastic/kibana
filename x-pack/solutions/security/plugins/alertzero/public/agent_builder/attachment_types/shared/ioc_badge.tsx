@@ -89,7 +89,7 @@ export const IocBadge: React.FC<IocBadgeProps> = ({
 
   return (
     <span data-test-subj={testSubj}>
-      <ActionableBadge item={value} index={index} actions={actions} textSize="s" />
+      <ActionableBadge item={value} index={index} actions={actions} />
     </span>
   );
 };

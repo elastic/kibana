@@ -16,7 +16,6 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
-import type { EuiTextProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
@@ -36,20 +35,9 @@ interface ActionableBadgeProps {
   item: string;
   index: number;
   actions?: MultiValueCellAction[];
-  /**
-   * EuiText size for the badge's label. Defaults to 'm' to preserve existing
-   * call sites (cloud security posture tables); attachment renderers pass 's'
-   * to match denser inline card typography.
-   */
-  textSize?: EuiTextProps['size'];
 }
 
-export const ActionableBadge = ({
-  item,
-  index,
-  actions = [],
-  textSize = 'm',
-}: ActionableBadgeProps) => {
+export const ActionableBadge = ({ item, index, actions = [] }: ActionableBadgeProps) => {
   const [showActions, setShowActions] = useState(false);
   const { euiTheme } = useEuiTheme();
   const buttonRef = useRef<HTMLDivElement | null>(null);
@@ -165,7 +153,7 @@ export const ActionableBadge = ({
           css={css`
             text-overflow: ellipsis;
           `}
-          size={textSize}
+          size="m"
         >
           {item}
         </EuiText>
