@@ -17,7 +17,7 @@ import {
   observableTypesMock,
   templatesConfigurationMock,
 } from '../../containers/mock';
-import { renderWithTestingProviders } from '../../common/mock';
+import { noCasesSettingsPermission, renderWithTestingProviders } from '../../common/mock';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { usePersistConfiguration } from '../../containers/configure/use_persist_configuration';
 import { useGetActionTypes } from '../../containers/configure/use_action_types';
@@ -388,6 +388,79 @@ describe('ConfigureCasesRedesign', () => {
         templates: templatesConfigurationMock,
       })
     );
+  });
+
+  describe('extract observables default switch', () => {
+    it('renders the extract observables section and switch checked by default', async () => {
+      renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+      expect(
+        await screen.findByTestId('cases-redesign-extract-observables-section')
+      ).toBeInTheDocument();
+      expect(screen.getByTestId('extract-observables-default-switch')).toHaveAttribute(
+        'aria-checked',
+        'true'
+      );
+    });
+
+    it('persists extractObservables false when the switch is toggled off', async () => {
+      renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+      await userEvent.click(await screen.findByTestId('extract-observables-default-switch'));
+
+      expect(persistCaseConfigure).toHaveBeenCalledWith(
+        expect.objectContaining({
+          extractObservables: false,
+          customFields: customFieldsConfigurationMock,
+          templates: templatesConfigurationMock,
+        })
+      );
+    });
+
+    it('persists extractObservables true when the switch is toggled on', async () => {
+      useGetCaseConfigurationMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        data: {
+          ...useCaseConfigureResponse.data,
+          customFields: customFieldsConfigurationMock,
+          templates: templatesConfigurationMock,
+          extractObservables: false,
+        },
+      }));
+
+      renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+      await userEvent.click(await screen.findByTestId('extract-observables-default-switch'));
+
+      expect(persistCaseConfigure).toHaveBeenCalledWith(
+        expect.objectContaining({
+          extractObservables: true,
+          customFields: customFieldsConfigurationMock,
+          templates: templatesConfigurationMock,
+        })
+      );
+    });
+
+    it('disables the switch when the user lacks settings permissions', async () => {
+      renderWithTestingProviders(<ConfigureCasesRedesign />, {
+        wrapperProps: { permissions: noCasesSettingsPermission() },
+      });
+
+      expect(await screen.findByTestId('extract-observables-default-switch')).toBeDisabled();
+    });
+
+    it('does not render the extract observables section when observables are disabled', async () => {
+      renderWithTestingProviders(<ConfigureCasesRedesign />, {
+        wrapperProps: { owner: ['observability'] },
+      });
+
+      await screen.findByTestId('cases-redesign-settings-panel');
+
+      expect(
+        screen.queryByTestId('cases-redesign-extract-observables-section')
+      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('extract-observables-default-switch')).not.toBeInTheDocument();
+    });
   });
 
   it('renders observable types as line-separated rows without a subdued panel', async () => {

@@ -35,6 +35,7 @@ export const usePersistConfiguration = () => {
       templates,
       connector,
       observableTypes,
+      extractObservables,
     }: Request) => {
       if (isEmpty(id) || isEmpty(version)) {
         return postCaseConfigure({
@@ -44,6 +45,7 @@ export const usePersistConfiguration = () => {
           templates: templates ?? [],
           owner: owner[0],
           observableTypes,
+          extractObservables,
         });
       }
 
@@ -54,6 +56,7 @@ export const usePersistConfiguration = () => {
         customFields: customFields ?? [],
         templates: templates ?? [],
         observableTypes,
+        extractObservables,
       });
     },
     {

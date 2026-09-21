@@ -170,6 +170,7 @@ export type CasesConfigurationUI = Pick<
   | 'version'
   | 'owner'
   | 'observableTypes'
+  | 'extractObservables'
 >;
 
 export type CasesConfigurationUICustomField = CasesConfigurationUI['customFields'][number];
