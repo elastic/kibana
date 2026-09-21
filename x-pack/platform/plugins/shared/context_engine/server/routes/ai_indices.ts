@@ -284,7 +284,7 @@ const aiIndexPropertiesSchema = {
     })
   ),
   memory_enabled: schema.boolean({
-    defaultValue: false,
+    defaultValue: true,
     meta: { description: 'Whether this AI index accepts memory writes.' },
   }),
   feedback_analysis: schema.maybe(feedbackAnalysisSchema),

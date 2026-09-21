@@ -117,21 +117,21 @@ apiTest.describe('AI-index memory toggle', { tag: tags.stateful.classic }, () =>
         responseType: 'json',
       });
       expect(defaultResponse).toHaveStatusCode(200);
-      expect(defaultResponse.body.memory_enabled).toBe(false);
+      expect(defaultResponse.body.memory_enabled).toBe(true);
 
       const updateResponse = await apiClient.put(path, {
         headers,
         responseType: 'json',
-        body: { ...body, memory_enabled: true },
+        body: { ...body, memory_enabled: false },
       });
       expect(updateResponse).toHaveStatusCode(200);
 
-      const enabledResponse = await apiClient.get(path, {
+      const disabledResponse = await apiClient.get(path, {
         headers,
         responseType: 'json',
       });
-      expect(enabledResponse).toHaveStatusCode(200);
-      expect(enabledResponse.body.memory_enabled).toBe(true);
+      expect(disabledResponse).toHaveStatusCode(200);
+      expect(disabledResponse.body.memory_enabled).toBe(false);
     } finally {
       await apiClient.delete(path, { headers, responseType: 'json' });
       await esClient.indices.deleteDataStream({ name: dest }, { ignore: [404] });
@@ -203,7 +203,7 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
 
       expect(response).toHaveStatusCode(200);
       expect(response.body).toMatchObject({ id: AI_INDEX.lifecycle, ...aiIndexBody });
-      expect(response.body.memory_enabled).toBe(false);
+      expect(response.body.memory_enabled).toBe(true);
       expect(response.body.date_created).toMatch(/^\d{4}-\d{2}-\d{2}T/);
       expect(response.body.date_modified).toMatch(/^\d{4}-\d{2}-\d{2}T/);
       dateCreated = response.body.date_created;
@@ -225,7 +225,7 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
       const response = await apiClient.put(path, {
         headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
         responseType: 'json',
-        body: { ...aiIndexBody, description: 'Updated description', memory_enabled: true },
+        body: { ...aiIndexBody, description: 'Updated description', memory_enabled: false },
       });
 
       expect(response).toHaveStatusCode(200);
@@ -236,7 +236,7 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
         responseType: 'json',
       });
       expect(updatedResponse.body.description).toBe('Updated description');
-      expect(updatedResponse.body.memory_enabled).toBe(true);
+      expect(updatedResponse.body.memory_enabled).toBe(false);
       expect(updatedResponse.body.date_created).toBe(dateCreated);
     });
 
