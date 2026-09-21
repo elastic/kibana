@@ -128,6 +128,10 @@ export const UpgradePrebuiltRulesTableButtons = ({
   const onUpdateAllRulesToTarget = useCallback(async () => {
     closeAllPopover();
 
+    if (!allRulesCustomizationCounts) {
+      return;
+    }
+
     if (!(await confirmForceUpgradeAllRulesToTarget(allRulesCustomizationCounts))) {
       return;
     }
@@ -183,7 +187,13 @@ export const UpgradePrebuiltRulesTableButtons = ({
     () =>
       isRulesCustomizationEnabled
         ? {
-            isDisabled: !canEditRules || !hasRulesToUpgrade || isRequestInProgress,
+            // Force-upgrading everything skips the confirmation modal when no rule is customized,
+            // so the action must stay disabled until the counts are actually known.
+            isDisabled:
+              !canEditRules ||
+              !hasRulesToUpgrade ||
+              isRequestInProgress ||
+              allRulesCustomizationCounts === null,
             tooltip: secondaryActionsButtonTooltip,
             ariaLabel: i18n.UPDATE_ALL_RULES_MORE_ACTIONS_ARIA_LABEL,
             dataTestSubj: 'upgradeAllRulesButton-secondary',
@@ -194,6 +204,7 @@ export const UpgradePrebuiltRulesTableButtons = ({
           }
         : undefined,
     [
+      allRulesCustomizationCounts,
       allRulesToTargetMenuItems,
       canEditRules,
       closeAllPopover,

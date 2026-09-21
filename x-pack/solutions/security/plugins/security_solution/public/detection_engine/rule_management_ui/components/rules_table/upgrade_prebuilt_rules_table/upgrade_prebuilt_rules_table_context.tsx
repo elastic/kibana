@@ -97,8 +97,9 @@ export interface UpgradePrebuiltRulesTableState {
   sortingOptions: UpgradePrebuiltRulesSortingOptions;
   /**
    * Customized-rule counts for the full filtered set of upgradeable rules.
+   * `null` until the upgrade review has loaded.
    */
-  allRulesCustomizationCounts: RuleUpgradeCustomizationCounts;
+  allRulesCustomizationCounts: RuleUpgradeCustomizationCounts | null;
 }
 
 export interface UpgradePrebuiltRulesTableActions {

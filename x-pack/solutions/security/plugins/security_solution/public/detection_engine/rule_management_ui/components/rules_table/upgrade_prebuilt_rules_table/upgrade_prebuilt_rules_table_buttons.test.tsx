@@ -428,6 +428,31 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
       expect(screen.getByTestId('upgradeAllRulesButton-secondary')).toBeDisabled();
     });
 
+    it('disables only the All secondary segment while the upgrade review has not loaded yet', () => {
+      mockContext({ allRulesCustomizationCounts: null });
+      renderButtons([]);
+
+      expect(screen.getByTestId('upgradeAllRulesButton')).toBeEnabled();
+      expect(screen.getByTestId('upgradeAllRulesButton-secondary')).toBeDisabled();
+    });
+
+    it('never force-upgrades when customization counts are unavailable', async () => {
+      const user = userEvent.setup();
+      const upgradeAllRulesToTarget = jest.fn();
+
+      mockContext({ upgradeAllRulesToTarget, allRulesCustomizationCounts: null });
+      renderButtons([]);
+
+      // The disabled segment swallows the click, so the popover and the action never appear.
+      await user.click(screen.getByTestId('upgradeAllRulesButton-secondary'));
+
+      expect(screen.queryByTestId('upgradeAllRulesToTargetAction')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('forceUpgradeAllRulesToTargetConfirmModal')
+      ).not.toBeInTheDocument();
+      expect(upgradeAllRulesToTarget).not.toHaveBeenCalled();
+    });
+
     it('disables both All segments when the user lacks edit privileges', () => {
       mockUseUserPrivileges.mockReturnValue({
         ...initialUserPrivilegesState(),
@@ -755,7 +780,7 @@ function mockContext({
   loadingRules?: string[];
   isRefetching?: boolean;
   isInitializingPrebuiltRulesPackage?: boolean;
-  allRulesCustomizationCounts?: { total: number; customizedCount: number };
+  allRulesCustomizationCounts?: { total: number; customizedCount: number } | null;
   upgradeRules?: jest.Mock;
   upgradeAllRules?: jest.Mock;
   upgradeRulesToTarget?: jest.Mock;

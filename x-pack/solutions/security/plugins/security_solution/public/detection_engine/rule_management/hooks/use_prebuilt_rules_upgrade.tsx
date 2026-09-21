@@ -339,11 +339,16 @@ export function usePrebuiltRulesUpgrade({
     [rulesUpgradeState]
   );
 
-  const allRulesCustomizationCounts = useMemo<RuleUpgradeCustomizationCounts>(
-    () => ({
-      total: upgradeReviewResponse?.total ?? 0,
-      customizedCount: upgradeReviewResponse?.counts?.isCustomized?.true ?? 0,
-    }),
+  // Stays `null` until the upgrade review has loaded so that callers fail closed: a missing or
+  // failed review must never be mistaken for "no customized rules" when confirming a force upgrade.
+  const allRulesCustomizationCounts = useMemo<RuleUpgradeCustomizationCounts | null>(
+    () =>
+      upgradeReviewResponse
+        ? {
+            total: upgradeReviewResponse.total,
+            customizedCount: upgradeReviewResponse.counts?.isCustomized?.true ?? 0,
+          }
+        : null,
     [upgradeReviewResponse]
   );
 

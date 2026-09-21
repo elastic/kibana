@@ -403,7 +403,7 @@ describe('usePrebuiltRulesUpgrade', () => {
       });
     });
 
-    it('defaults to { total: 0, customizedCount: 0 } when there is no review data', () => {
+    it('is null while the review has not loaded so callers cannot mistake it for zero customized rules', () => {
       mockUsePrebuiltRulesUpgradeReview.mockReturnValue({
         data: undefined,
         refetch: jest.fn(),
@@ -418,10 +418,7 @@ describe('usePrebuiltRulesUpgrade', () => {
         wrapper: TestProviders,
       });
 
-      expect(result.current.allRulesCustomizationCounts).toEqual({
-        total: 0,
-        customizedCount: 0,
-      });
+      expect(result.current.allRulesCustomizationCounts).toBeNull();
     });
 
     it('getSelectedRulesCustomizationCounts counts customized rules among the selected ids', () => {
@@ -538,7 +535,7 @@ describe('usePrebuiltRulesUpgrade', () => {
       expect(
         Object.keys(result.current.getSelectedRulesCustomizationCounts(['rule-a'])).sort()
       ).toEqual(['customizedCount', 'total']);
-      expect(Object.keys(result.current.allRulesCustomizationCounts).sort()).toEqual([
+      expect(Object.keys(result.current.allRulesCustomizationCounts ?? {}).sort()).toEqual([
         'customizedCount',
         'total',
       ]);
