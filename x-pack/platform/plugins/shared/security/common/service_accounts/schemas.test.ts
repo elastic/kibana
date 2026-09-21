@@ -34,9 +34,12 @@ describe('service account schemas', () => {
     );
 
     // The name is interpolated into an Elasticsearch URL path, so the charset rule is what keeps
-    // a traversal or a query separator from reaching the transport layer.
+    // a traversal or a query separator from reaching the transport layer. The trailing newline
+    // pins JavaScript's `$` to the true end of input: it would pass if the regex ever grew an
+    // `m` flag.
     it.each([
       '',
+      'nightshift-relay\n',
       '_leading',
       '-leading',
       'with space',
