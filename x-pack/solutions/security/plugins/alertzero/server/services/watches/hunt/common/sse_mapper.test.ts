@@ -10,7 +10,7 @@ import { significantSecurityEventAttachmentDataSchema } from '../../../../../com
 import { huntCoordinator } from '../hunt_coordinator';
 import { buildSseData, buildSseAttachmentId } from './sse_mapper';
 
-jest.mock('../common/resolve_index_scope', () => ({
+jest.mock('./resolve_index_scope', () => ({
   resolveIndexScope: jest.fn().mockResolvedValue({
     technology: 'aws_iam',
     status: 'ok',
@@ -36,8 +36,18 @@ const HIT_TIER1_RESULT = {
   timeRange: { from: '2026-07-30T13:00:00.000Z', to: '2026-07-30T15:00:00.000Z' },
   counts: { totalHits: 4, returnedHits: 4, affectedHosts: 1, affectedUsers: 1 },
   hits: [
-    { index: 'logs-aws.cloudtrail-default', id: 'evt-1', score: 1.2, '@timestamp': '2026-07-30T13:05:00.000Z' },
-    { index: '.alerts-security.alerts-default', id: 'evt-2', score: 0.9, '@timestamp': '2026-07-30T13:06:00.000Z' },
+    {
+      index: 'logs-aws.cloudtrail-default',
+      id: 'evt-1',
+      score: 1.2,
+      '@timestamp': '2026-07-30T13:05:00.000Z',
+    },
+    {
+      index: '.alerts-security.alerts-default',
+      id: 'evt-2',
+      score: 0.9,
+      '@timestamp': '2026-07-30T13:06:00.000Z',
+    },
   ],
   affectedAssets: {
     hosts: [{ name: 'ci-deploy-runner-07', hitCount: 1 }],
@@ -141,7 +151,9 @@ describe('buildSseData', () => {
 
     expect(coordinatorResult.status).toBe('tier1_and_tier2');
 
-    const entries = buildSseData(coordinatorResult, 'tr-aws-iam-assumerole-2026-07-28', { spaceId: 'default' });
+    const entries = buildSseData(coordinatorResult, 'tr-aws-iam-assumerole-2026-07-28', {
+      spaceId: 'default',
+    });
 
     // One entry per confirmed technique (Tier 2 produced two behaviors here).
     expect(entries).toHaveLength(2);
@@ -316,7 +328,9 @@ describe('buildSseData output parses against the SSE attachment schema', () => {
       tier2_when: 'on_hits',
     });
 
-    const [entry] = buildSseData(coordinatorResult, 'tr-aws-iam-assumerole-2026-07-28', { spaceId: 'default' });
+    const [entry] = buildSseData(coordinatorResult, 'tr-aws-iam-assumerole-2026-07-28', {
+      spaceId: 'default',
+    });
 
     // PR 1 owns title/severity/status/hypothesis_tested/evidence_for/evidence_against/
     // evaluation_record_ref; the hunt child's packaging step fills these in before
@@ -334,8 +348,9 @@ describe('buildSseData output parses against the SSE attachment schema', () => {
       timeline: [
         { at: '2026-07-30T13:05:00.000Z', what: 'AssumeRole into OrgAdminBoundary observed.' },
       ],
-      hypothesis_tested: 'A rarely used identity assumed a high-privilege role outside business hours.',
-      evidence_for: ['AssumeRole event outside the identity\'s normal access pattern.'],
+      hypothesis_tested:
+        'A rarely used identity assumed a high-privilege role outside business hours.',
+      evidence_for: ["AssumeRole event outside the identity's normal access pattern."],
       evidence_against: [] as string[],
       evaluation_record_ref: 'eval-run-hunt-20260730T160000Z',
     };
