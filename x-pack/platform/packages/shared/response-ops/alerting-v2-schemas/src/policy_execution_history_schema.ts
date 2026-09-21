@@ -86,6 +86,7 @@ export const listPolicyExecutionHistoryRequestSchema = z
       ),
     ...sharedFilterFields,
   })
+  .strict()
   .refine(
     ({ page = 1, per_page: perPage = EXECUTION_HISTORY_DEFAULT_PER_PAGE }) =>
       page * perPage <= EXECUTION_HISTORY_MAX_RESULT_WINDOW,

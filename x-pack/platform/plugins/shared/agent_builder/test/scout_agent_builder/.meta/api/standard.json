@@ -1,5 +1,5 @@
 {
-  "sha1": "7fa567f024f01deaee4542a25e1ac8c351f0c874",
+  "sha1": "1ad0732d27c72e6bd019a4d2e4335c5977715046",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -910,6 +910,182 @@
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_access_control_api.spec.ts",
         "line": 1275,
         "column": 29
+      }
+    },
+    {
+      "id": "a1750f6ef8a9b5d-0f41c2ca71e3bd8",
+      "title": "Agent Builder — POST /conversations/{id}/_add_events returns 200 and the materialized event with server-assigned fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_add_events_api.spec.ts",
+        "line": 39,
+        "column": 46
+      }
+    },
+    {
+      "id": "a1750f6ef8a9b5d-9c0436ebfd72161",
+      "title": "Agent Builder — POST /conversations/{id}/_add_events event persists on GET and does not affect the rounds projection",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_add_events_api.spec.ts",
+        "line": 62,
+        "column": 9
+      }
+    },
+    {
+      "id": "a1750f6ef8a9b5d-85738948a0328eb",
+      "title": "Agent Builder — POST /conversations/{id}/_add_events batch append: two events → two distinct ids in response",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_add_events_api.spec.ts",
+        "line": 88,
+        "column": 16
+      }
+    },
+    {
+      "id": "a1750f6ef8a9b5d-000005f826cd408",
+      "title": "Agent Builder — POST /conversations/{id}/_add_events batch atomicity: a bad event in the batch rejects the whole request and appends nothing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_add_events_api.spec.ts",
+        "line": 107,
+        "column": 10
+      }
+    },
+    {
+      "id": "a1750f6ef8a9b5d-42e35748e2cdee1",
+      "title": "Agent Builder — POST /conversations/{id}/_add_events returns 404 for a conversation that does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_add_events_api.spec.ts",
+        "line": 132,
+        "column": 16
+      }
+    },
+    {
+      "id": "a1750f6ef8a9b5d-9045d459f709ef0",
+      "title": "Agent Builder — POST /conversations/{id}/_add_events returns 400 for an unregistered event type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_add_events_api.spec.ts",
+        "line": 147,
+        "column": 5
+      }
+    },
+    {
+      "id": "a1750f6ef8a9b5d-1c69536502ad422",
+      "title": "Agent Builder — POST /conversations/{id}/_add_events returns 400 for a built-in (internal) event type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_add_events_api.spec.ts",
+        "line": 159,
+        "column": 68
+      }
+    },
+    {
+      "id": "a1750f6ef8a9b5d-442fd5a02702a42",
+      "title": "Agent Builder — POST /conversations/{id}/_add_events returns 400 when events array is empty",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_add_events_api.spec.ts",
+        "line": 169,
+        "column": 88
+      }
+    },
+    {
+      "id": "a1750f6ef8a9b5d-b3a802c6e4a7111",
+      "title": "Agent Builder — POST /conversations/{id}/_add_events returns 400 when actor is supplied in an event (unknown key)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_add_events_api.spec.ts",
+        "line": 174,
+        "column": 23
+      }
+    },
+    {
+      "id": "a1750f6ef8a9b5d-afca348780bcdc6",
+      "title": "Agent Builder — POST /conversations/{id}/_add_events returns 400 when id is supplied on an event (unknown key)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_add_events_api.spec.ts",
+        "line": 194,
+        "column": 13
+      }
+    },
+    {
+      "id": "a1750f6ef8a9b5d-164c9532ca3417f",
+      "title": "Agent Builder — POST /conversations/{id}/_add_events returns 400 when event is invalid for custom schema",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_add_events_api.spec.ts",
+        "line": 208,
+        "column": 97
       }
     },
     {
@@ -2158,6 +2334,54 @@
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_error_api.spec.ts",
         "line": 98,
         "column": 31
+      }
+    },
+    {
+      "id": "8b991b0ed7656e4-7187a78038f0967",
+      "title": "Agent Builder — interrupted executions are persisted on the conversation [local] persists a failed execution and surfaces it to the next round",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_interrupted_executions_api.spec.ts",
+        "line": 188,
+        "column": 6
+      }
+    },
+    {
+      "id": "8b991b0ed7656e4-dcd3f2158684356",
+      "title": "Agent Builder — interrupted executions are persisted on the conversation [task_manager] persists a failed execution and surfaces it to the next round",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_interrupted_executions_api.spec.ts",
+        "line": 188,
+        "column": 6
+      }
+    },
+    {
+      "id": "8b991b0ed7656e4-d37f24cd256eef5",
+      "title": "Agent Builder — interrupted executions are persisted on the conversation aborted execution (callback / task manager) is persisted, reports aborted, and is hidden from the next round",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_interrupted_executions_api.spec.ts",
+        "line": 300,
+        "column": 27
       }
     },
     {
