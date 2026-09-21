@@ -2659,10 +2659,11 @@ describe('current status route', () => {
             .mockResolvedValue(testMonitors as any);
 
           const result = await overviewStatusService.getOverviewStatus();
+          if (!result.configs || !result.pendingIds) {
+            throw new Error('expected a paginated overview status');
+          }
 
-          expect(result.configs.map((config: { configId: string }) => config.configId)).toEqual([
-            'id1',
-          ]);
+          expect(result.configs.map((config) => config.configId)).toEqual(['id1']);
           expect(result.staleConfigs.id1?.overallStatus).toBe('stale');
           expect(result.pendingConfigs.id1).toBeUndefined();
           expect(result.staleIds).toEqual([{ monitorQueryId: 'id1' }]);
