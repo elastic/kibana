@@ -13,6 +13,7 @@ export interface CasesSubActionParamsUI {
   templateVersion?: string | null;
   autoPushCase?: boolean;
   maximumCasesToOpen?: number;
+  extractObservables?: boolean | null;
 }
 export interface CasesActionParams {
   subAction: string;
