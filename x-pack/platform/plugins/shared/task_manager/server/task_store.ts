@@ -1215,13 +1215,15 @@ export class TaskStore {
     const queries = opts.map(({ sort = [{ 'task.runAt': 'asc' }], ...opt }) =>
       ensureQueryOnlyReturnsTaskObjects({ sort, ...opt })
     );
-    const searches = queries.flatMap((query) => [{}, query]);
+    const searches = queries.flatMap((query) => [
+      {},
+      { ...query, _source: { excludes: TASK_SEARCH_SOURCE_EXCLUDES } },
+    ]);
 
     const result = await this.esClient.msearch<SavedObjectsRawDoc['_source']>(
       {
         index: this.index,
         ignore_unavailable: true,
-        _source_excludes: TASK_SEARCH_SOURCE_EXCLUDES,
         searches,
       },
       { retryOnTimeout: false }

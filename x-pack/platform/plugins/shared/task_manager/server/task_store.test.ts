@@ -811,12 +811,12 @@ describe('TaskStore', () => {
       const { args } = await testMsearch([{}], []);
       expect(args).toMatchObject({
         index: 'tasky',
-        _source_excludes: ['task.state', 'task.params'],
         searches: [
           {},
           {
             sort: [{ 'task.runAt': 'asc' }],
             query: { term: { type: 'task' } },
+            _source: { excludes: ['task.state', 'task.params'] },
           },
         ],
       });
@@ -848,6 +848,7 @@ describe('TaskStore', () => {
                 must: [{ term: { type: 'task' } }, { term: { 'task.taskType': 'foo' } }],
               },
             },
+            _source: { excludes: ['task.state', 'task.params'] },
           },
           {},
           {
@@ -856,6 +857,7 @@ describe('TaskStore', () => {
                 must: [{ term: { type: 'task' } }, { term: { 'task.taskType': 'bar' } }],
               },
             },
+            _source: { excludes: ['task.state', 'task.params'] },
           },
         ],
       });
