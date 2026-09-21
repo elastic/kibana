@@ -941,6 +941,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Enable diagnostic mode',
     },
   },
+  'observability:nightshiftDeveloperMode': {
+    type: 'boolean',
+    _meta: {
+      description: 'Non-default value of whether Nightshift developer mode is enabled.',
+    },
+  },
   'genAiSettings:defaultAIConnector': {
     type: 'keyword',
     _meta: {
