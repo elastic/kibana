@@ -12,31 +12,34 @@ import type { AggregateQuery } from '@kbn/es-query';
 import type { EsqlNotificationActionApi } from './esql_notification_action';
 import { esqlNotificationAction } from './esql_notification_action';
 
-const makeApi = (queries: AggregateQuery[] = []): EsqlNotificationActionApi => ({
-  uuid: 'testId',
-  esql$: new BehaviorSubject<AggregateQuery[]>(queries),
-  approximationApplied$: new BehaviorSubject<boolean | undefined>(undefined),
-});
-
 describe('esql notification action', () => {
+  let esqlSubject: BehaviorSubject<AggregateQuery[]>;
+  let api: EsqlNotificationActionApi;
+
+  beforeEach(() => {
+    esqlSubject = new BehaviorSubject<AggregateQuery[]>([]);
+    api = {
+      uuid: 'testId',
+      esql$: esqlSubject,
+      approximationApplied$: new BehaviorSubject<boolean | undefined>(undefined),
+    };
+  });
+
   it('is incompatible when api is missing required functions', async () => {
     expect(await esqlNotificationAction.isCompatible!({ embeddable: {} })).toBe(false);
   });
 
   it('is incompatible when esql$ is empty', async () => {
-    expect(await esqlNotificationAction.isCompatible!({ embeddable: makeApi([]) })).toBe(false);
+    expect(await esqlNotificationAction.isCompatible!({ embeddable: api })).toBe(false);
   });
 
   it('is compatible when esql$ has at least one query', async () => {
-    expect(
-      await esqlNotificationAction.isCompatible!({
-        embeddable: makeApi([{ esql: 'FROM logs' }]),
-      })
-    ).toBe(true);
+    esqlSubject.next([{ esql: 'FROM logs' }]);
+    expect(await esqlNotificationAction.isCompatible!({ embeddable: api })).toBe(true);
   });
 
   it('couldBecomeCompatible returns true for a valid api', () => {
-    expect(esqlNotificationAction.couldBecomeCompatible!({ embeddable: makeApi() })).toBe(true);
+    expect(esqlNotificationAction.couldBecomeCompatible!({ embeddable: api })).toBe(true);
   });
 
   it('couldBecomeCompatible returns false for an incompatible api', () => {
@@ -44,10 +47,9 @@ describe('esql notification action', () => {
   });
 
   it('getCompatibilityChangesSubject emits when esql$ changes', (done) => {
-    const api = makeApi([]);
     const subject = esqlNotificationAction.getCompatibilityChangesSubject!({ embeddable: api });
     subject?.pipe(take(1)).subscribe(() => done());
-    api.esql$.next([{ esql: 'FROM logs' }]);
+    esqlSubject.next([{ esql: 'FROM logs' }]);
   });
 
   it('getCompatibilityChangesSubject returns undefined for incompatible api', () => {
