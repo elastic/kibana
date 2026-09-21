@@ -11,7 +11,13 @@ export function MachineLearningJobTypeSelectionProvider({ getService }: FtrProvi
   const testSubjects = getService('testSubjects');
 
   return {
+    // The recognizer response reveals the "Use preconfigured jobs" block and pushes the cards down.
+    async assertJobTypeSelectionReady() {
+      await testSubjects.existOrFail('mlJobTypeSelectionWizardCards loaded');
+    },
+
     async selectSingleMetricJob() {
+      await this.assertJobTypeSelectionReady();
       await testSubjects.clickWhenNotDisabledWithoutRetry('mlJobTypeLinkSingleMetricJob');
       await this.assertSingleMetricJobWizardOpen();
     },
@@ -21,6 +27,7 @@ export function MachineLearningJobTypeSelectionProvider({ getService }: FtrProvi
     },
 
     async selectMultiMetricJob() {
+      await this.assertJobTypeSelectionReady();
       await testSubjects.clickWhenNotDisabledWithoutRetry('mlJobTypeLinkMultiMetricJob');
       await this.assertMultiMetricJobWizardOpen();
     },
@@ -30,11 +37,13 @@ export function MachineLearningJobTypeSelectionProvider({ getService }: FtrProvi
     },
 
     async selectPopulationJob() {
+      await this.assertJobTypeSelectionReady();
       await testSubjects.clickWhenNotDisabledWithoutRetry('mlJobTypeLinkPopulationJob');
       await this.assertPopulationJobWizardOpen();
     },
 
     async selectGeoJob() {
+      await this.assertJobTypeSelectionReady();
       await testSubjects.clickWhenNotDisabledWithoutRetry('mlJobTypeLinkGeoJob');
       await this.assertGeoJobWizardOpen();
     },
@@ -48,6 +57,7 @@ export function MachineLearningJobTypeSelectionProvider({ getService }: FtrProvi
     },
 
     async selectAdvancedJob() {
+      await this.assertJobTypeSelectionReady();
       await testSubjects.clickWhenNotDisabledWithoutRetry('mlJobTypeLinkAdvancedJob');
       await this.assertAdvancedJobWizardOpen();
     },
@@ -57,6 +67,7 @@ export function MachineLearningJobTypeSelectionProvider({ getService }: FtrProvi
     },
 
     async selectCategorizationJob() {
+      await this.assertJobTypeSelectionReady();
       await testSubjects.clickWhenNotDisabledWithoutRetry('mlJobTypeLinkCategorizationJob');
       await this.assertCategorizationJobWizardOpen();
     },
@@ -66,6 +77,7 @@ export function MachineLearningJobTypeSelectionProvider({ getService }: FtrProvi
     },
 
     async selectRecognizerJob(moduleId: string) {
+      await this.assertJobTypeSelectionReady();
       await testSubjects.clickWhenNotDisabledWithoutRetry(`mlRecognizerCard ${moduleId}`);
       await this.assertRecognizerJobWizardOpen();
     },

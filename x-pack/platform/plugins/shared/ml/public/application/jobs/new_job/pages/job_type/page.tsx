@@ -22,6 +22,7 @@ import {
 
 import { useDataSource } from '../../../../contexts/ml';
 import { getUrlParams } from '../../utils/get_url_params';
+import type { DataRecognizerResults } from '../../../../components/data_recognizer';
 import { DataRecognizer } from '../../../../components/data_recognizer';
 import { addItemToRecentlyAccessed } from '../../../../util/recently_accessed';
 import { LinkCard } from '../../../../components/link_card';
@@ -47,6 +48,7 @@ export const Page: FC = () => {
   });
 
   const [recognizerResultsCount, setRecognizerResultsCount] = useState(0);
+  const [recognizerSettled, setRecognizerSettled] = useState(false);
 
   const { selectedDataView, selectedSavedSearch, projectRouting } = useDataSource();
 
@@ -115,12 +117,18 @@ export const Page: FC = () => {
         values: { dataViewName: selectedDataView.getName() },
       });
 
-  const recognizerResults = {
-    count: 0,
-    onChange() {
-      setRecognizerResultsCount(recognizerResults.count);
-    },
-  };
+  // Stable reference: DataRecognizer refetches whenever the results object identity changes.
+  const recognizerResults = useMemo<DataRecognizerResults>(() => {
+    const results: DataRecognizerResults = {
+      count: 0,
+      onChange() {
+        setRecognizerResultsCount(results.count);
+        setRecognizerSettled(true);
+      },
+    };
+
+    return results;
+  }, []);
 
   const getJobTypeUrlParams = () =>
     getUrlParams({
@@ -359,7 +367,11 @@ export const Page: FC = () => {
       </EuiTitle>
       <EuiSpacer size="m" />
 
-      <EuiFlexGrid gutterSize="l" columns={4}>
+      <EuiFlexGrid
+        gutterSize="l"
+        columns={4}
+        data-test-subj={`mlJobTypeSelectionWizardCards ${recognizerSettled ? 'loaded' : 'loading'}`}
+      >
         {jobTypes.map(({ onClick, icon, title, description, id }) => (
           <EuiFlexItem key={id}>
             <LinkCard

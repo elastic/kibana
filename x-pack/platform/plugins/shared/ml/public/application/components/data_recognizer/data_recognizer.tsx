@@ -33,32 +33,34 @@ export const DataRecognizer: FC<Props> = ({ indexPattern, savedSearch, results }
   useEffect(() => {
     let cancelled = false;
 
+    const settle = (elements: ReactElement[]) => {
+      if (cancelled) {
+        return;
+      }
+
+      results.count = elements.length;
+      results.onChange?.();
+
+      setRecognizedResults(elements);
+    };
+
     mlApi
       .recognizeIndex({ indexPatternTitle: indexPattern.title })
       .then((resp) => {
-        if (cancelled) {
-          return;
-        }
-
         resp.sort((res1, res2) => res1.title.localeCompare(res2.title));
 
-        const elements = resp.map((r) => (
-          <RecognizedResult
-            key={r.id}
-            config={r}
-            indexPattern={indexPattern}
-            savedSearch={savedSearch}
-          />
-        ));
-
-        results.count = elements.length;
-        results.onChange?.();
-
-        setRecognizedResults(elements);
+        settle(
+          resp.map((r) => (
+            <RecognizedResult
+              key={r.id}
+              config={r}
+              indexPattern={indexPattern}
+              savedSearch={savedSearch}
+            />
+          ))
+        );
       })
-      .catch(() => {
-        // Recognition failed; leave results empty.
-      });
+      .catch(() => settle([]));
 
     return () => {
       cancelled = true;
