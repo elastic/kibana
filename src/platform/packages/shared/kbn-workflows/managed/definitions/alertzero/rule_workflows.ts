@@ -11,26 +11,37 @@ import {
   ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
 } from './constants';
-import DETECTION_COVERAGE_YAML from './detection_coverage.yaml';
+import COVERAGE_REVIEW_YAML from './coverage_review.yaml';
+import COVERAGE_WORKER_YAML from './coverage_worker.yaml';
 import RULE_CREATION_YAML from './rule_creation.yaml';
 import RULE_PREVIEW_YAML from './rule_preview.yaml';
 import RULE_TUNING_REVIEW_YAML from './rule_tuning_review.yaml';
 import RULE_TUNING_WORKER_YAML from './rule_tuning_worker.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
 
-export const ALERTZERO_DETECTION_COVERAGE_WORKFLOW_ID = 'system-security-detection-coverage';
+export const ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID = 'system-security-coverage-review';
+export const ALERTZERO_COVERAGE_WORKER_WORKFLOW_ID = 'system-security-coverage-worker';
 export const ALERTZERO_RULE_PREVIEW_WORKFLOW_ID = 'system-security-rule-preview';
 export const ALERTZERO_RULE_TUNING_WORKER_WORKFLOW_ID = 'system-security-rule-tuning-worker';
 export const ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW_ID = 'system-security-rule-tuning-review';
 export const ALERTZERO_RULE_CREATION_WORKFLOW_ID = 'system-security-rule-creation';
 
-export const ALERTZERO_DETECTION_COVERAGE_WORKFLOW = {
+export const ALERTZERO_COVERAGE_REVIEW_WORKFLOW = {
   billable: false,
-  id: ALERTZERO_DETECTION_COVERAGE_WORKFLOW_ID,
+  id: ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   version: 1,
-  yaml: DETECTION_COVERAGE_YAML,
+  yaml: COVERAGE_REVIEW_YAML,
+} as const satisfies ManagedWorkflowDefinition;
+
+export const ALERTZERO_COVERAGE_WORKER_WORKFLOW = {
+  billable: false,
+  id: ALERTZERO_COVERAGE_WORKER_WORKFLOW_ID,
+  management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
+  pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
+  version: 1,
+  yaml: COVERAGE_WORKER_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
 export const ALERTZERO_RULE_PREVIEW_WORKFLOW = {
@@ -47,7 +58,7 @@ export const ALERTZERO_RULE_TUNING_WORKER_WORKFLOW = {
   id: ALERTZERO_RULE_TUNING_WORKER_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 23,
+  version: 25,
   yaml: RULE_TUNING_WORKER_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
@@ -56,7 +67,7 @@ export const ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW = {
   id: ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 18,
+  version: 22,
   yaml: RULE_TUNING_REVIEW_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
@@ -65,6 +76,6 @@ export const ALERTZERO_RULE_CREATION_WORKFLOW = {
   id: ALERTZERO_RULE_CREATION_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 2,
+  version: 3,
   yaml: RULE_CREATION_YAML,
 } as const satisfies ManagedWorkflowDefinition;

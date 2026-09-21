@@ -5,185 +5,185 @@
  * 2.0.
  */
 
-import {
-  SYSTEM_SECURITY_WATCH_DARK_ID,
-  SYSTEM_SECURITY_WATCH_FLOOR_ID,
-  SYSTEM_SECURITY_WATCH_OFFICER_ID,
-  TEMPLATE_ID_PROPOSAL,
-} from '../../constants';
-import type { Proposal } from '../schemas/components/investigation.gen';
+import type { ProposalWithMetadata } from '@kbn/agentic-investigations-plugin/common';
+import { MOCK_INVESTIGATIONS } from './investigations';
 
-export const MOCK_PROPOSALS: Proposal[] = [
+/** A proposal as the list API returns it: the conversation's title resolved on read. */
+type MockProposal = ProposalWithMetadata & { conversationTitle?: string };
+
+const INVESTIGATION_TITLES = new Map(MOCK_INVESTIGATIONS.map(({ id, title }) => [id, title]));
+
+const SYSTEM_USER = { username: 'system.alertzero', fullName: 'AlertZero', email: null };
+const ANALYST = { username: 'analyst.mrodriguez', fullName: 'M. Rodriguez', email: null };
+
+/** Hours before (negative) or after (positive) now, as an ISO 8601 timestamp. */
+const at = (hours: number): string => new Date(Date.now() + hours * 3600_000).toISOString();
+
+/**
+ * Mock proposals in the shape the proposals API returns. `conversationId` values are
+ * `MOCK_INVESTIGATIONS` ids, since an investigation is its conversation — the two sample
+ * sets describe one set of incidents, and `conversationTitle` is derived from that link
+ * rather than restated, so the two can never disagree.
+ *
+ * Covers each category the catalog declares plus decided proposals for the closed group,
+ * and the cases with no happy path: expired, no action to run, and a failed execution.
+ */
+const PROPOSALS: ProposalWithMetadata[] = [
   {
     id: 'prop-impossible-travel-revoke-001',
-    template_id: TEMPLATE_ID_PROPOSAL,
-    parentConversationId: 'inv-officer-impossible-travel-001',
-    type: 'contain',
-    confidence: 0.94,
-    reasoning:
+    spaceId: 'default',
+    conversationId: 'inv-officer-impossible-travel-001',
+    comment:
       'MFA satisfied from two geos in 40 minutes. Live sessions are the blast radius — revoke before mailbox rules fire.',
-    evidenceRefs: [
-      { id: 'alert-it-001', type: 'alert', label: 'Impossible travel · Okta' },
-      { id: 'evidence-sessions', type: 'enrichment', label: '3 active sessions · Okta + M365' },
-    ],
+    actionWorkflowId: 'system-alertzero-action-revoke-sessions',
+    actionInput: { user: 'cfo@corp', providers: ['okta', 'm365'] },
     status: 'pending',
-    assignee: null,
-    sla: new Date(Date.now() + 4 * 60 * 60 * 1000).toISOString(),
-    events: [
-      {
-        id: 'pevt-001',
-        timestamp: '2026-07-20T14:05:00Z',
-        type: 'proposal_created',
-        summary: 'Session revoke proposal drafted by Watch Officer',
-        actor: SYSTEM_SECURITY_WATCH_OFFICER_ID,
-      },
-    ],
-    sourceWatchId: SYSTEM_SECURITY_WATCH_OFFICER_ID,
-    approvalRequired: true,
-    summary: 'Revoke every live session for cfo@corp across Okta and Microsoft 365',
-    recommendation: 'Revoke sessions · remove 09:43 forwarding rule',
-  },
-  {
-    id: 'prop-impossible-travel-reset-002',
-    template_id: TEMPLATE_ID_PROPOSAL,
-    parentConversationId: 'inv-officer-impossible-travel-001',
-    type: 'contain',
-    confidence: 0.88,
-    reasoning: 'Force password + MFA re-enrollment after session revoke to close the token path.',
-    evidenceRefs: [{ id: 'evidence-mfa', type: 'enrichment', label: 'MFA enrollment state' }],
-    status: 'pending',
-    assignee: null,
-    sla: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
-    events: [],
-    sourceWatchId: SYSTEM_SECURITY_WATCH_OFFICER_ID,
-    approvalRequired: true,
-    summary: 'Force password reset and MFA re-enrollment for cfo@corp',
-    recommendation: 'Enforce reset at next sign-in',
+    impact: 'critical',
+    confidence: 'high',
+    category: 'respond',
+    origin: 'worker',
+    expiresAt: at(4),
+    createdAt: at(-0.3),
+    createdBy: SYSTEM_USER,
+    action: { name: 'Revoke sessions', category: 'respond', impact: 'critical' },
+    expired: false,
   },
   {
     id: 'prop-sales-nas-isolate-003',
-    template_id: TEMPLATE_ID_PROPOSAL,
-    parentConversationId: 'inv-officer-sales-nas-002',
-    type: 'contain',
-    confidence: 0.89,
-    reasoning:
+    spaceId: 'default',
+    conversationId: 'inv-officer-sales-nas-002',
+    comment:
       '1,431 files renamed in four minutes. Isolate the share before restoring from SNAP-7740.',
-    evidenceRefs: [
-      { id: 'evidence-nas-files', type: 'log', label: 'Mass rename · Sales-NAS' },
-      { id: 'evidence-snap', type: 'document', label: 'SNAP-7740' },
-    ],
+    actionWorkflowId: 'system-alertzero-action-isolate-host',
+    actionInput: { host: 'Sales-NAS' },
     status: 'pending',
-    assignee: 'analyst.mrodriguez',
-    sla: new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString(),
-    events: [],
-    sourceWatchId: SYSTEM_SECURITY_WATCH_OFFICER_ID,
-    approvalRequired: true,
-    summary: 'Cut Sales-NAS off the network pending restore',
-    recommendation: 'Isolate share · begin SNAP-7740 restore',
+    impact: 'high',
+    confidence: 'high',
+    category: 'respond',
+    origin: 'worker',
+    expiresAt: at(3),
+    createdAt: at(-1.2),
+    createdBy: SYSTEM_USER,
+    action: { name: 'Isolate host', category: 'respond', impact: 'high' },
+    expired: false,
   },
   {
+    // Deadline already passed. The list API does not filter expired proposals, so this
+    // row still offers Approve and the API refuses it on submit.
     id: 'prop-domain-admins-remove-004',
-    template_id: TEMPLATE_ID_PROPOSAL,
-    parentConversationId: 'inv-floor-domain-admins-003',
-    type: 'contain',
-    confidence: 0.82,
-    reasoning:
+    spaceId: 'default',
+    conversationId: 'inv-floor-domain-admins-003',
+    comment:
       'svc-helpdesk elevated to Domain Admins with no change ticket inside the FIN-WS-04 window.',
-    evidenceRefs: [{ id: 'evidence-ad-audit', type: 'log', label: 'AD group change audit' }],
+    actionWorkflowId: 'system-alertzero-action-revert-group-change',
+    actionInput: { principal: 'svc-helpdesk', group: 'Domain Admins' },
     status: 'pending',
-    assignee: null,
-    sla: new Date(Date.now() + 1 * 60 * 60 * 1000).toISOString(),
-    events: [],
-    sourceWatchId: SYSTEM_SECURITY_WATCH_FLOOR_ID,
-    approvalRequired: true,
-    summary: 'Remove svc-helpdesk from Domain Admins',
-    recommendation: 'Revert unauthorized elevation',
+    impact: 'high',
+    confidence: 'medium',
+    category: 'respond',
+    origin: 'worker',
+    expiresAt: at(-0.5),
+    createdAt: at(-6),
+    createdBy: SYSTEM_USER,
+    action: { name: 'Revert group change', category: 'respond', impact: 'high' },
+    expired: true,
   },
   {
+    // No action to run, so there is no action name to title the card with.
     id: 'prop-findb-egress-005',
-    template_id: TEMPLATE_ID_PROPOSAL,
-    parentConversationId: 'inv-floor-findb-staged-005',
-    type: 'escalate',
-    confidence: 0.74,
-    reasoning:
-      '4.2 GB archive staged on FIN-DB-02. Block egress so it cannot leave while IR investigates.',
-    evidenceRefs: [{ id: 'evidence-archive', type: 'log', label: 'C:\\temp archive · 4.2 GB' }],
+    spaceId: 'default',
+    conversationId: 'inv-floor-findb-staged-005',
+    comment:
+      '4.2 GB archive staged on FIN-DB-02. Nothing has left the host yet — needs a human read before anything is proposed.',
     status: 'pending',
-    assignee: null,
-    sla: new Date(Date.now() + 2.5 * 60 * 60 * 1000).toISOString(),
-    events: [],
-    sourceWatchId: SYSTEM_SECURITY_WATCH_FLOOR_ID,
-    approvalRequired: true,
-    summary: 'Apply egress block on FIN-DB-02',
-    recommendation: 'Block egress · keep host reachable for IR',
+    impact: 'medium',
+    confidence: 'medium',
+    category: 'investigate',
+    origin: 'worker',
+    createdAt: at(-2),
+    createdBy: SYSTEM_USER,
+    expired: false,
   },
   {
     id: 'prop-phishing-block-006',
-    template_id: TEMPLATE_ID_PROPOSAL,
-    parentConversationId: 'inv-floor-phishing-url-006',
-    type: 'escalate',
-    confidence: 0.66,
-    reasoning: 'Invoice lure URL still reachable after one credential submission — fleet block.',
-    evidenceRefs: [{ id: 'evidence-url', type: 'enrichment', label: 'Phishing URL reputation' }],
+    spaceId: 'default',
+    conversationId: 'inv-floor-phishing-url-006',
+    comment: 'Invoice lure URL still reachable after one credential submission — fleet block.',
+    actionWorkflowId: 'system-alertzero-action-block-url',
+    actionInput: { url: 'hxxps://invoice-review.example/secure' },
     status: 'pending',
-    assignee: 'analyst.jchen',
-    sla: new Date(Date.now() + 1.5 * 60 * 60 * 1000).toISOString(),
-    events: [],
-    sourceWatchId: SYSTEM_SECURITY_WATCH_FLOOR_ID,
-    approvalRequired: true,
-    summary: 'Block phishing URL fleet-wide',
-    recommendation: 'Proxy + mail gateway block',
-  },
-  {
-    id: 'prop-beacon-contain-007',
-    template_id: TEMPLATE_ID_PROPOSAL,
-    parentConversationId: 'inv-dark-beacon-corroborated-001',
-    type: 'contain',
-    confidence: 0.91,
-    reasoning:
-      'Dark Watch corroboration raised confidence to 0.94. Containment draft ready once analyst takes over.',
-    evidenceRefs: [
-      { id: 'evidence-c2', type: 'enrichment', label: 'Shared C2 endpoint' },
-      { id: 'evidence-persist', type: 'edr', label: 'Shared persistence mechanism' },
-    ],
-    status: 'pending',
-    assignee: 'oncall.sec-team',
-    sla: new Date(Date.now() + 2.5 * 60 * 60 * 1000).toISOString(),
-    events: [],
-    sourceWatchId: SYSTEM_SECURITY_WATCH_DARK_ID,
-    approvalRequired: true,
-    summary: 'Isolate beaconing hosts after take-over review',
-    recommendation: 'Network isolate · preserve memory',
+    impact: 'low',
+    confidence: 'high',
+    category: 'investigate',
+    origin: 'analyst',
+    expiresAt: at(8),
+    createdAt: at(-3),
+    createdBy: ANALYST,
+    action: { name: 'Block URL', category: 'investigate', impact: 'low' },
+    expired: false,
   },
   {
     id: 'prop-oauth-tune-008',
-    template_id: TEMPLATE_ID_PROPOSAL,
-    parentConversationId: 'inv-floor-oauth-tune-007',
-    type: 'tune',
-    confidence: 0.71,
-    reasoning:
+    spaceId: 'default',
+    conversationId: 'inv-floor-oauth-tune-007',
+    comment:
       'Salesforce sync volume matches the expected batch window. Threshold should exclude this SaaS pattern.',
-    evidenceRefs: [{ id: 'evidence-baseline', type: 'log', label: '30d OAuth volume baseline' }],
+    actionWorkflowId: 'system-alertzero-action-create-rule',
+    actionInput: { name: 'OAuth token volume — excluding batch window' },
     status: 'pending',
-    assignee: null,
-    sla: new Date(Date.now() + 1.5 * 60 * 60 * 1000).toISOString(),
-    events: [],
-    sourceWatchId: SYSTEM_SECURITY_WATCH_FLOOR_ID,
-    approvalRequired: true,
-    summary: 'Raise OAuth token-abuse threshold for app-salesforce-sync',
-    recommendation: 'Add exception · keep alerting on outliers',
+    impact: 'low',
+    confidence: 'high',
+    category: 'configure',
+    origin: 'worker',
+    createdAt: at(-4),
+    createdBy: SYSTEM_USER,
+    action: { name: 'Create detection rule', category: 'configure', impact: 'low' },
+    expired: false,
+  },
+  {
+    id: 'prop-mailbox-rule-removed-009',
+    spaceId: 'default',
+    conversationId: 'inv-hunt-mailbox-auto-008',
+    comment: 'Mailbox forwarding rule added to j.reyes at 09:43 and removed on approval.',
+    actionWorkflowId: 'system-alertzero-action-remove-mailbox-rule',
+    actionInput: { mailbox: 'j.reyes@corp', ruleId: 'inbox-rule-7740' },
+    status: 'succeeded',
+    impact: 'high',
+    confidence: 'high',
+    category: 'respond',
+    origin: 'worker',
+    decidedBy: ANALYST,
+    decidedAt: at(-2),
+    rationale: 'Confirmed exfil rule, not user-created. Removed.',
+    createdAt: at(-2.4),
+    createdBy: SYSTEM_USER,
+    action: { name: 'Remove mailbox rule', category: 'respond', impact: 'high' },
+    expired: false,
+  },
+  {
+    // Approved, then the workflow failed. executionError has no destination in the queue.
+    id: 'prop-oauth-tune-failed-010',
+    spaceId: 'default',
+    conversationId: 'inv-floor-oauth-tune-007',
+    comment: 'Raise the OAuth token-abuse threshold so the nightly sync stops tripping it.',
+    actionWorkflowId: 'system-alertzero-action-edit-rule',
+    actionInput: { ruleId: 'rule-oauth-token-abuse', threshold: 250 },
+    status: 'failed',
+    impact: 'medium',
+    confidence: 'medium',
+    category: 'configure',
+    origin: 'worker',
+    decidedBy: ANALYST,
+    decidedAt: at(-1),
+    executionError: 'rule_not_found: rule-oauth-token-abuse was deleted before execution',
+    createdAt: at(-1.5),
+    createdBy: SYSTEM_USER,
+    action: { name: 'Edit detection rule query', category: 'configure', impact: 'medium' },
+    expired: false,
   },
 ];
 
-export const createMockProposal = (overrides: Partial<Proposal> = {}): Proposal => ({
-  ...MOCK_PROPOSALS[0],
-  ...overrides,
-  events: overrides.events ?? MOCK_PROPOSALS[0].events,
-  evidenceRefs: overrides.evidenceRefs ?? MOCK_PROPOSALS[0].evidenceRefs,
-});
-
-export const getMockProposalsByInvestigationId = (investigationId: string): Proposal[] =>
-  MOCK_PROPOSALS.filter((proposal) => proposal.parentConversationId === investigationId);
-
-export const getMockProposalById = (id: string): Proposal | undefined =>
-  MOCK_PROPOSALS.find((proposal) => proposal.id === id);
+export const MOCK_PROPOSALS: MockProposal[] = PROPOSALS.map((proposal) => ({
+  ...proposal,
+  conversationTitle: INVESTIGATION_TITLES.get(proposal.conversationId),
+}));

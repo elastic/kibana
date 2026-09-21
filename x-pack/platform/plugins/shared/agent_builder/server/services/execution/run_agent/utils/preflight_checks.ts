@@ -6,23 +6,16 @@
  */
 
 import { createBadRequestError } from '@kbn/agent-builder-common/base/errors';
-import type { ConverseInput, ConversationAction, TimelineEvent } from '@kbn/agent-builder-common';
+import type { ConverseInput, TimelineEvent } from '@kbn/agent-builder-common';
 import { lastExecutionTerminated } from './context_timeline';
 
 export const ensureValidInput = ({
   input,
   timeline,
-  action,
 }: {
   input: ConverseInput;
   timeline: TimelineEvent[];
-  action?: ConversationAction;
 }) => {
-  // Regenerate uses the last round's input via prepareConversation - skip standard input check
-  if (action === 'regenerate') {
-    return;
-  }
-
   // The last execution's terminal event tells whether the conversation is paused for a prompt.
   const outcome = lastExecutionTerminated(timeline)?.data.outcome;
   const pendingPrompts = outcome?.type === 'prompt_requested' ? outcome.prompts : [];
