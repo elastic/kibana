@@ -96,17 +96,22 @@ export class AlertZeroPublicPlugin
     // This keeps KibanaContextProvider, QueryClient, and ConnectedEscalationModal (plus all their
     // EUI and hook dependencies) out of alertzero's main chunk.
     const LazyEscalationModal = React.lazy(async () => {
-      const [{ KibanaContextProvider }, { QueryClient, QueryClientProvider }, { ConnectedEscalationModal }] =
-        await Promise.all([
-          import('@kbn/kibana-react-plugin/public'),
-          import('@kbn/react-query'),
-          import('./pages/conversations/connected_escalation_modal'),
-        ]);
+      const [
+        { KibanaContextProvider },
+        { QueryClient, QueryClientProvider },
+        { ConnectedEscalationModal },
+      ] = await Promise.all([
+        import('@kbn/kibana-react-plugin/public'),
+        import('@kbn/react-query'),
+        import('./pages/conversations/connected_escalation_modal'),
+      ]);
 
       // QueryClient is created once here (inside the lazy factory) so it is stable across renders.
       const flyoutQueryClient = new QueryClient();
 
-      const WrappedModal: React.FC<React.ComponentProps<typeof ConnectedEscalationModal>> = (props) =>
+      const WrappedModal: React.FC<React.ComponentProps<typeof ConnectedEscalationModal>> = (
+        props
+      ) =>
         React.createElement(
           KibanaContextProvider,
           { services: { ...core, ...startDeps } },
@@ -126,7 +131,11 @@ export class AlertZeroPublicPlugin
       name: INVESTIGATION_TEMPLATE_NAME,
       icon: 'securitySignalDetected',
       renderEscalationModal: (props) =>
-        React.createElement(React.Suspense, { fallback: null }, React.createElement(LazyEscalationModal, props)),
+        React.createElement(
+          React.Suspense,
+          { fallback: null },
+          React.createElement(LazyEscalationModal, props)
+        ),
     });
 
     return {};
