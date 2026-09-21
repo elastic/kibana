@@ -17,6 +17,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiText,
+  EuiTextColor,
   EuiTitle,
   euiFontSize,
   useEuiTheme,
@@ -106,64 +107,50 @@ export const DiscoverUninitialized = ({ onRefresh }: Props) => {
   return (
     <div data-test-subj="discoverUninitialized">
       <EuiTitle size="xxs">
-        <h3
-          id={shortcutsLabelId}
-          data-test-subj="discoverUninitializedKeyboardShortcuts"
-          css={css`
-            && {
-              color: ${euiTheme.colors.textSubdued};
-            }
-            margin-bottom: 0;
-          `}
-        >
-          <FormattedMessage
-            id="discover.uninitialized.editorKeyboardShortcutsTitle"
-            defaultMessage="Editor keyboard shortcuts"
-          />
+        <h3 id={shortcutsLabelId} data-test-subj="discoverUninitializedKeyboardShortcuts">
+          <EuiTextColor color="subdued">
+            <FormattedMessage
+              id="discover.uninitialized.editorKeyboardShortcutsTitle"
+              defaultMessage="Editor keyboard shortcuts"
+            />
+          </EuiTextColor>
         </h3>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <EuiText
-        size="xs"
-        color="subdued"
-        css={css`
-          dt,
-          dd {
-            font-size: inherit;
-            font-weight: ${euiTheme.font.weight.regular};
-            line-height: inherit;
-          }
-
-          dd + dt {
-            margin-top: 0;
-          }
-
-          .euiDescriptionList {
-            row-gap: ${euiTheme.size.xs};
-            margin-bottom: 0;
-          }
-
-          kbd {
-            font-size: ${euiFontSize(euiThemeContext, 's').fontSize};
-            font-weight: ${euiTheme.font.weight.medium};
-            line-height: 1;
-            padding-block: ${euiTheme.size.xxs};
-            padding-inline: ${euiTheme.size.xs};
-          }
-        `}
-      >
+      <EuiText size="xs" color="subdued">
         <EuiDescriptionList
           aria-labelledby={shortcutsLabelId}
           type="column"
           columnWidths={['auto', 'auto']}
           columnGutterSize="m"
+          rowGutterSize="s"
           compressed
+          titleProps={{
+            css: css`
+              font-weight: ${euiTheme.font.weight.regular};
+            `,
+          }}
+          descriptionProps={{
+            css: css`
+              font-weight: ${euiTheme.font.weight.regular};
+            `,
+          }}
           listItems={esqlKeyboardShortcuts.map(({ keys, label }) => ({
             title: label,
             description: keys.map((key, index) => (
               <Fragment key={`${key}-${index}`}>
                 {index > 0 ? ' ' : null}
-                <kbd>{key}</kbd>
+                <kbd
+                  css={css`
+                    font-size: ${euiFontSize(euiThemeContext, 's').fontSize};
+                    font-weight: ${euiTheme.font.weight.medium};
+                    line-height: 1;
+                    padding-block: ${euiTheme.size.xxs};
+                    padding-inline: ${euiTheme.size.xs};
+                  `}
+                >
+                  {key}
+                </kbd>
               </Fragment>
             )),
           }))}
