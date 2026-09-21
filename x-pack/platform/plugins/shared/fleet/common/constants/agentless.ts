@@ -38,7 +38,7 @@ export const RETRYABLE_HTTP_STATUSES = [
 
 export const RETRYABLE_SERVER_CODES = [ECONNREFUSED_CODE];
 // Allowed output types for agentless integrations
-export const AGENTLESS_ALLOWED_OUTPUT_TYPES = [outputType.Elasticsearch];
+export const AGENTLESS_ALLOWED_OUTPUT_TYPES = [outputType.Elasticsearch, outputType.Otlp];
 
 export const AGENTLESS_API_ERROR_CODES = {
   OVER_PROVISIONED: 'OVER_PROVISIONED',
