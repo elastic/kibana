@@ -30,11 +30,11 @@ describe('InvestigationLocatorDefinition', () => {
   it('supports q and severity query params', async () => {
     const location = await definition.getLocation({
       q: 'service.name: checkout',
-      severity: 'critical',
+      severity: '80-critical',
     });
     expect(location).toEqual({
       app: NIGHTSHIFT_APP_ID,
-      path: '?q=service.name%3A+checkout&severity=critical',
+      path: '?q=service.name%3A+checkout&severity=80-critical',
       state: {},
     });
   });
