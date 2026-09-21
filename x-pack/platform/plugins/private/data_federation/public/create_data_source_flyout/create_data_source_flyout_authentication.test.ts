@@ -20,25 +20,54 @@ describe('create_data_source_flyout_authentication', () => {
       expect(getDefaultAuthenticationMode('s3')).toBe('access_and_secret_keys');
       expect(getDefaultAuthenticationMode('gcs')).toBe('access_and_secret_keys');
     });
+
+    it('returns federated_identity when federated identity is enabled', () => {
+      expect(getDefaultAuthenticationMode('s3', { enableFederatedIdentity: true })).toBe(
+        'federated_identity'
+      );
+      expect(getDefaultAuthenticationMode('gcs', { enableFederatedIdentity: true })).toBe(
+        'federated_identity'
+      );
+      expect(getDefaultAuthenticationMode('azure', { enableFederatedIdentity: true })).toBe(
+        'federated_identity'
+      );
+    });
   });
 
   describe('getCreateDataSourceAuthenticationOptions', () => {
-    it('includes Federated Identity for s3/gcs/azure', () => {
+    it('lists Federated Identity first for s3/gcs/azure', () => {
       expect(
         getCreateDataSourceAuthenticationOptions('s3', { enableFederatedIdentity: true }).map(
           (o) => o.value
         )
-      ).toEqual(['access_and_secret_keys', 'federated_identity', 'anonymous']);
+      ).toEqual(['federated_identity', 'access_and_secret_keys', 'anonymous']);
       expect(
         getCreateDataSourceAuthenticationOptions('gcs', { enableFederatedIdentity: true }).map(
           (o) => o.value
         )
-      ).toEqual(['access_and_secret_keys', 'federated_identity', 'anonymous']);
+      ).toEqual(['federated_identity', 'access_and_secret_keys', 'anonymous']);
       expect(
         getCreateDataSourceAuthenticationOptions('azure', { enableFederatedIdentity: true }).map(
           (o) => o.value
         )
-      ).toEqual(['credentials', 'federated_identity', 'anonymous']);
+      ).toEqual(['federated_identity', 'credentials', 'anonymous']);
+    });
+
+    it('marks only Federated Identity as recommended', () => {
+      expect(
+        getCreateDataSourceAuthenticationOptions('s3', { enableFederatedIdentity: true })
+          .filter((o) => o.recommended)
+          .map((o) => o.value)
+      ).toEqual(['federated_identity']);
+    });
+
+    it('gives every option a description', () => {
+      for (const dataSourceType of ['s3', 'gcs', 'azure'] as const) {
+        const options = getCreateDataSourceAuthenticationOptions(dataSourceType, {
+          enableFederatedIdentity: true,
+        });
+        expect(options.every((o) => o.description.length > 0)).toBe(true);
+      }
     });
 
     it('omits Federated Identity when disabled', () => {
