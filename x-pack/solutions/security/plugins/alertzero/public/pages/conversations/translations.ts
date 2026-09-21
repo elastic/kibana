@@ -59,10 +59,9 @@ export const ESCALATION_MODAL_TRANSLATIONS = Object.freeze({
       defaultMessage:
         'Inherited from the investigation — edit anytime. Metadata fills in automatically.',
     }),
-    visibilityLabel: i18n.translate(
-      'xpack.alertzero.escalationModal.createForm.visibilityLabel',
-      { defaultMessage: 'Visibility' }
-    ),
+    visibilityLabel: i18n.translate('xpack.alertzero.escalationModal.createForm.visibilityLabel', {
+      defaultMessage: 'Visibility',
+    }),
     publicLabel: i18n.translate('xpack.alertzero.escalationModal.createForm.publicLabel', {
       defaultMessage: 'Public',
     }),
@@ -101,14 +100,12 @@ export const ESCALATION_MODAL_TRANSLATIONS = Object.freeze({
     openBadge: i18n.translate('xpack.alertzero.escalationModal.addToExistingForm.openBadge', {
       defaultMessage: 'Open',
     }),
-    submitButton: i18n.translate(
-      'xpack.alertzero.escalationModal.addToExistingForm.submitButton',
-      { defaultMessage: 'Add to escalation' }
-    ),
-    loadingText: i18n.translate(
-      'xpack.alertzero.escalationModal.addToExistingForm.loadingText',
-      { defaultMessage: 'Loading escalations...' }
-    ),
+    submitButton: i18n.translate('xpack.alertzero.escalationModal.addToExistingForm.submitButton', {
+      defaultMessage: 'Add to escalation',
+    }),
+    loadingText: i18n.translate('xpack.alertzero.escalationModal.addToExistingForm.loadingText', {
+      defaultMessage: 'Loading escalations...',
+    }),
     emptyText: i18n.translate('xpack.alertzero.escalationModal.addToExistingForm.emptyText', {
       defaultMessage: 'No escalations found.',
     }),

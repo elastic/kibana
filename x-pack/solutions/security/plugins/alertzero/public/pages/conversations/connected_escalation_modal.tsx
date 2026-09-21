@@ -20,9 +20,6 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { type EscalationModalRenderProps } from '@kbn/agentic-investigations-common';
-import { CreateEscalationForm } from './create_escalation_form';
-import { AddToExistingEscalationForm } from './add_to_existing_escalation_form';
-import { ESCALATION_MODAL_TRANSLATIONS } from './translations';
 import {
   useListEscalations,
   useCreateEscalation,
@@ -34,6 +31,9 @@ import { getUserDisplayName } from '@kbn/user-profile-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { isHttpFetchError } from '@kbn/core-http-browser';
+import { ESCALATION_MODAL_TRANSLATIONS } from './translations';
+import { AddToExistingEscalationForm } from './add_to_existing_escalation_form';
+import { CreateEscalationForm } from './create_escalation_form';
 import { ESCALATION_ERRORS } from './translations';
 
 const T = ESCALATION_MODAL_TRANSLATIONS;
@@ -117,6 +117,7 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
                   <EuiFlexItem grow={false}>
                     <EuiRadio
                       id="escalation-mode-create"
+                      name="escalation-mode"
                       checked={mode === 'create'}
                       onChange={() => setMode('create')}
                     />
@@ -148,6 +149,7 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
                   <EuiFlexItem grow={false}>
                     <EuiRadio
                       id="escalation-mode-add-to-existing"
+                      name="escalation-mode"
                       checked={mode === 'addToExisting'}
                       onChange={() => setMode('addToExisting')}
                     />

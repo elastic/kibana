@@ -10,7 +10,10 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useBoolean } from '@kbn/react-hooks';
 import type { Investigation } from '../../types';
 import { BaseActions, type CardActionType } from '../actions';
-import { InvestigationActionModals, type EscalationModalRenderProps } from '../modals/investigation_action_modals';
+import {
+  InvestigationActionModals,
+  type EscalationModalRenderProps,
+} from '../modals/investigation_action_modals';
 import { DETAILS_FLYOUT_LABELS } from './translations';
 
 export interface ConversationDetailsFlyoutFooterProps {
@@ -71,7 +74,9 @@ export const ConversationDetailsFlyoutFooter = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               iconType="document"
-              onClick={() => setModalState({ type: 'openIncident', recordId: investigation.recordId })}
+              onClick={() =>
+                setModalState({ type: 'openIncident', recordId: investigation.recordId })
+              }
               size="s"
               fill
               color="primary"

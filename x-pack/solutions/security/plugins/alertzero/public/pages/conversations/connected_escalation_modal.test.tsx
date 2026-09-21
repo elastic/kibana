@@ -60,9 +60,17 @@ const addMutate = jest.fn();
 const onClose = jest.fn();
 
 const investigation: Investigation = {
+  id: 'inv-1',
+  template_id: 'investigation',
+  title: 'Suspicious login',
+  createdAt: '2026-01-01T00:00:00Z',
+  updatedAt: '2026-01-01T00:00:00Z',
+  watch_id: 'watch-1',
+  watch_execution_id: 'exec-1',
+  pendingProposalCount: 0,
+  events: [],
   recordId: 'inv-1',
   conversationId: 'conv-1',
-  title: 'Suspicious login',
 };
 
 const defaultProps: EscalationModalRenderProps = {
@@ -141,9 +149,7 @@ describe('ConnectedEscalationModal', () => {
   it('starts in addToExisting mode when initialMode is addToExisting', () => {
     renderModal({ mode: 'addToExisting' });
 
-    const addRadio = document.getElementById(
-      'escalation-mode-add-to-existing'
-    ) as HTMLInputElement;
+    const addRadio = document.getElementById('escalation-mode-add-to-existing') as HTMLInputElement;
     expect(addRadio.checked).toBe(true);
   });
 
@@ -152,9 +158,7 @@ describe('ConnectedEscalationModal', () => {
 
     fireEvent.click(screen.getByTestId('escalationModalModeAddToExisting'));
 
-    const addRadio = document.getElementById(
-      'escalation-mode-add-to-existing'
-    ) as HTMLInputElement;
+    const addRadio = document.getElementById('escalation-mode-add-to-existing') as HTMLInputElement;
     expect(addRadio.checked).toBe(true);
   });
 

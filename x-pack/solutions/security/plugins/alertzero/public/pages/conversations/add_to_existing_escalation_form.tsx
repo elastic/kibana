@@ -83,9 +83,7 @@ export const AddToExistingEscalationForm = memo<AddToExistingEscalationFormProps
                     ${incident.alreadyLinked
                       ? `cursor: not-allowed; opacity: 0.6;`
                       : `cursor: pointer;`}
-                    ${selectedId === incident.id
-                      ? `border-color: ${euiTheme.colors.primary};`
-                      : ''}
+                    ${selectedId === incident.id ? `border-color: ${euiTheme.colors.primary};` : ''}
                   `}
                   onClick={() => !incident.alreadyLinked && setSelectedId(incident.id)}
                   data-test-subj={`escalationModalIncident-${incident.id}`}
@@ -94,6 +92,7 @@ export const AddToExistingEscalationForm = memo<AddToExistingEscalationFormProps
                     <EuiFlexItem grow={false}>
                       <EuiRadio
                         id={`incident-${incident.id}`}
+                        name="escalation-incident"
                         checked={selectedId === incident.id}
                         disabled={incident.alreadyLinked}
                         onChange={() => !incident.alreadyLinked && setSelectedId(incident.id)}

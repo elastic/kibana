@@ -38,7 +38,8 @@
     "@kbn/ui-callout",
     "@kbn/std",
     "@kbn/react-query",
-    "@kbn/kibana-react-plugin"
+    "@kbn/kibana-react-plugin",
+    "@kbn/user-profile-components"
   ],
   "exclude": ["target/**/*"]
 }

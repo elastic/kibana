@@ -26,10 +26,7 @@ import {
   BlastRadius,
   type EscalationModalRenderProps,
 } from '@kbn/agentic-investigations-common';
-import {
-  useApproveProposal,
-  useDismissProposal,
-} from '@kbn/agentic-investigations-plugin/public';
+import { useApproveProposal, useDismissProposal } from '@kbn/agentic-investigations-plugin/public';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';

@@ -52,6 +52,7 @@ dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/app-menu'
   - '@kbn/search-inference-endpoints'
+  - '@kbn/user-profile-components'
 tags:
   - plugin
   - prod

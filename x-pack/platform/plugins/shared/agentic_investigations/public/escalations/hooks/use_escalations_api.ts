@@ -23,7 +23,6 @@ import type {
 import { retryOnTransientError } from '../../proposals/hooks/use_proposals_api';
 import { escalationQueryKeys } from '../query_keys';
 
-
 export const useListEscalations = (searchQuery?: string) => {
   const { services } = useKibana<CoreStart>();
   const [debouncedSearch, setDebouncedSearch] = useState(searchQuery);
