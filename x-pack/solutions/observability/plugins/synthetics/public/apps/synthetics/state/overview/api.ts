@@ -9,5 +9,25 @@ import type { TrendRequest, TrendTable } from '../../../../../common/types';
 import { apiService } from '../../../../utils/api_service';
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 
-export const fetchOverviewTrendStats = async (monitors: TrendRequest[]): Promise<TrendTable> =>
-  monitors.length ? apiService.post(SYNTHETICS_API_URLS.OVERVIEW_TRENDS, monitors) : {};
+export const fetchOverviewTrendStats = async (
+  monitors: TrendRequest[],
+  signal?: AbortSignal
+): Promise<TrendTable> => {
+  if (!monitors.length) {
+    return {};
+  }
+
+  if (signal) {
+    return apiService.post(
+      SYNTHETICS_API_URLS.OVERVIEW_TRENDS,
+      monitors,
+      undefined,
+      {},
+      {
+        signal,
+      }
+    );
+  }
+
+  return apiService.post(SYNTHETICS_API_URLS.OVERVIEW_TRENDS, monitors);
+};

@@ -42,21 +42,24 @@ export function toStatusOverviewQueryArgs(
   };
 }
 
-export const fetchOverviewStatus = async ({
-  pageState,
-  scopeStatusByLocation,
-  statusFilter,
-}: {
-  pageState: MonitorOverviewPageState;
-  scopeStatusByLocation?: boolean;
-  statusFilter?: string;
-}): Promise<PaginatedOverviewStatus> => {
-  const params = toStatusOverviewQueryArgs(pageState);
-  return apiService.get(SYNTHETICS_API_URLS.OVERVIEW_STATUS, {
-    ...params,
+export const fetchOverviewStatus = async (
+  {
+    pageState,
     scopeStatusByLocation,
-    ...(statusFilter ? { statusFilter } : {}),
-  });
+    statusFilter,
+  }: {
+    pageState: MonitorOverviewPageState;
+    scopeStatusByLocation?: boolean;
+    statusFilter?: string;
+  },
+  signal?: AbortSignal
+): Promise<PaginatedOverviewStatus> => {
+  const params = toStatusOverviewQueryArgs(pageState);
+  return apiService.get(
+    SYNTHETICS_API_URLS.OVERVIEW_STATUS,
+    { ...params, scopeStatusByLocation, ...(statusFilter ? { statusFilter } : {}) },
+    { signal }
+  );
 };
 
 /**
@@ -64,14 +67,22 @@ export const fetchOverviewStatus = async ({
  * monitors, so the client can promote the genuinely stale ones from `pending`
  * to `stale`. Scoped to `monitorQueryIds` to keep the lookup cheap.
  */
-export const fetchStaleStatus = async ({
-  pageState,
-  monitorQueryIds,
-}: {
-  pageState: MonitorOverviewPageState;
-  monitorQueryIds: string[];
-}): Promise<OverviewStaleStatus> => {
+export const fetchStaleStatus = async (
+  {
+    pageState,
+    monitorQueryIds,
+  }: {
+    pageState: MonitorOverviewPageState;
+    monitorQueryIds: string[];
+  },
+  signal?: AbortSignal
+): Promise<OverviewStaleStatus> => {
   const { monitorQueryIds: _ignoredMonitorQueryIds, ...params } =
     toStatusOverviewQueryArgs(pageState);
-  return apiService.post(SYNTHETICS_API_URLS.OVERVIEW_STATUS_STALE, { monitorQueryIds }, params);
+  return apiService.post(
+    SYNTHETICS_API_URLS.OVERVIEW_STATUS_STALE,
+    { monitorQueryIds },
+    params,
+    { signal }
+  );
 };

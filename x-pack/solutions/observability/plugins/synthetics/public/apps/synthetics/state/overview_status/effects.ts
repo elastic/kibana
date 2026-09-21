@@ -8,6 +8,7 @@
 import { put, select, takeLatest } from 'redux-saga/effects';
 import { uniq } from 'lodash';
 import type { MonitorOverviewPageState } from '..';
+import type { RequestCancellationManager } from '../request_cancellation_manager';
 import type { OverviewStatus } from '../../../../../common/runtime_types';
 import { selectOverviewPageState } from '../overview/selectors';
 import { fetchEffectFactory } from '../utils/fetch_effect';
@@ -21,13 +22,26 @@ import { fetchOverviewStatus, fetchStaleStatus } from './api';
 import { selectOverviewStatusReducer } from './selectors';
 import { getNextWindowRefreshPage } from './window_refresh';
 
-export function* fetchOverviewStatusEffect() {
+export function* fetchOverviewStatusEffect(
+  requestCancellationManager?: RequestCancellationManager
+) {
+  let requestSignal: AbortSignal | undefined;
+  const fetchStatus = requestCancellationManager
+    ? (request: Parameters<typeof fetchOverviewStatus>[0]) => {
+        requestSignal = requestCancellationManager.signal;
+        return fetchOverviewStatus(request, requestSignal);
+      }
+    : fetchOverviewStatus;
+
   yield takeLatest(
     [fetchOverviewStatusAction.get, quietFetchOverviewStatusAction.get],
     fetchEffectFactory(
-      fetchOverviewStatus,
+      fetchStatus,
       fetchOverviewStatusAction.success,
-      fetchOverviewStatusAction.fail
+      fetchOverviewStatusAction.fail,
+      undefined,
+      undefined,
+      () => Boolean(requestSignal?.aborted)
     ) as ReturnType<typeof fetchEffectFactory>
   );
 }
@@ -37,24 +51,48 @@ export function* fetchOverviewStatusEffect() {
  * request and a full replace/refresh never cancel each other — both land and
  * are reconciled by the reducer (append merges, replace overwrites).
  */
-export function* appendOverviewStatusEffect() {
+export function* appendOverviewStatusEffect(
+  requestCancellationManager?: RequestCancellationManager
+) {
+  let requestSignal: AbortSignal | undefined;
+  const fetchStatus = requestCancellationManager
+    ? (request: Parameters<typeof fetchOverviewStatus>[0]) => {
+        requestSignal = requestCancellationManager.signal;
+        return fetchOverviewStatus(request, requestSignal);
+      }
+    : fetchOverviewStatus;
+
   yield takeLatest(
     appendOverviewStatusAction.get,
     fetchEffectFactory(
-      fetchOverviewStatus,
+      fetchStatus,
       appendOverviewStatusAction.success,
-      appendOverviewStatusAction.fail
+      appendOverviewStatusAction.fail,
+      undefined,
+      undefined,
+      () => Boolean(requestSignal?.aborted)
     ) as ReturnType<typeof fetchEffectFactory>
   );
 }
 
-export function* fetchStaleStatusEffect() {
+export function* fetchStaleStatusEffect(requestCancellationManager?: RequestCancellationManager) {
+  let requestSignal: AbortSignal | undefined;
+  const fetchStatus = requestCancellationManager
+    ? (request: Parameters<typeof fetchStaleStatus>[0]) => {
+        requestSignal = requestCancellationManager.signal;
+        return fetchStaleStatus(request, requestSignal);
+      }
+    : fetchStaleStatus;
+
   yield takeLatest(
     fetchStaleStatusAction.get,
     fetchEffectFactory(
-      fetchStaleStatus,
+      fetchStatus,
       fetchStaleStatusAction.success,
-      fetchStaleStatusAction.fail
+      fetchStaleStatusAction.fail,
+      undefined,
+      undefined,
+      () => Boolean(requestSignal?.aborted)
     ) as ReturnType<typeof fetchEffectFactory>
   );
 }
