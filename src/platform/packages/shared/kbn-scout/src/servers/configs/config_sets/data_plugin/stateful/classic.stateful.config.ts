@@ -12,15 +12,15 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import type { ScoutServerConfig } from '../../../../../types';
 import { defaultConfig } from '../../default/stateful/base.config';
 
-const pluginPath = `--plugin-path=${resolve(
-  REPO_ROOT,
-  'src/platform/test/plugin_functional/plugins/data_search'
-)}`;
+const pluginPaths = ['data_search', 'index_patterns'].map(
+  (plugin) =>
+    `--plugin-path=${resolve(REPO_ROOT, 'src/platform/test/plugin_functional/plugins', plugin)}`
+);
 
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
   kbnTestServer: {
     ...defaultConfig.kbnTestServer,
-    serverArgs: [...defaultConfig.kbnTestServer.serverArgs, pluginPath],
+    serverArgs: [...defaultConfig.kbnTestServer.serverArgs, ...pluginPaths],
   },
 };
