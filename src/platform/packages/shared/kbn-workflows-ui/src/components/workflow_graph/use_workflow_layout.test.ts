@@ -94,7 +94,12 @@ describe('useWorkflowLayout', () => {
       );
     });
 
-    it('does NOT tag fan-in edges isMerge when both if branches are present', () => {
+    it('tags fan-in edges isMerge when both if branches are populated (no bypass lane)', () => {
+      // Both branches are real steps — no bypass lane — so previously isMerge
+      // was NOT set and edges fell through to getSmoothStepPath. With equal-depth
+      // branches both leaves share a rank, so the midpoint bend was invisible;
+      // but with unequal-depth branches (as in the reported repros) the midpoint
+      // appeared as a band far above the join node.
       const workflow = minimal({
         steps: [
           {
@@ -110,7 +115,9 @@ describe('useWorkflowLayout', () => {
       const { result } = renderHook(() => useWorkflowLayout({ workflow }));
       const fanInEdges = result.current.edges.filter((e) => e.target === 'after');
       expect(fanInEdges).toHaveLength(2);
-      expect(fanInEdges.every((e) => !(e.data as Record<string, unknown>)?.isMerge)).toBe(true);
+      expect(fanInEdges.every((e) => (e.data as Record<string, unknown>)?.isMerge === true)).toBe(
+        true
+      );
     });
 
     it('does NOT tag a plain sequential edge isMerge', () => {
@@ -124,6 +131,110 @@ describe('useWorkflowLayout', () => {
       const edge = result.current.edges.find((e) => e.source === 'a' && e.target === 'b');
       expect(edge).toBeDefined();
       expect((edge?.data as Record<string, unknown>)?.isMerge).toBeFalsy();
+    });
+
+    it('tags isMerge on all six fan-in edges (behavior workflow topology)', () => {
+      // Regression: remediate-behavior-windows-script-file has 6 leaves joining
+      // into a single `summary` sibling. All were real steps (no bypass lane),
+      // so isMerge was false and all six bent at their own smooth-step midpoints,
+      // forming a broad horizontal band far above the join node.
+      //
+      // Topology (reduced): route(if) → then: [a(if)→yes/no, b(if)→yes/no, c(if)→yes/no]
+      //                               → else: [d(if) → then: [loop(foreach)→inner], else: [e]]
+      //                     summary (sibling)
+      // Ids are slugged by IdAllocator / toSlugIdentifier: underscores → dashes.
+      const workflow = minimal({
+        steps: [
+          {
+            name: 'route',
+            type: 'if',
+            condition: 'x',
+            steps: [
+              {
+                name: 'branch_a',
+                type: 'if',
+                condition: 'a',
+                steps: [{ name: 'branch_a_yes', type: 'http' }],
+                else: [{ name: 'branch_a_no', type: 'http' }],
+              },
+              {
+                name: 'branch_b',
+                type: 'if',
+                condition: 'b',
+                steps: [{ name: 'branch_b_yes', type: 'http' }],
+                else: [{ name: 'branch_b_no', type: 'http' }],
+              },
+              {
+                name: 'branch_c',
+                type: 'if',
+                condition: 'c',
+                steps: [{ name: 'branch_c_yes', type: 'http' }],
+                else: [{ name: 'branch_c_no', type: 'http' }],
+              },
+            ],
+            else: [
+              {
+                name: 'branch_d',
+                type: 'if',
+                condition: 'd',
+                steps: [
+                  {
+                    name: 'loop',
+                    type: 'foreach',
+                    foreach: 'items',
+                    steps: [{ name: 'inner', type: 'http' }],
+                  },
+                ],
+                else: [{ name: 'branch_e', type: 'http' }],
+              },
+            ],
+          },
+          { name: 'summary', type: 'http' },
+        ] as unknown as WorkflowYaml['steps'],
+      });
+      const { result } = renderHook(() => useWorkflowLayout({ workflow }));
+      const fanInEdges = result.current.edges.filter((e) => e.target === 'summary');
+      // 6 leaves: branch_a_yes, branch_a_no, branch_b_yes, branch_b_no,
+      //           branch_c_yes (or branch_c_no), loop (foreach), branch_e
+      // Exact count depends on dedupe, but must be > 1 and all isMerge.
+      expect(fanInEdges.length).toBeGreaterThan(1);
+      expect(fanInEdges.every((e) => (e.data as Record<string, unknown>)?.isMerge === true)).toBe(
+        true
+      );
+    });
+
+    it('tags isMerge on fan-in edges inside a foreach body', () => {
+      // Pins the disjoint-union argument: inner edges (foreachGroups[].innerEdges)
+      // are included in incomingByTarget, so a fan-in inside a foreach body is
+      // also tagged — and the fix does not cross the container boundary.
+      const workflow = minimal({
+        steps: [
+          {
+            name: 'loop',
+            type: 'foreach',
+            foreach: 'items',
+            steps: [
+              {
+                name: 'inner_gate',
+                type: 'if',
+                condition: 'y',
+                steps: [{ name: 'inner_yes', type: 'http' }],
+                else: [{ name: 'inner_no', type: 'http' }],
+              },
+              { name: 'inner_after', type: 'http' },
+            ],
+          },
+        ] as unknown as WorkflowYaml['steps'],
+      });
+      const { result } = renderHook(() => useWorkflowLayout({ workflow }));
+      const fanInEdges = result.current.edges.filter((e) => e.target === 'inner-after');
+      expect(fanInEdges).toHaveLength(2);
+      expect(fanInEdges.every((e) => (e.data as Record<string, unknown>)?.isMerge === true)).toBe(
+        true
+      );
+      // Outer loop→loop-sibling edges must NOT be tagged (only one predecessor).
+      const outerEdges = result.current.edges.filter((e) => e.target === 'loop');
+      expect(outerEdges.every((e) => !(e.data as Record<string, unknown>)?.isMerge)).toBe(true);
     });
   });
 
