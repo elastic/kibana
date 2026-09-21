@@ -25,7 +25,7 @@ export const deleteAttachmentRoute = createCasesRoute({
   params: {
     params: schema.object({
       case_id: schema.string({ maxLength: MAX_CASE_ID_LENGTH }),
-      attachment_id: schema.string({ maxLength: MAX_ATTACHMENT_ID_LENGTH }),
+      id: schema.string({ maxLength: MAX_ATTACHMENT_ID_LENGTH }),
     }),
   },
   routerOptions: {
@@ -39,14 +39,14 @@ export const deleteAttachmentRoute = createCasesRoute({
       const caseContext = await context.cases;
       const client = await caseContext.getCasesClient();
       await client.attachments.delete({
-        savedObjectId: request.params.attachment_id,
+        savedObjectId: request.params.id,
         caseID: request.params.case_id,
       });
 
       return response.noContent();
     } catch (error) {
       throw createCaseError({
-        message: `Failed to delete attachment in route case id: ${request.params.case_id} attachment id: ${request.params.attachment_id}: ${error}`,
+        message: `Failed to delete attachment in route case id: ${request.params.case_id} id: ${request.params.id}: ${error}`,
         error,
       });
     }
