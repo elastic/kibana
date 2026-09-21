@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, { useState, useId } from 'react';
 
 import {
   EuiButtonEmpty,
@@ -62,57 +62,66 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
 
   const selectLanguageDescription = consoleTitle
     ? i18n.translate('searchApiPanels.welcomeBanner.codeBox.selectAriaLabel', {
-        defaultMessage: '{context}',
-        values: { context: consoleTitle },
-      })
+      defaultMessage: '{context}',
+      values: { context: consoleTitle },
+    })
     : i18n.translate('searchApiPanels.welcomeBanner.codeBox.selectLabel', {
-        defaultMessage: 'Select a programming language for the code snippet',
-      });
+      defaultMessage: 'Select a programming language for the code snippet',
+    });
 
   const getCopyButtonAriaLabel = consoleTitle
     ? i18n.translate('searchApiPanels.welcomeBanner.codeBox.copyAriaLabel', {
-        defaultMessage: 'Copy the {context} code snippet',
-        values: { context: consoleTitle },
-      })
+      defaultMessage: 'Copy the {context} code snippet',
+      values: { context: consoleTitle },
+    })
     : i18n.translate('searchApiPanels.welcomeBanner.codeBox.copyLabel', {
-        defaultMessage: 'Copy the code snippet',
-      });
+      defaultMessage: 'Copy the code snippet',
+    });
+
+
+  const selectLangDescriptionId = useId();
 
   const items = languages
     ? languages.map((language) => (
-        <EuiContextMenuItem
-          key={language.id}
-          icon={`${assetBasePath}/${language.iconType}`}
-          aria-label={i18n.translate(
-            'searchApiPanels.welcomeBanner.codeBox.selectChangeAriaLabel',
-            {
-              defaultMessage: 'Change language to {languageName} for every instance on this page',
-              values: { languageName: language.name },
-            }
-          )}
-          onClick={() => {
-            if (setSelectedLanguage) {
-              setSelectedLanguage(language);
-              setIsPopoverOpen(false);
-            }
-          }}
-        >
-          {language.name}
-        </EuiContextMenuItem>
-      ))
+      <EuiContextMenuItem
+        key={language.id}
+        icon={`${assetBasePath}/${language.iconType}`}
+        aria-label={i18n.translate(
+          'searchApiPanels.welcomeBanner.codeBox.selectChangeAriaLabel',
+          {
+            defaultMessage: 'Change language to {languageName} for every instance on this page',
+            values: { languageName: language.name },
+          }
+        )}
+        onClick={() => {
+          if (setSelectedLanguage) {
+            setSelectedLanguage(language);
+            setIsPopoverOpen(false);
+          }
+        }}
+      >
+        {language.name}
+      </EuiContextMenuItem>
+    ))
     : [];
 
   const button = selectedLanguage ? (
-    <EuiButtonEmpty
-      color="text"
-      iconType="chevronSingleDown"
-      iconSide="right"
-      size="s"
-      aria-label={selectLanguageDescription}
-      onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-    >
-      {selectedLanguage.name}
-    </EuiButtonEmpty>
+    <>
+      <span id={selectLangDescriptionId} className="euiScreenReaderOnly" aria-hidden="true">
+        {selectLanguageDescription}
+      </span>
+
+      <EuiButtonEmpty
+        color="text"
+        iconType="chevronSingleDown"
+        iconSide="right"
+        size="s"
+        aria-describedby={selectLangDescriptionId}
+        onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+      >
+        {selectedLanguage.name}
+      </EuiButtonEmpty>
+    </>
   ) : null;
 
   return (
