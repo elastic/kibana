@@ -35,6 +35,7 @@ interface DataDownloadOptionsProps {
   uiSettings: IUiSettingsClient;
   isFormatted?: boolean;
   fieldFormats: FieldFormatsStart;
+  missingValueDisplay?: 'text' | 'table';
 }
 
 const detectFormulasInTables = memoize((datatables: Datatable[]) =>
@@ -79,6 +80,7 @@ class DataDownloadOptions extends Component<DataDownloadOptionsProps, DataDownlo
               raw: !isFormatted,
               formatFactory: this.props.fieldFormats.deserialize,
               escapeFormulaValues: false,
+              missingValueDisplay: this.props.missingValueDisplay,
             }),
             type: CSV_MIME_TYPE,
           };

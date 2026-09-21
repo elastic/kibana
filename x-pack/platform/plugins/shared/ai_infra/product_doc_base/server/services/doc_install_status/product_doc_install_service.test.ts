@@ -35,6 +35,52 @@ describe('ProductDocInstallClient', () => {
   });
 
   describe('getInstallationStatus', () => {
+    it('reports every product as uninstalled when the saved objects cannot be read', async () => {
+      soClient.find.mockRejectedValue(new Error('es unavailable'));
+
+      const installStatus = await service.getInstallationStatus({ inferenceId });
+
+      expect(Object.values(installStatus).every(({ status }) => status === 'uninstalled')).toBe(
+        true
+      );
+      expect(log.error).toHaveBeenCalledTimes(1);
+    });
+
+    it('exposes when a product status was last written', async () => {
+      soClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            ...createObj({
+              product_name: 'kibana',
+              product_version: '8.15',
+              installation_status: 'uninstalled',
+            }),
+            updated_at: '2026-09-17T10:00:00.000Z',
+          },
+        ],
+        total: 1,
+        per_page: 100,
+        page: 1,
+      });
+
+      const installStatus = await service.getInstallationStatus({ inferenceId });
+
+      expect(installStatus.kibana).toEqual({
+        status: 'uninstalled',
+        version: '8.15',
+        updatedAt: '2026-09-17T10:00:00.000Z',
+      });
+      expect(installStatus.security.updatedAt).toBeUndefined();
+    });
+
+    it('propagates read failures from getInstallationStatusOrThrow', async () => {
+      soClient.find.mockRejectedValue(new Error('es unavailable'));
+
+      await expect(service.getInstallationStatusOrThrow({ inferenceId })).rejects.toThrow(
+        'es unavailable'
+      );
+    });
+
     it('returns the installation status based on existing entries', async () => {
       soClient.find.mockResolvedValue({
         saved_objects: [
@@ -124,7 +170,71 @@ describe('ProductDocInstallClient', () => {
     });
   });
 
+  describe('getOpenapiSpecInstallationStatus', () => {
+    it('exposes when the OpenAPI spec status was last written', async () => {
+      soClient.get.mockResolvedValue({
+        id: 'openapi',
+        type: 'type',
+        references: [],
+        updated_at: '2026-09-17T10:00:00.000Z',
+        attributes: {
+          product_name: 'kibana',
+          product_version: '9.5',
+          installation_status: 'uninstalled',
+          resource_type: ResourceTypes.openapiSpec,
+        },
+      });
+
+      await expect(service.getOpenapiSpecInstallationStatus({ inferenceId })).resolves.toEqual({
+        status: 'uninstalled',
+        version: '9.5',
+        updatedAt: '2026-09-17T10:00:00.000Z',
+      });
+    });
+  });
+
   describe('status setters', () => {
+    it.each([
+      [
+        'product documentation',
+        () => service.setInstallationFailed('kibana', 'boom', inferenceId),
+        { product_name: 'kibana', resource_type: ResourceTypes.productDoc },
+      ],
+      [
+        'Security Labs',
+        () => service.setSecurityLabsInstallationFailed({ failureReason: 'boom', inferenceId }),
+        { product_name: 'security', resource_type: ResourceTypes.securityLabs },
+      ],
+      [
+        'the OpenAPI spec',
+        () =>
+          service.setOpenapiSpecInstallationFailed({
+            productName: 'kibana',
+            productVersion: '9.6',
+            failureReason: 'boom',
+            inferenceId,
+          }),
+        { product_name: 'kibana', resource_type: ResourceTypes.openapiSpec },
+      ],
+    ])(
+      'records a failure of %s even when no status was written before',
+      async (_label, setFailed, expected) => {
+        soClient.update.mockResolvedValueOnce({} as any);
+
+        await setFailed();
+
+        expect(soClient.update).toHaveBeenCalledWith(
+          'product-doc-install-status',
+          expect.any(String),
+          expect.objectContaining({
+            installation_status: 'error',
+            last_installation_failure_reason: 'boom',
+          }),
+          { upsert: expect.objectContaining({ installation_status: 'error', ...expected }) }
+        );
+      }
+    );
+
     it('writes resource_type=product_doc when setting installation started', async () => {
       soClient.update.mockResolvedValueOnce({} as any);
 

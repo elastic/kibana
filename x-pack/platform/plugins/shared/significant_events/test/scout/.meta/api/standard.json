@@ -1,5 +1,5 @@
 {
-  "sha1": "404c8c4f99a4331615f99b4cb9539f772a5431f0",
+  "sha1": "0ec40595ca16abaf67963cafb22cfaef6e19f229",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -201,8 +201,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/workflows/managed_workflows.spec.ts",
-        "line": 36,
-        "column": 74
+        "line": 30,
+        "column": 50
       }
     },
     {
