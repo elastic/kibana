@@ -10,7 +10,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import moment from 'moment';
 import type { AgentDefinition, VersionedAttachment } from '@kbn/agent-builder-common';
 import { UserMessageEvent } from './items/user_message_event';
-import { PromptResponseEvent } from './items/prompt_response_event';
 import { AgentTurn } from './agent_turn';
 import { ConversationDateDivider } from './conversation_date_divider';
 import type { TimelineItem } from './types';
@@ -19,19 +18,50 @@ interface TimelineProps {
   items: TimelineItem[];
   agent?: AgentDefinition | null;
   conversationAttachments?: VersionedAttachment[];
+  /** True while an answered prompt's resume is in flight; spins the last group's avatar. */
+  isResuming?: boolean;
 }
 
 const itemDate = (item: TimelineItem): string =>
   item.kind === 'agentTurn' ? item.startedAt : item.event.created_at;
 
-export const Timeline: React.FC<TimelineProps> = ({ items, agent, conversationAttachments }) => {
+export const Timeline: React.FC<TimelineProps> = ({
+  items,
+  agent,
+  conversationAttachments,
+  isResuming = false,
+}) => {
+  const startsNewDateGroup = (index: number): boolean => {
+    const previous = items[index - 1];
+    return !previous || !moment(itemDate(items[index])).isSame(moment(itemDate(previous)), 'day');
+  };
+
+  // After user resumed, make the previous turn to show the loader
+  const isGroupLoading = (start: number): boolean => {
+    let index = start;
+    let running = false;
+    while (index < items.length) {
+      const entry = items[index];
+      if (entry.kind !== 'agentTurn') {
+        return running;
+      }
+      if (index > start && startsNewDateGroup(index)) {
+        return running;
+      }
+      running = running || entry.status === 'running';
+      index++;
+    }
+    return running || isResuming;
+  };
+
   return (
     <>
       <EuiFlexGroup direction="column" gutterSize="l">
         {items.map((item, index) => {
           const previous = items[index - 1];
-          const showDivider =
-            !previous || !moment(itemDate(item)).isSame(moment(itemDate(previous)), 'day');
+          const showDivider = startsNewDateGroup(index);
+          const showHeader =
+            showDivider || !(item.kind === 'agentTurn' && previous?.kind === 'agentTurn');
           let content: React.ReactNode;
           switch (item.kind) {
             case 'userMessage':
@@ -43,15 +73,14 @@ export const Timeline: React.FC<TimelineProps> = ({ items, agent, conversationAt
                 />
               );
               break;
-            case 'promptResponse':
-              content = <PromptResponseEvent event={item.event} />;
-              break;
             case 'agentTurn':
               content = (
                 <AgentTurn
                   item={item}
                   agent={agent}
                   conversationAttachments={conversationAttachments}
+                  showHeader={showHeader}
+                  isGroupLoading={showHeader ? isGroupLoading(index) : false}
                 />
               );
               break;

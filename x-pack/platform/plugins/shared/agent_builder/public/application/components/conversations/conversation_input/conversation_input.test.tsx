@@ -16,8 +16,8 @@ import {
   useConversationReadOnly,
   useConversationTitle,
   useHasActiveConversation,
-  useIsAwaitingPrompt,
 } from '../../../hooks/use_conversation';
+import { useIsAwaitingPrompt } from '../../../hooks/use_is_awaiting_prompt';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
@@ -41,6 +41,8 @@ jest.mock('../../../hooks/use_conversation', () => ({
   useConversationReadOnly: jest.fn(),
   useConversationTitle: jest.fn(),
   useHasActiveConversation: jest.fn(),
+}));
+jest.mock('../../../hooks/use_is_awaiting_prompt', () => ({
   useIsAwaitingPrompt: jest.fn(),
 }));
 jest.mock('../../../context/conversation/use_conversation_id', () => ({

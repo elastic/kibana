@@ -23,12 +23,15 @@ describe('ConversationDateDivider', () => {
   });
 
   it('labels the current day as "Today"', () => {
-    render(<ConversationDateDivider date="2026-06-15T08:30:00.000Z" />);
+    // Same clock time as NOW so the local calendar day matches in every timezone.
+    render(<ConversationDateDivider date="2026-06-15T12:00:00.000Z" />);
     expect(screen.getByRole('separator', { name: 'Today' })).toBeInTheDocument();
   });
 
   it('labels the previous day as "Yesterday"', () => {
-    render(<ConversationDateDivider date="2026-06-14T23:59:00.000Z" />);
+    // Exactly 24h before NOW, at the same clock time, so the local calendar day is always
+    // one day back regardless of timezone (a near-midnight offset would flip locally).
+    render(<ConversationDateDivider date="2026-06-14T12:00:00.000Z" />);
     expect(screen.getByRole('separator', { name: 'Yesterday' })).toBeInTheDocument();
   });
 

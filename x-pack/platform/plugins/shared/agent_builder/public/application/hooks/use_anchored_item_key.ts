@@ -10,7 +10,7 @@ import { useIsMutating } from '@kbn/react-query';
 import { useTimelineItems } from '../components/conversations/timeline/use_timeline_items';
 import { useConversationId } from '../context/conversation/use_conversation_id';
 import { mutationKeys } from '../mutation_keys';
-import { useIsCurrentConversationStreaming } from './use_is_current_conversation_streaming';
+import { useCurrentConversationStreamType } from './use_is_current_conversation_streaming';
 
 /**
  * Key of the timeline item the user's latest send appended: the item that landed at the position
@@ -20,10 +20,11 @@ import { useIsCurrentConversationStreaming } from './use_is_current_conversation
 export const useAnchoredItemKey = (): string | undefined => {
   const conversationId = useConversationId();
   const items = useTimelineItems();
-  const isStreaming = useIsCurrentConversationStreaming();
+  const streamType = useCurrentConversationStreamType();
   const isPosting =
     useIsMutating({ mutationKey: mutationKeys.sendUserMessage(conversationId) }) > 0;
-  const isActive = isStreaming || isPosting;
+  const isResuming = streamType === 'resume';
+  const isActive = streamType !== undefined || isPosting;
   const observed = useRef<{ conversationId?: string; active: boolean }>({ active: false });
   const lastKey = useRef<string>();
   const [anchor, setAnchor] = useState<{ index: number }>();
@@ -41,10 +42,10 @@ export const useAnchoredItemKey = (): string | undefined => {
       setAnchor(undefined);
       return;
     }
-    if (isActive && !previous.active) {
+    if (isActive && !previous.active && !isResuming) {
       setAnchor({ index: items.length });
     }
-  }, [isActive, conversationId, items.length]);
+  }, [isActive, isResuming, conversationId, items.length]);
 
   if (!anchor) {
     lastKey.current = undefined;

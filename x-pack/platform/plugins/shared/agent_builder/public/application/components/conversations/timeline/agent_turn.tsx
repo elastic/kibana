@@ -19,8 +19,14 @@ import { AgentResponse } from './agent_response';
 import { executionTerminatedToResponse } from './items/execution_terminated_event';
 import { ExecutionFailedEvent } from './items/execution_failed_event';
 import { ExecutionAbortedEvent } from './items/execution_aborted_event';
+import { PendingPrompts } from './items/pending_prompts';
 import type { AgentTurnItem } from './types';
-import { isCompletedTurn, isFailedTurn, isAbortedTurn } from './timeline_item_utils';
+import {
+  isCompletedTurn,
+  isFailedTurn,
+  isAbortedTurn,
+  isAwaitingPromptTurn,
+} from './timeline_item_utils';
 
 const loadingLabel = i18n.translate('xpack.agentBuilder.timeline.agentLoading', {
   defaultMessage: 'Agent is generating a response',
@@ -30,32 +36,20 @@ interface AgentTurnProps {
   item: AgentTurnItem;
   agent?: AgentDefinition | null;
   conversationAttachments?: VersionedAttachment[];
+  showHeader?: boolean;
+  /** Spins the shared avatar while a later turn of this turn's visual group is running. */
+  isGroupLoading?: boolean;
 }
 
-// `AgentResponse` stays at the same position for running and completed turns so its subtree
-// (expanded steps, streamed text) survives completion and the later swap to the saved item.
+// One `AgentResponse` at the same position for running, awaiting-prompt and completed turns, so
+// its subtree (expanded steps, streamed text) survives every state change and the swap to the
+// saved item. An answered pause has no response of its own; its steps carry the question and
+// answers.
 const renderContent = (
   item: AgentTurnItem,
   conversationId: string | undefined,
   conversationAttachments?: VersionedAttachment[]
 ): React.ReactNode => {
-  if (isCompletedTurn(item)) {
-    const completed = executionTerminatedToResponse(item.terminal, item.steps);
-    if (!completed) {
-      return null;
-    }
-    return (
-      <AgentResponse
-        steps={completed.steps}
-        response={completed.response}
-        isLoading={false}
-        executionTerminatedEvent={item.terminal}
-        conversationAttachments={conversationAttachments}
-        attachmentRefs={item.attachmentRefs}
-        triggerAttachmentRefs={item.triggerAttachmentRefs}
-      />
-    );
-  }
   if (isFailedTurn(item) || isAbortedTurn(item)) {
     return (
       <EuiFlexGroup direction="column" gutterSize="s">
@@ -79,25 +73,56 @@ const renderContent = (
       </EuiFlexGroup>
     );
   }
-  if (item.steps.length === 0 && !item.response) {
+
+  const completedTerminal = isCompletedTurn(item) ? item.terminal : undefined;
+  const completed = completedTerminal
+    ? executionTerminatedToResponse(completedTerminal, item.steps)
+    : undefined;
+  const steps = completed?.steps ?? item.steps;
+  const response = completed?.response ?? { message: item.response?.message ?? '' };
+  const isAwaiting = isAwaitingPromptTurn(item);
+  const hasContent = steps.length > 0 || response.message !== '';
+
+  if (!isAwaiting && !hasContent) {
     return null;
   }
+
+  const promptRequestedEventId = item.terminal?.id;
+
   return (
-    <AgentResponse
-      steps={item.steps}
-      response={{ message: item.response?.message ?? '' }}
-      isLoading
-      conversationAttachments={conversationAttachments}
-      attachmentRefs={item.attachmentRefs}
-    />
+    <>
+      {hasContent && (
+        <AgentResponse
+          steps={steps}
+          response={response}
+          isLoading={item.status === 'running'}
+          executionTerminatedEvent={completed ? completedTerminal : undefined}
+          conversationAttachments={conversationAttachments}
+          attachmentRefs={item.attachmentRefs}
+          triggerAttachmentRefs={completed ? item.triggerAttachmentRefs : undefined}
+        />
+      )}
+      {isAwaiting && promptRequestedEventId && (
+        <PendingPrompts
+          prompts={item.pendingPrompts}
+          promptRequestedEventId={promptRequestedEventId}
+        />
+      )}
+    </>
   );
 };
 
-export const AgentTurn: React.FC<AgentTurnProps> = ({ item, agent, conversationAttachments }) => {
+export const AgentTurn: React.FC<AgentTurnProps> = ({
+  item,
+  agent,
+  conversationAttachments,
+  showHeader = true,
+  isGroupLoading,
+}) => {
   const { euiTheme } = useEuiTheme();
   const conversationId = useConversationId();
   const { status, startedAt, origin } = item;
-  const isLoading = status === 'running' || status === 'awaiting_prompt';
+  const isLoading = isGroupLoading ?? status === 'running';
 
   const avatarColumnStyles = css`
     min-inline-size: ${euiTheme.size.l};
@@ -107,20 +132,22 @@ export const AgentTurn: React.FC<AgentTurnProps> = ({ item, agent, conversationA
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
+      {/* The column always renders so grouped turns stay aligned with the one above. */}
       <EuiFlexItem
         grow={false}
         css={avatarColumnStyles}
         data-test-subj="agentBuilderTimelineAvatar"
       >
-        {isLoading ? (
-          <EuiLoadingElastic size="l" aria-label={loadingLabel} />
-        ) : (
-          agent && <AgentAvatar agent={agent} size="s" iconSize="l" />
-        )}
+        {showHeader &&
+          (isLoading ? (
+            <EuiLoadingElastic size="l" aria-label={loadingLabel} />
+          ) : (
+            agent && <AgentAvatar agent={agent} size="s" iconSize="l" />
+          ))}
       </EuiFlexItem>
       <EuiFlexItem grow={true}>
         <EuiFlexGroup direction="column" gutterSize="s">
-          {agent && (
+          {showHeader && agent && (
             <EuiFlexItem grow={false}>
               <RoundAuthorHeader
                 name={agent.name}

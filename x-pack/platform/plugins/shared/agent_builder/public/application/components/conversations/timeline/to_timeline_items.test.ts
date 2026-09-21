@@ -9,7 +9,9 @@ import {
   ConversationOriginType,
   ConversationRoundStepType,
   EventActorType,
+  ToolResultType,
 } from '@kbn/agent-builder-common';
+import type { ToolResult } from '@kbn/agent-builder-common';
 import { groupTimelineEvents, buildItems } from './to_timeline_items';
 import { createUserMessageEvent } from './items/user_message_event.factory';
 import { createExecutionStartedEvent } from './items/execution_started.factory';
@@ -22,6 +24,7 @@ import type { ExecutionStreamingEvent, TimelineDisplayEvent } from '../../../../
 import { EXECUTION_STREAMING_EVENT_TYPE } from '../../../../services/events';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents';
+import { createExecutionPausedEvent } from './items/execution_paused_event.factory';
 
 const makeEventsById = (events: TimelineDisplayEvent[]) => new Map(events.map((e) => [e.id, e]));
 
@@ -170,14 +173,13 @@ describe('groupTimelineEvents', () => {
     }
   });
 
-  it('renders prompt_response as its own promptResponse item', () => {
+  it('skips prompt_response events (no item pushed; attachment refs still folded)', () => {
     const promptResponse = createPromptResponseEvent({ id: 'pr-1' });
 
     const events = [promptResponse];
     const items = groupTimelineEvents(events, makeEventsById(events));
 
-    expect(items).toHaveLength(1);
-    expect(items[0]).toEqual({ kind: 'promptResponse', key: 'pr-1', event: promptResponse });
+    expect(items).toHaveLength(0);
   });
 
   it('handles execution_aborted as aborted status', () => {
@@ -194,6 +196,69 @@ describe('groupTimelineEvents', () => {
       expect(execItem.status).toBe('aborted');
       expect(execItem.terminal).toBe(aborted);
     }
+  });
+});
+
+describe('groupTimelineEvents deduping a paused tool call', () => {
+  const toolCallStep = (results: ToolResult[]) => ({
+    type: ConversationRoundStepType.toolCall as const,
+    tool_call_id: 'tc-1',
+    tool_id: 'platform.core.list_indices',
+    params: {},
+    results,
+  });
+  const result: ToolResult = { type: ToolResultType.other, data: {}, tool_result_id: 'r-1' };
+
+  it('drops the unresolved copy once the resume execution resolves the same tool call', () => {
+    const user = createUserMessageEvent({ id: 'user-1' });
+    const pausedStarted = createExecutionStartedEvent({ execution_id: 'exec-1', id: 'es-1' });
+    const pausedStep = createExecutionStepEvent({
+      execution_id: 'exec-1',
+      id: 'paused-step',
+      data: { step: toolCallStep([]), sequence: 0 },
+    });
+    const pausedTerm = createExecutionTerminatedEvent({ execution_id: 'exec-1', id: 'et-1' });
+    const promptResponse = createPromptResponseEvent({ id: 'pr-1' });
+    const resumeStarted = createExecutionStartedEvent({ execution_id: 'exec-2', id: 'es-2' });
+    const resumeStep = createExecutionStepEvent({
+      execution_id: 'exec-2',
+      id: 'resume-step',
+      data: { step: toolCallStep([result]), sequence: 0 },
+    });
+    const resumeTerm = createExecutionTerminatedEvent({ execution_id: 'exec-2', id: 'et-2' });
+
+    const events = [
+      user,
+      pausedStarted,
+      pausedStep,
+      pausedTerm,
+      promptResponse,
+      resumeStarted,
+      resumeStep,
+      resumeTerm,
+    ];
+    const turns = groupTimelineEvents(events, makeEventsById(events)).filter(
+      (item) => item.kind === 'agentTurn'
+    );
+
+    const [paused, resumed] = turns;
+    expect(paused.kind === 'agentTurn' && paused.steps).toHaveLength(0);
+    expect(resumed.kind === 'agentTurn' && resumed.steps).toEqual([resumeStep.data.step]);
+  });
+
+  it('keeps an unresolved tool call while the run is still paused on it', () => {
+    const user = createUserMessageEvent({ id: 'user-1' });
+    const started = createExecutionStartedEvent({ execution_id: 'exec-1', id: 'es-1' });
+    const step = createExecutionStepEvent({
+      execution_id: 'exec-1',
+      id: 'paused-step',
+      data: { step: toolCallStep([]), sequence: 0 },
+    });
+
+    const events = [user, started, step];
+    const [, turn] = groupTimelineEvents(events, makeEventsById(events));
+
+    expect(turn.kind === 'agentTurn' && turn.steps).toEqual([step.data.step]);
   });
 });
 
@@ -223,12 +288,39 @@ describe('groupTimelineEvents while a run streams', () => {
     }
   });
 
-  it('moves the turn to awaiting_prompt once prompts are pending', () => {
+  it('keeps the turn running during streaming even when prompts are expected', () => {
+    const started = createExecutionStartedEvent({ execution_id: 'exec-live' });
+    const events = [started, streamingEvent({ message: 'thinking' })];
+
+    const [turn] = groupTimelineEvents(events, makeEventsById(events));
+
+    expect(turn.kind).toBe('agentTurn');
+    if (turn.kind === 'agentTurn') {
+      expect(turn.status).toBe('running');
+    }
+  });
+
+  it('moves the turn to awaiting_prompt when the terminal event carries a prompt_requested outcome', () => {
     const prompts: PromptRequest[] = [
       { id: 'p1', type: AgentPromptType.ask_user_question, questions: [] },
     ];
+    const paused = createExecutionPausedEvent({
+      id: 'round-live::execution_terminated',
+      execution_id: 'exec-live',
+      data: {
+        outcome: { type: 'prompt_requested', prompts },
+        model_usage: {
+          connector_id: '',
+          llm_calls: 1,
+          input_tokens: 1,
+          output_tokens: 1,
+        },
+        time_to_first_token: 0,
+        time_to_last_token: 0,
+      },
+    });
     const started = createExecutionStartedEvent({ execution_id: 'exec-live' });
-    const events = [started, streamingEvent({ message: 'thinking', pending_prompts: prompts })];
+    const events = [started, paused];
 
     const [turn] = groupTimelineEvents(events, makeEventsById(events));
 

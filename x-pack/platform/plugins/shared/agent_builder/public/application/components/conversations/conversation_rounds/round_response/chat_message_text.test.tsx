@@ -161,8 +161,6 @@ describe('chat_message_text', () => {
         onExecutionStarted: jest.fn(),
         onExecutionTerminated: jest.fn(),
         refetchConversation: jest.fn(),
-        clearPendingPrompts: jest.fn(),
-        setAskUserQuestionAnswers: jest.fn(),
         deleteConversation: jest.fn(),
         renameConversation: jest.fn(),
       },

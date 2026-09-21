@@ -11,7 +11,7 @@ import { useTimelineItems } from '../components/conversations/timeline/use_timel
 import type { TimelineItem } from '../components/conversations/timeline/types';
 import { createUserMessageEvent } from '../components/conversations/timeline/items/user_message_event.factory';
 import { useConversationId } from '../context/conversation/use_conversation_id';
-import { useIsCurrentConversationStreaming } from './use_is_current_conversation_streaming';
+import { useCurrentConversationStreamType } from './use_is_current_conversation_streaming';
 import { useAnchoredItemKey } from './use_anchored_item_key';
 
 jest.mock('@kbn/react-query', () => ({ useIsMutating: jest.fn() }));
@@ -20,7 +20,7 @@ jest.mock('../components/conversations/timeline/use_timeline_items', () => ({
 }));
 jest.mock('../context/conversation/use_conversation_id', () => ({ useConversationId: jest.fn() }));
 jest.mock('./use_is_current_conversation_streaming', () => ({
-  useIsCurrentConversationStreaming: jest.fn(),
+  useCurrentConversationStreamType: jest.fn(),
 }));
 
 const message = (id: string): TimelineItem => ({
@@ -40,15 +40,20 @@ interface State {
   conversationId?: string;
   isStreaming?: boolean;
   isPosting?: boolean;
+  // The current conversation's stream is a resume (continuing a paused turn) rather than a send.
+  isResuming?: boolean;
   items: TimelineItem[];
 }
 
 const setState = (state: State) => {
-  const { isStreaming = false, isPosting = false, items } = state;
+  const { isStreaming = false, isPosting = false, isResuming = false, items } = state;
   // An explicit `undefined` is the new-conversation page, which has no id yet.
   const conversationId = 'conversationId' in state ? state.conversationId : 'a';
   jest.mocked(useConversationId).mockReturnValue(conversationId);
-  jest.mocked(useIsCurrentConversationStreaming).mockReturnValue(isStreaming);
+  // The stream type is already scoped to the current conversation, so a resume elsewhere is simply
+  // invisible here: this conversation reads its own `send` (or nothing).
+  const streamType = isResuming ? 'resume' : isStreaming ? 'send' : undefined;
+  jest.mocked(useCurrentConversationStreamType).mockReturnValue(streamType);
   jest.mocked(useIsMutating).mockReturnValue(isPosting ? 1 : 0);
   jest.mocked(useTimelineItems).mockReturnValue(items);
 };
@@ -131,6 +136,35 @@ describe('useAnchoredItemKey', () => {
       isStreaming: true,
       items: [message('u1'), turn('t1'), message('u2'), turn('t2')],
     });
+    expect(result.current).toBe('u2');
+  });
+
+  it('does not re-latch when a paused round is resumed, keeping the prompt in view', () => {
+    const { result, update } = renderAnchor({ isStreaming: true, items: [] });
+    update({ isStreaming: true, items: history });
+    update({ isStreaming: false, items: history });
+    expect(result.current).toBe('u1');
+
+    // Answering the prompt resumes the round: a stream starts, but it continues the same turn.
+    update({ isResuming: true, isStreaming: true, items: history });
+    update({
+      isResuming: true,
+      isStreaming: true,
+      items: [...history, message('answer'), turn('t2')],
+    });
+    expect(result.current).toBe('u1');
+
+    update({ items: [...history, message('answer'), turn('t2')] });
+    expect(result.current).toBe('u1');
+  });
+
+  it('latches this conversation own send even while another conversation resumes in parallel', () => {
+    // The stream type is read for the current conversation only, so a resume in flight elsewhere
+    // does not reach this hook: this conversation still sees its own `send` and latches it.
+    const { result, update } = renderAnchor({ items: history });
+
+    update({ isStreaming: true, items: history });
+    update({ isStreaming: true, items: [...history, message('u2'), turn('t2')] });
     expect(result.current).toBe('u2');
   });
 

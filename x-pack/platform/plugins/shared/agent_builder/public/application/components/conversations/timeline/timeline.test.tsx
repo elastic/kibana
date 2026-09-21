@@ -12,8 +12,21 @@ import { createUserMessageEvent } from './items/user_message_event.factory';
 import { Timeline } from './timeline';
 
 jest.mock('./items/user_message_event', () => ({ UserMessageEvent: () => null }));
-jest.mock('./items/prompt_response_event', () => ({ PromptResponseEvent: () => null }));
-jest.mock('./agent_turn', () => ({ AgentTurn: () => null }));
+jest.mock('./agent_turn', () => ({
+  AgentTurn: ({
+    showHeader,
+    isGroupLoading,
+  }: {
+    showHeader?: boolean;
+    isGroupLoading?: boolean;
+  }) => (
+    <div
+      data-test-subj="agentTurn"
+      data-show-header={String(showHeader)}
+      data-group-loading={String(isGroupLoading)}
+    />
+  ),
+}));
 
 describe('Timeline', () => {
   it('marks each item with its key so the scroll anchor can find it', () => {
@@ -35,6 +48,71 @@ describe('Timeline', () => {
         el.getAttribute('data-timeline-item-key')
       )
     ).toEqual(['round-1::user_message', 'round-1::execution']);
+  });
+
+  describe('group loading', () => {
+    const message = (id: string): TimelineItem => ({
+      kind: 'userMessage',
+      key: id,
+      event: createUserMessageEvent({ id, created_at: '2025-01-01T09:00:00.000Z' }),
+    });
+    const turn = (
+      key: string,
+      status: 'completed' | 'running',
+      startedAt = '2025-01-01T09:00:10.000Z'
+    ): TimelineItem => ({
+      kind: 'agentTurn',
+      key,
+      status,
+      startedAt,
+      steps: [],
+    });
+
+    const turnFlags = () =>
+      screen.getAllByTestId('agentTurn').map((el) => ({
+        header: el.getAttribute('data-show-header'),
+        loading: el.getAttribute('data-group-loading'),
+      }));
+
+    it('spins the header turn of a group while a later grouped turn runs', () => {
+      render(<Timeline items={[message('u1'), turn('t1', 'completed'), turn('t2', 'running')]} />);
+
+      expect(turnFlags()).toEqual([
+        { header: 'true', loading: 'true' },
+        { header: 'false', loading: 'false' },
+      ]);
+    });
+
+    it('does not spin an earlier day group when a later day turn runs', () => {
+      render(
+        <Timeline
+          items={[
+            turn('t1', 'completed', '2025-01-01T09:00:10.000Z'),
+            turn('t2', 'running', '2025-01-02T09:00:10.000Z'),
+          ]}
+        />
+      );
+
+      // Different days render two headers; the scan must not cross the day boundary.
+      expect(turnFlags()).toEqual([
+        { header: 'true', loading: 'false' },
+        { header: 'true', loading: 'true' },
+      ]);
+    });
+
+    it('spins the last group while a resume is in flight with no turn yet', () => {
+      render(
+        <Timeline
+          items={[message('u1'), turn('t1', 'completed'), message('u2'), turn('t2', 'completed')]}
+          isResuming
+        />
+      );
+
+      expect(turnFlags()).toEqual([
+        { header: 'true', loading: 'false' },
+        { header: 'true', loading: 'true' },
+      ]);
+    });
   });
 
   describe('date dividers', () => {

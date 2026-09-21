@@ -147,6 +147,25 @@ describe('sseToEvents', () => {
     });
   });
 
+  it('builds a step from a resume’s tool_result when no tool_call preceded it', () => {
+    const stepId = executionStepEventId(ROUND_ID, 1, 0);
+    const state = fold(executionStarted(RESUME_EXECUTION_ID), {
+      type: ChatEventType.toolResult,
+      data: {
+        tool_call_id: 't1',
+        tool_id: 'my_tool',
+        results: [{ tool_result_id: 'r1', type: ToolResultType.other, data: { ok: true } }],
+      },
+    } as ChatEvent);
+
+    expect(ids(state)).toEqual([`${RESUME_EXECUTION_ID}::execution_started`, stepId]);
+    expect(stepAt(state, stepId)).toMatchObject({
+      tool_call_id: 't1',
+      tool_id: 'my_tool',
+      results: [{ tool_result_id: 'r1', type: ToolResultType.other, data: { ok: true } }],
+    });
+  });
+
   it('numbers a resume’s steps off its own execution id', () => {
     const state = fold(executionStarted(RESUME_EXECUTION_ID), toolCall('t1'), toolCall('t2'));
 
@@ -180,17 +199,25 @@ describe('sseToEvents', () => {
     expect(state.cursor).toBeUndefined();
   });
 
-  it('puts time_to_first_token and pending prompts on the streaming event', () => {
-    const prompt = { id: 'p1', type: 'confirmation', message: 'ok?' };
-    const state = fold(
-      executionStarted(),
-      { type: ChatEventType.thinkingComplete, data: { time_to_first_token: 42 } } as ChatEvent,
-      { type: ChatEventType.promptRequest, data: { prompt } } as ChatEvent
-    );
+  it('puts time_to_first_token on the streaming event', () => {
+    const state = fold(executionStarted(), {
+      type: ChatEventType.thinkingComplete,
+      data: { time_to_first_token: 42 },
+    } as ChatEvent);
 
     expect(streamingEvent(state)?.data).toMatchObject({
       time_to_first_token: 42,
-      pending_prompts: [prompt],
     });
+  });
+
+  it('ignores prompt_request events (outcome is carried on the terminal event)', () => {
+    const prompt = { id: 'p1', type: 'confirmation', message: 'ok?' };
+    const before = fold(executionStarted(), chunk('Hello'));
+    const after = sseToEvents(before, {
+      type: ChatEventType.promptRequest,
+      data: { prompt },
+    } as ChatEvent);
+
+    expect(after).toBe(before);
   });
 });

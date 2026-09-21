@@ -430,4 +430,78 @@ describe('ConversationStreamService', () => {
     expect(() => service.clearPersistedExecution('A', EXECUTION_ID)).not.toThrow();
     expect(service.getSnapshot('A')).toEqual([]);
   });
+
+  it('recordPromptResponse inserts the event into the live stream immediately', () => {
+    const { source } = makeFakeSource();
+    const service = new ConversationStreamService(source);
+    const emissions: TimelineDisplayEvent[][] = [];
+
+    service.getActiveStream$('A').subscribe((state) => emissions.push(state));
+
+    const promptResponse = {
+      id: 'pr-1',
+      type: TimelineEventType.promptResponse,
+      created_at: new Date().toISOString(),
+      actor: { type: EventActorType.agent, id: 'system' },
+      data: { prompt_requested_event_id: 'pause-1', responses: {} },
+    } as TimelineDisplayEvent;
+
+    service.recordPromptResponse('A', promptResponse as any);
+
+    const last = emissions[emissions.length - 1];
+    expect(last.find((e) => e.id === 'pr-1')).toBeDefined();
+  });
+
+  it('recordPromptResponse creates the stream when none exists', () => {
+    const { source } = makeFakeSource();
+    const service = new ConversationStreamService(source);
+
+    const promptResponse = {
+      id: 'pr-1',
+      type: TimelineEventType.promptResponse,
+      created_at: new Date().toISOString(),
+      actor: { type: EventActorType.agent, id: 'system' },
+      data: { prompt_requested_event_id: 'pause-1', responses: {} },
+    } as TimelineDisplayEvent;
+
+    expect(() => service.recordPromptResponse('A', promptResponse as any)).not.toThrow();
+    expect(service.getSnapshot('A').find((e) => e.id === 'pr-1')).toBeDefined();
+  });
+
+  it('clearPromptResponse removes the event by id', () => {
+    const { source } = makeFakeSource();
+    const service = new ConversationStreamService(source);
+    const emissions: TimelineDisplayEvent[][] = [];
+
+    service.getActiveStream$('A').subscribe((state) => emissions.push(state));
+
+    const promptResponse = {
+      id: 'pr-1',
+      type: TimelineEventType.promptResponse,
+      created_at: new Date().toISOString(),
+      actor: { type: EventActorType.agent, id: 'system' },
+      data: { prompt_requested_event_id: 'pause-1', responses: {} },
+    } as TimelineDisplayEvent;
+
+    service.recordPromptResponse('A', promptResponse as any);
+    service.clearPromptResponse('A', 'pr-1');
+
+    const last = emissions[emissions.length - 1];
+    expect(last.find((e) => e.id === 'pr-1')).toBeUndefined();
+  });
+
+  it('clearPromptResponse is a no-op when the stream does not exist', () => {
+    const { source } = makeFakeSource();
+    const service = new ConversationStreamService(source);
+
+    expect(() => service.clearPromptResponse('A', 'pr-1')).not.toThrow();
+  });
+
+  it('clearPromptResponse is a no-op when the event is not in the stream', () => {
+    const { source } = makeFakeSource();
+    const service = new ConversationStreamService(source);
+    service.getActiveStream$('A').subscribe(() => {});
+
+    expect(() => service.clearPromptResponse('A', 'pr-999')).not.toThrow();
+  });
 });

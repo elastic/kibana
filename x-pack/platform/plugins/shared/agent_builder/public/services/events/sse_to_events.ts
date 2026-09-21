@@ -45,7 +45,6 @@ import {
   createReasoningStep,
   createToolCallStep,
 } from '@kbn/agent-builder-common/chat/conversation';
-import type { PromptRequest } from '@kbn/agent-builder-common/agents';
 
 /**
  * A client-only event type carrying the half-written answer of a running execution.
@@ -59,8 +58,6 @@ export interface ExecutionStreamingEventData {
   message: string;
   /** Known once `thinking_complete` arrives; the terminal event carries it afterwards. */
   time_to_first_token?: number;
-  /** Prompts the run is waiting on (HITL), before the terminal event states the outcome. */
-  pending_prompts?: PromptRequest[];
 }
 
 export type ExecutionStreamingEvent = ConversationEvent<
@@ -95,17 +92,15 @@ export interface LiveEventsState {
   /** Answer text accumulated for the current execution. */
   message: string;
   timeToFirstToken?: number;
-  pendingPrompts: PromptRequest[];
 }
 
 export const emptyLiveEventsState = (): LiveEventsState => ({
   events: [],
   steps: [],
   message: '',
-  pendingPrompts: [],
 });
 
-const upsertEvent = (
+export const upsertEvent = (
   events: TimelineDisplayEvent[],
   event: TimelineDisplayEvent
 ): TimelineDisplayEvent[] => {
@@ -146,6 +141,9 @@ const findToolCallStep = (
   const sequence = steps.findIndex(
     (step) => isToolCallStep(step) && step.tool_call_id === toolCallId
   );
+  if (sequence === -1) {
+    return undefined;
+  }
   const step = steps[sequence];
   return isToolCallStep(step) ? { sequence, step } : undefined;
 };
@@ -178,8 +176,7 @@ const withStreamingEvent = (state: LiveEventsState): LiveEventsState => {
   }
   const { roundId, index, executionId, triggerEventId, actor } = cursor;
   const id = executionTerminatedEventId(roundId, index);
-  const hasContent =
-    state.message !== '' || state.timeToFirstToken !== undefined || state.pendingPrompts.length > 0;
+  const hasContent = state.message !== '' || state.timeToFirstToken !== undefined;
   // Nothing to show and nothing to clear: do not put an empty event on the timeline.
   if (!hasContent && !state.events.some((event) => event.id === id)) {
     return state;
@@ -196,7 +193,6 @@ const withStreamingEvent = (state: LiveEventsState): LiveEventsState => {
       ...(state.timeToFirstToken !== undefined
         ? { time_to_first_token: state.timeToFirstToken }
         : {}),
-      ...(state.pendingPrompts.length ? { pending_prompts: state.pendingPrompts } : {}),
     },
   };
   return { ...state, events: upsertEvent(state.events, streaming) };
@@ -233,7 +229,6 @@ export const sseToEvents = (state: LiveEventsState, event: ChatEvent): LiveEvent
       steps: [],
       message: '',
       timeToFirstToken: undefined,
-      pendingPrompts: [],
       events: upsertEvent(state.events, event),
     };
   }
@@ -251,7 +246,6 @@ export const sseToEvents = (state: LiveEventsState, event: ChatEvent): LiveEvent
       steps: [],
       message: '',
       timeToFirstToken: undefined,
-      pendingPrompts: [],
       events: upsertEvent(events, event),
     };
   }
@@ -320,21 +314,21 @@ export const sseToEvents = (state: LiveEventsState, event: ChatEvent): LiveEvent
   }
 
   if (isToolResultEvent(event)) {
-    const { tool_call_id: toolCallId, results } = event.data;
+    const { tool_call_id: toolCallId, tool_id: toolId, results } = event.data;
     const found = findToolCallStep(state.steps, toolCallId);
     if (!found) {
-      return state;
+      return withAppendedStep(
+        state,
+        createToolCallStep({ tool_call_id: toolCallId, tool_id: toolId, params: {}, results })
+      );
     }
     return withStepAt(state, found.sequence, { ...found.step, results });
   }
 
   if (isPromptRequestEvent(event)) {
-    // Not a step: the server turns pending prompts into the terminal event's outcome, so making
-    // one here would shift every later step id.
-    return withStreamingEvent({
-      ...state,
-      pendingPrompts: [...state.pendingPrompts, event.data.prompt],
-    });
+    // The prompts are carried on the terminal `execution_terminated` event, so no state is needed.
+    // Never turn a prompt into a step either: that would shift every later step id.
+    return state;
   }
 
   if (isCompactionStartedEvent(event)) {

@@ -79,7 +79,7 @@ export const ResponseMessage: React.FC<ResponseMessageProps> = ({
           />
         ) : null}
       </EuiFlexItem>
-      {!isLoading && !hasError && (
+      {!isLoading && !hasError && hasMessage && (
         <EuiFlexItem grow={false}>
           <ResponseActions
             content={response.message}

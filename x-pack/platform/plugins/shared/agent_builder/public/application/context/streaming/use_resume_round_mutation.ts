@@ -10,7 +10,13 @@ import { useCallback, useMemo, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { toToolMetadata } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
-import { isExecutionStartedEvent, isExecutionTerminalEvent } from '@kbn/agent-builder-common';
+import {
+  isExecutionStartedEvent,
+  isExecutionTerminalEvent,
+  EventActorType,
+  TimelineEventType,
+} from '@kbn/agent-builder-common';
+import type { PromptResponseEvent } from '@kbn/agent-builder-common';
 import { tap } from 'rxjs';
 import type { PromptResponse } from '@kbn/agent-builder-common/agents';
 import { useKibana } from '../../hooks/use_kibana';
@@ -23,12 +29,16 @@ import type { ConversationStreamService } from '../../../services/events';
 import { releaseLocalContent } from './release_local_content';
 import { isStreamCancelled, requestAbort, type StreamHandle } from './stream_handle';
 
+/** Placeholder id of the answer until `execution_started` reveals the saved one. */
+const PENDING_PROMPT_RESPONSE_ID = 'pending::prompt_response';
+
 export interface ResumeRoundVars {
   prompts: Record<string, PromptResponse>;
   conversationId: string;
   agentId: string;
   connectorId?: string;
   browserApiTools?: Array<BrowserApiToolDefinition<any>>;
+  promptRequestedEventId: string;
 }
 
 export interface ResumeRoundMutationBindings {
@@ -79,11 +89,20 @@ export const useResumeRoundMutation = ({
       const handle: StreamHandle = { controller, executionId, abortRequested: false };
       controllersRef.current.set(vars.conversationId, handle);
 
-      // Optimistically populate ask_user_question step answers before clearing the prompt —
-      // pending_prompts is needed to reconstruct the step, so this must come first.
-      streamActions.setAskUserQuestionAnswers(vars.prompts);
-      // Drop pending prompts from the round — the user has answered, the round is back in progress.
-      streamActions.clearPendingPrompts();
+      // The optimistic answer starts under a placeholder id; `execution_started` renames it to the
+      // saved one (its `trigger_event_id`), so the saved twin replaces it after the refetch.
+      let optimisticId = PENDING_PROMPT_RESPONSE_ID;
+      const optimisticResponse: PromptResponseEvent = {
+        id: optimisticId,
+        type: TimelineEventType.promptResponse,
+        created_at: new Date().toISOString(),
+        actor: { type: EventActorType.user, id: 'optimistic' },
+        data: {
+          prompt_requested_event_id: vars.promptRequestedEventId,
+          responses: vars.prompts,
+        },
+      };
+      conversationStreamService.recordPromptResponse(vars.conversationId, optimisticResponse);
 
       // The run owns its live events: hold the stream for its whole lifetime so it is not reclaimed
       // while the user is looking at another conversation, before or after `execution_started`.
@@ -91,6 +110,7 @@ export const useResumeRoundMutation = ({
         .getActiveStream$(vars.conversationId)
         .subscribe();
       let timelineExecutionId: string | undefined;
+      let streamEventArrived = false;
 
       try {
         const browserApiToolsMetadata = vars.browserApiTools?.map(toToolMetadata);
@@ -110,21 +130,37 @@ export const useResumeRoundMutation = ({
           tap((event) => {
             if (isExecutionStartedEvent(event)) {
               markStreamStarted(vars.conversationId);
+              // The resume's trigger is the saved prompt_response: rename the optimistic copy to
+              // that id so the saved twin replaces it, like the pending user message.
+              if (event.trigger_event_id && optimisticId === PENDING_PROMPT_RESPONSE_ID) {
+                conversationStreamService.clearPromptResponse(vars.conversationId, optimisticId);
+                optimisticId = event.trigger_event_id;
+                conversationStreamService.recordPromptResponse(vars.conversationId, {
+                  ...optimisticResponse,
+                  id: optimisticId,
+                });
+              }
             }
             if (isExecutionStartedEvent(event) || isExecutionTerminalEvent(event)) {
+              streamEventArrived = true;
               timelineExecutionId ??= event.execution_id;
             }
           })
         );
 
-        // Failures are persisted by the server and arrive through the refetch below.
+        // Failures are persisted by the server and arrive through the refetch below. A failure
+        // before any stream event means the resume never started: roll back the optimistic answer.
         await subscribeToChatEvents({
           events$,
           conversationActions: streamActions,
           browserApiTools: vars.browserApiTools,
           browserToolExecutor,
           isAborted: () => isStreamCancelled(handle),
-        }).catch(() => {});
+        }).catch(() => {
+          if (!streamEventArrived) {
+            conversationStreamService.clearPromptResponse(vars.conversationId, optimisticId);
+          }
+        });
 
         clearActiveStream(vars.conversationId);
         await releaseLocalContent({
@@ -136,6 +172,11 @@ export const useResumeRoundMutation = ({
               persistedExecutionId
             ),
         });
+      } catch (err) {
+        if (!streamEventArrived) {
+          conversationStreamService.clearPromptResponse(vars.conversationId, optimisticId);
+        }
+        throw err;
       } finally {
         retainedStream.unsubscribe();
         clearActiveStream(vars.conversationId);

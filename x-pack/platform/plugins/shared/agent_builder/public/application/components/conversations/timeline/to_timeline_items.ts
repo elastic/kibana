@@ -11,6 +11,9 @@ import type { TimelineDisplayEvent } from '../../../../services/events';
 import { EXECUTION_STREAMING_EVENT_TYPE } from '../../../../services/events';
 import type { ExecutionAccumulator, TimelineItem, UserEntry } from './types';
 import { accumulatorToItem, foldAttachmentRefs } from './timeline_item_utils';
+import { findAwaitingPromptEventId } from './awaiting_prompt';
+import { answersByPromptId, withQuestionAnswers } from './prompt_answers';
+import { resolvedToolCallIds, isSupersededToolCallStep } from './tool_call_steps';
 
 export const groupTimelineEvents = (
   events: TimelineDisplayEvent[],
@@ -18,6 +21,10 @@ export const groupTimelineEvents = (
   /** Id of the locally-built user message that has no saved twin yet. */
   pendingUserMessageId?: string
 ): TimelineItem[] => {
+  const awaitingPromptEventId = findAwaitingPromptEventId(events);
+  const answers = answersByPromptId(events);
+  const resolvedToolCalls = resolvedToolCallIds(events);
+
   const ordered: Array<UserEntry | ExecutionAccumulator> = [];
   const accMap = new Map<string, ExecutionAccumulator>();
   const seenAttachmentRefs = new Map<string, AttachmentVersionRef>();
@@ -56,7 +63,6 @@ export const groupTimelineEvents = (
 
       case TimelineEventType.promptResponse:
         foldAttachmentRefs(seenAttachmentRefs, event.data.input?.attachment_refs);
-        ordered.push({ kind: 'promptResponse', key: event.id, event });
         break;
 
       case TimelineEventType.executionStarted:
@@ -66,8 +72,10 @@ export const groupTimelineEvents = (
 
       case TimelineEventType.executionStep: {
         if (!event.execution_id) break;
+        const { step } = event.data;
+        if (isSupersededToolCallStep(step, resolvedToolCalls)) break;
         const acc = getOrCreateAcc(event.execution_id, event.created_at, event.trigger_event_id);
-        acc.steps.push(event.data.step);
+        acc.steps.push(withQuestionAnswers(step, answers));
         break;
       }
 
@@ -93,7 +101,8 @@ export const groupTimelineEvents = (
   }
 
   return ordered.map(
-    (entry): TimelineItem => ('executionId' in entry ? accumulatorToItem(entry, eventsById) : entry)
+    (entry): TimelineItem =>
+      'executionId' in entry ? accumulatorToItem(entry, eventsById, awaitingPromptEventId) : entry
   );
 };
 
