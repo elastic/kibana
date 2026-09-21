@@ -315,11 +315,11 @@ export class TimeBuckets {
       }
     }
 
-    // If the format shows time but not date, and the time range spans more than
-    // 24 hours, prepend the date — otherwise the same HH:mm value appears on
-    // multiple days and table rows look like duplicates.
-    const duration = this.getDuration();
-    if (duration && duration.asHours() > 24 && /[Hh]/.test(format) && !/D/.test(format)) {
+    // If the format shows time but not date, and the time range spans multiple
+    // calendar days, prepend the date — otherwise the same HH:mm value appears
+    // on multiple days and table rows look like duplicates.
+    const spansCalendarDay = this.hasBounds() && !this._lb!.isSame(this._ub!, 'day');
+    if (spansCalendarDay && /[Hh]/.test(format) && !/D/.test(format)) {
       format = `YYYY-MM-DD ${format}`;
     }
 

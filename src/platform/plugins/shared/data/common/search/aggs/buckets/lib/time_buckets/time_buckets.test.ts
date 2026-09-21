@@ -141,26 +141,26 @@ describe('TimeBuckets', () => {
     expect(format).toEqual('HH:mm');
   });
 
-  test('getScaledDateFormat - prepends date when range spans more than 24 hours and format is time-only', () => {
-    // Use a high maxBars so a 20m interval is not scaled up past 1h for a ~26h range.
+  test('getScaledDateFormat - prepends date when range spans multiple calendar days and format is time-only', () => {
+    // Use a high maxBars so a 20m interval is not scaled up past 1h.
     const config: TimeBucketsConfig = { ...timeBucketConfig, 'histogram:maxBars': 1000 };
     const timeBuckets = new TimeBuckets(config);
     timeBuckets.setBounds({
-      min: moment('2020-03-25T00:00:00'),
-      max: moment('2020-03-26T02:00:00'), // 26 hours
+      min: moment('2020-03-25T23:00:00'),
+      max: moment('2020-03-26T01:00:00'), // only 2 hours, but crosses midnight
     });
     timeBuckets.setInterval('20m');
     const format = timeBuckets.getScaledDateFormat();
-    // The PT1M rule selects 'HH:mm'; because duration > 24h the date is prepended.
+    // The PT1M rule selects 'HH:mm'; because the range crosses a calendar day the date is prepended.
     expect(format).toEqual('YYYY-MM-DD HH:mm');
   });
 
-  test('getScaledDateFormat - does not prepend date when range spans 24 hours or less', () => {
+  test('getScaledDateFormat - does not prepend date when range is within same calendar day', () => {
     const config: TimeBucketsConfig = { ...timeBucketConfig, 'histogram:maxBars': 1000 };
     const timeBuckets = new TimeBuckets(config);
     timeBuckets.setBounds({
       min: moment('2020-03-25T00:00:00'),
-      max: moment('2020-03-25T23:00:00'), // 23 hours
+      max: moment('2020-03-25T23:00:00'), // 23 hours, same calendar day
     });
     timeBuckets.setInterval('20m');
     const format = timeBuckets.getScaledDateFormat();

@@ -50,9 +50,11 @@ export const getDateHistogramSerializedFormat: GetSerializedFormatFn<
   }
 
   const absDateRange = convertToAbsoluteDateRange(dateRange, new Date());
-  const rangeMs =
-    new Date(absDateRange.toDate).getTime() - new Date(absDateRange.fromDate).getTime();
-  if (rangeMs > 24 * 60 * 60 * 1000 && /[Hh]/.test(pattern) && !/D/.test(pattern)) {
+  const spansCalendarDay = !moment.utc(absDateRange.fromDate).isSame(
+    moment.utc(absDateRange.toDate),
+    'day'
+  );
+  if (spansCalendarDay && /[Hh]/.test(pattern) && !/D/.test(pattern)) {
     pattern = `YYYY-MM-DD ${pattern}`;
   }
 
