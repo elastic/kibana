@@ -255,7 +255,7 @@ function resolveBuilderType(
   }
 
   const queryChanged =
-    updateData.query !== undefined && !isEqual(updateData.query, existingAttrs.query);
+    updateData.query !== undefined && !isEqual(updateData.query, toApiQuery(existingAttrs.query));
 
   if (queryChanged && existingAttrs.metadata.builder_type) {
     throw Boom.badRequest(

@@ -370,6 +370,72 @@ describe('utils', () => {
       expect(result.metadata.builder_type).toBeUndefined();
     });
 
+    it('preserves metadata.builder_type when a migrated composed rule resends its query', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'test-rule', builder_type: 'threshold' },
+        query: {
+          base: 'FROM logs-* | LIMIT 10',
+          breach: { segment: 'WHERE value > 80' },
+          format: 'composed',
+        },
+      });
+      const updateData: UpdateRuleData = {
+        query: { base: 'FROM logs-* | LIMIT 10', breach: { segment: 'WHERE value > 80' } },
+      };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: 'user-2',
+        updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
+      });
+
+      expect(result.metadata.builder_type).toBe('threshold');
+    });
+
+    it('preserves metadata.builder_type when a migrated standalone rule resends its query', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'test-rule', builder_type: 'threshold' },
+        query: {
+          base: 'FROM logs-* | WHERE value > 80',
+          breach: { query: 'FROM logs-* | WHERE value > 80' },
+          format: 'standalone',
+        },
+      });
+      const updateData: UpdateRuleData = {
+        query: { base: 'FROM logs-* | WHERE value > 80' },
+      };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: 'user-2',
+        updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
+      });
+
+      expect(result.metadata.builder_type).toBe('threshold');
+    });
+
+    it('rejects a query change on a migrated builder rule without an explicit clear', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'test-rule', builder_type: 'threshold' },
+        query: {
+          base: 'FROM logs-* | LIMIT 10',
+          breach: { segment: 'WHERE value > 80' },
+          format: 'composed',
+        },
+      });
+      const updateData: UpdateRuleData = {
+        query: { base: 'FROM logs-* | LIMIT 10', breach: { segment: 'WHERE value > 90' } },
+      };
+
+      expect(() =>
+        buildUpdateRuleAttributes(existing, updateData, {
+          updatedBy: 'user-2',
+          updatedAt: '2025-01-02T00:00:00.000Z',
+          version: 2,
+        })
+      ).toThrow(/Cannot update the query on a builder rule/);
+    });
+
     it('allows strategy change on a builder rule without clearing builder_type', () => {
       const existing = createRuleSoAttributes({
         metadata: { name: 'test-rule', builder_type: 'threshold' },
