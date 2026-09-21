@@ -8,7 +8,10 @@
 import type { RawRule } from '../../types';
 import type { CreateAPIKeyResult } from '../types';
 import type { RuleDomain } from '../../application/rule/types';
-import { MISSING_UIAM_API_KEY_TAG } from '../../application/rule/constants';
+import {
+  LEGACY_MISSING_UIAM_API_KEY_TAG,
+  MISSING_UIAM_API_KEY_TAG,
+} from '../../application/rule/constants';
 import { ApiKeyType } from '../../task_runner/types';
 
 /**
@@ -111,42 +114,29 @@ export function apiKeyAsRuleDomainProperties(
   return getApiKeyRuleProperties(apiKey, username, createdByUser);
 }
 
-/**
- * Determines if the missing UIAM API key tag should be added to a rule.
- * The tag is added when:
- * - The environment is serverless
- * - Rules use UIAM API keys in this deployment
- * - uiamApiKey is not set (null/undefined)
- *
- * The `shouldGrantUiam` and `apiKeyType` checks are the same pair the task runner uses to
- * decide if a rule runs with a UIAM key. Without them, rules would get the tag on
- * deployments that still use ES keys, where no rule has a UIAM key to begin with.
- */
-export function shouldAddMissingUiamKeyTag(
-  uiamApiKey: string | null | undefined,
-  isServerless: boolean,
-  shouldGrantUiam: boolean | undefined,
-  apiKeyType: ApiKeyType | undefined
-): boolean {
-  return isServerless && !!shouldGrantUiam && apiKeyType === ApiKeyType.UIAM && !uiamApiKey;
-}
-
-/**
- * Adds the missing UIAM API key tag to the tags array if needed.
- * Returns a new array with the tag appended if the condition is met.
- */
-export function addMissingUiamKeyTagIfNeeded(
+/** Reconciles the translated current and legacy missing UIAM API key tags. */
+export function updateMissingUiamKeyTag(
   tags: string[],
   uiamApiKey: string | null | undefined,
   isServerless: boolean,
   shouldGrantUiam: boolean | undefined,
   apiKeyType: ApiKeyType | undefined
 ): string[] {
-  if (shouldAddMissingUiamKeyTag(uiamApiKey, isServerless, shouldGrantUiam, apiKeyType)) {
-    // Avoid duplicates
-    if (!tags.includes(MISSING_UIAM_API_KEY_TAG)) {
-      return [...tags, MISSING_UIAM_API_KEY_TAG];
-    }
+  if (!isServerless || !shouldGrantUiam || apiKeyType !== ApiKeyType.UIAM) {
+    return tags;
   }
-  return tags;
+
+  const tagsWithoutMissingUiamKeyTags = tags.filter(
+    (tag) => tag !== MISSING_UIAM_API_KEY_TAG && tag !== LEGACY_MISSING_UIAM_API_KEY_TAG
+  );
+
+  const updatedTags = uiamApiKey
+    ? tagsWithoutMissingUiamKeyTags
+    : [...tagsWithoutMissingUiamKeyTags, MISSING_UIAM_API_KEY_TAG];
+
+  // Preserve the original reference so the rule loader can skip an unnecessary write.
+  return updatedTags.length === tags.length &&
+    updatedTags.every((tag, index) => tag === tags[index])
+    ? tags
+    : updatedTags;
 }
