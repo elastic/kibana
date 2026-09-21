@@ -30,11 +30,5 @@ export const ALERTZERO_API_PRIVILEGE_READ = 'alertzero_read' as const;
  */
 export const ALERTZERO_API_PRIVILEGE_WRITE = 'alertzero_write' as const;
 
-/** API privilege to create or link incidents. Granted by `alertzero:all` and the `manage_escalations` sub-feature. */
-export const ALERTZERO_API_PRIVILEGE_MANAGE_ESCALATIONS = 'manage_escalations' as const;
-
-/** UI capability paired with {@link ALERTZERO_API_PRIVILEGE_MANAGE_ESCALATIONS}. */
-export const ALERTZERO_UI_CAPABILITY_MANAGE_ESCALATIONS = 'manageEscalations' as const;
-
 /** Owner id registered for all AlertZero managed workflow definitions. */
 export const ALERTZERO_MANAGED_WORKFLOW_OWNER_ID = 'alertzero' as const;
