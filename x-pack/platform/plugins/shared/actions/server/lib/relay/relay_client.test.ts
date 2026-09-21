@@ -434,7 +434,7 @@ describe('RelayClient', () => {
       ).resolves.toEqual({ ref: '1700000000.000400', tenantKey: 'team-A', channel: 'C123' });
     });
 
-    it('forwards a channel name and returns Relay\'s resolved channel id', async () => {
+    it("forwards a channel name and returns Relay's resolved channel id", async () => {
       requestMock.mockResolvedValue({
         status: 202,
         data: { ref: '1700000000.000500', tenant_key: 'team-A', channel: 'C0123456789' },

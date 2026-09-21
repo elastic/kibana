@@ -81,7 +81,7 @@ describe('relaySendMessage', () => {
     );
   };
 
-  it('forwards a channel id and returns Relay\'s resolved channel', async () => {
+  it("forwards a channel id and returns Relay's resolved channel", async () => {
     const trigger = jest.fn().mockResolvedValue({
       ref: '1700.0001',
       tenantKey: 'team-A',
@@ -104,7 +104,7 @@ describe('relaySendMessage', () => {
     expect(listBindings).not.toHaveBeenCalled();
   });
 
-  it('forwards a channel name and returns Relay\'s resolved channel id', async () => {
+  it("forwards a channel name and returns Relay's resolved channel id", async () => {
     const trigger = jest.fn().mockResolvedValue({
       ref: '1700.0003',
       tenantKey: 'team-A',
