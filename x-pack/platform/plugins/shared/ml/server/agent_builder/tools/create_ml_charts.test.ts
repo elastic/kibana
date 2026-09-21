@@ -127,7 +127,11 @@ describe('createMlChartsTool', () => {
   });
 
   it('looks up detector config via mlClient when the factory is provided', async () => {
-    const mlClient = { getJobs: jest.fn().mockResolvedValue({ jobs: [{ analysis_config: {} }] }) };
+    const mlClient = {
+      getJobs: jest.fn().mockResolvedValue({
+        jobs: [{ analysis_config: { detectors: [{}] } }],
+      }),
+    };
     const asCurrentUserGetJobs = jest.fn();
     const tool = createMlChartsTool(
       resolveMlCapabilities,
@@ -147,6 +151,53 @@ describe('createMlChartsTool', () => {
 
     expect(mlClient.getJobs).toHaveBeenCalledWith({ job_id: 'job-1' });
     expect(asCurrentUserGetJobs).not.toHaveBeenCalled();
+  });
+
+  it('returns an error when the requested job is missing', async () => {
+    const attachmentsAdd = jest.fn();
+    const result = await createMlChartsToolInstance.handler(
+      { chart_type: 'single_metric_viewer', job_ids: ['missing-job'] },
+      createContext(attachmentsAdd, jest.fn().mockResolvedValue({ jobs: [] }))
+    );
+
+    expect(attachmentsAdd).not.toHaveBeenCalled();
+    const missingJobResult = result as {
+      results: Array<{ type: string; data: { message: string } }>;
+    };
+    expect(missingJobResult.results[0].type).toBe(ToolResultType.error);
+    expect(missingJobResult.results[0].data.message).toBe(
+      'single_metric_viewer cannot render: job "missing-job" was not found.'
+    );
+  });
+
+  it('returns an error when selected_detector_index is out of range', async () => {
+    const attachmentsAdd = jest.fn();
+    const getJobs = jest.fn().mockResolvedValue({
+      jobs: [
+        {
+          analysis_config: {
+            detectors: [{ function: 'mean', field_name: 'bytes' }],
+          },
+        },
+      ],
+    });
+    const result = await createMlChartsToolInstance.handler(
+      {
+        chart_type: 'single_metric_viewer',
+        job_ids: ['job-1'],
+        selected_detector_index: 3,
+      },
+      createContext(attachmentsAdd, getJobs)
+    );
+
+    expect(attachmentsAdd).not.toHaveBeenCalled();
+    const outOfRangeResult = result as {
+      results: Array<{ type: string; data: { message: string } }>;
+    };
+    expect(outOfRangeResult.results[0].type).toBe(ToolResultType.error);
+    expect(outOfRangeResult.results[0].data.message).toBe(
+      'single_metric_viewer cannot render: selected_detector_index 3 is out of range for job "job-1". The job has 1 detector.'
+    );
   });
 
   it('rejects boolean selected_entities values that the attachment schema cannot render', () => {

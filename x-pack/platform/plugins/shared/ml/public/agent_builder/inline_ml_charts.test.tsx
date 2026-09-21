@@ -15,6 +15,7 @@ import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
 import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
 import type { AnomalyChartsEmbeddableState } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
 import type { SingleMetricViewerEmbeddableState } from '@kbn/ml-server-schemas/embeddables/single_metric_viewer';
+import { useVisPreviewUnifiedSearch } from '@kbn/agent-builder-visualizations';
 import {
   InlineAnomalyCharts,
   InlineSingleMetricViewer,
@@ -23,6 +24,17 @@ import {
 } from './inline_ml_charts';
 
 const mockNavigateToWithEmbeddablePackages = jest.fn();
+const mockedUseVisPreviewUnifiedSearch = useVisPreviewUnifiedSearch as jest.MockedFunction<
+  typeof useVisPreviewUnifiedSearch
+>;
+
+jest.mock('@kbn/agent-builder-visualizations', () => {
+  const actual = jest.requireActual('@kbn/agent-builder-visualizations');
+  return {
+    ...actual,
+    useVisPreviewUnifiedSearch: jest.fn(actual.useVisPreviewUnifiedSearch),
+  };
+});
 
 jest.mock('@kbn/embeddable-plugin/public', () => ({
   EmbeddableRenderer: () => <div data-test-subj="mockMlEmbeddable" />,
@@ -82,6 +94,10 @@ const getLastRegisteredButtons = (registerActionButtons: jest.Mock): ActionButto
 describe('inline ML chart visualizations', () => {
   beforeEach(() => {
     mockNavigateToWithEmbeddablePackages.mockReset();
+    mockedUseVisPreviewUnifiedSearch.mockReset();
+    mockedUseVisPreviewUnifiedSearch.mockImplementation(
+      jest.requireActual('@kbn/agent-builder-visualizations').useVisPreviewUnifiedSearch
+    );
   });
 
   it('registers View in Anomaly Explorer and Save to dashboard for swim lanes', () => {
@@ -153,7 +169,7 @@ describe('inline ML chart visualizations', () => {
     ]);
   });
 
-  it('saves anomaly charts to a dashboard without a pinned time range', async () => {
+  it('saves anomaly charts to a dashboard with the preview time range', async () => {
     const user = userEvent.setup();
     const registerActionButtons = jest.fn();
 
@@ -192,14 +208,54 @@ describe('inline ML chart visualizations', () => {
               job_ids: ['job-1'],
               title: 'Saved chart',
               description: 'desc',
+              time_range: { from: 'now-7d', to: 'now' },
             }),
           }),
         ],
       })
     );
+  });
+
+  it('saves a historical chart with the time range from the inline picker', async () => {
+    const user = userEvent.setup();
+    const registerActionButtons = jest.fn();
+    const pickerTimeRange = {
+      from: '2024-01-01T00:00:00.000Z',
+      to: '2024-03-31T23:59:59.000Z',
+    };
+    mockedUseVisPreviewUnifiedSearch.mockReturnValue({
+      searchBarProps: {},
+      effectiveTimeRange: pickerTimeRange,
+      onBrushEnd: jest.fn(),
+    } as unknown as ReturnType<typeof useVisPreviewUnifiedSearch>);
+
+    renderWithProviders(
+      <InlineAnomalyCharts
+        attachment={{
+          id: 'att-5',
+          type: 'ml.anomaly_charts',
+          data: {
+            job_ids: ['job-1'],
+            time_range: { from: 'now-100d', to: 'now-90d' },
+          } as AnomalyChartsEmbeddableState,
+        }}
+        isSidebar={false}
+        services={createServices()}
+        registerActionButtons={registerActionButtons}
+      />
+    );
+
+    const saveButton = getLastRegisteredButtons(registerActionButtons).find(
+      (button) => button.label === 'Save to dashboard'
+    );
+    await act(async () => {
+      await saveButton?.handler();
+    });
+    await user.click(screen.getByText('confirm-save'));
+
     expect(
-      mockNavigateToWithEmbeddablePackages.mock.calls[0][1].state[0].serializedState
-    ).not.toHaveProperty('time_range');
+      mockNavigateToWithEmbeddablePackages.mock.calls[0][1].state[0].serializedState.time_range
+    ).toEqual(pickerTimeRange);
   });
 
   it('disables Save to dashboard without dashboard write permissions', () => {

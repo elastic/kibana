@@ -203,6 +203,9 @@ function InlineMlChart<
             type: embeddableType,
             serializedState: {
               ...serializedState,
+              // Pin the preview range so historical/batch charts keep their
+              // analysis window after save (including picker changes).
+              time_range: effectiveTimeRange,
               title: newTitle,
               description: newDescription,
             },
@@ -211,7 +214,7 @@ function InlineMlChart<
         path: dashboardId && dashboardId !== 'new' ? `#/view/${dashboardId}` : '#/create',
       });
     },
-    [embeddable, embeddableType, serializedState]
+    [embeddable, embeddableType, effectiveTimeRange, serializedState]
   );
 
   const viewInHref = useMemo(() => {
