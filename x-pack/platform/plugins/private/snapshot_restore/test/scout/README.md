@@ -15,7 +15,7 @@ Scout tests for the Snapshot and Restore management app.
 
 - `api/tests/repositories.spec.ts` — `GET /api/snapshot_restore/repository_types` (module-only types `azure`/`gcs`/`s3`; the Scout stateful cluster runs cloud-enabled, so the on-prem `fs`/`url` types are not offered).
 - `api/tests/policies.spec.ts` — SLM policy create/update and SLM status (`POST`/`PUT /policies`, `GET /policies/slm_status`). Local + Cloud: registers an `fs` repository locally, reuses the managed `found-snapshots` repository on Cloud.
-- `api/tests/snapshots.spec.ts` — `GET /api/snapshot_restore/snapshots` pagination, sorting, and search. Local only: relies on `fs` repositories.
+- `api/tests/snapshots.spec.ts` — `GET /api/snapshot_restore/snapshots` pagination, sorting, and search, plus `POST /api/snapshot_restore/snapshots/bulk_delete`. Local only: relies on `fs` repositories.
 
 ## How to run tests
 

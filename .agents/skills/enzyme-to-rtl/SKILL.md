@@ -193,7 +193,7 @@ Use this pattern instead of enzyme's `.find(Component).prop('propName')`. Clear 
 
 - `shallow` + `toMatchSnapshot()` → `render()` + `expect(container.children[0]).toMatchSnapshot()`.
 - Snapshots will be larger since RTL renders full DOM. This is expected — do not add mocks just to shrink snapshots during this migration.
-- Delete old `.snap` files and regenerate: `yarn test:jest --updateSnapshot <path>`.
+- Delete old `.snap` files and regenerate: `pnpm test:jest --updateSnapshot <path>`.
 - **Default to `container.children[0]` snapshots.** When the snapshot is too large or noisy, fall back to targeted assertions instead:
 
 ```typescript
@@ -238,7 +238,7 @@ await waitFor(() => {
 ## Running tests
 
 ```bash
-yarn test:jest <path-to-test-file> --updateSnapshot
+pnpm test:jest <path-to-test-file> --updateSnapshot
 ```
 
 ## Checklist
@@ -252,7 +252,7 @@ yarn test:jest <path-to-test-file> --updateSnapshot
 - [ ] `.prop()` / `.props()` replaced with mock-based pattern
 - [ ] Snapshots regenerated
 - [ ] Dead tests (passing only due to shallow rendering) removed
-- [ ] Test passes: `yarn test:jest <path>`
+- [ ] Test passes: `pnpm test:jest <path>`
 
 ## References
 

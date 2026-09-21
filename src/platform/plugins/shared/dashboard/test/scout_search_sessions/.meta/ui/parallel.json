@@ -1,5 +1,5 @@
 {
-  "sha1": "0038ea2b0c1e7bcd6f27c68c7858270a1f0d92b1",
+  "sha1": "c9febb93bfcb515d4423475d8f7cdf5d1db92f9c",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -78,8 +78,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout_search_sessions/ui/parallel_tests/dashboard_save_restore_session.spec.ts",
-        "line": 91,
-        "column": 34
+        "line": 89,
+        "column": 11
       }
     },
     {

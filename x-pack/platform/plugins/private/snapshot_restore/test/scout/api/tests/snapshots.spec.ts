@@ -9,7 +9,7 @@ import { randomUUID } from 'crypto';
 
 import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import type { ApiClientFixture, RoleApiCredentials } from '@kbn/scout';
+import type { ApiClientFixture, EsClient, RoleApiCredentials } from '@kbn/scout';
 
 import type { SnapshotDetails } from '../../../../common/types';
 import { SNAPSHOT_RESTORE_ADMIN_ROLE } from '../../common/fixtures/constants';
@@ -48,6 +48,12 @@ const BATCH_SNAPSHOT_NAME_2 = `xyz_another_snapshot_${runId}`;
 const LAST_BATCH_2_SNAPSHOT_NAME = `${BATCH_SNAPSHOT_NAME_2}_${BATCH_SIZE_2 - 1}`;
 // Exact snapshot-name search target.
 const BATCH_1_SNAPSHOT_2_NAME = `${BATCH_SNAPSHOT_NAME_1}_2`;
+// Extra snapshots used only by the bulk_delete tests; cleaned up so listing counts stay intact.
+const BULK_DELETE_PREFIX = `bulk_delete_${runId}`;
+const BULK_DELETE_SNAPSHOT_1 = `${BULK_DELETE_PREFIX}_1`;
+const BULK_DELETE_SNAPSHOT_2 = `${BULK_DELETE_PREFIX}_2`;
+const BULK_DELETE_SNAPSHOT_3 = `${BULK_DELETE_PREFIX}_3`;
+const MISSING_SNAPSHOT_NAME = `${BULK_DELETE_PREFIX}_missing`;
 // Run-isolated substrings matching only repo 2 / policy 2, for the partial-match searches.
 const REPO_2_SEARCH_TOKEN = `another_repo_2_${runId}`;
 const POLICY_2_SEARCH_TOKEN = `another_policy_2_${runId}`;
@@ -107,6 +113,33 @@ apiTest.describe('Snapshot and Restore - snapshots', { tag: ['@local-stateful-cl
     expect(response).toHaveStatusCode(200);
     return response.body;
   };
+
+  const seedBulkDeleteSnapshots = async (esClient: EsClient): Promise<void> => {
+    await createSnapshot(esClient, BULK_DELETE_SNAPSHOT_1, REPO_NAME_1);
+    await createSnapshot(esClient, BULK_DELETE_SNAPSHOT_2, REPO_NAME_1);
+    await createSnapshot(esClient, BULK_DELETE_SNAPSHOT_3, REPO_NAME_2);
+  };
+
+  const cleanupBulkDeleteSnapshots = async (esClient: EsClient): Promise<void> => {
+    await esClient.snapshot.delete(
+      { repository: REPO_NAME_1, snapshot: `${BULK_DELETE_PREFIX}_*` },
+      { ignore: [404] }
+    );
+    await esClient.snapshot.delete(
+      { repository: REPO_NAME_2, snapshot: `${BULK_DELETE_PREFIX}_*` },
+      { ignore: [404] }
+    );
+  };
+
+  const bulkDelete = (
+    apiClient: ApiClientFixture,
+    snapshots: Array<{ repository: string; snapshot: string }>
+  ) =>
+    apiClient.post(`${API_BASE_PATH}/snapshots/bulk_delete`, {
+      headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
+      responseType: 'json',
+      body: snapshots,
+    });
 
   apiTest.beforeAll(async ({ requestAuth, esClient }) => {
     credentials = await requestAuth.getApiKeyForCustomRole(SNAPSHOT_RESTORE_ADMIN_ROLE);
@@ -456,4 +489,64 @@ apiTest.describe('Snapshot and Restore - snapshots', { tag: ['@local-stateful-cl
     );
     expect(snapshotsExcluded).toBe(true);
   });
+
+  apiTest(
+    'bulk_delete: deletes snapshots from several repositories in one request',
+    async ({ apiClient, esClient }) => {
+      await seedBulkDeleteSnapshots(esClient);
+      try {
+        const response = await bulkDelete(apiClient, [
+          { repository: REPO_NAME_1, snapshot: BULK_DELETE_SNAPSHOT_1 },
+          { repository: REPO_NAME_2, snapshot: BULK_DELETE_SNAPSHOT_3 },
+          { repository: REPO_NAME_1, snapshot: BULK_DELETE_SNAPSHOT_2 },
+        ]);
+
+        expect(response).toHaveStatusCode(200);
+        expect(response.body).toStrictEqual({
+          itemsDeleted: [
+            { snapshot: BULK_DELETE_SNAPSHOT_1, repository: REPO_NAME_1 },
+            { snapshot: BULK_DELETE_SNAPSHOT_2, repository: REPO_NAME_1 },
+            { snapshot: BULK_DELETE_SNAPSHOT_3, repository: REPO_NAME_2 },
+          ],
+          errors: [],
+        });
+        const { total } = await getSnapshots(apiClient, {});
+        expect(total).toBe(SNAPSHOT_COUNT);
+      } finally {
+        await cleanupBulkDeleteSnapshots(esClient);
+      }
+    }
+  );
+
+  apiTest(
+    'bulk_delete: reports only the missing snapshot and still deletes the others',
+    async ({ apiClient, esClient }) => {
+      await seedBulkDeleteSnapshots(esClient);
+      try {
+        const response = await bulkDelete(apiClient, [
+          { repository: REPO_NAME_1, snapshot: MISSING_SNAPSHOT_NAME },
+          { repository: REPO_NAME_1, snapshot: BULK_DELETE_SNAPSHOT_1 },
+          { repository: REPO_NAME_2, snapshot: BULK_DELETE_SNAPSHOT_3 },
+        ]);
+
+        expect(response).toHaveStatusCode(200);
+        expect(response.body).toMatchObject({
+          itemsDeleted: [
+            { snapshot: BULK_DELETE_SNAPSHOT_1, repository: REPO_NAME_1 },
+            { snapshot: BULK_DELETE_SNAPSHOT_3, repository: REPO_NAME_2 },
+          ],
+          errors: [
+            {
+              id: { snapshot: MISSING_SNAPSHOT_NAME, repository: REPO_NAME_1 },
+              error: { statusCode: 404 },
+            },
+          ],
+        });
+        const { total } = await getSnapshots(apiClient, {});
+        expect(total).toBe(SNAPSHOT_COUNT + 1);
+      } finally {
+        await cleanupBulkDeleteSnapshots(esClient);
+      }
+    }
+  );
 });

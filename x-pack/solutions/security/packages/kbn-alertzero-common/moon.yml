@@ -18,9 +18,9 @@ project:
   sourceRoot: x-pack/solutions/security/packages/kbn-alertzero-common
 dependsOn:
   - '@kbn/zod'
-  - '@kbn/i18n'
   - '@kbn/deeplinks-security'
   - '@kbn/workflows'
+  - '@kbn/agentic-investigations-plugin'
 tags:
   - shared-common
   - package
