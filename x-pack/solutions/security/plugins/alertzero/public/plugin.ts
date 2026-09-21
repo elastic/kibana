@@ -14,7 +14,12 @@ import {
   type PluginInitializerContext,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { ALERTZERO_APP_ID, ALERTZERO_APP_PATH } from '@kbn/alertzero-common';
+import {
+  ALERTZERO_APP_ID,
+  ALERTZERO_APP_PATH,
+  TEMPLATE_ID_INVESTIGATION,
+} from '@kbn/alertzero-common';
+import { registerAgenticInvestigationTemplateUI } from '@kbn/agentic-investigations-common';
 import { getAlertZeroDeepLinks } from './deep_links';
 import type {
   AlertZeroClientConfig,
@@ -28,6 +33,10 @@ import type {
 // string literals, so a constant reference here would silently drop the message.
 const APP_TITLE = i18n.translate('xpack.alertzero.appTitle', {
   defaultMessage: 'AlertZero',
+});
+
+const INVESTIGATION_TEMPLATE_NAME = i18n.translate('xpack.alertzero.conversationTemplate.name', {
+  defaultMessage: 'Investigation',
 });
 
 export class AlertZeroPublicPlugin
@@ -78,7 +87,18 @@ export class AlertZeroPublicPlugin
     return {};
   }
 
-  public start(_core: CoreStart, _startDeps: AlertZeroStartDependencies): AlertZeroPublicStart {
+  public start(_core: CoreStart, startDeps: AlertZeroStartDependencies): AlertZeroPublicStart {
+    if (!this.config.enabled) {
+      return {};
+    }
+
+    registerAgenticInvestigationTemplateUI({
+      conversationTemplates: startDeps.agentBuilder.conversationTemplates,
+      templateId: TEMPLATE_ID_INVESTIGATION,
+      name: INVESTIGATION_TEMPLATE_NAME,
+      icon: 'securitySignalDetected',
+    });
+
     return {};
   }
 
