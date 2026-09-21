@@ -59,6 +59,44 @@ export const getCanonicalBandsOverlappingFloor = (
   });
 
 /**
+ * When the current filter is a custom open-ended floor such as `{ min: 30 }`,
+ * keep that floor while the remaining selection still covers floor-to-100.
+ * Partial first bands cannot be persisted (schema only allows canonical
+ * `{ min, max }` literals or open-ended `{ min }`), so they are dropped once
+ * the selection is no longer floor-to-100. Selecting a band entirely below
+ * the floor expands the filter to canonical bands.
+ */
+export const applyCustomOpenEndedFloorToSelection = (
+  selectedBands: SeverityThreshold[],
+  original: SeverityThreshold[]
+): SeverityThreshold[] => {
+  if (original.length !== 1 || !isOpenEndedSeverityThreshold(original[0])) {
+    return selectedBands;
+  }
+
+  const floor = original[0].min;
+  const expandedBelowFloor = selectedBands.some((band) => {
+    const max = getSeverityThresholdMax(band);
+    return max !== undefined && max <= floor;
+  });
+  if (expandedBelowFloor) {
+    return selectedBands;
+  }
+
+  const stillOpenToMax = selectedBands.some((band) => getSeverityThresholdMax(band) === undefined);
+  const stillHasPartialFirst = selectedBands.some((band) => {
+    const max = getSeverityThresholdMax(band);
+    return band.min < floor && (max === undefined || max > floor);
+  });
+
+  if (stillOpenToMax && stillHasPartialFirst) {
+    return [{ min: floor }];
+  }
+
+  return selectedBands.filter((band) => band.min >= floor);
+};
+
+/**
  * Utility function to resolve severity format from old to new format
  * @param value - The severity value which could be in old (number) or new (array) format
  * @returns Resolved severity value in the new format (array)

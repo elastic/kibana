@@ -8,6 +8,7 @@
 import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
 import type { SeverityThreshold } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
 import {
+  applyCustomOpenEndedFloorToSelection,
   getCanonicalBandsOverlappingFloor,
   getSeverityThresholdMax,
   resolveSeverityFormat,
@@ -105,5 +106,45 @@ describe('getCanonicalBandsOverlappingFloor', () => {
 
   it('selects every band for a floor of 0', () => {
     expect(getCanonicalBandsOverlappingFloor(0, canonicalBands)).toEqual(canonicalBands);
+  });
+});
+
+describe('applyCustomOpenEndedFloorToSelection', () => {
+  const canonicalBands: SeverityThreshold[] = [
+    { min: ML_ANOMALY_THRESHOLD.LOW, max: ML_ANOMALY_THRESHOLD.WARNING },
+    { min: ML_ANOMALY_THRESHOLD.WARNING, max: ML_ANOMALY_THRESHOLD.MINOR },
+    { min: ML_ANOMALY_THRESHOLD.MINOR, max: ML_ANOMALY_THRESHOLD.MAJOR },
+    { min: ML_ANOMALY_THRESHOLD.MAJOR, max: ML_ANOMALY_THRESHOLD.CRITICAL },
+    { min: ML_ANOMALY_THRESHOLD.CRITICAL },
+  ];
+
+  it('keeps a custom floor on the partial first band when higher bands are toggled off', () => {
+    expect(
+      applyCustomOpenEndedFloorToSelection(
+        [
+          { min: ML_ANOMALY_THRESHOLD.MINOR, max: ML_ANOMALY_THRESHOLD.MAJOR },
+          { min: ML_ANOMALY_THRESHOLD.MAJOR, max: ML_ANOMALY_THRESHOLD.CRITICAL },
+        ],
+        [{ min: 30 }]
+      )
+    ).toEqual([
+      { min: 30, max: ML_ANOMALY_THRESHOLD.MAJOR },
+      { min: ML_ANOMALY_THRESHOLD.MAJOR, max: ML_ANOMALY_THRESHOLD.CRITICAL },
+    ]);
+  });
+
+  it('uses canonical bands when the user expands below the original floor', () => {
+    expect(applyCustomOpenEndedFloorToSelection(canonicalBands.slice(1), [{ min: 30 }])).toEqual(
+      canonicalBands.slice(1)
+    );
+  });
+
+  it('leaves canonical selections unchanged', () => {
+    expect(
+      applyCustomOpenEndedFloorToSelection(
+        [{ min: ML_ANOMALY_THRESHOLD.MAJOR, max: ML_ANOMALY_THRESHOLD.CRITICAL }],
+        [{ min: ML_ANOMALY_THRESHOLD.MAJOR, max: ML_ANOMALY_THRESHOLD.CRITICAL }]
+      )
+    ).toEqual([{ min: ML_ANOMALY_THRESHOLD.MAJOR, max: ML_ANOMALY_THRESHOLD.CRITICAL }]);
   });
 });

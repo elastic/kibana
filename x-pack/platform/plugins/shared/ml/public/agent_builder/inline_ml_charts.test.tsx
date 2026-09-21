@@ -142,6 +142,75 @@ describe('inline ML chart visualizations', () => {
     );
   });
 
+  it('includes the swim lane severity threshold in the Anomaly Explorer link', () => {
+    const registerActionButtons = jest.fn();
+    const services = createServices();
+
+    renderWithProviders(
+      <InlineSwimLane
+        attachment={{
+          id: 'att-6',
+          type: 'ml.anomaly_swimlane',
+          data: {
+            job_ids: ['job-1'],
+            swimlane_type: 'viewBy',
+            view_by: 'host.name',
+            severity_threshold: 50,
+          } as AnomalySwimLaneEmbeddableState,
+        }}
+        isSidebar={false}
+        services={services}
+        registerActionButtons={registerActionButtons}
+      />
+    );
+
+    expect(services.locator?.getRedirectUrl).toHaveBeenCalledWith(
+      expect.objectContaining({
+        page: ML_PAGES.ANOMALY_EXPLORER,
+        pageState: expect.objectContaining({
+          jobIds: ['job-1'],
+          mlExplorerSwimlane: {
+            viewByFieldName: 'host.name',
+            severity: [{ min: 50 }],
+          },
+        }),
+      })
+    );
+  });
+
+  it('includes the anomaly charts severity threshold in the Anomaly Explorer link', () => {
+    const registerActionButtons = jest.fn();
+    const services = createServices();
+
+    renderWithProviders(
+      <InlineAnomalyCharts
+        attachment={{
+          id: 'att-7',
+          type: 'ml.anomaly_charts',
+          data: {
+            job_ids: ['job-1'],
+            severity_threshold: [{ min: 30 }],
+          } as AnomalyChartsEmbeddableState,
+        }}
+        isSidebar={false}
+        services={services}
+        registerActionButtons={registerActionButtons}
+      />
+    );
+
+    expect(services.locator?.getRedirectUrl).toHaveBeenCalledWith(
+      expect.objectContaining({
+        page: ML_PAGES.ANOMALY_EXPLORER,
+        pageState: expect.objectContaining({
+          jobIds: ['job-1'],
+          mlExplorerSwimlane: {
+            severity: [{ min: 30 }],
+          },
+        }),
+      })
+    );
+  });
+
   it('registers View in Single Metric Viewer for the single metric viewer', () => {
     const registerActionButtons = jest.fn();
 

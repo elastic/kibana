@@ -16,10 +16,13 @@ import { EuiFlexGroup, EuiFlexItem, EuiHealth, useEuiTheme } from '@elastic/eui'
 
 import { i18n } from '@kbn/i18n';
 import { usePageUrlState } from '@kbn/ml-url-state';
+import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
 import type { SeverityThreshold } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
 import { MultiSuperSelect } from '../../multi_super_select/multi_super_select';
 import { useSeverityOptions } from '../../../explorer/hooks/use_severity_options';
 import {
+  applyCustomOpenEndedFloorToSelection,
+  doesSeverityThresholdOverlapBand,
   getCanonicalBandsOverlappingFloor,
   getSeverityRangeDisplay,
   getSeverityThresholdMax,
@@ -156,11 +159,7 @@ export const SelectSeverityUI: FC<
     }
 
     return allSeverityOptions.filter((option) =>
-      severity.some(
-        (threshold) =>
-          threshold.min === option.threshold.min &&
-          getSeverityThresholdMax(threshold) === getSeverityThresholdMax(option.threshold)
-      )
+      severity.some((threshold) => doesSeverityThresholdOverlapBand(threshold, option.threshold))
     );
   }, [allSeverityOptions, severity]);
 
@@ -183,16 +182,15 @@ export const SelectSeverityUI: FC<
           </Fragment>
         );
       }
-      if (isOpenEndedSeverityThreshold(threshold)) {
-        const color = selectedSeverities[0]?.color;
-        return (
-          <Fragment>
-            <EuiHealth color={color} css={{ lineHeight: 'inherit' }}>
-              {`${threshold.min}-100`}
-            </EuiHealth>
-          </Fragment>
-        );
-      }
+      const max = getSeverityThresholdMax(threshold);
+      const color = selectedSeverities[0]?.color;
+      return (
+        <Fragment>
+          <EuiHealth color={color} css={{ lineHeight: 'inherit' }}>
+            {`${threshold.min}-${max ?? ML_ANOMALY_THRESHOLD.MAX}`}
+          </EuiHealth>
+        </Fragment>
+      );
     }
 
     // For multiple selections, show "Multiple" with horizontally overlapping health icons
@@ -252,10 +250,19 @@ export const SelectSeverityUI: FC<
       const newSelectedSeverities = allSeverityOptions.filter((option) =>
         selectedOptionKeys.includes(option.val.toString())
       );
+      const adjustedThresholds = applyCustomOpenEndedFloorToSelection(
+        newSelectedSeverities.map((option) => option.threshold),
+        severity
+      );
 
-      onChange(newSelectedSeverities);
+      onChange(
+        newSelectedSeverities.map((option, index) => ({
+          ...option,
+          threshold: adjustedThresholds[index] ?? option.threshold,
+        }))
+      );
     },
-    [onChange, allSeverityOptions]
+    [onChange, allSeverityOptions, severity]
   );
 
   const anomalyScoreLabel = i18n.translate('xpack.ml.explorer.severityThresholdLabel', {

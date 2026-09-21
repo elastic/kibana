@@ -23,7 +23,10 @@ import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '@kbn/ml-common-types/embeddabl
 import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '@kbn/ml-common-types/embeddables/anomaly_charts';
 import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '@kbn/ml-common-types/embeddables/single_metric_viewer';
 import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
-import type { AnomalyChartsEmbeddableState } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
+import type {
+  AnomalyChartsEmbeddableState,
+  SeverityThreshold,
+} from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
 import type { SingleMetricViewerEmbeddableState } from '@kbn/ml-server-schemas/embeddables/single_metric_viewer';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { HasSerializedChildState } from '@kbn/presentation-publishing';
@@ -36,6 +39,7 @@ import {
   VisualizationPreviewShell,
 } from '@kbn/agent-builder-visualizations';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import type { ExplorerAppState } from '@kbn/ml-common-types/locator';
 import type { MlLocator, MlLocatorParams } from '../locator';
 import { getDefaultSwimlanePanelTitle } from '../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
 import { getDefaultExplorerChartsPanelTitle } from '../embeddables/anomaly_charts/utils';
@@ -99,6 +103,32 @@ type InlineMlChartRenderProps<TData extends object> = AttachmentRenderProps<
 const omitTimeRange = <T extends { time_range?: TimeRange }>(state: T): Omit<T, 'time_range'> => {
   const { time_range: _timeRange, ...rest } = state;
   return rest;
+};
+
+const toExplorerSeverity = (
+  threshold: number | SeverityThreshold[] | undefined
+): SeverityThreshold[] | undefined => {
+  if (typeof threshold === 'number') {
+    return [{ min: threshold }];
+  }
+  return threshold && threshold.length > 0 ? threshold : undefined;
+};
+
+const toExplorerSwimlaneState = ({
+  viewByFieldName,
+  severity,
+}: {
+  viewByFieldName?: string;
+  severity?: number | SeverityThreshold[];
+}): ExplorerAppState['mlExplorerSwimlane'] | undefined => {
+  const explorerSeverity = toExplorerSeverity(severity);
+  if (!viewByFieldName && !explorerSeverity) {
+    return undefined;
+  }
+  return {
+    ...(viewByFieldName ? { viewByFieldName } : {}),
+    ...(explorerSeverity ? { severity: explorerSeverity } : {}),
+  };
 };
 
 const toLocatorEntities = (
@@ -280,16 +310,20 @@ export const InlineSwimLane = ({
 }: InlineMlChartRenderProps<AnomalySwimLaneEmbeddableState>) => {
   const { data } = attachment;
   const getViewInLocatorParams = useCallback(
-    (timeRange: TimeRange): MlLocatorParams => ({
-      page: ML_PAGES.ANOMALY_EXPLORER,
-      pageState: {
-        jobIds: data.job_ids,
-        timeRange,
-        ...(data.swimlane_type === 'viewBy'
-          ? { mlExplorerSwimlane: { viewByFieldName: data.view_by } }
-          : {}),
-      },
-    }),
+    (timeRange: TimeRange): MlLocatorParams => {
+      const mlExplorerSwimlane = toExplorerSwimlaneState({
+        viewByFieldName: data.swimlane_type === 'viewBy' ? data.view_by : undefined,
+        severity: data.severity_threshold,
+      });
+      return {
+        page: ML_PAGES.ANOMALY_EXPLORER,
+        pageState: {
+          jobIds: data.job_ids,
+          timeRange,
+          ...(mlExplorerSwimlane ? { mlExplorerSwimlane } : {}),
+        },
+      };
+    },
     [data]
   );
 
@@ -313,14 +347,20 @@ export const InlineAnomalyCharts = ({
 }: InlineMlChartRenderProps<AnomalyChartsEmbeddableState>) => {
   const { data } = attachment;
   const getViewInLocatorParams = useCallback(
-    (timeRange: TimeRange): MlLocatorParams => ({
-      page: ML_PAGES.ANOMALY_EXPLORER,
-      pageState: {
-        jobIds: data.job_ids,
-        timeRange,
-      },
-    }),
-    [data.job_ids]
+    (timeRange: TimeRange): MlLocatorParams => {
+      const mlExplorerSwimlane = toExplorerSwimlaneState({
+        severity: data.severity_threshold,
+      });
+      return {
+        page: ML_PAGES.ANOMALY_EXPLORER,
+        pageState: {
+          jobIds: data.job_ids,
+          timeRange,
+          ...(mlExplorerSwimlane ? { mlExplorerSwimlane } : {}),
+        },
+      };
+    },
+    [data.job_ids, data.severity_threshold]
   );
 
   return (
