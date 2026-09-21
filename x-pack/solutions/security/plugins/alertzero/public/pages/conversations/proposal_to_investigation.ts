@@ -113,6 +113,7 @@ export const proposalToInvestigation = (proposal: ProposalItem): Investigation =
     // recordId is repurposed to carry the proposal id into the ⋮ modal system.
     // The page renders dismiss/assign modals only if modalState.recordId is set.
     recordId: proposal.id,
+    conversationId: proposal.conversationId,
     summary: proposal.comment,
     primaryActionLabel: proposal.action?.name,
     assignee: null,

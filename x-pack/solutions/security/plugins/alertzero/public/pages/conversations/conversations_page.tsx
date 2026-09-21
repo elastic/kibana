@@ -24,8 +24,12 @@ import {
   type RecommendedAction,
   InvestigationActionModals,
   BlastRadius,
+  type EscalationModalRenderProps,
 } from '@kbn/agentic-investigations-common';
-import { useApproveProposal, useDismissProposal } from '@kbn/agentic-investigations-plugin/public';
+import {
+  useApproveProposal,
+  useDismissProposal,
+} from '@kbn/agentic-investigations-plugin/public';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
@@ -35,6 +39,7 @@ import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
 import { useProposalsList } from '../../hooks/use_proposals_api';
 import { useOpenInChat } from '../../hooks/use_open_in_chat';
 import { useConversationsUrlParams } from './conversations_url_params';
+import { ConnectedEscalationModal } from './connected_escalation_modal';
 import { useInvestigationDetails } from './use_investigation_details';
 import { QUEUE_PAGE_INFO, DECISION_ERRORS } from './translations';
 import { ProposalsTrendChartRow } from '../../components/proposals_trend_chart';
@@ -177,6 +182,11 @@ export const ConversationsPage: React.FC = () => {
     [dismiss, onDecisionError]
   );
 
+  const renderEscalationModal = useCallback(
+    (props: EscalationModalRenderProps) => <ConnectedEscalationModal {...props} />,
+    []
+  );
+
   const onClickRecommendedAction: ConversationsActionsGroupProps['onClickRecommendedAction'] =
     useCallback(
       ({ id }) => {
@@ -273,11 +283,13 @@ export const ConversationsPage: React.FC = () => {
         action={modalState.type}
         recordId={modalState.recordId}
         initialAssignee={actionInvestigation?.assignee}
+        investigation={actionInvestigation}
         approvalInvestigation={selectedRecommendedActionConversation}
         onCloseAction={closeModal}
         onCloseApproval={closeApproval}
         onConfirmApproval={confirmApproval}
         renderDismissModal={renderDismissModal}
+        renderEscalationModal={renderEscalationModal}
       />
 
       <EuiFlexGroup gutterSize="l" direction="column" wrap>

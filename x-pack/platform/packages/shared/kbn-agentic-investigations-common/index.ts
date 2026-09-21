@@ -82,3 +82,8 @@ export {
   type BlastRadiusContent,
   type BlastRadiusSectionProps,
 } from './src/components/modals/approval_modal/blast_radius_section';
+export {
+  type EscalationModalMode,
+  type EscalationIncidentSummary,
+} from './src/components/modals/escalation_modal';
+export { type EscalationModalRenderProps } from './src/components/modals/investigation_action_modals';

@@ -66,7 +66,7 @@ const useContextMenuItems = (
   );
 };
 
-export type CardActionType = 'openIncident' | 'close' | 'assign';
+export type CardActionType = 'openIncident' | 'attachToIncident' | 'close' | 'assign';
 export interface BaseActionsProps {
   investigation: Investigation;
   isFlyout?: boolean;
@@ -135,6 +135,12 @@ export const BaseActions = memo<BaseActionsProps>(
           icon: 'document',
           name: ACTIONS_TRANSLATIONS.buttons.openIncident,
           onClick: () => onClickAction('openIncident', investigation.recordId),
+        },
+        {
+          key: 'attachToIncident',
+          icon: 'link',
+          name: ACTIONS_TRANSLATIONS.buttons.attachToIncident,
+          onClick: () => onClickAction('attachToIncident', investigation.recordId),
         },
         ...(decided
           ? []

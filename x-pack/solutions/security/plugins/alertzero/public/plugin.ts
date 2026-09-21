@@ -19,8 +19,12 @@ import {
   ALERTZERO_APP_PATH,
   TEMPLATE_ID_INVESTIGATION,
 } from '@kbn/alertzero-common';
+import React from 'react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { registerAgenticInvestigationTemplateUI } from '@kbn/agentic-investigations-common';
 import { getAlertZeroDeepLinks } from './deep_links';
+import { ConnectedEscalationModal } from './pages/conversations/connected_escalation_modal';
 import type {
   AlertZeroClientConfig,
   AlertZeroPublicSetup,
@@ -86,16 +90,30 @@ export class AlertZeroPublicPlugin
     return {};
   }
 
-  public start(_core: CoreStart, startDeps: AlertZeroStartDependencies): AlertZeroPublicStart {
+  public start(core: CoreStart, startDeps: AlertZeroStartDependencies): AlertZeroPublicStart {
     if (!this.config.enabled) {
       return {};
     }
+
+    // A dedicated QueryClient for the escalation modal when rendered from the flyout, which mounts
+    // outside alertzero's app tree and therefore outside its QueryClientProvider.
+    const flyoutQueryClient = new QueryClient();
 
     registerAgenticInvestigationTemplateUI({
       conversationTemplates: startDeps.agentBuilder.conversationTemplates,
       templateId: TEMPLATE_ID_INVESTIGATION,
       name: INVESTIGATION_TEMPLATE_NAME,
       icon: 'securitySignalDetected',
+      renderEscalationModal: (props) =>
+        React.createElement(
+          KibanaContextProvider,
+          { services: { ...core, ...startDeps } },
+          React.createElement(
+            QueryClientProvider,
+            { client: flyoutQueryClient },
+            React.createElement(ConnectedEscalationModal, props)
+          )
+        ),
     });
 
     return {};

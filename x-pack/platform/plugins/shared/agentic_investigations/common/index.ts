@@ -93,6 +93,8 @@ export {
 export type {
   CreateEscalationRequest,
   EscalationConversation,
+  EscalationConversationSummary,
   EscalationVisibility,
+  ListEscalationsResponse,
   UpdateEscalationRequest,
 } from './escalations';

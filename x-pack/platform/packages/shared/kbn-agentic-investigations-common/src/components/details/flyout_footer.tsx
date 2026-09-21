@@ -10,13 +10,19 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useBoolean } from '@kbn/react-hooks';
 import type { Investigation } from '../../types';
 import { BaseActions, type CardActionType } from '../actions';
-import { InvestigationActionModals } from '../modals/investigation_action_modals';
+import { InvestigationActionModals, type EscalationModalRenderProps } from '../modals/investigation_action_modals';
 import { DETAILS_FLYOUT_LABELS } from './translations';
 
 export interface ConversationDetailsFlyoutFooterProps {
   investigation: Investigation;
   /** Supplied by the caller because flyout slots render outside a `KibanaContextProvider`. */
   onOpenChat: () => void;
+  /**
+   * When provided, renders a dedicated "Open escalation" primary button in the footer and
+   * handles rendering the escalation modal. Supplied by the caller who has access to Kibana
+   * HTTP hooks unavailable in this package.
+   */
+  onOpenEscalation?: (props: EscalationModalRenderProps) => React.ReactNode;
 }
 
 interface ModalState {
@@ -33,6 +39,7 @@ const CLOSED_MODAL: ModalState = { type: null, recordId: null };
 export const ConversationDetailsFlyoutFooter = ({
   investigation,
   onOpenChat,
+  onOpenEscalation,
 }: ConversationDetailsFlyoutFooterProps) => {
   const [modalState, setModalState] = useState<ModalState>(CLOSED_MODAL);
   const [isApprovalOpen, { on: openApproval, off: closeApproval }] = useBoolean();
@@ -59,24 +66,42 @@ export const ConversationDetailsFlyoutFooter = ({
             {DETAILS_FLYOUT_LABELS.actions.openChat}
           </EuiButton>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <BaseActions
-            investigation={investigation}
-            isFlyout={true}
-            onClickAction={onClickAction}
-            onClickRecommendedAction={openApproval}
-            data-test-subj="investigationFlyoutActions"
-          />
-        </EuiFlexItem>
+
+        {onOpenEscalation ? (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              iconType="document"
+              onClick={() => setModalState({ type: 'openIncident', recordId: investigation.recordId })}
+              size="s"
+              fill
+              color="primary"
+              data-test-subj="investigationFlyoutOpenEscalation"
+            >
+              {DETAILS_FLYOUT_LABELS.actions.openEscalation}
+            </EuiButton>
+          </EuiFlexItem>
+        ) : (
+          <EuiFlexItem grow={false}>
+            <BaseActions
+              investigation={investigation}
+              isFlyout={true}
+              onClickAction={onClickAction}
+              onClickRecommendedAction={openApproval}
+              data-test-subj="investigationFlyoutActions"
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
 
       <InvestigationActionModals
         action={modalState.type}
         recordId={modalState.recordId}
         initialAssignee={investigation.assignee}
+        investigation={investigation}
         approvalInvestigation={isApprovalOpen ? investigation : undefined}
         onCloseAction={closeModal}
         onCloseApproval={closeApproval}
+        renderEscalationModal={onOpenEscalation}
       />
     </>
   );
