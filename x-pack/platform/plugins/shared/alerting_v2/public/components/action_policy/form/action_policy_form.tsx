@@ -11,7 +11,6 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiSpacer,
-  EuiText,
   EuiTextArea,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -19,21 +18,15 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { useFetchRuleEventFields } from '../../../hooks/use_fetch_rule_event_fields';
-import { MatcherInput } from './components/matcher_input';
+import { AdvancedMatchingAccordion } from './components/advanced_matching_accordion';
 import { NotificationControlsSection } from './components/notification_controls_section';
 import { NotificationSummary } from './components/notification_summary';
-import { QuickFilters } from './components/quick_filters';
+import { optionalLabel } from './components/optional_label';
+import { PolicyScopeDescription } from './components/policy_scope_description';
+import { RuleTagsSelector } from './components/rule_tags_selector';
 import { SimpleWorkflowBuilder } from './components/simple_workflow_builder';
 import { WorkflowSelector } from './components/workflow_selector';
 import type { ActionPolicyFormState } from './types';
-
-const optionalLabel = (
-  <EuiText color="subdued" size="xs">
-    {i18n.translate('xpack.alertingV2.actionPolicy.form.optionalLabel', {
-      defaultMessage: 'Optional',
-    })}
-  </EuiText>
-);
 
 export const ActionPolicyForm = () => {
   const { control } = useFormContext<ActionPolicyFormState>();
@@ -128,45 +121,20 @@ export const ActionPolicyForm = () => {
             />
           </h3>
         }
-        description={
-          <FormattedMessage
-            id="xpack.alertingV2.actionPolicy.form.matchConditions.description"
-            defaultMessage="Define which alerts this policy applies to. Tags and expression conditions are combined with AND."
-          />
-        }
+        description={<PolicyScopeDescription matcher={matcher} />}
       >
         <Controller
           name="matcher"
           control={control}
           render={({ field }) => (
             <>
-              <QuickFilters matcher={field.value} onChange={field.onChange} />
+              <RuleTagsSelector matcher={field.value} onChange={field.onChange} />
               <EuiSpacer size="m" />
-              <EuiFormRow
-                label={i18n.translate('xpack.alertingV2.actionPolicy.form.matcher', {
-                  defaultMessage: 'Query',
-                })}
-                labelAppend={optionalLabel}
-                helpText={i18n.translate('xpack.alertingV2.actionPolicy.form.matcher.helpText', {
-                  defaultMessage:
-                    'A KQL query combined with the conditions above using AND. Leave all conditions empty to apply the policy to all episodes in the space.',
-                })}
-                fullWidth
-              >
-                <MatcherInput
-                  value={field.value?.expression ?? ''}
-                  onChange={(expr) => field.onChange({ ...field.value, expression: expr || null })}
-                  fullWidth
-                  data-test-subj="matcherInput"
-                  dataFieldNames={dataFieldNames}
-                  placeholder={i18n.translate(
-                    'xpack.alertingV2.actionPolicy.form.matcher.placeholder',
-                    {
-                      defaultMessage: 'e.g. data.host.name : "my-host.com" and rule.id : "uuid"',
-                    }
-                  )}
-                />
-              </EuiFormRow>
+              <AdvancedMatchingAccordion
+                matcher={field.value}
+                onChange={field.onChange}
+                dataFieldNames={dataFieldNames}
+              />
             </>
           )}
         />
