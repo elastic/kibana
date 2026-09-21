@@ -19,7 +19,7 @@ exports[`LicenseStatus component should display display warning is expired 1`] =
             class="css-154m2kl"
           >
             <div
-              class="css-1trvrwr-titleWrapper-titleOffsetStyle"
+              class="css-fsoqfw-titleWrapper"
             >
               <h1
                 class="euiTitle emotion-euiTitle-s"
@@ -117,7 +117,7 @@ exports[`LicenseStatus component should display normally when license is active 
             class="css-154m2kl"
           >
             <div
-              class="css-1trvrwr-titleWrapper-titleOffsetStyle"
+              class="css-fsoqfw-titleWrapper"
             >
               <h1
                 class="euiTitle emotion-euiTitle-s"
