@@ -238,6 +238,7 @@ const importContentRoute = createServerRoute({
     body: z.object({
       include: z
         .string()
+        .max(MAX_CONTENT_PACK_SIZE_BYTES)
         .transform((value) => boundedIncludedObjectsSchema.parse(JSON.parse(value))),
       content: z.instanceof(Readable),
     }),

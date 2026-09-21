@@ -44,7 +44,7 @@ import { isNoLLMSuggestionsError } from './no_llm_suggestions_error';
 
 const simulationBaseBodySchema = {
   documents: z.array(boundedFlattenRecord).max(1000),
-  detected_fields: z.array(namedFieldDefinitionConfigSchema).optional(),
+  detected_fields: z.array(namedFieldDefinitionConfigSchema).max(1000).optional(),
 };
 
 const PROCESSOR_TYPE_NAME_MAX_LENGTH = 128;
@@ -58,7 +58,7 @@ const paramsSchema = z.object({
     }),
     z.object({
       ...simulationBaseBodySchema,
-      processors: z.array(z.record(z.string().max(PROCESSOR_TYPE_NAME_MAX_LENGTH), z.any())),
+      processors: z.array(z.record(z.string().max(PROCESSOR_TYPE_NAME_MAX_LENGTH), z.any())).max(100),
     }),
   ]),
 }) satisfies z.Schema<ProcessingSimulationParams>;
