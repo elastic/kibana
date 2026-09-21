@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-export type {
-  ConversationCreatePublicRequest,
-  ConversationPublicClient,
-  ConversationUpdatePublicRequest,
-  ConversationAddEventsRequest,
-} from './types';
+import { ApiPrivileges } from '@kbn/core-security-server';
+
+export const ESCALATIONS_API_PRIVILEGE_READ = ApiPrivileges.read('escalations');
+export const ESCALATIONS_API_PRIVILEGE_MANAGE = ApiPrivileges.manage('escalations');

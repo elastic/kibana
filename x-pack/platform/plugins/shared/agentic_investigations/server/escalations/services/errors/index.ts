@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-export type {
-  ConversationCreatePublicRequest,
-  ConversationPublicClient,
-  ConversationUpdatePublicRequest,
-  ConversationAddEventsRequest,
-} from './types';
+export { InvalidLinkedInvestigationError } from './invalid_linked_investigation_error';
+export { NotAnEscalationError } from './not_an_escalation_error';
+export { TooManyLinkedInvestigationsError } from './too_many_linked_investigations_error';
