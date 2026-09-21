@@ -167,7 +167,7 @@ export const huntCoordinator = async (
         timeRange: timeRange ?? { from: 'now-24h', to: 'now' },
         counts: { totalHits: 0, returnedHits: 0, affectedHosts: 0, affectedUsers: 0 },
         hits: [],
-        affectedAssets: { hosts: [], users: [] },
+        affectedAssets: { hosts: [], users: [], services: [] },
         perIndex: [],
         message: `Index scope resolution failed: ${(err as Error).message}`,
       },
