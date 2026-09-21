@@ -265,12 +265,14 @@ describe('getFullAgentPolicy', () => {
         type: 'elasticsearch',
         hosts: ['http://127.0.0.1:9201'],
       },
-      downloadSource: {
-        id: 'default-download-source-id',
-        is_default: true,
-        name: 'Default host',
-        host: 'http://default-registry.co',
-      },
+      downloadSources: [
+        {
+          id: 'default-download-source-id',
+          is_default: true,
+          name: 'Default host',
+          host: 'http://default-registry.co',
+        },
+      ],
       downloadSourceProxy: undefined,
       fleetServerHost: {
         name: 'default Fleet Server',
@@ -533,12 +535,14 @@ describe('getFullAgentPolicy', () => {
         type: 'elasticsearch',
         hosts: ['http://es-monitoring.co:9201'],
       },
-      downloadSource: {
-        id: 'default-download-source-id',
-        is_default: true,
-        name: 'Default host',
-        host: 'http://default-registry.co',
-      },
+      downloadSources: [
+        {
+          id: 'default-download-source-id',
+          is_default: true,
+          name: 'Default host',
+          host: 'http://default-registry.co',
+        },
+      ],
       downloadSourceProxy: undefined,
       fleetServerHost: {
         name: 'default Fleet Server',
@@ -588,12 +592,14 @@ describe('getFullAgentPolicy', () => {
         type: 'elasticsearch',
         hosts: ['http://es-data.co:9201'],
       },
-      downloadSource: {
-        id: 'default-download-source-id',
-        is_default: true,
-        name: 'Default host',
-        host: 'http://default-registry.co',
-      },
+      downloadSources: [
+        {
+          id: 'default-download-source-id',
+          is_default: true,
+          name: 'Default host',
+          host: 'http://default-registry.co',
+        },
+      ],
       downloadSourceProxy: undefined,
       fleetServerHost: {
         name: 'default Fleet Server',
@@ -651,12 +657,14 @@ describe('getFullAgentPolicy', () => {
         type: 'elasticsearch',
         hosts: ['http://es-monitoring.co:9201'],
       },
-      downloadSource: {
-        id: 'default-download-source-id',
-        is_default: true,
-        name: 'Default host',
-        host: 'http://default-registry.co',
-      },
+      downloadSources: [
+        {
+          id: 'default-download-source-id',
+          is_default: true,
+          name: 'Default host',
+          host: 'http://default-registry.co',
+        },
+      ],
       downloadSourceProxy: undefined,
       fleetServerHost: {
         name: 'default Fleet Server',
@@ -724,12 +732,14 @@ describe('getFullAgentPolicy', () => {
         type: 'remote_elasticsearch',
         hosts: ['http://127.0.0.1:9201'],
       },
-      downloadSource: {
-        id: 'default-download-source-id',
-        is_default: true,
-        name: 'Default host',
-        host: 'http://default-registry.co',
-      },
+      downloadSources: [
+        {
+          id: 'default-download-source-id',
+          is_default: true,
+          name: 'Default host',
+          host: 'http://default-registry.co',
+        },
+      ],
       downloadSourceProxy: undefined,
       fleetServerHost: {
         name: 'default Fleet Server',
@@ -792,12 +802,14 @@ describe('getFullAgentPolicy', () => {
         type: 'elasticsearch',
         hosts: ['http://es-data.co:9201'],
       },
-      downloadSource: {
-        id: 'default-download-source-id',
-        is_default: true,
-        name: 'Default host',
-        host: 'http://default-registry.co',
-      },
+      downloadSources: [
+        {
+          id: 'default-download-source-id',
+          is_default: true,
+          name: 'Default host',
+          host: 'http://default-registry.co',
+        },
+      ],
       downloadSourceProxy: undefined,
       fleetServerHost: {
         name: 'default Fleet Server',
@@ -963,12 +975,14 @@ describe('getFullAgentPolicy', () => {
         type: 'elasticsearch',
         hosts: ['http://es-data.co:9201'],
       },
-      downloadSource: {
-        id: 'default-download-source-id',
-        is_default: true,
-        name: 'Default host',
-        host: 'http://default-registry.co',
-      },
+      downloadSources: [
+        {
+          id: 'default-download-source-id',
+          is_default: true,
+          name: 'Default host',
+          host: 'http://default-registry.co',
+        },
+      ],
       downloadSourceProxy: undefined,
       fleetServerHost: {
         name: 'default Fleet Server',
@@ -1126,17 +1140,19 @@ describe('getFullAgentPolicy', () => {
         type: 'elasticsearch',
         hosts: ['http://127.0.0.1:9201'],
       },
-      downloadSource: {
-        id: 'test-ds-1',
-        is_default: false,
-        name: 'Test',
-        host: 'http://custom-registry-test',
-        ssl: {
-          certificate: 'cert',
-          certificate_authorities: ['ca'],
-          key: 'KEY1',
+      downloadSources: [
+        {
+          id: 'test-ds-1',
+          is_default: false,
+          name: 'Test',
+          host: 'http://custom-registry-test',
+          ssl: {
+            certificate: 'cert',
+            certificate_authorities: ['ca'],
+            key: 'KEY1',
+          },
         },
-      },
+      ],
       downloadSourceProxy: undefined,
       fleetServerHost: {
         name: 'default Fleet Server',
@@ -1170,6 +1186,7 @@ describe('getFullAgentPolicy', () => {
       agent: {
         download: {
           sourceURI: 'http://custom-registry-test',
+          sources: ['http://custom-registry-test'],
           ssl: {
             certificate: 'cert',
             certificate_authorities: ['ca'],
@@ -1217,17 +1234,19 @@ describe('getFullAgentPolicy', () => {
         type: 'elasticsearch',
         hosts: ['http://127.0.0.1:9201'],
       },
-      downloadSource: {
-        id: 'test-ds-1',
-        is_default: false,
-        name: 'Test',
-        host: 'http://custom-registry-test',
-        secrets: {
-          ssl: {
-            key: 'KEY1',
+      downloadSources: [
+        {
+          id: 'test-ds-1',
+          is_default: false,
+          name: 'Test',
+          host: 'http://custom-registry-test',
+          secrets: {
+            ssl: {
+              key: 'KEY1',
+            },
           },
         },
-      },
+      ],
       downloadSourceProxy: undefined,
       fleetServerHost: {
         name: 'default Fleet Server',
@@ -1261,6 +1280,7 @@ describe('getFullAgentPolicy', () => {
       agent: {
         download: {
           sourceURI: 'http://custom-registry-test',
+          sources: ['http://custom-registry-test'],
           secrets: {
             ssl: {
               key: 'KEY1',
@@ -1470,6 +1490,7 @@ describe('getFullAgentPolicy', () => {
       agent: {
         download: {
           sourceURI: 'http://default-registry.co',
+          sources: ['http://default-registry.co'],
         },
         features: {},
         monitoring: {
@@ -1603,12 +1624,14 @@ describe('getFullAgentPolicy', () => {
         hosts: ['http://127.0.0.1:9201'],
         write_to_logs_streams: true,
       },
-      downloadSource: {
-        id: 'default-download-source-id',
-        is_default: true,
-        name: 'Default host',
-        host: 'http://default-registry.co',
-      },
+      downloadSources: [
+        {
+          id: 'default-download-source-id',
+          is_default: true,
+          name: 'Default host',
+          host: 'http://default-registry.co',
+        },
+      ],
       downloadSourceProxy: undefined,
       fleetServerHost: {
         name: 'default Fleet Server',
@@ -1717,12 +1740,14 @@ describe('getFullAgentPolicy', () => {
       proxies: [],
       dataOutput: bulkOutput,
       monitoringOutput: bulkOutput,
-      downloadSource: {
-        id: 'default-download-source-id',
-        is_default: true,
-        name: 'Default host',
-        host: 'http://default-registry.co',
-      },
+      downloadSources: [
+        {
+          id: 'default-download-source-id',
+          is_default: true,
+          name: 'Default host',
+          host: 'http://default-registry.co',
+        },
+      ],
       downloadSourceProxy: undefined,
       fleetServerHost: {
         name: 'default Fleet Server',
@@ -1781,12 +1806,14 @@ describe('getFullAgentPolicy', () => {
       proxies: [],
       dataOutput: bulkOutput,
       monitoringOutput: bulkOutput,
-      downloadSource: {
-        id: 'default-download-source-id',
-        is_default: true,
-        name: 'Default host',
-        host: 'http://default-registry.co',
-      },
+      downloadSources: [
+        {
+          id: 'default-download-source-id',
+          is_default: true,
+          name: 'Default host',
+          host: 'http://default-registry.co',
+        },
+      ],
       downloadSourceProxy: undefined,
       fleetServerHost: {
         name: 'default Fleet Server',
@@ -1906,12 +1933,14 @@ describe('getFullAgentPolicy', () => {
         type: 'elasticsearch',
         hosts: ['http://127.0.0.1:9201'],
       },
-      downloadSource: {
-        id: 'default-download-source-id',
-        is_default: true,
-        name: 'Default host',
-        host: 'http://default-registry.co',
-      },
+      downloadSources: [
+        {
+          id: 'default-download-source-id',
+          is_default: true,
+          name: 'Default host',
+          host: 'http://default-registry.co',
+        },
+      ],
       downloadSourceProxy: undefined,
       fleetServerHost: fleetServerHostWithSSL,
     });
@@ -2168,12 +2197,14 @@ describe('getFullAgentPolicy', () => {
           type: 'elasticsearch',
           hosts: ['http://127.0.0.1:9201'],
         },
-        downloadSource: {
-          id: 'default-download-source-id',
-          is_default: true,
-          name: 'Default host',
-          host: 'http://default-registry.co',
-        },
+        downloadSources: [
+          {
+            id: 'default-download-source-id',
+            is_default: true,
+            name: 'Default host',
+            host: 'http://default-registry.co',
+          },
+        ],
         downloadSourceProxy: undefined,
         fleetServerHost: {
           name: 'default Fleet Server',
@@ -2236,12 +2267,14 @@ describe('getFullAgentPolicy', () => {
           type: 'elasticsearch',
           hosts: ['http://127.0.0.1:9201'],
         },
-        downloadSource: {
-          id: 'default-download-source-id',
-          is_default: true,
-          name: 'Default host',
-          host: 'http://default-registry.co',
-        },
+        downloadSources: [
+          {
+            id: 'default-download-source-id',
+            is_default: true,
+            name: 'Default host',
+            host: 'http://default-registry.co',
+          },
+        ],
         downloadSourceProxy: undefined,
         fleetServerHost: {
           name: 'default Fleet Server',
@@ -2291,12 +2324,14 @@ describe('getFullAgentPolicy', () => {
           type: 'remote_elasticsearch',
           hosts: ['https://remote-es.example.com:9200'],
         },
-        downloadSource: {
-          id: 'default-download-source-id',
-          is_default: true,
-          name: 'Default host',
-          host: 'http://default-registry.co',
-        },
+        downloadSources: [
+          {
+            id: 'default-download-source-id',
+            is_default: true,
+            name: 'Default host',
+            host: 'http://default-registry.co',
+          },
+        ],
         downloadSourceProxy: undefined,
         fleetServerHost: {
           name: 'default Fleet Server',
@@ -2357,12 +2392,14 @@ describe('getFullAgentPolicy', () => {
           type: 'elasticsearch',
           hosts: ['http://127.0.0.1:9201'],
         },
-        downloadSource: {
-          id: 'default-download-source-id',
-          is_default: true,
-          name: 'Default host',
-          host: 'http://default-registry.co',
-        },
+        downloadSources: [
+          {
+            id: 'default-download-source-id',
+            is_default: true,
+            name: 'Default host',
+            host: 'http://default-registry.co',
+          },
+        ],
         downloadSourceProxy: undefined,
         fleetServerHost: {
           name: 'default Fleet Server',
@@ -3463,8 +3500,9 @@ describe('getBinarySourceSettings', () => {
   } as any;
 
   it('should return sourceURI for agent download config', () => {
-    expect(getBinarySourceSettings(downloadSource, undefined)).toEqual({
+    expect(getBinarySourceSettings([downloadSource], undefined)).toEqual({
       sourceURI: 'http://custom-registry-test',
+      sources: ['http://custom-registry-test'],
     });
   });
 
@@ -3477,8 +3515,9 @@ describe('getBinarySourceSettings', () => {
         key: 'KEY1',
       },
     };
-    expect(getBinarySourceSettings(downloadSourceSSL, undefined)).toEqual({
+    expect(getBinarySourceSettings([downloadSourceSSL], undefined)).toEqual({
       sourceURI: 'http://custom-registry-test',
+      sources: ['http://custom-registry-test'],
       ssl: {
         certificate: 'cert',
         certificate_authorities: ['ca'],
@@ -3496,8 +3535,9 @@ describe('getBinarySourceSettings', () => {
         },
       },
     };
-    expect(getBinarySourceSettings(downloadSourceSecrets, undefined)).toEqual({
+    expect(getBinarySourceSettings([downloadSourceSecrets], undefined)).toEqual({
       sourceURI: 'http://custom-registry-test',
+      sources: ['http://custom-registry-test'],
       secrets: {
         ssl: {
           key: { id: 'keyid' },
@@ -3519,8 +3559,9 @@ describe('getBinarySourceSettings', () => {
         },
       },
     };
-    expect(getBinarySourceSettings(downloadSourceSecrets, undefined)).toEqual({
+    expect(getBinarySourceSettings([downloadSourceSecrets], undefined)).toEqual({
       sourceURI: 'http://custom-registry-test',
+      sources: ['http://custom-registry-test'],
       ssl: {
         certificate: 'cert',
         certificate_authorities: ['ca'],
@@ -3547,8 +3588,9 @@ describe('getBinarySourceSettings', () => {
         },
       },
     };
-    expect(getBinarySourceSettings(downloadSourceSecrets, undefined)).toEqual({
+    expect(getBinarySourceSettings([downloadSourceSecrets], undefined)).toEqual({
       sourceURI: 'http://custom-registry-test',
+      sources: ['http://custom-registry-test'],
       ssl: {
         certificate: 'cert',
         certificate_authorities: ['ca'],
@@ -3574,9 +3616,10 @@ describe('getBinarySourceSettings', () => {
     };
 
     it('should return config with ssl options coming from the proxy', () => {
-      expect(getBinarySourceSettings(downloadSource, proxy)).toEqual({
+      expect(getBinarySourceSettings([downloadSource], proxy)).toEqual({
         proxy_url: 'http://proxy_uri.it',
         sourceURI: 'http://custom-registry-test',
+        sources: ['http://custom-registry-test'],
         proxy_headers: { ProxyHeader1: 'Test' },
         ssl: {
           certificate: 'proxy_cert',
@@ -3596,9 +3639,10 @@ describe('getBinarySourceSettings', () => {
         certificate_key: 'PROXY_KEY1',
         is_preconfigured: false,
       };
-      expect(getBinarySourceSettings(downloadSource, proxyWithNoHeaders)).toEqual({
+      expect(getBinarySourceSettings([downloadSource], proxyWithNoHeaders)).toEqual({
         proxy_url: 'http://proxy_uri.it',
         sourceURI: 'http://custom-registry-test',
+        sources: ['http://custom-registry-test'],
         ssl: {
           certificate: 'proxy_cert',
           certificate_authorities: ['PROXY_CA'],
@@ -3608,9 +3652,10 @@ describe('getBinarySourceSettings', () => {
     });
 
     it('should use proxy SSL options when present', () => {
-      expect(getBinarySourceSettings(downloadSource, proxy)).toEqual({
+      expect(getBinarySourceSettings([downloadSource], proxy)).toEqual({
         proxy_url: 'http://proxy_uri.it',
         sourceURI: 'http://custom-registry-test',
+        sources: ['http://custom-registry-test'],
         proxy_headers: { ProxyHeader1: 'Test' },
         ssl: {
           certificate: 'proxy_cert',
@@ -3629,9 +3674,10 @@ describe('getBinarySourceSettings', () => {
           },
         },
       };
-      expect(getBinarySourceSettings(downloadSourceSecrets, proxy)).toEqual({
+      expect(getBinarySourceSettings([downloadSourceSecrets], proxy)).toEqual({
         proxy_url: 'http://proxy_uri.it',
         sourceURI: 'http://custom-registry-test',
+        sources: ['http://custom-registry-test'],
         secrets: {
           ssl: {
             key: {
@@ -3649,10 +3695,11 @@ describe('getBinarySourceSettings', () => {
     });
 
     it('should redact proxy_headers and ssl.key when redactProxySecrets=true', () => {
-      const result = getBinarySourceSettings(downloadSource, proxy, true);
+      const result = getBinarySourceSettings([downloadSource], proxy, true);
       expect(result).toEqual({
         proxy_url: 'http://proxy_uri.it',
         sourceURI: 'http://custom-registry-test',
+        sources: ['http://custom-registry-test'],
         ssl: {
           certificate: 'proxy_cert',
           certificate_authorities: ['PROXY_CA'],
@@ -3672,8 +3719,9 @@ describe('getBinarySourceSettings', () => {
           password: 'pass1',
         },
       };
-      expect(getBinarySourceSettings(downloadSourceWithAuth, undefined)).toEqual({
+      expect(getBinarySourceSettings([downloadSourceWithAuth], undefined)).toEqual({
         sourceURI: 'http://custom-registry-test',
+        sources: ['http://custom-registry-test'],
         auth: {
           username: 'user1',
           password: 'pass1',
@@ -3688,8 +3736,9 @@ describe('getBinarySourceSettings', () => {
           api_key: 'my-api-key',
         },
       };
-      expect(getBinarySourceSettings(downloadSourceWithApiKey, undefined)).toEqual({
+      expect(getBinarySourceSettings([downloadSourceWithApiKey], undefined)).toEqual({
         sourceURI: 'http://custom-registry-test',
+        sources: ['http://custom-registry-test'],
         auth: {
           api_key: 'my-api-key',
         },
@@ -3708,8 +3757,9 @@ describe('getBinarySourceSettings', () => {
           },
         },
       };
-      expect(getBinarySourceSettings(downloadSourceWithSecretPassword, undefined)).toEqual({
+      expect(getBinarySourceSettings([downloadSourceWithSecretPassword], undefined)).toEqual({
         sourceURI: 'http://custom-registry-test',
+        sources: ['http://custom-registry-test'],
         auth: {
           username: 'user1',
         },
@@ -3730,8 +3780,9 @@ describe('getBinarySourceSettings', () => {
           },
         },
       };
-      expect(getBinarySourceSettings(downloadSourceWithSecretApiKey, undefined)).toEqual({
+      expect(getBinarySourceSettings([downloadSourceWithSecretApiKey], undefined)).toEqual({
         sourceURI: 'http://custom-registry-test',
+        sources: ['http://custom-registry-test'],
         secrets: {
           auth: {
             api_key: { id: 'api-key-secret-id' },
@@ -3753,8 +3804,9 @@ describe('getBinarySourceSettings', () => {
           },
         },
       };
-      expect(getBinarySourceSettings(downloadSourceWithBoth, undefined)).toEqual({
+      expect(getBinarySourceSettings([downloadSourceWithBoth], undefined)).toEqual({
         sourceURI: 'http://custom-registry-test',
+        sources: ['http://custom-registry-test'],
         auth: {
           username: 'user1',
           // password should NOT be included here since it's in secrets
@@ -3779,8 +3831,9 @@ describe('getBinarySourceSettings', () => {
           },
         },
       };
-      expect(getBinarySourceSettings(downloadSourceWithBoth, undefined)).toEqual({
+      expect(getBinarySourceSettings([downloadSourceWithBoth], undefined)).toEqual({
         sourceURI: 'http://custom-registry-test',
+        sources: ['http://custom-registry-test'],
         // auth should NOT be included since api_key is in secrets
         secrets: {
           auth: {
@@ -3805,8 +3858,9 @@ describe('getBinarySourceSettings', () => {
           },
         },
       };
-      expect(getBinarySourceSettings(downloadSourceWithAllSecrets, undefined)).toEqual({
+      expect(getBinarySourceSettings([downloadSourceWithAllSecrets], undefined)).toEqual({
         sourceURI: 'http://custom-registry-test',
+        sources: ['http://custom-registry-test'],
         auth: {
           username: 'user1',
         },
@@ -3833,8 +3887,9 @@ describe('getBinarySourceSettings', () => {
           ],
         },
       };
-      expect(getBinarySourceSettings(downloadSourceWithHeaders, undefined)).toEqual({
+      expect(getBinarySourceSettings([downloadSourceWithHeaders], undefined)).toEqual({
         sourceURI: 'http://custom-registry-test',
+        sources: ['http://custom-registry-test'],
         auth: {
           username: 'user1',
           password: 'pass1',
@@ -3858,8 +3913,9 @@ describe('getBinarySourceSettings', () => {
           ],
         },
       };
-      expect(getBinarySourceSettings(downloadSourceWithEmptyHeaders, undefined)).toEqual({
+      expect(getBinarySourceSettings([downloadSourceWithEmptyHeaders], undefined)).toEqual({
         sourceURI: 'http://custom-registry-test',
+        sources: ['http://custom-registry-test'],
         auth: {
           api_key: 'my-api-key',
           headers: [
@@ -3878,8 +3934,9 @@ describe('getBinarySourceSettings', () => {
           headers: [{ key: '', value: '' }],
         },
       };
-      expect(getBinarySourceSettings(downloadSourceWithOnlyEmptyHeaders, undefined)).toEqual({
+      expect(getBinarySourceSettings([downloadSourceWithOnlyEmptyHeaders], undefined)).toEqual({
         sourceURI: 'http://custom-registry-test',
+        sources: ['http://custom-registry-test'],
         auth: {
           api_key: 'my-api-key',
         },

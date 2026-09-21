@@ -91,23 +91,18 @@ const EnhanceButton = ({ action }: { action: AppHeaderExperimentalDashboardAiAct
     });
   };
 
-  if (iconOnly) {
-    return (
-      <AiButton
-        iconOnly
-        variant="empty"
-        size="xs"
-        iconType="sparkles"
-        withToolTip
-        aria-label={ENHANCE_LABEL}
-        isDisabled={action.isDisabled}
-        data-test-subj={testSubj}
-        onClick={handleClick}
-      />
-    );
-  }
-
-  return (
+  const button = iconOnly ? (
+    <AiButton
+      iconOnly
+      variant="empty"
+      size="xs"
+      iconType="sparkles"
+      aria-label={ENHANCE_LABEL}
+      isDisabled={action.isDisabled}
+      data-test-subj={testSubj}
+      onClick={handleClick}
+    />
+  ) : (
     <AiButton
       variant="empty"
       size="xs"
@@ -120,6 +115,8 @@ const EnhanceButton = ({ action }: { action: AppHeaderExperimentalDashboardAiAct
       {ENHANCE_LABEL}
     </AiButton>
   );
+
+  return <EuiToolTip content={action.tooltip}>{button}</EuiToolTip>;
 };
 
 export interface TitleActionsProps {
