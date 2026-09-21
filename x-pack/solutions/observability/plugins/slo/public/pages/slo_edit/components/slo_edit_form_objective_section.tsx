@@ -49,6 +49,7 @@ export function SloEditFormObjectiveSection() {
   const timeWindowSelect = useGeneratedHtmlId({ prefix: 'timeWindowSelect' });
   const timeWindowType = watch('timeWindow.type');
   const indicator = watch('indicator.type');
+  const budgetingMethod = watch('budgetingMethod');
 
   const [timeWindowTypeState, setTimeWindowTypeState] = useState<TimeWindowType | undefined>(
     defaultValues?.timeWindow?.type
@@ -202,14 +203,20 @@ export function SloEditFormObjectiveSection() {
           </EuiFlexItem>
         )}
 
-        {indicator === 'sli.synthetics.availability' && (
+        {indicator === 'sli.synthetics.availability' && budgetingMethod === 'timeslices' && (
           <EuiFlexItem>
             <KbnWarningCallout
               announceOnMount
-              title={
+              title={i18n.translate(
+                'xpack.slo.sloEdit.sliType.syntheticsAvailability.timeslicesWindowTitle',
+                {
+                  defaultMessage: 'Match the timeslice window to the monitor interval',
+                }
+              )}
+              text={
                 <FormattedMessage
-                  id="xpack.slo.sloEdit.sliType.syntheticAvailability.objectiveMessage"
-                  defaultMessage="The Synthetics availability indicator requires the budgeting method to be set to 'Occurrences'."
+                  id="xpack.slo.sloEdit.sliType.syntheticsAvailability.timeslicesWindowDescription"
+                  defaultMessage="Set the timeslice window to at least the monitor run interval. A shorter window can cause periods without monitor executions to inflate the calculated SLI and reduce burn rates."
                 />
               }
             />
@@ -241,10 +248,7 @@ export function SloEditFormObjectiveSection() {
                 render={({ field: { ref, ...field } }) => (
                   <EuiSelect
                     {...field}
-                    disabled={
-                      indicator === 'sli.metric.timeslice' ||
-                      indicator === 'sli.synthetics.availability'
-                    }
+                    disabled={indicator === 'sli.metric.timeslice'}
                     required
                     id={budgetingSelect}
                     data-test-subj="sloFormBudgetingMethodSelect"
@@ -258,9 +262,7 @@ export function SloEditFormObjectiveSection() {
             </EuiFormRow>
           </EuiFlexItem>
 
-          {watch('budgetingMethod') === 'timeslices' ? (
-            <SloEditFormObjectiveSectionTimeslices />
-          ) : null}
+          {budgetingMethod === 'timeslices' ? <SloEditFormObjectiveSectionTimeslices /> : null}
         </EuiFlexGrid>
 
         <EuiFlexGrid columns={3} gutterSize="m">
