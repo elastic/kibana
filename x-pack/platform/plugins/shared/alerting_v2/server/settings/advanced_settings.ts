@@ -69,6 +69,10 @@ export const alertingSpaceAdvancedSettings = {
     value: false,
     description: i18n.translate('xpack.alertingV2.experimentalFeaturesSettingDescription', {
       defaultMessage: 'Enables experimental features for Alerting V2.',
+    }),
+    schema: schema.boolean(),
+    requiresPageReload: true,
+    experimental: true,
   },
 } satisfies AlertingV2AdvancedSettingsRegistration<
   | typeof ALERTING_V2_SHOW_CLASSIC_ALERTS_PAGE_SETTING_ID
