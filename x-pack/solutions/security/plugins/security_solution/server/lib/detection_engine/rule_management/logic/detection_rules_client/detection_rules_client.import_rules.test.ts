@@ -758,4 +758,38 @@ describe('detectionRulesClient.importRules', () => {
       }),
     ]);
   });
+
+  it('overwrite branch: a Task Manager enable failure is an error, not a success', async () => {
+    const existingRule = { ...getRulesSchemaMock(), rule_id: 'existing-rule', enabled: false };
+    (findInstalledRulesBySignatureIds as jest.Mock).mockResolvedValueOnce({
+      'existing-rule': existingRule,
+    });
+    rulesClient.bulkUpdateRules.mockResolvedValueOnce({
+      successfulIds: [existingRule.id],
+      errors: [],
+      total: 1,
+    });
+    rulesClient.bulkEnableRules.mockResolvedValueOnce({
+      errors: [],
+      rules: [],
+      total: 1,
+      taskIdsFailedToBeEnabled: [existingRule.id],
+    });
+
+    const { successes, errors } = await subject.importRules({
+      allowMissingConnectorSecrets: false,
+      overwriteRules: true,
+      rules: [{ ...getImportRulesSchemaMock(), rule_id: 'existing-rule', enabled: true }],
+    });
+
+    expect(successes).toEqual([]);
+    expect(errors).toEqual([
+      expect.objectContaining({
+        error: expect.objectContaining({
+          ruleId: 'existing-rule',
+          message: 'Failed to enable task',
+        }),
+      }),
+    ]);
+  });
 });
