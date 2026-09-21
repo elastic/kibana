@@ -21,9 +21,10 @@ export interface ScenarioRegistryProvidedAlertsConfig {
 }
 
 export const buildScenarioRegistryProvidedAlertsExample = (
-  config: ScenarioRegistryProvidedAlertsConfig
+  config: ScenarioRegistryProvidedAlertsConfig,
+  runMarker: string
 ): AttackDiscoveryAgentBuilderExample => {
-  const alertIds = [...getAd2ScenarioAlertIds(config.scenarioKey)];
+  const alertIds = [...getAd2ScenarioAlertIds(config.scenarioKey, 'clean', runMarker)];
 
   return {
     input: {
