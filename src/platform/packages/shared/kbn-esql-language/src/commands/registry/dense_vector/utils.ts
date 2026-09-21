@@ -95,7 +95,7 @@ const COMMAND_KEYWORD_REGEX = /^\s*dense_vector\b/i;
  * the trailing empty column after a comma: `DENSE_VECTOR a, ` and `DENSE_VECTOR a ` both yield
  * `fields: ['a']`, so the AST alone cannot tell which list position the cursor is in.
  */
-const getTextAfterCommandKeyword = (
+export const getTextAfterCommandKeyword = (
   query: string,
   command: ESQLAstDenseVectorCommand,
   cursorPosition: number

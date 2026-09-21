@@ -175,13 +175,23 @@ describe('DENSE_VECTOR Autocomplete', () => {
         mockCallbacks
       );
     });
+
+    // A user may type a comma manually even though autocomplete won't offer one. Suggesting
+    // fields there would only mislead — any selection immediately fires the validation error.
+    test('offers only pipe and newline after a manually typed comma following a named target', async () => {
+      await expectDenseVectorSuggestions(
+        'from a | dense_vector vec = textField, ',
+        [newLineCompleteItem.text, pipeCompleteItem.text],
+        mockCallbacks
+      );
+    });
   });
 
   describe('suffix = "..." ON form', () => {
     test('suggests the suffix modifier right after the command keyword', async () => {
       await expectDenseVectorSuggestions(
         'from a | dense_vector ',
-        { contains: ['suffix = "${0:_dense_vector}" ON '] },
+        { contains: ['suffix = "${1:_dense_vector}" ON $0'] },
         mockCallbacks
       );
     });
@@ -189,7 +199,7 @@ describe('DENSE_VECTOR Autocomplete', () => {
     test('does not suggest the suffix modifier once a field is being typed', async () => {
       await expectDenseVectorSuggestions(
         'from a | dense_vector textField, ',
-        { notContains: ['suffix = "${0:_dense_vector}" ON '] },
+        { notContains: ['suffix = "${1:_dense_vector}" ON $0'] },
         mockCallbacks
       );
     });

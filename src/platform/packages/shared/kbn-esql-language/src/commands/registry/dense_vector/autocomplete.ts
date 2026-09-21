@@ -19,6 +19,7 @@ import {
   getPosition,
   CaretPosition,
   getFieldListExpressions,
+  getTextAfterCommandKeyword,
   canSuggestSuffixModifier,
   canSuggestTargetAssignment,
   isAwaitingSuffixOn,
@@ -42,7 +43,7 @@ import { getCommandMapExpressionSuggestions } from '../../definitions/utils/auto
 /** Opens the multi-field form, which renames every generated column with a shared suffix. */
 const SUFFIX_MODIFIER_SUGGESTION: ISuggestionItem = {
   label: `${DENSE_VECTOR_SUFFIX_KEYWORD} = "..." ON`,
-  text: `${DENSE_VECTOR_SUFFIX_KEYWORD} = "$\{0:${DENSE_VECTOR_DEFAULT_SUFFIX}}" ON `,
+  text: `${DENSE_VECTOR_SUFFIX_KEYWORD} = "$\{1:${DENSE_VECTOR_DEFAULT_SUFFIX}}" ON $0`,
   kind: 'Keyword',
   detail: i18n.translate(
     'kbn-esql-language.commands.denseVector.autocomplete.suffixModifierDetail',
@@ -132,6 +133,14 @@ export async function autocomplete(
       // AST, so it lands here. `ON <fields>` is the only thing that can follow it.
       if (isAwaitingSuffixOn(query, denseVectorCommand, cursorPosition)) {
         return [onCompleteItem];
+      }
+
+      // The user may type a comma after a named target even though autocomplete won't offer one.
+      if (
+        denseVectorCommand.targetField !== undefined &&
+        getTextAfterCommandKeyword(query, denseVectorCommand, cursorPosition).includes(',')
+      ) {
+        return [newLineCompleteItem, pipeCompleteItem];
       }
 
       const suggestions = await suggestFields(getFieldListExpressions(denseVectorCommand), {
