@@ -37,14 +37,12 @@ import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/reg
 import { registerInvestigationAgentType } from './agents/investigation';
 import { registerDeductiveInvestigationAgentType } from './agents/deductive_investigation';
 import { createInvestigationProgressReportTool } from './tools/investigation_progress_report/tool';
-import { SandboxConnectionManager } from './tools/sandbox_bash/grpc_client';
 import { createSandboxBashTool } from './tools/sandbox_bash/tool';
 import { createSandboxViewFileTool } from './tools/sandbox_bash/view_file_tool';
 import { createSandboxStrReplaceTool } from './tools/sandbox_bash/str_replace_tool';
 import { createSandboxWriteFileTool } from './tools/sandbox_bash/write_file_tool';
-import { writeConnectorManifest } from './tools/sandbox_bash/connector_manifest';
-import { writeElasticManifest } from './tools/sandbox_bash/elastic_manifest';
 import { createConnectorCredentialResolver } from './tools/sandbox_bash/connector_credentials';
+import { createSandboxWorkspaceManager } from './tools/sandbox_bash/sandbox_workspace_manager';
 import {
   nightshiftInvestigationSavedObjectType,
   NIGHTSHIFT_INVESTIGATION_SO_TYPE,
@@ -76,12 +74,12 @@ export class NightshiftInvestigationsPlugin
   private workflowsExtensionsStart?: NightshiftInvestigationsStartDeps['workflowsExtensions'];
   private spaces?: NightshiftInvestigationsStartDeps['spaces'];
   private agentBuilder?: NightshiftInvestigationsStartDeps['agentBuilder'];
+  private sandboxStart?: NightshiftInvestigationsStartDeps['sandbox'];
   private searchInferenceEndpoints?: NightshiftInvestigationsStartDeps['searchInferenceEndpoints'];
   private ruleRegistry?: NightshiftInvestigationsStartDeps['ruleRegistry'];
   private inference?: NightshiftInvestigationsStartDeps['inference'];
   private elasticsearch?: ElasticsearchServiceStart;
   private savedObjects?: CoreStart['savedObjects'];
-  private sandboxConnectionManager?: SandboxConnectionManager;
   private actionsStart?: ActionsPluginStart;
   private cortexEnabled = false;
   private investigationQuotaCallback?: InvestigationQuotaCallback;
@@ -130,7 +128,7 @@ export class NightshiftInvestigationsPlugin
       // deductive agent runs from the sandbox and talks to Cortex.
       registerInvestigationAgentType(plugins.agentBuilder);
       registerDeductiveInvestigationAgentType(plugins.agentBuilder, {
-        sandboxEnabled: !!config.sandbox,
+        sandboxEnabled: plugins.sandbox?.isAvailable ?? false,
         cortexEnabled: this.cortexEnabled,
         telemetryConnectorId,
       });
@@ -140,39 +138,16 @@ export class NightshiftInvestigationsPlugin
         })
       );
 
-      if (config.sandbox) {
-        const sandboxLogger = this.logger.get('sandbox_bash_tool');
-        const getSpaceId = (req: KibanaRequest) =>
-          this.spaces?.spacesService.getSpaceId(req) ?? DEFAULT_SPACE_ID;
-
-        const connectionManager = new SandboxConnectionManager({
-          config: config.sandbox,
-          logger: sandboxLogger,
-          // Both manifests are documentation only: they name the env vars the sandbox can
-          // reference, never the values behind them.
-          writeManifest: async (conversationId, callContext) => {
-            await writeConnectorManifest({
-              conversationId,
-              apiClient: connectionManager.apiClient,
-              callContext,
-              getActionsClient: this.actionsStart
-                ? (req) => this.actionsStart!.getActionsClientWithRequest(req)
-                : undefined,
-              logger: sandboxLogger,
-            });
-            if (telemetryConnectorId) {
-              await writeElasticManifest({
-                conversationId,
-                apiClient: connectionManager.apiClient,
-                connectorId: telemetryConnectorId,
-                logger: sandboxLogger,
-              });
-            }
-          },
-        });
-        this.sandboxConnectionManager = connectionManager;
+      if (plugins.sandbox?.isAvailable) {
+        const sandboxLogger = this.logger.get('sandbox');
 
         // Start deps are read lazily: tools are registered in setup() but only run after start().
+        const getSandboxStart = () => this.sandboxStart;
+        const sandboxWorkspaceManager = createSandboxWorkspaceManager({
+          getDeps: () => ({ actions: this.actionsStart }),
+          telemetryConnectorId,
+          logger: sandboxLogger,
+        });
         const resolveConnectorCredentials = createConnectorCredentialResolver({
           getDeps: () => ({ actions: this.actionsStart }),
           logger: sandboxLogger.get('connector_credentials'),
@@ -180,20 +155,32 @@ export class NightshiftInvestigationsPlugin
 
         plugins.agentBuilder.tools.register(
           createSandboxBashTool({
-            connectionManager,
+            getSandboxStart,
+            sandboxWorkspaceManager,
             resolveConnectorCredentials,
-            getSpaceId,
             logger: sandboxLogger,
           })
         );
         plugins.agentBuilder.tools.register(
-          createSandboxViewFileTool({ connectionManager, getSpaceId, logger: sandboxLogger })
+          createSandboxViewFileTool({
+            getSandboxStart,
+            sandboxWorkspaceManager,
+            logger: sandboxLogger,
+          })
         );
         plugins.agentBuilder.tools.register(
-          createSandboxStrReplaceTool({ connectionManager, getSpaceId, logger: sandboxLogger })
+          createSandboxStrReplaceTool({
+            getSandboxStart,
+            sandboxWorkspaceManager,
+            logger: sandboxLogger,
+          })
         );
         plugins.agentBuilder.tools.register(
-          createSandboxWriteFileTool({ connectionManager, getSpaceId, logger: sandboxLogger })
+          createSandboxWriteFileTool({
+            getSandboxStart,
+            sandboxWorkspaceManager,
+            logger: sandboxLogger,
+          })
         );
       }
     }
@@ -210,7 +197,7 @@ export class NightshiftInvestigationsPlugin
         if (this.cortexEnabled) {
           plugins.workflowsExtensions.registerStepDefinition(
             cortexHydrateStepDefinition({
-              getConnectionManager: () => this.sandboxConnectionManager,
+              getSandboxStart: () => this.sandboxStart,
               logger: this.logger.get('cortex'),
             })
           );
@@ -272,6 +259,7 @@ export class NightshiftInvestigationsPlugin
     this.spaces = plugins.spaces;
     this.workflowsExtensionsStart = plugins.workflowsExtensions;
     this.agentBuilder = plugins.agentBuilder;
+    this.sandboxStart = plugins.sandbox;
     this.searchInferenceEndpoints = plugins.searchInferenceEndpoints;
     this.ruleRegistry = plugins.ruleRegistry;
     this.inference = plugins.inference;
@@ -380,7 +368,5 @@ export class NightshiftInvestigationsPlugin
     await client.ready();
   }
 
-  stop(): void {
-    this.sandboxConnectionManager?.close();
-  }
+  stop(): void {}
 }

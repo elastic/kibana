@@ -1,6 +1,6 @@
 as work on serverless picks up we will add config values to these files that
 define how Kibana will run in "serverless" modes. To start Kibana locally with
-this configuration, pass `--serverless={mode}` or run `yarn serverless-{mode}`
+this configuration, pass `--serverless={mode}` or run `pnpm serverless-{mode}`
 
 [//]: # (BOOKMARK - List of Kibana project types)
 valid modes are currently: `es`, `oblt`, `security` and `workplaceai`
