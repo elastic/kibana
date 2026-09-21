@@ -10,27 +10,27 @@
 import * as Fs from 'fs';
 
 import { minimatch } from 'minimatch';
-import { getAffectedPackages, listChangedFiles } from '../../affected-packages';
-import type { BuildkiteStep } from '../../buildkite';
-import { BuildkiteClient } from '../../buildkite';
-import { getTrackedBranch } from '../../utils';
-import { CiStatsClient } from '../client';
+import { getAffectedPackages, listChangedFiles } from '../../affected-packages/index.ts';
+import type { BuildkiteStep } from '../../buildkite/index.ts';
+import { BuildkiteClient } from '../../buildkite/index.ts';
+import { getTrackedBranch } from '../../utils.ts';
+import { CiStatsClient } from '../client.ts';
 
-import { buildCiStatsGroups, buildCiStatsSources } from './ci_stats_sources';
-import { AGENT_DISK_GIB, DURATION_PERCENTILE, STEP_KEYS } from './const';
-import { loadRunOrderConfig } from './env_config';
-import { ftrManifest } from './ftr_manifests';
-import { discoverJestIntegrationConfigs, discoverJestUnitConfigs } from './jest_configs';
-import { getRunGroup, getRunGroups, labelJestSubgroups } from './run_groups';
-import { shouldSkipFtrTests } from './selective_ftr';
-import { isScoutPathOnlyDiff } from './selective_scout';
+import { buildCiStatsGroups, buildCiStatsSources } from './ci_stats_sources.ts';
+import { AGENT_DISK_GIB, DURATION_PERCENTILE, STEP_KEYS } from './const.ts';
+import { loadRunOrderConfig } from './env_config.ts';
+import { ftrManifest } from './ftr_manifests.ts';
+import { discoverJestIntegrationConfigs, discoverJestUnitConfigs } from './jest_configs.ts';
+import { getRunGroup, getRunGroups, labelJestSubgroups } from './run_groups.ts';
+import { shouldSkipFtrTests } from './selective_ftr.ts';
+import { isScoutPathOnlyDiff } from './selective_scout.ts';
 import {
   filterJestIntegrationConfigsByAffected,
   filterJestUnitConfigsByAffected,
   resolveSelectiveTestingContext,
-} from './selective_testing';
-import { buildFunctionalStepGroup, buildJestStep, registerCancelKeys } from './steps';
-import type { FtrRunOrder, FunctionalGroup } from './types';
+} from './selective_testing.ts';
+import { buildFunctionalStepGroup, buildJestStep, registerCancelKeys } from './steps.ts';
+import type { FtrRunOrder, FunctionalGroup } from './types.ts';
 
 /**
  * Orchestrates the per-build test group sizing for Buildkite:

@@ -48,6 +48,7 @@
     "@kbn/core-http-request-handler-context-server-internal",
     "@kbn/core-deferred-init-common",
     "@kbn/core-http-router-server-mocks",
+    "@kbn/core-security-server-mocks",
   ],
   "exclude": [
     "target/**/*",

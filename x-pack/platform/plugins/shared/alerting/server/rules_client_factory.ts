@@ -50,6 +50,7 @@ import {
 } from './saved_objects';
 import type { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
 import { type IChangeTrackingService } from './rules_client/lib/change_tracking';
+import { bulkMarkApiKeysForInvalidation } from './invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import {
   UIAM_LOGS_CREDENTIALS_TAGS,
   UIAM_LOGS_GRANT_TAGS,
@@ -92,7 +93,6 @@ export interface RulesClientFactoryOpts {
   shouldGrantUiam: boolean;
   apiKeyType: ApiKeyType;
   isServerless: boolean;
-  featureFlags: CoreStart['featureFlags'];
   analytics: CoreStart['analytics'];
 }
 
@@ -124,7 +124,6 @@ export class RulesClientFactory {
   private shouldGrantUiam: boolean = false;
   private apiKeyType: ApiKeyType = ApiKeyType.ES;
   private isServerless: boolean = false;
-  private featureFlags!: CoreStart['featureFlags'];
   private analytics!: CoreStart['analytics'];
 
   public initialize(options: RulesClientFactoryOpts) {
@@ -158,7 +157,6 @@ export class RulesClientFactory {
     this.shouldGrantUiam = options.shouldGrantUiam;
     this.apiKeyType = options.apiKeyType;
     this.isServerless = options.isServerless;
-    this.featureFlags = options.featureFlags;
     this.analytics = options.analytics;
   }
 
@@ -350,6 +348,21 @@ export class RulesClientFactory {
                   .join(', ')}`
               );
             }
+            // A refresh=false grant on bulk action can be missed out of ES search results.
+            const missed =
+              result &&
+              result.invalidated_api_keys.length === 0 &&
+              result.previously_invalidated_api_keys.length === 0;
+            if (missed && apiKey) {
+              this.logger.warn(
+                `Synchronous ES API key invalidation found no key for alerting rule : ${ruleName}; queueing for delayed invalidation.`
+              );
+              await bulkMarkApiKeysForInvalidation(
+                { apiKeys: [apiKey] },
+                this.logger,
+                this.internalSavedObjectsRepository
+              );
+            }
           } catch (err) {
             this.logger.error(
               `Failed to synchronously invalidate ES API key for alerting rule : ${ruleName}: ${
@@ -425,14 +438,13 @@ export class RulesClientFactory {
       shouldGrantUiam: this.shouldGrantUiam,
       apiKeyType: this.apiKeyType,
       isServerless: this.isServerless,
-      featureFlags: this.featureFlags,
       analytics: this.analytics,
 
       async getUserName() {
         const user = securityService.authc.getCurrentUser(request);
         return user?.username ?? null;
       },
-      async createAPIKey(name: string) {
+      async createAPIKey(name: string, refresh?: boolean | 'wait_for') {
         if (!securityPluginStart) {
           return { apiKeysEnabled: false };
         }
@@ -443,11 +455,15 @@ export class RulesClientFactory {
 
         let createEsAPIKeyResult;
         try {
-          createEsAPIKeyResult = await securityService.authc.apiKeys.grantAsInternalUser(request, {
-            name,
-            role_descriptors: {},
-            metadata: { managed: true, kibana: { type: 'alerting_rule' } },
-          });
+          createEsAPIKeyResult = await securityService.authc.apiKeys.grantAsInternalUser(
+            request,
+            {
+              name,
+              role_descriptors: {},
+              metadata: { managed: true, kibana: { type: 'alerting_rule' } },
+            },
+            { refresh }
+          );
         } catch (err) {
           // if the ES API key creation failed, we need to invalidate the UIAM API key
           if (createUiamApiKeyResult?.id) {

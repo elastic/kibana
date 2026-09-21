@@ -34,7 +34,16 @@ jest.mock('../../../../hooks/use_kibana', () => ({
         clearFocusedEvent: jest.fn(),
       },
     },
-    core: { notifications: { toasts: { addSuccess: jest.fn() } } },
+    core: {
+      notifications: { toasts: { addSuccess: jest.fn() } },
+      application: {
+        capabilities: {
+          nightshift: {
+            manage: true,
+          },
+        },
+      },
+    },
     dependencies: {
       start: {
         share: {
@@ -90,8 +99,8 @@ jest.mock('../../../../hooks/use_timefilter', () => ({
 jest.mock('../../../../hooks/use_time_range_update', () => ({
   useTimeRangeUpdate: jest.fn(() => ({ updateTimeRange: mockUpdateTimeRange })),
 }));
-jest.mock('../knowledge_indicators_table/ki_generation_context', () => ({
-  useKiGeneration: jest.fn(() => ({ filteredStreams: [] })),
+jest.mock('../../hooks/use_fetch_streams', () => ({
+  useFetchStreams: jest.fn(() => ({ data: { streams: [] } })),
 }));
 jest.mock('../../context/significant_events_page_context', () => ({
   useSignificantEventsPageContext: jest.fn(() => ({
@@ -141,6 +150,29 @@ describe('Significant Events timestamp rendering', () => {
 
     expect(screen.getByText(`formatted:${event.created_at}`)).toBeInTheDocument();
     expect(screen.queryByText(`formatted:${event['@timestamp']}`)).not.toBeInTheDocument();
+  });
+});
+
+describe('SignificantEventFlyout actions menu', () => {
+  it('shows Dismiss and Close for an open event and opens the dismiss modal', () => {
+    render(<SignificantEventFlyout event={event} onClose={jest.fn()} />);
+
+    fireEvent.click(screen.getByTestId('sigEventFlyoutActionsButton'));
+
+    expect(screen.getByText('Dismiss significant event')).toBeInTheDocument();
+    expect(screen.getByTestId('sigEventCloseButton')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText('Dismiss significant event'));
+
+    expect(screen.getByTestId('sigEventDismissModal')).toBeInTheDocument();
+  });
+
+  it('does not expose actions for an already dismissed event', () => {
+    render(
+      <SignificantEventFlyout event={{ ...event, status: 'dismissed' }} onClose={jest.fn()} />
+    );
+
+    expect(screen.queryByTestId('sigEventFlyoutActionsButton')).not.toBeInTheDocument();
   });
 });
 

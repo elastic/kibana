@@ -17,10 +17,14 @@ import type {
 import {
   buildTopFailingTable,
   classifiedEntries,
+  DEFAULT_TERMINAL_WIDTH,
   displaySummary,
   flakiestBranch,
+  flexColumnWidths,
   formatAge,
   groupByFile,
+  qualifyingBranch,
+  terminalWidth,
   wrapOn,
   type ClassifiedEntry,
 } from './flaky_tests_summary';
@@ -132,6 +136,36 @@ describe('flakiestBranch', () => {
   });
 });
 
+describe('qualifyingBranch', () => {
+  // 9.2 has the highest raw rate but, with a single failed build, is not what qualified the test
+  const byBranch = [
+    branch({ branch: 'main', builds: 100, failedBuilds: 3, buildFailRate: 0.03 }),
+    branch({ branch: '9.2', builds: 10, failedBuilds: 1, buildFailRate: 0.1 }),
+  ];
+  const flakiestBranchOnMain = {
+    branch: 'main',
+    builds: 100,
+    failedBuilds: 3,
+    buildFailRate: 0.03,
+  };
+
+  it('returns the per-branch stats of the branch the test qualified on', () => {
+    expect(qualifyingBranch({ byBranch, flakiestBranch: flakiestBranchOnMain }, 10)).toBe(
+      byBranch[0]
+    );
+  });
+
+  it('shows the recorded counts when the per-branch stats lack that branch', () => {
+    expect(qualifyingBranch({ byBranch: [], flakiestBranch: flakiestBranchOnMain }, 10)).toBe(
+      flakiestBranchOnMain
+    );
+  });
+
+  it('falls back to the highest fail rate for reports without a qualifying branch', () => {
+    expect(qualifyingBranch({ byBranch }, 10)?.branch).toBe('9.2');
+  });
+});
+
 const flaky = (overrides: Partial<FlakyTestEntry> = {}): ClassifiedEntry => ({
   entry: entry(overrides),
   classification: 'flaky',
@@ -169,6 +203,36 @@ describe('classifiedEntries', () => {
         ['f1', 'flaky'],
       ]
     );
+  });
+});
+
+describe('terminalWidth', () => {
+  it('uses the terminal columns when available', () => {
+    expect(terminalWidth(120)).toBe(120);
+  });
+
+  it('falls back to the Buildkite width when stdout is not a terminal', () => {
+    expect(terminalWidth(undefined)).toBe(DEFAULT_TERMINAL_WIDTH);
+    expect(terminalWidth(0)).toBe(DEFAULT_TERMINAL_WIDTH);
+    expect(terminalWidth(NaN)).toBe(DEFAULT_TERMINAL_WIDTH);
+  });
+});
+
+describe('flexColumnWidths', () => {
+  it('gives wider terminals wider columns', () => {
+    const narrow = flexColumnWidths(160);
+    const wide = flexColumnWidths(200);
+    expect(wide.owners).toBeGreaterThan(narrow.owners);
+    expect(wide.title).toBeGreaterThan(narrow.title);
+    expect(wide.file).toBeGreaterThan(narrow.file);
+  });
+
+  it('never shrinks a column below its minimum', () => {
+    expect(flexColumnWidths(40)).toEqual({ owners: 20, title: 20, file: 20 });
+  });
+
+  it('stops growing past the layout cap', () => {
+    expect(flexColumnWidths(300)).toEqual(flexColumnWidths(220));
   });
 });
 
@@ -216,7 +280,51 @@ describe('buildTopFailingTable', () => {
     expect(rendered).toContain('2/10');
   });
 
-  it('uses the latest run of the flakiest branch rather than the overall latest run', () => {
+  it('shows the branch the test qualified on, not the one with the highest raw fail rate', () => {
+    const rendered = render(
+      buildTopFailingTable(
+        [
+          flaky({
+            builds: 110,
+            failedBuilds: 4,
+            // 9.2 fails more often but its single failed build is below the thresholds
+            byBranch: [
+              branch({
+                branch: '9.2',
+                builds: 10,
+                failedBuilds: 1,
+                buildFailRate: 0.1,
+                latestRun: { status: 'passed', timestamp: new Date('2026-09-07T11:00:00.000Z') },
+              }),
+              branch({
+                branch: 'main',
+                builds: 100,
+                failedBuilds: 3,
+                buildFailRate: 0.03,
+                latestRun: { status: 'failed', timestamp: new Date('2026-09-05T12:00:00.000Z') },
+              }),
+            ],
+            flakiestBranch: { branch: 'main', builds: 100, failedBuilds: 3, buildFailRate: 0.03 },
+            latestRun: {
+              status: 'passed',
+              timestamp: new Date('2026-09-07T11:00:00.000Z'),
+              branch: '9.2',
+            },
+          }),
+        ],
+        [],
+        10,
+        now
+      )
+    );
+
+    expect(rendered).toContain('main (3.0%)');
+    expect(rendered).not.toContain('9.2 (10.0%)');
+    expect(rendered).toContain('failed');
+    expect(rendered).toContain('2d ago');
+  });
+
+  it('falls back to the highest fail rate among exercised branches for reports without a qualifying branch', () => {
     const rendered = render(
       buildTopFailingTable(
         [
@@ -271,11 +379,27 @@ describe('displaySummary', () => {
       from: new Date('2026-08-31T12:00:00.000Z'),
       to: now,
     },
-    scope: { pipelines: ['kibana-on-merge'], branches: [], frameworks: ['jest', 'playwright'] },
-    thresholds: { minBuilds: 10, minFailedBuilds: 2, maxTests: 200 },
-    summary: { totalFlaky: 2, totalConsistentlyFailing: 1, flakyByFramework: { jest: 2 } },
+    scope: {
+      pipelines: ['kibana-on-merge'],
+      branches: [],
+      frameworks: ['jest', 'playwright'],
+      classifications: ['flaky', 'consistently-failing'],
+    },
+    thresholds: {
+      minBuilds: 10,
+      minFailedBuilds: 2,
+      minFailRate: 0,
+      maxTests: 200,
+    },
+    summary: {
+      totalFlaky: 2,
+      totalConsistentlyFailing: 1,
+      flakyByFramework: { jest: 2 },
+      flakyByBranch: { main: 1, '9.5': 1 },
+    },
     flaky: [entry({ testId: 't1', title: 'first' }), entry({ testId: 't2', title: 'second' })],
     consistentlyFailing: [],
+    files: [],
   };
   const alwaysBroken = entry({
     testId: 'c1',
@@ -286,29 +410,60 @@ describe('displaySummary', () => {
     buildFailRate: 1,
   });
 
-  const renderSummary = (input: FlakyTestReport, limit: number): string => {
+  const renderSummary = (input: FlakyTestReport, limit: number, width?: number): string => {
     const writes: string[] = [];
     const log = new ToolingLog();
     log.write = jest.fn((...args: unknown[]) => {
       writes.push(String(args[0]));
     }) as unknown as ToolingLog['write'];
-    displaySummary(input, limit, log);
+    displaySummary(input, limit, log, width);
     return stripAnsi(writes.join(''));
   };
+
+  const widestLine = (output: string): number =>
+    Math.max(...output.split('\n').map((line) => line.length));
+
+  it('fits the panel in the terminal width, using the Buildkite width by default', () => {
+    const longNames = entry({
+      testId: 'long',
+      title:
+        'a very long test title that goes on and on describing every detail of the scenario under test',
+      filePath:
+        'x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/ui/tests/default_status_alert.spec.ts',
+      owners: ['elastic/actionable-obs-team', 'elastic/obs-signals-logs-team'],
+      byBranch: [
+        branch({
+          branch: '8.19',
+          buildFailRate: 1,
+          latestRun: { status: 'interrupted', timestamp: now },
+        }),
+      ],
+    });
+    const input = { ...report, flaky: [longNames, ...report.flaky] };
+
+    expect(widestLine(renderSummary(input, 10))).toBeLessThanOrEqual(DEFAULT_TERMINAL_WIDTH);
+    expect(widestLine(renderSummary(input, 10, 200))).toBeLessThanOrEqual(200);
+    expect(widestLine(renderSummary(input, 10, 200))).toBeGreaterThan(DEFAULT_TERMINAL_WIDTH);
+  });
 
   it('prints window, scope, totals and the capped top list', () => {
     const output = renderSummary(report, 1);
 
     expect(output).toContain('Flaky tests summary');
     expect(output).toContain('Lookback : 7d');
-    expect(output).toContain('Pipelines  : kibana-on-merge');
-    expect(output).toContain('Branches   : any');
-    expect(output).toContain('Frameworks : jest, playwright');
+    expect(output).toContain('Pipelines       : kibana-on-merge');
+    expect(output).toContain('Branches        : any');
+    expect(output).toContain('Frameworks      : jest, playwright');
+    expect(output).toContain('Classifications : flaky, consistently-failing');
     expect(output).toContain('Min builds        : 10');
     expect(output).toContain('Min failed builds : 2');
+    expect(output).toContain('Min fail rate     : 0.0%');
     expect(output).toContain('Max tests         : 200 per list');
     expect(output).toContain('Consistently failing = qualifying test that never passed');
     expect(output).toContain('Flaky                : 2 (jest: 2)');
+    expect(output).toContain(
+      'Flaky by branch      : main: 1, 9.5: 1 (branch each test qualified on)'
+    );
     expect(output).toContain('Consistently failing : 1');
     expect(output).toContain('Top 1 failing tests by failed builds');
     expect(output).toContain('first');
@@ -319,7 +474,7 @@ describe('displaySummary', () => {
     const output = renderSummary(
       {
         ...report,
-        summary: { totalFlaky: 2, totalConsistentlyFailing: 1, flakyByFramework: { jest: 2 } },
+        summary: { ...report.summary, totalConsistentlyFailing: 1 },
         consistentlyFailing: [alwaysBroken],
       },
       1
@@ -335,13 +490,19 @@ describe('displaySummary', () => {
     const output = renderSummary(
       {
         ...report,
-        summary: { totalFlaky: 0, totalConsistentlyFailing: 0, flakyByFramework: {} },
+        summary: {
+          totalFlaky: 0,
+          totalConsistentlyFailing: 0,
+          flakyByFramework: {},
+          flakyByBranch: {},
+        },
         flaky: [],
       },
       10
     );
 
     expect(output).toContain('Flaky                : 0');
+    expect(output).not.toContain('Flaky by branch');
     expect(output).not.toContain('failing tests by failed builds');
   });
 });

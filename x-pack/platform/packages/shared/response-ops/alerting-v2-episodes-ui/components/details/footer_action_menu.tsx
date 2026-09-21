@@ -55,15 +55,27 @@ export const EpisodeFooterActionMenu = ({
     WORKFLOW_ACTION_IDS.has(id)
   );
 
-  const toMenuItem = (action: EpisodeAction): EuiContextMenuPanelItemDescriptor => ({
-    name: action.displayName,
-    icon: action.iconType,
-    'data-test-subj': `alertingV2EpisodeTakeAction-${action.id}`,
-    onClick: () => {
-      closePopover();
-      action.execute({ episodes, onSuccess });
-    },
-  });
+  const toMenuItem = (action: EpisodeAction): EuiContextMenuPanelItemDescriptor => {
+    // An action that renders its own entry owns the click too, so it can anchor a
+    // nested popover to it. A plain descriptor item closes the menu on click,
+    // which would unmount the anchor before the popover could show.
+    if (action.renderMenuItem) {
+      return {
+        key: action.id,
+        renderItem: () => action.renderMenuItem!({ episodes, onSuccess, closeMenu: closePopover }),
+      };
+    }
+
+    return {
+      name: action.displayName,
+      icon: action.iconType,
+      'data-test-subj': `alertingV2EpisodeTakeAction-${action.id}`,
+      onClick: () => {
+        closePopover();
+        action.execute({ episodes, onSuccess });
+      },
+    };
+  };
 
   const viewDetailsGroup: EuiContextMenuPanelItemDescriptor[] = [
     {

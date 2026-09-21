@@ -7,15 +7,13 @@
 
 import { z } from '@kbn/zod/v4';
 import {
-  MAX_BLIND_SPOTS,
   MAX_HYPOTHESES,
-  MAX_RECOMMENDATIONS,
   MAX_TRIGGER_FEEDBACK,
   MAX_TEXT_LENGTH,
-  investigationBlindSpotSchema,
+  MAX_TITLE_LENGTH,
   investigationHypothesisSchema,
   investigationImpactSchema,
-  investigationRecommendationSchema,
+  investigationStateSchema,
   severitySchema,
   triggerFeedbackSchema,
 } from '@kbn/significant-events-schema';
@@ -36,13 +34,14 @@ const orAbsent = <T extends z.ZodType>(schema: T) =>
 
 const updateInvestigationBodySchema = z.object({
   status: z.enum(UPDATABLE_INVESTIGATION_STATUSES),
+  title: orAbsent(z.string().max(MAX_TITLE_LENGTH)),
   error: orAbsent(z.string().max(MAX_TEXT_LENGTH)),
   summary: orAbsent(z.string().max(MAX_TEXT_LENGTH)),
   conclusion: orAbsent(z.string().max(MAX_TEXT_LENGTH)),
   severity: orAbsent(severitySchema),
   hypotheses: orAbsent(z.array(investigationHypothesisSchema).max(MAX_HYPOTHESES)),
-  recommendations: orAbsent(z.array(investigationRecommendationSchema).max(MAX_RECOMMENDATIONS)),
-  blind_spots: orAbsent(z.array(investigationBlindSpotSchema).max(MAX_BLIND_SPOTS)),
+  recommendations: orAbsent(investigationStateSchema.shape.recommendations.unwrap()),
+  blind_spots: orAbsent(investigationStateSchema.shape.blind_spots.unwrap()),
   trigger_feedback: orAbsent(z.array(triggerFeedbackSchema).max(MAX_TRIGGER_FEEDBACK)),
   conversation_id: orAbsent(z.string().max(MAX_KEYWORD_LENGTH)),
   impact: orAbsent(investigationImpactSchema),
