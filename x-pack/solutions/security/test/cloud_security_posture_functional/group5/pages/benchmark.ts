@@ -36,6 +36,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
+    after(async () => {
+      await cspSecurity.restoreDefaultUser();
+    });
+
     // Blocked by https://github.com/elastic/kibana/issues/184621
     it.skip('Access with valid user role', async () => {
       await cspSecurity.logout();
@@ -60,8 +64,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       afterEach(async () => {
-        // force logout to prevent the next test from failing
-        await cspSecurity.logout();
+        await cspSecurity.restoreDefaultUser();
       });
 
       it('Access with valid user role', async () => {
