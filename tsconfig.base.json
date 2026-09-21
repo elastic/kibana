@@ -1933,6 +1933,8 @@
       "@kbn/notification-center-plugin/*": ["./x-pack/platform/plugins/shared/notification_center/*"],
       "@kbn/notifications-plugin": ["./x-pack/platform/plugins/shared/notifications"],
       "@kbn/notifications-plugin/*": ["./x-pack/platform/plugins/shared/notifications/*"],
+      "@kbn/oas-docs": ["./oas_docs"],
+      "@kbn/oas-docs/*": ["./oas_docs/*"],
       "@kbn/object-utils": ["./src/platform/packages/shared/kbn-object-utils"],
       "@kbn/object-utils/*": ["./src/platform/packages/shared/kbn-object-utils/*"],
       "@kbn/object-versioning": ["./src/platform/packages/shared/kbn-object-versioning"],
