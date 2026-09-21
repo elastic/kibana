@@ -641,7 +641,7 @@ describe('EpisodeRuleCell', () => {
   it('treats a source episode whose cached rule has kind as a native v2 rule', () => {
     const mockGetRuleDetailsHref = jest.fn().mockReturnValue('/app/alerting/rules/v2-rule-id');
     const mockOnRuleNameClick = jest.fn();
-    const v2Rule = { ...makeRule('V2 Rule'), kind: 'alert' };
+    const v2Rule: Rule = { ...makeRule('V2 Rule'), kind: 'alert' };
     const row = makeRow({
       'rule.id': 'v2-rule-id',
       source_id: 'classic-alerts',

@@ -27,14 +27,13 @@ import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import { DURATION_LOWER_BOUND_FIELD } from '@kbn/alerting-v2-common-queries';
 import { parseEpisodeDataJson } from '@kbn/alerting-v2-utils';
 import type { EpisodeActionState, EpisodeStatusGroupAction } from '../types/action';
-import { isSourceEpisode, type AlertEpisode } from '../queries/episodes_query';
+import { isNativeV2Rule, isSourceEpisode, type AlertEpisode } from '../queries/episodes_query';
 import { AlertingEpisodeGroupingTags } from './grouping/alerting_episode_grouping_tags';
 import { AlertEpisodeStatusBadges } from './status/status_badges';
 import { TagBadges } from './actions/tags';
 import { AlertEpisodeSeverityBadge } from './severity/episode_severity_badge';
 import type { EpisodeSeverity } from './severity/severity_utils';
 import { EMPTY_VALUE } from '../constants';
-import { isNativeV2Rule, isSourceEpisode, type AlertEpisode } from '../queries/episodes_query';
 import * as i18n from './translations';
 
 type Rule = FindRulesResponse['items'][number];
