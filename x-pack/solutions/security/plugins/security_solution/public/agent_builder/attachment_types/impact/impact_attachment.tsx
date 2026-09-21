@@ -48,4 +48,9 @@ export const createImpactAttachmentDefinition = (): AttachmentUIDefinition<Impac
       <LazyImpactInlineContent {...props} />
     </React.Suspense>
   ),
+  renderConversationDetailsContent: ({ attachment }) => (
+    <React.Suspense fallback={<EuiSkeletonText lines={4} />}>
+      <LazyImpactInlineContent attachment={attachment} isSidebar={true} />
+    </React.Suspense>
+  ),
 });
