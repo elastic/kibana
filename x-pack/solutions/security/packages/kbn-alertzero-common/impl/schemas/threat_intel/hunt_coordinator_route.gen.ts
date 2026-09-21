@@ -18,14 +18,35 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 import { HuntIoc } from '../components/threat_intel.gen';
 
+export const HuntCoordinatorStatus = lazySchema(() =>
+  z.enum(['tier1_only', 'tier1_and_tier2', 'tier2_only_skipped'])
+);
+export type HuntCoordinatorStatus = z.infer<typeof HuntCoordinatorStatus>;
+export type HuntCoordinatorStatusEnum = typeof HuntCoordinatorStatus.enum;
+export const HuntCoordinatorStatusEnum = HuntCoordinatorStatus.enum;
+
 export const HuntCoordinatorRequestBody = lazySchema(() =>
   z
     .object({
       report_id: z.string().optional(),
+      /**
+       * Run id supplied by the Worker fan-out so every child of one sweep shares it, which is what the packaging barrier and the conclusion dedupe key off. The route mints one only when the caller has no sweep to tie the run to.
+       */
+      runId: z
+        .string()
+        .optional()
+        .describe(
+          'Run id supplied by the Worker fan-out so every child of one sweep shares it, which is what the packaging barrier and the conclusion dedupe key off. The route mints one only when the caller has no sweep to tie the run to.'
+        ),
       text: z.string().max(200000).optional(),
       iocs: z.array(HuntIoc).optional(),
       techniques: z.array(z.string()).optional(),
-      time_range: z.object({ from: z.string(), to: z.string() }).optional(),
+      time_range: z
+        .object({
+          from: z.string(),
+          to: z.string(),
+        })
+        .optional(),
       size: z.number().int().min(1).optional(),
       max_assets: z.number().int().min(1).optional(),
       llm_confidence_threshold: z.number().min(0).max(1).optional(),
@@ -38,22 +59,24 @@ export const HuntCoordinatorRequestBody = lazySchema(() =>
 export type HuntCoordinatorRequestBody = z.infer<typeof HuntCoordinatorRequestBody>;
 export type HuntCoordinatorRequestBodyInput = z.input<typeof HuntCoordinatorRequestBody>;
 
-export const HuntCoordinatorStatus = lazySchema(() =>
-  z.enum(['tier1_only', 'tier1_and_tier2', 'tier2_only_skipped'])
-);
-export type HuntCoordinatorStatus = z.infer<typeof HuntCoordinatorStatus>;
-
 export const HuntCoordinatorResponse = lazySchema(() =>
   z.object({
     status: HuntCoordinatorStatus,
     report_id: z.string().optional(),
     runId: z.string(),
-    tier1: z.record(z.string(), z.unknown()),
-    tier2: z.record(z.string(), z.unknown()).optional(),
+    tier1: z.object({}),
+    tier2: z.object({}).optional(),
     tier2_skipped_reason: z.string().optional(),
     message: z.string(),
     next_step: z.string(),
-    completedSuccessfully: z.boolean(),
+    /**
+     * True when the run completed without hard errors. The calling workflow checks this before writing hunt evidence, so a failed run writes nothing.
+     */
+    completedSuccessfully: z
+      .boolean()
+      .describe(
+        'True when the run completed without hard errors. The calling workflow checks this before writing hunt evidence, so a failed run writes nothing.'
+      ),
   })
 );
 export type HuntCoordinatorResponse = z.infer<typeof HuntCoordinatorResponse>;

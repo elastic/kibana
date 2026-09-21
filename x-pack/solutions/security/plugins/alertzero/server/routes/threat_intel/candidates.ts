@@ -9,15 +9,25 @@ import { API_VERSIONS, CandidatesRequestBody, INTERNAL_API_ACCESS } from '@kbn/a
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_READ, HUNT_INTERNAL_ROUTE_BASE } from '../../../common/constants';
 import { buildCandidateQuery } from '../../services/watches/hunt/common/build_candidate_query';
+import type { OpenProposalConversationIdsReader } from '../../services/watches/hunt/common/build_candidate_query';
 import type { RouteDependencies } from '../register_routes';
 
 export const CANDIDATES_URL = `${HUNT_INTERNAL_ROUTE_BASE}/candidates` as const;
+
+/**
+ * An "active" Hunt Proposal, per the selection contract: awaiting a decision, or
+ * decided and currently running. The remaining statuses (`expired`, `failed`,
+ * `no_action`, `succeeded`) are terminal, so a report carrying only those is
+ * free to be hunted again.
+ */
+const OPEN_PROPOSAL_STATUSES = ['pending', 'executing'] as const;
 
 /** Returns the candidate report ids the next hunt fan-out will process. */
 export const registerCandidatesRoute = ({
   router,
   logger,
   getSpaceId,
+  getHuntServices,
 }: RouteDependencies): void => {
   router.versioned
     .post({
@@ -48,12 +58,34 @@ export const registerCandidatesRoute = ({
           const trigger =
             reportIds && reportIds.length > 0 ? ('manual' as const) : ('scheduled' as const);
 
-          const result = await buildCandidateQuery(esClient, logger, {
-            trigger,
-            reportIds: reportIds ?? undefined,
-            spaceId,
-            limit,
-          });
+          const proposalsService = getHuntServices().getProposalsService();
+          const readOpenProposalConversationIds: OpenProposalConversationIdsReader = async (
+            space
+          ) => {
+            const results = await Promise.all(
+              OPEN_PROPOSAL_STATUSES.map((status) =>
+                proposalsService.list(
+                  { status, excludeSuperseded: true, excludeExpired: true, size: 50, from: 0 },
+                  space
+                )
+              )
+            );
+            return new Set(
+              results.flatMap((page) => page.proposals.map((proposal) => proposal.conversationId))
+            );
+          };
+
+          const result = await buildCandidateQuery(
+            esClient,
+            logger,
+            {
+              trigger,
+              reportIds: reportIds ?? undefined,
+              spaceId,
+              limit,
+            },
+            readOpenProposalConversationIds
+          );
 
           return response.ok({ body: result });
         } catch (err) {
