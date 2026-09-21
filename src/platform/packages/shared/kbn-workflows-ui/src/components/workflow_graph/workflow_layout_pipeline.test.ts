@@ -410,8 +410,10 @@ describe('workflow layout pipeline', () => {
         centerX(findNode(grown.nodes, 'wide-loop'))
       );
       // and the relative lane assignment must match base (then is left in both)
-      const baseOrder = centerX(findNode(base.nodes, 'left-step')) < centerX(findNode(base.nodes, 'wide-loop'));
-      const grownOrder = centerX(findNode(grown.nodes, 'left-step')) < centerX(findNode(grown.nodes, 'wide-loop'));
+      const baseOrder =
+        centerX(findNode(base.nodes, 'left-step')) < centerX(findNode(base.nodes, 'wide-loop'));
+      const grownOrder =
+        centerX(findNode(grown.nodes, 'left-step')) < centerX(findNode(grown.nodes, 'wide-loop'));
       expect(baseOrder).toBe(grownOrder);
     });
 
@@ -466,9 +468,7 @@ describe('workflow layout pipeline', () => {
             { type: 'manual', enabled: true },
             { type: 'scheduled', enabled: true },
           ],
-          steps: [
-            { name: 'step_a', type: 'http' },
-          ] as unknown as WorkflowYaml['steps'],
+          steps: [{ name: 'step_a', type: 'http' }] as unknown as WorkflowYaml['steps'],
         }),
         'TB'
       );
@@ -546,8 +546,9 @@ const findOverlappingPairs = (
       const b = nodes[j];
       // Skip pairs where one is a group and the other is its inner node.
       // (Container position is absolute; inner node position is absolute too.)
-      if (groupIds.has(a.id) || groupIds.has(b.id)) continue;
-      if (overlaps(a, b)) pairs.push([a.id, b.id]);
+      if (!groupIds.has(a.id) && !groupIds.has(b.id) && overlaps(a, b)) {
+        pairs.push([a.id, b.id]);
+      }
     }
   }
   return pairs;

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { visitStepChildSlots, walkStepTree, STEP_CHILD_CONTAINER_KEYS } from './walk_step_tree';
 import type { Step } from './types';
+import { STEP_CHILD_CONTAINER_KEYS, visitStepChildSlots, walkStepTree } from './walk_step_tree';
 
 describe('visitStepChildSlots', () => {
   it('emits steps slot for if step', () => {
@@ -180,10 +180,20 @@ describe('STEP_CHILD_CONTAINER_KEYS — object-model ↔ AST invariant', () => {
     walkStepTree(workflow, (step) => visited.push(step.name));
 
     const expected = [
-      'gate', 'then-step', 'else-step', 'gate-handler',
-      'par', 'b0-step', 'b1-step',
-      'router', 'case-x', 'case-y', 'default-step',
-      'loop', 'loop-body', 'loop-error',
+      'gate',
+      'then-step',
+      'else-step',
+      'gate-handler',
+      'par',
+      'b0-step',
+      'b1-step',
+      'router',
+      'case-x',
+      'case-y',
+      'default-step',
+      'loop',
+      'loop-body',
+      'loop-error',
     ];
     for (const name of expected) {
       expect(visited).toContain(name);

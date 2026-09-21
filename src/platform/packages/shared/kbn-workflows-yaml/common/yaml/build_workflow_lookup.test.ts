@@ -623,8 +623,12 @@ steps:
     expect(result.steps['case-b-step']).toBeDefined();
     // Before the fix, both steps would inherit the parent's branchKey ('steps' or
     // undefined) and produce the same branchId in the minimap. Now they differ.
-    const branchIdA = `${result.steps['case-a-step'].parentStepId ?? ''}:${result.steps['case-a-step'].branchKey ?? ''}`;
-    const branchIdB = `${result.steps['case-b-step'].parentStepId ?? ''}:${result.steps['case-b-step'].branchKey ?? ''}`;
+    const branchIdA = `${result.steps['case-a-step'].parentStepId ?? ''}:${
+      result.steps['case-a-step'].branchKey ?? ''
+    }`;
+    const branchIdB = `${result.steps['case-b-step'].parentStepId ?? ''}:${
+      result.steps['case-b-step'].branchKey ?? ''
+    }`;
     expect(branchIdA).not.toBe(branchIdB);
     expect(result.steps['case-a-step'].branchKey).toBe('cases[0].steps');
     expect(result.steps['case-b-step'].branchKey).toBe('cases[1].steps');

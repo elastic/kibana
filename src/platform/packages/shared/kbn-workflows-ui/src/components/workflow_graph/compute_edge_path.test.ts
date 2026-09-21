@@ -436,7 +436,7 @@ describe('buildFailureLanePath', () => {
       targetX: 400,
       targetY: 300,
       sourcePosition: Position.Bottom, // the new unconditional handle position
-      targetPosition: Position.Left,   // LR target side — the direction signal
+      targetPosition: Position.Left, // LR target side — the direction signal
       isFailure: true,
     });
     expect(r.path.length).toBeGreaterThan(0);

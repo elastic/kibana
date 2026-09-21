@@ -155,7 +155,9 @@ const handleMultipleChildren = (
   if (siblingsWithSharedChildren.length > 1) {
     const allChildrenSet = new Set<string>();
     for (const sibling of siblingsWithSharedChildren) {
-      getFilteredSuccessors(g, sibling, ignoredEdgeIds).forEach((child) => allChildrenSet.add(child));
+      getFilteredSuccessors(g, sibling, ignoredEdgeIds).forEach((child) =>
+        allChildrenSet.add(child)
+      );
     }
     const allChildren = Array.from(allChildrenSet);
     const commonCenter = calculateCenterCross(allChildren, cross);
@@ -343,8 +345,6 @@ interface PavaBlock {
   pinnedValue?: number;
 }
 
-/** Private sentinel thrown when two pinned blocks merge — triggers a pin-relaxation retry. */
-const PIN_CONFLICT = Symbol('PIN_CONFLICT');
 
 /**
  * Resolve overlaps among a set of same-rank node centers on the cross axis,
@@ -405,9 +405,15 @@ const resolveCrossAxisOverlaps = (
 
   // Build the active pin set. If a pair of pins conflict (infeasible gap),
   // demote the later one and retry — at most n retries, each O(n).
-  const activePins = new Set(pinned ? pinned.map((p, i) => (p ? i : -1)).filter((i) => i >= 0) : []);
+  const activePins = new Set(
+    pinned ? pinned.map((p, i) => (p ? i : -1)).filter((i) => i >= 0) : []
+  );
 
-  const runPava = (): number[] | typeof PIN_CONFLICT => {
+  // runPava returns:
+  //   - number[]       → feasible resolved centers
+  //   - { conflictAt: number } → two pinned blocks merged; the value is the
+  //     index of the *later* (current) pin — the one to demote and retry.
+  const runPava = (): number[] | { conflictAt: number } => {
     const blocks: PavaBlock[] = [];
     for (let i = 0; i < n; i++) {
       const value = shifted[i];
@@ -419,8 +425,8 @@ const resolveCrossAxisOverlaps = (
       while (blocks.length > 0 && blocks[blocks.length - 1].value > current.value) {
         const prev = blocks.pop()!;
         if (prev.pinnedValue !== undefined && current.pinnedValue !== undefined) {
-          // Two pinned blocks must merge but cannot — infeasible.
-          return PIN_CONFLICT;
+          // Two pinned blocks must merge but cannot — demote the later (current) pin.
+          return { conflictAt: i };
         }
         const pinnedValue = prev.pinnedValue ?? current.pinnedValue;
         const sum = prev.sum + current.sum;
@@ -442,13 +448,13 @@ const resolveCrossAxisOverlaps = (
   };
 
   // Retry with demoted pins if two pinned blocks conflict.
+  // Demote only the *conflicting* pin (the later one), not the highest-indexed.
   let result = runPava();
   const demotedPins: number[] = [];
-  while (result === PIN_CONFLICT && activePins.size > 0) {
-    // Demote the most recently added pin (highest index in the conflict).
-    const lastPin = Math.max(...activePins);
-    activePins.delete(lastPin);
-    demotedPins.push(lastPin);
+  while (typeof result === 'object' && 'conflictAt' in result && activePins.size > 0) {
+    const conflictingPin = result.conflictAt;
+    activePins.delete(conflictingPin);
+    demotedPins.push(conflictingPin);
     result = runPava();
   }
   // `result` is always a valid number[] once all conflicting pins are demoted.
@@ -615,9 +621,7 @@ export const separatePositionedOverlapsInPlace = (
   const idxById = new Map(nodes.map((n, i) => [n.id, i]));
 
   // Mutable position store (cross axis only; main axis never changes here).
-  const crossPos = new Map<string, number>(
-    nodes.map((n) => [n.id, crossAxis === 'x' ? n.x : n.y])
-  );
+  const crossPos = new Map<string, number>(nodes.map((n) => [n.id, crossAxis === 'x' ? n.x : n.y]));
 
   // Cross-axis accessors operating on the mutable store.
   const crossOf = (id: string) => crossPos.get(id) ?? 0;
@@ -687,7 +691,7 @@ export const separatePositionedOverlapsInPlace = (
       if (useOuterPins) {
         const maskCandidates = active.map((id) => {
           const idx = idxById.get(id);
-          return idx !== undefined && (nodes[idx].crossPinned === true);
+          return idx !== undefined && nodes[idx].crossPinned === true;
         });
         if (maskCandidates.some(Boolean)) pinned = maskCandidates;
       }

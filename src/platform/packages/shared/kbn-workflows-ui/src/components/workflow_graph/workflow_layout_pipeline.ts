@@ -79,7 +79,9 @@ export const computeWorkflowLayout = (
   // no node id appears in two lanes. Both catch the graph-boundary asymmetry early.
   if (process.env.NODE_ENV !== 'production') {
     const rootNodeIdSet = new Set(dagNodes.map((n) => n.id));
-    const groupNodeSets = new Map(dagGroups.map((g) => [g.id, new Set(g.innerNodes.map((n) => n.id))]));
+    const groupNodeSets = new Map(
+      dagGroups.map((g) => [g.id, new Set(g.innerNodes.map((n) => n.id))])
+    );
     const allClaimedIds = new Set<string>();
     for (const lane of transformed.fallbackLanes) {
       for (const nodeId of lane.nodes) {
@@ -117,10 +119,7 @@ export const computeWorkflowLayout = (
   // clear edge waypoints after all position-mutating passes (Step 4).
   const crossAxis = direction === 'TB' ? 'x' : 'y';
   const initialCentres = new Map(
-    laid.nodes.map((n) => [
-      n.id,
-      crossAxis === 'x' ? n.x + n.width / 2 : n.y + n.height / 2,
-    ])
+    laid.nodes.map((n) => [n.id, crossAxis === 'x' ? n.x + n.width / 2 : n.y + n.height / 2])
   );
 
   // Post-dagre pass 1: enforce fork lane declaration order.
@@ -165,10 +164,7 @@ export const computeWorkflowLayout = (
   const groupInnerIds = new Map<string, Set<string>>(
     transformed.foreachGroups.map((g) => [
       g.id,
-      new Set([
-        ...g.innerNodes.map((n) => n.id),
-        ...(g.bypassLaneNodes ?? []).map((n) => n.id),
-      ]),
+      new Set([...g.innerNodes.map((n) => n.id), ...(g.bypassLaneNodes ?? []).map((n) => n.id)]),
     ])
   );
 
@@ -182,12 +178,7 @@ export const computeWorkflowLayout = (
   // reserved lanes — see ADR-0012). That push happens INSIDE dagLayout, before
   // the snapshot, so the snapshot already captures post-push positions and this
   // pass compares cross-axis deltas only, as before.
-  const finalEdges = reconcileEdgePoints(
-    triggeredEdges,
-    repairedNodes,
-    initialCentres,
-    crossAxis
-  );
+  const finalEdges = reconcileEdgePoints(triggeredEdges, repairedNodes, initialCentres, crossAxis);
 
   return { nodes: repairedNodes, edges: finalEdges };
 };

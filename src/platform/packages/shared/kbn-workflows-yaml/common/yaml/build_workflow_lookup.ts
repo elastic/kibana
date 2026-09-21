@@ -204,7 +204,12 @@ export function inspectStep(
               if (innerSteps) {
                 Object.assign(
                   result,
-                  inspectStep(innerSteps, lineCounter, childParentStepId, `${nestedKeyValue}[${idx}].steps`)
+                  inspectStep(
+                    innerSteps,
+                    lineCounter,
+                    childParentStepId,
+                    `${nestedKeyValue}[${idx}].steps`
+                  )
                 );
               }
             }

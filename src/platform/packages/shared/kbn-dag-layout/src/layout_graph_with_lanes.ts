@@ -52,7 +52,7 @@ const intervalsOverlap = (aStart: number, aEnd: number, bStart: number, bEnd: nu
  * - Lane nodes are tagged `crossPinned: true`.
  * - Boundary edges (exactly one endpoint in a lane) are returned with `points: []`.
  *
- * Handles an empty `lanes` array identically to `applyDagre`.
+ * Handles an empty `lanes` array like `applyDagre` plus fork-head alignment (§3.5).
  */
 export function layoutGraphWithLanes(
   nodes: readonly DagNode[],
@@ -66,12 +66,6 @@ export function layoutGraphWithLanes(
   edges: DagPositionedEdge[];
   lanePlacements: DagReservedLanePlacement[];
 } {
-  // Fast path: nothing to do for an empty lane set.
-  if (lanes.length === 0) {
-    const { nodes: n, edges: e } = applyDagre(nodes, edges, direction, nodeSep, rankSep);
-    return { nodes: n, edges: e, lanePlacements: [] };
-  }
-
   const isLR = direction === 'LR';
 
   // ── 1. Partition nodes ───────────────────────────────────────────────────
@@ -126,7 +120,10 @@ export function layoutGraphWithLanes(
       ? applyDagre(spineNodes, spineEdges, direction, nodeSep, rankSep)
       : { nodes: [], edges: [] };
 
-  const laneLayouts = new Map<DagReservedLane, { nodes: DagPositionedNode[]; edges: DagPositionedEdge[] }>();
+  const laneLayouts = new Map<
+    DagReservedLane,
+    { nodes: DagPositionedNode[]; edges: DagPositionedEdge[] }
+  >();
   for (const lane of lanes) {
     const ln = laneNodes.get(lane)!;
     const le = laneInternalEdges.get(lane)!;
@@ -138,9 +135,7 @@ export function layoutGraphWithLanes(
   }
 
   // Mutable node store — update in place throughout.
-  const spineById = new Map<string, DagPositionedNode>(
-    spineLayout.nodes.map((n) => [n.id, n])
-  );
+  const spineById = new Map<string, DagPositionedNode>(spineLayout.nodes.map((n) => [n.id, n]));
 
   const laneNodeById = new Map<string, DagPositionedNode>();
   for (const [, layout] of laneLayouts) {
@@ -189,7 +184,7 @@ export function layoutGraphWithLanes(
     // Cascade: head starts one rank below the owner (Fix 1, D3-revised).
     const ownerMainEnd = mainOf(currentOwner, isLR) + mainSpanOf(currentOwner, isLR);
     const headMainStart = mainOf(currentHead, isLR);
-    const mainDelta = Math.round((ownerMainEnd + rankSep) - headMainStart);
+    const mainDelta = Math.round(ownerMainEnd + rankSep - headMainStart);
 
     if (mainDelta !== 0) {
       for (const n of laneLayout.nodes) {
@@ -394,7 +389,9 @@ export function layoutGraphWithLanes(
     const laneMainStart = ownerPos
       ? mainOf(ownerPos, isLR)
       : Math.min(...laneNodePositions.map((n) => mainOf(n, isLR)));
-    const laneMainEnd = Math.max(...laneNodePositions.map((n) => mainOf(n, isLR) + mainSpanOf(n, isLR)));
+    const laneMainEnd = Math.max(
+      ...laneNodePositions.map((n) => mainOf(n, isLR) + mainSpanOf(n, isLR))
+    );
 
     // Spine nodes whose main interval intersects band(L).
     const obstacleSpineNodes = [...spineById.values()].filter((n) => {
@@ -431,11 +428,7 @@ export function layoutGraphWithLanes(
         nodes: laneLayout.nodes.map((n) => laneNodeById.get(n.id)!),
         edges: laneLayout.edges.map((e) => ({
           ...e,
-          points: translateEdgePoints(
-            e.points,
-            isLR ? 0 : crossDelta,
-            isLR ? crossDelta : 0
-          ),
+          points: translateEdgePoints(e.points, isLR ? 0 : crossDelta, isLR ? crossDelta : 0),
         })),
       });
     }
@@ -443,7 +436,9 @@ export function layoutGraphWithLanes(
     // Record this lane's placement for use as an obstacle by later (deeper) lanes.
     const updatedPositions = laneLayout.nodes.map((n) => laneNodeById.get(n.id) ?? n);
     const crossStart = Math.min(...updatedPositions.map((n) => crossOf(n, isLR)));
-    const crossEnd = Math.max(...updatedPositions.map((n) => crossOf(n, isLR) + crossSpanOf(n, isLR)));
+    const crossEnd = Math.max(
+      ...updatedPositions.map((n) => crossOf(n, isLR) + crossSpanOf(n, isLR))
+    );
     const mainStart = Math.min(...updatedPositions.map((n) => mainOf(n, isLR)));
     const mainEnd = Math.max(...updatedPositions.map((n) => mainOf(n, isLR) + mainSpanOf(n, isLR)));
 

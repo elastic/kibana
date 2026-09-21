@@ -519,11 +519,7 @@ steps:
           - name: inner-step
             type: wait
 `;
-      const result = insertStep(
-        switchWorkflow,
-        { name: 'new-step', type: 'wait' },
-        'inner-step'
-      );
+      const result = insertStep(switchWorkflow, { name: 'new-step', type: 'wait' }, 'inner-step');
 
       expect(result.success).toBe(true);
       const parsed = parseDocument(result.yaml).toJSON();
@@ -545,11 +541,7 @@ steps:
           - name: left-step
             type: wait
 `;
-      const result = insertStep(
-        parallelWorkflow,
-        { name: 'new-step', type: 'wait' },
-        'left-step'
-      );
+      const result = insertStep(parallelWorkflow, { name: 'new-step', type: 'wait' }, 'left-step');
 
       expect(result.success).toBe(true);
       const parsed = parseDocument(result.yaml).toJSON();

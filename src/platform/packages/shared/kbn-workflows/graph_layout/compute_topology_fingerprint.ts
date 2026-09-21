@@ -8,9 +8,9 @@
  */
 
 import type { Step } from './types';
-import type { WorkflowYaml } from '../spec/schema';
 import { visitStepChildSlots } from './walk_step_tree';
 import type { StepChildSlot } from './walk_step_tree';
+import type { WorkflowYaml } from '../spec/schema';
 
 /**
  * Returns a stable string capturing the workflow's *structure* (trigger types

@@ -87,7 +87,11 @@ export const visitStepChildSlots = (
     visit({ kind: 'default' }, Array.isArray(raw) ? (raw as unknown[]).filter(isStep) : []);
   }
   // on-failure.fallback — asymmetric: the list lives inside the on-failure object
-  if ('on-failure' in record && record['on-failure'] !== null && typeof record['on-failure'] === 'object') {
+  if (
+    'on-failure' in record &&
+    record['on-failure'] !== null &&
+    typeof record['on-failure'] === 'object'
+  ) {
     const onFailure = record['on-failure'] as Record<string, unknown>;
     if ('fallback' in onFailure) {
       const raw = onFailure.fallback;

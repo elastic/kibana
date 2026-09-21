@@ -95,15 +95,8 @@ export function transformWorkflowToGraph(workflow: WorkflowYaml | undefined): Tr
     };
 
   const ids = new IdAllocator();
-  const {
-    nodes,
-    edges,
-    failureEdges,
-    foreachGroups,
-    bypassLaneNodes,
-    nodeRefs,
-    fallbackLanes,
-  } = transformInternal(workflow.triggers ?? [], workflow.steps ?? [], ids, { fallbackDepth: 0 });
+  const { nodes, edges, failureEdges, foreachGroups, bypassLaneNodes, nodeRefs, fallbackLanes } =
+    transformInternal(workflow.triggers ?? [], workflow.steps ?? [], ids, { fallbackDepth: 0 });
   // Boundary 1: concatenate all failure edges after all structural edges so
   // the outer graph's edge list keeps [structural, failure] order (plan step 6).
   return {
@@ -576,5 +569,14 @@ function transformInternal(
   // Return failureEdges separately — the caller decides where to concatenate.
   // Only the two graph-level boundaries merge them (transformWorkflowToGraph and
   // the foreachGroups push), keeping [structural, failure] order per graph.
-  return { nodes, edges, failureEdges, foreachGroups, bypassLaneNodes, nodeRefs, fallbackLanes, leafIds: prevExitIds };
+  return {
+    nodes,
+    edges,
+    failureEdges,
+    foreachGroups,
+    bypassLaneNodes,
+    nodeRefs,
+    fallbackLanes,
+    leafIds: prevExitIds,
+  };
 }

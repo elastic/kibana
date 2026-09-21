@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowYaml } from '../spec/schema';
-import { walkStepTree } from '../graph_layout/walk_step_tree';
 import type { Step } from '../graph_layout/types';
+import { walkStepTree } from '../graph_layout/walk_step_tree';
+import type { WorkflowYaml } from '../spec/schema';
 
 interface StepNameValidationError {
   stepName: string;

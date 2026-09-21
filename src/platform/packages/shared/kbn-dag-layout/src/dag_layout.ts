@@ -42,7 +42,11 @@ function layoutCompoundGroup(
 ): CompoundGroupLayout {
   const { top: padTop, right: padRight, bottom: padBottom, left: padLeft } = compoundPadding;
 
-  const { nodes: innerLayouted, edges: innerEdges, lanePlacements } = layoutGraphWithLanes(
+  const {
+    nodes: innerLayouted,
+    edges: innerEdges,
+    lanePlacements,
+  } = layoutGraphWithLanes(
     group.innerNodes,
     group.innerEdges,
     groupLanes,
@@ -90,7 +94,11 @@ export function dagLayout(
   edges: readonly DagEdge[],
   compoundGroups: readonly DagCompoundGroup[] = [],
   options: DagLayoutOptions = {}
-): { nodes: DagPositionedNode[]; edges: DagPositionedEdge[]; reservedLanePlacements: DagReservedLanePlacement[] } {
+): {
+  nodes: DagPositionedNode[];
+  edges: DagPositionedEdge[];
+  reservedLanePlacements: DagReservedLanePlacement[];
+} {
   const direction = options.direction ?? 'TB';
   const compact = options.compact ?? false;
   const nodeSep = options.nodeSep ?? DEFAULT_NODE_SEP;
@@ -148,9 +156,7 @@ export function dagLayout(
         }
       }
       if (!found) {
-        throw new Error(
-          `reservedLane ownerId "${lane.ownerId}" not found in any graph node set`
-        );
+        throw new Error(`reservedLane ownerId "${lane.ownerId}" not found in any graph node set`);
       }
     }
   }
@@ -222,7 +228,14 @@ export function dagLayout(
   });
 
   const rootLanes = lanesByHostGraph.get(undefined) ?? [];
-  const outerLayoutResult = layoutGraphWithLanes(outerNodes, edges, rootLanes, direction, nodeSep, rankSep);
+  const outerLayoutResult = layoutGraphWithLanes(
+    outerNodes,
+    edges,
+    rootLanes,
+    direction,
+    nodeSep,
+    rankSep
+  );
   const outerLayout = { nodes: outerLayoutResult.nodes, edges: outerLayoutResult.edges };
   allLanePlacements.push(...outerLayoutResult.lanePlacements);
 

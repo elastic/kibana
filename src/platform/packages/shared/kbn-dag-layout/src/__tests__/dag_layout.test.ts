@@ -613,20 +613,17 @@ describe('dagLayout — reservedLanes', () => {
   const ASYMMETRIC_FORK_EDGES = () => [
     edge('s1-s2', 's1', 's2'),
     edge('s2-s3', 's2', 's3'),
-    edge('s2-fb1', 's2', 'fb1'),    // boundary: owner→lane head
-    edge('fb1-fb2', 'fb1', 'fb2'),  // lane-internal
+    edge('s2-fb1', 's2', 'fb1'), // boundary: owner→lane head
+    edge('fb1-fb2', 'fb1', 'fb2'), // lane-internal
   ];
   const ASYMMETRIC_FORK_LANES = (): import('../types').DagReservedLane[] => [
     { nodeIds: ['fb1', 'fb2'], depth: 0, ownerId: 's2' },
   ];
 
   it('spine is straight by construction: s1, s2, s3 share the same center column', () => {
-    const { nodes: laid } = dagLayout(
-      ASYMMETRIC_FORK_NODES(),
-      ASYMMETRIC_FORK_EDGES(),
-      [],
-      { reservedLanes: ASYMMETRIC_FORK_LANES() }
-    );
+    const { nodes: laid } = dagLayout(ASYMMETRIC_FORK_NODES(), ASYMMETRIC_FORK_EDGES(), [], {
+      reservedLanes: ASYMMETRIC_FORK_LANES(),
+    });
     const s1 = findNode(laid, 's1');
     const s2 = findNode(laid, 's2');
     const s3 = findNode(laid, 's3');
@@ -635,12 +632,9 @@ describe('dagLayout — reservedLanes', () => {
   });
 
   it('lane head sits one rank below its owner on main axis (cascade, D3)', () => {
-    const { nodes: laid } = dagLayout(
-      ASYMMETRIC_FORK_NODES(),
-      ASYMMETRIC_FORK_EDGES(),
-      [],
-      { reservedLanes: ASYMMETRIC_FORK_LANES() }
-    );
+    const { nodes: laid } = dagLayout(ASYMMETRIC_FORK_NODES(), ASYMMETRIC_FORK_EDGES(), [], {
+      reservedLanes: ASYMMETRIC_FORK_LANES(),
+    });
     const s2 = findNode(laid, 's2');
     const fb1 = findNode(laid, 'fb1');
     // Cascade: fb1.y = s2.y + s2.height + rankSep (leading-edge drop, not centre-align).
@@ -648,12 +642,9 @@ describe('dagLayout — reservedLanes', () => {
   });
 
   it('lane sits in the +cross margin, right of the spine in TB', () => {
-    const { nodes: laid } = dagLayout(
-      ASYMMETRIC_FORK_NODES(),
-      ASYMMETRIC_FORK_EDGES(),
-      [],
-      { reservedLanes: ASYMMETRIC_FORK_LANES() }
-    );
+    const { nodes: laid } = dagLayout(ASYMMETRIC_FORK_NODES(), ASYMMETRIC_FORK_EDGES(), [], {
+      reservedLanes: ASYMMETRIC_FORK_LANES(),
+    });
     const s2 = findNode(laid, 's2');
     const fb1 = findNode(laid, 'fb1');
     // Lane is to the RIGHT of the spine (cross axis = x in TB).
@@ -678,8 +669,14 @@ describe('dagLayout — reservedLanes', () => {
     // s2→fb1→fb2 (reserved lane)
     // s2→branch-a / s2→branch-b (if gate — produces its own fork)
     const nodes = [
-      node('s1'), node('s2'), node('branch-a'), node('branch-b'), node('s3'), node('s4'),
-      node('fb1'), node('fb2'),
+      node('s1'),
+      node('s2'),
+      node('branch-a'),
+      node('branch-b'),
+      node('s3'),
+      node('s4'),
+      node('fb1'),
+      node('fb2'),
     ];
     const edgeList = [
       edge('s1-s2', 's1', 's2'),
@@ -715,9 +712,9 @@ describe('dagLayout — reservedLanes', () => {
     const edgeList = [
       edge('s1-s2', 's1', 's2'),
       edge('s2-s3', 's2', 's3'),
-      edge('s2-n0', 's2', 'n0'),  // boundary
-      edge('n0-n1', 'n0', 'n1'),  // boundary
-      edge('n1-n2', 'n1', 'n2'),  // boundary
+      edge('s2-n0', 's2', 'n0'), // boundary
+      edge('n0-n1', 'n0', 'n1'), // boundary
+      edge('n1-n2', 'n1', 'n2'), // boundary
     ];
     const reservedLanes = [
       { nodeIds: ['n0'], depth: 0, ownerId: 's2' },
@@ -738,9 +735,9 @@ describe('dagLayout — reservedLanes', () => {
     expect(n2.y).toBeCloseTo(n1.y + n1.height + DEFAULT_RANK_SEP, 0);
 
     // Cross axis (TB = x): strictly monotonically outward (right).
-    expect(n0.x).toBeGreaterThan(s2.x + s2.width);    // col 1 right of spine
-    expect(n1.x).toBeGreaterThan(n0.x + n0.width);    // col 2 right of col 1
-    expect(n2.x).toBeGreaterThan(n1.x + n1.width);    // col 3 right of col 2
+    expect(n0.x).toBeGreaterThan(s2.x + s2.width); // col 1 right of spine
+    expect(n1.x).toBeGreaterThan(n0.x + n0.width); // col 2 right of col 1
+    expect(n2.x).toBeGreaterThan(n1.x + n1.width); // col 3 right of col 2
 
     // D7: spine below s2 clears the deepest lane node (n2).
     expect(s3.y).toBeGreaterThanOrEqual(n2.y + n2.height + DEFAULT_RANK_SEP - CENTER_TOLERANCE);
@@ -784,27 +781,28 @@ describe('dagLayout — reservedLanes', () => {
     const edgeList = [
       edge('s1-s2', 's1', 's2'),
       edge('s2-s3', 's2', 's3'),
-      edge('s2-a', 's2', 'a'), edge('a-b', 'a', 'b'),
+      edge('s2-a', 's2', 'a'),
+      edge('a-b', 'a', 'b'),
       edge('a-c', 'a', 'c'),
     ];
     const { nodes: laid } = dagLayout(nodes, edgeList, [], {
       reservedLanes: [
         { nodeIds: ['a', 'b'], depth: 0, ownerId: 's2' },
-        { nodeIds: ['c'],      depth: 1, ownerId: 'a' },
+        { nodeIds: ['c'], depth: 1, ownerId: 'a' },
       ],
     });
     const s2 = findNode(laid, 's2');
-    const a  = findNode(laid, 'a');
-    const b  = findNode(laid, 'b');
-    const c  = findNode(laid, 'c');
+    const a = findNode(laid, 'a');
+    const b = findNode(laid, 'b');
+    const c = findNode(laid, 'c');
 
     // a one rank below s2.
     expect(a.y).toBeCloseTo(s2.y + s2.height + DEFAULT_RANK_SEP, 0);
     // c one rank below a (its owner), NOT below b.
     expect(c.y).toBeCloseTo(a.y + a.height + DEFAULT_RANK_SEP, 0);
     // b and c may share a rank — assert they do NOT overlap cross-axis.
-    const bRight  = b.x + b.width;
-    const cLeft   = c.x;
+    const bRight = b.x + b.width;
+    const cLeft = c.x;
     expect(cLeft).toBeGreaterThan(bRight - DEFAULT_NODE_SEP);
     expectNoPairwiseOverlap(laid);
   });
@@ -816,15 +814,23 @@ describe('dagLayout — reservedLanes', () => {
     // O1's push moves O2 down. O2's cascade must level against O2's PUSHED
     // position, not against O2's pre-push position.
     const nodes = [
-      node('s1'), node('O1'), node('O2'), node('s4'),
-      node('fb1a'), node('fb1b'), node('fb2a'), node('fb2b'),
+      node('s1'),
+      node('O1'),
+      node('O2'),
+      node('s4'),
+      node('fb1a'),
+      node('fb1b'),
+      node('fb2a'),
+      node('fb2b'),
     ];
     const edgeList = [
       edge('s1-O1', 's1', 'O1'),
       edge('O1-O2', 'O1', 'O2'),
       edge('O2-s4', 'O2', 's4'),
-      edge('O1-fb1a', 'O1', 'fb1a'), edge('fb1a-fb1b', 'fb1a', 'fb1b'),
-      edge('O2-fb2a', 'O2', 'fb2a'), edge('fb2a-fb2b', 'fb2a', 'fb2b'),
+      edge('O1-fb1a', 'O1', 'fb1a'),
+      edge('fb1a-fb1b', 'fb1a', 'fb1b'),
+      edge('O2-fb2a', 'O2', 'fb2a'),
+      edge('fb2a-fb2b', 'fb2a', 'fb2b'),
     ];
     const { nodes: laid } = dagLayout(nodes, edgeList, [], {
       reservedLanes: [
@@ -832,8 +838,8 @@ describe('dagLayout — reservedLanes', () => {
         { nodeIds: ['fb2a', 'fb2b'], depth: 0, ownerId: 'O2' },
       ],
     });
-    const O1   = findNode(laid, 'O1');
-    const O2   = findNode(laid, 'O2');
+    const O1 = findNode(laid, 'O1');
+    const O2 = findNode(laid, 'O2');
     const fb1a = findNode(laid, 'fb1a');
     const fb2a = findNode(laid, 'fb2a');
 
@@ -858,22 +864,29 @@ describe('dagLayout — reservedLanes', () => {
     // `then` and pushed `els` down — even though it is a parallel branch.
     // The topology-based push (Fix 6) uses transitive reachability via spine
     // edges: `els` is reachable from `gate` but NOT from `then`, so it stays.
-    const nodes = [node('gate'), node('then'), node('loop'), node('els'), node('fb'), node('merge')];
+    const nodes = [
+      node('gate'),
+      node('then'),
+      node('loop'),
+      node('els'),
+      node('fb'),
+      node('merge'),
+    ];
     const edgeList = [
       edge('gate-then', 'gate', 'then'),
       edge('then-loop', 'then', 'loop'),
-      edge('loop-merge','loop', 'merge'),
-      edge('gate-els',  'gate', 'els'),
-      edge('els-merge', 'els',  'merge'),
+      edge('loop-merge', 'loop', 'merge'),
+      edge('gate-els', 'gate', 'els'),
+      edge('els-merge', 'els', 'merge'),
     ];
     const { nodes: laid } = dagLayout(nodes, edgeList, [], {
       reservedLanes: [{ nodeIds: ['fb'], depth: 0, ownerId: 'then' }],
     });
-    const thenN  = findNode(laid, 'then');
-    const elsN   = findNode(laid, 'els');
-    const loopN  = findNode(laid, 'loop');
+    const thenN = findNode(laid, 'then');
+    const elsN = findNode(laid, 'els');
+    const loopN = findNode(laid, 'loop');
     const mergeN = findNode(laid, 'merge');
-    const fbN    = findNode(laid, 'fb');
+    const fbN = findNode(laid, 'fb');
 
     // `els` must NOT be pushed below `then`. `loop` was pushed by deficit D,
     // so loop.y = rank2_y + D. With topology-based push `els` stays at its
@@ -886,10 +899,89 @@ describe('dagLayout — reservedLanes', () => {
     expect(fbN.y).toBeCloseTo(thenN.y + thenN.height + DEFAULT_RANK_SEP, 0);
 
     // Loop and merge ARE pushed (real topological successors of then).
-    expect(loopN.y).toBeGreaterThanOrEqual(fbN.y + fbN.height + DEFAULT_RANK_SEP - CENTER_TOLERANCE);
+    expect(loopN.y).toBeGreaterThanOrEqual(
+      fbN.y + fbN.height + DEFAULT_RANK_SEP - CENTER_TOLERANCE
+    );
     expect(mergeN.y).toBeGreaterThan(loopN.y);
 
     expectNoPairwiseOverlap(laid);
+  });
+});
+
+// ─── Cycle B: fork-head alignment must not depend on unrelated lanes ──────────
+//
+// §3.5 of layout_graph_with_lanes.ts corrects a dagre tight-tree artifact:
+// the shorter branch of an if/else gets assigned a later rank to tighten the
+// edge to the merge node. This correction should apply regardless of whether
+// any reserved lane exists elsewhere in the graph.
+//
+// Bug: §3.5 sits after the `lanes.length === 0` early return, so it only runs
+// when some (possibly unrelated) lane exists. Adding an on-failure to any step
+// anywhere in the YAML silently changes every unrelated fork's geometry.
+//
+// Fix: hoist §3.5 above the early return so it always runs.
+
+describe('dagLayout — fork-head alignment is lane-independent (Cycle B)', () => {
+  it('fork heads share the same main-axis rank with and without an unrelated lane', () => {
+    // Topology: fork → [then, els]; both merge to end.
+    // Then has a longer chain (then→thenB) to provoke tight-tree rank-skew on els.
+    // `distant` is a separate node wired in the reserved lane — unrelated to the fork.
+    const forkNodes = [
+      node('start'),
+      node('fork'),
+      node('then'),
+      node('thenB'),
+      node('els'),
+      node('merge'),
+      node('end'),
+    ];
+    const forkEdges = [
+      edge('s-f', 'start', 'fork'),
+      edge('f-t', 'fork', 'then'),
+      edge('f-e', 'fork', 'els'),
+      edge('t-tb', 'then', 'thenB'),
+      edge('tb-m', 'thenB', 'merge'),
+      edge('e-m', 'els', 'merge'),
+      edge('m-end', 'merge', 'end'),
+    ];
+
+    // Layout without any reserved lane.
+    const { nodes: withoutLane } = dagLayout(forkNodes, forkEdges, [], { direction: 'TB' });
+
+    // Same topology with an unrelated reserved lane on `start`.
+    const distantLaneNode = node('distant');
+    const nodesWithLane = [...forkNodes, distantLaneNode];
+    const edgesWithLane = forkEdges;
+    const { nodes: withLane } = dagLayout(nodesWithLane, edgesWithLane, [], {
+      direction: 'TB',
+      reservedLanes: [{ nodeIds: ['distant'], depth: 0, ownerId: 'start' }],
+    });
+
+    const findInLayout =
+      (laid: ReturnType<typeof dagLayout>['nodes']) =>
+      (id: string): ReturnType<typeof dagLayout>['nodes'][number] => {
+        const n = laid.find((x) => x.id === id);
+        if (!n) throw new Error(`Node ${id} not found`);
+        return n;
+      };
+
+    const findWithout = findInLayout(withoutLane);
+    const findWith = findInLayout(withLane);
+
+    // The fork heads (then, els) must be at the same y in both layouts.
+    // Before the fix, els.y differs because §3.5 only runs when lanes exist.
+    const elsWithout = findWithout('els');
+    const elsWith = findWith('els');
+    const thenWithout = findWithout('then');
+    const thenWith = findWith('then');
+
+    // Fork heads must share the same rank in each layout independently.
+    // Note: absolute y values differ between the two layouts because the lane on
+    // 'start' triggers D7 (spine push), shifting spine successors down to clear
+    // the lane's main extent. That is correct behaviour — only the within-layout
+    // equality of fork heads matters here.
+    expect(elsWithout.y).toBeCloseTo(thenWithout.y, 0);
+    expect(elsWith.y).toBeCloseTo(thenWith.y, 0);
   });
 });
 

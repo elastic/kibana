@@ -705,9 +705,7 @@ describe('computeTopologyFingerprint', () => {
         },
       ] as unknown as WorkflowYaml['steps'],
     });
-    expect(computeTopologyFingerprint(wfBase)).not.toEqual(
-      computeTopologyFingerprint(wfWithExtra)
-    );
+    expect(computeTopologyFingerprint(wfBase)).not.toEqual(computeTopologyFingerprint(wfWithExtra));
   });
 });
 

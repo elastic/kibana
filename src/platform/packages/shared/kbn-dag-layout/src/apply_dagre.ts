@@ -125,10 +125,16 @@ export function applyDagre(
       // one non-failure successor. Unfiltered, a fallback owner always shows
       // successorCount === 2 and drops its waypoints.
       const successorCount = (g.outEdges(edge.source) ?? []).filter(
-        (oe) => !ignoredEdgeIdSet.has(((g.edge(oe.v, oe.w) as EdgeLabel | undefined)?.label as string) ?? '')
+        (oe) =>
+          !ignoredEdgeIdSet.has(
+            ((g.edge(oe.v, oe.w) as EdgeLabel | undefined)?.label as string) ?? ''
+          )
       ).length;
       const predecessorCount = (g.inEdges(edge.target) ?? []).filter(
-        (ie) => !ignoredEdgeIdSet.has(((g.edge(ie.v, ie.w) as EdgeLabel | undefined)?.label as string) ?? '')
+        (ie) =>
+          !ignoredEdgeIdSet.has(
+            ((g.edge(ie.v, ie.w) as EdgeLabel | undefined)?.label as string) ?? ''
+          )
       ).length;
       // Fan-out/fan-in edges keep stale multi-rank Dagre buses after barycenter; smooth-step instead.
       const isBranchOrMergeEdge = successorCount > 1 || predecessorCount > 1;
