@@ -121,10 +121,9 @@ export const ESCALATION_MODAL_TRANSLATIONS = Object.freeze({
       'xpack.alertzero.escalationModal.addToExistingForm.loadErrorTitle',
       { defaultMessage: 'Failed to load escalations.' }
     ),
-    retryButton: i18n.translate(
-      'xpack.alertzero.escalationModal.addToExistingForm.retryButton',
-      { defaultMessage: 'Retry' }
-    ),
+    retryButton: i18n.translate('xpack.alertzero.escalationModal.addToExistingForm.retryButton', {
+      defaultMessage: 'Retry',
+    }),
   },
   cancelButton: i18n.translate('xpack.alertzero.escalationModal.cancelButton', {
     defaultMessage: 'Cancel',

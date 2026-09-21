@@ -90,6 +90,7 @@ export const AddToExistingEscalationForm = memo<AddToExistingEscalationFormProps
             </EuiFlexGroup>
           ) : isError ? (
             <EuiCallOut
+              announceOnMount
               title={T.loadErrorTitle}
               color="danger"
               iconType="error"
