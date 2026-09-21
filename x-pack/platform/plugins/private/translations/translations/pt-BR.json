@@ -16642,7 +16642,6 @@
     "xpack.cases.casesRedesign.details.showMetrics": "Mostrar métricas",
     "xpack.cases.casesRedesign.details.unknownReporter": "Desconhecido",
     "xpack.cases.casesRedesign.details.viewingCase": "Ver caso: {caseId}. Esta página está em construção.",
-    "xpack.cases.casesRedesign.list.title": "Lista de casos (redesign)",
     "xpack.cases.casesRedesign.listView.fieldClosed": "Fechado",
     "xpack.cases.casesRedesign.listView.fieldCreated": "Criado",
     "xpack.cases.casesRedesign.listView.lastUpdate": "Última atualização",
