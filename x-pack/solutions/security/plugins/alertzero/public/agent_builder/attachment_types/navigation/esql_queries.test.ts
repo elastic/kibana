@@ -7,6 +7,7 @@
 
 import {
   buildAlertLookupEsql,
+  buildActorLookupEsql,
   buildEntityLookupEsql,
   buildEventLookupEsql,
   buildIocLookupEsql,
@@ -71,24 +72,21 @@ describe('esql_queries', () => {
     );
   });
 
-  it('builds entity lookup ES|QL by kind', () => {
-    expect(buildEntityLookupEsql({ kind: 'user', value: 'dev-user' })).toBe(
-      'FROM "logs-*" | WHERE user.name == "dev-user" OR user.target.name == "dev-user"'
+  it('builds entity lookup ES|QL on the exact ECS field', () => {
+    expect(buildEntityLookupEsql({ field: 'user.name', value: 'dev-user' })).toBe(
+      'FROM "logs-*" | WHERE user.name == "dev-user"'
     );
-    expect(buildEntityLookupEsql({ kind: 'host', value: 'ci-deploy-runner-07' })).toBe(
-      'FROM "logs-*" | WHERE host.name == "ci-deploy-runner-07" OR host.hostname == "ci-deploy-runner-07"'
+    expect(buildEntityLookupEsql({ field: 'host.name', value: 'ci-deploy-runner-07' })).toBe(
+      'FROM "logs-*" | WHERE host.name == "ci-deploy-runner-07"'
     );
-    expect(buildEntityLookupEsql({ kind: 'role', value: 'escalated-role' })).toBe(
-      'FROM "logs-*" | WHERE user.name == "escalated-role" OR user.target.name == "escalated-role"'
-    );
-    expect(buildEntityLookupEsql({ kind: 'actor', value: 'APT-99' })).toBe(
-      'FROM ".kibana-threat-reports*" | WHERE extracted.threat_actors == "APT-99"'
-    );
+    expect(buildEntityLookupEsql({ field: 'user.name', value: '  ' })).toBeUndefined();
   });
 
-  it('returns undefined entity lookup for generic/unknown kinds', () => {
-    expect(buildEntityLookupEsql({ kind: 'generic', value: 'x' })).toBeUndefined();
-    expect(buildEntityLookupEsql({ kind: 'user', value: '  ' })).toBeUndefined();
+  it('builds actor lookup ES|QL against threat report actors', () => {
+    expect(buildActorLookupEsql({ value: 'APT-99' })).toBe(
+      'FROM ".kibana-threat-reports*" | WHERE extracted.threat_actors == "APT-99"'
+    );
+    expect(buildActorLookupEsql({ value: '  ' })).toBeUndefined();
   });
 
   it('builds threat report ioc_set_hash lookup ES|QL', () => {

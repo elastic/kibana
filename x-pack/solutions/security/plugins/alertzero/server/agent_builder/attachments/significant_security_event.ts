@@ -85,8 +85,7 @@ export const significantSecurityEventAttachmentDataSchema = alertZeroAttachmentD
   capability: z.string().max(256),
   run_id: z.string().max(256),
   security_knowledge_indicators: z.array(securityKnowledgeIndicatorSchema).max(50),
-  // Writers must emit typed entity strings (ECS / EUID / IAM ARN). Bare identifiers
-  // are rejected so the UI never guesses a Discover kind.
+  // Writers must emit allowlisted ECS `field: value` strings. No EUID/ARN decoding.
   entities: z
     .array(
       z
@@ -95,7 +94,7 @@ export const significantSecurityEventAttachmentDataSchema = alertZeroAttachmentD
         .max(2048)
         .refine(isTypedAttachmentEntityString, {
           message:
-            'entities entries must be ECS-prefixed (e.g. user.name: jdoe), EUID-wrapped, or an AWS IAM ARN',
+            'entities entries must be allowlisted ECS field: value (e.g. user.name: jdoe)',
         })
     )
     .max(50),

@@ -9,7 +9,12 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import { buildDiscoverEsqlUrl, buildEntityLookupEsql, DiscoverLink } from '../navigation';
+import {
+  buildActorLookupEsql,
+  buildDiscoverEsqlUrl,
+  buildEntityLookupEsql,
+  DiscoverLink,
+} from '../navigation';
 import {
   ATTACHMENT_ENTITY_ICON,
   parseAttachmentEntity,
@@ -29,18 +34,20 @@ const nameStyles = css`
 `;
 
 export interface EntityChipProps {
-  /** Raw entity string from the attachment, or a pre-parsed entity. */
+  /**
+   * SSE entity string (`field: value`), a pre-parsed entity, or a bare actor
+   * name when `kindOverride` is `actor`.
+   */
   entity: string | ParsedAttachmentEntity;
-  /** Override kind (e.g. hunt correlation `actor` anchors). */
-  kindOverride?: AttachmentEntityKind;
-  /** When present, entity name links to a Discover ES|QL lookup. */
+  /** Hunt correlation actor anchors only. */
+  kindOverride?: Extract<AttachmentEntityKind, 'actor'>;
   share?: SharePluginStart;
   testSubj?: string;
 }
 
 /**
- * Compact entity presentation inspired by Security flyout Insights Entities:
- * type icon + name. Name links to Discover when a lookup query is available.
+ * Compact entity chip: icon + name, optionally linked to Discover on the exact
+ * ECS field from the payload (or threat-actors for correlation actors).
  */
 export const EntityChip: React.FC<EntityChipProps> = ({
   entity,
@@ -48,10 +55,53 @@ export const EntityChip: React.FC<EntityChipProps> = ({
   share,
   testSubj,
 }) => {
+  if (kindOverride === 'actor') {
+    const name = typeof entity === 'string' ? entity : entity.value;
+    const esql = buildActorLookupEsql({ value: name });
+    const href = esql ? buildDiscoverEsqlUrl({ share, esql }) : undefined;
+
+    return (
+      <span css={chipStyles} data-test-subj="alertzeroEntityChip">
+        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
+          <EuiFlexItem grow={false}>
+            <EuiAvatar
+              name={name}
+              iconType={ATTACHMENT_ENTITY_ICON.actor}
+              color="subdued"
+              size="s"
+              data-test-subj="alertzeroEntityChipAvatar"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
+            <EuiText size="xs">
+              <DiscoverLink href={href} testSubj={testSubj ?? 'alertzeroEntityChipLink'}>
+                <strong css={nameStyles} data-test-subj="alertzeroEntityChipName">
+                  {name}
+                </strong>
+              </DiscoverLink>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </span>
+    );
+  }
+
   const parsed = typeof entity === 'string' ? parseAttachmentEntity(entity) : entity;
-  const kind = kindOverride ?? parsed.kind;
-  const { name } = parsed;
-  const esql = buildEntityLookupEsql({ kind, value: name });
+  if (!parsed) {
+    const raw = typeof entity === 'string' ? entity : entity.raw;
+    return (
+      <span css={chipStyles} data-test-subj="alertzeroEntityChip">
+        <EuiText size="xs">
+          <strong css={nameStyles} data-test-subj="alertzeroEntityChipName">
+            {raw}
+          </strong>
+        </EuiText>
+      </span>
+    );
+  }
+
+  const { value, kind, field } = parsed;
+  const esql = buildEntityLookupEsql({ field, value });
   const href = esql ? buildDiscoverEsqlUrl({ share, esql }) : undefined;
 
   return (
@@ -59,7 +109,7 @@ export const EntityChip: React.FC<EntityChipProps> = ({
       <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
         <EuiFlexItem grow={false}>
           <EuiAvatar
-            name={name}
+            name={value}
             iconType={ATTACHMENT_ENTITY_ICON[kind]}
             color="subdued"
             size="s"
@@ -70,7 +120,7 @@ export const EntityChip: React.FC<EntityChipProps> = ({
           <EuiText size="xs">
             <DiscoverLink href={href} testSubj={testSubj ?? 'alertzeroEntityChipLink'}>
               <strong css={nameStyles} data-test-subj="alertzeroEntityChipName">
-                {name}
+                {value}
               </strong>
             </DiscoverLink>
           </EuiText>

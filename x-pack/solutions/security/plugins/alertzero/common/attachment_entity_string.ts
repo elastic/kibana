@@ -6,27 +6,61 @@
  */
 
 /**
- * Canonical entity string shapes Hunt Watch writers may put on SSE `entities[]`.
- * Bare identifiers (e.g. `dev-user`) are rejected so the UI never has to guess a kind.
- *
- * Allowed:
- * - ECS-prefixed: `user.name: jdoe`, `host.name: srv-01`, …
- * - EUID wrappers: `entity:user:…`, `entity:host:…`, `entity:service:…`, `entity:generic:…`
- *   (also short `user:…` / `host:…` / `service:…`)
- * - AWS IAM ARNs: `arn:aws:iam::123456789012:user/dev-user`
+ * ECS fields Hunt Watch writers may put on SSE `entities[]` as `field: value`.
+ * No EUID / ARN decoding: the field written is the field Discover queries.
  */
-const ECS_PREFIXED =
-  /^(user\.name|user\.email|user\.id|host\.name|host\.hostname|host\.id|service\.name|service\.id):\s*.+$/i;
+export const ATTACHMENT_ENTITY_FIELDS = [
+  'user.name',
+  'user.email',
+  'user.id',
+  'host.name',
+  'host.hostname',
+  'host.id',
+  'service.name',
+  'service.id',
+] as const;
 
-const EUID_WRAPPED =
-  /^(entity:(user|host|service|generic)|user|host|service):.+$/i;
+export type AttachmentEntityField = (typeof ATTACHMENT_ENTITY_FIELDS)[number];
 
-const AWS_IAM_ARN = /^arn:aws:iam::\d+:(user|role|group)\/.+$/i;
+const FIELD_BY_LOWER = new Map(
+  ATTACHMENT_ENTITY_FIELDS.map((field) => [field.toLowerCase(), field] as const)
+);
 
-export const isTypedAttachmentEntityString = (value: string): boolean => {
-  const trimmed = value.trim();
+const ENTITY_STRING_PATTERN = new RegExp(
+  `^(${ATTACHMENT_ENTITY_FIELDS.map((field) => field.replace(/\./g, '\\.')).join('|')}):\\s*(.+)$`,
+  'i'
+);
+
+export interface ParsedTypedAttachmentEntityString {
+  field: AttachmentEntityField;
+  value: string;
+}
+
+/**
+ * Parse an SSE entity string into `{ field, value }`.
+ * Returns undefined for anything that is not an allowlisted `field: value` form.
+ */
+export const parseTypedAttachmentEntityString = (
+  raw: string
+): ParsedTypedAttachmentEntityString | undefined => {
+  const trimmed = raw.trim();
   if (!trimmed) {
-    return false;
+    return undefined;
   }
-  return ECS_PREFIXED.test(trimmed) || EUID_WRAPPED.test(trimmed) || AWS_IAM_ARN.test(trimmed);
+
+  const match = trimmed.match(ENTITY_STRING_PATTERN);
+  if (!match) {
+    return undefined;
+  }
+
+  const canonicalField = FIELD_BY_LOWER.get(match[1].toLowerCase());
+  const value = match[2].trim();
+  if (!canonicalField || !value) {
+    return undefined;
+  }
+
+  return { field: canonicalField, value };
 };
+
+export const isTypedAttachmentEntityString = (value: string): boolean =>
+  parseTypedAttachmentEntityString(value) != null;

@@ -95,50 +95,44 @@ export const buildIocLookupEsql = ({
   )}`;
 };
 
-/** ECS / document fields used for Discover lookups from attachment entity chips. */
-const ENTITY_KIND_TO_ESQL_FIELDS: Readonly<Record<string, readonly string[]>> = {
-  user: ['user.name', 'user.target.name'],
-  host: ['host.name', 'host.hostname'],
-  service: ['service.name'],
-  // IAM roles commonly surface on user.name in CloudTrail-normalized logs.
-  role: ['user.name', 'user.target.name'],
-};
-
 /**
- * Build an ES|QL lookup for an attachment entity short name by kind.
- * Returns undefined for unknown/generic kinds (prefer skip over guessing).
- *
- * Actors are stored on threat reports (`extracted.threat_actors`), not ECS
- * `threat.group.name` in logs, so they query the threat-reports index.
+ * Build an ES|QL lookup for an exact ECS field + value from an SSE entity string.
+ * `field` must already be allowlisted by the attachment entity schema.
  */
 export const buildEntityLookupEsql = ({
-  kind,
+  field,
   value,
   indexPattern = DEFAULT_LOGS_INDEX_PATTERN,
 }: {
-  kind: string;
+  field: string;
   value: string;
   indexPattern?: string;
+}): string | undefined => {
+  if (!field.trim() || !value.trim()) {
+    return undefined;
+  }
+
+  return `FROM ${quoteEsqlIdentifier(indexPattern)} | WHERE ${buildFieldEqualityWhere(
+    [field],
+    value
+  )}`;
+};
+
+/**
+ * Hunt correlation actor anchors live on threat reports, not ECS logs fields.
+ */
+export const buildActorLookupEsql = ({
+  value,
+}: {
+  value: string;
 }): string | undefined => {
   if (!value.trim()) {
     return undefined;
   }
 
-  if (kind === 'actor') {
-    return `FROM ${quoteEsqlIdentifier(
-      THREAT_REPORTS_INDEX_PATTERN
-    )} | WHERE ${buildFieldEqualityWhere(['extracted.threat_actors'], value)}`;
-  }
-
-  const fields = ENTITY_KIND_TO_ESQL_FIELDS[kind];
-  if (!fields || fields.length === 0) {
-    return undefined;
-  }
-
-  return `FROM ${quoteEsqlIdentifier(indexPattern)} | WHERE ${buildFieldEqualityWhere(
-    fields,
-    value
-  )}`;
+  return `FROM ${quoteEsqlIdentifier(
+    THREAT_REPORTS_INDEX_PATTERN
+  )} | WHERE ${buildFieldEqualityWhere(['extracted.threat_actors'], value)}`;
 };
 
 /**

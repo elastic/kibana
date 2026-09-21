@@ -15,7 +15,7 @@ import {
 } from './hunt_correlation_inline_content';
 import type { HuntCorrelationAttachment } from './types';
 import {
-  buildEntityLookupEsql,
+  buildActorLookupEsql,
   buildThreatReportIocSetHashLookupEsql,
   buildThreatReportLookupEsql,
   buildThreatReportsInEsql,
@@ -149,7 +149,7 @@ describe('HuntCorrelationInlineContent', () => {
     };
     const hashEsql = buildThreatReportsInEsql({ reportIds: [relatedReportId] });
     const iocSetEsql = buildThreatReportIocSetHashLookupEsql({ value: iocSetHashValue });
-    const actorEsql = buildEntityLookupEsql({ kind: 'actor', value: 'APT-99' });
+    const actorEsql = buildActorLookupEsql({ value: 'APT-99' });
 
     render(
       <HuntCorrelationInlineContent

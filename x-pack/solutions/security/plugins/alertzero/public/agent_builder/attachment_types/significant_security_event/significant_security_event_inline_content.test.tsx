@@ -126,15 +126,11 @@ describe('SignificantSecurityEventInlineContent', () => {
     expect(screen.getByText('No entities recorded')).toBeInTheDocument();
   });
 
-  it('renders entity names as Discover links without kind badges', () => {
-    const entities = [
-      'entity:generic:arn:aws:iam::123456789012:user/dev-user',
-      'entity:generic:arn:aws:iam::123456789012:role/escalated-role',
-      'entity:generic:host:ci-deploy-runner-07',
-    ];
-    const userEsql = buildEntityLookupEsql({ kind: 'user', value: 'dev-user' });
-    const roleEsql = buildEntityLookupEsql({ kind: 'role', value: 'escalated-role' });
-    const hostEsql = buildEntityLookupEsql({ kind: 'host', value: 'ci-deploy-runner-07' });
+  it('renders entity names as Discover links on the exact ECS field', () => {
+    const entities = ['user.name: dev-user', 'user.name: escalated-role', 'host.name: ci-deploy-runner-07'];
+    const userEsql = buildEntityLookupEsql({ field: 'user.name', value: 'dev-user' });
+    const roleEsql = buildEntityLookupEsql({ field: 'user.name', value: 'escalated-role' });
+    const hostEsql = buildEntityLookupEsql({ field: 'host.name', value: 'ci-deploy-runner-07' });
 
     render(
       <SignificantSecurityEventInlineContent
@@ -165,13 +161,6 @@ describe('SignificantSecurityEventInlineContent', () => {
       `https://example.test/discover?esql=${encodeURIComponent(hostEsql as string)}`
     );
     expect(hostLink).toHaveTextContent('ci-deploy-runner-07');
-
-    expect(screen.queryByText('User')).not.toBeInTheDocument();
-    expect(screen.queryByText('Role')).not.toBeInTheDocument();
-    expect(screen.queryByText('Host')).not.toBeInTheDocument();
-    expect(
-      screen.queryByText('entity:generic:arn:aws:iam::123456789012:user/dev-user')
-    ).not.toBeInTheDocument();
   });
 
   it('renders a Discover link for an event when share returns a URL', () => {

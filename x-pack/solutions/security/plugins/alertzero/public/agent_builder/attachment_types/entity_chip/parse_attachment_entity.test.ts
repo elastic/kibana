@@ -8,54 +8,33 @@
 import { parseAttachmentEntity } from './parse_attachment_entity';
 
 describe('parseAttachmentEntity', () => {
-  it('parses ECS-prefixed user and host fields', () => {
+  it('parses ECS field: value into field, value, and icon kind', () => {
     expect(parseAttachmentEntity('user.name: jdoe')).toEqual({
+      field: 'user.name',
+      value: 'jdoe',
       kind: 'user',
-      name: 'jdoe',
       raw: 'user.name: jdoe',
     });
     expect(parseAttachmentEntity('host.name: srv-01')).toEqual({
+      field: 'host.name',
+      value: 'srv-01',
       kind: 'host',
-      name: 'srv-01',
       raw: 'host.name: srv-01',
     });
     expect(parseAttachmentEntity('user.email: dev-user@corp.example')).toEqual({
+      field: 'user.email',
+      value: 'dev-user@corp.example',
       kind: 'user',
-      name: 'dev-user@corp.example',
       raw: 'user.email: dev-user@corp.example',
     });
   });
 
-  it('parses SSE EUIDs into short names and kinds', () => {
+  it('returns undefined for EUID, ARN, and bare strings', () => {
     expect(
       parseAttachmentEntity('entity:generic:arn:aws:iam::123456789012:user/dev-user')
-    ).toEqual({
-      kind: 'user',
-      name: 'dev-user',
-      raw: 'entity:generic:arn:aws:iam::123456789012:user/dev-user',
-    });
-    expect(
-      parseAttachmentEntity('entity:generic:arn:aws:iam::123456789012:role/escalated-role')
-    ).toEqual({
-      kind: 'role',
-      name: 'escalated-role',
-      raw: 'entity:generic:arn:aws:iam::123456789012:role/escalated-role',
-    });
-    expect(parseAttachmentEntity('entity:generic:host:ci-deploy-runner-07')).toEqual({
-      kind: 'host',
-      name: 'ci-deploy-runner-07',
-      raw: 'entity:generic:host:ci-deploy-runner-07',
-    });
-  });
-
-  it('fails closed to generic for bare or unrecognized strings (no Discover kind guess)', () => {
-    expect(parseAttachmentEntity('dev-user')).toEqual({
-      kind: 'generic',
-      name: 'dev-user',
-      raw: 'dev-user',
-    });
-    expect(parseAttachmentEntity('dev-user@corp.example').kind).toBe('generic');
-    expect(parseAttachmentEntity('ci-deploy-runner-07').kind).toBe('generic');
-    expect(parseAttachmentEntity('web.example.internal').kind).toBe('generic');
+    ).toBeUndefined();
+    expect(parseAttachmentEntity('arn:aws:iam::123456789012:role/escalated-role')).toBeUndefined();
+    expect(parseAttachmentEntity('dev-user')).toBeUndefined();
+    expect(parseAttachmentEntity('entity:generic:host:ci-deploy-runner-07')).toBeUndefined();
   });
 });

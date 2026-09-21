@@ -96,6 +96,20 @@ describe('createSignificantSecurityEventAttachmentType', () => {
       expect(result.valid).toBe(false);
     });
 
+    it('rejects EUID and ARN entity strings', async () => {
+      const euid = await attachmentType.validate({
+        ...validPayload,
+        entities: ['entity:generic:arn:aws:iam::123456789012:user/dev-user'],
+      });
+      const arn = await attachmentType.validate({
+        ...validPayload,
+        entities: ['arn:aws:iam::123456789012:user/dev-user'],
+      });
+
+      expect(euid.valid).toBe(false);
+      expect(arn.valid).toBe(false);
+    });
+
     it('accepts the optional maps_to_proposal field when present', async () => {
       const result = await attachmentType.validate({
         ...validPayload,

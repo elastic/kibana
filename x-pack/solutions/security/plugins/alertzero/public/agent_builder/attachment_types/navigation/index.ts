@@ -23,6 +23,7 @@ export { DiscoverLink } from './discover_link';
 export type { DiscoverLinkProps } from './discover_link';
 export {
   buildAlertLookupEsql,
+  buildActorLookupEsql,
   buildEntityLookupEsql,
   buildEventLookupEsql,
   buildIocLookupEsql,
