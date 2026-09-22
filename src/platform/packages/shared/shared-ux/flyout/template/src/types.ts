@@ -164,7 +164,7 @@ interface FlyoutFooterActionBaseProps extends DataAttributeProps {
 /** Props for the declarative `FlyoutTemplate.Footer.PrimaryAction` part. */
 export type FlyoutFooterPrimaryActionProps = Omit<
   EuiButtonProps,
-  'children' | 'fill' | ActionAnchorProps
+  'children' | 'element' | 'fill' | ActionAnchorProps
 > &
   FlyoutFooterActionBaseProps;
 
