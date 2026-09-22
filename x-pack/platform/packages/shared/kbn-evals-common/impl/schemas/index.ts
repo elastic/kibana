@@ -11,6 +11,7 @@ export * from './experiments/get_experiments_route.gen';
 export * from './experiments/get_experiment_route.gen';
 export * from './experiments/get_experiment_scores_route.gen';
 export * from './experiments/get_experiment_dataset_examples_route.gen';
+export * from './experiments/get_experiment_example_details_route.gen';
 export * from './experiments/compare_experiments_route.gen';
 
 export * from './datasets/get_datasets_route.gen';
