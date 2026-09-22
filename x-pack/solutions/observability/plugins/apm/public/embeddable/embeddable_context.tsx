@@ -11,6 +11,7 @@ import { RouterProvider } from '@kbn/typed-react-router-config';
 import type { MemoryHistory } from 'history';
 import { createMemoryHistory } from 'history';
 import React, { useEffect, useMemo, useRef } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import {
   OBSERVABILITY_APM_CPS_ENABLED_DEFAULT,
   OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
@@ -97,10 +98,15 @@ export function ApmEmbeddableContext({
   } as ApmPluginContextValue;
 
   createCallApmApi(deps.coreStart);
-  const isCpsEnabled = deps.coreStart.featureFlags.getBooleanValue(
-    OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
-    OBSERVABILITY_APM_CPS_ENABLED_DEFAULT
+  const isCpsEnabled$ = useMemo(
+    () =>
+      deps.coreStart.featureFlags.getBooleanValue$(
+        OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
+        OBSERVABILITY_APM_CPS_ENABLED_DEFAULT
+      ),
+    [deps.coreStart]
   );
+  const isCpsEnabled = useObservable(isCpsEnabled$, OBSERVABILITY_APM_CPS_ENABLED_DEFAULT);
   useMemo(() => {
     const cpsManager = isCpsEnabled ? deps.pluginsStart.cps?.cpsManager : undefined;
     const callApmApi = createCallApmApiV2(deps.coreStart, { cpsManager });

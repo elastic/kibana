@@ -66,6 +66,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { IUiSettingsClient, SettingsStart } from '@kbn/core-ui-settings-browser';
+import type { Subscription } from 'rxjs';
 import { from } from 'rxjs';
 import { map } from 'rxjs';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
@@ -242,6 +243,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   private telemetry: TelemetryService;
   private kibanaVersion: string;
   private isServerlessEnv: boolean;
+  private cpsEnabledSubscription?: Subscription;
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.initializerContext = initializerContext;
     this.telemetry = new TelemetryService();
@@ -545,24 +547,28 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         telemetryClient: this.telemetry.start(),
       }),
     });
-    const isCpsEnabled = core.featureFlags.getBooleanValue(
-      OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
-      OBSERVABILITY_APM_CPS_ENABLED_DEFAULT
-    );
 
     const ApmInternalServices: ApmInternalServices = {
       callApmApi: plugins.apmShared.callApmApi,
     };
 
-    if (isCpsEnabled) {
-      plugins.cps?.cpsManager?.registerAppAccess('apm', () => ProjectRoutingAccess.EDITABLE);
-      setApmInternalServices({
-        ...ApmInternalServices,
-        cpsManager: plugins.cps?.cpsManager,
+    this.cpsEnabledSubscription = core.featureFlags
+      .getBooleanValue$(
+        OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
+        OBSERVABILITY_APM_CPS_ENABLED_DEFAULT
+      )
+      .subscribe((isCpsEnabled) => {
+        if (isCpsEnabled) {
+          plugins.cps?.cpsManager?.registerAppAccess('apm', () => ProjectRoutingAccess.EDITABLE);
+          setApmInternalServices({
+            ...ApmInternalServices,
+            cpsManager: plugins.cps?.cpsManager,
+          });
+        } else {
+          setApmInternalServices(ApmInternalServices);
+        }
       });
-    } else {
-      setApmInternalServices(ApmInternalServices);
-    }
+
     if (plugins.agentBuilder) {
       registerServiceMapAttachment(plugins.agentBuilder.attachments);
       registerServiceMapContextAttachment(plugins.agentBuilder.attachments);
@@ -610,5 +616,9 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         tabs: [{ title: 'APM Agents', Component: getLazyApmAgentsTabExtension() }],
       });
     }
+  }
+
+  public stop() {
+    this.cpsEnabledSubscription?.unsubscribe();
   }
 }

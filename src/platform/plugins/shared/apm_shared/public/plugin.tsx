@@ -8,6 +8,7 @@
  */
 
 import React, { Suspense } from 'react';
+import { firstValueFrom } from 'rxjs';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { APMClientV2 } from '@kbn/apm-api-shared';
 import type { FocusedTraceWaterfallProps, FullTraceWaterfallProps } from '@kbn/apm-types';
@@ -63,7 +64,7 @@ export class ApmSharedPlugin
   }
 
   public start(core: CoreStart, { cps }: ApmSharedPluginStartDeps): ApmSharedPluginStart {
-    const isCpsEnabled = core.featureFlags.getBooleanValue(
+    const isCpsEnabled$ = core.featureFlags.getBooleanValue$(
       OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
       OBSERVABILITY_APM_CPS_ENABLED_DEFAULT
     );
@@ -72,12 +73,14 @@ export class ApmSharedPlugin
     let _api: APMClientV2 | undefined;
     const callApmApi: APMClientV2 = ((endpoint: any, options: any) => {
       if (_api) return _api(endpoint, options);
-      return import('@kbn/apm-api-shared').then(({ createCallApmApiV2 }) => {
-        _api = createCallApmApiV2(core, {
-          cpsManager: isCpsEnabled ? cps?.cpsManager : undefined,
-        });
-        return _api(endpoint, options);
-      });
+      return Promise.all([import('@kbn/apm-api-shared'), firstValueFrom(isCpsEnabled$)]).then(
+        ([{ createCallApmApiV2 }, isCpsEnabled]) => {
+          _api = createCallApmApiV2(core, {
+            cpsManager: isCpsEnabled ? cps?.cpsManager : undefined,
+          });
+          return _api(endpoint, options);
+        }
+      );
     }) as APMClientV2;
 
     const FocusedTraceWaterfallWithFetching = (props: FocusedTraceWaterfallProps) => (
