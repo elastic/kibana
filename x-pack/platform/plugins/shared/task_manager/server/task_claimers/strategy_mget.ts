@@ -7,11 +7,13 @@
 
 // Basic operation of this task claimer:
 // - search for candidate tasks to run, more than we actually can run
-// - initial search returns a slimmer task document for I/O efficiency (no params or state)
+// - initial search returns a slimmer task document for I/O efficiency (no params, state or
+//   API keys), so candidates are TaskClaimCandidate rather than ConcreteTaskInstance
 // - for each task found, do an mget to get the current seq_no and primary_term
 // - if the mget result doesn't match the search result, the task is stale
 // - from the non-stale search results, return as many as we can run based on available
 //   capacity and the cost of each task type to run
+// - the tasks we successfully claim are then hydrated into full task documents with a bulkGet
 
 import type { Logger } from 'elastic-apm-node';
 import apm from 'elastic-apm-node';
@@ -26,6 +28,7 @@ import type {
   ConcreteTaskInstance,
   ConcreteTaskInstanceVersion,
   PartialConcreteTaskInstance,
+  TaskClaimCandidate,
 } from '../task';
 import { TaskStatus, TaskCost } from '../task';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
@@ -131,9 +134,9 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   const docLatestVersions = await taskStore.getDocVersions(docs.map((doc) => `task:${doc.id}`));
 
   // filter out stale and missing tasks
-  const currentTasks: ConcreteTaskInstance[] = [];
-  const staleTasks: ConcreteTaskInstance[] = [];
-  const missingTasks: ConcreteTaskInstance[] = [];
+  const currentTasks: TaskClaimCandidate[] = [];
+  const staleTasks: TaskClaimCandidate[] = [];
+  const missingTasks: TaskClaimCandidate[] = [];
 
   for (const searchDoc of docs) {
     const searchVersion = versionMap.get(searchDoc.id);
@@ -159,9 +162,9 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   const candidateTasks = selectTasksByCapacity({ definitions, tasks: currentTasks, batches });
 
   // apply capacity constraint to candidate tasks
-  const tasksToRun: ConcreteTaskInstance[] = [];
-  const leftOverTasks: ConcreteTaskInstance[] = [];
-  const tasksWithMalformedData: ConcreteTaskInstance[] = [];
+  const tasksToRun: TaskClaimCandidate[] = [];
+  const leftOverTasks: TaskClaimCandidate[] = [];
+  const tasksWithMalformedData: TaskClaimCandidate[] = [];
 
   let capacityAccumulator = 0;
   for (const task of candidateTasks) {
@@ -271,7 +274,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
 }
 
 interface SearchAvailableTasksResponse {
-  docs: ConcreteTaskInstance[];
+  docs: TaskClaimCandidate[];
   versionMap: Map<string, ConcreteTaskInstanceVersion>;
 }
 
