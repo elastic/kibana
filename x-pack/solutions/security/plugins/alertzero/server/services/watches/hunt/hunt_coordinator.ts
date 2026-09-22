@@ -221,7 +221,8 @@ export const huntCoordinator = async (
     return tier1Only({
       reason: 'no_inference',
       message: `Tier 1: ${tier1Raw.status}. Tier 2 skipped (no GenAI connector).`,
-      nextStep: 'Tier 2 requires a GenAI connector. Configure one via Stack Management → Connectors.',
+      nextStep:
+        'Tier 2 requires a GenAI connector. Configure one via Stack Management → Connectors.',
       completedSuccessfully: true,
     });
   }

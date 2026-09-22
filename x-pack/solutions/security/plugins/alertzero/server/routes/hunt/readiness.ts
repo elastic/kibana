@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { HuntReadinessResponse } from '@kbn/alertzero-common';
 import {
   API_VERSIONS,
   HuntReadinessRequestQuery,
-  HuntReadinessResponse,
   HuntTechnology,
   INTERNAL_API_ACCESS,
 } from '@kbn/alertzero-common';
