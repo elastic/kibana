@@ -110,19 +110,20 @@ interface ElasticsearchServiceAccount {
  * who owns the account now. Elasticsearch is growing a creator of its own, so the field waits for
  * it in a followup instead of shipping a stand-in the UI would have to unlearn.
  *
- * `hasCredential` is a different question and stays: whether this account is one Kibana created
- * and still holds a token for, not whether anything can be bound to it today. See the field's own
- * documentation for that distinction.
+ * `assumable` is a different question and stays. Here it is answered by the token: Kibana can
+ * act as an account it minted one for, and has nothing to act with for an account created
+ * straight through Elasticsearch. See the field's own documentation for what that does and does
+ * not promise.
  */
 const toDirectoryEntry = (
   { id, name, roles, enabled }: ElasticsearchServiceAccount,
-  hasCredential: boolean
+  assumable: boolean
 ): ServiceAccountDirectoryEntry => ({
   id,
   name,
   roles,
   enabled,
-  hasCredential,
+  assumable,
 });
 
 export interface EsServiceAccountsOptions {
@@ -322,10 +323,10 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
    * page, which `search_after` resumes from — the last one reported, not the last one returned,
    * so that an account this page skipped is stepped over rather than served again.
    *
-   * Unlike {@link get}, the credentials joined here are taken at face value. Confirming each one
-   * the way `hasLiveCredential` does would cost an Elasticsearch round trip per account, up to a
-   * hundred of them on one page, so a listed account that was deleted and recreated outside
-   * Kibana keeps its stale `hasCredential` until it is opened.
+   * Unlike {@link get}, the stored credentials joined here are taken at face value. Confirming
+   * each one the way {@link isAssumable} does would cost an Elasticsearch round trip per account,
+   * up to a hundred of them on one page, so a listed account that was deleted and recreated
+   * outside Kibana keeps a stale `assumable` until it is opened.
    */
   async list(
     request: KibanaRequest,
@@ -467,26 +468,27 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     }
 
     const stored = (await this.credentialStore.getMetadata([id])).has(id);
-    return toDirectoryEntry(account, await this.hasLiveCredential(esClient, principal, stored));
+    return toDirectoryEntry(account, await this.isAssumable(esClient, principal, stored));
   }
 
   /**
-   * Whether Kibana's stored credential still describes the account in front of us.
+   * Whether Kibana can act as this account, which on Elasticsearch means holding a token the
+   * account still recognizes.
    *
    * A credential document is keyed by principal alone, so it outlives the account it was written
    * for: delete `namespace/name` through Elasticsearch and recreate it, and Kibana's document is
    * still there, holding a token that cannot authenticate the new account. Answering `true` off
-   * the document alone would claim a credential that no longer works, so the account is asked
+   * the document alone would send a caller into an exchange that fails, so the account is asked
    * whether it still holds the token Kibana mints.
    *
    * Two limits worth knowing. An operator who recreates the account and then mints their own
    * token under Kibana's reserved name passes this check, because the name is all Elasticsearch
    * exposes. And a check that cannot be completed falls through to the stored document rather
-   * than hiding a credential that is probably fine: `read_security` is enough to read an
-   * account's tokens, so this is a transient failure rather than an authorization one, and a
-   * reader should not be told an account is unmanaged because one call did not land.
+   * than calling the account unassumable: `read_security` is enough to read an account's tokens,
+   * so this is a transient failure rather than an authorization one, and one call that did not
+   * land is weaker evidence than the record Kibana holds.
    */
-  private async hasLiveCredential(
+  private async isAssumable(
     esClient: ElasticsearchClient,
     { namespace, name }: EsServiceAccountPrincipal,
     stored: boolean

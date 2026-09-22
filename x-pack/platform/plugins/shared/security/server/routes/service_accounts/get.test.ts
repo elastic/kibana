@@ -25,7 +25,7 @@ const serviceAccount = {
   name: 'nightshift-relay',
   roles: [],
   enabled: true,
-  hasCredential: true,
+  assumable: true,
   createdBy: { type: 'user' as const, username: 'user-id' },
 };
 

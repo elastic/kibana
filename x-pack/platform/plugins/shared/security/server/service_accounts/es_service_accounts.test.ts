@@ -705,14 +705,14 @@ describe('EsServiceAccounts', () => {
             name: 'billing',
             roles: ['billing_read'],
             enabled: false,
-            hasCredential: false,
+            assumable: false,
           },
           {
             id: 'kibana/nightshift-relay',
             name: 'nightshift-relay',
             roles: ['viewer'],
             enabled: true,
-            hasCredential: true,
+            assumable: true,
           },
         ],
       });
@@ -733,7 +733,7 @@ describe('EsServiceAccounts', () => {
 
       expect(entry).not.toHaveProperty('createdBy');
       expect(entry).not.toHaveProperty('createdAt');
-      expect(entry.hasCredential).toBe(true);
+      expect(entry.assumable).toBe(true);
     });
 
     it('asks for one more than the page and reports the last principal as the cursor when it arrives', async () => {
@@ -909,7 +909,7 @@ describe('EsServiceAccounts', () => {
       },
     });
 
-    it('reads the user-managed account and confirms its credential', async () => {
+    it('reads the user-managed account and confirms it is assumable', async () => {
       esClient.asCurrentUser.transport.request
         .mockResolvedValueOnce(accountEntry({ roles: ['viewer'] }))
         // The account still holds Kibana's token, so the stored credential describes it.
@@ -923,7 +923,7 @@ describe('EsServiceAccounts', () => {
         name: 'nightshift-relay',
         roles: ['viewer'],
         enabled: true,
-        hasCredential: true,
+        assumable: true,
       });
 
       expect(mockCheckPrivileges.globally).toHaveBeenCalledWith({
@@ -935,7 +935,7 @@ describe('EsServiceAccounts', () => {
       expect(credentialStore.getMetadata).toHaveBeenCalledWith([ACCOUNT_ID]);
     });
 
-    it('reports an account Kibana holds no credential for without asking for its tokens', async () => {
+    it('reports an account Kibana cannot assume without asking for its tokens', async () => {
       esClient.asCurrentUser.transport.request.mockResolvedValueOnce(accountEntry());
 
       await expect(serviceAccounts.get(request, ACCOUNT_ID)).resolves.toEqual({
@@ -943,14 +943,14 @@ describe('EsServiceAccounts', () => {
         name: 'nightshift-relay',
         roles: ['superuser'],
         enabled: true,
-        hasCredential: false,
+        assumable: false,
       });
 
       // An account Kibana never created costs no extra round trip.
       expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledTimes(1);
     });
 
-    it('drops a credential the account no longer holds', async () => {
+    it("stops reporting assumable once the account no longer holds Kibana's token", async () => {
       esClient.asCurrentUser.transport.request
         .mockResolvedValueOnce(accountEntry({ roles: ['viewer'] }))
         // Deleted and recreated through Elasticsearch: the account is back, Kibana's token is
@@ -963,7 +963,7 @@ describe('EsServiceAccounts', () => {
         name: 'nightshift-relay',
         roles: ['viewer'],
         enabled: true,
-        hasCredential: false,
+        assumable: false,
       });
     });
 
@@ -974,11 +974,11 @@ describe('EsServiceAccounts', () => {
       credentialStore.getMetadata.mockResolvedValue(new Map([[ACCOUNT_ID, storedCredential()]]));
 
       await expect(serviceAccounts.get(request, ACCOUNT_ID)).resolves.toMatchObject({
-        hasCredential: false,
+        assumable: false,
       });
     });
 
-    it('reports the stored credential when the token check cannot be completed', async () => {
+    it('stays assumable when the token check cannot be completed', async () => {
       esClient.asCurrentUser.transport.request
         .mockResolvedValueOnce(accountEntry({ roles: ['viewer'] }))
         // A reader must not be told an account is unmanaged because one call did not land.
@@ -986,7 +986,7 @@ describe('EsServiceAccounts', () => {
       credentialStore.getMetadata.mockResolvedValue(new Map([[ACCOUNT_ID, storedCredential()]]));
 
       await expect(serviceAccounts.get(request, ACCOUNT_ID)).resolves.toMatchObject({
-        hasCredential: true,
+        assumable: true,
       });
     });
 

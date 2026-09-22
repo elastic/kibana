@@ -1,5 +1,5 @@
 {
-  "sha1": "ee05bb183555bc60b8f1dad040b97e11992bcf2d",
+  "sha1": "bcd96894c4f77ab34206c902d2fb30e76dde9205",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -148,8 +148,8 @@
       }
     },
     {
-      "id": "99ae9153aa6c845-a830f1cd5ce4ec5",
-      "title": "List and get Elasticsearch service accounts gets an account Kibana holds no credential for",
+      "id": "99ae9153aa6c845-b996862d44cf376",
+      "title": "List and get Elasticsearch service accounts gets an account this Kibana cannot assume",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -161,8 +161,8 @@
       }
     },
     {
-      "id": "99ae9153aa6c845-069f32a1b9ed3cc",
-      "title": "List and get Elasticsearch service accounts stops claiming a credential once the account is recreated outside Kibana",
+      "id": "99ae9153aa6c845-1907ba75c5a8bf0",
+      "title": "List and get Elasticsearch service accounts stops reporting the account assumable once it is recreated outside Kibana",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -182,8 +182,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 269,
-        "column": 24
+        "line": 257,
+        "column": 15
       }
     },
     {
@@ -196,7 +196,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
         "line": 271,
-        "column": 31
+        "column": 22
       }
     },
     {
@@ -208,8 +208,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 283,
-        "column": 9
+        "line": 282,
+        "column": 23
       }
     },
     {
@@ -221,7 +221,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 298,
+        "line": 297,
         "column": 81
       }
     },
@@ -234,7 +234,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 343,
+        "line": 342,
         "column": 23
       }
     }

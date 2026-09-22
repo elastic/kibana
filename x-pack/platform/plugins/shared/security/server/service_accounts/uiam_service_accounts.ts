@@ -108,8 +108,12 @@ const toCreatedBy = (creator: UiamServiceAccountCreator): ServiceAccountDirector
 
 /**
  * Narrows a UIAM account to the directory entry. UIAM has no disabled state and reports no role
- * names yet, and Kibana exchanges for a token rather than holding one, so those three answers
- * are constants here.
+ * names yet, so those two answers are constants.
+ *
+ * So is `assumable`, for a different reason: UIAM authorizes both reads against the account's
+ * `assumable_by` policy and will not report an account this project cannot assume. Anything that
+ * reaches this function is assumable by definition, which is why the policy itself is left
+ * unparsed rather than re-checked here.
  */
 const toDirectoryEntry = ({
   id,
@@ -120,7 +124,7 @@ const toDirectoryEntry = ({
   name,
   roles: [],
   enabled: true,
-  hasCredential: true,
+  assumable: true,
   createdBy: toCreatedBy(creator),
 });
 

@@ -22,7 +22,7 @@ export const serviceAccountsServiceMock = {
         name: 'mock-service-account-name',
         roles: [],
         enabled: true,
-        hasCredential: true,
+        assumable: true,
         createdBy: { type: 'user' as const, username: 'mock-user-id' },
       }),
       createFakeRequest: jest.fn().mockImplementation(async () =>

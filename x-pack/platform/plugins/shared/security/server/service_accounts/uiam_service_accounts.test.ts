@@ -320,7 +320,7 @@ describe('UiamServiceAccounts', () => {
       name: validResponse.name,
       roles: [],
       enabled: true,
-      hasCredential: true,
+      assumable: true,
       createdBy: { type: 'user' as const, username: 'user-id', displayName: 'Ada Lovelace' },
     };
 
@@ -478,7 +478,7 @@ describe('UiamServiceAccounts', () => {
         name: validResponse.name,
         roles: [],
         enabled: true,
-        hasCredential: true,
+        assumable: true,
         createdBy: { type: 'user', username: 'user-id', displayName: 'Ada Lovelace' },
       });
 

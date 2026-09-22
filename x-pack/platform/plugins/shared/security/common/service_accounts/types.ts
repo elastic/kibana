@@ -33,17 +33,23 @@ export interface ServiceAccountDirectoryEntry {
   /** Whether the account can authenticate. Always `true` on UIAM, which has no disabled state. */
   enabled: boolean;
   /**
-   * Whether the account is one Kibana created and still holds a credential for. Always `true` on
-   * UIAM, where Kibana exchanges for a token instead of holding one. `false` on Elasticsearch for
-   * an account that was created outside Kibana.
+   * Whether this Kibana can exchange the account for a token and act as it.
    *
-   * Not a promise that the account can be bound to a workload: binding is a property of the
-   * deployment, and the Elasticsearch backend refuses every bind until the token exchange lands
-   * (https://github.com/elastic/kibana/issues/284466). On Elasticsearch it can also go stale for
-   * a listed account, because Kibana's record outlives an account deleted and recreated outside
-   * Kibana. Reading one account confirms the record, listing them does not.
+   * Both backends answer that question, by different means. On UIAM it is the account's
+   * `assumable_by` policy naming this project, which UIAM enforces before it will report the
+   * account at all, so everything Kibana can see is assumable. On Elasticsearch it is Kibana
+   * holding the token it minted, which an account created outside Kibana never had.
+   *
+   * The Elasticsearch token exchange is still landing
+   * (https://github.com/elastic/kibana/issues/284466). Until it does, `true` there means the
+   * account is ready to be assumed rather than that assuming it works today. Binding a workload
+   * asks for more again, so treat this as the account's half of that answer and not the whole.
+   *
+   * Reading one account confirms the answer against Elasticsearch. Listing them does not, so a
+   * listed account deleted and recreated outside Kibana keeps a stale `true` until it is opened,
+   * and assuming it would fail.
    */
-  hasCredential: boolean;
+  assumable: boolean;
   /**
    * The principal that created the account. Reported on UIAM, which records a creator of its
    * own, and absent on Elasticsearch until Elasticsearch stores one too.

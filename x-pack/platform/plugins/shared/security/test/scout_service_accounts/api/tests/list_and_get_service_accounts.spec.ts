@@ -54,7 +54,7 @@ interface DirectoryEntry {
   name: string;
   roles: string[];
   enabled: boolean;
-  hasCredential: boolean;
+  assumable: boolean;
 }
 
 interface ListResponse {
@@ -66,9 +66,9 @@ apiTest.describe('List and get Elasticsearch service accounts', { tag: LOCAL_ONL
   const created: ServiceAccountPrincipal[] = [];
 
   let adminHeaders: Record<string, string>;
-  /** Created through Kibana, so Kibana holds a credential for it. */
+  /** Created through Kibana, so Kibana holds a token and can assume it. */
   let kibanaManaged: ServiceAccountPrincipal;
-  /** Created straight through Elasticsearch, so Kibana holds nothing for it. */
+  /** Created straight through Elasticsearch, so Kibana holds nothing to assume it with. */
   let foreign: ServiceAccountPrincipal;
 
   const idOf = ({ namespace, name }: ServiceAccountPrincipal) => `${namespace}/${name}`;
@@ -87,7 +87,7 @@ apiTest.describe('List and get Elasticsearch service accounts', { tag: LOCAL_ONL
       name: kibanaManaged.name,
       roles: ['viewer'],
       enabled: true,
-      hasCredential: true,
+      assumable: true,
     });
   };
 
@@ -164,15 +164,15 @@ apiTest.describe('List and get Elasticsearch service accounts', { tag: LOCAL_ONL
 
       expectKibanaManagedEntry(accounts.find(({ id }) => id === idOf(kibanaManaged)));
 
-      // Kibana can describe an account it did not create, but holds no credential of its own for
-      // it: `hasCredential` is how the UI tells the two apart.
+      // Kibana can describe an account it did not create, but holds no token to act as it with.
+      // `assumable` is how the UI tells the two apart.
       const notManaged = accounts.find(({ id }) => id === idOf(foreign));
       expect(notManaged).toStrictEqual({
         id: idOf(foreign),
         name: foreign.name,
         roles: ['monitoring_user'],
         enabled: false,
-        hasCredential: false,
+        assumable: false,
       });
 
       // Built-in accounts are Elasticsearch's own and never appear in the directory.
@@ -218,7 +218,7 @@ apiTest.describe('List and get Elasticsearch service accounts', { tag: LOCAL_ONL
     expectKibanaManagedEntry(response.body as DirectoryEntry);
   });
 
-  apiTest('gets an account Kibana holds no credential for', async ({ apiClient }) => {
+  apiTest('gets an account this Kibana cannot assume', async ({ apiClient }) => {
     const response = await apiClient.get(getPath(idOf(foreign)), {
       headers: adminHeaders,
       responseType: 'json',
@@ -230,12 +230,12 @@ apiTest.describe('List and get Elasticsearch service accounts', { tag: LOCAL_ONL
       name: foreign.name,
       roles: ['monitoring_user'],
       enabled: false,
-      hasCredential: false,
+      assumable: false,
     });
   });
 
   apiTest(
-    'stops claiming a credential once the account is recreated outside Kibana',
+    'stops reporting the account assumable once it is recreated outside Kibana',
     async ({ apiClient, esClient }) => {
       const recreated = {
         namespace: ES_SERVICE_ACCOUNT_NAMESPACE,
@@ -254,7 +254,7 @@ apiTest.describe('List and get Elasticsearch service accounts', { tag: LOCAL_ONL
         headers: adminHeaders,
         responseType: 'json',
       });
-      expect((before.body as DirectoryEntry).hasCredential).toBe(true);
+      expect((before.body as DirectoryEntry).assumable).toBe(true);
 
       // Out of band, and supported. The token goes first: Elasticsearch refuses to recreate an
       // account that still has one, even after a forced delete of the account itself. Kibana's
@@ -283,14 +283,13 @@ apiTest.describe('List and get Elasticsearch service accounts', { tag: LOCAL_ONL
       });
 
       expect(after.statusCode).toBe(200);
-      // The stored token cannot authenticate this account, and whoever created the one it
-      // replaced did not create it, so neither is reported.
+      // The stored token cannot authenticate this account, so Kibana can no longer act as it.
       expect(after.body).toStrictEqual({
         id: idOf(recreated),
         name: recreated.name,
         roles: ['monitoring_user'],
         enabled: true,
-        hasCredential: false,
+        assumable: false,
       });
     }
   );
