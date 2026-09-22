@@ -98,7 +98,10 @@ const getRuleManagementSection = (core: CoreStart): PanelOpenerChildDefinition[]
     rulesChildren.push({ link: obsAlertingLink('rules-v2') });
     rulesChildren.push({ link: obsAlertingLink('rules-v1'), sideNavStatus: 'hidden' });
   } else {
-    rulesChildren.push({ link: obsAlertingLink('rules-v1'), title: i18n.translate('xpack.observability.nav.rulesV1', { defaultMessage: 'Rules' }) });
+    rulesChildren.push({
+      link: obsAlertingLink('rules-v1'),
+      title: i18n.translate('xpack.observability.nav.rulesV1', { defaultMessage: 'Rules' }),
+    });
   }
 
   return maybeSection(rulesChildren, {
