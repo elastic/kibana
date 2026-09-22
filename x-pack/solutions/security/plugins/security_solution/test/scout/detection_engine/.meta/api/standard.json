@@ -1,0 +1,72 @@
+{
+  "sha1": "1a9798b1a4b406f2f5d872437039a798e87cb4f5",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "ec2e0613f2d50b3-379e199936b1765",
+      "title": "Detection rules over source indices without the read privilege custom query rule reports a partial failure naming the pattern",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/api/tests/rule_execution/no_readable_source_indices.spec.ts",
+        "line": 150,
+        "column": 12
+      }
+    },
+    {
+      "id": "ec2e0613f2d50b3-70f8812745a8065",
+      "title": "Detection rules over source indices without the read privilege custom query rule with alert suppression reports a partial failure instead of the aggregations error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/api/tests/rule_execution/no_readable_source_indices.spec.ts",
+        "line": 165,
+        "column": 12
+      }
+    },
+    {
+      "id": "ec2e0613f2d50b3-5c58a1a0b8880c4",
+      "title": "Detection rules over source indices without the read privilege threshold rule reports a partial failure instead of the aggregations error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/api/tests/rule_execution/no_readable_source_indices.spec.ts",
+        "line": 181,
+        "column": 12
+      }
+    },
+    {
+      "id": "ec2e0613f2d50b3-27a45fbe8fcc153",
+      "title": "Detection rules over source indices without the read privilege new terms rule reports a partial failure instead of the aggregations error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/api/tests/rule_execution/no_readable_source_indices.spec.ts",
+        "line": 197,
+        "column": 12
+      }
+    }
+  ]
+}

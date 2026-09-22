@@ -75,7 +75,7 @@
   },
   "engines": {
     "node": "24.21.0",
-    "pnpm": "~11.21.0",
+    "pnpm": "~11.27.0",
     "yarn": "1.22.22"
   },
   "resolutions": {
@@ -1421,7 +1421,7 @@
     "ipaddr.js": "2.3.0",
     "isbinaryfile": "4.0.2",
     "jest-diff": "29.7.0",
-    "joi": "18.2.5",
+    "joi": "18.2.9",
     "joi-to-json": "5.0.0",
     "jquery": "3.7.1",
     "js-search": "1.4.3",
@@ -1446,7 +1446,7 @@
     "mime": "2.6.0",
     "mime-types": "2.1.35",
     "minimatch": "10.2.4",
-    "moment": "2.30.1",
+    "moment": "2.31.0",
     "moment-duration-format": "2.3.2",
     "moment-timezone": "0.6.1",
     "monaco-editor": "0.44.0",

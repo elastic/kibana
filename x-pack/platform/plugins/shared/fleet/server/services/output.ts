@@ -86,6 +86,8 @@ import {
 } from './secrets';
 import { findAgentlessPolicies } from './outputs/helpers';
 import { patchUpdateDataWithRequireEncryptedAADFields } from './outputs/so_helpers';
+import { getAgentCountForAgentPolicies } from './agent_policies/agent_policy_agent_count';
+import { buildAgentStatusRuntimeField } from './agents/build_status_runtime_field';
 
 import {
   canEnableSyncIntegrations,
@@ -97,6 +99,9 @@ type Nullable<T> = { [P in keyof T]: T[P] | null };
 const SAVED_OBJECT_TYPE = OUTPUT_SAVED_OBJECT_TYPE;
 
 const DEFAULT_ES_HOSTS = ['http://localhost:9200'];
+
+// ES filters aggregation creates one bucket per ID; stay well under search.max_buckets (default 65536).
+const AGENT_COUNT_POLICY_ID_CHUNK_SIZE = 1000;
 
 // differentiate
 function isUUID(val: string) {
@@ -1334,6 +1339,72 @@ class OutputService {
         concurrency: MAX_CONCURRENT_BACKFILL_OUTPUTS_PRESETS,
       }
     );
+  }
+
+  async getAgentAndPolicyCountForOutput(
+    esClient: ElasticsearchClient,
+    output: Output
+  ): Promise<{ agentPolicyCount: number; agentCount: number }> {
+    const internalSoClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
+    const escaped = escapeQuotes(output.id);
+
+    // Include both data_output_id and monitoring_output_id so monitoring-only outputs
+    // are counted correctly. Also cover the is_default fallback (no explicit data_output_id).
+    let agentPoliciesKuery =
+      `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${escaped}" or ` +
+      `${AGENT_POLICY_SAVED_OBJECT_TYPE}.monitoring_output_id:"${escaped}"`;
+
+    if (output.is_default) {
+      agentPoliciesKuery += ` or (not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*)`;
+    }
+    if (output.is_default_monitoring) {
+      agentPoliciesKuery += ` or (not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.monitoring_output_id:*)`;
+    }
+    const packagePoliciesKuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.output_id:"${escaped}"`;
+
+    // Iterate all pages so counts are correct beyond SO_SEARCH_LIMIT.
+    const directPolicyIds: string[] = [];
+    for await (const ids of await agentPolicyService.fetchAllAgentPolicyIds(internalSoClient, {
+      kuery: agentPoliciesKuery,
+      spaceId: '*',
+    })) {
+      directPolicyIds.push(...ids);
+    }
+
+    const directPolicyIdSet = new Set(directPolicyIds);
+    const pkgDerivedIdSet = new Set<string>();
+    for await (const pkgPolicies of await packagePolicyService.fetchAllItems(internalSoClient, {
+      kuery: packagePoliciesKuery,
+      spaceIds: ['*'],
+    })) {
+      for (const pp of pkgPolicies) {
+        for (const id of pp.policy_ids) {
+          if (!directPolicyIdSet.has(id)) {
+            pkgDerivedIdSet.add(id);
+          }
+        }
+      }
+    }
+
+    const uniqueIds = [...directPolicyIdSet, ...pkgDerivedIdSet];
+    const agentPolicyCount = uniqueIds.length;
+
+    let agentCount = 0;
+    if (agentPolicyCount > 0) {
+      // Build once — getInactivityTimeouts() does an SO find, so avoid per-chunk calls.
+      const runtimeMappings = await buildAgentStatusRuntimeField();
+      const chunks = _.chunk(uniqueIds, AGENT_COUNT_POLICY_ID_CHUNK_SIZE);
+      const chunkResults = await pMap(
+        chunks,
+        (chunk) => getAgentCountForAgentPolicies(esClient, chunk, { runtimeMappings }),
+        { concurrency: 5 }
+      );
+      agentCount = chunkResults
+        .flatMap((counts) => Object.values(counts))
+        .reduce((sum, n) => sum + n, 0);
+    }
+
+    return { agentPolicyCount, agentCount };
   }
 
   async getLatestOutputHealth(esClient: ElasticsearchClient, id: string): Promise<OutputHealth> {

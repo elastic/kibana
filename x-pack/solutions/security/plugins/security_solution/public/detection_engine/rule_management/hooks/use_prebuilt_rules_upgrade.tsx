@@ -23,6 +23,7 @@ import {
   type RuleSignatureId,
   type RuleUpgradeSpecifier,
   type PerformRuleUpgradeRequestBody,
+  type UpgradeConflictSkipReason,
   ThreeWayDiffConflict,
   SkipRuleUpgradeReasonEnum,
   UpgradeConflictResolutionEnum,
@@ -452,10 +453,14 @@ function useRulesUpgradeWithDryRun(
         on_conflict: UpgradeConflictResolutionEnum.SKIP,
       });
 
-      const numOfRulesWithSolvableConflicts = dryRunResults.results.skipped.filter(
-        (x) =>
+      const rulesWithSolvableConflicts = dryRunResults.results.skipped.filter(
+        (x): x is UpgradeConflictSkipReason =>
           x.reason === SkipRuleUpgradeReasonEnum.CONFLICT &&
           x.conflict === ThreeWayDiffConflict.SOLVABLE
+      );
+      const numOfRulesWithSolvableConflicts = rulesWithSolvableConflicts.length;
+      const numOfRulesWithRuleTypeChange = rulesWithSolvableConflicts.filter(
+        (x) => x.rule_type_change !== undefined
       ).length;
       const numOfRulesWithNonSolvableConflicts = dryRunResults.results.skipped.filter(
         (x) =>
@@ -474,6 +479,7 @@ function useRulesUpgradeWithDryRun(
           numOfRulesWithoutConflicts: dryRunResults.results.updated.length,
           numOfRulesWithSolvableConflicts,
           numOfRulesWithNonSolvableConflicts,
+          numOfRulesWithRuleTypeChange,
         });
 
         if (!result) {
