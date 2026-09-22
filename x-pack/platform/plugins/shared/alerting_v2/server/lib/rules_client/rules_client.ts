@@ -690,7 +690,7 @@ export class RulesClient {
     const persisted = await this.persistPreparedRules(prepared);
     errors.push(...persisted.errors);
 
-    const rules: RuleResponse[] = [];
+    const items: RuleResponse[] = [];
     const createdRules: EventRule[] = [];
     for (const doc of persisted.created) {
       const rule = this.toRuleApiResponse({
@@ -699,13 +699,13 @@ export class RulesClient {
         version: doc.version,
         references: doc.references,
       });
-      rules.push(rule);
+      items.push(rule);
       createdRules.push({ ruleId: rule.id, spaceId, rule });
     }
 
     this.ruleEventPublisher.emitRuleCreated(this.request, createdRules);
 
-    return { rules, errors };
+    return { items, errors };
   }
 
   @withApm

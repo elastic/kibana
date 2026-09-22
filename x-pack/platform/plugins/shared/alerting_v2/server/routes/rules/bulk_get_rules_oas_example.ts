@@ -16,7 +16,7 @@ export const BULK_GET_RULES_REQUEST: BulkGetRulesParams = {
 };
 
 export const BULK_GET_RULES_RESPONSE: BulkGetRulesResponse = {
-  rules: [RULE_RESPONSE],
+  items: [RULE_RESPONSE],
 };
 
 const INVALID_BULK_GET_RULES_RESPONSE = invalidResponseExample({

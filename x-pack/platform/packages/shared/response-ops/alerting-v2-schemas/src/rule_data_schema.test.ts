@@ -1849,18 +1849,18 @@ describe('bulkGetRulesResponseSchema', () => {
     updated_at: '2026-01-01T00:00:00.000Z',
   };
 
-  it('accepts an empty rules array', () => {
-    const result = bulkGetRulesResponseSchema.parse({ rules: [] });
-    expect(result).toEqual({ rules: [] });
+  it('accepts an empty items array', () => {
+    const result = bulkGetRulesResponseSchema.parse({ items: [] });
+    expect(result).toEqual({ items: [] });
   });
 
-  it('accepts a populated rules array', () => {
-    const result = bulkGetRulesResponseSchema.parse({ rules: [sampleRule] });
-    expect(result.rules).toHaveLength(1);
-    expect(result.rules[0]).toEqual(expect.objectContaining({ id: 'rule-1' }));
+  it('accepts a populated items array', () => {
+    const result = bulkGetRulesResponseSchema.parse({ items: [sampleRule] });
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0]).toEqual(expect.objectContaining({ id: 'rule-1' }));
   });
 
-  it('rejects a missing rules field', () => {
+  it('rejects a missing items field', () => {
     expect(() => bulkGetRulesResponseSchema.parse({})).toThrow();
   });
 });
@@ -1952,14 +1952,14 @@ describe('bulkCreateRulesResponseSchema', () => {
   };
 
   it('accepts created rules and an empty errors array', () => {
-    const result = bulkCreateRulesResponseSchema.parse({ rules: [sampleRule], errors: [] });
-    expect(result.rules).toHaveLength(1);
+    const result = bulkCreateRulesResponseSchema.parse({ items: [sampleRule], errors: [] });
+    expect(result.items).toHaveLength(1);
     expect(result.errors).toEqual([]);
   });
 
   it('accepts per-item errors without created rules', () => {
     const result = bulkCreateRulesResponseSchema.parse({
-      rules: [],
+      items: [],
       errors: [
         {
           id: 'rule-1',
@@ -1967,11 +1967,11 @@ describe('bulkCreateRulesResponseSchema', () => {
         },
       ],
     });
-    expect(result.rules).toEqual([]);
+    expect(result.items).toEqual([]);
     expect(result.errors).toHaveLength(1);
   });
 
-  it('rejects a missing rules field', () => {
+  it('rejects a missing items field', () => {
     expect(() => bulkCreateRulesResponseSchema.parse({ errors: [] })).toThrow();
   });
 });

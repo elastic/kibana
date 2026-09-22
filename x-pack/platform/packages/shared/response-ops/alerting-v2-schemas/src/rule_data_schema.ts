@@ -875,7 +875,7 @@ export type BulkGetRulesParams = z.infer<typeof bulkGetRulesParamsSchema>;
  */
 export const bulkGetRulesResponseSchema = z
   .object({
-    rules: z
+    items: z
       .array(ruleResponseSchema)
       .describe('The requested rules, in the same order as the requested ids.'),
   })
@@ -933,12 +933,12 @@ export type BulkCreateRulesParams = z.input<typeof bulkCreateRulesRequestSchema>
 
 /**
  * Response schema for `POST /api/alerting/v2/rules/_bulk_create`.
- * Successfully created rules are returned in `rules`; per-item failures land
+ * Successfully created rules are returned in `items`; per-item failures land
  * in `errors`. HTTP 200 even when some items fail (partial success).
  */
 export const bulkCreateRulesResponseSchema = z
   .object({
-    rules: z
+    items: z
       .array(ruleResponseSchema)
       .describe('Rules that were created. Rules listed in `errors` are not included.'),
     errors: z
