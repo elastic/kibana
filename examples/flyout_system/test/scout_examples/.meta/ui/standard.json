@@ -1,5 +1,5 @@
 {
-  "sha1": "e62b9cc04282d8417906f0f4594a222300691d15",
+  "sha1": "e2570662470311faf44bd8afbe9b3e58e5e69c46",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -33,27 +33,27 @@
     {
       "id": "e00b3f1d9068c4a-b4770e88becdbe3",
       "title": "Flyout System - persisted width scenarios second system push flyout opens at the width stored by resizing the first",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/persisted_width_scenarios.spec.ts",
-        "line": 32,
-        "column": 13
+        "line": 30,
+        "column": 18
       }
     },
     {
       "id": "f85d28e0ed04b82-43a3f50690347bb",
       "title": "Flyout System - push padding scenarios two standalone push flyouts, close oldest first, returns to no padding (elastic/eui#9788)",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/push_padding_scenarios.spec.ts",
-        "line": 40,
-        "column": 13
+        "line": 31,
+        "column": 18
       }
     },
     {
@@ -65,47 +65,47 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/push_padding_scenarios.spec.ts",
-        "line": 57,
-        "column": 15
+        "line": 46,
+        "column": 13
       }
     },
     {
       "id": "f85d28e0ed04b82-38d6e6d575f16c7",
       "title": "Flyout System - push padding scenarios standalone push + system push, close standalone first, keeps the system flyout pushed",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/push_padding_scenarios.spec.ts",
-        "line": 77,
-        "column": 19
+        "line": 64,
+        "column": 20
       }
     },
     {
       "id": "f85d28e0ed04b82-6b3e0d616fc071f",
       "title": "Flyout System - push padding scenarios standalone push under a system overlay keeps its padding when the overlay closes",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/push_padding_scenarios.spec.ts",
-        "line": 98,
-        "column": 21
+        "line": 80,
+        "column": 13
       }
     },
     {
       "id": "f85d28e0ed04b82-021b34a8f732109",
       "title": "Flyout System - push padding scenarios resizing a standalone push flyout behind an active system push flyout keeps following the active one",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/push_padding_scenarios.spec.ts",
-        "line": 123,
-        "column": 21
+        "line": 101,
+        "column": 20
       }
     },
     {
@@ -117,21 +117,21 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/push_padding_scenarios.spec.ts",
-        "line": 151,
-        "column": 16
+        "line": 123,
+        "column": 13
       }
     },
     {
       "id": "f85d28e0ed04b82-135df77982b40a3",
       "title": "Flyout System - push padding scenarios two system push sessions, close oldest first, keeps the newest open",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/push_padding_scenarios.spec.ts",
-        "line": 169,
-        "column": 21
+        "line": 142,
+        "column": 7
       }
     }
   ]
