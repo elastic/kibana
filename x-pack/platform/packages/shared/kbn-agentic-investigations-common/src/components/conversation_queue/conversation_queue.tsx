@@ -76,6 +76,8 @@ interface ConversationQueueProps {
   isFiltered?: boolean;
   /** Plural: the flyout shows an investigation, which several rows can share. */
   selectedIds?: readonly string[];
+  /** When true escalation actions are shown on every card. Requires the manage capability. */
+  canManageEscalations?: boolean;
 }
 
 const StyledAccordion = styled(EuiAccordion)`
@@ -115,6 +117,7 @@ export const ConversationQueue = memo<ConversationQueueProps>(
     getChatHref,
     getOutcomeLabel,
     selectedIds,
+    canManageEscalations,
   }) => {
     const { euiTheme } = useEuiTheme();
     // Work already finished reads as a list. Pinned to the bucket, not a prop: which
@@ -165,6 +168,7 @@ export const ConversationQueue = memo<ConversationQueueProps>(
             onOpenChat,
             onClickRecommendedAction,
             chatHref: getChatHref?.(investigation.id),
+            canManageEscalations,
           };
 
           return (

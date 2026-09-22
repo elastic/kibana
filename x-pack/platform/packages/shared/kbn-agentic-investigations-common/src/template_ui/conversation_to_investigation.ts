@@ -116,6 +116,7 @@ export const conversationToInvestigation = (conversation: Conversation): Investi
 
   return {
     id: conversation.id,
+    conversationId: conversation.id,
     // The flyout only renders for the investigation template, so this is the template it came from.
     template_id: 'investigation',
     title: conversation.title,

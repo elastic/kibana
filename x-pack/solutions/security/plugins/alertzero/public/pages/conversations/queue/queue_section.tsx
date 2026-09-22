@@ -25,6 +25,7 @@ export interface QueueSectionProps {
   onOpenChat: (id: Investigation['id']) => void;
   onClickRecommendedAction: ConversationsActionsGroupProps['onClickRecommendedAction'];
   getChatHref: (id: Investigation['id']) => string | undefined;
+  canManageEscalations?: boolean;
 }
 
 export const QueueSection = ({

@@ -48,6 +48,8 @@ export const createEscalationRequestSchema = z
      * route afterwards.
      */
     linked_investigation_id: conversationIdSchema,
+    /** Escalation title. Defaults to the linked investigation's title if omitted. */
+    title: z.string().min(1).max(CONVERSATION_TITLE_MAX_LENGTH).optional(),
     visibility: escalationVisibilitySchema,
     /**
      * List of user profile uids to add as collaborators. Required when
@@ -130,6 +132,7 @@ export const listEscalationsQuerySchema = z
       .min(1)
       .max(MAX_ESCALATIONS_PAGE_SIZE)
       .default(MAX_ESCALATIONS_PAGE_SIZE),
+    search: z.string().max(256).optional(),
   })
   .refine(({ page, per_page: perPage }) => page * perPage <= MAX_ESCALATIONS_RESULT_WINDOW, {
     message: `page * per_page must not exceed ${MAX_ESCALATIONS_RESULT_WINDOW}; escalations beyond that are not reachable through this API`,

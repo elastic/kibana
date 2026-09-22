@@ -117,7 +117,7 @@ export class EscalationsService {
       // Omit agentId so it defaults to the shared default agent, which all users can access.
       // Inheriting the investigation's agent_id would hide the escalation from collaborators
       // who lack access to that agent.
-      title: investigation.title,
+      title: body.title ?? investigation.title,
       templateId: ESCALATION_TEMPLATE_ID,
       metadata,
       accessControl,
@@ -189,6 +189,7 @@ export class EscalationsService {
       sort: ESCALATIONS_LIST_SORT,
       page: query.page,
       perPage: query.per_page,
+      query: query.search,
     });
 
     return { pagination: { total, page: query.page, per_page: query.per_page }, results };

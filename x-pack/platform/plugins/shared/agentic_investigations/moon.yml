@@ -44,6 +44,7 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/react-query'
   - '@kbn/kibana-react-plugin'
+  - '@kbn/user-profile-components'
 tags:
   - plugin
   - prod
