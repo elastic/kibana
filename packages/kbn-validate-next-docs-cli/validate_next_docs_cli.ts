@@ -76,7 +76,7 @@ run(
       });
 
       log.info('[docs.elastic.dev] building');
-      await docsRepo.run('yarn', ['build'], { desc: 'pnpm build', showOutput });
+      await docsRepo.run('yarn', ['build'], { desc: 'yarn build', showOutput });
     } catch {
       quietFail(`failed to build docs`);
     }

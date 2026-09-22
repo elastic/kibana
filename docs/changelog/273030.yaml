@@ -5,4 +5,4 @@ products:
 - product: cloud-serverless
   target: 2026-06-16
 title: Fix Kibana devcontainer startup failing before bootstrap completes
-description: Elasticsearch and Kibana no longer fail to start when devcontainer services launch before `pnpm kbn bootstrap` finishes linking workspaces.
+description: Elasticsearch and Kibana no longer fail to start when devcontainer services launch before `yarn kbn bootstrap` finishes linking workspaces.
