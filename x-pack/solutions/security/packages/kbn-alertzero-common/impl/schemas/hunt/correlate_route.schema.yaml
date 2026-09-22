@@ -48,6 +48,7 @@ paths:
                   - self_match_excluded
                   - diamond_scores
                   - anchor_summary
+                  - attachment_data
                 properties:
                   status:
                     $ref: '#/components/schemas/CorrelationEngineStatus'
@@ -104,6 +105,8 @@ paths:
                         type: integer
                       discriminating_anchor_count:
                         type: integer
+                  attachment_data:
+                    $ref: '#/components/schemas/HuntCorrelationAttachmentData'
 components:
   schemas:
     CorrelationEngineStatus:
@@ -140,3 +143,67 @@ components:
           type: array
           items:
             type: string
+
+    AnchorItem:
+      type: object
+      description: >-
+        One discriminating anchor that matched, flattened out of `AnchorSet`
+        for direct rendering on the `security.hunt_correlation` attachment
+        (`correlation_engine.ts`'s `buildAnchorItems`).
+      required: [kind, value]
+      properties:
+        kind:
+          type: string
+          enum: [hash, ioc_set_hash, actor]
+        value:
+          type: string
+
+    HuntCorrelationAttachmentThresholds:
+      type: object
+      required: [anchor_match, diamond_vertex]
+      properties:
+        anchor_match:
+          type: number
+        diamond_vertex:
+          type: number
+
+    HuntCorrelationAttachmentData:
+      type: object
+      description: >-
+        The `security.hunt_correlation` attachment payload (PR 1,
+        kibana#291882), built by `correlation_engine.ts`'s
+        `toAttachmentData()`. This is the shape `correlation.yaml` (PR 3b)
+        writes verbatim onto the source report's Investigation via
+        `ai.attachment.add`; the route's other top-level fields
+        (`matches`, `anchor_summary`, ...) describe the engine's own search,
+        not what the attachment reader sees.
+      required:
+        - anchors
+        - diamond_scores
+        - thresholds
+        - self_match_excluded
+        - report_revision
+      properties:
+        anchors:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnchorItem'
+        diamond_scores:
+          type: array
+          items:
+            type: object
+            required: [vertex, related_report_id, score]
+            properties:
+              vertex:
+                type: string
+              related_report_id:
+                type: string
+              score:
+                type: number
+        thresholds:
+          $ref: '#/components/schemas/HuntCorrelationAttachmentThresholds'
+        self_match_excluded:
+          type: boolean
+          enum: [true]
+        report_revision:
+          type: string
