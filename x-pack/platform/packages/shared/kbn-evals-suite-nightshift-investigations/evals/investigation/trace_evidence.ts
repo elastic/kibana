@@ -6,17 +6,31 @@
  */
 
 import assert from 'assert';
+import { isDeepStrictEqual } from 'util';
+import { isToolCallStep, ToolResultType } from '@kbn/agent-builder-common';
+import type { ConversationRound, ToolResult } from '@kbn/agent-builder-common';
 import { parseJsonAttr } from '@kbn/inference-tracing';
 import type {
   GenAISemConvAttributes,
   GenAIInputMessage,
   GenAIOutputMessage,
+  GenAITextPart,
 } from '@kbn/inference-tracing';
 
 /** Validates exported agent payloads independently of the placeholder score. */
 export const assertAgentTrace = (
   attributes: GenAISemConvAttributes[],
-  { question, conversationId }: { question: string; conversationId?: string }
+  {
+    question,
+    conversationId,
+    systemInstructions,
+    rounds,
+  }: {
+    question: string;
+    conversationId?: string;
+    systemInstructions: string;
+    rounds: Array<Pick<ConversationRound, 'steps' | 'response'>>;
+  }
 ): void => {
   const inputMessages = attributes.flatMap(
     (span) => parseJsonAttr<GenAIInputMessage[]>(span['gen_ai.input.messages']) ?? []
@@ -36,21 +50,64 @@ export const assertAgentTrace = (
   const responses = attributes.flatMap(
     (span) => parseJsonAttr<GenAIOutputMessage[]>(span['gen_ai.output.messages']) ?? []
   );
-  assert(
-    responses.some(({ parts }) => parts.length > 0),
-    'Agent trace must include responses'
-  );
-  for (const field of [
-    'gen_ai.system_instructions',
-    'gen_ai.tool.call.arguments',
-    'gen_ai.tool.call.result',
-  ] as const) {
+  for (const { response } of rounds) {
+    const structuredResponse = parseJsonAttr<object>(response.message);
     assert(
-      attributes.some((span) => {
-        const value = span[field]?.trim();
-        return value && !['[]', '{}', 'null'].includes(value);
-      }),
-      `Agent trace must include nonempty ${field}`
+      response.message &&
+        responses.some(
+          ({ role, parts }) =>
+            role === 'assistant' &&
+            parts.some(
+              (part) =>
+                (part.type === 'text' && part.content === response.message) ||
+                (part.type === 'tool_call' &&
+                  structuredResponse !== undefined &&
+                  isDeepStrictEqual(parseJsonAttr(part.arguments), structuredResponse))
+            )
+        ),
+      'Agent trace must include the actual final response'
+    );
+  }
+  const instructions = attributes.flatMap(
+    (span) => parseJsonAttr<GenAITextPart[]>(span['gen_ai.system_instructions']) ?? []
+  );
+  assert(
+    systemInstructions.trim() &&
+      instructions.some(
+        (part) => part.type === 'text' && part.content.includes(systemInstructions.trim())
+      ),
+    'Agent trace must include the actual system instructions'
+  );
+  const toolCalls = rounds.flatMap(({ steps }) => steps.filter(isToolCallStep));
+  assert(toolCalls.length > 0, 'Investigation must include tool calls');
+  for (const { tool_call_id: callId, tool_id: toolId, params, results } of toolCalls) {
+    const span = attributes.find(
+      (candidate) =>
+        candidate['gen_ai.tool.call.id'] === callId && candidate['gen_ai.tool.name'] === toolId
+    );
+    assert(span, `Agent trace must include tool call ${callId}`);
+    assert.deepStrictEqual(
+      parseJsonAttr(span['gen_ai.tool.call.arguments']),
+      params,
+      `Agent trace must retain arguments for ${callId}`
+    );
+    const result = parseJsonAttr<ToolResult[] | { results?: ToolResult[]; error?: string }>(
+      span['gen_ai.tool.call.result']
+    );
+    assert(result && typeof result === 'object', `Missing tool result for ${callId}`);
+    // Errored tool spans store the result array or thrown error rather than the handler envelope.
+    const traceResults = Array.isArray(result)
+      ? result
+      : result.results ??
+        (typeof result.error === 'string'
+          ? [{ type: ToolResultType.error, data: { message: result.error } }]
+          : undefined);
+    assert(Array.isArray(traceResults), `Malformed tool result for ${callId}`);
+    // Result IDs can be assigned after the execution span has already been exported.
+    assert.deepStrictEqual(
+      traceResults.map(({ type, data }) => ({ type, data })),
+      results.map(({ type, data }) => ({ type, data })),
+      `Agent trace must retain results for ${callId}`
     );
   }
 };

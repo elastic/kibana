@@ -5,8 +5,12 @@
  * 2.0.
  */
 
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import { expect } from '@playwright/test';
 import { tags } from '@kbn/evals';
+import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
+import { REPO_ROOT } from '@kbn/repo-info';
 import type { GenAISemConvAttributes } from '@kbn/inference-tracing';
 import { evaluate } from '../../src/evaluate';
 import { readInvestigationDataset } from './datasets';
@@ -20,6 +24,16 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
     'persists ungraded investigations and complete agent traces',
     async ({ executorClient, connector, fetch, evalsClient, traceEsClient, repetitions, log }) => {
       const dataset = readInvestigationDataset();
+      // The typed agent API omits inherited instructions; the source prompt is the acceptance oracle.
+      const systemInstructions = cleanPrompt(
+        readFileSync(
+          join(
+            REPO_ROOT,
+            'x-pack/platform/plugins/shared/nightshift_investigations/server/agents/deductive_investigation/instructions/deductive_investigator.md.text'
+          ),
+          'utf8'
+        )
+      );
       await fetch('/internal/search_inference_endpoints/settings', {
         method: 'PUT',
         headers: { 'elastic-api-version': '1' },
@@ -101,11 +115,15 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
         });
         expect(score.evaluator.trace_id).not.toBe(output.traceId);
 
+        const agentTraceIds =
+          output.conversation?.rounds.flatMap(({ trace_id: traceId }) =>
+            typeof traceId === 'string' ? [traceId] : traceId ?? []
+          ) ?? [];
         await expect(async () => {
           const spans = await traceEsClient.search<{ attributes: GenAISemConvAttributes }>({
             index: 'traces-*',
             size: 1_000,
-            query: { term: { 'trace.id': output.traceId } },
+            query: { terms: { 'trace.id': agentTraceIds } },
             _source: ['attributes'],
           });
           assertAgentTrace(
@@ -113,6 +131,8 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
             {
               question: output.query,
               conversationId: output.conversation_id,
+              systemInstructions,
+              rounds: output.conversation?.rounds ?? [],
             }
           );
         }).toPass({ timeout: 60_000 });
