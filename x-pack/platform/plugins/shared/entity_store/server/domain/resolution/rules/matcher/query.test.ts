@@ -81,13 +81,13 @@ describe('ES|QL matcher query builder', () => {
       expect(query).toContain(`FROM "${INDEX}"`);
     });
 
-    it('gates SID match values on an NT-authority inclusion pattern', () => {
+    it('gates SID match values on an account-domain inclusion pattern', () => {
       const query = buildMatchGroupsQuery({ index: INDEX, spec: WINDOWS_SID });
-      expect(query).toContain('match_value RLIKE "S-1-5-.*"');
+      expect(query).toContain('match_value RLIKE "S-1-5-21-.*"');
       expect(query).toContain(
         'entity.namespace IN ("local", "system", "windows", "active_directory")'
       );
-      expect(WINDOWS_SID.inclusionPattern).toBe('S-1-5-.*');
+      expect(WINDOWS_SID.inclusionPattern).toBe('S-1-5-21-.*');
       expect(WINDOWS_SID.exclusionPattern).toBe(
         '(S-1-5-18|S-1-5-19|S-1-5-20|S-1-5-32-54[4-9]|S-1-5-32-55[0-4])'
       );
@@ -96,7 +96,7 @@ describe('ES|QL matcher query builder', () => {
 
     it('gates leftover CrowdStrike SID matches the same way as the Windows SID bridge', () => {
       const query = buildMatchGroupsQuery({ index: INDEX, spec: CROWDSTRIKE_SID });
-      expect(query).toContain('match_value RLIKE "S-1-5-.*"');
+      expect(query).toContain('match_value RLIKE "S-1-5-21-.*"');
       expect(query).toContain(
         'NOT match_value RLIKE "(S-1-5-18|S-1-5-19|S-1-5-20|S-1-5-32-54[4-9]|S-1-5-32-55[0-4])"'
       );
@@ -104,10 +104,11 @@ describe('ES|QL matcher query builder', () => {
       expect(CROWDSTRIKE_SID.declineSameNamespaceDuplicates).toBe(false);
     });
 
-    it('accepts NT-authority SIDs and rejects Linux UIDs', () => {
+    it('accepts account-domain SIDs and rejects well-known SIDs and Linux UIDs', () => {
       const pattern = new RegExp(`^${WINDOWS_SID.inclusionPattern}$`);
       expect('S-1-5-21-111-222-333-1104').toMatch(pattern);
-      expect('S-1-5-18').toMatch(pattern);
+      expect('S-1-5-90-0-1').not.toMatch(pattern);
+      expect('S-1-5-18').not.toMatch(pattern);
       expect('1000').not.toMatch(pattern);
       expect('jane').not.toMatch(pattern);
     });

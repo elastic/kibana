@@ -30,10 +30,12 @@ export const WINDOWS_NON_PERSON_SID_EXCLUSION =
 export const ENTRA_GUID_INCLUSION = '[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}';
 
 /**
- * NT-authority SID prefix. `local` and CrowdStrike `user.id` can be a Linux UID
- * or a SID; only this shape is safe to bridge to AD.
+ * Account-domain / machine SID (`S-1-5-21-…`). Well-known authorities
+ * (SYSTEM, DWM, NT SERVICE, Anonymous, …) are the same string on every host
+ * and are not one account. Residual: non-sysprepped clones share a machine
+ * SID, so local Administrator (`S-1-5-21-<machine>-500`) can still merge.
  */
-export const NT_AUTHORITY_SID_INCLUSION = 'S-1-5-.*';
+export const ACCOUNT_DOMAIN_SID_INCLUSION = 'S-1-5-21-.*';
 
 /**
  * Cheap UPN shape: at least one character, `@`, at least one character.
@@ -94,7 +96,7 @@ export const RESOLUTION_RULE_CONFIGS: ResolutionRuleConfig[] = [
       field: 'user.id',
       namespaces: ['local', 'system', 'windows', 'active_directory'],
       lowercase: false,
-      inclusionPattern: NT_AUTHORITY_SID_INCLUSION,
+      inclusionPattern: ACCOUNT_DOMAIN_SID_INCLUSION,
       exclusionPattern: WINDOWS_NON_PERSON_SID_EXCLUSION,
       declineSameNamespaceDuplicates: false,
     },
@@ -122,7 +124,7 @@ export const RESOLUTION_RULE_CONFIGS: ResolutionRuleConfig[] = [
       field: 'user.id',
       namespaces: ['crowdstrike', 'active_directory'],
       lowercase: false,
-      inclusionPattern: NT_AUTHORITY_SID_INCLUSION,
+      inclusionPattern: ACCOUNT_DOMAIN_SID_INCLUSION,
       exclusionPattern: WINDOWS_NON_PERSON_SID_EXCLUSION,
       declineSameNamespaceDuplicates: false,
     },
