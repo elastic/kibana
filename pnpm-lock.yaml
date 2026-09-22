@@ -2053,6 +2053,9 @@ importers:
       '@kbn/esql-validation-example-plugin':
         specifier: workspace:*
         version: link:examples/esql_validation_example
+      '@kbn/esql-views-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/plugins/private/esql_views
       '@kbn/eval-kql':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-eval-kql
@@ -4980,8 +4983,8 @@ importers:
         specifier: 3.0.0
         version: 3.0.0(eslint@8.57.0(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3)
       '@elastic/eui-test-helpers':
-        specifier: 1.7.0
-        version: 1.7.0(@playwright/test@1.62.1)
+        specifier: 1.8.0
+        version: 1.8.0(@playwright/test@1.62.1)
       '@elastic/makelogs':
         specifier: 6.1.1
         version: 6.1.1
@@ -9171,6 +9174,8 @@ importers:
 
   x-pack/platform/plugins/private/drilldowns/url_drilldown: {}
 
+  x-pack/platform/plugins/private/esql_views: {}
+
   x-pack/platform/plugins/private/feedback: {}
 
   x-pack/platform/plugins/private/file_upload: {}
@@ -10942,8 +10947,8 @@ packages:
   '@elastic/eui-illustrations@1.1.0':
     resolution: {integrity: sha512-xqOf5dcFmB0WylGy7w2aTJfHMIOjGxW1xops2WkxsfWEpqSFz4r0y4QCpGW+zEhRBVemWcB/lr3S+GoFqm+AFQ==}
 
-  '@elastic/eui-test-helpers@1.7.0':
-    resolution: {integrity: sha512-JiWZoENq5P0TxBYIhExlFHl0DPh0ua9IQ5QTkZxpt9m9pRQZ5ceK5Lbf1StBFz1BupjKNf7XSM+sAS2+NRcRdw==}
+  '@elastic/eui-test-helpers@1.8.0':
+    resolution: {integrity: sha512-NDw0RugGpZNLwuqE45On/M8B3v+a9e1DwjMs6nWhFTHDxBKamllJTdZHz/Z+awy9hy1zWn+n2rxDhmkkYPxD/A==}
     peerDependencies:
       '@playwright/test': ^1.50.0
     peerDependenciesMeta:
@@ -27940,7 +27945,7 @@ snapshots:
 
   '@elastic/eui-illustrations@1.1.0': {}
 
-  '@elastic/eui-test-helpers@1.7.0(@playwright/test@1.62.1)':
+  '@elastic/eui-test-helpers@1.8.0(@playwright/test@1.62.1)':
     optionalDependencies:
       '@playwright/test': 1.62.1
 
