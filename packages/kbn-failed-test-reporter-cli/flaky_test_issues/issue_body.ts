@@ -302,7 +302,7 @@ const pipelineFailedBuilds = ({
   return `${failedBuilds} / ${builds} (${rate})`;
 };
 
-/** Collapsed per-pipeline breakdown over every pipeline and branch, not just the report scope. */
+/** Per-pipeline breakdown over every pipeline and branch, not just the report scope. */
 const failuresByPipeline = (suite: FlakySuite, report: FlakyTestReport): string | undefined => {
   if (suite.byPipeline.length === 0) {
     return undefined;
@@ -317,14 +317,10 @@ const failuresByPipeline = (suite: FlakySuite, report: FlakyTestReport): string 
     formatBuildLink(stats.lastFailedBuildUrl, stats.lastFailedAt),
   ]);
   return [
-    '<details>',
-    '<summary><b>Failures by pipeline</b></summary>',
-    '',
+    '#### Failures by pipeline',
     scope,
     '',
     table(['Pipeline', 'Failed builds', 'Branches', 'Sample failure'], rows),
-    '',
-    '</details>',
   ].join('\n');
 };
 

@@ -71,9 +71,7 @@ One sampled failure:
 Error: Timed out 30000ms waiting for expect(locator).toBeVisible()
 \`\`\`
 
-<details>
-<summary><b>Failures by pipeline</b></summary>
-
+#### Failures by pipeline
 2–9 Sep 2026, all branches:
 
 | Pipeline | Failed builds | Branches | Sample failure |
@@ -81,8 +79,6 @@ Error: Timed out 30000ms waiting for expect(locator).toBeVisible()
 | [\`kibana-pull-request\`](https://buildkite.com/elastic/kibana-pull-request) | 70 / 661 (**11%**) | 64 | [#498441](https://buildkite.com/elastic/kibana-pull-request/builds/498441) · 2026-09-08 16:05 UTC |
 | [\`kibana-on-merge\`](https://buildkite.com/elastic/kibana-on-merge) | 49 / 509 (**10%**) | 1 | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345) · 2026-09-09 06:12 UTC |
 | [\`kibana-elasticsearch-snapshot-verify\`](https://buildkite.com/elastic/kibana-elasticsearch-snapshot-verify) | 1 / 5 (20%) | 1 | 2026-09-09 06:12 UTC |
-
-</details>
 
 <!-- kibanaCiData = {\\"flaky-test-suite\\":{\\"suite.filePath\\":\\"x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts\\",\\"suite.title\\":\\"Default status alert\\",\\"suite.framework\\":\\"playwright\\",\\"suite.testIds\\":[\\"playwright:default_status_alert:creates default alert\\"],\\"report.generatedAt\\":\\"2026-09-09T09:04:41.000Z\\",\\"report.count\\":1,\\"report.history\\":[{\\"generatedAt\\":\\"2026-09-09T09:04:41.000Z\\",\\"builds\\":509,\\"failedBuilds\\":49}]}} -->"
 `;
