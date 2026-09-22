@@ -60,6 +60,17 @@ describe('validateMappingEditorValue', () => {
     expect(result.fieldErrorsById['2']?.name).toBe('Names must be unique.');
   });
 
+  it('disallows reserved field names', () => {
+    const value: MappingEditorValue = {
+      dynamic: true,
+      fields: [{ id: '1', name: '@timestamp', path: '', type: 'date', format: '' }],
+    };
+
+    const result = validateMappingEditorValue(value, { reservedFieldNames: ['@timestamp'] });
+    expect(result.isValid).toBe(false);
+    expect(result.fieldErrorsById['1']?.name).toBe('This field name is reserved.');
+  });
+
   it('does not require original field name (path)', () => {
     const value: MappingEditorValue = {
       dynamic: true,

@@ -13,6 +13,10 @@ import type {
   MappingEditorValidationResult,
 } from './mapping_editor';
 
+export interface ValidateMappingEditorValueOptions {
+  reservedFieldNames?: readonly string[];
+}
+
 const isFieldBlank = (field: MappingEditorField): boolean => {
   return (
     field.name.trim() === '' &&
@@ -23,12 +27,17 @@ const isFieldBlank = (field: MappingEditorField): boolean => {
 };
 
 export const validateMappingEditorValue = (
-  value: MappingEditorValue
+  value: MappingEditorValue,
+  options: ValidateMappingEditorValueOptions = {}
 ): MappingEditorValidationResult => {
   const fieldErrorsById: MappingEditorValidationResult['fieldErrorsById'] = {};
   const globalErrors: string[] = [];
 
   const nonBlankFields = value.fields.filter((f) => !isFieldBlank(f));
+
+  const reservedFieldNames = new Set(
+    (options.reservedFieldNames ?? []).map((n) => n.trim()).filter(Boolean)
+  );
 
   const trimmedNames = nonBlankFields.map((f) => ({ id: f.id, name: f.name.trim() }));
   const nameCounts = trimmedNames.reduce<Record<string, number>>((acc, { name }) => {
@@ -44,6 +53,10 @@ export const validateMappingEditorValue = (
     if (!name) {
       errors.name = i18n.translate('xpack.dataFederation.mappingEditor.validation.nameRequired', {
         defaultMessage: 'Name is required.',
+      });
+    } else if (reservedFieldNames.has(name)) {
+      errors.name = i18n.translate('xpack.dataFederation.mappingEditor.validation.nameReserved', {
+        defaultMessage: 'This field name is reserved.',
       });
     } else if ((nameCounts[name] ?? 0) > 1) {
       errors.name = i18n.translate('xpack.dataFederation.mappingEditor.validation.nameDuplicate', {

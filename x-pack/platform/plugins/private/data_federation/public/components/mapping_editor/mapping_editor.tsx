@@ -58,6 +58,7 @@ export interface MappingEditorProps {
   value: MappingEditorValue;
   onChange: (next: SetStateAction<MappingEditorValue>) => void;
   docLinks: DocLinksStart;
+  reservedFieldNames?: readonly string[];
 }
 
 export const buildDatasetMappings = (value: MappingEditorValue): DatasetMappings | undefined => {
@@ -90,12 +91,20 @@ export const buildDatasetMappings = (value: MappingEditorValue): DatasetMappings
   };
 };
 
-export const MappingEditor: FC<MappingEditorProps> = ({ value, onChange, docLinks }) => {
+export const MappingEditor: FC<MappingEditorProps> = ({
+  value,
+  onChange,
+  docLinks,
+  reservedFieldNames,
+}) => {
   const { euiTheme } = useEuiTheme();
   const typeInfoByValue = useMemo(() => getTypeInfoByValue(docLinks), [docLinks]);
   const nextId = useRef(0);
   const originalFieldById = useRef<Record<string, MappingEditorField>>({});
-  const validation = useMemo(() => validateMappingEditorValue(value), [value]);
+  const validation = useMemo(
+    () => validateMappingEditorValue(value, { reservedFieldNames }),
+    [reservedFieldNames, value]
+  );
   const [editingFieldId, setEditingFieldId] = useState<string | null>(null);
   const [creatingFieldIds, setCreatingFieldIds] = useState<readonly string[]>([]);
   const [draftField, setDraftField] = useState<MappingEditorField>(() => ({
@@ -204,6 +213,10 @@ export const MappingEditor: FC<MappingEditorProps> = ({ value, onChange, docLink
       errors.name = i18n.translate('xpack.dataFederation.mappingEditor.validation.nameRequired', {
         defaultMessage: 'Logical name is required.',
       });
+    } else if (reservedFieldNames?.some((n) => n.trim() === name)) {
+      errors.name = i18n.translate('xpack.dataFederation.mappingEditor.validation.nameReserved', {
+        defaultMessage: 'This field name is reserved.',
+      });
     } else {
       const isDuplicate = value.fields.some((f) => f.name.trim() === name);
       if (isDuplicate) {
@@ -233,7 +246,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({ value, onChange, docLink
     }
 
     return errors;
-  }, [draftField, draftValidationAttempted, value.fields]);
+  }, [draftField, draftValidationAttempted, reservedFieldNames, value.fields]);
 
   const addDraftField = useCallback(() => {
     setDraftValidationAttempted(true);
@@ -242,7 +255,9 @@ export const MappingEditor: FC<MappingEditorProps> = ({ value, onChange, docLink
     const type = draftField.type;
     const format = draftField.format.trim();
     const isDuplicate = Boolean(name) && value.fields.some((f) => f.name.trim() === name);
-    const hasErrors = !name || !type || isDuplicate || (Boolean(format) && type !== 'date');
+    const isReserved = Boolean(name) && (reservedFieldNames ?? []).some((n) => n.trim() === name);
+    const hasErrors =
+      !name || !type || isDuplicate || isReserved || (Boolean(format) && type !== 'date');
     if (hasErrors) return;
 
     const id = `mapping-field-${nextId.current++}`;
@@ -269,7 +284,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({ value, onChange, docLink
       format: '',
     });
     setDraftValidationAttempted(false);
-  }, [draftField, onChange, value.fields]);
+  }, [draftField, onChange, reservedFieldNames, value.fields]);
 
   return (
     <div data-test-subj="dataFederationMappingEditor" style={{ padding: euiTheme.size.m }}>
@@ -363,7 +378,9 @@ export const MappingEditor: FC<MappingEditorProps> = ({ value, onChange, docLink
                             isCreating ? () => removeField(f.id) : () => cancelEditingField(f.id)
                           }
                           onSubmit={() => {
-                            const nextValidation = validateMappingEditorValue(value);
+                            const nextValidation = validateMappingEditorValue(value, {
+                              reservedFieldNames,
+                            });
                             const fieldErrors = nextValidation.fieldErrorsById[f.id];
                             markFieldValidated(f.id);
                             if (fieldErrors) return;
