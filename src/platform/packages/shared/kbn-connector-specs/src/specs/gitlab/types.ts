@@ -516,6 +516,13 @@ export const AcceptMergeRequestInputSchema = lazySchema(() =>
   z.object({
     projectId: projectIdField(),
     mrIid: mrIidField(),
+    sha: z
+      .string()
+      .max(64)
+      .optional()
+      .describe(
+        'HEAD SHA of the source branch at the time of review. When provided, GitLab rejects the merge if the branch has moved since, preventing accidental merges of unreviewed commits.'
+      ),
     mergeCommitMessage: z
       .string()
       .max(2000)
@@ -656,32 +663,41 @@ export const ListLabelsInputSchema = lazySchema(() =>
 export type ListLabelsInput = z.infer<typeof ListLabelsInputSchema>;
 
 export const SearchCodeInputSchema = lazySchema(() =>
-  z.object({
-    search: z
-      .string()
-      .min(1)
-      .max(500)
-      .describe(
-        'Search term. Supports GitLab code search syntax (filename:, path:, extension: filters).'
-      ),
-    projectId: projectIdField()
-      .optional()
-      .describe(
-        'Restrict to one project (strongly recommended). Instance-wide code search requires Advanced Search (Premium/Ultimate) and returns 403 otherwise.'
-      ),
-    groupId: z
-      .string()
-      .max(500)
-      .optional()
-      .describe('Restrict to a group (numeric ID or full path). Also requires Advanced Search.'),
-    ref: z
-      .string()
-      .max(200)
-      .optional()
-      .describe('Branch or tag to search in (project scope only). Defaults to the default branch.'),
-    page: pageField(),
-    perPage: perPageField(),
-  })
+  z
+    .object({
+      search: z
+        .string()
+        .min(1)
+        .max(500)
+        .describe(
+          'Search term. Supports GitLab code search syntax (filename:, path:, extension: filters).'
+        ),
+      projectId: projectIdField()
+        .optional()
+        .describe(
+          'Restrict to one project (strongly recommended). Instance-wide code search requires Advanced Search (Premium/Ultimate) and returns 403 otherwise.'
+        ),
+      groupId: z
+        .string()
+        .max(500)
+        .optional()
+        .describe('Restrict to a group (numeric ID or full path). Also requires Advanced Search.'),
+      ref: z
+        .string()
+        .max(200)
+        .optional()
+        .describe(
+          'Branch or tag to search in. Only valid with projectId; omit for group or instance searches.'
+        ),
+      page: pageField(),
+      perPage: perPageField(),
+    })
+    .refine((v) => !(v.projectId !== undefined && v.groupId !== undefined), {
+      message: 'Provide projectId or groupId, not both.',
+    })
+    .refine((v) => !(v.ref !== undefined && v.projectId === undefined), {
+      message: 'ref is only supported with projectId.',
+    })
 );
 export type SearchCodeInput = z.infer<typeof SearchCodeInputSchema>;
 

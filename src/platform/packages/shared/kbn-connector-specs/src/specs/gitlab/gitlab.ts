@@ -108,7 +108,8 @@ const encodeProject = (projectId: string): string => encodeURIComponent(projectI
 const toPage = (response: { data: unknown[]; headers: Record<string, unknown> }) => ({
   values: response.data,
   page: Number(response.headers['x-page'] ?? 1),
-  total: Number(response.headers['x-total'] ?? response.data.length),
+  // GitLab omits x-total on large result sets; null signals "unknown" rather than a misleading page-size count
+  total: response.headers['x-total'] !== undefined ? Number(response.headers['x-total']) : null,
   nextPage: response.headers['x-next-page'] ? Number(response.headers['x-next-page']) : null,
   hasMore: !!response.headers['x-next-page'],
 });
@@ -599,6 +600,7 @@ export const Gitlab: ConnectorSpec = {
       handler: async (ctx, input: AcceptMergeRequestInput) => {
         const apiUrl = ctx.config?.apiUrl as string;
         const body: Record<string, unknown> = {};
+        if (input.sha !== undefined) body.sha = input.sha;
         if (input.mergeCommitMessage !== undefined)
           body.merge_commit_message = input.mergeCommitMessage;
         if (input.squash !== undefined) body.squash = input.squash;
@@ -834,33 +836,48 @@ export const Gitlab: ConnectorSpec = {
         const apiUrl = ctx.config?.apiUrl as string;
         const projectBase = `${apiUrl}/projects/${encodeProject(input.projectId)}`;
         const maxLength = input.maxLength ?? 20000;
-        let url: string;
-        let keepEnd: boolean;
+
         if (input.artifactPath !== undefined) {
-          url = `${projectBase}/jobs/${input.jobId}/artifacts/${encodeURIComponent(
+          // Artifact files may be binary — use arraybuffer to avoid UTF-8 corruption, then base64-encode.
+          // Range header limits bytes fetched before Axios buffers them.
+          const url = `${projectBase}/jobs/${input.jobId}/artifacts/${encodeURIComponent(
             input.artifactPath
           )}`;
-          keepEnd = false;
-        } else {
-          url = `${projectBase}/jobs/${input.jobId}/trace`;
-          keepEnd = true;
+          const response = await ctx.client.get(url, {
+            responseType: 'arraybuffer',
+            headers: { Range: `bytes=0-${maxLength - 1}` },
+          });
+          const buffer = Buffer.from(response.data);
+          const contentRange = response.headers?.['content-range'] as string | undefined;
+          const totalLength = contentRange
+            ? parseInt(contentRange.split('/')[1], 10)
+            : buffer.length;
+          return {
+            content: buffer.toString('base64'),
+            encoding: 'base64',
+            truncated: totalLength > maxLength,
+            totalLength,
+          };
         }
-        // Use an HTTP Range header to limit how much GitLab sends before Axios buffers it.
-        // For traces (keepEnd) we want the tail: "bytes=-N". For artifacts: "bytes=0-(N-1)".
-        // If GitLab ignores Range (200 instead of 206) the slice below is the fallback.
-        const rangeHeader = keepEnd ? `bytes=-${maxLength}` : `bytes=0-${maxLength - 1}`;
+
+        // Job log (trace) — plain text, keep the tail
+        const url = `${projectBase}/jobs/${input.jobId}/trace`;
         const response = await ctx.client.get(url, {
           responseType: 'text',
           transformResponse: [(data: unknown) => data],
-          headers: { Range: rangeHeader },
+          headers: { Range: `bytes=-${maxLength}` },
         });
         const text =
           typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
         // content-range: "bytes <start>-<end>/<total>" — present when GitLab honored the Range request
         const contentRange = response.headers?.['content-range'] as string | undefined;
         const totalLength = contentRange ? parseInt(contentRange.split('/')[1], 10) : text.length;
-        const content = keepEnd ? text.slice(-maxLength) : text.slice(0, maxLength);
-        return { content, truncated: totalLength > maxLength, totalLength };
+        return {
+          content: text.slice(-maxLength),
+          encoding: 'utf-8',
+          truncated: totalLength > maxLength,
+          totalLength,
+        };
       },
     },
 

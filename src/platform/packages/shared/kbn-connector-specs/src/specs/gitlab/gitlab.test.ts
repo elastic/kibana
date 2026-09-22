@@ -134,6 +134,17 @@ describe('Gitlab connector', () => {
 
       expect(mockGet.mock.calls[0][1].params).toMatchObject({ page: 2, per_page: 50 });
     });
+
+    it('returns null total when x-total header is absent (large result set)', async () => {
+      mockGet.mockResolvedValue({
+        data: [mockProject],
+        headers: { 'x-page': '1', 'x-next-page': '2' },
+      });
+      const input = parse('searchProjects', { search: 'kibana' });
+      const result = await Gitlab.actions.searchProjects.handler(mockContext, input);
+      expect(result.total).toBeNull();
+      expect(result.hasMore).toBe(true);
+    });
   });
 
   describe('getProject action', () => {
@@ -594,6 +605,15 @@ describe('Gitlab connector', () => {
         should_remove_source_branch: true,
       });
     });
+
+    it('includes sha precondition when provided', async () => {
+      await Gitlab.actions.acceptMergeRequest.handler(mockContext, {
+        projectId: '123',
+        mrIid: '15',
+        sha: 'deadbeef',
+      });
+      expect(mockPut.mock.calls[0][1]).toMatchObject({ sha: 'deadbeef' });
+    });
   });
 
   describe('addMergeRequestNote action', () => {
@@ -870,6 +890,18 @@ describe('Gitlab connector', () => {
       await Gitlab.actions.searchCode.handler(mockContext, input as never);
       expect(mockGet).toHaveBeenCalledWith(`${BASE}/search`, expect.anything());
     });
+
+    it('rejects when both projectId and groupId are provided', () => {
+      expect(() =>
+        Gitlab.actions.searchCode.input.parse({ search: 'foo', projectId: '123', groupId: 'my-group' })
+      ).toThrow();
+    });
+
+    it('rejects ref without projectId', () => {
+      expect(() =>
+        Gitlab.actions.searchCode.input.parse({ search: 'foo', ref: 'main' })
+      ).toThrow();
+    });
   });
 
   describe('getPipeline', () => {
@@ -914,26 +946,38 @@ describe('Gitlab connector', () => {
       expect(result.content.length).toBeLessThanOrEqual(20000);
     });
 
-    it('fetches artifact file with leading Range header', async () => {
-      mockGet.mockResolvedValue({ data: 'file content', headers: {} });
+    it('fetches artifact file as arraybuffer and returns base64-encoded content', async () => {
+      const rawContent = 'binary content';
+      // Use an isolated ArrayBuffer (not a Node.js pool buffer) to avoid stale data in Buffer.from()
+      const rawBuffer = Buffer.from(rawContent);
+      const isolatedArrayBuffer = rawBuffer.buffer.slice(
+        rawBuffer.byteOffset,
+        rawBuffer.byteOffset + rawBuffer.byteLength
+      );
+      mockGet.mockResolvedValue({ data: isolatedArrayBuffer, headers: {} });
       const input = parse('getJobArtifact', {
         projectId: '123',
         jobId: 7,
-        artifactPath: 'report.txt',
+        artifactPath: 'report.bin',
       });
       const result = await Gitlab.actions.getJobArtifact.handler(mockContext, input as never);
       expect(mockGet).toHaveBeenCalledWith(
-        expect.stringContaining('/jobs/7/artifacts/report.txt'),
-        expect.objectContaining({ headers: expect.objectContaining({ Range: 'bytes=0-19999' }) })
+        expect.stringContaining('/jobs/7/artifacts/report.bin'),
+        expect.objectContaining({
+          responseType: 'arraybuffer',
+          headers: expect.objectContaining({ Range: 'bytes=0-19999' }),
+        })
       );
+      expect(result.encoding).toBe('base64');
+      expect(Buffer.from(result.content, 'base64').toString()).toBe(rawContent);
       expect(result.truncated).toBe(false);
-      expect(result.content).toBe('file content');
     });
 
-    it('reports not truncated when content is within maxLength', async () => {
+    it('reports not truncated for short trace log', async () => {
       mockGet.mockResolvedValue({ data: 'short log', headers: {} });
       const input = parse('getJobArtifact', { projectId: '123', jobId: 7 });
       const result = await Gitlab.actions.getJobArtifact.handler(mockContext, input as never);
+      expect(result.encoding).toBe('utf-8');
       expect(result.truncated).toBe(false);
       expect(result.content).toBe('short log');
     });
