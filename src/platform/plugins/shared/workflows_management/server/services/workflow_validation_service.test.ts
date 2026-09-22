@@ -8,25 +8,36 @@
  */
 
 import type { CustomTriggerSchemaConfig } from '@kbn/workflows';
+import { z } from '@kbn/zod/v4';
 import type { WorkflowValidationDeps } from './types';
 import { WorkflowValidationService } from './workflow_validation_service';
 
+interface MakeDepsOptions {
+  /** Connector types the request can see, as `listTypes` returns them. */
+  listedConnectorTypes?: Array<Record<string, unknown>>;
+  /** Registered step definitions, keyed by step type. */
+  stepDefinitions?: Record<string, { outputSchema?: z.ZodType }>;
+}
+
 const makeDeps = (
-  listedTriggers: CustomTriggerSchemaConfig[] = []
+  listedTriggers: CustomTriggerSchemaConfig[] = [],
+  { listedConnectorTypes = [], stepDefinitions = {} }: MakeDepsOptions = {}
 ): {
   deps: WorkflowValidationDeps;
   actionsClient: { getAll: jest.Mock };
   actionsClientWithRequest: { listTypes: jest.Mock };
 } => {
   const actionsClient = { getAll: jest.fn().mockResolvedValue([]) };
-  const actionsClientWithRequest = { listTypes: jest.fn().mockResolvedValue([]) };
+  const actionsClientWithRequest = {
+    listTypes: jest.fn().mockResolvedValue(listedConnectorTypes),
+  };
   return {
     deps: {
       workflowsExtensions: {
         getAllTriggerDefinitions: () => listedTriggers as any,
         getTriggerDefinition: (triggerType: string) =>
           listedTriggers.find(({ id }) => id === triggerType) as any,
-        getStepDefinition: () => undefined,
+        getStepDefinition: (stepTypeId: string) => stepDefinitions[stepTypeId] as any,
       } as any,
       getActionsClient: jest.fn().mockResolvedValue(actionsClient) as any,
       getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest) as any,
@@ -35,6 +46,35 @@ const makeDeps = (
     actionsClientWithRequest,
   };
 };
+
+const slackConnectorType = {
+  id: '.slack',
+  name: 'Slack',
+  enabled: true,
+  enabledInConfig: true,
+  enabledInLicense: true,
+  minimumLicenseRequired: 'gold',
+  supportedFeatureIds: ['workflows'],
+};
+
+const slackWorkflowYaml = (reference: string) =>
+  [
+    'name: connector-output',
+    'enabled: true',
+    'triggers:',
+    '  - type: manual',
+    'steps:',
+    '  - name: notify',
+    '    type: slack',
+    '    connector-id: my-slack',
+    '    with:',
+    '      message: "hello"',
+    '  - name: log',
+    '    type: console',
+    '    with:',
+    `      message: "${reference}"`,
+    '',
+  ].join('\n');
 
 describe('WorkflowValidationService', () => {
   describe('getRegisteredCustomTriggerDefinitions', () => {
@@ -174,6 +214,60 @@ describe('WorkflowValidationService', () => {
       });
 
       expect(result.diagnostics.filter(({ source }) => source === 'variable')).toEqual([]);
+    });
+
+    it('resolves a reference against a registered step output', async () => {
+      // The registered definition must win over the connector contract for the
+      // same step type: `known` exists only on the definition, `channel` only on
+      // the connector.
+      const { deps } = makeDeps([], {
+        listedConnectorTypes: [slackConnectorType],
+        stepDefinitions: { slack: { outputSchema: z.object({ known: z.string() }) } },
+      });
+      const service = new WorkflowValidationService(deps);
+      const request = {} as any;
+
+      const resolves = await service.validateWorkflow(
+        slackWorkflowYaml('{{ steps.notify.output.known }}'),
+        'default',
+        request,
+        { includeVariableRules: true }
+      );
+      const fromConnectorOnly = await service.validateWorkflow(
+        slackWorkflowYaml('{{ steps.notify.output.channel }}'),
+        'default',
+        request,
+        { includeVariableRules: true }
+      );
+
+      expect(resolves.diagnostics.filter(({ source }) => source === 'variable')).toEqual([]);
+      expect(
+        fromConnectorOnly.diagnostics.filter(({ source }) => source === 'variable')
+      ).not.toEqual([]);
+    });
+
+    it('resolves a reference against a connector the request can see', async () => {
+      // `slack` exists only because `listTypes` reports it, so this covers the
+      // request-scoped connector contracts rather than the static set.
+      const { deps } = makeDeps([], { listedConnectorTypes: [slackConnectorType] });
+      const service = new WorkflowValidationService(deps);
+      const request = {} as any;
+
+      const resolves = await service.validateWorkflow(
+        slackWorkflowYaml('{{ steps.notify.output.channel }}'),
+        'default',
+        request,
+        { includeVariableRules: true }
+      );
+      const missing = await service.validateWorkflow(
+        slackWorkflowYaml('{{ steps.notify.output.missing }}'),
+        'default',
+        request,
+        { includeVariableRules: true }
+      );
+
+      expect(resolves.diagnostics.filter(({ source }) => source === 'variable')).toEqual([]);
+      expect(missing.diagnostics.filter(({ source }) => source === 'variable')).not.toEqual([]);
     });
 
     it('does not apply variable rules, so a run is not blocked by them', async () => {
