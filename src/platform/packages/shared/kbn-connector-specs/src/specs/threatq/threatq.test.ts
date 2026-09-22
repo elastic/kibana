@@ -14,6 +14,7 @@ import { z } from '@kbn/zod/v4';
 import type { ActionContext } from '../../connector_spec';
 import { BearerAuth } from '../../auth_types/bearer';
 import { OAuth } from '../../auth_types/oauth';
+import { OAuthPassword } from '../../auth_types/oauth_password';
 import { generateSecretsSchemaFromSpec } from '../../lib/generate_secrets_schema_from_spec';
 import type { JsonValue } from './types';
 import { ThreatQ } from './threatq';
@@ -389,6 +390,51 @@ describe('ThreatQ', () => {
     expect(schema.safeParse({ authType: 'bearer', ...secrets }).success).toBe(true);
     expect(schema.safeParse({ authType: 'bearer' }).success).toBe(false);
     expect(schema.safeParse({ authType: 'bearer', token: '' }).success).toBe(false);
+  });
+
+  it('requires user credentials and sets the ThreatQ password grant options', () => {
+    const schema = generateSecretsSchemaFromSpec(ThreatQ.auth);
+    const valid = {
+      authType: 'oauth_password',
+      tokenUrl: `${origin}/api/token`,
+      username: 'user@example.com',
+      password: 'user-password',
+      clientId: 'api-password',
+    };
+    expect(schema.parse(valid)).toMatchObject({
+      usernameField: 'email',
+      requestBodyFormat: 'json',
+    });
+    for (const field of ['tokenUrl', 'username', 'password', 'clientId']) {
+      expect(schema.safeParse({ ...valid, [field]: undefined }).success).toBe(false);
+      expect(schema.safeParse({ ...valid, [field]: '' }).success).toBe(false);
+    }
+    expect(
+      schema.safeParse({ ...valid, tokenUrl: 'http://threatq.example.com/api/token' }).success
+    ).toBe(false);
+  });
+
+  it('uses a password grant token for user authentication', async () => {
+    const getToken = jest.fn().mockResolvedValue('Bearer user-token');
+    const userSecrets: Parameters<typeof OAuthPassword.configure>[2] = {
+      tokenUrl: `${origin}/api/token`,
+      username: 'user@example.com',
+      password: 'user-password',
+      clientId: 'api-password',
+      usernameField: 'email',
+      requestBodyFormat: 'json',
+    };
+    ctx.client = await OAuthPassword.configure(
+      { getCustomHostSettings: () => undefined, getToken, logger: ctx.log, sslSettings: {} },
+      ctx.client,
+      userSecrets
+    );
+    nock(origin, { reqheaders: { authorization: 'Bearer user-token' } })
+      .get('/api/indicator/types')
+      .query({ limit: 1 })
+      .reply(200, response);
+    await expect(runTest()).resolves.toEqual({ message: 'Connected to ThreatQ.' });
+    expect(getToken).toHaveBeenCalledWith({ authType: 'oauth_password', ...userSecrets });
   });
 
   it('requires OAuth credentials and defaults to HTTP Basic token authentication', () => {

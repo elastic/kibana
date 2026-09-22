@@ -109,6 +109,17 @@ export interface OAuthClientCredsPrivateKeyJWTGetTokenOpts {
   clientId: string;
 }
 
+export interface OAuthPasswordGetTokenOpts {
+  authType: 'oauth_password';
+  tokenUrl: string;
+  username: string;
+  password: string;
+  clientId?: string;
+  scope?: string;
+  usernameField?: 'username' | 'email';
+  requestBodyFormat?: 'form' | 'json';
+}
+
 export interface EarsGetTokenOpts {
   authType: 'ears';
   provider: string;
@@ -117,6 +128,7 @@ export interface EarsGetTokenOpts {
 
 export type GetTokenOpts =
   | OAuthGetTokenOpts
+  | OAuthPasswordGetTokenOpts
   | OAuthClientCredsPrivateKeyJWTGetTokenOpts
   | EarsGetTokenOpts;
 

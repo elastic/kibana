@@ -31,6 +31,25 @@ describe('requestOAuthToken', () => {
     createAxiosInstanceMock.mockReturnValue(axiosInstanceMock);
   });
 
+  test.each(['bearer', 'BEARER', 'Bearer'])(
+    'normalizes token type %s to the Bearer header scheme',
+    async (tokenType) => {
+      axiosInstanceMock.mockResolvedValueOnce({
+        status: 200,
+        data: { access_token: 'token', token_type: tokenType },
+      });
+      await expect(
+        requestOAuthToken(
+          'https://test',
+          'client_credentials',
+          actionsConfigMock.create(),
+          mockLogger,
+          {}
+        )
+      ).resolves.toMatchObject({ tokenType: 'Bearer', accessToken: 'token' });
+    }
+  );
+
   test('making a token request with the required options', async () => {
     const configurationUtilities = actionsConfigMock.create();
     axiosInstanceMock.mockReturnValueOnce({
@@ -280,7 +299,7 @@ describe('requestOAuthToken', () => {
     );
 
     expect(result).toEqual({
-      tokenType: 'bearer',
+      tokenType: 'Bearer',
       accessToken: 'crowdstrike-token-123',
       expiresIn: 1799,
       refreshToken: undefined,
@@ -384,7 +403,7 @@ describe('requestOAuthToken', () => {
     );
 
     expect(result).toEqual({
-      tokenType: 'bearer',
+      tokenType: 'Bearer',
       accessToken: 'xoxp-slack-user-token',
       expiresIn: 7200,
       refreshToken: 'nested-refresh',
@@ -449,7 +468,7 @@ describe('requestOAuthToken', () => {
     );
 
     expect(result).toEqual({
-      tokenType: 'bearer',
+      tokenType: 'Bearer',
       accessToken: 'xoxp-user-token',
       expiresIn: 43200,
       refreshToken: 'top-level-refresh',
@@ -484,7 +503,7 @@ describe('requestOAuthToken', () => {
     );
 
     expect(result).toEqual({
-      tokenType: 'bearer',
+      tokenType: 'Bearer',
       accessToken: 'nested-token',
       expiresIn: 100,
       refreshToken: 'nested-refresh',

@@ -154,6 +154,38 @@ export const ThreatQ: ConnectorSpec = {
         },
       },
       {
+        type: 'oauth_password',
+        defaults: { usernameField: 'email', requestBodyFormat: 'json' },
+        overrides: {
+          label: i18n.translate('core.kibanaConnectorSpecs.threatq.auth.userLabel', {
+            defaultMessage: 'User authentication',
+          }),
+          meta: {
+            tokenUrl: {
+              helpText: i18n.translate('core.kibanaConnectorSpecs.threatq.auth.userTokenUrlHelp', {
+                defaultMessage: 'Your ThreatQ instance URL followed by /api/token.',
+              }),
+            },
+            username: {
+              label: i18n.translate('core.kibanaConnectorSpecs.threatq.auth.emailLabel', {
+                defaultMessage: 'Email',
+              }),
+            },
+            clientId: {
+              sensitive: true,
+              label: i18n.translate('core.kibanaConnectorSpecs.threatq.auth.apiPasswordLabel', {
+                defaultMessage: 'API password',
+              }),
+              helpText: i18n.translate('core.kibanaConnectorSpecs.threatq.auth.apiPasswordHelp', {
+                defaultMessage:
+                  'The API password from an administrator user profile in ThreatQ. This is separate from an OAuth client ID.',
+              }),
+            },
+            scope: { hidden: true },
+          },
+        },
+      },
+      {
         type: 'bearer',
         defaults: {},
         overrides: {
@@ -163,7 +195,7 @@ export const ThreatQ: ConnectorSpec = {
                 'core.kibanaConnectorSpecs.threatq.auth.bearerTokenHelpText',
                 {
                   defaultMessage:
-                    'A ThreatQ access token without the Bearer prefix. Replace it when it expires. For automatic token renewal, use OAuth 2.0 API credentials.',
+                    'A ThreatQ access token without the Bearer prefix. Replace it when it expires. OAuth 2.0 API credentials and user authentication renew tokens automatically.',
                 }
               ),
             },

@@ -14,6 +14,10 @@ export const OAUTH_PASSWORD_GRANT_TYPE = 'password';
 export interface PasswordOAuthRequestParams {
   username: string;
   password: string;
+  clientId?: string;
+  scope?: string;
+  usernameField?: 'username' | 'email';
+  requestBodyFormat?: 'form' | 'json';
 }
 
 export async function requestOAuthPasswordToken(
@@ -22,11 +26,26 @@ export async function requestOAuthPasswordToken(
   params: PasswordOAuthRequestParams,
   configurationUtilities: ActionsConfigurationUtilities
 ): Promise<OAuthTokenResponse> {
-  return await requestOAuthToken<PasswordOAuthRequestParams>(
+  const {
+    username,
+    password,
+    clientId,
+    scope,
+    usernameField = 'username',
+    requestBodyFormat,
+  } = params;
+  return await requestOAuthToken<Record<string, string>>(
     tokenUrl,
     OAUTH_PASSWORD_GRANT_TYPE,
     configurationUtilities,
     logger,
-    params
+    {
+      [usernameField]: username,
+      password,
+      ...(clientId ? { client_id: clientId } : {}),
+      ...(scope ? { scope } : {}),
+    },
+    false,
+    { bodyFormat: requestBodyFormat }
   );
 }
