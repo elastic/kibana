@@ -171,4 +171,4 @@ export {
   SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
 } from './src/inference_feature_ids';
 
-export { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from './src/feature_flags';
+export type { KnowledgeIndicatorClientContract } from './src/knowledge_indicator_client';
