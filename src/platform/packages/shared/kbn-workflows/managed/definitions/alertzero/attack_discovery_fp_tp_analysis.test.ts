@@ -100,10 +100,7 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
     // identity from `execution.id`, and everything about the attack from the loaded
     // document — so no caller can hand this workflow a stale copy of any of them.
     it('takes exactly the attack and the Investigation', () => {
-      expect(Object.keys(properties).sort()).toEqual([
-        'attack_discovery_id',
-        'investigation_id',
-      ]);
+      expect(Object.keys(properties).sort()).toEqual(['attack_discovery_id', 'investigation_id']);
     });
 
     it('requires both', () => {
@@ -134,12 +131,9 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
   describe('the output contract', () => {
     // The analyst-facing payload, matching the `security.attack_discovery.verdict`
     // attachment the review writes it into.
-    it.each(['verdict', 'summary_markdown', 'rationale_markdown'] as const)(
-      'emits %s',
-      (name) => {
-        expect(outputNames).toContain(name);
-      }
-    );
+    it.each(['verdict', 'summary_markdown', 'rationale_markdown'] as const)('emits %s', (name) => {
+      expect(outputNames).toContain(name);
+    });
 
     it('declares a type for every output', () => {
       expect((analysis.outputs ?? []).filter(({ type }) => type == null)).toEqual([]);
@@ -243,9 +237,12 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
     );
 
     it('loads both before analysing', () => {
-      expect(Math.max(stepNames.indexOf('load_attack_discovery'), stepNames.indexOf('load_investigation'))).toBeLessThan(
-        stepNames.indexOf('analyze')
-      );
+      expect(
+        Math.max(
+          stepNames.indexOf('load_attack_discovery'),
+          stepNames.indexOf('load_investigation')
+        )
+      ).toBeLessThan(stepNames.indexOf('analyze'));
     });
   });
 
