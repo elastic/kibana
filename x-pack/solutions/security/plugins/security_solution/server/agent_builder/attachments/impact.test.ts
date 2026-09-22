@@ -192,6 +192,23 @@ describe('createImpactAttachmentType', () => {
       }
     });
 
+    it('includes total_alert_count in the formatted text when supplied', async () => {
+      const formatted = await attachmentType.format(
+        makeAttachment({
+          entities: [validEntity],
+          truncated: true,
+          total_alert_count: 120,
+        }),
+        formatContext
+      );
+      const representation = await formatted.getRepresentation?.();
+
+      if (representation?.type === 'text') {
+        expect(representation.value).toContain('Total alerts: 120');
+        expect(representation.value).toContain('truncated');
+      }
+    });
+
     it('renders an empty-state message when there are no entities', async () => {
       const formatted = await attachmentType.format(
         makeAttachment({ entities: [] }),

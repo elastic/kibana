@@ -96,6 +96,9 @@ const formatForAgent = (data: ImpactAttachmentData): string => {
       `${entity_type} ${name}: ${alert_count} alert(s) — ${verdicts.true_positive} TP, ${verdicts.false_positive} FP, ${verdicts.inconclusive} inconclusive`
     );
   }
+  if (data.total_alert_count !== undefined) {
+    lines.push(`Total alerts: ${data.total_alert_count}`);
+  }
   if (data.truncated) {
     lines.push(`(list truncated to ${MAX_IMPACTED_ENTITIES} entities)`);
   }
