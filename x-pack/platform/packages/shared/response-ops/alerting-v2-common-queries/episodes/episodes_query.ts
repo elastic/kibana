@@ -259,7 +259,7 @@ export const buildEpisodesBaseQuery = (
   const trimmedSearch = filterState?.queryString?.trim();
   if (trimmedSearch) {
     query.pipe(
-      `WHERE ((type == "alert" AND QSTR(${escapeStringValue(
+      `WHERE ((type == "alert" AND KQL(${escapeStringValue(
         trimmedSearch
       )})) OR (action_type IN ("snooze", "unsnooze", "tag", "ack", "unack", "assign")))`
     );

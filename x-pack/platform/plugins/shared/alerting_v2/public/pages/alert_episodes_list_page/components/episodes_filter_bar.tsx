@@ -5,16 +5,9 @@
  * 2.0.
  */
 
-import React, {
-  useCallback,
-  useEffect,
-  useState,
-  type ChangeEvent,
-  type SetStateAction,
-} from 'react';
+import React, { useCallback, useEffect, useState, type SetStateAction } from 'react';
 import {
   EuiFilterGroup,
-  EuiFieldSearch,
   euiContainerCSS,
   euiContainerQuery,
   useEuiContainerQuery,
@@ -40,6 +33,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { AlertingDateRangePicker } from '@kbn/alerting-v2-browser-shared';
 import useDebounce from 'react-use/lib/useDebounce';
 import { css } from '@emotion/react';
+import { EpisodesKqlInput } from './episodes_kql_input';
 import * as i18n from '../translations';
 
 export interface EpisodesFilterBarProps {
@@ -100,6 +94,7 @@ export const EpisodesFilterBar = ({
     `(width < ${euiTheme.breakpoint.s}px)`
   );
   const [queryStringInput, setQueryStringInput] = useState(filterState.queryString ?? '');
+  const [isQueryStringValid, setIsQueryStringValid] = useState(true);
 
   useEffect(() => {
     setQueryStringInput(filterState.queryString ?? '');
@@ -107,13 +102,16 @@ export const EpisodesFilterBar = ({
 
   useDebounce(
     () => {
+      if (!isQueryStringValid) {
+        return;
+      }
       const trimmedValue = queryStringInput.trim() || undefined;
       onFilterChange((prev) =>
         trimmedValue !== prev.queryString ? { ...prev, queryString: trimmedValue } : prev
       );
     },
     300,
-    [queryStringInput]
+    [isQueryStringValid, queryStringInput]
   );
 
   const onStatusesChange = useCallback(
@@ -151,8 +149,9 @@ export const EpisodesFilterBar = ({
     [onFilterChange]
   );
 
-  const onKueryChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    setQueryStringInput(e.target.value);
+  const onKueryChange = useCallback((value: string, isValid: boolean) => {
+    setQueryStringInput(value);
+    setIsQueryStringValid(isValid);
   }, []);
 
   return (
@@ -181,13 +180,12 @@ export const EpisodesFilterBar = ({
         `}
       >
         <div css={searchCss}>
-          <EuiFieldSearch
-            fullWidth
-            compressed
-            placeholder={i18n.EPISODES_FILTER_BAR_SEARCH_PLACEHOLDER}
+          <EpisodesKqlInput
             value={queryStringInput}
             onChange={onKueryChange}
+            placeholder={i18n.EPISODES_FILTER_BAR_SEARCH_PLACEHOLDER}
             data-test-subj="episodesFilterBar-search"
+            http={services.http}
           />
         </div>
         <div css={filtersCss}>
