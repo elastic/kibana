@@ -26,8 +26,6 @@ const SCHEDULED_WORKFLOW_INTERVAL_MS = 60_000;
 // When the workflow interval is a multiple of the poll interval, the Least Common
 // Multiple (LCM) equals the interval itself and gaps are uniform:
 //
-// Maximum gap any consecutive-run gap can reach:
-//   interval + TASK_MANAGER_POLL_INTERVAL_MS  (one poll miss at most per interval)
 const TASK_MANAGER_POLL_INTERVAL_MS = 3_000;
 
 const SHORT_RUNNING_SCHEDULED_WORKFLOW_YAML = `
@@ -45,8 +43,7 @@ steps:
       message: "Scheduled execution fired"
 `;
 
-// Failing: See https://github.com/elastic/kibana/issues/259162
-spaceTest.describe.skip('Scheduled workflow execution', { tag: tags.deploymentAgnostic }, () => {
+spaceTest.describe('Scheduled workflow execution', { tag: tags.deploymentAgnostic }, () => {
   let workflowsApi: WorkflowsApiService;
   let workflowId: string;
 
@@ -86,14 +83,13 @@ spaceTest.describe.skip('Scheduled workflow execution', { tag: tags.deploymentAg
       .filter((e): e is NonNullable<typeof e> & { startedAt: string } => e?.startedAt != null)
       .toSorted((a, b) => a.startedAt.localeCompare(b.startedAt));
 
-    // Since 60s is a multiple of pollInterval (3s), LCM(60, 3) = 60s and gaps are
-    // uniform. Each gap must not exceed interval + pollInterval (one poll miss at most).
+    // Allow two poll intervals for task-claim and CI scheduling delays.
     //
     // No lower bound is asserted on `startedAt` gaps. `startedAt` is set by the
     // workflow engine after Task Manager claims the task, so cold-start overhead on
     // the first run shifts its timestamp, making the first→second gap appear shorter
     // than the scheduling interval — even though the Task Manager timing was correct.
-    const maxGapMs = SCHEDULED_WORKFLOW_INTERVAL_MS + TASK_MANAGER_POLL_INTERVAL_MS;
+    const maxGapMs = SCHEDULED_WORKFLOW_INTERVAL_MS + 2 * TASK_MANAGER_POLL_INTERVAL_MS;
     for (let index = 1; index < completedExecutionsSorted.length; index++) {
       const currentExecution = completedExecutionsSorted[index];
       const currentStart = new Date(currentExecution.startedAt).getTime();
@@ -141,8 +137,8 @@ spaceTest.describe.skip('Scheduled workflow execution', { tag: tags.deploymentAg
     // well within the polling interval so they never overlap by construction,
     // but verifying it catches scheduler bugs (e.g. double-dispatching).
     //
-    // We reuse the same workflow from beforeAll — it should already have 2+
-    // completed executions from the preceding test. If not, wait for them.
+    await workflowsApi.update(workflowId, { enabled: true });
+
     await waitForConditionOrThrow({
       action: () => workflowsApi.getExecutions(workflowId),
       condition: ({ results: r }) =>

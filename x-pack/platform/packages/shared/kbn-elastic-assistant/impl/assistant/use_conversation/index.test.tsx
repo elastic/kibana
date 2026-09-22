@@ -271,7 +271,11 @@ describe('useConversation', () => {
         expect(updateConversation).toHaveBeenCalledWith({
           http: httpMock,
           conversationId: mockConvo.id,
-          apiConfig: expect.objectContaining({ actionTypeId: '.gen-ai', connectorId: '123' }),
+          apiConfig: expect.objectContaining({
+            actionTypeId: '.gen-ai',
+            connectorId: '123',
+            defaultSystemPromptId: 'default-system-prompt',
+          }),
           messages: [],
           replacements: {},
         });

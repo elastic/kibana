@@ -8,6 +8,8 @@
 import React from 'react';
 import type { HttpSetup } from '@kbn/core/public';
 import { CoreScopedHistory } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import type { RenderResult } from '@testing-library/react';
@@ -69,17 +71,20 @@ export function renderRemoteClustersRoute<P extends object>(
   const WrappedComponent = WithAppDependencies(Component, httpSetup, contextOverrides);
 
   const user = userEvent.setup();
+  const coreStart = coreMock.createStart();
 
   const result = render(
-    <I18nProvider>
-      <Provider store={store}>
-        <Router history={scopedHistory}>
-          <Routes>
-            <Route path={routePath} component={WrappedComponent} />
-          </Routes>
-        </Router>
-      </Provider>
-    </I18nProvider>
+    <KibanaRenderContextProvider {...coreStart}>
+      <I18nProvider>
+        <Provider store={store}>
+          <Router history={scopedHistory}>
+            <Routes>
+              <Route path={routePath} component={WrappedComponent} />
+            </Routes>
+          </Router>
+        </Provider>
+      </I18nProvider>
+    </KibanaRenderContextProvider>
   );
 
   return { ...result, user, history, store };

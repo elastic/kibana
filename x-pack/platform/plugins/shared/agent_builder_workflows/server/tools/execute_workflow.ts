@@ -55,6 +55,8 @@ Use this tool when:
 — The user asks to run, trigger or execute a workflow.
 — You need to run a workflow you just generated (e.g. via \`generate_workflow\`).
 
+**This tool can perform destructive and irreversible operations** — workflows may include steps that delete Elasticsearch indices or documents, post messages to Slack, make arbitrary HTTP requests, or perform other actions with external side effects. Always review the workflow steps before executing.
+
 ## Source — exactly one must be provided
 
 - \`workflowId\`: a persisted workflow id (the workflow must be saved and enabled).
@@ -77,6 +79,10 @@ If set to false, or if the workflow does not complete within the timeout, the to
 
 - If the returned execution status is \`waiting_for_input\`, the workflow is paused; resume it with \`${platformCoreTools.resumeWorkflowExecution}\`.
 - If the status is not terminal (still running), call \`${platformCoreTools.getWorkflowExecutionStatus}\` later to get the final outcome.
+
+## API documentation
+- Workflows guide: https://www.elastic.co/docs/explore-analyze/workflows
+- Workflows API: https://www.elastic.co/docs/api/doc/kibana/group/endpoint-workflows
 `),
     schema: executeWorkflowSchema,
     annotations: {

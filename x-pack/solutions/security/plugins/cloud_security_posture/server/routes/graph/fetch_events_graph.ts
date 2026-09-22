@@ -507,7 +507,7 @@ ${buildPinnedEsql(['_id', 'actorEntityId', 'targetEntityId'], pinnedIds)}
 // are NOT used here as group keys — IDs are collected via VALUES() and type/sub-type
 // are not available (entity-store join is CPS-unsafe). The follow-up enrichment query
 // supplies type/sub-type and regroupEvents performs the final type-level merge in TypeScript.
-| STATS badge = COUNT(*),
+| STATS badge = COUNT_DISTINCT(_id),
   isAlert = MV_MAX(VALUES(isAlert)),
   docs = VALUES(docData),
   docIds = VALUES(_id),

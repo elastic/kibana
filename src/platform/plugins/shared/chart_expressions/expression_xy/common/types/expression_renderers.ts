@@ -9,7 +9,10 @@
 
 import type { CustomAnnotationTooltip } from '@elastic/charts';
 import type { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
-import type { ManualPointEventAnnotationArgs } from '@kbn/event-annotation-plugin/common';
+import type {
+  ManualPointEventAnnotationArgs,
+  PointEventAnnotationRow,
+} from '@kbn/event-annotation-plugin/common';
 import type { AvailableAnnotationIcon } from '@kbn/event-annotation-common';
 import type { XY_VIS_RENDERER } from '../constants';
 import type { AllowedXYOverrides, XYProps } from './expression_functions';
@@ -35,4 +38,5 @@ export interface MergedAnnotation extends Omit<ManualPointEventAnnotationArgs, '
   icon?: AvailableAnnotationIcon | string;
   customTooltip: CustomAnnotationTooltip;
   isGrouped: boolean;
+  rows: PointEventAnnotationRow[];
 }

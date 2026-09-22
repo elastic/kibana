@@ -18,7 +18,8 @@ For general information about writing evaluation tests, configuration, and usage
 
 ### Snapshot data
 
-Evaluations replay Elasticsearch snapshots from a GCS bucket (`significant-events-datasets`). The bucket is structured as:
+Evaluations replay Elasticsearch snapshots from a GCS bucket (`significant-events-datasets`).
+Most datasets use a run-scoped path:
 
 ```
 significant-events-datasets/
@@ -26,6 +27,10 @@ significant-events-datasets/
     <dataset>/
       <scenario-snapshot>
 ```
+
+Customer-0 incident snapshots use fixed paths such as
+`significant-events-datasets/customer0-incidents/incident-3048`, so
+`SIGEVENTS_SNAPSHOT_RUN` does not affect them.
 
 Set `GCS_CREDENTIALS` before starting Scout so Elasticsearch can access the GCS repository:
 
@@ -36,7 +41,7 @@ export GCS_CREDENTIALS='{"type":"service_account",...}'
 The default run ID is pinned in code (`SIGEVENTS_SNAPSHOT_RUN`). Override it at runtime:
 
 ```bash
-SIGEVENTS_SNAPSHOT_RUN=2026-02-25 node scripts/evals run --suite significant-events --judge gemini-3-pro
+SIGEVENTS_SNAPSHOT_RUN=2026-03-27 node scripts/evals run --suite significant-events --judge gemini-3-pro
 ```
 
 ### Tracing setup (optional — for token and latency metrics)
@@ -97,9 +102,15 @@ Without tracing infrastructure, token and latency evaluators gracefully return `
 node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet evals_tracing
 ```
 
-### Run all evaluations
+### Run the default datasets
 
 > **Note:** Use Gemini 3 Pro as the evaluation judge to ensure consistent scoring across models. This keeps LLM-as-a-judge criteria evaluations comparable regardless of which model is being evaluated.
+
+When `SIGEVENTS_DATASET` is unset or empty, the suite runs every registered dataset that is not
+marked `optIn: true`. Today those are `otel-demo`, `bank-of-anthos`, and `quarkus-super-heroes`.
+
+Implicit default runs may skip missing snapshots. Any non-empty `SIGEVENTS_DATASET` value is an
+explicit selection, and every spec fails when a selected snapshot is missing.
 
 ```bash
 node scripts/evals run \
@@ -108,7 +119,22 @@ node scripts/evals run \
   --judge <gemini-3-pro-connector-id>
 ```
 
+### Run every registered dataset
+
+Set `SIGEVENTS_DATASET=all` to run the default datasets along with the opt-in ones such as
+`incidents`.
+
+```bash
+SIGEVENTS_DATASET=all node scripts/evals run \
+  --suite significant-events \
+  --project <connector-id> \
+  --judge <gemini-3-pro-connector-id>
+```
+
 ### Run a specific dataset
+
+Before running evaluations against customer-0 incident data, confirm data-governance approval for
+the data sent to the selected task model and judges.
 
 ```bash
 SIGEVENTS_DATASET=otel-demo node scripts/evals run \
@@ -116,6 +142,11 @@ SIGEVENTS_DATASET=otel-demo node scripts/evals run \
   --project <connector-id> \
   --judge <gemini-3-pro-connector-id>
 ```
+
+The generic probe and replay scripts do not support datasets that use
+`replayMode: 'managed-stream'`. The replay script rejects them outright. The probe script warns and
+probes the rest of the selection, and fails only when every selected dataset is unsupported. Run
+those datasets through their evaluation spec.
 
 ### Run a specific spec file
 
@@ -142,9 +173,13 @@ node scripts/evals run \
 
 | Variable                                | Description                                                                 | Default                    |
 | --------------------------------------- | --------------------------------------------------------------------------- | -------------------------- |
-| `SIGEVENTS_SNAPSHOT_RUN`                | Run ID subfolder in GCS to replay snapshots from                            | `2026-03-27`               |
-| `SIGEVENTS_DATASET`                     | Dataset(s) to run (comma-separated or `all`)                                | `all`                      |
+| `SIGEVENTS_SNAPSHOT_RUN`                | Run ID subfolder for run-scoped GCS snapshots; fixed incident paths ignore it | `2026-03-27`               |
+| `SIGEVENTS_DATASET`                     | Dataset(s) to run (comma-separated or `all`)                                | registered datasets without `optIn: true` (`otel-demo`, `bank-of-anthos`, `quarkus-super-heroes`) |
 | `KI_QUERY_GENERATION_KI_FEATURE_SOURCE` | KI feature source for KI query generation (`canonical`, `snapshot`, `both`) | `canonical`                |
+| `KI_QUERY_GENERATION_SCENARIOS`         | Comma-separated KI query generation scenario ids to run (focused local runs); unset runs every scenario | `all`                      |
+| `SELECTED_EVALUATORS`                   | Shared permissive evaluator filter used across the suite, including evaluator-name patterns. The empty-stream safety canary always runs its mandatory evaluator. | all evaluators when unset       |
+| `KI_QUERY_GENERATION_EVALUATORS`        | Strict comma-separated exact evaluator names for the configurable main query-generation experiment. Unknown, empty, or trailing-comma selections fail fast. | falls back to `SELECTED_EVALUATORS` |
+| `KI_QUERY_GENERATION_MAX_STEPS`         | Optional max reasoning steps override for KI query generation (integer 2-20) | suite default               |
 | `GCS_CREDENTIALS`                       | GCS service account JSON for snapshot access                                | —                          |
 | `SIGEVENTS_TRUST_UPSTREAM`              | When `true`, use dataset examples from the golden cluster instead of upserting from code | `false`                    |
 | `TRACING_ES_URL`                        | Elasticsearch URL for trace queries (if traces are in a separate cluster)   | Falls back to test cluster |
@@ -217,7 +252,8 @@ node scripts/capture_sigevents_my_app_snapshots.js --connector-id <id> --run-id 
 
 1. Create a dataset file in `src/datasets/` (e.g. `my_app.ts`, following the [`otel_demo.ts`](src/datasets/otel_demo.ts) pattern)
 2. Define scenarios with evaluation criteria
-3. Register the dataset in `src/datasets/index.ts`
+3. Register the dataset in `src/datasets/index.ts`. Registration order is run order, and the
+   dataset joins the default runs unless you mark it `optIn: true`, as `incidents` does
 
 ### 3. Run evals
 

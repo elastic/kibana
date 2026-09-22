@@ -20,6 +20,7 @@ export async function createNewAPIKeySet(
     shouldUpdateApiKey,
     errorMessage,
     apiKeyOwnership,
+    refresh,
   }: {
     id: string;
     ruleName: string;
@@ -27,13 +28,22 @@ export async function createNewAPIKeySet(
     shouldUpdateApiKey: boolean;
     errorMessage?: string;
     apiKeyOwnership?: RuleApiKeyOwnership;
+    refresh?: boolean | 'wait_for';
   }
-): Promise<Pick<RawRule, 'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser' | 'uiamApiKey'>> {
+): Promise<
+  Pick<
+    RawRule,
+    'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser' | 'uiamApiKey' | 'uiamApiKeyExternal'
+  >
+> {
   let createdAPIKey = null;
   let isAuthTypeApiKey = false;
   try {
     const name = generateAPIKeyName(id, ruleName);
-    const resolved = await resolveRuleAPIKey(context, name, shouldUpdateApiKey, apiKeyOwnership);
+    const resolved = await resolveRuleAPIKey(context, name, shouldUpdateApiKey, {
+      apiKeyOwnership,
+      refresh,
+    });
     createdAPIKey = resolved.createdAPIKey;
     isAuthTypeApiKey = resolved.isAuthTypeApiKey;
   } catch (error) {

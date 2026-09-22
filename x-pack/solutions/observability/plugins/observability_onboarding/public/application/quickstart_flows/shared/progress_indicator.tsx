@@ -6,14 +6,7 @@
  */
 
 import React, { type FunctionComponent } from 'react';
-import {
-  EuiIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  type EuiCallOutProps,
-  EuiCallOut,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
+import { type EuiCallOutProps, EuiCallOut, EuiLoadingSpinner } from '@elastic/eui';
 
 interface ProgressIndicatorProps extends EuiCallOutProps {
   iconType?: string;
@@ -28,21 +21,9 @@ export const ProgressIndicator: FunctionComponent<ProgressIndicatorProps> = ({
 }) => {
   return (
     <EuiCallOut
-      title={
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          {isLoading ? (
-            <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner size={rest.size} />
-            </EuiFlexItem>
-          ) : iconType ? (
-            <EuiFlexItem grow={false}>
-              <EuiIcon aria-hidden={true} type={iconType} color={color} size={rest.size} />
-            </EuiFlexItem>
-          ) : null}
-          <EuiFlexItem>{title}</EuiFlexItem>
-        </EuiFlexGroup>
-      }
+      title={title}
       color={color}
+      iconType={isLoading ? EuiLoadingSpinner : iconType}
       {...rest}
     />
   );

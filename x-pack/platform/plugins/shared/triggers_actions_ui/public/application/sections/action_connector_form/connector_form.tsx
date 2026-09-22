@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ReactNode } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
 
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -47,6 +48,8 @@ interface Props {
   /** Handler to receive update on the form "isModified" state */
   onFormModifiedChange?: (isModified: boolean) => void;
   setResetForm?: (value: ResetForm) => void;
+  /** Optional content rendered under Connector settings (e.g. inbound webhook URL). */
+  settingsContent?: ReactNode;
 }
 
 const ConnectorFormComponent: React.FC<Props> = ({
@@ -56,6 +59,7 @@ const ConnectorFormComponent: React.FC<Props> = ({
   onChange,
   onFormModifiedChange,
   setResetForm,
+  settingsContent,
 }) => {
   const { form } = useForm({
     defaultValue: connector,
@@ -103,6 +107,7 @@ const ConnectorFormComponent: React.FC<Props> = ({
         isEdit={isEdit}
         registerPreSubmitValidator={registerPreSubmitValidator}
         authMode={connector.authMode}
+        settingsContent={settingsContent}
       />
       <EuiSpacer size="m" />
       <EncryptedFieldsCallout isEdit={isEdit} isMissingSecrets={connector.isMissingSecrets} />

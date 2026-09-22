@@ -6,18 +6,6 @@ Array [
     "actions": Object {
       "additional": Array [
         Object {
-          "data-test-subj": "gridCopyColumnNameToClipBoardButton",
-          "iconProps": Object {
-            "size": "m",
-          },
-          "iconType": "copy",
-          "label": <Memo(MemoizedFormattedMessage)
-            defaultMessage="Copy name"
-            id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
-          />,
-          "onClick": [Function],
-        },
-        Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
           "iconProps": Object {
             "size": "m",
@@ -39,7 +27,7 @@ Array [
       "showMoveRight": true,
     },
     "cellActions": Array [],
-    "display": <Memo(UnifiedDataTableSummaryColumnHeader)
+    "display": <Memo(UnifiedDataTableSourceColumnHeader)
       columnDisplayName="Summary"
       headerRowHeight={5}
     />,

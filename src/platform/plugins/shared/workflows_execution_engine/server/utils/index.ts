@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { parseDuration } from './parse-duration/parse-duration';
+export { parseDuration } from '@kbn/workflows';
 export { computeRetryDelayMs } from './retry_delay/retry_delay';
 export type { RetryDelayConfig } from './retry_delay/retry_delay';
 export { buildStepExecutionId } from './build_step_execution_id/build_step_execution_id';

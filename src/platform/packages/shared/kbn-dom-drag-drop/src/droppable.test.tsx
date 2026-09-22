@@ -209,7 +209,7 @@ describe('Droppable', () => {
     ]);
     startDragging();
     drop();
-    expect(onDrop).toBeCalledWith(
+    expect(onDrop).toHaveBeenCalledWith(
       expect.objectContaining({ humanData: expect.objectContaining({ label: 'drag_this' }) }),
       'field_add'
     );
@@ -266,7 +266,7 @@ describe('Droppable', () => {
       await dragOverToNextByKeyboard();
       // drops on second target
       await dropByKeyboard();
-      expect(firstDroppableOnDrop).not.toBeCalled();
+      expect(firstDroppableOnDrop).not.toHaveBeenCalled();
       expect(secondDroppableOnDrop).toHaveBeenCalledWith(draggableValue, 'field_add');
     });
     test('adds ghost to droppable when element is dragged over', async () => {
@@ -352,15 +352,15 @@ describe('Droppable', () => {
       startDragging();
       dragOver();
       drop();
-      expect(onDrop).toBeCalledWith(draggableValue, 'move_compatible');
+      expect(onDrop).toHaveBeenCalledWith(draggableValue, 'move_compatible');
       startDragging();
       dragOver(1);
       drop(1);
-      expect(onDrop).toBeCalledWith(draggableValue, 'duplicate_compatible');
+      expect(onDrop).toHaveBeenCalledWith(draggableValue, 'duplicate_compatible');
       startDragging();
       dragOver(2);
       drop(2);
-      expect(onDrop).toBeCalledWith(draggableValue, 'swap_compatible');
+      expect(onDrop).toHaveBeenCalledWith(draggableValue, 'swap_compatible');
     });
     test('pressing Alt or Shift when dragging over the main drop target sets extra drop target as active', () => {
       const { startDragging, dragOver, drop } = renderTestComponents([
@@ -373,12 +373,12 @@ describe('Droppable', () => {
       startDragging();
       dragOver(0, { altKey: true });
       drop(0, { altKey: true });
-      expect(onDrop).toBeCalledWith(draggableValue, 'duplicate_compatible');
+      expect(onDrop).toHaveBeenCalledWith(draggableValue, 'duplicate_compatible');
 
       startDragging();
       dragOver(0, { shiftKey: true });
       drop(0, { shiftKey: true });
-      expect(onDrop).toBeCalledWith(draggableValue, 'swap_compatible');
+      expect(onDrop).toHaveBeenCalledWith(draggableValue, 'swap_compatible');
     });
     test('pressing Alt or Shift when dragging over the extra drop target does nothing', () => {
       const { startDragging, dragOver, drop } = renderTestComponents([
@@ -391,7 +391,7 @@ describe('Droppable', () => {
       startDragging();
       dragOver(1, { shiftKey: true });
       drop(1, { shiftKey: true });
-      expect(onDrop).toBeCalledWith(draggableValue, 'duplicate_compatible');
+      expect(onDrop).toHaveBeenCalledWith(draggableValue, 'duplicate_compatible');
     });
     describe('keyboard mode', () => {
       // TODO needs fixing after the update of userEvent v14 https://github.com/elastic/kibana/pull/189949

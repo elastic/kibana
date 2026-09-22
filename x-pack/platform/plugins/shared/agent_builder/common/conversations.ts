@@ -16,6 +16,22 @@ export type ConversationCreateRequest = Omit<
 
 export interface ConversationListOptions {
   agentId?: string;
+  page?: number;
+  perPage?: number;
+  sortOrder?: 'asc' | 'desc';
+  pinned?: boolean;
+}
+
+/**
+ * Options the `_search` HTTP route accepts, a subset of the server-side `ConversationSearchOptions`
+ * from `@kbn/agent-builder-common`. Replace this with that type once the route supports `filter`
+ * and `sort`.
+ */
+export interface ConversationSearchRequestOptions {
+  query: string;
+  agentId?: string;
+  page?: number;
+  perPage?: number;
 }
 
 export interface ConversationGetOptions {

@@ -6,7 +6,11 @@
  */
 
 export type { SkillDefinition, DirectoryPath } from './type_definition';
-export { validateSkillDefinition, skillDefinitionSchema } from './type_definition';
+export {
+  validateSkillDefinition,
+  skillDefinitionSchema,
+  ELASTIC_SKILLS_BASE_PATH,
+} from './type_definition';
 export type { InternalSkillDefinition } from './internal';
 export type {
   SkillBoundedTool,

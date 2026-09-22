@@ -8,7 +8,11 @@
  */
 
 import { injectReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common';
-import type { DataGridDensity } from '@kbn/unified-data-table';
+import type {
+  DataGridDensity,
+  JsonModeSettings,
+  DocumentsDisplayMode,
+} from '@kbn/unified-data-table';
 import type { DiscoverSession, SortOrder } from '../types';
 import type { GetSavedSearchDependencies } from './get_saved_searches';
 import { getSearchSavedObject } from './get_saved_searches';
@@ -49,8 +53,11 @@ export const getDiscoverSession = async (
       breakdownField: tab.attributes.breakdownField,
       chartInterval: tab.attributes.chartInterval,
       density: tab.attributes.density as DataGridDensity,
+      documentsDisplayMode: tab.attributes.documentsDisplayMode as DocumentsDisplayMode,
+      jsonModeSettings: tab.attributes.jsonModeSettings as JsonModeSettings,
       visContext: tab.attributes.visContext,
       controlGroupJson: tab.attributes.controlGroupJson,
+      tabTypeState: tab.attributes.tabTypeState,
     })),
     managed: Boolean(so.item.managed),
     tags: deps.savedObjectsTagging

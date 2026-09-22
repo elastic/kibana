@@ -18,10 +18,10 @@ project:
   sourceRoot: x-pack/platform/plugins/shared/ingest_hub
 dependsOn:
   - '@kbn/core'
-  - '@kbn/config-schema'
   - '@kbn/i18n'
   - '@kbn/shared-ux-utility'
   - '@kbn/shared-ux-router'
+  - '@kbn/core-spaces-common'
   - '@kbn/spaces-plugin'
   - '@kbn/cloud-plugin'
   - '@kbn/deeplinks-observability'
@@ -31,6 +31,7 @@ dependsOn:
   - '@kbn/fleet-plugin'
   - '@kbn/i18n-react'
   - '@kbn/ui-callout'
+  - '@kbn/react-kibana-context-styled'
 tags:
   - plugin
   - prod

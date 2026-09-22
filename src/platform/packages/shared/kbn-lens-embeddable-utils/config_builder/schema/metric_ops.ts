@@ -52,14 +52,14 @@ export const staticOperationDefinitionSchema = genericOperationOptionsSchema
       description: 'Static value',
     }),
   })
-  .meta({ id: 'staticOperationDefinition', title: METRIC_OP_TITLES.static });
+  .meta({ id: 'visStaticOperationDefinition', title: METRIC_OP_TITLES.static });
 
 const advancedOperationSettings = {
   /**
    * Reduced time range
    */
   reduced_time_range: z.string().optional().meta({
-    id: 'operationReducedTimeRangeSetting',
+    id: 'visOperationReducedTimeRangeSetting',
     title: 'Operation Reduced Time Range Setting',
     description: 'Reduced time range',
   }),
@@ -67,7 +67,7 @@ const advancedOperationSettings = {
    * Time shift
    */
   time_shift: z.string().optional().meta({
-    id: 'operationTimeShiftSetting',
+    id: 'visOperationTimeShiftSetting',
     title: 'Operation Time Shift Setting',
     description: 'Time shift',
   }),
@@ -82,7 +82,7 @@ const advancedOperationSettings = {
     .union([z.literal('s'), z.literal('m'), z.literal('h'), z.literal('d')])
     .optional()
     .meta({
-      id: 'operationTimeScaleSetting',
+      id: 'visOperationTimeScaleSetting',
       title: 'Operation Time Scale Setting',
       description: 'Time scale',
     }),
@@ -106,7 +106,7 @@ export const formulaOperationDefinitionSchema = genericOperationOptionsSchema
       .optional()
       .meta({ description: 'Time scale' }),
   })
-  .meta({ id: 'formulaOperation', title: METRIC_OP_TITLES.formula });
+  .meta({ id: 'visFormulaOperation', title: METRIC_OP_TITLES.formula });
 
 const esqlColumn = {
   column: z.string().meta({
@@ -151,27 +151,27 @@ export const countMetricOperationSchema = fieldBasedOperationSharedSchema
     operation: z.literal('count'),
     field: z.string().optional().meta({ description: 'Field to be used for the metric' }),
   })
-  .meta({ id: 'countMetricOperation', title: METRIC_OP_TITLES.count });
+  .meta({ id: 'visCountMetricOperation', title: METRIC_OP_TITLES.count });
 
 export const uniqueCountMetricOperationSchema = fieldBasedOperationSharedSchema
   .extend(emptyAsNullSchemaRawObject)
   .extend({
     operation: z.literal('unique_count'),
   })
-  .meta({ id: 'uniqueCountMetricOperation', title: METRIC_OP_TITLES.uniqueCount });
+  .meta({ id: 'visUniqueCountMetricOperation', title: METRIC_OP_TITLES.uniqueCount });
 
 export const metricOperationSchema = fieldBasedOperationSharedSchema
   .extend({
     operation: z.enum(['min', 'max', 'average', 'median', 'standard_deviation']),
   })
-  .meta({ id: 'minMaxAvgMedianStdDevMetricOperation', title: METRIC_OP_TITLES.stats });
+  .meta({ id: 'visMinMaxAvgMedianStdDevMetricOperation', title: METRIC_OP_TITLES.stats });
 
 export const sumMetricOperationSchema = fieldBasedOperationSharedSchema
   .extend(emptyAsNullSchemaRawObject)
   .extend({
     operation: z.literal('sum'),
   })
-  .meta({ id: 'sumMetricOperation', title: METRIC_OP_TITLES.sum });
+  .meta({ id: 'visSumMetricOperation', title: METRIC_OP_TITLES.sum });
 
 export const lastValueOperationSchema = fieldBasedOperationSharedSchema
   .extend({
@@ -186,7 +186,7 @@ export const lastValueOperationSchema = fieldBasedOperationSharedSchema
         'Whether to return all values for multi-value fields. Only affects data table and metric charts; other charts use the last value from the array.',
     }),
   })
-  .meta({ id: 'lastValueOperation', title: METRIC_OP_TITLES.lastValue });
+  .meta({ id: 'visLastValueOperation', title: METRIC_OP_TITLES.lastValue });
 
 export const percentileOperationSchema = fieldBasedOperationSharedSchema
   .extend({
@@ -196,7 +196,7 @@ export const percentileOperationSchema = fieldBasedOperationSharedSchema
       .default(LENS_PERCENTILE_DEFAULT_VALUE)
       .meta({ description: 'Percentile' }),
   })
-  .meta({ id: 'percentileOperation', title: METRIC_OP_TITLES.percentile });
+  .meta({ id: 'visPercentileOperation', title: METRIC_OP_TITLES.percentile });
 
 export const percentileRanksOperationSchema = fieldBasedOperationSharedSchema
   .extend({
@@ -206,7 +206,7 @@ export const percentileRanksOperationSchema = fieldBasedOperationSharedSchema
       .default(LENS_PERCENTILE_RANK_DEFAULT_VALUE)
       .meta({ description: 'Percentile Rank' }),
   })
-  .meta({ id: 'percentileRanksOperation', title: METRIC_OP_TITLES.percentileRanks });
+  .meta({ id: 'visPercentileRanksOperation', title: METRIC_OP_TITLES.percentileRanks });
 
 export const fieldMetricOperationsSchema = z
   .union([
@@ -218,14 +218,14 @@ export const fieldMetricOperationsSchema = z
     percentileOperationSchema,
     percentileRanksOperationSchema,
   ])
-  .meta({ id: 'fieldMetricOperations', title: 'Field Metric Operations' });
+  .meta({ id: 'visFieldMetricOperations', title: 'Field Metric Operations' });
 
 export const differencesOperationSchema = metricOperationSharedSchema
   .extend({
     operation: z.literal('differences'),
     of: fieldMetricOperationsSchema,
   })
-  .meta({ id: 'differencesOperation', title: METRIC_OP_TITLES.differences });
+  .meta({ id: 'visDifferencesOperation', title: METRIC_OP_TITLES.differences });
 
 export const movingAverageOperationSchema = metricOperationSharedSchema
   .extend({
@@ -233,7 +233,7 @@ export const movingAverageOperationSchema = metricOperationSharedSchema
     of: fieldMetricOperationsSchema,
     window: z.number().default(LENS_MOVING_AVERAGE_DEFAULT_WINDOW).meta({ description: 'Window' }),
   })
-  .meta({ id: 'movingAverageOperation', title: METRIC_OP_TITLES.movingAverage });
+  .meta({ id: 'visMovingAverageOperation', title: METRIC_OP_TITLES.movingAverage });
 
 export const cumulativeSumOperationSchema = metricOperationSharedSchema
   .extend({
@@ -243,13 +243,13 @@ export const cumulativeSumOperationSchema = metricOperationSharedSchema
         'Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.',
     }),
   })
-  .meta({ id: 'cumulativeSumOperation', title: METRIC_OP_TITLES.cumulativeSum });
+  .meta({ id: 'visCumulativeSumOperation', title: METRIC_OP_TITLES.cumulativeSum });
 
 export const counterRateOperationSchema = fieldBasedOperationSharedSchema
   .extend({
     operation: z.literal('counter_rate'),
   })
-  .meta({ id: 'counterRateOperation', title: METRIC_OP_TITLES.counterRate });
+  .meta({ id: 'visCounterRateOperation', title: METRIC_OP_TITLES.counterRate });
 
 export const metricOperationDefinitionSchema = z
   .union([

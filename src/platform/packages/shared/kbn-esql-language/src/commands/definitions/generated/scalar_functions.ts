@@ -28,8 +28,10 @@
 
 import { scalarFunctionDefinitionsPart1 } from './scalar_functions/part_1';
 import { scalarFunctionDefinitionsPart2 } from './scalar_functions/part_2';
+import { scalarFunctionDefinitionsPart3 } from './scalar_functions/part_3';
 
 export const scalarFunctionDefinitions = [
   ...scalarFunctionDefinitionsPart1,
   ...scalarFunctionDefinitionsPart2,
+  ...scalarFunctionDefinitionsPart3,
 ];

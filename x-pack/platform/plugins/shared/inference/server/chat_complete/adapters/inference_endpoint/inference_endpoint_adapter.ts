@@ -15,6 +15,7 @@ import type {
   ChatCompleteMetadata,
   ChatCompletionChunkEvent,
   ChatCompletionTokenCountEvent,
+  ChatCompletionReasoning,
   ChatCompleteCacheControl,
 } from '@kbn/inference-common';
 import { InferenceEndpointProvider } from '@kbn/inference-common';
@@ -33,6 +34,7 @@ import {
 import { getTemperatureIfValid } from '../../utils/get_temperature';
 import type { InferenceEndpointExecutor } from '../../utils/inference_endpoint_executor';
 import { ensureToolsWhenHistoryHasToolUse } from '../../utils/ensure_tools_when_history_has_tool_use';
+import { resolveChatCompletionReasoning } from '../../utils/resolve_chat_completion_reasoning';
 import { sanitizeToolSchemasForVertex } from './sanitize_tool_schemas_for_vertex';
 import type { InferenceEndpointRequest } from './types';
 
@@ -43,6 +45,7 @@ export interface InferenceEndpointAdapterChatCompleteOptions {
   system?: string;
   functionCalling?: FunctionCallingMode;
   temperature?: number;
+  reasoning?: ChatCompletionReasoning;
   modelName?: string;
   // Endpoint model identity is authoritative for parameter support.
   endpointModelId?: string;
@@ -69,6 +72,7 @@ export const inferenceEndpointAdapter = {
       tools,
       functionCalling,
       temperature,
+      reasoning,
       modelName,
       endpointModelId,
       provider,
@@ -94,6 +98,7 @@ export const inferenceEndpointAdapter = {
       tools: sanitizedTools,
       simulatedFunctionCalling: useSimulatedFunctionCalling,
       temperature,
+      reasoning,
       modelName,
       endpointModelId,
       provider,
@@ -125,6 +130,7 @@ const createEndpointRequest = ({
   tools,
   simulatedFunctionCalling,
   temperature,
+  reasoning,
   modelName,
   endpointModelId,
   provider,
@@ -137,6 +143,7 @@ const createEndpointRequest = ({
   tools?: ToolOptions['tools'];
   simulatedFunctionCalling: boolean;
   temperature?: number;
+  reasoning?: ChatCompletionReasoning;
   modelName?: string;
   endpointModelId?: string;
   provider?: string;
@@ -167,17 +174,28 @@ const createEndpointRequest = ({
       toolChoice,
       tools,
     });
+    const resolvedReasoning = resolveChatCompletionReasoning({
+      reasoning,
+      hasNativeTools: false,
+      model: endpointModelId ?? modelName,
+    });
     return {
       ...temperatureOptions,
       ...eisFields,
       model: modelName,
       messages: messagesToOpenAI({ system: wrapped.system, messages: wrapped.messages }),
+      ...(resolvedReasoning ? { reasoning: resolvedReasoning } : {}),
     };
   }
 
   const toolsForRequest = ensureToolsWhenHistoryHasToolUse({ tools, messages });
   const openAiTools = toolsToOpenAI(toolsForRequest);
   const hasTools = Array.isArray(openAiTools) && openAiTools.length > 0;
+  const resolvedReasoning = resolveChatCompletionReasoning({
+    reasoning,
+    hasNativeTools: hasTools,
+    model: endpointModelId ?? modelName,
+  });
 
   return {
     ...temperatureOptions,
@@ -190,5 +208,6 @@ const createEndpointRequest = ({
           tools: openAiTools,
         }
       : {}),
+    ...(resolvedReasoning ? { reasoning: resolvedReasoning } : {}),
   };
 };

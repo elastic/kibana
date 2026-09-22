@@ -10,7 +10,7 @@ import type { PackagePolicy } from '../types/models';
 import { getAgentlessThroughputIndexPatterns } from './agentless_throughput_helper';
 
 const makePolicy = (
-  streams: Array<{ enabled: boolean; type?: string; dataset: string }>
+  streams: Array<{ enabled: boolean; type?: string; dataset: string; dynamicDataset?: boolean }>
 ): Pick<PackagePolicy, 'inputs'> =>
   ({
     inputs: [
@@ -19,7 +19,13 @@ const makePolicy = (
         enabled: true,
         streams: streams.map((s) => ({
           enabled: s.enabled,
-          data_stream: { type: s.type ?? 'logs', dataset: s.dataset },
+          data_stream: {
+            type: s.type ?? 'logs',
+            dataset: s.dataset,
+            ...(s.dynamicDataset !== undefined
+              ? { elasticsearch: { dynamic_dataset: s.dynamicDataset } }
+              : {}),
+          },
         })),
       },
     ],
@@ -82,6 +88,47 @@ describe('getAgentlessThroughputIndexPatterns', () => {
     expect(getAgentlessThroughputIndexPatterns(policy)).toEqual([
       'logs-nginx.access-*',
       'metrics-nginx.status-*',
+    ]);
+  });
+
+  it('widens the pattern to the package namespace when dynamic_dataset is true', () => {
+    // Okta EA: dataset is entityanalytics_okta.entity but routing rules divert all
+    // documents to entityanalytics_okta.user and entityanalytics_okta.device.
+    const policy = makePolicy([
+      { enabled: true, dataset: 'entityanalytics_okta.entity', dynamicDataset: true },
+    ]);
+    expect(getAgentlessThroughputIndexPatterns(policy)).toEqual(['logs-entityanalytics_okta.*-*']);
+  });
+
+  it('uses the explicit type when dynamic_dataset is true', () => {
+    const policy = makePolicy([
+      { enabled: true, type: 'metrics', dataset: 'mypkg.entity', dynamicDataset: true },
+    ]);
+    expect(getAgentlessThroughputIndexPatterns(policy)).toEqual(['metrics-mypkg.*-*']);
+  });
+
+  it('deduplicates widened patterns from multiple dynamic_dataset streams in the same package', () => {
+    // Two different declared data-stream names under the same package both collapse to the same widened pattern.
+    const policy = makePolicy([
+      { enabled: true, dataset: 'entityanalytics_okta.entity', dynamicDataset: true },
+      { enabled: true, dataset: 'entityanalytics_okta.other', dynamicDataset: true },
+    ]);
+    expect(getAgentlessThroughputIndexPatterns(policy)).toEqual(['logs-entityanalytics_okta.*-*']);
+  });
+
+  it('treats dynamic_dataset: false the same as absent (uses the exact dataset pattern)', () => {
+    const policy = makePolicy([{ enabled: true, dataset: 'pkg.ds', dynamicDataset: false }]);
+    expect(getAgentlessThroughputIndexPatterns(policy)).toEqual(['logs-pkg.ds-*']);
+  });
+
+  it('mixes regular and dynamic_dataset streams correctly', () => {
+    const policy = makePolicy([
+      { enabled: true, dataset: 'nginx.access' },
+      { enabled: true, dataset: 'entityanalytics_okta.entity', dynamicDataset: true },
+    ]);
+    expect(getAgentlessThroughputIndexPatterns(policy)).toEqual([
+      'logs-nginx.access-*',
+      'logs-entityanalytics_okta.*-*',
     ]);
   });
 

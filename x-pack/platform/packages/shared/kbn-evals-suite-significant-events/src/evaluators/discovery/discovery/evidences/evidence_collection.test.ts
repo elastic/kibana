@@ -51,7 +51,6 @@ const evaluate = (events: Partial<SignificantEvent>[], ruleUuids: string[]) =>
     },
     output: {
       significantEvents: events as SignificantEvent[],
-      steps: [],
     },
     expected: {} as never,
     metadata: null,

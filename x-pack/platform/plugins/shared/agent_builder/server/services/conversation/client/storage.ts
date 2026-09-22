@@ -13,14 +13,18 @@ import { chatSystemIndex } from '@kbn/agent-builder-server';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type {
   ConversationAccessControl,
+  ConversationEvent,
   ConversationInternalState,
   ConversationRoundStatus,
   ConversationOrigin,
-  TimelineEvent,
   ActiveExecution,
 } from '@kbn/agent-builder-common/chat';
 import type { SerializedMetadataValue } from '@kbn/agent-builder-common';
-import type { PersistentConversationRound } from './types';
+import type {
+  ConversationPinnedByEntry,
+  ConversationReadByEntry,
+  PersistentConversationRound,
+} from './types';
 
 export const conversationIndexName = chatSystemIndex('conversations');
 
@@ -32,10 +36,30 @@ const storageSettings = {
       user_name: types.keyword({}),
       agent_id: types.keyword({}),
       space: types.keyword({}),
-      title: types.text({}),
+      title: types.text({
+        fields: {
+          keyword: types.keyword(),
+          caseless: types.keyword({ normalizer: 'lowercase' }),
+        },
+      }),
       created_at: types.date({}),
       updated_at: types.date({}),
-      conversation_rounds: types.object({ dynamic: false, properties: {} }),
+      conversation_rounds: types.object({
+        dynamic: false,
+        properties: {
+          feedback: types.object({
+            dynamic: false,
+            properties: {
+              vote: types.keyword({}),
+              chips: types.keyword({}),
+              comment: types.text({}),
+              submitted_at: types.date({}),
+              connector_id: types.keyword({}),
+              model: types.keyword({}),
+            },
+          }),
+        },
+      }),
       events: types.nested({
         properties: {
           id: types.keyword({}),
@@ -62,13 +86,40 @@ const storageSettings = {
         },
       }),
       schema_version: types.long({}),
-      attachments: types.object({ dynamic: false, properties: {} }),
+      attachments: types.object({
+        dynamic: false,
+        properties: {
+          id: types.keyword({}),
+          type: types.keyword({}),
+        },
+      }),
       state: types.object({ dynamic: false, properties: {} }),
       status: types.keyword({}),
+      // legacy field, superseded by read_by
       read: types.boolean({}),
+      read_by: types.nested({
+        properties: {
+          userId: types.keyword({}),
+        },
+        dynamic: false,
+      }),
+      // legacy field, superseded by pinned_by
       pinned: types.boolean({}),
+      pinned_by: types.nested({
+        properties: {
+          userId: types.keyword({}),
+        },
+        dynamic: false,
+      }),
       read_only: types.boolean({}),
       workspace_id: types.keyword({}),
+      parent_conversation: types.object({
+        dynamic: false,
+        properties: {
+          id: types.keyword({}),
+          relation: types.keyword({}),
+        },
+      }),
       access_control: types.object({
         properties: {
           access_mode: types.keyword({}),
@@ -96,6 +147,14 @@ const storageSettings = {
   },
 } satisfies IndexStorageSettings;
 
+/**
+ * Persistent shape of the parent-conversation link.
+ */
+export interface PersistentConversationParentLink {
+  id: string;
+  relation: string;
+}
+
 export interface ConversationProperties {
   user_id?: string;
   user_name: string;
@@ -105,17 +164,22 @@ export interface ConversationProperties {
   created_at: string;
   updated_at: string;
   conversation_rounds: PersistentConversationRound[];
-  events?: TimelineEvent[];
+  events?: ConversationEvent[];
   active_execution?: ActiveExecution;
   schema_version?: number;
   attachments?: VersionedAttachment[];
   state?: ConversationInternalState;
   status?: ConversationRoundStatus;
+  // legacy field, superseded by read_by
   read?: boolean;
+  read_by?: ConversationReadByEntry[];
+  // legacy field, superseded by pinned_by
   pinned?: boolean;
+  pinned_by?: ConversationPinnedByEntry[];
   read_only?: boolean;
   workspace_id?: string;
   access_control?: Optional<ConversationAccessControl, 'entries'>;
+  parent_conversation?: PersistentConversationParentLink;
   origin?: ConversationOrigin;
   metadata?: Record<string, SerializedMetadataValue>;
   template_id?: string;

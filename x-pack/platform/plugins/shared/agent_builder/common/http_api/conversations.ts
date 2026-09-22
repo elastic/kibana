@@ -6,34 +6,35 @@
  */
 
 import type {
-  Conversation,
   ConversationAccessControl,
-  ConversationAccessControlEntry,
+  ConversationAccessControlEntryInput,
   ConversationAccessControlMode,
-  ConversationWithoutRounds,
+  ConversationAddEventInput,
+  ConversationEvent,
+  ConversationWithPermissions,
+  ConversationWithoutRoundsWithPermissions,
 } from '@kbn/agent-builder-common';
 
-export interface ConversationPermissions {
-  rename: boolean;
-  delete: boolean;
-  update_access_control: boolean;
-}
-
-export type ConversationWithPermissions = Conversation & {
-  permissions: ConversationPermissions;
-};
-
-export type ConversationWithoutRoundsWithPermissions = ConversationWithoutRounds & {
-  permissions: ConversationPermissions;
-};
+export type {
+  ConversationPermissions,
+  ConversationWithPermissions,
+  ConversationWithoutRoundsWithPermissions,
+} from '@kbn/agent-builder-common';
 
 export type GetConversationResponse = ConversationWithPermissions;
 
 export type ListConversationsResponseItem = ConversationWithoutRoundsWithPermissions;
 
 export interface ListConversationsResponse {
+  pagination: {
+    total: number;
+    page: number;
+    per_page: number;
+  };
   results: ListConversationsResponseItem[];
 }
+
+export type SearchConversationsResponse = ListConversationsResponse;
 
 export interface DeleteConversationResponse {
   success: boolean;
@@ -54,9 +55,19 @@ export interface MarkPinnedConversationResponse {
   pinned: boolean;
 }
 
+export type CreateConversationResponse = ConversationWithPermissions;
+
 export interface UpdateConversationAccessControlRequestBody {
   access_mode: ConversationAccessControlMode;
-  entries: Array<Omit<ConversationAccessControlEntry, 'added_at'>>;
+  entries: ConversationAccessControlEntryInput[];
 }
 
 export type UpdateConversationAccessControlResponse = ConversationAccessControl;
+
+export interface AddConversationEventsRequestBody {
+  events: ConversationAddEventInput[];
+}
+
+export interface AddConversationEventsResponse {
+  events: ConversationEvent[];
+}

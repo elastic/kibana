@@ -10,8 +10,8 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
   EuiPanel,
+  EuiSkeletonRectangle,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -24,7 +24,7 @@ import { useFetchEpisodeTrendQuery } from '../../hooks/use_fetch_episode_trend_q
 import { prepareTrendInputs } from './prepare_trend_inputs';
 import { mapEventDataToSeries } from './trend_data';
 import type { AlertEpisodeDetailsServices } from './types';
-import type { TrendMetricGroup } from './trend_types';
+import { TREND_CHART_HEIGHT, type TrendMetricGroup } from './trend_types';
 import * as i18n from './translations';
 
 const AlertEpisodeTrendChart = React.lazy(() =>
@@ -138,9 +138,15 @@ export const AlertEpisodeTrendChartSection = ({
           {i18n.TREND_CHART_LOAD_ERROR}
         </EuiText>
       ) : isLoading ? (
-        <EuiLoadingSpinner size="m" data-test-subj="alertingV2EpisodeTrendChartSectionLoading" />
+        <EuiSkeletonRectangle
+          width="100%"
+          height={TREND_CHART_HEIGHT}
+          data-test-subj="alertingV2EpisodeTrendChartSectionLoading"
+        />
       ) : series ? (
-        <React.Suspense fallback={<EuiLoadingSpinner size="m" />}>
+        <React.Suspense
+          fallback={<EuiSkeletonRectangle width="100%" height={TREND_CHART_HEIGHT} />}
+        >
           <AlertEpisodeTrendChart series={series} thresholds={selectedGroup!.thresholds} />
         </React.Suspense>
       ) : null}

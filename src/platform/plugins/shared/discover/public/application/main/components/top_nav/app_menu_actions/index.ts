@@ -8,6 +8,7 @@
  */
 
 export { getAlertsAppMenuItem, getCreateRuleOptionsAppMenuItem } from './get_alerts';
+export { getExportAppMenuItem } from './get_export';
 export { getNewSearchAppMenuItem } from './get_new_search';
 export { getOpenSearchAppMenuItem } from './get_open_search';
 export { getShareAppMenuItem } from './get_share';

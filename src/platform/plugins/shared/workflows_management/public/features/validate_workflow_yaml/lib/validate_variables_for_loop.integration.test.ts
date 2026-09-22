@@ -13,7 +13,7 @@ import { DynamicStepContextSchema } from '@kbn/workflows';
 import { getShape } from '@kbn/workflows/common/utils/zod';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import type { ConnectorStep } from '@kbn/workflows/spec/schema';
-import { VARIABLE_REGEX_GLOBAL } from '@kbn/workflows-yaml';
+import { matchAllVariables } from '@kbn/workflows-yaml';
 import {
   FOR_LOOP_NESTED_YAML,
   FOR_LOOP_VALIDATION_YAML,
@@ -35,9 +35,7 @@ describe('validateVariables for-loop integration', () => {
   const model = createFakeMonacoModel(FOR_LOOP_VALIDATION_YAML);
 
   function variableItemForKey(key: string) {
-    const match = [...FOR_LOOP_VALIDATION_YAML.matchAll(VARIABLE_REGEX_GLOBAL)].find(
-      (m) => m.groups?.key === key
-    );
+    const match = matchAllVariables(FOR_LOOP_VALIDATION_YAML).find((m) => m.groups.key === key);
     expect(match).toBeDefined();
     const startOffset = match!.index ?? 0;
     const startPosition = model.getPositionAt(startOffset);
@@ -136,9 +134,7 @@ steps:
     const graph = WorkflowGraph.fromWorkflowDefinition(definition);
     const doc = parseDocument(templateYaml);
     const innerModel = createFakeMonacoModel(templateYaml);
-    const match = [...templateYaml.matchAll(VARIABLE_REGEX_GLOBAL)].find(
-      (m) => m.groups?.key === 'forloop.index'
-    );
+    const match = matchAllVariables(templateYaml).find((m) => m.groups?.key === 'forloop.index');
     expect(match).toBeDefined();
     const offset = match!.index ?? 0;
     const start = innerModel.getPositionAt(offset);
@@ -266,7 +262,7 @@ steps:
     const nestedGraph = WorkflowGraph.fromWorkflowDefinition(forLoopNestedWorkflowDefinition);
     const nestedDoc = parseDocument(FOR_LOOP_NESTED_YAML);
     const nestedModel = createFakeMonacoModel(FOR_LOOP_NESTED_YAML);
-    const innerMatch = [...FOR_LOOP_NESTED_YAML.matchAll(VARIABLE_REGEX_GLOBAL)].find(
+    const innerMatch = matchAllVariables(FOR_LOOP_NESTED_YAML).find(
       (m) => m.groups?.key === 'inner'
     );
     expect(innerMatch).toBeDefined();

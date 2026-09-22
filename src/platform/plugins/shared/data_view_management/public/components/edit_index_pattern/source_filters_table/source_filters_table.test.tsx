@@ -155,7 +155,7 @@ describe('SourceFiltersTable', () => {
     await user.type(screen.getByTestId('fieldFilterInput'), 'na*');
     await user.click(screen.getByText('Add'));
 
-    expect(saveIndexPattern).toBeCalled();
+    expect(saveIndexPattern).toHaveBeenCalled();
     expect(await screen.findByText('na*')).toBeVisible();
 
     expect(indexPattern.sourceFilters).toEqual([{ value: 'tim*' }, { value: 'na*' }]);
@@ -175,7 +175,7 @@ describe('SourceFiltersTable', () => {
     await user.type(screen.getByTestId('filter_input_tim*'), 'ti*');
     await user.click(screen.getByTestId('save_filter-tim*'));
 
-    expect(saveIndexPattern).toBeCalled();
+    expect(saveIndexPattern).toHaveBeenCalled();
     expect(await screen.findByText('ti*')).toBeVisible();
     expect(indexPattern.sourceFilters).toEqual([{ value: 'ti*', clientId: 1 }]);
   });

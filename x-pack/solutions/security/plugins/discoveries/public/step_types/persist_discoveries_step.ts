@@ -43,6 +43,7 @@ export const persistDiscoveriesStepPublicDefinition: PublicStepDefinition = {
 - {apiConfig}: Connector configuration used for generation
 - {connectorName}: Display name of the connector
 - {generationUuid}: Execution UUID linking discoveries to generation event
+- {generationSource}: Identifies the producer of these attacks, so they never deduplicate against another producer's attacks built from the same alerts (optional; omit for Kibana Attack Discovery)
 - {alertsContextCount}: Number of alerts analyzed
 - {enableFieldRendering}: Render markdown fields (default: true)
 - {withReplacements}: Apply de-anonymization (default: false)
@@ -56,6 +57,7 @@ Returns persisted discoveries from the Attack Discovery alerts index.`,
           attackDiscoveries: '`attack_discoveries`',
           connectorName: '`connector_name`',
           enableFieldRendering: '`enable_field_rendering`',
+          generationSource: '`generation_source`',
           generationUuid: '`generation_uuid`',
           replacements: '`replacements`',
           validationStep: '`attack-discovery.defaultValidation`',

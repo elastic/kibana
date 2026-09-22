@@ -6,7 +6,13 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiPanel,
+  EuiSkeletonText,
+  EuiSkeletonTitle,
+  EuiSpacer,
+} from '@elastic/eui';
 import { useFetchEpisodeQuery } from '../../hooks/use_fetch_episode_query';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import {
@@ -15,7 +21,6 @@ import {
   isRuleLoaded,
   isRuleLoading,
 } from '../../types/rule_state';
-import { getRuleDetailsPath } from '../../constants';
 import { AlertEpisodeRuleOverviewPanel } from './rule_overview_panel';
 import type { AlertEpisodeDetailsServices } from './types';
 import * as i18n from './translations';
@@ -23,11 +28,13 @@ import * as i18n from './translations';
 export interface AlertEpisodeRuleOverviewPanelSectionProps {
   episodeId: string;
   services: Pick<AlertEpisodeDetailsServices, 'data' | 'http' | 'spaces'>;
+  getRuleDetailsHref: (ruleId: string) => string;
 }
 
 export const AlertEpisodeRuleOverviewPanelSection = ({
   episodeId,
   services,
+  getRuleDetailsHref,
 }: AlertEpisodeRuleOverviewPanelSectionProps) => {
   const {
     data: episode,
@@ -44,10 +51,15 @@ export const AlertEpisodeRuleOverviewPanelSection = ({
 
   if (isLoadingEpisode || (ruleId && isRuleLoading(ruleState))) {
     return (
-      <EuiLoadingSpinner
-        size="m"
+      <EuiPanel
+        hasBorder
+        paddingSize="m"
         data-test-subj="alertingV2EpisodeRuleOverviewPanelSectionLoading"
-      />
+      >
+        <EuiSkeletonTitle size="xs" />
+        <EuiSpacer size="s" />
+        <EuiSkeletonText lines={3} size="s" />
+      </EuiPanel>
     );
   }
   if (isEpisodeError || isRuleError(ruleState)) {
@@ -75,7 +87,7 @@ export const AlertEpisodeRuleOverviewPanelSection = ({
   return (
     <AlertEpisodeRuleOverviewPanel
       rule={ruleState.rule}
-      ruleDetailsHref={services.http.basePath.prepend(getRuleDetailsPath(resolvedRuleId))}
+      ruleDetailsHref={getRuleDetailsHref(resolvedRuleId)}
     />
   );
 };

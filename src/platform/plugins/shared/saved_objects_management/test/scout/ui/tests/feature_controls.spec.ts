@@ -63,6 +63,7 @@ test.describe('Saved objects management feature controls', { tag: tags.stateful.
     );
 
     await expect(pageObjects.savedObjectsManagement.codeEditor).toBeVisible();
+    await pageObjects.savedObjectsManagement.openInspectHeaderOverflow();
     await expect(pageObjects.savedObjectsManagement.inspectDeleteButton).toBeVisible();
   });
 

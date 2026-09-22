@@ -58,7 +58,7 @@ export type DashboardConfigMatchesAttachmentData = (
  * `React.lazy` boundary so the cost is deferred until a dashboard attachment
  * is actually rendered.
  *
- * Caller (`getDashboardAttachmentViewObject`) only mounts this when `data` is
+ * Caller (`getDashboardCreationActivity`) only mounts this when `data` is
  * present; with the schema-level requirement `data.config` is then guaranteed,
  * so we destructure directly without a narrowing helper.
  */

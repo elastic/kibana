@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CustomHostSettings, ProxySettings, SSLSettings } from '@kbn/actions-utils';
+import type {
+  CustomHostSettings,
+  ProxySettings,
+  SSLSettings,
+  getNodeSSLOptions,
+} from '@kbn/actions-utils';
 import type { Logger } from '@kbn/logging';
 
 export interface ConnectorResponseSettings {
@@ -15,14 +20,25 @@ export interface ConnectorResponseSettings {
   maxContentLength: number;
 }
 
+export type TlsConnectionOptions = ReturnType<typeof getNodeSSLOptions>;
+
+/** A resolved TCP target (hostname + port) used when building TLS and allowlist checks. */
+export interface HostTarget {
+  hostname: string;
+  port: number;
+}
+
 /**
- * The Kibana `xpack.actions.*` outbound-network settings, handed to a client type unchanged.
+ * Global / shared Kibana `xpack.actions.*` outbound-network settings, handed to a client type
+ * unchanged.
  *
- * These are the same settings the axios path applies via `get_axios_instance`. The framework only
- * makes them reachable; each client type is responsible for applying them through its own
- * library's native options. The two `ensure*` methods are
- * the exception: they are checks rather than values, because the `allowedHosts` matching logic
- * lives in the Actions plugin and cannot be re-implemented in this package.
+ * These are the same settings the axios path applies via `get_axios_instance`. They are for
+ * cluster-wide Actions policy only (allowlist, proxy, TLS, response limits). Do not extend this
+ * surface with client-specific knobs — those belong on connector `config` / secrets, or closed
+ * over in the client type. The framework only makes these settings reachable; each client type
+ * is responsible for applying them through its own library's native options. The two `ensure*`
+ * methods are the exception: they are checks rather than values, because the `allowedHosts`
+ * matching logic lives in the Actions plugin and cannot be re-implemented in this package.
  */
 export interface ConnectorNetworkSettings {
   /** Throws AllowlistDeniedError if the URL is not on xpack.actions.allowedHosts. */
@@ -35,6 +51,28 @@ export interface ConnectorNetworkSettings {
   getResponseSettings(): ConnectorResponseSettings;
 }
 
+/**
+ * Node-only platform capabilities injected into `BuildContext`. Separated from
+ * `ConnectorNetworkSettings` because these perform real I/O or invoke Node crypto — they are
+ * not passive config accessors.
+ */
+export interface PlatformServices {
+  /**
+   * Resolves `_<serviceName>._tcp.<name>` SRV records. `serviceName` is required — the caller
+   * supplies the protocol-specific name (e.g. `'mongodb'`) rather than relying on a default.
+   */
+  resolveSrvHosts(
+    name: string,
+    serviceName: string
+  ): Promise<Array<{ name: string; port: number }>>;
+  /**
+   * Applies `xpack.actions.ssl` and any matching `xpack.actions.customHostSettings` override to
+   * produce Node TLS options ready to spread into a driver's connect options. Consolidates the
+   * global-vs-per-host merge so client types don't each reimplement it.
+   */
+  buildTlsOptions(targets: HostTarget[], logger: Logger): TlsConnectionOptions;
+}
+
 export interface CredentialAccessor {
   getAuthHeaders(): Promise<Record<string, string>>;
 }
@@ -43,6 +81,7 @@ export interface BuildContext {
   logger: Logger;
   config?: Record<string, unknown>;
   networkSettings: ConnectorNetworkSettings;
+  platform: PlatformServices;
   credential: CredentialAccessor;
 }
 

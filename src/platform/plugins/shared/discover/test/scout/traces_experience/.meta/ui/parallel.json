@@ -1,21 +1,9 @@
 {
   "sha1": "49137728404c2ffc43a1c90e7bba168eb72b9c46",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "d4d97e00130eace-e748235f7fc12b4",
-      "title": "Teardown traces experience tests data",
-      "expectedStatus": "passed",
-      "tags": [],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/global.teardown.ts",
-        "line": 7,
-        "column": 1
-      }
-    },
     {
       "id": "ee40a7482a9e189-258b185aba8058b",
       "title": "Setup traces experience tests data",
@@ -871,6 +859,17 @@
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/waterfall_flyout_usage.spec.ts",
         "line": 235,
         "column": 43
+      }
+    },
+    {
+      "id": "d4d97e00130eace-e748235f7fc12b4",
+      "title": "Teardown traces experience tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/global.teardown.ts",
+        "line": 7,
+        "column": 1
       }
     }
   ]

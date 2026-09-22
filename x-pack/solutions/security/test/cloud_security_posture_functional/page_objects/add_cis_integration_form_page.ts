@@ -282,9 +282,17 @@ export function AddCisIntegrationFormPageProvider({
   };
 
   const clickPolicyToBeEdited = async (name: string) => {
-    const table = await testSubjects.find(TEST_IDS.INTEGRATION_POLICY_TABLE);
-    const integrationToBeEdited = await table.findByXpath(`//text()="${name}"`);
-    await integrationToBeEdited.click();
+    await retry.waitFor('integration policy name links to appear', async () =>
+      testSubjects.exists(TEST_IDS.INTEGRATION_NAME_LINK)
+    );
+    const nameLinks = await testSubjects.findAll(TEST_IDS.INTEGRATION_NAME_LINK);
+    for (const nameLink of nameLinks) {
+      if ((await nameLink.getVisibleText()).trim() === name) {
+        await nameLink.click();
+        return;
+      }
+    }
+    throw new Error(`Integration policy "${name}" was not found in the policies table`);
   };
 
   const clickFirstElementOnIntegrationTable = async () => {
@@ -534,7 +542,11 @@ export function AddCisIntegrationFormPageProvider({
   const inputUniqueIntegrationName = async () => {
     const flyout = await testSubjects.find(TEST_IDS.CREATE_PACKAGE_POLICY_PAGE);
     const nameField = await flyout.findAllByCssSelector('input[id="name"]');
-    await nameField[0].type(uuidv4());
+    const name = uuidv4();
+    // Clear the auto-generated default name so the saved policy name equals `name` exactly and `clickPolicyToBeEdited(name)` can match its row.
+    await nameField[0].clearValueWithKeyboard();
+    await nameField[0].type(name);
+    return name;
   };
 
   const inputIntegrationName = async (text: string) => {
@@ -590,6 +602,12 @@ export function AddCisIntegrationFormPageProvider({
     await clickOptionButton(GCP_PROVIDER_TEST_SUBJ);
     await clickOptionButton(GCP_SINGLE_ACCOUNT_TEST_SUBJ);
     await selectSetupTechnology('agentless');
+    // When GCP Cloud Connectors are enabled (package >= 3.3.0-preview03), the form defaults
+    // to cloud_connectors. Switch to credentials-json so the JSON field is visible.
+    if (await isGcpCredentialSelectorVisible()) {
+      await selectGcpCredentials('credentials-json');
+    }
+    await PageObjects.header.waitUntilLoadingHasFinished();
     await fillInTextField(GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID, projectId);
     await fillInTextField(GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON, credentialJson);
   };
@@ -629,6 +647,17 @@ export function AddCisIntegrationFormPageProvider({
 
     await navigateToEditAgentlessIntegrationPage();
     await PageObjects.header.waitUntilLoadingHasFinished();
+
+    // Secret fields (e.g. GCP credentials JSON) hide the saved value and show a Replace
+    // button on edit. Click it first so the input is available to type into.
+    const replaceButtonId = testSubjectId.replace(
+      /^(textAreaInput|passwordInput)-/,
+      'button-replace-'
+    );
+    if (replaceButtonId !== testSubjectId && (await testSubjects.exists(replaceButtonId))) {
+      await testSubjects.click(replaceButtonId);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
 
     // Fill out form to edit an agentless integration
     await fillInTextField(testSubjectId, value);

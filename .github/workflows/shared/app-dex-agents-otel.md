@@ -15,6 +15,7 @@ description: >-
 network:
   allowed:
     - agent-observability-ce9858.ingest.us-east4.gcp.elastic.cloud
+    - api.anthropic.com
 env:
   CLAUDE_CODE_ENABLE_TELEMETRY: "1"
   OTEL_METRICS_EXPORTER: otlp
@@ -23,6 +24,13 @@ env:
   OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
   OTEL_METRIC_EXPORT_INTERVAL: "10000"
   OTEL_LOG_TOOL_DETAILS: "1"
+# gh-aw does not currently include secrets referenced only by observability headers
+# in its automatic artifact redaction list.
+pre-agent-steps:
+  - name: Register OTLP API key for artifact redaction
+    env:
+      APPS_DX_AGENT_OBS_OTEL_SECRET: ${{ secrets.APPS_DX_AGENT_OBS_OTEL_SECRET }}
+    run: printf '::add-mask::%s\n' "$APPS_DX_AGENT_OBS_OTEL_SECRET"
 observability:
   otlp:
     endpoint:

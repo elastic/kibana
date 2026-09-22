@@ -31,15 +31,17 @@ import { scheduleResilienceTask, stopResilienceTask } from '../../tasks/resilien
 import { removeEntityMaintainer } from '../../tasks/entity_maintainers';
 import { entityMaintainersRegistry } from '../../tasks/entity_maintainers/entity_maintainers_registry';
 import { installSharedElasticsearchAssets, uninstallElasticsearchAssets } from './install_assets';
+import { deleteLegacyRemoteStateSavedObjects } from '../saved_objects/remote_log_extraction_state/types';
+import type { LogExtractionConfig } from '../saved_objects';
 import {
   EngineDescriptorTypeName,
   type EngineDescriptor,
   type EngineDescriptorClient,
   type EntityStoreGlobalStateClient,
   HistorySnapshotState,
-  LogExtractionConfig,
 } from '../saved_objects';
 import type { HistorySnapshotBodyParams, LogExtractionInstallParams } from '../../routes/constants';
+import { getMergedConfig } from '../config';
 import { ENGINE_STATUS, ENTITY_STORE_STATUS } from '../constants';
 import type {
   EntityStoreStatus,
@@ -57,15 +59,17 @@ import {
   getLatestEntitiesIndexName,
   getLatestEntityIndexPattern,
   getLegacySecurityEntityIndexPattern,
+  getLegacySecurityLatestEntitiesIndexName,
   getLegacySecurityLatestEntityIndexPattern,
 } from '../../../common/domain/entity_index';
 import { getLatestIndexTemplateId } from './latest_index_template';
-import { getUpdatesIndexTemplateId } from './updates_index_template';
-import { getComponentTemplateName, getUpdatesComponentTemplateName } from './component_templates';
+import { getComponentTemplateName } from './component_templates';
 import { getUpdatesEntitiesDataStreamName } from './updates_data_stream';
-import { getMetadataEntitiesDataStreamName } from './metadata_data_stream';
+import {
+  getMetadataEntitiesDataStreamName,
+  getLegacySecurityMetadataEntitiesDataStreamName,
+} from './metadata_data_stream';
 import type { LogsExtractionClient } from '../logs_extraction';
-import type { RemoteLogExtractionStateClient } from '../saved_objects/remote_log_extraction_state';
 import type { ManagedEntityDefinition } from '../../../common/domain/definitions/entity_schema';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
 import {
@@ -84,13 +88,13 @@ interface AssetManagerDependencies {
   taskManager: TaskManagerStartContract;
   engineDescriptorClient: EngineDescriptorClient;
   globalStateClient: EntityStoreGlobalStateClient;
-  remoteLogExtractionStateClient: RemoteLogExtractionStateClient;
   namespace: string;
   isServerless: boolean;
   logsExtractionClient: LogsExtractionClient;
   security: SecurityPluginStart;
   analytics: TelemetryReporter;
   savedObjectsClient: SavedObjectsClientContract;
+  isLegacySecurityAssetsMigrationEnabled?: () => Promise<boolean>;
 }
 
 export class AssetManagerClient {
@@ -100,13 +104,13 @@ export class AssetManagerClient {
   private readonly taskManager: TaskManagerStartContract;
   private readonly engineDescriptorClient: EngineDescriptorClient;
   private readonly globalStateClient: EntityStoreGlobalStateClient;
-  private readonly remoteLogExtractionStateClient: RemoteLogExtractionStateClient;
   private readonly namespace: string;
   private readonly isServerless: boolean;
   private readonly logsExtractionClient: LogsExtractionClient;
   private readonly security: SecurityPluginStart;
   private readonly analytics: TelemetryReporter;
   private readonly savedObjectsClient: SavedObjectsClientContract;
+  private readonly isLegacySecurityAssetsMigrationEnabled: () => Promise<boolean>;
 
   constructor(deps: AssetManagerDependencies) {
     this.logger = deps.logger;
@@ -115,13 +119,14 @@ export class AssetManagerClient {
     this.taskManager = deps.taskManager;
     this.engineDescriptorClient = deps.engineDescriptorClient;
     this.globalStateClient = deps.globalStateClient;
-    this.remoteLogExtractionStateClient = deps.remoteLogExtractionStateClient;
     this.namespace = deps.namespace;
     this.isServerless = deps.isServerless;
     this.logsExtractionClient = deps.logsExtractionClient;
     this.security = deps.security;
     this.analytics = deps.analytics;
     this.savedObjectsClient = deps.savedObjectsClient;
+    this.isLegacySecurityAssetsMigrationEnabled =
+      deps.isLegacySecurityAssetsMigrationEnabled ?? (async () => false);
   }
 
   public async init(
@@ -131,16 +136,11 @@ export class AssetManagerClient {
     historySnapshotParams?: HistorySnapshotBodyParams
   ) {
     try {
-      const existingState = await this.globalStateClient.find();
-      const logsExtraction = resolveLogsExtractionOnInstall(
-        existingState?.logsExtraction,
-        logsExtractionParams
-      );
       const historySnapshot = HistorySnapshotState.parse(historySnapshotParams ?? {});
 
       // Phase 1: Install shared ES assets/storage and run independent setup tasks.
       await Promise.all([
-        this.globalStateClient.init({ historySnapshot, logsExtraction }),
+        this.globalStateClient.init({ historySnapshot, logsExtraction: logsExtractionParams }),
 
         // V1 cleanup is legacy migration work — run it as the internal user so enabling the
         // entity store does not require the user to hold transform/enrich/index admin on v1 assets.
@@ -169,6 +169,7 @@ export class AssetManagerClient {
           migrationEsClient: this.internalEsClient,
           logger: this.logger,
           namespace: this.namespace,
+          allowLegacyMigration: await this.isLegacySecurityAssetsMigrationEnabled(),
         }),
       ]);
 
@@ -176,7 +177,7 @@ export class AssetManagerClient {
       // schedules are created — those tasks self-delete when they find zero engines,
       // so scheduling them in parallel with initEntity can tear down a freshly
       // scheduled status task mid-install.
-      await Promise.all(entityTypes.map((type) => this.initEntity(request, type, logsExtraction)));
+      await Promise.all(entityTypes.map((type) => this.initEntity(request, type)));
 
       // Phase 3: Schedule namespace-scoped background tasks after descriptors exist.
       await Promise.all([
@@ -212,11 +213,13 @@ export class AssetManagerClient {
     }
   }
 
-  public async start(request: KibanaRequest, type: EntityType, { frequency }: LogExtractionConfig) {
+  public async start(request: KibanaRequest, type: EntityType) {
     try {
       this.logger.get(type).debug(`Scheduling extract entity task for type: ${type}`);
 
       await this.engineDescriptorClient.update(type, { status: ENGINE_STATUS.STARTED });
+
+      const { frequency } = await this.getLogExtractionConfig(type);
 
       await scheduleExtractEntityTask({
         logger: this.logger,
@@ -258,10 +261,7 @@ export class AssetManagerClient {
       await this.stop(type);
 
       // Per-type saved objects — always safe to remove for this type alone.
-      await Promise.all([
-        this.engineDescriptorClient.delete(type),
-        this.remoteLogExtractionStateClient.delete(type),
-      ]);
+      await this.engineDescriptorClient.delete(type);
 
       // The ES indices/data streams are shared across all entity types in the namespace
       // (their names carry the namespace, not the type). Only remove them once no engine
@@ -327,6 +327,11 @@ export class AssetManagerClient {
         namespace: this.namespace,
       }),
       this.globalStateClient.delete(),
+      deleteLegacyRemoteStateSavedObjects({
+        soClient: this.savedObjectsClient,
+        namespace: this.namespace,
+        logger: this.logger,
+      }),
     ]);
 
     this.logger.debug(
@@ -336,13 +341,20 @@ export class AssetManagerClient {
 
   public async getStatus(withComponents: boolean = false): Promise<GetStatusResult> {
     try {
-      const [engines, { historySnapshot, logsExtraction: logsExtractionConfig }] =
+      const [engines, { historySnapshot, logsExtraction: logsExtractionConfig }, globalOverrides] =
         await Promise.all([
           this.engineDescriptorClient.getAll(),
           this.globalStateClient.findOrThrow(),
+          this.globalStateClient.findLogExtractionOverrides(),
         ]);
 
       const status = this.calculateEntityStoreStatus(engines);
+      const logsExtractionConfigByType = Object.fromEntries(
+        engines.map((engine) => [
+          engine.type,
+          getMergedConfig(engine.type, globalOverrides, engine.logExtractionConfig),
+        ])
+      ) as Partial<Record<EntityType, LogExtractionConfig>>;
 
       if (withComponents) {
         const enginesWithComponents = await Promise.all(
@@ -353,10 +365,17 @@ export class AssetManagerClient {
           engines: enginesWithComponents,
           historySnapshot,
           logsExtractionConfig,
+          logsExtractionConfigByType,
         };
       }
 
-      return { status, engines, historySnapshot, logsExtractionConfig };
+      return {
+        status,
+        engines,
+        historySnapshot,
+        logsExtractionConfig,
+        logsExtractionConfigByType,
+      };
     } catch (error) {
       if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
         return { status: ENTITY_STORE_STATUS.NOT_INSTALLED, engines: [] };
@@ -367,19 +386,19 @@ export class AssetManagerClient {
     }
   }
 
-  public async getLogExtractionConfig(): Promise<LogExtractionConfig> {
-    const globalState = await this.globalStateClient.find();
-    return globalState?.logsExtraction ?? LogExtractionConfig.parse({});
+  /** Log extraction config in effect for one entity type. */
+  public async getLogExtractionConfig(type: EntityType): Promise<LogExtractionConfig> {
+    const [globalOverrides, engine] = await Promise.all([
+      this.globalStateClient.findLogExtractionOverrides(),
+      this.engineDescriptorClient.findOrThrow(type),
+    ]);
+    return getMergedConfig(type, globalOverrides, engine.logExtractionConfig);
   }
 
-  private async initEntity(
-    request: KibanaRequest,
-    type: EntityType,
-    logsExtractionConfig: LogExtractionConfig
-  ): Promise<boolean> {
+  private async initEntity(request: KibanaRequest, type: EntityType): Promise<boolean> {
     const installed = await this.install(type);
     if (installed) {
-      await this.start(request, type, logsExtractionConfig);
+      await this.start(request, type);
     }
     this.analytics.reportEvent(ENTITY_STORE_INITIALIZATION_EVENT, {
       entityType: type,
@@ -547,29 +566,17 @@ export class AssetManagerClient {
   private async getIndexTemplateComponents(): Promise<EngineComponentStatus[]> {
     const resource = 'index_template';
     const latestId = getLatestIndexTemplateId(this.namespace);
-    const updatesId = getUpdatesIndexTemplateId(this.namespace);
-    const [latestExists, updatesExists] = await Promise.all([
-      this.tryAsBoolean(this.esClient.indices.getIndexTemplate({ name: latestId })),
-      this.tryAsBoolean(this.esClient.indices.getIndexTemplate({ name: updatesId })),
-    ]);
-    return [
-      { id: latestId, installed: latestExists, resource },
-      { id: updatesId, installed: updatesExists, resource },
-    ];
+    const latestExists = await this.tryAsBoolean(
+      this.esClient.indices.getIndexTemplate({ name: latestId })
+    );
+    return [{ id: latestId, installed: latestExists, resource }];
   }
 
   private async getIndexComponents(): Promise<EngineComponentStatus[]> {
     const resource: EngineComponentResource = 'index';
     const latestIndex = getLatestEntitiesIndexName(this.namespace);
-    const updatesDataStreamName = getUpdatesEntitiesDataStreamName(this.namespace);
-    const [latestExists, updatesExists] = await Promise.all([
-      this.esClient.indices.exists({ index: latestIndex }),
-      this.tryAsBoolean(this.esClient.indices.getDataStream({ name: updatesDataStreamName })),
-    ]);
-    return [
-      { id: latestIndex, installed: latestExists, resource },
-      { id: updatesDataStreamName, installed: updatesExists, resource },
-    ];
+    const latestExists = await this.esClient.indices.exists({ index: latestIndex });
+    return [{ id: latestIndex, installed: latestExists, resource }];
   }
 
   private async getComponentTemplateComponents(
@@ -577,15 +584,10 @@ export class AssetManagerClient {
   ): Promise<EngineComponentStatus[]> {
     const resource: EngineComponentResource = 'component_template';
     const latestName = getComponentTemplateName(definition.type, this.namespace);
-    const updatesName = getUpdatesComponentTemplateName(definition.type, this.namespace);
-    const [latestExists, updatesExists] = await Promise.all([
-      this.tryAsBoolean(this.esClient.cluster.getComponentTemplate({ name: latestName })),
-      this.tryAsBoolean(this.esClient.cluster.getComponentTemplate({ name: updatesName })),
-    ]);
-    return [
-      { id: latestName, installed: latestExists, resource },
-      { id: updatesName, installed: updatesExists, resource },
-    ];
+    const latestExists = await this.tryAsBoolean(
+      this.esClient.cluster.getComponentTemplate({ name: latestName })
+    );
+    return [{ id: latestName, installed: latestExists, resource }];
   }
 
   private async getIlmPolicyComponents(): Promise<EngineComponentStatus[]> {
@@ -628,36 +630,43 @@ export class AssetManagerClient {
   }
 
   /**
-   * Checks whether the three shared per-namespace assets exist (latest index, updates data stream,
-   * metadata data stream) and reinstalls any that are missing. Returns true if anything was
-   * recreated, false if all assets were already present.
+   * Checks whether the two shared per-namespace assets exist (latest index, metadata data stream)
+   * and reinstalls any that are missing. Returns true if anything was recreated, false if all
+   * assets were already present.
    *
    * Safe to call from a running task — the underlying creates use `throwIfExists: false`.
    */
   public async reinstallSharedAssetsIfMissing(): Promise<boolean> {
     const latestIndex = getLatestEntitiesIndexName(this.namespace);
-    const updatesDataStream = getUpdatesEntitiesDataStreamName(this.namespace);
+    const legacyLatestIndex = getLegacySecurityLatestEntitiesIndexName(this.namespace);
     const metadataDataStream = getMetadataEntitiesDataStreamName(this.namespace);
+    const legacyMetadataDataStream = getLegacySecurityMetadataEntitiesDataStreamName(
+      this.namespace
+    );
 
-    const [latestExists, updatesExists, metadataExists] = await Promise.all([
-      this.esClient.indices.exists({ index: latestIndex }),
+    const dataStreamExists = async (name: string): Promise<boolean> =>
       this.esClient.indices
-        .getDataStream({ name: updatesDataStream }, { ignore: [404] })
-        .then((r) => (r?.data_streams?.length ?? 0) > 0),
+        .getDataStream({ name }, { ignore: [404] })
+        .then((r) => (r?.data_streams?.length ?? 0) > 0);
+
+    const [latestExists, metadataExists] = await Promise.all([
       this.esClient.indices
-        .getDataStream({ name: metadataDataStream }, { ignore: [404] })
-        .then((r) => (r?.data_streams?.length ?? 0) > 0),
+        .exists({ index: latestIndex })
+        .then(
+          async (exists) => exists || this.esClient.indices.exists({ index: legacyLatestIndex })
+        ),
+      dataStreamExists(metadataDataStream).then(
+        async (exists) => exists || dataStreamExists(legacyMetadataDataStream)
+      ),
     ]);
 
-    if (latestExists && updatesExists && metadataExists) {
+    if (latestExists && metadataExists) {
       return false;
     }
 
-    const missing = [
-      !latestExists && latestIndex,
-      !updatesExists && updatesDataStream,
-      !metadataExists && metadataDataStream,
-    ].filter(Boolean);
+    const missing = [!latestExists && latestIndex, !metadataExists && metadataDataStream].filter(
+      Boolean
+    );
     this.logger.warn(
       `Recreating missing entity store assets in ${this.namespace}: ${missing.join(', ')}`
     );
@@ -667,6 +676,7 @@ export class AssetManagerClient {
       migrationEsClient: this.internalEsClient,
       logger: this.logger,
       namespace: this.namespace,
+      allowLegacyMigration: await this.isLegacySecurityAssetsMigrationEnabled(),
     });
     return true;
   }
@@ -698,18 +708,4 @@ export class AssetManagerClient {
 
     return ENTITY_STORE_STATUS.RUNNING;
   }
-}
-
-function resolveLogsExtractionOnInstall(
-  existing: LogExtractionConfig | undefined,
-  params: LogExtractionInstallParams | undefined
-): LogExtractionConfig {
-  const hasParams = params !== undefined && Object.keys(params).length > 0;
-  if (hasParams) {
-    return LogExtractionConfig.parse(params);
-  }
-  if (existing !== undefined) {
-    return existing;
-  }
-  return LogExtractionConfig.parse({});
 }

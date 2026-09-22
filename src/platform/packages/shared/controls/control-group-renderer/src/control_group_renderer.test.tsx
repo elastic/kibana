@@ -47,6 +47,7 @@ const getTestEmbeddableFactory = () =>
         }),
         anyStateChange$: of(),
         applySerializedState: jest.fn(),
+        latestState$: of(initialState),
       });
       return {
         Component: () => <div data-test-subj="testControl">{initialState.selection}</div>,
@@ -117,7 +118,7 @@ describe('control group renderer', () => {
       })
     );
 
-    expect(applySpy).toBeCalledWith({
+    expect(applySpy).toHaveBeenCalledWith({
       type: 'test_control',
       selection: 'test selection',
     });

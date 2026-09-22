@@ -7,6 +7,7 @@
 
 import { coreMock } from '@kbn/core/public/mocks';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { Datatable } from '@kbn/expressions-plugin/public';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import type {
   TextBasedPersistedState,
@@ -503,6 +504,106 @@ describe('Textbased Data Source', () => {
           (column) => column.columnId === 'trendline-breakdown-accessor'
         )
       ).toBe(false);
+    });
+
+    it('uses a dynamic TBUCKET alias for the trendline time column', () => {
+      const query = 'TS metrics-* | STATS avg_cpu = AVG(cpu) BY `Over time` = TBUCKET(1 hour)';
+      const state = {
+        layers: {
+          main: {
+            columns: [
+              {
+                columnId: 'metric-accessor',
+                fieldName: 'avg_cpu',
+                meta: { type: 'number' },
+              },
+            ],
+            query: { esql: query },
+            index: 'metrics',
+          },
+          trendline: {
+            columns: [
+              {
+                columnId: 'trendline-time-accessor',
+                fieldName: 'BUCKET(@timestamp, 75, ?_tstart, ?_tend)',
+                meta: { type: 'date' },
+              },
+            ],
+            query: { esql: query },
+            index: 'metrics',
+            timeField: '@timestamp',
+          },
+        },
+      } as unknown as TextBasedPrivateState;
+
+      const newState = TextBasedDatasource.syncColumns({
+        state,
+        links: [
+          {
+            from: {
+              layerId: 'main',
+              columnId: 'metric-accessor',
+              groupId: LENS_METRIC_GROUP_ID.METRIC,
+            },
+            to: {
+              layerId: 'trendline',
+              columnId: 'trendline-metric-accessor',
+              groupId: LENS_METRIC_GROUP_ID.TREND_METRIC,
+            },
+          },
+        ],
+        getDimensionGroups: jest.fn(),
+        indexPatterns: {},
+      });
+
+      expect(newState.layers.trendline.query?.esql).toBe(query);
+      expect(
+        newState.layers.trendline.columns.find(
+          (column) => column.columnId === 'trendline-time-accessor'
+        )?.fieldName
+      ).toBe('Over time');
+    });
+  });
+
+  describe('#initializeDimension', () => {
+    it('initializes the trendline time dimension from a TBUCKET alias', () => {
+      const query = 'TS metrics-* | STATS avg_cpu = AVG(cpu) BY custom_time = TBUCKET(100)';
+      const state = {
+        layers: {
+          trendline: {
+            columns: [],
+            query: { esql: query },
+            index: 'metrics',
+            timeField: '@timestamp',
+          },
+        },
+      } as unknown as TextBasedPrivateState;
+
+      const { initializeDimension } = TextBasedDatasource;
+      if (!initializeDimension) {
+        throw new Error('Expected text-based datasource to initialize dimensions');
+      }
+
+      const newState = initializeDimension(
+        state,
+        'trendline',
+        {},
+        {
+          columnId: 'trendline-time-accessor',
+          groupId: LENS_METRIC_GROUP_ID.TREND_TIME,
+          visualizationGroups: [],
+          autoTimeField: true,
+        }
+      );
+
+      expect(newState.layers.trendline.query?.esql).toBe(query);
+      expect(newState.layers.trendline.columns).toEqual([
+        {
+          columnId: 'trendline-time-accessor',
+          fieldName: 'custom_time',
+          meta: { type: 'date' },
+        },
+      ]);
     });
   });
 
@@ -1359,6 +1460,128 @@ describe('Textbased Data Source', () => {
       it('should return null for non-existant columns', () => {
         expect(publicAPI.getOperationForColumnId('col2')).toBe(null);
       });
+
+      it('should overlay type from activeData by columnId if present', () => {
+        const state = {
+          layers: {
+            a: {
+              columns: [
+                {
+                  columnId: 'heatmap_value_accessor_x',
+                  fieldName: '@timestamp',
+                  meta: {
+                    type: 'string',
+                  },
+                },
+              ],
+              index: 'foo',
+            },
+          },
+        } as unknown as TextBasedPrivateState;
+
+        publicAPI = TextBasedDatasource.getPublicAPI({
+          state,
+          layerId: 'a',
+          indexPatterns,
+          activeDataTable: {
+            type: 'datatable',
+            columns: [
+              {
+                id: 'heatmap_value_accessor_x',
+                name: '@timestamp',
+                meta: { type: 'date' },
+              },
+            ],
+            rows: [],
+          },
+        });
+        expect(publicAPI.getOperationForColumnId('heatmap_value_accessor_x')).toEqual({
+          label: '@timestamp',
+          dataType: 'date',
+          isBucketed: true,
+          hasTimeShift: false,
+          hasReducedTimeRange: false,
+          scale: 'interval',
+        });
+      });
+
+      it('should derive isBucketed and scale from the overlayed type, not persisted meta (number -> date)', () => {
+        // API Format Path can persist a metric-role guess of `number` while the query returns `date`.
+        // dataType, isBucketed and scale must all follow the overlayed Query Result Type.
+        const state = {
+          layers: {
+            a: {
+              columns: [
+                {
+                  columnId: 'col1',
+                  fieldName: '@timestamp',
+                  meta: { type: 'number' },
+                },
+              ],
+              index: 'foo',
+            },
+          },
+        } as unknown as TextBasedPrivateState;
+
+        publicAPI = TextBasedDatasource.getPublicAPI({
+          state,
+          layerId: 'a',
+          indexPatterns,
+          activeDataTable: {
+            type: 'datatable',
+            columns: [{ id: 'col1', name: '@timestamp', meta: { type: 'date' } }],
+            rows: [],
+          },
+        });
+
+        expect(publicAPI.getOperationForColumnId('col1')).toEqual({
+          label: '@timestamp',
+          dataType: 'date',
+          isBucketed: true,
+          hasTimeShift: false,
+          hasReducedTimeRange: false,
+          scale: 'interval',
+        });
+      });
+
+      it('should derive isBucketed and scale from the overlayed type, not persisted meta (string -> number)', () => {
+        // Persisted non-metric role guess of `string`, but the query returns `number`:
+        // the column must be treated as a metric (isBucketed: false, scale: ratio).
+        const state = {
+          layers: {
+            a: {
+              columns: [
+                {
+                  columnId: 'col1',
+                  fieldName: 'bytes',
+                  meta: { type: 'string' },
+                },
+              ],
+              index: 'foo',
+            },
+          },
+        } as unknown as TextBasedPrivateState;
+
+        publicAPI = TextBasedDatasource.getPublicAPI({
+          state,
+          layerId: 'a',
+          indexPatterns,
+          activeDataTable: {
+            type: 'datatable',
+            columns: [{ id: 'col1', name: 'bytes', meta: { type: 'number' } }],
+            rows: [],
+          },
+        });
+
+        expect(publicAPI.getOperationForColumnId('col1')).toEqual({
+          label: 'bytes',
+          dataType: 'number',
+          isBucketed: false,
+          hasTimeShift: false,
+          hasReducedTimeRange: false,
+          scale: 'ratio',
+        });
+      });
     });
 
     describe('getSourceId', () => {
@@ -1442,6 +1665,60 @@ describe('Textbased Data Source', () => {
         'reduced',
         'reduced',
       ]);
+    });
+
+    test('overlays the suggestion table dataType from activeData by columnId without mutating persisted meta', () => {
+      // After e.g. Datatable -> Bar, a timestamp can be persisted with a stale type `string` when new api is in use.
+      // The suggestion table must reflect the Query Result Type from `activeData` (`date`), while the persistable
+      // `layer.columns` stay untouched.
+      const state = {
+        layers: {
+          a: {
+            columns: [
+              {
+                columnId: 'metric',
+                fieldName: 'bytes',
+                meta: { type: 'number' },
+              },
+              {
+                columnId: 'bucket',
+                fieldName: '@timestamp',
+                meta: { type: 'string' },
+              },
+            ],
+            query: { esql: 'FROM activeData_overlay_test' },
+            index: 'foo',
+          },
+        },
+      } as unknown as TextBasedPrivateState;
+
+      const activeData = {
+        a: {
+          type: 'datatable',
+          columns: [
+            { id: 'metric', name: 'bytes', meta: { type: 'number' } },
+            { id: 'bucket', name: '@timestamp', meta: { type: 'date' } },
+          ],
+          rows: [],
+        },
+      } as unknown as Record<string, Datatable>;
+
+      const suggestions = TextBasedDatasource.getDatasourceSuggestionsFromCurrentState(
+        state,
+        indexPatterns,
+        undefined,
+        activeData
+      );
+
+      const unchanged = suggestions.find((s) => s.table.changeType === 'unchanged');
+      const bucketColumn = unchanged?.table.columns.find((c) => c.columnId === 'bucket');
+      expect(bucketColumn?.operation.dataType).toEqual('date');
+      expect(bucketColumn?.operation.isBucketed).toBe(true);
+
+      const persistedBucket = unchanged?.state.layers.a.columns.find(
+        (c) => c.columnId === 'bucket'
+      );
+      expect(persistedBucket?.meta?.type).toEqual('string');
     });
   });
 

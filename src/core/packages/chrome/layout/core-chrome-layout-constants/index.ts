@@ -6,9 +6,26 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { MAIN_CONTENT_SELECTORS as UI_MAIN_CONTENT_SELECTORS } from '@kbn/ui-chrome-layout-constants';
 
-export * from '@kbn/ui-chrome-layout-constants';
+/** @deprecated Import from `@kbn/core-chrome-layout` instead. */
+export {
+  layoutVar,
+  layoutVarName,
+  layoutLevels,
+  APP_MAIN_SCROLL_CONTAINER_ID,
+  FLYOUT_SELECTOR,
+  MAIN_CONTENT_SELECTORS,
+  SIDE_PANEL_CONTENT_GAP,
+  euiIncludeSelectorInFocusTrap,
+  APP_FIXED_VIEWPORT_ID,
+} from '@kbn/core-chrome-layout';
 
-export const APP_FIXED_VIEWPORT_ID = 'app-fixed-viewport';
-export const MAIN_CONTENT_SELECTORS = [...UI_MAIN_CONTENT_SELECTORS, '.kbnAppWrapper'];
+/** @deprecated Import from `@kbn/core-chrome-layout` instead. */
+export type {
+  LayoutVarName,
+  CSSVarName,
+  LayoutComponent,
+  LayoutProperty,
+  ApplicationComponent,
+  ApplicationVarName,
+} from '@kbn/core-chrome-layout';

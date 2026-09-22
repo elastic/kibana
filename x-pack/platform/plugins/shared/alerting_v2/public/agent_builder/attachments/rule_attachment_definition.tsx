@@ -30,7 +30,7 @@ export const createRuleAttachmentDefinition = ({
   container,
 }: RuleAttachmentDefinitionServices): AttachmentUIDefinition<RuleAttachment> => ({
   getLabel: (attachment) => attachment.data.metadata.name,
-  getIcon: () => 'bell',
+  getIcon: () => 'watchesApp',
 
   canvasWidth: '40vw',
 

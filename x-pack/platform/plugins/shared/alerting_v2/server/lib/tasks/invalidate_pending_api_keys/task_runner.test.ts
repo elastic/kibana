@@ -9,6 +9,8 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { createLoggerService } from '../../services/logger_service/logger_service.mock';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 
 import type { PluginInitializerContext } from '@kbn/core/server';
 import { API_KEY_PENDING_INVALIDATION_TYPE } from '../../../saved_objects';
@@ -26,7 +28,8 @@ const config = {
 } as unknown as PluginInitializerContext<PluginConfig>['config'];
 
 describe('ApiKeyInvalidationTaskRunner', () => {
-  const logger = loggingSystemMock.createLogger();
+  const coreLogger = loggingSystemMock.createLogger();
+  const { loggerService, mockLogger } = createLoggerService();
   const savedObjectsClient = savedObjectsClientMock.create();
   const securityStart = securityMock.createStart();
   const securityCore = securityServiceMock.createStart();
@@ -37,7 +40,8 @@ describe('ApiKeyInvalidationTaskRunner', () => {
     jest.clearAllMocks();
 
     runner = new ApiKeyInvalidationTaskRunner(
-      logger,
+      coreLogger,
+      loggerService,
       savedObjectsClient,
       securityCore,
       securityStart,
@@ -57,7 +61,7 @@ describe('ApiKeyInvalidationTaskRunner', () => {
         savedObjectType: API_KEY_PENDING_INVALIDATION_TYPE,
         savedObjectTypesToQuery: [],
         removalDelay: '1h',
-        logger,
+        logger: coreLogger,
         invalidateApiKeyFn: securityStart.authc.apiKeys.invalidateAsInternalUser,
         invalidateUiamApiKeyFn: securityCore.authc.apiKeys.uiam?.invalidate,
       })
@@ -100,10 +104,10 @@ describe('ApiKeyInvalidationTaskRunner', () => {
       signal: new AbortController().signal,
     });
 
-    expect(logger.error).toHaveBeenCalledWith(
-      'Error executing action policy apiKey invalidation task: invalidation failed',
-      expect.any(Object)
-    );
+    expect(mockLogger.warn).toHaveBeenCalledWith('API key invalidation task run failed', {
+      labels: { code: ALERTING_LOG_CODES.TASKS_API_KEY_INVALIDATION_RUN_FAILED },
+      error: expect.objectContaining({ message: 'invalidation failed' }),
+    });
     expect(result).toEqual({
       state: { runs: 2, total_invalidated: 0, missing_api_key_retries: {} },
       schedule: { interval: '5m' },

@@ -146,6 +146,7 @@ describe('webpack optimizer path', () => {
     Array [
       Array [
         Object {
+          "allowlistPluginGroups": undefined,
           "cache": true,
           "dist": true,
           "examples": true,
@@ -162,6 +163,7 @@ describe('webpack optimizer path', () => {
       ],
       Array [
         Object {
+          "allowlistPluginGroups": undefined,
           "cache": false,
           "dist": false,
           "examples": false,

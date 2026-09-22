@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { ChatOpener, ContextEngineStartDependencies } from '../../types';
+import type {
+  AgentBuilderIntegration,
+  ChatOpener,
+  ContextEngineAppServices,
+  ContextEngineStartDependencies,
+} from '../../types';
 
-export interface ContextEngineServices extends CoreStart {
+export interface ContextEngineServices extends ContextEngineAppServices {
   data: ContextEngineStartDependencies['data'];
   share: ContextEngineStartDependencies['share'];
   triggersActionsUi: ContextEngineStartDependencies['triggersActionsUi'];
@@ -21,6 +25,12 @@ export interface ContextEngineServices extends CoreStart {
    * mount is picked up on the next render.
    */
   getChatOpener?: () => ChatOpener | undefined;
+  /**
+   * Getter for registered suggest-automation hooks, resolved at call time (`undefined` when none are
+   * registered). A getter rather than the resolved value so hooks registered after mount are picked
+   * up on the next render.
+   */
+  getAgentBuilderIntegration?: () => AgentBuilderIntegration | undefined;
 }
 
 const useTypedKibana = () => useKibana<ContextEngineServices>();

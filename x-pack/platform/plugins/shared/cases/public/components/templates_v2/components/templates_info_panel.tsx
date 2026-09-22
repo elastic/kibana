@@ -26,7 +26,7 @@ const TemplatesInfoPanelComponent: React.FC<Props> = ({ onStartTour, onDismiss }
     children: i18n.LEARN_MORE,
     href: docLinks.links.cases.manageCaseTemplates,
     target: '_blank' as const,
-    iconType: 'popout' as const,
+    iconType: 'external' as const,
     iconSide: 'right' as const,
   };
 

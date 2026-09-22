@@ -28,6 +28,7 @@ import type {
   ServiceNowPublicConfigurationBaseType,
   ServiceNowSecretConfigurationType,
   ExecutorSubActionGetChoicesParams,
+  ExecutorSubActionGetIncidentParams,
   ExecutorSubActionCloseIncidentParams,
   ExecutorSubActionCommonFieldsParams,
   ServiceNowPublicConfigurationType,
@@ -196,6 +197,15 @@ async function executor(
     data = await api.closeIncident({
       externalService,
       params: closeIncidentParams,
+      logger,
+    });
+  }
+
+  if (subAction === 'getIncident') {
+    const getIncidentParams = subActionParams as ExecutorSubActionGetIncidentParams;
+    data = await api.getIncident({
+      externalService,
+      params: getIncidentParams,
       logger,
     });
   }

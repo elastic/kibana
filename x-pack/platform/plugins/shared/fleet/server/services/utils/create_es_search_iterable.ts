@@ -156,7 +156,10 @@ export const createEsSearchIterable = <TDocument = unknown>({
         },
 
         async return() {
-          done = true;
+          // Best-effort PIT cleanup. `return()` is invoked when the consumer `break`s out of
+          // (or throws from) a `for await`, so without this the PIT leaks until `keep_alive`.
+          // Swallow failures so we never mask the consumer's original error.
+          await setDone().catch(() => {});
           return createIteratorResult();
         },
       };
