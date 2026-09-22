@@ -39,7 +39,6 @@ export const useInvestigationAvailability = () => {
       }),
     enabled: Boolean(investigationsClient),
     retry: false,
-    staleTime: 5 * 60_000,
   });
 };
 

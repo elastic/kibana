@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiContextMenuItem } from '@elastic/eui';
 import type {
   EpisodeAction,
@@ -91,7 +92,9 @@ export const InvestigateEpisodeMenuItem = ({
 export const createInvestigateEpisodeAction = (): EpisodeAction => ({
   id: INVESTIGATE_EPISODE_ACTION_ID,
   order: 60,
-  displayName: 'Investigate',
+  displayName: i18n.translate('xpack.observabilityAlerting.actions.investigateDisplayName', {
+    defaultMessage: 'Investigate',
+  }),
   iconType: 'inspect',
   isCompatible: ({ episodes }: EpisodeActionContext) => {
     if (episodes.length !== 1) return false;

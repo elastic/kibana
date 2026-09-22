@@ -23,7 +23,6 @@ import type {
 } from './types';
 import { AlertsTableCellValue } from './common/cell_value';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useInvestigationAvailability } from '../../hooks/use_investigate_alert';
 import { getColumns } from './common/get_columns';
 
 const columns = getColumns({ showRuleName: true });
@@ -43,7 +42,6 @@ const caseConfiguration: GetObservabilityAlertsTableProp<'casesConfiguration'> =
 export function ObservabilityAlertsTable(props: ObservabilityAlertsTableProps) {
   const { observability } = useKibana<{ observability?: ObservabilityPublicStart }>().services;
   const { observabilityRuleTypeRegistry, config } = usePluginContext();
-  useInvestigationAvailability();
 
   const alertDetailsNavigation: AlertDetailsNavigation = {
     appId: 'observability',
