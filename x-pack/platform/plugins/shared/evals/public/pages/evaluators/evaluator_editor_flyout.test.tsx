@@ -529,7 +529,7 @@ describe('EvaluatorEditorFlyout', () => {
       expect(screen.queryByTestId('evalsEvaluatorTestResult')).not.toBeInTheDocument();
     });
 
-    it('explains a failed test run', async () => {
+    it('explains a failed test run beside the test controls, not at the top of the form', async () => {
       resolveMutateAsync.mockRejectedValueOnce(new Error('Trace is not ready'));
       renderCreate();
       fillValidDraft();
@@ -538,9 +538,47 @@ describe('EvaluatorEditorFlyout', () => {
 
       runTest();
 
-      expect(await screen.findByTestId('evalsEvaluatorSubmitError')).toHaveTextContent(
-        'Trace is not ready'
+      const testError = await screen.findByTestId('evalsEvaluatorTestError');
+      expect(testError).toHaveTextContent('Trace is not ready');
+      // The save callout sits above the form; a test failure there would be off-screen.
+      expect(screen.queryByTestId('evalsEvaluatorSubmitError')).not.toBeInTheDocument();
+      const inDocumentOrder = [...document.body.querySelectorAll('*')];
+      expect(inDocumentOrder.indexOf(testError)).toBeGreaterThan(
+        inDocumentOrder.indexOf(screen.getByTestId('evalsEvaluatorRunTest'))
       );
+    });
+
+    it('clears a test failure once the draft changes', async () => {
+      resolveMutateAsync.mockRejectedValueOnce(new Error('Trace is not ready'));
+      renderCreate();
+      fillValidDraft();
+      chooseConnector();
+      setField('evalsEvaluatorTraceId', TRACE_ID);
+
+      runTest();
+      await screen.findByTestId('evalsEvaluatorTestError');
+
+      setField('evalsEvaluatorPrompt', 'Rate {{{agent_response}}} strictly.');
+
+      await waitFor(() =>
+        expect(screen.queryByTestId('evalsEvaluatorTestError')).not.toBeInTheDocument()
+      );
+    });
+
+    it('names the reference data keys the evaluator requires', () => {
+      renderCreate();
+
+      expect(
+        screen.getByText('Optional JSON object supplied only to this test.')
+      ).toBeInTheDocument();
+
+      setField('evalsEvaluatorReferenceKeys', 'expected, baseline');
+
+      expect(
+        screen.getByText(
+          'Supplied only to this test. This evaluator requires expected, baseline, each a non-empty string.'
+        )
+      ).toBeInTheDocument();
     });
   });
 });

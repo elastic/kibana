@@ -133,7 +133,10 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   // Kept apart from `formError` because a server rejection highlights no field, and
   // routing it through EuiForm would title it "address the highlighted errors".
-  const [submitError, setSubmitError] = useState<{ title: string; message: string } | null>(null);
+  const [saveError, setSaveError] = useState<{ title: string; message: string } | null>(null);
+  // Rendered beside the test controls rather than with `saveError` at the top of the form,
+  // because the test section is far enough down that a message up there is off-screen.
+  const [testError, setTestError] = useState<{ title: string; message: string } | null>(null);
   const [testResult, setTestResult] = useState<TestEvaluatorResponse['result'] | null>(null);
   const testRunIdRef = useRef(0);
 
@@ -143,7 +146,8 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
     testRunIdRef.current += 1;
     setFormError(null);
     setFieldErrors({});
-    setSubmitError(null);
+    setSaveError(null);
+    setTestError(null);
     setTestResult(null);
   }, [
     connectorId,
@@ -183,6 +187,14 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
       key,
       evidence.includes(key as JudgeEvidence[number]),
     ])
+  );
+  const declaredReferenceDataKeys = useMemo(
+    () =>
+      referenceDataKeys
+        .split(',')
+        .map((key) => key.trim())
+        .filter(Boolean),
+    [referenceDataKeys]
   );
 
   const updateScore = (id: number, updates: Partial<ScoreFormValue>) => {
@@ -228,10 +240,7 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
       system_prompt: systemPrompt.trim(),
       prompt: prompt.trim(),
       evidence,
-      reference_data_keys: referenceDataKeys
-        .split(',')
-        .map((key) => key.trim())
-        .filter(Boolean),
+      reference_data_keys: declaredReferenceDataKeys,
       output: { scores: parsedScores },
     };
     const draft = { name: name.trim(), description: description.trim(), judge };
@@ -252,7 +261,8 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
   const onSave = async () => {
     setFormError(null);
     setFieldErrors({});
-    setSubmitError(null);
+    setSaveError(null);
+    setTestError(null);
     const judge = buildDraft();
     if (!judge) {
       return;
@@ -281,7 +291,7 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
       }
       onClose();
     } catch (error) {
-      setSubmitError({ title: i18n.SAVE_ERROR_TITLE, message: getErrorMessage(error) });
+      setSaveError({ title: i18n.SAVE_ERROR_TITLE, message: getErrorMessage(error) });
     }
   };
 
@@ -294,7 +304,8 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
 
     setFormError(null);
     setFieldErrors({});
-    setSubmitError(null);
+    setSaveError(null);
+    setTestError(null);
     setTestResult(null);
     const judge = buildDraft();
     if (!judge) {
@@ -351,7 +362,7 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
       if (isStaleRun()) {
         return;
       }
-      setSubmitError({ title: i18n.TEST_ERROR_TITLE, message: getErrorMessage(error) });
+      setTestError({ title: i18n.TEST_ERROR_TITLE, message: getErrorMessage(error) });
     }
   };
 
@@ -380,13 +391,13 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
           />
         ) : (
           <EuiForm isInvalid={Boolean(formError)} error={formError ?? undefined} component="form">
-            {submitError ? (
+            {saveError ? (
               <>
                 <KbnDangerCallout
                   announceOnMount
-                  title={submitError.title}
+                  title={saveError.title}
                   data-test-subj="evalsEvaluatorSubmitError"
-                  text={<p>{submitError.message}</p>}
+                  text={<p>{saveError.message}</p>}
                 />
                 <EuiSpacer size="m" />
               </>
@@ -624,7 +635,11 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
             </EuiFormRow>
             <EuiFormRow
               label={i18n.REFERENCE_DATA_JSON_LABEL}
-              helpText={i18n.REFERENCE_DATA_JSON_HELP}
+              helpText={
+                declaredReferenceDataKeys.length > 0
+                  ? i18n.REFERENCE_DATA_JSON_REQUIRED_HELP(declaredReferenceDataKeys.join(', '))
+                  : i18n.REFERENCE_DATA_JSON_HELP
+              }
               fullWidth
             >
               <EuiTextArea
@@ -642,6 +657,17 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
             >
               {i18n.RUN_TEST_BUTTON}
             </EuiButton>
+            {testError && (
+              <>
+                <EuiSpacer size="s" />
+                <KbnDangerCallout
+                  announceOnMount
+                  title={testError.title}
+                  data-test-subj="evalsEvaluatorTestError"
+                  text={<p>{testError.message}</p>}
+                />
+              </>
+            )}
             {testResult && (
               <>
                 <EuiSpacer size="s" />

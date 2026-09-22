@@ -233,6 +233,12 @@ export const REFERENCE_DATA_JSON_HELP = i18n.translate(
   'xpack.evals.evaluators.referenceDataJsonHelpDescription',
   { defaultMessage: 'Optional JSON object supplied only to this test.' }
 );
+export const REFERENCE_DATA_JSON_REQUIRED_HELP = (keys: string) =>
+  i18n.translate('xpack.evals.evaluators.referenceDataJsonRequiredHelpDescription', {
+    defaultMessage:
+      'Supplied only to this test. This evaluator requires {keys}, each a non-empty string.',
+    values: { keys },
+  });
 export const RUN_TEST_BUTTON = i18n.translate('xpack.evals.evaluators.runTestButtonLabel', {
   defaultMessage: 'Run test',
 });
