@@ -224,6 +224,35 @@ async function runIntegration(
     docsFailed: 0,
   };
 
+  if (config.resetRelationshipsBeforeRun) {
+    const { entitySource } = config.resetRelationshipsBeforeRun;
+    const relationshipKey =
+      config.kind === 'bucketed'
+        ? config.bucketTargetByThreshold.aboveThresholdRelationship
+        : config.relationshipKey;
+    try {
+      const { updated } = await crudClient.clearRelationshipIds({
+        entitySource,
+        relationshipKey,
+        signal,
+      });
+      logger.info(`${logPrefix} Cleared ${relationshipKey} on ${updated} ${entitySource} entities`);
+    } catch (err) {
+      // Populating on top of a half-cleared state is worse than leaving the
+      // previous run's data in place, so skip this integration entirely.
+      logger.error(`${logPrefix} Relationship reset failed, skipping integration: ${errMsg(err)}`);
+      return {
+        buckets: 0,
+        recordsCount: 0,
+        write: totalWriteResult,
+        metadata: totalMetadataResult,
+        outcome: 'error',
+        iterations: 0,
+        truncated: false,
+      };
+    }
+  }
+
   try {
     do {
       if (signal?.aborted) {

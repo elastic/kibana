@@ -63,6 +63,7 @@ const makeClients = (
     .mockImplementation(async (docs: unknown[]) => ({ successful: docs.length, failed: 0 }));
   const crudClient = {
     bulkUpdateEntity: bulkUpdate,
+    clearRelationshipIds: jest.fn().mockResolvedValue({ updated: 0, total: 0 }),
   } as unknown as EntityUpdateClient;
   const entityMetadataClient = {
     bulkAppendMetadata: bulkAppend,
@@ -1697,6 +1698,123 @@ describe('runRelationshipMaintainer', () => {
       expect(completionLog).toContain('records=');
       expect(completionLog).toContain('written=');
       expect(completionLog).toContain('truncated=');
+    });
+  });
+
+  describe('resetRelationshipsBeforeRun', () => {
+    it('does not clear anything when the config omits the flag', async () => {
+      const { esClient, search } = makeEsClient();
+      const { crudClient, entityMetadataClient } = makeClients();
+      search.mockResolvedValue(successResponse([]));
+
+      await runRelationshipMaintainer({
+        esClient,
+        logger: loggerMock.create(),
+        namespace: 'default',
+        crudClient,
+        entityMetadataClient,
+        integrations: [{ ...baseConfig, id: 'no-reset' }],
+        maintainerName: 'communicates_with',
+      });
+
+      expect(
+        (crudClient as unknown as { clearRelationshipIds: jest.Mock }).clearRelationshipIds
+      ).not.toHaveBeenCalled();
+    });
+
+    it('clears once per integration, before any write', async () => {
+      const { esClient, search, esql } = makeEsClient();
+      const { crudClient, entityMetadataClient } = makeClients();
+      const clearMock = (crudClient as unknown as { clearRelationshipIds: jest.Mock })
+        .clearRelationshipIds;
+      const bulkUpdateMock = (crudClient as unknown as { bulkUpdateEntity: jest.Mock })
+        .bulkUpdateEntity;
+      const callOrder: string[] = [];
+      clearMock.mockImplementation(async () => {
+        callOrder.push('clear');
+        return { updated: 0, total: 0 };
+      });
+      bulkUpdateMock.mockImplementation(async () => {
+        callOrder.push('write');
+        return [];
+      });
+
+      // One bucket, one esql record so the write path is exercised.
+      search.mockResolvedValueOnce(
+        successResponse([{ key: { 'user.name': 'alice' }, doc_count: 1 }])
+      );
+      esql.mockResolvedValueOnce({
+        columns: [
+          { name: 'actorUserId', type: 'keyword' },
+          { name: 'supervises', type: 'keyword' },
+        ],
+        values: [['user:alice@corp', ['user:bob@corp']]],
+      });
+
+      await runRelationshipMaintainer({
+        esClient,
+        logger: loggerMock.create(),
+        namespace: 'default',
+        crudClient,
+        entityMetadataClient,
+        integrations: [
+          {
+            kind: 'standard',
+            id: 'workday',
+            name: 'Workday',
+            indexPattern: (ns) => `.entities.v2.latest.security_${ns}`,
+            targetEntityType: 'user',
+            relationshipKey: 'supervises',
+            esqlWhereClause: 'true',
+            resetRelationshipsBeforeRun: { entitySource: 'workday' },
+          },
+        ],
+        maintainerName: 'supervises',
+      });
+
+      expect(clearMock).toHaveBeenCalledTimes(1);
+      expect(clearMock).toHaveBeenCalledWith(
+        expect.objectContaining({ entitySource: 'workday', relationshipKey: 'supervises' })
+      );
+      // The clear must precede every write, or the run would erase its own output.
+      expect(callOrder[0]).toBe('clear');
+      expect(callOrder.filter((c) => c === 'clear')).toHaveLength(1);
+    });
+
+    it('skips the integration when the clear fails, without touching writes', async () => {
+      const { esClient, search } = makeEsClient();
+      const { crudClient, entityMetadataClient } = makeClients();
+      const clearMock = (crudClient as unknown as { clearRelationshipIds: jest.Mock })
+        .clearRelationshipIds;
+      const bulkUpdateMock = (crudClient as unknown as { bulkUpdateEntity: jest.Mock })
+        .bulkUpdateEntity;
+      clearMock.mockRejectedValue(new Error('boom'));
+      search.mockResolvedValue(successResponse([]));
+
+      const result = await runRelationshipMaintainer({
+        esClient,
+        logger: loggerMock.create(),
+        namespace: 'default',
+        crudClient,
+        entityMetadataClient,
+        integrations: [
+          {
+            kind: 'standard',
+            id: 'workday',
+            name: 'Workday',
+            indexPattern: (ns) => `.entities.v2.latest.security_${ns}`,
+            targetEntityType: 'user',
+            relationshipKey: 'supervises',
+            esqlWhereClause: 'true',
+            resetRelationshipsBeforeRun: { entitySource: 'workday' },
+          },
+        ],
+        maintainerName: 'supervises',
+      });
+
+      // Populating on top of an unknown state is worse than leaving it alone.
+      expect(bulkUpdateMock).not.toHaveBeenCalled();
+      expect(result.totalWritten).toBe(0);
     });
   });
 });

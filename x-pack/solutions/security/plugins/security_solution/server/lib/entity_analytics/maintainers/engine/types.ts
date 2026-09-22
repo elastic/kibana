@@ -166,6 +166,20 @@ interface RelationshipIntegrationBase {
    */
   disableLookbackWindow?: boolean;
   /**
+   * Clear this config's `relationshipKey` on all entities from `entitySource`
+   * before processing any page, so the run repopulates from a clean slate.
+   *
+   * ONLY for sources that emit a COMPLETE snapshot of the relationship set each
+   * cycle (e.g. Workday's 24h user inventory). On an event-stream source
+   * (`accesses`, `communicates_with`) absence means "not seen in this window",
+   * never "no longer true" — clearing there would erase real observations.
+   *
+   * Safe only while a source's actors are namespace-partitioned into their own
+   * entity documents; otherwise this would delete another source's contribution
+   * to the same `ids` array.
+   */
+  resetRelationshipsBeforeRun?: { entitySource: string };
+  /**
    * Declares that every document this integration reads describes a *host-scoped*
    * (non-IDP) user — an identity meaningful only within one host, keyed by
    * `user.name` + `host.id` — and always carries `host.id`. This is an assertion
