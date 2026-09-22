@@ -795,7 +795,14 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async setTermsNumberOfValues(value: number) {
       const valuesInput = await this.getNumericFieldReady('indexPattern-terms-values');
       await valuesInput.type(`${value}`);
-      await common.sleep(500);
+      const expectedLabel = value === 1 ? 'Top value' : `Top ${value} values`;
+      await retry.waitFor('terms number of values to commit', async () => {
+        const dimensionTriggers = await testSubjects.findAll('lns-dimensionTrigger');
+        const triggerLabels = await Promise.all(
+          dimensionTriggers.map(async (trigger) => await trigger.getVisibleText())
+        );
+        return triggerLabels.some((label) => label.replace(/\u200b/g, '').includes(expectedLabel));
+      });
     },
 
     async checkTermsAreNotAvailableToAgg(fields: string[]) {
@@ -1020,14 +1027,15 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await header.waitUntilLoadingHasFinished();
     },
     async waitForSearchInputValue(subVisualizationId: string, searchTerm?: string) {
-      await retry.try(async () => {
-        await this.searchOnChartSwitch(subVisualizationId, searchTerm);
-        await common.sleep(1000); // give time for the value to be typed
+      await this.searchOnChartSwitch(subVisualizationId, searchTerm);
+      await retry.waitFor('chart switch search results to update', async () => {
         const searchInputValue = await testSubjects.getAttribute('lnsChartSwitchSearch', 'value');
         const queryTerm = searchTerm ?? subVisualizationId.substring(subVisualizationId.length - 3);
-        if (searchInputValue !== queryTerm) {
-          throw new Error('Search input value is not the expected value');
-        }
+        const optionExists = await testSubjects.exists(
+          `lnsChartSwitchPopover_${subVisualizationId}`,
+          { timeout: 0 }
+        );
+        return searchInputValue === queryTerm && optionExists;
       });
     },
 

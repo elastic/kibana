@@ -11,7 +11,7 @@ import { EMPTY_LABEL } from '@kbn/field-formats-common';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { visualize, lens, common } = getPageObjects(['visualize', 'lens', 'common']);
+  const { visualize, lens } = getPageObjects(['visualize', 'lens']);
   const elasticChart = getService('elasticChart');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
@@ -359,15 +359,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           operation: 'count',
         });
         await lens.waitForVisualization();
-        await common.sleep(20000);
-        // a empty value
-        expect(await lens.getDatatableCellText(1, 0)).to.eql(EMPTY_LABEL);
-        // b Other value
-        expect(await lens.getDatatableCellText(1, 1)).to.eql('Other');
-        // a Other value
-        expect(await lens.getDatatableCellText(5, 0)).to.eql('Other');
-        // b empty value
-        expect(await lens.getDatatableCellText(5, 1)).to.eql(EMPTY_LABEL);
+        await retry.try(async () => {
+          // a empty value
+          expect(await lens.getDatatableCellText(1, 0)).to.eql(EMPTY_LABEL);
+          // b Other value
+          expect(await lens.getDatatableCellText(1, 1)).to.eql('Other');
+          // a Other value
+          expect(await lens.getDatatableCellText(5, 0)).to.eql('Other');
+          // b empty value
+          expect(await lens.getDatatableCellText(5, 1)).to.eql(EMPTY_LABEL);
+        });
       });
     });
   });
