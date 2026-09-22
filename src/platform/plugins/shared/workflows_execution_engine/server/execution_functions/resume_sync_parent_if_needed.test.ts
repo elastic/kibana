@@ -164,6 +164,52 @@ describe('resumeSyncParentIfNeeded', () => {
     expect(repos.workflowTaskManager.scheduleAndRunImmediateResume).not.toHaveBeenCalled();
   });
 
+  it('wakes the grandparent after fail-closing a parent that is itself a sync child', async () => {
+    const grandparentExecId = 'grandparent-execution-id';
+    const { internalResumeWorkflowExecution, workflowExecutionRepository, ...repos } = createDeps();
+    internalResumeWorkflowExecution.mockImplementation(async (executionId: string) => {
+      if (executionId === grandparentExecId) {
+        return;
+      }
+      throw new Error('not found');
+    });
+    (workflowExecutionRepository.getWorkflowExecutionById as jest.Mock).mockResolvedValue({
+      id: parentExecId,
+      status: ExecutionStatus.WAITING_FOR_CHILD,
+      context: {
+        parentWorkflowInvocation: 'sync',
+        parentWorkflowExecutionId: grandparentExecId,
+      },
+    });
+
+    await resumeSyncParentIfNeeded({
+      childExecution: createChild(),
+      spaceId,
+      internalResumeWorkflowExecution,
+      workflowExecutionRepository,
+      logger,
+      ...repos,
+    });
+
+    expect(mockMarkFailed).toHaveBeenCalledTimes(1);
+    expect(mockMarkFailed).toHaveBeenCalledWith(
+      workflowExecutionRepository,
+      repos.stepExecutionRepository,
+      parentExecId,
+      expect.anything()
+    );
+    expect(internalResumeWorkflowExecution).toHaveBeenCalledWith(
+      grandparentExecId,
+      spaceId,
+      undefined
+    );
+    expect(internalResumeWorkflowExecution.mock.calls[8]).toEqual([
+      grandparentExecId,
+      spaceId,
+      undefined,
+    ]);
+  });
+
   it('wakes an existing parent resume task instead of failing when one is already armed', async () => {
     const { internalResumeWorkflowExecution, workflowTaskManager, ...repos } = createDeps();
     internalResumeWorkflowExecution.mockRejectedValue(new Error('not found'));

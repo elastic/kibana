@@ -101,6 +101,7 @@ export async function resumeSyncParentIfNeeded({
     parentExecId,
     childExecutionId: childExecution.id,
     spaceId,
+    internalResumeWorkflowExecution,
     workflowExecutionRepository,
     stepExecutionRepository,
     workflowTaskManager,
@@ -112,6 +113,7 @@ async function failClosedIfParentStillWaiting({
   parentExecId,
   childExecutionId,
   spaceId,
+  internalResumeWorkflowExecution,
   workflowExecutionRepository,
   stepExecutionRepository,
   workflowTaskManager,
@@ -120,6 +122,7 @@ async function failClosedIfParentStillWaiting({
   parentExecId: string;
   childExecutionId: string;
   spaceId: string;
+  internalResumeWorkflowExecution?: InternalResumeWorkflowExecution;
   workflowExecutionRepository?: WorkflowExecutionRepository;
   stepExecutionRepository?: StepExecutionRepository;
   workflowTaskManager?: WorkflowTaskManager;
@@ -184,6 +187,24 @@ async function failClosedIfParentStillWaiting({
       { type: TASK_RECOVERY_ERROR_TYPE, message }
     );
     logger.error(`Marked parent workflow ${parentExecId} FAILED: ${message}`);
+
+    // The failure was written out of band, so the parent loop never runs and
+    // handlePostExecutionLoop will not propagate. If this parent is itself a
+    // sync child, wake its parent under that parent's own resume task.
+    if (
+      isSyncParentInvocation(parent.context) &&
+      parent.context.parentWorkflowExecutionId !== parentExecId
+    ) {
+      await resumeSyncParentIfNeeded({
+        childExecution: { ...parent, status: ExecutionStatus.FAILED },
+        spaceId,
+        internalResumeWorkflowExecution,
+        workflowExecutionRepository,
+        stepExecutionRepository,
+        workflowTaskManager,
+        logger,
+      });
+    }
   } catch (failErr) {
     logger.error(
       `Failed to fail-close parent ${parentExecId} after child ${childExecutionId} completion: ${errorMessage(
