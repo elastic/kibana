@@ -147,6 +147,42 @@ const asOptionalString = (value: unknown): string | undefined =>
 const asOptionalNumber = (value: unknown): number | undefined =>
   typeof value === 'number' ? value : undefined;
 
+const invalidQueryField = (field: string): string =>
+  i18n.translate('xpack.alertingV2.yamlRuleForm.invalidQueryFieldError', {
+    defaultMessage: 'Invalid query field: {field}.',
+    values: { field },
+  });
+
+/**
+ * A missing field is left to RHF to report, but an unsupported one is not: a
+ * misspelt `breach` reads as "no breach condition" and would save a rule that
+ * breaches on every row of `base`.
+ */
+const findQueryFieldError = (value: unknown): string | undefined => {
+  if (value == null) return undefined;
+
+  const queryObj = asRecord(value);
+  if (!queryObj) return invalidQueryField('query');
+
+  const unsupportedKey = Object.keys(queryObj).find((key) => key !== 'base' && key !== 'breach');
+  if (unsupportedKey) return invalidQueryField(unsupportedKey);
+  if (queryObj.base != null && typeof queryObj.base !== 'string') return invalidQueryField('base');
+
+  const { breach } = queryObj;
+  if (breach == null || typeof breach === 'string') return undefined;
+
+  const breachObj = asRecord(breach);
+  if (!breachObj) return invalidQueryField('breach');
+
+  const unsupportedBreachKey = Object.keys(breachObj).find((key) => key !== 'segment');
+  if (unsupportedBreachKey) return invalidQueryField(`breach.${unsupportedBreachKey}`);
+  if (breachObj.segment != null && typeof breachObj.segment !== 'string') {
+    return invalidQueryField('breach.segment');
+  }
+
+  return undefined;
+};
+
 const parseQuery = (queryObj: Record<string, unknown> | undefined): RuleQuery => ({
   base: asOptionalString(queryObj?.base) ?? '',
   breach: { segment: extractNestedString(queryObj?.breach, 'segment') },
@@ -236,6 +272,11 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
   const name = metadata?.name;
   const resolvedKind = (kind as 'alert' | 'signal') ?? 'alert';
   const isAlert = resolvedKind === 'alert';
+
+  const queryFieldError = findQueryFieldError(obj.query);
+  if (queryFieldError) {
+    return { values: null, error: queryFieldError };
+  }
 
   // The request mappers drop these for signals, so accepting them here would
   // save a rule that silently differs from the YAML in front of the user.

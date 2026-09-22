@@ -302,6 +302,37 @@ describe('yaml_form_utils', () => {
       expect(result.values?.recovery).toEqual({ strategy: 'condition', segment: 'WHERE c < 50' });
     });
 
+    it.each([
+      [
+        'an unsupported query field',
+        { base: 'FROM logs-*', brech: { segment: 'WHERE c > 1' } },
+        'brech',
+      ],
+      ['a legacy query field', { format: 'composed', base: 'FROM logs-*' }, 'format'],
+      [
+        'an unsupported breach field',
+        { base: 'FROM logs-*', breach: { segmnet: 'WHERE c > 1' } },
+        'breach.segmnet',
+      ],
+      ['a non-string base', { base: 42 }, 'base'],
+      [
+        'a non-string breach segment',
+        { base: 'FROM logs-*', breach: { segment: 42 } },
+        'breach.segment',
+      ],
+    ])('rejects %s rather than reading it as no breach condition', (_label, query, field) => {
+      const yaml = stringify({
+        kind: 'alert',
+        metadata: { name: 'Invalid query' },
+        query,
+      });
+
+      const result = parseYamlToFormValues(yaml);
+
+      expect(result.values).toBeNull();
+      expect(result.error).toBe(`Invalid query field: ${field}.`);
+    });
+
     it('accepts a bare string breach for backward compatibility', () => {
       const yaml = stringify({
         metadata: { name: 'Bare string' },
