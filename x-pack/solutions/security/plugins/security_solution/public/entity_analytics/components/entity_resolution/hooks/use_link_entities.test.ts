@@ -56,6 +56,13 @@ describe('useLinkEntities', () => {
           version: '2023-10-31',
           method: 'POST',
           body: JSON.stringify({ target_id: 'target-1', entity_ids: ['alias-1'] }),
+          context: {
+            child: {
+              type: 'security_solution',
+              name: 'entity_analytics:entity_resolution',
+              id: 'resolution_link',
+            },
+          },
         })
       );
     });

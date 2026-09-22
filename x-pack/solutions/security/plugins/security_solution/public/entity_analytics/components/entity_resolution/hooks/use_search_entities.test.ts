@@ -147,6 +147,19 @@ describe('useSearchEntities', () => {
     expect(call.skip).toBe(false);
   });
 
+  it('passes the resolution_search execution context so entity-search requests are attributed in slow logs', () => {
+    renderHook(() => useSearchEntities(defaultParams), { wrapper: createWrapper() });
+
+    const call = mockUseEntitiesListQuery.mock.calls[0][0];
+    expect(call.executionContext).toEqual({
+      child: {
+        type: 'security_solution',
+        name: 'entity_analytics:entity_resolution',
+        id: 'resolution_search',
+      },
+    });
+  });
+
   it('stabilizes exclude IDs — same content, different reference produces same query', () => {
     const { rerender } = renderHook(
       ({ ids }: { ids: string[] }) =>
