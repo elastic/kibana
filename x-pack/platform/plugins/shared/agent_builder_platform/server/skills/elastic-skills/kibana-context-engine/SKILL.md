@@ -145,7 +145,7 @@ gives:
 
 - `id`, to pass to describe.
 - `esql_target`, the exact string to put after `FROM`. Use it verbatim: it differs from the id (`sales-knowledge` →
-  `ai-index-idx-sales-knowledge`) and may be a wildcard or a data stream.
+  `ai-index-idx-sales-knowledge`) and may be a data stream.
 - `description` and `managed`, to choose between entries.
 - `assigned_to_agent`, present only when running inside an Agent Builder agent: whether that agent is set up with this
   index.

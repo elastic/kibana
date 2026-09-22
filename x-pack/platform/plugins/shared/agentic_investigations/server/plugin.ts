@@ -16,6 +16,11 @@ import {
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { AGENTIC_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER_ID } from '../common/constants';
 import { registerFeatures } from './features';
+import { registerImpactRoutes } from './impact/routes/register_routes';
+import { createImpactPrivilegesChecker } from './impact/services/check_impact_privileges';
+import { createImpactClient } from './impact/services/impact_client';
+import { ImpactService } from './impact/services/impact_service';
+import { createImpactStorageClient } from './impact/storage/impact_storage';
 import { initializeManagedWorkflows } from './proposals/managed_workflows/initialize_managed_workflows';
 import { registerRoutes } from './proposals/routes/register_routes';
 import { ProposalsService } from './proposals/services/proposals_service';
@@ -49,6 +54,7 @@ export class AgenticInvestigationsPlugin
   // `workflowsManagement` is a required plugin, so this is set in setup() and
   // read only from start() onwards; the getter asserts that ordering.
   private proposalsService?: ProposalsService;
+  private impactService?: ImpactService;
   private proposalPrivileges?: ProposalPrivilegesChecker;
   private escalationsService?: EscalationsService;
   private spaces?: AgenticInvestigationsStartDependencies['spaces'];
@@ -101,6 +107,14 @@ export class AgenticInvestigationsPlugin
       resolveUser: (request) => this.requireUserResolver()(request),
     });
 
+    registerImpactRoutes({
+      router,
+      logger: this.logger,
+      getImpactService: () => this.requireImpactService(),
+      getSpaceId: (request) => this.getSpaceId(request),
+      resolveUser: (request) => this.requireUserResolver()(request),
+    });
+
     registerEscalationRoutes({
       router,
       logger: this.logger,
@@ -136,6 +150,13 @@ export class AgenticInvestigationsPlugin
       getWorkflowsApi: () => this.requireWorkflowsApi(),
     });
 
+    this.impactService = new ImpactService({
+      storage: createImpactStorageClient({
+        esClient: coreStart.elasticsearch.client.asInternalUser,
+        logger: this.logger,
+      }),
+    });
+
     this.escalationsService = new EscalationsService({
       logger: this.logger,
       getConversationClient: (request) =>
@@ -154,8 +175,18 @@ export class AgenticInvestigationsPlugin
       );
     });
 
+    const getImpactClient = createImpactClient({
+      getImpactService: () => this.requireImpactService(),
+      getSpaceId: (request) => this.getSpaceId(request),
+      privileges: createImpactPrivilegesChecker({
+        getSecurity: async () => plugins.security,
+        logger: this.logger,
+      }),
+    });
+
     return {
       getProposalsService: () => this.requireProposalsService(),
+      getImpactClient,
       getProposalPrivileges: () => this.requireProposalPrivileges(),
       getEscalationsService: () => this.requireEscalationsService(),
     };
@@ -177,6 +208,15 @@ export class AgenticInvestigationsPlugin
       );
     }
     return this.proposalsService;
+  }
+
+  private requireImpactService(): ImpactService {
+    if (!this.impactService) {
+      throw new Error(
+        'Impact service is not available until the agenticInvestigations plugin has started'
+      );
+    }
+    return this.impactService;
   }
 
   // Resolves security lazily per call, so step registration can use it during setup.
