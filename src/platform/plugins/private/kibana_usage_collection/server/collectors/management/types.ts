@@ -238,6 +238,5 @@ export interface UsageStats {
   'elasticRamen:enabled': boolean;
   'query_activity:minRunningTime': number;
   'genAiSettings:tokenUsageTracking': boolean;
-  'alerting:v2:enabled': boolean;
   'alerting:v1:showClassicAlertsTable': boolean;
 }
