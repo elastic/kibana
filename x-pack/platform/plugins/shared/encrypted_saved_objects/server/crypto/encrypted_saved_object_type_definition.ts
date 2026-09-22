@@ -71,6 +71,15 @@ const SYNTHETICS_MONITOR_DOTTED_LEGACY_KEYS = [
 ];
 
 /**
+ * Alerting notification policy attributes that use dotted keys.
+ */
+const ALERTING_NOTIFICATION_POLICY_DOTTED_KEYS = [
+  'auth.apiKey',
+  'auth.owner',
+  'auth.createdByUser',
+];
+
+/**
  * Attribute keys containing a dot that are nonetheless legitimate, listed per saved object type.
  *
  * These are genuine flat top-level attribute names that happen to contain dots, matching the
@@ -91,6 +100,7 @@ const TYPES_WITH_DOTTED_ATTRIBUTE_KEYS: Readonly<Record<string, ReadonlySet<stri
     ...SYNTHETICS_MONITOR_DOTTED_SECRET_KEYS,
     ...SYNTHETICS_MONITOR_DOTTED_AAD_KEYS,
   ]),
+  alerting_notification_policy: new Set([...ALERTING_NOTIFICATION_POLICY_DOTTED_KEYS]),
 };
 
 /**
