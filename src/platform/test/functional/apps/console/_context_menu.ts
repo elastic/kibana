@@ -310,11 +310,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       // Check Auto indent shortcut badge exists
-      const autoIndentShortcutExists = await testSubjects.exists('consoleMenuAutoIndentShortcut');
+      const autoIndentShortcutExists = await testSubjects.waitForExists(
+        'consoleMenuAutoIndentShortcut'
+      );
       expect(autoIndentShortcutExists).to.be(true);
 
       // Check API reference shortcut badge exists
-      const openDocsShortcutExists = await testSubjects.exists('consoleMenuOpenDocsShortcut');
+      const openDocsShortcutExists = await testSubjects.waitForExists(
+        'consoleMenuOpenDocsShortcut'
+      );
       expect(openDocsShortcutExists).to.be(true);
     });
   });

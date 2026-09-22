@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           shouldUseHashForSubUrl: false,
         });
         await testSubjects.click('detail-link-basic_index');
-        await testSubjects.exists('tab-indexedFields');
+        await testSubjects.waitForExists('tab-indexedFields');
         await testSubjects.missingOrFail('tab-scriptedFields');
       });
     });
@@ -94,7 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToUrl('management', 'kibana/dataViews', {
           shouldUseHashForSubUrl: false,
         });
-        await testSubjects.exists('detail-link-basic_index');
+        await testSubjects.waitForExists('detail-link-basic_index');
         await testSubjects.missingOrFail('rollup-tag');
         await testSubjects.click('detail-link-basic_index');
         await testSubjects.missingOrFail('rollup-tag');
@@ -134,7 +134,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToUrl('management', 'kibana/dataViews', {
           shouldUseHashForSubUrl: false,
         });
-        await testSubjects.exists('detail-link-basic_index');
+        await testSubjects.waitForExists('detail-link-basic_index');
         await testSubjects.existOrFail('tableHeaderCell_namespaces_1');
       });
     });

@@ -20,14 +20,14 @@ export default function ({ getService, getPageObject }: PluginFunctionalProvider
 
   const clickAppLink = async (app: string) => {
     const appLink = `dlNav${app}`;
-    if (!(await testSubjects.exists(appLink))) {
+    if (!(await testSubjects.waitForExists(appLink))) {
       log.debug(`App ${app} not found on side nav`);
     }
     await testSubjects.click(appLink);
   };
 
   const loadingScreenNotShown = async () =>
-    expect(await testSubjects.exists('kbnLoadingMessage')).to.be(false);
+    expect(await testSubjects.waitForExists('kbnLoadingMessage')).to.be(false);
 
   const checkAppVisible = async (app: string) => {
     const appContainer = `dlApp${app}`;

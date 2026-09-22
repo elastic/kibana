@@ -24,7 +24,7 @@ export class NavigationalSearchPageObject extends FtrService {
   async ensureSearchOpen() {
     // Poll the modal-open read so a transient re-render of the already-open modal isn't misread as
     // closed, which would click SEARCH_BUTTON — a toggle hidden under the modal's own overlay mask.
-    if (await this.testSubjects.exists(SEARCH_MODAL, { timeout: 2500 })) {
+    if (await this.testSubjects.waitForExists(SEARCH_MODAL, { timeout: 2500 })) {
       return;
     }
     await this.testSubjects.click(SEARCH_BUTTON);
@@ -38,7 +38,7 @@ export class NavigationalSearchPageObject extends FtrService {
   }
 
   async blur() {
-    if (!(await this.testSubjects.exists(SEARCH_MODAL, { timeout: 0 }))) {
+    if (!(await this.testSubjects.exists(SEARCH_MODAL))) {
       return;
     }
     await this.browser.pressKeys(this.browser.keys.ESCAPE);
@@ -71,7 +71,7 @@ export class NavigationalSearchPageObject extends FtrService {
   }
 
   async isPopoverDisplayed() {
-    return await this.testSubjects.exists(SEARCH_MODAL, { timeout: 0 });
+    return await this.testSubjects.exists(SEARCH_MODAL);
   }
 
   async clickOnOption(index: number) {
@@ -80,7 +80,7 @@ export class NavigationalSearchPageObject extends FtrService {
   }
 
   async waitForResultsLoaded(waitUntil: number = 3000) {
-    await this.testSubjects.exists('nav-search-option');
+    await this.testSubjects.waitForExists('nav-search-option');
     // results are emitted in multiple batches. Each individual batch causes a re-render of
     // the component, causing the current elements to become stale. We can't perform DOM access
     // without heavy flakiness in this situation.
@@ -97,7 +97,7 @@ export class NavigationalSearchPageObject extends FtrService {
   async isNoResultsPlaceholderDisplayed(checkAfter: number = 3000) {
     // see comment in `waitForResultsLoaded`
     await this.common.sleep(checkAfter);
-    return this.testSubjects.exists('nav-search-no-results');
+    return this.testSubjects.waitForExists('nav-search-no-results');
   }
 
   private async convertResultElement(resultEl: WebElementWrapper): Promise<SearchResult> {

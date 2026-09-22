@@ -44,7 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         afterEach(async () => {
           await PageObjects.header.waitUntilLoadingHasFinished();
-          await testSubjects.exists('indexPatternTable');
+          await testSubjects.waitForExists('indexPatternTable');
           await kibanaServer.savedObjects.cleanStandardList();
         });
       });
@@ -78,7 +78,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         afterEach(async () => {
           await PageObjects.header.waitUntilLoadingHasFinished();
-          await testSubjects.exists('indexPatternTable');
+          await testSubjects.waitForExists('indexPatternTable');
           await kibanaServer.savedObjects.cleanStandardList();
         });
         after(async () => {

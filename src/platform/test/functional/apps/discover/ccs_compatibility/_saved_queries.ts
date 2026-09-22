@@ -226,7 +226,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await queryBar.setQuery('response:404');
         await savedQueryManagementComponent.updateCurrentlyLoadedQuery('OkResponse', false, false);
         await savedQueryManagementComponent.savedQueryExistOrFail('OkResponse');
-        const contextMenuPanelTitleButton = await testSubjects.exists(
+        const contextMenuPanelTitleButton = await testSubjects.waitForExists(
           'contextMenuPanelTitleButton'
         );
         if (contextMenuPanelTitleButton) {
@@ -362,7 +362,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           null,
           'Save button should be enabled after adding a filter'
         );
-        const updateQueryButtonExists = await testSubjects.exists(
+        const updateQueryButtonExists = await testSubjects.waitForExists(
           'saved-query-management-save-changes-button'
         );
         expect(updateQueryButtonExists).to.equal(true, 'Update query button does not exist');

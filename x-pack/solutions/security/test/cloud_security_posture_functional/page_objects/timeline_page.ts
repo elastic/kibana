@@ -27,7 +27,7 @@ export class TimelinePageObject extends FtrService {
   private readonly logger = this.ctx.getService('log');
 
   async closeTimeline(): Promise<void> {
-    if (await this.testSubjects.exists(TIMELINE_CLOSE_BUTTON_TEST_SUBJ)) {
+    if (await this.testSubjects.waitForExists(TIMELINE_CLOSE_BUTTON_TEST_SUBJ)) {
       await this.testSubjects.click(TIMELINE_CLOSE_BUTTON_TEST_SUBJ);
       await this.testSubjects.waitForHidden(TIMELINE_MODAL_PAGE_TEST_SUBJ);
     }

@@ -94,20 +94,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.endpoint.navigateToEndpointList();
       });
       it('finds no data in list and prompts onboarding to add policy', async () => {
-        await testSubjects.exists('emptyPolicyTable');
+        await testSubjects.waitForExists('emptyPolicyTable');
       });
       it('navigates to fleet through the Enroll agent button when there are policies but no endpoints', async () => {
         const policyData = await policyTestResources.createPolicy();
         // refresh page
         await browser.refresh();
-        await testSubjects.exists('emptyHostsTable');
+        await testSubjects.waitForExists('emptyHostsTable');
         const firstPolicyOption = (
           await testSubjects.findService.allByCssSelector('.euiSelectableListItem')
         )[0];
         firstPolicyOption.click();
         await testSubjects.waitForEnabled('onboardingStartButton');
         await testSubjects.click('onboardingStartButton');
-        await testSubjects.exists('agentEnrollmentFlyout');
+        await testSubjects.waitForExists('agentEnrollmentFlyout');
 
         // cleanup
         await policyData.cleanup();

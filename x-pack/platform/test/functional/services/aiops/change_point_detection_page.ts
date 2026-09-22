@@ -126,7 +126,7 @@ export function ChangePointDetectionPageProvider(
     },
 
     async ensureFlyoutClosed() {
-      if (await testSubjects.exists('aiopsChangePointDetectionSelectedCharts')) {
+      if (await testSubjects.waitForExists('aiopsChangePointDetectionSelectedCharts')) {
         await this.closeFlyout();
       }
     },
@@ -143,7 +143,7 @@ export function ChangePointDetectionPageProvider(
 
     async openPanelContextMenu(panelIndex: number) {
       // Check if already open
-      const isOpen = await testSubjects.exists('aiopsChangePointDetectionAttachButton');
+      const isOpen = await testSubjects.waitForExists('aiopsChangePointDetectionAttachButton');
       if (isOpen) {
         return;
       }

@@ -305,7 +305,9 @@ export function MachineLearningNavigationProvider({
 
       await retry.tryForTime(60 * 1000, async () => {
         // Supplied configurations lives in the app menu overflow ("More") popover.
-        if (!(await testSubjects.exists('mlSuppliedConfigurationsButton', { timeout: 1000 }))) {
+        if (
+          !(await testSubjects.waitForExists('mlSuppliedConfigurationsButton', { timeout: 1000 }))
+        ) {
           await testSubjects.click('app-menu-overflow-button', 1000);
           await testSubjects.existOrFail('mlSuppliedConfigurationsButton', { timeout: 5000 });
         }
@@ -346,14 +348,14 @@ export function MachineLearningNavigationProvider({
     },
 
     async openKibanaNav() {
-      if (!(await testSubjects.exists('collapsibleNav'))) {
+      if (!(await testSubjects.waitForExists('collapsibleNav'))) {
         await testSubjects.click('toggleNavButton');
       }
       await testSubjects.existOrFail('collapsibleNav');
     },
 
     async closeKibanaNav() {
-      if (await testSubjects.exists('collapsibleNav')) {
+      if (await testSubjects.waitForExists('collapsibleNav')) {
         await testSubjects.click('toggleNavButton');
       }
       await testSubjects.missingOrFail('collapsibleNav');

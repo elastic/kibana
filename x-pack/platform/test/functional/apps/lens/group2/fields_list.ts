@@ -67,7 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await log.debug(`Opening field stats for ${fieldId}`);
           await testSubjects.click(fieldId);
           // check for popover
-          await testSubjects.exists('lnsFieldListPanel-title');
+          await testSubjects.waitForExists('lnsFieldListPanel-title');
           // check for top values chart
           await testSubjects.existOrFail('lnsFieldListPanel-topValues');
           const topValuesRows = await testSubjects.findAll('lnsFieldListPanel-topValues-bucket');
@@ -89,7 +89,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await log.debug(`Opening field stats for ${fieldId}`);
           await testSubjects.click(fieldId);
           // check for popover
-          await testSubjects.exists('lnsFieldListPanel-title');
+          await testSubjects.waitForExists('lnsFieldListPanel-title');
           // check for top values chart
           await testSubjects.existOrFail('lnsFieldListPanel-topValues');
           const topValuesRows = await testSubjects.findAll('lnsFieldListPanel-topValues-bucket');
@@ -109,7 +109,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await log.debug(`Opening field stats for ${fieldId}`);
           await testSubjects.click(fieldId);
           // check for popover
-          await testSubjects.exists('lnsFieldListPanel-title');
+          await testSubjects.waitForExists('lnsFieldListPanel-title');
           // check for date histogram chart
           expect(
             await find.existsByCssSelector(
@@ -138,7 +138,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await log.debug(`Opening field stats for ${fieldId}`);
           await testSubjects.click(fieldId);
           // check for popover
-          await testSubjects.exists('lnsFieldListPanel-title');
+          await testSubjects.waitForExists('lnsFieldListPanel-title');
           // check for top values chart
           await testSubjects.existOrFail('lnsFieldListPanel-topValues');
           // check values
@@ -163,7 +163,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await log.debug(`Opening field stats for ${fieldId}`);
           await testSubjects.click(fieldId);
           // check for popover
-          await testSubjects.exists('lnsFieldListPanel-title');
+          await testSubjects.waitForExists('lnsFieldListPanel-title');
           // check for top values chart
           await testSubjects.existOrFail('lnsFieldListPanel-topValues');
           // check no date histogram

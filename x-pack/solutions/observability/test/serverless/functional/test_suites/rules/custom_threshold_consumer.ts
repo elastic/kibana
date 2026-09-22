@@ -49,7 +49,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await testSubjects.click('observability.rules.custom_threshold-SelectOption');
       const ruleType = await testSubjects.getVisibleText('ruleDefinitionHeaderRuleTypeName');
       expect(ruleType).toEqual('Custom threshold');
-      await testSubjects.exists('selectDataViewExpression');
+      await testSubjects.waitForExists('selectDataViewExpression');
     });
 
     it('should create a new custom threshold rule', async () => {

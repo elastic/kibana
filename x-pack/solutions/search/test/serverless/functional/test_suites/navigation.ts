@@ -173,7 +173,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
     it('opens panel on legacy management landing page', async () => {
       await common.navigateToApp('management');
-      await testSubjects.exists('cards-navigation-page');
+      await testSubjects.waitForExists('cards-navigation-page');
       await solutionNavigation.sidenav.expectPanelExists('admin_and_settings');
     });
   });

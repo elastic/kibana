@@ -113,7 +113,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // If both requests have already completed, it will show a context menu first, otherwise it
         // will go directly to the details
-        if (await testSubjects.exists('viewDetailsContextMenu')) {
+        if (await testSubjects.waitForExists('viewDetailsContextMenu')) {
           await testSubjects.click('viewDetailsContextMenu');
         }
 

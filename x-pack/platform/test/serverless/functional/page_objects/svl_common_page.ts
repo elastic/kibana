@@ -116,7 +116,7 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
             );
           }
           // Verifying that we are logged in
-          if (await testSubjects.exists('userMenuButton', { timeout: 10_000 })) {
+          if (await testSubjects.waitForExists('userMenuButton', { timeout: 10_000 })) {
             log.debug('userMenuButton found, login passed');
             return true;
           } else {
@@ -183,7 +183,7 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
 
     async assertProjectHeaderExists() {
       await retry.try(async () => {
-        const exists = await testSubjects.exists('chromeNextGlobalHeader', { timeout: 0 });
+        const exists = await testSubjects.exists('chromeNextGlobalHeader');
         if (!exists) {
           throw new Error('chromeNextGlobalHeader is not present');
         }

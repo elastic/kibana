@@ -30,8 +30,8 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
   const toasts = getService('toasts');
 
   const refreshAlertsList = async () => {
-    const existsClearFilter = await testSubjects.exists('rules-list-clear-filter');
-    const existsRefreshButton = await testSubjects.exists('refreshRulesButton');
+    const existsClearFilter = await testSubjects.waitForExists('rules-list-clear-filter');
+    const existsRefreshButton = await testSubjects.waitForExists('refreshRulesButton');
     if (existsClearFilter) {
       await testSubjects.click('rules-list-clear-filter');
     } else if (existsRefreshButton) {
@@ -359,7 +359,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
 
       await testSubjects.click('collapsedItemActions');
       await testSubjects.click('deleteRule');
-      await testSubjects.exists('rulesDeleteIdsConfirmation');
+      await testSubjects.waitForExists('rulesDeleteIdsConfirmation');
       await testSubjects.click('confirmModalConfirmButton');
 
       await retry.try(async () => {
@@ -481,7 +481,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await testSubjects.click('bulkAction');
 
       await testSubjects.click('bulkDelete');
-      await testSubjects.exists('rulesDeleteIdsConfirmation');
+      await testSubjects.waitForExists('rulesDeleteIdsConfirmation');
       await testSubjects.click('confirmModalConfirmButton');
 
       await retry.try(async () => {

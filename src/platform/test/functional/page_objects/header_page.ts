@@ -68,7 +68,7 @@ export class HeaderPageObject extends FtrService {
 
   public async isGlobalLoadingIndicatorVisible() {
     this.log.debug('isGlobalLoadingIndicatorVisible');
-    return await this.testSubjects.exists('globalLoadingIndicator', { timeout: 1500 });
+    return await this.testSubjects.waitForExists('globalLoadingIndicator', { timeout: 1500 });
   }
 
   public async awaitGlobalLoadingIndicatorHidden() {
@@ -84,7 +84,7 @@ export class HeaderPageObject extends FtrService {
   }
 
   public async onAppLeaveWarning(ignoreWarning = false) {
-    const warning = await this.testSubjects.exists('confirmModalTitleText');
+    const warning = await this.testSubjects.waitForExists('confirmModalTitleText');
     if (warning) {
       await this.testSubjects.click(
         ignoreWarning ? 'confirmModalConfirmButton' : 'confirmModalCancelButton'

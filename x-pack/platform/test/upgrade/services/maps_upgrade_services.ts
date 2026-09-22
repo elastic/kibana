@@ -18,10 +18,10 @@ export function MapsHelper({ getPageObjects, getService }: FtrProviderContext) {
     // Maps created after this change will have a layer called "Total Requests by Destination"
     // toggleLayerVisibilityTotalRequests will toggle layer visibility for either value
     async toggleLayerVisibilityTotalRequests() {
-      const isRequestByCountry = await testSubjects.exists(
+      const isRequestByCountry = await testSubjects.waitForExists(
         'layerTocActionsPanelToggleButtonTotal_Requests_by_Country'
       );
-      const isRequestByDestination = await testSubjects.exists(
+      const isRequestByDestination = await testSubjects.waitForExists(
         'layerTocActionsPanelToggleButtonTotal_Requests_by_Destination'
       );
       if (!isRequestByCountry && !isRequestByDestination) {

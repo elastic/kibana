@@ -302,7 +302,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await actionsButton.click();
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
-        expect(await testSubjects.exists('hasActionsDisabled')).toBe(false);
+        expect(await testSubjects.waitForExists('hasActionsDisabled')).toBe(false);
 
         await testSubjects.click('ruleFormStep-details');
         await testSubjects.setValue('ruleDetailsNameInput', updatedRuleName, {
@@ -438,7 +438,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await actionsButton.click();
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
-        expect(await testSubjects.exists('hasActionsDisabled')).toEqual(false);
+        expect(await testSubjects.waitForExists('hasActionsDisabled')).toEqual(false);
 
         const headerText = await find.byCssSelector('[data-test-subj="ruleActionsItem"] h2');
 

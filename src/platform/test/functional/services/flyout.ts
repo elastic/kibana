@@ -26,7 +26,7 @@ export class FlyoutService extends FtrService {
   }
 
   public async ensureClosed(dataTestSubj: string): Promise<void> {
-    if (await this.testSubjects.exists(dataTestSubj, { timeout: 1000 })) {
+    if (await this.testSubjects.waitForExists(dataTestSubj, { timeout: 1000 })) {
       await this.close(dataTestSubj);
     }
   }
@@ -65,7 +65,7 @@ export class FlyoutService extends FtrService {
     const managedFlyoutCloseButton = `${testSubjectPrefix}euiFlyoutCloseButton`;
     const unmanagedFlyoutCloseButton = `${testSubjectPrefix}closeFlyoutButton`;
 
-    if (await this.testSubjects.exists(managedFlyoutCloseButton)) {
+    if (await this.testSubjects.waitForExists(managedFlyoutCloseButton)) {
       await this.testSubjects.click(managedFlyoutCloseButton);
     } else {
       await this.testSubjects.click(unmanagedFlyoutCloseButton);

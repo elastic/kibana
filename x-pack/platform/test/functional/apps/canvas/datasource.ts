@@ -82,10 +82,10 @@ export default function canvasExpressionTest({ getService, getPageObjects }: Ftr
         await testSubjects.click('canvasDataViewSelect');
 
         // check that data view options list is displayed
-        expect(await testSubjects.exists('canvasDataViewSelect-optionsList'));
+        expect(await testSubjects.waitForExists('canvasDataViewSelect-optionsList'));
 
         // check that the logstash-* data view without name attribute is available
-        expect(await testSubjects.exists('canvasDataViewSelect__logstash-*'));
+        expect(await testSubjects.waitForExists('canvasDataViewSelect__logstash-*'));
       });
 
       it('updates expression to use esdocs', async () => {

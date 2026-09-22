@@ -32,7 +32,7 @@ export class TimeToVisualizePageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
 
   public async ensureSaveModalIsOpen() {
-    await this.testSubjects.exists('savedObjectSaveModal', { timeout: 5000 });
+    await this.testSubjects.waitForExists('savedObjectSaveModal', { timeout: 5000 });
   }
 
   public async ensureDashboardOptionsAreDisabled() {
@@ -88,14 +88,14 @@ export class TimeToVisualizePageObject extends FtrService {
       });
     }
 
-    const hasSaveAsNew = await this.testSubjects.exists('saveAsNewCheckbox');
+    const hasSaveAsNew = await this.testSubjects.waitForExists('saveAsNewCheckbox');
     if (hasSaveAsNew && saveAsNew !== undefined) {
       const state = saveAsNew ? 'check' : 'uncheck';
       this.log.debug('save as new checkbox exists. Setting its state to', state);
       await this.testSubjects.setEuiSwitch('saveAsNewCheckbox', state);
     }
 
-    const hasDashboardSelector = await this.testSubjects.exists('add-to-dashboard-options');
+    const hasDashboardSelector = await this.testSubjects.waitForExists('add-to-dashboard-options');
     if (hasDashboardSelector && addToDashboard !== undefined) {
       let option: DashboardPickerOption = 'add-to-library-option';
       if (addToDashboard) {
@@ -111,7 +111,7 @@ export class TimeToVisualizePageObject extends FtrService {
       }
     }
 
-    const hasSaveToLibrary = await this.testSubjects.exists('add-to-library-checkbox');
+    const hasSaveToLibrary = await this.testSubjects.waitForExists('add-to-library-checkbox');
     if (hasSaveToLibrary && saveToLibrary !== undefined) {
       const libraryCheckbox = await this.find.byCssSelector('#add-to-library-checkbox');
       const isChecked = await libraryCheckbox.isSelected();
@@ -126,7 +126,7 @@ export class TimeToVisualizePageObject extends FtrService {
       }
     }
 
-    const hasRedirectToOrigin = await this.testSubjects.exists('returnToOriginModeSwitch');
+    const hasRedirectToOrigin = await this.testSubjects.waitForExists('returnToOriginModeSwitch');
     if (hasRedirectToOrigin && redirectToOrigin !== undefined) {
       const state = redirectToOrigin ? 'check' : 'uncheck';
       this.log.debug('redirect to origin checkbox exists. Setting its state to', state);

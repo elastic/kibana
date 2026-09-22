@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('can delete an index pattern', async () => {
         await PageObjects.settings.removeIndexPattern();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await testSubjects.exists('indexPatternTable');
+        await testSubjects.waitForExists('indexPatternTable');
       });
 
       after(async () => {

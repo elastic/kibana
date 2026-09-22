@@ -29,7 +29,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should load from the shareable lazy loader', async () => {
       await testSubjects.find('ruleEventLogListContainer');
-      const exists = await testSubjects.exists('ruleEventLogListContainer');
+      const exists = await testSubjects.waitForExists('ruleEventLogListContainer');
       expect(exists).to.be(true);
     });
   });

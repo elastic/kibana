@@ -124,7 +124,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await lens.saveAndReturn();
         await dashboard.waitForRenderComplete();
 
-        const partitionVisExists = await testSubjects.exists('partitionVisChart');
+        const partitionVisExists = await testSubjects.waitForExists('partitionVisChart');
         expect(partitionVisExists).to.be(true);
       });
 
@@ -157,7 +157,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await header.waitUntilLoadingHasFinished();
         await testSubjects.click('lnsApp_saveButton');
 
-        expect(await testSubjects.exists('add-to-library-checkbox')).to.equal(false);
+        expect(await testSubjects.waitForExists('add-to-library-checkbox')).to.equal(false);
 
         await timeToVisualize.saveFromModal('New Lens from Modal', {
           addToDashboard: 'new',
@@ -234,7 +234,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await visualize.ensureSavePanelOpen();
 
-        expect(await testSubjects.exists('add-to-library-checkbox')).to.equal(false);
+        expect(await testSubjects.waitForExists('add-to-library-checkbox')).to.equal(false);
         await timeToVisualize.saveFromModal('My New Vis 1', {
           addToDashboard: 'new',
         });

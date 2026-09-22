@@ -70,7 +70,7 @@ export class QueryBarService extends FtrService {
   public async switchQueryLanguage(lang: 'kql' | 'lucene'): Promise<void> {
     await this.testSubjects.click('switchQueryLanguageButton');
     await this.testSubjects.click(`${lang}LanguageMenuItem`);
-    const contextMenuPanelTitleButton = await this.testSubjects.exists(
+    const contextMenuPanelTitleButton = await this.testSubjects.waitForExists(
       'contextMenuPanelTitleButton'
     );
     if (contextMenuPanelTitleButton) {

@@ -259,7 +259,7 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async isA11yOverlayVisible() {
-    return await this.testSubjects.exists('codeEditorAccessibilityOverlay');
+    return await this.testSubjects.waitForExists('codeEditorAccessibilityOverlay');
   }
 
   public async clickPlay() {
@@ -297,7 +297,7 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async isPlayButtonVisible() {
-    return await this.testSubjects.exists('sendRequestButton');
+    return await this.testSubjects.waitForExists('sendRequestButton');
   }
 
   public async clickCopyOutput() {
@@ -305,7 +305,7 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async clickClearInput() {
-    const hasClearButton = await this.testSubjects.exists('clearConsoleInput');
+    const hasClearButton = await this.testSubjects.waitForExists('clearConsoleInput');
 
     if (hasClearButton) {
       await this.testSubjects.click('clearConsoleInput');
@@ -313,7 +313,7 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async clickClearOutput() {
-    const hasClearButton = await this.testSubjects.exists('clearConsoleOutput');
+    const hasClearButton = await this.testSubjects.waitForExists('clearConsoleOutput');
 
     if (hasClearButton) {
       await this.testSubjects.click('clearConsoleOutput');
@@ -391,7 +391,7 @@ export class ConsolePageObject extends FtrService {
     await this.retry.waitFor('console container is displayed', async () => {
       return await this.testSubjects.isDisplayed('consolePanel');
     });
-    return await this.testSubjects.exists(tabId);
+    return await this.testSubjects.waitForExists(tabId);
   }
 
   public async isShellOpen() {
@@ -506,7 +506,7 @@ export class ConsolePageObject extends FtrService {
   }
 
   async skipTourIfExists() {
-    const tourShown = await this.testSubjects.exists('consoleSkipTourButton');
+    const tourShown = await this.testSubjects.waitForExists('consoleSkipTourButton');
     if (tourShown) {
       await this.clickSkipTour();
     }
@@ -518,27 +518,27 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async isContextMenuOpen() {
-    return await this.testSubjects.exists('consoleMenu');
+    return await this.testSubjects.waitForExists('consoleMenu');
   }
 
   public async isCopyAsCurlButtonVisible() {
-    return await this.testSubjects.exists('consoleMenuCopyAsCurl');
+    return await this.testSubjects.waitForExists('consoleMenuCopyAsCurl');
   }
 
   public async isOpenDocumentationButtonVisible() {
-    return await this.testSubjects.exists('consoleMenuOpenDocs');
+    return await this.testSubjects.waitForExists('consoleMenuOpenDocs');
   }
 
   public async isAutoIndentButtonVisible() {
-    return await this.testSubjects.exists('consoleMenuAutoIndent');
+    return await this.testSubjects.waitForExists('consoleMenuAutoIndent');
   }
 
   public async isCopyToLanguageButtonVisible() {
-    return await this.testSubjects.exists('consoleMenuCopyAsButton');
+    return await this.testSubjects.waitForExists('consoleMenuCopyAsButton');
   }
 
   public async isSelectLanguageButtonVisible() {
-    return await this.testSubjects.exists('consoleMenuSelectLanguage');
+    return await this.testSubjects.waitForExists('consoleMenuSelectLanguage');
   }
 
   public async clickCopyAsCurlButton() {
@@ -645,7 +645,7 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async isOutputPanelEmptyStateVisible() {
-    return await this.testSubjects.exists('consoleOutputPanelEmptyState');
+    return await this.testSubjects.waitForExists('consoleOutputPanelEmptyState');
   }
 
   public async clickOutputFilterButton() {
@@ -654,13 +654,15 @@ export class ConsolePageObject extends FtrService {
 
   public async isOutputFilterRowVisible() {
     return (
-      (await this.testSubjects.exists('filterJq')) ||
-      (await this.testSubjects.exists('filterRegex'))
+      (await this.testSubjects.waitForExists('filterJq')) ||
+      (await this.testSubjects.waitForExists('filterRegex'))
     );
   }
 
   public async typeInFilterInput(text: string) {
-    const testSubj = (await this.testSubjects.exists('filterJq')) ? 'filterJq' : 'filterRegex';
+    const testSubj = (await this.testSubjects.waitForExists('filterJq'))
+      ? 'filterJq'
+      : 'filterRegex';
     const input = await this.testSubjects.find(testSubj);
     await input.clearValueWithKeyboard();
     await input.type(text);

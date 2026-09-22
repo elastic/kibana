@@ -86,6 +86,6 @@ export class AnnotationEditorPageObject extends FtrService {
   }
 
   public async showingMissingDataViewPrompt() {
-    return await this.testSubjects.exists('missingDataViewPrompt');
+    return await this.testSubjects.waitForExists('missingDataViewPrompt');
   }
 }

@@ -354,7 +354,9 @@ export function MachineLearningCommonUIProvider({
 
       await retry.tryForTime(overallTimeout, async () => {
         for (const testSubj of subjectsToCheck) {
-          const subjExists = await testSubjects.exists(testSubj, { timeout: singleSubjectTimeout });
+          const subjExists = await testSubjects.waitForExists(testSubj, {
+            timeout: singleSubjectTimeout,
+          });
           if (subjExists) return; // stop ckecking once we found an existing element
         }
         throw new Error(
@@ -409,7 +411,9 @@ export function MachineLearningCommonUIProvider({
     async ensureComboBoxClosed() {
       await retry.tryForTime(5000, async () => {
         await browser.pressKeys(browser.keys.ESCAPE);
-        const comboBoxOpen = await testSubjects.exists('~comboBoxOptionsList', { timeout: 50 });
+        const comboBoxOpen = await testSubjects.waitForExists('~comboBoxOptionsList', {
+          timeout: 50,
+        });
         expect(comboBoxOpen).to.eql(false, 'Combo box should be closed');
       });
     },

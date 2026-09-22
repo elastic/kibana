@@ -22,14 +22,14 @@ export default function ({ getService, getPageObject }: PluginFunctionalProvider
 
   const clickAppLink = async (app: string) => {
     const appLink = `fooNav${app}`;
-    if (!(await testSubjects.exists(appLink))) {
+    if (!(await testSubjects.waitForExists(appLink))) {
       log.debug(`App ${app} not found on side nav`);
     }
     await testSubjects.click(appLink);
   };
 
   const loadingScreenNotShown = async () =>
-    expect(await testSubjects.exists('kbnLoadingMessage')).to.be(false);
+    expect(await testSubjects.waitForExists('kbnLoadingMessage')).to.be(false);
 
   const checkAppVisible = async (app: string) => {
     const appContainer = `fooApp${app}`;
@@ -118,7 +118,7 @@ export default function ({ getService, getPageObject }: PluginFunctionalProvider
     it('navigating to chromeless application hides chrome', async () => {
       await common.navigateToApp('chromeless');
       await loadingScreenNotShown();
-      expect(await testSubjects.exists('headerGlobalNav')).to.be(false);
+      expect(await testSubjects.waitForExists('headerGlobalNav')).to.be(false);
 
       const wrapperHeight = await getAppWrapperHeight();
       const windowHeight = (await browser.getWindowInnerSize()).height;
@@ -128,7 +128,7 @@ export default function ({ getService, getPageObject }: PluginFunctionalProvider
     it('navigating away from chromeless application shows chrome', async () => {
       await common.navigateToApp('foo');
       await loadingScreenNotShown();
-      expect(await testSubjects.exists('headerGlobalNav')).to.be(true);
+      await testSubjects.existOrFail('headerGlobalNav');
 
       const wrapperHeight = await getAppWrapperHeight();
       const windowHeight = (await browser.getWindowInnerSize()).height;

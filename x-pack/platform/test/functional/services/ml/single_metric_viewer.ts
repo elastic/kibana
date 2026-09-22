@@ -123,7 +123,7 @@ export function MachineLearningSingleMetricViewerProvider(
     },
 
     async openConfigForControl(entityFieldName: string) {
-      const isPopoverOpened = await testSubjects.exists(
+      const isPopoverOpened = await testSubjects.waitForExists(
         `mlSingleMetricViewerEntitySelectionConfigPopover_${entityFieldName}`
       );
 

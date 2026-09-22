@@ -243,7 +243,7 @@ export class SettingsPageObject extends FtrService {
   }
 
   async clickDeletePattern() {
-    if (!(await this.testSubjects.exists('deleteIndexPatternButton'))) {
+    if (!(await this.testSubjects.waitForExists('deleteIndexPatternButton'))) {
       await this.testSubjects.click(APP_MENU_TEST_SUBJECTS.overflowButton);
     }
     await this.testSubjects.click('deleteIndexPatternButton');
@@ -500,7 +500,7 @@ export class SettingsPageObject extends FtrService {
   }
 
   async isIndexPatternListEmpty() {
-    return !(await this.testSubjects.exists('indexPatternTable', { timeout: 5000 }));
+    return !(await this.testSubjects.waitForExists('indexPatternTable', { timeout: 5000 }));
   }
 
   async removeLogstashIndexPatternIfExist() {
@@ -513,7 +513,7 @@ export class SettingsPageObject extends FtrService {
   // `toggleAdvancedSetting` flips the section between shown and hidden, so calling it
   // unconditionally would collapse the section again when the form is filled a second time.
   async showAdvancedSettings() {
-    if (await this.testSubjects.exists('advancedSettings')) {
+    if (await this.testSubjects.waitForExists('advancedSettings')) {
       return;
     }
     await this.testSubjects.click('toggleAdvancedSetting');
@@ -538,7 +538,7 @@ export class SettingsPageObject extends FtrService {
       await this.header.waitUntilLoadingHasFinished();
       if (
         options.ignoreMissing &&
-        !(await this.testSubjects.exists(`detail-link-${dataViewName}`))
+        !(await this.testSubjects.waitForExists(`detail-link-${dataViewName}`))
       ) {
         return;
       }
@@ -941,7 +941,7 @@ export class SettingsPageObject extends FtrService {
     await this.flyout.closeFlyout();
 
     // We might have unsaved changes and we need to confirm inside the modal
-    if (await this.testSubjects.exists('runtimeFieldModifiedFieldConfirmModal')) {
+    if (await this.testSubjects.waitForExists('runtimeFieldModifiedFieldConfirmModal')) {
       this.log.debug('Unsaved changes for the field: need to confirm');
       await this.testSubjects.click('confirmModalConfirmButton');
     }
@@ -1116,7 +1116,7 @@ export class SettingsPageObject extends FtrService {
 
   async openScriptedFieldHelp(activeTab: string) {
     this.log.debug('open Scripted Fields help');
-    let isOpen = await this.testSubjects.exists('scriptedFieldsHelpFlyout');
+    let isOpen = await this.testSubjects.waitForExists('scriptedFieldsHelpFlyout');
     if (!isOpen) {
       await this.retry.try(async () => {
         await this.testSubjects.click('scriptedFieldsHelpLink');

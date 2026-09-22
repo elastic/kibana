@@ -25,7 +25,7 @@ export class MonitoringPageObject extends FtrService {
   }
 
   async assertTableNoData(subj: string) {
-    if (!(await this.testSubjects.exists(subj))) {
+    if (!(await this.testSubjects.waitForExists(subj))) {
       throw new Error('Expected to find the no data message');
     }
   }

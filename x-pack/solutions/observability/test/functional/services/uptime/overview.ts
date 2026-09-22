@@ -26,7 +26,7 @@ export function UptimeOverviewProvider({ getService }: FtrProviderContext) {
      * Otherwise, open the popover, then click the nested button.
      */
     async navigateToNestedPopover(): Promise<void> {
-      if (await testSubjects.exists('xpack.synthetics.openAlertContextPanel')) {
+      if (await testSubjects.waitForExists('xpack.synthetics.openAlertContextPanel')) {
         return testSubjects.click('xpack.synthetics.openAlertContextPanel');
       }
       await testSubjects.click('xpack.synthetics.alertsPopover.toggleButton');
@@ -35,7 +35,7 @@ export function UptimeOverviewProvider({ getService }: FtrProviderContext) {
 
     async clickDefineSettings() {
       return retry.tryForTime(60 * 1000, async () => {
-        if (await testSubjects.exists('errorToastBtn', { timeout: 0 })) {
+        if (await testSubjects.exists('errorToastBtn')) {
           await testSubjects.click('toastCloseButton');
         }
         await testSubjects.click('uptimeSettingsLink');

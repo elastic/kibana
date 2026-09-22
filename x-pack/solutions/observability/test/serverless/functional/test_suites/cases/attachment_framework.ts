@@ -88,8 +88,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.click('toaster-content-case-view-link');
         await toasts.dismissAllWithChecks();
 
-        if (await testSubjects.exists('appLeaveConfirmModal')) {
-          await testSubjects.exists('confirmModalConfirmButton');
+        if (await testSubjects.waitForExists('appLeaveConfirmModal')) {
+          await testSubjects.waitForExists('confirmModalConfirmButton');
           await testSubjects.click('confirmModalConfirmButton');
         }
 
@@ -126,8 +126,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.click('toaster-content-case-view-link');
         await toasts.dismissAllWithChecks();
 
-        if (await testSubjects.exists('appLeaveConfirmModal')) {
-          await testSubjects.exists('confirmModalConfirmButton');
+        if (await testSubjects.waitForExists('appLeaveConfirmModal')) {
+          await testSubjects.waitForExists('confirmModalConfirmButton');
           await testSubjects.click('confirmModalConfirmButton');
         }
 

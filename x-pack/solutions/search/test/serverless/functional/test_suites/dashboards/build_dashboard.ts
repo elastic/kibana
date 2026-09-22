@@ -70,7 +70,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.lens.saveAndReturn();
       await PageObjects.dashboard.waitForRenderComplete();
 
-      const partitionVisExists = await testSubjects.exists('partitionVisChart');
+      const partitionVisExists = await testSubjects.waitForExists('partitionVisChart');
       expect(partitionVisExists).to.be(true);
     });
 

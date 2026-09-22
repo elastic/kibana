@@ -67,7 +67,7 @@ export class UpgradeAssistantFlyoutObject extends FtrService {
   }
 
   async isDeprecationLoggingEnabled(): Promise<boolean> {
-    return await this.testSubjects.exists('externalLinksTitle');
+    return await this.testSubjects.waitForExists('externalLinksTitle');
   }
 
   async clickResetLastCheckpointButton() {

@@ -54,7 +54,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await transform.testExecution.logTestStep(
         'should render an empty state or transforms table with a create button'
       );
-      if (await testSubjects.exists('transformNoTransformsFound')) {
+      if (await testSubjects.waitForExists('transformNoTransformsFound')) {
         await transform.management.assertNoTransformsFoundMessageExists();
         await transform.management.assertCreateFirstTransformButtonExists();
       } else {

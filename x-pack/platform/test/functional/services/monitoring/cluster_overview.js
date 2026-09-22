@@ -81,7 +81,7 @@ export function MonitoringClusterOverviewProvider({ getService }) {
     }
 
     doesClusterAlertsExist() {
-      return testSubjects.exists(SUBJ_CLUSTER_ALERTS);
+      return testSubjects.waitForExists(SUBJ_CLUSTER_ALERTS);
     }
 
     closeAlertsModal() {
@@ -151,7 +151,7 @@ export function MonitoringClusterOverviewProvider({ getService }) {
     }
 
     doesEsMlJobsExist() {
-      return testSubjects.exists(SUBJ_ES_ML_JOBS);
+      return testSubjects.waitForExists(SUBJ_ES_ML_JOBS);
     }
     getEsMlJobs() {
       return testSubjects.getVisibleText(SUBJ_ES_ML_JOBS);

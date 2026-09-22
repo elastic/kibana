@@ -62,7 +62,7 @@ export function MachineLearningJobExpandedDetailsProvider(
     },
 
     async clearSearchButton() {
-      if (await testSubjects.exists('clearSearchButton')) {
+      if (await testSubjects.waitForExists('clearSearchButton')) {
         await testSubjects.click('clearSearchButton');
         await testSubjects.missingOrFail('clearSearchButton');
       }

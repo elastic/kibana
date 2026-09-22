@@ -68,9 +68,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should display staging control buttons', async () => {
-        const submitButtonExists = await testSubjects.exists('inputControlSubmitBtn');
-        const cancelButtonExists = await testSubjects.exists('inputControlCancelBtn');
-        const clearButtonExists = await testSubjects.exists('inputControlClearBtn');
+        const submitButtonExists = await testSubjects.waitForExists('inputControlSubmitBtn');
+        const cancelButtonExists = await testSubjects.waitForExists('inputControlCancelBtn');
+        const clearButtonExists = await testSubjects.waitForExists('inputControlClearBtn');
         expect(submitButtonExists).to.equal(true);
         expect(cancelButtonExists).to.equal(true);
         expect(clearButtonExists).to.equal(true);
@@ -152,9 +152,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should not display staging control buttons', async () => {
-        const submitButtonExists = await testSubjects.exists('inputControlSubmitBtn');
-        const cancelButtonExists = await testSubjects.exists('inputControlCancelBtn');
-        const clearButtonExists = await testSubjects.exists('inputControlClearBtn');
+        const submitButtonExists = await testSubjects.waitForExists('inputControlSubmitBtn');
+        const cancelButtonExists = await testSubjects.waitForExists('inputControlCancelBtn');
+        const clearButtonExists = await testSubjects.waitForExists('inputControlClearBtn');
         expect(submitButtonExists).to.equal(false);
         expect(cancelButtonExists).to.equal(false);
         expect(clearButtonExists).to.equal(false);

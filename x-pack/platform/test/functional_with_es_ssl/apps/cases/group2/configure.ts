@@ -53,13 +53,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     describe('Connectors', function () {
       it('defaults the connector to none correctly', async () => {
-        expect(await testSubjects.exists('dropdown-connector-no-connector-label')).to.be(true);
+        await testSubjects.existOrFail('dropdown-connector-no-connector-label');
       });
 
       it('opens and closes the connectors flyout correctly', async () => {
         await common.clickAndValidate('add-new-connector', 'euiFlyoutCloseButton');
         await testSubjects.click('euiFlyoutCloseButton');
-        expect(await testSubjects.exists('euiFlyoutCloseButton')).to.be(false);
+        expect(await testSubjects.waitForExists('euiFlyoutCloseButton')).to.be(false);
       });
     });
   });

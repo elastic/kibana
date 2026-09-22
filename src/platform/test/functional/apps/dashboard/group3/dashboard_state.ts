@@ -93,7 +93,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.addSavedSearch('my search');
       await dashboard.saveDashboard('No local edits');
 
-      const inViewMode = await testSubjects.exists('dashboardEditMode');
+      const inViewMode = await testSubjects.waitForExists('dashboardEditMode');
       expect(inViewMode).to.be(true);
 
       await header.clickDiscover();

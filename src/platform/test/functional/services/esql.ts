@@ -35,7 +35,7 @@ export class ESQLService extends FtrService {
   }
 
   public async isHistoryPanelOpen() {
-    return await this.testSubjects.exists('ESQLEditor-history-container');
+    return await this.testSubjects.waitForExists('ESQLEditor-history-container');
   }
 
   public async toggleHistoryPanel() {
@@ -128,7 +128,7 @@ export class ESQLService extends FtrService {
   }
 
   public async isOpenQuickReferenceFlyout() {
-    return await this.testSubjects.exists('esqlInlineDocumentationFlyout');
+    return await this.testSubjects.waitForExists('esqlInlineDocumentationFlyout');
   }
 
   public async openQuickReferenceFlyout() {
@@ -178,7 +178,7 @@ export class ESQLService extends FtrService {
     await this.retry.waitFor('ES|QL control flyout to close after saving the control', async () => {
       await this.testSubjects.waitForEnabled('saveEsqlControlsFlyoutButton');
       await this.testSubjects.click('saveEsqlControlsFlyoutButton');
-      const flyoutOpen = await this.testSubjects.exists('create_esql_control_flyout', {
+      const flyoutOpen = await this.testSubjects.waitForExists('create_esql_control_flyout', {
         timeout: 2000,
       });
       return !flyoutOpen;

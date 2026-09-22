@@ -79,8 +79,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.click('toaster-content-case-view-link');
         await toasts.dismissAllWithChecks();
 
-        if (await testSubjects.exists('appLeaveConfirmModal')) {
-          await testSubjects.exists('confirmModalConfirmButton');
+        if (await testSubjects.waitForExists('appLeaveConfirmModal')) {
+          await testSubjects.waitForExists('confirmModalConfirmButton');
           await testSubjects.click('confirmModalConfirmButton');
         }
 
@@ -104,7 +104,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await header.waitUntilLoadingHasFinished();
         await testSubjects.click('LandingImageCards-accordionButton');
 
-        if (await testSubjects.exists('edit-unsaved-New-Dashboard')) {
+        if (await testSubjects.waitForExists('edit-unsaved-New-Dashboard')) {
           await testSubjects.click('edit-unsaved-New-Dashboard');
         }
 
@@ -119,8 +119,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.click('toaster-content-case-view-link');
         await toasts.dismissAllWithChecks();
 
-        if (await testSubjects.exists('appLeaveConfirmModal')) {
-          await testSubjects.exists('confirmModalConfirmButton');
+        if (await testSubjects.waitForExists('appLeaveConfirmModal')) {
+          await testSubjects.waitForExists('confirmModalConfirmButton');
           await testSubjects.click('confirmModalConfirmButton');
         }
 

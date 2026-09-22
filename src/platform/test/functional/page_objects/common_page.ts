@@ -428,7 +428,9 @@ export class CommonPageObject extends FtrService {
 
   async ensureModalOverlayHidden() {
     return this.retry.try(async () => {
-      const shown = await this.testSubjects.exists('confirmModalTitleText', { timeout: 500 });
+      const shown = await this.testSubjects.waitForExists('confirmModalTitleText', {
+        timeout: 500,
+      });
       if (shown) {
         throw new Error('Modal overlay is showing');
       }
@@ -438,7 +440,7 @@ export class CommonPageObject extends FtrService {
   async clickConfirmOnModal(ensureHidden = true) {
     this.log.debug('Clicking modal confirm');
     // make sure this data-test-subj 'confirmModalTitleText' exists because we're going to wait for it to be gone later
-    await this.testSubjects.exists('confirmModalTitleText');
+    await this.testSubjects.waitForExists('confirmModalTitleText');
     // make sure button is enabled before clicking it
     // (and conveniently give UI enough time to bind a handler to it)
     const isEnabled = await this.testSubjects.isEnabled('confirmModalConfirmButton');
@@ -492,15 +494,15 @@ export class CommonPageObject extends FtrService {
   }
 
   async isChromeVisible() {
-    return await this.testSubjects.exists('kbnAppWrapper visibleChrome');
+    return await this.testSubjects.waitForExists('kbnAppWrapper visibleChrome');
   }
 
   async isChromeHidden() {
-    return await this.testSubjects.exists('kbnAppWrapper hiddenChrome');
+    return await this.testSubjects.waitForExists('kbnAppWrapper hiddenChrome');
   }
 
   async isFatalErrorScreen() {
-    return await this.testSubjects.exists('fatalErrorScreen');
+    return await this.testSubjects.waitForExists('fatalErrorScreen');
   }
 
   async waitForTopNavToBeVisible() {
@@ -554,14 +556,14 @@ export class CommonPageObject extends FtrService {
    * Dismiss Banner if available.
    */
   async dismissBanner() {
-    if (await this.testSubjects.exists('global-banner-item')) {
+    if (await this.testSubjects.waitForExists('global-banner-item')) {
       const button = await this.find.byButtonText('Dismiss');
       await button.click();
     }
   }
 
   async isWelcomeScreen() {
-    return await this.testSubjects.exists('homeWelcomeInterstitial');
+    return await this.testSubjects.waitForExists('homeWelcomeInterstitial');
   }
 
   /**
@@ -585,7 +587,7 @@ export class CommonPageObject extends FtrService {
     if (isValidatorCssString) {
       await this.find.byCssSelector(validator);
     } else {
-      await this.testSubjects.exists(validator);
+      await this.testSubjects.waitForExists(validator);
     }
   }
 

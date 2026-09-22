@@ -63,7 +63,7 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
     },
 
     async isAdvancedSettingsExpanded() {
-      return await testSubjects.exists(formTestSubj.advancedSection.settingsContainer);
+      return await testSubjects.waitForExists(formTestSubj.advancedSection.settingsContainer);
     },
 
     /**

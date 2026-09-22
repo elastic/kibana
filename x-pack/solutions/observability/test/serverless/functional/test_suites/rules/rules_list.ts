@@ -27,7 +27,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   let roleAuthc: RoleCredentials;
 
   async function refreshRulesList() {
-    const existsClearFilter = await testSubjects.exists('rules-list-clear-filter');
+    const existsClearFilter = await testSubjects.waitForExists('rules-list-clear-filter');
     if (existsClearFilter) {
       await testSubjects.click('rules-list-clear-filter');
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
@@ -353,7 +353,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       await testSubjects.click('collapsedItemActions');
       await testSubjects.click('deleteRule');
-      await testSubjects.exists('rulesDeleteIdsConfirmation');
+      await testSubjects.waitForExists('rulesDeleteIdsConfirmation');
       await testSubjects.click('confirmModalConfirmButton');
 
       await retry.try(async () => {
@@ -472,7 +472,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await testSubjects.click(`checkboxSelectRow-${createdRule1.id}`);
       await testSubjects.click('bulkAction');
       await testSubjects.click('bulkDelete');
-      await testSubjects.exists('rulesDeleteIdsConfirmation');
+      await testSubjects.waitForExists('rulesDeleteIdsConfirmation');
       await testSubjects.click('confirmModalConfirmButton');
 
       await retry.try(async () => {

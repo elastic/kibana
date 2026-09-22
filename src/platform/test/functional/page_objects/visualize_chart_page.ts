@@ -171,7 +171,7 @@ export class VisualizeChartPageObject extends FtrService {
   }
 
   public async doesLegendColorChoiceExist(color: string) {
-    return await this.testSubjects.exists(`visColorPickerColor-${color}`);
+    return await this.testSubjects.waitForExists(`visColorPickerColor-${color}`);
   }
 
   public async selectNewLegendColorChoice(color: string) {

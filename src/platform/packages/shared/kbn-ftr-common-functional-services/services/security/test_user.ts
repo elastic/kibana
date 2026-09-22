@@ -75,7 +75,7 @@ export class TestUser extends FtrService {
     if (!options?.skipBrowserRefresh && this.browser && this.testSubjects) {
       if (
         (await this.browser.hasOpenWindow()) &&
-        (await this.testSubjects.exists('kibanaChrome', { allowHidden: true }))
+        (await this.testSubjects.waitForExists('kibanaChrome', { allowHidden: true }))
       ) {
         // Reload the current page so Kibana fetches fresh capabilities for the updated roles.
         // We do NOT use cookie injection here: the existing session remains valid after a role

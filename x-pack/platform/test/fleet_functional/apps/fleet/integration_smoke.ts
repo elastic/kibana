@@ -24,7 +24,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     // This is a basic smoke test to cover Fleet package installed logic
     // https://github.com/elastic/kibana/pull/144899
     it('should show the Elastic synthetics integration', async () => {
-      await testSubjects.exists('integration-card:epr:synthetics');
+      await testSubjects.waitForExists('integration-card:epr:synthetics');
     });
   });
 }

@@ -35,7 +35,7 @@ export function MonitoringElasticsearchShardsProvider({ getService }) {
 
   return new (class ElasticsearchShards {
     async getUnassignedIndexAllocation() {
-      const hasUnassigned = await testSubjects.exists(SUBJ_UNASSIGNED_SHARDS);
+      const hasUnassigned = await testSubjects.waitForExists(SUBJ_UNASSIGNED_SHARDS);
       if (!hasUnassigned) {
         return null;
       }
@@ -54,7 +54,7 @@ export function MonitoringElasticsearchShardsProvider({ getService }) {
 
     async getAssignedIndexAllocationByNode(nodeId) {
       const assignedParentSelector = SUBJ_ASSIGNED_CONTAINER_PREFIX + nodeId;
-      const hasAssigned = await testSubjects.exists(assignedParentSelector);
+      const hasAssigned = await testSubjects.waitForExists(assignedParentSelector);
       if (!hasAssigned) {
         return null; // NOTE: currently this can't happen, because of a bug where if an index has 0 shards allocated, it won't be monitored :(
       }
@@ -88,7 +88,7 @@ export function MonitoringElasticsearchShardsProvider({ getService }) {
 
     async getNodeAllocation(indexUuid) {
       const assignedParentSelector = SUBJ_ASSIGNED_CONTAINER_PREFIX + indexUuid;
-      const hasAssigned = await testSubjects.exists(assignedParentSelector);
+      const hasAssigned = await testSubjects.waitForExists(assignedParentSelector);
       if (!hasAssigned) {
         return null; // NOTE: currently this can't happen, because of a bug where if an index has 0 shards allocated, it won't be monitored :(
       }

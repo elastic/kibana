@@ -29,7 +29,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should load from the shareable lazy loader', async () => {
       await testSubjects.find('ruleStatusFilter');
-      const exists = await testSubjects.exists('ruleStatusFilter');
+      const exists = await testSubjects.waitForExists('ruleStatusFilter');
       expect(exists).to.be(true);
     });
 

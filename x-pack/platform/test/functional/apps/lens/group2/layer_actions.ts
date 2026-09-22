@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await visualize.clickVisType('lens');
 
       // check that no sampling info is shown in the dataView picker
-      expect(await testSubjects.exists('lnsChangeIndexPatternSamplingInfo')).to.be(false);
+      expect(await testSubjects.waitForExists('lnsChangeIndexPatternSamplingInfo')).to.be(false);
 
       // settings button should be available
       await testSubjects.existOrFail('lnsLayerSettings');
@@ -62,7 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should expose the ignore global filters control for a data layer', async () => {
       expect(
-        await testSubjects.exists('lns-layerPanel-0 > lnsChangeIndexPatternIgnoringFilters')
+        await testSubjects.waitForExists('lns-layerPanel-0 > lnsChangeIndexPatternIgnoringFilters')
       ).to.be(false);
       // click on open layer settings
       await testSubjects.click('lnsLayerSettings');
@@ -88,9 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // add annotation layer
       await lens.createLayer('annotations');
 
-      expect(
-        await testSubjects.exists('lns-layerPanel-1 > lnsChangeIndexPatternIgnoringFilters')
-      ).to.be(true);
+      await testSubjects.existOrFail('lns-layerPanel-1 > lnsChangeIndexPatternIgnoringFilters');
 
       await lens.ensureLayerTabIsActive(1);
       await testSubjects.click('lnsLayerSettings');
@@ -99,7 +97,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // now close the panel and check the dataView picker has no icon
       await testSubjects.click('lns-indexPattern-dimensionContainerBack');
       expect(
-        await testSubjects.exists('lns-layerPanel-1 > lnsChangeIndexPatternIgnoringFilters')
+        await testSubjects.waitForExists('lns-layerPanel-1 > lnsChangeIndexPatternIgnoringFilters')
       ).to.be(false);
     });
 
@@ -162,9 +160,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(
         await testSubjects.getVisibleText('lns-layerPanel-3 > lnsChangeIndexPatternSamplingInfo')
       ).to.be('1%');
-      expect(
-        await testSubjects.exists('lns-layerPanel-3 > lnsChangeIndexPatternIgnoringFilters')
-      ).to.be(true);
+      await testSubjects.existOrFail('lns-layerPanel-3 > lnsChangeIndexPatternIgnoringFilters');
     });
 
     it('should switch to pie chart and have layer settings available', async () => {

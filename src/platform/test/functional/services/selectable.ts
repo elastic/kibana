@@ -110,7 +110,7 @@ export class SelectableService extends FtrService {
 
   private async ensureOpened(buttonTestSubjectId: string, selectableBodyTestSubjectId: string) {
     // Open the selectable if `selectableBodyTestSubjectId` doesn't exist
-    const isSelectableOpen = await this.testSubjects.exists(selectableBodyTestSubjectId);
+    const isSelectableOpen = await this.testSubjects.waitForExists(selectableBodyTestSubjectId);
 
     if (!isSelectableOpen) {
       await this.testSubjects.click(buttonTestSubjectId);

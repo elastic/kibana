@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('Add dashboard link flyout', async () => {
       await testSubjects.click('links--panelEditor--addLinkBtn');
-      await testSubjects.exists('links--linkEditor--flyout');
+      await testSubjects.waitForExists('links--linkEditor--flyout');
       await a11y.testAppSnapshot();
     });
 

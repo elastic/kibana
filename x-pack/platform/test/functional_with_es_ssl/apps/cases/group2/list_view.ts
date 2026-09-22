@@ -757,20 +757,20 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('loads the initial state correctly', async () => {
         await cases.casesTable.validateCasesTableHasNthRows(caseIds.length);
-        expect(await testSubjects.exists('all-cases-clear-filters-link-icon')).to.be(false);
+        expect(await testSubjects.waitForExists('all-cases-clear-filters-link-icon')).to.be(false);
       });
 
       describe('assignees filtering', () => {
         it('filters cases by the first cases all user assignee', async () => {
           await cases.casesTable.filterByAssignee('all');
           await cases.casesTable.validateCasesTableHasNthRows(1);
-          await testSubjects.exists('case-user-profile-avatar-cases_all_user');
+          await testSubjects.waitForExists('case-user-profile-avatar-cases_all_user');
         });
 
         it('filters cases by the casesAllUser2 assignee', async () => {
           await cases.casesTable.filterByAssignee('2');
           await cases.casesTable.validateCasesTableHasNthRows(1);
-          await testSubjects.exists('case-user-profile-avatar-cases_all_user2');
+          await testSubjects.waitForExists('case-user-profile-avatar-cases_all_user2');
         });
 
         it('filters cases without assignees', async () => {

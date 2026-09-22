@@ -62,7 +62,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         return await deleteButton.isEnabled();
       });
       await deleteButton.click();
-      await testSubjects.exists('confirmModalBodyText');
+      await testSubjects.waitForExists('confirmModalBodyText');
       await testSubjects.click('confirmModalConfirmButton');
       await retry.try(async () => {
         await testSubjects.waitForDeleted('checkboxSelectRow-krazcyw4156m0763b503j7f9');

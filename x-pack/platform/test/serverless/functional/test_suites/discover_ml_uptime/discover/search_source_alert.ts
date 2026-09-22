@@ -231,11 +231,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const openDiscoverAlertFlyout = async () => {
     await testSubjects.click('app-menu-overflow-button');
     await testSubjects.click('discoverAlertsButton');
-    if (await testSubjects.exists('discoverCreateAlertButton')) {
+    if (await testSubjects.waitForExists('discoverCreateAlertButton')) {
       await testSubjects.click('discoverCreateAlertButton');
-    } else if (await testSubjects.exists('discoverLegacySearchThresholdRule')) {
+    } else if (await testSubjects.waitForExists('discoverLegacySearchThresholdRule')) {
       await testSubjects.click('discoverLegacySearchThresholdRule');
-    } else if (await testSubjects.exists('discoverAppMenuCustomThresholdRule')) {
+    } else if (await testSubjects.waitForExists('discoverAppMenuCustomThresholdRule')) {
       await testSubjects.click('discoverAppMenuCustomThresholdRule');
     } else {
       throw new Error('No discover alert rule option found in the app menu');
@@ -491,7 +491,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('selectDataViewExpression');
       await testSubjects.existOrFail('indexPattern-switcher--input');
       await testSubjects.click('indexPattern-switcher--input');
-      if (await testSubjects.exists('clearSearchButton')) {
+      if (await testSubjects.waitForExists('clearSearchButton')) {
         await testSubjects.click('clearSearchButton');
         await testSubjects.missingOrFail('clearSearchButton');
       }
@@ -542,7 +542,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.setValue('alertThresholdInput0', '1');
 
       // Different save buttons in serverless
-      if (await testSubjects.exists('saveEditedRuleButton')) {
+      if (await testSubjects.waitForExists('saveEditedRuleButton')) {
         await testSubjects.click('saveEditedRuleButton');
       } else {
         await testSubjects.click('rulePageFooterSaveButton');
@@ -717,7 +717,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await testSubjects.click('selectDataViewExpression');
       await testSubjects.click('indexPattern-switcher--input');
-      if (await testSubjects.exists('clearSearchButton')) {
+      if (await testSubjects.waitForExists('clearSearchButton')) {
         await testSubjects.click('clearSearchButton');
       }
       const dataViewsElem = await testSubjects.find('euiSelectableList');
@@ -728,13 +728,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // TODO: Serverless O11y has a required "Role visibility" selector
       // https://github.com/elastic/kibana/issues/168034
-      if (await testSubjects.exists('ruleFormConsumerSelect')) {
+      if (await testSubjects.waitForExists('ruleFormConsumerSelect')) {
         await comboBox.set('ruleFormConsumerSelect', 'Stack Rules');
       }
 
       await testSubjects.click('ruleFormStep-details');
       // Save rule button is different in serverless
-      if (await testSubjects.exists('ruleFlyoutFooterSaveButton')) {
+      if (await testSubjects.waitForExists('ruleFlyoutFooterSaveButton')) {
         await testSubjects.click('ruleFlyoutFooterSaveButton');
       } else {
         await testSubjects.click('rulePageFooterSaveButton');

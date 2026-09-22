@@ -56,13 +56,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should show on an empty dashboard', async function () {
         await dashboard.clickNewDashboard();
-        const hasAddFilter = await testSubjects.exists('addFilter');
+        const hasAddFilter = await testSubjects.waitForExists('addFilter');
         expect(hasAddFilter).to.be(true);
       });
 
       it('should continue to show for visualizations with no search source', async () => {
         await dashboardAddPanel.addVisualization('Rendering-Test:-input-control');
-        const hasAddFilter = await testSubjects.exists('addFilter');
+        const hasAddFilter = await testSubjects.waitForExists('addFilter');
         expect(hasAddFilter).to.be(true);
       });
     });

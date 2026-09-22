@@ -61,7 +61,7 @@ export class DashboardVisualizationsService extends FtrService {
 
     await this.discover.saveSearch(name);
     await this.header.waitUntilLoadingHasFinished();
-    await this.testSubjects.exists('saveSearchSuccess');
+    await this.testSubjects.waitForExists('saveSearchSuccess');
   }
 
   async createAndAddSavedSearch({

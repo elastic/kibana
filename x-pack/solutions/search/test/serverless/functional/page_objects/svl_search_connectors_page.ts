@@ -28,18 +28,22 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
       async createConnector() {
         await testSubjects.click('serverlessSearchEmptyConnectorsPromptCreateConnectorButton');
         await testSubjects.existOrFail('serverlessSearchEditConnectorButton');
-        await testSubjects.exists('serverlessSearchConnectorLinkElasticsearchRunWithDockerButton');
-        await testSubjects.exists('serverlessSearchConnectorLinkElasticsearchRunFromSourceButton');
+        await testSubjects.waitForExists(
+          'serverlessSearchConnectorLinkElasticsearchRunWithDockerButton'
+        );
+        await testSubjects.waitForExists(
+          'serverlessSearchConnectorLinkElasticsearchRunFromSourceButton'
+        );
       },
       async editDescription(description: string) {
         await testSubjects.existOrFail('serverlessSearchEditDescriptionButton');
         await testSubjects.click('serverlessSearchEditDescriptionButton');
-        await testSubjects.exists('serverlessSearchEditDescriptionFieldText');
+        await testSubjects.waitForExists('serverlessSearchEditDescriptionFieldText');
         await testSubjects.existOrFail('serverlessSearchSaveDescriptionButton');
         await testSubjects.existOrFail('serverlessSearchCancelDescriptionButton');
         await testSubjects.setValue('serverlessSearchEditDescriptionFieldText', description);
         await testSubjects.click('serverlessSearchSaveDescriptionButton');
-        await testSubjects.exists('serverlessSearchConnectorDescription');
+        await testSubjects.waitForExists('serverlessSearchConnectorDescription');
 
         expect(await testSubjects.getVisibleText('serverlessSearchConnectorDescription')).to.be(
           description
@@ -59,7 +63,7 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
             .then(() => true)
             .catch(() => false)
         );
-        await testSubjects.exists('serverlessSearchConnectorName');
+        await testSubjects.waitForExists('serverlessSearchConnectorName');
         expect(await testSubjects.getVisibleText('serverlessSearchConnectorName')).to.be(name);
       },
       async selectConnectorType(type: string) {
@@ -103,7 +107,9 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
       async expectConnectorOverviewPageComponentsToExist() {
         await testSubjects.existOrFail('serverlessSearchConnectorsTitle');
         // await testSubjects.existOrFail('serverlessSearchConnectorsOverviewElasticConnectorsLink');
-        await testSubjects.exists('serverlessSearchEmptyConnectorsPromptCreateConnectorButton');
+        await testSubjects.waitForExists(
+          'serverlessSearchEmptyConnectorsPromptCreateConnectorButton'
+        );
         // await testSubjects.existOrFail('serverlessSearchConnectorsOverviewCreateConnectorButton');
       },
       async expectConnectorTableToExist() {
@@ -156,7 +162,7 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
         await retry.try(
           async () => await testSubjects.click('serverlessSearchDeleteConnectorModalActionButton')
         );
-        await testSubjects.exists('confirmModalBodyText');
+        await testSubjects.waitForExists('confirmModalBodyText');
         expect(await testSubjects.getVisibleText('confirmModalBodyText')).to.be(
           'This action cannot be undone. Please type my-connector to confirm.\nConnector name'
         );

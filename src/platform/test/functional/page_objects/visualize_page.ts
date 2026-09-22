@@ -81,7 +81,7 @@ export class VisualizePageObject extends FtrService {
     if (await this.find.existsByCssSelector('.euiOverlayMask', 250)) {
       return false;
     }
-    if (!(await this.testSubjects.exists(APP_HEADER_TEST_SUBJECTS.back, { timeout: 500 }))) {
+    if (!(await this.testSubjects.waitForExists(APP_HEADER_TEST_SUBJECTS.back, { timeout: 500 }))) {
       return false;
     }
     const ariaLabel = await this.testSubjects.getAttribute(
@@ -93,7 +93,7 @@ export class VisualizePageObject extends FtrService {
     }
     try {
       await this.testSubjects.click(APP_HEADER_TEST_SUBJECTS.back);
-      if (await this.testSubjects.exists('confirmModalConfirmButton')) {
+      if (await this.testSubjects.waitForExists('confirmModalConfirmButton')) {
         await this.testSubjects.click('confirmModalConfirmButton');
         return 'confirmed';
       }
@@ -122,7 +122,7 @@ export class VisualizePageObject extends FtrService {
       await this.find.clickByCssSelector(selector);
       // Lens offers a last modal before leaving the page for unsaved charts
       // so close it as quick as possible
-      if (await this.testSubjects.exists('confirmModalConfirmButton')) {
+      if (await this.testSubjects.waitForExists('confirmModalConfirmButton')) {
         await this.testSubjects.click('confirmModalConfirmButton');
         return true;
       }
@@ -243,7 +243,7 @@ export class VisualizePageObject extends FtrService {
   }
 
   public async hasVisType(type: string) {
-    return await this.testSubjects.exists(`visType-${type}`);
+    return await this.testSubjects.waitForExists(`visType-${type}`);
   }
 
   public async clickVisType(type: string) {
@@ -363,7 +363,7 @@ export class VisualizePageObject extends FtrService {
   }
 
   public async isBetaInfoShown() {
-    return await this.testSubjects.exists('betaVisInfo');
+    return await this.testSubjects.waitForExists('betaVisInfo');
   }
 
   public async getBetaTypeLinks() {
@@ -375,7 +375,7 @@ export class VisualizePageObject extends FtrService {
   }
 
   public async isExperimentalInfoShown() {
-    return await this.testSubjects.exists('experimentalVisInfo');
+    return await this.testSubjects.waitForExists('experimentalVisInfo');
   }
 
   public async getExperimentalInfo() {
@@ -399,7 +399,7 @@ export class VisualizePageObject extends FtrService {
   public async ensureSavePanelOpen() {
     this.log.debug('ensureSavePanelOpen');
     await this.header.waitUntilLoadingHasFinished();
-    const isOpen = await this.testSubjects.exists('savedObjectSaveModal', { timeout: 5000 });
+    const isOpen = await this.testSubjects.waitForExists('savedObjectSaveModal', { timeout: 5000 });
     if (!isOpen) {
       await this.appMenu.clickMenuItem('visualizeSaveButton');
     }
@@ -447,7 +447,7 @@ export class VisualizePageObject extends FtrService {
    */
   public async onLandingPage() {
     this.log.debug(`VisualizePage.onLandingPage`);
-    return await this.testSubjects.exists('visualizationLandingPage');
+    return await this.testSubjects.waitForExists('visualizationLandingPage');
   }
 
   public async notOnLandingPageOrFail() {
@@ -500,14 +500,14 @@ export class VisualizePageObject extends FtrService {
       await this.testSubjects.setValue('savedObjectDescription', description);
     }
 
-    const saveAsNewCheckboxExists = await this.testSubjects.exists('saveAsNewCheckbox');
+    const saveAsNewCheckboxExists = await this.testSubjects.waitForExists('saveAsNewCheckbox');
     if (saveAsNewCheckboxExists) {
       const state = saveAsNew ? 'check' : 'uncheck';
       this.log.debug('save as new checkbox exists. Setting its state to', state);
       await this.testSubjects.setEuiSwitch('saveAsNewCheckbox', state);
     }
 
-    const redirectToOriginCheckboxExists = await this.testSubjects.exists(
+    const redirectToOriginCheckboxExists = await this.testSubjects.waitForExists(
       'returnToOriginModeSwitch'
     );
     if (redirectToOriginCheckboxExists) {
@@ -516,7 +516,9 @@ export class VisualizePageObject extends FtrService {
       await this.testSubjects.setEuiSwitch('returnToOriginModeSwitch', state);
     }
 
-    const dashboardSelectorExists = await this.testSubjects.exists('add-to-dashboard-options');
+    const dashboardSelectorExists = await this.testSubjects.waitForExists(
+      'add-to-dashboard-options'
+    );
     if (dashboardSelectorExists) {
       let option: DashboardPickerOption = 'add-to-library-option';
       if (addToDashboard) {
@@ -589,7 +591,7 @@ export class VisualizePageObject extends FtrService {
         'confirm modal to show',
         async () => await this.testSubjects.exists('appLeaveConfirmModal')
       );
-      await this.testSubjects.exists('confirmModalConfirmButton');
+      await this.testSubjects.waitForExists('confirmModalConfirmButton');
       await this.testSubjects.click('confirmModalConfirmButton');
     }
   }

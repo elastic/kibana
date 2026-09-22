@@ -33,11 +33,11 @@ export class SearchSessionsService extends FtrService {
   }
 
   public async exists(): Promise<boolean> {
-    return this.testSubjects.exists(BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT);
+    return this.testSubjects.waitForExists(BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT);
   }
 
   public async sendToBackgroundButtonExists(): Promise<boolean> {
-    return this.testSubjects.exists(BACKGROUND_SEARCH_SUBMIT_BUTTON);
+    return this.testSubjects.waitForExists(BACKGROUND_SEARCH_SUBMIT_BUTTON);
   }
 
   public async missingOrFail(): Promise<void> {

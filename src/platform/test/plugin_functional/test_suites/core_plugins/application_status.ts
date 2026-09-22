@@ -70,8 +70,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
       await navigateToApp('app_status');
 
-      expect(await testSubjects.exists('appNotFoundPageContent')).to.eql(true);
-      expect(await testSubjects.exists('appStatusApp')).to.eql(false);
+      await testSubjects.existOrFail('appNotFoundPageContent');
+      expect(await testSubjects.waitForExists('appStatusApp')).to.eql(false);
     });
 
     it('allows to navigate to an accessible app', async () => {
@@ -81,8 +81,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
       await navigateToApp('app_status');
 
-      expect(await testSubjects.exists('appNotFoundPageContent')).to.eql(false);
-      expect(await testSubjects.exists('appStatusApp')).to.eql(true);
+      expect(await testSubjects.waitForExists('appNotFoundPageContent')).to.eql(false);
+      await testSubjects.existOrFail('appStatusApp');
     });
 
     it('allows to change the defaultPath of an application', async () => {
@@ -99,7 +99,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       });
 
       await navigateToApp('app_status');
-      expect(await testSubjects.exists('appStatusApp')).to.eql(true);
+      await testSubjects.existOrFail('appStatusApp');
       const currentUrl = await browser.getCurrentUrl();
       expect(Url.parse(currentUrl).pathname).to.eql('/app/app_status/arbitrary/path');
     });
@@ -111,22 +111,22 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
       await navigateToApp('app_status');
 
-      expect(await testSubjects.exists('appNotFoundPageContent')).to.eql(false);
-      expect(await testSubjects.exists('appStatusApp')).to.eql(true);
+      expect(await testSubjects.waitForExists('appNotFoundPageContent')).to.eql(false);
+      await testSubjects.existOrFail('appStatusApp');
 
       await setAppStatus({
         status: AppStatus.inaccessible,
       });
 
-      expect(await testSubjects.exists('appNotFoundPageContent')).to.eql(true);
-      expect(await testSubjects.exists('appStatusApp')).to.eql(false);
+      await testSubjects.existOrFail('appNotFoundPageContent');
+      expect(await testSubjects.waitForExists('appStatusApp')).to.eql(false);
 
       await setAppStatus({
         status: AppStatus.accessible,
       });
 
-      expect(await testSubjects.exists('appNotFoundPageContent')).to.eql(false);
-      expect(await testSubjects.exists('appStatusApp')).to.eql(true);
+      expect(await testSubjects.waitForExists('appNotFoundPageContent')).to.eql(false);
+      await testSubjects.existOrFail('appStatusApp');
     });
   });
 }

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -75,7 +74,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await retry.waitFor('management landing page to be visible', async () => {
           return await testSubjects.exists('cards-navigation-page');
         });
-        expect(await testSubjects.exists('cards-navigation-page')).to.be(true);
+        await testSubjects.existOrFail('cards-navigation-page');
       });
     });
   });

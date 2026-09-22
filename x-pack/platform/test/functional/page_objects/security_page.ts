@@ -184,7 +184,7 @@ export class SecurityPageObject extends FtrService {
   }
 
   public async isLoginFormVisible() {
-    return await this.testSubjects.exists('loginForm');
+    return await this.testSubjects.waitForExists('loginForm');
   }
 
   private async waitForLoginForm() {
@@ -500,11 +500,11 @@ export class SecurityPageObject extends FtrService {
 
   async getElasticsearchRoles() {
     const roles = [];
-    await this.testSubjects.exists('rolesTable');
+    await this.testSubjects.waitForExists('rolesTable');
     await this.testSubjects.click('tablePaginationPopoverButton');
     await this.testSubjects.click('tablePagination-100-rows');
-    await this.testSubjects.exists('rolesTableLoading');
-    await this.testSubjects.exists('rolesTable');
+    await this.testSubjects.waitForExists('rolesTableLoading');
+    await this.testSubjects.waitForExists('rolesTable');
 
     for (const role of await this.testSubjects.findAll('roleRow')) {
       const [rolename, reserved, deprecated] = await Promise.all([

@@ -62,7 +62,7 @@ export function TimelinePageObjectProvider({ getService, getPageObjects }: FtrPr
     },
 
     async closeTimeline(): Promise<void> {
-      if (await testSubjects.exists(TIMELINE_CLOSE_BUTTON_TEST_SUBJ)) {
+      if (await testSubjects.waitForExists(TIMELINE_CLOSE_BUTTON_TEST_SUBJ)) {
         await testSubjects.click(TIMELINE_CLOSE_BUTTON_TEST_SUBJ);
         await testSubjects.waitForHidden(TIMELINE_MODAL_PAGE_TEST_SUBJ);
       }

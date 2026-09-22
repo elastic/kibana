@@ -29,11 +29,13 @@ export class InspectorService extends FtrService {
   private readonly browser = this.ctx.getService('browser');
 
   private async revealInspectorButton(): Promise<boolean> {
-    if (await this.testSubjects.exists('openInspectorButton', { timeout: 1000 })) {
+    if (await this.testSubjects.waitForExists('openInspectorButton', { timeout: 1000 })) {
       return false;
     }
     if (
-      !(await this.testSubjects.exists(APP_MENU_TEST_SUBJECTS.overflowButton, { timeout: 1000 }))
+      !(await this.testSubjects.waitForExists(APP_MENU_TEST_SUBJECTS.overflowButton, {
+        timeout: 1000,
+      }))
     ) {
       return false;
     }
@@ -43,7 +45,7 @@ export class InspectorService extends FtrService {
   }
 
   private async closeOverflowIfOpen(): Promise<void> {
-    if (await this.testSubjects.exists(APP_MENU_TEST_SUBJECTS.popover, { timeout: 250 })) {
+    if (await this.testSubjects.waitForExists(APP_MENU_TEST_SUBJECTS.popover, { timeout: 250 })) {
       await this.testSubjects.click(APP_MENU_TEST_SUBJECTS.overflowButton);
       await this.testSubjects.missingOrFail(APP_MENU_TEST_SUBJECTS.popover, { timeout: 2000 });
     }
@@ -86,12 +88,14 @@ export class InspectorService extends FtrService {
   public async open(openButton: string = 'openInspectorButton'): Promise<void> {
     this.log.debug('Inspector.open');
 
-    const isOpen = await this.testSubjects.exists('inspectorPanel');
+    const isOpen = await this.testSubjects.waitForExists('inspectorPanel');
     if (!isOpen) {
       await this.retry.try(async () => {
-        if (!(await this.testSubjects.exists(openButton, { timeout: 1000 }))) {
+        if (!(await this.testSubjects.waitForExists(openButton, { timeout: 1000 }))) {
           if (
-            await this.testSubjects.exists(APP_MENU_TEST_SUBJECTS.overflowButton, { timeout: 1000 })
+            await this.testSubjects.waitForExists(APP_MENU_TEST_SUBJECTS.overflowButton, {
+              timeout: 1000,
+            })
           ) {
             await this.testSubjects.click(APP_MENU_TEST_SUBJECTS.overflowButton);
           }
@@ -107,7 +111,7 @@ export class InspectorService extends FtrService {
    */
   public async close(): Promise<void> {
     this.log.debug('Close Inspector');
-    let isOpen = await this.testSubjects.exists('inspectorPanel');
+    let isOpen = await this.testSubjects.waitForExists('inspectorPanel');
     if (isOpen) {
       await this.retry.try(async () => {
         await this.flyout.close('inspectorPanel');
@@ -233,7 +237,7 @@ export class InspectorService extends FtrService {
     const dtsViewId = 'inspectorViewChooser' + viewId;
     const cssSelector = this.testSubjects.getCssSelector(dtsViewId);
     await this.retry.try(async () => {
-      if (!(await this.testSubjects.exists(dtsViewId, { timeout: 1000 }))) {
+      if (!(await this.testSubjects.waitForExists(dtsViewId, { timeout: 1000 }))) {
         await this.testSubjects.click('inspectorViewChooser');
       }
       const clicked = await this.browser.execute((sel: string) => {
@@ -255,7 +259,7 @@ export class InspectorService extends FtrService {
    * Opens inspector requests view
    */
   public async openInspectorRequestsView(): Promise<void> {
-    if (!(await this.testSubjects.exists('inspectorViewChooser'))) return;
+    if (!(await this.testSubjects.waitForExists('inspectorViewChooser'))) return;
     await this.openInspectorView('Requests');
   }
 
@@ -267,7 +271,7 @@ export class InspectorService extends FtrService {
     const chooserDataTestId = 'inspectorTableChooser';
     const menuDataTestId = 'inspectorTableChooserMenuPanel';
 
-    if (!(await this.testSubjects.exists(chooserDataTestId))) {
+    if (!(await this.testSubjects.waitForExists(chooserDataTestId))) {
       return 1;
     }
 
@@ -282,7 +286,7 @@ export class InspectorService extends FtrService {
 
   public async getTableDataWithId(tableTestSubj: string): Promise<string[][]> {
     const chooserDataTestId = 'inspectorTableChooser';
-    if (!(await this.testSubjects.exists(chooserDataTestId))) {
+    if (!(await this.testSubjects.waitForExists(chooserDataTestId))) {
       return [];
     }
 

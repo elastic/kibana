@@ -24,7 +24,7 @@ export function CasesNavigationProvider({ getPageObject, getService }: FtrProvid
      * first when the item is not directly clickable.
      */
     async clickHeaderMenuItem(testSubj: string) {
-      if (await testSubjects.exists(testSubj, { timeout: 2000 })) {
+      if (await testSubjects.waitForExists(testSubj, { timeout: 2000 })) {
         await testSubjects.click(testSubj);
         return;
       }

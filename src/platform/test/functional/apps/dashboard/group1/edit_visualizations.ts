@@ -128,7 +128,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await header.waitUntilLoadingHasFinished();
       await appsMenu.clickLink('Visualize library');
-      expect(await testSubjects.exists('visualizationLandingPage')).to.be(true);
+      await testSubjects.existOrFail('visualizationLandingPage');
     });
 
     it('visualize app menu navigates to the visualize listing page if the last opened visualization was linked to dashboard', async () => {
@@ -141,7 +141,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await header.waitUntilLoadingHasFinished();
       await appsMenu.clickLink('Visualize library');
-      expect(await testSubjects.exists('visualizationLandingPage')).to.be(true);
+      await testSubjects.existOrFail('visualizationLandingPage');
     });
 
     describe('by value', () => {
@@ -197,7 +197,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // return to origin should not be present in save modal
         await testSubjects.click('visualizeSaveButton');
-        const redirectToOriginCheckboxExists = await testSubjects.exists(
+        const redirectToOriginCheckboxExists = await testSubjects.waitForExists(
           'returnToOriginModeSwitch'
         );
         expect(redirectToOriginCheckboxExists).to.be(false);

@@ -29,7 +29,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should load from the shareable lazy loader', async () => {
       await testSubjects.find('statusDropdown');
-      const exists = await testSubjects.exists('statusDropdown');
+      const exists = await testSubjects.waitForExists('statusDropdown');
       expect(exists).to.be(true);
     });
 

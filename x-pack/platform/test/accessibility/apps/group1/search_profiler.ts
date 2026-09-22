@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -22,7 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await PageObjects.common.navigateToApp('searchProfiler');
       await a11y.testAppSnapshot();
-      expect(await testSubjects.exists('searchProfilerEditor')).to.be(true);
+      await testSubjects.existOrFail('searchProfilerEditor');
     });
 
     after(async () => {

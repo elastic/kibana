@@ -229,7 +229,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     }) {
       await retry.try(async () => {
         if (
-          !(await testSubjects.exists('lns-indexPattern-dimensionContainerClose', {
+          !(await testSubjects.waitForExists('lns-indexPattern-dimensionContainerClose', {
             timeout: 1000,
           }))
         ) {
@@ -649,7 +649,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async isDimensionEditorOpen() {
-      return await testSubjects.exists('lns-indexPattern-dimensionContainerBack');
+      return await testSubjects.waitForExists('lns-indexPattern-dimensionContainerBack');
     },
 
     // closes the dimension editor flyout
@@ -711,7 +711,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async hasFixAction() {
-      return await testSubjects.exists('errorFixAction');
+      return await testSubjects.waitForExists('errorFixAction');
     },
 
     async useFixAction() {
@@ -843,7 +843,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * Save the current Lens visualization.
      */
     async openSaveOptionsIfNeeded() {
-      if (await testSubjects.exists('lnsApp_saveButton')) {
+      if (await testSubjects.waitForExists('lnsApp_saveButton')) {
         return;
       }
       const secondarySubjects = [
@@ -852,7 +852,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         'lnsApp_replaceInCanvasButton-secondary-button',
       ];
       for (const subject of secondarySubjects) {
-        if (await testSubjects.exists(subject)) {
+        if (await testSubjects.waitForExists(subject)) {
           await testSubjects.click(subject);
           return;
         }
@@ -903,7 +903,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       // to exist, then type+assert in one retry so a remount cannot leave the
       // wait looking at a detached node.
       await retry.waitFor('name-input to exist', async () =>
-        testSubjects.exists('name-input', { timeout: 1000 })
+        testSubjects.waitForExists('name-input', { timeout: 1000 })
       );
       await retry.try(async () => {
         await testSubjects.setValue('name-input', label, { clearWithKeyboard: true });
@@ -1032,7 +1032,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async switchToVisualizationSubtype(subType: string, layerIndex: number = 0) {
-      if (!(await testSubjects.exists(`lns-layerPanel-${layerIndex} > lnsStackingOptionsButton`))) {
+      if (
+        !(await testSubjects.waitForExists(
+          `lns-layerPanel-${layerIndex} > lnsStackingOptionsButton`
+        ))
+      ) {
         throw new Error('No subtype available for the current visualization');
       }
       await testSubjects.click(`lns-layerPanel-${layerIndex} > lnsStackingOptionsButton`);
@@ -1047,7 +1051,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async openChartSwitchPopover(layerIndex = 0) {
       await this.ensureLayerTabIsActive(layerIndex);
 
-      if (await testSubjects.exists('lnsChartSwitchList', { timeout: 200 })) {
+      if (await testSubjects.waitForExists('lnsChartSwitchList', { timeout: 200 })) {
         return;
       }
       await retry.try(async () => {
@@ -1139,12 +1143,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     /** Counts the visible warnings in the config panel */
     async getWorkspaceErrorCount() {
-      const workspaceErrorsExists = await testSubjects.exists('lnsWorkspaceErrors');
+      const workspaceErrorsExists = await testSubjects.waitForExists('lnsWorkspaceErrors');
       if (!workspaceErrorsExists) {
         return 0;
       }
 
-      const paginationControlExists = await testSubjects.exists(
+      const paginationControlExists = await testSubjects.waitForExists(
         'lnsWorkspaceErrorsPaginationControl'
       );
       if (!paginationControlExists) {
@@ -1215,7 +1219,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         return fasterChecks.filter(Boolean).length > 0;
       });
 
-      if (await testSubjects.exists(`lnsLayerAddButton-${layerType}`)) {
+      if (await testSubjects.waitForExists(`lnsLayerAddButton-${layerType}`)) {
         await testSubjects.click(`lnsLayerAddButton-${layerType}`);
         if (layerType === 'data') {
           await testSubjects.click(`lnsXY_seriesType-${seriesType}`);
@@ -1798,7 +1802,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         // Check if the tab is already active
         const isActive = await tabs[index].getAttribute('aria-selected');
         if (isActive === 'true') {
-          await testSubjects.exists(`lns-layerPanel-${index}`);
+          await testSubjects.waitForExists(`lns-layerPanel-${index}`);
           return;
         }
 
@@ -1822,11 +1826,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
               // Determine scroll direction based on tab index
               // Lower indices are on the left, higher indices are on the right
-              const scrollRightBtnExists = await testSubjects.exists(
+              const scrollRightBtnExists = await testSubjects.waitForExists(
                 'unifiedTabs_tabsBar_scrollRightBtn',
                 { timeout: 500 }
               );
-              const scrollLeftBtnExists = await testSubjects.exists(
+              const scrollLeftBtnExists = await testSubjects.waitForExists(
                 'unifiedTabs_tabsBar_scrollLeftBtn',
                 { timeout: 500 }
               );
@@ -1851,7 +1855,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
         // Wait for the layer panel to render
         await retry.waitFor('layer panel to be visible', async () => {
-          return await testSubjects.exists(`lns-layerPanel-${index}`, { timeout: 1000 });
+          return await testSubjects.waitForExists(`lns-layerPanel-${index}`, { timeout: 1000 });
         });
       }
     },
@@ -1864,7 +1868,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
           // Check if the tab is already active
           const isActive = await tabs[i].getAttribute('aria-selected');
           if (isActive === 'true') {
-            await testSubjects.exists(`lns-layerPanel-${i}`);
+            await testSubjects.waitForExists(`lns-layerPanel-${i}`);
             return;
           }
 
@@ -1873,7 +1877,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
           // Wait for the layer panel to render
           await retry.waitFor('layer panel to be visible', async () => {
-            return await testSubjects.exists(`lns-layerPanel-${i}`, { timeout: 1000 });
+            return await testSubjects.waitForExists(`lns-layerPanel-${i}`, { timeout: 1000 });
           });
           return;
         }
@@ -2049,7 +2053,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     hasEmptySizeRatioButtonGroup() {
-      return testSubjects.exists('lnsEmptySizeRatioOption');
+      return testSubjects.waitForExists('lnsEmptySizeRatioOption');
     },
 
     async enableAutoApply() {
@@ -2065,7 +2069,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     applyChangesExists(whichButton: 'toolbar' | 'suggestions' | 'workspace') {
-      return testSubjects.exists(`lnsApplyChanges__${whichButton}`);
+      return testSubjects.waitForExists(`lnsApplyChanges__${whichButton}`);
     },
 
     async applyChanges(whichButton: 'toolbar' | 'suggestions' | 'workspace') {
@@ -2157,28 +2161,28 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async clickShareButton() {
-      if (await testSubjects.exists('lnsApp_shareButton')) {
+      if (await testSubjects.waitForExists('lnsApp_shareButton')) {
         return await testSubjects.click('lnsApp_shareButton');
       }
-      if (await testSubjects.exists('app-menu-overflow-button')) {
+      if (await testSubjects.waitForExists('app-menu-overflow-button')) {
         await testSubjects.click('app-menu-overflow-button');
       }
       return await testSubjects.click('lnsApp_shareButton');
     },
 
     async clickExportButton() {
-      if (await testSubjects.exists('lnsApp_exportButton')) {
+      if (await testSubjects.waitForExists('lnsApp_exportButton')) {
         return await testSubjects.click('lnsApp_exportButton');
       }
-      if (await testSubjects.exists('app-menu-overflow-button')) {
+      if (await testSubjects.waitForExists('app-menu-overflow-button')) {
         await testSubjects.click('app-menu-overflow-button');
       }
       return await testSubjects.click('lnsApp_exportButton');
     },
 
     async isShareable() {
-      if (!(await testSubjects.exists('lnsApp_shareButton'))) {
-        if (await testSubjects.exists('app-menu-overflow-button')) {
+      if (!(await testSubjects.waitForExists('lnsApp_shareButton'))) {
+        if (await testSubjects.waitForExists('app-menu-overflow-button')) {
           await testSubjects.click('app-menu-overflow-button');
         }
       }
@@ -2186,8 +2190,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async isExportActionEnabled() {
-      if (!(await testSubjects.exists('lnsApp_exportButton'))) {
-        if (await testSubjects.exists('app-menu-overflow-button')) {
+      if (!(await testSubjects.waitForExists('lnsApp_exportButton'))) {
+        if (await testSubjects.waitForExists('app-menu-overflow-button')) {
           await testSubjects.click('app-menu-overflow-button');
         }
       }
@@ -2205,7 +2209,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async ensureShareMenuIsOpen(action: 'link') {
       if (
-        (await testSubjects.exists('shareContextModal')) &&
+        (await testSubjects.waitForExists('shareContextModal')) &&
         !(await this.isShareActionEnabled(action))
       ) {
         throw Error(`${action} sharing feature is disabled`);
@@ -2289,7 +2293,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async closeSuggestionPanel() {
-      const isSuggestionPanelOpen = await testSubjects.exists('lnsSuggestionsPanel');
+      const isSuggestionPanelOpen = await testSubjects.waitForExists('lnsSuggestionsPanel');
       if (isSuggestionPanelOpen) {
         await testSubjects.click('lensSuggestionsPanelToggleButton');
       }
@@ -2380,7 +2384,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async findRowNumberColumn() {
-      return await testSubjects.exists('lnsDataTable-rowNumber');
+      return await testSubjects.waitForExists('lnsDataTable-rowNumber');
     },
 
     async checkDataTableDensity(size: 'l' | 'm' | 's') {

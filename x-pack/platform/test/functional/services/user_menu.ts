@@ -23,12 +23,12 @@ export function UserMenuProvider({ getService }: FtrProviderContext) {
     }
 
     async logoutLinkExists() {
-      if (!(await testSubjects.exists('userMenuButton'))) {
+      if (!(await testSubjects.waitForExists('userMenuButton'))) {
         return false;
       }
 
       await this._ensureMenuOpen();
-      return await testSubjects.exists('userMenu > logoutLink');
+      return await testSubjects.waitForExists('userMenu > logoutLink');
     }
 
     async openMenu() {
@@ -47,7 +47,7 @@ export function UserMenuProvider({ getService }: FtrProviderContext) {
     }
 
     async _ensureMenuOpen() {
-      if (await testSubjects.exists('userMenu')) {
+      if (await testSubjects.waitForExists('userMenu')) {
         return;
       }
 

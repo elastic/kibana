@@ -135,7 +135,7 @@ export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderCo
     async expectNoAddElementButton() {
       log.debug('CanvasPage.expectNoAddElementButton');
       // Ensure page is fully loaded first by waiting for the refresh button
-      const refreshPopoverExists = await testSubjects.exists('canvas-refresh-control', {
+      const refreshPopoverExists = await testSubjects.waitForExists('canvas-refresh-control', {
         timeout: 20000,
       });
       expect(refreshPopoverExists).to.be(true);
@@ -228,7 +228,7 @@ export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderCo
 
     async addNewPage() {
       log.debug('CanvasPage.addNewPage');
-      if (!(await testSubjects.exists('canvasAddPageButton'))) {
+      if (!(await testSubjects.waitForExists('canvasAddPageButton'))) {
         await this.togglePageManager();
       }
       await testSubjects.click('canvasAddPageButton');

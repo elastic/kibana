@@ -67,7 +67,7 @@ export function CasesTableServiceProvider(
      * table view which reuses `cases-table`).
      */
     async isCardListView() {
-      return await testSubjects.exists('cases-list-view');
+      return await testSubjects.waitForExists('cases-list-view');
     },
 
     /**
@@ -274,7 +274,7 @@ export function CasesTableServiceProvider(
     },
 
     async filterByOwner(owner: string) {
-      if (!(await testSubjects.exists('options-filter-popover-panel-owner'))) {
+      if (!(await testSubjects.waitForExists('options-filter-popover-panel-owner'))) {
         await testSubjects.click('options-filter-popover-button-owner');
         await retry.waitFor('the solution filter popover to open', async () => {
           return await testSubjects.exists('options-filter-popover-panel-owner');
@@ -531,7 +531,7 @@ export function CasesTableServiceProvider(
     },
 
     async clearFilters() {
-      if (await testSubjects.exists('all-cases-clear-filters-link-icon')) {
+      if (await testSubjects.waitForExists('all-cases-clear-filters-link-icon')) {
         await testSubjects.click('all-cases-clear-filters-link-icon');
         await header.waitUntilLoadingHasFinished();
       }

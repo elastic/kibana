@@ -35,7 +35,7 @@ export function EndpointResponderPageObjects({ getService }: FtrProviderContext)
   const closeActionLogFlyout = async () => {
     await ensureOnResponder();
 
-    if (await testSubjects.exists(TEST_SUBJ.actionLogFlyout)) {
+    if (await testSubjects.waitForExists(TEST_SUBJ.actionLogFlyout)) {
       await testSubjects.findService.clickByCssSelector(
         `${testSubjSelector(TEST_SUBJ.actionLogFlyout)} ${testSubjSelector('euiFlyoutCloseButton')}`
       );

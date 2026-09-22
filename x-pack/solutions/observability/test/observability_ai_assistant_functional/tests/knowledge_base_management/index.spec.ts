@@ -122,7 +122,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
     describe('User instruction management', () => {
       async function openUserInstructionFlyout() {
         await testSubjects.click(ui.pages.kbManagementTab.editUserInstructionButton);
-        await testSubjects.exists(ui.pages.kbManagementTab.saveEntryButton);
+        await testSubjects.waitForExists(ui.pages.kbManagementTab.saveEntryButton);
       }
 
       async function getUserInstructionContent() {
@@ -245,11 +245,11 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
       async function openBulkImportFlyout() {
         await testSubjects.click(ui.pages.kbManagementTab.newEntryButton);
-        await testSubjects.exists(ui.pages.kbManagementTab.bulkImportEntryButton);
+        await testSubjects.waitForExists(ui.pages.kbManagementTab.bulkImportEntryButton);
         await testSubjects.click(ui.pages.kbManagementTab.bulkImportEntryButton);
-        await testSubjects.exists(ui.pages.kbManagementTab.bulkImportFlyout);
-        await testSubjects.exists(ui.pages.kbManagementTab.bulkImportSaveButton);
-        await testSubjects.exists(ui.pages.kbManagementTab.bulkImportFilePicker);
+        await testSubjects.waitForExists(ui.pages.kbManagementTab.bulkImportFlyout);
+        await testSubjects.waitForExists(ui.pages.kbManagementTab.bulkImportSaveButton);
+        await testSubjects.waitForExists(ui.pages.kbManagementTab.bulkImportFilePicker);
       }
 
       async function uploadBulkImportFile(content: string) {

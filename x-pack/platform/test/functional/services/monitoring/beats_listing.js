@@ -25,7 +25,7 @@ export function MonitoringBeatsListingProvider({ getService, getPageObjects }) {
     }
 
     noRecentActivityMessageIsShowing() {
-      return testSubjects.exists(SUBJ_NO_RECENT_ACTIVITY_MESSAGE);
+      return testSubjects.waitForExists(SUBJ_NO_RECENT_ACTIVITY_MESSAGE);
     }
 
     setFilter(text) {

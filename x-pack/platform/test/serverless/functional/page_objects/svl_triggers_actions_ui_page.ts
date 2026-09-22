@@ -152,7 +152,7 @@ export function SvlTriggersActionsPageProvider({ getService }: FtrProviderContex
       );
     },
     async maybeClickOnRuleTab() {
-      if (await testSubjects.exists('ruleDetailsTabbedContent')) {
+      if (await testSubjects.waitForExists('ruleDetailsTabbedContent')) {
         const ruleTab = await testSubjects.find('ruleAlertListTab');
         await ruleTab.click();
       }

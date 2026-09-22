@@ -100,7 +100,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         // Warning callout is shown
-        await testSubjects.exists('searchResponseWarningsCallout');
+        await testSubjects.waitForExists('searchResponseWarningsCallout');
 
         // Timed out error notification is shown
         const { title } = await toasts.getErrorByIndex(1, true);
@@ -174,7 +174,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         // Warning callout is shown
-        await testSubjects.exists('searchResponseWarningsCallout');
+        await testSubjects.waitForExists('searchResponseWarningsCallout');
 
         // Timed out error notification is shown
         const { title } = await toasts.getErrorByIndex(1, true);
@@ -221,7 +221,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await timePicker.setDefaultAbsoluteRange();
         await header.waitUntilLoadingHasFinished();
         // Warning callout is shown
-        await testSubjects.exists('searchResponseWarningsCallout');
+        await testSubjects.waitForExists('searchResponseWarningsCallout');
 
         // Timed out error notification is shown
         const { title } = await toasts.getErrorByIndex(1, true);

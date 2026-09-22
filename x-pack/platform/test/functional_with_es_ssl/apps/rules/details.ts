@@ -367,7 +367,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await actionsButton.click();
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
-        expect(await testSubjects.exists('hasActionsDisabled')).to.eql(false);
+        expect(await testSubjects.waitForExists('hasActionsDisabled')).to.eql(false);
 
         await testSubjects.setValue('ruleDetailsNameInput', updatedRuleName, {
           clearWithKeyboard: true,
@@ -485,7 +485,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await actionsButton.click();
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
-        expect(await testSubjects.exists('hasActionsDisabled')).to.eql(false);
+        expect(await testSubjects.waitForExists('hasActionsDisabled')).to.eql(false);
 
         const headerText = await find.byCssSelector('[data-test-subj="ruleActionsItem"] h2');
 
@@ -807,7 +807,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.header.waitUntilLoadingHasFinished();
 
         // Check to see if the experimental is enabled, if not, just return
-        const tabbedContentExists = await testSubjects.exists('ruleDetailsTabbedContent');
+        const tabbedContentExists = await testSubjects.waitForExists('ruleDetailsTabbedContent');
         if (!tabbedContentExists) {
           return;
         }

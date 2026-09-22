@@ -40,7 +40,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     it('should open the rule creation flyout', async () => {
       await testSubjects.existOrFail('createRuleButton');
       await testSubjects.click('createRuleButton');
-      const isCreateRuleFlyoutVisible = await testSubjects.exists('ruleTypeModal');
+      const isCreateRuleFlyoutVisible = await testSubjects.waitForExists('ruleTypeModal');
       expect(isCreateRuleFlyoutVisible).toBe(true);
     });
 
@@ -52,7 +52,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     it('should create a new es query rule', async () => {
       await testSubjects.click('queryFormType_searchSource');
-      await testSubjects.exists('selectDataViewExpression');
+      await testSubjects.waitForExists('selectDataViewExpression');
       const input = await testSubjects.find('ruleDetailsNameInput');
       await input.clearValueWithKeyboard();
       await testSubjects.setValue('ruleDetailsNameInput', ruleName);

@@ -86,7 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       // Ensure a warning is shown
-      await testSubjects.exists('searchResponseWarningsCallout');
+      await testSubjects.waitForExists('searchResponseWarningsCallout');
     });
 
     /**
@@ -118,7 +118,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }`);
 
       // Ensure an error is shown
-      await testSubjects.exists('searchResponseWarningsEmptyPrompt');
+      await testSubjects.waitForExists('searchResponseWarningsEmptyPrompt');
     });
   });
 }

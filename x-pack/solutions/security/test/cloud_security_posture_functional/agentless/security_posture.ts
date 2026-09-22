@@ -47,10 +47,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cisIntegration.clickOptionButton(KSPM_RADIO_OPTION);
       await pageObjects.header.waitUntilLoadingHasFinished();
 
-      const hasSetupTechnologySelector = await testSubjects.exists(
+      const hasSetupTechnologySelector = await testSubjects.waitForExists(
         SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ
       );
-      const hasAgentBased = await testSubjects.exists(POLICY_NAME_FIELD);
+      const hasAgentBased = await testSubjects.waitForExists(POLICY_NAME_FIELD);
 
       expect(hasSetupTechnologySelector).to.be(false);
       expect(hasAgentBased).to.be(true);
@@ -66,10 +66,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cisIntegration.clickOptionButton(CNVM_RADIO_OPTION);
       await pageObjects.header.waitUntilLoadingHasFinished();
 
-      const hasSetupTechnologySelector = await testSubjects.exists(
+      const hasSetupTechnologySelector = await testSubjects.waitForExists(
         SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ
       );
-      const hasAgentBased = await testSubjects.exists(POLICY_NAME_FIELD);
+      const hasAgentBased = await testSubjects.waitForExists(POLICY_NAME_FIELD);
 
       expect(hasSetupTechnologySelector).to.be(false);
       expect(hasAgentBased).to.be(true);
@@ -84,10 +84,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cisIntegration.clickOptionButton(CSPM_RADIO_OPTION);
       await pageObjects.header.waitUntilLoadingHasFinished();
 
-      const hasSetupTechnologySelector = await testSubjects.exists(
+      const hasSetupTechnologySelector = await testSubjects.waitForExists(
         SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ
       );
-      const hasAgentBased = await testSubjects.exists(POLICY_NAME_FIELD);
+      const hasAgentBased = await testSubjects.waitForExists(POLICY_NAME_FIELD);
 
       expect(hasSetupTechnologySelector).to.be(true);
       expect(hasAgentBased).to.be(false);

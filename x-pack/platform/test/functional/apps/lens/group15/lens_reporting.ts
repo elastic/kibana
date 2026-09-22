@@ -67,7 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     afterEach(async () => {
-      if (await testSubjects.exists('toastCloseButton')) {
+      if (await testSubjects.waitForExists('toastCloseButton')) {
         await testSubjects.click('toastCloseButton');
       }
 
@@ -128,7 +128,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const url = await reporting.getReportURL(60000);
 
           expect(url).to.be.ok();
-          if (await testSubjects.exists('toastCloseButton')) {
+          if (await testSubjects.waitForExists('toastCloseButton')) {
             await testSubjects.click('toastCloseButton');
           }
         });
@@ -148,7 +148,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await lens.clickPopoverItem(type);
           await reporting.clickGenerateReportButton();
           await reporting.getReportURL(60000);
-          if (await testSubjects.exists('toastCloseButton')) {
+          if (await testSubjects.waitForExists('toastCloseButton')) {
             await testSubjects.click('toastCloseButton');
           }
           // navigate to the reporting page

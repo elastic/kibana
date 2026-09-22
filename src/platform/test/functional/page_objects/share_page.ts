@@ -36,16 +36,16 @@ export class SharePageObject extends FtrService {
   }
 
   async isShareMenuOpen() {
-    return await this.testSubjects.exists('shareContextMenu');
+    return await this.testSubjects.waitForExists('shareContextMenu');
   }
 
   async isShareModalOpen() {
-    return await this.testSubjects.exists('shareContextModal');
+    return await this.testSubjects.waitForExists('shareContextModal');
   }
 
   async clickShareTopNavButton() {
     // The project header renders share as a title action revealed on header hover, outside the menu.
-    if (await this.testSubjects.exists(APP_HEADER_TEST_SUBJECTS.root, { timeout: 1000 })) {
+    if (await this.testSubjects.waitForExists(APP_HEADER_TEST_SUBJECTS.root, { timeout: 1000 })) {
       await this.testSubjects.moveMouseTo(APP_HEADER_TEST_SUBJECTS.root);
       await this.testSubjects.click(`~${APP_HEADER_TEST_SUBJECTS.shareButton}`);
       return;

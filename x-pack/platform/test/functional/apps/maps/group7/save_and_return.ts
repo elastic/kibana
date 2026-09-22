@@ -106,7 +106,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
           // return to origin should not be present in save modal
           await maps.clickSaveButton();
-          const redirectToOriginCheckboxExists = await testSubjects.exists(
+          const redirectToOriginCheckboxExists = await testSubjects.waitForExists(
             'returnToOriginModeSwitch'
           );
           expect(redirectToOriginCheckboxExists).to.be(false);

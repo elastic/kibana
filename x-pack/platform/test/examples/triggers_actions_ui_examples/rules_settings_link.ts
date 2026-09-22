@@ -19,7 +19,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should load from shareable lazy loader', async () => {
-      const exists = await testSubjects.exists('rulesSettingsLink');
+      const exists = await testSubjects.waitForExists('rulesSettingsLink');
       expect(exists).to.be(true);
     });
 

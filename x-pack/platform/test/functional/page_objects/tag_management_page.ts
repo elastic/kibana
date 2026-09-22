@@ -73,7 +73,7 @@ class TagModal extends FtrService {
       // Close the popover before moving to the next input, as it can get in the way of interacting with other elements
       await this.testSubjects.existOrFail('euiSaturation');
       await this.retry.try(async () => {
-        if (await this.testSubjects.exists('euiSaturation', { timeout: 10 })) {
+        if (await this.testSubjects.waitForExists('euiSaturation', { timeout: 10 })) {
           await this.browser.pressKeys(this.browser.keys.ENTER);
         }
         await this.testSubjects.missingOrFail('euiSaturation', { timeout: 250 });
@@ -158,7 +158,7 @@ class TagModal extends FtrService {
    * Return true if the modal is currently opened.
    */
   async isOpened() {
-    return await this.testSubjects.exists('tagModalForm');
+    return await this.testSubjects.waitForExists('tagModalForm');
   }
 
   /**
@@ -307,7 +307,7 @@ export class TagManagementPageObject extends FtrService {
    * Return true if the `Create new tag` button is visible, false otherwise.
    */
   async isCreateButtonVisible() {
-    return await this.testSubjects.exists('createTagButton');
+    return await this.testSubjects.waitForExists('createTagButton');
   }
 
   /**
@@ -327,11 +327,11 @@ export class TagManagementPageObject extends FtrService {
         firstRow
       );
       await actionButton.click();
-      const actionPresent = await this.testSubjects.exists(`tagsTableAction-${action}`);
+      const actionPresent = await this.testSubjects.waitForExists(`tagsTableAction-${action}`);
       await actionButton.click();
       return actionPresent;
     } else {
-      return await this.testSubjects.exists(`tagsTableAction-${action}`);
+      return await this.testSubjects.waitForExists(`tagsTableAction-${action}`);
     }
   }
 
@@ -445,7 +445,7 @@ export class TagManagementPageObject extends FtrService {
    * Returns true if the tag bulk action menu is displayed, false otherwise.
    */
   async isActionMenuButtonDisplayed() {
-    return this.testSubjects.exists('actionBar-contextMenuButton');
+    return this.testSubjects.waitForExists('actionBar-contextMenuButton');
   }
 
   /**
@@ -471,7 +471,7 @@ export class TagManagementPageObject extends FtrService {
       await this.openActionMenu();
     }
 
-    return await this.testSubjects.exists(`actionBar-button-${actionId}`);
+    return await this.testSubjects.waitForExists(`actionBar-button-${actionId}`);
   }
 
   /**
@@ -493,7 +493,7 @@ export class TagManagementPageObject extends FtrService {
    * Return true if the bulk action menu is opened, false otherwise.
    */
   async isActionMenuOpened() {
-    return this.testSubjects.exists('actionBar-contextMenu');
+    return this.testSubjects.waitForExists('actionBar-contextMenu');
   }
 
   /**

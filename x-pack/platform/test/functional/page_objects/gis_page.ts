@@ -99,7 +99,7 @@ export class GisPageObject extends FtrService {
   // TODO combine with dashboard full screen into a service
   async existFullScreen() {
     this.log.debug(`existFullScreen`);
-    const isFullScreen = await this.testSubjects.exists('exitFullScreenModeButton');
+    const isFullScreen = await this.testSubjects.waitForExists('exitFullScreenModeButton');
     if (isFullScreen) {
       await this.testSubjects.click('exitFullScreenModeButton');
     }
@@ -242,14 +242,14 @@ export class GisPageObject extends FtrService {
 
   async onMapListingPage() {
     this.log.debug(`onMapListingPage`);
-    return await this.testSubjects.exists('mapLandingPage', {
+    return await this.testSubjects.waitForExists('mapLandingPage', {
       timeout: 5000,
     });
   }
 
   async onMapPage() {
     this.log.debug(`onMapPage`);
-    return await this.testSubjects.exists('mapLayerTOC', {
+    return await this.testSubjects.waitForExists('mapLayerTOC', {
       timeout: 5000,
     });
   }
@@ -338,7 +338,9 @@ export class GisPageObject extends FtrService {
   async clearLegendTooltip() {
     // The tooltip renders instantly when present, so use a short timeout: this is an
     // absence probe called many times per hook, and a long timeout burns hook budget.
-    const isTooltipOpen = await this.testSubjects.exists(`layerTocTooltip`, { timeout: 1000 });
+    const isTooltipOpen = await this.testSubjects.waitForExists(`layerTocTooltip`, {
+      timeout: 1000,
+    });
     if (isTooltipOpen) {
       await this.testSubjects.click(`layerTocTooltip`);
       // Wait for tooltip to go away
@@ -364,7 +366,7 @@ export class GisPageObject extends FtrService {
   }
 
   async openLegend() {
-    const isOpen = await this.testSubjects.exists('mapLayerTOC');
+    const isOpen = await this.testSubjects.waitForExists('mapLayerTOC');
     if (isOpen === false) {
       await this.testSubjects.click('mapExpandLayerControlButton');
       await this.testSubjects.existOrFail('mapLayerTOC');
@@ -372,7 +374,7 @@ export class GisPageObject extends FtrService {
   }
 
   async closeLegend() {
-    const isOpen = await this.testSubjects.exists('mapLayerTOC');
+    const isOpen = await this.testSubjects.waitForExists('mapLayerTOC');
     if (isOpen) {
       await this.testSubjects.click('mapToggleLegendButton');
       await this.testSubjects.waitForDeleted('mapLayerTOC');
@@ -395,7 +397,9 @@ export class GisPageObject extends FtrService {
 
   async openLayerTocActionsPanel(layerName: string) {
     const escapedDisplayName = escapeLayerName(layerName);
-    const isOpen = await this.testSubjects.exists(`layerTocActionsPanel${escapedDisplayName}`);
+    const isOpen = await this.testSubjects.waitForExists(
+      `layerTocActionsPanel${escapedDisplayName}`
+    );
     if (!isOpen) {
       await this.testSubjects.click(`layerTocActionsPanelToggleButton${escapedDisplayName}`);
     }
@@ -405,7 +409,7 @@ export class GisPageObject extends FtrService {
     const escapedDisplayName = escapeLayerName(layerName);
     await this.retry.try(async () => {
       await this.testSubjects.moveMouseTo(`layerTocActionsPanelToggleButton${escapedDisplayName}`);
-      const isOpen = await this.testSubjects.exists(`layerTocTooltip`, { timeout: 5000 });
+      const isOpen = await this.testSubjects.waitForExists(`layerTocTooltip`, { timeout: 5000 });
       if (!isOpen) {
         throw new Error('layer TOC tooltip not open');
       }
@@ -457,7 +461,7 @@ export class GisPageObject extends FtrService {
   }
 
   async doesLayerExist(layerName: string) {
-    return await this.testSubjects.exists(
+    return await this.testSubjects.waitForExists(
       `layerTocActionsPanelToggleButton${escapeLayerName(layerName)}`
     );
   }
@@ -473,7 +477,7 @@ export class GisPageObject extends FtrService {
    */
   async isLayerAddPanelOpen() {
     this.log.debug(`Is layer add panel open`);
-    return await this.testSubjects.exists('layerAddForm');
+    return await this.testSubjects.waitForExists('layerAddForm');
   }
 
   async waitForLayerAddPanelClosed() {
@@ -497,7 +501,7 @@ export class GisPageObject extends FtrService {
 
   async cancelLayerAdd(layerName: string) {
     this.log.debug(`Cancel layer add`);
-    const cancelExists = await this.testSubjects.exists('layerAddCancelButton');
+    const cancelExists = await this.testSubjects.waitForExists('layerAddCancelButton');
     if (cancelExists) {
       await this.testSubjects.click('layerAddCancelButton');
       await this.waitForLayerAddPanelClosed();
@@ -509,8 +513,8 @@ export class GisPageObject extends FtrService {
 
   async closeOrCancelLayer(layerName: string) {
     this.log.debug(`Close or cancel layer add`);
-    const cancelExists = await this.testSubjects.exists('layerAddCancelButton');
-    const closeExists = await this.testSubjects.exists('layerPanelCancelButton');
+    const cancelExists = await this.testSubjects.waitForExists('layerAddCancelButton');
+    const closeExists = await this.testSubjects.waitForExists('layerPanelCancelButton');
     if (cancelExists) {
       this.log.debug(`Cancel layer add.`);
       await this.testSubjects.click('layerAddCancelButton');
@@ -601,7 +605,7 @@ export class GisPageObject extends FtrService {
   }
 
   async exitFullScreenLogoButtonExists() {
-    return await this.testSubjects.exists('exitFullScreenModeButton');
+    return await this.testSubjects.waitForExists('exitFullScreenModeButton');
   }
 
   async getExitFullScreenLogoButton() {
@@ -624,7 +628,7 @@ export class GisPageObject extends FtrService {
   async doesInspectorHaveRequests() {
     await this.inspector.open();
     await this.inspector.openInspectorRequestsView();
-    return await this.testSubjects.exists('inspectorNoRequestsMessage');
+    return await this.testSubjects.waitForExists('inspectorNoRequestsMessage');
   }
 
   async getMapboxStyle() {

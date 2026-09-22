@@ -349,7 +349,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('lns_colorEditing_trigger');
         await retry.try(async () => {
           if (
-            !(await testSubjects.exists('lns-colorMapping-colorPicker-tab-custom', {
+            !(await testSubjects.waitForExists('lns-colorMapping-colorPicker-tab-custom', {
               timeout: 1000,
             }))
           ) {

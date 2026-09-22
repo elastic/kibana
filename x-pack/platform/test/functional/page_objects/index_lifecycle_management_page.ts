@@ -32,7 +32,7 @@ export function IndexLifecycleManagementPageProvider({ getService }: FtrProvider
       return await testSubjects.click('createPolicyButton');
     },
     async createPolicyButtonExists() {
-      return await testSubjects.exists('createPolicyButton');
+      return await testSubjects.waitForExists('createPolicyButton');
     },
     async fillNewPolicyForm(policy: Policy) {
       const {

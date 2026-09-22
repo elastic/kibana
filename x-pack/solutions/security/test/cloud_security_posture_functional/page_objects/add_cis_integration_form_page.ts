@@ -6,7 +6,6 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import expect from '@kbn/expect';
 import {
   AWS_PROVIDER_TEST_SUBJ,
   GCP_PROVIDER_TEST_SUBJ,
@@ -78,10 +77,10 @@ export function AddCisIntegrationFormPageProvider({
       return await testSubjects.find(TEST_IDS.POST_INSTALL_CLOUD_FORMATION_MODAL);
     },
     showPostInstallCloudFormationModal: async () => {
-      return await testSubjects.exists(TEST_IDS.POST_INSTALL_CLOUD_FORMATION_MODAL);
+      return await testSubjects.waitForExists(TEST_IDS.POST_INSTALL_CLOUD_FORMATION_MODAL);
     },
     showLaunchCloudFormationAgentlessButton: async () => {
-      return await testSubjects.exists(TEST_IDS.LAUNCH_CLOUD_FORMATION_AGENTLESS_BUTTON);
+      return await testSubjects.waitForExists(TEST_IDS.LAUNCH_CLOUD_FORMATION_AGENTLESS_BUTTON);
     },
   };
 
@@ -145,7 +144,7 @@ export function AddCisIntegrationFormPageProvider({
       });
     },
     showLaunchCloudShellAgentlessButton: async () => {
-      return await testSubjects.exists('launchGoogleCloudShellAgentlessButton');
+      return await testSubjects.waitForExists('launchGoogleCloudShellAgentlessButton');
     },
   };
 
@@ -351,7 +350,7 @@ export function AddCisIntegrationFormPageProvider({
   };
 
   const showSetupTechnologyComponent = async () => {
-    return await testSubjects.exists(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
+    return await testSubjects.waitForExists(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
   };
 
   const selectAwsCredentials = async (
@@ -385,7 +384,7 @@ export function AddCisIntegrationFormPageProvider({
    * It only appears when GCP Cloud Connectors are enabled (package >= 3.3.0-preview03).
    */
   const isGcpCredentialSelectorVisible = async () => {
-    return testSubjects.exists('gcpCredentialTypeSelector');
+    return testSubjects.waitForExists('gcpCredentialTypeSelector');
   };
 
   const clickOptionButton = async (text: string) => {
@@ -417,7 +416,7 @@ export function AddCisIntegrationFormPageProvider({
 
   const clickSaveButton = async (includeSystemPackage: boolean = false) => {
     await PageObjects.header.waitUntilLoadingHasFinished();
-    const isIncludeSystemPackageCheckboxExists = await testSubjects.exists(
+    const isIncludeSystemPackageCheckboxExists = await testSubjects.waitForExists(
       TEST_IDS.INCLUDE_SYSTEM_INTEGRATION_CHECKBOX_TEST_ID
     );
 
@@ -434,7 +433,7 @@ export function AddCisIntegrationFormPageProvider({
   };
 
   const waitUntilLaunchCloudFormationButtonAppears = async () =>
-    await testSubjects.exists(TEST_IDS.CONFIRM_CLOUD_FORMATION_MODAL_CONFIRM_BUTTON);
+    await testSubjects.waitForExists(TEST_IDS.CONFIRM_CLOUD_FORMATION_MODAL_CONFIRM_BUTTON);
 
   const clickSaveIntegrationButton = async () => {
     const optionToBeClicked = await findOptionInPage(TEST_IDS.SAVE_INTEGRATION);
@@ -442,11 +441,11 @@ export function AddCisIntegrationFormPageProvider({
   };
 
   const getPostInstallModal = async () => {
-    return await testSubjects.exists(TEST_IDS.CONFIRM_MODAL_TITLE_TEXT);
+    return await testSubjects.waitForExists(TEST_IDS.CONFIRM_MODAL_TITLE_TEXT);
   };
 
   const checkIntegrationPliAuthBlockExists = async () => {
-    return await testSubjects.exists(TEST_IDS.CLOUD_SECURITY_POSTURE_PLI_AUTH_BLOCK);
+    return await testSubjects.waitForExists(TEST_IDS.CLOUD_SECURITY_POSTURE_PLI_AUTH_BLOCK);
   };
 
   const pasteTextInField = async (selector: string, text: string) => {
@@ -528,7 +527,9 @@ export function AddCisIntegrationFormPageProvider({
   };
 
   const showCredentialJsonSecretPanel = async () => {
-    return await testSubjects.exists(GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON_SECRET_PANEL);
+    return await testSubjects.waitForExists(
+      GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON_SECRET_PANEL
+    );
   };
 
   const inputUniqueIntegrationName = async () => {
@@ -642,7 +643,7 @@ export function AddCisIntegrationFormPageProvider({
       /^(textAreaInput|passwordInput)-/,
       'button-replace-'
     );
-    if (replaceButtonId !== testSubjectId && (await testSubjects.exists(replaceButtonId))) {
+    if (replaceButtonId !== testSubjectId && (await testSubjects.waitForExists(replaceButtonId))) {
       await testSubjects.click(replaceButtonId);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
@@ -661,14 +662,14 @@ export function AddCisIntegrationFormPageProvider({
     await PageObjects.header.waitUntilLoadingHasFinished();
 
     // Check if the Direct Access Key is updated package policy api with successful toast
-    expect(await testSubjects.exists(TEST_IDS.POLICY_UPDATE_SUCCESS_TOAST)).to.be(true);
+    await testSubjects.existOrFail(TEST_IDS.POLICY_UPDATE_SUCCESS_TOAST);
 
     await navigateToEditAgentlessIntegrationPage();
     await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
   const showSuccessfulToast = async (testSubjectId: string) => {
-    return await testSubjects.exists(testSubjectId);
+    return await testSubjects.waitForExists(testSubjectId);
   };
 
   const getFirstCspmIntegrationPageIntegration = async () => {

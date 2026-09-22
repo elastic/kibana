@@ -577,7 +577,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('rulePageFooterCancelButton');
 
-      const confirmRuleCloseModalExists = await testSubjects.exists('confirmRuleCloseModal');
+      const confirmRuleCloseModalExists = await testSubjects.waitForExists('confirmRuleCloseModal');
       if (confirmRuleCloseModalExists) {
         await testSubjects.click('confirmRuleCloseModal > confirmModalConfirmButton');
         await testSubjects.missingOrFail('confirmRuleCloseModal');
@@ -598,7 +598,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         'ES|QL KEEP warning footer button to appear',
         testSubjects.TRY_TIME,
         async () =>
-          await testSubjects.exists('ESQLEditor-footerPopoverButton-warning', { timeout: 1000 })
+          await testSubjects.waitForExists('ESQLEditor-footerPopoverButton-warning', {
+            timeout: 1000,
+          })
       );
 
       await testSubjects.click('ESQLEditor-footerPopoverButton-warning');
@@ -676,7 +678,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('rulePageFooterCancelButton');
 
-      const confirmRuleCloseModalExists = await testSubjects.exists('confirmRuleCloseModal');
+      const confirmRuleCloseModalExists = await testSubjects.waitForExists('confirmRuleCloseModal');
       if (confirmRuleCloseModalExists) {
         await testSubjects.click('confirmRuleCloseModal > confirmModalConfirmButton');
         await testSubjects.missingOrFail('confirmRuleCloseModal');

@@ -88,7 +88,7 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
   }
 
   async showSearchBar(): Promise<void> {
-    const isSearchBarVisible = await this.testSubjects.exists(
+    const isSearchBarVisible = await this.testSubjects.waitForExists(
       `${GRAPH_INVESTIGATION_TEST_ID} > addFilter`
     );
     if (!isSearchBarVisible) {
@@ -154,7 +154,9 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
 
   async showEntityDetails(nodeId: string): Promise<void> {
     await this.clickOnNodeExpandButton(nodeId);
-    const itemId = (await this.testSubjects.exists(GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID))
+    const itemId = (await this.testSubjects.waitForExists(
+      GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID
+    ))
       ? GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID
       : GRAPH_NODE_POPOVER_SHOW_GROUPED_ENTITIES_ITEM_ID;
     await this.testSubjects.click(itemId);

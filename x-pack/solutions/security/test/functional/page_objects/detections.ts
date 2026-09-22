@@ -55,7 +55,7 @@ export class DetectionsPageObject extends FtrService {
   async openImportQueryModal(): Promise<void> {
     const element = await this.testSubjects.find('importQueryFromSavedTimeline');
     await element.click(500);
-    await this.testSubjects.exists('open-timeline-modal-body-filter-default');
+    await this.testSubjects.waitForExists('open-timeline-modal-body-filter-default');
   }
 
   async viewTemplatesInImportQueryModal(): Promise<void> {
@@ -77,7 +77,7 @@ export class DetectionsPageObject extends FtrService {
   async openAddFilterPopover(): Promise<void> {
     const addButtons = await this.testSubjects.findAll('addFilter');
     await addButtons[1].click();
-    await this.testSubjects.exists('saveFilter');
+    await this.testSubjects.waitForExists('saveFilter');
   }
 
   async closeAddFilterPopover(): Promise<void> {

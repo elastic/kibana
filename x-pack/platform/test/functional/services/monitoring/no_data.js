@@ -23,7 +23,7 @@ export function MonitoringNoDataProvider({ getService }) {
     }
 
     async isMonitoringEnabled() {
-      return testSubjects.exists('monitoringCollectionEnabledMessage');
+      return testSubjects.waitForExists('monitoringCollectionEnabledMessage');
     }
 
     async isOnNoDataPage() {
@@ -32,7 +32,7 @@ export function MonitoringNoDataProvider({ getService }) {
     }
 
     async isOnNoDataPageMonitoringEnablementDenied() {
-      return testSubjects.exists('weTriedContainer');
+      return testSubjects.waitForExists('weTriedContainer');
     }
 
     async clickSetupWithSelfMonitoring() {

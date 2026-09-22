@@ -69,7 +69,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await openLinksPanelEditor();
 
         await dashboardLinks.setExternalUrlInput('https://danger.example.com');
-        expect(await testSubjects.exists('links--linkDestination--error')).to.be(true);
+        await testSubjects.existOrFail('links--linkDestination--error');
         await dashboardLinks.clickLinkEditorCloseButton();
         await dashboardLinks.clickPanelEditorCloseButton();
       });
@@ -81,11 +81,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardLinks.toggleSaveByReference(true);
         await dashboardLinks.clickPanelEditorSaveButton();
 
-        await testSubjects.exists('savedObjectSaveModal');
+        await testSubjects.waitForExists('savedObjectSaveModal');
         await testSubjects.setValue('savedObjectTitle', LINKS_PANEL_NAME);
         await testSubjects.click('confirmSaveSavedObjectButton');
         await common.waitForSaveModalToClose();
-        await testSubjects.exists('addObjectToDashboardSuccess');
+        await testSubjects.waitForExists('addObjectToDashboardSuccess');
         await testSubjects.existOrFail('links--component');
         await dashboardPanelActions.expectLinkedToLibrary(LINKS_PANEL_NAME);
 
@@ -99,7 +99,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardLinks.toggleSaveByReference(true);
         await dashboardLinks.clickPanelEditorSaveButton();
 
-        await testSubjects.exists('savedObjectSaveModal');
+        await testSubjects.waitForExists('savedObjectSaveModal');
         await testSubjects.click('saveCancelButton');
         await testSubjects.existOrFail('links--panelEditor--flyout');
         await dashboardLinks.clickPanelEditorCloseButton();
@@ -112,7 +112,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await createSomeLinks();
           await dashboardLinks.toggleSaveByReference(false);
           await dashboardLinks.clickPanelEditorSaveButton();
-          await testSubjects.exists('addObjectToDashboardSuccess');
+          await testSubjects.waitForExists('addObjectToDashboardSuccess');
           await testSubjects.existOrFail('links--component');
           await dashboardPanelActions.expectNotLinkedToLibrary();
 
@@ -164,7 +164,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardLinks.expectPanelEditorFlyoutIsOpen();
 
         await dashboardLinks.editLinkByIndex(5);
-        await testSubjects.exists('links--linkEditor--flyout');
+        await testSubjects.waitForExists('links--linkEditor--flyout');
         await testSubjects.setValue('links--linkEditor--linkLabel--input', 'to be deleted');
         await dashboardLinks.clickLinksEditorSaveButton();
         await dashboardLinks.clickPanelEditorSaveButton();

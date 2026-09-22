@@ -835,7 +835,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('discover', {
           hash: `/doc/${indexPatternResult.id}/${indexTitle}?id=${testDocumentId}`,
         });
-        await testSubjects.exists('doc-hit');
+        await testSubjects.waitForExists('doc-hit');
 
         const renderedValue = await testSubjects.find(`tableDocViewRow-seconds-value`);
         const text = await renderedValue.getVisibleText();
@@ -951,7 +951,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('discover', {
           hash: `/doc/${indexPatternId}/${indexTitle}?id=${testDocumentId}`,
         });
-        await testSubjects.exists('doc-hit');
+        await testSubjects.waitForExists('doc-hit');
       });
 
       specs.forEach((spec, index) => {

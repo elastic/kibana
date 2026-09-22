@@ -110,7 +110,7 @@ export function DashboardDrilldownsManageProvider({ getService }: FtrProviderCon
         | typeof ON_CLICK_IMAGE
         | typeof ON_OPEN_PANEL_MENU
     ) {
-      if (await testSubjects.exists(`triggerPicker`)) {
+      if (await testSubjects.waitForExists(`triggerPicker`)) {
         const container = await testSubjects.find(`triggerPicker-${trigger}`);
         const radio = await container.findByCssSelector('input[type=radio]');
         await radio.click();

@@ -21,7 +21,7 @@ export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
         await testSubjects.click('xpack.synthetics.toggleTlsAlertFlyout');
       }
       // ensure the flyout has opened
-      await testSubjects.exists('ruleFlyoutTitle');
+      await testSubjects.waitForExists('ruleFlyoutTitle');
     },
     async openMonitorStatusAlertType(alertType: string) {
       await testSubjects.click(`xpack.synthetics.alerts.${alertType}-SelectOption`);

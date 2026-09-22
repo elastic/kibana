@@ -91,7 +91,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('can favorite and unfavorite a dashboard', async () => {
-      await testSubjects.exists('favoritesFilterButton');
+      await testSubjects.waitForExists('favoritesFilterButton');
       await listingTable.expectItemsCount('dashboard', 1);
 
       await testSubjects.click('favoritesFilterButton');
@@ -120,7 +120,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await listingTable.clickItemLink('dashboard', 'A-Dashboard');
       await dashboard.waitForRenderComplete();
       await testSubjects.click('favoriteButton');
-      await testSubjects.exists('unfavoriteButton');
+      await testSubjects.waitForExists('unfavoriteButton');
 
       await dashboard.gotoDashboardListingURL({
         args: {

@@ -170,7 +170,7 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
     },
 
     getCountersEmptyState: async () => {
-      return await testSubjects.exists('rules-counters-empty-state');
+      return await testSubjects.waitForExists('rules-counters-empty-state');
     },
 
     getPostureScoreCounter: async () => {
@@ -219,7 +219,7 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
     },
 
     doesElementExist: async (selector: string) => {
-      return await testSubjects.exists(selector);
+      return await testSubjects.waitForExists(selector);
     },
   };
 

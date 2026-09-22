@@ -66,7 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('delete option is not available on the detail page', async function () {
         await PageObjects.settings.navigateToDataViewById(MANAGED_DV_ID);
-        if (await testSubjects.exists(APP_MENU_TEST_SUBJECTS.overflowButton)) {
+        if (await testSubjects.waitForExists(APP_MENU_TEST_SUBJECTS.overflowButton)) {
           await testSubjects.click(APP_MENU_TEST_SUBJECTS.overflowButton);
         }
         await testSubjects.missingOrFail('deleteIndexPatternButton');

@@ -50,7 +50,7 @@ export class UnifiedTabsPageObject extends FtrService {
     const tabId = tab.replace(/^unifiedTabs_tab_/, '');
     const tabChangesIndicator = `unifiedTabs__tabChangesIndicator-${tabId}`;
 
-    return await this.testSubjects.exists(tabChangesIndicator);
+    return await this.testSubjects.waitForExists(tabChangesIndicator);
   }
 
   public async getSelectedTabLabel() {
@@ -220,8 +220,8 @@ export class UnifiedTabsPageObject extends FtrService {
 
   public async isScrollable() {
     return (
-      (await this.testSubjects.exists('unifiedTabs_tabsBar_scrollLeftBtn')) &&
-      (await this.testSubjects.exists('unifiedTabs_tabsBar_scrollRightBtn'))
+      (await this.testSubjects.waitForExists('unifiedTabs_tabsBar_scrollLeftBtn')) &&
+      (await this.testSubjects.waitForExists('unifiedTabs_tabsBar_scrollRightBtn'))
     );
   }
 
@@ -245,11 +245,11 @@ export class UnifiedTabsPageObject extends FtrService {
   }
 
   public async isTabsBarVisible() {
-    return await this.testSubjects.exists('unifiedTabs_tabsBar');
+    return await this.testSubjects.waitForExists('unifiedTabs_tabsBar');
   }
 
   public async isTabPreviewVisible() {
-    return await this.testSubjects.exists('unifiedTabs_tabPreview_contentPanel');
+    return await this.testSubjects.waitForExists('unifiedTabs_tabPreview_contentPanel');
   }
 
   public async closeTabPreviewWithEsc() {
@@ -481,7 +481,7 @@ export class UnifiedTabsPageObject extends FtrService {
   public async clearRecentlyClosedTabs() {
     await this.openTabsBarMenu();
     const buttonTestId = 'unifiedTabs_tabsMenu_clearRecentlyClosed';
-    const clearButtonExists = await this.testSubjects.exists(buttonTestId);
+    const clearButtonExists = await this.testSubjects.waitForExists(buttonTestId);
     if (clearButtonExists) {
       await this.testSubjects.click(buttonTestId);
       await this.retry.waitFor('recently closed tabs to be cleared', async () => {

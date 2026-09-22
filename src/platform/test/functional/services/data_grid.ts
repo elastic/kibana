@@ -116,7 +116,7 @@ export class DataGridService extends FtrService {
 
     let resizer: WebElementWrapper | undefined;
 
-    if (await this.testSubjects.exists('euiDataGridHeaderDroppable')) {
+    if (await this.testSubjects.waitForExists('euiDataGridHeaderDroppable')) {
       // if drag & drop is enabled for data grid columns
       const headerDraggableColumns = await this.find.allByCssSelector(
         '[data-test-subj="euiDataGridHeaderDroppable"] > div'
@@ -256,7 +256,7 @@ export class DataGridService extends FtrService {
    * @returns If the cell action button exists
    */
   public async cellExpandPopoverActionExists(cellActionId: string) {
-    return await this.testSubjects.exists(`*dataGridColumnCellAction-${cellActionId}`);
+    return await this.testSubjects.waitForExists(`*dataGridColumnCellAction-${cellActionId}`);
   }
 
   /**
@@ -476,11 +476,11 @@ export class DataGridService extends FtrService {
   }
 
   public async isShowingDocViewer() {
-    return await this.testSubjects.exists('kbnDocViewer');
+    return await this.testSubjects.waitForExists('kbnDocViewer');
   }
 
   public async isDocViewerNavigationVisible() {
-    return await this.testSubjects.exists('docViewerFlyoutNavigation');
+    return await this.testSubjects.waitForExists('docViewerFlyoutNavigation');
   }
 
   public async clickDocViewerTab(id: string) {
@@ -627,7 +627,7 @@ export class DataGridService extends FtrService {
 
   public async resetColumnWidthExists(field: string) {
     await this.openColMenuByField(field);
-    return await this.testSubjects.exists('unifiedDataTableResetColumnWidth');
+    return await this.testSubjects.waitForExists('unifiedDataTableResetColumnWidth');
   }
 
   public async clickResetColumnWidth(field: string) {
@@ -840,7 +840,7 @@ export class DataGridService extends FtrService {
   }
 
   public async isSelectedRowsMenuVisible() {
-    return await this.testSubjects.exists('unifiedDataTableSelectionBtn');
+    return await this.testSubjects.waitForExists('unifiedDataTableSelectionBtn');
   }
 
   public async openSelectedRowsMenu() {
@@ -859,7 +859,9 @@ export class DataGridService extends FtrService {
 
   public async compareSelectedButtonExists() {
     await this.openSelectedRowsMenu();
-    const exists = await this.testSubjects.exists('unifiedDataTableCompareSelectedDocuments');
+    const exists = await this.testSubjects.waitForExists(
+      'unifiedDataTableCompareSelectedDocuments'
+    );
     await this.closeSelectedRowsMenu();
     return exists;
   }
@@ -870,7 +872,7 @@ export class DataGridService extends FtrService {
   }
 
   public async isComparisonModeActive() {
-    return await this.testSubjects.exists('unifiedDataTableCompareDocuments');
+    return await this.testSubjects.waitForExists('unifiedDataTableCompareDocuments');
   }
 
   public async waitForComparisonModeToLoad() {
@@ -906,7 +908,7 @@ export class DataGridService extends FtrService {
   }
 
   public async openComparisonSettingsMenu() {
-    if (await this.testSubjects.exists('unifiedDataTableComparisonSettingsMenu')) {
+    if (await this.testSubjects.waitForExists('unifiedDataTableComparisonSettingsMenu')) {
       return;
     }
     await this.testSubjects.click('unifiedDataTableComparisonSettings');
@@ -958,7 +960,7 @@ export class DataGridService extends FtrService {
 
   public async showAllFieldsSwitchExists() {
     await this.openComparisonSettingsMenu();
-    return await this.testSubjects.exists('unifiedDataTableDiffOptionSwitch-showAllFields');
+    return await this.testSubjects.waitForExists('unifiedDataTableDiffOptionSwitch-showAllFields');
   }
 
   public async toggleShowAllFieldsSwitch() {
@@ -986,14 +988,14 @@ export class DataGridService extends FtrService {
   }
 
   public async getInTableSearchTerm() {
-    if (!(await this.testSubjects.exists(INPUT_TEST_SUBJ))) {
+    if (!(await this.testSubjects.waitForExists(INPUT_TEST_SUBJ))) {
       return null;
     }
     return await this.testSubjects.getAttribute(INPUT_TEST_SUBJ, 'value');
   }
 
   public async runInTableSearch(searchTerm: string) {
-    if (!(await this.testSubjects.exists(INPUT_TEST_SUBJ))) {
+    if (!(await this.testSubjects.waitForExists(INPUT_TEST_SUBJ))) {
       await this.testSubjects.click(BUTTON_TEST_SUBJ);
       await this.retry.waitFor('input to appear', async () => {
         return await this.testSubjects.exists(INPUT_TEST_SUBJ);
@@ -1007,7 +1009,7 @@ export class DataGridService extends FtrService {
   }
 
   public async exitInTableSearch() {
-    if (!(await this.testSubjects.exists(INPUT_TEST_SUBJ))) {
+    if (!(await this.testSubjects.waitForExists(INPUT_TEST_SUBJ))) {
       return;
     }
     const input = await this.testSubjects.find(INPUT_TEST_SUBJ);

@@ -49,7 +49,7 @@ export function EndpointPageUtils({ getService }: FtrProviderContext) {
      * @returns Promise<string[][]>
      */
     async tableData(dataTestSubj: string) {
-      await testSubjects.exists(dataTestSubj);
+      await testSubjects.waitForExists(dataTestSubj);
       const hostTable: WebElementWrapper = await testSubjects.find(dataTestSubj);
       const $ = await hostTable.parseDomContent();
       return $('tr')

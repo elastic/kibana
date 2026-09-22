@@ -24,14 +24,14 @@ export function CommonScreenshotsProvider({ getService }: FtrProviderContext) {
     },
 
     async openKibanaNav() {
-      if (!(await testSubjects.exists('collapsibleNav'))) {
+      if (!(await testSubjects.waitForExists('collapsibleNav'))) {
         await testSubjects.click('toggleNavButton');
       }
       await testSubjects.existOrFail('collapsibleNav');
     },
 
     async closeKibanaNav() {
-      if (await testSubjects.exists('collapsibleNav')) {
+      if (await testSubjects.waitForExists('collapsibleNav')) {
         await testSubjects.click('toggleNavButton');
       }
       await testSubjects.missingOrFail('collapsibleNav');

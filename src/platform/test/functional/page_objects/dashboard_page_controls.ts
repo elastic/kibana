@@ -509,7 +509,7 @@ export class DashboardPageControls extends FtrService {
         expectation.invalidSelections.sort()
       );
     });
-    if (await this.testSubjects.exists('optionsList-cardinality-label')) {
+    if (await this.testSubjects.waitForExists('optionsList-cardinality-label')) {
       expect(await this.optionsListGetCardinalityValue()).to.be(
         Object.keys(expectation.suggestions).length.toLocaleString()
       );
@@ -634,7 +634,7 @@ export class DashboardPageControls extends FtrService {
   public async controlEditorCancel() {
     this.log.debug(`Canceling changes in control editor`);
     await this.testSubjects.click(`control-editor-cancel`);
-    if (await this.testSubjects.exists('confirmModalTitleText')) {
+    if (await this.testSubjects.waitForExists('confirmModalTitleText')) {
       await this.common.clickConfirmOnModal();
     }
   }
@@ -809,14 +809,14 @@ export class DashboardPageControls extends FtrService {
   }
 
   public async closeTimeSliderPopover() {
-    const isOpen = await this.testSubjects.exists('timeSlider-popoverContents');
+    const isOpen = await this.testSubjects.waitForExists('timeSlider-popoverContents');
     if (isOpen) {
       await this.testSubjects.click('timeSlider-popoverToggleButton');
     }
   }
 
   public async getTimeSliceFromTimeSlider() {
-    const isOpen = await this.testSubjects.exists('timeSlider-popoverContents');
+    const isOpen = await this.testSubjects.waitForExists('timeSlider-popoverContents');
     if (!isOpen) {
       await this.testSubjects.click('timeSlider-popoverToggleButton');
       await this.retry.try(async () => {

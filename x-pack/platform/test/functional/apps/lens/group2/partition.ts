@@ -39,8 +39,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should not expose the grouping switch in Pie', async () => {
       await lens.openDimensionEditor('lnsPie_sliceByDimensionPanel > lns-dimensionTrigger');
 
-      expect(await testSubjects.exists('indexPattern-nesting-switch')).to.eql(false);
-      expect(await testSubjects.exists('indexPattern-nesting-select')).to.eql(false);
+      expect(await testSubjects.waitForExists('indexPattern-nesting-switch')).to.eql(false);
+      expect(await testSubjects.waitForExists('indexPattern-nesting-select')).to.eql(false);
 
       await lens.closeDimensionEditor();
     });
@@ -49,7 +49,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.setDonutHoleSize('Large');
 
       expect(
-        await testSubjects.exists('lnsPie_sliceByDimensionPanel > lns-empty-dimension')
+        await testSubjects.waitForExists('lnsPie_sliceByDimensionPanel > lns-empty-dimension')
       ).to.eql(false);
 
       expect(
@@ -60,8 +60,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should not expose the grouping switch in Donut', async () => {
       await lens.openDimensionEditor('lnsPie_sliceByDimensionPanel > lns-dimensionTrigger');
 
-      expect(await testSubjects.exists('indexPattern-nesting-switch')).to.eql(false);
-      expect(await testSubjects.exists('indexPattern-nesting-select')).to.eql(false);
+      expect(await testSubjects.waitForExists('indexPattern-nesting-switch')).to.eql(false);
+      expect(await testSubjects.waitForExists('indexPattern-nesting-select')).to.eql(false);
 
       await lens.closeDimensionEditor();
     });
@@ -70,7 +70,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.switchToVisualization('treemap');
 
       expect(
-        await testSubjects.exists('lnsPie_groupByDimensionPanel > lns-empty-dimension')
+        await testSubjects.waitForExists('lnsPie_groupByDimensionPanel > lns-empty-dimension')
       ).to.eql(false);
 
       expect(
@@ -81,8 +81,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should not expose the grouping switch in Treemap', async () => {
       await lens.openDimensionEditor('lnsPie_groupByDimensionPanel > lns-dimensionTrigger');
 
-      expect(await testSubjects.exists('indexPattern-nesting-switch')).to.eql(false);
-      expect(await testSubjects.exists('indexPattern-nesting-select')).to.eql(false);
+      expect(await testSubjects.waitForExists('indexPattern-nesting-switch')).to.eql(false);
+      expect(await testSubjects.waitForExists('indexPattern-nesting-select')).to.eql(false);
 
       await lens.closeDimensionEditor();
     });
@@ -91,7 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.switchToVisualization('mosaic');
 
       expect(
-        await testSubjects.exists('lnsPie_sliceByDimensionPanel > lns-empty-dimension')
+        await testSubjects.waitForExists('lnsPie_sliceByDimensionPanel > lns-empty-dimension')
       ).to.eql(false);
 
       expect(
@@ -108,7 +108,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should expose the grouping switch in Mosaic', async () => {
       await lens.openDimensionEditor('lnsPie_verticalAxisDimensionPanel > lns-dimensionTrigger');
 
-      expect(await testSubjects.exists('indexPattern-nesting-switch')).to.eql(true);
+      await testSubjects.existOrFail('indexPattern-nesting-switch');
 
       await lens.closeDimensionEditor();
     });
@@ -117,7 +117,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.switchToVisualization('waffle');
 
       expect(
-        await testSubjects.exists('lnsPie_groupByDimensionPanel > lns-empty-dimension')
+        await testSubjects.waitForExists('lnsPie_groupByDimensionPanel > lns-empty-dimension')
       ).to.eql(false);
 
       expect(
@@ -128,8 +128,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should expose the grouping switch in Waffle', async () => {
       await lens.openDimensionEditor('lnsPie_groupByDimensionPanel > lns-dimensionTrigger');
 
-      expect(await testSubjects.exists('indexPattern-nesting-switch')).to.eql(false);
-      expect(await testSubjects.exists('indexPattern-nesting-select')).to.eql(false);
+      expect(await testSubjects.waitForExists('indexPattern-nesting-switch')).to.eql(false);
+      expect(await testSubjects.waitForExists('indexPattern-nesting-select')).to.eql(false);
 
       await lens.closeDimensionEditor();
     });

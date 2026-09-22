@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await dashboard.navigateToApp();
-      if (await testSubjects.exists('discard-unsaved-New-Dashboard')) {
+      if (await testSubjects.waitForExists('discard-unsaved-New-Dashboard')) {
         await testSubjects.click('discard-unsaved-New-Dashboard');
       }
     });
@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(panelCount).to.eql(1);
       });
 
-      expect(await testSubjects.exists('lnsDataTable')).to.be(true);
+      await testSubjects.existOrFail('lnsDataTable');
     });
 
     it('should remove the panel if cancel button is clicked', async () => {

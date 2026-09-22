@@ -22,11 +22,11 @@ export class HomePageObject extends FtrService {
   }
 
   async doesSynopsisExist(title: string) {
-    return await this.testSubjects.exists(`homeSynopsisLink${title}`);
+    return await this.testSubjects.waitForExists(`homeSynopsisLink${title}`);
   }
 
   async doesSampleDataSetExist(id: string) {
-    return await this.testSubjects.exists(`sampleDataSetCard${id}`);
+    return await this.testSubjects.waitForExists(`sampleDataSetCard${id}`);
   }
 
   /**
@@ -236,7 +236,7 @@ export class HomePageObject extends FtrService {
 
   // open global nav if it's closed
   async openCollapsibleNav() {
-    if (!(await this.testSubjects.exists('collapsibleNav'))) {
+    if (!(await this.testSubjects.waitForExists('collapsibleNav'))) {
       await this.clickToggleGlobalNav();
     }
   }

@@ -110,7 +110,7 @@ export function DashboardSettingsProvider({ getService }: FtrProviderContext) {
 
     public async isShowingDuplicateTitleWarning() {
       log.debug('isShowingDuplicateTitleWarning');
-      await testSubjects.exists('duplicateTitleWarningMessage');
+      await testSubjects.waitForExists('duplicateTitleWarningMessage');
     }
 
     public async clickApplyButton(shouldClose: boolean = true) {

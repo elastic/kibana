@@ -54,7 +54,7 @@ export class PieChartService extends FtrService {
   async filterOnPieSlice(name?: string) {
     this.log.debug(`PieChart.filterOnPieSlice(${name})`);
     await this.clickOnPieSlice(name);
-    const hasUiActionsPopup = await this.testSubjects.exists('multipleActionsContextMenu');
+    const hasUiActionsPopup = await this.testSubjects.waitForExists('multipleActionsContextMenu');
     if (hasUiActionsPopup) {
       const actionElement = await this.panelActions.getActionWebElementByText(
         this.filterActionText
@@ -199,7 +199,7 @@ export class PieChartService extends FtrService {
   }
 
   async expectEmptyPieChart() {
-    const noResult = await this.testSubjects.exists('partitionVisEmptyValues');
+    const noResult = await this.testSubjects.waitForExists('partitionVisEmptyValues');
     expect(noResult).to.be(true);
   }
 

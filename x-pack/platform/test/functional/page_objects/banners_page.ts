@@ -11,7 +11,7 @@ export class BannersPageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
 
   isTopBannerVisible() {
-    return this.testSubjects.exists('bannerInnerWrapper');
+    return this.testSubjects.waitForExists('bannerInnerWrapper');
   }
 
   async getTopBannerText() {

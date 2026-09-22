@@ -65,7 +65,7 @@ export class UnifiedFieldListPageObject extends FtrService {
   }
 
   public async doesSidebarShowFields() {
-    return await this.testSubjects.exists('fieldListGroupedFieldGroups');
+    return await this.testSubjects.waitForExists('fieldListGroupedFieldGroups');
   }
 
   public getSidebarSectionSelector(
@@ -184,7 +184,7 @@ export class UnifiedFieldListPageObject extends FtrService {
   }
 
   public async isFieldSelected(field: string) {
-    if (!(await this.testSubjects.exists('fieldListGroupedSelectedFields'))) {
+    if (!(await this.testSubjects.waitForExists('fieldListGroupedSelectedFields'))) {
       return false;
     }
     const selectedList = await this.testSubjects.find('fieldListGroupedSelectedFields');
@@ -195,7 +195,7 @@ export class UnifiedFieldListPageObject extends FtrService {
     await this.waitUntilSidebarHasLoaded();
 
     if (
-      !(await this.testSubjects.exists('fieldListGroupedSelectedFields')) ||
+      !(await this.testSubjects.waitForExists('fieldListGroupedSelectedFields')) ||
       !(await this.isFieldSelected(field))
     ) {
       return;
@@ -235,7 +235,7 @@ export class UnifiedFieldListPageObject extends FtrService {
 
   public async clickFieldListAddBreakdownField(field: string) {
     const addBreakdownFieldTestSubj = `fieldPopoverHeader_addBreakdownField-${field}`;
-    if (!(await this.testSubjects.exists(addBreakdownFieldTestSubj))) {
+    if (!(await this.testSubjects.waitForExists(addBreakdownFieldTestSubj))) {
       // field has to be open
       await this.clickFieldListItem(field);
     }
@@ -245,7 +245,7 @@ export class UnifiedFieldListPageObject extends FtrService {
 
   public async clickFieldListPlusFilter(field: string, value: string) {
     const plusFilterTestSubj = `plus-${field}-${value}`;
-    if (!(await this.testSubjects.exists(plusFilterTestSubj))) {
+    if (!(await this.testSubjects.waitForExists(plusFilterTestSubj))) {
       // field has to be open
       await this.clickFieldListItem(field);
     }
@@ -263,7 +263,7 @@ export class UnifiedFieldListPageObject extends FtrService {
 
   public async clickFieldListExistsFilter(field: string) {
     const existsFilterTestSubj = `discoverFieldListPanelAddExistFilter-${field}`;
-    if (!(await this.testSubjects.exists(existsFilterTestSubj))) {
+    if (!(await this.testSubjects.waitForExists(existsFilterTestSubj))) {
       // field has to be open
       await this.clickFieldListItem(field);
     }
@@ -299,23 +299,23 @@ export class UnifiedFieldListPageObject extends FtrService {
     | 'exampleValues'
     | 'unknown'
   > {
-    if (await this.testSubjects.exists('unifiedFieldStats-buttonGroup')) {
+    if (await this.testSubjects.waitForExists('unifiedFieldStats-buttonGroup')) {
       return 'topValuesAndDistribution';
     }
 
-    if (await this.testSubjects.exists('unifiedFieldStats-timeDistribution')) {
+    if (await this.testSubjects.waitForExists('unifiedFieldStats-timeDistribution')) {
       return 'timeDistribution';
     }
 
-    if (await this.testSubjects.exists('unifiedFieldStats-histogram')) {
+    if (await this.testSubjects.waitForExists('unifiedFieldStats-histogram')) {
       return 'histogram';
     }
 
-    if (await this.testSubjects.exists('unifiedFieldStats-topValueBuckets')) {
+    if (await this.testSubjects.waitForExists('unifiedFieldStats-topValueBuckets')) {
       return 'topValues';
     }
 
-    if (await this.testSubjects.exists('unifiedFieldStats-exampleValueBuckets')) {
+    if (await this.testSubjects.waitForExists('unifiedFieldStats-exampleValueBuckets')) {
       return 'exampleValues';
     }
 

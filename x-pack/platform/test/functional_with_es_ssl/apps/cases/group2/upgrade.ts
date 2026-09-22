@@ -235,7 +235,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('shows the severity correctly', async () => {
-        await testSubjects.exists('case-severity-selection-low');
+        await testSubjects.waitForExists('case-severity-selection-low');
       });
 
       it('shows the status correctly', async () => {
@@ -244,11 +244,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('shows the refresh button', async () => {
-        await testSubjects.exists('case-refresh');
+        await testSubjects.waitForExists('case-refresh');
       });
 
       it('shows the actions button', async () => {
-        await testSubjects.exists('property-actions');
+        await testSubjects.waitForExists('property-actions');
       });
 
       it('shows the reporter correctly', async () => {
@@ -273,23 +273,23 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('shows the connector fields', async () => {
-        await testSubjects.exists('connector-fields');
+        await testSubjects.waitForExists('connector-fields');
       });
 
       it('shows the add comment markdown', async () => {
-        await testSubjects.exists('add-comment');
+        await testSubjects.waitForExists('add-comment');
       });
 
       it('shows the change status button', async () => {
-        await testSubjects.exists('case-view-status-action-button');
+        await testSubjects.waitForExists('case-view-status-action-button');
       });
 
       it('shows the add comment button', async () => {
-        await testSubjects.exists('submit-comment');
+        await testSubjects.waitForExists('submit-comment');
       });
 
       it('shows the assignees section', async () => {
-        await testSubjects.exists('case-view-assignees');
+        await testSubjects.waitForExists('case-view-assignees');
       });
     });
 

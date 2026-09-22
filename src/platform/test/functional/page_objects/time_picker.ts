@@ -64,7 +64,7 @@ export class TimePickerPageObject extends FtrService {
     // Wait for the page to settle before detecting, otherwise a stale picker
     // from a previous app may briefly appear during navigation.
     await this.header.awaitGlobalLoadingIndicatorHidden();
-    const isNew = await this.testSubjects.exists('dateRangePickerControlButton', {
+    const isNew = await this.testSubjects.waitForExists('dateRangePickerControlButton', {
       timeout: 5000,
     });
     this.log.debug(
@@ -87,7 +87,7 @@ export class TimePickerPageObject extends FtrService {
   }
 
   async ensureHiddenNoDataPopover() {
-    const isVisible = await this.testSubjects.exists('noDataPopoverDismissButton', {
+    const isVisible = await this.testSubjects.waitForExists('noDataPopoverDismissButton', {
       timeout: 100,
     });
     if (isVisible) {
@@ -121,9 +121,9 @@ export class TimePickerPageObject extends FtrService {
 
   public async timePickerExists() {
     if (await this.isNewDateRangePicker()) {
-      return await this.testSubjects.exists('dateRangePickerControlButton');
+      return await this.testSubjects.waitForExists('dateRangePickerControlButton');
     }
-    return await this.testSubjects.exists('superDatePickerToggleQuickMenuButton');
+    return await this.testSubjects.waitForExists('superDatePickerToggleQuickMenuButton');
   }
 
   /**
@@ -133,18 +133,22 @@ export class TimePickerPageObject extends FtrService {
   async setCommonlyUsedTime(option: CommonlyUsed | string) {
     if (await this.isNewDateRangePicker()) {
       await this.testSubjects.click('dateRangePickerControlButton');
-      await this.testSubjects.exists('dateRangePickerMainPanel', { timeout: 5000 });
+      await this.testSubjects.waitForExists('dateRangePickerMainPanel', { timeout: 5000 });
       // The component's toTestSubj replaces all whitespace with underscores
       const presetTestSubj = `dateRangePickerPresetItem-${option.replace(/\s+/g, '_')}`;
-      await this.testSubjects.exists(presetTestSubj, { timeout: 5000 });
+      await this.testSubjects.waitForExists(presetTestSubj, { timeout: 5000 });
       await this.testSubjects.scrollIntoView(presetTestSubj);
       await this.testSubjects.click(presetTestSubj);
       await this.testSubjects.missingOrFail('dateRangePickerPopoverPanel', { timeout: 5000 });
       await this.browser.pressKeys(this.browser.keys.ESCAPE);
     } else {
-      await this.testSubjects.exists('superDatePickerToggleQuickMenuButton', { timeout: 5000 });
+      await this.testSubjects.waitForExists('superDatePickerToggleQuickMenuButton', {
+        timeout: 5000,
+      });
       await this.testSubjects.click('superDatePickerToggleQuickMenuButton');
-      await this.testSubjects.exists(`superDatePickerCommonlyUsed_${option}`, { timeout: 5000 });
+      await this.testSubjects.waitForExists(`superDatePickerCommonlyUsed_${option}`, {
+        timeout: 5000,
+      });
       await this.testSubjects.click(`superDatePickerCommonlyUsed_${option}`);
     }
   }
@@ -165,7 +169,9 @@ export class TimePickerPageObject extends FtrService {
       }
       await this.setAbsoluteRangeNewPicker(parts[0].trim(), parts[1].trim());
     } else {
-      await this.testSubjects.exists('superDatePickerToggleQuickMenuButton', { timeout: 5000 });
+      await this.testSubjects.waitForExists('superDatePickerToggleQuickMenuButton', {
+        timeout: 5000,
+      });
       await this.testSubjects.click('superDatePickerToggleQuickMenuButton');
       const panel = await this.testSubjects.find('superDatePickerQuickMenu');
       const buttonByOptionText = await panel.findByXpath(`.//button[text()='${option}']`);
@@ -187,11 +193,16 @@ export class TimePickerPageObject extends FtrService {
 
   private async showStartEndTimes() {
     // This first await makes sure the superDatePicker has loaded before we check for the ShowDatesButton
-    await this.testSubjects.exists('superDatePickerToggleQuickMenuButton', { timeout: 20000 });
+    await this.testSubjects.waitForExists('superDatePickerToggleQuickMenuButton', {
+      timeout: 20000,
+    });
     await this.retry.tryForTime(5000, async () => {
-      const isShowDatesButton = await this.testSubjects.exists('superDatePickerShowDatesButton', {
-        timeout: 50,
-      });
+      const isShowDatesButton = await this.testSubjects.waitForExists(
+        'superDatePickerShowDatesButton',
+        {
+          timeout: 50,
+        }
+      );
       if (isShowDatesButton) {
         await this.testSubjects.moveMouseTo('superDatePickerShowDatesButton');
         await this.testSubjects.click('superDatePickerShowDatesButton', 50);
@@ -261,7 +272,7 @@ export class TimePickerPageObject extends FtrService {
       await picker.moveMouseTo();
       await picker.click();
 
-      if (!(await this.testSubjects.exists('dateRangePickerInput', { timeout: 5000 }))) {
+      if (!(await this.testSubjects.waitForExists('dateRangePickerInput', { timeout: 5000 }))) {
         this.log.debug('dateRangePickerInput did not appear after opening the picker, retrying');
         return false;
       }
@@ -269,7 +280,7 @@ export class TimePickerPageObject extends FtrService {
       await this.inputValue('dateRangePickerInput', rangeText);
       // Pressing Enter in inputValue applies the range and closes the popover.
       // Verify the button reflects the new range.
-      await this.testSubjects.exists('dateRangePickerControlButton', { timeout: 5000 });
+      await this.testSubjects.waitForExists('dateRangePickerControlButton', { timeout: 5000 });
       const actualRange = await this.testSubjects.getAttribute(
         'dateRangePickerControlButton',
         'data-date-range'
@@ -321,10 +332,12 @@ export class TimePickerPageObject extends FtrService {
 
     await this.retry.waitFor('Timepicker popover to close', async () => {
       await this.browser.pressKeys(this.browser.keys.ESCAPE);
-      return !(await this.testSubjects.exists('superDatePickerAbsoluteDateInput', { timeout: 50 }));
+      return !(await this.testSubjects.waitForExists('superDatePickerAbsoluteDateInput', {
+        timeout: 50,
+      }));
     });
 
-    const superDatePickerApplyButtonExists = await this.testSubjects.exists(
+    const superDatePickerApplyButtonExists = await this.testSubjects.waitForExists(
       'superDatePickerApplyTimeButton',
       { timeout: 100 }
     );
@@ -344,7 +357,11 @@ export class TimePickerPageObject extends FtrService {
     // whenever the time filter is off (no-time-field data view, isDisabled
     // prop, or auto-refresh-only mode); the legacy picker renders it visibly
     // inside the SuperDatePicker's isDisabled.display node.
-    if (await this.testSubjects.exists('kbnQueryBar-datePicker-disabled', { allowHidden: true })) {
+    if (
+      await this.testSubjects.waitForExists('kbnQueryBar-datePicker-disabled', {
+        allowHidden: true,
+      })
+    ) {
       return true;
     }
     // Legacy auto-refresh-only mode doesn't render the span; the
@@ -437,15 +454,15 @@ export class TimePickerPageObject extends FtrService {
    */
   private async openNewPickerSettingsPanel() {
     // If the settings panel is already visible, nothing to do.
-    const alreadyOpen = await this.testSubjects.exists('dateRangePickerSettingsPanel', {
+    const alreadyOpen = await this.testSubjects.waitForExists('dateRangePickerSettingsPanel', {
       timeout: 500,
     });
     if (alreadyOpen) return;
 
     await this.testSubjects.click('dateRangePickerControlButton');
-    await this.testSubjects.exists('dateRangePickerMainPanel', { timeout: 5000 });
+    await this.testSubjects.waitForExists('dateRangePickerMainPanel', { timeout: 5000 });
     await this.testSubjects.click('dateRangePickerSettingsButton');
-    await this.testSubjects.exists('dateRangePickerSettingsPanel', { timeout: 5000 });
+    await this.testSubjects.waitForExists('dateRangePickerSettingsPanel', { timeout: 5000 });
   }
 
   /**
@@ -461,9 +478,11 @@ export class TimePickerPageObject extends FtrService {
    */
   private async closeNewPickerSettingsPanel() {
     // Navigate back from settings sub-panel to main panel if still there.
-    if (await this.testSubjects.exists('dateRangePickerSubPanelBackButton', { timeout: 500 })) {
+    if (
+      await this.testSubjects.waitForExists('dateRangePickerSubPanelBackButton', { timeout: 500 })
+    ) {
       await this.testSubjects.click('dateRangePickerSubPanelBackButton');
-      await this.testSubjects.exists('dateRangePickerMainPanel', { timeout: 3000 });
+      await this.testSubjects.waitForExists('dateRangePickerMainPanel', { timeout: 3000 });
     }
     // Focus the text input (always visible in editing mode) and press Escape.
     // onInputKeyDown handles Escape → setIsEditing(false) → popover closes.
@@ -685,9 +704,12 @@ export class TimePickerPageObject extends FtrService {
     this.log.debug('resumeAutoRefresh');
     if (await this.isNewDateRangePicker()) {
       // The auto-refresh button is only rendered when isEnabled=true.
-      const buttonExists = await this.testSubjects.exists('dateRangePickerAutoRefreshButton', {
-        timeout: 1000,
-      });
+      const buttonExists = await this.testSubjects.waitForExists(
+        'dateRangePickerAutoRefreshButton',
+        {
+          timeout: 1000,
+        }
+      );
       if (buttonExists) {
         // Button is visible — only click it if it's in the "resume" (paused) state;
         // if it's already showing "pause", auto-refresh is running and we do nothing.

@@ -29,14 +29,14 @@ export function UptimeMLAnomalyProvider({ getService }: FtrProviderContext) {
     },
 
     async cancelAlertFlyout() {
-      if (await testSubjects.exists('euiFlyoutCloseButton'))
+      if (await testSubjects.waitForExists('euiFlyoutCloseButton'))
         await testSubjects.click('euiFlyoutCloseButton', 60 * 1000);
-      if (await testSubjects.exists('ruleFlyoutConfirmCancelConfirmButton'))
+      if (await testSubjects.waitForExists('ruleFlyoutConfirmCancelConfirmButton'))
         await testSubjects.click('ruleFlyoutConfirmCancelConfirmButton', 60 * 1000);
     },
 
     async alreadyHasJob() {
-      return await testSubjects.exists('uptimeManageMLJobBtn');
+      return await testSubjects.waitForExists('uptimeManageMLJobBtn');
     },
 
     async createMLJob() {
@@ -70,7 +70,7 @@ export function UptimeMLAnomalyProvider({ getService }: FtrProviderContext) {
     },
 
     async manageAnomalyAlertIsVisible() {
-      return await testSubjects.exists('uptimeManageAnomalyAlertBtn');
+      return await testSubjects.waitForExists('uptimeManageAnomalyAlertBtn');
     },
 
     async changeAlertThreshold(level: string) {

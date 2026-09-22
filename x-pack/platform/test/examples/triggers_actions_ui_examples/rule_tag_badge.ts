@@ -29,16 +29,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should load from the shareable lazy loader', async () => {
       await testSubjects.find('ruleTagBadge');
-      const exists = await testSubjects.exists('ruleTagBadge');
+      const exists = await testSubjects.waitForExists('ruleTagBadge');
       expect(exists).to.be(true);
     });
 
     it('should open and display tags', async () => {
       await testSubjects.click('ruleTagBadge');
-      expect(await testSubjects.exists('ruleTagBadgeItem-tag1')).to.be(true);
-      expect(await testSubjects.exists('ruleTagBadgeItem-tag2')).to.be(true);
-      expect(await testSubjects.exists('ruleTagBadgeItem-tag3')).to.be(true);
-      expect(await testSubjects.exists('ruleTagBadgeItem-tag4')).to.be(true);
+      await testSubjects.existOrFail('ruleTagBadgeItem-tag1');
+      await testSubjects.existOrFail('ruleTagBadgeItem-tag2');
+      await testSubjects.existOrFail('ruleTagBadgeItem-tag3');
+      await testSubjects.existOrFail('ruleTagBadgeItem-tag4');
     });
   });
 };

@@ -602,7 +602,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       expectedLabel: string,
       formData: Record<string, any>
     ) {
-      const isPopoverFormVisible = await testSubjects.exists(
+      const isPopoverFormVisible = await testSubjects.waitForExists(
         `transformAggPopoverForm_${expectedLabel}`
       );
       if (!isPopoverFormVisible) {
@@ -694,7 +694,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     async enableAdvancedPivotEditor() {
       await this.assertAdvancedPivotEditorSwitchCheckState(false);
       await testSubjects.click('transformAdvancedPivotEditorSwitch');
-      if (!(await testSubjects.exists('transformAdvancedPivotEditor'))) {
+      if (!(await testSubjects.waitForExists('transformAdvancedPivotEditor'))) {
         await browser.pressKeys(browser.keys.SPACE);
       }
       await retry.tryForTime(30 * 1000, async () => {

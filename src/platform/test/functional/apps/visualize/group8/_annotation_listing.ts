@@ -130,7 +130,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('recovers from missing field in data view', async () => {
           const assertShowingMissingFieldError = async (yes: boolean) => {
             const [failureExists, canvasExists] = await Promise.all([
-              testSubjects.exists('embeddable-lens-failure'),
+              testSubjects.waitForExists('embeddable-lens-failure'),
               find.existsByCssSelector('canvas', 1000),
             ]);
             expect(failureExists).to.be(yes);

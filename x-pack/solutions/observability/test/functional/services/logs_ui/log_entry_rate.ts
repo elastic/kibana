@@ -82,7 +82,7 @@ export function LogEntryRatePageProvider({ getPageObjects, getService }: FtrProv
     },
 
     async jobCreationDone() {
-      return await testSubjects.exists('infraProcessStepViewResultsButton');
+      return await testSubjects.waitForExists('infraProcessStepViewResultsButton');
     },
   };
 }

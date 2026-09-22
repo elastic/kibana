@@ -47,7 +47,7 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
     },
 
     async isApiKeyNamePresent() {
-      return await testSubjects.exists('apiKeyNameInput');
+      return await testSubjects.waitForExists('apiKeyNameInput');
     },
 
     async setApiKeyCustomExpiration(expirationTime: string) {
@@ -91,7 +91,7 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
           (await testSubjects.exists('apiKeysCreateTableButton'))
         );
       });
-      return await testSubjects.exists('apiKeysCreatePromptButton');
+      return await testSubjects.waitForExists('apiKeysCreatePromptButton');
     },
 
     async getApiKeysFirstPromptTitle() {
@@ -106,7 +106,7 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
     },
 
     async deleteAllApiKeyOneByOne() {
-      const hasApiKeysToDelete = await testSubjects.exists('*apiKeysTableDeleteAction');
+      const hasApiKeysToDelete = await testSubjects.waitForExists('*apiKeysTableDeleteAction');
       if (hasApiKeysToDelete) {
         const apiKeysToDelete = await testSubjects.findAll('*apiKeysTableDeleteAction');
         for (const element of apiKeysToDelete) {
@@ -117,7 +117,7 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
     },
 
     async bulkDeleteApiKeys() {
-      const hasApiKeysToDelete = await testSubjects.exists('checkboxSelectAll', {
+      const hasApiKeysToDelete = await testSubjects.waitForExists('checkboxSelectAll', {
         allowHidden: true,
       });
       if (hasApiKeysToDelete) {
@@ -136,7 +136,7 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
     },
 
     async doesApiKeyExist(apiKeyName: string) {
-      return await testSubjects.exists(`apiKeyRowName-${apiKeyName}`);
+      return await testSubjects.waitForExists(`apiKeyRowName-${apiKeyName}`);
     },
 
     async getMetadataSwitch() {

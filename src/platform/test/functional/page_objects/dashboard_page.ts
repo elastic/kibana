@@ -102,7 +102,7 @@ export class DashboardPageObject extends FtrService {
     await this.header.waitUntilLoadingHasFinished();
     this.log.debug(`clickFullScreenMode`);
     await this.appMenu.clickMenuItem('dashboardFullScreenMode');
-    await this.testSubjects.exists('exitFullScreenModeButton');
+    await this.testSubjects.waitForExists('exitFullScreenModeButton');
     await this.waitForRenderComplete();
   }
 
@@ -118,7 +118,7 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async exitFullScreenTextButtonExists() {
-    return await this.testSubjects.exists('exitFullScreenModeText');
+    return await this.testSubjects.waitForExists('exitFullScreenModeText');
   }
 
   public async getExitFullScreenTextButton() {
@@ -126,7 +126,7 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async exitFullScreenLogoButtonExists() {
-    return await this.testSubjects.exists('exitFullScreenModeButton');
+    return await this.testSubjects.waitForExists('exitFullScreenModeButton');
   }
 
   public async getExitFullScreenLogoButton() {
@@ -310,7 +310,7 @@ export class DashboardPageObject extends FtrService {
 
   public async switchToEditMode() {
     this.log.debug('Switching to edit mode');
-    if (await this.testSubjects.exists('dashboardEditMode')) {
+    if (await this.testSubjects.waitForExists('dashboardEditMode')) {
       // if the dashboard is not already in edit mode
       await this.testSubjects.click('dashboardEditMode');
     }
@@ -325,7 +325,7 @@ export class DashboardPageObject extends FtrService {
   }
   public async switchToViewMode() {
     this.log.debug('Switching to view mode');
-    if (await this.testSubjects.exists('dashboardViewOnlyMode')) {
+    if (await this.testSubjects.waitForExists('dashboardViewOnlyMode')) {
       await this.testSubjects.click('dashboardViewOnlyMode');
     }
     // wait until edit button appears
@@ -337,19 +337,21 @@ export class DashboardPageObject extends FtrService {
   public async getIsInEditMode() {
     this.log.debug('getIsInEditMode');
     // Check if the "switch to view mode" button exists (indicates we're in edit mode)
-    if (await this.testSubjects.exists('dashboardViewOnlyMode')) {
+    if (await this.testSubjects.waitForExists('dashboardViewOnlyMode')) {
       return true;
     }
     // In edit mode, either quick save button (saved dashboard) or interactive save button (new dashboard) is present
-    const hasQuickSave = await this.testSubjects.exists('dashboardQuickSaveMenuItem');
-    const hasInteractiveSave = await this.testSubjects.exists('dashboardInteractiveSaveMenuItem');
+    const hasQuickSave = await this.testSubjects.waitForExists('dashboardQuickSaveMenuItem');
+    const hasInteractiveSave = await this.testSubjects.waitForExists(
+      'dashboardInteractiveSaveMenuItem'
+    );
     return hasQuickSave || hasInteractiveSave;
   }
 
   public async getIsInViewMode() {
     this.log.debug('getIsInViewMode');
     // Check if the "edit" button exists (indicates we're in view mode)
-    if (await this.testSubjects.exists('dashboardEditMode')) {
+    if (await this.testSubjects.waitForExists('dashboardEditMode')) {
       return true;
     }
     // If we're not in edit mode, we're in view mode
@@ -370,7 +372,7 @@ export class DashboardPageObject extends FtrService {
     await this.appMenu.clickMenuItem('dashboardViewOnlyMode');
 
     if (accept) {
-      const confirmation = await this.testSubjects.exists('confirmModalTitleText');
+      const confirmation = await this.testSubjects.waitForExists('confirmModalTitleText');
       if (confirmation) {
         await this.common.clickConfirmOnModal();
       }
@@ -448,18 +450,20 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async expectUnsavedChangesNotificationExists(timeout: number | undefined = undefined) {
-    await this.testSubjects.exists(UNSAVED_CHANGES_NOTIFICATION, { timeout });
+    await this.testSubjects.waitForExists(UNSAVED_CHANGES_NOTIFICATION, { timeout });
   }
 
   public async clickNewDashboard(
     options: AddNewDashboardOptions = { continueEditing: false, expectWarning: false }
   ) {
     const { continueEditing, expectWarning } = options;
-    const discardButtonExists = await this.testSubjects.exists('discardDashboardPromptButton');
+    const discardButtonExists = await this.testSubjects.waitForExists(
+      'discardDashboardPromptButton'
+    );
     if (!continueEditing && discardButtonExists) {
       this.log.debug('found discard button');
       await this.testSubjects.click('discardDashboardPromptButton');
-      const confirmation = await this.testSubjects.exists('confirmModalTitleText');
+      const confirmation = await this.testSubjects.waitForExists('confirmModalTitleText');
       if (confirmation) {
         await this.common.clickConfirmOnModal();
       }
@@ -468,7 +472,7 @@ export class DashboardPageObject extends FtrService {
     if (expectWarning) {
       await this.testSubjects.existOrFail('dashboardCreateConfirm');
     }
-    if (await this.testSubjects.exists('dashboardCreateConfirm')) {
+    if (await this.testSubjects.waitForExists('dashboardCreateConfirm')) {
       if (continueEditing) {
         await this.testSubjects.click('dashboardCreateConfirmContinue');
       } else {
@@ -499,12 +503,12 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async getCreateDashboardPromptExists() {
-    return this.testSubjects.exists('emptyListPrompt');
+    return this.testSubjects.waitForExists('emptyListPrompt');
   }
 
   public async isSettingsOpen() {
     this.log.debug('isSettingsOpen');
-    return await this.testSubjects.exists('dashboardSettingsMenu');
+    return await this.testSubjects.waitForExists('dashboardSettingsMenu');
   }
 
   public async openSettingsFlyout() {
@@ -642,7 +646,7 @@ export class DashboardPageObject extends FtrService {
       await this.common.waitForSaveModalToClose();
     }
 
-    const isInViewMode = await this.testSubjects.exists('dashboardEditMode');
+    const isInViewMode = await this.testSubjects.waitForExists('dashboardEditMode');
     if (saveOptions.exitFromEditMode && !isInViewMode) {
       await this.clickCancelOutOfEditMode();
     }
@@ -668,7 +672,7 @@ export class DashboardPageObject extends FtrService {
     dashboardTitle: string,
     saveOptions: Omit<SaveDashboardOptions, 'saveAsNew'> = { waitDialogIsClosed: true }
   ) {
-    const isSaveModalOpen = await this.testSubjects.exists('savedObjectSaveModal', {
+    const isSaveModalOpen = await this.testSubjects.waitForExists('savedObjectSaveModal', {
       timeout: 2000,
     });
 
@@ -699,7 +703,7 @@ export class DashboardPageObject extends FtrService {
     }
 
     // Let the async "Permissions" (access control) section render and reflow the footer before clicking Save, so the button isn't hit mid-reflow.
-    await this.testSubjects.exists('accessModeContainer');
+    await this.testSubjects.waitForExists('accessModeContainer');
 
     await this.clickSave();
     if (saveOptions.waitDialogIsClosed) {
@@ -721,8 +725,8 @@ export class DashboardPageObject extends FtrService {
 
   public async openSaveSplitMenu() {
     if (
-      !(await this.testSubjects.exists('dashboardQuickSaveMenuItem-secondary-button')) &&
-      (await this.testSubjects.exists('app-menu-overflow-button'))
+      !(await this.testSubjects.waitForExists('dashboardQuickSaveMenuItem-secondary-button')) &&
+      (await this.testSubjects.waitForExists('app-menu-overflow-button'))
     ) {
       await this.testSubjects.click('app-menu-overflow-button');
     }
@@ -730,7 +734,7 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async clickInteractiveSave() {
-    if (await !this.testSubjects.exists('dashboardInteractiveSaveMenuItem')) {
+    if (await !this.testSubjects.waitForExists('dashboardInteractiveSaveMenuItem')) {
       await this.openSaveSplitMenu();
     }
     await this.testSubjects.click('dashboardInteractiveSaveMenuItem');
@@ -993,7 +997,7 @@ export class DashboardPageObject extends FtrService {
   public async getNotLoadedVisualizations(vizList: string[]) {
     const checkList = [];
     for (const name of vizList) {
-      const isPresent = await this.testSubjects.exists(
+      const isPresent = await this.testSubjects.waitForExists(
         `embeddablePanelHeading-${name.replace(/\s+/g, '')}`,
         { timeout: 10000 }
       );

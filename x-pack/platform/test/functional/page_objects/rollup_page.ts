@@ -136,7 +136,7 @@ export class RollupPageObject extends FtrService {
   }
 
   async verifyStepIsActive(stepNumber = 0) {
-    await this.testSubjects.exists(`createRollupStep${stepNumber}--active`);
+    await this.testSubjects.waitForExists(`createRollupStep${stepNumber}--active`);
   }
 
   async setScheduleTime(time: string, isCron: boolean) {

@@ -117,7 +117,7 @@ export class ReportingPageObject extends FtrService {
 
   async openShareMenuItem(itemTitle: string) {
     this.log.debug(`openShareMenuItem title:${itemTitle}`);
-    const isShareMenuOpen = await this.testSubjects.exists('shareContextMenu');
+    const isShareMenuOpen = await this.testSubjects.waitForExists('shareContextMenu');
     if (!isShareMenuOpen) {
       await this.appMenu.clickMenuItem('shareTopNavButton');
     } else {
@@ -136,13 +136,13 @@ export class ReportingPageObject extends FtrService {
     this.log.debug('open export popover');
 
     // First check if export button is directly visible
-    if (await this.testSubjects.exists('exportTopNavButton')) {
+    if (await this.testSubjects.waitForExists('exportTopNavButton')) {
       await this.exports.clickExportTopNavButton();
       return;
     }
 
     // If not visible, try the overflow menu
-    if (await this.testSubjects.exists('app-menu-overflow-button')) {
+    if (await this.testSubjects.waitForExists('app-menu-overflow-button')) {
       await this.testSubjects.click('app-menu-overflow-button');
       await this.exports.clickExportTopNavButton();
     }
@@ -153,7 +153,7 @@ export class ReportingPageObject extends FtrService {
   }
 
   async getQueueReportError() {
-    return await this.testSubjects.exists('errorToastBtn');
+    return await this.testSubjects.waitForExists('errorToastBtn');
   }
 
   async getGenerateReportButton() {
@@ -200,7 +200,7 @@ export class ReportingPageObject extends FtrService {
 
   async checkForReportingToasts() {
     this.log.debug('Reporting:checkForReportingToasts');
-    const isToastPresent = await this.testSubjects.exists('completeReportSuccess', {
+    const isToastPresent = await this.testSubjects.waitForExists('completeReportSuccess', {
       allowHidden: true,
       timeout: 90000,
     });

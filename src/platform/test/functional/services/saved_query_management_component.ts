@@ -79,7 +79,7 @@ export class SavedQueryManagementComponentService extends FtrService {
       return saveQueryFormSaveButtonStatus === false;
     });
 
-    const contextMenuPanelTitleButton = await this.testSubjects.exists(
+    const contextMenuPanelTitleButton = await this.testSubjects.waitForExists(
       'contextMenuPanelTitleButton'
     );
     if (contextMenuPanelTitleButton) {
@@ -178,7 +178,7 @@ export class SavedQueryManagementComponentService extends FtrService {
 
   async savedQueryExist(title: string) {
     await this.clickMenuButtonByTestSubject('saved-query-management-load-button');
-    const exists = await this.testSubjects.exists(`~load-saved-query-${title}-button`);
+    const exists = await this.testSubjects.waitForExists(`~load-saved-query-${title}-button`);
     await this.closeSavedQueryManagementComponent();
     return exists;
   }
@@ -212,7 +212,7 @@ export class SavedQueryManagementComponentService extends FtrService {
 
   async openSavedQueryManagementComponent() {
     await this.retry.try(async () => {
-      if (!(await this.testSubjects.exists('queryBarMenuPanel', { timeout: 1000 }))) {
+      if (!(await this.testSubjects.waitForExists('queryBarMenuPanel', { timeout: 1000 }))) {
         await this.testSubjects.click('showQueryBarMenu');
       }
       await this.testSubjects.existOrFail('queryBarMenuPanel');
@@ -220,7 +220,7 @@ export class SavedQueryManagementComponentService extends FtrService {
   }
 
   async closeSavedQueryManagementComponent() {
-    const isOpenAlready = await this.testSubjects.exists('queryBarMenuPanel');
+    const isOpenAlready = await this.testSubjects.waitForExists('queryBarMenuPanel');
     if (!isOpenAlready) return;
 
     await this.retry.try(async () => {

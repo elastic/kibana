@@ -26,15 +26,15 @@ export function MonitoringSetupModeProvider({ getService, getPageObjects }) {
     }
 
     async doesBottomBarAppear() {
-      return await testSubjects.exists(SUBJ_SETUP_MODE_BOTTOM_BAR);
+      return await testSubjects.waitForExists(SUBJ_SETUP_MODE_BOTTOM_BAR);
     }
 
     async doesMetricbeatMigrationTooltipAppear() {
-      return await testSubjects.exists(SUBJ_SETUP_MODE_METRICBEAT_MIGRATION_TOOLTIP);
+      return await testSubjects.waitForExists(SUBJ_SETUP_MODE_METRICBEAT_MIGRATION_TOOLTIP);
     }
 
     async doesAlertsTooltipAppear() {
-      return await testSubjects.exists(SUBJ_SETUP_MODE_ALERTS_BADGE);
+      return await testSubjects.waitForExists(SUBJ_SETUP_MODE_ALERTS_BADGE);
     }
 
     async clickExitSetupModeBtn() {

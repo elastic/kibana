@@ -186,7 +186,7 @@ export class DashboardAddPanelService extends FtrService {
 
   async isAddPanelOpen() {
     this.log.debug('DashboardAddPanel.isAddPanelOpen');
-    return await this.testSubjects.exists('dashboardAddPanel', { timeout: 500 });
+    return await this.testSubjects.waitForExists('dashboardAddPanel', { timeout: 500 });
   }
 
   async ensureAddPanelIsShowing() {
@@ -302,7 +302,7 @@ export class DashboardAddPanelService extends FtrService {
       )}"`
     );
     await this.testSubjects.click(`savedObjectTitle${embeddableName.split(' ').join('-')}`);
-    await this.testSubjects.exists('addObjectToDashboardSuccess');
+    await this.testSubjects.waitForExists('addObjectToDashboardSuccess');
     if (closePanelWhenComplete) {
       await this.closeAddPanel();
     }
@@ -325,6 +325,6 @@ export class DashboardAddPanelService extends FtrService {
     this.log.debug(`DashboardAddPanel.panelAddLinkExists(${name})`);
     await this.ensureAddPanelIsShowing();
     await this.savedObjectsFinder.filterEmbeddableNames(`"${name}"`);
-    return await this.testSubjects.exists(`savedObjectTitle${name.split(' ').join('-')}`);
+    return await this.testSubjects.waitForExists(`savedObjectTitle${name.split(' ').join('-')}`);
   }
 }

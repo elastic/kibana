@@ -217,7 +217,7 @@ export class DiscoverPageObject extends FtrService {
       await this.testSubjects.click(`dashboard-picker-option-${existing}`);
     }
     await this.clickConfirmSavedSearch();
-    if (await this.testSubjects.exists('appLeaveConfirmModal', { timeout: 1000 })) {
+    if (await this.testSubjects.waitForExists('appLeaveConfirmModal', { timeout: 1000 })) {
       await this.testSubjects.click('confirmModalConfirmButton');
     }
     await this.header.waitUntilLoadingHasFinished();
@@ -240,7 +240,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async isDataGridUpdating() {
-    return await this.testSubjects.exists('discoverDataGridUpdating');
+    return await this.testSubjects.waitForExists('discoverDataGridUpdating');
   }
 
   public async waitUntilSearchingHasFinished() {
@@ -268,7 +268,7 @@ export class DiscoverPageObject extends FtrService {
    */
   public async createNewTabAndSearch() {
     const unifiedTabs = this.ctx.getPageObject('unifiedTabs');
-    const esqlQuery = (await this.testSubjects.exists('ESQLEditor'))
+    const esqlQuery = (await this.testSubjects.waitForExists('ESQLEditor'))
       ? (await this.ctx.getService('esql').getEsqlEditorQuery()).trim()
       : '';
 
@@ -287,7 +287,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async openLoadSavedSearchPanel() {
-    let isOpen = await this.testSubjects.exists('loadSearchForm');
+    let isOpen = await this.testSubjects.waitForExists('loadSearchForm');
     if (isOpen) {
       return;
     }
@@ -312,7 +312,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async getSavedSearchTitle() {
-    if (await this.testSubjects.exists('breadcrumb last')) {
+    if (await this.testSubjects.waitForExists('breadcrumb last')) {
       const breadcrumb = await this.testSubjects.find('breadcrumb last');
       return await breadcrumb.getVisibleText();
     }
@@ -368,7 +368,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async hasUnsavedChangesIndicator() {
-    return await this.testSubjects.exists('split-button-notification-indicator');
+    return await this.testSubjects.waitForExists('split-button-notification-indicator');
   }
 
   public async revertUnsavedChanges() {
@@ -468,7 +468,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async isLensEditFlyoutOpen() {
-    return await this.testSubjects.exists('lnsChartSwitchPopover');
+    return await this.testSubjects.waitForExists('lnsChartSwitchPopover');
   }
 
   public async openLensEditFlyout() {
@@ -549,11 +549,11 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async isChartVisible() {
-    return await this.testSubjects.exists('unifiedHistogramChart');
+    return await this.testSubjects.waitForExists('unifiedHistogramChart');
   }
 
   public async isTableVisible() {
-    return await this.testSubjects.exists('discoverDocTable');
+    return await this.testSubjects.waitForExists('discoverDocTable');
   }
 
   public async toggleChartVisibility() {
@@ -746,7 +746,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async isSidebarPanelOpen() {
-    return await this.testSubjects.exists('fieldList');
+    return await this.testSubjects.waitForExists('fieldList');
   }
 
   public async getSidebarWidth() {
@@ -783,11 +783,11 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async hasNoResults() {
-    return await this.testSubjects.exists('discoverNoResults');
+    return await this.testSubjects.waitForExists('discoverNoResults');
   }
 
   public async hasNoResultsTimepicker() {
-    return await this.testSubjects.exists('discoverNoResultsTimefilter');
+    return await this.testSubjects.waitForExists('discoverNoResultsTimefilter');
   }
 
   public async showsErrorCallout() {
@@ -850,7 +850,7 @@ export class DiscoverPageObject extends FtrService {
 
   public async selectTextBaseLang() {
     // First check if the button is directly visible
-    if (await this.testSubjects.exists('select-text-based-language-btn')) {
+    if (await this.testSubjects.waitForExists('select-text-based-language-btn')) {
       await this.testSubjects.click('select-text-based-language-btn');
       await this.header.waitUntilLoadingHasFinished();
       await this.waitUntilSearchingHasFinished();
@@ -858,7 +858,7 @@ export class DiscoverPageObject extends FtrService {
     }
 
     // If not visible, try the overflow menu
-    if (await this.testSubjects.exists('app-menu-overflow-button')) {
+    if (await this.testSubjects.waitForExists('app-menu-overflow-button')) {
       await this.retry.try(async () => {
         try {
           await this.testSubjects.moveMouseTo('kbnQueryBar');
@@ -868,14 +868,14 @@ export class DiscoverPageObject extends FtrService {
         await this.testSubjects.click('app-menu-overflow-button');
       });
 
-      if (await this.testSubjects.exists('select-text-based-language-btn')) {
+      if (await this.testSubjects.waitForExists('select-text-based-language-btn')) {
         await this.testSubjects.click('select-text-based-language-btn');
         await this.header.waitUntilLoadingHasFinished();
         await this.waitUntilSearchingHasFinished();
       }
 
       // Close the popover if open
-      if (await this.testSubjects.exists('app-menu-popover')) {
+      if (await this.testSubjects.waitForExists('app-menu-popover')) {
         await this.testSubjects.click('app-menu-overflow-button');
       }
     }
@@ -900,7 +900,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async openInspectorFromTabMenu() {
-    const isOpen = await this.testSubjects.exists('inspectorPanel');
+    const isOpen = await this.testSubjects.waitForExists('inspectorPanel');
     if (isOpen) return;
 
     await this.clickSelectedTabMenuItem('unifiedTabs_tabMenuItem_inspect');
@@ -1343,7 +1343,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async enterInlineEditing() {
-    const isAlreadyActive = await this.testSubjects.exists(
+    const isAlreadyActive = await this.testSubjects.waitForExists(
       'discoverEmbeddableInlineEditSelectTabAction'
     );
     if (!isAlreadyActive) {

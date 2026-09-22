@@ -61,7 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should close the inspector when navigating away from Lens', async () => {
       await visualize.navigateToNewVisualization();
-      expect(await testSubjects.exists('inspectorPanel')).to.be(false);
+      expect(await testSubjects.waitForExists('inspectorPanel')).to.be(false);
     });
   });
 }

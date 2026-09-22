@@ -56,7 +56,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualBuilder.setFieldForAggregation('bytes');
       const isFieldForAggregationValid = await visualBuilder.checkFieldForAggregationValidity();
       expect(isFieldForAggregationValid).to.be(true);
-      expect(await testSubjects.exists('visualization-error-text')).to.be(false);
+      expect(await testSubjects.waitForExists('visualization-error-text')).to.be(false);
     });
 
     it('should render from a tsdb dataView supported tsdb field type', async () => {
@@ -64,7 +64,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualBuilder.setFieldForAggregation('bytes_gauge');
       const isFieldForAggregationValid = await visualBuilder.checkFieldForAggregationValidity();
       expect(isFieldForAggregationValid).to.be(true);
-      expect(await testSubjects.exists('visualization-error-text')).to.be(false);
+      expect(await testSubjects.waitForExists('visualization-error-text')).to.be(false);
     });
   });
 }

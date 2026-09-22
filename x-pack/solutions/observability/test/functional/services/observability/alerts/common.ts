@@ -200,7 +200,7 @@ export function ObservabilityAlertsCommonProvider({
     await reasonMessageLink.click();
     await retry.waitFor(
       'flyout open',
-      async () => await testSubjects.exists(ALERTS_FLYOUT_SELECTOR, { timeout: 2500 })
+      async () => await testSubjects.waitForExists(ALERTS_FLYOUT_SELECTOR, { timeout: 2500 })
     );
   });
 
@@ -245,7 +245,7 @@ export function ObservabilityAlertsCommonProvider({
   // Cell actions
 
   const filterForValueButtonExists = async () => {
-    return await testSubjects.exists(FILTER_FOR_VALUE_BUTTON_SELECTOR);
+    return await testSubjects.waitForExists(FILTER_FOR_VALUE_BUTTON_SELECTOR);
   };
 
   const getFilterForValueButton = async () => {
@@ -312,13 +312,13 @@ export function ObservabilityAlertsCommonProvider({
   const alertDataHasLoaded = async () => {
     await retry.waitFor(
       'Alert Table is loaded',
-      async () => await testSubjects.exists('alertsTableIsLoaded', { timeout: 2500 })
+      async () => await testSubjects.waitForExists('alertsTableIsLoaded', { timeout: 2500 })
     );
   };
 
   // Date picker
   const getTimeRange = async () => {
-    if (await testSubjects.exists('dateRangePickerControlButton', { timeout: 2000 })) {
+    if (await testSubjects.waitForExists('dateRangePickerControlButton', { timeout: 2000 })) {
       // New DateRangePicker renders the humanised range as the control button's
       // visible text (the `dateRangePickerValueDisplay` node), e.g. "Last 10 days"
       // or "30 days ago → 10 days ago". The button has no `value` attribute; the
@@ -326,7 +326,9 @@ export function ObservabilityAlertsCommonProvider({
       return await testSubjects.getVisibleText('dateRangePickerValueDisplay');
     }
 
-    const isAbsoluteRange = await testSubjects.exists('superDatePickerstartDatePopoverButton');
+    const isAbsoluteRange = await testSubjects.waitForExists(
+      'superDatePickerstartDatePopoverButton'
+    );
 
     if (isAbsoluteRange) {
       const startText = await testSubjects.getVisibleText('superDatePickerstartDatePopoverButton');

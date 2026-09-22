@@ -153,7 +153,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       );
     },
     async maybeClickOnAlertTab() {
-      if (await testSubjects.exists('ruleDetailsTabbedContent')) {
+      if (await testSubjects.waitForExists('ruleDetailsTabbedContent')) {
         const alertTab = await testSubjects.find('ruleAlertListTab');
         await alertTab.click();
       }

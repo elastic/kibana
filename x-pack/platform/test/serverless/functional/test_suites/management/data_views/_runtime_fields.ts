@@ -49,7 +49,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         log.debug('check that field preview is rendered');
-        expect(await testSubjects.exists('fieldPreviewItem', { timeout: 1500 })).to.be(true);
+        expect(await testSubjects.waitForExists('fieldPreviewItem', { timeout: 1500 })).to.be(true);
 
         await PageObjects.settings.clickSaveField();
 

@@ -81,7 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.console.clickClearOutput();
 
       // Check that after clearing the output, the empty state is shown
-      expect(await testSubjects.exists('consoleOutputPanelEmptyState')).to.be.ok();
+      expect(await testSubjects.waitForExists('consoleOutputPanelEmptyState')).to.be.ok();
     });
   });
 }

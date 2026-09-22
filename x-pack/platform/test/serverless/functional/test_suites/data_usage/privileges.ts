@@ -24,7 +24,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     if (expectedVisible) {
       await pageObjects.svlManagementPage.assertDataUsageManagementCardExists();
       await pageObjects.common.navigateToApp(dataUsageAppUrl);
-      await testSubjects.exists('data-usage-page');
+      await testSubjects.waitForExists('data-usage-page');
     } else {
       await pageObjects.svlManagementPage.assertDataUsageManagementCardDoesNotExist();
       await pageObjects.common.navigateToApp(dataUsageAppUrl);

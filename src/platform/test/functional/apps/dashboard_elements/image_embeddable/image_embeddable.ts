@@ -44,7 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // create an image embeddable
       await dashboardAddPanel.openAddPanelFlyout();
       await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Image');
-      await testSubjects.exists(`createImageEmbeddableFlyout`);
+      await testSubjects.waitForExists(`createImageEmbeddableFlyout`);
       await common.setFileInputPath(require.resolve('./elastic_logo.png'));
       await testSubjects.clickWhenNotDisabled(`imageEmbeddableEditorSave`);
 

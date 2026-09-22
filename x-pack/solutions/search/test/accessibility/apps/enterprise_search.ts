@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('loads the search home page', async function () {
-        await testSubjects.exists('search-homepage');
+        await testSubjects.waitForExists('search-homepage');
       });
     });
 

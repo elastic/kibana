@@ -95,7 +95,7 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
     });
 
     afterEach(async () => {
-      if (await testSubjects.exists('exportDerivativeFlyout-scheduledReports')) {
+      if (await testSubjects.waitForExists('exportDerivativeFlyout-scheduledReports')) {
         await testSubjects.click('euiFlyoutCloseButton');
       }
       await toasts.dismissIfExists();

@@ -104,7 +104,7 @@ export class FilterBarService extends FtrService {
       .filter(Boolean)
       .join(' & ');
 
-    return this.testSubjects.exists(dataSubj, { allowHidden: true });
+    return this.testSubjects.waitForExists(dataSubj, { allowHidden: true });
   }
 
   public async hasFilterWithId(
@@ -125,7 +125,7 @@ export class FilterBarService extends FtrService {
     ]
       .filter(Boolean)
       .join(' & ');
-    return this.testSubjects.exists(dataSubj, { allowHidden: true });
+    return this.testSubjects.waitForExists(dataSubj, { allowHidden: true });
   }
 
   /**
@@ -380,9 +380,12 @@ export class FilterBarService extends FtrService {
    * Closes field editor modal window
    */
   public async ensureFieldEditorModalIsClosed(): Promise<void> {
-    const cancelSaveFilterModalButtonExists = await this.testSubjects.exists('cancelSaveFilter', {
-      timeout: 1000,
-    });
+    const cancelSaveFilterModalButtonExists = await this.testSubjects.waitForExists(
+      'cancelSaveFilter',
+      {
+        timeout: 1000,
+      }
+    );
     if (cancelSaveFilterModalButtonExists) {
       await this.testSubjects.click('cancelSaveFilter');
     }

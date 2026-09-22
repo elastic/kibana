@@ -39,7 +39,7 @@ export class DashboardPanelActionsService extends FtrService {
   private readonly dashboard = this.ctx.getPageObject('dashboard');
 
   async getContainerTopOffset() {
-    const existsDashboardContainer = await this.testSubjects.exists('dashboardContainer');
+    const existsDashboardContainer = await this.testSubjects.waitForExists('dashboardContainer');
     if (existsDashboardContainer) {
       return this.getDashboardContainerTopOffset();
     }
@@ -110,7 +110,7 @@ export class DashboardPanelActionsService extends FtrService {
 
   async openContextMenu(wrapper?: WebElementWrapper) {
     this.log.debug(`openContextMenu(${wrapper}`);
-    const open = await this.testSubjects.exists('embeddablePanelContextMenuOpen');
+    const open = await this.testSubjects.waitForExists('embeddablePanelContextMenuOpen');
     if (!open) await this.toggleContextMenu(wrapper);
     await this.expectContextMenuToBeOpen();
   }
@@ -150,7 +150,9 @@ export class DashboardPanelActionsService extends FtrService {
     await this.clickPanelAction(EDIT_PANEL_DATA_TEST_SUBJ);
     await this.header.waitUntilLoadingHasFinished();
     await this.testSubjects.clickWhenNotDisabledWithoutRetry(EDIT_IN_LENS_EDITOR_DATA_TEST_SUBJ);
-    const isConfirmModalVisible = await this.testSubjects.exists('confirmModalConfirmButton');
+    const isConfirmModalVisible = await this.testSubjects.waitForExists(
+      'confirmModalConfirmButton'
+    );
     if (isConfirmModalVisible) {
       await this.testSubjects.clickWhenNotDisabledWithoutRetry('confirmModalConfirmButton', {
         timeout: 20000,
@@ -279,7 +281,7 @@ export class DashboardPanelActionsService extends FtrService {
     this.log.debug(`panelActionExists(${testSubject})`);
     return wrapper
       ? await this.testSubjects.descendantExists(testSubject, wrapper)
-      : await this.testSubjects.exists(testSubject, { allowHidden: true });
+      : await this.testSubjects.waitForExists(testSubject, { allowHidden: true });
   }
 
   async panelActionExistsByTitle(testSubject: string, title = '') {
@@ -395,7 +397,7 @@ export class DashboardPanelActionsService extends FtrService {
   async canConvertToLens(wrapper?: WebElementWrapper, { timeout = 500 } = {}) {
     this.log.debug('canConvertToLens');
     await this.openContextMenu(wrapper);
-    return await this.testSubjects.exists(CONVERT_TO_LENS_TEST_SUBJ, { timeout });
+    return await this.testSubjects.waitForExists(CONVERT_TO_LENS_TEST_SUBJ, { timeout });
   }
 
   async canConvertToLensByTitle(title = '', options?: { timeout?: number }) {

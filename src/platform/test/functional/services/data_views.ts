@@ -106,7 +106,7 @@ export class DataViewsService extends FtrService {
   async isAdHoc() {
     const dataView = await this.getSelectedName();
     await this.testSubjects.click('*dataView-switch-link');
-    const hasBadge = await this.testSubjects.exists(`dataViewItemTempBadge-${dataView}`);
+    const hasBadge = await this.testSubjects.waitForExists(`dataViewItemTempBadge-${dataView}`);
     await this.testSubjects.click('*dataView-switch-link');
     return hasBadge;
   }
@@ -117,7 +117,7 @@ export class DataViewsService extends FtrService {
   async isManaged() {
     const dataView = await this.getSelectedName();
     await this.testSubjects.click('*dataView-switch-link');
-    const hasBadge = await this.testSubjects.exists(`dataViewItemManagedBadge-${dataView}`);
+    const hasBadge = await this.testSubjects.waitForExists(`dataViewItemManagedBadge-${dataView}`);
     await this.testSubjects.click('*dataView-switch-link');
     return hasBadge;
   }
@@ -196,7 +196,7 @@ export class DataViewsService extends FtrService {
       await this.comboBox.set('timestampField', newTimeField);
     }
     await this.testSubjects.click('saveIndexPatternButton');
-    if (await this.testSubjects.exists('confirmModalConfirmButton')) {
+    if (await this.testSubjects.waitForExists('confirmModalConfirmButton')) {
       await this.testSubjects.click('confirmModalConfirmButton');
     }
   }

@@ -137,7 +137,7 @@ export function MachineLearningFieldStatsFlyoutProvider(
     },
 
     async ensureFieldStatsFlyoutClosed() {
-      const flyoutIsOpen = await testSubjects.exists('mlFieldStatsFlyout');
+      const flyoutIsOpen = await testSubjects.waitForExists('mlFieldStatsFlyout');
       if (flyoutIsOpen) {
         await retry.tryForTime(2000, async () => {
           await testSubjects.click('mlFieldStatsFlyout > euiFlyoutCloseButton');

@@ -78,7 +78,7 @@ export class DashboardPageLinks extends FtrService {
 
   public async findDraggableLinkByIndex(index: number) {
     this.log.debug(`find the draggable link element at index ${index}`);
-    await this.testSubjects.exists('links--panelEditor--flyout');
+    await this.testSubjects.waitForExists('links--panelEditor--flyout');
     const linksFormRow = await this.testSubjects.find('links--panelEditor--linksAreaDroppable');
     return await linksFormRow.findByCssSelector(
       `[data-test-subj="links--panelEditor--draggableLink"]:nth-child(${index})`

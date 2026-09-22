@@ -59,7 +59,7 @@ export function DetectionsPageObjectProvider({ getService, getPageObjects }: Ftr
     async openImportQueryModal(): Promise<void> {
       const element = await testSubjects.find('importQueryFromSavedTimeline');
       await element.click(500);
-      await testSubjects.exists('open-timeline-modal-body-filter-default');
+      await testSubjects.waitForExists('open-timeline-modal-body-filter-default');
     },
 
     async viewTemplatesInImportQueryModal(): Promise<void> {
@@ -81,7 +81,7 @@ export function DetectionsPageObjectProvider({ getService, getPageObjects }: Ftr
     async openAddFilterPopover(): Promise<void> {
       const addButtons = await testSubjects.findAll('addFilter');
       await addButtons[1].click();
-      await testSubjects.exists('saveFilter');
+      await testSubjects.waitForExists('saveFilter');
     },
 
     async closeAddFilterPopover(): Promise<void> {

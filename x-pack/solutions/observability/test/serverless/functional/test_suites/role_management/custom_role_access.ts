@@ -89,8 +89,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await pageObjects.common.navigateToApp('discover');
       await pageObjects.timePicker.setDefaultAbsoluteRange();
       await pageObjects.header.waitUntilLoadingHasFinished();
-      expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
-      expect(await testSubjects.exists('discoverQueryHits')).to.be(true);
+      await testSubjects.existOrFail('unifiedHistogramChart');
+      await testSubjects.existOrFail('discoverQueryHits');
     });
 
     it('should access console with API key', async () => {

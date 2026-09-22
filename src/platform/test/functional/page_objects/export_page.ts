@@ -17,7 +17,7 @@ export class ExportPageObject extends FtrService {
   private readonly browser = this.ctx.getService('browser');
 
   async exportButtonExists() {
-    return await this.testSubjects.exists('exportTopNavButton');
+    return await this.testSubjects.waitForExists('exportTopNavButton');
   }
 
   async exportButtonMissingOrFail() {
@@ -26,15 +26,15 @@ export class ExportPageObject extends FtrService {
 
   async clickExportTopNavButton(): Promise<boolean> {
     // First check if export button is directly visible
-    if (await this.testSubjects.exists('exportTopNavButton')) {
+    if (await this.testSubjects.waitForExists('exportTopNavButton')) {
       await this.testSubjects.click('exportTopNavButton');
       return true;
     }
 
     // If not visible, try the overflow menu
-    if (await this.testSubjects.exists('app-menu-overflow-button')) {
+    if (await this.testSubjects.waitForExists('app-menu-overflow-button')) {
       await this.testSubjects.click('app-menu-overflow-button');
-      if (await this.testSubjects.exists('exportTopNavButton')) {
+      if (await this.testSubjects.waitForExists('exportTopNavButton')) {
         await this.testSubjects.click('exportTopNavButton');
         return true;
       }
@@ -44,7 +44,7 @@ export class ExportPageObject extends FtrService {
   }
 
   async isExportPopoverOpen() {
-    return await this.testSubjects.exists('exportPopoverPanel');
+    return await this.testSubjects.waitForExists('exportPopoverPanel');
   }
 
   async isPopoverItemEnabled(label: string) {
@@ -86,7 +86,7 @@ export class ExportPageObject extends FtrService {
   }
 
   async isExportFlyoutOpen() {
-    return await this.testSubjects.exists('exportItemDetailsFlyout');
+    return await this.testSubjects.waitForExists('exportItemDetailsFlyout');
   }
 
   async closeExportFlyout() {

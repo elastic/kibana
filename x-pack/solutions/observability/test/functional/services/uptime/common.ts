@@ -22,7 +22,7 @@ export function UptimeCommonProvider({ getService, getPageObjects }: FtrProvider
 
   return {
     async assertExists(key: string) {
-      if (!(await testSubjects.exists(key))) {
+      if (!(await testSubjects.waitForExists(key))) {
         throw new Error(`Couldn't find expected element with key "${key}".`);
       }
     },
@@ -121,7 +121,7 @@ export function UptimeCommonProvider({ getService, getPageObjects }: FtrProvider
       });
     },
     async hasMappingsError() {
-      return testSubjects.exists('xpack.synthetics.mappingsErrorPage');
+      return testSubjects.waitForExists('xpack.synthetics.mappingsErrorPage');
     },
 
     async deleteUptimeSettingsObject() {

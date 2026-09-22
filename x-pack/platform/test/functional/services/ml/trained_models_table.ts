@@ -198,7 +198,9 @@ export function TrainedModelsTableProvider(
 
     public async doesModelCollapsedActionsButtonExist(modelId: string): Promise<boolean> {
       await headerPage.waitUntilLoadingHasFinished();
-      return await testSubjects.exists(this.rowSelector(modelId, 'euiCollapsedItemActionsButton'));
+      return await testSubjects.waitForExists(
+        this.rowSelector(modelId, 'euiCollapsedItemActionsButton')
+      );
     }
 
     public async toggleActionsContextMenu(modelId: string, expectOpen = true) {
@@ -217,7 +219,7 @@ export function TrainedModelsTableProvider(
     }
 
     public async assertModelDeleteActionButtonExists(modelId: string, expectedValue: boolean) {
-      const actionsExists = await testSubjects.exists(
+      const actionsExists = await testSubjects.waitForExists(
         this.rowSelector(modelId, 'mlModelsTableRowDeleteAction')
       );
       expect(actionsExists).to.eql(
@@ -229,7 +231,7 @@ export function TrainedModelsTableProvider(
     }
 
     public async assertModelDeployActionButtonExists(modelId: string, expectedValue: boolean) {
-      const actionsExists = await testSubjects.exists(
+      const actionsExists = await testSubjects.waitForExists(
         this.rowSelector(modelId, 'mlModelsTableRowDeployAction')
       );
 
@@ -242,7 +244,7 @@ export function TrainedModelsTableProvider(
     }
 
     public async assertModelAnalyzeDataDriftButtonExists(modelId: string, expectedValue: boolean) {
-      const actionsExists = await testSubjects.exists(
+      const actionsExists = await testSubjects.waitForExists(
         this.rowSelector(modelId, 'mlModelsAnalyzeDataDriftAction')
       );
 
@@ -307,7 +309,7 @@ export function TrainedModelsTableProvider(
     }
 
     public async assertModelTestButtonExists(modelId: string, expectedValue: boolean) {
-      const actionExists = await testSubjects.exists(
+      const actionExists = await testSubjects.waitForExists(
         this.rowSelector(modelId, 'mlModelsTableRowTestAction')
       );
       expect(actionExists).to.eql(

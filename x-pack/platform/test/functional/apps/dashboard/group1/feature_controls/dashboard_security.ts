@@ -214,7 +214,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           true,
           false
         );
-        const contextMenuPanelTitleButton = await testSubjects.exists(
+        const contextMenuPanelTitleButton = await testSubjects.waitForExists(
           'contextMenuPanelTitleButton'
         );
         if (contextMenuPanelTitleButton) {

@@ -102,7 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         for (let i = 0; i < 3; i++) {
           await PageObjects.settings.editScriptedField(scriptedPainlessFieldName);
-          const fieldSaveButton = await testSubjects.exists('fieldSaveButton');
+          const fieldSaveButton = await testSubjects.waitForExists('fieldSaveButton');
           expect(fieldSaveButton).to.be(true);
           await PageObjects.settings.clickSaveScriptedField();
         }

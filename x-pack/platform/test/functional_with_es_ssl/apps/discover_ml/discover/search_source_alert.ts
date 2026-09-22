@@ -475,7 +475,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('selectDataViewExpression');
       await testSubjects.existOrFail('indexPattern-switcher--input');
       await testSubjects.click('indexPattern-switcher--input');
-      if (await testSubjects.exists('clearSearchButton')) {
+      if (await testSubjects.waitForExists('clearSearchButton')) {
         await testSubjects.click('clearSearchButton');
         await testSubjects.missingOrFail('clearSearchButton');
       }
@@ -708,7 +708,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await testSubjects.click('selectDataViewExpression');
       await testSubjects.click('indexPattern-switcher--input');
-      if (await testSubjects.exists('clearSearchButton')) {
+      if (await testSubjects.waitForExists('clearSearchButton')) {
         await testSubjects.click('clearSearchButton');
       }
       const dataViewsElem = await testSubjects.find('euiSelectableList');

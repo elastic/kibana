@@ -32,7 +32,7 @@ export class AppsMenuService extends FtrService {
 
   private async isGlobalLoadingIndicatorVisible() {
     this.log.debug('isGlobalLoadingIndicatorVisible');
-    return await this.testSubjects.exists('globalLoadingIndicator', { timeout: 1500 });
+    return await this.testSubjects.waitForExists('globalLoadingIndicator', { timeout: 1500 });
   }
 
   private async awaitGlobalLoadingIndicatorHidden() {
@@ -57,10 +57,10 @@ export class AppsMenuService extends FtrService {
   }
 
   public async openCollapsibleNav() {
-    if (!(await this.testSubjects.exists('collapsibleNav'))) {
+    if (!(await this.testSubjects.waitForExists('collapsibleNav'))) {
       await this.testSubjects.click('toggleNavButton');
     }
-    await this.testSubjects.exists('collapsibleNav');
+    await this.testSubjects.waitForExists('collapsibleNav');
   }
 
   /**
