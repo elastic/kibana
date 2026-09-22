@@ -84,13 +84,11 @@ const SCOUT_TEST_SPACE_ID = /^test-space-\d+$/;
 const isSuiteOwnedSpace = (spaceId: string): boolean =>
   spaceId === DEFAULT_SPACE_ID || SCOUT_TEST_SPACE_ID.test(spaceId);
 
-const isSpacesUnavailableError = (error: unknown): boolean => {
-  if (typeof error === 'object' && error !== null && 'response' in error) {
-    const status = (error as { response?: { status?: number } }).response?.status;
-    return status === 404;
-  }
-  return false;
-};
+const isSpacesUnavailableError = (error: unknown): boolean =>
+  typeof error === 'object' &&
+  error !== null &&
+  'status' in error &&
+  (error as { status?: number }).status === 404;
 
 const listOwnedSpaceIds = async (kbnClient: KbnClient): Promise<string[]> => {
   try {
