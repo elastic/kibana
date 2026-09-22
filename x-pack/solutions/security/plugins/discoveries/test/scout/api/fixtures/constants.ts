@@ -36,17 +36,6 @@ export const MONITORING_ROUTES = {
     `internal/attack_discovery/workflow/${workflowId}/execution/${executionId}`,
 } as const;
 
-/**
- * Public attack discovery schedule API routes in elastic_assistant.
- * Used by isolation tests to verify tag-based separation.
- */
-export const PUBLIC_SCHEDULE_ROUTES = {
-  CREATE: 'api/attack_discovery/schedules',
-  DELETE: (id: string) => `api/attack_discovery/schedules/${id}`,
-  FIND: 'api/attack_discovery/schedules/_find',
-  GET: (id: string) => `api/attack_discovery/schedules/${id}`,
-} as const;
-
 export const SCHEDULE_TAGS = [...tags.stateful.classic, ...tags.serverless.security.complete];
 
 /**

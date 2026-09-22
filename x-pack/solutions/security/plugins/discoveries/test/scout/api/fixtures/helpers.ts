@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { INTERNAL_API_HEADERS, PUBLIC_API_HEADERS } from '@kbn/scout-security';
+import { INTERNAL_API_HEADERS } from '@kbn/scout-security';
 import type { ApiClientFixture, KibanaRole } from '@kbn/scout-security';
 import type { DiscoveriesApi } from '@kbn/security-solution-test-api-clients/scout';
 import type { CreateAttackDiscoveryScheduleRequestBodyInput } from '@kbn/discoveries-schemas/schemas/routes/post/schedules/create_schedule_route.gen';
@@ -16,7 +16,6 @@ import {
   ATTACK_DISCOVERY_WORKFLOWS_FEATURE_FLAG,
   COMMON_HEADERS,
   MONITORING_ROUTES,
-  PUBLIC_SCHEDULE_ROUTES,
 } from './constants';
 
 /**
@@ -124,31 +123,6 @@ export const getSimpleWorkflowSchedule = (
       alert_retrieval_mode: 'custom_query',
       alert_retrieval_workflow_ids: [],
     },
-  },
-  schedule: {
-    interval: '24h',
-  },
-  ...overrides,
-});
-
-/**
- * Returns a minimal valid schedule body for the public API.
- * The public API uses camelCase inside api_config and has no workflow_config.
- */
-export const getSimplePublicSchedule = (
-  overrides: Record<string, unknown> = {}
-): Record<string, unknown> => ({
-  actions: [],
-  enabled: false,
-  name: 'Test public schedule',
-  params: {
-    alerts_index_pattern: '.alerts-security.alerts-default',
-    api_config: {
-      actionTypeId: '.gen-ai',
-      connectorId: 'test-connector-id',
-      name: 'Test connector',
-    },
-    size: 20,
   },
   schedule: {
     interval: '24h',
@@ -265,53 +239,6 @@ export const getMonitoringApis = (
 };
 
 /**
- * Convenience wrapper around the public attack discovery schedule API routes.
- * Used by isolation tests to create/find schedules via the public API.
- */
-export const getPublicSchedulesApis = (
-  apiClient: ApiClientFixture,
-  headers: Record<string, string>
-) => {
-  const defaultHeaders = {
-    ...headers,
-    ...COMMON_HEADERS,
-    ...PUBLIC_API_HEADERS,
-  };
-
-  return {
-    createSchedule: (body: Record<string, unknown>) =>
-      apiClient.post(PUBLIC_SCHEDULE_ROUTES.CREATE, {
-        body,
-        headers: defaultHeaders,
-        responseType: 'json',
-      }),
-
-    deleteSchedule: (id: string) =>
-      apiClient.delete(PUBLIC_SCHEDULE_ROUTES.DELETE(id), {
-        headers: defaultHeaders,
-        responseType: 'json',
-      }),
-
-    findSchedules: (query: Record<string, unknown> = {}) =>
-      apiClient.get(
-        `${PUBLIC_SCHEDULE_ROUTES.FIND}?${new URLSearchParams(
-          query as Record<string, string>
-        ).toString()}`,
-        {
-          headers: defaultHeaders,
-          responseType: 'json',
-        }
-      ),
-
-    getSchedule: (id: string) =>
-      apiClient.get(PUBLIC_SCHEDULE_ROUTES.GET(id), {
-        headers: defaultHeaders,
-        responseType: 'json',
-      }),
-  };
-};
-
-/**
  * Deletes every workflow schedule in the given space. Only ever pointed at the worker's own
  * `scheduleSpace`, so it cannot touch schedules owned by other suites. Call this in `afterEach`.
  */
@@ -352,21 +279,4 @@ const assertCleanupStatus = (
       response.body
     )}`
   );
-};
-
-/**
- * Deletes all public attack discovery schedules created during test runs.
- */
-export const deleteAllPublicSchedules = async (
-  apiClient: ApiClientFixture,
-  headers: Record<string, string>
-): Promise<void> => {
-  const apis = getPublicSchedulesApis(apiClient, headers);
-  const findResult = await apis.findSchedules({ per_page: '100' });
-  const body = findResult.body as { data?: Array<{ id: string }> };
-  const schedules = body.data ?? [];
-
-  for (const schedule of schedules) {
-    await apis.deleteSchedule(schedule.id);
-  }
 };
