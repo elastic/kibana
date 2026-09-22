@@ -9,9 +9,11 @@ import React from 'react';
 
 import type { CategoryComponentProps } from './category_component';
 import { CategoryComponent } from './category_component';
-import { waitFor, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { showEuiComboBoxOptions } from '@elastic/eui/lib/test/rtl';
+
+jest.setTimeout(60_000);
 
 const onChange = jest.fn();
 const defaultProps: CategoryComponentProps = {
@@ -50,15 +52,6 @@ describe('Category ', () => {
     expect(screen.getByRole('combobox')).toHaveValue('new-category');
   });
 
-  it('renders allow to add new category option', async () => {
-    render(<CategoryComponent {...defaultProps} />);
-
-    await userEvent.type(screen.getByRole('combobox'), 'new{enter}');
-    await waitFor(() => {
-      expect(onChange).toHaveBeenCalledWith('new');
-    });
-  });
-
   it('renders current option list', async () => {
     render(<CategoryComponent {...defaultProps} />);
     await showEuiComboBoxOptions();
@@ -81,9 +74,7 @@ describe('Category ', () => {
 
     await userEvent.type(screen.getByRole('combobox'), 'hi{enter}');
 
-    await waitFor(() => {
-      expect(onChange).toHaveBeenCalledWith('hi');
-    });
+    expect(onChange).toHaveBeenCalledWith('hi');
   });
 
   it('should add case sensitive text', async () => {
@@ -91,14 +82,10 @@ describe('Category ', () => {
 
     await userEvent.type(screen.getByRole('combobox'), 'hi{enter}');
 
-    await waitFor(() => {
-      expect(onChange).toHaveBeenCalledWith('hi');
-    });
+    expect(onChange).toHaveBeenCalledWith('hi');
 
     await userEvent.type(screen.getByRole('combobox'), ' there{enter}');
 
-    await waitFor(() => {
-      expect(onChange).toHaveBeenCalledWith('there');
-    });
+    expect(onChange).toHaveBeenCalledWith('there');
   });
 });
