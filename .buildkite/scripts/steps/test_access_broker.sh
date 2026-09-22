@@ -43,7 +43,7 @@ OIDC_TOKEN="$(
     --claim "organization_slug,pipeline_id,build_id,cluster_id,queue_id,queue_key"
 )"
 
-echo "--- Calling access-broker LiteLLM proxy ($MODEL)"
+echo "--- Calling access-broker OpenRouter proxy ($MODEL)"
 RESPONSE_FILE="$(mktemp)"
 HTTP_STATUS="$(
   curl --silent --show-error \
@@ -53,7 +53,7 @@ HTTP_STATUS="$(
     --header "Authorization: Bearer $OIDC_TOKEN" \
     --header "Content-Type: application/json" \
     --data @- \
-    "https://access-broker.kibana.dev/proxy/kibana.litellm/v1/chat/completions" <<JSON
+    "https://access-broker.kibana.dev/proxy/kibana.openrouter/v1/chat/completions" <<JSON
 {
   "model": "$MODEL",
   "messages": [
