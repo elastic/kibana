@@ -6,6 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
+import type { SandboxPluginStart, SandboxSession } from '@kbn/sandbox-plugin/server';
 import { hydrateCortexWorkspace } from '../cortex/register_cortex';
 import { cortexHydrateStepDefinition } from './cortex_hydrate';
 
@@ -15,8 +16,13 @@ jest.mock('../cortex/register_cortex', () => ({
 
 describe('cortexHydrateStepDefinition', () => {
   const esClient = { search: jest.fn() };
-  const apiClient = { writeFiles: jest.fn(), mkdirs: jest.fn() };
   const getScopedEsClient = jest.fn().mockReturnValue(esClient);
+  const mockSession = { writeFiles: jest.fn(), mkdirs: jest.fn() } as unknown as SandboxSession;
+
+  const makeSandboxStart = (): SandboxPluginStart => ({
+    getSession: jest.fn(),
+    getSessionForSpace: jest.fn().mockReturnValue(mockSession),
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -41,43 +47,46 @@ describe('cortexHydrateStepDefinition', () => {
     } as never);
 
   it('hydrates the sandbox with the request-scoped ES client', async () => {
+    const sandboxStart = makeSandboxStart();
     const definition = cortexHydrateStepDefinition({
-      getConnectionManager: () => ({ apiClient } as never),
+      getSandboxStart: () => sandboxStart,
       logger: loggerMock.create(),
     });
 
     const result = await definition.handler(createContext('conv-1'));
 
+    expect(sandboxStart.getSessionForSpace).toHaveBeenCalledWith('default', 'conv-1');
     expect(hydrateCortexWorkspace).toHaveBeenCalledWith({
-      apiClient,
-      conversationId: 'default__conv-1',
+      session: mockSession,
       esClient,
       spaceId: 'default',
       signal: expect.any(AbortSignal),
       logger: expect.anything(),
     });
-    expect(result).toEqual({ output: { conversation_id: 'default__conv-1' } });
+    expect(result).toEqual({ output: { conversation_id: 'conv-1' } });
   });
 
-  // The sandbox tools key the workspace on `<space>:<conversation>`; hydrating the raw id would
-  // write the wiki into a workspace the agent never reads.
+  // The sandbox session is keyed on (spaceId, conversationId); the step passes the workflow
+  // spaceId so the session matches the one the agent tools will resolve from the request.
   it('scopes the workspace to the space the workflow runs in', async () => {
+    const sandboxStart = makeSandboxStart();
     const definition = cortexHydrateStepDefinition({
-      getConnectionManager: () => ({ apiClient } as never),
+      getSandboxStart: () => sandboxStart,
       logger: loggerMock.create(),
     });
 
     const result = await definition.handler(createContext('conv-1', 'marketing'));
 
+    expect(sandboxStart.getSessionForSpace).toHaveBeenCalledWith('marketing', 'conv-1');
     expect(hydrateCortexWorkspace).toHaveBeenCalledWith(
-      expect.objectContaining({ conversationId: 'marketing__conv-1' })
+      expect.objectContaining({ spaceId: 'marketing' })
     );
-    expect(result).toEqual({ output: { conversation_id: 'marketing__conv-1' } });
+    expect(result).toEqual({ output: { conversation_id: 'conv-1' } });
   });
 
   it('throws when the sandbox is not configured', async () => {
     const definition = cortexHydrateStepDefinition({
-      getConnectionManager: () => undefined,
+      getSandboxStart: () => undefined,
       logger: loggerMock.create(),
     });
 

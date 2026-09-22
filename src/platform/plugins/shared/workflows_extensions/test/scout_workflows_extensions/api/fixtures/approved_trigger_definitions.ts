@@ -39,6 +39,18 @@
  */
 export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: string }> = [
   {
+    id: 'ai.attachmentAdded',
+    schemaHash: '843b39ae3d48c95ab9b31c0f0c88be551b2498700535062b186aca8114c783bf',
+  },
+  {
+    id: 'ai.attachmentDeleted',
+    schemaHash: 'e89135cede7bc011a830318bbaec7e29709e72d41a71e4a04d747fe3cc6549b6',
+  },
+  {
+    id: 'ai.attachmentUpdated',
+    schemaHash: '4725f1ac547f598dbef94ac23d8bf667a75cdba14e64697126e2fd10263cd687',
+  },
+  {
     id: 'ai.conversation.metadataUpdated',
     schemaHash: '3ddfb053989618f32071989376a39b001b3ed1bead0e81bf9f48c20253a53c57',
   },

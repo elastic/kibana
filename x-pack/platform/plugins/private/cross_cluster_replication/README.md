@@ -4,10 +4,10 @@
 
 You can run a local cluster and simulate a remote cluster within a single Kibana directory.
 
-1. Ensure Kibana isn't running so it doesn't load up any data into your cluster. Run `yarn es snapshot --license=trial` to install a fresh snapshot. Wait for ES to finish setting up and activate the license.
+1. Ensure Kibana isn't running so it doesn't load up any data into your cluster. Run `pnpm es snapshot --license=trial` to install a fresh snapshot. Wait for ES to finish setting up and activate the license.
 2. Create a "remote" copy of your ES snapshot by running: `cp -R .es/8.0.0 .es/8.0.0-2`.
 4. Start your "local" cluster by running `.es/8.0.0/bin/elasticsearch`.
-5. Run `yarn start` to start Kibana so that it connects to the "local" cluster.
+5. Run `pnpm start` to start Kibana so that it connects to the "local" cluster.
 6. Start your "remote" cluster by running `.es/8.0.0-2/bin/elasticsearch -E cluster.name=europe -E transport.port=9400`.
 7. Index a document into your "remote" cluster by running `curl -X PUT http://elastic:changeme@localhost:9201/my-leader-index --data '{"settings":{"number_of_shards":1,"soft_deletes.enabled":true}}' --header "Content-Type: application/json"`. Note that these settings are required for testing auto-follow pattern conflicts errors (see below).
 
