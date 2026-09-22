@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ListPageTestProviders } from '../../test_utils/test_providers';
 import { ActionPoliciesListHeader } from './action_policies_list_header';
@@ -42,18 +42,20 @@ describe('ActionPoliciesListHeader', () => {
     mockPhase = 'populated';
   });
 
-  it('renders the create split button when the user can write and the list is populated', () => {
+  it('renders the create split button when the user can write and the list is populated', async () => {
     renderHeader();
 
-    expect(screen.getByTestId('createActionPolicyButton')).toBeInTheDocument();
-    expect(screen.getByTestId('createActionPolicyButton-secondary-button')).toBeInTheDocument();
+    expect(await screen.findByTestId('createActionPolicyButton')).toBeInTheDocument();
+    expect(
+      await screen.findByTestId('createActionPolicyButton-secondary-button')
+    ).toBeInTheDocument();
   });
 
   it('calls onCreatePolicy when the primary create button is clicked', async () => {
     const user = userEvent.setup({ delay: null });
     renderHeader();
 
-    await user.click(screen.getByTestId('createActionPolicyButton'));
+    await user.click(await screen.findByTestId('createActionPolicyButton'));
 
     expect(onCreatePolicy).toHaveBeenCalledTimes(1);
     expect(onCreateWithAgent).not.toHaveBeenCalled();
@@ -63,11 +65,10 @@ describe('ActionPoliciesListHeader', () => {
     const user = userEvent.setup({ delay: null });
     renderHeader();
 
-    await user.click(screen.getByTestId('createActionPolicyButton-secondary-button'));
-    await waitFor(() =>
-      expect(screen.getByTestId('createActionPolicyWithAgentButton')).toBeInTheDocument()
-    );
-    await user.click(screen.getByTestId('createActionPolicyWithAgentButton'));
+    await user.click(await screen.findByTestId('createActionPolicyButton-secondary-button'));
+    const agentButton = await screen.findByTestId('createActionPolicyWithAgentButton');
+    agentButton.focus();
+    await user.keyboard('{Enter}');
 
     expect(onCreateWithAgent).toHaveBeenCalledTimes(1);
     expect(onCreatePolicy).not.toHaveBeenCalled();
@@ -80,12 +81,8 @@ describe('ActionPoliciesListHeader', () => {
       createWithAgentTooltipText: 'Missing privileges',
     });
 
-    await user.click(screen.getByTestId('createActionPolicyButton-secondary-button'));
-    await waitFor(() =>
-      expect(screen.getByTestId('createActionPolicyWithAgentButton')).toBeInTheDocument()
-    );
-
-    const agentButton = screen.getByTestId('createActionPolicyWithAgentButton');
+    await user.click(await screen.findByTestId('createActionPolicyButton-secondary-button'));
+    const agentButton = await screen.findByTestId('createActionPolicyWithAgentButton');
     expect(agentButton).toBeDisabled();
 
     fireEvent.click(agentButton);
