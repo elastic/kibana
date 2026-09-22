@@ -531,6 +531,7 @@ describe('Http self client', () => {
     it('allows and safely logs self calls after authorization', async () => {
       const started = await startServer({ port: TEST_PORT });
       server = started.server;
+      (started.logger.get().debug as jest.Mock).mockClear();
       (started.logger.get().info as jest.Mock).mockClear();
 
       await started.supertest
@@ -538,27 +539,35 @@ describe('Http self client', () => {
         .set('x-kbn-self-call', 'true')
         .expect(200, { ok: true });
 
-      expect(started.logger.get().info).toHaveBeenCalledWith(
-        'Kibana self HTTP call completed',
-        expect.objectContaining({
-          event: { action: 'kibana_self_http_request' },
-          http: {
-            request: { method: 'GET' },
-            response: { status_code: 200 },
-          },
-          labels: expect.objectContaining({
-            self_http_route_template: '/self/observed_target',
-            self_http_status_class: '2xx',
+      const completedCalls = (started.logger.get().debug as jest.Mock).mock.calls.filter(
+        ([message]) => message === 'Kibana self HTTP call completed'
+      );
+      expect(completedCalls).toEqual([
+        [
+          'Kibana self HTTP call completed',
+          expect.objectContaining({
+            event: { action: 'kibana_self_http_request' },
+            http: {
+              request: { method: 'GET' },
+              response: { status_code: 200 },
+            },
+            labels: expect.objectContaining({
+              self_http_route_template: '/self/observed_target',
+              self_http_status_class: '2xx',
+            }),
           }),
-        })
-      );
-      expect(started.logger.get().info).toHaveBeenCalledTimes(1);
-      expect(JSON.stringify((started.logger.get().info as jest.Mock).mock.calls)).not.toContain(
-        'filter=raw-value'
-      );
+        ],
+      ]);
+      expect(started.logger.get().info).not.toHaveBeenCalled();
+      expect(JSON.stringify(completedCalls)).not.toContain('filter=raw-value');
 
-      (started.logger.get().info as jest.Mock).mockClear();
+      (started.logger.get().debug as jest.Mock).mockClear();
       await started.supertest.get('/self/authz_denied').set('x-kbn-self-call', 'true').expect(403);
+      expect(
+        (started.logger.get().debug as jest.Mock).mock.calls.some(
+          ([message]) => message === 'Kibana self HTTP call completed'
+        )
+      ).toBe(false);
       expect(started.logger.get().info).not.toHaveBeenCalled();
     });
 
