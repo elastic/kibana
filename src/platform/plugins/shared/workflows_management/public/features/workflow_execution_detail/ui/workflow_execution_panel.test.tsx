@@ -20,17 +20,22 @@ import {
 } from '../../../../common';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 import {
+  setExecution,
+  setStepExecutionPages,
   setStepExecutionsTotal,
-  showMoreStepExecutions,
 } from '../../../entities/workflows/store/workflow_detail/slice';
 import { createStartServicesMock } from '../../../mocks';
 import { getTestProvider } from '../../../shared/mocks/test_providers';
 
 const mockNavigateToApp = jest.fn();
+const mockGetExecutionSteps = jest.fn();
 
 jest.mock('@kbn/workflows-ui', () => ({
   ...jest.requireActual('@kbn/workflows-ui'),
   useWorkflowsCapabilities: jest.fn(),
+  WorkflowApi: jest.fn().mockImplementation(() => ({
+    getExecutionSteps: mockGetExecutionSteps,
+  })),
 }));
 
 // Mock child components
@@ -130,6 +135,7 @@ describe('WorkflowExecutionPanel', () => {
 
     const store = createMockStore(services);
     if (stepExecutionsTotal !== undefined) {
+      store.dispatch(setStepExecutionPages([[]]));
       store.dispatch(setStepExecutionsTotal(stepExecutionsTotal));
     }
 
@@ -228,81 +234,77 @@ describe('WorkflowExecutionPanel', () => {
       ).not.toBeInTheDocument();
     });
 
-    it('should request another page when Show more is clicked', async () => {
+    const loadedStep = {
+      id: 'step-1',
+      stepId: 'step-1',
+      stepType: 'console',
+      scopeStack: [],
+      workflowRunId: 'exec-123',
+      workflowId: 'workflow-123',
+      status: ExecutionStatus.COMPLETED,
+      startedAt: '2024-01-01T10:00:00Z',
+      topologicalIndex: 0,
+      globalExecutionIndex: 0,
+      stepExecutionIndex: 0,
+    };
+
+    const renderWithLoadedPages = (pages: number, total: number) => {
       const services = createStartServicesMock();
       services.application.navigateToApp = mockNavigateToApp;
       const store = createMockStore(services);
-      store.dispatch(setStepExecutionsTotal(1842));
+      store.dispatch(setExecution({ ...mockExecution, stepExecutions: [] }));
+      store.dispatch(setStepExecutionPages(Array.from({ length: pages }, () => [loadedStep])));
+      store.dispatch(setStepExecutionsTotal(total));
+      const execution = store.getState().detail.execution;
 
-      render(
-        <WorkflowExecutionPanel
-          {...defaultProps}
-          execution={{
-            ...mockExecution,
-            stepExecutions: [
-              {
-                id: 'step-1',
-                stepId: 'step-1',
-                stepType: 'console',
-                scopeStack: [],
-                workflowRunId: 'exec-123',
-                workflowId: 'workflow-123',
-                status: ExecutionStatus.COMPLETED,
-                startedAt: '2024-01-01T10:00:00Z',
-                topologicalIndex: 0,
-                globalExecutionIndex: 0,
-                stepExecutionIndex: 0,
-              },
-            ],
-          }}
-        />,
-        { wrapper: getTestProvider({ services, store }) }
-      );
+      render(<WorkflowExecutionPanel {...defaultProps} execution={execution ?? null} />, {
+        wrapper: getTestProvider({ services, store }),
+      });
+      return store;
+    };
 
-      expect(store.getState().detail.stepExecutionsPageCount).toBe(1);
+    it('should append the next page when Show more is clicked', async () => {
+      const nextStep = { ...loadedStep, id: 'step-2', stepId: 'step-2' };
+      mockGetExecutionSteps.mockResolvedValue({
+        results: [nextStep],
+        total: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE + 1,
+        page: 2,
+        size: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
+      });
+      const store = renderWithLoadedPages(1, WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE + 1);
+
+      fireEvent.click(screen.getByTestId('workflowExecutionShowMoreStepExecutionsButton'));
+
+      expect(mockGetExecutionSteps).toHaveBeenCalledWith('exec-123', {
+        page: 2,
+        size: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
+      });
+      await waitFor(() => {
+        expect(store.getState().detail.stepExecutionPages).toHaveLength(2);
+      });
+      expect(store.getState().detail.execution?.stepExecutions).toEqual([loadedStep, nextStep]);
+    });
+
+    it('should keep the loaded pages and the action when Show more fails', async () => {
+      mockGetExecutionSteps.mockRejectedValue(new Error('boom'));
+      const store = renderWithLoadedPages(1, WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE + 842);
 
       fireEvent.click(screen.getByTestId('workflowExecutionShowMoreStepExecutionsButton'));
 
       await waitFor(() => {
-        expect(store.getState().detail.stepExecutionsPageCount).toBe(2);
+        expect(mockGetExecutionSteps).toHaveBeenCalledTimes(1);
       });
+      expect(store.getState().detail.stepExecutionPages).toHaveLength(1);
+      expect(screen.getByText(/842 step executions were not loaded/)).toBeInTheDocument();
+      expect(
+        screen.getByTestId('workflowExecutionShowMoreStepExecutionsButton')
+      ).toBeInTheDocument();
     });
 
     it('should hide Show more once the page ceiling is reached', () => {
-      const services = createStartServicesMock();
-      const store = createMockStore(services);
-      store.dispatch(
-        setStepExecutionsTotal(
-          WORKFLOW_EXECUTION_STEPS_MAX_PAGE_COUNT * WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE + 500
-        )
-      );
-      for (let page = 1; page < WORKFLOW_EXECUTION_STEPS_MAX_PAGE_COUNT; page++) {
-        store.dispatch(showMoreStepExecutions());
-      }
-
-      render(
-        <WorkflowExecutionPanel
-          {...defaultProps}
-          execution={{
-            ...mockExecution,
-            stepExecutions: [
-              {
-                id: 'step-1',
-                stepId: 'step-1',
-                stepType: 'console',
-                scopeStack: [],
-                workflowRunId: 'exec-123',
-                workflowId: 'workflow-123',
-                status: ExecutionStatus.COMPLETED,
-                startedAt: '2024-01-01T10:00:00Z',
-                topologicalIndex: 0,
-                globalExecutionIndex: 0,
-                stepExecutionIndex: 0,
-              },
-            ],
-          }}
-        />,
-        { wrapper: getTestProvider({ services, store }) }
+      renderWithLoadedPages(
+        WORKFLOW_EXECUTION_STEPS_MAX_PAGE_COUNT,
+        WORKFLOW_EXECUTION_STEPS_MAX_PAGE_COUNT * WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE + 500
       );
 
       expect(

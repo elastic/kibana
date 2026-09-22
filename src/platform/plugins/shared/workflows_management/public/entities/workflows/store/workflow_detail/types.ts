@@ -9,7 +9,12 @@
 
 import type YAML from 'yaml';
 import type { LineCounter } from 'yaml';
-import type { WorkflowDetailDto, WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
+import type {
+  WorkflowDetailDto,
+  WorkflowExecutionDto,
+  WorkflowStepExecutionDto,
+  WorkflowYaml,
+} from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowLookup } from './utils/build_workflow_lookup';
 import type { LoadingStates } from './utils/loading_states';
@@ -40,11 +45,10 @@ export interface WorkflowDetailState {
   /** `total` from the paginated execution-steps list; used for the truncation callout. */
   stepExecutionsTotal: number;
   /**
-   * How many pages of step executions the detail view requests, each
-   * WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE long. Grows by one per "Show more" click, capped at
-   * WORKFLOW_EXECUTION_STEPS_MAX_PAGE_COUNT. Held in the store so polling reloads keep it.
+   * Step executions loaded so far, one entry per fetched page of
+   * WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE. `execution.stepExecutions` is the flattened view.
    */
-  stepExecutionsPageCount: number;
+  stepExecutionPages: WorkflowStepExecutionDto[][];
   /** The computed data derived from the selected execution, it is updated by the loadExecutionThunk */
   computedExecution?: ComputedData;
   /** The active tab (workflow or executions) */

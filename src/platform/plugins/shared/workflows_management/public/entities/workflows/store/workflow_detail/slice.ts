@@ -9,12 +9,16 @@
 
 import { createSlice } from 'redux-toolkit-v1';
 import type { Action } from 'redux-toolkit-v1';
-import type { EsWorkflow, WorkflowDetailDto, WorkflowExecutionDto } from '@kbn/workflows';
+import type {
+  EsWorkflow,
+  WorkflowDetailDto,
+  WorkflowExecutionDto,
+  WorkflowStepExecutionDto,
+} from '@kbn/workflows';
 import { WORKFLOW_GRAPH_FOCUS_TRIGGER } from '@kbn/workflows';
 import type { ActiveTab, ComputedData, LineColumnPosition, WorkflowDetailState } from './types';
 import { addLoadingStateReducers, initialLoadingState } from './utils/loading_states';
 import { resolveFocusForLine } from './utils/trigger_finder';
-import { WORKFLOW_EXECUTION_STEPS_MAX_PAGE_COUNT } from '../../../../../common';
 import { getWorkflowZodSchema } from '../../../../../common/schema';
 import { triggerSchemas } from '../../../../trigger_schemas';
 import type { WorkflowsResponse } from '../../model/types';
@@ -39,7 +43,7 @@ const initialState: WorkflowDetailState = {
   workflow: undefined,
   execution: undefined,
   stepExecutionsTotal: 0,
-  stepExecutionsPageCount: 1,
+  stepExecutionPages: [],
   computedExecution: undefined,
   activeTab: undefined,
   connectors: undefined,
@@ -137,23 +141,24 @@ const workflowDetailSlice = createSlice({
     setExecution: (state, action: { payload: WorkflowExecutionDto | undefined }) => {
       if (!action.payload || action.payload.id !== state.execution?.id) {
         state.stepExecutionsTotal = 0;
-        state.stepExecutionsPageCount = 1;
+        state.stepExecutionPages = [];
       }
       state.execution = action.payload;
     },
     setStepExecutionsTotal: (state, action: { payload: number }) => {
       state.stepExecutionsTotal = action.payload;
     },
-    showMoreStepExecutions: (state) => {
-      state.stepExecutionsPageCount = Math.min(
-        state.stepExecutionsPageCount + 1,
-        WORKFLOW_EXECUTION_STEPS_MAX_PAGE_COUNT
-      );
+    /** Single writer for loaded step pages; keeps `execution.stepExecutions` as their flat view. */
+    setStepExecutionPages: (state, action: { payload: WorkflowStepExecutionDto[][] }) => {
+      state.stepExecutionPages = action.payload;
+      if (state.execution) {
+        state.execution.stepExecutions = action.payload.flat();
+      }
     },
     clearExecution: (state) => {
       state.execution = undefined;
       state.stepExecutionsTotal = 0;
-      state.stepExecutionsPageCount = 1;
+      state.stepExecutionPages = [];
       state.computedExecution = undefined;
     },
     setActiveTab: (state, action: { payload: ActiveTab | undefined }) => {
@@ -254,7 +259,7 @@ export const {
   setWorkflows,
   setExecution,
   setStepExecutionsTotal,
-  showMoreStepExecutions,
+  setStepExecutionPages,
   clearExecution,
   setActiveTab,
   setHasYamlSchemaValidationErrors,

@@ -15,7 +15,12 @@ import { WorkflowApi } from '@kbn/workflows-ui';
 import { WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE } from '../../../../../../common';
 import type { WorkflowsServices } from '../../../../../types';
 import type { RootState } from '../../types';
-import { _setComputedExecution, setExecution, setStepExecutionsTotal } from '../slice';
+import {
+  _setComputedExecution,
+  setExecution,
+  setStepExecutionPages,
+  setStepExecutionsTotal,
+} from '../slice';
 import { performComputation } from '../utils/computation';
 
 export interface LoadExecutionParams {
@@ -36,34 +41,28 @@ export const loadExecutionThunk = createAsyncThunk<
     try {
       const {
         execution: previousExecution,
-        stepExecutionsPageCount,
+        stepExecutionPages: loadedPages,
         stepExecutionsTotal: previousStepExecutionsTotal,
       } = getState().detail;
 
-      // A finished run's step docs never change, so full pages already in the store are reused
-      // and only newly requested pages are fetched. An in-flight run refetches every page.
-      const isSameFinishedRun =
-        previousExecution !== undefined &&
-        previousExecution.id === id &&
-        isTerminalStatus(previousExecution.status);
-      const loadedStepExecutions = isSameFinishedRun ? previousExecution.stepExecutions : [];
-      const reusablePageCount = Math.min(
-        Math.floor(loadedStepExecutions.length / WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE),
-        stepExecutionsPageCount
-      );
-      const reusedStepExecutions = loadedStepExecutions.slice(
-        0,
-        reusablePageCount * WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE
-      );
+      // Loaded pages of a run still in flight are refetched so their statuses stay live. A
+      // finished run's pages never change, so they are kept; a different run starts from page 1.
+      const isSameRun = previousExecution !== undefined && previousExecution.id === id;
+      const keepLoadedPages = isSameRun && isTerminalStatus(previousExecution.status);
+      const pageCountToFetch = keepLoadedPages
+        ? loadedPages.length === 0
+          ? 1
+          : 0
+        : isSameRun
+        ? Math.max(1, loadedPages.length)
+        : 1;
 
       // One request per page keeps each response small; the pages concat in page order.
-      const stepPageRequests = Array.from(
-        { length: stepExecutionsPageCount - reusablePageCount },
-        (_, index) =>
-          api.getExecutionSteps(id, {
-            page: reusablePageCount + index + 1,
-            size: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
-          })
+      const stepPageRequests = Array.from({ length: pageCountToFetch }, (_, index) =>
+        api.getExecutionSteps(id, {
+          page: index + 1,
+          size: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
+        })
       );
 
       // includeOutput so AI token metadata (LangChain tokenUsage) is available for
@@ -77,11 +76,16 @@ export const loadExecutionThunk = createAsyncThunk<
         ...stepPageRequests,
       ]);
 
-      const response: WorkflowExecutionDto = {
-        ...execution,
-        stepExecutions: [...reusedStepExecutions, ...stepPages.flatMap((page) => page.results)],
-      };
+      // Replace the pages this poll fetched and keep any page "Show more" appended meanwhile.
+      const currentPages = getState().detail.stepExecutionPages;
+      const fetchedPages = stepPages.map((page) => page.results);
+      const pages = isSameRun
+        ? [...fetchedPages, ...currentPages.slice(fetchedPages.length)]
+        : fetchedPages;
+
+      const response: WorkflowExecutionDto = { ...execution, stepExecutions: pages.flat() };
       dispatch(setExecution(response));
+      dispatch(setStepExecutionPages(pages));
       // Every page carries the same run-wide total; reuse the stored one when no page was fetched.
       dispatch(setStepExecutionsTotal(stepPages[0]?.total ?? previousStepExecutionsTotal));
 

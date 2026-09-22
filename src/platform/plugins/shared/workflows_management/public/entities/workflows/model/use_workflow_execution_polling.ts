@@ -24,14 +24,8 @@ export interface PollingState {
 /**
  * Polls a single workflow execution serially: each request starts only after the previous
  * finishes, then waits WORKFLOW_EXECUTION_POLL_INTERVAL_MS before the next poll.
- *
- * Pass `stepExecutionsPageCount` so asking for another page re-polls immediately; the thunk
- * reads the page count from the store, this only needs to change the poll key.
  */
-export const useWorkflowExecutionPolling = (
-  workflowExecutionId: string,
-  stepExecutionsPageCount?: number
-): PollingState => {
+export const useWorkflowExecutionPolling = (workflowExecutionId: string): PollingState => {
   const [loadExecution, { result: workflowExecution, error }] =
     useAsyncThunkState(loadExecutionThunk);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -54,7 +48,7 @@ export const useWorkflowExecutionPolling = (
 
   useSerialPolling({
     poll: () => loadExecution({ id: workflowExecutionId }),
-    pollKey: `${workflowExecutionId}:${stepExecutionsPageCount ?? ''}`,
+    pollKey: workflowExecutionId,
     intervalMs: WORKFLOW_EXECUTION_POLL_INTERVAL_MS,
     shouldStop: () => {
       const execution = workflowExecutionRef.current;

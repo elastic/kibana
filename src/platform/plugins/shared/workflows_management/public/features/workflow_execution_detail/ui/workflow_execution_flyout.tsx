@@ -62,7 +62,7 @@ import {
 } from '../../../entities/connectors/model/use_available_connectors';
 import { useWorkflowExecutionPolling } from '../../../entities/workflows/model/use_workflow_execution_polling';
 import {
-  selectStepExecutionsPageCount,
+  selectExecution,
   selectStepExecutionsTotal,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { useNavigateToExecution } from '../../../hooks/navigation/use_navigate_to_execution';
@@ -465,12 +465,10 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
     const [errorArrivalPulseStepId, setErrorArrivalPulseStepId] = useState<string | null>(null);
     const autoExpandedForExecutionIdRef = useRef<string | null>(null);
 
+    const { error } = useWorkflowExecutionPolling(executionId);
+    // Read from the store so pages appended by "Show more" reach the tree without a re-poll.
+    const workflowExecution = useSelector(selectExecution);
     const stepExecutionsTotal = useSelector(selectStepExecutionsTotal);
-    const stepExecutionsPageCount = useSelector(selectStepExecutionsPageCount);
-    const { workflowExecution, error } = useWorkflowExecutionPolling(
-      executionId,
-      stepExecutionsPageCount
-    );
 
     const workflowName =
       workflowNameProp ||
@@ -1315,26 +1313,26 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                       padding: `${euiTheme.size.s} ${euiTheme.size.base} ${euiTheme.size.base}`,
                     }}
                   >
+                    {/* Both tabs show the same paginated run, so the callout sits above the switch. */}
+                    <StepExecutionsTruncatedCallout
+                      executionId={executionId}
+                      loadedCount={workflowExecution?.stepExecutions.length ?? 0}
+                    />
                     {activeTab === 'table' && (
-                      <>
-                        <StepExecutionsTruncatedCallout
-                          loadedCount={workflowExecution?.stepExecutions.length ?? 0}
-                        />
-                        <WorkflowStepExecutionTree
-                          definition={workflowDefinition}
-                          execution={workflowExecution ?? null}
-                          stepExecutionsTotal={stepExecutionsTotal}
-                          error={error}
-                          onStepExecutionClick={setSelectedStepExecutionId}
-                          selectedId={selectedStepExecutionId}
-                          childExecutionsMap={childExecutions}
-                          isLoadingChildExecutions={isLoadingChildExecutions}
-                          autoExpandErrorForStepId={autoExpandErrorForStepId}
-                          errorArrivalPulseStepId={errorArrivalPulseStepId}
-                          workflowName={workflowName}
-                          onBeforeDiagnose={() => setSelectedStepExecutionId(null)}
-                        />
-                      </>
+                      <WorkflowStepExecutionTree
+                        definition={workflowDefinition}
+                        execution={workflowExecution ?? null}
+                        stepExecutionsTotal={stepExecutionsTotal}
+                        error={error}
+                        onStepExecutionClick={setSelectedStepExecutionId}
+                        selectedId={selectedStepExecutionId}
+                        childExecutionsMap={childExecutions}
+                        isLoadingChildExecutions={isLoadingChildExecutions}
+                        autoExpandErrorForStepId={autoExpandErrorForStepId}
+                        errorArrivalPulseStepId={errorArrivalPulseStepId}
+                        workflowName={workflowName}
+                        onBeforeDiagnose={() => setSelectedStepExecutionId(null)}
+                      />
                     )}
                     {activeTab === 'json' && workflowExecution && (
                       <EuiCodeBlock language="json" fontSize="m" isCopyable overflowHeight="100%">

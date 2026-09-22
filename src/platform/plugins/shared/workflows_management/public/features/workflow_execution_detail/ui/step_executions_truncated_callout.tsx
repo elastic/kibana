@@ -9,7 +9,7 @@
 
 import { EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux-v7';
+import { useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnWarningCallout } from '@kbn/ui-callout';
@@ -19,10 +19,11 @@ import {
   WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
 } from '../../../../common';
 import {
-  selectStepExecutionsPageCount,
+  selectStepExecutionPages,
   selectStepExecutionsTotal,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
-import { showMoreStepExecutions } from '../../../entities/workflows/store/workflow_detail/slice';
+import { loadMoreStepExecutionsThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_more_step_executions_thunk';
+import { useAsyncThunkState } from '../../../hooks/use_async_thunk';
 
 const truncatedTitle = i18n.translate(
   'workflows.workflowExecutionPanel.stepExecutionsTruncatedTitle',
@@ -30,6 +31,7 @@ const truncatedTitle = i18n.translate(
 );
 
 export interface StepExecutionsTruncatedCalloutProps {
+  executionId: string;
   /** Step executions loaded into the tree; 0 means the skeleton or empty state owns the message. */
   loadedCount: number;
 }
@@ -39,22 +41,18 @@ export interface StepExecutionsTruncatedCalloutProps {
  * pull the next page into the tree until WORKFLOW_EXECUTION_STEPS_MAX_PAGE_COUNT is reached.
  */
 export const StepExecutionsTruncatedCallout = React.memo<StepExecutionsTruncatedCalloutProps>(
-  ({ loadedCount }) => {
-    const dispatch = useDispatch();
+  ({ executionId, loadedCount }) => {
     const stepExecutionsTotal = useSelector(selectStepExecutionsTotal);
-    const stepExecutionsPageCount = useSelector(selectStepExecutionsPageCount);
+    const loadedPageCount = useSelector(selectStepExecutionPages).length;
+    const [loadMore, { isLoading }] = useAsyncThunkState(loadMoreStepExecutionsThunk);
 
-    const omittedCount = getOmittedStepExecutionsCount(
-      stepExecutionsTotal,
-      stepExecutionsPageCount
-    );
-    const canShowMore = stepExecutionsPageCount < WORKFLOW_EXECUTION_STEPS_MAX_PAGE_COUNT;
+    const omittedCount = getOmittedStepExecutionsCount(stepExecutionsTotal, loadedPageCount);
+    const canShowMore = loadedPageCount < WORKFLOW_EXECUTION_STEPS_MAX_PAGE_COUNT;
     const nextBatchCount = Math.min(WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE, omittedCount);
 
-    // The detail view feeds the page count into its poll key, so raising it triggers the refetch.
     const onShowMore = useCallback(() => {
-      dispatch(showMoreStepExecutions());
-    }, [dispatch]);
+      loadMore({ id: executionId });
+    }, [loadMore, executionId]);
 
     const showMoreAction = useMemo(
       () =>
@@ -69,11 +67,12 @@ export const StepExecutionsTruncatedCallout = React.memo<StepExecutionsTruncated
                   }
                 ),
                 onClick: onShowMore,
+                isLoading,
                 'data-test-subj': 'workflowExecutionShowMoreStepExecutionsButton',
               },
             }
           : undefined,
-      [canShowMore, nextBatchCount, onShowMore]
+      [canShowMore, nextBatchCount, onShowMore, isLoading]
     );
 
     if (omittedCount === 0 || loadedCount === 0) {

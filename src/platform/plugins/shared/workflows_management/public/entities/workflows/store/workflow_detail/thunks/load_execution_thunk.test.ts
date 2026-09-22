@@ -14,7 +14,7 @@ import { loadExecutionThunk } from './load_execution_thunk';
 import { WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE } from '../../../../../../common';
 import { createMockStore, getMockServices } from '../../__mocks__/store.mock';
 import type { MockServices, MockStore } from '../../__mocks__/store.mock';
-import { setExecution, showMoreStepExecutions } from '../slice';
+import { setExecution, setStepExecutionPages } from '../slice';
 
 const mockGetExecution = jest.fn();
 const mockGetExecutionSteps = jest.fn();
@@ -178,9 +178,12 @@ describe('loadExecutionThunk', () => {
     });
   });
 
-  it('should fetch every page while the run is still in flight', async () => {
+  const loadedStep = { id: 's1', stepId: 's1', status: ExecutionStatus.COMPLETED };
+  const loadedPage = [loadedStep] as WorkflowExecutionDto['stepExecutions'];
+
+  it('should refetch every loaded page while the run is still in flight', async () => {
     store.dispatch(setExecution({ ...mockExecution, status: ExecutionStatus.RUNNING }));
-    store.dispatch(showMoreStepExecutions());
+    store.dispatch(setStepExecutionPages([loadedPage, loadedPage]));
     mockGetExecution.mockResolvedValue({ ...mockExecution, status: ExecutionStatus.RUNNING });
 
     await store.dispatch(loadExecutionThunk({ id: 'exec-1' }));
@@ -196,34 +199,31 @@ describe('loadExecutionThunk', () => {
     });
   });
 
-  it('should fetch only the new page when the run already finished', async () => {
-    const firstPage = Array.from({ length: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE }, (_, index) => ({
-      id: `s${index}`,
-      stepId: `s${index}`,
-      status: ExecutionStatus.COMPLETED,
-    })) as WorkflowExecutionDto['stepExecutions'];
-    store.dispatch(setExecution({ ...mockExecution, stepExecutions: firstPage }));
-    store.dispatch(showMoreStepExecutions());
-
-    const secondPage = [{ id: 's-next', stepId: 's-next', status: ExecutionStatus.COMPLETED }];
+  it('should keep the loaded pages of a finished run without refetching them', async () => {
+    store.dispatch(setExecution({ ...mockExecution }));
+    store.dispatch(setStepExecutionPages([loadedPage, loadedPage]));
     mockGetExecution.mockResolvedValue(mockExecution);
-    mockGetExecutionSteps.mockResolvedValue({
-      results: secondPage,
-      total: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE + 1,
-      page: 2,
-      size: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
-    });
 
     const result = await store.dispatch(loadExecutionThunk({ id: 'exec-1' }));
 
+    expect(mockGetExecutionSteps).not.toHaveBeenCalled();
+    expect(store.getState().detail.stepExecutionPages).toHaveLength(2);
+    expect(result.payload).toMatchObject({ stepExecutions: [loadedStep, loadedStep] });
+  });
+
+  it('should start from the first page when the execution id changes', async () => {
+    store.dispatch(setExecution({ ...mockExecution, id: 'exec-0' }));
+    store.dispatch(setStepExecutionPages([loadedPage, loadedPage, loadedPage]));
+    mockGetExecution.mockResolvedValue(mockExecution);
+
+    await store.dispatch(loadExecutionThunk({ id: 'exec-1' }));
+
     expect(mockGetExecutionSteps).toHaveBeenCalledTimes(1);
     expect(mockGetExecutionSteps).toHaveBeenCalledWith('exec-1', {
-      page: 2,
+      page: 1,
       size: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
     });
-    expect(result.payload).toMatchObject({
-      stepExecutions: [...firstPage, ...secondPage],
-    });
+    expect(store.getState().detail.stepExecutionPages).toHaveLength(1);
   });
 
   it('should handle HTTP error with body message', async () => {

@@ -123,7 +123,12 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
 
         <EuiFlexItem css={{ overflow: 'hidden' }}>
           <EuiPanel paddingSize="m" hasShadow={false} css={{ overflowY: 'auto' }}>
-            <StepExecutionsTruncatedCallout loadedCount={loadedCount} />
+            {execution && (
+              <StepExecutionsTruncatedCallout
+                executionId={execution.id}
+                loadedCount={loadedCount}
+              />
+            )}
             <WorkflowStepExecutionTree
               definition={definition}
               execution={execution ?? null}
