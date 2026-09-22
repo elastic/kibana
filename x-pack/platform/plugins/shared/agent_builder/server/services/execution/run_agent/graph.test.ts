@@ -16,6 +16,8 @@ import type { AgentEventEmitter } from '@kbn/agent-builder-server';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import { createAgentGraph } from './graph';
 import type { PromptFactory } from './prompts';
+import { RunStepTracker, type ToolExecutionBuffer } from './run_step_tracker';
+import type { StateType } from './state';
 import type { ProcessedConversation } from './utils/prepare_conversation';
 
 jest.mock('@langchain/langgraph/prebuilt', () => ({
@@ -38,11 +40,13 @@ const createTestGraph = ({
   outputSchema,
   sessionId,
   cacheControl,
+  toolExecutionBuffer,
 }: {
   structuredOutput?: boolean;
   outputSchema?: Record<string, unknown>;
   sessionId?: string;
   cacheControl?: ChatCompleteCacheControl;
+  toolExecutionBuffer?: ToolExecutionBuffer;
 } = {}) => {
   const researchInvoke = jest.fn();
   const structuredInvoke = jest.fn();
@@ -88,6 +92,7 @@ const createTestGraph = ({
     roundId: 'test-round',
     sessionId,
     cacheControl,
+    toolExecutionBuffer,
   });
 
   return {
@@ -382,5 +387,71 @@ describe('createAgentGraph', () => {
     const config = researchWithConfig.mock.calls[0][0];
     expect(config.sessionId).toBeUndefined();
     expect(config.cacheControl).toBeUndefined();
+  });
+
+  it('keeps the run step tracker converged with the final graph state over a real event stream', async () => {
+    // Feeds the tracker from the real `streamEvents` stream, the way `run_chat_agent` does, over a run
+    // with a retried empty response, two parallel tool calls and a second cycle. The tracker's mirror
+    // (used when the stream throws) must land on exactly what the graph's reducer produced.
+    const graphName = 'convergence-test-graph';
+    const tracker = new RunStepTracker({ graphName });
+    const { graph, researchInvoke } = createTestGraph({ toolExecutionBuffer: tracker });
+    const toolResult = (data: Record<string, unknown>) => ({
+      results: [{ type: 'other', data }],
+    });
+    researchInvoke
+      .mockResolvedValueOnce(new AIMessage({ content: '' }))
+      .mockResolvedValueOnce(
+        new AIMessage({
+          content: 'looking',
+          tool_calls: [
+            { id: 'c1', name: 'my_tool', args: { q: 1 } },
+            { id: 'c2', name: 'my_tool', args: { q: 2 } },
+          ],
+        })
+      )
+      .mockResolvedValueOnce(
+        new AIMessage({
+          content: 'one more',
+          tool_calls: [{ id: 'c3', name: 'my_tool', args: { q: 3 } }],
+        })
+      )
+      .mockResolvedValueOnce(new AIMessage({ content: 'done' }));
+    mockToolNodeOnce([
+      new ToolMessage({ tool_call_id: 'c1', content: 'r1', artifact: toolResult({ n: 1 }) }),
+      new ToolMessage({ tool_call_id: 'c2', content: 'r2', artifact: toolResult({ n: 2 }) }),
+    ]);
+    mockToolNodeOnce([
+      new ToolMessage({ tool_call_id: 'c3', content: 'r3', artifact: toolResult({ n: 3 }) }),
+    ]);
+    tracker.seed([], { execution: 'fresh', pendingToolCallIds: [] });
+
+    let finalState: StateType | undefined;
+    const stream = graph.streamEvents(
+      { cycleLimit: 5 },
+      { version: 'v2', runName: graphName, metadata: { graphName }, recursionLimit: 50 }
+    );
+    for await (const event of stream) {
+      tracker.observeGraphEvent(event);
+      if (event.event === 'on_chain_end' && event.name === graphName) {
+        finalState = event.data.output as StateType;
+      }
+    }
+
+    expect(finalState).toBeDefined();
+    expect(finalState!.steps.map((step) => step.type)).toEqual([
+      ConversationRoundStepType.reasoning,
+      ConversationRoundStepType.toolCall,
+      ConversationRoundStepType.toolCall,
+      ConversationRoundStepType.reasoning,
+      ConversationRoundStepType.toolCall,
+    ]);
+    expect(finalState!.steps[4]).toMatchObject({
+      tool_call_id: 'c3',
+      results: [{ data: { n: 3 } }],
+    });
+    expect(tracker.getSteps()).toEqual(finalState!.steps);
+    expect(tracker.snapshotSteps()).toEqual(finalState!.steps);
+    expect(tracker.executionProjection()).toEqual(finalState!.steps);
   });
 });
