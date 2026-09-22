@@ -148,9 +148,14 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       });
     }, []);
 
+    const selectableCasesOnPage = useMemo(
+      () => data.cases.filter(getCaseIsSelectable),
+      [data.cases, getCaseIsSelectable]
+    );
+
     const selectAllCasesOnPage = useCallback(() => {
-      setSelectedCases(data.cases);
-    }, [data.cases]);
+      setSelectedCases(selectableCasesOnPage);
+    }, [selectableCasesOnPage]);
 
     const getCaseIsSelectable = useCallback(
       (theCase: CaseUI): boolean => {
@@ -371,7 +376,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           showClearFiltersButton={showClearFiltersButton}
           viewMode={viewMode}
           onSelectAll={selectAllCasesOnPage}
-          totalOnPage={data.cases.length}
+          totalOnPage={selectableCasesOnPage.length}
         />
         {viewMode === VIEW_TOGGLE_TABLE_ID ? (
           <>
