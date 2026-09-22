@@ -64,6 +64,58 @@
     "@kbn/eslint/no_wrapped_error_in_logger": "error",
     "@kbn/eslint/no_npx_playwright": "error"
   },
+  "overrides": [
+    {
+      "files": [
+        "x-pack/platform/test/api_integration_deployment_agnostic/apis/**/*.{js,ts}",
+        "x-pack/platform/test/api_integration_deployment_agnostic/services/**/*.{js,ts}",
+        "x-pack/solutions/**/test/api_integration_deployment_agnostic/apis/**/*.{js,ts}",
+        "x-pack/solutions/**/test/api_integration_deployment_agnostic/services/**/*.{js,ts}"
+      ],
+      "rules": {
+        "@kbn/eslint/deployment_agnostic_test_context": "error"
+      }
+    },
+    {
+      "files": [
+        "src/platform/plugins/private/event_annotation/**/*",
+        "src/platform/plugins/private/event_annotation_listing/**/*",
+        "src/platform/plugins/private/vis_default_editor/**/*",
+        "src/platform/plugins/private/vis_types/**/*",
+        "src/platform/plugins/shared/chart_expressions/**/*",
+        "src/platform/plugins/shared/charts/**/*",
+        "src/platform/plugins/shared/expressions/**/*",
+        "src/platform/plugins/shared/vis_types/**/*",
+        "src/platform/plugins/shared/visualization_listing/**/*",
+        "src/platform/plugins/shared/visualizations/**/*",
+        "x-pack/platform/plugins/shared/lens/**/*",
+        "x-pack/platform/plugins/private/graph/**/*",
+        "src/platform/packages/private/kbn-lens-formula-docs/**/*",
+        "src/platform/packages/shared/kbn-lens-common/**/*",
+        "src/platform/packages/shared/kbn-lens-common-2/**/*",
+        "src/platform/packages/shared/kbn-coloring/**/*",
+        "src/platform/packages/shared/kbn-chart-icons/**/*",
+        "src/platform/packages/shared/kbn-event-annotation-common/**/*",
+        "src/platform/packages/shared/kbn-event-annotation-components/**/*"
+      ],
+      "rules": {
+        "@kbn/eslint/no_viz_naming": "error"
+      }
+    },
+    {
+      "files": [
+        "src/platform/plugins/**/server/index.ts",
+        "x-pack/platform/plugins/**/server/index.ts",
+        "x-pack/solutions/**/plugins/**/server/index.ts",
+        "examples/**/server/index.ts",
+        "packages/kbn-mock-idp-plugin/server/index.ts"
+      ],
+      "excludeFiles": ["**/test/**"],
+      "rules": {
+        "@kbn/eslint/no_sync_import_from_plugin": "error"
+      }
+    }
+  ],
 
   // oxlint's parser rejects TypeScript grammar errors (TS1016: required parameter after an
   // optional one) that ESLint's parser and tsc's `skipLibCheck` let through in this declaration.

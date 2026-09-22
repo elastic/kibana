@@ -9,9 +9,15 @@
 
 const { RuleTester: OxlintRuleTester } = await import('oxlint/plugins-dev');
 const { createRequire } = await import('node:module');
+const { dirname, resolve } = await import('node:path');
+const { fileURLToPath } = await import('node:url');
 
+const testDirectory = dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
 const eslint = require('eslint');
+const oxlintPlugin = require('../../oxlint_plugin');
+const legacyPluginPath = require.resolve('../..');
+require.cache[legacyPluginPath] = { exports: oxlintPlugin };
 
 class RuleTester extends OxlintRuleTester {
   constructor(config = {}) {
@@ -30,14 +36,20 @@ RuleTester.describe = (_, fn) => fn();
 RuleTester.it = (_, fn) => fn();
 eslint.RuleTester = RuleTester;
 
-require('../no_async_promise_body.test.js');
-require('../no_async_foreach.test.js');
-require('../no_conditional_saved_object_type_registration.test.js');
-require('../no_constructor_args_in_property_initializers.test.js');
-require('../no_this_in_property_initializers.test.js');
-require('../no_trailing_import_slash.test.js');
-require('../no_unsafe_console.test.js');
-require('../no_unsafe_dynamic_http_path.test.js');
-require('../no_wrapped_error_in_logger.test.js');
-require('../no_npx_playwright.test.js');
-require('../require_kibana_feature_privileges_naming.test.js');
+const ruleNames = Object.keys(oxlintPlugin.rules).sort();
+
+for (const ruleName of ruleNames) {
+  const rule = oxlintPlugin.rules[ruleName];
+  if (typeof rule.createOnce !== 'function') {
+    throw new Error(`Oxlint plugin rule '${ruleName}' must use createOnce.`);
+  }
+
+  const testFile = resolve(testDirectory, `../${ruleName}.test.js`);
+  try {
+    require.resolve(testFile);
+  } catch {
+    throw new Error(`Oxlint plugin rule '${ruleName}' has no parity test file.`);
+  }
+
+  require(testFile);
+}
