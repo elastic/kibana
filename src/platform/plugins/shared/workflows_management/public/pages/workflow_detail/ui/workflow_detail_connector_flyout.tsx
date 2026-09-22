@@ -80,6 +80,9 @@ export const WorkflowDetailConnectorFlyout = React.memo(
               dispatch(closeConnectorFlyout());
             }
           },
+          onConnectorUpdated: () => {
+            loadConnectors();
+          },
         });
       }
     }, [

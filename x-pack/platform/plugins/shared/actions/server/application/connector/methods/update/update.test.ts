@@ -1326,6 +1326,51 @@ describe('update()', () => {
       expect(unsecuredSavedObjectsClient.bulkDelete).not.toHaveBeenCalled();
     });
 
+    test('a failed credential delete still invalidates the previous identity', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        ...dualExisting,
+        attributes: {
+          ...dualExisting.attributes,
+          hasInboundEventIdentity: true,
+        },
+      } as never);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+        ...dualExisting,
+        attributes: {
+          ...dualExisting.attributes,
+          hasInboundEventIdentity: true,
+          apiKey: encodeApiKey('old-id', 'old-secret'),
+        },
+      } as never);
+      unsecuredSavedObjectsClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'cred-1',
+            type: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
+            attributes: { connectorId: 'connector-id' },
+            references: [],
+          },
+        ],
+        total: 1,
+        page: 1,
+        per_page: 10,
+      } as never);
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+        statuses: [{ id: 'cred-1', success: false }],
+      } as never);
+
+      await expect(
+        update({
+          context: dualContext,
+          id: 'connector-id',
+          action: { name: 'renamed', config: {}, secrets: {}, isInboundEventsEnabled: false },
+        })
+      ).rejects.toThrow('Failed to delete 1 ingest credential(s) for connector "connector-id"');
+      expect(securityService.authc.apiKeys.invalidateAsInternalUser).toHaveBeenCalledWith({
+        ids: ['old-id'],
+      });
+    });
+
     test('an explicit disable deletes credentials when inbound events are already off', async () => {
       unsecuredSavedObjectsClient.find.mockResolvedValue({
         saved_objects: [

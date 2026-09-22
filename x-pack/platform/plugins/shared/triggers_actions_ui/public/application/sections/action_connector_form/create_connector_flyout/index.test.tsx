@@ -51,6 +51,7 @@ describe('CreateConnectorFlyout', () => {
   let appMockRenderer: AppMockRenderer;
   const onClose = jest.fn();
   const onConnectorCreated = jest.fn();
+  const onConnectorUpdated = jest.fn();
   const onTestConnector = jest.fn();
 
   const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
@@ -1004,6 +1005,7 @@ describe('CreateConnectorFlyout', () => {
           actionTypeRegistry={actionTypeRegistry}
           onClose={onClose}
           onConnectorCreated={onConnectorCreated}
+          onConnectorUpdated={onConnectorUpdated}
           onTestConnector={onTestConnector}
         />
       );
@@ -1109,6 +1111,10 @@ describe('CreateConnectorFlyout', () => {
       await userEvent.click(screen.getByTestId('configureConnectorTab'));
 
       expect(await screen.findByTestId('nameInput')).toHaveValue('First edit');
+      expect(onConnectorUpdated).toHaveBeenCalledWith(
+        expect.objectContaining({ id: '123', name: 'First edit' })
+      );
+      expect(onConnectorCreated).toHaveBeenCalledTimes(1);
     });
   });
 

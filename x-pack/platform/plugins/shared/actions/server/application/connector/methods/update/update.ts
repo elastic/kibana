@@ -253,14 +253,17 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
   if (result instanceof Error) {
     await invalidateStoredConnectorEventIdentity(context, id, identityAttributes);
   } else {
-    if (shouldDisableInbound) {
-      await deleteIngressCredentialForConnector({
-        unsecuredSavedObjectsClient: context.unsecuredSavedObjectsClient,
-        connectorId: id,
-        logger: context.logger,
-      });
+    try {
+      if (shouldDisableInbound) {
+        await deleteIngressCredentialForConnector({
+          unsecuredSavedObjectsClient: context.unsecuredSavedObjectsClient,
+          connectorId: id,
+          logger: context.logger,
+        });
+      }
+    } finally {
+      await invalidateStoredConnectorEventIdentity(context, id, previousIdentity);
     }
-    await invalidateStoredConnectorEventIdentity(context, id, previousIdentity);
   }
 
   const wasSuccessful = !(result instanceof Error);

@@ -58,6 +58,7 @@ export interface CreateConnectorFlyoutProps {
   onClose: () => void;
   featureId?: string;
   onConnectorCreated?: (connector: ActionConnector) => void;
+  onConnectorUpdated?: (connector: ActionConnector) => void;
   onTestConnector?: (connector: ActionConnector) => void;
   isServerless?: boolean;
   initialConnector?: Partial<Omit<ActionConnector, 'secrets'>> & { actionTypeId: string };
@@ -70,6 +71,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   featureId,
   onClose,
   onConnectorCreated,
+  onConnectorUpdated,
   onTestConnector,
   initialConnector,
   icon,
@@ -299,6 +301,14 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
 
   const beforeCloseRef = useRef<() => void>(() => undefined);
 
+  const handleEmbeddedConnectorUpdated = useCallback(
+    (updated: ActionConnector) => {
+      setConnectorToTest(updated);
+      onConnectorUpdated?.(updated);
+    },
+    [onConnectorUpdated]
+  );
+
   const onFlyoutClose = useCallback(() => {
     if (connectorToTest && isFormModified) {
       setShowConfirmModal(true);
@@ -321,7 +331,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
           connector={connectorToTest}
           onClose={onClose}
           tab={editTab}
-          onConnectorUpdated={setConnectorToTest}
+          onConnectorUpdated={handleEmbeddedConnectorUpdated}
           icon={icon}
           isFormModified={isFormModified}
           onFormModifiedChange={setIsFormModified}

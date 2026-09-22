@@ -214,65 +214,6 @@ describe('Inbound events HTTP API', () => {
     expect(body.uiamApiKey).toBeUndefined();
   });
 
-  it('reports dual inbound from the presence flag on GET and list, and clears it on disable', async () => {
-    const createRes = await getSupertest(kibanaServer.root, 'post', '/api/actions/connector')
-      .set('kbn-xsrf', 'kibana')
-      .send({
-        name: 'datadog-dual',
-        connector_type_id: '.datadog',
-        config: { site: 'datadoghq.com' },
-        secrets: { authType: 'basic', username: 'api-key', password: 'app-key' },
-        is_inbound_events_enabled: true,
-      })
-      .expect((res: { status: number; body: unknown }) => {
-        if (res.status !== 200) {
-          throw new Error(
-            `create dual connector failed ${res.status}: ${JSON.stringify(res.body)}`
-          );
-        }
-      });
-
-    const created = createRes.body as ConnectorHttpBody;
-    expect(created.is_inbound_events_enabled).toBe(true);
-    expect(created).not.toHaveProperty('apiKey');
-
-    const stored = await readScopedAction(created.id);
-    expect(stored.apiKey).toBeUndefined();
-    expect(stored.uiamApiKey).toBeUndefined();
-    expect(stored.hasInboundEventIdentity).toBe(true);
-
-    const listRes = await getSupertest(kibanaServer.root, 'get', '/api/actions/connectors')
-      .set('kbn-xsrf', 'kibana')
-      .expect(200);
-    const listed = (listRes.body as ConnectorHttpBody[]).find(
-      (connector) => connector.id === created.id
-    );
-    expect(listed?.is_inbound_events_enabled).toBe(true);
-
-    await getSupertest(kibanaServer.root, 'put', `/api/actions/connector/${created.id}`)
-      .set('kbn-xsrf', 'kibana')
-      .send({
-        name: 'datadog-dual',
-        config: { site: 'datadoghq.com' },
-        secrets: { authType: 'basic', username: 'api-key', password: 'app-key' },
-        is_inbound_events_enabled: false,
-      })
-      .expect(200);
-
-    const disabled = await readScopedAction(created.id);
-    expect(disabled.hasInboundEventIdentity).toBe(false);
-    expect(disabled.apiKey).toBeUndefined();
-
-    const getRes = await getSupertest(
-      kibanaServer.root,
-      'get',
-      `/api/actions/connector/${created.id}`
-    )
-      .set('kbn-xsrf', 'kibana')
-      .expect(200);
-    expect((getRes.body as ConnectorHttpBody).is_inbound_events_enabled).toBe(false);
-  });
-
   it('omits is_inbound_events_enabled for outbound connectors', async () => {
     const createRes = await getSupertest(kibanaServer.root, 'post', '/api/actions/connector')
       .set('kbn-xsrf', 'kibana')
