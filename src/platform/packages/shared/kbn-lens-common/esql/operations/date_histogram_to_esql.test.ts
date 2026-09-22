@@ -91,10 +91,7 @@ describe('getDateHistogramSerializedFormat', () => {
   });
 
   test('prepends date when format uses kk (1-24 hour) and range crosses midnight', () => {
-    const rulesWithKk: Array<[string, string]> = [
-      ...scaledRules.slice(0, 2),
-      ['PT1M', 'kk:mm'],
-    ];
+    const rulesWithKk: Array<[string, string]> = [...scaledRules.slice(0, 2), ['PT1M', 'kk:mm']];
     const settingsWithKk = {
       get: (key: string) => {
         if (key === 'dateFormat') return 'YYYY-MM-DD';
@@ -102,13 +99,10 @@ describe('getDateHistogramSerializedFormat', () => {
         if (key === 'dateFormat:tz') return 'UTC';
       },
     } as any;
-    const result = getDateHistogramSerializedFormat(
-      column,
-      column,
-      indexPattern,
-      settingsWithKk,
-      { fromDate: '2020-03-25T23:00:00.000Z', toDate: '2020-03-26T01:00:00.000Z' }
-    );
+    const result = getDateHistogramSerializedFormat(column, column, indexPattern, settingsWithKk, {
+      fromDate: '2020-03-25T23:00:00.000Z',
+      toDate: '2020-03-26T01:00:00.000Z',
+    });
     expect(result).toEqual({ id: 'date', params: { pattern: 'YYYY-MM-DD kk:mm' } });
   });
 
