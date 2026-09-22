@@ -243,7 +243,7 @@ export class SettingsPageObject extends FtrService {
   }
 
   async clickDeletePattern() {
-    if (!(await this.testSubjects.exists('deleteIndexPatternButton'))) {
+    if (!(await this.testSubjects.waitForExists('deleteIndexPatternButton', { timeout: 3000 }))) {
       await this.testSubjects.click(APP_MENU_TEST_SUBJECTS.overflowButton);
     }
     await this.testSubjects.click('deleteIndexPatternButton');
