@@ -875,7 +875,7 @@ describe('AllCasesListGeneric', () => {
         }
       });
 
-      it('should enable the checkboxes when the user has read + reopenCase', async () => {
+      it('should disable the checkboxes for non-closed cases when the user has only reopenCase permission', async () => {
         renderWithTestingProviders(<AllCasesList />, {
           wrapperProps: {
             permissions: buildCasesPermissions({
@@ -892,10 +892,11 @@ describe('AllCasesListGeneric', () => {
           },
         });
 
-        expect(await screen.findByTestId('checkboxSelectAll')).toBeEnabled();
+        // Default mock cases are all open/in-progress, so none are selectable for reopenCase-only users
+        expect(await screen.findByTestId('checkboxSelectAll')).toBeDisabled();
 
         for (const theCase of defaultGetCases.data.cases) {
-          expect(await screen.findByTestId(`checkboxSelectRow-${theCase.id}`)).toBeEnabled();
+          expect(await screen.findByTestId(`checkboxSelectRow-${theCase.id}`)).toBeDisabled();
         }
       });
 

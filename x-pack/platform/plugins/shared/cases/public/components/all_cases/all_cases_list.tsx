@@ -152,8 +152,14 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       setSelectedCases(data.cases);
     }, [data.cases]);
 
-    const isSelectable =
-      permissions.update || permissions.delete || permissions.reopenCase || permissions.assign;
+    const getCaseIsSelectable = useCallback(
+      (theCase: CaseUI): boolean => {
+        if (permissions.update || permissions.delete || permissions.assign) return true;
+        if (permissions.reopenCase) return theCase.status === CaseStatuses.closed;
+        return false;
+      },
+      [permissions.update, permissions.delete, permissions.assign, permissions.reopenCase]
+    );
 
     const tableOnChangeCallback = useCallback(
       ({ page, sort }: EuiBasicTableOnChange) => {
@@ -271,9 +277,9 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       () => ({
         onSelectionChange: setSelectedCases,
         selected: selectedCases,
-        selectable: () => isSelectable,
+        selectable: getCaseIsSelectable,
       }),
-      [isSelectable, selectedCases]
+      [getCaseIsSelectable, selectedCases]
     );
     const isDataEmpty = useMemo(() => data.total === 0, [data]);
 
@@ -397,7 +403,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
             selectedFields={selectedFields}
             selectedCases={selectedCases}
             onSelectionChange={toggleCaseSelection}
-            isSelectable={isSelectable}
+            isSelectable={getCaseIsSelectable}
           />
         )}
       </>
