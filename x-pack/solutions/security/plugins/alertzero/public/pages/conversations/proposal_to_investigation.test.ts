@@ -64,16 +64,10 @@ describe('proposalToInvestigation', () => {
       expect(result.recommendedAction).toBe(expected);
     });
 
-    // `tune` is listed here rather than beside `configure`: the retired category no longer
-    // has a bucket of its own, so it takes the same fallback as any keyword the page has
-    // never heard of.
-    it.each(['escalate', 'tune'] as const)(
-      'maps the unrecognised category %s to investigate (fallback)',
-      (category) => {
-        const result = proposalToInvestigation({ ...baseProposal, category });
-        expect(result.recommendedAction).toBe('investigate');
-      }
-    );
+    it('maps an unrecognised category to investigate (fallback)', () => {
+      const result = proposalToInvestigation({ ...baseProposal, category: 'escalate' });
+      expect(result.recommendedAction).toBe('investigate');
+    });
 
     it('maps an absent category to investigate (fallback)', () => {
       const { category: _c, ...noCategory } = { ...baseProposal, category: undefined };

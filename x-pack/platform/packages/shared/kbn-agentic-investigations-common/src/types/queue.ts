@@ -33,17 +33,6 @@ export const CONVERSATION_QUEUE_CATEGORIES: ReadonlyArray<{
   { id: 'closed', label: CONVERSATION_QUEUE_LABELS.closed },
 ]);
 
-/**
- * Queue bucket → the colour its count badge carries, severity-ordered from
- * "act now" down to `closed`, which stays uncoloured: a decision already made
- * is not work, so it must not compete with the buckets that still need someone.
- *
- * Constrained to names `EuiBadge` recognises: its `color` prop is typed
- * `BadgeColor | string`, so an unknown name type-checks and then falls through
- * to the custom-CSS-colour path at runtime, where it fails validation and
- * renders an unstyled badge. `configure` is `primary` to match the trend
- * chart card for the same category; `hollow` is the badge's uncoloured default.
- */
 export const CONVERSATION_CATEGORY_COLORS: Record<
   RecommendedAction,
   'danger' | 'warning' | 'primary' | 'hollow'
