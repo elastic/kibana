@@ -1781,6 +1781,40 @@ describe('runRelationshipMaintainer', () => {
       expect(callOrder.filter((c) => c === 'clear')).toHaveLength(1);
     });
 
+    it('clears both threshold keys for a bucketed config with resetRelationshipsBeforeRun', async () => {
+      const { esClient, search } = makeEsClient();
+      const { crudClient, entityMetadataClient } = makeClients();
+      const clearMock = (crudClient as unknown as { clearRelationshipIds: jest.Mock })
+        .clearRelationshipIds;
+      search.mockResolvedValue(successResponse([]));
+
+      await runRelationshipMaintainer({
+        esClient,
+        logger: loggerMock.create(),
+        namespace: 'default',
+        crudClient,
+        entityMetadataClient,
+        integrations: [
+          {
+            ...baseConfig,
+            id: 'bucketed-reset',
+            resetRelationshipsBeforeRun: { entitySource: 'bucketed-source' },
+          },
+        ],
+        maintainerName: 'accesses_frequently_and_infrequently',
+      });
+
+      // Both threshold keys must be cleared — clearing only one would leave the
+      // other stale, which is the exact bug this feature exists to prevent.
+      const clearedKeys = clearMock.mock.calls.map(
+        (c) => (c[0] as { relationshipKey: string }).relationshipKey
+      );
+      expect(clearedKeys.sort()).toStrictEqual(
+        ['accesses_frequently', 'accesses_infrequently'].sort()
+      );
+      expect(clearMock).toHaveBeenCalledTimes(2);
+    });
+
     it('skips the integration when the clear fails, without touching writes', async () => {
       const { esClient, search } = makeEsClient();
       const { crudClient, entityMetadataClient } = makeClients();

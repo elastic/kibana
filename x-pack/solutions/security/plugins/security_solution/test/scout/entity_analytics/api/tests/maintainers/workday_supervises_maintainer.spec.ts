@@ -517,6 +517,62 @@ apiTest.describe(
     });
 
     apiTest(
+      'does not clear a supervises relationship on an entity from a different source',
+      async ({ apiClient, esClient }) => {
+        // Proves the entity.source filter is not over-broad: the pre-run reset
+        // must only touch entities with entity.source = ENTITY_SOURCE (Workday),
+        // not entities belonging to other integrations sharing the same index.
+        const runId = randomUUID().slice(0, 8);
+
+        // Okta actor with a seeded supervises raw_identifiers entry, simulating
+        // an edge written by a different maintainer before this run.
+        const oktaActorEmail = `okta.actor.${runId}@example.com`;
+        const oktaTargetEmail = `okta.target.${runId}@example.com`;
+        const oktaActorEntityId = `user:${oktaActorEmail}@okta`;
+        await seedUserEntity(esClient, {
+          entityId: oktaActorEntityId,
+          namespace: 'okta',
+          email: oktaActorEmail,
+          entitySource: 'entityanalytics_okta',
+          relationship: {
+            key: RELATIONSHIP_KEY,
+            userEmails: [oktaTargetEmail],
+          },
+        });
+
+        // Workday worker + manager pair so the integration actually runs and
+        // performs its pre-run reset.
+        const managerEmail = `iso.mgr.${runId}@example.com`;
+        const reportEmail = `iso.report.${runId}@example.com`;
+        const managerEntityId = `user:${managerEmail}@${NAMESPACE}`;
+        const reportEntityId = `user:${reportEmail}@${NAMESPACE}`;
+        for (const [entityId, email] of [
+          [managerEntityId, managerEmail],
+          [reportEntityId, reportEmail],
+        ] as Array<[string, string]>) {
+          await seedUserEntity(esClient, {
+            entityId,
+            namespace: NAMESPACE,
+            email,
+            entitySource: ENTITY_SOURCE,
+          });
+        }
+        await seedWorkdayRow(esClient, { userEmail: reportEmail, managerEmail });
+
+        await triggerMaintainerRun(apiClient, internalHeaders, MAINTAINER_ID, { sync: true });
+
+        // Workday run did real work: the manager received its report.
+        await waitForRelationshipIds(esClient, RELATIONSHIP_KEY, managerEntityId, reportEntityId);
+
+        // Okta actor's supervises.ids must be unchanged — it is a different
+        // entity document with entity.source = 'entityanalytics_okta', which
+        // the Workday pre-run reset must not touch.
+        const oktaIds = await getRelationshipIds(esClient, RELATIONSHIP_KEY, oktaActorEntityId);
+        expect(oktaIds).toStrictEqual([]);
+      }
+    );
+
+    apiTest(
       'keeps a manager who still has reports after the reset',
       async ({ apiClient, esClient }) => {
         // Guards the obvious failure mode of a reset: clearing without

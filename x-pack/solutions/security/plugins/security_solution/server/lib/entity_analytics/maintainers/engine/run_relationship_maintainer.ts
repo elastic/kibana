@@ -167,6 +167,37 @@ async function fetchTargetsForActors(
 }
 
 /**
+ * Clears every relationship key the config writes, for the configured entity
+ * source. Returns the total number of entity documents updated, or throws on
+ * transport failure (caller handles the error and skips the integration).
+ */
+async function clearConfiguredRelationships(
+  config: RelationshipIntegrationConfig,
+  entitySource: string,
+  crudClient: EntityUpdateClient,
+  signal: AbortSignal | undefined
+): Promise<number> {
+  const relationshipKeys =
+    config.kind === 'bucketed'
+      ? [
+          config.bucketTargetByThreshold.aboveThresholdRelationship,
+          config.bucketTargetByThreshold.belowThresholdRelationship,
+        ]
+      : [config.relationshipKey];
+
+  let totalCleared = 0;
+  for (const relationshipKey of relationshipKeys) {
+    const { updated } = await crudClient.clearRelationshipIds({
+      entitySource,
+      relationshipKey,
+      signal,
+    });
+    totalCleared += updated;
+  }
+  return totalCleared;
+}
+
+/**
  * Runs Step 1 + Step 2 + write for one integration end-to-end. Writes each
  * page's records to the entity store immediately after parsing, so the engine
  * never holds more than one page of records in memory at a time.
@@ -226,17 +257,16 @@ async function runIntegration(
 
   if (config.resetRelationshipsBeforeRun) {
     const { entitySource } = config.resetRelationshipsBeforeRun;
-    const relationshipKey =
-      config.kind === 'bucketed'
-        ? config.bucketTargetByThreshold.aboveThresholdRelationship
-        : config.relationshipKey;
     try {
-      const { updated } = await crudClient.clearRelationshipIds({
+      const totalCleared = await clearConfiguredRelationships(
+        config,
         entitySource,
-        relationshipKey,
-        signal,
-      });
-      logger.info(`${logPrefix} Cleared ${relationshipKey} on ${updated} ${entitySource} entities`);
+        crudClient,
+        signal
+      );
+      logger.info(
+        `${logPrefix} Pre-run reset cleared relationships on ${totalCleared} ${entitySource} entities`
+      );
     } catch (err) {
       // Populating on top of a half-cleared state is worse than leaving the
       // previous run's data in place, so skip this integration entirely.
@@ -263,6 +293,13 @@ async function runIntegration(
       iterations++;
       if (iterations > MAX_ITERATIONS) {
         logger.warn(`${logPrefix} Reached MAX_ITERATIONS (${MAX_ITERATIONS}), stopping`);
+        if (config.resetRelationshipsBeforeRun) {
+          // The relationship was cleared but not fully repopulated, so data is
+          // incomplete until the next clean run.
+          logger.warn(
+            `${logPrefix} Relationship was cleared before this run but pagination was truncated — data is incomplete until the next clean run`
+          );
+        }
         outcome = 'partial';
         truncated = true;
         break;
