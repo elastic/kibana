@@ -19,8 +19,8 @@ import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, useState } from 'react';
-import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
 import { useParams } from 'react-router-dom';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
 import { KI_SUMMARY_PAGE_SIZE } from '../../../common/constants';
 import {
   AutomationsPanel,
