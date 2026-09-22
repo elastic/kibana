@@ -13,8 +13,6 @@ import {
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
   LATEST_ALIAS,
-  LATEST_INDEX,
-  UPDATES_INDEX,
 } from '../../fixtures/maintainers/constants';
 import {
   clearEntityStoreIndices,
@@ -54,11 +52,7 @@ const actorId = (suffix: string) => `host:${ENTITY_PREFIX}-${suffix}.${domain}`;
 const targetFqdn = (suffix: string) => `${ENTITY_PREFIX}-${suffix}-target.${domain}`;
 const targetId = (suffix: string) => `host:${targetFqdn(suffix)}`;
 
-// TEMPORARY (do not merge): skipped to confirm this suite is what exhausts the
-// 60s beforeAll budget in the flaky-test runner. Its beforeAll is the heaviest
-// of the maintainer suites (concrete index delete + full entity-store install +
-// wait for all four engines) and it runs late, after ~107 other tests.
-apiTest.describe.skip(
+apiTest.describe(
   `Entity Store ${MAINTAINER_ID} maintainer (raw_identifiers)`,
   { tag: ENTITY_STORE_TAGS },
   () => {
@@ -78,10 +72,21 @@ apiTest.describe.skip(
       defaultHeaders = { ...credentials.cookieHeader, ...PUBLIC_HEADERS };
       internalHeaders = { ...credentials.cookieHeader, ...INTERNAL_HEADERS };
 
-      await esClient.indices.delete({
-        index: [LATEST_INDEX, UPDATES_INDEX],
-        ignore_unavailable: true,
-      });
+      // Uninstall first: this suite runs late in the config, so a previous suite's
+      // store is typically still installed. Installing over it leaves the engines
+      // reconciling against indices this hook is about to delete, which is what
+      // pushed provisioning past the 60s hook budget on loaded CI agents.
+      await apiClient
+        .post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
+          headers: defaultHeaders,
+          responseType: 'json',
+          body: {},
+        })
+        .catch(() => {});
+
+      // Covers all three index families; deleting only latest+updates would leak
+      // stale history snapshots from ~100 preceding tests into this install.
+      await clearEntityStoreIndices(esClient);
 
       const installResponse = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
         headers: defaultHeaders,
@@ -91,11 +96,10 @@ apiTest.describe.skip(
       expect([200, 201]).toContain(installResponse.statusCode);
 
       // Wait for all engine components to finish provisioning before seeding —
-      // the `running` status flips before the latest alias is ready. The explicit
-      // timeout matters: `apiTest.setTimeout` above applies to tests, not hooks,
-      // so this poll must outlast Playwright's 60s hook default or provisioning
-      // four engines on a loaded CI agent surfaces as an opaque hook timeout.
-      await waitForEntityStoreRunning(apiClient, defaultHeaders, 150_000);
+      // the `running` status flips before the latest alias is ready. Note the poll
+      // cannot outlast Playwright's 60s hook budget (`apiTest.setTimeout` applies
+      // to tests, not hooks), so this hook has to stay cheap rather than patient.
+      await waitForEntityStoreRunning(apiClient, defaultHeaders);
 
       const initResponse = await apiClient.post(
         ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT,
