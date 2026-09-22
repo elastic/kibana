@@ -26,6 +26,9 @@ const parseInterval = (raw: string): number => {
   }
   const unit = (match[2] ?? 's') as keyof typeof UNIT_MS;
   const ms = Number(match[1]) * UNIT_MS[unit];
+  if (!Number.isSafeInteger(ms) || ms > 2_147_483_647) {
+    throw new Error('--interval is too large.');
+  }
   if (ms < MIN_INTERVAL_MS) {
     throw new Error(`--interval must be at least ${MIN_INTERVAL_MS}ms.`);
   }
