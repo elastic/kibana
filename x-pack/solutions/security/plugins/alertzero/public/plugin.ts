@@ -87,7 +87,7 @@ export class AlertZeroPublicPlugin
     return {};
   }
 
-  public start(_core: CoreStart, startDeps: AlertZeroStartDependencies): AlertZeroPublicStart {
+  public start(core: CoreStart, startDeps: AlertZeroStartDependencies): AlertZeroPublicStart {
     if (!this.config.enabled) {
       return {};
     }
@@ -97,6 +97,12 @@ export class AlertZeroPublicPlugin
       templateId: TEMPLATE_ID_INVESTIGATION,
       name: INVESTIGATION_TEMPLATE_NAME,
       icon: 'securitySignalDetected',
+      onAssignSubmit: (conversationId, assignees) => {
+        core.http.patch(
+          `/internal/investigations/${encodeURIComponent(conversationId)}/assignees`,
+          { version: '1', body: JSON.stringify({ assignees }) }
+        );
+      },
     });
 
     return {};

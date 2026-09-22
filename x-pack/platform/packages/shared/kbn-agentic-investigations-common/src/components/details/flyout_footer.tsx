@@ -17,6 +17,13 @@ export interface ConversationDetailsFlyoutFooterProps {
   investigation: Investigation;
   /** Supplied by the caller because flyout slots render outside a `KibanaContextProvider`. */
   onOpenChat: () => void;
+  /**
+   * Commits the assignee write. Supplied by the solution layer which owns the HTTP client.
+   * The modal closes immediately after this is called; the implementation handles errors
+   * internally (e.g. via a toast or promise rejection).
+   * When absent, clicking Assign closes the modal without writing.
+   */
+  onAssignSubmit?: (assignee: string) => void;
 }
 
 interface ModalState {
@@ -33,11 +40,20 @@ const CLOSED_MODAL: ModalState = { type: null, recordId: null };
 export const ConversationDetailsFlyoutFooter = ({
   investigation,
   onOpenChat,
+  onAssignSubmit,
 }: ConversationDetailsFlyoutFooterProps) => {
   const [modalState, setModalState] = useState<ModalState>(CLOSED_MODAL);
   const [isApprovalOpen, { on: openApproval, off: closeApproval }] = useBoolean();
 
   const closeModal = useCallback(() => setModalState(CLOSED_MODAL), []);
+
+  const handleAssignSubmit = useCallback(
+    (assignee: string) => {
+      onAssignSubmit?.(assignee);
+      closeModal();
+    },
+    [onAssignSubmit, closeModal]
+  );
 
   const onClickAction = useCallback(
     (action: CardActionType, recordId: Investigation['recordId']) => {
@@ -77,6 +93,7 @@ export const ConversationDetailsFlyoutFooter = ({
         approvalInvestigation={isApprovalOpen ? investigation : undefined}
         onCloseAction={closeModal}
         onCloseApproval={closeApproval}
+        onAssignSubmit={onAssignSubmit ? handleAssignSubmit : undefined}
       />
     </>
   );

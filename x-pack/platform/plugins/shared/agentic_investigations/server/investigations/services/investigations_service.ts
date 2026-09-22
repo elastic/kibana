@@ -78,16 +78,18 @@ export class InvestigationsService {
       throw new NotAnInvestigationError(investigationId);
     }
 
-    if (body.assignees.length > 0) {
-      await this.validateAssignees(body.assignees);
+    const deduped = [...new Set(body.assignees)];
+
+    if (deduped.length > 0) {
+      await this.validateAssignees(deduped);
     }
 
     this.logger.debug(
-      `Updating assignees for investigation "${investigationId}" to [${body.assignees.join(', ')}]`
+      `Updating assignees for investigation "${investigationId}" to [${deduped.join(', ')}]`
     );
 
     const { conversation } = await client.patchMetadata(investigationId, {
-      assignees: body.assignees,
+      assignees: deduped,
     });
 
     return { assignees: readAssignees(conversation.metadata?.assignees) };
