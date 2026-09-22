@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { ATTACHMENT_ENTITY_FIELDS } from './attachment_entity';
 import { alertZeroAttachmentDataSchema } from './attachment_data_schema';
 import { SEVERITY_LEVELS } from './attachment_enums';
+import { EVENT_SOURCE_INDEX_ERROR, isAllowedEventSourceIndex } from './event_source_index';
 
 /**
  * Significant Security Event (SSE) attachment schema.
@@ -48,7 +49,11 @@ const alertRefSchema = z.object({
 
 const eventRefSchema = z.object({
   event_id: z.string().min(1).max(512),
-  source_index: z.string().min(1).max(256),
+  source_index: z
+    .string()
+    .min(1)
+    .max(256)
+    .refine(isAllowedEventSourceIndex, { message: EVENT_SOURCE_INDEX_ERROR }),
   timestamp: z.string().datetime().optional(),
   matched: z
     .object({
@@ -99,12 +104,20 @@ const huntResultPerIndexSchema = z.object({
 
 const huntResultTier1Schema = z.object({
   status: z.enum(['no_searchable_terms', 'no_environment_hits', 'environment_hits_found']),
-  counts: z.object({
-    total_hits: z.number().int().min(0),
-    returned_hits: z.number().int().min(0),
-    affected_hosts: z.number().int().min(0),
-    affected_users: z.number().int().min(0),
-  }),
+  counts: z
+    .object({
+      total_hits: z.number().int().min(0),
+      returned_hits: z.number().int().min(0),
+      affected_hosts: z.number().int().min(0),
+      affected_users: z.number().int().min(0),
+    })
+    // Returned hits are the sampled subset of total hits. Without this the UI and the agent
+    // formatter both suppress a larger `returned_hits` (they only surface it when it is the
+    // smaller number) and present the lower total as if the result set were complete.
+    .refine((counts) => counts.returned_hits <= counts.total_hits, {
+      message: 'returned_hits cannot exceed total_hits',
+      path: ['returned_hits'],
+    }),
   per_index: z.array(huntResultPerIndexSchema).max(20),
   resolved_iocs: z.array(huntIocSchema).max(50),
 });

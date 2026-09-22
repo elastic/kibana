@@ -132,10 +132,75 @@ describe('significantSecurityEventAttachmentDataSchema', () => {
     expect(result.success).toBe(true);
   });
 
+  it('rejects event source indices that could reach outside the intended source', () => {
+    // `source_index` flows straight into a Discover `FROM`, and unlike `alerts[]` there is no
+    // single alias to pin events to, so the shape itself has to be constrained.
+    const rejected = [
+      'logs-*',
+      '.alerts-security.alerts-default',
+      '.internal.alerts-security.alerts-default-000001',
+      '.preview.alerts-security.alerts-default',
+      '.kibana',
+      'logs-a,logs-b',
+      'remote:logs-default',
+      '-logs-default',
+      'logs default',
+    ];
+
+    for (const sourceIndex of rejected) {
+      const result = significantSecurityEventAttachmentDataSchema.safeParse({
+        ...validPayload,
+        events: [{ event_id: 'evt-1', source_index: sourceIndex }],
+      });
+      expect([sourceIndex, result.success]).toEqual([sourceIndex, false]);
+    }
+
+    const allowed = significantSecurityEventAttachmentDataSchema.safeParse({
+      ...validPayload,
+      events: [{ event_id: 'evt-1', source_index: 'logs-endpoint.events.process-default' }],
+    });
+    expect(allowed.success).toBe(true);
+  });
+
+  it('rejects a hunt result whose returned hits exceed its total hits', () => {
+    // Returned hits are a sample of total hits. A larger value is a producer bug, and both
+    // renderers hide it (they only surface returned_hits when it is smaller), so the
+    // contradictory payload would silently read as a complete result set.
+    const base = {
+      has_confirmed_hit: true,
+      time_range: { from: '2026-01-01T00:00:00Z', to: '2026-01-02T00:00:00Z' },
+      tier1: {
+        status: 'environment_hits_found' as const,
+        counts: { total_hits: 9, returned_hits: 5, affected_hosts: 1, affected_users: 1 },
+        per_index: [],
+        resolved_iocs: [],
+      },
+      tier2: {
+        status: 'no_behaviors_found' as const,
+        behaviors: [],
+      },
+    };
+
+    const invalid = significantSecurityEventAttachmentDataSchema.safeParse({
+      ...validPayload,
+      hunt_result: {
+        ...base,
+        tier1: { ...base.tier1, counts: { ...base.tier1.counts, total_hits: 5, returned_hits: 9 } },
+      },
+    });
+    expect(invalid.success).toBe(false);
+
+    const valid = significantSecurityEventAttachmentDataSchema.safeParse({
+      ...validPayload,
+      hunt_result: base,
+    });
+    expect(valid.success).toBe(true);
+  });
+
   it('rejects empty event_id or source_index on events', () => {
     const emptyEventId = significantSecurityEventAttachmentDataSchema.safeParse({
       ...validPayload,
-      events: [{ event_id: '', source_index: 'logs-*' }],
+      events: [{ event_id: '', source_index: 'logs-default' }],
     });
     const emptySourceIndex = significantSecurityEventAttachmentDataSchema.safeParse({
       ...validPayload,
