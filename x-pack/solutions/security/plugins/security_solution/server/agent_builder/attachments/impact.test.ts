@@ -140,6 +140,27 @@ describe('createImpactAttachmentType', () => {
       });
       expect(result.valid).toBe(false);
     });
+
+    it('rejects when verdict counts do not sum to alert_count', async () => {
+      const result = await attachmentType.validate({
+        entities: [
+          {
+            ...validEntity,
+            alert_count: 1,
+            verdicts: { true_positive: 100, false_positive: 0, inconclusive: 0 },
+          },
+        ],
+      });
+      expect(result.valid).toBe(false);
+    });
+
+    it('rejects when total_alert_count is below an entity alert_count', async () => {
+      const result = await attachmentType.validate({
+        entities: [validEntity],
+        total_alert_count: 1,
+      });
+      expect(result.valid).toBe(false);
+    });
   });
 
   describe('format', () => {

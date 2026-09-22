@@ -35,25 +35,53 @@ const impactVerdictCountsSchema = z.object({
   inconclusive: liquidNonNegativeInt.default(0),
 });
 
-const impactedEntitySchema = z.object({
-  entity_type: z.enum(['host', 'user']),
-  /** 'unknown' is a real value emitted by the sub-workflow when the alert lacked the field. */
-  name: z.string().min(1).max(1024),
-  alert_count: liquidNonNegativeInt,
-  verdicts: impactVerdictCountsSchema,
-});
+const impactedEntitySchema = z
+  .object({
+    entity_type: z.enum(['host', 'user']),
+    /** 'unknown' is a real value emitted by the sub-workflow when the alert lacked the field. */
+    name: z.string().min(1).max(1024),
+    alert_count: liquidNonNegativeInt,
+    verdicts: impactVerdictCountsSchema,
+  })
+  .superRefine((entity, ctx) => {
+    const verdictSum =
+      entity.verdicts.true_positive + entity.verdicts.false_positive + entity.verdicts.inconclusive;
+    if (verdictSum !== entity.alert_count) {
+      ctx.addIssue({
+        code: 'custom',
+        message: `verdict counts (${verdictSum}) must equal alert_count (${entity.alert_count})`,
+        path: ['verdicts'],
+      });
+    }
+  });
 
 export type ImpactedEntity = z.infer<typeof impactedEntitySchema>;
 
-export const impactAttachmentDataSchema = securityAttachmentDataSchema.extend({
-  entities: z.array(impactedEntitySchema).max(MAX_IMPACTED_ENTITIES),
-  total_alert_count: liquidNonNegativeInt.optional(),
-  /** True when the entity list was capped to MAX_IMPACTED_ENTITIES before attaching.
-   *  Accepts native boolean or the Liquid-rendered strings "true"/"false". */
-  truncated: z
-    .union([z.boolean(), z.enum(['true', 'false']).transform((v) => v === 'true')])
-    .optional(),
-});
+export const impactAttachmentDataSchema = securityAttachmentDataSchema
+  .extend({
+    entities: z.array(impactedEntitySchema).max(MAX_IMPACTED_ENTITIES),
+    total_alert_count: liquidNonNegativeInt.optional(),
+    /** True when the entity list was capped to MAX_IMPACTED_ENTITIES before attaching.
+     *  Accepts native boolean or the Liquid-rendered strings "true"/"false". */
+    truncated: z
+      .union([z.boolean(), z.enum(['true', 'false']).transform((v) => v === 'true')])
+      .optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.total_alert_count === undefined) {
+      return;
+    }
+    for (const entity of data.entities) {
+      if (data.total_alert_count < entity.alert_count) {
+        ctx.addIssue({
+          code: 'custom',
+          message: `total_alert_count (${data.total_alert_count}) must be >= each entity alert_count`,
+          path: ['total_alert_count'],
+        });
+        return;
+      }
+    }
+  });
 
 export type ImpactAttachmentData = z.infer<typeof impactAttachmentDataSchema>;
 
