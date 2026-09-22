@@ -153,7 +153,7 @@ export const propagateRoleArnToPackagePolicies = async ({
       `Cannot fan out role ARN for connector ${connectorId}: ${packagelessIds.length} package ${
         packagelessIds.length === 1 ? 'policy lacks' : 'policies lack'
       } a package and cannot be updated (ids: ${renderPolicyIds(packagelessIds)}).`,
-      { updateFailed: packagelessIds, revertFailed: [] }
+      { updateFailed: packagelessIds, revertFailed: [], bumpFailed: false }
     );
   }
 
@@ -294,9 +294,11 @@ export const propagateRoleArnToPackagePolicies = async ({
       );
 
       const { reverted, revertFailed } = await revertPlans(succeeded);
+      let bumpFailed = false;
       try {
         await bumpAgentPolicies(reverted);
       } catch (revertBumpError) {
+        bumpFailed = true;
         const revertBumpMessage =
           revertBumpError instanceof Error ? revertBumpError.message : String(revertBumpError);
         logger.error(
@@ -317,8 +319,11 @@ export const propagateRoleArnToPackagePolicies = async ({
               } (ids: ${renderPolicyIds(
                 revertFailed
               )}); those policies are now on the new role ARN while the connector still holds the old one.`
-            : `. All previously updated policies were reverted successfully; the connector is unchanged.`),
-        { updateFailed: failedIds, revertFailed }
+            : `. All previously updated policies were reverted successfully; the connector is unchanged.`) +
+          (bumpFailed
+            ? ` Agent policy revision bump after revert also failed; agents may still hold a stale compiled role ARN.`
+            : ''),
+        { updateFailed: failedIds, revertFailed, bumpFailed }
       );
     }
 
@@ -339,29 +344,45 @@ export const propagateRoleArnToPackagePolicies = async ({
           } after a failed connector write for connector ${connectorId}.`
         );
         const { reverted, revertFailed } = await revertPlans(rollbackPlans);
+        let bumpFailed = false;
         try {
           await bumpAgentPolicies(reverted);
         } catch (bumpError) {
+          bumpFailed = true;
           const bumpMessage = bumpError instanceof Error ? bumpError.message : String(bumpError);
           logger.error(
             `Failed to bump agent policy revisions in space ${spaceId} after rolling back the role ARN fan-out for connector ${connectorId}: ${bumpMessage}`
           );
         }
 
-        if (revertFailed.length === 0) {
+        if (revertFailed.length === 0 && !bumpFailed) {
           return;
         }
 
         revertFailed.sort();
-        throw new CloudConnectorRoleArnPropagationError(
-          `Failed to roll back role ARN on ${revertFailed.length} package ${
-            revertFailed.length === 1 ? 'policy' : 'policies'
-          } for connector ${connectorId} after the connector write failed` +
+        let message: string;
+        if (revertFailed.length > 0) {
+          message =
+            `Failed to roll back role ARN on ${revertFailed.length} package ${
+              revertFailed.length === 1 ? 'policy' : 'policies'
+            } for connector ${connectorId} after the connector write failed` +
             ` (ids: ${renderPolicyIds(
               revertFailed
-            )}); those policies are now on the new role ARN while the connector still holds the old one.`,
-          { updateFailed: [], revertFailed }
-        );
+            )}); those policies are now on the new role ARN while the connector still holds the old one.`;
+          if (bumpFailed) {
+            message +=
+              ' Agent policy revision bump after revert also failed; agents may still hold a stale compiled role ARN.';
+          }
+        } else {
+          message =
+            `Rolled back role ARN for connector ${connectorId} after the connector write failed, but the agent policy revision bump failed.` +
+            ` Agents may still hold a stale compiled role ARN.`;
+        }
+        throw new CloudConnectorRoleArnPropagationError(message, {
+          updateFailed: [],
+          revertFailed,
+          bumpFailed,
+        });
       },
     };
   }
@@ -382,11 +403,13 @@ export const propagateRoleArnToPackagePolicies = async ({
 
   // Bump agent policies for the ones we successfully reverted — their package-policy `revision`
   // moved (once forward, once back), so agents need one bump to re-fetch and discard the stale
-  // compiled version they may already have cached. Already throwing below, so a bump failure
-  // here is logged rather than nested into a second error path.
+  // compiled version they may already have cached. Surface bump failure in `detail.bumpFailed`
+  // rather than nesting a second error path; we are already throwing for the policy failures.
+  let bumpFailed = false;
   try {
     await bumpAgentPolicies(reverted);
   } catch (bumpError) {
+    bumpFailed = true;
     const bumpMessage = bumpError instanceof Error ? bumpError.message : String(bumpError);
     logger.error(
       `Failed to bump agent policy revisions in space ${spaceId} after reverting the role ARN fan-out for connector ${connectorId}: ${bumpMessage}`
@@ -409,8 +432,15 @@ export const propagateRoleArnToPackagePolicies = async ({
         } (ids: ${renderPolicyIds(
           revertFailed
         )}); those policies are now on the new role ARN while the connector still holds the old one.`
-      : `. All previously updated policies were reverted successfully; the connector is unchanged.`);
+      : `. All previously updated policies were reverted successfully; the connector is unchanged.`) +
+    (bumpFailed
+      ? ` Agent policy revision bump after revert also failed; agents may still hold a stale compiled role ARN.`
+      : '');
 
-  // exit 4/4: partial failure — caller must NOT write the connector; `detail` carries the ids.
-  throw new CloudConnectorRoleArnPropagationError(message, { updateFailed, revertFailed });
+  // exit 5: partial failure — caller must NOT write the connector; `detail` carries the ids.
+  throw new CloudConnectorRoleArnPropagationError(message, {
+    updateFailed,
+    revertFailed,
+    bumpFailed,
+  });
 };

@@ -1128,6 +1128,7 @@ describe('Cloud Connector API', () => {
         new CloudConnectorRoleArnPropagationError('Role ARN fan-out failed', {
           updateFailed: ['policy-1'],
           revertFailed: ['policy-2'],
+          bumpFailed: true,
         })
       );
       const request = httpServerMock.createKibanaRequest({
@@ -1148,6 +1149,7 @@ describe('Cloud Connector API', () => {
           attributes: {
             updateFailed: ['policy-1'],
             revertFailed: ['policy-2'],
+            bumpFailed: true,
           },
         },
       });

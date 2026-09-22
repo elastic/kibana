@@ -151,6 +151,7 @@ describe('updateCloudConnectorHandler', () => {
       new CloudConnectorRoleArnPropagationError(propagationMessage, {
         updateFailed: ['p1'],
         revertFailed: [],
+        bumpFailed: false,
       })
     );
     const request = httpServerMock.createKibanaRequest({
@@ -169,6 +170,7 @@ describe('updateCloudConnectorHandler', () => {
         attributes: {
           updateFailed: ['p1'],
           revertFailed: [],
+          bumpFailed: false,
         },
       },
     });

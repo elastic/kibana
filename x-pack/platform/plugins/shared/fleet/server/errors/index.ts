@@ -187,6 +187,8 @@ export class CloudConnectorUpdateError extends FleetError {
 export interface CloudConnectorRoleArnPropagationDetail {
   updateFailed: string[];
   revertFailed: string[];
+  /** True when the deferred agent-policy revision bump failed after a revert. */
+  bumpFailed: boolean;
 }
 
 export class CloudConnectorRoleArnPropagationError extends FleetError {

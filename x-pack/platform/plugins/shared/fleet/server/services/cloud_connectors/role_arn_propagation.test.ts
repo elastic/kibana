@@ -271,8 +271,10 @@ describe('propagateRoleArnToPackagePolicies', () => {
     expect(caught).toBeInstanceOf(CloudConnectorRoleArnPropagationError);
     expect(caught?.message).toMatch(/Failed to bump agent policy revisions/);
     expect(caught?.message).toMatch(/reverted successfully/);
+    expect(caught?.message).toMatch(/Agent policy revision bump after revert also failed/);
     expect(caught?.detail.updateFailed).toEqual(['a', 'b']);
     expect(caught?.detail.revertFailed).toEqual([]);
+    expect(caught?.detail.bumpFailed).toBe(true);
 
     const revertCalls = (packagePolicyService.update as jest.Mock).mock.calls.filter(
       ([, , , update]) => update.inputs[0].vars.role_arn.value === OLD_ARN
@@ -381,6 +383,35 @@ describe('propagateRoleArnToPackagePolicies', () => {
     expect(caught).toBeInstanceOf(CloudConnectorRoleArnPropagationError);
     expect(caught?.detail.updateFailed).toEqual([]);
     expect(caught?.detail.revertFailed).toEqual(['b']);
+    expect(caught?.detail.bumpFailed).toBe(false);
+  });
+
+  it('rollback handle reports bumpFailed when the post-revert bump fails', async () => {
+    mockListReturns([makePolicy('a')]);
+
+    const rollback = await propagateRoleArnToPackagePolicies({
+      soClient,
+      esClient,
+      connectorId: CONNECTOR_ID,
+      newRoleArn: NEW_ARN,
+    });
+
+    (agentPolicyService.bumpAgentPoliciesByIds as jest.Mock).mockRejectedValueOnce(
+      new Error('revert bump boom')
+    );
+
+    let caught: CloudConnectorRoleArnPropagationError | undefined;
+    try {
+      await rollback!.revert();
+    } catch (err) {
+      caught = err as CloudConnectorRoleArnPropagationError;
+    }
+
+    expect(caught).toBeInstanceOf(CloudConnectorRoleArnPropagationError);
+    expect(caught?.detail.updateFailed).toEqual([]);
+    expect(caught?.detail.revertFailed).toEqual([]);
+    expect(caught?.detail.bumpFailed).toBe(true);
+    expect(caught?.message).toMatch(/agent policy revision bump failed/i);
   });
 
   it('rejects packageless policies before any write', async () => {
@@ -461,6 +492,35 @@ describe('propagateRoleArnToPackagePolicies', () => {
     }
   });
 
+  it('includes bumpFailed when the post-revert agent-policy bump fails', async () => {
+    mockListReturns([makePolicy('a'), makePolicy('b')]);
+    (packagePolicyService.update as jest.Mock).mockImplementation(async (_so, _es, id: string) => {
+      if (id === 'b') throw new Error('boom');
+      return { id, version: `Wz${id}-after` };
+    });
+    (agentPolicyService.bumpAgentPoliciesByIds as jest.Mock).mockRejectedValue(
+      new Error('bump after revert boom')
+    );
+
+    let caught: CloudConnectorRoleArnPropagationError | undefined;
+    try {
+      await propagateRoleArnToPackagePolicies({
+        soClient,
+        esClient,
+        connectorId: CONNECTOR_ID,
+        newRoleArn: NEW_ARN,
+      });
+    } catch (err) {
+      caught = err as CloudConnectorRoleArnPropagationError;
+    }
+
+    expect(caught).toBeInstanceOf(CloudConnectorRoleArnPropagationError);
+    expect(caught?.detail.updateFailed).toEqual(['b']);
+    expect(caught?.detail.revertFailed).toEqual([]);
+    expect(caught?.detail.bumpFailed).toBe(true);
+    expect(caught?.message).toMatch(/Agent policy revision bump after revert also failed/);
+  });
+
   it('includes both updateFailed and revertFailed in the thrown detail', async () => {
     mockListReturns([makePolicy('a'), makePolicy('b')]);
     (packagePolicyService.update as jest.Mock).mockImplementation(
@@ -491,6 +551,7 @@ describe('propagateRoleArnToPackagePolicies', () => {
     expect(caught).toBeInstanceOf(CloudConnectorRoleArnPropagationError);
     expect(caught?.detail.updateFailed).toEqual(['b']);
     expect(caught?.detail.revertFailed).toEqual(['a']);
+    expect(caught?.detail.bumpFailed).toBe(false);
   });
 
   it('reports failed ids in a stable order, capped in the message but complete in the detail', async () => {

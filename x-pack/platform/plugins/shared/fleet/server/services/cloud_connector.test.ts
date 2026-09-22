@@ -1539,7 +1539,7 @@ describe('CloudConnectorService', () => {
       it('surfaces updateFailed/revertFailed when post-write rollback itself fails', async () => {
         const rollbackError = new CloudConnectorRoleArnPropagationError(
           'Failed to update role ARN on 1 package policy',
-          { updateFailed: [], revertFailed: ['policy-stuck'] }
+          { updateFailed: [], revertFailed: ['policy-stuck'], bumpFailed: false }
         );
         const rollback = { policyCount: 1, revert: jest.fn().mockRejectedValue(rollbackError) };
         propagateRoleArnToPackagePoliciesMock.mockResolvedValueOnce(rollback);
@@ -1562,6 +1562,7 @@ describe('CloudConnectorService', () => {
         expect(propagationError.detail).toEqual({
           updateFailed: [],
           revertFailed: ['policy-stuck'],
+          bumpFailed: false,
         });
         expect(propagationError.message).toMatch(/write-failed/i);
         expect(propagationError.message).toMatch(

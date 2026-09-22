@@ -223,6 +223,7 @@ export const updateCloudConnectorHandler: FleetRequestHandler<
           attributes: {
             updateFailed: error.detail.updateFailed,
             revertFailed: error.detail.revertFailed,
+            bumpFailed: error.detail.bumpFailed,
           },
         },
       });
