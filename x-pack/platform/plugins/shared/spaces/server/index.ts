@@ -23,6 +23,7 @@ export type {
 export type { SpacesServiceSetup, SpacesServiceStart } from './spaces_service';
 export type {
   ISpacesClient,
+  SpaceDeleteHandler,
   SpacesClientRepositoryFactory,
   SpacesClientWrapper,
 } from './spaces_client';

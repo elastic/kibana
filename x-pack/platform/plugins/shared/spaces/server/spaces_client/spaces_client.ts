@@ -38,8 +38,8 @@ const DEFAULT_PURPOSE = 'any';
 const LEGACY_URL_ALIAS_TYPE = 'legacy-url-alias';
 
 /**
- * Runs after a space and its saved objects have been deleted.
- * @param spaceId the id of the deleted space.
+ * Runs after a space's saved objects have been deleted and before the space itself is removed.
+ * @param spaceId the id of the space being deleted.
  */
 export type SpaceDeleteHandler = (spaceId: string) => Promise<void>;
 
@@ -377,6 +377,19 @@ export class SpacesClient implements ISpacesClient {
 
     await this.repository.deleteByNamespace(id);
 
+    const results = await Promise.allSettled(
+      this.spaceDeleteHandlers.map((handler) => handler(id))
+    );
+    const failures = results.filter(
+      (result): result is PromiseRejectedResult => result.status === 'rejected'
+    );
+    if (failures.length > 0) {
+      this.debugLogger(
+        `SpacesClient.delete(). ${failures.length} of ${results.length} space delete handlers failed for space ${id}.`
+      );
+      throw failures[0].reason;
+    }
+
     await this.repository.delete('space', id);
 
     if (this.npreClient) {
@@ -394,10 +407,6 @@ export class SpacesClient implements ISpacesClient {
           throw error;
         }
       }
-    }
-
-    for (const handler of this.spaceDeleteHandlers) {
-      await handler(id);
     }
   }
 

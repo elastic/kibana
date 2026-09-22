@@ -1642,7 +1642,7 @@ describe('#delete', () => {
     expect(mockCallWithRequestRepository.deleteByNamespace).toHaveBeenCalledWith(id);
   });
 
-  test(`runs space delete handlers after the saved objects are deleted`, async () => {
+  test(`runs space delete handlers after the saved objects and before the space are deleted`, async () => {
     const mockDebugLogger = createMockDebugLogger();
     const mockConfig = createMockConfig();
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
@@ -1666,6 +1666,9 @@ describe('#delete', () => {
     expect(handler.mock.invocationCallOrder[0]).toBeGreaterThan(
       mockCallWithRequestRepository.deleteByNamespace.mock.invocationCallOrder[0]
     );
+    expect(handler.mock.invocationCallOrder[0]).toBeLessThan(
+      mockCallWithRequestRepository.delete.mock.invocationCallOrder[0]
+    );
   });
 
   test(`propagates space delete handler errors`, async () => {
@@ -1687,7 +1690,34 @@ describe('#delete', () => {
     );
 
     await expect(client.delete(id)).rejects.toThrow('handler failed');
-    expect(mockCallWithRequestRepository.delete).toHaveBeenCalledWith('space', id);
+    expect(mockCallWithRequestRepository.delete).not.toHaveBeenCalled();
+  });
+
+  test(`runs every space delete handler when one fails`, async () => {
+    const mockDebugLogger = createMockDebugLogger();
+    const mockConfig = createMockConfig();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.get.mockResolvedValue(notReservedSavedObject);
+    const failingHandler = jest.fn().mockRejectedValue(new Error('handler failed'));
+    const handler = jest.fn().mockResolvedValue(undefined);
+
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'traditional',
+      featuresStart,
+      undefined,
+      [failingHandler, handler]
+    );
+
+    await expect(client.delete(id)).rejects.toThrow('handler failed');
+    expect(handler).toHaveBeenCalledWith(id);
+    expect(mockDebugLogger).toHaveBeenCalledWith(
+      `SpacesClient.delete(). 1 of 2 space delete handlers failed for space ${id}.`
+    );
+    expect(mockCallWithRequestRepository.delete).not.toHaveBeenCalled();
   });
 });
 
