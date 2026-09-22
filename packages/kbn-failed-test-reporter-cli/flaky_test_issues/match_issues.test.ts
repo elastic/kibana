@@ -208,6 +208,33 @@ describe('findMatchingIssues', () => {
     ]);
   });
 
+  it('does not take a suite issue of another framework for the suite, same file and title', () => {
+    const [suite] = groupIntoSuites([flakyTest({ suiteTitle: 'Default status alert' })]);
+    const suiteIssue = (number: number, framework: string) =>
+      describeIssue(
+        githubIssue({
+          number,
+          body: `text\n\n<!-- kibanaCiData = ${JSON.stringify({
+            'flaky-test-suite': {
+              'suite.filePath': SUITE_PATH,
+              'suite.title': 'Default status alert',
+              'suite.framework': framework,
+            },
+          })} -->`,
+        })
+      );
+
+    const matches = findMatchingIssues(suite, [
+      suiteIssue(31, 'jest'),
+      suiteIssue(32, 'playwright'),
+    ]);
+
+    expect(matches.map(({ issue, match }) => [issue.number, match])).toEqual([
+      [32, 'suite'],
+      [31, 'file'],
+    ]);
+  });
+
   it('matches Scout issues by test id, or by file for other tests of the suite', () => {
     const [suite] = groupIntoSuites([
       flakyTest({ testId: 'id-1', title: 'creates default alert' }),

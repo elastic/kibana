@@ -130,6 +130,17 @@ describe('flakySuiteIssueTitle', () => {
     );
   });
 
+  it('cuts a suite title that would push the issue title past what GitHub accepts', () => {
+    const { suite } = singleTestReport();
+    const title = flakySuiteIssueTitle(
+      { ...suite, suiteTitle: 'nested '.repeat(60).trim() },
+      'Synthetics'
+    );
+    expect(title).toHaveLength(256);
+    expect(title.startsWith('[Synthetics] Flaky Scout test suite: nested nested')).toBe(true);
+    expect(title.endsWith('…')).toBe(true);
+  });
+
   it('falls back to the file name without a suite title and omits an unknown module', () => {
     expect(
       flakySuiteIssueTitle({

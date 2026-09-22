@@ -25,6 +25,8 @@ export interface IssueDetails {
   suiteFilePath?: string;
   /** Suite of that file the issue is about; absent for issues about a whole file. */
   suiteTitle?: string;
+  /** Framework the suite issue is about; absent for issues filed before it was recorded. */
+  suiteFramework?: string;
   /** Scout test id from the `Test ID` row; the same id `discover-flaky-tests` reports. */
   scoutTestId?: string;
   /** File the issue names: the Scout `Location` row or the `<path>·ts` ending an FTR classname. */
@@ -76,6 +78,7 @@ export const describeIssue = (issue: GithubIssue): IssueDetails => {
     issue,
     suiteFilePath: suiteMetadata?.['suite.filePath'] ?? readSuiteFilePathFromTitle(issue.title),
     suiteTitle: suiteMetadata?.['suite.title'],
+    suiteFramework: suiteMetadata?.['suite.framework'],
     scoutTestId: issue.body.match(SCOUT_TEST_ID_ROW)?.[1],
     filePath: location
       ? undot(location)
@@ -182,16 +185,17 @@ export const findMatchingIssues = (
 
   const matches: MatchedIssue[] = [];
   for (const details of issues) {
-    const { issue, suiteFilePath, suiteTitle, scoutTestId, filePath, jestDirectory, testName } =
-      details;
-    const { text } = details;
+    const { issue, suiteFilePath, suiteTitle, suiteFramework, scoutTestId, filePath } = details;
+    const { jestDirectory, testName, text } = details;
     const mentionsFile = text.includes(suite.filePath);
     const namesFlakyTest = testName !== undefined && namesTest(testName, titles);
 
-    // An issue about the whole file is about each of its suites
+    // An issue about the whole file is about each of its suites; one file can hold suites of
+    // several frameworks, so a recorded framework has to agree too
     const aboutSuite =
       suiteFilePath === suite.filePath &&
-      (suiteTitle === undefined || suiteTitle === suite.suiteTitle);
+      (suiteTitle === undefined || suiteTitle === suite.suiteTitle) &&
+      (suiteFramework === undefined || suiteFramework === suite.framework);
     if (aboutSuite) {
       matches.push({ issue, match: 'suite' });
     } else if (scoutTestId !== undefined && testIds.has(scoutTestId)) {

@@ -79,8 +79,11 @@ export function runReportFlakyTestIssuesCli() {
           : undefined;
       log.info(
         `${dryRun ? 'Dry run against' : 'Filing issues in'} ${githubRepo}: open failed-test ` +
-          `issues and those closed in the last ${closedSinceDays} days count as tracking a ` +
-          `suite${tracking ? `, in ${tracking.repo} too` : ''}; at most ${maxNewIssues} new issues`
+          `issues and those closed in the last ${closedSinceDays} days count as tracking a suite` +
+          (tracking
+            ? `, and a suite whose every test has one in ${tracking.repo} is skipped`
+            : '') +
+          `; at most ${maxNewIssues} new issues`
       );
 
       const summary = await reportFlakySuiteIssues({
@@ -114,8 +117,10 @@ export function runReportFlakyTestIssuesCli() {
         File a GitHub failed-test issue for every flaky test suite of a report written by
         \`node scripts/scout discover-flaky-tests\` that no issue is about yet, worst suites first
         and up to --max-new-issues per run. Lists every open failed-test issue and the recently
-        closed ones in --github-repo and in --tracking-repo, then matches locally: a suite with an
-        issue in either, open or closed, about it or one of its tests gets none.
+        closed ones in --github-repo and in --tracking-repo, then matches locally. A suite gets no
+        issue when one in --github-repo, open or closed, is about it or one of its tests, or when
+        every one of its tests has an issue in --tracking-repo, a per-test one or one about the
+        suite or its file; a single test without one is enough for the suite issue to be filed.
 
         Examples:
           GITHUB_TOKEN=... node scripts/report_flaky_test_issues --input .scout/flaky_tests.json --dry-run
@@ -145,7 +150,7 @@ export function runReportFlakyTestIssuesCli() {
           --input               Flaky test report to read [default: ${DEFAULT_INPUT}]
           --summary-path        Where to write the JSON summary [default: ${DEFAULT_SUMMARY_PATH}]
           --github-repo         owner/name of the repository the issues are filed in [default: ${DEFAULT_GITHUB_REPO}]
-          --tracking-repo       owner/name whose failed-test issues also count as tracking a suite; never written to, empty disables [default: ${DEFAULT_TRACKING_REPO}]
+          --tracking-repo       owner/name whose failed-test issues cover a suite once every one of its tests has one; never written to, empty disables [default: ${DEFAULT_TRACKING_REPO}]
           --closed-since-days   Only closed issues updated within this many days count as tracking a suite [default: ${DEFAULT_CLOSED_SINCE_DAYS}]
           --max-new-issues      Issues created per run, worst suites first [default: ${DEFAULT_MAX_NEW_ISSUES}]
           --dashboard-url       Dashboard with the live numbers, linked from new issues

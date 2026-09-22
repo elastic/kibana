@@ -42,6 +42,8 @@ const HIGHLIGHTED_PIPELINES = new Set(['kibana-on-merge', 'kibana-pull-request']
 const RANK_TIERS = [5, 10, 20, 30, 50, 100];
 const MAX_TEST_ROWS = 15;
 const MAX_DISTINCT_FAILURES = 2;
+/** GitHub rejects longer issue titles with a 422. */
+const MAX_TITLE_LENGTH = 256;
 /** A branch is named in the headline when it fails at least this share of the flakiest one. */
 const HEADLINE_BRANCH_SHARE = 0.25;
 const MAX_HEADLINE_BRANCHES = 2;
@@ -154,7 +156,10 @@ export const flakySuiteIssueTitle = (
   const [flaky, testSuite] = FLAKY_TEST_SUITE_TITLE_TERMS;
   const subject = suite.suiteTitle ?? Path.basename(suite.filePath);
   const prefix = moduleLabel ? `[${moduleLabel}] ` : '';
-  return `${prefix}${flaky} ${FRAMEWORK_LABELS[suite.framework].short} ${testSuite}: ${subject}`;
+  const lead = `${prefix}${flaky} ${FRAMEWORK_LABELS[suite.framework].short} ${testSuite}: `;
+  // Nested describe blocks can join into a subject longer than GitHub accepts for a title
+  const room = MAX_TITLE_LENGTH - lead.length;
+  return lead + (subject.length > room ? `${subject.slice(0, room - 1)}…` : subject);
 };
 
 /** `in the top 30 flakiest tests`: the tier the suite's worst test falls in, over the whole report. */
