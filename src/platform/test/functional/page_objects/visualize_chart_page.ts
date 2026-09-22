@@ -213,17 +213,22 @@ export class VisualizeChartPageObject extends FtrService {
 
   public async waitForVisualizationRenderingStabilized() {
     await this.header.waitUntilLoadingHasFinished();
-    // assuming rendering is done when data-rendering-count is constant within 1000 ms
+    let previousCount: number | undefined;
+    let stablePolls = 0;
+    const requiredStablePolls = 3;
+
     await this.retry.waitFor('rendering count to stabilize', async () => {
-      const firstCount = await this.getVisualizationRenderingCount();
-      this.log.debug(`-- firstCount=${firstCount}`);
+      const currentCount = await this.getVisualizationRenderingCount();
+      this.log.debug(`-- currentRenderingCount=${currentCount}`);
 
-      await this.common.sleep(2000);
+      if (currentCount === previousCount) {
+        stablePolls++;
+      } else {
+        previousCount = currentCount;
+        stablePolls = 0;
+      }
 
-      const secondCount = await this.getVisualizationRenderingCount();
-      this.log.debug(`-- secondCount=${secondCount}`);
-
-      return firstCount === secondCount;
+      return stablePolls >= requiredStablePolls;
     });
   }
 
