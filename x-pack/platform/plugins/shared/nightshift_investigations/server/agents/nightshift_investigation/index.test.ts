@@ -9,9 +9,9 @@ import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { platformCoreTools, platformSignificantEventsTools } from '@kbn/agent-builder-common/tools';
 import type { AgentBaseConfiguration, AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
 import {
-  getDeductiveInvestigationAgentType,
-  registerDeductiveInvestigationAgentType,
-  NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_TYPE_ID,
+  getNightshiftInvestigationAgentType,
+  registerNightshiftInvestigationAgentType,
+  NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID,
 } from '.';
 import { SANDBOX_BASH_TOOL_ID } from '../../tools/sandbox_bash/tool';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../../tools/sandbox_bash/view_file_tool';
@@ -32,20 +32,20 @@ const staticBase = (type: AgentTypeDefinition): AgentBaseConfiguration => {
   return type.baseConfiguration;
 };
 
-describe('deductive investigation agent type', () => {
+describe('nightshift investigation agent type', () => {
   it('registers under its own type id, separate from the significant-events investigator', () => {
     const agentBuilder = agentBuilderMocks.createSetup();
 
-    registerDeductiveInvestigationAgentType(agentBuilder);
+    registerNightshiftInvestigationAgentType(agentBuilder);
 
     expect(agentBuilder.agents.registerType).toHaveBeenCalledWith(
-      expect.objectContaining({ id: NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_TYPE_ID })
+      expect.objectContaining({ id: NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID })
     );
   });
 
   it('carries a standalone sandbox prompt and no Elastic tools', () => {
     const base = staticBase(
-      getDeductiveInvestigationAgentType({ sandboxEnabled: true, cortexEnabled: true })
+      getNightshiftInvestigationAgentType({ sandboxEnabled: true, cortexEnabled: true })
     );
 
     expect(base).toMatchObject({
@@ -66,7 +66,7 @@ describe('deductive investigation agent type', () => {
 
   it('drops both cortex workflows when cortex is disabled', () => {
     const base = staticBase(
-      getDeductiveInvestigationAgentType({ sandboxEnabled: true, cortexEnabled: false })
+      getNightshiftInvestigationAgentType({ sandboxEnabled: true, cortexEnabled: false })
     );
 
     expect(base.workflow_ids).toBeUndefined();
@@ -75,7 +75,7 @@ describe('deductive investigation agent type', () => {
 
   it('drops the hydrate workflow when cortex is on but the sandbox is not configured', () => {
     const base = staticBase(
-      getDeductiveInvestigationAgentType({ sandboxEnabled: false, cortexEnabled: true })
+      getNightshiftInvestigationAgentType({ sandboxEnabled: false, cortexEnabled: true })
     );
 
     expect(base.workflow_ids).toBeUndefined();
@@ -87,7 +87,7 @@ describe('deductive investigation agent type', () => {
 
   it('allow-lists the telemetry connector when one is configured', () => {
     const base = staticBase(
-      getDeductiveInvestigationAgentType({
+      getNightshiftInvestigationAgentType({
         sandboxEnabled: true,
         cortexEnabled: true,
         telemetryConnectorId: 'elasticsearch-telemetry',

@@ -8,7 +8,7 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import {
-  DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
+  NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -17,7 +17,7 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import { investigationStateSchema } from '@kbn/significant-events-schema';
 import { assertNever } from '@kbn/std';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
-import { installDeductiveInvestigationAgent } from '../lib/install_deductive_investigation_agent';
+import { installNightshiftInvestigationAgent } from '../lib/install_nightshift_investigation_agent';
 import type { InvestigationQuotaCallback } from '../types';
 import type {
   AlertInvestigationContext,
@@ -88,22 +88,22 @@ const isTriggerType = (value: unknown): value is InvestigationTriggerType =>
 
 const INVESTIGATION_WORKFLOW_IDS = new Set([
   SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
-  DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
+  NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
 ]);
 
 /**
  * A manual investigation has no stored entity to write results back to, so it runs the lean
- * deductive workflow; every other subject runs the significant-events workflow, which attaches
- * its findings to the event or alert it was started from.
+ * Nightshift investigation workflow; every other subject runs the significant-events workflow,
+ * which attaches its findings to the event or alert it was started from.
  */
 const workflowIdForSubject = (subject: InvestigationSubject): string =>
   subject.type === 'manual'
-    ? DEDUCTIVE_INVESTIGATION_WORKFLOW_ID
+    ? NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID
     : SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID;
 
 /** Each workflow calls its own agent, so the pre-install has to follow the same split. */
 const installAgentForSubject = (subject: InvestigationSubject) =>
-  subject.type === 'manual' ? installDeductiveInvestigationAgent : installInvestigationAgent;
+  subject.type === 'manual' ? installNightshiftInvestigationAgent : installInvestigationAgent;
 
 /** Keeps a derived summary to one readable line, since it is rendered as a list headline. */
 const MAX_DERIVED_SUBJECT_SUMMARY_LENGTH = 200;

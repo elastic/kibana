@@ -9,13 +9,13 @@ import { AgentAccessControlMode } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
 import {
-  DEDUCTIVE_INVESTIGATION_AGENT_DESCRIPTION,
-  DEDUCTIVE_INVESTIGATION_AGENT_NAME,
-  NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID,
-  NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_TYPE_ID,
-} from '../agents/deductive_investigation';
+  NIGHTSHIFT_INVESTIGATION_AGENT_DESCRIPTION,
+  NIGHTSHIFT_INVESTIGATION_AGENT_NAME,
+  NIGHTSHIFT_INVESTIGATION_AGENT_ID,
+  NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID,
+} from '../agents/nightshift_investigation';
 
-export const installDeductiveInvestigationAgent = async ({
+export const installNightshiftInvestigationAgent = async ({
   agentBuilder,
   spaceId,
   availability,
@@ -28,12 +28,12 @@ export const installDeductiveInvestigationAgent = async ({
     spaceId,
     availability,
     agent: {
-      id: NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID,
-      type: NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_TYPE_ID,
-      name: DEDUCTIVE_INVESTIGATION_AGENT_NAME,
-      description: DEDUCTIVE_INVESTIGATION_AGENT_DESCRIPTION,
+      id: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
+      type: NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID,
+      name: NIGHTSHIFT_INVESTIGATION_AGENT_NAME,
+      description: NIGHTSHIFT_INVESTIGATION_AGENT_DESCRIPTION,
       labels: ['observability', 'significant-events', 'investigation', 'cortex', 'sandbox'],
-      avatar_symbol: 'ND',
+      avatar_symbol: 'NI',
       access_control: { access_mode: AgentAccessControlMode.Public },
       configuration: {
         tools: [],

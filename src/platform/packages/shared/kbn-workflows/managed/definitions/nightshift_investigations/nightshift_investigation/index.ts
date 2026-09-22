@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import DEDUCTIVE_INVESTIGATION_WORKFLOW_YAML from './deductive_investigation_workflow.yaml';
+import NIGHTSHIFT_INVESTIGATION_WORKFLOW_YAML from './nightshift_investigation_workflow.yaml';
 import type { ManagedWorkflowDefinition } from '../../../types';
 
-export const DEDUCTIVE_INVESTIGATION_WORKFLOW_ID = 'system-deductive-investigation';
+export const NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID = 'system-nightshift-investigation';
 
-export const DEDUCTIVE_INVESTIGATION_WORKFLOW = {
-  id: DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
+export const NIGHTSHIFT_INVESTIGATION_WORKFLOW = {
+  id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
   pluginId: 'nightshiftInvestigations',
   version: 1,
   billable: false,
-  yaml: DEDUCTIVE_INVESTIGATION_WORKFLOW_YAML,
+  yaml: NIGHTSHIFT_INVESTIGATION_WORKFLOW_YAML,
   management: {
     lifecycle: 'static',
     versionStrategy: 'auto',

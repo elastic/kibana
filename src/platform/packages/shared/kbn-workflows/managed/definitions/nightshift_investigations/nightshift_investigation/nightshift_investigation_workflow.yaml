@@ -1,5 +1,5 @@
 version: '1'
-name: Deductive Investigation
+name: Nightshift Investigation
 description: >
   General-purpose investigation. Ensures the investigator agent exists, persists
   the run, calls the agent with the caller's prompt, then writes the result back.
@@ -7,7 +7,7 @@ enabled: true
 settings:
   timeout: '60m'
   concurrency:
-    key: 'deductive-investigation-{{ inputs.concurrency_key | default: execution.id }}'
+    key: 'nightshift-investigation-{{ inputs.concurrency_key | default: execution.id }}'
     strategy: cancel-in-progress
     max: 1
 tags:
@@ -49,7 +49,7 @@ steps:
   - name: ensure_investigation_agent
     type: nightshift.ensureInvestigationAgent
     with:
-      agent_id: significant-events.deductive-investigation
+      agent_id: significant-events.nightshift-investigation
 
   - name: persist_investigation_started
     type: kibana.request
@@ -78,7 +78,7 @@ steps:
 
   - name: investigate
     type: ai.agent
-    agent-id: significant-events.deductive-investigation
+    agent-id: significant-events.nightshift-investigation
     connector-id-by-feature: 'significant_events_investigation'
     plugin-id: 'significant_events_investigation'
     aggregate-by: 'significant_events'

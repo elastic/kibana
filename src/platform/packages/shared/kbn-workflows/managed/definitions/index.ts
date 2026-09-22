@@ -45,7 +45,7 @@ import {
 } from './discoveries';
 import { NIGHTSHIFT_CORTEX_HYDRATE_WORKFLOW } from './nightshift_investigations/cortex_hydrate';
 import { NIGHTSHIFT_CORTEX_OPTIMIZE_WORKFLOW } from './nightshift_investigations/cortex_optimize';
-import { DEDUCTIVE_INVESTIGATION_WORKFLOW } from './nightshift_investigations/deductive_investigation';
+import { NIGHTSHIFT_INVESTIGATION_WORKFLOW } from './nightshift_investigations/nightshift_investigation';
 import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW } from './nightshift_investigations/investigation';
 import {
   SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW,
@@ -105,7 +105,7 @@ export {
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from './significant_events';
-export { DEDUCTIVE_INVESTIGATION_WORKFLOW_ID } from './nightshift_investigations/deductive_investigation';
+export { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from './nightshift_investigations/nightshift_investigation';
 export { NIGHTSHIFT_CORTEX_HYDRATE_WORKFLOW_ID } from './nightshift_investigations/cortex_hydrate';
 export { NIGHTSHIFT_CORTEX_OPTIMIZE_WORKFLOW_ID } from './nightshift_investigations/cortex_optimize';
 export { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from './nightshift_investigations/investigation';
@@ -177,7 +177,7 @@ export const managedWorkflowDefinitions = [
   NIGHTSHIFT_CORTEX_HYDRATE_WORKFLOW,
   NIGHTSHIFT_CORTEX_OPTIMIZE_WORKFLOW,
   SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW,
-  DEDUCTIVE_INVESTIGATION_WORKFLOW,
+  NIGHTSHIFT_INVESTIGATION_WORKFLOW,
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW,
   ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW,

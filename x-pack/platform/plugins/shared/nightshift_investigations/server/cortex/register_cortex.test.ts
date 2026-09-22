@@ -7,7 +7,7 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID } from '../agents/investigation';
-import { NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID } from '../agents/deductive_investigation';
+import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/nightshift_investigation';
 import { runCortexOptimize } from './register_cortex';
 import { optimizeCortex } from './optimize';
 
@@ -51,8 +51,8 @@ describe('runCortexOptimize', () => {
     jest.clearAllMocks();
   });
 
-  it('runs for the deductive investigation agent', async () => {
-    await run(NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID);
+  it('runs for the Nightshift investigation agent', async () => {
+    await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID);
     expect(optimizeCortex).toHaveBeenCalled();
   });
 

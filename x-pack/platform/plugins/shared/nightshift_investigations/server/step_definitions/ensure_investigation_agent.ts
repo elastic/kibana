@@ -11,14 +11,14 @@ import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import { SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID } from '../agents/investigation';
-import { NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID } from '../agents/deductive_investigation';
+import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/nightshift_investigation';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
-import { installDeductiveInvestigationAgent } from '../lib/install_deductive_investigation_agent';
+import { installNightshiftInvestigationAgent } from '../lib/install_nightshift_investigation_agent';
 
 /** Which agent a workflow wants installed. Defaults to the significant-events investigator. */
 const AGENT_INSTALLERS = {
   [SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID]: installInvestigationAgent,
-  [NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID]: installDeductiveInvestigationAgent,
+  [NIGHTSHIFT_INVESTIGATION_AGENT_ID]: installNightshiftInvestigationAgent,
 } as const;
 
 /**
@@ -43,7 +43,7 @@ export const ensureInvestigationAgentStepDefinition = (
       agent_id: z
         .enum([
           SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID,
-          NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID,
+          NIGHTSHIFT_INVESTIGATION_AGENT_ID,
         ])
         .optional()
         .describe(

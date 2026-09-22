@@ -8,7 +8,7 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { ExecutionStatus } from '@kbn/workflows';
 import {
-  DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
+  NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -16,7 +16,7 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { InvestigationStatus } from '../../common';
 import { freeFormContextSchema } from '../../common/schemas';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
-import { installDeductiveInvestigationAgent } from '../lib/install_deductive_investigation_agent';
+import { installNightshiftInvestigationAgent } from '../lib/install_nightshift_investigation_agent';
 import type {
   FindInvestigationsResult,
   InvestigationAttributes,
@@ -38,17 +38,17 @@ jest.mock('../lib/install_investigation_agent', () => ({
   installInvestigationAgent: jest.fn().mockResolvedValue(undefined),
 }));
 
-jest.mock('../lib/install_deductive_investigation_agent', () => ({
-  installDeductiveInvestigationAgent: jest.fn().mockResolvedValue(undefined),
+jest.mock('../lib/install_nightshift_investigation_agent', () => ({
+  installNightshiftInvestigationAgent: jest.fn().mockResolvedValue(undefined),
 }));
 
 const installInvestigationAgentMock = installInvestigationAgent as jest.MockedFunction<
   typeof installInvestigationAgent
 >;
 
-const installDeductiveInvestigationAgentMock =
-  installDeductiveInvestigationAgent as jest.MockedFunction<
-    typeof installDeductiveInvestigationAgent
+const installNightshiftInvestigationAgentMock =
+  installNightshiftInvestigationAgent as jest.MockedFunction<
+    typeof installNightshiftInvestigationAgent
   >;
 
 const SPACE_ID = 'test-space';
@@ -138,7 +138,7 @@ const createMockRepository = (): jest.Mocked<InvestigationRepository> => ({
 beforeEach(() => {
   jest.clearAllMocks();
   installInvestigationAgentMock.mockResolvedValue(undefined);
-  installDeductiveInvestigationAgentMock.mockResolvedValue(undefined);
+  installNightshiftInvestigationAgentMock.mockResolvedValue(undefined);
   investigationQuotaCallback.mockResolvedValue({ allowed: true });
   repository = createMockRepository();
 });
@@ -438,14 +438,14 @@ describe('NightshiftInvestigationsClient.start()', () => {
     expect(investigationQuotaCallback).not.toHaveBeenCalled();
   });
 
-  it('starts manual runs on the deductive investigation workflow', async () => {
-    const deductiveWorkflow = {
-      id: DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
+  it('starts manual runs on the nightshift investigation workflow', async () => {
+    const nightshiftWorkflow = {
+      id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
       enabled: true,
       valid: true,
       definition: { steps: [] },
     };
-    mockManagement.getWorkflow.mockResolvedValue(deductiveWorkflow);
+    mockManagement.getWorkflow.mockResolvedValue(nightshiftWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-manual');
 
     const result = await makeClient().start({
@@ -456,17 +456,17 @@ describe('NightshiftInvestigationsClient.start()', () => {
     });
 
     expect(mockManagement.getWorkflow).toHaveBeenCalledWith(
-      DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
+      NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
       SPACE_ID
     );
-    // The deductive workflow calls its own agent, so the pre-install must follow the split.
-    expect(installDeductiveInvestigationAgentMock).toHaveBeenCalledWith({
+    // The nightshift workflow calls its own agent, so the pre-install must follow the split.
+    expect(installNightshiftInvestigationAgentMock).toHaveBeenCalledWith({
       agentBuilder: mockAgentBuilder,
       spaceId: SPACE_ID,
     });
     expect(installInvestigationAgentMock).not.toHaveBeenCalled();
     expect(mockManagement.runWorkflow).toHaveBeenCalledWith(
-      expect.objectContaining({ id: DEDUCTIVE_INVESTIGATION_WORKFLOW_ID }),
+      expect.objectContaining({ id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID }),
       SPACE_ID,
       expect.objectContaining({
         message: 'Why did payment timeouts increase?',
@@ -480,7 +480,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
   it('labels a manual run with its prompt so it does not read as "manual" while running', async () => {
     mockManagement.getWorkflow.mockResolvedValue({
-      id: DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
+      id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
       enabled: true,
       valid: true,
       definition: { steps: [] },
@@ -516,7 +516,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
   it('truncates a long prompt rather than storing it whole as the headline', async () => {
     mockManagement.getWorkflow.mockResolvedValue({
-      id: DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
+      id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
       enabled: true,
       valid: true,
       definition: { steps: [] },
@@ -539,7 +539,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
   it('keeps an explicit subject summary over the prompt', async () => {
     mockManagement.getWorkflow.mockResolvedValue({
-      id: DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
+      id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
       enabled: true,
       valid: true,
       definition: { steps: [] },
@@ -1389,11 +1389,11 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     expect(repository.create).not.toHaveBeenCalled();
   });
 
-  it('accepts a manual execution of the deductive investigation workflow', async () => {
+  it('accepts a manual execution of the nightshift investigation workflow', async () => {
     mockManagement.getWorkflowExecution.mockResolvedValue(
       makeEnsureExecution({
-        workflowId: DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
-        originManagedWorkflowId: DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
+        workflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+        originManagedWorkflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
         context: {
           inputs: {
             message: 'Investigate last error',

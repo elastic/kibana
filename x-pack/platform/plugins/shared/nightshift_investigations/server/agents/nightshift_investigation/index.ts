@@ -12,16 +12,15 @@ import {
   NIGHTSHIFT_CORTEX_HYDRATE_WORKFLOW_ID,
   NIGHTSHIFT_CORTEX_OPTIMIZE_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
-import instructions from './instructions/deductive_investigator.md.text';
+import instructions from './instructions/nightshift_investigator.md.text';
 import { SANDBOX_BASH_TOOL_ID } from '../../tools/sandbox_bash/tool';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../../tools/sandbox_bash/view_file_tool';
 import { SANDBOX_STR_REPLACE_TOOL_ID } from '../../tools/sandbox_bash/str_replace_tool';
 import { SANDBOX_WRITE_FILE_TOOL_ID } from '../../tools/sandbox_bash/write_file_tool';
 
-export const NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID =
-  'significant-events.deductive-investigation';
-export const NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_TYPE_ID =
-  'platform.sig_events.deductive-investigation-type';
+export const NIGHTSHIFT_INVESTIGATION_AGENT_ID = 'significant-events.nightshift-investigation';
+export const NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID =
+  'platform.sig_events.nightshift-investigation-type';
 
 const SANDBOX_TOOL_IDS = [
   SANDBOX_BASH_TOOL_ID,
@@ -30,19 +29,19 @@ const SANDBOX_TOOL_IDS = [
   SANDBOX_WRITE_FILE_TOOL_ID,
 ] as const;
 
-export const DEDUCTIVE_INVESTIGATION_AGENT_NAME = 'Nightshift Deductive Investigator';
-export const DEDUCTIVE_INVESTIGATION_AGENT_DESCRIPTION =
+export const NIGHTSHIFT_INVESTIGATION_AGENT_NAME = 'Nightshift Investigation';
+export const NIGHTSHIFT_INVESTIGATION_AGENT_DESCRIPTION =
   'Answers an arbitrary investigation question by reasoning from cluster telemetry it queries ' +
   'inside a sandbox, and records what it learns in the Nightshift Cortex wiki.';
 
 /**
- * Builds the deductive investigation agent type. It is deliberately separate from
+ * Builds the Nightshift investigation agent type. It is deliberately separate from
  * `significant-events.investigation`, which keeps its own prompt and Agent Builder tools: this
  * agent works only from the sandbox, so it carries a standalone prompt and no ES|QL or
  * observability tools. Telemetry is reached through `telemetryConnectorId` as described in
  * `/workspace/elastic.md`.
  */
-export const getDeductiveInvestigationAgentType = ({
+export const getNightshiftInvestigationAgentType = ({
   sandboxEnabled,
   cortexEnabled,
   telemetryConnectorId,
@@ -51,9 +50,9 @@ export const getDeductiveInvestigationAgentType = ({
   cortexEnabled: boolean;
   telemetryConnectorId?: string;
 }): AgentTypeDefinition => ({
-  id: NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_TYPE_ID,
-  name: DEDUCTIVE_INVESTIGATION_AGENT_NAME,
-  description: DEDUCTIVE_INVESTIGATION_AGENT_DESCRIPTION,
+  id: NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID,
+  name: NIGHTSHIFT_INVESTIGATION_AGENT_NAME,
+  description: NIGHTSHIFT_INVESTIGATION_AGENT_DESCRIPTION,
   avatar_icon: 'logoElastic',
   baseConfiguration: {
     instructions,
@@ -79,7 +78,7 @@ export const getDeductiveInvestigationAgentType = ({
   },
 });
 
-export const registerDeductiveInvestigationAgentType = (
+export const registerNightshiftInvestigationAgentType = (
   agentBuilder: AgentBuilderPluginSetup,
   {
     sandboxEnabled,
@@ -92,6 +91,6 @@ export const registerDeductiveInvestigationAgentType = (
   } = { sandboxEnabled: false, cortexEnabled: false }
 ): void => {
   agentBuilder.agents.registerType(
-    getDeductiveInvestigationAgentType({ sandboxEnabled, cortexEnabled, telemetryConnectorId })
+    getNightshiftInvestigationAgentType({ sandboxEnabled, cortexEnabled, telemetryConnectorId })
   );
 };

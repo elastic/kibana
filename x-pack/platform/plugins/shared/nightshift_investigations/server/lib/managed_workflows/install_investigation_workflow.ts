@@ -6,7 +6,7 @@
  */
 
 import {
-  DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
+  NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
@@ -20,7 +20,7 @@ export const installInvestigationWorkflow = async ({
   await client.install(SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID, {
     spaceId: GLOBAL_WORKFLOW_SPACE_ID,
   });
-  await client.install(DEDUCTIVE_INVESTIGATION_WORKFLOW_ID, {
+  await client.install(NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID, {
     spaceId: GLOBAL_WORKFLOW_SPACE_ID,
   });
 };
