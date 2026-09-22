@@ -27,11 +27,12 @@ import {
 import { eventsForContext, groupTimelineRounds } from './context_timeline';
 import type { ProcessedTimelineEvent } from './context_timeline';
 import { roundToLangchain } from './to_langchain_messages';
+import { createSummarizationTransformer, type ToolSummarizationDeps } from './tool_summarization';
 
 const estimatePerRoundTokens = (
   rounds: ProcessedConversationRound[],
-  deps: Parameters<typeof estimateTimelineTokens>[1]
-) => estimateTimelineTokens(timelineFromRounds(rounds), deps);
+  deps: ToolSummarizationDeps
+) => estimateTimelineTokens(timelineFromRounds(rounds), createSummarizationTransformer(deps));
 
 const createMockToolManager = (
   summarizers: Map<
@@ -150,9 +151,12 @@ describe('interrupted rounds', () => {
     ).map((event) =>
       event.type === 'user_message' ? { ...event, data: { ...event.data, attachments: [] } } : event
     ) as ProcessedTimelineEvent[];
-    const deps = { toolManager: createMockToolManager(), toolRegistry: createMockToolRegistry() };
+    const transformer = createSummarizationTransformer({
+      toolManager: createMockToolManager(),
+      toolRegistry: createMockToolRegistry(),
+    });
 
-    const [tokens] = await estimateTimelineTokens(timeline, deps);
+    const [tokens] = await estimateTimelineTokens(timeline, transformer);
     const [round] = groupTimelineRounds(timeline);
     const messages = await roundToLangchain(round);
 

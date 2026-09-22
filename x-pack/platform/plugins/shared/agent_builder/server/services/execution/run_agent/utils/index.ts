@@ -36,4 +36,5 @@ export {
   createSummarizationTransformer,
 } from './tool_summarization';
 export { estimateMessagesTokens, estimatePerRoundTokens } from './estimate_conversation_tokens';
+export { legacyEligibleRoundIds, coveredRoundIds } from './compaction_coverage';
 export { createImageResolver, type CreateImageResolverOptions } from './image_resolver';

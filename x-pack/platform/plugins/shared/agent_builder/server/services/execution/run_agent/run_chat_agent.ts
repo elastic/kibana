@@ -56,6 +56,9 @@ import type { CompactedConversation } from './utils/conversation_compactor';
 import { computeContextBudget } from './utils/context_budget';
 import { DEFAULT_MAX_TOOL_RESULT_TOKENS } from './utils/tool_result_guardrail';
 import { compactConversation } from './utils/conversation_compactor';
+import { legacyEligibleRoundIds } from './utils/compaction_coverage';
+import { createSummarizationTransformer } from './utils/tool_summarization';
+import { sourceEvents } from '../../conversation/client/source_events';
 import { createAgentGraph } from './graph';
 import { convertGraphEvents } from './convert_graph_events';
 import { RunTracker } from './run_tracker';
@@ -313,10 +316,13 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   const graphRecursionLimit = getRecursionLimit(CYCLE_LIMIT);
 
-  const perRoundTokenCounts = await estimatePerRoundTokens(processedConversation.timeline, {
-    toolManager,
-    toolRegistry,
-  });
+  // One transformer instance for the estimate and for the summariser's rendering, so the
+  // compactor's chunk sizing matches what it sends.
+  const summarizationTransformer = createSummarizationTransformer({ toolManager, toolRegistry });
+  const perRoundTokenCounts = await estimatePerRoundTokens(
+    processedConversation.timeline,
+    summarizationTransformer
+  );
   const conversationTokenEstimate = perRoundTokenCounts.reduce((sum, count) => sum + count, 0);
 
   // Create unified result transformer for tool result optimization
@@ -338,6 +344,10 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     chatModel: model.chatModel,
     contextBudget,
     perRoundTokenCounts,
+    resultTransformer: summarizationTransformer,
+    legacyEligibleRoundIds: conversation
+      ? legacyEligibleRoundIds(sourceEvents(conversation))
+      : new Set<string>(),
     existingSummary: conversation?.state?.compaction_summary,
     logger,
     abortSignal,
