@@ -47,7 +47,7 @@ describe('runResolveEsqlNode', () => {
     expect(mockedResolve).not.toHaveBeenCalled();
     expect(result).toEqual({
       esqlQuery: params.esqlQuery,
-      actions: [{ type: 'generate_esql', success: true, preserved: true, query: params.esqlQuery }],
+      actions: [{ type: 'generate_esql', success: true, query: params.esqlQuery }],
     });
   });
 

@@ -18,8 +18,6 @@ export interface ResolveEsqlAction {
   query?: string;
   columns?: EsqlEsqlColumnInfo[];
   error?: string;
-  /** True when the stored query was kept and the schema probe was skipped. */
-  preserved?: boolean;
 }
 
 export interface RunResolveEsqlNodeParams
@@ -55,7 +53,7 @@ export const runResolveEsqlNode = async ({
   if (preserveESQL) {
     return {
       esqlQuery,
-      actions: [{ type: 'generate_esql', success: true, preserved: true, query: esqlQuery }],
+      actions: [{ type: 'generate_esql', success: true, query: esqlQuery }],
     };
   }
 

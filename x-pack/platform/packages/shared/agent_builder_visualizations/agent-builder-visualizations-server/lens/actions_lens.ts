@@ -14,8 +14,6 @@ export interface GenerateEsqlAction {
   query?: string;
   columns?: EsqlEsqlColumnInfo[];
   error?: string;
-  /** True when the stored query was kept and the schema probe was skipped. */
-  preserved?: boolean;
 }
 
 export interface GenerateConfigAction {

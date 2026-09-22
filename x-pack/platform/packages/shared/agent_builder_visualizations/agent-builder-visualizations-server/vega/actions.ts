@@ -14,8 +14,6 @@ export interface GenerateEsqlAction {
   /** Result columns of the executed query, used to inform spec authoring/validation. */
   columns?: EsqlEsqlColumnInfo[];
   error?: string;
-  /** True when the stored query was kept and the schema probe was skipped. */
-  preserved?: boolean;
 }
 
 export interface AuthorSpecAction {

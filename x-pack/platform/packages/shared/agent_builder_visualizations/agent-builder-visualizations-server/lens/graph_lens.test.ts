@@ -545,7 +545,6 @@ describe('createVisualizationGraph', () => {
         expect.objectContaining({
           type: 'generate_esql',
           success: true,
-          preserved: true,
           query: existingQuery,
         }),
       ])

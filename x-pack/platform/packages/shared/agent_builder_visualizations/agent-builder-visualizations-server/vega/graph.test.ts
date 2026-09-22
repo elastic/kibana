@@ -416,7 +416,6 @@ describe('createVegaGraph', () => {
         expect.objectContaining({
           type: 'generate_esql',
           success: true,
-          preserved: true,
           query: PROVIDED_ESQL,
         }),
       ])
