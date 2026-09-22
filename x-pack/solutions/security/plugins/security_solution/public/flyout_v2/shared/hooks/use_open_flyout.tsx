@@ -66,6 +66,9 @@ export const useOpenFlyout = (): OpenFlyout => {
       // back to it, and `onResize` persists the width whenever the user resizes.
       const persistsWidth =
         properties.session !== 'inherit' && meta?.surface !== FLYOUT_SURFACE.TOOL;
+      // Child flyouts are always overlays and don't own a persisted width, so the settings menu
+      // (push/overlay toggle + reset size) is inert for them — the header hides the gear entirely.
+      const isChildFlyout = properties.session === 'inherit';
       const storedWidth = persistsWidth ? getStoredFlyoutWidth(storage) : undefined;
       const sizeProperties: Partial<OverlaySystemFlyoutOpenOptions> = persistsWidth
         ? {
@@ -81,7 +84,7 @@ export const useOpenFlyout = (): OpenFlyout => {
           store,
           history,
           children: (
-            <FlyoutSessionContextProvider value={{ session, historyKey }}>
+            <FlyoutSessionContextProvider value={{ session, historyKey, isChildFlyout }}>
               <Suspense fallback={<FlyoutLoading />}>{children}</Suspense>
             </FlyoutSessionContextProvider>
           ),
