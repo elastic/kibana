@@ -439,7 +439,8 @@ export class DashboardPageControls extends FtrService {
     await this.retry.try(async () => {
       const isPopoverOpen = await this.isOptionsListPopoverOpen(controlId);
       if (isPopoverOpen) {
-        await this.testSubjects.click(`optionsList-control-${controlId}`);
+        const searchInput = await this.testSubjects.find('optionsList-control-search-input');
+        await searchInput.pressKeys(this.browser.keys.ESCAPE);
         await this.testSubjects.waitForDeleted(`optionsList-control-available-options`);
       }
     });
@@ -725,30 +726,24 @@ export class DashboardPageControls extends FtrService {
 
   public async rangeSliderSetLowerBound(controlId: string, value: string) {
     this.log.debug(`Setting range slider lower bound to ${value}`);
+    const lowerBoundSubject =
+      `range-slider-control-${controlId} > rangeSlider__lowerBoundFieldNumber` as const;
     await this.retry.try(async () => {
-      await this.testSubjects.setValue(
-        `range-slider-control-${controlId} > rangeSlider__lowerBoundFieldNumber`,
-        value
-      );
-      await this.testSubjects.pressEnter(
-        // force the change without waiting for the debounce
-        `range-slider-control-${controlId} > rangeSlider__lowerBoundFieldNumber`
-      );
+      await this.testSubjects.setValue(lowerBoundSubject, value);
+      // EuiDualRange flushes its debounced input change on mouseup.
+      await this.testSubjects.click(lowerBoundSubject);
       expect(await this.rangeSliderGetLowerBoundAttribute(controlId, 'value')).to.be(value);
     });
   }
 
   public async rangeSliderSetUpperBound(controlId: string, value: string) {
     this.log.debug(`Setting range slider lower bound to ${value}`);
+    const upperBoundSubject =
+      `range-slider-control-${controlId} > rangeSlider__upperBoundFieldNumber` as const;
     await this.retry.try(async () => {
-      await this.testSubjects.setValue(
-        `range-slider-control-${controlId} > rangeSlider__upperBoundFieldNumber`,
-        value
-      );
-      await this.testSubjects.pressEnter(
-        // force the change without waiting for the debounce
-        `range-slider-control-${controlId} > rangeSlider__upperBoundFieldNumber`
-      );
+      await this.testSubjects.setValue(upperBoundSubject, value);
+      // EuiDualRange flushes its debounced input change on mouseup.
+      await this.testSubjects.click(upperBoundSubject);
       expect(await this.rangeSliderGetUpperBoundAttribute(controlId, 'value')).to.be(value);
     });
   }

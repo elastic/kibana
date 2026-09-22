@@ -51,6 +51,7 @@ interface Options<T> {
 }
 
 export const DEFAULT_RETRY_DELAY = 100;
+export const DEFAULT_RETRY_COUNT_DELAY = 502;
 
 export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
   const {
@@ -61,10 +62,12 @@ export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
     onFailureBlock,
     onFailure = defaultOnFailure(methodName),
     accept = returnTrue,
-    retryDelay = DEFAULT_RETRY_DELAY,
+    retryDelay,
     retryCount,
     initialDelay,
   } = options;
+  const delayBetweenAttempts =
+    retryDelay ?? (retryCount === undefined ? DEFAULT_RETRY_DELAY : DEFAULT_RETRY_COUNT_DELAY);
 
   if (typeof initialDelay === 'number') {
     await delay(initialDelay);
@@ -130,6 +133,6 @@ export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
       lastError = attempt.error;
     }
 
-    await delay(retryDelay);
+    await delay(delayBetweenAttempts);
   }
 }

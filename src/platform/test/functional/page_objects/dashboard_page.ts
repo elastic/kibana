@@ -467,10 +467,25 @@ export class DashboardPageObject extends FtrService {
       }
     }
     await this.testSubjects.click('dashboardListingCreateButton');
+
+    let createConfirmationExists = false;
+    await this.retry.try(async () => {
+      createConfirmationExists = await this.testSubjects.exists('dashboardCreateConfirm', {
+        timeout: 0,
+      });
+      const dashboardIsReady = await this.find.existsByCssSelector(
+        '[data-dashboard-controls-ready="true"]',
+        0
+      );
+      if (!createConfirmationExists && !dashboardIsReady) {
+        throw new Error('waiting for the new dashboard or its confirmation prompt');
+      }
+    });
+
     if (expectWarning) {
       await this.testSubjects.existOrFail('dashboardCreateConfirm');
     }
-    if (await this.testSubjects.exists('dashboardCreateConfirm', { timeout: 0 })) {
+    if (createConfirmationExists) {
       if (continueEditing) {
         await this.testSubjects.click('dashboardCreateConfirmContinue');
       } else {

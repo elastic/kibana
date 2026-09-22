@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEFAULT_RETRY_DELAY, retryForSuccess } from './retry_for_success';
+import {
+  DEFAULT_RETRY_COUNT_DELAY,
+  DEFAULT_RETRY_DELAY,
+  retryForSuccess,
+} from './retry_for_success';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 import * as testJestHelpers from '@kbn/test-jest-helpers';
 
@@ -123,6 +127,25 @@ describe('Retry for success', () => {
 
     expect(delaySpy).toHaveBeenNthCalledWith(1, 250);
     expect(delaySpy).toHaveBeenNthCalledWith(2, 250);
+    delaySpy.mockRestore();
+  });
+
+  it('preserves the original delay for retry-count-limited callers', async () => {
+    const delaySpy = jest.spyOn(testJestHelpers, 'delay').mockResolvedValue(undefined);
+    const log = new ToolingLog();
+    let count = 0;
+
+    await retryForSuccess(log, {
+      block: async () => {
+        if (++count < 3) throw new Error('not yet');
+      },
+      timeout: 10000,
+      methodName: 'retryForSuccess retry count delay test',
+      retryCount: 3,
+    });
+
+    expect(delaySpy).toHaveBeenNthCalledWith(1, DEFAULT_RETRY_COUNT_DELAY);
+    expect(delaySpy).toHaveBeenNthCalledWith(2, DEFAULT_RETRY_COUNT_DELAY);
     delaySpy.mockRestore();
   });
 });
