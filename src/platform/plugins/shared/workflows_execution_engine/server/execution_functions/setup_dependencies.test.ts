@@ -98,7 +98,6 @@ describe('setupDependencies', () => {
     collectQueueMetrics: false,
     hitlExternalResume: { enabled: true },
     syncExecution: { enabled: false, maxDurationMs: 60_000 },
-    syncLogDrain: { enabled: true, intervalMs: 500, maxQueue: 20000, maxBatch: 4000 },
   };
 
   let mockDependencies: ReturnType<typeof mockContextDependencies>;
@@ -411,14 +410,6 @@ describe('setupDependencies', () => {
     });
   });
 
-  /**
-   * Machine-checked invariant: the syncLogDrain supplied to setupDependencies must
-   * be forwarded to WorkflowEventLoggerService so that every per-execution logger
-   * routes its flushEvents calls to the drain instead of writing to ES inline.
-   *
-   * If someone removes the forwarding at the setupDependencies callsite, this test
-   * fails while all drain unit tests still pass — making the regression visible.
-   */
   describe('WorkflowEventLoggerService wiring', () => {
     beforeEach(() => {
       const mockScopedClient = {

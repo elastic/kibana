@@ -30,7 +30,6 @@ export const createMockWorkflowExecutionEngineConfig = (): WorkflowsExecutionEng
   collectQueueMetrics: false,
   hitlExternalResume: { enabled: true },
   syncExecution: { enabled: false, maxDurationMs: 60_000 },
-  syncLogDrain: { enabled: true, intervalMs: 500, maxQueue: 20000, maxBatch: 4000 },
 });
 
 export const createMockLogger = (): Logger =>
