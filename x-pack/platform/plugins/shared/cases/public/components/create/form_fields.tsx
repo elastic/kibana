@@ -103,15 +103,12 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
     }, [configuration.connector.id, setFieldValue]);
 
     /**
-     * Form defaultValue is fixed at mount. While configurations load,
-     * getConfigurationByOwner returns initialConfiguration (id: '', extractObservables: true).
-     * Re-apply the space default when a real configuration arrives, but only while the field
-     * is still pristine so a user or template choice made during load is not overwritten.
+     * Form defaultValue is fixed at mount. Re-apply the space default when configuration
+     * changes (load completes, or owner switches to an unconfigured owner whose lookup
+     * returns initialConfiguration with id: '' and extractObservables: true). Skip only
+     * while the field is dirty so a user or template choice is not overwritten.
      */
     useEffect(() => {
-      if (configuration.id === '') {
-        return;
-      }
       const field = getFields().extractObservables;
       if (field && !field.isPristine) {
         return;

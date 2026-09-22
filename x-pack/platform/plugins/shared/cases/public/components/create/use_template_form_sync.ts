@@ -187,7 +187,13 @@ export const useTemplateFormSync = (
   excludedLinkedRefNames: ReadonlySet<string> = EMPTY_EXCLUDED_REF_NAMES
 ): UseTemplateFormSyncReturn => {
   const { setFieldValue, updateFieldValues } = useFormContext();
-  const [{ templateId }] = useFormData<{ templateId?: string }>({ watch: ['templateId'] });
+  // Use the create-form case owner (not template.owner) for the space extractObservables default.
+  // Clearing the template leaves `template` undefined; looking up by template.owner would fall
+  // back to initialConfiguration (true) and violate template → space-config precedence.
+  const [{ templateId, owner: caseOwner }] = useFormData<{
+    templateId?: string;
+    owner?: string;
+  }>({ watch: ['templateId', 'owner'] });
   const { data: template, isLoading: isTemplateLoading } = useGetTemplate(templateId || undefined);
   // A disabled query (no templateId) can sit in "loading" state indefinitely in react-query v4;
   // treat it as not-loading so the create form renders global fields without a template selected.
@@ -203,7 +209,7 @@ export const useTemplateFormSync = (
   const spaceExtractObservables = getSpaceExtractObservables(
     getConfigurationByOwner({
       configurations: configurations ?? null,
-      owner: template?.owner,
+      owner: caseOwner,
     })
   );
   const appliedRef = useRef<string | undefined>(undefined);
@@ -237,11 +243,11 @@ export const useTemplateFormSync = (
     }
 
     const { definition } = template;
-    // The exclusion set is part of the applied identity: when legacy custom-field visibility
-    // changes (e.g. the forced-on switch resolves after the configuration loads), the same
-    // template must re-sync so excluded defaults are removed from — or restored to — the form.
+    // Exclusion set and spaceExtractObservables are part of the applied identity: when legacy
+    // custom-field visibility changes, or when case configurations finish loading and flip the
+    // space default, the same template must re-sync so omitted extractObservables tracks space.
     const exclusionIdentity = [...excludedLinkedRefNames].sort().join('|');
-    const key = `${template.templateId}:${template.templateVersion}:${exclusionIdentity}`;
+    const key = `${template.templateId}:${template.templateVersion}:${exclusionIdentity}:${spaceExtractObservables}`;
     if (appliedRef.current === key) {
       return;
     }

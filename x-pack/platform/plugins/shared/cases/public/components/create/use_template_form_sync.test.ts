@@ -1026,6 +1026,88 @@ describe('useTemplateFormSync', () => {
       expect(mockSetFieldValue).toHaveBeenCalledWith('extractObservables', true);
     });
 
+    it('reverts extractObservables to the case owner space default when clearing a template', () => {
+      // Space config is false for the case owner. Clearing must not fall back to
+      // initialConfiguration.true via a missing template.owner.
+      mockUseGetAllCaseConfigurations.mockReturnValue({
+        data: [
+          {
+            id: 'cfg-1',
+            owner: 'securitySolution',
+            extractObservables: false,
+            closureType: 'close-by-user',
+            connector: { fields: null, id: 'none', name: 'none', type: '.none' },
+            customFields: [],
+            templates: [],
+            mappings: [],
+            version: '1',
+            observableTypes: [],
+          },
+        ],
+        isLoading: false,
+      });
+      mockUseFormData.mockReturnValue([
+        { templateId: 'template-settings', owner: 'securitySolution' },
+      ]);
+      mockUseGetTemplate.mockReturnValue({ data: templateWithSettings, isLoading: false });
+
+      const { rerender } = renderHook(() => useTemplateFormSync(innerForm, new Set()));
+
+      mockSetFieldValue.mockClear();
+      mockUseFormData.mockReturnValue([{ templateId: '', owner: 'securitySolution' }]);
+      mockUseGetTemplate.mockReturnValue({ data: undefined, isLoading: false });
+
+      rerender();
+
+      expect(mockSetFieldValue).toHaveBeenCalledWith('syncAlerts', false);
+      expect(mockSetFieldValue).toHaveBeenCalledWith('extractObservables', false);
+    });
+
+    it('reapplies omitted extractObservables when the space default loads after the template', () => {
+      // Template + field defs finish while configs are still the initial true fallback.
+      // When the real space config (false) arrives, omitted extractObservables must resync.
+      mockUseFormData.mockReturnValue([
+        { templateId: 'template-partial', owner: 'securitySolution' },
+      ]);
+      mockUseGetTemplate.mockReturnValue({
+        data: {
+          templateId: 'template-partial',
+          templateVersion: 1,
+          definition: { name: 'Partial', fields: [], settings: { syncAlerts: false } },
+        },
+        isLoading: false,
+      });
+      mockUseGetAllCaseConfigurations.mockReturnValue({ data: [], isLoading: false });
+
+      const { rerender } = renderHook(() => useTemplateFormSync(innerForm, new Set()));
+
+      expect(mockSetFieldValue).toHaveBeenCalledWith('extractObservables', true);
+
+      mockSetFieldValue.mockClear();
+      mockUseGetAllCaseConfigurations.mockReturnValue({
+        data: [
+          {
+            id: 'cfg-1',
+            owner: 'securitySolution',
+            extractObservables: false,
+            closureType: 'close-by-user',
+            connector: { fields: null, id: 'none', name: 'none', type: '.none' },
+            customFields: [],
+            templates: [],
+            mappings: [],
+            version: '1',
+            observableTypes: [],
+          },
+        ],
+        isLoading: false,
+      });
+
+      rerender();
+
+      expect(mockSetFieldValue).toHaveBeenCalledWith('syncAlerts', false);
+      expect(mockSetFieldValue).toHaveBeenCalledWith('extractObservables', false);
+    });
+
     it('reverts extractObservables to the space default when switching to a template that declares no settings', () => {
       // Direct A -> B switch: templateId goes straight from A's id to B's id (never through '').
       mockUseFormData.mockReturnValue([{ templateId: 'template-settings' }]);
