@@ -6,8 +6,8 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
+import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { FEATURE_ID_TO_COST_BUDGET_GROUP } from '../../../../common/cost';
-import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import type { SignificantEventsServer } from '../../../types';
 import type { PriceResult, PriceService } from '../../../lib/cost/price_service';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
@@ -112,9 +112,9 @@ describe('Significant Events cost route', () => {
     jest.useRealTimers();
   });
 
-  it('requires Streams manage and runs both access assertions', async () => {
+  it('requires Nightshift manage and configure and runs both access assertions', async () => {
     expect(route.security.authz).toEqual({
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage, NIGHTSHIFT_API_PRIVILEGES.configure],
     });
     await invoke();
     expect(assertSignificantEventsAccess).toHaveBeenCalledWith({

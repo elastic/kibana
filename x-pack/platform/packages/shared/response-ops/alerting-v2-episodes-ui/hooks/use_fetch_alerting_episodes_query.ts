@@ -8,6 +8,7 @@
 import { useQuery } from '@kbn/react-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { HttpStart } from '@kbn/core-http-browser';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { TimeRange } from '@kbn/es-query';
 import { normalizeTags } from '@kbn/alerting-v2-utils';
 import type { EpisodesFilterState, EpisodesSortState } from '@kbn/alerting-v2-common-queries';
@@ -19,7 +20,12 @@ import type { UseAlertingEpisodesDataViewOptions } from './use_alerting_episodes
 import { useAlertingEpisodesDataView } from './use_alerting_episodes_data_view';
 import { fetchAlertingEpisodes } from '../apis/fetch_alerting_episodes';
 import { mergeEpisodes } from '../utils/merge_episodes';
-import { fetchFromSource, type EpisodeSourceError } from '../utils/fetch_from_sources';
+import {
+  EMPTY_SOURCE_ERRORS,
+  fetchFromV2AndSource,
+  type EpisodeSourceError,
+} from '../utils/fetch_from_sources';
+import { useToastSourceErrors } from './use_toast_source_errors';
 
 interface CombinedEpisodesResult {
   episodes: AlertEpisode[];
@@ -34,6 +40,7 @@ export interface UseFetchAlertingEpisodesQueryOptions {
   services: UseAlertingEpisodesDataViewOptions['services'] & {
     expressions: ExpressionsStart;
     http: HttpStart;
+    notifications?: NotificationsStart;
   };
 }
 
@@ -67,45 +74,51 @@ export const useFetchAlertingEpisodesQuery = ({
     enabled: dataView != null,
     queryKey,
     queryFn: async ({ signal: abortSignal }) => {
-      const [v2Rows, sourceEpisodes] = await Promise.all([
-        fetchAlertingEpisodes({
-          spaceId,
-          abortSignal,
-          pageSize,
-          services,
-          filterState,
-          sortState,
-          timeRange,
-        }),
-        fetchFromSource(additionalEpisodesDataSource, (source) =>
-          source.fetchEpisodes({
-            services,
+      const { v2, additional, errors } = await fetchFromV2AndSource({
+        v2: () =>
+          fetchAlertingEpisodes({
+            spaceId,
             abortSignal,
             pageSize,
+            services,
             filterState,
             sortState,
             timeRange,
-          })
-        ),
-      ]);
+          }),
+        source: additionalEpisodesDataSource,
+        fromSource: (source) =>
+          source
+            .fetchEpisodes({
+              services,
+              abortSignal,
+              pageSize,
+              filterState,
+              sortState,
+              timeRange,
+            })
+            .then((episodes) => episodes.map((episode) => ({ ...episode, source_id: source.id }))),
+      });
 
-      const v2Episodes: AlertEpisode[] = v2Rows.map((ep) => ({
+      const v2Episodes: AlertEpisode[] = (v2 ?? []).map((ep) => ({
         ...ep,
         last_tags: normalizeTags(ep.last_tags),
       }));
 
       return {
-        episodes: mergeEpisodes([v2Episodes, ...sourceEpisodes.results], sortState, pageSize),
-        sourceErrors: sourceEpisodes.errors,
+        episodes: mergeEpisodes([v2Episodes, ...additional], sortState, pageSize),
+        sourceErrors: errors,
       };
     },
     keepPreviousData: true,
   });
 
+  const sourceErrors = query.data?.sourceErrors ?? EMPTY_SOURCE_ERRORS;
+  useToastSourceErrors(sourceErrors, services.notifications?.toasts, 'list');
+
   return {
     ...query,
     data: query.data?.episodes,
-    sourceErrors: query.data?.sourceErrors ?? [],
+    sourceErrors,
     dataView,
   };
 };

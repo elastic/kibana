@@ -10,8 +10,11 @@
 import { ExecutionStatus } from '@kbn/workflows';
 import {
   computeHitlWaitDeadlineMs,
+  DYNAMIC_TIMEOUT_STATE_KEY,
   getHitlIdleDeadlineMsForStep,
   hasHitlWaitExpired,
+  persistResolvedDynamicTimeout,
+  resolveDynamicTimeout,
 } from './hitl_timeout_helpers';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 
@@ -56,6 +59,24 @@ describe('hitl_timeout_helpers', () => {
     });
   });
 
+  describe('resolveDynamicTimeout', () => {
+    it('renders then validates the duration', () => {
+      expect(
+        resolveDynamicTimeout("{{ inputs.expiresIn | default: '72h' }}", '24h', () => '1h')
+      ).toBe('1h');
+    });
+
+    it('throws when the rendered value is not a duration', () => {
+      expect(() => resolveDynamicTimeout('{{ inputs.expiresIn }}', '24h', () => 'soon')).toThrow(
+        'Invalid duration format: soon'
+      );
+    });
+
+    it('accepts compound durations', () => {
+      expect(resolveDynamicTimeout('{{ inputs.expiresIn }}', '24h', () => '1h30m')).toBe('1h30m');
+    });
+  });
+
   describe('getHitlIdleDeadlineMsForStep', () => {
     it('returns undefined for non-HITL nodes', () => {
       const stepExecutionRuntime = {
@@ -82,6 +103,49 @@ describe('hitl_timeout_helpers', () => {
       expect(getHitlIdleDeadlineMsForStep(stepExecutionRuntime)).toBe(
         new Date('2025-06-01T12:00:00.000Z').getTime() + 72 * 60 * 60 * 1000
       );
+    });
+
+    it('prefers the persisted timeout over the YAML template', () => {
+      const stepExecutionRuntime = {
+        node: {
+          type: 'waitForApproval',
+          stepType: 'waitForApproval',
+          configuration: { timeout: "{{ inputs.expiresIn | default: '72h' }}" },
+        },
+        stepExecution: {
+          startedAt: '2025-06-01T12:00:00.000Z',
+          state: { [DYNAMIC_TIMEOUT_STATE_KEY]: '1h' },
+        },
+      } as unknown as StepExecutionRuntime;
+
+      expect(getHitlIdleDeadlineMsForStep(stepExecutionRuntime)).toBe(
+        new Date('2025-06-01T13:00:00.000Z').getTime()
+      );
+    });
+  });
+
+  describe('persistResolvedDynamicTimeout', () => {
+    it('writes the rendered duration onto step state', () => {
+      const setCurrentStepState = jest.fn();
+      const stepExecutionRuntime = {
+        stepExecution: { state: { resumeAt: undefined } },
+        contextManager: {
+          renderValueAccordingToContext: jest.fn(() => '2h'),
+        },
+        setCurrentStepState,
+      } as unknown as StepExecutionRuntime;
+
+      expect(
+        persistResolvedDynamicTimeout(
+          stepExecutionRuntime,
+          "{{ inputs.expiresIn | default: '72h' }}",
+          '24h'
+        )
+      ).toBe('2h');
+      expect(setCurrentStepState).toHaveBeenCalledWith({
+        resumeAt: undefined,
+        [DYNAMIC_TIMEOUT_STATE_KEY]: '2h',
+      });
     });
   });
 });

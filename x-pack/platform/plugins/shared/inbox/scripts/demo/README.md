@@ -42,7 +42,7 @@ Enable the Inbox plugin in `kibana.dev.yml`:
 xpack.inbox.enabled: true
 ```
 
-Start Kibana + ES locally (`yarn start --no-base-path`).
+Start Kibana + ES locally (`pnpm start --no-base-path`).
 
 ## Run
 
@@ -71,7 +71,7 @@ KIBANA_URL=http://localhost:5601 \
   node --import tsx x-pack/platform/plugins/shared/inbox/scripts/demo/seed_inbox_demo.ts
 ```
 
-> If you run Kibana with a base path (e.g. `yarn start` without
+> If you run Kibana with a base path (e.g. `pnpm start` without
 > `--no-base-path`, which mounts everything under `/kbn`), include
 > the base path in `KIBANA_URL`:
 >

@@ -10,6 +10,7 @@ import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { MAX_AI_INDICES } from '../../common/constants';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import { deleteBackingStoreResource } from './delete_resources';
+import { createAiIndexIdentityDslFilter } from '../utils/ai_index_identity_filter';
 import { aiIndicesIndexName } from './storage';
 
 const makeResponseError = (statusCode: number) =>
@@ -46,12 +47,13 @@ describe('deleteBackingStoreResource', () => {
     hits: { hits: [] },
   };
 
-  const deleteBackingStore = (dest: AiIndexDest) =>
+  const deleteBackingStore = (dest: AiIndexDest, spaceId = 'default') =>
     deleteBackingStoreResource({
       esClient,
       dest,
       logger,
       aiIndexId: 'my-ai-index',
+      spaceId,
     });
 
   beforeEach(() => {
@@ -79,6 +81,30 @@ describe('deleteBackingStoreResource', () => {
 
       await expect(deleteBackingStore(dest)).resolves.toBeNull();
       expect(warn).not.toHaveBeenCalled();
+    });
+
+    it('does not forward a stringified ES response body in the error string', async () => {
+      deleteDataStream.mockRejectedValue(
+        new errors.ResponseError({
+          meta: {
+            aborted: false,
+            attempts: 1,
+            connection: null,
+            context: null,
+            name: 'response_error',
+            request: {} as never,
+          },
+          warnings: [],
+          body: { unexpected: 'shape', secret: 'internal-detail' },
+          statusCode: 500,
+        })
+      );
+
+      const result = await deleteBackingStore(dest);
+
+      expect(result).toMatch(/Failed to delete the backing store/);
+      expect(result).not.toContain('internal-detail');
+      expect(result).toContain('Elasticsearch returned an unexpected error');
     });
 
     it('returns an error string for non-404 ES errors', async () => {
@@ -136,22 +162,92 @@ describe('deleteBackingStoreResource', () => {
   it('skips dest delete when another AI index still uses the dest', async () => {
     registrySearch.mockResolvedValue({
       hits: {
-        hits: [{ _id: 'my-ai-index' }, { _id: 'other_space_index' }],
+        hits: [{ _id: 'auto-gen-other', _source: { id: 'other_space_index' } }],
       },
     });
 
     await expect(
       deleteBackingStore({ type: 'data_stream', value: 'ai-index-ds-customer_support' })
-    ).resolves.toMatch(/other_space_index/);
+    ).resolves.toEqual(
+      expect.stringMatching(
+        /Did not delete the backing store 'ai-index-ds-customer_support': it is still used by other AI indices \(other_space_index\)/
+      )
+    );
 
     expect(registrySearch).toHaveBeenCalledWith({
       index: aiIndicesIndexName,
       size: MAX_AI_INDICES,
       track_total_hits: false,
-      query: { term: { 'dest.value': 'ai-index-ds-customer_support' } },
+      query: {
+        bool: {
+          filter: [{ term: { 'dest.value': 'ai-index-ds-customer_support' } }],
+          must_not: [createAiIndexIdentityDslFilter('my-ai-index', 'default')],
+        },
+      },
     });
     expect(deleteDataStream).not.toHaveBeenCalled();
     expect(deleteIndex).not.toHaveBeenCalled();
     expect(warn).toHaveBeenCalled();
+  });
+
+  it('falls back to _id for pre-upgrade documents that have no id field', async () => {
+    registrySearch.mockResolvedValue({
+      hits: {
+        hits: [{ _id: 'legacy-other-index' }],
+      },
+    });
+
+    await expect(
+      deleteBackingStore({ type: 'data_stream', value: 'ai-index-ds-customer_support' })
+    ).resolves.toMatch(/legacy-other-index/);
+    expect(deleteDataStream).not.toHaveBeenCalled();
+  });
+
+  it('keeps the backing store when the same logical id in another space uses it', async () => {
+    registrySearch.mockResolvedValue({
+      hits: {
+        hits: [{ _id: 'auto-gen-other', _source: { id: 'my-ai-index', space: 'marketing' } }],
+      },
+    });
+
+    await expect(
+      deleteBackingStore({ type: 'data_stream', value: 'ai-index-ds-customer_support' })
+    ).resolves.toMatch(/marketing\/my-ai-index/);
+    expect(deleteDataStream).not.toHaveBeenCalled();
+    expect(deleteIndex).not.toHaveBeenCalled();
+  });
+
+  it('treats a pre-upgrade default-space entry with the same id as another user of the dest', async () => {
+    registrySearch.mockResolvedValue({
+      hits: {
+        hits: [{ _id: 'my-ai-index' }],
+      },
+    });
+
+    await expect(
+      deleteBackingStore(
+        { type: 'data_stream', value: 'ai-index-ds-customer_support' },
+        'marketing'
+      )
+    ).resolves.toMatch(/default\/my-ai-index/);
+    expect(deleteDataStream).not.toHaveBeenCalled();
+  });
+
+  it('excludes the deleted entry by id and space, so the same id elsewhere still counts', async () => {
+    await deleteBackingStore(
+      { type: 'data_stream', value: 'ai-index-ds-customer_support' },
+      'marketing'
+    );
+
+    expect(registrySearch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: {
+          bool: {
+            filter: [{ term: { 'dest.value': 'ai-index-ds-customer_support' } }],
+            must_not: [createAiIndexIdentityDslFilter('my-ai-index', 'marketing')],
+          },
+        },
+      })
+    );
   });
 });

@@ -27,7 +27,7 @@ cd "$KIBANA_ROOT"
 bash "$KIBANA_ROOT/.ona/bootstrap.sh"
 
 echo "=== Starting Elasticsearch ==="
-yarn es snapshot &
+pnpm es snapshot &
 
 echo "Waiting for Elasticsearch to be ready..."
 for i in $(seq 1 60); do
@@ -43,7 +43,7 @@ for i in $(seq 1 60); do
 done
 
 echo "=== Starting Kibana ==="
-yarn start --no-base-path --server.host=0.0.0.0 &
+pnpm start --no-base-path --server.host=0.0.0.0 &
 
 echo "Waiting for Kibana to be available..."
 for i in $(seq 1 120); do

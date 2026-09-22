@@ -6,7 +6,7 @@
  */
 
 import type { ReactNode } from 'react';
-import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
+import type { AlertEpisode } from '../queries/episodes_query';
 export interface EpisodeActionContext {
   episodes: AlertEpisode[];
   /** Optional hook for the caller to refresh their data layer after a successful execute. */
@@ -32,4 +32,6 @@ export interface EpisodeAction {
    * the data table's bulk menu — fall back to `execute`.
    */
   renderMenuItem?: (ctx: EpisodeActionMenuItemContext) => ReactNode;
+  showWhenDisabled?: (ctx: EpisodeActionContext) => boolean;
+  disabledTooltip?: string;
 }

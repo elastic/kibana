@@ -15,12 +15,29 @@ export const streamNameFromTag = (tag: string): string | undefined =>
     ? tag.slice(STREAMS_RULE_STREAM_TAG_PREFIX.length)
     : undefined;
 
+export class BulkCreateRulesError extends Error {
+  constructor(
+    public readonly cause: Error,
+    public readonly createdIds: string[],
+    public readonly conflictIds: string[],
+    public readonly failedIds: string[]
+  ) {
+    super(cause.message);
+    this.name = 'BulkCreateRulesError';
+  }
+}
+
 /**
  * Narrow interface that decouples QueryClient from the Alerting v2 client.
  */
 export interface IRulesManagementClient {
   /** Idempotent create: implementations should handle 409 by updating in place. */
   createRule(id: string, definition: SignificantEventsRuleDefinition): Promise<void>;
+
+  /** Idempotent bulk create: implementations should handle per-rule 409s by updating in place. */
+  bulkCreateRules(
+    rules: Array<{ id: string; definition: SignificantEventsRuleDefinition }>
+  ): Promise<{ createdIds: string[] }>;
 
   /** Non-breaking patch: implementations should handle 404 by creating instead. */
   updateRule(id: string, definition: SignificantEventsRuleDefinition): Promise<void>;
