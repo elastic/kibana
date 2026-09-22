@@ -74,6 +74,7 @@ dependsOn:
   - '@kbn/shared-ux-router'
   - '@kbn/alerts-as-data-utils'
   - '@kbn/exploratory-view-plugin'
+  - '@kbn/event-annotation-common'
   - '@kbn/observability-shared-plugin'
   - '@kbn/observability-utils-common'
   - '@kbn/core-http-server'
