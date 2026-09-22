@@ -54,7 +54,11 @@ const actorId = (suffix: string) => `host:${ENTITY_PREFIX}-${suffix}.${domain}`;
 const targetFqdn = (suffix: string) => `${ENTITY_PREFIX}-${suffix}-target.${domain}`;
 const targetId = (suffix: string) => `host:${targetFqdn(suffix)}`;
 
-apiTest.describe(
+// TEMPORARY (do not merge): skipped to confirm this suite is what exhausts the
+// 60s beforeAll budget in the flaky-test runner. Its beforeAll is the heaviest
+// of the maintainer suites (concrete index delete + full entity-store install +
+// wait for all four engines) and it runs late, after ~107 other tests.
+apiTest.describe.skip(
   `Entity Store ${MAINTAINER_ID} maintainer (raw_identifiers)`,
   { tag: ENTITY_STORE_TAGS },
   () => {
