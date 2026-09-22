@@ -33,7 +33,7 @@ spaceTest.describe(
   () => {
     let seeded: SeededResponseActionsHistory | undefined;
 
-    spaceTest.beforeAll(async ({ esClient, kbnClient, scoutSpace }) => {
+    spaceTest.beforeAll(async ({ esClient, kbnClient, scoutSpace, config }) => {
       // Endpoint host indexing installs Fleet and waits on metadata transforms.
       spaceTest.setTimeout(600_000);
       await scoutSpace.setSolutionView('security');
@@ -41,6 +41,7 @@ spaceTest.describe(
         esClient,
         kbnClient,
         spaceId: scoutSpace.id,
+        config,
       });
     });
 

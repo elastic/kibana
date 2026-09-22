@@ -6,7 +6,8 @@
  */
 
 import { randomUUID } from 'crypto';
-import type { EsClient, KbnClient } from '@kbn/scout-security';
+import type { EsClient, KbnClient, ScoutTestConfig } from '@kbn/scout-security';
+import { createSystemIndicesEsClient } from './system_indices_es_client';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import {
   ENDPOINT_ACTIONS_INDEX,
@@ -46,6 +47,7 @@ interface SeedResponseActionsHistoryParams {
   esClient: EsClient;
   kbnClient: KbnClient;
   spaceId: string;
+  config: ScoutTestConfig;
 }
 
 /**
@@ -113,7 +115,7 @@ const indexResponseActionHost = ({
   kbnClient,
   numResponseActions,
   alertIds,
-}: Omit<SeedResponseActionsHistoryParams, 'spaceId'> & {
+}: Omit<SeedResponseActionsHistoryParams, 'spaceId' | 'config'> & {
   numResponseActions: number;
   alertIds?: string[];
 }): Promise<IndexedHostsAndAlertsResponse> => {
@@ -163,28 +165,42 @@ export const seedResponseActionsHistory = async ({
   esClient,
   kbnClient: rootKbnClient,
   spaceId,
+  config,
 }: SeedResponseActionsHistoryParams): Promise<SeededResponseActionsHistory> => {
   const kbnClient = scopeKbnClientToSpace(rootKbnClient, spaceId);
+  // `.fleet-agents` is a restricted index. The endpoint data loader creates it by
+  // indexing a fleet server agent, which Scout's `elastic` user cannot auto-create.
+  const systemEsClient = await createSystemIndicesEsClient(esClient, config);
   let manual: IndexedHostsAndAlertsResponse | undefined;
   let automated: IndexedHostsAndAlertsResponse | undefined;
   let alerts: IndexedEndpointRuleAlerts | undefined;
+  let cleaned = false;
 
   const cleanup = async (): Promise<void> => {
-    if (automated) {
-      await deleteIndexedHostsAndAlerts(esClient, kbnClient, automated);
+    if (cleaned) {
+      return;
     }
-    if (manual) {
-      await deleteIndexedHostsAndAlerts(esClient, kbnClient, manual);
-    }
-    if (alerts) {
-      await alerts.cleanup();
+    cleaned = true;
+
+    try {
+      if (automated) {
+        await deleteIndexedHostsAndAlerts(systemEsClient, kbnClient, automated);
+      }
+      if (manual) {
+        await deleteIndexedHostsAndAlerts(systemEsClient, kbnClient, manual);
+      }
+      if (alerts) {
+        await alerts.cleanup();
+      }
+    } finally {
+      await systemEsClient.close();
     }
   };
 
   try {
     const endpointAgentId = randomUUID();
     alerts = await indexEndpointRuleAlerts({
-      esClient,
+      esClient: systemEsClient,
       kbnClient,
       endpointAgentId,
       endpointHostname: `history-log-alert-${randomUUID()}`,
@@ -197,12 +213,12 @@ export const seedResponseActionsHistory = async ({
     }
 
     manual = await indexResponseActionHost({
-      esClient,
+      esClient: systemEsClient,
       kbnClient,
       numResponseActions: 2,
     });
     automated = await indexResponseActionHost({
-      esClient,
+      esClient: systemEsClient,
       kbnClient,
       numResponseActions: 1,
       alertIds: [alertId],
@@ -210,7 +226,7 @@ export const seedResponseActionsHistory = async ({
 
     const manualHost = hostIdentity(manual);
     const automatedHost = hostIdentity(automated);
-    await assertAutomatedActionRuleId(esClient, automatedHost.agentId);
+    await assertAutomatedActionRuleId(systemEsClient, automatedHost.agentId);
 
     return {
       agentIds: [manualHost.agentId, automatedHost.agentId],
