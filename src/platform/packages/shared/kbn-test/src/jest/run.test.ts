@@ -534,6 +534,55 @@ describe('run.ts', () => {
       expect(result.jestArgv).not.toContain('/old/config.js');
       expect(result.jestArgv).toContain('--verbose');
     });
+
+    it('passes a projects config as a file so each project keeps its own path', async () => {
+      process.argv = ['node', 'script', '--config', '/old/config.js', '--verbose'];
+      const configPath = '/repo/x-pack/platform/plugins/shared/lens/jest.config.js';
+      const baseConfig = {
+        projects: [
+          '<rootDir>/lens/common/jest.config.dev.js',
+          '<rootDir>/lens/public/jest.config.dev.js',
+        ],
+      };
+
+      const result = await prepareJestExecution(baseConfig, configPath);
+
+      expect(result.jestArgv).toEqual([
+        '--config',
+        configPath,
+        '--cacheDirectory',
+        '/mock/repo/root/data/jest-cache',
+        '--verbose',
+      ]);
+      expect(result.originalArgv).toEqual(['--config', '/old/config.js', '--verbose']);
+    });
+
+    it('keeps inlining a projects config when no file path is available', async () => {
+      const baseConfig = { projects: ['<rootDir>/lens/public/jest.config.dev.js'] };
+
+      const result = await prepareJestExecution(baseConfig);
+
+      const configValue = JSON.parse(result.jestArgv[result.jestArgv.indexOf('--config') + 1]);
+      expect(configValue).toEqual({
+        ...baseConfig,
+        id: 'kbn-test-jest',
+        cacheDirectory: '/mock/repo/root/data/jest-cache',
+      });
+    });
+
+    it('keeps inlining a file config that does not declare projects', async () => {
+      const baseConfig = { testMatch: ['**/*.test.js'] };
+
+      const result = await prepareJestExecution(baseConfig, '/repo/jest.config.js');
+
+      const configValue = JSON.parse(result.jestArgv[result.jestArgv.indexOf('--config') + 1]);
+      expect(configValue).toEqual({
+        ...baseConfig,
+        id: 'kbn-test-jest',
+        cacheDirectory: '/mock/repo/root/data/jest-cache',
+      });
+      expect(result.jestArgv).not.toContain('/repo/jest.config.js');
+    });
   });
 
   describe('Jest cache directory handling', () => {

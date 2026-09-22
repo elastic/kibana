@@ -159,7 +159,7 @@ export async function runJest(configName = 'jest.config.js'): Promise<void> {
   log.debug('Setting up Jest with shared cache directory...');
 
   // Prepare Jest execution context
-  const { originalArgv, jestArgv } = await prepareJestExecution(baseConfig);
+  const { originalArgv, jestArgv } = await prepareJestExecution(baseConfig, configPath);
 
   log.info('node scripts/jest', originalArgv.join(' '));
 
@@ -376,15 +376,33 @@ interface JestExecutionContext {
 
 /**
  * Prepares Jest execution context by setting up configuration and arguments.
- * This will make sure Jest uses an inline JSON config which has a cache directory set.
+ * Configs without `projects` are inlined as JSON with a shared cache directory.
+ * Configs with `projects` keep their file path: a JSON `--config` has no config path,
+ * so Jest re-reads every project from that same JSON and collapses them onto the root config.
  *
  * @param baseConfig - Base Jest configuration
+ * @param configPath - Absolute path of the config file, when one was loaded
  * @returns Jest execution context with processed arguments (already sliced for Jest consumption)
  */
 export async function prepareJestExecution(
-  baseConfig: Config.InitialOptions
+  baseConfig: Config.InitialOptions,
+  configPath?: string
 ): Promise<JestExecutionContext> {
   const cacheDirectory = join(REPO_ROOT, JEST_CACHE_DIR);
+
+  // Create shared cache directory
+  await fs.mkdir(cacheDirectory, { recursive: true });
+
+  const argumentsWithoutConfig = removeFlagFromArgv(process.argv, 'config');
+  const originalArgv = process.argv.slice(NODE_ARGV_SLICE_INDEX);
+  const forwardedArgv = argumentsWithoutConfig.slice(NODE_ARGV_SLICE_INDEX);
+
+  if (configPath && baseConfig.projects?.length) {
+    return {
+      jestArgv: ['--config', configPath, '--cacheDirectory', cacheDirectory, ...forwardedArgv],
+      originalArgv,
+    };
+  }
 
   const inlineConfig = {
     ...baseConfig,
@@ -392,22 +410,8 @@ export async function prepareJestExecution(
     cacheDirectory,
   };
 
-  // Create shared cache directory
-  await fs.mkdir(cacheDirectory, { recursive: true });
-
-  // Remove existing --config flags and provide the inline JSON config
-  const argumentsWithoutConfig = removeFlagFromArgv(process.argv, 'config');
-
-  const jestArgv = [
-    `--config`,
-    JSON.stringify(inlineConfig),
-    ...argumentsWithoutConfig.slice(NODE_ARGV_SLICE_INDEX),
-  ];
-
-  const originalArgv = process.argv.slice(NODE_ARGV_SLICE_INDEX);
-
   return {
-    jestArgv,
+    jestArgv: ['--config', JSON.stringify(inlineConfig), ...forwardedArgv],
     originalArgv,
   };
 }
