@@ -115,7 +115,7 @@ export const getFieldTypeDocsHelpText = (
   return (
     <EuiLink href={info.docs} target="_blank" external>
       {i18n.translate('xpack.dataFederation.mappingEditor.fieldTypeDocsLink', {
-        defaultMessage: 'View documentation for {type} field type',
+        defaultMessage: '{type} documentation',
         values: { type: info.label },
       })}
     </EuiLink>
