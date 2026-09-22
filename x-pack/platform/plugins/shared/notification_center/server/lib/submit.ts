@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
 import type { CoreSetup } from '@kbn/core/server';
 import { notificationWriteSchema } from '../../common/notification_schema';
 import {
@@ -60,7 +61,9 @@ const writeNotification = async (
   // A notification type without a flag defined in the registry passes through.
   const flagKey = NOTIFICATION_TYPE_FLAGS[joinNotificationTypeId(namespace, type)];
   const enabled = flagKey
-    ? await featureFlags.getBooleanValue(flagKey, NOTIFICATION_TYPE_ENABLED_DEFAULT)
+    ? await firstValueFrom(
+        featureFlags.getBooleanValue$(flagKey, NOTIFICATION_TYPE_ENABLED_DEFAULT)
+      )
     : true;
   if (!enabled) {
     return { status: 'skipped_disabled' };

@@ -29,7 +29,7 @@ const mockServices = (
       agentBuilder,
       cloud: { isServerlessEnabled },
       featureFlags: {
-        getBooleanValue: jest
+        useBooleanValue: jest
           .fn()
           .mockImplementation((flag: string, defaultValue: boolean) =>
             flag === SEARCH_GETTING_STARTED_CHAT_FEATURE_FLAG ? featureFlagValue : defaultValue
@@ -53,7 +53,7 @@ describe('useGettingStartChatEnabled', () => {
       services: {
         agentBuilder: {},
         cloud: undefined,
-        featureFlags: { getBooleanValue: jest.fn().mockReturnValue(true) },
+        featureFlags: { useBooleanValue: jest.fn().mockReturnValue(true) },
       },
     });
 
