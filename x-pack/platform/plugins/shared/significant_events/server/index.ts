@@ -19,9 +19,15 @@ export const plugin = async (ctx: PluginInitializerContext) => {
 
 export { SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID } from './agent_builder/agents/discovery/discovery';
 
-export { SIGNIFICANT_EVENTS_SEARCH_EVENTS_TOOL_ID } from './agent_builder/tools/tool_ids';
+export { FEATURE_IDENTIFICATION_AGENT_ID } from './agent_builder/agents/feature_identification';
+export { FINALIZE_FEATURES_TOOL_ID } from './agent_builder/skills/feature_identification';
+export { buildFeatureIdentificationUserMessage } from './lib/significant_events/features/build_user_message';
+export { compactInferenceDocuments } from './lib/significant_events/features/prepare_inferred_sampling';
+export {
+  parseFinalizedFeatures,
+  type RawFinalizeFeaturesParams,
+} from './lib/significant_events/features/parse_finalized_features';
 
-export { createMemoryDiscoveryTools } from './lib/significant_events/memory_discovery_tools';
-export { MemoryServiceImpl } from './memory_and_investigation/lib/memory';
+export { SIGNIFICANT_EVENTS_SEARCH_EVENTS_TOOL_ID } from './agent_builder/tools/tool_ids';
 
 export type { SignificantEventsRouteRepository } from './routes';

@@ -78,6 +78,13 @@ Pass --help in the command to discover supported rule types, required flags, and
 The tool returns the generated previewId and the attachment metadata. Use the returned attachmentId and version with <render_attachment id="..." version="..."> to display it.`,
     schema: runRulePreviewSchema,
     tags: ['security', 'detection', 'rule-preview', 'attachment'],
+    annotations: {
+      title: 'Run Rule Preview',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     handler: async (
       { command },
       { request, spaceId, savedObjectsClient, attachments, prompts, callContext }

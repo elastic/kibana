@@ -7,7 +7,10 @@
 
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { getChartTypeSelectionPromptContent } from '@kbn/agent-builder-visualizations-server';
+import {
+  getChartTypeSelectionPromptContent,
+  seriesStatisticsAgentGuidance,
+} from '@kbn/agent-builder-visualizations-server';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
 const chartTypeSelectionContent = getChartTypeSelectionPromptContent();
@@ -22,6 +25,7 @@ export const visualizationCreationSkill = defineSkillType({
 
 Use this skill when:
 - A user asks for one or more standalone visualizations (chart, metric, trend, breakdown, distribution).
+- A user asks for a standalone HTML-style panel that no chart type covers — a KPI scorecard, a status or health board, a panel mixing narrative text with live values.
 - You explicitly want a reusable visualization attachment ID for later use.
 - A user asks to update an existing visualization by attachment ID.
 
@@ -35,12 +39,12 @@ Do **not** use this skill when:
 
 - **${
     platformCoreTools.createVisualization
-  }**: Create or update visualization configurations and return \`attachment_id\` when persistence succeeds. It generates and validates the ES|QL internally from your natural-language \`query\` — you do not need to build ES|QL yourself for the common case.
+  }**: Create or update visualization configurations and return \`attachment_id\` when persistence succeeds. It generates and validates the ES|QL internally from your natural-language \`query\` — you do not need to build ES|QL yourself for the common case. You say what to build in \`target\`, discriminated by \`target.type\`: \`lens\`, \`vega\`, \`custom_content\`, or \`attachment\` (update an existing visualization).
 - **${
     platformCoreTools.generateEsql
   }**: Optional. Only for genuinely complex aggregations/joins you want to control and validate precisely; pass the result to ${
     platformCoreTools.createVisualization
-  } via \`esql\`. Not a required step before every visualization.
+  } via \`target.esql\`. Not a required step before every visualization.
 - **${platformCoreTools.executeEsql}**: Validate ES|QL and inspect sample result shape.
 
 ## Visualization Creation Workflow
@@ -67,22 +71,25 @@ Do **not** use this skill when:
      platformCoreTools.generateEsql
    }, optionally validate the shape with ${platformCoreTools.executeEsql}, then hand the query to ${
     platformCoreTools.createVisualization
-  } via \`esql\`.
+  } via \`target.esql\`.
 
 3. **Call ${platformCoreTools.createVisualization}**
    - Provide:
      - \`query\` (required, specific and field-accurate)
      - \`index\` (strongly recommended — pass the grounded index; omitting it forces auto-discovery, which fails for ungrounded/invented fields)
-     - \`renderer\` (new visualizations only; \`lens\` or \`vega\`; omit to default to Lens)
-     - \`chartType\` (required for a new Lens visualization; optional hint for a new Vega visualization; optional on updates)
-     - \`esql\` (optional, when you have a validated ES|QL)
-     - \`attachment_id\` (optional, only when updating an existing visualization)
+     - \`target\` (required) — one of:
+       - \`{ "type": "lens", "chartType": <required>, "esql"?: <validated ES|QL> }\` for a standard chart
+       - \`{ "type": "vega", "chartType"?: <styling hint>, "esql"?: <validated ES|QL> }\` for a custom Vega-Lite visualization
+       - \`{ "type": "custom_content", "esql"?: <validated ES|QL>, "has_data"?: false }\` for an HTML layout — omit \`esql\` to have a query generated; pass \`has_data: false\` only when the panel genuinely has no data
+       - \`{ "type": "attachment", "attachment_id": <id>, "chartType"?, "esql"?, "has_data"? }\` to update an existing visualization
+       \`esql\` is optional everywhere it appears: pass it when you already have a validated ES|QL, otherwise it is generated for you.
+     - \`time_range\` (optional; **only** when the user explicitly named a time window, e.g. "last 7 days", "May 20–24". Do not invent a range. Omit it otherwise — create applies a data-aware default, and edits keep the existing range.)
    - For multi-panel requests, resolve the index (and validate the fields) ONCE up front, then call ${
      platformCoreTools.createVisualization
    } once per panel WITH that \`index\`. Do **not** fan out several index-less calls in parallel — a single failed auto-discovery fails all of them identically.
 
 4. **Interpret output and preserve artifacts**
-   - Each successful call returns \`data.attachment_id\` and \`data.version\`. Save them: they identify the persisted attachment for rendering and for later updates (pass \`attachment_id\` back to update it in place).
+   - Each successful call returns \`data.attachment_id\` and \`data.version\`. Save them: they identify the persisted attachment for rendering and for later updates (pass it back as \`target: { "type": "attachment", "attachment_id": ... }\` to update it in place).
    - If \`data.attachment_id\` is missing, persistence failed; report that and treat the result as non-renderable and non-reusable.
 
 ## Inline Rendering Guidelines
@@ -95,7 +102,7 @@ Render a created visualization by referencing its persisted attachment, using th
 <render_attachment id="{attachment_id}" version="{version}" />
 \`\`\`
 
-- This renders both Lens and Vega visualizations. Copy \`attachment_id\` and \`version\` verbatim from the tool result; never invent them.
+- This renders Lens, Vega and custom content visualizations. Copy \`attachment_id\` and \`version\` verbatim from the tool result; never invent them.
 - Do **NOT** use the \`<visualization>\` element for ${
     platformCoreTools.createVisualization
   } output — that element is only for \`esql_results\` from \`${platformCoreTools.executeEsql}\`.
@@ -108,8 +115,11 @@ Reference only fields that exist in your grounded index mapping. The field names
 
 Good prompt patterns (specific and field-accurate):
 - "Show average <numeric field> over time grouped by <keyword field>"
+- "Log volume over time, show avg/min/max in the legend"
 - "Display top 10 <keyword field> values by document count as a bar chart"
 - "Show a single metric for count where <field> is <value>"
+
+${seriesStatisticsAgentGuidance}
 
 Poor prompt patterns:
 - "Show CPU" / "Make a chart" / "Display everything" (too vague)
@@ -121,13 +131,24 @@ Always reference real fields from the index mapping.
 
 ${
   platformCoreTools.createVisualization
-} renders with **Lens** (standard charts) or **Vega** (custom Vega-Lite). Decide and pass \`renderer\`:
+} renders with **Lens** (standard charts), **Vega** (custom Vega-Lite), or **custom content** (HTML layouts). Decide and pass \`target.type\`:
 
-- Pass \`renderer: "vega"\` when:
+- Pass \`target.type: "vega"\` when:
   - The user explicitly asks for a Vega or Vega-Lite visualization, OR
-  - No Lens chart type fits — e.g. small multiples / faceting, layered or combination charts (bars plus an overlaid line), scatter / bubble plots with an encoded size dimension, or custom tooltips/encodings.
-- Otherwise pass \`renderer: "lens"\` (or omit it to use the Lens default) with the required best-fitting \`chartType\`.
-- When updating an existing attachment, omit \`renderer\` — edits keep the existing renderer.
+  - No Lens chart type fits — e.g. small multiples / faceting, layered or combination charts of **different measures** (bars plus an overlaid line), scatter / bubble plots with an encoded size dimension, or custom tooltips/encodings.
+- Pass \`target.type: "custom_content"\` only when **neither chart grammar** can express the request: an HTML/CSS layout such as a KPI scorecard with colored status badges, a health or status board, a panel mixing narrative text with live values, or when the user explicitly asks for a custom or HTML panel. Anything that is a standard time series, bar, pie, metric or table belongs on Lens; anything faceted, layered or scatter-shaped belongs on Vega. Reach for custom content last.
+- Otherwise pass \`target.type: "lens"\` with the required best-fitting \`chartType\`. Legend statistics of one series stay on Lens xy — see the average/min/max distinction above.
+- When updating an existing attachment, pass \`target.type: "attachment"\` with its \`attachment_id\` — edits keep the existing renderer.
+
+### Custom content
+
+Pass \`target.type: "custom_content"\` and describe the panel in \`query\` — layout, copy, and any values or fields to show. Do not write HTML, and never pass a template: the markup is generated server-side.
+
+You decide whether the panel has data:
+- Omit \`target.esql\` and a query is generated from \`query\` (the common case), or pass a validated ES|QL yourself.
+- Pass \`target.has_data: false\` **only** when the panel genuinely shows no live values — a banner, a legend, an explanatory note, a title card. Never use \`has_data: false\` to get past a failed query generation; fix the index or fields and retry instead. Do not pass \`esql: null\` to mean "no data" — that is treated as omitting the query so one is generated.
+
+To change an existing panel, call this tool again with \`target: { "type": "attachment", "attachment_id": ... }\` and describe the update — do not read the attachment to edit the HTML. Omitting \`esql\` and \`has_data\` on an update keeps the panel's current data state (its query, or none); pass a validated \`esql\` to add or replace data, \`has_data: true\` to ensure it has data (the stored query is kept; one is generated only when the panel has none), and \`has_data: false\` to remove it. If the generated query is rejected, correct \`query\` (or pass a validated \`esql\`) and retry; do not fall back to writing markup yourself.
 
 **Scope — "Vega" here means Vega-Lite, not full Vega.** The Vega renderer only supports the Vega-Lite grammar. It cannot do full Vega features such as custom signals / imperative interactivity, arbitrary data transforms or expressions, or bespoke rendering. If a request fits neither a Lens chart type nor the Vega-Lite grammar, do **not** force a broken or misleading chart. Be honest with the user: explain that the requested chart is not supported in Vega-Lite and that full Vega is not available yet, then offer alternatives — the closest Vega-Lite approximation, a standard Lens chart, or splitting the request into multiple charts — and ask how they would like to proceed.
 
@@ -137,7 +158,7 @@ Supported values for \`chartType\`: ${Object.values(SupportedChartType).join(', 
 
 ${chartTypeSelectionContent}
 
-For every new Lens visualization, choose and pass \`chartType\`; it is required. For a new Vega visualization, \`chartType\` is an optional authoring hint — omit it when no Lens chart type represents the requested visualization. On updates, \`chartType\` is optional because the existing visualization provides the current form. When editing a Lens visualization, omit \`chartType\` to preserve its current chart family; provide a new \`chartType\` when the request changes the chart family, such as from \`xy\` to \`pie\`.
+For every new Lens visualization, choose and pass \`target.chartType\`; it is required. For a new Vega visualization, \`chartType\` is an optional authoring hint — omit it when no Lens chart type represents the requested visualization. Custom content has no \`chartType\`. On updates, \`chartType\` is optional because the existing visualization provides the current form. When editing a Lens visualization, omit \`chartType\` to preserve its current chart family; provide a new \`chartType\` when the request changes the chart family, such as from \`xy\` to \`pie\`.
 
 ## Edge Cases
 
@@ -158,7 +179,18 @@ For every new Lens visualization, choose and pass \`chartType\`; it is required.
 {
   "query": "Show average system.cpu.total.pct over time grouped by host.name",
   "index": "metrics-system.cpu-default",
-  "chartType": "xy"
+  "target": { "type": "lens", "chartType": "xy" }
+}
+\`\`\`
+
+## Create with an explicit user-named time window
+
+\`\`\`json
+{
+  "query": "Show error count over the last 7 days",
+  "index": "logs-*",
+  "target": { "type": "lens", "chartType": "xy" },
+  "time_range": { "from": "now-7d", "to": "now" }
 }
 \`\`\`
 
@@ -168,8 +200,40 @@ For every new Lens visualization, choose and pass \`chartType\`; it is required.
 {
   "query": "Top 10 source IPs by request count",
   "index": "logs-nginx.access-default",
-  "chartType": "xy",
-  "esql": "FROM logs-nginx.access-default | STATS requests = COUNT(*) BY source.ip | SORT requests DESC | LIMIT 10"
+  "target": {
+    "type": "lens",
+    "chartType": "xy",
+    "esql": "FROM logs-nginx.access-default | STATS requests = COUNT(*) BY source.ip | SORT requests DESC | LIMIT 10"
+  }
+}
+\`\`\`
+
+## Create a Vega-Lite visualization
+
+\`\`\`json
+{
+  "query": "Small multiples of request count over time, one panel per service.name",
+  "index": "logs-*",
+  "target": { "type": "vega" }
+}
+\`\`\`
+
+## Create a custom content panel (query generated for you)
+
+\`\`\`json
+{
+  "query": "A status board with one card per host showing its log count and a colored badge",
+  "index": "logs-*",
+  "target": { "type": "custom_content" }
+}
+\`\`\`
+
+## Create a custom content panel with no data
+
+\`\`\`json
+{
+  "query": "A header banner reading 'Production overview' with a short subtitle",
+  "target": { "type": "custom_content", "has_data": false }
 }
 \`\`\`
 
@@ -177,9 +241,9 @@ For every new Lens visualization, choose and pass \`chartType\`; it is required.
 
 \`\`\`json
 {
-  "attachment_id": "viz-attachment-123",
   "query": "Update this chart to show 95th percentile response bytes over time",
-  "index": "logs-nginx.access-default"
+  "index": "logs-nginx.access-default",
+  "target": { "type": "attachment", "attachment_id": "viz-attachment-123" }
 }
 \`\`\`
 `,

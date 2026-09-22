@@ -50,6 +50,13 @@ export function createEventTool({
         defaultMessage: 'Create a significant event for one or more streams.',
       })}
     `,
+    annotations: {
+      title: 'Create Significant Event',
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: false,
+    },
     schema: createEventSchema,
     tags: ['streams', 'significant-events'],
     confirmation: {
@@ -93,7 +100,7 @@ export function createEventTool({
         await assertSignificantEventsAccess({ server, licensing });
 
         const data = await createEventToolHandler({
-          eventClient: getEventClient(),
+          eventClient: await getEventClient(),
           eventInput: toolParams,
         });
 

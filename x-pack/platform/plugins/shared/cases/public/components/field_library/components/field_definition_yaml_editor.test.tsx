@@ -97,6 +97,40 @@ describe('FieldDefinitionYamlEditor', () => {
     expect(screen.getByTestId('fieldDefinitionYamlInput')).toBeInTheDocument();
   });
 
+  describe('authoring-charset validation split', () => {
+    const dashedFieldYaml = 'name: risk-score\ncontrol: INPUT_TEXT\ntype: keyword\n';
+
+    it('shows the charset error for a dashed name when creating', async () => {
+      renderWithTestingProviders(
+        <FieldDefinitionYamlEditor
+          value={dashedFieldYaml}
+          onChange={jest.fn()}
+          data-test-subj="fieldDefinitionYamlInput"
+        />
+      );
+
+      expect(await screen.findByText('1 error')).toBeInTheDocument();
+      expect(
+        screen.getByText(/Field name "risk-score" must contain only letters/)
+      ).toBeInTheDocument();
+    });
+
+    it('does not show the charset error for a stored dashed name when editing', async () => {
+      renderWithTestingProviders(
+        <FieldDefinitionYamlEditor
+          value={dashedFieldYaml}
+          onChange={jest.fn()}
+          isEditing
+          data-test-subj="fieldDefinitionYamlInput"
+        />
+      );
+
+      expect(await screen.findByTestId('mockYamlEditorBase')).toBeInTheDocument();
+      expect(screen.queryByText(/must contain only letters/)).not.toBeInTheDocument();
+      expect(screen.queryByText('1 error')).not.toBeInTheDocument();
+    });
+  });
+
   it('prefers the editor schema error when the YAML does not describe an inline field', async () => {
     renderWithTestingProviders(
       <FieldDefinitionYamlEditor

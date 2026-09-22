@@ -8,52 +8,113 @@
 import { schema } from '@kbn/config-schema';
 
 import { AWS_CLOUD_PROVIDER } from '../../../common/types/models/cloud_connector';
+import { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../../../common/types/rest_spec/iac_provisioner';
 import { CLOUD_CONNECTOR_RENDER_FLOW } from '../../../common/telemetry/iac_provisioner_events';
+
+const IacProvisionerFlowSchema = schema.oneOf([schema.literal(CLOUD_CONNECTOR_RENDER_FLOW)], {
+  meta: {
+    description: 'The Kibana flow requesting the render; reported in telemetry.',
+  },
+});
+
+const IacPolicyTemplateSelectionSchema = schema.object({
+  name: schema.string({
+    minLength: 1,
+    maxLength: 255,
+    meta: { description: 'Policy template name as declared in the package manifest.' },
+  }),
+  enabledInputs: schema.arrayOf(schema.string({ minLength: 1, maxLength: 255 }), {
+    minSize: 1,
+    maxSize: 100,
+    meta: { description: 'Input types the user enabled within this policy template.' },
+  }),
+});
+
+const IacIntegrationsSchema = schema.arrayOf(
+  schema.object({
+    name: schema.string({
+      minLength: 1,
+      maxLength: 255,
+      meta: { description: 'EPR package name.' },
+    }),
+    policyTemplates: schema.arrayOf(IacPolicyTemplateSelectionSchema, {
+      minSize: 1,
+      maxSize: 100,
+      meta: {
+        description: 'Policy templates whose enabled inputs to include.',
+      },
+    }),
+  }),
+  {
+    minSize: 1,
+    // Each entry costs a registry fetch; known flows send a single
+    // integration, so this cap only exists to bound abuse.
+    maxSize: 10,
+    meta: { description: 'Integrations selected by the user.' },
+  }
+);
 
 export const RenderIacTemplateRequestSchema = {
   body: schema.object({
     provider: schema.oneOf([schema.literal(AWS_CLOUD_PROVIDER)], {
       meta: { description: 'The cloud provider the template targets. Only AWS is supported.' },
     }),
-    flow: schema.oneOf([schema.literal(CLOUD_CONNECTOR_RENDER_FLOW)], {
-      meta: { description: 'The Kibana flow requesting the render; reported in telemetry.' },
+    workflow: schema.oneOf([schema.literal(IAC_FEDERATED_IDENTITY_WORKFLOW)], {
+      meta: {
+        description:
+          'Identity mechanism. Kibana name for the connector type; IaCP looks up the matching blueprint lineage.',
+      },
     }),
-    integrations: schema.arrayOf(
-      schema.object({
-        name: schema.string({
-          minLength: 1,
-          maxLength: 255,
-          meta: { description: 'EPR package name.' },
-        }),
-        policyTemplates: schema.arrayOf(schema.string({ minLength: 1, maxLength: 255 }), {
-          minSize: 1,
-          // Bounds input to avoid unbounded validation work; a package exposes
-          // only a handful of policy templates, so this is a generous ceiling.
-          maxSize: 100,
-          meta: {
-            description: 'Policy template names whose inputs to include in the rendered template.',
-          },
-        }),
-      }),
-      {
-        minSize: 1,
-        // Each entry costs a registry fetch; known flows send a single
-        // integration, so this cap only exists to bound abuse.
-        maxSize: 10,
-        meta: { description: 'Integrations to render the template for.' },
-      }
+    flow: IacProvisionerFlowSchema,
+    integrations: IacIntegrationsSchema,
+    templateSha: schema.maybe(
+      schema.string({
+        minLength: 1,
+        maxLength: 255,
+        meta: {
+          description:
+            'Stored template digest from this connector. Omit on first render and after a static-template fallback.',
+        },
+      })
     ),
   }),
 };
 
 export const RenderIacTemplateResponseSchema = schema.object({
-  artifactUrl: schema.string({
+  artifactUrl: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'Pre-signed URL of the rendered template. Present only when render is true. Embeds signing credentials — never log or cache.',
+      },
+    })
+  ),
+  expiresAt: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'ISO 8601 UTC timestamp when the pre-signed URL expires. Present with artifactUrl.',
+      },
+    })
+  ),
+  templateSha: schema.string({
     meta: {
       description:
-        'Pre-signed URL of the rendered template. Embeds signing credentials — never log or cache.',
+        'Digest of the canonical CloudFormation template. Persist on the connector at confirmation.',
     },
   }),
-  expiresAt: schema.string({
-    meta: { description: 'ISO 8601 UTC timestamp when the pre-signed URL expires.' },
+  render: schema.boolean({
+    meta: {
+      description:
+        'True when the user must apply the template. False when the stored templateSha still matches.',
+    },
+  }),
+  blueprint: schema.object({
+    id: schema.string({
+      meta: { description: 'Blueprint identifier that was rendered.' },
+    }),
+    version: schema.string({
+      meta: { description: 'Blueprint version that was rendered.' },
+    }),
   }),
 });

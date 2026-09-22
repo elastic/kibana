@@ -18,7 +18,7 @@ export function SetupModeExitButton({ exitSetupMode }: SetupModeExitButtonProps)
     <EuiButton
       color="danger"
       fill
-      iconType="flag"
+      iconType="logOut"
       iconSide="right"
       size="s"
       onClick={exitSetupMode}

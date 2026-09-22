@@ -7,6 +7,8 @@
 
 import type { z } from '@kbn/zod/v4';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { ToolResultType, type ErrorResult, type OtherResult } from '@kbn/agent-builder-common';
+import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { executeEsql } from '@kbn/agent-builder-genai-utils';
 import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/server';
 import type { IdentifierType } from '../../../../common/api/entity_analytics/common/common.gen';
@@ -279,7 +281,7 @@ export interface ResolveSingleEntityParams {
 
 /**
  * Resolves an `entityId` and classifies the outcome. Wraps `findEntityById` +
- * `isHighConfidenceSingleMatch` + `describeEntityRow` so both entity tools share
+ * `isHighConfidenceSingleMatch` + `describeEntityRow` so entity tools share
  * one resolution path; each branches on the returned `status`.
  */
 export const resolveSingleEntity = async ({
@@ -318,4 +320,74 @@ export const resolveSingleEntity = async ({
   }
 
   return { ...base, status: 'resolved', identity };
+};
+
+type RequireResolvedEntityResult =
+  | { ok: true; identity: EntityIdentity & { entityStoreId: string } }
+  | { ok: false; results: Array<ErrorResult | OtherResult> };
+
+/**
+ * Resolves an entity and returns either a canonical identity (with EUID) or
+ * ready-to-return tool results for not_found / ambiguous / no_identity.
+ */
+export const requireResolvedEntity = async ({
+  esClient,
+  spaceId,
+  entityId,
+  entityType,
+}: ResolveSingleEntityParams): Promise<RequireResolvedEntityResult> => {
+  const resolved = await resolveSingleEntity({ esClient, spaceId, entityId, entityType });
+
+  if (resolved.status === 'not_found') {
+    return {
+      ok: false,
+      results: [
+        {
+          tool_result_id: getToolResultId(),
+          type: ToolResultType.error,
+          data: { message: `No entity found for id: ${entityId}` },
+        },
+      ],
+    };
+  }
+
+  if (resolved.status === 'ambiguous') {
+    return {
+      ok: false,
+      results: [
+        {
+          tool_result_id: getToolResultId(),
+          type: ToolResultType.other,
+          data: {
+            message: `Multiple entities matched "${entityId}". Ask the user to provide the exact entity id (EUID), then call this tool again.`,
+            candidateEntityIds: resolved.candidateEntityIds,
+          },
+        },
+      ],
+    };
+  }
+
+  if (resolved.status === 'no_identity' || !resolved.identity.entityStoreId) {
+    return {
+      ok: false,
+      results: [
+        {
+          tool_result_id: getToolResultId(),
+          type: ToolResultType.error,
+          data: {
+            message: `Resolved an entity for "${entityId}" but it has no canonical entity.id.`,
+          },
+        },
+      ],
+    };
+  }
+
+  return {
+    ok: true,
+    // Re-declare entityStoreId so the success type has it as required (not optional).
+    identity: {
+      ...resolved.identity,
+      entityStoreId: resolved.identity.entityStoreId,
+    },
+  };
 };

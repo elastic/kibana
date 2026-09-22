@@ -9,7 +9,7 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { I18nProvider } from '@kbn/i18n-react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { AddDataSearchResults } from './search_results';
 
 interface TestItem {
@@ -28,23 +28,26 @@ const renderCard = (item: TestItem) => <div data-test-subj={`card-${item.id}`}>{
 const liveRegionTexts = () => screen.getAllByRole('status').map((region) => region.textContent);
 
 describe('AddDataSearchResults', () => {
-  it('shows the total match count in the header', () => {
+  it('shows the total match count in the header, count and noun emphasized', () => {
     renderWithI18n(
       <AddDataSearchResults
         searchTerm="redis"
-        items={makeItems(8)}
+        items={makeItems(5)}
         isLoading={false}
         renderCard={renderCard}
       />
     );
-    expect(screen.getByTestId('addDataSearchResultsCount')).toHaveTextContent('Showing 8 results');
+    const count = screen.getByTestId('addDataSearchResultsCount');
+    expect(count).toHaveTextContent('Showing 5 integrations');
+    expect(count.querySelector('strong')).toHaveTextContent('5 integrations');
+    expect(count.querySelector('strong')).not.toHaveTextContent('Showing');
   });
 
   it('names the results section after the count header', () => {
     renderWithI18n(
       <AddDataSearchResults
         searchTerm="redis"
-        items={makeItems(8)}
+        items={makeItems(5)}
         isLoading={false}
         renderCard={renderCard}
       />
@@ -60,12 +63,12 @@ describe('AddDataSearchResults', () => {
     renderWithI18n(
       <AddDataSearchResults
         searchTerm="redis"
-        items={makeItems(8)}
+        items={makeItems(5)}
         isLoading={false}
         renderCard={renderCard}
       />
     );
-    expect(liveRegionTexts()).toContain('Showing 8 results');
+    expect(liveRegionTexts()).toContain('Showing 5 integrations');
   });
 
   it('announces the empty state in a live region', () => {
@@ -80,116 +83,178 @@ describe('AddDataSearchResults', () => {
     expect(liveRegionTexts()).toContain('No results for zzz-no-match');
   });
 
-  it('renders only the first page and reveals more on Show more', async () => {
-    const user = userEvent.setup();
+  it('caps visible results at two rows and paginates the rest', () => {
     renderWithI18n(
       <AddDataSearchResults
-        searchTerm="redis"
-        items={makeItems(8)}
+        searchTerm="aws"
+        items={makeItems(30)}
         isLoading={false}
         renderCard={renderCard}
       />
     );
     expect(screen.getAllByTestId(/^card-item-/)).toHaveLength(6);
-    await user.click(screen.getByTestId('addDataSearchResultsShowMore'));
-    expect(screen.getAllByTestId(/^card-item-/)).toHaveLength(8);
-    expect(screen.queryByTestId('addDataSearchResultsShowMore')).not.toBeInTheDocument();
+    expect(screen.getByTestId('card-item-0')).toBeInTheDocument();
+    expect(screen.queryByTestId('card-item-6')).not.toBeInTheDocument();
+    expect(screen.getByTestId('addDataSearchResultsPagination')).toBeInTheDocument();
   });
 
-  // The other cases run on the default page size, so this is the only place a
-  // host-supplied `pageSize` is exercised at all.
-  it('pages by the host-supplied page size', async () => {
-    const user = userEvent.setup();
+  it('reports the visible range and the total when results exceed two rows', () => {
     renderWithI18n(
       <AddDataSearchResults
-        searchTerm="redis"
+        searchTerm="aws"
         items={makeItems(8)}
         isLoading={false}
         renderCard={renderCard}
-        pageSize={3}
       />
     );
-    expect(screen.getAllByTestId(/^card-item-/)).toHaveLength(3);
-    await user.click(screen.getByTestId('addDataSearchResultsShowMore'));
+    const count = screen.getByTestId('addDataSearchResultsCount');
+    expect(count).toHaveTextContent('Showing 1-6 of 8 integrations');
+    expect(count.querySelector('strong')).toHaveTextContent('1-6 of 8 integrations');
+    expect(count.querySelector('strong')).not.toHaveTextContent('Showing');
+    expect(liveRegionTexts()).toContain('Showing 1-6 of 8 integrations');
+  });
+
+  it('shows the next slice when the second page is selected', async () => {
+    const user = userEvent.setup();
+    renderWithI18n(
+      <AddDataSearchResults
+        searchTerm="aws"
+        items={makeItems(8)}
+        isLoading={false}
+        renderCard={renderCard}
+      />
+    );
+    await user.click(screen.getByTestId('pagination-button-1'));
+    expect(screen.getAllByTestId(/^card-item-/)).toHaveLength(2);
+    expect(screen.getByTestId('card-item-6')).toBeInTheDocument();
+    expect(screen.queryByTestId('card-item-0')).not.toBeInTheDocument();
+    expect(screen.getByTestId('addDataSearchResultsCount')).toHaveTextContent(
+      'Showing 7-8 of 8 integrations'
+    );
+  });
+
+  it('does not write to the url when the page changes', async () => {
+    const user = userEvent.setup();
+    const hrefBefore = window.location.href;
+    renderWithI18n(
+      <AddDataSearchResults
+        searchTerm="aws"
+        items={makeItems(8)}
+        isLoading={false}
+        renderCard={renderCard}
+      />
+    );
+    await user.click(screen.getByTestId('pagination-button-1'));
+    expect(window.location.href).toBe(hrefBefore);
+  });
+
+  it('hides pagination when the match count fits in two rows', () => {
+    renderWithI18n(
+      <AddDataSearchResults
+        searchTerm="redis"
+        items={makeItems(6)}
+        isLoading={false}
+        renderCard={renderCard}
+      />
+    );
     expect(screen.getAllByTestId(/^card-item-/)).toHaveLength(6);
+    expect(screen.queryByTestId('addDataSearchResultsPagination')).not.toBeInTheDocument();
+    expect(screen.getByTestId('addDataSearchResultsCount')).toHaveTextContent(
+      'Showing 6 integrations'
+    );
   });
 
-  it('moves focus onto the first revealed card when Show more unmounts the button', async () => {
+  it('returns to the first page when the search term changes', async () => {
     const user = userEvent.setup();
-    renderWithI18n(
+    const view = renderWithI18n(
       <AddDataSearchResults
-        searchTerm="redis"
-        items={makeItems(8)}
+        searchTerm="aws"
+        items={makeItems(12)}
         isLoading={false}
         renderCard={renderCard}
       />
     );
-    await user.click(screen.getByTestId('addDataSearchResultsShowMore'));
-    expect(screen.getByTestId('card-item-6').closest('[tabindex="-1"]')).toHaveFocus();
-  });
+    await user.click(screen.getByTestId('pagination-button-1'));
+    expect(screen.getByTestId('card-item-6')).toBeInTheDocument();
 
-  it('resets pagination when the search term changes', async () => {
-    const user = userEvent.setup();
-    const { rerender } = renderWithI18n(
-      <AddDataSearchResults
-        searchTerm="redis"
-        items={makeItems(14)}
-        isLoading={false}
-        renderCard={renderCard}
-      />
-    );
-    await user.click(screen.getByTestId('addDataSearchResultsShowMore'));
-    expect(screen.getAllByTestId(/^card-item-/)).toHaveLength(12);
-    rerender(
+    view.rerender(
       <I18nProvider>
         <AddDataSearchResults
-          searchTerm="nginx"
-          items={makeItems(14)}
+          searchTerm="azure"
+          items={makeItems(12, 'azure')}
           isLoading={false}
           renderCard={renderCard}
         />
       </I18nProvider>
     );
-    expect(screen.getAllByTestId(/^card-item-/)).toHaveLength(6);
+
+    expect(screen.getByTestId('card-azure-0')).toBeInTheDocument();
+    expect(screen.queryByTestId('card-azure-6')).not.toBeInTheDocument();
+    expect(screen.getByTestId('addDataSearchResultsCount')).toHaveTextContent(
+      'Showing 1-6 of 12 integrations'
+    );
   });
 
-  it('never mounts the expanded page of cards under the new search term', async () => {
+  it('returns to the first page when a new term has fewer pages', async () => {
     const user = userEvent.setup();
-    const mounted: string[] = [];
-    const TrackedCard = ({ id }: { id: string }) => {
-      useEffect(() => {
-        mounted.push(id);
-      }, [id]);
-      return <div data-test-subj={`card-${id}`} />;
-    };
-    const renderTrackedCard = (item: TestItem) => <TrackedCard id={item.id} />;
-
-    const { rerender } = renderWithI18n(
+    const view = renderWithI18n(
       <AddDataSearchResults
-        searchTerm="redis"
-        items={makeItems(14, 'redis')}
+        searchTerm="aws"
+        items={makeItems(30)}
         isLoading={false}
-        renderCard={renderTrackedCard}
+        renderCard={renderCard}
       />
     );
-    await user.click(screen.getByTestId('addDataSearchResultsShowMore'));
-    expect(screen.getAllByTestId(/^card-redis-/)).toHaveLength(12);
+    await user.click(screen.getByTestId('pagination-button-2'));
 
-    mounted.length = 0;
-    rerender(
+    view.rerender(
       <I18nProvider>
         <AddDataSearchResults
-          searchTerm="nginx"
-          items={makeItems(14, 'nginx')}
+          searchTerm="azure"
+          items={makeItems(8, 'azure')}
           isLoading={false}
-          renderCard={renderTrackedCard}
+          renderCard={renderCard}
         />
       </I18nProvider>
     );
 
-    // Resetting in an effect would let all 12 mount for one commit first, which
-    // host cards can report as usage-tracking impressions.
-    expect(mounted).toEqual(['nginx-0', 'nginx-1', 'nginx-2', 'nginx-3', 'nginx-4', 'nginx-5']);
+    expect(screen.getByTestId('card-azure-0')).toBeInTheDocument();
+    expect(screen.getByTestId('addDataSearchResultsCount')).toHaveTextContent(
+      'Showing 1-6 of 8 integrations'
+    );
+  });
+
+  it('clamps to the last page when the list shrinks under the same term', async () => {
+    const user = userEvent.setup();
+    const view = renderWithI18n(
+      <AddDataSearchResults
+        searchTerm="aws"
+        items={makeItems(8)}
+        isLoading={false}
+        renderCard={renderCard}
+      />
+    );
+    await user.click(screen.getByTestId('pagination-button-1'));
+    expect(screen.getByTestId('card-item-6')).toBeInTheDocument();
+
+    view.rerender(
+      <I18nProvider>
+        <AddDataSearchResults
+          searchTerm="aws"
+          items={makeItems(3)}
+          isLoading={false}
+          renderCard={renderCard}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getAllByTestId(/^card-item-/)).toHaveLength(3);
+    expect(screen.getByTestId('card-item-0')).toBeInTheDocument();
+    expect(screen.queryByTestId('card-item-6')).not.toBeInTheDocument();
+    expect(screen.getByTestId('addDataSearchResultsCount')).toHaveTextContent(
+      'Showing 3 integrations'
+    );
+    expect(screen.queryByTestId('addDataSearchResultsPagination')).not.toBeInTheDocument();
   });
 
   it('renders a loading skeleton', () => {
@@ -231,5 +296,7 @@ describe('AddDataSearchResults', () => {
       />
     );
     expect(screen.getByTestId('addDataSearchResultsEmpty')).toHaveTextContent('zzz-no-match');
+    expect(screen.queryByTestId('addDataSearchResultsPagination')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('addDataSearchResultsCount')).not.toBeInTheDocument();
   });
 });

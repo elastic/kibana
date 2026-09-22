@@ -83,7 +83,9 @@ export default ({ getService }: FtrProviderContext) => {
           await simulateMissingPipelineBug({ es, log, space });
         }
 
-        await entityAnalyticsRoutes.runMigrations();
+        for (const space of SPACE_TEST_SPACES) {
+          await entityAnalyticsRouteHelpersFactory(supertest, log, space).runMigrations();
+        }
 
         for (const space of SPACE_TEST_SPACES) {
           const pipelineExists = await doesEventIngestedPipelineExist({
@@ -134,7 +136,9 @@ export default ({ getService }: FtrProviderContext) => {
           await simulateMissingPipelineBug({ es, log, space });
         }
 
-        await entityAnalyticsRoutes.runMigrations();
+        for (const space of SPACE_TEST_SPACES) {
+          await entityAnalyticsRouteHelpersFactory(supertest, log, space).runMigrations();
+        }
 
         for (const space of SPACE_TEST_SPACES) {
           const pipelineExists = await doesEventIngestedPipelineExist({
@@ -282,7 +286,9 @@ export default ({ getService }: FtrProviderContext) => {
           await downgradeIndexVersion(space);
         }
 
-        await entityAnalyticsRoutes.runMigrations();
+        for (const space of SPACE_TEST_SPACES) {
+          await entityAnalyticsRouteHelpersFactory(supertest, log, space).runMigrations();
+        }
 
         for (const space of SPACE_TEST_SPACES) {
           const indexTemplate = await getRiskScoreIndexTemplate(es, space);
@@ -369,7 +375,9 @@ export default ({ getService }: FtrProviderContext) => {
           });
           await downgradeIndexVersion(space);
         }
-        await entityAnalyticsRoutes.runMigrations();
+        for (const space of SPACE_TEST_SPACES) {
+          await entityAnalyticsRouteHelpersFactory(supertest, log, space).runMigrations();
+        }
 
         for (const space of SPACE_TEST_SPACES) {
           expect(

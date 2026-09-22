@@ -26,40 +26,61 @@ import type {
 
 import { API_VERSIONS } from '../../../common/constants';
 
+import { persistPendingCloudConnectorIac } from './pending_cloud_connector_iac';
+
 import type { RequestError } from './use_request';
 import { sendRequest, sendRequestForRq, useRequest } from './use_request';
 
 /**
  * @deprecated use sendCreatePackagePolicyForRq instead
  */
-export const sendCreatePackagePolicy = (body: CreatePackagePolicyRequest['body']) => {
-  return sendRequest<CreatePackagePolicyResponse>({
+export const sendCreatePackagePolicy = async (body: CreatePackagePolicyRequest['body']) => {
+  const response = await sendRequest<CreatePackagePolicyResponse>({
     path: packagePolicyRouteService.getCreatePath(),
     method: 'post',
     version: API_VERSIONS.public.v1,
     body: JSON.stringify(body),
   });
+  if (!response.error) {
+    await persistPendingCloudConnectorIac({
+      policyName: body.name,
+      cloudConnectorId: response.data?.item.cloud_connector_id,
+    });
+  }
+  return response;
 };
 
-export const sendCreatePackagePolicyForRq = (body: CreatePackagePolicyRequest['body']) => {
-  return sendRequestForRq<CreatePackagePolicyResponse>({
+export const sendCreatePackagePolicyForRq = async (body: CreatePackagePolicyRequest['body']) => {
+  const result = await sendRequestForRq<CreatePackagePolicyResponse>({
     path: packagePolicyRouteService.getCreatePath(),
     method: 'post',
     version: API_VERSIONS.public.v1,
     body: JSON.stringify(body),
   });
+  await persistPendingCloudConnectorIac({
+    policyName: body.name,
+    cloudConnectorId: result.item.cloud_connector_id,
+  });
+  return result;
 };
 
-export const sendUpdatePackagePolicy = (
+export const sendUpdatePackagePolicy = async (
   packagePolicyId: string,
   body: UpdatePackagePolicyRequest['body']
 ) => {
-  return sendRequest<UpdatePackagePolicyResponse>({
+  const response = await sendRequest<UpdatePackagePolicyResponse>({
     path: packagePolicyRouteService.getUpdatePath(packagePolicyId),
     method: 'put',
     version: API_VERSIONS.public.v1,
     body: JSON.stringify(body),
   });
+  if (!response.error) {
+    await persistPendingCloudConnectorIac({
+      policyName: body.name,
+      cloudConnectorId: response.data?.item.cloud_connector_id ?? body.cloud_connector_id,
+    });
+  }
+  return response;
 };
 
 export const sendDeletePackagePolicy = (body: DeletePackagePoliciesRequest['body']) => {

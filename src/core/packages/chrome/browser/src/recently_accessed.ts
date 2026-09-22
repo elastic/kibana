@@ -36,6 +36,13 @@ export interface ChromeRecentlyAccessed {
   add(link: string, label: string, id: string): void;
 
   /**
+   * Removes an item from the recently accessed history.
+   *
+   * @param id the unique string used to de-duplicate the recently accessed list.
+   */
+  remove(id: string): void;
+
+  /**
    * Gets an Array of the current recently accessed history.
    *
    * @example

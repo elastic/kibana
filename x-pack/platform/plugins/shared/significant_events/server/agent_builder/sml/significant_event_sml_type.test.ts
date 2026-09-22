@@ -8,7 +8,8 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
-import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE, SIGNIFICANT_EVENT_SML_TYPE } from '../../../common';
+import { SIGNIFICANT_EVENT_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
+import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE } from '../../../common';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../routes/types';
 import { EventService } from '../../lib/significant_events/events/event_service';
 import { createSignificantEventSmlType } from './significant_event_sml_type';
@@ -33,6 +34,10 @@ const event: SignificantEvent = {
 
 const findLatestPaginated = jest.fn();
 const findByEventId = jest.fn();
+const getDataStreams = jest.fn().mockResolvedValue({
+  initializeClient: jest.fn().mockResolvedValue({}),
+});
+const isAvailable = jest.fn().mockResolvedValue(true);
 
 const createGetScopedClients = (
   events: SignificantEvent[]
@@ -50,6 +55,8 @@ describe('createSignificantEventSmlType', () => {
   beforeEach(() => {
     findLatestPaginated.mockReset();
     findByEventId.mockReset();
+    getDataStreams.mockClear();
+    isAvailable.mockReset().mockResolvedValue(true);
     jest.mocked(EventService).mockImplementation(
       () =>
         ({
@@ -61,10 +68,22 @@ describe('createSignificantEventSmlType', () => {
     );
   });
 
+  it('equals SIGNIFICANT_EVENT_KI_TYPE', () => {
+    const smlType = createSignificantEventSmlType({
+      getScopedClients: createGetScopedClients([]),
+      getDataStreams,
+      isAvailable,
+    });
+
+    expect(smlType.id).toBe(SIGNIFICANT_EVENT_KI_TYPE);
+  });
+
   it('lists significant events for SML indexing', async () => {
     findLatestPaginated.mockResolvedValue({ hits: [event] });
     const smlType = createSignificantEventSmlType({
       getScopedClients: createGetScopedClients([]),
+      getDataStreams,
+      isAvailable,
     });
 
     const iterator = smlType.list({
@@ -86,10 +105,33 @@ describe('createSignificantEventSmlType', () => {
     expect(findLatestPaginated).toHaveBeenCalledWith({ page: 1, perPage: 100 });
   });
 
+  it('does not initialize the data stream when significant events are unavailable', async () => {
+    isAvailable.mockResolvedValue(false);
+    const smlType = createSignificantEventSmlType({
+      getScopedClients: createGetScopedClients([]),
+      getDataStreams,
+      isAvailable,
+    });
+
+    const iterator = smlType.list({
+      esClient: {} as never,
+      savedObjectsClient: {} as never,
+      logger: loggingSystemMock.createLogger(),
+    });
+
+    await expect(iterator[Symbol.asyncIterator]().next()).resolves.toEqual({
+      done: true,
+      value: undefined,
+    });
+    expect(getDataStreams).not.toHaveBeenCalled();
+  });
+
   it('indexes a significant event chunk', async () => {
     findByEventId.mockResolvedValue({ hits: [event] });
     const smlType = createSignificantEventSmlType({
       getScopedClients: createGetScopedClients([]),
+      getDataStreams,
+      isAvailable,
     });
 
     const result = await smlType.getSmlEntry('payment-outage', {
@@ -100,7 +142,7 @@ describe('createSignificantEventSmlType', () => {
 
     expect(result).toEqual(
       expect.objectContaining({
-        type: SIGNIFICANT_EVENT_SML_TYPE,
+        type: SIGNIFICANT_EVENT_KI_TYPE,
         title: 'Payment outage',
       })
     );
@@ -112,6 +154,8 @@ describe('createSignificantEventSmlType', () => {
   it('getPermissions returns the streams read API privilege', () => {
     const smlType = createSignificantEventSmlType({
       getScopedClients: createGetScopedClients([]),
+      getDataStreams,
+      isAvailable,
     });
     const permissions = smlType.getPermissions!('payment-outage', {
       esClient: {} as never,
@@ -119,31 +163,46 @@ describe('createSignificantEventSmlType', () => {
       logger: loggingSystemMock.createLogger(),
     });
     expect(permissions).toEqual({
-      kibana: { privileges: [{ name: 'api:read_stream' }] },
+      kibana: { privileges: { name: [`ai_index:${SIGNIFICANT_EVENT_KI_TYPE}/read`] } },
     });
   });
 
   it('converts an SML document into an attachment', async () => {
     const smlType = createSignificantEventSmlType({
       getScopedClients: createGetScopedClients([event]),
+      getDataStreams,
+      isAvailable,
     });
 
     await expect(
       smlType.toAttachment(
         {
-          id: 'chunk-1',
-          type: SIGNIFICANT_EVENT_SML_TYPE,
+          type: SIGNIFICANT_EVENT_KI_TYPE,
           title: 'Payment outage',
-          origin_id: 'payment-outage',
-          origin: { uri: `${SIGNIFICANT_EVENT_SML_TYPE}://payment-outage` },
           content: 'Payment outage',
-          created_at: '2026-01-01T00:00:00.000Z',
+          id: 'chunk-1',
+          '@timestamp': '2026-01-01T00:00:00.000Z',
           updated_at: '2026-01-01T00:00:00.000Z',
-          spaces: ['default'],
-          permissions: {
-            kibana: { privileges: [{ name: 'api:read_stream' }] },
+          references: [
+            { uri: `${SIGNIFICANT_EVENT_KI_TYPE}://payment-outage`, relation: 'derived_from' },
+          ],
+          governance: {
+            provenance: {
+              created_by: { uri: 'crawler://sml', metadata: { ingestion_method: 'manual' } },
+              updated_by: { uri: 'crawler://sml', metadata: { ingestion_method: 'manual' } },
+            },
           },
-          ingestion_method: 'manual',
+          permissions: {
+            kibana: {
+              privileges: [
+                {
+                  space: 'default',
+                  name: [`ai_index:${SIGNIFICANT_EVENT_KI_TYPE}/read`],
+                  count: 1,
+                },
+              ],
+            },
+          },
         },
         {
           request: {} as KibanaRequest,

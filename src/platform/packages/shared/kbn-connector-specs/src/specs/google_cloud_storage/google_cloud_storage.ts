@@ -84,6 +84,7 @@ export const GoogleCloudStorageConnector: ConnectorSpec = {
   actions: {
     listProjects: {
       isTool: true,
+      scope: 'read',
       description:
         'List Google Cloud projects accessible to the configured credentials. This is the starting point for exploring Google Cloud Storage — use the returned project IDs with listBuckets.',
       input: ListProjectsInputSchema,
@@ -108,6 +109,7 @@ export const GoogleCloudStorageConnector: ConnectorSpec = {
 
     listBuckets: {
       isTool: true,
+      scope: 'read',
       description:
         'List all Google Cloud Storage buckets in a project. Use listProjects first to discover available project IDs.',
       input: ListBucketsInputSchema,
@@ -131,6 +133,7 @@ export const GoogleCloudStorageConnector: ConnectorSpec = {
 
     listObjects: {
       isTool: true,
+      scope: 'read',
       description:
         "List objects in a Google Cloud Storage bucket. This is the only way to find files — there is no search tool. Use prefix to filter by path and delimiter='/' to browse folder-by-folder, or omit delimiter to list all objects recursively under a prefix.",
       input: ListObjectsInputSchema,
@@ -157,6 +160,7 @@ export const GoogleCloudStorageConnector: ConnectorSpec = {
 
     getObjectMetadata: {
       isTool: true,
+      scope: 'read',
       description:
         'Get detailed metadata for a specific GCS object including content type, size, storage class, checksums, timestamps, and user-defined metadata. Use after listObjects to inspect a specific file. Prefer this over downloadObject when you only need file properties, not content.',
       input: GetObjectMetadataInputSchema,
@@ -177,6 +181,7 @@ export const GoogleCloudStorageConnector: ConnectorSpec = {
 
     downloadObject: {
       isTool: true,
+      scope: 'read',
       description:
         'Download an object from Google Cloud Storage and return its raw content as base64. Works with PDFs, Office documents, text files, and other formats. Use getObjectMetadata instead if you only need file properties (size, type, dates). Files exceeding maximumDownloadSizeBytes are skipped and returned with metadata only (hasContent: false).',
       input: DownloadObjectInputSchema,

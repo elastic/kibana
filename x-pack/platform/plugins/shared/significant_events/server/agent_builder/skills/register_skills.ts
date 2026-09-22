@@ -10,16 +10,14 @@ import type { Logger } from '@kbn/core/server';
 import type { EbtTelemetryClient } from '../../lib/telemetry/ebt';
 import type { SignificantEventsMaintenanceService } from '../../lib/maintenance/maintenance_service';
 import type { SignificantEventsKIsOnboardingClient } from '../../lib/workflows/onboarding_workflow_client';
-import type { MemoryToolsOptions } from '../../memory_and_investigation/tools/memory';
+import type { GetScopedClients } from '../../routes/types';
+import { createKIQueryGenerationSkill } from './ki_query_generation';
 import { knowledgeIndicatorsManagementSkill } from './knowledge_indicators_management';
 import { createKiIdentificationManagementSkill } from './ki_identification_management';
+import { featureIdentificationSkill } from './feature_identification';
 import { significantEventsManagementSkill } from './significant_events_management';
 import { significantEventsKIGroundingSkill } from './significant_events_ki_grounding';
-import {
-  createSignificantEventsOnboardingSkill,
-  createGapDetectionSkill,
-} from '../../memory_and_investigation/skills/memory';
-import { streamsInvestigationManagementSkill } from '../../memory_and_investigation/skills/investigation_management';
+import { streamsInvestigationManagementSkill } from './investigation_management';
 
 type SignificantEventsSkill = Parameters<AgentBuilderPluginStart['skills']['register']>[0];
 
@@ -46,14 +44,14 @@ interface RegisterSignificantEventsSkillsOptions {
   telemetry: EbtTelemetryClient;
   streamsKIsOnboardingClient?: SignificantEventsKIsOnboardingClient;
   maintenanceService?: SignificantEventsMaintenanceService;
-  memoryToolsOptions: MemoryToolsOptions;
+  getScopedClients: GetScopedClients;
   logger: Logger;
   isAvailable: () => Promise<boolean>;
 }
 
 /**
  * Registers the significant events agent-builder skills at start, gated by the
- * `streams.significantEventsAvailable` feature flag. Skills register through the start-phase
+ * `nightshift.enabled` feature flag. Skills register through the start-phase
  * `skills.register` API only when the feature is available, and again when the flag flips on. The
  * investigation skill is part of the unified experience, so it registers with the rest.
  *
@@ -72,7 +70,7 @@ export const registerSignificantEventsSkills = async ({
   telemetry,
   streamsKIsOnboardingClient,
   maintenanceService,
-  memoryToolsOptions,
+  getScopedClients,
   logger,
   isAvailable,
 }: RegisterSignificantEventsSkillsOptions): Promise<{ ensureRegistered: () => Promise<void> }> => {
@@ -80,8 +78,10 @@ export const registerSignificantEventsSkills = async ({
 
   const getCoreSkills = (): SignificantEventsSkill[] => [
     knowledgeIndicatorsManagementSkill,
+    createKIQueryGenerationSkill({ getScopedClients, logger }),
     significantEventsKIGroundingSkill,
     significantEventsManagementSkill,
+    featureIdentificationSkill,
     ...(streamsKIsOnboardingClient && maintenanceService
       ? [
           createKiIdentificationManagementSkill({
@@ -91,8 +91,6 @@ export const registerSignificantEventsSkills = async ({
           }),
         ]
       : []),
-    createSignificantEventsOnboardingSkill(memoryToolsOptions),
-    createGapDetectionSkill(memoryToolsOptions),
     streamsInvestigationManagementSkill,
   ];
 
@@ -147,7 +145,7 @@ export const registerSignificantEventsSkills = async ({
     await registerSkills(
       getCoreSkills(),
       'core',
-      'Significant events skills registered (streams.significantEventsAvailable is enabled)'
+      'Significant events skills registered (nightshift.enabled is enabled)'
     );
   };
 

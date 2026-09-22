@@ -7,16 +7,12 @@
 
 import { TaskCost } from '@kbn/task-manager-plugin/server';
 import {
-  buildCleanupQuery,
   CLEANUP_TASK_ID,
   CLEANUP_TASK_TYPE,
   registerNotificationCleanupTask,
   scheduleNotificationCleanupTask,
 } from './cleanup_task';
-import {
-  NOTIFICATION_DATA_RETENTION,
-  NOTIFICATION_DATA_STREAM_NAME,
-} from '../storage/notification_data_stream';
+import { NOTIFICATION_DATA_RETENTION } from '../storage/notification_data_stream';
 import { MAX_SEVERITY_TTL_DAYS, SEVERITY_TTL_DAYS } from '../../common/notification_schema';
 
 describe('cleanup_task', () => {
@@ -38,53 +34,14 @@ describe('cleanup_task', () => {
     });
   });
 
-  describe('buildCleanupQuery()', () => {
-    interface WindowClause {
-      bool: {
-        filter: [{ terms: { severity: string[] } }, { range: { '@timestamp': { lt: string } } }];
-      };
-    }
-    // The ES DSL builder's return is an ExactlyOne union; assert against a concrete local shape.
-    const cleanupBool = () =>
-      (
-        buildCleanupQuery() as unknown as {
-          bool: { minimum_should_match: number; should: WindowClause[] };
-        }
-      ).bool;
-
-    it('returns a bool query with minimum_should_match: 1', () => {
-      expect(cleanupBool().minimum_should_match).toBe(1);
-    });
-
-    it('produces one should-clause per TTL window (3 total)', () => {
-      expect(cleanupBool().should).toHaveLength(3);
-    });
-
-    it('each clause filters by terms severity and @timestamp range', () => {
-      const clauses = cleanupBool().should;
-
-      const byLt = (lt: string) =>
-        clauses.find((c) => c.bool.filter[1].range['@timestamp'].lt === lt);
-
-      const infoClause = byLt('now-30d/d');
-      expect(infoClause).toBeDefined();
-      expect(infoClause!.bool.filter[0].terms.severity).toEqual(['info']);
-
-      const warningClause = byLt('now-60d/d');
-      expect(warningClause).toBeDefined();
-      expect(warningClause!.bool.filter[0].terms.severity).toEqual(['warning']);
-
-      const longLivedClause = byLt('now-180d/d');
-      expect(longLivedClause).toBeDefined();
-      expect(longLivedClause!.bool.filter[0].terms.severity).toEqual(['error', 'critical']);
-    });
-  });
-
   describe('registerNotificationCleanupTask()', () => {
+    const search = jest.fn();
     const deleteByQuery = jest.fn().mockResolvedValue({});
     const getStartServices = jest
       .fn()
-      .mockResolvedValue([{ elasticsearch: { client: { asInternalUser: { deleteByQuery } } } }]);
+      .mockResolvedValue([
+        { elasticsearch: { client: { asInternalUser: { search, deleteByQuery } } } },
+      ]);
     const core = { getStartServices } as any;
 
     const registerTaskDefinitions = jest.fn();
@@ -96,6 +53,7 @@ describe('cleanup_task', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
+      search.mockResolvedValue({ aggregations: { expired_groups: { buckets: [] } } });
     });
 
     it('registers the task with the correct type, title, cost, and timeout', () => {
@@ -105,34 +63,26 @@ describe('cleanup_task', () => {
         expect.objectContaining({
           [CLEANUP_TASK_TYPE]: expect.objectContaining({
             title: 'Notification Center retention cleanup',
-            cost: TaskCost.Tiny,
+            cost: TaskCost.Normal,
             timeout: '10m',
           }),
         })
       );
     });
 
-    it('run() calls deleteByQuery against the notification data stream with the abort signal', async () => {
+    it('run() searches for expired groups with the abort signal', async () => {
       registerNotificationCleanupTask(core, taskManager, logger);
 
       const taskDef = registerTaskDefinitions.mock.calls[0][0][CLEANUP_TASK_TYPE];
       const runner = taskDef.createTaskRunner({ signal: abortController.signal });
       await runner.run();
 
-      expect(deleteByQuery).toHaveBeenCalledWith(
-        {
-          index: NOTIFICATION_DATA_STREAM_NAME,
-          ignore_unavailable: true,
-          conflicts: 'proceed',
-          refresh: false,
-          query: buildCleanupQuery(),
-        },
-        { signal: abortController.signal }
-      );
+      expect(search).toHaveBeenCalledWith(expect.any(Object), { signal: abortController.signal });
+      expect(deleteByQuery).not.toHaveBeenCalled();
     });
 
-    it('run() logs an error and does not throw when deleteByQuery fails', async () => {
-      deleteByQuery.mockRejectedValueOnce(new Error('ES unavailable'));
+    it('run() logs an error and does not throw when cleanup fails', async () => {
+      search.mockRejectedValueOnce(new Error('ES unavailable'));
 
       registerNotificationCleanupTask(core, taskManager, logger);
 
@@ -141,6 +91,18 @@ describe('cleanup_task', () => {
 
       await expect(runner.run()).resolves.toBeUndefined();
       expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('ES unavailable'));
+    });
+
+    it('does not start cleanup after the task is aborted', async () => {
+      const aborted = new AbortController();
+      aborted.abort();
+      registerNotificationCleanupTask(core, taskManager, logger);
+
+      const taskDef = registerTaskDefinitions.mock.calls[0][0][CLEANUP_TASK_TYPE];
+      const runner = taskDef.createTaskRunner({ signal: aborted.signal });
+      await runner.run();
+
+      expect(search).not.toHaveBeenCalled();
     });
   });
 

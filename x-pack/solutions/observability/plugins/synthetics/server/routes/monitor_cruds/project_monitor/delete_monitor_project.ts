@@ -4,7 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
+import {
+  asRouteSchema,
+  maxArraySizeMessage,
+  MAX_MONITOR_BATCH_SIZE,
+  routeId,
+} from '../../zod_query';
 import { syntheticsMonitorAttributes } from '../../../../common/types/saved_objects';
 import { DeleteMonitorAPI } from '../services/delete_monitor_api';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
@@ -14,16 +20,19 @@ import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { getSavedObjectKqlFilter } from '../../common';
 import { validateSpaceId } from '../services/validate_space_id';
 
-const MAX_MONITORS_TO_DELETE = 500;
 export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'DELETE',
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE,
   validate: {
-    body: schema.object({
-      monitors: schema.arrayOf(schema.string(), { maxSize: MAX_MONITORS_TO_DELETE }),
-    }),
-    params: schema.object({
-      projectName: schema.string(),
+    body: asRouteSchema(
+      z.strictObject({
+        monitors: z
+          .array(routeId)
+          .max(MAX_MONITOR_BATCH_SIZE, { error: maxArraySizeMessage(MAX_MONITOR_BATCH_SIZE) }),
+      })
+    ),
+    params: z.strictObject({
+      projectName: routeId,
     }),
   },
   handler: async (routeContext): Promise<any> => {
@@ -43,16 +52,20 @@ export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory 
 
     const { saved_objects: monitors } =
       await monitorConfigRepository.find<EncryptedSyntheticsMonitorAttributes>({
-        perPage: MAX_MONITORS_TO_DELETE,
+        perPage: MAX_MONITOR_BATCH_SIZE,
         filter: deleteFilter,
         fields: [],
       });
 
     const deleteMonitorAPI = new DeleteMonitorAPI(routeContext);
 
-    await deleteMonitorAPI.deleteMonitorBulk({
-      monitors,
+    const { res } = await deleteMonitorAPI.execute({
+      monitorIds: monitors.map(({ id }) => id),
     });
+
+    if (res) {
+      return res;
+    }
 
     return {
       deleted_monitors: monitorsToDelete,

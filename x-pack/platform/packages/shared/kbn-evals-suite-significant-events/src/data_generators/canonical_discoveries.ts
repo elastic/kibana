@@ -46,12 +46,7 @@ export const canonicalDiscoveryFromGroundTruth = ({
     summary: discovery.summary ?? '',
     severity: discovery.severity ?? '20-low',
     confidence: discovery.confidence ?? 0,
-    // Strip discovery-side confirmation before judge evaluation.
-    ...(discovery.signals
-      ? {
-          signals: discovery.signals.map(({ confirmed: _omitted, ...rest }) => rest),
-        }
-      : {}),
+    ...(discovery.signals ? { signals: discovery.signals } : {}),
     ...(discovery.causal_features ? { causal_features: discovery.causal_features } : {}),
     ...(discovery.blast_radius ? { blast_radius: discovery.blast_radius } : {}),
   };

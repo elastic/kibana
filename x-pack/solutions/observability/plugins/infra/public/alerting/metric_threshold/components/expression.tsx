@@ -11,11 +11,13 @@ import {
   EuiFieldSearch,
   EuiFormRow,
   EuiIconTip,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiRadioGroup,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type {
@@ -32,16 +34,13 @@ import type { Query } from '@kbn/es-query';
 import { UnifiedSearchBar } from '../../../components/shared/unified_search_bar';
 import type { NoDataBehavior } from '../../../../common/alerting/metrics';
 import { Aggregators, QUERY_INVALID } from '../../../../common/alerting/metrics';
-import {
-  useMetricsDataViewContext,
-  useSourceContext,
-  withSourceProvider,
-} from '../../../containers/metrics_source';
+import { withSourceProvider } from '../../../containers/metrics_source';
 import { MetricsExplorerGroupBy } from '../../../pages/metrics/metrics_explorer/components/group_by';
 import type { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 import type { AlertContextMeta, AlertParams, MetricExpression } from '../types';
 import { ExpressionRow } from './expression_row';
+import { useMetricsViewWithSource } from '../hooks/use_metrics_view_with_source';
 
 type Props = Omit<
   RuleTypeParamsExpressionProps<RuleTypeParams & AlertParams, AlertContextMeta>,
@@ -148,8 +147,13 @@ export const getNoDataBehaviorValue = (
 
 export const Expressions: React.FC<Props> = (props) => {
   const { setRuleParams, ruleParams, errors, metadata } = props;
-  const { source } = useSourceContext();
-  const { metricsView } = useMetricsDataViewContext();
+  const {
+    metricsView,
+    source,
+    error: metricsViewLoadError,
+    isLoading: isMetricsViewLoading,
+    refetch: refetchMetricsView,
+  } = useMetricsViewWithSource();
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<TimeUnitChar | undefined>('m');
 
@@ -350,7 +354,39 @@ export const Expressions: React.FC<Props> = (props) => {
         </h4>
       </EuiText>
       <EuiSpacer size="xs" />
-      {metricsView &&
+      {isMetricsViewLoading ? (
+        <div>
+          <EuiSpacer size="m" />
+          <EuiLoadingSpinner size="l" data-test-subj="infraMetricThresholdConditionsLoading" />
+          <EuiSpacer size="m" />
+        </div>
+      ) : metricsViewLoadError ? (
+        <>
+          <KbnDangerCallout
+            announceOnMount
+            data-test-subj="infraMetricThresholdConditionsError"
+            title={i18n.translate('xpack.infra.metricThreshold.rule.metricsViewError.title', {
+              defaultMessage: 'Sorry, there was a problem loading the conditions',
+            })}
+            text={metricsViewLoadError}
+            actionProps={{
+              primary: {
+                'data-test-subj': 'infraMetricThresholdConditionsErrorTryAgain',
+                onClick: refetchMetricsView,
+                iconType: 'refresh',
+                children: i18n.translate(
+                  'xpack.infra.metricThreshold.rule.metricsViewError.tryAgain',
+                  {
+                    defaultMessage: 'Try again',
+                  }
+                ),
+              },
+            }}
+          />
+          <EuiSpacer size="m" />
+        </>
+      ) : (
+        metricsView &&
         ruleParams.criteria.map((e, idx) => {
           let metricExpression = [
             {
@@ -404,7 +440,8 @@ export const Expressions: React.FC<Props> = (props) => {
               />
             </ExpressionRow>
           );
-        })}
+        })
+      )}
 
       <div style={{ marginLeft: 28 }}>
         <ForLastExpression
@@ -510,4 +547,4 @@ export const Expressions: React.FC<Props> = (props) => {
 
 // required for dynamic import
 // eslint-disable-next-line import/no-default-export
-export default withSourceProvider<Props>(Expressions)('default');
+export default withSourceProvider<Props>(Expressions)('default', false);

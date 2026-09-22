@@ -159,6 +159,7 @@ describe('WorkflowsService (facade)', () => {
     crudSpies = spyPrototype(WorkflowCrudService, [
       'getWorkflow',
       'getWorkflowDocumentSource',
+      'getManagedWorkflowDocumentsAllSpaces',
       'getWorkflowsByIds',
       'getWorkflowsSourceByIds',
       'createWorkflow',
@@ -176,6 +177,7 @@ describe('WorkflowsService (facade)', () => {
     executionQuerySpies = spyPrototype(WorkflowExecutionQueryService, [
       'getWorkflowExecution',
       'getChildWorkflowExecutions',
+      'getExecutionStepExecutions',
       'getWorkflowExecutions',
       'getWorkflowExecutionHistory',
       'getStepExecutions',
@@ -264,6 +266,33 @@ describe('WorkflowsService (facade)', () => {
   });
 
   describe('delegation', () => {
+    it('returns managed template values to their owning plugin', async () => {
+      const source = {
+        managed: true,
+        managedBy: 'alertzero',
+        managedTemplateValues: { autonomyLevel: 'assisted' },
+        originManagedWorkflowId: 'system-security-watch-floor',
+        spaceId: 'space-a',
+        version: 4,
+      };
+      crudSpies.getWorkflowDocumentSource.mockResolvedValue(source);
+      const service = await buildService();
+
+      await expect(
+        service.getInstalledManagedWorkflowState(
+          'system-security-watch-floor-space-a',
+          'space-a',
+          'alertzero'
+        )
+      ).resolves.toEqual({
+        workflowId: 'system-security-watch-floor-space-a',
+        templateValues: { autonomyLevel: 'assisted' },
+        definitionId: 'system-security-watch-floor',
+        spaceId: 'space-a',
+        documentVersion: 4,
+      });
+    });
+
     it('delegates CRUD reads and writes to WorkflowCrudService', async () => {
       const service = await buildService();
       const request = {} as any;
@@ -271,7 +300,9 @@ describe('WorkflowsService (facade)', () => {
       await service.getWorkflow('wf-1', 'default', { includeDeleted: true });
       await service.getWorkflowsByIds(['a', 'b'], 'default', { includeDeleted: true });
       await service.getWorkflowsSourceByIds(['a'], 'default', ['name'], { includeDeleted: false });
-      await service.createWorkflow({ name: 'n' } as any, 'default', request);
+      await service.createWorkflow({ name: 'n' } as any, 'default', request, {
+        nameFallback: 'n Copy',
+      });
       await service.bulkCreateWorkflows([{ name: 'n' } as any], 'default', request, {
         overwrite: true,
       });
@@ -288,7 +319,9 @@ describe('WorkflowsService (facade)', () => {
       expect(crudSpies.getWorkflowsSourceByIds).toHaveBeenCalledWith(['a'], 'default', ['name'], {
         includeDeleted: false,
       });
-      expect(crudSpies.createWorkflow).toHaveBeenCalledWith({ name: 'n' }, 'default', request);
+      expect(crudSpies.createWorkflow).toHaveBeenCalledWith({ name: 'n' }, 'default', request, {
+        nameFallback: 'n Copy',
+      });
       expect(crudSpies.bulkCreateWorkflows).toHaveBeenCalledWith(
         [{ name: 'n' }],
         'default',
@@ -360,6 +393,10 @@ describe('WorkflowsService (facade)', () => {
 
       await service.getWorkflowExecution('exec-1', 'default', { includeInput: true });
       await service.getChildWorkflowExecutions('parent-1', 'default');
+      await service.getExecutionStepExecutions(
+        { executionId: 'exec-1', page: 1, size: 100 },
+        'default'
+      );
       await service.getWorkflowExecutions({ workflowId: 'wf-1' } as any, 'default');
       await service.getWorkflowExecutionHistory('exec-1', 'default');
       await service.getStepExecutions({ executionId: 'exec-1' } as any, 'default');
@@ -373,6 +410,10 @@ describe('WorkflowsService (facade)', () => {
       });
       expect(executionQuerySpies.getChildWorkflowExecutions).toHaveBeenCalledWith(
         'parent-1',
+        'default'
+      );
+      expect(executionQuerySpies.getExecutionStepExecutions).toHaveBeenCalledWith(
+        { executionId: 'exec-1', page: 1, size: 100 },
         'default'
       );
       expect(executionQuerySpies.getWorkflowExecutions).toHaveBeenCalled();

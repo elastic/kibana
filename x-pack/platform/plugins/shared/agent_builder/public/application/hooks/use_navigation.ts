@@ -15,7 +15,6 @@ import type { CreateOAuthClientResponse } from '../../../common/http_api/oauth_c
 import { useKibana } from './use_kibana';
 
 export interface LocationState {
-  shouldStickToBottom?: boolean;
   initialMessage?: string;
   attachments?: ConversationAttachment[];
   autoSendInitialMessage?: boolean;

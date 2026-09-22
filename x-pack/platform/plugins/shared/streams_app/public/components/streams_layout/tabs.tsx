@@ -9,7 +9,6 @@ import type { ComponentType } from 'react';
 import { i18n } from '@kbn/i18n';
 import { StreamsCanvas } from '../stream_management/data_management/stream_detail_canvas';
 import { DestinationsTab } from './destinations';
-import { PipelinesTab } from './pipelines';
 import { SourcesTab } from './sources';
 
 interface StreamsLayoutTabConfig {
@@ -23,7 +22,7 @@ interface StreamsLayoutTabConfig {
 }
 
 /** Tab ids in the order they render in the header. */
-export const STREAMS_LAYOUT_TABS = ['canvas', 'sources', 'pipelines', 'destinations'] as const;
+export const STREAMS_LAYOUT_TABS = ['canvas', 'sources', 'destinations'] as const;
 
 export type StreamsLayoutTab = (typeof STREAMS_LAYOUT_TABS)[number];
 
@@ -46,12 +45,6 @@ export const streamsLayoutTabs: Record<StreamsLayoutTab, StreamsLayoutTabConfig>
       defaultMessage: 'Sources',
     }),
     Component: SourcesTab,
-  },
-  pipelines: {
-    label: i18n.translate('xpack.streams.streamsLayout.pipelinesTab', {
-      defaultMessage: 'Pipelines',
-    }),
-    Component: PipelinesTab,
   },
   destinations: {
     label: i18n.translate('xpack.streams.streamsLayout.destinationsTab', {

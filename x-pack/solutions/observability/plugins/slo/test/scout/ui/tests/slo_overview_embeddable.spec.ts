@@ -13,6 +13,14 @@ const TEST_TIMEOUT = 3 * 60 * 1000;
 /** Matches the SLO seeded by global.setup.ts via the worker-scoped sloData fixture. */
 const SLO_NAME = 'Test Stack SLO';
 const ALL_INSTANCES = 'All instances';
+/**
+ * Enabling this advanced setting makes SLO server routes wrap their responses in an
+ * `{ _wrapped, _inspect }` inspection envelope. Embeddables must strip that envelope
+ * before it reaches the data hooks; otherwise the panel fails to render. A dedicated
+ * test turns it on to make that regression deterministic instead of dev-mode-only,
+ * while the other tests keep covering the default (setting off) behavior.
+ */
+const ENABLE_INSPECT_ES_QUERIES = 'observability:enableInspectEsQueries';
 
 test.describe(
   'SLO Overview Embeddable',
@@ -24,6 +32,11 @@ test.describe(
     test.beforeEach(async ({ pageObjects, browserAuth }) => {
       await browserAuth.loginAsAdmin();
       await pageObjects.dashboard.openNewDashboard();
+    });
+
+    // Guarantees the inspect setting never leaks to other tests/files, even on failure.
+    test.afterAll(async ({ uiSettings }) => {
+      await uiSettings.unset(ENABLE_INSPECT_ES_QUERIES);
     });
 
     test('configures a single SLO overview panel from the add panel flyout', async ({
@@ -92,6 +105,41 @@ test.describe(
       await test.step('creates a group overview panel', async () => {
         await sloEmbeddable.confirm();
         await expect(sloEmbeddable.groupOverviewPanel).toBeVisible();
+      });
+    });
+
+    test('renders a single SLO overview panel when ES query inspection is enabled', async ({
+      pageObjects,
+      uiSettings,
+    }) => {
+      const { dashboard, sloEmbeddable, toasts } = pageObjects;
+
+      // With inspection on, SLO route responses come back wrapped in `{ _wrapped, _inspect }`.
+      // The embeddable must strip that envelope; otherwise the panel fails to render. The
+      // setting is read server-side per request, so no dashboard reload is needed.
+      await test.step('enable ES query inspection', async () => {
+        await uiSettings.set({ [ENABLE_INSPECT_ES_QUERIES]: true });
+      });
+
+      await test.step('configure single SLO selection', async () => {
+        await dashboard.openAddPanelFlyout();
+        await sloEmbeddable.addOverviewPanelFromFlyout();
+        await expect(sloEmbeddable.singleConfigurationFlyout).toBeVisible();
+
+        await sloEmbeddable.selectDefinition(SLO_NAME);
+        await sloEmbeddable.selectInstance(ALL_INSTANCES);
+        await sloEmbeddable.confirm();
+      });
+
+      await test.step('renders SLO card item chart', async () => {
+        await expect(sloEmbeddable.singleOverviewPanel).toBeVisible();
+        await expect(sloEmbeddable.singleOverviewPanel.locator('.echChart')).not.toHaveCount(0);
+        await expect(
+          sloEmbeddable.singleOverviewPanel.locator('.echMetricText__title')
+        ).not.toHaveCount(0);
+        await expect(sloEmbeddable.singleOverviewPanel).toContainText(SLO_NAME);
+
+        await toasts.closeAll();
       });
     });
   }

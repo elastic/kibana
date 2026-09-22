@@ -86,6 +86,17 @@ export function isVersionedAttachmentWithOrigin<
 }
 
 /**
+ * Returns true when `attachment.type` matches `type`. Narrows `attachment`'s data
+ * to the {@link AttachmentDataOf} type registered for that {@link AttachmentType}.
+ */
+export function isVersionedAttachmentOfType<Type extends AttachmentType>(
+  attachment: VersionedAttachment,
+  type: Type
+): attachment is VersionedAttachment<Type> {
+  return attachment.type === type;
+}
+
+/**
  * Operation performed on an attachment during a round.
  */
 export const ATTACHMENT_REF_OPERATION = {
@@ -296,9 +307,7 @@ export const parseVersionId = (
 /**
  * Checks if an attachment's current version is active (not deleted).
  */
-export const isAttachmentActive = <T = unknown>(
-  attachment: VersionedAttachment<string, T>
-): boolean => {
+export const isAttachmentActive = (attachment: Pick<VersionedAttachment, 'active'>): boolean => {
   return attachment.active !== false;
 };
 

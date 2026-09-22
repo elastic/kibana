@@ -15,7 +15,6 @@ import type {
 import {
   EuiBasicTable,
   EuiButtonIcon,
-  EuiCallOut,
   EuiCodeBlock,
   EuiConfirmModal,
   EuiFlexGroup,
@@ -29,6 +28,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { esql } from '@elastic/esql';
 
 import { layerTypes } from '../../..';
@@ -232,9 +232,7 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
         </EuiLink>
       </p>
 
-      <EuiCallOut
-        color="warning"
-        iconType="warning"
+      <KbnWarningCallout
         size="s"
         title={i18n.translate('xpack.lens.config.queryModeWarningDescription', {
           defaultMessage: `Once you save the chart after switching to query mode, you can't switch back.`,

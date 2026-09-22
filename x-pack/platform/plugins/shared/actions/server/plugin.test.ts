@@ -38,7 +38,10 @@ import {
 } from '../common';
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import { getConnectorType } from './fixtures';
-import { USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE } from './constants/saved_objects';
+import {
+  CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
+  USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+} from './constants/saved_objects';
 import { LeasePool } from './lib';
 
 function getConfig(overrides = {}) {
@@ -77,6 +80,7 @@ function getConfig(overrides = {}) {
     inboundEvents: {
       enabled: false,
       maxBodyBytes: new ByteSizeValue(1024 * 1024),
+      maxEmitted: 25,
     },
     ...overrides,
   };
@@ -139,6 +143,7 @@ describe('Actions Plugin', () => {
         inboundEvents: {
           enabled: false,
           maxBodyBytes: new ByteSizeValue(1024 * 1024),
+          maxEmitted: 25,
         },
       });
       plugin = new ActionsPlugin(context);
@@ -182,12 +187,32 @@ describe('Actions Plugin', () => {
       );
     });
 
+    it('should always register connector_ingress_credential without encryption', async () => {
+      await plugin.setup(coreSetup, pluginsSetup);
+      expect(coreSetup.savedObjects.registerType).toHaveBeenCalledWith(
+        expect.objectContaining({ name: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE })
+      );
+      expect(pluginsSetup.encryptedSavedObjects.registerType).not.toHaveBeenCalledWith(
+        expect.objectContaining({ type: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE })
+      );
+    });
+
     it('should expose the same client lease pool before start', async () => {
       const setupContract = await plugin.setup(coreSetup, pluginsSetup);
 
       const clientLeasePool = setupContract.getClientLeasePool();
       expect(clientLeasePool).toBeInstanceOf(LeasePool);
       expect(setupContract.getClientLeasePool()).toBe(clientLeasePool);
+    });
+
+    it('allows only one connector event emitter registration', async () => {
+      const setupContract = await plugin.setup(coreSetup, pluginsSetup);
+      const emitter = { emit: jest.fn() };
+
+      setupContract.registerConnectorEventEmitter(emitter);
+      expect(() => setupContract.registerConnectorEventEmitter({ emit: jest.fn() })).toThrow(
+        /only one emitter is supported/
+      );
     });
 
     describe('routeHandlerContext.getActionsClient()', () => {
@@ -563,6 +588,7 @@ describe('Actions Plugin', () => {
         inboundEvents: {
           enabled: false,
           maxBodyBytes: new ByteSizeValue(1024 * 1024),
+          maxEmitted: 25,
         },
       });
       plugin = new ActionsPlugin(context);

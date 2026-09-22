@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import type { ApplicationStart, HttpStart, NotificationsStart } from '@kbn/core/public';
+import type {
+  ApplicationStart,
+  FeatureFlagsStart,
+  HttpStart,
+  IUiSettingsClient,
+  NotificationsStart,
+} from '@kbn/core/public';
+import type { EuiFlyoutProps } from '@elastic/eui';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -21,11 +28,35 @@ export interface RuleFormServices {
   dataViews: DataViewsPublicPluginStart;
   notifications: NotificationsStart;
   application: ApplicationStart;
+  uiSettings: IUiSettingsClient;
+  featureFlags: FeatureFlagsStart;
   lens: LensPublicStart;
   uiActions?: UiActionsStart;
   dashboard?: DashboardStart;
   cps?: CPSPluginStart;
   minimumScheduleInterval?: string;
+  /**
+   * ES|QL help/docs menu, injected by the host plugin from `@kbn/esql`. Absent →
+   * the sandbox renders no menu.
+   */
+  esqlMenu?: React.ComponentType<{
+    hideHistory?: boolean;
+    hideVisor?: boolean;
+    hideRecommendedQueries?: boolean;
+    onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
+    docsFlyoutSize?: EuiFlyoutProps['size'];
+  }>;
+  /** Context provider the injected {@link esqlMenu} needs; injected alongside it. */
+  esqlEditorActionsProvider?: React.ComponentType<{ children: React.ReactNode }>;
+  /**
+   * Registers editor actions into {@link esqlEditorActionsProvider} so the standalone
+   * {@link esqlMenu} can drive them. Accepts any subset; the sandbox wires `currentQuery` +
+   * `submitEsqlQuery` to enable recommended queries for the single/unified editor.
+   */
+  esqlEditorActionsRegister?: React.ComponentType<{
+    currentQuery?: string;
+    submitEsqlQuery?: (query: string) => void;
+  }>;
 }
 
 export type RuleFormLayout = 'page' | 'flyout';

@@ -1,15 +1,17 @@
 {
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "esnext",
     // Only needed by ts-jest, which hardcodes `moduleResolution: Node10` when it
     // transpiles regardless of what is configured here, and whose peer range is
     // still `typescript: >=4.3 <7`. Drop this once ts-jest supports TS7; `tsc`
     // itself no longer needs it under either TS6 or TS7.
     "ignoreDeprecations": "6.0",
+    "allowImportingTsExtensions": true,
     "moduleResolution": "bundler",
     "outDir": "target/types",
-    "types": ["node", "jest"]
+    "types": ["node", "jest"],
+    "verbatimModuleSyntax": true
   },
   "include": [
     "pipeline-utils/**/*",

@@ -178,7 +178,7 @@ describe('ml_executor', () => {
       isAlertSuppressionActive: true,
       scheduleNotificationResponseActionsService: mockScheduledNotificationResponseAction,
     });
-    expect(mockScheduledNotificationResponseAction).toBeCalledWith({
+    expect(mockScheduledNotificationResponseAction).toHaveBeenCalledWith({
       signals: result.createdSignals,
       signalsCount: result.createdSignalsCount,
       responseActions: mlCompleteRule.ruleParams.responseActions,

@@ -270,7 +270,7 @@ describe('#getUnused()', () => {
         "a" => "b",
       }
     `);
-    expect(() => flags.number('a')).toThrowError();
+    expect(() => flags.number('a')).toThrow();
     expect(flags.getUnused()).toMatchInlineSnapshot(`Map {}`);
   });
 });
@@ -335,7 +335,7 @@ describe('#getUsed()', () => {
     const flags = new FlagsReader({ a: 'b' });
 
     expect(flags.getUsed()).toMatchInlineSnapshot(`Map {}`);
-    expect(() => flags.number('a')).toThrowError();
+    expect(() => flags.number('a')).toThrow();
     expect(flags.getUsed()).toMatchInlineSnapshot(`
       Map {
         "a" => "b",

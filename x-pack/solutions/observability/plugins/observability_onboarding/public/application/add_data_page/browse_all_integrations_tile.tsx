@@ -7,21 +7,26 @@
 
 import React, { useCallback } from 'react';
 import { EuiCard, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { OBLT_DEFAULT_CATEGORIES } from '@kbn/fleet-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ObservabilityOnboardingAppServices } from '../..';
 import { LogoIcon, type SupportedLogo } from '../shared/logo_icon';
 import { addPathParamToUrl } from '../package_list_search_form/use_card_url_rewrite';
 
-const LOGO_STACK_OVERLAP = '-8px';
+// Repeated category query params are Fleet's multi-filter encoding. A path
+// category like /browse/observability drops the OpenTelemetry default.
+const catalogueParams = new URLSearchParams();
+for (const category of OBLT_DEFAULT_CATEGORIES) {
+  catalogueParams.append('category', category);
+}
+const CATALOGUE_PATH = `/browse?${catalogueParams.toString()}`;
 
-const STACKED_LOGOS: readonly SupportedLogo[] = [
+const CHIP_LOGOS: readonly SupportedLogo[] = [
   'nginx',
-  'rabbitmq',
-  'apache',
-  'couchbase',
   'logstash',
+  'apache',
+  'rabbitmq',
   'redis',
   'mysql',
 ];
@@ -34,7 +39,7 @@ export const BrowseAllIntegrationsTile = () => {
 
   const handleClick = useCallback(() => {
     application.navigateToApp('integrations', {
-      path: addPathParamToUrl('/browse/observability', {}),
+      path: addPathParamToUrl(CATALOGUE_PATH, {}),
     });
   }, [application]);
 
@@ -46,27 +51,20 @@ export const BrowseAllIntegrationsTile = () => {
       icon={
         <EuiFlexGroup
           responsive={false}
-          gutterSize="none"
+          gutterSize="s"
           justifyContent="center"
           alignItems="center"
           aria-hidden
         >
-          {STACKED_LOGOS.map((logo, index) => (
-            <EuiFlexItem
-              key={`${logo}-${index}`}
-              grow={false}
-              css={css`
-                z-index: ${STACKED_LOGOS.length - index};
-                margin-left: ${index === 0 ? 0 : LOGO_STACK_OVERLAP};
-              `}
-            >
+          {CHIP_LOGOS.map((logo) => (
+            <EuiFlexItem key={logo} grow={false}>
               <LogoIcon
                 logo={logo}
                 isAvatar
                 size="l"
                 avatarType="space"
                 hasBorder
-                color={euiTheme.colors.backgroundBaseSubdued}
+                color={euiTheme.colors.emptyShade}
               />
             </EuiFlexItem>
           ))}

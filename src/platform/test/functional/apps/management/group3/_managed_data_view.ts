@@ -8,6 +8,7 @@
  */
 
 import expect from '@kbn/expect';
+import { APP_MENU_TEST_SUBJECTS } from '@kbn/app-header';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -65,7 +66,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('delete option is not available on the detail page', async function () {
         await PageObjects.settings.navigateToDataViewById(MANAGED_DV_ID);
-        await testSubjects.missingOrFail('moreActionsButton');
+        if (await testSubjects.exists(APP_MENU_TEST_SUBJECTS.overflowButton)) {
+          await testSubjects.click(APP_MENU_TEST_SUBJECTS.overflowButton);
+        }
         await testSubjects.missingOrFail('deleteIndexPatternButton');
       });
 
