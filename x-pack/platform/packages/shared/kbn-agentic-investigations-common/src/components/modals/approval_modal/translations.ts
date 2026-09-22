@@ -14,8 +14,14 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   actionImpactTitle: i18n.translate('xpack.alertzero.approvalModal.actionImpactTitle', {
     defaultMessage: 'Impact',
   }),
-  cancel: i18n.translate('xpack.alertzero.approvalModal.cancel', {
-    defaultMessage: 'Cancel',
+  approve: i18n.translate('xpack.alertzero.approvalModal.approve', {
+    defaultMessage: 'Approve',
+  }),
+  dismiss: i18n.translate('xpack.alertzero.approvalModal.dismiss', {
+    defaultMessage: 'Dismiss',
+  }),
+  noAction: i18n.translate('xpack.alertzero.approvalModal.noAction', {
+    defaultMessage: 'No automated action',
   }),
   modalAriaLabel: i18n.translate('xpack.alertzero.approvalModal.ariaLabel', {
     defaultMessage: 'Approval required modal',
