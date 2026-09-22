@@ -54,7 +54,11 @@ export const buildHuntCorrelationActionButtons = ({
       ? buildThreatReportsInEsql({ reportIds, spaceId: navigation.spaceId })
       : undefined;
 
-  return buildDiscoverActionButton({ share: navigation.share, esql, label: OPEN_RELATED_REPORTS_LABEL });
+  return buildDiscoverActionButton({
+    share: navigation.share,
+    esql,
+    label: OPEN_RELATED_REPORTS_LABEL,
+  });
 };
 
 const ABOVE_THRESHOLD_LABEL = i18n.translate(
