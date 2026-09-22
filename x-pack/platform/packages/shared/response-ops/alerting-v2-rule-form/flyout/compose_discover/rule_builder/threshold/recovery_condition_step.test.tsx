@@ -199,7 +199,9 @@ describe('BuilderRecoveryForm', () => {
     const builderState = makeBuilderState({
       stats: [{ id: 'stat-1', label: 'my_metric', aggregation: Aggregation.COUNT }],
       recovery: {
-        conditions: [{ id: '1', metric: 'my_metric', comparator: Comparator.LTE, threshold: [100] }],
+        conditions: [
+          { id: '1', metric: 'my_metric', comparator: Comparator.LTE, threshold: [100] },
+        ],
         conditionOperator: 'AND',
       },
     });
