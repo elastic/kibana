@@ -11,8 +11,6 @@ import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
 
-/** Ported verbatim from mustard `routes/lib/scoped_model.ts`. */
-
 const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
 
 const resolveConnectorId = async ({
@@ -69,14 +67,14 @@ const tryBuildScoped = async (
     return await buildScopedModel({ inference, request, connectorId });
   } catch (err) {
     logger.warn(
-      `[ti:connector] ${label} connector='${connectorId}' unavailable — falling through. ` +
+      `[hunt:connector] ${label} connector='${connectorId}' unavailable — falling through. ` +
         `${(err as Error).message}`
     );
     return null;
   }
 };
 
-export type ResolveScopedModelOutcome =
+type ResolveScopedModelOutcome =
   | { ok: true; model: ScopedModel }
   | { ok: false; reason: 'no_inference_plugin' | 'no_connector'; message: string };
 
@@ -84,10 +82,15 @@ export type ResolveScopedModelOutcome =
  * Resolves the connector an operator picked for an AlertZero model tier in
  * Stack Management > Model Settings.
  *
- * This runs ahead of the deployment default on purpose. The tiers register with
- * `ignoreGlobalDefault: true`, so falling straight through to the default
- * connector does not merely skip a preference, it resolves a different model
- * than the operator chose and silently undoes the tiering.
+ * The tier connector takes precedence over the deployment default on purpose.
+ * The tiers register with `ignoreGlobalDefault: true`, so falling through to
+ * the default connector would silently resolve a different model than the
+ * operator chose.
+ *
+ * If no tier connector is found, the function falls through to the genAI
+ * deployment default. This differs from the source's `ignoreGlobalDefault`
+ * behaviour, but is intentional: hunt callers always want a model even when
+ * no tier-specific connector is configured.
  */
 const resolveTierConnectorId = async ({
   searchInferenceEndpoints,
@@ -122,17 +125,15 @@ export const resolveScopedModel = async ({
   featureId,
   request,
   uiSettingsClient,
-  connectorIdOverride,
   logger,
 }: {
   inference: InferenceServerStart | undefined;
   /** Optional plugin: absent deployments fall back to the connector chain below. */
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   /** AlertZero model tier to resolve, e.g. `alertzero_reasoning` for Tier 2. */
-  featureId?: string;
+  featureId: string;
   request: KibanaRequest;
   uiSettingsClient: IUiSettingsClient;
-  connectorIdOverride?: string;
   logger: Logger;
 }): Promise<ResolveScopedModelOutcome> => {
   if (!inference) {
@@ -145,18 +146,7 @@ export const resolveScopedModel = async ({
     };
   }
 
-  if (connectorIdOverride) {
-    const model = await tryBuildScoped(
-      inference,
-      request,
-      connectorIdOverride,
-      'stage-override',
-      logger
-    );
-    if (model) return { ok: true, model };
-  }
-
-  if (searchInferenceEndpoints && featureId) {
+  if (searchInferenceEndpoints) {
     const tierId = await resolveTierConnectorId({
       searchInferenceEndpoints,
       featureId,
