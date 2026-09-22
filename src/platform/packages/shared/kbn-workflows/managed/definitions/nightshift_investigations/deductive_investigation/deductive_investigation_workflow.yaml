@@ -177,7 +177,10 @@ steps:
                 title:
                   type: string
                   maxLength: 512
-                  description: The action itself, stated concretely (e.g. "Revert the pool-size config change").
+                  description: >
+                    The action itself, stated concretely as concise plain text. Do not use Markdown
+                    or HTML, including links, emphasis, backticks, headings, lists, or code fences.
+                    Put explanations and links in description, and commands or snippets in code.
                 confidence:
                   type: number
                   minimum: 0
