@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "bootstrap": "yarn kbn bootstrap && yarn install",
+    "bootstrap": "node ../../scripts/kbn bootstrap && pnpm install",
     "build": "node ../../scripts/plugin_helpers build",
     "dev": "node ../../scripts/plugin_helpers dev",
     "plugin-helpers": "node ../../scripts/plugin_helpers",
