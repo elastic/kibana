@@ -7,25 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * What Kibana does with an oasdiff rule, regardless of the level oasdiff gives it.
- * `blocking` treats a warning-level rule as a breaking change. `report_only` keeps
- * the rule in the report without gating the build, whatever level oasdiff gave it.
- */
 export type RuleDisposition = 'blocking' | 'report_only';
 
 export interface RulePolicyEntry {
   disposition: RuleDisposition;
-  /** Why Kibana overrides oasdiff here. A report-only reason is included with the change. */
   reason: string;
 }
 
-/**
- * Kibana's opinion on individual oasdiff rules. oasdiff decides what changed; this
- * table decides what that means for us, so the policy is declared once instead of
- * being re-argued per PR. Rules absent from this table keep oasdiff's own level:
- * error gates, warning is dropped.
- */
+/** Rules not listed here keep oasdiff's level: errors gate, warnings are dropped. */
 export const OASDIFF_RULE_POLICY: Readonly<Record<string, RulePolicyEntry>> = {
   'request-property-removed': {
     disposition: 'blocking',
@@ -54,7 +43,7 @@ export const OASDIFF_RULE_POLICY: Readonly<Record<string, RulePolicyEntry>> = {
 /** Kibana's declared policy for an oasdiff rule, if it has one. */
 export const getRulePolicy = (id: string): RulePolicyEntry | undefined => OASDIFF_RULE_POLICY[id];
 
-/** True when a warning-level oasdiff rule is promoted to a breaking change. */
+/** True when the declared policy treats this rule as blocking. */
 export const isPromotedRule = (id: string): boolean =>
   getRulePolicy(id)?.disposition === 'blocking';
 

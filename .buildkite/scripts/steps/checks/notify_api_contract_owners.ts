@@ -23,7 +23,6 @@ export interface ImpactEntry {
   source?: string;
   tier: Tier;
   since?: string;
-  // Set when Kibana's declared rule policy demotes the oasdiff rule to report-only
   reportOnly?: boolean;
   policyReason?: string;
 }
@@ -101,8 +100,6 @@ ${reasons ? `${reasons}\n\n` : ''}${renderTable(entries)}
 };
 
 export const buildCommentBody = (entries: ImpactEntry[]): string => {
-  // A change is non-gating for either of two reasons: an experimental tier, or a
-  // rule the declared policy demotes to report-only.
   const gating = entries.filter((e) => !e.reportOnly);
 
   const gatingSections = [

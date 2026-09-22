@@ -267,8 +267,6 @@ run(
         log.info(`Impact report written to ${opts.reportPath}`);
       }
 
-      // Two independent reasons a change does not gate: an experimental tier, or a
-      // rule the declared policy treats as report-only. Both stay in the report.
       const gatingEntries = entries.filter(
         (entry) => isGatingTier(entry.tier) && !entry.reportOnly
       );

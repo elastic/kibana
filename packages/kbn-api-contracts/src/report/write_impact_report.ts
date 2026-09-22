@@ -26,9 +26,7 @@ export interface ImpactReportEntry {
   source?: string;
   tier: StabilityTier;
   since?: string;
-  /** Set when the declared rule policy demotes this rule to report-only. */
   reportOnly?: boolean;
-  /** Why the rule is report-only, taken from the declared rule policy. */
   policyReason?: string;
 }
 

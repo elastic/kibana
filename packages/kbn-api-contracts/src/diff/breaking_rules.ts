@@ -24,9 +24,7 @@ export interface BreakingChange {
   oasdiffId?: string;
   source?: string;
   details?: unknown;
-  /** Set when the declared rule policy demotes this rule to report-only. */
   reportOnly?: boolean;
-  /** Why the rule is report-only, taken from the declared rule policy. */
   policyReason?: string;
 }
 
