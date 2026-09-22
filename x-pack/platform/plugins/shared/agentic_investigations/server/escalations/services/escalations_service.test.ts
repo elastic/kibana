@@ -584,7 +584,7 @@ describe('EscalationsService.list', () => {
       search: jest.fn().mockResolvedValue({ results: [], total: 0 }),
     });
 
-    await service.list(request, { page: 1, per_page: 50, search: 'critical' });
+    await service.list(request, { page: 1, per_page: 50, status: 'open', search: 'critical' });
 
     expect(client.search).toHaveBeenCalledWith(expect.objectContaining({ query: 'critical' }));
   });
@@ -594,7 +594,7 @@ describe('EscalationsService.list', () => {
       search: jest.fn().mockResolvedValue({ results: [], total: 0 }),
     });
 
-    await service.list(request, { page: 1, per_page: 50 });
+    await service.list(request, { page: 1, per_page: 50, status: 'open' });
 
     expect(client.search).toHaveBeenCalledWith(expect.objectContaining({ query: undefined }));
   });
