@@ -256,10 +256,7 @@ describe('bootstrapNonPriorityTask', () => {
     typeof createLogsExtractionClient
   >;
 
-  const makeDescriptorSo = (
-    status: string,
-    logExtractionConfig?: Record<string, unknown>
-  ) => ({
+  const makeDescriptorSo = (status: string, logExtractionConfig?: Record<string, unknown>) => ({
     id: `${EngineDescriptorTypeName}-user-default`,
     type: EngineDescriptorTypeName,
     attributes: {
