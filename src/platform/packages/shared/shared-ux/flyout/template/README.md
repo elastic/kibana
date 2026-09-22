@@ -49,7 +49,7 @@ Tab selection props also live on the root: `selectedTabId` (controlled), `defaul
 - `FlyoutTemplate.Footer.PrimaryAction` — rendered as an `EuiButton`, filled.
 - `FlyoutTemplate.Footer.SecondaryAction` — rendered as an `EuiButtonEmpty`.
 
-Both actions accept `label`, `onClick`, an optional `id`, any `data-*` attributes, and the rest of their underlying EUI button props. Neither accepts `children` or the anchor props (`download`, `href`, `hrefLang`, `media`, `ping`, `referrerPolicy`, `rel`, `target`), so an action always renders a button. `PrimaryAction` additionally rejects `fill`, since it is always filled; `SecondaryAction` additionally rejects `buttonRef`. The `id` is forwarded to the button element.
+Both actions accept `label`, `onClick`, an optional `id`, any `data-*` attributes, and the remaining `EuiButton` props such as `iconType`, `iconSide`, `isLoading`, `isDisabled`, `contentProps`, and `textProps`. Both are typed from EUI's button-only props, so an action always renders a button and the anchor props are not reachable. The template owns appearance and sizing: `children`, `color`, `element`, `fill`, `fullWidth`, `size`, and `buttonRef` are not accepted, and `flush` is not offered on `SecondaryAction`. `PrimaryAction` also takes `minWidth`, which `EuiButtonEmpty` does not support. The `id` is forwarded to the button element.
 
 ## Behavior
 

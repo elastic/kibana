@@ -11,12 +11,12 @@ import type { MouseEventHandler, ReactNode } from 'react';
 import type {
   DataAttributeProps,
   EuiBadgeProps,
-  EuiButtonEmptyProps,
-  EuiButtonProps,
   EuiFlyoutProps,
   EuiIconProps,
   EuiTabProps,
 } from '@elastic/eui';
+// TODO: import from '@elastic/eui' once the type is exported from the package root.
+import type { EuiButtonPropsForButton } from '@elastic/eui/src/components/button/button';
 import type { InfoBlockItem } from '@kbn/flyout-info-blocks';
 import type { MetaBlock } from '@kbn/flyout-meta-blocks';
 import type {
@@ -142,15 +142,14 @@ export interface FlyoutBodyProps {
   children?: ReactNode;
 }
 
-type ActionAnchorProps =
-  | 'download'
-  | 'href'
-  | 'hrefLang'
-  | 'media'
-  | 'ping'
-  | 'referrerPolicy'
-  | 'rel'
-  | 'target';
+type ActionOwnedProps =
+  | 'buttonRef'
+  | 'children'
+  | 'color'
+  | 'element'
+  | 'fill'
+  | 'fullWidth'
+  | 'size';
 
 /** Props shared by the declarative footer action parts. Both render a button and never an anchor. */
 interface FlyoutFooterActionBaseProps extends DataAttributeProps {
@@ -163,15 +162,15 @@ interface FlyoutFooterActionBaseProps extends DataAttributeProps {
 
 /** Props for the declarative `FlyoutTemplate.Footer.PrimaryAction` part. */
 export type FlyoutFooterPrimaryActionProps = Omit<
-  EuiButtonProps,
-  'children' | 'element' | 'fill' | ActionAnchorProps
+  EuiButtonPropsForButton,
+  ActionOwnedProps | 'onClick'
 > &
   FlyoutFooterActionBaseProps;
 
 /** Props for the declarative `FlyoutTemplate.Footer.SecondaryAction` part. */
 export type FlyoutFooterSecondaryActionProps = Omit<
-  EuiButtonEmptyProps,
-  'children' | 'onClick' | 'buttonRef' | ActionAnchorProps
+  EuiButtonPropsForButton,
+  ActionOwnedProps | 'onClick' | 'minWidth'
 > &
   FlyoutFooterActionBaseProps;
 
