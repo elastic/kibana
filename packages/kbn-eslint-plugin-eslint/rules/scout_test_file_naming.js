@@ -113,27 +113,30 @@ module.exports = {
     fixable: null,
     schema: [],
   },
-  create: (context) => {
-    const filename = context.getFilename();
+  createOnce(context) {
+    let filename;
 
-    // Only process TypeScript files in test/scout directories
-    if (!filename.includes('/test/scout')) {
-      return {};
-    }
+    return {
+      before() {
+        filename = context.filename;
+      },
+      Program(node) {
+        // Only process TypeScript files in test/scout directories
+        if (!filename.includes('/test/scout')) {
+          return;
+        }
 
-    // Check if the file is in a Scout test directory
-    if (isInScoutTestDirectory(filename)) {
-      // Allow global.setup.ts and global.teardown.ts files
-      if (isGlobalSetupOrTeardownFile(filename)) {
-        return {};
-      }
+        // Check if the file is in a Scout test directory
+        if (isInScoutTestDirectory(filename)) {
+          // Allow global.setup.ts and global.teardown.ts files
+          if (isGlobalSetupOrTeardownFile(filename)) {
+            return;
+          }
 
-      // File is in correct directory structure, check extension
-      if (!hasSpecExtension(filename)) {
-        const actualExt = getExtension(filename);
+          // File is in correct directory structure, check extension
+          if (!hasSpecExtension(filename)) {
+            const actualExt = getExtension(filename);
 
-        return {
-          Program(node) {
             context.report({
               node,
               messageId: 'invalidExtension',
@@ -142,13 +145,9 @@ module.exports = {
                 expected: path.basename(filename).replace(actualExt, '.spec.ts'),
               },
             });
-          },
-        };
-      }
-    } else if (filename.includes('/test/scout') && filename.endsWith('.ts')) {
-      if (isNonStandardPlaywrightConfig(filename)) {
-        return {
-          Program(node) {
+          }
+        } else if (filename.endsWith('.ts')) {
+          if (isNonStandardPlaywrightConfig(filename)) {
             context.report({
               node,
               messageId: 'invalidPlaywrightConfigName',
@@ -156,35 +155,27 @@ module.exports = {
                 actual: path.basename(filename),
               },
             });
-          },
-        };
-      }
+            return;
+          }
 
-      // Check for unsupported two-level namespace paths, e.g. scout/<a>/<b>/{ui,api}/
-      if (SCOUT_TOO_DEEP_NAMESPACE_PATTERN.test(filename)) {
-        return {
-          Program(node) {
+          // Check for unsupported two-level namespace paths, e.g. scout/<a>/<b>/{ui,api}/
+          if (SCOUT_TOO_DEEP_NAMESPACE_PATTERN.test(filename)) {
             context.report({
               node,
               messageId: 'invalidNamespaceDepth',
             });
-          },
-        };
-      }
+            return;
+          }
 
-      // Only report if it looks like a test file (has .spec.ts extension)
-      if (hasSpecExtension(filename)) {
-        return {
-          Program(node) {
+          // Only report if it looks like a test file (has .spec.ts extension)
+          if (hasSpecExtension(filename)) {
             context.report({
               node,
               messageId: 'invalidPath',
             });
-          },
-        };
-      }
-    }
-
-    return {};
+          }
+        }
+      },
+    };
   },
 };

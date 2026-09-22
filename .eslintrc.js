@@ -3046,19 +3046,6 @@ module.exports = {
         ],
       },
     },
-    // Custom rules for scout tests
-    {
-      // Every Scout suite, excluding the Scout framework's own tests
-      files: SCOUT_TEST_FILE_GLOBS,
-      excludedFiles: ['src/platform/packages/shared/kbn-scout/test/**'],
-      rules: {
-        '@kbn/eslint/scout_test_file_naming': 'error',
-        '@kbn/eslint/scout_require_global_setup_hook_in_parallel_tests': 'error',
-        '@kbn/eslint/scout_no_es_archiver_in_parallel_tests': 'error',
-        '@kbn/eslint/scout_no_cross_boundary_imports': 'error',
-        '@kbn/eslint/scout_expect_import': 'error',
-      },
-    },
     {
       // Platform & Solutions API Tests
       files: [
