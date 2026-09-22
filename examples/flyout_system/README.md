@@ -21,7 +21,10 @@ Both widgets render the template's full set of parts, allowing accessibility beh
 | Header blocks | 3 meta blocks, 6 badges, 10 info blocks | same |
 | Body | `Body.Section` plus `Section.Subsection` | `Body.Accordion` plus `Accordion.Subsection` |
 | Tabs | none | three tabs, everything reachable on the first |
-| Footer | secondary and primary actions | same |
+| Main footer | secondary and primary actions | same |
+| Child B footer | secondary action plus `Footer.PrimaryActionMenu` | same |
+
+The footer's primary slot takes either a `PrimaryAction` or a `PrimaryActionMenu`, never both, so the menu lives on child flyout B while the main flyouts keep the plain primary action. Both widgets render the same menu, from `utils/flyout_footer_menu.ts`.
 
 Every flyout carries a root `data-test-subj` (`flyoutComponent<Session>` and
 `flyoutOverlays<Session>`, plus `…Child<A|B>`). The Scout suite under
