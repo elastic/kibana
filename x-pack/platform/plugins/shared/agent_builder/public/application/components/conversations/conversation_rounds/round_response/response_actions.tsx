@@ -11,12 +11,17 @@ import copy from 'copy-to-clipboard';
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
-import type { ConversationRoundStep, ExecutionTerminatedEvent } from '@kbn/agent-builder-common';
+import type {
+  ConversationRoundFeedback,
+  ConversationRoundStep,
+  ExecutionTerminatedEvent,
+} from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useToasts } from '../../../../hooks/use_toasts';
 import { useTracingEnabled } from '../../../../hooks/use_tracing_enabled';
 import { ExecutionMetadataPopover } from './execution_metadata_popover';
 import { TraceButton } from './trace_button';
+import { FeedbackActions } from './feedback_actions';
 
 const copyLabels = {
   response: {
@@ -45,6 +50,10 @@ interface ResponseActionsProps {
   steps?: ConversationRoundStep[];
   /** Which side of the exchange `content` comes from, so the copy wording matches it. */
   copyTarget?: keyof typeof copyLabels;
+  /** When set, renders the thumbs up/down feedback buttons. */
+  conversationId?: string;
+  roundId?: string;
+  feedback?: ConversationRoundFeedback;
 }
 
 export const ResponseActions: React.FC<ResponseActionsProps> = ({
@@ -53,6 +62,9 @@ export const ResponseActions: React.FC<ResponseActionsProps> = ({
   executionTerminatedEvent,
   steps,
   copyTarget = 'response',
+  conversationId,
+  roundId,
+  feedback,
 }) => {
   const { addSuccessToast } = useToasts();
   const { euiTheme } = useEuiTheme();
@@ -120,6 +132,11 @@ export const ResponseActions: React.FC<ResponseActionsProps> = ({
             executionTerminatedEvent={executionTerminatedEvent}
             steps={steps}
           />
+        </EuiFlexItem>
+      )}
+      {conversationId && roundId && (
+        <EuiFlexItem grow={false}>
+          <FeedbackActions conversationId={conversationId} roundId={roundId} feedback={feedback} />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

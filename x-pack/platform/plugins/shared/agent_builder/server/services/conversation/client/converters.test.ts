@@ -2246,6 +2246,39 @@ describe('conversation model converters', () => {
       // `toEs` re-emits it into the stored document.
       expect((updated as Conversation & { space: string }).space).toBe('different-space');
     });
+
+    it('carries round feedback across an appendEvents update (feedback survives eventsToRounds)', () => {
+      const conversation = eventsNativeStored();
+      const feedback = {
+        vote: 'up' as const,
+        chips: ['useful' as const],
+        submitted_at: '2025-01-01T00:00:00.000Z',
+      };
+      conversation.rounds = [{ ...conversation.rounds[0], feedback }];
+
+      const appended: TimelineEvent = {
+        id: 'appended::user_message',
+        type: TimelineEventType.userMessage,
+        created_at: roundCreationDate,
+        actor: { type: EventActorType.user, id: 'user_id', username: 'user_name' },
+        data: { message: 'follow-up' },
+      };
+
+      const updated = updateConversation({
+        conversation,
+        update: {
+          id: conversation.id,
+          events: [...conversation.events!, appended],
+        } as Parameters<typeof updateConversation>[0]['update'] & {
+          events: TimelineEvent[];
+        },
+        space: 'space',
+        updateDate: new Date(updateDate),
+      });
+
+      const round1 = updated.rounds.find((r) => r.id === conversation.rounds[0].id);
+      expect(round1?.feedback).toEqual(feedback);
+    });
   });
 
   // ---------------------------------------------------------------------------

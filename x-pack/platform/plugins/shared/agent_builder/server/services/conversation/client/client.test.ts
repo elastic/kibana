@@ -1655,12 +1655,12 @@ describe('ConversationClient', () => {
       expect(persistedRounds[0]).not.toHaveProperty('feedback');
     });
 
-    it('throws not found when the round does not exist in the conversation', async () => {
+    it('throws bad request when the round does not exist in the conversation', async () => {
       mockGetDocumentResponse(createConversationDocument({ rounds: [round] }));
 
       await expect(
         client.updateRoundFeedback('conversation-1', 'nonexistent-round', { vote: 'up' })
-      ).rejects.toMatchObject({ message: 'Conversation conversation-1 not found' });
+      ).rejects.toMatchObject({ message: 'round not found: nonexistent-round' });
 
       expect(mockEsClient.index).not.toHaveBeenCalled();
     });

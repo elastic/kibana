@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type {
   AssistantResponse,
+  ConversationRoundFeedback,
   ConversationRoundStep,
   ExecutionTerminatedEvent,
 } from '@kbn/agent-builder-common';
@@ -31,6 +32,8 @@ export interface ResponseMessageProps {
   attachmentRefs?: AttachmentVersionRef[];
   conversationId?: string;
   executionTerminatedEvent?: ExecutionTerminatedEvent;
+  roundId?: string;
+  feedback?: ConversationRoundFeedback;
 }
 
 export const ResponseMessage: React.FC<ResponseMessageProps> = ({
@@ -41,6 +44,8 @@ export const ResponseMessage: React.FC<ResponseMessageProps> = ({
   attachmentRefs,
   conversationId,
   executionTerminatedEvent,
+  roundId,
+  feedback,
 }) => {
   const hasMessage = Boolean(response.message);
 
@@ -93,6 +98,9 @@ export const ResponseMessage: React.FC<ResponseMessageProps> = ({
             isVisible
             executionTerminatedEvent={executionTerminatedEvent}
             steps={steps}
+            conversationId={conversationId}
+            roundId={roundId}
+            feedback={feedback}
           />
         </EuiFlexItem>
       )}

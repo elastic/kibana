@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type {
   AssistantResponse,
+  ConversationRoundFeedback,
   ConversationRoundStep,
   ExecutionTerminatedEvent,
 } from '@kbn/agent-builder-common';
@@ -33,6 +34,9 @@ interface AgentResponseProps {
   attachmentRefs?: AttachmentVersionRef[];
   /** The trigger message's refs; the agent's and system's entries are listed under the response. */
   triggerAttachmentRefs?: AttachmentVersionRef[];
+  /** Round id used to render feedback buttons on completed turns. */
+  roundId?: string;
+  feedback?: ConversationRoundFeedback;
 }
 
 /** The assistant's turn: shared presenter for both the finished run and the in-flight one. */
@@ -44,6 +48,8 @@ export const AgentResponse: React.FC<AgentResponseProps> = ({
   conversationAttachments,
   attachmentRefs,
   triggerAttachmentRefs,
+  roundId,
+  feedback,
 }) => {
   const conversationId = useConversationId();
 
@@ -68,6 +74,8 @@ export const AgentResponse: React.FC<AgentResponseProps> = ({
           conversationAttachments={conversationAttachments}
           attachmentRefs={attachmentRefs}
           conversationId={conversationId}
+          roundId={roundId}
+          feedback={feedback}
         />
       </EuiFlexItem>
       {!isLoading && (

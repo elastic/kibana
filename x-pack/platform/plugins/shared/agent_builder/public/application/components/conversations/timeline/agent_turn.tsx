@@ -9,7 +9,8 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { AgentDefinition } from '@kbn/agent-builder-common';
+import type { AgentDefinition, ConversationRoundFeedback } from '@kbn/agent-builder-common';
+import { parseExecutionId } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { AgentAvatar } from '../../common/agent_avatar';
 import { RoundAuthorHeader } from '../conversation_rounds/round_author_header';
@@ -27,6 +28,7 @@ import {
   isAbortedTurn,
   isAwaitingPromptTurn,
 } from './timeline_item_utils';
+import { useConversation } from '../../../hooks/use_conversation';
 
 const loadingLabel = i18n.translate('xpack.agentBuilder.timeline.agentLoading', {
   defaultMessage: 'Agent is generating a response',
@@ -48,6 +50,8 @@ interface AgentTurnProps {
 const renderContent = (
   item: AgentTurnItem,
   conversationId: string | undefined,
+  roundId: string | undefined,
+  feedback: ConversationRoundFeedback | undefined,
   conversationAttachments?: VersionedAttachment[]
 ): React.ReactNode => {
   if (isFailedTurn(item) || isAbortedTurn(item)) {
@@ -100,6 +104,8 @@ const renderContent = (
           conversationAttachments={conversationAttachments}
           attachmentRefs={item.attachmentRefs}
           triggerAttachmentRefs={completed ? item.triggerAttachmentRefs : undefined}
+          roundId={isCompletedTurn(item) ? roundId : undefined}
+          feedback={isCompletedTurn(item) ? feedback : undefined}
         />
       )}
       {isAwaiting && promptRequestedEventId && (
@@ -121,14 +127,23 @@ export const AgentTurn: React.FC<AgentTurnProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const conversationId = useConversationId();
+  const { conversation } = useConversation();
   const { status, startedAt, origin } = item;
   const isLoading = isGroupLoading ?? status === 'running';
+
+  const roundId = item.executionId
+    ? parseExecutionId(item.executionId)?.roundId ?? item.executionId
+    : undefined;
+
+  const feedback = roundId
+    ? conversation?.rounds.find((r) => r.id === roundId)?.feedback
+    : undefined;
 
   const avatarColumnStyles = css`
     min-inline-size: ${euiTheme.size.l};
   `;
 
-  const content = renderContent(item, conversationId, conversationAttachments);
+  const content = renderContent(item, conversationId, roundId, feedback, conversationAttachments);
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
