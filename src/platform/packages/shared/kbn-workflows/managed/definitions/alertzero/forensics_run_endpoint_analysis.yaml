@@ -247,10 +247,7 @@ steps:
 
                 After the forensic reconstruction,
                 - Assess whether this represents a real incident that warrants containment.
-                - Call `security.alertzero.actions.list` with categories `["contain"]` before proposing anything.
-                  Use the returned catalog as the only allowed actions. Set each `actionId` to a catalog
-                  `workflowId`. Do not invent workflow ids and do not recommend an action that is not in the
-                  catalog. If the catalog is empty, set propose=false and return an empty `recommendedActions` list.
+                - Call `security.alertzero.actions.list` with categories `["respond"]` before proposing anything.
                 - If this reconstruction justifies containment, recommend specific containment actions in
                   `recommendedActions` from that catalog. Recommend only what you can tie to the timeline
                   and indicators you returned.
