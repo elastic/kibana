@@ -153,12 +153,18 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
   // Spans the whole run. The mutation flags go quiet between probe attempts, which would
   // otherwise re-enable Save and let a second run start on top of the first.
   const [isRunningTest, setIsRunningTest] = useState(false);
+  // Held separately from `testRunIdRef`, which an edit also bumps. A run whose result was
+  // discarded still has to hand the controls back, so staleness cannot decide this.
+  const loadingOwnerRef = useRef(0);
 
   useEffect(
     // Closing the flyout has to invalidate the run in flight, or the probe loop carries on
     // and can still reach the model for a draft nobody is looking at.
     () => () => {
       testRunIdRef.current += 1;
+      // No run owns the controls once they are gone, which also skips a state update that
+      // would land after unmount.
+      loadingOwnerRef.current = 0;
     },
     []
   );
@@ -354,6 +360,7 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
     }
 
     setIsRunningTest(true);
+    loadingOwnerRef.current = runId;
     try {
       let resolvedProfile: ProbedProfile | undefined;
       let probeError: unknown;
@@ -411,8 +418,9 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
       }
       setTestError({ title: i18n.TEST_ERROR_TITLE, message: getErrorMessage(error) });
     } finally {
-      // A newer run owns the flag by then, and an unmounted flyout has no state to set.
-      if (!isStaleRun()) {
+      // Only whoever still holds the controls gives them back: a newer run clears its own,
+      // and a closed flyout has nothing to clear.
+      if (loadingOwnerRef.current === runId) {
         setIsRunningTest(false);
       }
     }

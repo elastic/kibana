@@ -602,6 +602,33 @@ describe('EvaluatorEditorFlyout', () => {
       expect(screen.getByTestId('evalsEvaluatorSave')).toBeDisabled();
     });
 
+    it('hands the controls back when an edit discards the run in flight', async () => {
+      // The edit invalidates the result, but the run still owns the buttons and has to
+      // release them, or the editor stays locked until it is reopened.
+      let resolveProbe: (value: unknown) => void = () => {};
+      resolveMutateAsync.mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveProbe = resolve;
+          })
+      );
+      renderCreate();
+      fillValidDraft();
+      chooseConnector();
+      setField('evalsEvaluatorTraceId', TRACE_ID);
+
+      runTest();
+      await waitFor(() => expect(screen.getByTestId('evalsEvaluatorSave')).toBeDisabled());
+
+      setField('evalsEvaluatorPrompt', 'Rate {{{agent_response}}} strictly.');
+      await act(async () => {
+        resolveProbe({ recommended_instrumentation: null, profiles: [] });
+      });
+
+      await waitFor(() => expect(screen.getByTestId('evalsEvaluatorSave')).toBeEnabled());
+      expect(testMutateAsync).not.toHaveBeenCalled();
+    });
+
     it('abandons a run when the flyout is closed', async () => {
       let resolveProbe: (value: unknown) => void = () => {};
       resolveMutateAsync.mockImplementationOnce(
