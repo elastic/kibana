@@ -77,7 +77,7 @@ describe('WorkerSettingsPanel view executions link', () => {
     expect(link).toHaveAttribute('href', `/app/workflows/${WORKFLOW_ID}?tab=executions`);
     expect(link).toHaveAttribute('target', '_blank');
     expect(link).toHaveAttribute('rel', 'noopener noreferrer');
-    expect(link.querySelector('[data-euiicon-type="popout"]')).toBeInTheDocument();
+    expect(link.querySelector('[data-euiicon-type="external"]')).toBeInTheDocument();
     expect(link.parentElement?.nextElementSibling).toContainElement(enabledSwitch);
     expect(core.application.getUrlForApp).toHaveBeenCalledWith('workflows', {
       path: `/${WORKFLOW_ID}?tab=executions`,

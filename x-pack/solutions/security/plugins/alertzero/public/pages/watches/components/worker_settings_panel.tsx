@@ -244,7 +244,7 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
           <EuiButtonEmpty
             size="s"
             color="text"
-            iconType="popout"
+            iconType="external"
             iconSide="right"
             href={executionsHref}
             target="_blank"
