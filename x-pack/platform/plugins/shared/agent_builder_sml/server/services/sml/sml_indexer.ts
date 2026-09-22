@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
@@ -19,11 +18,12 @@ import type {
   SmlIndexerDeleteAttachmentParams,
   SmlPermissionsInput,
   SmlDocument,
-  SmlDocumentAttributes,
+  SmlWriter,
   SmlTypeDefinition,
 } from './types';
 
-import { smlIndexName } from './sml_storage';
+import { INGESTION_METHOD_FIELD, smlIndexName } from './sml_storage';
+import { smlEntryId, smlEntryIdFromOriginUri, smlOriginUri } from './sml_origin';
 import { isNotFoundError } from './sml_service';
 import { SmlUnregisteredTypeError } from './sml_errors';
 
@@ -247,15 +247,24 @@ class SmlIndexerImpl implements SmlIndexer {
       return;
     }
 
-    await this.deleteEntry({ originUri, esClient });
+    if (smlEntry.type !== attachmentType) {
+      this.logger.warn(
+        `SML indexer: skipping origin '${originId}': the '${attachmentType}' type returned an entry with type '${smlEntry.type}', which must match. The existing entry is unchanged.`
+      );
+      return;
+    }
+
+    const entryId = smlEntryId(attachmentType, originId);
+    const creation = await this.readCreation({ entryId, esClient });
 
     const indexOp = this.buildIndexOp({
-      entryId: uuidv4(),
+      entryId,
       entry: smlEntry,
       originId,
       spaces,
       ingestionMethod: 'crawled',
       resolvedPermissions,
+      ...creation,
     });
 
     if (!indexOp) {
@@ -311,161 +320,6 @@ class SmlIndexerImpl implements SmlIndexer {
     return { kibana: { privileges: { name: [] } } };
   }
 
-  private buildIndexOp({
-    entryId,
-    entry,
-    originId,
-    spaces,
-    ingestionMethod,
-    resolvedPermissions,
-    createdAt,
-  }: {
-    entryId: string;
-    entry: SmlEntry;
-    originId: string;
-    spaces: string[];
-    ingestionMethod: SmlIngestionMethod;
-    resolvedPermissions: SmlPermissionsInput;
-    createdAt?: string;
-  }) {
-    const actions = [...new Set(resolvedPermissions.kibana?.privileges?.name ?? [])].sort();
-
-    const normalizedSpaces = spaces.includes('*') ? ['*'] : [...new Set(spaces)];
-    if (normalizedSpaces.length === 0) {
-      this.logger.warn(`SML indexer: entry '${entryId}' has no spaces — skipping (fail closed)`);
-      return undefined;
-    }
-
-    // One nested element per space. `count` is per-space: "how many actions THIS space requires".
-    // The ES-side DLS query evaluates each element independently, so a caller must satisfy a whole
-    // element to see the document — matches cannot accumulate across spaces. `count: 0` (a type
-    // with no `getPermissions` hook) means "requires nothing here" and the read filter admits it
-    // on space scoping alone.
-    const privileges = normalizedSpaces
-      .slice()
-      .sort()
-      .map((space) => ({ space, name: actions, count: actions.length }));
-
-    const now = new Date().toISOString();
-
-    // SML-owned keys are spread last so a producer cannot forge `origin.uri` or `ingestion_method`,
-    // which gate deletion and manual-entry protection.
-    const attributes: SmlDocumentAttributes = {
-      ...entry.attributes,
-      id: entryId,
-      origin: { uri: `${entry.type}://${originId}` },
-      created_at: createdAt || now,
-      updated_at: now,
-      ingestion_method: ingestionMethod,
-    };
-    if (entry.user_id !== undefined) {
-      attributes.user_id = entry.user_id;
-    }
-
-    const document: SmlDocument = {
-      type: entry.type,
-      title: entry.title,
-      content: entry.content,
-      permissions: { kibana: { privileges } },
-      attributes,
-    };
-    if (entry.description !== undefined) {
-      document.description = entry.description;
-    }
-    if (entry.tags !== undefined) {
-      document.tags = entry.tags;
-    }
-    if (entry.references !== undefined) {
-      document.references = entry.references;
-    }
-    return {
-      index: {
-        _id: entryId,
-        document,
-      },
-    };
-  }
-
-  private async executeIndexOp({
-    indexOp,
-    esClient,
-    originId,
-  }: {
-    indexOp: NonNullable<ReturnType<SmlIndexerImpl['buildIndexOp']>>;
-    esClient: ElasticsearchClient;
-    originId: string;
-  }): Promise<void> {
-    this.logger.debug(
-      `SML indexer: writing entry to index '${smlIndexName}' for origin '${originId}'`
-    );
-    try {
-      const response = await esClient.bulk({
-        index: smlIndexName,
-        refresh: 'wait_for',
-        operations: [{ index: { _id: indexOp.index._id } }, indexOp.index.document],
-      });
-
-      if (response.errors) {
-        const errorItems = response.items.filter((item) => item.index?.error);
-        this.logger.error(
-          `SML indexer: bulk index errors for '${originId}': ${JSON.stringify(
-            errorItems.slice(0, 3)
-          )}`
-        );
-      } else {
-        this.logger.debug(`SML indexer: successfully indexed entry for origin '${originId}'`);
-      }
-    } catch (error) {
-      this.logger.error(
-        `SML indexer: failed to index SML data for origin '${originId}': ${
-          (error as Error).message
-        }`
-      );
-      throw error;
-    }
-  }
-
-  /**
-   * Return true when the entry for this `origin_id` carries `ingestion_method: 'manual'`.
-   */
-  private async hasManualEntry({
-    originUri,
-    esClient,
-  }: {
-    originUri: string;
-    esClient: ElasticsearchClient;
-  }): Promise<boolean> {
-    try {
-      const response = await esClient.count({
-        index: smlIndexName,
-        ignore_unavailable: true,
-        allow_no_indices: true,
-        terminate_after: 1,
-        query: {
-          bool: {
-            filter: [
-              { term: { 'attributes.origin.uri': originUri } },
-              { term: { 'attributes.ingestion_method': 'manual' } },
-            ],
-          },
-        },
-      });
-      return (response.count ?? 0) > 0;
-    } catch (error) {
-      if (isNotFoundError(error)) {
-        // index_not_found: no index yet, no manual entry.
-        return false;
-      }
-      // Unexpected ES error: fail-closed — skip this crawl tick rather than risk destroying a manual entry.
-      this.logger.warn(
-        `SML indexer: hasManualEntry check failed for origin '${originUri}' (fail-closed): ${
-          (error as Error).message
-        }`
-      );
-      return true;
-    }
-  }
-
   /**
    * Delete SML entry for a given `origin_id`.
    *
@@ -488,10 +342,10 @@ class SmlIndexerImpl implements SmlIndexer {
     spaces?: string[];
   }): Promise<void> {
     const filter: Array<Record<string, unknown>> = [
-      { term: { 'attributes.origin.uri': originUri } },
+      { term: { id: smlEntryIdFromOriginUri(originUri) } },
     ];
     if (ingestionMethod) {
-      filter.push({ term: { 'attributes.ingestion_method': ingestionMethod } });
+      filter.push({ term: { [INGESTION_METHOD_FIELD]: ingestionMethod } });
     }
     if (spaces && spaces.length > 0) {
       // Space scoping is a direct term match on the nested `.space` field
@@ -534,6 +388,185 @@ class SmlIndexerImpl implements SmlIndexer {
           (error as Error).message
         }`
       );
+    }
+  }
+
+  /** Reads the existing entry's creation time and creator. */
+  private async readCreation({
+    entryId,
+    esClient,
+  }: {
+    entryId: string;
+    esClient: ElasticsearchClient;
+  }): Promise<{ createdAt?: string; createdBy?: SmlWriter }> {
+    const response = await esClient.get<Pick<SmlDocument, '@timestamp' | 'governance'>>(
+      {
+        index: smlIndexName,
+        id: entryId,
+        _source_includes: ['@timestamp', 'governance.provenance.created_by'],
+      },
+      { ignore: [404] }
+    );
+    if (!response.found || !response._source) {
+      return {};
+    }
+    return {
+      createdAt: response._source['@timestamp'],
+      createdBy: response._source.governance?.provenance?.created_by,
+    };
+  }
+
+  private async executeIndexOp({
+    indexOp,
+    esClient,
+    originId,
+  }: {
+    indexOp: NonNullable<ReturnType<SmlIndexerImpl['buildIndexOp']>>;
+    esClient: ElasticsearchClient;
+    originId: string;
+  }): Promise<void> {
+    this.logger.debug(
+      `SML indexer: writing entry to index '${smlIndexName}' for origin '${originId}'`
+    );
+    try {
+      const response = await esClient.bulk({
+        index: smlIndexName,
+        refresh: 'wait_for',
+        operations: [{ index: { _id: indexOp.index._id } }, indexOp.index.document],
+      });
+
+      if (response.errors) {
+        const errorItems = response.items.filter((item) => item.index?.error);
+        this.logger.error(
+          `SML indexer: bulk index errors for '${originId}': ${JSON.stringify(
+            errorItems.slice(0, 3)
+          )}`
+        );
+      } else {
+        this.logger.debug(`SML indexer: successfully indexed entry for origin '${originId}'`);
+      }
+    } catch (error) {
+      this.logger.error(
+        `SML indexer: failed to index SML data for origin '${originId}': ${
+          (error as Error).message
+        }`
+      );
+      throw error;
+    }
+  }
+
+  private buildIndexOp({
+    entryId,
+    entry,
+    originId,
+    spaces,
+    ingestionMethod,
+    resolvedPermissions,
+    createdAt,
+    createdBy,
+  }: {
+    entryId: string;
+    entry: SmlEntry;
+    originId: string;
+    spaces: string[];
+    ingestionMethod: SmlIngestionMethod;
+    resolvedPermissions: SmlPermissionsInput;
+    createdAt?: string;
+    createdBy?: SmlWriter;
+  }) {
+    const actions = [...new Set(resolvedPermissions.kibana?.privileges?.name ?? [])].sort();
+
+    const normalizedSpaces = spaces.includes('*') ? ['*'] : [...new Set(spaces)];
+    if (normalizedSpaces.length === 0) {
+      this.logger.warn(`SML indexer: entry '${entryId}' has no spaces — skipping (fail closed)`);
+      return undefined;
+    }
+
+    // One nested element per space. `count` is per-space: "how many actions THIS space requires".
+    // The ES-side DLS query evaluates each element independently, so a caller must satisfy a whole
+    // element to see the document — matches cannot accumulate across spaces. `count: 0` (a type
+    // with no `getPermissions` hook) means "requires nothing here" and the read filter admits it
+    // on space scoping alone.
+    const privileges = normalizedSpaces
+      .slice()
+      .sort()
+      .map((space) => ({ space, name: actions, count: actions.length }));
+
+    const now = new Date().toISOString();
+    const writer: SmlWriter = {
+      uri: entry.user_id !== undefined ? `user://${entry.user_id}` : 'crawler://sml',
+      metadata: { ingestion_method: ingestionMethod },
+    };
+
+    const document: SmlDocument = {
+      '@timestamp': createdAt || now,
+      id: entryId,
+      type: entry.type,
+      title: entry.title,
+      content: entry.content,
+      updated_at: now,
+      references: [
+        { uri: smlOriginUri(entry.type, originId), relation: 'derived_from' },
+        ...(entry.references ?? []),
+      ],
+      governance: { provenance: { created_by: createdBy ?? writer, updated_by: writer } },
+      permissions: { kibana: { privileges } },
+    };
+    if (entry.description !== undefined) {
+      document.description = entry.description;
+    }
+    if (entry.tags !== undefined) {
+      document.tags = entry.tags;
+    }
+    if (entry.attributes !== undefined) {
+      document.attributes = entry.attributes;
+    }
+    return {
+      index: {
+        _id: entryId,
+        document,
+      },
+    };
+  }
+
+  /**
+   * Return true when the entry for this `origin_id` carries `ingestion_method: 'manual'`.
+   */
+  private async hasManualEntry({
+    originUri,
+    esClient,
+  }: {
+    originUri: string;
+    esClient: ElasticsearchClient;
+  }): Promise<boolean> {
+    try {
+      const response = await esClient.count({
+        index: smlIndexName,
+        ignore_unavailable: true,
+        allow_no_indices: true,
+        terminate_after: 1,
+        query: {
+          bool: {
+            filter: [
+              { term: { id: smlEntryIdFromOriginUri(originUri) } },
+              { term: { [INGESTION_METHOD_FIELD]: 'manual' } },
+            ],
+          },
+        },
+      });
+      return (response.count ?? 0) > 0;
+    } catch (error) {
+      if (isNotFoundError(error)) {
+        // index_not_found: no index yet, no manual entry.
+        return false;
+      }
+      // Unexpected ES error: fail-closed — skip this crawl tick rather than risk destroying a manual entry.
+      this.logger.warn(
+        `SML indexer: hasManualEntry check failed for origin '${originUri}' (fail-closed): ${
+          (error as Error).message
+        }`
+      );
+      return true;
     }
   }
 }

@@ -117,6 +117,29 @@ export const concatJsonObjectPropertyEsqlExprAsString = (
   return `CONCAT("\\"${propertyName}\\":\\"", ${escapeJsonStringValueEsql(esqlExpr)}, "\\"")`;
 };
 
+/**
+ * Builds a JSON *array of strings* property from a multi-value ES|QL expression, e.g.
+ * `,"sources":["okta","endpoint"]` — including the leading comma.
+ *
+ * Each value is escaped before being joined: these values come from event module/dataset
+ * data, so a quote or backslash would otherwise produce malformed JSON and make
+ * `parseDocumentsData` throw, failing the whole graph request.
+ *
+ * The leading separator is emitted *inside* the COALESCE rather than by the caller, so the
+ * comma and the property always appear together. Emitting the separator from an enclosing
+ * `CASE(field IS NOT NULL, CONCAT(SEPARATOR, <this>), "")` is unsafe: `MV_CONCAT` (and the
+ * `REPLACE` escaping around it) can still return null for a non-null multi-value field, and
+ * the comma would then be emitted with an empty value — producing `…,,"next"`, which fails
+ * JSON.parse and drops the whole document in `filterDocDataToIds`.
+ */
+export const concatJsonObjectPropertyEsqlExprAsStringArray = (
+  propertyName: string,
+  esqlExpr: string
+): string => {
+  const escaped = escapeJsonStringValueEsql(`TO_STRING(${esqlExpr})`);
+  return `COALESCE(CONCAT(",", "\\"${propertyName}\\":[\\"", MV_CONCAT(${escaped}, "\\",\\""), "\\"]"), "")`;
+};
+
 export const JSON_OBJECT_SEPARATOR = '","';
 export const JSON_OBJECT_START = '"{"';
 export const JSON_OBJECT_END = '"}"';

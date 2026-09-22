@@ -9,7 +9,7 @@ import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ResourceType } from '@kbn/product-doc-common';
 import Semver from 'semver';
-import Fs from 'fs/promises';
+import { getSafePath } from '@kbn/fs';
 import {
   getArtifactName,
   getProductDocIndexName,
@@ -35,6 +35,12 @@ import {
   type ZipArchive,
   ensureInferenceDeployed,
   isLegacySemanticTextVersion,
+  checkArtifactAvailable,
+  ArtifactNotFoundError,
+  resolveArtifactsFolderPath,
+  removeArtifactFile,
+  logArtifactsFolderUsage,
+  purgeArtifactsFolder,
 } from './utils';
 import { majorMinor, latestVersion } from './utils/semver';
 import {
@@ -48,6 +54,7 @@ import {
 
 import { overrideInferenceSettings } from './steps/create_index';
 import { LATEST_PRODUCT_VERSION } from '../../../common/consts';
+import type { InstallationStatus } from '../../../common/install_status';
 interface PackageInstallerOpts {
   artifactsFolder: string;
   logger: Logger;
@@ -77,6 +84,7 @@ const OPEN_API_SPEC_PRODUCTS: Array<{
 export class PackageInstaller {
   private readonly log: Logger;
   private readonly artifactsFolder: string;
+  private readonly artifactsFolderPath: string;
   private readonly esClient: ElasticsearchClient;
   private readonly productDocClient: ProductDocInstallClient;
   private readonly artifactRepositoryUrl: string;
@@ -99,12 +107,101 @@ export class PackageInstaller {
     this.esClient = esClient;
     this.productDocClient = productDocClient;
     this.artifactsFolder = artifactsFolder;
+    this.artifactsFolderPath = resolveArtifactsFolderPath(artifactsFolder);
     this.artifactRepositoryUrl = artifactRepositoryUrl;
     this.artifactRepositoryProxyUrl = artifactRepositoryProxyUrl;
     this.currentVersion = majorMinor(kibanaVersion);
     this.log = logger;
     this.elserInferenceId = elserInferenceId || defaultInferenceEndpoints.ELSER;
     this.isServerless = isServerless ?? false;
+  }
+
+  /**
+   * Deletes artifact files left behind by a previous process lifetime or a failed install.
+   */
+  async purgeArtifactsFolder(): Promise<void> {
+    await purgeArtifactsFolder(this.artifactsFolderPath, this.log);
+  }
+
+  /**
+   * Returns the installed products whose version differs from the version selected for this deployment.
+   */
+  async getProductsToUpdate(params: {
+    inferenceId: string;
+    forceUpdate?: boolean;
+  }): Promise<ProductName[]> {
+    const { inferenceId, forceUpdate } = params;
+    const [repositoryVersions, installStatuses] = await Promise.all([
+      fetchArtifactVersions(this.getArtifactRepositoryOptions()),
+      this.productDocClient.getInstallationStatusOrThrow({ inferenceId }),
+    ]);
+    const toUpdate: ProductName[] = [];
+    for (const [name, productState] of Object.entries(installStatuses)) {
+      const productName = name as ProductName;
+      if (productState.status === 'uninstalled') {
+        continue;
+      }
+      const availableVersions = repositoryVersions[productName];
+      if (!availableVersions || !availableVersions.length) {
+        continue;
+      }
+      let installableVersion: string;
+      try {
+        installableVersion = await this.resolveInstallableVersion({
+          productName,
+          inferenceId,
+          availableVersions,
+        });
+      } catch (error) {
+        if (!isArtifactMissingError(error)) {
+          throw error;
+        }
+        this.log.warn(
+          `Skipping update of product [${productName}]: no artifact available for inference ID [${inferenceId}]`
+        );
+        continue;
+      }
+      if (productState.version !== installableVersion || Boolean(forceUpdate)) {
+        this.log.info(
+          `Updating product [${productName}] from version [${productState.version}] to version [${installableVersion}]`
+        );
+        toUpdate.push(productName);
+      }
+    }
+    return toUpdate;
+  }
+
+  /**
+   * Installs the version of a single product selected for this deployment, falling back to
+   * previous versions when the selected artifact is not available. Resolves to `false` when the
+   * repository has no version for the product and nothing was installed.
+   */
+  async installProduct(params: {
+    productName: ProductName;
+    inferenceId?: string;
+  }): Promise<boolean> {
+    const { productName, inferenceId } = params;
+    const [repositoryVersions, inferenceInfo] = await Promise.all([
+      fetchArtifactVersions(this.getArtifactRepositoryOptions()),
+      this.getInferenceInfo(inferenceId),
+    ]);
+    const availableVersions = repositoryVersions[productName];
+    if (!availableVersions || !availableVersions.length) {
+      this.log.warn(`No version found for product [${productName}]`);
+      return false;
+    }
+    const selectedVersion = selectVersion(
+      this.currentVersion,
+      availableVersions,
+      this.isServerless
+    );
+    await this.installPackageWithVersionFallback({
+      productName,
+      selectedVersion,
+      availableVersions,
+      customInference: inferenceInfo,
+    });
+    return true;
   }
 
   private getArtifactRepositoryOptions(): {
@@ -171,130 +268,164 @@ export class PackageInstaller {
   }
 
   /**
-   * Will not upgrade products that are not already installed
+   * Installs a product unless another task already installed the selected version after `since`
+   * (or an earlier attempt of the same task did), so overlapping installs and retries do not download
+   * and rebuild it again. Resolves to whether an install ran.
    */
-  async ensureUpToDate(params: { inferenceId: string; forceUpdate?: boolean }) {
-    const { inferenceId, forceUpdate } = params;
-    const inferenceInfo = await this.getInferenceInfo(inferenceId);
-    const [repositoryVersions, installStatuses, openapiSpecInstallStatus] = await Promise.all([
+  async installProductIfNeeded(params: {
+    productName: ProductName;
+    inferenceId: string;
+    since: Date;
+  }): Promise<boolean> {
+    const { productName, inferenceId, since } = params;
+    const [repositoryVersions, installStatuses] = await Promise.all([
       fetchArtifactVersions(this.getArtifactRepositoryOptions()),
-      this.productDocClient.getInstallationStatus({ inferenceId }),
+      this.productDocClient.getInstallationStatusOrThrow({ inferenceId }),
+    ]);
+    const availableVersions = repositoryVersions[productName];
+    if (!availableVersions?.length) {
+      this.log.warn(`No version found for product [${productName}]`);
+      return false;
+    }
+    const productState = installStatuses[productName];
+    const installableVersion = await this.resolveInstallableVersion({
+      productName,
+      inferenceId,
+      availableVersions,
+    });
+    if (
+      productState &&
+      !isUpdateNeeded({
+        status: productState.status,
+        version: productState.version,
+        updatedAt: productState.updatedAt,
+        selectedVersion: installableVersion,
+        forceUpdate: true,
+        since,
+      })
+    ) {
+      this.log.info(
+        `Skipping install of product [${productName}]: version [${installableVersion}] was installed after this request`
+      );
+      return false;
+    }
+    await this.installPackage({
+      productName,
+      productVersion: installableVersion,
+      customInference: await this.getInferenceInfo(inferenceId),
+    });
+    return true;
+  }
+
+  /**
+   * Re-installs a product planned for update unless that is no longer needed: it was uninstalled in
+   * the meantime, or it already is at the selected version and, for forced updates, was (re)installed
+   * after `since` by another task. Resolves to whether an install ran.
+   */
+  async updateProductIfNeeded(params: {
+    productName: ProductName;
+    inferenceId: string;
+    forceUpdate?: boolean;
+    since: Date;
+  }): Promise<boolean> {
+    const { productName, inferenceId, forceUpdate, since } = params;
+    const [repositoryVersions, installStatuses] = await Promise.all([
+      fetchArtifactVersions(this.getArtifactRepositoryOptions()),
+      this.productDocClient.getInstallationStatusOrThrow({ inferenceId }),
+    ]);
+    const productState = installStatuses[productName];
+    const availableVersions = repositoryVersions[productName];
+    if (!productState || productState.status === 'uninstalled' || !availableVersions?.length) {
+      this.log.info(
+        `Skipping update of product [${productName}]: not installed or no version available`
+      );
+      return false;
+    }
+    const installableVersion = await this.resolveInstallableVersion({
+      productName,
+      inferenceId,
+      availableVersions,
+    });
+    if (
+      !isUpdateNeeded({
+        status: productState.status,
+        version: productState.version,
+        updatedAt: productState.updatedAt,
+        selectedVersion: installableVersion,
+        forceUpdate,
+        since,
+      })
+    ) {
+      this.log.info(
+        `Skipping update of product [${productName}]: already at [${installableVersion}]`
+      );
+      return false;
+    }
+    await this.installPackage({
+      productName,
+      productVersion: installableVersion,
+      customInference: await this.getInferenceInfo(inferenceId),
+    });
+    return true;
+  }
+
+  /**
+   * Whether the given resource (product documentation or the OpenAPI spec) of this inference ID was
+   * uninstalled after `since`, meaning an uninstall request superseded the task that started at `since`.
+   * Status read failures are propagated so that they are not mistaken for an uninstall.
+   */
+  async wasUninstalledSince(params: {
+    inferenceId: string;
+    since: Date;
+    resourceType: typeof ResourceTypes.productDoc | typeof ResourceTypes.openapiSpec;
+  }): Promise<boolean> {
+    const { inferenceId, since, resourceType } = params;
+    const statuses =
+      resourceType === ResourceTypes.openapiSpec
+        ? [await this.productDocClient.getOpenapiSpecInstallationStatus({ inferenceId })]
+        : Object.values(await this.productDocClient.getInstallationStatusOrThrow({ inferenceId }));
+    return statuses.some(
+      ({ status, updatedAt }) =>
+        (status === 'uninstalled' || status === 'uninstalling') &&
+        updatedAt !== undefined &&
+        new Date(updatedAt).getTime() > since.getTime()
+    );
+  }
+
+  /**
+   * Installs the OpenAPI spec when the installed version differs from the version selected for this deployment.
+   */
+  async ensureOpenApiSpecUpToDate(params: {
+    inferenceId: string;
+    forceUpdate?: boolean;
+    /** Forced updates skip a spec another task already (re)installed after this time */
+    since?: Date;
+  }): Promise<void> {
+    const { inferenceId, forceUpdate, since } = params;
+    const [repositoryVersions, openapiSpecInstallStatus] = await Promise.all([
+      fetchArtifactVersions(this.getArtifactRepositoryOptions()),
       this.productDocClient.getOpenapiSpecInstallationStatus({ inferenceId }),
     ]);
-    const toUpdate: Array<{
-      productName: ProductName;
-      productVersion: string;
-    }> = [];
-    Object.entries(installStatuses).forEach(([productName, productState]) => {
-      if (productState.status === 'uninstalled') {
-        return;
-      }
-      const availableVersions = repositoryVersions[productName as ProductName];
-      if (!availableVersions || !availableVersions.length) {
-        return;
-      }
-      // Serverless/"latest" zip file has a special versioning strategy
-      // where we track by last date modified in the bucket
-      const shouldInstallLatest = this.isServerless;
-      const selectedVersion = selectVersion(
-        this.currentVersion,
-        availableVersions,
-        shouldInstallLatest
-      );
-      if (productState.version !== selectedVersion || Boolean(forceUpdate)) {
-        this.log.info(
-          `Updating product [${productName}] from version [${productState.version}] to version [${selectedVersion}]`
-        );
-        toUpdate.push({
-          productName: productName as ProductName,
-          productVersion: selectedVersion,
-        });
-      }
-    });
-
-    for (const { productName, productVersion } of toUpdate) {
-      await this.installPackageWithVersionFallback({
-        productName,
-        selectedVersion: productVersion,
-        availableVersions: repositoryVersions[productName] ?? [],
-        customInference: inferenceInfo,
-      });
-    }
-
     const openAPISpecVersionToUpgradeTo = selectVersion(
       this.currentVersion,
       repositoryVersions.openapi,
       this.isServerless
     );
-
-    // Upgrade to newest version of OpenAPI Spec if possile
     if (
-      forceUpdate ||
-      openapiSpecInstallStatus.version !== openAPISpecVersionToUpgradeTo ||
-      openAPISpecVersionToUpgradeTo === LATEST_PRODUCT_VERSION
+      isUpdateNeeded({
+        status: openapiSpecInstallStatus.status,
+        version: openapiSpecInstallStatus.version,
+        updatedAt: openapiSpecInstallStatus.updatedAt,
+        selectedVersion: openAPISpecVersionToUpgradeTo,
+        forceUpdate,
+        since,
+      })
     ) {
       await this.installOpenAPISpec({
         version: openAPISpecVersionToUpgradeTo,
         inferenceId,
       });
     }
-  }
-
-  async installAll(params: { inferenceId?: string } = {}) {
-    const { inferenceId } = params;
-    const repositoryVersions = await fetchArtifactVersions(this.getArtifactRepositoryOptions());
-    const allProducts = Object.values(DocumentationProduct) as ProductName[];
-    const inferenceInfo = await this.getInferenceInfo(inferenceId);
-
-    for (const productName of allProducts) {
-      const availableVersions = repositoryVersions[productName];
-
-      if (!availableVersions || !availableVersions.length) {
-        this.log.warn(`No version found for product [${productName}]`);
-        continue;
-      }
-
-      const shouldInstallLatest = this.isServerless;
-      const selectedVersion = selectVersion(
-        this.currentVersion,
-        availableVersions,
-        shouldInstallLatest
-      );
-
-      await this.installPackageWithVersionFallback({
-        productName,
-        selectedVersion,
-        availableVersions,
-        customInference: inferenceInfo,
-      });
-    }
-  }
-
-  private async installPackageWithVersionFallback({
-    productName,
-    selectedVersion,
-    availableVersions,
-    customInference,
-  }: {
-    productName: ProductName;
-    selectedVersion: string;
-    availableVersions: string[];
-    customInference?: InferenceInferenceEndpointInfo;
-  }) {
-    const fallbackVersions = getPreviousVersions(selectedVersion, availableVersions);
-    const candidateVersions = [selectedVersion, ...fallbackVersions];
-    const inferenceId = customInference?.inference_id ?? this.elserInferenceId;
-    const installableVersion = await this.findInstallableProductVersion({
-      productName,
-      candidateVersions,
-      inferenceId,
-    });
-
-    await this.installPackage({
-      productName,
-      productVersion: installableVersion,
-      customInference,
-    });
   }
 
   async installPackage({
@@ -320,16 +451,16 @@ export class PackageInstaller {
       ? LATEST_PRODUCT_VERSION
       : majorMinor(productVersion);
 
-    await this.uninstallPackage({ productName, inferenceId });
-
     let zipArchive: ZipArchive | undefined;
+    let artifactFullPath: string | undefined;
+    // The persisted status is only touched once the new archive is ready to replace the index, so a
+    // failure before that point leaves an installed version reported as such. A status read failure
+    // propagates rather than being mistaken for a fresh install.
+    const previousStatus = (
+      await this.productDocClient.getInstallationStatusOrThrow({ inferenceId })
+    )[productName]?.status;
+    let replacing = false;
     try {
-      await this.productDocClient.setInstallationStarted({
-        productName,
-        productVersion: artifactProductVersion,
-        inferenceId,
-      });
-
       if (
         customInference &&
         !isImpliedDefaultElserInferenceId(customInference.inference_id) &&
@@ -348,8 +479,10 @@ export class PackageInstaller {
       });
       const artifactUrl = `${this.artifactRepositoryUrl}/${artifactFileName}`;
       const artifactPathAtVolume = `${this.artifactsFolder}/${artifactFileName}`;
+      // Resolved up front so a failed download still gets cleaned up
+      artifactFullPath = getSafePath(artifactPathAtVolume).fullPath;
       this.log.debug(`Downloading from [${artifactUrl}] to [${artifactPathAtVolume}]`);
-      const artifactFullPath = await downloadToDisk(
+      artifactFullPath = await downloadToDisk(
         artifactUrl,
         artifactPathAtVolume,
         this.artifactRepositoryProxyUrl
@@ -369,6 +502,13 @@ export class PackageInstaller {
       const modifiedMappings = cloneDeep(mappings);
       overrideInferenceSettings(modifiedMappings, inferenceId!);
 
+      replacing = true;
+      await this.productDocClient.setInstallationStarted({
+        productName,
+        productVersion: artifactProductVersion,
+        inferenceId,
+      });
+      await this.deleteIndex(indexName);
       await createIndex({
         indexName,
         mappings: modifiedMappings, // Mappings will be overridden by the inference ID and inference type
@@ -392,7 +532,7 @@ export class PackageInstaller {
       );
     } catch (e) {
       let message = e.message;
-      if (message.includes('End of central directory record signature not found.')) {
+      if (isArtifactMissingError(e)) {
         message = i18n.translate('aiInfra.productDocBase.packageInstaller.noArtifactAvailable', {
           values: {
             productName,
@@ -407,10 +547,316 @@ export class PackageInstaller {
         `Error during documentation installation of product [${productName}]/[${productVersion}] : ${message}`
       );
 
-      await this.productDocClient.setInstallationFailed(productName, message, inferenceId);
+      if (!replacing && previousStatus === 'installed') {
+        this.log.warn(
+          `Keeping the installed documentation for product [${productName}]: the new version could not be prepared`
+        );
+      } else {
+        await this.productDocClient.setInstallationFailed(productName, message, inferenceId);
+      }
       throw e;
     } finally {
       zipArchive?.close();
+      await this.cleanupArtifact(artifactFullPath);
+    }
+  }
+
+  /**
+   * Install Security Labs content from the CDN.
+   */
+  async installSecurityLabs({
+    version,
+    inferenceId,
+  }: {
+    version?: string;
+    inferenceId?: string;
+  }): Promise<void> {
+    const effectiveInferenceId = inferenceId || this.elserInferenceId;
+
+    this.log.info(
+      `Starting Security Labs installation${
+        version ? ` for version [${version}]` : ''
+      } with inference ID [${effectiveInferenceId}]`
+    );
+
+    let zipArchive: ZipArchive | undefined;
+    let selectedVersion: string | undefined;
+    let artifactFullPath: string | undefined;
+    const { status: previousStatus } =
+      await this.productDocClient.getSecurityLabsInstallationStatus({
+        inferenceId: effectiveInferenceId,
+      });
+    let replacing = false;
+    try {
+      await this.ensureInferenceEndpointReady({ inferenceId: effectiveInferenceId });
+
+      // Determine version to install
+      selectedVersion = version;
+      if (!selectedVersion) {
+        const availableVersions = await fetchSecurityLabsVersions({
+          ...this.getArtifactRepositoryOptions(),
+          inferenceId: effectiveInferenceId,
+        });
+        if (availableVersions.length === 0) {
+          throw new Error('No Security Labs versions available');
+        }
+        // Select the latest version for this inference ID
+        selectedVersion = availableVersions.sort().reverse()[0];
+      }
+
+      const artifactFileName = getSecurityLabsArtifactName({
+        version: selectedVersion,
+        inferenceId: effectiveInferenceId,
+      });
+      const artifactUrl = `${this.artifactRepositoryUrl}/${artifactFileName}`;
+      const artifactPath = `${this.artifactsFolder}/${artifactFileName}`;
+      artifactFullPath = getSafePath(artifactPath).fullPath;
+
+      this.log.debug(`Downloading Security Labs from [${artifactUrl}] to [${artifactPath}]`);
+      artifactFullPath = await downloadToDisk(
+        artifactUrl,
+        artifactPath,
+        this.artifactRepositoryProxyUrl
+      );
+
+      zipArchive = await openZipArchive(artifactFullPath);
+      this.assertValidArtifactArchive(zipArchive, artifactFullPath);
+
+      const [manifest, mappings] = await Promise.all([
+        loadManifestFile(zipArchive),
+        loadMappingFile(zipArchive),
+      ]);
+
+      const manifestVersion = manifest.formatVersion;
+      const indexName = getSecurityLabsIndexName(effectiveInferenceId);
+
+      const modifiedMappings = cloneDeep(mappings);
+      overrideInferenceSettings(modifiedMappings, effectiveInferenceId);
+
+      replacing = true;
+      await this.productDocClient.setSecurityLabsInstallationStarted({
+        version: selectedVersion,
+        inferenceId: effectiveInferenceId,
+      });
+      await this.deleteIndex(indexName);
+      await createIndex({
+        indexName,
+        mappings: modifiedMappings,
+        manifestVersion,
+        esClient: this.esClient,
+        log: this.log,
+      });
+
+      await populateIndex({
+        indexName,
+        manifestVersion,
+        archive: zipArchive,
+        esClient: this.esClient,
+        log: this.log,
+        inferenceId: effectiveInferenceId,
+      });
+
+      await this.productDocClient.setSecurityLabsInstallationSuccessful({
+        version: selectedVersion,
+        indexName,
+        inferenceId: effectiveInferenceId,
+      });
+
+      this.log.info(`Security Labs installation successful for version [${selectedVersion}]`);
+    } catch (e) {
+      let message = e.message;
+      if (isArtifactMissingError(e)) {
+        message = i18n.translate(
+          'aiInfra.productDocBase.packageInstaller.noSecurityLabsArtifactAvailable',
+          {
+            values: { inferenceId: effectiveInferenceId },
+            defaultMessage:
+              'No Security Labs artifact available for Inference ID [{inferenceId}]. Please contact your administrator.',
+          }
+        );
+      }
+      this.log.error(`Error during Security Labs installation: ${message}`);
+      if (!replacing && previousStatus === 'installed') {
+        this.log.warn(
+          `Keeping the installed Security Labs content: the new version could not be prepared`
+        );
+      } else {
+        await this.productDocClient.setSecurityLabsInstallationFailed({
+          version: selectedVersion,
+          failureReason: message,
+          inferenceId: effectiveInferenceId,
+        });
+      }
+      throw e;
+    } finally {
+      zipArchive?.close();
+      await this.cleanupArtifact(artifactFullPath);
+    }
+  }
+
+  /**
+   * Install OpenAPI Spec content from the artifact repository.
+   */
+  async installOpenAPISpec({
+    version,
+    inferenceId,
+  }: {
+    version?: string;
+    inferenceId?: string;
+  }): Promise<void> {
+    const effectiveInferenceId = inferenceId || this.elserInferenceId;
+    const selectedVersion = version || this.currentVersion;
+    const stackVersion = await this.findInstallableOpenApiVersion({
+      selectedVersion,
+      inferenceId: effectiveInferenceId,
+      explicitVersionProvided: Boolean(version),
+    });
+
+    this.log.info(
+      `Starting OpenAPI Spec installation for version [${stackVersion}] with inference ID [${effectiveInferenceId}]`
+    );
+
+    let zipArchive: ZipArchive | undefined;
+    let artifactFullPath: string | undefined;
+    const { status: previousStatus } = await this.productDocClient.getOpenapiSpecInstallationStatus(
+      { inferenceId: effectiveInferenceId }
+    );
+    let replacing = false;
+    try {
+      await this.ensureInferenceEndpointReady({ inferenceId: effectiveInferenceId });
+      const artifactFileName = this.getOpenApiArtifactFileName({
+        stackVersion,
+        inferenceId: effectiveInferenceId,
+      });
+      const artifactUrl = `${this.artifactRepositoryUrl}/${artifactFileName}`;
+      const artifactPath = `${this.artifactsFolder}/${artifactFileName}`;
+      artifactFullPath = getSafePath(artifactPath).fullPath;
+
+      this.log.debug(`Downloading OpenAPI artifact from [${artifactUrl}] to [${artifactPath}]`);
+      artifactFullPath = await downloadToDisk(
+        artifactUrl,
+        artifactPath,
+        this.artifactRepositoryProxyUrl
+      );
+
+      zipArchive = await openZipArchive(artifactFullPath);
+      this.assertValidArtifactArchive(zipArchive, artifactFullPath, { openApi: true });
+
+      for (const { productName, indexName: unmodifiedIndexName } of OPEN_API_SPEC_PRODUCTS) {
+        this.log.info(`Installing OpenAPI spec for ${productName}`);
+
+        replacing = true;
+        await this.productDocClient.setOpenapiSpecInstallationStarted({
+          productName,
+          productVersion: stackVersion,
+          inferenceId: effectiveInferenceId,
+        });
+
+        // Load manifest and mappings from product folder
+        const manifestPath = `${productName}/manifest.json`;
+        const mappingsPath = `${productName}/mappings.json`;
+
+        if (!zipArchive.hasEntry(manifestPath) || !zipArchive.hasEntry(mappingsPath)) {
+          throw new Error(
+            `Missing required files for ${productName}: ${manifestPath} or ${mappingsPath} not found in archive`
+          );
+        }
+
+        const [manifestBuffer, mappingsBuffer] = await Promise.all([
+          zipArchive.getEntryContent(manifestPath),
+          zipArchive.getEntryContent(mappingsPath),
+        ]);
+
+        const manifest = JSON.parse(manifestBuffer.toString('utf-8'));
+        const mappings = JSON.parse(mappingsBuffer.toString('utf-8'));
+
+        const manifestVersion = manifest.formatVersion;
+        const modifiedMappings = cloneDeep(mappings);
+        overrideInferenceSettings(modifiedMappings, effectiveInferenceId);
+
+        const indexName = `${unmodifiedIndexName}${
+          !isImpliedDefaultElserInferenceId(effectiveInferenceId) ? `-${effectiveInferenceId}` : ''
+        }`;
+        await this.deleteIndex(indexName);
+        await createIndex({
+          indexName,
+          mappings: modifiedMappings,
+          manifestVersion,
+          esClient: this.esClient,
+          log: this.log,
+        });
+
+        // Populate index from product's content folder
+        const contentPrefix = `${productName}/content/`;
+        const contentEntries = zipArchive
+          .getEntryPaths()
+          .filter(
+            (path) =>
+              path.startsWith(contentPrefix) && path.match(/^.*\/content\/content-[0-9]+\.ndjson$/)
+          );
+
+        if (contentEntries.length === 0) {
+          throw new Error(`No content files found for ${productName} in archive`);
+        }
+
+        for (const entryPath of contentEntries) {
+          this.log.debug(`Indexing content for entry ${entryPath}`);
+          const contentBuffer = await zipArchive.getEntryContent(entryPath);
+          await this.indexContentFile({
+            indexName,
+            esClient: this.esClient,
+            contentBuffer,
+            manifestVersion,
+            inferenceId: effectiveInferenceId,
+          });
+        }
+
+        await this.productDocClient.setOpenapiSpecInstallationSuccessful({
+          productName,
+          productVersion: stackVersion,
+          indexName,
+          inferenceId: effectiveInferenceId,
+        });
+
+        this.log.info(`OpenAPI Spec installation successful for ${productName}`);
+      }
+
+      this.log.info(`OpenAPI Spec installation successful for version [${stackVersion}]`);
+    } catch (e) {
+      let message = e.message;
+      if (isArtifactMissingError(e)) {
+        message = i18n.translate(
+          'aiInfra.productDocBase.packageInstaller.noOpenApiSpecArtifactAvailable',
+          {
+            values: { inferenceId: effectiveInferenceId, version: stackVersion },
+            defaultMessage:
+              'No OpenAPI Spec artifact available for version [{version}] and Inference ID [{inferenceId}]. Please contact your administrator.',
+          }
+        );
+      }
+      this.log.error(`Error during OpenAPI Spec installation: ${message}`);
+      if (!replacing && previousStatus === 'installed') {
+        this.log.warn(
+          `Keeping the installed OpenAPI Spec content: the new version could not be prepared`
+        );
+      } else {
+        // Mark both products as failed
+        for (const productName of [
+          DocumentationProduct.elasticsearch,
+          DocumentationProduct.kibana,
+        ]) {
+          await this.productDocClient.setOpenapiSpecInstallationFailed({
+            productName: productName as 'elasticsearch' | 'kibana',
+            productVersion: stackVersion,
+            failureReason: message,
+            inferenceId: effectiveInferenceId,
+          });
+        }
+      }
+      throw e;
+    } finally {
+      zipArchive?.close();
+      await this.cleanupArtifact(artifactFullPath);
     }
   }
 
@@ -441,129 +887,6 @@ export class PackageInstaller {
     }
     if (resourceType === ResourceTypes.openapiSpec || !resourceType) {
       await this.uninstallOpenAPISpec({ inferenceId });
-    }
-  }
-
-  // Security Labs methods
-
-  /**
-   * Install Security Labs content from the CDN.
-   */
-  async installSecurityLabs({
-    version,
-    inferenceId,
-  }: {
-    version?: string;
-    inferenceId?: string;
-  }): Promise<void> {
-    const effectiveInferenceId = inferenceId || this.elserInferenceId;
-
-    this.log.info(
-      `Starting Security Labs installation${
-        version ? ` for version [${version}]` : ''
-      } with inference ID [${effectiveInferenceId}]`
-    );
-
-    // Uninstall existing Security Labs content first
-    await this.uninstallSecurityLabs({ inferenceId: effectiveInferenceId });
-
-    let zipArchive: ZipArchive | undefined;
-    let selectedVersion: string | undefined;
-    try {
-      await this.ensureInferenceEndpointReady({ inferenceId: effectiveInferenceId });
-
-      // Determine version to install
-      selectedVersion = version;
-      if (!selectedVersion) {
-        const availableVersions = await fetchSecurityLabsVersions({
-          ...this.getArtifactRepositoryOptions(),
-          inferenceId: effectiveInferenceId,
-        });
-        if (availableVersions.length === 0) {
-          throw new Error('No Security Labs versions available');
-        }
-        // Select the latest version for this inference ID
-        selectedVersion = availableVersions.sort().reverse()[0];
-      }
-
-      await this.productDocClient.setSecurityLabsInstallationStarted({
-        version: selectedVersion,
-        inferenceId: effectiveInferenceId,
-      });
-
-      const artifactFileName = getSecurityLabsArtifactName({
-        version: selectedVersion,
-        inferenceId: effectiveInferenceId,
-      });
-      const artifactUrl = `${this.artifactRepositoryUrl}/${artifactFileName}`;
-      const artifactPath = `${this.artifactsFolder}/${artifactFileName}`;
-
-      this.log.debug(`Downloading Security Labs from [${artifactUrl}] to [${artifactPath}]`);
-      const downloadedFullPath = await downloadToDisk(
-        artifactUrl,
-        artifactPath,
-        this.artifactRepositoryProxyUrl
-      );
-
-      zipArchive = await openZipArchive(downloadedFullPath);
-      this.assertValidArtifactArchive(zipArchive, downloadedFullPath);
-
-      const [manifest, mappings] = await Promise.all([
-        loadManifestFile(zipArchive),
-        loadMappingFile(zipArchive),
-      ]);
-
-      const manifestVersion = manifest.formatVersion;
-      const indexName = getSecurityLabsIndexName(effectiveInferenceId);
-
-      const modifiedMappings = cloneDeep(mappings);
-      overrideInferenceSettings(modifiedMappings, effectiveInferenceId);
-
-      await createIndex({
-        indexName,
-        mappings: modifiedMappings,
-        manifestVersion,
-        esClient: this.esClient,
-        log: this.log,
-      });
-
-      await populateIndex({
-        indexName,
-        manifestVersion,
-        archive: zipArchive,
-        esClient: this.esClient,
-        log: this.log,
-        inferenceId: effectiveInferenceId,
-      });
-
-      await this.productDocClient.setSecurityLabsInstallationSuccessful({
-        version: selectedVersion,
-        indexName,
-        inferenceId: effectiveInferenceId,
-      });
-
-      this.log.info(`Security Labs installation successful for version [${selectedVersion}]`);
-    } catch (e) {
-      let message = e.message;
-      if (message.includes('End of central directory record signature not found.')) {
-        message = i18n.translate(
-          'aiInfra.productDocBase.packageInstaller.noSecurityLabsArtifactAvailable',
-          {
-            values: { inferenceId: effectiveInferenceId },
-            defaultMessage:
-              'No Security Labs artifact available for Inference ID [{inferenceId}]. Please contact your administrator.',
-          }
-        );
-      }
-      this.log.error(`Error during Security Labs installation: ${message}`);
-      await this.productDocClient.setSecurityLabsInstallationFailed({
-        version: selectedVersion,
-        failureReason: message,
-        inferenceId: effectiveInferenceId,
-      });
-      throw e;
-    } finally {
-      zipArchive?.close();
     }
   }
 
@@ -643,6 +966,8 @@ export class PackageInstaller {
     }
   }
 
+  // Security Labs methods
+
   /**
    * Ensure Security Labs content is up to date, if currently installed.
    */
@@ -670,319 +995,76 @@ export class PackageInstaller {
     await this.installSecurityLabs({ version: latest, inferenceId });
   }
 
+  private async installPackageWithVersionFallback({
+    productName,
+    selectedVersion,
+    availableVersions,
+    customInference,
+  }: {
+    productName: ProductName;
+    selectedVersion: string;
+    availableVersions: string[];
+    customInference?: InferenceInferenceEndpointInfo;
+  }) {
+    const fallbackVersions = getPreviousVersions(selectedVersion, availableVersions);
+    const candidateVersions = [selectedVersion, ...fallbackVersions];
+    const inferenceId = customInference?.inference_id ?? this.elserInferenceId;
+    const installableVersion = await this.findInstallableProductVersion({
+      productName,
+      candidateVersions,
+      inferenceId,
+    });
+
+    await this.installPackage({
+      productName,
+      productVersion: installableVersion,
+      customInference,
+    });
+  }
+
+  // The existing index is only replaced once the new archive has been downloaded and validated
+  private async deleteIndex(indexName: string): Promise<void> {
+    await this.esClient.indices.delete({ index: indexName }, { ignore: [404] });
+  }
+
+  private async cleanupArtifact(artifactFullPath: string | undefined): Promise<void> {
+    if (artifactFullPath) {
+      await removeArtifactFile(artifactFullPath, this.log);
+    }
+    await logArtifactsFolderUsage(this.artifactsFolderPath, this.log);
+  }
+
   // OpenAPI Spec methods
 
   /**
-   * Install OpenAPI Spec content from the artifact repository.
+   * The version whose artifact is actually available for this inference ID: the version selected for
+   * this deployment, or the newest older one when the selected artifact is not published yet. Persisted
+   * statuses record this version, so it is what retries and overlapping tasks must compare against.
    */
-  async installOpenAPISpec({
-    version,
-    inferenceId,
-  }: {
-    version?: string;
-    inferenceId?: string;
-  }): Promise<void> {
-    const effectiveInferenceId = inferenceId || this.elserInferenceId;
-    const selectedVersion = version || this.currentVersion;
-    const stackVersion = await this.findInstallableOpenApiVersion({
-      selectedVersion,
-      inferenceId: effectiveInferenceId,
-      explicitVersionProvided: Boolean(version),
-    });
-
-    this.log.info(
-      `Starting OpenAPI Spec installation for version [${stackVersion}] with inference ID [${effectiveInferenceId}]`
-    );
-
-    let zipArchive: ZipArchive | undefined;
-    try {
-      await this.uninstallOpenAPISpec({ inferenceId: effectiveInferenceId });
-
-      await this.ensureInferenceEndpointReady({ inferenceId: effectiveInferenceId });
-      const artifactFileName = this.getOpenApiArtifactFileName({
-        stackVersion,
-        inferenceId: effectiveInferenceId,
-      });
-      const artifactUrl = `${this.artifactRepositoryUrl}/${artifactFileName}`;
-      const artifactPath = `${this.artifactsFolder}/${artifactFileName}`;
-
-      this.log.debug(`Downloading OpenAPI artifact from [${artifactUrl}] to [${artifactPath}]`);
-      const downloadedFullPath = await downloadToDisk(
-        artifactUrl,
-        artifactPath,
-        this.artifactRepositoryProxyUrl
-      );
-
-      zipArchive = await openZipArchive(downloadedFullPath);
-      this.assertValidArtifactArchive(zipArchive, downloadedFullPath, { openApi: true });
-
-      for (const { productName, indexName: unmodifiedIndexName } of OPEN_API_SPEC_PRODUCTS) {
-        this.log.info(`Installing OpenAPI spec for ${productName}`);
-
-        await this.productDocClient.setOpenapiSpecInstallationStarted({
-          productName,
-          productVersion: stackVersion,
-          inferenceId: effectiveInferenceId,
-        });
-
-        // Load manifest and mappings from product folder
-        const manifestPath = `${productName}/manifest.json`;
-        const mappingsPath = `${productName}/mappings.json`;
-
-        if (!zipArchive.hasEntry(manifestPath) || !zipArchive.hasEntry(mappingsPath)) {
-          throw new Error(
-            `Missing required files for ${productName}: ${manifestPath} or ${mappingsPath} not found in archive`
-          );
-        }
-
-        const [manifestBuffer, mappingsBuffer] = await Promise.all([
-          zipArchive.getEntryContent(manifestPath),
-          zipArchive.getEntryContent(mappingsPath),
-        ]);
-
-        const manifest = JSON.parse(manifestBuffer.toString('utf-8'));
-        const mappings = JSON.parse(mappingsBuffer.toString('utf-8'));
-
-        const manifestVersion = manifest.formatVersion;
-        const modifiedMappings = cloneDeep(mappings);
-        overrideInferenceSettings(modifiedMappings, effectiveInferenceId);
-
-        const indexName = `${unmodifiedIndexName}${
-          !isImpliedDefaultElserInferenceId(effectiveInferenceId) ? `-${effectiveInferenceId}` : ''
-        }`;
-        // Create index
-        await createIndex({
-          indexName,
-          mappings: modifiedMappings,
-          manifestVersion,
-          esClient: this.esClient,
-          log: this.log,
-        });
-
-        // Populate index from product's content folder
-        const contentPrefix = `${productName}/content/`;
-        const contentEntries = zipArchive
-          .getEntryPaths()
-          .filter(
-            (path) =>
-              path.startsWith(contentPrefix) && path.match(/^.*\/content\/content-[0-9]+\.ndjson$/)
-          );
-
-        if (contentEntries.length === 0) {
-          throw new Error(`No content files found for ${productName} in archive`);
-        }
-
-        for (const entryPath of contentEntries) {
-          this.log.debug(`Indexing content for entry ${entryPath}`);
-          const contentBuffer = await zipArchive.getEntryContent(entryPath);
-          await this.indexContentFile({
-            indexName,
-            esClient: this.esClient,
-            contentBuffer,
-            manifestVersion,
-            inferenceId: effectiveInferenceId,
-          });
-        }
-
-        await this.productDocClient.setOpenapiSpecInstallationSuccessful({
-          productName,
-          productVersion: stackVersion,
-          indexName,
-          inferenceId: effectiveInferenceId,
-        });
-
-        this.log.info(`OpenAPI Spec installation successful for ${productName}`);
-      }
-
-      this.log.info(`OpenAPI Spec installation successful for version [${stackVersion}]`);
-    } catch (e) {
-      let message = e.message;
-      if (isArtifactMissingError(e)) {
-        message = i18n.translate(
-          'aiInfra.productDocBase.packageInstaller.noOpenApiSpecArtifactAvailable',
-          {
-            values: { inferenceId: effectiveInferenceId, version: stackVersion },
-            defaultMessage:
-              'No OpenAPI Spec artifact available for version [{version}] and Inference ID [{inferenceId}]. Please contact your administrator.',
-          }
-        );
-      }
-      this.log.error(`Error during OpenAPI Spec installation: ${message}`);
-      // Mark both products as failed
-      for (const productName of [DocumentationProduct.elasticsearch, DocumentationProduct.kibana]) {
-        await this.productDocClient.setOpenapiSpecInstallationFailed({
-          productName: productName as 'elasticsearch' | 'kibana',
-          productVersion: stackVersion,
-          failureReason: message,
-          inferenceId: effectiveInferenceId,
-        });
-      }
-      throw e;
-    } finally {
-      zipArchive?.close();
-    }
-  }
-
-  private async findInstallableProductVersion({
+  private async resolveInstallableVersion({
     productName,
-    candidateVersions,
     inferenceId,
+    availableVersions,
   }: {
     productName: ProductName;
-    candidateVersions: string[];
     inferenceId: string;
+    availableVersions: string[];
   }): Promise<string> {
-    let lastMissingError: Error | undefined;
-
-    for (const candidateVersion of candidateVersions) {
-      try {
-        const artifactFileNameVersion = this.isServerless
-          ? LATEST_PRODUCT_VERSION
-          : majorMinor(candidateVersion);
-        const artifactFileName = getArtifactName({
-          productName,
-          productVersion: artifactFileNameVersion,
-          inferenceId,
-        });
-        await this.ensureArtifactArchiveAvailable(artifactFileName);
-        return candidateVersion;
-      } catch (error) {
-        if (!isArtifactMissingError(error)) {
-          throw error;
-        }
-        lastMissingError = error as Error;
-        if (candidateVersion !== candidateVersions[0]) {
-          this.log.warn(
-            `Artifact for version [${candidateVersions[0]}] is unavailable for product [${productName}]. Retrying with fallback version [${candidateVersion}]`
-          );
-        }
-      }
-    }
-
-    if (lastMissingError) {
-      throw lastMissingError;
-    }
-
-    throw new Error(`No candidate versions available for product [${productName}]`);
-  }
-
-  private async findInstallableOpenApiVersion({
-    selectedVersion,
-    inferenceId,
-    explicitVersionProvided,
-  }: {
-    selectedVersion: string;
-    inferenceId: string;
-    explicitVersionProvided: boolean;
-  }): Promise<string> {
-    const candidateVersions = [selectedVersion];
-    let fallbackVersionsLoaded = false;
-
-    if (!explicitVersionProvided) {
-      const availableVersions = await this.fetchArtifactVersionsWithRetry();
-      candidateVersions.push(...getPreviousVersions(selectedVersion, availableVersions.openapi));
-      fallbackVersionsLoaded = true;
-    }
-
-    for (let candidateIndex = 0; candidateIndex < candidateVersions.length; candidateIndex++) {
-      const stackVersion = candidateVersions[candidateIndex];
-      const artifactFileName = this.getOpenApiArtifactFileName({
-        stackVersion,
-        inferenceId,
-      });
-      try {
-        await this.ensureArtifactArchiveAvailable(artifactFileName, { openApi: true });
-        return stackVersion;
-      } catch (error) {
-        if (isArtifactMissingError(error) && explicitVersionProvided && !fallbackVersionsLoaded) {
-          try {
-            const availableVersions = await this.fetchArtifactVersionsWithRetry();
-            candidateVersions.push(
-              ...getPreviousVersions(selectedVersion, availableVersions.openapi)
-            );
-          } catch (fetchError) {
-            this.log.warn(
-              `Failed to fetch OpenAPI fallback versions after missing explicit version [${selectedVersion}]: ${
-                (fetchError as Error).message
-              }`
-            );
-          } finally {
-            fallbackVersionsLoaded = true;
-          }
-        }
-
-        if (isArtifactMissingError(error) && candidateIndex !== candidateVersions.length - 1) {
-          this.log.warn(
-            `OpenAPI artifact for version [${stackVersion}] is unavailable. Retrying with older version.`
-          );
-          continue;
-        }
-        throw error;
-      }
-    }
-
-    throw new Error(
-      `No installable OpenAPI artifact found for selected version [${selectedVersion}]`
+    // Serverless/"latest" zip file has a special versioning strategy
+    // where we track by last date modified in the bucket
+    const selectedVersion = selectVersion(
+      this.currentVersion,
+      availableVersions,
+      this.isServerless
     );
-  }
-
-  private getOpenApiArtifactFileName({
-    stackVersion,
-    inferenceId,
-  }: {
-    stackVersion: string;
-    inferenceId: string;
-  }): string {
-    const inferenceIdSuffix = isImpliedDefaultElserInferenceId(inferenceId)
-      ? ''
-      : `--${inferenceId}`;
-    return `kb-product-doc-openapi-${stackVersion}${inferenceIdSuffix}.zip`;
-  }
-
-  private async ensureArtifactArchiveAvailable(
-    artifactFileName: string,
-    { openApi = false }: { openApi?: boolean } = {}
-  ): Promise<void> {
-    const artifactUrl = `${this.artifactRepositoryUrl}/${artifactFileName}`;
-    const precheckArtifactPath = `${
-      this.artifactsFolder
-    }/.precheck-${Date.now()}-${artifactFileName}`;
-    let zipArchive: ZipArchive | undefined;
-    try {
-      const downloadedFullPath = await downloadToDisk(
-        artifactUrl,
-        precheckArtifactPath,
-        this.artifactRepositoryProxyUrl
-      );
-      zipArchive = await openZipArchive(downloadedFullPath);
-      this.assertValidArtifactArchive(zipArchive, downloadedFullPath, { openApi });
-    } finally {
-      zipArchive?.close();
-      await Fs.unlink(precheckArtifactPath).catch(() => {});
-    }
-  }
-
-  private async fetchArtifactVersionsWithRetry(retries = 3) {
-    let lastError: Error | undefined;
-    for (let attempt = 1; attempt <= retries; attempt++) {
-      try {
-        return await fetchArtifactVersions(this.getArtifactRepositoryOptions());
-      } catch (error) {
-        lastError = error as Error;
-        if (attempt < retries) {
-          await sleep(1000 * attempt);
-        }
-      }
-    }
-    throw lastError ?? new Error('Failed to fetch artifact versions');
-  }
-
-  async uninstallOpenAPISpec({ inferenceId }: { inferenceId?: string }): Promise<void> {
-    for (const { indexName } of OPEN_API_SPEC_PRODUCTS) {
-      this.log.info(`Uninstalling OpenAPI Spec from index [${indexName}]`);
-      await this.esClient.indices.delete({ index: indexName }, { ignore: [404] });
-      await this.productDocClient.setOpenapiSpecUninstalled(inferenceId);
-    }
+    return this.findInstallableProductVersion({
+      productName,
+      candidateVersions: [
+        selectedVersion,
+        ...getPreviousVersions(selectedVersion, availableVersions),
+      ],
+      inferenceId,
+    });
   }
 
   private async indexContentFile({
@@ -1057,6 +1139,175 @@ export class PackageInstaller {
     return clonedDoc;
   }
 
+  private async findInstallableProductVersion({
+    productName,
+    candidateVersions,
+    inferenceId,
+  }: {
+    productName: ProductName;
+    candidateVersions: string[];
+    inferenceId: string;
+  }): Promise<string> {
+    let lastMissingError: Error | undefined;
+    // Several candidate versions can map to the same artifact (e.g. every `latest-<timestamp>`
+    // entry on serverless), which must not be downloaded again once it is known to be missing.
+    const triedArtifacts = new Set<string>();
+
+    for (const candidateVersion of candidateVersions) {
+      const artifactFileNameVersion = this.isServerless
+        ? LATEST_PRODUCT_VERSION
+        : majorMinor(candidateVersion);
+      const artifactFileName = getArtifactName({
+        productName,
+        productVersion: artifactFileNameVersion,
+        inferenceId,
+      });
+      if (triedArtifacts.has(artifactFileName)) {
+        continue;
+      }
+      triedArtifacts.add(artifactFileName);
+      try {
+        await this.ensureArtifactAvailable(artifactFileName);
+        return candidateVersion;
+      } catch (error) {
+        if (!isArtifactMissingError(error)) {
+          throw error;
+        }
+        lastMissingError = error as Error;
+        if (candidateVersion !== candidateVersions[0]) {
+          this.log.warn(
+            `Artifact for version [${candidateVersions[0]}] is unavailable for product [${productName}]. Retrying with fallback version [${candidateVersion}]`
+          );
+        }
+      }
+    }
+
+    if (lastMissingError) {
+      throw lastMissingError;
+    }
+
+    throw new Error(`No candidate versions available for product [${productName}]`);
+  }
+
+  private async findInstallableOpenApiVersion({
+    selectedVersion,
+    inferenceId,
+    explicitVersionProvided,
+  }: {
+    selectedVersion: string;
+    inferenceId: string;
+    explicitVersionProvided: boolean;
+  }): Promise<string> {
+    const candidateVersions = [selectedVersion];
+    let fallbackVersionsLoaded = false;
+
+    if (!explicitVersionProvided) {
+      const availableVersions = await this.fetchArtifactVersionsWithRetry();
+      candidateVersions.push(...getPreviousVersions(selectedVersion, availableVersions.openapi));
+      fallbackVersionsLoaded = true;
+    }
+
+    // Several candidate versions can map to the same artifact (every `latest-<timestamp>` entry
+    // maps to the single `latest` file), which must not be downloaded again once known missing.
+    const triedArtifacts = new Set<string>();
+    let lastMissingError: Error | undefined;
+    for (let candidateIndex = 0; candidateIndex < candidateVersions.length; candidateIndex++) {
+      const stackVersion = candidateVersions[candidateIndex];
+      const artifactFileName = this.getOpenApiArtifactFileName({
+        stackVersion,
+        inferenceId,
+      });
+      if (triedArtifacts.has(artifactFileName)) {
+        continue;
+      }
+      triedArtifacts.add(artifactFileName);
+      try {
+        await this.ensureArtifactAvailable(artifactFileName);
+        return stackVersion;
+      } catch (error) {
+        if (!isArtifactMissingError(error)) {
+          throw error;
+        }
+        lastMissingError = error as Error;
+        if (explicitVersionProvided && !fallbackVersionsLoaded) {
+          try {
+            const availableVersions = await this.fetchArtifactVersionsWithRetry();
+            candidateVersions.push(
+              ...getPreviousVersions(selectedVersion, availableVersions.openapi)
+            );
+          } catch (fetchError) {
+            this.log.warn(
+              `Failed to fetch OpenAPI fallback versions after missing explicit version [${selectedVersion}]: ${
+                (fetchError as Error).message
+              }`
+            );
+          } finally {
+            fallbackVersionsLoaded = true;
+          }
+        }
+        this.log.warn(
+          `OpenAPI artifact [${artifactFileName}] for version [${stackVersion}] is unavailable.`
+        );
+      }
+    }
+
+    if (lastMissingError) {
+      throw lastMissingError;
+    }
+    throw new Error(
+      `No installable OpenAPI artifact found for selected version [${selectedVersion}]`
+    );
+  }
+
+  private getOpenApiArtifactFileName({
+    stackVersion,
+    inferenceId,
+  }: {
+    stackVersion: string;
+    inferenceId: string;
+  }): string {
+    const inferenceIdSuffix = isImpliedDefaultElserInferenceId(inferenceId)
+      ? ''
+      : `--${inferenceId}`;
+    // `latest-<timestamp>` versions track the upload date of the single `latest` artifact
+    const fileVersion =
+      extractLatestVersionTimestamp(stackVersion) !== undefined
+        ? LATEST_PRODUCT_VERSION
+        : stackVersion;
+    return `kb-product-doc-openapi-${fileVersion}${inferenceIdSuffix}.zip`;
+  }
+
+  // Existence is checked without downloading; the archive itself is validated once installed
+  private async ensureArtifactAvailable(artifactFileName: string): Promise<void> {
+    await checkArtifactAvailable(
+      `${this.artifactRepositoryUrl}/${artifactFileName}`,
+      this.artifactRepositoryProxyUrl
+    );
+  }
+
+  private async fetchArtifactVersionsWithRetry(retries = 3) {
+    let lastError: Error | undefined;
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        return await fetchArtifactVersions(this.getArtifactRepositoryOptions());
+      } catch (error) {
+        lastError = error as Error;
+        if (attempt < retries) {
+          await sleep(1000 * attempt);
+        }
+      }
+    }
+    throw lastError ?? new Error('Failed to fetch artifact versions');
+  }
+
+  async uninstallOpenAPISpec({ inferenceId }: { inferenceId?: string }): Promise<void> {
+    for (const { indexName } of OPEN_API_SPEC_PRODUCTS) {
+      this.log.info(`Uninstalling OpenAPI Spec from index [${indexName}]`);
+      await this.esClient.indices.delete({ index: indexName }, { ignore: [404] });
+      await this.productDocClient.setOpenapiSpecUninstalled(inferenceId);
+    }
+  }
+
   /**
    * Get the installation status of OpenAPI Spec content.
    */
@@ -1082,6 +1333,37 @@ export class PackageInstaller {
   }
 }
 
+// An item needs (re)installing when its version differs from the selected one, or when the update is
+// forced and nobody else has (re)installed it at that version since the forced update was requested
+const isUpdateNeeded = ({
+  status,
+  version,
+  updatedAt,
+  selectedVersion,
+  forceUpdate,
+  since,
+}: {
+  status: InstallationStatus;
+  version?: string;
+  updatedAt?: string;
+  selectedVersion: string;
+  forceUpdate?: boolean;
+  since?: Date;
+}): boolean => {
+  if (version !== selectedVersion) {
+    return true;
+  }
+  if (!forceUpdate) {
+    return false;
+  }
+  const refreshedSinceRequest =
+    status === 'installed' &&
+    since !== undefined &&
+    updatedAt !== undefined &&
+    new Date(updatedAt).getTime() > since.getTime();
+  return !refreshedSinceRequest;
+};
+
 const selectVersion = (
   currentVersion: string,
   availableVersions: string[],
@@ -1092,12 +1374,17 @@ const selectVersion = (
     : latestVersion(availableVersions, currentVersion);
 
   if (isServerless) {
-    const latestServerlessVersions = availableVersions.filter((version) =>
-      version.includes(LATEST_PRODUCT_VERSION)
-    );
-    return latestServerlessVersions.length > 0
-      ? latestServerlessVersions[0]
-      : latestAvailableVersion;
+    // Every `latest-<timestamp>` entry is a `latest` artifact upload; the most recent one wins
+    const newestLatestVersion = availableVersions
+      .filter((version) => version.includes(LATEST_PRODUCT_VERSION))
+      .reduce<string | undefined>((newest, version) => {
+        if (!newest) {
+          return version;
+        }
+        const timestamp = extractLatestVersionTimestamp(version) ?? -1;
+        return timestamp > (extractLatestVersionTimestamp(newest) ?? -1) ? version : newest;
+      }, undefined);
+    return newestLatestVersion ?? latestAvailableVersion;
   }
   return latestAvailableVersion;
 };
@@ -1107,6 +1394,8 @@ const isArtifactMissingError = (error: unknown): boolean => {
     return false;
   }
   return (
+    error instanceof ArtifactNotFoundError ||
+    error.name === 'ArtifactNotFoundError' ||
     error.message.includes('End of central directory record signature not found.') ||
     error.message.includes('No such file or directory') ||
     error.message.includes('ENOENT')

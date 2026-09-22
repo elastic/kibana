@@ -101,60 +101,10 @@ export abstract class LayoutMixin extends SaveMixin {
     return this.getDataViewSwitchName(await this.getVisibleDataViewSwitch());
   }
 
-  private async fillAndSubmitDataViewEditor({ name, adHoc = false }: DataViewOptions) {
-    // Minimal inline interaction with the data view editor flyout. The full
-    // `DataViewEditorPage` object lives in the `data_view_editor` plugin, but
-    // `kbn-scout` is a base package and must not depend on a plugin, so the few
-    // steps Discover needs are driven directly here.
-    const flyout = this.page.testSubj.locator('indexPatternEditorFlyout');
-    const form = this.page.testSubj.locator('indexPatternEditorForm');
-    const titleInput = this.page.testSubj.locator('createIndexPatternTitleInput');
-    const timestampField = this.page.testSubj.locator('timestampField');
-
-    await flyout.waitFor({ state: 'visible' });
-
-    // FTR passes the base name and relies on the editor auto-appending `*` as the
-    // user types. Scout sets the title verbatim (`fill`), so append the wildcard
-    // here to preserve that contract (`name`, `* will be added automatically`).
-    const title = name.endsWith('*') ? name : `${name}*`;
-    const timestampCombo = this.page.components.comboBox('timestampField');
-
-    await titleInput.waitFor({ state: 'visible', timeout: 30_000 });
-
-    await expect(async () => {
-      await titleInput.fill('');
-      await titleInput.fill(title);
-      // wait for async title validation to settle before continuing.
-      await form
-        .and(this.page.locator('[data-validation-error="0"]'))
-        .waitFor({ state: 'visible' });
-
-      // Wait for an actual selection rather than only `data-is-loading="0"`: that is also the
-      // field's initial state, so on its own it cannot tell "options loaded" apart from
-      // "loading has not started". Submitting too early still passes validation, but creates
-      // the data view with no time field, so no time filter is applied and hit counts include
-      // documents outside the selected range.
-      await expect
-        .poll(
-          async () => {
-            const isLoading = await timestampField.getAttribute('data-is-loading');
-            if (isLoading !== '0') {
-              return false;
-            }
-            return (await timestampCombo.getSelectedOptions()).length > 0;
-          },
-          { timeout: 15_000, intervals: [200] }
-        )
-        .toBe(true);
-
-      await this.page.testSubj.click(
-        adHoc ? 'exploreIndexPatternButton' : 'saveIndexPatternButton'
-      );
-
-      await expect(this.getSelectedDataView()).toHaveAccessibleName(title, { timeout: 20_000 });
-    }).toPass({ timeout: 45_000, intervals: [0] });
-
-    await this.waitUntilTabIsLoaded();
+  /** Opens the field editor from the sidebar's "Add a field" button, which is gated on `canEditDataView`. */
+  async openAddFieldEditorFromSidebar() {
+    await this.page.testSubj.click('dataView-add-field_btn');
+    await this.page.testSubj.locator('fieldEditor').waitFor({ state: 'visible' });
   }
 
   /**
@@ -273,6 +223,14 @@ export abstract class LayoutMixin extends SaveMixin {
   }
 
   // ── Runtime field / field editor helpers ───────────────────────────────────
+
+  /** Opens the histogram's interval selector popover without picking an option. */
+  async openChartIntervalSelector() {
+    await this.page.testSubj.click('unifiedHistogramTimeIntervalSelectorButton');
+    await this.page.testSubj.waitForSelector('unifiedHistogramTimeIntervalSelectorSelectable', {
+      state: 'visible',
+    });
+  }
 
   async createRuntimeField({
     fieldName,
@@ -704,18 +662,28 @@ export abstract class LayoutMixin extends SaveMixin {
    * Pick a histogram chart interval (e.g. `"Day"`).
    */
   async setChartInterval(intervalTitle: string) {
-    await this.page.testSubj.click('unifiedHistogramTimeIntervalSelectorButton');
-    await this.page.testSubj.waitForSelector('unifiedHistogramTimeIntervalSelectorSelectable', {
-      state: 'visible',
-    });
+    await this.openChartIntervalSelector();
     await this.page
       .locator(
-        `[data-test-subj="unifiedHistogramTimeIntervalSelectorSelectable"] .euiSelectableListItem[title="${intervalTitle}"]`
+        `[data-test-subj="unifiedHistogramTimeIntervalSelectorSelectable"] .euiSelectableListItem span[title="${intervalTitle}"]`
       )
       .click();
     await this.page.testSubj.waitForSelector('unifiedHistogramTimeIntervalSelectorSelectable', {
       state: 'hidden',
     });
+  }
+
+  async changeVisualizationShape(seriesType: string) {
+    await this.openLensEditFlyout();
+    const chartSwitch = this.page.testSubj.locator('lnsChartSwitchPopover');
+    await chartSwitch.click();
+    await this.page.testSubj.fill('lnsChartSwitchSearch', seriesType);
+    await this.page.testSubj.locator(`lnsChartSwitchPopover_${seriesType.toLowerCase()}`).click();
+    await chartSwitch.getByText(seriesType, { exact: true }).waitFor({ state: 'visible' });
+    await this.page.testSubj.locator('applyFlyoutButton').scrollIntoViewIfNeeded();
+    await this.page.testSubj.click('applyFlyoutButton');
+    await this.page.testSubj.locator('customizeLens').waitFor({ state: 'hidden' });
+    await this.waitUntilSearchingHasFinished();
   }
 
   /**
@@ -789,6 +757,32 @@ export abstract class LayoutMixin extends SaveMixin {
     await this.getLensEditFlyout().waitFor({ state: 'visible' });
   }
 
+  async chooseVisualizationSuggestion(suggestionType: string) {
+    await this.openLensEditFlyout();
+    await this.page.testSubj.click('lensSuggestionsPanelToggleButton');
+    const suggestion = this.page.testSubj.locator(`lnsSuggestion-${suggestionType}`);
+    await suggestion.waitFor({ state: 'visible' });
+    await suggestion.click();
+    await suggestion
+      .locator('[data-test-subj="lnsSuggestion"]')
+      .and(this.page.locator('[aria-current="true"]'))
+      .waitFor({ state: 'visible' });
+    await this.page.testSubj.locator('applyFlyoutButton').scrollIntoViewIfNeeded();
+    await this.page.testSubj.click('applyFlyoutButton');
+    await this.waitUntilSearchingHasFinished();
+  }
+
+  async getVisualizationTitle(): Promise<string> {
+    await this.openLensEditFlyout();
+    const title = await this.page.testSubj.innerText('lnsChartSwitchPopover');
+    await this.page.testSubj.click('cancelFlyoutButton');
+    return title;
+  }
+
+  getQueryInEsqlButton(): Locator {
+    return this.page.testSubj.locator('queryInEsqlButton');
+  }
+
   getLensEditFlyout(): Locator {
     return this.page.testSubj.locator('lnsChartSwitchPopover');
   }
@@ -822,8 +816,14 @@ export abstract class LayoutMixin extends SaveMixin {
     return this.getHitCountLocator().innerText();
   }
 
-  getRefreshDataButton(): Locator {
-    return this.page.testSubj.locator('refreshDataButton');
+  /** Switches to the Field statistics view and waits for its content to mount. */
+  async selectFieldStatisticsView() {
+    await this.page.testSubj.click('dscViewModeToggleButton');
+    await this.page.testSubj.locator('dscViewModeToggleSelectable').waitFor({ state: 'visible' });
+    await this.page.testSubj.click('dscViewModeFieldStatsOption');
+    // The Documents view stays mounted until the stats table renders, so callers
+    // need this gate to avoid acting on the previous view.
+    await this.page.testSubj.locator('dscFieldStatsEmbeddedContent').waitFor({ state: 'visible' });
   }
 
   getQuerySubmitButton(): Locator {
@@ -1005,10 +1005,68 @@ export abstract class LayoutMixin extends SaveMixin {
     }
   }
 
-  async selectFieldStatisticsView() {
-    await this.page.testSubj.click('dscViewModeToggleButton');
-    await this.page.testSubj.locator('dscViewModeToggleSelectable').waitFor({ state: 'visible' });
-    await this.page.testSubj.click('dscViewModeFieldStatsOption');
+  private async fillAndSubmitDataViewEditor({
+    name,
+    adHoc = false,
+    waitUntilLoaded = true,
+  }: DataViewOptions) {
+    // Minimal inline interaction with the data view editor flyout. The full
+    // `DataViewEditorPage` object lives in the `data_view_editor` plugin, but
+    // `kbn-scout` is a base package and must not depend on a plugin, so the few
+    // steps Discover needs are driven directly here.
+    const flyout = this.page.testSubj.locator('indexPatternEditorFlyout');
+    const form = this.page.testSubj.locator('indexPatternEditorForm');
+    const titleInput = this.page.testSubj.locator('createIndexPatternTitleInput');
+    const timestampField = this.page.testSubj.locator('timestampField');
+
+    await flyout.waitFor({ state: 'visible' });
+
+    // FTR passes the base name and relies on the editor auto-appending `*` as the
+    // user types. Scout sets the title verbatim (`fill`), so append the wildcard
+    // here to preserve that contract (`name`, `* will be added automatically`).
+    const title = name.endsWith('*') ? name : `${name}*`;
+    const timestampCombo = this.page.components.comboBox('timestampField');
+
+    await titleInput.waitFor({ state: 'visible', timeout: 30_000 });
+
+    await expect(async () => {
+      await titleInput.fill('');
+      await titleInput.fill(title);
+      // wait for async title validation to settle before continuing.
+      await form
+        .and(this.page.locator('[data-validation-error="0"]'))
+        .waitFor({ state: 'visible' });
+
+      // Wait for an actual selection rather than only `data-is-loading="0"`: that is also the
+      // field's initial state, so on its own it cannot tell "options loaded" apart from
+      // "loading has not started". Submitting too early still passes validation, but creates
+      // the data view with no time field, so no time filter is applied and hit counts include
+      // documents outside the selected range.
+      await expect
+        .poll(
+          async () => {
+            const isLoading = await timestampField.getAttribute('data-is-loading');
+            if (isLoading !== '0') {
+              return false;
+            }
+            return (await timestampCombo.getSelectedOptions()).length > 0;
+          },
+          { timeout: 15_000, intervals: [200] }
+        )
+        .toBe(true);
+
+      await this.page.testSubj.click(
+        adHoc ? 'exploreIndexPatternButton' : 'saveIndexPatternButton'
+      );
+
+      await expect(this.getSelectedDataView()).toHaveAccessibleName(title, { timeout: 20_000 });
+    }).toPass({ timeout: 45_000, intervals: [0] });
+
+    // New empty tabs stay uninitialized after a data-view change; the caller knows
+    // that and should pass `waitUntilLoaded: false` instead of probing the prompt.
+    if (waitUntilLoaded) {
+      await this.waitUntilTabIsLoaded();
+    }
   }
 
   async getFirstViewLensButtonFromFieldStatistics(): Promise<Locator> {

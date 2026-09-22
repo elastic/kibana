@@ -15,9 +15,9 @@ import { createAgentExecutionClient, type AgentExecutionClient } from '../persis
 import {
   handleAgentExecution,
   collectAndWriteEvents,
-  serializeExecutionError,
   type AgentExecutionDeps,
 } from '../execution_runner';
+import { serializeExecutionError } from '../utils/serialize_execution_error';
 import { AbortMonitor } from './abort_monitor';
 import { HeartbeatReporter } from './heartbeat_reporter';
 import { deliverCallbackEvents, type CallbackDeliveryService } from '../callback';
@@ -131,6 +131,14 @@ class TaskHandlerImpl implements TaskHandler {
     }
   }
 
+  /** Task Manager cancelled the task (timeout or Kibana shutdown). */
+  async cancel({ executionId }: { executionId: string }): Promise<void> {
+    const executionClient = this.createExecutionClient();
+    await executionClient.updateStatus(executionId, ExecutionStatus.aborted, {
+      abortReason: { source: 'task_manager' },
+    });
+  }
+
   /** Records the execution's failed or aborted status. */
   private async handleExecutionFailure({
     execution,
@@ -152,17 +160,12 @@ class TaskHandlerImpl implements TaskHandler {
         ? ExecutionStatus.aborted
         : ExecutionStatus.failed;
 
-      await executionClient.updateStatus(executionId, status, serializedError);
+      await executionClient.updateStatus(executionId, status, { error: serializedError });
     } catch (statusError) {
       this.logger.error(
         `Failed to update status for execution ${executionId}: ${statusError.message}`
       );
     }
-  }
-
-  async cancel({ executionId }: { executionId: string }): Promise<void> {
-    const executionClient = this.createExecutionClient();
-    await executionClient.updateStatus(executionId, ExecutionStatus.aborted);
   }
 
   private createExecutionClient(): AgentExecutionClient {

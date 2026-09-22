@@ -124,6 +124,7 @@ import { fullAgentConfigMapToYaml } from '../../common/services/agent_cm_to_yaml
 import {
   MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
   MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
+  DEFAULT_DOWNLOAD_SOURCE_REFERENCE,
 } from '../constants';
 
 import {
@@ -226,162 +227,138 @@ class AgentPolicyService {
     return agentPolicyUpdateEventHandler(esClient, action, agentPolicyId, options);
   };
 
-  private async _update(
+  public async copy(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     id: string,
-    agentPolicy: Partial<AgentPolicySOAttributes>,
-    user?: AuthenticatedUser,
-    options: {
-      bumpRevision: boolean;
-      removeProtection: boolean;
-      skipValidation: boolean;
-      returnUpdatedPolicy?: boolean;
-      asyncDeploy?: boolean;
-      hasAgentVersionConditions?: boolean;
-      minAgentVersion?: string | null;
-      packageAgentVersionConditions?: AgentPolicyAgentVersionCondition[] | null;
-    } = {
-      bumpRevision: true,
-      removeProtection: false,
-      skipValidation: false,
-      returnUpdatedPolicy: true,
-      asyncDeploy: false,
-      hasAgentVersionConditions: false,
-    }
+    newAgentPolicyProps: Pick<AgentPolicy, 'name' | 'description'>,
+    options?: { user?: AuthenticatedUser }
   ): Promise<AgentPolicy> {
-    const logger = this.getLogger('_update');
+    const logger = this.getLogger('copy');
+    logger.debug(`Starting copy of agent policy ${id}`);
 
-    logger.debug(
-      `Starting update of agent policy [${id}] with soClient scoped to [${soClient.getCurrentNamespace()}]`
-    );
-
-    // Skip the (potentially large, O(n) package-policy-count) full package policy fetch when
-    // deploying asynchronously: the async branch below only schedules a deploy task by id/spaceId
-    // and never reads `existingAgentPolicy.package_policies` — the scheduled task fetches whatever
-    // it needs itself when it runs.
-    const [savedObjectType, existingAgentPolicy] = await Promise.all([
-      getAgentPolicySavedObjectType(),
-      this.get(soClient, id, !options.asyncDeploy),
-    ]);
-
-    auditLoggingService.writeCustomSoAuditLog({
-      action: 'update',
-      id,
-      name: existingAgentPolicy?.name,
-      savedObjectType,
-    });
-
-    if (!existingAgentPolicy) {
+    // Copy base agent policy
+    const baseAgentPolicy = await this.get(soClient, id, true);
+    if (!baseAgentPolicy) {
       throw new AgentPolicyNotFoundError('Agent policy not found');
     }
-
-    if (
-      existingAgentPolicy.status === agentPolicyStatuses.Inactive &&
-      agentPolicy.status !== agentPolicyStatuses.Active
-    ) {
-      throw new FleetError(
-        `Agent policy ${id} cannot be updated because it is ${existingAgentPolicy.status}`
+    if (baseAgentPolicy.package_policies?.length) {
+      const hasManagedPackagePolicies = baseAgentPolicy.package_policies.some(
+        (packagePolicy) => packagePolicy.is_managed
       );
-    }
-
-    if (options.removeProtection) {
-      logger.warn(`Setting tamper protection for Agent Policy ${id} to false`);
-    }
-
-    if (!options.skipValidation) {
-      logger.debug(`Validating agent policy [${id}] before update`);
-
-      await validateOutputForPolicy(
-        soClient,
-        agentPolicy,
-        existingAgentPolicy,
-        getAllowedOutputTypesForAgentPolicy({ ...existingAgentPolicy, ...agentPolicy })
-      );
-    }
-    await soClient
-      .update<AgentPolicySOAttributes>(savedObjectType, id, {
-        ...agentPolicy,
-        ...(options.bumpRevision ? { revision: existingAgentPolicy.revision + 1 } : {}),
-        ...(options.removeProtection
-          ? { is_protected: false }
-          : { is_protected: agentPolicy.is_protected }),
-        updated_at: new Date().toISOString(),
-        updated_by: user ? user.username : 'system',
-        has_agent_version_conditions: options.hasAgentVersionConditions,
-        ...(options.minAgentVersion !== undefined
-          ? { min_agent_version: options.minAgentVersion }
-          : {}),
-        ...(options.packageAgentVersionConditions !== undefined
-          ? { package_agent_version_conditions: options.packageAgentVersionConditions }
-          : {}),
-      })
-      .catch(catchAndSetErrorStackTrace.withMessage(`SO update to agent policy [${id}] failed`));
-
-    const newAgentPolicy = await this.get(soClient, id, false);
-
-    logger.debug(`Agent policy [${id}] Saved Object was updated successfully`);
-
-    newAgentPolicy!.package_policies = existingAgentPolicy.package_policies;
-
-    if (options.bumpRevision || options.removeProtection) {
-      if (!options.asyncDeploy) {
-        logger.debug(`Triggering agent policy [${id}] updated event`);
-
-        await this.triggerAgentPolicyUpdatedEvent(esClient, 'updated', id, {
-          spaceId: soClient.getCurrentNamespace(),
-          agentPolicy: newAgentPolicy,
-        });
-      } else {
-        logger.debug(`Scheduling task to deploy agent policy [${id}]`);
-
-        await scheduleDeployAgentPoliciesTask(appContextService.getTaskManagerStart()!, [
-          {
-            id,
-            spaceId: soClient.getCurrentNamespace(),
-          },
-        ]);
-      }
-    }
-
-    // If this policy no longer requires version-specific policies (e.g. the integration/input
-    // that required them was removed), reassign any agents still assigned to a variant policy back
-    // to the base policy and clean up the stale variant documents. Otherwise those agents stay on
-    // a variant policy that is never updated again and get stuck reporting an outdated policy.
-    // See https://github.com/elastic/kibana/issues/276294
-    if (
-      appContextService.getExperimentalFeatures().enableVersionSpecificPolicies &&
-      existingAgentPolicy.has_agent_version_conditions &&
-      options.hasAgentVersionConditions === false
-    ) {
-      logger.debug(
-        `Agent policy [${id}] no longer has agent version conditions, reassigning agents from version-specific policies back to the base policy`
-      );
-      // Swallow and log: the SO update, revision bump, and deploy have already committed above, so
-      // a transient failure here must not fail the whole update (a retry would also skip this
-      // branch, since has_agent_version_conditions is now false). The periodic sweep is the
-      // fallback that recovers any agents this inline pass misses.
-      try {
-        await reassignAgentsFromVersionSpecificPolicies(soClient, esClient, id);
-      } catch (error) {
-        logger.error(
-          `Failed to reassign agents from version-specific policies for agent policy [${id}]: ${error}`
+      if (hasManagedPackagePolicies) {
+        throw new PackagePolicyRestrictionRelatedError(
+          `Cannot copy an agent policy ${id} that contains managed package policies`
         );
       }
     }
 
-    logger.debug(
-      `Agent policy ${id} update completed, revision: ${
-        options.bumpRevision ? existingAgentPolicy.revision + 1 : existingAgentPolicy.revision
-      }`
+    const newAgentPolicy = await this.create(
+      soClient,
+      esClient,
+      {
+        ...pick(baseAgentPolicy, [
+          'namespace',
+          'monitoring_enabled',
+          'inactivity_timeout',
+          'unenroll_timeout',
+          'agent_features',
+          'overrides',
+          'data_output_id',
+          'monitoring_output_id',
+          'download_source_id',
+          'download_source_ids',
+          'fleet_server_host_id',
+          'supports_agentless',
+          'global_data_tags',
+          'agentless',
+          'monitoring_pprof_enabled',
+          'monitoring_http',
+          'monitoring_diagnostics',
+        ]),
+        ...newAgentPolicyProps,
+      },
+      options
     );
 
-    if (options.returnUpdatedPolicy !== false) {
-      logger.debug(`returning updated policy for [${id}]`);
-      return (await this.get(soClient, id)) as AgentPolicy;
+    if (baseAgentPolicy.package_policies) {
+      // Copy non-shared package policies and append (copy n) to their names.
+      const basePackagePolicies = baseAgentPolicy.package_policies.filter(
+        (packagePolicy) => packagePolicy.policy_ids.length < 2
+      );
+      if (basePackagePolicies.length > 0) {
+        const newPackagePolicies = await pMap(
+          basePackagePolicies,
+          async (packagePolicy: PackagePolicy) => {
+            const updatedPackagePolicy = {
+              ...copyPackagePolicy(packagePolicy),
+              name: await incrementPackagePolicyCopyName(soClient, packagePolicy.name),
+            } as NewPackagePolicy & { id: undefined };
+            return updatedPackagePolicy;
+          }
+        );
+        await packagePolicyService.bulkCreate(
+          soClient,
+          esClient,
+          newPackagePolicies.map((newPackagePolicy) => ({
+            ...newPackagePolicy,
+            policy_ids: [newAgentPolicy.id],
+          })),
+          {
+            ...options,
+            bumpRevision: false,
+          }
+        );
+      }
+      // Link shared package policies to new agent policy.
+      const sharedBasePackagePolicies = baseAgentPolicy.package_policies.filter(
+        (packagePolicy) => packagePolicy.policy_ids.length > 1
+      );
+      if (sharedBasePackagePolicies.length > 0) {
+        const updatedSharedPackagePolicies = sharedBasePackagePolicies.map((packagePolicy) => ({
+          ...packagePolicy,
+          policy_ids: [...packagePolicy.policy_ids, newAgentPolicy.id],
+        }));
+        await packagePolicyService.bulkUpdate(soClient, esClient, updatedSharedPackagePolicies);
+      }
     }
 
-    return newAgentPolicy as AgentPolicy;
+    // Tamper protection is dependent on endpoint package policy
+    // Match tamper protection setting to the original policy
+    if (baseAgentPolicy.is_protected) {
+      await this._update(
+        soClient,
+        esClient,
+        newAgentPolicy.id,
+        { is_protected: true },
+        options?.user,
+        {
+          bumpRevision: false,
+          removeProtection: false,
+          skipValidation: false,
+        }
+      );
+    }
+
+    const policyNeedsBump = baseAgentPolicy.package_policies || baseAgentPolicy.is_protected;
+
+    // bump revision if agent policy is updated after creation
+    if (policyNeedsBump) {
+      await this.bumpRevision(soClient, esClient, newAgentPolicy.id, {
+        user: options?.user,
+      });
+    } else {
+      await this.deployPolicy(soClient, newAgentPolicy.id);
+    }
+
+    // Get updated agent policy with package policies and adjusted tamper protection
+    const updatedAgentPolicy = await this.get(soClient, newAgentPolicy.id, true);
+    if (!updatedAgentPolicy) {
+      throw new AgentPolicyNotFoundError('Copied agent policy not found');
+    }
+
+    logger.debug(`Completed copy of agent policy ${id}`);
+    return updatedAgentPolicy;
   }
 
   public async ensurePreconfiguredAgentPolicy(
@@ -1155,137 +1132,52 @@ class AgentPolicyService {
       });
   }
 
-  public async copy(
-    soClient: SavedObjectsClientContract,
-    esClient: ElasticsearchClient,
-    id: string,
-    newAgentPolicyProps: Pick<AgentPolicy, 'name' | 'description'>,
-    options?: { user?: AuthenticatedUser }
-  ): Promise<AgentPolicy> {
-    const logger = this.getLogger('copy');
-    logger.debug(`Starting copy of agent policy ${id}`);
+  /**
+   * Remove a download source from all agent policies that are using it, and replace the output by the default ones.
+   * @param soClient
+   * @param esClient
+   * @param downloadSourceId
+   */
+  public async removeDefaultSourceFromAll(esClient: ElasticsearchClient, downloadSourceId: string) {
+    const savedObjectType = await getAgentPolicySavedObjectType();
+    const agentPolicies = (
+      await appContextService
+        .getInternalUserSOClientWithoutSpaceExtension()
+        .find<AgentPolicySOAttributes>({
+          type: savedObjectType,
+          fields: ['revision', 'download_source_id', 'download_source_ids'],
+          searchFields: ['download_source_id', 'download_source_ids'],
+          search: escapeSearchQueryPhrase(downloadSourceId),
+          perPage: SO_SEARCH_LIMIT,
+          namespaces: ['*'],
+        })
+    ).saved_objects.map(mapAgentPolicySavedObjectToAgentPolicy);
 
-    // Copy base agent policy
-    const baseAgentPolicy = await this.get(soClient, id, true);
-    if (!baseAgentPolicy) {
-      throw new AgentPolicyNotFoundError('Agent policy not found');
-    }
-    if (baseAgentPolicy.package_policies?.length) {
-      const hasManagedPackagePolicies = baseAgentPolicy.package_policies.some(
-        (packagePolicy) => packagePolicy.is_managed
-      );
-      if (hasManagedPackagePolicies) {
-        throw new PackagePolicyRestrictionRelatedError(
-          `Cannot copy an agent policy ${id} that contains managed package policies`
-        );
-      }
-    }
-
-    const newAgentPolicy = await this.create(
-      soClient,
-      esClient,
-      {
-        ...pick(baseAgentPolicy, [
-          'namespace',
-          'monitoring_enabled',
-          'inactivity_timeout',
-          'unenroll_timeout',
-          'agent_features',
-          'overrides',
-          'data_output_id',
-          'monitoring_output_id',
-          'download_source_id',
-          'fleet_server_host_id',
-          'supports_agentless',
-          'global_data_tags',
-          'agentless',
-          'monitoring_pprof_enabled',
-          'monitoring_http',
-          'monitoring_diagnostics',
-        ]),
-        ...newAgentPolicyProps,
-      },
-      options
-    );
-
-    if (baseAgentPolicy.package_policies) {
-      // Copy non-shared package policies and append (copy n) to their names.
-      const basePackagePolicies = baseAgentPolicy.package_policies.filter(
-        (packagePolicy) => packagePolicy.policy_ids.length < 2
-      );
-      if (basePackagePolicies.length > 0) {
-        const newPackagePolicies = await pMap(
-          basePackagePolicies,
-          async (packagePolicy: PackagePolicy) => {
-            const updatedPackagePolicy = {
-              ...copyPackagePolicy(packagePolicy),
-              name: await incrementPackagePolicyCopyName(soClient, packagePolicy.name),
-            } as NewPackagePolicy & { id: undefined };
-            return updatedPackagePolicy;
-          }
-        );
-        await packagePolicyService.bulkCreate(
-          soClient,
-          esClient,
-          newPackagePolicies.map((newPackagePolicy) => ({
-            ...newPackagePolicy,
-            policy_ids: [newAgentPolicy.id],
-          })),
-          {
-            ...options,
-            bumpRevision: false,
-          }
-        );
-      }
-      // Link shared package policies to new agent policy.
-      const sharedBasePackagePolicies = baseAgentPolicy.package_policies.filter(
-        (packagePolicy) => packagePolicy.policy_ids.length > 1
-      );
-      if (sharedBasePackagePolicies.length > 0) {
-        const updatedSharedPackagePolicies = sharedBasePackagePolicies.map((packagePolicy) => ({
-          ...packagePolicy,
-          policy_ids: [...packagePolicy.policy_ids, newAgentPolicy.id],
-        }));
-        await packagePolicyService.bulkUpdate(soClient, esClient, updatedSharedPackagePolicies);
-      }
-    }
-
-    // Tamper protection is dependent on endpoint package policy
-    // Match tamper protection setting to the original policy
-    if (baseAgentPolicy.is_protected) {
-      await this._update(
-        soClient,
-        esClient,
-        newAgentPolicy.id,
-        { is_protected: true },
-        options?.user,
+    if (agentPolicies.length > 0) {
+      await pMap(
+        agentPolicies,
+        (agentPolicy) =>
+          this.update(
+            appContextService.getInternalUserSOClientForSpaceId(
+              getSpaceForAgentPolicy(agentPolicy)
+            ),
+            esClient,
+            agentPolicy.id,
+            {
+              download_source_id:
+                agentPolicy.download_source_id === downloadSourceId
+                  ? null
+                  : agentPolicy.download_source_id,
+              download_source_ids: agentPolicy.download_source_ids?.filter(
+                (id) => id !== downloadSourceId
+              ),
+            }
+          ),
         {
-          bumpRevision: false,
-          removeProtection: false,
-          skipValidation: false,
+          concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
         }
       );
     }
-
-    const policyNeedsBump = baseAgentPolicy.package_policies || baseAgentPolicy.is_protected;
-
-    // bump revision if agent policy is updated after creation
-    if (policyNeedsBump) {
-      await this.bumpRevision(soClient, esClient, newAgentPolicy.id, {
-        user: options?.user,
-      });
-    } else {
-      await this.deployPolicy(soClient, newAgentPolicy.id);
-    }
-
-    // Get updated agent policy with package policies and adjusted tamper protection
-    const updatedAgentPolicy = await this.get(soClient, newAgentPolicy.id, true);
-    if (!updatedAgentPolicy) {
-      throw new AgentPolicyNotFoundError('Copied agent policy not found');
-    }
-
-    logger.debug(`Completed copy of agent policy ${id}`);
-    return updatedAgentPolicy;
   }
 
   public async bumpRevision(
@@ -2371,51 +2263,6 @@ class AgentPolicyService {
     return result;
   }
 
-  /**
-   * Remove a download source from all agent policies that are using it, and replace the output by the default ones.
-   * @param soClient
-   * @param esClient
-   * @param downloadSourceId
-   */
-  public async removeDefaultSourceFromAll(esClient: ElasticsearchClient, downloadSourceId: string) {
-    const savedObjectType = await getAgentPolicySavedObjectType();
-    const agentPolicies = (
-      await appContextService
-        .getInternalUserSOClientWithoutSpaceExtension()
-        .find<AgentPolicySOAttributes>({
-          type: savedObjectType,
-          fields: ['revision', 'download_source_id'],
-          searchFields: ['download_source_id'],
-          search: escapeSearchQueryPhrase(downloadSourceId),
-          perPage: SO_SEARCH_LIMIT,
-          namespaces: ['*'],
-        })
-    ).saved_objects.map(mapAgentPolicySavedObjectToAgentPolicy);
-
-    if (agentPolicies.length > 0) {
-      await pMap(
-        agentPolicies,
-        (agentPolicy) =>
-          this.update(
-            appContextService.getInternalUserSOClientForSpaceId(
-              getSpaceForAgentPolicy(agentPolicy)
-            ),
-            esClient,
-            agentPolicy.id,
-            {
-              download_source_id:
-                agentPolicy.download_source_id === downloadSourceId
-                  ? null
-                  : agentPolicy.download_source_id,
-            }
-          ),
-        {
-          concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
-        }
-      );
-    }
-  }
-
   public async agentPoliciesExistForDownloadSourceId(downloadSourceId: string): Promise<boolean> {
     const savedObjectType = await getAgentPolicySavedObjectType();
     const escapedId = escapeSearchQueryPhrase(downloadSourceId);
@@ -2423,7 +2270,7 @@ class AgentPolicyService {
       .getInternalUserSOClientWithoutSpaceExtension()
       .find<AgentPolicySOAttributes>({
         type: savedObjectType,
-        filter: `(${savedObjectType}.attributes.download_source_id:${escapedId})`,
+        filter: `(${savedObjectType}.attributes.download_source_id:${escapedId}) OR (${savedObjectType}.attributes.download_source_ids:${escapedId})`,
         fields: ['id'],
         perPage: 1,
         namespaces: ['*'],
@@ -2440,16 +2287,25 @@ class AgentPolicyService {
       appContextService.getInternalUserSOClientWithoutSpaceExtension();
     const savedObjectType = await getAgentPolicySavedObjectType();
     const escapedId = escapeSearchQueryPhrase(downloadSourceId);
-    const filterClauses = [`(${savedObjectType}.attributes.download_source_id:${escapedId})`];
+    const filterClauses = [
+      `(${savedObjectType}.attributes.download_source_id:${escapedId})`,
+      `(${savedObjectType}.attributes.download_source_ids:${escapedId})`,
+    ];
     if (options?.isDefault) {
       filterClauses.push(`(NOT ${savedObjectType}.attributes.download_source_id:*)`);
+      // Policies holding a slot for whichever source is default track it by reference
+      filterClauses.push(
+        `(${savedObjectType}.attributes.download_source_ids:${escapeSearchQueryPhrase(
+          DEFAULT_DOWNLOAD_SOURCE_REFERENCE
+        )})`
+      );
     }
     const filter = filterClauses.join(' OR ');
 
     const currentPolicies =
       await internalSoClientWithoutSpaceExtension.find<AgentPolicySOAttributes>({
         type: savedObjectType,
-        fields: ['revision', 'download_source_id', 'namespaces'],
+        fields: ['revision', 'download_source_id', 'download_source_ids', 'namespaces'],
         filter,
         perPage: SO_SEARCH_LIMIT,
         namespaces: ['*'],
@@ -2460,6 +2316,165 @@ class AgentPolicyService {
       currentPolicies.saved_objects,
       options
     );
+  }
+
+  private async _update(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    id: string,
+    agentPolicy: Partial<AgentPolicySOAttributes>,
+    user?: AuthenticatedUser,
+    options: {
+      bumpRevision: boolean;
+      removeProtection: boolean;
+      skipValidation: boolean;
+      returnUpdatedPolicy?: boolean;
+      asyncDeploy?: boolean;
+      hasAgentVersionConditions?: boolean;
+      minAgentVersion?: string | null;
+      packageAgentVersionConditions?: AgentPolicyAgentVersionCondition[] | null;
+    } = {
+      bumpRevision: true,
+      removeProtection: false,
+      skipValidation: false,
+      returnUpdatedPolicy: true,
+      asyncDeploy: false,
+      hasAgentVersionConditions: false,
+    }
+  ): Promise<AgentPolicy> {
+    const logger = this.getLogger('_update');
+
+    logger.debug(
+      `Starting update of agent policy [${id}] with soClient scoped to [${soClient.getCurrentNamespace()}]`
+    );
+
+    // Skip the (potentially large, O(n) package-policy-count) full package policy fetch when
+    // deploying asynchronously: the async branch below only schedules a deploy task by id/spaceId
+    // and never reads `existingAgentPolicy.package_policies` — the scheduled task fetches whatever
+    // it needs itself when it runs.
+    const [savedObjectType, existingAgentPolicy] = await Promise.all([
+      getAgentPolicySavedObjectType(),
+      this.get(soClient, id, !options.asyncDeploy),
+    ]);
+
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'update',
+      id,
+      name: existingAgentPolicy?.name,
+      savedObjectType,
+    });
+
+    if (!existingAgentPolicy) {
+      throw new AgentPolicyNotFoundError('Agent policy not found');
+    }
+
+    if (
+      existingAgentPolicy.status === agentPolicyStatuses.Inactive &&
+      agentPolicy.status !== agentPolicyStatuses.Active
+    ) {
+      throw new FleetError(
+        `Agent policy ${id} cannot be updated because it is ${existingAgentPolicy.status}`
+      );
+    }
+
+    if (options.removeProtection) {
+      logger.warn(`Setting tamper protection for Agent Policy ${id} to false`);
+    }
+
+    if (!options.skipValidation) {
+      logger.debug(`Validating agent policy [${id}] before update`);
+
+      await validateOutputForPolicy(
+        soClient,
+        agentPolicy,
+        existingAgentPolicy,
+        getAllowedOutputTypesForAgentPolicy({ ...existingAgentPolicy, ...agentPolicy })
+      );
+    }
+    agentPolicy = this.normalizeDownloadSourceFields(agentPolicy);
+    await soClient
+      .update<AgentPolicySOAttributes>(savedObjectType, id, {
+        ...agentPolicy,
+        ...(options.bumpRevision ? { revision: existingAgentPolicy.revision + 1 } : {}),
+        ...(options.removeProtection
+          ? { is_protected: false }
+          : { is_protected: agentPolicy.is_protected }),
+        updated_at: new Date().toISOString(),
+        updated_by: user ? user.username : 'system',
+        has_agent_version_conditions: options.hasAgentVersionConditions,
+        ...(options.minAgentVersion !== undefined
+          ? { min_agent_version: options.minAgentVersion }
+          : {}),
+        ...(options.packageAgentVersionConditions !== undefined
+          ? { package_agent_version_conditions: options.packageAgentVersionConditions }
+          : {}),
+      })
+      .catch(catchAndSetErrorStackTrace.withMessage(`SO update to agent policy [${id}] failed`));
+
+    const newAgentPolicy = await this.get(soClient, id, false);
+
+    logger.debug(`Agent policy [${id}] Saved Object was updated successfully`);
+
+    newAgentPolicy!.package_policies = existingAgentPolicy.package_policies;
+
+    if (options.bumpRevision || options.removeProtection) {
+      if (!options.asyncDeploy) {
+        logger.debug(`Triggering agent policy [${id}] updated event`);
+
+        await this.triggerAgentPolicyUpdatedEvent(esClient, 'updated', id, {
+          spaceId: soClient.getCurrentNamespace(),
+          agentPolicy: newAgentPolicy,
+        });
+      } else {
+        logger.debug(`Scheduling task to deploy agent policy [${id}]`);
+
+        await scheduleDeployAgentPoliciesTask(appContextService.getTaskManagerStart()!, [
+          {
+            id,
+            spaceId: soClient.getCurrentNamespace(),
+          },
+        ]);
+      }
+    }
+
+    // If this policy no longer requires version-specific policies (e.g. the integration/input
+    // that required them was removed), reassign any agents still assigned to a variant policy back
+    // to the base policy and clean up the stale variant documents. Otherwise those agents stay on
+    // a variant policy that is never updated again and get stuck reporting an outdated policy.
+    // See https://github.com/elastic/kibana/issues/276294
+    if (
+      appContextService.getExperimentalFeatures().enableVersionSpecificPolicies &&
+      existingAgentPolicy.has_agent_version_conditions &&
+      options.hasAgentVersionConditions === false
+    ) {
+      logger.debug(
+        `Agent policy [${id}] no longer has agent version conditions, reassigning agents from version-specific policies back to the base policy`
+      );
+      // Swallow and log: the SO update, revision bump, and deploy have already committed above, so
+      // a transient failure here must not fail the whole update (a retry would also skip this
+      // branch, since has_agent_version_conditions is now false). The periodic sweep is the
+      // fallback that recovers any agents this inline pass misses.
+      try {
+        await reassignAgentsFromVersionSpecificPolicies(soClient, esClient, id);
+      } catch (error) {
+        logger.error(
+          `Failed to reassign agents from version-specific policies for agent policy [${id}]: ${error}`
+        );
+      }
+    }
+
+    logger.debug(
+      `Agent policy ${id} update completed, revision: ${
+        options.bumpRevision ? existingAgentPolicy.revision + 1 : existingAgentPolicy.revision
+      }`
+    );
+
+    if (options.returnUpdatedPolicy !== false) {
+      logger.debug(`returning updated policy for [${id}]`);
+      return (await this.get(soClient, id)) as AgentPolicy;
+    }
+
+    return newAgentPolicy as AgentPolicy;
   }
 
   public async bumpAllAgentPoliciesForFleetServerHosts(
@@ -2821,11 +2836,34 @@ class AgentPolicyService {
     return { policiesWithSingleAP, policiesWithMultipleAP };
   }
 
+  private normalizeDownloadSourceFields<T extends Partial<AgentPolicySOAttributes>>(
+    agentPolicy: T
+  ): T {
+    if ('download_source_ids' in agentPolicy) {
+      // Deduplicate while preserving order (first occurrence wins).
+      const deduped = [...new Set(agentPolicy.download_source_ids ?? [])];
+      // Keep download_source_id in sync with the primary entry so older nodes
+      // that only read this field compile the correct sourceURI during rolling upgrades.
+      return {
+        ...agentPolicy,
+        download_source_ids: deduped,
+        download_source_id: deduped[0] ?? null,
+      };
+    }
+    if ('download_source_id' in agentPolicy) {
+      return {
+        ...agentPolicy,
+        download_source_ids: agentPolicy.download_source_id ? [agentPolicy.download_source_id] : [],
+      };
+    }
+    return agentPolicy;
+  }
+
   private prepareAsNewSo(
     agentPolicy: NewAgentPolicy,
     options: { username?: string }
   ): AgentPolicySOAttributes {
-    const { space_ids: _, ...baseAgentPolicySo } = agentPolicy;
+    const { space_ids: _, ...baseAgentPolicySo } = this.normalizeDownloadSourceFields(agentPolicy);
     const now = new Date().toISOString();
     return {
       ...baseAgentPolicySo,

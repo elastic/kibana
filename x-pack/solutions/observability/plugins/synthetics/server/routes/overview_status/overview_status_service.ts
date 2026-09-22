@@ -412,51 +412,26 @@ export class OverviewStatusService {
     };
   }
 
-  private sortConfigs(
-    configs: OverviewStatusMetaData[],
-    sortField: string | undefined,
-    sortOrder: string | undefined
+  getMonitorMeta(
+    monitor: SavedObjectsFindResult<
+      EncryptedSyntheticsMonitorAttributes & { [ConfigKey.URLS]?: string }
+    >
   ) {
-    const dir = sortOrder === 'desc' ? -1 : 1;
-
-    switch (sortField) {
-      case 'name.keyword':
-        configs.sort((a, b) => dir * a.name.localeCompare(b.name));
-        break;
-      case 'updated_at': {
-        // Monitors with no `updated_at` (Heartbeat / CCS remote — no local saved
-        // object) sort as "now", matching the legacy client-side sort's
-        // `moment(undefined)` fallback, so they surface as most-recently-updated
-        // rather than sinking to the end of a large fleet. Computed once so the
-        // comparator stays a stable, deterministic total order.
-        const now = Date.now();
-        configs.sort((a, b) => {
-          const aTime = a.updated_at ? new Date(a.updated_at).getTime() : now;
-          const bTime = b.updated_at ? new Date(b.updated_at).getTime() : now;
-          return dir * (aTime - bTime);
-        });
-        break;
-      }
-      case 'urls': {
-        const withUrl = configs.filter((m) => m.urls);
-        const withoutUrl = configs.filter((m) => !m.urls);
-        withUrl.sort((a, b) => dir * (a.urls ?? '').localeCompare(b.urls ?? ''));
-        configs.length = 0;
-        configs.push(...withUrl, ...withoutUrl);
-        break;
-      }
-      case 'type.keyword':
-        configs.sort((a, b) => dir * (a.type ?? '').localeCompare(b.type ?? ''));
-        break;
-      case 'status':
-      default:
-        configs.sort((a, b) => {
-          const aRank = STATUS_RANK[a.overallStatus] ?? Number.MAX_SAFE_INTEGER;
-          const bRank = STATUS_RANK[b.overallStatus] ?? Number.MAX_SAFE_INTEGER;
-          return dir * (aRank - bRank);
-        });
-        break;
-    }
+    return {
+      name: monitor.attributes[ConfigKey.NAME],
+      configId: monitor.attributes[ConfigKey.CONFIG_ID],
+      schedule: monitor.attributes[ConfigKey.SCHEDULE].number,
+      tags: monitor.attributes[ConfigKey.TAGS],
+      isEnabled: monitor.attributes[ConfigKey.ENABLED],
+      type: monitor.attributes[ConfigKey.MONITOR_TYPE],
+      projectId: monitor.attributes[ConfigKey.PROJECT_ID],
+      isStatusAlertEnabled: isStatusEnabled(monitor.attributes[ConfigKey.ALERT_CONFIG]),
+      created_at: monitor.created_at,
+      updated_at: monitor.updated_at,
+      spaces: monitor.namespaces,
+      urls: monitor.attributes[ConfigKey.URLS],
+      maintenanceWindows: monitor.attributes[ConfigKey.MAINTENANCE_WINDOWS]?.map((mw) => mw),
+    };
   }
 
   async getEsDataFilters() {
@@ -1326,25 +1301,63 @@ export class OverviewStatusService {
     });
   }
 
-  getMonitorMeta(
-    monitor: SavedObjectsFindResult<
-      EncryptedSyntheticsMonitorAttributes & { [ConfigKey.URLS]?: string }
-    >
+  private sortConfigs(
+    configs: OverviewStatusMetaData[],
+    sortField: string | undefined,
+    sortOrder: string | undefined
   ) {
-    return {
-      name: monitor.attributes[ConfigKey.NAME],
-      configId: monitor.attributes[ConfigKey.CONFIG_ID],
-      schedule: monitor.attributes[ConfigKey.SCHEDULE].number,
-      tags: monitor.attributes[ConfigKey.TAGS],
-      isEnabled: monitor.attributes[ConfigKey.ENABLED],
-      type: monitor.attributes[ConfigKey.MONITOR_TYPE],
-      projectId: monitor.attributes[ConfigKey.PROJECT_ID],
-      isStatusAlertEnabled: isStatusEnabled(monitor.attributes[ConfigKey.ALERT_CONFIG]),
-      updated_at: monitor.updated_at,
-      spaces: monitor.namespaces,
-      urls: monitor.attributes[ConfigKey.URLS],
-      maintenanceWindows: monitor.attributes[ConfigKey.MAINTENANCE_WINDOWS]?.map((mw) => mw),
-    };
+    const dir = sortOrder === 'desc' ? -1 : 1;
+
+    switch (sortField) {
+      case 'name.keyword':
+        configs.sort((a, b) => dir * a.name.localeCompare(b.name));
+        break;
+      case 'updated_at': {
+        // Monitors with no `updated_at` (Heartbeat / CCS remote — no local saved
+        // object) sort as "now", matching the legacy client-side sort's
+        // `moment(undefined)` fallback, so they surface as most-recently-updated
+        // rather than sinking to the end of a large fleet. Computed once so the
+        // comparator stays a stable, deterministic total order.
+        const now = Date.now();
+        configs.sort((a, b) => {
+          const aTime = a.updated_at ? new Date(a.updated_at).getTime() : now;
+          const bTime = b.updated_at ? new Date(b.updated_at).getTime() : now;
+          return dir * (aTime - bTime);
+        });
+        break;
+      }
+      case 'created_at': {
+        // Same "missing sorts as now" fallback as `updated_at` above, for the
+        // same reason: Heartbeat / CCS remote monitors have no local saved
+        // object, so `created_at` is absent rather than falsy-zero.
+        const now = Date.now();
+        configs.sort((a, b) => {
+          const aTime = a.created_at ? new Date(a.created_at).getTime() : now;
+          const bTime = b.created_at ? new Date(b.created_at).getTime() : now;
+          return dir * (aTime - bTime);
+        });
+        break;
+      }
+      case 'urls': {
+        const withUrl = configs.filter((m) => m.urls);
+        const withoutUrl = configs.filter((m) => !m.urls);
+        withUrl.sort((a, b) => dir * (a.urls ?? '').localeCompare(b.urls ?? ''));
+        configs.length = 0;
+        configs.push(...withUrl, ...withoutUrl);
+        break;
+      }
+      case 'type.keyword':
+        configs.sort((a, b) => dir * (a.type ?? '').localeCompare(b.type ?? ''));
+        break;
+      case 'status':
+      default:
+        configs.sort((a, b) => {
+          const aRank = STATUS_RANK[a.overallStatus] ?? Number.MAX_SAFE_INTEGER;
+          const bRank = STATUS_RANK[b.overallStatus] ?? Number.MAX_SAFE_INTEGER;
+          return dir * (aRank - bRank);
+        });
+        break;
+    }
   }
 }
 

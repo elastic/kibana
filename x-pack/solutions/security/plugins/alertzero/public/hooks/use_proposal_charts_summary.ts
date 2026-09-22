@@ -12,8 +12,8 @@ import {
   PROPOSAL_CHARTS_SUMMARY_URL,
 } from '@kbn/agentic-investigations-plugin/common';
 import type { ProposalChartsSummaryResponse } from '@kbn/agentic-investigations-plugin/common';
+import { retryOnTransientError } from '@kbn/agentic-investigations-plugin/public';
 import { queryKeys } from '../query_keys';
-import { retryOnTransientError } from './use_watches_api';
 
 /**
  * Exported so callers that render the window (axis labels, tooltip ranges) read

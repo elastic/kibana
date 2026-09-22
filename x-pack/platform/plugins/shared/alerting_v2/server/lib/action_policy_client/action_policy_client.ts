@@ -11,6 +11,7 @@ import type {
   ActionPolicyResponse,
   BulkResponse,
   CreateActionPolicyDataInput,
+  MatchActionPoliciesResponse,
   MatchedActionPolicy,
 } from '@kbn/alerting-v2-schemas';
 import {
@@ -56,8 +57,7 @@ import type {
   CreateActionPolicyParams,
   FindActionPoliciesArgs,
   FindActionPoliciesResponse,
-  MatchActionPoliciesForRuleParams,
-  MatchActionPoliciesForRuleResponse,
+  MatchActionPoliciesParams,
   SnoozeActionPolicyParams,
   UpdateActionPolicyApiKeyParams,
   UpdateActionPolicyParams,
@@ -380,11 +380,10 @@ export class ActionPolicyClient {
     };
   }
 
-  public async matchActionPoliciesForRule(
-    params: MatchActionPoliciesForRuleParams
-  ): Promise<MatchActionPoliciesForRuleResponse> {
+  public async matchActionPolicies(
+    params: MatchActionPoliciesParams
+  ): Promise<MatchActionPoliciesResponse> {
     const { ruleTags = [] } = params;
-    const ruleTagSet = new Set(ruleTags);
 
     const items: MatchedActionPolicy[] = [];
 
@@ -392,18 +391,24 @@ export class ActionPolicyClient {
     for (const actionPolicy of allPolicies.items) {
       const { matcher } = actionPolicy;
 
-      if (PolicyMatcher.of(matcher).isCatchAll()) {
-        items.push({ actionPolicy, category: 'catch-all' });
+      const policyMatcher = PolicyMatcher.of(matcher);
+      if (policyMatcher.isCatchAll()) {
+        items.push({ action_policy: actionPolicy, category: 'catch-all' });
         continue;
       }
 
-      const matcherTags = matcher?.tags ?? [];
-      if (matcherTags.some((tag) => ruleTagSet.has(tag))) {
-        items.push({ actionPolicy, category: 'tags' });
+      if (policyMatcher.hasTags() && policyMatcher.matchesTags(ruleTags)) {
+        items.push({ action_policy: actionPolicy, category: 'tags' });
       }
     }
 
-    return { items, total: allPolicies.total };
+    const evaluatedCount = allPolicies.items.length;
+    return {
+      items,
+      total: allPolicies.total,
+      evaluated_count: evaluatedCount,
+      is_truncated: allPolicies.total > evaluatedCount,
+    };
   }
 
   public async enableActionPolicy({ id }: { id: string }): Promise<ActionPolicyResponse> {
@@ -596,26 +601,78 @@ export class ActionPolicyClient {
     return { affected_count: affectedCount, errors };
   }
 
-  private buildFindFilter(params: FindActionPoliciesArgs): KueryNode | undefined {
-    const conditions: KueryNode[] = [];
-    const attrPrefix = `${ACTION_POLICY_SAVED_OBJECT_TYPE}.attributes`;
+  public async upsertActionPolicy({
+    id,
+    data,
+  }: {
+    id: string;
+    data: CreateActionPolicyDataInput;
+  }): Promise<{ policy: ActionPolicyResponse; created: boolean }> {
+    // Validate up front so a bad body never spends an API key allocation or
+    // even consults the SO store.
+    const parsed = this.parseActionPolicyData(createActionPolicyDataSchema, data, 'upsert');
 
-    if (params.enabled !== undefined) {
-      conditions.push(nodeBuilder.is(`${attrPrefix}.enabled`, params.enabled ? 'true' : 'false'));
+    const exists = await this.actionPolicyExists({ id });
+
+    if (!exists) {
+      const policy = await this.createActionPolicy({ data, options: { id } });
+      return { policy, created: true };
     }
 
-    if (params.tags && params.tags.length > 0) {
-      const tagConditions = params.tags.map((tag) => nodeBuilder.is(`${attrPrefix}.tags`, tag));
-      conditions.push(
-        tagConditions.length === 1 ? tagConditions[0] : nodeBuilder.or(tagConditions)
-      );
+    const userProfileUid = await this.userService.getCurrentUserProfileUid();
+    const now = new Date().toISOString();
+
+    const { attrs: existingAttrs, version: existingVersion } = await this.getExistingActionPolicy(
+      id
+    );
+
+    // The API key is rotated on every replace; the old key is invalidated
+    // only after the SO write succeeds, so a failed replace doesn't leave
+    // the policy with a key that has already been invalidated.
+    const oldAuth = await this.getDecryptedAuth(id);
+    const apiKeyAttrs = await this.apiKeyService.create(`Action Policy: ${parsed.name}`);
+
+    // PUT replaces every field accepted by createActionPolicyDataSchema. Audit
+    // metadata (createdBy/createdAt) and operational state (enabled,
+    // snoozedUntil) are not part of the create schema and are preserved here.
+    // Tags are also preserved: they are no longer part of the API contract but
+    // remain in the saved object so they can be re-exposed later.
+    const replacementAttrs: ActionPolicySavedObjectAttributes = {
+      ...buildCreateActionPolicyAttributes({
+        data: parsed,
+        auth: apiKeyAttrs,
+        createdBy: existingAttrs.createdBy,
+        createdAt: existingAttrs.createdAt,
+        updatedBy: userProfileUid,
+        updatedAt: now,
+      }),
+      enabled: existingAttrs.enabled,
+      snoozedUntil: existingAttrs.snoozedUntil,
+      tags: existingAttrs.tags,
+    };
+
+    let updated: { id: string; version?: string };
+    try {
+      updated = await this.writeActionPolicyAttrs({
+        id,
+        attrs: replacementAttrs,
+        version: existingVersion,
+      });
+    } catch (e) {
+      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false, id);
+      throw e;
     }
 
-    if (conditions.length === 0) {
-      return undefined;
-    }
+    this.markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser, id);
 
-    return conditions.length === 1 ? conditions[0] : nodeBuilder.and(conditions);
+    return {
+      policy: transformActionPolicySoAttributesToApiResponse({
+        id,
+        version: updated.version,
+        attributes: replacementAttrs,
+      }),
+      created: false,
+    };
   }
 
   private mapSortField(sortField?: string): string | undefined {
@@ -630,12 +687,6 @@ export class ActionPolicyClient {
     };
 
     return sortFieldMap[sortField];
-  }
-
-  public async getTags(params?: { search?: string }): Promise<string[]> {
-    return this.actionPolicySavedObjectService.findTags({
-      search: params?.search,
-    });
   }
 
   /**
@@ -865,74 +916,13 @@ export class ActionPolicyClient {
     return this.getActionPolicy({ id });
   }
 
-  public async upsertActionPolicy({
-    id,
-    data,
-  }: {
-    id: string;
-    data: CreateActionPolicyDataInput;
-  }): Promise<{ policy: ActionPolicyResponse; created: boolean }> {
-    // Validate up front so a bad body never spends an API key allocation or
-    // even consults the SO store.
-    const parsed = this.parseActionPolicyData(createActionPolicyDataSchema, data, 'upsert');
+  private buildFindFilter(params: FindActionPoliciesArgs): KueryNode | undefined {
+    const attrPrefix = `${ACTION_POLICY_SAVED_OBJECT_TYPE}.attributes`;
 
-    const exists = await this.actionPolicyExists({ id });
-
-    if (!exists) {
-      const policy = await this.createActionPolicy({ data, options: { id } });
-      return { policy, created: true };
+    if (params.enabled !== undefined) {
+      return nodeBuilder.is(`${attrPrefix}.enabled`, params.enabled ? 'true' : 'false');
     }
 
-    const userProfileUid = await this.userService.getCurrentUserProfileUid();
-    const now = new Date().toISOString();
-
-    const { attrs: existingAttrs, version: existingVersion } = await this.getExistingActionPolicy(
-      id
-    );
-
-    // The API key is rotated on every replace; the old key is invalidated
-    // only after the SO write succeeds, so a failed replace doesn't leave
-    // the policy with a key that has already been invalidated.
-    const oldAuth = await this.getDecryptedAuth(id);
-    const apiKeyAttrs = await this.apiKeyService.create(`Action Policy: ${parsed.name}`);
-
-    // PUT replaces every field accepted by createActionPolicyDataSchema. Audit
-    // metadata (createdBy/createdAt) and operational state (enabled,
-    // snoozedUntil) are not part of the create schema and are preserved here.
-    const replacementAttrs: ActionPolicySavedObjectAttributes = {
-      ...buildCreateActionPolicyAttributes({
-        data: parsed,
-        auth: apiKeyAttrs,
-        createdBy: existingAttrs.createdBy,
-        createdAt: existingAttrs.createdAt,
-        updatedBy: userProfileUid,
-        updatedAt: now,
-      }),
-      enabled: existingAttrs.enabled,
-      snoozedUntil: existingAttrs.snoozedUntil,
-    };
-
-    let updated: { id: string; version?: string };
-    try {
-      updated = await this.writeActionPolicyAttrs({
-        id,
-        attrs: replacementAttrs,
-        version: existingVersion,
-      });
-    } catch (e) {
-      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false, id);
-      throw e;
-    }
-
-    this.markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser, id);
-
-    return {
-      policy: transformActionPolicySoAttributesToApiResponse({
-        id,
-        version: updated.version,
-        attributes: replacementAttrs,
-      }),
-      created: false,
-    };
+    return undefined;
   }
 }
