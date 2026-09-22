@@ -180,6 +180,11 @@ credential-gated cluster. Keep reference and per-example trace links in the PR e
 | **Golden Eval** | A versioned, approved set of examples and graders used for repeatable comparisons. |
 | **Trajectory** | The ordered tool calls, tool results and final response supplied to graders as execution evidence. |
 | **Harness Parity** | A comparison holding inputs and graders fixed to validate runner/target integration; without equivalent data access, scores are not capability comparisons. |
+| **Capability Baseline** | A run in which the Eval Target has the same data access a user would have, so its scores are the first real measurement of investigation quality. There is no minimum score; the number is the deliverable. |
+| **Eval Dataset** | The examples (question, reference answer, metadata) stored on an Eval Backend, as opposed to the telemetry a run investigates. |
+| **Telemetry Source** | The Elasticsearch cluster the Eval Target queries during a run: the ephemeral Scout cluster for Harness Parity, a remote cluster for a Capability Baseline. |
+| **Telemetry Connector** | The preconfigured Kibana stack connector whose URL and credentials the investigator's sandbox receives, one command at a time, to reach the Telemetry Source. |
+| **Connector Manifest** | The file written into the sandbox (`/workspace/elastic.md`) describing how to reach the Telemetry Connector: env var names, readable indices and query rules, never secrets. It is Kibana's counterpart of Deductive's per-connector docs. |
 
 ## Runner parity contract
 
@@ -215,6 +220,88 @@ The smoke eval also needs GCS seed credentials. Golden examples are scoring inpu
 are the Elasticsearch documents a target investigates. Golden Harness Parity deliberately
 loads no customer seed data. New seeded evals can follow `evals/smoke/` and `withSeedData`;
 new unseeded evals can follow `evals/golden/`.
+
+## Remote telemetry Capability Baseline
+
+`evals/remote/` runs the golden task and all 23 graders against a **remote** Telemetry Source:
+the investigator's sandbox queries a cluster you connect instead of the empty Scout cluster.
+Examples come from a local, labels-only JSON file that is never committed; there are no
+telemetry snapshots. This is a Capability Baseline: the first score is the deliverable and there
+is no minimum.
+
+Nothing in this repository names a cluster. The operator supplies four things through the
+environment, typically from a cluster-specific skill kept in a private repository:
+
+| Variable | Meaning |
+| --- | --- |
+| `NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL` | The remote cluster's Elasticsearch URL, reachable from the sandbox container. |
+| `NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY` | A **read-only** API key for that cluster. The Scout config turns the Telemetry Connector into a header-authenticated webhook (`Authorization: ApiKey …`) and the Connector Manifest switches to `CONNECTOR_SECRET_HEADER_AUTHORIZATION`. |
+| `NIGHTSHIFT_SANDBOX_READABLE_INDICES` | Markdown replacing the default readable-index hint in the Connector Manifest: remote-cluster naming, index patterns and useful fields. Load-bearing on clusters with many cross-cluster remotes, where wildcard discovery calls do not return. |
+| `NIGHTSHIFT_REMOTE_EXAMPLES_FILE` | Path to the examples file below. |
+
+The examples file validates against the same example contract as the golden eval, with two
+differences: `metadata.case_id` may replace `langsmith_example_id`, and the question limit is
+computed from the Elastic constraints suffix in [`evals/remote/prompts.ts`](evals/remote/prompts.ts).
+That suffix replaces the DoorDash one: it forbids reading the incident or ticket that describes
+the problem, restricts evidence to before the incident was detected, and disallows resolution
+notes as causes. The `dataset` name must start with `nightshift/`; approved `deductive/*` datasets
+are never written.
+
+```json
+{
+  "dataset": "nightshift/remote-smoke",
+  "description": "optional",
+  "tags": ["optional"],
+  "examples": [
+    {
+      "input": { "question": "i want you to debug and identify the root cause of \"<alert title>\"\nDetected: <UTC time>\nEnvironment: <cloud/region>" },
+      "output": { "reference_answer": "<what actually happened>" },
+      "metadata": {
+        "case_id": "<stable id>",
+        "category": "investigate",
+        "max_latency_seconds": 600,
+        "dataset_split": ["cluster/<name>", "suite/remote-smoke"],
+        "source_url": "<incident link, provenance only>"
+      }
+    }
+  ]
+}
+```
+
+Set `category: investigate` explicitly: the rubric selector otherwise keys on questions starting
+with "Debug this alert". Keep incident links out of the question; the sandbox can only reach
+Elasticsearch, and the suffix forbids reading them anyway.
+
+```bash
+NIGHTSHIFT_DATASETS=remote \
+NIGHTSHIFT_REMOTE_EXAMPLES_FILE=/path/to/examples.json \
+NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL=https://<remote-es>:443 \
+NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY="$(cat /path/to/read-only-key)" \
+NIGHTSHIFT_SANDBOX_READABLE_INDICES="$(cat /path/to/readable-indices.md)" \
+node scripts/evals start --suite nightshift-investigations --profile golden \
+  --model openrouter-anthropic-claude-sonnet-4-6 \
+  --judge openrouter-anthropic-claude-sonnet-4-6
+```
+
+The spec upserts the named dataset, runs every example at concurrency 2, and in addition to the
+golden acceptance checks requires that each trajectory contains at least one sandbox command
+that passed `connector_id` and returned without a tool error, proving the remote cluster was
+actually reached. Run metadata records `comparison: Capability Baseline`,
+`telemetry_source: remote` and the exact suffix.
+
+To ask the same investigator ad-hoc questions about the remote cluster once the stack is up,
+start a manual investigation against the Scout Kibana and poll it:
+
+```bash
+curl -s -u elastic:changeme -H 'kbn-xsrf: true' -H 'Content-Type: application/json' \
+  http://localhost:5620/internal/nightshift/investigations \
+  -d '{"subject":{"type":"manual"},"message":"<your question>"}'
+# → {"investigation_id": "..."}; then
+curl -s -u elastic:changeme http://localhost:5620/internal/nightshift/investigations/<id>
+```
+
+The Agent Builder UI on the same Kibana lists the conversation under the Deductive
+investigator agent.
 
 ## Seed data
 
@@ -279,10 +366,13 @@ against.
 
 | Variable | Effect |
 | --- | --- |
-| `NIGHTSHIFT_DATASETS` | Unset, `all` or `investigate-lite` selects the lite golden eval. `synthetic-smoke` selects the seed smoke eval. Unknown values fail early. |
+| `NIGHTSHIFT_DATASETS` | Unset, `all` or `investigate-lite` selects the lite golden eval. `synthetic-smoke` selects the seed smoke eval. `remote` selects the remote telemetry Capability Baseline. Unknown values fail early. |
 | `SANDBOX_API_KEY` | Required local sandbox-api key, shared by Scout and sandbox-api. |
 | `SANDBOX_API_HOST`, `SANDBOX_API_PORT` | Override `localhost:9090`. |
 | `NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL` | Elasticsearch URL reachable inside the sandbox; default `http://host.docker.internal:9220`. |
+| `NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY` | With the URL, makes the Telemetry Connector a header-authenticated remote cluster connector. |
+| `NIGHTSHIFT_SANDBOX_READABLE_INDICES` | Replaces the Connector Manifest's readable-index hint. |
+| `NIGHTSHIFT_REMOTE_EXAMPLES_FILE` | Labels-only examples file for the `remote` selector. |
 | `NIGHTSHIFT_GOLDEN_SNAPSHOT` | Managed by global setup; temporary source snapshot path. |
 | `SELECTED_EVALUATORS` | Standard native filter by evaluator name. Acceptance evidence uses all 23. |
 | `GCS_CREDENTIALS` | Needed only for seed snapshots; supplied through profile `gcsDatasetAccessCredentials`. |
