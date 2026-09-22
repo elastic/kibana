@@ -281,7 +281,7 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
     deploymentName: schema.maybe(schema.string({ maxLength: 255 })),
     serviceVars: schema.maybe(RequestServiceVarsSchema),
     services: schema.maybe(
-      schema.arrayOf(schema.string({ minLength: 1 }), {
+      schema.arrayOf(schema.string({ minLength: 1, maxLength: 256 }), {
         minSize: 1,
         maxSize: 1000,
         meta: {
@@ -328,7 +328,6 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
         },
       })
     ),
-    apiKeyId: schema.maybe(schema.string({ maxLength: 255 })),
     ecfStacks: schema.maybe(
       schema.arrayOf(EcfStackSchema, {
         maxSize: 10,

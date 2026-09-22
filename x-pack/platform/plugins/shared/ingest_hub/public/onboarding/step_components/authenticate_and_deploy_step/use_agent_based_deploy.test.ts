@@ -363,6 +363,39 @@ describe('useAgentBasedDeploy — SO persistence', () => {
     expect(payload).not.toHaveProperty('serviceVars');
   });
 
+  it('create payload includes agentPolicyIds for existing-policy mode so mid-deploy tab-close leaves a resumable record', async () => {
+    mockCreateDeployment.mockResolvedValue('so-id-existing-create');
+    mockUseOnboardingFlow.mockReturnValue({
+      servicesStep: { selectedServiceIds: ['serviceA'], dataFormat: 'ecs' as const },
+      authenticateAndDeployStep: {},
+      detectAndReviewStep: { policyIdsByInstance: {} },
+      updateDetectAndReviewStep: jest.fn(),
+      getLatestFailedInstances: jest.fn().mockReturnValue([]),
+      awsServicesMap: new Map(),
+      agentBasedDeployment: {
+        agentHostsMode: 'existing' as const,
+        agentPolicyId: undefined,
+        selectedAgentPolicyIds: ['policy-x', 'policy-y'],
+      },
+      setAgentBasedDeployment: jest.fn(),
+    });
+    mockBuildAgentBasedTargets.mockReturnValue([groupA]);
+    mockDeployToExistingAgentPolicies.mockResolvedValue({
+      packagePolicyIdsByInstance: { serviceA: 'pkg-A' },
+      failedInstances: [],
+      errorsByInstance: {},
+    });
+
+    const { result } = renderHook(() => useAgentBasedDeploy());
+    await act(async () => {
+      await result.current.handleDeploy();
+    });
+
+    expect(mockCreateDeployment).toHaveBeenCalledWith(
+      expect.objectContaining({ agentPolicyIds: ['policy-x', 'policy-y'] })
+    );
+  });
+
   it('partial retry status uses merged failure set, not just current-call failures', async () => {
     mockCreateDeployment.mockResolvedValue(null);
     makeFlowMock({ agentHostsMode: 'existing', policyIdsByInstance: { serviceA: 'pkg-A' } });

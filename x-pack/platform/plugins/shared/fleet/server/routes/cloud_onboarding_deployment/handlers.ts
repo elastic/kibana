@@ -131,6 +131,20 @@ export const updateCloudOnboardingDeploymentHandler: FleetRequestHandler<
   const { internalSoClient } = fleetContext;
 
   try {
+    // Validate authMethod against the deployment's persisted mechanisms so a client cannot
+    // change an agent-based record to identity_federation or a managed-integration record
+    // to assume_role — the same invariant enforced on POST.
+    if (request.body.authMethod) {
+      const existing = await cloudOnboardingDeploymentService.getById(
+        internalSoClient,
+        request.params.id
+      );
+      const authMethodError = validateAuthMethod(existing.mechanisms, request.body.authMethod);
+      if (authMethodError) {
+        return response.badRequest({ body: { message: authMethodError } });
+      }
+    }
+
     const deployment = await cloudOnboardingDeploymentService.update(
       internalSoClient,
       request.params.id,

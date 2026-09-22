@@ -497,6 +497,14 @@ export default function (providerContext: FtrProviderContext) {
           .send({ status: 'invalid-status' })
           .expect(400);
       });
+
+      it('should return 400 when updating a managed_integration deployment with assume_role authMethod', async () => {
+        await supertest
+          .put(`${BASE_URL}/${deploymentId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ authMethod: 'assume_role' })
+          .expect(400);
+      });
     });
 
     describe('agent_based deployment — PUT round-trip', () => {
@@ -565,6 +573,23 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .send({ agentPolicyIds: 'not-an-array', status: 'succeeded' })
           .expect(400);
+      });
+
+      it('should return 400 when updating an agent_based deployment with identity_federation authMethod', async () => {
+        await supertest
+          .put(`${BASE_URL}/${deploymentId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ authMethod: 'identity_federation' })
+          .expect(400);
+      });
+
+      it('should update authMethod on an agent_based deployment with a valid agent-based method', async () => {
+        const { body } = await supertest
+          .put(`${BASE_URL}/${deploymentId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ authMethod: 'shared_credentials' })
+          .expect(200);
+        expect(body.item.authMethod).to.equal('shared_credentials');
       });
 
       for (const authMethod of [

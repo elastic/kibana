@@ -49,7 +49,6 @@ export interface UpdateCloudOnboardingDeploymentRequest {
     authMethod?: CloudOnboardingDeploymentAuthMethod;
     agentPolicyIds?: string[];
     packagePolicyIds?: string[];
-    apiKeyId?: string;
     ecfStacks?: CloudOnboardingEcfStack[];
   };
 }

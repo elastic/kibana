@@ -165,7 +165,16 @@ export function AgentBasedSection({
 
   const handleCredentialMethodChange = (method: AgentCredentialMethod) => {
     setAgentBasedDeployment({ agentCredentialMethod: method });
-    setIsCredentialReady(false);
+    // For text-field methods, recompute readiness from retained persisted values so switching
+    // back to a previously populated assume_role/shared_credentials method doesn't leave Next
+    // permanently disabled until the user manually edits an already-valid field.
+    if (method === 'assume_role') {
+      setIsCredentialReady(!!persistedRoleArn);
+    } else if (method === 'shared_credentials') {
+      setIsCredentialReady(!!(persistedSharedCredentialFile || persistedCredentialProfileName));
+    } else {
+      setIsCredentialReady(false);
+    }
     // Reset in-memory secrets on method switch (safety: don't carry static keys into temporary slot).
     setStaticKeyCreds(undefined);
     setTemporaryKeyCreds(undefined);
