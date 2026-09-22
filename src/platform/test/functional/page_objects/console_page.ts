@@ -506,7 +506,9 @@ export class ConsolePageObject extends FtrService {
   }
 
   async skipTourIfExists() {
-    const tourShown = await this.testSubjects.waitForExists('consoleSkipTourButton', { timeout: 2000 });
+    const tourShown = await this.testSubjects.waitForExists('consoleSkipTourButton', {
+      timeout: 2000,
+    });
     if (tourShown) {
       await this.clickSkipTour();
     }
