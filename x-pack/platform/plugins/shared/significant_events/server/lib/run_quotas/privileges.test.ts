@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
+import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import type { SignificantEventsServer } from '../../types';
 import { assertCanManageRunQuotas, canManageRunQuotas } from './privileges';
 
@@ -14,7 +14,7 @@ const request = {} as KibanaRequest;
 
 const createServer = (hasAllRequested: boolean) => {
   const globally = jest.fn().mockResolvedValue({ hasAllRequested });
-  const get = jest.fn().mockReturnValue('streams-manage-action');
+  const get = jest.fn().mockImplementation((privilege: string) => privilege);
   const server = {
     security: {
       authz: {
@@ -28,17 +28,19 @@ const createServer = (hasAllRequested: boolean) => {
 };
 
 describe('run quota global management privilege', () => {
-  it('checks Streams manage globally', async () => {
+  it('checks Nightshift manage and configure globally', async () => {
     const { server, get, globally } = createServer(true);
 
     await expect(canManageRunQuotas({ request, server })).resolves.toBe(true);
-    expect(get).toHaveBeenCalledWith(STREAMS_API_PRIVILEGES.manage);
+    expect(get).toHaveBeenCalledTimes(2);
+    expect(get).toHaveBeenCalledWith(NIGHTSHIFT_API_PRIVILEGES.manage);
+    expect(get).toHaveBeenCalledWith(NIGHTSHIFT_API_PRIVILEGES.configure);
     expect(globally).toHaveBeenCalledWith({
-      kibana: ['streams-manage-action'],
+      kibana: [NIGHTSHIFT_API_PRIVILEGES.manage, NIGHTSHIFT_API_PRIVILEGES.configure],
     });
   });
 
-  it('denies settings management without Streams manage in every space', async () => {
+  it('denies settings management without Nightshift manage and configure in every space', async () => {
     const { server } = createServer(false);
 
     await expect(assertCanManageRunQuotas({ request, server })).rejects.toMatchObject({

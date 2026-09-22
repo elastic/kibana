@@ -101,7 +101,6 @@ describe('registerActionPolicyAutoAttach', () => {
     const policy = createPolicy({
       matcher: null,
       group_by: null,
-      tags: null,
       snoozed_until: null,
     });
 
@@ -119,7 +118,6 @@ describe('registerActionPolicyAutoAttach', () => {
         name: 'Critical production alerts',
         matcher: undefined,
         group_by: undefined,
-        tags: undefined,
         snoozed_until: undefined,
       }),
     });

@@ -113,13 +113,6 @@ export interface DiscoveryScenario {
   };
   /** Ordered ground-truth continuation chains by `rule_name`, keyed by continuation path label. */
   continuationChains?: Record<string, string[]>;
-  /** Memory pages seeded via the memory API before the agent runs (the spec wipes the memory data stream between scenarios). */
-  memoryPages?: Array<{
-    name: string;
-    title: string;
-    content: string;
-    categories?: string[];
-  }>;
   output: {
     criteria: SamplingCriterion[];
     expected_min_evidence_count?: number;
@@ -141,7 +134,19 @@ export interface DiscoveryScenario {
 export interface DatasetConfig {
   id: string;
   description: string;
+  optIn?: true;
   gcs: GcsConfig;
+  /**
+   * How log data is replayed from the snapshot:
+   * - `undefined` (default): `replaySignificantEventsSnapshot` — restores the snapshot's
+   *   `logs` data-stream backing indices (`.ds-logs-*`) and reindexes them into a local
+   *   `logs` data stream. Used by demo-app snapshots captured from a managed `logs` stream.
+   * - `'managed-stream'`: `replayIntoManagedStream` — reindexes all `logs-*` indices in the
+   *   snapshot into the managed `logs` stream. Required for archived incident snapshots, which
+   *   store plain indices under their original data-stream names (`logs-<dataset>-<namespace>`)
+   *   instead of `.ds-*` backing indices.
+   */
+  replayMode?: 'managed-stream';
   kiQueryGeneration: KIQueryGenerationScenario[];
   kiFeatureExtraction: KIFeatureExtractionScenario[];
   kiFeatureExclusion: KIFeatureExclusionScenario[];

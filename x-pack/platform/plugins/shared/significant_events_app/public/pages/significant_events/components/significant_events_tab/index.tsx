@@ -25,6 +25,7 @@ import { css } from '@emotion/react';
 import { capitalize } from 'lodash';
 import useInterval from 'react-use/lib/useInterval';
 import { i18n } from '@kbn/i18n';
+import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import {
   getSeverityLabel,
   severitySchema,
@@ -42,7 +43,7 @@ import { RUNNING_POLL_INTERVAL_MS } from '../../../../constants';
 import { useFetchSignificantEvents } from '../../../../hooks/use_fetch_significant_events';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { useTimeRangeUpdate } from '../../../../hooks/use_time_range_update';
-import { useKiGeneration } from '../knowledge_indicators_table/ki_generation_context';
+import { useFetchStreams } from '../../hooks/use_fetch_streams';
 import { useSignificantEventsPageContext } from '../../context/significant_events_page_context';
 import { SignificantEventFlyout } from './significant_event_flyout';
 import { FindSignificantEventsButton } from '../streams_view/find_significant_events_button';
@@ -53,9 +54,11 @@ import { FilterPopover } from './filter_popover';
 import { getSignificantEventStatusColor } from '../shared/status_display';
 import { SIGNIFICANT_EVENT_STATUS_LABELS } from '../shared/translations';
 import { SeverityBadge } from '../severity_badge/severity_badge';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { useTriggerInvestigation } from '../../../../hooks/use_trigger_investigation';
 import { useUpdateSignificantEvent } from '../../../../hooks/use_update_significant_event';
 import { useBlocksNewActivity } from '../../../../hooks/use_significant_events_maintenance';
+import { DismissEventModal } from './dismiss_event_modal';
 
 export const DEFAULT_SIGNIFICANT_EVENT_SEVERITY_FILTER: Severity[] = ['80-critical', '60-high'];
 
@@ -73,6 +76,13 @@ const CLOSE_EVENT_ARIA_LABEL = i18n.translate(
   }
 );
 
+const DISMISS_EVENT_ARIA_LABEL = i18n.translate(
+  'xpack.significantEventsApp.significantEventsTab.dismissEventButton.ariaLabel',
+  {
+    defaultMessage: 'Dismiss this significant event',
+  }
+);
+
 const VIEW_DETAILS_ARIA_LABEL = i18n.translate(
   'xpack.significantEventsApp.significantEventsTab.viewDetailsAriaLabel',
   {
@@ -86,8 +96,21 @@ const MINIMIZE_DETAILS_ARIA_LABEL = i18n.translate(
 );
 
 const RunInvestigationCell = ({ event }: { event: SignificantEvent }) => {
+  const {
+    core: {
+      application: {
+        capabilities: { nightshift },
+      },
+    },
+  } = useKibana();
+  const { canManage } = getNightshiftCapabilities(nightshift);
   const { triggerInvestigation, isTriggering } = useTriggerInvestigation();
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
+
+  if (!canManage) {
+    return null;
+  }
+
   return (
     <EuiToolTip content={activityBlockTooltip ?? RUN_ARIA_LABEL} disableScreenReaderOutput>
       <EuiButtonIcon
@@ -108,9 +131,17 @@ const RunInvestigationCell = ({ event }: { event: SignificantEvent }) => {
 };
 
 const CloseEventCell = ({ event }: { event: SignificantEvent }) => {
+  const {
+    core: {
+      application: {
+        capabilities: { nightshift },
+      },
+    },
+  } = useKibana();
+  const { canManage } = getNightshiftCapabilities(nightshift);
   const { updateEventStatus, isUpdating } = useUpdateSignificantEvent();
 
-  if (event.status === 'closed') {
+  if (!canManage || event.status !== 'open') {
     return null;
   }
 
@@ -130,6 +161,46 @@ const CloseEventCell = ({ event }: { event: SignificantEvent }) => {
         data-test-subj="sigEventCloseIconButton"
       />
     </EuiToolTip>
+  );
+};
+
+const DismissEventCell = ({ event }: { event: SignificantEvent }) => {
+  const {
+    core: {
+      application: {
+        capabilities: { nightshift },
+      },
+    },
+  } = useKibana();
+  const { canManage } = getNightshiftCapabilities(nightshift);
+  const [isDismissModalOpen, setIsDismissModalOpen] = useState(false);
+
+  if (!canManage || event.status !== 'open') {
+    return null;
+  }
+
+  return (
+    <>
+      <EuiToolTip content={DISMISS_EVENT_ARIA_LABEL} disableScreenReaderOutput>
+        <EuiButtonIcon
+          iconType="eyeSlash"
+          aria-label={DISMISS_EVENT_ARIA_LABEL}
+          onClick={(e: React.MouseEvent) => {
+            e.stopPropagation();
+            setIsDismissModalOpen(true);
+          }}
+          size="s"
+          color="danger"
+          data-test-subj="sigEventDismissIconButton"
+        />
+      </EuiToolTip>
+      {isDismissModalOpen && (
+        <DismissEventModal
+          eventUuid={event.event_uuid}
+          onClose={() => setIsDismissModalOpen(false)}
+        />
+      )}
+    </>
   );
 };
 
@@ -292,12 +363,15 @@ export const getSignificantEventTableColumns = ({
   },
   {
     name: '',
-    width: '88px',
+    width: '112px',
     align: 'right' as const,
     render: (item: SignificantEvent) => (
       <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd" responsive={false}>
         <EuiFlexItem grow={false}>
           <RunInvestigationCell event={item} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <DismissEventCell event={item} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <CloseEventCell event={item} />
@@ -335,7 +409,7 @@ export const SignificantEventsTab = () => {
   const { timeState } = useTimefilter();
   const { updateTimeRange } = useTimeRangeUpdate();
 
-  const { filteredStreams } = useKiGeneration();
+  const { data: streamsData } = useFetchStreams();
   // Closed events are hidden by default; users can opt back in via the Status filter.
   const [statusFilter, setStatusFilter] = useState<SignificantEventStatus[]>(() =>
     SIGNIFICANT_EVENT_STATUS_OPTIONS.filter((status) => status === 'open')
@@ -367,8 +441,8 @@ export const SignificantEventsTab = () => {
   }, [selectedEventId]);
 
   const streamOptions = useMemo(
-    () => (filteredStreams ?? []).map((s) => s.stream.name).sort(),
-    [filteredStreams]
+    () => (streamsData?.streams ?? []).map((s) => s.stream.name).sort(),
+    [streamsData]
   );
 
   const { isRunning, isCanceling, handleRun, handleCancel } = useSignificantEventsPageContext();

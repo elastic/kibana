@@ -11,7 +11,6 @@ import type {
   KibanaRequest,
   Logger,
 } from '@kbn/core/server';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { ToolsStart } from '@kbn/agent-builder-server';
 import type { InferenceClient } from '@kbn/inference-common';
 import { getStreamTypeFromDefinition } from '@kbn/streams-schema';
@@ -22,7 +21,6 @@ import {
 import { isInferenceProviderError } from '@kbn/inference-common';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { StreamsClient } from '@kbn/streams-plugin/server';
-import { PromptsConfigService } from '@kbn/streams-plugin/server';
 import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from '../semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled';
 import { isSignificantEventsFeatureFlagEnabled } from '../feature_flags/is_significant_events_feature_flag_enabled';
 import { createSemanticCodeSearchTools } from '../semantic_code_search_grounding/semantic_code_search_tools';
@@ -31,8 +29,6 @@ import type { EbtTelemetryClient } from '../telemetry/ebt';
 import { resolveConnectorForFeature } from '../../routes/utils/resolve_connector_for_feature';
 import { formatInferenceProviderError } from '../../routes/utils/create_connector_sse_error';
 import { identifyKIQueries } from './identify_ki_queries';
-import { MemoryServiceImpl } from '../../memory_and_investigation/lib/memory';
-import { createMemoryDiscoveryTools } from './memory_discovery_tools';
 import { createKiExtractionContextTools } from './ki_extraction_context_tools';
 
 export interface GenerateKIQueriesParams {
@@ -46,7 +42,6 @@ export interface GenerateKIQueriesParams {
 export interface GenerateKIQueriesDependencies {
   streamsClient: StreamsClient;
   inferenceClient: InferenceClient;
-  soClient: SavedObjectsClientContract;
   kiClient: KnowledgeIndicatorClient;
   esClient: ElasticsearchClient;
   /**
@@ -78,7 +73,6 @@ export async function generateKIQueries(
   const {
     streamsClient,
     inferenceClient,
-    soClient,
     kiClient,
     esClient,
     streamDataEsClient,
@@ -102,26 +96,12 @@ export async function generateKIQueries(
 
   logger.debug(`Using connector ${connectorId} for query generation`);
 
-  const [
-    definition,
-    { significantEventsPromptOverride },
-    significantEventsAvailable,
-    useSemanticCodeSearchGrounding,
-  ] = await Promise.all([
-    streamsClient.getStream(streamName),
-    new PromptsConfigService({ soClient, logger }).getPrompt(),
-    isSignificantEventsFeatureFlagEnabled(featureFlags),
-    isSignificantEventsSemanticCodeSearchGroundingEnabled(featureFlags),
-  ]);
-
-  const memoryTools = significantEventsAvailable
-    ? createMemoryDiscoveryTools({
-        memoryService: new MemoryServiceImpl({
-          logger: logger.get('memory'),
-          esClient,
-        }),
-      })
-    : undefined;
+  const [definition, significantEventsAvailable, useSemanticCodeSearchGrounding] =
+    await Promise.all([
+      streamsClient.getStream(streamName),
+      isSignificantEventsFeatureFlagEnabled(featureFlags),
+      isSignificantEventsSemanticCodeSearchGroundingEnabled(featureFlags),
+    ]);
 
   const semanticCodeSearchLogger = logger.get('semantic_code_search_grounding');
 
@@ -157,7 +137,6 @@ export async function generateKIQueries(
     {
       definition,
       connectorId,
-      systemPrompt: significantEventsPromptOverride,
       maxExistingQueriesForContext,
       maxDurationMs,
       queryValidationTimeoutMs,
@@ -168,7 +147,6 @@ export async function generateKIQueries(
       kiClient,
       logger: logger.get('significant_events_generation'),
       signal,
-      memoryTools,
       kiExtractionContextTools,
       semanticCodeSearchTools,
     }

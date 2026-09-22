@@ -35,13 +35,24 @@ spaceTest.describe('Discover request cancellation', { tag: '@local-stateful-clas
     await discoverScoutSpace.teardownDiscoverDefaults();
   });
 
-  spaceTest('allows cancelling active requests', async ({ pageObjects }) => {
+  spaceTest('allows cancelling active requests', async ({ page, pageObjects }) => {
     const { discover, filterBar } = pageObjects;
 
     await expect(discover.getQuerySubmitButton()).toBeVisible();
     await expect(discover.getQueryCancelButton()).toBeHidden();
 
+    // Set up the listener before adding the filter to avoid a race condition where
+    // the async search response arrives before we start listening.
+    const asyncSearchResponsePromise = page.waitForResponse(
+      (req) => req.url().includes('/internal/search/ese') && req.ok()
+    );
+
     await filterBar.addDslFilter(STALLED_LOGSTASH_QUERY);
+
+    // Wait for the first async search response to ensure the async ID is established in the
+    // search interceptor. Without an ID, the interceptor cannot fetch partial results on cancel,
+    // and the cancellation warning prompt would not appear.
+    await asyncSearchResponsePromise;
 
     await expect(discover.getQueryCancelButton()).toBeVisible();
     await discover.getQueryCancelButton().click();

@@ -6,7 +6,11 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { ALERTZERO_ACTION_WORKFLOW_IDS, ALERTZERO_RULE_WORKFLOW_IDS } from '@kbn/workflows/managed';
+import {
+  ALERTZERO_ACTION_WORKFLOW_IDS,
+  ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS,
+  ALERTZERO_RULE_WORKFLOW_IDS,
+} from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
@@ -27,10 +31,11 @@ export const initializeManagedWorkflows = async ({
   let canReconcile = true;
 
   // AlertZero action catalog entries install alongside the rule workflows:
-  // both are global and static.
+  // all are global and static.
   const globalWorkflowIds = [
     ...ALERTZERO_RULE_WORKFLOW_IDS,
     ...ALERTZERO_ACTION_WORKFLOW_IDS,
+    ...ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS,
   ] as const;
 
   const globalWorkflowInstalls = await Promise.allSettled(

@@ -19,15 +19,18 @@ import type {
   FeedbackChipId,
 } from '@kbn/agent-builder-common';
 import {
+  type ConversationEvent,
   type CurrentUser,
   type Conversation,
   type ConversationAccessControl,
   type ConversationAccessControlEntry,
+  type ConversationAddEventInput,
   CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES,
   CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
   CONVERSATION_SCHEMA_VERSION,
   CONVERSATION_TITLE_MAX_LENGTH,
   ConversationAccessControlMode,
+  EventActorType,
   isConversationAccessControlRole,
   normalizeConversationAccessControl,
   createBadRequestError,
@@ -37,14 +40,20 @@ import {
   createInternalError,
   isAgentNotFoundError,
   isAgentUnavailableError,
+  isAttachmentEvent,
   isConversationNotFoundError,
+  isExecutionTerminalEvent,
 } from '@kbn/agent-builder-common';
-import type { SerializedMetadataValue, MetadataFieldValue } from '@kbn/agent-builder-common';
+import type {
+  ConversationSearchOptions,
+  SerializedMetadataValue,
+  MetadataFieldValue,
+} from '@kbn/agent-builder-common';
 import type {
   ConversationWithPermissions,
+  ConversationWithoutRoundsWithPermissions,
   UpdateConversationAccessControlRequestBody,
 } from '../../../../common/http_api/conversations';
-import type { ConversationSearchOptions } from '../../../../common/conversations';
 import type { AgentRegistry } from '../../agents/agent_registry';
 import {
   buildPinnedFilter,
@@ -57,7 +66,6 @@ import {
   type ConversationAccess,
 } from '../access_control';
 import type {
-  AddAttachmentsToLastRoundRequest,
   AppendEventsRequest,
   ConversationCreateRequest,
   ConversationUpdatableFields,
@@ -66,7 +74,6 @@ import type {
   NormalizedConversation,
   ReplaceRoundEventsRequest,
   ConversationListResult,
-  UpsertRoundRequest,
 } from './types';
 import { createSpaceDslFilter, isDefaultSpace } from '../../../utils/spaces';
 import {
@@ -74,16 +81,17 @@ import {
   MAX_CONVERSATION_SEARCH_PER_PAGE,
   MAX_RESULT_WINDOW,
 } from '../../../../common/constants';
+import { buildConversationIdsFilter } from './build_ids_filter';
 import { isVersionConflictError } from '../../../utils/is_version_conflict_error';
 import type { ConversationProperties, ConversationStorage } from './storage';
 import { conversationIndexName, createStorage } from './storage';
 import { getTemplate } from '../templates/registry';
 import { validateTemplateDefaults, validateMetadataUpdate } from '../templates/validation';
 import { serializeMetadataValue, buildMetadataFromTemplate } from '../templates/serialize';
-import { reconcileAttachments, upsertRound as upsertRoundInList } from './round_writes';
-import { applyAttachmentRefsToRounds } from './migrate_attachments';
+import { reconcileAttachments } from './round_writes';
 import { updateReadBy } from './read_by';
 import { updatePinnedBy } from './pinned_by';
+import { buildSearchSort, compileConversationFilter } from '../search';
 import {
   fromEs,
   fromEsWithoutRounds,
@@ -97,7 +105,12 @@ import {
   updateConversation,
   type Document,
 } from './converters';
-import type { ConversationMetadataPatchedPayload } from '../../../workflows/triggers/conversation_event_bus';
+import type { ScopedConversationEventEmitter } from '../../../workflows/triggers/conversation_event_bus';
+import type { ConversationEventsServiceStart } from '../../conversation_events';
+import {
+  materializeConversationEvents,
+  validateConversationEvents,
+} from '../../conversation_events';
 
 // Note: comparison is order-sensitive for arrays — reordering elements counts as a change.
 // This is intentional: metadata arrays (e.g. ordered checklists) preserve insertion order.
@@ -119,18 +132,14 @@ export interface ConversationClient {
     conversation: ConversationUpdateRequest,
     options?: { access: ConversationAccess; retryOnConflict?: boolean }
   ): Promise<Conversation>;
-  addAttachmentsToLastRound(
-    request: AddAttachmentsToLastRoundRequest,
-    options?: { access: ConversationAccess }
-  ): Promise<Conversation>;
-  upsertRound(
-    request: UpsertRoundRequest,
-    options?: { access: ConversationAccess }
-  ): Promise<Conversation>;
   appendEvents(
     request: AppendEventsRequest,
     options?: { access: ConversationAccess }
   ): Promise<Conversation>;
+  addCustomEvents(request: {
+    id: string;
+    events: ConversationAddEventInput[];
+  }): Promise<ConversationEvent[]>;
   replaceRoundEvents(
     request: ReplaceRoundEventsRequest,
     options?: { access: ConversationAccess }
@@ -143,6 +152,7 @@ export interface ConversationClient {
     feedback: { vote: 'up' | 'down' | null; chips?: FeedbackChipId[]; comment?: string }
   ): Promise<void>;
   list(options?: ConversationListOptions): Promise<ConversationListResult>;
+  bulkGet(ids: string[]): Promise<Map<string, ConversationWithoutRoundsWithPermissions>>;
   search(options: ConversationSearchOptions): Promise<ConversationListResult>;
   delete(conversationId: string): Promise<boolean>;
   updateAccessControl(
@@ -185,6 +195,14 @@ const CONVERSATION_LIST_SOURCE_FIELDS = [
   'template_id',
   'template_version',
   'metadata',
+  'attachments.id',
+  'attachments.type',
+  'attachments.active',
+];
+
+const CONVERSATION_BULK_GET_SOURCE_FIELDS = [
+  ...CONVERSATION_LIST_SOURCE_FIELDS,
+  'parent_conversation',
 ];
 
 /**
@@ -205,14 +223,16 @@ export const createClient = ({
   esClient,
   user,
   agentRegistry,
-  onMetadataPatched,
+  conversationEvents,
+  eventEmitter,
 }: {
   space: string;
   logger: Logger;
   esClient: ElasticsearchClient;
   user: CurrentUser;
   agentRegistry: AgentRegistry;
-  onMetadataPatched?: (payload: ConversationMetadataPatchedPayload) => void;
+  conversationEvents: ConversationEventsServiceStart;
+  eventEmitter?: ScopedConversationEventEmitter;
 }): ConversationClient => {
   const storage = createStorage({ logger, esClient });
   return new ConversationClientImpl({
@@ -221,10 +241,33 @@ export const createClient = ({
     user,
     space,
     agentRegistry,
+    conversationEvents,
     logger,
-    onMetadataPatched,
+    eventEmitter,
   });
 };
+
+/**
+ * Thrown from inside an OCC `fields` callback to turn the write into a no-op: the stored document
+ * is returned as is. Used by the terminal guard of events writes (`skipIfTerminalExistsFor`).
+ */
+const WRITE_SKIPPED = Symbol('conversation write skipped');
+interface WriteSkipped {
+  [WRITE_SKIPPED]: true;
+  current: NormalizedConversation;
+}
+const skipWrite = (current: NormalizedConversation): WriteSkipped => ({
+  [WRITE_SKIPPED]: true,
+  current,
+});
+const isWriteSkipped = (value: unknown): value is WriteSkipped =>
+  typeof value === 'object' && value !== null && WRITE_SKIPPED in value;
+
+/** True when the stored events already end `executionId` with a terminal lifecycle event. */
+const hasTerminalEventFor = (current: NormalizedConversation, executionId: string): boolean =>
+  (current.events ?? []).some(
+    (event) => isExecutionTerminalEvent(event) && event.execution_id === executionId
+  );
 
 class ConversationClientImpl implements ConversationClient {
   private readonly space: string;
@@ -232,8 +275,9 @@ class ConversationClientImpl implements ConversationClient {
   private readonly esClient: ElasticsearchClient;
   private readonly user: CurrentUser;
   private readonly agentRegistry: AgentRegistry;
+  private readonly conversationEvents: ConversationEventsServiceStart;
   private readonly logger: Logger;
-  private readonly onMetadataPatched?: (payload: ConversationMetadataPatchedPayload) => void;
+  private readonly eventEmitter?: ScopedConversationEventEmitter;
 
   constructor({
     storage,
@@ -241,24 +285,48 @@ class ConversationClientImpl implements ConversationClient {
     user,
     space,
     agentRegistry,
+    conversationEvents,
     logger,
-    onMetadataPatched,
+    eventEmitter,
   }: {
     storage: ConversationStorage;
     esClient: ElasticsearchClient;
     user: CurrentUser;
     space: string;
     agentRegistry: AgentRegistry;
+    conversationEvents: ConversationEventsServiceStart;
     logger: Logger;
-    onMetadataPatched?: (payload: ConversationMetadataPatchedPayload) => void;
+    eventEmitter?: ScopedConversationEventEmitter;
   }) {
     this.storage = storage;
     this.esClient = esClient;
     this.user = user;
     this.space = space;
     this.agentRegistry = agentRegistry;
+    this.conversationEvents = conversationEvents;
     this.logger = logger;
-    this.onMetadataPatched = onMetadataPatched;
+    this.eventEmitter = eventEmitter;
+  }
+
+  /**
+   * Notifies the attachment-events listener with the attachment events that were just persisted.
+   * Best-effort: listener failures are logged and never fail the write.
+   */
+  private notifyAttachmentEvents(conversationId: string, writtenEvents: ConversationEvent[]): void {
+    if (!this.eventEmitter) {
+      return;
+    }
+    const attachmentEvents = writtenEvents.filter(isAttachmentEvent);
+    if (attachmentEvents.length === 0) {
+      return;
+    }
+    try {
+      this.eventEmitter.emitAttachmentEvents({ conversationId, events: attachmentEvents });
+    } catch (error) {
+      this.logger.warn(
+        `Failed to notify attachment events for conversation "${conversationId}": ${error}`
+      );
+    }
   }
 
   async list(options: ConversationListOptions = {}): Promise<ConversationListResult> {
@@ -295,15 +363,56 @@ class ConversationClientImpl implements ConversationClient {
     return this.mapListResponse(response);
   }
 
+  async bulkGet(ids: string[]): Promise<Map<string, ConversationWithoutRoundsWithPermissions>> {
+    if (ids.length === 0) {
+      return new Map();
+    }
+
+    const idsFilter = buildConversationIdsFilter(ids);
+
+    const agentIds = await this.resolveAccessibleAgentIds();
+    if (agentIds.length === 0) {
+      return new Map();
+    }
+
+    const response = await this.storage.getClient().search({
+      size: ids.length,
+      track_total_hits: false,
+      seq_no_primary_term: true,
+      _source: CONVERSATION_BULK_GET_SOURCE_FIELDS,
+      query: {
+        bool: {
+          filter: [
+            ...this.buildBaseFilters(agentIds, { includeSubAgentConversations: true }),
+            idsFilter,
+          ],
+        },
+      },
+    });
+
+    const { results } = this.mapListResponse(response);
+
+    return new Map(results.map((conversation) => [conversation.id, conversation]));
+  }
+
   async search(options: ConversationSearchOptions): Promise<ConversationListResult> {
-    const { query, agentId, page = 1, perPage = MAX_CONVERSATION_SEARCH_PER_PAGE } = options;
+    const {
+      query,
+      filter,
+      sort,
+      agentId,
+      page = 1,
+      perPage = MAX_CONVERSATION_SEARCH_PER_PAGE,
+    } = options;
+
+    const compiledFilter = compileConversationFilter(filter);
 
     const agentIds = await this.resolveAccessibleAgentIds(agentId);
     if (agentIds.length === 0) {
       return { results: [], total: 0 };
     }
 
-    const trimmedQuery = query.trim();
+    const trimmedQuery = query?.trim();
     const titleMatch = trimmedQuery
       ? [
           {
@@ -341,17 +450,12 @@ class ConversationClientImpl implements ConversationClient {
       track_total_hits: MAX_RESULT_WINDOW,
       from: (page - 1) * perPage,
       size: perPage,
-      // Relevance first; updated_at/created_at break the frequent _score ties so paging is stable.
-      sort: [
-        { _score: { order: 'desc' } },
-        { updated_at: { order: 'desc' } },
-        { created_at: { order: 'desc' } },
-      ],
+      sort: buildSearchSort({ sort, hasQuery: titleMatch.length > 0 }),
       seq_no_primary_term: true,
       _source: CONVERSATION_LIST_SOURCE_FIELDS,
       query: {
         bool: {
-          filter: this.buildBaseFilters(agentIds),
+          filter: [...this.buildBaseFilters(agentIds), ...(compiledFilter ? [compiledFilter] : [])],
           must: titleMatch,
         },
       },
@@ -376,15 +480,19 @@ class ConversationClientImpl implements ConversationClient {
   }
 
   /**
-   * Filter clauses shared by every conversation list/search query: space scoping, read access,
-   * and hiding sub-agent conversations from the nav list - hardcoded until we need to do better.
+   * Filter clauses shared by every conversation list/search query: space scoping and read access.
    * Query-specific filters (e.g. `pinned`, a title match) are appended by the caller.
    */
-  private buildBaseFilters(agentIds: string[]): QueryDslQueryContainer[] {
+  private buildBaseFilters(
+    agentIds: string[],
+    { includeSubAgentConversations = false }: { includeSubAgentConversations?: boolean } = {}
+  ): QueryDslQueryContainer[] {
     return [
       createSpaceDslFilter(this.space),
       buildReadAccessFilter({ user: this.user, agentIds }),
-      { bool: { must_not: [{ exists: { field: 'parent_conversation' } }] } },
+      ...(includeSubAgentConversations
+        ? []
+        : [{ bool: { must_not: [{ exists: { field: 'parent_conversation' } }] } }]),
     ];
   }
 
@@ -555,6 +663,8 @@ class ConversationClientImpl implements ConversationClient {
       throw error;
     }
 
+    this.notifyAttachmentEvents(id, conversation.events ?? []);
+
     return this.get(id);
   }
 
@@ -575,66 +685,26 @@ class ConversationClientImpl implements ConversationClient {
     return result;
   }
 
-  async addAttachmentsToLastRound(
-    request: AddAttachmentsToLastRoundRequest,
-    options: { access: ConversationAccess } = { access: 'owner' }
-  ): Promise<Conversation> {
-    const { id: conversationId, refs, attachments } = request;
-    const { access } = options;
-
-    const result = await this.writeConversation({
-      conversationId,
-      access,
-      fields: (current) => {
-        if (current.rounds.length === 0) {
-          throw createBadRequestError(`Conversation ${conversationId} has no rounds to attach to`);
-        }
-
-        return {
-          rounds: applyAttachmentRefsToRounds(
-            current.rounds,
-            new Map([[current.rounds.length - 1, refs]])
-          ),
-          attachments: reconcileAttachments({
-            snapshot: attachments.snapshot,
-            stored: current.attachments ?? [],
-            produced: attachments.produced,
-          }),
-        };
-      },
+  async addCustomEvents({
+    id,
+    events: inputs,
+  }: {
+    id: string;
+    events: ConversationAddEventInput[];
+  }): Promise<ConversationEvent[]> {
+    const actor = {
+      type: EventActorType.user,
+      id: this.user.id ?? this.user.username,
+      ...(this.user.username ? { username: this.user.username } : {}),
+    };
+    const validatedEvents = validateConversationEvents(inputs, this.conversationEvents);
+    const materialized = materializeConversationEvents({
+      events: validatedEvents,
+      actor,
+      now: new Date(),
     });
-    return result;
-  }
-
-  async upsertRound(
-    request: UpsertRoundRequest,
-    options: { access: ConversationAccess } = { access: 'converse' }
-  ): Promise<Conversation> {
-    const { id: conversationId, round, replacesRoundId, state, attachments, workspaceId } = request;
-    const { access } = options;
-
-    const result = await this.writeConversation({
-      conversationId,
-      access,
-      fields: (current) => ({
-        rounds: upsertRoundInList(current.rounds, round, replacesRoundId),
-        status: round.status,
-        ...(state ? { state } : {}),
-        ...(attachments
-          ? {
-              attachments: reconcileAttachments({
-                snapshot: attachments.snapshot,
-                stored: current.attachments ?? [],
-                produced: attachments.produced,
-              }),
-            }
-          : {}),
-        ...(workspaceId && !current.workspace_id ? { workspace_id: workspaceId } : {}),
-        read_by: [],
-        read: false,
-      }),
-    });
-    return result;
+    await this.appendEvents({ id, events: materialized });
+    return materialized;
   }
 
   /** Appends timeline events onto a conversation.*/
@@ -642,16 +712,32 @@ class ConversationClientImpl implements ConversationClient {
     request: AppendEventsRequest,
     options: { access: ConversationAccess } = { access: 'converse' }
   ): Promise<Conversation> {
-    const { id: conversationId, events, title, status, state, attachments, workspaceId } = request;
+    const {
+      id: conversationId,
+      events,
+      title,
+      status,
+      state,
+      attachments,
+      workspaceId,
+      skipIfTerminalExistsFor,
+    } = request;
     const { access } = options;
 
-    return this.writeConversation({
+    // `fields` may run more than once on OCC retry; the last run is the one that was written.
+    let writtenEvents: ConversationEvent[] = [];
+
+    const result = await this.writeConversation({
       conversationId,
       access,
       fields: (current) => {
+        if (skipIfTerminalExistsFor && hasTerminalEventFor(current, skipIfTerminalExistsFor)) {
+          throw skipWrite(current);
+        }
         const currentEvents = current.events ?? [];
         const existingIds = new Set(currentEvents.map((event) => event.id));
         const newEvents = events.filter((event) => !existingIds.has(event.id));
+        writtenEvents = newEvents;
         const appended = [...currentEvents, ...newEvents];
         return {
           events: appended,
@@ -665,6 +751,7 @@ class ConversationClientImpl implements ConversationClient {
                   snapshot: attachments.snapshot,
                   stored: current.attachments ?? [],
                   produced: attachments.produced,
+                  storedRounds: current.rounds,
                 }),
               }
             : {}),
@@ -674,6 +761,9 @@ class ConversationClientImpl implements ConversationClient {
         };
       },
     });
+
+    this.notifyAttachmentEvents(result.id, writtenEvents);
+    return result;
   }
 
   async replaceRoundEvents(
@@ -689,17 +779,28 @@ class ConversationClientImpl implements ConversationClient {
       state,
       attachments,
       workspaceId,
+      skipIfTerminalExistsFor,
     } = request;
     const { access } = options;
     const roundPrefix = `${roundId}::`;
 
-    return this.writeConversation({
+    let writtenEvents: ConversationEvent[] = [];
+
+    const result = await this.writeConversation({
       conversationId,
       access,
       fields: (current) => {
+        if (skipIfTerminalExistsFor && hasTerminalEventFor(current, skipIfTerminalExistsFor)) {
+          throw skipWrite(current);
+        }
         const currentEvents = current.events ?? [];
         const nonRoundEvents = currentEvents.filter((event) => !event.id.startsWith(roundPrefix));
-        const replaced = [...nonRoundEvents, ...events];
+        const existingIds = new Set(nonRoundEvents.map((event) => event.id));
+        // Round-derived events for this round were just wiped, so they always pass; additive ids
+        // collide only when a caller re-inserts an existing uuid, which we drop.
+        const eventsToWrite = events.filter((event) => !existingIds.has(event.id));
+        writtenEvents = eventsToWrite;
+        const replaced = [...nonRoundEvents, ...eventsToWrite];
         return {
           events: replaced,
           schema_version: CONVERSATION_SCHEMA_VERSION,
@@ -712,6 +813,7 @@ class ConversationClientImpl implements ConversationClient {
                   snapshot: attachments.snapshot,
                   stored: current.attachments ?? [],
                   produced: attachments.produced,
+                  storedRounds: current.rounds,
                 }),
               }
             : {}),
@@ -721,6 +823,9 @@ class ConversationClientImpl implements ConversationClient {
         };
       },
     });
+
+    this.notifyAttachmentEvents(result.id, writtenEvents);
+    return result;
   }
 
   async markRead(conversationId: string, read: boolean): Promise<Conversation> {
@@ -931,8 +1036,8 @@ class ConversationClientImpl implements ConversationClient {
       },
     });
 
-    if (changedFields.length > 0 && this.onMetadataPatched) {
-      this.onMetadataPatched({
+    if (changedFields.length > 0 && this.eventEmitter) {
+      this.eventEmitter.emitMetadataPatched({
         conversationId: result.id,
         templateId: result.template_id,
         parentId: result.parent_conversation?.id,
@@ -1113,6 +1218,12 @@ class ConversationClientImpl implements ConversationClient {
 
       return toConversationResponse({ conversation: document, resolveTemplate: getTemplate });
     } catch (error) {
+      if (isWriteSkipped(error)) {
+        return toConversationResponse({
+          conversation: error.current,
+          resolveTemplate: getTemplate,
+        });
+      }
       // retries are exhausted
       if (isElasticsearchWriteConflict(error)) {
         this.logger.warn(

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+export { PROPOSAL_ATTACHMENT_TYPE } from './attachment';
+
 export {
   MAX_CHARTS_SUMMARY_BUCKETS,
   PROPOSALS_INDEX_NAME,
@@ -26,16 +28,17 @@ export type { ActionMetadata } from '@kbn/workflows';
 
 export {
   approveProposalRequestSchema,
+  boundedActionInput,
   createProposalRequestSchema,
   dismissProposalRequestSchema,
   dismissReasonSchema,
-  isDecided,
+  isAwaitingDecision,
   isExpired,
   listProposalsQuerySchema,
-  MAX_PROPOSALS_SIZE,
-  proposalsQuerySchema,
+  proposalFiltersSchema,
   proposalCategorySchema,
   proposalConfidenceSchema,
+  proposalDecisionSchema,
   proposalImpactSchema,
   proposalOriginSchema,
   proposalSchema,
@@ -49,14 +52,13 @@ export type {
   CreateProposalRequest,
   DismissProposalRequest,
   DismissReason,
-  ListByWindowQuery,
   ListProposalsQuery,
   ListProposalsResponse,
   Proposal,
-  ProposalsQuery,
-  ProposalsListResponse,
   ProposalCategory,
   ProposalConfidence,
+  ProposalDecision,
+  ProposalFilters,
   ProposalImpact,
   ProposalOrigin,
   ProposalChartsSummaryBucket,
