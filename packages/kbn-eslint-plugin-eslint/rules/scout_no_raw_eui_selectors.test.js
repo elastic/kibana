@@ -35,9 +35,9 @@ const ruleTester = new RuleTester({
 });
 
 const pill =
-  '`.euiComboBoxPill` is an internal of EuiComboBox. Use the EuiComboBoxObject Component Object from @elastic/eui-test-helpers (page.components in Scout). If no method covers your case, build the locator from the exported EuiComboBoxSelectors constants instead.';
+  '`.euiComboBoxPill` is an internal of EuiComboBox. Use the EuiComboBoxObject Component Object via page.components. If no method covers your case, build the locator from `euiSelectors` exported by @kbn/scout instead of a raw class.';
 const row =
-  '`.euiDataGridRow` is an internal of EuiDataGrid. Use the EuiDataGridObject Component Object from @elastic/eui-test-helpers (page.components in Scout). If no method covers your case, build the locator from the exported EuiDataGridSelectors constants instead.';
+  '`.euiDataGridRow` is an internal of EuiDataGrid. Use the EuiDataGridObject Component Object via page.components. If no method covers your case, build the locator from `euiSelectors` exported by @kbn/scout instead of a raw class.';
 
 describe('loadEuiSelectors', () => {
   it('collects only string *_SELECTOR entries that are EUI classes', () => {
@@ -62,8 +62,8 @@ ruleTester.run('@kbn/eslint/scout_no_raw_eui_selectors', rule, {
     // a class with no Component Object is not a violation
     { code: `page.locator('.euiFlyoutFooter');` },
     // the escape hatch: a locator built from the exported constants is not a literal
-    { code: 'page.locator(`${EuiDataGridSelectors.ROW_SELECTOR} input:checked`);' },
-    { code: `page.locator(EuiComboBoxSelectors.PILL_SELECTOR);` },
+    { code: 'page.locator(`${euiSelectors.dataGrid.ROW_SELECTOR} input:checked`);' },
+    { code: `page.locator(euiSelectors.comboBox.PILL_SELECTOR);` },
   ],
 
   invalid: [
