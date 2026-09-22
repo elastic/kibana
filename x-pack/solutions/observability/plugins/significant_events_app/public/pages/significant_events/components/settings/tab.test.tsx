@@ -244,6 +244,40 @@ describe('SettingsTab developer mode', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('preserves a dirty YAML draft when developer-mode disable rolls back after a failed save', () => {
+    const { rerender } = setup({ isDeveloperMode: true });
+
+    fireEvent.change(screen.getByTestId('streams-settings-tuning-editor'), {
+      target: { value: 'sample_size: 99' },
+    });
+
+    // Simulate optimistic update: isDeveloperMode goes false while save is in flight
+    mockUseDeveloperMode.mockReturnValue({
+      isDeveloperMode: false,
+      isSaving: true,
+      setDeveloperMode,
+    });
+    rerender(
+      <I18nProvider>
+        <SettingsTab />
+      </I18nProvider>
+    );
+
+    // Simulate rollback: save failed, isDeveloperMode reverts to true
+    mockUseDeveloperMode.mockReturnValue({
+      isDeveloperMode: true,
+      isSaving: false,
+      setDeveloperMode,
+    });
+    rerender(
+      <I18nProvider>
+        <SettingsTab />
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('streams-settings-tuning-editor')).toHaveValue('sample_size: 99');
+  });
+
   it('hides the tuning panel and disables save while developer mode is saving', () => {
     const { rerender } = setup({ isDeveloperMode: true });
 

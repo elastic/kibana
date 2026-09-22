@@ -182,11 +182,11 @@ export function SettingsTab() {
   const [savedConfigYamlState, setSavedConfigYamlState] = useState<string>(savedConfigYaml);
 
   useEffect(() => {
-    if (!isDeveloperMode) {
+    if (!isDeveloperMode && !isDeveloperModeSaving) {
       setDraftConfigYaml(savedConfigYamlState);
       setParsedTuningConfig(null);
     }
-  }, [isDeveloperMode, savedConfigYamlState]);
+  }, [isDeveloperMode, isDeveloperModeSaving, savedConfigYamlState]);
 
   const [isSaving, setIsSaving] = useState(false);
   const [isConfirmingZeroMatch, setIsConfirmingZeroMatch] = useState(false);
@@ -845,7 +845,7 @@ export function SettingsTab() {
             <EuiFlexItem grow={2}>
               <EuiText color="subdued" size="s">
                 {i18n.translate('xpack.significantEventsApp.settings.developerModeHelpText', {
-                  defaultMessage: 'Show extra details and configurations options for expert users.',
+                  defaultMessage: 'Show extra details and configuration options for expert users.',
                 })}
               </EuiText>
             </EuiFlexItem>
