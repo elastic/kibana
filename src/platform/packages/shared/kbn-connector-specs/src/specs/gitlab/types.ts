@@ -809,7 +809,7 @@ export const ListDeploymentsInputSchema = lazySchema(() =>
       .optional()
       .describe('Only deployments to this environment name, e.g. "production".'),
     status: z
-      .enum(['created', 'running', 'success', 'failed', 'canceled', 'skipped', 'blocked'])
+      .enum(['created', 'running', 'success', 'failed', 'canceled', 'blocked'])
       .optional()
       .describe('Only deployments with this status.'),
     updatedAfter: isoDateField('Only deployments updated on or after this time'),
@@ -817,7 +817,10 @@ export const ListDeploymentsInputSchema = lazySchema(() =>
       .enum(['id', 'iid', 'created_at', 'updated_at', 'finished_at'])
       .optional()
       .describe('Field to order by (default "id").'),
-    sort: sortOrderField(),
+    sort: z
+      .enum(['asc', 'desc'])
+      .optional()
+      .describe('Sort direction: "asc" or "desc" (default "asc").'),
     page: pageField(),
     perPage: perPageField(),
   })
