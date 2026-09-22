@@ -277,6 +277,7 @@ dependsOn:
   - '@kbn/agent-builder-browser'
   - '@kbn/mitre-attack-plugin'
   - '@kbn/security-mitre-attack-common'
+  - '@kbn/security-mitre-attack-server'
   - '@kbn/lazy-object'
   - '@kbn/ai-assistant-common'
   - '@kbn/product-doc-common'
