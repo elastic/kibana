@@ -8,8 +8,15 @@
 import Path from 'path';
 import { createPlaywrightEvalsConfig } from '@kbn/evals';
 
+const selection = process.env.NIGHTSHIFT_DATASETS ?? 'synthetic-smoke';
+if (!['all', 'synthetic-smoke', 'trace-only'].includes(selection)) {
+  throw new Error(
+    `Unknown NIGHTSHIFT_DATASETS: ${selection}. Choose synthetic-smoke or trace-only.`
+  );
+}
+
 export default createPlaywrightEvalsConfig({
   testDir: Path.resolve(__dirname, './evals'),
-  // Restoring and reindexing a snapshot dominates the runtime of every spec here.
-  timeout: 10 * 60_000,
+  timeout: selection === 'trace-only' ? 45 * 60_000 : 10 * 60_000,
+  testIgnore: selection === 'trace-only' ? '**/smoke/**' : '**/investigation/**',
 });
