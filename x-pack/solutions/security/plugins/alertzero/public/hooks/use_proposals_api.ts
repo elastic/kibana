@@ -18,6 +18,13 @@ import type { ProposalsPageResponse } from '../../common/proposals/list';
 import { MAX_QUEUE_REACH } from '../../common/proposals/list';
 import { queryKeys } from '../query_keys';
 
+/**
+ * Workers add proposals on their own cadence, so the queue polls rather than waiting
+ * for a decision to invalidate it. React Query does not poll a disabled query, so a
+ * collapsed section refreshes only its count.
+ */
+export const PROPOSALS_POLL_INTERVAL_MS = 60_000;
+
 const categoryPath = (category: string) =>
   ALERTZERO_PROPOSALS_CATEGORY_URL.replace('{category}', encodeURIComponent(category));
 
@@ -52,6 +59,7 @@ const useProposalsCount = (
         version: API_VERSIONS.internal.v1,
         query: { size: 0, from: 0 },
       }),
+    refetchInterval: PROPOSALS_POLL_INTERVAL_MS,
     retry: retryOnTransientError,
   });
 };
@@ -75,6 +83,9 @@ const useProposalsPages = (
     },
     getNextPageParam: nextOffset,
     enabled,
+    // A poll refetches every page already loaded, so the rows on screen all refresh
+    // rather than the list snapping back to its first page.
+    refetchInterval: PROPOSALS_POLL_INTERVAL_MS,
     retry: retryOnTransientError,
   });
 };

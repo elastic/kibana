@@ -1,0 +1,139 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { renderHook, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import {
+  PROPOSALS_POLL_INTERVAL_MS,
+  useClosedProposals,
+  useClosedProposalsCount,
+  useProposalsByCategory,
+} from './use_proposals_api';
+
+jest.mock('@kbn/kibana-react-plugin/public', () => ({ useKibana: jest.fn() }));
+
+const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
+
+const createWrapper = () => {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+    logger: { log: () => null, warn: () => null, error: () => null },
+  });
+  const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) =>
+    React.createElement(QueryClientProvider, { client: queryClient }, children);
+  return Wrapper;
+};
+
+const page = (rows: number, total: number) => ({
+  proposals: Array.from({ length: rows }, (_, i) => ({ id: `prop-${i}` })),
+  total,
+});
+
+let http: { get: jest.Mock };
+
+beforeEach(() => {
+  http = { get: jest.fn() };
+  useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<typeof useKibana>);
+});
+
+const queryOf = (call: number) => http.get.mock.calls[call][1].query;
+
+describe('useProposalsByCategory', () => {
+  it('asks for the first page at the size the caller opened with', async () => {
+    http.get.mockResolvedValue(page(10, 30));
+
+    const { result } = renderHook(
+      () => useProposalsByCategory('respond', { firstPageSize: 10, step: 10, enabled: true }),
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(queryOf(0)).toEqual({ from: 0, size: 10 });
+  });
+
+  it('steps later pages by the step size, from the rows already loaded', async () => {
+    http.get.mockResolvedValue(page(10, 30));
+
+    const { result } = renderHook(
+      () => useProposalsByCategory('respond', { firstPageSize: 10, step: 10, enabled: true }),
+      { wrapper: createWrapper() }
+    );
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    void result.current.fetchNextPage();
+
+    // Offset is the accumulated row count, which is what lets the first page be a
+    // different size from the rest.
+    await waitFor(() => expect(http.get).toHaveBeenCalledTimes(2));
+    expect(queryOf(1)).toEqual({ from: 10, size: 10 });
+  });
+
+  it('stops offering pages once the bucket is exhausted', async () => {
+    http.get.mockResolvedValue(page(10, 10));
+
+    const { result } = renderHook(
+      () => useProposalsByCategory('respond', { firstPageSize: 10, step: 10, enabled: true }),
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.hasNextPage).toBe(false);
+  });
+
+  it('issues no request while the section is collapsed', () => {
+    renderHook(
+      () => useProposalsByCategory('respond', { firstPageSize: 10, step: 10, enabled: false }),
+      { wrapper: createWrapper() }
+    );
+
+    expect(http.get).not.toHaveBeenCalled();
+  });
+
+  it('polls, so a worker adding a proposal shows up without a reload', async () => {
+    jest.useFakeTimers();
+    http.get.mockResolvedValue(page(10, 30));
+
+    const { result } = renderHook(
+      () => useProposalsByCategory('respond', { firstPageSize: 10, step: 10, enabled: true }),
+      { wrapper: createWrapper() }
+    );
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    jest.advanceTimersByTime(PROPOSALS_POLL_INTERVAL_MS);
+
+    await waitFor(() => expect(http.get).toHaveBeenCalledTimes(2));
+    jest.useRealTimers();
+  });
+});
+
+describe('useClosedProposals', () => {
+  it('opens at its own larger first page', async () => {
+    http.get.mockResolvedValue(page(25, 60));
+
+    const { result } = renderHook(
+      () => useClosedProposals({ firstPageSize: 25, step: 10, enabled: true }),
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(queryOf(0)).toEqual({ from: 0, size: 25 });
+  });
+});
+
+describe('useClosedProposalsCount', () => {
+  it('reads the total without any rows', async () => {
+    http.get.mockResolvedValue(page(0, 42));
+
+    const { result } = renderHook(() => useClosedProposalsCount(), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(queryOf(0)).toEqual({ from: 0, size: 0 });
+    expect(result.current.data?.total).toBe(42);
+  });
+});
