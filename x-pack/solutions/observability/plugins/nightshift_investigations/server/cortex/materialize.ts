@@ -118,5 +118,11 @@ export const materializeCortex = async ({
     { path: `${CORTEX_WORKSPACE_ROOT}/INDEX.md`, content: Buffer.from(renderIndex(pages), 'utf8') },
   ]);
 
-  logger.info(`Materialized ${fullPages.length} Cortex page(s) into sandbox`);
+  logger.info(
+    fullPages.length > 0
+      ? `Materialized ${fullPages.length} Cortex page(s) into sandbox: ${fullPages
+          .map((page) => page.id)
+          .join(', ')}`
+      : 'Materialized 0 Cortex page(s) into sandbox — store.list returned no live pages'
+  );
 };

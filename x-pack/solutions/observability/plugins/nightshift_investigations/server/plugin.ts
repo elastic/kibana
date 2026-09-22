@@ -35,6 +35,7 @@ import { isInvestigationAvailable } from './is_investigation_available';
 import { ensureInvestigationAgentStepDefinition } from './step_definitions/ensure_investigation_agent';
 import { triggerInvestigationStepDefinition } from './step_definitions/trigger_investigation';
 import { obtainSandboxStepDefinition } from './step_definitions/obtain_sandbox';
+import { composeHydrateNotificationsStepDefinition } from './step_definitions/compose_hydrate_notifications';
 import { cortexHydrateStepDefinition } from './step_definitions/cortex_hydrate';
 import { memoryMaterializeToSandboxStepDefinition } from './step_definitions/memory_materialize_to_sandbox';
 import { cortexOptimizeStepDefinition } from './step_definitions/cortex_optimize';
@@ -44,7 +45,7 @@ import { memoryOptimizeStepDefinition } from './step_definitions/memory_optimize
 import { createCortexStore, registerCortexAiIndex } from './cortex/register_cortex';
 import { createDecisionTreeStore } from './decision_trees/store';
 import { registerDecisionTreeAiIndex } from './decision_trees/register_decision_trees';
-import { registerMemoryAiIndex, createMemoryStore } from './memory/register_memory';
+import { ensureMemoryIndex } from './memory/ensure_memory_index';
 import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/emit';
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import { registerInvestigationAgentType } from './agents/investigation';
@@ -92,7 +93,6 @@ export class NightshiftInvestigationsPlugin
   private sandboxStart?: NightshiftInvestigationsStartDeps['sandbox'];
   private searchInferenceEndpoints?: NightshiftInvestigationsStartDeps['searchInferenceEndpoints'];
   private ruleRegistry?: NightshiftInvestigationsStartDeps['ruleRegistry'];
-  private inference?: NightshiftInvestigationsStartDeps['inference'];
   private elasticsearch?: ElasticsearchServiceStart;
   private savedObjects?: CoreStart['savedObjects'];
   private featureFlags?: CoreStart['featureFlags'];
@@ -120,9 +120,6 @@ export class NightshiftInvestigationsPlugin
     this.memoryEnabled = this.ctx.config.get().memory.enabled;
     if (this.cortexEnabled) {
       registerCortexAiIndex(plugins.contextEngine, this.logger.get('cortex'));
-    }
-    if (this.memoryEnabled) {
-      registerMemoryAiIndex(plugins.contextEngine, this.logger.get('memory'));
     }
 
     // Decision trees are edited in the sandbox and read the Cortex investigator context, so the
@@ -277,17 +274,18 @@ export class NightshiftInvestigationsPlugin
           })
         );
         plugins.workflowsExtensions.registerStepDefinition(
+          composeHydrateNotificationsStepDefinition()
+        );
+        plugins.workflowsExtensions.registerStepDefinition(
           cortexOptimizeStepDefinition({
-            getInference: () => this.inference,
-            getSearchInferenceEndpoints: () => this.searchInferenceEndpoints,
+            getAgentBuilder: () => this.agentBuilder,
             logger: this.logger.get('cortex'),
             isEnabled: () => this.cortexEnabled,
           })
         );
         plugins.workflowsExtensions.registerStepDefinition(
           memoryOptimizeStepDefinition({
-            getInference: () => this.inference,
-            getSearchInferenceEndpoints: () => this.searchInferenceEndpoints,
+            getAgentBuilder: () => this.agentBuilder,
             getSandboxStart: () => this.sandboxStart,
             logger: this.logger.get('memory'),
             isEnabled: () => this.memoryEnabled,
@@ -374,12 +372,20 @@ export class NightshiftInvestigationsPlugin
     this.sandboxStart = plugins.sandbox;
     this.searchInferenceEndpoints = plugins.searchInferenceEndpoints;
     this.ruleRegistry = plugins.ruleRegistry;
-    this.inference = plugins.inference;
     this.elasticsearch = coreStart.elasticsearch;
     this.savedObjects = coreStart.savedObjects;
     this.featureFlags = coreStart.featureFlags;
     this.actionsStart = plugins.actions;
     this.security = coreStart.security;
+
+    if (this.memoryEnabled) {
+      void ensureMemoryIndex({
+        esClient: coreStart.elasticsearch.client.asInternalUser,
+        logger: this.logger.get('memory'),
+      }).catch((err) => {
+        this.logger.error(`Failed to ensure Semantic Memory index: ${err.message}`);
+      });
+    }
 
     // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
     // agent exists wherever an investigation runs. This narrower install exists so the agent is

@@ -7,26 +7,35 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
-  MEMORY_AI_INDEX_DEST,
+  MEMORY_INDEX,
+  type MemoryArchiveReason,
   type StoredMemoryPage,
   type StoredMemoryStatus,
   type MemoryPage,
   type MemoryStats,
 } from '../../common/memory';
+import { formatPageRefs, previewText } from './log_format';
 import { applyUpdates, displayTelemetry, type CounterState, type CounterUpdate } from './ranking';
 
 const MAX_LIST_SIZE = 500;
 const MEMORY_TAG = 'memory';
-const SPACE_ID_FIELD = 'attributes.space_id';
+const AGENT_ID_FIELD = 'attributes.agent_id';
 
 export type { CounterUpdate };
+
+export type MemoryRetrieveMatch = 'context' | 'content';
 
 export interface MemoryPageStore {
   list: (options?: { status?: StoredMemoryStatus }) => Promise<{
     pages: MemoryPage[];
     stats: MemoryStats;
   }>;
-  retrieve: (options?: { query?: string; size?: number }) => Promise<MemoryPage[]>;
+  retrieve: (options?: {
+    query?: string;
+    size?: number;
+    /** Task recall uses `context` (default). Duplicate-detection uses `content`. */
+    match?: MemoryRetrieveMatch;
+  }) => Promise<MemoryPage[]>;
   get: (id: string) => Promise<MemoryPage | undefined>;
   getByName: (name: string) => Promise<MemoryPage | undefined>;
   upsert: (page: {
@@ -34,10 +43,14 @@ export interface MemoryPageStore {
     title: string;
     description?: string;
     content: string;
+    context?: string;
     tags: string[];
     categories: string[];
     references: string[];
     status: StoredMemoryStatus;
+    source?: string;
+    merged_from?: string[];
+    archive_reason?: MemoryArchiveReason;
     telemetry?: {
       impressions: number;
       conversions: number;
@@ -46,7 +59,7 @@ export interface MemoryPageStore {
     user: string;
   }) => Promise<MemoryPage>;
   applyCounterUpdates: (updates: readonly CounterUpdate[]) => Promise<void>;
-  archive: (id: string) => Promise<MemoryPage | undefined>;
+  archive: (id: string, reason: MemoryArchiveReason) => Promise<MemoryPage | undefined>;
   delete: (id: string) => Promise<void>;
   pruneDuplicates: () => Promise<number>;
 }
@@ -133,9 +146,13 @@ const toPage = (id: string, source: StoredMemoryPage): MemoryPage | undefined =>
     title: source.title,
     description: source.description,
     content: source.content ?? '',
+    context: source.context,
     tags: source.tags ?? [],
     status,
-    space_id: source.attributes?.space_id ?? 'default',
+    agent_id: source.attributes?.agent_id ?? '',
+    source: source.attributes?.source,
+    merged_from: source.attributes?.merged_from,
+    archive_reason: source.attributes?.archive_reason,
     categories: source.attributes?.categories ?? [],
     references: source.attributes?.references ?? [],
     created_at: source.attributes?.created_at ?? source['@timestamp'] ?? new Date().toISOString(),
@@ -154,13 +171,13 @@ const toPage = (id: string, source: StoredMemoryPage): MemoryPage | undefined =>
 export const createMemoryPageStore = ({
   esClient,
   logger,
-  spaceId,
+  agentId,
   signal,
   now = () => Date.now() / 1000,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
-  spaceId: string;
+  agentId: string;
   signal?: AbortSignal;
   now?: () => number;
 }): MemoryPageStore => {
@@ -171,18 +188,20 @@ export const createMemoryPageStore = ({
     return message.includes('index_not_found_exception');
   };
 
-  const toStoredId = (pageId: string): string => `${spaceId}:${pageId}`;
-  const toPageId = (storedId: string): string =>
-    storedId.startsWith(`${spaceId}:`) ? storedId.slice(spaceId.length + 1) : storedId;
+  const idPrefix = `${agentId}:`;
+  const toStoredId = (pageId: string): string => `${idPrefix}${pageId}`;
+  /** Drops leftover `default:` (and any other agent) ids. No migration. */
+  const toPageId = (storedId: string): string | undefined =>
+    storedId.startsWith(idPrefix) ? storedId.slice(idPrefix.length) : undefined;
 
   const listAll = async (): Promise<MemoryPage[]> => {
     try {
       const response = await esClient.search<StoredMemoryPage>(
         {
-          index: MEMORY_AI_INDEX_DEST,
+          index: MEMORY_INDEX,
           query: {
             bool: {
-              filter: [{ term: { tags: MEMORY_TAG } }, { term: { [SPACE_ID_FIELD]: spaceId } }],
+              filter: [{ term: { tags: MEMORY_TAG } }, { term: { [AGENT_ID_FIELD]: agentId } }],
             },
           },
           size: MAX_LIST_SIZE,
@@ -193,7 +212,9 @@ export const createMemoryPageStore = ({
 
       return response.hits.hits.flatMap((hit) => {
         if (!hit._id || !hit._source) return [];
-        const page = toPage(toPageId(hit._id), hit._source);
+        const pageId = toPageId(hit._id);
+        if (!pageId) return [];
+        const page = toPage(pageId, hit._source);
         return page ? [page] : [];
       });
     } catch (err) {
@@ -213,67 +234,159 @@ export const createMemoryPageStore = ({
       });
 
       const nowSec = now();
-      let decayed_impressions = 0;
-      let decayed_conversions = 0;
+      let decayedImpressions = 0;
+      let decayedConversions = 0;
       for (const page of filtered) {
         const display = toMemoryDisplayTelemetry(page, nowSec);
-        decayed_impressions += display.impressions;
-        decayed_conversions += display.conversions;
+        decayedImpressions += display.impressions;
+        decayedConversions += display.conversions;
       }
 
       return {
         pages: filtered,
         stats: {
           total: filtered.length,
-          decayed_impressions,
-          decayed_conversions,
+          decayed_impressions: decayedImpressions,
+          decayed_conversions: decayedConversions,
         },
       };
     },
 
-    async retrieve({ query, size } = {}) {
+    async retrieve({ query, size, match = 'context' } = {}) {
       const trimmed = query?.trim();
       const isSearch = trimmed !== undefined && trimmed.length > 0;
       const pageSize = size ?? (isSearch ? 50 : 150);
+      const agentAndTagFilter = [
+        { term: { tags: MEMORY_TAG } },
+        { term: { [AGENT_ID_FIELD]: agentId } },
+      ];
+      const notArchived = { term: { 'attributes.status': 'archived' } };
+      logger.debug(
+        `Memory retrieve start match=${match} search=${isSearch} size=${pageSize} ` +
+          `agent=${agentId} query=${JSON.stringify(previewText(trimmed))}`
+      );
 
-      try {
-        const response = await esClient.search<StoredMemoryPage>(
-          {
-            index: MEMORY_AI_INDEX_DEST,
-            query: {
-              bool: {
-                filter: [{ term: { tags: MEMORY_TAG } }, { term: { [SPACE_ID_FIELD]: spaceId } }],
-                must_not: [{ term: { 'attributes.status': 'archived' } }],
-                ...(isSearch
-                  ? {
-                      must: [
-                        {
-                          bool: {
-                            should: [
-                              { match: { title: trimmed } },
-                              { match: { content: trimmed } },
-                            ],
-                            minimum_should_match: 1,
-                          },
-                        },
-                      ],
-                    }
-                  : {}),
-              },
-            },
-            size: pageSize,
-            ...(isSearch ? {} : { sort: [{ '@timestamp': { order: 'desc' as const } }] }),
-          },
-          { signal }
-        );
-
-        return response.hits.hits.flatMap((hit) => {
+      const hitsToPages = (
+        hits: Array<{ _id?: string; _source?: StoredMemoryPage }>
+      ): MemoryPage[] =>
+        hits.flatMap((hit) => {
           if (!hit._id || !hit._source) return [];
-          const page = toPage(toPageId(hit._id), hit._source);
+          const pageId = toPageId(hit._id);
+          if (!pageId) return [];
+          const page = toPage(pageId, hit._source);
           return page ? [page] : [];
         });
+
+      const searchWithQuery = async (queryText: string) => {
+        if (match === 'content') {
+          const response = await esClient.search<StoredMemoryPage>(
+            {
+              index: MEMORY_INDEX,
+              query: {
+                bool: {
+                  filter: agentAndTagFilter,
+                  must_not: [notArchived],
+                  must: [
+                    {
+                      bool: {
+                        should: [
+                          { match: { title: queryText } },
+                          { match: { content: queryText } },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  ],
+                },
+              },
+              size: pageSize,
+            },
+            { signal }
+          );
+          return hitsToPages(response.hits.hits);
+        }
+
+        try {
+          const response = await esClient.search<StoredMemoryPage>(
+            {
+              index: MEMORY_INDEX,
+              size: pageSize,
+              retriever: {
+                rrf: {
+                  retrievers: [
+                    { standard: { query: { match: { context: queryText } } } },
+                    { standard: { query: { match: { 'context.semantic': queryText } } } },
+                  ],
+                  filter: {
+                    bool: {
+                      filter: agentAndTagFilter,
+                      must_not: [notArchived],
+                    },
+                  },
+                  rank_window_size: pageSize,
+                },
+              },
+            },
+            { signal }
+          );
+          return hitsToPages(response.hits.hits);
+        } catch (err) {
+          if (isIndexNotFoundError(err)) {
+            return [];
+          }
+          logger.warn(
+            `Memory context hybrid retrieve failed, falling back to BM25: ${
+              err instanceof Error ? err.message : String(err)
+            }`
+          );
+          const response = await esClient.search<StoredMemoryPage>(
+            {
+              index: MEMORY_INDEX,
+              query: {
+                bool: {
+                  filter: agentAndTagFilter,
+                  must_not: [notArchived],
+                  must: [{ match: { context: queryText } }],
+                },
+              },
+              size: pageSize,
+            },
+            { signal }
+          );
+          return hitsToPages(response.hits.hits);
+        }
+      };
+
+      try {
+        let pages: MemoryPage[];
+        if (!isSearch || trimmed === undefined) {
+          const response = await esClient.search<StoredMemoryPage>(
+            {
+              index: MEMORY_INDEX,
+              query: {
+                bool: {
+                  filter: agentAndTagFilter,
+                  must_not: [notArchived],
+                },
+              },
+              size: pageSize,
+              sort: [{ '@timestamp': { order: 'desc' as const } }],
+            },
+            { signal }
+          );
+          pages = hitsToPages(response.hits.hits);
+        } else {
+          pages = await searchWithQuery(trimmed);
+        }
+        logger.debug(
+          `Memory retrieve done match=${match} hits=${pages.length}: ${formatPageRefs(pages)}`
+        );
+        return pages;
       } catch (err) {
-        if (isIndexNotFoundError(err)) return [];
+        if (isIndexNotFoundError(err)) {
+          logger.debug(`Memory retrieve index ${MEMORY_INDEX} missing — returning 0 hits`);
+          return [];
+        }
         throw err;
       }
     },
@@ -283,7 +396,7 @@ export const createMemoryPageStore = ({
       try {
         const response = await esClient.get<StoredMemoryPage>(
           {
-            index: MEMORY_AI_INDEX_DEST,
+            index: MEMORY_INDEX,
             id: storedId,
           },
           { signal }
@@ -318,13 +431,16 @@ export const createMemoryPageStore = ({
         title: page.title,
         description: page.description,
         content: page.content,
+        context: page.context ?? existing?.context,
         tags: memoryTags(page.tags),
-        search_embedding: `${page.title}\n\n${page.content}`,
         attributes: {
           status: page.status,
           slug: page.slug,
-          space_id: spaceId,
+          agent_id: agentId,
           categories: page.categories,
+          ...(page.source !== undefined ? { source: page.source } : {}),
+          ...(page.merged_from !== undefined ? { merged_from: page.merged_from } : {}),
+          ...(page.archive_reason !== undefined ? { archive_reason: page.archive_reason } : {}),
           references: page.references,
           created_at: existing?.created_at ?? nowIso,
           updated_at: nowIso,
@@ -341,7 +457,7 @@ export const createMemoryPageStore = ({
 
       await esClient.index(
         {
-          index: MEMORY_AI_INDEX_DEST,
+          index: MEMORY_INDEX,
           id: storedId,
           document,
           refresh: 'wait_for',
@@ -372,7 +488,7 @@ export const createMemoryPageStore = ({
       try {
         const response = await esClient.mget<StoredMemoryPage>(
           {
-            index: MEMORY_AI_INDEX_DEST,
+            index: MEMORY_INDEX,
             ids: storedIds,
           },
           { signal }
@@ -390,7 +506,11 @@ export const createMemoryPageStore = ({
         if (!doc._id || doc.found === false || !doc._source) {
           continue;
         }
-        sourceByPageId.set(toPageId(doc._id), doc._source);
+        const pageId = toPageId(doc._id);
+        if (!pageId) {
+          continue;
+        }
+        sourceByPageId.set(pageId, doc._source);
       }
 
       const nowSec = now();
@@ -400,7 +520,7 @@ export const createMemoryPageStore = ({
       for (const id of uniqueIds) {
         const source = sourceByPageId.get(id);
         const page = source ? toPage(id, source) : undefined;
-        if (!page || page.status === 'archived') {
+        if (!source || !page || page.status === 'archived') {
           continue;
         }
         current[id] = toCounterState(page.telemetry);
@@ -428,10 +548,11 @@ export const createMemoryPageStore = ({
             last_impression_time: epochSecondsToIso(counter.lastTime),
           },
         };
-        operations.push({ index: { _index: MEMORY_AI_INDEX_DEST, _id: toStoredId(id) } }, document);
+        operations.push({ index: { _index: MEMORY_INDEX, _id: toStoredId(id) } }, document);
       }
 
       if (operations.length === 0) {
+        logger.debug('Memory counter bulk update skipped — no writable pages');
         return;
       }
 
@@ -442,12 +563,25 @@ export const createMemoryPageStore = ({
         },
         { signal }
       );
+      logger.debug(
+        `Memory counter bulk update wrote ${sourcesToWrite.length} doc(s): ` +
+          sourcesToWrite
+            .map((row) => {
+              const counter = next[row.id];
+              return counter
+                ? `${row.id} imp=${counter.impressions.toFixed(
+                    3
+                  )} conv=${counter.conversions.toFixed(3)}`
+                : row.id;
+            })
+            .join(', ')
+      );
       if (bulk.errors) {
         logger.warn('Memory counter bulk update reported item errors');
       }
     },
 
-    async archive(id) {
+    async archive(id, reason) {
       const existing = await this.get(id);
       if (!existing || existing.status === 'archived') {
         return undefined;
@@ -458,10 +592,14 @@ export const createMemoryPageStore = ({
         title: existing.title,
         description: existing.description,
         content: existing.content,
+        context: existing.context,
         tags: existing.tags,
         categories: existing.categories,
         references: existing.references,
         status: 'archived',
+        source: existing.source,
+        merged_from: existing.merged_from,
+        archive_reason: reason,
         telemetry: existing.telemetry,
         user: existing.updated_by,
       });
@@ -472,7 +610,7 @@ export const createMemoryPageStore = ({
       try {
         await esClient.delete(
           {
-            index: MEMORY_AI_INDEX_DEST,
+            index: MEMORY_INDEX,
             id: storedId,
             refresh: 'wait_for',
           },

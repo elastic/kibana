@@ -9,10 +9,10 @@ import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { Logger } from '@kbn/core/server';
-import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { SandboxPluginStart, SandboxSession } from '@kbn/sandbox-plugin/server';
 import { runMemoryOptimize } from '../memory/register_memory';
+import { teeWorkflowLogger } from '../lib/tee_workflow_logger';
 import { unscopeConversationId } from '../tools/sandbox_bash/tool_utils';
 import { withTimeout } from './with_timeout';
 
@@ -25,14 +25,12 @@ const MAX_ROUND_TEXT_LENGTH = 65_536;
 const OPTIMIZE_TIMEOUT_MS = 120_000;
 
 export const memoryOptimizeStepDefinition = ({
-  getInference,
-  getSearchInferenceEndpoints,
+  getAgentBuilder,
   getSandboxStart,
   logger,
   isEnabled,
 }: {
-  getInference: () => InferenceServerStart | undefined;
-  getSearchInferenceEndpoints: () => SearchInferenceEndpointsPluginStart | undefined;
+  getAgentBuilder: () => AgentBuilderPluginStart | undefined;
   getSandboxStart: () => SandboxPluginStart | undefined;
   logger: Logger;
   isEnabled?: () => boolean;
@@ -43,7 +41,7 @@ export const memoryOptimizeStepDefinition = ({
     category: StepCategory.Ai,
     description:
       'Labels recalled Semantic Memory pages from a completed investigation round and ' +
-      'extracts durable customer-environment facts into the AI index. Reads ' +
+      'extracts durable customer-environment facts into the Semantic Memory index. Reads ' +
       '/workspace/memories/.recalled.json from the sandbox_id hydrate wrote.',
     inputSchema: z.object({
       prompt: z
@@ -63,6 +61,11 @@ export const memoryOptimizeStepDefinition = ({
           'Workspace key from nightshift.obtainSandbox. Already space-scoped. ' +
             'Omit when there is no conversation sandbox.'
         ),
+      connector_id: z
+        .string()
+        .max(1024)
+        .optional()
+        .describe('Inference connector the triggering agent used for this round.'),
     }),
     outputSchema: z.object({
       status: z.literal('ok').describe('The memory optimizer finished without throwing.'),
@@ -70,6 +73,7 @@ export const memoryOptimizeStepDefinition = ({
     }),
     handler: async (context) => {
       if (isEnabled && !isEnabled()) {
+        context.logger.info('Skipped memory optimize (flag off)');
         return { output: { status: 'ok' as const, skipped: true } };
       }
 
@@ -83,10 +87,25 @@ export const memoryOptimizeStepDefinition = ({
             spaceId,
             unscopeConversationId(spaceId, sandboxId)
           );
-        } catch {
+        } catch (err) {
           session = undefined;
+          context.logger.debug(
+            `Memory optimize could not open sandbox session for ${sandboxId}: ${
+              err instanceof Error ? err.message : String(err)
+            }`
+          );
         }
       }
+      context.logger.info(
+        `Running memory optimize for sandbox ${sandboxId ?? 'none'} (agent ${
+          context.input.agent_id ?? 'unknown'
+        })`
+      );
+      context.logger.debug(
+        `Memory optimize step connector=${context.input.connector_id ?? '(none)'} ` +
+          `promptChars=${context.input.prompt.length} responseChars=${context.input.response.length} ` +
+          `hasSession=${Boolean(session)}`
+      );
 
       await withTimeout(
         (signal) =>
@@ -99,9 +118,9 @@ export const memoryOptimizeStepDefinition = ({
             esClient: context.contextManager.getScopedEsClient(),
             spaceId,
             signal,
-            logger,
-            getInference,
-            getSearchInferenceEndpoints,
+            logger: teeWorkflowLogger(logger, context.logger),
+            getAgentBuilder,
+            connectorId: context.input.connector_id,
           }),
         OPTIMIZE_TIMEOUT_MS,
         `Memory optimize timed out after ${OPTIMIZE_TIMEOUT_MS}ms`

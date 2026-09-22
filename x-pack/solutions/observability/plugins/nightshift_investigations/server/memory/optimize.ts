@@ -6,9 +6,15 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { InferenceClient } from '@kbn/inference-common';
+import type { BoundInferenceClient } from '@kbn/inference-common';
+import { formatPageRefs, previewText } from './log_format';
 import type { MemoryPageStore } from './page_store';
-import { toMemoryKiId, canonicalizeSlug } from './page_store';
+import {
+  canonicalizeSlug,
+  epochSecondsToIso,
+  toMemoryDisplayTelemetry,
+  toMemoryKiId,
+} from './page_store';
 import { toCounterUpdates } from './ranking';
 import { type MemoryPage } from '../../common/memory';
 
@@ -25,7 +31,9 @@ Evaluate how retrieved *memory* affected an agent's work.
 - *Negative signal* ("harmful"): memory caused contradiction, wasted steps, or misinformation.
 - Neutral / unused: omit.
 
-Be conservative with labeling useful memories: only identify as useful if definitely helpful.`;
+Be conservative with labeling useful memories: only identify as useful if definitely helpful.
+
+Return only recalled memory ids (the id= value, e.g. memory_checkout-redis-evictions). Never titles, content, or the full recalled line.`;
 
 export const MEMORY_EXTRACT_SYSTEM_PROMPT = `You are a knowledge distillation engine for an AI SRE assistant. After each conversation you extract **1 to 3** reusable facts that would help the same assistant on a *similar but not exactly the same* task in this same customer environment in the future.
 
@@ -70,10 +78,57 @@ export type ProposeMemoryLabels = (input: {
   recalledMemories: MemoryPage[];
 }) => Promise<MemoryLabelProposal>;
 
+export interface MemoryExtractionBatch {
+  extractions: MemoryExtractProposal[];
+  /** Recalled ids the model says are the same fact. Each inner list is one group. */
+  mergeTargets: string[][];
+}
+
+export interface MemoryMergeSynthesis {
+  title: string;
+  content: string;
+  context: string;
+}
+
 export type ProposeMemoryExtractions = (input: {
   transcript: string;
   recalledMemories: MemoryPage[];
-}) => Promise<MemoryExtractProposal[]>;
+}) => Promise<MemoryExtractionBatch>;
+
+export type SynthesizeMemoryGroup = (input: {
+  sources: MemoryPage[];
+  extract?: MemoryExtractProposal;
+  task?: string;
+}) => Promise<MemoryMergeSynthesis>;
+
+/** Drop a trailing `<system_update>` so extract `context` stays the original task. */
+export const unwrapUserTask = (prompt: string | undefined): string => {
+  if (!prompt) {
+    return '';
+  }
+  const tag = prompt.search(/<system_update>/);
+  return (tag === -1 ? prompt : prompt.slice(0, tag)).trim();
+};
+
+export const MERGED_CONTENT_MAX_CHARS = 3000;
+
+export const capMergedContent = (content: string, maxChars = MERGED_CONTENT_MAX_CHARS): string => {
+  if (maxChars <= 0 || content.length <= maxChars) {
+    return content;
+  }
+  const suffix = '\n\n…(truncated)';
+  const budget = Math.max(1, maxChars - suffix.length);
+  let head = content.slice(0, budget);
+  const window = head.slice(-200);
+  for (const delim of ['\n\n', '. ', '\n']) {
+    const idx = window.lastIndexOf(delim);
+    if (idx >= 0) {
+      head = head.slice(0, budget - window.length + idx + delim.length).trimEnd();
+      break;
+    }
+  }
+  return head + suffix;
+};
 
 const formatRecalled = (recalledMemories: MemoryPage[]): string =>
   recalledMemories.length === 0
@@ -81,21 +136,51 @@ const formatRecalled = (recalledMemories: MemoryPage[]): string =>
     : recalledMemories
         .map(
           (mem) =>
-            `- id=${mem.id} | title="${mem.title}" | content="${mem.content.substring(0, 150)}"`
+            `- id=${mem.id}\n  title: ${mem.title}\n  content: ${mem.content.substring(0, 150)}`
         )
         .join('\n');
 
+/** Pull a page id out of a critique string. LLMs often echo `id=memory_x | title=…`. */
+const MEMORY_LABEL_ID_RE = /\bmemory_[a-z0-9-]{1,80}\b/i;
+
+export const canonicalizeMemoryLabelId = (raw: string): string | undefined => {
+  const trimmed = raw.trim();
+  if (trimmed.length === 0) {
+    return undefined;
+  }
+  const fromEq = /(?:^|[|\s,])id\s*=\s*(memory_[a-z0-9-]+)/i.exec(` ${trimmed}`);
+  if (fromEq) {
+    return fromEq[1];
+  }
+  if (/^memory_[a-z0-9-]+$/i.test(trimmed)) {
+    return trimmed;
+  }
+  const embedded = MEMORY_LABEL_ID_RE.exec(trimmed);
+  return embedded ? embedded[0] : undefined;
+};
+
+export const canonicalizeMemoryLabelIds = (raw: readonly string[]): string[] => {
+  const out: string[] = [];
+  const seen = new Set<string>();
+  for (const value of raw) {
+    const id = canonicalizeMemoryLabelId(value);
+    if (!id || seen.has(id)) {
+      continue;
+    }
+    seen.add(id);
+    out.push(id);
+  }
+  return out;
+};
+
 export const createLlmProposeMemoryLabels = ({
   inferenceClient,
-  connectorId,
 }: {
-  inferenceClient: InferenceClient;
-  connectorId: string;
+  inferenceClient: BoundInferenceClient;
 }): ProposeMemoryLabels => {
   return async ({ transcript, recalledMemories }) => {
     const response = await inferenceClient.output({
       id: 'nightshift_memory_critique',
-      connectorId,
       system: MEMORY_CRITIQUE_SYSTEM_PROMPT,
       input: `Evaluate the list of recalled memory per the system instructions.\n\nRecalled memories:\n${formatRecalled(
         recalledMemories
@@ -103,37 +188,48 @@ export const createLlmProposeMemoryLabels = ({
       schema: {
         type: 'object',
         properties: {
-          useful: { type: 'array', items: { type: 'string' } },
-          harmful: { type: 'array', items: { type: 'string' } },
+          useful: {
+            type: 'array',
+            items: { type: 'string' },
+            description: 'Recalled memory ids only, e.g. memory_checkout-redis-evictions.',
+          },
+          harmful: {
+            type: 'array',
+            items: { type: 'string' },
+            description: 'Recalled memory ids only, e.g. memory_checkout-redis-evictions.',
+          },
         },
         required: ['useful', 'harmful'],
       },
     });
 
     return {
-      useful: Array.isArray(response.output?.useful)
-        ? response.output.useful.map((id: unknown) => String(id))
-        : [],
-      harmful: Array.isArray(response.output?.harmful)
-        ? response.output.harmful.map((id: unknown) => String(id))
-        : [],
+      useful: canonicalizeMemoryLabelIds(
+        Array.isArray(response.output?.useful)
+          ? response.output.useful.map((id: unknown) => String(id))
+          : []
+      ),
+      harmful: canonicalizeMemoryLabelIds(
+        Array.isArray(response.output?.harmful)
+          ? response.output.harmful.map((id: unknown) => String(id))
+          : []
+      ),
     };
   };
 };
 
 export const createLlmProposeMemoryExtractions = ({
   inferenceClient,
-  connectorId,
 }: {
-  inferenceClient: InferenceClient;
-  connectorId: string;
+  inferenceClient: BoundInferenceClient;
 }): ProposeMemoryExtractions => {
   return async ({ transcript, recalledMemories }) => {
     const response = await inferenceClient.output({
       id: 'nightshift_memory_extract',
-      connectorId,
       system: MEMORY_EXTRACT_SYSTEM_PROMPT,
       input: `${MEMORY_EXTRACT_GUIDELINES}
+
+If two or more recalled memories state the same fact, add each group to merge_targets as {"ids":["memory_a","memory_b"]}. Otherwise return an empty merge_targets.
 
 Recalled memories (do not re-extract these):\n${formatRecalled(recalledMemories)}
 
@@ -141,6 +237,17 @@ Investigation transcript:\n${transcript}`,
       schema: {
         type: 'object',
         properties: {
+          merge_targets: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                ids: { type: 'array', items: { type: 'string' } },
+              },
+              required: ['ids'],
+            },
+            description: 'Groups of recalled memory ids that say the same thing.',
+          },
           extractions: {
             type: 'array',
             items: {
@@ -160,30 +267,101 @@ Investigation transcript:\n${transcript}`,
       },
     });
 
-    const extractions = Array.isArray(response.output?.extractions)
+    const extractions: unknown[] = Array.isArray(response.output?.extractions)
       ? response.output.extractions
       : [];
-    return extractions
-      .map(
-        (entry: {
-          slug?: unknown;
-          title?: unknown;
-          content?: unknown;
-          tags?: unknown;
-          categories?: unknown;
-        }) => ({
-          slug: canonicalizeSlug(String(entry.slug ?? '')),
-          title: String(entry.title ?? '').trim(),
-          content: String(entry.content ?? '').trim(),
-          tags: Array.isArray(entry.tags) ? entry.tags.map(String) : [],
-          categories: Array.isArray(entry.categories) ? entry.categories.map(String) : [],
+    return {
+      mergeTargets: normalizeMergeTargets(response.output?.merge_targets),
+      extractions: extractions
+        .map((entry) => {
+          const candidate =
+            typeof entry === 'object' && entry !== null ? (entry as Record<string, unknown>) : {};
+          return {
+            slug: canonicalizeSlug(String(candidate.slug ?? '')),
+            title: String(candidate.title ?? '').trim(),
+            content: String(candidate.content ?? '').trim(),
+            tags: Array.isArray(candidate.tags) ? candidate.tags.map(String) : [],
+            categories: Array.isArray(candidate.categories) ? candidate.categories.map(String) : [],
+          };
         })
+        .filter(
+          (entry: MemoryExtractProposal) =>
+            entry.slug.length > 0 && entry.title.length > 0 && entry.content.length > 0
+        )
+        .slice(0, MAX_EXTRACTIONS),
+    };
+  };
+};
+
+const normalizeMergeTargets = (raw: unknown): string[][] => {
+  if (!Array.isArray(raw)) {
+    return [];
+  }
+  const groups = raw.every((item) => typeof item === 'string')
+    ? [raw.map((id) => String(id))]
+    : raw.flatMap((item) => {
+        if (Array.isArray(item)) {
+          return [item.map((id: unknown) => String(id))];
+        }
+        if (typeof item === 'object' && item !== null) {
+          const ids = (item as { ids?: unknown }).ids;
+          return Array.isArray(ids) ? [ids.map((id: unknown) => String(id))] : [];
+        }
+        return [];
+      });
+  return groups
+    .map((group) => canonicalizeMemoryLabelIds(group))
+    .filter((group) => group.length >= 2);
+};
+
+export const MEMORY_MERGE_SYSTEM_PROMPT = `You merge overlapping semantic memories into one canonical page.
+
+Return title, markdown content, and context.
+context is the recall key: compact, semantically rich phrases covering the union of the sources' task and goal descriptors. Not verbatim sentences. Not a concatenation of full prompts. Not one source's task copied when the others differ.
+If you cannot write a non-empty context that covers that union, return an empty context string.`;
+
+export const createLlmSynthesizeMemoryGroup = ({
+  inferenceClient,
+}: {
+  inferenceClient: BoundInferenceClient;
+}): SynthesizeMemoryGroup => {
+  return async ({ sources, extract, task }) => {
+    const sourceBlock = sources
+      .map(
+        (page) =>
+          `- id=${page.id}\n  title: ${page.title}\n  context: ${
+            page.context ?? ''
+          }\n  content: ${page.content.slice(0, 1500)}`
       )
-      .filter(
-        (entry: MemoryExtractProposal) =>
-          entry.slug.length > 0 && entry.title.length > 0 && entry.content.length > 0
-      )
-      .slice(0, MAX_EXTRACTIONS);
+      .join('\n');
+    const extractBlock = extract
+      ? `\n\nNew extract to fold in:\n- slug=${extract.slug}\n  title: ${
+          extract.title
+        }\n  content: ${extract.content.slice(0, 1500)}`
+      : '';
+    const taskBlock =
+      extract && task
+        ? `\n\nThis round's original task (cover its goal in context; do not copy it verbatim): ${task}`
+        : '';
+    const response = await inferenceClient.output({
+      id: 'nightshift_memory_merge',
+      system: MEMORY_MERGE_SYSTEM_PROMPT,
+      input: `Sources:\n${sourceBlock}${extractBlock}${taskBlock}`,
+      schema: {
+        type: 'object',
+        properties: {
+          title: { type: 'string' },
+          content: { type: 'string' },
+          context: { type: 'string' },
+        },
+        required: ['title', 'content', 'context'],
+      },
+    });
+    return {
+      title: String(response.output?.title ?? '').trim(),
+      content: String(response.output?.content ?? '').trim(),
+      context: String(response.output?.context ?? '').trim(),
+    };
   };
 };
 
@@ -267,69 +445,383 @@ export const isDuplicateExtraction = ({
   );
 };
 
+const liveOverlapPages = ({
+  extra,
+  recalledIds,
+  recalledMemories,
+  catalogHits,
+}: {
+  extra: MemoryExtractProposal;
+  recalledIds: readonly string[];
+  recalledMemories: readonly MemoryPage[];
+  catalogHits: readonly MemoryPage[];
+}): MemoryPage[] => {
+  const extraId = toMemoryKiId(extra.slug);
+  const extraSlug = canonicalizeSlug(extra.slug);
+  const seen = new Set<string>();
+  const out: MemoryPage[] = [];
+  const push = (page: MemoryPage | undefined) => {
+    if (!page || page.status === 'archived' || seen.has(page.id)) {
+      return;
+    }
+    seen.add(page.id);
+    out.push(page);
+  };
+
+  const recalled = new Set(recalledIds);
+  if (
+    recalled.has(extraId) ||
+    [...recalled].some((id) => id.replace(/^memory_/, '') === extraSlug)
+  ) {
+    push(recalledMemories.find((page) => page.id === extraId || page.slug === extraSlug));
+  }
+
+  const extraTitle = normalizeMemoryTitle(extra.title);
+  const extraText = `${extra.title}\n${extra.content}`;
+  const matches = (page: ExtractionPage, allowSameSlug: boolean): boolean => {
+    const samePage = page.id === extraId || page.slug === extraSlug;
+    if (samePage) {
+      return !allowSameSlug;
+    }
+    if (extraTitle.length > 0 && normalizeMemoryTitle(page.title) === extraTitle) {
+      return true;
+    }
+    return (
+      contentOverlap(extraText, `${page.title}\n${page.content}`) >= EXTRACTION_OVERLAP_THRESHOLD
+    );
+  };
+
+  for (const page of recalledMemories) {
+    if (matches(page, false)) {
+      push(page);
+    }
+  }
+  for (const page of catalogHits) {
+    if (matches(page, true)) {
+      push(page);
+    }
+  }
+  return out;
+};
+
+const unionStrings = (...groups: Array<readonly string[] | undefined>): string[] => {
+  const out: string[] = [];
+  const seen = new Set<string>();
+  for (const group of groups) {
+    for (const value of group ?? []) {
+      if (!value || seen.has(value)) {
+        continue;
+      }
+      seen.add(value);
+      out.push(value);
+    }
+  }
+  return out;
+};
+
 export const applyMemoryEdits = async ({
   store,
   recalledIds,
   recalledMemories = [],
   labels,
   extractions,
+  mergeTargets = [],
+  context,
+  synthesizeMemoryGroup,
+  now = () => Date.now() / 1000,
   logger,
 }: {
   store: MemoryPageStore;
   recalledIds: string[];
-  recalledMemories?: ExtractionPage[];
+  recalledMemories?: MemoryPage[];
   labels: MemoryLabelProposal;
   extractions: MemoryExtractProposal[];
+  mergeTargets?: string[][];
+  /** Current user task — stored on new pages as the recall key. */
+  context?: string;
+  synthesizeMemoryGroup?: SynthesizeMemoryGroup;
+  now?: () => number;
   logger: Logger;
 }): Promise<void> => {
   const recalled = new Set(recalledIds);
+  const usefulIds = canonicalizeMemoryLabelIds(labels.useful).filter((id) => recalled.has(id));
+  const harmfulIds = canonicalizeMemoryLabelIds(labels.harmful).filter((id) => recalled.has(id));
+  const droppedUseful = canonicalizeMemoryLabelIds(labels.useful).filter((id) => !recalled.has(id));
+  const droppedHarmful = canonicalizeMemoryLabelIds(labels.harmful).filter(
+    (id) => !recalled.has(id)
+  );
   const { archiveIds, updates } = toCounterUpdates({
     impressionIds: recalledIds,
-    usefulIds: labels.useful.filter((id) => recalled.has(id)),
-    harmfulIds: labels.harmful.filter((id) => recalled.has(id)),
+    usefulIds,
+    harmfulIds,
   });
+  logger.info(
+    `Memory labels useful=${labels.useful.length} harmful=${labels.harmful.length}; ` +
+      `archiving ${archiveIds.length}, counter updates ${updates.length}, ` +
+      `extractions ${extractions.length}`
+  );
+  logger.debug(
+    `Memory label apply useful=[${usefulIds.join(', ') || '(none)'}] ` +
+      `harmful=[${harmfulIds.join(', ') || '(none)'}] ` +
+      `droppedUseful=[${droppedUseful.join(', ') || '(none)'}] ` +
+      `droppedHarmful=[${droppedHarmful.join(', ') || '(none)'}] ` +
+      `archive=[${archiveIds.join(', ') || '(none)'}] ` +
+      `counters=${
+        updates.length === 0
+          ? '(none)'
+          : updates
+              .map((update) => `${update.id}+imp=${update.addImp}+conv=${update.addConv}`)
+              .join(',')
+      } ` +
+      `extractContext=${JSON.stringify(previewText(context))}`
+  );
 
+  const harmful = new Set(harmfulIds);
   for (const id of archiveIds) {
-    await store.archive(id);
+    await store.archive(id, 'harmful');
+    logger.debug(`Memory archived ${id} reason=harmful`);
   }
   await store.applyCounterUpdates(updates);
 
-  for (const extra of extractions) {
+  const task = unwrapUserTask(context);
+  const consumedIds = new Set<string>();
+  const consumedExtracts = new Set<number>();
+
+  interface MergeGroup {
+    sourceIds: string[];
+    extract?: MemoryExtractProposal;
+  }
+  const groups: MergeGroup[] = [];
+
+  for (let index = 0; index < extractions.length; index++) {
+    const extra = extractions[index];
+    logger.debug(
+      `Memory extraction candidate slug=${extra.slug} title=${JSON.stringify(
+        previewText(extra.title, 80)
+      )} content=${JSON.stringify(previewText(extra.content))} ` +
+        `tags=${extra.tags.join(',') || '(none)'}`
+    );
     if (looksLikeSecret(`${extra.title}\n${extra.content}`)) {
       logger.warn(`Skipped extraction "${extra.slug}" — content looks like a secret`);
+      consumedExtracts.add(index);
       continue;
     }
 
-    const catalogHits = (await store.retrieve({ query: extra.title, size: 5 })) ?? [];
-    if (
-      isDuplicateExtraction({
-        extra,
-        recalledIds,
-        recalledMemories,
-        catalogHits,
-      })
-    ) {
-      logger.debug(`Skipped extraction "${extra.slug}" — overlaps recalled or catalog memory`);
+    const catalogHits =
+      (await store.retrieve({ query: extra.title, size: 5, match: 'content' })) ?? [];
+    const overlaps = liveOverlapPages({
+      extra,
+      recalledIds,
+      recalledMemories,
+      catalogHits,
+    }).filter((page) => !consumedIds.has(page.id));
+    if (overlaps.some((page) => harmful.has(page.id))) {
+      logger.debug(`Skipped extraction "${extra.slug}" — merge group includes a harmful memory`);
+      consumedExtracts.add(index);
       continue;
     }
+    const live = overlaps;
+    if (live.length === 0) {
+      continue;
+    }
+    for (const page of live) {
+      consumedIds.add(page.id);
+    }
+    consumedExtracts.add(index);
+    groups.push({ sourceIds: live.map((page) => page.id), extract: extra });
+    logger.debug(
+      `Memory merge group for "${extra.slug}" with ${formatPageRefs(live)} ` +
+        `(catalog=${formatPageRefs(catalogHits)})`
+    );
+  }
 
+  for (const targets of mergeTargets) {
+    const ids = canonicalizeMemoryLabelIds(targets).filter(
+      (id) => recalled.has(id) && !harmful.has(id) && !consumedIds.has(id)
+    );
+    if (ids.length < 2) {
+      continue;
+    }
+    if (targets.some((id) => harmful.has(canonicalizeMemoryLabelId(id) ?? id))) {
+      continue;
+    }
+    for (const id of ids) {
+      consumedIds.add(id);
+    }
+    groups.push({ sourceIds: ids });
+  }
+
+  for (const group of groups) {
+    const sources = (await Promise.all(group.sourceIds.map(async (id) => store.get(id)))).filter(
+      (page): page is MemoryPage => page !== undefined && page.status !== 'archived'
+    );
+    const memberCount = sources.length + (group.extract ? 1 : 0);
+    if (sources.length < 1 || memberCount < 2) {
+      logger.debug('Memory merge skipped — fewer than 2 live members after refresh');
+      continue;
+    }
+    if (!synthesizeMemoryGroup) {
+      logger.warn('Memory merge skipped — no synthesizer configured');
+      continue;
+    }
+    await mergeMemoryGroup({
+      store,
+      sources,
+      extract: group.extract,
+      task,
+      synthesizeMemoryGroup,
+      now,
+      logger,
+    });
+  }
+
+  for (let index = 0; index < extractions.length; index++) {
+    if (consumedExtracts.has(index)) {
+      continue;
+    }
+    const extra = extractions[index];
     try {
       const existing = await store.get(toMemoryKiId(extra.slug));
       await store.upsert({
         slug: extra.slug,
         title: extra.title,
         content: extra.content,
+        context: task,
         tags: extra.tags,
         categories: extra.categories,
         references: [],
-        status: existing?.status ?? 'tentative',
+        status: existing?.status === 'established' ? 'established' : 'tentative',
         user: 'nightshift-optimizer',
       });
       logger.info(`Extracted new memory page: ${extra.slug}`);
+      logger.debug(
+        `Memory extract upserted ${toMemoryKiId(extra.slug)} contextChars=${task.length}`
+      );
     } catch (err) {
       logger.warn(`Failed to extract memory "${extra.slug}": ${(err as Error).message}`);
     }
   }
+};
+
+const mergeMemoryGroup = async ({
+  store,
+  sources,
+  extract,
+  task,
+  synthesizeMemoryGroup,
+  now,
+  logger,
+}: {
+  store: MemoryPageStore;
+  sources: MemoryPage[];
+  extract?: MemoryExtractProposal;
+  task: string;
+  synthesizeMemoryGroup: SynthesizeMemoryGroup;
+  now: () => number;
+  logger: Logger;
+}): Promise<void> => {
+  let synthesis: MemoryMergeSynthesis;
+  try {
+    synthesis = await synthesizeMemoryGroup({
+      sources,
+      extract,
+      task: extract ? task : undefined,
+    });
+  } catch (err) {
+    logger.warn(`Memory merge synthesis failed: ${(err as Error).message}`);
+    return;
+  }
+
+  const content = capMergedContent(synthesis.content);
+  if (synthesis.title.length === 0 || content.trim().length === 0) {
+    logger.warn('Memory merge aborted — synthesis returned an empty title or content');
+    return;
+  }
+  if (looksLikeSecret(`${synthesis.title}\n${content}`)) {
+    logger.warn('Memory merge aborted — synthesised content looks like a secret');
+    return;
+  }
+  const sourcesHadContext = sources.some((page) => (page.context ?? '').trim().length > 0);
+  const hadRecallKey = sourcesHadContext || (extract !== undefined && task.length > 0);
+  if (synthesis.context.length === 0 && hadRecallKey) {
+    logger.warn('Memory merge aborted — synthesis returned an empty recall context');
+    return;
+  }
+
+  const nowSec = now();
+  const avoid = new Set(sources.map((page) => page.id));
+  const base = canonicalizeSlug(synthesis.title) || 'merged';
+  let slug = `${base}-merged`;
+  for (let attempt = 0; attempt < 6; attempt++) {
+    const candidate =
+      attempt === 0 ? base : attempt === 1 ? `${base}-merged` : `${base}-merged-${attempt}`;
+    const candidateId = toMemoryKiId(candidate);
+    if (avoid.has(candidateId)) {
+      continue;
+    }
+    const existing = await store.get(candidateId);
+    if (existing && existing.status !== 'archived') {
+      continue;
+    }
+    slug = candidate;
+    break;
+  }
+
+  const mergedFrom = unionStrings(
+    sources.map((page) => page.id),
+    extract ? [toMemoryKiId(extract.slug)] : []
+  );
+  let impressions = 0;
+  let conversions = 0;
+  for (const page of sources) {
+    const display = toMemoryDisplayTelemetry(page, nowSec);
+    impressions += display.impressions;
+    conversions += display.conversions;
+  }
+
+  try {
+    await store.upsert({
+      slug,
+      title: synthesis.title,
+      content,
+      context: synthesis.context,
+      tags: unionStrings(
+        sources.flatMap((page) => page.tags),
+        extract?.tags
+      ).filter((tag) => tag !== 'memory'),
+      categories: unionStrings(
+        sources.flatMap((page) => page.categories),
+        extract?.categories
+      ),
+      references: [],
+      status: sources.some((page) => page.status === 'established') ? 'established' : 'tentative',
+      source: `Merged from memories: ${mergedFrom.join(', ')}`,
+      merged_from: mergedFrom,
+      telemetry: {
+        impressions,
+        conversions,
+        last_impression_time: epochSecondsToIso(nowSec),
+      },
+      user: 'nightshift-optimizer',
+    });
+  } catch (err) {
+    logger.warn(`Memory merge failed to write canonical page: ${(err as Error).message}`);
+    return;
+  }
+
+  for (const page of sources) {
+    try {
+      await store.archive(page.id, 'merged');
+    } catch (err) {
+      logger.warn(
+        `Memory merge wrote canonical but failed to archive ${page.id}: ${(err as Error).message}`
+      );
+    }
+  }
+  logger.info(
+    `Merged ${sources.map((page) => page.id).join(', ')} into ${toMemoryKiId(slug)}` +
+      (extract ? ` (folded extract ${extract.slug})` : '')
+  );
 };
 
 export const optimizeMemory = async ({
@@ -337,6 +829,7 @@ export const optimizeMemory = async ({
   recalledIds,
   proposeLabels,
   proposeExtractions,
+  synthesizeMemoryGroup,
   userMessage,
   assistantMessage,
   logger,
@@ -345,37 +838,83 @@ export const optimizeMemory = async ({
   recalledIds: string[];
   proposeLabels: ProposeMemoryLabels;
   proposeExtractions: ProposeMemoryExtractions;
+  synthesizeMemoryGroup?: SynthesizeMemoryGroup;
   userMessage: string;
   assistantMessage: string;
   logger: Logger;
 }): Promise<void> => {
+  logger.debug(
+    `Memory optimize start recalledIds=${recalledIds.length} ` +
+      `[${recalledIds.join(', ') || '(none)'}] userChars=${userMessage.length} ` +
+      `assistantChars=${assistantMessage.length} user=${JSON.stringify(previewText(userMessage))}`
+  );
   if (recalledIds.length === 0 && assistantMessage.trim().length === 0) {
-    logger.debug('Memory optimizer skipped — no recalled memories and empty assistant message');
+    logger.info('Memory optimizer skipped — no recalled memories and empty assistant message');
     return;
   }
 
   const recalledMemories = (await Promise.all(recalledIds.map((id) => store.get(id)))).filter(
     (page): page is MemoryPage => page !== undefined
   );
+  const loadedIds = new Set(recalledMemories.map((page) => page.id));
+  const missingIds = recalledIds.filter((id) => !loadedIds.has(id));
+  logger.debug(
+    `Memory optimize loaded ${recalledMemories.length}/${recalledIds.length} recalled page(s): ` +
+      `${formatPageRefs(recalledMemories)} missing=[${missingIds.join(', ') || '(none)'}]`
+  );
 
+  const task = unwrapUserTask(userMessage);
   const transcript = [
     '## User',
-    userMessage.slice(0, MAX_TRANSCRIPT_CHARS),
+    task.slice(0, MAX_TRANSCRIPT_CHARS),
     '',
     '## Assistant',
     assistantMessage.slice(0, MAX_TRANSCRIPT_CHARS),
   ].join('\n');
 
-  const labels =
-    recalledMemories.length === 0
-      ? { useful: [], harmful: [] }
-      : await proposeLabels({ transcript, recalledMemories });
+  let labels: MemoryLabelProposal;
+  if (recalledMemories.length === 0) {
+    logger.debug('Memory critique skipped — no recalled pages loaded');
+    labels = { useful: [], harmful: [] };
+  } else {
+    const critiqueStarted = Date.now();
+    logger.debug(
+      `Memory critique LLM start nightshift_memory_critique recalled=${recalledMemories.length} ` +
+        `transcriptChars=${transcript.length}`
+    );
+    labels = await proposeLabels({ transcript, recalledMemories });
+    logger.debug(
+      `Memory critique LLM done ${Date.now() - critiqueStarted}ms ` +
+        `useful=[${labels.useful.join(', ') || '(none)'}] ` +
+        `harmful=[${labels.harmful.join(', ') || '(none)'}]`
+    );
+  }
 
   // Cold-start rounds have an empty recalled set; still extract or the store never fills.
   const shouldExtract = assistantMessage.trim().length > 0;
-  const extractions = shouldExtract
-    ? await proposeExtractions({ transcript, recalledMemories })
-    : [];
+  let extractions: MemoryExtractProposal[] = [];
+  let mergeTargets: string[][] = [];
+  if (!shouldExtract) {
+    logger.debug('Memory extract skipped — empty assistant message');
+  } else {
+    const extractStarted = Date.now();
+    logger.debug(
+      `Memory extract LLM start nightshift_memory_extract recalled=${recalledMemories.length} ` +
+        `transcriptChars=${transcript.length}`
+    );
+    const extracted = await proposeExtractions({ transcript, recalledMemories });
+    extractions = extracted.extractions;
+    mergeTargets = extracted.mergeTargets;
+    logger.debug(
+      `Memory extract LLM done ${Date.now() - extractStarted}ms ` +
+        `proposals=${extractions.length} ` +
+        (extractions.length === 0
+          ? '(none)'
+          : extractions
+              .map((extra) => `${extra.slug} "${previewText(extra.title, 60)}"`)
+              .join(', '))
+    );
+  }
 
   if (
     labels.useful.length === 0 &&
@@ -383,7 +922,7 @@ export const optimizeMemory = async ({
     extractions.length === 0 &&
     recalledIds.length === 0
   ) {
-    logger.debug('Memory optimizer proposed no edits');
+    logger.info('Memory optimizer proposed no edits');
     return;
   }
 
@@ -393,6 +932,9 @@ export const optimizeMemory = async ({
     recalledMemories,
     labels,
     extractions,
+    mergeTargets,
+    context: task,
+    synthesizeMemoryGroup,
     logger,
   });
 };

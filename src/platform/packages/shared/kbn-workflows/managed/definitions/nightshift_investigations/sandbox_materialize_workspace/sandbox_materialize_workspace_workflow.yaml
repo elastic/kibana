@@ -23,6 +23,9 @@ triggers:
         conversation_id:
           type: string
           description: Conversation id that namespaces the sandbox. Absent for standalone runs.
+        agent_id:
+          type: string
+          description: Agent id for this round. Memory materialize is skipped when it is absent.
       additionalProperties: false
 
 steps:
@@ -54,3 +57,10 @@ steps:
             with:
               sandbox_id: '{{ steps.obtain_sandbox.output.sandbox_id }}'
               prompt: '{{ inputs.prompt }}'
+              agent_id: '{{ inputs.agent_id }}'
+  - name: compose_prompt
+    type: nightshift.composeHydrateNotifications
+    with:
+      notifications:
+        - '{{ steps.hydrate_cortex.output.notification }}'
+        - '{{ steps.memory_materialize_to_sandbox.output.notification }}'

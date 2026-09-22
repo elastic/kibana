@@ -11,7 +11,11 @@ import { hydrateCortexWorkspace } from '../cortex/register_cortex';
 import { cortexHydrateStepDefinition } from './cortex_hydrate';
 
 jest.mock('../cortex/register_cortex', () => ({
-  hydrateCortexWorkspace: jest.fn().mockResolvedValue(undefined),
+  hydrateCortexWorkspace: jest
+    .fn()
+    .mockResolvedValue(
+      'Cortex pages materialized this turn:\n- `/workspace/cortex/services/checkout.md`'
+    ),
 }));
 
 describe('cortexHydrateStepDefinition', () => {
@@ -44,7 +48,7 @@ describe('cortexHydrateStepDefinition', () => {
       abortSignal: new AbortController().signal,
       stepId: 'hydrate_cortex',
       stepType: 'nightshift.cortexHydrate',
-    }) as never;
+    } as never);
 
   it('hydrates the sandbox with the request-scoped ES client', async () => {
     const sandboxStart = makeSandboxStart();
@@ -63,7 +67,7 @@ describe('cortexHydrateStepDefinition', () => {
       signal: expect.any(AbortSignal),
       logger: expect.anything(),
     });
-    expect(result).toEqual({ output: { sandbox_id: 'default__conv-1' } });
+    expect(result).toEqual({ output: { sandbox_id: 'default__conv-1', notification: '' } });
   });
 
   it('uses the obtained sandbox_id without re-scoping it', async () => {
@@ -79,7 +83,7 @@ describe('cortexHydrateStepDefinition', () => {
     expect(hydrateCortexWorkspace).toHaveBeenCalledWith(
       expect.objectContaining({ spaceId: 'marketing' })
     );
-    expect(result).toEqual({ output: { sandbox_id: 'marketing__conv-1' } });
+    expect(result).toEqual({ output: { sandbox_id: 'marketing__conv-1', notification: '' } });
   });
 
   it('throws when the sandbox is not configured', async () => {
@@ -104,6 +108,8 @@ describe('cortexHydrateStepDefinition', () => {
     const result = await definition.handler(createContext('default__conv-1'));
 
     expect(hydrateCortexWorkspace).not.toHaveBeenCalled();
-    expect(result).toEqual({ output: { sandbox_id: 'default__conv-1', skipped: true } });
+    expect(result).toEqual({
+      output: { sandbox_id: 'default__conv-1', skipped: true, notification: '' },
+    });
   });
 });

@@ -11,6 +11,8 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { Logger } from '@kbn/core/server';
 import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
 import { hydrateMemoryWorkspace } from '../memory/register_memory';
+import { previewText } from '../memory/log_format';
+import { teeWorkflowLogger } from '../lib/tee_workflow_logger';
 import { unscopeConversationId } from '../tools/sandbox_bash/tool_utils';
 import { withTimeout } from './with_timeout';
 
@@ -44,17 +46,34 @@ export const memoryMaterializeToSandboxStepDefinition = ({
         .max(65_536)
         .optional()
         .describe('The user message for this round, used as a memory search query when present.'),
+      agent_id: z
+        .string()
+        .max(1024)
+        .optional()
+        .describe('Agent whose memory store to materialize. Missing agent_id skips memory.'),
     }),
     outputSchema: z.object({
       sandbox_id: z.string().describe('Sandbox that received the memory pages.'),
       skipped: z.boolean().optional(),
+      notification: z
+        .string()
+        .describe('Markdown fragment listing memory pages new this turn, or empty.'),
     }),
     handler: async (context) => {
-      const { sandbox_id: sandboxId, prompt } = context.input;
+      const { sandbox_id: sandboxId, prompt, agent_id: agentId } = context.input;
       const { spaceId } = context.contextManager.getContext().workflow;
 
       if (isEnabled && !isEnabled()) {
-        return { output: { sandbox_id: sandboxId, skipped: true } };
+        context.logger.info(`Skipped memory materialize for sandbox ${sandboxId} (flag off)`);
+        return { output: { sandbox_id: sandboxId, skipped: true, notification: '' } };
+      }
+
+      const trimmedAgentId = agentId?.trim();
+      if (!trimmedAgentId) {
+        context.logger.info(
+          `Skipped memory materialize for sandbox ${sandboxId} (missing agent_id)`
+        );
+        return { output: { sandbox_id: sandboxId, skipped: true, notification: '' } };
       }
 
       const sandboxStart = getSandboxStart();
@@ -71,20 +90,29 @@ export const memoryMaterializeToSandboxStepDefinition = ({
         unscopeConversationId(spaceId, sandboxId)
       );
 
-      await withTimeout(
+      context.logger.info(
+        `Materializing semantic memory into sandbox ${sandboxId} (agent ${trimmedAgentId})`
+      );
+      context.logger.debug(
+        `Memory materialize step promptChars=${prompt?.length ?? 0} prompt=${JSON.stringify(
+          previewText(prompt)
+        )}`
+      );
+
+      const notification = await withTimeout(
         (signal) =>
           hydrateMemoryWorkspace({
             session,
             esClient: context.contextManager.getScopedEsClient(),
-            spaceId,
+            agentId: trimmedAgentId,
             query: prompt,
             signal,
-            logger,
+            logger: teeWorkflowLogger(logger, context.logger),
           }),
         MATERIALIZE_TIMEOUT_MS,
         `Memory materialize to sandbox timed out after ${MATERIALIZE_TIMEOUT_MS}ms`
       );
 
-      return { output: { sandbox_id: sandboxId } };
+      return { output: { sandbox_id: sandboxId, notification } };
     },
   });

@@ -11,6 +11,7 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { Logger } from '@kbn/core/server';
 import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
 import { hydrateCortexWorkspace } from '../cortex/register_cortex';
+import { teeWorkflowLogger } from '../lib/tee_workflow_logger';
 import { unscopeConversationId } from '../tools/sandbox_bash/tool_utils';
 import { withTimeout } from './with_timeout';
 
@@ -43,13 +44,19 @@ export const cortexHydrateStepDefinition = ({
     outputSchema: z.object({
       sandbox_id: z.string().describe('Sandbox that was hydrated.'),
       skipped: z.boolean().optional(),
+      notification: z
+        .string()
+        .describe(
+          'Always empty. Cortex writes the full wiki every turn, so it does not list pages in the system update.'
+        ),
     }),
     handler: async (context) => {
       const { sandbox_id: sandboxId } = context.input;
       const { spaceId } = context.contextManager.getContext().workflow;
 
       if (isEnabled && !isEnabled()) {
-        return { output: { sandbox_id: sandboxId, skipped: true } };
+        context.logger.info(`Skipped Cortex hydrate for sandbox ${sandboxId} (flag off)`);
+        return { output: { sandbox_id: sandboxId, skipped: true, notification: '' } };
       }
 
       const sandboxStart = getSandboxStart();
@@ -66,6 +73,8 @@ export const cortexHydrateStepDefinition = ({
         unscopeConversationId(spaceId, sandboxId)
       );
 
+      context.logger.info(`Hydrating Cortex into sandbox ${sandboxId} (space ${spaceId})`);
+
       await withTimeout(
         (signal) =>
           hydrateCortexWorkspace({
@@ -73,12 +82,12 @@ export const cortexHydrateStepDefinition = ({
             esClient: context.contextManager.getScopedEsClient(),
             spaceId,
             signal,
-            logger,
+            logger: teeWorkflowLogger(logger, context.logger),
           }),
         HYDRATE_TIMEOUT_MS,
         `Cortex hydrate timed out after ${HYDRATE_TIMEOUT_MS}ms`
       );
 
-      return { output: { sandbox_id: sandboxId } };
+      return { output: { sandbox_id: sandboxId, notification: '' } };
     },
   });
