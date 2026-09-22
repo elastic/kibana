@@ -9,7 +9,6 @@ import type { FlattenRecord } from '@kbn/streams-schema';
 import {
   MAX_STREAM_NAME_LENGTH,
   boundedFlattenRecord,
-  boundedJsonValue,
   boundedNamedFieldDefinitionSchema,
   isEnabledFailureStore,
 } from '@kbn/streams-schema';
