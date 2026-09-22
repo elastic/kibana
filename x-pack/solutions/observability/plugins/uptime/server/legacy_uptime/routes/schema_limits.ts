@@ -22,8 +22,8 @@ export const MAX_FILTER_LENGTH = 10_000;
  * 4KB covers ~100 names (~40 chars each); a full public location set is well under that.
  */
 export const MAX_LOCATION_LIST_LENGTH = 4096;
-/** Cursor pagination JSON, which embeds a monitor id. */
-export const MAX_PAGINATION_LENGTH = 8192;
+/** Cursor pagination JSON. ~100 bytes of wrapper plus a monitor id (max 2048). */
+export const MAX_PAGINATION_LENGTH = 4096;
 export const MAX_STATUS_LENGTH = 32;
 export const MAX_SORT_LENGTH = 16;
 export const MAX_BUCKET_SIZE_LENGTH = 64;
@@ -34,9 +34,9 @@ export const MAX_EVENT_TYPE_LENGTH = 128;
 export const MAX_HASH_LENGTH = 256;
 /** Comma-separated heartbeat index patterns. */
 export const MAX_INDEX_PATTERN_LENGTH = 4096;
-/** Connector ids and email addresses stored in dynamic settings. */
-export const MAX_SETTINGS_STRING_LENGTH = 4096;
-export const MAX_SETTINGS_LIST_SIZE = 1000;
+/** Connector ids (~36) and email addresses (≤254). */
+export const MAX_SETTINGS_STRING_LENGTH = 256;
+export const MAX_SETTINGS_LIST_SIZE = 100;
 
 export const boundedString = (maxLength: number) => schema.string({ maxLength });
 
