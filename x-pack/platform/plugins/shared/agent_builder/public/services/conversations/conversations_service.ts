@@ -8,6 +8,8 @@
 import { type HttpSetup, buildPath } from '@kbn/core-http-browser';
 import type { FeedbackChipId } from '@kbn/agent-builder-common';
 import type {
+  AddConversationEventsRequestBody,
+  AddConversationEventsResponse,
   GetConversationResponse,
   ListConversationsResponse,
   SearchConversationsResponse,
@@ -157,6 +159,18 @@ export class ConversationsService {
       {
         body: JSON.stringify(accessControl),
       }
+    );
+  }
+
+  async addEvents({
+    conversationId,
+    events,
+  }: AddConversationEventsRequestBody & {
+    conversationId: string;
+  }): Promise<AddConversationEventsResponse> {
+    return await this.http.post<AddConversationEventsResponse>(
+      buildPath(`${publicApiPath}/conversations/{conversationId}/_add_events`, { conversationId }),
+      { body: JSON.stringify({ events }) }
     );
   }
 
