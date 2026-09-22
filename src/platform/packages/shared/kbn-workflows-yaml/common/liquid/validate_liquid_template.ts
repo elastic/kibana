@@ -78,10 +78,66 @@ function mapToAbsolutePosition(
 
 const LIQUID_OUTPUT_PATTERN = '{{';
 const LIQUID_TAG_PATTERN = '{%';
-// Matches ${{ ... }} — JS/conditional expression syntax used alongside Liquid in workflow YAML.
-// These may contain operators (!=, ?, :) that are not valid Liquid syntax and must be stripped
-// before the Liquid parser sees the value.
-const DYNAMIC_EXPRESSION_STRIP = /\$\{\{(?:[^}]|\}(?!\}))*\}\}/g;
+// Matches ${{ ... }} — typed expressions (WorkflowTemplatingEngine.evaluateExpression).
+// Same Liquid value grammar as runtime (evalValueSync after stripping the leading `$`).
+const DYNAMIC_EXPRESSION_PATTERN = /\$\{\{(?:[^}]|\}(?!\}))*\}\}/g;
+
+const blankDynamicExpressions = (value: string): string =>
+  value.replace(DYNAMIC_EXPRESSION_PATTERN, (match) => ' '.repeat(match.length));
+
+const pushLiquidError = (
+  errors: LiquidValidationError[],
+  yamlString: string,
+  node: Scalar,
+  liquidText: string,
+  error: unknown,
+  /** Offset to add onto positions extracted from liquidText (relative to node.value). */
+  valueOffset = 0
+): void => {
+  const errorMessage = error instanceof Error ? error.message : 'Invalid Liquid syntax';
+  const relativeInLiquid = extractLiquidErrorPosition(liquidText, errorMessage);
+  const relativePosition = {
+    start: valueOffset + relativeInLiquid.start,
+    end: valueOffset + relativeInLiquid.end,
+  };
+  const absPosition = mapToAbsolutePosition(yamlString, node, errorMessage, relativePosition);
+
+  const startPos = convertOffsetToLineColumn(yamlString, absPosition.start);
+  const endPos = convertOffsetToLineColumn(yamlString, absPosition.end);
+
+  errors.push({
+    message: errorMessage.replace(/, line:\d+, col:\d+/g, ''),
+    startLine: startPos.line,
+    startColumn: startPos.column,
+    endLine: endPos.line,
+    endColumn: endPos.column,
+  });
+};
+
+/**
+ * Validate each `${{ ... }}` with the same Liquid grammar the runtime uses
+ * (`${{ expr }}` → drop `$` → parse as `{{ expr }}`, matching evaluateExpression).
+ * Catches unknown filters and invalid syntax (e.g. ternaries) that wholesale blanking
+ * would hide, while still accepting operators like `!=` that Liquid supports.
+ */
+const validateDynamicExpressions = (
+  yamlString: string,
+  node: Scalar,
+  value: string,
+  errors: LiquidValidationError[]
+): void => {
+  for (const match of value.matchAll(DYNAMIC_EXPRESSION_PATTERN)) {
+    const matchIndex = match.index ?? 0;
+    // `${{ expr }}` → `{{ expr }}` (same as templating_engine dropping the leading `$`).
+    const asLiquid = match[0].substring(1);
+    try {
+      parseTemplateString(asLiquid);
+    } catch (error) {
+      // asLiquid starts one char after `$`, so shift positions into node.value.
+      pushLiquidError(errors, yamlString, node, asLiquid, error, matchIndex + 1);
+    }
+  }
+};
 
 export function validateLiquidTemplate(
   yamlString: string,
@@ -95,9 +151,13 @@ export function validateLiquidTemplate(
       if (!node.range) return;
       if (typeof node.value !== 'string') return;
 
-      // Strip ${{ ... }} before Liquid validation — the Liquid parser would reject
-      // JS-style operators (!=, ?) inside those expressions as invalid Liquid syntax.
-      const liquidValue = node.value.replace(DYNAMIC_EXPRESSION_STRIP, '');
+      // Validate typed expressions with the runtime Liquid grammar before blanking them
+      // out of the surrounding scalar (mixed `${{ }}` + `{{ }}` / `{% %}` values).
+      validateDynamicExpressions(yamlString, node, node.value, errors);
+
+      // Blank ${{ ... }} before validating remaining Liquid — avoids double-reporting the
+      // same expression, and keeps mixed-value offsets aligned with the original scalar.
+      const liquidValue = blankDynamicExpressions(node.value);
 
       if (!liquidValue.includes(LIQUID_OUTPUT_PATTERN) && !liquidValue.includes(LIQUID_TAG_PATTERN))
         return;
@@ -105,20 +165,7 @@ export function validateLiquidTemplate(
       try {
         parseTemplateString(liquidValue);
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Invalid Liquid syntax';
-        const relativePosition = extractLiquidErrorPosition(node.value, errorMessage);
-        const absPosition = mapToAbsolutePosition(yamlString, node, errorMessage, relativePosition);
-
-        const startPos = convertOffsetToLineColumn(yamlString, absPosition.start);
-        const endPos = convertOffsetToLineColumn(yamlString, absPosition.end);
-
-        errors.push({
-          message: errorMessage.replace(/, line:\d+, col:\d+/g, ''),
-          startLine: startPos.line,
-          startColumn: startPos.column,
-          endLine: endPos.line,
-          endColumn: endPos.column,
-        });
+        pushLiquidError(errors, yamlString, node, liquidValue, error);
       }
     },
   });

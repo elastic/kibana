@@ -425,6 +425,9 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(note).toContain('variables.batch_output_tokens');
     expect(note).toContain('variables.batch_llm_calls');
     expect(note).toContain('variables.pending_alert_count');
+    // Worker path clears connector_id for the feature-registry swap; the note must attribute
+    // the resolved ID captured after the agent call (standalone falls back to connector_id).
+    expect(note).toContain('variables.resolved_connector_id | default: variables.connector_id');
 
     const collectStep = findStepByName(workflow.steps, 'collect_batch_verdicts') as {
       with: Record<string, string>;
@@ -664,10 +667,10 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(setStep.with.auto_close_confidence_score_min_threshold).toBe(
       '${{ inputs.autoCloseConfidenceScoreMinThreshold | default: variables.auto_close_confidence_score_min_threshold }}'
     );
-    // autoCloseEnabled is deliberately NOT in set_caller_overrides. `| default:` would swallow
-    // the Worker's explicit false (Liquid treats false as falsy) and let the sub-workflow close
-    // alerts the Worker must gate behind a proposal, so it gets its own presence gate.
-    expect(setStep.with.auto_close_enabled).toBeUndefined();
+    // Worker mode defaults auto-close off so omitting autoCloseEnabled cannot inherit a
+    // space-level true and close FPs inside the sub-workflow. An explicit input still wins
+    // via the presence gate below (`| default:` would swallow false).
+    expect(setStep.with.auto_close_enabled).toBe(false);
     const autoCloseGate = findStepByName(
       overrideStep.steps,
       'set_auto_close_enabled_if_provided'
@@ -694,10 +697,18 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
   // counts zero pending alerts, skips the whole analysis and returns empty verdicts. It
   // reports success while doing nothing, which is why this is asserted rather than assumed.
   it('analyses a caller-supplied alert set, falling back to the trigger event', () => {
-    const declaringTrigger = (
+    // Caller inputs are declared on the manual trigger (AlertRuleTriggerSchema strips inputs).
+    const manualTrigger = (
       workflow.triggers as Array<{ type: string; inputs?: { properties?: object } }>
-    ).find(({ inputs }) => inputs?.properties != null);
-    expect(declaringTrigger?.inputs?.properties).toHaveProperty('alerts');
+    ).find(({ type }) => type === 'manual');
+    expect(manualTrigger?.inputs?.properties).toHaveProperty('alerts');
+    expect(manualTrigger?.inputs?.properties).toHaveProperty('calledByWorker');
+
+    const alertTrigger = (workflow.triggers as Array<{ type: string; inputs?: unknown }>).find(
+      ({ type }) => type === 'alert'
+    );
+    expect(alertTrigger).toBeDefined();
+    expect(alertTrigger?.inputs).toBeUndefined();
 
     // Default is the trigger's own alerts, so the standalone path is unchanged.
     const defaultStep = findStepByName(workflow.steps, 'set_alert_set') as {
@@ -1162,20 +1173,20 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
       condition: string;
     };
 
-    expect(evaluateExpression(engine, accumulateGate.condition, { inputs: { calledByWorker: true } })).toBe(
-      true
-    );
+    expect(
+      evaluateExpression(engine, accumulateGate.condition, { inputs: { calledByWorker: true } })
+    ).toBe(true);
     expect(
       evaluateExpression(engine, accumulateGate.condition, { inputs: { calledByWorker: false } })
     ).toBe(false);
     expect(evaluateExpression(engine, accumulateGate.condition, { inputs: {} })).toBe(false);
 
-    expect(evaluateExpression(engine, summaryGate.condition, { inputs: { calledByWorker: true } })).toBe(
-      true
-    );
-    expect(evaluateExpression(engine, overrideGate.condition, { inputs: { calledByWorker: true } })).toBe(
-      true
-    );
+    expect(
+      evaluateExpression(engine, summaryGate.condition, { inputs: { calledByWorker: true } })
+    ).toBe(true);
+    expect(
+      evaluateExpression(engine, overrideGate.condition, { inputs: { calledByWorker: true } })
+    ).toBe(true);
   });
 
   it('builds an output verdict keyed on the real alert id, with unknown entity defaults', () => {
