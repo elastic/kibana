@@ -32,12 +32,6 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
     const noAuthRequiredUrl = deployment.getHostPort() + '/bootstrap-anonymous.js';
     log.debug(`browser: navigate to /bootstrap-anonymous.js`);
     await browser.get(noAuthRequiredUrl);
-    // previous test might left unsaved changes and alert will show up on url change
-    const alert = await browser.getAlert();
-    if (alert) {
-      log.debug(`browser: closing alert`);
-      await alert.accept();
-    }
     log.debug(`browser: wait for resource page to be loaded`);
     // TODO: temporary solution while we don't migrate all functional tests to SAML auth
     // On CI sometimes we are redirected to cloud login page, in this case we skip cleanup
@@ -58,7 +52,6 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
     log.debug(`browser: delete all the cookies`);
     await retry.waitForWithTimeout('Browser cookies are deleted', 10000, async () => {
       await browser.deleteAllCookies();
-      await pageObjects.common.sleep(1000);
       const cookies = await browser.getCookies();
       return cookies.length === 0;
     });
@@ -85,7 +78,6 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
           log.debug(`browser: set the new cookie`);
           await retry.waitForWithTimeout('New cookie is added', 10000, async () => {
             await browser.setCookie('sid', sidCookie);
-            await pageObjects.common.sleep(1000);
             const cookies = await browser.getCookies();
             return cookies.length === 1;
           });

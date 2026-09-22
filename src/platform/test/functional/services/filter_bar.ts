@@ -186,13 +186,19 @@ export class FilterBarService extends FtrService {
     return ((await filter.getAttribute('data-test-subj')) ?? '').includes('filter-negated');
   }
 
-  public async getFilterCount(): Promise<number> {
-    const filters = await this.testSubjects.findAll('~filter');
+  public async getFilterCount(timeout?: number): Promise<number> {
+    const filters = await this.testSubjects.findAll('~filter', timeout);
     return filters.length;
   }
 
-  public async getFiltersLabel(): Promise<string[]> {
-    const filters = await this.testSubjects.findAll('~filter');
+  public async waitForFilterCount(expectedCount: number): Promise<void> {
+    await this.retry.waitFor(`filter count to be ${expectedCount}`, async () => {
+      return (await this.getFilterCount(0)) === expectedCount;
+    });
+  }
+
+  public async getFiltersLabel(timeout?: number): Promise<string[]> {
+    const filters = await this.testSubjects.findAll('~filter', timeout);
     return Promise.all(filters.map((filter) => filter.getVisibleText()));
   }
 

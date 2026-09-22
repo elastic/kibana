@@ -279,7 +279,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('Vega extension functions', () => {
       beforeEach(async () => {
-        const filtersCount = await filterBar.getFilterCount();
+        const filtersCount = await filterBar.getFilterCount(0);
         if (filtersCount > 0) {
           await filterBar.removeAllFilters();
         }
@@ -324,7 +324,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           getTestSpec('kibanaRemoveFilter({ match_phrase: { response: "200" }})')
         );
 
-        expect(await filterBar.getFilterCount()).to.be(0);
+        await filterBar.waitForFilterCount(0);
       });
 
       it('should remove all filters by calling "kibanaRemoveAllFilters" expression', async () => {
@@ -335,7 +335,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await fillSpecAndGo(getTestSpec('kibanaRemoveAllFilters()'));
 
-        expect(await filterBar.getFilterCount()).to.be(0);
+        await filterBar.waitForFilterCount(0);
       });
     });
 

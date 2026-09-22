@@ -742,8 +742,5 @@ export class GisPageObject extends FtrService {
 
   async refreshAndClearUnsavedChangesWarning() {
     await this.browser.refresh();
-    // accept alert if it pops up
-    const alert = await this.browser.getAlert();
-    await alert?.accept();
   }
 }

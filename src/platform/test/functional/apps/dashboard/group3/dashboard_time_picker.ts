@@ -32,8 +32,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await kibanaServer.uiSettings.replace({});
       await browser.refresh();
-      const alert = await browser.getAlert();
-      await alert?.accept();
     });
 
     it('Visualization updated when time picker changes', async () => {
@@ -82,8 +80,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         `)`;
       log.debug('go to url' + `${kibanaBaseUrl}#${urlQuery}`);
       await browser.get(`${kibanaBaseUrl}#${urlQuery}`, true);
-      const alert = await browser.getAlert();
-      await alert?.accept();
       await header.waitUntilLoadingHasFinished();
       const time = await timePicker.getTimeConfig();
       const refresh = await timePicker.getRefreshConfig();
@@ -95,8 +91,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('Timepicker respects dateFormat from UI settings', async () => {
       await kibanaServer.uiSettings.replace({ dateFormat: 'YYYY-MM-DD HH:mm:ss.SSS' });
       await browser.refresh();
-      const alert = await browser.getAlert();
-      await alert?.accept();
 
       await elasticChart.setNewChartUiDebugFlag(true);
 
