@@ -16,6 +16,10 @@ import { SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID } from '../../agent_builder
 import { executeKIQueryGenerationAgent } from './identify_ki_queries_via_agent';
 
 describe('executeKIQueryGenerationAgent', () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('returns finalized queries from the latest validation result', async () => {
     const validatedQuery = {
       type: 'match' as const,
@@ -82,6 +86,11 @@ describe('executeKIQueryGenerationAgent', () => {
       },
       execution: { executeAgent },
     } as unknown as AgentBuilderPluginStart;
+    const requestSignal = new AbortController().signal;
+    const timeoutSignal = new AbortController().signal;
+    const executionSignal = new AbortController().signal;
+    const timeoutSpy = jest.spyOn(AbortSignal, 'timeout').mockReturnValue(timeoutSignal);
+    const anySpy = jest.spyOn(AbortSignal, 'any').mockReturnValue(executionSignal);
     const definition: Streams.WiredStream.Definition = {
       name: 'logs.test',
       description: 'Test logs',
@@ -102,6 +111,7 @@ describe('executeKIQueryGenerationAgent', () => {
         request,
         connectorId: 'connector-1',
         definition,
+        signal: requestSignal,
         logger: loggerMock.create(),
       })
     ).resolves.toEqual({
@@ -124,5 +134,11 @@ describe('executeKIQueryGenerationAgent', () => {
         cached: 2,
       },
     });
+
+    expect(timeoutSpy).toHaveBeenCalledWith(300_000);
+    expect(anySpy).toHaveBeenCalledWith([requestSignal, timeoutSignal]);
+    expect(executeAgent).toHaveBeenCalledWith(
+      expect.objectContaining({ abortSignal: executionSignal })
+    );
   });
 });

@@ -33,6 +33,21 @@ import {
 import { chatTokenCountFromModelUsage } from './features/chat_token_count';
 import { streamToAnalysisTarget } from './stream_to_analysis_target';
 
+const QUERY_GENERATION_MAX_DURATION_MS = 300_000;
+
+interface FinalizedValidationData {
+  finalized: true;
+  finalized_queries: AcceptedQuery[];
+}
+
+const isFinalizedValidationData = (data: unknown): data is FinalizedValidationData =>
+  typeof data === 'object' &&
+  data !== null &&
+  'finalized' in data &&
+  data.finalized === true &&
+  'finalized_queries' in data &&
+  Array.isArray(data.finalized_queries);
+
 export interface ExecuteKIQueryGenerationAgentOptions {
   agentBuilder: AgentBuilderPluginStart;
   request: KibanaRequest;
@@ -63,10 +78,12 @@ export async function executeKIQueryGenerationAgent({
     accessControl: { access_mode: ConversationAccessControlMode.Public },
   });
 
+  const timeoutSignal = AbortSignal.timeout(QUERY_GENERATION_MAX_DURATION_MS);
+  const executionSignal = signal ? AbortSignal.any([signal, timeoutSignal]) : timeoutSignal;
   const { events$ } = await agentBuilder.execution.executeAgent({
     mode: AgentExecutionMode.conversation,
     request,
-    abortSignal: signal,
+    abortSignal: executionSignal,
     useTaskManager: false,
     params: {
       agentId: KI_QUERY_GENERATION_AGENT_ID,
@@ -87,23 +104,16 @@ export async function executeKIQueryGenerationAgent({
     .filter(isToolResultEvent)
     .filter((event) => event.data.tool_id === SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID)
     .at(-1);
-  const finalizedResult = validationResultEvent?.data.results.find(
-    (result) =>
-      typeof result.data === 'object' &&
-      result.data !== null &&
-      'finalized' in result.data &&
-      result.data.finalized === true &&
-      'finalized_queries' in result.data &&
-      Array.isArray(result.data.finalized_queries)
-  );
+  const finalizedData = validationResultEvent?.data.results
+    .map(({ data }) => data)
+    .find(isFinalizedValidationData);
 
-  if (!finalizedResult) {
+  if (!finalizedData) {
     throw new Error('KI query generation agent did not finalize validate_queries');
   }
 
   const roundEvent = events.find(isRoundCompleteEvent);
-  const rawQueries = (finalizedResult.data as { finalized_queries: AcceptedQuery[] })
-    .finalized_queries;
+  const rawQueries = finalizedData.finalized_queries;
 
   const queries: GeneratedSignificantEventQuery[] = rawQueries.map((q) => ({
     type: q.type,

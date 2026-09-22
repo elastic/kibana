@@ -182,14 +182,14 @@ If `existing_queries` is empty or absent, skip this evaluation entirely.
 
 ---
 
-## 2. Query generation workflow
+## 2. Query generation invariants
 
-1. Call `platform_sig_events_ki_features_get` (without filters) to retrieve all features and existing queries in a single call.
-2. Evaluate any existing queries against the current features using the checklist above.
-3. Generate candidate queries grounded in the retrieved features. Every query must reference at least one `feature_id`.
-4. Call `platform_sig_events_ki_queries_validate` with the full candidate batch. If `finalized` is false, repair rejected queries and resubmit the full batch.
-5. Repeat step 4 until the latest validation returns `finalized: true`. If the features provide no evidence for any query, validate an empty `queries` array instead — never invent ungrounded queries to fill the batch.
-6. Respond with a brief 2–3 sentence plain-text summary of the finalized queries (or state that no queries were justified by the available evidence).
+- Retrieve the target's features and existing queries before reasoning about candidates.
+- Evaluate every existing query against the current features using the checklist above.
+- Ground every candidate in the retrieved features and reference at least one `feature_id`.
+- Submit the full candidate batch for validation. If `finalized` is false, repair rejected queries and resubmit the full batch.
+- Finish only after the latest validation returns `finalized: true`. If the features justify no query, validate an empty `queries` array rather than inventing candidates.
+- End with a brief 2–3 sentence plain-text summary of the finalized queries, or state that no queries were justified by the available evidence.
 
 ---
 ## 3. Tool call examples

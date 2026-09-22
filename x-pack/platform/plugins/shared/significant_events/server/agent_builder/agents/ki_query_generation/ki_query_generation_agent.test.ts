@@ -22,6 +22,13 @@ describe('kiQueryGenerationAgentType', () => {
     expect(isAllowedBuiltinSkill(KI_QUERY_GENERATION_SKILL_ID)).toBe(true);
   });
 
+  it('defines a single ordered query generation workflow', () => {
+    const { instructions } = kiQueryGenerationAgentType.baseConfiguration;
+    expect(instructions.match(/## Query generation workflow/g)).toHaveLength(1);
+    expect(instructions).toContain('1. **Load skill**');
+    expect(instructions).toContain('2. **Fetch features**');
+  });
+
   it('feature-gates every registered SCS tool', async () => {
     const enabledAgentType = createKIQueryGenerationAgentType({
       isSemanticCodeSearchGroundingEnabled: jest.fn().mockResolvedValue(true),
