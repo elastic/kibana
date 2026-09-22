@@ -569,7 +569,7 @@ describe('WatchDetailPage', () => {
       within(section)
         .getAllByTestId('alertZeroAutonomyCardFact')
         .map((fact) => fact.textContent)
-    ).toEqual([expect.stringContaining('Analysis'), expect.stringContaining('Containment')]);
+    ).toEqual([expect.stringContaining('Findings'), expect.stringContaining('Response')]);
   });
 
   it('shows the analysis window only on Rule Tuning and does not write while editing', () => {
