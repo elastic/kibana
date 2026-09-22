@@ -9,6 +9,7 @@ import type { Observable } from 'rxjs';
 import { BehaviorSubject, of } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import { cpsPluginMock } from '@kbn/cps/public/mocks';
+import type { CPSAppAccessResolver } from '@kbn/cps-utils';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import {
   OBSERVABILITY_APM_CPS_ENABLED_DEFAULT,
@@ -19,16 +20,26 @@ import { TelemetryService } from './services/telemetry';
 import type { ApmPluginStartDeps } from './plugin';
 import { ApmPlugin, getApmInternalServices } from './plugin';
 
-type CpsStart = ReturnType<typeof cpsPluginMock.createStartContract>;
-
 describe('ApmPlugin', () => {
   const callApmApi = jest.fn();
+
+  // `CPSPluginStart['cpsManager']` is optional and not deep-mocked, so own the spy to keep the
+  // registered resolvers typed.
+  const createCpsStart = () => {
+    const registerAppAccess = jest.fn<void, [string, CPSAppAccessResolver]>();
+    const startContract = cpsPluginMock.createStartContract();
+
+    return {
+      registerAppAccess,
+      cps: { ...startContract, cpsManager: { ...startContract.cpsManager, registerAppAccess } },
+    };
+  };
 
   const startPlugin = (isCpsEnabled$: Observable<boolean>, { withCps = true } = {}) => {
     const core = coreMock.createStart();
     core.featureFlags.getBooleanValue$.mockReturnValue(isCpsEnabled$);
 
-    const cps = cpsPluginMock.createStartContract();
+    const { cps, registerAppAccess } = createCpsStart();
     const plugins = {
       discoverShared: { features: { registry: { register: jest.fn() } } },
       share: {},
@@ -41,12 +52,15 @@ describe('ApmPlugin', () => {
     const plugin = new ApmPlugin(coreMock.createPluginInitializerContext());
     plugin.start(core, plugins);
 
-    return { plugin, core, cps };
+    return { plugin, core, cps, registerAppAccess };
   };
 
   /** Access the APM app resolves to through the resolver registered by the nth flag emission. */
-  const resolvedAccess = (cps: CpsStart, callIndex: number) => {
-    const [appId, resolver] = cps.cpsManager.registerAppAccess.mock.calls[callIndex];
+  const resolvedAccess = (
+    registerAppAccess: ReturnType<typeof createCpsStart>['registerAppAccess'],
+    callIndex: number
+  ) => {
+    const [appId, resolver] = registerAppAccess.mock.calls[callIndex];
     expect(appId).toBe('apm');
     return resolver('/app/apm');
   };
@@ -68,44 +82,44 @@ describe('ApmPlugin', () => {
   });
 
   it('registers editable access and publishes the manager when the flag is enabled', () => {
-    const { cps } = startPlugin(of(true));
+    const { cps, registerAppAccess } = startPlugin(of(true));
 
-    expect(resolvedAccess(cps, 0)).toBe(ProjectRoutingAccess.EDITABLE);
+    expect(resolvedAccess(registerAppAccess, 0)).toBe(ProjectRoutingAccess.EDITABLE);
     expect(getApmInternalServices()).toEqual({ callApmApi, cpsManager: cps.cpsManager });
   });
 
   it('registers disabled access and withholds the manager when the flag is disabled', () => {
-    const { cps } = startPlugin(of(false));
+    const { registerAppAccess } = startPlugin(of(false));
 
-    expect(resolvedAccess(cps, 0)).toBe(ProjectRoutingAccess.DISABLED);
+    expect(resolvedAccess(registerAppAccess, 0)).toBe(ProjectRoutingAccess.DISABLED);
     expect(getApmInternalServices()).toEqual({ callApmApi, cpsManager: undefined });
   });
 
   it('follows the flag when it changes after start', () => {
     const isCpsEnabled$ = new BehaviorSubject(false);
-    const { cps } = startPlugin(isCpsEnabled$);
+    const { cps, registerAppAccess } = startPlugin(isCpsEnabled$);
 
     expect(getApmInternalServices()?.cpsManager).toBeUndefined();
 
     isCpsEnabled$.next(true);
 
-    expect(resolvedAccess(cps, 1)).toBe(ProjectRoutingAccess.EDITABLE);
+    expect(resolvedAccess(registerAppAccess, 1)).toBe(ProjectRoutingAccess.EDITABLE);
     expect(getApmInternalServices()?.cpsManager).toBe(cps.cpsManager);
 
     isCpsEnabled$.next(false);
 
-    expect(resolvedAccess(cps, 2)).toBe(ProjectRoutingAccess.DISABLED);
+    expect(resolvedAccess(registerAppAccess, 2)).toBe(ProjectRoutingAccess.DISABLED);
     expect(getApmInternalServices()?.cpsManager).toBeUndefined();
   });
 
   it('stops following the flag on stop', () => {
     const isCpsEnabled$ = new BehaviorSubject(false);
-    const { plugin, cps } = startPlugin(isCpsEnabled$);
+    const { plugin, registerAppAccess } = startPlugin(isCpsEnabled$);
 
     plugin.stop();
     isCpsEnabled$.next(true);
 
-    expect(cps.cpsManager.registerAppAccess).toHaveBeenCalledTimes(1);
+    expect(registerAppAccess).toHaveBeenCalledTimes(1);
     expect(getApmInternalServices()?.cpsManager).toBeUndefined();
   });
 

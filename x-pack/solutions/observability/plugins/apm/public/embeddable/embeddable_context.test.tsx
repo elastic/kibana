@@ -11,7 +11,7 @@ import { createMemoryHistory } from 'history';
 import { Router } from '@kbn/shared-ux-router';
 import { useLocation } from 'react-router-dom';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, of, Subject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { License } from '@kbn/licensing-plugin/common/license';
 import { cpsPluginMock } from '@kbn/cps/public/mocks';
 import {
@@ -212,7 +212,7 @@ describe('ApmEmbeddableContext', () => {
       );
 
       // Never, not just last: seeding the hook with the `true` default would install the manager on
-      // the first render, and descendant mount effects run before the subscription lands.
+      // the first render, before the subscription lands.
       expect(mockSetApmInternalServices).not.toHaveBeenCalledWith(
         expect.objectContaining({ cpsManager: cps.cpsManager })
       );
@@ -221,16 +221,26 @@ describe('ApmEmbeddableContext', () => {
       );
     });
 
-    it('leaves the internal services alone until the flag emits', () => {
-      const { deps } = createFlaggedDeps(new Subject<boolean>());
+    it('resolves the flag before descendants render', () => {
+      const { deps } = createFlaggedDeps(of(false));
+      const seenByChild: Array<ReturnType<typeof apmPluginModule.getApmInternalServices>> = [];
+
+      function ServicesProbe() {
+        seenByChild.push(apmPluginModule.getApmInternalServices());
+        return null;
+      }
 
       render(
         <ApmEmbeddableContext deps={deps}>
-          <div>Test</div>
+          <ServicesProbe />
         </ApmEmbeddableContext>
       );
 
-      expect(mockSetApmInternalServices).not.toHaveBeenCalled();
+      // Descendants read the services while rendering, so they must already exist by then, and
+      // already reflect the real flag rather than the fallback.
+      expect(mockSetApmInternalServices).toHaveBeenCalledTimes(1);
+      expect(seenByChild[0]).toBe(mockSetApmInternalServices.mock.calls[0][0]);
+      expect(seenByChild[0]).toEqual(expect.objectContaining({ cpsManager: undefined }));
     });
 
     it('re-wires the internal services when the flag emits a new value', () => {
