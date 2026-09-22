@@ -227,10 +227,13 @@ const handleConversationExecution = async ({
   // The execution service resolved the conversation and wrote the opening user message before
   // this run was dispatched, so the round reuses the id it opened and reports the creation the
   // service performed — by now the conversation is stored either way.
+
+  // fallback: an execution record written before the service reserved the round id
   const roundId = providedRoundId ?? uuidv4();
   const receivedAt = new Date();
   const conversation: ConversationWithOperation = {
     ...resolvedConversation,
+    // the resolution above re-reads a stored conversation, so a creation only shows up here
     operation: conversationOperation ?? resolvedConversation.operation,
   };
 
