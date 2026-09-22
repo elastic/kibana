@@ -150,13 +150,10 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
   const roleArnChanged = editedRoleArn !== existingRoleArn;
   const roleArnToSave =
     isAws && !roleArnInvalid && roleArnChanged && editedRoleArn !== '' ? editedRoleArn : undefined;
-  // The API replaces `vars` wholesale (the package-policy save path depends on that), so the
-  // edited ARN has to travel with the connector's other vars. Dropping `external_id` here would
-  // orphan its secret in `.fleet-secrets` and leave every later read without an external ID.
+  // The server merges a Role ARN update onto the connector vars it reads at request time.
+  // Sending the flyout's other vars would overwrite a secret rotated after this flyout loaded.
   const varsToSave: AwsCloudConnectorVars | undefined =
-    roleArnToSave !== undefined && isAwsCloudConnectorVars(cloudConnectorVars, provider)
-      ? { ...cloudConnectorVars, role_arn: { type: 'text', value: roleArnToSave } }
-      : undefined;
+    roleArnToSave !== undefined ? { role_arn: { type: 'text', value: roleArnToSave } } : undefined;
 
   // IacTemplateDetails trims on input, so the value judged here is the value that gets saved.
   const deploymentIdInvalid = isStackArnInvalid(editedIacDeploymentId);

@@ -773,13 +773,9 @@ describe('CloudConnectorPoliciesFlyout', () => {
       });
     });
 
-    it('keeps the external_id secret reference in the vars it sends on Save', () => {
-      // The API replaces `vars` wholesale, so the edited ARN has to travel with the connector's
-      // other vars or the secret reference is dropped and orphaned in `.fleet-secrets`.
-      const externalId = {
-        type: 'password',
-        value: { isSecretRef: true, id: 'EXTERNALID1234567890' },
-      };
+    it('sends only role_arn so a stale external_id cannot overwrite a rotated secret', () => {
+      // The server merges `{ role_arn }` onto the connector vars it reads at request time.
+      // Spreading the flyout's `external_id` would restore a secret reference from render time.
       const mockMutate = jest.fn();
       mockUseUpdateCloudConnector.mockReturnValue({
         mutate: mockMutate,
@@ -789,7 +785,10 @@ describe('CloudConnectorPoliciesFlyout', () => {
         provider: 'aws',
         cloudConnectorVars: {
           role_arn: { type: 'text', value: 'arn:aws:iam::123456789012:role/Existing' },
-          external_id: externalId,
+          external_id: {
+            type: 'password',
+            value: { isSecretRef: true, id: 'EXTERNALID1234567890' },
+          },
         },
       });
 
@@ -803,7 +802,6 @@ describe('CloudConnectorPoliciesFlyout', () => {
       expect(mockMutate).toHaveBeenCalledWith({
         vars: {
           role_arn: { type: 'text', value: 'arn:aws:iam::123456789012:role/NewRole' },
-          external_id: externalId,
         },
       });
     });
