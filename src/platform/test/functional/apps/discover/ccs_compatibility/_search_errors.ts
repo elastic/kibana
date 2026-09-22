@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const dataViews = getService('dataViews');
-  const { common, discover, timePicker } = getPageObjects(['common', 'discover', 'timePicker']);
+  const { discover, timePicker } = getPageObjects(['discover', 'timePicker']);
 
   const isCcsTest = config.get('esTestCluster.ccs');
   const archiveDirectory = isCcsTest
@@ -57,7 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
      * number is the proof only the failed shard was lost.
      */
     it('exception on single shard shows warning and results', async () => {
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await dataViews.switchToAndValidate(defaultIndex);
       await timePicker.setDefaultAbsoluteRange();
       await retry.try(async () => {
@@ -95,7 +95,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
      * extract_warnings.test.ts.
      */
     it('exception on all shards shows error', async () => {
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await dataViews.switchToAndValidate(defaultIndex);
       await timePicker.setDefaultAbsoluteRange();
       await retry.try(async () => {

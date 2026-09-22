@@ -24,12 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const toasts = getService('toasts');
-  const { common, discover, header, timePicker } = getPageObjects([
-    'common',
-    'discover',
-    'header',
-    'timePicker',
-  ]);
+  const { discover, header, timePicker } = getPageObjects(['discover', 'header', 'timePicker']);
   const dataViews = getService('dataViews');
   const monacoEditor = getService('monacoEditor');
 
@@ -68,7 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
        * local 14,004 hits. Drop the hardcoded 5s sleep (wait for `queryCancelButton`).
        */
       it('should show warning and results', async () => {
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await dataViews.createFromSearchBar({
           name: 'ftr-remote:logstash-*,logstash-*',
           hasTimeField: false,
@@ -135,7 +130,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
        * cancel smoke. Keep the 746 hit count. Drop the hardcoded 5s sleep.
        */
       it('should show warning and results', async () => {
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await discover.selectTextBaseLang();
         await timePicker.setDefaultAbsoluteRange();
         await monacoEditor.setCodeEditorValue(`FROM logstash-*, ftr-remote:logstash-* METADATA _index

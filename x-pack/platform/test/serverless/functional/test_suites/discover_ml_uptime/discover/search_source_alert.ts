@@ -267,7 +267,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const openAlertResults = async (value: string, type: 'id' | 'name' = 'name') => {
-    await PageObjects.common.navigateToApp('discover');
+    await PageObjects.discover.navigateToApp('classic');
     await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.discover.clickNewSearchButton(); // reset params
     await dataViews.switchToAndValidate(OUTPUT_DATA_VIEW);
@@ -455,7 +455,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show time field validation error', async () => {
-      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.navigateToApp('classic');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await dataViews.switchToAndValidate(SOURCE_DATA_VIEW);
       await PageObjects.timePicker.setCommonlyUsedTime('Last_15 minutes');
@@ -600,7 +600,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should navigate to alert results via link provided in notification using adhoc data view', async () => {
-      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.navigateToApp('classic');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await dataViews.createFromSearchBar({
         name: 'search-source-',

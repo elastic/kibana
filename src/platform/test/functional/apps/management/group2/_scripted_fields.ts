@@ -142,7 +142,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should see scripted field value in Discover', async function () {
-          await PageObjects.common.navigateToApp('discover');
+          await PageObjects.discover.navigateToApp('classic');
 
           await retry.try(async function () {
             await PageObjects.unifiedFieldList.clickFieldListItemAdd(scriptedPainlessFieldName);
@@ -244,7 +244,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should see scripted field value in Discover', async function () {
-        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.navigateToApp('classic');
 
         await retry.try(async function () {
           await PageObjects.unifiedFieldList.clickFieldListItemAdd(scriptedPainlessFieldName2);
@@ -345,7 +345,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should see scripted field value in Discover', async function () {
-        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.navigateToApp('classic');
 
         await retry.try(async function () {
           await PageObjects.unifiedFieldList.clickFieldListItemAdd(scriptedPainlessFieldName2);
@@ -439,7 +439,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should see scripted field value in Discover', async function () {
-        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.navigateToApp('classic');
 
         await retry.try(async function () {
           await PageObjects.unifiedFieldList.clickFieldListItemAdd(scriptedPainlessFieldName2);

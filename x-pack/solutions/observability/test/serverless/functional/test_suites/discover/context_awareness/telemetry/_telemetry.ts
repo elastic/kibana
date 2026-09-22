@@ -49,7 +49,7 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
       });
 
       it('should set EBT context for telemetry events with o11y root profile', async () => {
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
         await monacoEditor.setCodeEditorValue('from my-example-* | sort @timestamp desc');
@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
       });
 
       it('should set EBT context for telemetry events when logs data source profile and reset', async () => {
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
         await monacoEditor.setCodeEditorValue('from my-example-logs | sort @timestamp desc');
@@ -150,7 +150,7 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
       });
 
       it('should send EBT events when a different data source profile gets resolved', async () => {
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await discover.selectTextBaseLang();
         await discover.waitUntilSearchingHasFinished();
         await monacoEditor.setCodeEditorValue('from my-example-logs | sort @timestamp desc');
@@ -211,7 +211,7 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
       });
 
       it('should send EBT events when a different document profile gets resolved', async () => {
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await discover.selectTextBaseLang();
         await monacoEditor.setCodeEditorValue('from my-example-logs | sort @timestamp desc');
         await ebtUIHelper.setOptIn(true); // starts the recording of events from this moment
@@ -247,7 +247,7 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
     describe('events', () => {
       beforeEach(async () => {
         await svlCommonPage.loginAsAdmin();
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();
       });

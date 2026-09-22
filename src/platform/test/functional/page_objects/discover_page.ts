@@ -41,8 +41,30 @@ export class DiscoverPageObject extends FtrService {
 
   public readonly APP_ID = 'discover';
 
-  public async navigateToApp() {
+  /**
+   * Navigates to Discover, optionally pinning the query mode (classic vs ES|QL)
+   * for this load.
+   */
+  public async navigateToApp(queryMode?: string) {
+    if (queryMode) {
+      await this.setQueryMode(queryMode, 'esql');
+    }
     await this.common.navigateToApp(this.APP_ID);
+  }
+
+  /**
+   * Navigates to Discover via an explicit rison-encoded app-state URL (e.g. to seed
+   * ES|QL query state directly), optionally pinning the query mode for this load.
+   */
+  public async navigateToActualUrl(
+    queryMode: string | undefined,
+    hash?: string,
+    options?: { basePath?: string; ensureCurrentUrl?: boolean; shouldLoginIfPrompted?: boolean }
+  ) {
+    if (queryMode) {
+      await this.setQueryMode(queryMode, 'esql');
+    }
+    await this.common.navigateToActualUrl(this.APP_ID, hash, options);
   }
 
   /** Ensures that navigation to discover has completed */
@@ -1321,11 +1343,9 @@ export class DiscoverPageObject extends FtrService {
   /**
    * Seeds the persisted query mode in localStorage. Discover ignores `currentMode`
    * unless `defaultMode` matches the resolved default (the `discover.isEsqlDefault`
-   * flag), so `defaultMode` defaults to `'classic'` to match today's default. When
-   * the flag is flipped to make ES|QL the default, update `defaultMode` or the seed
-   * is ignored.
+   * flag), so `defaultMode` defaults to `'esql'` to match the resolved default.
    */
-  public setQueryMode(currentMode: string, defaultMode: string = 'classic') {
+  public setQueryMode(currentMode: string, defaultMode: string = 'esql') {
     return this.browser.setLocalStorageItem(
       DISCOVER_QUERY_MODE_KEY,
       JSON.stringify({ currentMode, defaultMode })

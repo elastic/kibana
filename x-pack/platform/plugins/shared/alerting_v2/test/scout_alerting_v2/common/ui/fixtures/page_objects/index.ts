@@ -66,7 +66,7 @@ export const extendPageObjects = (
     episodeDetails: createLazyPageObject(EpisodeDetailsPage, page, kbnUrl),
     executionHistory: createLazyPageObject(ExecutionHistoryPage, page, kbnUrl),
     ruleBuilder: createLazyPageObject(RuleBuilderPage, page),
-    ruleForm: createLazyPageObject(RuleFormPage, page, discoverAppMenu),
+    ruleForm: createLazyPageObject(RuleFormPage, page, discoverAppMenu, pageObjects.discover),
     rulesList: createLazyPageObject(RulesListPage, page),
     thresholdBuilder: createLazyPageObject(ThresholdBuilderPage, page),
   };

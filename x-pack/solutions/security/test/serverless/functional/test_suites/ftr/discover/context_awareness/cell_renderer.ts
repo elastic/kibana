@@ -40,7 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('DataView mode', () => {
       it('should render alert workflow status badge', async () => {
-        await PageObjects.common.navigateToActualUrl('discover', undefined, {
+        await PageObjects.discover.navigateToActualUrl('classic', undefined, {
           ensureCurrentUrl: false,
         });
         await PageObjects.discover.selectIndexPattern(SECURITY_SOLUTION_DATA_VIEW);

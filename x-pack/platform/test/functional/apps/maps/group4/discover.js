@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }) {
         'global_visualize_read',
       ]);
       await common.setTime({ from, to });
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
     });
 
     after(async () => {

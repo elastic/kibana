@@ -24,11 +24,13 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const common = getPageObject('common');
+  const discover = getPageObject('discover');
 
   describe('navigation', function () {
     before(async () => {
       await esArchiver.load(archiveEmptyIndex);
       await svlCommonPage.loginWithRole('admin');
+      await discover.setQueryMode('classic', 'esql');
       await svlSearchNavigation.navigateToElasticsearchHome();
     });
     after(async () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Locator, ScoutPage } from '@kbn/scout';
+import type { DiscoverApp, Locator, ScoutPage } from '@kbn/scout';
 import { KibanaCodeEditorWrapper } from '@kbn/scout';
 import type { DiscoverAppMenu } from './discover_app_menu';
 
@@ -30,7 +30,11 @@ export class RuleFormPage {
 
   private readonly codeEditor: KibanaCodeEditorWrapper;
 
-  constructor(private readonly page: ScoutPage, private readonly discoverAppMenu: DiscoverAppMenu) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly discoverAppMenu: DiscoverAppMenu,
+    private readonly discover: DiscoverApp
+  ) {
     this.codeEditor = new KibanaCodeEditorWrapper(page);
 
     this.nameInput = this.page.testSubj.locator('ruleNameInput');
@@ -60,7 +64,7 @@ export class RuleFormPage {
   }
 
   async gotoDiscover() {
-    await this.page.gotoApp('discover');
+    await this.discover.goto({ queryMode: 'classic' });
   }
 
   /**
