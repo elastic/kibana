@@ -19,23 +19,6 @@ You can configure `xpack.reporting` settings to:
 - [Control how screenshots are captured for PNG/PDF reports](#reporting-capture-settings)
 - [Control the limits and capabilities of CSV reports](#reporting-csv-settings)
 
-## Serverless availability [reporting-serverless-availability]
-
-On {{serverless-full}}, reporting support depends on the surface and export type. These `xpack.reporting` settings are not user-configurable there.
-
-| Surface                                       | Generate      | Schedule |
-| --------------------------------------------- | ------------- | -------- |
-| Discover CSV                                  | Yes           | Yes      |
-| Lens CSV                                      | Download only | No       |
-| Dashboard, Lens, and visualization PDF or PNG | No            | No       |
-| Dashboard JSON                                | Yes           | n/a      |
-
-PDF and PNG export types default to disabled (`xpack.reporting.export_types.pdf.enabled` and `xpack.reporting.export_types.png.enabled` are `false`) and cannot be turned on.
-
-Compared with {{ech}}, Serverless does not generate or schedule dashboard PDF or PNG reports.
-
-For user-facing steps, refer to [Reporting and sharing](docs-content://explore-analyze/report-and-share.md) and [Automatically generate reports](docs-content://explore-analyze/report-and-share/automating-report-generation.md).
-
 ## Enable reporting [general-reporting-settings]
 
 :::{settings} /reference/configuration-reference/reporting-settings-enable.yml
