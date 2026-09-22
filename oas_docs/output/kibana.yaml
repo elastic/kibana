@@ -102,6 +102,7 @@ tags:
       description: Connector documentation
       url: https://www.elastic.co/docs/reference/kibana/connectors-kibana
     x-displayName: Connectors
+  - name: context engine
   - name: Dashboards
     description: |
       > This documentation is temporarily hosted at a separate location.
@@ -22637,6 +22638,709 @@ paths:
       tags:
         - cases
       x-state: Technical preview
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/context_engine/ai_index:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/context_engine/ai_index</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Lists the AI Indices registered in the current space that the caller can read. An AI Index is left out when the caller cannot read its backing index. An empty AI Index is still listed. Up to 100 entries. The space comes from the request URL (`/s/{spaceId}/…`, or the default space); it cannot be set any other way.<br/><br/>[Required authorization] Route required privileges: contextEngine:read.
+      operationId: get-context-engine-ai-index
+      parameters: []
+      responses: {}
+      summary: List AI Indices
+      tags:
+        - context engine
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/context_engine/ai_index</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Creates an AI Index record attached to a data stream or index pattern. Fails with a 409 if an AI Index with the same id already exists.<br/><br/>[Required authorization] Route required privileges: contextEngine:write.
+      operationId: post-context-engine-ai-index
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                automations:
+                  default: []
+                  description: Automations associated with the AI Index. Defaults to an empty array when omitted.
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      type:
+                        enum:
+                          - workflow
+                        type: string
+                      value:
+                        maxLength: 1024
+                        minLength: 0
+                        type: string
+                    required:
+                      - type
+                      - value
+                  maxItems: 100
+                  type: array
+                description:
+                  description: Human-readable description of the AI Index.
+                  maxLength: 2048
+                  type: string
+                dest:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    type:
+                      description: The type of the backing store. `data_stream` for a data stream, or `index` for an index or index pattern.
+                      enum:
+                        - data_stream
+                        - index
+                      type: string
+                    value:
+                      description: The data stream or index (e.g. `ai-index-ds-foo`, `ai-index-idx-foo*`) the AI Index is attached to. Must match `type` and start with `ai-index-ds-` (for `data_stream`) or `ai-index-idx-` (for `index`). System indices are not allowed.
+                      maxLength: 1024
+                      minLength: 1
+                      type: string
+                  required:
+                    - type
+                    - value
+                feedback_analysis:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    agent_id:
+                      description: Agent Builder agent id that runs this index’s feedback-loop analysis.
+                      maxLength: 256
+                      type: string
+                    allowed_actions:
+                      default:
+                        - add_ki
+                        - edit_ki
+                        - remove_ki
+                        - add_workflow
+                        - edit_workflow
+                        - remove_workflow
+                        - add_source
+                        - edit_source
+                        - remove_source
+                      description: Improvement actions the analysis may propose. An empty list is observe-only.
+                      items:
+                        enum:
+                          - add_ki
+                          - edit_ki
+                          - remove_ki
+                          - add_workflow
+                          - edit_workflow
+                          - remove_workflow
+                          - add_source
+                          - edit_source
+                          - remove_source
+                        type: string
+                      maxItems: 9
+                      type: array
+                    enabled:
+                      description: Desired state of the recurring analysis. The scheduler stays authoritative for whether it is actually running.
+                      type: boolean
+                    schedule:
+                      additionalProperties: false
+                      default:
+                        interval: 24h
+                      type: object
+                      properties:
+                        interval:
+                          description: How often to analyze, for example `1h` or `24h`. At least 15 minutes.
+                          maxLength: 16
+                          type: string
+                      required:
+                        - interval
+                    signal_filter:
+                      description: 'KQL narrowing which signals this index analyzes, for example `tags: query_error`.'
+                      maxLength: 4096
+                      type: string
+                    signal_time_range:
+                      anyOf:
+                        - additionalProperties: false
+                          type: object
+                          properties:
+                            from:
+                              description: Date math relative to now, for example `now-30d`.
+                              maxLength: 64
+                              type: string
+                            type:
+                              enum:
+                                - relative
+                              type: string
+                          required:
+                            - type
+                            - from
+                        - additionalProperties: false
+                          type: object
+                          properties:
+                            from:
+                              description: ISO 8601 date to analyze signals since.
+                              maxLength: 64
+                              type: string
+                            type:
+                              enum:
+                                - absolute
+                              type: string
+                          required:
+                            - type
+                            - from
+                      default:
+                        from: now-30d
+                        type: relative
+                      description: Which signals the analysis reads. A read filter only.
+                  required:
+                    - enabled
+                id:
+                  description: The unique identifier of the AI Index.
+                  maxLength: 256
+                  minLength: 1
+                  type: string
+                sources:
+                  default: []
+                  description: Additional sources that provide context for the AI Index. Defaults to an empty array when omitted.
+                  items:
+                    anyOf:
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          type:
+                            enum:
+                              - esql
+                            type: string
+                          value:
+                            description: The source value; an ES|QL query when `type` is `esql`.
+                            maxLength: 10240
+                            minLength: 0
+                            type: string
+                        required:
+                          - type
+                          - value
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          type:
+                            enum:
+                              - connector
+                            type: string
+                          value:
+                            description: The source value; a connector id when `type` is `connector`.
+                            maxLength: 10240
+                            minLength: 1
+                            type: string
+                        required:
+                          - type
+                          - value
+                  maxItems: 100
+                  type: array
+                traces:
+                  default: []
+                  description: Trace sources linked to this AI index. A write replaces the whole array. Defaults to an empty array when omitted.
+                  items:
+                    anyOf:
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          type:
+                            enum:
+                              - elastic_agent
+                            type: string
+                          value:
+                            description: The Agent Builder agent id.
+                            maxLength: 10240
+                            minLength: 1
+                            type: string
+                        required:
+                          - type
+                          - value
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          type:
+                            enum:
+                              - index
+                            type: string
+                          value:
+                            description: An index or data stream name or pattern to read traces from.
+                            maxLength: 10240
+                            minLength: 1
+                            type: string
+                        required:
+                          - type
+                          - value
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          type:
+                            enum:
+                              - esql
+                            type: string
+                          value:
+                            description: An ES|QL query to select traces.
+                            maxLength: 10240
+                            minLength: 1
+                            type: string
+                        required:
+                          - type
+                          - value
+                  maxItems: 100
+                  type: array
+              required:
+                - id
+                - dest
+      responses: {}
+      summary: Create an AI Index
+      tags:
+        - context engine
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/context_engine/ai_index/_query:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/context_engine/ai_index/_query</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Runs an ES|QL query as the current user, with a space filter and a row limit (at most 1000) applied server-side. The space comes from the request URL (`/s/{spaceId}/…`, or the default space); nothing in the request body can change it or replace the space filter. The query decides which indices it reads; Elasticsearch index privileges bound what it can reach.<br/><br/>[Required authorization] Route required privileges: contextEngine:read.
+      operationId: post-context-engine-ai-index-query
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                limit:
+                  description: Maximum rows to return. Defaults to 100; a trailing `LIMIT` in the query is capped to this value.
+                  maximum: 1000
+                  minimum: 1
+                  type: number
+                params:
+                  additionalProperties:
+                    anyOf:
+                      - maxLength: 4096
+                        type: string
+                      - type: number
+                      - type: boolean
+                  description: Values for `?name` placeholders in the query.
+                  type: object
+                query:
+                  description: The ES|QL query to run. Its FROM decides which Elasticsearch indices are read (normally `ai-index-*`); the server adds the space filter and a row limit.
+                  maxLength: 10000
+                  minLength: 1
+                  type: string
+              required:
+                - query
+      responses: {}
+      summary: Query AI Indices
+      tags:
+        - context engine
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/context_engine/ai_index/{aiIndexId}:
+    delete:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/context_engine/ai_index/{aiIndexId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Deletes an AI Index by id. The backing data stream/index (and therefore its Knowledge Indicators) and the attached workflow automations are left untouched unless the `delete_knowledge_indicators`/`delete_automations` query parameters are set to true. The dest is not deleted when another AI Index still uses it.<br/><br/>[Required authorization] Route required privileges: contextEngine:write. Extended privileges (optional, expand functionality when granted): workflowsManagement:delete.
+      operationId: delete-context-engine-ai-index-aiindexid
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The unique identifier of the AI Index.
+          in: path
+          name: aiIndexId
+          required: true
+          schema:
+            maxLength: 256
+            minLength: 1
+            type: string
+        - description: When true, also delete the backing data stream/index, which removes its Knowledge Indicators. Skipped when another AI index still uses the same dest. Defaults to false.
+          in: query
+          name: delete_knowledge_indicators
+          required: false
+          schema:
+            default: false
+            type: boolean
+        - description: When true, also delete the attached workflow automations. Defaults to false.
+          in: query
+          name: delete_automations
+          required: false
+          schema:
+            default: false
+            type: boolean
+      responses: {}
+      summary: Delete an AI Index
+      tags:
+        - context engine
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/context_engine/ai_index/{aiIndexId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Fetches an AI Index by id.<br/><br/>[Required authorization] Route required privileges: contextEngine:read.
+      operationId: get-context-engine-ai-index-aiindexid
+      parameters:
+        - description: The unique identifier of the AI Index.
+          in: path
+          name: aiIndexId
+          required: true
+          schema:
+            maxLength: 256
+            minLength: 1
+            type: string
+      responses: {}
+      summary: Get an AI Index
+      tags:
+        - context engine
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/context_engine/ai_index/{aiIndexId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Creates or updates an AI Index record attached to a data stream or index pattern.<br/><br/>[Required authorization] Route required privileges: contextEngine:write.
+      operationId: put-context-engine-ai-index-aiindexid
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The unique identifier of the AI Index.
+          in: path
+          name: aiIndexId
+          required: true
+          schema:
+            maxLength: 256
+            minLength: 1
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                automations:
+                  default: []
+                  description: Automations associated with the AI Index. Defaults to an empty array when omitted.
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      type:
+                        enum:
+                          - workflow
+                        type: string
+                      value:
+                        maxLength: 1024
+                        minLength: 0
+                        type: string
+                    required:
+                      - type
+                      - value
+                  maxItems: 100
+                  type: array
+                description:
+                  description: Human-readable description of the AI Index.
+                  maxLength: 2048
+                  type: string
+                dest:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    type:
+                      description: The type of the backing store. `data_stream` for a data stream, or `index` for an index or index pattern.
+                      enum:
+                        - data_stream
+                        - index
+                      type: string
+                    value:
+                      description: The data stream or index (e.g. `ai-index-ds-foo`, `ai-index-idx-foo*`) the AI Index is attached to. Must match `type` and start with `ai-index-ds-` (for `data_stream`) or `ai-index-idx-` (for `index`). System indices are not allowed.
+                      maxLength: 1024
+                      minLength: 1
+                      type: string
+                  required:
+                    - type
+                    - value
+                feedback_analysis:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    agent_id:
+                      description: Agent Builder agent id that runs this index’s feedback-loop analysis.
+                      maxLength: 256
+                      type: string
+                    allowed_actions:
+                      default:
+                        - add_ki
+                        - edit_ki
+                        - remove_ki
+                        - add_workflow
+                        - edit_workflow
+                        - remove_workflow
+                        - add_source
+                        - edit_source
+                        - remove_source
+                      description: Improvement actions the analysis may propose. An empty list is observe-only.
+                      items:
+                        enum:
+                          - add_ki
+                          - edit_ki
+                          - remove_ki
+                          - add_workflow
+                          - edit_workflow
+                          - remove_workflow
+                          - add_source
+                          - edit_source
+                          - remove_source
+                        type: string
+                      maxItems: 9
+                      type: array
+                    enabled:
+                      description: Desired state of the recurring analysis. The scheduler stays authoritative for whether it is actually running.
+                      type: boolean
+                    schedule:
+                      additionalProperties: false
+                      default:
+                        interval: 24h
+                      type: object
+                      properties:
+                        interval:
+                          description: How often to analyze, for example `1h` or `24h`. At least 15 minutes.
+                          maxLength: 16
+                          type: string
+                      required:
+                        - interval
+                    signal_filter:
+                      description: 'KQL narrowing which signals this index analyzes, for example `tags: query_error`.'
+                      maxLength: 4096
+                      type: string
+                    signal_time_range:
+                      anyOf:
+                        - additionalProperties: false
+                          type: object
+                          properties:
+                            from:
+                              description: Date math relative to now, for example `now-30d`.
+                              maxLength: 64
+                              type: string
+                            type:
+                              enum:
+                                - relative
+                              type: string
+                          required:
+                            - type
+                            - from
+                        - additionalProperties: false
+                          type: object
+                          properties:
+                            from:
+                              description: ISO 8601 date to analyze signals since.
+                              maxLength: 64
+                              type: string
+                            type:
+                              enum:
+                                - absolute
+                              type: string
+                          required:
+                            - type
+                            - from
+                      default:
+                        from: now-30d
+                        type: relative
+                      description: Which signals the analysis reads. A read filter only.
+                  required:
+                    - enabled
+                sources:
+                  default: []
+                  description: Additional sources that provide context for the AI Index. Defaults to an empty array when omitted.
+                  items:
+                    anyOf:
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          type:
+                            enum:
+                              - esql
+                            type: string
+                          value:
+                            description: The source value; an ES|QL query when `type` is `esql`.
+                            maxLength: 10240
+                            minLength: 0
+                            type: string
+                        required:
+                          - type
+                          - value
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          type:
+                            enum:
+                              - connector
+                            type: string
+                          value:
+                            description: The source value; a connector id when `type` is `connector`.
+                            maxLength: 10240
+                            minLength: 1
+                            type: string
+                        required:
+                          - type
+                          - value
+                  maxItems: 100
+                  type: array
+                traces:
+                  default: []
+                  description: Trace sources linked to this AI index. A write replaces the whole array. Defaults to an empty array when omitted.
+                  items:
+                    anyOf:
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          type:
+                            enum:
+                              - elastic_agent
+                            type: string
+                          value:
+                            description: The Agent Builder agent id.
+                            maxLength: 10240
+                            minLength: 1
+                            type: string
+                        required:
+                          - type
+                          - value
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          type:
+                            enum:
+                              - index
+                            type: string
+                          value:
+                            description: An index or data stream name or pattern to read traces from.
+                            maxLength: 10240
+                            minLength: 1
+                            type: string
+                        required:
+                          - type
+                          - value
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          type:
+                            enum:
+                              - esql
+                            type: string
+                          value:
+                            description: An ES|QL query to select traces.
+                            maxLength: 10240
+                            minLength: 1
+                            type: string
+                        required:
+                          - type
+                          - value
+                  maxItems: 100
+                  type: array
+              required:
+                - dest
+      responses: {}
+      summary: Create or update an AI Index
+      tags:
+        - context engine
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/context_engine/ai_index/{aiIndexId}/_describe:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/context_engine/ai_index/{aiIndexId}/_describe</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns a free-form text context block for an agent: the AI Index, its ES|QL target, the fields its backing indices expose (at most 500) and which are semantic, knowledge item type and tag counts in the current space, and example ES|QL queries. Read as the current user, so Elasticsearch index privileges bound what it can reach. The space comes from the request URL (`/s/{spaceId}/…`, or the default space); it cannot be set any other way.<br/><br/>[Required authorization] Route required privileges: contextEngine:read.
+      operationId: get-context-engine-ai-index-aiindexid-describe
+      parameters:
+        - description: The unique identifier of the AI Index.
+          in: path
+          name: aiIndexId
+          required: true
+          schema:
+            maxLength: 256
+            minLength: 1
+            type: string
+      responses: {}
+      summary: Describe an AI Index
+      tags:
+        - context engine
+      x-state: Experimental
       x-metaTags:
         - content: Kibana
           name: product_name
