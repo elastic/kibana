@@ -267,6 +267,21 @@ describe('getInitialAppState', () => {
     expect(actual.hideTable).toBe(false);
   });
 
+  test('keeps the grid implementation from the URL', () => {
+    const services = createDiscoverServicesMock();
+    const actual = getInitialAppState({
+      hasGlobalState: false,
+      initialUrlState: {
+        gridImplementation: 'unified',
+      },
+      persistedTab: undefined,
+      dataView: dataViewWithTimefieldMock,
+      services,
+    });
+
+    expect(actual.gridImplementation).toBe('unified');
+  });
+
   const getPersistedTab = ({ services }: { services: DiscoverServices }) =>
     fromTabStateToSavedObjectTab({
       tab: getTabStateMock({ id: 'mock-tab' }),

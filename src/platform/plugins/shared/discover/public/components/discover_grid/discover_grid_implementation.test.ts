@@ -11,6 +11,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   DEFAULT_DISCOVER_GRID_IMPLEMENTATION,
   getDiscoverGridImplementation,
+  resolveDiscoverGridImplementation,
   setDiscoverGridImplementation,
 } from './discover_grid_implementation';
 
@@ -40,5 +41,12 @@ describe('discover grid implementation storage', () => {
   it('ignores invalid stored values', () => {
     localStorage.setItem('discover:discoverGridImplementation', JSON.stringify('invalid'));
     expect(getDiscoverGridImplementation(storage)).toBe(DEFAULT_DISCOVER_GRID_IMPLEMENTATION);
+  });
+
+  it('resolves URL values and falls back when the value is missing or invalid', () => {
+    expect(resolveDiscoverGridImplementation('unified')).toBe('unified');
+    expect(resolveDiscoverGridImplementation('tanstack')).toBe('tanstack');
+    expect(resolveDiscoverGridImplementation(undefined)).toBe(DEFAULT_DISCOVER_GRID_IMPLEMENTATION);
+    expect(resolveDiscoverGridImplementation('eui')).toBe(DEFAULT_DISCOVER_GRID_IMPLEMENTATION);
   });
 });

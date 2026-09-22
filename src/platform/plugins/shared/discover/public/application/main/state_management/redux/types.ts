@@ -46,6 +46,9 @@ import type { ProfileStateMap } from '../../../../../common/context_awareness';
 import type { DefaultEsqlQueryConfig } from '../../../../context_awareness';
 import type { CascadedDocumentsDataGridUiStateMap } from '../../components/layout/cascaded_documents';
 
+/** Documents grid implementation. `unified` is the EUI data grid. */
+export type DiscoverGridImplementation = 'tanstack' | 'unified';
+
 /** Group path used to reconstruct a cascade leaf query for a nested-grid flyout. */
 export interface ExpandedDocCascadePath {
   nodePath: string[];
@@ -142,6 +145,11 @@ export interface DiscoverAppState {
    * Density of table
    */
   density?: DataGridDensity;
+  /**
+   * Documents grid implementation. Omitted means TanStack.
+   * `unified` renders the EUI data grid.
+   */
+  gridImplementation?: DiscoverGridImplementation;
   /**
    * Documents display mode: 'table' or 'json'
    */

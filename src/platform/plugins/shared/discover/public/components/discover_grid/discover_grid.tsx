@@ -26,6 +26,10 @@ import {
 } from '../../application/main/components/layout/cascaded_documents';
 import { TanStackDataGrid } from './tanstack_data_grid';
 import { DiscoverGridImplementationSwitch } from './discover_grid_implementation_switch';
+import {
+  resolveDiscoverGridImplementation,
+  type DiscoverGridImplementation,
+} from './discover_grid_implementation';
 import { useDiscoverGridImplementation } from './use_discover_grid_implementation';
 
 export interface DiscoverGridProps extends UnifiedDataTableProps {
@@ -33,6 +37,12 @@ export interface DiscoverGridProps extends UnifiedDataTableProps {
   cascadedDocumentsContext?: CascadedDocumentsContext;
   tanStackToolbarLeftSide?: ReactNode;
   tanStackToolbarTrailingControl?: ReactNode;
+  /**
+   * App-state grid implementation. Used when `onChangeGridImplementation` is provided
+   * so the choice is stored in Discover URL state instead of local storage.
+   */
+  gridImplementation?: DiscoverGridImplementation;
+  onChangeGridImplementation?: (implementation: DiscoverGridImplementation) => void;
 }
 
 /**
@@ -48,12 +58,34 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
     onFullScreenChange,
     tanStackToolbarLeftSide,
     tanStackToolbarTrailingControl,
+    gridImplementation,
+    onChangeGridImplementation,
     ...props
   }) => {
     const { dataView, services } = props;
-    const { usesUnifiedDataTable, toggleImplementation } = useDiscoverGridImplementation(
-      services.storage
-    );
+    const {
+      implementation: storedGridImplementation,
+      onChangeImplementation: onChangeStoredGridImplementation,
+    } = useDiscoverGridImplementation(services.storage);
+    const resolvedGridImplementation = onChangeGridImplementation
+      ? resolveDiscoverGridImplementation(gridImplementation)
+      : storedGridImplementation;
+    const usesUnifiedDataTable = resolvedGridImplementation === 'unified';
+    const toggleImplementation = useCallback(() => {
+      const nextImplementation: DiscoverGridImplementation =
+        resolvedGridImplementation === 'unified' ? 'tanstack' : 'unified';
+
+      if (onChangeGridImplementation) {
+        onChangeGridImplementation(nextImplementation);
+        return;
+      }
+
+      onChangeStoredGridImplementation(nextImplementation);
+    }, [
+      onChangeGridImplementation,
+      onChangeStoredGridImplementation,
+      resolvedGridImplementation,
+    ]);
 
     const getRowIndicatorProvider = useProfileAccessor('getRowIndicatorProvider');
     const getRowIndicator = useMemo(() => {

@@ -8,25 +8,31 @@
  */
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { DiscoverGridImplementation } from '../../application/main/state_management/redux/types';
 
-export type DiscoverGridImplementation = 'tanstack' | 'unified';
+export type { DiscoverGridImplementation };
 
 export const DISCOVER_GRID_IMPLEMENTATION_STORAGE_KEY = 'discoverGridImplementation';
 export const DEFAULT_DISCOVER_GRID_IMPLEMENTATION: DiscoverGridImplementation = 'tanstack';
 
-const getStorageKey = (consumer: string) => `${consumer}:${DISCOVER_GRID_IMPLEMENTATION_STORAGE_KEY}`;
+const getStorageKey = (consumer: string) =>
+  `${consumer}:${DISCOVER_GRID_IMPLEMENTATION_STORAGE_KEY}`;
+
+export const isDiscoverGridImplementation = (
+  value: unknown
+): value is DiscoverGridImplementation => value === 'tanstack' || value === 'unified';
+
+/** Returns a known grid implementation, falling back when the value is missing or invalid. */
+export const resolveDiscoverGridImplementation = (
+  value: unknown,
+  fallback: DiscoverGridImplementation = DEFAULT_DISCOVER_GRID_IMPLEMENTATION
+): DiscoverGridImplementation => (isDiscoverGridImplementation(value) ? value : fallback);
 
 export const getDiscoverGridImplementation = (
   storage: Storage,
   consumer = 'discover'
 ): DiscoverGridImplementation => {
-  const stored = storage.get(getStorageKey(consumer));
-
-  if (stored === 'tanstack' || stored === 'unified') {
-    return stored;
-  }
-
-  return DEFAULT_DISCOVER_GRID_IMPLEMENTATION;
+  return resolveDiscoverGridImplementation(storage.get(getStorageKey(consumer)));
 };
 
 export const setDiscoverGridImplementation = (
