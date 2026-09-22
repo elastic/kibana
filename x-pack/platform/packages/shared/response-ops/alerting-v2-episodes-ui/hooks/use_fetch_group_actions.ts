@@ -23,6 +23,14 @@ export interface UseFetchGroupActionsOptions {
 export const getGroupActionKey = (ruleId: string | null | undefined, groupHash: string) =>
   `${ruleId ?? ''}:${groupHash}`;
 
+export const getGroupAction = (
+  groupActionsMap: ReadonlyMap<string, AlertEpisodeGroupAction> | undefined,
+  ruleId: string | null | undefined,
+  groupHash: string
+) =>
+  groupActionsMap?.get(getGroupActionKey(ruleId, groupHash)) ??
+  groupActionsMap?.get(getGroupActionKey(null, groupHash));
+
 export const useFetchGroupActions = ({ groupHashes, services }: UseFetchGroupActionsOptions) => {
   const { expressions } = services;
   const spaceId = useSpaceId(services.spaces);

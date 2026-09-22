@@ -11,7 +11,7 @@ import type { EpisodeActionState, AlertEpisodeGroupAction } from '../types/actio
 import { isRuleLoading, type RuleState } from '../types/rule_state';
 import { useFetchEpisodeQuery } from './use_fetch_episode_query';
 import { useFetchEpisodeActions } from './use_fetch_episode_actions';
-import { getGroupActionKey, useFetchGroupActions } from './use_fetch_group_actions';
+import { getGroupAction, useFetchGroupActions } from './use_fetch_group_actions';
 import { useFetchRule } from './use_fetch_rule';
 import { useEpisodeFlapping } from './use_episode_flapping';
 
@@ -65,7 +65,7 @@ export const useEpisodeDetailsHeaderData = ({
   const severity = episode?.severity;
   const episodeAction = episodeActionsMap?.get(episodeId);
   const groupAction = resolvedGroupHash
-    ? groupActionsMap?.get(getGroupActionKey(ruleId, resolvedGroupHash))
+    ? getGroupAction(groupActionsMap, ruleId, resolvedGroupHash)
     : undefined;
 
   const isLoading =

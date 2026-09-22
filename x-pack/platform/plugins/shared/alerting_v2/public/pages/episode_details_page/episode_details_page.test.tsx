@@ -312,7 +312,7 @@ describe('EpisodeDetailsPage', () => {
     );
   });
 
-  it('uses the rule and group hash to render group-derived header state', () => {
+  it('prefers rule-scoped group actions for group-derived header state', () => {
     mockUseFetchGroupActions.mockReturnValue({
       data: new Map([
         [
@@ -320,6 +320,45 @@ describe('EpisodeDetailsPage', () => {
           {
             groupHash: 'group-1',
             ruleId: 'rule-1',
+            lastDeactivateAction: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
+            lastSnoozeAction: null,
+            snoozeExpiry: null,
+            tags: [],
+            lastSnoozeActor: null,
+            lastDeactivateActor: null,
+          },
+        ],
+        [
+          ':group-1',
+          {
+            groupHash: 'group-1',
+            ruleId: null,
+            lastDeactivateAction: ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
+            lastSnoozeAction: null,
+            snoozeExpiry: null,
+            tags: [],
+            lastSnoozeActor: null,
+            lastDeactivateActor: null,
+          },
+        ],
+      ]),
+    } as unknown as ReturnType<typeof useFetchGroupActions>);
+
+    renderPage();
+
+    expect(screen.getByTestId('alertingV2EpisodeDetailsHeaderStatusBadge')).toHaveTextContent(
+      'Inactive'
+    );
+  });
+
+  it('uses legacy group actions without a rule id for group-derived header state', () => {
+    mockUseFetchGroupActions.mockReturnValue({
+      data: new Map([
+        [
+          ':group-1',
+          {
+            groupHash: 'group-1',
+            ruleId: null,
             lastDeactivateAction: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
             lastSnoozeAction: null,
             snoozeExpiry: null,
