@@ -10,7 +10,10 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
+import type { OsqueryExportLiveQueryResultsResponse } from '@kbn/osquery-plugin/common/api/live_query/live_queries.gen';
+import type { ReadRuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/read_rule/read_rule_route.gen';
 import { SecuritySolutionScoutApiServiceProvider as createDetectionsApi } from './detections.gen';
+import { SecuritySolutionScoutApiServiceProvider as createOsqueryApi } from './osquery.gen';
 
 /**
  * Guards the runtime behaviour of the `api_client_scout` generator template through one of its
@@ -74,11 +77,47 @@ describe('generated Scout API client (api_client_scout template)', () => {
     expect(options).toMatchObject({ body, responseType: 'text' });
   });
 
+  it('types the body after the requested response type for multi-content operations', async () => {
+    const ndjson = '{"id":"a"}\n{"id":"b"}\n';
+    const apiClient = createApiClientMock();
+    apiClient.post.mockResolvedValue({ ...response, body: ndjson });
+    const osqueryApi = createOsqueryApi(apiClient);
+    const props = {
+      params: { id: 'live-query-1', actionId: 'action-1' },
+      query: { format: 'ndjson' as const },
+      body: {},
+    };
+
+    const textResponse = await osqueryApi.osqueryExportLiveQueryResults(props, {
+      responseType: 'text',
+    });
+    const text: string = textResponse.body;
+
+    expect(text).toBe(ndjson);
+
+    apiClient.post.mockResolvedValue({ ...response, body: Buffer.from(ndjson) });
+    const bufferResponse = await osqueryApi.osqueryExportLiveQueryResults(props, {
+      responseType: 'buffer',
+    });
+    const buffer: Buffer = bufferResponse.body;
+
+    expect(buffer.toString('utf8')).toBe(ndjson);
+
+    apiClient.post.mockResolvedValue({ ...response, body: { results: [] } });
+    const jsonResponse = await osqueryApi.osqueryExportLiveQueryResults(props);
+    const results: OsqueryExportLiveQueryResultsResponse['results'] = jsonResponse.body.results;
+
+    expect(results).toEqual([]);
+  });
+
   it('defaults to a JSON response and sends the Kibana headers', async () => {
     const apiClient = createApiClientMock();
     const detectionsApi = createDetectionsApi(apiClient);
 
-    await detectionsApi.readRule({ query: { id: 'rule-1' } });
+    const jsonResponse = await detectionsApi.readRule({ query: { id: 'rule-1' } });
+    const rule: ReadRuleResponse = jsonResponse.body;
+
+    expect(rule).toEqual(response.body);
 
     const [, options] = apiClient.get.mock.calls[0];
 

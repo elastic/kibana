@@ -23,16 +23,28 @@ import type {
 {{/if}}
 {{/each}}
 
-export interface ScoutApiRequestOptions {
+export type ScoutResponseType = NonNullable<ApiClientOptions['responseType']>;
+
+/**
+ * Body the Scout `apiClient` yields for a given `responseType`: the OpenAPI response for 'json',
+ * a string for 'text' and a Buffer for 'buffer'.
+ */
+export type ScoutResponseBody<
+  TResponseType extends ScoutResponseType,
+  TJsonBody = ApiClientResponse['body']
+> = TResponseType extends 'text' ? string : TResponseType extends 'buffer' ? Buffer : TJsonBody;
+
+export interface ScoutApiRequestOptions<TResponseType extends ScoutResponseType = 'json'> {
   /** Extra headers merged on top of the defaults, e.g. an API key or a SAML cookie for auth */
   headers?: Record<string, string>;
   /** Kibana space id the request targets. Omit or pass 'default' for the default space */
   kibanaSpace?: string;
   /**
    * How the response body should be parsed. Defaults to 'json'.
-   * Use 'text' or 'buffer' for endpoints returning non-JSON payloads, e.g. NDJSON exports.
+   * Use 'text' or 'buffer' for endpoints returning non-JSON payloads, e.g. NDJSON or CSV exports;
+   * the returned `body` is then typed as a string or a Buffer accordingly.
    */
-  responseType?: ApiClientOptions['responseType'];
+  responseType?: TResponseType;
   /**
    * Raw request body for operations whose payload is not described by the OpenAPI request body,
    * e.g. multipart/form-data imports. Ignored for operations with a typed request body.
@@ -47,11 +59,11 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       * {{{description}}}
       */
     {{/if}}
-    async {{camelCase operationId}}({{#if (or requestQuery requestParams requestBody)}}props: {{operationId}}Props, {{/if}}options: ScoutApiRequestOptions = {}): Promise<ApiClientResponse{{#if response}}<{{operationId}}Response>{{/if}}> {
+    async {{camelCase operationId}}<TResponseType extends ScoutResponseType = 'json'>({{#if (or requestQuery requestParams requestBody)}}props: {{operationId}}Props, {{/if}}options: ScoutApiRequestOptions<TResponseType> = {}): Promise<ApiClientResponse<ScoutResponseBody<TResponseType{{#if response}}, {{operationId}}Response{{/if}}>>> {
       const basePath = options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
       const path = `${basePath}{{#if requestParams}}${replaceParams('{{path}}', props.params)}{{else}}{{path}}{{/if}}`;
 
-      return apiClient.{{method}}{{#if response}}<{{operationId}}Response>{{/if}}(
+      return apiClient.{{method}}<ScoutResponseBody<TResponseType{{#if response}}, {{operationId}}Response{{/if}}>>(
         {{~#if requestQuery}}`${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`{{else}}path{{/if}},
         {
           headers: {

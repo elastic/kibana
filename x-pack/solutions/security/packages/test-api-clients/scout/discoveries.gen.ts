@@ -60,16 +60,28 @@ import type {
   UpdateAttackDiscoveryScheduleResponse,
 } from '@kbn/discoveries-schemas/schemas/routes/put/schedules/update_schedule_route.gen';
 
-export interface ScoutApiRequestOptions {
+export type ScoutResponseType = NonNullable<ApiClientOptions['responseType']>;
+
+/**
+ * Body the Scout `apiClient` yields for a given `responseType`: the OpenAPI response for 'json',
+ * a string for 'text' and a Buffer for 'buffer'.
+ */
+export type ScoutResponseBody<
+  TResponseType extends ScoutResponseType,
+  TJsonBody = ApiClientResponse['body']
+> = TResponseType extends 'text' ? string : TResponseType extends 'buffer' ? Buffer : TJsonBody;
+
+export interface ScoutApiRequestOptions<TResponseType extends ScoutResponseType = 'json'> {
   /** Extra headers merged on top of the defaults, e.g. an API key or a SAML cookie for auth */
   headers?: Record<string, string>;
   /** Kibana space id the request targets. Omit or pass 'default' for the default space */
   kibanaSpace?: string;
   /**
    * How the response body should be parsed. Defaults to 'json'.
-   * Use 'text' or 'buffer' for endpoints returning non-JSON payloads, e.g. NDJSON exports.
+   * Use 'text' or 'buffer' for endpoints returning non-JSON payloads, e.g. NDJSON or CSV exports;
+   * the returned `body` is then typed as a string or a Buffer accordingly.
    */
-  responseType?: ApiClientOptions['responseType'];
+  responseType?: TResponseType;
   /**
    * Raw request body for operations whose payload is not described by the OpenAPI request body,
    * e.g. multipart/form-data imports. Ignored for operations with a typed request body.
@@ -81,32 +93,39 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   /**
    * Internal API that creates a new attack discovery schedule for analyzing security alerts at specified intervals. The schedule defines when and how analysis should run, including workflow configuration.
    */
-  async createAttackDiscoverySchedule(
+  async createAttackDiscoverySchedule<TResponseType extends ScoutResponseType = 'json'>(
     props: CreateAttackDiscoveryScheduleProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<CreateAttackDiscoveryScheduleResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, CreateAttackDiscoveryScheduleResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/internal/attack_discovery/schedules`;
 
-    return apiClient.post<CreateAttackDiscoveryScheduleResponse>(path, {
-      headers: {
-        'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-        ...options.headers,
-      },
-      body: props.body,
-      responseType: options.responseType ?? 'json',
-    });
+    return apiClient.post<ScoutResponseBody<TResponseType, CreateAttackDiscoveryScheduleResponse>>(
+      path,
+      {
+        headers: {
+          'kbn-xsrf': 'true',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+          ...options.headers,
+        },
+        body: props.body,
+        responseType: options.responseType ?? 'json',
+      }
+    );
   },
   /**
    * Internal API that permanently deletes an attack discovery schedule and all associated configuration.
    */
-  async deleteAttackDiscoverySchedule(
+  async deleteAttackDiscoverySchedule<TResponseType extends ScoutResponseType = 'json'>(
     props: DeleteAttackDiscoveryScheduleProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<DeleteAttackDiscoveryScheduleResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, DeleteAttackDiscoveryScheduleResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
@@ -114,7 +133,9 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       props.params
     )}`;
 
-    return apiClient.delete<DeleteAttackDiscoveryScheduleResponse>(path, {
+    return apiClient.delete<
+      ScoutResponseBody<TResponseType, DeleteAttackDiscoveryScheduleResponse>
+    >(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '1',
@@ -128,10 +149,12 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   /**
    * Internal API that disables an attack discovery schedule, preventing it from running according to its configured interval. The schedule configuration is preserved and can be re-enabled later.
    */
-  async disableAttackDiscoverySchedule(
+  async disableAttackDiscoverySchedule<TResponseType extends ScoutResponseType = 'json'>(
     props: DisableAttackDiscoveryScheduleProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<DisableAttackDiscoveryScheduleResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, DisableAttackDiscoveryScheduleResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
@@ -139,24 +162,29 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       props.params
     )}`;
 
-    return apiClient.post<DisableAttackDiscoveryScheduleResponse>(path, {
-      headers: {
-        'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-        ...options.headers,
-      },
-      body: options.body,
-      responseType: options.responseType ?? 'json',
-    });
+    return apiClient.post<ScoutResponseBody<TResponseType, DisableAttackDiscoveryScheduleResponse>>(
+      path,
+      {
+        headers: {
+          'kbn-xsrf': 'true',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+          ...options.headers,
+        },
+        body: options.body,
+        responseType: options.responseType ?? 'json',
+      }
+    );
   },
   /**
    * Internal API that enables a previously disabled attack discovery schedule, allowing it to run according to its configured interval.
    */
-  async enableAttackDiscoverySchedule(
+  async enableAttackDiscoverySchedule<TResponseType extends ScoutResponseType = 'json'>(
     props: EnableAttackDiscoveryScheduleProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<EnableAttackDiscoveryScheduleResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, EnableAttackDiscoveryScheduleResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
@@ -164,29 +192,34 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       props.params
     )}`;
 
-    return apiClient.post<EnableAttackDiscoveryScheduleResponse>(path, {
-      headers: {
-        'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-        ...options.headers,
-      },
-      body: options.body,
-      responseType: options.responseType ?? 'json',
-    });
+    return apiClient.post<ScoutResponseBody<TResponseType, EnableAttackDiscoveryScheduleResponse>>(
+      path,
+      {
+        headers: {
+          'kbn-xsrf': 'true',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+          ...options.headers,
+        },
+        body: options.body,
+        responseType: options.responseType ?? 'json',
+      }
+    );
   },
   /**
    * Internal API that finds attack discovery schedules matching the search criteria. Supports pagination and sorting by various fields.
    */
-  async findAttackDiscoverySchedules(
+  async findAttackDiscoverySchedules<TResponseType extends ScoutResponseType = 'json'>(
     props: FindAttackDiscoverySchedulesProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<FindAttackDiscoverySchedulesResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, FindAttackDiscoverySchedulesResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/internal/attack_discovery/schedules/_find`;
 
-    return apiClient.get<FindAttackDiscoverySchedulesResponse>(
+    return apiClient.get<ScoutResponseBody<TResponseType, FindAttackDiscoverySchedulesResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -203,10 +236,12 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   /**
    * Internal API that retrieves a specific attack discovery schedule by its unique identifier. Returns complete schedule configuration including parameters, interval settings, associated actions, and execution history.
    */
-  async getAttackDiscoverySchedule(
+  async getAttackDiscoverySchedule<TResponseType extends ScoutResponseType = 'json'>(
     props: GetAttackDiscoveryScheduleProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<GetAttackDiscoveryScheduleResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, GetAttackDiscoveryScheduleResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
@@ -214,29 +249,32 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       props.params
     )}`;
 
-    return apiClient.get<GetAttackDiscoveryScheduleResponse>(path, {
-      headers: {
-        'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-        ...options.headers,
-      },
-      body: options.body,
-      responseType: options.responseType ?? 'json',
-    });
+    return apiClient.get<ScoutResponseBody<TResponseType, GetAttackDiscoveryScheduleResponse>>(
+      path,
+      {
+        headers: {
+          'kbn-xsrf': 'true',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+          ...options.headers,
+        },
+        body: options.body,
+        responseType: options.responseType ?? 'json',
+      }
+    );
   },
   /**
    * Internal API that kicks off the Attack Discovery pipeline (retrieve → generate → validate). Returns an execution UUID for tracking.
    */
-  async postGenerate(
+  async postGenerate<TResponseType extends ScoutResponseType = 'json'>(
     props: PostGenerateProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<PostGenerateResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, PostGenerateResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/internal/attack_discovery/_generate`;
 
-    return apiClient.post<PostGenerateResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, PostGenerateResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '1',
@@ -250,15 +288,15 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   /**
    * Internal API that uses an LLM to generate an alert retrieval workflow from a natural language description. Returns the generated workflow ID and name.
    */
-  async postGenerateWorkflow(
+  async postGenerateWorkflow<TResponseType extends ScoutResponseType = 'json'>(
     props: PostGenerateWorkflowProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<PostGenerateWorkflowResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, PostGenerateWorkflowResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/internal/attack_discovery/_generate_workflow`;
 
-    return apiClient.post<PostGenerateWorkflowResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, PostGenerateWorkflowResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '1',
@@ -272,10 +310,12 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   /**
    * Internal API that updates an existing attack discovery schedule with new configuration. All schedule properties can be modified including name, parameters, interval, and actions.
    */
-  async updateAttackDiscoverySchedule(
+  async updateAttackDiscoverySchedule<TResponseType extends ScoutResponseType = 'json'>(
     props: UpdateAttackDiscoveryScheduleProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<UpdateAttackDiscoveryScheduleResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, UpdateAttackDiscoveryScheduleResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
@@ -283,16 +323,19 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       props.params
     )}`;
 
-    return apiClient.put<UpdateAttackDiscoveryScheduleResponse>(path, {
-      headers: {
-        'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-        ...options.headers,
-      },
-      body: props.body,
-      responseType: options.responseType ?? 'json',
-    });
+    return apiClient.put<ScoutResponseBody<TResponseType, UpdateAttackDiscoveryScheduleResponse>>(
+      path,
+      {
+        headers: {
+          'kbn-xsrf': 'true',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+          ...options.headers,
+        },
+        body: props.body,
+        responseType: options.responseType ?? 'json',
+      }
+    );
   },
 });
 

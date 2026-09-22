@@ -99,16 +99,28 @@ import type {
   RunScriptActionResponse,
 } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/run_script/run_script.gen';
 
-export interface ScoutApiRequestOptions {
+export type ScoutResponseType = NonNullable<ApiClientOptions['responseType']>;
+
+/**
+ * Body the Scout `apiClient` yields for a given `responseType`: the OpenAPI response for 'json',
+ * a string for 'text' and a Buffer for 'buffer'.
+ */
+export type ScoutResponseBody<
+  TResponseType extends ScoutResponseType,
+  TJsonBody = ApiClientResponse['body']
+> = TResponseType extends 'text' ? string : TResponseType extends 'buffer' ? Buffer : TJsonBody;
+
+export interface ScoutApiRequestOptions<TResponseType extends ScoutResponseType = 'json'> {
   /** Extra headers merged on top of the defaults, e.g. an API key or a SAML cookie for auth */
   headers?: Record<string, string>;
   /** Kibana space id the request targets. Omit or pass 'default' for the default space */
   kibanaSpace?: string;
   /**
    * How the response body should be parsed. Defaults to 'json'.
-   * Use 'text' or 'buffer' for endpoints returning non-JSON payloads, e.g. NDJSON exports.
+   * Use 'text' or 'buffer' for endpoints returning non-JSON payloads, e.g. NDJSON or CSV exports;
+   * the returned `body` is then typed as a string or a Buffer accordingly.
    */
-  responseType?: ApiClientOptions['responseType'];
+  responseType?: TResponseType;
   /**
    * Raw request body for operations whose payload is not described by the OpenAPI request body,
    * e.g. multipart/form-data imports. Ignored for operations with a typed request body.
@@ -120,15 +132,15 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   /**
    * Cancel a running or pending response action (Applies only to some agent types).
    */
-  async cancelAction(
+  async cancelAction<TResponseType extends ScoutResponseType = 'json'>(
     props: CancelActionProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<CancelActionResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, CancelActionResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/endpoint/action/cancel`;
 
-    return apiClient.post<CancelActionResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, CancelActionResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -142,10 +154,12 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   /**
    * Create or update the protection updates note for a package policy.
    */
-  async createUpdateProtectionUpdatesNote(
+  async createUpdateProtectionUpdatesNote<TResponseType extends ScoutResponseType = 'json'>(
     props: CreateUpdateProtectionUpdatesNoteProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<CreateUpdateProtectionUpdatesNoteResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, CreateUpdateProtectionUpdatesNoteResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
@@ -153,7 +167,9 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       props.params
     )}`;
 
-    return apiClient.post<CreateUpdateProtectionUpdatesNoteResponse>(path, {
+    return apiClient.post<
+      ScoutResponseBody<TResponseType, CreateUpdateProtectionUpdatesNoteResponse>
+    >(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -167,15 +183,15 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   /**
    * Run a shell command on an endpoint.
    */
-  async endpointExecuteAction(
+  async endpointExecuteAction<TResponseType extends ScoutResponseType = 'json'>(
     props: EndpointExecuteActionProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<EndpointExecuteActionResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, EndpointExecuteActionResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/endpoint/action/execute`;
 
-    return apiClient.post<EndpointExecuteActionResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, EndpointExecuteActionResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -192,10 +208,10 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
 > Files retrieved from third-party-protected hosts require a different password. Refer to [Third-party response actions](https://www.elastic.co/docs/solutions/security/endpoint-response-actions/third-party-response-actions) for your system's password.
 
       */
-  async endpointFileDownload(
+  async endpointFileDownload<TResponseType extends ScoutResponseType = 'json'>(
     props: EndpointFileDownloadProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
@@ -203,7 +219,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       props.params
     )}`;
 
-    return apiClient.get(path, {
+    return apiClient.get<ScoutResponseBody<TResponseType>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -218,10 +234,10 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       * Get information for the specified response action file download.
 
       */
-  async endpointFileInfo(
+  async endpointFileInfo<TResponseType extends ScoutResponseType = 'json'>(
     props: EndpointFileInfoProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<EndpointFileInfoResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, EndpointFileInfoResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
@@ -229,7 +245,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       props.params
     )}`;
 
-    return apiClient.get<EndpointFileInfoResponse>(path, {
+    return apiClient.get<ScoutResponseBody<TResponseType, EndpointFileInfoResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -243,15 +259,15 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   /**
    * Get a list of all response actions.
    */
-  async endpointGetActionsList(
+  async endpointGetActionsList<TResponseType extends ScoutResponseType = 'json'>(
     props: EndpointGetActionsListProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<EndpointGetActionsListResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, EndpointGetActionsListResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/endpoint/action`;
 
-    return apiClient.get<EndpointGetActionsListResponse>(
+    return apiClient.get<ScoutResponseBody<TResponseType, EndpointGetActionsListResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -268,14 +284,14 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   /**
    * Get a response actions state, which reports whether encryption is enabled.
    */
-  async endpointGetActionsState(
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<EndpointGetActionsStateResponse>> {
+  async endpointGetActionsState<TResponseType extends ScoutResponseType = 'json'>(
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, EndpointGetActionsStateResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/endpoint/action/state`;
 
-    return apiClient.get<EndpointGetActionsStateResponse>(path, {
+    return apiClient.get<ScoutResponseBody<TResponseType, EndpointGetActionsStateResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -289,15 +305,17 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   /**
    * Get the status of response actions for the specified agent IDs.
    */
-  async endpointGetActionsStatus(
+  async endpointGetActionsStatus<TResponseType extends ScoutResponseType = 'json'>(
     props: EndpointGetActionsStatusProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<EndpointGetActionsStatusResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, EndpointGetActionsStatusResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/endpoint/action_status`;
 
-    return apiClient.get<EndpointGetActionsStatusResponse>(
+    return apiClient.get<ScoutResponseBody<TResponseType, EndpointGetActionsStatusResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -314,15 +332,15 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   /**
    * Get a file from an endpoint.
    */
-  async endpointGetFileAction(
+  async endpointGetFileAction<TResponseType extends ScoutResponseType = 'json'>(
     props: EndpointGetFileActionProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<EndpointGetFileActionResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, EndpointGetFileActionResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/endpoint/action/get_file`;
 
-    return apiClient.post<EndpointGetFileActionResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, EndpointGetFileActionResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -336,37 +354,42 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   /**
    * Get a list of all processes running on an endpoint.
    */
-  async endpointGetProcessesAction(
+  async endpointGetProcessesAction<TResponseType extends ScoutResponseType = 'json'>(
     props: EndpointGetProcessesActionProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<EndpointGetProcessesActionResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, EndpointGetProcessesActionResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/endpoint/action/running_procs`;
 
-    return apiClient.post<EndpointGetProcessesActionResponse>(path, {
-      headers: {
-        'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-        ...options.headers,
-      },
-      body: props.body,
-      responseType: options.responseType ?? 'json',
-    });
+    return apiClient.post<ScoutResponseBody<TResponseType, EndpointGetProcessesActionResponse>>(
+      path,
+      {
+        headers: {
+          'kbn-xsrf': 'true',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+          ...options.headers,
+        },
+        body: props.body,
+        responseType: options.responseType ?? 'json',
+      }
+    );
   },
   /**
    * Isolate an endpoint from the network. The endpoint remains isolated until it's released.
    */
-  async endpointIsolateAction(
+  async endpointIsolateAction<TResponseType extends ScoutResponseType = 'json'>(
     props: EndpointIsolateActionProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<EndpointIsolateActionResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, EndpointIsolateActionResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/endpoint/action/isolate`;
 
-    return apiClient.post<EndpointIsolateActionResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, EndpointIsolateActionResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -380,37 +403,42 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   /**
    * Terminate a running process on an endpoint.
    */
-  async endpointKillProcessAction(
+  async endpointKillProcessAction<TResponseType extends ScoutResponseType = 'json'>(
     props: EndpointKillProcessActionProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<EndpointKillProcessActionResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, EndpointKillProcessActionResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/endpoint/action/kill_process`;
 
-    return apiClient.post<EndpointKillProcessActionResponse>(path, {
-      headers: {
-        'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-        ...options.headers,
-      },
-      body: props.body,
-      responseType: options.responseType ?? 'json',
-    });
+    return apiClient.post<ScoutResponseBody<TResponseType, EndpointKillProcessActionResponse>>(
+      path,
+      {
+        headers: {
+          'kbn-xsrf': 'true',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+          ...options.headers,
+        },
+        body: props.body,
+        responseType: options.responseType ?? 'json',
+      }
+    );
   },
   /**
    * Scan a specific file or directory on an endpoint for malware.
    */
-  async endpointScanAction(
+  async endpointScanAction<TResponseType extends ScoutResponseType = 'json'>(
     props: EndpointScanActionProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<EndpointScanActionResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, EndpointScanActionResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/endpoint/action/scan`;
 
-    return apiClient.post<EndpointScanActionResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, EndpointScanActionResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -424,37 +452,42 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   /**
    * Suspend a running process on an endpoint.
    */
-  async endpointSuspendProcessAction(
+  async endpointSuspendProcessAction<TResponseType extends ScoutResponseType = 'json'>(
     props: EndpointSuspendProcessActionProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<EndpointSuspendProcessActionResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, EndpointSuspendProcessActionResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/endpoint/action/suspend_process`;
 
-    return apiClient.post<EndpointSuspendProcessActionResponse>(path, {
-      headers: {
-        'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-        ...options.headers,
-      },
-      body: props.body,
-      responseType: options.responseType ?? 'json',
-    });
+    return apiClient.post<ScoutResponseBody<TResponseType, EndpointSuspendProcessActionResponse>>(
+      path,
+      {
+        headers: {
+          'kbn-xsrf': 'true',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+          ...options.headers,
+        },
+        body: props.body,
+        responseType: options.responseType ?? 'json',
+      }
+    );
   },
   /**
    * Release an isolated endpoint, allowing it to rejoin a network.
    */
-  async endpointUnisolateAction(
+  async endpointUnisolateAction<TResponseType extends ScoutResponseType = 'json'>(
     props: EndpointUnisolateActionProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<EndpointUnisolateActionResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, EndpointUnisolateActionResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/endpoint/action/unisolate`;
 
-    return apiClient.post<EndpointUnisolateActionResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, EndpointUnisolateActionResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -468,14 +501,14 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   /**
    * Upload a file to an endpoint.
    */
-  async endpointUploadAction(
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<EndpointUploadActionResponse>> {
+  async endpointUploadAction<TResponseType extends ScoutResponseType = 'json'>(
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, EndpointUploadActionResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/endpoint/action/upload`;
 
-    return apiClient.post<EndpointUploadActionResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, EndpointUploadActionResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -486,14 +519,18 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       responseType: options.responseType ?? 'json',
     });
   },
-  async getEndpointExceptionsPerPolicyOptIn(
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<GetEndpointExceptionsPerPolicyOptInResponse>> {
+  async getEndpointExceptionsPerPolicyOptIn<TResponseType extends ScoutResponseType = 'json'>(
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, GetEndpointExceptionsPerPolicyOptInResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/internal/api/endpoint/endpoint_exceptions_per_policy_opt_in`;
 
-    return apiClient.get<GetEndpointExceptionsPerPolicyOptInResponse>(path, {
+    return apiClient.get<
+      ScoutResponseBody<TResponseType, GetEndpointExceptionsPerPolicyOptInResponse>
+    >(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '1',
@@ -507,15 +544,15 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   /**
    * Get a list of all endpoint host metadata.
    */
-  async getEndpointMetadataList(
+  async getEndpointMetadataList<TResponseType extends ScoutResponseType = 'json'>(
     props: GetEndpointMetadataListProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<GetEndpointMetadataListResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, GetEndpointMetadataListResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/endpoint/metadata`;
 
-    return apiClient.get<GetEndpointMetadataListResponse>(
+    return apiClient.get<ScoutResponseBody<TResponseType, GetEndpointMetadataListResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -529,10 +566,10 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       }
     );
   },
-  async getEndpointSuggestions(
+  async getEndpointSuggestions<TResponseType extends ScoutResponseType = 'json'>(
     props: GetEndpointSuggestionsProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<GetEndpointSuggestionsResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, GetEndpointSuggestionsResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
@@ -540,7 +577,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       props.params
     )}`;
 
-    return apiClient.post<GetEndpointSuggestionsResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, GetEndpointSuggestionsResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -554,15 +591,15 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   /**
    * Get the most recent policy response for an endpoint.
    */
-  async getPolicyResponse(
+  async getPolicyResponse<TResponseType extends ScoutResponseType = 'json'>(
     props: GetPolicyResponseProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<GetPolicyResponseResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, GetPolicyResponseResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/endpoint/policy_response`;
 
-    return apiClient.get<GetPolicyResponseResponse>(
+    return apiClient.get<ScoutResponseBody<TResponseType, GetPolicyResponseResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -579,10 +616,12 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   /**
    * Get the protection updates note for a package policy.
    */
-  async getProtectionUpdatesNote(
+  async getProtectionUpdatesNote<TResponseType extends ScoutResponseType = 'json'>(
     props: GetProtectionUpdatesNoteProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<GetProtectionUpdatesNoteResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, GetProtectionUpdatesNoteResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
@@ -590,7 +629,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       props.params
     )}`;
 
-    return apiClient.get<GetProtectionUpdatesNoteResponse>(path, {
+    return apiClient.get<ScoutResponseBody<TResponseType, GetProtectionUpdatesNoteResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -601,14 +640,14 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       responseType: options.responseType ?? 'json',
     });
   },
-  async performEndpointExceptionsPerPolicyOptIn(
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse> {
+  async performEndpointExceptionsPerPolicyOptIn<TResponseType extends ScoutResponseType = 'json'>(
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/internal/api/endpoint/endpoint_exceptions_per_policy_opt_in`;
 
-    return apiClient.post(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '1',
@@ -622,15 +661,15 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   /**
    * Run a script on a host. Currently supported only for some agent types.
    */
-  async runScriptAction(
+  async runScriptAction<TResponseType extends ScoutResponseType = 'json'>(
     props: RunScriptActionProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<RunScriptActionResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, RunScriptActionResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/endpoint/action/run_script`;
 
-    return apiClient.post<RunScriptActionResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, RunScriptActionResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',

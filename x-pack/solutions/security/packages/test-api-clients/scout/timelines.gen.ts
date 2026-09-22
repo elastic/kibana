@@ -87,16 +87,28 @@ import type {
   ResolveTimelineResponse,
 } from '@kbn/security-solution-plugin/common/api/timeline/resolve_timeline/resolve_timeline_route.gen';
 
-export interface ScoutApiRequestOptions {
+export type ScoutResponseType = NonNullable<ApiClientOptions['responseType']>;
+
+/**
+ * Body the Scout `apiClient` yields for a given `responseType`: the OpenAPI response for 'json',
+ * a string for 'text' and a Buffer for 'buffer'.
+ */
+export type ScoutResponseBody<
+  TResponseType extends ScoutResponseType,
+  TJsonBody = ApiClientResponse['body']
+> = TResponseType extends 'text' ? string : TResponseType extends 'buffer' ? Buffer : TJsonBody;
+
+export interface ScoutApiRequestOptions<TResponseType extends ScoutResponseType = 'json'> {
   /** Extra headers merged on top of the defaults, e.g. an API key or a SAML cookie for auth */
   headers?: Record<string, string>;
   /** Kibana space id the request targets. Omit or pass 'default' for the default space */
   kibanaSpace?: string;
   /**
    * How the response body should be parsed. Defaults to 'json'.
-   * Use 'text' or 'buffer' for endpoints returning non-JSON payloads, e.g. NDJSON exports.
+   * Use 'text' or 'buffer' for endpoints returning non-JSON payloads, e.g. NDJSON or CSV exports;
+   * the returned `body` is then typed as a string or a Buffer accordingly.
    */
-  responseType?: ApiClientOptions['responseType'];
+  responseType?: TResponseType;
   /**
    * Raw request body for operations whose payload is not described by the OpenAPI request body,
    * e.g. multipart/form-data imports. Ignored for operations with a typed request body.
@@ -111,15 +123,15 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
 > If the user already has a draft Timeline, the existing draft Timeline is cleared and returned.
 
       */
-  async cleanDraftTimelines(
+  async cleanDraftTimelines<TResponseType extends ScoutResponseType = 'json'>(
     props: CleanDraftTimelinesProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<CleanDraftTimelinesResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, CleanDraftTimelinesResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/timeline/_draft`;
 
-    return apiClient.post<CleanDraftTimelinesResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, CleanDraftTimelinesResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -134,15 +146,15 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       * Copies and returns a timeline or timeline template.
 
       */
-  async copyTimeline(
+  async copyTimeline<TResponseType extends ScoutResponseType = 'json'>(
     props: CopyTimelineProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<CopyTimelineResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, CopyTimelineResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/timeline/_copy`;
 
-    return apiClient.post<CopyTimelineResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, CopyTimelineResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -156,15 +168,15 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   /**
    * Create a new Timeline or Timeline template.
    */
-  async createTimelines(
+  async createTimelines<TResponseType extends ScoutResponseType = 'json'>(
     props: CreateTimelinesProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<CreateTimelinesResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, CreateTimelinesResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/timeline`;
 
-    return apiClient.post<CreateTimelinesResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, CreateTimelinesResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -183,15 +195,15 @@ The response has HTTP 200 with an empty body on success.
 Requires the **Timeline and Notes** write privilege (`notes_write`).
 
       */
-  async deleteNote(
+  async deleteNote<TResponseType extends ScoutResponseType = 'json'>(
     props: DeleteNoteProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/note`;
 
-    return apiClient.delete(path, {
+    return apiClient.delete<ScoutResponseBody<TResponseType>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -205,15 +217,15 @@ Requires the **Timeline and Notes** write privilege (`notes_write`).
   /**
    * Delete one or more Timelines or Timeline templates.
    */
-  async deleteTimelines(
+  async deleteTimelines<TResponseType extends ScoutResponseType = 'json'>(
     props: DeleteTimelinesProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<DeleteTimelinesResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, DeleteTimelinesResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/timeline`;
 
-    return apiClient.delete<DeleteTimelinesResponse>(path, {
+    return apiClient.delete<ScoutResponseBody<TResponseType, DeleteTimelinesResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -227,37 +239,40 @@ Requires the **Timeline and Notes** write privilege (`notes_write`).
   /**
    * Export Timelines as an NDJSON file.
    */
-  async exportTimelines(
+  async exportTimelines<TResponseType extends ScoutResponseType = 'json'>(
     props: ExportTimelinesProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/timeline/_export`;
 
-    return apiClient.post(`${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`, {
-      headers: {
-        'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-        ...options.headers,
-      },
-      body: props.body,
-      responseType: options.responseType ?? 'json',
-    });
+    return apiClient.post<ScoutResponseBody<TResponseType>>(
+      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      {
+        headers: {
+          'kbn-xsrf': 'true',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+          ...options.headers,
+        },
+        body: props.body,
+        responseType: options.responseType ?? 'json',
+      }
+    );
   },
   /**
    * Get the details of the draft Timeline  or Timeline template for the current user. If the user doesn't have a draft Timeline, an empty Timeline is returned.
    */
-  async getDraftTimelines(
+  async getDraftTimelines<TResponseType extends ScoutResponseType = 'json'>(
     props: GetDraftTimelinesProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<GetDraftTimelinesResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, GetDraftTimelinesResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/timeline/_draft`;
 
-    return apiClient.get<GetDraftTimelinesResponse>(
+    return apiClient.get<ScoutResponseBody<TResponseType, GetDraftTimelinesResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -285,15 +300,15 @@ Requires the **Timeline and Notes** write privilege (`notes_write`).
 Requires the **Timeline and Notes** read privilege (`notes_read`).
 
       */
-  async getNotes(
+  async getNotes<TResponseType extends ScoutResponseType = 'json'>(
     props: GetNotesProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<GetNotesResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, GetNotesResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/note`;
 
-    return apiClient.get<GetNotesResponse>(
+    return apiClient.get<ScoutResponseBody<TResponseType, GetNotesResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -310,15 +325,15 @@ Requires the **Timeline and Notes** read privilege (`notes_read`).
   /**
    * Get the details of an existing saved Timeline or Timeline template.
    */
-  async getTimeline(
+  async getTimeline<TResponseType extends ScoutResponseType = 'json'>(
     props: GetTimelineProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<GetTimelineResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, GetTimelineResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/timeline`;
 
-    return apiClient.get<GetTimelineResponse>(
+    return apiClient.get<ScoutResponseBody<TResponseType, GetTimelineResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -335,15 +350,15 @@ Requires the **Timeline and Notes** read privilege (`notes_read`).
   /**
    * Get a list of all saved Timelines or Timeline templates.
    */
-  async getTimelines(
+  async getTimelines<TResponseType extends ScoutResponseType = 'json'>(
     props: GetTimelinesProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<GetTimelinesResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, GetTimelinesResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/timelines`;
 
-    return apiClient.get<GetTimelinesResponse>(
+    return apiClient.get<ScoutResponseBody<TResponseType, GetTimelinesResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -360,15 +375,15 @@ Requires the **Timeline and Notes** read privilege (`notes_read`).
   /**
    * Import Timelines.
    */
-  async importTimelines(
+  async importTimelines<TResponseType extends ScoutResponseType = 'json'>(
     props: ImportTimelinesProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<ImportTimelinesResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, ImportTimelinesResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/timeline/_import`;
 
-    return apiClient.post<ImportTimelinesResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, ImportTimelinesResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -382,37 +397,42 @@ Requires the **Timeline and Notes** read privilege (`notes_read`).
   /**
    * Install or update prepackaged Timelines.
    */
-  async installPrepackedTimelines(
+  async installPrepackedTimelines<TResponseType extends ScoutResponseType = 'json'>(
     props: InstallPrepackedTimelinesProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<InstallPrepackedTimelinesResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, InstallPrepackedTimelinesResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/timeline/_prepackaged`;
 
-    return apiClient.post<InstallPrepackedTimelinesResponse>(path, {
-      headers: {
-        'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-        ...options.headers,
-      },
-      body: props.body,
-      responseType: options.responseType ?? 'json',
-    });
+    return apiClient.post<ScoutResponseBody<TResponseType, InstallPrepackedTimelinesResponse>>(
+      path,
+      {
+        headers: {
+          'kbn-xsrf': 'true',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+          ...options.headers,
+        },
+        body: props.body,
+        responseType: options.responseType ?? 'json',
+      }
+    );
   },
   /**
    * Update an existing Timeline. You can update the title, description, date range, pinned events, pinned queries, and/or pinned saved queries of an existing Timeline.
    */
-  async patchTimeline(
+  async patchTimeline<TResponseType extends ScoutResponseType = 'json'>(
     props: PatchTimelineProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<PatchTimelineResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, PatchTimelineResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/timeline`;
 
-    return apiClient.patch<PatchTimelineResponse>(path, {
+    return apiClient.patch<ScoutResponseBody<TResponseType, PatchTimelineResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -426,15 +446,15 @@ Requires the **Timeline and Notes** read privilege (`notes_read`).
   /**
    * Favorite a Timeline or Timeline template for the current user.
    */
-  async persistFavoriteRoute(
+  async persistFavoriteRoute<TResponseType extends ScoutResponseType = 'json'>(
     props: PersistFavoriteRouteProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<PersistFavoriteRouteResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, PersistFavoriteRouteResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/timeline/_favorite`;
 
-    return apiClient.patch<PersistFavoriteRouteResponse>(path, {
+    return apiClient.patch<ScoutResponseBody<TResponseType, PersistFavoriteRouteResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -455,15 +475,15 @@ Requires the **Timeline and Notes** read privilege (`notes_read`).
 Requires the **Timeline and Notes** write privilege (`notes_write`).
 
       */
-  async persistNoteRoute(
+  async persistNoteRoute<TResponseType extends ScoutResponseType = 'json'>(
     props: PersistNoteRouteProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<PersistNoteRouteResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, PersistNoteRouteResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/note`;
 
-    return apiClient.patch<PersistNoteRouteResponse>(path, {
+    return apiClient.patch<ScoutResponseBody<TResponseType, PersistNoteRouteResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -477,37 +497,40 @@ Requires the **Timeline and Notes** write privilege (`notes_write`).
   /**
    * Pin/unpin an event to/from an existing Timeline.
    */
-  async persistPinnedEventRoute(
+  async persistPinnedEventRoute<TResponseType extends ScoutResponseType = 'json'>(
     props: PersistPinnedEventRouteProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<PersistPinnedEventRouteResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, PersistPinnedEventRouteResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/pinned_event`;
 
-    return apiClient.patch<PersistPinnedEventRouteResponse>(path, {
-      headers: {
-        'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-        ...options.headers,
-      },
-      body: props.body,
-      responseType: options.responseType ?? 'json',
-    });
+    return apiClient.patch<ScoutResponseBody<TResponseType, PersistPinnedEventRouteResponse>>(
+      path,
+      {
+        headers: {
+          'kbn-xsrf': 'true',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+          ...options.headers,
+        },
+        body: props.body,
+        responseType: options.responseType ?? 'json',
+      }
+    );
   },
   /**
    * Resolve a Timeline or Timeline template, surfacing outcomes such as `exactMatch`, `aliasMatch`, or `conflict` when object IDs have been remapped during upgrades or imports. Provide **either** `id` for default Timelines or `template_timeline_id` for templates.
    */
-  async resolveTimeline(
+  async resolveTimeline<TResponseType extends ScoutResponseType = 'json'>(
     props: ResolveTimelineProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<ResolveTimelineResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, ResolveTimelineResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/timeline/resolve`;
 
-    return apiClient.get<ResolveTimelineResponse>(
+    return apiClient.get<ScoutResponseBody<TResponseType, ResolveTimelineResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {

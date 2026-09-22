@@ -79,16 +79,28 @@ import type {
   UpdateListItemResponse,
 } from '@kbn/securitysolution-lists-common/api/update_list_item/update_list_item.gen';
 
-export interface ScoutApiRequestOptions {
+export type ScoutResponseType = NonNullable<ApiClientOptions['responseType']>;
+
+/**
+ * Body the Scout `apiClient` yields for a given `responseType`: the OpenAPI response for 'json',
+ * a string for 'text' and a Buffer for 'buffer'.
+ */
+export type ScoutResponseBody<
+  TResponseType extends ScoutResponseType,
+  TJsonBody = ApiClientResponse['body']
+> = TResponseType extends 'text' ? string : TResponseType extends 'buffer' ? Buffer : TJsonBody;
+
+export interface ScoutApiRequestOptions<TResponseType extends ScoutResponseType = 'json'> {
   /** Extra headers merged on top of the defaults, e.g. an API key or a SAML cookie for auth */
   headers?: Record<string, string>;
   /** Kibana space id the request targets. Omit or pass 'default' for the default space */
   kibanaSpace?: string;
   /**
    * How the response body should be parsed. Defaults to 'json'.
-   * Use 'text' or 'buffer' for endpoints returning non-JSON payloads, e.g. NDJSON exports.
+   * Use 'text' or 'buffer' for endpoints returning non-JSON payloads, e.g. NDJSON or CSV exports;
+   * the returned `body` is then typed as a string or a Buffer accordingly.
    */
-  responseType?: ApiClientOptions['responseType'];
+  responseType?: TResponseType;
   /**
    * Raw request body for operations whose payload is not described by the OpenAPI request body,
    * e.g. multipart/form-data imports. Ignored for operations with a typed request body.
@@ -100,15 +112,15 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   /**
    * Create a new value list.
    */
-  async createList(
+  async createList<TResponseType extends ScoutResponseType = 'json'>(
     props: CreateListProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<CreateListResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, CreateListResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/lists`;
 
-    return apiClient.post<CreateListResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, CreateListResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -128,14 +140,14 @@ indices exist with `GET /api/lists/index`.
 Creates the `.lists` and `.items` data streams in the current Kibana space.
 
       */
-  async createListIndex(
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<CreateListIndexResponse>> {
+  async createListIndex<TResponseType extends ScoutResponseType = 'json'>(
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, CreateListIndexResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/lists/index`;
 
-    return apiClient.post<CreateListIndexResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, CreateListIndexResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -154,15 +166,15 @@ All value list items in the same list must be the same type. For example, each l
 > Before creating a list item, you must create a list.
 
       */
-  async createListItem(
+  async createListItem<TResponseType extends ScoutResponseType = 'json'>(
     props: CreateListItemProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<CreateListItemResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, CreateListItemResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/lists/items`;
 
-    return apiClient.post<CreateListItemResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, CreateListItemResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -179,15 +191,15 @@ All value list items in the same list must be the same type. For example, each l
 > When you delete a list, all of its list items are also deleted.
 
       */
-  async deleteList(
+  async deleteList<TResponseType extends ScoutResponseType = 'json'>(
     props: DeleteListProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<DeleteListResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, DeleteListResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/lists`;
 
-    return apiClient.delete<DeleteListResponse>(
+    return apiClient.delete<ScoutResponseBody<TResponseType, DeleteListResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -204,14 +216,14 @@ All value list items in the same list must be the same type. For example, each l
   /**
    * Delete the `.lists` and `.items` data streams.
    */
-  async deleteListIndex(
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<DeleteListIndexResponse>> {
+  async deleteListIndex<TResponseType extends ScoutResponseType = 'json'>(
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, DeleteListIndexResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/lists/index`;
 
-    return apiClient.delete<DeleteListIndexResponse>(path, {
+    return apiClient.delete<ScoutResponseBody<TResponseType, DeleteListIndexResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -225,15 +237,15 @@ All value list items in the same list must be the same type. For example, each l
   /**
    * Delete a value list item using its `id`, or its `list_id` and `value` fields.
    */
-  async deleteListItem(
+  async deleteListItem<TResponseType extends ScoutResponseType = 'json'>(
     props: DeleteListItemProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<DeleteListItemResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, DeleteListItemResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/lists/items`;
 
-    return apiClient.delete<DeleteListItemResponse>(
+    return apiClient.delete<ScoutResponseBody<TResponseType, DeleteListItemResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -250,37 +262,40 @@ All value list items in the same list must be the same type. For example, each l
   /**
    * Export list item values from the specified value list.
    */
-  async exportListItems(
+  async exportListItems<TResponseType extends ScoutResponseType = 'json'>(
     props: ExportListItemsProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/lists/items/_export`;
 
-    return apiClient.post(`${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`, {
-      headers: {
-        'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-        ...options.headers,
-      },
-      body: options.body,
-      responseType: options.responseType ?? 'json',
-    });
+    return apiClient.post<ScoutResponseBody<TResponseType>>(
+      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      {
+        headers: {
+          'kbn-xsrf': 'true',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+          ...options.headers,
+        },
+        body: options.body,
+        responseType: options.responseType ?? 'json',
+      }
+    );
   },
   /**
    * Get all value list items in the specified list.
    */
-  async findListItems(
+  async findListItems<TResponseType extends ScoutResponseType = 'json'>(
     props: FindListItemsProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<FindListItemsResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, FindListItemsResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/lists/items/_find`;
 
-    return apiClient.get<FindListItemsResponse>(
+    return apiClient.get<ScoutResponseBody<TResponseType, FindListItemsResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -297,15 +312,15 @@ All value list items in the same list must be the same type. For example, each l
   /**
    * Get a paginated subset of value lists. By default, the first page is returned, with 20 results per page.
    */
-  async findLists(
+  async findLists<TResponseType extends ScoutResponseType = 'json'>(
     props: FindListsProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<FindListsResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, FindListsResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/lists/_find`;
 
-    return apiClient.get<FindListsResponse>(
+    return apiClient.get<ScoutResponseBody<TResponseType, FindListsResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -325,15 +340,15 @@ All value list items in the same list must be the same type. For example, each l
 You can import items to a new or existing list.
 
       */
-  async importListItems(
+  async importListItems<TResponseType extends ScoutResponseType = 'json'>(
     props: ImportListItemsProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<ImportListItemsResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, ImportListItemsResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/lists/items/_import`;
 
-    return apiClient.post<ImportListItemsResponse>(
+    return apiClient.post<ScoutResponseBody<TResponseType, ImportListItemsResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -350,15 +365,15 @@ You can import items to a new or existing list.
   /**
    * Update specific fields of an existing list using the list `id`.
    */
-  async patchList(
+  async patchList<TResponseType extends ScoutResponseType = 'json'>(
     props: PatchListProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<PatchListResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, PatchListResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/lists`;
 
-    return apiClient.patch<PatchListResponse>(path, {
+    return apiClient.patch<ScoutResponseBody<TResponseType, PatchListResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -372,15 +387,15 @@ You can import items to a new or existing list.
   /**
    * Update specific fields of an existing value list item using the item `id`.
    */
-  async patchListItem(
+  async patchListItem<TResponseType extends ScoutResponseType = 'json'>(
     props: PatchListItemProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<PatchListItemResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, PatchListItemResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/lists/items`;
 
-    return apiClient.patch<PatchListItemResponse>(path, {
+    return apiClient.patch<ScoutResponseBody<TResponseType, PatchListItemResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -394,15 +409,15 @@ You can import items to a new or existing list.
   /**
    * Get the details of a value list using the list ID.
    */
-  async readList(
+  async readList<TResponseType extends ScoutResponseType = 'json'>(
     props: ReadListProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<ReadListResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, ReadListResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/lists`;
 
-    return apiClient.get<ReadListResponse>(
+    return apiClient.get<ScoutResponseBody<TResponseType, ReadListResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -419,14 +434,14 @@ You can import items to a new or existing list.
   /**
    * Verify that `.lists` and `.items` data streams exist.
    */
-  async readListIndex(
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<ReadListIndexResponse>> {
+  async readListIndex<TResponseType extends ScoutResponseType = 'json'>(
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, ReadListIndexResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/lists/index`;
 
-    return apiClient.get<ReadListIndexResponse>(path, {
+    return apiClient.get<ScoutResponseBody<TResponseType, ReadListIndexResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -440,15 +455,15 @@ You can import items to a new or existing list.
   /**
    * Get the details of a value list item.
    */
-  async readListItem(
+  async readListItem<TResponseType extends ScoutResponseType = 'json'>(
     props: ReadListItemProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<ReadListItemResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, ReadListItemResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/lists/items`;
 
-    return apiClient.get<ReadListItemResponse>(
+    return apiClient.get<ScoutResponseBody<TResponseType, ReadListItemResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -468,14 +483,14 @@ privileges for `.lists` and `.items` data streams in the current Kibana space. U
 APIs (`read` vs `all` operations) are available before you create or import lists.
 
       */
-  async readListPrivileges(
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<ReadListPrivilegesResponse>> {
+  async readListPrivileges<TResponseType extends ScoutResponseType = 'json'>(
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, ReadListPrivilegesResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/lists/privileges`;
 
-    return apiClient.get<ReadListPrivilegesResponse>(path, {
+    return apiClient.get<ScoutResponseBody<TResponseType, ReadListPrivilegesResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -492,15 +507,15 @@ APIs (`read` vs `all` operations) are available before you create or import list
 > You cannot modify the `id` value.
 
       */
-  async updateList(
+  async updateList<TResponseType extends ScoutResponseType = 'json'>(
     props: UpdateListProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<UpdateListResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, UpdateListResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/lists`;
 
-    return apiClient.put<UpdateListResponse>(path, {
+    return apiClient.put<ScoutResponseBody<TResponseType, UpdateListResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -517,15 +532,15 @@ APIs (`read` vs `all` operations) are available before you create or import list
 > You cannot modify the `id` value.
 
       */
-  async updateListItem(
+  async updateListItem<TResponseType extends ScoutResponseType = 'json'>(
     props: UpdateListItemProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<UpdateListItemResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, UpdateListItemResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/lists/items`;
 
-    return apiClient.put<UpdateListItemResponse>(path, {
+    return apiClient.put<ScoutResponseBody<TResponseType, UpdateListItemResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',

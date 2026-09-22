@@ -192,16 +192,28 @@ import type {
   UploadWatchlistCsvResponse,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/csv_upload/csv_upload.gen';
 
-export interface ScoutApiRequestOptions {
+export type ScoutResponseType = NonNullable<ApiClientOptions['responseType']>;
+
+/**
+ * Body the Scout `apiClient` yields for a given `responseType`: the OpenAPI response for 'json',
+ * a string for 'text' and a Buffer for 'buffer'.
+ */
+export type ScoutResponseBody<
+  TResponseType extends ScoutResponseType,
+  TJsonBody = ApiClientResponse['body']
+> = TResponseType extends 'text' ? string : TResponseType extends 'buffer' ? Buffer : TJsonBody;
+
+export interface ScoutApiRequestOptions<TResponseType extends ScoutResponseType = 'json'> {
   /** Extra headers merged on top of the defaults, e.g. an API key or a SAML cookie for auth */
   headers?: Record<string, string>;
   /** Kibana space id the request targets. Omit or pass 'default' for the default space */
   kibanaSpace?: string;
   /**
    * How the response body should be parsed. Defaults to 'json'.
-   * Use 'text' or 'buffer' for endpoints returning non-JSON payloads, e.g. NDJSON exports.
+   * Use 'text' or 'buffer' for endpoints returning non-JSON payloads, e.g. NDJSON or CSV exports;
+   * the returned `body` is then typed as a string or a Buffer accordingly.
    */
-  responseType?: ApiClientOptions['responseType'];
+  responseType?: TResponseType;
   /**
    * Raw request body for operations whose payload is not described by the OpenAPI request body,
    * e.g. multipart/form-data imports. Ignored for operations with a typed request body.
@@ -214,23 +226,28 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       * **Deprecated in 9.4.0.** Use the Entity Store APIs to check privileges for managing asset criticality.
 
       */
-  async assetCriticalityGetPrivileges(
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<AssetCriticalityGetPrivilegesResponse>> {
+  async assetCriticalityGetPrivileges<TResponseType extends ScoutResponseType = 'json'>(
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, AssetCriticalityGetPrivilegesResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/internal/asset_criticality/privileges`;
 
-    return apiClient.get<AssetCriticalityGetPrivilegesResponse>(path, {
-      headers: {
-        'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-        ...options.headers,
-      },
-      body: options.body,
-      responseType: options.responseType ?? 'json',
-    });
+    return apiClient.get<ScoutResponseBody<TResponseType, AssetCriticalityGetPrivilegesResponse>>(
+      path,
+      {
+        headers: {
+          'kbn-xsrf': 'true',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+          ...options.headers,
+        },
+        body: options.body,
+        responseType: options.responseType ?? 'json',
+      }
+    );
   },
   /**
       * Assigns the provided entities to the specified watchlist using a "manual" source label.
@@ -240,10 +257,10 @@ If an entity is already on the watchlist, no new document is created — the "ma
 is added to its existing source labels instead.
 
       */
-  async assignWatchlistEntities(
+  async assignWatchlistEntities<TResponseType extends ScoutResponseType = 'json'>(
     props: AssignWatchlistEntitiesProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<AssignWatchlistEntitiesResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, AssignWatchlistEntitiesResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
@@ -251,7 +268,7 @@ is added to its existing source labels instead.
       props.params
     )}`;
 
-    return apiClient.post<AssignWatchlistEntitiesResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, AssignWatchlistEntitiesResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -270,15 +287,19 @@ Bulk upsert up to 1000 asset criticality records.
 If asset criticality records already exist for the specified entities, those records are overwritten with the specified values. If asset criticality records don't exist for the specified entities, new records are created.
 
       */
-  async bulkUpsertAssetCriticalityRecords(
+  async bulkUpsertAssetCriticalityRecords<TResponseType extends ScoutResponseType = 'json'>(
     props: BulkUpsertAssetCriticalityRecordsProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<BulkUpsertAssetCriticalityRecordsResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, BulkUpsertAssetCriticalityRecordsResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/asset_criticality/bulk`;
 
-    return apiClient.post<BulkUpsertAssetCriticalityRecordsResponse>(path, {
+    return apiClient.post<
+      ScoutResponseBody<TResponseType, BulkUpsertAssetCriticalityRecordsResponse>
+    >(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -292,14 +313,14 @@ If asset criticality records already exist for the specified entities, those rec
   /**
    * Cleaning up the the Risk Engine by removing the indices, mapping and transforms
    */
-  async cleanUpRiskEngine(
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<CleanUpRiskEngineResponse>> {
+  async cleanUpRiskEngine<TResponseType extends ScoutResponseType = 'json'>(
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, CleanUpRiskEngineResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/risk_score/engine/dangerously_delete_data`;
 
-    return apiClient.delete<CleanUpRiskEngineResponse>(path, {
+    return apiClient.delete<ScoutResponseBody<TResponseType, CleanUpRiskEngineResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -313,15 +334,19 @@ If asset criticality records already exist for the specified entities, those rec
   /**
    * Configuring the Risk Engine Saved Object
    */
-  async configureRiskEngineSavedObject(
+  async configureRiskEngineSavedObject<TResponseType extends ScoutResponseType = 'json'>(
     props: ConfigureRiskEngineSavedObjectProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<ConfigureRiskEngineSavedObjectResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, ConfigureRiskEngineSavedObjectResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/risk_score/engine/saved_object/configure`;
 
-    return apiClient.patch<ConfigureRiskEngineSavedObjectResponse>(path, {
+    return apiClient.patch<
+      ScoutResponseBody<TResponseType, ConfigureRiskEngineSavedObjectResponse>
+    >(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -340,24 +365,29 @@ Create or update an asset criticality record for a specific entity.
 If a record already exists for the specified entity, that record is overwritten with the specified value. If a record doesn't exist for the specified entity, a new record is created.
 
       */
-  async createAssetCriticalityRecord(
+  async createAssetCriticalityRecord<TResponseType extends ScoutResponseType = 'json'>(
     props: CreateAssetCriticalityRecordProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<CreateAssetCriticalityRecordResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, CreateAssetCriticalityRecordResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/asset_criticality`;
 
-    return apiClient.post<CreateAssetCriticalityRecordResponse>(path, {
-      headers: {
-        'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-        ...options.headers,
-      },
-      body: props.body,
-      responseType: options.responseType ?? 'json',
-    });
+    return apiClient.post<ScoutResponseBody<TResponseType, CreateAssetCriticalityRecordResponse>>(
+      path,
+      {
+        headers: {
+          'kbn-xsrf': 'true',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+          ...options.headers,
+        },
+        body: props.body,
+        responseType: options.responseType ?? 'json',
+      }
+    );
   },
   /**
       * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
@@ -365,15 +395,15 @@ If a record already exists for the specified entity, that record is overwritten 
 Create a new entity source configuration.
 
       */
-  async createEntitySource(
+  async createEntitySource<TResponseType extends ScoutResponseType = 'json'>(
     props: CreateEntitySourceProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<CreateEntitySourceResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, CreateEntitySourceResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/entity_analytics/monitoring/entity_source`;
 
-    return apiClient.post<CreateEntitySourceResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, CreateEntitySourceResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -390,24 +420,29 @@ Create a new entity source configuration.
 Create an index for Privileges Monitoring import.
 
       */
-  async createPrivilegesImportIndex(
+  async createPrivilegesImportIndex<TResponseType extends ScoutResponseType = 'json'>(
     props: CreatePrivilegesImportIndexProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<CreatePrivilegesImportIndexResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, CreatePrivilegesImportIndexResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/entity_analytics/monitoring/privileges/indices`;
 
-    return apiClient.put<CreatePrivilegesImportIndexResponse>(path, {
-      headers: {
-        'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-        ...options.headers,
-      },
-      body: props.body,
-      responseType: options.responseType ?? 'json',
-    });
+    return apiClient.put<ScoutResponseBody<TResponseType, CreatePrivilegesImportIndexResponse>>(
+      path,
+      {
+        headers: {
+          'kbn-xsrf': 'true',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+          ...options.headers,
+        },
+        body: props.body,
+        responseType: options.responseType ?? 'json',
+      }
+    );
   },
   /**
       * **Deprecated in 9.4.0.** Use the Watchlists API instead.
@@ -415,15 +450,15 @@ Create an index for Privileges Monitoring import.
 Creates a new privileged user to be monitored by the Privilege Monitoring Engine.
 
       */
-  async createPrivMonUser(
+  async createPrivMonUser<TResponseType extends ScoutResponseType = 'json'>(
     props: CreatePrivMonUserProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<CreatePrivMonUserResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, CreatePrivMonUserResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/entity_analytics/monitoring/users`;
 
-    return apiClient.post<CreatePrivMonUserResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, CreatePrivMonUserResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -437,15 +472,15 @@ Creates a new privileged user to be monitored by the Privilege Monitoring Engine
   /**
    * Creates a new entity analytics watchlist with an optional set of entity sources. Watchlists apply a risk score modifier to matched entities.
    */
-  async createWatchlist(
+  async createWatchlist<TResponseType extends ScoutResponseType = 'json'>(
     props: CreateWatchlistProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<CreateWatchlistResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, CreateWatchlistResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/entity_analytics/watchlists`;
 
-    return apiClient.post<CreateWatchlistResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, CreateWatchlistResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -456,10 +491,12 @@ Creates a new privileged user to be monitored by the Privilege Monitoring Engine
       responseType: options.responseType ?? 'json',
     });
   },
-  async createWatchlistEntitySource(
+  async createWatchlistEntitySource<TResponseType extends ScoutResponseType = 'json'>(
     props: CreateWatchlistEntitySourceProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<CreateWatchlistEntitySourceResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, CreateWatchlistEntitySourceResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
@@ -467,16 +504,19 @@ Creates a new privileged user to be monitored by the Privilege Monitoring Engine
       props.params
     )}`;
 
-    return apiClient.post<CreateWatchlistEntitySourceResponse>(path, {
-      headers: {
-        'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-        ...options.headers,
-      },
-      body: props.body,
-      responseType: options.responseType ?? 'json',
-    });
+    return apiClient.post<ScoutResponseBody<TResponseType, CreateWatchlistEntitySourceResponse>>(
+      path,
+      {
+        headers: {
+          'kbn-xsrf': 'true',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+          ...options.headers,
+        },
+        body: props.body,
+        responseType: options.responseType ?? 'json',
+      }
+    );
   },
   /**
       * **Deprecated in 9.4.0.** Use the Entity Store APIs to unassign asset criticality for a specific entity.
@@ -484,15 +524,17 @@ Creates a new privileged user to be monitored by the Privilege Monitoring Engine
 Delete the asset criticality record for a specific entity.
 
       */
-  async deleteAssetCriticalityRecord(
+  async deleteAssetCriticalityRecord<TResponseType extends ScoutResponseType = 'json'>(
     props: DeleteAssetCriticalityRecordProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<DeleteAssetCriticalityRecordResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, DeleteAssetCriticalityRecordResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/asset_criticality`;
 
-    return apiClient.delete<DeleteAssetCriticalityRecordResponse>(
+    return apiClient.delete<ScoutResponseBody<TResponseType, DeleteAssetCriticalityRecordResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -512,10 +554,10 @@ Delete the asset criticality record for a specific entity.
 Delete an entity source configuration.
 
       */
-  async deleteEntitySource(
+  async deleteEntitySource<TResponseType extends ScoutResponseType = 'json'>(
     props: DeleteEntitySourceProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
@@ -523,7 +565,7 @@ Delete an entity source configuration.
       props.params
     )}`;
 
-    return apiClient.delete(path, {
+    return apiClient.delete<ScoutResponseBody<TResponseType>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -537,15 +579,15 @@ Delete an entity source configuration.
   /**
    * **Deprecated in 9.4.0.** Deletes the Privilege Monitoring Engine and optionally removes all associated privileged user data.
    */
-  async deleteMonitoringEngine(
+  async deleteMonitoringEngine<TResponseType extends ScoutResponseType = 'json'>(
     props: DeleteMonitoringEngineProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<DeleteMonitoringEngineResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, DeleteMonitoringEngineResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/entity_analytics/monitoring/engine/delete`;
 
-    return apiClient.delete<DeleteMonitoringEngineResponse>(
+    return apiClient.delete<ScoutResponseBody<TResponseType, DeleteMonitoringEngineResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -565,10 +607,10 @@ Delete an entity source configuration.
 Removes a privileged user from monitoring by their document ID.
 
       */
-  async deletePrivMonUser(
+  async deletePrivMonUser<TResponseType extends ScoutResponseType = 'json'>(
     props: DeletePrivMonUserProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<DeletePrivMonUserResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, DeletePrivMonUserResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
@@ -576,7 +618,7 @@ Removes a privileged user from monitoring by their document ID.
       props.params
     )}`;
 
-    return apiClient.delete<DeletePrivMonUserResponse>(path, {
+    return apiClient.delete<ScoutResponseBody<TResponseType, DeletePrivMonUserResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -587,10 +629,10 @@ Removes a privileged user from monitoring by their document ID.
       responseType: options.responseType ?? 'json',
     });
   },
-  async deleteWatchlistEntitySource(
+  async deleteWatchlistEntitySource<TResponseType extends ScoutResponseType = 'json'>(
     props: DeleteWatchlistEntitySourceProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
@@ -598,7 +640,7 @@ Removes a privileged user from monitoring by their document ID.
       props.params
     )}`;
 
-    return apiClient.delete(path, {
+    return apiClient.delete<ScoutResponseBody<TResponseType>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -612,15 +654,21 @@ Removes a privileged user from monitoring by their document ID.
   /**
    * Calculates and persists Risk Scores for an entity, returning the calculated risk score.
    */
-  async deprecatedTriggerRiskScoreCalculation(
+  async deprecatedTriggerRiskScoreCalculation<TResponseType extends ScoutResponseType = 'json'>(
     props: DeprecatedTriggerRiskScoreCalculationProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<DeprecatedTriggerRiskScoreCalculationResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<
+      ScoutResponseBody<TResponseType, DeprecatedTriggerRiskScoreCalculationResponse>
+    >
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/risk_scores/calculation/entity`;
 
-    return apiClient.post<DeprecatedTriggerRiskScoreCalculationResponse>(path, {
+    return apiClient.post<
+      ScoutResponseBody<TResponseType, DeprecatedTriggerRiskScoreCalculationResponse>
+    >(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '1',
@@ -634,14 +682,14 @@ Removes a privileged user from monitoring by their document ID.
   /**
    * **Deprecated in 9.4.0.** Disables the Privilege Monitoring Engine, stopping all monitoring activity without removing data.
    */
-  async disableMonitoringEngine(
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<DisableMonitoringEngineResponse>> {
+  async disableMonitoringEngine<TResponseType extends ScoutResponseType = 'json'>(
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, DisableMonitoringEngineResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/entity_analytics/monitoring/engine/disable`;
 
-    return apiClient.post<DisableMonitoringEngineResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, DisableMonitoringEngineResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -652,14 +700,14 @@ Removes a privileged user from monitoring by their document ID.
       responseType: options.responseType ?? 'json',
     });
   },
-  async disableRiskEngine(
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<DisableRiskEngineResponse>> {
+  async disableRiskEngine<TResponseType extends ScoutResponseType = 'json'>(
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, DisableRiskEngineResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/internal/risk_score/engine/disable`;
 
-    return apiClient.post<DisableRiskEngineResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, DisableRiskEngineResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '1',
@@ -670,14 +718,14 @@ Removes a privileged user from monitoring by their document ID.
       responseType: options.responseType ?? 'json',
     });
   },
-  async enableRiskEngine(
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<EnableRiskEngineResponse>> {
+  async enableRiskEngine<TResponseType extends ScoutResponseType = 'json'>(
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, EnableRiskEngineResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/internal/risk_score/engine/enable`;
 
-    return apiClient.post<EnableRiskEngineResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, EnableRiskEngineResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '1',
@@ -688,15 +736,15 @@ Removes a privileged user from monitoring by their document ID.
       responseType: options.responseType ?? 'json',
     });
   },
-  async entityDetailsHighlights(
+  async entityDetailsHighlights<TResponseType extends ScoutResponseType = 'json'>(
     props: EntityDetailsHighlightsProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<EntityDetailsHighlightsResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, EntityDetailsHighlightsResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/internal/entity_details/highlights`;
 
-    return apiClient.post<EntityDetailsHighlightsResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, EntityDetailsHighlightsResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '1',
@@ -710,15 +758,17 @@ Removes a privileged user from monitoring by their document ID.
   /**
    * **Deprecated in 9.4.0.** List asset criticality records, paging, sorting and filtering as needed.
    */
-  async findAssetCriticalityRecords(
+  async findAssetCriticalityRecords<TResponseType extends ScoutResponseType = 'json'>(
     props: FindAssetCriticalityRecordsProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<FindAssetCriticalityRecordsResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, FindAssetCriticalityRecordsResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/asset_criticality/list`;
 
-    return apiClient.get<FindAssetCriticalityRecordsResponse>(
+    return apiClient.get<ScoutResponseBody<TResponseType, FindAssetCriticalityRecordsResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -735,10 +785,10 @@ Removes a privileged user from monitoring by their document ID.
   /**
    * Returns time-bucketed anomaly counts and tactic distribution for a given entity.
    */
-  async getAnomalyOverview(
+  async getAnomalyOverview<TResponseType extends ScoutResponseType = 'json'>(
     props: GetAnomalyOverviewProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<GetAnomalyOverviewResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, GetAnomalyOverviewResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
@@ -746,7 +796,7 @@ Removes a privileged user from monitoring by their document ID.
       props.params
     )}`;
 
-    return apiClient.post<GetAnomalyOverviewResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, GetAnomalyOverviewResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '1',
@@ -760,10 +810,10 @@ Removes a privileged user from monitoring by their document ID.
   /**
    * Queries ML anomaly records on demand, enriches them with baseline data, and returns results for a given entity.
    */
-  async getAnomalySummary(
+  async getAnomalySummary<TResponseType extends ScoutResponseType = 'json'>(
     props: GetAnomalySummaryProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<GetAnomalySummaryResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, GetAnomalySummaryResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
@@ -771,7 +821,7 @@ Removes a privileged user from monitoring by their document ID.
       props.params
     )}`;
 
-    return apiClient.post<GetAnomalySummaryResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, GetAnomalySummaryResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '1',
@@ -785,15 +835,17 @@ Removes a privileged user from monitoring by their document ID.
   /**
    * **Deprecated in 9.4.0.** Get the asset criticality record for a specific entity.
    */
-  async getAssetCriticalityRecord(
+  async getAssetCriticalityRecord<TResponseType extends ScoutResponseType = 'json'>(
     props: GetAssetCriticalityRecordProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<GetAssetCriticalityRecordResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, GetAssetCriticalityRecordResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/asset_criticality`;
 
-    return apiClient.get<GetAssetCriticalityRecordResponse>(
+    return apiClient.get<ScoutResponseBody<TResponseType, GetAssetCriticalityRecordResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -811,23 +863,28 @@ Removes a privileged user from monitoring by their document ID.
       * **Deprecated in 9.4.0.** Use the Entity Store APIs to get asset criticality status for a specific entity.
 
       */
-  async getAssetCriticalityStatus(
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<GetAssetCriticalityStatusResponse>> {
+  async getAssetCriticalityStatus<TResponseType extends ScoutResponseType = 'json'>(
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, GetAssetCriticalityStatusResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/internal/asset_criticality/status`;
 
-    return apiClient.get<GetAssetCriticalityStatusResponse>(path, {
-      headers: {
-        'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-        ...options.headers,
-      },
-      body: options.body,
-      responseType: options.responseType ?? 'json',
-    });
+    return apiClient.get<ScoutResponseBody<TResponseType, GetAssetCriticalityStatusResponse>>(
+      path,
+      {
+        headers: {
+          'kbn-xsrf': 'true',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+          ...options.headers,
+        },
+        body: options.body,
+        responseType: options.responseType ?? 'json',
+      }
+    );
   },
   /**
       * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
@@ -835,10 +892,10 @@ Removes a privileged user from monitoring by their document ID.
 Get an entity source configuration by ID.
 
       */
-  async getEntitySource(
+  async getEntitySource<TResponseType extends ScoutResponseType = 'json'>(
     props: GetEntitySourceProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<GetEntitySourceResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, GetEntitySourceResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
@@ -846,7 +903,7 @@ Get an entity source configuration by ID.
       props.params
     )}`;
 
-    return apiClient.get<GetEntitySourceResponse>(path, {
+    return apiClient.get<ScoutResponseBody<TResponseType, GetEntitySourceResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -860,14 +917,20 @@ Get an entity source configuration by ID.
   /**
    * Returns the installation and ML module setup status of the privileged access detection package, along with the state of each associated ML job.
    */
-  async getPrivilegedAccessDetectionPackageStatus(
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<GetPrivilegedAccessDetectionPackageStatusResponse>> {
+  async getPrivilegedAccessDetectionPackageStatus<TResponseType extends ScoutResponseType = 'json'>(
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<
+      ScoutResponseBody<TResponseType, GetPrivilegedAccessDetectionPackageStatusResponse>
+    >
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/entity_analytics/privileged_user_monitoring/pad/status`;
 
-    return apiClient.get<GetPrivilegedAccessDetectionPackageStatusResponse>(path, {
+    return apiClient.get<
+      ScoutResponseBody<TResponseType, GetPrivilegedAccessDetectionPackageStatusResponse>
+    >(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -881,14 +944,14 @@ Get an entity source configuration by ID.
   /**
    * Returns the status of both the legacy transform-based risk engine, as well as the new risk engine
    */
-  async getRiskEngineStatus(
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<GetRiskEngineStatusResponse>> {
+  async getRiskEngineStatus<TResponseType extends ScoutResponseType = 'json'>(
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, GetRiskEngineStatusResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/internal/risk_score/engine/status`;
 
-    return apiClient.get<GetRiskEngineStatusResponse>(path, {
+    return apiClient.get<ScoutResponseBody<TResponseType, GetRiskEngineStatusResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '1',
@@ -902,15 +965,15 @@ Get an entity source configuration by ID.
   /**
    * Returns time-ordered historical risk score entries from the risk score time-series index for a given entity.
    */
-  async getRiskScoreHistory(
+  async getRiskScoreHistory<TResponseType extends ScoutResponseType = 'json'>(
     props: GetRiskScoreHistoryProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<GetRiskScoreHistoryResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, GetRiskScoreHistoryResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/risk_score/history`;
 
-    return apiClient.get<GetRiskScoreHistoryResponse>(
+    return apiClient.get<ScoutResponseBody<TResponseType, GetRiskScoreHistoryResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -927,10 +990,10 @@ Get an entity source configuration by ID.
   /**
    * Retrieves the details of an entity analytics watchlist by its unique identifier.
    */
-  async getWatchlist(
+  async getWatchlist<TResponseType extends ScoutResponseType = 'json'>(
     props: GetWatchlistProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<GetWatchlistResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, GetWatchlistResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
@@ -938,7 +1001,7 @@ Get an entity source configuration by ID.
       props.params
     )}`;
 
-    return apiClient.get<GetWatchlistResponse>(path, {
+    return apiClient.get<ScoutResponseBody<TResponseType, GetWatchlistResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -949,10 +1012,12 @@ Get an entity source configuration by ID.
       responseType: options.responseType ?? 'json',
     });
   },
-  async getWatchlistEntitySource(
+  async getWatchlistEntitySource<TResponseType extends ScoutResponseType = 'json'>(
     props: GetWatchlistEntitySourceProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<GetWatchlistEntitySourceResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, GetWatchlistEntitySourceResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
@@ -960,7 +1025,7 @@ Get an entity source configuration by ID.
       props.params
     )}`;
 
-    return apiClient.get<GetWatchlistEntitySourceResponse>(path, {
+    return apiClient.get<ScoutResponseBody<TResponseType, GetWatchlistEntitySourceResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -974,14 +1039,14 @@ Get an entity source configuration by ID.
   /**
    * **Deprecated in 9.4.0.** Initializes the Privilege Monitoring Engine, setting up the required resources and starting the engine.
    */
-  async initMonitoringEngine(
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<InitMonitoringEngineResponse>> {
+  async initMonitoringEngine<TResponseType extends ScoutResponseType = 'json'>(
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, InitMonitoringEngineResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/entity_analytics/monitoring/engine/init`;
 
-    return apiClient.post<InitMonitoringEngineResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, InitMonitoringEngineResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -995,14 +1060,14 @@ Get an entity source configuration by ID.
   /**
    * Initializes the Risk Engine by creating the necessary indices and mappings, removing old transforms, and starting the new risk engine
    */
-  async initRiskEngine(
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<InitRiskEngineResponse>> {
+  async initRiskEngine<TResponseType extends ScoutResponseType = 'json'>(
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, InitRiskEngineResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/internal/risk_score/engine/init`;
 
-    return apiClient.post<InitRiskEngineResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, InitRiskEngineResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '1',
@@ -1016,14 +1081,20 @@ Get an entity source configuration by ID.
   /**
    * Installs the privileged access detection integration package and sets up the associated ML modules required for the Entity Analytics privileged user monitoring experience.
    */
-  async installPrivilegedAccessDetectionPackage(
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<InstallPrivilegedAccessDetectionPackageResponse>> {
+  async installPrivilegedAccessDetectionPackage<TResponseType extends ScoutResponseType = 'json'>(
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<
+      ScoutResponseBody<TResponseType, InstallPrivilegedAccessDetectionPackageResponse>
+    >
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/entity_analytics/privileged_user_monitoring/pad/install`;
 
-    return apiClient.post<InstallPrivilegedAccessDetectionPackageResponse>(path, {
+    return apiClient.post<
+      ScoutResponseBody<TResponseType, InstallPrivilegedAccessDetectionPackageResponse>
+    >(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -1042,14 +1113,18 @@ CSV must contain header row with "type" and "criticality_level" columns, in addi
 Each row will match up to 10,000 entities.
 
       */
-  async internalUploadAssetCriticalityV2Csv(
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<InternalUploadAssetCriticalityV2CsvResponse>> {
+  async internalUploadAssetCriticalityV2Csv<TResponseType extends ScoutResponseType = 'json'>(
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, InternalUploadAssetCriticalityV2CsvResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/internal/asset_criticality/upload_csv_v2`;
 
-    return apiClient.post<InternalUploadAssetCriticalityV2CsvResponse>(path, {
+    return apiClient.post<
+      ScoutResponseBody<TResponseType, InternalUploadAssetCriticalityV2CsvResponse>
+    >(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '1',
@@ -1066,15 +1141,15 @@ Each row will match up to 10,000 entities.
 List all entity source configurations.
 
       */
-  async listEntitySources(
+  async listEntitySources<TResponseType extends ScoutResponseType = 'json'>(
     props: ListEntitySourcesProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<ListEntitySourcesResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, ListEntitySourcesResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/entity_analytics/monitoring/entity_source/list`;
 
-    return apiClient.get<ListEntitySourcesResponse>(
+    return apiClient.get<ScoutResponseBody<TResponseType, ListEntitySourcesResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -1094,15 +1169,15 @@ List all entity source configurations.
 Returns a list of all privileged users currently being monitored. Supports optional KQL filtering.
 
       */
-  async listPrivMonUsers(
+  async listPrivMonUsers<TResponseType extends ScoutResponseType = 'json'>(
     props: ListPrivMonUsersProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<ListPrivMonUsersResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, ListPrivMonUsersResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/entity_analytics/monitoring/users/list`;
 
-    return apiClient.get<ListPrivMonUsersResponse>(
+    return apiClient.get<ScoutResponseBody<TResponseType, ListPrivMonUsersResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -1116,10 +1191,12 @@ Returns a list of all privileged users currently being monitored. Supports optio
       }
     );
   },
-  async listWatchlistEntitySources(
+  async listWatchlistEntitySources<TResponseType extends ScoutResponseType = 'json'>(
     props: ListWatchlistEntitySourcesProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<ListWatchlistEntitySourcesResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, ListWatchlistEntitySourcesResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
@@ -1127,7 +1204,7 @@ Returns a list of all privileged users currently being monitored. Supports optio
       props.params
     )}`;
 
-    return apiClient.get<ListWatchlistEntitySourcesResponse>(
+    return apiClient.get<ScoutResponseBody<TResponseType, ListWatchlistEntitySourcesResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -1144,14 +1221,14 @@ Returns a list of all privileged users currently being monitored. Supports optio
   /**
    * Returns a list of all entity analytics watchlists.
    */
-  async listWatchlists(
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<ListWatchlistsResponse>> {
+  async listWatchlists<TResponseType extends ScoutResponseType = 'json'>(
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, ListWatchlistsResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/entity_analytics/watchlists/list`;
 
-    return apiClient.get<ListWatchlistsResponse>(path, {
+    return apiClient.get<ScoutResponseBody<TResponseType, ListWatchlistsResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -1165,15 +1242,15 @@ Returns a list of all privileged users currently being monitored. Supports optio
   /**
    * Calculates and returns a list of Risk Scores, sorted by identifier_type and risk score.
    */
-  async previewRiskScore(
+  async previewRiskScore<TResponseType extends ScoutResponseType = 'json'>(
     props: PreviewRiskScoreProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<PreviewRiskScoreResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, PreviewRiskScoreResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/internal/risk_score/preview`;
 
-    return apiClient.post<PreviewRiskScoreResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, PreviewRiskScoreResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '1',
@@ -1190,35 +1267,40 @@ Returns a list of all privileged users currently being monitored. Supports optio
 Bulk upserts privileged users by uploading a CSV file. Returns per-row errors and aggregate upload statistics.
 
       */
-  async privmonBulkUploadUsersCsv(
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<PrivmonBulkUploadUsersCSVResponse>> {
+  async privmonBulkUploadUsersCsv<TResponseType extends ScoutResponseType = 'json'>(
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, PrivmonBulkUploadUsersCSVResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/entity_analytics/monitoring/users/_csv`;
 
-    return apiClient.post<PrivmonBulkUploadUsersCSVResponse>(path, {
-      headers: {
-        'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-        ...options.headers,
-      },
-      body: options.body,
-      responseType: options.responseType ?? 'json',
-    });
+    return apiClient.post<ScoutResponseBody<TResponseType, PrivmonBulkUploadUsersCSVResponse>>(
+      path,
+      {
+        headers: {
+          'kbn-xsrf': 'true',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+          ...options.headers,
+        },
+        body: options.body,
+        responseType: options.responseType ?? 'json',
+      }
+    );
   },
   /**
    * **Deprecated in 9.4.0.** Returns the current health status of the Privilege Monitoring Engine, including engine status, error details, and user count statistics.
    */
-  async privMonHealth(
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<PrivMonHealthResponse>> {
+  async privMonHealth<TResponseType extends ScoutResponseType = 'json'>(
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, PrivMonHealthResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/entity_analytics/monitoring/privileges/health`;
 
-    return apiClient.get<PrivMonHealthResponse>(path, {
+    return apiClient.get<ScoutResponseBody<TResponseType, PrivMonHealthResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -1235,14 +1317,14 @@ Bulk upserts privileged users by uploading a CSV file. Returns per-row errors an
 Check if the current user has all required permissions for Privilege Monitoring.
 
       */
-  async privMonPrivileges(
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<PrivMonPrivilegesResponse>> {
+  async privMonPrivileges<TResponseType extends ScoutResponseType = 'json'>(
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, PrivMonPrivilegesResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/entity_analytics/monitoring/privileges/privileges`;
 
-    return apiClient.get<PrivMonPrivilegesResponse>(path, {
+    return apiClient.get<ScoutResponseBody<TResponseType, PrivMonPrivilegesResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -1253,14 +1335,14 @@ Check if the current user has all required permissions for Privilege Monitoring.
       responseType: options.responseType ?? 'json',
     });
   },
-  async readRiskEngineSettings(
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<ReadRiskEngineSettingsResponse>> {
+  async readRiskEngineSettings<TResponseType extends ScoutResponseType = 'json'>(
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, ReadRiskEngineSettingsResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/internal/risk_score/engine/settings`;
 
-    return apiClient.get<ReadRiskEngineSettingsResponse>(path, {
+    return apiClient.get<ScoutResponseBody<TResponseType, ReadRiskEngineSettingsResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '1',
@@ -1271,14 +1353,14 @@ Check if the current user has all required permissions for Privilege Monitoring.
       responseType: options.responseType ?? 'json',
     });
   },
-  async riskEngineGetPrivileges(
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<RiskEngineGetPrivilegesResponse>> {
+  async riskEngineGetPrivileges<TResponseType extends ScoutResponseType = 'json'>(
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, RiskEngineGetPrivilegesResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/internal/risk_engine/privileges`;
 
-    return apiClient.get<RiskEngineGetPrivilegesResponse>(path, {
+    return apiClient.get<ScoutResponseBody<TResponseType, RiskEngineGetPrivilegesResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '1',
@@ -1289,57 +1371,67 @@ Check if the current user has all required permissions for Privilege Monitoring.
       responseType: options.responseType ?? 'json',
     });
   },
-  async runEntityAnalyticsMigrations(
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<RunEntityAnalyticsMigrationsResponse>> {
+  async runEntityAnalyticsMigrations<TResponseType extends ScoutResponseType = 'json'>(
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, RunEntityAnalyticsMigrationsResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/internal/entity_analytics/migrations/run`;
 
-    return apiClient.post<RunEntityAnalyticsMigrationsResponse>(path, {
-      headers: {
-        'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-        ...options.headers,
-      },
-      body: options.body,
-      responseType: options.responseType ?? 'json',
-    });
+    return apiClient.post<ScoutResponseBody<TResponseType, RunEntityAnalyticsMigrationsResponse>>(
+      path,
+      {
+        headers: {
+          'kbn-xsrf': 'true',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+          ...options.headers,
+        },
+        body: options.body,
+        responseType: options.responseType ?? 'json',
+      }
+    );
   },
   /**
    * **Deprecated in 9.4.0.** Schedules the Privilege Monitoring Engine to run as soon as possible, triggering an immediate monitoring cycle.
    */
-  async scheduleMonitoringEngine(
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<ScheduleMonitoringEngineResponse>> {
+  async scheduleMonitoringEngine<TResponseType extends ScoutResponseType = 'json'>(
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, ScheduleMonitoringEngineResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/entity_analytics/monitoring/engine/schedule_now`;
 
-    return apiClient.post<ScheduleMonitoringEngineResponse>(path, {
-      headers: {
-        'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-        ...options.headers,
-      },
-      body: options.body,
-      responseType: options.responseType ?? 'json',
-    });
+    return apiClient.post<ScoutResponseBody<TResponseType, ScheduleMonitoringEngineResponse>>(
+      path,
+      {
+        headers: {
+          'kbn-xsrf': 'true',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+          ...options.headers,
+        },
+        body: options.body,
+        responseType: options.responseType ?? 'json',
+      }
+    );
   },
   /**
    * Schedule the risk scoring engine to run as soon as possible. You can use this to recalculate entity risk scores after updating their asset criticality.
    */
-  async scheduleRiskEngineNow(
+  async scheduleRiskEngineNow<TResponseType extends ScoutResponseType = 'json'>(
     props: ScheduleRiskEngineNowProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<ScheduleRiskEngineNowResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, ScheduleRiskEngineNowResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/risk_score/engine/schedule_now`;
 
-    return apiClient.post<ScheduleRiskEngineNowResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, ScheduleRiskEngineNowResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -1356,15 +1448,15 @@ Check if the current user has all required permissions for Privilege Monitoring.
 Search Indices for Privileges Monitoring import.
 
       */
-  async searchPrivilegesIndices(
+  async searchPrivilegesIndices<TResponseType extends ScoutResponseType = 'json'>(
     props: SearchPrivilegesIndicesProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<SearchPrivilegesIndicesResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, SearchPrivilegesIndicesResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/entity_analytics/monitoring/privileges/indices`;
 
-    return apiClient.get<SearchPrivilegesIndicesResponse>(
+    return apiClient.get<ScoutResponseBody<TResponseType, SearchPrivilegesIndicesResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -1378,10 +1470,10 @@ Search Indices for Privileges Monitoring import.
       }
     );
   },
-  async syncWatchlist(
+  async syncWatchlist<TResponseType extends ScoutResponseType = 'json'>(
     props: SyncWatchlistProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<SyncWatchlistResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, SyncWatchlistResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
@@ -1389,7 +1481,7 @@ Search Indices for Privileges Monitoring import.
       props.params
     )}`;
 
-    return apiClient.post<SyncWatchlistResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, SyncWatchlistResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -1403,24 +1495,29 @@ Search Indices for Privileges Monitoring import.
   /**
    * Calculates and persists Risk Scores for an entity, returning the calculated risk score.
    */
-  async triggerRiskScoreCalculation(
+  async triggerRiskScoreCalculation<TResponseType extends ScoutResponseType = 'json'>(
     props: TriggerRiskScoreCalculationProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<TriggerRiskScoreCalculationResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, TriggerRiskScoreCalculationResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/internal/risk_score/calculation/entity`;
 
-    return apiClient.post<TriggerRiskScoreCalculationResponse>(path, {
-      headers: {
-        'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-        ...options.headers,
-      },
-      body: props.body,
-      responseType: options.responseType ?? 'json',
-    });
+    return apiClient.post<ScoutResponseBody<TResponseType, TriggerRiskScoreCalculationResponse>>(
+      path,
+      {
+        headers: {
+          'kbn-xsrf': 'true',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+          ...options.headers,
+        },
+        body: props.body,
+        responseType: options.responseType ?? 'json',
+      }
+    );
   },
   /**
       * Unassigns the provided entities from the specified watchlist.
@@ -1429,10 +1526,12 @@ assigned via other sources (for example, index or integration), it will
 remain on the watchlist.
 
       */
-  async unassignWatchlistEntities(
+  async unassignWatchlistEntities<TResponseType extends ScoutResponseType = 'json'>(
     props: UnassignWatchlistEntitiesProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<UnassignWatchlistEntitiesResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, UnassignWatchlistEntitiesResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
@@ -1440,16 +1539,19 @@ remain on the watchlist.
       props.params
     )}`;
 
-    return apiClient.post<UnassignWatchlistEntitiesResponse>(path, {
-      headers: {
-        'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-        ...options.headers,
-      },
-      body: props.body,
-      responseType: options.responseType ?? 'json',
-    });
+    return apiClient.post<ScoutResponseBody<TResponseType, UnassignWatchlistEntitiesResponse>>(
+      path,
+      {
+        headers: {
+          'kbn-xsrf': 'true',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+          ...options.headers,
+        },
+        body: props.body,
+        responseType: options.responseType ?? 'json',
+      }
+    );
   },
   /**
       * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
@@ -1457,10 +1559,10 @@ remain on the watchlist.
 Update an entity source configuration.
 
       */
-  async updateEntitySource(
+  async updateEntitySource<TResponseType extends ScoutResponseType = 'json'>(
     props: UpdateEntitySourceProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<UpdateEntitySourceResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, UpdateEntitySourceResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
@@ -1468,7 +1570,7 @@ Update an entity source configuration.
       props.params
     )}`;
 
-    return apiClient.put<UpdateEntitySourceResponse>(path, {
+    return apiClient.put<ScoutResponseBody<TResponseType, UpdateEntitySourceResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -1485,10 +1587,10 @@ Update an entity source configuration.
 Updates the details of an existing monitored privileged user by their document ID.
 
       */
-  async updatePrivMonUser(
+  async updatePrivMonUser<TResponseType extends ScoutResponseType = 'json'>(
     props: UpdatePrivMonUserProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<UpdatePrivMonUserResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, UpdatePrivMonUserResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
@@ -1496,7 +1598,7 @@ Updates the details of an existing monitored privileged user by their document I
       props.params
     )}`;
 
-    return apiClient.put<UpdatePrivMonUserResponse>(path, {
+    return apiClient.put<ScoutResponseBody<TResponseType, UpdatePrivMonUserResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -1510,10 +1612,10 @@ Updates the details of an existing monitored privileged user by their document I
   /**
    * Updates the name, description, risk modifier, or managed status of an existing entity analytics watchlist.
    */
-  async updateWatchlist(
+  async updateWatchlist<TResponseType extends ScoutResponseType = 'json'>(
     props: UpdateWatchlistProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<UpdateWatchlistResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, UpdateWatchlistResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
@@ -1521,7 +1623,7 @@ Updates the details of an existing monitored privileged user by their document I
       props.params
     )}`;
 
-    return apiClient.put<UpdateWatchlistResponse>(path, {
+    return apiClient.put<ScoutResponseBody<TResponseType, UpdateWatchlistResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -1532,10 +1634,12 @@ Updates the details of an existing monitored privileged user by their document I
       responseType: options.responseType ?? 'json',
     });
   },
-  async updateWatchlistEntitySource(
+  async updateWatchlistEntitySource<TResponseType extends ScoutResponseType = 'json'>(
     props: UpdateWatchlistEntitySourceProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<UpdateWatchlistEntitySourceResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, UpdateWatchlistEntitySourceResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
@@ -1543,38 +1647,46 @@ Updates the details of an existing monitored privileged user by their document I
       props.params
     )}`;
 
-    return apiClient.put<UpdateWatchlistEntitySourceResponse>(path, {
-      headers: {
-        'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-        ...options.headers,
-      },
-      body: props.body,
-      responseType: options.responseType ?? 'json',
-    });
+    return apiClient.put<ScoutResponseBody<TResponseType, UpdateWatchlistEntitySourceResponse>>(
+      path,
+      {
+        headers: {
+          'kbn-xsrf': 'true',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+          ...options.headers,
+        },
+        body: props.body,
+        responseType: options.responseType ?? 'json',
+      }
+    );
   },
   /**
       * **Deprecated in 9.4.0.** Use `POST /internal/asset_criticality/upload_csv_v2` instead.
 
       */
-  async uploadAssetCriticalityRecords(
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<UploadAssetCriticalityRecordsResponse>> {
+  async uploadAssetCriticalityRecords<TResponseType extends ScoutResponseType = 'json'>(
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, UploadAssetCriticalityRecordsResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/asset_criticality/upload_csv`;
 
-    return apiClient.post<UploadAssetCriticalityRecordsResponse>(path, {
-      headers: {
-        'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-        ...options.headers,
-      },
-      body: options.body,
-      responseType: options.responseType ?? 'json',
-    });
+    return apiClient.post<ScoutResponseBody<TResponseType, UploadAssetCriticalityRecordsResponse>>(
+      path,
+      {
+        headers: {
+          'kbn-xsrf': 'true',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+          ...options.headers,
+        },
+        body: options.body,
+        responseType: options.responseType ?? 'json',
+      }
+    );
   },
   /**
       * Uploads a CSV file to add entities to a watchlist. The CSV must contain a header row
@@ -1587,10 +1699,10 @@ field is updated in the entity store.
 Each row will match up to 10,000 entities.
 
       */
-  async uploadWatchlistCsv(
+  async uploadWatchlistCsv<TResponseType extends ScoutResponseType = 'json'>(
     props: UploadWatchlistCsvProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<UploadWatchlistCsvResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, UploadWatchlistCsvResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
@@ -1598,7 +1710,7 @@ Each row will match up to 10,000 entities.
       props.params
     )}`;
 
-    return apiClient.post<UploadWatchlistCsvResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, UploadWatchlistCsvResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',

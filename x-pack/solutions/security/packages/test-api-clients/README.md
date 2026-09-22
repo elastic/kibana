@@ -53,6 +53,6 @@ apiTest('creates a rule', async ({ detectionsApi, requestAuth }) => {
 });
 ```
 
-Use `options.kibanaSpace` to target a non-default space and `options.responseType` for non-JSON payloads such as NDJSON exports.
+Use `options.kibanaSpace` to target a non-default space and `options.responseType` for non-JSON payloads such as NDJSON or CSV exports. The response `body` type follows it: the OpenAPI response type for `'json'` (the default), `string` for `'text'` and `Buffer` for `'buffer'`.
 
 Because this package depends on `@kbn/security-solution-plugin` for the request and response types, TypeScript project references stop the plugin itself (and `@kbn/scout-security`, which the plugin references) from depending on this package. Scout tests that live inside the plugin's `tsconfig.json` therefore cannot import these clients yet.

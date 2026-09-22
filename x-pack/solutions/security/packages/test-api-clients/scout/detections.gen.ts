@@ -164,16 +164,28 @@ import type {
   UpdateRuleResponse,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/update_rule/update_rule_route.gen';
 
-export interface ScoutApiRequestOptions {
+export type ScoutResponseType = NonNullable<ApiClientOptions['responseType']>;
+
+/**
+ * Body the Scout `apiClient` yields for a given `responseType`: the OpenAPI response for 'json',
+ * a string for 'text' and a Buffer for 'buffer'.
+ */
+export type ScoutResponseBody<
+  TResponseType extends ScoutResponseType,
+  TJsonBody = ApiClientResponse['body']
+> = TResponseType extends 'text' ? string : TResponseType extends 'buffer' ? Buffer : TJsonBody;
+
+export interface ScoutApiRequestOptions<TResponseType extends ScoutResponseType = 'json'> {
   /** Extra headers merged on top of the defaults, e.g. an API key or a SAML cookie for auth */
   headers?: Record<string, string>;
   /** Kibana space id the request targets. Omit or pass 'default' for the default space */
   kibanaSpace?: string;
   /**
    * How the response body should be parsed. Defaults to 'json'.
-   * Use 'text' or 'buffer' for endpoints returning non-JSON payloads, e.g. NDJSON exports.
+   * Use 'text' or 'buffer' for endpoints returning non-JSON payloads, e.g. NDJSON or CSV exports;
+   * the returned `body` is then typed as a string or a Buffer accordingly.
    */
-  responseType?: ApiClientOptions['responseType'];
+  responseType?: TResponseType;
   /**
    * Raw request body for operations whose payload is not described by the OpenAPI request body,
    * e.g. multipart/form-data imports. Ignored for operations with a typed request body.
@@ -192,24 +204,27 @@ index may be deleted. While you can delete these indices manually, the endpoint 
 to the relevant index, causing it to be deleted after 30 days, and removes other migration-specific artifacts.
 
       */
-  async alertsMigrationCleanup(
+  async alertsMigrationCleanup<TResponseType extends ScoutResponseType = 'json'>(
     props: AlertsMigrationCleanupProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<AlertsMigrationCleanupResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, AlertsMigrationCleanupResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/detection_engine/signals/migration`;
 
-    return apiClient.delete<AlertsMigrationCleanupResponse>(path, {
-      headers: {
-        'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-        ...options.headers,
-      },
-      body: props.body,
-      responseType: options.responseType ?? 'json',
-    });
+    return apiClient.delete<ScoutResponseBody<TResponseType, AlertsMigrationCleanupResponse>>(
+      path,
+      {
+        headers: {
+          'kbn-xsrf': 'true',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+          ...options.headers,
+        },
+        body: props.body,
+        responseType: options.responseType ?? 'json',
+      }
+    );
   },
   /**
       * Creates an index for Elastic Security alerts. Calling this API is not
@@ -217,14 +232,14 @@ required for the detection engine to function properly. You can create
 rules and alerts without calling this API.
 
       */
-  async createAlertsIndex(
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<CreateAlertsIndexResponse>> {
+  async createAlertsIndex<TResponseType extends ScoutResponseType = 'json'>(
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, CreateAlertsIndexResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/detection_engine/index`;
 
-    return apiClient.post<CreateAlertsIndexResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, CreateAlertsIndexResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -244,15 +259,15 @@ Initiate a migration of detection alerts. Migrations are initiated per index. Th
 and should not remove existing data, but it can consume significant cluster resources. Plan capacity accordingly.
 
       */
-  async createAlertsMigration(
+  async createAlertsMigration<TResponseType extends ScoutResponseType = 'json'>(
     props: CreateAlertsMigrationProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<CreateAlertsMigrationResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, CreateAlertsMigrationResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/detection_engine/signals/migration`;
 
-    return apiClient.post<CreateAlertsMigrationResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, CreateAlertsMigrationResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -320,15 +335,15 @@ For detailed information on Kibana actions and alerting, and additional API call
 * [Connectors API](https://www.elastic.co/docs/api/doc/kibana/group/endpoint-connectors)
 
       */
-  async createRule(
+  async createRule<TResponseType extends ScoutResponseType = 'json'>(
     props: CreateRuleProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<CreateRuleResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, CreateRuleResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/detection_engine/rules`;
 
-    return apiClient.post<CreateRuleResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, CreateRuleResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -345,14 +360,14 @@ stored in it. Use with caution; prefer lifecycle policies or the UI when availab
 Call `GET /api/detection_engine/index` first to confirm the index that will be removed.
 
       */
-  async deleteAlertsIndex(
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<DeleteAlertsIndexResponse>> {
+  async deleteAlertsIndex<TResponseType extends ScoutResponseType = 'json'>(
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, DeleteAlertsIndexResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/detection_engine/index`;
 
-    return apiClient.delete<DeleteAlertsIndexResponse>(path, {
+    return apiClient.delete<ScoutResponseBody<TResponseType, DeleteAlertsIndexResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -374,15 +389,15 @@ The URL query must include one of the following:
 The difference between the `id` and `rule_id` is that the `id` is a unique rule identifier that is randomly generated when a rule is created and cannot be set, whereas `rule_id` is a stable rule identifier that can be assigned during rule creation.
 
       */
-  async deleteRule(
+  async deleteRule<TResponseType extends ScoutResponseType = 'json'>(
     props: DeleteRuleProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<DeleteRuleResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, DeleteRuleResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/detection_engine/rules`;
 
-    return apiClient.delete<DeleteRuleResponse>(
+    return apiClient.delete<ScoutResponseBody<TResponseType, DeleteRuleResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -408,24 +423,27 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
 > Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
 
       */
-  async exportRules(
+  async exportRules<TResponseType extends ScoutResponseType = 'json'>(
     props: ExportRulesProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/detection_engine/rules/_export`;
 
-    return apiClient.post(`${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`, {
-      headers: {
-        'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-        ...options.headers,
-      },
-      body: props.body,
-      responseType: options.responseType ?? 'json',
-    });
+    return apiClient.post<ScoutResponseBody<TResponseType>>(
+      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      {
+        headers: {
+          'kbn-xsrf': 'true',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+          ...options.headers,
+        },
+        body: props.body,
+        responseType: options.responseType ?? 'json',
+      }
+    );
   },
   /**
       * **DEPRECATED.** Completes a legacy alert index migration. Do not automate against this in new code.
@@ -436,15 +454,15 @@ successfully migrated index's alias. The endpoint is idempotent, so you can poll
 finishes and then call this operation once.
 
       */
-  async finalizeAlertsMigration(
+  async finalizeAlertsMigration<TResponseType extends ScoutResponseType = 'json'>(
     props: FinalizeAlertsMigrationProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<FinalizeAlertsMigrationResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, FinalizeAlertsMigrationResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/detection_engine/signals/finalize_migration`;
 
-    return apiClient.post<FinalizeAlertsMigrationResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, FinalizeAlertsMigrationResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -458,15 +476,15 @@ finishes and then call this operation once.
   /**
    * Retrieve a paginated list of detection rules. By default, the first page is returned, with 20 results per page.
    */
-  async findRules(
+  async findRules<TResponseType extends ScoutResponseType = 'json'>(
     props: FindRulesProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<FindRulesResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, FindRulesResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/detection_engine/rules/_find`;
 
-    return apiClient.get<FindRulesResponse>(
+    return apiClient.get<ScoutResponseBody<TResponseType, FindRulesResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -499,15 +517,15 @@ finishes and then call this operation once.
 > Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
 
       */
-  async importRules(
+  async importRules<TResponseType extends ScoutResponseType = 'json'>(
     props: ImportRulesProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<ImportRulesResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, ImportRulesResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/detection_engine/rules/_import`;
 
-    return apiClient.post<ImportRulesResponse>(
+    return apiClient.post<ScoutResponseBody<TResponseType, ImportRulesResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -535,14 +553,18 @@ This ensures that your detection engine is always up-to-date with the latest rul
 providing you with the most current and effective threat detection capabilities.
 
       */
-  async installPrebuiltRulesAndTimelines(
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<InstallPrebuiltRulesAndTimelinesResponse>> {
+  async installPrebuiltRulesAndTimelines<TResponseType extends ScoutResponseType = 'json'>(
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, InstallPrebuiltRulesAndTimelinesResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/detection_engine/rules/prepackaged`;
 
-    return apiClient.put<InstallPrebuiltRulesAndTimelinesResponse>(path, {
+    return apiClient.put<
+      ScoutResponseBody<TResponseType, InstallPrebuiltRulesAndTimelinesResponse>
+    >(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -563,15 +585,15 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
 > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
 
       */
-  async patchRule(
+  async patchRule<TResponseType extends ScoutResponseType = 'json'>(
     props: PatchRuleProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<PatchRuleResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, PatchRuleResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/detection_engine/rules`;
 
-    return apiClient.patch<PatchRuleResponse>(path, {
+    return apiClient.patch<ScoutResponseBody<TResponseType, PatchRuleResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -593,15 +615,15 @@ The edit action is idempotent, meaning that if you add a tag to a rule that alre
 > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
 
       */
-  async performRulesBulkAction(
+  async performRulesBulkAction<TResponseType extends ScoutResponseType = 'json'>(
     props: PerformRulesBulkActionProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<PerformRulesBulkActionResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, PerformRulesBulkActionResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/detection_engine/rules/_bulk_action`;
 
-    return apiClient.post<PerformRulesBulkActionResponse>(
+    return apiClient.post<ScoutResponseBody<TResponseType, PerformRulesBulkActionResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -621,14 +643,14 @@ whether its mapping is outdated. Use this to verify that an alert index is provi
 or running rules that write alerts to it.
 
       */
-  async readAlertsIndex(
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<ReadAlertsIndexResponse>> {
+  async readAlertsIndex<TResponseType extends ScoutResponseType = 'json'>(
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, ReadAlertsIndexResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/detection_engine/index`;
 
-    return apiClient.get<ReadAlertsIndexResponse>(path, {
+    return apiClient.get<ScoutResponseBody<TResponseType, ReadAlertsIndexResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -648,15 +670,17 @@ Retrieves indices that contain detection alerts of a particular age, along with 
 each of those indices.
 
       */
-  async readAlertsMigrationStatus(
+  async readAlertsMigrationStatus<TResponseType extends ScoutResponseType = 'json'>(
     props: ReadAlertsMigrationStatusProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<ReadAlertsMigrationStatusResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, ReadAlertsMigrationStatusResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/detection_engine/signals/migration_status`;
 
-    return apiClient.get<ReadAlertsMigrationStatusResponse>(
+    return apiClient.get<ScoutResponseBody<TResponseType, ReadAlertsMigrationStatusResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -676,14 +700,18 @@ each of those indices.
 This endpoint provides detailed information about the number of custom rules, installed prebuilt rules, available prebuilt rules that are not installed, outdated prebuilt rules, installed prebuilt timelines, available prebuilt timelines that are not installed, and outdated prebuilt timelines.
 
       */
-  async readPrebuiltRulesAndTimelinesStatus(
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<ReadPrebuiltRulesAndTimelinesStatusResponse>> {
+  async readPrebuiltRulesAndTimelinesStatus<TResponseType extends ScoutResponseType = 'json'>(
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, ReadPrebuiltRulesAndTimelinesStatusResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/detection_engine/rules/prepackaged/_status`;
 
-    return apiClient.get<ReadPrebuiltRulesAndTimelinesStatusResponse>(path, {
+    return apiClient.get<
+      ScoutResponseBody<TResponseType, ReadPrebuiltRulesAndTimelinesStatusResponse>
+    >(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -701,14 +729,14 @@ index for the Elastic Security alerts generated by
 detection engine rules.
 
       */
-  async readPrivileges(
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<ReadPrivilegesResponse>> {
+  async readPrivileges<TResponseType extends ScoutResponseType = 'json'>(
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, ReadPrivilegesResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/detection_engine/privileges`;
 
-    return apiClient.get<ReadPrivilegesResponse>(path, {
+    return apiClient.get<ScoutResponseBody<TResponseType, ReadPrivilegesResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -730,15 +758,15 @@ The URL query must include one of the following:
 The difference between the `id` and `rule_id` is that the `id` is a unique rule identifier that is randomly generated when a rule is created and cannot be set, whereas `rule_id` is a stable rule identifier that can be assigned during rule creation.
 
       */
-  async readRule(
+  async readRule<TResponseType extends ScoutResponseType = 'json'>(
     props: ReadRuleProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<ReadRuleResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, ReadRuleResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/detection_engine/rules`;
 
-    return apiClient.get<ReadRuleResponse>(
+    return apiClient.get<ScoutResponseBody<TResponseType, ReadRuleResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -752,10 +780,12 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       }
     );
   },
-  async readRuleExecutionResults(
+  async readRuleExecutionResults<TResponseType extends ScoutResponseType = 'json'>(
     props: ReadRuleExecutionResultsProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<ReadRuleExecutionResultsResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, ReadRuleExecutionResultsResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
@@ -763,28 +793,31 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       props.params
     )}`;
 
-    return apiClient.post<ReadRuleExecutionResultsResponse>(path, {
-      headers: {
-        'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-        ...options.headers,
-      },
-      body: props.body,
-      responseType: options.responseType ?? 'json',
-    });
+    return apiClient.post<ScoutResponseBody<TResponseType, ReadRuleExecutionResultsResponse>>(
+      path,
+      {
+        headers: {
+          'kbn-xsrf': 'true',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+          ...options.headers,
+        },
+        body: props.body,
+        responseType: options.responseType ?? 'json',
+      }
+    );
   },
   /**
    * List all unique tags from all detection rules.
    */
-  async readTags(
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<ReadTagsResponse>> {
+  async readTags<TResponseType extends ScoutResponseType = 'json'>(
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, ReadTagsResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/detection_engine/tags`;
 
-    return apiClient.get<ReadTagsResponse>(path, {
+    return apiClient.get<ScoutResponseBody<TResponseType, ReadTagsResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -799,10 +832,10 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       * Restore a detection rule to a specific historical snapshot.
 
       */
-  async restoreRuleFromHistory(
+  async restoreRuleFromHistory<TResponseType extends ScoutResponseType = 'json'>(
     props: RestoreRuleFromHistoryProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<RestoreRuleFromHistoryResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, RestoreRuleFromHistoryResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
@@ -810,7 +843,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       props.params
     )}`;
 
-    return apiClient.post<RestoreRuleFromHistoryResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, RestoreRuleFromHistoryResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '1',
@@ -824,15 +857,15 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
   /**
    * Lists prebuilt detection rules that can be installed
    */
-  async reviewRuleInstallation(
+  async reviewRuleInstallation<TResponseType extends ScoutResponseType = 'json'>(
     props: ReviewRuleInstallationProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<ReviewRuleInstallationResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, ReviewRuleInstallationResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/internal/detection_engine/prebuilt_rules/installation/_review`;
 
-    return apiClient.post<ReviewRuleInstallationResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, ReviewRuleInstallationResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '1',
@@ -846,15 +879,15 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
   /**
    * Lists currently installed prebuilt detection rules that have newer versions available.
    */
-  async reviewRuleUpgrade(
+  async reviewRuleUpgrade<TResponseType extends ScoutResponseType = 'json'>(
     props: ReviewRuleUpgradeProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<ReviewRuleUpgradeResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, ReviewRuleUpgradeResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/internal/detection_engine/prebuilt_rules/upgrade/_review`;
 
-    return apiClient.post<ReviewRuleUpgradeResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, ReviewRuleUpgradeResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '1',
@@ -871,10 +904,10 @@ Each item contains the rule snapshot at that point in time and the snapshot of
 the immediately preceding revision in `old_values`.
 
       */
-  async ruleChangesHistory(
+  async ruleChangesHistory<TResponseType extends ScoutResponseType = 'json'>(
     props: RuleChangesHistoryProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<RuleChangesHistoryResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, RuleChangesHistoryResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
@@ -882,7 +915,7 @@ the immediately preceding revision in `old_values`.
       props.params
     )}`;
 
-    return apiClient.get<RuleChangesHistoryResponse>(
+    return apiClient.get<ScoutResponseBody<TResponseType, RuleChangesHistoryResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -902,15 +935,15 @@ time window, without persisting a rule or writing alerts. Use the response to va
 matching documents, and inspect execution logs. Pair `invocationCount` and `timeframeEnd` to cap run time.
 
       */
-  async rulePreview(
+  async rulePreview<TResponseType extends ScoutResponseType = 'json'>(
     props: RulePreviewProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<RulePreviewResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, RulePreviewResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/detection_engine/rules/preview`;
 
-    return apiClient.post<RulePreviewResponse>(
+    return apiClient.post<ScoutResponseBody<TResponseType, RulePreviewResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -927,15 +960,15 @@ matching documents, and inspect execution logs. Pair `invocationCount` and `time
   /**
    * Find and/or aggregate detection alerts that match the given query.
    */
-  async searchAlerts(
+  async searchAlerts<TResponseType extends ScoutResponseType = 'json'>(
     props: SearchAlertsProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<SearchAlertsResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, SearchAlertsResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/detection_engine/signals/search`;
 
-    return apiClient.post<SearchAlertsResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, SearchAlertsResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -949,15 +982,15 @@ matching documents, and inspect execution logs. Pair `invocationCount` and `time
   /**
    * Find and/or aggregate attack discovery alerts that match the given query. Searches scheduled and ad hoc attack discovery alert indices for the active space only.
    */
-  async searchAttacks(
+  async searchAttacks<TResponseType extends ScoutResponseType = 'json'>(
     props: SearchAttacksProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<SearchAttacksResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, SearchAttacksResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/detection_engine/attacks/search`;
 
-    return apiClient.post<SearchAttacksResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, SearchAttacksResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -971,15 +1004,15 @@ matching documents, and inspect execution logs. Pair `invocationCount` and `time
   /**
    * Retrieve a paginated list of detection rules with KQL filter, facet counts, and search_after pagination.
    */
-  async searchRules(
+  async searchRules<TResponseType extends ScoutResponseType = 'json'>(
     props: SearchRulesProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<SearchRulesResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, SearchRulesResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/internal/detection_engine/rules/_search`;
 
-    return apiClient.post<SearchRulesResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, SearchRulesResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '1',
@@ -993,15 +1026,15 @@ matching documents, and inspect execution logs. Pair `invocationCount` and `time
   /**
    * Find and/or aggregate detection and attack alerts that match the given query.
    */
-  async searchUnifiedAlerts(
+  async searchUnifiedAlerts<TResponseType extends ScoutResponseType = 'json'>(
     props: SearchUnifiedAlertsProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<SearchUnifiedAlertsResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, SearchUnifiedAlertsResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/internal/detection_engine/unified_alerts/search`;
 
-    return apiClient.post<SearchUnifiedAlertsResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, SearchUnifiedAlertsResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '1',
@@ -1018,15 +1051,15 @@ matching documents, and inspect execution logs. Pair `invocationCount` and `time
 > You cannot add and remove the same assignee in the same request.
 
       */
-  async setAlertAssignees(
+  async setAlertAssignees<TResponseType extends ScoutResponseType = 'json'>(
     props: SetAlertAssigneesProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<SetAlertAssigneesResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, SetAlertAssigneesResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/detection_engine/signals/assignees`;
 
-    return apiClient.post<SetAlertAssigneesResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, SetAlertAssigneesResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -1040,15 +1073,15 @@ matching documents, and inspect execution logs. Pair `invocationCount` and `time
   /**
    * Set the status of one or more detection alerts.
    */
-  async setAlertsStatus(
+  async setAlertsStatus<TResponseType extends ScoutResponseType = 'json'>(
     props: SetAlertsStatusProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<SetAlertsStatusResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, SetAlertsStatusResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/detection_engine/signals/status`;
 
-    return apiClient.post<SetAlertsStatusResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, SetAlertsStatusResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -1065,15 +1098,15 @@ matching documents, and inspect execution logs. Pair `invocationCount` and `time
 > You cannot add and remove the same alert tag in the same request.
 
       */
-  async setAlertTags(
+  async setAlertTags<TResponseType extends ScoutResponseType = 'json'>(
     props: SetAlertTagsProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<SetAlertTagsResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, SetAlertTagsResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/detection_engine/signals/tags`;
 
-    return apiClient.post<SetAlertTagsResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, SetAlertTagsResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -1091,15 +1124,15 @@ Optionally cascade the change to related detection alerts via `kibana.alert.atta
 > You cannot add and remove the same assignee in the same request.
 
       */
-  async setAttacksAssignees(
+  async setAttacksAssignees<TResponseType extends ScoutResponseType = 'json'>(
     props: SetAttacksAssigneesProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<SetAttacksAssigneesResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, SetAttacksAssigneesResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/detection_engine/attacks/assignees`;
 
-    return apiClient.post<SetAttacksAssigneesResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, SetAttacksAssigneesResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -1113,15 +1146,15 @@ Optionally cascade the change to related detection alerts via `kibana.alert.atta
   /**
    * Set the workflow status of one or more attack discovery alerts by IDs, optionally cascading the status to their related detection alerts.
    */
-  async setAttacksStatus(
+  async setAttacksStatus<TResponseType extends ScoutResponseType = 'json'>(
     props: SetAttacksStatusProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<SetAttacksStatusResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, SetAttacksStatusResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/detection_engine/attacks/status`;
 
-    return apiClient.post<SetAttacksStatusResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, SetAttacksStatusResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -1135,15 +1168,15 @@ Optionally cascade the change to related detection alerts via `kibana.alert.atta
   /**
    * Add tags to attack discovery alerts, and remove them from alerts, by attack IDs in a single request. Optionally cascade tag changes to related detection alerts.
    */
-  async setAttacksTags(
+  async setAttacksTags<TResponseType extends ScoutResponseType = 'json'>(
     props: SetAttacksTagsProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<SetAttacksTagsResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, SetAttacksTagsResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/detection_engine/attacks/tags`;
 
-    return apiClient.post<SetAttacksTagsResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, SetAttacksTagsResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -1160,24 +1193,29 @@ Optionally cascade the change to related detection alerts via `kibana.alert.atta
 > You cannot add and remove the same assignee in the same request.
 
       */
-  async setUnifiedAlertsAssignees(
+  async setUnifiedAlertsAssignees<TResponseType extends ScoutResponseType = 'json'>(
     props: SetUnifiedAlertsAssigneesProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<SetUnifiedAlertsAssigneesResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, SetUnifiedAlertsAssigneesResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/internal/detection_engine/unified_alerts/assignees`;
 
-    return apiClient.post<SetUnifiedAlertsAssigneesResponse>(path, {
-      headers: {
-        'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-        ...options.headers,
-      },
-      body: props.body,
-      responseType: options.responseType ?? 'json',
-    });
+    return apiClient.post<ScoutResponseBody<TResponseType, SetUnifiedAlertsAssigneesResponse>>(
+      path,
+      {
+        headers: {
+          'kbn-xsrf': 'true',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+          ...options.headers,
+        },
+        body: props.body,
+        responseType: options.responseType ?? 'json',
+      }
+    );
   },
   /**
       * Add tags to detection and attack alerts, and remove them from alerts.
@@ -1185,15 +1223,15 @@ Optionally cascade the change to related detection alerts via `kibana.alert.atta
 > You cannot add and remove the same alert tag in the same request.
 
       */
-  async setUnifiedAlertsTags(
+  async setUnifiedAlertsTags<TResponseType extends ScoutResponseType = 'json'>(
     props: SetUnifiedAlertsTagsProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<SetUnifiedAlertsTagsResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, SetUnifiedAlertsTagsResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/internal/detection_engine/unified_alerts/tags`;
 
-    return apiClient.post<SetUnifiedAlertsTagsResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, SetUnifiedAlertsTagsResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '1',
@@ -1207,46 +1245,54 @@ Optionally cascade the change to related detection alerts via `kibana.alert.atta
   /**
    * Set the workflow status of one or more detection and attack alerts by IDs.
    */
-  async setUnifiedAlertsWorkflowStatus(
+  async setUnifiedAlertsWorkflowStatus<TResponseType extends ScoutResponseType = 'json'>(
     props: SetUnifiedAlertsWorkflowStatusProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<SetUnifiedAlertsWorkflowStatusResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, SetUnifiedAlertsWorkflowStatusResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/internal/detection_engine/unified_alerts/workflow_status`;
 
-    return apiClient.post<SetUnifiedAlertsWorkflowStatusResponse>(path, {
-      headers: {
-        'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-        ...options.headers,
-      },
-      body: props.body,
-      responseType: options.responseType ?? 'json',
-    });
+    return apiClient.post<ScoutResponseBody<TResponseType, SetUnifiedAlertsWorkflowStatusResponse>>(
+      path,
+      {
+        headers: {
+          'kbn-xsrf': 'true',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+          ...options.headers,
+        },
+        body: props.body,
+        responseType: options.responseType ?? 'json',
+      }
+    );
   },
   /**
    * Suggests user profiles.
    */
-  async suggestUserProfiles(
+  async suggestUserProfiles<TResponseType extends ScoutResponseType = 'json'>(
     props: SuggestUserProfilesProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/internal/detection_engine/users/_find`;
 
-    return apiClient.post(`${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`, {
-      headers: {
-        'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-        ...options.headers,
-      },
-      body: options.body,
-      responseType: options.responseType ?? 'json',
-    });
+    return apiClient.post<ScoutResponseBody<TResponseType>>(
+      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      {
+        headers: {
+          'kbn-xsrf': 'true',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+          ...options.headers,
+        },
+        body: options.body,
+        responseType: options.responseType ?? 'json',
+      }
+    );
   },
   /**
       * Update a detection rule using the `rule_id` or `id` field. The original rule is replaced, and all unspecified fields are deleted.
@@ -1258,15 +1304,15 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
 > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
 
       */
-  async updateRule(
+  async updateRule<TResponseType extends ScoutResponseType = 'json'>(
     props: UpdateRuleProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<UpdateRuleResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, UpdateRuleResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/detection_engine/rules`;
 
-    return apiClient.put<UpdateRuleResponse>(path, {
+    return apiClient.put<ScoutResponseBody<TResponseType, UpdateRuleResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',

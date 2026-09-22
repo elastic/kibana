@@ -85,16 +85,28 @@ import type {
   UpdateExceptionListItemResponse,
 } from '@kbn/securitysolution-exceptions-common/api/update_exception_list_item/update_exception_list_item.gen';
 
-export interface ScoutApiRequestOptions {
+export type ScoutResponseType = NonNullable<ApiClientOptions['responseType']>;
+
+/**
+ * Body the Scout `apiClient` yields for a given `responseType`: the OpenAPI response for 'json',
+ * a string for 'text' and a Buffer for 'buffer'.
+ */
+export type ScoutResponseBody<
+  TResponseType extends ScoutResponseType,
+  TJsonBody = ApiClientResponse['body']
+> = TResponseType extends 'text' ? string : TResponseType extends 'buffer' ? Buffer : TJsonBody;
+
+export interface ScoutApiRequestOptions<TResponseType extends ScoutResponseType = 'json'> {
   /** Extra headers merged on top of the defaults, e.g. an API key or a SAML cookie for auth */
   headers?: Record<string, string>;
   /** Kibana space id the request targets. Omit or pass 'default' for the default space */
   kibanaSpace?: string;
   /**
    * How the response body should be parsed. Defaults to 'json'.
-   * Use 'text' or 'buffer' for endpoints returning non-JSON payloads, e.g. NDJSON exports.
+   * Use 'text' or 'buffer' for endpoints returning non-JSON payloads, e.g. NDJSON or CSV exports;
+   * the returned `body` is then typed as a string or a Buffer accordingly.
    */
-  responseType?: ApiClientOptions['responseType'];
+  responseType?: TResponseType;
   /**
    * Raw request body for operations whose payload is not described by the OpenAPI request body,
    * e.g. multipart/form-data imports. Ignored for operations with a typed request body.
@@ -109,15 +121,15 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
 > All exception items added to the same list are evaluated using `OR` logic. That is, if any of the items in a list evaluate to `true`, the exception prevents the rule from generating an alert. Likewise, `OR` logic is used for evaluating exceptions when more than one exception list is assigned to a rule. To use the `AND` operator, you can define multiple clauses (`entries`) in a single exception item.
 
       */
-  async createExceptionList(
+  async createExceptionList<TResponseType extends ScoutResponseType = 'json'>(
     props: CreateExceptionListProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<CreateExceptionListResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, CreateExceptionListResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/exception_lists`;
 
-    return apiClient.post<CreateExceptionListResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, CreateExceptionListResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -134,15 +146,15 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
 > Before creating exception items, you must create an exception list.
 
       */
-  async createExceptionListItem(
+  async createExceptionListItem<TResponseType extends ScoutResponseType = 'json'>(
     props: CreateExceptionListItemProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<CreateExceptionListItemResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, CreateExceptionListItemResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/exception_lists/items`;
 
-    return apiClient.post<CreateExceptionListItemResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, CreateExceptionListItemResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -156,10 +168,12 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   /**
    * Create exception items that apply to a single detection rule.
    */
-  async createRuleExceptionListItems(
+  async createRuleExceptionListItems<TResponseType extends ScoutResponseType = 'json'>(
     props: CreateRuleExceptionListItemsProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<CreateRuleExceptionListItemsResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, CreateRuleExceptionListItemsResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
@@ -167,16 +181,19 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       props.params
     )}`;
 
-    return apiClient.post<CreateRuleExceptionListItemsResponse>(path, {
-      headers: {
-        'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-        ...options.headers,
-      },
-      body: props.body,
-      responseType: options.responseType ?? 'json',
-    });
+    return apiClient.post<ScoutResponseBody<TResponseType, CreateRuleExceptionListItemsResponse>>(
+      path,
+      {
+        headers: {
+          'kbn-xsrf': 'true',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+          ...options.headers,
+        },
+        body: props.body,
+        responseType: options.responseType ?? 'json',
+      }
+    );
   },
   /**
       * An exception list groups exception items and can be associated with detection rules. A shared exception list can apply to multiple detection rules.
@@ -184,24 +201,29 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
 > All exception items added to the same list are evaluated using `OR` logic. That is, if any of the items in a list evaluate to `true`, the exception prevents the rule from generating an alert. Likewise, `OR` logic is used for evaluating exceptions when more than one exception list is assigned to a rule. To use the `AND` operator, you can define multiple clauses (`entries`) in a single exception item.
 
       */
-  async createSharedExceptionList(
+  async createSharedExceptionList<TResponseType extends ScoutResponseType = 'json'>(
     props: CreateSharedExceptionListProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<CreateSharedExceptionListResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, CreateSharedExceptionListResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/exceptions/shared`;
 
-    return apiClient.post<CreateSharedExceptionListResponse>(path, {
-      headers: {
-        'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-        ...options.headers,
-      },
-      body: props.body,
-      responseType: options.responseType ?? 'json',
-    });
+    return apiClient.post<ScoutResponseBody<TResponseType, CreateSharedExceptionListResponse>>(
+      path,
+      {
+        headers: {
+          'kbn-xsrf': 'true',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+          ...options.headers,
+        },
+        body: props.body,
+        responseType: options.responseType ?? 'json',
+      }
+    );
   },
   /**
       * Delete an exception list using the `id` or `list_id` field.
@@ -211,15 +233,15 @@ exception list from those rules. Deleting a linked exception list can leave rule
 an exception list that no longer exists.
 
       */
-  async deleteExceptionList(
+  async deleteExceptionList<TResponseType extends ScoutResponseType = 'json'>(
     props: DeleteExceptionListProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<DeleteExceptionListResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, DeleteExceptionListResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/exception_lists`;
 
-    return apiClient.delete<DeleteExceptionListResponse>(
+    return apiClient.delete<ScoutResponseBody<TResponseType, DeleteExceptionListResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -236,15 +258,15 @@ an exception list that no longer exists.
   /**
    * Delete an exception list item using the `id` or `item_id` field.
    */
-  async deleteExceptionListItem(
+  async deleteExceptionListItem<TResponseType extends ScoutResponseType = 'json'>(
     props: DeleteExceptionListItemProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<DeleteExceptionListItemResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, DeleteExceptionListItemResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/exception_lists/items`;
 
-    return apiClient.delete<DeleteExceptionListItemResponse>(
+    return apiClient.delete<ScoutResponseBody<TResponseType, DeleteExceptionListItemResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -261,15 +283,15 @@ an exception list that no longer exists.
   /**
    * Duplicate an existing exception list.
    */
-  async duplicateExceptionList(
+  async duplicateExceptionList<TResponseType extends ScoutResponseType = 'json'>(
     props: DuplicateExceptionListProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<DuplicateExceptionListResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, DuplicateExceptionListResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/exception_lists/_duplicate`;
 
-    return apiClient.post<DuplicateExceptionListResponse>(
+    return apiClient.post<ScoutResponseBody<TResponseType, DuplicateExceptionListResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -286,37 +308,40 @@ an exception list that no longer exists.
   /**
    * Export an exception list and its associated items to an NDJSON file.
    */
-  async exportExceptionList(
+  async exportExceptionList<TResponseType extends ScoutResponseType = 'json'>(
     props: ExportExceptionListProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/exception_lists/_export`;
 
-    return apiClient.post(`${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`, {
-      headers: {
-        'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-        ...options.headers,
-      },
-      body: options.body,
-      responseType: options.responseType ?? 'json',
-    });
+    return apiClient.post<ScoutResponseBody<TResponseType>>(
+      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      {
+        headers: {
+          'kbn-xsrf': 'true',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+          ...options.headers,
+        },
+        body: options.body,
+        responseType: options.responseType ?? 'json',
+      }
+    );
   },
   /**
    * Get a list of all exception list items in the specified list.
    */
-  async findExceptionListItems(
+  async findExceptionListItems<TResponseType extends ScoutResponseType = 'json'>(
     props: FindExceptionListItemsProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<FindExceptionListItemsResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, FindExceptionListItemsResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/exception_lists/items/_find`;
 
-    return apiClient.get<FindExceptionListItemsResponse>(
+    return apiClient.get<ScoutResponseBody<TResponseType, FindExceptionListItemsResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -333,15 +358,15 @@ an exception list that no longer exists.
   /**
    * Get a list of all exception list containers.
    */
-  async findExceptionLists(
+  async findExceptionLists<TResponseType extends ScoutResponseType = 'json'>(
     props: FindExceptionListsProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<FindExceptionListsResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, FindExceptionListsResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/exception_lists/_find`;
 
-    return apiClient.get<FindExceptionListsResponse>(
+    return apiClient.get<ScoutResponseBody<TResponseType, FindExceptionListsResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -358,15 +383,15 @@ an exception list that no longer exists.
   /**
    * Import an exception list and its associated items from an NDJSON file.
    */
-  async importExceptionList(
+  async importExceptionList<TResponseType extends ScoutResponseType = 'json'>(
     props: ImportExceptionListProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<ImportExceptionListResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, ImportExceptionListResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/exception_lists/_import`;
 
-    return apiClient.post<ImportExceptionListResponse>(
+    return apiClient.post<ScoutResponseBody<TResponseType, ImportExceptionListResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -383,15 +408,15 @@ an exception list that no longer exists.
   /**
    * Get the details of an exception list using the `id` or `list_id` field.
    */
-  async readExceptionList(
+  async readExceptionList<TResponseType extends ScoutResponseType = 'json'>(
     props: ReadExceptionListProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<ReadExceptionListResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, ReadExceptionListResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/exception_lists`;
 
-    return apiClient.get<ReadExceptionListResponse>(
+    return apiClient.get<ScoutResponseBody<TResponseType, ReadExceptionListResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -408,15 +433,15 @@ an exception list that no longer exists.
   /**
    * Get the details of an exception list item using the `id` or `item_id` field.
    */
-  async readExceptionListItem(
+  async readExceptionListItem<TResponseType extends ScoutResponseType = 'json'>(
     props: ReadExceptionListItemProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<ReadExceptionListItemResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, ReadExceptionListItemResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/exception_lists/items`;
 
-    return apiClient.get<ReadExceptionListItemResponse>(
+    return apiClient.get<ScoutResponseBody<TResponseType, ReadExceptionListItemResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -433,15 +458,17 @@ an exception list that no longer exists.
   /**
    * Get a summary of the specified exception list.
    */
-  async readExceptionListSummary(
+  async readExceptionListSummary<TResponseType extends ScoutResponseType = 'json'>(
     props: ReadExceptionListSummaryProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<ReadExceptionListSummaryResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, ReadExceptionListSummaryResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/exception_lists/summary`;
 
-    return apiClient.get<ReadExceptionListSummaryResponse>(
+    return apiClient.get<ScoutResponseBody<TResponseType, ReadExceptionListSummaryResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -458,15 +485,15 @@ an exception list that no longer exists.
   /**
    * Update an exception list using the `id` or `list_id` field.
    */
-  async updateExceptionList(
+  async updateExceptionList<TResponseType extends ScoutResponseType = 'json'>(
     props: UpdateExceptionListProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<UpdateExceptionListResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, UpdateExceptionListResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/exception_lists`;
 
-    return apiClient.put<UpdateExceptionListResponse>(path, {
+    return apiClient.put<ScoutResponseBody<TResponseType, UpdateExceptionListResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -480,15 +507,15 @@ an exception list that no longer exists.
   /**
    * Update an exception list item using the `id` or `item_id` field.
    */
-  async updateExceptionListItem(
+  async updateExceptionListItem<TResponseType extends ScoutResponseType = 'json'>(
     props: UpdateExceptionListItemProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<UpdateExceptionListItemResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, UpdateExceptionListItemResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/exception_lists/items`;
 
-    return apiClient.put<UpdateExceptionListItemResponse>(path, {
+    return apiClient.put<ScoutResponseBody<TResponseType, UpdateExceptionListItemResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',

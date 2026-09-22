@@ -43,16 +43,28 @@ import type {
   UpdateEndpointListItemResponse,
 } from '@kbn/securitysolution-endpoint-exceptions-common/api/update_endpoint_list_item/update_endpoint_list_item.gen';
 
-export interface ScoutApiRequestOptions {
+export type ScoutResponseType = NonNullable<ApiClientOptions['responseType']>;
+
+/**
+ * Body the Scout `apiClient` yields for a given `responseType`: the OpenAPI response for 'json',
+ * a string for 'text' and a Buffer for 'buffer'.
+ */
+export type ScoutResponseBody<
+  TResponseType extends ScoutResponseType,
+  TJsonBody = ApiClientResponse['body']
+> = TResponseType extends 'text' ? string : TResponseType extends 'buffer' ? Buffer : TJsonBody;
+
+export interface ScoutApiRequestOptions<TResponseType extends ScoutResponseType = 'json'> {
   /** Extra headers merged on top of the defaults, e.g. an API key or a SAML cookie for auth */
   headers?: Record<string, string>;
   /** Kibana space id the request targets. Omit or pass 'default' for the default space */
   kibanaSpace?: string;
   /**
    * How the response body should be parsed. Defaults to 'json'.
-   * Use 'text' or 'buffer' for endpoints returning non-JSON payloads, e.g. NDJSON exports.
+   * Use 'text' or 'buffer' for endpoints returning non-JSON payloads, e.g. NDJSON or CSV exports;
+   * the returned `body` is then typed as a string or a Buffer accordingly.
    */
-  responseType?: ApiClientOptions['responseType'];
+  responseType?: TResponseType;
   /**
    * Raw request body for operations whose payload is not described by the OpenAPI request body,
    * e.g. multipart/form-data imports. Ignored for operations with a typed request body.
@@ -64,14 +76,14 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   /**
    * Create the exception list for Elastic Endpoint rule exceptions. When you create the exception list, it will have a `list_id` of `endpoint_list`. If the Elastic Endpoint exception list already exists, your request will return an empty response.
    */
-  async createEndpointList(
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<CreateEndpointListResponse>> {
+  async createEndpointList<TResponseType extends ScoutResponseType = 'json'>(
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, CreateEndpointListResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/endpoint_list`;
 
-    return apiClient.post<CreateEndpointListResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, CreateEndpointListResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -85,15 +97,15 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   /**
    * Create an Elastic Endpoint exception list item, and associate it with the Elastic Endpoint exception list.
    */
-  async createEndpointListItem(
+  async createEndpointListItem<TResponseType extends ScoutResponseType = 'json'>(
     props: CreateEndpointListItemProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<CreateEndpointListItemResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, CreateEndpointListItemResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/endpoint_list/items`;
 
-    return apiClient.post<CreateEndpointListItemResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, CreateEndpointListItemResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -107,15 +119,15 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   /**
    * Delete an Elastic Endpoint exception list item, specified by the `id` or `item_id` field.
    */
-  async deleteEndpointListItem(
+  async deleteEndpointListItem<TResponseType extends ScoutResponseType = 'json'>(
     props: DeleteEndpointListItemProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<DeleteEndpointListItemResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, DeleteEndpointListItemResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/endpoint_list/items`;
 
-    return apiClient.delete<DeleteEndpointListItemResponse>(
+    return apiClient.delete<ScoutResponseBody<TResponseType, DeleteEndpointListItemResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -132,15 +144,15 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   /**
    * Get a list of all Elastic Endpoint exception list items.
    */
-  async findEndpointListItems(
+  async findEndpointListItems<TResponseType extends ScoutResponseType = 'json'>(
     props: FindEndpointListItemsProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<FindEndpointListItemsResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, FindEndpointListItemsResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/endpoint_list/items/_find`;
 
-    return apiClient.get<FindEndpointListItemsResponse>(
+    return apiClient.get<ScoutResponseBody<TResponseType, FindEndpointListItemsResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -157,15 +169,15 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   /**
    * Get the details of an Elastic Endpoint exception list item, specified by the `id` or `item_id` field.
    */
-  async readEndpointListItem(
+  async readEndpointListItem<TResponseType extends ScoutResponseType = 'json'>(
     props: ReadEndpointListItemProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<ReadEndpointListItemResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, ReadEndpointListItemResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/endpoint_list/items`;
 
-    return apiClient.get<ReadEndpointListItemResponse>(
+    return apiClient.get<ScoutResponseBody<TResponseType, ReadEndpointListItemResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -182,15 +194,15 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   /**
    * Update an Elastic Endpoint exception list item, specified by the `id` or `item_id` field.
    */
-  async updateEndpointListItem(
+  async updateEndpointListItem<TResponseType extends ScoutResponseType = 'json'>(
     props: UpdateEndpointListItemProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<UpdateEndpointListItemResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, UpdateEndpointListItemResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/endpoint_list/items`;
 
-    return apiClient.put<UpdateEndpointListItemResponse>(path, {
+    return apiClient.put<ScoutResponseBody<TResponseType, UpdateEndpointListItemResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',

@@ -102,16 +102,28 @@ import type {
 import type { ReadInstallationStatusResponse } from '@kbn/osquery-plugin/common/api/status/status.gen';
 import type { ReadPrivilegesCheckResponse } from '@kbn/osquery-plugin/common/api/status/privileges_check.gen';
 
-export interface ScoutApiRequestOptions {
+export type ScoutResponseType = NonNullable<ApiClientOptions['responseType']>;
+
+/**
+ * Body the Scout `apiClient` yields for a given `responseType`: the OpenAPI response for 'json',
+ * a string for 'text' and a Buffer for 'buffer'.
+ */
+export type ScoutResponseBody<
+  TResponseType extends ScoutResponseType,
+  TJsonBody = ApiClientResponse['body']
+> = TResponseType extends 'text' ? string : TResponseType extends 'buffer' ? Buffer : TJsonBody;
+
+export interface ScoutApiRequestOptions<TResponseType extends ScoutResponseType = 'json'> {
   /** Extra headers merged on top of the defaults, e.g. an API key or a SAML cookie for auth */
   headers?: Record<string, string>;
   /** Kibana space id the request targets. Omit or pass 'default' for the default space */
   kibanaSpace?: string;
   /**
    * How the response body should be parsed. Defaults to 'json'.
-   * Use 'text' or 'buffer' for endpoints returning non-JSON payloads, e.g. NDJSON exports.
+   * Use 'text' or 'buffer' for endpoints returning non-JSON payloads, e.g. NDJSON or CSV exports;
+   * the returned `body` is then typed as a string or a Buffer accordingly.
    */
-  responseType?: ApiClientOptions['responseType'];
+  responseType?: TResponseType;
   /**
    * Raw request body for operations whose payload is not described by the OpenAPI request body,
    * e.g. multipart/form-data imports. Ignored for operations with a typed request body.
@@ -120,10 +132,10 @@ export interface ScoutApiRequestOptions {
 }
 
 const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => ({
-  async getAgentDetails(
+  async getAgentDetails<TResponseType extends ScoutResponseType = 'json'>(
     props: GetAgentDetailsProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<GetAgentDetailsResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, GetAgentDetailsResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
@@ -131,7 +143,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       props.params
     )}`;
 
-    return apiClient.get<GetAgentDetailsResponse>(path, {
+    return apiClient.get<ScoutResponseBody<TResponseType, GetAgentDetailsResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '1',
@@ -142,14 +154,14 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       responseType: options.responseType ?? 'json',
     });
   },
-  async getAgentPackagePolicies(
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<GetAgentPackagePoliciesResponse>> {
+  async getAgentPackagePolicies<TResponseType extends ScoutResponseType = 'json'>(
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, GetAgentPackagePoliciesResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/internal/osquery/fleet_wrapper/package_policies`;
 
-    return apiClient.get<GetAgentPackagePoliciesResponse>(path, {
+    return apiClient.get<ScoutResponseBody<TResponseType, GetAgentPackagePoliciesResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '1',
@@ -160,14 +172,14 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       responseType: options.responseType ?? 'json',
     });
   },
-  async getAgentPolicies(
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<GetAgentPoliciesResponse>> {
+  async getAgentPolicies<TResponseType extends ScoutResponseType = 'json'>(
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, GetAgentPoliciesResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/internal/osquery/fleet_wrapper/agent_policies`;
 
-    return apiClient.get<GetAgentPoliciesResponse>(path, {
+    return apiClient.get<ScoutResponseBody<TResponseType, GetAgentPoliciesResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '1',
@@ -178,10 +190,10 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       responseType: options.responseType ?? 'json',
     });
   },
-  async getAgentPolicy(
+  async getAgentPolicy<TResponseType extends ScoutResponseType = 'json'>(
     props: GetAgentPolicyProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<GetAgentPolicyResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, GetAgentPolicyResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
@@ -189,7 +201,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       props.params
     )}`;
 
-    return apiClient.get<GetAgentPolicyResponse>(path, {
+    return apiClient.get<ScoutResponseBody<TResponseType, GetAgentPolicyResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '1',
@@ -200,15 +212,15 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       responseType: options.responseType ?? 'json',
     });
   },
-  async getAgents(
+  async getAgents<TResponseType extends ScoutResponseType = 'json'>(
     props: GetAgentsProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<GetAgentsResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, GetAgentsResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/internal/osquery/fleet_wrapper/agents`;
 
-    return apiClient.get<GetAgentsResponse>(
+    return apiClient.get<ScoutResponseBody<TResponseType, GetAgentsResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -225,15 +237,15 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   /**
    * Create a copy of a query pack with a unique name by appending a `_copy` suffix. If the name already exists, a numeric suffix is added (e.g., `_copy_2`). The copied pack is always created with `enabled` set to `false`.
    */
-  async osqueryCopyPacks(
+  async osqueryCopyPacks<TResponseType extends ScoutResponseType = 'json'>(
     props: OsqueryCopyPacksProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<OsqueryCopyPacksResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, OsqueryCopyPacksResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams('/api/osquery/packs/{id}/copy', props.params)}`;
 
-    return apiClient.post<OsqueryCopyPacksResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, OsqueryCopyPacksResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -247,10 +259,10 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   /**
    * Create a copy of a saved query with a unique name by appending a `_copy` suffix. If the name already exists, a numeric suffix is added (e.g., `_copy_2`).
    */
-  async osqueryCopySavedQuery(
+  async osqueryCopySavedQuery<TResponseType extends ScoutResponseType = 'json'>(
     props: OsqueryCopySavedQueryProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<OsqueryCopySavedQueryResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, OsqueryCopySavedQueryResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
@@ -258,7 +270,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       props.params
     )}`;
 
-    return apiClient.post<OsqueryCopySavedQueryResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, OsqueryCopySavedQueryResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -272,15 +284,15 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   /**
    * Create and run a live query.
    */
-  async osqueryCreateLiveQuery(
+  async osqueryCreateLiveQuery<TResponseType extends ScoutResponseType = 'json'>(
     props: OsqueryCreateLiveQueryProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<OsqueryCreateLiveQueryResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, OsqueryCreateLiveQueryResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/osquery/live_queries`;
 
-    return apiClient.post<OsqueryCreateLiveQueryResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, OsqueryCreateLiveQueryResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -294,15 +306,15 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   /**
    * Create a query pack.
    */
-  async osqueryCreatePacks(
+  async osqueryCreatePacks<TResponseType extends ScoutResponseType = 'json'>(
     props: OsqueryCreatePacksProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<OsqueryCreatePacksResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, OsqueryCreatePacksResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/osquery/packs`;
 
-    return apiClient.post<OsqueryCreatePacksResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, OsqueryCreatePacksResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -316,15 +328,15 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   /**
    * Create and save a query for later use.
    */
-  async osqueryCreateSavedQuery(
+  async osqueryCreateSavedQuery<TResponseType extends ScoutResponseType = 'json'>(
     props: OsqueryCreateSavedQueryProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<OsqueryCreateSavedQueryResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, OsqueryCreateSavedQueryResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/osquery/saved_queries`;
 
-    return apiClient.post<OsqueryCreateSavedQueryResponse>(path, {
+    return apiClient.post<ScoutResponseBody<TResponseType, OsqueryCreateSavedQueryResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -338,15 +350,15 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   /**
    * Delete a query pack using the pack ID.
    */
-  async osqueryDeletePacks(
+  async osqueryDeletePacks<TResponseType extends ScoutResponseType = 'json'>(
     props: OsqueryDeletePacksProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<OsqueryDeletePacksResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, OsqueryDeletePacksResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams('/api/osquery/packs/{id}', props.params)}`;
 
-    return apiClient.delete<OsqueryDeletePacksResponse>(path, {
+    return apiClient.delete<ScoutResponseBody<TResponseType, OsqueryDeletePacksResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -360,33 +372,38 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   /**
    * Delete a saved query using the query ID.
    */
-  async osqueryDeleteSavedQuery(
+  async osqueryDeleteSavedQuery<TResponseType extends ScoutResponseType = 'json'>(
     props: OsqueryDeleteSavedQueryProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<OsqueryDeleteSavedQueryResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, OsqueryDeleteSavedQueryResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams('/api/osquery/saved_queries/{id}', props.params)}`;
 
-    return apiClient.delete<OsqueryDeleteSavedQueryResponse>(path, {
-      headers: {
-        'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-        ...options.headers,
-      },
-      body: options.body,
-      responseType: options.responseType ?? 'json',
-    });
+    return apiClient.delete<ScoutResponseBody<TResponseType, OsqueryDeleteSavedQueryResponse>>(
+      path,
+      {
+        headers: {
+          'kbn-xsrf': 'true',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+          ...options.headers,
+        },
+        body: options.body,
+        responseType: options.responseType ?? 'json',
+      }
+    );
   },
   /**
       * Export the results of a live query action as a downloadable file. The response is a streaming file attachment in the requested format.
 
       */
-  async osqueryExportLiveQueryResults(
+  async osqueryExportLiveQueryResults<TResponseType extends ScoutResponseType = 'json'>(
     props: OsqueryExportLiveQueryResultsProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<OsqueryExportLiveQueryResultsResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, OsqueryExportLiveQueryResultsResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
@@ -394,7 +411,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       props.params
     )}`;
 
-    return apiClient.post<OsqueryExportLiveQueryResultsResponse>(
+    return apiClient.post<ScoutResponseBody<TResponseType, OsqueryExportLiveQueryResultsResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -412,10 +429,12 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       * Export all result rows for a specific scheduled query execution as a downloadable file. The response is a streaming file attachment in the requested format.
 
       */
-  async osqueryExportScheduledQueryResults(
+  async osqueryExportScheduledQueryResults<TResponseType extends ScoutResponseType = 'json'>(
     props: OsqueryExportScheduledQueryResultsProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<OsqueryExportScheduledQueryResultsResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, OsqueryExportScheduledQueryResultsResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
@@ -423,32 +442,31 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       props.params
     )}`;
 
-    return apiClient.post<OsqueryExportScheduledQueryResultsResponse>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
-      {
-        headers: {
-          'kbn-xsrf': 'true',
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-          ...options.headers,
-        },
-        body: props.body,
-        responseType: options.responseType ?? 'json',
-      }
-    );
+    return apiClient.post<
+      ScoutResponseBody<TResponseType, OsqueryExportScheduledQueryResultsResponse>
+    >(`${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`, {
+      headers: {
+        'kbn-xsrf': 'true',
+        [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+        ...options.headers,
+      },
+      body: props.body,
+      responseType: options.responseType ?? 'json',
+    });
   },
   /**
    * Get a list of all live queries.
    */
-  async osqueryFindLiveQueries(
+  async osqueryFindLiveQueries<TResponseType extends ScoutResponseType = 'json'>(
     props: OsqueryFindLiveQueriesProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<OsqueryFindLiveQueriesResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, OsqueryFindLiveQueriesResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/osquery/live_queries`;
 
-    return apiClient.get<OsqueryFindLiveQueriesResponse>(
+    return apiClient.get<ScoutResponseBody<TResponseType, OsqueryFindLiveQueriesResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -465,15 +483,15 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   /**
    * Get a list of all query packs.
    */
-  async osqueryFindPacks(
+  async osqueryFindPacks<TResponseType extends ScoutResponseType = 'json'>(
     props: OsqueryFindPacksProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<OsqueryFindPacksResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, OsqueryFindPacksResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/osquery/packs`;
 
-    return apiClient.get<OsqueryFindPacksResponse>(
+    return apiClient.get<ScoutResponseBody<TResponseType, OsqueryFindPacksResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -490,15 +508,15 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   /**
    * Get a list of all saved queries.
    */
-  async osqueryFindSavedQueries(
+  async osqueryFindSavedQueries<TResponseType extends ScoutResponseType = 'json'>(
     props: OsqueryFindSavedQueriesProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<OsqueryFindSavedQueriesResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, OsqueryFindSavedQueriesResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/osquery/saved_queries`;
 
-    return apiClient.get<OsqueryFindSavedQueriesResponse>(
+    return apiClient.get<ScoutResponseBody<TResponseType, OsqueryFindSavedQueriesResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -515,32 +533,39 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   /**
    * Get the details of a live query using the query ID.
    */
-  async osqueryGetLiveQueryDetails(
+  async osqueryGetLiveQueryDetails<TResponseType extends ScoutResponseType = 'json'>(
     props: OsqueryGetLiveQueryDetailsProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<OsqueryGetLiveQueryDetailsResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, OsqueryGetLiveQueryDetailsResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams('/api/osquery/live_queries/{id}', props.params)}`;
 
-    return apiClient.get<OsqueryGetLiveQueryDetailsResponse>(path, {
-      headers: {
-        'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-        ...options.headers,
-      },
-      body: options.body,
-      responseType: options.responseType ?? 'json',
-    });
+    return apiClient.get<ScoutResponseBody<TResponseType, OsqueryGetLiveQueryDetailsResponse>>(
+      path,
+      {
+        headers: {
+          'kbn-xsrf': 'true',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+          ...options.headers,
+        },
+        body: options.body,
+        responseType: options.responseType ?? 'json',
+      }
+    );
   },
   /**
    * Get the results of a live query using the query action ID.
    */
-  async osqueryGetLiveQueryResults(
+  async osqueryGetLiveQueryResults<TResponseType extends ScoutResponseType = 'json'>(
     props: OsqueryGetLiveQueryResultsProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<OsqueryGetLiveQueryResultsResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, OsqueryGetLiveQueryResultsResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
@@ -548,7 +573,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       props.params
     )}`;
 
-    return apiClient.get<OsqueryGetLiveQueryResultsResponse>(
+    return apiClient.get<ScoutResponseBody<TResponseType, OsqueryGetLiveQueryResultsResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -565,15 +590,15 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   /**
    * Get the details of a query pack using the pack ID.
    */
-  async osqueryGetPacksDetails(
+  async osqueryGetPacksDetails<TResponseType extends ScoutResponseType = 'json'>(
     props: OsqueryGetPacksDetailsProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<OsqueryGetPacksDetailsResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, OsqueryGetPacksDetailsResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams('/api/osquery/packs/{id}', props.params)}`;
 
-    return apiClient.get<OsqueryGetPacksDetailsResponse>(path, {
+    return apiClient.get<ScoutResponseBody<TResponseType, OsqueryGetPacksDetailsResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -587,42 +612,18 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   /**
    * Get the details of a saved query using the query ID.
    */
-  async osqueryGetSavedQueryDetails(
+  async osqueryGetSavedQueryDetails<TResponseType extends ScoutResponseType = 'json'>(
     props: OsqueryGetSavedQueryDetailsProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<OsqueryGetSavedQueryDetailsResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, OsqueryGetSavedQueryDetailsResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams('/api/osquery/saved_queries/{id}', props.params)}`;
 
-    return apiClient.get<OsqueryGetSavedQueryDetailsResponse>(path, {
-      headers: {
-        'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-        ...options.headers,
-      },
-      body: options.body,
-      responseType: options.responseType ?? 'json',
-    });
-  },
-  /**
-      * Get paginated per-agent action results for a specific scheduled query execution, with success/failure aggregation and execution metadata (pack name, query name/text, timestamp).
-
-      */
-  async osqueryGetScheduledActionResults(
-    props: OsqueryGetScheduledActionResultsProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<OsqueryGetScheduledActionResultsResponse>> {
-    const basePath =
-      options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
-    const path = `${basePath}${replaceParams(
-      '/api/osquery/scheduled_results/{scheduleId}/{executionCount}',
-      props.params
-    )}`;
-
-    return apiClient.get<OsqueryGetScheduledActionResultsResponse>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+    return apiClient.get<ScoutResponseBody<TResponseType, OsqueryGetSavedQueryDetailsResponse>>(
+      path,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -636,13 +637,45 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
     );
   },
   /**
+      * Get paginated per-agent action results for a specific scheduled query execution, with success/failure aggregation and execution metadata (pack name, query name/text, timestamp).
+
+      */
+  async osqueryGetScheduledActionResults<TResponseType extends ScoutResponseType = 'json'>(
+    props: OsqueryGetScheduledActionResultsProps,
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, OsqueryGetScheduledActionResultsResponse>>
+  > {
+    const basePath =
+      options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
+    const path = `${basePath}${replaceParams(
+      '/api/osquery/scheduled_results/{scheduleId}/{executionCount}',
+      props.params
+    )}`;
+
+    return apiClient.get<
+      ScoutResponseBody<TResponseType, OsqueryGetScheduledActionResultsResponse>
+    >(`${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`, {
+      headers: {
+        'kbn-xsrf': 'true',
+        [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+        ...options.headers,
+      },
+      body: options.body,
+      responseType: options.responseType ?? 'json',
+    });
+  },
+  /**
       * Get paginated query result rows (the actual osquery output data) for a specific scheduled query execution.
 
       */
-  async osqueryGetScheduledQueryResults(
+  async osqueryGetScheduledQueryResults<TResponseType extends ScoutResponseType = 'json'>(
     props: OsqueryGetScheduledQueryResultsProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<OsqueryGetScheduledQueryResultsResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, OsqueryGetScheduledQueryResultsResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
@@ -650,7 +683,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       props.params
     )}`;
 
-    return apiClient.get<OsqueryGetScheduledQueryResultsResponse>(
+    return apiClient.get<ScoutResponseBody<TResponseType, OsqueryGetScheduledQueryResultsResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -668,15 +701,17 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       * Get a unified, time-sorted history of live, rule-triggered, and scheduled osquery executions. The response uses cursor-based pagination.
 
       */
-  async osqueryGetUnifiedHistory(
+  async osqueryGetUnifiedHistory<TResponseType extends ScoutResponseType = 'json'>(
     props: OsqueryGetUnifiedHistoryProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<OsqueryGetUnifiedHistoryResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, OsqueryGetUnifiedHistoryResponse>>
+  > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/osquery/history`;
 
-    return apiClient.get<OsqueryGetUnifiedHistoryResponse>(
+    return apiClient.get<ScoutResponseBody<TResponseType, OsqueryGetUnifiedHistoryResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -696,15 +731,15 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
 > You cannot update a prebuilt pack.
 
       */
-  async osqueryUpdatePacks(
+  async osqueryUpdatePacks<TResponseType extends ScoutResponseType = 'json'>(
     props: OsqueryUpdatePacksProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<OsqueryUpdatePacksResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, OsqueryUpdatePacksResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams('/api/osquery/packs/{id}', props.params)}`;
 
-    return apiClient.put<OsqueryUpdatePacksResponse>(path, {
+    return apiClient.put<ScoutResponseBody<TResponseType, OsqueryUpdatePacksResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -721,15 +756,15 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
 > You cannot update a prebuilt saved query.
 
       */
-  async osqueryUpdateSavedQuery(
+  async osqueryUpdateSavedQuery<TResponseType extends ScoutResponseType = 'json'>(
     props: OsqueryUpdateSavedQueryProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<OsqueryUpdateSavedQueryResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, OsqueryUpdateSavedQueryResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams('/api/osquery/saved_queries/{id}', props.params)}`;
 
-    return apiClient.put<OsqueryUpdateSavedQueryResponse>(path, {
+    return apiClient.put<ScoutResponseBody<TResponseType, OsqueryUpdateSavedQueryResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -740,15 +775,15 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       responseType: options.responseType ?? 'json',
     });
   },
-  async readAssetsStatus(
+  async readAssetsStatus<TResponseType extends ScoutResponseType = 'json'>(
     props: ReadAssetsStatusProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<ReadAssetsStatusResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, ReadAssetsStatusResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/internal/osquery/assets`;
 
-    return apiClient.get<ReadAssetsStatusResponse>(
+    return apiClient.get<ScoutResponseBody<TResponseType, ReadAssetsStatusResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
@@ -762,14 +797,14 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       }
     );
   },
-  async readInstallationStatus(
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<ReadInstallationStatusResponse>> {
+  async readInstallationStatus<TResponseType extends ScoutResponseType = 'json'>(
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, ReadInstallationStatusResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/internal/osquery/status`;
 
-    return apiClient.get<ReadInstallationStatusResponse>(path, {
+    return apiClient.get<ScoutResponseBody<TResponseType, ReadInstallationStatusResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '1',
@@ -780,14 +815,14 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       responseType: options.responseType ?? 'json',
     });
   },
-  async readPrivilegesCheck(
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<ReadPrivilegesCheckResponse>> {
+  async readPrivilegesCheck<TResponseType extends ScoutResponseType = 'json'>(
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, ReadPrivilegesCheckResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/internal/osquery/privileges_check`;
 
-    return apiClient.get<ReadPrivilegesCheckResponse>(path, {
+    return apiClient.get<ScoutResponseBody<TResponseType, ReadPrivilegesCheckResponse>>(path, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '1',
@@ -798,15 +833,15 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       responseType: options.responseType ?? 'json',
     });
   },
-  async updateAssetsStatus(
+  async updateAssetsStatus<TResponseType extends ScoutResponseType = 'json'>(
     props: UpdateAssetsStatusProps,
-    options: ScoutApiRequestOptions = {}
-  ): Promise<ApiClientResponse<UpdateAssetsStatusResponse>> {
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, UpdateAssetsStatusResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/internal/osquery/assets/update`;
 
-    return apiClient.post<UpdateAssetsStatusResponse>(
+    return apiClient.post<ScoutResponseBody<TResponseType, UpdateAssetsStatusResponse>>(
       `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
