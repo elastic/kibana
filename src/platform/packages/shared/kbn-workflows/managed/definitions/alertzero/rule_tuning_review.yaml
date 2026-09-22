@@ -817,8 +817,8 @@ steps:
                   id: "{{ inputs.rule_uuid }}"
                   threshold:
                     value: "${{ steps.diagnose_rule.output.structured_output.proposed_threshold_value }}"
-                    field: "{% if steps.diagnose_rule.output.structured_output.proposed_threshold_field != nil %}{{ steps.diagnose_rule.output.structured_output.proposed_threshold_field | json }}{% else %}{{ steps.fetch_rule.output.threshold.field | json }}{% endif %}"
-                    cardinality: "{% if steps.diagnose_rule.output.structured_output.proposed_threshold_cardinality != nil %}{{ steps.diagnose_rule.output.structured_output.proposed_threshold_cardinality | json }}{% else %}{{ steps.fetch_rule.output.threshold.cardinality | json }}{% endif %}"
+                    field: "${{ steps.diagnose_rule.output.structured_output.proposed_threshold_field != nil ? steps.diagnose_rule.output.structured_output.proposed_threshold_field : steps.fetch_rule.output.threshold.field }}"
+                    cardinality: "${{ steps.diagnose_rule.output.structured_output.proposed_threshold_cardinality != nil ? steps.diagnose_rule.output.structured_output.proposed_threshold_cardinality : steps.fetch_rule.output.threshold.cardinality }}"
                 impact: medium
                 confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
                 autoApprove: false
