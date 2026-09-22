@@ -178,9 +178,9 @@ export const createSubmitOptimizerResultTool = ({
               text:
                 attached.length === 0
                   ? 'No decision-tree changes submitted. Turn complete.'
-                  : `No structural edits. Attached learnings to ${attached.length} tree(s):\n${attached
-                      .map((treeId) => `- ${treeId}`)
-                      .join('\n')}`,
+                  : `No structural edits. Attached learnings to ${
+                      attached.length
+                    } tree(s):\n${attached.map((treeId) => `- ${treeId}`).join('\n')}`,
               summary: params.summary,
             },
           },
@@ -374,9 +374,7 @@ const hasNewlyTakenEdges = (
     existing.tree_id,
     existing.evidence_gatherer_metadata
   );
-  const originalTaken = new Set(
-    original.edges.filter((edge) => edge.is_taken).map(takenEdgeKey)
-  );
+  const originalTaken = new Set(original.edges.filter((edge) => edge.is_taken).map(takenEdgeKey));
   return newTree.edges.some((edge) => edge.is_taken && !originalTaken.has(takenEdgeKey(edge)));
 };
 

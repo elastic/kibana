@@ -75,11 +75,7 @@ export function TreeView({ symptom }: TreeViewProps) {
   const parsed = useMemo(
     () =>
       tree
-        ? parseStoredDecisionTree(
-            tree.mermaid,
-            tree.tree_id,
-            tree.evidence_gatherer_metadata
-          )
+        ? parseStoredDecisionTree(tree.mermaid, tree.tree_id, tree.evidence_gatherer_metadata)
         : undefined,
     [tree]
   );

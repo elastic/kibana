@@ -53,11 +53,7 @@ export const getDecisionTreeVersionRoute = createNightshiftInvestigationsServerR
         withDiff = {
           ...version,
           diff: diffDecisionTrees(
-            parseStoredDecisionTree(
-              previous.mermaid,
-              treeId,
-              previous.evidence_gatherer_metadata
-            ),
+            parseStoredDecisionTree(previous.mermaid, treeId, previous.evidence_gatherer_metadata),
             parseStoredDecisionTree(version.mermaid, treeId, version.evidence_gatherer_metadata)
           ),
         };
