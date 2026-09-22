@@ -81,7 +81,17 @@ export const KeyValuePairsField = ({
   const valueLabelId = useGeneratedHtmlId({ prefix: 'keyValuePairsValueLabel' });
 
   useEffect(() => {
-    setPairs((prevPairs) => (isEqual(prevPairs, defaultPairs) ? prevPairs : defaultPairs));
+    setPairs((prevPairs) => {
+      if (isEqual(prevPairs, defaultPairs)) {
+        return prevPairs;
+      }
+      // Parents drop rows that do not have a key yet. Keep those in-progress rows.
+      const committedPairs = prevPairs.filter(([key]) => key);
+      if (isEqual(committedPairs, defaultPairs)) {
+        return prevPairs;
+      }
+      return defaultPairs;
+    });
   }, [defaultPairs]);
 
   const updatePairs = useCallback(
