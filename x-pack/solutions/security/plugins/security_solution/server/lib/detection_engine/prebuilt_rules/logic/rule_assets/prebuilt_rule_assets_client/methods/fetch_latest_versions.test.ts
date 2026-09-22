@@ -6,6 +6,7 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { PrebuiltRuleAssetsFilter } from '../../../../../../../../common/api/detection_engine/prebuilt_rules/common/prebuilt_rule_assets_filter';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../prebuilt_rule_assets_type';
 import { prepareQueryDslFilter } from '../utils';
 import { fetchLatestVersions } from './fetch_latest_versions';
@@ -85,18 +86,21 @@ describe('fetchLatestVersions', () => {
     });
 
     it('excludes a rule when its latest version no longer has the filtered tag', async () => {
-      const result = await fetchLatestVersions(savedObjectsClient, {
-        filter: `${PREBUILT_RULE_ASSETS_SO_TYPE}.tags: "${OLD_TAG}"`,
-      });
+      const filter: PrebuiltRuleAssetsFilter = {
+        fields: { tags: { include: { values: [OLD_TAG] } } },
+      };
+      const result = await fetchLatestVersions(savedObjectsClient, { filter });
 
       expect(result).toEqual([]);
     });
 
     it('applies the tag filter only to the asset fetch, not the latest-version aggregation', async () => {
-      const kqlFilter = `${PREBUILT_RULE_ASSETS_SO_TYPE}.tags: "${OLD_TAG}"`;
-      const [expectedFilterClause] = prepareQueryDslFilter({ filter: kqlFilter }).filter;
+      const filter: PrebuiltRuleAssetsFilter = {
+        fields: { tags: { include: { values: [OLD_TAG] } } },
+      };
+      const [expectedFilterClause] = prepareQueryDslFilter({ filter }).filter;
 
-      await fetchLatestVersions(savedObjectsClient, { filter: kqlFilter });
+      await fetchLatestVersions(savedObjectsClient, { filter });
 
       const [aggCall, assetFetchCall] = searchMock.mock.calls;
 
@@ -112,9 +116,10 @@ describe('fetchLatestVersions', () => {
       .mockResolvedValueOnce(aggResponse(RULE_ID, 10))
       .mockResolvedValueOnce(hitsResponse(RULE_ID, 10));
 
-    const result = await fetchLatestVersions(savedObjectsClient, {
-      filter: `${PREBUILT_RULE_ASSETS_SO_TYPE}.tags: "Platform: AWS"`,
-    });
+    const filter: PrebuiltRuleAssetsFilter = {
+      fields: { tags: { include: { values: ['Platform: AWS'] } } },
+    };
+    const result = await fetchLatestVersions(savedObjectsClient, { filter });
 
     expect(result).toEqual([{ rule_id: RULE_ID, version: 10, type: 'query' }]);
   });

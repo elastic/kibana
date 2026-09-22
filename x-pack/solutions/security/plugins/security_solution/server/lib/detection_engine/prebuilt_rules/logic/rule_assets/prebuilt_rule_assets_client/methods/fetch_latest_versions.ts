@@ -10,6 +10,7 @@ import type {
   SearchHitsMetadata,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract, SavedObjectsRawDocSource } from '@kbn/core/server';
+import type { ESFilter } from '@kbn/es-types';
 import { invariant } from '../../../../../../../../common/utils/invariant';
 import { MAX_PREBUILT_RULES_COUNT } from '../../../../../rule_management/logic/search/get_existing_prepackaged_rules';
 import type { BasicRuleInfo } from '../../../basic_rule_info';
@@ -68,8 +69,7 @@ export async function fetchLatestVersions(
 
 async function fetchLatestVersionSpecifiers(
   savedObjectsClient: SavedObjectsClientContract,
-  ruleIds?: string[],
-  filter?: PrebuiltRuleAssetsFilter
+  ruleIds?: string[]
 ) {
   /**
    * Fetches deprecated rule assets in order to filter out all versions of the deprecated rules
@@ -153,7 +153,7 @@ async function fetchVersionsBySoIds(
   savedObjectsClient: SavedObjectsClientContract,
   soIds: string[],
   sort?: PrebuiltRuleAssetsSort,
-  additionalFilter?: string
+  additionalFilter?: PrebuiltRuleAssetsFilter
 ) {
   const filter: ESFilter[] = [{ terms: { _id: soIds } }];
 
