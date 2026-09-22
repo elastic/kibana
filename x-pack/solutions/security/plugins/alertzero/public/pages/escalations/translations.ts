@@ -23,4 +23,7 @@ export const ESCALATIONS_PAGE_INFO = Object.freeze({
   assignError: i18n.translate('xpack.alertzero.escalationsPage.assignError', {
     defaultMessage: 'Could not update assignees',
   }),
+  assignSuccess: i18n.translate('xpack.alertzero.escalationsPage.assignSuccess', {
+    defaultMessage: 'Assignees updated',
+  }),
 });

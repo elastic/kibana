@@ -103,6 +103,9 @@ export const EscalationsPage: React.FC = () => {
           body: { [ESCALATION_ASSIGNEES_FIELD]: selected.map((p) => p.uid) },
         },
         {
+          onSuccess: () => {
+            notifications?.toasts.addSuccess(ESCALATIONS_PAGE_INFO.assignSuccess);
+          },
           onError: () => {
             notifications?.toasts.addDanger(ESCALATIONS_PAGE_INFO.assignError);
           },

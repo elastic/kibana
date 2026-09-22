@@ -234,6 +234,19 @@ describe('EscalationsPage', () => {
     );
   });
 
+  it('shows a success toast when the assignee update succeeds', () => {
+    mockBothQueues([openEscalation], []);
+    const { core } = renderPage();
+
+    fireEvent.click(screen.getByTestId('mock-assign-esc-open-1'));
+
+    // Extract the callbacks object passed as the second arg to mutate and invoke onSuccess.
+    const [, callbacks] = updateMutate.mock.calls[0];
+    callbacks.onSuccess();
+
+    expect(core.notifications.toasts.addSuccess).toHaveBeenCalledWith('Assignees updated');
+  });
+
   it('renders the assignee widget as read-only when manageEscalations is false', () => {
     mockBothQueues([openEscalation], []);
     renderPage({ capabilities: { showEscalations: true, manageEscalations: false } });
