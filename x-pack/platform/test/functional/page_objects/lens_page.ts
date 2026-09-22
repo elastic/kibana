@@ -721,10 +721,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async dragRangeInput(testId: string, steps: number = 1, direction: 'left' | 'right' = 'right') {
       const inputEl = await testSubjects.find(testId);
-      await inputEl.focus();
       const browserKey = direction === 'left' ? browser.keys.LEFT : browser.keys.RIGHT;
       while (steps--) {
-        await browser.pressKeys(browserKey);
+        // key the element itself, so no focus change elsewhere can swallow the keystroke
+        await inputEl.pressKeys(browserKey);
       }
     },
 
