@@ -124,12 +124,12 @@ describe('classic alerts query builders', () => {
       );
       expect(severities).toEqual([
         'critical',
-        'high',
         'major',
-        'medium',
+        'high',
         'minor',
-        'low',
+        'medium',
         'warning',
+        'low',
         'info',
         null,
       ]);
