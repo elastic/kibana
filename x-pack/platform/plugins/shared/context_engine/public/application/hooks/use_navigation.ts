@@ -7,7 +7,10 @@
 
 import { useCallback } from 'react';
 import { CONTEXT_ENGINE_APP_ID } from '../../../common/features';
+import type { AiIndexCreatedLocationState } from '../ai_index_created_location_state';
 import { useKibana } from './use_kibana';
+
+export type ContextEngineLocationState = AiIndexCreatedLocationState;
 
 const buildPath = (path: string, params?: Record<string, string>): string => {
   const queryParams = new URLSearchParams(params);
@@ -26,7 +29,7 @@ export const useNavigation = () => {
   );
 
   const navigateToContextEngine = useCallback(
-    (path: string, params?: Record<string, string>, state?: unknown): void => {
+    (path: string, params?: Record<string, string>, state?: ContextEngineLocationState): void => {
       application.navigateToApp(CONTEXT_ENGINE_APP_ID, {
         path: buildPath(path, params),
         ...(state !== undefined ? { state } : {}),

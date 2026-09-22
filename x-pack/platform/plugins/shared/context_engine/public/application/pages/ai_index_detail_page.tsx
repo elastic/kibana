@@ -17,8 +17,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo, useState } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
 import type { AiIndexCreatedLocationState } from '../ai_index_created_location_state';
 import { KI_SUMMARY_PAGE_SIZE } from '../../../common/constants';
 import {
@@ -70,6 +70,7 @@ const signalsLockedAriaLabel = i18n.translate(
 export const AiIndexDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const location = useLocation<AiIndexCreatedLocationState | undefined>();
+  const history = useHistory<AiIndexCreatedLocationState | undefined>();
   const { aiIndex, isLoading, error, refetch } = useAiIndex(id);
   const { createContextEngineUrl, navigateToContextEngine } = useNavigation();
   const [isEditingSources, setIsEditingSources] = useState(false);
@@ -77,6 +78,15 @@ export const AiIndexDetailPage = () => {
   const [showCreatedCallout, setShowCreatedCallout] = useState(
     () => location.state?.aiIndexCreated === true
   );
+
+  // Remove aiIndexCreated from location state after it has been shown
+  useEffect(() => {
+    if (!location.state?.aiIndexCreated) {
+      return;
+    }
+
+    history.replace({ ...location, state: undefined });
+  }, [location, history]);
 
   const { summary } = useKiList({
     aiIndexId: aiIndex?.id,

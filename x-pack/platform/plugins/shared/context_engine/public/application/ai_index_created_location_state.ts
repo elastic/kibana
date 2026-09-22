@@ -6,7 +6,7 @@
  */
 
 export interface AiIndexCreatedLocationState {
-  aiIndexCreated?: boolean;
+  aiIndexCreated: boolean;
 }
 
 export const AI_INDEX_CREATED_LOCATION_STATE: AiIndexCreatedLocationState = {
