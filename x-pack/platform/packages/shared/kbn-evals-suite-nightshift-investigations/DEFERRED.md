@@ -1,6 +1,6 @@
 # Deferred investigation graders
 
-The 18 golden graders, prompts, adapters, schemas, tests and the selection of five existing native trace metrics. Port onto the trace-only runner incrementally; this preserves the old integration, not a validated replacement. The six shared RCA judges use common judge infrastructure; goal and anti-leakage also have judge paths.
+The 18 golden graders, prompts, adapters, schemas, tests and the selection of five existing native trace metrics. Port onto the trace-only runner incrementally; this preserves the old integration, not a validated replacement. The six shared RCA judges are rca_mechanism_class, rca_timeline_ok, rca_signal_coverage, rca_cause_completeness, rca_confidence_ok and rca_anti_leakage. goal_pass, rca_hypothesis_focus and rca_evidence_quality use independent judge calls. CODE graders and the native trace metrics can be introduced independently once their required task evidence is adapted.
 
 Source: `b656789f07c89379c2d82deb34636f262138fdc5`; base: `b0a6c50cf43447489e6f93aa4820105f0732c3e8`. Original complete snapshot: `nightshift/archive-291002-b656789f`. Preserved for follow-up; not validated on this extracted branch. Historical validation is in PR #291002 before its scope rewrite. None of this branch is required for task 1 of deductive-ai/deductive#10565.
 
