@@ -62,9 +62,9 @@ describe('formatBranchRates', () => {
     ],
   });
 
-  it('lists every branch by rate, in bold where the rate clears the threshold', () => {
+  it('lists every branch by rate on its own line, in bold where the rate clears the threshold', () => {
     expect(formatBranchRates(test, 0.03)).toBe(
-      '**`9.5` 3% (4 / 122)** · `9.4` 2% (2 / 100) · `main` 0% (0 / 547)'
+      '**`9.5` 3% (4 / 122)**<br>`9.4` 2% (2 / 100)<br>`main` 0% (0 / 547)'
     );
   });
 

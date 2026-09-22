@@ -104,9 +104,9 @@ export const branchesByFailedBuilds = (
 };
 
 /**
- * `` **`9.5` 3% (4 / 122)** · `main` 0% (0 / 547) ``: the share of builds that failed the test on
- * each branch it ran on, highest first, in bold where it clears the report's `minFailRate`. The
- * total over branches is left out on purpose, a clean branch dilutes it below what qualified.
+ * `` **`9.5` 3% (4 / 122)** `` over `` `main` 0% (0 / 547) ``, one line per branch the test ran on,
+ * highest rate first, in bold where it clears the report's `minFailRate`. The total over branches
+ * is left out on purpose, a clean branch dilutes it below what qualified.
  */
 export const formatBranchRates = (
   test: Pick<FlakyTestEntry, 'byBranch'>,
@@ -128,7 +128,7 @@ export const formatBranchRates = (
       )} (${failedBuilds} / ${builds})`;
       return minFailRate > 0 && buildFailRate >= minFailRate ? `**${rate}**` : rate;
     })
-    .join(' · ');
+    .join('<br>');
 };
 
 /** Rows of the per-test table, `Test ID` column optional; the suite's tests come ranked. */

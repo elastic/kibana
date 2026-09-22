@@ -15,7 +15,7 @@ exports[`renderFlakySuiteIssueBody renders a multi-test suite with distinct fail
 
 | Test | Flaky rate by branch | Test ID |
 |---|---|---|
-| does not keep a hidden histogram after visiting Dashboard | **\`main\` 10% (20 / 200)** · **\`9.2\` 5% (3 / 64)** | a |
+| does not keep a hidden histogram after visiting Dashboard | **\`main\` 10% (20 / 200)**<br>**\`9.2\` 5% (3 / 64)** | a |
 | reverts breakdown, interval, and visibility on a saved session | **\`main\` 10% (49 / 509)** | b |
 | persists hide/show of the histogram on a saved session | **\`main\` 10% (49 / 509)** | c |
 
