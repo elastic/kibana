@@ -15,6 +15,7 @@ import { connectorTypeIsDual } from '@kbn/connector-specs';
 import type { ActionTypeModel, ConnectorValidationFunc } from '../../../types';
 import { SectionLoading } from '../../components/section_loading';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
+import { readClusterInboundEventsEnabled } from '../../lib/inbound_ingress';
 import { useKibana } from '../../../common/lib/kibana';
 import { ConnectorFormFieldsGlobal } from './connector_form_fields_global';
 import { InboundEventsFormSection, OutboundSectionTitle } from './inbound_events_form_section';
@@ -41,10 +42,11 @@ const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
   savedIsInboundEventsEnabled = false,
   showInboundEvents = true,
 }) => {
+  const services = useKibana().services;
   const {
     application: { capabilities },
-    actions: { isInboundEventsEnabled: isClusterInboundEventsEnabled },
-  } = useKibana().services;
+  } = services;
+  const isClusterInboundEventsEnabled = readClusterInboundEventsEnabled(services);
   const canSave = hasSaveActionsCapability(capabilities);
   const FieldsComponent = actionTypeModel?.actionConnectorFields ?? null;
   const actionTypeId = actionTypeModel?.id;

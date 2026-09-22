@@ -50,7 +50,10 @@ import { FlyoutHeader } from './header';
 import { FlyoutFooter } from './footer';
 import { UpgradeLicenseCallOut } from './upgrade_license_callout';
 import { InboundEventsSaveToGenerateCallout } from '../inbound_events_save_to_generate_callout';
-import { shouldRotateInboundAfterSave } from '../../../lib/inbound_ingress';
+import {
+  readClusterInboundEventsEnabled,
+  shouldRotateInboundAfterSave,
+} from '../../../lib/inbound_ingress';
 import { useRotateInboundIngress } from '../../../hooks/use_rotate_inbound_ingress';
 
 export interface CreateConnectorFlyoutProps {
@@ -77,10 +80,9 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   icon,
   size,
 }) => {
-  const {
-    docLinks,
-    actions: { isInboundEventsEnabled: isClusterInboundEventsEnabled },
-  } = useKibana().services;
+  const services = useKibana().services;
+  const { docLinks } = services;
+  const isClusterInboundEventsEnabled = readClusterInboundEventsEnabled(services);
   const [allActionTypes, setAllActionTypes] = useState<ActionTypeIndex | undefined>(undefined);
   const [actionType, setActionType] = useState<ActionType | null>(null);
   const [hasActionsUpgradeableByTrial, setHasActionsUpgradeableByTrial] = useState<boolean>(false);

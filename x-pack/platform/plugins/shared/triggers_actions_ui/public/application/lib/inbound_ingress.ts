@@ -12,6 +12,11 @@ import {
 } from '@kbn/connector-specs';
 import type { ActionConnector } from '../../types';
 
+/** Embedded flyouts render inside the host app context, which often has no actions plugin contract. */
+export const readClusterInboundEventsEnabled = (services: {
+  actions?: { isInboundEventsEnabled?: boolean };
+}): boolean => services.actions?.isInboundEventsEnabled === true;
+
 export const getInboundIngestToken = (connector: ActionConnector): string | undefined => {
   if (!('secrets' in connector) || connector.secrets == null) {
     return undefined;

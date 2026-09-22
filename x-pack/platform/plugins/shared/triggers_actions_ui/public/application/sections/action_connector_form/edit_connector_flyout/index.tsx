@@ -53,6 +53,7 @@ import { InboundEventsSaveToGenerateCallout } from '../inbound_events_save_to_ge
 import {
   getInboundIngestToken,
   isInboundEventsEnabledPayload,
+  readClusterInboundEventsEnabled,
   isInboundIngressConnector,
 } from '../../../lib/inbound_ingress';
 import { useRotateInboundIngress } from '../../../hooks/use_rotate_inbound_ingress';
@@ -181,13 +182,14 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
 }) => {
   const confirmModalTitleId = useGeneratedHtmlId();
 
+  const services = useKibana().services;
   const {
     docLinks,
     http,
     uiSettings,
     application: { capabilities },
-    actions: { isInboundEventsEnabled: isClusterInboundEventsEnabled },
-  } = useKibana().services;
+  } = services;
+  const isClusterInboundEventsEnabled = readClusterInboundEventsEnabled(services);
 
   const isMounted = useRef(false);
   const canSave = hasSaveActionsCapability(capabilities);

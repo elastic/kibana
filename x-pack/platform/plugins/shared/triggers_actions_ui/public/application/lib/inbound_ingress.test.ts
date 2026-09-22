@@ -11,6 +11,7 @@ import {
   getInboundIngestToken,
   isInboundEventsEnabledPayload,
   isInboundIngressConnector,
+  readClusterInboundEventsEnabled,
   shouldRotateInboundAfterSave,
 } from './inbound_ingress';
 
@@ -24,6 +25,17 @@ jest.mock('@kbn/connector-specs', () => {
 });
 
 describe('inbound ingress helpers', () => {
+  it('reads the cluster flag only when the host context provides the actions plugin', () => {
+    expect(readClusterInboundEventsEnabled({})).toBe(false);
+    expect(readClusterInboundEventsEnabled({ actions: {} })).toBe(false);
+    expect(readClusterInboundEventsEnabled({ actions: { isInboundEventsEnabled: false } })).toBe(
+      false
+    );
+    expect(readClusterInboundEventsEnabled({ actions: { isInboundEventsEnabled: true } })).toBe(
+      true
+    );
+  });
+
   it('treats connectors with inbound events as inbound ingress', () => {
     expect(
       isInboundIngressConnector(

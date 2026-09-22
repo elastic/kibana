@@ -13,7 +13,10 @@ import { useActionTypeModel } from '@kbn/alerts-ui-shared/src/common/hooks/use_a
 import { connectorTypeIsDual } from '@kbn/connector-specs';
 import type { ActionConnector, ActionTypeRegistryContract } from '../../../types';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
-import { isInboundEventsEnabledPayload } from '../../lib/inbound_ingress';
+import {
+  isInboundEventsEnabledPayload,
+  readClusterInboundEventsEnabled,
+} from '../../lib/inbound_ingress';
 import { useKibana } from '../../../common/lib/kibana';
 import { useCreateConnector } from '../../hooks/use_create_connector';
 import type { ConnectorFormState } from './connector_form';
@@ -41,13 +44,14 @@ export const useConnectorCreateForm = ({
   actionTypeId,
   initialConnector,
 }: UseConnectorCreateFormParams) => {
+  const services = useKibana().services;
   const {
     application: { capabilities },
     http,
     docLinks,
     uiSettings,
-    actions: { isInboundEventsEnabled: isClusterInboundEventsEnabled },
-  } = useKibana().services;
+  } = services;
+  const isClusterInboundEventsEnabled = readClusterInboundEventsEnabled(services);
   const {
     isLoading: isSavingConnector,
     createConnector,
