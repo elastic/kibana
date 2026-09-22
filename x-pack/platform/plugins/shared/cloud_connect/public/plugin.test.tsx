@@ -27,8 +27,8 @@ describe('CloudConnectedPlugin', () => {
     const cloud = cloudMock.createSetup();
     const home = homePluginMock.createSetupContract();
     const management = managementPluginMock.createSetupContract();
-    cloud.isEce = false;
-    cloud.isServerlessEnabled = false;
+    cloud.isElasticCloudHosted = true;
+    cloud.isFedrampHigh = false;
     cloud.deploymentUrl = 'https://cloud.elastic.co/deployments/deployment-id';
 
     plugin.setup(coreSetup, { cloud, home, management });
@@ -45,6 +45,25 @@ describe('CloudConnectedPlugin', () => {
     expect(result.current.autoOpsServiceUrl).toBe(
       'https://cloud.elastic.co/deployments/deployment-id'
     );
+  });
+
+  it('does not show the ECH AutoOps banner on FedRAMP High', () => {
+    const plugin = createPlugin();
+    const coreSetup = coreMock.createSetup();
+    const coreStart = coreMock.createStart();
+    const cloud = cloudMock.createSetup();
+    const home = homePluginMock.createSetupContract();
+    const management = managementPluginMock.createSetupContract();
+    cloud.isElasticCloudHosted = true;
+    cloud.isFedrampHigh = true;
+    cloud.isEce = false;
+
+    plugin.setup(coreSetup, { cloud, home, management });
+    plugin.start(coreStart);
+
+    expect(coreSetup.application.register).not.toHaveBeenCalled();
+    expect(home.addData.registerCloudConnectStatusHook).not.toHaveBeenCalled();
+    expect(management.registerAutoOpsStatusHook).not.toHaveBeenCalled();
   });
 
   it('keeps the API-backed status hook for ECE', () => {
@@ -92,8 +111,8 @@ describe('CloudConnectedPlugin', () => {
     const coreStart = coreMock.createStart();
     const cloud = cloudMock.createSetup();
     const management = managementPluginMock.createSetupContract();
-    cloud.isEce = false;
-    cloud.isServerlessEnabled = false;
+    cloud.isElasticCloudHosted = true;
+    cloud.isFedrampHigh = false;
     cloud.deploymentUrl = undefined;
 
     plugin.setup(coreSetup, { cloud, management });

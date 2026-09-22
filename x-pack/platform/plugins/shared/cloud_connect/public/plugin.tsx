@@ -54,9 +54,8 @@ export class CloudConnectedPlugin
     plugins: CloudConnectedSetupDeps
   ): CloudConnectedPluginSetup {
     const isEch =
-      plugins.cloud?.isCloudEnabled &&
-      !plugins.cloud.isServerlessEnabled &&
-      plugins.cloud.isEce === false;
+      plugins.cloud?.isElasticCloudHosted === true &&
+      plugins.cloud?.isFedrampHigh !== true;
 
     if (isEch) {
       this.isEch = true;
