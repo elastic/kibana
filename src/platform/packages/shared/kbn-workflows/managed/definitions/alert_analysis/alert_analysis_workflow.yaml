@@ -53,12 +53,12 @@ triggers:
   - type: alert
     # Optional caller-supplied inputs. When provided (e.g. by the AlertZero Alert Triage Worker
     # via workflow.execute), they override the space's uiSettings runtime_config values.
-    # Absent inputs leave the standalone path byte-identical (success criterion 7 / R8).
+    # Absent inputs leave the standalone (alert-trigger) path unchanged.
     #
     # CONTRACT — Worker-path steps are gated on `calledByWorker: true`. A caller that omits
-    # this flag runs the standalone path byte-identical to a trigger-fired run (R8). Any
-    # caller that sets `calledByWorker: true` MUST also supply the other Worker-specific
-    # inputs (alerts, connectorIdByFeature, etc.) or those steps will produce empty output.
+    # this flag runs the same path as a trigger-fired run. Any caller that sets
+    # `calledByWorker: true` MUST also supply the other Worker-specific inputs (alerts,
+    # connectorIdByFeature, etc.) or those steps will produce empty output.
     inputs:
       additionalProperties: false
       properties:
@@ -100,7 +100,7 @@ triggers:
             Explicit flag that this run was triggered by an AlertZero Worker via
             workflow.execute (not by the alert trigger directly). When true, Worker-specific
             steps activate: input overrides, caller-supplied alerts, and output accumulation.
-            Absent (or false) keeps the standalone path byte-identical (R8).
+            Absent (or false) keeps the standalone (alert-trigger) path unchanged.
         investigationConversationId:
           type: string
           description: >
@@ -306,13 +306,13 @@ steps:
   # ---------------------------------------------------------------------------
   # When a caller (e.g. the Alert Triage Worker) supplies inputs, those values take
   # precedence over the space's uiSettings read above. Gated on calledByWorker so the
-  # standalone path (trigger-fired, no Worker) remains byte-identical (R8).
+  # standalone (trigger-fired) path is unchanged.
   #
   # NOTE — workflow_enabled is intentionally NOT overridden here. If a space admin
   # has disabled the workflow in uiSettings, Worker invocations will also no-op (the
   # analysis_enabled guard sees workflow_enabled=false and skips). This is the intended
   # behaviour: space-admin intent is respected on both paths. The Worker must check
-  # workflowEnabled before invoking this sub-workflow (PR 4's responsibility).
+  # workflowEnabled before invoking this sub-workflow.
   - name: apply_caller_input_overrides
     type: if
     condition: "${{ inputs.calledByWorker == true }}"
@@ -321,7 +321,7 @@ steps:
         type: data.set
         with:
           # Swap to the feature-registry connector; clear the uiSettings connector so
-          # the ai.agent step's superRefine never sees both non-empty (Z1 invariant).
+          # the ai.agent step's superRefine never sees both non-empty.
           connector_id: ""
           connector_id_by_feature: "{{ inputs.connectorIdByFeature }}"
           # When min threshold arrives as an input, collapse max to 1: the range
@@ -333,9 +333,9 @@ steps:
           auto_close_confidence_score_max_threshold: 1
           agent_id: "{{ inputs.agentId | default: variables.agent_id }}"
           tag_prefix: "{{ inputs.tagPrefix | default: variables.tag_prefix }}"
-          # When called by the Worker the ai.agent output is machine-readable JSON
-          # posted into the Investigation conversation (R3). Showing a separate Agent
-          # Builder chat entry in the Chats UI would be confusing and redundant.
+          # When called by the Worker the ai.agent output is posted into the Investigation
+          # conversation. Showing a separate Agent Builder chat entry in the Chats UI
+          # would be confusing and redundant.
           create_conversation: false
           # When the Worker passes investigationConversationId, store it for progress
           # comment steps guarded by calledByWorker.
@@ -383,7 +383,7 @@ steps:
   # The alert set under analysis. `workflow.execute` passes only `inputs` — a child run has
   # no trigger event at all — so a caller-supplied set is the only way this workflow can be
   # driven by anything other than its own alert trigger. Defaults to the trigger's alerts,
-  # which keeps the standalone path byte-identical (success criterion 7 / R8).
+  # which keeps the standalone path unchanged.
   - name: set_alert_set
     type: data.set
     with:
@@ -1222,10 +1222,10 @@ steps:
             type: ai.agent
             agent-id: "{{ variables.agent_id }}"
             connector-id: "{{ variables.connector_id }}"
-            # INVARIANT: exactly one of connector-id / connector-id-by-feature is non-empty at
+            # Exactly one of connector-id / connector-id-by-feature must be non-empty at
             # execution time. Liquid renders "" for the unused variable; the ai.agent step's
-            # superRefine only fires when BOTH are non-empty, so they coexist safely (Z1 spike,
-            # DONE/PASS). Standalone path: connector_id_by_feature="", connector_id=<real id>.
+            # superRefine only fires when BOTH are non-empty, so they coexist safely.
+            # Standalone path: connector_id_by_feature="", connector_id=<real id>.
             # Worker path: connector_id="", connector_id_by_feature=<feature id>.
             connector-id-by-feature: "{{ variables.connector_id_by_feature }}"
             create-conversation: "${{ variables.create_conversation }}"
@@ -1602,10 +1602,10 @@ steps:
       # Grouped verdict counts, per entity, as a ready-to-render sentence
       # (Worker path only — gated on calledByWorker; standalone runs have no caller to receive it)
       # -----------------------------------------------------------------------
-      # The epic asks an Investigation conclusion to read "X alerts for host A classified as
-      # true positive. Y alerts from host B were classified as false positives." Rendered
-      # here rather than in the caller so grouping stays with the data that produced it, and
-      # deterministic (plain Liquid over the counts, no second model call — D41).
+      # Builds an Investigation conclusion like "X alerts for host A classified as true
+      # positive. Y alerts from host B were classified as false positives." Rendered here
+      # rather than in the caller so grouping stays with the data that produced it, and stays
+      # deterministic (plain Liquid over the counts — no second model call).
       - name: build_grouped_counts_summary_gate
         type: if
         condition: "${{ inputs.calledByWorker == true }}"

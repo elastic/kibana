@@ -303,7 +303,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(agentStep).toBeDefined();
     expect(agentStep['connector-id']).toBe('{{ variables.connector_id }}');
     // Dual connector params coexist: superRefine only fires when BOTH are non-empty; Liquid renders
-    // "" for the unused variable so exactly one is non-empty at execution time (Z1 spike, DONE/PASS).
+    // "" for the unused variable so exactly one is non-empty at execution time.
     expect(agentStep['connector-id-by-feature']).toBe('{{ variables.connector_id_by_feature }}');
     // `${{ }}` preserves the boolean; a plain `{{ }}` would render the string "false" (truthy).
     expect(agentStep['create-conversation']).toBe('${{ variables.create_conversation }}');
@@ -625,21 +625,21 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(initStep.with.auto_close_ids).toEqual([]);
   });
 
-  it('initialises connector_id_by_feature to empty string so the standalone path is unchanged (R8)', () => {
-    // R8: Both paths invoke the same underlying workflow. The empty initialiser means that when no
+  it('initialises connector_id_by_feature to empty string so the standalone path is unchanged', () => {
+    // Both paths invoke the same underlying workflow. The empty initialiser means that when no
     // caller supplies connectorIdByFeature, the variable exists but is "" — the analysis_enabled
     // guard sees connector_configured = (connector_id != '' or '' != '') = (connector_id != ''),
-    // which is byte-identical to the pre-Worker guard behaviour.
+    // which matches the pre-Worker guard behaviour.
     const initStep = findStepByName(workflow.steps, 'set_workflow_variables') as {
       with: { connector_id_by_feature: string; investigation_conversation_id: string };
     };
     expect(initStep.with.connector_id_by_feature).toBe('');
     // Standalone path: empty string keeps conversation creation under uiSettings control.
-    // Worker path: set_caller_overrides overwrites this with the Investigation conversation id (R3).
+    // Worker path: set_caller_overrides overwrites this with the Investigation conversation id.
     expect(initStep.with.investigation_conversation_id).toBe('');
   });
 
-  it('applies caller-supplied inputs only when connectorIdByFeature is present', () => {
+  it('applies caller-supplied inputs only when calledByWorker is true', () => {
     const overrideStep = findStepByName(workflow.steps, 'apply_caller_input_overrides') as {
       type: string;
       condition: string;
@@ -655,7 +655,8 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     const setStep = findStepByName(overrideStep.steps, 'set_caller_overrides') as {
       with: Record<string, string | number>;
     };
-    // Swap to feature-registry connector and clear the uiSettings connector (Z1 invariant)
+    // Swap to feature-registry connector and clear the uiSettings connector
+    // so ai.agent never sees both connector fields non-empty.
     expect(setStep.with.connector_id).toBe('');
     expect(setStep.with.connector_id_by_feature).toBe('{{ inputs.connectorIdByFeature }}');
     // Absent threshold preserves the fetched runtime-config value. A filter, not a ternary:
@@ -665,7 +666,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     );
     // autoCloseEnabled is deliberately NOT in set_caller_overrides. `| default:` would swallow
     // the Worker's explicit false (Liquid treats false as falsy) and let the sub-workflow close
-    // alerts the Worker must gate behind a proposal (R11), so it gets its own presence gate.
+    // alerts the Worker must gate behind a proposal, so it gets its own presence gate.
     expect(setStep.with.auto_close_enabled).toBeUndefined();
     const autoCloseGate = findStepByName(
       overrideStep.steps,
@@ -680,9 +681,8 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     // and neither field would be intentionally set to "")
     expect(setStep.with.agent_id).toBe('{{ inputs.agentId | default: variables.agent_id }}');
     expect(setStep.with.tag_prefix).toBe('{{ inputs.tagPrefix | default: variables.tag_prefix }}');
-    // R3: Worker forces the agent reasoning into the Investigation conversation.
-    // create_conversation: false prevents a second orphaned conversation from being created;
-    // investigation_conversation_id is passed to runAgent_step's conversation_id (Mode B).
+    // Worker path: suppress Agent Builder chats (output goes to the Investigation via comments)
+    // and stash investigationConversationId for the gated kibana.request comment steps.
     expect(setStep.with.create_conversation).toBe(false);
     expect(setStep.with.investigation_conversation_id).toBe(
       '{{ inputs.investigationConversationId }}'
@@ -699,7 +699,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     ).find(({ inputs }) => inputs?.properties != null);
     expect(declaringTrigger?.inputs?.properties).toHaveProperty('alerts');
 
-    // Default is the trigger's own alerts, so the standalone path is unchanged (R8).
+    // Default is the trigger's own alerts, so the standalone path is unchanged.
     const defaultStep = findStepByName(workflow.steps, 'set_alert_set') as {
       with: { alert_set: string };
     };
