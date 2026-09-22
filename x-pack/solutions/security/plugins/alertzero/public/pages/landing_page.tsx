@@ -13,19 +13,20 @@ import { ConversationsPage } from './conversations';
 import { OnboardingPage } from './onboarding';
 
 export const LandingPage: React.FC = () => {
-  // Latched to true once the queue decision is known, which disables the count
-  // queries so they stop polling after navigation (LandingPage stays mounted).
-  const [queueDecided, setQueueDecided] = useState(false);
+  // Once latched, queries are disabled so they stop polling while LandingPage
+  // remains mounted as a wrapper. 'onboarding' also prevents the spinner from
+  // re-appearing on every background poll after the decision is confirmed.
+  const [decision, setDecision] = useState<'queue' | 'onboarding' | null>(null);
 
+  const queryEnabled = decision === null;
   const workers = useWorkers();
-  const respond = useProposalsByCategoryCount('respond', !queueDecided);
-  const investigate = useProposalsByCategoryCount('investigate', !queueDecided);
-  const configure = useProposalsByCategoryCount('configure', !queueDecided);
-  const closed = useClosedProposalsCount(!queueDecided);
+  const respond = useProposalsByCategoryCount('respond', queryEnabled);
+  const investigate = useProposalsByCategoryCount('investigate', queryEnabled);
+  const configure = useProposalsByCategoryCount('configure', queryEnabled);
+  const closed = useClosedProposalsCount(queryEnabled);
 
-  // Positive signals are checked before isLoading so a known result (enabled
-  // worker, existing proposals, error) renders the queue immediately without
-  // waiting for any sibling query that is still in flight.
+  // Positive signals short-circuit before isLoading/isFetching so a known
+  // result renders the queue immediately without waiting for sibling queries.
   const hasEnabledWorker = workers.data?.workers.some((w) => w.enabled) ?? false;
   const hasProposals =
     (respond.data?.total ?? 0) > 0 ||
@@ -39,24 +40,36 @@ export const LandingPage: React.FC = () => {
     configure.error != null ||
     closed.error != null;
 
-  const showQueue = queueDecided || hasAnyError || hasEnabledWorker || hasProposals;
+  const showQueue = decision === 'queue' || hasAnyError || hasEnabledWorker || hasProposals;
+
+  // isFetching covers background refetches of stale cached empty results that
+  // would otherwise fall through to onboarding before the fresh response lands.
+  const isUnresolved =
+    workers.isLoading ||
+    workers.isFetching ||
+    respond.isLoading ||
+    respond.isFetching ||
+    investigate.isLoading ||
+    investigate.isFetching ||
+    configure.isLoading ||
+    configure.isFetching ||
+    closed.isLoading ||
+    closed.isFetching;
 
   useEffect(() => {
-    if (showQueue) setQueueDecided(true);
-  }, [showQueue]);
+    if (decision !== null) return;
+    if (showQueue) {
+      setDecision('queue');
+    } else if (!isUnresolved) {
+      setDecision('onboarding');
+    }
+  }, [decision, showQueue, isUnresolved]);
 
-  if (showQueue) {
-    return <ConversationsPage />;
-  }
+  if (showQueue) return <ConversationsPage />;
 
-  const isLoading =
-    workers.isLoading ||
-    respond.isLoading ||
-    investigate.isLoading ||
-    configure.isLoading ||
-    closed.isLoading;
-
-  if (isLoading) {
+  // Guard on decision === null so the spinner only appears before the initial
+  // resolution; after the onboarding decision is latched we render directly.
+  if (decision === null && isUnresolved) {
     return (
       <EuiFlexGroup justifyContent="center" style={{ minHeight: 200 }}>
         <EuiFlexItem grow={false}>

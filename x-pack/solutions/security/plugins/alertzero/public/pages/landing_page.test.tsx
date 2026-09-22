@@ -45,6 +45,7 @@ type QueryOverrides = Partial<{
 const workersResult = (workers: Array<{ enabled: boolean }>, overrides: QueryOverrides = {}) => ({
   data: { workers: workers.map((w, i) => ({ id: `w-${i}`, ...w })) },
   isLoading: false,
+  isFetching: false,
   error: undefined,
   ...overrides,
 });
@@ -52,6 +53,7 @@ const workersResult = (workers: Array<{ enabled: boolean }>, overrides: QueryOve
 const proposalsResult = (total: number, overrides: QueryOverrides = {}) => ({
   data: { proposals: [], total },
   isLoading: false,
+  isFetching: false,
   error: undefined,
   ...overrides,
 });
@@ -188,6 +190,19 @@ describe('LandingPage', () => {
     mockUseProposalsByCategoryCount.mockReturnValue(
       proposalsResult(0, { isLoading: true, data: undefined })
     );
+
+    renderPage();
+
+    expect(screen.queryByText('Get started with AlertZero')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('conversations-page')).not.toBeInTheDocument();
+    expect(document.querySelector('[class*="euiLoadingSpinner"]')).toBeInTheDocument();
+  });
+
+  it('shows a spinner when stale cached zeros are being refetched in the background', () => {
+    // Simulates an established user whose cached data shows empty workers/proposals
+    // but React Query is in a background refetch (isLoading=false, isFetching=true).
+    mockUseWorkers.mockReturnValue(workersResult([], { isFetching: true }));
+    mockUseProposalsByCategoryCount.mockReturnValue(proposalsResult(0, { isFetching: true }));
 
     renderPage();
 
