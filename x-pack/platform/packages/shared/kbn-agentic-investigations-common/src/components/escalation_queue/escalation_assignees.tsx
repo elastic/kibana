@@ -26,6 +26,12 @@ interface EscalationAssigneesProps {
    */
   isProfilesLoading?: boolean;
   /**
+   * When true, a spinner replaces the `+` button to signal that an update is
+   * in flight. The popover is also closed so the user cannot submit a second
+   * change while the first is still being processed.
+   */
+  isUpdating?: boolean;
+  /**
    * When false the component renders the assignee display without the `+` button
    * or picker popover. Use this to honour `manageEscalations` capability.
    */
@@ -55,6 +61,7 @@ export const EscalationAssignees = memo<EscalationAssigneesProps>(
     suggestions,
     isSuggestionsLoading,
     isProfilesLoading = false,
+    isUpdating = false,
     canManage,
     onSearchChange,
     onChange,
@@ -123,7 +130,7 @@ export const EscalationAssignees = memo<EscalationAssigneesProps>(
               options: suggestions,
               onChange: handleChange,
               onSearchChange,
-              isLoading: isSuggestionsLoading,
+              isLoading: isSuggestionsLoading || isUpdating,
               singleSelection: false,
               loadingMessage: ESCALATION_QUEUE_LABELS.searchAssignees,
               'data-test-subj': `escalationAssigneesSelectable-${escalationId}`,

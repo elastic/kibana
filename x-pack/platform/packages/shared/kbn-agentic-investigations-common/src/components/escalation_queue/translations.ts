@@ -35,6 +35,9 @@ export const ESCALATION_QUEUE_LABELS = Object.freeze({
   loadError: i18n.translate('xpack.alertzero.escalationQueue.loadError', {
     defaultMessage: 'Failed to load escalations',
   }),
+  updatingAssignees: i18n.translate('xpack.alertzero.escalationQueue.updatingAssignees', {
+    defaultMessage: 'Updating assignees…',
+  }),
   showMore: (remaining: number) =>
     i18n.translate('xpack.alertzero.escalationQueue.showMore', {
       defaultMessage: 'Show more ({remaining})',

@@ -64,6 +64,19 @@ export const EscalationsPage: React.FC = () => {
     setOpenItems((prev) =>
       openQuery.data!.pagination.page === 1 ? newItems : [...prev, ...newItems]
     );
+    // When fresh data arrives, clear any pending optimistic entries for escalations
+    // included in this page. This removes the pending state only after the server has
+    // confirmed the change, eliminating the flash that would occur if we cleared
+    // optimistically in onSettled (before the refetch completed).
+    setPendingAssignees((prev) => {
+      if (prev.size === 0) return prev;
+      const next = new Map(prev);
+      let changed = false;
+      for (const item of newItems) {
+        if (next.delete(item.id)) changed = true;
+      }
+      return changed ? next : prev;
+    });
     // openQuery.data is the only dep: fires when React Query delivers a new page.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [openQuery.data]);
@@ -74,6 +87,15 @@ export const EscalationsPage: React.FC = () => {
     setClosedItems((prev) =>
       closedQuery.data!.pagination.page === 1 ? newItems : [...prev, ...newItems]
     );
+    setPendingAssignees((prev) => {
+      if (prev.size === 0) return prev;
+      const next = new Map(prev);
+      let changed = false;
+      for (const item of newItems) {
+        if (next.delete(item.id)) changed = true;
+      }
+      return changed ? next : prev;
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [closedQuery.data]);
 
@@ -110,8 +132,19 @@ export const EscalationsPage: React.FC = () => {
 
   const updateEscalation = useUpdateEscalation();
 
+  // Optimistic assignee state: maps escalationId → the selected profiles that were submitted
+  // but not yet confirmed by the server. The avatar stack renders from this while in-flight.
+  // Cleared by the list-query useEffect once refetched data arrives (success path), or
+  // immediately in onError (no refetch happens on failure).
+  const [pendingAssignees, setPendingAssignees] = useState<
+    Map<string, UserProfileWithAvatar[]>
+  >(new Map());
+
   const handleAssigneesChange = useCallback(
     (escalationId: string, selected: UserProfileWithAvatar[]) => {
+      // Show the new selection immediately before the server responds.
+      setPendingAssignees((prev) => new Map(prev).set(escalationId, selected));
+
       updateEscalation.mutate(
         {
           escalationId,
@@ -120,9 +153,17 @@ export const EscalationsPage: React.FC = () => {
         {
           onSuccess: () => {
             notifications?.toasts.addSuccess(ESCALATIONS_PAGE_INFO.assignSuccess);
+            // Pending state is cleared by the useEffect when the refetched data arrives,
+            // so the optimistic UI stays visible right up until the server confirms.
           },
           onError: () => {
             notifications?.toasts.addDanger(ESCALATIONS_PAGE_INFO.assignError);
+            // On error the query won't refetch, so roll back the optimistic state now.
+            setPendingAssignees((prev) => {
+              const next = new Map(prev);
+              next.delete(escalationId);
+              return next;
+            });
           },
         }
       );
@@ -132,21 +173,25 @@ export const EscalationsPage: React.FC = () => {
 
   const renderAssignees = useCallback(
     (escalation: EscalationQueueItem) => {
-      // Build the `selected` array from resolved profiles, but preserve unresolved UIDs as
-      // synthetic placeholder profiles so they round-trip through the replace-in-full payload
-      // and can be removed only by explicit deselect (not silently dropped on a profile miss).
-      const selected: UserProfileWithAvatar[] = escalation.assigneeUids.map((uid) => {
-        const resolved = profilesByUid.get(uid);
-        if (resolved) return resolved;
-        // Synthesise a minimal profile for an unresolvable UID (e.g. deleted user).
-        // Rendering falls back to an avatar with initials from the uid.
-        return {
-          uid,
-          enabled: true,
-          user: { username: uid },
-          data: {},
-        } as UserProfileWithAvatar;
-      });
+      const isUpdating = pendingAssignees.has(escalation.id);
+
+      // While an update is in flight use the optimistically submitted profiles directly
+      // (they carry full avatar data from the picker). Otherwise build the list from
+      // resolved profiles, preserving unresolved UIDs as synthetic placeholders so they
+      // round-trip through the replace-in-full payload and can only be removed explicitly.
+      const selected: UserProfileWithAvatar[] = isUpdating
+        ? (pendingAssignees.get(escalation.id) ?? [])
+        : escalation.assigneeUids.map((uid) => {
+            const resolved = profilesByUid.get(uid);
+            if (resolved) return resolved;
+            // Synthesise a minimal profile for an unresolvable UID (e.g. deleted user).
+            return {
+              uid,
+              enabled: true,
+              user: { username: uid },
+              data: {},
+            } as UserProfileWithAvatar;
+          });
 
       return (
         <EscalationAssignees
@@ -160,6 +205,7 @@ export const EscalationsPage: React.FC = () => {
           // even for disabled queries that have no data (e.g. when there are no assignee UIDs),
           // which would permanently grey out the button for unassigned escalations.
           isProfilesLoading={profilesQuery.isFetching}
+          isUpdating={isUpdating}
           canManage={canManage && escalation.status !== 'closed'}
           onSearchChange={setSearchTerm}
           onChange={(newSelected) => handleAssigneesChange(escalation.id, newSelected)}
@@ -167,8 +213,9 @@ export const EscalationsPage: React.FC = () => {
       );
     },
     [
+      pendingAssignees,
       profilesByUid,
-      profilesQuery.isLoading,
+      profilesQuery.isFetching,
       suggestQuery.data,
       suggestQuery.isLoading,
       canManage,
