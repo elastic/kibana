@@ -73,10 +73,8 @@ export class ExportCSVAction implements Action<ExportContext> {
       return;
     }
 
-    const tableAdapters = this.getDataTableContent(embeddable?.getInspectorAdapters()) as Record<
-      string,
-      Datatable
-    >;
+    const adapters = embeddable?.getInspectorAdapters();
+    const tableAdapters = this.getDataTableContent(adapters) as Record<string, Datatable>;
 
     if (tableAdapters) {
       const datatables = Object.values(tableAdapters);
@@ -93,6 +91,7 @@ export class ExportCSVAction implements Action<ExportContext> {
                 quoteValues: coreServices.uiSettings.get('csv:quoteValues', true),
                 formatFactory,
                 escapeFormulaValues: false,
+                missingValueDisplay: adapters?.tables?.missingValueDisplay,
               }),
               type: exporters.CSV_MIME_TYPE,
             };
