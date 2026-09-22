@@ -59,6 +59,7 @@ dependsOn:
   - '@kbn/security-solution-distribution-bar'
   - '@kbn/core-application-browser'
   - '@kbn/test-jest-helpers'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod
