@@ -52,6 +52,8 @@ export interface QueueSection {
   hasLoadError: boolean;
   /** The count failed, so this section cannot say how big it is. */
   hasCountError: boolean;
+  /** Refetches both of this section's queries, behind the failure's retry control. */
+  retry: () => void;
   /** Rows Show more can still reach. Labels the control; `canLoadMore` gates it. */
   remaining: number;
   canLoadMore: boolean;
@@ -59,10 +61,16 @@ export interface QueueSection {
   isLoadingMore: boolean;
 }
 
-const useSectionState = (
-  id: RecommendedAction,
-  pagesQueryKey: readonly unknown[]
-): { isOpen: boolean; onToggle: (isOpen: boolean) => void } => {
+/** Both of a section's keys, derived from its bucket so `retry` can stay stable. */
+const keysFor = (id: RecommendedAction) =>
+  id === CLOSED_GROUP_KEY
+    ? { pages: queryKeys.proposals.closed(), count: queryKeys.proposals.closedCount() }
+    : {
+        pages: queryKeys.proposals.byCategory(id),
+        count: queryKeys.proposals.byCategoryCount(id),
+      };
+
+const useSectionState = (id: RecommendedAction) => {
   const [isOpen, setIsOpen] = useState(id !== CLOSED_GROUP_KEY);
   const queryClient = useQueryClient();
 
@@ -70,19 +78,25 @@ const useSectionState = (
   // query, or the cache discard races a refetch of the pages we are throwing away.
   useEffect(() => {
     if (!isOpen) {
-      queryClient.removeQueries({ queryKey: pagesQueryKey });
+      queryClient.removeQueries({ queryKey: keysFor(id).pages });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, queryClient]);
+  }, [isOpen, queryClient, id]);
 
-  return { isOpen, onToggle: setIsOpen };
+  // Keyed off the bucket rather than the query objects, so the memoised queue is not
+  // re-rendered by a new callback on every poll.
+  const retry = useCallback(() => {
+    const { pages, count } = keysFor(id);
+    void queryClient.refetchQueries({ queryKey: pages });
+    void queryClient.refetchQueries({ queryKey: count });
+  }, [queryClient, id]);
+
+  return { isOpen, onToggle: setIsOpen, retry };
 };
 
 const useSection = (
   id: RecommendedAction,
   firstPageSize: number,
-  isOpen: boolean,
-  onToggle: (isOpen: boolean) => void,
+  { isOpen, onToggle, retry }: ReturnType<typeof useSectionState>,
   countQuery: UseQueryResult<ProposalsPageResponse>,
   pagesQuery: UseInfiniteQueryResult<ProposalsPageResponse>
 ): QueueSection => {
@@ -108,6 +122,7 @@ const useSection = (
     investigations,
     isOpen,
     onToggle,
+    retry,
     loadingRows: pagesQuery.isInitialLoading ? Math.min(total ?? firstPageSize, firstPageSize) : 0,
     hasLoadError: Boolean(pagesQuery.error) && proposals.length === 0,
     hasCountError: Boolean(countQuery.error) && total === undefined,
@@ -121,35 +136,33 @@ const useSection = (
 };
 
 export const useCategoryQueueSection = (category: RecommendedAction): QueueSection => {
-  const { isOpen, onToggle } = useSectionState(category, queryKeys.proposals.byCategory(category));
+  const state = useSectionState(category);
 
   return useSection(
     category,
     CATEGORY_PAGE_SIZE,
-    isOpen,
-    onToggle,
+    state,
     useProposalsByCategoryCount(category),
     useProposalsByCategory(category, {
       firstPageSize: CATEGORY_PAGE_SIZE,
       step: SHOW_MORE_STEP,
-      enabled: isOpen,
+      enabled: state.isOpen,
     })
   );
 };
 
 export const useClosedQueueSection = (): QueueSection => {
-  const { isOpen, onToggle } = useSectionState(CLOSED_GROUP_KEY, queryKeys.proposals.closed());
+  const state = useSectionState(CLOSED_GROUP_KEY);
 
   return useSection(
     CLOSED_GROUP_KEY,
     CLOSED_PAGE_SIZE,
-    isOpen,
-    onToggle,
+    state,
     useClosedProposalsCount(),
     useClosedProposals({
       firstPageSize: CLOSED_PAGE_SIZE,
       step: SHOW_MORE_STEP,
-      enabled: isOpen,
+      enabled: state.isOpen,
     })
   );
 };

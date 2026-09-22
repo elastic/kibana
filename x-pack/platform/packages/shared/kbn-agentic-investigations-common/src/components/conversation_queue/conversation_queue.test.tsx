@@ -169,6 +169,15 @@ describe('ConversationQueue', () => {
       expect(trigger()).toHaveTextContent('Respond');
     });
 
+    it('offers a way out, rather than only waiting for the next poll', () => {
+      const onRetry = jest.fn();
+      renderQueue({ isError: true, briefingList: [], count: undefined, onRetry });
+
+      fireEvent.click(screen.getByTestId('conversationQueueRetry-respond'));
+
+      expect(onRetry).toHaveBeenCalledTimes(1);
+    });
+
     it('stays quiet while closed', () => {
       renderQueue({ isError: true, isOpen: false, briefingList: [] });
 

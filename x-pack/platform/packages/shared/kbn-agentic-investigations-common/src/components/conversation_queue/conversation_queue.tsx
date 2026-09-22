@@ -68,6 +68,8 @@ interface ConversationQueueProps {
   isError?: boolean;
   /** The count read failed, so the badge stands down rather than spinning forever. */
   isCountUnavailable?: boolean;
+  /** Refetches the section. Without it the failure carries no way out but waiting. */
+  onRetry?: () => void;
   /** Rows Show more can still load. The footer hides at 0. */
   remaining?: number;
   onShowMore?: () => void;
@@ -118,6 +120,7 @@ export const ConversationQueue = memo<ConversationQueueProps>(
     loadingRows = 0,
     isError = false,
     isCountUnavailable = false,
+    onRetry,
     remaining = 0,
     onShowMore,
     isLoadingMore = false,
@@ -256,19 +259,35 @@ export const ConversationQueue = memo<ConversationQueueProps>(
               replace them. No retry control either — the queue polls, so a transient
               failure clears itself within the minute. */}
           {loadingRows === 0 && isError && rows.length === 0 && isOpen ? (
-            <EuiEmptyPrompt
-              data-test-subj={`conversationQueueError-${briefingType}`}
-              color="danger"
-              paddingSize="m"
-              icon={<EuiIcon type="error" size="l" color="danger" aria-hidden={true} />}
-              title={<h4>{CONVERSATION_QUEUE_ERROR.title}</h4>}
-              titleSize="xs"
-              body={
-                <EuiText size="xs" color="subdued">
-                  {CONVERSATION_QUEUE_ERROR.body}
-                </EuiText>
-              }
-            />
+            // The panel sets `pointer` for the cards; nothing here is a card, and only
+            // the retry control is clickable.
+            <div css={{ padding: euiTheme.size.base, cursor: 'default' }}>
+              <EuiEmptyPrompt
+                data-test-subj={`conversationQueueError-${briefingType}`}
+                color="danger"
+                paddingSize="m"
+                icon={<EuiIcon type="error" size="l" color="danger" aria-hidden={true} />}
+                title={<h4>{CONVERSATION_QUEUE_ERROR.title}</h4>}
+                titleSize="xs"
+                body={
+                  <EuiText size="xs" color="subdued">
+                    {CONVERSATION_QUEUE_ERROR.body}
+                  </EuiText>
+                }
+                actions={
+                  onRetry ? (
+                    <EuiButtonEmpty
+                      size="s"
+                      iconType="refresh"
+                      onClick={onRetry}
+                      data-test-subj={`conversationQueueRetry-${briefingType}`}
+                    >
+                      {CONVERSATION_QUEUE_ERROR.retry}
+                    </EuiButtonEmpty>
+                  ) : undefined
+                }
+              />
+            </div>
           ) : null}
 
           {/* Only meaningful for a section someone is looking at; rendering it mid-collapse

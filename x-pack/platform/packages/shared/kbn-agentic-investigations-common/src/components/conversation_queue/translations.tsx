@@ -23,6 +23,9 @@ export const CONVERSATION_QUEUE_ERROR = Object.freeze({
   body: i18n.translate('xpack.alertzero.conversationQueue.loadErrorBody', {
     defaultMessage: 'Something went wrong while fetching events for this category.',
   }),
+  retry: i18n.translate('xpack.alertzero.conversationQueue.loadErrorRetry', {
+    defaultMessage: 'Try again',
+  }),
 });
 
 export const LOADING_CONVERSATION_QUEUE = i18n.translate(

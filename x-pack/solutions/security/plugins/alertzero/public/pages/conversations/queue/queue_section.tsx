@@ -43,6 +43,7 @@ export const QueueSection = ({
     loadingRows,
     hasLoadError,
     hasCountError,
+    retry,
     remaining,
     canLoadMore,
     loadMore,
@@ -84,6 +85,7 @@ export const QueueSection = ({
       loadingRows={loadingRows}
       isError={hasLoadError}
       isCountUnavailable={hasCountError}
+      onRetry={retry}
       remaining={canLoadMore ? remaining : 0}
       onShowMore={loadMore}
       isLoadingMore={isLoadingMore}
