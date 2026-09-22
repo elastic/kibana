@@ -135,6 +135,7 @@ export const setupQueryTranslationTestDataStream = async (esClient: EsClient) =>
 };
 
 export const teardownQueryTranslationTestDataStream = async (esClient: EsClient) => {
+  await esClient.indices.deleteDataStream({ name: QUERY_TRANSLATION_TEST_INDEX }).catch(() => {});
   await esClient.indices
     .deleteIndexTemplate({ name: 'entity-store-query-translation-test' })
     .catch(() => {});
