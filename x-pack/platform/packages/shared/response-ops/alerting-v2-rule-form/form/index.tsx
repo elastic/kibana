@@ -8,7 +8,6 @@
 export type {
   FormValues,
   StateTransitionDelayMode,
-  RuleNotificationsValue,
   RuleQuery,
   RuleRecovery,
   RuleNoData,

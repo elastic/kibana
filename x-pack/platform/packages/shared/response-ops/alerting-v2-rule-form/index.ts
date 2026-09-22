@@ -52,7 +52,6 @@ export type {
   RuleFormMeta,
   RuleFormLayout,
   RuleRequestCommon,
-  RuleNotificationsValue,
   RuleQuery,
   RuleRecovery,
   RuleNoData,
@@ -63,10 +62,6 @@ export type {
 
 export {
   buildInlineWorkflowYaml,
-  buildRuleScopedMatcher,
-  buildRuleNotificationTag,
-  resolveRuleNotificationTag,
-  ruleHasNotificationTag,
   InlineWorkflowEditor,
   INLINE_ACTION_STEP_DEFINITIONS,
   getInlineActionStepDefinition,

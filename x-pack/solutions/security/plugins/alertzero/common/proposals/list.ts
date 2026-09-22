@@ -18,12 +18,14 @@ export interface ProposalItem extends ProposalWithMetadata {
    * conversation redirect, which resolves the agent itself.
    */
   conversationAgentId?: string;
+  /**
+   * User ids assigned to the investigation, from conversation metadata. Always an array —
+   * empty when unset or the conversation is unreadable — so callers need no fallback.
+   */
+  conversationAssignees: string[];
 }
 
-export type ProposalGroups = Record<string, ProposalItem[]>;
-
-export interface GetProposalsListResponse {
-  groups: ProposalGroups;
+export interface ProposalsPageResponse {
+  proposals: ProposalItem[];
   total: number;
-  truncated: boolean;
 }

@@ -300,7 +300,7 @@ describe('EpisodeRuleCell', () => {
     it('calls back with the rule id and prevents navigation on a plain click', () => {
       // fireEvent returns false when the handler called preventDefault
       expect(fireEvent.click(renderRuleNameLink())).toBe(false);
-      expect(mockOnRuleNameClick).toHaveBeenCalledWith('r1');
+      expect(mockOnRuleNameClick).toHaveBeenCalledWith('r1', undefined);
     });
 
     it('lets a modified click follow the link', () => {
@@ -602,9 +602,122 @@ describe('EpisodeRuleCell', () => {
     expect(screen.getByTestId('episodeRuleCellBreachQuery')).toHaveTextContent('FROM My Rule');
   });
 
+  it('calls getRuleDetailsHref with isSourceRule=true for a source episode', () => {
+    const mockGetRuleDetailsHref = jest.fn().mockReturnValue('/app/rules/v1-rule-id');
+    const row = makeRow({
+      'rule.id': 'v1-rule-id',
+      source_id: 'classic-alerts',
+      rule_category: 'Test',
+    });
+    render(
+      <EpisodeRuleCell
+        {...ruleCellProps}
+        getRuleDetailsHref={mockGetRuleDetailsHref}
+        row={row}
+        rulesCache={{ 'v1-rule-id': makeRule('Classic Rule') }}
+        isLoadingRules={false}
+        rowHeight={1}
+      />
+    );
+    expect(mockGetRuleDetailsHref).toHaveBeenCalledWith('v1-rule-id', true);
+  });
+
+  it('calls getRuleDetailsHref with isSourceRule=false for a v2 episode', () => {
+    const mockGetRuleDetailsHref = jest.fn().mockReturnValue('/app/rules/r1');
+    const row = makeRow({ 'rule.id': 'r1' });
+    render(
+      <EpisodeRuleCell
+        {...ruleCellProps}
+        getRuleDetailsHref={mockGetRuleDetailsHref}
+        row={row}
+        rulesCache={{ r1: makeRule('V2 Rule') }}
+        isLoadingRules={false}
+        rowHeight={1}
+      />
+    );
+    expect(mockGetRuleDetailsHref).toHaveBeenCalledWith('r1', false);
+  });
+
+  it('treats a source episode whose cached rule has kind as a native v2 rule', () => {
+    const mockGetRuleDetailsHref = jest.fn().mockReturnValue('/app/alerting/rules/v2-rule-id');
+    const mockOnRuleNameClick = jest.fn();
+    const v2Rule: Rule = { ...makeRule('V2 Rule'), kind: 'alert' };
+    const row = makeRow({
+      'rule.id': 'v2-rule-id',
+      source_id: 'classic-alerts',
+      rule_category: 'Custom query',
+    });
+    render(
+      <EpisodeRuleCell
+        {...ruleCellProps}
+        getRuleDetailsHref={mockGetRuleDetailsHref}
+        row={row}
+        rulesCache={{ 'v2-rule-id': v2Rule }}
+        isLoadingRules={false}
+        rowHeight={1}
+        onRuleNameClick={mockOnRuleNameClick}
+      />
+    );
+
+    const link = screen.getByTestId('episodeRuleCellNameLink');
+    expect(mockGetRuleDetailsHref).toHaveBeenCalledWith('v2-rule-id', false);
+    expect(link).toHaveAttribute('href', '/app/alerting/rules/v2-rule-id');
+    fireEvent.click(link);
+    expect(mockOnRuleNameClick).toHaveBeenCalledWith('v2-rule-id', undefined);
+  });
+
+  it('omits href when getRuleDetailsHref returns no details route', () => {
+    const mockOnRuleNameClick = jest.fn();
+    const row = makeRow({
+      'rule.id': 'v1-rule-id',
+      source_id: 'classic-alerts',
+      rule_category: 'Test',
+    });
+    render(
+      <EpisodeRuleCell
+        {...ruleCellProps}
+        getRuleDetailsHref={() => undefined}
+        row={row}
+        rulesCache={{ 'v1-rule-id': makeRule('Classic Rule') }}
+        isLoadingRules={false}
+        rowHeight={1}
+        onRuleNameClick={mockOnRuleNameClick}
+      />
+    );
+
+    const link = screen.getByTestId('episodeRuleCellNameLink');
+    expect(link).not.toHaveAttribute('href');
+    fireEvent.click(link);
+    expect(mockOnRuleNameClick).toHaveBeenCalledWith('v1-rule-id', { category: 'Test' });
+  });
+
+  it('calls onRuleNameClick with sourceRuleInfo for a source episode', () => {
+    const mockOnRuleNameClick = jest.fn();
+    const row = makeRow({
+      'rule.id': 'v1-rule-id',
+      source_id: 'classic-alerts',
+      rule_category: 'Test',
+    });
+    render(
+      <EpisodeRuleCell
+        {...ruleCellProps}
+        row={row}
+        rulesCache={{ 'v1-rule-id': makeRule('Classic Rule') }}
+        isLoadingRules={false}
+        rowHeight={1}
+        onRuleNameClick={mockOnRuleNameClick}
+      />
+    );
+    fireEvent.click(screen.getByTestId('episodeRuleCellNameLink'));
+    expect(mockOnRuleNameClick).toHaveBeenCalledWith('v1-rule-id', {
+      category: 'Test',
+    });
+  });
+
   it('renders classic rule via rules cache when resolved by classic fallback', () => {
     const row = makeRow({
       'rule.id': 'v1-rule-id',
+      source_id: 'classic-alerts',
       supports_actions: false,
       supports_timeline: false,
     });
@@ -626,6 +739,7 @@ describe('EpisodeRuleCell', () => {
     } as unknown as Rule;
     const row = makeRow({
       'rule.id': 'v1-rule-id',
+      source_id: 'classic-alerts',
       supports_actions: false,
       supports_timeline: false,
     });
