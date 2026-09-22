@@ -151,7 +151,9 @@ describe('ManagementApp', () => {
     unmount();
 
     const unsupportedClient = createClient();
-    unsupportedClient.getViews.mockRejectedValue(createClientError('No handler found', 404));
+    unsupportedClient.getViews.mockRejectedValue(
+      createClientError('no handler found for uri [/_query/view] and method [GET]', 501)
+    );
 
     renderApp(unsupportedClient);
     expect(await screen.findByTestId('esqlViewsUnsupported')).toBeInTheDocument();
