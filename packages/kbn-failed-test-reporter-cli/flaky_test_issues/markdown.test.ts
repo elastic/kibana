@@ -12,9 +12,8 @@ import {
   formatBuildLink,
   formatDateRange,
   formatFailureMessage,
-  formatFlakiestBranch,
+  formatBranchRates,
   formatPercent,
-  qualifyingBranch,
   testsTable,
 } from './markdown';
 import { flakyTest } from './test_fixtures';
@@ -37,15 +36,14 @@ describe('formatDateRange', () => {
   });
 });
 
-describe('branchesByFailedBuilds / formatFlakiestBranch', () => {
-  const test = flakyTest({
-    byBranch: [
-      { branch: 'main', builds: 400, failedBuilds: 10, buildFailRate: 0.025 },
-      { branch: '9.2', builds: 100, failedBuilds: 30, buildFailRate: 0.3 },
-    ],
-  });
-
+describe('branchesByFailedBuilds', () => {
   it('orders branches by failed builds, adding them up over several tests', () => {
+    const test = flakyTest({
+      byBranch: [
+        { branch: 'main', builds: 400, failedBuilds: 10, buildFailRate: 0.025 },
+        { branch: '9.2', builds: 100, failedBuilds: 30, buildFailRate: 0.3 },
+      ],
+    });
     expect(
       branchesByFailedBuilds([test, test]).map(({ branch, failedBuilds }) => [branch, failedBuilds])
     ).toEqual([
@@ -53,22 +51,26 @@ describe('branchesByFailedBuilds / formatFlakiestBranch', () => {
       ['main', 20],
     ]);
   });
+});
 
-  it('names the branch the test qualified on, with its numbers when it ran on several', () => {
-    // the fixture qualified on `main`, which fails less than 9.2 here
-    expect(qualifyingBranch(test)).toEqual({
-      branch: 'main',
-      builds: 400,
-      failedBuilds: 10,
-      buildFailRate: 0.025,
-    });
-    expect(formatFlakiestBranch(test)).toBe('`main` · 10 / 400');
-    expect(formatFlakiestBranch(flakyTest())).toBe('`main`');
+describe('formatBranchRates', () => {
+  const test = flakyTest({
+    byBranch: [
+      { branch: 'main', builds: 547, failedBuilds: 0, buildFailRate: 0 },
+      { branch: '9.5', builds: 122, failedBuilds: 4, buildFailRate: 4 / 122 },
+      { branch: '9.4', builds: 100, failedBuilds: 2, buildFailRate: 0.02 },
+    ],
   });
 
-  it('falls back to the branch with the most failed builds for reports without a qualifying one', () => {
-    expect(formatFlakiestBranch({ ...test, flakiestBranch: undefined })).toBe('`9.2` · 30 / 100');
-    expect(formatFlakiestBranch(flakyTest({ byBranch: [], flakiestBranch: undefined }))).toBe('-');
+  it('lists every branch by rate, in bold where the rate clears the threshold', () => {
+    expect(formatBranchRates(test, 0.03)).toBe(
+      '**`9.5` 3% (4 / 122)** · `9.4` 2% (2 / 100) · `main` 0% (0 / 547)'
+    );
+  });
+
+  it('bolds nothing without a rate threshold, and shows a dash without branches', () => {
+    expect(formatBranchRates(test, 0)).not.toContain('**');
+    expect(formatBranchRates(flakyTest({ byBranch: [] }), 0.03)).toBe('-');
   });
 });
 
@@ -77,13 +79,16 @@ describe('testsTable', () => {
     const tests = Array.from({ length: 4 }, (_, index) =>
       flakyTest({ testId: `t${index}`, title: `test | ${index}` })
     );
-    const rendered = testsTable(tests, { withTestId: true, maxRows: 2 });
+    const rendered = testsTable(tests, { withTestId: true, maxRows: 2, minFailRate: 0.03 });
 
     expect(rendered.split('\n')).toHaveLength(6);
-    expect(rendered).toContain('| test \\| 0 |');
+    expect(rendered).toContain('| Test | Flaky rate by branch | Test ID |');
+    expect(rendered).toContain('| test \\| 0 | **`main` 10% (49 / 509)** | t0 |');
     expect(rendered).toContain('| t1 |');
     expect(rendered).toContain('and 2 more flaky tests in this file.');
-    expect(testsTable(tests, { withTestId: false, maxRows: 10 })).not.toContain('Test ID');
+    expect(testsTable(tests, { withTestId: false, maxRows: 10, minFailRate: 0.03 })).not.toContain(
+      'Test ID'
+    );
   });
 });
 

@@ -47,8 +47,6 @@ export const formatPercent = (rate: number): string => {
 };
 
 /** `98 / 505 (19%)` */
-export const formatFailedBuilds = (failedBuilds: number, builds: number): string =>
-  `${failedBuilds} / ${builds} (${formatPercent(builds > 0 ? failedBuilds / builds : 0)})`;
 
 /** `2026-09-08 16:05 UTC` */
 export const formatDateTime = (date: Date): string =>
@@ -106,43 +104,48 @@ export const branchesByFailedBuilds = (
 };
 
 /**
- * The branch the test qualified on, which is what the report's thresholds were checked against,
- * with the counts of its `byBranch` row. Reports written before `flakiestBranch` existed fall
- * back to the branch with the most failed builds.
+ * `` **`9.5` 3% (4 / 122)** · `main` 0% (0 / 547) ``: the share of builds that failed the test on
+ * each branch it ran on, highest first, in bold where it clears the report's `minFailRate`. The
+ * total over branches is left out on purpose, a clean branch dilutes it below what qualified.
  */
-export const qualifyingBranch = (
-  test: Pick<FlakyTestEntry, 'byBranch' | 'flakiestBranch'>
-): BranchFailures | undefined => {
-  const { flakiestBranch } = test;
-  if (!flakiestBranch) {
-    return branchesByFailedBuilds([test])[0];
-  }
-  return test.byBranch.find((stats) => stats.branch === flakiestBranch.branch) ?? flakiestBranch;
-};
-
-/** `` `main` · 98 / 505 ``, or just `` `main` `` when it is the only branch the test ran on. */
-export const formatFlakiestBranch = (test: FlakyTestEntry): string => {
-  const flakiest = qualifyingBranch(test);
-  if (!flakiest) {
+export const formatBranchRates = (
+  test: Pick<FlakyTestEntry, 'byBranch'>,
+  minFailRate: number
+): string => {
+  if (test.byBranch.length === 0) {
     return '-';
   }
-  return test.byBranch.length > 1
-    ? `${inlineCode(flakiest.branch)} · ${flakiest.failedBuilds} / ${flakiest.builds}`
-    : inlineCode(flakiest.branch);
+  return [...test.byBranch]
+    .sort(
+      (a, b) =>
+        b.buildFailRate - a.buildFailRate ||
+        b.failedBuilds - a.failedBuilds ||
+        a.branch.localeCompare(b.branch)
+    )
+    .map(({ branch, builds, failedBuilds, buildFailRate }) => {
+      const rate = `${inlineCode(branch)} ${formatPercent(
+        buildFailRate
+      )} (${failedBuilds} / ${builds})`;
+      return minFailRate > 0 && buildFailRate >= minFailRate ? `**${rate}**` : rate;
+    })
+    .join(' · ');
 };
 
 /** Rows of the per-test table, `Test ID` column optional; the suite's tests come ranked. */
 export const testsTable = (
   tests: readonly FlakyTestEntry[],
-  { withTestId, maxRows }: { withTestId: boolean; maxRows: number }
+  {
+    withTestId,
+    maxRows,
+    minFailRate,
+  }: { withTestId: boolean; maxRows: number; minFailRate: number }
 ): string => {
-  const header = ['Test', 'Failed builds', 'Flakiest branch'];
+  const header = ['Test', 'Flaky rate by branch'];
   const rows = tests
     .slice(0, maxRows)
     .map((test) => [
       test.title,
-      formatFailedBuilds(test.failedBuilds, test.builds),
-      formatFlakiestBranch(test),
+      formatBranchRates(test, minFailRate),
       ...(withTestId ? [test.testId] : []),
     ]);
   const rest = tests.length - maxRows;

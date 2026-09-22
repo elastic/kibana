@@ -101,7 +101,7 @@ export const flakyReport = (
     frameworks: ['jest', 'ftr', 'cypress', 'playwright'],
     classifications: ['flaky'],
   },
-  thresholds: { minBuilds: 10, minFailedBuilds: 2, minFailRate: 0, maxTests: 200 },
+  thresholds: { minBuilds: 10, minFailedBuilds: 2, minFailRate: 0.03, maxTests: 200 },
   summary: {
     totalFlaky: flaky.length,
     totalConsistentlyFailing: 0,

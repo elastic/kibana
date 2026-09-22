@@ -331,7 +331,11 @@ export const renderFlakySuiteIssueBody = (
     '### Suite Details',
     suiteDetails(suite),
     '### Flaky Tests',
-    testsTable(suite.tests, { withTestId: true, maxRows: MAX_TEST_ROWS }),
+    testsTable(suite.tests, {
+      withTestId: true,
+      maxRows: MAX_TEST_ROWS,
+      minFailRate: ctx.report.thresholds.minFailRate,
+    }),
     '### Failures',
     failuresSection(suite),
     failuresByPipeline(suite, ctx.report),
