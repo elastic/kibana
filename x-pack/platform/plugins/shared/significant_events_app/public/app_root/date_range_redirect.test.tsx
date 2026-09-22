@@ -49,21 +49,7 @@ describe('DateRangeRedirect', () => {
     } as never);
   });
 
-  it('leaves the standalone Settings URL unchanged', () => {
-    const history = renderRedirect('/settings');
-
-    expect(history.location.search).toBe('');
-  });
-
-  it('removes date range params from Settings while preserving other query params', () => {
-    const history = renderRedirect(
-      '/settings?rangeFrom=now-24h&rangeTo=now&selectedItem=maintenance'
-    );
-
-    expect(history.location.search).toBe('?selectedItem=maintenance');
-  });
-
-  it('continues adding the default range to management routes', () => {
+  it('adds the default range to management routes', () => {
     const history = renderRedirect('/streams');
 
     expect(history.location.search).toBe('?rangeFrom=now-24h&rangeTo=now');
