@@ -73,7 +73,10 @@ export const buildSignificantSecurityEventActionButtons = ({
   const exit =
     events.length > 0
       ? { esql: buildEventsLookupEsql({ events }), label: openEventsLabel }
-      : { esql: buildAlertsLookupEsql({ alerts }), label: openAlertsLabel };
+      : {
+          esql: buildAlertsLookupEsql({ alerts, spaceId: navigation.spaceId }),
+          label: openAlertsLabel,
+        };
 
   return buildDiscoverActionButton({
     share: navigation.share,

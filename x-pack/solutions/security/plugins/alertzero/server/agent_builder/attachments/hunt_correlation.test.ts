@@ -82,6 +82,20 @@ describe('createHuntCorrelationAttachmentType', () => {
       expect(result.valid).toBe(false);
     });
 
+    it('rejects a duplicate (related_report_id, vertex) pair', async () => {
+      // The table keys by this pair while the header badge scores every row, so a duplicate
+      // could show an above-threshold value under a "Below threshold" badge.
+      const result = await attachmentType.validate({
+        ...validPayload,
+        diamond_scores: [
+          { vertex: 'victim', related_report_id: 'report-1', score: 0.9 },
+          { vertex: 'victim', related_report_id: 'report-1', score: 0.1 },
+        ],
+      });
+
+      expect(result.valid).toBe(false);
+    });
+
     it('allows diamond_scores up to the 100-item cap, and rejects beyond it', async () => {
       const atCap = await attachmentType.validate({
         ...validPayload,
@@ -143,9 +157,11 @@ describe('createHuntCorrelationAttachmentType', () => {
           kind: 'hash' as const,
           value: 'a'.repeat(2048),
         })),
+        // Unique (related_report_id, vertex) pairs per the schema's uniqueness rule, still at
+        // the 512-char id cap so this stays the worst-case size.
         diamond_scores: Array.from({ length: 100 }, (_, i) => ({
           vertex: 'infrastructure' as const,
-          related_report_id: 'r'.repeat(512),
+          related_report_id: `${i}`.padEnd(512, 'r'),
           score: 1,
         })),
         thresholds: { anchor_match: 0.8, diamond_vertex: 0.6 },

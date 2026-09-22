@@ -53,22 +53,30 @@ export const buildAlertDetailsPath = ({
   )}?${params.toString()}`;
 };
 
+/**
+ * Alert details redirect for a single `alerts[]` ref.
+ *
+ * The persisted `index` is deliberately ignored in favour of the current space's alerts
+ * alias. `alertRefSchema` accepts any non-empty string, and these attachments are authored
+ * by workflows, so a ref could name another space's alias (or a wildcard) and a public
+ * conversation link would query it directly for any viewer holding underlying index
+ * privileges. The alert id still scopes the lookup, so deriving the index from `spaceId`
+ * costs nothing for well-formed refs and keeps the Spaces boundary intact.
+ */
 export const buildAlertDetailsUrl = ({
   prependPath,
   spaceId,
   alertId,
-  index,
   timestamp,
 }: {
   prependPath: (path: string) => string;
   spaceId: string;
   alertId: string;
-  index?: string;
   timestamp?: string;
 }): string => {
   const path = buildAlertDetailsPath({
     alertId,
-    index: index ?? getAlertsIndex(spaceId),
+    index: getAlertsIndex(spaceId),
     timestamp,
   });
   return prependPath(path);

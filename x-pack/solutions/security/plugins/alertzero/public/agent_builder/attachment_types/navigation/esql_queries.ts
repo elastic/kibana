@@ -103,14 +103,23 @@ export const buildEventsLookupEsql = ({
     refs: events.map((event) => ({ id: event.event_id, index: event.source_index })),
   });
 
-/** Discover exit for all of an SSE's `alerts[]` refs at once. */
+/**
+ * Discover exit for all of an SSE's `alerts[]` refs at once.
+ *
+ * Every ref is pinned to the current space's alerts alias rather than its persisted
+ * `index`, for the reason documented on `buildAlertDetailsUrl`: the schema accepts any
+ * non-empty index string and these payloads are workflow-authored, so a ref must not be
+ * able to point a conversation link at another space's alias or a wildcard.
+ */
 export const buildAlertsLookupEsql = ({
   alerts,
+  spaceId,
 }: {
   alerts: Array<{ alert_id: string; index: string }>;
+  spaceId: string;
 }): string | undefined =>
   buildDocRefsLookupEsql({
-    refs: alerts.map((alert) => ({ id: alert.alert_id, index: alert.index })),
+    refs: alerts.map((alert) => ({ id: alert.alert_id, index: getAlertsIndex(spaceId) })),
     idField: 'kibana.alert.uuid',
   });
 

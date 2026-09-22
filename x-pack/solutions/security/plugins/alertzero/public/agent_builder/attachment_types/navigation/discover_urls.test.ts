@@ -39,7 +39,7 @@ describe('buildAlertDetailsUrl', () => {
     );
   });
 
-  it('defaults index from spaceId and applies prependPath', () => {
+  it('derives the index from spaceId and ignores any persisted index', () => {
     const prependPath = jest.fn((path: string) => `/s/soc${path}`);
     expect(
       buildAlertDetailsUrl({

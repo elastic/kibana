@@ -81,20 +81,22 @@ describe('esql_queries', () => {
     ).toBeUndefined();
   });
 
-  it('builds an alerts lookup from the indices on the refs', () => {
+  it('pins every alert ref to the current space alias, ignoring the persisted index', () => {
     expect(
       buildAlertsLookupEsql({
         alerts: [
-          { alert_id: 'alert-1', index: '.alerts-security.alerts-soc' },
-          { alert_id: 'alert-2', index: '.alerts-security.alerts-soc' },
+          // A ref naming another space's alias must not be queried.
+          { alert_id: 'alert-1', index: '.alerts-security.alerts-other' },
+          { alert_id: 'alert-2', index: '*' },
         ],
+        spaceId: 'soc',
       })
     ).toBe(
       'FROM ".alerts-security.alerts-soc" METADATA _id, _index | ' +
         'WHERE (_index == ".alerts-security.alerts-soc" AND ' +
         '(kibana.alert.uuid IN ("alert-1", "alert-2") OR _id IN ("alert-1", "alert-2")))'
     );
-    expect(buildAlertsLookupEsql({ alerts: [] })).toBeUndefined();
+    expect(buildAlertsLookupEsql({ alerts: [], spaceId: 'soc' })).toBeUndefined();
   });
 
   it('builds threat report lookup ES|QL scoped to the current space and global sentinel', () => {

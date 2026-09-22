@@ -200,7 +200,6 @@ const AlertList: React.FC<{
             prependPath: navigation.prependPath,
             spaceId: navigation.spaceId,
             alertId: alert.alert_id,
-            index: alert.index,
             timestamp: alert.timestamp,
           });
           return (

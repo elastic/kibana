@@ -33,7 +33,19 @@ export const thresholdsSchema = z.object({
  */
 export const huntCorrelationAttachmentDataSchema = alertZeroAttachmentDataSchema.extend({
   anchors: z.array(anchorSchema).max(50),
-  diamond_scores: z.array(diamondScoreSchema).max(100),
+  // One score per (related report, vertex). The renderer keys the table by that pair and the
+  // header badge evaluates every row against the threshold, so a duplicate pair would let the
+  // table show one value while the badge judged another. These payloads are machine-generated,
+  // so a duplicate means a producer bug rather than input to reconcile.
+  diamond_scores: z
+    .array(diamondScoreSchema)
+    .max(100)
+    .refine(
+      (scores) =>
+        new Set(scores.map((score) => `${score.related_report_id}:${score.vertex}`)).size ===
+        scores.length,
+      { message: 'diamond_scores must not repeat a (related_report_id, vertex) pair' }
+    ),
   thresholds: thresholdsSchema,
   self_match_excluded: z.literal(true),
   report_revision: z.string().min(1).max(256).optional(),
