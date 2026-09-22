@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// A before-all timeout, then an after-all timeout. Mocha still runs the after-all hook when the
-// before-all fails; it does not abort the runner unless something calls `runner.abort()`.
-describe('TIMEOUT_SUITE', () => {
+// Same shape as timeout.js, loaded as a separate file so Mocha's require cache does not collide
+// with the non-abort timeout fixture.
+describe('TIMEOUT_ABORTED_SUITE', () => {
   before('root cause', async function () {
     this.timeout(1);
     await new Promise((resolve) => setTimeout(resolve, 100));

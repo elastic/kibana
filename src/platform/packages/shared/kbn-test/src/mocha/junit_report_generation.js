@@ -19,9 +19,12 @@ import { getUniqueJunitReportPath } from '../report_path';
 import { getSnapshotOfRunnableLogs } from './log_cache';
 import { escapeCdata } from '../..';
 import { prettifyCommandLine } from '../prettify_command_line';
-import { isMochaTimeoutError } from './mocha_timeout';
 
 const dateNow = Date.now.bind(Date);
+
+// Mocha's `Runner.abort()` sets this private flag (see mocha `lib/runner.js`). FTR only calls
+// `runner.abort()` for cleanup / AbortSignal cancellation on this branch — not on a Mocha timeout.
+const isRunnerAborted = (mochaRunner) => mochaRunner._abort === true;
 
 export function setupJUnitReportGeneration(runner, options = {}) {
   const {
@@ -34,10 +37,11 @@ export function setupJUnitReportGeneration(runner, options = {}) {
   const stats = {};
   const results = [];
 
-  // Failures after the first Mocha timeout (remaining hooks/tests that then time out too) are
-  // tagged so reporters can fold them into the timeout that caused them.
+  // Failures that occur after Mocha has been aborted (`runner.abort()`) are trailing hooks/tests
+  // that only ran because the suite was torn down. Tag them so reporters fold them into the
+  // failure that caused the abort. A Mocha timeout by itself does not abort the run on this
+  // branch (`mochaOpts.bail` defaults to false; FTR does not abort on ERR_MOCHA_TIMEOUT).
   // See https://github.com/elastic/apps-dx/issues/37.
-  let sawMochaTimeout = false;
 
   const getDuration = (node) =>
     node.startTime && node.endTime ? ((node.endTime - node.startTime) / 1000).toFixed(3) : null;
@@ -78,8 +82,7 @@ export function setupJUnitReportGeneration(runner, options = {}) {
   runner.on('pass', (node) => results.push({ node }));
   runner.on('pass', setEndTime);
   runner.on('fail', (node, error) => {
-    results.push({ failed: true, error, node, cascading: sawMochaTimeout });
-    sawMochaTimeout = sawMochaTimeout || isMochaTimeoutError(error);
+    results.push({ failed: true, error, node, cascading: isRunnerAborted(runner) });
   });
   runner.on('fail', setEndTime);
   runner.on('suite end', () => setEndTime(stats));

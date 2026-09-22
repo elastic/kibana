@@ -28,8 +28,8 @@ export type TestFailure = FailedTestCase['$'] & {
   testType?: JUnitTestType;
   location?: string;
   /**
-   * Set when the failure only happened because an earlier Mocha timeout aborted the run. These are
-   * kept for the record but never reported to GitHub and get no artifacts of their own.
+   * Set when the failure only happened because Mocha was already aborted. These are kept for the
+   * record but never reported to GitHub and get no artifacts of their own.
    */
   cascading?: boolean;
 };

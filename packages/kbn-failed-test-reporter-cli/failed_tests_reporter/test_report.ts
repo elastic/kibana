@@ -67,7 +67,7 @@ export interface TestCase {
     'command-line'?: string;
     /* the codeowners of the file */
     owners?: string;
-    /* "true" when this failure only happened because an earlier Mocha timeout aborted the run */
+    /* "true" when this failure only happened because Mocha was already aborted */
     'cascading-failure'?: string;
   };
   /* contents of system-out elements */

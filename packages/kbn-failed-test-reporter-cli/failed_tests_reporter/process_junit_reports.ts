@@ -28,8 +28,8 @@ import { getRootMetadata, readTestReport } from './test_report';
 // contain several independent failures, and capping those would drop GitHub tracking.
 //
 // Failures the FTR marked as cascading are excluded from GitHub regardless of test type: they are
-// trailing Mocha timeouts that describe the same event. Only the failure that caused them reaches
-// GitHub; the rest are listed on its report.
+// trailing hooks/tests that ran after Mocha was aborted. Only the failure that caused the abort
+// reaches GitHub; the rest are listed on its report.
 
 export async function processJUnitReports(
   reportPaths: string[],
@@ -85,8 +85,8 @@ export async function processJUnitReports(
       if (failure.cascading) {
         cascadingFailures += 1;
         pushMessage(
-          'Failure is a consequence of an earlier Mocha timeout that aborted the config run, so an ' +
-            'issue was not created or updated. See the failure that caused the abort.'
+          'Failure is a consequence of an earlier Mocha abort, so an issue was not created or ' +
+            'updated. See the failure that caused the abort.'
         );
         failure.failureCount = 0;
         continue;
@@ -156,8 +156,7 @@ export async function processJUnitReports(
     if (cascadingFailures > 0) {
       log.info(
         `Ignored ${cascadingFailures} failure(s) in ${reportPath} that cascaded from an earlier ` +
-          `Mocha timeout aborting the config run. They are listed on the report of the failure ` +
-          `that caused the abort.`
+          `Mocha abort. They are listed on the report of the failure that caused the abort.`
       );
     }
 

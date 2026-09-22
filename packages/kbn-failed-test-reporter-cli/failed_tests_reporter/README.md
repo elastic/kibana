@@ -4,10 +4,10 @@ A little CLI that runs in CI to find the failed tests in the JUnit reports, then
 
 ## Cascading failures
 
-When a Mocha timeout is followed by further failures in the same report (for example remaining
-hooks that then time out too), the FTR JUnit reporter tags those trailing entries with
+When Mocha is aborted (`runner.abort()`, used by FTR for cleanup / AbortSignal cancellation) later
+hooks still run and can fail. The FTR JUnit reporter tags those trailing entries with
 `cascading-failure="true"`. This CLI keeps them out of GitHub and out of the failure report
-artifacts: they are listed on the report of the failure that caused the timeout instead. They are
+artifacts: they are listed on the report of the failure that caused the abort instead. They are
 still present in the JUnit report and indexed to Elasticsearch, flagged as `cascading`.
 
 ## Test this script locally

@@ -7,18 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// A before-all timeout, then an after-all timeout. Mocha still runs the after-all hook when the
-// before-all fails; it does not abort the runner unless something calls `runner.abort()`.
-describe('TIMEOUT_SUITE', () => {
-  before('root cause', async function () {
+// A Mocha timeout followed by an independent assertion failure. Without `runner.abort()`, Mocha
+// continues and that later failure is a real, reportable error.
+describe('TIMEOUT_THEN_ASSERT', () => {
+  before('timeout', async function () {
     this.timeout(1);
     await new Promise((resolve) => setTimeout(resolve, 100));
   });
 
   it('never runs', () => {});
 
-  after('trailing', async function () {
-    this.timeout(1);
-    await new Promise((resolve) => setTimeout(resolve, 100));
+  after('independent failure', () => {
+    throw new Error('INDEPENDENT_ASSERT');
   });
 });
