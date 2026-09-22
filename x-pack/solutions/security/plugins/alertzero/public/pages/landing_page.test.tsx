@@ -34,7 +34,12 @@ jest.mock('../hooks/use_alertzero_doc_title', () => ({ useAlertZeroDocTitle: jes
 const mockUseWorkers = useWorkers as jest.Mock;
 const mockUseProposalsByCategory = useProposalsByCategory as jest.Mock;
 
-type QueryOverrides = Partial<{ data: unknown; isLoading: boolean; isFetching: boolean; error: Error | undefined }>;
+type QueryOverrides = Partial<{
+  data: unknown;
+  isLoading: boolean;
+  isFetching: boolean;
+  error: Error | undefined;
+}>;
 
 const workersResult = (workers: Array<{ enabled: boolean }>, overrides: QueryOverrides = {}) => ({
   data: { workers: workers.map((w, i) => ({ id: `w-${i}`, ...w })) },
@@ -150,7 +155,9 @@ describe('LandingPage', () => {
   });
 
   it('shows a loading spinner while proposals are loading', () => {
-    mockUseProposalsByCategory.mockReturnValue(proposalsResult(0, { isLoading: true, data: undefined }));
+    mockUseProposalsByCategory.mockReturnValue(
+      proposalsResult(0, { isLoading: true, data: undefined })
+    );
 
     renderPage();
 
