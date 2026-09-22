@@ -10,7 +10,6 @@ import { isBoom } from '@hapi/boom';
 import {
   CASE_FIELD_DEFINITION_DETAILS_URL,
   MAX_FIELD_DEFINITION_ID_LENGTH,
-  MAX_FIELD_DEFINITION_NAME_LENGTH,
 } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { getTypedApiErrorAttributes } from '../../../common/api_errors';
@@ -63,15 +62,12 @@ export const putPublicFieldDefinitionRoute = createCasesRoute({
         return response.badRequest({ body: { message: definitionValidation.message } });
       }
 
-      // Resolve `name` from the YAML when the caller omitted it, then enforce the public limit.
+      // Resolve `name` from the YAML when the caller omitted it.
+      // Do NOT enforce MAX_FIELD_DEFINITION_NAME_LENGTH here: existing definitions may have names
+      // that exceed the 50-char public write limit (internal creates have a higher bound), and
+      // the identity-immutability guard prevents changing the name, so enforcing the limit on PUT
+      // would permanently strand those definitions.
       const resolvedName = bodyResult.data.name ?? definitionValidation.name;
-      if (resolvedName.length > MAX_FIELD_DEFINITION_NAME_LENGTH) {
-        return response.badRequest({
-          body: {
-            message: `Field name must not exceed ${MAX_FIELD_DEFINITION_NAME_LENGTH} characters`,
-          },
-        });
-      }
 
       const input = {
         ...bodyResult.data,

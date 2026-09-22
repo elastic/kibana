@@ -384,9 +384,10 @@ describe('Public Field Definition Routes', () => {
       });
     });
 
-    it('returns 400 when YAML-derived name exceeds the 50-character limit', async () => {
+    it('accepts a YAML-derived name longer than 50 chars (existing definitions must remain modifiable)', async () => {
       const longName = 'a'.repeat(51);
-      const context = createMockContext();
+      const client = createMockFieldDefinitionsClient();
+      const context = createMockContext(client);
       const request = {
         params: { field_definition_id: 'fd-1' },
         body: { owner: 'cases', definition: buildDefinitionYaml(longName), isGlobal: false },
@@ -397,8 +398,8 @@ describe('Public Field Definition Routes', () => {
       // @ts-expect-error: mocking necessary properties for handler logic only
       await putPublicFieldDefinitionRoute.handler({ context, request, response });
 
-      expect(response.badRequest).toHaveBeenCalled();
-      expect(response.ok).not.toHaveBeenCalled();
+      expect(client.updateFieldDefinition).toHaveBeenCalled();
+      expect(response.badRequest).not.toHaveBeenCalled();
     });
 
     it('returns 400 when name is an empty string', async () => {

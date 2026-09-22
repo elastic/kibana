@@ -75,16 +75,21 @@ export const getPublicFieldDefinitionsRoute = createCasesRoute({
         );
       }
 
-      if (sortField) {
-        const order = sortOrder === 'asc' ? 1 : -1;
-        filtered = [...filtered].sort((a, b) => {
+      // Always sort so pagination is stable across requests. When a sortField is requested,
+      // use it as the primary key; break ties (and the no-sortField case) by fieldDefinitionId.
+      const primaryOrder = sortOrder === 'asc' ? 1 : -1;
+      filtered = [...filtered].sort((a, b) => {
+        if (sortField) {
           const av = a[sortField] ?? '';
           const bv = b[sortField] ?? '';
-          if (av < bv) return -order;
-          if (av > bv) return order;
-          return 0;
-        });
-      }
+          if (av < bv) return -primaryOrder;
+          if (av > bv) return primaryOrder;
+        }
+        // Secondary: stable tie-break on fieldDefinitionId ascending.
+        if (a.fieldDefinitionId < b.fieldDefinitionId) return -1;
+        if (a.fieldDefinitionId > b.fieldDefinitionId) return 1;
+        return 0;
+      });
 
       const total = filtered.length;
       const start = (page - 1) * perPage;
