@@ -37,10 +37,18 @@ const mockGetVegaVisRenderer = jest.fn();
 const mockGetAddVegaPanelAction = jest.fn(() => ({ id: ADD_VEGA_PANEL_ACTION_ID }));
 const mockGetAddVegaEmbeddableAction = jest.fn(() => ({ id: ADD_VEGA_EMBEDDABLE_ACTION_ID }));
 
+jest.mock('./embeddable/add_vega_embeddable_action', () => ({
+  AddVegaEmbeddableAction: function AddVegaEmbeddableAction() {
+    return mockGetAddVegaEmbeddableAction();
+  },
+}));
+
 jest.mock('./async_module', () => ({
   createVegaFn: mockCreateVegaFn,
-  getAddVegaEmbeddableAction: mockGetAddVegaEmbeddableAction,
-  getAddVegaPanelAction: mockGetAddVegaPanelAction,
+  AddVegaEmbeddableAction: mockGetAddVegaEmbeddableAction,
+  AddVegaPanelAction: function AddVegaPanelAction() {
+    return mockGetAddVegaPanelAction();
+  },
   getVegaVisRenderer: mockGetVegaVisRenderer,
   vegaVisType: {},
 }));
@@ -139,7 +147,7 @@ describe('VegaPlugin', () => {
       );
     });
 
-    it('registers the Vega editor menu actions once and attaches them to the shared trigger', async () => {
+    it('registers Vega editor menu actions with loaders', async () => {
       const { uiActions } = startPlugin(new BehaviorSubject(false));
       expect(uiActions.registerActionAsync).toHaveBeenCalledWith(
         VEGA_EDITOR_OPTIONS_ACTION,
@@ -157,19 +165,18 @@ describe('VegaPlugin', () => {
         EMBEDDABLE_EDITOR_MENU_TRIGGER,
         VEGA_EDITOR_HELP_ACTION
       );
-
       const optionsLoader = uiActions.registerActionAsync.mock.calls.find(
         ([actionId]) => actionId === VEGA_EDITOR_OPTIONS_ACTION
       )?.[1];
       const helpLoader = uiActions.registerActionAsync.mock.calls.find(
         ([actionId]) => actionId === VEGA_EDITOR_HELP_ACTION
       )?.[1];
-      if (!optionsLoader || !helpLoader) throw new Error('Expected editor action loaders');
+      if (!optionsLoader || !helpLoader) throw new Error('Expected editor menu action loaders');
       expect((await optionsLoader()).id).toBe(VEGA_EDITOR_OPTIONS_ACTION);
       expect((await helpLoader()).id).toBe(VEGA_EDITOR_HELP_ACTION);
     });
 
-    it('loads both add actions from the shared async module', async () => {
+    it('loads the legacy add action from the shared async module and the embeddable action on its own', async () => {
       const { uiActions } = startPlugin(new BehaviorSubject(false));
       const legacyLoader = uiActions.registerActionAsync.mock.calls.find(
         ([actionId]) => actionId === ADD_VEGA_PANEL_ACTION_ID

@@ -13,16 +13,23 @@ import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { VEGA_EMBEDDABLE_TYPE } from '../../common/constants';
 import { VEGA_EDITOR_HELP_ACTION, VEGA_EDITOR_OPTIONS_ACTION } from '../constants';
 
+export const getVegaEditorOptionsLabel = () =>
+  i18n.translate('visTypeVega.editor.vegaEditorOptionsButtonAriaLabel', {
+    defaultMessage: 'Vega editor options',
+  });
+
+export const getVegaEditorHelpLabel = () =>
+  i18n.translate('visTypeVega.editor.vegaHelpButtonAriaLabel', {
+    defaultMessage: 'Vega help',
+  });
+
 export const getVegaEditorOptionsAction =
   (): UiActionsActionDefinition<EditorMenuActionContext> => ({
     id: VEGA_EDITOR_OPTIONS_ACTION,
     type: VEGA_EDITOR_OPTIONS_ACTION,
     order: 30,
     getIconType: () => 'gear',
-    getDisplayName: () =>
-      i18n.translate('visTypeVega.editor.vegaEditorOptionsButtonAriaLabel', {
-        defaultMessage: 'Vega editor options',
-      }),
+    getDisplayName: () => getVegaEditorOptionsLabel(),
     isCompatible: async ({ editor }) =>
       editor.type === VEGA_EMBEDDABLE_TYPE && Boolean(editor.toggleOptions),
     execute: async ({ anchor, editor }) => {
@@ -35,10 +42,7 @@ export const getVegaEditorHelpAction = (): UiActionsActionDefinition<EditorMenuA
   type: VEGA_EDITOR_HELP_ACTION,
   order: 20,
   getIconType: () => 'question',
-  getDisplayName: () =>
-    i18n.translate('visTypeVega.editor.vegaHelpButtonAriaLabel', {
-      defaultMessage: 'Vega help',
-    }),
+  getDisplayName: () => getVegaEditorHelpLabel(),
   isCompatible: async ({ editor }) =>
     editor.type === VEGA_EMBEDDABLE_TYPE && Boolean(editor.toggleHelp),
   execute: async ({ anchor, editor }) => {

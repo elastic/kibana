@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutFooter,
+  EuiSkeletonText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EditorMenuManager } from './types';
@@ -59,7 +60,15 @@ export const EditorFiltersFlyout = ({
 
   return (
     <>
-      <EuiFlyoutBody data-test-subj="editorFiltersFlyoutBody" />
+      <EuiFlyoutBody data-test-subj="editorFiltersFlyoutBody">
+        <EuiSkeletonText
+          lines={3}
+          data-test-subj="editorFiltersFlyoutLoading"
+          aria-label={i18n.translate('embeddableApi.editorMenu.filtersLoadingAriaLabel', {
+            defaultMessage: 'Loading filters',
+          })}
+        />
+      </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={false}>

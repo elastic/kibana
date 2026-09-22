@@ -13,7 +13,7 @@ import { EDITOR_MENU_EDIT_FILTERS_ACTION } from '../editor_menu/constants';
 import { registerActions } from './register_actions';
 
 describe('registerActions', () => {
-  it('registers and attaches the edit filters editor action', async () => {
+  it('registers the filters action with a loader', async () => {
     const uiActions = uiActionsPluginMock.createSetupContract();
 
     registerActions(uiActions);
@@ -26,12 +26,10 @@ describe('registerActions', () => {
       EMBEDDABLE_EDITOR_MENU_TRIGGER,
       EDITOR_MENU_EDIT_FILTERS_ACTION
     );
-
-    const registration = uiActions.registerActionAsync.mock.calls.find(
+    const loader = uiActions.registerActionAsync.mock.calls.find(
       ([actionId]) => actionId === EDITOR_MENU_EDIT_FILTERS_ACTION
-    );
-    expect(registration).toBeDefined();
-    const action = await registration?.[1]();
-    expect(action?.id).toBe(EDITOR_MENU_EDIT_FILTERS_ACTION);
+    )?.[1];
+    if (!loader) throw new Error('Expected filters action loader');
+    expect((await loader()).id).toBe(EDITOR_MENU_EDIT_FILTERS_ACTION);
   });
 });

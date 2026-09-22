@@ -8,11 +8,14 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
-import type { Action } from '@kbn/ui-actions-plugin/public';
-import type { EditorMenuActionContext, EditorMenuItem } from './types';
+import { getFlyoutManagerStore } from '@elastic/eui';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import type { EditorMenuItem } from './types';
 import { initializeEditorMenuManager } from './editor_menu_manager';
-import { core, uiActions } from '../kibana_services';
+import { core } from '../kibana_services';
+
+const OPTIONS_ACTION = 'options-action';
+const HELP_ACTION = 'help-action';
 
 jest.mock('../kibana_services', () => ({
   core: {
@@ -20,41 +23,52 @@ jest.mock('../kibana_services', () => ({
     overlays: { openSystemFlyout: jest.fn() },
   },
   uiActions: {
-    getTrigger: jest.fn(() => ({ id: 'EMBEDDABLE_EDITOR_MENU_TRIGGER' })),
-    getTriggerCompatibleActions: jest.fn(),
+    getAction: jest.fn(async (id: string) => ({
+      execute: async ({
+        anchor,
+        editor,
+      }: {
+        anchor?: HTMLElement;
+        editor: {
+          toggleOptions?: (button: HTMLElement) => void;
+          toggleHelp?: (button: HTMLElement) => void;
+          mountFiltersBody?: (body: () => null) => void;
+        };
+      }) => {
+        if (!anchor) return;
+        if (id === OPTIONS_ACTION) editor.toggleOptions?.(anchor);
+        else if (id === HELP_ACTION) editor.toggleHelp?.(anchor);
+        else editor.mountFiltersBody?.(() => null);
+      },
+    })),
   },
 }));
-const mockAddError = jest.mocked(core.notifications.toasts.addError);
 const mockOpenSystemFlyout = jest.mocked(core.overlays.openSystemFlyout);
-const mockGetTriggerCompatibleActions = jest.mocked(uiActions.getTriggerCompatibleActions);
 
-const createAction = (menu: EditorMenuItem, order: number): Action<object> => ({
-  id: menu,
-  type: menu,
-  order,
-  getDisplayName: () => menu,
-  getIconType: () => 'gear',
-  isCompatible: async () => true,
-  execute: async (context) => {
-    const { anchor, editor } = context as unknown as EditorMenuActionContext;
-    if (!anchor) return;
-    if (menu === 'options') editor.toggleOptions?.(anchor);
-    if (menu === 'help') editor.toggleHelp?.(anchor);
-    if (menu === 'filters') editor.openFilters?.(anchor);
-  },
-});
+const writableSearchApi = {
+  filters$: {},
+  query$: {},
+  timeRange$: {},
+  setFilters: () => undefined,
+  setQuery: () => undefined,
+  setTimeRange: () => undefined,
+};
 
-const initialize = async (
+const initialize = (
   supportedMenus: EditorMenuItem[],
-  actions = [createAction('filters', 10), createAction('help', 20), createAction('options', 30)],
-  flyoutType?: 'push' | 'overlay'
+  flyoutType?: 'push' | 'overlay',
+  api: unknown = writableSearchApi
 ) => {
-  mockGetTriggerCompatibleActions.mockResolvedValue(actions);
-  const manager = await initializeEditorMenuManager({
+  const manager = initializeEditorMenuManager({
+    api,
     editorType: 'test',
     flyoutType,
     title: 'Test editor',
     supportedMenus,
+    menuActionIds: {
+      options: OPTIONS_ACTION,
+      help: HELP_ACTION,
+    },
   });
   render(
     <>
@@ -83,33 +97,46 @@ describe('initializeEditorMenuManager', () => {
     });
   });
 
-  it('orders actions and publishes menu changes', async () => {
-    const manager = await initialize(['options', 'help', 'filters']);
+  it('orders menus and publishes menu changes', async () => {
+    const manager = initialize(['filters', 'help', 'options']);
     expect(screen.getAllByRole('button').map((button) => button.textContent)).toEqual([
-      'options',
-      'help',
-      'filters',
+      'Options',
+      'Help',
+      'Edit filters',
     ]);
 
-    const options = screen.getByRole('button', { name: 'options' });
+    const options = screen.getByRole('button', { name: 'Options' });
     fireEvent.click(options);
-    expect(manager.activeMenu$.getValue()).toEqual({
-      menu: 'options',
-      button: options,
-      isOpen: true,
-    });
+    await waitFor(() =>
+      expect(manager.activeMenu$.getValue()).toEqual({
+        menu: 'options',
+        button: options,
+        isOpen: true,
+      })
+    );
     fireEvent.click(options);
-    expect(manager.activeMenu$.getValue()).toEqual({
-      menu: 'options',
-      button: options,
-      isOpen: false,
-    });
+    await waitFor(() =>
+      expect(manager.activeMenu$.getValue()).toEqual({
+        menu: 'options',
+        button: options,
+        isOpen: false,
+      })
+    );
   });
 
-  it('supports a filters-only editor and restores focus on return', async () => {
-    const manager = await initialize(['filters'], [createAction('filters', 10)]);
-    expect(screen.queryByRole('button', { name: 'options' })).not.toBeInTheDocument();
-    const filters = screen.getByRole('button', { name: 'filters' });
+  it('omits edit filters when the panel cannot write unified search', () => {
+    initialize(['options', 'filters'], undefined, null);
+    expect(screen.queryByRole('button', { name: 'Edit filters' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Options' })).toBeInTheDocument();
+
+    initialize(['filters'], undefined, { filters$: {}, query$: {}, timeRange$: {} });
+    expect(screen.queryByRole('button', { name: 'Edit filters' })).not.toBeInTheDocument();
+  });
+
+  it('supports a filters-only editor and restores focus on return', () => {
+    const manager = initialize(['filters']);
+    expect(screen.queryByRole('button', { name: 'Options' })).not.toBeInTheDocument();
+    const filters = screen.getByRole('button', { name: 'Edit filters' });
     fireEvent.click(filters);
     manager.returnToEditor();
     expect(manager.activeMenu$.getValue()).toBeNull();
@@ -117,19 +144,19 @@ describe('initializeEditorMenuManager', () => {
   });
 
   it.each(['push', 'overlay'] as const)(
-    'opens filters as one inherited %s system flyout and closes it on disposal',
+    'opens filters as a sibling %s system flyout and closes it on disposal',
     async (flyoutType) => {
-      const manager = await initialize(['filters'], [createAction('filters', 10)], flyoutType);
+      const manager = initialize(['filters'], flyoutType);
 
-      fireEvent.click(screen.getByRole('button', { name: 'filters' }));
-      fireEvent.click(screen.getByRole('button', { name: 'filters' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Edit filters' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Edit filters' }));
 
       expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(1);
       expect(mockOpenSystemFlyout).toHaveBeenCalledWith(expect.anything(), {
         id: `${manager.flyoutId}-filters`,
-        session: 'inherit',
+        session: 'start',
         historyKey: manager.historyKey,
-        size: 's',
+        size: 'm',
         maxWidth: 800,
         paddingSize: 'm',
         type: flyoutType,
@@ -144,13 +171,6 @@ describe('initializeEditorMenuManager', () => {
           title: 'Panel level filters',
           hideTitle: false,
           hideCloseButton: true,
-          leadingActions: [
-            {
-              iconType: 'undo',
-              'aria-label': 'Back to Test editor',
-              onClick: expect.any(Function),
-            },
-          ],
           trailingActions: [
             {
               iconType: 'cross',
@@ -167,53 +187,43 @@ describe('initializeEditorMenuManager', () => {
     }
   );
 
+  it('opens filters at the editor flyout width', async () => {
+    const manager = initialize(['filters']);
+    const store = getFlyoutManagerStore();
+    store.addFlyout(manager.flyoutId, 'Test editor', 'main', 'm', manager.historyKey);
+    store.setFlyoutWidth(manager.flyoutId, 640);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Edit filters' }));
+
+    expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(1);
+    expect(mockOpenSystemFlyout.mock.calls[0][1]).toEqual(
+      expect.objectContaining({ size: 640, maxWidth: 640 })
+    );
+    store.closeAllFlyouts();
+    manager.dispose();
+  });
+
   it('defaults filters to a push flyout', async () => {
-    const manager = await initialize(['filters'], [createAction('filters', 10)]);
-    fireEvent.click(screen.getByRole('button', { name: 'filters' }));
+    const manager = initialize(['filters']);
+    fireEvent.click(screen.getByRole('button', { name: 'Edit filters' }));
+    expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(1);
     expect(mockOpenSystemFlyout.mock.calls[0][1]?.type).toBe('push');
     manager.dispose();
   });
 
-  it('ignores stale closes and action execution after disposal', async () => {
-    const manager = await initialize(['options', 'help']);
-    fireEvent.click(screen.getByRole('button', { name: 'options' }));
+  it('ignores stale closes and clicks after disposal', async () => {
+    const manager = initialize(['options', 'help']);
+    fireEvent.click(screen.getByRole('button', { name: 'Options' }));
+    await waitFor(() => expect(manager.activeMenu$.getValue()?.menu).toBe('options'));
     const staleMenu = manager.activeMenu$.getValue();
     if (!staleMenu) throw new Error('Expected options menu');
-    fireEvent.click(screen.getByRole('button', { name: 'help' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Help' }));
+    await waitFor(() => expect(manager.activeMenu$.getValue()?.menu).toBe('help'));
     manager.close(staleMenu);
     expect(manager.activeMenu$.getValue()?.menu).toBe('help');
 
     manager.dispose();
-    fireEvent.click(screen.getByRole('button', { name: 'options' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Options' }));
     expect(manager.activeMenu$.isStopped).toBe(true);
-  });
-
-  it('notifies and rejects when action discovery fails', async () => {
-    const failure = new Error('Discovery failed');
-    mockGetTriggerCompatibleActions.mockRejectedValueOnce(failure);
-    await expect(
-      initializeEditorMenuManager({
-        editorType: 'test',
-        title: 'Test editor',
-        supportedMenus: [],
-      })
-    ).rejects.toBe(failure);
-    expect(mockAddError).toHaveBeenCalledWith(failure, {
-      title: 'Unable to load editor menu actions',
-    });
-  });
-
-  it('notifies when the selected action fails', async () => {
-    const failure = new Error('Execution failed');
-    const action = createAction('options', 10);
-    action.execute = jest.fn(async () => {
-      throw failure;
-    });
-    await initialize(['options'], [action]);
-    fireEvent.click(screen.getByRole('button', { name: 'options' }));
-    await Promise.resolve();
-    expect(mockAddError).toHaveBeenCalledWith(failure, {
-      title: 'Unable to run editor menu action',
-    });
   });
 });

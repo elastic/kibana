@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { Suspense, lazy, useEffect, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -16,14 +16,18 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiSkeletonText,
   EuiTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { EditorMenuManager } from '@kbn/embeddable-plugin/public';
 import { VegaEditorMenu } from './vega_editor_menu';
-import { VegaSpecEditor } from '../components/vega_vis_editor';
 import type { VegaByValueState } from '../../server';
+
+const VegaSpecEditor = lazy(() =>
+  import('../components/vega_vis_editor').then((module) => ({ default: module.VegaSpecEditor }))
+);
 
 const bodyCss = css({
   '.euiFlyoutBody__overflowContent': {
@@ -106,13 +110,25 @@ export const VegaEditorFlyout = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody css={bodyCss}>
-        <VegaSpecEditor
-          renderControls={(actions) => <VegaEditorMenu menuManager={menuManager} {...actions} />}
-          editorValue={spec}
-          initialFormat={initialSpec.format}
-          onChange={setSpec}
-          onFormatChange={setFormat}
-        />
+        <Suspense
+          fallback={
+            <EuiSkeletonText
+              lines={3}
+              data-test-subj="vegaEditorFlyoutLoading"
+              aria-label={i18n.translate('visTypeVega.dashboard.editorLoadingAriaLabel', {
+                defaultMessage: 'Loading Vega editor',
+              })}
+            />
+          }
+        >
+          <VegaSpecEditor
+            renderControls={(actions) => <VegaEditorMenu menuManager={menuManager} {...actions} />}
+            editorValue={spec}
+            initialFormat={initialSpec.format}
+            onChange={setSpec}
+            onFormatChange={setFormat}
+          />
+        </Suspense>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup responsive={false} justifyContent="spaceBetween">

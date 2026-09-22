@@ -8,25 +8,47 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import {
+  apiPublishesWritableUnifiedSearch,
+  type PublishesWritableUnifiedSearch,
+} from '@kbn/presentation-publishing';
+import type { Action } from '@kbn/ui-actions-plugin/public';
 import { EDITOR_MENU_EDIT_FILTERS_ACTION } from './constants';
 import type { EditorMenuActionContext } from './types';
 
-export const getEditFiltersAction = (): UiActionsActionDefinition<EditorMenuActionContext> => ({
-  id: EDITOR_MENU_EDIT_FILTERS_ACTION,
-  type: EDITOR_MENU_EDIT_FILTERS_ACTION,
-  order: 10,
-  getIconType: () => 'filter',
-  getDisplayName: () =>
-    i18n.translate('embeddableApi.editorMenu.editFiltersButtonLabel', {
+export type EditFiltersActionApi = PublishesWritableUnifiedSearch;
+
+const isApiCompatible = (api: unknown | null): api is EditFiltersActionApi =>
+  apiPublishesWritableUnifiedSearch(api);
+
+export class EditFiltersAction implements Action<EditorMenuActionContext> {
+  public readonly type = EDITOR_MENU_EDIT_FILTERS_ACTION;
+  public readonly id = EDITOR_MENU_EDIT_FILTERS_ACTION;
+  public order = 10;
+
+  public getIconType() {
+    return 'filter';
+  }
+
+  public getDisplayName() {
+    return i18n.translate('embeddableApi.editorMenu.editFiltersButtonLabel', {
       defaultMessage: 'Edit filters',
-    }),
-  getDisplayNameTooltip: () =>
-    i18n.translate('embeddableApi.editorMenu.editFiltersButtonTooltip', {
+    });
+  }
+
+  public getDisplayNameTooltip() {
+    return i18n.translate('embeddableApi.editorMenu.editFiltersButtonTooltip', {
       defaultMessage: 'Edit filters',
-    }),
-  isCompatible: async ({ editor }) => Boolean(editor.openFilters),
-  execute: async ({ anchor, editor }) => {
-    if (anchor) editor.openFilters?.(anchor);
-  },
-});
+    });
+  }
+
+  public async isCompatible({ api, editor }: EditorMenuActionContext): Promise<boolean> {
+    if (!isApiCompatible(api ?? null)) return false;
+    return Boolean(editor.mountFiltersBody);
+  }
+
+  public async execute({ editor }: EditorMenuActionContext) {
+    const { EditorFiltersFlyout } = await import('./editor_filters_flyout');
+    editor.mountFiltersBody?.(EditorFiltersFlyout);
+  }
+}

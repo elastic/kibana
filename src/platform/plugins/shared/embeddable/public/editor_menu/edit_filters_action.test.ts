@@ -7,22 +7,44 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getEditFiltersAction } from './edit_filters_action';
+import { EditFiltersAction } from './edit_filters_action';
 
 describe('edit filters editor action', () => {
-  const action = getEditFiltersAction();
+  const action = new EditFiltersAction();
+  const writableSearchApi = {
+    filters$: {},
+    query$: {},
+    timeRange$: {},
+    setFilters: jest.fn(),
+    setQuery: jest.fn(),
+    setTimeRange: jest.fn(),
+  };
 
-  it('is compatible only when the editor supports filters', async () => {
+  it('is compatible when the panel publishes writable unified search and the editor can mount the body', async () => {
     expect(await action.isCompatible?.({ editor: { type: 'test' } })).toBe(false);
-    expect(await action.isCompatible?.({ editor: { type: 'test', openFilters: jest.fn() } })).toBe(
-      true
-    );
+    expect(
+      await action.isCompatible?.({
+        api: writableSearchApi,
+        editor: { type: 'test' },
+      })
+    ).toBe(false);
+    expect(
+      await action.isCompatible?.({
+        api: { ...writableSearchApi, setFilters: undefined },
+        editor: { type: 'test', mountFiltersBody: jest.fn() },
+      })
+    ).toBe(false);
+    expect(
+      await action.isCompatible?.({
+        api: writableSearchApi,
+        editor: { type: 'test', mountFiltersBody: jest.fn() },
+      })
+    ).toBe(true);
   });
 
-  it('delegates execution to the editor session', async () => {
-    const openFilters = jest.fn();
-    const anchor = document.createElement('button');
-    await action.execute({ editor: { type: 'test', openFilters }, anchor });
-    expect(openFilters).toHaveBeenCalledWith(anchor);
+  it('mounts the filters body into the flyout the editor already opened', async () => {
+    const mountFiltersBody = jest.fn();
+    await action.execute({ editor: { type: 'test', mountFiltersBody } });
+    expect(mountFiltersBody).toHaveBeenCalledWith(expect.any(Function));
   });
 });

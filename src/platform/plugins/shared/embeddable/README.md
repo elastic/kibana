@@ -119,14 +119,18 @@ The embeddable panel uses UiActions and Triggers registry to make the embeddable
 ### Editor menus
 
 Embeddable editors can create a transient editor-menu session with
-`initializeEditorMenuManager`. The manager discovers compatible actions attached to
-`EMBEDDABLE_EDITOR_MENU_TRIGGER` before the editor opens and exposes them as ordered flyout trailing
-actions. Create one manager for each editor flyout and call `dispose` when the flyout closes.
+`initializeEditorMenuManager`. The manager builds ordered flyout trailing actions from the editor's
+`supportedMenus` (`options`, `help`, and `filters`) before the editor opens, so the loading flyout
+can show those buttons immediately. Create one manager for each editor flyout and call `dispose`
+when the flyout closes.
 
-Embeddable registers `EDITOR_MENU_EDIT_FILTERS_ACTION` on this trigger. The action is compatible
-with editors that include `filters` in `supportedMenus`; the manager opens the shared filters
-flyout in the editor's flyout session. Editor-owning plugins can register additional actions against
-the same trigger, such as Vega's Options and Help actions.
+Pass `menuActionIds` for menus whose behavior is a plugin action, and `menuLabels` to override the
+default button label. A plugin cannot add a trailing action the editor did not list. Buttons do not
+resolve those actions while the editor is opening. A click loads the `registerActionAsync` loader
+for that known id and then executes it. Options and Help actions toggle menus that stay with the
+editor. The filters button is included only when the panel publishes writable unified search, matching `EditFiltersAction`. It opens a sibling managed flyout on the editor's history key immediately,
+at the editor flyout's current width, and the filters action fills that body after the shell is
+open. The body shows a text skeleton until the action and the filter data arrive.
 
 The embeddable panel passes the embeddable API to UiActions. Each UiAction uses its `isCompatable` method to exclude embeddable API's that do not implement the required shared interfaces. An action is not displayed when `isCompatable` returns false.
 

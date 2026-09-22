@@ -49,7 +49,6 @@ import {
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { openLazySystemFlyout, tracksOverlays } from '@kbn/presentation-util';
-import { initializeEditorMenuManager } from '@kbn/embeddable-plugin/public';
 import {
   VEGA_EMBEDDABLE_TYPE,
   VEGA_STANDALONE_EMBEDDABLE_FLAG,
@@ -65,6 +64,13 @@ import { getPublishedEsqlQuery, specUsesEsql } from '../lib/spec_uses_esql';
 import { reportVegaRender } from '../lib/vega_render_telemetry';
 import { createInspectorAdapters } from '../vega_inspector';
 import type { VegaByValueState } from '../../server';
+import {
+  createVegaEditorMenuManager,
+  type VegaEditorRenderParams,
+} from './vega_editor_menu_session';
+// Frame only. The spec editor stays a separate lazy chunk inside this module, so Edit does not
+// wait on `vega_editor_flyout` before the flyout can render.
+import { VegaEditorFlyout } from './vega_editor_flyout';
 
 const LazyVegaVisComponent = lazy(() =>
   import('../async_services').then(({ VegaVisComponent }) => ({ default: VegaVisComponent }))
@@ -100,7 +106,10 @@ export type VegaEmbeddableApi = DefaultEmbeddableApi<VegaByValueState> &
   PublishesEsqlUsage &
   PublishesProjectRoutingOverrides &
   PublishesDataViews &
-  PublishesRendered;
+  PublishesRendered & {
+    /** Renders the editor into a flyout that is already open. */
+    renderEditor: (params: VegaEditorRenderParams) => JSX.Element;
+  };
 
 interface VegaEmbeddableDependencies {
   uiActions: Pick<VegaPluginStartDependencies['uiActions'], 'executeTriggerActions'>;
@@ -188,6 +197,33 @@ export const vegaEmbeddableFactory = (
       },
     });
 
+    const renderEditor = ({
+      ariaLabelledBy,
+      closeFlyout,
+      isNewPanel,
+      menuManager,
+    }: VegaEditorRenderParams) => {
+      const initialSpec = spec$.getValue();
+      return (
+        <VegaEditorFlyout
+          menuManager={menuManager}
+          ariaLabelledBy={ariaLabelledBy}
+          closeFlyout={closeFlyout}
+          initialSpec={initialSpec}
+          isNewPanel={isNewPanel}
+          onPreview={(spec) => spec$.next(spec)}
+          onSave={(spec) => spec$.next(spec)}
+          onRevert={() => {
+            if (isNewPanel && apiIsPresentationContainer(parentApi)) {
+              parentApi.removePanel(api.uuid);
+            } else {
+              spec$.next(initialSpec);
+            }
+          }}
+        />
+      );
+    };
+
     const api = finalizeApi({
       ...titleManager.api,
       ...timeRangeManager.api,
@@ -203,20 +239,11 @@ export const vegaEmbeddableFactory = (
       supportedTriggers: () => VEGA_SUPPORTED_TRIGGERS,
       getTypeDisplayName: () => 'Vega',
       isEditingEnabled: () => true,
+      renderEditor,
       onEdit: async ({ isNewPanel = false, returnFocus } = {}) => {
-        const initialSpec = spec$.getValue();
-        let menuManager;
-        try {
-          const flyoutType = (tracksOverlays(parentApi) && parentApi.panelFlyoutType) || 'push';
-          menuManager = await initializeEditorMenuManager({
-            editorType: VEGA_EMBEDDABLE_TYPE,
-            flyoutType,
-            title: 'Vega',
-            supportedMenus: ['options', 'help', 'filters'],
-          });
-        } catch {
-          return;
-        }
+        const flyoutType =
+          tracksOverlays(parentApi) && parentApi.panelFlyoutType === 'overlay' ? 'overlay' : 'push';
+        const menuManager = createVegaEditorMenuManager(flyoutType, api);
         const flyoutRef = openLazySystemFlyout({
           core,
           parentApi,
@@ -228,27 +255,7 @@ export const vegaEmbeddableFactory = (
             flyoutMenuProps: menuManager.flyoutMenuProps,
             focusedPanelId: uuid,
           },
-          loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
-            const { VegaEditorFlyout } = await import('./vega_editor_flyout');
-            return (
-              <VegaEditorFlyout
-                menuManager={menuManager}
-                ariaLabelledBy={ariaLabelledBy}
-                closeFlyout={closeFlyout}
-                initialSpec={initialSpec}
-                isNewPanel={isNewPanel}
-                onPreview={(spec) => spec$.next(spec)}
-                onSave={(spec) => spec$.next(spec)}
-                onRevert={() => {
-                  if (isNewPanel && apiIsPresentationContainer(parentApi)) {
-                    parentApi.removePanel(api.uuid);
-                  } else {
-                    spec$.next(initialSpec);
-                  }
-                }}
-              />
-            );
-          },
+          loadContent: async (args) => renderEditor({ ...args, isNewPanel, menuManager }),
         });
         void flyoutRef.onClose.then(menuManager.dispose);
       },

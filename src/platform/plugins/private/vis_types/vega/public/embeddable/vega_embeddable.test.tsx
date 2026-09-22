@@ -12,7 +12,6 @@ import { render, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { initializeDrilldownsManager } from '@kbn/embeddable-plugin/public/drilldowns/drilldowns_manager';
-import { uiActions as embeddableUiActions } from '@kbn/embeddable-plugin/public/kibana_services';
 import { openLazySystemFlyout } from '@kbn/presentation-util';
 import { BehaviorSubject } from 'rxjs';
 import { ESQLVariableType } from '@kbn/esql-types';
@@ -64,19 +63,14 @@ const mockOpenLazyFlyout = jest.mocked(openLazySystemFlyout);
 const mockReportVegaRender = jest.mocked(reportVegaRender);
 
 jest.mock('@kbn/embeddable-plugin/public/kibana_services', () => ({
-  core: { notifications: { toasts: { addError: jest.fn() } } },
-  uiActions: {
-    getTrigger: jest.fn(() => ({ id: 'EMBEDDABLE_EDITOR_MENU_TRIGGER' })),
-    getTriggerCompatibleActions: jest.fn(async (): Promise<never[]> => []),
+  core: {
+    notifications: { toasts: { addError: jest.fn() } },
+    overlays: { openSystemFlyout: jest.fn() },
   },
 }));
 
 describe('vegaEmbeddableFactory', () => {
   const executeTriggerActions = jest.fn();
-  const mockGetTrigger = jest.mocked(embeddableUiActions.getTrigger);
-  const mockGetTriggerCompatibleActions = jest.mocked(
-    embeddableUiActions.getTriggerCompatibleActions
-  );
 
   /**
    * Built fresh per test. The embeddable subscribes to these when it is built but only unsubscribes
@@ -173,8 +167,6 @@ describe('vegaEmbeddableFactory', () => {
       close: jest.fn(),
       onClose: new Promise(() => {}),
     });
-    mockGetTrigger.mockClear();
-    mockGetTriggerCompatibleActions.mockClear();
     mockReportVegaRender.mockReset();
     mockCreateVegaRequestHandler.mockClear();
     mockVegaRequestHandler.mockReset();
@@ -381,18 +373,17 @@ describe('vegaEmbeddableFactory', () => {
     expect(mockOpenLazyFlyout.mock.calls[0][0]).toEqual(
       expect.objectContaining({
         returnFocus,
-        flyoutProps: expect.objectContaining({ focusedPanelId: api.uuid }),
+        flyoutProps: expect.objectContaining({
+          focusedPanelId: api.uuid,
+          flyoutMenuProps: expect.objectContaining({
+            trailingActions: [
+              expect.objectContaining({ 'aria-label': 'Vega editor options', iconType: 'gear' }),
+              expect.objectContaining({ 'aria-label': 'Vega help', iconType: 'question' }),
+            ],
+          }),
+        }),
       })
     );
-  });
-
-  it('does not open the editor when menu action discovery fails', async () => {
-    const { api } = await buildEmbeddable();
-    mockGetTriggerCompatibleActions.mockRejectedValueOnce(new Error('Discovery failed'));
-
-    await api.onEdit();
-
-    expect(mockOpenLazyFlyout).not.toHaveBeenCalled();
   });
 
   it('disposes the menu manager when the editor closes', async () => {
