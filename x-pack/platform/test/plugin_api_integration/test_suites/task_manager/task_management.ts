@@ -595,6 +595,35 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    it('should keep an ad-hoc task that yields and resume the same task', async () => {
+      const originalTask = await scheduleTask(supertest, {
+        taskType: 'sampleTask',
+        params: {
+          yieldExecution: true,
+          yieldTimes: 1,
+          yieldDelay: '10m',
+          nextParams: { phase: 'resumed' },
+        },
+        state: {},
+      });
+
+      await retry.try(async () => {
+        const task = await currentTask<{ count: number }, { phase?: string }>(originalTask.id);
+        expect(task.id).to.eql(originalTask.id);
+        expect(task.attempts).to.eql(0);
+        expect(task.status).to.eql('idle');
+        expect(task.state.count).to.eql(1);
+        expect(task.params.phase).to.eql('resumed');
+      });
+
+      await runTaskSoon({ id: originalTask.id });
+
+      await retry.try(async () => {
+        const missing = await currentTaskError(originalTask.id);
+        expect(missing.statusCode).to.eql(404);
+      });
+    });
+
     it('should reschedule if task has an interval', async () => {
       const interval = random(5, 200);
       const intervalMilliseconds = interval * 60000;

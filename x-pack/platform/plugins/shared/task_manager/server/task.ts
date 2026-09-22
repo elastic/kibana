@@ -181,7 +181,8 @@ export interface RunContext {
 export type SuccessfulRunResult = {
   /**
    * The state which will be passed to the next run of this task (if this is a
-   * recurring task). See the RunContext type definition for more details.
+   * recurring task, or an ad-hoc task that yielded). See the RunContext type
+   * definition for more details.
    */
   state: Record<string, unknown>;
   taskRunError?: DecoratedError;
@@ -198,6 +199,16 @@ export type SuccessfulRunResult = {
        */
       runAt?: Date;
       schedule?: never;
+      /**
+       * When true, an ad-hoc task keeps its document, releases its capacity slot, and
+       * is claimed again at `runAt` with the returned state and params. Recurring
+       * tasks cannot yield.
+       */
+      shouldYieldTask?: boolean;
+      /**
+       * Replaces the task params for the next run. Only applied when the task yields.
+       */
+      params?: Record<string, any>;
     }
   | {
       /**
@@ -207,6 +218,8 @@ export type SuccessfulRunResult = {
        */
       schedule?: IntervalSchedule | RruleSchedule;
       runAt?: never;
+      shouldYieldTask?: never;
+      params?: never;
     }
 );
 
@@ -224,6 +237,41 @@ export const getDeleteTaskRunResult = () => ({
   state: {},
   shouldDeleteTask: true,
 });
+
+export interface YieldTaskRunResultOptions {
+  /** Checkpoint stored on the task and passed to the next run. */
+  state?: Record<string, unknown>;
+  /** Replaces the task params for the next run. Omit to keep the current params. */
+  params?: Record<string, any>;
+  /**
+   * How long to wait before the task is claimable again, as an interval (`30s`, `5m`).
+   * Omit to make the task eligible on the next claim cycle.
+   */
+  delay?: string;
+}
+
+/**
+ * Builds a run result that ends the current ad-hoc execution, frees its capacity
+ * slot, and resumes the same task later with the handed-off state and params.
+ */
+export const getYieldTaskRunResult = ({
+  state,
+  params,
+  delay,
+}: YieldTaskRunResultOptions = {}): SuccessfulRunResult => {
+  if (delay !== undefined && !isInterval(delay)) {
+    throw new Error(
+      `Invalid yield delay "${delay}". Delay must be of the form "{number}{cadence}" where cadence is s, m, h, or d. Example: 5m.`
+    );
+  }
+
+  return {
+    state: state ?? {},
+    ...(params !== undefined ? { params } : {}),
+    shouldYieldTask: true,
+    runAt: delay ? new Date(Date.now() + parseIntervalAsMillisecond(delay)) : new Date(),
+  };
+};
 
 export const isFailedRunResult = (result: unknown): result is FailedRunResult =>
   !!((result as FailedRunResult)?.error ?? false);
