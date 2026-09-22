@@ -796,6 +796,7 @@ describe('parseSelectedDocumentPairs', () => {
 // alignment path. The same alert-comment fixtures used by other describe blocks work here.
 const workflowOnlyRegistry = new UnifiedAttachmentTypeRegistry();
 workflowOnlyRegistry.register({ id: 'security.alert', schema: z.any(), workflow: {} });
+workflowOnlyRegistry.register({ id: 'custom.document', schema: z.any(), workflow: {} });
 
 describe('getDefaultTargets — positional index alignment', () => {
   it('keeps each id paired with its own index in a 1-to-1 aligned array', () => {
@@ -1060,6 +1061,45 @@ describe('default alignment for types registered with workflow: {}', () => {
         documents: { selected: [], attached: [] },
       })
     ).toThrow('Attachment workflow origin "so-v1" is not selected.');
+  });
+
+  it('accepts an indexed registered attachment target omitted by the built-in document fetch', () => {
+    const caseWithCustomDocument = {
+      ...theCase,
+      comments: [
+        {
+          id: 'attachment-so-1',
+          type: 'custom.document',
+          attachmentId: 'doc-1',
+          metadata: { index: '.custom-documents' },
+          owner: SECURITY_SOLUTION_OWNER,
+        },
+      ],
+    } as unknown as Case;
+
+    expect(() =>
+      validateOriginWithAttachments({
+        origin: {
+          type: 'cases.attachment',
+          caseId: 'case-1',
+          attachmentType: 'custom.document',
+          attachmentId: 'doc-1',
+        },
+        theCase: caseWithCustomDocument,
+        inputs: {
+          event: {
+            documents: [{ _id: 'doc-1', _index: '.custom-documents' }],
+          },
+        },
+        attachmentTypeRegistry: workflowOnlyRegistry,
+        alerts: { selected: [], attached: [] },
+        documents: {
+          selected: [{ _id: 'doc-1', _index: '.custom-documents' }],
+          // `getAllDocumentsAttachedToCase({ attachmentTypes: [event] })` omits custom types.
+          attached: [],
+        },
+      })
+    ).not.toThrow();
   });
 
   it('passes when the origin target is in the selected documents even when alertIds are also present', () => {

@@ -7,7 +7,13 @@
 
 import { z } from '@kbn/zod/v4';
 import { UserActionTypes } from '../action/v1';
-import { CASE_WORKFLOW_RUN_ORIGIN_TYPES } from '../../../domain/user_action/workflow/constants';
+import {
+  ATTACHMENTS_WORKFLOW_ORIGIN_TYPE,
+  ATTACHMENT_WORKFLOW_ORIGIN_TYPE,
+  CASE_WORKFLOW_ORIGIN_TYPE,
+  OBSERVABLES_WORKFLOW_ORIGIN_TYPE,
+  OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
+} from '../../../domain/user_action/workflow/constants';
 
 export const WorkflowPayloadSchema = z.object({
   id: z.string(),
@@ -15,15 +21,35 @@ export const WorkflowPayloadSchema = z.object({
   executionId: z.string(),
 });
 
-export const WorkflowOriginSchema = z.object({
-  type: z.enum(CASE_WORKFLOW_RUN_ORIGIN_TYPES),
-  id: z.string(),
-  attachmentType: z.string().optional(),
-  index: z.string().optional(),
-  count: z.number().optional(),
-  typeKey: z.string().optional(),
-  value: z.string().optional(),
-});
+export const WorkflowOriginSchema = z.discriminatedUnion('type', [
+  z.object({
+    type: z.literal(CASE_WORKFLOW_ORIGIN_TYPE),
+    id: z.string(),
+  }),
+  z.object({
+    type: z.literal(OBSERVABLE_WORKFLOW_ORIGIN_TYPE),
+    id: z.string(),
+    typeKey: z.string().optional(),
+    value: z.string().optional(),
+  }),
+  z.object({
+    type: z.literal(OBSERVABLES_WORKFLOW_ORIGIN_TYPE),
+    id: z.string(),
+    count: z.number().optional(),
+  }),
+  z.object({
+    type: z.literal(ATTACHMENT_WORKFLOW_ORIGIN_TYPE),
+    id: z.string(),
+    attachmentType: z.string(),
+    index: z.string().optional(),
+  }),
+  z.object({
+    type: z.literal(ATTACHMENTS_WORKFLOW_ORIGIN_TYPE),
+    id: z.string(),
+    attachmentType: z.string(),
+    count: z.number().optional(),
+  }),
+]);
 
 export const WorkflowUserActionPayloadSchema = z.object({
   workflow: WorkflowPayloadSchema,

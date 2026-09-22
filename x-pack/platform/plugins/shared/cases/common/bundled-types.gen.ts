@@ -2503,59 +2503,74 @@ export const PayloadWorkflow = lazySchema(() =>
      * The context from which the workflow was triggered.
      */
     origin: z
-      .object({
-        /**
-         * The origin type.
-         */
-        type: z
-          .enum([
-            'cases.case',
-            'cases.observable',
-            'cases.observables',
-            'cases.attachment',
-            'cases.attachments',
-          ])
-          .describe('The origin type.'),
-        /**
-         * The primary identifier of the case, observable, or attachment from which the workflow was triggered.
-         */
-        id: z
-          .string()
-          .describe(
-            'The primary identifier of the case, observable, or attachment from which the workflow was triggered.'
-          ),
-        /**
-         * For generic attachment origins, the normalized registered attachment type.
-         */
-        attachmentType: z
-          .string()
-          .optional()
-          .describe('For generic attachment origins, the normalized registered attachment type.'),
-        /**
-         * For document-backed attachment origins, the Elasticsearch index the document lives in.
-         */
-        index: z
-          .string()
-          .optional()
-          .describe(
-            'For document-backed attachment origins, the Elasticsearch index the document lives in.'
-          ),
-        /**
-         * For bulk attachment or observable origins, the number of selected targets.
-         */
-        count: z
-          .number()
-          .optional()
-          .describe('For bulk attachment or observable origins, the number of selected targets.'),
-        /**
-         * For observable origins, the observable type key.
-         */
-        typeKey: z.string().optional().describe('For observable origins, the observable type key.'),
-        /**
-         * For observable origins, the observable value.
-         */
-        value: z.string().optional().describe('For observable origins, the observable value.'),
-      })
+      .union([
+        z.object({
+          type: z.literal('cases.case'),
+          /**
+           * The case ID.
+           */
+          id: z.string().describe('The case ID.'),
+        }),
+        z.object({
+          type: z.literal('cases.observable'),
+          /**
+           * The observable ID.
+           */
+          id: z.string().describe('The observable ID.'),
+          /**
+           * The observable type key.
+           */
+          typeKey: z.string().optional().describe('The observable type key.'),
+          /**
+           * The observable value.
+           */
+          value: z.string().optional().describe('The observable value.'),
+        }),
+        z.object({
+          type: z.literal('cases.observables'),
+          /**
+           * The case ID.
+           */
+          id: z.string().describe('The case ID.'),
+          /**
+           * The number of selected observables.
+           */
+          count: z.number().optional().describe('The number of selected observables.'),
+        }),
+        z.object({
+          type: z.literal('cases.attachment'),
+          /**
+           * The attachment target ID.
+           */
+          id: z.string().describe('The attachment target ID.'),
+          /**
+           * The normalized registered attachment type.
+           */
+          attachmentType: z.string().describe('The normalized registered attachment type.'),
+          /**
+           * The Elasticsearch index the target document lives in.
+           */
+          index: z
+            .string()
+            .optional()
+            .describe('The Elasticsearch index the target document lives in.'),
+        }),
+        z.object({
+          type: z.literal('cases.attachments'),
+          /**
+           * The case ID.
+           */
+          id: z.string().describe('The case ID.'),
+          /**
+           * The normalized registered attachment type.
+           */
+          attachmentType: z.string().describe('The normalized registered attachment type.'),
+          /**
+           * The number of selected attachment targets.
+           */
+          count: z.number().optional().describe('The number of selected attachment targets.'),
+        }),
+      ])
       .optional()
       .describe('The context from which the workflow was triggered.'),
   })

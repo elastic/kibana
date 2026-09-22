@@ -208,6 +208,7 @@ describe('CasesWorkflowRunService', () => {
     // recordWorkflowExecution persists the activity log entry after a successful run.
     expect(clientArgs.services.userActionService.creator.bulkCreateUserAction).toHaveBeenCalledWith(
       expect.objectContaining({
+        throwOnItemError: true,
         userActions: [
           expect.objectContaining({
             caseId: 'case-1',

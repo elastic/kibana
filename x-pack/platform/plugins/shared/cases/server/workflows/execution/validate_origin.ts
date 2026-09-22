@@ -337,13 +337,24 @@ export const validateOrigin = ({
     attachmentOrigin !== undefined
       ? resolveAttachmentOrigin({ origin: attachmentOrigin, theCase, attachmentTypeRegistry })
       : undefined;
+  // The document client fetches only built-in alert/event attachments. Registered unified
+  // attachment targets are already resolved from the case above, so include their indexed pairs
+  // in membership checks without broadening the fetch to unrelated attachment types.
+  const resolvedAttachmentPairs = new Set(
+    (resolvedAttachmentOrigin?.targets ?? []).flatMap(({ id, index }) =>
+      index !== undefined ? [`${id}|${index}`] : []
+    )
+  );
 
   // Step 2 — alert-membership check: applied whenever alertIds appear in inputs,
   // regardless of origin type, using (id, index) pairs for precise matching.
   // `selectedAlerts` comes from `parseSelectedAlertPairs` — the same parsed set that alert
   // preprocessing will later fetch, so the validated set and the fetched set are identical.
   if (selectedAlerts.length > 0) {
-    const attachedPairs = new Set(attachedAlerts.map(({ id, index }) => `${id}|${index}`));
+    const attachedPairs = new Set([
+      ...attachedAlerts.map(({ id, index }) => `${id}|${index}`),
+      ...resolvedAttachmentPairs,
+    ]);
     if (selectedAlerts.some(({ _id, _index }) => !attachedPairs.has(`${_id}|${_index}`))) {
       throw Boom.badRequest('All selected alerts must belong to the case.');
     }
@@ -354,7 +365,10 @@ export const validateOrigin = ({
   // Unlike alerts, documents are forwarded verbatim (no server-side re-fetch), so this check
   // is the only guard against a caller referencing documents outside the case.
   if (selectedDocuments.length > 0) {
-    const attachedEventPairs = new Set(attachedEvents.map(({ id, index }) => `${id}|${index}`));
+    const attachedEventPairs = new Set([
+      ...attachedEvents.map(({ id, index }) => `${id}|${index}`),
+      ...resolvedAttachmentPairs,
+    ]);
     if (selectedDocuments.some(({ _id, _index }) => !attachedEventPairs.has(`${_id}|${_index}`))) {
       throw Boom.badRequest('All selected documents must belong to the case.');
     }

@@ -4419,39 +4419,91 @@ components:
               type: string
               description: The execution ID returned by the Workflows engine.
         origin:
-          type: object
           description: The context from which the workflow was triggered.
-          required:
-            - type
-            - id
-          properties:
-            type:
-              type: string
-              description: The origin type.
-              enum:
-                - cases.case
-                - cases.observable
-                - cases.observables
-                - cases.attachment
-                - cases.attachments
-            id:
-              type: string
-              description: The primary identifier of the case, observable, or attachment from which the workflow was triggered.
-            attachmentType:
-              type: string
-              description: For generic attachment origins, the normalized registered attachment type.
-            index:
-              type: string
-              description: For document-backed attachment origins, the Elasticsearch index the document lives in.
-            count:
-              type: number
-              description: For bulk attachment or observable origins, the number of selected targets.
-            typeKey:
-              type: string
-              description: For observable origins, the observable type key.
-            value:
-              type: string
-              description: For observable origins, the observable value.
+          oneOf:
+            - type: object
+              required:
+                - type
+                - id
+              properties:
+                type:
+                  type: string
+                  enum:
+                    - cases.case
+                id:
+                  type: string
+                  description: The case ID.
+            - type: object
+              required:
+                - type
+                - id
+              properties:
+                type:
+                  type: string
+                  enum:
+                    - cases.observable
+                id:
+                  type: string
+                  description: The observable ID.
+                typeKey:
+                  type: string
+                  description: The observable type key.
+                value:
+                  type: string
+                  description: The observable value.
+            - type: object
+              required:
+                - type
+                - id
+              properties:
+                type:
+                  type: string
+                  enum:
+                    - cases.observables
+                id:
+                  type: string
+                  description: The case ID.
+                count:
+                  type: number
+                  description: The number of selected observables.
+            - type: object
+              required:
+                - type
+                - id
+                - attachmentType
+              properties:
+                type:
+                  type: string
+                  enum:
+                    - cases.attachment
+                id:
+                  type: string
+                  description: The attachment target ID.
+                attachmentType:
+                  type: string
+                  description: The normalized registered attachment type.
+                index:
+                  type: string
+                  description: The Elasticsearch index the target document lives in.
+            - type: object
+              required:
+                - type
+                - id
+                - attachmentType
+              properties:
+                type:
+                  type: string
+                  enum:
+                    - cases.attachments
+                id:
+                  type: string
+                  description: The case ID.
+                attachmentType:
+                  type: string
+                  description: The normalized registered attachment type.
+                count:
+                  type: number
+                  description: The number of selected attachment targets.
     user_actions_find_response_properties:
       type: object
       required:

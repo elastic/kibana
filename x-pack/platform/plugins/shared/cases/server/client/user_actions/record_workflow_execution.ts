@@ -91,6 +91,9 @@ export const recordWorkflowExecution = async (
 
     await userActionService.creator.bulkCreateUserAction({
       userActions,
+      // Saved Objects bulk operations can return a mixture of successes and per-item errors.
+      // Surface any failed activity row so the run response reports activityStatus: 'failed'.
+      throwOnItemError: true,
       // wait_for ensures the activity rows are visible to the next find the client issues
       // right after the run mutation resolves.
       refresh: 'wait_for',

@@ -434,6 +434,11 @@ export type CreateUserActionArgs<T extends keyof BuilderParameters> = {
 
 export type BulkCreateUserActionArgs<T extends keyof BuilderParameters> = {
   userActions: Array<CreateUserAction<T> & CommonUserActionArgs>;
+  /**
+   * Throw when Saved Objects returns an error for any individual user action.
+   * Successful items are not rolled back.
+   */
+  throwOnItemError?: boolean;
 } & IndexRefresh;
 
 export interface CreateUserActionES<T> extends IndexRefresh {
