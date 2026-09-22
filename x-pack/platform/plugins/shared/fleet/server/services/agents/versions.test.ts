@@ -601,4 +601,31 @@ describe('getAvailableVersions', () => {
       expect.stringContaining('xpack.fleet.productVersionsApiTimeoutMs')
     );
   });
+
+  it('should fall back to disk versions when the response body read stalls', async () => {
+    mockKibanaVersion = '300.0.0';
+    mockConfig = { productVersionsApiTimeoutMs: 50 };
+    mockedReadFile.mockResolvedValue(`["8.1.0"]`);
+
+    // Headers arrive, then the body never streams. Only the fetch timeout can end this read.
+    mockedFetch.mockImplementation((_url, requestOptions) => {
+      const { signal } = requestOptions as { signal: AbortSignal };
+      return Promise.resolve({
+        status: 200,
+        text: () =>
+          new Promise((_resolve, reject) => {
+            signal.addEventListener('abort', () =>
+              reject(Object.assign(new Error('The operation was aborted'), { name: 'AbortError' }))
+            );
+          }),
+      } as any);
+    });
+
+    const res = await getAvailableVersions({ ignoreCache: true });
+
+    expect(res).toEqual(['300.0.0', '8.1.0']);
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Timed out fetching available agent versions')
+    );
+  });
 });
