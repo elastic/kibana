@@ -46,7 +46,7 @@ interface TabRuntimeState {
   scopedProfilesManager: ScopedProfilesManager;
   scopedEbtManager: ScopedDiscoverEBTManager;
   cascadedDocumentsFetcher: CascadedDocumentsFetcher;
-  currentDataView: DataView;
+  currentDataView: DataView | undefined;
   unsubscribeFn: (() => void) | undefined;
 }
 

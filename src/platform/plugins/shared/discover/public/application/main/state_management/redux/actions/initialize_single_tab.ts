@@ -183,9 +183,12 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
      * Tab initialization
      */
 
-    let dataView: DataView;
+    let dataView: DataView | undefined;
 
-    if (isOfAggregateQueryType(initialQuery) && !isEmptyEsqlQuery(initialQuery)) {
+    if (isEmptyEsqlQuery(initialQuery)) {
+      // Empty ES|QL has no index pattern yet — leave the data view unset until a query runs.
+      dataView = undefined;
+    } else if (isOfAggregateQueryType(initialQuery)) {
       // Regardless of what was requested, we always use ad hoc data views for ES|QL
       dataView = await getEsqlDataView(
         initialQuery,
@@ -212,12 +215,12 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
 
     dispatch(setDataView({ tabId, dataView }));
 
-    if (!dataView.isPersisted()) {
+    if (dataView && !dataView.isPersisted()) {
       dispatch(appendAdHocDataViews(dataView));
     }
 
     const initialGlobalState: TabStateGlobalState = {
-      ...(persistedTab?.timeRestore && dataView.isTimeBased()
+      ...(persistedTab?.timeRestore && dataView?.isTimeBased()
         ? pick(persistedTab, 'timeRange', 'refreshInterval')
         : undefined),
       ...tabInitialGlobalState,
@@ -298,10 +301,12 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
 
       // some filters may not be valid for this context, so update
       // the filter manager with a modified list of valid filters
-      const currentFilters = services.filterManager.getFilters();
-      const validFilters = getValidFilters(dataView, currentFilters);
-      if (!isEqual(currentFilters, validFilters)) {
-        services.filterManager.setFilters(validFilters);
+      if (dataView) {
+        const currentFilters = services.filterManager.getFilters();
+        const validFilters = getValidFilters(dataView, currentFilters);
+        if (!isEqual(currentFilters, validFilters)) {
+          services.filterManager.setFilters(validFilters);
+        }
       }
 
       if (initialAppState.query) {
