@@ -18,90 +18,48 @@ const monotonicClock: TimestampProvider = {
 export type EluHistorySmoothingAlgorithm = 'ema' | 'time-weighted-ema';
 
 /**
- * Fixed-interval exponential moving average (sample-count warm-up).
+ * Exponential moving average with sample-count warm-up.
+ *
+ * Warm-up accumulates `(current × expectedInterval) / period` for the first `period / expectedInterval`
+ * samples, then switches to exponential smoothing. With `ema`, α is fixed from the collection interval;
+ * with `time-weighted-ema`, α is derived from the monotonic gap since the previous sample.
  *
  * @see https://en.wikipedia.org/wiki/Exponential_smoothing
  */
-export function intervalBasedExponentialMovingAverage(
-  period: number,
-  interval: number
-): OperatorFunction<number, number> {
-  const alpha = 1 - Math.exp(-interval / period);
-
-  return (inner) => {
-    let previous: number | undefined;
-    let mean = 0;
-
-    return inner.pipe(
-      map((current, index) => {
-        if (index < period / interval) {
-          return (mean += (current * interval) / period);
-        }
-        return (previous = previous == null ? current : alpha * current + (1 - alpha) * previous);
-      })
-    );
-  };
-}
-
-/**
- * Time-weighted exponential moving average (elapsed-time warm-up and smoothing).
- *
- * @see https://en.wikipedia.org/wiki/Exponential_smoothing
- */
-export function timeWeightedExponentialMovingAverage(
-  period: number,
-  expectedInterval: number,
-  timestampProvider: TimestampProvider = monotonicClock
-): OperatorFunction<number, number> {
-  return (inner) => {
-    let previous: number | undefined;
-    let mean = 0;
-    let elapsed = 0;
-    let lastTimestamp: number | undefined;
-
-    return inner.pipe(
-      map((current) => {
-        const timestamp = timestampProvider.now();
-        const dt =
-          lastTimestamp == null ? expectedInterval : Math.max(timestamp - lastTimestamp, 0);
-        lastTimestamp = timestamp;
-
-        if (elapsed < period) {
-          const remainingWarmUp = period - elapsed;
-          const dtWarmUp = Math.min(dt, remainingWarmUp);
-          const dtAfter = dt - dtWarmUp;
-
-          mean += (current * dtWarmUp) / period;
-          elapsed += dtWarmUp;
-
-          if (dtAfter > 0) {
-            previous = mean;
-            const alpha = 1 - Math.exp(-dtAfter / period);
-            return (previous = alpha * current + (1 - alpha) * previous);
-          }
-
-          if (elapsed >= period) {
-            previous = mean;
-          }
-
-          return mean;
-        }
-
-        const alpha = 1 - Math.exp(-dt / period);
-        return (previous = alpha * current + (1 - alpha) * (previous ?? current));
-      })
-    );
-  };
-}
-
-/** @internal */
 export function createExponentialMovingAverage(
   algorithm: EluHistorySmoothingAlgorithm,
   period: number,
   expectedInterval: number,
   timestampProvider: TimestampProvider = monotonicClock
 ): OperatorFunction<number, number> {
-  return algorithm === 'time-weighted-ema'
-    ? timeWeightedExponentialMovingAverage(period, expectedInterval, timestampProvider)
-    : intervalBasedExponentialMovingAverage(period, expectedInterval);
+  const fixedAlpha = 1 - Math.exp(-expectedInterval / period);
+  const warmUpSampleCount = period / expectedInterval;
+  const useTimeWeightedAlpha = algorithm === 'time-weighted-ema';
+
+  return (inner) => {
+    let previous: number | undefined;
+    let mean = 0;
+    let lastTimestamp: number | undefined;
+
+    return inner.pipe(
+      map((current, index) => {
+        let sampleGapMs = expectedInterval;
+
+        if (useTimeWeightedAlpha) {
+          const timestamp = timestampProvider.now();
+          sampleGapMs =
+            lastTimestamp == null ? expectedInterval : Math.max(timestamp - lastTimestamp, 0);
+          lastTimestamp = timestamp;
+        }
+
+        if (index < warmUpSampleCount) {
+          return (mean += (current * expectedInterval) / period);
+        }
+
+        const alpha = useTimeWeightedAlpha ? 1 - Math.exp(-sampleGapMs / period) : fixedAlpha;
+
+        return (previous = previous == null ? current : alpha * current + (1 - alpha) * previous);
+      })
+    );
+  };
 }
