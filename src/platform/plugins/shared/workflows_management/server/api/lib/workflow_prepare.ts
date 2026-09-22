@@ -79,6 +79,7 @@ export const prepareWorkflowDocumentFromYaml = (params: {
   triggerDefinitions?: Array<{ id: string; eventSchema: z.ZodType }>;
   nameFallback?: string;
   logger?: Logger;
+  warnIgnoredKibanaFetcher?: boolean;
 }): { id: string; workflowData: WorkflowProperties; definition?: WorkflowYaml } => {
   const {
     id: providedId,
@@ -90,6 +91,7 @@ export const prepareWorkflowDocumentFromYaml = (params: {
     triggerDefinitions,
     nameFallback,
     logger,
+    warnIgnoredKibanaFetcher = false,
   } = params;
 
   const looseMetadata = extractLooseMetadataFields(yaml);
@@ -117,9 +119,9 @@ export const prepareWorkflowDocumentFromYaml = (params: {
 
   const id = providedId || generateWorkflowId(workflowToCreate.name);
 
-  const ignoredFetcherSteps = collectIgnoredKibanaFetcherStepNames(
-    validation.parsedWorkflow?.steps
-  );
+  const ignoredFetcherSteps = warnIgnoredKibanaFetcher
+    ? collectIgnoredKibanaFetcherStepNames(validation.parsedWorkflow?.steps)
+    : [];
   if (logger && ignoredFetcherSteps.length > 0) {
     logger.warn(
       `Workflow "${workflowToCreate.name}" contains a deprecated kibana step "fetcher" setting. ${IGNORED_KIBANA_FETCHER_SETTING_MESSAGE}`,

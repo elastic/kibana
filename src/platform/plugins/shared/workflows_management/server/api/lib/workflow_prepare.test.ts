@@ -437,6 +437,7 @@ describe('prepareWorkflowDocumentFromYaml', () => {
       now,
       spaceId: 'default',
       logger,
+      warnIgnoredKibanaFetcher: true,
     });
 
     expect(logger.warn).toHaveBeenCalledTimes(1);
@@ -447,5 +448,36 @@ describe('prepareWorkflowDocumentFromYaml', () => {
         labels: expect.objectContaining({ step_names: 'status' }),
       })
     );
+  });
+
+  it('does not log kibana fetcher when the self-client path is off', () => {
+    const zodSchema = getWorkflowZodSchema({});
+    const logger = { warn: jest.fn() } as unknown as import('@kbn/logging').Logger;
+    const yaml = [
+      "version: '1'",
+      'name: kibana-fetcher',
+      'enabled: true',
+      'triggers:',
+      '  - type: manual',
+      'steps:',
+      '  - name: status',
+      '    type: kibana.request',
+      '    with:',
+      '      method: GET',
+      '      path: /api/status',
+      '      fetcher:',
+      '        skip_ssl_verification: true',
+    ].join('\n');
+
+    prepareWorkflowDocumentFromYaml({
+      yaml,
+      zodSchema,
+      authenticatedUser: 'user1',
+      now,
+      spaceId: 'default',
+      logger,
+    });
+
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 });

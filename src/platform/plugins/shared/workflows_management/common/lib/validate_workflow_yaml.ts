@@ -28,6 +28,11 @@ import { validateTriggers } from './validate_triggers';
 
 export interface ValidateWorkflowYamlOptions {
   triggerDefinitions?: TriggerDefinitionForValidateTriggers[];
+  /**
+   * When true, kibana-step YAML `fetcher` is warned as ignored (self-client path).
+   * Default false so the warning is not a lie while the legacy transport still honors it.
+   */
+  warnIgnoredKibanaFetcher?: boolean;
 }
 
 export function validateWorkflowYaml(
@@ -127,14 +132,16 @@ export function validateWorkflowYaml(
       diagnostics.push({ severity: 'error', message, source: 'graph', ruleId: 'graphBuildError' });
     }
 
-    for (const path of collectIgnoredKibanaFetcherPaths(parsedWorkflow.steps)) {
-      diagnostics.push({
-        severity: 'warning',
-        message: IGNORED_KIBANA_FETCHER_SETTING_MESSAGE,
-        source: 'deprecation',
-        path,
-        ruleId: 'ignoredFetcherSetting',
-      });
+    if (options?.warnIgnoredKibanaFetcher) {
+      for (const path of collectIgnoredKibanaFetcherPaths(parsedWorkflow.steps)) {
+        diagnostics.push({
+          severity: 'warning',
+          message: IGNORED_KIBANA_FETCHER_SETTING_MESSAGE,
+          source: 'deprecation',
+          path,
+          ruleId: 'ignoredFetcherSetting',
+        });
+      }
     }
   }
 

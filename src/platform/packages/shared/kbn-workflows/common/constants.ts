@@ -27,6 +27,14 @@ export const WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID = 'workflows:ui:show
 export const WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID = 'workflows:executionStatsBar:enabled';
 
 /**
+ * LaunchDarkly flag that routes `kibana.request` through Core `http.selfClient`.
+ * Fallback is false so on-prem and untargeted environments keep the legacy transport
+ * (including YAML `fetcher`) until rollout flips the code default.
+ */
+export const WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG =
+  'workflowsExecutionEngine.coreSelfClientEnabled';
+
+/**
  * Global Advanced Setting gating the Workflow Template Library tech preview.
  *
  * Registered as a global uiSetting (not per-space) so the same toggle is

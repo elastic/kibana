@@ -21,11 +21,11 @@ describe('KibanaActionStepImpl', () => {
   let step: KibanaActionStepImpl;
   let workflowLogger: { logInfo: jest.Mock; logError: jest.Mock; logWarn: jest.Mock };
 
-  const createStep = (withValue: any) => {
+  const createStep = (withValue: any, stepType = 'kibana.request') => {
     const node = {
       stepId: 'request',
-      stepType: 'kibana.request',
-      configuration: { type: 'kibana.request', with: withValue, 'max-step-size': 1000 },
+      stepType,
+      configuration: { type: stepType, with: withValue, 'max-step-size': 1000 },
     } as unknown as KibanaGraphNode;
     return new KibanaActionStepImpl(
       node,
@@ -35,8 +35,11 @@ describe('KibanaActionStepImpl', () => {
     );
   };
 
+  const mockGetBooleanValue = jest.fn().mockResolvedValue(true);
+
   beforeEach(() => {
     global.fetch = jest.fn();
+    mockGetBooleanValue.mockResolvedValue(true);
     workflowLogger = {
       logInfo: jest.fn(),
       logError: jest.fn(),
@@ -50,6 +53,14 @@ describe('KibanaActionStepImpl', () => {
         headers: {},
         body: { ok: true },
         url: 'http://localhost:5601/api/test',
+      }),
+      getCoreStart: jest.fn().mockReturnValue({
+        featureFlags: { getBooleanValue: mockGetBooleanValue },
+        security: { authc: { apiKeys: {} } },
+      }),
+      getDependencies: jest.fn().mockReturnValue({ cloudSetup: undefined, config: {} }),
+      getFakeRequest: jest.fn().mockReturnValue({
+        headers: { authorization: 'ApiKey test-key' },
       }),
     };
     runtime = { contextManager } as unknown as StepExecutionRuntime;
@@ -177,5 +188,66 @@ describe('KibanaActionStepImpl', () => {
     expect(contextManager.callKibanaApi).toHaveBeenCalledWith(
       expect.objectContaining({ target: 'local' })
     );
+  });
+
+  describe('when workflowsExecutionEngine.coreSelfClientEnabled is off', () => {
+    const jsonResponse = (body: unknown, status = 200) =>
+      new Response(JSON.stringify(body), {
+        status,
+        headers: { 'content-type': 'application/json' },
+      });
+
+    beforeEach(() => {
+      mockGetBooleanValue.mockResolvedValue(false);
+      (global.fetch as jest.Mock).mockResolvedValue(jsonResponse({ ok: true }));
+    });
+
+    it('uses global fetch and never the self-client adapter', async () => {
+      step = createStep({ request: { method: 'POST', path: '/api/test', body: { x: 1 } } });
+      await (step as any)._run();
+      expect(contextManager.callKibanaApi).not.toHaveBeenCalled();
+      expect(global.fetch).toHaveBeenCalledWith(
+        'http://localhost:5601/api/test',
+        expect.objectContaining({ method: 'POST' })
+      );
+    });
+
+    it('applies YAML fetcher without an ignore warning', async () => {
+      step = createStep({
+        request: { method: 'GET', path: '/api/test' },
+        fetcher: { skip_ssl_verification: true, follow_redirects: false },
+      });
+      await (step as any)._run();
+      expect(workflowLogger.logWarn).not.toHaveBeenCalled();
+      expect(global.fetch).toHaveBeenCalledWith(
+        'http://localhost:5601/api/test',
+        expect.objectContaining({
+          redirect: 'manual',
+          dispatcher: expect.any(Object),
+        })
+      );
+    });
+
+    it('keeps use_localhost as hardcoded localhost:5601', async () => {
+      step = createStep({
+        request: { method: 'GET', path: '/api/test' },
+        use_localhost: true,
+      });
+      await (step as any)._run();
+      expect(workflowLogger.logWarn).not.toHaveBeenCalled();
+      expect(global.fetch).toHaveBeenCalledWith(
+        'http://localhost:5601/api/test',
+        expect.any(Object)
+      );
+    });
+
+    it('keeps generated kibana actions on the self-client adapter', async () => {
+      step = createStep({ request: { method: 'GET', path: '/api/status' } }, 'kibana.getCase');
+      await (step as any)._run();
+      expect(contextManager.callKibanaApi).toHaveBeenCalledWith(
+        expect.objectContaining({ method: 'GET', path: '/api/status' })
+      );
+      expect(global.fetch).not.toHaveBeenCalled();
+    });
   });
 });

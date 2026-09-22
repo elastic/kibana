@@ -636,7 +636,7 @@ steps:
       fetcher:
         skip_ssl_verification: true
 `;
-      const result = validateWorkflowYaml(yaml, schema);
+      const result = validateWorkflowYaml(yaml, schema, { warnIgnoredKibanaFetcher: true });
 
       expect(result.valid).toBe(true);
       expect(result.diagnostics).toEqual([
@@ -647,6 +647,30 @@ steps:
           path: ['steps', 0, 'with', 'fetcher'],
         }),
       ]);
+    });
+
+    it('does not warn when the self-client path is off', () => {
+      const yaml = `
+version: '1'
+name: kibana-fetcher
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: status
+    type: kibana.request
+    with:
+      method: GET
+      path: /api/status
+      fetcher:
+        skip_ssl_verification: true
+`;
+      const result = validateWorkflowYaml(yaml, schema);
+
+      expect(result.valid).toBe(true);
+      expect(result.diagnostics.some((diag) => diag.ruleId === 'ignoredFetcherSetting')).toBe(
+        false
+      );
     });
 
     it('does not warn on http connector fetcher settings', () => {

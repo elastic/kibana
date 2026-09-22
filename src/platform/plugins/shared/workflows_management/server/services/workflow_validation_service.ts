@@ -8,7 +8,11 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { toCustomTriggerSchemaConfigs, type ValidateWorkflowResponseDto } from '@kbn/workflows';
+import {
+  toCustomTriggerSchemaConfigs,
+  type ValidateWorkflowResponseDto,
+  WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG,
+} from '@kbn/workflows';
 import type { GetAvailableConnectorsResponse } from '@kbn/workflows/types/v1';
 import type { ServerTriggerDefinition } from '@kbn/workflows-extensions/server';
 import type { z } from '@kbn/zod/v4';
@@ -44,7 +48,10 @@ export class WorkflowValidationService {
   ): Promise<ValidateWorkflowResponseDto> {
     const zodSchema = await this.getWorkflowZodSchema({ loose: false }, spaceId, request);
     const triggerDefinitions = this.getRegisteredCustomTriggerDefinitions();
-    return validateWorkflowYaml(yaml, zodSchema, { triggerDefinitions });
+    const warnIgnoredKibanaFetcher = await this.deps
+      .getCoreStart()
+      .featureFlags.getBooleanValue(WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG, false);
+    return validateWorkflowYaml(yaml, zodSchema, { triggerDefinitions, warnIgnoredKibanaFetcher });
   }
 
   async getWorkflowZodSchema(

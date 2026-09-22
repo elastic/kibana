@@ -207,7 +207,8 @@ const ruleParityCases: RuleParityCase[] = [
       }
       return getClientRuleIds(validateIgnoredFetcherSetting(workflowLookup, yamlLineCounter));
     },
-    getServerRuleIds: () => getServerRuleIds(KIBANA_FETCHER_YAML),
+    getServerRuleIds: () =>
+      getServerRuleIds(KIBANA_FETCHER_YAML, { warnIgnoredKibanaFetcher: true }),
   },
 ];
 
