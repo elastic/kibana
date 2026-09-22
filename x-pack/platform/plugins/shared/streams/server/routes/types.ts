@@ -12,7 +12,6 @@ import type { InferenceClient } from '@kbn/inference-common';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
-import type { KnowledgeIndicatorClientContract } from '@kbn/significant-events-schema';
 import type { IUiSettingsClient } from '@kbn/core/server';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import type { RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
@@ -38,7 +37,6 @@ export interface RouteHandlerScopedClients {
   canEncrypt: boolean;
   attachmentClient: AttachmentClient;
   streamsClient: StreamsClient;
-  getKnowledgeIndicatorClient?: () => Promise<KnowledgeIndicatorClientContract>;
   inferenceClient: InferenceClient;
   contentClient: ContentClient;
   licensing: LicensingPluginStart;
