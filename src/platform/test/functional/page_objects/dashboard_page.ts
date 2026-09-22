@@ -370,7 +370,9 @@ export class DashboardPageObject extends FtrService {
     await this.appMenu.clickMenuItem('dashboardViewOnlyMode');
 
     if (accept) {
-      const confirmation = await this.testSubjects.exists('confirmModalTitleText');
+      const confirmation = await this.testSubjects.waitForExists('confirmModalTitleText', {
+        timeout: 2000,
+      });
       if (confirmation) {
         await this.common.clickConfirmOnModal();
       }
@@ -459,7 +461,9 @@ export class DashboardPageObject extends FtrService {
     if (!continueEditing && discardButtonExists) {
       this.log.debug('found discard button');
       await this.testSubjects.click('discardDashboardPromptButton');
-      const confirmation = await this.testSubjects.exists('confirmModalTitleText');
+      const confirmation = await this.testSubjects.waitForExists('confirmModalTitleText', {
+        timeout: 2000,
+      });
       if (confirmation) {
         await this.common.clickConfirmOnModal();
       }
@@ -468,7 +472,7 @@ export class DashboardPageObject extends FtrService {
     if (expectWarning) {
       await this.testSubjects.existOrFail('dashboardCreateConfirm');
     }
-    if (await this.testSubjects.exists('dashboardCreateConfirm')) {
+    if (await this.testSubjects.waitForExists('dashboardCreateConfirm', { timeout: 2000 })) {
       if (continueEditing) {
         await this.testSubjects.click('dashboardCreateConfirmContinue');
       } else {
