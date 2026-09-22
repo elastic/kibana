@@ -95,11 +95,20 @@ export const ConversationCardCompact = memo<ConversationCardCompactProps>(
                 and the controls keep their place however long the title is. */}
             <EuiText
               size="s"
-              css={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+              css={{
+                // Off EUI's type scale on purpose — it steps 12px to 14px, and the
+                // design puts a closed row's title between the two.
+                fontSize: '0.8125rem',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
             >
               <strong>{investigation.title}</strong>
               {investigation.primaryActionLabel ? (
-                <EuiTextColor color="subdued">{` ${investigation.primaryActionLabel}`}</EuiTextColor>
+                <EuiTextColor color="subdued" css={{ paddingInlineStart: euiTheme.size.s }}>
+                  {investigation.primaryActionLabel}
+                </EuiTextColor>
               ) : null}
             </EuiText>
           </EuiFlexItem>
