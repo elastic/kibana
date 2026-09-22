@@ -360,9 +360,7 @@ export function ServiceFlyoutOverview() {
   }, [liveTransactionFilters]);
 
   const isFiltersPending = Boolean(
-    selectedTransaction &&
-      !selectedTransaction.isFiltersStale &&
-      !isSameListFilters(selectedTransaction.filters, liveTransactionFilters)
+    selectedTransaction && !selectedTransaction.isFiltersStale && pendingFilterReconcileRef.current
   );
 
   const onTransactionClick = useCallback(
@@ -429,9 +427,11 @@ export function ServiceFlyoutOverview() {
           return prev;
         }
 
-        // Settled failure — do not promote or freeze from an error response.
+        // Settled failure — keep confirmed filters, but leave pending so the spinner clears.
         if (meta.error) {
-          return prev;
+          pendingFilterReconcileRef.current = false;
+          seenLoadingSincePendingRef.current = false;
+          return { ...prev };
         }
 
         if (pendingFilterReconcileRef.current && !seenLoadingSincePendingRef.current) {

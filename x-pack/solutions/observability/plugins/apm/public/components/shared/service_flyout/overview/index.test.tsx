@@ -1128,6 +1128,10 @@ describe('ServiceFlyoutOverview transactions section props', () => {
     expect(mockTransactionDetailFlyoutProps).toHaveBeenLastCalledWith(
       expect.objectContaining({
         isFiltersStale: false,
+        isFiltersPending: false,
+        filters: expect.objectContaining({
+          environment: 'production',
+        }),
       })
     );
 
