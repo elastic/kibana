@@ -20,8 +20,5 @@ export const isEsqlSubPlanTooLargeError = (error: unknown): boolean => {
   const body = error.body as ElasticsearchErrorDetails | undefined;
   const type = body?.error?.type ?? '';
   const reason = body?.error?.reason ?? '';
-  return (
-    (type === 'illegal_argument_exception' || type.includes('illegal_argument')) &&
-    reason.includes(SUB_PLAN_REASON_SUBSTRING)
-  );
+  return type === 'illegal_argument_exception' && reason.includes(SUB_PLAN_REASON_SUBSTRING);
 };

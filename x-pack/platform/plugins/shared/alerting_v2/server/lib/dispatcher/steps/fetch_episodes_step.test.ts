@@ -8,6 +8,17 @@
 import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 import type { AlertEventSeverity } from '@kbn/alerting-v2-schemas';
+
+const makeSubPlanError = () =>
+  new errors.ResponseError({
+    statusCode: 400,
+    body: {
+      error: {
+        type: 'illegal_argument_exception',
+        reason: 'sub-plan execution results too large [21mb] > [20mb]',
+      },
+    },
+  } as DiagnosticResult);
 import { FetchEpisodesStep, parseAlertEpisodes } from './fetch_episodes_step';
 import { createQueryService } from '../../services/query_service/query_service.mock';
 import { createDispatchableAlertEventsResponse } from '../fixtures/dispatcher';
@@ -128,47 +139,12 @@ describe('FetchEpisodesStep', () => {
     const { queryService, mockEsClient } = createQueryService();
     const step = new FetchEpisodesStep(queryService);
 
-    const subPlanError = new errors.ResponseError({
-      statusCode: 400,
-      body: {
-        error: {
-          type: 'illegal_argument_exception',
-          reason: 'sub-plan execution results too large [21mb] > [20mb]',
-        },
-      },
-    } as DiagnosticResult);
-
-    mockEsClient.esql.query.mockRejectedValueOnce(subPlanError);
+    mockEsClient.esql.query.mockRejectedValueOnce(makeSubPlanError());
 
     const state = createDispatcherPipelineState();
     const result = await step.execute(state, logger);
 
     expect(result).toEqual({ type: 'halt', reason: 'inline_stats_too_large' });
-  });
-
-  it('does not set scan episodes on inline_stats_too_large halt', async () => {
-    const { queryService, mockEsClient } = createQueryService();
-    const step = new FetchEpisodesStep(queryService);
-
-    const subPlanError = new errors.ResponseError({
-      statusCode: 400,
-      body: {
-        error: {
-          type: 'illegal_argument_exception',
-          reason: 'sub-plan execution results too large [21mb] > [20mb]',
-        },
-      },
-    } as DiagnosticResult);
-
-    mockEsClient.esql.query.mockRejectedValueOnce(subPlanError);
-
-    const state = createDispatcherPipelineState();
-    const result = await step.execute(state, logger);
-
-    expect(result.type).toBe('halt');
-    if (result.type !== 'halt') return;
-    // halt carries no scan data
-    expect(result).not.toHaveProperty('data');
   });
 
   it('propagates a 400 with a different reason (not sub-plan)', async () => {
@@ -177,12 +153,7 @@ describe('FetchEpisodesStep', () => {
 
     const otherError = new errors.ResponseError({
       statusCode: 400,
-      body: {
-        error: {
-          type: 'illegal_argument_exception',
-          reason: 'field [foo] is not supported',
-        },
-      },
+      body: { error: { type: 'illegal_argument_exception', reason: 'field [foo] is not supported' } },
     } as DiagnosticResult);
 
     mockEsClient.esql.query.mockRejectedValueOnce(otherError);

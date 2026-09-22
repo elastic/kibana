@@ -31,14 +31,16 @@ export const computeNextWatermark = ({
 
   let nextWatermark: Date;
 
-  if (haltReason === 'aborted' && finalState.recordedEpisodes === undefined) {
-    // Pipeline stopped before StoreActionsStep — no records written, do not advance.
-    nextWatermark = eventWatermark;
-  } else if (haltReason === 'inline_stats_too_large') {
-    // ES rejected the INLINE STATS query: scan was refused, not executed.
-    // Hold the watermark so stuckTicks increments and the pre-fetch escape hatch
-    // can eventually force-advance. Do NOT use no_episodes here — that advances
-    // to windowEnd immediately and would silently skip the window on the first hit.
+  if (
+    (haltReason === 'aborted' && finalState.recordedEpisodes === undefined) ||
+    haltReason === 'inline_stats_too_large'
+  ) {
+    // Pipeline stopped before any records were written — do not advance.
+    //   'aborted': TM signal or tick deadline stopped the pipeline before StoreActionsStep.
+    //   'inline_stats_too_large': ES rejected the INLINE STATS pre-fetch query (sub-plan
+    //     too large); scan was refused, not executed. stuckTicks increments so the
+    //     pre-fetch escape hatch can eventually force-advance. Do NOT fall through to the
+    //     no_episodes path — that would advance to windowEnd on the first hit.
     nextWatermark = eventWatermark;
   } else if (haltReason === 'no_actions') {
     // All episodes were filtered (e.g. maintenance window) — window fully consumed.
