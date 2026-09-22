@@ -18,6 +18,7 @@ import type {
   UpsellingSectionId,
 } from '@kbn/security-solution-upselling/service/types';
 import React from 'react';
+import { CloudDefendIntegrationPliBlockLazy } from './sections/cloud_defend';
 import { CloudSecurityPostureIntegrationPliBlockLazy } from './sections/cloud_security_posture';
 import {
   EndpointAgentTamperProtectionLazy,
@@ -136,6 +137,11 @@ export const upsellingSections: UpsellingSections = [
     id: 'endpoint_protection_updates',
     pli: ProductFeatureKey.endpointProtectionUpdates,
     component: EndpointProtectionUpdatesLazy,
+  },
+  {
+    id: 'cloud_defend_integration_installation',
+    pli: ProductFeatureKey.cloudDefend,
+    component: CloudDefendIntegrationPliBlockLazy,
   },
   {
     id: 'cloud_security_posture_integration_installation',
