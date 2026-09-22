@@ -327,6 +327,25 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     );
   });
 
+  it('posts batch progress counts reconciled to this batch alert ids, not raw agent verdicts', () => {
+    const progress = findStepByName(workflow.steps, 'post_batch_progress_comment') as {
+      with: { body: { input: string } };
+    };
+    // Fabricated agent ids must not inflate the Investigation summary.
+    expect(progress.with.body.input).toContain('variables.batch_tp_count');
+    expect(progress.with.body.input).toContain('variables.batch_fp_count');
+    expect(progress.with.body.input).toContain('variables.batch_inc_count');
+    expect(progress.with.body.input).not.toContain(
+      "structured_output.verdicts | where: 'classification'"
+    );
+
+    const counts = findStepByName(workflow.steps, 'set_batch_progress_counts') as {
+      with: { batch_tp_count: string };
+    };
+    expect(counts.with.batch_tp_count).toContain('variables.batch_tp_match_expr');
+    expect(counts.with.batch_tp_count).toContain('where_exp');
+  });
+
   it('fetches rule-scoped enrichment once per execution, not once per alert', () => {
     // Every alert of a rule execution shares the rule, so prevalence, noise, close history and
     // rule metadata are the same for all of them.
@@ -703,6 +722,16 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     ).find(({ type }) => type === 'manual');
     expect(manualTrigger?.inputs?.properties).toHaveProperty('alerts');
     expect(manualTrigger?.inputs?.properties).toHaveProperty('calledByWorker');
+
+    const alertsInput = (
+      manualTrigger?.inputs?.properties as {
+        alerts?: { items?: { required?: string[] }; maxItems?: number };
+      }
+    )?.alerts;
+    expect(alertsInput?.maxItems).toBe(1000);
+    expect(alertsInput?.items?.required).toEqual(
+      expect.arrayContaining(['_id', '@timestamp', 'kibana'])
+    );
 
     const alertTrigger = (workflow.triggers as Array<{ type: string; inputs?: unknown }>).find(
       ({ type }) => type === 'alert'
