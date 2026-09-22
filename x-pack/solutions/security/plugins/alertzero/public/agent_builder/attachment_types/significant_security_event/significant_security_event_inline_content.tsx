@@ -74,6 +74,41 @@ export const SSE_ATTACHMENT_EMPTY_TEST_ID = 'alertzeroSignificantSecurityEventAt
 export const SSE_ATTACHMENT_HEADLINE_TEST_ID = 'alertzeroSignificantSecurityEventHeadline';
 
 const HYPOTHESIS_ACCORDION_THRESHOLD = 160;
+
+/**
+ * Tier 1 and Tier 2 outcome labels. These are required schema fields and they carry the
+ * difference between a hunt that could not run (`no_searchable_terms`) and one that ran and
+ * found nothing (`no_environment_hits`), which both render as zero counts otherwise.
+ */
+const TIER1_STATUS_LABELS: Record<HuntResult['tier1']['status'], string> = {
+  no_searchable_terms: i18n.translate(
+    'xpack.alertzero.agentBuilder.attachments.sse.tier1NoSearchableTerms',
+    { defaultMessage: 'No searchable terms' }
+  ),
+  no_environment_hits: i18n.translate(
+    'xpack.alertzero.agentBuilder.attachments.sse.tier1NoEnvironmentHits',
+    { defaultMessage: 'No environment hits' }
+  ),
+  environment_hits_found: i18n.translate(
+    'xpack.alertzero.agentBuilder.attachments.sse.tier1EnvironmentHitsFound',
+    { defaultMessage: 'Environment hits found' }
+  ),
+};
+
+const TIER2_STATUS_LABELS: Record<NonNullable<HuntResult['tier2']>['status'], string> = {
+  no_behaviors_found: i18n.translate(
+    'xpack.alertzero.agentBuilder.attachments.sse.tier2NoBehaviorsFound',
+    { defaultMessage: 'No behaviors found' }
+  ),
+  no_behaviors_validated: i18n.translate(
+    'xpack.alertzero.agentBuilder.attachments.sse.tier2NoBehaviorsValidated',
+    { defaultMessage: 'No behaviors validated' }
+  ),
+  behaviors_proposed: i18n.translate(
+    'xpack.alertzero.agentBuilder.attachments.sse.tier2BehaviorsProposed',
+    { defaultMessage: 'Behaviors proposed' }
+  ),
+};
 const EVIDENCE_BULLET_LIMIT = 5;
 
 const cellStyles = css`
@@ -538,6 +573,34 @@ const HuntResultSection: React.FC<{ huntResult: HuntResult }> = ({ huntResult })
         })}
       </SectionHeading>
       <EuiSpacer size="xs" />
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="xs"
+        wrap
+        responsive={false}
+        data-test-subj="alertzeroSignificantSecurityEventHuntResultOutcome"
+      >
+        <EuiFlexItem grow={false}>
+          <EuiBadge color={huntResult.has_confirmed_hit ? 'danger' : 'hollow'}>
+            {huntResult.has_confirmed_hit
+              ? i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.huntConfirmedHit', {
+                  defaultMessage: 'Confirmed hit',
+                })
+              : i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.huntNoConfirmedHit', {
+                  defaultMessage: 'No confirmed hit',
+                })}
+          </EuiBadge>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiBadge color="hollow">{TIER1_STATUS_LABELS[tier1.status]}</EuiBadge>
+        </EuiFlexItem>
+        {tier2?.status && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow">{TIER2_STATUS_LABELS[tier2.status]}</EuiBadge>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+      <EuiSpacer size="xs" />
       <EuiText size="xs" color="subdued">
         <DateTime value={huntResult.time_range.from} />
         {' - '}
@@ -547,11 +610,31 @@ const HuntResultSection: React.FC<{ huntResult: HuntResult }> = ({ huntResult })
       <EuiFlexGroup gutterSize="m" responsive={false} wrap>
         <EuiFlexItem grow={false}>
           <CompactStat
-            title={tier1.counts.total_hits}
-            description={i18n.translate(
-              'xpack.alertzero.agentBuilder.attachments.sse.huntResultTotalHits',
-              { defaultMessage: 'Total hits' }
-            )}
+            title={
+              tier1.counts.returned_hits < tier1.counts.total_hits
+                ? i18n.translate(
+                    'xpack.alertzero.agentBuilder.attachments.sse.huntResultReturnedOfTotal',
+                    {
+                      defaultMessage: '{returned} of {total}',
+                      values: {
+                        returned: tier1.counts.returned_hits,
+                        total: tier1.counts.total_hits,
+                      },
+                    }
+                  )
+                : tier1.counts.total_hits
+            }
+            description={
+              tier1.counts.returned_hits < tier1.counts.total_hits
+                ? i18n.translate(
+                    'xpack.alertzero.agentBuilder.attachments.sse.huntResultHitsSampled',
+                    { defaultMessage: 'Hits (sampled)' }
+                  )
+                : i18n.translate(
+                    'xpack.alertzero.agentBuilder.attachments.sse.huntResultTotalHits',
+                    { defaultMessage: 'Total hits' }
+                  )
+            }
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

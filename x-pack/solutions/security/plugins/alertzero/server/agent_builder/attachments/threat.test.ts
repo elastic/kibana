@@ -62,6 +62,22 @@ describe('createThreatAttachmentType', () => {
       expect(result.valid).toBe(false);
     });
 
+    it('returns invalid for whitespace-only report_id and title', async () => {
+      // A blank report_id fetches an encoded blank and builds a Discover link for it; a blank
+      // title becomes the chrome label when attachmentLabel is absent.
+      const blankReportId = await attachmentType.validate({
+        attachmentLabel: 'Threat Report',
+        report_id: '   ',
+      });
+      const blankTitle = await attachmentType.validate({
+        report_id: 'report-1',
+        title: '   ',
+      });
+
+      expect(blankReportId.valid).toBe(false);
+      expect(blankTitle.valid).toBe(false);
+    });
+
     it('returns invalid when severity is not one of the allowed values', async () => {
       const result = await attachmentType.validate({
         attachmentLabel: 'Threat Report',

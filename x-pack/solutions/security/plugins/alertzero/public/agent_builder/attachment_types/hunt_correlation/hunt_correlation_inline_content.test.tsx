@@ -11,6 +11,7 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import {
   HuntCorrelationInlineContent,
   HUNT_CORRELATION_ATTACHMENT_TEST_ID,
+  HUNT_CORRELATION_ATTACHMENT_SUMMARY_TEST_ID,
   HUNT_CORRELATION_ATTACHMENT_EMPTY_TEST_ID,
 } from './hunt_correlation_inline_content';
 import type { HuntCorrelationAttachment } from './types';
@@ -66,10 +67,24 @@ describe('HuntCorrelationInlineContent', () => {
     expect(screen.getByText('report-2')).toBeInTheDocument();
   });
 
-  it('does not render the hero summary line (it moved to the header subtitle)', () => {
+  it('renders the verdict summary inline when no action button gives it a chrome header', () => {
+    // `share` is optional, and without it there is no Discover action, so Agent Builder omits
+    // the header. The anchor/report counts and threshold badge would otherwise be invisible.
     render(<HuntCorrelationInlineContent {...renderProps(buildAttachment(baseData))} />);
-    expect(screen.queryByText(/anchors? .* related reports?/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/anchor/i, { selector: 'strong' })).toBeInTheDocument();
+
+    const summary = screen.getByTestId(HUNT_CORRELATION_ATTACHMENT_SUMMARY_TEST_ID);
+    expect(summary).toHaveTextContent('2 anchors');
+    expect(summary).toHaveTextContent('1 related report');
+    expect(summary).toHaveTextContent(/threshold/i);
+  });
+
+  it('defers the verdict summary to the header when an action button exists', () => {
+    render(
+      <HuntCorrelationInlineContent
+        {...renderProps(buildAttachment(baseData), { ...defaultNavigation, share: mockShare })}
+      />
+    );
+    expect(screen.queryByTestId(HUNT_CORRELATION_ATTACHMENT_SUMMARY_TEST_ID)).toBeNull();
   });
 
   it('does not render the trailing thresholds description list', () => {

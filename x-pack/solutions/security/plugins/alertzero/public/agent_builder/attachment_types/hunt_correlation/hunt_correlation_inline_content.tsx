@@ -8,7 +8,10 @@
 import React from 'react';
 import { groupBy } from 'lodash';
 import {
+  EuiBadge,
   EuiBasicTable,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiIconTip,
   EuiPanel,
   EuiProgress,
@@ -31,7 +34,12 @@ import { LabeledBadgeTable } from '../shared/labeled_badge_table';
 import type { LabeledBadgeTableRow } from '../shared/labeled_badge_table';
 import { DIAMOND_VERTICES, formatPercent } from '../shared/severity';
 import { SectionHeading, AttachmentEmptyState } from '../shared/primitives';
-import { parseHuntCorrelationData } from './types';
+import { hasChromeHeaderForActions } from '../shared/attachment_definition_helpers';
+import {
+  buildHuntCorrelationActionButtons,
+  buildHuntCorrelationSummary,
+  parseHuntCorrelationData,
+} from './types';
 import type { Anchor, DiamondScore, HuntCorrelationAttachment } from './types';
 
 export interface HuntCorrelationInlineContentProps
@@ -40,6 +48,8 @@ export interface HuntCorrelationInlineContentProps
 }
 
 export const HUNT_CORRELATION_ATTACHMENT_TEST_ID = 'alertzeroHuntCorrelationAttachment';
+export const HUNT_CORRELATION_ATTACHMENT_SUMMARY_TEST_ID =
+  'alertzeroHuntCorrelationAttachmentSummary';
 export const HUNT_CORRELATION_ATTACHMENT_EMPTY_TEST_ID = 'alertzeroHuntCorrelationAttachmentEmpty';
 
 const HASH_LIKE_ANCHOR_KINDS = new Set<Anchor['kind']>(['hash', 'ioc_set_hash']);
@@ -210,12 +220,45 @@ export const HuntCorrelationInlineContent: React.FC<HuntCorrelationInlineContent
     ),
   ];
 
+  const summary = buildHuntCorrelationSummary(parsed);
+  const hasChromeHeader = hasChromeHeaderForActions(
+    buildHuntCorrelationActionButtons({
+      parsed,
+      navigation,
+      // The label only affects button text, not whether a button exists.
+      label: '',
+    })
+  );
+
   return (
     <EuiPanel
       hasBorder={false}
       paddingSize="s"
       data-test-subj={HUNT_CORRELATION_ATTACHMENT_TEST_ID}
     >
+      {!hasChromeHeader && (
+        <>
+          <EuiFlexGroup
+            alignItems="center"
+            gutterSize="xs"
+            wrap
+            responsive={false}
+            data-test-subj={HUNT_CORRELATION_ATTACHMENT_SUMMARY_TEST_ID}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">{summary.subtitle}</EuiText>
+            </EuiFlexItem>
+            {summary.thresholdLabel && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color={summary.allAboveThreshold ? 'success' : 'hollow'}>
+                  {summary.thresholdLabel}
+                </EuiBadge>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+        </>
+      )}
       <SectionHeading
         suffix={
           parsed.thresholds && (

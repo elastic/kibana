@@ -16,8 +16,8 @@ import { SEVERITY_LEVELS } from './attachment_enums';
  * reference and its fallback fields.
  */
 export const threatAttachmentDataSchema = alertZeroAttachmentDataSchema.extend({
-  report_id: z.string().min(1).max(512),
-  title: z.string().min(1).max(512).optional(),
+  report_id: z.string().trim().min(1).max(512),
+  title: z.string().trim().min(1).max(512).optional(),
   severity: z.enum(SEVERITY_LEVELS).optional(),
   source: z.string().min(1).max(256).optional(),
 });

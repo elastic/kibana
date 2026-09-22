@@ -596,6 +596,55 @@ describe('SignificantSecurityEventInlineContent', () => {
     expect(screen.getByText('deadbeef')).toBeInTheDocument();
   });
 
+  it('distinguishes a hunt that could not run from one that ran and found nothing', () => {
+    // `no_searchable_terms` and `no_environment_hits` both render as zero counts, so the
+    // outcome badges are the only thing that tells an analyst which one happened.
+    renderWithI18n(
+      <SignificantSecurityEventInlineContent
+        {...renderProps(
+          buildAttachment({
+            ...baseData,
+            hunt_result: {
+              ...huntResult,
+              has_confirmed_hit: false,
+              tier1: { ...huntResult.tier1, status: 'no_searchable_terms' as const },
+            },
+          })
+        )}
+      />
+    );
+
+    const outcome = screen.getByTestId('alertzeroSignificantSecurityEventHuntResultOutcome');
+    expect(outcome).toHaveTextContent('No confirmed hit');
+    expect(outcome).toHaveTextContent('No searchable terms');
+  });
+
+  it('shows returned hits when the result set is a capped sample', () => {
+    renderWithI18n(
+      <SignificantSecurityEventInlineContent
+        {...renderProps(
+          buildAttachment({
+            ...baseData,
+            hunt_result: {
+              ...huntResult,
+              tier1: {
+                ...huntResult.tier1,
+                counts: {
+                  ...huntResult.tier1.counts,
+                  total_hits: 10000,
+                  returned_hits: 100,
+                },
+              },
+            },
+          })
+        )}
+      />
+    );
+
+    expect(screen.getByText('100 of 10000')).toBeInTheDocument();
+    expect(screen.getByText('Hits (sampled)')).toBeInTheDocument();
+  });
+
   describe('headline fallback when Agent Builder omits its chrome header', () => {
     it('renders title, severity, status and confidence when there is no action button', () => {
       // No events and no alerts means no Discover action, so the platform header is absent.
