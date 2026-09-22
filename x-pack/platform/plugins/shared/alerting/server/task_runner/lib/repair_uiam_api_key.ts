@@ -245,8 +245,7 @@ export const repairUiamApiKey = async ({
     // was sent — so that key is certainly referenced by nothing and is queued for invalidation.
     // Any other failure (a timeout, a dropped connection) may have committed after all, and
     // revoking a key that did persist would break every subsequent run, so those are left
-    // alone as a bounded leak. Same split as the UIAM provisioning task makes between
-    // per-item and whole-call `bulkUpdate` failures.
+    // alone as a bounded leak.
     if (freshUiamApiKey && isDefiniteNonWrite(error)) {
       await bulkMarkApiKeysForInvalidation(
         { apiKeys: [freshUiamApiKey] },

@@ -9,11 +9,10 @@
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiEmptyPrompt, useEuiTheme, EuiImage, EuiMarkdownFormat } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiIllustration, EuiMarkdownFormat, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
-import emptyFavoritesDark from './empty_favorites_dark.svg';
-import emptyFavoritesLight from './empty_favorites_light.svg';
+import { pricingModel } from '@elastic/eui-illustrations';
 
 export const FavoritesEmptyState = ({
   emptyStateType = 'noItems',
@@ -69,21 +68,24 @@ export const FavoritesEmptyState = ({
 };
 
 const NoFavoritesIllustration = () => {
-  const { colorMode } = useEuiTheme();
-
-  const src = colorMode === 'DARK' ? emptyFavoritesDark : emptyFavoritesLight;
+  const { euiTheme } = useEuiTheme();
+  const illustrationInlineSize = euiTheme.base * 13;
 
   return (
-    <EuiImage
-      style={{
-        width: 300,
-        height: 220,
-        objectFit: 'contain',
-      }} /* we use fixed width to prevent layout shift */
-      src={src}
-      alt={i18n.translate('contentManagement.favorites.noFavoritesIllustrationAlt', {
-        defaultMessage: 'No starred items illustrations',
-      })}
-    />
+    <span
+      css={css`
+        display: inline-block;
+        inline-size: ${illustrationInlineSize}px;
+        max-inline-size: 100%;
+      `}
+    >
+      <EuiIllustration
+        type={pricingModel}
+        fullWidth
+        alt={i18n.translate('contentManagement.favorites.noFavoritesIllustrationAlt', {
+          defaultMessage: 'No starred items illustrations',
+        })}
+      />
+    </span>
   );
 };
