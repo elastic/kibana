@@ -2841,7 +2841,7 @@ module.exports = {
       // loads them natively via createRequire (see rspack_runtime.ts).
       files: [
         'packages/kbn-rspack-optimizer/**/*.{ts,tsx}',
-        'packages/kbn-plugin-helpers/src/tasks/optimize_rspack.ts',
+        'packages/kbn-plugin-helpers/src/tasks/optimize.ts',
       ],
       rules: {
         '@typescript-eslint/no-restricted-imports': [
