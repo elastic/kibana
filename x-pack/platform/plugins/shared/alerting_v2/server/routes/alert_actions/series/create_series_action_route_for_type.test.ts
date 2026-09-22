@@ -27,7 +27,7 @@ describe('createSeriesActionRouteForType', () => {
     });
 
     expect(RouteClass.method).toBe('post');
-    expect(RouteClass.path).toBe(`/api/alerting/v2/series/{group_hash}/${suffix}`);
+    expect(RouteClass.path).toBe(`/internal/alerting/v2/series/{group_hash}/${suffix}`);
     expect(RouteClass.options?.summary).toBe(summary);
     expect(RouteClass.validate).toBeDefined();
     expect(RouteClass.validate).toEqual(
