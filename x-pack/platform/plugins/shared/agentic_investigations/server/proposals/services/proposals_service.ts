@@ -203,7 +203,7 @@ export class ProposalsService {
         render_inline: true,
       });
     } catch (error) {
-      this.deps.logger.error(
+      this.deps.logger.warn(
         `Failed to attach proposal ${proposalId} to conversation ${conversationId}: ${error}`
       );
     }
