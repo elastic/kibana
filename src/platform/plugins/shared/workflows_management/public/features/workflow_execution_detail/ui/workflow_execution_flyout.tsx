@@ -69,6 +69,7 @@ import { useNavigateToExecution } from '../../../hooks/navigation/use_navigate_t
 import { useKibana } from '../../../hooks/use_kibana';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations/status_translations';
+import { JSONCodeEditorCommonMemoized } from '../../../shared/ui/execution_data_viewer/json_editor_common';
 import { FormattedRelativeEnhanced } from '../../../shared/ui/formatted_relative_enhanced/formatted_relative_enhanced';
 import { getExecutionStatusIcon } from '../../../shared/ui/status_badge';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
@@ -469,6 +470,11 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
     // Read from the store so pages appended by "Show more" reach the tree without a re-poll.
     const workflowExecution = useSelector(selectExecution);
     const stepExecutionsTotal = useSelector(selectStepExecutionsTotal);
+    // Monaco renders only the visible lines, so a run with thousands of loaded steps stays usable.
+    const executionJson = useMemo(
+      () => (workflowExecution ? JSON.stringify(workflowExecution, null, 2) : ''),
+      [workflowExecution]
+    );
 
     const workflowName =
       workflowNameProp ||
@@ -1313,7 +1319,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                       padding: `${euiTheme.size.s} ${euiTheme.size.base} ${euiTheme.size.base}`,
                     }}
                   >
-                    {/* Both tabs show the same paginated run, so the callout sits above the switch. */}
+                    {/* Both tabs show the same paginated run, so the callout is outside the Table branch. */}
                     <StepExecutionsTruncatedCallout
                       executionId={executionId}
                       loadedCount={workflowExecution?.stepExecutions.length ?? 0}
@@ -1334,10 +1340,17 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                         onBeforeDiagnose={() => setSelectedStepExecutionId(null)}
                       />
                     )}
-                    {activeTab === 'json' && workflowExecution && (
-                      <EuiCodeBlock language="json" fontSize="m" isCopyable overflowHeight="100%">
-                        {JSON.stringify(workflowExecution, null, 2)}
-                      </EuiCodeBlock>
+                    {activeTab === 'json' && (
+                      <div css={{ height: '70vh' }}>
+                        <JSONCodeEditorCommonMemoized
+                          data-test-subj="workflowExecutionJsonEditor"
+                          jsonValue={executionJson}
+                          onEditorDidMount={() => {}}
+                          height="100%"
+                          hasLineNumbers
+                          enableFindAction
+                        />
+                      </div>
                     )}
                   </div>
                 </>
