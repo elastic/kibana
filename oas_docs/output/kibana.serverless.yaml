@@ -20999,8 +20999,27 @@ paths:
               - isGlobal
               - displayOrder
             type: string
-        - $ref: '#/components/parameters/Cases_sort_order'
-        - $ref: '#/components/parameters/Cases_search'
+        - description: >
+            When `asc`, sorts ascending; when `desc` (default), sorts descending.
+          in: query
+          name: sortOrder
+          required: false
+          schema:
+            enum:
+              - asc
+              - desc
+            default: desc
+            type: string
+        - description: >
+            A case-insensitive substring to match against each definition's `name` and
+            `description` fields. Definitions where neither field contains the substring are
+            excluded.
+          in: query
+          name: search
+          required: false
+          schema:
+            maxLength: 1000
+            type: string
       responses:
         '200':
           content:

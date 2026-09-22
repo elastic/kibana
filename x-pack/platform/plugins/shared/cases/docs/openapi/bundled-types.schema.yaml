@@ -1247,8 +1247,9 @@ paths:
                 $ref: '#/components/examples/field_definition_write_request'
       responses:
         '200':
-          description: |
-            Indicates a successful call. Returns the created field definition, or `{ "valid": true }` when `dry_run=true`.
+          description: >
+            Indicates a successful call. Returns the created field definition, or `{ "valid": true
+            }` when `dry_run=true`.
           content:
             application/json:
               schema:
@@ -1377,8 +1378,9 @@ paths:
                 $ref: '#/components/examples/field_definition_write_request'
       responses:
         '200':
-          description: |
-            Indicates a successful call. Returns the updated field definition, or `{ "valid": true }` when `dry_run=true`.
+          description: >
+            Indicates a successful call. Returns the updated field definition, or `{ "valid": true
+            }` when `dry_run=true`.
           content:
             application/json:
               schema:

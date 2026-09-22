@@ -10,6 +10,7 @@ import { isBoom } from '@hapi/boom';
 import {
   CASE_FIELD_DEFINITION_DETAILS_URL,
   MAX_FIELD_DEFINITION_ID_LENGTH,
+  MAX_FIELD_DEFINITION_NAME_LENGTH,
 } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { getTypedApiErrorAttributes } from '../../../common/api_errors';
@@ -62,10 +63,19 @@ export const putPublicFieldDefinitionRoute = createCasesRoute({
         return response.badRequest({ body: { message: definitionValidation.message } });
       }
 
-      // Resolve `name` from the YAML when the caller omitted it.
+      // Resolve `name` from the YAML when the caller omitted it, then enforce the public limit.
+      const resolvedName = bodyResult.data.name ?? definitionValidation.name;
+      if (resolvedName.length > MAX_FIELD_DEFINITION_NAME_LENGTH) {
+        return response.badRequest({
+          body: {
+            message: `Field name must not exceed ${MAX_FIELD_DEFINITION_NAME_LENGTH} characters`,
+          },
+        });
+      }
+
       const input = {
         ...bodyResult.data,
-        name: bodyResult.data.name ?? definitionValidation.name,
+        name: resolvedName,
       };
 
       if (request.query.dry_run) {

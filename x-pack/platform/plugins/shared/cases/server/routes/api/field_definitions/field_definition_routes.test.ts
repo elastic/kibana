@@ -253,6 +253,40 @@ describe('Public Field Definition Routes', () => {
       expect(response.ok).not.toHaveBeenCalled();
     });
 
+    it('extracts name from YAML definition when name is omitted', async () => {
+      const context = createMockContext();
+      const bodyWithoutName = {
+        owner: 'cases',
+        definition: buildDefinitionYaml('priority'),
+        isGlobal: false,
+      };
+      const request = { body: bodyWithoutName, query: { dry_run: false } };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await postPublicFieldDefinitionRoute.handler({ context, request, response });
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: expect.objectContaining({ name: 'priority' }),
+      });
+    });
+
+    it('returns 400 when YAML-derived name exceeds the 50-character limit', async () => {
+      const longName = 'a'.repeat(51);
+      const context = createMockContext();
+      const request = {
+        body: { owner: 'cases', definition: buildDefinitionYaml(longName), isGlobal: false },
+        query: { dry_run: false },
+      };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await postPublicFieldDefinitionRoute.handler({ context, request, response });
+
+      expect(response.badRequest).toHaveBeenCalled();
+      expect(response.ok).not.toHaveBeenCalled();
+    });
+
     it('returns 409 when client throws a Boom conflict', async () => {
       const client = createMockFieldDefinitionsClient();
       client.createFieldDefinition.mockRejectedValue(
@@ -326,6 +360,45 @@ describe('Public Field Definition Routes', () => {
 
       const body = response.ok.mock.calls[0][0].body;
       expect(body).not.toHaveProperty('legacyKey');
+    });
+
+    it('extracts name from YAML definition when name is omitted', async () => {
+      const context = createMockContext();
+      const bodyWithoutName = {
+        owner: 'cases',
+        definition: buildDefinitionYaml('priority'),
+        isGlobal: false,
+      };
+      const request = {
+        params: { field_definition_id: 'fd-1' },
+        body: bodyWithoutName,
+        query: { dry_run: false },
+      };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await putPublicFieldDefinitionRoute.handler({ context, request, response });
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: expect.objectContaining({ fieldDefinitionId: 'fd-1' }),
+      });
+    });
+
+    it('returns 400 when YAML-derived name exceeds the 50-character limit', async () => {
+      const longName = 'a'.repeat(51);
+      const context = createMockContext();
+      const request = {
+        params: { field_definition_id: 'fd-1' },
+        body: { owner: 'cases', definition: buildDefinitionYaml(longName), isGlobal: false },
+        query: { dry_run: false },
+      };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await putPublicFieldDefinitionRoute.handler({ context, request, response });
+
+      expect(response.badRequest).toHaveBeenCalled();
+      expect(response.ok).not.toHaveBeenCalled();
     });
 
     it('returns 400 when name is an empty string', async () => {

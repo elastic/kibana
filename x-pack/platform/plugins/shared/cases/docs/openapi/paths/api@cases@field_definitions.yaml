@@ -45,7 +45,15 @@ get:
           - isGlobal
           - displayOrder
     - $ref: '../components/parameters/sort_order.yaml'
-    - $ref: '../components/parameters/search.yaml'
+    - in: query
+      name: search
+      description: >
+        A case-insensitive substring to match against each definition's `name` and `description`
+        fields. Definitions where neither field contains the substring are excluded.
+      required: false
+      schema:
+        type: string
+        maxLength: 1000
   responses:
     '200':
       description: Indicates a successful call.

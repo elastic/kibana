@@ -76,7 +76,7 @@ export const getPublicFieldDefinitionsRoute = createCasesRoute({
       }
 
       if (sortField) {
-        const order = sortOrder === 'desc' ? -1 : 1;
+        const order = sortOrder === 'asc' ? 1 : -1;
         filtered = [...filtered].sort((a, b) => {
           const av = a[sortField] ?? '';
           const bv = b[sortField] ?? '';
