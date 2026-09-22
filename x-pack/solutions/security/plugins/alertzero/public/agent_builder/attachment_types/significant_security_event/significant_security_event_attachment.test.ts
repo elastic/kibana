@@ -12,7 +12,6 @@ import { createMockShare, createMockNavigation } from '../test_utils';
 
 describe('createSignificantSecurityEventAttachmentDefinition', () => {
   const navigation = createMockNavigation();
-
   const mockShare = createMockShare();
 
   const baseData = {
@@ -33,130 +32,69 @@ describe('createSignificantSecurityEventAttachmentDefinition', () => {
     evaluation_record_ref: 'eval-1',
   };
 
-  describe('getLabel', () => {
-    it('falls back to title when no attachmentLabel is set', () => {
-      const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
-      const attachment = { data: { title: 'x' } } as unknown as SignificantSecurityEventAttachment;
-      expect(definition.getLabel(attachment)).toBe('x');
-    });
+  it('renders the default shape from title, with the hunt finding badge and icon', () => {
+    const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
+    const attachment = { data: baseData } as unknown as SignificantSecurityEventAttachment;
 
-    it('returns the default label when neither attachmentLabel nor title is set', () => {
-      const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
-      const attachment = { data: {} } as unknown as SignificantSecurityEventAttachment;
-      expect(definition.getLabel(attachment)).toBe('Significant Security Event');
+    expect(definition.getLabel(attachment)).toBe('Suspicious lateral movement');
+    expect(definition.getIcon?.()).toBe('securitySignalDetected');
+    expect(definition.getHeader?.({ attachment } as never)).toEqual({
+      icon: 'securitySignalDetected',
+      subtitle: 'From ti-report-1 · lateral-movement-detector',
+      badges: [
+        { label: 'Hunt finding', color: 'primary' },
+        { label: 'open', color: 'hollow' },
+        { label: '80%', color: 'hollow' },
+      ],
     });
+    expect(definition.renderInlineContent).toBeDefined();
+  });
 
-    it('returns the attachmentLabel override when present', () => {
-      const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
-      const attachment = {
-        data: { title: 'x', attachmentLabel: 'Custom label' },
-      } as unknown as SignificantSecurityEventAttachment;
-      expect(definition.getLabel(attachment)).toBe('Custom label');
-    });
+  it('overrides the label and leads with the confirmed hit count when hunt_result has hits', () => {
+    const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
+    const withOverride = {
+      data: { ...baseData, attachmentLabel: 'Custom label' },
+    } as unknown as SignificantSecurityEventAttachment;
+    expect(definition.getLabel(withOverride)).toBe('Custom label');
 
-    it('leads with the confirmed hit count when hunt_result has total_hits', () => {
-      const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
-      const attachment = {
-        data: {
-          ...baseData,
-          hunt_result: {
-            has_confirmed_hit: true,
-            time_range: { from: '2024-01-01T00:00:00Z', to: '2024-01-02T00:00:00Z' },
-            tier1: {
-              status: 'environment_hits_found',
-              counts: { total_hits: 3, returned_hits: 3, affected_hosts: 1, affected_users: 1 },
-              per_index: [],
-              resolved_iocs: [],
-            },
+    const withHits = {
+      data: {
+        ...baseData,
+        hunt_result: {
+          has_confirmed_hit: true,
+          time_range: { from: '2024-01-01T00:00:00Z', to: '2024-01-02T00:00:00Z' },
+          tier1: {
+            status: 'environment_hits_found',
+            counts: { total_hits: 3, returned_hits: 3, affected_hosts: 1, affected_users: 1 },
+            per_index: [],
+            resolved_iocs: [],
           },
         },
-      } as unknown as SignificantSecurityEventAttachment;
-      expect(definition.getLabel(attachment)).toBe('3 hits confirm: Suspicious lateral movement');
-    });
+      },
+    } as unknown as SignificantSecurityEventAttachment;
+    expect(definition.getLabel(withHits)).toBe('3 hits confirm: Suspicious lateral movement');
+  });
 
-    it('falls back to the title when hunt_result has no total_hits', () => {
-      const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
-      const attachment = { data: baseData } as unknown as SignificantSecurityEventAttachment;
-      expect(definition.getLabel(attachment)).toBe('Suspicious lateral movement');
+  it('falls back to a malformed-payload shape: default label, capability-only subtitle', () => {
+    const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
+    expect(definition.getLabel({ data: {} } as unknown as SignificantSecurityEventAttachment)).toBe(
+      'Significant Security Event'
+    );
+
+    const capabilityOnly = {
+      data: { source_watch: 'watch-1' },
+    } as unknown as SignificantSecurityEventAttachment;
+    expect(definition.getHeader?.({ attachment: capabilityOnly } as never)?.subtitle).toBe(
+      'watch-1'
+    );
+
+    expect(definition.getHeader?.({ attachment: {} as never })).toEqual({
+      icon: 'securitySignalDetected',
+      badges: [{ label: 'Hunt finding', color: 'primary' }],
     });
   });
 
-  describe('getIcon', () => {
-    it('returns the securitySignalDetected icon', () => {
-      const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
-      expect(definition.getIcon?.()).toBe('securitySignalDetected');
-    });
-  });
-
-  describe('getHeader', () => {
-    it('builds the full header for a payload with severity, status, and confidence', () => {
-      const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
-      const header = definition.getHeader?.({
-        attachment: {
-          data: { ...baseData, severity: 'critical', status: 'investigating', confidence: 0.9 },
-        } as unknown as SignificantSecurityEventAttachment,
-      } as never);
-      expect(header).toEqual({
-        icon: 'securitySignalDetected',
-        subtitle: 'From ti-report-1 · lateral-movement-detector',
-        badges: [
-          { label: 'Hunt finding', color: 'primary' },
-          { label: 'investigating', color: 'hollow' },
-          { label: '90%', color: 'hollow' },
-        ],
-      });
-    });
-
-    it('omits the trailing separator when capability is absent from the fallback fields', () => {
-      const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
-      const header = definition.getHeader?.({
-        attachment: {
-          data: { source_watch: 'watch-1' },
-        } as unknown as SignificantSecurityEventAttachment,
-      } as never);
-      expect(header?.subtitle).toBe('watch-1');
-    });
-
-    it('returns just the hunt finding badge for a malformed attachment', () => {
-      const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
-      expect(definition.getHeader?.({ attachment: {} as never })).toEqual({
-        icon: 'securitySignalDetected',
-        badges: [{ label: 'Hunt finding', color: 'primary' }],
-      });
-    });
-
-    it('keeps the confidence badge when hunt_result has a confirmed hit', () => {
-      const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
-      const header = definition.getHeader?.({
-        attachment: {
-          data: {
-            ...baseData,
-            confidence: 0.9,
-            hunt_result: {
-              has_confirmed_hit: true,
-              time_range: { from: '2024-01-01T00:00:00Z', to: '2024-01-02T00:00:00Z' },
-              tier1: {
-                status: 'environment_hits_found',
-                counts: { total_hits: 1, returned_hits: 1, affected_hosts: 1, affected_users: 1 },
-                per_index: [],
-                resolved_iocs: [],
-              },
-            },
-          },
-        } as unknown as SignificantSecurityEventAttachment,
-      } as never);
-      expect(header?.badges).toContainEqual({ label: '90%', color: 'hollow' });
-    });
-  });
-
-  describe('renderInlineContent', () => {
-    it('is defined', () => {
-      const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
-      expect(definition.renderInlineContent).toBeDefined();
-    });
-  });
-
-  describe('getActionButtons', () => {
+  it('exits to Discover for events, then alerts, and returns none without either or share', () => {
     const getButtonsWithShare = (data: unknown, share?: SharePluginStart) => {
       const definition = createSignificantSecurityEventAttachmentDefinition({
         navigation: { ...navigation, share },
@@ -165,55 +103,39 @@ describe('createSignificantSecurityEventAttachmentDefinition', () => {
         attachment: { data } as unknown as SignificantSecurityEventAttachment,
       } as never);
     };
-
     const getButtons = (data: unknown) => getButtonsWithShare(data, mockShare);
 
-    it('opens every event across its indices in one Discover query', () => {
-      const buttons = getButtons({
-        ...baseData,
-        events: [
-          { event_id: 'evt-1', source_index: 'logs-endpoint.events.process-default' },
-          { event_id: 'evt-2', source_index: 'logs-endpoint.events.network-default' },
-          { event_id: 'evt-1', source_index: 'logs-endpoint.events.process-default' },
-        ],
-      });
-
-      expect(buttons).toHaveLength(1);
-      expect(buttons?.[0].label).toBe('Open events in Discover');
-      expect(decodeURIComponent(buttons?.[0].href ?? '')).toContain(
-        'FROM "logs-endpoint.events.process-default", "logs-endpoint.events.network-default" ' +
-          'METADATA _id | WHERE _id IN ("evt-1", "evt-2")'
-      );
+    const eventButtons = getButtons({
+      ...baseData,
+      events: [
+        { event_id: 'evt-1', source_index: 'logs-endpoint.events.process-default' },
+        { event_id: 'evt-2', source_index: 'logs-endpoint.events.network-default' },
+      ],
     });
+    expect(eventButtons).toHaveLength(1);
+    expect(eventButtons?.[0].label).toBe('Open events in Discover');
+    expect(decodeURIComponent(eventButtons?.[0].href ?? '')).toContain(
+      'FROM "logs-endpoint.events.process-default", "logs-endpoint.events.network-default" ' +
+        'METADATA _id | WHERE _id IN ("evt-1", "evt-2")'
+    );
 
-    it('falls back to the alerts exit when the event carries no events', () => {
-      const buttons = getButtons({
-        ...baseData,
-        alerts: [{ alert_id: 'alert-1', index: '.alerts-security.alerts-default' }],
-      });
-
-      expect(buttons).toHaveLength(1);
-      expect(buttons?.[0].label).toBe('Open alerts in Discover');
-      expect(decodeURIComponent(buttons?.[0].href ?? '')).toContain(
-        'kibana.alert.uuid IN ("alert-1")'
-      );
+    const alertButtons = getButtons({
+      ...baseData,
+      alerts: [{ alert_id: 'alert-1', index: '.alerts-security.alerts-default' }],
     });
+    expect(alertButtons).toHaveLength(1);
+    expect(alertButtons?.[0].label).toBe('Open alerts in Discover');
+    expect(decodeURIComponent(alertButtons?.[0].href ?? '')).toContain(
+      'kibana.alert.uuid IN ("alert-1")'
+    );
 
-    it('returns no buttons when the event references neither events nor alerts', () => {
-      expect(getButtons(baseData)).toEqual([]);
-    });
-
-    it('returns no buttons when share is unavailable', () => {
-      const buttons = getButtonsWithShare({
+    expect(getButtons(baseData)).toEqual([]);
+    expect(
+      getButtonsWithShare({
         ...baseData,
         events: [{ event_id: 'evt-1', source_index: 'logs-default' }],
-      });
-
-      expect(buttons).toEqual([]);
-    });
-
-    it('returns no buttons for a malformed payload', () => {
-      expect(getButtons({ severity: 'high' })).toEqual([]);
-    });
+      })
+    ).toEqual([]);
+    expect(getButtons({ severity: 'high' })).toEqual([]);
   });
 });

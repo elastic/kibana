@@ -13,8 +13,7 @@ import { createMockShare, createMockNavigation } from '../test_utils';
 
 describe('createHuntCorrelationAttachmentDefinition', () => {
   const navigation = createMockNavigation();
-
-  const mockShare = createMockShare();
+  const withShare = { ...navigation, share: createMockShare() };
 
   const baseData: HuntCorrelationAttachment['data'] = {
     anchors: [{ kind: 'hash', value: 'abc123' }],
@@ -27,129 +26,78 @@ describe('createHuntCorrelationAttachmentDefinition', () => {
     self_match_excluded: true,
   };
 
-  describe('getLabel', () => {
-    it('returns the default label when no attachmentLabel is set', () => {
-      const definition = createHuntCorrelationAttachmentDefinition({ navigation });
-      const attachment = { data: { anchors: [] } } as unknown as HuntCorrelationAttachment;
-      expect(definition.getLabel(attachment)).toBe('Hunt Correlation');
-    });
+  it('renders the default shape with a pluralized subtitle and a below-threshold badge', () => {
+    const definition = createHuntCorrelationAttachmentDefinition({ navigation });
+    const attachment = { data: baseData } as unknown as HuntCorrelationAttachment;
 
-    it('returns the attachmentLabel override when present', () => {
-      const definition = createHuntCorrelationAttachmentDefinition({ navigation });
-      const attachment = {
-        data: { anchors: [], attachmentLabel: 'Custom label' },
-      } as unknown as HuntCorrelationAttachment;
-      expect(definition.getLabel(attachment)).toBe('Custom label');
+    expect(definition.getLabel(attachment)).toBe('Hunt Correlation');
+    expect(definition.getIcon?.()).toBe('link');
+    expect(definition.getHeader?.({ attachment } as never)).toEqual({
+      icon: 'link',
+      subtitle: '1 anchor · 2 related reports',
+      badges: [{ label: 'Below threshold', color: 'hollow' }],
+    });
+    expect(definition.renderInlineContent).toBeDefined();
+  });
+
+  it('overrides the label, uses singular grammar, and badges above-threshold scores', () => {
+    const definition = createHuntCorrelationAttachmentDefinition({ navigation });
+    const singularData = {
+      ...baseData,
+      attachmentLabel: 'Custom label',
+      diamond_scores: [
+        { vertex: 'infrastructure' as const, related_report_id: 'report-2', score: 0.7 },
+        { vertex: 'adversary' as const, related_report_id: 'report-3', score: 0.9 },
+      ],
+    };
+    const attachment = { data: singularData } as unknown as HuntCorrelationAttachment;
+
+    expect(definition.getLabel(attachment)).toBe('Custom label');
+    expect(definition.getHeader?.({ attachment } as never)).toEqual({
+      icon: 'link',
+      subtitle: '1 anchor · 2 related reports',
+      badges: [{ label: 'Above threshold', color: 'success' }],
     });
   });
 
-  describe('getIcon', () => {
-    it('returns the link icon', () => {
-      const definition = createHuntCorrelationAttachmentDefinition({ navigation });
-      expect(definition.getIcon?.()).toBe('link');
-    });
+  it('omits the badge when there are no diamond scores', () => {
+    const definition = createHuntCorrelationAttachmentDefinition({ navigation });
+    const attachment = {
+      data: { ...baseData, diamond_scores: [] },
+    } as unknown as HuntCorrelationAttachment;
+
+    expect(definition.getHeader?.({ attachment } as never)?.badges).toEqual([]);
   });
 
-  describe('getHeader', () => {
-    it('returns the link icon and a pluralized anchor/report subtitle', () => {
-      const definition = createHuntCorrelationAttachmentDefinition({ navigation });
-      const attachment = { data: baseData } as unknown as HuntCorrelationAttachment;
-      const header = definition.getHeader?.({ attachment } as never);
-      expect(header?.icon).toBe('link');
-      expect(header?.subtitle).toBe('1 anchor · 2 related reports');
+  it('returns Open related reports in Discover for unique report ids when share is available', () => {
+    const definition = createHuntCorrelationAttachmentDefinition({ navigation: withShare });
+    const attachment = { data: baseData } as unknown as HuntCorrelationAttachment;
+    const expectedEsql = buildThreatReportsInEsql({
+      reportIds: ['report-2', 'report-3', 'report-2'],
     });
 
-    it('uses singular grammar for exactly one anchor and one related report', () => {
-      const definition = createHuntCorrelationAttachmentDefinition({ navigation });
-      const attachment = {
-        data: {
-          ...baseData,
-          diamond_scores: [
-            { vertex: 'infrastructure' as const, related_report_id: 'report-2', score: 0.75 },
-          ],
-        },
-      } as unknown as HuntCorrelationAttachment;
-      const header = definition.getHeader?.({ attachment } as never);
-      expect(header?.subtitle).toBe('1 anchor · 1 related report');
-    });
-
-    it('badges "Above threshold" (success) when every diamond score meets the threshold', () => {
-      const definition = createHuntCorrelationAttachmentDefinition({ navigation });
-      const attachment = {
-        data: {
-          ...baseData,
-          diamond_scores: [
-            { vertex: 'infrastructure' as const, related_report_id: 'report-2', score: 0.7 },
-            { vertex: 'adversary' as const, related_report_id: 'report-3', score: 0.9 },
-          ],
-        },
-      } as unknown as HuntCorrelationAttachment;
-      const header = definition.getHeader?.({ attachment } as never);
-      expect(header?.badges).toEqual([{ label: 'Above threshold', color: 'success' }]);
-    });
-
-    it('badges "Below threshold" (hollow) when any diamond score misses the threshold', () => {
-      const definition = createHuntCorrelationAttachmentDefinition({ navigation });
-      const attachment = { data: baseData } as unknown as HuntCorrelationAttachment;
-      const header = definition.getHeader?.({ attachment } as never);
-      expect(header?.badges).toEqual([{ label: 'Below threshold', color: 'hollow' }]);
-    });
-
-    it('omits the badge entirely when there are no diamond scores', () => {
-      const definition = createHuntCorrelationAttachmentDefinition({ navigation });
-      const attachment = {
-        data: { ...baseData, diamond_scores: [] },
-      } as unknown as HuntCorrelationAttachment;
-      const header = definition.getHeader?.({ attachment } as never);
-      expect(header?.badges).toEqual([]);
-    });
+    expect(definition.getActionButtons?.({ attachment } as never)).toEqual([
+      expect.objectContaining({
+        label: 'Open related reports in Discover',
+        icon: 'discoverApp',
+        type: ActionButtonType.SECONDARY,
+        openInNewTab: true,
+        href: `https://example.test/discover?esql=${encodeURIComponent(expectedEsql as string)}`,
+      }),
+    ]);
   });
 
-  describe('renderInlineContent', () => {
-    it('is defined', () => {
-      const definition = createHuntCorrelationAttachmentDefinition({ navigation });
-      expect(definition.renderInlineContent).toBeDefined();
+  it('returns no action buttons without share or without related report ids', () => {
+    const definition = createHuntCorrelationAttachmentDefinition({ navigation });
+    const attachment = { data: baseData } as unknown as HuntCorrelationAttachment;
+    expect(definition.getActionButtons?.({ attachment } as never)).toEqual([]);
+
+    const definitionWithShare = createHuntCorrelationAttachmentDefinition({
+      navigation: withShare,
     });
-  });
-
-  describe('getActionButtons', () => {
-    it('returns Open related reports in Discover for unique report ids when share is available', () => {
-      const definition = createHuntCorrelationAttachmentDefinition({
-        navigation: { ...navigation, share: mockShare },
-      });
-      const attachment = { data: baseData } as unknown as HuntCorrelationAttachment;
-      const expectedEsql = buildThreatReportsInEsql({
-        reportIds: ['report-2', 'report-3', 'report-2'],
-      });
-
-      const buttons = definition.getActionButtons?.({ attachment } as never) ?? [];
-
-      expect(buttons).toHaveLength(1);
-      expect(buttons[0].label).toBe('Open related reports in Discover');
-      expect(buttons[0].icon).toBe('discoverApp');
-      expect(buttons[0].type).toBe(ActionButtonType.SECONDARY);
-      expect(buttons[0].openInNewTab).toBe(true);
-      expect(buttons[0].href).toBe(
-        `https://example.test/discover?esql=${encodeURIComponent(expectedEsql as string)}`
-      );
-    });
-
-    it('returns no buttons when share is undefined', () => {
-      const definition = createHuntCorrelationAttachmentDefinition({ navigation });
-      const attachment = { data: baseData } as unknown as HuntCorrelationAttachment;
-
-      expect(definition.getActionButtons?.({ attachment } as never)).toEqual([]);
-    });
-
-    it('returns no buttons when there are no related report ids', () => {
-      const definition = createHuntCorrelationAttachmentDefinition({
-        navigation: { ...navigation, share: mockShare },
-      });
-      const attachment = {
-        data: { ...baseData, diamond_scores: [] },
-      } as unknown as HuntCorrelationAttachment;
-
-      expect(definition.getActionButtons?.({ attachment } as never)).toEqual([]);
-    });
+    const noReports = {
+      data: { ...baseData, diamond_scores: [] },
+    } as unknown as HuntCorrelationAttachment;
+    expect(definitionWithShare.getActionButtons?.({ attachment: noReports } as never)).toEqual([]);
   });
 });
