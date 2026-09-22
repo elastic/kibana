@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { Logger, ElasticsearchClient, AuthenticatedUser } from '@kbn/core/server';
+import {
+  SavedObjectsErrorHelpers,
+  type AuthenticatedUser,
+  type ElasticsearchClient,
+  type Logger,
+} from '@kbn/core/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
 import { isIamRoleArn } from '../../common/services/cloud_connectors';
@@ -568,7 +573,12 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       };
     } catch (error) {
       logger.error(`Failed to update cloud connector: ${getErrorMessage(error)}`);
-      if (error instanceof CloudConnectorRoleArnPropagationError) {
+      if (
+        error instanceof CloudConnectorRoleArnPropagationError ||
+        SavedObjectsErrorHelpers.isConflictError(error)
+      ) {
+        // Keep the saved-object conflict intact so the route can return 409. Wrapping it as a
+        // generic update error makes a retryable OCC race look like a validation failure.
         throw error;
       }
       rethrowIfInstanceOrWrap(error, CloudConnectorCreateError, 'Failed to update cloud connector');

@@ -1432,15 +1432,19 @@ describe('CloudConnectorService', () => {
           )
         );
 
-        await expect(
-          service.update(
+        let caught: unknown;
+        try {
+          await service.update(
             mockSoClient,
             connectorId,
             { vars: { role_arn: { type: 'text', value: newArn } } },
             { esClient: mockEsClient }
-          )
-        ).rejects.toThrow(/conflict/i);
+          );
+        } catch (err) {
+          caught = err;
+        }
 
+        expect(SavedObjectsErrorHelpers.isConflictError(caught)).toBe(true);
         expect(rollback.revert).toHaveBeenCalledTimes(1);
       });
 

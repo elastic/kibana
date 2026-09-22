@@ -229,6 +229,15 @@ export const updateCloudConnectorHandler: FleetRequestHandler<
         },
       });
     }
+    if (SavedObjectsErrorHelpers.isConflictError(error)) {
+      logger.error(`Cloud connector ${cloudConnectorId} update conflicted`, error);
+      return response.customError({
+        statusCode: 409,
+        body: {
+          message: error.message,
+        },
+      });
+    }
     logger.error(`Failed to update cloud connector ${cloudConnectorId}`, error);
     return response.customError({
       statusCode: 400,

@@ -46,3 +46,14 @@ responses:
               statusCode: 400
               error: 'Bad Request'
               message: 'An error message describing what went wrong'
+  409:
+    description: 'Conflict'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'The connector changed while the Role ARN fan-out was in progress'
+            value:
+              statusCode: 409
+              error: 'Conflict'
+              message: 'Saved object [fleet-cloud-connector/cloud-connector-id-1] conflict'

@@ -231,6 +231,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
               body: genericErrorResponse,
               description: 'A bad request.',
             },
+            409: {
+              body: genericErrorResponse,
+              description: 'A conflict occurred.',
+            },
           },
         },
       },

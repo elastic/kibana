@@ -202,6 +202,27 @@ describe('updateCloudConnectorHandler', () => {
     });
   });
 
+  it('surfaces a saved-object conflict as 409', async () => {
+    mockedUpdate.mockRejectedValueOnce(
+      SavedObjectsErrorHelpers.createConflictError('fleet-cloud-connector', 'cc-1')
+    );
+    const request = httpServerMock.createKibanaRequest({
+      params: { cloudConnectorId: 'cc-1' },
+      body: {
+        vars: { role_arn: { type: 'text', value: 'arn:aws:iam::123456789012:role/New' } },
+      },
+    });
+
+    await updateCloudConnectorHandler(buildUpdateContext(), request, response);
+
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 409,
+      body: {
+        message: expect.stringMatching(/conflict/i),
+      },
+    });
+  });
+
   it('surfaces other errors as 400', async () => {
     mockedUpdate.mockRejectedValueOnce(new Error('boom'));
     const request = httpServerMock.createKibanaRequest({
