@@ -70,11 +70,13 @@ function makeFlowMock({
   policyIdsByInstance = {} as Record<string, string>,
 } = {}) {
   const updateDetectAndReviewStep = jest.fn();
+  const removeDeployInstance = jest.fn();
   mockUseOnboardingFlow.mockReturnValue({
     servicesStep: { selectedServiceIds: [] },
     authenticateAndDeployStep: {},
     detectAndReviewStep: { policyIdsByInstance },
     updateDetectAndReviewStep,
+    removeDeployInstance,
     getLatestFailedInstances: jest.fn().mockReturnValue([]),
     awsServicesMap: new Map(),
     agentBasedDeployment: {
@@ -84,7 +86,7 @@ function makeFlowMock({
     },
     setAgentBasedDeployment: jest.fn(),
   });
-  return { updateDetectAndReviewStep };
+  return { updateDetectAndReviewStep, removeDeployInstance };
 }
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
@@ -177,6 +179,7 @@ describe('useAgentBasedDeploy — cleanup orchestration', () => {
 
   it('calls cleanupPackagePolicies and clears pendingCleanupPolicyIds when cleanup is pending', async () => {
     const updateDetectAndReviewStep = jest.fn();
+    const removeDeployInstance = jest.fn();
     mockUseOnboardingFlow.mockReturnValue({
       servicesStep: { selectedServiceIds: [] },
       authenticateAndDeployStep: {},
@@ -185,6 +188,7 @@ describe('useAgentBasedDeploy — cleanup orchestration', () => {
         pendingCleanupPolicyIds: { instA: 'pkg-policy-A' },
       },
       updateDetectAndReviewStep,
+      removeDeployInstance,
       getLatestFailedInstances: jest.fn().mockReturnValue([]),
       awsServicesMap: new Map(),
       agentBasedDeployment: {
@@ -222,6 +226,7 @@ describe('useAgentBasedDeploy — cleanup orchestration', () => {
         pendingCleanupPolicyIds: { instA: 'pkg-policy-A' },
       },
       updateDetectAndReviewStep: jest.fn(),
+      removeDeployInstance: jest.fn(),
       getLatestFailedInstances: jest.fn().mockReturnValue([]),
       awsServicesMap: new Map(),
       agentBasedDeployment: {
@@ -255,6 +260,7 @@ describe('useAgentBasedDeploy — cleanup orchestration', () => {
         pendingCleanupPolicyIds: { instX: 'pkg-policy-X' },
       },
       updateDetectAndReviewStep: jest.fn(),
+      removeDeployInstance: jest.fn(),
       getLatestFailedInstances: jest.fn().mockReturnValue(['serviceA']),
       awsServicesMap: new Map(),
       agentBasedDeployment: {
@@ -297,5 +303,56 @@ describe('useAgentBasedDeploy — cleanup orchestration', () => {
     });
 
     expect(mockCleanupPackagePolicies).not.toHaveBeenCalled();
+  });
+
+  it('triggers cleanup for services deselected from Step 1 (policyIdsByInstance has stale entry not in targets)', async () => {
+    // 'old-svc' was deployed previously (policyIdsByInstance has it) but was deselected from
+    // Step 1 without going through removeDeployInstance, so pendingCleanupPolicyIds is empty.
+    // buildAgentBasedTargets returns only groupA (serviceA = currently selected) — old-svc is absent.
+    // Live-stale detection should find old-svc and trigger cleanupPackagePolicies + removeDeployInstance.
+    const updateDetectAndReviewStep = jest.fn();
+    const removeDeployInstance = jest.fn();
+    mockUseOnboardingFlow.mockReturnValue({
+      servicesStep: { selectedServiceIds: [] },
+      authenticateAndDeployStep: {},
+      detectAndReviewStep: {
+        policyIdsByInstance: { serviceA: 'pkg-policy-A', 'old-svc': 'pkg-policy-OLD' },
+        pendingCleanupPolicyIds: {},
+      },
+      updateDetectAndReviewStep,
+      removeDeployInstance,
+      getLatestFailedInstances: jest.fn().mockReturnValue([]),
+      awsServicesMap: new Map(),
+      agentBasedDeployment: {
+        agentHostsMode: 'existing' as const,
+        agentPolicyId: 'agent-policy-1',
+        selectedAgentPolicyIds: ['agent-policy-1'],
+      },
+      setAgentBasedDeployment: jest.fn(),
+    });
+    mockUseSessionStorage.mockReturnValue([{ globalRegion: '', serviceVars: {} }, jest.fn()]);
+    // targets only contains serviceA — old-svc has been deselected from Step 1.
+    mockBuildAgentBasedTargets.mockReturnValue([groupA]);
+    // serviceA is already deployed, so targetsToDeploy is empty; this is a cleanup-only run.
+    mockDeployToExistingAgentPolicies.mockResolvedValue({
+      packagePolicyIdsByInstance: {},
+      failedInstances: [],
+      errorsByInstance: {},
+    });
+
+    const { result } = renderHook(() => useAgentBasedDeploy());
+
+    await act(async () => {
+      await result.current.handleDeploy();
+    });
+
+    expect(mockCleanupPackagePolicies).toHaveBeenCalledTimes(1);
+    const cleanupCall = mockCleanupPackagePolicies.mock.calls[0][0];
+    expect(cleanupCall.pendingCleanupPolicyIds).toEqual({ 'old-svc': 'pkg-policy-OLD' });
+
+    expect(removeDeployInstance).toHaveBeenCalledWith('old-svc');
+    expect(updateDetectAndReviewStep).toHaveBeenCalledWith(
+      expect.objectContaining({ pendingCleanupPolicyIds: {} })
+    );
   });
 });

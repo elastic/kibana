@@ -45,6 +45,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
     authenticateAndDeployStep,
     detectAndReviewStep,
     updateDetectAndReviewStep,
+    removeDeployInstance,
     getLatestFailedInstances,
     awsServicesMap: servicesMap,
     agentBasedDeployment,
@@ -108,8 +109,20 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         ? targets.filter((g) => g.instanceIds.some((id) => instanceIds.includes(id)))
         : targets.filter((g) => g.instanceIds.some((id) => !alreadyDeployedIds.has(id)));
 
-      const hasPendingCleanup =
-        !isRetry && Object.keys(detectAndReviewStep.pendingCleanupPolicyIds ?? {}).length > 0;
+      // Services deselected from Step 1 never call removeDeployInstance, so pendingCleanupPolicyIds
+      // won't capture them. Detect stale entries by comparing policyIdsByInstance against the
+      // reconciled targets (which already filters by selectedServiceIds).
+      const activeInstanceIds = new Set(targets.flatMap((g) => g.instanceIds));
+      const liveStalePolicyIds: Record<string, string> = {};
+      for (const [iid, pid] of Object.entries(detectAndReviewStep.policyIdsByInstance ?? {})) {
+        if (!activeInstanceIds.has(iid)) liveStalePolicyIds[iid] = pid;
+      }
+      const effectivePendingCleanup: Record<string, string> = {
+        ...liveStalePolicyIds,
+        ...(detectAndReviewStep.pendingCleanupPolicyIds ?? {}),
+      };
+
+      const hasPendingCleanup = !isRetry && Object.keys(effectivePendingCleanup).length > 0;
 
       if (targetsToDeploy.length === 0 && !hasPendingCleanup) return { failed: false };
 
@@ -134,8 +147,8 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         if (hasPendingCleanup) {
           const targetPolicyIds = agentPolicyId ? [agentPolicyId] : selectedAgentPolicyIds ?? [];
           await cleanupPackagePolicies({
-            pendingCleanupPolicyIds: detectAndReviewStep.pendingCleanupPolicyIds ?? {},
-            currentPolicyIdsByInstance: detectAndReviewStep.policyIdsByInstance,
+            pendingCleanupPolicyIds: effectivePendingCleanup,
+            currentPolicyIdsByInstance: detectAndReviewStep.policyIdsByInstance ?? {},
             instances: serviceSettings?.instances ?? [],
             storedServiceVars,
             globalRegion,
@@ -144,6 +157,9 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
             servicesMap: servicesMap ?? new Map(),
             selectedAgentPolicyIds: targetPolicyIds,
           });
+          for (const iid of Object.keys(liveStalePolicyIds)) {
+            removeDeployInstance(iid);
+          }
           updateDetectAndReviewStep({ pendingCleanupPolicyIds: {} });
         }
 
@@ -239,6 +255,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
       setAgentBasedDeployment,
       detectAndReviewStep,
       updateDetectAndReviewStep,
+      removeDeployInstance,
       getLatestFailedInstances,
       servicesMap,
     ]
