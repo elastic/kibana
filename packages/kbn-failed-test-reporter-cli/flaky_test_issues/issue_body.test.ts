@@ -126,7 +126,7 @@ describe('flakySuiteIssueTitle', () => {
   it('names the module, the framework and the suite title', () => {
     const { suite } = singleTestReport();
     expect(flakySuiteIssueTitle(suite, 'Synthetics')).toBe(
-      '[Synthetics] Flaky Scout test suite: Default status alert'
+      'Flaky Scout suite [Synthetics]: Default status alert'
     );
   });
 
@@ -137,7 +137,7 @@ describe('flakySuiteIssueTitle', () => {
       'Synthetics'
     );
     expect(title).toHaveLength(256);
-    expect(title.startsWith('[Synthetics] Flaky Scout test suite: nested nested')).toBe(true);
+    expect(title.startsWith('Flaky Scout suite [Synthetics]: nested nested')).toBe(true);
     expect(title.endsWith('…')).toBe(true);
   });
 
@@ -148,7 +148,7 @@ describe('flakySuiteIssueTitle', () => {
         framework: 'ftr',
         suiteTitle: undefined,
       })
-    ).toBe('Flaky FTR test suite: b.ts');
+    ).toBe('Flaky FTR suite: b.ts');
   });
 });
 

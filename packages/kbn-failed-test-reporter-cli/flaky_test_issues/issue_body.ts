@@ -30,10 +30,11 @@ import {
 import type { FlakySuite } from './suites';
 
 /**
- * Words every suite issue title contains, e.g. `[Lens] Flaky Scout test suite: <suite>`. Older
- * issues named the file instead of the suite; `readSuiteFilePathFromTitle` still reads those.
+ * `Flaky <framework> test suite: <file>`, the title format of issues filed before the suite title
+ * was used; `readSuiteFilePathFromTitle` still reads those. Current titles start with
+ * `Flaky <framework> suite` and are recognised by their metadata instead.
  */
-export const FLAKY_TEST_SUITE_TITLE_TERMS = ['Flaky', 'test suite'] as const;
+const LEGACY_TITLE_PATTERN = /^Flaky\b.*\btest suite:\s*(\S+\.[jt]sx?)\s*$/;
 /** Namespace of the hidden `kibanaCiData` block at the end of the issue body and comments. */
 export const FLAKY_TEST_SUITE_METADATA_PREFIX = 'flaky-test-suite';
 
@@ -78,11 +79,6 @@ export interface FlakySuiteIssueMetadata {
   /** One snapshot per report that found the suite flaky, oldest first. */
   'report.history': FlakySuiteReportSnapshot[];
 }
-
-/** `Flaky <anything> test suite: <file>`, the title format of issues filed before the suite title. */
-const LEGACY_TITLE_PATTERN = new RegExp(
-  `^${FLAKY_TEST_SUITE_TITLE_TERMS[0]}\\b.*\\b${FLAKY_TEST_SUITE_TITLE_TERMS[1]}:\\s*(\\S+\\.[jt]sx?)\\s*$`
-);
 
 /** Suite file path named by a legacy issue title. */
 export const readSuiteFilePathFromTitle = (title: string): string | undefined =>
@@ -148,15 +144,14 @@ export const flakySuiteIssueMetadata = (
   'report.history': [snapshot(suite, report)],
 });
 
-/** `[Lens] Flaky Scout test suite: Lens ESQL dashboard inline editing` */
+/** `Flaky Scout suite [Lens]: Lens ESQL dashboard inline editing`; the module is left out when unknown. */
 export const flakySuiteIssueTitle = (
   suite: Pick<FlakySuite, 'filePath' | 'framework' | 'suiteTitle'>,
   moduleLabel?: string
 ): string => {
-  const [flaky, testSuite] = FLAKY_TEST_SUITE_TITLE_TERMS;
   const subject = suite.suiteTitle ?? Path.basename(suite.filePath);
-  const prefix = moduleLabel ? `[${moduleLabel}] ` : '';
-  const lead = `${prefix}${flaky} ${FRAMEWORK_LABELS[suite.framework].short} ${testSuite}: `;
+  const module = moduleLabel ? ` [${moduleLabel}]` : '';
+  const lead = `Flaky ${FRAMEWORK_LABELS[suite.framework].short} suite${module}: `;
   // Nested describe blocks can join into a subject longer than GitHub accepts for a title
   const room = MAX_TITLE_LENGTH - lead.length;
   return lead + (subject.length > room ? `${subject.slice(0, room - 1)}…` : subject);

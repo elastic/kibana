@@ -75,7 +75,7 @@ const suiteIssue = (number: number, overrides: Partial<GithubIssue> = {}) => {
   const [suite] = groupIntoSuites(report.flaky);
   return githubIssue({
     number,
-    title: '[Synthetics] Flaky Scout test suite: Default status alert',
+    title: 'Flaky Scout suite [Synthetics]: Default status alert',
     body: renderFlakySuiteIssueBody(suite, {
       report: { ...report, generatedAt: new Date('2026-09-01T09:00:00.000Z') },
     }),
@@ -153,7 +153,7 @@ describe('reportFlakySuiteIssues', () => {
 
       expect(github.createIssue).toHaveBeenCalledTimes(1);
       const [title, body, labels] = github.createIssue.mock.calls[0];
-      expect(title).toBe('[Synthetics] Flaky Scout test suite: Default status alert');
+      expect(title).toBe('Flaky Scout suite [Synthetics]: Default status alert');
       expect(body).toContain('Possibly related: #7.');
       expect(readFlakySuiteIssueMetadata(body)?.['suite.filePath']).toBe(SUITE_PATH);
       expect(labels).toEqual(['failed-test']);
@@ -184,8 +184,8 @@ describe('reportFlakySuiteIssues', () => {
 
       expect(github.createIssue).toHaveBeenCalledTimes(2);
       expect(github.createIssue.mock.calls.map(([title]) => title)).toEqual([
-        '[Synthetics] Flaky Scout test suite: second describe',
-        '[Synthetics] Flaky Scout test suite: first describe',
+        'Flaky Scout suite [Synthetics]: second describe',
+        'Flaky Scout suite [Synthetics]: first describe',
       ]);
       expect(summary.actions.map(({ suiteTitle }) => suiteTitle)).toEqual([
         'second describe',
