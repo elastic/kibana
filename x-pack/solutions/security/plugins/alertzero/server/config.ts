@@ -16,9 +16,6 @@ export const configSchema = schema.object({
    * user-facing per-space gate is the `securitySolution:enableAlertZero` advanced setting.
    */
   enabled: schema.boolean({ defaultValue: false }),
-  ui: schema.object({
-    useMockData: schema.boolean({ defaultValue: false }),
-  }),
 });
 
 export type AlertZeroConfig = TypeOf<typeof configSchema>;
@@ -26,7 +23,6 @@ export type AlertZeroConfig = TypeOf<typeof configSchema>;
 export const config: PluginConfigDescriptor<AlertZeroConfig> = {
   exposeToBrowser: {
     enabled: true,
-    ui: true,
   },
   schema: configSchema,
 };

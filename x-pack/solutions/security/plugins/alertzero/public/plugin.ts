@@ -98,7 +98,6 @@ export class AlertZeroPublicPlugin
           coreStart,
           startDeps,
           params,
-          config: this.config,
         });
       },
     });

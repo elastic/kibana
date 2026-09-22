@@ -9,9 +9,8 @@ import {
   AD2_FILE_EVENTS_INDEX,
   AD2_NETWORK_EVENTS_INDEX,
   AD2_PROCESS_EVENTS_INDEX,
-  AD2_SCENARIO_ID_PREFIX,
-  AD2_SCENARIO_SEED_LABEL,
 } from './constants';
+import { ad2ScenarioAlertId, ad2SeedId } from './ids';
 import type {
   Ad2IndexedAlert,
   Ad2IndexedRawEvent,
@@ -22,12 +21,23 @@ import type {
 
 const isoTimestamp = (value: Date): string => value.toISOString().replace(/\.\d{3}Z$/, '.000Z');
 
-const hostDocument = (host: string, osType: Ad2ScenarioOs): Record<string, unknown> => {
+/**
+ * Every identifier below is a digest of the coordinates that produced the
+ * document (`ids.ts`) — including the run marker, so two runs never share an
+ * `_id` — never the scenario key: the key is the target/noise discriminator and
+ * `_id` comes back in the dense ES|QL result, so spelling it out would hand the
+ * model the answer it is being measured on.
+ */
+const hostDocument = (
+  host: string,
+  osType: Ad2ScenarioOs,
+  runMarker: string
+): Record<string, unknown> => {
   const hostNumber = [...host].reduce((sum, character) => sum + character.charCodeAt(0), 0);
   return {
     name: host,
     hostname: host,
-    id: `${AD2_SCENARIO_ID_PREFIX}host-${host}`,
+    id: ad2SeedId(runMarker, 'host', host),
     ip: [`10.50.${(hostNumber % 200) + 1}.${((hostNumber * 7) % 200) + 1}`],
     os: { type: osType, name: osType.charAt(0).toUpperCase() + osType.slice(1), version: 'test' },
   };
@@ -38,12 +48,13 @@ export const buildAlertDocument = (
   scenario: Ad2ScenarioDefinition,
   stepNumber: number,
   step: Ad2ScenarioStep,
-  timestamp: Date
+  timestamp: Date,
+  runMarker: string
 ): Ad2IndexedAlert => {
-  const alertId = `${AD2_SCENARIO_ID_PREFIX}${scenarioKey}-alert-${stepNumber}`;
+  const alertId = ad2ScenarioAlertId(runMarker, scenarioKey, stepNumber);
   const dataset = scenario.dataset ?? 'endpoint.alerts';
   const category = scenario.category ?? 'Endpoint Behavior Detection';
-  const ancestorId = `${AD2_SCENARIO_ID_PREFIX}${scenarioKey}-process-${stepNumber}`;
+  const ancestorId = ad2SeedId(runMarker, 'process', scenarioKey, stepNumber);
 
   const doc: Record<string, unknown> = {
     '@timestamp': isoTimestamp(timestamp),
@@ -60,18 +71,28 @@ export const buildAlertDocument = (
       outcome: 'success',
     },
     data_stream: { type: 'logs', dataset, namespace: 'default' },
-    labels: { ad_portable_seed: AD2_SCENARIO_SEED_LABEL, ad_test_scenario: scenarioKey },
+    // Root `tags` is the fixture's RETRIEVAL marker: an ECS `keyword` field on
+    // the alerts index, which is what the live-retrieval datasets scope their
+    // query by (the golden-path fixture filters on the same field). `labels` is
+    // the cleanup marker only — it is an object field, so it is not a contract
+    // a generated ES|QL filter can be written against. Both carry the RUN
+    // marker, so a retrieval and a cleanup reach exactly the documents of the
+    // run that names them and nothing else. Neither carries the scenario key: a
+    // per-document label naming the chain is the same target/noise
+    // discriminator as an id that spells it out.
+    tags: [runMarker],
+    labels: { ad_portable_seed: runMarker },
     agent: {
-      id: `${AD2_SCENARIO_ID_PREFIX}agent-${scenario.host}`,
+      id: ad2SeedId(runMarker, 'agent', scenario.host),
       type: 'endpoint',
       version: '9.5.0',
     },
-    host: hostDocument(scenario.host, scenario.os),
+    host: hostDocument(scenario.host, scenario.os, runMarker),
     user: { name: scenario.user, domain: 'CONTOSO' },
     message: step.message,
     rule: {
       name: step.ruleName,
-      id: `${AD2_SCENARIO_ID_PREFIX}rule-${scenarioKey}-${stepNumber}`,
+      id: ad2SeedId(runMarker, 'rule', scenarioKey, stepNumber),
       description: step.message,
     },
     'kibana.alert.rule.category': category,
@@ -79,8 +100,8 @@ export const buildAlertDocument = (
     'kibana.alert.rule.producer': 'siem',
     'kibana.alert.rule.name': step.ruleName,
     'kibana.alert.rule.rule_type_id': 'siem.eqlRule',
-    'kibana.alert.rule.rule_id': `${AD2_SCENARIO_ID_PREFIX}rule-${scenarioKey}-${stepNumber}`,
-    'kibana.alert.rule.uuid': `${AD2_SCENARIO_ID_PREFIX}rule-${scenarioKey}-${stepNumber}`,
+    'kibana.alert.rule.rule_id': ad2SeedId(runMarker, 'rule', scenarioKey, stepNumber),
+    'kibana.alert.rule.uuid': ad2SeedId(runMarker, 'rule', scenarioKey, stepNumber),
     'kibana.alert.rule.version': 1,
     'kibana.alert.rule.revision': 1,
     'kibana.alert.rule.description': step.message,
@@ -133,24 +154,26 @@ export const buildRawEventDocuments = (
   scenario: Ad2ScenarioDefinition,
   stepNumber: number,
   step: Ad2ScenarioStep,
-  timestamp: Date
+  timestamp: Date,
+  runMarker: string
 ): Ad2IndexedRawEvent[] => {
   if (!step.processName) {
     return [];
   }
 
-  const eventId = `${AD2_SCENARIO_ID_PREFIX}${scenarioKey}-process-${stepNumber}`;
-  const host = hostDocument(scenario.host, scenario.os);
+  const eventId = ad2SeedId(runMarker, 'process', scenarioKey, stepNumber);
+  const host = hostDocument(scenario.host, scenario.os, runMarker);
+  const agentId = ad2SeedId(runMarker, 'agent', scenario.host);
   const base = {
     '@timestamp': isoTimestamp(new Date(timestamp.getTime() - 3_000)),
     ecs: { version: '9.0.0' },
-    labels: { ad_portable_seed: AD2_SCENARIO_SEED_LABEL, ad_test_scenario: scenarioKey },
+    labels: { ad_portable_seed: runMarker },
     agent: {
-      id: `${AD2_SCENARIO_ID_PREFIX}agent-${scenario.host}`,
+      id: agentId,
       type: 'endpoint',
       version: '9.5.0',
     },
-    elastic: { agent: { id: `${AD2_SCENARIO_ID_PREFIX}agent-${scenario.host}` } },
+    elastic: { agent: { id: agentId } },
     host,
     user: { name: scenario.user, domain: 'CONTOSO' },
     message: step.message,
@@ -173,7 +196,7 @@ export const buildRawEventDocuments = (
     process: {
       name: step.processName,
       pid: 4000 + stepNumber,
-      entity_id: `${AD2_SCENARIO_ID_PREFIX}${scenarioKey}-entity-${stepNumber}`,
+      entity_id: ad2SeedId(runMarker, 'entity', scenarioKey, stepNumber),
       executable: step.processName,
       command_line: commandLine,
       args: commandLine.split(/\s+/).filter(Boolean),
@@ -187,7 +210,7 @@ export const buildRawEventDocuments = (
   ];
 
   if (step.eventType === 'network' && step.context) {
-    const netId = `${AD2_SCENARIO_ID_PREFIX}${scenarioKey}-network-${stepNumber}`;
+    const netId = ad2SeedId(runMarker, 'network', scenarioKey, stepNumber);
     const hostIps = host.ip;
     const sourceIp =
       Array.isArray(hostIps) && typeof hostIps[0] === 'string' ? hostIps[0] : '10.0.0.1';
@@ -216,7 +239,7 @@ export const buildRawEventDocuments = (
   }
 
   if (step.eventType === 'file' && step.context) {
-    const fileId = `${AD2_SCENARIO_ID_PREFIX}${scenarioKey}-file-${stepNumber}`;
+    const fileId = ad2SeedId(runMarker, 'file', scenarioKey, stepNumber);
     const path = step.context;
     docs.push({
       index: AD2_FILE_EVENTS_INDEX,
@@ -245,7 +268,8 @@ export const buildRawEventDocuments = (
 
 export const buildScenarioDocuments = (
   scenario: Ad2ScenarioDefinition,
-  baseTime: Date = new Date()
+  baseTime: Date,
+  runMarker: string
 ): { alerts: Ad2IndexedAlert[]; rawEvents: Ad2IndexedRawEvent[] } => {
   const alerts: Ad2IndexedAlert[] = [];
   const rawEvents: Ad2IndexedRawEvent[] = [];
@@ -254,10 +278,10 @@ export const buildScenarioDocuments = (
   scenario.steps.forEach((step, index) => {
     const stepNumber = index + 1;
     const timestamp = new Date(start.getTime() + (stepNumber - 1) * 7 * 60 * 1000);
-    alerts.push(buildAlertDocument(scenario.key, scenario, stepNumber, step, timestamp));
+    alerts.push(buildAlertDocument(scenario.key, scenario, stepNumber, step, timestamp, runMarker));
     if (scenario.raw) {
       rawEvents.push(
-        ...buildRawEventDocuments(scenario.key, scenario, stepNumber, step, timestamp)
+        ...buildRawEventDocuments(scenario.key, scenario, stepNumber, step, timestamp, runMarker)
       );
     }
   });

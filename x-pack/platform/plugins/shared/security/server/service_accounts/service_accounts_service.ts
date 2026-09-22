@@ -7,6 +7,7 @@
 
 import type {
   AuthenticatedUser,
+  IClusterClient,
   KibanaRequest,
   Logger,
   SavedObjectsServiceStart,
@@ -20,6 +21,7 @@ import {
   ServiceAccountWorkloadBindings,
   WorkloadBindingStore,
 } from './bindings';
+import { SERVICE_ACCOUNT_CREDENTIAL_TYPE, ServiceAccountCredentialStore } from './credentials';
 import { EsServiceAccounts } from './es_service_accounts';
 import type { CloudProjectContext, ServiceAccountsServiceStart } from './types';
 import { UiamServiceAccounts } from './uiam_service_accounts';
@@ -29,11 +31,14 @@ import type { UiamServicePublic } from '../uiam';
 
 export interface ServiceAccountsServiceStartParams {
   config: ConfigType;
+  /** Whether this is a serverless deployment, which is what selects the backend. */
+  isServerless: boolean;
   license: SecurityLicense;
   /** The UIAM service, when UIAM is configured for this deployment. */
   uiam?: UiamServicePublic;
   checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
   cloudProjectContext?: CloudProjectContext;
+  clusterClient: IClusterClient;
   savedObjects: SavedObjectsServiceStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   /** Whether saved object encryption is possible, captured from the encrypted saved objects setup contract. */
@@ -52,10 +57,12 @@ export class ServiceAccountsService {
    */
   start({
     config,
+    isServerless,
     license,
     uiam,
     checkPrivilegesWithRequest,
     cloudProjectContext,
+    clusterClient,
     savedObjects,
     encryptedSavedObjects,
     canEncrypt,
@@ -63,58 +70,97 @@ export class ServiceAccountsService {
     getCurrentUserProfileId,
     getSpaceId,
   }: ServiceAccountsServiceStartParams): ServiceAccountsServiceStart | null {
-    if (!config.serviceAccounts?.enabled) {
+    if (!config.serviceAccounts.enabled) {
       this.logger.debug('Service accounts are not enabled.');
       return null;
     }
 
-    // Backend selection keys off UIAM availability rather than the build flavor, so
-    // that the Elasticsearch path is reachable and testable before it is finished.
-    if (!uiam || !cloudProjectContext) {
-      this.logger.debug(
-        'UIAM is not available; falling back to the Elasticsearch service accounts backend.'
-      );
+    if (isServerless) {
+      // `SecurityPlugin#setup` rejects a serverless deployment without `uiam.enabled`, and the
+      // service is only ever constructed from that same config, so this is unreachable in
+      // practice. It stays as a guard because the parameter is optional, and the alternative is
+      // a non-null assertion further down.
+      if (!uiam) {
+        this.logger.error(
+          'Service accounts are enabled but the UIAM service was never constructed, so they ' +
+            'cannot be offered on this deployment.'
+        );
+        return null;
+      }
+
+      // Reachable, unlike the guard above: the project context comes from the `cloud` plugin at
+      // setup time, which the config-level check in `SecurityPlugin#setup` cannot speak for. Any
+      // of the organization, the project or the project type being absent lands here.
+      if (!cloudProjectContext) {
+        this.logger.error(
+          'Service accounts are enabled but the cloud project context is missing, so they ' +
+            'cannot be offered on this deployment.'
+        );
+        return null;
+      }
+
+      const backend = new UiamServiceAccounts({
+        logger: this.logger,
+        requestLifetimeMs: config.serviceAccounts.requestLifetime.asMilliseconds(),
+        license,
+        uiam,
+        checkPrivilegesWithRequest,
+        cloudProjectContext,
+        getCurrentUser,
+      });
+
+      const bindingsLogger = this.logger.get('workload-bindings');
+      const store = new WorkloadBindingStore({
+        client: savedObjects.getUnsafeInternalClient({
+          includedHiddenTypes: [SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE],
+        }),
+        encryptedClient: encryptedSavedObjects.getClient({
+          includedHiddenTypes: [SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE],
+        }),
+        isEncryptionError: encryptedSavedObjects.isEncryptionError,
+        logger: bindingsLogger,
+      });
+
       return {
-        backend: new EsServiceAccounts(),
-        workloads: createNotImplementedWorkloadBindings(),
+        backend,
+        workloads: new ServiceAccountWorkloadBindings({
+          logger: bindingsLogger,
+          license,
+          store,
+          backend,
+          checkPrivilegesWithRequest,
+          getCurrentUser,
+          getCurrentUserProfileId,
+          getSpaceId,
+          canEncrypt,
+        }),
       };
     }
 
-    const backend = new UiamServiceAccounts({
-      logger: this.logger,
-      requestLifetimeMs: config.serviceAccounts.requestLifetime.asMilliseconds(),
-      license,
-      uiam,
-      checkPrivilegesWithRequest,
-      cloudProjectContext,
-      getCurrentUser,
-    });
-
-    const bindingsLogger = this.logger.get('workload-bindings');
-    const store = new WorkloadBindingStore({
-      client: savedObjects.getUnsafeInternalClient({
-        includedHiddenTypes: [SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE],
-      }),
-      encryptedClient: encryptedSavedObjects.getClient({
-        includedHiddenTypes: [SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE],
-      }),
-      isEncryptionError: encryptedSavedObjects.isEncryptionError,
-      logger: bindingsLogger,
-    });
-
+    this.logger.debug('Using the Elasticsearch service accounts backend.');
     return {
-      backend,
-      workloads: new ServiceAccountWorkloadBindings({
-        logger: bindingsLogger,
+      backend: new EsServiceAccounts({
+        logger: this.logger.get('elasticsearch'),
         license,
-        store,
-        backend,
+        clusterClient,
         checkPrivilegesWithRequest,
+        credentialStore: new ServiceAccountCredentialStore({
+          client: savedObjects.getUnsafeInternalClient({
+            includedHiddenTypes: [SERVICE_ACCOUNT_CREDENTIAL_TYPE],
+          }),
+          encryptedClient: encryptedSavedObjects.getClient({
+            includedHiddenTypes: [SERVICE_ACCOUNT_CREDENTIAL_TYPE],
+          }),
+          isEncryptionError: encryptedSavedObjects.isEncryptionError,
+          logger: this.logger.get('credentials'),
+        }),
+        canEncrypt,
         getCurrentUser,
         getCurrentUserProfileId,
-        getSpaceId,
-        canEncrypt,
       }),
+      // Workload binding is a UIAM-only capability until the Elasticsearch token exchange
+      // lands; see https://github.com/elastic/kibana/issues/284466.
+      workloads: createNotImplementedWorkloadBindings(),
     };
   }
 }
