@@ -45240,8 +45240,19 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                agentPolicyIds:
+                  description: Agent policy IDs for agent_based existing-policy deploys. Provided on create so that a mid-deploy tab-close leaves a record that hydrates back into existing mode.
+                  items:
+                    maxLength: 255
+                    type: string
+                  maxItems: 1000
+                  type: array
                 authMethod:
-                  description: 'Authentication method. managed_integration: identity_federation | static_keys. agent_based: static_keys (direct_access_keys) | temporary_keys | shared_credentials | assume_role.'
+                  description: |-
+                    Authentication method. Allowed values depend on the delivery mechanism:
+
+                    - managed_integration: identity_federation | static_keys
+                    - agent_based: static_keys (direct_access_keys) | temporary_keys | shared_credentials | assume_role
                   enum:
                     - identity_federation
                     - static_keys
@@ -45383,7 +45394,7 @@ paths:
                         description: Agent policy IDs for agent_based deployments. Single-element for new-policy deploys; multiple for existing-policy deploys targeting several policies.
                         items:
                           type: string
-                        maxItems: 100
+                        maxItems: 1000
                         type: array
                       apiKeyId:
                         description: Elasticsearch API key ID for push mechanisms (ecf). Set by the backend; used for key rotation/revocation.
@@ -45393,7 +45404,11 @@ paths:
                         minimum: 1
                         type: number
                       authMethod:
-                        description: 'Authentication method. managed_integration: identity_federation | static_keys. agent_based: static_keys (direct_access_keys) | temporary_keys | shared_credentials | assume_role.'
+                        description: |-
+                          Authentication method. Allowed values depend on the delivery mechanism:
+
+                          - managed_integration: identity_federation | static_keys
+                          - agent_based: static_keys (direct_access_keys) | temporary_keys | shared_credentials | assume_role
                         enum:
                           - identity_federation
                           - static_keys
@@ -45461,7 +45476,7 @@ paths:
                         maxItems: 10
                         type: array
                       packagePolicyIds:
-                        description: Package policy IDs created for managed_integration services.
+                        description: Package policy IDs created for this deployment (managed_integration and agent_based).
                         items:
                           type: string
                         maxItems: 100
@@ -45669,6 +45684,8 @@ paths:
                   description: A cloud onboarding deployment that has succeeded
                   value:
                     item:
+                      agentPolicyIds:
+                        - agent-policy-id-1
                       attemptCount: 1
                       connectorId: cloud-connector-id-1
                       deploymentId: arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-aws-onboarding/aaa-bbb-ccc
@@ -45705,7 +45722,7 @@ paths:
                         description: Agent policy IDs for agent_based deployments. Single-element for new-policy deploys; multiple for existing-policy deploys targeting several policies.
                         items:
                           type: string
-                        maxItems: 100
+                        maxItems: 1000
                         type: array
                       apiKeyId:
                         description: Elasticsearch API key ID for push mechanisms (ecf). Set by the backend; used for key rotation/revocation.
@@ -45715,7 +45732,11 @@ paths:
                         minimum: 1
                         type: number
                       authMethod:
-                        description: 'Authentication method. managed_integration: identity_federation | static_keys. agent_based: static_keys (direct_access_keys) | temporary_keys | shared_credentials | assume_role.'
+                        description: |-
+                          Authentication method. Allowed values depend on the delivery mechanism:
+
+                          - managed_integration: identity_federation | static_keys
+                          - agent_based: static_keys (direct_access_keys) | temporary_keys | shared_credentials | assume_role
                         enum:
                           - identity_federation
                           - static_keys
@@ -45783,7 +45804,7 @@ paths:
                         maxItems: 10
                         type: array
                       packagePolicyIds:
-                        description: Package policy IDs created for managed_integration services.
+                        description: Package policy IDs created for this deployment (managed_integration and agent_based).
                         items:
                           type: string
                         maxItems: 100
@@ -45928,7 +45949,7 @@ paths:
                   items:
                     maxLength: 255
                     type: string
-                  maxItems: 100
+                  maxItems: 1000
                   type: array
                 apiKeyId:
                   maxLength: 255
@@ -45937,6 +45958,15 @@ paths:
                   description: Incremented by callers performing a retry.
                   minimum: 1
                   type: number
+                authMethod:
+                  description: Authentication method. Refreshed on each successful deploy so a credential-method change between deploys is reflected on resume.
+                  enum:
+                    - identity_federation
+                    - static_keys
+                    - temporary_keys
+                    - shared_credentials
+                    - assume_role
+                  type: string
                 deploymentId:
                   description: CFN stack ARN (or equivalent); provided by the client after manual deployment.
                   maxLength: 2048
@@ -45974,6 +46004,7 @@ paths:
                   maxItems: 10
                   type: array
                 packagePolicyIds:
+                  description: Package policy IDs created for this deployment (managed_integration and agent_based).
                   items:
                     maxLength: 255
                     type: string
@@ -46015,6 +46046,8 @@ paths:
                   description: The updated cloud onboarding deployment
                   value:
                     item:
+                      agentPolicyIds:
+                        - agent-policy-id-1
                       attemptCount: 1
                       connectorId: cloud-connector-id-1
                       deploymentId: arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-aws-onboarding/aaa-bbb-ccc
@@ -46041,7 +46074,7 @@ paths:
                         description: Agent policy IDs for agent_based deployments. Single-element for new-policy deploys; multiple for existing-policy deploys targeting several policies.
                         items:
                           type: string
-                        maxItems: 100
+                        maxItems: 1000
                         type: array
                       apiKeyId:
                         description: Elasticsearch API key ID for push mechanisms (ecf). Set by the backend; used for key rotation/revocation.
@@ -46051,7 +46084,11 @@ paths:
                         minimum: 1
                         type: number
                       authMethod:
-                        description: 'Authentication method. managed_integration: identity_federation | static_keys. agent_based: static_keys (direct_access_keys) | temporary_keys | shared_credentials | assume_role.'
+                        description: |-
+                          Authentication method. Allowed values depend on the delivery mechanism:
+
+                          - managed_integration: identity_federation | static_keys
+                          - agent_based: static_keys (direct_access_keys) | temporary_keys | shared_credentials | assume_role
                         enum:
                           - identity_federation
                           - static_keys
@@ -46119,7 +46156,7 @@ paths:
                         maxItems: 10
                         type: array
                       packagePolicyIds:
-                        description: Package policy IDs created for managed_integration services.
+                        description: Package policy IDs created for this deployment (managed_integration and agent_based).
                         items:
                           type: string
                         maxItems: 100
@@ -46248,7 +46285,9 @@ paths:
                   description: List of cloud onboarding deployments for a connector
                   value:
                     items:
-                      - attemptCount: 1
+                      - agentPolicyIds:
+                          - agent-policy-id-1
+                        attemptCount: 1
                         connectorId: cloud-connector-id-1
                         deploymentId: arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-aws-onboarding/aaa-bbb-ccc
                         deploymentName: elastic-aws-onboarding
@@ -46289,7 +46328,7 @@ paths:
                           description: Agent policy IDs for agent_based deployments. Single-element for new-policy deploys; multiple for existing-policy deploys targeting several policies.
                           items:
                             type: string
-                          maxItems: 100
+                          maxItems: 1000
                           type: array
                         apiKeyId:
                           description: Elasticsearch API key ID for push mechanisms (ecf). Set by the backend; used for key rotation/revocation.
@@ -46299,7 +46338,11 @@ paths:
                           minimum: 1
                           type: number
                         authMethod:
-                          description: 'Authentication method. managed_integration: identity_federation | static_keys. agent_based: static_keys (direct_access_keys) | temporary_keys | shared_credentials | assume_role.'
+                          description: |-
+                            Authentication method. Allowed values depend on the delivery mechanism:
+
+                            - managed_integration: identity_federation | static_keys
+                            - agent_based: static_keys (direct_access_keys) | temporary_keys | shared_credentials | assume_role
                           enum:
                             - identity_federation
                             - static_keys
@@ -46367,7 +46410,7 @@ paths:
                           maxItems: 10
                           type: array
                         packagePolicyIds:
-                          description: Package policy IDs created for managed_integration services.
+                          description: Package policy IDs created for this deployment (managed_integration and agent_based).
                           items:
                             type: string
                           maxItems: 100
