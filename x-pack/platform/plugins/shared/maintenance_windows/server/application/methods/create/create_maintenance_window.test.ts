@@ -498,4 +498,46 @@ describe('MaintenanceWindowClient - create', () => {
     // so the wildcard query should appear unchanged in the output — no index pattern needed.
     expect(parsedDsl.bool.filter[0]).toEqual(wildcardQuery);
   });
+
+  it('should mirror a filters-only alerting scope into scopedQuery', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
+
+    const mockMaintenanceWindow = getMockMaintenanceWindow({
+      expirationDate: moment(new Date()).tz('UTC').add(1, 'year').toISOString(),
+    });
+
+    savedObjectsClient.create.mockResolvedValueOnce({
+      attributes: mockMaintenanceWindow,
+      version: '123',
+      id: 'test-id',
+    } as unknown as SavedObject);
+
+    const filters = [
+      {
+        meta: { disabled: false, negate: false, alias: null },
+        $state: { store: FilterStateStore.APP_STATE },
+        query: { match_phrase: { 'kibana.alert.action_group': 'test' } },
+      },
+    ];
+
+    await createMaintenanceWindow(mockContext, {
+      data: {
+        title: mockMaintenanceWindow.title,
+        duration: mockMaintenanceWindow.duration,
+        rRule: mockMaintenanceWindow.rRule as CreateMaintenanceWindowParams['data']['rRule'],
+        schedule: mockMaintenanceWindow.schedule,
+        scope: { alerting: { enabled: true, kql: '', filters } },
+      },
+    });
+
+    const { scopedQuery } = savedObjectsClient.create.mock.calls[0][1] as MaintenanceWindow;
+    expect(scopedQuery).toEqual({
+      kql: '',
+      filters,
+      dsl: expect.any(String),
+    });
+    expect(JSON.parse(scopedQuery!.dsl!).bool.filter).toEqual([
+      { match_phrase: { 'kibana.alert.action_group': 'test' } },
+    ]);
+  });
 });

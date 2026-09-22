@@ -566,6 +566,66 @@ describe('MaintenanceWindowClient - update', () => {
     expect(storedScope?.alerting).toBeNull();
   });
 
+  it('should mirror a filters-only alerting scope into scopedQuery', async () => {
+    jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
+
+    const mockMaintenanceWindow = getMockMaintenanceWindow({
+      schedule: {
+        custom: {
+          start: '2023-03-26T00:00:00.000Z',
+          duration: '1h',
+          timezone: 'CET',
+          recurring: {
+            every: '1w',
+            occurrences: 5,
+          },
+        },
+      },
+      events: [{ gte: '2023-03-26T00:00:00.000Z', lte: '2023-03-26T00:12:34.000Z' }],
+      expirationDate: moment(new Date(firstTimestamp)).tz('UTC').add(2, 'week').toISOString(),
+    });
+
+    savedObjectsClient.get.mockResolvedValue({
+      attributes: mockMaintenanceWindow,
+      version: '123',
+      id: 'test-id',
+    } as unknown as SavedObject);
+
+    savedObjectsClient.create.mockResolvedValue({
+      attributes: {
+        ...mockMaintenanceWindow,
+        ...updatedAttributes,
+        ...updatedMetadata,
+      },
+      id: 'test-id',
+    } as unknown as SavedObject);
+
+    const filters = [
+      {
+        meta: { disabled: false, negate: false, alias: null },
+        $state: { store: FilterStateStore.APP_STATE },
+        query: { match_phrase: { 'kibana.alert.action_group': 'test' } },
+      },
+    ];
+
+    await updateMaintenanceWindow(mockContext, {
+      id: 'test-id',
+      data: {
+        scope: { alerting: { enabled: true, kql: '', filters } },
+      },
+    });
+
+    const { scopedQuery } = savedObjectsClient.create.mock.calls[0][1] as MaintenanceWindow;
+    expect(scopedQuery).toEqual({
+      kql: '',
+      filters,
+      dsl: expect.any(String),
+    });
+    expect(JSON.parse(scopedQuery!.dsl!).bool.filter).toEqual([
+      { match_phrase: { 'kibana.alert.action_group': 'test' } },
+    ]);
+  });
+
   it('should throw if updating a maintenance window with invalid scope', async () => {
     jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
     const mockMaintenanceWindow = getMockMaintenanceWindow({
