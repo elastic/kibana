@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UseEuiTheme } from '@elastic/eui';
+import type { EuiButtonGroupProps, UseEuiTheme } from '@elastic/eui';
 import {
   EuiFormRow,
   EuiButtonGroup,
@@ -15,6 +15,7 @@ import {
   EuiSpacer,
   useEuiTheme,
   EuiColorPalettePicker,
+  EuiButton,
 } from '@elastic/eui';
 import type { LayoutDirection } from '@elastic/charts';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
@@ -484,6 +485,59 @@ function SecondaryMetricEditor({
     [state]
   );
 
+  const nameDisplayOptions = useMemo(() => {
+    return [
+      {
+        id: `${idPrefix}hidden`,
+        label: i18n.translate('xpack.lens.metric.secondaryMetric.nameDisplay.hide', {
+          defaultMessage: 'Hide',
+        }),
+        'data-test-subj': 'lnsMetric_secondaryNameVisibility_hidden',
+        value: 'hidden' as const,
+      },
+      {
+        id: `${idPrefix}tooltip`,
+        label: i18n.translate('xpack.lens.metric.secondaryMetric.nameDisplay.tooltip', {
+          defaultMessage: 'Tooltip',
+        }),
+        'data-test-subj': 'lnsMetric_secondaryNameVisibility_tooltip',
+        value: 'tooltip' as const,
+      },
+      {
+        id: `${idPrefix}before`,
+        label: i18n.translate('xpack.lens.metric.secondaryMetric.nameDisplay.before', {
+          defaultMessage: 'Before',
+        }),
+        'data-test-subj': 'lnsMetric_secondaryNameVisibility_before',
+        value: 'before' as const,
+      },
+      {
+        id: `${idPrefix}after`,
+        label: i18n.translate('xpack.lens.metric.secondaryMetric.nameDisplay.after', {
+          defaultMessage: 'After',
+        }),
+        'data-test-subj': 'lnsMetric_secondaryNameVisibility_after',
+        value: 'after' as const,
+      },
+    ];
+  }, [idPrefix]);
+
+  const handleNameDisplayChange: EuiButtonGroupProps['onChange'] = useCallback(
+    (id: string) => {
+      const value = nameDisplayOptions.find((option) => option.id === id)?.value;
+
+      if (!value || value === state.secondaryNameVisibility) {
+        return;
+      }
+
+      setState({
+        ...state,
+        secondaryNameVisibility: value,
+      });
+    },
+    [setState, state, nameDisplayOptions]
+  );
+
   return (
     <div className="lnsIndexPatternDimensionEditor--padded">
       <EuiFormRow
@@ -495,47 +549,23 @@ function SecondaryMetricEditor({
       >
         <EuiButtonGroup
           isFullWidth
-          buttonSize="compressed"
+          buttonSize="s"
+          variant="selection"
           legend={i18n.translate('xpack.lens.metric.secondaryMetric.nameDisplay', {
             defaultMessage: 'Name display',
           })}
           data-test-subj="lnsMetric_secondaryNameVisibility_buttons"
-          options={[
-            {
-              id: `${idPrefix}hidden`,
-              label: i18n.translate('xpack.lens.metric.secondaryMetric.nameDisplay.hide', {
-                defaultMessage: 'Hide',
-              }),
-              'data-test-subj': 'lnsMetric_secondaryNameVisibility_hidden',
-              value: 'hidden' as const,
-            },
-            {
-              id: `${idPrefix}before`,
-              label: i18n.translate('xpack.lens.metric.secondaryMetric.nameDisplay.before', {
-                defaultMessage: 'Before',
-              }),
-              'data-test-subj': 'lnsMetric_secondaryNameVisibility_before',
-              value: 'before' as const,
-            },
-            {
-              id: `${idPrefix}after`,
-              label: i18n.translate('xpack.lens.metric.secondaryMetric.nameDisplay.after', {
-                defaultMessage: 'After',
-              }),
-              'data-test-subj': 'lnsMetric_secondaryNameVisibility_after',
-              value: 'after' as const,
-            },
-          ]}
           idSelected={`${idPrefix}${
             state.secondaryNameVisibility ?? LENS_METRIC_STATE_DEFAULTS.secondaryNameVisibility
           }`}
-          onChange={(_id, secondaryNameVisibility) => {
-            setState({
-              ...state,
-              secondaryNameVisibility,
-            });
-          }}
-        />
+          onChange={handleNameDisplayChange}
+        >
+          {nameDisplayOptions.map((option) => (
+            <EuiButton key={option.id} data-test-subj={option['data-test-subj']} id={option.id}>
+              {option.label}
+            </EuiButton>
+          ))}
+        </EuiButtonGroup>
       </EuiFormRow>
 
       <EuiFormRow

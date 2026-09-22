@@ -224,4 +224,38 @@ describe('getConnectorList', () => {
     const endpoint = result.find((c) => c.isInferenceEndpoint);
     expect(endpoint?.name).toBe('Display Name Takes Priority');
   });
+
+  it('omits ocr-only inference endpoints from the connector list', async () => {
+    getInferenceEndpointsMock.mockResolvedValue([
+      {
+        inferenceId: '.jina-ocr-v1',
+        taskType: 'chat_completion',
+        service: 'elastic',
+        serviceSettings: { model_id: 'jina-ocr-v1' },
+        metadata: {
+          display: { name: 'Jina OCR v1' },
+          heuristics: { properties: ['ocr-only'] },
+        },
+      },
+      {
+        inferenceId: '.claude-sonnet',
+        taskType: 'chat_completion',
+        service: 'elastic',
+        serviceSettings: { model_id: 'claude-sonnet' },
+        metadata: {
+          display: { name: 'Claude Sonnet' },
+          heuristics: { properties: ['kibana-connector'] },
+        },
+      },
+    ]);
+
+    const result = await getConnectorList({ actions, request, esClient, logger });
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({
+      connectorId: '.claude-sonnet',
+      name: 'Claude Sonnet',
+      isInferenceEndpoint: true,
+    });
+  });
 });
