@@ -132,6 +132,32 @@ describe('AlertAnalysisWorkflowOutput', () => {
     ).toBe(false);
   });
 
+  it('rejects when a count does not match its classification (swapped counts)', () => {
+    expect(
+      AlertAnalysisWorkflowOutput.safeParse({
+        ...sampleOutput,
+        // Totals still sum to verdicts.length, but classifications are swapped.
+        true_positive_count: 0,
+        false_positive_count: 2,
+        inconclusive_count: 0,
+      }).success
+    ).toBe(false);
+  });
+
+  it('rejects when impacted_entities exceeds 50', () => {
+    expect(
+      AlertAnalysisWorkflowOutput.safeParse({
+        ...sampleOutput,
+        impacted_entities: Array.from({ length: 51 }, (_, i) => ({
+          entity_type: 'host' as const,
+          name: `host-${i}`,
+          alert_count: 1,
+          verdicts: { true_positive: 1, false_positive: 0, inconclusive: 0 },
+        })),
+      }).success
+    ).toBe(false);
+  });
+
   it('rejects when a verdict has more than 3 contributing_factors', () => {
     expect(
       AlertAnalysisWorkflowOutput.safeParse({
