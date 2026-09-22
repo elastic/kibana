@@ -44,10 +44,13 @@ export async function navigateToOnboardingStep(
     instances?: unknown[];
     /** Optional ECF launch step to seed — sets the post-launch state without clicking the button. */
     ecfLaunchStep?: PersistedEcfLaunchStep;
-    /** Optional authenticate-and-deploy step to seed (connector or static-keys auth). */
+    /** Optional authenticate-and-deploy step to seed (connector, static-keys auth, or agent-based). */
     authenticateAndDeployStep?: {
       connectorId?: string;
       authMethod?: 'identity_federation' | 'static_keys';
+      deploymentMethod?: 'managed_integration' | 'agent_based';
+      agentHostsMode?: 'new' | 'existing';
+      selectedAgentPolicyIds?: string[];
     };
     /** Seed detectAndReviewStep session state to simulate post-deploy conditions. */
     detectAndReviewStep?: {
