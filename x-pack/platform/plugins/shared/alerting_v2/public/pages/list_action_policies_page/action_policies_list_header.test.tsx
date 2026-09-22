@@ -96,6 +96,9 @@ describe('ActionPoliciesListHeader', () => {
     await waitFor(() =>
       expect(screen.getByTestId('createActionPolicyWithAgentButton')).toBeInTheDocument()
     );
+    expect(screen.getByTestId('createActionPolicyWithAgentButton')).toHaveTextContent(
+      'Create with agent (Experimental)'
+    );
     await user.click(screen.getByTestId('createActionPolicyWithAgentButton'));
 
     expect(onCreateWithAgent).toHaveBeenCalledTimes(1);

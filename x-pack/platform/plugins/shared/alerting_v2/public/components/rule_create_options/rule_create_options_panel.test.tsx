@@ -11,6 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { RuleCreateOptionsPanel, getCreateWithAgentTooltipText } from './rule_create_options_panel';
 
 let mockAreAgentBuilderSkillsAvailable = true;
+let mockAlertingV2ExperimentalFeaturesEnabled = true;
 let mockAgentBuilderSkillsRequirements = {
   hasAgentBuilderCapability: true,
   isExperimentalFeaturesEnabled: true,
@@ -19,6 +20,10 @@ let mockAgentBuilderSkillsRequirements = {
 jest.mock('../../hooks/use_are_agent_builder_skills_available', () => ({
   useAreAgentBuilderSkillsAvailable: () => mockAreAgentBuilderSkillsAvailable,
   useAgentBuilderSkillsRequirements: () => mockAgentBuilderSkillsRequirements,
+}));
+
+jest.mock('../../hooks/use_alerting_v2_experimental_features', () => ({
+  useAlertingV2ExperimentalFeatures: () => mockAlertingV2ExperimentalFeaturesEnabled,
 }));
 
 const onCreateEsqlRule = jest.fn();
@@ -40,6 +45,7 @@ describe('RuleCreateOptionsPanel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockAreAgentBuilderSkillsAvailable = true;
+    mockAlertingV2ExperimentalFeaturesEnabled = true;
     mockAgentBuilderSkillsRequirements = {
       hasAgentBuilderCapability: true,
       isExperimentalFeaturesEnabled: true,
@@ -68,6 +74,21 @@ describe('RuleCreateOptionsPanel', () => {
     fireEvent.click(screen.getByTestId('createWithAgentCard'));
 
     expect(onCreateWithAgent).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders an experimental badge with the enabled agent card', () => {
+    renderPanel();
+
+    expect(screen.getByTestId('createWithAgentExperimentalBadge')).toHaveTextContent(
+      'Experimental'
+    );
+  });
+
+  it('does not render the agent card when Alerting V2 experimental features are disabled', () => {
+    mockAlertingV2ExperimentalFeaturesEnabled = false;
+    renderPanel();
+
+    expect(screen.queryByTestId('createWithAgentCard')).not.toBeInTheDocument();
   });
 
   it('renders the rule builder divider between the second and third options', () => {

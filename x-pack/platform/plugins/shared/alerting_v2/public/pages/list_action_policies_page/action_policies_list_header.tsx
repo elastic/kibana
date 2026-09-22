@@ -57,7 +57,7 @@ const getActionPoliciesListMenu = ({
             {
               id: 'createWithAgent',
               label: i18n.translate('xpack.alertingV2.actionPoliciesList.createWithAgentButton', {
-                defaultMessage: 'Create with agent',
+                defaultMessage: 'Create with agent (Experimental)',
               }),
               iconType: 'sparkles' as const,
               order: 0,

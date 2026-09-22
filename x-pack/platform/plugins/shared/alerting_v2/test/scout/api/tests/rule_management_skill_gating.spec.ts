@@ -23,10 +23,10 @@ const getSkillIds = (results: Array<{ id: string }>) => results.map((skill) => s
 /*
  * Alerting V2 Agent Builder skills (`rule-management` and
  * `action-policy-management`) are gated behind the Agent Builder
- * experimental-features advanced setting and `alerting:v2:enabled`. Action
- * Policy Management has one additional, space-scoped gate:
- * `alerting:v2:experimentalFeatures`. This suite exercises the common gates
- * and enables the additional Action Policy gate before asserting both skills.
+ * experimental-features advanced setting and `alerting:v2:enabled`. Both
+ * skills also share one additional, space-scoped gate:
+ * `alerting:v2:experimentalFeatures`. This suite exercises all gates before
+ * asserting either skill is listed.
  *
  * This is the canonical gating suite because the generic Scout config leaves
  * `alerting:v2:enabled` unpinned, so it can be flipped on and off at runtime.
@@ -120,7 +120,7 @@ apiTest.describe('Agent Builder — alerting V2 skill gating', () => {
   );
 
   apiTest(
-    'lists rule management but not action-policy management when its experimental gate is disabled',
+    'does not list either Alerting V2 skill when its experimental gate is disabled',
     { tag: tags.stateful.classic },
     async ({ apiClient, kbnClient, requestAuth }) => {
       await kbnClient.uiSettings.update({
@@ -141,7 +141,7 @@ apiTest.describe('Agent Builder — alerting V2 skill gating', () => {
       expect(Array.isArray(response.body.results)).toBe(true);
 
       const skillIds = getSkillIds(response.body.results);
-      expect(skillIds).toContain(RULE_MANAGEMENT_SKILL_ID);
+      expect(skillIds).not.toContain(RULE_MANAGEMENT_SKILL_ID);
       expect(skillIds).not.toContain(ACTION_POLICY_MANAGEMENT_SKILL_ID);
     }
   );

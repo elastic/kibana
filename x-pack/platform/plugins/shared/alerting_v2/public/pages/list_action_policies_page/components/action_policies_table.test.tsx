@@ -555,6 +555,9 @@ describe('ActionPoliciesTable', () => {
       });
       expect(screen.getByTestId('createActionPolicyCard')).toBeInTheDocument();
       expect(screen.getByTestId('createActionPolicyWithAgentCard')).toBeInTheDocument();
+      expect(screen.getByTestId('createActionPolicyWithAgentExperimentalBadge')).toHaveTextContent(
+        'Experimental'
+      );
     });
 
     it('hides the header create button in the empty state', async () => {

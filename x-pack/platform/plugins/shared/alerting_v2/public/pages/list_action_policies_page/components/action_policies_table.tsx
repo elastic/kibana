@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { ActionPolicyResponse, CreateActionPolicyData } from '@kbn/alerting-v2-schemas';
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiBadge, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -38,6 +38,7 @@ import { useUpdateActionPolicyApiKey } from '../../../hooks/use_update_action_po
 import { UserCapabilities } from '../../../services/user_capabilities';
 import { ENABLED_FILTER_ID, useActionPoliciesDataSource } from '../action_policies_data_source';
 import { ActionPoliciesListHeader } from '../action_policies_list_header';
+import { experimentalBadgeLabel } from '../../../components/experimental_badge';
 import { UpdateApiKeyConfirmationModal } from './update_api_key_confirmation_modal';
 import {
   ActionPoliciesTableContent,
@@ -193,7 +194,19 @@ export const ActionPoliciesTable = () => {
             {
               id: 'create-with-agent',
               iconType: 'productAgent' as const,
-              title: CREATE_WITH_AGENT_OPTION_TITLE,
+              title: (
+                <EuiFlexGroup gutterSize="s" responsive={false}>
+                  <EuiFlexItem grow={false}>{CREATE_WITH_AGENT_OPTION_TITLE}</EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge
+                      color="hollow"
+                      data-test-subj="createActionPolicyWithAgentExperimentalBadge"
+                    >
+                      {experimentalBadgeLabel}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              ),
               description: CREATE_WITH_AGENT_OPTION_DESCRIPTION,
               onClick: navigateToAgentBuilder,
               disabled: !areAgentBuilderSkillsAvailable,
