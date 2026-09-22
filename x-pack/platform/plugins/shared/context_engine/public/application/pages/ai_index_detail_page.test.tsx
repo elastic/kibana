@@ -22,6 +22,7 @@ import { createEvent, fireEvent, render, screen, waitFor } from '@testing-librar
 import React from 'react';
 import type { GetAiIndexResponse } from '../../../common/http_api/ai_indices';
 import { CONTEXT_ENGINE_APP_ID } from '../../../common/features';
+import { AI_INDEX_CREATED_LOCATION_STATE } from '../ai_index_created_location_state';
 import { CONTEXT_ENGINE_PATHS, getAiIndexDetailPath } from '../paths';
 import { CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ } from '../layout/context_engine_page_header';
 import { AiIndexDetailPage } from './ai_index_detail_page';
@@ -133,7 +134,10 @@ const createServices = () => {
   return services;
 };
 
-const renderWithProviders = (services: ReturnType<typeof createServices>) => {
+const renderWithProviders = (
+  services: ReturnType<typeof createServices>,
+  locationState?: typeof AI_INDEX_CREATED_LOCATION_STATE
+) => {
   const discoverLocator = sharePluginMock.createLocator();
   discoverLocator.getRedirectUrl.mockReturnValue('/app/discover');
 
@@ -160,7 +164,14 @@ const renderWithProviders = (services: ReturnType<typeof createServices>) => {
             services={{ ...services, triggersActionsUi: triggersActionsUiMock.createStart() }}
           >
             <QueryClientProvider client={queryClient}>
-              <MemoryRouter initialEntries={[getAiIndexDetailPath(aiIndex.id)]}>
+              <MemoryRouter
+                initialEntries={[
+                  {
+                    pathname: getAiIndexDetailPath(aiIndex.id),
+                    ...(locationState ? { state: locationState } : {}),
+                  },
+                ]}
+              >
                 <Route path={CONTEXT_ENGINE_PATHS.detail} component={AiIndexDetailPage} />
               </MemoryRouter>
             </QueryClientProvider>
@@ -182,6 +193,42 @@ describe('AiIndexDetailPage', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('shows a dismissible success callout when navigated from AI index creation', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+
+    renderWithProviders(services, AI_INDEX_CREATED_LOCATION_STATE);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.getByTestId('contextAiIndexCreatedCallout')).toBeInTheDocument();
+    expect(screen.getByText('Your AI index is ready')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Add sources to build agent context from your data, or use it to store agent memory/i
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexCreatedCalloutDocumentationLink')).toHaveAttribute(
+      'href',
+      services.docLinks.links.contextEngine.overview
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Dismiss AI index created message' }));
+
+    expect(screen.queryByTestId('contextAiIndexCreatedCallout')).not.toBeInTheDocument();
+  });
+
+  it('does not show the success callout without creation navigation state', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.queryByTestId('contextAiIndexCreatedCallout')).not.toBeInTheDocument();
   });
 
   it('fetches the AI index and renders its id and sources', async () => {

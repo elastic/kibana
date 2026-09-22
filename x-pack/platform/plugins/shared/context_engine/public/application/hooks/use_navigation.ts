@@ -26,8 +26,11 @@ export const useNavigation = () => {
   );
 
   const navigateToContextEngine = useCallback(
-    (path: string, params?: Record<string, string>): void => {
-      application.navigateToApp(CONTEXT_ENGINE_APP_ID, { path: buildPath(path, params) });
+    (path: string, params?: Record<string, string>, state?: unknown): void => {
+      application.navigateToApp(CONTEXT_ENGINE_APP_ID, {
+        path: buildPath(path, params),
+        ...(state !== undefined ? { state } : {}),
+      });
     },
     [application]
   );
