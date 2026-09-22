@@ -586,8 +586,18 @@ export class DashboardPageControls extends FtrService {
       const buttonTestSubject = include
         ? 'optionsList__includeResults'
         : 'optionsList__excludeResults';
-      await this.testSubjects.click(buttonTestSubject);
-      const selectedButton = await this.testSubjects.find(buttonTestSubject);
+      const [buttonGroup] = await this.testSubjects.findAll(
+        'optionsList__includeExcludeButtonGroup'
+      );
+      const button = await this.testSubjects.findDescendant(buttonTestSubject, buttonGroup);
+      await button.click();
+      const [updatedButtonGroup] = await this.testSubjects.findAll(
+        'optionsList__includeExcludeButtonGroup'
+      );
+      const selectedButton = await this.testSubjects.findDescendant(
+        buttonTestSubject,
+        updatedButtonGroup
+      );
       expect(await selectedButton.getAttribute('aria-pressed')).to.be('true');
     });
   }
