@@ -67,7 +67,8 @@ export function validateVariables(
             yamlDocument,
             offset,
             pathSchema,
-            yamlString
+            yamlString,
+            stepContext.templateLocalSchemaCache
           );
           fullContextCache.set(fullContextKey, context);
         }

@@ -13,6 +13,7 @@ import { getShape } from '@kbn/workflows/common/utils/zod';
 import { getScalarValueAtOffset } from '../../yaml/get_scalar_value_at_offset';
 import { z } from '@kbn/zod/v4';
 import {
+  createTemplateLocalSchemaCache,
   extendContextWithTemplateLocals,
   getContextSchemaWithTemplateLocals,
   mapBlockScalarSourceToValueOffset,
@@ -106,8 +107,34 @@ describe('extendContextWithTemplateLocals', () => {
 });
 
 describe('extendContextWithTemplateLocals reuse', () => {
+  // The cache belongs to the caller, so reuse only happens within one of them.
+  let schemaCache = createTemplateLocalSchemaCache();
+
+  beforeEach(() => {
+    schemaCache = createTemplateLocalSchemaCache();
+  });
+
   const extend = (template: string, offset: number) =>
-    extendContextWithTemplateLocals(DynamicStepContextSchema, template, offset);
+    extendContextWithTemplateLocals(DynamicStepContextSchema, template, offset, schemaCache);
+
+  it('builds a separate schema for a caller with its own cache', () => {
+    const template = '{% assign a = "x" %}{{ a }}';
+    const offset = template.indexOf('{{ a }}');
+    const other = createTemplateLocalSchemaCache();
+
+    expect(
+      extendContextWithTemplateLocals(DynamicStepContextSchema, template, offset, other)
+    ).not.toBe(extend(template, offset));
+  });
+
+  it('builds a new schema every call when no cache is passed', () => {
+    const template = '{% assign a = "x" %}{{ a }}';
+    const offset = template.indexOf('{{ a }}');
+
+    expect(extendContextWithTemplateLocals(DynamicStepContextSchema, template, offset)).not.toBe(
+      extendContextWithTemplateLocals(DynamicStepContextSchema, template, offset)
+    );
+  });
 
   it('returns one schema for references that share the same locals', () => {
     // Both references sit after the same assign, so both see the same locals.

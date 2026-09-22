@@ -256,27 +256,40 @@ function inferSchemaFromAssignRhs(
  * reference sharing a signature shares one schema: extending a base schema with
  * one key per assign is the bulk of the cost, and a scalar holding thousands of
  * assigns and thousands of references would otherwise pay it once per reference.
+ *
+ * Owned by the caller rather than by this module, so its lifetime is a
+ * validation run: `createStepContextResolver` makes one and drops it with the
+ * run. A base schema is rebuilt per run anyway, so nothing here outlives it.
  */
-const extendedSchemaCache = new WeakMap<object, Map<string, typeof DynamicStepContextSchema>>();
+export type TemplateLocalSchemaCache = WeakMap<
+  object,
+  Map<string, typeof DynamicStepContextSchema>
+>;
+
+export const createTemplateLocalSchemaCache = (): TemplateLocalSchemaCache => new WeakMap();
 
 export function extendContextWithTemplateLocals(
   baseSchema: typeof DynamicStepContextSchema,
   templateString: string,
-  offsetInTemplate: number
+  offsetInTemplate: number,
+  schemaCache?: TemplateLocalSchemaCache
 ): typeof DynamicStepContextSchema {
   const { assignVars, captureNames, forLoopScopes, signature } = getTemplateLocalContext(
     templateString,
     offsetInTemplate
   );
 
-  let bySignature = extendedSchemaCache.get(baseSchema);
-  if (!bySignature) {
-    bySignature = new Map();
-    extendedSchemaCache.set(baseSchema, bySignature);
-  }
-  const cached = bySignature.get(signature);
-  if (cached) {
-    return cached;
+  let bySignature: Map<string, typeof DynamicStepContextSchema> | undefined;
+  if (schemaCache) {
+    bySignature = schemaCache.get(baseSchema);
+    if (!bySignature) {
+      bySignature = new Map();
+      schemaCache.set(baseSchema, bySignature);
+    }
+    const cached = bySignature.get(signature);
+    if (cached) {
+      return cached;
+    }
   }
 
   const extension: Record<string, z.ZodType> = {};
@@ -313,7 +326,7 @@ export function extendContextWithTemplateLocals(
         // dynamic and not reflected in the static type.
         (baseSchema.extend(extension) as typeof DynamicStepContextSchema);
 
-  bySignature.set(signature, extended);
+  bySignature?.set(signature, extended);
   return extended;
 }
 
@@ -360,7 +373,8 @@ export function getContextSchemaWithTemplateLocals(
   offset: number,
   baseSchema: typeof DynamicStepContextSchema,
   /** Original YAML source (e.g. editor model). Prefer over re-serialized `doc.toString()` for block scalars. */
-  yamlSource?: string
+  yamlSource?: string,
+  schemaCache?: TemplateLocalSchemaCache
 ): typeof DynamicStepContextSchema {
   const scalarNode = getScalarValueAtOffset(yamlDocument, offset);
   if (!scalarNode || typeof scalarNode.value !== 'string' || !scalarNode.range) {
@@ -395,5 +409,5 @@ export function getContextSchemaWithTemplateLocals(
     return baseSchema;
   }
 
-  return extendContextWithTemplateLocals(baseSchema, templateString, offsetInTemplate);
+  return extendContextWithTemplateLocals(baseSchema, templateString, offsetInTemplate, schemaCache);
 }

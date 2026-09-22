@@ -11,6 +11,10 @@ import type { Document } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { DynamicStepContextSchema } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
+import {
+  createTemplateLocalSchemaCache,
+  type TemplateLocalSchemaCache,
+} from './extend_context_with_template_locals';
 import { getContextSchemaForStep } from './get_context_for_path';
 import type { StepEntrySchemaCache } from './get_steps_collection_schema';
 import { getWorkflowContextSchema } from './get_workflow_context_schema';
@@ -19,6 +23,8 @@ import type { WorkflowContextRegistry } from './registry';
 /** Shares step context schemas across validators within one validation run. */
 export interface StepContextResolver {
   readonly baseSchema: typeof DynamicStepContextSchema;
+  /** Template-local schemas built during this run, shared by the validators in it. */
+  readonly templateLocalSchemaCache: TemplateLocalSchemaCache;
   forStep(stepName?: string): typeof DynamicStepContextSchema;
 }
 
@@ -38,6 +44,7 @@ export function createStepContextResolver(
 
   return {
     baseSchema,
+    templateLocalSchemaCache: createTemplateLocalSchemaCache(),
     forStep(stepName?: string) {
       if (!stepName) {
         return baseSchema;

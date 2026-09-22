@@ -229,7 +229,8 @@ function collectForLoopCollectionResults(
         ctx.yamlDocument,
         absRange.start,
         stepSchema,
-        ctx.yamlString
+        ctx.yamlString,
+        ctx.stepContext.templateLocalSchemaCache
       );
     }
 
