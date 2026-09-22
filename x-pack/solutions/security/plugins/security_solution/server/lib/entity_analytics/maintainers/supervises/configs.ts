@@ -185,6 +185,24 @@ const WORKDAY_INGESTED_LOOKBACK_ESQL = `NOW() - ${WORKDAY_INGESTED_LOOKBACK_DAYS
  * untouched. Case 1 would need discovery keyed on the worker rather than the
  * manager, which inverts how Step 1 buckets for this config.
  *
+ * **Why Workday is retractable in principle and `accesses` is not.** Unlike the
+ * log-based maintainers, this source emits a *complete inventory* on every 24h
+ * poll — a report, not a stream of occurrences. Absence is therefore positive
+ * evidence: if a worker's newest row does not name Bob, Bob is genuinely no
+ * longer their manager. Contrast `accesses` on `logs-system.auth`, where a login
+ * is a historical fact that stays true forever and absence means only "not used
+ * in this window". That is why the engine's additive default is correct there and
+ * costly here, and it makes this config the motivating case for #292358.
+ *
+ * Snapshot semantics alone are not enough to retract, though. An authoritative
+ * write (including `{ ids: [] }`, which `engine/update_entities.ts` deliberately
+ * never emits) is only safe when the run holds the actor's *complete* target set
+ * at write time. The engine streams writes per composite page, and this config's
+ * `MV_EXPAND` + row cap mean a saturated page can return an incomplete group —
+ * so an authoritative write over truncated output would delete real
+ * relationships rather than merely leave stale ones. Any retraction work here
+ * must resolve that first.
+ *
  * `Worker_s_Manager` is deliberately unused: it is a display name
  * ("Alex Manager (000687)"), not a resolvable identifier.
  *
