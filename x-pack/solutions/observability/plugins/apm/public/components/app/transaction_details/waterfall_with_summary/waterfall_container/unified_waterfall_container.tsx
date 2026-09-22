@@ -7,10 +7,8 @@
 
 import type { Error } from '@kbn/apm-types';
 import { TRACE_WATERFALL_EBT_ELEMENTS } from '@kbn/apm-ui-shared';
-import { UnifiedDocViewerObservabilityTraceDocFlyout } from '@kbn/unified-doc-viewer-plugin/public';
-import type { UnifiedDocViewerObservabilityTracesDocumentType } from '@kbn/unified-doc-viewer-plugin/public';
 import type { History } from 'history';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { TraceItem } from '../../../../../../common/waterfall/unified_trace_item';
 import { fromQuery, toQuery } from '../../../../shared/links/url_helpers';
@@ -19,8 +17,6 @@ import { useErrorClickHandler } from './use_error_click_handler';
 import { useGetErrorMarkerHrefFromRouter } from './use_get_error_marker_href_from_router';
 import { useGetServiceBadgeHrefFromRouter } from './use_get_service_badge_href_from_router';
 import { useKibana } from '../../../../../context/kibana_context/use_kibana';
-import { useAdHocApmDataView } from '../../../../../hooks/use_adhoc_apm_data_view';
-import { useLogsIndexPattern } from '../../../../../hooks/use_logs_index_pattern';
 
 interface Props {
   traceItems: TraceItem[];
@@ -34,7 +30,6 @@ interface Props {
   traceDocsTotal?: number;
   maxTraceItems?: number;
   discoverHref?: string;
-  traceId?: string;
 }
 
 const toggleFlyout = ({
@@ -68,7 +63,6 @@ export function UnifiedWaterfallContainer({
   traceDocsTotal,
   maxTraceItems,
   discoverHref,
-  traceId,
 }: Props) {
   const {
     services: { apmShared },
@@ -78,54 +72,10 @@ export function UnifiedWaterfallContainer({
   const getServiceBadgeHref = useGetServiceBadgeHrefFromRouter();
   const getErrorMarkerHref = useGetErrorMarkerHrefFromRouter();
 
-  // --- Doc flyout state (for unprocessed OTel errors and multi-error rows) ---
-  const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
-  const [selectedDocIndex, setSelectedDocIndex] = useState<string | undefined>(undefined);
-  const [activeFlyoutType, setActiveFlyoutType] =
-    useState<UnifiedDocViewerObservabilityTracesDocumentType>('span');
-  const [activeSection, setActiveSection] = useState<'errors-table' | undefined>(undefined);
-
-  const { dataView, apmIndices } = useAdHocApmDataView();
-  const { logsIndexPattern } = useLogsIndexPattern();
-
-  const indexes = useMemo(
-    () => ({
-      logs: logsIndexPattern,
-      apm: {
-        traces: apmIndices?.transaction,
-        errors: apmIndices?.error,
-      },
-    }),
-    [logsIndexPattern, apmIndices?.transaction, apmIndices?.error]
-  );
-
-  const openDocFlyout = useCallback(
-    ({
-      type,
-      docId,
-      docIndex,
-      activeSection: section,
-    }: {
-      type: UnifiedDocViewerObservabilityTracesDocumentType;
-      docId: string;
-      docIndex: string | undefined;
-      activeSection: 'errors-table' | undefined;
-    }) => {
-      setActiveFlyoutType(type);
-      setSelectedDocId(docId);
-      setSelectedDocIndex(docIndex);
-      setActiveSection(section);
-    },
-    []
-  );
-
-  const closeDocFlyout = useCallback(() => {
-    setSelectedDocId(null);
-    setSelectedDocIndex(undefined);
-    setActiveSection(undefined);
-  }, []);
-
-  const handleErrorClick = useErrorClickHandler(traceItems, openDocFlyout);
+  // Every error-badge click navigates to the service's Errors page. The page
+  // renders two sections ("APM errors" + "Errors from logs") scoped by the kuery
+  // that use_error_click_handler sets.
+  const handleErrorClick = useErrorClickHandler(traceItems);
 
   const handleNodeClick = (id: string, options?: { flyoutDetailTab?: string }) => {
     toggleFlyout({
@@ -166,20 +116,6 @@ export function UnifiedWaterfallContainer({
           toggleFlyout={toggleFlyout}
         />
       </TraceWaterfall>
-      {selectedDocId && traceId && dataView && (
-        <UnifiedDocViewerObservabilityTraceDocFlyout
-          type={activeFlyoutType}
-          docId={selectedDocId}
-          docIndex={selectedDocIndex}
-          traceId={traceId}
-          dataView={dataView}
-          indexes={indexes}
-          activeSection={activeSection}
-          onCloseFlyout={closeDocFlyout}
-          dataTestSubj="apmWaterfallErrorDocFlyout"
-          size="m"
-        />
-      )}
     </div>
   );
 }

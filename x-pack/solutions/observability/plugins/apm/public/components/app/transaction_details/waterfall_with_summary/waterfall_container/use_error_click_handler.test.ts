@@ -15,7 +15,6 @@ import type { TraceItem } from '../../../../../../common/waterfall/unified_trace
 describe('useErrorClickHandler', () => {
   const mockNavigateToUrl = jest.fn();
   const mockLink = jest.fn();
-  const mockOnOpenDocFlyout = jest.fn();
 
   const mockUseApmRouter = jest.spyOn(useApmRouterModule, 'useApmRouter');
   const mockUseAnyOfApmParams = jest.spyOn(useApmParamsModule, 'useAnyOfApmParams');
@@ -29,6 +28,10 @@ describe('useErrorClickHandler', () => {
     rangeTo: 'now',
     environment: 'ENVIRONMENT_ALL',
     kuery: '',
+    // comparisonEnabled is optional on the source routes (transactions/view, dependencies/operation),
+    // so use_error_click_handler provides `false` as a safe fallback for the errors routes which
+    // require it as non-optional boolean.
+    comparisonEnabled: false,
   };
 
   const mockTraceItems: TraceItem[] = [
@@ -61,7 +64,6 @@ describe('useErrorClickHandler', () => {
     jest.clearAllMocks();
 
     mockLink.mockImplementation((path: string) => `/apm${path}`);
-    mockOnOpenDocFlyout.mockReset();
 
     mockUseApmRouter.mockReturnValue({
       link: mockLink,
@@ -81,13 +83,13 @@ describe('useErrorClickHandler', () => {
   });
 
   it('returns a callback function', () => {
-    const { result } = renderHook(() => useErrorClickHandler(mockTraceItems, mockOnOpenDocFlyout));
+    const { result } = renderHook(() => useErrorClickHandler(mockTraceItems));
 
     expect(typeof result.current).toBe('function');
   });
 
   it('does not navigate when item is not found', () => {
-    const { result } = renderHook(() => useErrorClickHandler(mockTraceItems, mockOnOpenDocFlyout));
+    const { result } = renderHook(() => useErrorClickHandler(mockTraceItems));
 
     result.current({
       traceId: 'trace-123',
@@ -96,11 +98,10 @@ describe('useErrorClickHandler', () => {
     });
 
     expect(mockNavigateToUrl).not.toHaveBeenCalled();
-    expect(mockOnOpenDocFlyout).not.toHaveBeenCalled();
   });
 
   it('navigates to standard errors page for a single classic APM error', () => {
-    const { result } = renderHook(() => useErrorClickHandler(mockTraceItems, mockOnOpenDocFlyout));
+    const { result } = renderHook(() => useErrorClickHandler(mockTraceItems));
 
     result.current({
       traceId: 'trace-123',
@@ -115,17 +116,13 @@ describe('useErrorClickHandler', () => {
         ...defaultQuery,
         serviceGroup: '',
         kuery: 'trace.id : "trace-123" and (span.id : "span-1" or transaction.id : "span-1")',
-        // traceId/spanId are appended so the OTel panel can self-suppress when absent.
-        traceId: 'trace-123',
-        spanId: 'span-1',
       },
     });
     expect(mockNavigateToUrl).toHaveBeenCalled();
-    expect(mockOnOpenDocFlyout).not.toHaveBeenCalled();
   });
 
   it('navigates to mobile errors page for a single classic APM error on a mobile agent', () => {
-    const { result } = renderHook(() => useErrorClickHandler(mockTraceItems, mockOnOpenDocFlyout));
+    const { result } = renderHook(() => useErrorClickHandler(mockTraceItems));
 
     result.current({
       traceId: 'trace-123',
@@ -143,11 +140,10 @@ describe('useErrorClickHandler', () => {
       },
     });
     expect(mockNavigateToUrl).toHaveBeenCalled();
-    expect(mockOnOpenDocFlyout).not.toHaveBeenCalled();
   });
 
   it('navigates to errors page for multiple classic APM errors (regression guard for synth-classic-errors)', () => {
-    const { result } = renderHook(() => useErrorClickHandler(mockTraceItems, mockOnOpenDocFlyout));
+    const { result } = renderHook(() => useErrorClickHandler(mockTraceItems));
 
     result.current({
       traceId: 'my-trace-id',
@@ -161,17 +157,15 @@ describe('useErrorClickHandler', () => {
       expect.objectContaining({
         query: expect.objectContaining({
           kuery: 'trace.id : "my-trace-id" and (span.id : "span-1" or transaction.id : "span-1")',
-          traceId: 'my-trace-id',
-          spanId: 'span-1',
         }),
       })
     );
     expect(mockNavigateToUrl).toHaveBeenCalled();
-    expect(mockOnOpenDocFlyout).not.toHaveBeenCalled();
   });
 
-  it('opens log flyout for a single unprocessed OTel error', () => {
-    const { result } = renderHook(() => useErrorClickHandler(mockTraceItems, mockOnOpenDocFlyout));
+  it('navigates to errors page for a single unprocessed OTel error (was: log flyout)', () => {
+    // Previously this opened a log doc flyout; now every badge click goes to the Errors page.
+    const { result } = renderHook(() => useErrorClickHandler(mockTraceItems));
 
     result.current({
       traceId: 'trace-123',
@@ -182,17 +176,21 @@ describe('useErrorClickHandler', () => {
       errorSource: 'unprocessedOtel',
     });
 
-    expect(mockOnOpenDocFlyout).toHaveBeenCalledWith({
-      type: 'log',
-      docId: 'log-doc-id',
-      docIndex: 'logs-generic.otel-default',
-      activeSection: undefined,
-    });
-    expect(mockNavigateToUrl).not.toHaveBeenCalled();
+    expect(mockNavigateToUrl).toHaveBeenCalled();
+    expect(mockLink).toHaveBeenCalledWith(
+      '/services/{serviceName}/errors',
+      expect.objectContaining({
+        query: expect.objectContaining({
+          kuery: 'trace.id : "trace-123" and (span.id : "span-1" or transaction.id : "span-1")',
+        }),
+      })
+    );
   });
 
-  it('opens span flyout with errors-table for pure-OTel multi-error rows (unprocessedOtel source)', () => {
-    const { result } = renderHook(() => useErrorClickHandler(mockTraceItems, mockOnOpenDocFlyout));
+  it('navigates to errors page for pure-OTel multi-error rows (was: span flyout)', () => {
+    // Previously this opened the span flyout scrolled to the errors table.
+    // Now every badge click goes to the Errors page regardless of source.
+    const { result } = renderHook(() => useErrorClickHandler(mockTraceItems));
 
     result.current({
       traceId: 'trace-123',
@@ -201,17 +199,20 @@ describe('useErrorClickHandler', () => {
       errorSource: 'unprocessedOtel',
     });
 
-    expect(mockOnOpenDocFlyout).toHaveBeenCalledWith({
-      type: 'span',
-      docId: 'span-1',
-      docIndex: undefined,
-      activeSection: 'errors-table',
-    });
-    expect(mockNavigateToUrl).not.toHaveBeenCalled();
+    expect(mockNavigateToUrl).toHaveBeenCalled();
+    expect(mockLink).toHaveBeenCalledWith(
+      '/services/{serviceName}/errors',
+      expect.objectContaining({
+        query: expect.objectContaining({
+          kuery: 'trace.id : "trace-123" and (span.id : "span-1" or transaction.id : "span-1")',
+        }),
+      })
+    );
   });
 
-  it('navigates to errors page with traceId/spanId for mixed spans (APM + OTel errors)', () => {
-    const { result } = renderHook(() => useErrorClickHandler(mockTraceItems, mockOnOpenDocFlyout));
+  it('navigates to errors page for mixed spans (APM + OTel errors) — no traceId/spanId in query', () => {
+    // The kuery carries the trace/span scoping; no separate URL params are needed.
+    const { result } = renderHook(() => useErrorClickHandler(mockTraceItems));
 
     result.current({
       traceId: 'trace-mixed',
@@ -220,28 +221,24 @@ describe('useErrorClickHandler', () => {
       errorSource: 'mixed',
     });
 
-    expect(mockLink).toHaveBeenCalledWith(
-      '/services/{serviceName}/errors',
-      expect.objectContaining({
-        query: expect.objectContaining({
-          traceId: 'trace-mixed',
-          spanId: 'span-1',
-        }),
-      })
+    const callArgs = mockLink.mock.calls[0][1] as { query: Record<string, unknown> };
+    expect(callArgs.query.traceId).toBeUndefined();
+    expect(callArgs.query.spanId).toBeUndefined();
+    expect(callArgs.query.kuery).toBe(
+      'trace.id : "trace-mixed" and (span.id : "span-1" or transaction.id : "span-1")'
     );
     expect(mockNavigateToUrl).toHaveBeenCalled();
-    expect(mockOnOpenDocFlyout).not.toHaveBeenCalled();
   });
 
-  it('explicit traceId overrides any stale traceId inherited from the transactions/view route query', () => {
-    // transactions/view declares traceId in its own schema; use_error_click_handler spreads
-    // the whole query object, which may carry a stale traceId from the sampled transaction.
-    // The row's own errorTraceId must win.
+  it('strips the stale traceId/spanId inherited from the transactions/view route query', () => {
+    // apmRouter.link() does NOT strip params the target route schema omits — it
+    // stringifies the raw merged query. Without the explicit `omit`, a stale traceId
+    // from the sampled transaction would ride along into the Errors page URL.
     mockUseAnyOfApmParams.mockReturnValue({
-      query: { ...defaultQuery, traceId: 'stale-trace-from-transactions-view' },
+      query: { ...defaultQuery, traceId: 'stale-trace-from-transactions-view', spanId: 'stale-span' },
     } as any);
 
-    const { result } = renderHook(() => useErrorClickHandler(mockTraceItems, mockOnOpenDocFlyout));
+    const { result } = renderHook(() => useErrorClickHandler(mockTraceItems));
 
     result.current({
       traceId: 'actual-error-trace',
@@ -250,25 +247,20 @@ describe('useErrorClickHandler', () => {
       errorSource: 'apm',
     });
 
-    expect(mockLink).toHaveBeenCalledWith(
-      expect.any(String),
-      expect.objectContaining({
-        query: expect.objectContaining({
-          // The row's traceId overrides the stale one from the spread.
-          traceId: 'actual-error-trace',
-          spanId: 'span-1',
-        }),
-      })
-    );
-    // Stale traceId must NOT appear in the link when it differs.
     const callArgs = mockLink.mock.calls[0][1] as { query: Record<string, unknown> };
-    expect(callArgs.query.traceId).toBe('actual-error-trace');
+    // The stale ids must be gone — not overridden by the error trace, just absent.
+    expect(callArgs.query.traceId).toBeUndefined();
+    expect(callArgs.query.spanId).toBeUndefined();
+    // The kuery carries the actual trace scoping.
+    expect(callArgs.query.kuery).toBe(
+      'trace.id : "actual-error-trace" and (span.id : "span-1" or transaction.id : "span-1")'
+    );
   });
 
   it('constructs correct kuery with traceId and both id fields for spans (multiple APM errors)', () => {
-    const { result } = renderHook(() => useErrorClickHandler(mockTraceItems, mockOnOpenDocFlyout));
+    const { result } = renderHook(() => useErrorClickHandler(mockTraceItems));
 
-    // Use span-1 (non-mobile service) so the result is the standard /errors route with all params.
+    // Use span-1 (non-mobile service) so the result is the standard /errors route.
     result.current({
       traceId: 'my-trace-id',
       docId: 'span-1',
@@ -281,8 +273,6 @@ describe('useErrorClickHandler', () => {
       expect.objectContaining({
         query: expect.objectContaining({
           kuery: 'trace.id : "my-trace-id" and (span.id : "span-1" or transaction.id : "span-1")',
-          traceId: 'my-trace-id',
-          spanId: 'span-1',
         }),
       })
     );
@@ -306,7 +296,7 @@ describe('useErrorClickHandler', () => {
       },
     ];
 
-    const { result } = renderHook(() => useErrorClickHandler(otelTraceItems, mockOnOpenDocFlyout));
+    const { result } = renderHook(() => useErrorClickHandler(otelTraceItems));
 
     result.current({
       traceId: 'trace-123',
@@ -322,8 +312,6 @@ describe('useErrorClickHandler', () => {
         serviceGroup: '',
         kuery:
           'trace.id : "trace-123" and (span.id : "otel-span-id" or transaction.id : "otel-span-id")',
-        traceId: 'trace-123',
-        spanId: 'otel-span-id',
       },
     });
   });

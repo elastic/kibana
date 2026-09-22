@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
@@ -15,13 +22,15 @@ import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group
 import { FailedTransactionRateChart } from '../../shared/charts/failed_transaction_rate_chart';
 import { ErrorDistribution } from '../error_group_details/distribution';
 import { ErrorGroupList } from './error_group_list';
-import { UnprocessedOtelErrors } from './unprocessed_otel_errors';
+import { ErrorsFromLogsSection } from './errors_from_logs';
+import { useServiceErrorsFromLogs } from './errors_from_logs/use_service_errors_from_logs';
+import { getApmErrorsPresence } from './use_has_apm_errors';
 
 export function ErrorGroupOverview() {
   const { serviceName } = useApmServiceContext();
 
   const {
-    query: { environment, kuery, comparisonEnabled, rangeFrom, rangeTo, traceId, spanId },
+    query: { environment, kuery, comparisonEnabled, rangeFrom, rangeTo },
   } = useApmParams('/services/{serviceName}/errors');
 
   const { errorDistributionData, errorDistributionStatus } = useErrorGroupDistributionFetcher({
@@ -31,73 +40,109 @@ export function ErrorGroupOverview() {
     kuery,
   });
 
-  const headerTitle = i18n.translate(
+  const errorsFromLogs = useServiceErrorsFromLogs({
+    serviceName,
+    environment,
+    kuery,
+    rangeFrom,
+    rangeTo,
+  });
+
+  // Collapse the APM section only when we know it is empty AND there is something to show
+  // instead. Every other state (including pending states) keeps APM visible, which is
+  // the arrangement the overwhelming majority of services land on, so layout is stable.
+  const apmErrors = getApmErrorsPresence({ errorDistributionData, errorDistributionStatus });
+  const showApmSection = !(apmErrors === 'absent' && errorsFromLogs.hasRows);
+
+  const chartTitle = i18n.translate(
     'xpack.apm.serviceDetails.metrics.errorOccurrencesChart.title',
     { defaultMessage: 'Error occurrences' }
   );
 
+  const apmSectionTitle = (
+    <EuiTitle size="s">
+      <h2>
+        {i18n.translate('xpack.apm.errorGroupOverview.apmErrorsSectionTitle', {
+          defaultMessage: 'APM errors',
+        })}
+      </h2>
+    </EuiTitle>
+  );
+
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiFlexItem>
-        <EuiFlexGroup direction="row" gutterSize="s">
-          <ChartPointerEventContextProvider>
-            <EuiFlexItem>
-              <EuiPanel hasBorder={true}>
-                <ErrorDistribution
-                  fetchStatus={errorDistributionStatus}
-                  distribution={errorDistributionData}
-                  title={headerTitle}
-                  discoverParams={{
-                    label: i18n.translate('xpack.apm.errorGroupOverview.openErrorsInDiscover', {
-                      defaultMessage: 'Open errors in Discover',
-                    }),
-                    rangeFrom,
-                    rangeTo,
-                    queryParams: {
-                      kuery,
-                      serviceName,
-                      sortDirection: 'DESC',
-                    },
-                  }}
-                />
-              </EuiPanel>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <FailedTransactionRateChart kuery={kuery} />
-            </EuiFlexItem>
-          </ChartPointerEventContextProvider>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-
-      <EuiFlexItem>
-        <EuiPanel hasBorder={true}>
-          <EuiTitle size="xs">
-            <h3>
-              {i18n.translate('xpack.apm.serviceDetails.metrics.errorsList.title', {
-                defaultMessage: 'Errors',
-              })}
-            </h3>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-
-          <ErrorGroupList
-            serviceName={serviceName}
-            comparisonEnabled={comparisonEnabled}
-            initialPageSize={10}
-            tableCaption={headerTitle}
-          />
-        </EuiPanel>
-      </EuiFlexItem>
-
-      {/* Unprocessed OTel exceptions panel: only renders when the user arrived via the
-          waterfall error badge on a mixed span (both APM errors and OTel exception logs).
-          Both params must be present; the component self-suppresses when the response
-          contains no OTel rows (e.g. pure-APM spans where the panel is not needed). */}
-      {traceId && spanId ? (
+    <EuiFlexGroup direction="column" gutterSize="l">
+      {/* ── APM errors section ── */}
+      {showApmSection && (
         <EuiFlexItem>
-          <UnprocessedOtelErrors traceId={traceId} spanId={spanId} />
+          <EuiAccordion
+            id="apm-errors-accordion"
+            data-test-subj="apmErrorsSection"
+            initialIsOpen={true}
+            buttonContent={apmSectionTitle}
+            paddingSize="none"
+          >
+            <EuiSpacer size="s" />
+            <EuiFlexGroup direction="column" gutterSize="s">
+              <EuiFlexItem>
+                <EuiFlexGroup direction="row" gutterSize="s">
+                  <ChartPointerEventContextProvider>
+                    <EuiFlexItem>
+                      <EuiPanel hasBorder={true}>
+                        <ErrorDistribution
+                          fetchStatus={errorDistributionStatus}
+                          distribution={errorDistributionData}
+                          title={chartTitle}
+                          discoverParams={{
+                            label: i18n.translate(
+                              'xpack.apm.errorGroupOverview.openErrorsInDiscover',
+                              { defaultMessage: 'Open errors in Discover' }
+                            ),
+                            rangeFrom,
+                            rangeTo,
+                            queryParams: {
+                              kuery,
+                              serviceName,
+                              sortDirection: 'DESC',
+                            },
+                          }}
+                        />
+                      </EuiPanel>
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <FailedTransactionRateChart kuery={kuery} />
+                    </EuiFlexItem>
+                  </ChartPointerEventContextProvider>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+
+              <EuiFlexItem>
+                {/* No inner title — the accordion button above already says "APM errors". */}
+                <EuiPanel hasBorder={true}>
+                  <EuiSpacer size="xs" />
+                  <ErrorGroupList
+                    serviceName={serviceName}
+                    comparisonEnabled={comparisonEnabled}
+                    initialPageSize={10}
+                    tableCaption={chartTitle}
+                  />
+                </EuiPanel>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiAccordion>
         </EuiFlexItem>
-      ) : null}
+      )}
+
+      {/* ── Errors from logs section ── */}
+      <EuiFlexItem>
+        <ErrorsFromLogsSection
+          serviceName={serviceName}
+          environment={environment}
+          kuery={kuery}
+          rangeFrom={rangeFrom}
+          rangeTo={rangeTo}
+          {...errorsFromLogs}
+        />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 }

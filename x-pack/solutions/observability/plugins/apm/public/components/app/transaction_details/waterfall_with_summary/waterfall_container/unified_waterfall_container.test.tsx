@@ -68,26 +68,6 @@ jest.mock('../../../../../hooks/use_time_range', () => ({
   }),
 }));
 
-jest.mock('../../../../../hooks/use_adhoc_apm_data_view', () => ({
-  useAdHocApmDataView: () => ({
-    dataView: { id: 'apm-static-data-view' },
-    apmIndices: { transaction: 'traces-apm*', error: 'logs-apm.error-*' },
-  }),
-}));
-
-jest.mock('../../../../../hooks/use_logs_index_pattern', () => ({
-  useLogsIndexPattern: () => ({ logsIndexPattern: 'logs-*' }),
-}));
-
-const mockDocFlyout = jest.fn();
-
-jest.mock('@kbn/unified-doc-viewer-plugin/public', () => ({
-  UnifiedDocViewerObservabilityTraceDocFlyout: (props: any) => {
-    mockDocFlyout(props);
-    return null;
-  },
-}));
-
 const mockUnifiedWaterfallFlyout = jest.fn((props: any) => (
   <div data-test-subj="mock-unified-waterfall-flyout" />
 ));
@@ -133,7 +113,6 @@ interface RenderOptions {
   maxTraceItems?: number;
   discoverHref?: string;
   showCriticalPath?: boolean;
-  traceId?: string;
 }
 
 function renderUnifiedWaterfallContainer(options: RenderOptions = {}) {
@@ -145,7 +124,6 @@ function renderUnifiedWaterfallContainer(options: RenderOptions = {}) {
     maxTraceItems,
     discoverHref,
     showCriticalPath = false,
-    traceId,
   } = options;
 
   const history = createMemoryHistory({ initialEntries: [initialPath] });
@@ -167,7 +145,6 @@ function renderUnifiedWaterfallContainer(options: RenderOptions = {}) {
           traceDocsTotal={traceDocsTotal}
           maxTraceItems={maxTraceItems}
           discoverHref={discoverHref}
-          traceId={traceId}
         />
       </Router>
     </IntlProvider>
@@ -295,11 +272,13 @@ describe('UnifiedWaterfallContainer', () => {
 
       expect(mockNavigateToUrl).not.toHaveBeenCalled();
     });
-  });
 
-  describe('document flyout for unprocessed OTel errors', () => {
-    it('opens the log doc flyout for a single unprocessed OTel error', () => {
-      renderUnifiedWaterfallContainer({ traceId: 'trace-123' });
+    it('navigates to the Errors page for a single unprocessed OTel error (was: log doc flyout)', () => {
+      // Previously this case opened a log document flyout. Now every badge click goes
+      // to the Errors page regardless of errorSource — the page itself shows both
+      // "APM errors" and "Errors from logs" sections, scoped by the kuery.
+      mockRouterLink.mockReturnValue('/services/products-service/errors?kuery=...');
+      renderUnifiedWaterfallContainer();
 
       act(() => {
         capturedTraceWaterfallProps.onErrorClick({
@@ -312,20 +291,20 @@ describe('UnifiedWaterfallContainer', () => {
         });
       });
 
-      expect(mockNavigateToUrl).not.toHaveBeenCalled();
-      expect(mockDocFlyout).toHaveBeenCalledWith(
+      expect(mockNavigateToUrl).toHaveBeenCalledTimes(1);
+      expect(mockRouterLink).toHaveBeenCalledWith(
+        '/services/{serviceName}/errors',
         expect.objectContaining({
-          type: 'log',
-          docId: 'otel-error-1',
-          docIndex: 'logs-generic.otel-default',
-          traceId: 'trace-123',
-          activeSection: undefined,
+          path: { serviceName: 'products-service' },
         })
       );
     });
 
-    it('opens the span flyout on the errors table for a pure-OTel row with several errors', () => {
-      renderUnifiedWaterfallContainer({ traceId: 'trace-123' });
+    it('navigates to the Errors page for a pure-OTel row with several errors (was: span flyout)', () => {
+      // Previously this case opened the span flyout scrolled to the errors table.
+      // Now every badge click goes to the Errors page regardless of errorSource.
+      mockRouterLink.mockReturnValue('/services/products-service/errors?kuery=...');
+      renderUnifiedWaterfallContainer();
 
       act(() => {
         capturedTraceWaterfallProps.onErrorClick({
@@ -336,20 +315,34 @@ describe('UnifiedWaterfallContainer', () => {
         });
       });
 
-      expect(mockNavigateToUrl).not.toHaveBeenCalled();
-      expect(mockDocFlyout).toHaveBeenCalledWith(
+      expect(mockNavigateToUrl).toHaveBeenCalledTimes(1);
+      expect(mockRouterLink).toHaveBeenCalledWith(
+        '/services/{serviceName}/errors',
         expect.objectContaining({
-          type: 'span',
-          docId: 'span-1',
-          activeSection: 'errors-table',
+          path: { serviceName: 'products-service' },
         })
       );
     });
 
-    it('does not render the flyout before an error is selected', () => {
-      renderUnifiedWaterfallContainer({ traceId: 'trace-123' });
+    it('does not render a doc flyout for any error source', () => {
+      // The UnifiedDocViewerObservabilityTraceDocFlyout is no longer mounted by this
+      // component — it was removed when every error-badge click was unified to navigate.
+      renderUnifiedWaterfallContainer();
 
-      expect(mockDocFlyout).not.toHaveBeenCalled();
+      // Trigger a click that previously would have opened the log flyout.
+      act(() => {
+        capturedTraceWaterfallProps.onErrorClick({
+          traceId: 'trace-123',
+          docId: 'span-1',
+          errorCount: 1,
+          errorDocId: 'otel-error-1',
+          docIndex: 'logs-generic.otel-default',
+          errorSource: 'unprocessedOtel',
+        });
+      });
+
+      // The only side-effect is navigation — no flyout component is rendered.
+      expect(mockNavigateToUrl).toHaveBeenCalledTimes(1);
     });
   });
 

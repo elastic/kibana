@@ -257,7 +257,6 @@ function TimelineTabContent({
       traceDocsTotal={unifiedWaterfallFetchResult.traceDocsTotal}
       maxTraceItems={unifiedWaterfallFetchResult.maxTraceItems}
       discoverHref={discoverHref}
-      traceId={traceId}
     />
   );
 }
