@@ -192,7 +192,7 @@ Read the `scout-ui-testing` or `scout-api-testing` skill for implementation deta
 Key rules:
 - **Tags are required** — Scout validates UI test tags at runtime
 - **One suite per file** — single top-level `test.describe()` or `spaceTest.describe()`
-- **Keep spec files small** — one role + one flow; roughly 4–5 short tests (2–3 if scenarios are long). Do not port a large Cypress spec 1:1 into one Scout file. `@kbn/eslint/scout_max_tests_per_file` warns above 8 UI / 15 API tests.
+- **One role + one flow** — do not port a large Cypress spec 1:1 into one Scout file.
 - **UI actions in page objects**, assertions in specs
 - **API-based setup/teardown** via `apiServices` / `kbnClient`
 - **Use `test.step()`** for multi-step flows to reuse browser context
