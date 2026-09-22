@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { getInventoryRuleSchema } from './get_inventory_rule_schema';
+import {
+  getInventoryAlertGroupingField,
+  getInventoryRuleSchema,
+} from './get_inventory_rule_schema';
 
 describe('getInventoryRuleSchema', () => {
   it('forces a pod rule to ecs for every stored schema', () => {
@@ -20,5 +23,21 @@ describe('getInventoryRuleSchema', () => {
     expect(getInventoryRuleSchema('host', 'ecs')).toBe('ecs');
     expect(getInventoryRuleSchema('host', undefined)).toBeUndefined();
     expect(getInventoryRuleSchema('host', null)).toBeUndefined();
+  });
+});
+
+describe('getInventoryAlertGroupingField', () => {
+  it('groups a stored semconv pod rule on kubernetes.pod.uid', () => {
+    // Same ecs coerce as rule evaluation. Becomes k8s.pod.uid when that pod branch is removed.
+    expect(getInventoryAlertGroupingField('pod', 'semconv')).toBe('kubernetes.pod.uid');
+    expect(getInventoryAlertGroupingField('pod', undefined)).toBe('kubernetes.pod.uid');
+  });
+
+  it('keeps host.name for a SemConv host rule', () => {
+    expect(getInventoryAlertGroupingField('host', 'semconv')).toBe('host.name');
+  });
+
+  it('leaves AWS inventory types ungrouped', () => {
+    expect(getInventoryAlertGroupingField('awsEC2', 'ecs')).toBeUndefined();
   });
 });

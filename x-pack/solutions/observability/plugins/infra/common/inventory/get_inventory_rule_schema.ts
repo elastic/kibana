@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { DataSchemaFormat, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import {
+  findInventoryFields,
+  getFieldByType,
+  type DataSchemaFormat,
+  type InventoryItemType,
+} from '@kbn/metrics-data-access-plugin/common';
 
 /**
  * Schema an Inventory Threshold rule evaluates, and the flyout preview requests.
@@ -23,4 +28,21 @@ export const getInventoryRuleSchema = (
   }
 
   return schema ?? undefined;
+};
+
+/**
+ * Alerts-as-data grouping field for an Inventory Threshold rule.
+ *
+ * Uses the same schema as rule evaluation. `getFieldByType` stays the gate for
+ * AWS types, which have no grouping field.
+ */
+export const getInventoryAlertGroupingField = (
+  nodeType: InventoryItemType,
+  schema: DataSchemaFormat | null | undefined
+): string | undefined => {
+  if (getFieldByType(nodeType) === undefined) {
+    return undefined;
+  }
+
+  return findInventoryFields(nodeType, getInventoryRuleSchema(nodeType, schema)).id;
 };
