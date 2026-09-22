@@ -37,7 +37,7 @@ interface CodecUnderTest<A> {
   decode: (input: unknown) => DecodeOutcome<A>;
 }
 
-const ioTsCodec = <A, O>(codec: t.Type<A, O, unknown>): CodecUnderTest<A> => ({
+const ioTsCodec = (codec: t.Any | z.ZodType): CodecUnderTest<unknown> => ({
   flavor: 'io-ts',
   decode: (input) => decode(codec, input),
 });

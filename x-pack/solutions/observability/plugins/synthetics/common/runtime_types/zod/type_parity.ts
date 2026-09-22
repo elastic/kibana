@@ -20,7 +20,6 @@
  * by the zod twin (server re-exports it).
  */
 import type { z } from '@kbn/zod';
-import type * as t from 'io-ts';
 import type { ExpectAllTrue, KnownKeys, MutuallyAssignable } from '../test_helpers/type_equality';
 import type {
   CheckGeoType,
@@ -126,10 +125,15 @@ import type {
 } from '../monitor_management/synthetics_params';
 import type * as zodParams from './synthetics_params';
 
-type Pair<I extends t.Mixed, Z extends z.ZodType> = MutuallyAssignable<
-  t.TypeOf<I>,
-  KnownKeys<z.output<Z>>
->;
+// Re-exported codecs are already zod, so they have no `_A`. Compare KnownKeys
+// of both outputs. Codecs that are still io-ts keep the `t.TypeOf` side.
+type OutputOf<T> = T extends { readonly _tag: string; readonly _A: infer A }
+  ? A
+  : T extends z.ZodType
+  ? KnownKeys<z.output<T>>
+  : never;
+
+type Pair<I, Z extends z.ZodType> = MutuallyAssignable<OutputOf<I>, KnownKeys<z.output<Z>>>;
 
 interface Parity {
   Location: Pair<typeof LocationType, typeof zodCommon.LocationType>;
