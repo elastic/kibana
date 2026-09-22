@@ -7,34 +7,50 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSkeletonText } from '@elastic/eui';
-import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { AttachmentUIDefinition, HeaderBadge } from '@kbn/agent-builder-browser/attachments';
 import type { AttachmentNavigationDeps } from '../navigation';
-import { buildDiscoverEsqlUrl, buildThreatReportLookupEsql } from '../navigation';
+import { buildThreatReportLookupEsql } from '../navigation';
 import { severityBadgeColor } from '../shared/severity';
+import {
+  buildDiscoverActionButton,
+  joinSubtitle,
+  lazyInlineContent,
+} from '../shared/attachment_definition_helpers';
 import { isValidThreatAttachmentData } from './types';
 import type { ThreatAttachment } from './types';
+import type { ThreatAttachmentInlineContentProps } from './threat_inline_content';
 
 const DEFAULT_LABEL = i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.label', {
   defaultMessage: 'Threat Report',
 });
 
+const OPEN_REPORT_LABEL = i18n.translate(
+  'xpack.alertzero.agentBuilder.attachments.threat.openInDiscover',
+  { defaultMessage: 'Open report in Discover' }
+);
+
+const TYPE_BADGE_LABEL = i18n.translate(
+  'xpack.alertzero.agentBuilder.attachments.threat.typeBadge',
+  { defaultMessage: 'Threat report' }
+);
+
 /**
  * Lazy-loaded inline renderer. Pulls the `useQuery`/`http.fetch` dependencies into their own
  * chunk so the alertzero bundle doesn't pay for them until an attachment actually renders.
  */
-const LazyThreatAttachmentInlineContent = React.lazy(() =>
-  import(
-    /* webpackChunkName: "alertzero_threat_attachment_inline" */
-    './threat_inline_content'
-  ).then((m) => ({ default: m.ThreatAttachmentInlineContent }))
+const LazyThreatAttachmentInlineContent = lazyInlineContent<ThreatAttachmentInlineContentProps>(
+  () =>
+    import(
+      /* webpackChunkName: "alertzero_threat_attachment_inline" */
+      './threat_inline_content'
+    ).then((m) => ({ default: m.ThreatAttachmentInlineContent })),
+  2
 );
 
 /**
  * Builds the `security.threat` `AttachmentUIDefinition`. Takes `http` from the plugin's
- * `start()` closure (not `useKibana`) per the plan's Phase 2 contract.
+ * `start()` closure (not `useKibana`).
  */
 export const createThreatAttachmentDefinition = ({
   http,
@@ -49,18 +65,12 @@ export const createThreatAttachmentDefinition = ({
   getHeader: ({ attachment }) => {
     const data = attachment?.data;
     const badges: HeaderBadge[] = [
-      {
-        label: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.typeBadge', {
-          defaultMessage: 'Threat report',
-        }),
-        color: 'hollow',
-        iconType: 'document',
-      },
+      { label: TYPE_BADGE_LABEL, color: 'hollow', iconType: 'document' },
     ];
     if (data?.severity) {
       badges.push({ label: data.severity, color: severityBadgeColor(data.severity) });
     }
-    const subtitle = [data?.source, data?.report_id].filter(Boolean).join(' · ');
+    const subtitle = joinSubtitle(data?.source, data?.report_id);
     return {
       icon: 'document',
       ...(subtitle ? { subtitle } : {}),
@@ -68,32 +78,13 @@ export const createThreatAttachmentDefinition = ({
     };
   },
   renderInlineContent: (props) => (
-    <React.Suspense fallback={<EuiSkeletonText lines={2} />}>
-      <LazyThreatAttachmentInlineContent {...props} http={http} navigation={navigation} />
-    </React.Suspense>
+    <LazyThreatAttachmentInlineContent {...props} http={http} navigation={navigation} />
   ),
   getActionButtons: ({ attachment }) => {
     if (!isValidThreatAttachmentData(attachment?.data)) {
       return [];
     }
-
     const esql = buildThreatReportLookupEsql({ reportId: attachment.data.report_id });
-    const href = buildDiscoverEsqlUrl({ share: navigation.share, esql });
-    if (!href) {
-      return [];
-    }
-
-    return [
-      {
-        label: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.openInDiscover', {
-          defaultMessage: 'Open report in Discover',
-        }),
-        icon: 'discoverApp',
-        type: ActionButtonType.SECONDARY,
-        href,
-        openInNewTab: true,
-        handler: () => undefined,
-      },
-    ];
+    return buildDiscoverActionButton({ share: navigation.share, esql, label: OPEN_REPORT_LABEL });
   },
 });

@@ -7,13 +7,16 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSkeletonText } from '@elastic/eui';
-import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { AttachmentUIDefinition, HeaderBadge } from '@kbn/agent-builder-browser/attachments';
 import type { AttachmentNavigationDeps } from '../navigation';
-import { buildDiscoverEsqlUrl, buildThreatReportsInEsql } from '../navigation';
+import { buildThreatReportsInEsql } from '../navigation';
+import {
+  buildDiscoverActionButton,
+  lazyInlineContent,
+} from '../shared/attachment_definition_helpers';
 import { parseHuntCorrelationData } from './types';
 import type { HuntCorrelationAttachment } from './types';
+import type { HuntCorrelationInlineContentProps } from './hunt_correlation_inline_content';
 
 const DEFAULT_LABEL = i18n.translate(
   'xpack.alertzero.agentBuilder.attachments.huntCorrelation.label',
@@ -30,16 +33,23 @@ const BELOW_THRESHOLD_LABEL = i18n.translate(
   { defaultMessage: 'Below threshold' }
 );
 
-const LazyHuntCorrelationInlineContent = React.lazy(() =>
-  import(
-    /* webpackChunkName: "alertzero_hunt_correlation_attachment_inline" */
-    './hunt_correlation_inline_content'
-  ).then((m) => ({ default: m.HuntCorrelationInlineContent }))
+const OPEN_RELATED_REPORTS_LABEL = i18n.translate(
+  'xpack.alertzero.agentBuilder.attachments.huntCorrelation.openRelatedReports',
+  { defaultMessage: 'Open related reports in Discover' }
+);
+
+const LazyHuntCorrelationInlineContent = lazyInlineContent<HuntCorrelationInlineContentProps>(
+  () =>
+    import(
+      /* webpackChunkName: "alertzero_hunt_correlation_attachment_inline" */
+      './hunt_correlation_inline_content'
+    ).then((m) => ({ default: m.HuntCorrelationInlineContent })),
+  3
 );
 
 /**
  * Builds the `security.hunt_correlation` `AttachmentUIDefinition`. Static payload (no live
- * fetch), kept as a factory to mirror the sibling types' registration shape.
+ * fetch).
  */
 export const createHuntCorrelationAttachmentDefinition = ({
   navigation,
@@ -82,9 +92,7 @@ export const createHuntCorrelationAttachmentDefinition = ({
     };
   },
   renderInlineContent: (props) => (
-    <React.Suspense fallback={<EuiSkeletonText lines={3} />}>
-      <LazyHuntCorrelationInlineContent {...props} navigation={navigation} />
-    </React.Suspense>
+    <LazyHuntCorrelationInlineContent {...props} navigation={navigation} />
   ),
   getActionButtons: ({ attachment }) => {
     const parsed = parseHuntCorrelationData(attachment?.data);
@@ -93,32 +101,12 @@ export const createHuntCorrelationAttachmentDefinition = ({
     }
 
     const reportIds = [...new Set(parsed.diamond_scores.map((score) => score.related_report_id))];
-    if (reportIds.length === 0) {
-      return [];
-    }
+    const esql = reportIds.length > 0 ? buildThreatReportsInEsql({ reportIds }) : undefined;
 
-    const esql = buildThreatReportsInEsql({ reportIds });
-    if (!esql) {
-      return [];
-    }
-
-    const href = buildDiscoverEsqlUrl({ share: navigation.share, esql });
-    if (!href) {
-      return [];
-    }
-
-    return [
-      {
-        label: i18n.translate(
-          'xpack.alertzero.agentBuilder.attachments.huntCorrelation.openRelatedReports',
-          { defaultMessage: 'Open related reports in Discover' }
-        ),
-        icon: 'discoverApp',
-        type: ActionButtonType.SECONDARY,
-        href,
-        openInNewTab: true,
-        handler: () => undefined,
-      },
-    ];
+    return buildDiscoverActionButton({
+      share: navigation.share,
+      esql,
+      label: OPEN_RELATED_REPORTS_LABEL,
+    });
   },
 });
