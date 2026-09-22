@@ -48,7 +48,7 @@ export const toRuleEvent = (event: SignificantEvent): CreateAlertEventData => {
   return {
     source: SIGNIFICANT_EVENTS_ALERT_SOURCE,
     fingerprint: event.event_id,
-    timestamp: event['@timestamp'],
+    timestamp: new Date(event['@timestamp']).toISOString(),
     severity: SIGNIFICANT_EVENTS_SEVERITY_MAP[event.severity],
     alert_status: SIGNIFICANT_EVENTS_STATUS_MAP[event.status],
     data,

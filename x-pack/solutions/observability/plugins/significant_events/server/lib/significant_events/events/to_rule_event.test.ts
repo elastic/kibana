@@ -76,7 +76,7 @@ describe('toRuleEvent', () => {
     it('maps a minimal event to the full CreateAlertEventData shape', () => {
       expect(toRuleEvent(createSignificantEvent())).toEqual({
         fingerprint: 'stable-id-1',
-        source: 'significant_events',
+        source: 'elastic.significant_events',
         timestamp: '2026-01-01T00:00:00.000Z',
         severity: 'high',
         alert_status: 'active',
@@ -111,7 +111,7 @@ describe('toRuleEvent', () => {
 
       expect(toRuleEvent(event)).toEqual({
         fingerprint: 'ev-max',
-        source: 'significant_events',
+        source: 'elastic.significant_events',
         timestamp: '2026-03-01T09:00:00.000Z',
         severity: 'critical',
         alert_status: 'inactive',
@@ -136,13 +136,18 @@ describe('toRuleEvent', () => {
   });
 
   describe('schema validity', () => {
-    it('passes createAlertEventDataSchema for a minimal event', () => {
-      expect(() =>
-        createAlertEventDataSchema.parse(toRuleEvent(createSignificantEvent()))
-      ).not.toThrow();
+    it('rejects the reserved elastic source via createAlertEventDataSchema', () => {
+      expect(
+        createAlertEventDataSchema.safeParse(toRuleEvent(createSignificantEvent())).success
+      ).toBe(false);
     });
 
-    it('passes createAlertEventDataSchema for a maximal event', () => {
+    it('passes createAlertEventDataSchema field constraints with a non-reserved probe source', () => {
+      const payload = { ...toRuleEvent(createSignificantEvent()), source: 'probe_source' };
+      expect(() => createAlertEventDataSchema.parse(payload)).not.toThrow();
+    });
+
+    it('passes createAlertEventDataSchema field constraints for a maximal event with a probe source', () => {
       const event = createSignificantEvent({
         symptom_hypothesis: 'Database pool exhausted.',
         assessment_note: 'Kept open — active failure confirmed.',
@@ -154,7 +159,18 @@ describe('toRuleEvent', () => {
         conversation_id: 'conv-1',
       });
 
-      expect(() => createAlertEventDataSchema.parse(toRuleEvent(event))).not.toThrow();
+      expect(() =>
+        createAlertEventDataSchema.parse({ ...toRuleEvent(event), source: 'probe_source' })
+      ).not.toThrow();
+    });
+
+    it('normalizes offset timestamps to UTC ISO for createAlertEventDataSchema', () => {
+      const event = createSignificantEvent({ '@timestamp': '2026-01-01T01:00:00+01:00' });
+      const payload = toRuleEvent(event);
+      expect(payload.timestamp).toBe('2026-01-01T00:00:00.000Z');
+      expect(() =>
+        createAlertEventDataSchema.parse({ ...payload, source: 'probe_source' })
+      ).not.toThrow();
     });
   });
 
@@ -168,8 +184,8 @@ describe('toRuleEvent', () => {
       expect(toRuleEvent(createSignificantEvent()).source).toBe(SIGNIFICANT_EVENTS_ALERT_SOURCE);
     });
 
-    it('source does not start with "elastic"', () => {
-      expect(SIGNIFICANT_EVENTS_ALERT_SOURCE.startsWith('elastic')).toBe(false);
+    it('source starts with "elastic"', () => {
+      expect(SIGNIFICANT_EVENTS_ALERT_SOURCE.startsWith('elastic')).toBe(true);
     });
 
     it('sets timestamp to @timestamp', () => {
