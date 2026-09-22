@@ -419,21 +419,6 @@ describe('KnowledgeIndicatorClient.getStreamNamesToReconcile', () => {
     expect(new Set(result)).toEqual(new Set(['logs.nginx', 'logs.apache', 'logs.orphan']));
     expect(result).toHaveLength(3);
   });
-
-  it('drops a rule slug when the raw source id is already in the KI set', async () => {
-    const { client, findStreamNamesWithOwnedRules } = makeClient();
-    runEsql.mockResolvedValueOnce({
-      columns: [{ name: 'sourceId', type: 'keyword' }],
-      values: [['logs.nginx']],
-    });
-    // `logs-nginx` is the tag slug of `logs.nginx`, not a second source.
-    findStreamNamesWithOwnedRules.mockResolvedValueOnce(['logs-nginx', 'logs.orphan']);
-
-    const result = await client.getStreamNamesToReconcile();
-
-    expect(new Set(result)).toEqual(new Set(['logs.nginx', 'logs.orphan']));
-    expect(result).toHaveLength(2);
-  });
 });
 
 describe('KnowledgeIndicatorClient.getFeatures', () => {

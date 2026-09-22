@@ -538,14 +538,14 @@ export class QueryRuleOrchestrator {
 
     const orphans = ownedRuleIds.filter((id) => !keepSet.has(id));
     let orphanRulesDeleted = 0;
-    if (orphans.length > 0) {
-      if (hits.length === 0 && links.length === 0) {
-        this.logger.warn(
-          `reconcileStream("${sourceId}"): deleting ${orphans.length} orphan rule(s) with zero ` +
-            `visible KIs in this space. If these rules backed pre-migration documents (no ` +
-            `kibana.space_ids), re-onboard the source to recreate them.`
-        );
-      }
+    // Pre-migration documents have no `kibana.space_ids`, so an empty read cannot
+    // tell an orphan rule from one that still backs those documents.
+    if (orphans.length > 0 && hits.length === 0 && links.length === 0) {
+      this.logger.warn(
+        `reconcileStream("${sourceId}"): leaving ${orphans.length} owned rule(s) in place. ` +
+          `No knowledge indicators are visible in this space.`
+      );
+    } else if (orphans.length > 0) {
       await uninstallRuleIds(this.rulesManagementClient, orphans);
       orphanRulesDeleted = orphans.length;
     }
