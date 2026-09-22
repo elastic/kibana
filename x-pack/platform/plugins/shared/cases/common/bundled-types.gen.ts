@@ -1715,48 +1715,50 @@ Identity constraints: the `name` property must match the `name` key in the YAML 
 
   */
 export const FieldDefinitionWriteRequest = lazySchema(() =>
-  z.object({
-    /**
+  z
+    .object({
+      /**
       * The field name, unique per owner (case-insensitive). Must match the `name` key inside the YAML definition. When omitted, the name is extracted from the definition YAML automatically. Immutable after creation.
 
       */
-    name: z
-      .string()
-      .min(1)
-      .max(50)
-      .optional()
-      .describe(
-        'The field name, unique per owner (case-insensitive). Must match the `name` key inside the YAML definition. When omitted, the name is extracted from the definition YAML automatically. Immutable after creation.\n'
-      ),
-    owner: Owner,
-    /**
-     * The field definition as a YAML string describing a single field (type, label, control, metadata).
-     */
-    definition: z
-      .string()
-      .max(30000)
-      .describe(
-        'The field definition as a YAML string describing a single field (type, label, control, metadata).'
-      ),
-    /**
-     * Optional human-readable description of the field's purpose.
-     */
-    description: z
-      .string()
-      .max(1000)
-      .optional()
-      .describe("Optional human-readable description of the field's purpose."),
-    /**
+      name: z
+        .string()
+        .min(1)
+        .max(50)
+        .optional()
+        .describe(
+          'The field name, unique per owner (case-insensitive). Must match the `name` key inside the YAML definition. When omitted, the name is extracted from the definition YAML automatically. Immutable after creation.\n'
+        ),
+      owner: Owner,
+      /**
+       * The field definition as a YAML string describing a single field (type, label, control, metadata).
+       */
+      definition: z
+        .string()
+        .max(30000)
+        .describe(
+          'The field definition as a YAML string describing a single field (type, label, control, metadata).'
+        ),
+      /**
+       * Optional human-readable description of the field's purpose.
+       */
+      description: z
+        .string()
+        .max(1000)
+        .optional()
+        .describe("Optional human-readable description of the field's purpose."),
+      /**
       * When true, this field is rendered in every case for this owner, regardless of the template used. Global fields cannot be demoted (set to false) while they are linked to an active v1 custom field in the Cases configuration.
 
       */
-    isGlobal: z
-      .boolean()
-      .optional()
-      .describe(
-        'When true, this field is rendered in every case for this owner, regardless of the template used. Global fields cannot be demoted (set to false) while they are linked to an active v1 custom field in the Cases configuration.\n'
-      ),
-  })
+      isGlobal: z
+        .boolean()
+        .optional()
+        .describe(
+          'When true, this field is rendered in every case for this owner, regardless of the template used. Global fields cannot be demoted (set to false) while they are linked to an active v1 custom field in the Cases configuration.\n'
+        ),
+    })
+    .strict()
 );
 export type FieldDefinitionWriteRequest = z.infer<typeof FieldDefinitionWriteRequest>;
 
