@@ -160,7 +160,7 @@ export const AD2_FULL_ONLY_SCENARIOS = {
         75,
         'Google Chrome Helper spawned osascript to display a deceptive prompt',
         'osascript',
-        "osascript -e 'display dialog \"System update required\"'",
+        'osascript -e \'display dialog "System update required"\'',
         'process',
         null
       ),

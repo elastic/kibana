@@ -22,45 +22,45 @@ export const buildFullProfileDiscriminationDataset = (runMarker: string) => {
     fullProfilePlan.alerts.length - (fullProfilePlan.noiseAlertIds?.length ?? 0);
 
   return {
-  name: 'attack-discovery-agent-builder: full profile (noise discrimination)',
-  description:
-    'Live-retrieval eval over portable-seeder full profile: seven signal chains plus background noise and a 40-alert Defender cluster. On-demand only — not part of weekly golden-path CI.',
-  examples: [
-    {
-      input: {
-        question: `Run Attack Discovery by retrieving open alerts seeded with label ${AD2_SCENARIO_SEED_LABEL} from the last twenty-four hours. Return validated discoveries for real attack chains and avoid turning unrelated background or Defender update alerts into discoveries.`,
-        triageType: 'live-retrieval',
-        expectedSkills: ['attack-discovery-generator'],
-        expectedToolPath: [
-          'security.attack-discovery.get_default_esql_query',
-          'platform.core.execute_esql',
-          'security.attack-discovery.run',
-        ],
+    name: 'attack-discovery-agent-builder: full profile (noise discrimination)',
+    description:
+      'Live-retrieval eval over portable-seeder full profile: seven signal chains plus background noise and a 40-alert Defender cluster. On-demand only — not part of weekly golden-path CI.',
+    examples: [
+      {
+        input: {
+          question: `Run Attack Discovery by retrieving open alerts seeded with label ${AD2_SCENARIO_SEED_LABEL} from the last twenty-four hours. Return validated discoveries for real attack chains and avoid turning unrelated background or Defender update alerts into discoveries.`,
+          triageType: 'live-retrieval',
+          expectedSkills: ['attack-discovery-generator'],
+          expectedToolPath: [
+            'security.attack-discovery.get_default_esql_query',
+            'platform.core.execute_esql',
+            'security.attack-discovery.run',
+          ],
+        },
+        output: {
+          expectedToolPath: [
+            'security.attack-discovery.get_default_esql_query',
+            'platform.core.execute_esql',
+            'security.attack-discovery.run',
+          ],
+          expectedWorkflowStages: ['generation', 'validation'],
+          expectedRetrievedAlertCount: signalAlertCount,
+          expectedPassedAlertCount: null,
+          forbiddenAlertIds: [...(fullProfilePlan.noiseAlertIds ?? [])],
+          maxDiscoveryCount: 12,
+          minValidatedDiscoveryCount: 1,
+          criteria: [
+            'At least one insight references a real attack chain host (for example wks-alice-01, dev-cloudops-04, or mbp-taylor-05).',
+            'Insights do not treat the Defender signature-update cluster as a coordinated attack chain.',
+            'Insights do not cite background-only Okta, firewall, or heartbeat noise as primary attack evidence.',
+          ],
+        },
+        metadata: {
+          alertCount: fullProfilePlan.alerts.length,
+          fixture: 'full-profile',
+          seedProfile: 'full',
+        },
       },
-      output: {
-        expectedToolPath: [
-          'security.attack-discovery.get_default_esql_query',
-          'platform.core.execute_esql',
-          'security.attack-discovery.run',
-        ],
-        expectedWorkflowStages: ['generation', 'validation'],
-        expectedRetrievedAlertCount: signalAlertCount,
-        expectedPassedAlertCount: null,
-        forbiddenAlertIds: [...(fullProfilePlan.noiseAlertIds ?? [])],
-        maxDiscoveryCount: 12,
-        minValidatedDiscoveryCount: 1,
-        criteria: [
-          'At least one insight references a real attack chain host (for example wks-alice-01, dev-cloudops-04, or mbp-taylor-05).',
-          'Insights do not treat the Defender signature-update cluster as a coordinated attack chain.',
-          'Insights do not cite background-only Okta, firewall, or heartbeat noise as primary attack evidence.',
-        ],
-      },
-      metadata: {
-        alertCount: fullProfilePlan.alerts.length,
-        fixture: 'full-profile',
-        seedProfile: 'full',
-      },
-    },
-  ] satisfies AttackDiscoveryAgentBuilderExample[],
+    ] satisfies AttackDiscoveryAgentBuilderExample[],
   };
 };

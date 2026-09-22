@@ -16,18 +16,73 @@ interface BackgroundRule {
 }
 
 const BACKGROUND_RULES: readonly BackgroundRule[] = [
-  { ruleName: 'Okta Sign-In from New Geographic Location', category: 'Identity', dataset: 'okta.system', count: 12 },
-  { ruleName: 'Okta MFA Push Denied by User', category: 'Identity', dataset: 'okta.system', count: 8 },
-  { ruleName: 'Suspicious Cross-Region API Call', category: 'Cloud', dataset: 'aws.cloudtrail', count: 10 },
-  { ruleName: 'SSH Login from Corp Bastion', category: 'Network', dataset: 'system.auth', count: 10 },
-  { ruleName: 'New Local User Created', category: 'Endpoint Behavior Detection', dataset: 'endpoint.events.iam', count: 5 },
+  {
+    ruleName: 'Okta Sign-In from New Geographic Location',
+    category: 'Identity',
+    dataset: 'okta.system',
+    count: 12,
+  },
+  {
+    ruleName: 'Okta MFA Push Denied by User',
+    category: 'Identity',
+    dataset: 'okta.system',
+    count: 8,
+  },
+  {
+    ruleName: 'Suspicious Cross-Region API Call',
+    category: 'Cloud',
+    dataset: 'aws.cloudtrail',
+    count: 10,
+  },
+  {
+    ruleName: 'SSH Login from Corp Bastion',
+    category: 'Network',
+    dataset: 'system.auth',
+    count: 10,
+  },
+  {
+    ruleName: 'New Local User Created',
+    category: 'Endpoint Behavior Detection',
+    dataset: 'endpoint.events.iam',
+    count: 5,
+  },
   { ruleName: 'Slack API Token Created', category: 'Identity', dataset: 'slack.audit', count: 8 },
-  { ruleName: 'GitHub OAuth Token Created', category: 'Identity', dataset: 'github.audit', count: 8 },
-  { ruleName: 'Endpoint Agent Heartbeat Missed', category: 'System', dataset: 'endpoint.status', count: 14 },
-  { ruleName: 'Anomalous Process Execution on Server', category: 'Endpoint Behavior Detection', dataset: 'endpoint.events.process', count: 10 },
-  { ruleName: 'USB Mass Storage Connected', category: 'Endpoint Behavior Detection', dataset: 'endpoint.events.registry', count: 5 },
-  { ruleName: 'Anomalous DNS Query Volume', category: 'Network', dataset: 'endpoint.events.dns', count: 10 },
-  { ruleName: 'Firewall Deny from Corp Range', category: 'Network', dataset: 'firewall.log', count: 10 },
+  {
+    ruleName: 'GitHub OAuth Token Created',
+    category: 'Identity',
+    dataset: 'github.audit',
+    count: 8,
+  },
+  {
+    ruleName: 'Endpoint Agent Heartbeat Missed',
+    category: 'System',
+    dataset: 'endpoint.status',
+    count: 14,
+  },
+  {
+    ruleName: 'Anomalous Process Execution on Server',
+    category: 'Endpoint Behavior Detection',
+    dataset: 'endpoint.events.process',
+    count: 10,
+  },
+  {
+    ruleName: 'USB Mass Storage Connected',
+    category: 'Endpoint Behavior Detection',
+    dataset: 'endpoint.events.registry',
+    count: 5,
+  },
+  {
+    ruleName: 'Anomalous DNS Query Volume',
+    category: 'Network',
+    dataset: 'endpoint.events.dns',
+    count: 10,
+  },
+  {
+    ruleName: 'Firewall Deny from Corp Range',
+    category: 'Network',
+    dataset: 'firewall.log',
+    count: 10,
+  },
 ] as const;
 
 const BACKGROUND_HOSTS: ReadonlyArray<readonly [string, Ad2ScenarioOs, string]> = [

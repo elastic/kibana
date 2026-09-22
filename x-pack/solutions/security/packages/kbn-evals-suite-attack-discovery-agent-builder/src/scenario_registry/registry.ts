@@ -1,4 +1,11 @@
 /*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under the
  * Elastic License 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
@@ -11,10 +18,7 @@ import {
 } from './clean_scenarios';
 import { AD2_DENSE_SCENARIO_KEYS, AD2_DENSE_SCENARIOS } from './dense_scenarios';
 import { ad2ScenarioAlertId } from './ids';
-import {
-  buildBackgroundNoiseAlerts,
-  buildLoudClusterAlerts,
-} from './background_noise';
+import { buildBackgroundNoiseAlerts, buildLoudClusterAlerts } from './background_noise';
 import {
   AD2_FULL_ONLY_SCENARIO_KEYS,
   AD2_FULL_ONLY_SCENARIOS,
