@@ -1012,6 +1012,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       archiveBuffer,
       contentType,
       spaceId,
+      request,
       ignoreMappingUpdateErrors,
       skipDataStreamRollover,
     } = args;
@@ -1022,6 +1023,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       archiveBuffer,
       contentType,
       spaceId,
+      request,
       authorizationHeader,
       ignoreMappingUpdateErrors,
       skipDataStreamRollover,
