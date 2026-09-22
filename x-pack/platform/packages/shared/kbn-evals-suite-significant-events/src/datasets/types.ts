@@ -134,7 +134,19 @@ export interface DiscoveryScenario {
 export interface DatasetConfig {
   id: string;
   description: string;
+  optIn?: true;
   gcs: GcsConfig;
+  /**
+   * How log data is replayed from the snapshot:
+   * - `undefined` (default): `replaySignificantEventsSnapshot` — restores the snapshot's
+   *   `logs` data-stream backing indices (`.ds-logs-*`) and reindexes them into a local
+   *   `logs` data stream. Used by demo-app snapshots captured from a managed `logs` stream.
+   * - `'managed-stream'`: `replayIntoManagedStream` — reindexes all `logs-*` indices in the
+   *   snapshot into the managed `logs` stream. Required for archived incident snapshots, which
+   *   store plain indices under their original data-stream names (`logs-<dataset>-<namespace>`)
+   *   instead of `.ds-*` backing indices.
+   */
+  replayMode?: 'managed-stream';
   kiQueryGeneration: KIQueryGenerationScenario[];
   kiFeatureExtraction: KIFeatureExtractionScenario[];
   kiFeatureExclusion: KIFeatureExclusionScenario[];
