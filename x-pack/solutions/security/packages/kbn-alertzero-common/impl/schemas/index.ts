@@ -85,8 +85,11 @@ export {
 } from './hunt/hunt_coordinator_route.gen';
 export {
   AnchorIoc,
+  AnchorItem,
   AnchorSet,
   CorrelateRequestBody,
   CorrelateResponse,
   CorrelationEngineStatus,
+  HuntCorrelationAttachmentData,
+  HuntCorrelationAttachmentThresholds,
 } from './hunt/correlate_route.gen';

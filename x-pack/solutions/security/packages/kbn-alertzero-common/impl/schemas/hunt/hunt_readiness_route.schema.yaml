@@ -9,10 +9,8 @@ paths:
       x-labels: [ess, serverless]
       operationId: HuntReadiness
       description: >-
-        Readiness projection over A2's resolveIndexScope, one entry per
-        technology (or the single requested one), for the given space. A
-        thin projection over the resolution service, not a duplicate of its
-        logic (plan.md:249).
+        Readiness projection over resolveIndexScope, one entry per technology
+        (or the single requested one), for the given space.
       summary: Hunt index-scope readiness per technology
       tags:
         - AlertZero API

@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: AlertZero correlate route (E7 anchor correlation engine)
+  title: AlertZero correlate route
   version: '1'
 paths:
   /internal/alertzero/hunt/correlate:
@@ -9,11 +9,9 @@ paths:
       x-labels: [ess, serverless]
       operationId: Correlate
       description: >-
-        Runs the anchors correlation leg (plan.md Phase 7). `no_match` and
-        `unavailable` are both successful outcomes: unavailable correlation
-        blocks containment but never blocks the Tier 1 finding. `diamond_scores`
-        stays empty until PR 3b lands the diamond leg behind the same engine
-        interface.
+        Runs the anchors correlation leg. `no_match` and `unavailable` are
+        both successful outcomes: unavailable correlation blocks containment
+        but never blocks the Tier 1 finding.
       summary: Correlate a report against others by shared anchors
       tags:
         - AlertZero API
@@ -170,13 +168,10 @@ components:
     HuntCorrelationAttachmentData:
       type: object
       description: >-
-        The `security.hunt_correlation` attachment payload (PR 1,
-        kibana#291882), built by `correlation_engine.ts`'s
-        `toAttachmentData()`. This is the shape `correlation.yaml` (PR 3b)
-        writes verbatim onto the source report's Investigation via
-        `ai.attachment.add`; the route's other top-level fields
-        (`matches`, `anchor_summary`, ...) describe the engine's own search,
-        not what the attachment reader sees.
+        The `security.hunt_correlation` attachment payload, written verbatim
+        onto the source report's Investigation via `ai.attachment.add`. The
+        route's other top-level fields (`matches`, `anchor_summary`, ...) describe
+        the engine's own search, not what the attachment reader sees.
       required:
         - attachment_id
         - anchors

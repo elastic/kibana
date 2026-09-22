@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: AlertZero Hunt threat-intel component schemas
+  title: AlertZero Hunt component schemas
   version: '1'
 paths: {}
 components:
@@ -10,8 +10,7 @@ components:
       type: string
       enum: [aws_iam, fortigate]
       description: >-
-        Technologies the MVP resolves an index scope for (plan.md Phase 2).
-        Extend only alongside a TECHNOLOGY_INDEX_MAP entry.
+        Supported technologies. Extend only alongside a TECHNOLOGY_INDEX_MAP entry.
 
     IndexScopeStatus:
       type: string
@@ -36,9 +35,8 @@ components:
       type: object
       required: [technology, status, required, optional, missing, window, rowLimit]
       description: >-
-        A2's output contract (plan.md:245). `required`/`optional` list every
-        pattern checked for the technology; `missing` lists every pattern
-        from either list that resolved to zero indices.
+        `required`/`optional` list every pattern checked for the technology;
+        `missing` lists every pattern from either list that resolved to zero indices.
       properties:
         technology:
           $ref: '#/components/schemas/HuntTechnology'
@@ -79,9 +77,8 @@ components:
       type: string
       enum: [no_searchable_terms, no_environment_hits, environment_hits_found]
       description: >-
-        Tier 1's raw statuses (plan.md:259). The hit/clean collapse for
-        evidence[].last_hunt_status happens in the managed-workflow evidence
-        step, not here.
+        Tier 1 raw hunt statuses. The hit/clean collapse for
+        evidence[].last_hunt_status happens in the managed-workflow evidence step.
 
     AffectedAsset:
       type: object
@@ -146,9 +143,8 @@ components:
         hasConfirmedHit:
           type: boolean
           description: >-
-            A confirmed event match in a required index inside the window
-            (hunt-watch-implementation.md:42). Never set by an optional-index
-            or out-of-window match.
+            A confirmed event match in a required index inside the window.
+            Never set by an optional-index or out-of-window match.
         searchedIocs:
           type: integer
         searchedTechniques:
@@ -187,13 +183,17 @@ components:
             $ref: '#/components/schemas/HuntForThreatHit'
         affectedAssets:
           type: object
-          required: [hosts, users]
+          required: [hosts, users, services]
           properties:
             hosts:
               type: array
               items:
                 $ref: '#/components/schemas/AffectedAsset'
             users:
+              type: array
+              items:
+                $ref: '#/components/schemas/AffectedAsset'
+            services:
               type: array
               items:
                 $ref: '#/components/schemas/AffectedAsset'

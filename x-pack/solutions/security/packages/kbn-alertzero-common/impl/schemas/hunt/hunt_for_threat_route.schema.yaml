@@ -9,11 +9,8 @@ paths:
       x-labels: [ess, serverless]
       operationId: HuntForThreat
       description: >-
-        Runs Tier 1's deterministic search against a technology's A2-resolved
-        index scope (plan.md Phase 3). Exists for manual/dev invocation and
-        Phase 4 debugging; the production caller is the hunt child workflow,
-        which calls the service in-process rather than over HTTP. A blocked
-        scope is refused outright (409).
+        Runs Tier 1's deterministic search against a technology's resolved
+        index scope. A blocked scope is refused with 409.
       summary: Run Tier 1 deterministic hunt
       tags:
         - AlertZero API
