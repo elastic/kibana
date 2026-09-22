@@ -36,6 +36,8 @@ export interface TransactionDetailFlyoutContextValue {
     }) => void;
   };
   filters: TransactionDetailFlyoutFilters;
+  /** Host refresh signal. Nested charts and fetchers reload when this changes. */
+  refreshToken: number;
   /**
    * From hosts whose surrounding UI is computed from raw documents (Discover).
    * Combined with OTel schema, selects ES|QL RED charts over APM chart APIs.
