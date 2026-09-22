@@ -8,9 +8,9 @@
 import type { CoreStart } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID } from '@kbn/context-engine-plugin/common/constants';
 import { apiPrivileges } from '@kbn/context-engine-plugin/common/features';
 import { isContextEngineEnabledInSpace } from '@kbn/context-engine-plugin/server/utils/is_context_engine_enabled_in_space';
+import { CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 
 export const assertContextEngineWriteAccess = async ({
   request,

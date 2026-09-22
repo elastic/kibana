@@ -84,6 +84,7 @@ export const ALERTING_V2_ENABLED_SETTING_ID = 'alerting:v2:enabled';
 
 // Context engine settings
 export const CONTEXT_ENGINE_ENABLED_SETTING_ID = 'contextEngine:enabled';
+export const CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID = 'contextEngine:memoryEnabled';
 
 // Autocomplete settings
 export const AUTOCOMPLETE_USE_TIME_RANGE_ID = 'autocomplete:useTimeRange';

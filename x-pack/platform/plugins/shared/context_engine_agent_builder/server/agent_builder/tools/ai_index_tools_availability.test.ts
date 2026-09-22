@@ -7,9 +7,11 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { CoreStart } from '@kbn/core/server';
-import { CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID } from '@kbn/context-engine-plugin/common/constants';
-import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type { AvailabilityContext } from '@kbn/agent-builder-server';
+import {
+  CONTEXT_ENGINE_ENABLED_SETTING_ID,
+  CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID,
+} from '@kbn/management-settings-ids';
 import {
   aiIndexToolsAvailability,
   createMemoryToolsAvailability,
@@ -73,6 +75,10 @@ describe('aiIndexToolsAvailability', () => {
       } as unknown as CoreStart;
       return createMemoryToolsAvailability(async () => coreStart);
     };
+
+    it('does not cache the global memory flag', () => {
+      expect(createAvailability(true).cacheMode).toBe('none');
+    });
 
     it('is available when Context Engine and memory are enabled', async () => {
       const availability = createAvailability(true);
