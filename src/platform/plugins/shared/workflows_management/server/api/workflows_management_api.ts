@@ -1207,7 +1207,13 @@ export class WorkflowsManagementApi {
     params: SearchStepExecutionsParams & { request: KibanaRequest },
     spaceId: string
   ): Promise<StepExecutionListResult> {
-    await this.assertWorkflowAccess(params.workflowId, spaceId, 'read', params.request);
+    const workflow = await this.workflowsService.getWorkflow(params.workflowId, spaceId, {
+      includeDeleted: true,
+    });
+    if (workflow) {
+      const access = await this.workflowsService.getAccessControl();
+      await access.assertAccess(workflow, 'read', params.request);
+    }
     return this.workflowsService.searchStepExecutions(params, spaceId);
   }
 

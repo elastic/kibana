@@ -854,7 +854,7 @@ export class WorkflowExecutionQueryService {
       });
       const execution = items[0]?.document;
       if (!execution || execution.spaceId !== spaceId) return null;
-      if (execution.stepExecutionIds) {
+      if (execution.stepExecutionIds?.length) {
         const { items: steps } = await this.deps.stepExecutionsDataClient.getByIds(
           execution.stepExecutionIds,
           { sourceIncludes: ['id', 'spaceId', 'workflowRunId', 'stepType', 'status', 'finishedAt'] }

@@ -915,6 +915,21 @@ steps:
         expect(readerHistory).toHaveStatusCode(200);
         expect(readerHistory.body.results).toStrictEqual([]);
         expect(readerHistory.body.total).toBe(0);
+        await expect
+          .poll(
+            async () => {
+              const steps = await apiClient.get(`${workflowPath}/executions/steps`, {
+                headers: ownerHeaders,
+              });
+              expect(steps).toHaveStatusCode(200);
+              return steps.body.results.length;
+            },
+            { timeout: 60000 }
+          )
+          .toBeGreaterThan(0);
+        expect(
+          await apiClient.get(`${workflowPath}/executions/steps`, { headers: readerHeaders })
+        ).toHaveStatusCode(403);
         const warning = await apiClient.delete(`${workflowPath}?force=true`, {
           headers: ownerHeaders,
         });

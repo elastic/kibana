@@ -1433,6 +1433,19 @@ describe('WorkflowExecutionQueryService', () => {
       expect(await service.getWaitingStepExecutionId('run-1', 'default')).toBeNull();
     });
 
+    it('uses the legacy lookup when the saved step ID list is empty', async () => {
+      mockParent([]);
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [{ _index: 'steps', _id: 'step-1', _source: { id: 'step-1' } }] },
+        took: 0,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, failed: 0 },
+      });
+
+      expect(await service.getWaitingStepExecutionId('run-1', 'default')).toBe('step-1');
+      expect(mockStepDataClient.getByIds).not.toHaveBeenCalled();
+    });
+
     it('returns null (not throws) when the step-executions index does not exist yet', async () => {
       mockEsClient.search.mockRejectedValueOnce(
         new errors.ResponseError({

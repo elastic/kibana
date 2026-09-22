@@ -118,6 +118,7 @@ describe('WorkflowsManagementApi', () => {
         .mockResolvedValue({ id: 'run-1', workflowId: 'workflow-123' }),
       getWorkflowExecutions: jest.fn(),
       getExecutionStepExecutions: jest.fn(),
+      searchStepExecutions: jest.fn(),
       markStepAsResponded: jest.fn(),
       getWaitingStepExecutionId: jest.fn(),
       getWorkflowsExecutionEngine: () => mockWorkflowsExecutionEngine,
@@ -154,7 +155,7 @@ describe('WorkflowsManagementApi', () => {
       { name: 'public', profileId: 'outsider', mode: 'public', allowed: true },
       { name: 'legacy', profileId: 'outsider', mode: undefined, allowed: true },
     ] as const)(
-      'checks $name access without scanning the space',
+      'checks $name access to soft-deleted workflow history without scanning the space',
       async ({ profileId, mode, allowed }) => {
         const core = coreMock.createStart();
         core.userProfile.getCurrentProfileId.mockResolvedValue(profileId);
@@ -163,7 +164,7 @@ describe('WorkflowsManagementApi', () => {
           writeWorkflowDocumentWithOcc: jest.fn(),
         });
         mockWorkflowsService.getAccessControl.mockResolvedValue(access);
-        mockWorkflowsService.getWorkflow.mockResolvedValue({
+        const stored: WorkflowDetailDto = {
           ...workflow,
           access_control: mode
             ? {
@@ -173,7 +174,10 @@ describe('WorkflowsManagementApi', () => {
                 ],
               }
             : undefined,
-        });
+        };
+        mockWorkflowsService.getWorkflow.mockImplementation(async (_id, _spaceId, options) =>
+          options?.includeDeleted ? stored : null
+        );
         const params = { workflowId: workflow.id, request: mockRequest, page: 2, size: 10 };
 
         await api.getWorkflowExecutions(params, 'default');
@@ -199,6 +203,19 @@ describe('WorkflowsManagementApi', () => {
           await expect(steps).rejects.toBeInstanceOf(WorkflowAccessDeniedError);
           expect(mockWorkflowsService.getExecutionStepExecutions).not.toHaveBeenCalled();
         }
+
+        const searchParams = { workflowId: workflow.id, request: mockRequest };
+        const history = api.searchStepExecutions(searchParams, 'default');
+        if (allowed) {
+          await history;
+          expect(mockWorkflowsService.searchStepExecutions).toHaveBeenCalledWith(
+            searchParams,
+            'default'
+          );
+        } else {
+          await expect(history).rejects.toBeInstanceOf(WorkflowAccessDeniedError);
+          expect(mockWorkflowsService.searchStepExecutions).not.toHaveBeenCalled();
+        }
       }
     );
 
@@ -214,6 +231,9 @@ describe('WorkflowsManagementApi', () => {
         'default'
       );
       expect(access.executionFilter).not.toHaveBeenCalled();
+      await api.searchStepExecutions(params, 'default');
+      expect(mockWorkflowsService.searchStepExecutions).toHaveBeenCalledWith(params, 'default');
+      expect(access.assertAccess).not.toHaveBeenCalled();
     });
 
     it('keeps the space filter for cross-workflow history', async () => {
