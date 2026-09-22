@@ -167,7 +167,7 @@ describe('renderFlakySuiteIssueBody', () => {
       renderFlakySuiteIssueBody(single.suite, { report: single.report, area: 'Synthetics' })
     ).toContain(
       [
-        'We identified a flaky test suite in the **Synthetics** area: it passes most of the time and fails intermittently in CI.',
+        'We identified a flaky test suite in the **Synthetics** area.',
         '',
         '- **Flaky rate:** **10%** of builds on `main` (49 of 509)',
         '- **Pipeline:** `kibana-on-merge`, last 7 days (2–9 Sep 2026)',
@@ -177,7 +177,7 @@ describe('renderFlakySuiteIssueBody', () => {
       ].join('\n')
     );
     expect(renderFlakySuiteIssueBody(single.suite, { report: single.report })).toContain(
-      'We identified a flaky test suite: it passes'
+      'We identified a flaky test suite.\n'
     );
     const multi = multiTestReport();
     expect(renderFlakySuiteIssueBody(multi.suite, { report: multi.report })).toContain(

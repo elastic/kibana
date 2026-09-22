@@ -225,9 +225,7 @@ const otherPipelines = (suite: FlakySuite, report: FlakyTestReport): string | un
 /** One sentence saying what this is, then the facts a reader needs first, one per bullet. */
 const overview = (suite: FlakySuite, ctx: FlakySuiteIssueContext): string => {
   const { report, area, dashboardUrl } = ctx;
-  const opening =
-    `We identified a flaky test suite${area ? ` in the **${area}** area` : ''}: it passes most ` +
-    'of the time and fails intermittently in CI.';
+  const opening = `We identified a flaky test suite${area ? ` in the **${area}** area` : ''}.`;
   const rate = flakyRate(suite);
   // Older reports do not record the qualifying branch; name the branches failing most instead
   const branches = rate === undefined ? headlineBranches(suite) : undefined;
