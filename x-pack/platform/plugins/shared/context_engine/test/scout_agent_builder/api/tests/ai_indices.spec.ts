@@ -25,6 +25,7 @@ const TRACES_INDEX = 'traces-agent_builder.otel-default';
 const DEST = {
   dataStream: 'ai-index-ds-scout-test',
   index: 'ai-index-idx-scout-test',
+  alias: 'ai-index-idx-scout-alias',
   last: 'ai-index-ds-scout-last-dest',
   shared: 'ai-index-ds-scout-shared-dest',
   crossSpace: 'ai-index-ds-scout-cross-space-dest',
@@ -98,6 +99,7 @@ apiTest.describe.skip('context engine AI indices API', { tag: tags.stateful.clas
       await esClient.indices.createDataStream({ name }, { ignore: [400] });
     }
     await esClient.indices.create({ index: DEST.index }, { ignore: [400] });
+    await esClient.indices.putAlias({ index: DEST.index, name: DEST.alias });
   });
 
   apiTest.afterAll(async ({ apiClient, esClient, apiServices }) => {
@@ -466,6 +468,17 @@ apiTest.describe.skip('context engine AI indices API', { tag: tags.stateful.clas
     expect(response.body.message).toContain(
       'must name a single index or data stream, not a pattern'
     );
+  });
+
+  apiTest('rejects an alias dest', async ({ apiClient }) => {
+    const response = await apiClient.put(aiIndexPath(AI_INDEX.rejectedDest), {
+      headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
+      responseType: 'json',
+      body: { ...aiIndexBody, dest: { type: 'index', value: DEST.alias } },
+    });
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.message).toContain(`'${DEST.alias}' is an alias`);
   });
 
   apiTest(
