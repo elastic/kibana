@@ -21,6 +21,7 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import { createEvaluatorRegistryMock } from '../../evaluators/registry.mock';
 import { registerGetExperimentExampleDetailsRoute } from './get_experiment_example_details';
+import { EXAMPLE_REPETITION_PAYLOAD_SORT } from './preview_source_script';
 
 describe('GET experiment example repetition details', () => {
   const setup = () => {
@@ -109,6 +110,7 @@ describe('GET experiment example repetition details', () => {
     expect(evaluationScoreService.search).toHaveBeenCalledWith({
       query: expectedQuery,
       size: 1,
+      sort: EXAMPLE_REPETITION_PAYLOAD_SORT,
       _source_includes: ['example.input', 'task.output'],
       track_total_hits: false,
     });

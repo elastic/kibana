@@ -23,7 +23,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { EVALS_API_PRIVILEGES, EXPERIMENT_LIMITS } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 import { handleMaximumResponseSizeExceededError } from '../utils/handle_response_size_error';
-import { previewScriptField } from './preview_source_script';
+import { EXAMPLE_REPETITION_PAYLOAD_SORT, previewScriptField } from './preview_source_script';
 
 type GroupedExampleScores = GetEvaluationExperimentDatasetExamplesResponse['examples'][number];
 type ContentPreview = NonNullable<EvaluationExperimentExamplePreview['input']>;
@@ -143,6 +143,7 @@ export const registerGetExperimentDatasetExamplesRoute = ({
                             source: {
                               top_hits: {
                                 size: 1,
+                                sort: EXAMPLE_REPETITION_PAYLOAD_SORT,
                                 _source: { includes: ['task.repetition_index'] },
                                 script_fields: {
                                   input_preview: previewScriptField('example', 'input'),

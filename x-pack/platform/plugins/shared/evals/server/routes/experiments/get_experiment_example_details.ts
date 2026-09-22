@@ -20,6 +20,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 import { handleMaximumResponseSizeExceededError } from '../utils/handle_response_size_error';
+import { EXAMPLE_REPETITION_PAYLOAD_SORT } from './preview_source_script';
 
 const DETAILS_SOURCE_FIELDS = ['example.input', 'task.output'] as const;
 
@@ -101,6 +102,7 @@ export const registerGetExperimentExampleDetailsRoute = ({
               repetitionIndex,
             }),
             size: 1,
+            sort: EXAMPLE_REPETITION_PAYLOAD_SORT,
             _source_includes: [...DETAILS_SOURCE_FIELDS],
             track_total_hits: false,
           });

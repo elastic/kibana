@@ -23,7 +23,7 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import { createEvaluatorRegistryMock } from '../../evaluators/registry.mock';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { registerGetExperimentDatasetExamplesRoute } from './get_experiment_dataset_examples';
-import { previewScriptField } from './preview_source_script';
+import { EXAMPLE_REPETITION_PAYLOAD_SORT, previewScriptField } from './preview_source_script';
 
 describe('GET /internal/evals/experiments/{experimentId}/datasets/{datasetId}/examples', () => {
   const setup = () => {
@@ -355,6 +355,7 @@ describe('GET /internal/evals/experiments/{experimentId}/datasets/{datasetId}/ex
                 source: {
                   top_hits: {
                     size: 1,
+                    sort: EXAMPLE_REPETITION_PAYLOAD_SORT,
                     _source: { includes: ['task.repetition_index'] },
                     script_fields: {
                       input_preview: previewScriptField('example', 'input'),
