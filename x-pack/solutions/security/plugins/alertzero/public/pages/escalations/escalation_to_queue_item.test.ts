@@ -35,12 +35,18 @@ describe('escalationToQueueItem', () => {
 
   describe('status coercion', () => {
     it('defaults to "open" when metadata is absent', () => {
-      const item = escalationToQueueItem({ ...base, metadata: undefined } as unknown as EscalationConversationSummary);
+      const item = escalationToQueueItem({
+        ...base,
+        metadata: undefined,
+      } as unknown as EscalationConversationSummary);
       expect(item.status).toBe('open');
     });
 
     it('defaults to "open" when the status field is absent from metadata', () => {
-      const item = escalationToQueueItem({ ...base, metadata: {} } as unknown as EscalationConversationSummary);
+      const item = escalationToQueueItem({
+        ...base,
+        metadata: {},
+      } as unknown as EscalationConversationSummary);
       expect(item.status).toBe('open');
     });
 

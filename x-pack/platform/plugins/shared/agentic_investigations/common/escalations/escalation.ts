@@ -152,13 +152,9 @@ export const updateEscalationRequestSchema = z
         'title and assignees cannot be updated in the same request; send separate PATCH calls',
     }
   )
-  .refine(
-    (value) => !(value.title !== undefined && value.status !== undefined),
-    {
-      message:
-        'title and status cannot be updated in the same request; send separate PATCH calls',
-    }
-  );
+  .refine((value) => !(value.title !== undefined && value.status !== undefined), {
+    message: 'title and status cannot be updated in the same request; send separate PATCH calls',
+  });
 
 export type UpdateEscalationRequest = z.infer<typeof updateEscalationRequestSchema>;
 

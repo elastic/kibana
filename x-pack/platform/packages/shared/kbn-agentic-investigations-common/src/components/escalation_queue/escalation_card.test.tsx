@@ -30,7 +30,11 @@ const closedEscalation: EscalationQueueItem = {
 const renderCard = (escalation: EscalationQueueItem, hasBorder = false) => {
   const renderAssignees = jest.fn(() => <span data-test-subj="assignees-widget" />);
   renderWithKibanaRenderContext(
-    <EscalationCard escalation={escalation} hasBorder={hasBorder} renderAssignees={renderAssignees} />
+    <EscalationCard
+      escalation={escalation}
+      hasBorder={hasBorder}
+      renderAssignees={renderAssignees}
+    />
   );
   return { renderAssignees };
 };

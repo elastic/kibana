@@ -28,10 +28,7 @@ const closedItem: EscalationQueueItem = {
   status: 'closed',
 };
 
-const renderQueue = (
-  status: 'open' | 'closed',
-  escalations: EscalationQueueItem[]
-) => {
+const renderQueue = (status: 'open' | 'closed', escalations: EscalationQueueItem[]) => {
   renderWithKibanaRenderContext(
     <EscalationQueue
       status={status}
