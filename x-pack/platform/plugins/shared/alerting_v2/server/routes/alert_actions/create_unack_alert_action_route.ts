@@ -18,4 +18,5 @@ export const CreateUnackAlertActionRoute = createAlertActionRouteForType({
   summary: 'Unacknowledge an alert',
   bodySchema: createUnackAlertActionBodySchema,
   oasOperationObject: createUnackAlertActionOasExamples,
+  access: 'public' as const,
 });

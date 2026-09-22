@@ -18,4 +18,5 @@ export const CreateDeactivateAlertActionRoute = createAlertActionRouteForType({
   summary: 'Deactivate an alert',
   bodySchema: createDeactivateAlertActionBodySchema,
   oasOperationObject: createDeactivateAlertActionOasExamples,
+  access: 'public' as const,
 });

@@ -25,8 +25,9 @@ type IdleTimeoutHitlStep =
   | StepExecutionRuntime
   | { node: GraphNodeUnion; startedAt: string | undefined };
 
-function getIdleTimeoutResumeDeadlineMs(
-  params: WorkflowExecutionLoopParams,
+/** Returns the earliest deadline across the waiting step and its enclosing timeout scopes. */
+export function getIdleTimeoutResumeDeadlineMs(
+  params: Pick<WorkflowExecutionLoopParams, 'workflowExecutionGraph' | 'workflowExecutionState'>,
   workflowExecution: EsWorkflowExecution,
   scopeStackFrames: StackFrame[],
   hitlStep: IdleTimeoutHitlStep

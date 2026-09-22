@@ -17,7 +17,7 @@ import {
   testData,
 } from '../fixtures';
 
-const TAGS_URL = `${testData.ACTION_POLICY_API_PATH}/tags`;
+const TAGS_URL = `${testData.INTERNAL_ACTION_POLICY_API_PATH}/tags`;
 
 const tagsUrl = (params: Record<string, string | undefined> = {}): string => {
   const search = new URLSearchParams();

@@ -48,7 +48,7 @@ export interface AlertingBoomData {
 @injectable()
 export abstract class BaseAlertingRoute implements RouteHandler {
   protected static readonly defaultOptions: RouteConfigOptions<RouteMethod> = {
-    access: 'public',
+    access: 'internal',
     tags: ['oas-tag:alerting-v2'],
     availability: { stability: 'experimental', since: '9.5.0' },
   };
@@ -99,7 +99,7 @@ export abstract class BaseAlertingRoute implements RouteHandler {
     503: {
       body: () => errorResponseSchema,
       description:
-        'Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.',
+        'This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.',
     },
   };
 

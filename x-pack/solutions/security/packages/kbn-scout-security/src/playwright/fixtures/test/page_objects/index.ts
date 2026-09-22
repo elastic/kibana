@@ -17,6 +17,7 @@ import { EntityAnalyticsManagementPage } from './entity_analytics_management';
 import { CspmIntegrationPage } from './cspm_integration_page';
 import { TimelinePage } from './timeline';
 import { DetectionsAttackDiscoveryPage } from './detections_attack_discovery';
+import { RuleCreateWizardPage } from './rule_create_wizard';
 import { ThreatMatchRuleCreatePage } from './threat_match_rule_create_page';
 import { AttackDetailsRightPanelPage } from './attack_details_right_panel';
 import { ServerlessProjectChromePage } from './serverless_project_chrome_page';
@@ -31,6 +32,7 @@ import { PrevalenceTool } from './flyout_v2/document/tools/prevalence_tool';
 import { AnalyzerTool } from './flyout_v2/document/tools/analyzer_tool';
 import { EntityFlyoutAnomaliesPage } from './entity_flyout_anomalies_page';
 
+export type { RuleCreateWizardPage } from './rule_create_wizard';
 export type { ThreatMatchRuleCreatePage } from './threat_match_rule_create_page';
 export { AddExceptionButtonType } from './add_exception_flyout';
 
@@ -45,6 +47,8 @@ export interface SecurityPageObjects extends PageObjects {
   cspmIntegrationPage: CspmIntegrationPage;
   timelinePage: TimelinePage;
   detectionsAttackDiscoveryPage: DetectionsAttackDiscoveryPage;
+  /** Custom query rule create wizard — Define → About → Schedule → Actions. */
+  ruleCreateWizard: RuleCreateWizardPage;
   /** Indicator match (threat match) rule creation page — threat index and field mapping controls. */
   threatMatchRuleCreatePage: ThreatMatchRuleCreatePage;
   attackDetailsRightPanelPage: AttackDetailsRightPanelPage;
@@ -92,6 +96,7 @@ export function extendPageObjects(
       page,
       config
     ),
+    ruleCreateWizard: createLazyPageObject(RuleCreateWizardPage, page),
     threatMatchRuleCreatePage: createLazyPageObject(ThreatMatchRuleCreatePage, page),
     attackDetailsRightPanelPage: createLazyPageObject(AttackDetailsRightPanelPage, page),
     serverlessProjectChromePage: createLazyPageObject(ServerlessProjectChromePage, page),

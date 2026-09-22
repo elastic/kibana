@@ -32,6 +32,7 @@ export class BulkCreateAlertActionRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
+    access: 'public' as const,
     summary: 'Bulk create alert actions',
     description: 'Create actions for multiple alert groups in a single request.',
     oasOperationObject: bulkCreateAlertActionOasExamples,

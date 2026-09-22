@@ -98,7 +98,7 @@ main () {
 
   git add $GIT_SCOPE
   if [ "$VERSION_BUMPED" == "true" ]; then
-    git add package.json yarn.lock
+    git add package.json pnpm-lock.yaml
   fi
   git commit -m "Update function metadata"
 

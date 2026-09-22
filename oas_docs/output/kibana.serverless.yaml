@@ -313,8 +313,6 @@ tags:
   - description: You can create Timelines and Timeline templates via the API, as well as import new Timelines from an ndjson file.
     name: Security Timeline API
     x-displayName: Security timeline
-  - name: significant_events
-    x-displayName: Significant Events
   - description: SLO APIs enable you to define, manage and track service-level objectives
     name: slo
     x-displayName: Service level objectives
@@ -8376,7 +8374,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: List action policies
       tags:
         - alerting-v2
@@ -8531,7 +8529,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Create an action policy
       tags:
         - alerting-v2
@@ -8654,7 +8652,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Delete action policies in bulk by ID
       tags:
         - alerting-v2
@@ -8777,7 +8775,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Disable action policies in bulk by ID
       tags:
         - alerting-v2
@@ -8900,7 +8898,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Enable action policies in bulk by ID
       tags:
         - alerting-v2
@@ -9024,7 +9022,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Snooze action policies in bulk by ID
       tags:
         - alerting-v2
@@ -9147,7 +9145,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Cancel snooze for action policies in bulk by ID
       tags:
         - alerting-v2
@@ -9270,159 +9268,8 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Rotate API keys for action policies in bulk by ID
-      tags:
-        - alerting-v2
-      x-state: Experimental
-      x-metaTags:
-        - content: Kibana, Elastic Cloud Serverless
-          name: product_name
-  /api/alerting/v2/action_policies/_match_for_rule:
-    post:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/action_policies/_match_for_rule</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Returns the action policies that apply to a rule, based on the rule's tags. Each result includes a `category` with the reason it matched. This endpoint does not evaluate `matcher.expression`, because those queries need alert data that is only available once an alert exists. As a result, policies that match only by an expression are not returned, and a returned policy might not match every alert from the rule.<br/><br/>[Required authorization] Route required privileges: read_alerting-v2-action-policies.
-      operationId: post-alerting-v2-action-policies-match-for-rule
-      parameters:
-        - description: A required header to protect against CSRF attacks
-          in: header
-          name: kbn-xsrf
-          required: true
-          schema:
-            example: 'true'
-            type: string
-      requestBody:
-        content:
-          application/json:
-            examples:
-              matchActionPoliciesForRuleRequest:
-                summary: Rule to match action policies against
-                value:
-                  rule:
-                    tags:
-                      - production
-            schema:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_match_action_policies_for_rule_request'
-      responses:
-        '200':
-          content:
-            application/json:
-              examples:
-                matchActionPoliciesForRuleResponse:
-                  summary: Action policies matching the rule
-                  value:
-                    items:
-                      - actionPolicy:
-                          auth:
-                            created_by_user: true
-                            owner: elastic
-                          created_at: '2026-01-15T12:00:00.000Z'
-                          created_by: elastic
-                          description: Sends notifications for alerts generated by rules with the production tag.
-                          destinations:
-                            - id: workflow-1
-                              type: workflow
-                          enabled: true
-                          group_by: null
-                          grouping_mode: per_episode
-                          id: action-policy-1
-                          matcher:
-                            tags:
-                              - production
-                          name: Notify on production alerts
-                          snoozed_until: null
-                          tags:
-                            - production
-                          throttle:
-                            interval: null
-                            strategy: on_status_change
-                          updated_at: '2026-01-15T12:00:00.000Z'
-                          updated_by: elastic
-                          version: WzAsMV0=
-                        category: tags
-                    total: 1
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_match_action_policies_for_rule_response'
-          description: Indicates a successful call.
-        '400':
-          content:
-            application/json:
-              examples:
-                invalidRequest:
-                  summary: Indicates an invalid schema or parameters.
-                  value:
-                    code: BAD_REQUEST
-                    details:
-                      errors:
-                        errors: []
-                        properties:
-                          rule:
-                            errors:
-                              - 'Invalid input: expected object, received undefined'
-                    error: Bad Request
-                    message: 'rule: Invalid input: expected object, received undefined'
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates an invalid schema or parameters.
-        '401':
-          content:
-            application/json:
-              examples:
-                unauthorized:
-                  summary: Request was not authenticated
-                  value:
-                    code: UNAUTHORIZED
-                    error: Unauthorized
-                    message: Authentication required to access this API.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the request was not authenticated.
-        '403':
-          content:
-            application/json:
-              examples:
-                forbidden:
-                  summary: Caller lacks required privileges
-                  value:
-                    code: FORBIDDEN
-                    error: Forbidden
-                    message: The current user does not have the required privileges for this request.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the user does not have the required privileges to perform the request.
-        '500':
-          content:
-            application/json:
-              examples:
-                internalServerError:
-                  summary: Unexpected server-side error
-                  value:
-                    code: INTERNAL_SERVER_ERROR
-                    error: Internal Server Error
-                    message: An unexpected error occurred.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates an unexpected server-side error.
-        '503':
-          content:
-            application/json:
-              examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
-                  value:
-                    code: ALERTING_DISABLED
-                    error: Service Unavailable
-                    message: Alerting is disabled.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: Match action policies for a rule
       tags:
         - alerting-v2
       x-state: Experimental
@@ -9438,7 +9285,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Delete an action policy by identifier.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-action-policies.
+        Deletes the action policy whose ID you include in the URL path. Use the `id` returned when you created the policy, or from get or list. This request has no body.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-action-policies.
       operationId: delete-alerting-v2-action-policies-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -9448,7 +9295,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The action policy identifier.
+        - description: The ID of the action policy to delete. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -9516,7 +9363,7 @@ paths:
                     details:
                       action_policy_id: action-policy-1
                     error: Not Found
-                    message: Action policy with id "action-policy-1" not found
+                    message: Action policy with ID "action-policy-1" not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an action policy with the given ID does not exist.
@@ -9545,7 +9392,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Delete an action policy
       tags:
         - alerting-v2
@@ -9564,7 +9411,7 @@ paths:
         Get an action policy by identifier.<br/><br/>[Required authorization] Route required privileges: read_alerting-v2-action-policies.
       operationId: get-alerting-v2-action-policies-id
       parameters:
-        - description: The action policy identifier.
+        - description: The ID of the action policy to get. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -9665,7 +9512,7 @@ paths:
                     details:
                       action_policy_id: action-policy-1
                     error: Not Found
-                    message: Action policy with id "action-policy-1" not found
+                    message: Action policy with ID "action-policy-1" not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an action policy with the given ID does not exist.
@@ -9694,7 +9541,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Get an action policy
       tags:
         - alerting-v2
@@ -9720,7 +9567,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The action policy identifier.
+        - description: The ID of the action policy to update. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -9834,7 +9681,7 @@ paths:
                     details:
                       action_policy_id: action-policy-1
                     error: Not Found
-                    message: Action policy with id "action-policy-1" not found
+                    message: Action policy with ID "action-policy-1" not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an action policy with the given ID does not exist.
@@ -9849,7 +9696,7 @@ paths:
                     details:
                       action_policy_id: action-policy-1
                     error: Conflict
-                    message: Action policy with id "action-policy-1" has already been updated by another user
+                    message: Action policy with ID "action-policy-1" has already been updated by another user
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the action policy was concurrently updated by another caller.
@@ -9878,7 +9725,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Partially update an action policy.
       tags:
         - alerting-v2
@@ -9917,7 +9764,7 @@ paths:
           application/json:
             examples:
               upsertActionPolicyRequest:
-                summary: Action policy to create or replace at the given id
+                summary: Action policy to create or replace at the given ID
                 value:
                   description: Sends notifications for alerts generated by rules with the production tag.
                   destinations:
@@ -10062,7 +9909,7 @@ paths:
                     details:
                       action_policy_id: action-policy-1
                     error: Not Found
-                    message: Action policy with id "action-policy-1" not found
+                    message: Action policy with ID "action-policy-1" not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an action policy with the given ID does not exist.
@@ -10077,7 +9924,7 @@ paths:
                     details:
                       action_policy_id: action-policy-1
                     error: Conflict
-                    message: Action policy with id "action-policy-1" has already been updated by another user
+                    message: Action policy with ID "action-policy-1" has already been updated by another user
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the action policy was created or updated concurrently by another caller.
@@ -10106,7 +9953,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Create or replace an action policy
       tags:
         - alerting-v2
@@ -10133,7 +9980,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The action policy identifier.
+        - description: The ID of the action policy to disable. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -10234,7 +10081,7 @@ paths:
                     details:
                       action_policy_id: action-policy-1
                     error: Not Found
-                    message: Action policy with id "action-policy-1" not found
+                    message: Action policy with ID "action-policy-1" not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an action policy with the given ID does not exist.
@@ -10249,7 +10096,7 @@ paths:
                     details:
                       action_policy_id: action-policy-1
                     error: Conflict
-                    message: Action policy with id "action-policy-1" has already been updated by another user
+                    message: Action policy with ID "action-policy-1" has already been updated by another user
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the action policy was concurrently updated by another caller.
@@ -10278,7 +10125,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Disable an action policy
       tags:
         - alerting-v2
@@ -10305,7 +10152,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The action policy identifier.
+        - description: The ID of the action policy to enable. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -10406,7 +10253,7 @@ paths:
                     details:
                       action_policy_id: action-policy-1
                     error: Not Found
-                    message: Action policy with id "action-policy-1" not found
+                    message: Action policy with ID "action-policy-1" not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an action policy with the given ID does not exist.
@@ -10421,7 +10268,7 @@ paths:
                     details:
                       action_policy_id: action-policy-1
                     error: Conflict
-                    message: Action policy with id "action-policy-1" has already been updated by another user
+                    message: Action policy with ID "action-policy-1" has already been updated by another user
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the action policy was concurrently updated by another caller.
@@ -10450,7 +10297,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Enable an action policy
       tags:
         - alerting-v2
@@ -10477,7 +10324,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The action policy identifier.
+        - description: The ID of the action policy to snooze. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -10588,7 +10435,7 @@ paths:
                     details:
                       action_policy_id: action-policy-1
                     error: Not Found
-                    message: Action policy with id "action-policy-1" not found
+                    message: Action policy with ID "action-policy-1" not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an action policy with the given ID does not exist.
@@ -10603,7 +10450,7 @@ paths:
                     details:
                       action_policy_id: action-policy-1
                     error: Conflict
-                    message: Action policy with id "action-policy-1" has already been updated by another user
+                    message: Action policy with ID "action-policy-1" has already been updated by another user
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the action policy was concurrently updated by another caller.
@@ -10632,7 +10479,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Snooze an action policy
       tags:
         - alerting-v2
@@ -10659,7 +10506,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The action policy identifier.
+        - description: The ID of the action policy to unsnooze. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -10760,7 +10607,7 @@ paths:
                     details:
                       action_policy_id: action-policy-1
                     error: Not Found
-                    message: Action policy with id "action-policy-1" not found
+                    message: Action policy with ID "action-policy-1" not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an action policy with the given ID does not exist.
@@ -10775,7 +10622,7 @@ paths:
                     details:
                       action_policy_id: action-policy-1
                     error: Conflict
-                    message: Action policy with id "action-policy-1" has already been updated by another user
+                    message: Action policy with ID "action-policy-1" has already been updated by another user
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the action policy was concurrently updated by another caller.
@@ -10804,7 +10651,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Unsnooze an action policy
       tags:
         - alerting-v2
@@ -10831,7 +10678,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The action policy identifier.
+        - description: The ID of the action policy of the API key to update. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -10899,7 +10746,7 @@ paths:
                     details:
                       action_policy_id: action-policy-1
                     error: Not Found
-                    message: Action policy with id "action-policy-1" not found
+                    message: Action policy with ID "action-policy-1" not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an action policy with the given ID does not exist.
@@ -10914,7 +10761,7 @@ paths:
                     details:
                       action_policy_id: action-policy-1
                     error: Conflict
-                    message: Action policy with id "action-policy-1" has already been updated by another user
+                    message: Action policy with ID "action-policy-1" has already been updated by another user
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the action policy was concurrently updated by another caller.
@@ -10943,131 +10790,8 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Update an action policy API key
-      tags:
-        - alerting-v2
-      x-state: Experimental
-      x-metaTags:
-        - content: Kibana, Elastic Cloud Serverless
-          name: product_name
-  /api/alerting/v2/action_policies/tags:
-    get:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/action_policies/tags</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Get unique tags used across action policies.<br/><br/>[Required authorization] Route required privileges: read_alerting-v2-action-policies.
-      operationId: get-alerting-v2-action-policies-tags
-      parameters:
-        - description: Prefix to filter tags by. Returns all most-used tags when omitted.
-          in: query
-          name: search
-          required: false
-          schema:
-            maxLength: 256
-            type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              examples:
-                actionPolicyTagsResponse:
-                  summary: Action policy tags
-                  value:
-                    tags:
-                      - production
-                      - critical
-                      - hosts
-              schema:
-                additionalProperties: false
-                description: All unique tags across action policies.
-                type: object
-                properties:
-                  tags:
-                    description: The list of unique tags.
-                    items:
-                      type: string
-                    type: array
-                required:
-                  - tags
-          description: Returns the action policy tags.
-        '400':
-          content:
-            application/json:
-              examples:
-                invalidRequest:
-                  summary: Indicates an invalid schema or parameters.
-                  value:
-                    code: BAD_REQUEST
-                    details:
-                      errors:
-                        errors: []
-                        properties:
-                          search:
-                            errors:
-                              - 'Too big: expected string to have <=256 characters'
-                    error: Bad Request
-                    message: 'search: Too big: expected string to have <=256 characters'
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates an invalid schema or parameters.
-        '401':
-          content:
-            application/json:
-              examples:
-                unauthorized:
-                  summary: Request was not authenticated
-                  value:
-                    code: UNAUTHORIZED
-                    error: Unauthorized
-                    message: Authentication required to access this API.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the request was not authenticated.
-        '403':
-          content:
-            application/json:
-              examples:
-                forbidden:
-                  summary: Caller lacks required privileges
-                  value:
-                    code: FORBIDDEN
-                    error: Forbidden
-                    message: The current user does not have the required privileges for this request.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the user does not have the required privileges to perform the request.
-        '500':
-          content:
-            application/json:
-              examples:
-                internalServerError:
-                  summary: Unexpected server-side error
-                  value:
-                    code: INTERNAL_SERVER_ERROR
-                    error: Internal Server Error
-                    message: An unexpected error occurred.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates an unexpected server-side error.
-        '503':
-          content:
-            application/json:
-              examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
-                  value:
-                    code: ALERTING_DISABLED
-                    error: Service Unavailable
-                    message: Alerting is disabled.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: Get action policy tags
       tags:
         - alerting-v2
       x-state: Experimental
@@ -11190,7 +10914,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Bulk create alert actions
       tags:
         - alerting-v2
@@ -11322,7 +11046,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Acknowledge an alert
       tags:
         - alerting-v2
@@ -11455,7 +11179,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Activate an alert
       tags:
         - alerting-v2
@@ -11588,7 +11312,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Assign an alert to a user
       tags:
         - alerting-v2
@@ -11721,7 +11445,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Deactivate an alert
       tags:
         - alerting-v2
@@ -11853,7 +11577,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Snooze an alert
       tags:
         - alerting-v2
@@ -11987,7 +11711,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Add tags to an alert
       tags:
         - alerting-v2
@@ -12119,7 +11843,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Unacknowledge an alert
       tags:
         - alerting-v2
@@ -12250,7 +11974,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Unsnooze an alert
       tags:
         - alerting-v2
@@ -12440,7 +12164,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: List action policy executions
       tags:
         - alerting-v2
@@ -12635,7 +12359,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: List rule executions
       tags:
         - alerting-v2
@@ -12820,7 +12544,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: List rules
       tags:
         - alerting-v2
@@ -12986,7 +12710,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Create a rule
       tags:
         - alerting-v2
@@ -13106,7 +12830,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Delete rules in bulk by ID
       tags:
         - alerting-v2
@@ -13226,7 +12950,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Disable rules in bulk by ID
       tags:
         - alerting-v2
@@ -13346,7 +13070,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Enable rules in bulk by ID
       tags:
         - alerting-v2
@@ -13508,7 +13232,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Get rules in bulk
       tags:
         - alerting-v2
@@ -13628,7 +13352,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Update the API key of rules in bulk by ID
       tags:
         - alerting-v2
@@ -13750,7 +13474,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Delete rules matching a query (dry-run by default)
       tags:
         - alerting-v2
@@ -13872,7 +13596,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Disable rules matching a query (dry-run by default)
       tags:
         - alerting-v2
@@ -13994,7 +13718,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Enable rules matching a query (dry-run by default)
       tags:
         - alerting-v2
@@ -14116,7 +13840,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Update the API key of rules matching a query (dry-run by default)
       tags:
         - alerting-v2
@@ -14240,7 +13964,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Delete a rule
       tags:
         - alerting-v2
@@ -14394,7 +14118,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Get a rule
       tags:
         - alerting-v2
@@ -14580,7 +14304,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Update a rule
       tags:
         - alerting-v2
@@ -14824,7 +14548,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Create or replace a rule
       tags:
         - alerting-v2
@@ -15001,7 +14725,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Disable a rule
       tags:
         - alerting-v2
@@ -15174,7 +14898,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Enable a rule
       tags:
         - alerting-v2
@@ -15308,700 +15032,8 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Run a rule now
-      tags:
-        - alerting-v2
-      x-state: Experimental
-      x-metaTags:
-        - content: Kibana, Elastic Cloud Serverless
-          name: product_name
-  /api/alerting/v2/rules/{id}/history:
-    get:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/rules/{id}/history</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Get a paginated list of prior configurations for a rule from change history. List rows are lean (diff summary only); use the detail route for full snapshots.<br/><br/>[Required authorization] Route required privileges: read_alerting-v2-rules.
-      operationId: get-alerting-v2-rules-id-history
-      parameters:
-        - description: The identifier for the rule.
-          in: path
-          name: id
-          required: true
-          schema:
-            maxLength: 150
-            minLength: 1
-            type: string
-        - description: Page number (1-based).
-          in: query
-          name: page
-          required: true
-          schema:
-            default: 1
-            maximum: 10000
-            minimum: 1
-            type: integer
-        - description: Number of results per page.
-          in: query
-          name: per_page
-          required: true
-          schema:
-            default: 20
-            maximum: 100
-            minimum: 1
-            type: integer
-      responses:
-        '200':
-          content:
-            application/json:
-              examples:
-                listRuleChangeHistoryResponse:
-                  summary: Two rule change-history events (newest first)
-                  value:
-                    items:
-                      - action: rule_update
-                        actor:
-                          name: elastic
-                          profileId: u_profile_1
-                        changes:
-                          count: 1
-                          summary:
-                            metadata:
-                              name: Host CPU high
-                        id: 0194f0c8-aaaa-7bbb-8ccc-ddddeeeeffff
-                        isCurrent: true
-                        metadata:
-                          version: 2
-                        timestamp: '2026-01-15T12:05:00.000Z'
-                      - action: rule_create
-                        actor:
-                          name: elastic
-                          profileId: u_profile_1
-                        id: 0194f0c8-1111-7222-8333-444455556666
-                        metadata:
-                          version: 1
-                        timestamp: '2026-01-15T12:00:00.000Z'
-                    total: 2
-              schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  items:
-                    items:
-                      type: object
-                      properties:
-                        action:
-                          type: string
-                        actor:
-                          type: object
-                          properties:
-                            name:
-                              type: string
-                            profileId:
-                              type: string
-                          required:
-                            - name
-                        changes:
-                          type: object
-                          properties:
-                            count:
-                              maximum: 9007199254740991
-                              minimum: 0
-                              type: integer
-                            summary:
-                              additionalProperties: {}
-                              type: object
-                          required:
-                            - count
-                        comment:
-                          type: string
-                        id:
-                          type: string
-                        isCurrent:
-                          type: boolean
-                        metadata:
-                          additionalProperties: {}
-                          type: object
-                        tags:
-                          items:
-                            type: string
-                          type: array
-                        timestamp:
-                          type: string
-                      required:
-                        - id
-                        - timestamp
-                        - actor
-                        - action
-                    type: array
-                  total:
-                    maximum: 9007199254740991
-                    minimum: 0
-                    type: integer
-                required:
-                  - items
-                  - total
-          description: Returns a paginated list of rule change-history events.
-        '400':
-          content:
-            application/json:
-              examples:
-                invalidRequest:
-                  summary: Exceeds the max result window
-                  value:
-                    code: BAD_REQUEST
-                    details:
-                      errors:
-                        page:
-                          - page * per_page cannot exceed 10000.
-                    error: Bad Request
-                    message: page * per_page cannot exceed 10000.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates an invalid schema or parameters.
-        '401':
-          content:
-            application/json:
-              examples:
-                unauthorized:
-                  summary: Request was not authenticated
-                  value:
-                    code: UNAUTHORIZED
-                    error: Unauthorized
-                    message: Authentication required to access this API.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the request was not authenticated.
-        '403':
-          content:
-            application/json:
-              examples:
-                forbidden:
-                  summary: Caller lacks required privileges
-                  value:
-                    code: FORBIDDEN
-                    error: Forbidden
-                    message: The current user does not have the required privileges for this request.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the user does not have the required privileges to perform the request.
-        '500':
-          content:
-            application/json:
-              examples:
-                internalServerError:
-                  summary: Unexpected server-side error
-                  value:
-                    code: INTERNAL_SERVER_ERROR
-                    error: Internal Server Error
-                    message: An unexpected error occurred.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates an unexpected server-side error.
-        '503':
-          content:
-            application/json:
-              examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
-                  value:
-                    code: ALERTING_DISABLED
-                    error: Service Unavailable
-                    message: Alerting is disabled.
-                ruleChangeHistoryUnavailable:
-                  summary: Change history data stream is not initialized
-                  value:
-                    code: RULE_CHANGE_HISTORY_UNAVAILABLE
-                    error: Service Unavailable
-                    message: Rule change history is unavailable
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: List rule change history
-      tags:
-        - alerting-v2
-      x-state: Experimental
-      x-metaTags:
-        - content: Kibana, Elastic Cloud Serverless
-          name: product_name
-  /api/alerting/v2/rules/{id}/history/{eventId}:
-    get:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/rules/{id}/history/{eventId}</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Get the full detail for a single rule change-history event, including the rule configuration snapshot.<br/><br/>[Required authorization] Route required privileges: read_alerting-v2-rules.
-      operationId: get-alerting-v2-rules-id-history-eventid
-      parameters:
-        - description: The identifier for the rule.
-          in: path
-          name: id
-          required: true
-          schema:
-            maxLength: 150
-            minLength: 1
-            type: string
-        - description: The change-history event identifier (`event.id`).
-          in: path
-          name: eventId
-          required: true
-          schema:
-            maxLength: 150
-            minLength: 1
-            type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              examples:
-                getRuleChangeHistoryEventResponse:
-                  summary: Retrieved rule change-history event with snapshot
-                  value:
-                    action: rule_update
-                    actor:
-                      name: elastic
-                      profileId: u_profile_1
-                    changes:
-                      count: 1
-                      summary:
-                        metadata:
-                          name: Host CPU high
-                    id: 0194f0c8-aaaa-7bbb-8ccc-ddddeeeeffff
-                    isCurrent: true
-                    metadata:
-                      version: 2
-                    snapshot:
-                      created_at: '2026-01-15T12:00:00.000Z'
-                      created_by: elastic
-                      enabled: true
-                      grouping:
-                        fields:
-                          - host.name
-                      id: rule-1
-                      kind: alert
-                      metadata:
-                        description: Alerts when average CPU usage exceeds a threshold.
-                        name: Host CPU critical
-                        tags:
-                          - production
-                          - infra
-                        version: 2
-                      query:
-                        breach:
-                          query: FROM metrics-* | WHERE host.cpu.usage > 0.9 | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
-                        format: standalone
-                      recovery_strategy: no_breach
-                      schedule:
-                        every: 1m
-                        lookback: 5m
-                      state_transition:
-                        pending_count: 1
-                        recovering_count: 1
-                      time_field: '@timestamp'
-                      updated_at: '2026-01-15T12:00:00.000Z'
-                      updated_by: elastic
-                    timestamp: '2026-01-15T12:05:00.000Z'
-              schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  action:
-                    type: string
-                  actor:
-                    additionalProperties: false
-                    type: object
-                    properties:
-                      name:
-                        type: string
-                      profileId:
-                        type: string
-                    required:
-                      - name
-                  changes:
-                    additionalProperties: false
-                    type: object
-                    properties:
-                      count:
-                        maximum: 9007199254740991
-                        minimum: 0
-                        type: integer
-                      summary:
-                        additionalProperties: {}
-                        type: object
-                    required:
-                      - count
-                  comment:
-                    type: string
-                  id:
-                    type: string
-                  isCurrent:
-                    type: boolean
-                  metadata:
-                    additionalProperties: {}
-                    type: object
-                  reason:
-                    type: string
-                  snapshot:
-                    additionalProperties: {}
-                    type: object
-                  tags:
-                    items:
-                      type: string
-                    type: array
-                  timestamp:
-                    type: string
-                required:
-                  - id
-                  - timestamp
-                  - actor
-                  - action
-                  - snapshot
-          description: Returns the requested rule change-history event.
-        '400':
-          content:
-            application/json:
-              examples:
-                invalidRequest:
-                  summary: Indicates an invalid schema or parameters.
-                  value:
-                    code: BAD_REQUEST
-                    details:
-                      errors:
-                        errors: []
-                        properties:
-                          eventId:
-                            errors:
-                              - 'Too small: expected string to have >=1 characters'
-                    error: Bad Request
-                    message: 'eventId: Too small: expected string to have >=1 characters'
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the request failed schema validation.
-        '401':
-          content:
-            application/json:
-              examples:
-                unauthorized:
-                  summary: Request was not authenticated
-                  value:
-                    code: UNAUTHORIZED
-                    error: Unauthorized
-                    message: Authentication required to access this API.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the request was not authenticated.
-        '403':
-          content:
-            application/json:
-              examples:
-                forbidden:
-                  summary: Caller lacks required privileges
-                  value:
-                    code: FORBIDDEN
-                    error: Forbidden
-                    message: The current user does not have the required privileges for this request.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the user does not have the required privileges to perform the request.
-        '404':
-          content:
-            application/json:
-              examples:
-                ruleChangeNotFound:
-                  summary: No change-history event exists for the given ID
-                  value:
-                    code: RULE_CHANGE_NOT_FOUND
-                    details:
-                      event_id: missing-event
-                      rule_id: rule-1
-                    error: Not Found
-                    message: Rule change with event id "missing-event" not found for rule "rule-1"
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates a change-history event with the given ID does not exist.
-        '500':
-          content:
-            application/json:
-              examples:
-                internalServerError:
-                  summary: Unexpected server-side error
-                  value:
-                    code: INTERNAL_SERVER_ERROR
-                    error: Internal Server Error
-                    message: An unexpected error occurred.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates an unexpected server-side error.
-        '503':
-          content:
-            application/json:
-              examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
-                  value:
-                    code: ALERTING_DISABLED
-                    error: Service Unavailable
-                    message: Alerting is disabled.
-                ruleChangeHistoryUnavailable:
-                  summary: Change history data stream is not initialized
-                  value:
-                    code: RULE_CHANGE_HISTORY_UNAVAILABLE
-                    error: Service Unavailable
-                    message: Rule change history is unavailable
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: Get a rule change-history event
-      tags:
-        - alerting-v2
-      x-state: Experimental
-      x-metaTags:
-        - content: Kibana, Elastic Cloud Serverless
-          name: product_name
-  /api/alerting/v2/rules/tags:
-    get:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/rules/tags</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        [Required authorization] Route required privileges: read_alerting-v2-rules.
-      operationId: get-alerting-v2-rules-tags
-      parameters:
-        - description: Prefix to filter tags by. Returns all most-used tags when omitted.
-          in: query
-          name: search
-          required: false
-          schema:
-            maxLength: 256
-            type: string
-        - description: Restrict tags to rules of the given kind.
-          in: query
-          name: kind
-          required: false
-          schema:
-            anyOf:
-              - description: Default. Tracks each problem as an alert episode and its lifecycle, link it to workflows to notify your team. Use when the user wants to detect and respond.
-                enum:
-                  - alert
-                type: string
-              - description: Matches are stored as queryable events. No alerts, no notifications - just data. Use when the user wants to collect evidence.
-                enum:
-                  - signal
-                type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              examples:
-                ruleTagsResponse:
-                  summary: Unique tags across matching rules
-                  value:
-                    tags:
-                      - production
-                      - infra
-                      - critical
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_tags_response'
-          description: Returns the requested rule tags.
-        '400':
-          content:
-            application/json:
-              examples:
-                invalidRequest:
-                  summary: Indicates an invalid schema or parameters.
-                  value:
-                    code: BAD_REQUEST
-                    details:
-                      errors:
-                        errors: []
-                        properties:
-                          search:
-                            errors:
-                              - 'Too big: expected string to have <=256 characters'
-                    error: Bad Request
-                    message: 'search: Too big: expected string to have <=256 characters'
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates an invalid schema or parameters.
-        '401':
-          content:
-            application/json:
-              examples:
-                unauthorized:
-                  summary: Request was not authenticated
-                  value:
-                    code: UNAUTHORIZED
-                    error: Unauthorized
-                    message: Authentication required to access this API.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the request was not authenticated.
-        '403':
-          content:
-            application/json:
-              examples:
-                forbidden:
-                  summary: Caller lacks required privileges
-                  value:
-                    code: FORBIDDEN
-                    error: Forbidden
-                    message: The current user does not have the required privileges for this request.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the user does not have the required privileges to perform the request.
-        '500':
-          content:
-            application/json:
-              examples:
-                internalServerError:
-                  summary: Unexpected server-side error
-                  value:
-                    code: INTERNAL_SERVER_ERROR
-                    error: Internal Server Error
-                    message: An unexpected error occurred.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates an unexpected server-side error.
-        '503':
-          content:
-            application/json:
-              examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
-                  value:
-                    code: ALERTING_DISABLED
-                    error: Service Unavailable
-                    message: Alerting is disabled.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: Get rule tags
-      tags:
-        - alerting-v2
-      x-state: Experimental
-      x-metaTags:
-        - content: Kibana, Elastic Cloud Serverless
-          name: product_name
-  /api/alerting/v2/suggestions/rule_event_fields:
-    get:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/suggestions/rule_event_fields</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Get suggestions for matcher data fields.<br/><br/>[Required authorization] Route required privileges: read_alerting-v2-alerts.
-      operationId: get-alerting-v2-suggestions-rule-event-fields
-      parameters:
-        - description: Optional matcher expression used to scope suggested data field names.
-          in: query
-          name: matcher
-          required: false
-          schema:
-            maxLength: 2048
-            minLength: 1
-            type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              examples:
-                matcherDataFieldsResponse:
-                  summary: Available matcher data fields
-                  value:
-                    - host.name
-                    - host.ip
-                    - kibana.alert.rule.name
-              schema:
-                description: The list of available matcher data field names.
-                items:
-                  type: string
-                type: array
-          description: Returns the available matcher data field names.
-        '400':
-          content:
-            application/json:
-              examples:
-                invalidRequest:
-                  summary: Indicates an invalid schema or parameters.
-                  value:
-                    code: BAD_REQUEST
-                    details:
-                      errors:
-                        errors: []
-                        properties:
-                          matcher:
-                            errors:
-                              - 'Too small: expected string to have >=1 characters'
-                    error: Bad Request
-                    message: 'matcher: Too small: expected string to have >=1 characters'
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates an invalid schema or parameters.
-        '401':
-          content:
-            application/json:
-              examples:
-                unauthorized:
-                  summary: Request was not authenticated
-                  value:
-                    code: UNAUTHORIZED
-                    error: Unauthorized
-                    message: Authentication required to access this API.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the request was not authenticated.
-        '403':
-          content:
-            application/json:
-              examples:
-                forbidden:
-                  summary: Caller lacks required privileges
-                  value:
-                    code: FORBIDDEN
-                    error: Forbidden
-                    message: The current user does not have the required privileges for this request.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the user does not have the required privileges to perform the request.
-        '500':
-          content:
-            application/json:
-              examples:
-                internalServerError:
-                  summary: Unexpected server-side error
-                  value:
-                    code: INTERNAL_SERVER_ERROR
-                    error: Internal Server Error
-                    message: An unexpected error occurred.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates an unexpected server-side error.
-        '503':
-          content:
-            application/json:
-              examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
-                  value:
-                    code: ALERTING_DISABLED
-                    error: Service Unavailable
-                    message: Alerting is disabled.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: Get matcher data fields suggestions
       tags:
         - alerting-v2
       x-state: Experimental
@@ -75824,7 +74856,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Exports a content pack with the stream structure (routing, mappings, and processing). Significant-event queries are not included; manage them via the /api/streams/{name}/queries endpoints.<br/><br/>[Required authorization] Route required privileges: manage_stream.
+        Exports a content pack with the stream structure (routing, mappings, and processing). Significant-event queries are not included.<br/><br/>[Required authorization] Route required privileges: manage_stream.
       operationId: post-streams-name-content-export
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -75928,441 +74960,6 @@ paths:
       summary: Import content into a stream
       tags:
         - streams
-      x-state: Experimental
-      x-metaTags:
-        - content: Kibana, Elastic Cloud Serverless
-          name: product_name
-  /api/streams/{name}/queries:
-    get:
-      deprecated: true
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{name}/queries</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Fetches all queries linked to a stream that are visible to the current user in the current space.<br/><br/>[Required authorization] Route required privileges: read_stream.
-      operationId: get-streams-name-queries
-      parameters:
-        - description: The name of the stream.
-          in: path
-          name: name
-          required: true
-          schema:
-            maxLength: 255
-            type: string
-      requestBody:
-        content:
-          application/json:
-            examples: {}
-            schema:
-              anyOf:
-                - additionalProperties: false
-                  type: object
-                  properties: {}
-                - {}
-              nullable: true
-      responses:
-        '200':
-          content:
-            application/json:
-              examples:
-                listQueries:
-                  value:
-                    queries:
-                      - description: Count error-level log events grouped by host name
-                        esql:
-                          query: FROM logs.nginx | WHERE log.level == "error" | STATS count = COUNT(*) BY host.name
-                        id: error-count-by-host
-                        severity_score: 75
-                        title: Error count by host
-                        type: match
-                      - description: Requests with response time above 2 seconds
-                        esql:
-                          query: FROM logs.nginx | WHERE http.response_time > 2000
-                        id: high-latency-requests
-                        severity_score: 50
-                        title: High latency requests
-                        type: match
-          description: List of queries linked to the stream.
-      summary: Get stream queries
-      tags:
-        - significant_events
-      x-state: Experimental
-      x-metaTags:
-        - content: Kibana, Elastic Cloud Serverless
-          name: product_name
-  /api/streams/{name}/queries/_bulk:
-    post:
-      deprecated: true
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{name}/queries/_bulk</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Bulk update queries of a stream. Can add new queries and delete existing ones.<br/><br/>[Required authorization] Route required privileges: manage_stream.
-      operationId: post-streams-name-queries-bulk
-      parameters:
-        - description: A required header to protect against CSRF attacks
-          in: header
-          name: kbn-xsrf
-          required: true
-          schema:
-            example: 'true'
-            type: string
-        - description: The name of the stream.
-          in: path
-          name: name
-          required: true
-          schema:
-            maxLength: 255
-            type: string
-      requestBody:
-        content:
-          application/json:
-            examples:
-              bulkQueries:
-                value:
-                  operations:
-                    - index:
-                        description: Count error-level log events grouped by host name
-                        esql:
-                          query: FROM logs* | WHERE log.level == "error" | STATS count = COUNT(*) BY host.name
-                        id: error-count-by-host
-                        title: Error count by host
-                    - delete:
-                        id: old-query-id
-            schema:
-              additionalProperties: false
-              type: object
-              properties:
-                operations:
-                  items:
-                    anyOf:
-                      - type: object
-                        properties:
-                          index:
-                            type: object
-                            properties:
-                              description:
-                                default: ''
-                                maxLength: 10000
-                                type: string
-                              esql:
-                                type: object
-                                properties:
-                                  query:
-                                    maxLength: 10000
-                                    type: string
-                                required:
-                                  - query
-                              evidence:
-                                items:
-                                  maxLength: 10000
-                                  type: string
-                                type: array
-                              expires_at:
-                                format: date-time
-                                pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
-                                type: string
-                              id:
-                                description: A non-empty string.
-                                minLength: 1
-                                type: string
-                              severity_score:
-                                type: number
-                              title:
-                                description: A non-empty string.
-                                minLength: 1
-                                type: string
-                            required:
-                              - title
-                              - esql
-                              - id
-                        required:
-                          - index
-                      - type: object
-                        properties:
-                          delete:
-                            type: object
-                            properties:
-                              id:
-                                maxLength: 255
-                                type: string
-                            required:
-                              - id
-                        required:
-                          - delete
-                  type: array
-              required:
-                - operations
-      responses:
-        '200':
-          description: Bulk operation completed successfully.
-      summary: Bulk update queries
-      tags:
-        - significant_events
-      x-state: Experimental
-      x-metaTags:
-        - content: Kibana, Elastic Cloud Serverless
-          name: product_name
-  /api/streams/{name}/queries/{queryId}:
-    delete:
-      deprecated: true
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{name}/queries/{queryId}</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Remove a query from a stream. Noop if the query is not found on the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.
-      operationId: delete-streams-name-queries-queryid
-      parameters:
-        - description: A required header to protect against CSRF attacks
-          in: header
-          name: kbn-xsrf
-          required: true
-          schema:
-            example: 'true'
-            type: string
-        - description: The name of the stream.
-          in: path
-          name: name
-          required: true
-          schema:
-            maxLength: 255
-            type: string
-        - description: The identifier of the query to remove.
-          in: path
-          name: queryId
-          required: true
-          schema:
-            maxLength: 255
-            type: string
-      requestBody:
-        content:
-          application/json:
-            examples: {}
-            schema:
-              anyOf:
-                - additionalProperties: false
-                  type: object
-                  properties: {}
-                - {}
-              nullable: true
-      responses:
-        '200':
-          description: The query was removed successfully.
-      summary: Remove a query from a stream
-      tags:
-        - significant_events
-      x-state: Experimental
-      x-metaTags:
-        - content: Kibana, Elastic Cloud Serverless
-          name: product_name
-    put:
-      deprecated: true
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{name}/queries/{queryId}</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Adds a query to a stream. Noop if the query is already present on the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.
-      operationId: put-streams-name-queries-queryid
-      parameters:
-        - description: A required header to protect against CSRF attacks
-          in: header
-          name: kbn-xsrf
-          required: true
-          schema:
-            example: 'true'
-            type: string
-        - description: The name of the stream.
-          in: path
-          name: name
-          required: true
-          schema:
-            maxLength: 255
-            type: string
-        - description: The identifier of the query.
-          in: path
-          name: queryId
-          required: true
-          schema:
-            maxLength: 255
-            type: string
-      requestBody:
-        content:
-          application/json:
-            examples:
-              upsertQuery:
-                value:
-                  description: Count error-level log events grouped by host name
-                  esql:
-                    query: FROM logs* | WHERE log.level == "error" | STATS count = COUNT(*) BY host.name
-                  title: Error count by host
-            schema:
-              additionalProperties: false
-              type: object
-              properties:
-                description:
-                  default: ''
-                  maxLength: 10000
-                  type: string
-                esql:
-                  additionalProperties: false
-                  type: object
-                  properties:
-                    query:
-                      maxLength: 10000
-                      type: string
-                  required:
-                    - query
-                evidence:
-                  items:
-                    maxLength: 10000
-                    type: string
-                  type: array
-                expires_at:
-                  format: date-time
-                  pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
-                  type: string
-                severity_score:
-                  type: number
-                title:
-                  description: A non-empty string.
-                  minLength: 1
-                  type: string
-              required:
-                - title
-                - esql
-      responses:
-        '200':
-          description: The query was added or updated successfully.
-      summary: Upsert a query to a stream
-      tags:
-        - significant_events
-      x-state: Experimental
-      x-metaTags:
-        - content: Kibana, Elastic Cloud Serverless
-          name: product_name
-  /api/streams/{name}/significant_events:
-    get:
-      deprecated: true
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{name}/significant_events</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Read the significant events<br/><br/>[Required authorization] Route required privileges: read_stream.
-      operationId: get-streams-name-significant-events
-      parameters:
-        - description: The name of the stream.
-          in: path
-          name: name
-          required: true
-          schema:
-            maxLength: 255
-            type: string
-        - description: Start of the time range as an ISO 8601 date string.
-          in: query
-          name: from
-          required: true
-          schema:
-            maxLength: 255
-            type: string
-        - description: End of the time range as an ISO 8601 date string.
-          in: query
-          name: to
-          required: true
-          schema:
-            maxLength: 255
-            type: string
-        - description: The bucket size for aggregating events (e.g. "1m", "1h").
-          in: query
-          name: bucketSize
-          required: true
-          schema:
-            maxLength: 255
-            pattern: ^(\d+)([smhd])$
-            type: string
-        - description: Query string to filter significant events on metadata fields
-          in: query
-          name: query
-          required: false
-          schema:
-            maxLength: 10000
-            type: string
-        - description: 'Search mode: keyword (BM25), semantic (vector), or hybrid (RRF). When omitted, defaults to hybrid with a silent keyword fallback on failure. When set explicitly, failures propagate as errors.'
-          in: query
-          name: searchMode
-          required: false
-          schema:
-            enum:
-              - keyword
-              - semantic
-              - hybrid
-            type: string
-      requestBody:
-        content:
-          application/json:
-            examples: {}
-            schema:
-              anyOf:
-                - additionalProperties: false
-                  type: object
-                  properties: {}
-                - {}
-              nullable: true
-      responses:
-        '200':
-          content:
-            application/json:
-              examples:
-                queryOccurrences:
-                  value:
-                    aggregated_occurrences:
-                      - count: 42
-                        date: '2025-01-15T10:00:00.000Z'
-                      - count: 18
-                        date: '2025-01-15T11:00:00.000Z'
-                      - count: 7
-                        date: '2025-01-15T12:00:00.000Z'
-                    queries:
-                      - change_points:
-                          type:
-                            spike:
-                              change_point: 1
-                              p_value: 0.002
-                        description: Count error-level log events grouped by host name
-                        esql:
-                          query: FROM logs.nginx | WHERE log.level == "error" | STATS count = COUNT(*) BY host.name
-                        id: error-count-by-host
-                        occurrences:
-                          - count: 42
-                            date: '2025-01-15T10:00:00.000Z'
-                          - count: 18
-                            date: '2025-01-15T11:00:00.000Z'
-                          - count: 7
-                            date: '2025-01-15T12:00:00.000Z'
-                        rule_backed: false
-                        rule_uuid: 9fdfcf5a-4e1d-5ee3-b05d-7bc2b014e81c
-                        severity_score: 75
-                        stream_name: logs.nginx
-                        title: Error count by host
-                        type: match
-          description: Significant events for the stream.
-      summary: Read the significant events
-      tags:
-        - significant_events
       x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -91178,57 +89775,6 @@ components:
         - code
         - error
         - message
-    Kibana_HTTP_APIs_alerting_match_action_policies_for_rule_request:
-      additionalProperties: false
-      type: object
-      properties:
-        rule:
-          additionalProperties: false
-          type: object
-          properties:
-            tags:
-              description: Tags of the rule you want to check. The response includes policies whose `matcher.tags` contain at least one of the tags in this list, along with policies that apply to every rule.
-              items:
-                maxLength: 256
-                minLength: 1
-                type: string
-              maxItems: 100
-              type: array
-    Kibana_HTTP_APIs_alerting_match_action_policies_for_rule_response:
-      additionalProperties: false
-      description: Action policies that match a given rule, grouped by match category.
-      type: object
-      properties:
-        items:
-          description: The list of matched action policies.
-          items:
-            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_matched_action_policy'
-          type: array
-        total:
-          description: Total number of action policies in the space. If greater than the number evaluated, the match results may be incomplete.
-          maximum: 9007199254740991
-          minimum: 0
-          type: integer
-      required:
-        - items
-        - total
-    Kibana_HTTP_APIs_alerting_matched_action_policy:
-      additionalProperties: false
-      description: An action policy that matches a rule, along with the reason it matched.
-      type: object
-      properties:
-        actionPolicy:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_response'
-          description: The matched action policy.
-        category:
-          description: The reason this policy applies to the rule. `catch-all` means the policy has neither `matcher.tags` nor `matcher.expression`, so it applies to every rule. `tags` means the rule has at least one tag listed in the policy's `matcher.tags`.
-          enum:
-            - catch-all
-            - tags
-          type: string
-      required:
-        - actionPolicy
-        - category
     Kibana_HTTP_APIs_alerting_new_ack_alert_action:
       additionalProperties: false
       type: object
@@ -92016,18 +90562,6 @@ components:
           type: string
       required:
         - every
-    Kibana_HTTP_APIs_alerting_rule_tags_response:
-      additionalProperties: false
-      description: All unique tags across rules.
-      type: object
-      properties:
-        tags:
-          description: The list of unique tags.
-          items:
-            type: string
-          type: array
-      required:
-        - tags
     Kibana_HTTP_APIs_alerting_snooze_action_policy_request:
       additionalProperties: false
       type: object
@@ -103939,10 +102473,10 @@ components:
           minItems: 1
           type: array
         onMonthDay:
-          description: The specific days of the month for a recurring schedule. Valid values are 1-31.
+          description: The specific days of the month for a recurring schedule. Valid values are `1` to `31`, or `-1` for the last day of the month.
           items:
             maximum: 31
-            minimum: 1
+            minimum: -1
             type: number
           maxItems: 31
           minItems: 1
@@ -103976,7 +102510,7 @@ components:
           maxItems: 12
           type: array
         onMonthDay:
-          description: The specific days of the month for a recurring schedule. Valid values are 1-31.
+          description: The specific days of the month for a recurring schedule. Valid values are `1` to `31`, or `-1` for the last day of the month.
           items:
             type: number
           maxItems: 31

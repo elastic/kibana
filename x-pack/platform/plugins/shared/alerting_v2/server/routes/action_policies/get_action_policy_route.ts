@@ -23,7 +23,13 @@ import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 import { ACTION_POLICY_NOT_FOUND_DESCRIPTION } from './action_policy_route_descriptions';
 
 const getActionPolicyParamsSchema = z.object({
-  id: z.string().min(1).max(ID_MAX_LENGTH).describe('The action policy identifier.'),
+  id: z
+    .string()
+    .min(1)
+    .max(ID_MAX_LENGTH)
+    .describe(
+      'The ID of the action policy to get. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.'
+    ),
 });
 
 @injectable()
@@ -36,6 +42,7 @@ export class GetActionPolicyRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
+    access: 'public' as const,
     summary: 'Get an action policy',
     description: 'Get an action policy by identifier.',
     oasOperationObject: getActionPolicyOasExamples,

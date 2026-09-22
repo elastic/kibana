@@ -9,7 +9,7 @@ import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { ALERTING_V2_ACTION_POLICIES_READ_ROLE, apiTest, testData } from '../fixtures';
 
-const MATCH_ACTION_POLICIES_FOR_RULE_URL = `${testData.ACTION_POLICY_API_PATH}/_match_for_rule`;
+const MATCH_ACTION_POLICIES_FOR_RULE_URL = `${testData.INTERNAL_ACTION_POLICY_API_PATH}/_match_for_rule`;
 
 apiTest.describe('Match action policies for rule API', { tag: '@local-stateful-classic' }, () => {
   let readerCredentials: RoleApiCredentials;

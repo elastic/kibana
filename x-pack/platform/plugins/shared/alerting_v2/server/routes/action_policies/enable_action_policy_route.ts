@@ -26,7 +26,13 @@ import {
 } from './action_policy_route_descriptions';
 
 const enableActionPolicyParamsSchema = z.object({
-  id: z.string().min(1).max(ID_MAX_LENGTH).describe('The action policy identifier.'),
+  id: z
+    .string()
+    .min(1)
+    .max(ID_MAX_LENGTH)
+    .describe(
+      'The ID of the action policy to enable. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.'
+    ),
 });
 
 @injectable()
@@ -39,6 +45,7 @@ export class EnableActionPolicyRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
+    access: 'public' as const,
     summary: 'Enable an action policy',
     description: 'Enable an action policy by identifier.',
     oasOperationObject: enableActionPolicyOasExamples,
