@@ -60,10 +60,10 @@ function isBeforeAgentWorkflowOutput(value: unknown): value is BeforeAgentWorkfl
 
 /**
  * Runs the agent's configured before-agent workflows in sequence, updating the
- * round input when a workflow returns `new_prompt`. Throws on workflow failure
- * or when a workflow aborts the agent.
+ * round input when a workflow returns `new_prompt` or model-only context. Throws
+ * on workflow failure or when a workflow aborts the agent.
  *
- * @returns Updated nextInput when any workflow returned `new_prompt`, otherwise undefined
+ * @returns Updated nextInput when any workflow changed it, otherwise undefined
  */
 export async function runBeforeAgentWorkflows({
   context,
@@ -94,6 +94,7 @@ export async function runBeforeAgentWorkflows({
       workflowParams: {
         prompt: currentNextInput.message ?? '',
         ...(context.conversationId ? { conversation_id: context.conversationId } : {}),
+        ...(context.agentId ? { agent_id: context.agentId } : {}),
       },
       request: context.request,
       spaceId,
@@ -126,6 +127,16 @@ export async function runBeforeAgentWorkflows({
 
     if (output.new_prompt) {
       currentNextInput = { ...currentNextInput, message: output.new_prompt };
+    }
+
+    const modelContext = output.model_context?.trim();
+    if (modelContext) {
+      currentNextInput = {
+        ...currentNextInput,
+        model_context: [currentNextInput.model_context?.trim(), modelContext]
+          .filter((fragment): fragment is string => Boolean(fragment))
+          .join('\n\n'),
+      };
     }
 
     if (output.abort || output.abort_message) {

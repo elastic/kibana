@@ -40,6 +40,11 @@ export interface ProcessedAttachmentVersionRef extends AttachmentVersionRef {
 export interface ProcessedRoundInput {
   message: string;
   attachments: ProcessedAttachment[];
+  /**
+   * Ephemeral context appended to the user message only when constructing model input.
+   * It is intentionally not part of persisted RoundInput or rendered as user-authored text.
+   */
+  model_context?: string;
   /** References to versioned conversation-level attachments touched during this round. */
   attachment_refs?: ProcessedAttachmentVersionRef[];
   /** Pre-rendered, immutable attachment prompt context for this round (see RoundInput). */

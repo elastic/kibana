@@ -16,6 +16,7 @@ import {
   ChatEventType,
   ConversationRoundStatus,
   ConversationRoundStepType,
+  HookLifecycle,
   ToolOrigin,
   createAskUserQuestionStep,
 } from '@kbn/agent-builder-common';
@@ -234,6 +235,66 @@ describe('runDefaultAgentMode', () => {
     );
 
     expect(context.toolManager.setMaxToolResultTokens).toHaveBeenCalledWith(20_000);
+  });
+
+  it('sends model_context to the prompt factory without persisting it as user input', async () => {
+    const context = createAgentHandlerContextMock();
+    jest.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
+      connector: { name: 'test-connector' },
+      chatModel: {},
+    } as any);
+    context.toolManager.getToolIdMapping.mockReturnValue(new Map());
+    context.toolManager.getDynamicToolIds.mockReturnValue([]);
+    getPendingTurnMock.mockReturnValue(undefined);
+    selectToolsMock.mockResolvedValue({ staticTools: [], dynamicTools: [] } as any);
+    prepareConversationMock.mockResolvedValue({
+      timeline: [],
+      nextInput: { message: 'user task', attachments: [] },
+      attachments: [],
+      attachmentTypes: [],
+      attachmentStateManager: context.attachmentStateManager,
+    } as any);
+    extractRoundMock.mockResolvedValue(createRound({ id: 'round-1' }));
+    createAgentGraphMock.mockReturnValue({ streamEvents: jest.fn(() => []) } as any);
+    (context.hooks.run as jest.Mock).mockImplementation(
+      async (lifecycle: HookLifecycle, hookContext: any) =>
+        lifecycle === HookLifecycle.beforeAgent
+          ? {
+              ...hookContext,
+              nextInput: {
+                ...hookContext.nextInput,
+                model_context: '<system_update>hydrated context</system_update>',
+              },
+            }
+          : hookContext
+    );
+
+    await runDefaultAgentMode(
+      {
+        nextInput: { message: 'user task' },
+        agentConfiguration: { tools: [] } as any,
+      },
+      context
+    );
+
+    expect(createPromptFactoryMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        processedConversation: expect.objectContaining({
+          nextInput: expect.objectContaining({
+            message: 'user task',
+            model_context: '<system_update>hydrated context</system_update>',
+          }),
+        }),
+      })
+    );
+    const roundStarted = (context.events.emit as jest.Mock).mock.calls
+      .map(([event]) => event)
+      .find((event) => event.type === ChatEventType.roundStarted);
+    expect(roundStarted.data.input).toEqual({
+      message: 'user task',
+      attachments: [],
+      attachment_refs: undefined,
+    });
   });
 
   describe('plugin skill id filtering', () => {

@@ -61,12 +61,15 @@ export const runAfterExecutionWorkflows = async ({
     params: step.params as Record<string, unknown>,
   }));
 
+  const connectorId = round.model_usage?.connector_id?.trim();
+
   const workflowParams: AfterExecutionWorkflowParams = {
     prompt: round.input.message ?? '',
     response: round.response.message ?? '',
     round_id: round.id,
     ...(context.conversationId ? { conversation_id: context.conversationId } : {}),
     ...(context.agentId ? { agent_id: context.agentId } : {}),
+    ...(connectorId ? { connector_id: connectorId } : {}),
     tool_calls: toolCalls,
   };
 

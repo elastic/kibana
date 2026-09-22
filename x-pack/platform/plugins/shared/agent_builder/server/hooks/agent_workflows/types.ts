@@ -10,11 +10,13 @@
  * - abort: when true, agent execution is aborted
  * - abort_message: message shown to the user when the workflow aborts the agent
  * - new_prompt: prompt to use for the next conversation round (replaces user message)
+ * - model_context: context appended only to model input, not persisted as user-authored text
  */
 export interface BeforeAgentWorkflowOutput {
   abort?: boolean;
   abort_message?: string;
   new_prompt?: string;
+  model_context?: string;
 }
 
 /**
@@ -27,6 +29,8 @@ export interface AfterExecutionWorkflowParams {
   conversation_id?: string;
   round_id: string;
   agent_id?: string;
+  /** Connector used by the triggering round (`round.model_usage.connector_id`). */
+  connector_id?: string;
   tool_calls: Array<{
     tool_id: string;
     tool_call_id: string;

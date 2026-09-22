@@ -52,7 +52,10 @@ describe('prepareMessages', () => {
     message: string,
     attachments: ProcessedAttachment[] = [],
     overrides: Partial<
-      Pick<ProcessedRoundInput, 'attachment_refs' | 'attachment_context' | 'author'>
+      Pick<
+        ProcessedRoundInput,
+        'attachment_refs' | 'attachment_context' | 'model_context' | 'author'
+      >
     > = {}
   ): ProcessedRoundInput => ({
     message,
@@ -799,6 +802,23 @@ describe('prepareMessages', () => {
 
       expect(result[0].content as string).not.toContain('<attachments');
       expect(result[0].content as string).not.toContain('<attachments');
+    });
+  });
+
+  describe('with model_context', () => {
+    it('appends model-only context to the outgoing user message', async () => {
+      const nextInput = makeRoundInput('user-authored task', [], {
+        model_context: '<system_update>hydrated context</system_update>',
+      });
+
+      const result = await prepareMessages({
+        conversation: createConversation({ nextInput }),
+      });
+
+      expect(result).toHaveLength(1);
+      expect(result[0].content).toBe(
+        'user-authored task\n\n<system_update>hydrated context</system_update>\n'
+      );
     });
   });
 

@@ -459,6 +459,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     finalize(() => manualEvents$.complete())
   );
 
+  // Persist only user-authored input. Ephemeral model_context from before-agent hooks was already
+  // consumed by the prompt factory and must not be rendered or replayed as if the user wrote it.
   const processedInput: RoundInput = {
     message: processedConversation.nextInput.message,
     attachments: [], // legacy attachments are always stripped in `prepare_conversation` and replaced with refs

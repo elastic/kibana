@@ -197,7 +197,8 @@ export const formatUserInput = ({
   attachmentTypes?: ProcessedAttachmentType[];
   attachmentTypeInstructionsProvided?: Set<string>;
 }): HumanMessage => {
-  const { message, attachments, attachment_context, attachment_refs, author } = input;
+  const { message, attachments, attachment_context, attachment_refs, author, model_context } =
+    input;
 
   let content = message;
 
@@ -214,6 +215,9 @@ export const formatUserInput = ({
   }
   if (attachment_context) {
     content += `\n\n${attachment_context}\n`;
+  }
+  if (model_context) {
+    content += `\n\n${model_context}\n`;
   }
   if (
     attachment_refs &&
