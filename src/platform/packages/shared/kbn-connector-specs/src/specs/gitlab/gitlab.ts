@@ -45,6 +45,20 @@ import {
   AddMergeRequestNoteInputSchema,
   RequestMergeRequestReviewInputSchema,
   CreateOrUpdateFileInputSchema,
+  ListGroupsInputSchema,
+  GetCommitInputSchema,
+  DeleteFileInputSchema,
+  ListTagsInputSchema,
+  ListLabelsInputSchema,
+  SearchCodeInputSchema,
+  ApproveMergeRequestInputSchema,
+  GetPipelineInputSchema,
+  PipelineActionInputSchema,
+  ListJobsInputSchema,
+  GetJobArtifactInputSchema,
+  ListPipelineSchedulesInputSchema,
+  ListEnvironmentsInputSchema,
+  ListDeploymentsInputSchema,
 } from './types';
 import type {
   SearchProjectsInput,
@@ -69,12 +83,35 @@ import type {
   AddMergeRequestNoteInput,
   RequestMergeRequestReviewInput,
   CreateOrUpdateFileInput,
+  ListGroupsInput,
+  GetCommitInput,
+  DeleteFileInput,
+  ListTagsInput,
+  ListLabelsInput,
+  SearchCodeInput,
+  ApproveMergeRequestInput,
+  GetPipelineInput,
+  PipelineActionInput,
+  ListJobsInput,
+  GetJobArtifactInput,
+  ListPipelineSchedulesInput,
+  ListEnvironmentsInput,
+  ListDeploymentsInput,
 } from './types';
 
 const GITLAB_COM_API = 'https://gitlab.com/api/v4';
 
 /** URL-encode a project ID or namespace/path for use in a URL path segment. */
 const encodeProject = (projectId: string): string => encodeURIComponent(projectId);
+
+/** Wrap a GitLab list response with pagination metadata from response headers. */
+const toPage = (response: { data: unknown[]; headers: Record<string, unknown> }) => ({
+  values: response.data,
+  page: Number(response.headers['x-page'] ?? 1),
+  total: Number(response.headers['x-total'] ?? response.data.length),
+  nextPage: response.headers['x-next-page'] ? Number(response.headers['x-next-page']) : null,
+  hasMore: !!response.headers['x-next-page'],
+});
 
 export const Gitlab: ConnectorSpec = {
   metadata: {
@@ -177,7 +214,7 @@ export const Gitlab: ConnectorSpec = {
             sort: 'desc',
           },
         });
-        return response.data;
+        return toPage(response);
       },
     },
 
@@ -211,7 +248,7 @@ export const Gitlab: ConnectorSpec = {
             per_page: input.perPage,
           },
         });
-        return response.data;
+        return toPage(response);
       },
     },
 
@@ -235,7 +272,7 @@ export const Gitlab: ConnectorSpec = {
           `${apiUrl}/projects/${encodeProject(input.projectId)}/issues`,
           { params }
         );
-        return response.data;
+        return toPage(response);
       },
     },
 
@@ -274,7 +311,7 @@ export const Gitlab: ConnectorSpec = {
           `${apiUrl}/projects/${encodeProject(input.projectId)}/merge_requests`,
           { params }
         );
-        return response.data;
+        return toPage(response);
       },
     },
 
@@ -282,14 +319,25 @@ export const Gitlab: ConnectorSpec = {
       isTool: true,
       scope: 'read',
       description:
-        'Get full details for a single merge request by its IID. Returns the title, description, source/target branches, diff stats, labels, assignees, and pipeline status. Use the mrIid returned by listMergeRequests.',
+        'Get full details for a single merge request by its IID. Optionally pass include: ["approvals", "diffs"] to fetch approval status and changed-file list in the same call. Use the mrIid returned by listMergeRequests.',
       input: GetMergeRequestInputSchema,
       handler: async (ctx, input: GetMergeRequestInput) => {
         const apiUrl = ctx.config?.apiUrl as string;
-        const response = await ctx.client.get(
-          `${apiUrl}/projects/${encodeProject(input.projectId)}/merge_requests/${input.mrIid}`
-        );
-        return response.data;
+        const base = `${apiUrl}/projects/${encodeProject(input.projectId)}/merge_requests/${
+          input.mrIid
+        }`;
+        const [mrRes, approvalsRes, diffsRes] = await Promise.all([
+          ctx.client.get(base),
+          input.include?.includes('approvals') ? ctx.client.get(`${base}/approvals`) : null,
+          input.include?.includes('diffs')
+            ? ctx.client.get(`${base}/diffs`, { params: { per_page: 100 } })
+            : null,
+        ]);
+        return {
+          ...mrRes.data,
+          ...(approvalsRes ? { approvals: approvalsRes.data } : {}),
+          ...(diffsRes ? { diffs: diffsRes.data } : {}),
+        };
       },
     },
 
@@ -310,7 +358,7 @@ export const Gitlab: ConnectorSpec = {
           `${apiUrl}/projects/${encodeProject(input.projectId)}/repository/branches`,
           { params }
         );
-        return response.data;
+        return toPage(response);
       },
     },
 
@@ -352,7 +400,7 @@ export const Gitlab: ConnectorSpec = {
           `${apiUrl}/projects/${encodeProject(input.projectId)}/repository/commits`,
           { params }
         );
-        return response.data;
+        return toPage(response);
       },
     },
 
@@ -374,7 +422,7 @@ export const Gitlab: ConnectorSpec = {
           `${apiUrl}/projects/${encodeProject(input.projectId)}/pipelines`,
           { params }
         );
-        return response.data;
+        return toPage(response);
       },
     },
 
@@ -625,6 +673,337 @@ export const Gitlab: ConnectorSpec = {
         return response.data;
       },
     },
+
+    // =========================================================================
+    // Additional read actions
+    // =========================================================================
+
+    listGroups: {
+      isTool: true,
+      scope: 'read',
+      description:
+        'List GitLab groups the authenticated user is a member of. Supports filtering by name/path and restricting to top-level groups only.',
+      input: ListGroupsInputSchema,
+      handler: async (ctx, input: ListGroupsInput) => {
+        const apiUrl = ctx.config?.apiUrl as string;
+        const params: Record<string, unknown> = {
+          page: input.page ?? 1,
+          per_page: input.perPage ?? 20,
+        };
+        if (input.search !== undefined) params.search = input.search;
+        if (input.topLevelOnly === true) params.top_level_only = true;
+        const response = await ctx.client.get(`${apiUrl}/groups`, { params });
+        return toPage(response);
+      },
+    },
+
+    getCommit: {
+      isTool: true,
+      scope: 'read',
+      description:
+        'Fetch a single commit by SHA, branch name, or tag. By default also returns per-file diffs (up to 100 files). Set includeDiff: false to retrieve metadata only.',
+      input: GetCommitInputSchema,
+      handler: async (ctx, input: GetCommitInput) => {
+        const apiUrl = ctx.config?.apiUrl as string;
+        const url = `${apiUrl}/projects/${encodeProject(
+          input.projectId
+        )}/repository/commits/${encodeURIComponent(input.sha)}`;
+        const response = await ctx.client.get(url);
+        if (input.includeDiff === false) {
+          return response.data;
+        }
+        const diffsResponse = await ctx.client.get(`${url}/diff`, { params: { per_page: 100 } });
+        return { ...response.data, diffs: diffsResponse.data };
+      },
+    },
+
+    listTags: {
+      isTool: true,
+      scope: 'read',
+      description: 'List repository tags for a project, with optional name filtering and sorting.',
+      input: ListTagsInputSchema,
+      handler: async (ctx, input: ListTagsInput) => {
+        const apiUrl = ctx.config?.apiUrl as string;
+        const params: Record<string, unknown> = {
+          page: input.page ?? 1,
+          per_page: input.perPage ?? 20,
+        };
+        if (input.search !== undefined) params.search = input.search;
+        if (input.orderBy !== undefined) params.order_by = input.orderBy;
+        if (input.sort !== undefined) params.sort = input.sort;
+        const response = await ctx.client.get(
+          `${apiUrl}/projects/${encodeProject(input.projectId)}/repository/tags`,
+          { params }
+        );
+        return toPage(response);
+      },
+    },
+
+    listLabels: {
+      isTool: true,
+      scope: 'read',
+      description: 'List labels defined on a project, with optional name/description filtering.',
+      input: ListLabelsInputSchema,
+      handler: async (ctx, input: ListLabelsInput) => {
+        const apiUrl = ctx.config?.apiUrl as string;
+        const params: Record<string, unknown> = {
+          page: input.page ?? 1,
+          per_page: input.perPage ?? 20,
+        };
+        if (input.search !== undefined) params.search = input.search;
+        const response = await ctx.client.get(
+          `${apiUrl}/projects/${encodeProject(input.projectId)}/labels`,
+          { params }
+        );
+        return toPage(response);
+      },
+    },
+
+    searchCode: {
+      isTool: true,
+      scope: 'read',
+      description:
+        'Search for code (blobs) across a project, group, or the whole instance. Project-scoped search works on all tiers; group- or instance-scoped search requires Advanced Search (Premium/Ultimate). Supports GitLab code search syntax (filename:, path:, extension: filters).',
+      input: SearchCodeInputSchema,
+      handler: async (ctx, input: SearchCodeInput) => {
+        const apiUrl = ctx.config?.apiUrl as string;
+        const params: Record<string, unknown> = {
+          scope: 'blobs',
+          search: input.search,
+          page: input.page ?? 1,
+          per_page: input.perPage ?? 20,
+        };
+        if (input.ref !== undefined) params.ref = input.ref;
+        let url: string;
+        if (input.projectId !== undefined) {
+          url = `${apiUrl}/projects/${encodeProject(input.projectId)}/search`;
+        } else if (input.groupId !== undefined) {
+          url = `${apiUrl}/groups/${encodeURIComponent(input.groupId)}/search`;
+        } else {
+          url = `${apiUrl}/search`;
+        }
+        const response = await ctx.client.get(url, { params });
+        return toPage(response);
+      },
+    },
+
+    getPipeline: {
+      isTool: true,
+      scope: 'read',
+      description: 'Fetch details and status of a single CI/CD pipeline by its numeric ID.',
+      input: GetPipelineInputSchema,
+      handler: async (ctx, input: GetPipelineInput) => {
+        const apiUrl = ctx.config?.apiUrl as string;
+        const response = await ctx.client.get(
+          `${apiUrl}/projects/${encodeProject(input.projectId)}/pipelines/${input.pipelineId}`
+        );
+        return response.data;
+      },
+    },
+
+    listJobs: {
+      isTool: true,
+      scope: 'read',
+      description:
+        'List jobs for a specific pipeline. Optionally filter by one or more job statuses (e.g. ["failed"]). Returns job IDs needed for getJobArtifact.',
+      input: ListJobsInputSchema,
+      handler: async (ctx, input: ListJobsInput) => {
+        const apiUrl = ctx.config?.apiUrl as string;
+        const params: Record<string, unknown> = {
+          page: input.page ?? 1,
+          per_page: input.perPage ?? 20,
+        };
+        if (input.scope !== undefined) params['scope[]'] = input.scope;
+        if (input.includeRetried === true) params.include_retried = true;
+        const response = await ctx.client.get(
+          `${apiUrl}/projects/${encodeProject(input.projectId)}/pipelines/${input.pipelineId}/jobs`,
+          { params }
+        );
+        return toPage(response);
+      },
+    },
+
+    getJobArtifact: {
+      isTool: true,
+      scope: 'read',
+      description:
+        'Return the job log (trace) or a specific file from the job artifacts archive. Provide artifactPath to retrieve a file; omit it to retrieve the log. Output is truncated to maxLength characters (default 20000).',
+      input: GetJobArtifactInputSchema,
+      handler: async (ctx, input: GetJobArtifactInput) => {
+        const apiUrl = ctx.config?.apiUrl as string;
+        const projectBase = `${apiUrl}/projects/${encodeProject(input.projectId)}`;
+        const maxLength = input.maxLength ?? 20000;
+        let url: string;
+        let keepEnd: boolean;
+        if (input.artifactPath !== undefined) {
+          url = `${projectBase}/jobs/${input.jobId}/artifacts/${encodeURIComponent(
+            input.artifactPath
+          )}`;
+          keepEnd = false;
+        } else {
+          url = `${projectBase}/jobs/${input.jobId}/trace`;
+          keepEnd = true;
+        }
+        const response = await ctx.client.get(url, {
+          responseType: 'text',
+          transformResponse: [(data: unknown) => data],
+        });
+        const text =
+          typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
+        const truncated = keepEnd ? text.slice(-maxLength) : text.slice(0, maxLength);
+        return { content: truncated, truncated: text.length > maxLength, totalLength: text.length };
+      },
+    },
+
+    listPipelineSchedules: {
+      isTool: true,
+      scope: 'read',
+      description:
+        'List pipeline schedules for a project. Optionally filter to only "active" or "inactive" schedules.',
+      input: ListPipelineSchedulesInputSchema,
+      handler: async (ctx, input: ListPipelineSchedulesInput) => {
+        const apiUrl = ctx.config?.apiUrl as string;
+        const params: Record<string, unknown> = {
+          page: input.page ?? 1,
+          per_page: input.perPage ?? 20,
+        };
+        if (input.scope !== undefined) params.scope = input.scope;
+        const response = await ctx.client.get(
+          `${apiUrl}/projects/${encodeProject(input.projectId)}/pipeline_schedules`,
+          { params }
+        );
+        return toPage(response);
+      },
+    },
+
+    listEnvironments: {
+      isTool: true,
+      scope: 'read',
+      description:
+        'List deployment environments for a project, with optional name filtering and state filtering (available, stopping, stopped).',
+      input: ListEnvironmentsInputSchema,
+      handler: async (ctx, input: ListEnvironmentsInput) => {
+        const apiUrl = ctx.config?.apiUrl as string;
+        const params: Record<string, unknown> = {
+          page: input.page ?? 1,
+          per_page: input.perPage ?? 20,
+        };
+        if (input.search !== undefined) params.search = input.search;
+        if (input.states !== undefined) params.states = input.states;
+        const response = await ctx.client.get(
+          `${apiUrl}/projects/${encodeProject(input.projectId)}/environments`,
+          { params }
+        );
+        return toPage(response);
+      },
+    },
+
+    listDeployments: {
+      isTool: true,
+      scope: 'read',
+      description:
+        'List deployments for a project. Filter by environment name, status, or time range. Useful for checking when a version was deployed to production.',
+      input: ListDeploymentsInputSchema,
+      handler: async (ctx, input: ListDeploymentsInput) => {
+        const apiUrl = ctx.config?.apiUrl as string;
+        const params: Record<string, unknown> = {
+          page: input.page ?? 1,
+          per_page: input.perPage ?? 20,
+        };
+        if (input.environment !== undefined) params.environment = input.environment;
+        if (input.status !== undefined) params.status = input.status;
+        if (input.updatedAfter !== undefined) params.updated_after = input.updatedAfter;
+        if (input.orderBy !== undefined) params.order_by = input.orderBy;
+        if (input.sort !== undefined) params.sort = input.sort;
+        const response = await ctx.client.get(
+          `${apiUrl}/projects/${encodeProject(input.projectId)}/deployments`,
+          { params }
+        );
+        return toPage(response);
+      },
+    },
+
+    // =========================================================================
+    // Additional write/destroy actions
+    // =========================================================================
+
+    approveMergeRequest: {
+      isTool: true,
+      scope: 'write',
+      description:
+        'Approve a merge request. Optionally provide sha to guard against approving a version that has since changed. Requires GitLab Premium/Ultimate for enforced approvals.',
+      input: ApproveMergeRequestInputSchema,
+      handler: async (ctx, input: ApproveMergeRequestInput) => {
+        const apiUrl = ctx.config?.apiUrl as string;
+        const body: Record<string, unknown> = {};
+        if (input.sha !== undefined) body.sha = input.sha;
+        const response = await ctx.client.post(
+          `${apiUrl}/projects/${encodeProject(input.projectId)}/merge_requests/${
+            input.mrIid
+          }/approve`,
+          body
+        );
+        return response.data;
+      },
+    },
+
+    cancelPipeline: {
+      isTool: true,
+      scope: 'destroy',
+      description:
+        'Cancel a running CI/CD pipeline. Returns the updated pipeline object. Has no effect if the pipeline is already finished.',
+      input: PipelineActionInputSchema,
+      handler: async (ctx, input: PipelineActionInput) => {
+        const apiUrl = ctx.config?.apiUrl as string;
+        const response = await ctx.client.post(
+          `${apiUrl}/projects/${encodeProject(input.projectId)}/pipelines/${
+            input.pipelineId
+          }/cancel`,
+          {}
+        );
+        return response.data;
+      },
+    },
+
+    retryPipeline: {
+      isTool: true,
+      scope: 'write',
+      description:
+        'Retry failed jobs in a finished CI/CD pipeline. Creates a new pipeline run for the failed jobs. Returns the updated pipeline object.',
+      input: PipelineActionInputSchema,
+      handler: async (ctx, input: PipelineActionInput) => {
+        const apiUrl = ctx.config?.apiUrl as string;
+        const response = await ctx.client.post(
+          `${apiUrl}/projects/${encodeProject(input.projectId)}/pipelines/${
+            input.pipelineId
+          }/retry`,
+          {}
+        );
+        return response.data;
+      },
+    },
+
+    deleteFile: {
+      isTool: true,
+      scope: 'destroy',
+      description:
+        'Delete a file from a repository branch by committing a deletion. Pass lastCommitId (from getFile) to detect concurrent modifications.',
+      input: DeleteFileInputSchema,
+      handler: async (ctx, input: DeleteFileInput) => {
+        const apiUrl = ctx.config?.apiUrl as string;
+        const encodedPath = encodeURIComponent(input.filePath);
+        const url = `${apiUrl}/projects/${encodeProject(
+          input.projectId
+        )}/repository/files/${encodedPath}`;
+        const data: Record<string, unknown> = {
+          branch: input.branch,
+          commit_message: input.commitMessage,
+        };
+        if (input.lastCommitId !== undefined) data.last_commit_id = input.lastCommitId;
+        await ctx.client.delete(url, { data });
+        return { deleted: true, filePath: input.filePath, branch: input.branch };
+      },
+    },
   },
 
   test: {
@@ -654,14 +1033,19 @@ export const Gitlab: ConnectorSpec = {
     '- To find a project: use searchProjects with a keyword, then use the returned ID or path in other actions.',
     '- To find users for assignment: use searchUsers to resolve a username to a numeric user ID.',
     '- Issue workflow: listIssues → getIssue (details) → updateIssue (close/edit) / addIssueNote (comment).',
-    '- MR workflow: listMergeRequests → getMergeRequest (details) → updateMergeRequest (edit) / acceptMergeRequest (merge).',
+    '- MR workflow: listMergeRequests → getMergeRequest (details) → updateMergeRequest (edit) / approveMergeRequest (approve) / acceptMergeRequest (merge).',
     '- File reading: use getFile with the file path (e.g. "src/index.ts") and the desired ref (branch or commit SHA).',
-    '- CI/CD: use listPipelines to check recent pipeline status; use triggerPipeline to start a new run.',
+    '- File writing: use createOrUpdateFile to create/update, deleteFile to remove a file from a branch.',
+    '- CI/CD: listPipelines → getPipeline (status) → listJobs (per-job status) → getJobArtifact (log or artifact). Use triggerPipeline to start a run, cancelPipeline to abort, retryPipeline to re-run failed jobs.',
+    '- Deployments: listEnvironments shows environments; listDeployments shows when/what was deployed.',
+    '- Code search: use searchCode with projectId for project-scoped search (works on all tiers).',
     '',
     '### Common gotchas',
     '- Pagination: all list actions return up to perPage results (default 20, max 100). Pass page=2 and beyond to get more results.',
     '- For updateIssue and updateMergeRequest, the labels field REPLACES all existing labels — include all desired labels, not just the ones to add.',
     '- acceptMergeRequest fails with 405 if the MR has merge conflicts or pending required approvals — check getMergeRequest first.',
+    '- searchCode without a projectId or groupId requires Advanced Search (GitLab Premium/Ultimate) and returns 403 on lower tiers.',
+    '- getJobArtifact requires that the job has completed and artifacts have not expired.',
     '- Self-managed GitLab instances require the apiUrl connector config to point to their own API, e.g. https://gitlab.example.com/api/v4.',
   ].join('\n'),
 };

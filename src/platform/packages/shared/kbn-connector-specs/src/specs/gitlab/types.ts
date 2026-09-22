@@ -171,6 +171,13 @@ export const GetMergeRequestInputSchema = lazySchema(() =>
   z.object({
     projectId: projectIdField(),
     mrIid: mrIidField(),
+    include: z
+      .array(z.enum(['approvals', 'diffs']))
+      .max(2)
+      .optional()
+      .describe(
+        'Optional extra data to fetch in parallel: "approvals" (approval status and approvers), "diffs" (list of changed files, up to 100).'
+      ),
   })
 );
 export type GetMergeRequestInput = z.infer<typeof GetMergeRequestInputSchema>;
@@ -549,6 +556,273 @@ export const RequestMergeRequestReviewInputSchema = lazySchema(() =>
   })
 );
 export type RequestMergeRequestReviewInput = z.infer<typeof RequestMergeRequestReviewInputSchema>;
+
+// =============================================================================
+// Additional schemas (actions added from v2 implementation)
+// =============================================================================
+
+const sortOrderField = () =>
+  z.enum(['asc', 'desc']).optional().describe('Sort direction: "asc" or "desc" (default "desc").');
+
+const pipelineIdField = () =>
+  z
+    .number()
+    .int()
+    .positive()
+    .describe('Numeric pipeline ID (from listPipelines or triggerPipeline).');
+
+const isoDateField = (what: string) =>
+  z
+    .string()
+    .max(64)
+    .optional()
+    .describe(`${what} as an ISO 8601 timestamp, e.g. "2026-01-15T00:00:00Z".`);
+
+export const ListGroupsInputSchema = lazySchema(() =>
+  z.object({
+    search: z.string().max(255).optional().describe('Filter groups by name or path.'),
+    topLevelOnly: z
+      .boolean()
+      .optional()
+      .describe('When true, only top-level groups (no subgroups).'),
+    page: pageField(),
+    perPage: perPageField(),
+  })
+);
+export type ListGroupsInput = z.infer<typeof ListGroupsInputSchema>;
+
+export const GetCommitInputSchema = lazySchema(() =>
+  z.object({
+    projectId: projectIdField(),
+    sha: z
+      .string()
+      .min(1)
+      .max(255)
+      .describe('Commit SHA (full or abbreviated), branch name, or tag name.'),
+    includeDiff: z
+      .boolean()
+      .optional()
+      .describe(
+        'When true (default), also returns per-file diffs for up to 100 changed files. Set false for metadata only.'
+      ),
+  })
+);
+export type GetCommitInput = z.infer<typeof GetCommitInputSchema>;
+
+export const DeleteFileInputSchema = lazySchema(() =>
+  z.object({
+    projectId: projectIdField(),
+    filePath: z
+      .string()
+      .min(1)
+      .max(1024)
+      .describe('Path to the file to delete. Example: "config/old.yaml".'),
+    branch: z.string().min(1).max(200).describe('Branch to commit the deletion on.'),
+    commitMessage: z.string().min(1).max(2000).describe('Commit message for the deletion.'),
+    lastCommitId: z
+      .string()
+      .max(200)
+      .optional()
+      .describe(
+        'SHA of the last known commit for this file. Provide to detect concurrent changes (from getFile).'
+      ),
+  })
+);
+export type DeleteFileInput = z.infer<typeof DeleteFileInputSchema>;
+
+export const ListTagsInputSchema = lazySchema(() =>
+  z.object({
+    projectId: projectIdField(),
+    search: z.string().max(255).optional().describe('Filter tags by name substring.'),
+    orderBy: z
+      .enum(['name', 'updated', 'version'])
+      .optional()
+      .describe('Order by "name", "updated" (default), or "version" (semantic version).'),
+    sort: sortOrderField(),
+    page: pageField(),
+    perPage: perPageField(),
+  })
+);
+export type ListTagsInput = z.infer<typeof ListTagsInputSchema>;
+
+export const ListLabelsInputSchema = lazySchema(() =>
+  z.object({
+    projectId: projectIdField(),
+    search: z.string().max(255).optional().describe('Filter labels by name or description.'),
+    page: pageField(),
+    perPage: perPageField(),
+  })
+);
+export type ListLabelsInput = z.infer<typeof ListLabelsInputSchema>;
+
+export const SearchCodeInputSchema = lazySchema(() =>
+  z.object({
+    search: z
+      .string()
+      .min(1)
+      .max(500)
+      .describe(
+        'Search term. Supports GitLab code search syntax (filename:, path:, extension: filters).'
+      ),
+    projectId: projectIdField()
+      .optional()
+      .describe(
+        'Restrict to one project (strongly recommended). Instance-wide code search requires Advanced Search (Premium/Ultimate) and returns 403 otherwise.'
+      ),
+    groupId: z
+      .string()
+      .max(500)
+      .optional()
+      .describe('Restrict to a group (numeric ID or full path). Also requires Advanced Search.'),
+    ref: z
+      .string()
+      .max(200)
+      .optional()
+      .describe('Branch or tag to search in (project scope only). Defaults to the default branch.'),
+    page: pageField(),
+    perPage: perPageField(),
+  })
+);
+export type SearchCodeInput = z.infer<typeof SearchCodeInputSchema>;
+
+export const ApproveMergeRequestInputSchema = lazySchema(() =>
+  z.object({
+    projectId: projectIdField(),
+    mrIid: mrIidField(),
+    sha: z
+      .string()
+      .max(64)
+      .optional()
+      .describe(
+        'HEAD SHA of the source branch. When provided, approval fails if the branch has moved since review.'
+      ),
+  })
+);
+export type ApproveMergeRequestInput = z.infer<typeof ApproveMergeRequestInputSchema>;
+
+export const GetPipelineInputSchema = lazySchema(() =>
+  z.object({
+    projectId: projectIdField(),
+    pipelineId: pipelineIdField(),
+  })
+);
+export type GetPipelineInput = z.infer<typeof GetPipelineInputSchema>;
+
+export const PipelineActionInputSchema = lazySchema(() =>
+  z.object({
+    projectId: projectIdField(),
+    pipelineId: pipelineIdField(),
+  })
+);
+export type PipelineActionInput = z.infer<typeof PipelineActionInputSchema>;
+
+export const ListJobsInputSchema = lazySchema(() =>
+  z.object({
+    projectId: projectIdField(),
+    pipelineId: pipelineIdField(),
+    scope: z
+      .array(
+        z.enum([
+          'created',
+          'pending',
+          'running',
+          'failed',
+          'success',
+          'canceling',
+          'canceled',
+          'skipped',
+          'waiting_for_resource',
+          'manual',
+          'scheduled',
+        ])
+      )
+      .max(11)
+      .optional()
+      .describe('Only jobs in these statuses, e.g. ["failed"].'),
+    includeRetried: z
+      .boolean()
+      .optional()
+      .describe('When true, include retried (superseded) jobs.'),
+    page: pageField(),
+    perPage: perPageField(),
+  })
+);
+export type ListJobsInput = z.infer<typeof ListJobsInputSchema>;
+
+export const GetJobArtifactInputSchema = lazySchema(() =>
+  z.object({
+    projectId: projectIdField(),
+    jobId: z.number().int().positive().describe('Numeric job ID (from listJobs).'),
+    artifactPath: z
+      .string()
+      .max(1024)
+      .optional()
+      .describe(
+        'Path of a file inside the job artifacts archive, e.g. "gl-sast-report.json". Omit to return the job log (trace) instead.'
+      ),
+    maxLength: z
+      .number()
+      .int()
+      .min(1)
+      .max(200000)
+      .optional()
+      .describe(
+        'Maximum characters to return (default 20000). Logs keep the end; artifacts keep the start.'
+      ),
+  })
+);
+export type GetJobArtifactInput = z.infer<typeof GetJobArtifactInputSchema>;
+
+export const ListPipelineSchedulesInputSchema = lazySchema(() =>
+  z.object({
+    projectId: projectIdField(),
+    scope: z
+      .enum(['active', 'inactive'])
+      .optional()
+      .describe('Only "active" or "inactive" schedules.'),
+    page: pageField(),
+    perPage: perPageField(),
+  })
+);
+export type ListPipelineSchedulesInput = z.infer<typeof ListPipelineSchedulesInputSchema>;
+
+export const ListEnvironmentsInputSchema = lazySchema(() =>
+  z.object({
+    projectId: projectIdField(),
+    search: z.string().max(255).optional().describe('Filter environments by name.'),
+    states: z
+      .enum(['available', 'stopping', 'stopped'])
+      .optional()
+      .describe('Only environments in this state.'),
+    page: pageField(),
+    perPage: perPageField(),
+  })
+);
+export type ListEnvironmentsInput = z.infer<typeof ListEnvironmentsInputSchema>;
+
+export const ListDeploymentsInputSchema = lazySchema(() =>
+  z.object({
+    projectId: projectIdField(),
+    environment: z
+      .string()
+      .max(255)
+      .optional()
+      .describe('Only deployments to this environment name, e.g. "production".'),
+    status: z
+      .enum(['created', 'running', 'success', 'failed', 'canceled', 'skipped', 'blocked'])
+      .optional()
+      .describe('Only deployments with this status.'),
+    updatedAfter: isoDateField('Only deployments updated on or after this time'),
+    orderBy: z
+      .enum(['id', 'iid', 'created_at', 'updated_at', 'finished_at'])
+      .optional()
+      .describe('Field to order by (default "id").'),
+    sort: sortOrderField(),
+    page: pageField(),
+    perPage: perPageField(),
+  })
+);
+export type ListDeploymentsInput = z.infer<typeof ListDeploymentsInputSchema>;
 
 export const CreateOrUpdateFileInputSchema = lazySchema(() =>
   z.object({

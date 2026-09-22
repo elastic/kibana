@@ -31,10 +31,20 @@ const mockUser = { id: 7, username: 'jsmith', name: 'Jane Smith' };
 
 const BASE = 'https://gitlab.com/api/v4';
 
+/** Build a paginated axios response with GitLab pagination headers. */
+const pageResponse = <T>(items: T[], total?: number) => ({
+  data: items,
+  headers: {
+    'x-page': '1',
+    'x-total': String(total ?? items.length),
+    'x-next-page': '',
+  },
+});
+
 describe('Gitlab connector', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockGet.mockResolvedValue({ data: {} });
+    mockGet.mockResolvedValue(pageResponse([]));
     mockPost.mockResolvedValue({ data: {} });
     mockPut.mockResolvedValue({ data: {} });
   });
@@ -96,7 +106,7 @@ describe('Gitlab connector', () => {
 
   describe('searchProjects action', () => {
     it('applies default pagination and ordering when omitted', async () => {
-      mockGet.mockResolvedValue({ data: [mockProject] });
+      mockGet.mockResolvedValue(pageResponse([mockProject]));
       const input = parse('searchProjects', { search: 'kibana' });
 
       await Gitlab.actions.searchProjects.handler(mockContext, input);
@@ -138,7 +148,7 @@ describe('Gitlab connector', () => {
 
   describe('searchUsers action', () => {
     it('calls GET /users with search param', async () => {
-      mockGet.mockResolvedValue({ data: [mockUser] });
+      mockGet.mockResolvedValue(pageResponse([mockUser]));
       const input = parse('searchUsers', { search: 'jsmith' });
 
       await Gitlab.actions.searchUsers.handler(mockContext, input);
@@ -151,7 +161,7 @@ describe('Gitlab connector', () => {
 
   describe('listIssues action', () => {
     it('applies default state and pagination', async () => {
-      mockGet.mockResolvedValue({ data: [mockIssue] });
+      mockGet.mockResolvedValue(pageResponse([mockIssue]));
       const input = parse('listIssues', { projectId: '123' });
 
       await Gitlab.actions.listIssues.handler(mockContext, input);
@@ -196,7 +206,7 @@ describe('Gitlab connector', () => {
 
   describe('listMergeRequests action', () => {
     it('applies default state and pagination', async () => {
-      mockGet.mockResolvedValue({ data: [mockMr] });
+      mockGet.mockResolvedValue(pageResponse([mockMr]));
       const input = parse('listMergeRequests', { projectId: 'elastic/kibana' });
 
       await Gitlab.actions.listMergeRequests.handler(mockContext, input);
