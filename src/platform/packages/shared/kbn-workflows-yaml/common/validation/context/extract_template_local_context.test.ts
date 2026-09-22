@@ -11,7 +11,8 @@ import {
   forLoopScopesContainingOffset,
   getAllForLoopScopes,
   getTemplateLocalContext,
-  getTemplateLocalIndexCacheStats,
+  getTemplateLocalIndexCacheEntries,
+  hasCachedTemplateLocalIndex,
   isLiquidRangeLiteral,
   resolveAssignChain,
 } from './extract_template_local_context';
@@ -347,24 +348,33 @@ describe('isLiquidRangeLiteral', () => {
 });
 
 describe('template index cache', () => {
-  const MAX_CHARS = 1024 * 1024;
-  /** A distinct template of roughly `chars` characters. */
+  const MAX_CACHED_TEMPLATES = 16;
   const templateOfSize = (chars: number, marker: string) =>
     `{% assign ${marker} = "x" %}`.padEnd(chars, ' ');
 
-  it('keeps the cached template text under the cap', () => {
-    for (const marker of ['one', 'two', 'three', 'four']) {
-      getTemplateLocalContext(templateOfSize(400_000, marker), 0);
+  it('keeps at most the cap in templates', () => {
+    for (let i = 0; i < MAX_CACHED_TEMPLATES * 2; i++) {
+      getTemplateLocalContext(templateOfSize(100, `m${i}`), 0);
     }
 
-    expect(getTemplateLocalIndexCacheStats().chars).toBeLessThanOrEqual(MAX_CHARS);
+    expect(getTemplateLocalIndexCacheEntries()).toBeLessThanOrEqual(MAX_CACHED_TEMPLATES);
   });
 
-  it('does not cache a template larger than the whole cap', () => {
-    const before = getTemplateLocalIndexCacheStats();
+  it('does not cache a template the Liquid engine refuses to parse', () => {
+    // Above the engine's 150,000-character parse limit, so the index is empty
+    // and keeping it would retain the string for nothing.
+    const huge = templateOfSize(200_000, 'huge');
 
-    getTemplateLocalContext(templateOfSize(MAX_CHARS + 1, 'huge'), 0);
+    getTemplateLocalContext(huge, 0);
 
-    expect(getTemplateLocalIndexCacheStats()).toEqual(before);
+    expect(hasCachedTemplateLocalIndex(huge)).toBe(false);
+  });
+
+  it('caches a template the engine does parse', () => {
+    const parsed = templateOfSize(100, 'parsed');
+
+    getTemplateLocalContext(parsed, parsed.length);
+
+    expect(hasCachedTemplateLocalIndex(parsed)).toBe(true);
   });
 });

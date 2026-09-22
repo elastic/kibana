@@ -20,6 +20,7 @@
  */
 
 import type { AssignTag, CaptureTag, ForTag, Tag, Template } from 'liquidjs';
+import { LRUCache } from 'lru-cache';
 import { parseTemplateString } from '../../liquid/liquid_parse_cache';
 
 export interface AssignVariable {
@@ -366,19 +367,23 @@ const EMPTY_INDEX: TemplateLocalIndex = {
 let nextIndexId = 1;
 
 /**
- * Cap on the template text the index cache may hold. Counted in characters
- * rather than entries: 64 entries is 64 MiB of one scalar near the route's body
- * limit and a rounding error of 64 short ones, so the entry count says nothing
- * about the memory retained. The cap is the route's own 1 MiB body limit, so a
- * single worst-case body still fits.
+ * An entry cannot grow without limit: the Liquid engine refuses to parse a
+ * template above its `parseLimit` of 150,000 characters, and the densest
+ * template that does parse — one assign every 26 characters — indexes to
+ * ~660 KiB including the string it is keyed by. So this many entries is a
+ * ceiling of roughly 10 MiB.
  */
-const MAX_INDEX_CACHE_CHARS = 1024 * 1024;
-const indexCache = new Map<string, TemplateLocalIndex>();
-let indexCacheChars = 0;
+const MAX_CACHED_TEMPLATES = 16;
+const indexCache = new LRUCache<string, TemplateLocalIndex>({ max: MAX_CACHED_TEMPLATES });
 
 /** Cache contents, for tests that assert eviction. */
-export function getTemplateLocalIndexCacheStats(): { entries: number; chars: number } {
-  return { entries: indexCache.size, chars: indexCacheChars };
+export function getTemplateLocalIndexCacheEntries(): number {
+  return indexCache.size;
+}
+
+/** Whether one template is currently cached, for tests. */
+export function hasCachedTemplateLocalIndex(templateString: string): boolean {
+  return indexCache.has(templateString);
 }
 
 function buildTemplateLocalIndex(templateString: string): TemplateLocalIndex {
@@ -403,11 +408,9 @@ function buildTemplateLocalIndex(templateString: string): TemplateLocalIndex {
 }
 
 /**
- * LRU over the templates seen so far, bounded by the characters they hold.
- *
- * This cache is deliberately not scoped to one validation run: a keystroke
+ * The walk of one template, kept across validation runs on purpose: a keystroke
  * reparses the document, and every scalar the edit did not touch keys the same
- * string, so the reuse that matters in the editor is the reuse across runs.
+ * string, so reuse across runs is the reuse that matters in the editor.
  */
 function getTemplateLocalIndex(templateString: string): TemplateLocalIndex {
   if (!templateString.includes('{%')) {
@@ -415,24 +418,20 @@ function getTemplateLocalIndex(templateString: string): TemplateLocalIndex {
   }
   const cached = indexCache.get(templateString);
   if (cached) {
-    indexCache.delete(templateString);
-    indexCache.set(templateString, cached);
     return cached;
   }
   const index = buildTemplateLocalIndex(templateString);
-  // A template larger than the whole cap would evict everything and then itself.
-  if (templateString.length > MAX_INDEX_CACHE_CHARS) {
-    return index;
-  }
-  indexCache.set(templateString, index);
-  indexCacheChars += templateString.length;
-  while (indexCacheChars > MAX_INDEX_CACHE_CHARS) {
-    const oldest: string | undefined = indexCache.keys().next().value;
-    if (oldest === undefined) {
-      break;
-    }
-    indexCache.delete(oldest);
-    indexCacheChars -= oldest.length;
+  // A template the engine refused to parse has nothing to keep, and keying an
+  // empty index by a string of any size is how this cache would exceed its
+  // ceiling.
+  // A template the engine refused to parse has nothing to keep, and keying an
+  // empty index by a string of any size is how this cache would exceed its
+  // ceiling.
+  // A template the engine refused to parse has nothing to keep, and keying an
+  // empty index by a string of any size is how this cache would exceed its
+  // ceiling.
+  if (index !== EMPTY_INDEX) {
+    indexCache.set(templateString, index);
   }
   return index;
 }
