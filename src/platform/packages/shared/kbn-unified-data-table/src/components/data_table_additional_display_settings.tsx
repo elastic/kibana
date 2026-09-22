@@ -40,12 +40,15 @@ export interface UnifiedDataTableAdditionalDisplaySettingsProps {
   lineCountInput: number | undefined;
   headerLineCountInput: number | undefined;
   densityControl?: React.ReactNode;
-  documentsDisplayMode: DocumentsDisplayMode;
+  additionalContent?: React.ReactNode;
+  documentsDisplayMode?: DocumentsDisplayMode;
   onChangeDocumentsDisplayMode?: (documentsDisplayMode: DocumentsDisplayMode) => void;
-  jsonModeSettings: JsonModeSettings;
+  jsonModeSettings?: JsonModeSettings;
   onChangeJsonModeSettings?: (jsonModeSettings: JsonModeSettings) => void;
   isViewModeNew?: boolean;
 }
+
+const DEFAULT_JSON_MODE_SETTINGS: JsonModeSettings = {};
 
 const defaultOnChangeSampleSize = () => {};
 
@@ -274,9 +277,10 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
   lineCountInput,
   headerLineCountInput,
   densityControl,
-  documentsDisplayMode,
+  additionalContent,
+  documentsDisplayMode = 'table',
   onChangeDocumentsDisplayMode,
-  jsonModeSettings,
+  jsonModeSettings = DEFAULT_JSON_MODE_SETTINGS,
   onChangeJsonModeSettings,
   isViewModeNew,
 }) => {
@@ -333,7 +337,11 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
     !isJsonMode && Boolean(onChangeHeaderRowHeight && onChangeHeaderRowHeightLines);
   const showRowHeight = !isJsonMode && Boolean(onChangeRowHeight && onChangeRowHeightLines);
   const hasControlsAfterViewMode =
-    isJsonMode || showDensity || showHeaderRowHeight || showRowHeight;
+    isJsonMode ||
+    showDensity ||
+    showHeaderRowHeight ||
+    showRowHeight ||
+    Boolean(additionalContent);
 
   return (
     <>
@@ -379,6 +387,7 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
           onChangeActiveSampleSize={onChangeActiveSampleSize}
         />
       )}
+      {additionalContent}
     </>
   );
 };

@@ -18,9 +18,18 @@ export {
   RowHeightSettings,
   type RowHeightSettingsProps,
 } from './src/components/row_height_settings';
+export {
+  UnifiedDataTableAdditionalDisplaySettings,
+  type UnifiedDataTableAdditionalDisplaySettingsProps,
+} from './src/components/data_table_additional_display_settings';
 export { getDisplayedColumns, SOURCE_COLUMN } from './src/utils/columns';
 export { getTextBasedColumnsMeta } from './src/utils/get_columns_meta';
-export { ROWS_HEIGHT_OPTIONS, DataGridDensity, DEFAULT_PAGINATION_MODE } from './src/constants';
+export {
+  ROWS_HEIGHT_OPTIONS,
+  DataGridDensity,
+  DEFAULT_PAGINATION_MODE,
+  defaultTimeColumnWidth,
+} from './src/constants';
 
 export { JSONCodeEditorCommonMemoized } from './src/components/json_code_editor/json_code_editor_common';
 export { SourceDocument } from './src/components/source_document';
@@ -43,10 +52,32 @@ export {
   renderCustomToolbar,
 } from './src/components/custom_toolbar/render_custom_toolbar';
 
-export { getDataGridDensity, getDataGridDensityPadding } from './src/hooks/use_data_grid_density';
-export { getRowHeight } from './src/hooks/use_row_height';
+export {
+  getDataGridDensity,
+  getDataGridDensityPadding,
+  useDataGridDensity,
+  DATA_GRID_DENSITY_STYLE_MAP,
+} from './src/hooks/use_data_grid_density';
+export { getRowHeight, useRowHeight, RowHeightType } from './src/hooks/use_row_height';
+export { RowHeightMode } from './src/components/row_height_settings';
 
 export type { UnifiedDataTableRestorableState } from './src/restorable_state';
 export { UnifiedDataTableSourceColumnHeader } from './src/components/data_table_source_column_header';
+
+export { getColumnDisplayName } from './src/components/data_table_columns';
+export {
+  buildCopyColumnNameButton,
+  buildCopyColumnValuesButton,
+} from './src/components/build_copy_column_button';
+export { buildEditFieldButton } from './src/components/build_edit_field_button';
+export { isSortable } from './src/hooks/use_sorting';
+export { getSchemaByKbnType, getSchemaDetectors } from './src/components/data_table_schema';
+export { convertValueToString } from './src/utils/convert_value_to_string';
+export { CompareDocuments } from './src/components/compare_documents';
+export {
+  CopyAsTextFormat,
+  copyRowsAsJsonToClipboard,
+  copyRowsAsTextToClipboard,
+} from './src/utils/copy_value_to_clipboard';
 
 export { type EuiDataGridRefProps } from '@elastic/eui';
