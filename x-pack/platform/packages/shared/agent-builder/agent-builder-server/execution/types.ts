@@ -116,17 +116,24 @@ export interface ConversationExecutionParams extends BaseExecutionParams {
    * other option here unused. Defaults to `always`.
    */
   triggerMode?: ChatTriggerMode;
+}
+
+/**
+ * What the execution service stores on a conversation-mode record, and what a run reads back:
+ * the caller's parameters plus the resolution the service already performed on the request node.
+ * The service is its only producer — callers of {@link AgentExecutionService.executeAgent} pass
+ * {@link ConversationExecutionParams}.
+ */
+export interface StoredConversationExecutionParams extends ConversationExecutionParams {
+  /** The conversation the service resolved, created by the time the run starts. */
+  conversationId: string;
+  /** The round the service opened, so the run reuses the ids of the events written for it. */
+  roundId: string;
   /**
-   * @internal Id of the round the caller opened, so the run reuses the ids of the events already
-   * written for it. Set by the execution service; callers should leave it unset.
+   * How the conversation was resolved, so the run reports a creation this request made rather
+   * than the update its own read sees.
    */
-  roundId?: string;
-  /**
-   * @internal How the conversation was resolved, so the run reports a creation this request made
-   * rather than the update its own read sees. Set by the execution service; callers should leave
-   * it unset.
-   */
-  conversationOperation?: ConversationOperation;
+  conversationOperation: ConversationOperation;
 }
 
 /**
@@ -135,9 +142,9 @@ export interface ConversationExecutionParams extends BaseExecutionParams {
 export type StandaloneExecutionParams = BaseExecutionParams;
 
 /**
- * Union of all execution parameter types.
+ * Union of all stored execution parameter types — the shape of a record's `agent_params`.
  */
-export type AgentExecutionParams = ConversationExecutionParams | StandaloneExecutionParams;
+export type AgentExecutionParams = StoredConversationExecutionParams | StandaloneExecutionParams;
 
 /**
  * Common fields shared by all agent execution documents.
@@ -178,7 +185,7 @@ interface BaseAgentExecution {
  */
 export interface ConversationAgentExecution extends BaseAgentExecution {
   executionMode: AgentExecutionMode.conversation;
-  agentParams: ConversationExecutionParams;
+  agentParams: StoredConversationExecutionParams;
 }
 
 /**
