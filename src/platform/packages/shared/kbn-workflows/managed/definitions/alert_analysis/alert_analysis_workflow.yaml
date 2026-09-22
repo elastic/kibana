@@ -482,6 +482,28 @@ steps:
         with:
           alert_set: "${{ inputs.alerts }}"
 
+  # ---------------------------------------------------------------------------
+  # Rule context for enrichment queries / logs
+  # ---------------------------------------------------------------------------
+  # Standalone (alert trigger) reads event.rule. Worker/manual child runs have no
+  # trigger event, so derive from the first alert in alert_set. Floor Triage batches
+  # are single-rule; multi-rule Worker sets are unsupported (enrichment filters one uuid).
+  - name: set_rule_context
+    type: data.set
+    with:
+      rule_id: "{{ event.rule.id }}"
+      rule_name: "{{ event.rule.name }}"
+
+  - name: derive_rule_context_from_alerts
+    type: if
+    condition: "${{ inputs.calledByWorker == true }}"
+    steps:
+      - name: apply_rule_from_alert_set
+        type: data.set
+        with:
+          rule_id: "{{ variables.alert_set[0].kibana.alert.rule.uuid }}"
+          rule_name: "{{ variables.alert_set[0].kibana.alert.rule.name }}"
+
   - name: set_alert_counts
     type: data.set
     with:
@@ -507,7 +529,7 @@ steps:
         type: console
         with:
           message: >-
-            Alert analysis for rule {{ event.rule.name }} ({{ event.rule.id }}):
+            Alert analysis for rule {{ variables.rule_name }} ({{ variables.rule_id }}):
             {{ variables.pending_alert_count }} of {{ variables.total_alert_count }} alerts to analyze
             in batches of {{ consts.batch_size }}.
 
@@ -535,7 +557,7 @@ steps:
             bool:
               filter:
                 - term:
-                    kibana.alert.rule.uuid: "{{event.rule.id}}"
+                    kibana.alert.rule.uuid: "{{ variables.rule_id }}"
                 - term:
                     kibana.alert.workflow_status: "closed"
                 - range:
@@ -553,7 +575,7 @@ steps:
             bool:
               filter:
                 - term:
-                    kibana.alert.rule.uuid: "{{event.rule.id}}"
+                    kibana.alert.rule.uuid: "{{ variables.rule_id }}"
                 - term:
                     kibana.alert.workflow_status: "closed"
                 - range:
@@ -588,7 +610,7 @@ steps:
             | STATS close_reason_count = COUNT(*) BY close_reason
             | SORT close_reason_count DESC
           params:
-            - "{{event.rule.id}}"
+            - "{{ variables.rule_id }}"
           filter:
             bool:
               filter:
@@ -651,7 +673,7 @@ steps:
             bool:
               filter:
                 - term:
-                    kibana.alert.rule.uuid: "{{event.rule.id}}"
+                    kibana.alert.rule.uuid: "{{ variables.rule_id }}"
                 - range:
                     "@timestamp":
                       gte: '{{ variables.anchor_timestamp }}||-24h'
@@ -731,7 +753,7 @@ steps:
             bool:
               filter:
                 - term:
-                    kibana.alert.rule.uuid: "{{event.rule.id}}"
+                    kibana.alert.rule.uuid: "{{ variables.rule_id }}"
                 - range:
                     "@timestamp":
                       gte: '{{ variables.anchor_timestamp }}||-7d'
@@ -786,14 +808,14 @@ steps:
             - "kibana.alert.rule.threat"
           query:
             term:
-              kibana.alert.rule.uuid: "{{event.rule.id}}"
+              kibana.alert.rule.uuid: "{{ variables.rule_id }}"
 
       - name: get_rule_metadata
         type: data.set
         with:
-          rule_id: "{{event.rule.id}}"
+          rule_id: "{{ variables.rule_id }}"
           metadata:
-            rule_id: "{{event.rule.id}}"
+            rule_id: "{{ variables.rule_id }}"
             rule_name: '{{ steps.get_rule_metadata_source.output.hits.hits[0]._source["kibana.alert.rule.name"] }}'
             rule_uuid: '{{ steps.get_rule_metadata_source.output.hits.hits[0]._source["kibana.alert.rule.uuid"] }}'
             rule_description: '{{ steps.get_rule_metadata_source.output.hits.hits[0]._source["kibana.alert.rule.description"] }}'
@@ -1368,6 +1390,7 @@ steps:
                           description: One short sentence (max 20 words) naming the decision gate and the strongest evidence
                         contributing_factors:
                           type: array
+                          maxItems: 3
                           items:
                             type: string
                           description: At most 3 short phrases (max 6 words each) naming the strongest contributing factors
@@ -1824,7 +1847,7 @@ steps:
         type: console
         with:
           message: >-
-            Alert analysis finished for rule {{ event.rule.name }}:
+            Alert analysis finished for rule {{ variables.rule_name }}:
             {{ variables.all_verdicts | size }} verdicts for {{ variables.pending_alert_count }} alerts
             in {{ variables.batch_llm_calls }} model call(s);
             {{ variables.auto_close_ids | size }} alert(s) matched the auto-close thresholds.
