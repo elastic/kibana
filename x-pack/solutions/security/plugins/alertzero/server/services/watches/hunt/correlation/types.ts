@@ -94,6 +94,7 @@ export interface HuntCorrelationAttachmentThresholds {
 }
 
 export interface HuntCorrelationAttachmentData {
+  attachment_id: string;
   anchors: AnchorItem[];
   diamond_scores: DiamondScore[];
   thresholds: HuntCorrelationAttachmentThresholds;
