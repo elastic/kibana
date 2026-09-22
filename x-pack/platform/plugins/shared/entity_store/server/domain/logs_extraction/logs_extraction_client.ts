@@ -17,6 +17,7 @@ import type {
   ManagedEntityDefinition,
   ExtractionMode,
 } from '../../../common/domain/definitions/entity_schema';
+import { EXTRACTION_MODE } from '../../../common/domain/definitions/entity_schema';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
 import { type LogSlicePaginationParams, type PaginationParams } from './query_builder_commons';
 import {
@@ -55,11 +56,12 @@ import { type LogExtractionConfig } from '../saved_objects';
 import {
   type EngineDescriptor,
   type EngineDescriptorClient,
+  type EngineError,
   type EngineLogExtractionState,
   type EntityStoreGlobalStateClient,
 } from '../saved_objects';
 import { ENGINE_STATUS } from '../constants';
-import { EntityStoreNotRunningError } from '../errors';
+import { EntityStoreNotRunningError, NonPriorityExtractionDisabledError } from '../errors';
 import type { LogExtractionInstallParams } from '../../routes/constants';
 
 /** Engine state with all cursor fields cleared. Used between sub-window iterations so a fresh
@@ -109,17 +111,28 @@ export interface LogsExtractionClientDependencies {
 }
 
 export class LogsExtractionClient {
-  /** Maps each extraction mode to the field holding its extraction state. single and priority share
-   * logExtractionState; nonPriority has its own field so the two processes do not overwrite each
-   * other's position. */
-  private static readonly EXTRACTION_STATE_FIELD_BY_MODE: Record<
-    ExtractionMode,
-    keyof EngineDescriptor
-  > = {
-    single: 'logExtractionState',
-    priority: 'logExtractionState',
-    nonPriority: 'nonPriorityLogExtractionState',
-  };
+  /**
+   * Maps each extraction mode to the descriptor fields holding its cursor, status and error.
+   * single and priority share the original fields; nonPriority has its own set, so the two
+   * processes never write the same key and cannot overwrite each other.
+   *
+   * Every read and write of these three must go through this map. Reading `status` directly would
+   * make stopping one process stop the other, since extraction is gated on it, and clearing
+   * `error` directly would let a non-priority success wipe a priority failure.
+   */
+  private static readonly DESCRIPTOR_FIELDS_BY_MODE = {
+    single: { state: 'logExtractionState', status: 'status', error: 'error' },
+    priority: { state: 'logExtractionState', status: 'status', error: 'error' },
+    nonPriority: {
+      state: 'nonPriorityLogExtractionState',
+      status: 'nonPriorityStatus',
+      error: 'nonPriorityError',
+    },
+  } as const satisfies Record<ExtractionMode, Record<string, keyof EngineDescriptor>>;
+
+  private get descriptorFields() {
+    return LogsExtractionClient.DESCRIPTOR_FIELDS_BY_MODE[this.extractionMode];
+  }
 
   logger: Logger;
   namespace: string;
@@ -143,40 +156,60 @@ export class LogsExtractionClient {
     this.dataViewsService = dataViewsService;
     this.engineDescriptorClient = engineDescriptorClient;
     this.globalStateClient = globalStateClient;
-    this.extractionMode = extractionMode ?? 'single';
+    this.extractionMode = extractionMode ?? EXTRACTION_MODE.single;
   }
 
   private extractionStatePatch(state: EngineLogExtractionState): Partial<EngineDescriptor> {
-    return {
-      [LogsExtractionClient.EXTRACTION_STATE_FIELD_BY_MODE[this.extractionMode]]: state,
-    } as Partial<EngineDescriptor>;
+    return { [this.descriptorFields.state]: state } as Partial<EngineDescriptor>;
+  }
+
+  private errorPatch(error: EngineError | null): Partial<EngineDescriptor> {
+    return { [this.descriptorFields.error]: error } as Partial<EngineDescriptor>;
   }
 
   private async getLogExtractionConfigAndState(
     type: EntityType
   ): Promise<{ config: LogExtractionConfig; engineState: EngineLogExtractionState }> {
     const engineDescriptor = await this.engineDescriptorClient.findOrThrow(type);
-    if (engineDescriptor.status !== ENGINE_STATUS.STARTED) {
+    const status = engineDescriptor[this.descriptorFields.status];
+    if (status !== ENGINE_STATUS.STARTED) {
+      if (this.extractionMode === EXTRACTION_MODE.nonPriority && status === ENGINE_STATUS.STOPPED) {
+        throw new NonPriorityExtractionDisabledError();
+      }
       throw new EntityStoreNotRunningError();
     }
     const globalOverrides = await this.globalStateClient.findLogExtractionOverrides();
     const engineState =
-      this.extractionMode === 'nonPriority'
+      this.extractionMode === EXTRACTION_MODE.nonPriority
         ? engineDescriptor.nonPriorityLogExtractionState ?? FRESH_ENGINE_LOG_EXTRACTION_STATE
         : engineDescriptor.logExtractionState;
     return {
-      config: getMergedConfig(type, globalOverrides, engineDescriptor.logExtractionConfig),
+      config: getMergedConfig(
+        type,
+        globalOverrides,
+        engineDescriptor.logExtractionConfig,
+        this.extractionMode
+      ),
       engineState,
     };
   }
 
-  /** Config in effect for one entity type, without requiring the engine to be started. */
-  public async getMergedConfigForType(type: EntityType): Promise<LogExtractionConfig> {
+  /** Config in effect for one entity type and extraction process, without requiring the engine to
+   * be started. Defaults to this client's own mode. */
+  public async getMergedConfigForType(
+    type: EntityType,
+    extractionMode: ExtractionMode = this.extractionMode
+  ): Promise<LogExtractionConfig> {
     const [globalOverrides, engineDescriptor] = await Promise.all([
       this.globalStateClient.findLogExtractionOverrides(),
       this.engineDescriptorClient.findOrThrow(type),
     ]);
-    return getMergedConfig(type, globalOverrides, engineDescriptor.logExtractionConfig);
+    return getMergedConfig(
+      type,
+      globalOverrides,
+      engineDescriptor.logExtractionConfig,
+      extractionMode
+    );
   }
 
   public async extractLogs(
@@ -227,7 +260,7 @@ export class LogsExtractionClient {
       if (logsCapDeferred) {
         // Cursor is already persisted at the last completed slice end inside runMainExtractionLoop;
         // do not overwrite it — only clear any stale error.
-        await this.engineDescriptorClient.update(type, { error: null });
+        await this.engineDescriptorClient.update(type, this.errorPatch(null));
       } else {
         await this.engineDescriptorClient.update(type, {
           ...this.extractionStatePatch({
@@ -236,7 +269,7 @@ export class LogsExtractionClient {
             lastExecutionTimestamp: lastSearchTimestamp || moment().utc().toISOString(),
             sliceEndTimestamp: null,
           }),
-          error: null,
+          ...this.errorPatch(null),
         });
       }
 
@@ -996,7 +1029,8 @@ export class LogsExtractionClient {
   ): Promise<ExtractedLogsSummary> {
     if (
       SavedObjectsErrorHelpers.isNotFoundError(error) ||
-      error instanceof EntityStoreNotRunningError
+      error instanceof EntityStoreNotRunningError ||
+      error instanceof NonPriorityExtractionDisabledError
     ) {
       return {
         success: false,
@@ -1005,9 +1039,10 @@ export class LogsExtractionClient {
       };
     }
 
-    await this.engineDescriptorClient.update(type, {
-      error: { message: error.message, action: 'extractLogs' },
-    });
+    await this.engineDescriptorClient.update(
+      type,
+      this.errorPatch({ message: error.message, action: 'extractLogs' })
+    );
     return { success: false, isRemote, error };
   }
 
