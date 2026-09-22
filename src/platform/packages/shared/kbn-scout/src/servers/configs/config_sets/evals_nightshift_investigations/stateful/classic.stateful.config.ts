@@ -14,6 +14,10 @@ import type { ScoutServerConfig } from '../../../../../types';
 import { servers as tracing } from '../../evals_tracing/stateful/classic.stateful.config';
 
 const createInvestigationConfig = (): ScoutServerConfig => {
+  const concurrency = Number(process.env.NIGHTSHIFT_CONCURRENCY ?? 2);
+  if (!Number.isInteger(concurrency) || concurrency < 1 || concurrency > 20) {
+    throw new Error('NIGHTSHIFT_CONCURRENCY must be an integer between 1 and 20');
+  }
   const sandboxKey = process.env.SANDBOX_API_KEY;
   if (!sandboxKey)
     throw new Error(
@@ -104,6 +108,8 @@ const createInvestigationConfig = (): ScoutServerConfig => {
             !(telemetryUrl && telemetryApiKey && arg.startsWith(connectorPrefix))
         ),
         '--xpack.nightshift_investigations.enabled=true',
+        // Each workflow costs two units; its agent runs inline. Reserve ten for background tasks.
+        `--xpack.task_manager.capacity=${concurrency * 2 + 10}`,
         '--feature_flags.overrides.streams.significantEventsAvailable=true',
         '--xpack.nightshift_investigations.cortex.enabled=false',
         `--config=${sandboxConfigPath}`,

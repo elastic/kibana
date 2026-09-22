@@ -52,6 +52,8 @@ Config files live in `scripts/vault/config.<profile>.json`. The golden cluster p
 | `--grep <pattern>`  | Filter tests by name                                                   |
 | `--repetitions <n>` | Repeat each example N times                                            |
 | `--space-ids <ids>` | Spaces to assign datasets and scores to (the run works from the first) |
+| `--dataset-id <id>` | Existing stored dataset for `nightshift-investigations`; selects trace-only execution |
+| `--concurrency <n>` | Nightshift trace-only concurrency (1–20, default 2); `start` sizes Task Manager capacity |
 | `--skip-server`     | Skip EDOT/Scout startup (use existing services)                        |
 | `--skip-init`       | Skip config and connector setup                                        |
 | `--dry-run`         | Print configuration and exit                                           |

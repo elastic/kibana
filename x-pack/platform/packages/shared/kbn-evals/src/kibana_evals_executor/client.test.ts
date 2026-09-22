@@ -50,6 +50,35 @@ describe('KibanaEvalsClient', () => {
     (getCurrentTraceId as jest.Mock).mockReturnValue('default-trace-id');
   });
 
+  it('runs a stored dataset without rewriting it and retains dataset and example IDs', async () => {
+    const upsertDataset = jest.fn();
+    const onEvaluationComplete = jest.fn();
+    const client = createClient({ upsertDataset, onEvaluationComplete });
+    const dataset = {
+      id: 'stored-dataset-id',
+      name: 'curated-dataset',
+      description: 'Managed in the evaluations UI',
+      examples: [{ id: 'stored-example-id', input: { question: 'Investigate' } }],
+    };
+    const [result] = await client.runExperiment(
+      { datasets: [dataset], task: async () => ({ answer: 'Done' }) },
+      [
+        {
+          name: 'placeholder',
+          kind: 'CODE',
+          direction: 'neutral',
+          evaluate: async () => ({ score: 1 }),
+        },
+      ]
+    );
+
+    expect(upsertDataset).not.toHaveBeenCalled();
+    expect(result.datasetId).toBe('stored-dataset-id');
+    expect(onEvaluationComplete).toHaveBeenCalledWith(
+      expect.objectContaining({ datasetId: 'stored-dataset-id', exampleId: 'stored-example-id' })
+    );
+  });
+
   it('computes a stable datasetId for datasets with the same name', async () => {
     const client = createClient();
 

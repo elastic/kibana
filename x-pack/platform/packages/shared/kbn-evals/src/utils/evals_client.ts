@@ -345,7 +345,8 @@ export class EvalsClient {
     return UpsertEvaluationDatasetResponse.parse(getResponseData(response)).dataset_id;
   }
 
-  private async fetchDatasetById(datasetId: string): Promise<DatasetWithId | null> {
+  /** Reads a stored dataset and its examples from the run's home Space without modifying it. */
+  async getDatasetById(datasetId: string): Promise<DatasetWithId | null> {
     try {
       const response = await this.kbnClient.request({
         path: this.path(EVALS_DATASET_URL.replace('{datasetId}', encodeURIComponent(datasetId))),
@@ -382,7 +383,7 @@ export class EvalsClient {
    * first — all an older Kibana understands — then asking the server.
    */
   async getDatasetByName(datasetName: string): Promise<DatasetWithId | null> {
-    const defaultSpaceDataset = await this.fetchDatasetById(
+    const defaultSpaceDataset = await this.getDatasetById(
       getDatasetId(DEFAULT_SPACE_ID, datasetName)
     );
     if (defaultSpaceDataset) {
@@ -399,7 +400,7 @@ export class EvalsClient {
       });
 
       const { id } = ResolveEvaluationDatasetResponse.parse(getResponseData(response));
-      return await this.fetchDatasetById(id);
+      return await this.getDatasetById(id);
     } catch (error: unknown) {
       // A Kibana without this route reads `_resolve` as a dataset id and also
       // answers 404, same as a genuinely unknown name.

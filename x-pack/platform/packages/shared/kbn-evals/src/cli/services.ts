@@ -28,7 +28,7 @@ interface ServiceEntry {
   serverConfigSet?: string;
   /**
    * SHA-256 of the env the service was started with (Scout: TRACING_EXPORTERS,
-   * GCS_CREDENTIALS; EDOT: ELASTICSEARCH_HOST).
+   * GCS_CREDENTIALS, NIGHTSHIFT_DATASETS, NIGHTSHIFT_CONCURRENCY; EDOT: ELASTICSEARCH_HOST).
    */
   envHash?: string;
 }
@@ -81,7 +81,12 @@ export const connectorsHash = (): string =>
   ]);
 
 export const scoutEnvHash = (env: Record<string, string> | undefined): string =>
-  hashParts([env?.TRACING_EXPORTERS, env?.GCS_CREDENTIALS]);
+  hashParts([
+    env?.TRACING_EXPORTERS,
+    env?.GCS_CREDENTIALS,
+    env?.NIGHTSHIFT_DATASETS,
+    env?.NIGHTSHIFT_CONCURRENCY,
+  ]);
 
 export const edotEnvHash = (elasticsearchHost: string | undefined): string =>
   hashParts([elasticsearchHost]);
@@ -111,8 +116,8 @@ export const isScoutStale = (
   }
 
   const currentEnvHash = scoutEnvHash(scoutEnv);
-  if (entry.envHash && entry.envHash !== currentEnvHash) {
-    return { stale: true, reason: 'TRACING_EXPORTERS or GCS_CREDENTIALS changed' };
+  if ((entry.envHash || scoutEnv?.NIGHTSHIFT_CONCURRENCY) && entry.envHash !== currentEnvHash) {
+    return { stale: true, reason: 'Scout tracing, credentials or investigation settings changed' };
   }
 
   const runningConfigSet = entry.serverConfigSet ?? DEFAULT_SERVER_CONFIG_SET;

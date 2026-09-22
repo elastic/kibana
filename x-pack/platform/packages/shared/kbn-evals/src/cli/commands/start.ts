@@ -33,6 +33,7 @@ export const startCmd: Command<void> = {
     node scripts/evals start --suite agent-builder --model eis-gpt-4.1,eis-claude-4-sonnet
     node scripts/evals start --suite agent-builder --grep "product documentation"
     node scripts/evals start --suite agent-builder --skip-server
+    node scripts/evals start --suite nightshift-investigations --dataset-id <id> --concurrency 16
     node scripts/evals stop
   `,
   flags: evalRunFlags,
@@ -56,6 +57,16 @@ export const startCmd: Command<void> = {
     } = await resolveEvalRunContext({ repoRoot, log, flagsReader, profile });
 
     const skipServer = flagsReader.boolean('skip-server');
+
+    const envOverrides = buildEvalRunEnv({
+      evaluationConnectorId,
+      requiresEisCcm,
+      skipServer,
+      suite,
+      profileEnvOverrides,
+      flagsReader,
+      log,
+    });
 
     log.info('');
     log.info(`Suite:     ${suiteId ?? configPath}`);
@@ -96,7 +107,7 @@ export const startCmd: Command<void> = {
       await ensureEvalStack({
         repoRoot,
         log,
-        profileEnvOverrides,
+        profileEnvOverrides: envOverrides,
         serverConfigSet: suite?.serverConfigSet,
         requiresEisCcm,
       });
@@ -104,16 +115,6 @@ export const startCmd: Command<void> = {
 
     log.info(`[run] Running suite: ${suiteId ?? configPath}`);
     log.info('');
-
-    const envOverrides = buildEvalRunEnv({
-      evaluationConnectorId,
-      requiresEisCcm,
-      skipServer,
-      suite,
-      profileEnvOverrides,
-      flagsReader,
-      log,
-    });
 
     const args = ['scripts/playwright', 'test', '--config', resolvedConfigPath];
     for (const p of projects) {

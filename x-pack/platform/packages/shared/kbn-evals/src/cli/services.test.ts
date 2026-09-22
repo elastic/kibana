@@ -8,7 +8,7 @@
 import Fs from 'fs';
 import Os from 'os';
 import Path from 'path';
-import { edotEnvHash, isEdotStale } from './services';
+import { connectorsHash, scoutEnvHash, isScoutStale, edotEnvHash, isEdotStale } from './services';
 
 const LOCAL_ES = 'http://elastic:changeme@localhost:9200';
 const CLOUD_ES = 'https://kbn-evals-serverless.es.us-central1.gcp.elastic.cloud';
@@ -76,5 +76,58 @@ describe('isEdotStale', () => {
 
   it('says nothing when no collector was ever started', () => {
     expect(isEdotStale(repoRoot, LOCAL_ES)).toEqual({ stale: false });
+  });
+});
+
+describe('Scout investigation configuration freshness', () => {
+  let repoRoot: string;
+  beforeEach(() => {
+    repoRoot = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'kbn-evals-scout-'));
+    Fs.mkdirSync(Path.join(repoRoot, 'target/evals'), { recursive: true });
+    Fs.writeFileSync(
+      Path.join(repoRoot, 'target/evals/services.json'),
+      JSON.stringify({
+        scout: {
+          pid: process.pid,
+          connectorsHash: connectorsHash(),
+          serverConfigSet: 'evals_nightshift_investigations',
+          envHash: scoutEnvHash({ NIGHTSHIFT_DATASETS: 'trace-only', NIGHTSHIFT_CONCURRENCY: '2' }),
+        },
+      })
+    );
+  });
+  afterEach(() => Fs.rmSync(repoRoot, { recursive: true, force: true }));
+
+  it('restarts for changed concurrency so Task Manager gets the new capacity', () => {
+    expect(
+      isScoutStale(repoRoot, 'evals_nightshift_investigations', {
+        NIGHTSHIFT_DATASETS: 'trace-only',
+        NIGHTSHIFT_CONCURRENCY: '16',
+      }).stale
+    ).toBe(true);
+  });
+
+  it('restarts a legacy stack whose investigation capacity was never recorded', () => {
+    const statePath = Path.join(repoRoot, 'target/evals/services.json');
+    const state = JSON.parse(Fs.readFileSync(statePath, 'utf8'));
+    delete state.scout.envHash;
+    Fs.writeFileSync(statePath, JSON.stringify(state));
+    expect(
+      isScoutStale(repoRoot, 'evals_nightshift_investigations', {
+        NIGHTSHIFT_DATASETS: 'trace-only',
+        NIGHTSHIFT_CONCURRENCY: '16',
+      }).stale
+    ).toBe(true);
+  });
+
+  it('restarts when switching to smoke but reuses a stack when only the stored dataset changes', () => {
+    expect(isScoutStale(repoRoot, 'evals_nightshift_investigations', {}).stale).toBe(true);
+    expect(
+      isScoutStale(repoRoot, 'evals_nightshift_investigations', {
+        NIGHTSHIFT_DATASETS: 'trace-only',
+        NIGHTSHIFT_CONCURRENCY: '2',
+        NIGHTSHIFT_DATASET_ID: 'another-dataset',
+      }).stale
+    ).toBe(false);
   });
 });

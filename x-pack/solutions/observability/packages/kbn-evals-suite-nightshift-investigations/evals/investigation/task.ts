@@ -15,6 +15,8 @@ import type {
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import type { InvestigationExample, InvestigationTaskOutput } from './types';
 
+export const INVESTIGATION_TIMEOUT_MS = 20 * 60_000;
+
 /** Runs a manual product investigation and retains its persisted report and conversation evidence. */
 export const runInvestigation = async (
   fetch: HttpHandler,
@@ -42,7 +44,7 @@ export const runInvestigation = async (
     while (investigation.status === 'pending' || investigation.status === 'running') {
       output.workflow_status = investigation.status;
       output.conversation_id = investigation.conversation_id;
-      if (Date.now() - started > 20 * 60_000) {
+      if (Date.now() - started > INVESTIGATION_TIMEOUT_MS) {
         throw new Error('Investigation did not reach a terminal status within 20 minutes');
       }
       await setTimeout(1000);

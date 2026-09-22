@@ -13,9 +13,9 @@ import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { GenAISemConvAttributes } from '@kbn/inference-tracing';
 import { evaluate } from '../../src/evaluate';
-import { readInvestigationDataset } from './datasets';
+import { loadInvestigationDataset } from './datasets';
 import { ungradedPlaceholder } from './placeholder';
-import { runInvestigation } from './task';
+import { INVESTIGATION_TIMEOUT_MS, runInvestigation } from './task';
 import { assertAgentTrace, assertSuccessfulSandboxCommand } from './trace_evidence';
 import type { InvestigationTaskOutput } from './types';
 
@@ -23,7 +23,16 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
   evaluate(
     'persists ungraded investigations and complete agent traces',
     async ({ executorClient, connector, fetch, evalsClient, traceEsClient, repetitions, log }) => {
-      const dataset = readInvestigationDataset();
+      const dataset = await loadInvestigationDataset(evalsClient);
+      const concurrency = Number(process.env.NIGHTSHIFT_CONCURRENCY ?? 2);
+      if (!Number.isInteger(concurrency) || concurrency < 1 || concurrency > 20) {
+        throw new Error('NIGHTSHIFT_CONCURRENCY must be an integer between 1 and 20');
+      }
+      evaluate.setTimeout(
+        Math.ceil((dataset.examples.length * repetitions) / concurrency) *
+          INVESTIGATION_TIMEOUT_MS +
+          5 * 60_000
+      );
       // The typed agent API omits inherited instructions; the source prompt is the acceptance oracle.
       const systemInstructions = cleanPrompt(
         readFileSync(
@@ -58,7 +67,8 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
         {
           name: 'Nightshift ungraded investigation traces',
           datasets: [dataset],
-          concurrency: 2,
+          concurrency,
+          metadata: { concurrency },
           task: (example) => runInvestigation(fetch, example),
         },
         [ungradedPlaceholder]
@@ -92,7 +102,7 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
           output.structured_report?.conclusion || output.structured_report?.summary
         ).toBeTruthy();
         expect(output.conversation?.rounds.length).toBeGreaterThan(0);
-        if (!process.env.NIGHTSHIFT_EXAMPLES_FILE) {
+        if (!process.env.NIGHTSHIFT_EXAMPLES_FILE && !process.env.NIGHTSHIFT_DATASET_ID) {
           assertSuccessfulSandboxCommand(output.conversation?.rounds ?? []);
         }
         expect(output.traceId).toMatch(/^[a-f0-9]{32}$/);

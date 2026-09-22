@@ -27,9 +27,16 @@ describe('Nightshift remote telemetry configuration', () => {
   let fixtureDirectory: string;
   const configDirectories: string[] = [];
 
-  const readServers = () =>
-    jest.requireActual<typeof import('./classic.stateful.config')>('./classic.stateful.config')
-      .servers;
+  const readServers = () => {
+    const servers = jest.requireActual<typeof import('./classic.stateful.config')>(
+      './classic.stateful.config'
+    ).servers;
+    const configPath = servers.kbnTestServer.serverArgs
+      .find((arg) => arg.startsWith('--config='))
+      ?.slice(9);
+    if (configPath) configDirectories.push(dirname(configPath));
+    return servers;
+  };
 
   beforeEach(() => {
     jest.resetModules();
@@ -47,6 +54,7 @@ describe('Nightshift remote telemetry configuration', () => {
     delete process.env.NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL;
     delete process.env.NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY;
     delete process.env.NIGHTSHIFT_SANDBOX_READABLE_INDICES;
+    delete process.env.NIGHTSHIFT_CONCURRENCY;
   });
 
   afterEach(() => {
@@ -73,7 +81,6 @@ describe('Nightshift remote telemetry configuration', () => {
     const configPath = serverArgs.find((arg) => arg.startsWith('--config='))?.slice(9);
     expect(configPath).toBeDefined();
     if (!configPath) throw new Error('Missing private runtime configuration');
-    configDirectories.push(dirname(configPath));
     const privateConfig = JSON.parse(readFileSync(configPath, 'utf8'));
 
     expect(statSync(configPath).mode.toString(8).slice(-3)).toBe('600');
@@ -97,6 +104,16 @@ describe('Nightshift remote telemetry configuration', () => {
       telemetry_connector_id: 'nightshift-evals-telemetry',
       telemetry_readable_indices: 'Read remote-a:logs-service-*',
     });
+  });
+
+  it('reserves capacity for sixteen normal workflow tasks plus background tasks', () => {
+    process.env.NIGHTSHIFT_CONCURRENCY = '16';
+    expect(readServers().kbnTestServer.serverArgs).toContain('--xpack.task_manager.capacity=42');
+  });
+
+  it.each(['0', '21', '1.5', 'invalid'])('rejects unsupported concurrency %s', (value) => {
+    process.env.NIGHTSHIFT_CONCURRENCY = value;
+    expect(readServers).toThrow('NIGHTSHIFT_CONCURRENCY must be an integer between 1 and 20');
   });
 
   it.each([

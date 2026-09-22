@@ -64,9 +64,14 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
   ) {}
 
   private async resolveDataset(
-    dataset: EvaluationDataset,
+    dataset: EvaluationDataset | EvaluationDatasetWithId,
     trustUpstreamDataset: boolean
   ): Promise<{ dataset: EvaluationDataset; upstreamId?: string }> {
+    if (dataset.id !== undefined) {
+      if (!dataset.id) throw new Error('Stored dataset id must not be empty');
+      const { id, ...storedDataset } = dataset;
+      return { dataset: storedDataset, upstreamId: id };
+    }
     if (!trustUpstreamDataset) {
       return { dataset };
     }
@@ -98,7 +103,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
   }
 
   async runExperiment<
-    TEvaluationDataset extends EvaluationDataset,
+    TEvaluationDataset extends EvaluationDataset | EvaluationDatasetWithId,
     TTaskOutput extends TaskOutput = TaskOutput
   >(
     {
@@ -140,7 +145,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
   }
 
   private async runSingleDatasetExperiment<
-    TEvaluationDataset extends EvaluationDataset,
+    TEvaluationDataset extends EvaluationDataset | EvaluationDatasetWithId,
     TTaskOutput extends TaskOutput = TaskOutput
   >(
     {
@@ -165,7 +170,8 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
         dataset,
         trustUpstreamDataset
       );
-      const upsertedId = await this.options.upsertDataset?.(resolvedDataset);
+      const upsertedId =
+        dataset.id === undefined ? await this.options.upsertDataset?.(resolvedDataset) : undefined;
 
       // Scores are stamped with this id, so it has to be the one the server
       // stored the dataset under. Deriving it locally is a last resort: ids

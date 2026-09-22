@@ -3,7 +3,7 @@
 Evaluation suite for [Nightshift investigations](../../plugins/nightshift_investigations).
 
 The default smoke eval checks seed data loading and score ingestion. An explicitly selected
-trace-only eval runs the real manual investigation workflow on file-based questions and persists
+trace-only eval runs the real manual investigation workflow on file-based or stored questions and persists
 its report, conversation and full agent trace. Its single placeholder score is **ungraded**; it
 does not measure investigation quality or establish execution success.
 
@@ -72,7 +72,7 @@ Recovered tool errors remain visible in the evidence. Trace acceptance checks th
 payloads, including model calls rejected by schema validation before tool execution.
 The bundled synthetic cases also require a successful sandbox command (exit code zero), so an
 unavailable sandbox cannot pass acceptance. The calculation output and investigation answer stay
-ungraded; this fixture-specific execution check does not apply to custom dataset files.
+ungraded; this fixture-specific execution check does not apply to custom files or stored datasets.
 
 The default [synthetic file](evals/investigation/synthetic.json) contains two public fictional
 incidents. Their questions contain all evidence and request a sandbox calculation, so no telemetry
@@ -129,16 +129,46 @@ investigation, conversation and trace IDs for sharing. Inspect them in the evalu
 Historical full-grader runs are not acceptance evidence for this runner. Graders, native trace
 metrics, automatic provisioning and generalized CI defaults are deferred.
 
-Stop and restart the managed stack before switching between smoke and trace-only selections,
-changing any `SANDBOX_*` variable, or changing certificate/key file contents. The native CLI caches
-Scout by config-set name and does not detect those startup inputs; automatic freshness detection
-is a separate follow-up. Use `evals run` to repeat a run with unchanged startup settings. Plain
+Stop and restart the managed stack after changing any `SANDBOX_*` variable or certificate/key
+file contents. The native CLI does not detect those startup inputs; automatic freshness detection
+for sandbox credentials is a separate follow-up. Use `evals run` to repeat a run with unchanged startup settings. Plain
 `start` and CI keep the original smoke selection and `evals_tracing` behavior, without requiring
 sandbox credentials.
 
+## Stored investigation datasets and concurrency
+
+Select an existing evaluations dataset directly by its UI ID:
+
+```bash
+node scripts/evals start --suite nightshift-investigations --profile golden \
+  --dataset-id <dataset-id> --concurrency 16 --repetitions 1 \
+  --model openrouter-anthropic-claude-sonnet-4-6 \
+  --judge openrouter-anthropic-claude-sonnet-4-6
+```
+
+`--dataset-id` selects trace-only investigations and reads the dataset from the results profile's
+Kibana, in the first `--space-ids` Space (default: `default`). It preserves the original dataset
+and example IDs, labels, tags and metadata without updating the stored dataset. Its examples
+must satisfy the same question and distinct `case_id` requirements as a file. Do not combine it
+with `NIGHTSHIFT_EXAMPLES_FILE`. The dataset's telemetry source still needs the sandbox and remote
+telemetry settings below; selecting a dataset does not provision its source data.
+
+`--concurrency` also selects trace-only investigations. It defaults to 2 and accepts integers
+from 1 to 20. The managed stack allocates two Task Manager capacity units per concurrent workflow
+plus ten units for background tasks: concurrency 16 sets `xpack.task_manager.capacity=42`.
+The workflow executes its agent inline, without a second Task Manager task. The upper bound keeps
+capacity within Kibana's supported maximum of 50. The test timeout scales with the number of
+example/repetition batches and the existing 20-minute investigation deadline.
+
+Both flags work with `start` and `run`. Prefer `start` after changing concurrency: it restarts
+Scout when concurrency or smoke/trace-only selection changes. `run` and `start --skip-server`
+use your existing stack, whose Task Manager capacity you must configure yourself. Wait for any
+active eval to finish before restarting a shared local stack. Environment equivalents are
+`NIGHTSHIFT_DATASET_ID` and `NIGHTSHIFT_CONCURRENCY` (with `NIGHTSHIFT_DATASETS=trace-only`).
+
 ## Remote telemetry investigations
 
-Use the same `trace-only` selection, file loader, investigation task, placeholder evaluator and
+Use the same `trace-only` selection, dataset loader, investigation task, placeholder evaluator and
 trace acceptance checks to investigate an operator-configured Elasticsearch cluster. The telemetry
 source is independent of the evaluations profile: the sandbox queries the remote cluster, while
 the profile still selects where experiment results and agent traces are persisted.
