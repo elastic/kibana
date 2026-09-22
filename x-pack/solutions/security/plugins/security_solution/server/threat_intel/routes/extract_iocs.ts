@@ -5,21 +5,15 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import { EXTRACT_IOCS_API_PATH } from '../../../common/threat_intel';
+import {
+  EXTRACT_IOCS_API_PATH,
+  extractIocsBodySchema,
+  extractIocsResponseSchema,
+  EXTRACT_IOCS_MAX_BODY_BYTES,
+} from '../../../common/threat_intel';
 import { extractIocs } from '../services';
 import { THREAT_INTEL_WRITE_AUTHZ } from './lib/authz';
 import type { RouteRegistrationDeps } from '.';
-
-const extractIocsBodySchema = schema.object({
-  // Bounded plain text only. Callers pass `content.body_text`; no HTML is accepted
-  // or converted here.
-  text: schema.string({ minLength: 1, maxLength: 5_000_000 }),
-  defang: schema.maybe(schema.boolean()),
-});
-
-// Bounded plain-text bodies can exceed Kibana's default 1 MiB cap; 10 MiB matches other large-text internal routes.
-const EXTRACT_IOCS_MAX_BODY_BYTES = 10 * 1024 * 1024;
 
 /**
  * Public route for the `extract_iocs` domain action.
@@ -43,7 +37,10 @@ export const registerExtractIocsRoute = ({ router, logger }: RouteRegistrationDe
     .addVersion(
       {
         version: '1',
-        validate: { request: { body: extractIocsBodySchema } },
+        validate: {
+          request: { body: extractIocsBodySchema },
+          response: { 200: { body: () => extractIocsResponseSchema } },
+        },
       },
       async (_context, request, response) => {
         try {

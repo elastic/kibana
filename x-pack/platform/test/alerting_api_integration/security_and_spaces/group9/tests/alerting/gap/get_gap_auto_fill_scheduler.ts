@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { UserAtSpaceScenarios } from '../../../../scenarios';
+import { UserAtSpaceScenarios, SuperuserAtSpace1 } from '../../../../scenarios';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getUrlPrefix } from '../../../../../common/lib';
 
@@ -84,29 +84,28 @@ export default function getGapAutoFillSchedulerTests({ getService }: FtrProvider
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
           }
         });
-
-        it('returns 404 for non-existent id when authorized', async () => {
-          if (
-            ![
-              'superuser at space1',
-              'space_1_all at space1',
-              'space_1_all_alerts_none_actions at space1',
-              'space_1_all_with_restricted_fixture at space1',
-            ].includes(scenario.id)
-          ) {
-            return;
-          }
-
-          const resp = await supertestWithoutAuth
-            .get(
-              `${getUrlPrefix(
-                apiOptions.spaceId
-              )}/internal/alerting/rules/gaps/auto_fill_scheduler/does-not-exist`
-            )
-            .auth(apiOptions.username, apiOptions.password);
-          expect(resp.statusCode).to.eql(404);
-        });
       });
     }
+
+    // Lookup of a missing scheduler does not vary by role, so it runs once.
+    describe(`${SuperuserAtSpace1.id} (runs once)`, () => {
+      const { user, space } = SuperuserAtSpace1;
+      const apiOptions = {
+        spaceId: space.id,
+        username: user.username,
+        password: user.password,
+      };
+
+      it('returns 404 for non-existent id when authorized', async () => {
+        const resp = await supertestWithoutAuth
+          .get(
+            `${getUrlPrefix(
+              apiOptions.spaceId
+            )}/internal/alerting/rules/gaps/auto_fill_scheduler/does-not-exist`
+          )
+          .auth(apiOptions.username, apiOptions.password);
+        expect(resp.statusCode).to.eql(404);
+      });
+    });
   });
 }

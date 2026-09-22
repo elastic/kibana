@@ -1191,6 +1191,7 @@ x-pack/platform/plugins/private/data_usage @elastic/kibana-management
 x-pack/platform/plugins/private/data_visualizer @elastic/search-ml-ux
 x-pack/platform/plugins/private/discover_enhanced @elastic/kibana-discover
 x-pack/platform/plugins/private/drilldowns/url_drilldown @elastic/kibana-dashboards
+x-pack/platform/plugins/private/esql_views @elastic/kibana-management
 x-pack/platform/plugins/private/feedback @elastic/appex-sharedux
 x-pack/platform/plugins/private/file_upload @elastic/kibana-dashboards @elastic/search-ml-ux
 x-pack/platform/plugins/private/gen_ai_settings @elastic/search-ml-ux
@@ -1276,6 +1277,7 @@ x-pack/platform/plugins/shared/maps @elastic/kibana-dashboards
 x-pack/platform/plugins/shared/ml @elastic/search-ml-ux
 x-pack/platform/plugins/shared/ml/evals @elastic/search-ml-ux
 x-pack/platform/plugins/shared/nightshift_investigations @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
+x-pack/platform/plugins/shared/nightshift_sources @elastic/nightshift-sre-agent-team
 x-pack/platform/plugins/shared/notification_center @elastic/search-ml-ux
 x-pack/platform/plugins/shared/notifications @elastic/appex-sharedux
 x-pack/platform/plugins/shared/observability_ai_assistant @elastic/nightshift-context-and-research-team
@@ -3415,6 +3417,7 @@ x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/securi
 /x-pack/solutions/security/plugins/security_solution/test/scout/workflows/ui/parallel_tests/create_rule_exception.spec.ts @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/test/scout/workflows/ui/parallel_tests/create_exception_list_item.spec.ts @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/test/scout/workflows/api/ @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/test/scout_managed_mitre @elastic/security-detection-engineering
 
 /x-pack/solutions/security/plugins/security_solution/scripts/openapi @elastic/security-detection-engineering
 
@@ -3759,6 +3762,7 @@ x-pack/platform/plugins/shared/anonymization/server/saved_objects/register_anony
 x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts @elastic/streams-ui @elastic/kibana-security
 x-pack/solutions/observability/plugins/synthetics/server/saved_objects/saved_objects.ts @elastic/obs-signals-logs-team @elastic/kibana-security
 x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetics_monitor/legacy_synthetics_monitor.ts @elastic/obs-signals-logs-team @elastic/kibana-security
+x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetics_monitor/synthetics_monitor_config.ts @elastic/obs-signals-logs-team @elastic/kibana-security
 x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetics_param.ts @elastic/obs-signals-logs-team @elastic/kibana-security
 
 # OpenTelemetry semantic conventions Buildkite pipeline and scripts
