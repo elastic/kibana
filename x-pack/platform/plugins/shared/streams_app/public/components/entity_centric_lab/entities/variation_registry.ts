@@ -144,7 +144,7 @@ export type DashboardStyleVariation = 'embedded' | 'list';
 export const DASHBOARD_STYLE_DIMENSION: VariationDimension = {
   id: 'dashboardStyle',
   label: 'Dashboard style',
-  defaultOption: 'embedded',
+  defaultOption: 'list',
   options: [
     {
       id: 'embedded',

@@ -867,6 +867,17 @@ const AllEntitiesViewInner = ({
   // entity query is per-view, not a preference.
   const [activeTagFilters, setActiveTagFilters] = useEntitiesTagFilters();
   const [viewMode, setViewMode] = useEntitiesViewMode();
+
+  // Step 3 ("Color by") is anchored to a ColorByPopover inside
+  // GroupedGridView, which only renders in hex-map mode. If the user
+  // is in list view, auto-skip to step 4 so the tour doesn't vanish.
+  // Placed after `viewMode` to avoid a temporal dead zone reference.
+  useEffect(() => {
+    if (isTourActive && tourStep === 3 && viewMode !== 'grid') {
+      setTourStep(4);
+    }
+  }, [isTourActive, tourStep, viewMode]);
+
   // ElasticOn "Group by" (1–3 fields). Non-ElasticOn modes never surface the
   // control, so this stays at the built-in Category → Type default there.
   const [groupBy, setGroupBy] = useEntitiesGroupBy();
@@ -1076,16 +1087,24 @@ const AllEntitiesViewInner = ({
   // mirrors the parent so the stable `openEntity` callback can decide, without
   // re-creating on every selection change, whether a click should open the
   // parent (nothing open yet) or a child (parent already open).
-  // Restore flyout when returning from a full-page expand (back-navigation
-  // puts `flyoutEntity=<name>` back into the URL).
+  // Restore flyout from URL: `?flyoutEntity=` comes from back-navigation
+  // after full-page expand; `?entity=` is the deep-link param for sharing.
+  // An optional `?tab=` deep-links to a specific flyout tab.
   const [selectedEntityName, setSelectedEntityName] = useState<string | null>(() => {
     const params = new URLSearchParams(location.search);
-    const restored = params.get('flyoutEntity');
-    if (restored) {
-      // Clean the query param so it doesn't stick around on subsequent
-      // navigations / refreshes.
+    const restored = params.get('flyoutEntity') ?? params.get('entity');
+    if (params.has('flyoutEntity')) {
       params.delete('flyoutEntity');
       history.replace({ ...location, search: params.toString() });
+    }
+    // Seed the flyout tab from the URL so the flyout opens on the right tab.
+    const tabParam = params.get('tab');
+    if (restored && tabParam) {
+      try {
+        sessionStorage.setItem('entityCentricLab_activeTab', tabParam);
+      } catch {
+        // ignore
+      }
     }
     return restored;
   });
@@ -1432,8 +1451,12 @@ const AllEntitiesViewInner = ({
       setSelectedEntityName(entityName);
       setChildEntityName(null);
       setChildEntityContext(null);
+      // Sync to URL so the deep-link is shareable.
+      const params = new URLSearchParams(location.search);
+      params.set('entity', entityName);
+      history.replace({ ...location, search: params.toString() });
     },
-    [isEntityOpenable, detailVariation, router]
+    [isEntityOpenable, detailVariation, router, location, history]
   );
 
   // Selecting an entity from *inside* a flyout (Dependencies row, etc.)
@@ -1460,7 +1483,9 @@ const AllEntitiesViewInner = ({
     (currentTab?: string) => {
       if (!selectedEntityName) return;
       // Stamp the current URL so the flyout re-opens on back-navigation.
+      // Remove the deep-link `entity` param — `flyoutEntity` takes over.
       const params = new URLSearchParams(location.search);
+      params.delete('entity');
       params.set('flyoutEntity', selectedEntityName);
       history.replace({ ...location, search: params.toString() });
 
@@ -1490,7 +1515,13 @@ const AllEntitiesViewInner = ({
     setSelectedEntityName(null);
     setChildEntityName(null);
     setChildEntityContext(null);
-  }, []);
+    // Remove the deep-link param so the flyout doesn't re-open on refresh.
+    const params = new URLSearchParams(location.search);
+    if (params.has('entity')) {
+      params.delete('entity');
+      history.replace({ ...location, search: params.toString() });
+    }
+  }, [location, history]);
   const closeChildEntity = useCallback(() => {
     setChildEntityName(null);
     setChildEntityContext(null);
@@ -1528,8 +1559,14 @@ const AllEntitiesViewInner = ({
       setSelectedEntityName(null);
       setChildEntityName(null);
       setChildEntityContext(null);
+      // Clean up the deep-link param when closing via "Add to filter".
+      const params = new URLSearchParams(location.search);
+      if (params.has('entity')) {
+        params.delete('entity');
+        history.replace({ ...location, search: params.toString() });
+      }
     },
-    [k8sClusterNames]
+    [k8sClusterNames, location, history]
   );
 
   // Clicking a region on the Geomap toggles that region into the shared
