@@ -27,7 +27,7 @@ All reporting is gated on the `contextEngine:enabled` advanced setting. KI workf
 | `context_engine_ki_delete` | The `context-engine.deleteKi` workflow step deletes a KI document, or fails to. |
 | `context_engine_ki_verification` | The `context-engine.verifyKi` workflow step completes a verifier run, or fails to. |
 
-The AI index HTTP routes are not instrumented. Their ECS audit events in `server/routes/audit_events.ts` remain the record of AI index reads and writes.
+The AI index HTTP routes are not instrumented. Their ECS audit events in `server/audit/audit_events.ts` remain the record of AI index reads and writes.
 
 A cancelled workflow run reports `outcome: aborted` instead of `failure`, keyed off the error itself (`RequestAbortedError`/`AbortError`) so a genuine error still reports as a failure even when the signal is already aborted. Aborted events carry no `error_type`.
 
@@ -49,7 +49,10 @@ A cancelled workflow run reports `outcome: aborted` instead of `failure`, keyed 
 | `outcome` | The run outcome: `success` (verification completed, pass or fail), `failure` (the run errored), or `aborted` when the run was cancelled. |
 | `passed` | Whether every applicable verifier passed. A throwing verifier counts as a failure. Present when the run completed. |
 | `verifiers_run` | Number of verifiers that ran; `0` means the KI had nothing to verify, so those passes can be filtered out. Present when the run completed. |
-| `failed_verifier_ids` | Failing verifier ids, verbatim. Present only when a completed run failed verification. |
+| `failed_verifier_ids` | Distinct failing verifier ids: built-in ids verbatim (e.g. `esql-valid-syntax`), custom verifier workflows as `workflow:<workflow_id>` (e.g. `workflow:ki-has-title`). Present only when a completed run failed verification. |
+| `failed_workflow_verifier_count` | Number of custom verifier workflows that failed. Present when at least one custom verifier failed. |
+| `workflow_id` | The id of the workflow that ran this verification step. |
+| `ai_index_id` | The AI index the KI belongs to, when provided by the caller. |
 | `error_type` | As in KI write events. Present only on `failure`. |
 
 ## Logs

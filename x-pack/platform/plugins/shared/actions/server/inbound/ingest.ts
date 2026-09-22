@@ -24,6 +24,7 @@ import {
 import { logInboundIngressOutcome } from './log_inbound_ingress_outcome';
 import type { ConnectorEventEmitParams, DispatchConnectorEventsResult } from './types';
 import { extractIngestToken, verifyIngestToken } from './verify_ingress_auth';
+import { loadIngressCredential, parseIngestToken } from './ingress_credential';
 import { loadInboundConnector } from './load_inbound_connector';
 import { validateSpokeHttpHeaders } from './spoke_http';
 
@@ -136,27 +137,28 @@ export async function ingestInboundEvent({
     return { status: 'not_found' };
   }
 
-  const ingestTokenHash =
-    typeof connector.config.ingestTokenHash === 'string'
-      ? connector.config.ingestTokenHash
-      : undefined;
-  if (typeof ingestTokenHash !== 'string' || ingestTokenHash.length === 0) {
-    logInboundIngressOutcome(logger, { ...baseLog, outcome: 'auth_fail' });
-    return { status: 'not_found' };
-  }
-
-  // Query is validated by the route schema before ingest runs.
   const providedToken = extractIngestToken({
     query,
     headers,
   });
+  const parsedToken = providedToken ? parseIngestToken(providedToken) : undefined;
+  if (!providedToken || !parsedToken) {
+    logInboundIngressOutcome(logger, { ...baseLog, outcome: 'auth_fail' });
+    return { status: 'not_found' };
+  }
+
+  const credential = await loadIngressCredential({
+    unsecuredSavedObjectsClient,
+    credentialId: parsedToken.credentialId,
+    connectorId,
+  });
   if (
-    !providedToken ||
+    !credential ||
     !verifyIngestToken({
       connectorId,
       spaceId,
       providedToken,
-      ingestTokenHash,
+      ingestTokenHash: credential.ingestTokenHash,
     })
   ) {
     logInboundIngressOutcome(logger, { ...baseLog, outcome: 'auth_fail' });

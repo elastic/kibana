@@ -803,7 +803,7 @@ export const getAlertAnalysisWorkflowSettings = (): SettingsConfig => ({
     name: i18n.translate('xpack.securitySolution.uiSettings.alertAnalysisWorkflowEnabledLabel', {
       defaultMessage: 'Enable alert analysis workflow',
     }),
-    value: true,
+    value: false,
     description: i18n.translate(
       'xpack.securitySolution.uiSettings.alertAnalysisWorkflowEnabledDescription',
       {
