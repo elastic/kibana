@@ -49,6 +49,11 @@ jest.mock('../hooks/use_monitor_list', () => ({
   useMonitorList: () => mockUseMonitorList(),
 }));
 
+jest.mock('../../common/app_header', () => ({
+  MonitorsListingPage: ({ children }: { children: React.ReactNode }) => children,
+  SyntheticsHeaderToolbar: () => null,
+}));
+
 jest.mock('../../../hooks', () => ({
   useEnablement: jest.fn(() => ({
     isEnabled: true,
@@ -87,6 +92,10 @@ jest.mock('../../common/alerting_callout/alerting_callout', () => ({
 
 jest.mock('../common/monitor_filters/filter_group', () => ({
   FilterGroup: () => null,
+}));
+
+jest.mock('../common/monitor_filters/selected_filter_pills', () => ({
+  SelectedFilterPills: () => null,
 }));
 
 jest.mock('../common/search_field', () => ({

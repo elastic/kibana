@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { ServiceFlyoutTransactionsSection } from '@kbn/apm-ui-shared';
 import type { ServiceFlyoutService } from '..';
@@ -51,6 +51,27 @@ jest.mock('./lens_chart', () => ({
   ServiceFlyoutLensChart: () => <div data-test-subj="lensChartMock" />,
 }));
 
+const mockTransactionDetailFlyoutProps = jest.fn();
+jest.mock('../../transaction_detail_flyout', () => ({
+  TransactionDetailFlyout: (props: {
+    filters: { transactionName: string };
+    onClose: () => void;
+    preferDocumentBasedCharts?: boolean;
+    schema?: string;
+    indices?: unknown;
+    deps: { lens?: unknown; dataViews?: unknown };
+  }) => {
+    mockTransactionDetailFlyoutProps(props);
+    return (
+      <div data-test-subj="transactionDetailFlyoutMock">
+        <span>{props.filters.transactionName}</span>
+        <button type="button" onClick={props.onClose}>
+          close
+        </button>
+      </div>
+    );
+  },
+}));
 const mockServiceFlyoutApmCharts = jest.fn((_props: unknown) => (
   <div data-test-subj="apmChartsMock" />
 ));
@@ -68,11 +89,13 @@ function buildContextValue({
   schema = 'ecs' as const,
   filters = {},
   preferDocumentBasedCharts,
+  transactionType = 'request',
 }: {
   refreshToken?: number;
   schema?: 'ecs' | 'otel' | 'unknown';
   filters?: Record<string, unknown>;
   preferDocumentBasedCharts?: boolean;
+  transactionType?: string;
 } = {}) {
   return {
     preferDocumentBasedCharts,
@@ -87,6 +110,7 @@ function buildContextValue({
     },
     service,
     indices: null,
+    flyoutHistoryKey: Symbol('test-service-flyout-history'),
     capabilities: {
       loading: false,
       error: undefined,
@@ -101,7 +125,7 @@ function buildContextValue({
       rangeFrom: 'now-15m',
       rangeTo: 'now',
       setRange: jest.fn(),
-      transactionType: 'request',
+      transactionType,
       setTransactionType: jest.fn(),
       refreshToken,
       onRefresh: jest.fn(),
@@ -110,8 +134,20 @@ function buildContextValue({
   };
 }
 
-function renderOverview({ refreshToken }: { refreshToken?: number } = {}) {
-  mockUseServiceFlyoutContext.mockReturnValue(buildContextValue({ refreshToken }));
+function renderOverview({
+  refreshToken,
+  transactionType,
+  preferDocumentBasedCharts,
+  schema,
+}: {
+  refreshToken?: number;
+  transactionType?: string;
+  preferDocumentBasedCharts?: boolean;
+  schema?: 'ecs' | 'otel' | 'unknown';
+} = {}) {
+  mockUseServiceFlyoutContext.mockReturnValue(
+    buildContextValue({ refreshToken, transactionType, preferDocumentBasedCharts, schema })
+  );
   return render(
     <IntlProvider locale="en">
       <ServiceFlyoutOverview />
@@ -355,6 +391,105 @@ describe('ServiceFlyoutOverview transactions section props', () => {
     expect(transactionsSectionProps?.refreshToken).toBe(42);
   });
 
+  it('opens TransactionDetailFlyout when a transaction name is clicked', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    renderOverview({ preferDocumentBasedCharts: true, schema: 'ecs' });
+
+    expect(screen.queryByTestId('transactionDetailFlyoutMock')).not.toBeInTheDocument();
+    expect(transactionsSectionProps?.onTransactionClick).toEqual(expect.any(Function));
+    expect(transactionsSectionProps?.isTransactionExpanded).toEqual(expect.any(Function));
+
+    act(() => {
+      transactionsSectionProps!.onTransactionClick!({
+        name: 'GET /api/orders',
+        transactionType: 'request',
+        latency: { value: 1 },
+        throughput: { value: 1 },
+        errorRate: { value: 0 },
+      });
+    });
+
+    expect(screen.getByTestId('transactionDetailFlyoutMock')).toHaveTextContent('GET /api/orders');
+    expect(mockTransactionDetailFlyoutProps).toHaveBeenCalledWith(
+      expect.objectContaining({
+        preferDocumentBasedCharts: true,
+        schema: 'ecs',
+        indices: null,
+        deps: expect.objectContaining({
+          lens: undefined,
+          dataViews: undefined,
+        }),
+      })
+    );
+    expect(
+      transactionsSectionProps!.isTransactionExpanded!({
+        name: 'GET /api/orders',
+        transactionType: 'request',
+        latency: { value: 1 },
+        throughput: { value: 1 },
+        errorRate: { value: 0 },
+      })
+    ).toBe(true);
+  });
+
+  it('closes TransactionDetailFlyout when the same transaction is clicked again', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    renderOverview();
+
+    const item = {
+      name: 'GET /api/orders',
+      transactionType: 'request',
+      latency: { value: 1 },
+      throughput: { value: 1 },
+      errorRate: { value: 0 },
+    };
+
+    act(() => {
+      transactionsSectionProps!.onTransactionClick!(item);
+    });
+    expect(screen.getByTestId('transactionDetailFlyoutMock')).toBeInTheDocument();
+
+    act(() => {
+      transactionsSectionProps!.onTransactionClick!(item);
+    });
+    expect(screen.queryByTestId('transactionDetailFlyoutMock')).not.toBeInTheDocument();
+  });
+
+  it('does not open TransactionDetailFlyout when transaction type is missing', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    renderOverview({ transactionType: '' });
+
+    act(() => {
+      transactionsSectionProps!.onTransactionClick!({
+        name: 'GET /api/orders',
+        latency: { value: 1 },
+        throughput: { value: 1 },
+        errorRate: { value: 0 },
+      });
+    });
+
+    expect(screen.queryByTestId('transactionDetailFlyoutMock')).not.toBeInTheDocument();
+  });
+
+  it('closes TransactionDetailFlyout when onClose is called', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    const { getByRole, queryByTestId } = renderOverview();
+
+    act(() => {
+      transactionsSectionProps!.onTransactionClick!({
+        name: 'GET /api/orders',
+        latency: { value: 1 },
+        throughput: { value: 1 },
+        errorRate: { value: 0 },
+      });
+    });
+
+    expect(queryByTestId('transactionDetailFlyoutMock')).toBeInTheDocument();
+    act(() => {
+      getByRole('button', { name: 'close' }).click();
+    });
+    expect(queryByTestId('transactionDetailFlyoutMock')).not.toBeInTheDocument();
+  });
   it('forwards projectRouting to ServiceFlyoutTransactionsSection', () => {
     mockUseProjectRouting.mockReturnValue('_alias:*');
     mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });

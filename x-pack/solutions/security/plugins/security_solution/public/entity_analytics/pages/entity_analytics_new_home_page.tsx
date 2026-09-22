@@ -11,6 +11,7 @@ import { EuiLoadingSpinner, EuiPanel, EuiSpacer, useEuiTheme } from '@elastic/eu
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
+import { PageLoader } from '../../common/components/page_loader';
 import { SecurityPageName } from '../../app/types';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { EntitySearchBar } from '../components/home/entity_search_bar';
@@ -20,6 +21,8 @@ import { useSpaceId } from '../../common/hooks/use_space_id';
 import { useGlobalFilterQuery } from '../../common/hooks/use_global_filter_query';
 import { useEntityStoreDataView } from '../components/home/use_entity_store_data_view';
 import { DataViewErrorComponent } from '../../common/components/data_view_error';
+import { useEntityStoreStatus } from '../components/entity_store/hooks/use_entity_store';
+import { EntityStoreDisabledEmptyPrompt } from './entity_store_disabled_empty_prompt';
 import { useGetWatchlists } from '../api/hooks/use_get_watchlists';
 import { useErrorToast } from '../../common/hooks/use_error_toast';
 import { useTimeRangeParam } from '../components/home/use_time_range_param';
@@ -276,8 +279,15 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     [dataView, isDataViewLoading]
   );
 
-  if (isDataViewLoading) return <EuiLoadingSpinner size="l" />;
+  const { data: entityStoreStatusData } = useEntityStoreStatus();
+  const entityStoreDisabled =
+    entityStoreStatusData?.status === 'not_installed' ||
+    entityStoreStatusData?.status === 'stopped';
+  const entityStoreInstalling = entityStoreStatusData?.status === 'installing';
+
+  if (isDataViewLoading || entityStoreInstalling) return <EuiLoadingSpinner size="l" />;
   if (isDataViewError) return <DataViewErrorComponent />;
+  if (entityStoreDisabled) return <EntityStoreDisabledEmptyPrompt />;
 
   return (
     <>

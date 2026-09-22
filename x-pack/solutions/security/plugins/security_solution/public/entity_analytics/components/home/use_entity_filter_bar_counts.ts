@@ -13,7 +13,11 @@ import type {
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import { SEVERITY_UI_SORT_ORDER } from '../../common/utils';
-import { ValidCriticalityLevels } from '../../../../common/entity_analytics/asset_criticality/constants';
+import {
+  CriticalityLevelsForBulkUpload,
+  ValidCriticalityLevels,
+} from '../../../../common/entity_analytics/asset_criticality/constants';
+import { RiskSeverity } from '../../../../common/search_strategy';
 import { getEntityAnalyticsEntityTypes } from '../../../../common/entity_analytics/utils';
 import { useKibana } from '../../../common/lib/kibana';
 import { useErrorToast } from '../../../common/hooks/use_error_toast';
@@ -57,6 +61,62 @@ const getResolvedViewFilter = (view: 'resolved' | 'raw') =>
       ]
     : [];
 
+export const buildEntityFilterCountsRequest = ({
+  spaceId,
+  view,
+  filter,
+}: {
+  spaceId: string;
+  view: 'resolved' | 'raw';
+  filter?: QueryDslQueryContainer;
+}) => ({
+  index: [getEntitiesAlias(ENTITY_LATEST, spaceId)],
+  size: 0,
+  query: {
+    bool: {
+      filter: [
+        { terms: { 'entity.EngineMetadata.Type': getEntityAnalyticsEntityTypes() } },
+        ...(filter ? [filter] : []),
+        ...getResolvedViewFilter(view),
+      ],
+    },
+  },
+  aggs: {
+    entity_types: { terms: { field: 'entity.EngineMetadata.Type', size: ENTITY_TYPE_COUNT } },
+    risk_levels: {
+      terms: {
+        field: 'entity.risk.calculated_level',
+        size: SEVERITY_UI_SORT_ORDER.length,
+        missing: RiskSeverity.Unknown,
+      },
+    },
+    asset_criticality: {
+      terms: {
+        field: 'asset.criticality',
+        size: ValidCriticalityLevels.length,
+        missing: CriticalityLevelsForBulkUpload.UNASSIGNED,
+      },
+    },
+    watchlists: { terms: { field: 'entity.attributes.watchlists', size: 200 } },
+    data_sources: { terms: { field: 'entity.source', size: 200 } },
+  },
+});
+
+export const parseEntityFilterCountsResponse = (
+  aggs: Record<string, AggregationsStringTermsAggregate> | undefined
+): EntityFilterBarCounts => ({
+  entity_types: toBucketMap(aggs?.entity_types),
+  risk_levels: toBucketMap(aggs?.risk_levels),
+  asset_criticality: toBucketMap(aggs?.asset_criticality),
+  watchlists: toBucketMap(aggs?.watchlists),
+  data_sources: toBucketMap(aggs?.data_sources),
+});
+
+interface UseEntityFilterBarCountsResult {
+  counts: EntityFilterBarCounts;
+  isLoading: boolean;
+}
+
 export const useEntityFilterBarCounts = ({
   spaceId,
   view,
@@ -65,61 +125,22 @@ export const useEntityFilterBarCounts = ({
   spaceId: string | undefined;
   view: 'resolved' | 'raw';
   filter?: QueryDslQueryContainer;
-}): EntityFilterBarCounts => {
+}): UseEntityFilterBarCountsResult => {
   const { data: dataServices } = useKibana().services;
 
-  const { data, error } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ['entity-filter-aggregations', spaceId, view, filter],
     enabled: !!spaceId,
     keepPreviousData: true,
     queryFn: async (): Promise<EntityFilterBarCounts> => {
-      const index = getEntitiesAlias(ENTITY_LATEST, spaceId as string);
-
       const { rawResponse } = await lastValueFrom(
         dataServices.search.search({
-          params: {
-            index: [index],
-            size: 0,
-            query: {
-              bool: {
-                filter: [
-                  { terms: { 'entity.EngineMetadata.Type': getEntityAnalyticsEntityTypes() } },
-                  ...(filter ? [filter] : []),
-                  ...getResolvedViewFilter(view),
-                ],
-              },
-            },
-            aggs: {
-              entity_types: {
-                terms: { field: 'entity.EngineMetadata.Type', size: ENTITY_TYPE_COUNT },
-              },
-              risk_levels: {
-                terms: {
-                  field: 'entity.risk.calculated_level',
-                  size: SEVERITY_UI_SORT_ORDER.length,
-                },
-              },
-              asset_criticality: {
-                terms: { field: 'asset.criticality', size: ValidCriticalityLevels.length },
-              },
-              watchlists: { terms: { field: 'entity.attributes.watchlists', size: 200 } },
-              data_sources: { terms: { field: 'entity.source', size: 200 } },
-            },
-          },
+          params: buildEntityFilterCountsRequest({ spaceId: spaceId as string, view, filter }),
         })
       );
-
-      const aggs = rawResponse.aggregations as
-        | Record<string, AggregationsStringTermsAggregate>
-        | undefined;
-
-      return {
-        entity_types: toBucketMap(aggs?.entity_types),
-        risk_levels: toBucketMap(aggs?.risk_levels),
-        asset_criticality: toBucketMap(aggs?.asset_criticality),
-        watchlists: toBucketMap(aggs?.watchlists),
-        data_sources: toBucketMap(aggs?.data_sources),
-      };
+      return parseEntityFilterCountsResponse(
+        rawResponse.aggregations as Record<string, AggregationsStringTermsAggregate> | undefined
+      );
     },
   });
 
@@ -130,5 +151,5 @@ export const useEntityFilterBarCounts = ({
     error
   );
 
-  return data ?? EMPTY_FILTER_COUNTS;
+  return { counts: data ?? EMPTY_FILTER_COUNTS, isLoading };
 };
