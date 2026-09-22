@@ -388,6 +388,80 @@ describe('runEsqlMatcherRule', () => {
     expect(mockCascadeLink).toHaveBeenCalledWith('user-cs-1', ['user-cs-2']);
   });
 
+  it('links two unresolved local entities sharing a domain SID with no other namespace', async () => {
+    (mockEsClient.esql.query as jest.Mock)
+      .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
+      .mockResolvedValueOnce(
+        esqlResponse(
+          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'total_n'],
+          [
+            groupRow({
+              matchValue: 'S-1-5-21-111-222-333-1104',
+              unresolvedIds: ['user-local-z', 'user-local-a'],
+              namespaces: ['local'],
+              unresolvedCount: 2,
+            }),
+          ]
+        )
+      );
+    (mockEsClient.search as jest.Mock).mockResolvedValue({
+      hits: {
+        hits: [entityHit('user-local-z', 'local'), entityHit('user-local-a', 'local')],
+      },
+    });
+
+    await runEsqlMatcherRule(
+      createDeps(createInitialState(), mockEsClient, mockResolutionClient, {
+        spec: SID_SPEC,
+        ruleId: RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE,
+      })
+    );
+
+    expect(mockCascadeLink).toHaveBeenCalledWith('user-local-a', ['user-local-z']);
+  });
+
+  it('retargets a local-headed SID group onto Active Directory when the AD user arrives', async () => {
+    mockCascadeLink.mockResolvedValueOnce({
+      linked: ['user-local-a'],
+      retargeted: ['user-local-z'],
+      skipped: [],
+      cascadesBlocked: 0,
+      target_id: 'user-ad',
+    });
+    (mockEsClient.esql.query as jest.Mock)
+      .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
+      .mockResolvedValueOnce(
+        esqlResponse(
+          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'total_n'],
+          [
+            groupRow({
+              matchValue: 'S-1-5-21-111-222-333-1104',
+              unresolvedIds: ['user-ad', 'user-local-a'],
+              namespaces: ['active_directory', 'local'],
+              existingTargets: ['user-local-a'],
+              unresolvedCount: 2,
+            }),
+          ]
+        )
+      );
+    (mockEsClient.search as jest.Mock).mockResolvedValue({
+      hits: {
+        hits: [entityHit('user-ad', 'active_directory'), entityHit('user-local-a', 'local')],
+      },
+    });
+
+    const result = await runEsqlMatcherRule(
+      createDeps(createInitialState(), mockEsClient, mockResolutionClient, {
+        spec: SID_SPEC,
+        ruleId: RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE,
+      })
+    );
+
+    expect(mockCascadeLink).toHaveBeenCalledWith('user-ad', ['user-local-a']);
+    expect(result.lastRun?.resolutionsCreated).toBe(1);
+    expect(result.lastRun?.cascadeRetargeted).toBe(1);
+  });
+
   it('declines a bucket above the group-size ceiling without linking a subset', async () => {
     const logger = loggerMock.create();
     (mockEsClient.esql.query as jest.Mock)

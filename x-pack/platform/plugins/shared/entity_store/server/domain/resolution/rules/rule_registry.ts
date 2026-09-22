@@ -90,7 +90,7 @@ export const RESOLUTION_RULE_CONFIGS: ResolutionRuleConfig[] = [
     id: RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE,
     kind: RESOLUTION_RULE_KINDS.SAME_FIELD,
     description:
-      'Links user entities that share the same SID (`user.id`) to Active Directory, including several `local` Windows or CrowdStrike endpoint users on different hosts. A SID names one account, so duplicates in any namespace are the same account (identifier drift), not a collision. Excludes well-known SIDs such as LocalSystem and Linux numeric UIDs. Needs Windows or CrowdStrike endpoint events (which create `local` user entities) and Active Directory entity analytics. Disable if well-known SID exclusions are not enough for your environment.',
+      'Links user entities that share the same SID (`user.id`) to Active Directory, including several `local` Windows or CrowdStrike endpoint users on different hosts. Windows domain accounts seen on several hosts are linked even before the Active Directory user is ingested; the AD user becomes the target once it arrives. A SID names one account, so duplicates in any namespace are the same account (identifier drift), not a collision. Excludes well-known SIDs such as LocalSystem and Linux numeric UIDs. Needs Windows or CrowdStrike endpoint events (which create `local` user entities) and Active Directory entity analytics. Disable if well-known SID exclusions are not enough for your environment.',
     defaultEnabled: true,
     matcher: {
       field: 'user.id',

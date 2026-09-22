@@ -552,6 +552,66 @@ apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_T
     }
   );
 
+  apiTest(
+    'Windows SID bridge links two local entities sharing a domain SID before the Active Directory user arrives',
+    async ({ apiClient, esClient }) => {
+      const sid = 'S-1-5-21-111-222-333-1105';
+      const localA = 'user:jane-pre-ad@host-a@local';
+      const localB = 'user:jane-pre-ad@host-b@local';
+      const adEntity = 'user:jane-pre-ad@active_directory';
+
+      await seedUserEntity(esClient, {
+        entityId: localA,
+        namespace: 'local',
+        email: 'test-pre-ad-a@sid.example',
+        userId: sid,
+        userName: 'jane-pre-ad',
+      });
+      await seedUserEntity(esClient, {
+        entityId: localB,
+        namespace: 'local',
+        email: 'test-pre-ad-b@sid.example',
+        userId: sid,
+        userName: 'jane-pre-ad',
+      });
+
+      await triggerMaintainerRun(apiClient, internalHeaders);
+      await waitForResolution(esClient, localB, localA);
+
+      const localGroup = await apiClient.get(
+        `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${localA}&apiVersion=2`,
+        { headers: defaultHeaders, responseType: 'json' }
+      );
+      expect(localGroup.statusCode).toBe(200);
+      expect(localGroup.body.group_size).toBe(2);
+      expect(localGroup.body.target.entity.id).toBe(localA);
+      expect(localGroup.body.aliases).toHaveLength(1);
+      expect(localGroup.body.aliases[0].entity.id).toBe(localB);
+
+      await seedUserEntity(esClient, {
+        entityId: adEntity,
+        namespace: 'active_directory',
+        email: 'test-pre-ad-ad@sid.example',
+        userId: sid,
+        userName: 'jane-pre-ad',
+      });
+
+      await triggerMaintainerRun(apiClient, internalHeaders);
+      await waitForResolution(esClient, localA, adEntity);
+      await waitForResolution(esClient, localB, adEntity);
+
+      const adGroup = await apiClient.get(
+        `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${adEntity}&apiVersion=2`,
+        { headers: defaultHeaders, responseType: 'json' }
+      );
+      expect(adGroup.statusCode).toBe(200);
+      expect(adGroup.body.group_size).toBe(3);
+      expect(adGroup.body.target.entity.id).toBe(adEntity);
+      const aliasIds = adGroup.body.aliases.map((a: { entity: { id: string } }) => a.entity.id);
+      expect(aliasIds).toStrictEqual(expect.arrayContaining([localA, localB]));
+    }
+  );
+
   apiTest('Entra GUID bridge links Defender to Entra ID', async ({ apiClient, esClient }) => {
     const guid = 'aa534e49-edfd-4541-8256-8bbf34f122b4';
     const defenderEntity = 'test12-defender';
