@@ -7,7 +7,7 @@
 
 import type { IconType } from '@elastic/eui';
 
-export interface BlastRadiusItemStatus {
+export interface ActionImpactItemStatus {
   label: string;
   /** @default 'check' */
   iconType?: IconType;

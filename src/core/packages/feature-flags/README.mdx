@@ -97,24 +97,36 @@ In general, the recommendation is to check our telemetry to validate the usage o
 
 ## Evaluating feature flags
 
-This service provides 2 ways to evaluate your feature flags, depending on the use case:
+There are 3 typed methods. Each returns an RxJS observable that emits the current value, and again when the flag or evaluation context changes.
 
-1. **Single evaluation**: performs the evaluation once, and doesn't react to updates. These APIs are synchronous in the
-browser, and asynchronous in the server.
-2. **Observed evaluation**: observes the flag for any changes so that the code can adapt. These APIs return an RxJS observable.
+|  Type   | API                                                      |
+|:-------:|:---------------------------------------------------------|
+| Boolean | `core.featureFlags.getBooleanValue$(flagName, fallback)` |
+| String  | `core.featureFlags.getStringValue$(flagName, fallback)`  |
+| Number  | `core.featureFlags.getNumberValue$(flagName, fallback)`  |
 
-Also, the APIs are typed, so you need to use the appropriate API depending on the `variationType` you defined your flag:
+In React, subscribe with `useObservable`:
 
-|  Type   | Single evaluation                                       | Observed evaluation                                      |
-|:-------:|:--------------------------------------------------------|:---------------------------------------------------------|
-| Boolean | `core.featureFlags.getBooleanValue(flagName, fallback)` | `core.featureFlags.getBooleanValue$(flagName, fallback)` |
-| String  | `core.featureFlags.getStringValue(flagName, fallback)`  | `core.featureFlags.getStringValue$(flagName, fallback)`  |
-| Number  | `core.featureFlags.getNumberValue(flagName, fallback)`  | `core.featureFlags.getNumberValue$(flagName, fallback)`  |
+```tsx
+import useObservable from 'react-use/lib/useObservable';
+
+const enabled = useObservable(
+  core.featureFlags.getBooleanValue$('myPlugin.exampleBoolean', false),
+  false // value until the first emission
+);
+```
+
+On the server (and in non-React browser code), subscribe directly:
+
+```ts
+core.featureFlags.getBooleanValue$('myPlugin.exampleBoolean', false).subscribe((enabled) => {
+  // adapt to the current value
+});
+```
 
 ### Request handler context
 
-Additionally, to make things easier in our HTTP handlers, the _Single evaluation_ APIs are available as part of the core
-context provided to the handlers:
+In HTTP handlers, evaluate flags from the core request context:
 
 ```typescript
 async (context, request, response) => {
@@ -124,7 +136,7 @@ async (context, request, response) => {
       number: await featureFlags.getNumberValue('myPlugin.exampleNumber', 1),
     },
   });
-}
+};
 ```
 
 ## Extending the evaluation context

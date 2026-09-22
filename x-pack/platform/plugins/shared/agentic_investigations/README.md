@@ -2,7 +2,7 @@
 
 Solution-agnostic base layer for the entities an agent and a human collaborate on. It owns their storage, their API, and their workflow steps, so a Worker in any solution can create them and any solution's UI can act on them.
 
-Today it holds one entity, **proposals**. **Investigations** and **incidents** are next, which is why the plugin is an umbrella rather than one plugin per entity.
+Today it holds two entities: **proposals** and **escalations**. **Investigations** are next, which is why the plugin is an umbrella rather than one plugin per entity.
 
 Consumed by AlertZero (Security) and intended for Nightshift (Observability). Nothing in this plugin is solution-specific.
 
@@ -39,9 +39,29 @@ One Kibana feature, `agenticInvestigations`, shown in the Roles and Spaces picke
 | `all`             | `read_proposals`, `manage_proposals` | `showProposals`, `decideProposals`   |
 | `read`            | `read_proposals`                     | `showProposals`                      |
 
-So `read` can see the queue but cannot decide it. Because there are no sub-feature privileges to withhold, `minimal_all` and `minimal_read` grant the same as `all` and `read`. The feature carries `minimumLicense: 'enterprise'`.
+So `read` can see the queue but cannot decide it. The feature carries `minimumLicense: 'enterprise'`.
 
-When a second entity lands and needs to be grantable on its own, its capabilities belong in a sub-feature pulled up through `includeIn` rather than in more inline privileges.
+**Note:** `minimal_all` and `minimal_read` are **not** equivalent to `all` and `read`. Incidents landed as a sub-feature (see below), and sub-feature privileges are included in the base privilege levels through `includeIn: 'all'` / `includeIn: 'read'` — but `minimal_all` and `minimal_read` only grant sub-features marked `groupType: 'independent'` when the user holds them explicitly. Any new entity should follow the same pattern: put its capabilities in a sub-feature with `includeIn` rather than in additional inline privileges.
+
+### Three questions, three places
+
+Conflating these is how proposal authorization goes wrong, so each is enforced somewhere different.
+
+| Question | Principal | Enforced by | On refusal |
+| --- | --- | --- | --- |
+| May this HTTP caller decide? | The request | `requiredPrivileges` on the route | Synchronous `403` — the only place a human can be told |
+| May this resumer decide *this* proposal? | The approver, which post-gate is the execution identity | `proposals.checkDecidePrivileges`, **after the gate and before any write** | Returns `false`; the gate workflow re-parks for someone who can |
+| May this execution write proposals at all? | The Worker running the step | An assert **inside each writing step** | Fails the step; a Worker without the privilege is a misconfiguration, not something to retry |
+
+**Ordering is load-bearing.** The boolean check must precede every write inside the decision loop. If a write came first and failed instead, the gate would already be claimed and spent, the workflow would fail, and the proposal would strand with no way for a privileged approver to retry.
+
+All checks **fail closed**, including when the `security` plugin is absent entirely: without it there is no principal to evaluate, and a workflow that cannot be attributed must not write. Workflows cannot execute steps without an identity, so an absent principal is a bug rather than a normal path.
+
+**Not in the service.** The service is reached from routes (already gated declaratively), from steps (principal is an execution), and from other plugins through the start contract — in-process and trusted, which is how AlertZero's `ConversationProposalsService` calls `list`. Request-based authz there would mean threading a request through every call and standing up a second mechanism beside the routes'. The service stays the invariant layer instead: terminal guards, decision immutability, valid-pair enforcement, action-input validation.
+
+**The principal differs by surface, and one of them cannot be checked.** An authenticated resume runs the post-gate steps under a clone of the resumer's API key, so the check evaluates the human. An **external-token resume carries no request**, so the engine wakes the pre-scheduled task under the *workflow runner's* key instead — and that identity necessarily holds `manage_proposals`, because it had to in order to create the proposal. Checking it would therefore authorize every click on a magic link, as the Worker, and record the Worker as the decider.
+
+`hitlExternalResume.enabled` defaults to `true` and `external_resume_service.ts` handles `waitForApproval` explicitly, so this is reachable rather than theoretical. `proposals.checkDecidePrivileges` therefore takes the gate's own `respondedBy` and refuses any principal prefixed `external_resume:` outright, without consulting the privilege service — there is nothing it could usefully ask. The loop re-parks, so an authenticated approver can still decide. Enabling external channels for proposal gates needs the platform to propagate the responder's identity, not just their answer.
 
 ## Proposals
 
@@ -50,7 +70,70 @@ When a second entity lands and needs to be grantable on its own, its capabilitie
 - A **proposal** is a recommendation awaiting a human decision. It lives in `.kibana-investigation-proposals` and points at the conversation it belongs to.
 - An **action proposal** additionally references a managed **action workflow** (`actionWorkflowId`) plus its `actionInput`. Approving it runs that workflow.
 - A **non-action proposal** carries only its `comment` — instructions the analyst carries out themselves before approving. It is always gated: autonomy governs whether an action may run unattended, and there is no action here to govern, so `autoApprove` is ignored.
-- Proposals are immutable once decided, and are never tuned: changing an action means dismissing the proposal and creating a new one.
+- Proposals are immutable once **decided**. An undecided proposal can still be **revised**: `revise()` supersedes the current head with a new revision that carries the correction, and the gate decides whichever revision is live when the analyst answers. The predecessor is marked `superseded` and hidden from the queue by `excludeSuperseded`, so a chain shows one live row at a time.
+
+### Decision and status are two axes
+
+`decision` records what a human concluded; `status` records where the proposal got to. They are separate fields because they answer different questions and settle at different times.
+
+- **`decision: approved | dismissed`** — absent until someone decides, and immutable once set. Groups with `decidedBy` / `decidedAt` / `rationale` / `dismissReason`.
+- **`status: pending | executing | succeeded | failed | expired | no_action`** — always defined.
+
+The split exists because a single field could not express both: `status` has to say whether an approved action succeeded, and `decision` has to survive that outcome so the queue knows a human already answered.
+
+Because `pending` is only ever valid while undecided, the two axes give you two distinct reads rather than one:
+
+- **`status: 'pending'`** — undecided *and not yet settled*: "awaiting a human right now". This is what a decision queue filters on.
+- **`decision` does not exist** — `status ∈ {pending, expired}`: "no human ever answered", including deadlines that passed unanswered.
+
+Nothing needs the second today, so only the first is exposed as a filter.
+
+Two of the statuses exist to stop other values doing double duty:
+
+- **`expired`** means nobody answered in time, so `dismissed` no longer has to cover both "a human declined" and "the deadline passed".
+- **`no_action`** means a human answered and nothing will execute: a dismissal of any kind, or an approval of a proposal carrying no action. It reads as "no action was executed" under both. Without it, both cases would sit at `pending` forever, indistinguishable from awaiting.
+
+The only valid combinations, enforced by `ProposalsService.update`:
+
+| `decision` | `status` | Meaning |
+| --- | --- | --- |
+| absent | `pending` | Awaiting a human |
+| absent | `expired` | The deadline passed unanswered |
+| `dismissed` | `no_action` | Declined |
+| `approved` | `no_action` | Accepted, but there is nothing to run |
+| `approved` | `executing` | The action is running |
+| `approved` | `succeeded` / `failed` | The action's outcome |
+
+Note the consequence for an undecided proposal: `expired` is its *only* terminal status, since every execution state requires an approval. A malfunction before anyone decided therefore settles as "no decision was reached" rather than as a failure.
+
+Two independent guards replace what used to be one terminal check: a status cannot *change* once it is `succeeded | failed | expired | no_action`, and a `decision` cannot be overwritten once set. They are independent because the axes settle independently — the decision guard is what refuses a second approver on a proposal that is still `pending` behind the gate.
+
+Re-writing the *same* terminal status is deliberately allowed, so settling stays idempotent. The workflow's failure handler records `failed` on a record the loop may have already failed — if the clone step throws after `record_action_failure` succeeded, say — and refusing that would replace the real error with a conflict about recording it.
+
+**`expired` is persisted but expiry is also computed.** Between the deadline passing and the loop settling the record there is task lag during which it still reads `pending`. The computed `expired` flag on the read model is for the UI; persisted `status: expired` is the durable settlement.
+
+`supersededBy` points at the proposal that replaced this one — written when a failed action is re-offered as a fresh proposal. The queue filters superseded records out so a chain of retries appears once rather than per attempt.
+
+### The revision chain
+
+A proposal that is still undecided can be corrected rather than dismissed and
+re-offered. `revise()` writes a new revision, points the predecessor at it with
+`supersededBy`, and marks that predecessor `superseded`; both rows carry the same
+`rootProposalId`, so the chain is one query rather than a pointer walk. Only the
+head is live: `excludeSuperseded` hides the rest from the queue, and `revise()`
+refuses a proposal that is already superseded, decided, or expired, so a chain
+cannot fork and cannot be extended past its deadline.
+
+The gate does not re-park on a revision. It stays parked on the *original*
+execution, and the decision is applied to whichever revision is live when the
+analyst answers — `proposals.getLatestRevision`, called after the resumer is
+authorized and before any write, resolves the carried id to the chain head. An
+approval therefore carries the `actionInput` of the revision the approver was
+shown, not the one the Worker first proposed.
+
+Chains predating this field have `rootProposalId` on neither row; the term query
+misses and the fallback returns the row asked about, which is the correct answer
+for a chain of one. The plugin is unshipped, so there is nothing to migrate.
 
 ### Architecture
 
@@ -62,7 +145,7 @@ flowchart TB
     end
 
     subgraph proposals["agenticInvestigations (this plugin)"]
-        steps["investigations.createProposal<br/>investigations.updateProposal"]
+        steps["proposals.createProposal<br/>proposals.updateProposal<br/>proposals.checkDecidePrivileges<br/>proposals.getProposal<br/>proposals.cloneProposal"]
         api["Internal HTTP API<br/>/internal/investigations/proposals"]
         service["ProposalsService<br/><i>the only writer</i>"]
         gate["system-create-investigation-proposal<br/><i>managed gate workflow</i>"]
@@ -85,12 +168,14 @@ flowchart TB
     ui -->|"read / approve / dismiss"| api
     api --> service
     service --> index
-    service -->|"resume, as the approver"| engine
+    api -->|"release the gate"| engine
     service -->|"reads consts.actionMetadata"| catalog
     gate -->|"workflow.execute"| catalog
 ```
 
-Two boundaries are worth stating outright. `ProposalsService` is the **only** writer of the index — the steps and the routes both go through it, and there is no second path. And the solution plugin owns no storage: it contributes a Worker and a UI, and reaches the record only through the HTTP API.
+Three boundaries are worth stating outright. `ProposalsService` is the **only** writer of the index — the steps and the routes both go through it, and there is no second path. The solution plugin owns no storage: it contributes a Worker and a UI, and reaches the record only through the HTTP API. And **the gate workflow is the only writer of a decision**: the routes release the gate, and the steps behind it record what was decided.
+
+That last one is the point of the design. Every resume surface — this API, the platform's own resume route, the Inbox, Agent Builder — funnels through the same parked gate, so a check and a write placed behind it cover all of them at once. Writing the decision in the approve route instead would mean only that one route ever recorded it.
 
 The Agent is where the action is chosen. A Worker spawns it with an `ai.agent` step; the agent reads the action catalog to see which actions exist and what each one takes, then returns structured output naming an `actionWorkflowId` and its `actionInput`. Neither this plugin nor the gate workflow decides which action is appropriate.
 
@@ -106,24 +191,65 @@ sequenceDiagram
     participant AW as Action workflow
 
     W->>G: workflow.execute(conversationId, actionWorkflowId, actionInput)
-    G->>S: investigations.createProposal
+    G->>S: proposals.createProposal
     S->>I: pending proposal (+ this execution id)
-    S-->>G: proposalId
-    G->>G: waitForApproval — parked, up to 72h
+    S-->>G: proposalId, expiresAt
+    G->>G: waitForApproval — parked
 
     A->>S: POST /approve
-    S->>I: status=approved, decidedBy=<analyst>
-    Note over S,I: The decision is written first.<br/>The workflow only ever gets a boolean.
+    Note over S,I: Writes nothing but the rationale.<br/>Nothing durable, so nothing to roll back.
     S->>G: resume(approved: true), as the analyst
 
-    G->>S: investigations.updateProposal(executing)
+    G->>S: proposals.checkDecidePrivileges
+    Note over G,S: Before any read or write. A denial re-parks<br/>rather than spending the gate.
+    G->>S: proposals.getLatestRevision
+    Note over G,S: A revision may have landed during the park,<br/>so the decision settles the chain's live head.
+    G->>S: proposals.updateProposal(approved + executing)
+    S->>I: decision=approved, decidedBy=<analyst>
     G->>AW: workflow.execute(actionInput)
     Note over AW: Runs under the analyst's API key,<br/>so the result is attributed to them.
     AW-->>G: output
-    G->>S: investigations.updateProposal(succeeded)
+    G->>S: proposals.updateProposal(succeeded)
 ```
 
-Dismissal follows the same shape and releases the gate down its negative branch, so no action runs. A gate timeout surfaces as a step failure with an `ExecutionError` of type `TimeoutError`; the workflow-level `on-failure` reads that type and lands the proposal on `dismissed` — a decision that never came, rather than a malfunction — while any other failure becomes `failed`.
+Dismissal follows the same shape down the gate's negative branch, so no action runs, and settles at `dismissed` + `no_action`.
+
+**The decision is asynchronous.** The resume call returns before the post-gate steps run, so the route's response body still describes an undecided proposal. Callers must invalidate and refetch rather than trust it — `useApproveProposal` and `useDismissProposal` both do.
+
+### The decision loop
+
+The gate sits inside a `while` loop, because releasing a gate is not the same thing as deciding. Two cases need the proposal parked again rather than settled: a resumer who cannot decide, and an action that failed and is worth re-offering. Each iteration:
+
+1. **Recompute the remaining time** from the proposal's fixed `expiresAt`, so a failed attempt never extends the deadline. Two `data.set` steps, because Liquid cannot read a variable written by the same step.
+2. **Settle and break** if the deadline has passed (`expired`) or the attempt budget is spent.
+3. **Park on the gate**, under a step-level `on-failure: continue`, and settle `expired` if it times out. The gate's timeout and the recorded deadline are the same literal, so a gate that times out is always past its deadline and there is nothing left to re-park for. Handling it here rather than letting it reach the workflow-level handler is what makes an unanswered proposal end the run as `completed` with an output, instead of `failed`. This branch has to come before anything reads the gate's answer: a timed-out gate answers blank, which the dismissal branch would otherwise record as a decision nobody made. The key is honoured by the engine but unmodelled by `WaitForApprovalStepSchema` — see "Known limitations" and [#19315](https://github.com/elastic/security-team/issues/19315).
+4. **Copy the gate output into variables immediately**, inside the iteration that produced it — `waitForApproval` is not exempt from output eviction, and a step output resolves to its latest execution, so a later iteration that skipped the gate would read this pass's values.
+5. **Re-read the clock** and settle `expired` if the deadline passed while parked. The check in step 1 ran before a park that may have lasted days, and only the HTTP routes refuse an expired decision — so without this a resume through the platform resume API or the Inbox would be recorded and run its action past the deadline the analyst was shown.
+6. **Check the resumer's privilege**, and `loop.continue` when denied. Nothing has been written at this point.
+7. **Record the decision**, together with the status it implies — never on its own, because `approved` + `pending` is not a legal pair, and a decision-only write would leave the record claiming an approval with no outcome.
+8. On an action failure, **clone** the proposal, adopt the new id, and loop; the clone inherits the deadline so a chain of retries cannot outlive it. Cloning a proposal that already carries `supersededBy` is refused, because overwriting the pointer would orphan the first clone.
+
+Three invariants the loop depends on:
+
+- **`max-iterations` cannot settle the record.** A `while` is a flow-control step, so the engine excludes it from the workflow-level `on-failure` wrapping, and the error `on-limit: fail` throws reaches no handler at all. The in-loop budget check is what actually writes a terminal status; `on-limit: fail` is an unreachable backstop.
+- **No `iteration-timeout`.** It wraps the loop body in a step-timeout zone, which would cut the parked gate short.
+- **Never read a loop-body step output after the loop.** Those are evicted on exit. `data.set` variables survive both the loop and a HITL park, which is why everything the loop carries lives in one.
+
+Conditions use a single `and` or a single comparison throughout. Liquid has no operator precedence and no parentheses, so a mixed `and`/`or` expression binds in a way that does not match how it reads.
+
+### Custom steps
+
+| Step | Privilege | On refusal |
+| --- | --- | --- |
+| `proposals.createProposal` | manage | Fails the step |
+| `proposals.updateProposal` | manage | Fails the step |
+| `proposals.getProposal` | read | Fails the step |
+| `proposals.cloneProposal` | manage | Fails the step |
+| `proposals.checkDecidePrivileges` | manage | **Returns `false`** |
+
+Each failure mode gets its own `ExecutionError.type` (`PermissionError`, `ConflictError`, `ExpiredError`, `NotFoundError`, `ValidationError`, `ApiError`), because the type is the only part of an error a workflow can branch on — `ExecutionError` carries just `{ type, message, details? }`, and all three timeout sources already share `TimeoutError`.
+
+`checkDecidePrivileges` is the one step that does not fail on a denial, but it *does* fail on an unexpected error: a privilege service that is down is not a refusal, and a loop that treated it as one would re-park forever.
 
 ### How a Worker creates a proposal
 
@@ -151,12 +277,13 @@ The input contract:
 | `comment` | yes | Markdown explaining what is being proposed. A proposal a human cannot read is not reviewable. |
 | `actionWorkflowId` | no | Omit for a proposal the analyst carries out themselves. |
 | `actionInput` | no | Passed to the action workflow as its single `actionInput` object. |
-| `impact`, `confidence` | no | Snapshotted at creation; used for queue ordering. |
+| `impact`, `confidence` | no | Snapshotted at creation; used for queue ordering. `impact` overrides the action's own. |
+| `category` | no | Overrides the action's own. Pass it for a proposal with no action, or it cannot be grouped and consumers will drop it. |
 | `autoApprove` | no | See below. Defaults to `false`, so the gate is fail-closed. |
 
 You get back `proposalId` and `status`.
 
-**The decision deadline is a fixed 72h, not a caller input.** The workflow engine does not template-render a step's `timeout`; it hands the raw string to the duration parser, so `timeout: "{{ inputs.expiresIn }}"` fails at execution time ([#290258](https://github.com/elastic/kibana/issues/290258)). The gate timeout and the `expiresIn` recorded on the proposal are therefore both hardcoded to `72h` and must stay equal — otherwise the deadline the queue shows an analyst is not the one the gate enforces. The `investigations.createProposal` step still accepts `expiresIn`, so a caller driving that step directly can set its own deadline; only this gate workflow is pinned.
+**The decision deadline is a fixed 72h, not a caller input.** The workflow engine does not template-render a step's `timeout`; it hands the raw string to the duration parser, so `timeout: "{{ inputs.expiresIn }}"` fails at execution time ([#290258](https://github.com/elastic/kibana/issues/290258)). Until that lands, the gate `timeout` and the `expiresIn` recorded on the proposal are the same literal, so the queue and the parked gate cannot disagree about when a decision expires — and a gate that times out is therefore always past the deadline, which is why the loop settles it as `expired` outright. `settings.timeout` is deliberately much larger: the ceiling is a backstop that runs no handler, so it must never fire before the gate. See "Known limitations". The `proposals.createProposal` step still accepts `expiresIn`, so a caller driving that step directly can set its own deadline; only this gate workflow is pinned.
 
 **`autoApprove` is for callers that already resolved autonomy.** This plugin has no autonomy policy of its own; a Worker that has decided the action is permitted without a human passes `autoApprove: true` and the gate is skipped — the proposal is still recorded, and the action still runs. Anything else leaves it unset. It applies only to action proposals: a proposal with no `actionWorkflowId` is always gated regardless of the flag.
 
@@ -181,24 +308,59 @@ See `definitions/alertzero/actions/action_create_detection_rule.yaml` for a work
 
 All routes are internal and versioned (`/internal/investigations/proposals`, version `1`):
 
-- `POST /internal/investigations/proposals` — create
-- `GET /internal/investigations/proposals` — list (filter by `status`, `conversationId`, `excludeExpired`; paged with `from` and `size`)
+- `GET /internal/investigations/proposals` — list (filter by `status`, `decision`, `conversationId`, `excludeSuperseded`, `excludeExpired`; paged with `from` and `size`)
 - `GET /internal/investigations/proposals/{id}` — read one, with action metadata resolved
-- `POST /internal/investigations/proposals/{id}/approve` — approve, then release the gate
-- `POST /internal/investigations/proposals/{id}/dismiss` — dismiss with a structured reason
+- `POST /internal/investigations/proposals/{id}/approve` — release the gate positively
+- `POST /internal/investigations/proposals/{id}/dismiss` — annotate the reason, then release the gate negatively
+- `POST /internal/investigations/proposals/{proposalId}/revisions` — supersede the current head with a corrected revision, which becomes the proposal the gate decides
+- `GET /internal/investigations/proposals/charts-summary` — aggregate counts for the queue's charts
 
-Reads need `read_proposals`; both decisions need `manage_proposals`. There is deliberately **no update route** — `status` is a consequence of deciding and executing, never something a caller sets.
+Reads and the chart summary need `read_proposals`; both decisions and a revision need `manage_proposals`.
+
+Two routes are deliberately absent. There is **no update route**: `status` is a consequence of deciding and executing, never something a caller sets. And there is **no create route**: a decision is written behind the proposal's gate, so a proposal created without a gate execution could never be decided — approving it would annotate the record and report success while nothing settled it. `proposals.createProposal` is the only way to make one, and the only caller that knows the execution id to stamp.
+
+### Reads share one filter vocabulary
+
+`ProposalFilters` — `status`, `decision`, `conversationId`, `excludeSuperseded`, `excludeExpired` — is translated by a single builder, so a filter cannot come to mean one thing on the HTTP list and another on the in-process one. `list()` is the only read that consumes it: it applies the filters as a conjunction, then sorts and pages in Elasticsearch. `decidedWithinHours` goes through the same builder, bounding a closed queue to a recency window rather than all decided history.
+
+An open queue filters on `status: 'pending'`, which is the whole "awaiting" condition. `excludeExpired` is still worth passing alongside it, because it filters on the deadline *date* rather than the status: between the deadline passing and the gate workflow settling the record there is task lag during which it still reads `pending`.
+
+A recently expired proposal *does* reach a closed queue, through `decidedWithinHours`: `update` stamps `decidedAt` whenever it settles a proposal, including one nobody decided, so "you missed this" surfaces as activity. It carries no `decision`, though — which is why a consumer must classify on the status. `isAwaitingDecision()` exists for exactly that, and classifying on the decision instead puts an unanswerable proposal back in the open queue.
+
+**The two decision routes are privilege-checked bridges to the gate, not writers.** Each loads the proposal, asserts no decision exists yet, asserts the deadline has not passed, compares the submitted `actionInput` against the record on an approval, and resumes. The workflow behind the gate records the decision.
+
+They do make **one narrow write**, because `waitForApproval` reconstructs its resume payload and discards everything but the boolean:
+
+```214:220:src/platform/plugins/shared/workflows_execution_engine/server/step/wait_for_approval_step/wait_for_approval_step.ts
+      transformResumeInput: (input, respondedBy) => {
+        const approved = input?.approved;
+        return {
+          response: { approved: approved === true },
+          respondedBy,
+        };
+      },
+```
+
+So `dismissReason` and `rationale` cannot reach the workflow through the gate. `releaseGate` therefore writes **only those two fields**, and only after every refusal has passed — the decided check, the expiry check and the action-input comparison all come first, so a rejected decision leaves the record exactly as it found it. Ordering matters more than it looks: an annotation written ahead of a conflict would leave a dismiss reason on a proposal that was never dismissed, and a later approval would land on top of it. The line is "the route annotates, the workflow decides." A dismissal arriving through the platform's own resume API simply carries no reason, which is fine because both fields are optional.
+
+A resume that fails *after* that point does leave the annotation behind on an undecided proposal. That window cannot be closed without a transaction, and it is the better trade: annotating after the resume would race the workflow's own decision write and lose the reason outright.
+
+The service surface follows from that: `releaseGate()` makes at most that one annotation write, `clone()` re-offers a failed proposal, and `update()` is the workflow's entry point. There is no `approve()`, `dismiss()` or resume-failure rollback — with no decision written before the resume, there is nothing to roll back.
 
 ### Invariants worth preserving
 
-- **The decision is written before the workflow is resumed.** The gate only ever receives a boolean, so the record is the durable channel for what was decided.
+- **The decision is written behind the gate, by the workflow.** Every resume surface funnels through the gate, so one write there covers them all; a write in the approve route would only ever cover that route.
+- **Nothing durable is written before the resume**, so a failed resume needs no rollback. The sole exception is the dismiss reason, which the gate cannot carry.
+- **The privilege check precedes every read and write in the loop.** The chain resolve reads the proposal on the resumer's behalf, so it waits for the check too; an unauthorized resumer is re-parked before anything is read for it. The timeout path resolves the chain separately, inside its own handler, because it writes without ever reaching that check.
+- **The privilege check precedes every write in the loop.** A write that failed first would leave the gate spent and the proposal stranded.
+- **A settled status cannot move and a decision cannot be overwritten.** Two independent guards, because the two axes settle independently.
 - **The gate step is resolved explicitly.** The platform's waiting-step lookup only matches `waitForInput`; for a `waitForApproval` gate it returns nothing and would resume *without* claiming the step or stamping the audit envelope. `resumeGate` finds the step itself and passes `stepExecutionId`.
 - **The decision actor is server-derived.** Never accepted from a request body. `createdBy` and `decidedBy` store `{ username, fullName, email, profileUid? }`, the shape Cases established: the profile uid is the stable identity a UI resolves an avatar from, and the names are stored rather than looked up so attribution survives a missing profile. The uid is genuinely often absent — security disabled, a `run-as` proxy, a session without a profile, or an API key whose creator has no activated profile, which is exactly what the resume path runs under.
 - **Approval carries the action input the approver was shown**, so an approval that no longer matches the record is refused with a conflict.
-- **Action metadata is resolved on read** from the action workflow's `consts.actionMetadata`, never copied onto the proposal, so a catalog change is picked up rather than going stale. `impact` is the exception: it is intrinsic to the action, so it is snapshotted from the metadata at creation.
+- **Action metadata is resolved on read** from the action workflow's `consts.actionMetadata`, never copied onto the proposal, so a catalog change is picked up rather than going stale. `impact` is the exception: it is snapshotted at creation, as `params.impact ?? metadata.impact ?? 'low'`. The caller wins because it knows the situation the proposal came out of, which the action's own metadata cannot; the `low` floor exists because `impactRank` is the queue's primary sort key and must always have a value.
 - **`actionInput` is validated at creation**, against the schema the action declares on its manual trigger, so a proposal that could never run never reaches a human. Best-effort: the JSON Schema to zod conversion does not cover every keyword.
 - **The queue's order lives in Elasticsearch.** `impact` and `confidence` are keywords, which sort alphabetically, so each is mirrored by a numeric rank written at creation. That is what makes the list pageable rather than capped at one fetch; the ranks are stripped before a proposal leaves the service.
-- **`category` is an arbitrary keyword this plugin does not own.** Each solution defines the vocabulary its own actions declare and its own queries group by — AlertZero's set is not NightShift's — so there is no shared enum and no default to fall back on. It is absent on a proposal that carries no action. Consumers group and aggregate on it; nothing sorts on it, and which category is displayed first is a UI decision rather than a stored rank.
+- **`category` is an arbitrary keyword this plugin does not own.** Each solution defines the vocabulary its own actions declare and its own queries group by — AlertZero's set is not NightShift's — so there is no shared enum and no default to fall back on. Resolved as `params.category ?? metadata.category`, the same precedence as `impact` and for the same reason; a caller-supplied value is also the *only* way a proposal carrying no action gets one, since there is no action metadata to read it from. That matters because consumers group the queue by category and drop what has none, so an uncategorised non-action proposal would have nowhere to appear. Nothing sorts on it, and which category leads is a UI decision rather than a stored rank.
 
 ## Managed workflows
 
@@ -208,7 +370,31 @@ Registering the owner is not optional. The startup sweep `cleanupUnregisteredOrp
 
 ## Index naming
 
-`.kibana-investigation-proposals` is permanent. `.kibana*` is already granted to the `kibana_system` role, so the index needs no Elasticsearch-side system index registration — a dedicated prefix such as `.investigation-proposals` would. `anonymization` ships `.kibana-anonymization-profiles` on the same reasoning. Each entity gets its own index rather than one index discriminated by a type field.
+`.kibana-investigation-proposals` is permanent. `.kibana*` is already granted to the `kibana_system` role, so the index needs no Elasticsearch-side system index registration — a dedicated prefix such as `.investigation-proposals` would. `anonymization` ships `.kibana-anonymization-profiles` on the same reasoning. Each entity gets its own index rather than one index discriminated by a type field. **Escalations are the documented exception:** they live in Agent Builder's `.chat-conversations` index (a conversation with `template_id: 'escalation'`), and this plugin owns no storage for them. The reasons are: (a) Agent Builder's conversation model already provides everything an escalation needs — metadata, access control, space scoping, OCC writes; (b) adding an escalations index would duplicate that infrastructure for no benefit; (c) the visibility and collaborator model that agents and investigations already use must apply to escalations for free. Any future entity that fits the conversation model should do the same rather than adding an index by default.
+
+## Testing the gate workflow
+
+Three layers, because no single one reaches the whole thing.
+
+**YAML shape** — `kbn-workflows/managed/definitions/agentic_investigations/proposals/create_investigation_proposal.test.ts` parses the definition and asserts how the loop is wired: that the privilege check precedes every write, that each settle branch breaks, that no condition mixes `and` with `or`. Cheap and fast, but it only sees structure.
+
+**Loop behaviour** — `integration_tests/create_investigation_proposal.test.ts` runs the **shipped YAML through the real execution engine**, with Elasticsearch replaced by a Map and the real `ProposalsService` behind it:
+
+```bash
+node scripts/jest_integration --config x-pack/platform/plugins/shared/agentic_investigations/integration_tests/jest.integration.config.js
+```
+
+It uses `WorkflowRunFixture` from `@kbn/workflows-execution-engine/test_helpers`, which drives `runWorkflow`/`resumeWorkflow` against mocked repositories — real graph builder, real node implementations, real Liquid, no stack, a few seconds. Custom steps are injected by stubbing `hasStepDefinition` **and** `getStepDefinition` on the extensions mock; stubbing only the getter makes `nodes_factory` skip the branch and read `proposals.createProposal` as a connector.
+
+This is the layer that covers what a shape test cannot see: that the gate re-parks on a *new* step execution so a second answer can be claimed, that a privilege denial writes nothing, that `data.set` variables survive a park and resume, that an action failure clones with an inherited deadline and re-parks, and — the bug class that actually bit during development — that every decision/status pair the workflow writes is one the service accepts.
+
+Keeping the real `ProposalsService` rather than a stub is deliberate: the valid-pair table and the immutability guards are exactly what a workflow gets wrong, so stubbing them out would remove the point.
+
+**Real stack** — Scout API coverage for the HTTP surface is still to come ([#19347](https://github.com/elastic/security-team/issues/19347)): the `403` for a reader, the `409` on a concurrent decision, the asynchronous decision the UI has to refetch for, and the identity assertion that a created rule's `created_by` is the approver. Until then the runbook below covers those by hand.
+
+Deliberately uncovered: the real deadline timing, see "Known limitations".
+
+One blind spot worth knowing about. Both layers read the YAML *raw* — the shape tests with `yaml.parse`, and `WorkflowRunFixture` with `YAML.parseDocument(...).toJSON()` — so neither sees which keys the full `WorkflowSchema` models. That matches how managed workflows install, since `lightweightValidation` does not validate steps either, so the fixture is faithful to production. What it cannot tell you is that a key is unmodelled, and therefore honoured only by that skipped validation. The schema-parity test in `@kbn/workflows` covers exactly that, and names the two keys in this definition which are load-bearing by accident.
 
 ## Manual verification
 
@@ -223,24 +409,105 @@ The point of the exercise is the identity behaviour: a rule created by an approv
 
 **Privileges on the approving user:**
 
-- `all` on **Proposed Actions** — to decide.
-- Security → **Rules** `all` (`rules-all`) — the rule is created under *their* credentials. Worth exercising deliberately: an approver **without** it should see the proposal reach `failed`, not `succeeded`. That failure is the model working as designed.
+- `all` on **Proposed Actions** — to decide. Worth exercising the negative too: a user with only `read` should get a `403` from the approve route, and a *resume* from the platform's own API by such a user should leave the proposal untouched and the gate parked again rather than failing the workflow.
+- Security → **Rules** `all` (`rules-all`) — the rule is created under *their* credentials. Worth exercising deliberately: an approver **without** it should see the proposal reach `approved` + `failed`, and a fresh `pending` clone appear pointing at the same gate execution. That is the retry loop working as designed.
 - `workflowsManagement` execute — the resume route rides on `execute` until step-level privileges land ([#19134](https://github.com/elastic/security-team/issues/19134)).
 
 **Steps:**
 
 1. Start Kibana. On start this plugin installs `system-create-investigation-proposal` globally, and `alertzero` installs `system-alertzero-action-create-rule` and `system-alertzero-action-edit-rule`. Confirm all three appear in Workflows management, and that the log contains no `orphan_cleanup` deletion for them.
 2. Trigger the gate workflow directly with `conversationId`, `actionWorkflowId: system-alertzero-action-create-rule`, and an `actionInput` carrying `name`, `description`, `query` and `index`.
-3. Confirm the record: `GET .kibana-investigation-proposals/_search` should show `status: pending`, `category: tune`, the `actionWorkflowId`, and a `workflowExecutionId` pointing at a gate execution that is `waiting_for_input`.
+3. Confirm the record: `GET .kibana-investigation-proposals/_search` should show `status: pending` with **no `decision` field**, `category: tune`, the `actionWorkflowId`, and a `workflowExecutionId` pointing at a gate execution that is `waiting_for_input`.
 4. Approve from the AlertZero app (`/app/alertzero`) — under "Awaiting your decision" on the landing page, or the investigation's Proposals tab.
-5. Assert the outcome: the proposal reaches `succeeded`; a **disabled** rule with that name exists (`security.createRule` always creates rules disabled); **`created_by` on the rule is the approver**, not whoever triggered the gate; and the `waitForApproval` step execution carries `hitl.respondedBy`.
+5. Assert the outcome: the proposal reaches `decision: approved` with `status: succeeded`; a **disabled** rule with that name exists (`security.createRule` always creates rules disabled); **`created_by` on the rule is the approver**, not whoever triggered the gate; and the `waitForApproval` step execution carries `hitl.respondedBy`.
 6. Repeat in a non-default space. Space scoping is invisible in `default`: every query filters on `spaceId`, and a missing filter would only show up elsewhere.
 
-**Also worth exercising:** dismissal with a reason (reaches `dismissed`, records `dismissReason` and `rationale`, creates no rule); first-actor-wins (approve from two sessions at once — one `200`, one `409`, action runs once); a gate timeout (shorten the gate timeout and let it expire — the workflow-level `on-failure` should move the proposal to `dismissed`, not `failed`); and a non-action proposal created through the API with a `comment` and no `actionWorkflowId`, which should terminate at `approved` without executing anything.
+**Also worth exercising:**
+
+- **Dismissal with a reason** — reaches `decision: dismissed` with `status: no_action`, records `dismissReason` and `rationale`, creates no rule.
+- **A non-action proposal** created with a `comment` and no `actionWorkflowId` — should terminate at `decision: approved` with `status: no_action`, executing nothing.
+- **First-actor-wins** — approve from two sessions at once. One `200`, one `409`; the action runs once.
+- **The asynchronous decision** — immediately after approving, the route's response body still shows no `decision`. Confirm the UI reflects the decision anyway, which means it refetched rather than trusting the response.
+- **An unprivileged resume** — resume the execution through the platform's resume API as a `read`-only user. The proposal should be untouched and the gate parked on a *new* step execution, so a privileged approver can still decide it.
+- **The retry loop** — approve as a user without `rules-all`. The first proposal settles at `approved` + `failed`, a clone appears at `pending` sharing the original's `expiresAt` and `workflowExecutionId`, and the original carries `supersededBy`. The queue should show only the clone.
 
 ## Known limitations
 
+- **Two steps rely on an `on-failure` their schema does not model** ([#19315](https://github.com/elastic/security-team/issues/19315)). Neither `WaitForApprovalStepSchema` nor `WorkflowExecuteStepSchema` merges `StepWithOnFailureSchema`, unlike the connector-derived schema every custom step gets — so zod drops the key on any path that validates steps against the full schema. The engine honours it on both: a HITL wait fails through the ordinary `failStep` path with a `TimeoutError`, and `handleStepLevelOnFailure` wraps any step declaring the key with no exclusion by type. Both handlers are load-bearing here — the gate's settles an unanswered proposal, the action's keeps a failed action inside the loop to be cloned — and both reach the engine only because managed workflows install under `lightweightValidation`, which does not validate steps. The schema-parity test beside the definition pins exactly these two so a third cannot appear unnoticed, and so the list shrinks when #19315 lands.
+- **The deadline is enforced in 72h steps, not continuously.** The gate's `timeout` is not template-rendered ([#290258](https://github.com/elastic/kibana/issues/290258)), so each park waits a fresh `72h` rather than the time left on the deadline. Every iteration settles on the deadline before parking again, so this cannot extend a proposal's life indefinitely — but a proposal re-parked shortly before its deadline waits out a second full `72h` before its gate times out and the loop records `expired`. That is why the workflow ceiling is `168h`: it has to stay above that worst case, because a ceiling timeout runs no handler at all (`EnterWorkflowTimeoutZoneNodeImpl.monitor()` marks the execution `TIMED_OUT` and `catchError` returns early), so anything it catches strands as `pending`. Resolves to a one-line change (`timeout: '{{ variables.remaining_seconds }}s'`) once #290258 lands.
+- **A denied resume still spends an attempt.** The loop's budget counts every iteration, including a release by someone who fails the decide check, and the exhaustion write runs as whoever released the gate last — so a user who can resume workflows but not manage proposals can spend the budget and leave the record `pending`. Resolves with #290258 too: once the gate waits only the time left on the deadline, expiry does all the settling and the attempt budget can be a large backstop rather than a terminal one.
 - **Deep paging stops at 10,000.** The list pages with `from`/`size` inside Elasticsearch's default result window. Going past that needs `search_after`, which the list does not expose yet.
 - **`.kibana-*` index naming** buys us out of a system index registration, at the cost of living in a namespace we do not own.
 - **No Scout API coverage yet.** The HTTP surface is covered by Jest only, as `anonymization` shipped.
-- **Only one entity so far.** The directory convention is designed for investigations and incidents, but neither exists yet, so the umbrella's seams are unproven.
+- **Two entities, umbrella seams exercised.** Proposals and escalations both exist. The directory convention holds across both.
+
+## Escalations
+
+### Model
+
+An **escalation** is a durable, shareable record that an analyst creates when a collection of investigations warrants formal escalation. Unlike proposals — which live in a bespoke index — escalations live in Agent Builder's `.chat-conversations` index as conversations with `template_id: 'escalation'`. That choice buys the full conversation stack: OCC-safe metadata writes, access control, space scoping, and Agent Builder's conversation template validation.
+
+`EscalationsService` is a thin orchestration façade over `agentBuilder.conversations.getScopedClient({ request })`. It owns no Elasticsearch client and no index.
+
+### Privileges
+
+Escalations use an `escalations` sub-feature on the `agenticInvestigations` Kibana feature:
+
+The `escalations` sub-feature uses a `mutually_exclusive` privilege group, so a user receives exactly one of:
+
+| Sub-feature privilege | API | UI |
+| --- | --- | --- |
+| `escalations_all` (included in `all`) | `read_escalations`, `manage_escalations` | `showEscalations`, `manageEscalations` |
+| `escalations_read` (included in `read`) | `read_escalations` | `showEscalations` |
+
+### API
+
+All routes are internal and versioned (`/internal/investigations/escalations`, version `1`):
+
+- `GET /internal/investigations/escalations` — list non-closed escalations the caller can access; needs `read_escalations`
+- `POST /internal/investigations/escalations` — create an escalation from a linked investigation; needs `manage_escalations`
+- `PATCH /internal/investigations/escalations/{id}` — update title or append linked investigations; needs `manage_escalations`
+
+### Create behaviour
+
+`POST` takes `{ linked_investigation_id, visibility, collaborators? }`. The handler:
+
+1. Fetches the investigation through the caller's scoped client — this enforces that the caller can see the investigation they are escalating.
+2. Validates that the target is an `investigation` conversation (throws a `400` otherwise).
+3. Resolves the escalation template's declared fields at runtime via `agentBuilder.conversationTemplates.get('escalation')`.
+4. Copies the intersection of the investigation's metadata and those declared fields, **excluding `status`** (so the escalation opens with `status: 'open'` from the template default) and **excluding `linked_investigations`** (set separately to `[linked_investigation_id]`). This filter is what prevents a `400` from `workflow_execution_id`, which is declared on the investigation template but not on the escalation template.
+5. Creates the conversation with `templateId: 'escalation'` and no explicit `agentId` — the default agent is used, so collaborators can always see the escalation regardless of their access to the investigation's agent.
+
+### List behaviour
+
+`GET` accepts optional `page` and `per_page` query parameters (defaults: `page=1`, `per_page=50`; maximum `per_page=50`; `page * per_page` must not exceed `10,000`). It returns:
+
+```json
+{
+  "pagination": { "total": 42, "page": 1, "per_page": 50 },
+  "results": [ /* ConversationWithoutRoundsWithPermissions */ ]
+}
+```
+
+The filter is **fixed and server-side**: `template_id: "escalation" and not metadata.status: "closed"`. A few things to note:
+
+- The filter uses `metadata.status`, not the bare `status` field. The bare `status` maps to the
+  conversation-level `ConversationRoundStatus` (`in_progress`/`completed`/…); the escalation
+  open/closed state lives in the template metadata.
+- `not metadata.status: "closed"` keeps documents where the field is absent, so a freshly created
+  escalation (whose metadata carries `status: "open"` from the template default) always appears.
+- Access filtering is inherited from Agent Builder's `buildReadAccessFilter`: a caller sees public
+  escalations, their own escalations, and private escalations they are listed in. No access control needs
+  to be written in this plugin.
+- Results are sorted `updated_at desc` (newest-first) with a `created_at` tiebreaker, which is the
+  `client.search()` default when no explicit sort is requested.
+- Results include no round data (`_source` is `CONVERSATION_LIST_SOURCE_FIELDS`). The response type
+  is `EscalationConversationSummary` (`ConversationWithoutRoundsWithPermissions`), which is distinct
+  from `EscalationConversation` (the create/update response that includes rounds).
+
+### MVP limitations
+
+- **Owner-only writes.** `patchMetadata` and `update` in Agent Builder are `access: 'owner'`. This conflicts with the epic requirement that participants can link further investigations. A follow-up is needed to widen the access check in Agent Builder's authorization layer.
+- **Last-write-wins on concurrent appends.** The array union for `linked_investigations` is computed in the service (outside the OCC write callback), so two concurrent `PATCH` requests can each read stale state and one link can be silently lost. The fix is to move the union computation into `writeConversation`'s `fields` callback. Accepted for MVP; follow-up filed.
+- **List caps at 10,000 results.** Offset pagination cannot go beyond Elasticsearch's default result window. Escalations beyond that threshold are unreachable through this API. `search_after` would be needed for deeper paging.
+- **Closed escalations are never returned.** The `status: "closed"` filter is not toggleable. A separate endpoint or a future filter parameter would be needed to retrieve closed escalations.
