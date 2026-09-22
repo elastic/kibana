@@ -7,13 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
 import { WorkflowExecutionPanel } from './workflow_execution_panel';
+import {
+  WORKFLOW_EXECUTION_STEPS_MAX_PAGE_COUNT,
+  WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
+} from '../../../../common';
+import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
+import {
+  setStepExecutionsTotal,
+  showMoreStepExecutions,
+} from '../../../entities/workflows/store/workflow_detail/slice';
 import { createStartServicesMock } from '../../../mocks';
 import { getTestProvider } from '../../../shared/mocks/test_providers';
 
@@ -112,11 +121,20 @@ describe('WorkflowExecutionPanel', () => {
     jest.mocked(useWorkflowsCapabilities).mockReturnValue(createMockWorkflowsCapabilities());
   });
 
-  const renderComponent = (props = {}, services = createStartServicesMock()) => {
+  const renderComponent = (
+    props = {},
+    services = createStartServicesMock(),
+    stepExecutionsTotal?: number
+  ) => {
     services.application.navigateToApp = mockNavigateToApp;
 
+    const store = createMockStore(services);
+    if (stepExecutionsTotal !== undefined) {
+      store.dispatch(setStepExecutionsTotal(stepExecutionsTotal));
+    }
+
     return render(<WorkflowExecutionPanel {...defaultProps} {...props} />, {
-      wrapper: getTestProvider({ services }),
+      wrapper: getTestProvider({ services, store }),
     });
   };
 
@@ -143,27 +161,30 @@ describe('WorkflowExecutionPanel', () => {
     });
 
     it('should show a truncation warning with the omitted step count', () => {
-      renderComponent({
-        stepExecutionsTotal: 1842,
-        execution: {
-          ...mockExecution,
-          stepExecutions: [
-            {
-              id: 'step-1',
-              stepId: 'step-1',
-              stepType: 'console',
-              scopeStack: [],
-              workflowRunId: 'exec-123',
-              workflowId: 'workflow-123',
-              status: ExecutionStatus.COMPLETED,
-              startedAt: '2024-01-01T10:00:00Z',
-              topologicalIndex: 0,
-              globalExecutionIndex: 0,
-              stepExecutionIndex: 0,
-            },
-          ],
+      renderComponent(
+        {
+          execution: {
+            ...mockExecution,
+            stepExecutions: [
+              {
+                id: 'step-1',
+                stepId: 'step-1',
+                stepType: 'console',
+                scopeStack: [],
+                workflowRunId: 'exec-123',
+                workflowId: 'workflow-123',
+                status: ExecutionStatus.COMPLETED,
+                startedAt: '2024-01-01T10:00:00Z',
+                topologicalIndex: 0,
+                globalExecutionIndex: 0,
+                stepExecutionIndex: 0,
+              },
+            ],
+          },
         },
-      });
+        createStartServicesMock(),
+        1842
+      );
       expect(
         screen.getByTestId('workflowExecutionStepExecutionsTruncatedCallout')
       ).toBeInTheDocument();
@@ -171,39 +192,124 @@ describe('WorkflowExecutionPanel', () => {
     });
 
     it('should not show a truncation warning for mget gaps on a single page', () => {
-      renderComponent({
-        stepExecutionsTotal: 500,
-        execution: {
-          ...mockExecution,
-          stepExecutions: [
-            {
-              id: 'step-1',
-              stepId: 'step-1',
-              stepType: 'console',
-              scopeStack: [],
-              workflowRunId: 'exec-123',
-              workflowId: 'workflow-123',
-              status: ExecutionStatus.COMPLETED,
-              startedAt: '2024-01-01T10:00:00Z',
-              topologicalIndex: 0,
-              globalExecutionIndex: 0,
-              stepExecutionIndex: 0,
-            },
-          ],
+      renderComponent(
+        {
+          execution: {
+            ...mockExecution,
+            stepExecutions: [
+              {
+                id: 'step-1',
+                stepId: 'step-1',
+                stepType: 'console',
+                scopeStack: [],
+                workflowRunId: 'exec-123',
+                workflowId: 'workflow-123',
+                status: ExecutionStatus.COMPLETED,
+                startedAt: '2024-01-01T10:00:00Z',
+                topologicalIndex: 0,
+                globalExecutionIndex: 0,
+                stepExecutionIndex: 0,
+              },
+            ],
+          },
         },
-      });
+        createStartServicesMock(),
+        500
+      );
       expect(
         screen.queryByTestId('workflowExecutionStepExecutionsTruncatedCallout')
       ).not.toBeInTheDocument();
     });
 
     it('should not show a truncation warning when the step list is empty', () => {
-      renderComponent({
-        execution: { ...mockExecution },
-        stepExecutionsTotal: 12,
-      });
+      renderComponent({ execution: { ...mockExecution } }, createStartServicesMock(), 12);
       expect(
         screen.queryByTestId('workflowExecutionStepExecutionsTruncatedCallout')
+      ).not.toBeInTheDocument();
+    });
+
+    it('should request another page when Show more is clicked', async () => {
+      const services = createStartServicesMock();
+      services.application.navigateToApp = mockNavigateToApp;
+      const store = createMockStore(services);
+      store.dispatch(setStepExecutionsTotal(1842));
+
+      render(
+        <WorkflowExecutionPanel
+          {...defaultProps}
+          execution={{
+            ...mockExecution,
+            stepExecutions: [
+              {
+                id: 'step-1',
+                stepId: 'step-1',
+                stepType: 'console',
+                scopeStack: [],
+                workflowRunId: 'exec-123',
+                workflowId: 'workflow-123',
+                status: ExecutionStatus.COMPLETED,
+                startedAt: '2024-01-01T10:00:00Z',
+                topologicalIndex: 0,
+                globalExecutionIndex: 0,
+                stepExecutionIndex: 0,
+              },
+            ],
+          }}
+        />,
+        { wrapper: getTestProvider({ services, store }) }
+      );
+
+      expect(store.getState().detail.stepExecutionsPageCount).toBe(1);
+
+      fireEvent.click(screen.getByTestId('workflowExecutionShowMoreStepExecutionsButton'));
+
+      await waitFor(() => {
+        expect(store.getState().detail.stepExecutionsPageCount).toBe(2);
+      });
+    });
+
+    it('should hide Show more once the page ceiling is reached', () => {
+      const services = createStartServicesMock();
+      const store = createMockStore(services);
+      store.dispatch(
+        setStepExecutionsTotal(
+          WORKFLOW_EXECUTION_STEPS_MAX_PAGE_COUNT * WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE + 500
+        )
+      );
+      for (let page = 1; page < WORKFLOW_EXECUTION_STEPS_MAX_PAGE_COUNT; page++) {
+        store.dispatch(showMoreStepExecutions());
+      }
+
+      render(
+        <WorkflowExecutionPanel
+          {...defaultProps}
+          execution={{
+            ...mockExecution,
+            stepExecutions: [
+              {
+                id: 'step-1',
+                stepId: 'step-1',
+                stepType: 'console',
+                scopeStack: [],
+                workflowRunId: 'exec-123',
+                workflowId: 'workflow-123',
+                status: ExecutionStatus.COMPLETED,
+                startedAt: '2024-01-01T10:00:00Z',
+                topologicalIndex: 0,
+                globalExecutionIndex: 0,
+                stepExecutionIndex: 0,
+              },
+            ],
+          }}
+        />,
+        { wrapper: getTestProvider({ services, store }) }
+      );
+
+      expect(
+        screen.getByTestId('workflowExecutionStepExecutionsTruncatedCallout')
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('workflowExecutionShowMoreStepExecutionsButton')
       ).not.toBeInTheDocument();
     });
 

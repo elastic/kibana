@@ -9,7 +9,7 @@
 
 import { EuiPanel } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { useDispatch } from 'react-redux-v7';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 import { useQueryClient } from '@kbn/react-query';
@@ -25,6 +25,7 @@ import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json
 import { WorkflowExecutionPanel } from './workflow_execution_panel';
 import { WorkflowStepExecutionDetails } from './workflow_step_execution_details';
 import { useWorkflowExecutionPolling } from '../../../entities/workflows/model/use_workflow_execution_polling';
+import { selectStepExecutionsPageCount } from '../../../entities/workflows/store/workflow_detail/selectors';
 import {
   HIGHLIGHTED_STEP_TRIGGER,
   setHighlightedStepId,
@@ -77,7 +78,11 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
     onSelectedStepExecutionChange,
   }) => {
     const dispatch = useDispatch();
-    const { workflowExecution, error } = useWorkflowExecutionPolling(executionId);
+    const stepExecutionsPageCount = useSelector(selectStepExecutionsPageCount);
+    const { workflowExecution, error } = useWorkflowExecutionPolling(
+      executionId,
+      stepExecutionsPageCount
+    );
     const queryClient = useQueryClient();
 
     const urlState = useWorkflowUrlState();

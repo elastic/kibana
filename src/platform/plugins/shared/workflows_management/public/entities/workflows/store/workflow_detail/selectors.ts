@@ -127,6 +127,10 @@ export const selectStepExecutionsTotal = createSelector(
   selectDetail,
   (detail) => detail.stepExecutionsTotal
 );
+export const selectStepExecutionsPageCount = createSelector(
+  selectDetail,
+  (detail) => detail.stepExecutionsPageCount
+);
 export const selectStepExecutions = createSelector(
   selectExecution,
   (execution) => execution?.stepExecutions

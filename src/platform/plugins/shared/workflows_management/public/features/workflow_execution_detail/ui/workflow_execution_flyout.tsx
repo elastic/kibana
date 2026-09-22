@@ -41,6 +41,7 @@ import {
 import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -49,6 +50,7 @@ import { ExecutionTakeActionSplitButton } from './execution_take_action_split_bu
 import { ForeachIterationsSection } from './foreach_iterations_section';
 import { StepDataValueCell } from './step_data_value_cell';
 import { StepDetailAccordionSection } from './step_detail_accordion_section';
+import { StepExecutionsTruncatedCallout } from './step_executions_truncated_callout';
 import {
   buildOverviewStepExecutionFromContext,
   buildTriggerStepExecutionFromContext,
@@ -59,6 +61,10 @@ import {
   useFetchConnector,
 } from '../../../entities/connectors/model/use_available_connectors';
 import { useWorkflowExecutionPolling } from '../../../entities/workflows/model/use_workflow_execution_polling';
+import {
+  selectStepExecutionsPageCount,
+  selectStepExecutionsTotal,
+} from '../../../entities/workflows/store/workflow_detail/selectors';
 import { useNavigateToExecution } from '../../../hooks/navigation/use_navigate_to_execution';
 import { useKibana } from '../../../hooks/use_kibana';
 import { formatDuration } from '../../../shared/lib/format_duration';
@@ -459,7 +465,12 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
     const [errorArrivalPulseStepId, setErrorArrivalPulseStepId] = useState<string | null>(null);
     const autoExpandedForExecutionIdRef = useRef<string | null>(null);
 
-    const { workflowExecution, error } = useWorkflowExecutionPolling(executionId);
+    const stepExecutionsTotal = useSelector(selectStepExecutionsTotal);
+    const stepExecutionsPageCount = useSelector(selectStepExecutionsPageCount);
+    const { workflowExecution, error } = useWorkflowExecutionPolling(
+      executionId,
+      stepExecutionsPageCount
+    );
 
     const workflowName =
       workflowNameProp ||
@@ -1305,19 +1316,25 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                     }}
                   >
                     {activeTab === 'table' && (
-                      <WorkflowStepExecutionTree
-                        definition={workflowDefinition}
-                        execution={workflowExecution ?? null}
-                        error={error}
-                        onStepExecutionClick={setSelectedStepExecutionId}
-                        selectedId={selectedStepExecutionId}
-                        childExecutionsMap={childExecutions}
-                        isLoadingChildExecutions={isLoadingChildExecutions}
-                        autoExpandErrorForStepId={autoExpandErrorForStepId}
-                        errorArrivalPulseStepId={errorArrivalPulseStepId}
-                        workflowName={workflowName}
-                        onBeforeDiagnose={() => setSelectedStepExecutionId(null)}
-                      />
+                      <>
+                        <StepExecutionsTruncatedCallout
+                          loadedCount={workflowExecution?.stepExecutions.length ?? 0}
+                        />
+                        <WorkflowStepExecutionTree
+                          definition={workflowDefinition}
+                          execution={workflowExecution ?? null}
+                          stepExecutionsTotal={stepExecutionsTotal}
+                          error={error}
+                          onStepExecutionClick={setSelectedStepExecutionId}
+                          selectedId={selectedStepExecutionId}
+                          childExecutionsMap={childExecutions}
+                          isLoadingChildExecutions={isLoadingChildExecutions}
+                          autoExpandErrorForStepId={autoExpandErrorForStepId}
+                          errorArrivalPulseStepId={errorArrivalPulseStepId}
+                          workflowName={workflowName}
+                          onBeforeDiagnose={() => setSelectedStepExecutionId(null)}
+                        />
+                      </>
                     )}
                     {activeTab === 'json' && workflowExecution && (
                       <EuiCodeBlock language="json" fontSize="m" isCopyable overflowHeight="100%">

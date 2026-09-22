@@ -30,7 +30,10 @@ import {
 } from './workflow_pseudo_step_context';
 import { WorkflowStepExecutionDetails } from './workflow_step_execution_details';
 import { useWorkflowExecutionPolling } from '../../../entities/workflows/model/use_workflow_execution_polling';
-import { selectStepExecutionsTotal } from '../../../entities/workflows/store/workflow_detail/selectors';
+import {
+  selectStepExecutionsPageCount,
+  selectStepExecutionsTotal,
+} from '../../../entities/workflows/store/workflow_detail/selectors';
 import {
   HIGHLIGHTED_STEP_TRIGGER,
   setHighlightedStepId,
@@ -79,7 +82,11 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
   }) => {
     const dispatch = useDispatch();
     const stepExecutionsTotal = useSelector(selectStepExecutionsTotal);
-    const { workflowExecution, error } = useWorkflowExecutionPolling(executionId);
+    const stepExecutionsPageCount = useSelector(selectStepExecutionsPageCount);
+    const { workflowExecution, error } = useWorkflowExecutionPolling(
+      executionId,
+      stepExecutionsPageCount
+    );
     const queryClient = useQueryClient();
 
     const urlState = useWorkflowUrlState();

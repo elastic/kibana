@@ -39,6 +39,12 @@ export interface WorkflowDetailState {
   execution?: WorkflowExecutionDto;
   /** `total` from the paginated execution-steps list; used for the truncation callout. */
   stepExecutionsTotal: number;
+  /**
+   * How many pages of step executions the detail view requests, each
+   * WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE long. Grows by one per "Show more" click, capped at
+   * WORKFLOW_EXECUTION_STEPS_MAX_PAGE_COUNT. Held in the store so polling reloads keep it.
+   */
+  stepExecutionsPageCount: number;
   /** The computed data derived from the selected execution, it is updated by the loadExecutionThunk */
   computedExecution?: ComputedData;
   /** The active tab (workflow or executions) */

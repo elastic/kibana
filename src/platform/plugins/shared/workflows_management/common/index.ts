@@ -25,9 +25,19 @@ export const WORKFLOW_EXECUTION_EMBEDDED_STEPS_MAX_COUNT = 5000;
 /** Page size the execution-detail UI requests (tree budget). */
 export const WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE = 1000;
 
-/** Count of steps past the UI page budget. Ignores transient mget gaps on the loaded page. */
-export const getOmittedStepExecutionsCount = (stepExecutionsTotal: number): number =>
-  Math.max(0, stepExecutionsTotal - WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE);
+/**
+ * Pages the detail view may request, one page per "Show more" click. Ten pages is the
+ * Elasticsearch `max_result_window`, which bounds the search fallback that pre-`stepExecutionIds`
+ * runs still use.
+ */
+export const WORKFLOW_EXECUTION_STEPS_MAX_PAGE_COUNT = 10;
+
+/** Count of steps past the pages loaded so far. Ignores transient mget gaps on a loaded page. */
+export const getOmittedStepExecutionsCount = (
+  stepExecutionsTotal: number,
+  loadedPageCount = 1
+): number =>
+  Math.max(0, stepExecutionsTotal - loadedPageCount * WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE);
 
 /**
  * True when the server reported steps but none loaded, and that is not an
