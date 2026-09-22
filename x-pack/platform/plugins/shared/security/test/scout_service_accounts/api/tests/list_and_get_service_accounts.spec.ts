@@ -46,8 +46,8 @@ const uniqueName = (prefix: string) => `${prefix}-${Date.now()}-${Math.floor(Mat
 const getPath = (id: string) => `${SERVICE_ACCOUNT_ENDPOINT}/${encodeURIComponent(id)}`;
 
 /**
- * What this suite expects back. No `createdBy` or `createdAt`: those are UIAM-only for now, and
- * this suite exercises the Elasticsearch backend.
+ * What this suite expects back. No `createdBy`, which is UIAM-only for now while this suite
+ * exercises the Elasticsearch backend, and no creation time, which neither backend reports.
  */
 interface DirectoryEntry {
   id: string;

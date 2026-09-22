@@ -52,11 +52,12 @@ export interface ServiceAccountDirectoryEntry {
    * Elasticsearch is the one on the credential it stored, which says who asked Kibana to create
    * the account rather than who owns it now, and goes stale the moment someone recreates the
    * account out of band. Reporting it would have the UI show an attribution it then has to
-   * unlearn, so both fields wait for Elasticsearch in a followup.
+   * unlearn, so the field waits for Elasticsearch in a followup.
    */
   createdBy?: ServiceAccountDirectoryCreator;
-  /** ISO-8601 creation time. Reported on the same terms as {@link createdBy}. */
-  createdAt?: string;
+  // No creation time. UIAM reports no timestamp of any kind, and the only one Elasticsearch could
+  // offer is on the credential Kibana stored, which dates Kibana's record rather than the
+  // account. It arrives with the same followup that brings the Elasticsearch creator.
 }
 
 /**
