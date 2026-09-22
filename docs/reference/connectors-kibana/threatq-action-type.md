@@ -13,7 +13,7 @@ The ThreatQ connector searches and updates intelligence in a hosted or on-premis
 
 ## Before you begin
 
-ThreatQ supports OAuth 2.0 API credentials (recommended) and user account authentication. The account needs read access to the requested objects. Changes require write access, and plugin actions require permission to run the selected operation.
+The connector supports OAuth 2.0 API credentials (recommended) and bearer tokens. The account needs read access to the requested objects. Changes require write access, and plugin actions require permission to run the selected operation.
 
 The instance must be reachable from {{kib}} over HTTPS. If you configure [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md), include the ThreatQ hostname. Use a certificate trusted by {{kib}}, or configure the instance certificate authority through the action settings.
 
@@ -35,11 +35,11 @@ Default source
 
 Enter the token URL (`https://your-instance/api/token`), OAuth client ID, and client secret. Generate credentials with the ThreatQ CLI. Hosted customers must request credentials from ThreatQ support. The connector uses the client credentials grant with HTTP Basic authentication. Kibana manages token refresh.
 
-**ThreatQ user account**
+**Bearer token**
 
-Enter the token URL (`https://your-instance/api/token`), email, password, and API password (`client_id`). Get the API password from an administrator user profile in ThreatQ. It is distinct from an OAuth client ID.
+Enter a valid ThreatQ access token without the `Bearer` prefix. Obtain the token through ThreatQ's API or SDK, using credentials with access to the required objects. The connector stores the token as an encrypted secret and sends it with each request.
 
-The account password and API password are stored as encrypted secrets. Kibana validates the required fields before execution and exchanges them for a temporary access token. The account needs read access to the requested objects, write access for changes, and permission to run the selected plugin operation.
+Bearer tokens expire. Replace the saved token when it expires. The connector does not exchange usernames, passwords, or API passwords for tokens. Use OAuth 2.0 API credentials for automatic token renewal.
 
 See [ThreatQ authentication](https://helpcenter.threatq.com/Developer_Resources/SDK/Authentication.htm) for credential setup.
 

@@ -153,7 +153,23 @@ export const ThreatQ: ConnectorSpec = {
           },
         },
       },
-      'threatq_user',
+      {
+        type: 'bearer',
+        defaults: {},
+        overrides: {
+          meta: {
+            token: {
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.threatq.auth.bearerTokenHelpText',
+                {
+                  defaultMessage:
+                    'A ThreatQ access token without the Bearer prefix. Replace it when it expires. For automatic token renewal, use OAuth 2.0 API credentials.',
+                }
+              ),
+            },
+          },
+        },
+      },
     ],
   },
   schema: configSchema,

@@ -12,7 +12,7 @@ import { Request, Response, Headers } from 'undici';
 import { loggerMock } from '@kbn/logging-mocks';
 import { z } from '@kbn/zod/v4';
 import type { ActionContext } from '../../connector_spec';
-import { ThreatQUserAuth } from '../../auth_types/threatq_user';
+import { BearerAuth } from '../../auth_types/bearer';
 import { OAuth } from '../../auth_types/oauth';
 import { generateSecretsSchemaFromSpec } from '../../lib/generate_secrets_schema_from_spec';
 import type { JsonValue } from './types';
@@ -32,21 +32,8 @@ jest.mock('axios', () => jest.requireActual('axios/dist/node/axios.cjs'));
 let nock: typeof import('nock');
 
 const origin = 'https://threatq.example.com';
-const secrets = { username: 'analyst@example.com', password: 'test-password' };
-const tokenBody = {
-  email: secrets.username,
-  password: secrets.password,
-  grant_type: 'password',
-  client_id: 'test-client',
-};
+const secrets = { token: 'test-token' };
 const response = { total: 1, data: [{ id: 123 }], nextCursorMark: 'next-page' };
-
-const authenticate = () =>
-  nock(origin)
-    .post('/api/token', tokenBody)
-    .matchHeader('content-type', 'application/json')
-    .matchHeader('authorization', (value) => value === undefined)
-    .reply(200, { access_token: 'test-token', token_type: 'bearer', expires_in: 3600 });
 
 const authenticatedApi = () => nock(origin, { reqheaders: { authorization: 'Bearer test-token' } });
 
@@ -66,7 +53,16 @@ describe('ThreatQ', () => {
   });
   beforeEach(async () => {
     const log = loggerMock.create();
-    const client = axios.create({ proxy: false, adapter: 'http' });
+    const client = await BearerAuth.configure(
+      {
+        getCustomHostSettings: () => undefined,
+        getToken: async () => null,
+        logger: log,
+        sslSettings: {},
+      },
+      axios.create({ proxy: false, adapter: 'http' }),
+      secrets
+    );
     ctx = {
       client,
       config: { url: origin },
@@ -75,26 +71,9 @@ describe('ThreatQ', () => {
       getClient: jest.fn(),
     };
   });
-  const configureClient = async () => {
-    ctx.client = await ThreatQUserAuth.configure(
-      {
-        getCustomHostSettings: () => undefined,
-        getToken: async () => null,
-        logger: ctx.log,
-        sslSettings: {},
-      },
-      axios.create({ proxy: false, adapter: 'http' }),
-      { ...secrets, clientId: 'test-client', tokenUrl: `${origin}/api/token` }
-    );
-  };
-  const execute = async (action: string, input: Record<string, JsonValue>) => {
-    await configureClient();
-    return ThreatQ.actions[action].handler(ctx, input);
-  };
-  const runTest = async () => {
-    await configureClient();
-    return ThreatQ.test.handler(ctx);
-  };
+  const execute = (action: string, input: Record<string, JsonValue>) =>
+    ThreatQ.actions[action].handler(ctx, input);
+  const runTest = () => ThreatQ.test.handler(ctx);
   afterEach(() => {
     const pending = nock.pendingMocks();
     nock.cleanAll();
@@ -106,7 +85,6 @@ describe('ThreatQ', () => {
   });
 
   it('sends search criteria and filters in the body and pagination in the query', async () => {
-    authenticate();
     const criteria = { value: { '+contains': 'example.com' } };
     const filters = {
       '+and': [{ type_name: 'FQDN' }, { status_name: 'Active' }, { score: { '+gte': 6 } }],
@@ -126,7 +104,6 @@ describe('ThreatQ', () => {
   });
 
   it('retains the cursor and omits offset during a Threat Library cursor search', async () => {
-    authenticate();
     authenticatedApi()
       .post('/api/campaign/query', { criteria: { title: 'Example' } })
       .query({ limit: 50, cursorMark: '*', sort: 'id' })
@@ -144,7 +121,6 @@ describe('ThreatQ', () => {
   it.each(['report', 'reports'])(
     'preserves the selected %s search endpoint',
     async (objectType) => {
-      authenticate();
       authenticatedApi()
         .post(`/api/${objectType}/query`, {})
         .query({ limit: 50, offset: 0 })
@@ -156,7 +132,6 @@ describe('ThreatQ', () => {
   );
 
   it('includes indicator context by default and accepts an instance-specific relationship list', async () => {
-    authenticate();
     authenticatedApi()
       .get('/api/indicators/123')
       .query({ with: 'attributes,sources,score,status,adversaries,events' })
@@ -164,7 +139,6 @@ describe('ThreatQ', () => {
     await expect(
       execute('getIndicator', GetIndicatorInputSchema.parse({ indicatorId: 123 }))
     ).resolves.toEqual(response);
-    authenticate();
     authenticatedApi()
       .get('/api/indicators/123')
       .query({ with: 'adversaries,malware,attributes,campaign,report,events,score' })
@@ -181,7 +155,6 @@ describe('ThreatQ', () => {
   it.each(['adversaries', 'events', 'report'])(
     'reads %s with comma-separated customer relationship names',
     async (objectType) => {
-      authenticate();
       authenticatedApi()
         .get(`/api/${objectType}/123`)
         .query({ with: 'descriptions,ttp,attack_pattern' })
@@ -196,7 +169,6 @@ describe('ThreatQ', () => {
   );
 
   it('reads an object without forcing version-specific relationships', async () => {
-    authenticate();
     authenticatedApi().get('/api/report/123').reply(200, response);
     await expect(execute('getObject', { objectType: 'report', objectId: 123 })).resolves.toEqual(
       response
@@ -206,7 +178,6 @@ describe('ThreatQ', () => {
   it.each(['indicators', 'events', 'adversaries'])(
     'gets related %s with pagination',
     async (relatedType) => {
-      authenticate();
       authenticatedApi()
         .get(`/api/indicators/123/${relatedType}`)
         .query({ limit: 25, offset: 50, with: 'sources' })
@@ -225,7 +196,6 @@ describe('ThreatQ', () => {
   );
 
   it('creates an indicator with an array body and preserves source metadata', async () => {
-    authenticate();
     const sources = [
       { name: 'Elastic Security', tlp: { name: 'AMBER' }, published_at: '2026-09-16 10:00:00' },
     ];
@@ -242,7 +212,6 @@ describe('ThreatQ', () => {
   });
 
   it('updates only the indicator status', async () => {
-    authenticate();
     authenticatedApi().put('/api/indicators/123', { status_id: 4 }).reply(201, response);
     await expect(
       execute('updateIndicatorStatus', { indicatorId: 123, statusId: 4 })
@@ -252,7 +221,6 @@ describe('ThreatQ', () => {
   it.each(['indicators', 'events', 'adversaries'])(
     'adds an attribute to %s',
     async (objectType) => {
-      authenticate();
       const sources = [{ name: 'Elastic Security' }];
       authenticatedApi()
         .post(`/api/${objectType}/123/attributes`, {
@@ -274,7 +242,6 @@ describe('ThreatQ', () => {
   );
 
   it('creates an event with the API timestamp field', async () => {
-    authenticate();
     authenticatedApi()
       .post('/api/events', {
         title: 'Example event',
@@ -292,7 +259,6 @@ describe('ThreatQ', () => {
   });
 
   it('creates an adversary with source records', async () => {
-    authenticate();
     const input = { name: 'Example actor', sources: [{ name: 'Elastic Security' }] };
     authenticatedApi().post('/api/adversaries', input).reply(201, response);
     await expect(execute('createAdversary', input)).resolves.toEqual(response);
@@ -301,7 +267,6 @@ describe('ThreatQ', () => {
   it.each(['adversaries', 'events', 'indicators'])(
     'links an indicator to %s with an array of IDs',
     async (relatedType) => {
-      authenticate();
       authenticatedApi()
         .post(`/api/indicators/123/${relatedType}`, [{ id: 456 }])
         .reply(201, response);
@@ -321,13 +286,11 @@ describe('ThreatQ', () => {
     ['listIndicatorTypes', '/indicator/types'],
     ['listPlugins', '/plugins'],
   ])('%s uses its documented endpoint', async (action, path) => {
-    authenticate();
     authenticatedApi().get(`/api${path}`).query({ limit: 50, offset: 0 }).reply(200, response);
     await expect(execute(action, { limit: 50, offset: 0 })).resolves.toEqual(response);
   });
 
   it('gets plugin actions and supported object types', async () => {
-    authenticate();
     authenticatedApi()
       .get('/api/plugins/12')
       .query({ with: 'action,objectType' })
@@ -336,7 +299,6 @@ describe('ThreatQ', () => {
   });
 
   it('runs a plugin with type, string ID, and action in the body', async () => {
-    authenticate();
     authenticatedApi()
       .post('/api/plugins/12/execute', { type: 'Indicator', id: '123', action: 'whois' })
       .reply(201, response);
@@ -352,7 +314,6 @@ describe('ThreatQ', () => {
 
   it('attributes a status update to the configured source', async () => {
     ctx.config = { url: origin, defaultSource: 'Elastic Security' };
-    authenticate();
     authenticatedApi()
       .put('/api/indicators/123', {
         status_id: 6,
@@ -365,7 +326,6 @@ describe('ThreatQ', () => {
   });
 
   it('sends plugin action parameters in the request body', async () => {
-    authenticate();
     const parameters = { msg: 'Elastic Security rule', action: 'alert', create_signature: false };
     authenticatedApi()
       .post('/api/plugins/5/execute', {
@@ -390,7 +350,6 @@ describe('ThreatQ', () => {
     'tests connectivity with URL %s',
     async (url) => {
       ctx.config = { url };
-      authenticate();
       authenticatedApi().get('/api/indicator/types').query({ limit: 1 }).reply(200, response);
       await expect(runTest()).resolves.toEqual({
         message: 'Connected to ThreatQ.',
@@ -398,39 +357,9 @@ describe('ThreatQ', () => {
     }
   );
 
-  it('configures a fresh client and token for each action', async () => {
-    for (const token of ['first-token', 'second-token']) {
-      nock(origin).post('/api/token', tokenBody).reply(200, { access_token: token });
-      nock(origin, { reqheaders: { authorization: `Bearer ${token}` } })
-        .get('/api/indicator/types')
-        .query({ limit: 1 })
-        .reply(200, response);
-      await runTest();
-    }
-    expect(ctx.client.defaults.headers.common.Authorization).toBe('Bearer second-token');
-    expect(ctx.client.defaults.auth).toBeUndefined();
-  });
-
-  it('does not expose credentials from an authentication failure', async () => {
-    nock(origin).post('/api/token', tokenBody).reply(401, { password: secrets.password });
-    await expect(runTest()).rejects.toThrow(
-      'ThreatQ authentication failed (HTTP 401). Check the account credentials and API password.'
-    );
-    expect(ctx.log.error).not.toHaveBeenCalled();
-  });
-
-  it.each([{}, { access_token: '' }, { access_token: 123 }])(
-    'rejects a token response without a usable access token: %j',
-    async (body) => {
-      nock(origin).post('/api/token', tokenBody).reply(200, body);
-      await expect(runTest()).rejects.toThrow('ThreatQ authentication failed');
-    }
-  );
-
   it.each([401, 403, 404, 429, 500])(
     'reports API HTTP %s without exposing the response body or token',
     async (status) => {
-      authenticate();
       authenticatedApi()
         .get('/api/indicator/types')
         .query({ limit: 1 })
@@ -441,15 +370,7 @@ describe('ThreatQ', () => {
     }
   );
 
-  it('does not follow an authentication redirect', async () => {
-    nock(origin)
-      .post('/api/token', tokenBody)
-      .reply(307, '', { Location: 'https://other.example.com/token' });
-    await expect(runTest()).rejects.toThrow('ThreatQ authentication failed (HTTP 307)');
-  });
-
   it('does not follow an API redirect or retry a plugin operation', async () => {
-    authenticate();
     authenticatedApi()
       .post('/api/plugins/12/execute')
       .reply(307, '', { Location: 'https://other.example.com/execute' });
@@ -463,22 +384,29 @@ describe('ThreatQ', () => {
     ).rejects.toThrow('ThreatQ request failed (HTTP 307)');
   });
 
-  it('requires account fields through the generated secrets schema', () => {
+  it('requires a bearer token through the generated secrets schema', () => {
+    const schema = generateSecretsSchemaFromSpec(ThreatQ.auth);
+    expect(schema.safeParse({ authType: 'bearer', ...secrets }).success).toBe(true);
+    expect(schema.safeParse({ authType: 'bearer' }).success).toBe(false);
+    expect(schema.safeParse({ authType: 'bearer', token: '' }).success).toBe(false);
+  });
+
+  it('requires OAuth credentials and defaults to HTTP Basic token authentication', () => {
     const schema = generateSecretsSchemaFromSpec(ThreatQ.auth);
     const valid = {
-      authType: 'threatq_user',
-      ...secrets,
-      clientId: 'api-password',
+      authType: 'oauth_client_credentials',
       tokenUrl: `${origin}/api/token`,
+      clientId: 'oauth-client',
+      clientSecret: 'oauth-secret',
     };
-    expect(schema.safeParse(valid).success).toBe(true);
-    for (const field of ['username', 'password', 'clientId', 'tokenUrl']) {
+    expect(schema.parse(valid)).toMatchObject({ tokenEndpointAuthMethod: 'client_secret_basic' });
+    for (const field of ['tokenUrl', 'clientId', 'clientSecret']) {
       expect(schema.safeParse({ ...valid, [field]: undefined }).success).toBe(false);
       expect(schema.safeParse({ ...valid, [field]: '' }).success).toBe(false);
     }
   });
 
-  it('uses the configured OAuth client credentials token without password authentication', async () => {
+  it('uses the token from the existing OAuth client credentials provider', async () => {
     const getToken = jest.fn().mockResolvedValue('Bearer oauth-token');
     ctx.client = await OAuth.configure(
       { getCustomHostSettings: () => undefined, getToken, logger: ctx.log, sslSettings: {} },
@@ -508,7 +436,6 @@ describe('ThreatQ', () => {
   it.each(['searchIndicators', 'searchObjects'])(
     '%s sends fields in the body and relationships in the query',
     async (action) => {
-      authenticate();
       authenticatedApi()
         .post('/api/indicators/query', { fields: ['id', 'value'] })
         .query({ limit: 50, offset: 0, with: 'sources,attributes' })
@@ -523,7 +450,6 @@ describe('ThreatQ', () => {
   );
 
   it('adds tags with an array body', async () => {
-    authenticate();
     authenticatedApi()
       .post('/api/indicators/123/tags', [{ name: 'Elastic triage' }, { name: 'EICAR' }])
       .reply(201, response);
@@ -538,7 +464,6 @@ describe('ThreatQ', () => {
 
   it('creates a custom object and supplies the configured default source', async () => {
     ctx.config = { url: origin, defaultSource: 'Elastic Security' };
-    authenticate();
     authenticatedApi()
       .post('/api/custom_object', { value: 'Example', sources: [{ name: 'Elastic Security' }] })
       .reply(201, response);
@@ -549,7 +474,6 @@ describe('ThreatQ', () => {
 
   it('keeps explicit sources instead of replacing them with the default', async () => {
     ctx.config = { url: origin, defaultSource: 'Elastic Security' };
-    authenticate();
     authenticatedApi()
       .post('/api/custom_object', { value: 'Example', sources: [{ name: 'Analyst' }] })
       .reply(201, response);
