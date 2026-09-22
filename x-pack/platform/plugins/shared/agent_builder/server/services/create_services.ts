@@ -213,6 +213,7 @@ export class ServiceManager {
       spaces,
       agents,
       eventBus: conversationEventBus,
+      conversationEvents,
     });
 
     const runnerFactory = new RunnerFactoryImpl({

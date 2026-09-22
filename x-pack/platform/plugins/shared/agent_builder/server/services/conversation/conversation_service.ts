@@ -21,6 +21,7 @@ import type { ConversationClient } from './client';
 import { createClient } from './client';
 import type { ConversationEventBus } from '../../workflows/triggers/conversation_event_bus';
 import { createScopedConversationEventEmitter } from '../../workflows/triggers/conversation_event_bus';
+import type { ConversationEventsServiceStart } from '../conversation_events';
 
 export interface ConversationService {
   getScopedClient(options: { request: KibanaRequest }): Promise<ConversationClient>;
@@ -39,6 +40,7 @@ interface ConversationServiceDeps {
   spaces?: SpacesPluginStart;
   agents: AgentsServiceStart;
   eventBus?: ConversationEventBus;
+  conversationEvents: ConversationEventsServiceStart;
 }
 
 export class ConversationServiceImpl implements ConversationService {
@@ -48,6 +50,7 @@ export class ConversationServiceImpl implements ConversationService {
   private readonly spaces?: SpacesPluginStart;
   private readonly agents: AgentsServiceStart;
   private readonly eventBus?: ConversationEventBus;
+  private readonly conversationEvents: ConversationEventsServiceStart;
 
   constructor({
     logger,
@@ -56,6 +59,7 @@ export class ConversationServiceImpl implements ConversationService {
     spaces,
     agents,
     eventBus,
+    conversationEvents,
   }: ConversationServiceDeps) {
     this.logger = logger;
     this.security = security;
@@ -63,6 +67,7 @@ export class ConversationServiceImpl implements ConversationService {
     this.spaces = spaces;
     this.agents = agents;
     this.eventBus = eventBus;
+    this.conversationEvents = conversationEvents;
   }
 
   async getScopedClient({ request }: { request: KibanaRequest }): Promise<ConversationClient> {
@@ -78,6 +83,7 @@ export class ConversationServiceImpl implements ConversationService {
       logger: this.logger,
       space,
       agentRegistry,
+      conversationEvents: this.conversationEvents,
       eventEmitter: eventBus ? createScopedConversationEventEmitter(eventBus, request) : undefined,
     });
   }

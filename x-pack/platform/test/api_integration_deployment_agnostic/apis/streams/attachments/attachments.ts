@@ -51,9 +51,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const SECOND_RULE_ID = '312638da-43d1-4d6e-8fb8-9cae201cdd3a';
 
   describe('Attachments API', function () {
-    // failsOnMKI see https://github.com/elastic/kibana/issues/286262
-    this.tags(['failsOnMKI']);
-
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
@@ -1241,17 +1238,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const SLO_TEST_STREAM = 'logs.otel.slo_test';
       const SLO_QUERY_TEST_STREAM = 'query-attach-slo-test-stream';
 
-      const resolveSloSavedObjectId = async (logicalSloId: string): Promise<string> => {
-        const { saved_objects: sloSavedObjects } = await kibanaServer.savedObjects.find<{
-          id: string;
-        }>({ type: 'slo' });
-        const match = sloSavedObjects.find((so) => so.attributes.id === logicalSloId);
-        if (!match) {
-          throw new Error(`Could not find SLO saved object for logical id ${logicalSloId}`);
-        }
-        return match.id;
-      };
-
       const wiredChildStreamBody = {
         dashboards: [],
         rules: [],
@@ -1295,27 +1281,43 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         tags: ['streams-test'],
       });
 
-      it('removes SLO attachment links when the stream is deleted', async () => {
-        let sloId = '';
-        const supertest = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
-          useCookieHeader: true,
-          withInternalHeaders: true,
+      const createSloSavedObject = async (name: string) => {
+        const randomSuffix = Math.random().toString(36).slice(2, 8);
+        const logicalSloId = `${name}-${Date.now()}-${randomSuffix}`;
+        return kibanaServer.savedObjects.create({
+          type: 'slo',
+          overwrite: false,
+          attributes: {
+            ...sloFixture(name),
+            id: logicalSloId,
+            enabled: true,
+          },
         });
+      };
+
+      const safelyDeleteSloSavedObject = async (sloSavedObjectId: string) => {
+        await kibanaServer.savedObjects
+          .delete({ type: 'slo', id: sloSavedObjectId })
+          .catch((err) => {
+            const message = String(err?.message ?? err);
+            if (!/\b404\b/.test(message)) {
+              log.warning(
+                `SLO cascade cleanup: delete saved object failed for ${sloSavedObjectId}: ${message}`
+              );
+            }
+          });
+      };
+
+      it('removes SLO attachment links when the stream is deleted', async () => {
+        let sloSavedObjectId = '';
 
         try {
           await putStream(apiClient, SLO_TEST_STREAM, wiredChildStreamBody);
 
-          const createSloResponse = await supertest
-            .post('/api/observability/slos')
-            .set('kbn-xsrf', 'foo')
-            .send(sloFixture('streams-attachments-slo-unlink-regression'))
-            .expect(200);
-
-          expect(createSloResponse.body.id).to.be.a('string');
-          sloId = createSloResponse.body.id as string;
-          expect(sloId).to.not.be.empty();
-
-          const sloSavedObjectId = await resolveSloSavedObjectId(sloId);
+          const slo = await createSloSavedObject('streams-attachments-slo-unlink-regression');
+          sloSavedObjectId = slo.id;
+          expect(sloSavedObjectId).to.be.a('string');
+          expect(sloSavedObjectId).to.not.be.empty();
 
           await linkAttachment({
             apiClient,
@@ -1350,11 +1352,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               );
             }
           });
-          if (sloId) {
-            await supertest
-              .delete(`/api/observability/slos/${encodeURIComponent(sloId)}`)
-              .set('kbn-xsrf', 'foo')
-              .expect(204);
+          if (sloSavedObjectId) {
+            await safelyDeleteSloSavedObject(sloSavedObjectId);
           }
         }
       });
@@ -1378,27 +1377,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('removes SLO attachment links when a query stream is deleted', async () => {
-          let sloId = '';
-          const supertest = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
-            useCookieHeader: true,
-            withInternalHeaders: true,
-          });
+          let sloSavedObjectId = '';
           const queryStreamBody = { query: { esql: 'FROM logs.otel' } };
 
           try {
             await putQueryStream(apiClient, SLO_QUERY_TEST_STREAM, queryStreamBody);
 
-            const createSloResponse = await supertest
-              .post('/api/observability/slos')
-              .set('kbn-xsrf', 'foo')
-              .send(sloFixture('streams-attachments-slo-query-unlink-regression'))
-              .expect(200);
-
-            expect(createSloResponse.body.id).to.be.a('string');
-            sloId = createSloResponse.body.id as string;
-            expect(sloId).to.not.be.empty();
-
-            const sloSavedObjectId = await resolveSloSavedObjectId(sloId);
+            const slo = await createSloSavedObject(
+              'streams-attachments-slo-query-unlink-regression'
+            );
+            sloSavedObjectId = slo.id;
+            expect(sloSavedObjectId).to.be.a('string');
+            expect(sloSavedObjectId).to.not.be.empty();
 
             await linkAttachment({
               apiClient,
@@ -1435,11 +1425,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 );
               }
             });
-            if (sloId) {
-              await supertest
-                .delete(`/api/observability/slos/${encodeURIComponent(sloId)}`)
-                .set('kbn-xsrf', 'foo')
-                .expect(204);
+            if (sloSavedObjectId) {
+              await safelyDeleteSloSavedObject(sloSavedObjectId);
             }
           }
         });

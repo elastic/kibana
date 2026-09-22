@@ -9,7 +9,6 @@ import type { Observable } from 'rxjs';
 import { firstValueFrom, toArray } from 'rxjs';
 import type { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream, cloudProxyBufferSize } from '@kbn/sse-utils-server';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { ChatRequestBodyPayload, ChatConverseResponse } from '../../common/http_api/chat';
 import { chatApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
@@ -61,31 +60,28 @@ export function registerChatApiRoutes({
           request: { body: chatPayloadSchema },
         },
       },
-      wrapHandler(
-        async (ctx, request, response) => {
-          const payload = request.body as ChatRequestBodyPayload;
+      wrapHandler(async (ctx, request, response) => {
+        const payload = request.body as ChatRequestBodyPayload;
 
-          const { conversations: conversationsService, execution: executionService } =
-            getInternalServices();
+        const { conversations: conversationsService, execution: executionService } =
+          getInternalServices();
 
-          await validateConfigurationOverrides({ payload, request });
+        await validateConfigurationOverrides({ payload, request });
 
-          const { events$: chatEvents$ } = await executeAgent({
-            payload,
-            request,
-            executionService,
-          });
+        const { events$: chatEvents$ } = await executeAgent({
+          payload,
+          request,
+          executionService,
+        });
 
-          const events = await firstValueFrom(chatEvents$.pipe(toArray()));
-          const conversationId = findConversationEvent(events).data.conversation_id;
+        const events = await firstValueFrom(chatEvents$.pipe(toArray()));
+        const conversationId = findConversationEvent(events).data.conversation_id;
 
-          const client = await conversationsService.getScopedClient({ request });
-          const conversation = await client.get(conversationId);
+        const client = await conversationsService.getScopedClient({ request });
+        const conversation = await client.get(conversationId);
 
-          return response.ok<ChatConverseResponse>({ body: conversation });
-        },
-        { featureFlag: AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID }
-      )
+        return response.ok<ChatConverseResponse>({ body: conversation });
+      })
     );
 
   router.versioned
@@ -116,41 +112,38 @@ export function registerChatApiRoutes({
           request: { body: chatPayloadSchema },
         },
       },
-      wrapHandler(
-        async (ctx, request, response) => {
-          const [, { cloud }] = await coreSetup.getStartServices();
-          const { execution: executionService } = getInternalServices();
-          const payload = request.body as ChatRequestBodyPayload;
+      wrapHandler(async (ctx, request, response) => {
+        const [, { cloud }] = await coreSetup.getStartServices();
+        const { execution: executionService } = getInternalServices();
+        const payload = request.body as ChatRequestBodyPayload;
 
-          await validateConfigurationOverrides({ payload, request });
+        await validateConfigurationOverrides({ payload, request });
 
-          const abortController = new AbortController();
-          request.events.aborted$.subscribe(() => {
-            abortController.abort();
-          });
+        const abortController = new AbortController();
+        request.events.aborted$.subscribe(() => {
+          abortController.abort();
+        });
 
-          const { events$: chatEvents$ } = await executeAgent({
-            payload,
-            request,
-            executionService,
-          });
+        const { events$: chatEvents$ } = await executeAgent({
+          payload,
+          request,
+          executionService,
+        });
 
-          const nativeEvents$ = chatEvents$.pipe(filterEventsNativeApiEvents());
+        const nativeEvents$ = chatEvents$.pipe(filterEventsNativeApiEvents());
 
-          return response.ok({
-            headers: getSSEResponseHeaders(),
-            body: observableIntoEventSourceStream(
-              nativeEvents$ as unknown as Observable<ServerSentEvent>,
-              {
-                signal: abortController.signal,
-                flushThrottleMs: 100,
-                flushMinBytes: cloud?.isCloudEnabled ? cloudProxyBufferSize : undefined,
-                logger,
-              }
-            ),
-          });
-        },
-        { featureFlag: AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID }
-      )
+        return response.ok({
+          headers: getSSEResponseHeaders(),
+          body: observableIntoEventSourceStream(
+            nativeEvents$ as unknown as Observable<ServerSentEvent>,
+            {
+              signal: abortController.signal,
+              flushThrottleMs: 100,
+              flushMinBytes: cloud?.isCloudEnabled ? cloudProxyBufferSize : undefined,
+              logger,
+            }
+          ),
+        });
+      })
     );
 }

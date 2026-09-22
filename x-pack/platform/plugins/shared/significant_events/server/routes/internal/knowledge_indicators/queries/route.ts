@@ -325,7 +325,7 @@ const bulkDeleteQueriesRoute = createServerRoute({
       try {
         const { rulesClient } = await scopedClients.getSignificantEventsAlertingContext();
         await cleanupStaleEvents({
-          eventClient: scopedClients.getEventClient(),
+          eventClient: await scopedClients.getEventClient(),
           rulesClient,
           candidateRuleIds: [...candidateRuleIds],
         });
@@ -663,7 +663,6 @@ const generateQueriesRoute = createServerRoute({
     const {
       streamsClient,
       inferenceClient,
-      soClient,
       scopedClusterClient,
       streamDataEsClient,
       licensing,
@@ -693,7 +692,6 @@ const generateQueriesRoute = createServerRoute({
       {
         streamsClient,
         inferenceClient,
-        soClient,
         kiClient,
         esClient: scopedClusterClient.asCurrentUser,
         streamDataEsClient,

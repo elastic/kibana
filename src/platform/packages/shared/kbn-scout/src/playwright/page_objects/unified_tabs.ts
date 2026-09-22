@@ -212,7 +212,9 @@ export class UnifiedTabs {
 
   /**
    * Clicks the "New tab" button and waits for the newly created tab to become
-   * the active one.
+   * the active one. Discover new tabs stay uninitialized (no auto-fetch); use
+   * `discover.createNewTabAndSearch()` when the test needs results, the sidebar,
+   * histogram, or DocViewer or perform a search manually after createNewTab().
    */
   async createNewTab() {
     await this.clickNewTabButton();
@@ -327,11 +329,10 @@ export class UnifiedTabs {
     await this.closeTabsBarMenu();
   }
 
-  async closeTab(index: number) {
-    const tab = await this.getTab(index);
+  private async closeTabLocator(tab: Locator) {
     const tabTestSubj = await tab.getAttribute('data-test-subj');
     if (!tabTestSubj) {
-      throw new Error(`Tab at index ${index} is missing a data-test-subj attribute`);
+      throw new Error('Tab is missing a data-test-subj attribute');
     }
 
     const tabId = tabTestSubj.slice(UNIFIED_TABS_TEST_SUBJ.selectTabBtnPrefix.length);
@@ -341,6 +342,14 @@ export class UnifiedTabs {
     await this.page.testSubj.click(`${UNIFIED_TABS_TEST_SUBJ.closeTabBtnPrefix}${tabId}`);
     await closedTab.waitFor({ state: 'hidden' });
     await this.hideTabPreview();
+  }
+
+  async closeTab(index: number) {
+    await this.closeTabLocator(await this.getTab(index));
+  }
+
+  async closeTabByName(name: string) {
+    await this.closeTabLocator(this.getTabsBar().getByRole('tab', { name, exact: true }));
   }
 
   async restoreRecentlyClosedTab(index: number) {

@@ -40,9 +40,6 @@ const GROUP_LABELS: Record<CostBudgetGroup, string> = {
     'xpack.significantEventsApp.settings.costEstimate.kiExtractionRowTitle',
     { defaultMessage: 'KI extraction' }
   ),
-  memory: i18n.translate('xpack.significantEventsApp.settings.costEstimate.memoryRowTitle', {
-    defaultMessage: 'Memory',
-  }),
 };
 
 const PARTIAL_FLOOR_LABEL = i18n.translate(
