@@ -162,8 +162,7 @@ async function updateAgentlessPolicy(
 
   const serviceVarsMap: Record<string, ServiceVars> = {};
   for (const { instance, service } of members) {
-    serviceVarsMap[service.id] =
-      storedServiceVars[instance.instanceId] ??
+    serviceVarsMap[service.id] = storedServiceVars[instance.instanceId] ??
       storedServiceVars[instance.serviceId] ?? {
         enabledDataStreams: service.dataStreams,
         varsByDataStream: {},
@@ -178,7 +177,8 @@ async function updateAgentlessPolicy(
     name?: string;
     input?: string;
     inputs?: Array<{ type: string }>;
-  }> = (pkgInfo as unknown as Record<string, unknown>).policy_templates as typeof pkgTemplates ?? [];
+  }> =
+    ((pkgInfo as unknown as Record<string, unknown>).policy_templates as typeof pkgTemplates) ?? [];
   for (const template of pkgTemplates) {
     const templateInputs = template.inputs ?? (template.input ? [{ type: template.input }] : []);
     for (const input of templateInputs) {
@@ -271,8 +271,7 @@ async function updatePackagePolicy(
 
   const serviceVarsMap: Record<string, ServiceVars> = {};
   for (const { instance, service } of members) {
-    serviceVarsMap[service.id] =
-      storedServiceVars[instance.instanceId] ??
+    serviceVarsMap[service.id] = storedServiceVars[instance.instanceId] ??
       storedServiceVars[instance.serviceId] ?? {
         enabledDataStreams: service.dataStreams,
         varsByDataStream: {},
@@ -286,7 +285,8 @@ async function updatePackagePolicy(
     name?: string;
     input?: string;
     inputs?: Array<{ type: string }>;
-  }> = (pkgInfo as unknown as Record<string, unknown>).policy_templates as typeof pkgTemplates ?? [];
+  }> =
+    ((pkgInfo as unknown as Record<string, unknown>).policy_templates as typeof pkgTemplates) ?? [];
   for (const template of pkgTemplates) {
     const templateInputs = template.inputs ?? (template.input ? [{ type: template.input }] : []);
     for (const input of templateInputs) {

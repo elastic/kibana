@@ -109,8 +109,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         : targets.filter((g) => g.instanceIds.some((id) => !alreadyDeployedIds.has(id)));
 
       const hasPendingCleanup =
-        !isRetry &&
-        Object.keys(detectAndReviewStep.pendingCleanupPolicyIds ?? {}).length > 0;
+        !isRetry && Object.keys(detectAndReviewStep.pendingCleanupPolicyIds ?? {}).length > 0;
 
       if (targetsToDeploy.length === 0 && !hasPendingCleanup) return { failed: false };
 
@@ -133,9 +132,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
 
         // Clean up package policies for removed services before creating new ones.
         if (hasPendingCleanup) {
-          const targetPolicyIds = agentPolicyId
-            ? [agentPolicyId]
-            : selectedAgentPolicyIds ?? [];
+          const targetPolicyIds = agentPolicyId ? [agentPolicyId] : selectedAgentPolicyIds ?? [];
           await cleanupPackagePolicies({
             pendingCleanupPolicyIds: detectAndReviewStep.pendingCleanupPolicyIds ?? {},
             currentPolicyIdsByInstance: detectAndReviewStep.policyIdsByInstance,
