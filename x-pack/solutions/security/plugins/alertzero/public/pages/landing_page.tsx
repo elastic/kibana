@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { useWorkers } from '../hooks/use_workers_api';
-import { useProposalsByCategory } from '../hooks/use_proposals_api';
+import { useProposalsByCategory, useClosedProposals } from '../hooks/use_proposals_api';
 import { ConversationsPage } from './conversations';
 import { OnboardingPage } from './onboarding';
 
@@ -17,9 +17,14 @@ export const LandingPage: React.FC = () => {
   const respond = useProposalsByCategory('respond');
   const investigate = useProposalsByCategory('investigate');
   const configure = useProposalsByCategory('configure');
+  const closed = useClosedProposals();
 
   const isLoading =
-    workers.isLoading || respond.isLoading || investigate.isLoading || configure.isLoading;
+    workers.isLoading ||
+    respond.isLoading ||
+    investigate.isLoading ||
+    configure.isLoading ||
+    closed.isLoading;
 
   if (isLoading) {
     return (
@@ -35,12 +40,14 @@ export const LandingPage: React.FC = () => {
     workers.error != null ||
     respond.error != null ||
     investigate.error != null ||
-    configure.error != null;
+    configure.error != null ||
+    closed.error != null;
   const hasEnabledWorker = workers.data?.workers.some((w) => w.enabled) ?? false;
   const hasProposals =
     (respond.data?.total ?? 0) > 0 ||
     (investigate.data?.total ?? 0) > 0 ||
-    (configure.data?.total ?? 0) > 0;
+    (configure.data?.total ?? 0) > 0 ||
+    (closed.data?.total ?? 0) > 0;
 
   if (hasAnyError || hasEnabledWorker || hasProposals) {
     return <ConversationsPage />;

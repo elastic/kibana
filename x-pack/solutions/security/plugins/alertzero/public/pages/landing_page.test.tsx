@@ -14,7 +14,7 @@ import { createMemoryHistory } from 'history';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { useWorkers } from '../hooks/use_workers_api';
-import { useProposalsByCategory } from '../hooks/use_proposals_api';
+import { useProposalsByCategory, useClosedProposals } from '../hooks/use_proposals_api';
 import { LandingPage } from './landing_page';
 
 jest.mock('../hooks/use_workers_api');
@@ -33,6 +33,7 @@ jest.mock('../hooks/use_alertzero_doc_title', () => ({ useAlertZeroDocTitle: jes
 
 const mockUseWorkers = useWorkers as jest.Mock;
 const mockUseProposalsByCategory = useProposalsByCategory as jest.Mock;
+const mockUseClosedProposals = useClosedProposals as jest.Mock;
 
 type QueryOverrides = Partial<{
   data: unknown;
@@ -74,6 +75,7 @@ const renderPage = () => {
 
 beforeEach(() => {
   mockUseProposalsByCategory.mockReturnValue(proposalsResult(0));
+  mockUseClosedProposals.mockReturnValue(proposalsResult(0));
   mockUseWorkers.mockReturnValue(workersResult([]));
 });
 
@@ -166,6 +168,26 @@ describe('LandingPage', () => {
     expect(document.querySelector('[class*="euiLoadingSpinner"]')).toBeInTheDocument();
   });
 
+  it('shows the queue when closed proposals exist even with no workers enabled', () => {
+    mockUseWorkers.mockReturnValue(workersResult([]));
+    mockUseClosedProposals.mockReturnValue(proposalsResult(5));
+
+    renderPage();
+
+    expect(screen.getByTestId('conversations-page')).toBeInTheDocument();
+    expect(screen.queryByText('Get started with AlertZero')).not.toBeInTheDocument();
+  });
+
+  it('shows a loading spinner while closed proposals are loading', () => {
+    mockUseClosedProposals.mockReturnValue(proposalsResult(0, { isLoading: true, data: undefined }));
+
+    renderPage();
+
+    expect(screen.queryByText('Get started with AlertZero')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('conversations-page')).not.toBeInTheDocument();
+    expect(document.querySelector('[class*="euiLoadingSpinner"]')).toBeInTheDocument();
+  });
+
   it('falls through to the queue on workers fetch error', () => {
     mockUseWorkers.mockReturnValue({
       data: undefined,
@@ -181,6 +203,19 @@ describe('LandingPage', () => {
   it('falls through to the queue on proposals fetch error', () => {
     mockUseWorkers.mockReturnValue(workersResult([]));
     mockUseProposalsByCategory.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: new Error('network error'),
+    });
+
+    renderPage();
+
+    expect(screen.getByTestId('conversations-page')).toBeInTheDocument();
+  });
+
+  it('falls through to the queue on closed proposals fetch error', () => {
+    mockUseWorkers.mockReturnValue(workersResult([]));
+    mockUseClosedProposals.mockReturnValue({
       data: undefined,
       isLoading: false,
       error: new Error('network error'),
