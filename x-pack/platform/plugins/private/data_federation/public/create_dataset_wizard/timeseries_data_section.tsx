@@ -85,7 +85,7 @@ export function TimeseriesDataSection({
         <>
           <EuiSpacer size="m" />
           <EuiFlexGroup gutterSize="m" alignItems="flexStart" responsive={false}>
-            <EuiFlexItem>
+            <EuiFlexItem grow={false} style={{ maxWidth: 200 }}>
               <EuiFormRow
                 label={i18n.translate(
                   'xpack.dataFederation.createDatasetWizard.timestampFieldTypeLabel',

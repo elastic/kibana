@@ -136,8 +136,13 @@ export function FieldMappingForm({
   return (
     <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
       <EuiFlexItem>
-        <EuiFlexGroup gutterSize="m" alignItems="flexStart">
-          <EuiFlexItem>
+        <EuiFlexGroup
+          gutterSize="m"
+          alignItems="flexStart"
+          responsive={false}
+          style={{ width: '100%' }}
+        >
+          <EuiFlexItem grow={false} style={{ maxWidth: 200 }}>
             <EuiFormRow
               label={i18n.translate('xpack.dataFederation.mappingEditor.typeLabel', {
                 defaultMessage: 'Field type',
