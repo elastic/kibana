@@ -16,6 +16,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { randomUUID } from 'crypto';
 import { ALERTZERO_API_PRIVILEGE_READ, HUNT_INTERNAL_ROUTE_BASE } from '../../../common/constants';
 import { huntCoordinator } from '../../services/watches/hunt/hunt_coordinator';
+import { parseTechnologyInput } from '../../services/watches/hunt/common/resolve_index_scope';
 import { resolveScopedModel } from './lib/scoped_model';
 import type { RouteDependencies } from '../register_routes';
 
@@ -73,6 +74,13 @@ export const registerHuntCoordinatorRoute = ({
 
           const model = modelOutcome.ok ? modelOutcome.model : undefined;
 
+          const technologyInput = parseTechnologyInput(request.body.technology);
+          if ('invalid' in technologyInput) {
+            return response.badRequest({
+              body: { message: `Unknown technology "${technologyInput.invalid}".` },
+            });
+          }
+
           const {
             report_id,
             text,
@@ -86,7 +94,6 @@ export const registerHuntCoordinatorRoute = ({
             max_tier2_sample_events,
             trigger,
             run_id: runId,
-            technology,
           } = request.body;
 
           const result = await huntCoordinator(esClient, model, logger, {
@@ -102,9 +109,7 @@ export const registerHuntCoordinatorRoute = ({
             tier2_when,
             max_tier2_sample_events,
             trigger,
-            // A workflow caller renders an unset input as null; both mean "resolve
-            // from the environment".
-            technology: technology ?? undefined,
+            technology: technologyInput.technology,
             // The Worker fan-out supplies a run id so one sweep's children share it,
             // which is what the packaging barrier and conclusion dedupe key off. Only
             // mint one when the caller has no sweep to tie the run to.

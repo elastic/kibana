@@ -16,7 +16,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-import { HuntTechnology, HuntIoc, HuntForThreatResult } from '../components/hunt.gen';
+import { HuntIoc, HuntTechnology, HuntForThreatResult } from '../components/hunt.gen';
 
 export const HuntCoordinatorStatus = lazySchema(() =>
   z.enum(['blocked', 'tier1_only', 'tier1_and_tier2', 'tier2_only_skipped'])
@@ -39,12 +39,15 @@ export const HuntCoordinatorRequestBody = lazySchema(() =>
           'Run id supplied by the Worker fan-out so every child of one sweep shares it, which is what the packaging barrier and the conclusion dedupe key off. The route mints one only when the caller has no sweep to tie the run to.'
         ),
       /**
-       * Pins the hunt to one technology's index scope. Omit it (or send null, which is what a workflow template renders for an unset input) and the coordinator resolves every known technology and hunts the ones whose required indices exist in the space.
+       * One of the HuntTechnology values to pin the hunt to that technology's index scope. Omit it, or send null or an empty string (a workflow renders an unset input as ""), and the coordinator resolves every known technology and hunts the ones whose required indices exist in the space. Any other value is a 400. Kept a plain string because a workflow caller cannot omit the key.
        */
-      technology: HuntTechnology.nullable()
+      technology: z
+        .string()
+        .max(64)
+        .nullable()
         .optional()
         .describe(
-          "Pins the hunt to one technology's index scope. Omit it (or send null, which is what a workflow template renders for an unset input) and the coordinator resolves every known technology and hunts the ones whose required indices exist in the space."
+          'One of the HuntTechnology values to pin the hunt to that technology\'s index scope. Omit it, or send null or an empty string (a workflow renders an unset input as ""), and the coordinator resolves every known technology and hunts the ones whose required indices exist in the space. Any other value is a 400. Kept a plain string because a workflow caller cannot omit the key.'
         ),
       text: z.string().max(200000).optional(),
       iocs: z.array(HuntIoc).optional(),
