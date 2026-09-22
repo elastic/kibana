@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { SchemaOutput } from '../schema_output';
-import {
-  SnapshotType,
-} from '../zod/snapshot';
+import * as t from 'io-ts';
 
-export {
-  SnapshotType,
-};
+export const SnapshotType = t.type({
+  down: t.number,
+  total: t.number,
+  up: t.number,
+});
 
-export type Snapshot = SchemaOutput<typeof SnapshotType>;
+export type Snapshot = t.TypeOf<typeof SnapshotType>;

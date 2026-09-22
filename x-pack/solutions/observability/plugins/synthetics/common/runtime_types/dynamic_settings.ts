@@ -5,21 +5,51 @@
  * 2.0.
  */
 
-import type { SchemaOutput } from './schema_output';
-import {
-  DynamicSettingsSaveCodec,
-  DynamicSettingsCodec,
-  LocationMonitorsType,
-  DefaultEmailCodec,
-} from './zod/dynamic_settings';
+import * as t from 'io-ts';
 
-export {
-  DynamicSettingsSaveCodec,
-  DynamicSettingsCodec,
-  LocationMonitorsType,
-};
+const DefaultEmailCodec = t.intersection([
+  t.type({
+    to: t.array(t.string),
+  }),
+  t.partial({
+    cc: t.array(t.string),
+    bcc: t.array(t.string),
+  }),
+]);
 
-export type DynamicSettings = SchemaOutput<typeof DynamicSettingsCodec>;
-export type DefaultEmail = SchemaOutput<typeof DefaultEmailCodec>;
-export type DynamicSettingsSaveResponse = SchemaOutput<typeof DynamicSettingsSaveCodec>;
-export type LocationMonitorsResponse = SchemaOutput<typeof LocationMonitorsType>;
+export const DynamicSettingsSaveCodec = t.intersection([
+  t.type({
+    success: t.boolean,
+  }),
+  t.partial({
+    error: t.string,
+  }),
+]);
+
+export const DynamicSettingsCodec = t.intersection([
+  t.strict({
+    certAgeThreshold: t.number,
+    certExpirationThreshold: t.number,
+    defaultConnectors: t.array(t.string),
+  }),
+  t.partial({
+    defaultEmail: DefaultEmailCodec,
+    defaultTLSRuleEnabled: t.boolean,
+    defaultStatusRuleEnabled: t.boolean,
+    privateLocationsSyncInterval: t.number,
+    rebalancePrivateLocationShardsEnabled: t.boolean,
+  }),
+]);
+
+export type DynamicSettings = t.TypeOf<typeof DynamicSettingsCodec>;
+export type DefaultEmail = t.TypeOf<typeof DefaultEmailCodec>;
+export type DynamicSettingsSaveResponse = t.TypeOf<typeof DynamicSettingsSaveCodec>;
+
+export const LocationMonitorsType = t.array(
+  t.type({
+    id: t.string,
+    count: t.number,
+  })
+);
+
+export type LocationMonitorsResponse = t.TypeOf<typeof LocationMonitorsType>;

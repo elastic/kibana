@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import type { SchemaOutput } from './schema_output';
-import {
-  remoteMonitorInfoSchema,
-} from './zod/remote';
+import * as t from 'io-ts';
 
-export {
-  remoteMonitorInfoSchema,
-};
+export const remoteMonitorInfoSchema = t.intersection([
+  t.type({
+    remoteName: t.string,
+  }),
+  t.partial({
+    kibanaUrl: t.string,
+  }),
+]);
 
-export type RemoteMonitorInfo = SchemaOutput<typeof remoteMonitorInfoSchema>;
+export type RemoteMonitorInfo = t.TypeOf<typeof remoteMonitorInfoSchema>;

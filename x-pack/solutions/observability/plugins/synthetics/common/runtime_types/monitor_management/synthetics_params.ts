@@ -5,25 +5,55 @@
  * 2.0.
  */
 
-import type { SchemaOutput } from '../schema_output';
-import {
-  SyntheticsParamsReadonlyCodec,
-  SyntheticsParamsReadonlyCodecList,
-  SyntheticsParamsCodec,
-  DeleteParamsResponseCodec,
-  SyntheticsParamRequestCodec,
-} from '../zod/synthetics_params';
+import * as t from 'io-ts';
 
-export {
-  SyntheticsParamsReadonlyCodec,
-  SyntheticsParamsReadonlyCodecList,
-  SyntheticsParamsCodec,
-  DeleteParamsResponseCodec,
-  SyntheticsParamRequestCodec,
-};
+export const SyntheticsParamsReadonlyCodec = t.intersection([
+  t.interface({
+    id: t.string,
+    key: t.string,
+  }),
+  t.partial({
+    description: t.string,
+    tags: t.array(t.string),
+    namespaces: t.array(t.string),
+  }),
+]);
 
-export type SyntheticsParamsReadonly = SchemaOutput<typeof SyntheticsParamsReadonlyCodec>;
-export type SyntheticsParams = SchemaOutput<typeof SyntheticsParamsCodec>;
-export type SyntheticsParamSOAttributes = SchemaOutput<typeof SyntheticsParamsCodec>;
-export type DeleteParamsResponse = SchemaOutput<typeof DeleteParamsResponseCodec>;
-export type SyntheticsParamRequest = SchemaOutput<typeof SyntheticsParamRequestCodec>;
+export const SyntheticsParamsReadonlyCodecList = t.array(SyntheticsParamsReadonlyCodec);
+
+export type SyntheticsParamsReadonly = t.TypeOf<typeof SyntheticsParamsReadonlyCodec>;
+
+export const SyntheticsParamsCodec = t.intersection([
+  SyntheticsParamsReadonlyCodec,
+  t.interface({ value: t.string }),
+]);
+
+export type SyntheticsParams = t.TypeOf<typeof SyntheticsParamsCodec>;
+
+export type SyntheticsParamSOAttributes = t.TypeOf<typeof SyntheticsParamsCodec>;
+
+export const DeleteParamsResponseCodec = t.intersection([
+  t.interface({
+    id: t.string,
+    deleted: t.boolean,
+  }),
+  t.partial({
+    error: t.string,
+  }),
+]);
+
+export type DeleteParamsResponse = t.TypeOf<typeof DeleteParamsResponseCodec>;
+
+export const SyntheticsParamRequestCodec = t.intersection([
+  t.interface({
+    key: t.string,
+    value: t.string,
+  }),
+  t.partial({
+    description: t.string,
+    tags: t.array(t.string),
+    share_across_spaces: t.boolean,
+  }),
+]);
+
+export type SyntheticsParamRequest = t.TypeOf<typeof SyntheticsParamRequestCodec>;

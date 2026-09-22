@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 
-export const NetworkTimingsType = z.looseObject({
+const NetworkTimingsType = z.looseObject({
   queueing: z.number(),
   connect: z.number(),
   total: z.number(),
@@ -20,14 +20,14 @@ export const NetworkTimingsType = z.looseObject({
   ssl: z.number(),
 });
 
-export const CertificateDataType = z.looseObject({
+const CertificateDataType = z.looseObject({
   validFrom: z.string().optional(),
   validTo: z.string().optional(),
   issuer: z.string().optional(),
   subjectName: z.string().optional(),
 });
 
-export const NetworkEventType = z.looseObject({
+const NetworkEventType = z.looseObject({
   timestamp: z.string(),
   requestSentTime: z.number(),
   loadEndTime: z.number(),

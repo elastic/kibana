@@ -5,31 +5,30 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import type { SchemaOutput } from '../schema_output';
+import * as t from 'io-ts';
 
-const MonitorFilterCodec = z.object({
-  label: z.string(),
-  count: z.number(),
+const MonitorFilterCodec = t.interface({
+  label: t.string,
+  count: t.number,
 });
 
-export type MonitorFilter = SchemaOutput<typeof MonitorFilterCodec>;
+export type MonitorFilter = t.TypeOf<typeof MonitorFilterCodec>;
 
-export const MonitorFiltersResultCodec = z.object({
-  monitorTypes: z.array(MonitorFilterCodec),
-  tags: z.array(MonitorFilterCodec),
-  locations: z.array(MonitorFilterCodec),
-  projects: z.array(MonitorFilterCodec),
-  schedules: z.array(MonitorFilterCodec),
+export const MonitorFiltersResultCodec = t.interface({
+  monitorTypes: t.array(MonitorFilterCodec),
+  tags: t.array(MonitorFilterCodec),
+  locations: t.array(MonitorFilterCodec),
+  projects: t.array(MonitorFilterCodec),
+  schedules: t.array(MonitorFilterCodec),
 });
 
-export type MonitorFiltersResult = SchemaOutput<typeof MonitorFiltersResultCodec>;
+export type MonitorFiltersResult = t.TypeOf<typeof MonitorFiltersResultCodec>;
 
 // Type-ahead values for bulk edit fields that are not indexed on the monitor
 // saved objects (service.name and label keys), sourced from ping documents.
-export const FieldSuggestionsResultCodec = z.object({
-  serviceNames: z.array(z.string()),
-  labelKeys: z.array(z.string()),
+export const FieldSuggestionsResultCodec = t.interface({
+  serviceNames: t.array(t.string),
+  labelKeys: t.array(t.string),
 });
 
-export type FieldSuggestionsResult = SchemaOutput<typeof FieldSuggestionsResultCodec>;
+export type FieldSuggestionsResult = t.TypeOf<typeof FieldSuggestionsResultCodec>;

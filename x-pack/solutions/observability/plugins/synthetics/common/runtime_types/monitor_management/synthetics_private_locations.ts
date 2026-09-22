@@ -5,16 +5,28 @@
  * 2.0.
  */
 
-import type { SchemaOutput } from '../schema_output';
-import {
-  PrivateLocationCodec,
-  SyntheticsPrivateLocationsType,
-} from '../zod/synthetics_private_locations';
+import * as t from 'io-ts';
 
-export {
-  PrivateLocationCodec,
-  SyntheticsPrivateLocationsType,
-};
+export const PrivateLocationCodec = t.intersection([
+  t.interface({
+    label: t.string,
+    id: t.string,
+    agentPolicyId: t.string,
+  }),
+  t.partial({
+    isServiceManaged: t.boolean,
+    isInvalid: t.boolean,
+    tags: t.array(t.string),
+    geo: t.interface({
+      lat: t.number,
+      lon: t.number,
+    }),
+    namespace: t.string,
+    spaces: t.array(t.string),
+    isAgentSharding: t.boolean,
+  }),
+]);
 
-export type PrivateLocation = SchemaOutput<typeof PrivateLocationCodec>;
-export type SyntheticsPrivateLocations = SchemaOutput<typeof SyntheticsPrivateLocationsType>;
+export const SyntheticsPrivateLocationsType = t.array(PrivateLocationCodec);
+export type PrivateLocation = t.TypeOf<typeof PrivateLocationCodec>;
+export type SyntheticsPrivateLocations = t.TypeOf<typeof SyntheticsPrivateLocationsType>;

@@ -5,16 +5,22 @@
  * 2.0.
  */
 
-import type { SchemaOutput } from './schema_output';
-import {
-  SyntheticsServiceApiKeyType,
-  SyntheticsServiceApiKeySaveType,
-} from './zod/settings';
+import * as t from 'io-ts';
 
-export {
-  SyntheticsServiceApiKeyType,
-  SyntheticsServiceApiKeySaveType,
-};
+export const SyntheticsServiceApiKeyType = t.type({
+  id: t.string,
+  name: t.string,
+  apiKey: t.string,
+});
 
-export type SyntheticsServiceApiKey = SchemaOutput<typeof SyntheticsServiceApiKeyType>;
-export type SyntheticsServiceApiKeySaveResponse = SchemaOutput<typeof SyntheticsServiceApiKeySaveType>;
+export const SyntheticsServiceApiKeySaveType = t.intersection([
+  t.type({
+    success: t.boolean,
+  }),
+  t.partial({
+    error: t.string,
+  }),
+]);
+
+export type SyntheticsServiceApiKey = t.TypeOf<typeof SyntheticsServiceApiKeyType>;
+export type SyntheticsServiceApiKeySaveResponse = t.TypeOf<typeof SyntheticsServiceApiKeySaveType>;

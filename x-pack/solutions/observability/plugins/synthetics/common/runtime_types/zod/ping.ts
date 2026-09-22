@@ -286,7 +286,7 @@ export const UrlType = z.looseObject({
   path: z.string().optional(),
 });
 
-export const SummaryCodec = z.looseObject({
+const SummaryCodec = z.looseObject({
   down: z.number(),
   up: z.number(),
   status: z.enum(['up', 'down']),

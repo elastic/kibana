@@ -5,24 +5,32 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import type { SchemaOutput } from '../../common/runtime_types/schema_output';
+import * as t from 'io-ts';
 
-const DefaultEmailCodec = z.object({
-  to: z.array(z.string()),
-  cc: z.array(z.string()).optional(),
-  bcc: z.array(z.string()).optional(),
-});
+const DefaultEmailCodec = t.intersection([
+  t.type({
+    to: t.array(t.string),
+  }),
+  t.partial({
+    cc: t.array(t.string),
+    bcc: t.array(t.string),
+  }),
+]);
 
-export const DynamicSettingsAttributesCodec = z.object({
-  certAgeThreshold: z.number(),
-  certExpirationThreshold: z.number(),
-  defaultConnectors: z.array(z.string()),
-  defaultEmail: DefaultEmailCodec.optional(),
-  defaultStatusRuleEnabled: z.boolean().optional(),
-  defaultTLSRuleEnabled: z.boolean().optional(),
-  rebalancePrivateLocationShardsEnabled: z.boolean().optional(),
-});
+export const DynamicSettingsAttributesCodec = t.intersection([
+  t.strict({
+    certAgeThreshold: t.number,
+    certExpirationThreshold: t.number,
+    defaultConnectors: t.array(t.string),
+  }),
+  t.partial({
+    defaultEmail: DefaultEmailCodec,
+    defaultStatusRuleEnabled: t.boolean,
+    defaultTLSRuleEnabled: t.boolean,
+    rebalancePrivateLocationShardsEnabled: t.boolean,
+  }),
+]);
 
-// `DynamicSettingsAttributes` isolates the Saved Object's attributes from the API response.
-export type DynamicSettingsAttributes = SchemaOutput<typeof DynamicSettingsAttributesCodec>;
+// `DynamicSettingsAttributes` type helps isolate the Saved Object's attributes from API response object,
+// and it may likely be a duplicate of `DynamicSettings` initially.
+export type DynamicSettingsAttributes = t.TypeOf<typeof DynamicSettingsAttributesCodec>;

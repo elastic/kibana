@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 
-export const DefaultEmailCodec = z.looseObject({
+const DefaultEmailCodec = z.looseObject({
   to: z.array(z.string()),
   cc: z.array(z.string()).optional(),
   bcc: z.array(z.string()).optional(),

@@ -5,15 +5,27 @@
  * 2.0.
  */
 
-import type { SchemaOutput } from '../schema_output';
-import {
-  StateEndsCodec,
-  ErrorStateCodec,
-} from '../zod/ping';
+import * as t from 'io-ts';
+export const StateEndsCodec = t.type({
+  duration_ms: t.union([t.string, t.number]),
+  checks: t.number,
+  ends: t.union([t.string, t.null]),
+  started_at: t.string,
+  id: t.string,
+  up: t.number,
+  down: t.number,
+  status: t.string,
+});
 
-export {
-  StateEndsCodec,
-  ErrorStateCodec,
-};
+export const ErrorStateCodec = t.type({
+  duration_ms: t.union([t.string, t.number]),
+  checks: t.number,
+  ends: t.union([StateEndsCodec, t.null]),
+  started_at: t.string,
+  id: t.string,
+  up: t.number,
+  down: t.number,
+  status: t.string,
+});
 
-export type ErrorState = SchemaOutput<typeof ErrorStateCodec>;
+export type ErrorState = t.TypeOf<typeof ErrorStateCodec>;

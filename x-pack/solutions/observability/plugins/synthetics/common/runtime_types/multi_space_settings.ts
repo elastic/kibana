@@ -5,18 +5,21 @@
  * 2.0.
  */
 
-import type { SchemaOutput } from './schema_output';
-import { syntheticsMultiSpaceSettingsSchema } from './zod/settings';
+import * as t from 'io-ts';
 
 // Multi-space Synthetics settings stored in the `synthetics-settings-multi-space`
 // saved object. Today it carries only CCS-related fields; future space-scoped
 // settings should be added here.
-export { syntheticsMultiSpaceSettingsSchema };
+export const syntheticsMultiSpaceSettingsSchema = t.partial({
+  useAllRemoteClusters: t.boolean,
+  selectedRemoteClusters: t.array(t.string),
+});
 
-export type SyntheticsMultiSpaceSettings = SchemaOutput<typeof syntheticsMultiSpaceSettingsSchema>;
+export type SyntheticsMultiSpaceSettings = t.TypeOf<typeof syntheticsMultiSpaceSettingsSchema>;
 
 // API-facing shape that includes the spaces the settings are currently shared with.
-// `spaces` is SO envelope metadata, not an attribute, so it lives only on this type.
+// `spaces` is SO envelope metadata, not an attribute, so it lives only on this
+// type and never inside the io-ts attributes codec.
 export interface SyntheticsMultiSpaceSettingsWithSpaces extends SyntheticsMultiSpaceSettings {
   spaces: string[];
 }

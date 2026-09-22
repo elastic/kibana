@@ -22,7 +22,6 @@
 
 import { z } from '@kbn/zod';
 import { ConfigKey } from '../monitor_management/config_key';
-import { MonitorTypeEnum } from '../monitor_management/monitor_configs';
 import { AlertConfigsCodec } from './alert_config';
 import {
   FormMonitorTypeCodec,
@@ -37,7 +36,7 @@ import {
   VerificationModeCodec,
 } from './monitor_configs';
 import { MetadataCodec } from './monitor_meta_data';
-import { MonitorServiceLocationCodec, ServiceLocationErrors } from './locations';
+import { MonitorServiceLocationCodec } from './locations';
 import { PrivateLocationCodec } from './synthetics_private_locations';
 import {
   getNonEmptyStringCodec,
@@ -48,7 +47,7 @@ import {
   TimeoutString,
 } from './common';
 
-export const ScheduleCodec = z.looseObject({
+const ScheduleCodec = z.looseObject({
   number: z.string(),
   unit: ScheduleUnitCodec,
 });
@@ -69,7 +68,7 @@ export const TLSFieldsCodec = z.looseObject(tlsFields);
 export const TLSSensitiveFieldsCodec = z.looseObject(tlsSensitiveFields);
 export const TLSCodec = z.looseObject({ ...tlsFields, ...tlsSensitiveFields });
 
-export const MonitorLocationsCodec = nonEmptyArray(
+const MonitorLocationsCodec = nonEmptyArray(
   z.union([MonitorServiceLocationCodec, PrivateLocationCodec])
 );
 
@@ -240,7 +239,7 @@ export const HTTPFieldsCodec = z.looseObject({
   ...tlsSensitiveFields,
 });
 
-export const ThrottlingConfigValueCodec = z.looseObject({
+const ThrottlingConfigValueCodec = z.looseObject({
   download: z.string(),
   upload: z.string(),
   latency: z.string(),
@@ -416,7 +415,7 @@ export const SyntheticsMonitorWithIdCodec = SyntheticsMonitorCodec.and(
   })
 );
 
-export const HeartbeatFieldsCodec = z.looseObject({
+const HeartbeatFieldsCodec = z.looseObject({
   config_id: z.string(),
   run_once: z.boolean().optional(),
   test_run_id: z.string().optional(),
@@ -442,28 +441,5 @@ export const EncryptedSyntheticsSavedMonitorCodec = EncryptedSyntheticsMonitorCo
     id: z.string(),
     updated_at: z.string(),
     created_at: z.string(),
-  })
-);
-
-export const MonitorDefaultsCodec = z.looseObject({
-  [MonitorTypeEnum.HTTP]: HTTPFieldsCodec,
-  [MonitorTypeEnum.TCP]: TCPFieldsCodec,
-  [MonitorTypeEnum.ICMP]: ICMPSimpleFieldsCodec,
-  [MonitorTypeEnum.BROWSER]: BrowserFieldsCodec,
-  [MonitorTypeEnum.API]: APIFieldsCodec,
-});
-
-export const MonitorManagementListResultCodec = z.looseObject({
-  monitors: z.array(EncryptedSyntheticsSavedMonitorCodec),
-  page: z.number(),
-  perPage: z.number(),
-  total: z.union([z.number(), z.null()]),
-  absoluteTotal: z.union([z.number(), z.null()]),
-  syncErrors: z.union([ServiceLocationErrors, z.null()]),
-});
-
-export const SyntheticsMonitorWithSecretsCodec = EncryptedSyntheticsMonitorCodec.and(
-  z.looseObject({
-    secrets: z.string(),
   })
 );

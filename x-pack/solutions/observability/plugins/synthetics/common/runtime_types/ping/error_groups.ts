@@ -5,25 +5,55 @@
  * 2.0.
  */
 
-import type { SchemaOutput } from '../schema_output';
-import {
-  ErrorGroupItemType,
-  ErrorGroupHistogramBucketType,
-  ErrorGroupPatternType,
-  ErrorGroupType,
-  ErrorGroupsResponseType,
-} from '../zod/ping';
+import * as t from 'io-ts';
 
-export {
-  ErrorGroupItemType,
-  ErrorGroupHistogramBucketType,
-  ErrorGroupPatternType,
-  ErrorGroupType,
-  ErrorGroupsResponseType,
-};
+export const ErrorGroupItemType = t.type({
+  timestamp: t.string,
+  monitorName: t.string,
+  monitorType: t.string,
+  configId: t.string,
+  stateId: t.string,
+  checkGroup: t.string,
+  locationName: t.string,
+  locationId: t.string,
+  durationMs: t.number,
+  errorMessage: t.string,
+});
 
-export type ErrorGroupItem = SchemaOutput<typeof ErrorGroupItemType>;
-export type ErrorGroupHistogramBucket = SchemaOutput<typeof ErrorGroupHistogramBucketType>;
-export type ErrorGroupPattern = SchemaOutput<typeof ErrorGroupPatternType>;
-export type ErrorGroup = SchemaOutput<typeof ErrorGroupType>;
-export type ErrorGroupsResponse = SchemaOutput<typeof ErrorGroupsResponseType>;
+export type ErrorGroupItem = t.TypeOf<typeof ErrorGroupItemType>;
+
+export const ErrorGroupHistogramBucketType = t.type({
+  timestamp: t.number,
+  count: t.number,
+});
+
+export type ErrorGroupHistogramBucket = t.TypeOf<typeof ErrorGroupHistogramBucketType>;
+
+export const ErrorGroupPatternType = t.keyof({
+  persistent: null,
+  intermittent: null,
+  new: null,
+});
+
+export type ErrorGroupPattern = t.TypeOf<typeof ErrorGroupPatternType>;
+
+export const ErrorGroupType = t.type({
+  name: t.string,
+  sampleMessage: t.string,
+  pattern: ErrorGroupPatternType,
+  count: t.number,
+  monitorCount: t.number,
+  locationCount: t.number,
+  firstSeen: t.string,
+  lastSeen: t.string,
+  histogram: t.array(ErrorGroupHistogramBucketType),
+  items: t.array(ErrorGroupItemType),
+});
+
+export type ErrorGroup = t.TypeOf<typeof ErrorGroupType>;
+
+export const ErrorGroupsResponseType = t.type({
+  groups: t.array(ErrorGroupType),
+});
+
+export type ErrorGroupsResponse = t.TypeOf<typeof ErrorGroupsResponseType>;

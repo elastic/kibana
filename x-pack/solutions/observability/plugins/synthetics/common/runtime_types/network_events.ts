@@ -5,19 +5,60 @@
  * 2.0.
  */
 
-import type { SchemaOutput } from './schema_output';
-import {
-  SyntheticsNetworkEventsApiResponseType,
-  NetworkTimingsType,
-  CertificateDataType,
-  NetworkEventType,
-} from './zod/network_events';
+import * as t from 'io-ts';
 
-export {
-  SyntheticsNetworkEventsApiResponseType,
-};
+const NetworkTimingsType = t.type({
+  queueing: t.number,
+  connect: t.number,
+  total: t.number,
+  send: t.number,
+  blocked: t.number,
+  receive: t.number,
+  wait: t.number,
+  dns: t.number,
+  proxy: t.number,
+  ssl: t.number,
+});
 
-export type NetworkTimings = SchemaOutput<typeof NetworkTimingsType>;
-export type CertificateData = SchemaOutput<typeof CertificateDataType>;
-export type NetworkEvent = SchemaOutput<typeof NetworkEventType>;
-export type SyntheticsNetworkEventsApiResponse = SchemaOutput<typeof SyntheticsNetworkEventsApiResponseType>;
+const CertificateDataType = t.partial({
+  validFrom: t.string,
+  validTo: t.string,
+  issuer: t.string,
+  subjectName: t.string,
+});
+
+const NetworkEventType = t.intersection([
+  t.type({
+    timestamp: t.string,
+    requestSentTime: t.number,
+    loadEndTime: t.number,
+    url: t.string,
+  }),
+  t.partial({
+    certificates: CertificateDataType,
+    ip: t.string,
+    method: t.string,
+    status: t.number,
+    mimeType: t.string,
+    responseHeaders: t.record(t.string, t.string),
+    requestHeaders: t.record(t.string, t.string),
+    timings: NetworkTimingsType,
+    transferSize: t.number,
+    resourceSize: t.number,
+  }),
+]);
+
+export type NetworkTimings = t.TypeOf<typeof NetworkTimingsType>;
+export type CertificateData = t.TypeOf<typeof CertificateDataType>;
+export type NetworkEvent = t.TypeOf<typeof NetworkEventType>;
+
+export const SyntheticsNetworkEventsApiResponseType = t.type({
+  events: t.array(NetworkEventType),
+  total: t.number,
+  isWaterfallSupported: t.boolean,
+  hasNavigationRequest: t.boolean,
+});
+
+export type SyntheticsNetworkEventsApiResponse = t.TypeOf<
+  typeof SyntheticsNetworkEventsApiResponseType
+>;
