@@ -664,7 +664,15 @@ describe('CasesParamsFields renders', () => {
     it('does not render auto-push checkbox when v2 template has no connector', async () => {
       enableTemplatesV2();
       mockUseGetTemplates.mockReturnValue({
-        data: { templates: [{ templateId: 'tmpl-v2', definition: 'title: Test' }] },
+        data: {
+          templates: [
+            {
+              templateId: 'tmpl-v2',
+              definition: 'title: Test',
+              definitionString: 'title: Test',
+            },
+          ],
+        },
         isLoading: false,
       });
       const props = {
@@ -681,14 +689,16 @@ describe('CasesParamsFields renders', () => {
 
     it('renders auto-push checkbox when v2 template has a connector', async () => {
       enableTemplatesV2();
-      const definition = [
+      const definitionString = [
         'connector:',
         '  type: .jira',
         '  id: jira-connector-id',
         '  fields: null',
       ].join('\n');
       mockUseGetTemplates.mockReturnValue({
-        data: { templates: [{ templateId: 'tmpl-v2', definition }] },
+        data: {
+          templates: [{ templateId: 'tmpl-v2', definition: definitionString, definitionString }],
+        },
         isLoading: false,
       });
       const props = {
@@ -705,7 +715,7 @@ describe('CasesParamsFields renders', () => {
 
     it('renders auto-push checkbox for a legacy v1 key bridged to a v2 template with connector', async () => {
       enableTemplatesV2();
-      const definition = [
+      const definitionString = [
         'connector:',
         '  type: .jira',
         '  id: jira-connector-id',
@@ -713,7 +723,14 @@ describe('CasesParamsFields renders', () => {
       ].join('\n');
       mockUseGetTemplates.mockReturnValue({
         data: {
-          templates: [{ templateId: 'tmpl-v2-uuid', legacyKey: 'legacy-key-1', definition }],
+          templates: [
+            {
+              templateId: 'tmpl-v2-uuid',
+              legacyKey: 'legacy-key-1',
+              definition: definitionString,
+              definitionString,
+            },
+          ],
         },
         isLoading: false,
       });

@@ -238,8 +238,8 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
       v2TemplatesData?.templates ?? [],
       currentConfiguration.templates
     );
-    if (!v2Template?.definition) return false;
-    const { connector } = getTemplateSettingsAndConnectorFromYaml(v2Template.definition);
+    if (!v2Template?.definitionString) return false;
+    const { connector } = getTemplateSettingsAndConnectorFromYaml(v2Template.definitionString);
     return !!normalizeTemplateConnector(connector);
   }, [
     isTemplatesV2Enabled,
