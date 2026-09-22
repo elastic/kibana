@@ -59,8 +59,9 @@ export function FormWizard<T extends object = { [key: string]: any }, S extends 
           );
 
           const getIsStepDisabled = (stepIndex: number) => {
-            // Disable all steps when the current step is invalid
-            if (stepIndex !== activeStepIndex && isCurrentStepValid === false) {
+            // When the current step is invalid, allow navigating backwards
+            // but block navigation to the next step and beyond.
+            if (stepIndex > activeStepIndex && isCurrentStepValid === false) {
               return true;
             }
 
