@@ -134,22 +134,51 @@ triggers:
 # (field_conversion.ts), so an array of objects cannot be expressed in it: `verdicts` would
 # fail output validation once per verdict at the end of an otherwise successful run.
 outputs:
+  # Keep in sync with AlertAnalysisWorkflowOutput / AlertAnalysisVerdict /
+  # AlertAnalysisImpactedEntity in security_solution/common/workflows/alert_analysis_workflow.ts.
+  required:
+    - verdicts
+    - false_positive_count
+    - true_positive_count
+    - inconclusive_count
+    - auto_closed_ids
+    - grouped_counts_summary
+    - generated_summary
+    - connector_id
+    - agent_id
+    - impacted_entities
+    - impacted_entities_truncated
   properties:
     verdicts:
       type: array
       items:
         type: object
+        required:
+          - alert_id
+          - classification
+          - confidence_score
+          - rationale
+          - contributing_factors
+          - host_name
+          - user_name
         properties:
           alert_id:
             type: string
           classification:
             type: string
+            enum:
+              - true_positive
+              - false_positive
+              - inconclusive
           confidence_score:
             type: number
+            minimum: 0
+            maximum: 1
           rationale:
             type: string
           contributing_factors:
             type: array
+            maxItems: 3
             items:
               type: string
           host_name:
@@ -164,16 +193,52 @@ outputs:
       type: string
     impacted_entities:
       type: array
+      maxItems: 50
       items:
         type: object
+        required:
+          - entity_type
+          - name
+          - alert_count
+          - verdicts
+        properties:
+          entity_type:
+            type: string
+            enum:
+              - host
+              - user
+          name:
+            type: string
+          alert_count:
+            type: integer
+            minimum: 0
+          verdicts:
+            type: object
+            required:
+              - true_positive
+              - false_positive
+              - inconclusive
+            properties:
+              true_positive:
+                type: integer
+                minimum: 0
+              false_positive:
+                type: integer
+                minimum: 0
+              inconclusive:
+                type: integer
+                minimum: 0
     impacted_entities_truncated:
       type: string
     false_positive_count:
-      type: number
+      type: integer
+      minimum: 0
     true_positive_count:
-      type: number
+      type: integer
+      minimum: 0
     inconclusive_count:
-      type: number
+      type: integer
+      minimum: 0
     auto_closed_ids:
       type: array
       items:
