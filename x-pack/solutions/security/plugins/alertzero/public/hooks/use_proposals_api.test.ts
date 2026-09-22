@@ -10,6 +10,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { queryKeys as platformQueryKeys } from '@kbn/agentic-investigations-plugin/public';
+import { MAX_QUEUE_REACH } from '../../common/proposals/list';
 import {
   PROPOSALS_POLL_INTERVAL_MS,
   useClosedProposals,
@@ -85,6 +86,29 @@ describe('useProposalsByCategory', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.hasNextPage).toBe(false);
+  });
+
+  it('shrinks the last page to land on the reach, rather than stopping short of it', async () => {
+    const firstPageSize = MAX_QUEUE_REACH - 5;
+    http.get
+      .mockResolvedValueOnce(page(firstPageSize, 50_000))
+      .mockResolvedValueOnce(page(5, 50_000));
+
+    const { result } = renderHook(
+      () => useProposalsByCategory('respond', { firstPageSize, step: 10, enabled: true }),
+      { wrapper: createWrapper().Wrapper }
+    );
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    // Read off the resolved fetch rather than `result.current`: this harness renders
+    // the hook alone, so the observer's update can land after the assertion does.
+    const next = await result.current.fetchNextPage();
+
+    // A full step would put `from + size` past the reach, which the route refuses.
+    expect(queryOf(1)).toEqual({ from: firstPageSize, size: 5 });
+
+    // The bucket holds 50k rows, so it is the reach that ends the paging.
+    expect(next.hasNextPage).toBe(false);
   });
 
   it('issues no request while the section is collapsed', () => {

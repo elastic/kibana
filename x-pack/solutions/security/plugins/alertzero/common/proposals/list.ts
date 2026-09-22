@@ -47,5 +47,6 @@ export const MAX_QUEUE_PAGE_SIZE = 100;
  */
 export const MAX_QUEUE_REACH = 10_000;
 
-/** Largest `from` the routes accept, keeping `from + size` inside that window. */
-export const MAX_QUEUE_OFFSET = MAX_QUEUE_REACH - MAX_QUEUE_PAGE_SIZE;
+/** The window a page has to fit inside, whatever offset it starts at. */
+export const fitsQueueReach = ({ size, from }: ProposalsPageParams) =>
+  from + size <= MAX_QUEUE_REACH;

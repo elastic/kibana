@@ -15,7 +15,7 @@ import {
 } from '@kbn/alertzero-common';
 import { retryOnTransientError } from '@kbn/agentic-investigations-plugin/public';
 import type { ProposalsPageResponse } from '../../common/proposals/list';
-import { MAX_QUEUE_OFFSET } from '../../common/proposals/list';
+import { MAX_QUEUE_REACH } from '../../common/proposals/list';
 import { queryKeys } from '../query_keys';
 
 /**
@@ -39,9 +39,7 @@ interface PagesOptions {
  */
 const nextOffset = (lastPage: ProposalsPageResponse, pages: ProposalsPageResponse[]) => {
   const loaded = pages.reduce((count, page) => count + page.proposals.length, 0);
-  // MAX_QUEUE_OFFSET, not MAX_QUEUE_REACH: an offset past what the route accepts
-  // would be offered and then rejected with a 400 nothing surfaces.
-  return loaded >= lastPage.total || loaded > MAX_QUEUE_OFFSET ? undefined : loaded;
+  return loaded >= lastPage.total || loaded >= MAX_QUEUE_REACH ? undefined : loaded;
 };
 
 /** `size: 0` — the bucket's total with none of its rows. */
@@ -75,9 +73,12 @@ const useProposalsPages = (
     // React Query v4 calls the first page with `pageParam: undefined`.
     queryFn: async ({ pageParam }: { pageParam?: number }): Promise<ProposalsPageResponse> => {
       const from = pageParam ?? 0;
+      // Shrunk on the last page: the route refuses `from + size` past the reach, so
+      // a full step near the ceiling would 400 instead of returning the rows left.
+      const size = Math.min(from === 0 ? firstPageSize : step, MAX_QUEUE_REACH - from);
       return services.http!.get<ProposalsPageResponse>(path, {
         version: API_VERSIONS.internal.v1,
-        query: { from, size: from === 0 ? firstPageSize : step },
+        query: { from, size },
       });
     },
     getNextPageParam: nextOffset,

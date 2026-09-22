@@ -7,22 +7,39 @@
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedDate, FormattedRelative } from '@kbn/i18n-react';
+import { selectUnit } from '@formatjs/intl-utils';
 import { type Investigation } from '../../types';
 
+const UPDATE_INTERVAL_SECONDS = 60;
+
+/** react-intl throws rather than schedule an update once the unit passes an hour. */
+const INCREMENTABLE_UNITS: ReadonlyArray<ReturnType<typeof selectUnit>['unit']> = [
+  'second',
+  'minute',
+  'hour',
+];
+
 /**
- * No `updateIntervalInSeconds`: react-intl refuses to schedule updates once the unit
- * exceeds an hour, and the queue re-renders on its own poll anyway.
+ * Ages itself. Nothing re-renders a card whose row is unchanged, so without this the
+ * label freezes at whatever it read when the card mounted.
  */
 export const ConversationMetaInfo = memo<{
   createdAt: Investigation['createdAt'];
 }>(({ createdAt }) => {
+  const { unit } = selectUnit(new Date(createdAt));
+
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive direction="row">
       <EuiFlexItem grow={false}>
         <EuiToolTip content={<FormattedDate value={createdAt} dateStyle="full" timeStyle="long" />}>
           {/* Focusable so the exact time is reachable without a pointer. */}
           <EuiText size="xs" color="subdued" component="span" tabIndex={0}>
-            <FormattedRelative value={createdAt} />
+            <FormattedRelative
+              value={createdAt}
+              updateIntervalInSeconds={
+                INCREMENTABLE_UNITS.includes(unit) ? UPDATE_INTERVAL_SECONDS : undefined
+              }
+            />
           </EuiText>
         </EuiToolTip>
       </EuiFlexItem>
