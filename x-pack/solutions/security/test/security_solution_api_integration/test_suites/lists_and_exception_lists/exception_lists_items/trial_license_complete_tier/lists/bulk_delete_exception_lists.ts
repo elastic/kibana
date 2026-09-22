@@ -143,7 +143,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body.errors).to.eql([
           {
             lists: [{ id: createdItem.id }],
-            message: `exception list id: "${createdItem.id}" does not exist`,
+            message: `exception list id: "${createdItem.id}" is not an exception list container`,
             status_code: 404,
           },
         ]);
