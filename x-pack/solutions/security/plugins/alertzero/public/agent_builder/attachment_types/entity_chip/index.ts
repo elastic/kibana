@@ -7,5 +7,3 @@
 
 export { EntityChip } from './entity_chip';
 export type { EntityChipProps } from './entity_chip';
-export { ATTACHMENT_ENTITY_ICON, parseAttachmentEntity } from './parse_attachment_entity';
-export type { AttachmentEntityKind, ParsedAttachmentEntity } from './parse_attachment_entity';

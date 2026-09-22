@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { ATTACHMENT_ENTITY_FIELDS } from './attachment_entity_string';
+import { ATTACHMENT_ENTITY_FIELDS } from './attachment_entity';
 import { alertZeroAttachmentDataSchema } from './attachment_data_schema';
 
 /**
