@@ -72,6 +72,7 @@ export class EditJobFlyoutUI extends Component {
       datafeedQueryDelay: '',
       datafeedFrequency: '',
       datafeedScrollSize: '',
+      datafeedMaxConsecutiveExtractionFailures: '',
       datafeedProjectRouting: undefined,
       jobModelMemoryLimitValidationError: '',
       jobGroupsValidationError: '',
@@ -126,6 +127,7 @@ export class EditJobFlyoutUI extends Component {
         'datafeedQueryDelay',
         'datafeedFrequency',
         'datafeedScrollSize',
+        'datafeedMaxConsecutiveExtractionFailures',
         'datafeedProjectRouting',
       ])
     );
@@ -189,6 +191,10 @@ export class EditJobFlyoutUI extends Component {
       datafeedQueryDelay: hasDatafeed ? datafeedConfig.query_delay : '',
       datafeedFrequency: hasDatafeed ? frequency : '',
       datafeedScrollSize: hasDatafeed ? +datafeedConfig.scroll_size : null,
+      datafeedMaxConsecutiveExtractionFailures:
+        hasDatafeed && datafeedConfig.max_consecutive_extraction_failures !== undefined
+          ? datafeedConfig.max_consecutive_extraction_failures
+          : '',
       datafeedProjectRouting: hasDatafeed ? datafeedConfig.project_routing : undefined,
     });
   }
@@ -306,6 +312,7 @@ export class EditJobFlyoutUI extends Component {
       datafeedQueryDelay: this.state.datafeedQueryDelay,
       datafeedFrequency: this.state.datafeedFrequency,
       datafeedScrollSize: this.state.datafeedScrollSize,
+      datafeedMaxConsecutiveExtractionFailures: this.state.datafeedMaxConsecutiveExtractionFailures,
       datafeedProjectRouting: this.state.datafeedProjectRouting,
       customUrls: this.state.jobCustomUrls,
     };
@@ -410,6 +417,7 @@ export class EditJobFlyoutUI extends Component {
         datafeedQueryDelay,
         datafeedFrequency,
         datafeedScrollSize,
+        datafeedMaxConsecutiveExtractionFailures,
         datafeedProjectRouting,
         jobGroupsValidationError,
         jobModelMemoryLimitValidationError,
@@ -473,6 +481,7 @@ export class EditJobFlyoutUI extends Component {
               datafeedQueryDelay={datafeedQueryDelay}
               datafeedFrequency={datafeedFrequency}
               datafeedScrollSize={datafeedScrollSize}
+              datafeedMaxConsecutiveExtractionFailures={datafeedMaxConsecutiveExtractionFailures}
               jobBucketSpan={jobBucketSpan}
               setDatafeed={this.setDatafeed}
               datafeedRunning={datafeedRunning}

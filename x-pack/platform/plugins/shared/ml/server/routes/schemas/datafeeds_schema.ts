@@ -51,6 +51,7 @@ export const datafeedConfigSchema = schema.object({
   job_id: schema.maybe(schema.string({ maxLength: 10000 })),
   query: schema.maybe(schema.any()),
   max_empty_searches: schema.maybe(schema.number()),
+  max_consecutive_extraction_failures: schema.maybe(schema.number()),
   query_delay: schema.maybe(schema.string({ maxLength: 10000 })),
   script_fields: schema.maybe(schema.any()),
   runtime_mappings: schema.maybe(schema.any()),

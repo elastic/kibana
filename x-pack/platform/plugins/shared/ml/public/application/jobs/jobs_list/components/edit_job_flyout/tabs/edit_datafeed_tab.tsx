@@ -25,6 +25,7 @@ interface EditDatafeedTabProps {
   datafeedQueryDelay: string;
   datafeedFrequency: string;
   datafeedScrollSize: number;
+  datafeedMaxConsecutiveExtractionFailures: number | '';
   datafeedProjectRouting: string | undefined;
   jobBucketSpan: string;
   setDatafeed: (datafeed: Record<string, string | number | undefined>) => void;
@@ -36,6 +37,7 @@ export const EditDatafeedTab: FC<EditDatafeedTabProps> = ({
   datafeedQueryDelay,
   datafeedFrequency,
   datafeedScrollSize,
+  datafeedMaxConsecutiveExtractionFailures,
   datafeedProjectRouting,
   jobBucketSpan,
   setDatafeed,
@@ -69,6 +71,12 @@ export const EditDatafeedTab: FC<EditDatafeedTabProps> = ({
 
   const onScrollSizeChange = (e: ChangeEvent<HTMLInputElement>) => {
     setDatafeed({ datafeedScrollSize: +e.target.value });
+  };
+
+  const onMaxConsecutiveExtractionFailuresChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setDatafeed({
+      datafeedMaxConsecutiveExtractionFailures: e.target.value === '' ? '' : +e.target.value,
+    });
   };
 
   const cpsManager = cps?.cpsManager;
@@ -184,6 +192,26 @@ export const EditDatafeedTab: FC<EditDatafeedTabProps> = ({
             value={datafeedScrollSize}
             placeholder={String(defaults.scrollSize)}
             onChange={onScrollSizeChange}
+            disabled={datafeedRunning}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.ml.jobsList.editJobFlyout.datafeed.maxConsecutiveExtractionFailuresLabel"
+              defaultMessage="Maximum consecutive extraction failures"
+            />
+          }
+          helpText={
+            <FormattedMessage
+              id="xpack.ml.jobsList.editJobFlyout.datafeed.maxConsecutiveExtractionFailuresHelpText"
+              defaultMessage="The datafeed stops automatically after this many consecutive real-time extraction failures. Leave empty to use the default (approximately one day of searches). Set to -1 to retry indefinitely."
+            />
+          }
+        >
+          <EuiFieldNumber
+            value={datafeedMaxConsecutiveExtractionFailures}
+            onChange={onMaxConsecutiveExtractionFailuresChange}
             disabled={datafeedRunning}
           />
         </EuiFormRow>

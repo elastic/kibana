@@ -161,7 +161,7 @@ function extractCustomSettings(job, newJobData) {
   return settingsData;
 }
 
-function extractDatafeed(job, newDatafeedData) {
+export function extractDatafeed(job, newDatafeedData) {
   const datafeedData = {};
   if (job.datafeed_config !== undefined) {
     const origQueryString = JSON.stringify(job.datafeed_config.query);
@@ -185,6 +185,16 @@ function extractDatafeed(job, newDatafeedData) {
 
     if (job.datafeed_config.scroll_size !== newDatafeedData.datafeedScrollSize) {
       datafeedData.scroll_size = newDatafeedData.datafeedScrollSize;
+    }
+
+    if (
+      newDatafeedData.datafeedMaxConsecutiveExtractionFailures !== '' &&
+      newDatafeedData.datafeedMaxConsecutiveExtractionFailures !== undefined &&
+      job.datafeed_config.max_consecutive_extraction_failures !==
+        newDatafeedData.datafeedMaxConsecutiveExtractionFailures
+    ) {
+      datafeedData.max_consecutive_extraction_failures =
+        newDatafeedData.datafeedMaxConsecutiveExtractionFailures;
     }
 
     if (job.datafeed_config.project_routing !== newDatafeedData.datafeedProjectRouting) {
