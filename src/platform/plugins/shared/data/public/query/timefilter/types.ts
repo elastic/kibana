@@ -25,6 +25,4 @@ export type InputTimeRange =
       to: Moment;
     };
 
-export type SetTimeInput = Partial<InputTimeRange>;
-
 export type { TimeRangeBounds } from '../../../common';
