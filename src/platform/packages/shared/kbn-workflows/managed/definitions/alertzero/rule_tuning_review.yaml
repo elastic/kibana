@@ -689,12 +689,8 @@ steps:
         Current threshold field: {{ steps.fetch_rule.output.threshold.field | json }}
         Proposed threshold field: {{ steps.diagnose_rule.output.structured_output.proposed_threshold_field | json }}
         {% endif %}
-        {% if steps.diagnose_rule.output.structured_output.proposed_threshold_cardinality %}
-        Proposed threshold cardinality:
-        {% for entry in steps.diagnose_rule.output.structured_output.proposed_threshold_cardinality %}
-        - {{ entry.field }} >= {{ entry.value }}
-        {% endfor %}
-        {% endif %}
+        Current threshold cardinality: {% if steps.fetch_rule.output.threshold.cardinality %}{% for entry in steps.fetch_rule.output.threshold.cardinality %}- {{ entry.field }} >= {{ entry.value }} {% endfor %}{% else %}none{% endif %}
+        Proposed threshold cardinality: {% if steps.diagnose_rule.output.structured_output.proposed_threshold_cardinality %}{% for entry in steps.diagnose_rule.output.structured_output.proposed_threshold_cardinality %}- {{ entry.field }} >= {{ entry.value }} {% endfor %}{% else %}none{% endif %}
         Approving patches the rule's threshold settings. The change can be reverted in the Detection Rules UI.
         {% when "schedule" %}
         Current interval: {{ steps.fetch_rule.output.interval }}
