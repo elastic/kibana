@@ -15,6 +15,7 @@ import {
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import { i18n } from '@kbn/i18n';
+import { getSpaceIdFromPath } from '@kbn/core-spaces-common';
 import {
   ALERTZERO_APP_ID,
   ALERTZERO_APP_PATH,
@@ -102,24 +103,26 @@ export class AlertZeroPublicPlugin
       icon: 'securitySignalDetected',
     });
 
-    const registerAttachments = async () => {
-      // Fall back to 'default' only when the spaces plugin is absent. If spaces is
-      // present but getActiveSpace fails, let the error propagate so we do not
-      // register alert-index links scoped to the wrong space.
-      const spaceId = startDeps.spaces ? (await startDeps.spaces.getActiveSpace()).id : 'default';
+    // `spaceId` is derived synchronously from the base path rather than awaited from
+    // `spaces.getActiveSpace()`, so registration no longer waits on a round trip before it
+    // starts. The registrars themselves still resolve lazily (`await import(...)` keeps these
+    // renderers out of the initial bundle), so this stays a floating promise, and the registry
+    // is a plain Map with no subscription: a definition arriving after a conversation renders
+    // shows as `null` for the rest of that view.
+    const { spaceId } = getSpaceIdFromPath(
+      core.http.basePath.get(),
+      core.http.basePath.serverBasePath
+    );
 
-      await registerAlertZeroAttachmentTypesUI(startDeps.agentBuilder.attachments, {
-        http: core.http,
-        navigation: {
-          share: startDeps.share,
-          spaceId,
-          prependPath: (path) => core.http.basePath.prepend(path),
-          getUrlForApp: core.application.getUrlForApp,
-        },
-      });
-    };
-
-    registerAttachments().catch((error) => {
+    registerAlertZeroAttachmentTypesUI(startDeps.agentBuilder.attachments, {
+      http: core.http,
+      navigation: {
+        share: startDeps.share,
+        spaceId,
+        prependPath: (path) => core.http.basePath.prepend(path),
+        getUrlForApp: core.application.getUrlForApp,
+      },
+    }).catch((error) => {
       this.logger.error('Failed to register AlertZero attachment UI definitions', error);
     });
 
