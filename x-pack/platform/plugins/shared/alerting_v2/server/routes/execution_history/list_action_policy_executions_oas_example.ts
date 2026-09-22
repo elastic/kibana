@@ -25,7 +25,7 @@ export const LIST_ACTION_POLICY_EXECUTIONS_RESPONSE: ListPolicyExecutionHistoryR
   ],
   page: 1,
   per_page: 20,
-  total_events: 1,
+  total: 1,
   search_matches: null,
 };
 

@@ -171,7 +171,7 @@ export const listPolicyExecutionHistoryResponseSchema = z
     page: z.number().int().min(1),
     // Allows 0 for count-only reads (per_page=0), unlike the rule executions response.
     per_page: z.number().int().min(0),
-    total_events: z.number().int().nonnegative(),
+    total: z.number().int().nonnegative(),
     search_matches: searchMatchCountsSchema
       .nullable()
       .describe(

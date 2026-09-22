@@ -15,7 +15,7 @@ import { ExecutionHistoryApi } from './execution_history_api';
 describe('ExecutionHistoryApi', () => {
   const buildApi = () => {
     const http = httpServiceMock.createStartContract();
-    http.get.mockResolvedValue({ items: [], page: 1, perPage: 50, totalEvents: 0 });
+    http.get.mockResolvedValue({ items: [], page: 1, perPage: 50, total: 0 });
     const api = new ExecutionHistoryApi(http);
     return { api, http };
   };
@@ -95,7 +95,7 @@ describe('ExecutionHistoryApi', () => {
       items: [{ dispatched_at: '2026-05-05T10:00:00Z' }],
       page: 2,
       perPage: 25,
-      totalEvents: 137,
+      total: 137,
     };
     http.get.mockResolvedValueOnce(fakeResponse);
 

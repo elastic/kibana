@@ -44,7 +44,7 @@ describe('useCountNewActionPolicyExecutions', () => {
       items: [],
       page: 1,
       perPage: 0,
-      totalEvents: 7,
+      total: 7,
       searchMatches: null,
     });
 
@@ -70,12 +70,12 @@ describe('useCountNewActionPolicyExecutions', () => {
     });
   });
 
-  it('exposes the list response (with totalEvents) as data', async () => {
+  it('exposes the list response (with total) as data', async () => {
     const fakeResponse = {
       items: [],
       page: 1,
       perPage: 0,
-      totalEvents: 42,
+      total: 42,
       searchMatches: null,
     };
     mockListActionPolicyExecutions.mockResolvedValue(fakeResponse);

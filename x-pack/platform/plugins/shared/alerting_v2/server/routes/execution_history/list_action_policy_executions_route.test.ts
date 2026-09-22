@@ -23,7 +23,7 @@ const createMocks = () => {
       items: [],
       page: 1,
       perPage: 100,
-      totalEvents: 0,
+      total: 0,
       searchMatches: null,
     }),
   };
@@ -128,7 +128,7 @@ describe('ListActionPolicyExecutionsRoute', () => {
       items: [{ id: 'x' }],
       page: 4,
       perPage: 25,
-      totalEvents: 137,
+      total: 137,
       searchMatches: null,
     };
     mocks.executionHistoryClient.listExecutionHistory.mockResolvedValue(clientResult as any);
@@ -143,7 +143,7 @@ describe('ListActionPolicyExecutionsRoute', () => {
       items: [{ id: 'x' }],
       page: 4,
       per_page: 25,
-      total_events: 137,
+      total: 137,
       search_matches: null,
     });
   });

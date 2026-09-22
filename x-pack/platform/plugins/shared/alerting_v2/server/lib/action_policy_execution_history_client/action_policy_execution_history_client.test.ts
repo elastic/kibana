@@ -227,7 +227,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
       });
     });
 
-    it('returns the page/perPage/totalEvents from the service', async () => {
+    it('returns the page/perPage/total from the service', async () => {
       const { client, eventLogService } = createMocks();
       eventLogService.findActionPolicyExecutionEvents.mockResolvedValue({
         events: [],
@@ -239,7 +239,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
 
       const result = await client.listExecutionHistory({ request });
 
-      expect(result).toMatchObject({ page: 4, perPage: 25, totalEvents: 137, items: [] });
+      expect(result).toMatchObject({ page: 4, perPage: 25, total: 137, items: [] });
     });
 
     it('propagates errors from the underlying service', async () => {
@@ -446,7 +446,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
           items: [],
           page: 1,
           perPage: EXECUTION_HISTORY_DEFAULT_PER_PAGE,
-          totalEvents: 0,
+          total: 0,
           searchMatches: { policies: 0, rules: 0, cap: 500 },
         });
       });

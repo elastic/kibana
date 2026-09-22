@@ -57,7 +57,7 @@ export const toListExecutionHistoryResponse = ({
   items,
   page,
   perPage,
-  totalEvents,
+  total,
   searchMatches,
   ...rest
 }: ListExecutionHistoryResult): Complete<ListPolicyExecutionHistoryResponse> => {
@@ -66,7 +66,7 @@ export const toListExecutionHistoryResponse = ({
     items,
     page,
     per_page: perPage,
-    total_events: totalEvents,
+    total,
     search_matches: searchMatches,
   };
 };

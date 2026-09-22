@@ -96,7 +96,7 @@ export const buildFindActionPolicyEventsQuery = (
  * privilege (`executionHistory.read`) is the sole gate; see spec §6.4.
  *
  * `track_total_hits: true` is set so callers see precise counts (the list
- * `totalEvents` and the "new events since" badge depend on exact totals).
+ * `total` and the "new events since" badge depend on exact totals).
  */
 const buildBaseActionPolicyEventsQuery = (
   params: BuildActionPolicyEventsQueryParams

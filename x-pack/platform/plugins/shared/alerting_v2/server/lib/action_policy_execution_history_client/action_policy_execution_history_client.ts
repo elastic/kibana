@@ -69,7 +69,7 @@ export interface ListExecutionHistoryResult {
   items: PolicyExecutionHistoryItem[];
   page: number;
   perPage: number;
-  totalEvents: number;
+  total: number;
   searchMatches: SearchMatchCounts | null;
 }
 
@@ -113,7 +113,7 @@ export class ActionPolicyExecutionHistoryClient {
         items: [],
         page,
         perPage,
-        totalEvents: 0,
+        total: 0,
         searchMatches: matchingSearchIds.matches,
       };
     }
@@ -147,7 +147,7 @@ export class ActionPolicyExecutionHistoryClient {
       items,
       page: result.page,
       perPage: result.perPage,
-      totalEvents: result.total,
+      total: result.total,
       searchMatches: matchingSearchIds.matches,
     };
   }

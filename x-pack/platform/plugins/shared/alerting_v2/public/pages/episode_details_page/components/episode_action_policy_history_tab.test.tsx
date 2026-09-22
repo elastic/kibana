@@ -129,7 +129,7 @@ const mockFetchResult = (
       items: PolicyExecutionHistoryItem[];
       page: number;
       perPage: number;
-      totalEvents: number;
+      total: number;
       searchMatches: null;
     };
     isFetching: boolean;
@@ -137,7 +137,7 @@ const mockFetchResult = (
   }> = {}
 ) => {
   mockUseFetchExecutionHistory.mockReturnValue({
-    data: { items: [], page: 1, perPage: 10, totalEvents: 0, searchMatches: null },
+    data: { items: [], page: 1, perPage: 10, total: 0, searchMatches: null },
     isFetching: false,
     isError: false,
     refetch: mockRefetch,
@@ -207,7 +207,7 @@ describe('EpisodeActionPolicyHistoryTab', () => {
 
   it('renders rows without the Episodes, Action groups, and Rules columns', () => {
     mockFetchResult({
-      data: { items: [buildItem()], page: 1, perPage: 10, totalEvents: 1, searchMatches: null },
+      data: { items: [buildItem()], page: 1, perPage: 10, total: 1, searchMatches: null },
     });
     renderTab();
 
@@ -239,7 +239,7 @@ describe('EpisodeActionPolicyHistoryTab', () => {
 
   it('opens the policy flyout when the policy link is clicked and closes it on dismiss', async () => {
     mockFetchResult({
-      data: { items: [buildItem()], page: 1, perPage: 10, totalEvents: 1, searchMatches: null },
+      data: { items: [buildItem()], page: 1, perPage: 10, total: 1, searchMatches: null },
     });
     renderTab();
 

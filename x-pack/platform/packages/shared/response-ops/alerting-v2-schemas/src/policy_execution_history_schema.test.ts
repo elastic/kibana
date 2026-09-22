@@ -466,7 +466,7 @@ describe('policy_execution_history_schema', () => {
         items: [],
         page: 1,
         per_page: EXECUTION_HISTORY_DEFAULT_PER_PAGE,
-        total_events: 0,
+        total: 0,
         search_matches: null,
       });
       expect(parsed.items).toEqual([]);
@@ -478,7 +478,7 @@ describe('policy_execution_history_schema', () => {
         items: [validItem],
         page: 1,
         per_page: 20,
-        total_events: 1,
+        total: 1,
         search_matches: { policies: 1, rules: 1, cap: 100 },
       });
       expect(parsed.items).toHaveLength(1);
@@ -490,7 +490,7 @@ describe('policy_execution_history_schema', () => {
           items: [],
           page: 1,
           per_page: 0,
-          total_events: 42,
+          total: 42,
           search_matches: null,
         }).success
       ).toBe(true);
@@ -502,7 +502,7 @@ describe('policy_execution_history_schema', () => {
           items: [],
           page: 0,
           per_page: 20,
-          total_events: 0,
+          total: 0,
           search_matches: null,
         }).success
       ).toBe(false);
@@ -514,19 +514,19 @@ describe('policy_execution_history_schema', () => {
           items: [],
           page: 1,
           per_page: -1,
-          total_events: 0,
+          total: 0,
           search_matches: null,
         }).success
       ).toBe(false);
     });
 
-    it('rejects a negative total_events', () => {
+    it('rejects a negative total', () => {
       expect(
         listPolicyExecutionHistoryResponseSchema.safeParse({
           items: [],
           page: 1,
           per_page: 20,
-          total_events: -1,
+          total: -1,
           search_matches: null,
         }).success
       ).toBe(false);
@@ -539,7 +539,7 @@ describe('policy_execution_history_schema', () => {
           items: [badItem],
           page: 1,
           per_page: 20,
-          total_events: 1,
+          total: 1,
           search_matches: null,
         }).success
       ).toBe(false);
