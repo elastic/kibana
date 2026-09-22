@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import JSZip from 'jszip';
+import AdmZip from 'adm-zip';
 import expect from '@kbn/expect';
 import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 
@@ -26,31 +26,32 @@ export default function (providerContext: FtrProviderContext) {
   const privilegeTestPkgName = 'preflight_authz_test';
   const privilegeTestPkgVersion = '1.0.0';
 
-  async function buildPackageZipWithAssetType(
-    assetType: string,
-    assetContent: object
-  ): Promise<Buffer> {
+  function buildPackageZipWithAssetType(assetType: string, assetContent: object): Buffer {
     const pkgKey = `${privilegeTestPkgName}-${privilegeTestPkgVersion}`;
-    const zip = new JSZip();
-    zip.file(
+    const zip = new AdmZip();
+    zip.addFile(
       `${pkgKey}/manifest.yml`,
-      [
-        `name: ${privilegeTestPkgName}`,
-        `title: Preflight Authz Test`,
-        `version: ${privilegeTestPkgVersion}`,
-        `description: Test package for preflight authz checks`,
-        `type: integration`,
-        `format_version: 1.0.0`,
-        `categories: []`,
-        `conditions:`,
-        `  kibana.version: "^8.0.0"`,
-        `owner:`,
-        `  github: elastic/fleet`,
-      ].join('\n')
+      Buffer.from(
+        [
+          `name: ${privilegeTestPkgName}`,
+          `title: Preflight Authz Test`,
+          `version: ${privilegeTestPkgVersion}`,
+          `description: Test package for preflight authz checks`,
+          `type: integration`,
+          `format_version: 1.0.0`,
+          `categories: []`,
+          `conditions:`,
+          `  kibana.version: "^8.0.0"`,
+          `owner:`,
+          `  github: elastic/fleet`,
+        ].join('\n')
+      )
     );
-    zip.file(`${pkgKey}/kibana/${assetType}/test-asset.json`, JSON.stringify(assetContent));
-    const buffer = await zip.generateAsync({ type: 'nodebuffer' });
-    return buffer;
+    zip.addFile(
+      `${pkgKey}/kibana/${assetType}/test-asset.json`,
+      Buffer.from(JSON.stringify(assetContent))
+    );
+    return zip.toBuffer();
   }
 
   describe('Upload preflight asset privilege checks', () => {
@@ -92,7 +93,7 @@ export default function (providerContext: FtrProviderContext) {
         type: 'security-ai-prompt',
         attributes: { name: 'Test Prompt', content: 'You are a security assistant.' },
       };
-      const buf = await buildPackageZipWithAssetType('security_ai_prompt', aiPromptAsset);
+      const buf = buildPackageZipWithAssetType('security_ai_prompt', aiPromptAsset);
 
       await supertestWithoutAuth
         .post(`/api/fleet/epm/packages`)
@@ -118,7 +119,7 @@ export default function (providerContext: FtrProviderContext) {
           version: 1,
         },
       };
-      const buf = await buildPackageZipWithAssetType('security_rule', securityRuleAsset);
+      const buf = buildPackageZipWithAssetType('security_rule', securityRuleAsset);
 
       await supertestWithoutAuth
         .post(`/api/fleet/epm/packages`)
@@ -159,7 +160,7 @@ export default function (providerContext: FtrProviderContext) {
           version: 1,
         },
       };
-      const buf = await buildPackageZipWithAssetType('security_rule', securityRuleAsset);
+      const buf = buildPackageZipWithAssetType('security_rule', securityRuleAsset);
 
       await supertestWithoutAuth
         .post(`/api/fleet/epm/packages`)
@@ -179,7 +180,7 @@ export default function (providerContext: FtrProviderContext) {
         type: 'security-ai-prompt',
         attributes: { name: 'Test Prompt', content: 'You are a security assistant.' },
       };
-      const buf = await buildPackageZipWithAssetType('security_ai_prompt', aiPromptAsset);
+      const buf = buildPackageZipWithAssetType('security_ai_prompt', aiPromptAsset);
 
       await supertestWithoutAuth
         .post(`/api/fleet/epm/packages`)
@@ -209,7 +210,7 @@ export default function (providerContext: FtrProviderContext) {
           version: 1,
         },
       };
-      const buf = await buildPackageZipWithAssetType('security_rule', mlRuleAsset);
+      const buf = buildPackageZipWithAssetType('security_rule', mlRuleAsset);
 
       await supertestWithoutAuth
         .post(`/api/fleet/epm/packages`)
@@ -239,7 +240,7 @@ export default function (providerContext: FtrProviderContext) {
           version: 1,
         },
       };
-      const buf = await buildPackageZipWithAssetType('security_rule', mlRuleAsset);
+      const buf = buildPackageZipWithAssetType('security_rule', mlRuleAsset);
 
       // fleet_all_int_all_siem_all has rules-all (via siemV5:all) but not ml:canCreateJob
       await supertestWithoutAuth
@@ -304,7 +305,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('rejects upload when caller lacks rules-all in destination additional Space — 403', async () => {
-        const buf = await buildPackageZipWithAssetType('security_rule', securityRuleAsset);
+        const buf = buildPackageZipWithAssetType('security_rule', securityRuleAsset);
 
         // fleet_all_int_all_siem_default_only has siemV5:all scoped to [default] only,
         // so it lacks rules-all in the extra Space where the existing rule ref lives.
@@ -321,7 +322,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('allows upload when caller has rules-all in all destination Spaces — 200', async () => {
-        const buf = await buildPackageZipWithAssetType('security_rule', securityRuleAsset);
+        const buf = buildPackageZipWithAssetType('security_rule', securityRuleAsset);
 
         // fleet_all_int_all_siem_all has siemV5:all in spaces: ['*'] — covers the extra Space too.
         await supertestWithoutAuth
