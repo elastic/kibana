@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import type { FeedbackChipId } from '@kbn/agent-builder-common';
-import { useQueryClient } from '@kbn/react-query';
+import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import { queryKeys } from '../query_keys';
+import { mutationKeys } from '../mutation_keys';
 import { useAgentBuilderServices } from './use_agent_builder_service';
+import { useToasts } from './use_toasts';
 
 interface UseRoundFeedbackParams {
   conversationId: string;
@@ -25,28 +27,16 @@ interface SubmitFeedbackParams {
 export const useRoundFeedback = ({ conversationId, roundId }: UseRoundFeedbackParams) => {
   const { conversationsService } = useAgentBuilderServices();
   const queryClient = useQueryClient();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { addErrorToast } = useToasts();
 
-  const submitFeedback = useCallback(
-    async ({ vote, chips, comment }: SubmitFeedbackParams) => {
-      setIsSubmitting(true);
-      try {
-        await conversationsService.submitRoundFeedback({
-          conversationId,
-          roundId,
-          vote,
-          chips,
-          comment,
-        });
-        await queryClient.invalidateQueries({
-          queryKey: queryKeys.conversations.byId(conversationId),
-        });
-      } finally {
-        setIsSubmitting(false);
-      }
-    },
-    [conversationsService, conversationId, roundId, queryClient]
-  );
+  const { mutateAsync: submitFeedback, isLoading: isSubmitting } = useMutation({
+    mutationKey: mutationKeys.submitRoundFeedback(conversationId, roundId),
+    mutationFn: ({ vote, chips, comment }: SubmitFeedbackParams) =>
+      conversationsService.submitRoundFeedback({ conversationId, roundId, vote, chips, comment }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: queryKeys.conversations.byId(conversationId) }),
+    onError: (error) => addErrorToast({ title: formatAgentBuilderErrorMessage(error) }),
+  });
 
   return { submitFeedback, isSubmitting };
 };

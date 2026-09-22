@@ -136,7 +136,7 @@ export const AgentTurn: React.FC<AgentTurnProps> = ({
     : undefined;
 
   const feedback = roundId
-    ? conversation?.rounds.find((r) => r.id === roundId)?.feedback
+    ? conversation?.rounds?.find((r) => r.id === roundId)?.feedback
     : undefined;
 
   const avatarColumnStyles = css`

@@ -17,4 +17,6 @@ export const mutationKeys = {
     ['agentProfiles', agentId, 'accessControl', 'update'] as const,
   updateConversationAccessControl: (conversationId: string) =>
     ['conversations', conversationId, 'accessControl', 'update'] as const,
+  submitRoundFeedback: (conversationId: string, roundId: string) =>
+    ['conversations', conversationId, 'rounds', roundId, 'feedback'] as const,
 };

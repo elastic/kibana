@@ -13,6 +13,14 @@ import type { ConversationRoundFeedback } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useRoundFeedback } from '../../../../hooks/use_round_feedback';
 
+const thumbUpLabel = i18n.translate('xpack.agentBuilder.feedbackActions.thumbUp', {
+  defaultMessage: 'Good response',
+});
+
+const thumbDownLabel = i18n.translate('xpack.agentBuilder.feedbackActions.thumbDown', {
+  defaultMessage: 'Bad response',
+});
+
 interface FeedbackActionsProps {
   conversationId: string;
   roundId: string;
@@ -35,14 +43,6 @@ export const FeedbackActions: React.FC<FeedbackActionsProps> = ({
   const handleThumbDown = useCallback(() => {
     submitFeedback({ vote: currentVote === 'down' ? null : 'down' });
   }, [submitFeedback, currentVote]);
-
-  const thumbUpLabel = i18n.translate('xpack.agentBuilder.feedbackActions.thumbUp', {
-    defaultMessage: 'Good response',
-  });
-
-  const thumbDownLabel = i18n.translate('xpack.agentBuilder.feedbackActions.thumbDown', {
-    defaultMessage: 'Bad response',
-  });
 
   return (
     <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center" responsive={false}>
