@@ -58,22 +58,21 @@ const proposalsResult = (total: number, overrides: QueryOverrides = {}) => ({
   ...overrides,
 });
 
-const renderPage = () => {
+const wrap = (ui: React.ReactElement) => {
   const core = coreMock.createStart();
   const history = createMemoryHistory();
-
-  render(
+  return (
     <I18nProvider>
       <EuiProvider>
         <KibanaContextProvider services={core}>
-          <Router history={history}>
-            <LandingPage />
-          </Router>
+          <Router history={history}>{ui}</Router>
         </KibanaContextProvider>
       </EuiProvider>
     </I18nProvider>
   );
 };
+
+const renderPage = () => render(wrap(<LandingPage />));
 
 beforeEach(() => {
   mockUseProposalsByCategoryCount.mockReturnValue(proposalsResult(0));
@@ -209,6 +208,21 @@ describe('LandingPage', () => {
     expect(screen.queryByText('Get started with AlertZero')).not.toBeInTheDocument();
     expect(screen.queryByTestId('conversations-page')).not.toBeInTheDocument();
     expect(document.querySelector('[class*="euiLoadingSpinner"]')).toBeInTheDocument();
+  });
+
+  it('transitions from queue to onboarding when stale positive cache is corrected by a fresh empty response', () => {
+    // Phase 1: stale cache shows an enabled worker while refetching — queue shown optimistically.
+    mockUseWorkers.mockReturnValue(workersResult([{ enabled: true }], { isFetching: true }));
+    const { rerender } = render(wrap(<LandingPage />));
+
+    expect(screen.getByTestId('conversations-page')).toBeInTheDocument();
+
+    // Phase 2: fresh response arrives — worker disabled, nothing fetching.
+    mockUseWorkers.mockReturnValue(workersResult([{ enabled: false }]));
+    rerender(wrap(<LandingPage />));
+
+    expect(screen.getByText('Get started with AlertZero')).toBeInTheDocument();
+    expect(screen.queryByTestId('conversations-page')).not.toBeInTheDocument();
   });
 
   it('shows the queue when closed proposals exist even with no workers enabled', () => {

@@ -56,13 +56,12 @@ export const LandingPage: React.FC = () => {
     closed.isLoading ||
     closed.isFetching;
 
+  // Only latch once data is fresh (not fetching). Stale positive cache renders
+  // the queue optimistically but must not permanently lock the decision before
+  // the fresh response confirms or contradicts it.
   useEffect(() => {
-    if (decision !== null) return;
-    if (showQueue) {
-      setDecision('queue');
-    } else if (!isUnresolved) {
-      setDecision('onboarding');
-    }
+    if (decision !== null || isUnresolved) return;
+    setDecision(showQueue ? 'queue' : 'onboarding');
   }, [decision, showQueue, isUnresolved]);
 
   if (showQueue) return <ConversationsPage />;
