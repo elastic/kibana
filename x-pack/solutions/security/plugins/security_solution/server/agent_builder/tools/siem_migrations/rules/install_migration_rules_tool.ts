@@ -80,7 +80,7 @@ See the ${RULE_MIGRATION_SKILLS.INSTALL} skill for the full workflow.`,
         buildPath(migrationId),
         {
           method: 'POST',
-          body: { ids, enabled },
+          body: { ids: ids && ids.length > 0 ? ids : undefined, enabled },
         }
       );
 
