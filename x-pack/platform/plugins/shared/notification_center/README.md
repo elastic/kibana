@@ -246,12 +246,8 @@ node x-pack/platform/plugins/shared/notification_center/scripts/seed_notificatio
 node x-pack/platform/plugins/shared/notification_center/scripts/seed_notifications.js --clean
 ```
 
-Kibana must already be running with `xpack.notificationCenter.enabled: true`. The bell also
-needs `notificationCenter.uiEnabled` (see Feature flags above). The script reads the list
+Kibana must already be running with `xpack.notificationCenter.enabled: true`. The script reads the list
 route once before writing anything: that is what makes the plugin create the data stream.
-Writing first would let Elasticsearch auto-create a plain index under the same name, which
-then permanently blocks the plugin's own creation of it.
-
 Kibana is detected on `localhost:5601` (serverless) or `localhost:5611` (stack), including a
 dev base path. If both are running, pass `--kibana-url`. Elasticsearch follows the chosen
 Kibana (serverless vs stack). Override with `--es-url`.
