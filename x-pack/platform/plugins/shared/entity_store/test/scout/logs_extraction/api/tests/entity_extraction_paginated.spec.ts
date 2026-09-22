@@ -14,16 +14,19 @@ import {
   ENTITY_STORE_TAGS,
   LATEST_ALIAS,
 } from '../../../common/fixtures/constants';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common';
 import {
   assertEntitiesEqual,
   expectedHostEntities,
 } from '../../../common/fixtures/entity_extraction_expected';
 import {
-  clearEntityStoreIndices,
+  clearInstalledEntityStoreDocuments,
   setupLogsTestDataStream,
   teardownLogsTestDataStream,
 } from '../../../common/fixtures/helpers';
+import {
+  LOG_EXTRACTION_DOCS_LIMIT_DEFAULT,
+  LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
+} from '../../../../../server/domain/saved_objects';
 
 apiTest.describe(
   'Entity Store Logs Extraction with pagination (entity pages + maxLogsPerPage)',
@@ -32,7 +35,7 @@ apiTest.describe(
     let defaultHeaders: Record<string, string>;
     let internalHeaders: Record<string, string>;
 
-    apiTest.beforeAll(async ({ samlAuth, apiClient, esClient, esArchiver, kbnClient }) => {
+    apiTest.beforeAll(async ({ samlAuth, apiClient, esClient, esArchiver }) => {
       const credentials = await samlAuth.asInteractiveUser('admin');
       defaultHeaders = {
         ...credentials.cookieHeader,
@@ -42,38 +45,33 @@ apiTest.describe(
         ...credentials.cookieHeader,
         ...INTERNAL_HEADERS,
       };
-
-      // enable feature flag
-      await kbnClient.uiSettings.update({
-        [FF_ENABLE_ENTITY_STORE_V2]: true,
-      });
-
-      // Install the entity store
-      const response = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: {
-          logExtraction: {
-            docsLimit: 5,
-          },
-        },
-      });
-      expect(response.statusCode).toBe(201);
+      await clearInstalledEntityStoreDocuments(esClient);
 
       await setupLogsTestDataStream(esClient);
       await esArchiver.loadIfNeeded(
         'x-pack/platform/plugins/shared/entity_store/test/scout/common/es_archives/logs'
       );
+
+      const updateResponse = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: { logExtraction: { docsLimit: 5 } },
+      });
+      expect(updateResponse.statusCode).toBe(200);
     });
 
     apiTest.afterAll(async ({ apiClient, esClient }) => {
-      const response = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
+      const resetResponse = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
         headers: defaultHeaders,
         responseType: 'json',
-        body: {},
+        body: {
+          logExtraction: {
+            docsLimit: LOG_EXTRACTION_DOCS_LIMIT_DEFAULT,
+            maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
+          },
+        },
       });
-      expect(response.statusCode).toBe(200);
-      await clearEntityStoreIndices(esClient);
+      expect(resetResponse.statusCode).toBe(200);
       await teardownLogsTestDataStream(esClient);
     });
 

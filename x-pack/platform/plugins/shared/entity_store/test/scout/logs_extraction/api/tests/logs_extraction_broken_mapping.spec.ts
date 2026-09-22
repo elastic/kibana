@@ -8,7 +8,6 @@
 import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { EsClient } from '@kbn/scout';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common';
 import {
   ENTITY_CONFIDENCE,
   USER_ENTITY_NAMESPACE,
@@ -20,7 +19,7 @@ import {
   LATEST_ALIAS,
   PUBLIC_HEADERS,
 } from '../../../common/fixtures/constants';
-import { clearEntityStoreIndices } from '../../../common/fixtures/helpers';
+import { clearInstalledEntityStoreDocuments } from '../../../common/fixtures/helpers';
 
 const BROKEN_MAPPING_DATA_STREAM = 'logs-broken-mapping';
 const BROKEN_MAPPING_TEMPLATE = 'logs-broken-mapping-template';
@@ -355,7 +354,7 @@ apiTest.describe('Entity Store logs extraction broken mapping', { tag: ENTITY_ST
   let defaultHeaders: Record<string, string>;
   let internalHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ samlAuth, apiClient, kbnClient, esClient }) => {
+  apiTest.beforeAll(async ({ samlAuth, esClient }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
@@ -365,17 +364,7 @@ apiTest.describe('Entity Store logs extraction broken mapping', { tag: ENTITY_ST
       ...credentials.cookieHeader,
       ...INTERNAL_HEADERS,
     };
-
-    await kbnClient.uiSettings.update({
-      [FF_ENABLE_ENTITY_STORE_V2]: true,
-    });
-
-    const installResponse = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {},
-    });
-    expect(installResponse.statusCode).toBe(201);
+    await clearInstalledEntityStoreDocuments(esClient);
 
     await cleanupBrokenMappingArtifacts(esClient);
     await createBrokenMappingTemplate(esClient);
@@ -385,17 +374,8 @@ apiTest.describe('Entity Store logs extraction broken mapping', { tag: ENTITY_ST
     );
   });
 
-  apiTest.afterAll(async ({ apiClient, esClient }) => {
+  apiTest.afterAll(async ({ esClient }) => {
     await cleanupBrokenMappingArtifacts(esClient);
-
-    const uninstallResponse = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {},
-    });
-    expect(uninstallResponse.statusCode).toBe(200);
-
-    await clearEntityStoreIndices(esClient);
   });
 
   apiTest(

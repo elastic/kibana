@@ -14,9 +14,8 @@ import {
   ENTITY_STORE_TAGS,
   LATEST_ALIAS,
 } from '../../../common/fixtures/constants';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common';
 import {
-  clearEntityStoreIndices,
+  clearInstalledEntityStoreDocuments,
   ingestDoc,
   LOGS_TEST_INDEX,
 } from '../../../common/fixtures/helpers';
@@ -41,7 +40,7 @@ apiTest.describe('Entity Store volume cap', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
   let internalHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ samlAuth, apiClient, kbnClient }) => {
+  apiTest.beforeAll(async ({ samlAuth, esClient }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
@@ -51,27 +50,7 @@ apiTest.describe('Entity Store volume cap', { tag: ENTITY_STORE_TAGS }, () => {
       ...credentials.cookieHeader,
       ...INTERNAL_HEADERS,
     };
-
-    await kbnClient.uiSettings.update({
-      [FF_ENABLE_ENTITY_STORE_V2]: true,
-    });
-
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {},
-    });
-    expect(response.statusCode).toBe(201);
-  });
-
-  apiTest.afterAll(async ({ apiClient, esClient }) => {
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {},
-    });
-    expect(response.statusCode).toBe(200);
-    await clearEntityStoreIndices(esClient);
+    await clearInstalledEntityStoreDocuments(esClient);
   });
 
   // Defer: cap fires mid-window — caller uses lastSearchTimestamp to resume

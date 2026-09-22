@@ -14,7 +14,6 @@ import {
   ENTITY_STORE_TAGS,
   LATEST_ALIAS,
 } from '../../../common/fixtures/constants';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common';
 import {
   ENTITY_CONFIDENCE,
   USER_ENTITY_NAMESPACE,
@@ -27,7 +26,7 @@ import {
   expectedUserEntities,
 } from '../../../common/fixtures/entity_extraction_expected';
 import {
-  clearEntityStoreIndices,
+  clearInstalledEntityStoreDocuments,
   forceLogExtraction,
   ingestDoc,
   normalizeKeywordList,
@@ -41,7 +40,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
   let defaultHeaders: Record<string, string>;
   let internalHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ samlAuth, apiClient, esClient, kbnClient, esArchiver }) => {
+  apiTest.beforeAll(async ({ samlAuth, apiClient, esClient, esArchiver }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
@@ -51,11 +50,6 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       ...credentials.cookieHeader,
       ...INTERNAL_HEADERS,
     };
-
-    // enable feature flag
-    await kbnClient.uiSettings.update({
-      [FF_ENABLE_ENTITY_STORE_V2]: true,
-    });
 
     // Pre-create the `security-solution-default` data view. In API-only test
     // environments the Security Solution sourcerer (which normally creates it
@@ -77,13 +71,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     });
     expect(dataViewResponse.statusCode).toBe(200);
 
-    // Install the entity store
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {},
-    });
-    expect(response.statusCode).toBe(201);
+    await clearInstalledEntityStoreDocuments(esClient);
 
     await setupLogsTestDataStream(esClient);
     await esArchiver.loadIfNeeded(
@@ -91,14 +79,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     );
   });
 
-  apiTest.afterAll(async ({ apiClient, esClient }) => {
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {},
-    });
-    expect(response.statusCode).toBe(200);
-    await clearEntityStoreIndices(esClient);
+  apiTest.afterAll(async ({ esClient }) => {
     await teardownLogsTestDataStream(esClient);
   });
 
