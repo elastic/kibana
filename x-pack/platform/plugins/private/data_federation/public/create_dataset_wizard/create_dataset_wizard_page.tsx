@@ -31,6 +31,36 @@ import type { DatasetWizardContent, DatasetWizardSection } from './types';
 
 const { FormWizard, FormWizardStep } = Forms;
 
+const passthroughAdditionalSettingsKeys = [
+  'target_split_size',
+  'split_probe_window',
+  'file_sort_by',
+  'file_order',
+  'schema_sample_size',
+  'segment_size',
+  'comment',
+  'multi_value_syntax',
+  'max_field_size',
+  'region',
+] as const;
+
+type PassthroughAdditionalSettingsKey = (typeof passthroughAdditionalSettingsKeys)[number];
+
+// todo: doublecheck this
+const pickPassthroughAdditionalSettings = (
+  settings: DataSetWithName['settings'] | undefined
+): Partial<NonNullable<DataSetWithName['settings']>> => {
+  if (!settings) return {};
+  const picked: Partial<NonNullable<DataSetWithName['settings']>> = {};
+  for (const key of passthroughAdditionalSettingsKeys) {
+    const value = (settings as Record<PassthroughAdditionalSettingsKey, unknown>)[key];
+    if (value !== undefined) {
+      (picked as Record<PassthroughAdditionalSettingsKey, unknown>)[key] = value;
+    }
+  }
+  return picked;
+};
+
 const wizardContentFromFormValues = (values: CreateDatasetFormValues): DatasetWizardContent => ({
   dataset: {
     name: values.name,
@@ -93,12 +123,14 @@ export function CreateDatasetWizardPage({
     try {
       const desc = values.description?.trim();
       const settings = buildDatasetSettingsFromFormValues(values.settings);
+      const passthroughSettings = pickPassthroughAdditionalSettings(initialDataSet?.settings);
+      const mergedSettings = { ...(settings ?? {}), ...passthroughSettings };
       const payload: DataSetWithName = {
         name: values.name.trim(),
         data_source: values.data_source.trim(),
         resource: values.resource.trim(),
         ...(desc ? { description: desc } : {}),
-        ...(settings ? { settings } : {}),
+        ...(Object.keys(mergedSettings).length > 0 ? { settings: mergedSettings } : {}),
       };
       await datasetsClient.add(payload);
 

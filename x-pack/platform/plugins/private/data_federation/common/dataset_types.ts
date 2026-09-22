@@ -58,7 +58,12 @@ export interface DatasetSettingsFile {
 
   // API-only (recognized by the API, not shown in the UI)
   target_split_size?: string;
+  split_probe_window?: string;
   segment_size?: string;
+  max_split_probes?: number;
+  file_sort_by?: Array<'list' | 'name' | 'mtime'>;
+  file_order?: 'asc' | 'desc';
+  region?: string;
   optimized_reader?: boolean;
   late_materialization?: boolean;
 }

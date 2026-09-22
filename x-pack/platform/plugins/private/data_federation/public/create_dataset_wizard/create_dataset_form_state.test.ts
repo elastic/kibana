@@ -25,7 +25,6 @@ describe('create_dataset_form_state', () => {
         hive_partitioning: '',
         optimized_reader: '',
         late_materialization: '',
-        schema_sample_size: '',
         delimiter: '',
         mode: '',
         header_row: '',
@@ -38,11 +37,8 @@ describe('create_dataset_form_state', () => {
         max_error_ratio: '',
         quote: '',
         escape: '',
-        comment: '',
         column_prefix: 'col',
         trim_spaces: false,
-        multi_value_syntax: '',
-        max_field_size: '',
       });
     });
   });
@@ -96,25 +92,7 @@ describe('create_dataset_form_state', () => {
       expect(buildDatasetSettingsFromFormValues({ ...empty(), error_mode: 'skip_row' })).toEqual({
         error_mode: 'skip_row',
       });
-      expect(
-        buildDatasetSettingsFromFormValues({ ...empty(), delimiter: ',', schema_sample_size: '10' })
-      ).toBeUndefined();
-    });
-
-    it('includes schema_sample_size when set to a positive integer (csv)', () => {
-      expect(
-        buildDatasetSettingsFromFormValues({ ...empty(), format: 'csv', schema_sample_size: '10' })
-      ).toEqual({ format: 'csv', schema_sample_size: 10 });
-    });
-
-    it('includes schema_sample_size when set to a positive integer (ndjson)', () => {
-      expect(
-        buildDatasetSettingsFromFormValues({
-          ...empty(),
-          format: 'ndjson',
-          schema_sample_size: '10',
-        })
-      ).toEqual({ format: 'ndjson', schema_sample_size: 10 });
+      expect(buildDatasetSettingsFromFormValues({ ...empty(), delimiter: ',' })).toBeUndefined();
     });
 
     it('includes datetime_format for ndjson', () => {
@@ -245,7 +223,6 @@ describe('create_dataset_form_state', () => {
         encoding: 'UTF-8',
         error_mode: 'skip_row',
         max_errors: '5',
-        schema_sample_size: '100',
       });
       expect(result).toEqual({ format: 'parquet', error_mode: 'skip_row', max_errors: 5 });
     });
@@ -256,9 +233,8 @@ describe('create_dataset_form_state', () => {
         format: 'ndjson',
         delimiter: ',',
         mode: 'quoted',
-        schema_sample_size: '50',
       });
-      expect(result).toEqual({ format: 'ndjson', schema_sample_size: 50 });
+      expect(result).toEqual({ format: 'ndjson' });
     });
   });
 });

@@ -31,7 +31,6 @@ describe('dataset_form_initial_values', () => {
       '**/_delta_log/**',
     ]);
     expect(values.settings.hive_partitioning).toBe('');
-    expect(values.settings.schema_sample_size).toBe('');
     expect(values.settings.delimiter).toBe('');
     expect(values.settings.header_row).toBe('');
     expect(values.settings.skip_rows).toBe('');
@@ -60,7 +59,6 @@ describe('dataset_form_initial_values', () => {
     expect(result.resource).toBe('r');
     expect(result.settings.error_mode).toBe('skip_row');
     expect(result.settings.partition_detection).toBe('');
-    expect(result.settings.schema_sample_size).toBe('');
     expect(result.settings.format).toBe('');
   });
 
@@ -86,19 +84,15 @@ describe('dataset_form_initial_values', () => {
       data_source: 'source',
       resource: 'r',
       settings: {
-        schema_sample_size: 5000,
         max_errors: 10,
         max_error_ratio: 0.1,
-        max_field_size: 0,
         skip_rows: 12,
       },
     };
 
     const result = dataSetToFormValues(data);
-    expect(result.settings.schema_sample_size).toBe('5000');
     expect(result.settings.max_errors).toBe('10');
     expect(result.settings.max_error_ratio).toBe('0.1');
-    expect(result.settings.max_field_size).toBe('0');
     expect(result.settings.skip_rows).toBe('12');
   });
 

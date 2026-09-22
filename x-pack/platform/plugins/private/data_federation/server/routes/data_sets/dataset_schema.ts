@@ -44,8 +44,6 @@ export const datasetSchema = schema.object({
       ),
       partition_path: optionalString,
       hive_partitioning: schema.maybe(schema.boolean()),
-      // CSV/TSV + NDJSON
-      schema_sample_size: schema.maybe(schema.number({ min: 1 })),
       // CSV/TSV commonly changed
       delimiter: schema.maybe(schema.string({ maxLength: 1, minLength: 1 })),
       mode: schema.maybe(
@@ -72,16 +70,26 @@ export const datasetSchema = schema.object({
       comment: optionalString,
       column_prefix: optionalString,
       trim_spaces: schema.maybe(schema.boolean()),
-      multi_value_syntax: schema.maybe(
-        schema.oneOf([schema.literal('none'), schema.literal('brackets')])
-      ),
-      max_field_size: schema.maybe(schema.number({ min: 0 })),
-      // NDJSON advanced
-      segment_size: optionalString,
+
       // Parquet advanced
       optimized_reader: schema.maybe(schema.boolean()),
       late_materialization: schema.maybe(schema.boolean()),
       // API-only (not shown in the UI)
+      file_order: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
+      file_sort_by: schema.maybe(
+        schema.arrayOf(
+          schema.oneOf([schema.literal('list'), schema.literal('name'), schema.literal('mtime')]),
+          { maxSize: 3 }
+        )
+      ),
+      max_field_size: schema.maybe(schema.number({ min: 0 })),
+      multi_value_syntax: schema.maybe(
+        schema.oneOf([schema.literal('none'), schema.literal('brackets')])
+      ),
+      region: optionalString,
+      schema_sample_size: schema.maybe(schema.number({ min: 1 })),
+      segment_size: optionalString,
+      split_probe_window: optionalString,
       target_split_size: optionalString,
     })
   ),

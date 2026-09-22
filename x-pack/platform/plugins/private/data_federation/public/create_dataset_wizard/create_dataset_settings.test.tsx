@@ -125,14 +125,6 @@ describe('CreateDatasetSettings', () => {
       expect(getByTestId('createDatasetSettingsHeaderRow')).toBeVisible();
     });
 
-    it('shows CSV advanced fields when CSV is selected', () => {
-      const { getByTestId } = renderSettings();
-
-      selectFormat(getByTestId, 'csv');
-
-      expect(getByTestId('createDatasetSettingsSchemaSampleSize')).toBeVisible();
-    });
-
     it('updates a CSV core field in form state', () => {
       const { getByTestId } = renderSettings();
 
@@ -250,6 +242,11 @@ describe('CreateDatasetAdditionalSettings', () => {
     expect(getByTestId('createDatasetSharedAdvancedSettings')).toBeInTheDocument();
     expect(getByTestId('createDatasetSettingsErrorMode')).toBeInTheDocument();
     expect(getByTestId('createDatasetSettingsTrimSpaces')).toBeInTheDocument();
+    // API-only / passthrough-only fields are never shown in the UI
+    expect(queryByTestId('createDatasetSettingsSchemaSampleSize')).toBeNull();
+    expect(queryByTestId('createDatasetSettingsComment')).toBeNull();
+    expect(queryByTestId('createDatasetSettingsMultiValueSyntax')).toBeNull();
+    expect(queryByTestId('createDatasetSettingsMaxFieldSize')).toBeNull();
     expect(queryByTestId('createDatasetParquetAdvancedSettings')).toBeNull();
   });
 

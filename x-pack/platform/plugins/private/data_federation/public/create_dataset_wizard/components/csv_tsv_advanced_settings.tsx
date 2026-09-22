@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFieldNumber, EuiFieldText, EuiFormRow, EuiSelect } from '@elastic/eui';
+import { EuiFieldText, EuiFormRow, EuiSelect } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController, useWatch } from 'react-hook-form';
 
@@ -15,20 +15,12 @@ import {
   DEFAULT_COLUMN_PREFIX,
   DEFAULT_CSV_ESCAPE,
   DEFAULT_CSV_QUOTE,
-  validateMaxFieldSize,
   validateEscapeCharacter,
   validateQuoteCharacter,
-  validateSchemaSampleSize,
   type CreateDatasetFormValues,
   type DatasetFormatFormValue,
 } from '../create_dataset_form_state';
 import { FormRowLabelWithInfo } from './form_row_label_with_info';
-
-const MULTI_VALUE_SYNTAX_OPTIONS = [
-  { value: '', text: createDatasetWizardStrings.settingsMultiValueSyntaxPlaceholder },
-  { value: 'none', text: createDatasetWizardStrings.settingsMultiValueSyntaxNone },
-  { value: 'brackets', text: createDatasetWizardStrings.settingsMultiValueSyntaxBrackets },
-];
 
 const TRIM_SPACES_OPTIONS = [
   { value: 'false', text: createDatasetWizardStrings.falseLabel },
@@ -37,11 +29,6 @@ const TRIM_SPACES_OPTIONS = [
 
 export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
   const format: DatasetFormatFormValue = useWatch({ control, name: 'settings.format' });
-  const { field: schemaSampleSizeField, fieldState: schemaSampleSizeState } = useController({
-    name: 'settings.schema_sample_size',
-    control,
-    rules: { validate: validateSchemaSampleSize },
-  });
   const { field: quoteField, fieldState: quoteState } = useController({
     name: 'settings.quote',
     control,
@@ -52,18 +39,8 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
     control,
     rules: { validate: validateEscapeCharacter },
   });
-  const { field: commentField } = useController({ name: 'settings.comment', control });
   const { field: columnPrefixField } = useController({ name: 'settings.column_prefix', control });
   const { field: trimSpacesField } = useController({ name: 'settings.trim_spaces', control });
-  const { field: multiValueSyntaxField } = useController({
-    name: 'settings.multi_value_syntax',
-    control,
-  });
-  const { field: maxFieldSizeField, fieldState: maxFieldSizeState } = useController({
-    name: 'settings.max_field_size',
-    control,
-    rules: { validate: validateMaxFieldSize },
-  });
 
   React.useEffect(() => {
     if (format === 'csv') {
@@ -81,30 +58,6 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
 
   return (
     <div data-test-subj="createDatasetCsvTsvAdvancedSettings">
-      <EuiFormRow
-        label={
-          <FormRowLabelWithInfo
-            label={createDatasetWizardStrings.settingsSchemaSampleSizeLabel}
-            infoText={createDatasetWizardStrings.settingsSchemaSampleSizeDescription}
-          />
-        }
-        helpText={createDatasetWizardStrings.settingsSchemaSampleSizeHelp}
-        fullWidth
-        isInvalid={Boolean(schemaSampleSizeState.error)}
-        error={schemaSampleSizeState.error?.message}
-      >
-        <EuiFieldNumber
-          data-test-subj="createDatasetSettingsSchemaSampleSize"
-          fullWidth
-          min={1}
-          step={1}
-          isInvalid={Boolean(schemaSampleSizeState.error)}
-          value={schemaSampleSizeField.value}
-          onChange={(e) => schemaSampleSizeField.onChange(e.target.value)}
-          name={schemaSampleSizeField.name}
-          inputRef={schemaSampleSizeField.ref}
-        />
-      </EuiFormRow>
       <EuiFormRow
         label={
           <FormRowLabelWithInfo
@@ -154,25 +107,6 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
       <EuiFormRow
         label={
           <FormRowLabelWithInfo
-            label={createDatasetWizardStrings.settingsCommentLabel}
-            infoText={createDatasetWizardStrings.settingsCommentPrefixDescription}
-          />
-        }
-        helpText={createDatasetWizardStrings.settingsCommentHelp}
-        fullWidth
-      >
-        <EuiFieldText
-          data-test-subj="createDatasetSettingsComment"
-          fullWidth
-          value={commentField.value}
-          onChange={(e) => commentField.onChange(e.target.value)}
-          name={commentField.name}
-          inputRef={commentField.ref}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        label={
-          <FormRowLabelWithInfo
             label={createDatasetWizardStrings.settingsColumnPrefixLabel}
             infoText={createDatasetWizardStrings.settingsColumnPrefixDescription}
           />
@@ -208,50 +142,6 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
           onChange={(e) => trimSpacesField.onChange(e.target.value === 'true')}
           name={trimSpacesField.name}
           inputRef={trimSpacesField.ref}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        label={
-          <FormRowLabelWithInfo
-            label={createDatasetWizardStrings.settingsMultiValueSyntaxLabel}
-            infoText={createDatasetWizardStrings.settingsMultiValueSyntaxDescription}
-          />
-        }
-        fullWidth
-      >
-        <EuiSelect
-          options={MULTI_VALUE_SYNTAX_OPTIONS}
-          data-test-subj="createDatasetSettingsMultiValueSyntax"
-          fullWidth
-          aria-label={createDatasetWizardStrings.settingsMultiValueSyntaxLabel}
-          value={multiValueSyntaxField.value}
-          onChange={(e) => multiValueSyntaxField.onChange(e.target.value)}
-          name={multiValueSyntaxField.name}
-          inputRef={multiValueSyntaxField.ref}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        label={
-          <FormRowLabelWithInfo
-            label={createDatasetWizardStrings.settingsMaxFieldSizeLabel}
-            infoText={createDatasetWizardStrings.settingsMaxFieldSizeDescription}
-          />
-        }
-        helpText={createDatasetWizardStrings.settingsMaxFieldSizeHelp}
-        fullWidth
-        isInvalid={Boolean(maxFieldSizeState.error)}
-        error={maxFieldSizeState.error?.message}
-      >
-        <EuiFieldNumber
-          data-test-subj="createDatasetSettingsMaxFieldSize"
-          fullWidth
-          min={0}
-          step={1}
-          isInvalid={Boolean(maxFieldSizeState.error)}
-          value={maxFieldSizeField.value}
-          onChange={(e) => maxFieldSizeField.onChange(e.target.value)}
-          name={maxFieldSizeField.name}
-          inputRef={maxFieldSizeField.ref}
         />
       </EuiFormRow>
     </div>

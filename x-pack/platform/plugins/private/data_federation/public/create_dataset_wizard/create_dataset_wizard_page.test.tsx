@@ -221,7 +221,21 @@ describe('CreateDatasetWizardPage', () => {
       data_source: 'source-1',
       resource: 'bucket/*',
       description: '',
-      settings: { format: 'csv', partition_detection: 'hive' },
+      settings: {
+        format: 'csv',
+        partition_detection: 'hive',
+        // passthrough-only additional settings should be preserved unchanged on edit
+        target_split_size: '64mb',
+        split_probe_window: '16mb',
+        schema_sample_size: 5000,
+        segment_size: '32mb',
+        comment: '#',
+        multi_value_syntax: 'brackets',
+        max_field_size: 1048576,
+        region: 'us-east-1',
+        file_sort_by: ['mtime'],
+        file_order: 'desc',
+      },
     };
 
     const { getByTestId } = render(
@@ -270,6 +284,18 @@ describe('CreateDatasetWizardPage', () => {
         expect.objectContaining({
           name: 'logs-dataset',
           resource: 'bucket/updated/*',
+          settings: expect.objectContaining({
+            target_split_size: '64mb',
+            split_probe_window: '16mb',
+            schema_sample_size: 5000,
+            segment_size: '32mb',
+            comment: '#',
+            multi_value_syntax: 'brackets',
+            max_field_size: 1048576,
+            region: 'us-east-1',
+            file_sort_by: ['mtime'],
+            file_order: 'desc',
+          }),
         })
       );
       expect(remove).not.toHaveBeenCalled();

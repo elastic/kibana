@@ -12,7 +12,6 @@ import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
 export type DatasetFormatFormValue = '' | 'parquet' | 'csv' | 'tsv' | 'ndjson' | 'orc';
 export type DatasetErrorModeFormValue = '' | 'fail_fast' | 'skip_row' | 'null_field';
 export type DatasetModeFormValue = '' | 'quoted' | 'escaped' | 'plain';
-export type DatasetMultiValueSyntaxFormValue = '' | 'none' | 'brackets';
 export type DatasetPartitionDetectionFormValue = '' | 'auto' | 'hive' | 'none';
 export type DatasetSchemaResolutionFormValue = '' | 'first_file_wins' | 'strict' | 'union_by_name';
 export type DatasetBooleanFormValue = '' | 'true' | 'false';
@@ -41,8 +40,6 @@ export interface CreateDatasetSettingsFormValues {
   // Parquet advanced
   optimized_reader: DatasetBooleanFormValue;
   late_materialization: DatasetBooleanFormValue;
-  // CSV/TSV + NDJSON
-  schema_sample_size: string;
   // CSV/TSV core
   delimiter: string;
   mode: DatasetModeFormValue;
@@ -54,11 +51,8 @@ export interface CreateDatasetSettingsFormValues {
   // CSV/TSV advanced
   quote: string;
   escape: string;
-  comment: string;
   column_prefix: string;
   trim_spaces: boolean;
-  multi_value_syntax: DatasetMultiValueSyntaxFormValue;
-  max_field_size: string;
   // CSV/TSV error handling
   error_mode: DatasetErrorModeFormValue;
   max_errors: string;
@@ -82,7 +76,6 @@ export const emptyCreateDatasetSettingsFormValues = (): CreateDatasetSettingsFor
   hive_partitioning: '',
   optimized_reader: '',
   late_materialization: '',
-  schema_sample_size: '',
   delimiter: '',
   mode: '',
   header_row: '',
@@ -92,23 +85,12 @@ export const emptyCreateDatasetSettingsFormValues = (): CreateDatasetSettingsFor
   encoding: DEFAULT_ENCODING,
   quote: '',
   escape: '',
-  comment: '',
   column_prefix: DEFAULT_COLUMN_PREFIX,
   trim_spaces: false,
-  multi_value_syntax: '',
-  max_field_size: '',
   error_mode: '',
   max_errors: '',
   max_error_ratio: '',
 });
-
-const parseOptionalPositiveInteger = (value: string): number | undefined => {
-  const trimmed = value?.trim();
-  if (!trimmed) return undefined;
-  const parsed = Number(trimmed);
-  if (!Number.isInteger(parsed) || parsed < 1) return undefined;
-  return parsed;
-};
 
 const parseNonNegativeInteger = (value: string): number | undefined => {
   const trimmed = value?.trim();
@@ -135,14 +117,6 @@ const parseBooleanFormValue = (value: DatasetBooleanFormValue): boolean | undefi
 const fileExclusionsEqualDefault = (value: readonly string[]): boolean =>
   value.length === DEFAULT_FILE_EXCLUSIONS.length &&
   DEFAULT_FILE_EXCLUSIONS.every((pattern, index) => value[index] === pattern);
-
-export const validateSchemaSampleSize = (value: string): true | string => {
-  const parsed = parseOptionalPositiveInteger(value);
-  if (value?.trim() && parsed === undefined) {
-    return createDatasetWizardStrings.settingsSchemaSampleSizeInvalid;
-  }
-  return true;
-};
 
 export const validateMaxErrors = (value: string): true | string => {
   if (!value?.trim()) return true;
@@ -179,13 +153,6 @@ export const validateSkipRows = (value: string): true | string => {
 const validateSingleCharacter = (value: string, errorMessage: string): true | string => {
   if (!value) return true;
   if (value.length !== 1) return errorMessage;
-  return true;
-};
-
-export const validateMaxFieldSize = (value: string): true | string => {
-  if (!value?.trim()) return true;
-  const parsed = parseNonNegativeInteger(value);
-  if (parsed === undefined) return createDatasetWizardStrings.settingsMaxFieldSizeInvalid;
   return true;
 };
 
@@ -258,14 +225,10 @@ export const buildDatasetSettingsFromFormValues = (
       if (settings.quote) applied.quote = settings.quote;
       if (settings.escape) applied.escape = settings.escape;
     }
-    if (settings.comment) applied.comment = settings.comment;
     if (settings.column_prefix && settings.column_prefix !== DEFAULT_COLUMN_PREFIX) {
       applied.column_prefix = settings.column_prefix;
     }
     if (settings.trim_spaces) applied.trim_spaces = true;
-    if (settings.multi_value_syntax) applied.multi_value_syntax = settings.multi_value_syntax;
-    const maxFieldSize = parseNonNegativeInteger(settings.max_field_size);
-    if (maxFieldSize !== undefined) applied.max_field_size = maxFieldSize;
   }
 
   if (isParquet) {
@@ -276,9 +239,6 @@ export const buildDatasetSettingsFromFormValues = (
   }
 
   if (isCsvTsv || isNdjson) {
-    const schemaSampleSize = parseOptionalPositiveInteger(settings.schema_sample_size);
-    if (schemaSampleSize !== undefined) applied.schema_sample_size = schemaSampleSize;
-
     if (settings.datetime_format && settings.datetime_format !== DEFAULT_DATETIME_FORMAT) {
       applied.datetime_format = settings.datetime_format;
     }
