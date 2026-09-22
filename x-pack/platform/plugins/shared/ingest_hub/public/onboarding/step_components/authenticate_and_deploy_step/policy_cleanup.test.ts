@@ -323,9 +323,7 @@ describe('updateAgentlessPolicy — payload shape', () => {
         item: {
           version: '2.5.0',
           vars: [],
-          policy_templates: [
-            { name: 'unrelated_svc', input: 'httpjson' },
-          ],
+          policy_templates: [{ name: 'unrelated_svc', input: 'httpjson' }],
         },
       },
     });

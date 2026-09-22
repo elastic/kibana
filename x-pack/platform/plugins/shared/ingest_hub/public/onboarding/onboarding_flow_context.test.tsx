@@ -245,9 +245,7 @@ describe('OnboardingFlowProvider', () => {
       });
       rerender();
 
-      expect(
-        result.current.detectAndReviewStep.pendingCleanupPolicyIds ?? {}
-      ).toEqual({});
+      expect(result.current.detectAndReviewStep.pendingCleanupPolicyIds ?? {}).toEqual({});
     });
   });
 
