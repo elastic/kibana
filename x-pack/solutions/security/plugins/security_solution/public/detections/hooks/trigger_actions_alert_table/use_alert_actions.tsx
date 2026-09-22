@@ -9,24 +9,17 @@ import type {
   BulkActionsConfig,
   BulkActionsPanelConfig,
 } from '@kbn/response-ops-alerts-table/types';
-import { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
+import { EuiIcon } from '@elastic/eui';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { TableId } from '@kbn/securitysolution-data-table';
 import { useBulkClosingReasonItems } from '@kbn/response-ops-detections-close-reason';
 import type { AlertClosingReason } from '../../../../common/types';
-import {
-  RuntimeFieldTypeEnum,
-  type RuntimeFieldType,
-} from '../../../../common/api/detection_engine/signals/set_signal_status/set_signals_status_route.gen';
 import { APM_USER_INTERACTIONS } from '../../../common/lib/apm/constants';
-
-// Derived from the server's Zod enum so this stays in sync if new types are added.
-// Filters out ES-only types ('composite', 'lookup') that the server schema does not accept,
-// preventing a Zod validation 400 from failing the entire bulk-close request.
-const SUPPORTED_RUNTIME_FIELD_TYPES = new Set<string>(Object.values(RuntimeFieldTypeEnum));
 import { updateAlertStatus } from '../../../common/components/toolbar/bulk_actions/update_alerts';
+import { toBulkCloseRuntimeMappings } from '../../../common/components/toolbar/bulk_actions/runtime_mappings_for_bulk_close';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useStartTransaction } from '../../../common/lib/apm/use_start_transaction';
 import type { AlertWorkflowStatus } from '../../../common/types';
@@ -35,6 +28,11 @@ import * as i18n from '../translations';
 import { buildTimeRangeFilter } from '../../components/alerts_table/helpers';
 import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
 import { useAlertCloseInfoModal } from '../use_alert_close_info_modal';
+
+export const BULK_ALERT_STATUS_ACTION_IDS = {
+  markAsAcknowledged: 'acknowledged-alert-status',
+  markAsOpen: 'open-alert-status',
+} as const;
 
 export interface UseBulkAlertActionItemsArgs {
   /* Table ID for which this hook is being used */
@@ -60,13 +58,14 @@ export const useBulkAlertActionItems = ({
   const { hasAlertsUpdate } = useAlertsPrivileges();
   const { startTransaction } = useStartTransaction();
 
-  const runtimeFields = useMemo(() => {
-    if (!runtimeMappings) return undefined;
-    const entries = Object.entries(runtimeMappings)
-      .filter(([, field]) => SUPPORTED_RUNTIME_FIELD_TYPES.has(field.type))
-      .map(([name, field]) => [name, field.type] as [string, RuntimeFieldType]);
-    return entries.length > 0 ? Object.fromEntries(entries) : undefined;
-  }, [runtimeMappings]);
+  // Convert data view runtime mappings to the narrower shape the route accepts,
+  // preserving each field's type and Painless script so the close query can
+  // evaluate scripted fields at query time rather than falling back to a
+  // _source read (which misses scripted/computed values entirely).
+  const bulkCloseRuntimeMappings = useMemo(
+    () => toBulkCloseRuntimeMappings(runtimeMappings),
+    [runtimeMappings]
+  );
 
   const { addSuccess, addError, addWarning } = useAppToasts();
 
@@ -156,7 +155,10 @@ export const useBulkAlertActionItems = ({
             query,
             signalIds: ids,
             reason,
-            runtimeFields,
+            // runtimeMappings is only used by the query path (select-all). When ids is
+            // defined the by-IDs path is taken and this prop is ignored — that path
+            // doesn't send a filter query, so runtime mappings aren't needed.
+            runtimeMappings: bulkCloseRuntimeMappings,
           });
 
           setAlertLoading(false);
@@ -189,7 +191,7 @@ export const useBulkAlertActionItems = ({
       to,
       refetchProp,
       promptAlertCloseConfirmation,
-      runtimeFields,
+      bulkCloseRuntimeMappings,
     ]
   );
 
@@ -222,17 +224,37 @@ export const useBulkAlertActionItems = ({
           : status === FILTER_CLOSED
           ? i18n.BULK_ACTION_CLOSE_SELECTED
           : i18n.BULK_ACTION_ACKNOWLEDGED_SELECTED;
+      const icon = (
+        <EuiIcon
+          type="dot"
+          color={
+            status === FILTER_OPEN
+              ? 'danger'
+              : status === FILTER_ACKNOWLEDGED
+              ? 'primary'
+              : 'subdued'
+          }
+          aria-hidden
+        />
+      );
 
       if (status === FILTER_CLOSED) {
-        return alertClosingReasonItem;
+        return alertClosingReasonItem
+          ? { ...alertClosingReasonItem, icon, groupId: 'status' as const }
+          : undefined;
       }
 
       return {
         label,
-        key: `${status}-alert-status`,
+        key:
+          status === FILTER_OPEN
+            ? BULK_ALERT_STATUS_ACTION_IDS.markAsOpen
+            : BULK_ALERT_STATUS_ACTION_IDS.markAsAcknowledged,
         'data-test-subj': `${status}-alert-status`,
         disableOnQuery: false,
         onClick: getOnAction(status),
+        icon,
+        groupId: 'status' as const,
       };
     },
     [alertClosingReasonItem, getOnAction]

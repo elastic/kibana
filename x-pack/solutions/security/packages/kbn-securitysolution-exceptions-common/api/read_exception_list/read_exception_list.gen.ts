@@ -28,17 +28,25 @@ export const ReadExceptionListRequestQuery = lazySchema(() =>
     /**
      * Exception list's identifier. Either `id` or `list_id` must be specified.
      */
-    id: ExceptionListId.optional(),
+    id: ExceptionListId.optional().describe(
+      "Exception list's identifier. Either `id` or `list_id` must be specified."
+    ),
     /**
      * Human readable exception list string identifier, e.g. `trusted-linux-processes`. Either `id` or `list_id` must be specified.
      */
-    list_id: ExceptionListHumanId.optional(),
+    list_id: ExceptionListHumanId.optional().describe(
+      'Human readable exception list string identifier, e.g. `trusted-linux-processes`. Either `id` or `list_id` must be specified.'
+    ),
     /**
       * When `single`, the list is resolved in the current Kibana space. When `agnostic`, the list is a global
 (space-agnostic) container. Required for looking up the correct list when `list_id` is not unique.
 
       */
-    namespace_type: ExceptionNamespaceType.optional().default('single'),
+    namespace_type: ExceptionNamespaceType.optional()
+      .default('single')
+      .describe(
+        'When `single`, the list is resolved in the current Kibana space. When `agnostic`, the list is a global\n(space-agnostic) container. Required for looking up the correct list when `list_id` is not unique.\n'
+      ),
   })
 );
 export type ReadExceptionListRequestQuery = z.infer<typeof ReadExceptionListRequestQuery>;

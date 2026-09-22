@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SignificantEventsToolUsage } from '@kbn/streams-ai';
+import type { SignificantEventsToolUsage } from '@kbn/nightshift-ai';
 import type { StreamType } from '@kbn/streams-schema';
 import type { SignificantEventStatus } from '@kbn/significant-events-schema';
 

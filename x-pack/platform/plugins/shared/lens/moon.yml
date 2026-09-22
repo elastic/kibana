@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/lens-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/kibana-visualizations'
+  defaultOwner: '@elastic/kibana-dashboards'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/lens-plugin'
   description: Moon project for @kbn/lens-plugin
   channel: ''
-  owner: '@elastic/kibana-visualizations'
+  owner: '@elastic/kibana-dashboards'
   sourceRoot: x-pack/platform/plugins/shared/lens
 dependsOn:
   - '@kbn/spaces-plugin'
@@ -109,6 +109,11 @@ dependsOn:
   - '@kbn/test-eui-helpers'
   - '@kbn/shared-ux-utility'
   - '@kbn/esql-utils'
+  - '@kbn/app-header'
+  - '@kbn/core-chrome-app-menu'
+  - '@kbn/core-chrome-app-menu-components'
+  - '@kbn/core-chrome-browser-context'
+  - '@kbn/core-chrome-browser-mocks'
   - '@kbn/sort-predicates'
   - '@kbn/presentation-publishing'
   - '@kbn/saved-objects-finder-plugin'
@@ -124,6 +129,7 @@ dependsOn:
   - '@kbn/core-application-browser'
   - '@kbn/core-chrome-browser'
   - '@kbn/core-capabilities-common'
+  - '@kbn/managed-content-badge'
   - '@kbn/esql-types'
   - '@kbn/react-kibana-context-theme'
   - '@kbn/fields-metadata-plugin'
@@ -151,6 +157,7 @@ dependsOn:
   - '@kbn/field-formats-common'
   - '@kbn/as-code-shared-schemas'
   - '@kbn/as-code-shared-telemetry'
+  - '@kbn/as-code-shared-transforms'
   - '@kbn/core-http-browser'
   - '@kbn/use-observable'
   - '@kbn/zod'

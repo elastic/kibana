@@ -9,7 +9,6 @@ export { QUERY_STATUSES } from './queries';
 export type { QueryStatus } from './queries';
 
 export {
-  STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG,
   SIGNIFICANT_EVENTS_SEMANTIC_CODE_SEARCH_GROUNDING_ENABLED_FLAG,
   STREAMS_SIGNIFICANT_EVENTS_APPS_ENABLED_FLAG,
 } from './feature_flags';
@@ -94,3 +93,15 @@ export type {
   RunQuotaWindow,
   RunQuotasResponse,
 } from './run_quotas';
+
+export { COST_BUDGET_GROUPS, FEATURE_ID_TO_COST_BUDGET_GROUP } from './cost';
+export type {
+  BudgetGroupCost,
+  CostBudgetGroup,
+  CostCaveat,
+  CostResponse,
+  CostStatus,
+  CostUnavailableReason,
+  PeriodCost,
+  TokenTrackingCoverage,
+} from './cost';

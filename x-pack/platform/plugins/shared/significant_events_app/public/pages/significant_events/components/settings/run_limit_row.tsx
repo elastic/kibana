@@ -80,37 +80,16 @@ export const RunLimitRow = ({
             })}
           </p>
         </EuiText>
-        {group === 'investigation' && (
-          <EuiText size="xs" color="subdued">
-            <p data-test-subj="significantEventsInvestigationCriticalContinuation">
-              {i18n.translate(
-                'xpack.significantEventsApp.settings.runLimits.investigationCriticalContinuationDescription',
-                {
-                  defaultMessage:
-                    'Critical scheduled investigations continue beyond the daily limit.',
-                }
-              )}
-            </p>
-          </EuiText>
-        )}
         {reached && (
           <EuiText size="xs" color="warning">
             <p data-test-subj={`significantEventsRunLimitReached-${group}`}>
-              {group === 'investigation'
-                ? i18n.translate(
-                    'xpack.significantEventsApp.settings.runLimits.investigationReachedDescription',
-                    {
-                      defaultMessage:
-                        'The limit is reached. New non-critical scheduled investigations can be denied until the UTC day resets.',
-                    }
-                  )
-                : i18n.translate(
-                    'xpack.significantEventsApp.settings.runLimits.workerReachedDescription',
-                    {
-                      defaultMessage:
-                        'The limit is reached. New scheduled work in this category can be denied until the UTC day resets.',
-                    }
-                  )}
+              {i18n.translate(
+                'xpack.significantEventsApp.settings.runLimits.workerReachedDescription',
+                {
+                  defaultMessage:
+                    'The limit is reached. New scheduled work in this category can be denied until the UTC day resets.',
+                }
+              )}
             </p>
           </EuiText>
         )}

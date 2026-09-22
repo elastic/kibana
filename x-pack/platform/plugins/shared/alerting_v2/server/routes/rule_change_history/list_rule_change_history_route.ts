@@ -22,7 +22,7 @@ import {
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
-import { ALERTING_V2_RULE_CHANGE_HISTORY_API_PATH } from '../constants';
+import { ALERTING_V2_INTERNAL_RULE_CHANGE_HISTORY_API_PATH } from '../constants';
 import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
 import { ruleIdParamsSchema } from '../rules/route_schemas';
 import { listRuleChangeHistoryOasExamples } from './list_rule_change_history_oas_example';
@@ -30,13 +30,14 @@ import { listRuleChangeHistoryOasExamples } from './list_rule_change_history_oas
 @injectable()
 export class ListRuleChangeHistoryRoute extends BaseAlertingRoute {
   static method = 'get' as const;
-  static path = ALERTING_V2_RULE_CHANGE_HISTORY_API_PATH;
+  static path = ALERTING_V2_INTERNAL_RULE_CHANGE_HISTORY_API_PATH;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.rules.read],
     },
   };
   static routeOptions = {
+    access: 'internal' as const,
     summary: 'List rule change history',
     description:
       'Get a paginated list of prior configurations for a rule from change history. ' +

@@ -12,6 +12,7 @@ import type {
   RunToolStackEntry,
 } from '@kbn/agent-builder-server/runner';
 import type { ToolCallSource } from '@kbn/agent-builder-server/runner/runner';
+import type { ConversationOriginType } from '@kbn/agent-builder-common';
 
 export const createEmptyRunContext = ({
   runId = uuidv4(),
@@ -50,8 +51,10 @@ export const forkContextForAgentRun = ({
   ...agentEntry
 }: {
   agentId: string;
+  agentName?: string;
   conversationId?: string;
   executionId?: string;
+  origin?: ConversationOriginType;
   parentContext: RunContext;
 }): RunContext => {
   return {

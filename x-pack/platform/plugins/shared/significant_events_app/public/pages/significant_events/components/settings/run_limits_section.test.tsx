@@ -100,7 +100,6 @@ describe('RunLimitsSection', () => {
     expect(screen.getByText('Discovery')).toBeInTheDocument();
     expect(screen.getByText('Investigation')).toBeInTheDocument();
     expect(screen.getByText('Knowledge indicator extraction')).toBeInTheDocument();
-    expect(screen.queryByText('Memory updates')).not.toBeInTheDocument();
     expect(screen.getByTestId('significantEventsRunLimitCount-detection')).toHaveTextContent(
       '14 counted scheduled admissions today'
     );
@@ -229,7 +228,7 @@ describe('RunLimitsSection', () => {
     );
   });
 
-  it('explains critical investigation continuation without claiming an exception count', () => {
+  it('does not describe an investigation severity bypass', () => {
     setup(
       response({
         counts: {
@@ -241,10 +240,12 @@ describe('RunLimitsSection', () => {
     );
 
     expect(
-      screen.getByTestId('significantEventsInvestigationCriticalContinuation')
-    ).toHaveTextContent('Critical scheduled investigations continue beyond the daily limit.');
-    expect(screen.queryByText(/critical override/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/critical exception/i)).not.toBeInTheDocument();
+      screen.queryByTestId('significantEventsInvestigationCriticalContinuation')
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/non-critical scheduled/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/critical scheduled investigations continue/i)
+    ).not.toBeInTheDocument();
   });
 
   it('keeps the active exhaustion banner while a raised limit is unsaved', () => {

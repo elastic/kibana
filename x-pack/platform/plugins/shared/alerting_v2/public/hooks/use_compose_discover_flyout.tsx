@@ -25,7 +25,6 @@ import React, { useCallback, useMemo, useState } from 'react';
 import type { RuleApiResponse } from '../services/rules_api';
 import { useBuilderToEsqlTransition } from './use_builder_to_esql_transition';
 import { useCreateRule } from './use_create_rule';
-import { useSetupRuleNotifications } from './use_setup_rule_notifications';
 import { useUpdateRule } from './use_update_rule';
 
 const templateToSyntheticRule = (template: RuleTemplateResponse): RuleApiResponse => ({
@@ -92,7 +91,6 @@ export const useComposeDiscoverFlyout = ({
     });
 
   const createRuleMutation = useCreateRule();
-  const setupNotificationsMutation = useSetupRuleNotifications();
   const updateRuleMutation = useUpdateRule();
   const ruleFormServices = useMemo<RuleFormServices>(
     () => ({
@@ -227,45 +225,13 @@ export const useComposeDiscoverFlyout = ({
       builderType={builderType ?? undefined}
       initialBuilderState={initialBuilderState}
       onSwitchToEsql={builderType ? requestSwitchToEsql : undefined}
-      onCreateRule={(payload, ruleNotifications) =>
-        createRuleMutation.mutate(
-          { payload },
-          {
-            onSuccess: (rule) => {
-              const actions = ruleNotifications?.workflows ?? [];
-              if (actions.length > 0) {
-                setupNotificationsMutation.mutate(
-                  { rule, actions },
-                  { onSuccess: closeAndRedirect, onError: closeAndRedirect }
-                );
-              } else {
-                closeAndRedirect();
-              }
-            },
-          }
-        )
+      onCreateRule={(payload) =>
+        createRuleMutation.mutate({ payload }, { onSuccess: closeAndRedirect })
       }
-      onUpdateRule={(id, payload, ruleNotifications) =>
-        updateRuleMutation.mutate(
-          { id, payload },
-          {
-            onSuccess: (rule) => {
-              const actions = ruleNotifications?.workflows ?? [];
-              if (actions.length === 0) {
-                closeFlyout();
-                return;
-              }
-              // Only close the flyout once notification setup also succeeds
-              setupNotificationsMutation.mutate({ rule, actions }, { onSuccess: closeFlyout });
-            },
-          }
-        )
+      onUpdateRule={(id, payload) =>
+        updateRuleMutation.mutate({ id, payload }, { onSuccess: closeFlyout })
       }
-      isSaving={
-        createRuleMutation.isLoading ||
-        setupNotificationsMutation.isLoading ||
-        updateRuleMutation.isLoading
-      }
+      isSaving={createRuleMutation.isLoading || updateRuleMutation.isLoading}
     />
   ) : null;
 

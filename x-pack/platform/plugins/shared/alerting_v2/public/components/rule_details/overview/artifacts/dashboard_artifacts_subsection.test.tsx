@@ -11,8 +11,8 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { DASHBOARD_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
 import { DashboardArtifactsSubsection } from './dashboard_artifacts_subsection';
 import { SELECTABLE_LIST_MAX_HEIGHT } from './manage_dashboards_popover';
-import { RuleProvider } from '../../rule_context';
 import type { RuleApiResponse } from '../../../../services/rules_api';
+import type { RuleSummaryData } from '../../../rule/types';
 
 const mockResolveDashboardsByIds = jest.fn();
 const mockSearchRelatedDashboard = jest.fn();
@@ -31,7 +31,7 @@ jest.mock('@kbn/alerting-v2-utils', () => ({
 
 jest.mock('@kbn/alerting-v2-rule-form', () => ({
   getDashboardId: (artifact: { data: Record<string, unknown> }) =>
-    typeof artifact.data.dashboardId === 'string' ? artifact.data.dashboardId : undefined,
+    typeof artifact.data.dashboard_id === 'string' ? artifact.data.dashboard_id : undefined,
   resolveDashboardsByIds: (...args: unknown[]) => mockResolveDashboardsByIds(...args),
   searchRelatedDashboard: (...args: unknown[]) => mockSearchRelatedDashboard(...args),
   mapArtifacts: (artifacts: unknown) =>
@@ -120,12 +120,10 @@ const baseRule: RuleApiResponse = {
   updated_at: '2026-03-04T12:00:00.000Z',
 };
 
-const renderSubsection = (rule: RuleApiResponse) =>
+const renderSubsection = (rule: RuleSummaryData) =>
   render(
     <I18nProvider>
-      <RuleProvider rule={rule}>
-        <DashboardArtifactsSubsection />
-      </RuleProvider>
+      <DashboardArtifactsSubsection rule={rule} />
     </I18nProvider>
   );
 
@@ -160,13 +158,37 @@ describe('DashboardArtifactsSubsection', () => {
     expect(screen.queryByTestId('ruleDashboardArtifactsEmptyAddButton')).not.toBeInTheDocument();
   });
 
+  it('renders draft rules without dashboard management controls', async () => {
+    mockResolveDashboardsByIds.mockResolvedValue({
+      resolved: [{ id: 'dash-1', title: 'Ops Dashboard' }],
+      missing: [],
+    });
+
+    renderSubsection({
+      ...baseRule,
+      id: undefined,
+      artifacts: [
+        { id: 'artifact-1', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboard_id: 'dash-1' } },
+      ],
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('ruleDashboardArtifactTitle-dash-1')).toBeInTheDocument();
+    });
+    expect(screen.queryByTestId('ruleDashboardArtifactsAddButton')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('ruleDashboardArtifactDeleteButton-dash-1')
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId('ruleDashboardArtifactOpenLink-dash-1')).toBeInTheDocument();
+  });
+
   it('renders loading state while dashboards are being resolved', () => {
     mockResolveDashboardsByIds.mockReturnValue(new Promise(() => {}));
 
     renderSubsection({
       ...baseRule,
       artifacts: [
-        { id: 'artifact-1', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: 'dash-1' } },
+        { id: 'artifact-1', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboard_id: 'dash-1' } },
       ],
     });
 
@@ -179,7 +201,7 @@ describe('DashboardArtifactsSubsection', () => {
     renderSubsection({
       ...baseRule,
       artifacts: [
-        { id: 'artifact-1', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: 'dash-1' } },
+        { id: 'artifact-1', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboard_id: 'dash-1' } },
       ],
     });
 
@@ -197,7 +219,7 @@ describe('DashboardArtifactsSubsection', () => {
     renderSubsection({
       ...baseRule,
       artifacts: [
-        { id: 'artifact-1', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: 'dash-1' } },
+        { id: 'artifact-1', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboard_id: 'dash-1' } },
       ],
     });
 
@@ -311,7 +333,7 @@ describe('DashboardArtifactsSubsection', () => {
             {
               id: 'generated-dashboard',
               type: DASHBOARD_ARTIFACT_TYPE,
-              data: { dashboardId: 'dash-new' },
+              data: { dashboard_id: 'dash-new' },
             },
           ],
         },
@@ -329,7 +351,7 @@ describe('DashboardArtifactsSubsection', () => {
     const rule = {
       ...baseRule,
       artifacts: [
-        { id: 'artifact-1', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: 'dash-1' } },
+        { id: 'artifact-1', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboard_id: 'dash-1' } },
         { id: 'artifact-2', type: 'runbook', data: { content: 'runbook-content' } },
       ],
     };
@@ -366,7 +388,7 @@ describe('DashboardArtifactsSubsection', () => {
         {
           id: 'artifact-missing',
           type: DASHBOARD_ARTIFACT_TYPE,
-          data: { dashboardId: 'dash-missing' },
+          data: { dashboard_id: 'dash-missing' },
         },
       ],
     };
@@ -422,7 +444,7 @@ describe('DashboardArtifactsSubsection', () => {
       renderSubsection({
         ...baseRule,
         artifacts: [
-          { id: 'artifact-1', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: 'dash-1' } },
+          { id: 'artifact-1', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboard_id: 'dash-1' } },
         ],
       });
 

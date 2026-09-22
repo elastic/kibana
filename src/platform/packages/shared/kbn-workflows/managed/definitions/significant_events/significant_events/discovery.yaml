@@ -221,12 +221,10 @@ steps:
             items:
               type: string
             description: >-
-              rule_uuid of every detection that is done this cycle: (1) already-recorded
-              known noise/false-positive that exited after the confirmation query without
-              events_write, or (2) a detection whose events_write result was written: true
-              or skipped with reason existing_active_event or unchanged_outcome.
-              Failed (bulk_error) or unattempted writes (except the already-recorded-noise
-              exit) must not be included.
+              rule_uuid of every detection that is done this cycle: a detection whose
+              events_write result was written: true or skipped with reason
+              existing_active_event or unchanged_outcome.
+              Failed (bulk_error) or unattempted writes must not be included.
               Used both as a hallucination guardrail (schema validation forces the agent
               to report real activity) and as the per-rule filter for which detections
               get stamped as processed. Full discovery data is written via the
@@ -452,7 +450,6 @@ steps:
                               path: '/s/{{ workflow.spaceId }}/internal/significant_events/run_quotas/_consume'
                               body:
                                 group: 'investigation'
-                                critical: '${{ steps.resolve_open_event.output.hits.hits[0]._source.severity == "80-critical" }}'
                               headers:
                                 x-elastic-internal-origin: 'kibana'
                             timeout: '10s'
@@ -474,6 +471,7 @@ steps:
                                       {{ steps.resolve_open_event.output.hits.hits[0]._source.summary }}
 
                                       Probable cause: {{ steps.resolve_open_event.output.hits.hits[0]._source.symptom_hypothesis }}
+                                    title: '{{ steps.resolve_open_event.output.hits.hits[0]._source.title }}'
                                     stream_names: '${{ steps.resolve_open_event.output.hits.hits[0]._source.stream_names | default: [] }}'
                                     concurrency_key: '{{ foreach.item.event_id }}'
                                     context:

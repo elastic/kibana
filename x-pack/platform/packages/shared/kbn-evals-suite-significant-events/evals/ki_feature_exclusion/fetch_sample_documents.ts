@@ -7,7 +7,8 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { formatRawDocument, type InferenceDocument } from '@kbn/streams-ai';
+import type { InferenceDocument } from '@kbn/nightshift-ai';
+import { compactInferenceDocuments } from '@kbn/significant-events-plugin/server';
 import { MANAGED_STREAM_SEARCH_PATTERN } from '../../src/datasets';
 
 export async function fetchSampleDocuments({
@@ -37,8 +38,5 @@ export async function fetchSampleDocuments({
     );
   }
 
-  return sampleDocuments.flatMap((hit) => {
-    const document = formatRawDocument({ hit });
-    return document ? [document] : [];
-  });
+  return compactInferenceDocuments(sampleDocuments);
 }

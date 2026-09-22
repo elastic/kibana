@@ -9,10 +9,26 @@ import type { Client } from '@elastic/elasticsearch';
 import type { JsonObject } from '@kbn/utility-types';
 import expect from '@kbn/expect';
 import type { SearchTotalHits, Refresh } from '@elastic/elasticsearch/lib/api/types';
-import type { BaseFeature, Feature } from '@kbn/significant-events-schema';
-import type { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
-import type { SignificantEventsRouteRepository } from '@kbn/significant-events-plugin/server';
+import { omit } from 'lodash';
+import type {
+  BaseFeature,
+  Feature,
+  QueryWithOccurrences,
+  StreamQuery,
+} from '@kbn/significant-events-schema';
 import type { SignificantEventsSupertestRepositoryClient } from './repository_client';
+
+export interface BulkQueryIndexInput {
+  id: string;
+  title: string;
+  description?: string;
+  esql: { query: string };
+  severity_score?: number;
+  evidence?: string[];
+  expires_at?: string;
+}
+
+export type BulkQueryOperation = { index: BulkQueryIndexInput } | { delete: { id: string } };
 
 // ---------------------------------------------------------------------------
 // Elasticsearch resource helpers
@@ -149,47 +165,106 @@ export async function fetchDocument(esClient: Client, index: string, id: string)
   return response.hits.hits[0];
 }
 
+// Discovery list requires a time range even when callers only want stored
+// query documents. Keep the window to one bucket so computeOccurrences stays cheap.
+const LIST_QUERIES_RANGE = {
+  from: '2020-01-01T00:00:00.000Z',
+  to: '2020-01-01T01:00:00.000Z',
+  bucketSize: '1h',
+} as const;
+
+function toListedQuery(query: QueryWithOccurrences): StreamQuery {
+  return omit(query, ['occurrences', 'change_points', 'rule_backed', 'rule_uuid', 'stream_name']);
+}
+
 /**
- * Lists the significant-event queries attached to a stream via the dedicated queries API.
- * Queries are no longer part of the stream GET response, so tests read them through here.
+ * Lists stored queries via the discovery read. Expired rows are omitted.
+ * `active` + `draft` is backed plus unbacked.
  */
 export async function getQueries(
   apiClient: SignificantEventsSupertestRepositoryClient,
   name: string,
   expectStatusCode: number = 200
 ) {
-  return await apiClient
-    .fetch('GET /api/streams/{name}/queries 2023-10-31', {
+  const body = await apiClient
+    .fetch('GET /internal/streams/_queries', {
       params: {
-        path: { name },
+        query: {
+          ...LIST_QUERIES_RANGE,
+          streamNames: [name],
+          status: ['active', 'draft'],
+          perPage: 1000,
+        },
+      },
+    })
+    .expect(expectStatusCode)
+    .then((response) => response.body);
+
+  return {
+    queries: body.queries.map(toListedQuery),
+  };
+}
+
+export async function upsertQuery(
+  apiClient: SignificantEventsSupertestRepositoryClient,
+  streamName: string,
+  queryId: string,
+  body: Omit<BulkQueryIndexInput, 'id'>,
+  expectStatusCode: number = 200
+) {
+  return apiClient
+    .fetch('PUT /internal/significant_events/queries/{queryId}', {
+      params: {
+        path: { queryId },
+        body: {
+          ...body,
+          target_name: streamName,
+        },
       },
     })
     .expect(expectStatusCode)
     .then((response) => response.body);
 }
 
+export async function deleteQueries(
+  apiClient: SignificantEventsSupertestRepositoryClient,
+  queryIds: string[],
+  expectStatusCode: number = 200
+) {
+  return apiClient
+    .fetch('POST /internal/streams/queries/_bulk_delete', {
+      params: { body: { queryIds } },
+    })
+    .expect(expectStatusCode)
+    .then((response) => response.body);
+}
+
 /**
- * Bulk-applies significant-event query operations (index/delete) to a stream via the dedicated
- * queries API. Queries are no longer part of the stream upsert, so tests seed them through here.
+ * Fan-out leftover from the deleted public bulk route: upserts first, then
+ * deletes. Not atomic; overlapping ids net a delete.
  */
 export async function bulkQueries(
   apiClient: SignificantEventsSupertestRepositoryClient,
   name: string,
-  operations: ClientRequestParamsOf<
-    SignificantEventsRouteRepository,
-    'POST /api/streams/{name}/queries/_bulk 2023-10-31'
-  >['params']['body']['operations'],
+  operations: BulkQueryOperation[],
   expectStatusCode: number = 200
 ) {
-  return await apiClient
-    .fetch('POST /api/streams/{name}/queries/_bulk 2023-10-31', {
-      params: {
-        path: { name },
-        body: { operations },
-      },
-    })
-    .expect(expectStatusCode)
-    .then((response) => response.body);
+  const indexOps = operations.flatMap((operation) =>
+    'index' in operation ? [operation.index] : []
+  );
+  const deleteIds = operations.flatMap((operation) =>
+    'delete' in operation ? [operation.delete.id] : []
+  );
+
+  for (const query of indexOps) {
+    const { id, ...body } = query;
+    await upsertQuery(apiClient, name, id, body, expectStatusCode);
+  }
+  if (deleteIds.length > 0) {
+    await deleteQueries(apiClient, deleteIds, expectStatusCode);
+  }
+
+  return { acknowledged: true };
 }
 
 export async function upsertFeature(

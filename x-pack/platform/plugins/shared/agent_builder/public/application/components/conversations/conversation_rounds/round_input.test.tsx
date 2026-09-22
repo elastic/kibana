@@ -11,6 +11,8 @@ import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { useCurrentUser } from '../../../hooks/use_current_user';
 import { useUserProfiles } from '../../../hooks/use_user_profiles';
 import { RoundInput } from './round_input';
+import { RoundResponseActions } from './round_response/round_response_actions';
+import { RoundInputImages } from './round_input_images';
 
 jest.mock('../../../hooks/use_current_user', () => ({
   useCurrentUser: jest.fn(),
@@ -21,15 +23,21 @@ jest.mock('../../../hooks/use_user_profiles', () => ({
 }));
 
 jest.mock('./round_response/round_response_actions', () => ({
-  RoundResponseActions: () => <div data-test-subj="agentBuilderRoundInputActions" />,
+  RoundResponseActions: jest.fn(() => <div data-test-subj="agentBuilderRoundInputActions" />),
 }));
 
 jest.mock('./round_attachment_references', () => ({
   RoundAttachmentReferences: () => <div data-test-subj="agentBuilderRoundInputAttachments" />,
 }));
 
+jest.mock('./round_input_images', () => ({
+  RoundInputImages: jest.fn(() => <div data-test-subj="agentBuilderRoundInputImages" />),
+}));
+
 const mockUseCurrentUser = jest.mocked(useCurrentUser);
 const mockUseUserProfiles = jest.mocked(useUserProfiles);
+const MockRoundResponseActions = jest.mocked(RoundResponseActions);
+const MockRoundInputImages = jest.mocked(RoundInputImages);
 
 const currentUser = {
   uid: 'current-user',
@@ -47,6 +55,8 @@ const currentUser = {
 
 describe('RoundInput', () => {
   beforeEach(() => {
+    MockRoundResponseActions.mockClear();
+    MockRoundInputImages.mockClear();
     mockUseCurrentUser.mockReturnValue({
       currentUser,
       isLoading: false,
@@ -55,6 +65,20 @@ describe('RoundInput', () => {
     mockUseUserProfiles.mockReturnValue({
       data: [currentUser],
     } as unknown as ReturnType<typeof useUserProfiles>);
+  });
+
+  it('tells RoundResponseActions to copy the prompt, not the response', () => {
+    render(
+      <RoundInput
+        input="hello agent"
+        isPendingCurrentRound={false}
+        startedAt="2026-01-01T00:00:00.000Z"
+      />
+    );
+
+    const [props] = MockRoundResponseActions.mock.calls[0];
+    expect(props.content).toBe('hello agent');
+    expect(props.copyTarget).toBe('prompt');
   });
 
   it('renders the avatar beside the authored input content', () => {
@@ -79,5 +103,32 @@ describe('RoundInput', () => {
     expect(content).toContainElement(screen.getByTestId('agentBuilderRoundInputActions'));
     expect(layout.firstElementChild).toBe(avatar);
     expect(avatar.nextElementSibling).toBe(content);
+  });
+
+  it('renders RoundInputImages inside the panel when attachments are present', () => {
+    render(
+      <RoundInput
+        input="Show me the preview"
+        isPendingCurrentRound={false}
+        startedAt="2026-01-01T00:00:00.000Z"
+        attachmentRefs={[{ attachment_id: 'img1', version: 1 }]}
+      />
+    );
+
+    expect(screen.getByTestId('agentBuilderRoundInputImages')).toBeInTheDocument();
+  });
+
+  it('passes hoveredImageName=null initially to RoundInputImages', () => {
+    render(
+      <RoundInput
+        input="hello"
+        isPendingCurrentRound={false}
+        startedAt="2026-01-01T00:00:00.000Z"
+        attachmentRefs={[{ attachment_id: 'img1', version: 1 }]}
+      />
+    );
+
+    const [props] = MockRoundInputImages.mock.calls[0];
+    expect(props.hoveredImageName).toBeNull();
   });
 });

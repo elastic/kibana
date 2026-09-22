@@ -12,7 +12,7 @@ const { resolve, join } = require('path');
 
 const SECURITY_SOLUTION_ROOT = resolve(__dirname, '../..');
 
-// This script is also run in CI: to track down the scripts that run it in CI, code search for `yarn openapi:generate` in the `.buildkite` top level directory
+// This script is also run in CI: to track down the scripts that run it in CI, code search for `pnpm openapi:generate` in the `.buildkite` top level directory
 
 (async () => {
   await generate({

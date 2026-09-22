@@ -638,6 +638,76 @@ describe('generateOpenApiDocument', () => {
     });
   });
 
+  describe('operationId', () => {
+    it('uses an explicit ID when provided and derives one when omitted', async () => {
+      const [routers, versionedRouters] = createTestRouters({
+        routers: {
+          testRouter: {
+            routes: [
+              {
+                path: '/explicit/{id}/{path*}',
+                method: 'put',
+                options: { operationId: 'upsert-dashboard', access: 'public' },
+              },
+              {
+                path: '/derived/{id}/{path*}',
+                method: 'get',
+                options: { access: 'public' },
+              },
+            ],
+          },
+        },
+        versionedRouters: {
+          testVersionedRouter: {
+            routes: [
+              {
+                path: '/explicit-v',
+                method: 'put',
+                options: {
+                  access: 'public',
+                  operationId: 'upsert-visualization',
+                  security: {
+                    authz: {
+                      requiredPrivileges: ['foo'],
+                    },
+                  },
+                },
+              },
+              {
+                path: '/derived-v',
+                method: 'get',
+                options: {
+                  access: 'public',
+                  security: {
+                    authz: {
+                      requiredPrivileges: ['foo'],
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        },
+      });
+      const result = await generateOpenApiDocument(
+        {
+          routers,
+          versionedRouters,
+        },
+        {
+          title: 'test',
+          baseUrl: 'https://test.oas',
+          version: '99.99.99',
+        }
+      );
+
+      expect(result.paths['/explicit/{id}/{path}']!.put!.operationId).toBe('upsert-dashboard');
+      expect(result.paths['/derived/{id}/{path}']!.get!.operationId).toBe('get-derived-id-path');
+      expect(result.paths['/explicit-v']!.put!.operationId).toBe('upsert-visualization');
+      expect(result.paths['/derived-v']!.get!.operationId).toBe('get-derived-v');
+    });
+  });
+
   describe('availability', () => {
     const testCases = [
       {

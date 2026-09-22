@@ -1,5 +1,5 @@
 {
-  "sha1": "861b847024c9e87c7dbe2650465ce37310f835de",
+  "sha1": "95463214e97ab5ce4dc1e7a05fcacd7d4c3e5f2b",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -128,8 +128,8 @@
       }
     },
     {
-      "id": "63983bc249d77f4-fb6ccdc1b694d87",
-      "title": "Stream canvas - classic source to destination nodes renders the canvas toolbar with undo/redo and add-node placeholders",
+      "id": "63983bc249d77f4-1451aa0cc9ff964",
+      "title": "Stream canvas - classic source to destination nodes keeps the viewport where the user left it when tidying up",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -144,8 +144,8 @@
       }
     },
     {
-      "id": "63983bc249d77f4-68ba85ffd15d224",
-      "title": "Stream canvas - classic source to destination nodes exposes accessible node labels and keyboard controls",
+      "id": "63983bc249d77f4-c58942ef30fb32e",
+      "title": "Stream canvas - classic source to destination nodes keeps the viewport where the user left it when opening a node flyout",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -160,6 +160,38 @@
       }
     },
     {
+      "id": "63983bc249d77f4-fb6ccdc1b694d87",
+      "title": "Stream canvas - classic source to destination nodes renders the canvas toolbar with undo/redo and add-node placeholders",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
+        "line": 119,
+        "column": 7
+      }
+    },
+    {
+      "id": "63983bc249d77f4-68ba85ffd15d224",
+      "title": "Stream canvas - classic source to destination nodes exposes accessible node labels and keyboard controls",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
+        "line": 126,
+        "column": 21
+      }
+    },
+    {
       "id": "63983bc249d77f4-07e1b29a8d7c4c2",
       "title": "Stream canvas - classic source to destination nodes undoes a keyboard-driven node reposition",
       "expectedStatus": "passed",
@@ -171,7 +203,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 132,
+        "line": 149,
         "column": 24
       }
     },
@@ -187,7 +219,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 141,
+        "line": 158,
         "column": 13
       }
     },
@@ -203,8 +235,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 147,
-        "column": 26
+        "line": 164,
+        "column": 10
       }
     },
     {
@@ -219,8 +251,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 154,
-        "column": 21
+        "line": 168,
+        "column": 7
       }
     },
     {
@@ -235,8 +267,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 169,
-        "column": 7
+        "line": 189,
+        "column": 82
       }
     },
     {

@@ -21,13 +21,13 @@ import React from 'react';
 import { StreamingText } from './streaming_text';
 import { ChatMessageText } from './chat_message_text';
 import { RoundResponseActions } from './round_response_actions';
+import { JsonCodeBlock } from '../round_events/json_code_block';
 
 export interface RoundResponseProps {
   response: AssistantResponse;
   steps: ConversationRoundStep[];
   isLoading: boolean;
   hasError: boolean;
-  isLastRound: boolean;
   conversationAttachments?: VersionedAttachment[];
   attachmentRefs?: AttachmentVersionRef[];
   conversationId?: string;
@@ -39,7 +39,6 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
   response,
   steps,
   isLoading,
-  isLastRound,
   conversationAttachments,
   attachmentRefs,
   conversationId,
@@ -47,8 +46,8 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
 }) => {
   const hasMessage = Boolean(response.message);
 
-  const showStreamingText = isLoading && hasMessage;
-  const showCompletedAnswer = !isLoading;
+  const showStreamingText = isLoading && hasMessage && !response.structured_output;
+  const showCompletedAnswer = !isLoading || Boolean(response.structured_output);
 
   return (
     <EuiFlexGroup
@@ -72,21 +71,28 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
             conversationId={conversationId}
           />
         ) : showCompletedAnswer ? (
-          <ChatMessageText
-            content={response.message}
-            steps={steps}
-            conversationAttachments={conversationAttachments}
-            attachmentRefs={attachmentRefs}
-            conversationId={conversationId}
-          />
+          response.structured_output ? (
+            <JsonCodeBlock data={response.structured_output} />
+          ) : (
+            <ChatMessageText
+              content={response.message}
+              steps={steps}
+              conversationAttachments={conversationAttachments}
+              attachmentRefs={attachmentRefs}
+              conversationId={conversationId}
+            />
+          )
         ) : null}
       </EuiFlexItem>
       {!isLoading && !hasError && (
         <EuiFlexItem grow={false}>
           <RoundResponseActions
-            content={response.message}
+            content={
+              response.structured_output
+                ? JSON.stringify(response.structured_output, null, 2)
+                : response.message
+            }
             isVisible
-            isLastRound={isLastRound}
             rawRound={rawRound}
           />
         </EuiFlexItem>
