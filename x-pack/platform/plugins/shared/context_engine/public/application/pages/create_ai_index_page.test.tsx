@@ -289,32 +289,6 @@ describe('CreateAiIndexPage', () => {
     });
   });
 
-  it('creates a data-stream-backed AI index when that storage type is selected', async () => {
-    const services = coreMock.createStart();
-    services.http.post.mockResolvedValue({});
-
-    renderWithProviders(services);
-
-    typeId(VALID_ID);
-    fireEvent.click(screen.getByTestId('contextAiIndexStorageType-data_stream'));
-    fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
-
-    await waitFor(() => {
-      expect(services.http.post).toHaveBeenCalledWith(
-        '/api/context_engine/ai_index',
-        expect.objectContaining({
-          body: JSON.stringify({
-            id: VALID_ID,
-            dest: { type: 'data_stream', value: 'ai-index-ds-support-ticket-triage' },
-            automations: [],
-            sources: [],
-            traces: [],
-          }),
-        })
-      );
-    });
-  });
-
   it('does not navigate when the create request fails', async () => {
     const services = coreMock.createStart();
     services.http.post.mockRejectedValue(new Error('boom'));

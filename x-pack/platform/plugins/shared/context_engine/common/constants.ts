@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { AiIndexType } from './http_api/ai_indices';
+
 export const publicApiPath = '/api/context_engine';
 export const internalApiPath = '/internal/context_engine';
 
@@ -74,6 +76,12 @@ export const AI_INDEX_INTERNAL_API_VERSION = '1';
 export const AI_INDEX_DEST_PREFIX = 'ai-index-';
 export const AI_INDEX_DATA_STREAM_PREFIX = `${AI_INDEX_DEST_PREFIX}ds-`;
 export const AI_INDEX_INDEX_PREFIX = `${AI_INDEX_DEST_PREFIX}idx-`;
+
+/**
+ * Storage type used for AI indexes created from the UI. The `data_stream` type still exists
+ * and is supported by the API/server for solutions and expert users; only the UI is defaulted.
+ */
+export const DEFAULT_AI_INDEX_TYPE: AiIndexType = 'index';
 
 /**
  * Hard limit on the number of AI indices returned by the list API.
