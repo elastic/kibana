@@ -55,8 +55,7 @@ export const IndexDocuments: React.FC<IndexDocumentsProps> = ({
     errorText = i18n.translate(
       'xpack.idxMgmt.indexDetails.data.preview.staleDocumentsWithReasonErrorMessage',
       {
-        defaultMessage:
-          'Data preview may show stale data. Error: {errorMessage}',
+        defaultMessage: 'Data preview may show stale data. {errorMessage}',
         values: { errorMessage: error.message },
       }
     );
@@ -68,13 +67,7 @@ export const IndexDocuments: React.FC<IndexDocumentsProps> = ({
       }
     );
   } else if (error?.message) {
-    errorText = i18n.translate(
-      'xpack.idxMgmt.indexDetails.data.preview.loadErrorMessage',
-      {
-        defaultMessage: 'Error: {errorMessage}',
-        values: { errorMessage: error.message },
-      }
-    );
+    errorText = error.message;
   }
 
   return (
@@ -154,7 +147,7 @@ export const IndexDocuments: React.FC<IndexDocumentsProps> = ({
             title={errorTitle}
             text={errorText}
             aria-label={errorTitle}
-            size='s'
+            size="s"
           />
           {hasDocuments && <EuiSpacer size="m" />}
         </>
