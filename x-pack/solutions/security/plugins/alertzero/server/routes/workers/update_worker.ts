@@ -74,9 +74,6 @@ export const registerUpdateWorkerRoute = ({
               return response.badRequest({
                 body: {
                   message: result.what,
-                  ...(result.settingsPath
-                    ? { attributes: { settingsPath: result.settingsPath } }
-                    : {}),
                 },
               });
             case 'invalid':

@@ -8,7 +8,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { isEqual } from 'lodash';
 import { isHttpFetchError } from '@kbn/core-http-browser';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type {
   UpdateWorkerRequestBody,
   Worker,
@@ -33,7 +32,6 @@ interface WorkerDraftOverlay {
   enabled?: boolean;
   settings?: WorkerSettingsDraft;
   error?: string;
-  errorLink?: string;
 }
 
 const isWorkerDirty = (worker: Worker, overlay: WorkerDraftOverlay | undefined): boolean => {
@@ -56,8 +54,6 @@ const isWorkerDirty = (worker: Worker, overlay: WorkerDraftOverlay | undefined):
  * would read as part of this draft and be written back with a fresh revision.
  */
 export const useWatchSettingsDraft = (workers: Worker[]) => {
-  const { services } = useKibana();
-  const application = services.application;
   const { mutateAsync } = useUpdateWorker();
   const [overlays, setOverlays] = useState<Record<string, WorkerDraftOverlay>>({});
   const [isSaving, setIsSaving] = useState(false);
@@ -69,7 +65,6 @@ export const useWatchSettingsDraft = (workers: Worker[]) => {
         enabled: overlay?.enabled ?? worker.enabled,
         settings: overlay?.settings?.draft ?? worker.settings,
         error: overlay?.error,
-        errorLink: overlay?.errorLink,
         dirty: isWorkerDirty(worker, overlay),
       };
     },
@@ -156,23 +151,16 @@ export const useWatchSettingsDraft = (workers: Worker[]) => {
               : error instanceof Error
               ? error.message
               : String(error);
-          const settingsPath =
-            isHttpFetchError(error) && typeof error.body?.attributes?.settingsPath === 'string'
-              ? error.body.attributes.settingsPath
-              : undefined;
-          const errorLink = settingsPath
-            ? application?.getUrlForApp('security', { path: settingsPath })
-            : undefined;
           setOverlays((current) => ({
             ...current,
-            [worker.id]: { ...current[worker.id], error: message, errorLink },
+            [worker.id]: { ...current[worker.id], error: message },
           }));
         }
       }
     } finally {
       setIsSaving(false);
     }
-  }, [application, mutateAsync, overlays, resolve, workers]);
+  }, [mutateAsync, overlays, resolve, workers]);
 
   return {
     discard,

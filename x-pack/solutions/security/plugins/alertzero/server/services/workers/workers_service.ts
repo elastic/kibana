@@ -84,7 +84,7 @@ const templateValuesEqual = (
 export type WorkerUpdateResult =
   | { outcome: 'updated'; response: UpdateWorkerResponse }
   | { outcome: 'not-found' }
-  | { outcome: 'rejected'; what: string; settingsPath?: string }
+  | { outcome: 'rejected'; what: string }
   | { outcome: 'invalid'; message: string }
   | { outcome: 'conflict' }
   | { outcome: 'unavailable' }
@@ -260,7 +260,6 @@ export class WorkersService {
           return {
             outcome: 'rejected',
             what: preflight.message,
-            settingsPath: preflight.settingsPath,
           };
         }
       }
@@ -299,8 +298,8 @@ export class WorkersService {
 
   /**
    * Returns an error message if the Alert Analysis workflow cannot do the Worker's work, null
-   * if the enable may proceed. The Worker is a wrapper around that workflow (R8), so enabling
-   * it against an unusable one produces a Worker that triages nothing.
+   * if the enable may proceed. The Worker wraps that workflow, so enabling it against an
+   * unusable one produces a Worker that triages nothing.
    *
    * Two independent things have to hold, and they fail differently:
    *
@@ -317,7 +316,7 @@ export class WorkersService {
    */
   private async checkAlertAnalysisPreflight(
     request: KibanaRequest
-  ): Promise<{ message: string; settingsPath?: string } | null> {
+  ): Promise<{ message: string } | null> {
     const management = this.management;
     if (!management) return null;
     try {
@@ -346,7 +345,6 @@ export class WorkersService {
           return {
             message:
               'Alert Triage requires alert analysis to be turned on for this space. Go to Alert analysis settings, then turn on the Alert Triage Worker.',
-            settingsPath: '/rules/alert_analysis_workflow',
           };
         }
       } catch (err) {
