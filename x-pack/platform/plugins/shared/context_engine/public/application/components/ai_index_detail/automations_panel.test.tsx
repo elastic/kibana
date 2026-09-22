@@ -258,6 +258,17 @@ describe('AutomationsPanel', () => {
     expect(row).not.toHaveTextContent('wf-1');
   });
 
+  it('shows a missing-privilege callout when the user lacks the workflows read privilege', () => {
+    mockUseWorkflowSummaries.mockReturnValue(summariesResult([], false, true));
+
+    renderPanel();
+
+    expect(screen.getByTestId('contextAutomationsMissingPrivilegeCallout')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAutomationsMissingPrivilegeCallout')).toHaveTextContent(
+      'You need the Workflows read privilege to see automation details.'
+    );
+  });
+
   it('swaps the Edit button for Save and Cancel while editing', () => {
     const { rerender } = renderPanel();
 
