@@ -396,7 +396,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...enabledRuleTypesSetting,
           ...emailMaximumBodyLengthSetting,
           ...ruleChangeTrackingSettings,
-          '--xpack.eventLog.logEntries=true',
           `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify([
             'actions:test.excluded',
           ])}`,

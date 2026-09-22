@@ -7,7 +7,8 @@
 
 import expect from '@kbn/expect';
 import moment from 'moment';
-import type { SecurityAlert } from '@kbn/alerts-as-data-utils';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { Alert, SecurityAlert } from '@kbn/alerts-as-data-utils';
 import {
   ALERT_LAST_DETECTED,
   ALERT_RULE_CATEGORY,
@@ -20,6 +21,8 @@ import {
   ALERT_RULE_UUID,
   ALERT_START,
   ALERT_STATUS,
+  ALERT_TRACKED,
+  ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
   EVENT_KIND,
   SPACE_IDS,
@@ -47,7 +50,10 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
   const objectRemover = new ObjectRemover(supertest);
 
   const alertsAsDataIndex = '.alerts-security.alerts-space1';
+  const patternFiringAlertsIndex = '.alerts-test.patternfiring.alerts-space1';
   const timestampPattern = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+
+  type PatternFiringAlert = Alert & { patternIndex: number; instancePattern: boolean[] };
 
   describe('ad hoc backfill task', () => {
     beforeEach(async () => {
@@ -56,9 +62,10 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
     });
     afterEach(async () => {
       await es.deleteByQuery({
-        index: alertsAsDataIndex,
+        index: [alertsAsDataIndex, patternFiringAlertsIndex],
         query: { match_all: {} },
         conflicts: 'proceed',
+        ignore_unavailable: true,
       });
       await objectRemover.removeAll();
       await esTestIndexTool.destroy();
@@ -639,5 +646,84 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
       const numHits = await searchScheduledTask(es, backfillId);
       expect(numHits).to.eql(0);
     });
+
+    // An ad hoc run keeps its own task state and never owns the rule's tracked
+    // alerts, so it must not rewrite them. Today that is guaranteed twice over:
+    // backfill rejects lifecycle rule types at schedule time, and the alerts
+    // client is initialized with `ownsRuleTrackedAlerts: false` for ad hoc runs.
+    // If backfill is ever allowed for lifecycle rules, this test fails and the
+    // orphan handling in AlertBuilder must be revisited.
+    it('should not allow a backfill to touch the tracked alerts of a lifecycle rule', async () => {
+      const spaceId = SuperuserAtSpace1.space.id;
+
+      // Create a lifecycle (alerts-as-data) rule that keeps one alert active
+      const response1 = await supertestWithoutAuth
+        .post(`${getUrlPrefix(spaceId)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .auth(SuperuserAtSpace1.user.username, SuperuserAtSpace1.user.password)
+        .send(
+          getTestRuleData({
+            rule_type_id: 'test.patternFiringAad',
+            schedule: { interval: '1d' },
+            throttle: null,
+            actions: [],
+            params: { pattern: { alertA: [true, true, true] } },
+          })
+        )
+        .expect(200);
+      const ruleId = response1.body.id;
+      objectRemover.add(spaceId, ruleId, 'rule', 'alerting');
+
+      // Wait for the rule to write its tracked active alert
+      const alertDocsBefore = await retry.try(async () => {
+        const docs = await queryForPatternFiringAlertDocs(ruleId);
+        expect(docs.length).to.eql(1);
+        return docs;
+      });
+      expect(alertDocsBefore[0]._source![ALERT_STATUS]).to.eql('active');
+      expect(alertDocsBefore[0]._source![ALERT_TRACKED]).to.eql(true);
+
+      // Scheduling a backfill for a lifecycle rule is rejected
+      const start = moment().utc().startOf('day').subtract(1, 'day').toISOString();
+      const end = moment().utc().startOf('day').toISOString();
+      const response2 = await supertestWithoutAuth
+        .post(`${getUrlPrefix(spaceId)}/internal/alerting/rules/backfill/_schedule`)
+        .set('kbn-xsrf', 'foo')
+        .auth(SuperuserAtSpace1.user.username, SuperuserAtSpace1.user.password)
+        .send([{ rule_id: ruleId, ranges: [{ start, end }] }])
+        .expect(200);
+
+      expect(response2.body).to.eql([
+        {
+          error: {
+            message: `Rule type "test.patternFiringAad" for rule ${ruleId} is not supported`,
+            rule: { id: ruleId, name: response1.body.name },
+          },
+        },
+      ]);
+
+      // The tracked alert is untouched
+      const alertDocsAfter = await queryForPatternFiringAlertDocs(ruleId);
+      expect(alertDocsAfter.length).to.eql(1);
+      expect(alertDocsAfter[0]._source![ALERT_UUID]).to.eql(
+        alertDocsBefore[0]._source![ALERT_UUID]
+      );
+      expect(alertDocsAfter[0]._source![ALERT_STATUS]).to.eql('active');
+      expect(alertDocsAfter[0]._source![ALERT_TRACKED]).to.eql(true);
+    });
   });
+
+  async function queryForPatternFiringAlertDocs(
+    ruleId: string
+  ): Promise<Array<SearchHit<PatternFiringAlert>>> {
+    // `es.search` is not realtime, so refresh before reading the alerts written
+    // by the run that just completed
+    await es.indices.refresh({ index: patternFiringAlertsIndex, ignore_unavailable: true });
+    const searchResult = await es.search<PatternFiringAlert>({
+      index: patternFiringAlertsIndex,
+      ignore_unavailable: true,
+      query: { bool: { must: [{ term: { [ALERT_RULE_UUID]: ruleId } }] } },
+    });
+    return searchResult.hits.hits;
+  }
 }

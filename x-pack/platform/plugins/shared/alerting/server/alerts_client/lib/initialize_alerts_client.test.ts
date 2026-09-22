@@ -149,7 +149,78 @@ describe('initializeAlertsClient', () => {
       recoveredAlertsFromState: {},
       ruleLabel: `test:1: 'rule-name'`,
       startedAt,
+      ownsRuleTrackedAlerts: true,
     });
+    spy1.mockRestore();
+  });
+
+  test('should pass ownsRuleTrackedAlerts false through to the alerts client', async () => {
+    const spy1 = jest
+      .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
+      .mockImplementation(() => legacyAlertsClient);
+    alertsService.createAlertsClient.mockImplementationOnce(() => alertsClient);
+    await initializeAlertsClient({
+      alertsService,
+      context: {
+        alertingEventLogger,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        maintenanceWindowsService,
+        logger,
+        request: fakeRequest,
+        ruleId: RULE_ID,
+        ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
+        ruleRunMetricsStore,
+        spaceId: asSpaceId('default'),
+        isServerless: false,
+      },
+      executionId: 'abc',
+      logger,
+      maxAlerts: 100,
+      rule: mockedRule,
+      ruleType: ruleTypeWithAlerts,
+      startedAt: new Date(),
+      taskInstance: mockedTaskInstance,
+      ownsRuleTrackedAlerts: false,
+    });
+
+    expect(alertsClient.initializeExecution).toHaveBeenCalledWith(
+      expect.objectContaining({ ownsRuleTrackedAlerts: false })
+    );
+    spy1.mockRestore();
+  });
+
+  test('should pass ownsRuleTrackedAlerts false through to the legacy alerts client', async () => {
+    const spy1 = jest
+      .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
+      .mockImplementation(() => legacyAlertsClient);
+    alertsService.createAlertsClient.mockImplementationOnce(() => null);
+    await initializeAlertsClient({
+      alertsService,
+      context: {
+        alertingEventLogger,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        maintenanceWindowsService,
+        logger,
+        request: fakeRequest,
+        ruleId: RULE_ID,
+        ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
+        ruleRunMetricsStore,
+        spaceId: asSpaceId('default'),
+        isServerless: false,
+      },
+      executionId: 'abc',
+      logger,
+      maxAlerts: 100,
+      rule: mockedRule,
+      ruleType: ruleTypeWithAlerts,
+      startedAt: new Date(),
+      taskInstance: mockedTaskInstance,
+      ownsRuleTrackedAlerts: false,
+    });
+
+    expect(legacyAlertsClient.initializeExecution).toHaveBeenCalledWith(
+      expect.objectContaining({ ownsRuleTrackedAlerts: false })
+    );
     spy1.mockRestore();
   });
 
@@ -213,6 +284,7 @@ describe('initializeAlertsClient', () => {
       recoveredAlertsFromState: {},
       ruleLabel: `test:1: 'rule-name'`,
       startedAt: expect.any(Date),
+      ownsRuleTrackedAlerts: true,
     });
     spy1.mockRestore();
   });
@@ -285,6 +357,7 @@ describe('initializeAlertsClient', () => {
       recoveredAlertsFromState: {},
       ruleLabel: `test:1: 'rule-name'`,
       startedAt: expect.any(Date),
+      ownsRuleTrackedAlerts: true,
     });
     spy1.mockRestore();
   });
@@ -362,6 +435,7 @@ describe('initializeAlertsClient', () => {
       recoveredAlertsFromState: {},
       ruleLabel: `test:1: 'rule-name'`,
       startedAt: expect.any(Date),
+      ownsRuleTrackedAlerts: true,
     });
     spy1.mockRestore();
   });

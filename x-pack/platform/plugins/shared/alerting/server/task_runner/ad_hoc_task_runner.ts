@@ -254,6 +254,9 @@ export class AdHocTaskRunner implements CancellableTask {
       runTimestamp: this.runDate,
       startedAt: new Date(scheduleToRun.runAt),
       taskInstance,
+      // This task keeps its own state and always returns an empty one, so the
+      // rule's tracked alerts belong to the scheduled task, not to this run.
+      ownsRuleTrackedAlerts: false,
     });
 
     const executorServices = getExecutorServices({

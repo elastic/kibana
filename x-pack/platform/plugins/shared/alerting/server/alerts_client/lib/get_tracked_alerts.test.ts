@@ -612,5 +612,52 @@ describe('get_tracked_alerts', () => {
         logTags
       );
     });
+
+    it('does not query the rule tracked alerts when the run does not own them', async () => {
+      const search = jest.fn();
+
+      const result = await getTrackedAlerts({
+        ruleId,
+        activeAlertsFromState: {},
+        recoveredAlertsFromState: {},
+        search,
+        logger,
+        ruleInfoMessage,
+        logTags,
+        ownsRuleTrackedAlerts: false,
+      });
+
+      expect(search).not.toHaveBeenCalled();
+      expect(Object.keys(result.all)).toHaveLength(0);
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('fetches only the run own task state alerts when it does not own the rule tracked alerts', async () => {
+      const search = jest.fn().mockResolvedValueOnce({
+        hits: [
+          makeHit({
+            uuid: 'uuid-1',
+            instanceId: 'alert-0',
+            status: ALERT_STATUS_ACTIVE,
+            executionUuid: 'exec-old-1',
+          }),
+        ],
+      });
+
+      const result = await getTrackedAlerts({
+        ruleId,
+        ...makeStateFromUuids(['uuid-1']),
+        search,
+        logger,
+        ruleInfoMessage,
+        logTags,
+        ownsRuleTrackedAlerts: false,
+      });
+
+      expect(search).toHaveBeenCalledTimes(1);
+      expect(search.mock.calls[0][0].query.bool.filter).toEqual([{ ids: { values: ['uuid-1'] } }]);
+      expect(result.active['uuid-1']).toBeDefined();
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
   });
 });

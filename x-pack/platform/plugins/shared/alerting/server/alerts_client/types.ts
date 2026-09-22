@@ -169,6 +169,9 @@ export interface InitializeExecutionOpts {
   activeAlertsFromState: Record<string, RawAlertInstance>;
   recoveredAlertsFromState: Record<string, RawAlertInstance>;
   snoozedInstances?: RawRuleSnoozedInstance[];
+  // False for executions that keep their own task state (ad hoc / backfill),
+  // which do not own the rule's tracked alerts. Defaults to true.
+  ownsRuleTrackedAlerts?: boolean;
 }
 
 export interface TrackedAlerts<

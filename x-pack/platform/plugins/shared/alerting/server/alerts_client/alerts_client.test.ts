@@ -1649,6 +1649,57 @@ describe('Alerts Client', () => {
           );
         });
 
+        test('should not load or untrack the rule tracked alerts when the run does not own them', async () => {
+          const scheduledAlert = {
+            ...fetchedAlert1,
+            [ALERT_STATUS]: 'active',
+            [ALERT_INSTANCE_ID]: 'scheduled',
+            [ALERT_UUID]: 'scheduled-uuid',
+            [ALERT_TRACKED]: true,
+          };
+
+          clusterClient.search.mockResolvedValue({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 0 },
+              hits: [
+                {
+                  _id: 'scheduled-uuid',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _seq_no: 41,
+                  _primary_term: 665,
+                  _source: scheduledAlert,
+                },
+              ],
+            },
+          });
+
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+
+          await alertsClient.initializeExecution({
+            ...defaultExecutionOpts,
+            activeAlertsFromState: {},
+            recoveredAlertsFromState: {},
+            ownsRuleTrackedAlerts: false,
+          });
+
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+
+          await alertsClient.persistAlerts();
+
+          expect(clusterClient.search).not.toHaveBeenCalled();
+          // nothing to write: the scheduled run's alerts are not in this run's
+          // working set, so they must not be untracked here
+          expect(clusterClient.bulk).not.toHaveBeenCalled();
+        });
+
         test('should log when a recovered alert has no existing AAD document', async () => {
           clusterClient.search.mockResolvedValue({
             took: 10,

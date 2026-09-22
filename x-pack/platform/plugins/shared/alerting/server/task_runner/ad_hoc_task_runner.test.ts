@@ -623,6 +623,24 @@ describe('Ad Hoc Task Runner', () => {
     );
   });
 
+  test('initializes the alerts client as not owning the rule tracked alerts', async () => {
+    mockValidateRuleTypeParams.mockReturnValue(mockedAdHocRunSO.attributes.rule.params);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedAdHocRunSO);
+    alertsClient.getProcessedAlerts.mockReturnValue({});
+    mockAlertsService.createAlertsClient.mockImplementation(() => alertsClient);
+
+    const taskRunner = createAdHocTaskRunner({
+      context: { ...taskRunnerFactoryInitializerParams, alertsService: mockAlertsService },
+    });
+
+    await taskRunner.run();
+    await taskRunner.cleanup();
+
+    expect(alertsClient.initializeExecution).toHaveBeenCalledWith(
+      expect.objectContaining({ ownsRuleTrackedAlerts: false })
+    );
+  });
+
   test('passes consumer metrics to AlertingEventLogger', async () => {
     const consumerMetrics = {
       matched_indices_count: 3,

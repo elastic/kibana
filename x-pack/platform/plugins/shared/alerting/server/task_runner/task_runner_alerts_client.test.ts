@@ -1080,6 +1080,7 @@ describe('Task Runner', () => {
         runTimestamp: undefined,
         snoozedInstances: [],
         startedAt: new Date(DATE_1970),
+        ownsRuleTrackedAlerts: true,
       });
       expect(alertsClientNotToUse.initializeExecution).not.toHaveBeenCalled();
 

@@ -34,6 +34,10 @@ export interface GetTrackedAlertsParams<AlertData extends RuleAlertData> {
   logger: Logger;
   ruleInfoMessage: string;
   logTags: { tags: string[] };
+  // Only the rule's scheduled task owns the rule's tracked alerts. Executions
+  // that run with their own task state (ad hoc / backfill) must not load the
+  // scheduled run's working set, or they would rewrite alerts they do not own.
+  ownsRuleTrackedAlerts?: boolean;
 }
 
 export async function getTrackedAlerts<AlertData extends RuleAlertData>({
@@ -44,18 +48,21 @@ export async function getTrackedAlerts<AlertData extends RuleAlertData>({
   logger,
   ruleInfoMessage,
   logTags,
+  ownsRuleTrackedAlerts = true,
 }: GetTrackedAlertsParams<AlertData>): Promise<TrackedAADAlerts<AlertData>> {
   const trackedAlerts = createEmptyTrackedAlerts<AlertData>();
 
   const searchWithRetry = (queryBody: Record<string, unknown>) =>
     retryTransientEsErrors(() => search(queryBody), { logger });
 
-  const hits = await fetchTrackedAlerts({
-    ruleId,
-    search: searchWithRetry,
-  });
+  if (ownsRuleTrackedAlerts) {
+    const hits = await fetchTrackedAlerts({
+      ruleId,
+      search: searchWithRetry,
+    });
 
-  populateTrackedAlerts(trackedAlerts, hits);
+    populateTrackedAlerts(trackedAlerts, hits);
+  }
 
   const alertUuidsFromState = getAlertUuidsFromState(
     activeAlertsFromState,
@@ -64,10 +71,12 @@ export async function getTrackedAlerts<AlertData extends RuleAlertData>({
   const missingUuids = findMissingAlertUuids(alertUuidsFromState, trackedAlerts);
 
   if (missingUuids.length > 0) {
-    logger.warn(
-      `Found ${missingUuids.length} alerts in task state not returned by tracked alerts query ${ruleInfoMessage}. Fetching them directly to restore tracking info.`,
-      logTags
-    );
+    if (ownsRuleTrackedAlerts) {
+      logger.warn(
+        `Found ${missingUuids.length} alerts in task state not returned by tracked alerts query ${ruleInfoMessage}. Fetching them directly to restore tracking info.`,
+        logTags
+      );
+    }
     try {
       const missingHits = await fetchAlertsByIds({
         ruleId,
