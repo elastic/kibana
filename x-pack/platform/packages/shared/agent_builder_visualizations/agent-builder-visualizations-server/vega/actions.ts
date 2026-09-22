@@ -7,8 +7,6 @@
 
 import type { ResolveEsqlAction } from '../shared/run_resolve_esql_node';
 
-export type GenerateEsqlAction = ResolveEsqlAction;
-
 export interface AuthorSpecAction {
   type: 'author_spec';
   success: boolean;
@@ -36,9 +34,9 @@ export interface ValidateSpecAction {
   error?: string;
 }
 
-export type VegaAction = GenerateEsqlAction | AuthorSpecAction | ValidateSpecAction;
+export type VegaAction = ResolveEsqlAction | AuthorSpecAction | ValidateSpecAction;
 
-export const isGenerateEsqlAction = (action: VegaAction): action is GenerateEsqlAction =>
+export const isGenerateEsqlAction = (action: VegaAction): action is ResolveEsqlAction =>
   action.type === 'generate_esql';
 
 export const isAuthorSpecAction = (action: VegaAction): action is AuthorSpecAction =>

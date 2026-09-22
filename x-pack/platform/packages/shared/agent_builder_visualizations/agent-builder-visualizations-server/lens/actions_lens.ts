@@ -8,8 +8,6 @@
 import type { ResolveEsqlAction } from '../shared/run_resolve_esql_node';
 import type { VisualizationConfig } from './types';
 
-export type GenerateEsqlAction = ResolveEsqlAction;
-
 export interface GenerateConfigAction {
   type: 'generate_config';
   success: boolean;
@@ -28,9 +26,9 @@ export interface ValidateConfigAction {
   error?: string;
 }
 
-export type Action = GenerateEsqlAction | GenerateConfigAction | ValidateConfigAction;
+export type Action = ResolveEsqlAction | GenerateConfigAction | ValidateConfigAction;
 
-export function isGenerateEsqlAction(action: Action): action is GenerateEsqlAction {
+export function isGenerateEsqlAction(action: Action): action is ResolveEsqlAction {
   return action.type === 'generate_esql';
 }
 

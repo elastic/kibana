@@ -11,7 +11,7 @@ import {
   type ResolveEsqlForAuthoringParams,
 } from './resolve_esql_for_authoring';
 
-/** Graph action emitted by the shared resolve-ES|QL node; Lens and Vega alias it as GenerateEsqlAction. */
+/** Graph action emitted by the shared resolve-ES|QL node, part of both the Lens and Vega action unions. */
 export interface ResolveEsqlAction {
   type: 'generate_esql';
   success: boolean;
