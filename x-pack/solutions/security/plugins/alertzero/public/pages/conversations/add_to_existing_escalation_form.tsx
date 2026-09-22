@@ -26,7 +26,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { EscalationIncidentSummary } from '@kbn/agentic-investigations-common';
-import { ESCALATION_MODAL_TRANSLATIONS } from './translations';
+import { ESCALATION_MODAL_TRANSLATIONS } from './escalation_modal_translations';
 
 const T = ESCALATION_MODAL_TRANSLATIONS.addToExistingForm;
 

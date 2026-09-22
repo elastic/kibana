@@ -26,7 +26,7 @@ import {
 import { css } from '@emotion/react';
 import { UserProfilesSelectable } from '@kbn/user-profile-components';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { ESCALATION_MODAL_TRANSLATIONS } from './translations';
+import { ESCALATION_MODAL_TRANSLATIONS } from './escalation_modal_translations';
 
 const T = ESCALATION_MODAL_TRANSLATIONS.createForm;
 

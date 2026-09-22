@@ -30,10 +30,9 @@ import { getUserDisplayName } from '@kbn/user-profile-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { isHttpFetchError } from '@kbn/core-http-browser';
-import { ESCALATION_MODAL_TRANSLATIONS } from './translations';
+import { ESCALATION_MODAL_TRANSLATIONS, ESCALATION_ERRORS } from './escalation_modal_translations';
 import { AddToExistingEscalationForm } from './add_to_existing_escalation_form';
 import { CreateEscalationForm } from './create_escalation_form';
-import { ESCALATION_ERRORS } from './translations';
 
 const T = ESCALATION_MODAL_TRANSLATIONS;
 
