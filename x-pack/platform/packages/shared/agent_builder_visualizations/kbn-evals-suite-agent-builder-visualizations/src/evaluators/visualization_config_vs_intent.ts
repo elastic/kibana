@@ -22,10 +22,25 @@ const SKIP_KEYS = new Set(['data_source']);
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
+interface MatchReport {
+  checked: number;
+  mismatches: string[];
+}
+
+const createReport = (): MatchReport => ({ checked: 0, mismatches: [] });
+
+const mergeReports = (target: MatchReport, source: MatchReport): void => {
+  target.checked += source.checked;
+  target.mismatches.push(...source.mismatches);
+};
+
 /**
  * CODE evaluator: subset-matches gold Config API against the generated
- * visualization. Extra actual fields, titles, styling, and column alias wording
- * are ignored. New gold keys are scored automatically.
+ * visualization and scores the fraction of gold leaf assertions that hold.
+ * Leaves are `type`-style strings (with alternatives), `{ column }` / `{ field }`
+ * bindings (alias-tolerant), and number / boolean / null values (strict
+ * equality). Keys absent from gold are never checked, so titles, styling, and
+ * alias wording are ignored unless the gold spells them out.
  */
 export function createVisualizationConfigVsIntentEvaluator<
   TExample extends Example = Example,
@@ -76,36 +91,45 @@ export function createVisualizationConfigVsIntentEvaluator<
 
       const goldQuery = extractGoldQuery(expected);
       const details = visualizations.map((visualization, index) => {
-        const mismatches: string[] = [];
+        const report = createReport();
         matchValue(
           goldConfig,
           actualConfig(visualization),
           '',
           goldQuery,
           visualization.esql,
-          mismatches
+          report
         );
+        const { checked, mismatches } = report;
+        const matchedLeaves = checked - mismatches.length;
         return {
           index,
-          matched: mismatches.length === 0,
+          score: checked === 0 ? 1 : matchedLeaves / checked,
+          matchedLeaves,
+          checkedLeaves: checked,
           mismatches,
           actualChartType: visualization.chartType ?? null,
           renderer: visualization.renderer ?? null,
         };
       });
 
-      const matchedCount = details.filter((detail) => detail.matched).length;
-      const score = matchedCount / details.length;
+      const score = details.reduce((sum, detail) => sum + detail.score, 0) / details.length;
+      const matchedLeaves = details.reduce((sum, detail) => sum + detail.matchedLeaves, 0);
+      const checkedLeaves = details.reduce((sum, detail) => sum + detail.checkedLeaves, 0);
+      const mismatches = details.flatMap((detail) => detail.mismatches);
 
       return {
         score,
         label: score === 1 ? 'match' : score === 0 ? 'mismatch' : 'partial',
         explanation:
           score === 1
-            ? `All ${details.length} visualization(s) matched the gold config.`
-            : `${matchedCount}/${details.length} visualization(s) matched the gold config.`,
+            ? `All ${checkedLeaves} gold assertion(s) held across ${details.length} visualization(s).`
+            : `${matchedLeaves}/${checkedLeaves} gold assertion(s) held across ${
+                details.length
+              } visualization(s). Mismatches: ${mismatches.join('; ')}`,
         metadata: {
-          matchedCount,
+          matchedLeaves,
+          checkedLeaves,
           totalVisualizations: details.length,
           visualizations: details,
         },
@@ -139,14 +163,15 @@ function matchValue(
   path: string,
   goldQuery: string,
   actualQuery: string,
-  mismatches: string[]
+  report: MatchReport
 ): void {
   if (gold === undefined) {
     return;
   }
   if (isStringAlternatives(gold)) {
+    report.checked += 1;
     if (!typeMatches(gold, actual)) {
-      mismatches.push(
+      report.mismatches.push(
         `${path || 'value'}: expected ${formatExpected(gold)}, got ${
           readType(actual) ?? 'undefined'
         }`
@@ -155,76 +180,100 @@ function matchValue(
     return;
   }
   if (Array.isArray(gold)) {
-    matchObjectArray(gold, actual, path, goldQuery, actualQuery, mismatches);
+    matchObjectArray(gold, actual, path, goldQuery, actualQuery, report);
+    return;
+  }
+  if (isPrimitiveLeaf(gold)) {
+    report.checked += 1;
+    if (actual !== gold) {
+      report.mismatches.push(
+        `${path || 'value'}: expected ${JSON.stringify(gold)}, got ${JSON.stringify(actual)}`
+      );
+    }
     return;
   }
   if (!isRecord(gold)) {
+    report.checked += 1;
+    report.mismatches.push(`${path || 'value'}: unsupported gold value of type ${typeof gold}`);
     return;
   }
 
   const goldColumn = readColumn(gold);
   if (goldColumn) {
+    report.checked += 1;
     const actualColumn = readColumn(actual);
     if (!actualColumn) {
-      mismatches.push(`${path}: missing column`);
+      report.mismatches.push(`${path}: missing column`);
       return;
     }
     if (!columnsReferToSameExpression(goldColumn, goldQuery, actualColumn, actualQuery)) {
-      mismatches.push(`${path}: expected ${goldColumn}, got ${actualColumn}`);
+      report.mismatches.push(`${path}: expected ${goldColumn}, got ${actualColumn}`);
     }
     return;
   }
 
-  if (!isRecord(actual)) {
-    mismatches.push(`${path || 'config'}: actual is missing`);
-    return;
-  }
-
+  // A missing parent still recurses so every gold leaf below it is counted and reported.
+  const actualRecord = isRecord(actual) ? actual : {};
   for (const [key, goldChild] of Object.entries(gold)) {
     if (goldChild === undefined || SKIP_KEYS.has(key)) {
       continue;
     }
     matchValue(
       goldChild,
-      actual[key],
+      actualRecord[key],
       path ? `${path}.${key}` : key,
       goldQuery,
       actualQuery,
-      mismatches
+      report
     );
   }
 }
 
+/**
+ * Each gold item is paired with the unused actual item that satisfies the most
+ * of its leaves, so a layer with the right columns but wrong type earns partial
+ * credit instead of failing wholesale. Unpaired gold items report every leaf.
+ */
 function matchObjectArray(
   gold: unknown[],
   actual: unknown,
   path: string,
   goldQuery: string,
   actualQuery: string,
-  mismatches: string[]
+  report: MatchReport
 ): void {
-  if (!Array.isArray(actual) || actual.length < gold.length) {
-    mismatches.push(
-      `${path}: expected at least ${gold.length}, got ${Array.isArray(actual) ? actual.length : 0}`
-    );
-    return;
-  }
+  const candidates = Array.isArray(actual) ? actual : [];
   const used = new Set<number>();
+
   gold.forEach((goldItem, goldIndex) => {
-    const matchIndex = actual.findIndex((candidate, actualIndex) => {
-      if (used.has(actualIndex)) {
-        return false;
+    const itemPath = `${path}[${goldIndex}]`;
+    let best: { index: number; report: MatchReport } | undefined;
+
+    candidates.forEach((candidate, candidateIndex) => {
+      if (used.has(candidateIndex) || (best && best.report.mismatches.length === 0)) {
+        return;
       }
-      const nested: string[] = [];
-      matchValue(goldItem, candidate, `${path}[${goldIndex}]`, goldQuery, actualQuery, nested);
-      return nested.length === 0;
+      const candidateReport = createReport();
+      matchValue(goldItem, candidate, itemPath, goldQuery, actualQuery, candidateReport);
+      if (!best || candidateReport.mismatches.length < best.report.mismatches.length) {
+        best = { index: candidateIndex, report: candidateReport };
+      }
     });
-    if (matchIndex < 0) {
-      mismatches.push(`${path}[${goldIndex}]: no matching item`);
+
+    if (best) {
+      used.add(best.index);
+      mergeReports(report, best.report);
       return;
     }
-    used.add(matchIndex);
+
+    const missing = createReport();
+    matchValue(goldItem, undefined, itemPath, goldQuery, actualQuery, missing);
+    mergeReports(report, missing);
   });
+}
+
+function isPrimitiveLeaf(value: unknown): value is number | boolean | null {
+  return value === null || typeof value === 'number' || typeof value === 'boolean';
 }
 
 function isStringAlternatives(value: unknown): value is string | string[] {

@@ -13,7 +13,7 @@ Per [issue #277136](https://github.com/elastic/kibana/issues/277136), "correct" 
 - **Chart Type vs Intent** (`CODE`) — `create_visualization`'s `chart_type` matches the example's gold `config.type` (bar/line → `xy`, KPI → `metric`, …).
 - **Renderer vs Intent** (`CODE`) — `renderer` matches when the example declares `lens` or `vega` (skipped otherwise).
 - **Visualization Config Validity** (`CODE`) — Lens configs parse against the chart-type ESQL schema; Vega-Lite specs parse as JSON with a visual root.
-- **Visualization Config vs Intent** (`CODE`) — generated Lens/Vega config matches the gold partial Config API: layer type, column roles (alias-tolerant), Vega mark/encodings. Titles, styling, and column alias wording are ignored.
+- **Visualization Config vs Intent** (`CODE`) — generated Lens/Vega config matches the gold partial Config API: layer type, column roles (alias-tolerant), Vega mark/encodings. Scored as the fraction of gold leaf assertions that hold, with each mismatch listed in metadata, so one wrong field does not zero the example. Column alias wording is always ignored; titles, styling, and other keys are only checked when the gold spells them out.
 - **Chart Compatible Result** (`CODE`) — executed ES|QL column shape fits the chart type (e.g. `xy` needs a dimension + numeric measure).
 - **Trajectory** — the agent routed the request to `load_skill` → `platform.core.create_visualization`.
 - **Trace-based** — tokens / latency / tool-call counts from OTel spans.
@@ -39,6 +39,28 @@ Seed examples live inline in `evals/visualization_creation/visualization_creatio
 - **host metrics** (synthtrace Beats load fixture): multi-series load averages on `metrics-system.load-default`
 
 Each positive example carries a partial Lens Config API gold (`config`): chart `type`, layer type / column roles, and ground-truth ES|QL nested in `data_source.query`. Negatives / recovery / multi-turn edits are still follow-ups.
+
+### What a gold `config` can assert
+
+Config vs Intent walks the gold object and turns every leaf into one assertion. Keys the gold does not mention are never checked, so the gold only needs to spell out what the prompt actually pins down.
+
+| Gold leaf | How it is compared | Example |
+| --- | --- | --- |
+| `type`-style string | case-insensitive, `['a', 'b']` means either | `type: 'xy'`, `layers[0].type: ['bar', 'bar_horizontal']`, Vega `mark: 'point'` (also accepts `circle`) |
+| `{ column }` / `{ field }` | resolved through the ES\|QL alias map, so wording differs freely | gold `y: [{ column: 'Request Count' }]` matches actual `y: [{ column: 'count' }]` when both alias `COUNT(*)` |
+| number / boolean / null | strict equality | `sampling: 1`, `ignore_global_filters: false` |
+| array of objects | each gold item is paired with the best-fitting unused actual item; extra actual items are fine | gold `y: [{ column: 'Request Count' }]` passes against actual `y: [count, bytes]` |
+| `data_source` | skipped here; the query is scored by the ES\|QL evaluators instead | — |
+
+Worked examples against the bar-chart gold above (`type` + layer `type` + `x` + `y[0]` = 4 leaves):
+
+- Actual is a `bar` layer with `x: response` and `y: count` over `STATS count = COUNT(*) BY response` → 4/4, score 1. `response` vs `response.keyword` and `count` vs `Request Count` are alias-tolerant.
+- Actual is a `line` layer with the same columns → 3/4, score 0.75, mismatch `layers[0].type: expected bar | bar_horizontal, got line`.
+- Actual is `xy` with no `layers` at all → 1/4, score 0.25; every leaf under `layers[0]` is reported individually.
+- Actual is a `pie` → the top-level `type` fails and `layers` is absent, so 0/4. Chart Type vs Intent also reports the type mismatch, so a wrong chart type is penalised twice by design.
+- Actual `y: [{ column: 'total' }]` over `STATS total = SUM(bytes) BY response.keyword` → `y[0]` fails because `total` resolves to `SUM(bytes)`, not `COUNT(*)`.
+
+Column resolution follows one alias hop inside `STATS` and `EVAL`, tolerates `.keyword` twins, `COUNT()` / `COUNT(*)`, `HOUR()` / `DATE_EXTRACT("HOUR_OF_DAY", …)`, and treats any `BUCKET` / `TBUCKET` as the same time axis. It does not follow `RENAME` or chained aliases (`EVAL a = … | STATS b = AVG(a)`).
 
 **Gold queries follow the agent's idiom** (see `agent-builder-visualizations-server/shared/esql_instructions.ts`):
 
