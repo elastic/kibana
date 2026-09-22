@@ -6,22 +6,26 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ActionImpactItemProps } from '@kbn/agentic-investigations-common';
-import type { ProposalWithMetadata } from '../../../common';
+import type { ActionImpactItemProps } from './action_impact_item';
+import type { ApprovalProposal } from './types';
 
 type ActionImpactItem = ActionImpactItemProps['item'];
 
 /**
- * Maps a `ProposalWithMetadata` to a list of {@link ActionImpactItem} entries
- * for the `ActionImpactSection` list variant.
+ * Maps a proposal to the {@link ActionImpactItem} rows the `ActionImpactSection` list renders.
  *
  * Rows, in order:
  * - Category (from action metadata when available, else proposal's own)
  * - Impact
  * - Reversibility (only when the action carries this flag)
  * - Decision deadline / expiry (only when `expiresAt` is set)
+ *
+ * Message ids stay under `xpack.agenticInvestigations.*` from when this lived in that plugin:
+ * this package is not registered in `x-pack/.i18nrc.json`, so re-prefixing them would only
+ * invalidate the existing translations without making them checked. See the tracking issue in
+ * the PR description.
  */
-export const toActionImpactItems = (proposal: ProposalWithMetadata): ActionImpactItem[] => {
+export const toActionImpactItems = (proposal: ApprovalProposal): ActionImpactItem[] => {
   const items: ActionImpactItem[] = [];
 
   const category = proposal.action?.category ?? proposal.category;
