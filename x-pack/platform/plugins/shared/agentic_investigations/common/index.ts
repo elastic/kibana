@@ -37,9 +37,7 @@ export {
   isAwaitingDecision,
   isExpired,
   listProposalsQuerySchema,
-  MAX_PROPOSALS_SIZE,
   proposalFiltersSchema,
-  proposalsQuerySchema,
   proposalCategorySchema,
   proposalConfidenceSchema,
   proposalDecisionSchema,
@@ -51,18 +49,32 @@ export {
   proposalUserSchema,
 } from './proposals';
 
+export {
+  IMPACT_INDEX_NAME,
+  IMPACT_INTERNAL_URL,
+  IMPACT_UI_CAPABILITY_MANAGE,
+  IMPACT_UI_CAPABILITY_SHOW,
+  MAX_ENTITY_ID_LENGTH,
+  MAX_ENTITY_IDS,
+  MAX_ENTITY_NAME_LENGTH,
+  MAX_IMPACT_CONVERSATION_IDS,
+  MAX_IMPACT_ID_LENGTH,
+  attachImpactRequestSchema,
+  getImpactQuerySchema,
+  impactEntitiesSchema,
+  impactEntitySchema,
+  impactSchema,
+} from './impact';
+
 export type {
   ActionMetadata,
   ApproveProposalRequest,
   CreateProposalRequest,
   DismissProposalRequest,
   DismissReason,
-  ListByWindowQuery,
   ListProposalsQuery,
   ListProposalsResponse,
   Proposal,
-  ProposalsQuery,
-  ProposalsListResponse,
   ProposalCategory,
   ProposalConfidence,
   ProposalDecision,
@@ -77,11 +89,14 @@ export type {
   ProposalWithMetadata,
 } from './proposals';
 
+export type { AttachImpactRequest, GetImpactQuery, Impact, ImpactEntity } from './impact';
+
 export {
   ESCALATION_BY_ID_URL,
   ESCALATION_LINKED_INVESTIGATIONS_FIELD,
   ESCALATION_TEMPLATE_ID,
   ESCALATIONS_INTERNAL_URL,
+  ESCALATIONS_SUGGEST_USERS_URL,
   ESCALATIONS_UI_CAPABILITY_MANAGE,
   INVESTIGATION_TEMPLATE_ID,
   MAX_ESCALATION_LINKED_INVESTIGATIONS,
@@ -93,6 +108,8 @@ export {
 export type {
   CreateEscalationRequest,
   EscalationConversation,
+  EscalationConversationSummary,
   EscalationVisibility,
+  ListEscalationsResponse,
   UpdateEscalationRequest,
 } from './escalations';

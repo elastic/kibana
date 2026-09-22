@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { esql } from '@elastic/esql';
 import { isEqual } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { asyncMapWithLimit } from '@kbn/std';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
 import type { JSONSchema7 } from 'json-schema';
 import {
   ACTION_WORKFLOW_INPUT,
@@ -20,14 +20,17 @@ import {
 } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { ActionMetadata } from '@kbn/workflows';
+import { PROPOSALS_RESUME_CHANNEL } from '../../../common/proposals/constants';
+import type { ChartsWindow } from './esql';
 import {
-  PROPOSALS_RESUME_CHANNEL,
-  PROPOSAL_UNCATEGORIZED,
-} from '../../../common/proposals/constants';
+  anchorQuery,
+  bucketedEventQuery,
+  currentOpenQuery,
+  ESQL_RESULT_TRUNCATION_MAX_SIZE,
+} from './esql';
 import type {
   CreateProposalRequest,
   DismissReason,
-  ListByWindowQuery,
   ListProposalsQuery,
   ListProposalsResponse,
   Proposal,
@@ -36,13 +39,12 @@ import type {
   ProposalChartsSummaryResponse,
   ProposalDecision,
   ProposalFilters,
-  ProposalsListResponse,
   ProposalStatus,
   ProposalUser,
   ProposalWithMetadata,
 } from '../../../common/proposals/proposal';
 import type { ReviseProposalRequest } from '../../../common/proposals/revision';
-import { isExpired, MAX_PROPOSALS_SIZE } from '../../../common/proposals/proposal';
+import { isExpired } from '../../../common/proposals/proposal';
 import type { ProposalDocument, ProposalsStorageClient } from '../storage/proposals_storage';
 import { toSortRanks } from '../storage/sort_ranks';
 import {
@@ -53,16 +55,6 @@ import {
 } from './errors';
 
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
-
-/**
- * Elasticsearch's `esql.query.result_truncation_max_size` default. A LIMIT above
- * this is capped to it rather than honoured, so asking for more is not a way to
- * avoid truncation — bounding the row count is (see MAX_CHARTS_SUMMARY_BUCKETS).
- */
-const ESQL_RESULT_TRUNCATION_MAX_SIZE = 10000;
-
-/** One row per category; generous enough that truncation implies a bug. */
-const ESQL_CATEGORY_ROW_LIMIT = 1000;
 
 /** The parts of an action workflow definition this service reads. */
 interface ActionWorkflowDefinition {
@@ -191,14 +183,22 @@ export class ProposalsService {
    * alphabetically. Doing it here rather than in memory is what makes the list
    * pageable instead of capped at a single fetch. Category is not part of the
    * order: a UI groups by it and decides for itself which group leads.
+   *
+   * Action-metadata resolution is batched across the page, so a page of
+   * proposals sharing an action costs one `getWorkflow` rather than one each.
    */
-  async list(query: ListProposalsQuery, spaceId: string): Promise<ListProposalsResponse> {
+  async list(
+    query: ListProposalsQuery,
+    spaceId: string,
+    /** Replaces the default priority sort; the queues page by recency instead. */
+    sort?: SortCombinations[]
+  ): Promise<ListProposalsResponse> {
     const response = await this.deps.storage.search({
       track_total_hits: true,
       size: query.size,
       from: query.from,
       query: { bool: { filter: toFilterClauses(query, spaceId) } },
-      sort: [
+      sort: sort ?? [
         { impactRank: { order: 'asc' } },
         { confidenceRank: { order: 'asc' } },
         // Soonest deadline first; proposals without one come after those with.
@@ -208,12 +208,11 @@ export class ProposalsService {
       ],
     });
 
-    const proposals = await Promise.all(
+    const proposals = await this.withMetadataBatch(
       response.hits.hits
         .filter((hit): hit is typeof hit & { _id: string } => hit._id !== undefined)
-        .map((hit) =>
-          this.withMetadata(toProposal(hit._id, hit._source as ProposalDocument), spaceId)
-        )
+        .map((hit) => toProposal(hit._id, hit._source as ProposalDocument)),
+      spaceId
     );
 
     return {
@@ -226,73 +225,10 @@ export class ProposalsService {
   }
 
   /**
-   * An activity view: everything still awaiting a decision, at any age, plus
-   * everything decided within the last N hours. In creation order, capped
-   * rather than paged.
-   *
-   * It is a separate method because the two halves are a disjunction — "still
-   * awaiting" and "decided recently" are unrelated conditions, so neither can
-   * be expressed as one more filter on top of `list()`. The shared filters in
-   * `ProposalFilters` apply to both halves and mean exactly what they mean in
-   * `list()`; only the union and the paging differ.
-   *
-   * Expired proposals fall out of both halves on their own: the awaiting half
-   * matches on `status: 'pending'`, and the decided half needs a `decidedAt`
-   * that a proposal nobody answered never got.
-   *
-   * No HTTP route, because a capped read with no paging is not a contract worth
-   * exposing; in-process callers reach it through the start contract.
-   *
-   * Action-metadata resolution is memoised per `actionWorkflowId` across the
-   * entire result set to avoid a `getWorkflow` fetch per proposal.
-   */
-  async listByWindow(query: ListByWindowQuery, spaceId: string): Promise<ProposalsListResponse> {
-    const response = await this.deps.storage.search({
-      track_total_hits: true,
-      size: MAX_PROPOSALS_SIZE,
-      query: {
-        bool: {
-          filter: toFilterClauses(query, spaceId),
-          should: [
-            // `pending` is only ever valid while undecided, so the status is
-            // the whole condition.
-            { term: { status: 'pending' } },
-            { range: { decidedAt: { gte: `now-${query.decidedWithinHours}h` } } },
-          ],
-          minimum_should_match: 1,
-        },
-      },
-      sort: [{ createdAt: { order: 'asc' } }],
-    });
-
-    const hits = response.hits.hits.filter(
-      (hit): hit is typeof hit & { _id: string } => hit._id !== undefined
-    );
-    const rawProposals = hits.map((hit) => toProposal(hit._id, hit._source as ProposalDocument));
-
-    const proposals = await this.withMetadataBatch(rawProposals, spaceId);
-
-    const total =
-      typeof response.hits.total === 'number'
-        ? response.hits.total
-        : response.hits.total?.value ?? proposals.length;
-
-    return { proposals, total, truncated: total > proposals.length };
-  }
-
-  /**
-   * Open-proposal counts per bucket. A proposal counts as open at bucket T if it
-   * was created at or before the end of T and had neither been decided nor
-   * expired by the start of T+1.
-   *
-   * An anchor count seeds a running sum that opens, closes and expiries then
-   * move, which is what keeps this to four queries instead of one per bucket.
-   *
-   * Expiry is treated as a fourth event stream rather than as a `WHERE` filter.
-   * Filtering on `expiresAt > NOW()` would evaluate a *request-time* predicate
-   * against every historical bucket, so a proposal that has since expired would
-   * be erased from its own past — the same past bucket would return a different
-   * value on each refetch.
+   * Per bucket, how many proposals were open at any point during it. Open means
+   * `status: 'pending'`, so an expiry closes a proposal the same way a decision
+   * does. An anchor count seeds a running sum that opens and closes then move,
+   * keeping this to four queries rather than one per bucket.
    */
   async chartsSummary(
     { windowHours, bucketMinutes }: ProposalChartsSummaryQuery,
@@ -310,82 +246,27 @@ export class ProposalsService {
         timestamp: windowStartMs + i * bucketMs,
         counts: {},
       })),
+      currentOpen: 0,
     });
+
+    const window: ChartsWindow = { spaceId, windowStartIso, bucketMinutes };
 
     let anchorResponse;
     let opensResponse;
     let closesResponse;
-    let expiriesResponse;
+    let currentOpenResponse;
     try {
-      [anchorResponse, opensResponse, closesResponse, expiriesResponse] = await Promise.all([
-        // `AND supersededBy IS NULL` in all four: a superseded proposal is represented
-        // by its successor, so counting both would double-count every revision.
-        this.deps.storage.esql({
-          pipeline: esql`WHERE spaceId == ${{ spaceId }}
-          AND supersededBy IS NULL
-          AND createdAt < TO_DATETIME(${{ wsAnchorCreated: windowStartIso }})
-          AND (decidedAt IS NULL OR decidedAt >= TO_DATETIME(${{
-            wsAnchorDecided: windowStartIso,
-          }}))
-          AND (expiresAt IS NULL OR expiresAt >= TO_DATETIME(${{
-            wsAnchorExpires: windowStartIso,
-          }}))
-        | EVAL category = COALESCE(category, ${{ anchorUncategorized: PROPOSAL_UNCATEGORIZED }})
-        | STATS anchor = COUNT(*) BY category
-        | LIMIT ${ESQL_CATEGORY_ROW_LIMIT}`,
-        }),
-
-        this.deps.storage.esql({
-          pipeline: esql`WHERE spaceId == ${{ spaceId }}
-          AND supersededBy IS NULL
-          AND createdAt >= TO_DATETIME(${{ wsOpensFilter: windowStartIso }})
-        | EVAL idx = FLOOR(DATE_DIFF("minutes", TO_DATETIME(${{
-          wsOpensDiff: windowStartIso,
-        }}), createdAt) / ${{ bucketMinutes }})
-        | EVAL category = COALESCE(category, ${{ opensUncategorized: PROPOSAL_UNCATEGORIZED }})
-        | STATS opens = COUNT(*) BY idx, category
-        | SORT idx ASC
-        | LIMIT ${ESQL_RESULT_TRUNCATION_MAX_SIZE}`,
-        }),
-
-        this.deps.storage.esql({
-          pipeline: esql`WHERE spaceId == ${{ spaceId }}
-          AND supersededBy IS NULL
-          AND decidedAt IS NOT NULL
-          AND decidedAt >= TO_DATETIME(${{ wsClosesFilter: windowStartIso }})
-        | EVAL idx = FLOOR(DATE_DIFF("minutes", TO_DATETIME(${{
-          wsClosesDiff: windowStartIso,
-        }}), decidedAt) / ${{ bucketMinutes }})
-        | EVAL category = COALESCE(category, ${{ closesUncategorized: PROPOSAL_UNCATEGORIZED }})
-        | STATS closes = COUNT(*) BY idx, category
-        | SORT idx ASC
-        | LIMIT ${ESQL_RESULT_TRUNCATION_MAX_SIZE}`,
-        }),
-
-        // `decidedAt IS NULL` so a proposal that expired and was later decided is
-        // decremented once, by the closes query, rather than by both.
-        this.deps.storage.esql({
-          pipeline: esql`WHERE spaceId == ${{ spaceId }}
-          AND supersededBy IS NULL
-          AND decidedAt IS NULL
-          AND expiresAt IS NOT NULL
-          AND expiresAt >= TO_DATETIME(${{ wsExpiriesFilter: windowStartIso }})
-          AND expiresAt <= NOW()
-        | EVAL idx = FLOOR(DATE_DIFF("minutes", TO_DATETIME(${{
-          wsExpiriesDiff: windowStartIso,
-        }}), expiresAt) / ${{ bucketMinutes }})
-        | EVAL category = COALESCE(category, ${{ expiriesUncategorized: PROPOSAL_UNCATEGORIZED }})
-        | STATS expiries = COUNT(*) BY idx, category
-        | SORT idx ASC
-        | LIMIT ${ESQL_RESULT_TRUNCATION_MAX_SIZE}`,
-        }),
+      [anchorResponse, opensResponse, closesResponse, currentOpenResponse] = await Promise.all([
+        this.deps.storage.esql({ pipeline: anchorQuery(window) }),
+        this.deps.storage.esql({ pipeline: bucketedEventQuery('opens', window) }),
+        this.deps.storage.esql({ pipeline: bucketedEventQuery('closes', window) }),
+        this.deps.storage.esql({ pipeline: currentOpenQuery(window) }),
       ]);
     } catch (error) {
       // An index created outside the storage adapter can be missing a field this
       // queries, which ES|QL rejects rather than treating as null. Read *that*
-      // case as "no data" so the UI flatlines instead of 500ing. Every other
-      // verification failure is a genuine query defect and must propagate:
-      // swallowing it would render a healthy-looking dashboard of zeroes.
+      // case as "no data" so the UI flatlines instead of 500ing; every other
+      // verification failure is a genuine query defect and must propagate.
       if (isEsqlUnknownColumnError(error)) {
         this.deps.logger.warn(
           `chartsSummary: ES|QL reported an unknown column — returning zero buckets. ` +
@@ -398,12 +279,10 @@ export class ProposalsService {
 
     this.warnIfTruncated(opensResponse, 'opens');
     this.warnIfTruncated(closesResponse, 'closes');
-    this.warnIfTruncated(expiriesResponse, 'expiries');
 
     const anchorByCat = parseEsqlCountByCategory(anchorResponse, 'anchor');
     const opensByIdxAndCat = parseEsqlCountByIdxAndCategory(opensResponse, 'opens');
     const closesByIdxAndCat = parseEsqlCountByIdxAndCategory(closesResponse, 'closes');
-    const expiriesByIdxAndCat = parseEsqlCountByIdxAndCategory(expiriesResponse, 'expiries');
 
     const runningSums: Record<string, number> = { ...anchorByCat };
     const buckets: ProposalChartsSummaryBucket[] = [];
@@ -414,19 +293,28 @@ export class ProposalsService {
       for (const [cat, count] of Object.entries(opensByIdxAndCat[i] ?? {})) {
         runningSums[cat] = (runningSums[cat] ?? 0) + count;
       }
+
+      // Snapshotted after opens but before closes: those two sets are disjoint,
+      // so this is exactly the count open at some point in the bucket. A
+      // proposal that opened and closed inside one bucket would otherwise net to
+      // zero and never appear.
+      const openDuring: Record<string, number> = { ...runningSums };
+
       for (const [cat, count] of Object.entries(closesByIdxAndCat[i] ?? {})) {
-        // Clamped because a close whose open the anchor missed would drive this
-        // negative, and a negative open count is worse than an undercount.
-        runningSums[cat] = Math.max(0, (runningSums[cat] ?? 0) - count);
-      }
-      for (const [cat, count] of Object.entries(expiriesByIdxAndCat[i] ?? {})) {
+        // Clamped because a close whose open the anchor missed would go negative.
         runningSums[cat] = Math.max(0, (runningSums[cat] ?? 0) - count);
       }
 
-      buckets.push({ timestamp, counts: { ...runningSums } });
+      // Keeps the key set stable: a category whose only event here was a close
+      // is absent from the pre-close snapshot.
+      for (const cat of Object.keys(runningSums)) {
+        openDuring[cat] ??= 0;
+      }
+
+      buckets.push({ timestamp, counts: openDuring });
     }
 
-    return { buckets };
+    return { buckets, currentOpen: parseEsqlScalar(currentOpenResponse, 'currentOpen') };
   }
 
   /**
@@ -1218,7 +1106,10 @@ type QueryFilterList = Array<Record<string, unknown>>;
  * Translates the shared filter vocabulary once, so every read applies it
  * identically. The space term is always present: no read crosses a space.
  */
-const toFilterClauses = (filters: ProposalFilters, spaceId: string): QueryFilterList => {
+const toFilterClauses = (
+  filters: ProposalFilters & { category?: string; decidedWithinHours?: number },
+  spaceId: string
+): QueryFilterList => {
   const filter: QueryFilterList = [{ term: { spaceId } }];
 
   if (filters.status) {
@@ -1229,6 +1120,12 @@ const toFilterClauses = (filters: ProposalFilters, spaceId: string): QueryFilter
   }
   if (filters.conversationId) {
     filter.push({ term: { conversationId: filters.conversationId } });
+  }
+  if (filters.category) {
+    filter.push({ term: { category: filters.category } });
+  }
+  if (filters.decidedWithinHours !== undefined) {
+    filter.push({ range: { decidedAt: { gte: `now-${filters.decidedWithinHours}h` } } });
   }
   if (filters.excludeSuperseded) {
     // A superseded proposal is represented by its successor, so showing both
@@ -1403,6 +1300,16 @@ const parseEsqlCountByCategory = (
     if (category) result[category] = count ?? 0;
   }
   return result;
+};
+
+/** Same by-name lookup, for a bare `STATS` returning a single unkeyed row. */
+const parseEsqlScalar = (
+  response: { columns: Array<{ name: string }>; values: Array<unknown[]> },
+  countField: string
+): number => {
+  const colIdx = response.columns.findIndex((c) => c.name === countField);
+  if (colIdx === -1) return 0;
+  return (response.values[0]?.[colIdx] as number | null) ?? 0;
 };
 
 /** Same by-name lookup as above. Rows with a negative or non-finite `idx` are dropped. */
