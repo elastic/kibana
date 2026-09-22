@@ -52,6 +52,15 @@ export function useErrorClickHandler(traceItems: TraceItem[]): OnErrorClick {
       // APM errors populate both. The waterfall item id is itself `span.id ?? transaction.id`,
       // so match either field instead of guessing one from the doc type.
       //
+      // Known limitation: for a classic-APM transaction row whose badge shows only span-less
+      // errors (keyed by `transaction.id` with no `span.id`), this OR form also pulls in
+      // child-span errors that share `transaction.id` — making the Errors page wider than the
+      // badge count. The server-side `docIdQuery` in `getApmTraceErrorQuery` already applies
+      // the correct `transaction.id + must_not exists span.id` semantics; mirroring that here
+      // requires distinguishing classic-APM transaction rows from OTel-native ones (where
+      // `item.docType === 'transaction'` but `item.id` IS a span ID and errors are keyed by
+      // `span.id`). Safe fix requires a per-item flag — tracked for a follow-up.
+      //
       // `transaction.id` is unmapped in the logs indices that back the "Errors from logs"
       // section. kqlQuery() compiles it to a match_phrase, which Elasticsearch resolves to
       // match-nothing on an unmapped field rather than failing, so the clause is inert there.
