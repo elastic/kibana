@@ -176,6 +176,21 @@ describe('useOpenFlyout', () => {
     expect(mockStorage.set).toHaveBeenCalledWith(FLYOUT_WIDTH_LOCAL_STORAGE, 812);
   });
 
+  it('composes with, rather than overwrites, a caller-supplied onResize', () => {
+    mockOpenSystemFlyout.mockReturnValue(createOverlayRef().ref);
+    const callerOnResize = jest.fn();
+
+    const { result } = renderHook(() => useOpenFlyout());
+    result.current(<div />, { size: 's', session: 'start', onResize: callerOnResize });
+
+    const { onResize } = mockOpenSystemFlyout.mock.calls[0][1];
+    onResize(812);
+
+    // Width is still persisted, and the caller's own handler still fires.
+    expect(mockStorage.set).toHaveBeenCalledWith(FLYOUT_WIDTH_LOCAL_STORAGE, 812);
+    expect(callerOnResize).toHaveBeenCalledWith(812);
+  });
+
   it('returns the OverlayRef from openSystemFlyout', () => {
     const { ref } = createOverlayRef();
     mockOpenSystemFlyout.mockReturnValue(ref);

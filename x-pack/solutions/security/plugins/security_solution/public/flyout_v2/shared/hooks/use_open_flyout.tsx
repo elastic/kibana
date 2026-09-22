@@ -63,7 +63,8 @@ export const useOpenFlyout = (): OpenFlyout => {
       // where a saved standalone width can't be honored (EUI clamps it to the sibling's leftover
       // space). Child flyouts (session: 'inherit') are also skipped — EUI throws on a numeric size
       // for children. `defaultSize` records the flyout's default so the settings menu can reset
-      // back to it, and `onResize` persists the width whenever the user resizes.
+      // back to it, and `onResize` persists the width whenever the user resizes — composing with,
+      // rather than overwriting, any `onResize` the caller supplied.
       const persistsWidth =
         properties.session !== 'inherit' && meta?.surface !== FLYOUT_SURFACE.TOOL;
       // Child flyouts are always overlays and don't own a persisted width, so the settings menu
@@ -74,7 +75,10 @@ export const useOpenFlyout = (): OpenFlyout => {
         ? {
             size: storedWidth ?? properties.size,
             defaultSize: properties.size,
-            onResize: (width: number) => setStoredFlyoutWidth(storage, width),
+            onResize: (width: number) => {
+              setStoredFlyoutWidth(storage, width);
+              properties.onResize?.(width);
+            },
           }
         : {};
 
