@@ -19,8 +19,8 @@ import type { BaseActionsProps } from '../actions';
 import { ConversationsActionsGroup } from './actions_group';
 import { ConversationMetaInfo } from './conversation_meta_info';
 
-/** Fixed, so a longer age does not push the titles out of line. Fits "59 minutes ago". */
-const AGE_COLUMN_WIDTH = '7.5rem';
+/** Fixed, so a longer age does not push the titles out of line. */
+const AGE_COLUMN_WIDTH = '6.5rem';
 
 interface ConversationCardCompactProps {
   investigation: Investigation;
@@ -94,13 +94,7 @@ export const ConversationCardCompact = memo<ConversationCardCompactProps>(
             {/* Truncate together, so the outcome and controls keep their place. */}
             <EuiText
               size="s"
-              css={{
-                // Off EUI's type scale on purpose: it steps 12px to 14px.
-                fontSize: '0.8125rem',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              }}
+              css={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
             >
               <strong>{investigation.title}</strong>
               {investigation.primaryActionLabel ? (
