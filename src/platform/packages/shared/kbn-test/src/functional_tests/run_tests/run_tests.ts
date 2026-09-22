@@ -22,25 +22,13 @@ import { Config, readConfigFile } from '../../functional_test_runner';
 
 import { checkForEnabledTestsInFtrConfig, runFtr } from '../lib/run_ftr';
 import { runElasticsearch } from '../lib/run_elasticsearch';
+import { createKibanaPlatformPluginsBuilder } from './build_kibana_platform_plugins';
 import type { RunTestsOptions } from './flags';
 /**
  * Run servers and tests for each config
  */
 export async function runTests(log: ToolingLog, options: RunTestsOptions) {
-  if (!process.env.CI) {
-    // [rspack-transition] When the legacy optimizer is removed, keep only the rspack script.
-    const buildScript =
-      process.env.KBN_USE_RSPACK === 'true' || process.env.KBN_USE_RSPACK === '1'
-        ? 'node scripts/build_rspack_bundles'
-        : 'node scripts/build_kibana_platform_plugins';
-    log.warning('❗️❗️❗️');
-    log.warning('❗️❗️❗️');
-    log.warning('❗️❗️❗️');
-    log.warning(`   Don't forget to use \`${buildScript}\` to build plugins you plan on testing`);
-    log.warning('❗️❗️❗️');
-    log.warning('❗️❗️❗️');
-    log.warning('❗️❗️❗️');
-  }
+  const ensureKibanaPlatformPluginsBuilt = createKibanaPlatformPluginsBuilder();
 
   const settingOverrides = {
     mochaOpts: {
@@ -126,6 +114,14 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
                   shutdownEs = shutdown;
                 })
               : undefined;
+
+          await withSpan('build_kibana_platform_plugins', () =>
+            ensureKibanaPlatformPluginsBuilt({
+              procs,
+              config,
+              installDir: options.installDir,
+            })
+          );
 
           const kibanaPromise = withSpan('start_kibana', () =>
             runKibanaServer({
