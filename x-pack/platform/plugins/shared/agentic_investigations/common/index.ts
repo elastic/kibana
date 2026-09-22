@@ -49,6 +49,23 @@ export {
   proposalUserSchema,
 } from './proposals';
 
+export {
+  IMPACT_INDEX_NAME,
+  IMPACT_INTERNAL_URL,
+  IMPACT_UI_CAPABILITY_MANAGE,
+  IMPACT_UI_CAPABILITY_SHOW,
+  MAX_ENTITY_ID_LENGTH,
+  MAX_ENTITY_IDS,
+  MAX_ENTITY_NAME_LENGTH,
+  MAX_IMPACT_CONVERSATION_IDS,
+  MAX_IMPACT_ID_LENGTH,
+  attachImpactRequestSchema,
+  getImpactQuerySchema,
+  impactEntitiesSchema,
+  impactEntitySchema,
+  impactSchema,
+} from './impact';
+
 export type {
   ActionMetadata,
   ApproveProposalRequest,
@@ -72,6 +89,8 @@ export type {
   ProposalWithMetadata,
 } from './proposals';
 
+export type { AttachImpactRequest, GetImpactQuery, Impact, ImpactEntity } from './impact';
+
 export {
   ESCALATION_ASSIGNEES_FIELD,
   ESCALATION_BY_ID_URL,
@@ -79,6 +98,7 @@ export {
   ESCALATION_STATUS_FIELD,
   ESCALATION_TEMPLATE_ID,
   ESCALATIONS_INTERNAL_URL,
+  ESCALATIONS_SUGGEST_USERS_URL,
   ESCALATIONS_UI_CAPABILITY_MANAGE,
   ESCALATIONS_UI_CAPABILITY_SHOW,
   INVESTIGATION_TEMPLATE_ID,

@@ -12,7 +12,7 @@ pageLoadAssetSize:
   aiops: 586
   alerting: 8789
   alertingVTwo: 24358
-  alertzero: 10276
+  alertzero: 16031
   apm: 35746
   apmShared: 1896
   apmSourcesAccess: 1174
@@ -66,7 +66,7 @@ pageLoadAssetSize:
   embeddableAlertsTable: 1536
   enterpriseSearch: 28188
   entityStore: 2252
-  esql: 306
+  esql: 341
   esqlDataGrid: 215
   esqlViews: 1205
   esUiShared: 2284
@@ -112,7 +112,7 @@ pageLoadAssetSize:
   interactiveSetup: 32694
   intercepts: 14374
   kibanaOverview: 1863
-  kibanaReact: 1225
+  kibanaReact: 1618
   kibanaUsageCollection: 529
   kibanaUtils: 2884
   kql: 337
@@ -206,7 +206,7 @@ pageLoadAssetSize:
   stackConnectors: 63548
   streams: 4563
   streamsApp: 55882
-  synthetics: 18443
+  synthetics: 20839
   telemetry: 20586
   telemetryManagementSection: 1738
   timelines: 1409

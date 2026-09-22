@@ -106,6 +106,7 @@ const createWorker = (
   lastRun: null,
   state: 'paused',
   settingsRevision: null,
+  workflowId: null,
   settings: {
     workerId: overrides.id,
     autonomy: 'manual',

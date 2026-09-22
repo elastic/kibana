@@ -29,7 +29,12 @@ export { queryKeys } from './proposals/query_keys';
 
 export { DISMISS_REASON_LABELS, DISMISS_REASON_OPTIONS } from './proposals/dismiss_reason_i18n';
 
-export { useListEscalations, useUpdateEscalation } from './escalations/hooks/use_escalations_api';
+export {
+  useListEscalations,
+  useCreateEscalation,
+  useAddToEscalation,
+  useUpdateEscalation,
+} from './escalations/hooks/use_escalations_api';
 
 export {
   useEscalationUserProfiles,
@@ -37,3 +42,6 @@ export {
 } from './escalations/hooks/use_escalation_user_profiles';
 
 export { escalationQueryKeys } from './escalations/query_keys';
+
+export { useCurrentUserProfile } from './user_profiles/hooks/use_current_user_profile';
+export { useSuggestUserProfiles } from './user_profiles/hooks/use_suggest_user_profiles';
