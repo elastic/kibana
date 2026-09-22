@@ -1,5 +1,5 @@
 {
-  "sha1": "e99f07b20e8e15bdd679180e446e2e6ecf85a386",
+  "sha1": "e62b9cc04282d8417906f0f4594a222300691d15",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -27,6 +27,19 @@
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/flyout_with_component.spec.ts",
         "line": 36,
+        "column": 13
+      }
+    },
+    {
+      "id": "e00b3f1d9068c4a-b4770e88becdbe3",
+      "title": "Flyout System - persisted width scenarios second system push flyout opens at the width stored by resizing the first",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/persisted_width_scenarios.spec.ts",
+        "line": 32,
         "column": 13
       }
     },
