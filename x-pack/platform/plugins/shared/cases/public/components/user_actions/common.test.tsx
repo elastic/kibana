@@ -122,7 +122,7 @@ describe('createCommonUpdateUserActionBuilder ', () => {
     expect(handleOutlineComment).toHaveBeenCalled();
   });
 
-it('appends the action source to the event', () => {
+  it('appends the action source to the event', () => {
     const userAction = getUserAction('title', UserActionActions.update, {
       source: { type: 'agent', id: 'agent-1', name: 'Elastic AI Agent' },
     });
