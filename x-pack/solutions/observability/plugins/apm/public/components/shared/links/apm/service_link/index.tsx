@@ -56,7 +56,7 @@ export function ServiceLink({ agentName, query, serviceName }: ServiceLinkProps)
           <PopoverTooltip
             ariaLabel={i18n.translate('xpack.apm.serviceLink.tooltip', {
               defaultMessage:
-                'Number of services instrumented has reached the current capacity of the APM server',
+                'Number of services instrumented has reached the current capacity',
             })}
             iconType="warning"
           >
