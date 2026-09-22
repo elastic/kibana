@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
 import type { FeatureFlagsStart } from '@kbn/core/server';
 import { FF_MIGRATE_LEGACY_SECURITY_ASSETS } from '../../../common';
 
@@ -15,4 +16,5 @@ import { FF_MIGRATE_LEGACY_SECURITY_ASSETS } from '../../../common';
  */
 export const isLegacySecurityAssetsMigrationEnabled = (
   featureFlags: FeatureFlagsStart
-): Promise<boolean> => featureFlags.getBooleanValue(FF_MIGRATE_LEGACY_SECURITY_ASSETS, false);
+): Promise<boolean> =>
+  firstValueFrom(featureFlags.getBooleanValue$(FF_MIGRATE_LEGACY_SECURITY_ASSETS, false));

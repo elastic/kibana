@@ -8,6 +8,7 @@
 import { useFetchAnonymizationFields } from '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields';
 import { API_VERSIONS, ATTACK_DISCOVERY_GENERATE } from '@kbn/elastic-assistant-common';
 import { renderHook, act } from '@testing-library/react';
+import { of } from 'rxjs';
 import React from 'react';
 
 import { useKibana } from '../../../common/lib/kibana';
@@ -69,7 +70,7 @@ describe('useAttackDiscovery', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     // Mock feature flags service to return false by default
-    mockedUseKibana.services.featureFlags.getBooleanValue = jest.fn().mockResolvedValue(false);
+    mockedUseKibana.services.featureFlags.getBooleanValue$ = jest.fn().mockReturnValue(of(false));
     (useKibana as jest.Mock).mockReturnValue(mockedUseKibana);
     (useFetchAnonymizationFields as jest.Mock).mockReturnValue({ data: [] });
   });
@@ -192,12 +193,12 @@ describe('useAttackDiscovery', () => {
 
   describe('when the feature flag is ON but the per-space uiSetting is OFF', () => {
     beforeEach(() => {
-      mockedUseKibana.services.featureFlags.getBooleanValue = jest.fn().mockResolvedValue(true);
+      mockedUseKibana.services.featureFlags.getBooleanValue$ = jest.fn().mockReturnValue(of(true));
       mockedUseKibana.services.uiSettings.get = jest.fn().mockReturnValue(false);
     });
 
     afterEach(() => {
-      mockedUseKibana.services.featureFlags.getBooleanValue = jest.fn().mockResolvedValue(false);
+      mockedUseKibana.services.featureFlags.getBooleanValue$ = jest.fn().mockReturnValue(of(false));
       mockedUseKibana.services.uiSettings.get = jest.fn().mockReturnValue(false);
     });
 
@@ -248,7 +249,7 @@ describe('useAttackDiscovery', () => {
       await result.current.fetchAttackDiscoveries();
     });
 
-    expect(mockedUseKibana.services.featureFlags.getBooleanValue).toHaveBeenCalledWith(
+    expect(mockedUseKibana.services.featureFlags.getBooleanValue$).toHaveBeenCalledWith(
       'securitySolution.attackDiscoveryWorkflowsEnabled',
       true
     );
@@ -256,12 +257,12 @@ describe('useAttackDiscovery', () => {
 
   describe('when the feature flag is OFF but the per-space uiSetting is ON', () => {
     beforeEach(() => {
-      mockedUseKibana.services.featureFlags.getBooleanValue = jest.fn().mockResolvedValue(false);
+      mockedUseKibana.services.featureFlags.getBooleanValue$ = jest.fn().mockReturnValue(of(false));
       mockedUseKibana.services.uiSettings.get = jest.fn().mockReturnValue(true);
     });
 
     afterEach(() => {
-      mockedUseKibana.services.featureFlags.getBooleanValue = jest.fn().mockResolvedValue(false);
+      mockedUseKibana.services.featureFlags.getBooleanValue$ = jest.fn().mockReturnValue(of(false));
       mockedUseKibana.services.uiSettings.get = jest.fn().mockReturnValue(false);
     });
 
@@ -296,14 +297,14 @@ describe('useAttackDiscovery', () => {
   describe('when attackDiscoveryWorkflowsEnabled feature flag is enabled', () => {
     beforeEach(() => {
       // Mock feature flags service to return true for this test suite
-      mockedUseKibana.services.featureFlags.getBooleanValue = jest.fn().mockResolvedValue(true);
+      mockedUseKibana.services.featureFlags.getBooleanValue$ = jest.fn().mockReturnValue(of(true));
       // Also enable the per-space uiSetting opt-in
       mockedUseKibana.services.uiSettings.get = jest.fn().mockReturnValue(true);
     });
 
     afterEach(() => {
       // Reset to default (false)
-      mockedUseKibana.services.featureFlags.getBooleanValue = jest.fn().mockResolvedValue(false);
+      mockedUseKibana.services.featureFlags.getBooleanValue$ = jest.fn().mockReturnValue(of(false));
       mockedUseKibana.services.uiSettings.get = jest.fn().mockReturnValue(false);
     });
 
