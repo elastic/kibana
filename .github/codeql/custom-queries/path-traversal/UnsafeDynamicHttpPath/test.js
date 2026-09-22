@@ -115,6 +115,23 @@ http.delete('/api/dashboards/' + encodedId);
 const builtPath = buildPath('/api/dashboards/{id}', { id });
 http.get(INTERNAL_ROUTES.BASE + builtPath);
 
+// GOOD: the route template may itself be a constant reference or a constant-only template
+http.get(INTERNAL_ROUTES.BASE + buildPath(`${INTERNAL_ROUTES.BASE}/{id}`, { id }));
+
+// =============================================================================
+// buildPath() only encodes what it substitutes for a `{param}` placeholder
+// =============================================================================
+
+// BAD: one-argument buildPath() has no placeholder to substitute into, so it returns `id` as-is
+http.get(`/api/dashboards/${buildPath(id)}`); // $ Alert
+
+// BAD: the route template itself is dynamic, so the unencoded segment survives buildPath()
+const dynamicRouteTemplate = `/api/dashboards/${id}`;
+http.get(INTERNAL_ROUTES.BASE + buildPath(dynamicRouteTemplate, {})); // $ Alert
+
+// BAD: `map(buildPath)` passes each element as the template argument, which is returned unchanged
+http.get([INTERNAL_ROUTES.BASE, id].map(buildPath).join('/')); // $ Alert
+
 // GOOD: non-string literal segments are constants, not user input
 http.get(`/api/dashboards/${1}`);
 http.get('/api/dashboards/' + 1);
@@ -248,6 +265,17 @@ http.get(safeMutParts.join('/'));
 
 // BAD: concat introduces the unsafe segment
 http.get([INTERNAL_ROUTES.BASE].concat(unsafeParts).join('/')); // $ Alert
+
+// BAD: concat introduces the unsafe segment after an element-preserving transform
+http.get([INTERNAL_ROUTES.BASE].filter(Boolean).concat(id).join('/')); // $ Alert
+
+// GOOD: the segment concatenated onto the transformed array is encoded
+http.get([INTERNAL_ROUTES.BASE].filter(Boolean).concat(encodeURIComponent(id)).join('/'));
+
+// BAD: the unsafe segment is pushed onto a transformed array
+const transformedParts = [INTERNAL_ROUTES.BASE].filter(Boolean);
+transformedParts.push(id);
+http.get(transformedParts.join('/')); // $ Alert
 
 // BAD: filter preserves whatever was already unsafe
 http.get([INTERNAL_ROUTES.BASE, id].filter(Boolean).join('/')); // $ Alert

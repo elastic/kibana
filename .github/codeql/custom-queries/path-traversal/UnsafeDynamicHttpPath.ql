@@ -43,11 +43,56 @@ import javascript
 
 /* ---------- "Safe" path building blocks (mirrors the ESLint rule) ---------- */
 
-/** A direct call to `encodeURIComponent(...)` or `buildPath(...)` (identifier or member callee). */
+/**
+ * A route template `buildPath()` can be trusted to substitute into: a literal, a constant prefix
+ * reference, or a template/concatenation built only from those - written inline or held in a
+ * variable first. Anything else could carry a user-controllable segment through `buildPath()`
+ * untouched.
+ */
+predicate isStaticRouteTemplate(Expr e) {
+  forex(Expr src | src = DataFlow::valueNode(e).getALocalSource().asExpr() |
+    src instanceof Literal
+    or
+    isConstantPrefixRef(src)
+    or
+    src instanceof TemplateLiteral and
+    forall(Expr part |
+      part = src.(TemplateLiteral).getAnElement() and not part instanceof TemplateElement
+    |
+      isStaticRouteTemplate(part)
+    )
+    or
+    src instanceof AddExpr and
+    isStaticRouteTemplate(src.(AddExpr).getLeftOperand()) and
+    isStaticRouteTemplate(src.(AddExpr).getRightOperand())
+  )
+}
+
+/**
+ * A `buildPath(template, params)` call whose result really is encoded. `buildPath()` URI-encodes
+ * only the values it substitutes for `{param}` placeholders and returns the template otherwise
+ * unchanged, so it is an encoder only when the template argument cannot itself carry a
+ * user-controllable segment. A one-argument `buildPath(id)` has no placeholders to substitute
+ * into and returns `id` verbatim, so it is NOT an encoder. Exact name equality also keeps
+ * `buildDeletePath` from matching `buildPath`.
+ */
+predicate isEncodingBuildPathCall(Expr e) {
+  exists(CallExpr call | call = e |
+    call.getCalleeName() = "buildPath" and
+    isStaticRouteTemplate(call.getArgument(0))
+  )
+}
+
+/**
+ * A direct call to `encodeURIComponent(...)`, or a `buildPath(...)` call that actually encodes
+ * (identifier or member callee).
+ */
 predicate isDirectEncodeCall(Expr e) {
-  // Exact names only. `encodeURI` is deliberately NOT here: it does not escape `/` or `.`, so
-  // `../../` survives it. Exact equality also keeps `buildDeletePath` from matching `buildPath`.
-  e.(CallExpr).getCalleeName() = ["encodeURIComponent", "buildPath"]
+  // Exact name only. `encodeURI` is deliberately NOT here: it does not escape `/` or `.`, so
+  // `../../` survives it.
+  e.(CallExpr).getCalleeName() = "encodeURIComponent"
+  or
+  isEncodingBuildPathCall(e)
 }
 
 /** Holds if EVERY local source of `e` is a direct encoder call. */
@@ -181,11 +226,32 @@ predicate templateHasInterpolation(TemplateLiteral t) {
   exists(Expr part | part = t.getAnElement() and not part instanceof TemplateElement)
 }
 
-/** A callback that encodes each element it is applied to (`map(encodeURIComponent)`). */
+/**
+ * A callback that encodes each element it is applied to (`map(encodeURIComponent)`). `buildPath`
+ * is deliberately absent: `map` passes each element as `buildPath()`'s *template* argument, which
+ * comes back unchanged, so `map(buildPath)` encodes nothing.
+ */
 predicate isEncodingCallback(DataFlow::Node cb) {
-  cb.asExpr().(VarAccess).getName() = ["encodeURIComponent", "buildPath"]
+  cb.asExpr().(VarAccess).getName() = "encodeURIComponent"
   or
   isEncodingWrapperFunction(cb.getALocalSource().(DataFlow::FunctionNode).getFunction())
+}
+
+/** An `Array.prototype` method that returns a new array holding the same elements. */
+private string elementPreservingArrayMethod() {
+  result = ["concat", "filter", "slice", "flat", "reverse", "sort"]
+}
+
+/**
+ * An array a path may be joined from: an array literal (or `Array(...)`), or any
+ * element-preserving transform of one. Tracking this *lineage* - not just the creation node - is
+ * what lets the mutation and `concat` branches below still see an array that was transformed
+ * before it was appended to (`[BASE].filter(Boolean).concat(id)`).
+ */
+DataFlow::SourceNode segmentArray() {
+  result instanceof DataFlow::ArrayCreationNode
+  or
+  result = segmentArray().getAMethodCall([elementPreservingArrayMethod(), "map"])
 }
 
 /**
@@ -194,10 +260,11 @@ predicate isEncodingCallback(DataFlow::Node cb) {
  * or an element-preserving transform of such an array.
  */
 DataFlow::SourceNode unsafeSegmentArray() {
-  exists(DataFlow::ArrayCreationNode arr, DataFlow::Node el |
+  exists(DataFlow::SourceNode arr, DataFlow::Node el |
     result = arr and
+    arr = segmentArray() and
     (
-      el = arr.getAnElement()
+      el = arr.(DataFlow::ArrayCreationNode).getAnElement()
       or
       // `const parts = [BASE]; parts.push(id); parts.join('/')`
       el = arr.getAMethodCall(["push", "unshift"]).getAnArgument()
@@ -210,12 +277,13 @@ DataFlow::SourceNode unsafeSegmentArray() {
   )
   or
   // These keep whatever elements were already unsafe: `[BASE, id].filter(Boolean).join('/')`.
-  result =
-    unsafeSegmentArray().getAMethodCall(["concat", "filter", "slice", "flat", "reverse", "sort"])
+  result = unsafeSegmentArray().getAMethodCall(elementPreservingArrayMethod())
   or
-  // `[BASE].concat(parts)` - `concat` can also introduce a new unsafe element.
+  // `concat` can also introduce a new unsafe element onto an array that was safe up to that
+  // point - `[BASE].concat(parts)`, or `[BASE].filter(Boolean).concat(id)` once the receiver is
+  // matched against the whole lineage rather than the array literal alone.
   exists(DataFlow::MethodCallNode concatCall, DataFlow::Node arg |
-    concatCall = any(DataFlow::ArrayCreationNode arr).getAMethodCall("concat") and
+    concatCall = segmentArray().getAMethodCall("concat") and
     result = concatCall and
     arg = concatCall.getAnArgument() and
     not isSafePathSegment(arg.asExpr())

@@ -8,7 +8,7 @@
  */
 
 // Cross-file helpers used by test.js to exercise interprocedural + cross-file value
-// flow — the cases the ESLint rule cannot see.
+// flow - the cases the ESLint rule cannot see.
 
 // Unsafe: returns a path with an unencoded, interpolated segment.
 export const makeUnsafeDeletePath = (id: string): string => `/api/things/${id}`;
