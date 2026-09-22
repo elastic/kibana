@@ -71,6 +71,14 @@ export function ErrorGroupOverview() {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
+      {/* ── Failed transaction rate — always visible. Kept outside the showApmSection
+           conditional because failed-transaction data is independent of APM error docs:
+           a service can have failing HTTP responses with zero error documents. Hiding it
+           alongside the error charts would silently remove a chart the user may rely on. ── */}
+      <EuiFlexItem>
+        <FailedTransactionRateChart kuery={kuery} />
+      </EuiFlexItem>
+
       {/* ── APM errors section ── */}
       {showApmSection && (
         <EuiFlexItem>
@@ -84,35 +92,28 @@ export function ErrorGroupOverview() {
             <EuiSpacer size="s" />
             <EuiFlexGroup direction="column" gutterSize="s">
               <EuiFlexItem>
-                <EuiFlexGroup direction="row" gutterSize="s">
-                  <ChartPointerEventContextProvider>
-                    <EuiFlexItem>
-                      <EuiPanel hasBorder={true}>
-                        <ErrorDistribution
-                          fetchStatus={errorDistributionStatus}
-                          distribution={errorDistributionData}
-                          title={chartTitle}
-                          discoverParams={{
-                            label: i18n.translate(
-                              'xpack.apm.errorGroupOverview.openErrorsInDiscover',
-                              { defaultMessage: 'Open errors in Discover' }
-                            ),
-                            rangeFrom,
-                            rangeTo,
-                            queryParams: {
-                              kuery,
-                              serviceName,
-                              sortDirection: 'DESC',
-                            },
-                          }}
-                        />
-                      </EuiPanel>
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <FailedTransactionRateChart kuery={kuery} />
-                    </EuiFlexItem>
-                  </ChartPointerEventContextProvider>
-                </EuiFlexGroup>
+                <ChartPointerEventContextProvider>
+                  <EuiPanel hasBorder={true}>
+                    <ErrorDistribution
+                      fetchStatus={errorDistributionStatus}
+                      distribution={errorDistributionData}
+                      title={chartTitle}
+                      discoverParams={{
+                        label: i18n.translate(
+                          'xpack.apm.errorGroupOverview.openErrorsInDiscover',
+                          { defaultMessage: 'Open errors in Discover' }
+                        ),
+                        rangeFrom,
+                        rangeTo,
+                        queryParams: {
+                          kuery,
+                          serviceName,
+                          sortDirection: 'DESC',
+                        },
+                      }}
+                    />
+                  </EuiPanel>
+                </ChartPointerEventContextProvider>
               </EuiFlexItem>
 
               <EuiFlexItem>
