@@ -48,6 +48,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
     authenticateAndDeployStep,
     detectAndReviewStep,
     updateDetectAndReviewStep,
+    removeDeployInstance,
     getLatestFailedInstances,
     awsServicesMap: servicesMap,
   } = useOnboardingFlow();
@@ -143,8 +144,20 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
           }
         }
 
-        const hasPendingCleanup =
-          Object.keys(detectAndReviewStep.pendingCleanupPolicyIds ?? {}).length > 0;
+        // Services deselected from Step 1 never call removeDeployInstance, so pendingCleanupPolicyIds
+        // won't capture them. Detect stale entries by comparing policyIdsByInstance against the
+        // reconciled deployGroups (which already filters by selectedServiceIds).
+        const activeInstanceIds = new Set(deployGroups.flatMap((g) => g.instanceIds));
+        const liveStalePolicyIds: Record<string, string> = {};
+        for (const [iid, pid] of Object.entries(detectAndReviewStep.policyIdsByInstance)) {
+          if (!activeInstanceIds.has(iid)) liveStalePolicyIds[iid] = pid;
+        }
+        const effectivePendingCleanup: Record<string, string> = {
+          ...liveStalePolicyIds,
+          ...(detectAndReviewStep.pendingCleanupPolicyIds ?? {}),
+        };
+
+        const hasPendingCleanup = Object.keys(effectivePendingCleanup).length > 0;
 
         if (
           targets.length === 0 &&
@@ -165,7 +178,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
 
         if (hasPendingCleanup) {
           cleanupOps = await cleanupAgentlessPolicies({
-            pendingCleanupPolicyIds: detectAndReviewStep.pendingCleanupPolicyIds ?? {},
+            pendingCleanupPolicyIds: effectivePendingCleanup,
             currentPolicyIdsByInstance: detectAndReviewStep.policyIdsByInstance,
             instances: serviceSettings?.instances ?? [],
             storedServiceVars: serviceSettings?.serviceVars ?? {},
@@ -174,6 +187,11 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
             authenticateAndDeployStep,
             servicesMap: servicesMap ?? new Map(),
           });
+          // Prune stale instances (Step 1 deselections) from policyIdsByInstance before clearing
+          // the staging area — removeDeployInstance must come first so its removal isn't overwritten.
+          for (const iid of Object.keys(liveStalePolicyIds)) {
+            removeDeployInstance(iid);
+          }
           updateDetectAndReviewStep({ pendingCleanupPolicyIds: {} });
         }
 
@@ -307,6 +325,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       namespace,
       onContinue,
       updateDetectAndReviewStep,
+      removeDeployInstance,
       getLatestFailedInstances,
       detectAndReviewStep.serviceStatuses,
       detectAndReviewStep.failedInstances,

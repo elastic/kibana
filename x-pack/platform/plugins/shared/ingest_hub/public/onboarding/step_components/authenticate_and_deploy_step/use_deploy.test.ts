@@ -732,6 +732,7 @@ function setupMocks({
     },
     awsServicesMap: (useAwsServicesMap as jest.Mock)(),
     updateDetectAndReviewStep: jest.fn(),
+    removeDeployInstance: jest.fn(),
     getLatestFailedInstances: jest.fn().mockReturnValue([]),
   });
 
@@ -1611,6 +1612,38 @@ describe('useDeploy — cleanup orchestration', () => {
     const updateBody = mockSendUpdateCloudOnboardingDeployment.mock.calls[0][1];
     expect(updateBody.packagePolicyIds).not.toContain('policy-A');
     expect(updateBody.packagePolicyIds).toContain('policy-B');
+  });
+
+  it('triggers cleanup for services deselected from Step 1 (policyIdsByInstance has stale entry not in deployGroups)', async () => {
+    // 'vpcflow' was deployed but is no longer selected — its instanceId is in policyIdsByInstance
+    // but NOT in selectedServiceIds → liveStalePolicyIds should pick it up without needing
+    // pendingCleanupPolicyIds to be set.
+    mockCleanupAgentlessPolicies.mockResolvedValue({ toDelete: ['policy-VPC'], toUpdate: [] });
+    setupMocks({
+      selectedServiceIds: [],  // vpcflow deselected
+      detectAndReviewStep: {
+        pendingCleanupPolicyIds: {},
+        policyIdsByInstance: { vpcflow: 'policy-VPC' },
+        serviceStatuses: { vpcflow: 'receiving' },
+        failedInstances: [],
+      },
+    });
+
+    const removeDeployInstance = (
+      mockUseOnboardingFlow() as ReturnType<typeof mockUseOnboardingFlow>
+    ).removeDeployInstance as jest.Mock;
+
+    const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+
+    await act(async () => {
+      await result.current.handleDeploy();
+    });
+
+    expect(mockCleanupAgentlessPolicies).toHaveBeenCalledTimes(1);
+    const cleanupCall = mockCleanupAgentlessPolicies.mock.calls[0][0];
+    expect(cleanupCall.pendingCleanupPolicyIds).toEqual({ vpcflow: 'policy-VPC' });
+    // removeDeployInstance must prune the stale entry from policyIdsByInstance.
+    expect(removeDeployInstance).toHaveBeenCalledWith('vpcflow');
   });
 
   it('does not call cleanupAgentlessPolicies on retry (instanceIds provided)', async () => {
