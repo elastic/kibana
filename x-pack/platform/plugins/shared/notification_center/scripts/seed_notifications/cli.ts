@@ -12,7 +12,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { Notification } from '../../common/types';
 import { NOTIFICATION_DATA_STREAM_NAME } from '../../server/storage/notification_data_stream';
 import { buildChunk, buildTick, validateFixture } from './fixtures';
-import { createEsClient, getConnection } from './lib/connection';
+import { assertSameCluster, createEsClient, getConnection } from './lib/connection';
 import { clearNotifications, ensureDataStream, writeNotifications } from './lib/notification_store';
 import { clearReadHorizon, setReadHorizon } from './lib/read_horizon';
 
@@ -92,6 +92,7 @@ run(
     addCleanupTask(() => {
       void esClient.close();
     });
+    await assertSameCluster(connection, esClient, log);
     await ensureDataStream(connection, esClient, log);
 
     if (flags.clean === true) {

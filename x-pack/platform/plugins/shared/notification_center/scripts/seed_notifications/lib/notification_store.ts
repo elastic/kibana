@@ -88,8 +88,8 @@ export const ensureDataStream = async (
 
   if (!(await isDataStream(esClient))) {
     throw createFailError(
-      `Kibana served the list route but "${NOTIFICATION_DATA_STREAM_NAME}" still does not exist. ` +
-        `Is ${connection.esUrl} the cluster that Kibana is pointed at?`
+      `Kibana served the list route but "${NOTIFICATION_DATA_STREAM_NAME}" still does not exist ` +
+        `on ${connection.esUrl}. Check the Kibana logs for a data stream creation failure.`
     );
   }
 };

@@ -157,6 +157,41 @@ const discoverKibanaUrl = async (log: ToolingLog): Promise<string> => {
   );
 };
 
+/**
+ * Fail unless Kibana reads the cluster the script is about to write to.
+ *
+ * Nothing downstream can tell the difference on its own: a cluster that already holds the data
+ * stream from an earlier run satisfies every other check, so the seed would land somewhere the
+ * UI never looks and `--clean` would empty the wrong cluster.
+ */
+export const assertSameCluster = async (
+  connection: SeedConnection,
+  esClient: Client,
+  log: ToolingLog
+): Promise<void> => {
+  const { username, password, kibanaUrl, esUrl } = connection;
+  const response = await fetch(`${kibanaUrl}/api/stats?extended=true`, {
+    headers: {
+      authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`,
+    },
+  }).catch(() => undefined);
+
+  const stats = response?.ok ? await response.json().catch(() => undefined) : undefined;
+  const kibanaCluster = stats?.cluster_uuid;
+  if (typeof kibanaCluster !== 'string') {
+    log.debug(`${kibanaUrl} did not report a cluster uuid, so its cluster could not be confirmed.`);
+    return;
+  }
+
+  const { cluster_uuid: esCluster } = await esClient.info();
+  if (kibanaCluster !== esCluster) {
+    throw createFlagError(
+      `${kibanaUrl} reads cluster ${kibanaCluster}, but ${esUrl} is cluster ${esCluster}. ` +
+        `Seeding it would write where the UI never looks. Check --es-url and --kibana-url.`
+    );
+  }
+};
+
 const clusterForKibana = (kibanaUrl: string) =>
   LOCAL_CLUSTER_BY_KIBANA_PORT[new URL(kibanaUrl).port];
 

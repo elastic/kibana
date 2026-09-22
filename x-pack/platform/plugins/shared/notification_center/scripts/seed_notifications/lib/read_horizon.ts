@@ -63,8 +63,18 @@ const request = async (
   const response = await fetch(`${connection.kibanaUrl}${READ_HORIZON_PATH}`, {
     ...init,
     headers: { ...SESSION_HEADERS, cookie },
+  }).catch((error: unknown) => {
+    log.warning(
+      `Could not reach ${connection.kibanaUrl} to update the read horizon: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+    return undefined;
   });
 
+  if (!response) {
+    return false;
+  }
   if (!response.ok) {
     log.warning(`Could not update the read horizon: ${response.status} ${await response.text()}`);
     return false;
