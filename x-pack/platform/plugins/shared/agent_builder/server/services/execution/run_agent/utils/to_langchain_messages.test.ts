@@ -1531,9 +1531,14 @@ describe('prepareMessages — multi-execution (HITL) timelines', () => {
     // user message, ask_user_question tool call + answer, assistant response, next input
     expect(messages).toHaveLength(5);
     expect(messages[0].content as string).toContain('do it');
-    expect(isAIMessage(messages[1]) && messages[1].tool_calls?.[0].name).toBe('ask_user_question');
-    expect(isToolMessage(messages[2])).toBe(true);
-    expect(messages[2].content as string).toContain('"selected_options":["a"]');
+    expect(isAIMessage(messages[1]) && messages[1].tool_calls?.[0]).toMatchObject({
+      id: 'p1',
+      name: 'ask_user_question',
+    });
+    expect(isToolMessage(messages[2]) && messages[2].tool_call_id).toBe('p1');
+    expect(messages[2].content as string).toMatch(
+      /^<tool_result>.*"selected_options":\["a"\].*<\/tool_result>$/
+    );
     expect(messages[3].content).toBe('done');
     expect(messages[4].content).toBe('current');
   });
@@ -1548,10 +1553,8 @@ describe('prepareMessages — multi-execution (HITL) timelines', () => {
     const fromAppendOnly = await prepareMessages({ conversation: baseConversation(appendOnly) });
     const fromSingle = await prepareMessages({ conversation: baseConversation(singleExecution) });
 
-    // The materialized ask_user_question tool call gets a fresh id on every render.
-    const withoutToolCallIds = (messages: unknown) =>
-      JSON.stringify(messages).replace(/[0-9a-f]{8}-[0-9a-f-]{27}/g, '<id>');
-    expect(withoutToolCallIds(fromAppendOnly)).toEqual(withoutToolCallIds(fromSingle));
+    // The materialized ask_user_question tool call is keyed on the prompt id, so both renderings match exactly.
+    expect(JSON.stringify(fromAppendOnly)).toEqual(JSON.stringify(fromSingle));
   });
 
   describe('failed executions', () => {

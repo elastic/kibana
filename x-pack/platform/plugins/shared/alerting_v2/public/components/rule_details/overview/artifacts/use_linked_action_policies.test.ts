@@ -25,9 +25,9 @@ const RULE_TAGS = ['prod'];
 
 const buildItem = (
   category: MatchedActionPolicy['category'],
-  overrides: Partial<MatchedActionPolicy['actionPolicy']> = {}
+  overrides: Partial<MatchedActionPolicy['action_policy']> = {}
 ): MatchedActionPolicy => ({
-  actionPolicy: {
+  action_policy: {
     id: 'policy-1',
     name: 'Policy',
     description: '',
@@ -45,7 +45,7 @@ const buildItem = (
     updatedBy: 'user',
     updatedAt: '2026-01-01T00:00:00.000Z',
     ...overrides,
-  } as MatchedActionPolicy['actionPolicy'],
+  } as MatchedActionPolicy['action_policy'],
   category,
 });
 
@@ -68,12 +68,12 @@ describe('useLinkedActionPolicies', () => {
     expect(mockUseMatchedActionPolicies).toHaveBeenCalledWith({ http: mockHttp, tags: RULE_TAGS });
   });
 
-  it('counts items with category "catch-all" as catch-all and "tags" as matching criteria', () => {
+  it('counts items with category "catch_all" as catch-all and "tags" as matching criteria', () => {
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
       error: null,
       items: [
-        buildItem('catch-all', { id: 'catch-all-1' }),
+        buildItem('catch_all', { id: 'catch-all-1' }),
         buildItem('tags', { id: 'filtered-1' }),
         buildItem('tags', { id: 'filtered-2' }),
       ],

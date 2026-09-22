@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
+import { apiTest } from '../fixtures';
 import { SCHEDULE_TAGS } from '../fixtures/constants';
 import {
   deleteAllWorkflowSchedules,
-  enableWorkflowsFeatureFlag,
   getScheduleAdminRoleDescriptor,
   getSimpleWorkflowSchedule,
   getWorkflowSchedulesApis,
@@ -18,24 +17,25 @@ import {
 
 apiTest.describe('Workflow schedule API - get', { tag: SCHEDULE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
+  let spaceId: string;
 
-  apiTest.beforeAll(async ({ apiServices, samlAuth }) => {
-    await enableWorkflowsFeatureFlag(apiServices);
+  apiTest.beforeAll(async ({ samlAuth, scheduleSpace }) => {
+    spaceId = scheduleSpace.id;
 
     const credentials = await samlAuth.asInteractiveUser(getScheduleAdminRoleDescriptor());
     defaultHeaders = { ...credentials.cookieHeader };
   });
 
-  apiTest.afterEach(async ({ apiClient }) => {
-    await deleteAllWorkflowSchedules(apiClient, defaultHeaders);
+  apiTest.afterEach(async ({ discoveriesApi }) => {
+    await deleteAllWorkflowSchedules(discoveriesApi, defaultHeaders, spaceId);
   });
 
-  apiTest('should get a schedule by id', async ({ apiClient }) => {
-    const apis = getWorkflowSchedulesApis(apiClient, defaultHeaders);
-    const scheduleBody = getSimpleWorkflowSchedule();
+  apiTest('should get a schedule by id', async ({ discoveriesApi }) => {
+    const apis = getWorkflowSchedulesApis(discoveriesApi, defaultHeaders, spaceId);
+    const scheduleBody = getSimpleWorkflowSchedule(spaceId);
 
     const createResult = await apis.createSchedule(scheduleBody);
-    expect(createResult.statusCode).toBe(200);
+    expect(createResult).toHaveStatusCode(200);
     const createdId = (createResult.body as Record<string, unknown>).id as string;
 
     const { body, statusCode } = await apis.getSchedule(createdId);
@@ -49,8 +49,8 @@ apiTest.describe('Workflow schedule API - get', { tag: SCHEDULE_TAGS }, () => {
     expect(schedule.schedule).toStrictEqual({ interval: '24h' });
   });
 
-  apiTest('should return 404 for non-existent schedule', async ({ apiClient }) => {
-    const apis = getWorkflowSchedulesApis(apiClient, defaultHeaders);
+  apiTest('should return 404 for non-existent schedule', async ({ discoveriesApi }) => {
+    const apis = getWorkflowSchedulesApis(discoveriesApi, defaultHeaders, spaceId);
 
     const response = await apis.getSchedule('non-existent-id-12345');
     const body = response.body as { message?: string };
