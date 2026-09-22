@@ -22416,7 +22416,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Creates an AI Index record attached to a data stream or index pattern. Fails with a 409 if an AI Index with the same id already exists.<br/><br/>[Required authorization] Route required privileges: contextEngine:write.
+        Creates an AI Index record attached to a data stream or index. Fails with a 409 if an AI Index with the same id already exists.<br/><br/>[Required authorization] Route required privileges: contextEngine:write.
       operationId: post-context-engine-ai-index
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -23409,7 +23409,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Creates or updates an AI Index record attached to a data stream or index pattern.<br/><br/>[Required authorization] Route required privileges: contextEngine:write.
+        Creates or updates an AI Index record attached to a data stream or index.<br/><br/>[Required authorization] Route required privileges: contextEngine:write.
       operationId: put-context-engine-ai-index-aiindexid
       parameters:
         - description: A required header to protect against CSRF attacks
