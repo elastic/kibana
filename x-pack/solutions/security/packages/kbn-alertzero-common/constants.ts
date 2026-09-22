@@ -21,33 +21,29 @@ export const ALERTZERO_WATCH_URL_TEMPLATE = `${ALERTZERO_WATCHES_URL}/{watchId}`
 export const buildWatchUrl = (watchId: string) =>
   `${ALERTZERO_WATCHES_URL}/${encodeURIComponent(watchId)}`;
 
-/** Global worker / skill catalogs — shared across watches. */
+/** Global worker catalog — shared across watches. */
 export const ALERTZERO_WORKERS_URL = `${ALERTZERO_INTERNAL_URL}/workers` as const;
-export const ALERTZERO_SKILLS_URL = `${ALERTZERO_INTERNAL_URL}/skills` as const;
 
 export const ALERTZERO_WORKER_URL_TEMPLATE = `${ALERTZERO_WORKERS_URL}/{workerId}` as const;
-export const ALERTZERO_SKILL_URL_TEMPLATE = `${ALERTZERO_SKILLS_URL}/{skillId}` as const;
 
 export const buildWorkerUrl = (workerId: string) =>
   `${ALERTZERO_WORKERS_URL}/${encodeURIComponent(workerId)}`;
 
-export const buildSkillUrl = (skillId: string) =>
-  `${ALERTZERO_SKILLS_URL}/${encodeURIComponent(skillId)}`;
+/** Pending proposals for a single action category. */
+export const ALERTZERO_PROPOSALS_CATEGORY_URL =
+  `${ALERTZERO_INTERNAL_URL}/proposals/category/{category}` as const;
 
-export const ALERTZERO_INVESTIGATIONS_URL = `${ALERTZERO_INTERNAL_URL}/investigations` as const;
-export const ALERTZERO_INVESTIGATION_URL_TEMPLATE = `${ALERTZERO_INVESTIGATIONS_URL}/{id}` as const;
-
-export const buildInvestigationUrl = (id: string) =>
-  `${ALERTZERO_INVESTIGATIONS_URL}/${encodeURIComponent(id)}`;
-
-/** Proposals grouped by category — AlertZero landing page. */
-export const ALERTZERO_PROPOSALS_URL = `${ALERTZERO_INTERNAL_URL}/proposals` as const;
+/** Proposals decided in the last 72 h (any non-pending status, including expired). */
+export const ALERTZERO_PROPOSALS_CLOSED_URL = `${ALERTZERO_INTERNAL_URL}/proposals/closed` as const;
 
 /** Action catalog — category-scoped discovery of installed action workflows. */
 export const ALERTZERO_ACTIONS_URL = `${ALERTZERO_INTERNAL_URL}/actions` as const;
 
 /** Agent Builder builtin tool wrapping the action catalog API. */
 export const ALERTZERO_ACTIONS_LIST_TOOL_ID = 'security.alertzero.actions.list' as const;
+
+/** Agent Builder builtin tool that appends a revision to a proposal chain — see elastic/security-team#19289. */
+export const ALERTZERO_PROPOSALS_REVISE_TOOL_ID = 'security.alertzero.proposals.revise' as const;
 
 /**
  * Shared thin AlertZero agent for all Worker `ai.agent` steps.
@@ -81,15 +77,21 @@ export const SYSTEM_SECURITY_WATCH_IDS = [
 export const WATCH_AUTONOMY_LEVELS = ['manual', 'assisted', 'supervised'] as const;
 
 /**
+ * The review-gated subset of the dial: every action passes a human review gate, so the Worker
+ * offers no unattended (supervised) level. Declared once here so narrowing the shared scale can
+ * never leave these declarations behind.
+ */
+export const WATCH_AUTONOMY_REVIEW_GATED = ['manual', 'assisted'] as const;
+
+/**
  * Presentation metadata for the managed watch catalog.
  *
  * The managed five are compile-time constants, so consumers that must not wait for an HTTP round
  * trip — the app's deep links and the solution navigation tree — build their
  * entries from this list rather than from `list_watches`.
  *
- * Deliberately free of schema and sample imports: both consumers are page-load critical, and pulling
- * `WATCHES_SEED` in would drag Zod and the mock samples into that bundle. Live placeholders and
- * `WATCHES_SEED` both take name, colour and lifecycle from here so the two cannot drift.
+ * Deliberately free of schema imports: both consumers are page-load critical, and pulling a schema
+ * in would drag Zod into that bundle. Live placeholders take name, colour and lifecycle from here.
  *
  * Custom (unmanaged) watches are absent by construction — they are discoverable only at runtime.
  */
@@ -97,7 +99,7 @@ export const SYSTEM_SECURITY_WATCH_CATALOG = [
   {
     id: SYSTEM_SECURITY_WATCH_FLOOR_ID,
     deepLinkId: SecurityPageName.alertZeroWatchFloor,
-    name: 'Watch Floor',
+    name: 'Triage Watch',
     color: '#16b3a6',
   },
   {
@@ -116,7 +118,7 @@ export const SYSTEM_SECURITY_WATCH_CATALOG = [
   {
     id: SYSTEM_SECURITY_WATCH_DEEP_ID,
     deepLinkId: SecurityPageName.alertZeroWatchDeep,
-    name: 'Deep Watch',
+    name: 'Forensics Watch',
     color: '#8b5cf6',
     isBeta: true,
   },
@@ -213,9 +215,32 @@ export const WORKER_SCHEDULE_UNITS = ['m', 'h', 'd'] as const;
 
 export type WorkerScheduleUnit = (typeof WORKER_SCHEDULE_UNITS)[number];
 
+/**
+ * Inference feature registry ids. Operators pick the model for each tier in Stack Management >
+ * Model Settings, and Worker `ai.agent` steps resolve through them with
+ * `connector-id-by-feature` instead of naming an endpoint themselves.
+ *
+ * The axis is the kind of call, not the Worker. One Worker can span several tiers — Attack
+ * Discovery generates and then investigates, three `workflow.execute` hops apart — and a step
+ * names its own tier wherever it sits in the call tree, so nothing has to be threaded through
+ * `workflow.execute` inputs. A new Worker usually costs no new tier.
+ *
+ * Tiers are named for the execution profile a model needs rather than the task it happens to serve
+ * today, so a step is not pushed toward the wrong rung by a name that reads like a job title: the
+ * same fast model that gates an alert also enriches a threat report. Other Security features are
+ * expected to pin to these rather than register per-feature rows of their own.
+ */
+export const ALERTZERO_INFERENCE_PARENT_FEATURE_ID = 'alertzero_parent' as const;
+/** Low latency, high volume, lightweight judgment. */
+export const ALERTZERO_FAST_INFERENCE_FEATURE_ID = 'alertzero_fast' as const;
+/** Deeper single-shot thinking on a self-contained task. */
+export const ALERTZERO_REASONING_INFERENCE_FEATURE_ID = 'alertzero_reasoning' as const;
+/** Multi-step work over tools and iteration, where cost multiplies by the round count. */
+export const ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID = 'alertzero_agentic' as const;
+
+/** Agent Builder conversation template ids. A proposal is an attachment, not a template. */
 export const TEMPLATE_ID_INVESTIGATION = 'investigation' as const;
-export const TEMPLATE_ID_PROPOSAL = 'proposal' as const;
-export const TEMPLATE_ID_INCIDENT = 'incident' as const;
+export const TEMPLATE_ID_ESCALATION = 'escalation' as const;
 
 export const API_VERSIONS = {
   internal: {

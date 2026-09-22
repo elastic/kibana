@@ -60,7 +60,12 @@ export function registerSanitizeRoute(
     },
     async (ctx, req, res) => {
       try {
-        const result = await sanitize(getCachedDashboardStateSchema(), req.body);
+        const typeRegistry = (await ctx.core).savedObjects.typeRegistry;
+        const result = await sanitize(
+          getCachedDashboardStateSchema(),
+          req.body,
+          (type) => typeRegistry.getType(type)?.management?.displayName ?? type
+        );
         return res.ok({ body: result });
       } catch (e) {
         const message = e.stack ?? e.message;

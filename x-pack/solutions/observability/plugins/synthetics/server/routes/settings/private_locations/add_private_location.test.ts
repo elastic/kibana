@@ -234,19 +234,23 @@ describe('PrivateLocationSchema isAgentSharding', () => {
   const base = { label: 'loc', agentPolicyId: 'ap' };
 
   it('accepts a boolean flag', () => {
-    expect(PrivateLocationSchema.validate({ ...base, isAgentSharding: true })).toEqual(
+    expect(PrivateLocationSchema.parse({ ...base, isAgentSharding: true })).toEqual(
       expect.objectContaining({ isAgentSharding: true })
     );
-    expect(PrivateLocationSchema.validate({ ...base, isAgentSharding: false })).toEqual(
+    expect(PrivateLocationSchema.parse({ ...base, isAgentSharding: false })).toEqual(
       expect.objectContaining({ isAgentSharding: false })
     );
   });
 
   it('allows omitting the flag so existing clients stay classic', () => {
-    expect(PrivateLocationSchema.validate(base).isAgentSharding).toBeUndefined();
+    expect(PrivateLocationSchema.parse(base).isAgentSharding).toBeUndefined();
   });
 
   it('rejects a non-boolean flag', () => {
-    expect(() => PrivateLocationSchema.validate({ ...base, isAgentSharding: 'yes' })).toThrow();
+    expect(() => PrivateLocationSchema.parse({ ...base, isAgentSharding: 'yes' })).toThrow();
+  });
+
+  it('rejects unknown keys so a sharding typo cannot persist a classic location', () => {
+    expect(() => PrivateLocationSchema.parse({ ...base, isAgentShardng: true })).toThrow();
   });
 });

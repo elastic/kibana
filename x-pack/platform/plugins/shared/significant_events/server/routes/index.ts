@@ -21,7 +21,6 @@ import { internalKIQueriesRoutes } from './internal/knowledge_indicators/queries
 import { internalKIQueryOccurrencesRoutes } from './internal/knowledge_indicators/query_occurrences/route';
 import { internalKIResetKisRoutes } from './internal/knowledge_indicators/reset_kis/route';
 import { internalMaintenanceRoutes } from './internal/maintenance/route';
-import { internalMemoryRoutes } from '../memory_and_investigation/routes/route';
 import { internalRunQuotaRoutes } from './internal/run_quotas/route';
 import { internalCostRoutes } from './internal/cost/route';
 import { reconcileRoutes } from './internal/knowledge_indicators/reconcile_route';
@@ -46,7 +45,6 @@ export const significantEventsRouteRepository = {
   ...internalKIQueryOccurrencesRoutes,
   ...internalKIResetKisRoutes,
   ...internalMaintenanceRoutes,
-  ...internalMemoryRoutes,
   ...internalRunQuotaRoutes,
   ...internalCostRoutes,
   ...reconcileRoutes,
