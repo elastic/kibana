@@ -36,6 +36,28 @@ export const OverviewPingCodec = t.intersection([
   }),
 ]);
 
+// A location of a local saved-object monitor whose winning ping was stored on
+// a linked cluster. The row stays local (`monitorQueryId` only); this is how
+// the chart can include that ping without matching every remote copy.
+export const LinkedRemoteLocationCodec = t.interface({
+  remoteName: t.string,
+  locationId: t.string,
+});
+
+export const OverviewStatusFilterIdCodec = t.intersection([
+  t.interface({
+    monitorQueryId: t.string,
+  }),
+  t.partial({
+    remoteName: t.string,
+    // Heartbeat / CCS rows are one location each. Without this, a Down
+    // filter on one location of a shared `monitorQueryId` would also match
+    // that monitor's Up pings at another location (and vice versa).
+    locationId: t.string,
+    linkedRemoteLocations: t.array(LinkedRemoteLocationCodec),
+  }),
+]);
+
 export const OverviewStatusMetaDataCodec = t.intersection([
   t.interface({
     monitorQueryId: t.string,
@@ -84,6 +106,7 @@ export const OverviewStatusMetaDataCodec = t.intersection([
     urls: t.string,
     maintenanceWindows: t.array(t.string),
     remote: remoteMonitorInfoSchema,
+    linkedRemoteLocations: t.array(LinkedRemoteLocationCodec),
     // Provenance for monitors that have no Synthetics saved object and are
     // therefore read-only in the app. `heartbeat` marks a monitor discovered
     // purely from local ping data (Heartbeat / Elastic Agent autodiscovery),
@@ -108,7 +131,11 @@ export const OverviewStatusCodec = t.interface({
   disabledConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
   enabledMonitorQueryIds: t.array(t.string),
   disabledMonitorQueryIds: t.array(t.string),
-  allIds: t.array(t.string),
+  // Same identity as `upIds`/`downIds`/etc — `monitorQueryId` plus `remoteName`
+  // / `locationId` when the row is a one-location CCS or Heartbeat monitor.
+  // A string list cannot tell two copies of the same query id apart, and the
+  // activity chart's search / AND-location `terms` query is built from this.
+  allIds: t.array(OverviewStatusFilterIdCodec),
 });
 
 export const PaginatedOverviewStatusCodec = t.intersection([
@@ -118,6 +145,20 @@ export const PaginatedOverviewStatusCodec = t.intersection([
     total: t.number,
     page: t.number,
     perPage: t.number,
+    // Complete (unpaginated) monitor id sets per status bucket — `upConfigs`/
+    // `downConfigs`/etc above are sliced to just the current page here, same
+    // as `configs`, so a consumer that needs "every monitor id currently up
+    // (or down/pending/stale)" — e.g. to scope another query to the active
+    // `statusFilter` — can't get it from those. Mirrors `allIds`, which
+    // already does this for the (status-independent) location/tag/schedule
+    // filters. `remoteName` and `locationId` keep two CCS/Heartbeat copies
+    // of the same `monitorQueryId` distinguishable — a string id list cannot,
+    // and a `monitor.id` terms query would then mix an Up copy into a
+    // Down-filtered chart (and vice versa).
+    upIds: t.array(OverviewStatusFilterIdCodec),
+    downIds: t.array(OverviewStatusFilterIdCodec),
+    pendingIds: t.array(OverviewStatusFilterIdCodec),
+    staleIds: t.array(OverviewStatusFilterIdCodec),
   }),
 ]);
 
@@ -145,6 +186,7 @@ export const OverviewStaleStatusCodec = t.interface({
 });
 
 export type OverviewPing = t.TypeOf<typeof OverviewPingCodec>;
+export type OverviewStatusFilterId = t.TypeOf<typeof OverviewStatusFilterIdCodec>;
 export type OverviewStatus = t.TypeOf<typeof OverviewStatusCodec>;
 export type OverviewStatusState = t.TypeOf<typeof OverviewStatusCodec>;
 export type PaginatedOverviewStatus = t.TypeOf<typeof PaginatedOverviewStatusCodec>;
