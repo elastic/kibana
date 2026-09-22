@@ -17,11 +17,9 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
+import { CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
-import {
-  CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID,
-  CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID,
-} from '../common/constants';
+import { CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID } from '../common/constants';
 import { apiPrivileges } from '../common/features';
 import type {
   ContextEnginePluginSetup,

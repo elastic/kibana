@@ -8,9 +8,11 @@
 import { coreMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
-import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
-import { CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID } from '@kbn/context-engine-plugin/common/constants';
 import { apiPrivileges } from '@kbn/context-engine-plugin/common/features';
+import {
+  CONTEXT_ENGINE_ENABLED_SETTING_ID,
+  CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID,
+} from '@kbn/management-settings-ids';
 import { assertContextEngineWriteAccess } from './assert_context_engine_write_access';
 
 describe('assertContextEngineWriteAccess', () => {

@@ -99,7 +99,7 @@ describe('remember tool', () => {
     const tool = createTool();
 
     expect(tool.id).toBe(CONTEXT_ENGINE_REMEMBER_TOOL_ID);
-    expect(tool.availability?.cacheMode).toBe('space');
+    expect(tool.availability?.cacheMode).toBe('none');
     expect(tool.confirmation).toBeUndefined();
     expect(tool.schema.safeParse(params).success).toBe(true);
     expect(tool.schema.safeParse({ ...params, expires_at: null }).success).toBe(true);
