@@ -20,6 +20,28 @@ import { parseSignificantSecurityEventData } from './types';
 import type { SignificantSecurityEventAttachment } from './types';
 import type { SignificantSecurityEventInlineContentProps } from './significant_security_event_inline_content';
 
+const parsedDataCache = new WeakMap<
+  NonNullable<SignificantSecurityEventAttachment['data']>,
+  ReturnType<typeof parseSignificantSecurityEventData>
+>();
+
+/**
+ * `parseSignificantSecurityEventData`, memoized per attachment payload object. getLabel,
+ * getHeader, and getActionButtons each need the parsed shape for the same attachment within
+ * one render pass; this avoids re-running the zod parse three times for that one payload.
+ */
+const parseOnce = (
+  data: SignificantSecurityEventAttachment['data']
+): ReturnType<typeof parseSignificantSecurityEventData> => {
+  if (!data) {
+    return parseSignificantSecurityEventData(data);
+  }
+  if (!parsedDataCache.has(data)) {
+    parsedDataCache.set(data, parseSignificantSecurityEventData(data));
+  }
+  return parsedDataCache.get(data);
+};
+
 const DEFAULT_LABEL = i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.label', {
   defaultMessage: 'Significant Security Event',
 });
@@ -72,7 +94,7 @@ export const createSignificantSecurityEventAttachmentDefinition = ({
   // which finding it is. Lead with the hit count when we have one.
   getLabel: (attachment) => {
     const data = attachment?.data;
-    const parsed = parseSignificantSecurityEventData(data);
+    const parsed = parseOnce(data);
     const title = data?.attachmentLabel ?? data?.title ?? DEFAULT_LABEL;
     const totalHits = parsed?.hunt_result?.tier1.counts.total_hits;
     if (typeof totalHits === 'number') {
@@ -86,7 +108,7 @@ export const createSignificantSecurityEventAttachmentDefinition = ({
   getIcon: () => 'securitySignalDetected',
   getHeader: ({ attachment }) => {
     const data = attachment?.data;
-    const parsed = parseSignificantSecurityEventData(data);
+    const parsed = parseOnce(data);
     const subtitle = parsed?.report_id
       ? joinSubtitle(FROM_REPORT_LABEL(parsed.report_id), parsed.capability)
       : joinSubtitle(data?.source_watch, data?.capability);
@@ -112,7 +134,7 @@ export const createSignificantSecurityEventAttachmentDefinition = ({
     <LazySignificantSecurityEventInlineContent {...props} navigation={navigation} />
   ),
   getActionButtons: ({ attachment }) => {
-    const parsed = parseSignificantSecurityEventData(attachment?.data);
+    const parsed = parseOnce(attachment?.data);
     if (!parsed) {
       return [];
     }

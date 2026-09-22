@@ -6,6 +6,7 @@
  */
 
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import { threatAttachmentDataSchema } from '../../../../common/threat_attachment_schema';
 import type { ThreatAttachmentData } from '../../../../common/threat_attachment_schema';
 
 export type { ThreatAttachmentData } from '../../../../common/threat_attachment_schema';
@@ -13,15 +14,11 @@ export type { ThreatAttachmentData } from '../../../../common/threat_attachment_
 export type ThreatAttachment = Attachment<string, ThreatAttachmentData>;
 
 /**
- * Structural check for the fields the renderer actually reads. Deliberately
- * permissive on the optional captured fields (old/malformed attachments
- * should still render with whatever fallback data is usable) but requires a
- * non-empty `report_id`, since that is the only field the live fetch needs.
+ * Structural check for the fields the renderer actually reads: requires a non-empty
+ * `report_id`, since that is the only field the live fetch needs. Deliberately permissive
+ * on the optional captured fields (old/malformed attachments should still render with
+ * whatever fallback data is usable); `.safeParse` accepts a payload missing those.
  */
 export const isValidThreatAttachmentData = (
   candidate: unknown
-): candidate is ThreatAttachmentData => {
-  if (!candidate || typeof candidate !== 'object') return false;
-  const record = candidate as Record<string, unknown>;
-  return typeof record.report_id === 'string' && record.report_id.length > 0;
-};
+): candidate is ThreatAttachmentData => threatAttachmentDataSchema.safeParse(candidate).success;

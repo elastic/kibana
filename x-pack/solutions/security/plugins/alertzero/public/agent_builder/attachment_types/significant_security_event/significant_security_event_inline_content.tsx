@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { groupBy } from 'lodash';
 import { css } from '@emotion/react';
 import {
   EuiAccordion,
@@ -212,15 +213,9 @@ const IndicatorList: React.FC<{
     (indicator) => indicator.type !== 'ioc' && indicator.type !== 'technique'
   );
 
-  const iocsByType = new Map<string, SecurityKnowledgeIndicator[]>();
-  for (const indicator of iocIndicators) {
-    const iocType = indicator.ioc?.type ?? 'unknown';
-    const bucket = iocsByType.get(iocType) ?? [];
-    bucket.push(indicator);
-    iocsByType.set(iocType, bucket);
-  }
+  const iocsByType = groupBy(iocIndicators, (indicator) => indicator.ioc?.type ?? 'unknown');
 
-  const rows: LabeledBadgeTableRow[] = [...iocsByType.entries()].map(([iocType, group]) => ({
+  const rows: LabeledBadgeTableRow[] = Object.entries(iocsByType).map(([iocType, group]) => ({
     id: iocType,
     label: iocType,
     values: (
@@ -272,13 +267,8 @@ const IndicatorList: React.FC<{
     });
   }
 
-  const otherByType = new Map<string, SecurityKnowledgeIndicator[]>();
-  for (const indicator of otherIndicators) {
-    const bucket = otherByType.get(indicator.type) ?? [];
-    bucket.push(indicator);
-    otherByType.set(indicator.type, bucket);
-  }
-  for (const [indicatorType, group] of otherByType.entries()) {
+  const otherByType = groupBy(otherIndicators, (indicator) => indicator.type);
+  for (const [indicatorType, group] of Object.entries(otherByType)) {
     rows.push({
       id: indicatorType,
       label: indicatorType,
@@ -364,10 +354,12 @@ const HypothesisSection: React.FC<{ hypothesis: string }> = ({ hypothesis }) => 
   }
 
   return (
-    <EuiText size="s">
-      <strong>{title}</strong>
-      <p css={cellStyles}>{hypothesis}</p>
-    </EuiText>
+    <>
+      <SectionHeading>{title}</SectionHeading>
+      <EuiText size="s">
+        <p css={cellStyles}>{hypothesis}</p>
+      </EuiText>
+    </>
   );
 };
 
@@ -733,13 +725,11 @@ export const SignificantSecurityEventInlineContent: React.FC<
       {parsed.entities.length > 0 && (
         <>
           <EuiSpacer size="s" />
-          <EuiText size="s">
-            <strong>
-              {i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.entities', {
-                defaultMessage: 'Entities',
-              })}
-            </strong>
-          </EuiText>
+          <SectionHeading>
+            {i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.entities', {
+              defaultMessage: 'Entities',
+            })}
+          </SectionHeading>
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
             {parsed.entities.map((entity, index) => (
               <EuiFlexItem grow={false} key={`${entity.field}:${entity.value}:${index}`}>

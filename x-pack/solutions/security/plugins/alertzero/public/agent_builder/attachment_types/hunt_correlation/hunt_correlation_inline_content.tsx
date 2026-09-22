@@ -51,20 +51,12 @@ interface DiamondScoreRow {
 }
 
 const groupDiamondScoresByReport = (diamondScores: DiamondScore[]): DiamondScoreRow[] => {
-  const rowsByReportId = new Map<string, DiamondScoreRow>();
-  for (const score of diamondScores) {
-    let row = rowsByReportId.get(score.related_report_id);
-    if (!row) {
-      row = {
-        id: score.related_report_id,
-        relatedReportId: score.related_report_id,
-        scoresByVertex: {},
-      };
-      rowsByReportId.set(score.related_report_id, row);
-    }
-    row.scoresByVertex[score.vertex] = score.score;
-  }
-  return [...rowsByReportId.values()];
+  const scoresByReportId = groupBy(diamondScores, (score) => score.related_report_id);
+  return Object.entries(scoresByReportId).map(([relatedReportId, scores]) => ({
+    id: relatedReportId,
+    relatedReportId,
+    scoresByVertex: Object.fromEntries(scores.map((score) => [score.vertex, score.score])),
+  }));
 };
 
 const renderAnchorValue = ({
