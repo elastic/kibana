@@ -16,7 +16,6 @@ import { firstValueFrom, of, Subject, toArray } from 'rxjs';
 import { internalApiPath, publicApiPath } from '../../common/constants';
 import {
   callbackConversePayloadSchema,
-  chatPayloadSchema,
   conversePayloadSchema,
   promptResponseEntrySchema,
   registerChatRoutes,
@@ -146,35 +145,6 @@ describe('conversePayloadSchema', () => {
         configuration_overrides: { enable_elastic_capabilities: 'yes' },
       })
     ).toThrow(/enable_elastic_capabilities/);
-  });
-});
-
-describe('chatPayloadSchema', () => {
-  it('accepts trigger_mode for sync chat requests', () => {
-    expect(chatPayloadSchema.validate({ input: 'hi' }).trigger_mode).toBe('always');
-    expect(
-      chatPayloadSchema.validate({
-        trigger_mode: 'never',
-        conversation_id: '00000000-0000-4000-8000-000000000001',
-        input: 'hi',
-      })
-    ).toMatchObject({ trigger_mode: 'never' });
-  });
-
-  it('rejects unsupported trigger_mode values', () => {
-    expect(() => chatPayloadSchema.validate({ trigger_mode: 'auto' })).toThrow();
-  });
-
-  it('accepts execution options alongside trigger_mode never', () => {
-    expect(() =>
-      chatPayloadSchema.validate({
-        trigger_mode: 'never',
-        conversation_id: '00000000-0000-4000-8000-000000000001',
-        input: 'hi',
-        connector_id: 'connector-1',
-        read_only: true,
-      })
-    ).not.toThrow();
   });
 });
 

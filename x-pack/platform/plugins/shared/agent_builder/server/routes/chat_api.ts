@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import type { Observable } from 'rxjs';
 import { firstValueFrom, toArray } from 'rxjs';
 import type { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream, cloudProxyBufferSize } from '@kbn/sse-utils-server';
 import type { ChatRequestBodyPayload, ChatConverseResponse } from '../../common/http_api/chat';
+import { ChatTriggerMode } from '../../common/http_api/chat';
 import { chatApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
 import type { RouteDependencies } from './types';
@@ -17,7 +19,20 @@ import { getHandlerWrapper } from './wrap_handler';
 import { AGENT_SOCKET_TIMEOUT_MS, getSSEResponseHeaders } from './utils';
 import { getConverseHelpers, filterEventsNativeApiEvents } from './converse_helpers';
 import { findConversationEvent } from '../services/execution/utils/chat_response';
-import { chatPayloadSchema } from './chat';
+import { conversePayloadSchema } from './chat';
+
+export const chatPayloadSchema = conversePayloadSchema.extends({
+  trigger_mode: schema.oneOf(
+    [schema.literal(ChatTriggerMode.Always), schema.literal(ChatTriggerMode.Never)],
+    {
+      defaultValue: ChatTriggerMode.Always,
+      meta: {
+        description:
+          'Use never to append a user message to an existing conversation without executing the agent. Only conversation_id, input and attachments are read; the execution options are ignored.',
+      },
+    }
+  ),
+});
 
 /** Events-native chat API */
 export function registerChatApiRoutes({

@@ -9,7 +9,7 @@ import { firstValueFrom, of, Subject, throwError, toArray } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { ChatEventType, TimelineEventType } from '@kbn/agent-builder-common';
 import { chatApiPath } from '../../common/constants';
-import { registerChatApiRoutes } from './chat_api';
+import { chatPayloadSchema, registerChatApiRoutes } from './chat_api';
 
 const mockObservableIntoEventSourceStream = jest.fn();
 jest.mock('@kbn/sse-utils-server', () => ({
@@ -378,5 +378,34 @@ describe('user message requests', () => {
 
     const [{ params }] = executeAgent.mock.calls[0];
     expect(params).not.toHaveProperty('triggerMode');
+  });
+});
+
+describe('chatPayloadSchema', () => {
+  it('accepts trigger_mode for sync chat requests', () => {
+    expect(chatPayloadSchema.validate({ input: 'hi' }).trigger_mode).toBe('always');
+    expect(
+      chatPayloadSchema.validate({
+        trigger_mode: 'never',
+        conversation_id: '00000000-0000-4000-8000-000000000001',
+        input: 'hi',
+      })
+    ).toMatchObject({ trigger_mode: 'never' });
+  });
+
+  it('rejects unsupported trigger_mode values', () => {
+    expect(() => chatPayloadSchema.validate({ trigger_mode: 'auto' })).toThrow();
+  });
+
+  it('accepts execution options alongside trigger_mode never', () => {
+    expect(() =>
+      chatPayloadSchema.validate({
+        trigger_mode: 'never',
+        conversation_id: '00000000-0000-4000-8000-000000000001',
+        input: 'hi',
+        connector_id: 'connector-1',
+        read_only: true,
+      })
+    ).not.toThrow();
   });
 });
