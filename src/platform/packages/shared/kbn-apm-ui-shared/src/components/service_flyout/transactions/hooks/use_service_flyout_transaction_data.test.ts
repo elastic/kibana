@@ -320,6 +320,55 @@ describe('useServiceFlyoutTransactionData', () => {
       await waitFor(() => expect(http.get).toHaveBeenCalledTimes(2));
     });
 
+    it('treats an unsearched maxCountExceeded result as unable to prove absence while search is active', async () => {
+      let resolveServerSearch: (value: object) => void;
+      const serverSearchPromise = new Promise<object>((resolve) => {
+        resolveServerSearch = resolve;
+      });
+      let mainCall = 0;
+
+      const http = {
+        get: jest.fn().mockImplementation((url: string) => {
+          if (url.includes('detailed_statistics')) {
+            return Promise.resolve(EMPTY_DETAILED_RESPONSE);
+          }
+          mainCall += 1;
+          if (mainCall === 1) {
+            // Truncated top groups without the searched transaction — a follow-up
+            // server search will run once maxCountExceeded flips.
+            return Promise.resolve({
+              transactionGroups: [TRANSACTION_GROUPS[1]],
+              maxCountExceeded: true,
+              hasActiveAlerts: false,
+            });
+          }
+          return serverSearchPromise;
+        }),
+      } as unknown as HttpStart;
+
+      const { result } = renderHook(
+        ({ searchQuery }: { searchQuery: string }) =>
+          useServiceFlyoutTransactionData({ http, ...BASE_PARAMS, searchQuery }),
+        { initialProps: { searchQuery: 'orders' } }
+      );
+
+      await waitFor(() => expect(result.current.maxCountExceeded).toBe(true));
+      // Intermediate unsearched response must not look conclusive while search is active.
+      expect(result.current.isServerSearch).toBe(true);
+      expect(result.current.presenceItems.map((item) => item.name)).toEqual(['POST /api/checkout']);
+
+      resolveServerSearch!({
+        transactionGroups: [TRANSACTION_GROUPS[0]],
+        maxCountExceeded: true,
+        hasActiveAlerts: false,
+      });
+
+      await waitFor(() =>
+        expect(result.current.items.map((item) => item.name)).toEqual(['GET /api/orders'])
+      );
+      expect(result.current.isServerSearch).toBe(true);
+    });
+
     it('keeps isServerSearch true for the retained result while clearing search reloads', async () => {
       let resolveUnsearchedMain: (value: object) => void;
       const unsearchedMainPromise = new Promise<object>((resolve) => {

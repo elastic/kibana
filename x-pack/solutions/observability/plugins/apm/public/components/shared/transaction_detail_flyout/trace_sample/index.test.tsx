@@ -98,6 +98,8 @@ describe('TransactionDetailFlyoutTraceSample', () => {
       end: '2026-08-21T10:43:35.610Z',
       traceId: 'trace-1',
       entryTransactionId: 'tx-1',
+      serviceName: 'checkout',
+      refreshToken: undefined,
     });
     expect(screen.getByTestId('transactionDetailFlyoutSection-traceSample')).toBeInTheDocument();
     expect(screen.getByTestId('transactionDetailFlyoutTraceSampleTitle')).toHaveTextContent(

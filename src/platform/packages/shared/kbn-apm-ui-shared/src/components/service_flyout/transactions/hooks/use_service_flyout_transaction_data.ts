@@ -301,10 +301,13 @@ export function useServiceFlyoutTransactionData({
     /** Full list before client-side search. Server search still narrows this list. */
     presenceItems: allItems,
     /**
-     * True when the retained main-stats result was fetched with a non-empty server
-     * search — not when the live input has a query (clearing search keeps the old
-     * narrowed rows until the unsearched request settles).
+     * True when the retained list cannot prove absence under the live search:
+     * either it was fetched with a server search, or it hit maxCountExceeded while
+     * a search is active (a follow-up server-search request is pending / about to run).
+     * Clearing search keeps appliedServerSearchQuery until the unsearched request settles.
      */
-    isServerSearch: Boolean(mainResponse?.appliedServerSearchQuery),
+    isServerSearch:
+      Boolean(mainResponse?.appliedServerSearchQuery) ||
+      Boolean(searchQuery && mainResponse?.maxCountExceeded),
   };
 }

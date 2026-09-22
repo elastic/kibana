@@ -31,6 +31,7 @@ export function useTransactionDetailFlyoutDistributionChartData({
     deps: {
       core: { notifications },
     },
+    refreshToken,
   } = useTransactionDetailFlyoutContext();
 
   const params = useMemo(
@@ -52,6 +53,7 @@ export function useTransactionDetailFlyoutDistributionChartData({
     error: overallLatencyError,
   } = useFetcher(
     (callApmApi) => {
+      void refreshToken;
       if (params.serviceName && params.environment && params.start && params.end) {
         return callApmApi('POST /internal/apm/latency/overall_distribution/transactions', {
           params: {
@@ -64,7 +66,7 @@ export function useTransactionDetailFlyoutDistributionChartData({
         });
       }
     },
-    [params]
+    [params, refreshToken]
   );
 
   useEffect(() => {
@@ -90,6 +92,7 @@ export function useTransactionDetailFlyoutDistributionChartData({
 
   const { data: errorHistogramData = {}, error: errorHistogramError } = useFetcher(
     (callApmApi) => {
+      void refreshToken;
       if (
         params.serviceName &&
         params.environment &&
@@ -117,7 +120,7 @@ export function useTransactionDetailFlyoutDistributionChartData({
         });
       }
     },
-    [params, overallLatencyData.durationMin, overallLatencyData.durationMax]
+    [params, overallLatencyData.durationMin, overallLatencyData.durationMax, refreshToken]
   );
 
   useEffect(() => {

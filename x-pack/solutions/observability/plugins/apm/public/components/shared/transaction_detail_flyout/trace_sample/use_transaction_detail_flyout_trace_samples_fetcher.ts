@@ -24,6 +24,7 @@ export function useTransactionDetailFlyoutTraceSamplesFetcher({
     deps: {
       core: { notifications },
     },
+    refreshToken,
   } = useTransactionDetailFlyoutContext();
 
   const fetchParams = useMemo(
@@ -41,6 +42,7 @@ export function useTransactionDetailFlyoutTraceSamplesFetcher({
 
   const { data, status, error } = useFetcher(
     (callApmApi) => {
+      void refreshToken;
       if (
         fetchParams.serviceName &&
         fetchParams.start &&
@@ -65,7 +67,7 @@ export function useTransactionDetailFlyoutTraceSamplesFetcher({
         });
       }
     },
-    [fetchParams]
+    [fetchParams, refreshToken]
   );
 
   useEffect(() => {

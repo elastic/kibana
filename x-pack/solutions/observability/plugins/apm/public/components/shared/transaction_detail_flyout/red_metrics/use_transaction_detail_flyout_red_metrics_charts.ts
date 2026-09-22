@@ -14,6 +14,7 @@ import { getLatencyChartSelector } from '../../../../selectors/latency_chart_sel
 import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 import { ChartType, getTimeSeriesColor } from '../../charts/helper/get_timeseries_color';
+import { useTransactionDetailFlyoutContext } from '../transaction_detail_flyout_context';
 import type { TransactionDetailFlyoutFilters } from '../types';
 
 const THROUGHPUT_INITIAL_STATE: APIReturnType<'GET /internal/apm/services/{serviceName}/throughput'> =
@@ -45,6 +46,7 @@ export function useTransactionDetailFlyoutRedMetricsCharts({
 }: TransactionDetailFlyoutFilters & {
   latencyAggregationType: LatencyAggregationType;
 }) {
+  const { refreshToken } = useTransactionDetailFlyoutContext();
   const kuery = '';
 
   const preferred = usePreferredDataSourceAndBucketSize({
@@ -64,6 +66,8 @@ export function useTransactionDetailFlyoutRedMetricsCharts({
     error: latencyError,
   } = useFetcher(
     (callApmApi) => {
+      // Absolute ranges keep the same start/end on refresh — include the token so we re-fetch.
+      void refreshToken;
       if (serviceName && transactionType && start && end && latencyAggregationType && preferred) {
         return callApmApi('GET /internal/apm/services/{serviceName}/transactions/charts/latency', {
           params: {
@@ -96,6 +100,7 @@ export function useTransactionDetailFlyoutRedMetricsCharts({
       kuery,
       shouldUseDurationSummary,
       transactionName,
+      refreshToken,
     ]
   );
 
@@ -115,6 +120,7 @@ export function useTransactionDetailFlyoutRedMetricsCharts({
     error: throughputError,
   } = useFetcher(
     (callApmApi) => {
+      void refreshToken;
       if (serviceName && transactionType && start && end && preferred) {
         return callApmApi('GET /internal/apm/services/{serviceName}/throughput', {
           params: {
@@ -134,7 +140,17 @@ export function useTransactionDetailFlyoutRedMetricsCharts({
         });
       }
     },
-    [environment, kuery, serviceName, start, end, transactionType, transactionName, preferred]
+    [
+      environment,
+      kuery,
+      serviceName,
+      start,
+      end,
+      transactionType,
+      transactionName,
+      preferred,
+      refreshToken,
+    ]
   );
 
   const {
@@ -143,6 +159,7 @@ export function useTransactionDetailFlyoutRedMetricsCharts({
     error: errorRateError,
   } = useFetcher(
     (callApmApi) => {
+      void refreshToken;
       if (serviceName && transactionType && start && end && preferred) {
         return callApmApi(
           'GET /internal/apm/services/{serviceName}/transactions/charts/error_rate',
@@ -165,7 +182,17 @@ export function useTransactionDetailFlyoutRedMetricsCharts({
         );
       }
     },
-    [environment, kuery, serviceName, start, end, transactionType, transactionName, preferred]
+    [
+      environment,
+      kuery,
+      serviceName,
+      start,
+      end,
+      transactionType,
+      transactionName,
+      preferred,
+      refreshToken,
+    ]
   );
 
   const { currentPeriodColor: throughputColor } = getTimeSeriesColor(ChartType.THROUGHPUT);

@@ -107,19 +107,17 @@ export function ServiceFlyout({
   const titleId = useGeneratedHtmlId({ prefix: 'serviceFlyoutTitle' });
   const [flyoutEnvironment, setFlyoutEnvironment] = useState(environment);
   const [flyoutRange, setFlyoutRange] = useState({ rangeFrom, rangeTo });
-  const { start, end, refreshTimeRange } = useTimeRange({
+  const { start, end } = useTimeRange({
     rangeFrom: flyoutRange.rangeFrom,
     rangeTo: flyoutRange.rangeTo,
   });
   const [flyoutTransactionType, setFlyoutTransactionType] = useState(transactionType ?? '');
   const [refreshToken, setRefreshToken] = useState(Date.now());
 
+  // Local only — do not call refreshTimeRange() (app-wide timeRangeId / unrelated page fetchers).
   const onRefresh = useCallback(() => {
     setRefreshToken(Date.now());
-    // Bump APM timeRangeId so useFetcher-based charts/traces reload without needing
-    // refreshToken as a fake dependency in those hooks. Lens still uses refreshToken.
-    refreshTimeRange();
-  }, [refreshTimeRange]);
+  }, []);
 
   const capabilities = useServiceFlyoutCapabilities({
     serviceName: service.name,

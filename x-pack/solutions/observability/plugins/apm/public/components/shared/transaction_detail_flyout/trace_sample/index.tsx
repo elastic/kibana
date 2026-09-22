@@ -30,7 +30,7 @@ import { TransactionDetailFlyoutTraceSampleTimeline } from './trace_sample_timel
 import { useTransactionDetailFlyoutTraceSamplesFetcher } from './use_transaction_detail_flyout_trace_samples_fetcher';
 
 export function TransactionDetailFlyoutTraceSample() {
-  const { filters, openFullTraceFlyout } = useTransactionDetailFlyoutContext();
+  const { filters, openFullTraceFlyout, refreshToken } = useTransactionDetailFlyoutContext();
   const { serviceName, start, end } = filters;
 
   const traceSamplesFetchResult = useTransactionDetailFlyoutTraceSamplesFetcher(filters);
@@ -51,6 +51,8 @@ export function TransactionDetailFlyoutTraceSample() {
     end,
     traceId,
     entryTransactionId,
+    serviceName,
+    refreshToken,
   });
 
   const isLoading =
