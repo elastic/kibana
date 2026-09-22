@@ -34,6 +34,7 @@ import type {
   SkillCreationOrigin,
   SkillInvocationOrigin,
   SkillSolutionArea,
+  TelemetryConversationOrigin,
 } from '@kbn/agent-builder-common/telemetry/agent_builder_events';
 import type { ModelProvider } from '@kbn/inference-common';
 import { normalizeErrorType, sanitizeForCounterName } from './error_utils';
@@ -325,6 +326,7 @@ export class AnalyticsService {
           attachments,
           conversation_id: conversationId,
           execution_id: executionId,
+          origin: round.origin?.type,
           input_tokens: round.model_usage.input_tokens,
           cached_input_tokens: round.model_usage.cached_input_tokens,
           llm_calls: round.model_usage.llm_calls,
@@ -357,6 +359,7 @@ export class AnalyticsService {
     error,
     modelProvider,
     roundId,
+    roundOrigin,
   }: {
     agentId: string;
     conversationId?: string;
@@ -364,6 +367,7 @@ export class AnalyticsService {
     error: unknown;
     modelProvider: ModelProvider;
     roundId?: string;
+    roundOrigin?: TelemetryConversationOrigin;
   }): void {
     try {
       const normalizedAgentId = normalizeAgentIdForTelemetry(agentId);
@@ -373,6 +377,7 @@ export class AnalyticsService {
         agent_id: normalizedAgentId ?? 'unknown',
         conversation_id: conversationId,
         execution_id: executionId,
+        origin: roundOrigin,
         round_id: roundId,
         model_provider: modelProvider,
         error_message: errorMessage,
@@ -388,6 +393,7 @@ export class AnalyticsService {
     agentId,
     conversationId,
     executionId,
+    origin,
     toolId,
     toolType,
     toolCallId,
@@ -398,6 +404,7 @@ export class AnalyticsService {
     agentId?: string;
     conversationId?: string;
     executionId?: string;
+    origin?: TelemetryConversationOrigin;
     toolId: string;
     toolType?: ToolType | string;
     toolCallId: string;
@@ -412,6 +419,7 @@ export class AnalyticsService {
           agent_id: normalizeAgentIdForTelemetry(agentId),
           conversation_id: conversationId,
           execution_id: executionId,
+          origin,
           tool_id: normalizeToolIdForTelemetry(toolId, toolType),
           tool_call_id: toolCallId,
           source,
@@ -428,6 +436,7 @@ export class AnalyticsService {
     agentId,
     conversationId,
     executionId,
+    origin,
     toolId,
     toolType,
     toolCallId,
@@ -439,6 +448,7 @@ export class AnalyticsService {
     agentId?: string;
     conversationId?: string;
     executionId?: string;
+    origin?: TelemetryConversationOrigin;
     toolId: string;
     toolType?: ToolType | string;
     toolCallId: string;
@@ -454,6 +464,7 @@ export class AnalyticsService {
           agent_id: normalizeAgentIdForTelemetry(agentId),
           conversation_id: conversationId,
           execution_id: executionId,
+          origin,
           tool_id: normalizeToolIdForTelemetry(toolId, toolType),
           tool_call_id: toolCallId,
           source,

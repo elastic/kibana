@@ -58,6 +58,7 @@ import {
   Source,
   ButtonGroup,
   FormattedComboBox,
+  MonitorTagsComboBox,
   JSONEditor,
   MonitorTypeRadioGroup,
   HeaderField,
@@ -659,7 +660,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
   },
   [ConfigKey.TAGS]: {
     fieldKey: ConfigKey.TAGS,
-    component: FormattedComboBox,
+    component: MonitorTagsComboBox,
     label: i18n.translate('xpack.synthetics.monitorConfig.tags.label', {
       defaultMessage: 'Tags',
     }),

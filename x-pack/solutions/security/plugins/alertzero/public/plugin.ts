@@ -76,7 +76,6 @@ export class AlertZeroPublicPlugin implements Plugin<
           coreStart,
           startDeps,
           params,
-          config: this.config,
         });
       },
     });

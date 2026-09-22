@@ -386,8 +386,8 @@ describe('Metric', () => {
       expect(apiOutput.styling?.secondary?.label).toEqual({ visible: false });
     });
 
-    it.each(['before', 'after'] as const)(
-      'should place a visible name %s the value',
+    it.each(['before', 'after', 'tooltip'] as const)(
+      'should round-trip a visible name with %s placement',
       (placement) => {
         const { visualization, apiOutput } = convert(
           getConfigWithSecondaryLabel({ visible: true, placement })

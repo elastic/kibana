@@ -16,6 +16,7 @@ import type {
 import {
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
   AGENT_BUILDER_BASH_SUPPORT_SETTING_ID,
+  AGENT_BUILDER_API_DISCOVERY_SETTING_ID,
   ALERTING_V2_ENABLED_SETTING_ID,
   ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID,
 } from '@kbn/management-settings-ids';
@@ -154,6 +155,9 @@ export class SecuritySolutionServerlessPlugin implements Plugin<
       }
       if (!projectSettings.includes(AGENT_BUILDER_BASH_SUPPORT_SETTING_ID)) {
         projectSettings.push(AGENT_BUILDER_BASH_SUPPORT_SETTING_ID);
+      }
+      if (!projectSettings.includes(AGENT_BUILDER_API_DISCOVERY_SETTING_ID)) {
+        projectSettings.push(AGENT_BUILDER_API_DISCOVERY_SETTING_ID);
       }
     }
 

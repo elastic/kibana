@@ -12,7 +12,7 @@ import {
   type AnalysisTarget,
   type ExistingQuerySummary,
 } from '@kbn/nightshift-ai';
-import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
+import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { tags } from '@kbn/scout';
 
 import {
@@ -94,7 +94,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
       headers: { 'elastic-api-version': '1' },
       body: {
         'feature_flags.overrides': {
-          [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: true,
+          [NIGHTSHIFT_ENABLED_FLAG]: true,
         },
       },
     });
@@ -107,6 +107,19 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
       log
     );
     snapshots.forEach((v, k) => availableSnapshotsBySource.set(k, v));
+  });
+
+  evaluate.afterAll(async ({ kbnClient }) => {
+    await kbnClient.request({
+      path: '/internal/core/_settings',
+      method: 'PUT',
+      headers: { 'elastic-api-version': '1' },
+      body: {
+        'feature_flags.overrides': {
+          [NIGHTSHIFT_ENABLED_FLAG]: null,
+        },
+      },
+    });
   });
 
   for (const dataset of activeDatasets) {

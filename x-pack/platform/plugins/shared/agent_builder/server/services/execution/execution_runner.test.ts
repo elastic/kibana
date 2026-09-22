@@ -108,12 +108,15 @@ const createModelProviderMock = () => ({
 const createDeps = ({
   conversationClient,
   getConversationRoundAuthor = jest.fn().mockResolvedValue(undefined),
+  analyticsService,
 }: {
   conversationClient: ReturnType<typeof createConversationClientMock>;
   getConversationRoundAuthor?: jest.Mock;
+  analyticsService?: { reportRoundComplete?: jest.Mock; reportRoundError?: jest.Mock };
 }) =>
   ({
     logger: loggingSystemMock.createLogger(),
+    analyticsService,
     runAgent: jest.fn(),
     agentService: {
       getRegistry: jest
@@ -1156,6 +1159,91 @@ describe('handleAgentExecution — interrupted executions', () => {
       'round-1::execution::1::execution_failed',
     ]);
     expect(write).not.toHaveProperty('status');
+  });
+
+  it('failure on a HITL resume: the round error keeps the paused round origin the request omits', async () => {
+    const conversationClient = echoingClient();
+    const paused = {
+      ...createEmptyConversation({ id: 'conversation-1', agent_id: 'test-agent' }),
+      rounds: [
+        createRound({
+          id: 'round-1',
+          status: ConversationRoundStatus.awaitingPrompt,
+          origin: { type: ConversationOriginType.Slack },
+        }),
+      ],
+    };
+    conversationClient.get.mockResolvedValue(paused);
+    stubResolveServices(conversationClient);
+    mockAgentStream([makeRoundInterruptedEvent()], 'asyncShared', new Error('llm exploded'));
+
+    const reportRoundError = jest.fn();
+    const deps = createDeps({ conversationClient, analyticsService: { reportRoundError } });
+
+    const events$ = await handleAgentExecution({
+      execution: {
+        executionId: 'execution-1',
+        executionMode: AgentExecutionMode.conversation,
+        agentParams: {
+          agentId: 'test-agent',
+          conversationId: 'conversation-1',
+          nextInput: { prompts: {} },
+        },
+      } as never,
+      deps: deps as never,
+      request: { headers: {} } as never,
+      abortSignal: new AbortController().signal,
+    });
+    const { thrown } = await collect(events$);
+
+    expect(thrown).toMatchObject({ code: AgentBuilderErrorCode.internalError });
+    expect(reportRoundError).toHaveBeenCalledWith(
+      expect.objectContaining({ roundOrigin: ConversationOriginType.Slack })
+    );
+  });
+
+  it('failure on a fresh round: a completed round origin is not carried over to the new round', async () => {
+    const conversationClient = echoingClient();
+    const slackConversation = {
+      ...createEmptyConversation({ id: 'conversation-1', agent_id: 'test-agent' }),
+      rounds: [
+        createRound({
+          id: 'round-1',
+          status: ConversationRoundStatus.completed,
+          origin: { type: ConversationOriginType.Slack },
+        }),
+      ],
+    };
+    conversationClient.get.mockResolvedValue(slackConversation);
+    stubResolveServices(conversationClient);
+    mockAgentStream(
+      [makeRoundStartedEvent(), makeRoundInterruptedEvent()],
+      'asyncShared',
+      new Error('llm exploded')
+    );
+
+    const reportRoundError = jest.fn();
+    const deps = createDeps({ conversationClient, analyticsService: { reportRoundError } });
+
+    const events$ = await handleAgentExecution({
+      execution: {
+        executionId: 'execution-1',
+        executionMode: AgentExecutionMode.conversation,
+        agentParams: {
+          agentId: 'test-agent',
+          conversationId: 'conversation-1',
+          nextInput: { message: 'Hello' },
+        },
+      } as never,
+      deps: deps as never,
+      request: { headers: {} } as never,
+      abortSignal: new AbortController().signal,
+    });
+    await collect(events$);
+
+    expect(reportRoundError).toHaveBeenCalledWith(
+      expect.objectContaining({ roundOrigin: undefined })
+    );
   });
 
   it('storeConversation=false: nothing is written and the error surfaces unchanged in kind', async () => {

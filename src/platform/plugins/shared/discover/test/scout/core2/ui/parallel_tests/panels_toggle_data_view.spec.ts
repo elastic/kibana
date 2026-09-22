@@ -21,7 +21,12 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { createPanelsStateAssertion, expectSidebarState, spaceTest } from '../fixtures';
+import {
+  createPanelsStateAssertion,
+  getPageA11yViolations,
+  expectSidebarState,
+  spaceTest,
+} from '../fixtures';
 
 spaceTest.describe(
   'Discover panels toggle - data view mode',
@@ -54,6 +59,7 @@ spaceTest.describe(
       await spaceTest.step('sidebar toggle', async () => {
         await discover.closeSidebar();
         await expectSidebarState(page, false);
+        expect(await getPageA11yViolations(page)).toStrictEqual([]);
 
         await discover.openSidebar();
         await expectSidebarState(page, true);
@@ -62,6 +68,7 @@ spaceTest.describe(
       await spaceTest.step('histogram toggle', async () => {
         await discover.hideChart();
         await expectPanels({ sidebar: true, chart: false, table: true });
+        expect(await getPageA11yViolations(page)).toStrictEqual([]);
 
         await discover.showChart();
         await expectPanels({ sidebar: true, chart: true, table: true });

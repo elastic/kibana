@@ -39,6 +39,7 @@ import { ConversationProposalsService } from './services/conversation_proposals/
 import { WatchWorkflowsManagementClientImpl } from './services/watches/watch_workflows_management_client';
 import { ActionsService } from './services/actions/actions_service';
 import { listActionsTool } from './agent_builder_tools/list_actions_tool';
+import { reviseProposalTool } from './agent_builder_tools/revise_proposal_tool';
 import { agentType, ensureAgent, ensureAgentSafe, registerAgentType } from './agent';
 
 export class AlertZeroPlugin implements Plugin<
@@ -57,6 +58,7 @@ export class AlertZeroPlugin implements Plugin<
   private actionsService?: ActionsService;
   private workersService?: WorkersService;
   private conversationProposalsService?: ConversationProposalsService;
+  private agenticInvestigations?: AlertZeroStartDependencies['agenticInvestigations'];
 
   constructor(context: PluginInitializerContext<AlertZeroConfig>) {
     this.logger = context.logger.get();
@@ -91,6 +93,9 @@ export class AlertZeroPlugin implements Plugin<
     agentBuilder.tools.register({
       ...listActionsTool(() => this.requireActionsService()),
     });
+    agentBuilder.tools.register({
+      ...reviseProposalTool(() => this.requireAgenticInvestigations()),
+    });
 
     features.registerKibanaFeature({
       id: ALERTZERO_FEATURE_ID,
@@ -119,7 +124,6 @@ export class AlertZeroPlugin implements Plugin<
     registerRoutes({
       router,
       logger: this.logger,
-      config: this.config,
       getSpaceId: (request) => this.getSpaceId(request),
       getWatchesService: () => this.requireWatchesService(),
       getWorkersService: () => this.requireWorkersService(),
@@ -132,6 +136,7 @@ export class AlertZeroPlugin implements Plugin<
 
   start(_core: CoreStart, plugins: AlertZeroStartDependencies): AlertZeroPluginStart {
     this.spaces = plugins.spaces;
+    this.agenticInvestigations = plugins.agenticInvestigations;
 
     if (!this.config.enabled) {
       return {};
@@ -167,7 +172,6 @@ export class AlertZeroPlugin implements Plugin<
       this.logger
     );
 
-    // Mock mode changes presentation data only; durable Worker settings and enablement still use Workflows.
     this.watchesService = new WatchesService();
     this.actionsService = new ActionsService(
       () =>
@@ -200,6 +204,14 @@ export class AlertZeroPlugin implements Plugin<
       throw new Error('Actions service is not available until the AlertZero plugin has started');
     }
     return this.actionsService;
+  }
+  private requireAgenticInvestigations(): AlertZeroStartDependencies['agenticInvestigations'] {
+    if (!this.agenticInvestigations) {
+      throw new Error(
+        'agenticInvestigations plugin start contract is not available until the AlertZero plugin has started'
+      );
+    }
+    return this.agenticInvestigations;
   }
   private requireWorkersService(): WorkersService {
     if (!this.workersService) {
