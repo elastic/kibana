@@ -516,11 +516,11 @@ export class CommonPageObject extends FtrService {
   }
 
   async getJsonBodyText() {
-    if (await this.find.existsByCssSelector('a[id=rawdata-tab]', this.defaultFindTimeout)) {
+    if (await this.find.existsByCssSelector('a[id=rawdata-tab]', 0)) {
       // Firefox has 3 tabs and requires navigation to see Raw output
       await this.find.clickByCssSelector('a[id=rawdata-tab]');
     }
-    const msgElements = await this.find.allByCssSelector('body pre');
+    const msgElements = await this.find.allByCssSelector('body pre', 0);
     if (msgElements.length > 0) {
       return await msgElements[0].getVisibleText();
     } else {
