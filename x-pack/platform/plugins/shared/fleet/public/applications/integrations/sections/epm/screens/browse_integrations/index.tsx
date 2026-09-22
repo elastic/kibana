@@ -112,7 +112,6 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
     eprPackageLoadingError,
     eprCategoryLoadingError,
     filteredCards: rawFilteredCards,
-    allCards,
     onCategoryChange,
     availableSubCategories,
   } = useBrowseIntegrationHook({ prereleaseIntegrationsEnabled });
@@ -127,13 +126,14 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
     [rawFilteredCards, openCollection]
   );
 
-  // Resolve the open collection card from allCards so it survives category/search filters.
+  // Resolve the open collection card from rawFilteredCards so the flyout variants
+  // reflect the active filter state (category, signal, setup method, etc.).
   const openCollectionCard = useMemo(
     () =>
       openCollectionGroupId
-        ? allCards.find((c) => c.isCollectionCard && c.name === openCollectionGroupId)
+        ? rawFilteredCards.find((c) => c.isCollectionCard && c.name === openCollectionGroupId)
         : undefined,
-    [openCollectionGroupId, allCards]
+    [openCollectionGroupId, rawFilteredCards]
   );
 
   const collectionReturnPath = useMemo(

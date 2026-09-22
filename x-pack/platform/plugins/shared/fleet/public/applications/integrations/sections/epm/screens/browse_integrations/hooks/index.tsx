@@ -17,6 +17,30 @@ import { STATUS_DEPRECATED } from '../types';
 import { useUrlFilters } from './url_filters';
 import { useUrlCategories, useUrlDefaultCategories, useSetUrlCategory } from './url_categories';
 
+// Apply a filter predicate to cards, also filtering groupMembers of collection cards so
+// badge counts and flyout variants reflect the active filter state. Collections that drop
+// below 2 matching members degrade to individual tiles (matching ungrouped semantics).
+function applyCardFilter(
+  cards: IntegrationCardItem[],
+  predicate: (card: IntegrationCardItem) => boolean
+): IntegrationCardItem[] {
+  const result: IntegrationCardItem[] = [];
+  for (const card of cards) {
+    if (!card.isCollectionCard) {
+      if (predicate(card)) result.push(card);
+      continue;
+    }
+    const filteredMembers = (card.groupMembers ?? []).filter(predicate);
+    if (filteredMembers.length === 0) continue;
+    if (filteredMembers.length === 1) {
+      result.push(filteredMembers[0]);
+      continue;
+    }
+    result.push({ ...card, groupMembers: filteredMembers });
+  }
+  return result;
+}
+
 export function useBrowseIntegrationHook({
   prereleaseIntegrationsEnabled,
 }: {
@@ -84,17 +108,21 @@ export function useBrowseIntegrationHook({
       : sortedCards;
 
     // Hide deprecated integrations by default; only show them when the user has explicitly
-    // enabled the filter (status includes STATUS_DEPRECATED).
+    // enabled the filter (status includes STATUS_DEPRECATED). Collection cards have
+    // isDeprecated: false, so they always pass; we don't filter their members here because
+    // variants within a collection are browsed deliberately.
     const showDeprecated = urlFilters.status?.includes(STATUS_DEPRECATED) ?? false;
     if (!showDeprecated) {
       cards = cards.filter((card) => !('isDeprecated' in card && card.isDeprecated === true));
     }
 
-    // Apply setup method filters (union: show cards matching ANY selected method)
+    // Apply setup method filters (union: show cards matching ANY selected method).
+    // applyCardFilter ensures collection members are filtered too so badge/flyout reflect
+    // only the members matching the active setup method.
     const setupMethodFilters = urlFilters.setupMethod;
     if (setupMethodFilters && setupMethodFilters.length > 0) {
-      cards = cards.filter((card) => {
-        return setupMethodFilters.some((method) => {
+      cards = applyCardFilter(cards, (card) =>
+        setupMethodFilters.some((method) => {
           switch (method) {
             case 'agentless':
               return card.supportsAgentless === true;
@@ -103,17 +131,21 @@ export function useBrowseIntegrationHook({
             default:
               return false;
           }
-        });
-      });
+        })
+      );
     }
 
-    // Apply signal filters (union: show cards matching ANY selected signal)
+    // Apply signal filters (union: show cards matching ANY selected signal).
     const signalFilters = urlFilters.signal;
     if (signalFilters && signalFilters.length > 0) {
-      cards = cards.filter((card) => signalFilters.some((s) => card.signalTypes?.includes(s)));
+      cards = applyCardFilter(cards, (card) =>
+        signalFilters.some((s) => card.signalTypes?.includes(s))
+      );
     }
 
-    // Hide content packs by default; only show when the user has explicitly enabled the filter
+    // Hide content packs by default; only show when the user has explicitly enabled the filter.
+    // Collection cards (type: undefined) pass this filter naturally; we don't filter their
+    // members here because all collection variants should remain visible inside the flyout.
     if (!urlFilters.showContent) {
       cards = cards.filter((card) => card.type !== 'content');
     }
@@ -131,10 +163,11 @@ export function useBrowseIntegrationHook({
 
   // Apply category filter on top of non-category filters.
   // When multiple effective categories are active, show cards matching ALL of them
-  // (AND logic / intersection).
+  // (AND logic / intersection). applyCardFilter ensures collection members are filtered
+  // too so the badge count and flyout variants reflect the active category state.
   const filteredCards = useMemo(() => {
     if (effectiveCategories.length > 0 || selectedSubCategory) {
-      return nonCategoryFilteredCards.filter((c) => {
+      return applyCardFilter(nonCategoryFilteredCards, (c) => {
         if (selectedSubCategory) return c.categories.includes(selectedSubCategory);
         return effectiveCategories.every((cat) => c.categories.includes(cat));
       });

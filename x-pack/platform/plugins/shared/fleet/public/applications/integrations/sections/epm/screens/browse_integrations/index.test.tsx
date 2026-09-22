@@ -243,7 +243,10 @@ describe('BrowseIntegrationsPage', () => {
 
     it('renders the CollectionFlyout when ?collection=nginx is in the URL', async () => {
       mockUseBrowseIntegrationHook.mockReturnValue(
-        makeDefaultHookReturn({ allCards: [nginxCollectionCard] })
+        makeDefaultHookReturn({
+          filteredCards: [nginxCollectionCard],
+          allCards: [nginxCollectionCard],
+        })
       );
       mockUseLocation.mockReturnValue({
         pathname: '/app/integrations/browse',
@@ -267,7 +270,10 @@ describe('BrowseIntegrationsPage', () => {
 
     it('calls history.replace without the collection param when the flyout is closed', async () => {
       mockUseBrowseIntegrationHook.mockReturnValue(
-        makeDefaultHookReturn({ allCards: [nginxCollectionCard] })
+        makeDefaultHookReturn({
+          filteredCards: [nginxCollectionCard],
+          allCards: [nginxCollectionCard],
+        })
       );
       mockUseLocation.mockReturnValue({
         pathname: '/app/integrations/browse',
