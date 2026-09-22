@@ -74,6 +74,21 @@ let accumulated = '/api/dashboards';
 accumulated += `/${id}`;
 http.delete(accumulated); // $ Alert
 
+// BAD: `+=` with a bare dynamic value, equivalent to '/api/things/' + id
+let bareAccumulated = '/api/things/';
+bareAccumulated += id;
+http.delete(bareAccumulated); // $ Alert
+
+// GOOD: `+=` that only ever appends literals
+let literalAccumulated = '/api/things';
+literalAccumulated += '/status';
+http.get(literalAccumulated);
+
+// GOOD: `+=` with an encoded segment
+let encodedAccumulated = '/api/things/';
+encodedAccumulated += encodeURIComponent(id);
+http.get(encodedAccumulated);
+
 // BAD: path assembled with Array#join and a non-empty separator
 const joinedPath = [INTERNAL_ROUTES.BASE, id].join('/');
 http.get(joinedPath); // $ Alert
@@ -174,6 +189,16 @@ http.get(`${INTERNAL_ROUTES.BASE}${buildDashPath(id)}`);
 
 // GOOD: cross-file encoding wrapper (proves getACallee() resolves through the import)
 http.get(`/api/things/${encodeSeg(id)}`);
+
+// GOOD: a wrapper that delegates to another wrapper (chains more than one hop)
+const encodeOnce = (val) => encodeURIComponent(val || '');
+const encodeTwice = (val) => encodeOnce(val);
+http.get(`/api/dashboards/${encodeTwice(id)}`);
+
+// BAD: a two-hop chain whose inner helper does not encode
+const encodeNeither = (val) => `${val}`;
+const wrapNeither = (val) => encodeNeither(val);
+http.get(`/api/dashboards/${wrapNeither(id)}`); // $ Alert
 
 // BAD: a wrapper that only encodes on one branch is NOT a wrapper
 function maybeEncode(val, shouldEncode) {
@@ -285,6 +310,31 @@ http.get([INTERNAL_ROUTES.BASE, id].map(String).join('/')); // $ Alert
 
 // GOOD: map with encodeURIComponent encodes every element
 http.get([INTERNAL_ROUTES.BASE, id].map(encodeURIComponent).join('/'));
+
+// GOOD: map with a local encoding wrapper as the callback
+const mapEncodeSeg = (val) => encodeURIComponent(val);
+http.get([INTERNAL_ROUTES.BASE, id].map(mapEncodeSeg).join('/'));
+
+// BAD: a callback that may also resolve to a pass-through encodes only on one branch
+const maybeEncodeSeg = cond ? mapEncodeSeg : (val) => val;
+http.get([INTERNAL_ROUTES.BASE, id].map(maybeEncodeSeg).join('/')); // $ Alert
+
+// =============================================================================
+// join() separators
+// =============================================================================
+
+// BAD: a dynamic separator lands between every pair of otherwise-safe elements
+http.get([INTERNAL_ROUTES.BASE, 'status'].join(id)); // $ Alert
+
+// GOOD: no separator argument defaults to ','
+http.get([INTERNAL_ROUTES.BASE, 'status'].join());
+
+// GOOD: separator hoisted into a variable that only ever holds a literal
+const pathSeparator = '/';
+http.get([INTERNAL_ROUTES.BASE, 'status'].join(pathSeparator));
+
+// GOOD: encoded separator
+http.get([INTERNAL_ROUTES.BASE, 'status'].join(encodeURIComponent(sep)));
 
 // GOOD: splice used to remove an element does not introduce a segment
 const splicedParts = [INTERNAL_ROUTES.BASE, 'status'];

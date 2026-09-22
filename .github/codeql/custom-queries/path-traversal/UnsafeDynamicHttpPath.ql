@@ -44,12 +44,13 @@ import javascript
 /* ---------- "Safe" path building blocks (mirrors the ESLint rule) ---------- */
 
 /**
- * A route template `buildPath()` can be trusted to substitute into: a literal, a constant prefix
+ * A string expression that cannot carry a dynamic segment: a literal, a constant prefix
  * reference, or a template/concatenation built only from those - written inline or held in a
- * variable first. Anything else could carry a user-controllable segment through `buildPath()`
- * untouched.
+ * variable first. Used for the two positions where a value is not a path segment in its own
+ * right but still ends up inside the path: a `buildPath()` route template, and a `join()`
+ * separator.
  */
-predicate isStaticRouteTemplate(Expr e) {
+predicate isStaticPathText(Expr e) {
   forex(Expr src | src = DataFlow::valueNode(e).getALocalSource().asExpr() |
     src instanceof Literal
     or
@@ -59,12 +60,12 @@ predicate isStaticRouteTemplate(Expr e) {
     forall(Expr part |
       part = src.(TemplateLiteral).getAnElement() and not part instanceof TemplateElement
     |
-      isStaticRouteTemplate(part)
+      isStaticPathText(part)
     )
     or
     src instanceof AddExpr and
-    isStaticRouteTemplate(src.(AddExpr).getLeftOperand()) and
-    isStaticRouteTemplate(src.(AddExpr).getRightOperand())
+    isStaticPathText(src.(AddExpr).getLeftOperand()) and
+    isStaticPathText(src.(AddExpr).getRightOperand())
   )
 }
 
@@ -79,7 +80,7 @@ predicate isStaticRouteTemplate(Expr e) {
 predicate isEncodingBuildPathCall(Expr e) {
   exists(CallExpr call | call = e |
     call.getCalleeName() = "buildPath" and
-    isStaticRouteTemplate(call.getArgument(0))
+    isStaticPathText(call.getArgument(0))
   )
 }
 
@@ -95,9 +96,15 @@ predicate isDirectEncodeCall(Expr e) {
   isEncodingBuildPathCall(e)
 }
 
-/** Holds if EVERY local source of `e` is a direct encoder call. */
-predicate isDirectlyEncodedValue(Expr e) {
-  forex(Expr src | src = DataFlow::valueNode(e).getALocalSource().asExpr() | isDirectEncodeCall(src))
+/**
+ * Holds if EVERY local source of `e` is an encoder result: a direct encoder call, or a call to
+ * another encoding wrapper. Allowing the latter is what lets a wrapper chain more than one hop
+ * (`const encodeSegment = (v) => encodeIfNotEmpty(v);`).
+ */
+predicate isEncodedReturnValue(Expr e) {
+  forex(Expr src | src = DataFlow::valueNode(e).getALocalSource().asExpr() |
+    isEncodeOrBuildPathCall(src)
+  )
 }
 
 /**
@@ -115,16 +122,22 @@ predicate alwaysReturnsAValue(Function f) {
 }
 
 /**
- * A function that exists only to encode: every value it can return is a direct encoder result.
- * Models Kibana helpers such as
+ * A function that exists only to encode: every value it can return is an encoder result. Models
+ * Kibana helpers such as
  * `const encodeURIComponentIfNotEmpty = (val?: string) => encodeURIComponent(val || '');`.
  * Wrapping the encoder in a small helper is a common idiom; without this every call site of such
  * a helper is a false positive. A helper with even one unencoded return does not qualify.
+ *
+ * Mutually recursive with `isEncodingWrapperCall` via `isEncodedReturnValue`, so a helper that
+ * delegates to another helper qualifies too. The recursion is monotone: every recursive call sits
+ * inside a `forall`/`forex`, which desugars to a doubly-negated existential. The least fixpoint
+ * also fails safe - a self-recursive or mutually-recursive helper never becomes a wrapper, so it
+ * keeps reporting rather than going quiet.
  */
 predicate isEncodingWrapperFunction(Function f) {
   exists(f.getAReturnedExpr()) and
   alwaysReturnsAValue(f) and
-  forall(Expr ret | ret = f.getAReturnedExpr() | isDirectlyEncodedValue(ret))
+  forall(Expr ret | ret = f.getAReturnedExpr() | isEncodedReturnValue(ret))
 }
 
 /**
@@ -230,11 +243,18 @@ predicate templateHasInterpolation(TemplateLiteral t) {
  * A callback that encodes each element it is applied to (`map(encodeURIComponent)`). `buildPath`
  * is deliberately absent: `map` passes each element as `buildPath()`'s *template* argument, which
  * comes back unchanged, so `map(buildPath)` encodes nothing.
+ *
+ * `forex` over EVERY local source, matching `isEncodingWrapperCall`: a callback that can hold
+ * more than one function (`cond ? encodeSeg : (x) => x`) encodes only when all of them do. The
+ * range covers every source, not just the function-valued ones, so a source that does not resolve
+ * to a function fails the cast and leaves the callback unsafe.
  */
 predicate isEncodingCallback(DataFlow::Node cb) {
   cb.asExpr().(VarAccess).getName() = "encodeURIComponent"
   or
-  isEncodingWrapperFunction(cb.getALocalSource().(DataFlow::FunctionNode).getFunction())
+  forex(DataFlow::Node src | src = cb.getALocalSource() |
+    isEncodingWrapperFunction(src.(DataFlow::FunctionNode).getFunction())
+  )
 }
 
 /** An `Array.prototype` method that returns a new array holding the same elements. */
@@ -298,21 +318,44 @@ DataFlow::SourceNode unsafeSegmentArray() {
 }
 
 /**
- * An `[...].join(sep)` call over an array that holds at least one unsafe segment. The shared
- * `StringConcatenation` library only models `join` with an empty separator, so a path assembled
- * as `[BASE, id].join('/')` needs its own source. The array is tracked through mutation
- * (`push`/`unshift`/`splice`) and through element-preserving transforms, so a path assembled
- * after the literal was created is still reported.
+ * A `join` separator that cannot itself introduce a dynamic segment. `isStaticPathText` rather
+ * than `isSafePathSegment` alone, because a separator is routinely hoisted into a plain
+ * lowercase `const sep = '/'`, which `isSafePathSegment` does not follow back to its literal.
  */
-predicate isUnsafeJoinPath(Expr e) { e = unsafeSegmentArray().getAMethodCall("join").asExpr() }
+predicate isSafeJoinSeparator(Expr e) { isStaticPathText(e) or isSafePathSegment(e) }
+
+/**
+ * An `[...].join(sep)` call that may produce an unencoded path. The shared `StringConcatenation`
+ * library only models `join` with an empty separator, so a path assembled as
+ * `[BASE, id].join('/')` needs its own source. Two ways to be unsafe:
+ *
+ * - the array holds an unsafe segment. It is tracked through mutation (`push`/`unshift`/`splice`)
+ *   and through element-preserving transforms, so a path assembled after the literal was created
+ *   is still reported.
+ * - the separator is dynamic. It lands between every pair of elements, so
+ *   `[BASE, 'status'].join(id)` puts `id` in the path even though both elements are constant.
+ *
+ * The separator is matched inside an `exists` so that a no-argument `join()` - which defaults to
+ * `','` - does not satisfy the negation vacuously.
+ */
+predicate isUnsafeJoinPath(Expr e) {
+  e = unsafeSegmentArray().getAMethodCall("join").asExpr()
+  or
+  exists(DataFlow::MethodCallNode joinCall |
+    joinCall = segmentArray().getAMethodCall("join") and
+    e = joinCall.asExpr()
+  |
+    exists(Expr sep | sep = joinCall.getArgument(0).asExpr() | not isSafeJoinSeparator(sep))
+  )
+}
 
 /**
  * An expression that builds a path dynamically with at least one unsafe (non-literal,
  * non-encoded, non-constant) segment: an interpolated template literal, a `+`
- * concatenation that is not fully sanitized, or a `join(sep)` over an array holding unsafe
- * parts. Only those that actually reach an `http.*` path sink are reported, so unrelated
- * concatenations are never surfaced. Conditionals are intentionally not sources: each
- * branch is its own source and flows through the conditional to the sink.
+ * concatenation that is not fully sanitized, the appended value of a `+=`, or a `join(sep)`
+ * over an array holding unsafe parts. Only those that actually reach an `http.*` path sink are
+ * reported, so unrelated concatenations are never surfaced. Conditionals are intentionally not
+ * sources: each branch is its own source and flows through the conditional to the sink.
  */
 predicate isUnsafeDynamicPath(Expr e) {
   (
@@ -323,6 +366,13 @@ predicate isUnsafeDynamicPath(Expr e) {
   not isSafePathSegment(e)
   or
   isUnsafeJoinPath(e)
+  or
+  // `let p = '/api/things/'; p += id;` - the appended value is itself the dynamic segment, and no
+  // `AddExpr` is written anywhere, so without this the `+=` spelling is missed while the
+  // equivalent `'/api/things/' + id` reports. `isAdditionalFlowStep` below already carries the
+  // right-hand side to the assigned variable, so this needs no flow step of its own.
+  exists(AssignAddExpr assign | e = assign.getRhs()) and
+  not isSafePathSegment(e)
 }
 
 /* ---------- HTTP request-path sinks ---------- */
