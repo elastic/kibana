@@ -15,14 +15,53 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
 
-import { EvaluationScoreDocument } from '../common_attributes.gen';
+import { Model } from '../common_attributes.gen';
+
+export const EvaluationExperimentScoreSummary = lazySchema(() =>
+  z.object({
+    '@timestamp': z.string().max(64),
+    task: z.object({
+      repetition_index: z.number().int(),
+      trace_id: z.string().max(256).nullable().optional(),
+    }),
+    evaluator: z.object({
+      name: z.string().max(256),
+      score: z.number().nullable().optional(),
+      label: z.string().max(256).nullable().optional(),
+      trace_id: z.string().max(256).nullable().optional(),
+      model: Model.optional(),
+    }),
+  })
+);
+export type EvaluationExperimentScoreSummary = z.infer<typeof EvaluationExperimentScoreSummary>;
+
+export const EvaluationExperimentExamplePreview = lazySchema(() =>
+  z.object({
+    repetition_index: z.number().int(),
+    input: z
+      .object({
+        content: z.string().max(4096),
+        truncated: z.boolean(),
+      })
+      .nullable(),
+    output: z
+      .object({
+        content: z.string().max(4096),
+        truncated: z.boolean(),
+      })
+      .nullable(),
+  })
+);
+export type EvaluationExperimentExamplePreview = z.infer<typeof EvaluationExperimentExamplePreview>;
 
 export const EvaluationExperimentDatasetExample = lazySchema(() =>
   z.object({
     example_id: z.string().max(1024),
     example_index: z.number().int().nullable(),
-    scores: z.array(EvaluationScoreDocument),
+    scores: z.array(EvaluationExperimentScoreSummary),
+    preview: EvaluationExperimentExamplePreview.optional(),
   })
 );
 export type EvaluationExperimentDatasetExample = z.infer<typeof EvaluationExperimentDatasetExample>;
@@ -32,7 +71,13 @@ export const GetEvaluationExperimentDatasetExamplesRequestQuery = lazySchema(() 
     /**
      * When provided, fetches examples for all experiments in this execution
      */
-    execution_id: z.string().max(1024).optional(),
+    execution_id: z
+      .string()
+      .max(1024)
+      .optional()
+      .describe('When provided, fetches examples for all experiments in this execution'),
+    page: z.coerce.number().int().min(1).max(400).optional().default(1),
+    include_previews: BooleanFromString.optional().default(false),
   })
 );
 export type GetEvaluationExperimentDatasetExamplesRequestQuery = z.infer<
@@ -58,6 +103,9 @@ export type GetEvaluationExperimentDatasetExamplesRequestParamsInput = z.input<
 export const GetEvaluationExperimentDatasetExamplesResponse = lazySchema(() =>
   z.object({
     examples: z.array(EvaluationExperimentDatasetExample),
+    page: z.number().int().min(1).max(400),
+    per_page: z.number().int().min(25).max(25),
+    total: z.number().int().min(0),
   })
 );
 export type GetEvaluationExperimentDatasetExamplesResponse = z.infer<

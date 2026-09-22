@@ -7,7 +7,11 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
-import type { AnyIDataStreamClient, ClientSearchRequest } from '@kbn/data-streams';
+import type {
+  AnyIDataStreamClient,
+  BaseSearchRuntimeMappings,
+  ClientSearchRequest,
+} from '@kbn/data-streams';
 import type { EvaluationScoreDocument, IngestScoresRequestBody } from '@kbn/evals-common';
 import { EvaluationIndices } from '@kbn/evals-common';
 
@@ -129,7 +133,9 @@ export class EvaluationScoreService {
     return this.coreDataStreams.initializeClient(EvaluationIndices.SCORES);
   }
 
-  public async search(request: ClientSearchRequest): Promise<DataStreamSearchResponse> {
+  public async search(
+    request: ClientSearchRequest<BaseSearchRuntimeMappings>
+  ): Promise<DataStreamSearchResponse> {
     const client = await this.getClient();
     return client.search(request);
   }

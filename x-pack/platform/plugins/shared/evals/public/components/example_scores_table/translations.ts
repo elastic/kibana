@@ -105,3 +105,44 @@ export const getEvaluatorAccordionAriaLabel = (evaluatorName: string) =>
     defaultMessage: 'Toggle details for evaluator {evaluatorName}',
     values: { evaluatorName },
   });
+
+export const VIEW_FULL_INPUT_BUTTON_LABEL = i18n.translate(
+  'xpack.evals.exampleScoresTable.viewFullInputButtonLabel',
+  {
+    defaultMessage: 'View full input',
+  }
+);
+
+export const VIEW_FULL_OUTPUT_BUTTON_LABEL = i18n.translate(
+  'xpack.evals.exampleScoresTable.viewFullOutputButtonLabel',
+  {
+    defaultMessage: 'View full output',
+  }
+);
+
+export const PREVIEW_TRUNCATED_LABEL = i18n.translate(
+  'xpack.evals.exampleScoresTable.previewTruncatedLabel',
+  {
+    defaultMessage: 'Preview truncated',
+  }
+);
+
+export const EXAMPLE_PAGINATION_ARIA_LABEL = i18n.translate(
+  'xpack.evals.exampleScoresTable.examplePaginationAriaLabel',
+  {
+    defaultMessage: 'Example result pages',
+  }
+);
+
+export const NO_EVALUATOR_DETAILS_MESSAGE = i18n.translate(
+  'xpack.evals.exampleScoresTable.noEvaluatorDetailsMessage',
+  {
+    defaultMessage: 'No additional evaluator details.',
+  }
+);
+
+export const getDetailsLoadErrorMessage = (errorMessage: string) =>
+  i18n.translate('xpack.evals.exampleScoresTable.detailsLoadErrorMessage', {
+    defaultMessage: 'Failed to load details: {errorMessage}',
+    values: { errorMessage },
+  });
