@@ -19,11 +19,6 @@ type ActionImpactItem = ActionImpactItemProps['item'];
  * - Impact
  * - Reversibility (only when the action carries this flag)
  * - Decision deadline / expiry (only when `expiresAt` is set)
- *
- * Message ids stay under `xpack.agenticInvestigations.*` from when this lived in that plugin:
- * this package is not registered in `x-pack/.i18nrc.json`, so re-prefixing them would only
- * invalidate the existing translations without making them checked. See the tracking issue in
- * the PR description.
  */
 export const toActionImpactItems = (proposal: ApprovalProposal): ActionImpactItem[] => {
   const items: ActionImpactItem[] = [];
@@ -40,7 +35,7 @@ export const toActionImpactItems = (proposal: ApprovalProposal): ActionImpactIte
   items.push({
     id: 'impact',
     iconType: 'warning',
-    text: i18n.translate('xpack.agenticInvestigations.proposals.actionImpact.impactText', {
+    text: i18n.translate('xpack.alertzero.proposals.actionImpact.impactText', {
       defaultMessage: '{impact} impact',
       // The proposal's own impact first: a revision can override it.
       values: { impact: proposal.impact ?? proposal.action?.impact },
@@ -52,18 +47,18 @@ export const toActionImpactItems = (proposal: ApprovalProposal): ActionImpactIte
       id: 'reversible',
       iconType: 'editorUndo',
       text: proposal.action.reversible
-        ? i18n.translate('xpack.agenticInvestigations.proposals.actionImpact.reversibleText', {
+        ? i18n.translate('xpack.alertzero.proposals.actionImpact.reversibleText', {
             defaultMessage: 'Reversible',
           })
-        : i18n.translate('xpack.agenticInvestigations.proposals.actionImpact.notReversibleText', {
+        : i18n.translate('xpack.alertzero.proposals.actionImpact.notReversibleText', {
             defaultMessage: 'Not reversible',
           }),
       status: {
         label: proposal.action.reversible
-          ? i18n.translate('xpack.agenticInvestigations.proposals.actionImpact.reversibleYes', {
+          ? i18n.translate('xpack.alertzero.proposals.actionImpact.reversibleYes', {
               defaultMessage: 'Yes',
             })
-          : i18n.translate('xpack.agenticInvestigations.proposals.actionImpact.reversibleNo', {
+          : i18n.translate('xpack.alertzero.proposals.actionImpact.reversibleNo', {
               defaultMessage: 'No',
             }),
         iconType: proposal.action.reversible ? 'check' : 'cross',
@@ -75,17 +70,17 @@ export const toActionImpactItems = (proposal: ApprovalProposal): ActionImpactIte
   if (proposal.expiresAt) {
     const deadline = new Date(proposal.expiresAt);
     const label = proposal.expired
-      ? i18n.translate('xpack.agenticInvestigations.proposals.actionImpact.expiredLabel', {
+      ? i18n.translate('xpack.alertzero.proposals.actionImpact.expiredLabel', {
           defaultMessage: 'Expired',
         })
       : deadline.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
     items.push({
       id: 'expires',
       iconType: 'clock',
-      text: i18n.translate(
-        'xpack.agenticInvestigations.proposals.actionImpact.decisionDeadlineText',
-        { defaultMessage: 'Decision deadline: {label}', values: { label } }
-      ),
+      text: i18n.translate('xpack.alertzero.proposals.actionImpact.decisionDeadlineText', {
+        defaultMessage: 'Decision deadline: {label}',
+        values: { label },
+      }),
     });
   }
 
