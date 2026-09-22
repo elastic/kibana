@@ -21,7 +21,7 @@ describe('buildEpisodeActionsQuery', () => {
     expect(queryString).toContain('last_assignee_uid = LAST(assignee_value');
     expect(queryString).toContain('last_ack_actor = LAST(ack_actor');
     expect(queryString).toContain(
-      'last_deactivate_action = LAST(action_type, @timestamp) WHERE action_type IN ("deactivate", "activate")'
+      'last_deactivate_action = LAST(action_type, @timestamp) WHERE (action_type IN ("deactivate", "activate"))'
     );
     expect(queryString).toContain('last_deactivate_actor = LAST(deactivate_actor');
     expect(queryString).toContain('BY episode_id, rule_id, group_hash');
