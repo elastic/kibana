@@ -42,47 +42,40 @@ triggers:
             name:
               type: string
               minLength: 1
-              maxLength: 256
-              description: Rule name.
+              description: Rule name. Non-empty, as the detection engine requires.
             description:
               type: string
               minLength: 1
-              maxLength: 32768
-              description: Rule description.
+              description: Rule description. Non-empty, as the detection engine requires.
             query:
               type: string
               minLength: 1
-              maxLength: 65536
               description: ES|QL query the rule runs; it names its own source.
             interval:
               type: string
-              maxLength: 64
             from:
               type: string
-              maxLength: 64
             to:
               type: string
-              maxLength: 64
             severity:
               type: string
               enum: ["low", "medium", "high", "critical"]
             risk_score:
+              # Mirrors the engine's own `RiskScore`, an integer from 0 to 100. A
+              # fractional score passes a bare `number` here and is only rejected
+              # when the rule is created, after an analyst has already approved it.
               type: integer
               minimum: 0
               maximum: 100
             threat:
               type: array
-              maxItems: 20
               items:
                 type: object
                 additionalProperties: true
             tags:
               type: array
-              maxItems: 50
               items:
                 type: string
-                minLength: 1
-                maxLength: 256
           required:
             - type
             - language

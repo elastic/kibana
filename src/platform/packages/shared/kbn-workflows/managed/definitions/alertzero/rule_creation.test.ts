@@ -82,16 +82,21 @@ describe('Detection Rule Creation worker', () => {
       const props = action.triggers?.[0]?.inputs?.properties as Record<
         string,
         {
-          properties?: Record<string, { enum?: string[]; maxLength?: number; minLength?: number }>;
+          properties?: Record<string, Record<string, unknown>>;
           required?: string[];
           additionalProperties?: boolean;
         }
       >;
       expect(props.actionInput.properties?.type?.enum).toEqual(['esql']);
       expect(props.actionInput.properties?.language?.enum).toEqual(['esql']);
-      expect(props.actionInput.properties?.name?.maxLength).toBe(256);
-      expect(props.actionInput.properties?.query?.maxLength).toBe(65536);
-      expect(props.actionInput.properties?.query?.minLength).toBe(1);
+      // The engine requires a non-empty name and description, and an integer risk
+      // score; the action mirrors that so a draft it would reject never reaches an
+      // analyst. Nothing here is stricter than the engine itself.
+      expect(props.actionInput.properties?.name?.minLength).toBe(1);
+      expect(props.actionInput.properties?.description?.minLength).toBe(1);
+      expect(props.actionInput.properties?.risk_score).toEqual(
+        expect.objectContaining({ type: 'integer', minimum: 0, maximum: 100 })
+      );
       expect(props.actionInput.additionalProperties).toBe(false);
       expect(props.actionInput.required).toEqual(
         expect.arrayContaining(['type', 'language', 'name', 'description', 'query'])

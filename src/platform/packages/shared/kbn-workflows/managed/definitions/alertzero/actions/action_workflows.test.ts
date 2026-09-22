@@ -42,6 +42,11 @@ interface ActionYaml {
   steps: YamlStep[];
 }
 
+// The three rule actions this workflow set owns. The universal contract — tag,
+// valid actionMetadata, one actionInput object, explicit output — is asserted for
+// every registered action by definitions/action_workflows.test.ts, which discovers
+// them by tag. What is left here is specific to these three: they always gate, and
+// they carry a rule body the detection engine has to accept.
 const ACTIONS = [
   ALERTZERO_ACTION_CREATE_RULE_WORKFLOW,
   ALERTZERO_ACTION_ENABLE_RULE_WORKFLOW,
@@ -82,21 +87,12 @@ describe('AlertZero action workflows', () => {
         expect(trigger?.inputs?.properties?.actionInput?.required?.length).toBeGreaterThan(0);
       });
 
-      // Unknown keys are rejected when the proposal is created, not when it is applied.
+      // Unknown keys are rejected when the proposal is created, not when it is applied,
+      // so a drafted body carrying a field the action cannot honour never reaches an
+      // analyst.
       it('rejects unknown fields on actionInput, so they fail at proposal creation', () => {
         const [trigger] = yaml.triggers ?? [];
         expect(trigger?.inputs?.properties?.actionInput?.additionalProperties).toBe(false);
-      });
-
-      it('bounds every actionInput string so an unbounded value fails at proposal creation', () => {
-        const props = yaml.triggers?.[0]?.inputs?.properties?.actionInput?.properties ?? {};
-        const uncapped = Object.entries(props)
-          .filter(
-            ([, schema]) =>
-              schema.type === 'string' && schema.maxLength == null && schema.enum == null
-          )
-          .map(([name]) => name);
-        expect(uncapped).toEqual([]);
       });
 
       it('ends in an explicit workflow.output', () => {

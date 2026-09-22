@@ -95,13 +95,10 @@ steps:
             properties:
               name:
                 type: string
-                maxLength: 256
               description:
                 type: string
-                maxLength: 32768
               query:
                 type: string
-                maxLength: 65536
               language:
                 type: string
                 enum: [esql]
@@ -110,32 +107,28 @@ steps:
                 enum: [esql]
               interval:
                 type: string
-                maxLength: 64
               from:
                 type: string
-                maxLength: 64
               to:
                 type: string
-                maxLength: 64
               severity:
                 type: string
                 enum: [low, medium, high, critical]
               risk_score:
+                # Integer, as the detection engine's own `RiskScore` is; the create
+                # action rejects a fractional score before it reaches an analyst.
                 type: integer
                 minimum: 0
                 maximum: 100
               threat:
                 type: array
-                maxItems: 20
                 items:
                   type: object
                   additionalProperties: true
               tags:
                 type: array
-                maxItems: 50
                 items:
                   type: string
-                  maxLength: 256
             required:
               - name
               - description
@@ -151,10 +144,8 @@ steps:
               - tags
           attachment_id:
             type: string
-            maxLength: 512
           attachment_version:
             type: number
-            minimum: 0
         required:
           - rule
           - attachment_id
