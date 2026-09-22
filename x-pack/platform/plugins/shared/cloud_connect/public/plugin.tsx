@@ -42,7 +42,7 @@ export class CloudConnectedPlugin
   private readonly telemetry = new CloudConnectTelemetryService();
   private homeSetup?: HomePublicPluginSetup;
   private managementSetup?: ManagementSetup;
-  private isEch = false;
+  private shouldShowEchAutoOpsBanner = false;
   private echDeploymentUrl?: string;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -53,12 +53,12 @@ export class CloudConnectedPlugin
     core: CoreSetup<CloudConnectedStartDeps>,
     plugins: CloudConnectedSetupDeps
   ): CloudConnectedPluginSetup {
-    const isEch =
+    const shouldShowEchAutoOpsBanner =
       plugins.cloud?.isElasticCloudHosted === true &&
       plugins.cloud?.isFedrampHigh !== true;
 
-    if (isEch) {
-      this.isEch = true;
+    if (shouldShowEchAutoOpsBanner) {
+      this.shouldShowEchAutoOpsBanner = true;
       this.echDeploymentUrl = plugins.cloud?.deploymentUrl;
       this.managementSetup = plugins.management;
       return {};
@@ -108,7 +108,7 @@ export class CloudConnectedPlugin
   }
 
   public start(core: CoreStart): CloudConnectedPluginStart {
-    const useCloudConnectStatus = this.isEch
+    const useCloudConnectStatus = this.shouldShowEchAutoOpsBanner
       ? createUseEchAutoOpsStatusHook(this.echDeploymentUrl)
       : createUseCloudConnectStatusHook({ http: core.http });
 
