@@ -221,10 +221,9 @@ test.describe('Maintenance window create form', { tag: tags.stateful.classic }, 
     await page.testSubj.click('alertingV2ScopedQuerySwitch');
     await expect(page.testSubj.locator('maintenanceWindowAlertingV2FilterInput')).toBeVisible();
 
-    // Enter a KQL episode filter.
-    const episodeInput = page.testSubj
-      .locator('maintenanceWindowAlertingV2FilterInput')
-      .locator('[data-test-subj="queryInput"]');
+    // Enter a KQL episode filter. The QueryStringInput renders with the supplied dataTestSubj
+    // directly on the text input element (it replaces the default 'queryInput' test-subj).
+    const episodeInput = page.testSubj.locator('maintenanceWindowAlertingV2FilterInput');
     await episodeInput.fill('episode_id: "test-episode"');
     await episodeInput.press('Enter');
 
