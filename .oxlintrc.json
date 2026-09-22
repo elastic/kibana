@@ -75,10 +75,52 @@
       "excludeFiles": ["src/platform/packages/shared/kbn-scout/test/**"],
       "rules": {
         "@kbn/eslint/scout_no_describe_configure": "error",
+        "@kbn/eslint/scout_max_one_describe": "error",
+        "@kbn/eslint/scout_no_core_settings_in_space_test": "warn",
         "@kbn/eslint/scout_no_deprecated_tags": "error",
         "@kbn/eslint/scout_no_at_in_test_titles": "warn",
         "@kbn/eslint/scout_no_promise_all_with_playwright_apis": "error",
+        "@kbn/eslint/scout_no_locators": ["error", { "restricted": ["globalLoadingIndicator"] }],
         "@kbn/eslint/require_include_in_check_a11y": "warn"
+      }
+    },
+    {
+      "files": [
+        "src/platform/plugins/shared/**/*.ts",
+        "x-pack/solutions/**/*.ts",
+        "x-pack/plugins/**/*.ts",
+        "x-pack/platform/plugins/shared/**/*.ts"
+      ],
+      "excludeFiles": [
+        "**/*.{test,spec}.ts",
+        "**/*.test.ts",
+        "**/test/**",
+        "**/tests/**",
+        "**/__tests__/**",
+        "**/scripts/**",
+        "**/e2e/**",
+        "**/cypress/**",
+        "**/ftr_e2e/**",
+        "**/.storybook/**",
+        "**/json_schemas/**",
+        "src/platform/plugins/shared/telemetry/**",
+        "x-pack/solutions/security/packages/test-api-clients/**",
+        "x-pack/platform/plugins/shared/automatic_import/**"
+      ],
+      "rules": {
+        "@kbn/eslint/require_kbn_fs": [
+          "error",
+          {
+            "restrictedMethods": [
+              "writeFile",
+              "writeFileSync",
+              "createWriteStream",
+              "appendFile",
+              "appendFileSync"
+            ],
+            "disallowedMessage": "Use `@kbn/fs` for file write operations instead of direct `fs` in production code"
+          }
+        ]
       }
     },
     {
