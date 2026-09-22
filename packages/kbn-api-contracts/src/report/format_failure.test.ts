@@ -85,6 +85,35 @@ describe('formatFailure', () => {
     expect(output).not.toContain('Informational — not blocking merge');
   });
 
+  it('lists report-only changes separately and excludes them from the count', () => {
+    const output = formatFailure([
+      stableEntry('/api/old'),
+      {
+        ...stableEntry(
+          '/api/cases/{caseId}/user_actions/_find',
+          'added a variant to payload oneOf'
+        ),
+        method: 'get',
+        oasdiffId: 'response-property-one-of-added',
+        reportOnly: true,
+        policyReason: 'Adding a variant to a response oneOf is additive.',
+      },
+    ]);
+
+    expectOutputContains(
+      output,
+      // count reflects only the gating change, even though both are stable tier
+      'Detected 1 breaking change(s) in stable/tech_preview APIs (1 stable, 0 tech_preview)',
+      'Kibana treats as additive',
+      '/api/cases/{caseId}/user_actions/_find',
+      'Why this does not block: Adding a variant to a response oneOf is additive.'
+    );
+  });
+
+  it('omits the report-only section when no rule was demoted', () => {
+    expect(formatFailure([stableEntry('/api/old')])).not.toContain('Kibana treats as additive');
+  });
+
   it('produces deterministic output for the same input', () => {
     const entries = [stableEntry('/api/test')];
 

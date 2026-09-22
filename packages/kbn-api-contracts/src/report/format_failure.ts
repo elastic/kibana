@@ -48,6 +48,10 @@ const formatEntry = (entry: ImpactReportEntry, idx: number): string[] => {
     lines.push(`   Method: ${entry.method.toUpperCase()}`);
   }
 
+  if (entry.reportOnly && entry.policyReason) {
+    lines.push(`   Why this does not block: ${entry.policyReason}`);
+  }
+
   return [...lines, ''];
 };
 
@@ -61,20 +65,37 @@ break. They are listed for visibility only and do not fail this check.
 
 `.split('\n');
 
+const REPORT_ONLY_HEADING = `
+────────────────────────────────────────────────────────────────────────────
+
+Informational — not blocking merge:
+
+The following change(s) match oasdiff rules Kibana treats as additive, so they
+do not fail this check. They are listed so the owning team can decide whether a
+release note is still worth adding.
+
+`.split('\n');
+
 /**
  * Format the CI-log summary for detected breaking changes. Gating tiers (stable
  * first, then tech_preview) lead the report and drive the summary count;
- * experimental changes, if any, follow in a clearly non-blocking section. Entries
- * are already tier-classified by check_contracts, so this is presentation only.
+ * experimental changes and report-only rules, if any, follow in clearly
+ * non-blocking sections. Entries are already tier-classified and policy-labeled
+ * by check_contracts, so this is presentation only.
  */
 export function formatFailure(entries: ImpactReportEntry[]): string {
-  const stable = entries.filter((e) => e.tier === 'stable');
-  const techPreview = entries.filter((e) => e.tier === 'tech_preview');
-  const experimental = entries.filter((e) => e.tier === 'experimental');
+  const reportOnly = entries.filter((e) => e.reportOnly);
+  const gatingCandidates = entries.filter((e) => !e.reportOnly);
+  const stable = gatingCandidates.filter((e) => e.tier === 'stable');
+  const techPreview = gatingCandidates.filter((e) => e.tier === 'tech_preview');
+  const experimental = gatingCandidates.filter((e) => e.tier === 'experimental');
   const gating = [...stable, ...techPreview];
 
   const experimentalSection =
     experimental.length > 0 ? [...EXPERIMENTAL_HEADING, ...experimental.flatMap(formatEntry)] : [];
+
+  const reportOnlySection =
+    reportOnly.length > 0 ? [...REPORT_ONLY_HEADING, ...reportOnly.flatMap(formatEntry)] : [];
 
   return [
     ...HEADER,
@@ -83,6 +104,7 @@ export function formatFailure(entries: ImpactReportEntry[]): string {
     '',
     ...gating.flatMap(formatEntry),
     ...experimentalSection,
+    ...reportOnlySection,
     ...FOOTER,
   ].join('\n');
 }
