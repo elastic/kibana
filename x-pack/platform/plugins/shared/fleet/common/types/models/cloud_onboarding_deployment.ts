@@ -76,7 +76,6 @@ export type CreateCloudOnboardingDeploymentInput = Omit<
   | 'deploymentId'
   | 'deploymentName'
   | 'packagePolicyIds'
-  | 'agentPolicyIds'
   | 'apiKeyId'
 >;
 

@@ -154,6 +154,12 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
               globalRegion,
               dataFormat,
               authMethod: toSOAuthMethod(agentCredentialMethod),
+              // For existing-policy mode, the target policy ids are known before the deploy starts.
+              // Persisting them on create means a mid-deploy tab-close leaves a record that hydrates
+              // back into existing mode rather than incorrectly creating a new agent policy.
+              ...(agentHostsMode === 'existing' && selectedAgentPolicyIds?.length
+                ? { agentPolicyIds: selectedAgentPolicyIds }
+                : {}),
             })) ?? undefined;
           if (onboardingDeploymentId) persistDeploymentId(onboardingDeploymentId);
         }
@@ -234,6 +240,9 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
               string,
               Record<string, unknown>
             >,
+            // Refresh authMethod so a credential-method change between deploys (Back→change→Next)
+            // is reflected on resume rather than presenting the original method's form.
+            authMethod: toSOAuthMethod(agentCredentialMethod),
             status: mergedFailed.length === 0 ? 'succeeded' : 'failed',
           });
         }

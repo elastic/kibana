@@ -151,7 +151,8 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
     schema.arrayOf(schema.string(), {
       maxSize: 100,
       meta: {
-        description: 'Package policy IDs created for managed_integration services.',
+        description:
+          'Package policy IDs created for this deployment (managed_integration and agent_based).',
       },
     })
   ),
@@ -225,6 +226,15 @@ export const CreateCloudOnboardingDeploymentRequestSchema = {
         }
       )
     ),
+    agentPolicyIds: schema.maybe(
+      schema.arrayOf(schema.string({ maxLength: 255 }), {
+        maxSize: 1000,
+        meta: {
+          description:
+            'Agent policy IDs for agent_based existing-policy deploys. Provided on create so that a mid-deploy tab-close leaves a record that hydrates back into existing mode.',
+        },
+      })
+    ),
   }),
 };
 
@@ -283,6 +293,23 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
     attemptCount: schema.maybe(
       schema.number({ min: 1, meta: { description: 'Incremented by callers performing a retry.' } })
     ),
+    authMethod: schema.maybe(
+      schema.oneOf(
+        [
+          schema.literal('identity_federation'),
+          schema.literal('static_keys'),
+          schema.literal('temporary_keys'),
+          schema.literal('shared_credentials'),
+          schema.literal('assume_role'),
+        ],
+        {
+          meta: {
+            description:
+              'Authentication method. Refreshed on each successful deploy so a credential-method change between deploys is reflected on resume.',
+          },
+        }
+      )
+    ),
     agentPolicyIds: schema.maybe(
       schema.arrayOf(schema.string({ maxLength: 255 }), {
         maxSize: 1000,
@@ -293,7 +320,13 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
       })
     ),
     packagePolicyIds: schema.maybe(
-      schema.arrayOf(schema.string({ maxLength: 255 }), { maxSize: 100 })
+      schema.arrayOf(schema.string({ maxLength: 255 }), {
+        maxSize: 100,
+        meta: {
+          description:
+            'Package policy IDs created for this deployment (managed_integration and agent_based).',
+        },
+      })
     ),
     apiKeyId: schema.maybe(schema.string({ maxLength: 255 })),
     ecfStacks: schema.maybe(

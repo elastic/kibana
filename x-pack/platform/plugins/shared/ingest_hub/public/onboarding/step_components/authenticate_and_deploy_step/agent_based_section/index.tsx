@@ -207,13 +207,14 @@ export function AgentBasedSection({
 
   // ── Next-button readiness ─────────────────────────────────────────────────
   // Tells the parent step whether its Next button should be enabled.
-  // Note: the isPolicyCreated branch is intentionally NOT guarded by isCredentialReady.
-  // Hydration deliberately avoids seeding agentPolicyId (commit 76e342a), so isPolicyCreated
-  // is false on resume and this branch is unreachable via ?deploymentId=. Fixing the
-  // agentHostsMode branch (below) is sufficient to prevent the credential-omission bug on resume.
-  // The isPolicyCreated case covers new-policy mode only, after the flyout has created the policy.
+  // All three branches require isCredentialReady:
+  // - isPolicyCreated: flyout created the policy; agentCredentialsRef resets to undefined on every
+  //   mount, so navigating to step 4 and back clears in-memory secrets. An incremental deploy
+  //   (add service after first success) must re-enter credentials.
+  // - agentHostsMode === 'existing': user selected an existing policy; credentials always in-memory.
+  // - new-policy: credentials must be entered before the flyout runs.
   const isNextReady = isPolicyCreated
-    ? true // policy exists; Next will attach package policies to it
+    ? isCredentialReady
     : agentHostsMode === 'existing'
     ? selectedAgentPolicyIds.length > 0 && isCredentialReady
     : !isPolicyNameLoading && isPolicyFormValid && isCredentialReady;
@@ -303,8 +304,9 @@ export function AgentBasedSection({
             </p>
           </EuiText>
 
-          {/* Credential fields — show until the policy is created; in existing mode always show. */}
-          {(!isPolicyCreated || agentHostsMode === 'existing') && (
+          {/* Credential fields — show in existing mode always; in new-policy mode until the policy
+              is created AND credentials are in memory (re-show after Back navigation remount). */}
+          {(!isPolicyCreated || agentHostsMode === 'existing' || !isCredentialReady) && (
             <>
               <EuiSpacer size="m" />
 

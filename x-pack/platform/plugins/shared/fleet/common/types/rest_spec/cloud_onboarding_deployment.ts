@@ -24,6 +24,7 @@ export interface CreateCloudOnboardingDeploymentRequest {
     globalRegion?: string;
     dataFormat?: 'ecs' | 'otel';
     authMethod?: CloudOnboardingDeploymentAuthMethod;
+    agentPolicyIds?: string[];
   };
 }
 
@@ -45,6 +46,7 @@ export interface UpdateCloudOnboardingDeploymentRequest {
     serviceVars?: Record<string, Record<string, unknown>>;
     services?: string[];
     attemptCount?: number;
+    authMethod?: CloudOnboardingDeploymentAuthMethod;
     agentPolicyIds?: string[];
     packagePolicyIds?: string[];
     apiKeyId?: string;
