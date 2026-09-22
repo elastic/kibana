@@ -297,6 +297,51 @@ export default function ({ getService }: FtrProviderContext) {
                     )
                   );
               });
+
+              describe('maximum number of rules', () => {
+                // Kept in sync with MAX_RULES in validate_yara.c. Over-limit sources are rejected
+                // before rules are collected, so later rules are not silently skipped.
+                const maxNumberOfRulesPerEntry = 256;
+
+                const generateNumberOfRules = (count: number) =>
+                  Array.from({ length: count }, (_, i) => `rule r${i}{condition:true}`).join('');
+
+                it(`accepts ${maxNumberOfRulesPerEntry} rules`, async () => {
+                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                    customYaraSignatureApiCall.path
+                  )
+                    .set('kbn-xsrf', 'true')
+                    .send(
+                      customYaraSignatureApiCall.getBody(
+                        generateNumberOfRules(maxNumberOfRulesPerEntry)
+                      )
+                    )
+                    .expect(200);
+                });
+
+                it(`rejects more than ${maxNumberOfRulesPerEntry} rules`, async () => {
+                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                    customYaraSignatureApiCall.path
+                  )
+                    .set('kbn-xsrf', 'true')
+                    .send(
+                      customYaraSignatureApiCall.getBody(
+                        generateNumberOfRules(maxNumberOfRulesPerEntry + 1)
+                      )
+                    )
+                    .expect(400)
+                    .expect(anEndpointArtifactError)
+                    .expect(
+                      anErrorMessageWith(
+                        new RegExp(
+                          `Invalid YARA rules \\(libyara [0-9.]+\\), 1 error found: YARA source contains ${
+                            maxNumberOfRulesPerEntry + 1
+                          } rules; maximum is ${maxNumberOfRulesPerEntry}`
+                        )
+                      )
+                    );
+                });
+              });
             });
 
             describe('Rule identifiers', () => {
