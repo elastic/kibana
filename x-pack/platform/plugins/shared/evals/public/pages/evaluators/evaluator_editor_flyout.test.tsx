@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { EvaluatorEditorFlyout } from './evaluator_editor_flyout';
 import {
   useCreateEvaluator,
@@ -558,6 +558,84 @@ describe('EvaluatorEditorFlyout', () => {
         await screen.findByTestId('evalsEvaluatorTestError', undefined, { timeout: 8000 })
       ).toHaveTextContent('No supported instrumentation profile could resolve this trace.');
       expect(resolveMutateAsync).toHaveBeenCalledTimes(3);
+      expect(testMutateAsync).not.toHaveBeenCalled();
+    });
+
+    it('keeps saving locked in the pause between probe attempts', async () => {
+      // Neither mutation is in flight during the delay, so a flag derived only from them
+      // would hand the user a Save button in the middle of a run.
+      const unresolvable = {
+        recommended_instrumentation: null,
+        profiles: [
+          {
+            profile: 'elastic-inference',
+            evidence: {
+              user_query: { status: 'not_found' },
+              agent_response: { status: 'not_found' },
+              tool_calls: { status: 'not_found' },
+            },
+          },
+        ],
+      };
+      let resolveProbe: (value: unknown) => void = () => {};
+      resolveMutateAsync
+        .mockImplementationOnce(
+          () =>
+            new Promise((resolve) => {
+              resolveProbe = resolve;
+            })
+        )
+        .mockResolvedValue(unresolvable);
+      renderCreate();
+      fillValidDraft();
+      chooseConnector();
+      setField('evalsEvaluatorTraceId', TRACE_ID);
+
+      runTest();
+      await waitFor(() => expect(screen.getByTestId('evalsEvaluatorSave')).toBeDisabled());
+
+      await act(async () => {
+        resolveProbe(unresolvable);
+      });
+
+      // The first attempt has settled and the second has not started.
+      expect(screen.getByTestId('evalsEvaluatorSave')).toBeDisabled();
+    });
+
+    it('abandons a run when the flyout is closed', async () => {
+      let resolveProbe: (value: unknown) => void = () => {};
+      resolveMutateAsync.mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveProbe = resolve;
+          })
+      );
+      const { unmount } = renderCreate();
+      fillValidDraft();
+      chooseConnector();
+      setField('evalsEvaluatorTraceId', TRACE_ID);
+
+      runTest();
+      await waitFor(() => expect(resolveMutateAsync).toHaveBeenCalled());
+
+      unmount();
+      await act(async () => {
+        resolveProbe({
+          recommended_instrumentation: { profile: 'elastic-inference' },
+          profiles: [
+            {
+              profile: 'elastic-inference',
+              evidence: {
+                user_query: { status: 'found' },
+                agent_response: { status: 'found' },
+                tool_calls: { status: 'found' },
+              },
+            },
+          ],
+        });
+      });
+
+      // A closed flyout must not spend a model call on a draft nobody is looking at.
       expect(testMutateAsync).not.toHaveBeenCalled();
     });
 

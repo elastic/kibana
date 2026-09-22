@@ -256,14 +256,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ]);
       });
 
-      it('writes a new minor version without replacing the old one', async () => {
+      it('writes a new version without replacing the old one', async () => {
         const { body } = await adminClient
           .put(evaluatorPath(name))
           .send({ description: 'Updated tone evaluator' })
           .expect(200);
         const updated = body as UpdateEvaluatorResponse;
 
-        expect(updated.evaluator.version).to.eql('1.1.0');
+        // A patch: the description is not shown to the judge, so scores still compare.
+        expect(updated.evaluator.version).to.eql('1.0.1');
         expect(updated.evaluator.description).to.eql('Updated tone evaluator');
 
         const { body: oldBody } = await adminClient
@@ -272,7 +273,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .expect(200);
         const oldVersion = oldBody as GetEvaluatorResponse;
         expect(oldVersion.evaluator.description).to.eql('Initial tone evaluator');
-        expect(oldVersion.evaluator.versions).to.eql(['1.1.0', '1.0.0']);
+        expect(oldVersion.evaluator.versions).to.eql(['1.0.1', '1.0.0']);
       });
 
       it('rejects an update with no changes', async () => {
@@ -284,7 +285,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const response = body as ListEvaluatorsResponse;
         const found = response.evaluators.find((evaluator) => evaluator.name === name);
 
-        expect(found?.version).to.eql('1.1.0');
+        expect(found?.version).to.eql('1.0.1');
         expect(found?.origin).to.eql('user_defined');
       });
 
@@ -305,7 +306,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         await adminClient.get(evaluatorPath(name)).query({ version: '1.0.0' }).expect(404);
         const { body: latestBody } = await adminClient.get(evaluatorPath(name)).expect(200);
-        expect((latestBody as GetEvaluatorResponse).evaluator.version).to.eql('1.1.0');
+        expect((latestBody as GetEvaluatorResponse).evaluator.version).to.eql('1.0.1');
       });
 
       it('deletes every remaining version', async () => {

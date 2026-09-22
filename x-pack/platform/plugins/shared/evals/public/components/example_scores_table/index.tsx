@@ -141,19 +141,16 @@ const splitScoreName = (scoreName: string): { evaluatorName: string; scoreLabel:
   };
 };
 
+/**
+ * A missing value counts as its own entry rather than being dropped, so a group that mixes
+ * scores carrying the attribute with scores that lack it cannot collapse onto the one value
+ * that happens to be present and label the others with it.
+ */
 const collectModelIds = (scores: EvaluationExperimentDatasetExample['scores']): Set<string> =>
-  new Set(
-    scores
-      .map((scoreDoc) => scoreDoc.evaluator.model?.id)
-      .filter((modelId): modelId is string => Boolean(modelId))
-  );
+  new Set(scores.map((scoreDoc) => scoreDoc.evaluator.model?.id ?? ''));
 
 const collectVersions = (scores: EvaluationExperimentDatasetExample['scores']): Set<string> =>
-  new Set(
-    scores
-      .map((scoreDoc) => scoreDoc.evaluator.version)
-      .filter((version): version is string => Boolean(version))
-  );
+  new Set(scores.map((scoreDoc) => scoreDoc.evaluator.version ?? ''));
 
 interface EvaluatorScoreGroup {
   evaluatorName: string;

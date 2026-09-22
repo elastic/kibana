@@ -668,6 +668,59 @@ describe('EvaluatorDefinitionClient', () => {
       expect(updated.updated_at).toBe(updated.created_at);
     });
 
+    it('reapplies onto a concurrent edit that derived a different level', async () => {
+      const { client, docs, index } = createClient();
+      const created = await client.create({ name: 'tone', description: 'Tone', judge: JUDGE });
+      const racingJudge: LlmJudgeConfig = { ...JUDGE, evidence: ['input', 'response'] };
+
+      // Two writers from 1.0.0: this one patches the description, the other takes a major for
+      // changing the evidence. Their ids differ, so nothing collides and both writes land.
+      index.mockImplementationOnce(async (params: Record<string, unknown>) => {
+        docs.set(getEvaluatorDefinitionId(DEFAULT_SPACE_ID, 'tone', '2.0.0'), {
+          ...docs.get(created.id)!,
+          version: '2.0.0',
+          judge: racingJudge,
+          created_at: '2126-01-01T00:00:00.000Z',
+        });
+        docs.set(params.id as string, params.document as EvaluatorStorageProperties);
+        return { result: 'created' };
+      });
+
+      const updated = await client.update('tone', { description: 'Sharper' });
+
+      // Landing below the head would have left the description out of what everything reads.
+      expect(updated.version).toBe('2.0.1');
+      expect(updated.description).toBe('Sharper');
+      expect(updated.judge).toEqual(racingJudge);
+      await expect(client.getLatest('tone')).resolves.toEqual(
+        expect.objectContaining({ version: '2.0.1', description: 'Sharper' })
+      );
+    });
+
+    it('settles without a new version when the head already carries the edit', async () => {
+      const { client, docs, index } = createClient();
+      const created = await client.create({ name: 'tone', description: 'Tone', judge: JUDGE });
+      const ownJudge: LlmJudgeConfig = { ...JUDGE, evidence: ['input', 'response'] };
+
+      // The racing writer carried this judge forward onto a higher version, so re-reading
+      // finds the edit already applied and there is nothing left to write.
+      index.mockImplementationOnce(async (params: Record<string, unknown>) => {
+        docs.set(getEvaluatorDefinitionId(DEFAULT_SPACE_ID, 'tone', '2.0.1'), {
+          ...docs.get(created.id)!,
+          version: '2.0.1',
+          judge: ownJudge,
+          created_at: '2126-01-01T00:00:00.000Z',
+        });
+        docs.set(params.id as string, params.document as EvaluatorStorageProperties);
+        return { result: 'created' };
+      });
+
+      const updated = await client.update('tone', { judge: ownJudge });
+
+      expect(updated.version).toBe('2.0.1');
+      expect(docs.has(getEvaluatorDefinitionId(DEFAULT_SPACE_ID, 'tone', '2.0.2'))).toBe(false);
+    });
+
     it('bumps past a version another writer took first', async () => {
       const { client, docs, index } = createClient();
       const created = await client.create({ name: 'tone', description: 'Tone', judge: JUDGE });

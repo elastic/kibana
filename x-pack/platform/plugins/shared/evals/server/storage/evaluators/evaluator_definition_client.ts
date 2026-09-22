@@ -325,7 +325,6 @@ export class EvaluatorDefinitionClient {
 
       try {
         await this.storage.index({ id, op_type: 'create', document, refresh: true });
-        return toDefinition(id, document);
       } catch (error) {
         if (!isConflict(error)) {
           throw error;
@@ -334,7 +333,21 @@ export class EvaluatorDefinitionClient {
         this.logger.debug(
           `Version ${nextVersion} of evaluator "${name}" was taken by a concurrent update; retrying (attempt ${attempt})`
         );
+        continue;
       }
+
+      // The id only collides with a writer that derived the same level, so a concurrent edit
+      // bumping a different one lands beside this write rather than against it. Whoever ends
+      // up below the head has to reapply onto it, or their edit is missing from the version
+      // everything else reads.
+      const latest = await this.getLatest(name);
+      if (latest?.version === nextVersion) {
+        return toDefinition(id, document);
+      }
+
+      this.logger.debug(
+        `Version ${nextVersion} of evaluator "${name}" was overtaken by ${latest?.version}; reapplying (attempt ${attempt})`
+      );
     }
 
     throw new Error(

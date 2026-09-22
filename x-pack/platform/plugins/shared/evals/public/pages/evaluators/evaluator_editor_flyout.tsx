@@ -37,10 +37,10 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { NotificationsStart } from '@kbn/core/public';
 import {
   UserDefinedEvaluatorDraft,
-  type EvaluationInstrumentationProfile,
   type JudgeEvidence,
   type JudgeScore,
   type LlmJudgeConfig,
+  type ResolveInstrumentationResponse,
   type TestEvaluatorResponse,
 } from '@kbn/evals-common';
 import {
@@ -80,6 +80,9 @@ const EMPTY_SCORE: ScoreFormValue = {
   description: '',
   labels: '',
 };
+
+/** Taken from the probe's own response, so the two cannot drift apart. */
+type ProbedProfile = ResolveInstrumentationResponse['profiles'][number]['profile'];
 
 const TRACE_ID_PATTERN = /^[0-9a-fA-F]{32}$/;
 const PROFILE_PROBE_ATTEMPTS = 3;
@@ -147,6 +150,18 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
   const [testError, setTestError] = useState<{ title: string; message: string } | null>(null);
   const [testResult, setTestResult] = useState<TestEvaluatorResponse['result'] | null>(null);
   const testRunIdRef = useRef(0);
+  // Spans the whole run. The mutation flags go quiet between probe attempts, which would
+  // otherwise re-enable Save and let a second run start on top of the first.
+  const [isRunningTest, setIsRunningTest] = useState(false);
+
+  useEffect(
+    // Closing the flyout has to invalidate the run in flight, or the probe loop carries on
+    // and can still reach the model for a draft nobody is looking at.
+    () => () => {
+      testRunIdRef.current += 1;
+    },
+    []
+  );
 
   useEffect(() => {
     // Any edit invalidates a result or error describing the previous draft, including one
@@ -338,8 +353,9 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
       return;
     }
 
+    setIsRunningTest(true);
     try {
-      let resolvedProfile: EvaluationInstrumentationProfile | undefined;
+      let resolvedProfile: ProbedProfile | undefined;
       let probeError: unknown;
 
       // The probe reports the documents indexed right now, while `_test` waits for the
@@ -394,11 +410,16 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
         return;
       }
       setTestError({ title: i18n.TEST_ERROR_TITLE, message: getErrorMessage(error) });
+    } finally {
+      // A newer run owns the flag by then, and an unmounted flyout has no state to set.
+      if (!isStaleRun()) {
+        setIsRunningTest(false);
+      }
     }
   };
 
   const isSaving = createEvaluator.isLoading || updateEvaluator.isLoading;
-  const isTesting = testEvaluator.isLoading || resolveInstrumentation.isLoading;
+  const isTesting = isRunningTest || testEvaluator.isLoading || resolveInstrumentation.isLoading;
   const TestResultCallout = testResult?.status === 'ok' ? KbnSuccessCallout : KbnDangerCallout;
 
   return (
