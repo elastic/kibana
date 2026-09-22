@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-export {
-  BaseActions,
-  hasAvailableActions,
-  type CardActionType,
-  type BaseActionsProps,
-} from './base_actions';
-export { ActionButton } from './action_button';
+export type { EscalationModalMode, EscalationIncidentSummary } from './types';

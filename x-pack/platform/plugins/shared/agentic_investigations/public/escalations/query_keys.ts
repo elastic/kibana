@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-export {
-  BaseActions,
-  hasAvailableActions,
-  type CardActionType,
-  type BaseActionsProps,
-} from './base_actions';
-export { ActionButton } from './action_button';
+export const escalationQueryKeys = {
+  escalations: {
+    all: ['agenticInvestigations', 'escalations'] as const,
+    list: (search?: string) =>
+      [...escalationQueryKeys.escalations.all, 'list', search ?? ''] as const,
+  },
+};

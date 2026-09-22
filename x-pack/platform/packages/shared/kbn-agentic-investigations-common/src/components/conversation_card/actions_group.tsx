@@ -9,7 +9,7 @@ import React, { memo } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { type Investigation } from '../../types';
-import { ActionButton, BaseActions, type BaseActionsProps } from '../actions';
+import { ActionButton, BaseActions, hasAvailableActions, type BaseActionsProps } from '../actions';
 import { ACTIONS_TRANSLATIONS } from '../actions/translations';
 
 export interface ConversationsActionsGroupProps {
@@ -24,6 +24,8 @@ export interface ConversationsActionsGroupProps {
    * be able to resolve one; the control still works as a button without it.
    */
   chatHref?: string;
+  /** When true escalation actions are shown. Requires the manage escalations capability. */
+  canManageEscalations?: boolean;
 }
 
 /**
@@ -32,7 +34,14 @@ export interface ConversationsActionsGroupProps {
  * action, so the card surfaces navigation rather than a decision.
  */
 export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
-  ({ investigation, onClickRecommendedAction, onClickAction, onOpenChat, chatHref }) => {
+  ({
+    investigation,
+    onClickRecommendedAction,
+    onClickAction,
+    onOpenChat,
+    chatHref,
+    canManageEscalations,
+  }) => {
     const { euiTheme } = useEuiTheme();
 
     return (
@@ -46,26 +55,31 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
             data-test-subj="conversationCardOpenInChat"
           />
         </EuiFlexItem>
-        <span
-          aria-hidden="true"
-          css={css({
-            width: '1px',
-            height: euiTheme.size.base,
-            background: euiTheme.colors.backgroundLightText,
-            marginLeft: euiTheme.size.s,
-            marginRight: euiTheme.size.xs,
-            [`@media (max-width: ${euiTheme.breakpoint.m}px)`]: {
-              display: 'none',
-            },
-          })}
-        />
-        <EuiFlexItem grow={false}>
-          <BaseActions
-            investigation={investigation}
-            onClickAction={onClickAction}
-            onClickRecommendedAction={onClickRecommendedAction}
-          />
-        </EuiFlexItem>
+        {hasAvailableActions(investigation, canManageEscalations) && (
+          <>
+            <span
+              aria-hidden="true"
+              css={css({
+                width: '1px',
+                height: euiTheme.size.base,
+                background: euiTheme.colors.backgroundLightText,
+                marginLeft: euiTheme.size.s,
+                marginRight: euiTheme.size.xs,
+                [`@media (max-width: ${euiTheme.breakpoint.m}px)`]: {
+                  display: 'none',
+                },
+              })}
+            />
+            <EuiFlexItem grow={false}>
+              <BaseActions
+                investigation={investigation}
+                onClickAction={onClickAction}
+                onClickRecommendedAction={onClickRecommendedAction}
+                canManageEscalations={canManageEscalations}
+              />
+            </EuiFlexItem>
+          </>
+        )}
       </EuiFlexGroup>
     );
   }
