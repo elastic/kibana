@@ -320,21 +320,28 @@ describe('propagateRoleArnToPackagePolicies', () => {
     expect(agentPolicyService.bumpAgentPoliciesByIds).not.toHaveBeenCalled();
   });
 
-  it('omits package from the update payload when the policy has none', async () => {
+  it('rejects packageless policies before any write', async () => {
+    // packagePolicyService.update throws on policies without a package; the old unit test mocked
+    // that away and claimed we could omit `package` from the payload. Fail fast instead.
     const { package: _package, ...policyWithoutPackage } = makePolicy('a');
-    mockListReturns([policyWithoutPackage]);
+    mockListReturns([policyWithoutPackage, makePolicy('b')]);
 
-    await propagateRoleArnToPackagePolicies({
-      soClient,
-      esClient,
-      connectorId: CONNECTOR_ID,
-      newRoleArn: NEW_ARN,
-    });
+    let caught: CloudConnectorRoleArnPropagationError | undefined;
+    try {
+      await propagateRoleArnToPackagePolicies({
+        soClient,
+        esClient,
+        connectorId: CONNECTOR_ID,
+        newRoleArn: NEW_ARN,
+      });
+    } catch (err) {
+      caught = err as CloudConnectorRoleArnPropagationError;
+    }
 
-    expect(packagePolicyService.update).toHaveBeenCalledTimes(1);
-    const updatePayload = (packagePolicyService.update as jest.Mock).mock.calls[0][3];
-    expect(Object.hasOwn(updatePayload, 'package')).toBe(false);
-    expect(updatePayload.inputs[0].vars.role_arn.value).toBe(NEW_ARN);
+    expect(caught).toBeInstanceOf(CloudConnectorRoleArnPropagationError);
+    expect(caught?.detail.updateFailed).toEqual(['a']);
+    expect(caught?.message).toMatch(/lack.*a package/i);
+    expect(packagePolicyService.update).not.toHaveBeenCalled();
   });
 
   it('is a no-op when no policies reference the connector', async () => {

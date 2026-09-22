@@ -68,9 +68,10 @@ const renderPolicyIds = (ids: string[]): string => {
  * Exit points (in source order):
  *   1. `return` — no package policy references the connector (nothing to do).
  *   2. `return` — policies reference the connector but none carry a `role_arn` variable.
- *   3. `return` — Phase 1 forward writes all succeeded and the agent-policy revision bump
+ *   3. `throw`  — one or more referencing policies lack a `package` (cannot be updated).
+ *   4. `return` — Phase 1 forward writes all succeeded and the agent-policy revision bump
  *      succeeded. Caller is safe to write the connector.
- *   4. `throw`  — Phase 1 had policy failures, or the post-Phase-1 agent-policy bump failed;
+ *   5. `throw`  — Phase 1 had policy failures, or the post-Phase-1 agent-policy bump failed;
  *      successful policy writes are reverted and `CloudConnectorRoleArnPropagationError` is
  *      thrown with `updateFailed` / `revertFailed` id lists. Caller must NOT write the connector.
  */
@@ -128,6 +129,21 @@ export const propagateRoleArnToPackagePolicies = async ({
       `Connector ${connectorId} has ${policies.length} referencing package policies but none carry a role_arn variable; nothing to fan out.`
     );
     return; // exit 2/4: policies reference this connector but hold no role_arn to rewrite
+  }
+
+  // packagePolicyService.update unconditionally rejects policies without a package. Attempting
+  // the write would fail the whole fan-out mid-flight; fail fast before any SO mutation.
+  const packagelessIds = plans
+    .filter((plan) => !plan.policy.package)
+    .map((plan) => plan.policy.id)
+    .sort();
+  if (packagelessIds.length > 0) {
+    throw new CloudConnectorRoleArnPropagationError(
+      `Cannot fan out role ARN for connector ${connectorId}: ${packagelessIds.length} package ${
+        packagelessIds.length === 1 ? 'policy lacks' : 'policies lack'
+      } a package and cannot be updated (ids: ${renderPolicyIds(packagelessIds)}).`,
+      { updateFailed: packagelessIds, revertFailed: [] }
+    );
   }
 
   logger.info(
