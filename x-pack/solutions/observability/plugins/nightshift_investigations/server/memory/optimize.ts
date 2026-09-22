@@ -90,6 +90,37 @@ export interface MemoryMergeSynthesis {
   context: string;
 }
 
+export interface MemoryEditSummary {
+  usefulCount: number;
+  harmfulCount: number;
+  extractionProposedCount: number;
+  standaloneUpsertCount: number;
+  safetySkipCount: number;
+  mergeAttemptCount: number;
+  mergeSuccessCount: number;
+  harmfulArchiveCount: number;
+  mergedSourceArchiveCount: number;
+  writeFailureCount: number;
+}
+
+export interface MemoryOptimizeSummary extends MemoryEditSummary {
+  recalledCount: number;
+  loadedCount: number;
+}
+
+const emptyMemoryEditSummary = (): MemoryEditSummary => ({
+  usefulCount: 0,
+  harmfulCount: 0,
+  extractionProposedCount: 0,
+  standaloneUpsertCount: 0,
+  safetySkipCount: 0,
+  mergeAttemptCount: 0,
+  mergeSuccessCount: 0,
+  harmfulArchiveCount: 0,
+  mergedSourceArchiveCount: 0,
+  writeFailureCount: 0,
+});
+
 export type ProposeMemoryExtractions = (input: {
   transcript: string;
   recalledMemories: MemoryPage[];
@@ -542,10 +573,16 @@ export const applyMemoryEdits = async ({
   synthesizeMemoryGroup?: SynthesizeMemoryGroup;
   now?: () => number;
   logger: Logger;
-}): Promise<void> => {
+}): Promise<MemoryEditSummary> => {
   const recalled = new Set(recalledIds);
   const usefulIds = canonicalizeMemoryLabelIds(labels.useful).filter((id) => recalled.has(id));
   const harmfulIds = canonicalizeMemoryLabelIds(labels.harmful).filter((id) => recalled.has(id));
+  const summary: MemoryEditSummary = {
+    ...emptyMemoryEditSummary(),
+    usefulCount: usefulIds.length,
+    harmfulCount: harmfulIds.length,
+    extractionProposedCount: extractions.length,
+  };
   const droppedUseful = canonicalizeMemoryLabelIds(labels.useful).filter((id) => !recalled.has(id));
   const droppedHarmful = canonicalizeMemoryLabelIds(labels.harmful).filter(
     (id) => !recalled.has(id)
@@ -579,6 +616,7 @@ export const applyMemoryEdits = async ({
   const harmful = new Set(harmfulIds);
   for (const id of archiveIds) {
     await store.archive(id, 'harmful');
+    summary.harmfulArchiveCount += 1;
     logger.debug(`Memory archived ${id} reason=harmful`);
   }
   await store.applyCounterUpdates(updates);
@@ -603,6 +641,7 @@ export const applyMemoryEdits = async ({
     );
     if (looksLikeSecret(`${extra.title}\n${extra.content}`)) {
       logger.warn(`Skipped extraction "${extra.slug}" — content looks like a secret`);
+      summary.safetySkipCount += 1;
       consumedExtracts.add(index);
       continue;
     }
@@ -664,7 +703,8 @@ export const applyMemoryEdits = async ({
       logger.warn('Memory merge skipped — no synthesizer configured');
       continue;
     }
-    await mergeMemoryGroup({
+    summary.mergeAttemptCount += 1;
+    const mergeResult = await mergeMemoryGroup({
       store,
       sources,
       extract: group.extract,
@@ -673,6 +713,11 @@ export const applyMemoryEdits = async ({
       now,
       logger,
     });
+    if (mergeResult.merged) {
+      summary.mergeSuccessCount += 1;
+    }
+    summary.mergedSourceArchiveCount += mergeResult.archivedSourceCount;
+    summary.writeFailureCount += mergeResult.writeFailureCount;
   }
 
   for (let index = 0; index < extractions.length; index++) {
@@ -693,15 +738,24 @@ export const applyMemoryEdits = async ({
         status: existing?.status === 'established' ? 'established' : 'tentative',
         user: 'nightshift-optimizer',
       });
+      summary.standaloneUpsertCount += 1;
       logger.info(`Extracted new memory page: ${extra.slug}`);
       logger.debug(
         `Memory extract upserted ${toMemoryKiId(extra.slug)} contextChars=${task.length}`
       );
     } catch (err) {
+      summary.writeFailureCount += 1;
       logger.warn(`Failed to extract memory "${extra.slug}": ${(err as Error).message}`);
     }
   }
+  return summary;
 };
+
+interface MergeMemoryGroupResult {
+  merged: boolean;
+  archivedSourceCount: number;
+  writeFailureCount: number;
+}
 
 const mergeMemoryGroup = async ({
   store,
@@ -719,7 +773,7 @@ const mergeMemoryGroup = async ({
   synthesizeMemoryGroup: SynthesizeMemoryGroup;
   now: () => number;
   logger: Logger;
-}): Promise<void> => {
+}): Promise<MergeMemoryGroupResult> => {
   let synthesis: MemoryMergeSynthesis;
   try {
     synthesis = await synthesizeMemoryGroup({
@@ -729,23 +783,23 @@ const mergeMemoryGroup = async ({
     });
   } catch (err) {
     logger.warn(`Memory merge synthesis failed: ${(err as Error).message}`);
-    return;
+    return { merged: false, archivedSourceCount: 0, writeFailureCount: 0 };
   }
 
   const content = capMergedContent(synthesis.content);
   if (synthesis.title.length === 0 || content.trim().length === 0) {
     logger.warn('Memory merge aborted — synthesis returned an empty title or content');
-    return;
+    return { merged: false, archivedSourceCount: 0, writeFailureCount: 0 };
   }
   if (looksLikeSecret(`${synthesis.title}\n${content}`)) {
     logger.warn('Memory merge aborted — synthesised content looks like a secret');
-    return;
+    return { merged: false, archivedSourceCount: 0, writeFailureCount: 0 };
   }
   const sourcesHadContext = sources.some((page) => (page.context ?? '').trim().length > 0);
   const hadRecallKey = sourcesHadContext || (extract !== undefined && task.length > 0);
   if (synthesis.context.length === 0 && hadRecallKey) {
     logger.warn('Memory merge aborted — synthesis returned an empty recall context');
-    return;
+    return { merged: false, archivedSourceCount: 0, writeFailureCount: 0 };
   }
 
   const nowSec = now();
@@ -806,13 +860,17 @@ const mergeMemoryGroup = async ({
     });
   } catch (err) {
     logger.warn(`Memory merge failed to write canonical page: ${(err as Error).message}`);
-    return;
+    return { merged: false, archivedSourceCount: 0, writeFailureCount: 1 };
   }
 
+  let archivedSourceCount = 0;
+  let writeFailureCount = 0;
   for (const page of sources) {
     try {
       await store.archive(page.id, 'merged');
+      archivedSourceCount += 1;
     } catch (err) {
+      writeFailureCount += 1;
       logger.warn(
         `Memory merge wrote canonical but failed to archive ${page.id}: ${(err as Error).message}`
       );
@@ -822,6 +880,7 @@ const mergeMemoryGroup = async ({
     `Merged ${sources.map((page) => page.id).join(', ')} into ${toMemoryKiId(slug)}` +
       (extract ? ` (folded extract ${extract.slug})` : '')
   );
+  return { merged: true, archivedSourceCount, writeFailureCount };
 };
 
 export const optimizeMemory = async ({
@@ -842,7 +901,7 @@ export const optimizeMemory = async ({
   userMessage: string;
   assistantMessage: string;
   logger: Logger;
-}): Promise<void> => {
+}): Promise<MemoryOptimizeSummary> => {
   logger.debug(
     `Memory optimize start recalledIds=${recalledIds.length} ` +
       `[${recalledIds.join(', ') || '(none)'}] userChars=${userMessage.length} ` +
@@ -850,7 +909,7 @@ export const optimizeMemory = async ({
   );
   if (recalledIds.length === 0 && assistantMessage.trim().length === 0) {
     logger.info('Memory optimizer skipped — no recalled memories and empty assistant message');
-    return;
+    return { ...emptyMemoryEditSummary(), recalledCount: 0, loadedCount: 0 };
   }
 
   const recalledMemories = (await Promise.all(recalledIds.map((id) => store.get(id)))).filter(
@@ -923,10 +982,14 @@ export const optimizeMemory = async ({
     recalledIds.length === 0
   ) {
     logger.info('Memory optimizer proposed no edits');
-    return;
+    return {
+      ...emptyMemoryEditSummary(),
+      recalledCount: recalledIds.length,
+      loadedCount: recalledMemories.length,
+    };
   }
 
-  await applyMemoryEdits({
+  const editSummary = await applyMemoryEdits({
     store,
     recalledIds,
     recalledMemories,
@@ -937,4 +1000,9 @@ export const optimizeMemory = async ({
     synthesizeMemoryGroup,
     logger,
   });
+  return {
+    ...editSummary,
+    recalledCount: recalledIds.length,
+    loadedCount: recalledMemories.length,
+  };
 };

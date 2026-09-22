@@ -58,6 +58,7 @@ steps:
               sandbox_id: '{{ steps.obtain_sandbox.output.sandbox_id }}'
               prompt: '{{ inputs.prompt }}'
               agent_id: '{{ inputs.agent_id }}'
+              conversation_id: '{{ inputs.conversation_id }}'
   - name: compose_prompt
     type: nightshift.composeHydrateNotifications
     with:

@@ -11,13 +11,32 @@ import { hydrateMemoryWorkspace } from '../memory/register_memory';
 import { memoryMaterializeToSandboxStepDefinition } from './memory_materialize_to_sandbox';
 
 jest.mock('../memory/register_memory', () => ({
-  hydrateMemoryWorkspace: jest.fn().mockResolvedValue(''),
+  hydrateMemoryWorkspace: jest.fn().mockResolvedValue({
+    recalledIds: ['memory_a'],
+    notification: '',
+    summary: {
+      retrievalMode: 'search',
+      searchFallback: false,
+      candidateCount: 2,
+      recalledCount: 1,
+      newPageCount: 1,
+      catalogSize: 3,
+      podReset: false,
+      notificationChars: 0,
+    },
+  }),
 }));
+
+const hydrateMemoryWorkspaceMock = jest.mocked(hydrateMemoryWorkspace);
 
 describe('memoryMaterializeToSandboxStepDefinition', () => {
   const esClient = { search: jest.fn() };
   const getScopedEsClient = jest.fn().mockReturnValue(esClient);
   const mockSession = { writeFiles: jest.fn(), mkdirs: jest.fn() } as unknown as SandboxSession;
+  const telemetry = {
+    reportSemanticMemoryMaterialized: jest.fn(),
+    reportSemanticMemoryOptimized: jest.fn(),
+  };
 
   const makeSandboxStart = (): SandboxPluginStart => ({
     getSession: jest.fn(),
@@ -36,10 +55,22 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
     agentId?: string
   ) =>
     ({
-      input: { sandbox_id: sandboxId, prompt, agent_id: agentId },
-      rawInput: { sandbox_id: sandboxId, prompt, agent_id: agentId },
+      input: {
+        sandbox_id: sandboxId,
+        prompt,
+        agent_id: agentId,
+        conversation_id: 'conv-1',
+      },
+      rawInput: {
+        sandbox_id: sandboxId,
+        prompt,
+        agent_id: agentId,
+        conversation_id: 'conv-1',
+      },
       contextManager: {
-        getContext: jest.fn().mockReturnValue({ workflow: { spaceId } }),
+        getContext: jest
+          .fn()
+          .mockReturnValue({ workflow: { spaceId }, execution: { id: 'workflow-exec-1' } }),
         getFakeRequest: jest.fn(),
         getScopedEsClient,
         renderInputTemplate: jest.fn((val) => val),
@@ -56,6 +87,7 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
     const definition = memoryMaterializeToSandboxStepDefinition({
       getSandboxStart: () => sandboxStart,
       logger: loggerMock.create(),
+      telemetry: telemetry as never,
     });
 
     const result = await definition.handler(
@@ -77,6 +109,20 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
       logger: expect.anything(),
     });
     expect(result).toEqual({ output: { sandbox_id: 'default__conv-1', notification: '' } });
+    expect(telemetry.reportSemanticMemoryMaterialized).toHaveBeenCalledWith({
+      agent_id: 'significant-events.deductive-investigation',
+      conversation_id: 'conv-1',
+      workflow_execution_id: 'workflow-exec-1',
+      outcome: 'success',
+      retrieval_mode: 'search',
+      search_fallback: false,
+      candidate_count: 2,
+      recalled_count: 1,
+      new_page_count: 1,
+      catalog_size: 3,
+      pod_reset: false,
+      notification_chars: 0,
+    });
   });
 
   it('uses the obtained sandbox_id without re-scoping it', async () => {
@@ -84,6 +130,7 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
     const definition = memoryMaterializeToSandboxStepDefinition({
       getSandboxStart: () => sandboxStart,
       logger: loggerMock.create(),
+      telemetry: telemetry as never,
     });
 
     const result = await definition.handler(
@@ -101,6 +148,7 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
     const definition = memoryMaterializeToSandboxStepDefinition({
       getSandboxStart: () => undefined,
       logger: loggerMock.create(),
+      telemetry: telemetry as never,
     });
 
     await expect(
@@ -109,11 +157,32 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
     expect(hydrateMemoryWorkspace).not.toHaveBeenCalled();
   });
 
+  it('reports one failure event and rethrows when materialize fails', async () => {
+    hydrateMemoryWorkspaceMock.mockRejectedValueOnce(new Error('write failed'));
+    const definition = memoryMaterializeToSandboxStepDefinition({
+      getSandboxStart: () => makeSandboxStart(),
+      logger: loggerMock.create(),
+      telemetry: telemetry as never,
+    });
+
+    await expect(
+      definition.handler(createContext('default__conv-1', 'default', 'task', 'agent-1'))
+    ).rejects.toThrow('write failed');
+    expect(telemetry.reportSemanticMemoryMaterialized).toHaveBeenCalledTimes(1);
+    expect(telemetry.reportSemanticMemoryMaterialized).toHaveBeenCalledWith({
+      agent_id: 'agent-1',
+      conversation_id: 'conv-1',
+      workflow_execution_id: 'workflow-exec-1',
+      outcome: 'failure',
+    });
+  });
+
   it('skips materialize when the memory flag is off', async () => {
     const definition = memoryMaterializeToSandboxStepDefinition({
       getSandboxStart: () => makeSandboxStart(),
       logger: loggerMock.create(),
       isEnabled: () => false,
+      telemetry: telemetry as never,
     });
 
     const result = await definition.handler(createContext('default__conv-1'));
@@ -128,6 +197,7 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
     const definition = memoryMaterializeToSandboxStepDefinition({
       getSandboxStart: () => makeSandboxStart(),
       logger: loggerMock.create(),
+      telemetry: telemetry as never,
     });
 
     const result = await definition.handler(createContext('default__conv-1', 'default', 'task'));

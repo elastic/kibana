@@ -13,6 +13,7 @@ import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
 import { hydrateMemoryWorkspace } from '../memory/register_memory';
 import { previewText } from '../memory/log_format';
 import { teeWorkflowLogger } from '../lib/tee_workflow_logger';
+import type { NightshiftTelemetryClient } from '../telemetry';
 import { unscopeConversationId } from '../tools/sandbox_bash/tool_utils';
 import { withTimeout } from './with_timeout';
 
@@ -23,10 +24,12 @@ export const memoryMaterializeToSandboxStepDefinition = ({
   getSandboxStart,
   logger,
   isEnabled,
+  telemetry,
 }: {
   getSandboxStart: () => SandboxPluginStart | undefined;
   logger: Logger;
   isEnabled?: () => boolean;
+  telemetry: NightshiftTelemetryClient;
 }) =>
   createServerStepDefinition({
     id: 'nightshift.memoryMaterializeToSandbox',
@@ -51,6 +54,11 @@ export const memoryMaterializeToSandboxStepDefinition = ({
         .max(1024)
         .optional()
         .describe('Agent whose memory store to materialize. Missing agent_id skips memory.'),
+      conversation_id: z
+        .string()
+        .max(1024)
+        .optional()
+        .describe('Agent Builder conversation id for telemetry correlation.'),
     }),
     outputSchema: z.object({
       sandbox_id: z.string().describe('Sandbox that received the memory pages.'),
@@ -60,8 +68,15 @@ export const memoryMaterializeToSandboxStepDefinition = ({
         .describe('Markdown fragment listing memory pages new this turn, or empty.'),
     }),
     handler: async (context) => {
-      const { sandbox_id: sandboxId, prompt, agent_id: agentId } = context.input;
-      const { spaceId } = context.contextManager.getContext().workflow;
+      const {
+        sandbox_id: sandboxId,
+        prompt,
+        agent_id: agentId,
+        conversation_id: conversationId,
+      } = context.input;
+      const workflowContext = context.contextManager.getContext();
+      const { spaceId } = workflowContext.workflow;
+      const workflowExecutionId = workflowContext.execution.id;
 
       if (isEnabled && !isEnabled()) {
         context.logger.info(`Skipped memory materialize for sandbox ${sandboxId} (flag off)`);
@@ -99,20 +114,46 @@ export const memoryMaterializeToSandboxStepDefinition = ({
         )}`
       );
 
-      const notification = await withTimeout(
-        (signal) =>
-          hydrateMemoryWorkspace({
-            session,
-            esClient: context.contextManager.getScopedEsClient(),
-            agentId: trimmedAgentId,
-            query: prompt,
-            signal,
-            logger: teeWorkflowLogger(logger, context.logger),
-          }),
-        MATERIALIZE_TIMEOUT_MS,
-        `Memory materialize to sandbox timed out after ${MATERIALIZE_TIMEOUT_MS}ms`
-      );
+      let result: Awaited<ReturnType<typeof hydrateMemoryWorkspace>>;
+      try {
+        result = await withTimeout(
+          (signal) =>
+            hydrateMemoryWorkspace({
+              session,
+              esClient: context.contextManager.getScopedEsClient(),
+              agentId: trimmedAgentId,
+              query: prompt,
+              signal,
+              logger: teeWorkflowLogger(logger, context.logger),
+            }),
+          MATERIALIZE_TIMEOUT_MS,
+          `Memory materialize to sandbox timed out after ${MATERIALIZE_TIMEOUT_MS}ms`
+        );
+      } catch (error) {
+        telemetry.reportSemanticMemoryMaterialized({
+          agent_id: trimmedAgentId,
+          ...(conversationId ? { conversation_id: conversationId } : {}),
+          workflow_execution_id: workflowExecutionId,
+          outcome: 'failure',
+        });
+        throw error;
+      }
 
-      return { output: { sandbox_id: sandboxId, notification } };
+      telemetry.reportSemanticMemoryMaterialized({
+        agent_id: trimmedAgentId,
+        ...(conversationId ? { conversation_id: conversationId } : {}),
+        workflow_execution_id: workflowExecutionId,
+        outcome: 'success',
+        retrieval_mode: result.summary.retrievalMode,
+        search_fallback: result.summary.searchFallback,
+        candidate_count: result.summary.candidateCount,
+        recalled_count: result.summary.recalledCount,
+        new_page_count: result.summary.newPageCount,
+        catalog_size: result.summary.catalogSize,
+        pod_reset: result.summary.podReset,
+        notification_chars: result.summary.notificationChars,
+      });
+
+      return { output: { sandbox_id: sandboxId, notification: result.notification } };
     },
   });

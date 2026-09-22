@@ -75,6 +75,8 @@ describe('nightshift agent optimize workflow', () => {
                 with: expect.objectContaining({
                   sandbox_id: '{{ steps.obtain_sandbox.output.sandbox_id }}',
                   connector_id: '{{ inputs.connector_id }}',
+                  conversation_id: '{{ inputs.conversation_id }}',
+                  round_id: '{{ inputs.round_id }}',
                 }),
               }),
             ],

@@ -118,7 +118,7 @@ describe('applyMemoryEdits', () => {
   it('archives harmful ids and batches useful/unrelated counter updates', async () => {
     const store = createStore();
 
-    await applyMemoryEdits({
+    const summary = await applyMemoryEdits({
       store,
       recalledIds: ['memory_a', 'memory_b', 'memory_c'],
       labels: { useful: ['memory_a', 'memory_not_recalled'], harmful: ['memory_c'] },
@@ -132,6 +132,14 @@ describe('applyMemoryEdits', () => {
       { id: 'memory_b', addImp: 1, addConv: 0 },
     ]);
     expect(store.list).not.toHaveBeenCalled();
+    expect(summary).toEqual(
+      expect.objectContaining({
+        usefulCount: 1,
+        harmfulCount: 1,
+        harmfulArchiveCount: 1,
+        extractionProposedCount: 0,
+      })
+    );
   });
 
   it('archives when the critique echoes the recalled line instead of a raw id', async () => {
@@ -168,7 +176,7 @@ describe('applyMemoryEdits', () => {
         .mockImplementation(async (id: string) => (id === source.id ? source : undefined)),
     });
 
-    await applyMemoryEdits({
+    const summary = await applyMemoryEdits({
       store,
       recalledIds: ['memory_kafka-lag'],
       recalledMemories: [source],
@@ -208,6 +216,15 @@ describe('applyMemoryEdits', () => {
     expect(store.upsert).not.toHaveBeenCalledWith(
       expect.objectContaining({ slug: 'checkout-kafka' })
     );
+    expect(summary).toEqual(
+      expect.objectContaining({
+        extractionProposedCount: 1,
+        mergeAttemptCount: 1,
+        mergeSuccessCount: 1,
+        mergedSourceArchiveCount: 1,
+        standaloneUpsertCount: 0,
+      })
+    );
   });
 
   it('does not merge when synthesis returns an empty context', async () => {
@@ -217,7 +234,7 @@ describe('applyMemoryEdits', () => {
       get: jest.fn().mockResolvedValue(source),
     });
 
-    await applyMemoryEdits({
+    const summary = await applyMemoryEdits({
       store,
       recalledIds: ['memory_kafka-lag'],
       recalledMemories: [source],
@@ -242,6 +259,9 @@ describe('applyMemoryEdits', () => {
 
     expect(store.upsert).not.toHaveBeenCalled();
     expect(store.archive).not.toHaveBeenCalled();
+    expect(summary).toEqual(
+      expect.objectContaining({ mergeAttemptCount: 1, mergeSuccessCount: 0 })
+    );
   });
 
   it('merges a catalog overlap and sums decayed telemetry', async () => {
@@ -260,7 +280,7 @@ describe('applyMemoryEdits', () => {
       get: jest.fn().mockImplementation(async (id: string) => (id === hit.id ? hit : undefined)),
     });
 
-    await applyMemoryEdits({
+    const summary = await applyMemoryEdits({
       store,
       recalledIds: [],
       labels: { useful: [], harmful: [] },
@@ -295,6 +315,9 @@ describe('applyMemoryEdits', () => {
       })
     );
     expect(store.archive).toHaveBeenCalledWith('memory_checkout-redis', 'merged');
+    expect(summary).toEqual(
+      expect.objectContaining({ mergeAttemptCount: 1, mergeSuccessCount: 1 })
+    );
   });
 
   it('still upserts when a catalog hit is the same slug', async () => {
@@ -324,7 +347,7 @@ describe('applyMemoryEdits', () => {
   it('skips extractions that look like secrets', async () => {
     const store = createStore();
 
-    await applyMemoryEdits({
+    const summary = await applyMemoryEdits({
       store,
       recalledIds: [],
       labels: { useful: [], harmful: [] },
@@ -342,6 +365,7 @@ describe('applyMemoryEdits', () => {
 
     expect(store.upsert).not.toHaveBeenCalled();
     expect(store.retrieve).not.toHaveBeenCalled();
+    expect(summary.safetySkipCount).toBe(1);
   });
 });
 

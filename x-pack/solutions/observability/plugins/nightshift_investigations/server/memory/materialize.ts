@@ -31,6 +31,16 @@ export interface MemoryCatalogEntry {
 export interface MaterializeMemoryResult {
   recalledIds: string[];
   notification: string;
+  summary: {
+    retrievalMode: 'search' | 'browse';
+    searchFallback: boolean;
+    candidateCount: number;
+    recalledCount: number;
+    newPageCount: number;
+    catalogSize: number;
+    podReset: boolean;
+    notificationChars: number;
+  };
 }
 
 export const parseRecalledSidecar = (raw: string): string[] => {
@@ -171,6 +181,7 @@ export const materializeMemory = async ({
 }): Promise<MaterializeMemoryResult> => {
   const trimmedQuery = query?.trim();
   let mode: 'search' | 'browse' = trimmedQuery ? 'search' : 'browse';
+  let searchFallback = false;
   const retrieveSize = mode === 'search' ? 50 : keepCount * 10;
   logger.debug(
     `Memory materialize start mode=${mode} keepCount=${keepCount} retrieveSize=${retrieveSize} ` +
@@ -191,6 +202,7 @@ export const materializeMemory = async ({
         trimmedQuery
       )} matched 0 page(s) — falling back to browse`
     );
+    searchFallback = true;
     mode = 'browse';
     candidates = await store.retrieve({ size: keepCount * 10 });
   } else if (mode === 'search') {
@@ -306,5 +318,18 @@ export const materializeMemory = async ({
         } Semantic Memory page(s) into the sandbox workspace (${mode}): ${recalledIds.join(', ')}`
       : `Materialized 0 Semantic Memory page(s) into the sandbox workspace (${mode})`
   );
-  return { recalledIds, notification };
+  return {
+    recalledIds,
+    notification,
+    summary: {
+      retrievalMode: mode,
+      searchFallback,
+      candidateCount: candidates.length,
+      recalledCount: recalledIds.length,
+      newPageCount: newPages.length,
+      catalogSize: entries.length,
+      podReset,
+      notificationChars: notification.length,
+    },
+  };
 };

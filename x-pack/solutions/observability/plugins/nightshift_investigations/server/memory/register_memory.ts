@@ -11,12 +11,13 @@ import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import { NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID } from '../agents/deductive_investigation';
 import { createOptimizeModel } from '../lib/create_optimize_model';
 import { previewText } from './log_format';
-import { materializeMemory, readRecalledIds } from './materialize';
+import { materializeMemory, readRecalledIds, type MaterializeMemoryResult } from './materialize';
 import {
   createLlmProposeMemoryExtractions,
   createLlmProposeMemoryLabels,
   createLlmSynthesizeMemoryGroup,
   optimizeMemory,
+  type MemoryOptimizeSummary,
 } from './optimize';
 import { createMemoryPageStore, type MemoryPageStore } from './page_store';
 
@@ -46,11 +47,10 @@ export const hydrateMemoryWorkspace = async ({
   query?: string;
   signal?: AbortSignal;
   logger: Logger;
-}): Promise<string> => {
+}): Promise<MaterializeMemoryResult> => {
   const store = createMemoryStore({ esClient, logger, agentId, signal });
   logger.debug(`Memory hydrate agent=${agentId} query=${JSON.stringify(previewText(query))}`);
-  const { notification } = await materializeMemory({ session, store, logger, query });
-  return notification;
+  return materializeMemory({ session, store, logger, query });
 };
 
 const loadRecalledIds = async ({
@@ -100,14 +100,14 @@ export const runMemoryOptimize = async ({
   getAgentBuilder: () => AgentBuilderPluginStart | undefined;
   logger: Logger;
   connectorId?: string;
-}): Promise<void> => {
+}): Promise<MemoryOptimizeSummary | undefined> => {
   if (agentId !== NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID) {
     logger.info('Memory optimizer skipped — round was not produced by the deductive investigator');
     logger.debug(
       `Memory optimize skip agent=${agentId ?? '(missing)'} ` +
         `expected=${NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID}`
     );
-    return;
+    return undefined;
   }
 
   logger.debug(
@@ -124,12 +124,12 @@ export const runMemoryOptimize = async ({
     logger,
   });
   if (!model) {
-    return;
+    return undefined;
   }
 
   const store = createMemoryStore({ esClient, logger, agentId, signal });
   const recalledIds = await loadRecalledIds({ session, logger });
-  await optimizeMemory({
+  return optimizeMemory({
     store,
     recalledIds,
     proposeLabels: createLlmProposeMemoryLabels({ inferenceClient: model.inferenceClient }),

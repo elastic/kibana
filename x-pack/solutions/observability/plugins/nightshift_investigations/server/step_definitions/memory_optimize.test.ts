@@ -11,8 +11,23 @@ import { runMemoryOptimize } from '../memory/register_memory';
 import { memoryOptimizeStepDefinition } from './memory_optimize';
 
 jest.mock('../memory/register_memory', () => ({
-  runMemoryOptimize: jest.fn().mockResolvedValue(undefined),
+  runMemoryOptimize: jest.fn().mockResolvedValue({
+    recalledCount: 3,
+    loadedCount: 3,
+    usefulCount: 2,
+    harmfulCount: 1,
+    extractionProposedCount: 2,
+    standaloneUpsertCount: 1,
+    safetySkipCount: 0,
+    mergeAttemptCount: 1,
+    mergeSuccessCount: 1,
+    harmfulArchiveCount: 1,
+    mergedSourceArchiveCount: 2,
+    writeFailureCount: 0,
+  }),
 }));
+
+const runMemoryOptimizeMock = jest.mocked(runMemoryOptimize);
 
 describe('memoryOptimizeStepDefinition', () => {
   const esClient = { search: jest.fn() };
@@ -21,6 +36,10 @@ describe('memoryOptimizeStepDefinition', () => {
   const getScopedEsClient = jest.fn().mockReturnValue(esClient);
   const getFakeRequest = jest.fn().mockReturnValue(request);
   const getAgentBuilder = jest.fn();
+  const telemetry = {
+    reportSemanticMemoryMaterialized: jest.fn(),
+    reportSemanticMemoryOptimized: jest.fn(),
+  };
 
   const makeSandboxStart = (): SandboxPluginStart => ({
     getSession: jest.fn(),
@@ -40,6 +59,8 @@ describe('memoryOptimizeStepDefinition', () => {
       agent_id?: string;
       sandbox_id?: string;
       connector_id?: string;
+      conversation_id?: string;
+      round_id?: string;
     },
     spaceId = 'default'
   ) =>
@@ -47,7 +68,9 @@ describe('memoryOptimizeStepDefinition', () => {
       input,
       rawInput: input,
       contextManager: {
-        getContext: jest.fn().mockReturnValue({ workflow: { spaceId } }),
+        getContext: jest
+          .fn()
+          .mockReturnValue({ workflow: { spaceId }, execution: { id: 'workflow-exec-1' } }),
         getFakeRequest,
         getScopedEsClient,
         renderInputTemplate: jest.fn((val) => val),
@@ -65,6 +88,7 @@ describe('memoryOptimizeStepDefinition', () => {
       getAgentBuilder,
       getSandboxStart: () => sandboxStart,
       logger: loggerMock.create(),
+      telemetry: telemetry as never,
     });
 
     const result = await definition.handler(
@@ -73,6 +97,8 @@ describe('memoryOptimizeStepDefinition', () => {
         response: 'Redis evictions.',
         agent_id: 'significant-events.deductive-investigation',
         sandbox_id: 'default__conv-1',
+        conversation_id: 'conv-1',
+        round_id: 'round-1',
       })
     );
 
@@ -91,6 +117,25 @@ describe('memoryOptimizeStepDefinition', () => {
       connectorId: undefined,
     });
     expect(result).toEqual({ output: { status: 'ok' } });
+    expect(telemetry.reportSemanticMemoryOptimized).toHaveBeenCalledWith({
+      agent_id: 'significant-events.deductive-investigation',
+      conversation_id: 'conv-1',
+      round_id: 'round-1',
+      workflow_execution_id: 'workflow-exec-1',
+      outcome: 'success',
+      recalled_count: 3,
+      loaded_count: 3,
+      useful_count: 2,
+      harmful_count: 1,
+      extraction_proposed_count: 2,
+      standalone_upsert_count: 1,
+      safety_skip_count: 0,
+      merge_attempt_count: 1,
+      merge_success_count: 1,
+      harmful_archive_count: 1,
+      merged_source_archive_count: 2,
+      write_failure_count: 0,
+    });
   });
 
   it('uses the obtained sandbox_id without re-scoping it', async () => {
@@ -99,6 +144,7 @@ describe('memoryOptimizeStepDefinition', () => {
       getAgentBuilder,
       getSandboxStart: () => sandboxStart,
       logger: loggerMock.create(),
+      telemetry: telemetry as never,
     });
 
     await definition.handler(
@@ -120,6 +166,7 @@ describe('memoryOptimizeStepDefinition', () => {
       getAgentBuilder,
       getSandboxStart: () => undefined,
       logger: loggerMock.create(),
+      telemetry: telemetry as never,
     });
 
     await definition.handler(
@@ -143,6 +190,7 @@ describe('memoryOptimizeStepDefinition', () => {
       getSandboxStart: () => makeSandboxStart(),
       logger: loggerMock.create(),
       isEnabled: () => false,
+      telemetry: telemetry as never,
     });
 
     const result = await definition.handler(
@@ -163,6 +211,7 @@ describe('memoryOptimizeStepDefinition', () => {
       getAgentBuilder,
       getSandboxStart: () => sandboxStart,
       logger: loggerMock.create(),
+      telemetry: telemetry as never,
     });
 
     await definition.handler(
@@ -178,5 +227,35 @@ describe('memoryOptimizeStepDefinition', () => {
     expect(runMemoryOptimize).toHaveBeenCalledWith(
       expect.objectContaining({ connectorId: 'anthropic-sonnet' })
     );
+  });
+
+  it('reports one failure event and rethrows when optimize fails', async () => {
+    runMemoryOptimizeMock.mockRejectedValueOnce(new Error('model failed'));
+    const definition = memoryOptimizeStepDefinition({
+      getAgentBuilder,
+      getSandboxStart: () => makeSandboxStart(),
+      logger: loggerMock.create(),
+      telemetry: telemetry as never,
+    });
+
+    await expect(
+      definition.handler(
+        createContext({
+          prompt: 'why?',
+          response: 'because',
+          agent_id: 'agent-1',
+          conversation_id: 'conv-1',
+          round_id: 'round-1',
+        })
+      )
+    ).rejects.toThrow('model failed');
+    expect(telemetry.reportSemanticMemoryOptimized).toHaveBeenCalledTimes(1);
+    expect(telemetry.reportSemanticMemoryOptimized).toHaveBeenCalledWith({
+      agent_id: 'agent-1',
+      conversation_id: 'conv-1',
+      round_id: 'round-1',
+      workflow_execution_id: 'workflow-exec-1',
+      outcome: 'failure',
+    });
   });
 });
