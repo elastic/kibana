@@ -81,9 +81,6 @@ export class TestUser extends FtrService {
         // We do NOT use cookie injection here: the existing session remains valid after a role
         // change and a browser.refresh() is sufficient — and faster — than creating a new session.
         await this.browser.refresh();
-        // accept alert if it pops up
-        const alert = await this.browser.getAlert();
-        await alert?.accept();
         await this.testSubjects.find('kibanaChrome', this.config.get('timeouts.find') * 10);
       }
     }

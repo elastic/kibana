@@ -90,8 +90,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(timePickerValues.end).to.eql(timePicker.defaultEndTime);
         });
         it('cleans filters', async () => {
-          const filterCount = await filterBar.getFilterCount();
-          expect(filterCount).to.equal(0);
+          await filterBar.waitForFilterCount(0);
         });
         it('cleans query', async () => {
           const query = await queryBar.getQueryString();
@@ -121,8 +120,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const timePickerValues = await timePicker.getTimeConfigAsAbsoluteTimes();
         expect(timePickerValues.start).to.eql(timePicker.defaultStartTime);
         expect(timePickerValues.end).to.eql(timePicker.defaultEndTime);
-        const filterCount = await filterBar.getFilterCount();
-        expect(filterCount).to.equal(0);
+        await filterBar.waitForFilterCount(0);
         const query = await queryBar.getQueryString();
         expect(query).to.equal('');
         await lens.assertLegacyMetric('Unique count of @timestamp', '14,181');
