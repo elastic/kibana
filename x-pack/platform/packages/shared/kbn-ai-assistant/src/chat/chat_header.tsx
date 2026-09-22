@@ -234,6 +234,7 @@ export function ChatHeader({
                             )
                       }
                       anchorPosition="downLeft"
+                      closePopover={() => {}}
                       button={
                         <EuiToolTip
                           content={
@@ -270,6 +271,7 @@ export function ChatHeader({
                           { defaultMessage: 'Navigate to conversations' }
                         )}
                         anchorPosition="downLeft"
+                        closePopover={() => {}}
                         button={
                           <EuiToolTip
                             content={i18n.translate(

@@ -13,6 +13,7 @@ import {
   EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import type { EuiPopoverProps } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import * as i18n from './translations';
 import { EntityAnalyticsLearnMoreLink } from '../../entity_analytics/components/entity_analytics_learn_more_link';
@@ -21,7 +22,7 @@ export const RiskScoreInfoTooltip: React.FC<{
   toolTipContent: React.ReactNode;
   toolTipTitle?: React.ReactNode;
   width?: number;
-  anchorPosition?: EuiPopover['props']['anchorPosition'];
+  anchorPosition?: EuiPopoverProps['anchorPosition'];
 }> = ({ toolTipContent, toolTipTitle, width = 270, anchorPosition = 'leftCenter' }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const popoverTitleId = useGeneratedHtmlId();

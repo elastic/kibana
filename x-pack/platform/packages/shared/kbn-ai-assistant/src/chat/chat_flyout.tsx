@@ -214,6 +214,7 @@ export function ChatFlyout({
                 )}
                 anchorPosition="downLeft"
                 className={expandButtonContainerClassName}
+                closePopover={() => {}}
                 button={
                   <EuiToolTip
                     content={
@@ -264,6 +265,7 @@ export function ChatFlyout({
                     { defaultMessage: 'New conversation' }
                   )}
                   anchorPosition="downLeft"
+                  closePopover={() => {}}
                   button={
                     <EuiToolTip
                       content={i18n.translate(

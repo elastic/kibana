@@ -208,7 +208,7 @@ describe('ServiceAccountsTable', () => {
 
     await user.click(screen.getByTestId('pagination-button-next'));
     await user.click(screen.getByRole('button', { name: 'Role Selection' }));
-    await user.click(screen.getByRole('option', { name: 'editor' }));
+    await user.click(await screen.findByRole('option', { name: 'editor' }));
 
     expect(screen.getByText('account-00')).toBeVisible();
     expect(screen.queryByText('account-10')).not.toBeInTheDocument();

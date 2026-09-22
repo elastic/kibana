@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import type { ModelOptionsData } from '../utils/get_model_options_for_inference_endpoints';
 import { SelectModelAndInstallKnowledgeBase } from './select_model_and_install_knowledge_base';
 
@@ -78,11 +78,10 @@ describe('SelectModelAndInstallKnowledgeBase', () => {
     const defaultSelection = screen.getByText('Label1');
     fireEvent.click(defaultSelection);
 
-    const nextSelection = screen.getByText('Label2');
-    await waitFor(() => nextSelection);
+    const nextSelection = await screen.findByText('Label2');
     fireEvent.click(nextSelection);
 
-    expect(nextSelection).toBeInTheDocument();
+    expect(screen.getByText('Label2')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /Install Knowledge Base/i }));
     expect(onInstall).toHaveBeenCalledWith('id2');
@@ -98,8 +97,7 @@ describe('SelectModelAndInstallKnowledgeBase', () => {
     const defaultSelection = screen.getByText('Label1');
     fireEvent.click(defaultSelection);
 
-    const nextSelection = screen.getByText('Label2');
-    await waitFor(() => nextSelection);
+    const nextSelection = await screen.findByText('Label2');
     fireEvent.click(nextSelection);
 
     const callout = screen.getByTestId('eisKnowledgeBaseCallout');
