@@ -107,7 +107,7 @@ describe('LinkedActionPoliciesStep', () => {
     expect(screen.getByText('No matching action policies found.')).toBeInTheDocument();
   });
 
-  it('renders a catch_all badge for a global policy', () => {
+  it('renders a catch-all badge for a global policy', () => {
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
       error: null,
