@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { huntCoordinator } from './hunt_coordinator';
 
 jest.mock('./common/resolve_index_scope', () => ({
@@ -46,12 +47,7 @@ jest.mock('./tier2/hunt_behavior', () => ({
   }),
 }));
 
-const logger = {
-  debug: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
-  info: jest.fn(),
-} as unknown as import('@kbn/core/server').Logger;
+const logger = loggingSystemMock.createLogger();
 
 const esClient = {} as ElasticsearchClient;
 

@@ -6,34 +6,21 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { buildCandidateQuery } from './build_candidate_query';
 import { buildHuntInvestigationConversationId } from './hunt_investigation_id';
 
-const logger = {
-  debug: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
-  info: jest.fn(),
-} as unknown as import('@kbn/core/server').Logger;
-
-const buildMockEsClient = (
-  hits: Array<{ _id: string }> = [],
-  total = 0
-): jest.Mocked<Pick<ElasticsearchClient, 'search'>> => ({
-  search: jest.fn().mockResolvedValue({
-    hits: {
-      hits,
-      total: { value: total, relation: 'eq' },
-    },
-  }),
-});
+const logger = loggingSystemMock.createLogger();
 
 const searchBodyOf = (esClient: ElasticsearchClient) =>
   (esClient.search as jest.Mock).mock.calls[0][0];
 
 describe('buildCandidateQuery', () => {
   it('returns empty ids when no reports exist', async () => {
-    const esClient = buildMockEsClient([], 0) as unknown as ElasticsearchClient;
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.search.mockResolvedValue({
+      hits: { hits: [], total: { value: 0, relation: 'eq' } },
+    });
     const result = await buildCandidateQuery(esClient, logger, {
       trigger: 'scheduled',
       spaceId: 'default',
@@ -42,10 +29,10 @@ describe('buildCandidateQuery', () => {
   });
 
   it('returns ids for scheduled trigger (hunt-once gate)', async () => {
-    const esClient = buildMockEsClient(
-      [{ _id: 'rpt-1' }, { _id: 'rpt-2' }],
-      2
-    ) as unknown as ElasticsearchClient;
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.search.mockResolvedValue({
+      hits: { hits: [{ _id: 'rpt-1' }, { _id: 'rpt-2' }], total: { value: 2, relation: 'eq' } },
+    });
     const result = await buildCandidateQuery(esClient, logger, {
       trigger: 'scheduled',
       spaceId: 'default',
@@ -54,7 +41,10 @@ describe('buildCandidateQuery', () => {
   });
 
   it('uses ids filter for manual trigger with explicit reportIds', async () => {
-    const esClient = buildMockEsClient([{ _id: 'rpt-abc' }], 1) as unknown as ElasticsearchClient;
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.search.mockResolvedValue({
+      hits: { hits: [{ _id: 'rpt-abc' }], total: { value: 1, relation: 'eq' } },
+    });
     const result = await buildCandidateQuery(esClient, logger, {
       trigger: 'manual',
       reportIds: ['rpt-abc'],
@@ -64,7 +54,10 @@ describe('buildCandidateQuery', () => {
   });
 
   it('lifts the hunt-once gate for a manually named report', async () => {
-    const esClient = buildMockEsClient([{ _id: 'rpt-abc' }], 1) as unknown as ElasticsearchClient;
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.search.mockResolvedValue({
+      hits: { hits: [{ _id: 'rpt-abc' }], total: { value: 1, relation: 'eq' } },
+    });
     await buildCandidateQuery(esClient, logger, {
       trigger: 'manual',
       reportIds: ['rpt-abc'],
@@ -80,7 +73,10 @@ describe('buildCandidateQuery', () => {
     // `must_not` always passes, and every sweep re-hunts the whole pool. These two
     // assertions are the regression guard for exactly that.
     it('excludes reports already hunted in this space via a nested evidence query', async () => {
-      const esClient = buildMockEsClient([], 0) as unknown as ElasticsearchClient;
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 0, relation: 'eq' } },
+      });
       await buildCandidateQuery(esClient, logger, {
         trigger: 'scheduled',
         spaceId: 'hunt-a',
@@ -107,7 +103,10 @@ describe('buildCandidateQuery', () => {
     });
 
     it('never gates on the unmapped flat feedback field', async () => {
-      const esClient = buildMockEsClient([], 0) as unknown as ElasticsearchClient;
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 0, relation: 'eq' } },
+      });
       await buildCandidateQuery(esClient, logger, {
         trigger: 'scheduled',
         spaceId: 'hunt-a',
@@ -116,7 +115,10 @@ describe('buildCandidateQuery', () => {
     });
 
     it('sorts corroborated_rank_score as a nested field scoped to this space', async () => {
-      const esClient = buildMockEsClient([], 0) as unknown as ElasticsearchClient;
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 0, relation: 'eq' } },
+      });
       await buildCandidateQuery(esClient, logger, {
         trigger: 'scheduled',
         spaceId: 'hunt-a',
@@ -137,10 +139,13 @@ describe('buildCandidateQuery', () => {
     const readOpenProposals = async () => new Set([buildHuntInvestigationConversationId(hunted)]);
 
     it('drops a report whose Hunt Proposal is still open', async () => {
-      const esClient = buildMockEsClient(
-        [{ _id: hunted }, { _id: free }],
-        2
-      ) as unknown as ElasticsearchClient;
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue({
+        hits: {
+          hits: [{ _id: hunted }, { _id: free }],
+          total: { value: 2, relation: 'eq' },
+        },
+      });
       const result = await buildCandidateQuery(
         esClient,
         logger,
@@ -151,10 +156,13 @@ describe('buildCandidateQuery', () => {
     });
 
     it('reports the dropped report under skipped with reason open_proposal', async () => {
-      const esClient = buildMockEsClient(
-        [{ _id: hunted }, { _id: free }],
-        2
-      ) as unknown as ElasticsearchClient;
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue({
+        hits: {
+          hits: [{ _id: hunted }, { _id: free }],
+          total: { value: 2, relation: 'eq' },
+        },
+      });
       const result = await buildCandidateQuery(
         esClient,
         logger,
@@ -165,7 +173,10 @@ describe('buildCandidateQuery', () => {
     });
 
     it('applies to a manually named report too, so replay cannot bypass a parked gate', async () => {
-      const esClient = buildMockEsClient([{ _id: hunted }], 1) as unknown as ElasticsearchClient;
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue({
+        hits: { hits: [{ _id: hunted }], total: { value: 1, relation: 'eq' } },
+      });
       const result = await buildCandidateQuery(
         esClient,
         logger,
@@ -177,7 +188,10 @@ describe('buildCandidateQuery', () => {
 
     it('selects nothing when the proposal store cannot be read', async () => {
       // Failing open would re-hunt a report whose containment is parked at a gate.
-      const esClient = buildMockEsClient([{ _id: free }], 1) as unknown as ElasticsearchClient;
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue({
+        hits: { hits: [{ _id: free }], total: { value: 1, relation: 'eq' } },
+      });
       const result = await buildCandidateQuery(
         esClient,
         logger,
@@ -191,7 +205,10 @@ describe('buildCandidateQuery', () => {
   });
 
   it('reports a manually named report that matched nothing as not_found', async () => {
-    const esClient = buildMockEsClient([], 0) as unknown as ElasticsearchClient;
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.search.mockResolvedValue({
+      hits: { hits: [], total: { value: 0, relation: 'eq' } },
+    });
     const result = await buildCandidateQuery(esClient, logger, {
       trigger: 'manual',
       reportIds: ['rpt-missing'],
@@ -202,7 +219,10 @@ describe('buildCandidateQuery', () => {
 
   it('caps returned ids at 10 however many the caller asks for', async () => {
     const hits = Array.from({ length: 30 }, (_, i) => ({ _id: `rpt-${i}` }));
-    const esClient = buildMockEsClient(hits, 30) as unknown as ElasticsearchClient;
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.search.mockResolvedValue({
+      hits: { hits, total: { value: 30, relation: 'eq' } },
+    });
     const result = await buildCandidateQuery(esClient, logger, {
       trigger: 'scheduled',
       spaceId: 'default',
@@ -212,7 +232,10 @@ describe('buildCandidateQuery', () => {
   });
 
   it('over-fetches on the scheduled path so post-search exclusions still fill the page', async () => {
-    const esClient = buildMockEsClient([], 0) as unknown as ElasticsearchClient;
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.search.mockResolvedValue({
+      hits: { hits: [], total: { value: 0, relation: 'eq' } },
+    });
     await buildCandidateQuery(esClient, logger, {
       trigger: 'scheduled',
       spaceId: 'default',
@@ -222,7 +245,10 @@ describe('buildCandidateQuery', () => {
   });
 
   it('asks for exactly the named ids on the manual path', async () => {
-    const esClient = buildMockEsClient([], 0) as unknown as ElasticsearchClient;
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.search.mockResolvedValue({
+      hits: { hits: [], total: { value: 0, relation: 'eq' } },
+    });
     await buildCandidateQuery(esClient, logger, {
       trigger: 'manual',
       reportIds: ['a', 'b'],
@@ -233,10 +259,13 @@ describe('buildCandidateQuery', () => {
   });
 
   it('sets truncated when total exceeds what was returned', async () => {
-    const esClient = buildMockEsClient(
-      [{ _id: 'r1' }, { _id: 'r2' }],
-      20
-    ) as unknown as ElasticsearchClient;
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.search.mockResolvedValue({
+      hits: {
+        hits: [{ _id: 'r1' }, { _id: 'r2' }],
+        total: { value: 20, relation: 'eq' },
+      },
+    });
     const result = await buildCandidateQuery(esClient, logger, {
       trigger: 'scheduled',
       spaceId: 'default',

@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { significantSecurityEventAttachmentDataSchema } from '../../../../../common/significant_security_event_schema';
 import { huntCoordinator } from '../hunt_coordinator';
 import { buildSseData, buildSseAttachmentId } from './sse_mapper';
@@ -14,10 +15,9 @@ jest.mock('./resolve_index_scope', () => ({
   resolveIndexScope: jest.fn().mockResolvedValue({
     technology: 'aws_iam',
     status: 'ok',
-    // A wildcard pattern, matching what resolveIndexScope actually returns in
-    // production (`logs-aws.*`), not a concrete `_index` bucket name. The
-    // review's must-fix #1: the old fixture used a concrete index name here,
-    // which made `matchesRequired`'s regex-vs-exact-string bug invisible.
+    // A wildcard pattern matching what resolveIndexScope returns in production
+    // (`logs-aws.*`), not a concrete `_index` bucket name. The fixture must use
+    // the pattern so `matchesRequired`'s regex logic is exercised correctly.
     required: ['logs-aws.*'],
     optional: ['.alerts-security.alerts-default'],
     missing: [],
@@ -103,12 +103,7 @@ jest.mock('../tier2/hunt_behavior', () => ({
   huntBehavior: jest.fn(),
 }));
 
-const logger = {
-  debug: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
-  info: jest.fn(),
-} as unknown as import('@kbn/core/server').Logger;
+const logger = loggingSystemMock.createLogger();
 
 const esClient = {} as ElasticsearchClient;
 
@@ -220,9 +215,9 @@ describe('buildSseData', () => {
     const iocIndicator = entry.data.security_knowledge_indicators.find((i) => i.type === 'ioc');
     expect(iocIndicator?.ioc).toEqual({ type: 'hash', value: '9f2b1e7c4a6d8e0f1b3c5d7e9f0a1b2c' });
 
-    // Per-technique filtering (review must-fix #2): the first entry is scoped
-    // to T1078.004 alone. The second technique's behavior/rule name must not
-    // leak onto it, since the SSE is meant to be 1:1 with a Proposal.
+    // Per-technique filtering: the first entry is scoped to T1078.004 alone.
+    // The second technique's behavior/rule name must not leak onto it, since
+    // the SSE is meant to be 1:1 with a Proposal.
     const techniqueIndicators = entry.data.security_knowledge_indicators.filter(
       (i) => i.type === 'technique'
     );
@@ -333,13 +328,11 @@ describe('buildSseData output parses against the SSE attachment schema', () => {
       spaceId: 'default',
     });
 
-    // PR 1 owns title/severity/status/hypothesis_tested/evidence_for/evidence_against/
-    // evaluation_record_ref; the hunt child's packaging step fills these in before
-    // writing the attachment. This is the schema lock: buildSseData's own fields
-    // (report_id, run_id, source_watch, capability, security_knowledge_indicators,
-    // entities, events, hunt_result) must parse as-is against PR 1's real schema, with
-    // no cast, so a drift between the two PRs fails this test instead of surfacing at
-    // demo time.
+    // The caller fills in title/severity/status/hypothesis_tested/evidence_for/
+    // evidence_against/evaluation_record_ref before writing the attachment. Schema
+    // lock: buildSseData's own fields (report_id, run_id, source_watch, capability,
+    // security_knowledge_indicators, entities, events, hunt_result) must parse
+    // as-is against the real SSE schema with no cast.
     const candidateAttachment = {
       ...entry.data,
       title: 'AssumeRole into OrgAdminBoundary from ci-deploy-runner-07',

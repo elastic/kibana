@@ -6,6 +6,7 @@
  */
 
 import type { ScopedModel } from '@kbn/agent-builder-server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { huntBehavior } from './hunt_behavior';
 import {
   huntBehaviorLlmExtractionSchema,
@@ -38,12 +39,7 @@ const buildMockModel = (
   };
 };
 
-const logger = {
-  debug: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
-  info: jest.fn(),
-} as unknown as import('@kbn/core/server').Logger;
+const logger = loggingSystemMock.createLogger();
 
 describe('huntBehavior', () => {
   it('returns no_behaviors_found when LLM extracts nothing', async () => {
