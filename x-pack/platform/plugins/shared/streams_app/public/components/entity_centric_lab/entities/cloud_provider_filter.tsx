@@ -11,11 +11,12 @@
  * cluster filter so the two controls look identical in the toolbar.
  */
 
-import React, { useMemo } from 'react';
-import { EuiSelect } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
+import { EuiComboBox } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Entity } from './fake_entities';
-import { CLOUD_PROVIDERS, type CloudProviderId } from './cloud_providers';
+import { CLOUD_PROVIDERS } from './cloud_providers';
 import { labThings, useIsElasticOn } from '../lab_terminology';
 
 export const CLOUD_PROVIDER_FILTER_ALL = '__all__';
@@ -48,28 +49,36 @@ export const CloudProviderFilter = ({ value, onChange }: CloudProviderFilterProp
     'xpack.streams.entityCentricLab.entities.cloudProviderFilter.allOption',
     { defaultMessage: 'All providers' }
   );
-  const options = useMemo(
-    () => [
-      {
-        value: CLOUD_PROVIDER_FILTER_ALL,
-        text: allProvidersLabel,
-      },
-      ...CLOUD_PROVIDERS.map((provider) => ({
+  const options = useMemo<EuiComboBoxOptionOption[]>(
+    () =>
+      CLOUD_PROVIDERS.map((provider) => ({
+        label: provider.label,
         value: provider.id,
-        text: i18n.translate(
-          'xpack.streams.entityCentricLab.entities.cloudProviderFilter.providerOption',
-          { defaultMessage: 'Provider: {name}', values: { name: provider.label } }
-        ),
       })),
-    ],
-    [allProvidersLabel]
+    []
+  );
+  const selectedOptions = useMemo<EuiComboBoxOptionOption[]>(
+    () =>
+      value === CLOUD_PROVIDER_FILTER_ALL
+        ? []
+        : [{ label: `Provider: ${CLOUD_PROVIDERS.find((p) => p.id === value)?.label ?? value}`, value }],
+    [value]
+  );
+  const handleChange = useCallback(
+    (selected: EuiComboBoxOptionOption[]) => {
+      onChange(selected.length > 0 ? (selected[0].value as string) : CLOUD_PROVIDER_FILTER_ALL);
+    },
+    [onChange]
   );
   return (
-    <EuiSelect
+    <EuiComboBox
       compressed
+      singleSelection={{ asPlainText: true }}
       options={options}
-      value={value}
-      onChange={(event) => onChange(event.target.value)}
+      selectedOptions={selectedOptions}
+      onChange={handleChange}
+      placeholder={allProvidersLabel}
+      isClearable
       aria-label={i18n.translate(
         'xpack.streams.entityCentricLab.entities.cloudProviderFilter.ariaLabel',
         {
@@ -78,6 +87,7 @@ export const CloudProviderFilter = ({ value, onChange }: CloudProviderFilterProp
         }
       )}
       data-test-subj="entityCentricLabCloudProviderFilter"
+      style={{ minWidth: 200 }}
     />
   );
 };
