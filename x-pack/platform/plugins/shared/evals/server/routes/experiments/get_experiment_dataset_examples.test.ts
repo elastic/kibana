@@ -17,6 +17,7 @@ import {
   SCORES_SORT_ORDER,
   buildSpaceFilter,
 } from '@kbn/evals-common';
+import { EXPERIMENT_LIMITS } from '../../../common';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { createEvaluatorRegistryMock } from '../../evaluators/registry.mock';
@@ -216,60 +217,103 @@ describe('GET /internal/evals/experiments/{experimentId}/datasets/{datasetId}/ex
           buckets: [
             {
               key: 'example-a',
-              first_repetition: {
-                hits: {
-                  hits: [
-                    {
-                      _source: { task: { repetition_index: 0 } },
-                      fields: {
-                        input_preview: [truncatedInput],
-                        output_preview: [truncatedOutput],
+              repetitions: {
+                buckets: [
+                  {
+                    key: 1,
+                    source: {
+                      hits: {
+                        hits: [
+                          {
+                            _source: { task: { repetition_index: 1 } },
+                            fields: {
+                              input_preview: [shortInput],
+                              output_preview: [shortOutput],
+                            },
+                          },
+                        ],
                       },
                     },
-                  ],
-                },
+                  },
+                  {
+                    key: 0,
+                    source: {
+                      hits: {
+                        hits: [
+                          {
+                            _source: { task: { repetition_index: 0 } },
+                            fields: {
+                              input_preview: [truncatedInput],
+                              output_preview: [truncatedOutput],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  },
+                ],
               },
             },
             {
               key: 'example-b',
-              first_repetition: {
-                hits: {
-                  hits: [
-                    {
-                      _source: { task: { repetition_index: 1 } },
-                      fields: { input_preview: [null], output_preview: [null] },
+              repetitions: {
+                buckets: [
+                  {
+                    key: 1,
+                    source: {
+                      hits: {
+                        hits: [
+                          {
+                            _source: { task: { repetition_index: 1 } },
+                            fields: { input_preview: [null], output_preview: [null] },
+                          },
+                        ],
+                      },
                     },
-                  ],
-                },
+                  },
+                ],
               },
             },
             {
               key: 'missing-example',
-              first_repetition: {
-                hits: {
-                  hits: [
-                    {
-                      _source: { task: { repetition_index: 0 } },
-                      fields: {
-                        input_preview: [shortInput],
-                        output_preview: [shortOutput],
+              repetitions: {
+                buckets: [
+                  {
+                    key: 0,
+                    source: {
+                      hits: {
+                        hits: [
+                          {
+                            _source: { task: { repetition_index: 0 } },
+                            fields: {
+                              input_preview: [shortInput],
+                              output_preview: [shortOutput],
+                            },
+                          },
+                        ],
                       },
                     },
-                  ],
-                },
+                  },
+                ],
               },
             },
             {
               key: 'example-c',
-              first_repetition: {
-                hits: {
-                  hits: [
-                    {
-                      _source: { task: { repetition_index: 2 } },
-                      fields: { input_preview: [shortInput], output_preview: [shortOutput] },
+              repetitions: {
+                buckets: [
+                  {
+                    key: 2,
+                    source: {
+                      hits: {
+                        hits: [
+                          {
+                            fields: { input_preview: [shortInput], output_preview: [shortOutput] },
+                          },
+                        ],
+                      },
                     },
-                  ],
-                },
+                  },
+                ],
               },
             },
           ],
@@ -301,14 +345,22 @@ describe('GET /internal/evals/experiments/{experimentId}/datasets/{datasetId}/ex
         previews: {
           terms: { field: 'example.id', size: 10000 },
           aggs: {
-            first_repetition: {
-              top_hits: {
-                size: 1,
-                sort: [{ 'task.repetition_index': { order: 'asc', missing: '_last' } }],
-                _source: { includes: ['task.repetition_index'] },
-                script_fields: {
-                  input_preview: previewScriptField('example', 'input'),
-                  output_preview: previewScriptField('task', 'output'),
+            repetitions: {
+              terms: {
+                field: 'task.repetition_index',
+                size: EXPERIMENT_LIMITS.maxRepetitions,
+                order: { _key: 'asc' },
+              },
+              aggs: {
+                source: {
+                  top_hits: {
+                    size: 1,
+                    _source: { includes: ['task.repetition_index'] },
+                    script_fields: {
+                      input_preview: previewScriptField('example', 'input'),
+                      output_preview: previewScriptField('task', 'output'),
+                    },
+                  },
                 },
               },
             },
@@ -316,21 +368,32 @@ describe('GET /internal/evals/experiments/{experimentId}/datasets/{datasetId}/ex
         },
       },
     });
-    expect(response.payload.examples[0].preview).toEqual({
-      repetition_index: 0,
-      input: truncatedInput,
-      output: truncatedOutput,
-    });
-    expect(response.payload.examples[1].preview).toEqual({
-      repetition_index: 1,
-      input: null,
-      output: null,
-    });
-    expect(response.payload.examples[2].preview).toEqual({
-      repetition_index: 2,
-      input: shortInput,
-      output: shortOutput,
-    });
+    expect(response.payload.examples[0].previews).toEqual([
+      {
+        repetition_index: 0,
+        input: truncatedInput,
+        output: truncatedOutput,
+      },
+      {
+        repetition_index: 1,
+        input: shortInput,
+        output: shortOutput,
+      },
+    ]);
+    expect(response.payload.examples[1].previews).toEqual([
+      {
+        repetition_index: 1,
+        input: null,
+        output: null,
+      },
+    ]);
+    expect(response.payload.examples[2].previews).toEqual([
+      {
+        repetition_index: 2,
+        input: shortInput,
+        output: shortOutput,
+      },
+    ]);
     expect(response.payload.examples).toHaveLength(3);
   });
 

@@ -312,15 +312,16 @@ const PreviewFadeButton: React.FC<{
 const PreviewJsonDetail: React.FC<{
   detailsContext: ExampleDetailsContext;
   field: 'input' | 'output';
-  preview?: EvaluationExperimentExamplePreview;
-}> = ({ detailsContext, field, preview }) => {
+  previews?: EvaluationExperimentExamplePreview[];
+}> = ({ detailsContext, field, previews }) => {
   const [requested, setRequested] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const frameRef = useRef<HTMLDivElement>(null);
   const [frameHeight, setFrameHeight] = useState(0);
   const { experimentId, datasetId, executionId, exampleId, repetitionIndex } = detailsContext;
-  const serializedPreview =
-    preview?.repetition_index === repetitionIndex ? preview[field] : undefined;
+  const serializedPreview = previews?.find(
+    (preview) => preview.repetition_index === repetitionIndex
+  )?.[field];
   const { data, isLoading, error } = useExperimentExampleDetails(
     experimentId,
     datasetId,
@@ -541,7 +542,7 @@ const EvaluatorScoreGroupBlock: React.FC<{
 interface ExampleScoreRow {
   exampleId: string;
   exampleIndex: number | null;
-  preview?: EvaluationExperimentExamplePreview;
+  previews?: EvaluationExperimentExamplePreview[];
   repetitionIndices: number[];
   scoresByRepetition: Record<number, EvaluationExperimentDatasetExample['scores']>;
 }
@@ -624,7 +625,7 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
         return {
           exampleId: example.example_id,
           exampleIndex: example.example_index ?? null,
-          preview: example.preview,
+          previews: example.previews,
           repetitionIndices,
           scoresByRepetition,
         };
@@ -716,7 +717,7 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
         <PreviewJsonDetail
           key={`input-${row.exampleId}-${getSelectedRepetitionIndex(row)}`}
           field="input"
-          preview={row.preview}
+          previews={row.previews}
           detailsContext={{
             experimentId,
             datasetId,
@@ -738,7 +739,7 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
         <PreviewJsonDetail
           key={`output-${row.exampleId}-${getSelectedRepetitionIndex(row)}`}
           field="output"
-          preview={row.preview}
+          previews={row.previews}
           detailsContext={{
             experimentId,
             datasetId,

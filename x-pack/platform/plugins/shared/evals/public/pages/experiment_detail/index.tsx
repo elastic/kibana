@@ -113,14 +113,14 @@ export const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
 
   const examplesWithPreviews = useMemo(() => {
     const previewsByExampleId = new Map(
-      (datasetExamplePreviews?.examples ?? []).map(({ example_id: exampleId, preview }) => [
+      (datasetExamplePreviews?.examples ?? []).map(({ example_id: exampleId, previews }) => [
         exampleId,
-        preview,
+        previews,
       ])
     );
     return (datasetExamples?.examples ?? []).map((example) => {
-      const preview = previewsByExampleId.get(example.example_id);
-      return preview ? { ...example, preview } : example;
+      const previews = previewsByExampleId.get(example.example_id);
+      return previews ? { ...example, previews } : example;
     });
   }, [datasetExamplePreviews?.examples, datasetExamples?.examples]);
 

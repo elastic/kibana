@@ -43,7 +43,13 @@ export const EvaluationExperimentDatasetExample = lazySchema(() =>
     example_id: z.string().max(1024),
     example_index: z.number().int().nullable(),
     scores: z.array(EvaluationScoreDocument),
-    preview: EvaluationExperimentExamplePreview.optional(),
+    /**
+     * Bounded input and output previews, one per repetition
+     */
+    previews: z
+      .array(EvaluationExperimentExamplePreview)
+      .optional()
+      .describe('Bounded input and output previews, one per repetition'),
   })
 );
 export type EvaluationExperimentDatasetExample = z.infer<typeof EvaluationExperimentDatasetExample>;

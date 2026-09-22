@@ -38,11 +38,13 @@ const example: EvaluationExperimentDatasetExample = {
   scores: [],
 };
 
-const preview: NonNullable<EvaluationExperimentDatasetExample['preview']> = {
-  repetition_index: 0,
-  input: { content: '{"prompt":"preview input"}', truncated: false },
-  output: { content: '{"completion":"preview output"}', truncated: false },
-};
+const previews: NonNullable<EvaluationExperimentDatasetExample['previews']> = [
+  {
+    repetition_index: 0,
+    input: { content: '{"prompt":"preview input"}', truncated: false },
+    output: { content: '{"completion":"preview output"}', truncated: false },
+  },
+];
 
 const buildGroup = (datasetId: string) => ({
   datasetId,
@@ -92,7 +94,7 @@ describe('DatasetStatsAccordion', () => {
       (_experimentId, _datasetId, _executionId, options) =>
         ({
           data: {
-            examples: options?.includePreviews ? [{ ...example, preview }] : [example],
+            examples: options?.includePreviews ? [{ ...example, previews }] : [example],
           },
           isLoading: false,
           error: null,
@@ -122,7 +124,7 @@ describe('DatasetStatsAccordion', () => {
         experimentId: 'experiment-1',
         datasetId: 'dataset-1',
         executionId: 'execution-1',
-        examples: [{ ...example, preview }],
+        examples: [{ ...example, previews }],
       }),
       expect.anything()
     );

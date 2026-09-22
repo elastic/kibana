@@ -300,7 +300,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(examplesResponse.examples.every((example) => example.scores.length >= 1)).to.be(
           true
         );
-        expect(examplesResponse.examples.every((example) => example.preview === undefined)).to.be(
+        expect(examplesResponse.examples.every((example) => example.previews === undefined)).to.be(
           true
         );
       });
@@ -317,7 +317,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const [example] = examplesResponse.examples;
         expect(example.example_id).to.eql(largePayloadExampleId);
-        expect(example.preview).to.be(undefined);
+        expect(example.previews).to.be(undefined);
         expect(example.scores.length).to.eql(2);
         expect(
           example.scores.every(
@@ -350,15 +350,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const serializedInput = JSON.stringify(largeInput);
         const serializedOutput = JSON.stringify(largeOutput);
         const [example] = previewResponse.examples;
-        expect(example.preview?.repetition_index).to.eql(0);
-        expect(example.preview?.input).to.eql({
-          content: serializedInput.slice(0, EXPERIMENT_EXAMPLE_PREVIEW_MAX_LENGTH),
-          truncated: true,
-        });
-        expect(example.preview?.output).to.eql({
-          content: serializedOutput.slice(0, EXPERIMENT_EXAMPLE_PREVIEW_MAX_LENGTH),
-          truncated: true,
-        });
+        expect(example.previews).to.eql([
+          {
+            repetition_index: 0,
+            input: {
+              content: serializedInput.slice(0, EXPERIMENT_EXAMPLE_PREVIEW_MAX_LENGTH),
+              truncated: true,
+            },
+            output: {
+              content: serializedOutput.slice(0, EXPERIMENT_EXAMPLE_PREVIEW_MAX_LENGTH),
+              truncated: true,
+            },
+          },
+        ]);
 
         const serializedPreviewResponse = JSON.stringify(previewResponse);
         expect(serializedPreviewResponse).to.contain(largeInputSentinel);

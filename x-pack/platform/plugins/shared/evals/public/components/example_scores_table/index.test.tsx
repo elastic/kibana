@@ -74,12 +74,12 @@ const buildExample = (
   exampleId: string,
   scores: EvaluationExperimentDatasetExample['scores'] = [buildScore()],
   exampleIndex = 0,
-  preview?: EvaluationExperimentDatasetExample['preview']
+  previews?: EvaluationExperimentDatasetExample['previews']
 ): EvaluationExperimentDatasetExample => ({
   example_id: exampleId,
   example_index: exampleIndex,
   scores,
-  preview,
+  previews,
 });
 
 const buildDetails = (repetitionIndex: number): GetEvaluationExperimentExampleDetailsResponse => ({
@@ -152,11 +152,18 @@ describe('ExampleScoresTable', () => {
         }),
       ],
       0,
-      {
-        repetition_index: 0,
-        input: { content: truncatedInputPreview, truncated: true },
-        output: { content: '{"completion":"preview-output"}', truncated: false },
-      }
+      [
+        {
+          repetition_index: 0,
+          input: { content: truncatedInputPreview, truncated: true },
+          output: { content: '{"completion":"preview-output"}', truncated: false },
+        },
+        {
+          repetition_index: 1,
+          input: { content: '{"prompt":"preview-input-r2"}', truncated: false },
+          output: { content: '{"completion":"preview-output-r2"}', truncated: false },
+        },
+      ]
     );
 
     renderTable([example]);
@@ -205,8 +212,12 @@ describe('ExampleScoresTable', () => {
     });
     fireEvent.click(within(repetitionPagination).getByRole('button', { name: 'Next page' }));
 
-    expect(screen.queryByText(/input-r2/)).not.toBeInTheDocument();
-    expect(screen.queryByText(/output-r2/)).not.toBeInTheDocument();
+    expect(screen.getByText('{"prompt":"preview-input-r2"}')).toBeInTheDocument();
+    expect(screen.getByText('{"completion":"preview-output-r2"}')).toBeInTheDocument();
+    expect(screen.queryByText(truncatedInputPreview)).not.toBeInTheDocument();
+    expect(screen.queryByText('{"completion":"preview-output"}')).not.toBeInTheDocument();
+    expect(screen.queryByText(/"prompt": "input-r2"/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/"completion": "output-r2"/)).not.toBeInTheDocument();
     expect(screen.getByText('explanation-r2')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'View full output' }));

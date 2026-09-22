@@ -20,7 +20,7 @@ import {
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import { EVALS_API_PRIVILEGES } from '../../../common';
+import { EVALS_API_PRIVILEGES, EXPERIMENT_LIMITS } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 import { handleMaximumResponseSizeExceededError } from '../utils/handle_response_size_error';
 import { previewScriptField } from './preview_source_script';
@@ -38,7 +38,12 @@ interface ScriptedPreviewHit {
 interface PreviewTermsAggregation {
   buckets?: Array<{
     key?: string | number;
-    first_repetition?: { hits?: { hits?: ScriptedPreviewHit[] } };
+    repetitions?: {
+      buckets?: Array<{
+        key?: string | number;
+        source?: { hits?: { hits?: ScriptedPreviewHit[] } };
+      }>;
+    };
   }>;
 }
 
@@ -68,6 +73,18 @@ const readScriptedPreview = (value: unknown): ContentPreview | null => {
   }
 
   return { content: preview.content, truncated: preview.truncated };
+};
+
+const readRepetitionIndex = (
+  hit: ScriptedPreviewHit | undefined,
+  bucketKey: unknown
+): number | undefined => {
+  const fromSource = hit?._source?.task?.repetition_index;
+  if (typeof fromSource === 'number') {
+    return fromSource;
+  }
+  const fromKey = typeof bucketKey === 'number' ? bucketKey : Number(bucketKey);
+  return Number.isInteger(fromKey) && fromKey >= 0 ? fromKey : undefined;
 };
 
 export const registerGetExperimentDatasetExamplesRoute = ({
@@ -116,14 +133,22 @@ export const registerGetExperimentDatasetExamplesRoute = ({
                     previews: {
                       terms: { field: 'example.id', size: MAX_SCORES_PER_QUERY },
                       aggs: {
-                        first_repetition: {
-                          top_hits: {
-                            size: 1,
-                            sort: [{ 'task.repetition_index': { order: 'asc', missing: '_last' } }],
-                            _source: { includes: ['task.repetition_index'] },
-                            script_fields: {
-                              input_preview: previewScriptField('example', 'input'),
-                              output_preview: previewScriptField('task', 'output'),
+                        repetitions: {
+                          terms: {
+                            field: 'task.repetition_index',
+                            size: EXPERIMENT_LIMITS.maxRepetitions,
+                            order: { _key: 'asc' },
+                          },
+                          aggs: {
+                            source: {
+                              top_hits: {
+                                size: 1,
+                                _source: { includes: ['task.repetition_index'] },
+                                script_fields: {
+                                  input_preview: previewScriptField('example', 'input'),
+                                  output_preview: previewScriptField('task', 'output'),
+                                },
+                              },
                             },
                           },
                         },
@@ -165,18 +190,31 @@ export const registerGetExperimentDatasetExamplesRoute = ({
           const previewBuckets = previewAggregation?.buckets;
           for (const bucket of previewBuckets ?? []) {
             const exampleId = bucket.key == null ? undefined : String(bucket.key);
-            const hit = bucket.first_repetition?.hits?.hits?.[0];
-            const repetitionIndex = hit?._source?.task?.repetition_index;
             const example = exampleId ? groupedExamplesById.get(exampleId) : undefined;
-            if (!example || repetitionIndex === undefined || !hit) {
+            if (!example) {
               continue;
             }
 
-            example.preview = {
-              repetition_index: repetitionIndex,
-              input: readScriptedPreview(hit.fields?.input_preview),
-              output: readScriptedPreview(hit.fields?.output_preview),
-            };
+            const previews: EvaluationExperimentExamplePreview[] = [];
+            for (const repetitionBucket of bucket.repetitions?.buckets ?? []) {
+              const hit = repetitionBucket.source?.hits?.hits?.[0];
+              const repetitionIndex = readRepetitionIndex(hit, repetitionBucket.key);
+              if (!hit || repetitionIndex === undefined) {
+                continue;
+              }
+
+              previews.push({
+                repetition_index: repetitionIndex,
+                input: readScriptedPreview(hit.fields?.input_preview),
+                output: readScriptedPreview(hit.fields?.output_preview),
+              });
+            }
+
+            if (previews.length > 0) {
+              example.previews = previews.sort(
+                (left, right) => left.repetition_index - right.repetition_index
+              );
+            }
           }
 
           return response.ok({ body: { examples } });
