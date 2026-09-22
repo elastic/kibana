@@ -58,6 +58,20 @@ interface SystemFlyoutControllerProps {
 }
 
 /**
+ * The `size` value `resetSize` pins the flyout to (synchronously) before restoring
+ * `resetSizeTarget`. EUI only re-seeds its width when the `size` prop changes, so this pinned value
+ * must differ from the target or the change back to it wouldn't register. A named target (e.g.
+ * `'m'`) never equals the dragged pixel width (a number), but `defaultSize` is `@public` and may be
+ * numeric — a consumer could pass a number equal to the dragged width. In that case, use an
+ * equivalent `${n}px` string: it renders the same width but is a distinct prop value, so the re-seed
+ * still fires. The returned value is always `!== resetSizeTarget`.
+ */
+export const resolveResetPinnedWidth = (
+  resizedWidth: number,
+  resetSizeTarget: SystemFlyoutSize
+): SystemFlyoutSize => (resizedWidth === resetSizeTarget ? `${resizedWidth}px` : resizedWidth);
+
+/**
  * Owns the reactive push/overlay `type` and `size` of a system flyout and exposes them via
  * {@link SystemFlyoutTypeContext} / {@link SystemFlyoutSizeContext}. Because the state lives here —
  * above the `EuiFlyout` — content rendered inside the flyout can switch push/overlay or reset the
@@ -87,10 +101,11 @@ const SystemFlyoutController: React.FC<SystemFlyoutControllerProps> = ({
   const resetSize = React.useCallback(() => {
     // Changing `size` re-seeds the flyout. If the prop already equals the reset target (the flyout
     // was dragged away from its default this session), EUI wouldn't re-seed — so first pin the prop
-    // to the measured width, synchronously (before paint), so the change to the default registers.
+    // to a value distinct from the target (synchronously, before paint), so the change back to the
+    // target registers. See {@link resolveResetPinnedWidth}.
     const resizedWidth = resizedWidthRef.current;
     if (sizeRef.current === resetSizeTarget && resizedWidth != null) {
-      flushSync(() => setSize(resizedWidth));
+      flushSync(() => setSize(resolveResetPinnedWidth(resizedWidth, resetSizeTarget)));
     }
     setSize(resetSizeTarget);
     resizedWidthRef.current = null;

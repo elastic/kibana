@@ -13,12 +13,13 @@ import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
-import { SystemFlyoutService } from './system_flyout_service';
+import { resolveResetPinnedWidth, SystemFlyoutService } from './system_flyout_service';
 import type { SystemFlyoutRef } from './system_flyout_ref';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import type {
   OverlayFlyoutTemplateStart,
   OverlaySystemFlyoutStart,
+  SystemFlyoutSize,
 } from '@kbn/core-overlays-browser';
 import { useSystemFlyoutSize } from '@kbn/core-overlays-browser';
 import { FlyoutTemplate, useFlyoutClose } from '@kbn/flyout-template';
@@ -932,5 +933,32 @@ describe('SystemFlyoutService', () => {
 
       expect(getByTestId('flyout-size')).toHaveTextContent('s');
     });
+  });
+});
+
+describe('resolveResetPinnedWidth', () => {
+  it('returns the dragged width when it already differs from a named target', () => {
+    expect(resolveResetPinnedWidth(800, 'm')).toBe(800);
+  });
+
+  it('returns the dragged width when it differs from a numeric target', () => {
+    expect(resolveResetPinnedWidth(900, 800)).toBe(900);
+  });
+
+  it('returns an equivalent px string when a numeric target equals the dragged width', () => {
+    // `800` and `'800px'` render the same width but are distinct prop values, so EUI still re-seeds.
+    expect(resolveResetPinnedWidth(800, 800)).toBe('800px');
+  });
+
+  it('always returns a value distinct from the reset target (so the re-seed registers)', () => {
+    const cases: Array<[number, SystemFlyoutSize]> = [
+      [800, 800],
+      [900, 800],
+      [800, 'm'],
+      [640, 640],
+    ];
+    for (const [resizedWidth, resetSizeTarget] of cases) {
+      expect(resolveResetPinnedWidth(resizedWidth, resetSizeTarget)).not.toBe(resetSizeTarget);
+    }
   });
 });
