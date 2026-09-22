@@ -40,6 +40,19 @@ describe('kiRetrievalSkill', () => {
     expect(kiRetrievalSkill.content).toContain('on every AI-index query');
   });
 
+  it('excludes memory types from ordinary KI retrieval', () => {
+    expect(kiRetrievalSkill.content).toContain('"memory.session"');
+    expect(kiRetrievalSkill.content).toContain('"memory.session_fact"');
+    expect(kiRetrievalSkill.content).toMatch(/type != "memory\.session"/);
+    expect(kiRetrievalSkill.content).toMatch(/type != "memory\.session_fact"/);
+  });
+
+  it('points to describe_ai_index for memory recall queries rather than duplicating them', () => {
+    expect(kiRetrievalSkill.content).toContain('## Memory');
+    expect(kiRetrievalSkill.content).toContain('describe_ai_index');
+    expect(kiRetrievalSkill.content).toContain('platform.context_engine.remember');
+  });
+
   it('has no referencedContent', () => {
     expect(kiRetrievalSkill.referencedContent).toHaveLength(0);
   });

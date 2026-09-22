@@ -19,7 +19,11 @@ import {
   ANALYZE_AND_IMPROVE_SKILL_ID,
   KI_RETRIEVAL_SKILL_ID,
 } from '../../common/agent_builder_skills';
-import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '../../common/agent_builder_tools';
+import {
+  CONTEXT_ENGINE_FORGET_TOOL_ID,
+  CONTEXT_ENGINE_REMEMBER_TOOL_ID,
+  CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID,
+} from '../../common/agent_builder_tools';
 
 /**
  * Server-side definition for the `ai_index` attachment type — a read-only snapshot
@@ -60,6 +64,12 @@ export const createAiIndexAttachmentType = (): AttachmentTypeDefinition<
       `hold. That skill is read-only: also load \`${AI_INDEX_AUTOMATIONS_SKILL_ID}\` to draft,`,
       `validate or run an automation, and \`${AI_INDEX_SOURCES_SKILL_ID}\` to choose or change the`,
       `data it draws on. For querying KIs in this index, load \`${KI_RETRIEVAL_SKILL_ID}\`.`,
+      'When the formatted attachment shows `Memory: enabled`, this index supports memory writes.',
+      'Record durable organizational knowledge — definitions, patterns, effective approaches,',
+      'domain-wide findings — as it is established, without waiting to be asked. Call',
+      `\`describe_ai_index\` on this index to get the recall queries. Use`,
+      `\`${CONTEXT_ENGINE_REMEMBER_TOOL_ID}\` to write; use \`${CONTEXT_ENGINE_FORGET_TOOL_ID}\``,
+      'with an id to tombstone a memory.',
       'This attachment authorizes you to apply changes, not only to propose them.',
       'Two gates sit on this work, at opposite ends of it. Ask before you build. Do not ask before',
       'you save or run what came back — the save tool opens its own dialog for that.',
@@ -106,7 +116,11 @@ export const createAiIndexAttachmentType = (): AttachmentTypeDefinition<
       'ran under the same privileges you have, so the same attempt fails the same way, and where it',
       'failed after the run had already begun a second one starts the automation twice.',
     ].join(' '),
-  getTools: () => [CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID],
+  getTools: () => [
+    CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID,
+    CONTEXT_ENGINE_REMEMBER_TOOL_ID,
+    CONTEXT_ENGINE_FORGET_TOOL_ID,
+  ],
 });
 
 const formatAiIndex = (data: AiIndexAttachmentData): string => {
@@ -115,6 +129,8 @@ const formatAiIndex = (data: AiIndexAttachmentData): string => {
   if (data.description) {
     parts.push(`Description: ${data.description}`);
   }
+
+  parts.push(`Memory: ${data.memory_enabled ? 'enabled' : 'not enabled'}`);
 
   parts.push(`Destination: ${data.dest.type} "${data.dest.value}"`);
 

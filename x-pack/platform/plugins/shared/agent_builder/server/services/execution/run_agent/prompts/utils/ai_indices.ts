@@ -11,15 +11,21 @@ import type { AiIndexCatalogEntry } from '../../types';
 /**
  * Builds the AI INDICES prompt section from the resolved catalog. Empty when disabled or when
  * the catalog has no entries.
+ *
+ * @param hasQueryAiIndicesTools - true (default) when `query_ai_indices` and `list_ai_indices` are
+ * available to the run. When false, the section falls back to `execute_esql` wording so the agent
+ * is not left without a legal way to query.
  */
 export const getAiIndicesInstructions = ({
   enabled,
   catalog,
   spaceId,
+  hasQueryAiIndicesTools = true,
 }: {
   enabled: boolean;
   catalog: AiIndexCatalogEntry[];
   spaceId: string;
+  hasQueryAiIndicesTools?: boolean;
 }): string => {
   if (!enabled || catalog.length === 0) {
     return '';
@@ -37,16 +43,8 @@ export const getAiIndicesInstructions = ({
   const catalogSection =
     entries.length > 0 ? `Available to this agent:\n\n${entries.join('\n')}` : '';
 
-  return cleanPrompt(`
-## AI INDICES
-
-An AI Index stores Knowledge Indicators (KIs): context prepared for agents, such as data descriptions, summaries, access patterns, queries, or records of Kibana resources. A KI may answer a question directly or help locate and use another source. AI Indices are Elasticsearch indices named \`ai-index-idx-*\`, or data streams named \`ai-index-ds-*\`.
-
-Search relevant AI Indices before broader retrieval when their KIs may help. If they do not cover the question, continue with other relevant data or tools.
-
-${catalogSection}
-
-### Tools
+  const toolsSection = hasQueryAiIndicesTools
+    ? `### Tools
 
 Work with AI Indices through their dedicated tools, in this order:
 
@@ -58,6 +56,26 @@ Do not query AI Indices with \`execute_esql\`: only \`query_ai_indices\` applies
 
 ### Space scoping
 
-This conversation runs in the space \`${spaceId}\`. Documents in an AI Index may belong to specific spaces. \`query_ai_indices\` applies that scoping server-side and returns only documents visible from this space. Never write a space condition in ES|QL: a filter you write does not replace the server's scoping, and can silently match nothing.
+This conversation runs in the space \`${spaceId}\`. Documents in an AI Index may belong to specific spaces. \`query_ai_indices\` applies that scoping server-side and returns only documents visible from this space. Never write a space condition in ES|QL: a filter you write does not replace the server's scoping, and can silently match nothing.`
+    : `### Tools
+
+Use \`describe_ai_index\` to read what an index holds, its fields, and example ES|QL queries before querying it. Fields differ between AI Indices.
+
+Use \`execute_esql\` to run queries directly. Apply the space filter from the AI INDICES section on every query — pass it as the \`filter\` argument, not in the ES|QL text.
+
+### Space scoping
+
+This conversation runs in the space \`${spaceId}\`. Documents in an AI Index may carry a \`spaces\` field that restricts visibility. Pass the space filter verbatim as an \`execute_esql\` argument on every AI-index query; a \`WHERE\` on \`spaces\` silently drops documents from indices that do not define the field.`;
+
+  return cleanPrompt(`
+## AI INDICES
+
+An AI Index stores Knowledge Indicators (KIs): context prepared for agents, such as data descriptions, summaries, access patterns, queries, or records of Kibana resources. A KI may answer a question directly or help locate and use another source. AI Indices are Elasticsearch indices named \`ai-index-idx-*\`, or data streams named \`ai-index-ds-*\`.
+
+Search relevant AI Indices before broader retrieval when their KIs may help. If they do not cover the question, continue with other relevant data or tools.
+
+${catalogSection}
+
+${toolsSection}
 `);
 };
