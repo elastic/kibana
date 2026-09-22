@@ -144,5 +144,8 @@ describe('ClassicAlertDetailsFlyout', () => {
     });
 
     expect(screen.getByTestId('alertingV2EpisodeFlyoutTakeAction')).toBeInTheDocument();
+    expect(mockAction.isCompatible).toHaveBeenCalledWith({
+      episodes: [expect.objectContaining({ source_id: 'v1' })],
+    });
   });
 });

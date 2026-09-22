@@ -50,6 +50,7 @@ import { EpisodeFooterActionMenu } from '@kbn/alerting-v2-episodes-ui/components
 import type { EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
 import { mapClassicAlertToEpisode } from '@kbn/alerting-v2-episodes-ui/classic_alerts/utils/map_alert';
 import type { ClassicAlertSource } from '@kbn/alerting-v2-episodes-ui/classic_alerts/utils/map_alert';
+import { CLASSIC_EPISODE_SOURCE_ID } from '@kbn/alerting-v2-episodes-ui/classic_alerts/constants';
 import { fetchClassicAlertById } from '@kbn/alerting-v2-episodes-ui/classic_alerts/apis/fetch_classic_alert_by_id';
 import type { ClassicAlertFields } from '@kbn/alerting-v2-episodes-ui/classic_alerts/types';
 import { classicAlertQueryKeys } from '@kbn/alerting-v2-episodes-ui/classic_alerts/query_keys';
@@ -160,16 +161,14 @@ export const ClassicAlertDetailsFlyout = ({
     enabled: Boolean(alertId),
   });
 
-  const episode = useMemo(
-    () =>
-      alert
-        ? mapClassicAlertToEpisode(
-            alert as unknown as ClassicAlertSource,
-            typeof alert._index === 'string' ? alert._index : ''
-          )
-        : undefined,
-    [alert]
-  );
+  const episode = useMemo(() => {
+    if (!alert) return undefined;
+    const mapped = mapClassicAlertToEpisode(
+      alert as unknown as ClassicAlertSource,
+      typeof alert._index === 'string' ? alert._index : ''
+    );
+    return { ...mapped, source_id: CLASSIC_EPISODE_SOURCE_ID };
+  }, [alert]);
   const episodes = useMemo(() => (episode ? [episode] : []), [episode]);
   const compatibleActions = useMemo(
     () => (actions && episodes.length ? actions.filter((a) => a.isCompatible({ episodes })) : []),
