@@ -97,6 +97,7 @@ const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
     isLoading: examplesLoading,
     error: examplesError,
     refetch: refetchExamples,
+    getExampleQueryOptions,
   } = useExperimentDatasetExamples(experimentId, isOpen ? group.datasetId : '', executionId, {
     refetchInterval: isRunning ? RUN_POLL_INTERVAL_MS : false,
     staleTime: isRunning ? 0 : undefined,
@@ -166,6 +167,7 @@ const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
         ) : (
           <ExampleScoresTable
             examples={datasetExamples?.examples ?? []}
+            getExampleQueryOptions={getExampleQueryOptions}
             selectedExampleId={selectedExampleId}
             onTraceClick={onTraceClick}
           />

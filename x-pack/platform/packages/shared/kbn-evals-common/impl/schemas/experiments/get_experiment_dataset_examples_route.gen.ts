@@ -32,7 +32,38 @@ export const GetEvaluationExperimentDatasetExamplesRequestQuery = lazySchema(() 
     /**
      * When provided, fetches examples for all experiments in this execution
      */
-    execution_id: z.string().max(1024).optional(),
+    execution_id: z
+      .string()
+      .max(1024)
+      .optional()
+      .describe('When provided, fetches examples for all experiments in this execution'),
+    /**
+     * Summary omits input, output, and evaluator details for lightweight score tables
+     */
+    view: z
+      .enum(['full', 'summary'])
+      .optional()
+      .default('full')
+      .describe('Summary omits input, output, and evaluator details for lightweight score tables'),
+    /**
+     * Restrict results to a single example
+     */
+    example_id: z
+      .string()
+      .min(1)
+      .max(1024)
+      .optional()
+      .describe('Restrict results to a single example'),
+    /**
+     * Restrict results to a single repetition
+     */
+    repetition_index: z.coerce
+      .number()
+      .int()
+      .min(0)
+      .max(10000)
+      .optional()
+      .describe('Restrict results to a single repetition'),
   })
 );
 export type GetEvaluationExperimentDatasetExamplesRequestQuery = z.infer<

@@ -32,6 +32,30 @@ paths:
             type: string
             maxLength: 1024
           description: When provided, fetches examples for all experiments in this execution
+        - name: view
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [full, summary]
+            default: full
+          description: Summary omits input, output, and evaluator details for lightweight score tables
+        - name: example_id
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 1024
+          description: Restrict results to a single example
+        - name: repetition_index
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 10000
+          description: Restrict results to a single repetition
       responses:
         '200':
           description: Successful response

@@ -105,3 +105,33 @@ export const getEvaluatorAccordionAriaLabel = (evaluatorName: string) =>
     defaultMessage: 'Toggle details for evaluator {evaluatorName}',
     values: { evaluatorName },
   });
+
+export const VIEW_INPUT = i18n.translate('xpack.evals.exampleScoresTable.viewInputButtonLabel', {
+  defaultMessage: 'View input',
+});
+
+export const VIEW_OUTPUT = i18n.translate('xpack.evals.exampleScoresTable.viewOutputButtonLabel', {
+  defaultMessage: 'View output',
+});
+
+export const COPY_JSON = i18n.translate('xpack.evals.exampleScoresTable.copyJsonButtonLabel', {
+  defaultMessage: 'Copy JSON',
+});
+
+export const PREVIEW_TRUNCATED = i18n.translate(
+  'xpack.evals.exampleScoresTable.previewTruncatedDescription',
+  {
+    defaultMessage: 'Preview truncated. Copy JSON to get the full content.',
+  }
+);
+
+export const PAYLOAD_LOAD_ERROR = i18n.translate(
+  'xpack.evals.exampleScoresTable.payloadLoadErrorMessage',
+  {
+    defaultMessage: 'Could not load example details.',
+  }
+);
+
+export const RETRY = i18n.translate('xpack.evals.exampleScoresTable.retryButtonLabel', {
+  defaultMessage: 'Retry',
+});

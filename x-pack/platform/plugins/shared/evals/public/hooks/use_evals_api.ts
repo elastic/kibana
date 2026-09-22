@@ -47,6 +47,7 @@ import {
   type GetEvaluationExperimentResponse,
   type GetEvaluationExperimentScoresResponse,
   type GetEvaluationExperimentDatasetExamplesResponse,
+  type GetEvaluationExperimentDatasetExamplesRequestQuery,
   type GetExampleScoresResponse,
   type GetTraceResponse,
   type GetTracingProjectsResponse,
@@ -599,27 +600,53 @@ export const useExperimentDatasetExamples = (
   options: ExperimentDatasetExamplesOptions = {}
 ) => {
   const { services } = useKibana();
-
-  return useQuery({
-    queryKey: queryKeys.experiments.datasetExamples(experimentId, datasetId, executionId),
-    queryFn: async (): Promise<GetEvaluationExperimentDatasetExamplesResponse> => {
+  const fetchExamples = useCallback(
+    (
+      query: GetEvaluationExperimentDatasetExamplesRequestQuery
+    ): Promise<GetEvaluationExperimentDatasetExamplesResponse> => {
       const url = EVALS_EXPERIMENT_DATASET_EXAMPLES_URL.replace(
         '{experimentId}',
         encodeURIComponent(experimentId)
       ).replace('{datasetId}', encodeURIComponent(datasetId));
-      const query: Record<string, string> = {};
-      if (executionId) {
-        query.execution_id = executionId;
-      }
       return services.http!.get<GetEvaluationExperimentDatasetExamplesResponse>(url, {
-        query,
+        query: { ...query, ...(executionId ? { execution_id: executionId } : {}) },
         version: API_VERSIONS.internal.v1,
       });
     },
+    [services.http, experimentId, datasetId, executionId]
+  );
+  const result = useQuery({
+    queryKey: queryKeys.experiments.datasetExamples(experimentId, datasetId, executionId, {
+      view: 'summary',
+    }),
+    queryFn: () => fetchExamples({ view: 'summary' }),
     enabled: experimentId.length > 0 && datasetId.length > 0,
     refetchInterval: options.refetchInterval,
     staleTime: options.staleTime,
   });
+  const getExampleQueryOptions = useCallback(
+    (exampleId: string, repetitionIndex: number, version?: string) => {
+      const query = {
+        view: 'full' as const,
+        example_id: exampleId,
+        repetition_index: repetitionIndex,
+      };
+      return {
+        queryKey: [
+          ...queryKeys.experiments.datasetExamples(experimentId, datasetId, executionId, query),
+          version,
+        ],
+        queryFn: async () => {
+          const response = await fetchExamples(query);
+          return (
+            response.examples.find((example) => example.example_id === exampleId)?.scores ?? []
+          );
+        },
+      };
+    },
+    [fetchExamples, experimentId, datasetId, executionId]
+  );
+  return { ...result, getExampleQueryOptions };
 };
 
 export const useExampleScores = (exampleId: string, datasetId?: string) => {

@@ -12,7 +12,6 @@ import {
   EuiBasicTable,
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPagination,
@@ -21,6 +20,7 @@ import {
   EuiToolTip,
   useEuiTheme,
   type EuiBasicTableColumn,
+  type Criteria,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type {
@@ -28,6 +28,14 @@ import type {
   EvaluationScoreDocument,
 } from '@kbn/evals-common';
 import * as i18n from './translations';
+import {
+  ExamplePayload,
+  JsonPreview,
+  LazyJsonPreview,
+  type GetExampleQueryOptions,
+} from './example_payload';
+
+const PAGE_SIZE = 10;
 
 const formatScore = (score: number | null | undefined) =>
   score == null ? i18n.SCORE_NOT_AVAILABLE : score.toFixed(2);
@@ -179,13 +187,17 @@ const groupScoresByEvaluator = (
 };
 
 const getScoreKey = (scoreDoc: EvaluationScoreDocument, exampleId: string): string =>
-  [
+  JSON.stringify([
     exampleId,
+    scoreDoc.experiment_id,
+    scoreDoc.metadata?.suite_id,
+    scoreDoc.task.model.id,
     scoreDoc.evaluator.name,
+    scoreDoc.evaluator.model?.id,
     scoreDoc.task.repetition_index,
-    scoreDoc.task.trace_id ?? 'no_trace',
+    scoreDoc.task.trace_id,
     scoreDoc['@timestamp'],
-  ].join(':');
+  ]);
 
 /**
  * Deliberately not a badge: the badges alongside it are verdicts, and the judge is metadata
@@ -203,14 +215,25 @@ const EvaluatorScoreAccordion: React.FC<{
   scoreLabel: string;
   judgeModelId?: string;
   onTraceClick: (traceId: string) => void;
-}> = ({ score, exampleId, scoreLabel, judgeModelId, onTraceClick }) => {
+  getExampleQueryOptions?: GetExampleQueryOptions;
+  payloadVersion?: string;
+}> = ({
+  score,
+  exampleId,
+  scoreLabel,
+  judgeModelId,
+  onTraceClick,
+  getExampleQueryOptions,
+  payloadVersion,
+}) => {
+  const [open, setOpen] = useState(false);
   const { evaluator } = score;
   const accordionId = [exampleId, evaluator.name, score.task.repetition_index].join('-');
 
   const hasExplanation = evaluator.explanation != null && evaluator.explanation.length > 0;
   const hasMetadata = hasNonEmptyMetadata(evaluator.metadata);
   const hasTraceId = evaluator.trace_id != null && evaluator.trace_id.length > 0;
-  const hasDetails = hasExplanation || hasMetadata || hasTraceId;
+  const hasDetails = getExampleQueryOptions || hasExplanation || hasMetadata || hasTraceId;
 
   const buttonContent = (
     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
@@ -234,6 +257,39 @@ const EvaluatorScoreAccordion: React.FC<{
     </EuiFlexGroup>
   );
 
+  const renderDetails = (details: EvaluationScoreDocument) => (
+    <div>
+      {details.evaluator.explanation && (
+        <>
+          <EuiText size="xs" color="subdued">
+            <strong>{i18n.EVALUATOR_EXPLANATION}</strong>
+          </EuiText>
+          <JsonPreview value={details.evaluator.explanation} />
+          <EuiSpacer size="xs" />
+        </>
+      )}
+      {hasNonEmptyMetadata(details.evaluator.metadata) && (
+        <>
+          <EuiText size="xs" color="subdued">
+            <strong>{i18n.EVALUATOR_METADATA}</strong>
+          </EuiText>
+          <JsonPreview value={details.evaluator.metadata} />
+          <EuiSpacer size="xs" />
+        </>
+      )}
+      {hasTraceId && (
+        <EuiButtonEmpty
+          size="xs"
+          iconType="chartWaterfall"
+          onClick={() => onTraceClick(evaluator.trace_id!)}
+          aria-label={i18n.getEvaluatorViewTraceAriaLabel(evaluator.name)}
+        >
+          {i18n.EVALUATOR_VIEW_TRACE}
+        </EuiButtonEmpty>
+      )}
+    </div>
+  );
+
   if (!hasDetails) {
     return <div className={accordionButtonCss}>{buttonContent}</div>;
   }
@@ -241,50 +297,32 @@ const EvaluatorScoreAccordion: React.FC<{
   return (
     <EuiAccordion
       id={`evaluator-${accordionId}`}
+      onToggle={setOpen}
       buttonContent={buttonContent}
       buttonClassName={accordionButtonCss}
       paddingSize="xs"
       arrowDisplay="left"
       aria-label={i18n.getEvaluatorAccordionAriaLabel(evaluator.name)}
     >
-      <div>
-        {hasExplanation && (
-          <>
-            <EuiText size="xs" color="subdued">
-              <strong>{i18n.EVALUATOR_EXPLANATION}</strong>
-            </EuiText>
-            <EuiText size="xs">{evaluator.explanation}</EuiText>
-            <EuiSpacer size="xs" />
-          </>
-        )}
-        {hasMetadata && (
-          <>
-            <EuiText size="xs" color="subdued">
-              <strong>{i18n.EVALUATOR_METADATA}</strong>
-            </EuiText>
-            <EuiCodeBlock
-              overflowHeight={100}
-              language="json"
-              paddingSize="none"
-              transparentBackground
-              fontSize="s"
-            >
-              {JSON.stringify(evaluator.metadata, null, 2)}
-            </EuiCodeBlock>
-            <EuiSpacer size="xs" />
-          </>
-        )}
-        {hasTraceId && (
-          <EuiButtonEmpty
-            size="xs"
-            iconType="chartWaterfall"
-            onClick={() => onTraceClick(evaluator.trace_id!)}
-            aria-label={i18n.getEvaluatorViewTraceAriaLabel(evaluator.name)}
+      {open &&
+        (getExampleQueryOptions ? (
+          <ExamplePayload
+            getExampleQueryOptions={getExampleQueryOptions}
+            exampleId={exampleId}
+            repetitionIndex={score.task.repetition_index}
+            version={payloadVersion}
           >
-            {i18n.EVALUATOR_VIEW_TRACE}
-          </EuiButtonEmpty>
-        )}
-      </div>
+            {(scores) =>
+              renderDetails(
+                scores.find(
+                  (candidate) => getScoreKey(candidate, exampleId) === getScoreKey(score, exampleId)
+                ) ?? score
+              )
+            }
+          </ExamplePayload>
+        ) : (
+          renderDetails(score)
+        ))}
     </EuiAccordion>
   );
 };
@@ -294,7 +332,9 @@ const EvaluatorScoreGroupBlock: React.FC<{
   exampleId: string;
   showJudge: boolean;
   onTraceClick: (traceId: string) => void;
-}> = ({ group, exampleId, showJudge, onTraceClick }) => {
+  getExampleQueryOptions?: GetExampleQueryOptions;
+  payloadVersion?: string;
+}> = ({ group, exampleId, showJudge, onTraceClick, getExampleQueryOptions, payloadVersion }) => {
   const { euiTheme } = useEuiTheme();
   const { evaluatorName, scores, sharedModelId } = group;
 
@@ -304,6 +344,8 @@ const EvaluatorScoreGroupBlock: React.FC<{
     return (
       <EvaluatorScoreAccordion
         score={score}
+        getExampleQueryOptions={getExampleQueryOptions}
+        payloadVersion={payloadVersion}
         exampleId={exampleId}
         scoreLabel={score.evaluator.name}
         judgeModelId={showJudge ? score.evaluator.model?.id : undefined}
@@ -331,6 +373,8 @@ const EvaluatorScoreGroupBlock: React.FC<{
           <EvaluatorScoreAccordion
             key={getScoreKey(score, exampleId)}
             score={score}
+            getExampleQueryOptions={getExampleQueryOptions}
+            payloadVersion={payloadVersion}
             exampleId={exampleId}
             scoreLabel={splitScoreName(score.evaluator.name).scoreLabel}
             judgeModelId={
@@ -356,14 +400,17 @@ export interface ExampleScoresTableProps {
   examples: EvaluationExperimentDatasetExample[];
   selectedExampleId?: string | null;
   onTraceClick: (traceId: string, exampleId: string) => void;
+  getExampleQueryOptions?: GetExampleQueryOptions;
 }
 
 export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
   examples,
   selectedExampleId,
   onTraceClick,
+  getExampleQueryOptions,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const [pageIndex, setPageIndex] = useState(0);
   const [selectedRepetitions, setSelectedRepetitions] = useState<Record<string, number>>({});
 
   const selectedRowClassName = useMemo(
@@ -374,12 +421,6 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
       `,
     [euiTheme.colors.primary]
   );
-
-  useEffect(() => {
-    if (!selectedExampleId) return;
-    const element = document.getElementById(`evalsExampleRow-${selectedExampleId}`);
-    element?.scrollIntoView({ block: 'center' });
-  }, [selectedExampleId]);
 
   const rows = useMemo<ExampleScoreRow[]>(() => {
     return [...examples]
@@ -430,6 +471,21 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
       });
   }, [examples]);
 
+  const activePage = Math.min(pageIndex, Math.max(0, Math.ceil(rows.length / PAGE_SIZE) - 1));
+  const visibleRows = rows.slice(activePage * PAGE_SIZE, (activePage + 1) * PAGE_SIZE);
+  const selectedRowIndex = rows.findIndex((row) => row.exampleId === selectedExampleId);
+
+  useEffect(() => {
+    if (selectedRowIndex >= 0) setPageIndex(Math.floor(selectedRowIndex / PAGE_SIZE));
+  }, [selectedExampleId, selectedRowIndex]);
+
+  useEffect(() => {
+    if (!selectedExampleId) return;
+    document
+      .getElementById(`evalsExampleRow-${selectedExampleId}`)
+      ?.scrollIntoView?.({ block: 'center' });
+  }, [selectedExampleId, activePage, rows]);
+
   const getSelectedRepetitionIndex = useCallback(
     (row: ExampleScoreRow): number => {
       const defaultRepetitionIndex = row.repetitionIndices[0] ?? 0;
@@ -461,30 +517,26 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
       )
     );
 
-  const renderJsonPreview = (value: unknown) => {
-    if (value == null) {
-      return '-';
-    }
+  const getPayloadVersion = (row: ExampleScoreRow): string =>
+    JSON.stringify(
+      getScoresForSelectedRepetition(row).map((score) => getScoreKey(score, row.exampleId))
+    );
 
-    const serializedValue = JSON.stringify(value, null, 2);
-    if (!serializedValue) {
-      return '-';
-    }
-
-    return (
-      <EuiCodeBlock
-        // Table cell content is a flex container, so without an explicit width the block
-        // shrink-wraps the JSON and pulls its copy/expand controls in with it.
-        css={{ width: '100%' }}
-        overflowHeight={200}
-        language="json"
-        paddingSize="none"
-        transparentBackground
-        fontSize="s"
-        isCopyable
-      >
-        {serializedValue}
-      </EuiCodeBlock>
+  const renderPayload = (row: ExampleScoreRow, field: 'input' | 'output') => {
+    const firstScore = getScoresForSelectedRepetition(row)[0];
+    return getExampleQueryOptions ? (
+      <LazyJsonPreview
+        key={`${row.exampleId}-${getSelectedRepetitionIndex(row)}`}
+        getExampleQueryOptions={getExampleQueryOptions}
+        exampleId={row.exampleId}
+        repetitionIndex={getSelectedRepetitionIndex(row)}
+        version={getPayloadVersion(row)}
+        field={field}
+      />
+    ) : (
+      <JsonPreview
+        value={field === 'input' ? firstScore?.example.input : firstScore?.task.output}
+      />
     );
   };
 
@@ -497,10 +549,10 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
             aria-label={i18n.getRepetitionPaginationAriaLabel(row.exampleId)}
             pageCount={row.repetitionIndices.length}
             activePage={row.repetitionIndices.indexOf(getSelectedRepetitionIndex(row))}
-            onPageClick={(pageIndex) =>
+            onPageClick={(repetitionPageIndex) =>
               setSelectedRepetitions((prev) => ({
                 ...prev,
-                [row.exampleId]: row.repetitionIndices[pageIndex],
+                [row.exampleId]: row.repetitionIndices[repetitionPageIndex],
               }))
             }
             compressed
@@ -539,8 +591,7 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
         _scoresByRepetition: ExampleScoreRow['scoresByRepetition'],
         row: ExampleScoreRow
       ) => {
-        const firstScoreDocument = getScoresForSelectedRepetition(row)[0];
-        return renderJsonPreview(firstScoreDocument?.example.input);
+        return renderPayload(row, 'input');
       },
     },
     {
@@ -551,8 +602,7 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
         _scoresByRepetition: ExampleScoreRow['scoresByRepetition'],
         row: ExampleScoreRow
       ) => {
-        const firstScoreDocument = getScoresForSelectedRepetition(row)[0];
-        return renderJsonPreview(firstScoreDocument?.task.output);
+        return renderPayload(row, 'output');
       },
     },
     {
@@ -574,6 +624,8 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
                 {idx > 0 && <EuiSpacer size="xs" />}
                 <EvaluatorScoreGroupBlock
                   group={group}
+                  getExampleQueryOptions={getExampleQueryOptions}
+                  payloadVersion={getPayloadVersion(row)}
                   exampleId={row.exampleId}
                   showJudge={showJudge}
                   onTraceClick={(traceId) => onTraceClick(traceId, row.exampleId)}
@@ -623,7 +675,20 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
 
   return (
     <EuiBasicTable
-      items={rows}
+      items={visibleRows}
+      pagination={
+        rows.length > PAGE_SIZE
+          ? {
+              pageIndex: activePage,
+              pageSize: PAGE_SIZE,
+              totalItemCount: rows.length,
+              showPerPageOptions: false,
+            }
+          : undefined
+      }
+      onChange={({ page }: Criteria<ExampleScoreRow>) => {
+        if (page) setPageIndex(page.index);
+      }}
       itemId="exampleId"
       itemIdToExpandedRowMap={itemIdToExpandedRowMap}
       columns={columns}

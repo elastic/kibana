@@ -52,7 +52,7 @@ describe('GET /internal/evals/experiments/{experimentId}/datasets/{datasetId}/ex
     return { handler, context, evaluationScoreService, logger };
   };
 
-  const makeRequest = (experimentId = 'experiment-123', datasetId = 'dataset-123') =>
+  const makeRequest = (experimentId = 'experiment-123', datasetId = 'dataset-123', query = {}) =>
     httpServerMock.createKibanaRequest({
       method: 'get',
       path: EVALS_EXPERIMENT_DATASET_EXAMPLES_URL.replace('{experimentId}', experimentId).replace(
@@ -60,7 +60,7 @@ describe('GET /internal/evals/experiments/{experimentId}/datasets/{datasetId}/ex
         datasetId
       ),
       params: { experimentId, datasetId },
-      query: {},
+      query,
     });
 
   it('uses the correct query parameters', async () => {
@@ -84,6 +84,46 @@ describe('GET /internal/evals/experiments/{experimentId}/datasets/{datasetId}/ex
         },
       })
     );
+  });
+
+  it('excludes payloads from summaries and scopes lazy loads to one example and repetition', async () => {
+    const { handler, context, evaluationScoreService } = setup();
+    await handler(
+      context,
+      makeRequest(undefined, undefined, { view: 'summary' }),
+      kibanaResponseFactory
+    );
+    expect(evaluationScoreService.search).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        _source_excludes: expect.arrayContaining([
+          'task.output',
+          'example.input',
+          'example.metadata',
+          'evaluator.metadata',
+          'evaluator.explanation',
+        ]),
+      })
+    );
+
+    await handler(
+      context,
+      makeRequest(undefined, undefined, {
+        view: 'full',
+        example_id: 'example-7',
+        repetition_index: 0,
+        execution_id: 'execution-1',
+      }),
+      kibanaResponseFactory
+    );
+    const [query] = evaluationScoreService.search.mock.lastCall ?? [];
+    expect(query._source_excludes).toBeUndefined();
+    expect(query.query.bool.must).toEqual([
+      { term: { 'example.dataset.id': 'dataset-123' } },
+      { term: { 'metadata.execution_id': 'execution-1' } },
+      buildSpaceFilter('default'),
+      { term: { 'example.id': 'example-7' } },
+      { term: { 'task.repetition_index': 0 } },
+    ]);
   });
 
   it('groups scores by example id and sorts by example index', async () => {

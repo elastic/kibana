@@ -6,9 +6,34 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import axe from 'axe-core';
+import { AXE_CONFIG, AXE_OPTIONS } from '@kbn/axe-config';
+import { fireEvent, render as renderComponent, screen, waitFor } from '@testing-library/react';
 import type { EvaluationExperimentDatasetExample } from '@kbn/evals-common';
 import { ExampleScoresTable, getVerdictBadgeColor } from '.';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+
+const render = (element: React.ReactElement) => {
+  const client = new QueryClient();
+  return renderComponent(element, {
+    wrapper: ({ children }) => (
+      <QueryClientProvider client={client}>{children}</QueryClientProvider>
+    ),
+  });
+};
+
+const createExampleQueryOptions =
+  (
+    loadExample: (
+      exampleId: string,
+      repetitionIndex: number,
+      version?: string
+    ) => Promise<EvaluationExperimentDatasetExample['scores']>
+  ) =>
+  (exampleId: string, repetitionIndex: number, version?: string) => ({
+    queryKey: ['example', exampleId, repetitionIndex, version],
+    queryFn: () => loadExample(exampleId, repetitionIndex, version),
+  });
 
 const buildScore = ({
   timestamp,
@@ -101,6 +126,164 @@ const buildMixedJudgeExample = (): EvaluationExperimentDatasetExample => ({
 });
 
 describe('ExampleScoresTable', () => {
+  it('renders only one page of examples and opens the page containing a linked example', () => {
+    const examples = Array.from({ length: 61 }, (_, index) => ({
+      example_id: `case-${index}`,
+      example_index: index,
+      scores: [],
+    }));
+    const { rerender } = render(
+      <ExampleScoresTable examples={examples} onTraceClick={jest.fn()} />
+    );
+
+    expect(screen.getByText('case-0')).toBeInTheDocument();
+    expect(screen.getByText('case-9')).toBeInTheDocument();
+    expect(screen.queryByText('case-10')).not.toBeInTheDocument();
+    expect(screen.queryByText('case-60')).not.toBeInTheDocument();
+
+    rerender(
+      <ExampleScoresTable
+        examples={examples}
+        selectedExampleId="case-60"
+        onTraceClick={jest.fn()}
+      />
+    );
+    expect(screen.getByText('case-60')).toBeInTheDocument();
+    expect(screen.queryByText('case-0')).not.toBeInTheDocument();
+  });
+
+  it('loads output only when opened and bounds large JSON previews', async () => {
+    const score = buildScore({
+      timestamp: '2026-03-02T12:00:00.000Z',
+      evaluatorName: 'Criteria',
+      repetitionIndex: 0,
+    });
+    const loadExample = jest.fn().mockResolvedValue([
+      {
+        ...score,
+        task: {
+          ...score.task,
+          output: {
+            conversation: Array.from({ length: 2000 }, () => ({ message: 'long response' })),
+          },
+        },
+      },
+    ]);
+    const { container } = render(
+      <ExampleScoresTable
+        examples={[{ example_id: 'example-1', example_index: 0, scores: [score] }]}
+        getExampleQueryOptions={createExampleQueryOptions(loadExample)}
+        onTraceClick={jest.fn()}
+      />
+    );
+    axe.configure(AXE_CONFIG);
+    expect((await axe.run(container, AXE_OPTIONS)).violations).toHaveLength(0);
+    expect(loadExample).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'View output' }));
+    await waitFor(() =>
+      expect(
+        screen.getByText('Preview truncated. Copy JSON to get the full content.')
+      ).toBeInTheDocument()
+    );
+    expect(loadExample).toHaveBeenCalledWith('example-1', 0, expect.any(String));
+    expect(container.textContent?.length).toBeLessThan(12000);
+    expect(screen.getByRole('button', { name: 'Copy JSON' })).toBeInTheDocument();
+    expect((await axe.run(container, AXE_OPTIONS)).violations).toHaveLength(0);
+  });
+
+  it('retries failed payload loads and loads the selected repetition after navigation', async () => {
+    const scores = [0, 1].map((repetitionIndex) =>
+      buildScore({
+        timestamp: '2026-03-02T12:00:00.000Z',
+        evaluatorName: 'Criteria',
+        repetitionIndex,
+        taskOutput: { answer: `answer-${repetitionIndex}` },
+      })
+    );
+    const loadExample = jest
+      .fn()
+      .mockRejectedValueOnce(new Error('unavailable'))
+      .mockResolvedValueOnce([scores[0]])
+      .mockResolvedValueOnce([scores[1]]);
+    const { container } = render(
+      <ExampleScoresTable
+        examples={[{ example_id: 'example-1', example_index: 0, scores }]}
+        getExampleQueryOptions={createExampleQueryOptions(loadExample)}
+        onTraceClick={jest.fn()}
+      />
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'View output' }));
+    expect(await screen.findByText('Could not load example details.')).toBeInTheDocument();
+    expect((await axe.run(container, AXE_OPTIONS)).violations).toHaveLength(0);
+    fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
+    expect(await screen.findByText(/"answer": "answer-0"/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Next page' }));
+    expect(screen.queryByText(/"answer": "answer-0"/)).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'View output' }));
+    expect(await screen.findByText(/"answer": "answer-1"/)).toBeInTheDocument();
+    expect(loadExample).toHaveBeenLastCalledWith('example-1', 1, expect.any(String));
+  });
+
+  it('refreshes an open evaluator panel when live scores are replaced', async () => {
+    const first = buildScore({
+      timestamp: '2026-03-02T12:00:00.000Z',
+      evaluatorName: 'Criteria',
+      repetitionIndex: 0,
+    });
+    const updated = { ...first, '@timestamp': '2026-03-02T12:01:00.000Z' };
+    const loadExample = jest
+      .fn()
+      .mockResolvedValueOnce([
+        { ...first, evaluator: { ...first.evaluator, explanation: 'First explanation' } },
+      ])
+      .mockResolvedValueOnce([
+        { ...updated, evaluator: { ...updated.evaluator, explanation: 'Updated explanation' } },
+      ]);
+    const props = {
+      getExampleQueryOptions: createExampleQueryOptions(loadExample),
+      onTraceClick: jest.fn(),
+    };
+    const { rerender } = render(
+      <ExampleScoresTable
+        {...props}
+        examples={[{ example_id: 'example-1', example_index: 0, scores: [first] }]}
+      />
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Criteria: n/a' }));
+    expect(await screen.findByText('First explanation')).toBeInTheDocument();
+    rerender(
+      <ExampleScoresTable
+        {...props}
+        examples={[{ example_id: 'example-1', example_index: 0, scores: [updated] }]}
+      />
+    );
+    expect(await screen.findByText('Updated explanation')).toBeInTheDocument();
+    expect(loadExample).toHaveBeenCalledTimes(2);
+  });
+
+  it('matches lazy evaluator details to their experiment when execution members share a timestamp', async () => {
+    const first = buildScore({
+      timestamp: '2026-03-02T12:00:00.000Z',
+      evaluatorName: 'Criteria',
+      repetitionIndex: 0,
+    });
+    const second = { ...first, experiment_id: 'experiment-2' };
+    const loadExample = jest.fn().mockResolvedValue([
+      { ...first, evaluator: { ...first.evaluator, explanation: 'First experiment' } },
+      { ...second, evaluator: { ...second.evaluator, explanation: 'Second experiment' } },
+    ]);
+    render(
+      <ExampleScoresTable
+        examples={[{ example_id: 'example-1', example_index: 0, scores: [first, second] }]}
+        getExampleQueryOptions={createExampleQueryOptions(loadExample)}
+        onTraceClick={jest.fn()}
+      />
+    );
+    fireEvent.click(screen.getAllByRole('button', { name: 'Criteria: n/a' })[1]);
+    expect(await screen.findByText('Second experiment')).toBeInTheDocument();
+    expect(screen.queryByText('First experiment')).not.toBeInTheDocument();
+  });
+
   it('renders repetition navigation and inline JSON previews for multi-repetition rows', () => {
     const onTraceClick = jest.fn();
     const examples: EvaluationExperimentDatasetExample[] = [
