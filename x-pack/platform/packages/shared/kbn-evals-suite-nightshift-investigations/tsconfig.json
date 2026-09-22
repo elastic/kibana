@@ -16,6 +16,7 @@
     "@kbn/tooling-log",
     "@kbn/agent-builder-common",
     "@kbn/core",
+    "@kbn/inference-tracing",
     "@kbn/nightshift-investigations-plugin",
     "@kbn/significant-events-schema",
     "@kbn/workflows",

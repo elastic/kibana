@@ -7,10 +7,12 @@
 
 import { expect } from '@playwright/test';
 import { tags } from '@kbn/evals';
+import type { GenAISemConvAttributes } from '@kbn/inference-tracing';
 import { evaluate } from '../../src/evaluate';
 import { readInvestigationDataset } from './datasets';
 import { ungradedPlaceholder } from './placeholder';
 import { runInvestigation } from './task';
+import { assertAgentTrace } from './trace_evidence';
 import type { InvestigationTaskOutput } from './types';
 
 evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.classic }, () => {
@@ -88,34 +90,21 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
         });
         expect(score.evaluator.trace_id).not.toBe(output.traceId);
 
-        for (const field of [
-          'gen_ai.input.messages',
-          'gen_ai.output.messages',
-          'gen_ai.system_instructions',
-          'gen_ai.tool.call.arguments',
-          'gen_ai.tool.call.result',
-          'gen_ai.conversation.id',
-        ]) {
-          await expect
-            .poll(
-              async () =>
-                (
-                  await traceEsClient.count({
-                    index: 'traces-*',
-                    query: {
-                      bool: {
-                        filter: [
-                          { term: { 'trace.id': output.traceId } },
-                          { exists: { field: `attributes.${field}` } },
-                        ],
-                      },
-                    },
-                  })
-                ).count,
-              { timeout: 60_000 }
-            )
-            .toBeGreaterThan(0);
-        }
+        await expect(async () => {
+          const spans = await traceEsClient.search<{ attributes: GenAISemConvAttributes }>({
+            index: 'traces-*',
+            size: 1_000,
+            query: { term: { 'trace.id': output.traceId } },
+            _source: ['attributes'],
+          });
+          assertAgentTrace(
+            spans.hits.hits.flatMap(({ _source: source }) => (source ? [source.attributes] : [])),
+            {
+              question: output.query,
+              conversationId: output.conversation_id,
+            }
+          );
+        }).toPass({ timeout: 60_000 });
         log.info(
           JSON.stringify({
             experiment_id: experiment.id,

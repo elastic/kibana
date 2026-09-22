@@ -8,7 +8,10 @@
 import { z } from '@kbn/zod/v4';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import type { ConversationRound } from '@kbn/agent-builder-common';
-import type { InvestigationStructuredOutput } from '@kbn/nightshift-investigations-plugin/common';
+import type {
+  InvestigationStructuredOutput,
+  InvestigationStatus,
+} from '@kbn/nightshift-investigations-plugin/common';
 
 export const investigationExampleSchema = z.object({
   input: z.object({ question: z.string().trim().min(1).max(MAX_TEXT_LENGTH) }).catchall(z.json()),
@@ -23,7 +26,7 @@ export interface InvestigationTaskOutput {
   query: string;
   investigation_id?: string;
   conversation_id?: string;
-  workflow_status?: string;
+  workflow_status?: InvestigationStatus;
   structured_report?: InvestigationStructuredOutput;
   conversation?: { rounds: ConversationRound[] };
   traceId?: string;

@@ -25,6 +25,7 @@ export const runInvestigation = async (
     case_id: example.metadata.case_id,
     query: example.input.question,
   };
+  let investigation: GetInvestigationResponse | undefined;
   try {
     const { investigation_id: investigationId } = await fetch<StartInvestigationResponse>(
       '/internal/nightshift/investigations',
@@ -37,7 +38,7 @@ export const runInvestigation = async (
     const investigationPath = `/internal/nightshift/investigations/${encodeURIComponent(
       investigationId
     )}`;
-    let investigation = await fetch<GetInvestigationResponse>(investigationPath);
+    investigation = await fetch<GetInvestigationResponse>(investigationPath);
     while (investigation.status === 'pending' || investigation.status === 'running') {
       output.workflow_status = investigation.status;
       output.conversation_id = investigation.conversation_id;
@@ -47,13 +48,20 @@ export const runInvestigation = async (
       await setTimeout(1000);
       investigation = await fetch<GetInvestigationResponse>(investigationPath);
     }
+  } catch (error) {
+    output.execution_error = error instanceof Error ? error.message : String(error);
+  }
+  if (!investigation || !output.investigation_id) return output;
+
+  // A timeout or failed poll must not discard the conversation accumulated before the failure.
+  try {
     output.workflow_status = investigation.status;
     output.conversation_id = investigation.conversation_id;
     if (investigation.status !== 'completed') {
-      output.execution_error = investigation.error || `Investigation ${investigation.status}`;
+      output.execution_error ??= investigation.error || `Investigation ${investigation.status}`;
       // Workflow details enrich the primary error without preventing partial evidence collection.
       const workflow = await fetch<WorkflowExecutionDto>(
-        `/api/workflows/executions/${encodeURIComponent(investigationId)}`,
+        `/api/workflows/executions/${encodeURIComponent(output.investigation_id)}`,
         { headers: { 'elastic-api-version': '2023-10-31' } }
       ).catch(() => undefined);
       if (workflow) {

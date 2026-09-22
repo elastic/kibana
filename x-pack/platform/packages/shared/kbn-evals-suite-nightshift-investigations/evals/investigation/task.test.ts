@@ -122,7 +122,28 @@ it('reports a completed investigation without a conversation as an execution err
   expect(output.traceId).toBeUndefined();
 });
 
-it('bounds polling and retains identifiers when an investigation times out', async () => {
+it('retains the latest report and conversation when a later poll fails', async () => {
+  const fetch = jest
+    .fn()
+    .mockResolvedValueOnce({ investigation_id: 'interrupted-investigation' })
+    .mockResolvedValueOnce({
+      status: 'running',
+      conversation_id: 'partial-conversation',
+      summary: 'Partial report',
+    })
+    .mockRejectedValueOnce(new Error('Polling failed'))
+    .mockRejectedValueOnce(new Error('Workflow details unavailable'))
+    .mockResolvedValueOnce({ rounds: [{ trace_id: 'partial-trace', steps: [] }] });
+  expect(await runInvestigation(fetch, example)).toMatchObject({
+    execution_error: 'Polling failed',
+    workflow_status: 'running',
+    structured_report: { summary: 'Partial report' },
+    conversation_id: 'partial-conversation',
+    traceId: 'partial-trace',
+  });
+});
+
+it('bounds polling and retains partial conversation evidence when an investigation times out', async () => {
   const clock = jest
     .spyOn(Date, 'now')
     .mockReturnValueOnce(0)
@@ -131,11 +152,15 @@ it('bounds polling and retains identifiers when an investigation times out', asy
     const fetch = jest
       .fn()
       .mockResolvedValueOnce({ investigation_id: 'slow-investigation' })
-      .mockResolvedValueOnce({ status: 'running', conversation_id: 'slow-conversation' });
+      .mockResolvedValueOnce({ status: 'running', conversation_id: 'slow-conversation' })
+      .mockRejectedValueOnce(new Error('Workflow details unavailable'))
+      .mockResolvedValueOnce({ rounds: [{ trace_id: 'partial-trace', steps: [] }] });
     expect(await runInvestigation(fetch, example)).toMatchObject({
       investigation_id: 'slow-investigation',
       conversation_id: 'slow-conversation',
       workflow_status: 'running',
+      traceId: 'partial-trace',
+      conversation: { rounds: [{ trace_id: 'partial-trace', steps: [] }] },
       execution_error: 'Investigation did not reach a terminal status within 20 minutes',
     });
   } finally {

@@ -74,6 +74,7 @@ const createInvestigationConfig = (): ScoutServerConfig => {
       serverArgs: [
         ...parentArgs.filter((arg) => !arg.startsWith(exporterPrefix)),
         '--xpack.nightshift_investigations.enabled=true',
+        '--feature_flags.overrides.streams.significantEventsAvailable=true',
         '--xpack.nightshift_investigations.cortex.enabled=false',
         `--config=${sandboxConfigPath}`,
         '--uiSettings.overrides.workflows:ui:enabled=true',
