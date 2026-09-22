@@ -120,6 +120,33 @@ apiTest.describe('Agent Builder — alerting V2 skill gating', () => {
   );
 
   apiTest(
+    'lists rule management but not action-policy management when its experimental gate is disabled',
+    { tag: tags.stateful.classic },
+    async ({ apiClient, kbnClient, requestAuth }) => {
+      await kbnClient.uiSettings.update({
+        [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
+      });
+
+      const { apiKeyHeader } = await requestAuth.getApiKeyForAdmin();
+      const headers = { ...COMMON_HEADERS, ...apiKeyHeader };
+
+      const setResponse = await apiClient.post(
+        `${GLOBAL_SETTINGS_API}/${ALERTING_V2_ENABLED_SETTING}`,
+        { headers, body: { value: true }, responseType: 'json' }
+      );
+      expect(setResponse).toHaveStatusCode(200);
+
+      const response = await apiClient.get(SKILLS_API, { headers, responseType: 'json' });
+      expect(response).toHaveStatusCode(200);
+      expect(Array.isArray(response.body.results)).toBe(true);
+
+      const skillIds = getSkillIds(response.body.results);
+      expect(skillIds).toContain(RULE_MANAGEMENT_SKILL_ID);
+      expect(skillIds).not.toContain(ACTION_POLICY_MANAGEMENT_SKILL_ID);
+    }
+  );
+
+  apiTest(
     'lists both Alerting V2 skills when all applicable gates are enabled',
     { tag: tags.stateful.classic },
     async ({ apiClient, kbnClient, requestAuth }) => {
