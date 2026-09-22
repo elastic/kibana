@@ -51,6 +51,8 @@ export const createProposalStepInputSchema = z.object({
 
 export const createProposalStepOutputSchema = z.object({
   proposalId: z.string(),
+  /** Equal to `proposalId` here; carried by the gate so it can resolve the chain later. */
+  rootProposalId: z.string(),
   status: z.string(),
   /** Comes from the action's metadata, so absent on a proposal with no action. */
   category: z.string().optional(),
