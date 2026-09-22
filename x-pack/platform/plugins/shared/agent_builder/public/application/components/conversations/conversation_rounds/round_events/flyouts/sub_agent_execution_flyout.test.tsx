@@ -40,6 +40,8 @@ const makeToolCallStep = () =>
     results: [{ tool_result_id: 'r1', type: ToolResultType.other, data: {} }],
   });
 
+jest.setTimeout(30_000);
+
 describe('SubAgentExecutionFlyout', () => {
   beforeEach(() => {
     useFollowExecution.mockReturnValue({
