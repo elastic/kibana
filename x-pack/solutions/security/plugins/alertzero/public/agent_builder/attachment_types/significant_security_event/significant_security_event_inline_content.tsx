@@ -357,7 +357,11 @@ const EvidenceSection: React.FC<{
         </ul>
       </EuiText>
       {hiddenCount > 0 && (
-        <EuiText size="xs" color="subdued" data-test-subj="alertzeroSignificantSecurityEventEvidenceOverflow">
+        <EuiText
+          size="xs"
+          color="subdued"
+          data-test-subj="alertzeroSignificantSecurityEventEvidenceOverflow"
+        >
           <FormattedMessage
             id="xpack.alertzero.agentBuilder.attachments.sse.evidenceOverflow"
             defaultMessage="+{hiddenCount} more"
@@ -594,16 +598,15 @@ const HuntResultSection: React.FC<{ huntResult: HuntResult }> = ({ huntResult })
 };
 
 const ProposalSection: React.FC<{ proposal: MapsToProposal }> = ({ proposal }) => {
-  const { category, impact, confidence, actionWorkflowId, manual_remediation: manualSteps } =
-    proposal;
+  const {
+    category,
+    impact,
+    confidence,
+    actionWorkflowId,
+    manual_remediation: manualSteps,
+  } = proposal;
 
-  if (
-    !category &&
-    !impact &&
-    confidence == null &&
-    !actionWorkflowId &&
-    !manualSteps?.length
-  ) {
+  if (!category && !impact && confidence == null && !actionWorkflowId && !manualSteps?.length) {
     return null;
   }
 

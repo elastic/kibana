@@ -137,9 +137,7 @@ export const buildThreatReportLookupEsql = ({
   const escapedReportId = escapeEsqlString(reportId);
   return `FROM ${quoteEsqlIdentifier(
     THREAT_REPORTS_INDEX_PATTERN
-  )} METADATA _id | WHERE _id == "${escapedReportId}" AND ${buildThreatReportSpaceWhere(
-    spaceId
-  )}`;
+  )} METADATA _id | WHERE _id == "${escapedReportId}" AND ${buildThreatReportSpaceWhere(spaceId)}`;
 };
 
 export const buildThreatReportsInEsql = ({
