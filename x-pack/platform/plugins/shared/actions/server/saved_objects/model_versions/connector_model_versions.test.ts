@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import { readFileSync } from 'fs';
+import { join } from 'path';
+
 import type {
   SavedObjectModelTransformationContext,
   SavedObjectsFullModelVersion,
 } from '@kbn/core-saved-objects-server';
 import type { Logger } from '@kbn/core/server';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { rawConnectorSchemaV3, rawConnectorSchemaV4 } from '../schemas/raw_connector';
 import { connectorModelVersions } from './connector_model_versions';
 import { actionEncryptedRegistrationV2, actionEncryptedRegistrationV3 } from '../action_encryption';
 
@@ -294,6 +298,40 @@ describe('Connector Model Versions', () => {
       };
 
       expect(backfillFn!(mockDocument, context)).toBe(mockDocument);
+    });
+
+    it('migrates the 10.4.0 action fixtures from v3 documents', () => {
+      const backfillChange = version4.changes.find((change) => change.type === 'data_backfill');
+      const backfillFn =
+        backfillChange && backfillChange.type === 'data_backfill'
+          ? backfillChange.backfillFn
+          : undefined;
+      const fixturePath = join(
+        __dirname,
+        '../../../../../../../../packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/action/10.4.0.json'
+      );
+      const fixture = JSON.parse(readFileSync(fixturePath, 'utf8')) as {
+        '10.3.0': Array<Record<string, unknown>>;
+        '10.4.0': Array<Record<string, unknown>>;
+      };
+
+      expect(fixture['10.3.0']).toHaveLength(fixture['10.4.0'].length);
+      fixture['10.3.0'].forEach((previous, index) => {
+        expect(rawConnectorSchemaV3.validate(previous)).toEqual(previous);
+        const migrated = backfillFn!(
+          {
+            id: `fixture-${index}`,
+            type: 'action',
+            attributes: previous,
+            references: [],
+          },
+          context
+        );
+        expect(migrated.attributes).toEqual(fixture['10.4.0'][index]);
+        expect(rawConnectorSchemaV4.validate(fixture['10.4.0'][index])).toEqual(
+          fixture['10.4.0'][index]
+        );
+      });
     });
   });
 });

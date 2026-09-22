@@ -348,21 +348,32 @@ describe('rotateInboundIngress', () => {
     encryptedSavedObjectsClient.getDecryptedAsInternalUser
       .mockResolvedValueOnce(enabled as never)
       .mockResolvedValueOnce(disabled as never);
+    let findCount = 0;
     unsecuredSavedObjectsClient.find.mockImplementation(async () => {
+      findCount += 1;
       const created = unsecuredSavedObjectsClient.create.mock.calls.find(
         (call: [string, ...unknown[]]) => call[0] === CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE
       );
       const id = (created?.[2] as { id?: string } | undefined)?.id ?? 'cred-new';
+      const savedObjects = [
+        {
+          id,
+          type: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
+          attributes: { connectorId: 'connector-id' },
+          references: [],
+        },
+      ];
+      if (findCount > 1) {
+        savedObjects.push({
+          id: 'cred-live',
+          type: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
+          attributes: { connectorId: 'connector-id' },
+          references: [],
+        });
+      }
       return {
-        saved_objects: [
-          {
-            id,
-            type: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
-            attributes: { connectorId: 'connector-id' },
-            references: [],
-          },
-        ],
-        total: 1,
+        saved_objects: savedObjects,
+        total: savedObjects.length,
         page: 1,
         per_page: 10,
       } as never;
@@ -378,6 +389,7 @@ describe('rotateInboundIngress', () => {
     const created = unsecuredSavedObjectsClient.create.mock.calls.find(
       (call: [string, ...unknown[]]) => call[0] === CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE
     );
+    expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledWith([
       {
