@@ -877,15 +877,16 @@ describe('addRoundCompleteEvent', () => {
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
-  it('warns when the tracker diverged from the final graph state', async () => {
+  it('persists the final graph steps and warns when the tracker diverged from them', async () => {
     const tracker = freshTracker();
     const logger = { warn: jest.fn() } as unknown as Logger;
-    await firstValueFrom(
+    const graphOnly = { type: ConversationRoundStepType.reasoning, reasoning: 'unseen' };
+    const events = await firstValueFrom(
       of(
         createFinalStateEvent({
           currentCycle: 0,
           errorCount: 0,
-          steps: [{ type: ConversationRoundStepType.reasoning, reasoning: 'unseen' }],
+          steps: [graphOnly],
           toolRenderState: {},
         } as StateType) as ConvertedEvents,
         messageComplete()
@@ -901,6 +902,9 @@ describe('addRoundCompleteEvent', () => {
       )
     );
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('diverged'));
+    // the graph state is authoritative for the round's steps; the mirror is only a fallback
+    const roundComplete = events.find(isRoundCompleteEvent)!;
+    expect(roundComplete.data.round.steps).toEqual([graphOnly]);
   });
 
   it('merges input, attachments, usage, overrides and identity across two resumes like the legacy fold', async () => {

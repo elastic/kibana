@@ -225,7 +225,7 @@ export const createAgentGraph = ({
           isToolCallStep(candidate) && candidate.tool_call_id === toolCallId
       );
       if (!step) {
-        return 'unknown';
+        throw invalidState(`[executeTool] tool_call_id "${toolCallId}" has no step in the run`);
       }
       return state.toolRenderState[toolCallId]?.kind === 'browser'
         ? `${BROWSER_TOOL_PREFIX}${step.tool_id}`

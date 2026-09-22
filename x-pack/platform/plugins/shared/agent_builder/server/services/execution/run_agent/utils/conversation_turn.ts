@@ -20,6 +20,8 @@ import {
   isAskUserQuestionPromptResponse,
   type PromptRequest,
 } from '@kbn/agent-builder-common/agents/prompts';
+import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
+import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
 import {
   TimelineEventType,
@@ -87,19 +89,12 @@ const bucketExecutions = (events: TimelineEvent[]): ExecutionBucket[] => {
 };
 
 /**
- * A native execution persists at most one todos step. A legacy round that was resumed carries one
+ * Same rule as `eventsToRounds`: dedupe by event id, order by `sequence`, fall back to the terminal
+ * snapshot. The result goes through the reducer with no updates so it carries the reducer's todos
+ * invariant (a single trailing todos step): a legacy round that was resumed carries one todos step
  * per execution (`mergeRounds` concatenates steps) and `roundsToEvents` projects all of them into a
- * single bucket; keep only the latest, trailing — the invariant `applyStepUpdates` maintains.
+ * single bucket.
  */
-const canonicalizeTodos = (steps: ConversationRoundStep[]): ConversationRoundStep[] => {
-  const todos = steps.filter(isTodosStep);
-  if (todos.length <= 1) {
-    return steps;
-  }
-  return [...steps.filter((step) => !isTodosStep(step)), todos[todos.length - 1]];
-};
-
-/** Same rule as `eventsToRounds`: dedupe by event id, order by `sequence`, fall back to the terminal snapshot. */
 const executionSteps = ({ stepEvents, terminated }: ExecutionBucket): ConversationRoundStep[] => {
   const raw =
     stepEvents.length === 0
@@ -107,7 +102,7 @@ const executionSteps = ({ stepEvents, terminated }: ExecutionBucket): Conversati
       : [...new Map(stepEvents.map((event) => [event.id, event])).values()]
           .sort((a, b) => a.data.sequence - b.data.sequence)
           .map((event) => event.data.step);
-  return canonicalizeTodos(raw);
+  return applyStepUpdates(raw, []);
 };
 
 /** Converts a resume execution's persisted (execution-owned) steps into updates over the turn's steps. */
@@ -216,8 +211,13 @@ export const getPendingTurn = (conversation: Conversation): PendingTurn | undefi
   }
   const compatRound = eventsToRounds(events).find((round) => round.id === last.id);
   if (!compatRound) {
-    // cannot happen: both folds accept the same executions
-    return undefined;
+    // Both folds accept the same executions, so this is a bug — failing here beats silently running
+    // the prompt response as a brand-new round and leaving the paused turn open forever.
+    throw createAgentExecutionError(
+      `[resume] no legacy round found for pending turn "${last.id}"`,
+      AgentExecutionErrorCode.invalidState,
+      {}
+    );
   }
   return { ...last, compatRound };
 };

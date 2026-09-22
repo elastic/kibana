@@ -5,20 +5,22 @@
  * 2.0.
  */
 
-import type { CompactionStep, ConversationRoundStep } from '@kbn/agent-builder-common';
+import type { CompactionStep, RelevantSkillsStep } from '@kbn/agent-builder-common';
 import { ConversationRoundStepType, createRelevantSkillsStep } from '@kbn/agent-builder-common';
 import type { CompactedConversation } from './conversation_compactor';
 import type { RelevantSkillSelection } from './relevant_skills/select_relevant_skills';
 
-/** The bookkeeping steps a fresh run starts with, before the agent produces anything. */
+export type PreExecutionStep = CompactionStep | RelevantSkillsStep;
+
+/** The bookkeeping steps a run starts with, before the agent produces anything. */
 export const createPreExecutionSteps = ({
   compactionResult,
   relevantSkillsSelection,
 }: {
   compactionResult?: CompactedConversation;
   relevantSkillsSelection?: RelevantSkillSelection;
-}): ConversationRoundStep[] => {
-  const steps: ConversationRoundStep[] = [];
+}): PreExecutionStep[] => {
+  const steps: PreExecutionStep[] = [];
 
   if (compactionResult?.compactionTriggered && compactionResult.summary) {
     const compactionStep: CompactionStep = {

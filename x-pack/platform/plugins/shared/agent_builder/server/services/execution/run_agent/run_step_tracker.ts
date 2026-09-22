@@ -152,12 +152,13 @@ export class RunStepTracker implements ToolExecutionBuffer {
   }
 
   /**
-   * The mirror plus what LangGraph never saw: undrained progress on calls that did not resolve
-   * (interrupted by a prompt, or failed mid-execution) and a `todo_write` that `executeTool` did not
-   * get to fold in. This is what persistence uses for the round's full steps.
+   * `base` (the final graph steps when available, else the mirror) plus what LangGraph never saw:
+   * undrained progress on calls that did not resolve (interrupted by a prompt, or failed
+   * mid-execution) and a `todo_write` that `executeTool` did not get to fold in. This is what
+   * persistence uses for the round's full steps.
    */
-  snapshotSteps(): ConversationRoundStep[] {
-    const withProgress = this.steps.map((step) => {
+  snapshotSteps(base: ConversationRoundStep[] = this.steps): ConversationRoundStep[] {
+    const withProgress = base.map((step) => {
       if (!isToolCallStep(step)) return step;
       const buffered = this.bufferedProgress.get(step.tool_call_id);
       if (!buffered?.length) return step;

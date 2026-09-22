@@ -23,6 +23,7 @@ import {
 import { AgentPromptType, type PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import { createEmptyConversation, createRound } from '../../../../test_utils/conversations';
 import { roundsToEvents } from '../../../conversation/client/rounds_to_events';
+import * as eventsToRoundsModule from '../../../conversation/client/events_to_rounds';
 import { applyStepUpdates, stepUpdates } from '../step_state';
 import { foldConversationTurns, getPendingTurn } from './conversation_turn';
 
@@ -350,5 +351,22 @@ describe('getPendingTurn', () => {
 
   it('returns undefined for an empty conversation', () => {
     expect(getPendingTurn(createEmptyConversation())).toBeUndefined();
+  });
+
+  it('fails instead of starting a fresh round when the legacy fold has no round for the pending turn', () => {
+    const conversation = createEmptyConversation({
+      rounds: [
+        createRound({
+          id: 'r1',
+          status: ConversationRoundStatus.awaitingPrompt,
+          pending_prompts: [prompt],
+          steps: [pendingCall],
+        }),
+      ],
+    });
+    // Cannot happen with the real fold (both accept the same executions); simulate a divergence.
+    jest.spyOn(eventsToRoundsModule, 'eventsToRounds').mockReturnValueOnce([]);
+
+    expect(() => getPendingTurn(conversation)).toThrow(/no legacy round found for pending turn/);
   });
 });

@@ -6,7 +6,7 @@
  */
 
 import { AIMessageChunk, ToolMessage } from '@langchain/core/messages';
-import { ConversationRoundStepType } from '@kbn/agent-builder-common';
+import { ConversationRoundStepType, ToolResultType } from '@kbn/agent-builder-common';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
 import { internalTools } from '@kbn/agent-builder-common/tools';
@@ -232,13 +232,37 @@ describe('processToolNodeResponse', () => {
     expect(turn.completedToolCallIds).toEqual([]);
   });
 
-  it('strips the LangGraph error suffix and falls back to an empty result list', () => {
+  it('strips the LangGraph error suffix and resolves a thrown tool error as an error result', () => {
+    // What ToolNode emits when a tool throws: "Error: <message>" plus its fix-up suffix, no artifact.
     const turn = processToolNodeResponse(
-      [new ToolMessage({ tool_call_id: 'c1', content: 'boom\n Please fix your mistakes.' })],
+      [new ToolMessage({ tool_call_id: 'c1', content: 'Error: boom\n Please fix your mistakes.' })],
       deps
     );
-    expect(turn.stepUpdates[0]).toMatchObject({ type: 'resolve_tool_call', results: [] });
-    expect(turn.renderState.c1?.content).toBe('boom');
+    expect(turn.stepUpdates[0]).toMatchObject({
+      type: 'resolve_tool_call',
+      results: [expect.objectContaining({ type: ToolResultType.error })],
+    });
+    expect(turn.renderState.c1?.content).toBe('Error: boom');
+  });
+
+  it('fails loudly on a tool message with no artifact and no error content', () => {
+    // A tool that returns without a structured artifact is a tool bug; it must not persist as a
+    // silently empty result.
+    expect(() =>
+      processToolNodeResponse(
+        [new ToolMessage({ tool_call_id: 'c1', content: 'plain text, no artifact' })],
+        deps
+      )
+    ).toThrow(/No artifact attached/);
+  });
+
+  it('fails loudly on a malformed artifact', () => {
+    expect(() =>
+      processToolNodeResponse(
+        [new ToolMessage({ tool_call_id: 'c1', content: 'x', artifact: { nope: true } })],
+        deps
+      )
+    ).toThrow(/not a structured tool artifact/);
   });
 
   it('resolves a schema-validation failure (no artifact, "Error:" content) as an error result', () => {

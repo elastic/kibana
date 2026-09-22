@@ -24,7 +24,6 @@ import {
   AgentExecutionMode,
   ConversationRoundStepType,
   carriedOverTodos,
-  isRelevantSkillsStep,
 } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
 import { HookLifecycle } from '@kbn/agent-builder-server';
@@ -63,6 +62,7 @@ import { compactConversation } from './utils/conversation_compactor';
 import { createAgentGraph } from './graph';
 import { convertGraphEvents } from './convert_graph_events';
 import { RunStepTracker } from './run_step_tracker';
+import { applyStepUpdates, stepUpdates } from './step_state';
 import { buildRoundInterruptedEvent } from './utils/build_round_interrupted_event';
 import { emitRoundInterruptedOnError } from './utils/emit_round_interrupted_on_error';
 import type { RunAgentParams, RunAgentResponse } from './run_agent';
@@ -139,8 +139,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   } = context;
 
   // The context is built from the normalized event timeline (legacy conversations serialized
-  // through roundsToEvents) so preflight and message building read one source. Regenerate replaces
-  // the last round, so a paused one is never resumed.
+  // through roundsToEvents) so preflight and message building read one source.
   const timeline = conversation ? eventsForContext(conversation) : [];
 
   ensureValidInput({ input: nextInput, timeline });
@@ -361,15 +360,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   };
   processedConversation.subagentRosterFallback = subagentTracker.snapshot();
 
-  let relevantSkillsSelection: RelevantSkillSelection | undefined;
-  if (relevantSkillsEnabled) {
-    if (pendingTurn) {
-      const persisted = pendingTurn.steps.find(isRelevantSkillsStep);
-      relevantSkillsSelection = persisted ? { skills: persisted.skills } : undefined;
-    } else if (relevantSkillsSelectionPromise) {
-      relevantSkillsSelection = await relevantSkillsSelectionPromise;
-    }
-  }
+  // On a resume the selection is already persisted as a `relevant_skills` step of the paused turn.
+  const relevantSkillsSelection = await relevantSkillsSelectionPromise;
 
   const imageResolver = createImageResolver({
     attachmentStateManager: context.attachmentStateManager,
@@ -424,11 +416,9 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       promptManager,
       eventEmitter,
       tracker,
-      preExecutionSteps: buildPreExecutionSteps({
-        compactionResult,
-        relevantSkillsSelection,
-        initialTodos,
-      }),
+      compactionResult,
+      relevantSkillsSelection,
+      initialTodos,
     }),
     {
       version: 'v2',
@@ -631,7 +621,9 @@ const createInitializerCommand = ({
   promptManager,
   eventEmitter,
   tracker,
-  preExecutionSteps,
+  compactionResult,
+  relevantSkillsSelection,
+  initialTodos,
 }: {
   pendingTurn?: PendingTurn;
   cycleLimit: number;
@@ -639,9 +631,16 @@ const createInitializerCommand = ({
   promptManager: PromptManager;
   eventEmitter: AgentEventEmitterFn;
   tracker: RunStepTracker;
-  preExecutionSteps: ConversationRoundStep[];
+  compactionResult?: CompactedConversation;
+  relevantSkillsSelection?: RelevantSkillSelection;
+  initialTodos?: TodoItem[];
 }): Command => {
   if (!pendingTurn) {
+    const preExecutionSteps = buildPreExecutionSteps({
+      compactionResult,
+      relevantSkillsSelection,
+      initialTodos,
+    });
     tracker.seed(preExecutionSteps, { execution: 'fresh', pendingToolCallIds: [] });
     const update: StateUpdate = { cycleLimit, steps: new Overwrite(preExecutionSteps) };
     return new Command({ update, goto: steps.init });
@@ -657,10 +656,17 @@ const createInitializerCommand = ({
   for (const id of init.consumedPromptIds) {
     promptManager.delete(id);
   }
+  // The inherited steps are seeded, then this execution's own bookkeeping (a compaction step, if
+  // compaction ran) is applied on top so the tracker attributes it to the resume execution. The
+  // paused turn already carries its relevant-skills and todos steps.
+  const ownUpdates = createPreExecutionSteps({ compactionResult }).map((step) =>
+    stepUpdates.append(step)
+  );
   tracker.seed(init.steps, { execution: 'resume', pendingToolCallIds: init.pendingToolCallIds });
+  tracker.apply(ownUpdates);
   const update: StateUpdate = {
     cycleLimit,
-    steps: new Overwrite(init.steps),
+    steps: new Overwrite(applyStepUpdates(init.steps, ownUpdates)),
     pendingToolCallIds: init.pendingToolCallIds,
     researchOutcome: init.researchOutcome,
     toolRenderState: init.toolRenderState,

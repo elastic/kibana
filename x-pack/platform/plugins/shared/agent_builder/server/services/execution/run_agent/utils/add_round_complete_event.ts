@@ -267,8 +267,8 @@ const getFinalGraphState = (events: SourceEvents[]): StateType => {
 };
 
 /**
- * The round's full steps: the tracker's mirror of the graph's `steps` channel plus what LangGraph
- * never saw (progress on a call interrupted by a prompt, an unconsumed `todo_write`), minus the
+ * The round's full steps: the final graph `steps` channel (authoritative) plus what LangGraph never
+ * saw (progress on a call interrupted by a prompt, an unconsumed `todo_write`), minus the
  * runtime-only browser / dedicated-lifecycle calls.
  */
 const resolveRoundSteps = ({
@@ -280,13 +280,15 @@ const resolveRoundSteps = ({
   finalGraphState: StateType;
   logger: Logger;
 }): ConversationRoundStep[] => {
-  if (
-    process.env.NODE_ENV !== 'production' &&
-    !isEqual(tracker.getSteps(), finalGraphState.steps)
-  ) {
+  // The mirror is what the interruption path and the resume projection persist from; drift means
+  // one of them would differ from what the graph actually did.
+  if (!isEqual(tracker.getSteps(), finalGraphState.steps)) {
     logger.warn('[run_chat_agent] run step tracker diverged from the final graph state');
   }
-  return persistableSteps(tracker.snapshotSteps(), finalGraphState.toolRenderState);
+  return persistableSteps(
+    tracker.snapshotSteps(finalGraphState.steps),
+    finalGraphState.toolRenderState
+  );
 };
 
 const resumeRound = ({

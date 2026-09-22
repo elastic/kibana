@@ -6,7 +6,11 @@
  */
 
 import { Overwrite, type Command } from '@langchain/langgraph';
-import type { BrowserApiToolMetadata, ToolCallStep } from '@kbn/agent-builder-common';
+import type {
+  BrowserApiToolMetadata,
+  CompactionStep,
+  ToolCallStep,
+} from '@kbn/agent-builder-common';
 import {
   ChatEventType,
   ConversationRoundStatus,
@@ -30,6 +34,7 @@ import {
   selectSkills,
   extractRound,
   getPendingTurn,
+  createPreExecutionSteps,
 } from './utils';
 import { createAgentGraph } from './graph';
 import { createPromptFactory } from './prompts';
@@ -85,6 +90,9 @@ const selectToolsMock = selectTools as jest.MockedFn<typeof selectTools>;
 const selectSkillsMock = selectSkills as jest.MockedFn<typeof selectSkills>;
 const extractRoundMock = extractRound as jest.MockedFn<typeof extractRound>;
 const getPendingTurnMock = getPendingTurn as jest.MockedFn<typeof getPendingTurn>;
+const createPreExecutionStepsMock = createPreExecutionSteps as jest.MockedFn<
+  typeof createPreExecutionSteps
+>;
 const createAgentGraphMock = createAgentGraph as jest.MockedFn<typeof createAgentGraph>;
 const addRoundCompleteEventMock = addRoundCompleteEvent as jest.MockedFn<
   typeof addRoundCompleteEvent
@@ -646,6 +654,68 @@ describe('runDefaultAgentMode', () => {
         toolRenderState: { 'call-1': { toolName: 'my_tool', kind: 'server' } },
       });
       expect(context.attachmentStateManager.clearAccessTracking).not.toHaveBeenCalled();
+    });
+
+    it('appends the compaction step to a resumed turn as a step owned by the resume execution', async () => {
+      const { context, streamEvents } = setup();
+      const compaction: CompactionStep = {
+        type: ConversationRoundStepType.compaction,
+        token_count_before: 100,
+        token_count_after: 10,
+        summarized_round_count: 1,
+      };
+      createPreExecutionStepsMock.mockReturnValue([compaction]);
+      const conversation = createEmptyConversation({
+        rounds: [
+          createRound({
+            id: 'round-1',
+            status: ConversationRoundStatus.awaitingPrompt,
+            steps: [pausedCall],
+            pending_prompts: [
+              { id: 'p1', type: AgentPromptType.confirmation, title: 't', message: 'm' },
+            ],
+            state: {
+              version: 2,
+              agent: {
+                current_cycle: 1,
+                error_count: 0,
+                nodes: [
+                  {
+                    step: 'execute_tool',
+                    tool_call_id: 'call-1',
+                    tool_id: 'my.tool',
+                    tool_params: { q: 1 },
+                    tool_state: undefined,
+                  },
+                ],
+              },
+            },
+          }),
+        ],
+      });
+      getPendingTurnMock.mockImplementation(realGetPendingTurn);
+      (context.promptManager.dump as jest.Mock).mockReturnValue({ responses: {} });
+
+      await runDefaultAgentMode(
+        {
+          nextInput: { prompts: { p1: { allow: true } } },
+          agentConfiguration: { tools: [] } as any,
+          conversation,
+        },
+        context
+      );
+
+      // the graph is seeded with the inherited steps plus the compaction step
+      const command = initialCommand(streamEvents);
+      expect(command.update).toMatchObject({ steps: new Overwrite([pausedCall, compaction]) });
+      // the tracker attributes the compaction step to this execution, not to the paused one
+      const tracker = createAgentGraphMock.mock.calls[0][0].toolExecutionBuffer as RunStepTracker;
+      expect(tracker.getSteps()).toEqual([pausedCall, compaction]);
+      expect(tracker.executionProjection()).toEqual([
+        expect.objectContaining({ tool_call_id: 'call-1' }),
+        compaction,
+      ]);
+      createPreExecutionStepsMock.mockReturnValue([]);
     });
 
     it('resumes at researchAgent when the turn only paused on an ask_user_question', async () => {

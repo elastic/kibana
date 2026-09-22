@@ -6,14 +6,9 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { AIMessageChunk, ToolMessage } from '@langchain/core/messages';
+import type { AIMessageChunk, BaseMessage, ToolMessage } from '@langchain/core/messages';
 import { isToolMessage } from '@langchain/core/messages';
-import type {
-  ReasoningStep,
-  ToolCallProgress,
-  ToolCallStep,
-  ToolResult,
-} from '@kbn/agent-builder-common';
+import type { ReasoningStep, ToolCallProgress, ToolCallStep } from '@kbn/agent-builder-common';
 import { ConversationRoundStepType, createAskUserQuestionStep } from '@kbn/agent-builder-common';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import {
@@ -168,14 +163,13 @@ export const processResearchResponse = (
   };
 };
 
-const toToolMessages = (toolNodeResult: unknown): ToolMessage[] => {
-  if (Array.isArray(toolNodeResult)) {
-    return toolNodeResult.filter(isToolMessage);
-  }
-  const messages = (toolNodeResult as { messages?: unknown } | undefined)?.messages;
-  return Array.isArray(messages) ? messages.filter(isToolMessage) : [];
-};
+/** What `ToolNode.invoke` returns depending on how it was invoked: a message list or a `{ messages }` state. */
+export type ToolNodeResult = BaseMessage[] | { messages: BaseMessage[] };
 
+const toToolMessages = (toolNodeResult: ToolNodeResult): ToolMessage[] =>
+  (Array.isArray(toolNodeResult) ? toolNodeResult : toolNodeResult.messages).filter(isToolMessage);
+
+/** `artifact` is untyped on LangChain's `ToolMessage`; this is the parsing boundary. */
 const extractInterruptPrompt = (artifact: unknown): PromptRequest | undefined => {
   const toolReturn = artifact as ToolHandlerReturn | undefined;
   if (toolReturn && isToolHandlerInterruptReturn(toolReturn)) {
@@ -184,23 +178,9 @@ const extractInterruptPrompt = (artifact: unknown): PromptRequest | undefined =>
   return undefined;
 };
 
-const safeExtractResults = ({
-  content,
-  artifact,
-}: {
-  content: string;
-  artifact?: unknown;
-}): ToolResult[] => {
-  try {
-    return extractToolReturn({ content, artifact }).results ?? [];
-  } catch {
-    return [];
-  }
-};
-
 /** Converts the ToolNode result into resolutions, question steps and interrupt prompts. */
 export const processToolNodeResponse = (
-  toolNodeResult: unknown,
+  toolNodeResult: ToolNodeResult,
   {
     cycle,
     drainProgress,
@@ -237,7 +217,9 @@ export const processToolNodeResponse = (
     }
 
     const content = stripLangGraphErrorSuffix(extractTextContent(message));
-    const results = safeExtractResults({ content, artifact: message.artifact });
+    // A malformed artifact is a tool bug: let it fail the run loudly rather than persist a step
+    // with no results while the model reads the raw content.
+    const results = extractToolReturn({ content, artifact: message.artifact }).results ?? [];
     updates.push(
       stepUpdates.resolveToolCall({
         toolCallId,
