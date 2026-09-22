@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import styled from '@emotion/styled';
 import {
   EuiAccordion,
@@ -98,6 +98,16 @@ export const ConversationQueue = memo<ConversationQueueProps>(
     selectedIds,
   }) => {
     const { euiTheme } = useEuiTheme();
+
+    // Collapsing drops the section's query to a count-only read, so its rows empty on the
+    // same frame the accordion starts animating shut — it would glide down over an empty
+    // panel. Keep the last loaded rows until it opens again; while shut they are not visible.
+    const [heldRows, setHeldRows] = useState(briefingList);
+    if (briefingList.length > 0 && briefingList !== heldRows) {
+      setHeldRows(briefingList);
+    }
+    const rows = isOpen ? briefingList : heldRows;
+
     const buttonContent = (
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
@@ -146,13 +156,13 @@ export const ConversationQueue = memo<ConversationQueueProps>(
         >
           {loadingRows > 0 ? <ConversationQueueSkeleton rows={loadingRows} /> : null}
 
-          {loadingRows === 0 && briefingList.length > 0 ? (
+          {loadingRows === 0 && rows.length > 0 ? (
             <EuiFlexGroup direction="column" gutterSize="none">
-              {briefingList.map((investigation, i) => (
+              {rows.map((investigation, i) => (
                 <EuiFlexItem key={investigation.id} grow={false}>
                   <ConversationCard
                     investigation={investigation}
-                    hasBorder={i < briefingList.length - 1}
+                    hasBorder={i < rows.length - 1}
                     isSelected={selectedIds?.includes(investigation.id)}
                     onClickAction={onClickAction}
                     onClickCard={onClickCard}
@@ -165,7 +175,9 @@ export const ConversationQueue = memo<ConversationQueueProps>(
             </EuiFlexGroup>
           ) : null}
 
-          {loadingRows === 0 && briefingList.length === 0 ? (
+          {/* Only meaningful for a section someone is looking at; rendering it mid-collapse
+              is what made the empty copy flash. */}
+          {loadingRows === 0 && rows.length === 0 && isOpen ? (
             <EuiPanel>
               <EuiText size="xs" color="subdued">
                 {isFiltered

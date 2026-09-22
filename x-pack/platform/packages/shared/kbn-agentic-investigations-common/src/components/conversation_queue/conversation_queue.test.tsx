@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { fireEvent, screen, within } from '@testing-library/react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import type { Investigation } from '../../types';
@@ -24,20 +24,22 @@ const investigation: Investigation = {
   events: [],
 };
 
+const queueElement = (props: Partial<React.ComponentProps<typeof ConversationQueue>> = {}) => (
+  <ConversationQueue
+    briefingType="respond"
+    briefingList={[investigation]}
+    isOpen
+    onToggle={jest.fn()}
+    onClickAction={jest.fn()}
+    onClickCard={jest.fn()}
+    onOpenChat={jest.fn()}
+    onClickRecommendedAction={jest.fn()}
+    {...props}
+  />
+);
+
 const renderQueue = (props: Partial<React.ComponentProps<typeof ConversationQueue>> = {}) =>
-  renderWithKibanaRenderContext(
-    <ConversationQueue
-      briefingType="respond"
-      briefingList={[investigation]}
-      isOpen
-      onToggle={jest.fn()}
-      onClickAction={jest.fn()}
-      onClickCard={jest.fn()}
-      onOpenChat={jest.fn()}
-      onClickRecommendedAction={jest.fn()}
-      {...props}
-    />
-  );
+  renderWithKibanaRenderContext(queueElement(props));
 
 const trigger = () => screen.getByRole('button', { name: /Respond/ });
 
@@ -55,10 +57,39 @@ describe('ConversationQueue', () => {
     expect(screen.getByLabelText('Loading count')).toBeInTheDocument();
   });
 
-  it('renders no rows when closed', () => {
+  it('renders nothing when closed with nothing ever loaded', () => {
     renderQueue({ isOpen: false, briefingList: [] });
 
     expect(screen.queryByText(investigation.title)).not.toBeInTheDocument();
+    expect(screen.queryByText('No events in this category.')).not.toBeInTheDocument();
+  });
+
+  it('holds the last rows through a collapse, so the empty copy cannot flash', () => {
+    // Mirrors the caller: collapsing drops its query to a count-only read, so the rows
+    // empty on the same frame `isOpen` goes false.
+    const Collapsing = () => {
+      const [isOpen, setIsOpen] = useState(true);
+      return queueElement({
+        isOpen,
+        briefingList: isOpen ? [investigation] : [],
+        count: 1,
+        onToggle: setIsOpen,
+      });
+    };
+
+    renderWithKibanaRenderContext(<Collapsing />);
+    expect(screen.getByText(investigation.title)).toBeInTheDocument();
+
+    fireEvent.click(trigger());
+
+    expect(screen.getByText(investigation.title)).toBeInTheDocument();
+    expect(screen.queryByText('No events in this category.')).not.toBeInTheDocument();
+  });
+
+  it('shows the empty state once an open section really is empty', () => {
+    renderQueue({ isOpen: true, briefingList: [], count: 0 });
+
+    expect(screen.getByText('No events in this category.')).toBeInTheDocument();
   });
 
   it('reports a toggle so the caller can drive its fetch', () => {
