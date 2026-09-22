@@ -19,6 +19,25 @@ import type {
   GenAITextPart,
 } from '@kbn/inference-tracing';
 
+/** Requires sandbox execution for the bundled fixtures without grading the calculation or answer. */
+export const assertSuccessfulSandboxCommand = (
+  rounds: Array<Pick<ConversationRound, 'steps'>>
+): void => {
+  assert(
+    rounds
+      .flatMap(({ steps }) => steps.filter(isToolCallStep))
+      .some(
+        ({ tool_id: toolId, results }) =>
+          toolId === 'nightshift_sandbox_bash' &&
+          results.some(
+            ({ type, data }) =>
+              type === ToolResultType.other && 'exit_code' in data && data.exit_code === 0
+          )
+      ),
+    'Bundled synthetic investigations must include a successful sandbox command'
+  );
+};
+
 /** Validates exported agent payloads independently of the placeholder score. */
 export const assertAgentTrace = (
   attributes: GenAISemConvAttributes[],

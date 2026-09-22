@@ -88,4 +88,32 @@ describe('investigation file dataset', () => {
     writeFileSync(path, '{');
     expect(() => readInvestigationDataset(path)).toThrow();
   });
+
+  it.each([
+    ['a'.repeat(65)],
+    ['invalid tag'],
+    Array.from({ length: 19 }, (_, index) => `tag-${index}`),
+  ])('rejects tags the dataset upsert API cannot accept: %j', (...tags) => {
+    writeFileSync(
+      path,
+      JSON.stringify({
+        dataset: 'nightshift/tags',
+        tags,
+        examples: [{ input: { question: 'Question' }, metadata: { case_id: 'case' } }],
+      })
+    );
+    expect(() => readInvestigationDataset(path)).toThrow();
+  });
+
+  it('reserves space for required tags within the API limit', () => {
+    writeFileSync(
+      path,
+      JSON.stringify({
+        dataset: 'nightshift/tags',
+        tags: ['a'.repeat(64), ...Array.from({ length: 17 }, (_, index) => `tag-${index}`)],
+        examples: [{ input: { question: 'Question' }, metadata: { case_id: 'case' } }],
+      })
+    );
+    expect(readInvestigationDataset(path).tags).toHaveLength(20);
+  });
 });

@@ -70,6 +70,9 @@ that no quality evaluation was performed. Execution errors, missing reports, inc
 examples or missing persisted scores fail independent acceptance checks even if that score is one.
 Recovered tool errors remain visible in the evidence. Trace acceptance checks their complete
 payloads, including model calls rejected by schema validation before tool execution.
+The bundled synthetic cases also require a successful sandbox command (exit code zero), so an
+unavailable sandbox cannot pass acceptance. The calculation output and investigation answer stay
+ungraded; this fixture-specific execution check does not apply to custom dataset files.
 
 The default [synthetic file](evals/investigation/synthetic.json) contains two public fictional
 incidents. Their questions contain all evidence and request a sandbox calculation, so no telemetry
@@ -114,6 +117,8 @@ nonempty questions within the product's 10,000-character limit. Dataset names mu
 input/metadata fields, file `description` and `tags` are preserved. Questions alone reach the
 investigator; labels and metadata do not. `NIGHTSHIFT_EXAMPLES_FILE` defaults to the committed
 synthetic fixture. No golden-source derivation or LangSmith identifier is needed.
+Tags must satisfy the shared dataset API schema, including its 64-character limit and 20-tag
+total after adding the required `nightshift` and `ungraded` tags.
 
 Acceptance verifies expected example/repetition coverage, one persisted placeholder per run,
 completed investigations, saved report/conversation identifiers, complete linked agent traces,

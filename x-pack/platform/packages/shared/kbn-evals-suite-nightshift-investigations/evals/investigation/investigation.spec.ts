@@ -16,7 +16,7 @@ import { evaluate } from '../../src/evaluate';
 import { readInvestigationDataset } from './datasets';
 import { ungradedPlaceholder } from './placeholder';
 import { runInvestigation } from './task';
-import { assertAgentTrace } from './trace_evidence';
+import { assertAgentTrace, assertSuccessfulSandboxCommand } from './trace_evidence';
 import type { InvestigationTaskOutput } from './types';
 
 evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.classic }, () => {
@@ -92,6 +92,9 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
           output.structured_report?.conclusion || output.structured_report?.summary
         ).toBeTruthy();
         expect(output.conversation?.rounds.length).toBeGreaterThan(0);
+        if (!process.env.NIGHTSHIFT_EXAMPLES_FILE) {
+          assertSuccessfulSandboxCommand(output.conversation?.rounds ?? []);
+        }
         expect(output.traceId).toMatch(/^[a-f0-9]{32}$/);
         expect(run.traceId).toBe(output.traceId);
 

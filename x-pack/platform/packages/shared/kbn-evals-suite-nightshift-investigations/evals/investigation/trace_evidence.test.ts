@@ -7,7 +7,7 @@
 
 import { ConversationRoundStepType, ToolResultType } from '@kbn/agent-builder-common';
 import type { ToolCallStep } from '@kbn/agent-builder-common';
-import { assertAgentTrace } from './trace_evidence';
+import { assertAgentTrace, assertSuccessfulSandboxCommand } from './trace_evidence';
 
 const toolCall = {
   type: ConversationRoundStepType.toolCall,
@@ -50,6 +50,52 @@ const expected = {
   systemInstructions: 'Investigate the evidence.',
   rounds: [{ steps: [toolCall], response: { message: 'Timeouts increased after the change.' } }],
 };
+
+it('accepts a successful sandbox command after recovered tool errors', () => {
+  expect(() =>
+    assertSuccessfulSandboxCommand([
+      {
+        steps: [
+          {
+            ...toolCall,
+            results: [
+              {
+                tool_result_id: 'failed',
+                type: ToolResultType.error,
+                data: { message: 'Transient sandbox failure' },
+              },
+            ],
+          },
+          {
+            ...toolCall,
+            results: [{ ...toolCall.results[0], data: { stdout: '30%', exit_code: 0 } }],
+          },
+        ],
+      },
+    ])
+  ).not.toThrow();
+});
+
+it.each([
+  {
+    ...toolCall,
+    tool_id: 'platform.streams.investigation_progress_report',
+    results: [{ ...toolCall.results[0], data: { acknowledged: true } }],
+  },
+  {
+    ...toolCall,
+    results: [
+      {
+        tool_result_id: 'failed',
+        type: ToolResultType.error,
+        data: { message: 'Sandbox unavailable' },
+      },
+    ],
+  },
+  { ...toolCall, results: [{ ...toolCall.results[0], data: { exit_code: 1 } }] },
+])('rejects bundled fixture acceptance without a successful sandbox command: %j', (step) => {
+  expect(() => assertSuccessfulSandboxCommand([{ steps: [step] }])).toThrow('successful sandbox');
+});
 
 it('accepts full payload evidence for the investigation conversation', () => {
   expect(() => assertAgentTrace(attributes, expected)).not.toThrow();

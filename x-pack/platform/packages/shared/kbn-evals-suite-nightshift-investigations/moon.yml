@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/dev-cli-runner'
   - '@kbn/es-snapshot-loader'
   - '@kbn/evals'
+  - '@kbn/evals-common'
   - '@kbn/kibana-api-cli'
   - '@kbn/scout'
   - '@kbn/tooling-log'

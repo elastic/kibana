@@ -9,6 +9,7 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import { z } from '@kbn/zod/v4';
 import type { EvaluationDataset } from '@kbn/evals';
+import { DatasetTags } from '@kbn/evals-common';
 import { investigationExampleSchema, type InvestigationExample } from './types';
 
 const investigationFileSchema = z.object({
@@ -18,7 +19,7 @@ const investigationFileSchema = z.object({
     .max(200)
     .startsWith('nightshift/'),
   description: z.string().max(2_000).optional(),
-  tags: z.array(z.string().min(1).max(100)).max(20).default([]),
+  tags: DatasetTags.default([]),
   examples: z.array(investigationExampleSchema).min(1).max(1_000),
 });
 
@@ -37,7 +38,7 @@ export const readInvestigationDataset = (
   return {
     name: file.dataset,
     description: file.description ?? 'Ungraded investigations with complete agent traces.',
-    tags: [...new Set(['nightshift', 'ungraded', ...file.tags])],
+    tags: DatasetTags.parse([...new Set(['nightshift', 'ungraded', ...file.tags])]),
     examples: file.examples,
   };
 };
