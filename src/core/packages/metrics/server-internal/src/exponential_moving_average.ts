@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { performance } from 'node:perf_hooks';
 import { map, type OperatorFunction, type TimestampProvider } from 'rxjs';
 
-const wallClock: TimestampProvider = {
-  now: () => Date.now(),
+const monotonicClock: TimestampProvider = {
+  now: () => performance.now(),
 };
 
 /** @internal */
@@ -50,7 +51,7 @@ export function intervalBasedExponentialMovingAverage(
 export function timeWeightedExponentialMovingAverage(
   period: number,
   expectedInterval: number,
-  timestampProvider: TimestampProvider = wallClock
+  timestampProvider: TimestampProvider = monotonicClock
 ): OperatorFunction<number, number> {
   return (inner) => {
     let previous: number | undefined;
@@ -66,8 +67,18 @@ export function timeWeightedExponentialMovingAverage(
         lastTimestamp = timestamp;
 
         if (elapsed < period) {
-          elapsed += dt;
-          mean += (current * dt) / period;
+          const remainingWarmUp = period - elapsed;
+          const dtWarmUp = Math.min(dt, remainingWarmUp);
+          const dtAfter = dt - dtWarmUp;
+
+          mean += (current * dtWarmUp) / period;
+          elapsed += dtWarmUp;
+
+          if (dtAfter > 0) {
+            previous = mean;
+            const alpha = 1 - Math.exp(-dtAfter / period);
+            return (previous = alpha * current + (1 - alpha) * previous);
+          }
 
           if (elapsed >= period) {
             previous = mean;
@@ -88,7 +99,7 @@ export function createExponentialMovingAverage(
   algorithm: EluHistorySmoothingAlgorithm,
   period: number,
   expectedInterval: number,
-  timestampProvider: TimestampProvider = wallClock
+  timestampProvider: TimestampProvider = monotonicClock
 ): OperatorFunction<number, number> {
   return algorithm === 'time-weighted-ema'
     ? timeWeightedExponentialMovingAverage(period, expectedInterval, timestampProvider)

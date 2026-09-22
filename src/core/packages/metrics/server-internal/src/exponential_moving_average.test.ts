@@ -146,6 +146,40 @@ describe('timeWeightedExponentialMovingAverage', () => {
     ]);
   });
 
+  it('should not exceed unit range when warm-up completes mid-sample', () => {
+    const { clock, advance } = createClock();
+    const results: number[] = [];
+    const subject = new Subject<number>();
+
+    subject
+      .pipe(timeWeightedExponentialMovingAverage(period, interval, clock))
+      .subscribe((value) => {
+        results.push(value);
+      });
+
+    subject.next(1);
+    advance(period * 2);
+    subject.next(1);
+    subject.complete();
+
+    for (const value of results) {
+      expect(value).toBeGreaterThanOrEqual(0);
+      expect(value).toBeLessThanOrEqual(1);
+    }
+
+    expect(results[0]).toEqual(expect.closeTo(1 / 3, 2));
+
+    const dt = period * 2;
+    const dtWarmUp = period - interval;
+    const dtAfter = dt - dtWarmUp;
+    const warmUpMean = 1 / 3 + dtWarmUp / period;
+    const alpha = 1 - Math.exp(-dtAfter / period);
+    const expectedSecond = alpha * 1 + (1 - alpha) * warmUpMean;
+
+    expect(results[1]).toEqual(expect.closeTo(expectedSecond, 2));
+    expect(results[1]).toBeLessThanOrEqual(1);
+  });
+
   it('should treat back-to-back samples as zero elapsed time in smoothing', () => {
     const { clock, advance } = createClock();
     const results: number[] = [];

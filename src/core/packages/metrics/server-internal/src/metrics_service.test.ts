@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { performance } from 'node:perf_hooks';
 import moment from 'moment';
 import { merge } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
@@ -224,7 +225,7 @@ describe('MetricsService', () => {
 
     it('emits time-weighted ELU values when configured', async () => {
       let now = 1_000;
-      jest.spyOn(Date, 'now').mockImplementation(() => now);
+      jest.spyOn(performance, 'now').mockImplementation(() => now);
       httpMock.rateLimiter = { ...httpMock.rateLimiter, algorithm: 'time-weighted-ema' };
 
       mockOpsCollector.collect
@@ -244,7 +245,7 @@ describe('MetricsService', () => {
       await new Promise((resolve) => process.nextTick(resolve));
       await metricsService.stop();
 
-      jest.spyOn(Date, 'now').mockRestore();
+      jest.spyOn(performance, 'now').mockRestore();
 
       await expect(eluMetricsPromise).resolves.toEqual([
         expect.objectContaining({
