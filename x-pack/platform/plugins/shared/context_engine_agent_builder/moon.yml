@@ -35,7 +35,6 @@ dependsOn:
   - '@kbn/agent-builder-plugin'
   - '@kbn/spaces-plugin'
   - '@kbn/scout'
-  - '@kbn/core-spaces-common'
 tags:
   - plugin
   - prod

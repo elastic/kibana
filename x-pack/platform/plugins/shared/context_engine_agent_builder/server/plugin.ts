@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import type {
-  CoreSetup,
-  CoreStart,
-  Logger,
-  Plugin,
-  PluginInitializerContext,
-} from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type {
   ContextEngineAgentBuilderPluginSetup,
   ContextEngineAgentBuilderPluginStart,
@@ -20,7 +13,6 @@ import type {
   ContextEngineAgentBuilderStartDependencies,
 } from './types';
 import { registerContextEngineAgentBuilderIntegration } from './register_agent_builder_integration';
-import { installContextEngineAgent } from './agent/install_context_engine_agent';
 
 export class ContextEngineAgentBuilderPlugin
   implements
@@ -31,11 +23,7 @@ export class ContextEngineAgentBuilderPlugin
       ContextEngineAgentBuilderStartDependencies
     >
 {
-  private readonly logger: Logger;
-
-  constructor(initializerContext: PluginInitializerContext) {
-    this.logger = initializerContext.logger.get();
-  }
+  constructor(_initializerContext: PluginInitializerContext) {}
 
   setup(
     coreSetup: CoreSetup<
@@ -55,19 +43,8 @@ export class ContextEngineAgentBuilderPlugin
 
   start(
     _coreStart: CoreStart,
-    startDeps: ContextEngineAgentBuilderStartDependencies
+    _startDeps: ContextEngineAgentBuilderStartDependencies
   ): ContextEngineAgentBuilderPluginStart {
-    if (startDeps.agentBuilder) {
-      void installContextEngineAgent({
-        agentBuilder: startDeps.agentBuilder,
-        spaceId: DEFAULT_SPACE_ID,
-      }).catch((err: Error) => {
-        this.logger.error(
-          `Failed to install context engine setup agent in default space: ${err.message}`
-        );
-      });
-    }
-
     return {};
   }
 
