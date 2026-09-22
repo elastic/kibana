@@ -43,11 +43,6 @@ export const DISCARD_WATCH_SETTINGS = i18n.translate(
   { defaultMessage: 'Discard' }
 );
 
-export const WORKER_SETTINGS_SAVE_ERROR = i18n.translate(
-  'xpack.alertzero.watches.settings.worker.saveError',
-  { defaultMessage: 'Could not save this Worker. Other saved changes were kept.' }
-);
-
 export const WATCH_SETTINGS_INVALID = i18n.translate(
   'xpack.alertzero.watches.settings.invalidDrafts',
   { defaultMessage: 'Fix invalid settings before saving.' }
@@ -172,7 +167,7 @@ export const AUTONOMY_LEVEL_DESCRIPTIONS: Record<string, string> = {
   }),
   supervised: i18n.translate('xpack.alertzero.watches.settings.autonomy.supervised.description', {
     defaultMessage:
-      'This Worker acts within its allow-list and tells you afterwards. Consequential actions still gate.',
+      'False positives auto-close with rationale logged. You are notified after the fact and can undo.',
   }),
 };
 
@@ -624,6 +619,28 @@ export const RUN_OUTCOME_LABELS: Record<string, string> = {
     defaultMessage: 'Completed',
   }),
 };
+
+/* -------------------------------------------------------------------------- */
+/* Alert Triage Worker extras                                                 */
+/* -------------------------------------------------------------------------- */
+
+export const WORKER_SETTINGS_ALERT_ANALYSIS_LINK = i18n.translate(
+  'xpack.alertzero.watches.settings.worker.alertAnalysisSettingsLink',
+  { defaultMessage: 'Go to Alert analysis settings' }
+);
+
+export const MINIMUM_CONFIDENCE_SCORE_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.minimumConfidenceScoreLabel',
+  { defaultMessage: 'Minimum confidence score' }
+);
+
+export const MINIMUM_CONFIDENCE_SCORE_HELP_TEXT = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.minimumConfidenceScoreHelpText',
+  {
+    defaultMessage:
+      'False positive alerts must meet or exceed this confidence score to be surfaced for review or auto-closed. Alerts below the threshold are still tagged with the verdict but require no action. Lower values surface more alerts; higher values are more conservative.',
+  }
+);
 
 /* -------------------------------------------------------------------------- */
 /* Per-watch intro                                                            */

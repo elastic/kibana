@@ -247,7 +247,8 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
         who: i18n.translate(
           'xpack.alertzero.watches.settings.autonomyCards.alertTriage.supervised.who',
           {
-            defaultMessage: 'Closes false positives on its own — same as Assisted for this Worker.',
+            defaultMessage:
+              'Closes false positives on its own — you can reopen any you disagree with.',
           }
         ),
         facts: [

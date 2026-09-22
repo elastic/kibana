@@ -94,6 +94,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     consts: Record<string, unknown>;
     settings: Record<string, unknown>;
     steps: unknown[];
+    triggers: unknown[];
   };
 
   it('reads per-space config at run time from the space-scoped runtime_config route', () => {
@@ -182,10 +183,11 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(guard.type).toBe('if');
     // A disabled space or a space with no connector must skip enrichment, the AI agent calls, and
     // auto-close (fixes enabled-with-no-connector and moves the on/off decision to run time), and
-    // an execution whose alerts were all analyzed already must not call the model at all. The
-    // guard is a parens-free `and` because the workflow template parser reads `(` as range syntax.
+    // an execution whose alerts were all analyzed already must not call the model at all. The guard
+    // is a parens-free `and` chain; `connector_configured` is pre-computed by set_connector_configured
+    // to avoid the `(` range-syntax pitfall with the two-connector OR.
     expect(guard.condition).toBe(
-      "${{ variables.workflow_enabled and variables.connector_id != '' and variables.pending_alert_count > 0 }}"
+      '${{ variables.workflow_enabled and variables.connector_configured and variables.pending_alert_count > 0 }}'
     );
 
     // Everything expensive lives under the guard — including the "about to analyze N alerts" log,
@@ -225,7 +227,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     // what amortises the ~28k-token agent framework prompt across the whole batch.
     expect(loops).toHaveLength(1);
     expect(loops[0].foreach).toBe(
-      "{{ event.alerts | reject_exp: 'a', variables.pending_filter_expr | chunk: consts.batch_size | json }}"
+      "{{ variables.alert_set | reject_exp: 'a', variables.pending_filter_expr | chunk: consts.batch_size | json }}"
     );
     expect(workflow.consts.batch_size).toEqual(expect.any(Number));
     expect(workflow.consts.batch_size).toBeGreaterThan(1);
@@ -294,11 +296,15 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
   it('passes the runtime connector id and create-conversation flag to the AI agent step', () => {
     const agentStep = findStepByName(workflow.steps, 'runAgent_step') as {
       'connector-id': string;
+      'connector-id-by-feature': string;
       'create-conversation': string;
     };
 
     expect(agentStep).toBeDefined();
     expect(agentStep['connector-id']).toBe('{{ variables.connector_id }}');
+    // Dual connector params coexist: superRefine only fires when BOTH are non-empty; Liquid renders
+    // "" for the unused variable so exactly one is non-empty at execution time (Z1 spike, DONE/PASS).
+    expect(agentStep['connector-id-by-feature']).toBe('{{ variables.connector_id_by_feature }}');
     // `${{ }}` preserves the boolean; a plain `{{ }}` would render the string "false" (truthy).
     expect(agentStep['create-conversation']).toBe('${{ variables.create_conversation }}');
   });
@@ -339,7 +345,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     const anchorStep = findStepByName(workflow.steps, 'set_enrichment_anchor') as {
       with: { anchor_timestamp: string };
     };
-    expect(anchorStep.with.anchor_timestamp).toBe('{{ event.alerts[0]["@timestamp"] }}');
+    expect(anchorStep.with.anchor_timestamp).toBe('{{ variables.alert_set[0]["@timestamp"] }}');
   });
 
   it('keeps the related-alert graph per alert and summarises it into the batch prompt', () => {
@@ -618,6 +624,176 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     };
     expect(initStep.with.auto_close_ids).toEqual([]);
   });
+
+  it('initialises connector_id_by_feature to empty string so the standalone path is unchanged (R8)', () => {
+    // R8: Both paths invoke the same underlying workflow. The empty initialiser means that when no
+    // caller supplies connectorIdByFeature, the variable exists but is "" — the analysis_enabled
+    // guard sees connector_configured = (connector_id != '' or '' != '') = (connector_id != ''),
+    // which is byte-identical to the pre-Worker guard behaviour.
+    const initStep = findStepByName(workflow.steps, 'set_workflow_variables') as {
+      with: { connector_id_by_feature: string; investigation_conversation_id: string };
+    };
+    expect(initStep.with.connector_id_by_feature).toBe('');
+    // Standalone path: empty string keeps conversation creation under uiSettings control.
+    // Worker path: set_caller_overrides overwrites this with the Investigation conversation id (R3).
+    expect(initStep.with.investigation_conversation_id).toBe('');
+  });
+
+  it('applies caller-supplied inputs only when connectorIdByFeature is present', () => {
+    const overrideStep = findStepByName(workflow.steps, 'apply_caller_input_overrides') as {
+      type: string;
+      condition: string;
+      steps: Step[];
+    };
+    expect(overrideStep).toBeDefined();
+    expect(overrideStep.type).toBe('if');
+    // Gate on the explicit calledByWorker flag — absent (or false) on the standalone path.
+    // NOTE: workflow_enabled is intentionally not overridden here — a space admin's decision
+    // to disable the workflow is respected on both standalone and Worker paths.
+    expect(overrideStep.condition).toBe('${{ inputs.calledByWorker == true }}');
+
+    const setStep = findStepByName(overrideStep.steps, 'set_caller_overrides') as {
+      with: Record<string, string | number>;
+    };
+    // Swap to feature-registry connector and clear the uiSettings connector (Z1 invariant)
+    expect(setStep.with.connector_id).toBe('');
+    expect(setStep.with.connector_id_by_feature).toBe('{{ inputs.connectorIdByFeature }}');
+    // Absent threshold preserves the fetched runtime-config value. A filter, not a ternary:
+    // the engine's Liquid has no ternary operator and fails at execution time on one.
+    expect(setStep.with.auto_close_confidence_score_min_threshold).toBe(
+      '${{ inputs.autoCloseConfidenceScoreMinThreshold | default: variables.auto_close_confidence_score_min_threshold }}'
+    );
+    // autoCloseEnabled is deliberately NOT in set_caller_overrides. `| default:` would swallow
+    // the Worker's explicit false (Liquid treats false as falsy) and let the sub-workflow close
+    // alerts the Worker must gate behind a proposal (R11), so it gets its own presence gate.
+    expect(setStep.with.auto_close_enabled).toBeUndefined();
+    const autoCloseGate = findStepByName(
+      overrideStep.steps,
+      'set_auto_close_enabled_if_provided'
+    ) as { type: string; condition: string; steps: Array<{ with: Record<string, string> }> };
+    expect(autoCloseGate.type).toBe('if');
+    expect(autoCloseGate.condition).toBe('${{ inputs.autoCloseEnabled != null }}');
+    expect(autoCloseGate.steps[0].with.auto_close_enabled).toBe('${{ inputs.autoCloseEnabled }}');
+    // Max threshold collapsed to 1 so the Worker's min threshold acts as a floor only
+    expect(setStep.with.auto_close_confidence_score_max_threshold).toBe(1);
+    // String fields use Liquid | default: (safe because empty string is the only falsy edge case
+    // and neither field would be intentionally set to "")
+    expect(setStep.with.agent_id).toBe('{{ inputs.agentId | default: variables.agent_id }}');
+    expect(setStep.with.tag_prefix).toBe('{{ inputs.tagPrefix | default: variables.tag_prefix }}');
+    // R3: Worker forces the agent reasoning into the Investigation conversation.
+    // create_conversation: false prevents a second orphaned conversation from being created;
+    // investigation_conversation_id is passed to runAgent_step's conversation_id (Mode B).
+    expect(setStep.with.create_conversation).toBe(false);
+    expect(setStep.with.investigation_conversation_id).toBe(
+      '{{ inputs.investigationConversationId }}'
+    );
+  });
+
+  // `workflow.execute` hands the child only `inputs` — a child run has no trigger event —
+  // so without a caller-supplied alert set the workflow reads an absent `event.alerts`,
+  // counts zero pending alerts, skips the whole analysis and returns empty verdicts. It
+  // reports success while doing nothing, which is why this is asserted rather than assumed.
+  it('analyses a caller-supplied alert set, falling back to the trigger event', () => {
+    const declaringTrigger = (
+      workflow.triggers as Array<{ type: string; inputs?: { properties?: object } }>
+    ).find(({ inputs }) => inputs?.properties != null);
+    expect(declaringTrigger?.inputs?.properties).toHaveProperty('alerts');
+
+    // Default is the trigger's own alerts, so the standalone path is unchanged (R8).
+    const defaultStep = findStepByName(workflow.steps, 'set_alert_set') as {
+      with: { alert_set: string };
+    };
+    expect(defaultStep.with.alert_set).toBe('${{ event.alerts }}');
+
+    // The override is gated on calledByWorker — only a Worker call supplies an alert set.
+    const overrideStep = findStepByName(workflow.steps, 'use_caller_alerts_if_provided') as {
+      condition: string;
+      steps: Array<{ name: string; with: { alert_set: string } }>;
+    };
+    expect(overrideStep.condition).toBe('${{ inputs.calledByWorker == true }}');
+    expect(overrideStep.steps[0].with.alert_set).toBe('${{ inputs.alerts }}');
+
+    // Every site that iterates or counts alerts must read the resolved set, or a caller's
+    // alerts would be analysed in one place and ignored in another. `set_alert_set` is the
+    // sole legitimate reader of the trigger event.
+    const stepsWithoutResolver = (workflow.steps as Array<{ name: string }>).filter(
+      ({ name }) => name !== 'set_alert_set'
+    );
+    expect(JSON.stringify(stepsWithoutResolver)).not.toContain('event.alerts');
+  });
+
+  // The model echoes the alert id back with each verdict, and that echo is only safe as a
+  // pairing key. A caller acts on what workflow.output emits — the Alert Triage Worker tags,
+  // notes and closes by it — so exporting the raw model output would let a fabricated id close
+  // an unrelated alert. The workflow already refuses to trust the echo internally; this pins
+  // the same guarantee at the boundary, where it is easy to undo by "simplifying" one variable.
+  it('emits verdicts keyed on the real alert id, never the model-supplied one', () => {
+    const outputStep = findStepByName(workflow.steps, 'emit_workflow_output') as {
+      with: Record<string, string>;
+    };
+    expect(outputStep.with.verdicts).toBe('${{ variables.output_verdicts }}');
+    expect(outputStep.with.verdicts).not.toContain('all_verdicts');
+
+    // The exported list is built from the alert being iterated, not from the model's echo.
+    const buildStep = findStepByName(workflow.steps, 'build_output_verdict') as {
+      with: { output_verdict: Record<string, string> };
+    };
+    expect(buildStep.with.output_verdict.alert_id).toBe('{{ foreach.item._id }}');
+
+    // Counts must agree with the exported list, or a caller sees a total it cannot reconcile
+    // against the verdicts it was given.
+    for (const field of [
+      'false_positive_count',
+      'true_positive_count',
+      'inconclusive_count',
+    ] as const) {
+      expect(outputStep.with[field]).toContain('variables.output_verdicts');
+    }
+  });
+
+  // The engine's Liquid dialect has no ternary operator. A `cond ? a : b` parses as valid YAML
+  // and installs cleanly, then fails mid-run with "The provided expression is invalid" — so it
+  // survives review and schema validation and only shows up as a failed execution.
+  it('uses no ternary expressions, which the engine rejects at execution time', () => {
+    const ternaryInExpression = /\{\{[^}]*\?[^}]*:[^}]*\}\}/;
+    expect(JSON.stringify(workflow.steps)).not.toMatch(ternaryInExpression);
+  });
+
+  it('pre-computes connector_configured to keep the analysis_enabled guard a simple and chain', () => {
+    const helperStep = findStepByName(workflow.steps, 'set_connector_configured') as {
+      type: string;
+      with: { connector_configured: string };
+    };
+    expect(helperStep).toBeDefined();
+    expect(helperStep.type).toBe('data.set');
+    expect(helperStep.with.connector_configured).toBe(
+      "${{ variables.connector_id != '' or variables.connector_id_by_feature != '' }}"
+    );
+    // Must run before analysis_enabled so the guard sees the computed value
+    const ancestors = findStepAncestors(workflow.steps, 'set_connector_configured') ?? [];
+    expect(ancestors.map((a) => a.name)).not.toContain('analysis_enabled');
+  });
+
+  it('emits workflow.output at the top level so callers always receive a structured result', () => {
+    const outputStep = findStepByName(workflow.steps, 'emit_workflow_output') as {
+      type: string;
+      status: string;
+      with: Record<string, string>;
+    };
+    expect(outputStep).toBeDefined();
+    expect(outputStep.type).toBe('workflow.output');
+    expect(outputStep.status).toBe('completed');
+    expect(outputStep.with.verdicts).toBe('${{ variables.output_verdicts }}');
+    expect(outputStep.with.false_positive_count).toContain("'classification', 'false_positive'");
+    expect(outputStep.with.true_positive_count).toContain("'classification', 'true_positive'");
+    expect(outputStep.with.inconclusive_count).toContain("'classification', 'inconclusive'");
+    expect(outputStep.with.auto_closed_ids).toBe('${{ variables.auto_close_ids }}');
+    // Must be OUTSIDE analysis_enabled so it fires even when the guard short-circuits.
+    // The accumulators are initialised to [] / 0 in set_workflow_variables, so the output
+    // is always well-formed (callers receive an empty verdict list when analysis is skipped).
+    const ancestors = findStepAncestors(workflow.steps, 'emit_workflow_output') ?? [];
+    expect(ancestors.map((a) => a.name)).not.toContain('analysis_enabled');
+  });
 });
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -639,7 +815,7 @@ const makeRenderContext = (batchAlerts: unknown[], relatedSummaries: unknown[] =
     batch_llm_calls: 1,
     batch_input_tokens: 0,
     batch_output_tokens: 0,
-    normalized_version: 'v0_0_3',
+    normalized_version: 'v0_0_4',
     connector_id: 'test-connector',
   },
   steps: {

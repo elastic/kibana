@@ -589,7 +589,40 @@ describe('proposals.getProposal step', () => {
       supersededBy: 'proposal-2',
       expiresAt: '2026-09-04T00:00:00.000Z',
       actionWorkflowId: 'system-alertzero-action-create-rule',
+      dismissReason: undefined,
+      rationale: undefined,
     });
+  });
+
+  it('should return dismissReason and rationale when a proposal is dismissed', async () => {
+    const get = jest.fn().mockResolvedValue({
+      status: 'failed',
+      decision: 'dismissed',
+      decidedBy: { username: 'analyst', fullName: 'Alice Analyst', email: null },
+      dismissReason: 'wrong',
+      rationale: 'The alert fired on a known-good admin script, not a real intrusion.',
+    });
+
+    const result = await getDefinition(get).handler(createContext({ proposalId: 'proposal-1' }));
+
+    expect(result.output).toMatchObject({
+      decision: 'dismissed',
+      dismissReason: 'wrong',
+      rationale: 'The alert fired on a known-good admin script, not a real intrusion.',
+    });
+  });
+
+  it('should return dismissReason without rationale when rationale was not supplied', async () => {
+    const get = jest.fn().mockResolvedValue({
+      status: 'failed',
+      decision: 'dismissed',
+      dismissReason: 'low_value',
+    });
+
+    const result = await getDefinition(get).handler(createContext({ proposalId: 'proposal-1' }));
+
+    expect(result.output?.dismissReason).toBe('low_value');
+    expect(result.output?.rationale).toBeUndefined();
   });
 
   it('should leave decidedBy undefined when the stored proposal has no decider', async () => {

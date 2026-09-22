@@ -38,6 +38,8 @@ export const getGetProposalStepDefinition = ({
             supersededBy: proposal.supersededBy,
             expiresAt: proposal.expiresAt,
             actionWorkflowId: proposal.actionWorkflowId,
+            dismissReason: proposal.dismissReason,
+            rationale: proposal.rationale,
           },
         };
       } catch (error) {

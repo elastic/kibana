@@ -30,6 +30,7 @@ export {
   ALERTZERO_PROPOSALS_CATEGORY_URL,
   ALERTZERO_PROPOSALS_CLOSED_URL,
   ALERTZERO_PROPOSALS_REVISE_TOOL_ID,
+  ALERTZERO_ALERT_TRIAGE_INFERENCE_FEATURE_ID,
   ALERTZERO_THIN_AGENT_ID,
   ALERTZERO_WATCHES_URL,
   ALERTZERO_WATCH_URL_TEMPLATE,
@@ -97,6 +98,8 @@ export {
   WatchTriggerProjection,
   AnalysisWindowDays,
   RuleTuningWorkerExtras,
+  AutoCloseConfidenceScoreMinThreshold,
+  AlertTriageWorkerExtras,
   Worker,
   WorkerRunState,
   WorkerScheduleInterval,
@@ -119,6 +122,7 @@ export type {
 } from './impl/watches/watch_helpers';
 
 export {
+  ALERT_TRIAGE_DEFAULT_EXTRAS,
   ANALYSIS_WINDOW_DAYS_DEFAULT,
   ANALYSIS_WINDOW_DAYS_MAX,
   ANALYSIS_WINDOW_DAYS_MIN,

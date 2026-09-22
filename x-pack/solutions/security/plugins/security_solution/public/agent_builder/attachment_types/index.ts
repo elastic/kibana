@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type {
   AttachmentServiceStartContract,
@@ -88,6 +89,22 @@ export const registerAttachmentUiDefinitions = (attachments: AttachmentServiceSt
           : ALERTS_DEFAULT_LABEL;
       },
       getIcon: () => 'bell',
+      renderConversationDetailsContent: ({ attachment }) => {
+        const ids = (attachment.data?.alertIds ?? []) as string[];
+        return React.createElement(
+          'ul',
+          {
+            style: {
+              listStyle: 'none',
+              padding: 0,
+              margin: 0,
+              fontFamily: 'monospace',
+              fontSize: 12,
+            },
+          },
+          ...ids.map((id) => React.createElement('li', { key: id }, id))
+        );
+      },
     }
   );
 };
@@ -128,6 +145,28 @@ export const registerInvestigationIocsAttachment = ({
     attachments.addAttachmentType(
       SecurityAgentBuilderAttachments.investigationIocs,
       createInvestigationIocsAttachmentDefinition()
+    );
+  });
+};
+
+/**
+ * Registers the `security.impact` attachment renderer (entity × verdict table summarising
+ * alert-analysis results for impacted hosts and users). Dynamically imports
+ * [./impact](./impact/index.ts) so EuiBasicTable and the impact-specific code stay off the
+ * main `securitySolution` page-load bundle.
+ */
+export const registerImpactAttachment = ({
+  attachments,
+}: {
+  attachments: AttachmentServiceStartContract;
+}): void => {
+  void import(
+    /* webpackChunkName: "security_impact_attachment" */
+    './impact'
+  ).then(({ createImpactAttachmentDefinition }) => {
+    attachments.addAttachmentType(
+      SecurityAgentBuilderAttachments.impact,
+      createImpactAttachmentDefinition()
     );
   });
 };

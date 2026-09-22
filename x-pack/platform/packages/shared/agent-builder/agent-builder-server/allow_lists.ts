@@ -58,6 +58,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
 
   // Security Solution
   `${internalNamespaces.security}.alertzero.actions.list`,
+  `${internalNamespaces.security}.alertzero.proposals.revise`,
   `${internalNamespaces.security}.entity_risk_score`,
   `${internalNamespaces.security}.create_detection_rule`,
   `${internalNamespaces.security}.run_rule_preview`,
@@ -344,6 +345,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
 
   // Security Solution
   'security.alert',
+  'security.impact',
   'security.alerts',
   'security.entity',
   'security.entity_analytics_dashboard',

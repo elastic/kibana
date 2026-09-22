@@ -52,6 +52,12 @@ export const ALERTZERO_PROPOSALS_REVISE_TOOL_ID = 'security.alertzero.proposals.
  */
 export const ALERTZERO_THIN_AGENT_ID = 'alertzero-thin-agent' as const;
 
+/**
+ * Inference feature id for the Alert Triage Worker, registered under `security_search_inference_parent`
+ * in Model Management. Used by `connector-id-by-feature` in floor_alert_triage.yaml.
+ */
+export const ALERTZERO_ALERT_TRIAGE_INFERENCE_FEATURE_ID = 'alertzero_alert_triage' as const;
+
 /** Managed catalog workflow ids — owned by Security. */
 export const SYSTEM_SECURITY_WATCH_FLOOR_ID = 'system-security-watch-floor' as const;
 export const SYSTEM_SECURITY_WATCH_OFFICER_ID = 'system-security-watch-officer' as const;
