@@ -16,7 +16,7 @@ import { SavedObjectSaveModal } from './saved_object_save_modal';
 const DEFAULT_MAP_LOADING_TIMEOUT = 20_000;
 
 export class MapsPage {
-  public readonly mapContainer;
+  public readonly mapsPlugin;
   public readonly mapRenderComplete;
   public readonly saveAndReturnButton;
   public readonly saveButton;
@@ -30,11 +30,13 @@ export class MapsPage {
   private readonly mapLayerToc;
   private readonly layerTocTooltip;
   private readonly appMenu: AppMenu;
+  private readonly mapContainer;
+  private readonly setViewForm;
   /** Save modal locators/actions, shared with other apps (e.g. Visualize) via `SavedObjectSaveModal`. */
   public readonly saveModal: SavedObjectSaveModal;
 
   constructor(private readonly page: ScoutPage) {
-    this.mapContainer = this.page.locator('#maps-plugin');
+    this.mapsPlugin = this.page.locator('#maps-plugin');
     this.mapRenderComplete = this.page.locator('#maps-plugin[data-map-loaded="true"]');
     this.saveAndReturnButton = this.page.testSubj.locator('mapSaveAndReturnButton');
     this.saveButton = this.page.testSubj.locator('mapSaveButton');
@@ -48,6 +50,8 @@ export class MapsPage {
     this.appMenu = new AppMenu(this.page);
     this.mapLayerToc = this.page.testSubj.locator('mapLayerTOC');
     this.layerTocTooltip = this.page.testSubj.locator('layerTocTooltip');
+    this.mapContainer = this.page.testSubj.locator('mapContainer');
+    this.setViewForm = this.page.testSubj.locator('mapSetViewForm');
     this.saveModal = new SavedObjectSaveModal(this.page);
   }
 
@@ -74,7 +78,7 @@ export class MapsPage {
 
   async waitForRenderComplete() {
     // first wait for the top level container to be present
-    await this.mapContainer.waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
+    await this.mapsPlugin.waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
     // then wait for the map to be fully rendered
     return this.mapRenderComplete.waitFor({
       state: 'attached',
@@ -161,18 +165,16 @@ export class MapsPage {
   }
 
   private async openSetViewPopover() {
-    const form = this.page.testSubj.locator('mapSetViewForm');
-    if (!(await form.isVisible())) {
+    if (!(await this.setViewForm.isVisible())) {
       await this.page.testSubj.click('toggleSetViewVisibilityButton');
-      await form.waitFor({ state: 'visible' });
+      await this.setViewForm.waitFor({ state: 'visible' });
     }
   }
 
   private async closeSetViewPopover() {
-    const form = this.page.testSubj.locator('mapSetViewForm');
-    if (await form.isVisible()) {
+    if (await this.setViewForm.isVisible()) {
       await this.page.testSubj.click('toggleSetViewVisibilityButton');
-      await form.waitFor({ state: 'hidden' });
+      await this.setViewForm.waitFor({ state: 'hidden' });
     }
   }
 
@@ -200,12 +202,11 @@ export class MapsPage {
    * Retries until mapTooltipCloseButton appears (i.e. a feature was hit and tooltip locked).
    */
   async lockTooltipAtPosition(xOffset: number, yOffset: number) {
-    const mapContainer = this.page.testSubj.locator('mapContainer');
-    await mapContainer.waitFor({ state: 'visible' });
+    await this.mapContainer.waitFor({ state: 'visible' });
     const closeButton = this.page.testSubj.locator('mapTooltipCloseButton');
 
     await expect(async () => {
-      const box = await mapContainer.boundingBox();
+      const box = await this.mapContainer.boundingBox();
       if (!box) throw new Error('Map container bounding box not found');
       await this.page.mouse.click(
         box.x + box.width / 2 + xOffset,
