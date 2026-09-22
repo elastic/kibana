@@ -130,7 +130,7 @@ export const RulesListHeader = ({
       {
         id: 'v1Rules',
         label: i18n.translate('xpack.alertingV2.rulesList.v1RulesTabTitle', {
-          defaultMessage: 'V1 rules',
+          defaultMessage: 'Name A',
         }),
         isSelected: false,
         href: basePath.prepend(triggersActionsRoute),
@@ -139,7 +139,7 @@ export const RulesListHeader = ({
       {
         id: 'v2Rules',
         label: i18n.translate('xpack.alertingV2.rulesList.v2RulesTabTitle', {
-          defaultMessage: 'V2 rules',
+          defaultMessage: 'Name B',
         }),
         isSelected: true,
         href: basePath.prepend(paths.ruleList),
