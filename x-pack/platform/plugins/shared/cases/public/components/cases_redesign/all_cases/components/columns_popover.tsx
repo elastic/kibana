@@ -218,6 +218,7 @@ export const ColumnsPopover: React.FC<Props> = ({
                           <EuiPanel
                             color="transparent"
                             paddingSize="xs"
+                            hasBorder={false}
                             css={styles.dragHandle}
                             {...provided.dragHandleProps}
                             aria-label={i18n.DRAG_HANDLE}
