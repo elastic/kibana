@@ -12,6 +12,7 @@ import type { AgentRegistry } from '../services/agents';
 import { getConversationMetadataStepDefinition } from './steps/get_conversation_metadata';
 import { updateConversationMetadataStepDefinition } from './steps/update_conversation_metadata';
 import { createConversationStepDefinition } from './steps/create_conversation';
+import { addConversationEventStepDefinition } from './steps/add_conversation_event';
 
 export interface ConversationStepDeps {
   getConversationClient: (request: KibanaRequest) => Promise<ConversationClient>;
@@ -29,4 +30,5 @@ export const conversationStepRegistry: ConversationStepFactory[] = [
   getConversationMetadataStepDefinition,
   updateConversationMetadataStepDefinition,
   createConversationStepDefinition,
+  addConversationEventStepDefinition,
 ];
