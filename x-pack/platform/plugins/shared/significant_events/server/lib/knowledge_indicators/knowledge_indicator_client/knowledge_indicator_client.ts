@@ -27,6 +27,7 @@ import { IndicatorWriter } from './indicator_writer';
 import { IndicatorReader } from './indicator_reader';
 import { IndicatorSearcher } from './indicator_searcher';
 import { QueryRuleOrchestrator, type PromoteQueriesResult } from './query_rule_orchestrator';
+import { withoutSlugAliases } from './rules/rules_management_client';
 import { computeExpiresAt } from './serializers';
 import type { SignificantEventsAlertingContext } from '../../significant_events/alerting/significant_events_alerting_context';
 
@@ -199,7 +200,7 @@ export class KnowledgeIndicatorClient {
       this.reader.getStreamNamesWithKnowledgeIndicators(),
       this.orchestrator.findStreamNamesWithOwnedRules(),
     ]);
-    return [...new Set([...withIndicators, ...withOwnedRules])];
+    return [...new Set([...withIndicators, ...withoutSlugAliases(withIndicators, withOwnedRules)])];
   }
 
   findIndicators(

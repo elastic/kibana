@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-/** Ownership tag every Nightshift-managed rule carries: `nightshift:source:<sourceId>`. */
+import { getSourceSlugFromTitle } from '@kbn/nightshift-shared';
+
+/** Ownership tag every Nightshift-managed rule carries: `nightshift:source:<slug>`. */
 export const NIGHTSHIFT_RULE_SOURCE_TAG_PREFIX = 'nightshift:source:' as const;
 
 export class BulkCreateRulesError extends Error {
@@ -22,12 +24,9 @@ export class BulkCreateRulesError extends Error {
 
 /**
  * Ownership tag written before knowledge indicators were keyed by source
- * (`sigevents:stream:<streamName>`). Those rules are still "owned": the
- * documents that backed them are invisible after the re-keying, so the
- * routine orphan sweep (`reconcileStream`) retires them, and the cluster-wide
- * `POST /internal/significant_events/knowledge_indicators/_reset` deletes them
- * outright. A source id equals the stream name while streams are the source
- * universe, which is what lets the two tags be matched per source.
+ * (`sigevents:stream:<streamName>`). The suffix is the raw stream name those
+ * rules were created with, so it is not slugified. Current rules use
+ * `nightshift:source:<slug>` instead, which is what shows up on the rule.
  */
 export const LEGACY_RULE_STREAM_TAG_PREFIX = 'sigevents:stream:' as const;
 
@@ -40,13 +39,36 @@ export const RULE_OWNERSHIP_TAG_PREFIXES: readonly RuleOwnershipTagPrefix[] = [
   LEGACY_RULE_STREAM_TAG_PREFIX,
 ];
 
+/**
+ * `logs.nginx` becomes `nightshift:source:logs-nginx`. The slug is the part a
+ * person reads on the rule; the source id itself may later be an opaque id.
+ * Lookup still passes the source id: this function slugifies it the same way.
+ */
 export const toSourceTag = (sourceId: string): string =>
-  `${NIGHTSHIFT_RULE_SOURCE_TAG_PREFIX}${sourceId}`;
+  `${NIGHTSHIFT_RULE_SOURCE_TAG_PREFIX}${getSourceSlugFromTitle(sourceId)}`;
 
 export const toLegacyStreamTag = (sourceId: string): string =>
   `${LEGACY_RULE_STREAM_TAG_PREFIX}${sourceId}`;
 
-/** Source id carried by either ownership tag, or `undefined` for unrelated tags. */
+/**
+ * Rule-tag suffixes that are not their own source. A current tag stores the
+ * slug (`logs-nginx`) while knowledge indicators are still keyed by the raw id
+ * (`logs.nginx`). Reconciling the slug as a second source sees zero indicators
+ * and deletes the rules.
+ */
+export const withoutSlugAliases = (
+  sourceIds: readonly string[],
+  ruleKeys: readonly string[]
+): string[] => {
+  const known = new Set(sourceIds);
+  const slugs = new Set(sourceIds.map((sourceId) => getSourceSlugFromTitle(sourceId)));
+  return ruleKeys.filter((key) => !known.has(key) && !slugs.has(key));
+};
+
+/**
+ * Suffix of an ownership tag, or `undefined` for an unrelated tag.
+ * `nightshift:source:` carries the slug. `sigevents:stream:` carries the raw stream name.
+ */
 export const sourceIdFromOwnershipTag = (tag: string): string | undefined => {
   const prefix = RULE_OWNERSHIP_TAG_PREFIXES.find((candidate) => tag.startsWith(candidate));
   return prefix ? tag.slice(prefix.length) : undefined;
@@ -74,15 +96,16 @@ export interface IRulesManagementClient {
   findExistingRuleIds(ids: string[]): Promise<string[]>;
 
   /**
-   * Rule ids owned by a source, i.e. tagged `nightshift:source:<sourceId>` or
-   * with the legacy `sigevents:stream:<sourceId>` tag, in the client's space.
+   * Rule ids owned by a source, in the client's space. Matches
+   * `nightshift:source:<slug>` and the legacy `sigevents:stream:<sourceId>` tag.
    */
   findOwnedRuleIds(sourceId: string): Promise<string[]>;
 
   /**
-   * Distinct source ids owning at least one rule (either ownership tag), so
-   * orphan-rule cleanup can reach sources whose rules outlived all of their
-   * knowledge indicators.
+   * Ownership-tag suffixes for sources that still have a rule. Current tags
+   * contribute the slug; legacy tags contribute the raw stream name. Callers
+   * that reconcile must drop a slug when the raw source id is already known
+   * ({@link withoutSlugAliases}).
    */
   findStreamNamesWithOwnedRules(): Promise<string[]>;
 
