@@ -8,7 +8,10 @@
 import { schema } from '@kbn/config-schema';
 
 import { AWS_CLOUD_PROVIDER } from '../../../common/types/models/cloud_connector';
-import { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../../../common/types/rest_spec/iac_provisioner';
+import {
+  IAC_FEDERATED_IDENTITY_WORKFLOW,
+  MAX_IAC_RENDER_INTEGRATIONS,
+} from '../../../common/types/rest_spec/iac_provisioner';
 import { CLOUD_CONNECTOR_RENDER_FLOW } from '../../../common/telemetry/iac_provisioner_events';
 
 const IacProvisionerFlowSchema = schema.oneOf([schema.literal(CLOUD_CONNECTOR_RENDER_FLOW)], {
@@ -30,29 +33,34 @@ const IacPolicyTemplateSelectionSchema = schema.object({
   }),
 });
 
-const IacIntegrationsSchema = schema.arrayOf(
-  schema.object({
-    name: schema.string({
-      minLength: 1,
-      maxLength: 255,
-      meta: { description: 'EPR package name.' },
-    }),
-    policyTemplates: schema.arrayOf(IacPolicyTemplateSelectionSchema, {
-      minSize: 1,
-      maxSize: 100,
-      meta: {
-        description: 'Policy templates whose enabled inputs to include.',
-      },
-    }),
+// Re-exported for the route modules that import every schema constant from here.
+export { MAX_IAC_RENDER_INTEGRATIONS };
+
+/**
+ * One package plus the policy templates the user enabled, each listing only the input
+ * types the user enabled under it. Shared with the connector verify route, which sends
+ * the same shape for the integrations being added.
+ */
+export const RenderIacTemplateIntegrationSchema = schema.object({
+  name: schema.string({
+    minLength: 1,
+    maxLength: 255,
+    meta: { description: 'EPR package name.' },
   }),
-  {
+  policyTemplates: schema.arrayOf(IacPolicyTemplateSelectionSchema, {
     minSize: 1,
-    // Each entry costs a registry fetch; known flows send a single
-    // integration, so this cap only exists to bound abuse.
-    maxSize: 10,
-    meta: { description: 'Integrations selected by the user.' },
-  }
-);
+    maxSize: 100,
+    meta: {
+      description: 'Policy templates whose enabled inputs to include.',
+    },
+  }),
+});
+
+const IacIntegrationsSchema = schema.arrayOf(RenderIacTemplateIntegrationSchema, {
+  minSize: 1,
+  maxSize: MAX_IAC_RENDER_INTEGRATIONS,
+  meta: { description: 'Integrations selected by the user.' },
+});
 
 export const RenderIacTemplateRequestSchema = {
   body: schema.object({
