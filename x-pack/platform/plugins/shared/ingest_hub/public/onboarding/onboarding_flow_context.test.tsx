@@ -317,6 +317,36 @@ describe('OnboardingFlowProvider', () => {
         inst_a: 'policy-A',
       });
     });
+
+    it('removeDeployInstances + updateDetectAndReviewStep in the same tick: removal is not overwritten', () => {
+      // Production sequence from use_deploy / use_agent_based_deploy cleanup path:
+      //   removeDeployInstances(stalIds)          ← advances ref eagerly
+      //   updateDetectAndReviewStep({ pendingCleanupPolicyIds: {} })  ← reads ref; must see post-removal state
+      //
+      // Without the ref-advance fix, updateDetectAndReviewStep would read the stale snapshot
+      // (still containing 'old-svc') and its setState call (which React applies last) would
+      // reintroduce the removed instance.
+      const { result, rerender } = renderHook(() => useOnboardingFlow(), { wrapper });
+
+      act(() => {
+        result.current.updateDetectAndReviewStep({
+          policyIdsByInstance: { elb: 'policy-ELB', 'old-svc': 'policy-OLD' },
+        });
+      });
+      rerender();
+
+      act(() => {
+        // Same tick: exactly the sequence used by deploy hooks after cleanup.
+        result.current.removeDeployInstances(['old-svc']);
+        result.current.updateDetectAndReviewStep({ pendingCleanupPolicyIds: {} });
+      });
+      rerender();
+
+      // old-svc must be gone despite the follow-up state write.
+      expect(result.current.detectAndReviewStep.policyIdsByInstance).toEqual({ elb: 'policy-ELB' });
+      // pendingCleanupPolicyIds must be cleared (the updateDetectAndReviewStep took effect).
+      expect(result.current.detectAndReviewStep.pendingCleanupPolicyIds).toEqual({});
+    });
   });
 
   describe('updateDetectAndReviewStep — pendingCleanupPolicyIds merge semantics', () => {

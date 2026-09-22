@@ -270,6 +270,17 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
   const persistedDetectAndReviewStepRef = useRef(persistedDetectAndReviewStep);
   persistedDetectAndReviewStepRef.current = persistedDetectAndReviewStep;
 
+  // Wrapper that advances the ref eagerly so that any same-tick reader of the ref
+  // (e.g. a second updateDetectAndReviewStep call after removeDeployInstances) sees
+  // the post-write snapshot rather than the pre-render stale value.
+  const setDetectAndReviewStep = useCallback(
+    (next: PersistedDetectAndReviewStep) => {
+      persistedDetectAndReviewStepRef.current = next;
+      setPersistedDetectAndReviewStep(next);
+    },
+    [setPersistedDetectAndReviewStep]
+  );
+
   const updateDetectAndReviewStep = useCallback(
     (update: Partial<DetectAndReviewStepState>) => {
       if (update.isDeploying !== undefined) {
@@ -278,7 +289,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
       const { isDeploying: _, ...rest } = update;
       if (Object.keys(rest).length > 0) {
         const prev = persistedDetectAndReviewStepRef.current;
-        setPersistedDetectAndReviewStep({
+        setDetectAndReviewStep({
           serviceStatuses: { ...(prev?.serviceStatuses ?? {}), ...(rest.serviceStatuses ?? {}) },
           policyIdsByInstance: {
             ...(prev?.policyIdsByInstance ?? {}),
@@ -297,7 +308,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         });
       }
     },
-    [setPersistedDetectAndReviewStep]
+    [setDetectAndReviewStep]
   );
 
   const removeDeployInstance = useCallback(
@@ -312,7 +323,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
       // Kept separate from policyIdsByInstance so the cleanup diff survives the deletion here.
       const nextPendingCleanup = { ...(prev?.pendingCleanupPolicyIds ?? {}) };
       if (removedPolicyId) nextPendingCleanup[instanceId] = removedPolicyId;
-      setPersistedDetectAndReviewStep({
+      setDetectAndReviewStep({
         serviceStatuses: nextStatuses,
         policyIdsByInstance: nextPolicyIds,
         failedInstances: (prev?.failedInstances ?? []).filter((id) => id !== instanceId),
@@ -324,7 +335,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         pendingCleanupPolicyIds: nextPendingCleanup,
       });
     },
-    [setPersistedDetectAndReviewStep]
+    [setDetectAndReviewStep]
   );
 
   // Batch variant of removeDeployInstance — applies all removals in one state write so
@@ -350,7 +361,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         nextFailedInstances = nextFailedInstances.filter((id) => id !== instanceId);
         delete nextDeployErrors[instanceId];
       }
-      setPersistedDetectAndReviewStep({
+      setDetectAndReviewStep({
         serviceStatuses: nextStatuses,
         policyIdsByInstance: nextPolicyIds,
         failedInstances: nextFailedInstances,
@@ -360,7 +371,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         pendingCleanupPolicyIds: nextPendingCleanup,
       });
     },
-    [removeDeployInstance, setPersistedDetectAndReviewStep]
+    [removeDeployInstance, setDetectAndReviewStep]
   );
 
   const getLatestFailedInstances = useCallback(
@@ -425,14 +436,14 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
       };
       persistedAuthStepRef.current = next;
       setPersistedAuthenticateAndDeployStep(next);
-      setPersistedDetectAndReviewStep({
+      setDetectAndReviewStep({
         serviceStatuses: {},
         policyIdsByInstance: {},
         failedInstances: [],
         deployErrors: {},
       });
     },
-    [setPersistedAuthenticateAndDeployStep, setPersistedDetectAndReviewStep]
+    [setPersistedAuthenticateAndDeployStep, setDetectAndReviewStep]
   );
 
   const authenticateAndDeployStep: AuthenticateAndDeployStepState = {
