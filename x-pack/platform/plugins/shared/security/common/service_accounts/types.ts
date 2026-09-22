@@ -41,16 +41,21 @@ export interface ServiceAccountDirectoryEntry {
    * deployment, and the Elasticsearch backend refuses every bind until the token exchange lands
    * (https://github.com/elastic/kibana/issues/284466). On Elasticsearch it can also go stale for
    * a listed account, because Kibana's record outlives an account deleted and recreated outside
-   * Kibana; reading one account confirms the record, listing them does not.
+   * Kibana. Reading one account confirms the record, listing them does not.
    */
   hasCredential: boolean;
   /**
-   * The principal that created the account, when the backend records one. Carries the same
-   * staleness caveat as {@link ServiceAccountDirectoryEntry.hasCredential}: on Elasticsearch it
-   * describes whoever created the credential Kibana stored, which a recreated account outdates.
+   * The principal that created the account. Reported on UIAM, which records a creator of its
+   * own, and absent on Elasticsearch until Elasticsearch stores one too.
+   *
+   * Kibana will not stand in for it in the meantime. The only creator it could name on
+   * Elasticsearch is the one on the credential it stored, which says who asked Kibana to create
+   * the account rather than who owns it now, and goes stale the moment someone recreates the
+   * account out of band. Reporting it would have the UI show an attribution it then has to
+   * unlearn, so both fields wait for Elasticsearch in a followup.
    */
   createdBy?: ServiceAccountDirectoryCreator;
-  /** ISO-8601 creation time, when the backend records one. */
+  /** ISO-8601 creation time. Reported on the same terms as {@link createdBy}. */
   createdAt?: string;
 }
 

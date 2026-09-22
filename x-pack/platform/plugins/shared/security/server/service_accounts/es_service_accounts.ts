@@ -14,29 +14,20 @@ import type {
   KibanaRequest,
   Logger,
 } from '@kbn/core/server';
-import type {
-  CreateServiceAccountParams,
-  ServiceAccount,
-  ServiceAccountWorkloadBinder,
-} from '@kbn/core-security-server';
+import type { CreateServiceAccountParams, ServiceAccount } from '@kbn/core-security-server';
 import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
 import { z } from '@kbn/zod';
 
 import { bestEffortUserProfileIdResolver, resolveWorkloadBinder } from './bindings';
 import { ensureClusterPrivilege } from './cluster_privilege';
 import { parseCreateServiceAccountParams } from './create_params';
-import type {
-  ServiceAccountCredentialMetadata,
-  ServiceAccountCredentialStore,
-} from './credentials';
+import type { ServiceAccountCredentialStore } from './credentials';
 import type { EsServiceAccountPrincipal } from './es_service_account_id';
 import { parseEsServiceAccountId } from './es_service_account_id';
 import type { ListServiceAccountsParams, ServiceAccountsBackend } from './types';
 import type { SecurityLicense } from '../../common';
-import { getUserDisplayName } from '../../common';
 import type {
   ListServiceAccountsResponse,
-  ServiceAccountDirectoryCreator,
   ServiceAccountDirectoryEntry,
 } from '../../common/service_accounts';
 import {
@@ -52,7 +43,6 @@ import {
 } from '../../common/service_accounts';
 import { getDetailedErrorMessage } from '../errors';
 import { securityTelemetry } from '../otel/instrumentation';
-import type { UserProfileServiceStartInternal } from '../user_profile';
 
 /**
  * The discriminator on an account Elasticsearch reports, which decides whether the account is one
@@ -113,52 +103,26 @@ interface ElasticsearchServiceAccount {
 }
 
 /**
- * Projects the stored binder onto the creator the directory reports, field by field rather than
- * by spreading it: the binder comes off a saved object, and only the fields named here belong in
- * an API response.
- */
-const toDirectoryCreator = (
-  binder: ServiceAccountWorkloadBinder,
-  displayNames: Map<string, string>
-): ServiceAccountDirectoryCreator => {
-  if (binder.type === 'service_account') {
-    return { type: 'service_account', serviceAccountId: binder.serviceAccountId };
-  }
-
-  const { userProfileId } = binder;
-  const displayName = userProfileId === undefined ? undefined : displayNames.get(userProfileId);
-  const resolved = {
-    ...(userProfileId !== undefined ? { userProfileId } : {}),
-    ...(displayName !== undefined ? { displayName } : {}),
-  };
-
-  return binder.type === 'user'
-    ? { type: 'user', username: binder.username, ...resolved }
-    : { type: 'api_key', apiKeyId: binder.apiKeyId, variant: binder.variant, ...resolved };
-};
-
-/**
- * Joins an account with the credential Kibana holds for it, if any. An account created straight
- * through the Elasticsearch API has no credential here, which is what `hasCredential` reports:
- * whether this account is one Kibana created and still holds a token for, not whether anything
- * can be bound to it today. See the field's own documentation for that distinction.
+ * Narrows an account to the directory entry.
+ *
+ * No `createdBy` or `createdAt`: the only creator Kibana could name here is the one recorded on
+ * the credential it stored, and that answers who asked Kibana to create the account rather than
+ * who owns the account now. Elasticsearch is growing a creator of its own, so the field waits for
+ * it in a followup instead of shipping a stand-in the UI would have to unlearn.
+ *
+ * `hasCredential` is a different question and stays: whether this account is one Kibana created
+ * and still holds a token for, not whether anything can be bound to it today. See the field's own
+ * documentation for that distinction.
  */
 const toDirectoryEntry = (
   { id, name, roles, enabled }: ElasticsearchServiceAccount,
-  credential: ServiceAccountCredentialMetadata | undefined,
-  displayNames: Map<string, string>
+  hasCredential: boolean
 ): ServiceAccountDirectoryEntry => ({
   id,
   name,
   roles,
   enabled,
-  hasCredential: credential !== undefined,
-  ...(credential
-    ? {
-        createdBy: toDirectoryCreator(credential.createdBy, displayNames),
-        createdAt: credential.createdAt,
-      }
-    : {}),
+  hasCredential,
 });
 
 export interface EsServiceAccountsOptions {
@@ -171,8 +135,6 @@ export interface EsServiceAccountsOptions {
   canEncrypt: boolean;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
   getCurrentUserProfileId: (request: KibanaRequest) => Promise<string | null>;
-  /** Resolves the creators the directory reports names for. Only ever read from, never written. */
-  userProfiles: Pick<UserProfileServiceStartInternal, 'bulkGet'>;
 }
 
 /**
@@ -191,7 +153,6 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
   private readonly canEncrypt: boolean;
   private readonly getCurrentUser: EsServiceAccountsOptions['getCurrentUser'];
   private readonly getCurrentUserProfileId: EsServiceAccountsOptions['getCurrentUserProfileId'];
-  private readonly userProfiles: EsServiceAccountsOptions['userProfiles'];
 
   constructor({
     logger,
@@ -202,7 +163,6 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     canEncrypt,
     getCurrentUser,
     getCurrentUserProfileId,
-    userProfiles,
   }: EsServiceAccountsOptions) {
     this.logger = logger;
     this.license = license;
@@ -212,7 +172,6 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     this.canEncrypt = canEncrypt;
     this.getCurrentUser = getCurrentUser;
     this.getCurrentUserProfileId = getCurrentUserProfileId;
-    this.userProfiles = userProfiles;
   }
 
   async create(
@@ -364,9 +323,9 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
    * so that an account this page skipped is stepped over rather than served again.
    *
    * Unlike {@link get}, the credentials joined here are taken at face value. Confirming each one
-   * the way `confirmCredential` does would cost an Elasticsearch round trip per account, up to a
+   * the way `hasLiveCredential` does would cost an Elasticsearch round trip per account, up to a
    * hundred of them on one page, so a listed account that was deleted and recreated outside
-   * Kibana keeps its stale `hasCredential` and attribution until it is opened.
+   * Kibana keeps its stale `hasCredential` until it is opened.
    */
   async list(
     request: KibanaRequest,
@@ -447,10 +406,9 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     });
 
     const credentials = await this.credentialStore.getMetadata(accounts.map(({ id }) => id));
-    const displayNames = await this.resolveCreatorNames(credentials.values());
 
     const serviceAccounts = accounts.map((account) =>
-      toDirectoryEntry(account, credentials.get(account.id), displayNames)
+      toDirectoryEntry(account, credentials.has(account.id))
     );
 
     if (rawAccounts.length <= limit) {
@@ -473,43 +431,6 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     }
 
     return { serviceAccounts, nextPage: cursor.data.username };
-  }
-
-  /**
-   * Resolves the display names of the profiles behind a page of credentials, keyed by profile id.
-   *
-   * Best effort: a directory read must not fail because the profile index is unavailable, so a
-   * lookup that throws is logged and the page goes out with the ids alone. Profiles that do not
-   * come back are simply absent from the map.
-   */
-  private async resolveCreatorNames(
-    credentials: Iterable<ServiceAccountCredentialMetadata>
-  ): Promise<Map<string, string>> {
-    const uids = new Set<string>();
-    for (const { createdBy } of credentials) {
-      if (createdBy.type !== 'service_account' && createdBy.userProfileId !== undefined) {
-        uids.add(createdBy.userProfileId);
-      }
-    }
-
-    const displayNames = new Map<string, string>();
-    if (uids.size === 0) {
-      return displayNames;
-    }
-
-    try {
-      for (const { uid, user } of await this.userProfiles.bulkGet({ uids })) {
-        displayNames.set(uid, getUserDisplayName(user));
-      }
-    } catch (e) {
-      this.logger.warn(
-        `Could not resolve the creators of the listed service accounts: ${getDetailedErrorMessage(
-          e
-        )}`
-      );
-    }
-
-    return displayNames;
   }
 
   async get(request: KibanaRequest, id: string): Promise<ServiceAccountDirectoryEntry> {
@@ -545,24 +466,18 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       throw Boom.notFound(`Service account [${id}] was not found`);
     }
 
-    const credential = await this.confirmCredential(
-      esClient,
-      principal,
-      (await this.credentialStore.getMetadata([id])).get(id)
-    );
-    const displayNames = await this.resolveCreatorNames(credential ? [credential] : []);
-    return toDirectoryEntry(account, credential, displayNames);
+    const stored = (await this.credentialStore.getMetadata([id])).has(id);
+    return toDirectoryEntry(account, await this.hasLiveCredential(esClient, principal, stored));
   }
 
   /**
-   * Confirms that a stored credential still describes the account in front of us, resolving
-   * `undefined` when it does not.
+   * Whether Kibana's stored credential still describes the account in front of us.
    *
    * A credential document is keyed by principal alone, so it outlives the account it was written
    * for: delete `namespace/name` through Elasticsearch and recreate it, and Kibana's document is
-   * still there, holding a token that cannot authenticate the new account and naming whoever
-   * created the old one. Reporting it would claim both a credential and an attribution that are
-   * no longer true, so the account is asked whether it still holds the token Kibana mints.
+   * still there, holding a token that cannot authenticate the new account. Answering `true` off
+   * the document alone would claim a credential that no longer works, so the account is asked
+   * whether it still holds the token Kibana mints.
    *
    * Two limits worth knowing. An operator who recreates the account and then mints their own
    * token under Kibana's reserved name passes this check, because the name is all Elasticsearch
@@ -571,33 +486,33 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
    * account's tokens, so this is a transient failure rather than an authorization one, and a
    * reader should not be told an account is unmanaged because one call did not land.
    */
-  private async confirmCredential(
+  private async hasLiveCredential(
     esClient: ElasticsearchClient,
     { namespace, name }: EsServiceAccountPrincipal,
-    credential: ServiceAccountCredentialMetadata | undefined
-  ): Promise<ServiceAccountCredentialMetadata | undefined> {
+    stored: boolean
+  ): Promise<boolean> {
     // Ordered so that an account Kibana never created costs no extra round trip.
-    if (!credential) {
-      return undefined;
+    if (!stored) {
+      return false;
     }
 
     try {
       if (await this.hasManagedToken(esClient, namespace, name)) {
-        return credential;
+        return true;
       }
     } catch (e) {
       this.logger.debug(
         `Could not confirm the credential of service account [${namespace}/${name}], so the ` +
           `stored one was reported as it is: ${getDetailedErrorMessage(e)}`
       );
-      return credential;
+      return true;
     }
 
     this.logger.debug(
       `Service account [${namespace}/${name}] no longer holds a [${ES_SERVICE_ACCOUNT_TOKEN_NAME}] ` +
         `token, so the credential Kibana stored for it was not reported.`
     );
-    return undefined;
+    return false;
   }
 
   // See https://github.com/elastic/kibana/issues/284466.

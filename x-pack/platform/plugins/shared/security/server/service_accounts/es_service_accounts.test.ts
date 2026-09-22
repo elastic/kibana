@@ -81,7 +81,6 @@ describe('EsServiceAccounts', () => {
   let request: KibanaRequest;
   let getCurrentUser: jest.Mock;
   let getCurrentUserProfileId: jest.Mock;
-  let userProfiles: { bulkGet: jest.Mock };
   let mockCheckPrivileges: jest.Mocked<CheckPrivileges>;
 
   /** Queues the transport responses for the happy path: pre-flight miss, PUT, token. */
@@ -115,7 +114,6 @@ describe('EsServiceAccounts', () => {
     request = httpServerMock.createKibanaRequest();
     getCurrentUser = jest.fn().mockReturnValue(mockAuthenticatedUser({ roles: ['superuser'] }));
     getCurrentUserProfileId = jest.fn().mockResolvedValue(null);
-    userProfiles = { bulkGet: jest.fn().mockResolvedValue([]) };
 
     serviceAccounts = new EsServiceAccounts({
       logger,
@@ -126,7 +124,6 @@ describe('EsServiceAccounts', () => {
       canEncrypt: true,
       getCurrentUser,
       getCurrentUserProfileId,
-      userProfiles,
     });
   });
 
@@ -320,7 +317,6 @@ describe('EsServiceAccounts', () => {
         canEncrypt: false,
         getCurrentUser,
         getCurrentUserProfileId: jest.fn().mockResolvedValue(null),
-        userProfiles,
       });
 
       await expect(serviceAccounts.create(request, createParams)).rejects.toMatchObject({
@@ -717,87 +713,27 @@ describe('EsServiceAccounts', () => {
             roles: ['viewer'],
             enabled: true,
             hasCredential: true,
-            createdAt: '2026-09-21T00:00:00.000Z',
-            createdBy: { type: 'user', username: 'elastic' },
           },
         ],
       });
       expect(result).not.toHaveProperty('nextPage');
-      // No creator carries a profile id, so the profile index is never consulted.
-      expect(userProfiles.bulkGet).not.toHaveBeenCalled();
     });
 
-    it('resolves the creator display name from the user profile', async () => {
+    it('reports no creator, which Elasticsearch does not record yet', async () => {
       esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
         service_accounts: [queried('kibana/nightshift-relay')],
       });
+      // The credential names whoever asked Kibana to create the account. That is not the
+      // account's creator, so it stays out of the entry until Elasticsearch reports one.
       credentialStore.getMetadata.mockResolvedValue(
-        new Map([
-          ['kibana/nightshift-relay', credential('2026-09-21T00:00:00.000Z', 'profile-uid')],
-        ])
-      );
-      userProfiles.bulkGet.mockResolvedValue([
-        { uid: 'profile-uid', user: { username: 'elastic', full_name: 'Ada Lovelace' } },
-      ]);
-
-      const result = await serviceAccounts.list(request);
-
-      expect(userProfiles.bulkGet).toHaveBeenCalledWith({ uids: new Set(['profile-uid']) });
-      expect(result.serviceAccounts[0].createdBy).toEqual({
-        type: 'user',
-        username: 'elastic',
-        userProfileId: 'profile-uid',
-        displayName: 'Ada Lovelace',
-      });
-    });
-
-    it('reports the page without names when the profile lookup fails', async () => {
-      esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
-        service_accounts: [queried('kibana/nightshift-relay')],
-      });
-      credentialStore.getMetadata.mockResolvedValue(
-        new Map([
-          ['kibana/nightshift-relay', credential('2026-09-21T00:00:00.000Z', 'profile-uid')],
-        ])
-      );
-      userProfiles.bulkGet.mockRejectedValue(new Error('profile index unavailable'));
-
-      const result = await serviceAccounts.list(request);
-
-      // A directory read must not fail because the profile index is down.
-      expect(result.serviceAccounts[0].createdBy).toEqual({
-        type: 'user',
-        username: 'elastic',
-        userProfileId: 'profile-uid',
-      });
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Could not resolve the creators of the listed service accounts')
-      );
-    });
-
-    it('reports only the binder fields, dropping anything else the credential carries', async () => {
-      esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
-        service_accounts: [queried('kibana/nightshift-relay')],
-      });
-      credentialStore.getMetadata.mockResolvedValue(
-        new Map([
-          [
-            'kibana/nightshift-relay',
-            {
-              createdAt: '2026-09-21T00:00:00.000Z',
-              createdBy: {
-                type: 'user' as const,
-                username: 'elastic',
-                token: 'AAEAAWtpYmFuYS9...',
-              },
-            },
-          ],
-        ])
+        new Map([['kibana/nightshift-relay', credential('2026-09-21T00:00:00.000Z')]])
       );
 
-      const result = await serviceAccounts.list(request);
+      const [entry] = (await serviceAccounts.list(request)).serviceAccounts;
 
-      expect(result.serviceAccounts[0].createdBy).toEqual({ type: 'user', username: 'elastic' });
+      expect(entry).not.toHaveProperty('createdBy');
+      expect(entry).not.toHaveProperty('createdAt');
+      expect(entry.hasCredential).toBe(true);
     });
 
     it('asks for one more than the page and reports the last principal as the cursor when it arrives', async () => {
@@ -973,43 +909,21 @@ describe('EsServiceAccounts', () => {
       },
     });
 
-    it('reads the user-managed account and joins its credential', async () => {
+    it('reads the user-managed account and confirms its credential', async () => {
       esClient.asCurrentUser.transport.request
         .mockResolvedValueOnce(accountEntry({ roles: ['viewer'] }))
         // The account still holds Kibana's token, so the stored credential describes it.
         .mockResolvedValueOnce(accountCredentials(['kibana-managed']));
-      credentialStore.getMetadata.mockResolvedValue(
-        new Map([
-          [
-            ACCOUNT_ID,
-            {
-              createdAt: '2026-09-21T00:00:00.000Z',
-              createdBy: {
-                type: 'user' as const,
-                username: 'elastic',
-                userProfileId: 'profile-uid',
-              },
-            },
-          ],
-        ])
-      );
-      userProfiles.bulkGet.mockResolvedValue([
-        { uid: 'profile-uid', user: { username: 'elastic', full_name: 'Ada Lovelace' } },
-      ]);
+      credentialStore.getMetadata.mockResolvedValue(new Map([[ACCOUNT_ID, storedCredential()]]));
 
+      // The credential records who asked Kibana to create the account, and none of it is
+      // reported: Elasticsearch does not store a creator yet, and Kibana will not invent one.
       await expect(serviceAccounts.get(request, ACCOUNT_ID)).resolves.toEqual({
         id: ACCOUNT_ID,
         name: 'nightshift-relay',
         roles: ['viewer'],
         enabled: true,
         hasCredential: true,
-        createdAt: '2026-09-21T00:00:00.000Z',
-        createdBy: {
-          type: 'user',
-          username: 'elastic',
-          userProfileId: 'profile-uid',
-          displayName: 'Ada Lovelace',
-        },
       });
 
       expect(mockCheckPrivileges.globally).toHaveBeenCalledWith({
@@ -1036,7 +950,7 @@ describe('EsServiceAccounts', () => {
       expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledTimes(1);
     });
 
-    it('drops a credential the account no longer holds, and the attribution with it', async () => {
+    it('drops a credential the account no longer holds', async () => {
       esClient.asCurrentUser.transport.request
         .mockResolvedValueOnce(accountEntry({ roles: ['viewer'] }))
         // Deleted and recreated through Elasticsearch: the account is back, Kibana's token is
@@ -1051,9 +965,6 @@ describe('EsServiceAccounts', () => {
         enabled: true,
         hasCredential: false,
       });
-
-      // Naming whoever created the account this one replaced would be worse than saying nothing.
-      expect(userProfiles.bulkGet).not.toHaveBeenCalled();
     });
 
     it('ignores tokens an operator deployed under another name', async () => {
@@ -1070,18 +981,12 @@ describe('EsServiceAccounts', () => {
     it('reports the stored credential when the token check cannot be completed', async () => {
       esClient.asCurrentUser.transport.request
         .mockResolvedValueOnce(accountEntry({ roles: ['viewer'] }))
-        // Reading credentials can need a privilege beyond the `read_security` this route asks
-        // for, and a reader must not be told an account is unmanaged just because they cannot
-        // see its tokens.
+        // A reader must not be told an account is unmanaged because one call did not land.
         .mockRejectedValueOnce(Boom.forbidden('insufficient privileges'));
       credentialStore.getMetadata.mockResolvedValue(new Map([[ACCOUNT_ID, storedCredential()]]));
-      userProfiles.bulkGet.mockResolvedValue([
-        { uid: 'profile-uid', user: { username: 'elastic', full_name: 'Ada Lovelace' } },
-      ]);
 
       await expect(serviceAccounts.get(request, ACCOUNT_ID)).resolves.toMatchObject({
         hasCredential: true,
-        createdAt: '2026-09-21T00:00:00.000Z',
       });
     });
 

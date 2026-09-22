@@ -561,7 +561,6 @@ export class SecurityPlugin
       getCurrentUser: this.authenticationStart.getCurrentUser,
       getCurrentUserProfileId: (request) =>
         this.getUserProfileService().getCurrentProfileId({ request }),
-      userProfiles: this.getUserProfileService(),
       getSpaceId: (request) => spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
     });
 

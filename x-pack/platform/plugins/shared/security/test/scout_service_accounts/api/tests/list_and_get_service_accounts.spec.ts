@@ -45,20 +45,16 @@ const uniqueName = (prefix: string) => `${prefix}-${Date.now()}-${Math.floor(Mat
 
 const getPath = (id: string) => `${SERVICE_ACCOUNT_ENDPOINT}/${encodeURIComponent(id)}`;
 
-interface DirectoryCreator {
-  type: string;
-  username?: string;
-  displayName?: string;
-}
-
+/**
+ * What this suite expects back. No `createdBy` or `createdAt`: those are UIAM-only for now, and
+ * this suite exercises the Elasticsearch backend.
+ */
 interface DirectoryEntry {
   id: string;
   name: string;
   roles: string[];
   enabled: boolean;
   hasCredential: boolean;
-  createdBy?: DirectoryCreator;
-  createdAt?: string;
 }
 
 interface ListResponse {
@@ -78,29 +74,21 @@ apiTest.describe('List and get Elasticsearch service accounts', { tag: LOCAL_ONL
   const idOf = ({ namespace, name }: ServiceAccountPrincipal) => `${namespace}/${name}`;
 
   /**
-   * The account created through Kibana in `beforeAll`, as the directory reports it. The creator
-   * and the timestamp are checked by shape only: the SAML admin's username and the clock are the
-   * test environment's, not this suite's.
+   * The account created through Kibana in `beforeAll`, as the directory reports it.
+   *
+   * Asserted whole, which pins the absence of a creator as much as the rest: Elasticsearch does
+   * not record who created an account yet, and Kibana deliberately does not answer with the
+   * creator of the credential it stored instead. A followup reports both fields once
+   * Elasticsearch has them, and this assertion is what will catch that change.
    */
   const expectKibanaManagedEntry = (entry: DirectoryEntry | undefined) => {
-    expect(entry).toBeDefined();
-    const { createdBy, createdAt, ...rest } = entry as DirectoryEntry;
-    expect(rest).toStrictEqual({
+    expect(entry).toStrictEqual({
       id: idOf(kibanaManaged),
       name: kibanaManaged.name,
       roles: ['viewer'],
       enabled: true,
       hasCredential: true,
     });
-    expect(createdBy).toMatchObject({ type: 'user' });
-    // The username identifies the creator durably; the display name is what to show. Both are
-    // asserted, so dropping either one fails here.
-    expect(typeof createdBy?.username).toBe('string');
-    expect(createdBy?.username).not.toBe('');
-    // The SAML admin has a user profile, so Kibana resolves the creator's name server-side
-    // rather than handing the UI an id to look up.
-    expect(typeof createdBy?.displayName).toBe('string');
-    expect(typeof createdAt).toBe('string');
   };
 
   apiTest.beforeAll(async ({ apiClient, esClient, samlAuth }) => {
