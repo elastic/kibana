@@ -6,13 +6,13 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { HuntTechnology, IndexScopeWindow, ResolvedIndexScope } from '@kbn/alertzero-common';
 import { HUNT_ALERTS_INDEX_PATTERN_PREFIX } from '../../../../../common/constants';
-import type { HuntTechnology, IndexScopeWindow, ResolvedIndexScope } from './types';
 
-/** Default lookback window: 30 days, matching mustard's `DEFAULT_LOOKBACK_DAYS` (hunt_for_threat.ts:102). */
+/** Default lookback window: 30 days. */
 const DEFAULT_WINDOW_DAYS = 30;
 
-/** Default row limit per search, matching mustard's `size = 25` default (hunt_for_threat.ts:193). */
+/** Default row limit per search. */
 const DEFAULT_ROW_LIMIT = 25;
 
 /**
@@ -21,16 +21,11 @@ const DEFAULT_ROW_LIMIT = 25;
  * `required`: patterns the hunt cannot run without — zero resolved required
  * patterns means `blocked`.
  * `optional`: extension patterns whose absence only degrades coverage.
- * `.alerts-security.alerts-{spaceId}` is not listed here per technology; it's
- * appended for every technology by `resolveIndexScope` since it's
- * space-derived, not technology-derived (buildout.md:175).
+ * `.alerts-security.alerts-{spaceId}` is appended by `resolveIndexScope`
+ * for every technology since it is space-derived, not technology-derived.
  *
- * MVP scope is AWS IAM and FortiGate only (buildout.md:175, research.md:25,
- * research.md:194). Other technologies mustard's flat allow-list touched
- * (Endpoint, Vulnerability, Okta, Kubernetes, GitHub, Network Traffic) are
- * deliberately not mapped here yet — see open-questions.md #4. Adding a
- * technology means adding both a `HuntTechnology` union member and an entry
- * here; the type system will not do it for you.
+ * Adding a technology means adding both a `HuntTechnology` union member and
+ * an entry here; the type system will not do it for you.
  */
 const TECHNOLOGY_INDEX_MAP: Record<HuntTechnology, { required: string[]; optional: string[] }> = {
   aws_iam: {
@@ -53,17 +48,9 @@ const defaultWindow = (): IndexScopeWindow => ({
 
 /**
  * Resolves whether a technology's target indices actually exist in the given
- * space, rather than assuming a fixed allow-list is present (mustard's
- * `constants.ts:689-698` is the negative example this replaces — a missing
- * index there reads as a clean zero-hit search, not as `blocked`).
- *
- * Every pattern — required, optional, and the space-derived alerts pattern —
- * is checked with `resolveIndex` so a missing integration reads as `blocked`
- * or `degraded` instead of a hunt silently querying nothing. `window` and
- * `rowLimit` are caller-suppliable and default in this module when omitted
- * (buildout.md:175); the search itself keeps `ignore_unavailable: true`
- * (hunt_for_threat.ts:283-285) but this projection carries the truth about
- * what was missing.
+ * space. Every pattern — required, optional, and the space-derived alerts
+ * pattern — is checked with `resolveIndex` so a missing integration reads as
+ * `blocked` or `degraded` instead of a hunt silently querying nothing.
  */
 export const resolveIndexScope = async ({
   esClient,

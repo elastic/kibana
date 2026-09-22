@@ -2,7 +2,7 @@
   "_meta": {
     "generated_from": "MITRE STIX bundle (see MITRE_CONTENT_URL)",
     "generator": "x-pack/solutions/security/plugins/security_solution/scripts/extract_tactics_techniques_mitre.js",
-    "regenerate_with": "yarn extract-mitre-attacks"
+    "regenerate_with": "Run 'yarn extract-mitre-attacks' in security_solution, then port the updated mitre_tactics_techniques.ts into this file by hand (see README.md)"
   },
   "tactics": [
     {

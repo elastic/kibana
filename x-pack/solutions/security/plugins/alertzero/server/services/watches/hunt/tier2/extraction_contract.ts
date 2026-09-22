@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-/**
- * This extraction schema and prompts are an intentional duplicate of the E3 counterpart
- * at `security_solution/server/threat_intel/`. No cross-plugin import is allowed
- * (buildout.md:31). Unification into a shared package is a post-demo follow-up.
- */
-
 import { z } from '@kbn/zod/v4';
 
 const candidateBehaviorSchema = z.object({

@@ -12,13 +12,16 @@ import { alertZeroAttachmentDataSchema } from './attachment_data_schema';
 /**
  * Significant Security Event (SSE) attachment schema.
  *
- * Lives in `alertzero/common/` (not `server/agent_builder/attachments/`) so
- * PR 3's `sse_mapper.ts` (in `alertzero/server/services/watches/hunt/common/`)
- * can import it directly across the plugin boundary, without an HTTP
- * round-trip. This is the schema lock for the SSE attachment contract:
- * `sse_mapper.test.ts` runs `buildSseData`'s output through this schema
- * directly, so a drift between the mapper and the schema fails a test
- * instead of surfacing at demo time.
+ * Lives in `alertzero/common/` so `sse_mapper.ts` can import it directly
+ * across the plugin boundary without an HTTP round-trip. This is the schema
+ * lock for the SSE attachment contract: `sse_mapper.test.ts` runs
+ * `buildSseData`'s output through this schema so drift between the mapper
+ * and the schema fails a test.
+ *
+ * Note (Section 6): this file carries a local copy of the schema that will
+ * also exist in the `hunt-watch-attachment-types` PR. The copy that lands
+ * second must reconcile differences (`.trim()`, `.datetime()` on timestamp).
+ * Decision: keep this copy as-is and merge at rebase time.
  *
  * ECS-first writer contract:
  * - `entities` are `{ field, value }` pairs using allowlisted ECS entity fields.
@@ -34,7 +37,7 @@ const entityRefSchema = z.object({
   value: z.string().min(1).max(2048),
 });
 
-export const huntIocSchema = z.object({
+const huntIocSchema = z.object({
   type: z.enum(['ip', 'email', 'domain', 'url', 'hash']),
   value: z.string().min(1).max(2048),
 });
@@ -120,7 +123,7 @@ const huntResultTier2Schema = z.object({
   behaviors: z.array(huntResultTier2BehaviorSchema).max(20),
 });
 
-export const huntResultSchema = z.object({
+const huntResultSchema = z.object({
   has_confirmed_hit: z.boolean(),
   time_range: z.object({
     from: z.string().datetime(),
@@ -166,10 +169,7 @@ const mapsToProposalSchema = z
   })
   .optional();
 
-/**
- * Hunt-owned Significant Security Event payload, per the D39 field table
- * (docs/working-groups/dark-watch/artifacts/mvp-slice.md:541-561).
- */
+/** Hunt-owned Significant Security Event payload. */
 export const significantSecurityEventAttachmentDataSchema = alertZeroAttachmentDataSchema.extend({
   title: z.string().min(1).max(512),
   severity: z.enum(['low', 'medium', 'high', 'critical']),

@@ -13,10 +13,7 @@ import { registerCandidatesRoute } from './candidates';
 import { registerHuntCoordinatorRoute } from './hunt_coordinator';
 import { registerCorrelateRoute } from './correlate';
 
-/**
- * Registers the hunt routes (readiness, Tier 1, Tier 2,
- * coordinator, candidates, correlate). Phases 5–7 added in hunt-watch-services-lift.
- */
+/** Registers the hunt routes (readiness, Tier 1, Tier 2, coordinator, candidates, correlate). */
 export const registerHuntRoutes = (deps: RouteDependencies): void => {
   registerHuntReadinessRoute(deps);
   registerHuntForThreatRoute(deps);
