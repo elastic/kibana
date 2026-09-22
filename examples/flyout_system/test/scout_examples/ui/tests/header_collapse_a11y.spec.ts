@@ -118,7 +118,9 @@ test.describe(
         }
       });
 
-      test(`the ${form} header does not strand focus when it collapses`, async ({ pageObjects }) => {
+      test(`the ${form} header does not strand focus when it collapses`, async ({
+        pageObjects,
+      }) => {
         const app = pageObjects.flyoutSystem;
         const session = app.session(form);
         const flyout = await app.openFlyout(form, session);
