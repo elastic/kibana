@@ -13,7 +13,7 @@ export type {
   MitreTechnique,
 } from './src/types';
 
-export { CATALOG_META, subtechniques, tactics, techniques } from './src/catalog';
+export { subtechniques, tactics, techniques } from './src/catalog';
 
 export { subtechniqueById } from './src/lookup/subtechnique_by_id';
 export { tacticsToIds } from './src/lookup/tactics_to_ids';

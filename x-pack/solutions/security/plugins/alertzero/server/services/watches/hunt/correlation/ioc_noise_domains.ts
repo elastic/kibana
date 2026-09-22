@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-/**
- * IOC denylist for correlation anchoring. Copied from mustard's
- * `services/data/ioc_noise_domains.ts` — full denylist in follow-up when
- * this moves to a shared package. No cross-plugin import allowed (buildout.md:31).
- */
+/** IOC denylist for correlation anchoring. Kept local; no cross-plugin import allowed. */
 
 interface NoiseDomainEntry {
   readonly domain: string;

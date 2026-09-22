@@ -5,14 +5,6 @@
  * 2.0.
  */
 
-/**
- * Canonical hunt-once candidate selection query. Called by the hunt child workflow and the
- * candidates route; PR 4's Worker YAML never carries a query copy. The fan-out shape is
- * parallel dynamic fan-out with concurrency.max: 10, not mustard's serial foreach. The
- * runbook's replay row states the named-report manual re-run, matching the manual bypass
- * decision.
- */
-
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { HUNT_REPORTS_INDEX } from '../../../../../common/constants';
@@ -136,7 +128,11 @@ export const buildCandidateQuery = async (
       query: { bool: { filter: filterClauses } },
     });
   } catch (err) {
-    logger.warn(`build_candidate_query: ES search failed, ${(err as Error).message}`);
+    logger.error(
+      `build_candidate_query: ES search failed, refusing to select candidates. ${
+        (err as Error).message
+      }`
+    );
     return { ids: [], skipped: [], total: 0, truncated: false };
   }
 
@@ -147,9 +143,8 @@ export const buildCandidateQuery = async (
       ? response.hits.total
       : response.hits.total?.value ?? matchedIds.length;
 
-  // A report whose Hunt Proposal is still awaiting a decision is out of the pool,
-  // scheduled and manual-named alike, so an unattended sweep cannot revisit reports
-  // while their approval gates are parked (amended 2026-09-18, PR 4 review finding 8).
+  // A report whose Hunt Proposal is still awaiting a decision is excluded from selection,
+  // so an unattended sweep cannot revisit reports while their approval gates are parked.
   const skipped: CandidateQueryResult['skipped'] = [];
   let openProposalConversationIds: Set<string> | undefined;
   if (readOpenProposalConversationIds) {
