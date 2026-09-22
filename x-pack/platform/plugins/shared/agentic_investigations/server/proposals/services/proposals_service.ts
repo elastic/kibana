@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { esql } from '@elastic/esql';
 import { isEqual } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { asyncMapWithLimit } from '@kbn/std';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
 import type { JSONSchema7 } from 'json-schema';
 import {
   ACTION_WORKFLOW_INPUT,
@@ -20,14 +20,17 @@ import {
 } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { ActionMetadata } from '@kbn/workflows';
+import { PROPOSALS_RESUME_CHANNEL } from '../../../common/proposals/constants';
+import type { ChartsWindow } from './esql';
 import {
-  PROPOSALS_RESUME_CHANNEL,
-  PROPOSAL_UNCATEGORIZED,
-} from '../../../common/proposals/constants';
+  anchorQuery,
+  bucketedEventQuery,
+  currentOpenQuery,
+  ESQL_RESULT_TRUNCATION_MAX_SIZE,
+} from './esql';
 import type {
   CreateProposalRequest,
   DismissReason,
-  ListByWindowQuery,
   ListProposalsQuery,
   ListProposalsResponse,
   Proposal,
@@ -36,12 +39,12 @@ import type {
   ProposalChartsSummaryResponse,
   ProposalDecision,
   ProposalFilters,
-  ProposalsListResponse,
   ProposalStatus,
   ProposalUser,
   ProposalWithMetadata,
 } from '../../../common/proposals/proposal';
-import { isExpired, MAX_PROPOSALS_SIZE } from '../../../common/proposals/proposal';
+import type { ReviseProposalRequest } from '../../../common/proposals/revision';
+import { isExpired } from '../../../common/proposals/proposal';
 import type { ProposalDocument, ProposalsStorageClient } from '../storage/proposals_storage';
 import { toSortRanks } from '../storage/sort_ranks';
 import {
@@ -52,16 +55,6 @@ import {
 } from './errors';
 
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
-
-/**
- * Elasticsearch's `esql.query.result_truncation_max_size` default. A LIMIT above
- * this is capped to it rather than honoured, so asking for more is not a way to
- * avoid truncation — bounding the row count is (see MAX_CHARTS_SUMMARY_BUCKETS).
- */
-const ESQL_RESULT_TRUNCATION_MAX_SIZE = 10000;
-
-/** One row per category; generous enough that truncation implies a bug. */
-const ESQL_CATEGORY_ROW_LIMIT = 1000;
 
 /** The parts of an action workflow definition this service reads. */
 interface ActionWorkflowDefinition {
@@ -167,6 +160,10 @@ export class ProposalsService {
       workflowExecutionId: blankToUndefined(params.workflowExecutionId),
       createdAt: new Date().toISOString(),
       createdBy: user,
+      // A fresh proposal is a single-member revision chain rooted at itself.
+      // `clone()` retries deliberately do not touch it: a retry is not a revision.
+      rootProposalId: id,
+      revision: 1,
     };
 
     await this.deps.storage.index({ id, document, op_type: 'create' });
@@ -186,14 +183,22 @@ export class ProposalsService {
    * alphabetically. Doing it here rather than in memory is what makes the list
    * pageable instead of capped at a single fetch. Category is not part of the
    * order: a UI groups by it and decides for itself which group leads.
+   *
+   * Action-metadata resolution is batched across the page, so a page of
+   * proposals sharing an action costs one `getWorkflow` rather than one each.
    */
-  async list(query: ListProposalsQuery, spaceId: string): Promise<ListProposalsResponse> {
+  async list(
+    query: ListProposalsQuery,
+    spaceId: string,
+    /** Replaces the default priority sort; the queues page by recency instead. */
+    sort?: SortCombinations[]
+  ): Promise<ListProposalsResponse> {
     const response = await this.deps.storage.search({
       track_total_hits: true,
       size: query.size,
       from: query.from,
       query: { bool: { filter: toFilterClauses(query, spaceId) } },
-      sort: [
+      sort: sort ?? [
         { impactRank: { order: 'asc' } },
         { confidenceRank: { order: 'asc' } },
         // Soonest deadline first; proposals without one come after those with.
@@ -203,12 +208,11 @@ export class ProposalsService {
       ],
     });
 
-    const proposals = await Promise.all(
+    const proposals = await this.withMetadataBatch(
       response.hits.hits
         .filter((hit): hit is typeof hit & { _id: string } => hit._id !== undefined)
-        .map((hit) =>
-          this.withMetadata(toProposal(hit._id, hit._source as ProposalDocument), spaceId)
-        )
+        .map((hit) => toProposal(hit._id, hit._source as ProposalDocument)),
+      spaceId
     );
 
     return {
@@ -221,73 +225,10 @@ export class ProposalsService {
   }
 
   /**
-   * An activity view: everything still awaiting a decision, at any age, plus
-   * everything decided within the last N hours. In creation order, capped
-   * rather than paged.
-   *
-   * It is a separate method because the two halves are a disjunction — "still
-   * awaiting" and "decided recently" are unrelated conditions, so neither can
-   * be expressed as one more filter on top of `list()`. The shared filters in
-   * `ProposalFilters` apply to both halves and mean exactly what they mean in
-   * `list()`; only the union and the paging differ.
-   *
-   * Expired proposals fall out of both halves on their own: the awaiting half
-   * matches on `status: 'pending'`, and the decided half needs a `decidedAt`
-   * that a proposal nobody answered never got.
-   *
-   * No HTTP route, because a capped read with no paging is not a contract worth
-   * exposing; in-process callers reach it through the start contract.
-   *
-   * Action-metadata resolution is memoised per `actionWorkflowId` across the
-   * entire result set to avoid a `getWorkflow` fetch per proposal.
-   */
-  async listByWindow(query: ListByWindowQuery, spaceId: string): Promise<ProposalsListResponse> {
-    const response = await this.deps.storage.search({
-      track_total_hits: true,
-      size: MAX_PROPOSALS_SIZE,
-      query: {
-        bool: {
-          filter: toFilterClauses(query, spaceId),
-          should: [
-            // `pending` is only ever valid while undecided, so the status is
-            // the whole condition.
-            { term: { status: 'pending' } },
-            { range: { decidedAt: { gte: `now-${query.decidedWithinHours}h` } } },
-          ],
-          minimum_should_match: 1,
-        },
-      },
-      sort: [{ createdAt: { order: 'asc' } }],
-    });
-
-    const hits = response.hits.hits.filter(
-      (hit): hit is typeof hit & { _id: string } => hit._id !== undefined
-    );
-    const rawProposals = hits.map((hit) => toProposal(hit._id, hit._source as ProposalDocument));
-
-    const proposals = await this.withMetadataBatch(rawProposals, spaceId);
-
-    const total =
-      typeof response.hits.total === 'number'
-        ? response.hits.total
-        : response.hits.total?.value ?? proposals.length;
-
-    return { proposals, total, truncated: total > proposals.length };
-  }
-
-  /**
-   * Open-proposal counts per bucket. A proposal counts as open at bucket T if it
-   * was created at or before the end of T and had neither been decided nor
-   * expired by the start of T+1.
-   *
-   * An anchor count seeds a running sum that opens, closes and expiries then
-   * move, which is what keeps this to four queries instead of one per bucket.
-   *
-   * Expiry is treated as a fourth event stream rather than as a `WHERE` filter.
-   * Filtering on `expiresAt > NOW()` would evaluate a *request-time* predicate
-   * against every historical bucket, so a proposal that has since expired would
-   * be erased from its own past — the same past bucket would return a different
-   * value on each refetch.
+   * Per bucket, how many proposals were open at any point during it. Open means
+   * `status: 'pending'`, so an expiry closes a proposal the same way a decision
+   * does. An anchor count seeds a running sum that opens and closes then move,
+   * keeping this to four queries rather than one per bucket.
    */
   async chartsSummary(
     { windowHours, bucketMinutes }: ProposalChartsSummaryQuery,
@@ -305,84 +246,27 @@ export class ProposalsService {
         timestamp: windowStartMs + i * bucketMs,
         counts: {},
       })),
+      currentOpen: 0,
     });
+
+    const window: ChartsWindow = { spaceId, windowStartIso, bucketMinutes };
 
     let anchorResponse;
     let opensResponse;
     let closesResponse;
-    let expiriesResponse;
+    let currentOpenResponse;
     try {
-      [anchorResponse, opensResponse, closesResponse, expiriesResponse] = await Promise.all([
-        // TODO(#19258): once `supersededBy` exists, add `AND supersededBy IS NULL`
-        // to all four queries, so a superseded proposal is not counted alongside
-        // its replacement.
-        //
-        // `COALESCE(category, …)` in every query: a proposal with no action has no
-        // category, and a bare `BY category` would drop it from the aggregation —
-        // and, under `drop_null_columns`, drop the column outright when no row has
-        // one, zeroing the whole chart.
-        this.deps.storage.esql({
-          pipeline: esql`WHERE spaceId == ${{ spaceId }}
-          AND createdAt < TO_DATETIME(${{ wsAnchorCreated: windowStartIso }})
-          AND (decidedAt IS NULL OR decidedAt >= TO_DATETIME(${{
-            wsAnchorDecided: windowStartIso,
-          }}))
-          AND (expiresAt IS NULL OR expiresAt >= TO_DATETIME(${{
-            wsAnchorExpires: windowStartIso,
-          }}))
-        | EVAL category = COALESCE(category, ${{ anchorUncategorized: PROPOSAL_UNCATEGORIZED }})
-        | STATS anchor = COUNT(*) BY category
-        | LIMIT ${ESQL_CATEGORY_ROW_LIMIT}`,
-        }),
-
-        this.deps.storage.esql({
-          pipeline: esql`WHERE spaceId == ${{ spaceId }}
-          AND createdAt >= TO_DATETIME(${{ wsOpensFilter: windowStartIso }})
-        | EVAL idx = FLOOR(DATE_DIFF("minutes", TO_DATETIME(${{
-          wsOpensDiff: windowStartIso,
-        }}), createdAt) / ${{ bucketMinutes }})
-        | EVAL category = COALESCE(category, ${{ opensUncategorized: PROPOSAL_UNCATEGORIZED }})
-        | STATS opens = COUNT(*) BY idx, category
-        | SORT idx ASC
-        | LIMIT ${ESQL_RESULT_TRUNCATION_MAX_SIZE}`,
-        }),
-
-        this.deps.storage.esql({
-          pipeline: esql`WHERE spaceId == ${{ spaceId }}
-          AND decidedAt IS NOT NULL
-          AND decidedAt >= TO_DATETIME(${{ wsClosesFilter: windowStartIso }})
-        | EVAL idx = FLOOR(DATE_DIFF("minutes", TO_DATETIME(${{
-          wsClosesDiff: windowStartIso,
-        }}), decidedAt) / ${{ bucketMinutes }})
-        | EVAL category = COALESCE(category, ${{ closesUncategorized: PROPOSAL_UNCATEGORIZED }})
-        | STATS closes = COUNT(*) BY idx, category
-        | SORT idx ASC
-        | LIMIT ${ESQL_RESULT_TRUNCATION_MAX_SIZE}`,
-        }),
-
-        // `decidedAt IS NULL` so a proposal that expired and was later decided is
-        // decremented once, by the closes query, rather than by both.
-        this.deps.storage.esql({
-          pipeline: esql`WHERE spaceId == ${{ spaceId }}
-          AND decidedAt IS NULL
-          AND expiresAt IS NOT NULL
-          AND expiresAt >= TO_DATETIME(${{ wsExpiriesFilter: windowStartIso }})
-          AND expiresAt <= NOW()
-        | EVAL idx = FLOOR(DATE_DIFF("minutes", TO_DATETIME(${{
-          wsExpiriesDiff: windowStartIso,
-        }}), expiresAt) / ${{ bucketMinutes }})
-        | EVAL category = COALESCE(category, ${{ expiriesUncategorized: PROPOSAL_UNCATEGORIZED }})
-        | STATS expiries = COUNT(*) BY idx, category
-        | SORT idx ASC
-        | LIMIT ${ESQL_RESULT_TRUNCATION_MAX_SIZE}`,
-        }),
+      [anchorResponse, opensResponse, closesResponse, currentOpenResponse] = await Promise.all([
+        this.deps.storage.esql({ pipeline: anchorQuery(window) }),
+        this.deps.storage.esql({ pipeline: bucketedEventQuery('opens', window) }),
+        this.deps.storage.esql({ pipeline: bucketedEventQuery('closes', window) }),
+        this.deps.storage.esql({ pipeline: currentOpenQuery(window) }),
       ]);
     } catch (error) {
       // An index created outside the storage adapter can be missing a field this
       // queries, which ES|QL rejects rather than treating as null. Read *that*
-      // case as "no data" so the UI flatlines instead of 500ing. Every other
-      // verification failure is a genuine query defect and must propagate:
-      // swallowing it would render a healthy-looking dashboard of zeroes.
+      // case as "no data" so the UI flatlines instead of 500ing; every other
+      // verification failure is a genuine query defect and must propagate.
       if (isEsqlUnknownColumnError(error)) {
         this.deps.logger.warn(
           `chartsSummary: ES|QL reported an unknown column — returning zero buckets. ` +
@@ -395,12 +279,10 @@ export class ProposalsService {
 
     this.warnIfTruncated(opensResponse, 'opens');
     this.warnIfTruncated(closesResponse, 'closes');
-    this.warnIfTruncated(expiriesResponse, 'expiries');
 
     const anchorByCat = parseEsqlCountByCategory(anchorResponse, 'anchor');
     const opensByIdxAndCat = parseEsqlCountByIdxAndCategory(opensResponse, 'opens');
     const closesByIdxAndCat = parseEsqlCountByIdxAndCategory(closesResponse, 'closes');
-    const expiriesByIdxAndCat = parseEsqlCountByIdxAndCategory(expiriesResponse, 'expiries');
 
     const runningSums: Record<string, number> = { ...anchorByCat };
     const buckets: ProposalChartsSummaryBucket[] = [];
@@ -411,19 +293,28 @@ export class ProposalsService {
       for (const [cat, count] of Object.entries(opensByIdxAndCat[i] ?? {})) {
         runningSums[cat] = (runningSums[cat] ?? 0) + count;
       }
+
+      // Snapshotted after opens but before closes: those two sets are disjoint,
+      // so this is exactly the count open at some point in the bucket. A
+      // proposal that opened and closed inside one bucket would otherwise net to
+      // zero and never appear.
+      const openDuring: Record<string, number> = { ...runningSums };
+
       for (const [cat, count] of Object.entries(closesByIdxAndCat[i] ?? {})) {
-        // Clamped because a close whose open the anchor missed would drive this
-        // negative, and a negative open count is worse than an undercount.
-        runningSums[cat] = Math.max(0, (runningSums[cat] ?? 0) - count);
-      }
-      for (const [cat, count] of Object.entries(expiriesByIdxAndCat[i] ?? {})) {
+        // Clamped because a close whose open the anchor missed would go negative.
         runningSums[cat] = Math.max(0, (runningSums[cat] ?? 0) - count);
       }
 
-      buckets.push({ timestamp, counts: { ...runningSums } });
+      // Keeps the key set stable: a category whose only event here was a close
+      // is absent from the pre-close snapshot.
+      for (const cat of Object.keys(runningSums)) {
+        openDuring[cat] ??= 0;
+      }
+
+      buckets.push({ timestamp, counts: openDuring });
     }
 
-    return { buckets };
+    return { buckets, currentOpen: parseEsqlScalar(currentOpenResponse, 'currentOpen') };
   }
 
   /**
@@ -530,6 +421,15 @@ export class ProposalsService {
   async update(params: UpdateProposalParams, spaceId: string): Promise<Proposal> {
     const { id } = params;
     const { proposal, seqNo, primaryTerm } = await this.load(id, spaceId);
+
+    // The status vocabulary admits `superseded`, but it is only correct alongside
+    // the successor that replaced the row, which only `revise()` establishes.
+    if (params.status === 'superseded') {
+      throw new ProposalConflictError(
+        `Proposal [${id}] cannot be moved to superseded: only revise() establishes that ` +
+          `status, together with the successor it points at`
+      );
+    }
 
     // Re-writing the same terminal status is allowed, so a settled proposal
     // stays idempotent: the workflow's failure handler writes `failed` onto a
@@ -656,6 +556,252 @@ export class ProposalsService {
     await this.writeDocument(id, superseded, { seqNo, primaryTerm });
 
     return cloneId;
+  }
+
+  /**
+   * Appends a revision carrying the caller's overrides and retires the addressed
+   * proposal.
+   *
+   * `createdAt`, `expiresAt` and `workflowExecutionId` are inherited rather than
+   * restarted — the deadline and the gate execution belong to the chain, not to
+   * any single revision — mirroring `clone()`'s inheritance of the same fields.
+   */
+  async revise(
+    { id, comment, actionInput, impact, confidence }: ReviseProposalParams,
+    spaceId: string
+  ): Promise<{ proposalId: string; revision: number }> {
+    const { proposal, seqNo, primaryTerm } = await this.load(id, spaceId);
+
+    // Only the live revision may be revised: anything decided, settled or already
+    // superseded is not the head, and revising it would fork the chain.
+    if (proposal.decision !== undefined) {
+      throw new ProposalConflictError(
+        `Proposal [${id}] was already decided as ${proposal.decision} and cannot be revised`
+      );
+    }
+    if (proposal.status !== 'pending') {
+      throw new ProposalConflictError(
+        `Proposal [${id}] has settled as ${proposal.status} and cannot be revised`
+      );
+    }
+    if (proposal.supersededBy !== undefined) {
+      // Overwriting the pointer would fork the chain: two rows would claim to
+      // be the latest revision, with nothing to say which one actually is.
+      throw new ProposalConflictError(
+        `Proposal [${id}] was already superseded by ${proposal.supersededBy}`
+      );
+    }
+    // Mirrors `assertDecidable`, for the same lag: a deadline can pass before the
+    // workflow settles the record, so a revision cut here would be born expired.
+    if (isExpired(proposal)) {
+      throw new ProposalExpiredError(id);
+    }
+
+    const { id: _id, ...original } = proposal;
+
+    // The override is merged over the predecessor's input and the merged object is
+    // what gets validated: the action's contract describes the whole input, so
+    // changing one key must not silently drop the other required ones.
+    const mergedActionInput =
+      actionInput === undefined
+        ? original.actionInput
+        : { ...original.actionInput, ...actionInput };
+
+    if (mergedActionInput !== undefined && original.actionWorkflowId !== undefined) {
+      await this.resolveAndValidateAction(original.actionWorkflowId, mergedActionInput, spaceId);
+    }
+
+    // Resolved once, so the enums and the ranks derived from them cannot drift.
+    const nextImpact = impact ?? original.impact;
+    const nextConfidence = confidence ?? original.confidence;
+
+    const revisionId = uuidv4();
+    const rootProposalId = original.rootProposalId ?? id;
+    // `?? 1` covers records created before this field existed. Bound to a `number`
+    // local so the spread below does not widen it back to `number | undefined`.
+    const revision: number = (original.revision ?? 1) + 1;
+
+    const document: ProposalDocument = {
+      ...original,
+      rootProposalId,
+      supersedes: id,
+      revision,
+      supersededBy: undefined,
+      status: 'pending',
+      decision: undefined,
+      decidedBy: undefined,
+      decidedAt: undefined,
+      dismissReason: undefined,
+      rationale: undefined,
+      executionError: undefined,
+      ...(comment !== undefined ? { comment } : {}),
+      ...(mergedActionInput !== undefined ? { actionInput: mergedActionInput } : {}),
+      impact: nextImpact,
+      confidence: nextConfidence,
+      // Recomputed from the final enums rather than inherited with the rest of
+      // the document: the queue sorts on these mirrors, so a revision that
+      // changes the rating but keeps the predecessor's rank would show one
+      // impact and queue as another.
+      ...toSortRanks({ impact: nextImpact, confidence: nextConfidence }),
+    };
+
+    // The new revision is created before the predecessor is marked,
+    // deliberately — the same ordering `clone()` uses and for the same
+    // reason: if the second write loses its race, the queue shows both
+    // records rather than a pointer to a revision that does not exist.
+    await this.deps.storage.index({ id: revisionId, document, op_type: 'create' });
+
+    const superseded: ProposalDocument = {
+      ...original,
+      status: 'superseded',
+      supersededBy: revisionId,
+    };
+
+    try {
+      await this.writeDocument(id, superseded, { seqNo, primaryTerm });
+    } catch (error) {
+      // The create above already landed and nothing points at it. A concurrent
+      // revision that won the predecessor's sequence-number race would
+      // otherwise leave this row live and unreachable, giving the chain two
+      // heads that `getLatestRevision` and the queue could pick between
+      // nondeterministically. Only a conflict is compensated for: it is the
+      // one failure that proves the predecessor write did not apply, whereas
+      // any other error leaves its outcome unknown, and deleting this row
+      // could orphan the predecessor's pointer instead.
+      if (error instanceof ProposalConflictError) {
+        await this.retireOrphanRevision(revisionId);
+      }
+      throw error;
+    }
+
+    return { proposalId: revisionId, revision };
+  }
+
+  /**
+   * Removes a revision whose link write lost its race. Best-effort: the
+   * original failure is what the caller has to see, so a cleanup failure is
+   * logged rather than replacing it.
+   */
+  private async retireOrphanRevision(revisionId: string): Promise<void> {
+    try {
+      await this.deps.storage.delete({ id: revisionId });
+    } catch (error) {
+      this.deps.logger.warn(
+        `Failed to retire orphaned revision [${revisionId}] after a lost race: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  }
+
+  /**
+   * Resolves the live revision of the chain a given proposal belongs to,
+   * regardless of which revision's id was passed in. Used by the gate
+   * workflow so a decision is never written against a stale, already
+   * superseded pointer once a revision has landed while the gate was parked.
+   *
+   * A query on `rootProposalId` plus `supersededBy` absent is O(1) — it does
+   * not walk `supersedes` pointers hop by hop, so the cost does not grow with
+   * the length of the chain.
+   */
+  async getLatestRevision(
+    id: string,
+    spaceId: string
+  ): Promise<{
+    proposalId: string;
+    revision: number;
+    status: ProposalStatus;
+    decision: ProposalDecision | undefined;
+    /**
+     * The live revision's action input, so a caller that resolves the head
+     * before executing can run the parameters the analyst actually approved.
+     * A revision that corrected `actionInput` would otherwise leave the
+     * original's stale parameters in whatever the caller captured earlier.
+     */
+    actionInput: Record<string, unknown> | undefined;
+  }> {
+    const { proposal } = await this.load(id, spaceId);
+
+    if (proposal.rootProposalId === undefined) {
+      // A record written before `rootProposalId` existed: the term query below
+      // cannot find it, so following the pointers is the only way to reach the
+      // live head. Without this the fallback answers with the stale member it
+      // was asked about — exactly the id a parked gate holds across an
+      // upgrade, and the row `update()` then refuses to settle.
+      return this.walkSupersededChain(proposal, spaceId);
+    }
+
+    const rootProposalId = proposal.rootProposalId;
+
+    const response = await this.deps.storage.search({
+      track_total_hits: false,
+      size: 1,
+      query: {
+        bool: {
+          filter: [{ term: { rootProposalId } }, { term: { spaceId } }],
+          must_not: [{ exists: { field: 'supersededBy' } }],
+        },
+      },
+    });
+
+    const hit = response.hits.hits[0];
+    if (!hit?._source || hit._id === undefined) {
+      // Should be unreachable: every chain has exactly one live revision by
+      // construction. Falls back to the proposal that was asked about rather
+      // than throwing, so a storage inconsistency degrades to "trust the
+      // caller's id" instead of failing the gate outright.
+      return {
+        proposalId: proposal.id,
+        revision: proposal.revision ?? 1,
+        status: proposal.status,
+        decision: proposal.decision,
+        actionInput: proposal.actionInput,
+      };
+    }
+
+    const source = hit._source as ProposalDocument;
+    return {
+      proposalId: hit._id,
+      revision: source.revision ?? 1,
+      status: source.status,
+      decision: source.decision,
+      actionInput: source.actionInput,
+    };
+  }
+
+  /**
+   * Follows `supersededBy` hop by hop, for chains that predate
+   * `rootProposalId`. Bounded rather than open-ended: a corrupt chain that
+   * points in a circle would otherwise spin forever, and stopping after a
+   * finite number of hops degrades to the last member reached — the same
+   * "answer with what we have" the root query's fallback gives.
+   */
+  private async walkSupersededChain(
+    start: StoredProposalRecord,
+    spaceId: string
+  ): Promise<{
+    proposalId: string;
+    revision: number;
+    status: ProposalStatus;
+    decision: ProposalDecision | undefined;
+    actionInput: Record<string, unknown> | undefined;
+  }> {
+    let current = start;
+
+    for (let hop = 0; hop < MAX_LEGACY_CHAIN_HOPS; hop++) {
+      if (current.supersededBy === undefined) {
+        break;
+      }
+      current = (await this.load(current.supersededBy, spaceId)).proposal;
+    }
+
+    return {
+      proposalId: current.id,
+      revision: current.revision ?? 1,
+      status: current.status,
+      decision: current.decision,
+      actionInput: current.actionInput,
+    };
   }
 
   /**
@@ -950,13 +1096,20 @@ export interface CloneProposalParams {
   executionError?: string;
 }
 
+export interface ReviseProposalParams extends ReviseProposalRequest {
+  id: string;
+}
+
 type QueryFilterList = Array<Record<string, unknown>>;
 
 /**
  * Translates the shared filter vocabulary once, so every read applies it
  * identically. The space term is always present: no read crosses a space.
  */
-const toFilterClauses = (filters: ProposalFilters, spaceId: string): QueryFilterList => {
+const toFilterClauses = (
+  filters: ProposalFilters & { category?: string; decidedWithinHours?: number },
+  spaceId: string
+): QueryFilterList => {
   const filter: QueryFilterList = [{ term: { spaceId } }];
 
   if (filters.status) {
@@ -967,6 +1120,12 @@ const toFilterClauses = (filters: ProposalFilters, spaceId: string): QueryFilter
   }
   if (filters.conversationId) {
     filter.push({ term: { conversationId: filters.conversationId } });
+  }
+  if (filters.category) {
+    filter.push({ term: { category: filters.category } });
+  }
+  if (filters.decidedWithinHours !== undefined) {
+    filter.push({ range: { decidedAt: { gte: `now-${filters.decidedWithinHours}h` } } });
   }
   if (filters.excludeSuperseded) {
     // A superseded proposal is represented by its successor, so showing both
@@ -1001,11 +1160,25 @@ const toProposal = (id: string, document: ProposalDocument): Proposal =>
   stripRanks({ id, ...document });
 
 /**
+ * Ceiling on the legacy pointer walk in `getLatestRevision`. A chain longer
+ * than this is a corruption or an attack, and either way the walk has to end.
+ */
+const MAX_LEGACY_CHAIN_HOPS = 100;
+
+/**
  * A status that has settled. `pending` and `executing` are the only two a
  * proposal can still be moved out of.
  */
 const isTerminal = (status: ProposalStatus): boolean =>
-  status === 'succeeded' || status === 'failed' || status === 'expired' || status === 'no_action';
+  status === 'succeeded' ||
+  status === 'failed' ||
+  status === 'expired' ||
+  status === 'no_action' ||
+  // Undecided, unlike the other four, but equally unable to move: a
+  // superseded proposal is not the live revision anymore, and a caller that
+  // still holds its id (a stale workflow variable, a retried step) must not
+  // be able to resurrect it via update().
+  status === 'superseded';
 
 /**
  * The only legal decision/status pairs. Exhaustive on purpose: the two axes are
@@ -1017,7 +1190,7 @@ const isTerminal = (status: ProposalStatus): boolean =>
  * dismissal, or an approval of a proposal that carries nothing to run.
  */
 const VALID_STATUSES: Record<'undecided' | ProposalDecision, readonly ProposalStatus[]> = {
-  undecided: ['pending', 'expired'],
+  undecided: ['pending', 'expired', 'superseded'],
   dismissed: ['no_action'],
   approved: ['no_action', 'executing', 'succeeded', 'failed'],
 };
@@ -1127,6 +1300,16 @@ const parseEsqlCountByCategory = (
     if (category) result[category] = count ?? 0;
   }
   return result;
+};
+
+/** Same by-name lookup, for a bare `STATS` returning a single unkeyed row. */
+const parseEsqlScalar = (
+  response: { columns: Array<{ name: string }>; values: Array<unknown[]> },
+  countField: string
+): number => {
+  const colIdx = response.columns.findIndex((c) => c.name === countField);
+  if (colIdx === -1) return 0;
+  return (response.values[0]?.[colIdx] as number | null) ?? 0;
 };
 
 /** Same by-name lookup as above. Rows with a negative or non-finite `idx` are dropped. */

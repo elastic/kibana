@@ -8,6 +8,7 @@
 import axios from 'axios';
 import type { AxiosResponse } from 'axios';
 import type { Logger } from '@kbn/core/server';
+import type { SystemIdentity } from '@kbn/security-plugin-types-server';
 import type { ActionsConfigurationUtilities } from '../../actions_config';
 import { request } from '../axios_utils';
 import { RelayRequestError } from './relay_error';
@@ -28,6 +29,19 @@ export interface RelayClientOptions {
   baseUrl: string;
   configurationUtilities: ActionsConfigurationUtilities;
   logger: Logger;
+  /**
+   * Whether to authenticate every Relay request with an ephemeral UIAM token for Kibana's own
+   * identity (`xpack.actions.relay.uiam.enabled`). When `false` the Relay identifies Kibana from
+   * the mTLS leg alone.
+   */
+  useSystemIdentity: boolean;
+  /**
+   * Kibana's own UIAM identity. Resolved on each request because the client is built during
+   * `setup`, before the security plugin's start contract exists. `undefined` means UIAM is not
+   * configured for this Kibana, or is configured without the client certificate the identity is
+   * derived from. Either is a misconfiguration when `useSystemIdentity` is on.
+   */
+  getSystemIdentity: () => SystemIdentity | undefined;
 }
 
 /** Largest page size the Relay accepts on its cursor-paginated list endpoints. */
@@ -54,11 +68,21 @@ export class RelayClient implements RelayClientContract {
   private readonly baseUrl: URL;
   private readonly configurationUtilities: ActionsConfigurationUtilities;
   private readonly logger: Logger;
+  private readonly useSystemIdentity: boolean;
+  private readonly getSystemIdentity: RelayClientOptions['getSystemIdentity'];
 
-  constructor({ baseUrl, configurationUtilities, logger }: RelayClientOptions) {
+  constructor({
+    baseUrl,
+    configurationUtilities,
+    logger,
+    useSystemIdentity,
+    getSystemIdentity,
+  }: RelayClientOptions) {
     this.baseUrl = new URL(baseUrl);
     this.configurationUtilities = configurationUtilities;
     this.logger = logger;
+    this.useSystemIdentity = useSystemIdentity;
+    this.getSystemIdentity = getSystemIdentity;
   }
 
   async startInstall(body: RelayInstallRequest): Promise<RelayInstallResponse> {
@@ -224,18 +248,38 @@ export class RelayClient implements RelayClientContract {
     throw new RelayRequestError(path, response.status, relayMessage);
   }
 
-  private sendRequest(
+  /**
+   * The Relay runs in a different region from this Kibana, so the proxy-verified mTLS identity
+   * alone is not enough: the Relay forwards this bearer token together with Kibana's certificate
+   * SANs to UIAM. A fresh token is minted per request.
+   */
+  private async createSystemIdentityToken(signal?: AbortSignal): Promise<string> {
+    const systemIdentity = this.getSystemIdentity();
+    if (!systemIdentity) {
+      throw new Error(
+        'Cannot authenticate the Relay request: `xpack.actions.relay.uiam.enabled` is set but this Kibana has no UIAM system identity. Configure `xpack.security.uiam` with a client certificate (`ssl.certificate` and `ssl.key`).'
+      );
+    }
+    return await systemIdentity.createEphemeralToken(signal);
+  }
+
+  private async sendRequest(
     url: string,
     data: unknown,
     method: 'get' | 'post' | 'put' | 'delete' = 'post',
     signal?: AbortSignal
   ): Promise<AxiosResponse> {
+    const token = this.useSystemIdentity ? await this.createSystemIdentityToken(signal) : undefined;
+
     return request({
       axios: this.axios,
       url,
       method,
       data,
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
       configurationUtilities: this.configurationUtilities,
       sslOverrides: this.configurationUtilities.getRelaySSLSettings(),
       logger: this.logger,

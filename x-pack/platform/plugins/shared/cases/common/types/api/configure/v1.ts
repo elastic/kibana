@@ -189,6 +189,7 @@ export const ConfigurationRequestRt = rt.intersection([
       customFields: CustomFieldsConfigurationRt,
       templates: TemplatesConfigurationRt,
       observableTypes: ObservableTypesConfigurationRt,
+      extractObservables: rt.boolean,
     })
   ),
 ]);
@@ -215,6 +216,7 @@ export const ConfigurationPatchRequestRt = rt.intersection([
       customFields: CustomFieldsConfigurationRt,
       templates: TemplatesConfigurationRt,
       observableTypes: ObservableTypesConfigurationRt,
+      extractObservables: ConfigurationBasicWithoutOwnerRt.type.props.extractObservables,
     })
   ),
   rt.strict({ version: rt.string }),

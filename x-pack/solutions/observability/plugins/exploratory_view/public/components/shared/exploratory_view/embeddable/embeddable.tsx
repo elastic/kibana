@@ -9,7 +9,12 @@ import { i18n } from '@kbn/i18n';
 import type { Position } from '@elastic/charts';
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
-import type { LensPublicStart, UserMessage, XYVisualizationState } from '@kbn/lens-plugin/public';
+import type {
+  LensPublicStart,
+  UserMessage,
+  XYVisualizationState,
+  EmbeddableComponentProps,
+} from '@kbn/lens-plugin/public';
 import { observabilityFeatureId } from '@kbn/observability-shared-plugin/public';
 import styled from '@emotion/styled';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
@@ -47,6 +52,7 @@ export interface ExploratoryEmbeddableProps {
   legendPosition?: Position;
   hideTicks?: boolean;
   onBrushEnd?: (param: { range: number[] }) => void;
+  onAnnotationClick?: EmbeddableComponentProps['onAnnotationClick'];
   onLoad?: (loading: boolean) => void;
   onBeforeBadgesRender?: (userMessages: UserMessage[]) => UserMessage[];
   caseOwner?: string;
@@ -84,6 +90,7 @@ export default function Embeddable(props: ExploratoryEmbeddableComponentProps) {
     legendPosition,
     lens,
     onBrushEnd,
+    onAnnotationClick,
     caseOwner = observabilityFeatureId,
     reportType,
     showCalculationMethod = false,
@@ -213,6 +220,7 @@ export default function Embeddable(props: ExploratoryEmbeddableComponentProps) {
         timeRange={timeRange}
         attributes={{ ...attributesJSON, title: '', description: '' }}
         onBrushEnd={onBrushEnd}
+        onAnnotationClick={onAnnotationClick}
         withDefaultActions={Boolean(withActions)}
         disabledActions={DISABLED_ACTIONS}
         extraActions={actions}
