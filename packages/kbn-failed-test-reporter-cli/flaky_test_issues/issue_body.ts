@@ -195,9 +195,8 @@ const flakyRate = (suite: FlakySuite): string | undefined => {
     `${inlineCode(flakiestBranch.branch)} (${flakiestBranch.failedBuilds} of ${
       flakiestBranch.builds
     })`;
-  return suite.tests.length > 1
-    ? `${rate}, for the flakiest of ${plural(suite.tests.length, 'test')}`
-    : rate;
+  // The worst test's rate; the suite as a whole fails at least that often
+  return suite.tests.length > 1 ? `up to ${rate}` : rate;
 };
 
 /**
@@ -220,11 +219,14 @@ const otherPipelines = (suite: FlakySuite, report: FlakyTestReport): string | un
     .join(', ');
 };
 
-/** One line naming the suite, then the facts a reader needs first, one per bullet. */
+/** One line counting the tests and naming the suite, then the facts a reader needs first. */
 const overview = (suite: FlakySuite, ctx: FlakySuiteIssueContext): string => {
   const { report, dashboardUrl } = ctx;
   const subject = suite.suiteTitle ?? Path.basename(suite.filePath);
-  const opening = `The ${inlineCode(subject)} suite appears to be flaky:`;
+  const count = suite.tests.length;
+  const opening =
+    `${plural(count, 'test')} in the ${inlineCode(subject)} suite ` +
+    `${count === 1 ? 'appears' : 'appear'} to be flaky:`;
   const rate = flakyRate(suite);
   // Older reports do not record the qualifying branch; name the branches failing most instead
   const branches = rate === undefined ? headlineBranches(suite) : undefined;

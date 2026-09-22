@@ -161,11 +161,11 @@ describe('readSuiteFilePathFromTitle', () => {
 });
 
 describe('renderFlakySuiteIssueBody', () => {
-  it('opens by naming the suite, then the rate, pipeline and other pipelines', () => {
+  it('opens by counting the tests and naming the suite, then rate, pipeline and other pipelines', () => {
     const single = singleTestReport();
     expect(renderFlakySuiteIssueBody(single.suite, { report: single.report })).toContain(
       [
-        'The `Default status alert` suite appears to be flaky:',
+        '1 test in the `Default status alert` suite appears to be flaky:',
         '',
         '- **Flaky rate:** **10%** of builds on `main` (49 of 509)',
         '- **Pipeline:** `kibana-on-merge`, last 7 days (2–9 Sep 2026)',
@@ -178,7 +178,8 @@ describe('renderFlakySuiteIssueBody', () => {
     );
     const multi = multiTestReport();
     expect(renderFlakySuiteIssueBody(multi.suite, { report: multi.report })).toContain(
-      '(49 of 509), for the flakiest of 3 tests\n- **Pipeline:**'
+      '3 tests in the `Default status alert` suite appear to be flaky:\n\n' +
+        '- **Flaky rate:** up to **10%** of builds on `main` (49 of 509)\n- **Pipeline:**'
     );
   });
 
