@@ -7,25 +7,22 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { createHash } from 'crypto';
-import { searchByAnchors } from './search_by_anchors';
+import type { AnchorItem, HuntCorrelationAttachmentData } from '@kbn/alertzero-common';
+import { searchByAnchors, EMPTY_ANCHOR_SUMMARY } from './search_by_anchors';
 import type {
-  AnchorItem,
   AnchorSet,
   CorrelationEngineResult,
-  HuntCorrelationAttachmentData,
   SearchByAnchorsParams,
+  SearchByAnchorsResult,
 } from './types';
 
 const DISCRIMINATING_MIN = 1;
 
 /**
- * Attachment-facing thresholds (`security.hunt_correlation`'s
- * `anchor_match`/`diamond_vertex`, PR 1 kibana#291882). `anchor_match` is
- * pinned to 1.0 here because this phase's gate is binary — the anchors
- * search either returns discriminating matches or doesn't, there is no
- * partial-credit anchor score yet. `diamond_vertex` is a placeholder until
- * PR 3b's diamond leg actually produces `diamond_scores`; that phase should
- * revisit this constant alongside its scoring, not invent a new field.
+ * Thresholds for the `anchor_match` and `diamond_vertex` fields in the
+ * correlation attachment. `anchor_match` is pinned to 1.0 because the gate
+ * is binary: discriminating anchors either match or they don't. `diamond_vertex`
+ * is a placeholder pending real diamond scoring.
  */
 const ANCHOR_MATCH_THRESHOLD = 1;
 const DIAMOND_VERTEX_THRESHOLD = 0.5;
@@ -48,10 +45,9 @@ const buildAnchorItems = (anchors: AnchorSet): AnchorItem[] => {
 
 /**
  * Subject-stable correlation attachment id: `corr-{sha256(space|reportId)}`.
- * Matches the `trigger-{sha256(space|reportId)}` / `sse-{sha256(...)}`
- * convention (`sse_mapper.ts`'s `buildSseAttachmentId`, `mvp-slice.md`).
- * Unlike the SSE id, correlation has no technique dimension: one correlation
- * pass produces at most one attachment per report.
+ * Mirrors the `sse-{sha256(...)}` convention in `sse_mapper.ts`. Unlike the SSE
+ * id, correlation has no technique dimension: one pass produces at most one
+ * attachment per report.
  */
 export const buildCorrAttachmentId = ({
   spaceId,
@@ -70,72 +66,48 @@ export const runCorrelationEngine = async (
   spaceId: string,
   searchParams: SearchByAnchorsParams,
   reportRevision: string = ''
-): Promise<CorrelationEngineResult & { toAttachmentData: () => HuntCorrelationAttachmentData }> => {
-  let searchResult;
+): Promise<CorrelationEngineResult & { attachment_data: HuntCorrelationAttachmentData }> => {
+  let searchResult: SearchByAnchorsResult | undefined;
   try {
     searchResult = await searchByAnchors(esClient, logger, spaceId, searchParams);
   } catch (err) {
     logger.warn(`correlation_engine: searchByAnchors failed — ${(err as Error).message}`);
-    const emptyAnchors = searchParams.anchors ?? {};
-    return {
-      status: 'unavailable',
-      anchors: emptyAnchors,
-      matches: [],
-      thresholds: { discriminating_min: DISCRIMINATING_MIN },
-      self_match_excluded: true,
-      diamond_scores: [],
-      anchor_summary: {
-        hash_ioc_count: 0,
-        network_ioc_count: 0,
-        ioc_set_hash: null,
-        actor_count: 0,
-        technique_count: 0,
-        discriminating_anchor_count: 0,
-      },
-      toAttachmentData: () => ({
-        attachment_id: buildCorrAttachmentId({
-          spaceId,
-          reportId: searchParams.source_report_id ?? '',
-        }),
-        anchors: [],
-        diamond_scores: [],
-        thresholds: {
-          anchor_match: ANCHOR_MATCH_THRESHOLD,
-          diamond_vertex: DIAMOND_VERTEX_THRESHOLD,
-        },
-        self_match_excluded: true,
-        report_revision: reportRevision,
-      }),
-    };
   }
 
   const anchors = searchParams.anchors ?? {};
-  const status: CorrelationEngineResult['status'] =
-    searchResult.hits.length > 0 ? 'matched' : 'no_match';
-
+  const status: CorrelationEngineResult['status'] = !searchResult
+    ? 'unavailable'
+    : searchResult.hits.length > 0
+    ? 'matched'
+    : 'no_match';
+  const resolvedResult = searchResult ?? {
+    hits: [],
+    total: 0,
+    anchor_summary: EMPTY_ANCHOR_SUMMARY,
+  };
   const anchorItems = buildAnchorItems(anchors);
 
   return {
     status,
     anchors,
-    matches: searchResult.hits,
+    matches: resolvedResult.hits,
     thresholds: { discriminating_min: DISCRIMINATING_MIN },
     self_match_excluded: true,
-    diamond_scores: [], // Empty until PR 3b's diamond phase.
-    anchor_summary: searchResult.anchor_summary,
-    toAttachmentData: (): HuntCorrelationAttachmentData => ({
+    diamond_scores: [],
+    anchor_summary: resolvedResult.anchor_summary,
+    attachment_data: {
       attachment_id: buildCorrAttachmentId({
         spaceId,
         reportId: searchParams.source_report_id ?? '',
       }),
-      anchors: anchorItems,
-      diamond_scores: [], // Empty until PR 3b's diamond phase.
+      anchors: status === 'unavailable' ? [] : anchorItems,
+      diamond_scores: [],
       thresholds: {
         anchor_match: ANCHOR_MATCH_THRESHOLD,
         diamond_vertex: DIAMOND_VERTEX_THRESHOLD,
       },
       self_match_excluded: true,
       report_revision: reportRevision,
-    }),
+    },
   };
 };

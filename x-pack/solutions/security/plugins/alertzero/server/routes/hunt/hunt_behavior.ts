@@ -9,6 +9,7 @@ import {
   ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
   API_VERSIONS,
   HuntBehaviorRequestBody,
+  HuntBehaviorResponse,
   INTERNAL_API_ACCESS,
 } from '@kbn/alertzero-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
@@ -21,8 +22,8 @@ export const HUNT_BEHAVIOR_URL = `${HUNT_INTERNAL_ROUTE_BASE}/hunt_behavior` as 
 
 /**
  * Runs Tier 2's LLM-backed behavioral extraction against report text.
- * Returns 503 when no GenAI connector is configured so the coordinator can
- * degrade gracefully to Tier 1 only.
+ * Returns 503 when the inference plugin is not installed, or 400 when no
+ * connector is configured.
  */
 export const registerHuntBehaviorRoute = ({
   router,
@@ -86,14 +87,14 @@ export const registerHuntBehaviorRoute = ({
           const { text, report_id, llm_confidence_threshold, iocs, article_context } = request.body;
           const esClient = core.elasticsearch.client.asCurrentUser;
 
-          const result = await huntBehavior(
+          const body: HuntBehaviorResponse = await huntBehavior(
             modelOutcome.model,
             logger,
             { text, report_id, llm_confidence_threshold, iocs, article_context },
             esClient
           );
 
-          return response.ok({ body: result });
+          return response.ok({ body });
         } catch (err) {
           logger.warn(`hunt_behavior route failed: ${(err as Error).message}`);
           return response.customError({

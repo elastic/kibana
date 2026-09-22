@@ -10,6 +10,7 @@ import type { IndexedBehavior, ValidatedBehavior } from './types';
 const buildFindingId = (techniqueId: string, reportId?: string): string =>
   `${reportId ?? 'anon'}:${techniqueId}`;
 
+// Used by huntBehavior; IndexedBehavior is on HuntBehaviorResult for external workflow consumers.
 /** Projects `ValidatedBehavior[]` to the strict `extracted.behaviors` nested mapping shape. */
 export const toIndexedBehaviors = (
   behaviors: ValidatedBehavior[],
