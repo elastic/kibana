@@ -39,11 +39,13 @@ export const HuntCoordinatorRequestBody = lazySchema(() =>
           'Run id supplied by the Worker fan-out so every child of one sweep shares it, which is what the packaging barrier and the conclusion dedupe key off. The route mints one only when the caller has no sweep to tie the run to.'
         ),
       /**
-       * Pins the hunt to one technology's index scope. Omit it and the coordinator resolves every known technology and hunts the ones whose required indices exist in the space.
+       * Pins the hunt to one technology's index scope. Omit it (or send null, which is what a workflow template renders for an unset input) and the coordinator resolves every known technology and hunts the ones whose required indices exist in the space.
        */
-      technology: HuntTechnology.optional().describe(
-        "Pins the hunt to one technology's index scope. Omit it and the coordinator resolves every known technology and hunts the ones whose required indices exist in the space."
-      ),
+      technology: HuntTechnology.nullable()
+        .optional()
+        .describe(
+          "Pins the hunt to one technology's index scope. Omit it (or send null, which is what a workflow template renders for an unset input) and the coordinator resolves every known technology and hunts the ones whose required indices exist in the space."
+        ),
       text: z.string().max(200000).optional(),
       iocs: z.array(HuntIoc).optional(),
       techniques: z.array(z.string()).optional(),
