@@ -58,7 +58,7 @@ describe('Severity form field', () => {
   it('renders', async () => {
     renderWithTestingProviders(<CasesTableUtilityBar {...props} />);
 
-    expect(await screen.findByText('Showing 5 of 5')).toBeInTheDocument();
+    expect(await screen.findByText('Showing 5 of 5 cases')).toBeInTheDocument();
     expect(await screen.findByText('Selected 1 case')).toBeInTheDocument();
     expect(await screen.findByTestId('case-table-bulk-actions-link-icon')).toBeInTheDocument();
 
@@ -77,7 +77,7 @@ describe('Severity form field', () => {
 
     renderWithTestingProviders(<CasesTableUtilityBar {...updatedProps} />);
 
-    expect(await screen.findByText('Showing 10 of 20')).toBeInTheDocument();
+    expect(await screen.findByText('Showing 10 of 20 cases')).toBeInTheDocument();
     expect(await screen.findByText('Selected 1 case')).toBeInTheDocument();
   });
 
@@ -94,7 +94,7 @@ describe('Severity form field', () => {
 
     renderWithTestingProviders(<CasesTableUtilityBar {...updatedProps} />);
 
-    expect(await screen.findByText('Showing 10 of 20')).toBeInTheDocument();
+    expect(await screen.findByText('Showing 10 of 20 cases')).toBeInTheDocument();
     expect(await screen.findByText('Selected 1 case')).toBeInTheDocument();
   });
 
@@ -112,7 +112,7 @@ describe('Severity form field', () => {
     };
 
     renderWithTestingProviders(<CasesTableUtilityBar {...updatedProps} />);
-    expect(await screen.findByText('Showing 0 of 0')).toBeInTheDocument();
+    expect(await screen.findByText('Showing 0 of 0 cases')).toBeInTheDocument();
   });
 
   it('opens the bulk actions correctly', async () => {
@@ -312,7 +312,7 @@ describe('Severity form field', () => {
         );
 
         expect(
-          await screen.findByText(`Showing ${size} of ${MAX_DOCS_PER_PAGE}`)
+          await screen.findByText(`Showing ${size} of ${MAX_DOCS_PER_PAGE} cases`)
         ).toBeInTheDocument();
 
         expect(screen.queryByTestId('all-cases-maximum-limit-warning')).not.toBeInTheDocument();
@@ -334,7 +334,7 @@ describe('Severity form field', () => {
         );
 
         expect(
-          await screen.findByText(`Showing ${size} of ${MAX_DOCS_PER_PAGE}`)
+          await screen.findByText(`Showing ${size} of ${MAX_DOCS_PER_PAGE} cases`)
         ).toBeInTheDocument();
 
         expect(await screen.findByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
@@ -356,7 +356,7 @@ describe('Severity form field', () => {
         );
 
         expect(
-          await screen.findByText(`Showing ${size} of ${MAX_DOCS_PER_PAGE}`)
+          await screen.findByText(`Showing ${size} of ${MAX_DOCS_PER_PAGE} cases`)
         ).toBeInTheDocument();
 
         expect(await screen.findByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
