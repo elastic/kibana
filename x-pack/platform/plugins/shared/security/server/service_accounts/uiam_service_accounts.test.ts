@@ -415,29 +415,6 @@ describe('UiamServiceAccounts', () => {
       expect(mockUiam.listServiceAccounts).not.toHaveBeenCalled();
     });
 
-    it('rejects when the upstream response does not match the expected shape', async () => {
-      mockUiam.listServiceAccounts.mockResolvedValue({ items: [listedAccount] } as never);
-
-      await expect(
-        serviceAccounts.list(createMockRequest('Bearer essu_my_token'))
-      ).rejects.toThrowError('Error occurred during service account listing');
-    });
-
-    it('skips an account missing its creator and still reports the rest of the page', async () => {
-      mockUiam.listServiceAccounts.mockResolvedValue({
-        service_accounts: [validResponse, listedAccount],
-        next_page: 'next',
-      } as never);
-
-      const result = await serviceAccounts.list(createMockRequest('Bearer essu_my_token'));
-
-      // One unreadable account costs that account, not the directory.
-      expect(result).toEqual({ serviceAccounts: [expectedEntry], nextPage: 'next' });
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Skipping a service account UIAM reported in an unrecognized shape')
-      );
-    });
-
     it("propagates a 403 when UIAM refuses Kibana's assumable_by", async () => {
       mockUiam.listServiceAccounts.mockRejectedValue(Boom.forbidden('not assumable'));
 
@@ -510,14 +487,6 @@ describe('UiamServiceAccounts', () => {
       });
     });
 
-    it('rejects when creator is missing', async () => {
-      mockUiam.getServiceAccount.mockResolvedValue(validResponse as never);
-
-      await expect(
-        serviceAccounts.get(createMockRequest('Bearer essu_my_token'), 'service-account-id')
-      ).rejects.toThrowError('Error occurred during service account retrieval');
-    });
-
     it('rejects with a 403 when security features are disabled in Elasticsearch', async () => {
       mockLicense.isEnabled.mockReturnValue(false);
 
@@ -548,14 +517,6 @@ describe('UiamServiceAccounts', () => {
       ).rejects.toMatchObject({ output: { statusCode: 403 } });
 
       expect(mockUiam.getServiceAccount).not.toHaveBeenCalled();
-    });
-
-    it('rejects when the upstream response does not match the expected shape', async () => {
-      mockUiam.getServiceAccount.mockResolvedValue({ id: 'only-id' } as never);
-
-      await expect(
-        serviceAccounts.get(createMockRequest('Bearer essu_my_token'), 'service-account-id')
-      ).rejects.toThrowError('Error occurred during service account retrieval');
     });
 
     it('propagates a 404 when UIAM has no such account', async () => {

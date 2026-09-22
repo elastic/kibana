@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { serviceAccountNameSchema } from '../../common/service_accounts';
-
 export interface EsServiceAccountPrincipal {
   namespace: string;
   name: string;
@@ -14,9 +12,7 @@ export interface EsServiceAccountPrincipal {
 
 /**
  * Splits an Elasticsearch service account id, `{namespace}/{service}`, into its two parts, or
- * returns `undefined` when the id cannot name an Elasticsearch account at all. Both parts are
- * held to the same rules Elasticsearch applies to them, which is also what keeps either half from
- * carrying a second slash into a URL path.
+ * returns `undefined` when the id is not shaped like one.
  */
 export const parseEsServiceAccountId = (id: string): EsServiceAccountPrincipal | undefined => {
   const parts = id.split('/');
@@ -25,12 +21,5 @@ export const parseEsServiceAccountId = (id: string): EsServiceAccountPrincipal |
   }
 
   const [namespace, name] = parts;
-  if (
-    !serviceAccountNameSchema.safeParse(namespace).success ||
-    !serviceAccountNameSchema.safeParse(name).success
-  ) {
-    return undefined;
-  }
-
   return { namespace, name };
 };

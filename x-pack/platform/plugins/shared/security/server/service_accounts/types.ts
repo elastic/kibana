@@ -38,9 +38,7 @@ export interface ServiceAccountsBackend {
   create(request: KibanaRequest, params: CreateServiceAccountParams): Promise<ServiceAccount>;
 
   /**
-   * Lists the service accounts this Kibana can see, one page at a time. Not part of Core's
-   * consumer contract: Core stays create-only, and the directory exists for the security plugin's
-   * own HTTP routes.
+   * Lists the service accounts this Kibana can see, one page at a time.
    *
    * Authorizes the Kibana caller first. On UIAM the outbound call is then authenticated as Kibana
    * over mTLS, not as the user.

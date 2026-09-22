@@ -44,6 +44,7 @@ import {
   isExternalApiKey,
   type UiamServiceAccount,
   type UiamServiceAccountCreator,
+  type UiamServiceAccountDetails,
   type UiamServicePublic,
 } from '../uiam';
 
@@ -55,35 +56,6 @@ import {
 const serviceAccountSchema = z.object({
   id: serviceAccountIdSchema,
   name: serviceAccountNameSchema,
-});
-
-const serviceAccountCreatorSchema = z.discriminatedUnion('type', [
-  z.object({
-    type: z.literal('user'),
-    id: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH),
-    first_name: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH).optional(),
-    last_name: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH).optional(),
-  }),
-  z.object({
-    type: z.literal('api-key'),
-    id: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH),
-    description: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH).optional(),
-  }),
-]);
-
-/** What get and list report on top of the create payload. */
-const serviceAccountDetailsSchema = serviceAccountSchema.extend({
-  creator: serviceAccountCreatorSchema,
-});
-
-/**
- * The envelope only. Its entries are deliberately `unknown` here and parsed one at a time in
- * {@link UiamServiceAccounts.list}, so that one account UIAM reports oddly cannot make the whole
- * directory unreadable.
- */
-const listServiceAccountsResponseSchema = z.object({
-  service_accounts: z.array(z.unknown()).max(SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE),
-  next_page: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH).optional(),
 });
 
 /**
@@ -119,7 +91,7 @@ const toDirectoryEntry = ({
   id,
   name,
   creator,
-}: z.infer<typeof serviceAccountDetailsSchema>): ServiceAccountDirectoryEntry => ({
+}: UiamServiceAccountDetails): ServiceAccountDirectoryEntry => ({
   id,
   name,
   roles: [],
@@ -300,38 +272,16 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     this.logger.debug('Attempting to list service accounts');
 
     try {
-      const result = await this.uiam.listServiceAccounts({
-        limit,
-        // Forwarded unchecked: the cursor's shape is UIAM's, not Kibana's. UIAM validates it as
-        // an id of 1 to 100 characters and answers a bad one with its own 400, which
-        // `#parseUiamResponse` turns into the Boom this method propagates.
-        ...(after !== undefined ? { after } : {}),
-      });
-      const parsed = listServiceAccountsResponseSchema.safeParse(result);
-      if (!parsed.success) {
-        this.logger.error(
-          `Service account list payload from UIAM failed validation: ${parsed.error.message}`
-        );
-        throw Boom.badGateway('Error occurred during service account listing.');
-      }
+      const { service_accounts: accounts, next_page: nextPage } =
+        await this.uiam.listServiceAccounts({
+          limit,
+          // Forwarded unchecked: the cursor's shape is UIAM's, not Kibana's. UIAM validates it as
+          // an id of 1 to 100 characters and answers a bad one with its own 400, which
+          // `#parseUiamResponse` turns into the Boom this method propagates.
+          ...(after !== undefined ? { after } : {}),
+        });
 
-      const { service_accounts: rawAccounts, next_page: nextPage } = parsed.data;
-
-      // Each account is parsed on its own, and one Kibana cannot read is skipped rather than
-      // taken as a reason to refuse the page. Same call `readAccount` makes on the Elasticsearch
-      // backend, which answers `undefined` for an account type it does not know: an oddity in one
-      // account must not make the whole directory unreadable.
-      const serviceAccounts = rawAccounts.flatMap((account) => {
-        const details = serviceAccountDetailsSchema.safeParse(account);
-        if (!details.success) {
-          this.logger.warn(
-            `Skipping a service account UIAM reported in an unrecognized shape: ${details.error.message}`
-          );
-          return [];
-        }
-
-        return [toDirectoryEntry(details.data)];
-      });
+      const serviceAccounts = accounts.map(toDirectoryEntry);
 
       return {
         serviceAccounts,
@@ -361,16 +311,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     this.logger.debug(`Attempting to get service account ${id}`);
 
     try {
-      const result = await this.uiam.getServiceAccount(id);
-      const parsed = serviceAccountDetailsSchema.safeParse(result);
-      if (!parsed.success) {
-        this.logger.error(
-          `Service account payload from UIAM failed validation: ${parsed.error.message}`
-        );
-        throw Boom.badGateway('Error occurred during service account retrieval.');
-      }
-
-      return toDirectoryEntry(parsed.data);
+      return toDirectoryEntry(await this.uiam.getServiceAccount(id));
     } catch (e) {
       this.logger.error(`Failed to get service account: ${getDetailedErrorMessage(e)}`);
       throw e;

@@ -283,13 +283,8 @@ export interface UiamServicePublic {
   ): Promise<UiamServiceAccount>;
 
   /**
-   * Lists service accounts via the UIAM service, one page at a time.
-   *
-   * Authenticated as Kibana itself: the mTLS client certificate the dispatcher presents is the
-   * only credential, and UIAM returns the accounts whose `assumable_by` policy names this Kibana's
-   * project. No user credential or shared secret is sent. UIAM skips certificate authentication
-   * when an `Authorization` header is present, and the shared secret on its own identifies
-   * nobody.
+   * Lists service accounts via the UIAM service, one page at a time. Only returns the accounts
+   * whose `assumable_by` policy names this Kibana's project.
    */
   listServiceAccounts(params?: {
     limit?: number;
@@ -297,10 +292,8 @@ export interface UiamServicePublic {
   }): Promise<UiamListServiceAccountsResponse>;
 
   /**
-   * Fetches one service account via the UIAM service.
-   *
-   * Authenticated as Kibana itself over mTLS, exactly like {@link listServiceAccounts}, and
-   * authorized by UIAM against the account's `assumable_by`.
+   * Fetches one service account via the UIAM service. Only returns the account when its
+   * `assumable_by` policy names this Kibana's project.
    */
   getServiceAccount(serviceAccountId: string): Promise<UiamServiceAccountDetails>;
 

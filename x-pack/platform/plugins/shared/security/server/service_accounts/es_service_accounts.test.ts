@@ -772,45 +772,17 @@ describe('EsServiceAccounts', () => {
       expect(credentialStore.findExisting).toHaveBeenCalledWith([]);
     });
 
-    it('rejects a cursor this backend could not have issued with a 400', async () => {
-      await expect(
-        serviceAccounts.list(request, { after: 'not-a-principal' })
-      ).rejects.toMatchObject({ output: { statusCode: 400 } });
-
-      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
-    });
-
-    it('rejects with a 502 when the envelope itself is unrecognized', async () => {
-      // A broken envelope is the one shape there is no page to salvage from, unlike a single
-      // account Kibana cannot read.
-      esClient.asCurrentUser.transport.request.mockResolvedValueOnce({ accounts: [] });
-
-      await expect(serviceAccounts.list(request)).rejects.toMatchObject({
-        output: { statusCode: 502 },
-      });
-      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('unrecognized shape'));
-    });
-
-    it('skips an account it cannot read and still reports the rest of the page', async () => {
+    it('skips an account whose principal it cannot split and still reports the rest of the page', async () => {
       esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
-        service_accounts: [
-          queried('no-namespace'),
-          { username: 'kibana/no-roles', type: 'user_managed' },
-          queried('kibana/nightshift-relay'),
-        ],
+        service_accounts: [queried('no-namespace'), queried('kibana/nightshift-relay')],
       });
 
       const result = await serviceAccounts.list(request);
 
-      // Two unreadable accounts cost those accounts, not the directory.
+      // One unreadable account costs that account, not the directory.
       expect(result.serviceAccounts.map(({ id }) => id)).toEqual(['kibana/nightshift-relay']);
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('Skipping service account [no-namespace]')
-      );
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining(
-          'Skipping a service account Elasticsearch reported in an unrecognized shape'
-        )
       );
       // The credential join only ever sees the accounts that survived.
       expect(credentialStore.findExisting).toHaveBeenCalledWith(['kibana/nightshift-relay']);
@@ -821,7 +793,7 @@ describe('EsServiceAccounts', () => {
         service_accounts: [
           queried('kibana/a'),
           // Unreadable, and the last account of the page: the cursor still has to step over it.
-          { username: 'kibana/b', type: 'user_managed' },
+          queried('no-namespace'),
           queried('kibana/c'),
         ],
       });
@@ -829,34 +801,7 @@ describe('EsServiceAccounts', () => {
       const result = await serviceAccounts.list(request, { limit: 2 });
 
       expect(result.serviceAccounts.map(({ id }) => id)).toEqual(['kibana/a']);
-      expect(result.nextPage).toBe('kibana/b');
-    });
-
-    it.each([
-      ['no username at all', { type: 'user_managed' }],
-      ['a username this backend would refuse back', queried('no-namespace')],
-    ])('rejects with a 502 when the last account of the page has %s', async (_, lastAccount) => {
-      esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
-        service_accounts: [queried('kibana/a'), lastAccount, queried('kibana/c')],
-      });
-
-      // Every cursor this backend hands out has to be one it will accept back, and silently
-      // ending the directory here would hide every account after this one.
-      await expect(serviceAccounts.list(request, { limit: 2 })).rejects.toMatchObject({
-        output: { statusCode: 502 },
-      });
-    });
-
-    it('hands out a cursor its own `after` guard accepts', async () => {
-      esClient.asCurrentUser.transport.request.mockResolvedValue({
-        service_accounts: [queried('kibana/a'), queried('kibana/b')],
-      });
-
-      const { nextPage } = await serviceAccounts.list(request, { limit: 1 });
-
-      await expect(serviceAccounts.list(request, { limit: 1, after: nextPage })).resolves.toEqual(
-        expect.objectContaining({ serviceAccounts: expect.any(Array) })
-      );
+      expect(result.nextPage).toBe('no-namespace');
     });
 
     it('rejects with a 403 when security features are disabled in Elasticsearch', async () => {
@@ -987,10 +932,10 @@ describe('EsServiceAccounts', () => {
       });
     });
 
-    it('rejects an id that is not namespace/service with a 400 before reaching Elasticsearch', async () => {
+    it('reports an id that is not namespace/service as missing, without reaching Elasticsearch', async () => {
       for (const id of ['nightshift-relay', 'kibana/../_cluster', 'a/b/c', '']) {
         await expect(serviceAccounts.get(request, id)).rejects.toMatchObject({
-          output: { statusCode: 400 },
+          output: { statusCode: 404 },
         });
       }
       expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();

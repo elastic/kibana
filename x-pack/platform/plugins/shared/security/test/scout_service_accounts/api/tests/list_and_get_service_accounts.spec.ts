@@ -294,34 +294,27 @@ apiTest.describe('List and get Elasticsearch service accounts', { tag: LOCAL_ONL
     }
   );
 
-  apiTest('answers 404 for an unknown account and for a built-in one', async ({ apiClient }) => {
-    for (const id of [
-      `${ES_SERVICE_ACCOUNT_NAMESPACE}/${uniqueName('missing')}`,
-      'elastic/kibana',
-    ]) {
-      const response = await apiClient.get(getPath(id), {
-        headers: adminHeaders,
-        responseType: 'json',
-      });
-      expect(response.statusCode, `id [${id}] should be a 404`).toBe(404);
+  apiTest(
+    'answers 404 for an unknown account, a built-in one, and an id that is no principal at all',
+    async ({ apiClient }) => {
+      for (const id of [
+        `${ES_SERVICE_ACCOUNT_NAMESPACE}/${uniqueName('missing')}`,
+        'elastic/kibana',
+        'no-namespace',
+        'kibana/../_cluster/settings',
+        'a/b/c',
+      ]) {
+        const response = await apiClient.get(getPath(id), {
+          headers: adminHeaders,
+          responseType: 'json',
+        });
+        expect(response.statusCode, `id [${id}] should be a 404`).toBe(404);
+      }
     }
-  });
+  );
 
-  apiTest('rejects an id that is not a service account principal', async ({ apiClient }) => {
-    for (const id of ['no-namespace', 'kibana/../_cluster/settings', 'a/b/c']) {
-      const response = await apiClient.get(getPath(id), {
-        headers: adminHeaders,
-        responseType: 'json',
-      });
-      expect(response.statusCode, `id [${id}] should be a 400`).toBe(400);
-    }
-  });
-
-  // Stateful only: the `after` case is the Elasticsearch backend refusing a cursor it could not
-  // have issued. UIAM validates its own cursors and answers a bad one itself, so this assertion
-  // does not carry over to a serverless deployment.
-  apiTest('rejects a page size outside 1 to 100 and a foreign cursor', async ({ apiClient }) => {
-    for (const query of ['?limit=0', '?limit=101', '?after=not-a-principal']) {
+  apiTest('rejects a page size outside 1 to 100', async ({ apiClient }) => {
+    for (const query of ['?limit=0', '?limit=101']) {
       const response = await apiClient.get(`${SERVICE_ACCOUNT_ENDPOINT}${query}`, {
         headers: adminHeaders,
         responseType: 'json',

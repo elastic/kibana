@@ -37,7 +37,6 @@ import {
   ES_SERVICE_ACCOUNT_TOKEN_NAME,
   SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE,
   SERVICE_ACCOUNT_MAX_ROLES,
-  SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
   serviceAccountRoleNameSchema,
   serviceAccountRolesSchema,
 } from '../../common/service_accounts';
@@ -70,28 +69,11 @@ const createTokenResponseSchema = z.object({
  * One account as the query API reports it. Unlike the keyed GET response, the principal is a
  * `username` field on each item. The API only ever returns user-managed accounts.
  */
-const queriedAccountSchema = accountEntrySchema.extend({
-  username: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH),
-  type: z.literal('user_managed'),
-});
-
-/**
- * The envelope only. Its entries are deliberately `unknown` here and parsed one at a time in
- * {@link EsServiceAccounts.list}, so that one account Elasticsearch reports oddly cannot make the
- * whole directory unreadable. One more than the page is allowed through, for the row that answers
- * "is there another page".
- */
-const queryServiceAccountsResponseSchema = z.object({
-  service_accounts: z.array(z.unknown()).max(SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE + 1),
-});
-
-/**
- * The one field of a raw row the cursor is taken from, read without the rest of the account:
- * paging has to continue over an entry the page itself skipped.
- */
-const cursorSchema = z.object({
-  username: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH),
-});
+interface QueriedServiceAccount {
+  username: string;
+  roles: string[];
+  enabled: boolean;
+}
 
 /** An Elasticsearch user-managed service account, as Elasticsearch reports it. */
 interface ElasticsearchServiceAccount {
@@ -102,19 +84,7 @@ interface ElasticsearchServiceAccount {
   enabled: boolean;
 }
 
-/**
- * Narrows an account to the directory entry.
- *
- * No `createdBy` or `createdAt`: the only creator Kibana could name here is the one recorded on
- * the credential it stored, and that answers who asked Kibana to create the account rather than
- * who owns the account now. Elasticsearch is growing a creator of its own, so the field waits for
- * it in a followup instead of shipping a stand-in the UI would have to unlearn.
- *
- * `assumable` is a different question and stays. Here it is answered by the token: Kibana can
- * act as an account it minted one for, and has nothing to act with for an account created
- * straight through Elasticsearch. See the field's own documentation for what that does and does
- * not promise.
- */
+/** Narrows an account to the directory entry. */
 const toDirectoryEntry = (
   { id, name, roles, enabled }: ElasticsearchServiceAccount,
   assumable: boolean
@@ -346,19 +316,13 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       action: 'list service accounts',
     });
 
-    // Cursors are principals this backend handed out. Anything else is refused up front rather
-    // than sent to Elasticsearch as a `search_after` value.
-    if (after !== undefined && parseEsServiceAccountId(after) === undefined) {
-      throw Boom.badRequest(
-        'Cannot list service accounts: the `after` cursor was not issued by this deployment'
-      );
-    }
-
     const esClient = this.clusterClient.asScoped(request).asCurrentUser;
 
     // One more than the page, so that "is there another page" is answered by the same query
     // without trusting a total that a concurrent create could shift.
-    const response = await esClient.transport.request<unknown>({
+    const { service_accounts: rawAccounts } = await esClient.transport.request<{
+      service_accounts: QueriedServiceAccount[];
+    }>({
       method: 'POST',
       path: '/_security/_query/service',
       body: {
@@ -368,35 +332,11 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       },
     });
 
-    const parsed = queryServiceAccountsResponseSchema.safeParse(response);
-    if (!parsed.success) {
-      this.logger.error(
-        `Elasticsearch reported service accounts in an unrecognized shape: ${parsed.error.message}`
-      );
-      throw Boom.badGateway(
-        'Cannot list service accounts: Elasticsearch reported them in an unrecognized shape.'
-      );
-    }
-
-    const rawAccounts = parsed.data.service_accounts;
-
-    // Each account is parsed on its own, and one Kibana cannot read is skipped rather than taken
-    // as a reason to refuse the page. Same call `readAccount` makes for a single account, where
-    // an account type Kibana does not know resolves to `undefined`: an oddity in one account must
-    // not make the whole directory unreadable.
-    const accounts = rawAccounts.slice(0, limit).flatMap((rawAccount) => {
-      const account = queriedAccountSchema.safeParse(rawAccount);
-      if (!account.success) {
-        this.logger.warn(
-          `Skipping a service account Elasticsearch reported in an unrecognized shape: ${account.error.message}`
-        );
-        return [];
-      }
-
-      const { username, roles, enabled } = account.data;
+    // An account whose principal Kibana cannot split is skipped rather than taken as a reason to
+    // refuse the page: an oddity in one account must not make the whole directory unreadable.
+    const accounts = rawAccounts.slice(0, limit).flatMap(({ username, roles, enabled }) => {
       const principal = parseEsServiceAccountId(username);
       if (!principal) {
-        // Elasticsearch enforces the same naming rules, so this is a contract change, not data.
         this.logger.warn(
           `Skipping service account [${username}], which Elasticsearch reported with an unrecognized principal`
         );
@@ -417,21 +357,8 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     }
 
     // The cursor comes off the raw page rather than the entries above, so that skipping an entry
-    // cannot rewind paging over everything that followed it. It is held to the rule the `after`
-    // guard above applies, because this is the value that comes back through it: every cursor
-    // this backend hands out has to be one it will accept.
-    const cursor = cursorSchema.safeParse(rawAccounts[limit - 1]);
-    if (!cursor.success || parseEsServiceAccountId(cursor.data.username) === undefined) {
-      this.logger.error(
-        `Elasticsearch reported the last service account of the page without a usable cursor: ` +
-          `${JSON.stringify(rawAccounts[limit - 1])}`
-      );
-      throw Boom.badGateway(
-        'Cannot list service accounts: Elasticsearch reported a page that cannot be continued.'
-      );
-    }
-
-    return { serviceAccounts, nextPage: cursor.data.username };
+    // cannot rewind paging over everything that followed it.
+    return { serviceAccounts, nextPage: rawAccounts[limit - 1].username };
   }
 
   async get(request: KibanaRequest, id: string): Promise<ServiceAccountDirectoryEntry> {
@@ -449,13 +376,11 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       action: 'get a service account',
     });
 
-    // Refused before it can reach a URL path: an id this backend would never issue is malformed,
-    // not merely missing.
+    // An id that is not `{namespace}/{service}` names no Elasticsearch account, so it is missing
+    // rather than malformed.
     const principal = parseEsServiceAccountId(id);
     if (!principal) {
-      throw Boom.badRequest(
-        'Cannot get a service account: the id is not an Elasticsearch service account principal'
-      );
+      throw Boom.notFound(`Service account [${id}] was not found`);
     }
 
     const esClient = this.clusterClient.asScoped(request).asCurrentUser;
