@@ -1313,6 +1313,126 @@ describe('ServiceFlyoutOverview transactions section props', () => {
     );
   });
 
+  it('syncs locator range text without pending when resolved start/end are unchanged', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    const { rerender } = renderOverview();
+
+    act(() => {
+      transactionsSectionProps!.onTransactionClick!({
+        name: 'GET /api/orders',
+        transactionType: 'request',
+        latency: { value: 1 },
+        throughput: { value: 1 },
+        errorRate: { value: 0 },
+      });
+    });
+
+    // Date picker Update can rewrite now-15m/now to equivalent absolute strings without a
+    // new list request (start/end already match those absolutes).
+    mockUseServiceFlyoutContext.mockReturnValue(
+      buildContextValue({
+        filters: {
+          rangeFrom: '2026-09-11T00:00:00.000Z',
+          rangeTo: '2026-09-18T15:20:34.096Z',
+          start: '2026-09-11T00:00:00.000Z',
+          end: '2026-09-18T15:20:34.096Z',
+        },
+      })
+    );
+    rerender(
+      <IntlProvider locale="en">
+        <ServiceFlyoutOverview />
+      </IntlProvider>
+    );
+
+    expect(mockTransactionDetailFlyoutProps).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        isFiltersStale: false,
+        isFiltersPending: false,
+        filters: expect.objectContaining({
+          rangeFrom: '2026-09-11T00:00:00.000Z',
+          rangeTo: '2026-09-18T15:20:34.096Z',
+          start: '2026-09-11T00:00:00.000Z',
+          end: '2026-09-18T15:20:34.096Z',
+        }),
+      })
+    );
+  });
+
+  it('reconciles after a prior list error when loading still carries the retained error', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    const { rerender } = renderOverview();
+
+    act(() => {
+      transactionsSectionProps!.onTransactionClick!({
+        name: 'GET /api/orders',
+        transactionType: 'request',
+        latency: { value: 1 },
+        throughput: { value: 1 },
+        errorRate: { value: 0 },
+      });
+    });
+
+    act(() => {
+      transactionsSectionProps!.onTransactionsChange!(
+        [],
+        listMeta(false, PRODUCTION_LIST_FILTERS, new Error('boom'))
+      );
+    });
+
+    mockUseServiceFlyoutContext.mockReturnValue(
+      buildContextValue({
+        filters: {
+          environment: 'staging',
+          rangeFrom: 'now-1h',
+          rangeTo: 'now-5m',
+          start: '2026-09-18T14:20:34.096Z',
+          end: '2026-09-18T15:15:34.096Z',
+        },
+      })
+    );
+    rerender(
+      <IntlProvider locale="en">
+        <ServiceFlyoutOverview />
+      </IntlProvider>
+    );
+
+    // useAbortableAsync retains the previous error while the next request is loading.
+    act(() => {
+      transactionsSectionProps!.onTransactionsChange!(
+        [],
+        listMeta(true, STAGING_LIST_FILTERS, new Error('boom'))
+      );
+    });
+
+    act(() => {
+      transactionsSectionProps!.onTransactionsChange!(
+        [
+          {
+            name: 'GET /api/orders',
+            transactionType: 'request',
+            latency: { value: 1 },
+            throughput: { value: 1 },
+            errorRate: { value: 0 },
+          },
+        ],
+        listMeta(false, STAGING_LIST_FILTERS)
+      );
+    });
+
+    expect(mockTransactionDetailFlyoutProps).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        isFiltersStale: false,
+        isFiltersPending: false,
+        filters: expect.objectContaining({
+          environment: 'staging',
+          start: '2026-09-18T14:20:34.096Z',
+          end: '2026-09-18T15:15:34.096Z',
+        }),
+      })
+    );
+  });
+
   it('forwards projectRouting to ServiceFlyoutTransactionsSection', () => {
     mockUseProjectRouting.mockReturnValue('_alias:*');
     mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });

@@ -69,15 +69,17 @@ function isSameAppliedFilters(a: AppliedTransactionFilters, b: AppliedTransactio
   );
 }
 
-function toFiltersKey(filters: AppliedTransactionFilters): string {
-  return [
-    filters.environment,
-    filters.rangeFrom,
-    filters.rangeTo,
-    filters.start,
-    filters.end,
-    filters.transactionType,
-  ].join('|');
+function isSameListFilters(a: AppliedTransactionFilters, b: AppliedTransactionFilters): boolean {
+  return (
+    a.environment === b.environment &&
+    a.start === b.start &&
+    a.end === b.end &&
+    a.transactionType === b.transactionType
+  );
+}
+
+function toListFiltersKey(filters: AppliedTransactionFilters): string {
+  return [filters.environment, filters.start, filters.end, filters.transactionType].join('|');
 }
 
 const KEY_METRICS_SECTION_TITLE = i18n.translate('xpack.apm.serviceFlyout.keyMetricsSectionTitle', {
@@ -276,26 +278,28 @@ export function ServiceFlyoutOverview() {
     [environment, rangeFrom, rangeTo, start, end, transactionType]
   );
 
-  const liveFiltersKey = useMemo(
-    () => toFiltersKey(liveTransactionFilters),
+  const liveListFiltersKey = useMemo(
+    () => toListFiltersKey(liveTransactionFilters),
     [liveTransactionFilters]
   );
 
   // After a parent filter change, ignore list settles until we've seen loading for
   // the new filters — the previous list can still report the selection as present
   // for one paint (useAbortableAsync keeps the old value with loading=false).
+  // Key only on list-affecting fields: rangeFrom/rangeTo can change to equivalent
+  // absolutes without a new list request (EuiSuperDatePicker stores resolved values).
   const pendingFilterReconcileRef = useRef(false);
   const seenLoadingSincePendingRef = useRef(false);
-  const prevLiveFiltersKeyRef = useRef(liveFiltersKey);
+  const prevLiveListFiltersKeyRef = useRef(liveListFiltersKey);
 
   if (!selectedTransaction) {
     pendingFilterReconcileRef.current = false;
     seenLoadingSincePendingRef.current = false;
-    prevLiveFiltersKeyRef.current = liveFiltersKey;
-  } else if (prevLiveFiltersKeyRef.current !== liveFiltersKey) {
+    prevLiveListFiltersKeyRef.current = liveListFiltersKey;
+  } else if (prevLiveListFiltersKeyRef.current !== liveListFiltersKey) {
     pendingFilterReconcileRef.current = true;
     seenLoadingSincePendingRef.current = false;
-    prevLiveFiltersKeyRef.current = liveFiltersKey;
+    prevLiveListFiltersKeyRef.current = liveListFiltersKey;
   }
 
   // When the transactions section unmounts (e.g. filters resolve to OTel), freeze on the
@@ -322,10 +326,43 @@ export function ServiceFlyoutOverview() {
     });
   }, [transactionsAvailable]);
 
+  // Locator-only range text change (same resolved start/end) — sync without pending.
+  useEffect(() => {
+    setSelectedTransaction((prev) => {
+      if (!prev || prev.isFiltersStale) {
+        return prev;
+      }
+      if (!isSameListFilters(prev.filters, liveTransactionFilters)) {
+        return prev;
+      }
+      if (
+        prev.filters.rangeFrom === liveTransactionFilters.rangeFrom &&
+        prev.filters.rangeTo === liveTransactionFilters.rangeTo &&
+        prev.confirmedFilters.rangeFrom === liveTransactionFilters.rangeFrom &&
+        prev.confirmedFilters.rangeTo === liveTransactionFilters.rangeTo
+      ) {
+        return prev;
+      }
+      return {
+        ...prev,
+        filters: {
+          ...prev.filters,
+          rangeFrom: liveTransactionFilters.rangeFrom,
+          rangeTo: liveTransactionFilters.rangeTo,
+        },
+        confirmedFilters: {
+          ...prev.confirmedFilters,
+          rangeFrom: liveTransactionFilters.rangeFrom,
+          rangeTo: liveTransactionFilters.rangeTo,
+        },
+      };
+    });
+  }, [liveTransactionFilters]);
+
   const isFiltersPending = Boolean(
     selectedTransaction &&
       !selectedTransaction.isFiltersStale &&
-      !isSameAppliedFilters(selectedTransaction.filters, liveTransactionFilters)
+      !isSameListFilters(selectedTransaction.filters, liveTransactionFilters)
   );
 
   const onTransactionClick = useCallback(
@@ -351,7 +388,7 @@ export function ServiceFlyoutOverview() {
         }
         pendingFilterReconcileRef.current = false;
         seenLoadingSincePendingRef.current = false;
-        prevLiveFiltersKeyRef.current = liveFiltersKey;
+        prevLiveListFiltersKeyRef.current = liveListFiltersKey;
         return {
           transactionName: item.name,
           transactionType: resolvedTransactionType,
@@ -362,13 +399,13 @@ export function ServiceFlyoutOverview() {
         };
       });
     },
-    [transactionType, liveTransactionFilters, liveFiltersKey, capabilities.schema]
+    [transactionType, liveTransactionFilters, liveListFiltersKey, capabilities.schema]
   );
 
   const onTransactionsChange = useCallback(
     (items: TransactionGroup[], meta: TransactionsListChangeMeta) => {
       setSelectedTransaction((prev) => {
-        if (!prev || meta.error) {
+        if (!prev) {
           return prev;
         }
 
@@ -383,10 +420,17 @@ export function ServiceFlyoutOverview() {
           return prev;
         }
 
+        // Record current-generation loading before treating a retained error. useAbortableAsync
+        // keeps the previous error while the next request is loading and clears it only on success.
         if (meta.isLoading) {
           if (pendingFilterReconcileRef.current) {
             seenLoadingSincePendingRef.current = true;
           }
+          return prev;
+        }
+
+        // Settled failure — do not promote or freeze from an error response.
+        if (meta.error) {
           return prev;
         }
 
