@@ -241,9 +241,10 @@ export class SlackAppService {
     // - Observability signals get direct ES read: the obs agent tools query them as this key
     //   (asCurrentUser). Broad conventional patterns cover APM/OTel logs, metrics and traces
     //   without regenerating the key when new data is onboarded.
-    // - Significant Events and Streams data is reached through the `streams` Kibana feature
-    //   (read), and connectors/LLM through `actions` (read) — both go via the internal Kibana
-    //   client, so no grants on system/dot indices (unsupported in serverless) are needed.
+    // - Nightshift data is reached through the `nightshift` Kibana feature (read includes
+    //   every engine via includeIn), Streams data through `streams` (read), and
+    //   connectors/LLM through `actions` (read). Those go via the internal Kibana client,
+    //   so no grants on system/dot indices (unsupported in serverless) are needed.
     const apiKeyResult = await this.server.security.authc.apiKeys.grantAsInternalUser(request, {
       name: 'nightshift-relay-agent-builder',
       metadata: { managed: true, managed_by: 'nightshift-relay', type: 'agent_builder_converse' },
@@ -263,6 +264,7 @@ export class SlackAppService {
             {
               spaces: ['*'],
               feature: {
+                nightshift: ['read'],
                 streams: ['read'],
                 agentBuilder: ['read'],
                 actions: ['read'],

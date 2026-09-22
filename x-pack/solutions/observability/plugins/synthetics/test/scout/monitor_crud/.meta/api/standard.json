@@ -1,5 +1,5 @@
 {
-  "sha1": "1f53149a010d5050843f6a5f31762bbb11198701",
+  "sha1": "4fee04a41c2367d9c02fc70592ea04a5cc3dc085",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -699,6 +699,90 @@
       }
     },
     {
+      "id": "881e677e5b68d4b-eec97b5847d5328",
+      "title": "AddMonitorPublicAPI request validation accepts the base monitor the negative cases mutate",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/monitor_validation.spec.ts",
+        "line": 59,
+        "column": 31
+      }
+    },
+    {
+      "id": "881e677e5b68d4b-9eab933ed97adc6",
+      "title": "AddMonitorPublicAPI request validation rejects an unknown monitor type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/monitor_validation.spec.ts",
+        "line": 61,
+        "column": 7
+      }
+    },
+    {
+      "id": "881e677e5b68d4b-b6be3c541b1ce93",
+      "title": "AddMonitorPublicAPI request validation rejects a monitor with no locations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/monitor_validation.spec.ts",
+        "line": 64,
+        "column": 89
+      }
+    },
+    {
+      "id": "881e677e5b68d4b-a34345f0b08f2bb",
+      "title": "AddMonitorPublicAPI request validation rejects an unknown top-level field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/monitor_validation.spec.ts",
+        "line": 68,
+        "column": 61
+      }
+    },
+    {
+      "id": "881e677e5b68d4b-8d16f4a7dbf0529",
+      "title": "AddMonitorPublicAPI request validation rejects an invalid namespace",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/monitor_validation.spec.ts",
+        "line": 71,
+        "column": 77
+      }
+    },
+    {
+      "id": "881e677e5b68d4b-ba9b7864c8537e3",
+      "title": "AddMonitorPublicAPI request validation rejects a schedule outside the allowed set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/monitor_validation.spec.ts",
+        "line": 75,
+        "column": 13
+      }
+    },
+    {
       "id": "66867247d5e8f72-477aeb8cdb738c8",
       "title": "Synthetics multi-space settings [GET] returns defaults anchored to the current space when no SO exists",
       "expectedStatus": "passed",
@@ -803,6 +887,170 @@
       }
     },
     {
+      "id": "7c76ec8d73532ba-027706e8f1b527e",
+      "title": "getOverviewStatus omits page fields when page and perPage are not both sent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/overview_status.spec.ts",
+        "line": 192,
+        "column": 19
+      }
+    },
+    {
+      "id": "7c76ec8d73532ba-5e93be0468ad70a",
+      "title": "getOverviewStatus returns a page of configs and keeps fleet-wide counts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/overview_status.spec.ts",
+        "line": 200,
+        "column": 85
+      }
+    },
+    {
+      "id": "7c76ec8d73532ba-471a171fc999ce1",
+      "title": "getOverviewStatus page slices are disjoint and cover every config",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/overview_status.spec.ts",
+        "line": 226,
+        "column": 98
+      }
+    },
+    {
+      "id": "7c76ec8d73532ba-c8e98f76df3aa9b",
+      "title": "getOverviewStatus statusFilter paginates a single bucket",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/overview_status.spec.ts",
+        "line": 272,
+        "column": 7
+      }
+    },
+    {
+      "id": "7c76ec8d73532ba-985656c3aabd7a0",
+      "title": "getOverviewStatus query narrows the page to a matching monitor name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/overview_status.spec.ts",
+        "line": 285,
+        "column": 93
+      }
+    },
+    {
+      "id": "7c76ec8d73532ba-8317bbe45963b80",
+      "title": "getOverviewStatus rejects out-of-range page and perPage",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/overview_status.spec.ts",
+        "line": 291,
+        "column": 84
+      }
+    },
+    {
+      "id": "7c76ec8d73532ba-c784627f0cdc1b7",
+      "title": "getOverviewStatus stale lookup returns no prior runs for a never-run monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/overview_status.spec.ts",
+        "line": 305,
+        "column": 19
+      }
+    },
+    {
+      "id": "7c76ec8d73532ba-dbc0229f4b93441",
+      "title": "getOverviewStatus keeps two Heartbeat locations that share configId as distinct page rows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/overview_status.spec.ts",
+        "line": 324,
+        "column": 27
+      }
+    },
+    {
+      "id": "2ca770c721a7347-905a30533941939",
+      "title": "RunTestManuallyPermissions read-only role cannot run tests (403)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/run_test_manually.spec.ts",
+        "line": 155,
+        "column": 27
+      }
+    },
+    {
+      "id": "2ca770c721a7347-49991afc3c99bf6",
+      "title": "RunTestManuallyPermissions user with no Synthetics access cannot run tests (403)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/run_test_manually.spec.ts",
+        "line": 162,
+        "column": 27
+      }
+    },
+    {
+      "id": "2ca770c721a7347-bcdafea1617e095",
+      "title": "RunTestManuallyPermissions read + can_run_test_manually role is authorized to run tests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/run_test_manually.spec.ts",
+        "line": 167,
+        "column": 27
+      }
+    },
+    {
+      "id": "2ca770c721a7347-43eb8e8308d5839",
+      "title": "RunTestManuallyPermissions base `all` role is still authorized to run tests (non-breaking)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/run_test_manually.spec.ts",
+        "line": 173,
+        "column": 27
+      }
+    },
+    {
       "id": "0748b0e208605b1-ceb30d1a52ecd1f",
       "title": "SyntheticsSuggestions returns the suggestions",
       "expectedStatus": "passed",
@@ -839,8 +1087,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/synthetics_api_security.spec.ts",
-        "line": 142,
-        "column": 4
+        "line": 143,
+        "column": 12
       }
     },
     {
@@ -852,8 +1100,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/synthetics_api_security.spec.ts",
-        "line": 153,
-        "column": 7
+        "line": 161,
+        "column": 17
       }
     },
     {

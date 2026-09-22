@@ -12,6 +12,10 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { EuiProvider } from '@elastic/eui';
 
 import { EditPackPage } from '.';
+import {
+  OsqueryPageHeaderProvider,
+  useOsqueryPageHeaderTitle,
+} from '../../../components/osquery_page_header_context';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -96,6 +100,12 @@ const mockPackData = {
   read_only: false,
 };
 
+const PublishedTitle = () => {
+  const title = useOsqueryPageHeaderTitle();
+
+  return <span data-test-subj="published-osquery-title">{title ?? ''}</span>;
+};
+
 const renderPage = () => {
   capturedOnDirtyStateChange = undefined;
 
@@ -103,7 +113,10 @@ const renderPage = () => {
     <EuiProvider>
       <IntlProvider locale="en">
         <QueryClientProvider client={createTestQueryClient()}>
-          <EditPackPage />
+          <OsqueryPageHeaderProvider>
+            <EditPackPage />
+            <PublishedTitle />
+          </OsqueryPageHeaderProvider>
         </QueryClientProvider>
       </IntlProvider>
     </EuiProvider>
@@ -213,6 +226,22 @@ describe('EditPackPage', () => {
       renderPage();
 
       expect(screen.queryByText('View all packs')).not.toBeInTheDocument();
+    });
+
+    it('publishes a fallback header title when the pack fails to load', () => {
+      mockUsePack.mockReturnValue({ isLoading: false, data: undefined, error: new Error('nope') });
+      renderPage();
+
+      expect(screen.getByText('Failed to load pack')).toBeInTheDocument();
+      expect(screen.getByTestId('published-osquery-title')).toHaveTextContent('Edit pack');
+    });
+
+    it('publishes a view-pack fallback title when a read-only load fails', () => {
+      setPermissions({ readPacks: true, writePacks: false });
+      mockUsePack.mockReturnValue({ isLoading: false, data: undefined, error: new Error('nope') });
+      renderPage();
+
+      expect(screen.getByTestId('published-osquery-title')).toHaveTextContent('View pack');
     });
   });
 

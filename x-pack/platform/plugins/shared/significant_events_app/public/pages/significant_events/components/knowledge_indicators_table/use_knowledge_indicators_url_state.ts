@@ -8,7 +8,7 @@
 import { castArray } from 'lodash';
 import { useDebouncedValue } from '@kbn/react-hooks';
 import { COMPUTED_FEATURE_TYPES } from '@kbn/significant-events-schema';
-import type { KnowledgeIndicator } from '@kbn/streams-ai';
+import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSignificantEventsAppParams } from '../../../../hooks/use_significant_events_app_params';

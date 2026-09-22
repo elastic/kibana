@@ -9,11 +9,9 @@ import type { Client } from '@elastic/elasticsearch';
 import { isNotFoundError } from '@kbn/es-errors';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { createGcsRepository } from '@kbn/es-snapshot-loader';
-import type { KbnClient } from '@kbn/test';
 import type { GcsConfig } from './snapshot_run_config';
 import { resolveBasePath } from './snapshot_run_config';
 import { ensureLogsIndexTemplate } from './logs_index_template';
-import { SIGNIFICANT_EVENTS_MEMORIES_DATA_STREAM } from './snapshot_indices';
 
 const LOGS_STREAM_NAME = 'logs';
 const REPLAY_TEMP_PREFIX = 'sigevents-replay-temp-';
@@ -90,10 +88,12 @@ const getLogsIndicesFromSnapshot = async ({
   esClient,
   repoName,
   snapshotName,
+  includeOriginalNameIndices = false,
 }: {
   esClient: Client;
   repoName: string;
   snapshotName: string;
+  includeOriginalNameIndices?: boolean;
 }): Promise<string[]> => {
   const snapshotInfo = await esClient.snapshot.get({
     repository: repoName,
@@ -109,8 +109,15 @@ const getLogsIndicesFromSnapshot = async ({
   // matters: `.startsWith('.ds-logs')` would also match sibling streams like `logs.ecs`
   // (`.ds-logs.ecs-…`), which the discovery eval does not target — and restoring those extra backing
   // indices is what trips `index_not_found` at reindex. The agent reads `FROM logs`, so only `logs`.
+  // Archived incident snapshots store plain indices under their original data-stream names
+  // (`logs-<dataset>-<namespace>`, no `.ds-` prefix). Callers must opt in through
+  // `includeOriginalNameIndices`, so demo-snapshot replays keep their strict filter; the dash keeps
+  // sibling streams like `logs.ecs` excluded either way.
   const logsIndices = (snapshot.indices ?? []).filter(
-    (indexName) => indexName.startsWith('.ds-logs-') || indexName === LOGS_STREAM_NAME
+    (indexName) =>
+      indexName.startsWith('.ds-logs-') ||
+      indexName === LOGS_STREAM_NAME ||
+      (includeOriginalNameIndices && indexName.startsWith('logs-'))
   );
   if (logsIndices.length === 0) {
     throw new Error(`No logs indices found in snapshot "${snapshotName}"`);
@@ -462,7 +469,8 @@ export async function replayIntoManagedStream(
   esClient: Client,
   log: ToolingLog,
   snapshotName: string,
-  gcs: GcsConfig
+  gcs: GcsConfig,
+  options: { includeOriginalNameIndices?: boolean } = {}
 ): Promise<ReplayStats> {
   log.debug(`Replaying snapshot "${snapshotName}" into managed logs stream`);
 
@@ -485,6 +493,7 @@ export async function replayIntoManagedStream(
       esClient,
       repoName: artifacts.repoName,
       snapshotName,
+      includeOriginalNameIndices: options.includeOriginalNameIndices,
     });
     artifacts.tempIndices = await restoreLogsIndicesToTemp({
       esClient,
@@ -560,49 +569,3 @@ export async function replayIntoManagedStream(
     await cleanupReplayArtifacts({ esClient, log, artifacts });
   }
 }
-
-export const resetMemoryPages = async ({
-  esClient,
-  log,
-}: {
-  esClient: Client;
-  log: ToolingLog;
-}): Promise<void> => {
-  // Delete the data stream instead of deleting through its write alias. The memory stream is
-  // versioned and stale documents in older backing indices can otherwise remain searchable.
-  await esClient.indices
-    .deleteDataStream({ name: SIGNIFICANT_EVENTS_MEMORIES_DATA_STREAM })
-    .catch((error: unknown) => {
-      if (!isNotFoundError(error)) throw error;
-    });
-  log.debug('Reset significant events memory data stream');
-};
-
-export const replayIntoMemoryPages = async ({
-  log,
-  memoryPages,
-  kbnClient,
-}: {
-  log: ToolingLog;
-  kbnClient: KbnClient;
-  memoryPages: Array<{ name: string; content: string }>;
-}): Promise<void> => {
-  // Seed through the memory API so the data stream is provisioned and each page
-  // is embedded (with lexical fallback) exactly as production pages are.
-  await Promise.all(
-    memoryPages.map(async (page) => {
-      const response = await kbnClient.request<{
-        id: string;
-        name: string;
-      }>({
-        path: '/internal/streams/memory/entries',
-        method: 'POST',
-        body: page,
-      });
-      if (response.data.name !== page.name || !response.data.id) {
-        throw new Error(`Memory seed returned an invalid page for "${page.name}"`);
-      }
-      log.info(`Seeded memory page "${page.name}"`);
-    })
-  );
-};

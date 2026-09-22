@@ -25,6 +25,8 @@ import { actionExecutorMock } from '../../../../lib/action_executor.mock';
 import { connectorTokenClientMock } from '../../../../lib/connector_token_client.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { computeIngestTokenHash } from '../../../../inbound/compute_ingest_token_hash';
+import { parseIngestToken } from '../../../../inbound/ingress_credential';
+import { CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE } from '../../../../constants/saved_objects';
 import { connectorTypeHasInboundEvents } from '@kbn/connector-specs';
 
 jest.mock('@kbn/connector-specs', () => {
@@ -86,8 +88,6 @@ const mockContext: ActionsClientContext = {
   spaceId: 'default',
 };
 
-const storedHash = 'b'.repeat(64);
-
 const decryptedInbound = {
   id: 'connector-id',
   type: 'action',
@@ -95,9 +95,10 @@ const decryptedInbound = {
     actionTypeId: '.inboundWebhook',
     name: 'sales-ingress',
     isMissingSecrets: false,
-    config: { ingestTokenHash: storedHash },
+    config: {},
     secrets: {},
     authMode: 'shared',
+    apiKey: 'stored-last-saver-key',
   },
   references: [],
   version: '1',
@@ -119,12 +120,17 @@ describe('rotateInboundIngress', () => {
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(
       decryptedInbound as never
     );
-    unsecuredSavedObjectsClient.get.mockResolvedValue(decryptedInbound as never);
-    unsecuredSavedObjectsClient.create.mockImplementation(async (_type, attributes) => ({
-      id: 'connector-id',
-      type: 'action',
+    unsecuredSavedObjectsClient.find.mockResolvedValue({
+      saved_objects: [],
+      total: 0,
+      page: 1,
+      per_page: 10,
+    } as never);
+    unsecuredSavedObjectsClient.create.mockImplementation(async (type, attributes, options) => ({
+      id: options?.id ?? 'generated-id',
+      type,
       attributes,
-      references: [],
+      references: options?.references ?? [],
     }));
     (actionTypeRegistry.get as jest.Mock).mockReturnValue(
       getConnectorType({
@@ -139,23 +145,39 @@ describe('rotateInboundIngress', () => {
     );
   });
 
-  it('remints credentials and returns the new token once', async () => {
+  it('mints a credential SO and returns the token once without writing connector config', async () => {
     const result = await rotateInboundIngress({
       context: mockContext,
       id: 'connector-id',
     });
 
     expect(result.ingestToken).toEqual(expect.any(String));
-    const saved = unsecuredSavedObjectsClient.create.mock.calls[0][1] as {
-      config: { ingestTokenHash: string };
-    };
-    expect(saved.config.ingestTokenHash).not.toBe(storedHash);
-    expect(saved.config.ingestTokenHash).toBe(
-      computeIngestTokenHash({
+    const parsed = parseIngestToken(result.ingestToken);
+    expect(parsed).toBeDefined();
+
+    const created = unsecuredSavedObjectsClient.create.mock.calls.find(
+      (call) => call[0] === CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE
+    );
+    expect(created).toBeDefined();
+    expect(created?.[1]).toEqual(
+      expect.objectContaining({
         connectorId: 'connector-id',
-        spaceId: 'default',
-        token: result.ingestToken,
+        ingestTokenHash: computeIngestTokenHash({
+          connectorId: 'connector-id',
+          spaceId: 'default',
+          token: result.ingestToken,
+        }),
       })
+    );
+    expect(created?.[2]).toEqual(
+      expect.objectContaining({
+        id: parsed?.credentialId,
+      })
+    );
+    expect(created?.[2]).not.toEqual(expect.objectContaining({ overwrite: true }));
+    expect(parsed?.credentialId).not.toBe('connector-id');
+    expect(unsecuredSavedObjectsClient.create.mock.calls.some((call) => call[0] === 'action')).toBe(
+      false
     );
   });
 
@@ -203,6 +225,10 @@ describe('rotateInboundIngress', () => {
     });
 
     expect(result.ingestToken).toEqual(expect.any(String));
-    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
+      expect.any(Object),
+      expect.any(Object)
+    );
   });
 });

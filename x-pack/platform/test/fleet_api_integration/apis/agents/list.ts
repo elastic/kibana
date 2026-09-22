@@ -486,40 +486,60 @@ export default function ({ getService }: FtrProviderContext) {
 
       const agentlessPolicyId = policyRes.item.id;
 
-      // Enroll an agent into the agentless policy
-      const agentId = 'agentless-agent-1';
+      // Agent 1: plain policy_id, no policy_base_id (legacy/unmigrated doc shape).
+      // Covers the fallback branch: policy_id exact-match + NOT policy_base_id:*.
+      const agentIdPlain = 'agentless-agent-plain';
       await es.index({
         index: AGENTS_INDEX,
-        id: agentId,
+        id: agentIdPlain,
         refresh: 'wait_for',
         document: {
           type: 'PERMANENT',
           active: true,
           enrolled_at: new Date().toISOString(),
-          local_metadata: { elastic: { agent: { id: agentId, version: '9.0.0' } } },
+          local_metadata: { elastic: { agent: { id: agentIdPlain, version: '9.0.0' } } },
           status: 'online',
           policy_id: agentlessPolicyId,
         },
       });
 
-      // Call the agent list API without showAgentless parameter
+      // Agent 2: versioned policy_id with policy_base_id (regression case).
+      // Agents enrolled by fleet-server after version-specific policies are enabled carry
+      // policy_id: "<uuid>#<version>" but policy_base_id: "<uuid>". Before the fix, the
+      // exact-term NOT policy_id:("uuid") exclusion did not match this agent.
+      const agentIdVersioned = 'agentless-agent-versioned';
+      await es.index({
+        index: AGENTS_INDEX,
+        id: agentIdVersioned,
+        refresh: 'wait_for',
+        document: {
+          type: 'PERMANENT',
+          active: true,
+          enrolled_at: new Date().toISOString(),
+          local_metadata: { elastic: { agent: { id: agentIdVersioned, version: '9.0.0' } } },
+          status: 'online',
+          policy_id: `${agentlessPolicyId}#9.6`,
+          policy_base_id: agentlessPolicyId,
+        },
+      });
+
+      // Both agents must appear when the toggle is on (default).
       const { body: apiResponseWithAgentless } = await supertest.get('/api/fleet/agents');
-
-      // Assert that the agentless agent is returned
       const agentIdsWithAgentless = apiResponseWithAgentless.items.map((agent: any) => agent.id);
-      expect(agentIdsWithAgentless).to.contain(agentId);
+      expect(agentIdsWithAgentless).to.contain(agentIdPlain);
+      expect(agentIdsWithAgentless).to.contain(agentIdVersioned);
 
-      // Call the agent list API with showAgentless=false
+      // Both agents must be absent when the toggle is off.
       const { body: apiResponse } = await supertest
         .get('/api/fleet/agents?showAgentless=false')
         .expect(200);
-
-      // Assert that the agentless agent is not returned
       const agentIds = apiResponse.items.map((agent: any) => agent.id);
-      expect(agentIds).not.contain(agentId);
+      expect(agentIds).not.contain(agentIdPlain);
+      expect(agentIds).not.contain(agentIdVersioned);
 
-      // Cleanup: delete the agent and policy
-      await es.delete({ index: AGENTS_INDEX, id: agentId, refresh: 'wait_for' });
+      // Cleanup
+      await es.delete({ index: AGENTS_INDEX, id: agentIdPlain, refresh: 'wait_for' });
+      await es.delete({ index: AGENTS_INDEX, id: agentIdVersioned, refresh: 'wait_for' });
       await supertest
         .post(`/api/fleet/agent_policies/delete`)
         .set('kbn-xsrf', 'xxxx')

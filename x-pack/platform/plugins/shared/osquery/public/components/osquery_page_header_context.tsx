@@ -39,6 +39,8 @@ export const useOsquerySubpageTitle = (title: string | undefined) => {
   const { setTitle } = useContext(OsqueryPageHeaderContext);
 
   useLayoutEffect(() => {
+    // Skip undefined so a pack/query id switch does not wipe the current title
+    // and flash the header skeleton. The tradeoff is a brief stale title.
     if (title === undefined) {
       return;
     }

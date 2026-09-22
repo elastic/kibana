@@ -21,7 +21,6 @@ import {
 } from '@kbn/agent-builder-common/agents/prompts';
 import { toolCallAction, executeToolAction } from '../actions';
 import type { ResearchAgentAction } from '../actions';
-import type { ProcessedConversationRound } from './prepare_conversation';
 import { materializeAskUserQuestionToolCall } from './ask_user_question_tool_call';
 
 /**
@@ -32,7 +31,7 @@ export const pendingAskUserQuestionStepsToActions = ({
   promptState,
   eventEmitter,
 }: {
-  round: ConversationRound | ProcessedConversationRound;
+  round: ConversationRound;
   promptState: PromptStorageState;
   eventEmitter: (event: ChatAgentEvent) => void;
 }): { actions: ResearchAgentAction[]; consumedPromptIds: string[] } => {

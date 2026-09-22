@@ -4,7 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CriteriaWithPagination, Direction, EuiTableSelectionType, Query } from '@elastic/eui';
+import type {
+  CriteriaWithPagination,
+  Direction,
+  EuiBasicTableColumn,
+  EuiTableSelectionType,
+  Query,
+} from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -69,6 +75,7 @@ export function StreamsTreeTable({
   selection,
   blocksActivity = false,
   activityBlockTooltip,
+  canManage,
   onOnboardStreamActionClick,
   onStopOnboardingActionClick,
 }: {
@@ -76,11 +83,12 @@ export function StreamsTreeTable({
   streamOnboardingResultMap: Record<string, SignificantEventsWorkflowStatusResult>;
   loading?: boolean;
   searchQuery: Query;
-  selection: EuiTableSelectionType<TableRow>;
+  selection?: EuiTableSelectionType<TableRow>;
   /** When true, per-row onboard actions are disabled (global pause / status loading). */
   blocksActivity?: boolean;
   /** Explains why onboard actions are disabled (loading / error / paused). */
   activityBlockTooltip?: string;
+  canManage: boolean;
   onOnboardStreamActionClick: (streamName: string) => void;
   onStopOnboardingActionClick: (streamName: string) => void;
 }) {
@@ -223,6 +231,7 @@ export function StreamsTreeTable({
           selection={selection}
           loading={loading}
           data-test-subj="streamsTable"
+          // prettier-ignore
           columns={[
             {
               field: 'nameSortKey',
@@ -429,7 +438,9 @@ export function StreamsTreeTable({
                 );
               },
             },
-          ]}
+          ].filter((column) => canManage || column.field !== 'definition') as Array<
+            EuiBasicTableColumn<TableRow>
+          >}
           itemId="nameSortKey"
           items={items}
           sorting={sorting}

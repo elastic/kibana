@@ -5,165 +5,107 @@
  * 2.0.
  */
 
-import { css, keyframes } from '@emotion/react';
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { css } from '@emotion/react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiCallOut,
+  EuiFieldSearch,
   EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
+  EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
 import { SIGNIFICANT_EVENTS_APP_ID } from '@kbn/deeplinks-observability';
 import { usePageReady } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
-import type { SignificantEvent } from '@kbn/significant-events-schema';
+import { useDebouncedValue } from '@kbn/react-hooks';
+import type { ListInvestigationItem, Severity } from '@kbn/nightshift-investigations-plugin/common';
+import { SEVERITY_OPTIONS } from '@kbn/significant-events-schema';
 import { useKibana } from '../hooks/use_kibana';
-import { buildNewSignificantEventChatOptions } from '../chat/open_significant_event_in_chat';
+import { isHttpNotFoundError } from '../common/http_error';
+import { RETRY_BUTTON_LABEL } from '../common/messages';
+import { useInvestigationSections } from '../hooks/use_investigation_sections';
 import {
-  byCriticalityAndUpdatedAtDesc,
-  getLatestInvestigation,
-  getNeedsActionEvents,
-  getResolvedEvents,
-} from '../event/significant_event_status';
-import { useFetchEventById } from '../hooks/use_fetch_event_by_id';
-import { useFetchSignificantEvents } from '../hooks/use_fetch_significant_events';
-import { useFetchInvestigationStatuses } from '../hooks/use_fetch_investigation_statuses';
-import { useCloseSignificantEvent } from '../hooks/use_close_significant_event';
+  InvestigationList,
+  type InvestigationListHandle,
+} from '../investigation/investigation_list';
+import { InvestigationDetailFlyout } from '../investigation/investigation_detail_flyout';
+import { isInvestigationSectionVisible } from '../investigation/investigation_section';
+import { InvestigationSeverityTiles } from '../investigation/investigation_severity_tiles';
 import {
-  buildImpactedServiceChips,
-  filterEventsByImpactedServiceChip,
-} from '../landing/impacted_services_chips';
-import { ImpactedServices } from '../landing/impacted_services';
-import { SignificantEventList } from '../landing/significant_event_list';
-import { SignificantEventStatuses } from '../landing/significant_event_statuses';
-import { EventFlyout } from '../event/event_flyout';
-import { NightshiftHeader } from './header';
-import { NightshiftEmptyState } from './empty_state';
-import {
-  clearNightshiftEventIdParam,
-  getNightshiftEventIdFromSearch,
-  IMPACTED_SERVICES_QUERY_PARAM,
-  setNightshiftEventIdParam,
+  clearNightshiftInvestigationIdParam,
+  getNightshiftInvestigationIdFromSearch,
+  getNightshiftSearchQueryFromSearch,
+  getNightshiftSeverityFromSearch,
+  setNightshiftInvestigationIdParam,
+  setNightshiftSearchQueryParam,
+  setNightshiftSeverityParam,
 } from '../common/url_params';
+import { NightshiftHeader } from './header';
 
-const COMPACT_APP_HEADER_HEIGHT_PX = 48;
-const POPULATED_CONTENT_TRANSITION_MS = 400;
+function isSeverity(value: string | undefined): value is Severity {
+  return SEVERITY_OPTIONS.some((severity) => severity === value);
+}
 
-const loadingStateExitAnimation = keyframes`
-  from {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-  to {
-    opacity: 0;
-    transform: translateY(-16px) scale(0.985);
-  }
-`;
-
-const populatedContentEntryAnimation = keyframes`
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-`;
-
-const setElementInert = (element: HTMLDivElement | null): void => {
-  element?.setAttribute('inert', '');
-};
+const INVESTIGATIONS_SEARCH_DEBOUNCE_MS = 300;
 
 export function NightshiftApp(): React.ReactElement {
   const { euiTheme } = useEuiTheme();
-  const { agentBuilder, application } = useKibana().services;
+  const { application, nightshiftInvestigations } = useKibana().services;
   const history = useHistory();
   const { search } = useLocation();
-  const needsActionSectionRef = useRef<HTMLElement>(null);
-  const resolvedSectionRef = useRef<HTMLElement>(null);
-  const [isTransitioningFromLoading, setIsTransitioningFromLoading] = useState(false);
+  const sectionsRef = useRef<InvestigationListHandle>(null);
+  const scrolledToSeverity = useRef<Severity | undefined>(undefined);
 
-  const { data, error: eventsError, isFetching, isLoading, refetch } = useFetchSignificantEvents();
-  const { closeSignificantEvent, closingEventUuid } = useCloseSignificantEvent();
-  const wasLoadingRef = useRef(isLoading);
+  // Read filter state from URL so it survives navigation and is shareable.
+  const searchQuery = useMemo(() => getNightshiftSearchQueryFromSearch(search), [search]);
+  const debouncedSearchQuery = useDebouncedValue(searchQuery, INVESTIGATIONS_SEARCH_DEBOUNCE_MS);
+  const rawSeverity = useMemo(() => getNightshiftSeverityFromSearch(search), [search]);
+  const activeSeverity: Severity | undefined = useMemo(
+    () => (isSeverity(rawSeverity) ? rawSeverity : undefined),
+    [rawSeverity]
+  );
 
-  const events = useMemo(() => data?.hits ?? [], [data]);
+  const {
+    sections,
+    severityCounts,
+    hasActiveInvestigations,
+    isInitialLoading,
+    isFetching,
+    totalCount,
+    loadedCount,
+    refetchAll,
+  } = useInvestigationSections({ query: debouncedSearchQuery });
 
-  const investigationExecutionIds = useMemo(
+  // A tile scrolls to its section, so it is only actionable while the list is rendering that
+  // section — which the list, not the count, decides.
+  const scrollableSeverities = useMemo(
     () =>
-      events
-        .map((event) => getLatestInvestigation(event)?.workflow_execution_id)
-        .filter((executionId): executionId is string => Boolean(executionId)),
-    [events]
-  );
-  const { data: investigationStatuses } = useFetchInvestigationStatuses(investigationExecutionIds);
-  const selectedEventIdFromUrl = useMemo(() => getNightshiftEventIdFromSearch(search), [search]);
-
-  // Derived from the freshest fetched list (not a click-time snapshot), so
-  // background refetches keep the open flyout current.
-  const eventFromList = useMemo(
-    () => events.find(({ event_id: eventId }) => eventId === selectedEventIdFromUrl),
-    [events, selectedEventIdFromUrl]
+      new Set(
+        sections
+          .filter(isInvestigationSectionVisible)
+          .map(({ id }) => id)
+          .filter(isSeverity)
+      ),
+    [sections]
   );
 
-  const shouldFetchById = Boolean(selectedEventIdFromUrl) && !eventFromList && !isLoading;
-  const eventByIdQuery = useFetchEventById(selectedEventIdFromUrl, { enabled: shouldFetchById });
-  const selectedEvent = eventFromList ?? eventByIdQuery.data;
+  const isInvestigationsAvailable = nightshiftInvestigations?.investigationsClient != null;
 
-  const [notFoundEventId, setNotFoundEventId] = useState<string>();
-
-  useEffect(() => {
-    if (!selectedEventIdFromUrl || isLoading) {
-      return;
-    }
-    if (selectedEvent) {
-      setNotFoundEventId(undefined);
-      return;
-    }
-    if (!eventByIdQuery.isFetched) {
-      return;
-    }
-
-    setNotFoundEventId(selectedEventIdFromUrl);
-    const params = new URLSearchParams(history.location.search);
-    clearNightshiftEventIdParam(params);
-    history.replace({ search: params.toString() });
-  }, [eventByIdQuery.isFetched, history, isLoading, selectedEvent, selectedEventIdFromUrl]);
-
-  const selectedImpactedServiceKey = useMemo(
-    () => new URLSearchParams(search).get(IMPACTED_SERVICES_QUERY_PARAM) ?? undefined,
+  const selectedInvestigationId = useMemo(
+    () => getNightshiftInvestigationIdFromSearch(search),
     [search]
   );
 
   const showAllEventsHref = application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
     deepLinkId: 'events',
   });
-  const emptyStateLogsHref = application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
-    path: '/significant_events?rangeFrom=now-24h&rangeTo=now',
-  });
 
-  const handleChatClick = useCallback(
-    (event: SignificantEvent) => {
-      agentBuilder?.openChat(buildNewSignificantEventChatOptions(event));
-    },
-    [agentBuilder]
-  );
-  const onChatClick = agentBuilder ? handleChatClick : undefined;
-  const handleCloseSignificantEvent = useCallback(
-    (event: SignificantEvent) => closeSignificantEvent(event.event_uuid),
-    [closeSignificantEvent]
-  );
-
-  const handleEventClick = useCallback(
-    (event: SignificantEvent) => {
-      setNotFoundEventId(undefined);
+  const handleInvestigationClick = useCallback(
+    (investigation: ListInvestigationItem) => {
       const params = new URLSearchParams(history.location.search);
-      setNightshiftEventIdParam(params, event.event_id);
+      setNightshiftInvestigationIdParam(params, investigation.investigation_id);
       history.replace({ search: params.toString() });
     },
     [history]
@@ -171,172 +113,91 @@ export function NightshiftApp(): React.ReactElement {
 
   const handleFlyoutClose = useCallback(() => {
     const params = new URLSearchParams(history.location.search);
-    clearNightshiftEventIdParam(params);
+    clearNightshiftInvestigationIdParam(params);
     history.replace({ search: params.toString() });
   }, [history]);
 
-  // Highest-severity events first so critical items are never buried below older, lower-impact ones.
-  const needsActionEvents = useMemo(
-    () => getNeedsActionEvents(events).sort(byCriticalityAndUpdatedAtDesc),
-    [events]
-  );
-  const resolvedEvents = useMemo(
-    () => getResolvedEvents(events).sort(byCriticalityAndUpdatedAtDesc),
-    [events]
-  );
-
-  // The events we display drive the empty state.
-  const shownEvents = useMemo(
-    () => [...needsActionEvents, ...resolvedEvents],
-    [needsActionEvents, resolvedEvents]
-  );
-
-  // Chips cover every event on the page, resolved included, so filtering by a service that only
-  // appears in resolved events is still reachable.
-  const impactedServiceChips = useMemo(() => buildImpactedServiceChips(shownEvents), [shownEvents]);
-
-  const activeImpactedServiceChip = impactedServiceChips.some(
-    ({ key }) => key === selectedImpactedServiceKey
-  )
-    ? selectedImpactedServiceKey
-    : undefined;
-
-  const handleImpactedServiceSelect = useCallback(
-    (chipKey: string) => {
+  const handleSearchChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       const params = new URLSearchParams(history.location.search);
-      const nextKey = activeImpactedServiceChip === chipKey ? undefined : chipKey;
-      if (nextKey) {
-        params.set(IMPACTED_SERVICES_QUERY_PARAM, nextKey);
-      } else {
-        params.delete(IMPACTED_SERVICES_QUERY_PARAM);
-      }
+      setNightshiftSearchQueryParam(params, e.target.value);
       history.replace({ search: params.toString() });
     },
-    [activeImpactedServiceChip, history]
+    [history]
   );
 
-  const visibleNeedsActionEvents = useMemo(
-    () => filterEventsByImpactedServiceChip(needsActionEvents, activeImpactedServiceChip),
-    [needsActionEvents, activeImpactedServiceChip]
-  );
-  const visibleResolvedEvents = useMemo(
-    () => filterEventsByImpactedServiceChip(resolvedEvents, activeImpactedServiceChip),
-    [resolvedEvents, activeImpactedServiceChip]
-  );
-
-  const scrollToSection = (sectionRef: React.RefObject<HTMLElement>) => {
-    sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
-
-  const scrollToNeedsAction = useCallback(() => {
-    scrollToSection(needsActionSectionRef);
-  }, []);
-
-  const scrollToResolved = useCallback(() => {
-    scrollToSection(resolvedSectionRef);
-  }, []);
-
-  const hasEvents = shownEvents.length > 0;
-  const hasNeedsAction = needsActionEvents.length > 0;
-  const showCenteredEmptyLayout = isLoading || !hasEvents;
-  const contentTopMargin =
-    showCenteredEmptyLayout && !isLoading ? euiTheme.size.m : euiTheme.size.l;
-  const constrainContentToViewport = showCenteredEmptyLayout || isTransitioningFromLoading;
-  const viewportContentHeight = `calc(
-    var(--kbn-application--content-height, 100vh) -
-    ${COMPACT_APP_HEADER_HEIGHT_PX}px -
-    ${euiTheme.size.l} -
-    ${euiTheme.size.l} -
-    ${contentTopMargin}
-  )`;
-
-  useLayoutEffect(() => {
-    const shouldTransitionToPopulatedContent =
-      wasLoadingRef.current && !isLoading && hasEvents && !eventsError;
-    wasLoadingRef.current = isLoading;
-
-    if (!shouldTransitionToPopulatedContent) {
-      if (isLoading) {
-        setIsTransitioningFromLoading(false);
+  const handleSeverityClick = useCallback(
+    (severity: Severity) => {
+      const params = new URLSearchParams(history.location.search);
+      setNightshiftSeverityParam(params, severity);
+      history.replace({ search: params.toString() });
+      if (sectionsRef.current?.scrollToSeverity(severity)) {
+        scrolledToSeverity.current = severity;
       }
+    },
+    [history]
+  );
+
+  // A deep link can name a tier the list is not rendering yet, so the jump counts as done only
+  // once it lands, and is retried as sections appear. Keying on the severity rather than a flag
+  // lets a later `?severity=` in the same mounted app scroll too.
+  useEffect(() => {
+    if (!activeSeverity || scrolledToSeverity.current === activeSeverity) {
       return;
     }
-
-    const prefersReducedMotion =
-      typeof window !== 'undefined' &&
-      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReducedMotion) {
-      return;
+    if (sectionsRef.current?.scrollToSeverity(activeSeverity)) {
+      scrolledToSeverity.current = activeSeverity;
     }
-
-    setIsTransitioningFromLoading(true);
-    const transitionTimeout = window.setTimeout(
-      () => setIsTransitioningFromLoading(false),
-      POPULATED_CONTENT_TRANSITION_MS
-    );
-
-    return () => window.clearTimeout(transitionTimeout);
-  }, [eventsError, hasEvents, isLoading]);
-
-  usePageReady({
-    isReady: !isLoading && !eventsError,
-    isRefreshing: isFetching && !isLoading,
-    customMetrics: {
-      key1: 'critical_high_event_count',
-      value1: events.length,
-      key2: 'needs_action_event_count',
-      value2: needsActionEvents.length,
-      key3: 'resolved_event_count',
-      value3: resolvedEvents.length,
-      key4: 'impacted_services_filter_active',
-      value4: activeImpactedServiceChip ? 1 : 0,
-    },
-    meta: {
-      description:
-        '[ttfmp_nightshift] The Nightshift landing page has loaded critical/high significant events.',
-    },
-  });
-
-  const sharedListProps = {
-    closingEventUuid,
-    investigationStatuses,
-    onChatClick,
-    onCloseClick: handleCloseSignificantEvent,
-    onEventClick: handleEventClick,
-    selectedEventUuid: selectedEvent?.event_uuid,
-  };
-
-  const eventNotFoundCallout = notFoundEventId ? (
-    <div
-      css={css`
-        margin-top: ${euiTheme.size.m};
-        width: 100%;
-      `}
-    >
-      <EuiCallOut
-        announceOnMount
-        color="warning"
-        iconType="warning"
-        size="s"
-        title={i18n.translate('xpack.nightshift.eventNotFoundTitle', {
-          defaultMessage: 'Significant Event {eventId} not found',
-          values: { eventId: notFoundEventId },
-        })}
-      >
-        <EuiText size="s">
-          {i18n.translate('xpack.nightshift.eventNotFoundDescription', {
-            defaultMessage:
-              'The event in this link is no longer in the current results. The URL has been cleared.',
-          })}
-        </EuiText>
-      </EuiCallOut>
-    </div>
-  ) : null;
+  }, [activeSeverity, scrollableSeverities]);
 
   // Only treat a load failure as fatal when there is nothing to show; a failed
   // background refetch that still has cached data degrades to a non-blocking warning.
-  if (eventsError && !hasEvents && !isLoading) {
-    return <LoadingErrorCallout onRetry={() => refetch()} />;
+  const allFailed =
+    !isInitialLoading &&
+    sections.every((section) => section.error && section.investigations.length === 0);
+  const loadedInvestigations = useMemo(
+    () => sections.flatMap((section) => section.investigations),
+    [sections]
+  );
+
+  usePageReady({
+    isReady: !isInitialLoading && !allFailed,
+    isRefreshing: isFetching && !isInitialLoading,
+    customMetrics: {
+      key1: 'investigation_count',
+      value1: loadedCount,
+      key2: 'investigation_total',
+      value2: totalCount,
+      key3: 'active_investigation_count',
+      value3: loadedInvestigations.filter(
+        ({ status }) => status === 'pending' || status === 'running'
+      ).length,
+      key4: 'failed_investigation_count',
+      value4: loadedInvestigations.filter(({ status }) => status === 'failed').length,
+    },
+    meta: {
+      description: '[ttfmp_nightshift] The Nightshift landing page has loaded investigations.',
+    },
+  });
+
+  if (!isInvestigationsAvailable || allFailed) {
+    const fatalError = sections.find((section) => section.error)?.error ?? null;
+    if (!isInvestigationsAvailable || isHttpNotFoundError(fatalError)) {
+      return (
+        <EuiCallOut
+          announceOnMount
+          color="warning"
+          iconType="warning"
+          css={css`
+            margin-top: ${euiTheme.size.l};
+          `}
+          title={i18n.translate('xpack.nightshift.investigations.unavailableTitle', {
+            defaultMessage: 'Investigations are not available in this deployment',
+          })}
+        />
+      );
+    }
+    return <LoadingErrorCallout onRetry={refetchAll} />;
   }
 
   return (
@@ -345,177 +206,53 @@ export function NightshiftApp(): React.ReactElement {
       gutterSize="none"
       responsive={false}
       css={css`
-        align-items: ${showCenteredEmptyLayout ? 'center' : 'stretch'};
         background: ${euiTheme.colors.backgroundBaseSubdued};
         box-sizing: border-box;
-        gap: ${showCenteredEmptyLayout ? euiTheme.size.xl : 0};
-        height: ${constrainContentToViewport ? viewportContentHeight : 'auto'};
-        justify-content: ${showCenteredEmptyLayout ? 'center' : 'flex-start'};
-        margin-top: ${contentTopMargin};
-        min-height: 0;
-        overflow-y: ${constrainContentToViewport ? 'clip' : 'visible'};
-        padding: ${showCenteredEmptyLayout ? euiTheme.size.xxl : 0}
-          ${showCenteredEmptyLayout ? euiTheme.size.xl : 0} calc(${euiTheme.size.xxl} * 1.5);
-        position: relative;
+        margin-top: ${euiTheme.size.l};
+        padding-bottom: calc(${euiTheme.size.xxl} * 1.5);
       `}
     >
       <NightshiftHeader
-        isEmptyState={showCenteredEmptyLayout}
-        isLoading={isLoading}
-        hasNeedsAction={hasNeedsAction}
-        showAllEventsHref={hasEvents ? showAllEventsHref : undefined}
+        isLoading={isInitialLoading}
+        hasActiveInvestigations={hasActiveInvestigations}
+        showAllEventsHref={showAllEventsHref}
       />
 
-      {showCenteredEmptyLayout ? (
-        <>
-          {eventNotFoundCallout}
-          <NightshiftEmptyState isProcessing={isLoading} logsHref={emptyStateLogsHref} />
-        </>
-      ) : (
-        <div
-          data-test-subj="nightshiftPopulatedContent"
-          css={[
-            css`
-              width: 100%;
+      <EuiSpacer size="l" />
 
-              @media (prefers-reduced-motion: reduce) {
-                animation: none;
-              }
-            `,
-            isTransitioningFromLoading &&
-              css`
-                animation: ${populatedContentEntryAnimation} ${POPULATED_CONTENT_TRANSITION_MS}ms
-                  ${euiTheme.animation.resistance} both;
-              `,
-          ]}
-        >
-          {eventsError && (
-            <div
-              css={css`
-                margin-top: ${euiTheme.size.m};
-              `}
-            >
-              <EuiCallOut
-                announceOnMount
-                color="warning"
-                iconType="warning"
-                size="s"
-                title={i18n.translate('xpack.nightshift.refreshWarningTitle', {
-                  defaultMessage: 'Showing the last loaded results; refreshing failed.',
-                })}
-              >
-                <EuiButtonEmpty
-                  color="warning"
-                  data-test-subj="nightshiftRefreshRetryButton"
-                  flush="left"
-                  iconType="refresh"
-                  onClick={() => refetch()}
-                  size="s"
-                >
-                  {i18n.translate('xpack.nightshift.retryButtonText', {
-                    defaultMessage: 'Retry',
-                  })}
-                </EuiButtonEmpty>
-              </EuiCallOut>
-            </div>
-          )}
+      <EuiFieldSearch
+        data-test-subj="nightshiftInvestigationsSearchInput"
+        placeholder={i18n.translate('xpack.nightshift.investigations.searchPlaceholder', {
+          defaultMessage: 'Search',
+        })}
+        value={searchQuery ?? ''}
+        onChange={handleSearchChange}
+        isClearable
+        fullWidth
+      />
 
-          {eventNotFoundCallout}
+      <EuiSpacer size="m" />
 
-          <SignificantEventStatuses
-            needsActionCount={needsActionEvents.length}
-            onNeedsActionClick={scrollToNeedsAction}
-            onResolvedClick={scrollToResolved}
-            resolvedCount={resolvedEvents.length}
-          />
+      <InvestigationSeverityTiles
+        severityCounts={severityCounts}
+        scrollableSeverities={scrollableSeverities}
+        isLoading={isInitialLoading}
+        onSeverityClick={handleSeverityClick}
+      />
 
-          <ImpactedServices
-            services={impactedServiceChips}
-            onSelect={handleImpactedServiceSelect}
-            selectedServiceKey={activeImpactedServiceChip}
-          />
+      <EuiSpacer size="l" />
 
-          <EuiFlexItem
-            css={css`
-              margin-top: ${euiTheme.size.l};
-            `}
-          >
-            <EuiFlexGroup direction="column" gutterSize="l" responsive={false}>
-              {needsActionEvents.length > 0 && (
-                <EuiFlexItem>
-                  <SignificantEventList
-                    {...sharedListProps}
-                    events={visibleNeedsActionEvents}
-                    filterActive={Boolean(activeImpactedServiceChip)}
-                    onClearFilter={
-                      activeImpactedServiceChip
-                        ? () => handleImpactedServiceSelect(activeImpactedServiceChip)
-                        : undefined
-                    }
-                    sectionRef={needsActionSectionRef}
-                    statusColor="danger"
-                    title={i18n.translate('xpack.nightshift.list.needActionTitle', {
-                      defaultMessage: 'Need Action',
-                    })}
-                  />
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem>
-                <SignificantEventList
-                  {...sharedListProps}
-                  events={visibleResolvedEvents}
-                  filterActive={Boolean(activeImpactedServiceChip && resolvedEvents.length > 0)}
-                  onClearFilter={
-                    activeImpactedServiceChip && resolvedEvents.length > 0
-                      ? () => handleImpactedServiceSelect(activeImpactedServiceChip)
-                      : undefined
-                  }
-                  sectionRef={resolvedSectionRef}
-                  statusColor="success"
-                  title={i18n.translate('xpack.nightshift.list.resolvedTitle', {
-                    defaultMessage: 'Resolved',
-                  })}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </div>
-      )}
+      <InvestigationList
+        ref={sectionsRef}
+        sections={sections}
+        selectedInvestigationId={selectedInvestigationId}
+        onInvestigationClick={handleInvestigationClick}
+      />
 
-      {isTransitioningFromLoading && (
-        <div
-          aria-hidden={true}
-          data-test-subj="nightshiftLoadingExitTransition"
-          ref={setElementInert}
-          css={css`
-            align-items: center;
-            animation: ${loadingStateExitAnimation} ${POPULATED_CONTENT_TRANSITION_MS}ms
-              ${euiTheme.animation.resistance} both;
-            background: ${euiTheme.colors.backgroundBaseSubdued};
-            display: flex;
-            flex-direction: column;
-            gap: ${euiTheme.size.xl};
-            inset: 0;
-            justify-content: center;
-            padding: ${euiTheme.size.xxl} ${euiTheme.size.xl} calc(${euiTheme.size.xxl} * 1.5);
-            pointer-events: none;
-            position: absolute;
-            z-index: 1;
-
-            @media (prefers-reduced-motion: reduce) {
-              animation: none;
-            }
-          `}
-        >
-          <NightshiftHeader isEmptyState isLoading />
-          <NightshiftEmptyState isProcessing logsHref={emptyStateLogsHref} />
-        </div>
-      )}
-
-      {selectedEvent && (
-        <EventFlyout
-          key={selectedEvent.event_id}
-          event={selectedEvent}
+      {selectedInvestigationId && (
+        <InvestigationDetailFlyout
+          key={selectedInvestigationId}
+          investigationId={selectedInvestigationId}
           onClose={handleFlyoutClose}
         />
       )}
@@ -528,11 +265,11 @@ function LoadingErrorCallout({ onRetry }: { onRetry: () => void }): React.ReactE
 
   return (
     <EuiCallOut
+      announceOnMount
       color="danger"
       iconType="warning"
-      announceOnMount
-      title={i18n.translate('xpack.nightshift.loadingErrorTitle', {
-        defaultMessage: 'Unable to load significant events',
+      title={i18n.translate('xpack.nightshift.investigations.loadingErrorTitle', {
+        defaultMessage: 'Unable to load investigations',
       })}
       css={css`
         margin-top: ${euiTheme.size.l};
@@ -545,9 +282,7 @@ function LoadingErrorCallout({ onRetry }: { onRetry: () => void }): React.ReactE
         onClick={onRetry}
         size="s"
       >
-        {i18n.translate('xpack.nightshift.retryButtonText', {
-          defaultMessage: 'Retry',
-        })}
+        {RETRY_BUTTON_LABEL}
       </EuiButton>
     </EuiCallOut>
   );

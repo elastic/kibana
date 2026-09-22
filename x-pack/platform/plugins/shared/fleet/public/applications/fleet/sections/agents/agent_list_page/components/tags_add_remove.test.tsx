@@ -244,7 +244,9 @@ describe('TagsAddRemove', () => {
 
     fireEvent.click(getTag('tag2'));
 
-    expect(result.getByTitle('tag2').getAttribute('aria-checked')).toEqual('true');
+    expect(result.getByRole('option', { name: 'tag2' }).getAttribute('aria-checked')).toEqual(
+      'true'
+    );
   });
 
   it('should remove from selected tags on remove if action not completed immediately', async () => {
@@ -256,7 +258,9 @@ describe('TagsAddRemove', () => {
 
     fireEvent.click(getTag('tag1'));
 
-    expect(result.getByTitle('tag1').getAttribute('aria-checked')).toEqual('false');
+    expect(result.getByRole('option', { name: 'tag1' }).getAttribute('aria-checked')).toEqual(
+      'false'
+    );
   });
 
   it('should optimistically check tag when adding for single agent', async () => {
@@ -265,7 +269,9 @@ describe('TagsAddRemove', () => {
 
     fireEvent.click(getTag('tag2'));
 
-    expect(result.getByTitle('tag2').getAttribute('aria-checked')).toEqual('true');
+    expect(result.getByRole('option', { name: 'tag2' }).getAttribute('aria-checked')).toEqual(
+      'true'
+    );
   });
 
   it('should optimistically uncheck tag when removing for single agent', async () => {
@@ -274,7 +280,9 @@ describe('TagsAddRemove', () => {
 
     fireEvent.click(getTag('tag1'));
 
-    expect(result.getByTitle('tag1').getAttribute('aria-checked')).toEqual('false');
+    expect(result.getByRole('option', { name: 'tag1' }).getAttribute('aria-checked')).toEqual(
+      'false'
+    );
   });
 
   it('should rollback tag state on error when adding for single agent', async () => {
@@ -286,7 +294,9 @@ describe('TagsAddRemove', () => {
 
     fireEvent.click(getTag('tag2'));
 
-    expect(result.getByTitle('tag2').getAttribute('aria-checked')).toEqual('false');
+    expect(result.getByRole('option', { name: 'tag2' }).getAttribute('aria-checked')).toEqual(
+      'false'
+    );
   });
 
   it('should rollback tag state on error when removing for single agent', async () => {
@@ -298,7 +308,9 @@ describe('TagsAddRemove', () => {
 
     fireEvent.click(getTag('tag1'));
 
-    expect(result.getByTitle('tag1').getAttribute('aria-checked')).toEqual('true');
+    expect(result.getByRole('option', { name: 'tag1' }).getAttribute('aria-checked')).toEqual(
+      'true'
+    );
   });
 
   it('should rollback tag state on error for bulk selection', async () => {
@@ -310,7 +322,9 @@ describe('TagsAddRemove', () => {
 
     fireEvent.click(getTag('tag2'));
 
-    expect(result.getByTitle('tag2').getAttribute('aria-checked')).toEqual('false');
+    expect(result.getByRole('option', { name: 'tag2' }).getAttribute('aria-checked')).toEqual(
+      'false'
+    );
   });
 
   it('should add new tag when not found in search and button clicked - bulk selection', () => {

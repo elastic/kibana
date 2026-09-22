@@ -6,7 +6,7 @@
  */
 
 import type { Evaluator } from '@kbn/evals';
-import type { SignificantEventsToolUsage } from '@kbn/streams-ai';
+import type { SignificantEventsToolUsage } from '@kbn/nightshift-ai';
 
 interface ToolUsageTaskOutput {
   toolUsage?: SignificantEventsToolUsage;

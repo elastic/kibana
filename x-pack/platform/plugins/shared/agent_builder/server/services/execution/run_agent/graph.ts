@@ -19,7 +19,11 @@ import {
   createToolCallMessage,
 } from '@kbn/agent-builder-genai-utils/langchain';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
-import { isSubagentRosterUpdatedStep, type SubagentRosterEntry } from '@kbn/agent-builder-common';
+import {
+  isSubagentRosterUpdatedStep,
+  TimelineEventType,
+  type SubagentRosterEntry,
+} from '@kbn/agent-builder-common';
 import type { ResolvedConfiguration } from './types';
 import type { ResearchAgentAction } from './actions';
 import { convertError, isRecoverableError } from './utils/errors';
@@ -344,8 +348,8 @@ export const createAgentGraph = ({
  * SubagentRosterUpdatedStep across previous rounds.
  */
 const getPriorPurposes = (processedConversation: ProcessedConversation): Record<string, string> => {
-  const step = processedConversation.previousRounds
-    .flatMap((round) => round.steps)
+  const step = processedConversation.timeline
+    .flatMap((event) => (event.type === TimelineEventType.executionStep ? [event.data.step] : []))
     .findLast(isSubagentRosterUpdatedStep);
 
   if (!step) return {};

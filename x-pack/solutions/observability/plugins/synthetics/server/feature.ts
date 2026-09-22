@@ -30,8 +30,33 @@ import {
 import { syntheticsApiKeyObjectType } from './saved_objects/service_api_key';
 
 export const PRIVATE_LOCATION_WRITE_API = 'private-location-write';
+export const MONITOR_RUN_MANUALLY_API = 'monitor-run-manually';
+export const WRITE_SYNTHETICS_DEFAULT_RULES_API = 'write_synthetics_default_rules';
 
 const alertingFeatures = SYNTHETICS_ALERTING_FEATURES;
+
+const canRunTestManuallyPrivilege: SubFeaturePrivilegeGroupConfig = {
+  groupType: 'independent' as SubFeaturePrivilegeGroupType,
+  privileges: [
+    {
+      id: 'can_run_test_manually',
+      name: i18n.translate('xpack.synthetics.features.canRunTestManually', {
+        defaultMessage: 'Can run tests manually',
+      }),
+      // `includeIn: 'none'` — never granted implicitly. The run-test route accepts
+      // EITHER `uptime-write` (which base `all` already has, so existing roles keep
+      // working) OR this `monitor-run-manually` privilege, which lets an admin grant manual
+      // test runs to an otherwise read-only role without granting write access.
+      includeIn: 'none',
+      api: [MONITOR_RUN_MANUALLY_API],
+      savedObject: {
+        all: [],
+        read: [],
+      },
+      ui: ['canRunTestManually'],
+    },
+  ],
+};
 
 const elasticManagedLocationsEnabledPrivilege: SubFeaturePrivilegeGroupConfig = {
   groupType: 'independent' as SubFeaturePrivilegeGroupType,
@@ -87,6 +112,39 @@ const canReadParamsPrivilege: SubFeaturePrivilegeGroupConfig = {
       /* Field level access is enforced for the VALUE of the param.
        * The api is still accessible for SO operations to users without this privilege */
       api: [],
+    },
+  ],
+};
+
+const canManageRulesPrivilege: SubFeaturePrivilegeGroupConfig = {
+  groupType: 'independent',
+  privileges: [
+    {
+      id: 'can_manage_rules',
+      name: i18n.translate('xpack.synthetics.features.canManageRules.label', {
+        defaultMessage: 'Can manage rules',
+      }),
+      // `includeIn: 'none'` — never granted implicitly. Default-alerting write
+      // routes accept EITHER `uptime-write` (which base `all` already has, so
+      // existing roles keep working) OR this `write_synthetics_default_rules`
+      // privilege. Alerting grants match base `all` so a read-only role can
+      // create, update, delete, enable, run, and backfill Synthetics/Uptime
+      // rules without monitor, settings, parameter, or private-location writes.
+      includeIn: 'none',
+      api: [WRITE_SYNTHETICS_DEFAULT_RULES_API],
+      savedObject: {
+        all: [],
+        read: [],
+      },
+      alerting: {
+        rule: {
+          all: alertingFeatures,
+          enable: alertingFeatures,
+          manual_run: alertingFeatures,
+          manage_rule_settings: alertingFeatures,
+        },
+      },
+      ui: ['canManageRules'],
     },
   ],
 };
@@ -170,6 +228,16 @@ export const syntheticsFeature = {
   },
   subFeatures: [
     {
+      name: i18n.translate('xpack.synthetics.features.app.runTest', {
+        defaultMessage: 'Run tests manually',
+      }),
+      description: i18n.translate('xpack.synthetics.features.app.runTest.description', {
+        defaultMessage:
+          'This feature allows a read-only user to trigger manual test runs of existing monitors, without granting the ability to create, edit, or delete monitors.',
+      }),
+      privilegeGroups: [canRunTestManuallyPrivilege],
+    },
+    {
       name: i18n.translate('xpack.synthetics.features.app.elastic', {
         defaultMessage: 'Elastic managed locations',
       }),
@@ -197,6 +265,16 @@ export const syntheticsFeature = {
         defaultMessage: 'This feature allows you to read global parameters values',
       }),
       privilegeGroups: [canReadParamsPrivilege],
+    },
+    {
+      name: i18n.translate('xpack.synthetics.features.app.rules', {
+        defaultMessage: 'Alert rules',
+      }),
+      description: i18n.translate('xpack.synthetics.features.app.rules.description', {
+        defaultMessage:
+          'Create, update, delete, enable, disable, run, and backfill Synthetics and Uptime alert rules, including the default status and TLS rules. This does not grant permission to create or edit monitors.',
+      }),
+      privilegeGroups: [canManageRulesPrivilege],
     },
   ],
 };
