@@ -41,6 +41,8 @@ const FREQUENCY_SELECT = 'customRecurringScheduleFrequencySelect';
 const SUBMIT_BUTTON = 'create-submit';
 const TOAST_TITLE = 'euiToastHeader__title';
 const MULTIPLE_SOLUTIONS_WARNING = 'maintenanceWindowMultipleSolutionsRemovedWarning';
+const TABLE_LOADED_CSS =
+  '.euiBasicTable[data-test-subj="maintenance-windows-table"]:not(.euiBasicTable-loading)';
 
 interface MaintenanceWindowFindResponse {
   data: Array<{ id: string; title: string }>;
@@ -82,6 +84,22 @@ const deleteMaintenanceWindows = async (kbnClient: KbnClient, ids: string[]) => 
       })
     )
   );
+};
+
+const openEditFlowByTitle = async (
+  page: ScoutPage,
+  kbnUrl: { get: (p: string) => string },
+  name: string
+) => {
+  await page.goto(kbnUrl.get(MAINTENANCE_WINDOWS_APP_PATH));
+  await page.locator(TABLE_LOADED_CSS).waitFor();
+  const searchBox = page.locator('.euiFieldSearch:not(.euiSelectableTemplateSitewide__search)');
+  await searchBox.fill(name);
+  await searchBox.press('Enter');
+  await page.locator(TABLE_LOADED_CSS).waitFor();
+  await page.testSubj.click('table-actions-popover');
+  await page.testSubj.click('table-actions-edit');
+  await expect(page.testSubj.locator(CREATE_FORM)).toBeVisible();
 };
 
 test.describe('Maintenance window create form', { tag: tags.stateful.classic }, () => {
@@ -185,5 +203,46 @@ test.describe('Maintenance window create form', { tag: tags.stateful.classic }, 
     await expect(page.testSubj.locator(TOAST_TITLE)).toContainText(
       `Created maintenance window '${name}'`
     );
+  });
+
+  test('creates with Episodes scope and verifies the filter is restored on edit', async ({
+    page,
+    kbnUrl,
+  }) => {
+    const name = getUniqueMaintenanceWindowName('Episodes Scope Maintenance Window');
+    createdMaintenanceWindowTitles.push(name);
+
+    await page.testSubj.click(CREATE_BUTTON);
+    await expect(page.testSubj.locator(CREATE_FORM)).toBeVisible();
+
+    await page.testSubj.locator(NAME_INPUT).fill(name);
+
+    // Enable the Episodes card — it is OFF by default.
+    await page.testSubj.click('alertingV2ScopedQuerySwitch');
+    await expect(page.testSubj.locator('maintenanceWindowAlertingV2FilterInput')).toBeVisible();
+
+    // Enter a KQL episode filter.
+    const episodeInput = page.testSubj
+      .locator('maintenanceWindowAlertingV2FilterInput')
+      .locator('[data-test-subj="queryInput"]');
+    await episodeInput.fill('episode_id: "test-episode"');
+    await episodeInput.press('Enter');
+
+    await page.testSubj.click(SUBMIT_BUTTON);
+
+    await expect(page.testSubj.locator(TOAST_TITLE)).toContainText(
+      `Created maintenance window '${name}'`
+    );
+
+    // Navigate to the edit form and verify the Episodes scope is hydrated correctly.
+    await openEditFlowByTitle(page, kbnUrl, name);
+
+    // Episodes toggle must be ON.
+    await expect(page.testSubj.locator('alertingV2ScopedQuerySwitch')).toBeChecked();
+
+    // Episodes KQL must be restored.
+    await expect(
+      page.testSubj.locator('maintenanceWindowAlertingV2FilterInput')
+    ).toContainText('episode_id: "test-episode"');
   });
 });
