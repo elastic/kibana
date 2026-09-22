@@ -7,7 +7,15 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiCode, EuiIcon, EuiLink, EuiSkeletonText, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import {
+  EuiCode,
+  EuiCopy,
+  EuiIcon,
+  EuiLink,
+  EuiSkeletonText,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 
 import { getRouterLinkProps } from '@kbn/router-utils';
 import type { CustomCellRenderer } from '@kbn/unified-data-table';
@@ -19,8 +27,7 @@ import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import { DURATION_LOWER_BOUND_FIELD } from '@kbn/alerting-v2-common-queries';
 import { parseEpisodeDataJson } from '@kbn/alerting-v2-utils';
 import type { EpisodeActionState, EpisodeStatusGroupAction } from '../types/action';
-import { isSourceEpisode, type AlertEpisode } from '../queries/episodes_query';
-import { CopyableShortId } from './copyable_short_id';
+import { isNativeV2Rule, isSourceEpisode, type AlertEpisode } from '../queries/episodes_query';
 import { AlertingEpisodeGroupingTags } from './grouping/alerting_episode_grouping_tags';
 import { AlertEpisodeStatusBadges } from './status/status_badges';
 import { TagBadges } from './actions/tags';
@@ -31,6 +38,9 @@ import * as i18n from './translations';
 
 type Rule = FindRulesResponse['items'][number];
 type CellRendererProps = Parameters<CustomCellRenderer[string]>[0];
+
+/** Characters of the rule id shown when a rule has no name to display. */
+const SHORT_RULE_ID_LENGTH = 7;
 
 const getEpisodeGroupingFromRow = (
   row: CellRendererProps['row'],
@@ -141,13 +151,13 @@ export interface EpisodeRuleCellProps extends CellRendererProps {
   rulesCache: Record<string, Rule>;
   isLoadingRules: boolean;
   rowHeight: number;
-  /** Builds the href of the rule details page for a rule id. */
-  getRuleDetailsHref: (ruleId: string) => string;
+  /** Builds the href of the rule details page for a rule id. Omit when there is no details route. */
+  getRuleDetailsHref: (ruleId: string, isSourceRule?: boolean) => string | undefined;
   /**
    * Called when the rule name is clicked, for hosts that show the rule somewhere on the page
    * instead of navigating to it. Modified and non-left clicks still follow the link.
    */
-  onRuleNameClick?: (ruleId: string) => void;
+  onRuleNameClick?: (ruleId: string, sourceRuleInfo?: { category?: string }) => void;
   /** Source data views keyed by rule id, used to format grouping values via `fieldFormats`. */
   sourceDataViewsByRule?: Map<string, DataView>;
 }
@@ -251,12 +261,30 @@ export const EpisodeRuleCell = ({
             </span>
           </span>
         </EuiToolTip>
-        <CopyableShortId
-          id={ruleId}
-          copyTooltip={i18n.getRuleCellCopyRuleIdTooltip(ruleId)}
-          copiedTooltip={i18n.RULE_CELL_RULE_ID_COPIED}
-          data-test-subj="episodeRuleCellCopyRuleId"
-        />
+        <EuiCopy
+          textToCopy={ruleId}
+          beforeMessage={i18n.getRuleCellCopyRuleIdTooltip(ruleId)}
+          afterMessage={i18n.RULE_CELL_RULE_ID_COPIED}
+        >
+          {(copy) => (
+            // eslint-disable-next-line @elastic/eui/require-href-for-link
+            <EuiLink color="subdued" onClick={copy} data-test-subj="episodeRuleCellCopyRuleId">
+              <EuiCode
+                css={css`
+                  display: inline-flex;
+                  align-items: center;
+                  padding-block: 0;
+                  padding-inline: ${euiTheme.size.xs};
+                  line-height: ${euiTheme.size.base};
+                  font-weight: ${euiTheme.font.weight.regular};
+                  color: ${euiTheme.colors.textSubdued};
+                `}
+              >
+                {ruleId.slice(0, SHORT_RULE_ID_LENGTH)}
+              </EuiCode>
+            </EuiLink>
+          )}
+        </EuiCopy>
       </span>
     );
   }
@@ -266,14 +294,25 @@ export const EpisodeRuleCell = ({
     rule.grouping?.fields ?? []
   );
   const showQuery = rowHeight !== ROWS_HEIGHT_OPTIONS.single;
-  const detailsHref = getRuleDetailsHref(ruleId);
+  const episode = row.flattened as unknown as AlertEpisode;
+  // `source_id` means the row came from a source fetch, not that the rule is classic. Mixed
+  // rows (classic alert, native v2 rule) keep the v2 href and flyout.
+  const sourceRuleInfo =
+    isSourceEpisode(episode) && !isNativeV2Rule(rule)
+      ? { category: episode.rule_category }
+      : undefined;
   // The href stays on the link either way, so opening the rule page in a new tab keeps working.
+  const detailsHref = getRuleDetailsHref(ruleId, !!sourceRuleInfo) || undefined;
   const nameLinkProps = onRuleNameClick
-    ? getRouterLinkProps({ href: detailsHref, onClick: () => onRuleNameClick(ruleId) })
+    ? getRouterLinkProps({
+        href: detailsHref,
+        onClick: () => onRuleNameClick(ruleId, sourceRuleInfo),
+      })
     : { href: detailsHref };
 
   return (
     <span data-test-subj="episodeRuleCell">
+      {/* eslint-disable-next-line @elastic/eui/require-href-for-link -- source rules may have no details route */}
       <EuiLink {...nameLinkProps} css={nameCss} data-test-subj="episodeRuleCellNameLink">
         {rule.metadata.name}
       </EuiLink>
