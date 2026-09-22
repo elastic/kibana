@@ -277,26 +277,51 @@ export const useAvailablePackages = ({
   // its category sidebar counts). Derived from allCards so the sort/map work
   // is not duplicated.
   const cards: IntegrationCardItem[] = useMemo(() => {
-    if (isAgentlessEnabled && onlyAgentlessFilter) {
-      return allCards.filter((item) => item.supportsAgentless === true);
+    if (!isAgentlessEnabled || !onlyAgentlessFilter) return allCards;
+    const agentlessMatch = (c: IntegrationCardItem) => c.supportsAgentless === true;
+    const result: IntegrationCardItem[] = [];
+    for (const card of allCards) {
+      if (!card.isCollectionCard) {
+        if (agentlessMatch(card)) result.push(card);
+        continue;
+      }
+      const filteredMembers = (card.groupMembers ?? []).filter(agentlessMatch);
+      if (filteredMembers.length === 0) continue;
+      if (filteredMembers.length === 1) {
+        result.push(filteredMembers[0]);
+        continue;
+      }
+      result.push({ ...card, groupMembers: filteredMembers });
     }
-    return allCards;
+    return result;
   }, [allCards, isAgentlessEnabled, onlyAgentlessFilter]);
 
   // Packages to show
-  // Filters out based on selected category and subcategory (if any)
-  const filteredCards = useMemo(
-    () =>
-      cards.filter((c) => {
-        if (selectedCategory === '') {
-          return true;
-        }
-        if (!selectedSubCategory) return c.categories.includes(selectedCategory);
-
-        return c.categories.includes(selectedSubCategory);
-      }),
-    [cards, selectedCategory, selectedSubCategory]
-  );
+  // Filters out based on selected category and subcategory (if any).
+  // For collection cards, filters groupMembers too so badge counts and flyout
+  // variants reflect the active filter state.
+  const filteredCards = useMemo(() => {
+    if (selectedCategory === '') return cards;
+    const categoryMatch = (c: IntegrationCardItem) =>
+      selectedSubCategory
+        ? c.categories.includes(selectedSubCategory)
+        : c.categories.includes(selectedCategory);
+    const result: IntegrationCardItem[] = [];
+    for (const card of cards) {
+      if (!card.isCollectionCard) {
+        if (categoryMatch(card)) result.push(card);
+        continue;
+      }
+      const filteredMembers = (card.groupMembers ?? []).filter(categoryMatch);
+      if (filteredMembers.length === 0) continue;
+      if (filteredMembers.length === 1) {
+        result.push(filteredMembers[0]);
+        continue;
+      }
+      result.push({ ...card, groupMembers: filteredMembers });
+    }
+    return result;
+  }, [cards, selectedCategory, selectedSubCategory]);
 
   const {
     data: eprCategoriesRes,

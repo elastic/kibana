@@ -78,7 +78,6 @@ export const AvailablePackages: React.FC<{ prereleaseIntegrationsEnabled: boolea
     setUrlandPushHistory,
     setUrlandReplaceHistory,
     filteredCards,
-    allCards,
     availableSubCategories,
     selectedSubCategory,
     setSelectedSubCategory,
@@ -129,14 +128,14 @@ export const AvailablePackages: React.FC<{ prereleaseIntegrationsEnabled: boolea
     [filteredCards, openCollection]
   );
 
-  // Resolve the open collection card from allCards (not filteredCards so it survives
-  // category/search filters that may not include the group).
+  // Resolve the open collection card from filteredCards so the flyout variants
+  // reflect the active category/agentless filter state.
   const openCollectionCard = useMemo(
     () =>
       openCollectionGroupId
-        ? allCards.find((c) => c.isCollectionCard && c.name === openCollectionGroupId)
+        ? filteredCards.find((c) => c.isCollectionCard && c.name === openCollectionGroupId)
         : undefined,
-    [openCollectionGroupId, allCards]
+    [openCollectionGroupId, filteredCards]
   );
 
   // Build the return path that member detail pages use to navigate back here with the flyout open.
