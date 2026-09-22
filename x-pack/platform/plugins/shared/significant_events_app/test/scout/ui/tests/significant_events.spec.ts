@@ -8,7 +8,7 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
-import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
+import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { test } from '../fixtures';
 
 test.describe(
@@ -22,7 +22,7 @@ test.describe(
       // eslint-disable-next-line playwright/no-skipped-test
       test.skip(
         config.isCloud === true,
-        `Cannot override '${STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG}' on Cloud deployments`
+        `Cannot override '${NIGHTSHIFT_ENABLED_FLAG}' on Cloud deployments`
       );
       // skip() in beforeAll only skips the tests, not the hook body, so guard the requests too.
       if (config.isCloud) {
@@ -31,7 +31,7 @@ test.describe(
 
       await apiServices.core.settings({
         'feature_flags.overrides': {
-          [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: true,
+          [NIGHTSHIFT_ENABLED_FLAG]: true,
         },
       });
     });
@@ -46,12 +46,12 @@ test.describe(
       }
       await apiServices.core.settings({
         'feature_flags.overrides': {
-          [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: false,
+          [NIGHTSHIFT_ENABLED_FLAG]: null,
         },
       });
     });
 
-    test('loads and redirects / to /streams tab by default', async ({ page }) => {
+    test('loads the default tab and links back to Nightshift', async ({ page }) => {
       await page.gotoApp('significant_events');
       await expect(page).toHaveURL(/\/app\/significant_events\/streams/, { timeout: 60_000 });
 
@@ -61,6 +61,13 @@ test.describe(
       await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title)).toHaveText(
         'Nightshift Management'
       );
+
+      const nightshiftBackLink = page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.back);
+      await expect(nightshiftBackLink).toBeVisible();
+      await nightshiftBackLink.click();
+
+      await expect(page).toHaveURL(/\/app\/nightshift/);
+      await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title)).toHaveText('Nightshift');
     });
 
     test('renders navigation tabs and links to Settings', async ({ page }) => {
@@ -92,7 +99,7 @@ test.describe(
     }) => {
       await apiServices.core.settings({
         'feature_flags.overrides': {
-          [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: false,
+          [NIGHTSHIFT_ENABLED_FLAG]: false,
         },
       });
       await page.gotoApp('significant_events/streams');
