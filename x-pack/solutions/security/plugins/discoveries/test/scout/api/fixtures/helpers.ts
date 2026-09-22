@@ -322,11 +322,36 @@ export const deleteAllWorkflowSchedules = async (
 ): Promise<void> => {
   const apis = getWorkflowSchedulesApis(discoveriesApi, headers, spaceId);
   const findResult = await apis.findSchedules({ per_page: 100 });
-  const schedules = findResult.body.data ?? [];
+  assertCleanupStatus('find', findResult, [200]);
 
-  for (const schedule of schedules) {
-    await apis.deleteSchedule(schedule.id);
+  for (const schedule of findResult.body.data ?? []) {
+    // 404 means the schedule is already gone, which is the state we want
+    assertCleanupStatus(
+      `delete ${schedule.id}`,
+      await apis.deleteSchedule(schedule.id),
+      [200, 404]
+    );
   }
+};
+
+/**
+ * Fails cleanup loudly instead of letting a 4xx/5xx leave stale schedules behind that would break
+ * the count assertions of unrelated specs sharing the worker's space.
+ */
+const assertCleanupStatus = (
+  operation: string,
+  response: { statusCode: number; body: unknown },
+  allowedStatusCodes: number[]
+): void => {
+  if (allowedStatusCodes.includes(response.statusCode)) {
+    return;
+  }
+
+  throw new Error(
+    `Schedule cleanup failed on ${operation}: HTTP ${response.statusCode} ${JSON.stringify(
+      response.body
+    )}`
+  );
 };
 
 /**
