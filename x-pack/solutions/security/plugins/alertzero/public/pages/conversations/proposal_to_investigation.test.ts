@@ -77,6 +77,46 @@ describe('proposalToInvestigation', () => {
     });
   });
 
+  describe('closed action label derivation', () => {
+    const decidedAt = '2026-09-10T11:00:00.000Z';
+
+    it('uses "N alerts closed as false positive" when actionInput.alertIds is an array', () => {
+      const result = proposalToInvestigation({
+        ...baseProposal,
+        decidedAt,
+        actionInput: { alertIds: ['a1', 'a2', 'a3'], reason: 'false_positive' },
+      });
+      expect(result.primaryActionLabel).toBe('3 alerts closed as false positive');
+    });
+
+    it('singularises "alert" when count is 1', () => {
+      const result = proposalToInvestigation({
+        ...baseProposal,
+        decidedAt,
+        actionInput: { alertIds: ['a1'], reason: 'false_positive' },
+      });
+      expect(result.primaryActionLabel).toBe('1 alert closed as false positive');
+    });
+
+    it('falls back to action.name when alertIds is absent', () => {
+      const result = proposalToInvestigation({
+        ...baseProposal,
+        decidedAt,
+        action: { name: 'Close alerts as false positive' } as ProposalWithMetadata['action'],
+      });
+      expect(result.primaryActionLabel).toBe('Close alerts as false positive');
+    });
+
+    it('does not override primaryActionLabel for pending proposals', () => {
+      const result = proposalToInvestigation({
+        ...baseProposal,
+        action: { name: 'Close alerts as false positive' } as ProposalWithMetadata['action'],
+        actionInput: { alertIds: ['a1', 'a2'], reason: 'false_positive' },
+      });
+      expect(result.primaryActionLabel).toBe('Close alerts as false positive');
+    });
+  });
+
   describe('closed detection', () => {
     it('sets recommendedAction to "closed" when decidedAt is present, regardless of category', () => {
       const result = proposalToInvestigation({

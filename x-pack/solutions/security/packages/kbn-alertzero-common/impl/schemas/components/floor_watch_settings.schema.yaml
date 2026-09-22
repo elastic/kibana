@@ -1,0 +1,27 @@
+openapi: 3.0.0
+info:
+  title: AlertZero Floor Watch Worker-specific settings
+  version: '1'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    AutoCloseConfidenceScoreMinThreshold:
+      type: number
+      minimum: 0
+      maximum: 1
+      description: >-
+        Minimum confidence score (0–1) for the Alert Triage Worker to auto-close an alert
+        as a false positive. Alerts below this threshold require human review.
+
+    AlertTriageWorkerExtras:
+      type: object
+      additionalProperties: false
+      description: >-
+        Complete Worker-specific settings for the Alert Triage Worker, owned by Floor Watch.
+        Sent whole on write; a replacement missing a field is rejected.
+      required:
+        - autoCloseConfidenceScoreMinThreshold
+      properties:
+        autoCloseConfidenceScoreMinThreshold:
+          $ref: '#/components/schemas/AutoCloseConfidenceScoreMinThreshold'

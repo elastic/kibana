@@ -75,7 +75,7 @@ const MAX_ID_LENGTH = 256;
 const MAX_NAME_LENGTH = 256;
 /** Markdown shown to a human, so it needs room without being unbounded. */
 export const MAX_COMMENT_LENGTH = 8192;
-const MAX_RATIONALE_LENGTH = 4096;
+export const MAX_RATIONALE_LENGTH = 4096;
 const MAX_ERROR_LENGTH = 4096;
 /** ISO 8601 timestamps; generous enough for any offset notation. */
 const MAX_TIMESTAMP_LENGTH = 64;

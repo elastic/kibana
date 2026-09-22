@@ -61,6 +61,7 @@ import {
   hasConversationConverseAccess,
   hasConversationDeleteAccess,
   hasConversationOwnerAccess,
+  hasConversationPatchMetadataAccess,
   hasConversationRenameAccess,
   hasConversationUpdateAccessControlAccess,
   type ConversationAccess,
@@ -1002,7 +1003,7 @@ class ConversationClientImpl implements ConversationClient {
 
     const result = await this.writeConversation({
       conversationId,
-      access: 'owner',
+      access: 'patchMetadata',
       fields: (current) => {
         if (!current.template_id) {
           throw createBadRequestError(
@@ -1165,6 +1166,10 @@ class ConversationClientImpl implements ConversationClient {
 
       case 'owner':
         allowed = hasConversationOwnerAccess({ conversation, user: this.user });
+        break;
+
+      case 'patchMetadata':
+        allowed = hasConversationPatchMetadataAccess({ conversation, user: this.user });
         break;
 
       case 'rename':

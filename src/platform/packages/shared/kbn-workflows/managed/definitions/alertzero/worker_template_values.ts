@@ -57,3 +57,18 @@ export const renderRuleTuningWorkerYaml = (
     '__WORKER_ANALYSIS_WINDOW_DAYS__',
     String(values.extras.analysisWindowDays)
   );
+
+export interface AlertTriageWorkerTemplateValues extends CommonWorkerTemplateValues {
+  extras: {
+    autoCloseConfidenceScoreMinThreshold: number;
+  };
+}
+
+export const renderAlertTriageWorkerYaml = (
+  yaml: string,
+  values: AlertTriageWorkerTemplateValues
+): string =>
+  renderCommonWorkerYaml(yaml, values).replaceAll(
+    '__WORKER_AUTO_CLOSE_CONFIDENCE_MIN_THRESHOLD__',
+    String(values.extras.autoCloseConfidenceScoreMinThreshold)
+  );

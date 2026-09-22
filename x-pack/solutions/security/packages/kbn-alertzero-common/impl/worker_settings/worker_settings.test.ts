@@ -60,14 +60,18 @@ describe('Worker settings declarations', () => {
     }
   );
 
-  it('nests Rule Tuning fields under extras and omits extras elsewhere', () => {
+  it('nests Worker-specific fields under extras', () => {
     expect(createDefaultWorkerSettings(RULE_TUNING)).toEqual({
       workerId: RULE_TUNING,
       autonomy: 'manual',
       scheduleInterval: '2h',
       extras: { analysisWindowDays: 14 },
     });
-    expect(createDefaultWorkerSettings(TRIAGE)).toEqual({ workerId: TRIAGE, autonomy: 'manual' });
+    expect(createDefaultWorkerSettings(TRIAGE)).toEqual({
+      workerId: TRIAGE,
+      autonomy: 'manual',
+      extras: { autoCloseConfidenceScoreMinThreshold: 0.85 },
+    });
     expect(createDefaultWorkerSettings(ATTACK_DISCOVERY)).not.toHaveProperty('extras');
   });
 
