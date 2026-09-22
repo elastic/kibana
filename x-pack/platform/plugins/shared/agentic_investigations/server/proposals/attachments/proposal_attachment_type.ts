@@ -59,7 +59,10 @@ const formatProposalForAgent = (proposal: ProposalWithMetadata): string => {
   const lines: string[] = [
     `## Investigation proposal: ${label}`,
     `Status: ${proposal.status}`,
-    isExpired ? 'EXPIRED: the decision deadline has passed, and it can no longer be decided.' : '',
+    // Not "the deadline has passed": the gate can settle a proposal as expired
+    // before its deadline, and `Decision deadline` below would then print a
+    // future date directly under a banner claiming it was behind us.
+    isExpired ? 'EXPIRED: this proposal can no longer be decided.' : '',
     '',
     proposal.comment,
     '',

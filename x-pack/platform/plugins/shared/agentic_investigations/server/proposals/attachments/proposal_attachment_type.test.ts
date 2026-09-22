@@ -139,6 +139,9 @@ describe('proposalAttachmentType', () => {
       expect(value).toContain('EXPIRED');
       expect(value).not.toContain('Decision: pending');
       expect(value).not.toContain('Awaiting a human decision');
+      // The gate can settle a proposal as expired before its deadline, so the
+      // banner must not claim the deadline is what passed.
+      expect(value).not.toContain('deadline has passed');
     });
 
     it('should read the id from the payload when the attachment has no origin', async () => {
