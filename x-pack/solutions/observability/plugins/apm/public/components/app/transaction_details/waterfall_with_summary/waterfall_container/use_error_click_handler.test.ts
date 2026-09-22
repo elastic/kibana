@@ -235,7 +235,11 @@ describe('useErrorClickHandler', () => {
     // stringifies the raw merged query. Without the explicit `omit`, a stale traceId
     // from the sampled transaction would ride along into the Errors page URL.
     mockUseAnyOfApmParams.mockReturnValue({
-      query: { ...defaultQuery, traceId: 'stale-trace-from-transactions-view', spanId: 'stale-span' },
+      query: {
+        ...defaultQuery,
+        traceId: 'stale-trace-from-transactions-view',
+        spanId: 'stale-span',
+      },
     } as any);
 
     const { result } = renderHook(() => useErrorClickHandler(mockTraceItems));

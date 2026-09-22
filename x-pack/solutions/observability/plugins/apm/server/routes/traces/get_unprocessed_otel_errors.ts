@@ -47,7 +47,5 @@ export async function getUnprocessedOtelErrors({
     fields: [...requiredOtelFields, ...optionalOtelFields],
   });
 
-  return compactMap(response.hits.hits, (hit) =>
-    toUnprocessedOtelError(hit, { traceId })
-  );
+  return compactMap(response.hits.hits, (hit) => toUnprocessedOtelError(hit, { traceId }));
 }

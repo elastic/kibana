@@ -6,7 +6,8 @@
  */
 
 import type { ErrorDistributionResponse } from '@kbn/apm-api-shared';
-import { FETCH_STATUS, isPending } from '../../../hooks/use_fetcher';
+import type { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { isPending } from '../../../hooks/use_fetcher';
 
 export type ApmErrorsPresence = 'pending' | 'present' | 'absent';
 
@@ -37,10 +38,7 @@ export function getApmErrorsPresence({
 
   // `getBuckets` uses `min_doc_count: 0` + `extended_bounds`, so bucket arrays are
   // never empty — you must sum the `y` values rather than checking `length`.
-  const total = errorDistributionData.currentPeriod.reduce(
-    (sum, { y }) => sum + (y ?? 0),
-    0
-  );
+  const total = errorDistributionData.currentPeriod.reduce((sum, { y }) => sum + (y ?? 0), 0);
 
   return total > 0 ? 'present' : 'absent';
 }

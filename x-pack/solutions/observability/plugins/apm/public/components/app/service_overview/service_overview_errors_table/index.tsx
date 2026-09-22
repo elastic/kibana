@@ -38,10 +38,9 @@ export function ServiceOverviewErrorsTable({ serviceName, onLoadTable }: Props) 
     defaultMessage: 'Errors',
   });
 
-  const logsTableCaption = i18n.translate(
-    'xpack.apm.serviceOverview.errorsFromLogsTableCaption',
-    { defaultMessage: 'Errors from logs' }
-  );
+  const logsTableCaption = i18n.translate('xpack.apm.serviceOverview.errorsFromLogsTableCaption', {
+    defaultMessage: 'Errors from logs',
+  });
 
   // Only supply emptyStateContent when logs actually has rows. When it doesn't,
   // ErrorGroupList falls through to its own ManagedTable with the styled

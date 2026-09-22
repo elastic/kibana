@@ -25,11 +25,7 @@ export const unprocessedOtelErrorsRoute = defineRoute<UnprocessedOtelErrorsRespo
   params: lazySchema(() =>
     z.object({
       path: z.object({ serviceName: z.string() }),
-      query: z
-        .object({})
-        .merge(environmentSchema)
-        .merge(kuerySchema)
-        .merge(rangeSchema),
+      query: z.object({}).merge(environmentSchema).merge(kuerySchema).merge(rangeSchema),
     })
   ),
 });

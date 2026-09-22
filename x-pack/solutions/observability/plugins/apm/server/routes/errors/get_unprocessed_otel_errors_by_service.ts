@@ -85,9 +85,7 @@ export async function getUnprocessedOtelErrorsByService({
   // Slice to the cap; the over-fetched extra is only used to detect truncation.
   const cappedHits = maxCountExceeded ? hits.slice(0, MAX_UNPROCESSED_OTEL_ERRORS) : hits;
 
-  const unprocessedOtelErrors = compactMap(cappedHits, (hit) =>
-    toUnprocessedOtelError(hit)
-  );
+  const unprocessedOtelErrors = compactMap(cappedHits, (hit) => toUnprocessedOtelError(hit));
 
   return { unprocessedOtelErrors, maxCountExceeded };
 }

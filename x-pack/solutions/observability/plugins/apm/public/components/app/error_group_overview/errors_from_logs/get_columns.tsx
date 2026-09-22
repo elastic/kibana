@@ -93,11 +93,7 @@ export function getColumns({
     align: RIGHT_ALIGNMENT,
     sortable: true,
     render: (_: unknown, item: ErrorFromLogsRow) => (
-      <Timestamp
-        timestamp={item.timestampUs / 1000}
-        timeUnit="milliseconds"
-        renderMode="tooltip"
-      />
+      <Timestamp timestamp={item.timestampUs / 1000} timeUnit="milliseconds" renderMode="tooltip" />
     ),
   });
 
