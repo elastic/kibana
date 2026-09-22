@@ -53,7 +53,7 @@ describe('getSplitChunksCacheGroups', () => {
     expect(typeof vendorsHeavy.name).toBe('string');
   });
 
-  it('jqueryFlot is unnamed so bootstrap does not preload it', () => {
+  it('jqueryFlot is an on-demand cache group so the preload manifest can skip it', () => {
     const groups = getSplitChunksCacheGroups();
     const jqueryFlot = groups.jqueryFlot as {
       name: unknown;

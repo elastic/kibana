@@ -82,16 +82,27 @@ describe('ChunkPreloadManifestPlugin', () => {
     expect(manifest.allChunks).toContain('shared.js');
   });
 
-  it('does not preload cache groups whose name is false', () => {
+  it('does not preload name:false cache groups, even as kibana entrypoint children', () => {
     const lazyChunk = createMockChunk(['jquery-flot.js'], ['jqueryFlot']);
     const sharedChunk = createMockChunk(['vendors.js'], ['vendors']);
+    const asyncChunk = createMockChunk(['async-plugin.js']);
+
+    const entrypoints = new Map([
+      [
+        'kibana',
+        {
+          childrenIterable: [{ chunks: [lazyChunk, asyncChunk] }],
+        },
+      ],
+    ]);
 
     const { compiler, runProcessAssets, getEmittedAssets } = createMockCompiler({
       cacheGroups: {
         jqueryFlot: { name: false },
         vendors: { name: 'vendors' },
       },
-      chunks: [lazyChunk, sharedChunk],
+      chunks: [lazyChunk, sharedChunk, asyncChunk],
+      entrypoints,
     });
 
     const plugin = new ChunkPreloadManifestPlugin();
@@ -99,7 +110,7 @@ describe('ChunkPreloadManifestPlugin', () => {
     runProcessAssets();
 
     const manifest = JSON.parse(getEmittedAssets()[0].source);
-    expect(manifest.allChunks).toEqual(['vendors.js']);
+    expect(manifest.allChunks).toEqual(['async-plugin.js', 'vendors.js']);
     expect(manifest.allChunks).not.toContain('jquery-flot.js');
   });
 

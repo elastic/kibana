@@ -17,9 +17,10 @@ type CacheGroups = NonNullable<OptimizationSplitChunksOptions['cacheGroups']>;
  * land in a *named* cache group (`vendors`, `shared-packages`, `shared-misc`)
  * ChunkPreloadManifestPlugin puts that chunk on every Kibana bootstrap.
  *
- * `name: false` creates an unnamed async chunk that is fetched only when those
- * apps load. Keep this regex in sync with the exclusions on `vendors`,
- * `sharedPackages`, and `default`.
+ * `name: false` marks the chunk on demand. ChunkPreloadManifestPlugin skips
+ * those groups when building the bootstrap `load()` list, so the chunk is
+ * fetched only when those apps load. Keep this regex in sync with the
+ * exclusions on `vendors`, `sharedPackages`, and `default`.
  */
 export const JQUERY_FLOT_MODULE =
   /[\\/]node_modules[\\/]jquery(?:[\\/]|$)|[\\/]packages[\\/]shared[\\/]kbn-flot-charts[\\/]/;
@@ -45,8 +46,8 @@ const isJqueryFlotModule = (name: string | null | undefined): boolean =>
  *  -20: default          - catch-all (minChunks: 3, name: 'shared-misc')
  *
  * Named groups use category-level static names so they can be preloaded and
- * tracked as page-load metrics. `jqueryFlot` is the exception (`name: false`)
- * so it stays an on-demand async chunk. No maxSize — benchmarked at
+ * tracked as page-load metrics. `jqueryFlot` uses `name: false` so
+ * ChunkPreloadManifestPlugin omits it from bootstrap. No maxSize — benchmarked at
  * 500K/1M/6M/10M/20M (global and per-group); all caused regressions.
  */
 export const getSplitChunksCacheGroups = (): CacheGroups => ({
@@ -57,7 +58,8 @@ export const getSplitChunksCacheGroups = (): CacheGroups => ({
   defaultVendors: false,
 
   // Canvas / Monitoring / vislib share jquery + Flot. Must win over `vendors`
-  // and `sharedPackages`. `name: false` keeps the chunk out of bootstrap.
+  // and `sharedPackages`. `name: false` marks it on demand so the preload
+  // manifest leaves it out of bootstrap.
   jqueryFlot: {
     test: JQUERY_FLOT_MODULE,
     name: false,
