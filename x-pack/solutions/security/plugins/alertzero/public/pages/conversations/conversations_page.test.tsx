@@ -53,13 +53,13 @@ const fetchNextPage: Record<string, jest.Mock> = {};
 
 /**
  * Fans a category→proposals map across the four hooks a section uses: a count-only
- * read that is always live, and an infinite rows query that only runs while open.
- * `total` is the whole bucket, the pages only what was asked for — the badge reads
- * the first and the rows the second, so the fake must not conflate them.
+ * read, and an infinite rows query that only runs while open. Both answer nothing
+ * while disabled, which is what makes the badge's source observable. `total` is the
+ * whole bucket and the pages only what was asked for, so the fake keeps them apart.
  */
 const mockProposals = (groups: Record<string, ProposalItem[]>) => {
-  const count = (all: ProposalItem[]) => ({
-    data: { proposals: [], total: all.length },
+  const count = (all: ProposalItem[], enabled: boolean) => ({
+    data: enabled ? { proposals: [], total: all.length } : undefined,
     isLoading: false,
     error: undefined,
   });
@@ -89,10 +89,12 @@ const mockProposals = (groups: Record<string, ProposalItem[]>) => {
     };
   };
 
-  mockUseProposalsByCategoryCount.mockImplementation((category: string) =>
-    count(groups[category] ?? [])
+  mockUseProposalsByCategoryCount.mockImplementation((category: string, enabled: boolean) =>
+    count(groups[category] ?? [], enabled)
   );
-  mockUseClosedProposalsCount.mockImplementation(() => count(groups.closed ?? []));
+  mockUseClosedProposalsCount.mockImplementation((enabled: boolean) =>
+    count(groups.closed ?? [], enabled)
+  );
 
   mockUseProposalsByCategory.mockImplementation(
     (category: string, { firstPageSize, enabled }: { firstPageSize: number; enabled: boolean }) =>
@@ -515,6 +517,19 @@ describe('ConversationsPage queue sections', () => {
     expect(screen.getByRole('button', { name: /^Respond/ })).toHaveTextContent(
       String(CATEGORY_PAGE_SIZE + 5)
     );
+  });
+
+  it('drops the count-only request for a section whose rows already report the total', () => {
+    mockProposals({
+      respond: bucketOf(CATEGORY_PAGE_SIZE + 5, { category: 'respond' }),
+      closed: [closedProposal],
+    });
+
+    renderPage('/');
+
+    expect(mockUseProposalsByCategoryCount).toHaveBeenCalledWith('respond', false);
+    // Collapsed, so nothing else can report it.
+    expect(mockUseClosedProposalsCount).toHaveBeenLastCalledWith(true);
   });
 
   describe('show more', () => {

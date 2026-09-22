@@ -86,6 +86,19 @@ const useSectionState = (id: RecommendedAction) => {
   return { isOpen, onToggle: setIsOpen, retry };
 };
 
+/**
+ * Every page repeats the bucket total, so loaded rows answer the count for free.
+ * The first page, which a refetch renews before the rest.
+ */
+const totalFromPages = (pagesQuery: UseInfiniteQueryResult<ProposalsPageResponse>) =>
+  pagesQuery.data?.pages[0]?.total;
+
+/** The count-only read earns its request until the rows can answer instead. */
+const needsCountRequest = (
+  isOpen: boolean,
+  pagesQuery: UseInfiniteQueryResult<ProposalsPageResponse>
+) => !isOpen || totalFromPages(pagesQuery) === undefined;
+
 const useSection = (
   id: RecommendedAction,
   firstPageSize: number,
@@ -106,7 +119,7 @@ const useSection = (
   );
   const investigations = useMemo(() => proposals.map(proposalToInvestigation), [proposals]);
 
-  const total = countQuery.data?.total;
+  const total = totalFromPages(pagesQuery) ?? countQuery.data?.total;
   const { fetchNextPage, hasNextPage, isFetchingNextPage } = pagesQuery;
 
   const loadMore = useCallback(() => {
@@ -136,32 +149,27 @@ const useSection = (
 
 export const useCategoryQueueSection = (category: RecommendedAction): QueueSection => {
   const state = useSectionState(category);
-
-  return useSection(
+  const pagesQuery = useProposalsByCategory(category, {
+    firstPageSize: CATEGORY_PAGE_SIZE,
+    step: SHOW_MORE_STEP,
+    enabled: state.isOpen,
+  });
+  const countQuery = useProposalsByCategoryCount(
     category,
-    CATEGORY_PAGE_SIZE,
-    state,
-    useProposalsByCategoryCount(category),
-    useProposalsByCategory(category, {
-      firstPageSize: CATEGORY_PAGE_SIZE,
-      step: SHOW_MORE_STEP,
-      enabled: state.isOpen,
-    })
+    needsCountRequest(state.isOpen, pagesQuery)
   );
+
+  return useSection(category, CATEGORY_PAGE_SIZE, state, countQuery, pagesQuery);
 };
 
 export const useClosedQueueSection = (): QueueSection => {
   const state = useSectionState(CLOSED_GROUP_KEY);
+  const pagesQuery = useClosedProposals({
+    firstPageSize: CLOSED_PAGE_SIZE,
+    step: SHOW_MORE_STEP,
+    enabled: state.isOpen,
+  });
+  const countQuery = useClosedProposalsCount(needsCountRequest(state.isOpen, pagesQuery));
 
-  return useSection(
-    CLOSED_GROUP_KEY,
-    CLOSED_PAGE_SIZE,
-    state,
-    useClosedProposalsCount(),
-    useClosedProposals({
-      firstPageSize: CLOSED_PAGE_SIZE,
-      step: SHOW_MORE_STEP,
-      enabled: state.isOpen,
-    })
-  );
+  return useSection(CLOSED_GROUP_KEY, CLOSED_PAGE_SIZE, state, countQuery, pagesQuery);
 };

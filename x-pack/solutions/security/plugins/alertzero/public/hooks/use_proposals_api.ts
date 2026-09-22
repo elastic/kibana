@@ -42,10 +42,14 @@ const nextOffset = (lastPage: ProposalsPageResponse, pages: ProposalsPageRespons
   return loaded >= lastPage.total || loaded >= MAX_QUEUE_REACH ? undefined : loaded;
 };
 
-/** `size: 0` — the bucket's total with none of its rows. */
+/**
+ * `size: 0` — the bucket's total with none of its rows. Only worth its own request
+ * while the rows are not loaded: a page response carries the same total.
+ */
 const useProposalsCount = (
   queryKey: readonly unknown[],
-  path: string
+  path: string,
+  enabled: boolean
 ): UseQueryResult<ProposalsPageResponse> => {
   const { services } = useKibana();
 
@@ -56,6 +60,7 @@ const useProposalsCount = (
         version: API_VERSIONS.internal.v1,
         query: { size: 0, from: 0 },
       }),
+    enabled,
     refetchInterval: PROPOSALS_POLL_INTERVAL_MS,
     retry: retryOnTransientError,
   });
@@ -89,11 +94,11 @@ const useProposalsPages = (
   });
 };
 
-export const useProposalsByCategoryCount = (category: string) =>
-  useProposalsCount(queryKeys.proposals.byCategoryCount(category), categoryPath(category));
+export const useProposalsByCategoryCount = (category: string, enabled: boolean) =>
+  useProposalsCount(queryKeys.proposals.byCategoryCount(category), categoryPath(category), enabled);
 
-export const useClosedProposalsCount = () =>
-  useProposalsCount(queryKeys.proposals.closedCount(), ALERTZERO_PROPOSALS_CLOSED_URL);
+export const useClosedProposalsCount = (enabled: boolean) =>
+  useProposalsCount(queryKeys.proposals.closedCount(), ALERTZERO_PROPOSALS_CLOSED_URL, enabled);
 
 export const useProposalsByCategory = (category: string, options: PagesOptions) =>
   useProposalsPages(queryKeys.proposals.byCategory(category), categoryPath(category), options);

@@ -18,6 +18,9 @@ const withoutProposal = (data: InfiniteData<ProposalsPageResponse>, proposalId: 
   ...data,
   pages: data.pages.map((page) => ({
     ...page,
+    // The badge reads this total while the section is open, so it has to fall with
+    // the row rather than wait for the poll.
+    total: Math.max(page.total - 1, 0),
     proposals: page.proposals.filter(({ id }) => id !== proposalId),
   })),
 });

@@ -194,7 +194,7 @@ describe('refreshing after a decision', () => {
 
     const { result } = renderHook(
       () => ({
-        count: useClosedProposalsCount(),
+        count: useClosedProposalsCount(true),
         // Collapsed, so its rows query is disabled and therefore inactive.
         rows: useClosedProposals({ firstPageSize: 25, step: 10, enabled: false }),
       }),
@@ -219,7 +219,7 @@ describe('useClosedProposalsCount', () => {
   it('reads the total without any rows', async () => {
     http.get.mockResolvedValue(page(0, 42));
 
-    const { result } = renderHook(() => useClosedProposalsCount(), {
+    const { result } = renderHook(() => useClosedProposalsCount(true), {
       wrapper: createWrapper().Wrapper,
     });
 
