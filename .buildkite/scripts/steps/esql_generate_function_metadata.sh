@@ -29,10 +29,12 @@ main () {
   report_main_step "Generate function definitions"
 
   pnpm make:defs $PARENT_DIR/elasticsearch
+  pnpm lint:fix:definitions
 
   report_main_step "Generate inline function docs"
 
   pnpm make:docs $PARENT_DIR/elasticsearch
+  pnpm lint:fix:docs
 
   report_main_step "Run i18n check"
 
