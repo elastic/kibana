@@ -941,7 +941,11 @@ export class SettingsPageObject extends FtrService {
     await this.flyout.closeFlyout();
 
     // We might have unsaved changes and we need to confirm inside the modal
-    if (await this.testSubjects.exists('runtimeFieldModifiedFieldConfirmModal')) {
+    if (
+      await this.testSubjects.waitForExists('runtimeFieldModifiedFieldConfirmModal', {
+        timeout: 2000,
+      })
+    ) {
       this.log.debug('Unsaved changes for the field: need to confirm');
       await this.testSubjects.click('confirmModalConfirmButton');
     }
