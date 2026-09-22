@@ -38,7 +38,7 @@ export const useFetchGroupActions = ({ groupHashes, services }: UseFetchGroupAct
           ruleId: row.rule_id ?? null,
           lastDeactivateAction: row.last_deactivate_action ?? null,
           lastSnoozeAction: row.last_snooze_action ?? null,
-          snoozeExpiry: row.snooze_expiry ?? null,
+          snoozedUntil: row.snoozed_until ?? null,
           tags: normalizeTags(row.tags),
           lastSnoozeActor: row.last_snooze_actor ?? null,
           lastDeactivateActor: row.last_deactivate_actor ?? null,

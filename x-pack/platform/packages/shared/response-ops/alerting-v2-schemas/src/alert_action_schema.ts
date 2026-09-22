@@ -35,7 +35,10 @@ export type AlertEpisodeActionType =
 const snoozeActionSchema = z
   .object({
     action_type: z.literal(ALERT_EPISODE_ACTION_TYPE.SNOOZE).describe('Snoozes an alert.'),
-    expiry: z.iso.datetime().optional().describe('ISO datetime when snooze should expire.'),
+    snoozed_until: z.iso
+      .datetime()
+      .optional()
+      .describe('ISO datetime until which the alert should be snoozed.'),
   })
   .strict()
   .meta({ id: 'alerting_snooze_alert_action' });

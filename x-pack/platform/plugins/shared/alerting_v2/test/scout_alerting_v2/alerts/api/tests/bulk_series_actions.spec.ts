@@ -61,8 +61,8 @@ apiTest.describe('Bulk series actions API', { tag: '@local-stateful-classic' }, 
         headers: writerHeaders,
         body: {
           items: [
-            { group_hash: groupHashOne, expiry: '2099-01-01T00:00:00Z' },
-            { group_hash: groupHashTwo, expiry: '2099-06-01T00:00:00Z' },
+            { group_hash: groupHashOne, snoozed_until: '2099-01-01T00:00:00Z' },
+            { group_hash: groupHashTwo, snoozed_until: '2099-06-01T00:00:00Z' },
           ],
         },
       });
@@ -149,8 +149,11 @@ apiTest.describe('Bulk series actions API', { tag: '@local-stateful-classic' }, 
         headers: writerHeaders,
         body: {
           items: [
-            { group_hash: knownGroup, expiry: '2099-01-01T00:00:00Z' },
-            { group_hash: 'bulk-series-partial-unknown-group', expiry: '2099-01-01T00:00:00Z' },
+            { group_hash: knownGroup, snoozed_until: '2099-01-01T00:00:00Z' },
+            {
+              group_hash: 'bulk-series-partial-unknown-group',
+              snoozed_until: '2099-01-01T00:00:00Z',
+            },
           ],
         },
       });
@@ -250,7 +253,7 @@ apiTest.describe('Bulk series actions API', { tag: '@local-stateful-classic' }, 
   apiTest('schema: rejects an item missing group_hash with 400', async ({ apiClient }) => {
     const response = await apiClient.post(BULK_SNOOZE_SERIES_ACTION_URL, {
       headers: writerHeaders,
-      body: { items: [{ expiry: '2099-01-01T00:00:00Z' }] },
+      body: { items: [{ snoozed_until: '2099-01-01T00:00:00Z' }] },
     });
 
     expect(response).toHaveStatusCode(400);
@@ -284,11 +287,11 @@ apiTest.describe('Bulk series actions API', { tag: '@local-stateful-classic' }, 
   apiTest(
     'schema: rejects an item with an invalid per-action body with 400',
     async ({ apiClient }) => {
-      // Snooze items accept an ISO `expiry` date; sending a non-date string
-      // should fail validation.
+      // Snooze items accept an ISO `snoozed_until` date; sending a non-date
+      // string should fail validation.
       const response = await apiClient.post(BULK_SNOOZE_SERIES_ACTION_URL, {
         headers: writerHeaders,
-        body: { items: [{ group_hash: 'any-group', expiry: 'not-a-date' }] },
+        body: { items: [{ group_hash: 'any-group', snoozed_until: 'not-a-date' }] },
       });
 
       expect(response).toHaveStatusCode(400);

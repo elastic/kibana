@@ -20,7 +20,7 @@ const DATE_SORT_FIELDS = new Set([
   'first_timestamp',
   'last_timestamp',
   'triggered_at',
-  'snooze_expiry',
+  'snoozed_until',
 ]);
 
 const getSeverityRank = (severity: AlertEpisode['severity']): number => {

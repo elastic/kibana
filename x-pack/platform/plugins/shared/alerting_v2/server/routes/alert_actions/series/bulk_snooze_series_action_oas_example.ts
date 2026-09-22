@@ -11,7 +11,7 @@ import type { AlertingOasOperationObject } from '../../oas_types';
 
 export const BULK_SNOOZE_SERIES_ACTION_REQUEST: BulkSnoozeSeriesActionBody = {
   items: [
-    { group_hash: 'group-hash-1', expiry: '2026-01-16T12:00:00.000Z' },
+    { group_hash: 'group-hash-1', snoozed_until: '2026-01-16T12:00:00.000Z' },
     { group_hash: 'group-hash-2' },
   ],
 };

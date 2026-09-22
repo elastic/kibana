@@ -21,7 +21,7 @@ import {
 describe('createSeriesAlertActionBodySchema', () => {
   it('accepts every series-level action variant', () => {
     const variants = [
-      { action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE, expiry: '2026-08-12T00:00:00.000Z' },
+      { action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE, snoozed_until: '2026-08-12T00:00:00.000Z' },
       { action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE },
       { action_type: ALERT_EPISODE_ACTION_TYPE.UNSNOOZE },
     ];
@@ -133,7 +133,10 @@ describe('verb-specific bulk action body schemas', () => {
   it('accepts a valid bulk snooze series envelope', () => {
     expect(() =>
       bulkSnoozeSeriesActionBodySchema.parse({
-        items: [{ group_hash: 'g1', expiry: '2026-08-12T00:00:00.000Z' }, { group_hash: 'g2' }],
+        items: [
+          { group_hash: 'g1', snoozed_until: '2026-08-12T00:00:00.000Z' },
+          { group_hash: 'g2' },
+        ],
       })
     ).not.toThrow();
   });

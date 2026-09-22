@@ -46,7 +46,7 @@ export const alertEpisodeSchema = z
     last_ack_action: z.enum(['ack', 'unack']).nullable().optional(),
     last_assignee_uid: z.string().min(1).max(ID_MAX_LENGTH).nullable().optional(),
     last_snooze_action: z.enum(['snooze', 'unsnooze']).nullable().optional(),
-    snooze_expiry: z.iso.datetime().nullable().optional(),
+    snoozed_until: z.iso.datetime().nullable().optional(),
     last_tags: tagsSchema.nullable().optional(),
     /** JSON string from the latest non-empty alert `data`. */
     episode_data: z.string().nullable().optional(),

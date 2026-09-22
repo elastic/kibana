@@ -52,7 +52,7 @@ describe('EpisodeStatusCell', () => {
       group_hash: 'gh1',
       last_ack_action: 'ack',
       last_snooze_action: 'snooze',
-      snooze_expiry: '3035-01-01T00:00:00Z',
+      snoozed_until: '3035-01-01T00:00:00Z',
     });
     renderWithI18n(<EpisodeStatusCell {...baseCellProps} columnId="episode.status" row={row} />);
 

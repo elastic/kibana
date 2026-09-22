@@ -429,10 +429,11 @@ export class AlertActionsClient {
     docEpisodeId: string | null;
   }): AlertAction {
     const { action, alertEvent, userProfileUid, docEpisodeId } = params;
-    // Strip the identifiers bulk items carry alongside the action payload
-    // (`group_hash` on series items, `episode_id` on episode items) — the
-    // doc's own identifier fields below are authoritative.
     const actionData = omit(action, ['group_hash', 'episode_id', 'action_type']);
+    const storageActionData =
+      action.action_type === ALERT_EPISODE_ACTION_TYPE.SNOOZE
+        ? { ...omit(actionData, ['snoozed_until']), expiry: action.snoozed_until }
+        : actionData;
 
     return {
       '@timestamp': new Date().toISOString(),
@@ -444,7 +445,7 @@ export class AlertActionsClient {
       group_hash: alertEvent.group_hash,
       episode_id: docEpisodeId,
       space_id: alertEvent.space_id,
-      ...actionData,
+      ...storageActionData,
     };
   }
 }

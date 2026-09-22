@@ -32,7 +32,7 @@ describe('episodeAttachmentDataSchema', () => {
       last_ack_action: 'ack',
       last_assignee_uid: 'user-1',
       last_snooze_action: 'snooze',
-      snooze_expiry: '2026-04-11T00:00:00.000Z',
+      snoozed_until: '2026-04-11T00:00:00.000Z',
       last_tags: ['ops', 'cpu'],
       episode_data: '{"host":"a"}',
       severity: 'high',

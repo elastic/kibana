@@ -32,7 +32,7 @@ export function AlertEpisodeStatusBadges({
   isFlapping = false,
 }: AlertEpisodeStatusBadgesProps) {
   const isAcknowledged = episodeAction?.lastAckAction === ALERT_EPISODE_ACTION_TYPE.ACK;
-  const isSnoozed = isEpisodeSnoozed(groupAction?.lastSnoozeAction, groupAction?.snoozeExpiry);
+  const isSnoozed = isEpisodeSnoozed(groupAction?.lastSnoozeAction, groupAction?.snoozedUntil);
 
   return (
     <EuiFlexGroup
@@ -55,14 +55,14 @@ export function AlertEpisodeStatusBadges({
           <EuiToolTip
             anchorProps={tooltipAnchorProps}
             content={
-              groupAction?.snoozeExpiry ? (
+              groupAction?.snoozedUntil ? (
                 <FormattedMessage
                   id="xpack.alertingV2EpisodesUi.snoozedUntilTooltip"
                   defaultMessage="Notifications snoozed until {expiry}."
                   values={{
                     expiry: (
                       <FormattedDate
-                        value={new Date(groupAction.snoozeExpiry)}
+                        value={new Date(groupAction.snoozedUntil)}
                         year="numeric"
                         month="short"
                         day="numeric"

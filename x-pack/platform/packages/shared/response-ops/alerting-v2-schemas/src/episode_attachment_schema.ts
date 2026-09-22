@@ -33,7 +33,7 @@ export const episodeAttachmentDataSchema = z
     last_ack_action: z.enum(['ack', 'unack']).optional(),
     last_assignee_uid: z.string().min(1).max(ID_MAX_LENGTH).optional(),
     last_snooze_action: z.enum(['snooze', 'unsnooze']).optional(),
-    snooze_expiry: z.iso.datetime().optional(),
+    snoozed_until: z.iso.datetime().optional(),
     last_tags: tagsSchema.optional(),
     episode_data: z.string().max(MAX_EPISODE_DATA_LENGTH).optional(),
     severity: z.string().min(1).max(ID_MAX_LENGTH).optional(),

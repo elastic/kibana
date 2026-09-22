@@ -44,7 +44,7 @@ describe('createBulkSeriesActionRouteForType', () => {
     const request = {
       body: {
         items: [
-          { group_hash: 'group-1', expiry: '2026-08-12T00:00:00.000Z' },
+          { group_hash: 'group-1', snoozed_until: '2026-08-12T00:00:00.000Z' },
           { group_hash: 'group-2' },
         ],
       },
@@ -59,7 +59,7 @@ describe('createBulkSeriesActionRouteForType', () => {
     await route.handle();
 
     expect(alertActionsClient.createBulkSeriesActions).toHaveBeenCalledWith([
-      { action_type: 'snooze', group_hash: 'group-1', expiry: '2026-08-12T00:00:00.000Z' },
+      { action_type: 'snooze', group_hash: 'group-1', snoozed_until: '2026-08-12T00:00:00.000Z' },
       { action_type: 'snooze', group_hash: 'group-2' },
     ]);
     expect(ctx.response.ok).toHaveBeenCalledWith({

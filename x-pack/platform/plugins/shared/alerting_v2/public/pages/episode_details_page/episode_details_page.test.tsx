@@ -239,7 +239,7 @@ beforeEach(() => {
           ruleId: 'rule-1',
           lastDeactivateAction: null,
           lastSnoozeAction: null,
-          snoozeExpiry: null,
+          snoozedUntil: null,
           tags: [],
           lastSnoozeActor: null,
           lastDeactivateActor: null,

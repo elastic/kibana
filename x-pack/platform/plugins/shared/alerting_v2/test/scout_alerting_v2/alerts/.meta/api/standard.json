@@ -1214,7 +1214,7 @@
     },
     {
       "id": "4142b94b18e5336-2970509f3772c3b",
-      "title": "Create snooze series action API snooze: writes a snooze action with expiry and returns 204",
+      "title": "Create snooze series action API snooze: writes a snooze action with snoozed_until and returns 204",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -1227,7 +1227,7 @@
     },
     {
       "id": "4142b94b18e5336-15e3393e10d192e",
-      "title": "Create snooze series action API snooze: writes a snooze action without expiry and returns 204",
+      "title": "Create snooze series action API snooze: writes a snooze action without snoozed_until and returns 204",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -1240,7 +1240,7 @@
     },
     {
       "id": "4142b94b18e5336-8a59e02e7d55dd1",
-      "title": "Create snooze series action API schema: rejects expiry that is not ISO 8601 with 400",
+      "title": "Create snooze series action API schema: rejects snoozed_until that is not ISO 8601 with 400",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -1253,7 +1253,7 @@
     },
     {
       "id": "4142b94b18e5336-b146e52837b6deb",
-      "title": "Create snooze series action API schema: rejects expiry without the time component with 400",
+      "title": "Create snooze series action API schema: rejects snoozed_until without the time component with 400",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"

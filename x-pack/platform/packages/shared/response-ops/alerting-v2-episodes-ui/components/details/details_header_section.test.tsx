@@ -63,7 +63,7 @@ describe('AlertEpisodeDetailsHeaderSection', () => {
         rule_id: 'rule-1',
         last_deactivate_action: null,
         last_snooze_action: null,
-        snooze_expiry: null,
+        snoozed_until: null,
         tags: ['tag-a'],
         last_snooze_actor: null,
         last_deactivate_actor: null,
