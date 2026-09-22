@@ -68,7 +68,13 @@ export class SelfHttpDispatcherProvider {
       (certificate): certificate is string => certificate !== undefined
     );
 
-    const { verificationMode } = config.selfHttp.ssl;
+    // Local hops use this process's listener. The cert SAN is usually the public
+    // hostname, not `localhost` / the bind address, so `full` would fail identity.
+    // Still verify the pinned leaf; honor an explicit `none`.
+    const verificationMode =
+      usesLocalTarget && config.selfHttp.ssl.verificationMode === 'full'
+        ? 'certificate'
+        : config.selfHttp.ssl.verificationMode;
 
     // Node's global dispatcher already verifies fully, so it only stays usable in `full` mode.
     if (certificateAuthorities.length === 0 && verificationMode === 'full') {

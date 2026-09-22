@@ -145,7 +145,7 @@ describe('SelfHttpDispatcherProvider', () => {
   });
 
   describe('local target', () => {
-    it("trusts the listener's own certificate in full mode", () => {
+    it('treats full as certificate so the loopback hostname is not required to match the SAN', () => {
       const { provider } = createProvider({
         verificationMode: 'full',
         target: 'local',
@@ -154,11 +154,11 @@ describe('SelfHttpDispatcherProvider', () => {
 
       provider.get(HTTPS_URL, 'local');
 
-      expect(connectOptionsOf(0)).toEqual({
-        ca: [...rootCertificates, 'local server certificate'],
-        allowPartialTrustChain: true,
-        rejectUnauthorized: true,
-      });
+      const connect = connectOptionsOf(0);
+      expect(connect.ca).toEqual([...rootCertificates, 'local server certificate']);
+      expect(connect.allowPartialTrustChain).toBe(true);
+      expect(connect.rejectUnauthorized).toBe(true);
+      expect(connect.checkServerIdentity('localhost', {})).toBeUndefined();
     });
 
     it('skips verification in none mode', () => {

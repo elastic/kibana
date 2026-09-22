@@ -211,6 +211,58 @@ describe('InternalHttpSelfScopedClient', () => {
     expect(serializedLog).not.toContain('fake-request');
   });
 
+  it('logs a connect failure with the target URL and mode', async () => {
+    const { log, self } = createClient();
+    (global.fetch as jest.Mock).mockRejectedValueOnce(new Error('fetch failed'));
+
+    await expect(self.asScoped(createRequest()).fetch('/api/status')).rejects.toThrow(
+      'Kibana self HTTP call failed: GET https://kibana.example.com/base/s/my-space/api/status: fetch failed'
+    );
+    expect(log.error).toHaveBeenCalledWith(
+      'Kibana scoped self HTTP call failed',
+      expect.objectContaining({
+        error: expect.objectContaining({
+          message:
+            'Kibana self HTTP call failed: GET https://kibana.example.com/base/s/my-space/api/status: fetch failed',
+          name: 'HttpSelfFetchError',
+        }),
+        http: { request: { method: 'GET' } },
+        labels: {
+          self_http_target_method: 'GET',
+          self_http_target_mode: 'public',
+          self_http_target_url: 'https://kibana.example.com/base/s/my-space/api/status',
+        },
+      })
+    );
+  });
+
+  it('logs a non-success response with status and omits the query string', async () => {
+    const { log, self } = createClient();
+    (global.fetch as jest.Mock).mockResolvedValueOnce(
+      new Response(JSON.stringify({ message: 'nope' }), {
+        status: 502,
+        headers: { 'content-type': 'application/json' },
+      })
+    );
+
+    await expect(
+      self.asScoped(createRequest()).fetch('/api/status', { query: { token: 'secret-query' } })
+    ).rejects.toThrow(
+      'Kibana self HTTP call failed: GET https://kibana.example.com/base/s/my-space/api/status → 502'
+    );
+    expect(log.error).toHaveBeenCalledWith(
+      'Kibana scoped self HTTP call failed',
+      expect.objectContaining({
+        http: { request: { method: 'GET' }, response: { status_code: 502 } },
+        labels: expect.objectContaining({
+          self_http_target_url: 'https://kibana.example.com/base/s/my-space/api/status',
+          self_http_status_class: '5xx',
+        }),
+      })
+    );
+    expect(JSON.stringify((log.error as jest.Mock).mock.calls)).not.toContain('secret-query');
+  });
+
   it('builds a local URL from server info when publicBaseUrl is absent', async () => {
     const { self } = createClient({ publicBaseUrl: null });
 

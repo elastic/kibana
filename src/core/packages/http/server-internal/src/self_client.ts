@@ -125,7 +125,12 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
       const body = (await parseResponseBody(response)) as TResponseBody;
 
       if (!response.ok) {
-        throw createHttpSelfFetchError(response.statusText, request, response, body);
+        throw createHttpSelfFetchError(
+          `Kibana self HTTP call failed: ${describeSelfCall(request, response)}`,
+          request,
+          response,
+          body
+        );
       }
 
       if (options.asResponse) {
@@ -134,10 +139,16 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
 
       return body;
     } catch (error) {
-      if (isHttpSelfFetchError(error)) {
-        throw error;
-      }
-      throw createHttpSelfFetchError((error as Error).message, request);
+      const selfError = isHttpSelfFetchError(error)
+        ? error
+        : createHttpSelfFetchError(
+            `Kibana self HTTP call failed: ${describeSelfCall(request)}: ${
+              (error as Error).message
+            }`,
+            request
+          );
+      this.logFailure(selfError, options.target);
+      throw selfError;
     } finally {
       cleanup.forEach((clean) => clean());
     }
@@ -152,6 +163,27 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
         self_http_source_route_template: this.request.route.path,
         self_http_target_method: targetMethod,
         self_http_target_mode: targetMode,
+      },
+    });
+  }
+
+  private logFailure(error: HttpSelfFetchError, target?: 'local'): void {
+    const targetMode = this.getEffectiveTarget(target) === 'local' ? 'local' : 'public';
+    const statusCode = error.response?.status;
+
+    this.params.log.error('Kibana scoped self HTTP call failed', {
+      error,
+      http: {
+        request: { method: error.request.method },
+        ...(statusCode !== undefined ? { response: { status_code: statusCode } } : {}),
+      },
+      labels: {
+        self_http_target_method: error.request.method,
+        self_http_target_mode: targetMode,
+        self_http_target_url: describeSelfCallUrl(error.request),
+        ...(statusCode !== undefined
+          ? { self_http_status_class: `${Math.floor(statusCode / 100)}xx` }
+          : {}),
       },
     });
   }
@@ -327,6 +359,16 @@ const createHttpSelfFetchError = <TResponseBody>(
 
 const isHttpSelfFetchError = (error: unknown): error is HttpSelfFetchError => {
   return error instanceof Error && error.name === 'HttpSelfFetchError';
+};
+
+const describeSelfCallUrl = (request: Request): string => {
+  const url = new URL(request.url);
+  return `${url.origin}${url.pathname}`;
+};
+
+const describeSelfCall = (request: Request, response?: Response): string => {
+  const target = `${request.method} ${describeSelfCallUrl(request)}`;
+  return response ? `${target} → ${response.status}` : target;
 };
 
 const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);

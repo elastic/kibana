@@ -998,7 +998,7 @@ groups:
       - setting: server.selfHttp.ssl.verificationMode
         id: server-selfhttp-ssl-verificationmode
         description: |
-          Controls verification of the server certificate on HTTPS requests Kibana makes to its own APIs, including workflow `kibana.request` steps. `"full"` verifies the certificate and hostname, `"certificate"` verifies the certificate only, and `"none"` skips verification. This setting applies to both local listener hops and `publicBaseUrl` hops.
+          Controls verification of the server certificate on HTTPS requests Kibana makes to its own APIs, including workflow `kibana.request` steps. `"full"` verifies the certificate and hostname, `"certificate"` verifies the certificate only, and `"none"` skips verification. Local listener hops treat `"full"` as `"certificate"` because the loopback URL hostname usually does not match the certificate SAN. `"none"` is still honored on local hops.
         datatype: enum
         default: full
         options:
