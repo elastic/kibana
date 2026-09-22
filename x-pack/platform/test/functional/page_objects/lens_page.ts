@@ -1775,6 +1775,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     /** resets visualization/layer or removes a layer */
     async removeLayer(index: number = 0) {
       await retry.try(async () => {
+        await timePicker.ensureHiddenNoDataPopover();
+
         // Hover over the tab to make the layer actions button visible
         const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 0);
         if (tabs[index]) {
