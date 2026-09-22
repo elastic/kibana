@@ -59,9 +59,10 @@ triggers:
     # Absent inputs leave the standalone (alert-trigger) path unchanged.
     #
     # CONTRACT — Worker-path steps are gated on `calledByWorker: true`. A caller that omits
-    # this flag runs the same path as a trigger-fired run. Any caller that sets
-    # `calledByWorker: true` MUST also supply the other Worker-specific inputs (alerts,
-    # connectorIdByFeature, etc.) or those steps will produce empty output.
+    # this flag runs the same path as a trigger-fired run. A caller that sets
+    # `calledByWorker: true` MUST supply a non-empty `alerts` array (and typically
+    # connectorIdByFeature); missing or empty alerts fail the run via workflow.fail
+    # rather than completing with empty output.
     inputs:
       additionalProperties: false
       properties:
@@ -111,8 +112,10 @@ triggers:
           description: >
             Alert documents to analyse, supplied by a `workflow.execute` caller such as the
             AlertZero Alert Triage Worker. A child run receives no trigger event, so without
-            this the workflow sees zero alerts and silently skips. Absent on the standalone
-            path, which keeps reading the alert trigger's own `event.alerts`.
+            this the workflow would see zero alerts. When `calledByWorker` is true, a missing
+            or empty `alerts` array fails the run (workflow.fail) instead of completing with
+            empty output. Absent on the standalone path, which keeps reading the alert
+            trigger's own `event.alerts`.
             Bounded to 1000 items; each item must include `_id`, `@timestamp`, and
             `kibana.alert.rule.uuid` (writebacks, enrichment date-range anchor, and rule-context
             derivation). Execution still chunks by consts.batch_size.
@@ -213,6 +216,7 @@ outputs:
         properties:
           alert_id:
             type: string
+            maxLength: 512
           classification:
             type: string
             enum:
@@ -225,21 +229,28 @@ outputs:
             maximum: 1
           rationale:
             type: string
+            maxLength: 500
           contributing_factors:
             type: array
             maxItems: 3
             items:
               type: string
+              maxLength: 100
           host_name:
             type: string
+            maxLength: 512
           user_name:
             type: string
+            maxLength: 512
     generated_summary:
       type: string
+      maxLength: 2000
     connector_id:
       type: string
+      maxLength: 512
     agent_id:
       type: string
+      maxLength: 64
     impacted_entities:
       type: array
       maxItems: 50
@@ -258,6 +269,7 @@ outputs:
               - user
           name:
             type: string
+            maxLength: 512
           alert_count:
             type: integer
             minimum: 0
@@ -279,6 +291,9 @@ outputs:
                 minimum: 0
     impacted_entities_truncated:
       type: string
+      enum:
+        - "true"
+        - "false"
     false_positive_count:
       type: integer
       minimum: 0
@@ -292,8 +307,10 @@ outputs:
       type: array
       items:
         type: string
+        maxLength: 512
     grouped_counts_summary:
       type: string
+      maxLength: 10000
 
 settings:
   on-failure:
@@ -455,13 +472,14 @@ steps:
           # the ai.agent step's superRefine never sees both non-empty.
           connector_id: ""
           connector_id_by_feature: "{{ inputs.connectorIdByFeature }}"
-          # When min threshold arrives as an input, collapse max to 1: the range
-          # degenerates to a floor, so the Worker can close at any score >= min.
+          # When min threshold is omitted, keep the uiSettings max. Collapsing max to 1
+          # happens only in collapse_max_threshold_if_min_provided below — otherwise a
+          # Worker that enables auto-close without passing min would widen the range to
+          # [uiSettings.min, 1] past the space admin's configured max.
           # NOTE: the engine's Liquid has no ternary operator — `a != null ? a : b` fails at
           # execution time with "The provided expression is invalid", so every fallback here
           # is either a filter or a separate gated step.
           auto_close_confidence_score_min_threshold: "${{ inputs.autoCloseConfidenceScoreMinThreshold | default: variables.auto_close_confidence_score_min_threshold }}"
-          auto_close_confidence_score_max_threshold: 1
           agent_id: "{{ inputs.agentId | default: variables.agent_id }}"
           tag_prefix: "{{ inputs.tagPrefix | default: variables.tag_prefix }}"
           # When called by the Worker the ai.agent output is posted into the Investigation
@@ -475,6 +493,18 @@ steps:
           # omits autoCloseEnabled — otherwise a space with uiSettings auto-close on would
           # still close FPs inside this sub-workflow and bypass the proposal gate.
           auto_close_enabled: false
+
+      # When the Worker supplies a min threshold, collapse max to 1 so the range is a
+      # floor (close at any score >= min). Gated separately so omitting min leaves the
+      # uiSettings max intact.
+      - name: collapse_max_threshold_if_min_provided
+        type: if
+        condition: "${{ inputs.autoCloseConfidenceScoreMinThreshold != null }}"
+        steps:
+          - name: apply_max_floor
+            type: data.set
+            with:
+              auto_close_confidence_score_max_threshold: 1
 
       # Optional explicit override after the Worker-mode default above. Cannot use
       # `| default:`: Liquid treats false as falsy, so `false | default: x` yields x.
@@ -530,6 +560,32 @@ steps:
         type: data.set
         with:
           alert_set: "${{ inputs.alerts }}"
+
+  # Worker path with a missing or empty alerts input would otherwise skip analysis and
+  # emit empty workflow.output with status completed — a miswired caller looks healthy.
+  # Fail loud instead so the Worker treats the run as an error and retries / surfaces it.
+  # Split into two gates: parentheses are illegal in workflow conditions (range syntax).
+  - name: require_caller_alerts_present
+    type: if
+    condition: "${{ inputs.calledByWorker == true and inputs.alerts == null }}"
+    steps:
+      - name: fail_missing_caller_alerts
+        type: workflow.fail
+        with:
+          message: >-
+            Alert Analysis Worker path requires a non-empty alerts input;
+            inputs.alerts was missing.
+
+  - name: require_caller_alerts_nonempty
+    type: if
+    condition: "${{ inputs.calledByWorker == true and inputs.alerts.size == 0 }}"
+    steps:
+      - name: fail_empty_caller_alerts
+        type: workflow.fail
+        with:
+          message: >-
+            Alert Analysis Worker path requires a non-empty alerts input;
+            inputs.alerts was an empty array.
 
   # ---------------------------------------------------------------------------
   # Rule context for enrichment queries / logs
@@ -1649,10 +1705,11 @@ steps:
                         contributing_factors: "${{ variables.alert_verdict.contributing_factors }}"
                         # Entity the alert belongs to, carried so a caller can group verdicts by
                         # host/user without re-reading the alerts. Read from the alert document,
-                        # never from the model's reply. `unknown` keeps grouping total: an alert
-                        # with no host still belongs in exactly one group.
-                        host_name: "{{ foreach.item.host.name | default: 'unknown' }}"
-                        user_name: "{{ foreach.item.user.name | default: 'unknown' }}"
+                        # never from the model's reply. `__missing__` keeps grouping total (an
+                        # alert with no host still belongs in exactly one group) and cannot
+                        # collide with a real ECS host/user named "unknown".
+                        host_name: "{{ foreach.item.host.name | default: '__missing__' }}"
+                        user_name: "{{ foreach.item.user.name | default: '__missing__' }}"
 
                   - name: accumulate_output_verdict
                     type: data.set
