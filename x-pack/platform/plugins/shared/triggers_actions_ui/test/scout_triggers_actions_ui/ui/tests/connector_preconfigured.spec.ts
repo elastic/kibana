@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiBasicTableSelectors } from '@elastic/eui-test-helpers';
 import type { KibanaRole, KibanaUrl, ScoutPage } from '@kbn/scout';
 import { test, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
@@ -59,7 +60,9 @@ const searchConnectors = async (page: ScoutPage, name: string) => {
   await searchBox.fill(name);
   await searchBox.press('Enter');
   await page
-    .locator('.euiBasicTable[data-test-subj="actionsTable"].euiBasicTable-loading')
+    .locator(
+      `${EuiBasicTableSelectors.ROOT_SELECTOR}[data-test-subj="actionsTable"].euiBasicTable-loading`
+    )
     .waitFor({ state: 'visible', timeout: 1_000 })
     .catch(() => {});
   await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();

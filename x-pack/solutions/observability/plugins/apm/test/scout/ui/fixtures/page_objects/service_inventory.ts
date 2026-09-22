@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiBasicTableSelectors } from '@elastic/eui-test-helpers';
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
 import { ENVIRONMENT_ALL, EXTENDED_TIMEOUT } from '../constants';
 import { testData } from '..';
@@ -13,7 +14,7 @@ export class ServiceInventoryPage {
   readonly servicesTable;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
-    this.servicesTable = this.page.locator('.euiBasicTable');
+    this.servicesTable = this.page.locator(EuiBasicTableSelectors.ROOT_SELECTOR);
   }
 
   async gotoServiceInventory(

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiModalSelectors } from '@elastic/eui-test-helpers';
 import type { Locator, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
@@ -111,7 +112,7 @@ export class FileDataVisualizer {
   }
 
   async closeAnalysisExplanationPanel() {
-    await this.page.locator('.euiButtonIcon.euiModal__closeIcon').click();
+    await this.page.locator(EuiModalSelectors.CLOSE_BUTTON_SELECTOR).click();
   }
 
   async waitForFileStatsPanel(index: number) {

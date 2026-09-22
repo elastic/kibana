@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiFilterButtonSelectors } from '@elastic/eui-test-helpers';
 import type { DiscoverApp, ScoutPage } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
@@ -20,7 +21,10 @@ const openLoadSavedSearchPanel = async (page: ScoutPage, discover: DiscoverApp) 
 };
 
 const selectFilterTags = async (page: ScoutPage, ...tagNames: string[]) => {
-  await page.testSubj.locator('loadSearchForm').locator('.euiFilterGroup .euiFilterButton').click();
+  await page.testSubj
+    .locator('loadSearchForm')
+    .locator(`.euiFilterGroup ${EuiFilterButtonSelectors.ROOT_SELECTOR}`)
+    .click();
   for (const tagName of tagNames) {
     await page.testSubj.click(`tag-searchbar-option-${tagName.replace(' ', '_')}`);
   }

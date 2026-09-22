@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiModalSelectors } from '@elastic/eui-test-helpers';
 import type { ToolConfirmationPolicyMode, ToolType } from '@kbn/agent-builder-common';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import type { LlmProxy } from '@kbn/ftr-llm-proxy';
@@ -598,7 +599,7 @@ export class AgentBuilderApp {
     const deleteActionSelector = `agentBuilderAgentsListDelete-${agentId}`;
     await this.agentAction(agentId, deleteActionSelector).click();
     const modal = this.page.locator(
-      '.euiModal[role="alertdialog"][aria-labelledby^="agentDeleteModalTitle"]'
+      `${EuiModalSelectors.ROOT_SELECTOR}[role="alertdialog"][aria-labelledby^="agentDeleteModalTitle"]`
     );
     return {
       getTitle: async () => {

@@ -11,6 +11,7 @@
  * Data-grid footer and sorting behavior for date_nanos data views.
  */
 
+import { EuiDataGridSelectors } from '@elastic/eui-test-helpers';
 import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '@kbn/scout';
@@ -32,7 +33,9 @@ const footerLocator = (page: ScoutPage) => page.testSubj.locator('unifiedDataTab
 
 const getRowsText = async (page: ScoutPage): Promise<string[]> =>
   page
-    .locator('[data-test-subj="discoverDocTable"] .euiDataGridRow[data-grid-row-index]')
+    .locator(
+      `[data-test-subj="discoverDocTable"] ${EuiDataGridSelectors.ROW_SELECTOR}[data-grid-row-index]`
+    )
     .evaluateAll((rows) =>
       rows.map((row) => {
         const getCellText = (columnId: string) =>
