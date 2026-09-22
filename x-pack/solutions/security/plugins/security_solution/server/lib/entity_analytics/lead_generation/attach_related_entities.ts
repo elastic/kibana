@@ -36,12 +36,25 @@ const CRITICALITY_SCORES: Partial<Record<string, number>> = {
   extreme_impact: 100,
 };
 
+const RISK_LEVEL_SCORES: Partial<Record<string, number>> = {
+  Low: 25,
+  Moderate: 50,
+  High: 75,
+  Critical: 100,
+};
+
 const getSignificanceScore = (entity: LeadEntity): number => {
   const criticality = getAssetCriticality(entity);
   const criticalityScore = criticality ? CRITICALITY_SCORES[criticality] ?? 0 : 0;
   const riskScore = getEntityRisk(entity)?.calculatedScoreNorm ?? 0;
   return Math.max(criticalityScore, riskScore);
 };
+
+export const getRelatedEntitySignificance = (related: RelatedEntity): number =>
+  Math.max(
+    related.criticality ? CRITICALITY_SCORES[related.criticality] ?? 0 : 0,
+    related.riskLevel ? RISK_LEVEL_SCORES[related.riskLevel] ?? 0 : 0
+  );
 
 /**
  * Walks `candidate`'s relationship ids across all kinds, joins each id to
@@ -156,12 +169,14 @@ export const attachRelatedEntities = async ({
   esClient,
   spaceId,
   logger,
+  withInteractionCounts = true,
 }: {
   candidates: readonly LeadCandidate[];
   entitiesMap: ReadonlyMap<string, LeadEntity>;
   esClient: ElasticsearchClient;
   spaceId: string;
   logger: Logger;
+  withInteractionCounts?: boolean;
 }): Promise<LeadCandidate[]> => {
   if (candidates.length === 0) return [];
 
@@ -171,18 +186,21 @@ export const attachRelatedEntities = async ({
   );
 
   // get access/communication relationships and count how many other entities are interacting with them
-  const interactionTargetIds = new Set(
-    resolvedByCandidate
-      .flat()
-      .filter((r) => r.hasInteractionKind)
-      .map(({ entity }) => entity.id)
-  );
-  const interactionCounts = await countInteractingEntities(
-    esClient,
-    spaceId,
-    [...interactionTargetIds],
-    logger
-  );
+  const interactionCounts = withInteractionCounts
+    ? await countInteractingEntities(
+        esClient,
+        spaceId,
+        [
+          ...new Set(
+            resolvedByCandidate
+              .flat()
+              .filter((r) => r.hasInteractionKind)
+              .map(({ entity }) => entity.id)
+          ),
+        ],
+        logger
+      )
+    : new Map<string, number>();
 
   const candidatesWithRelated = candidates.map((candidate, i) => {
     // select the top entities per kind

@@ -6,13 +6,15 @@
  */
 
 import type { OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
-import type { YaraCompiledRule, YaraMetaKeyOfInterest, YaraValidateResult } from '../libyara';
+import type { YaraCompiledRule, YaraValidateResult } from '../libyara';
 import { validateYaraRule } from '../libyara';
+import {
+  YaraMetaKeyOfInterest,
+  MetaArchValue,
+  MetaScanTypeValue,
+  MetaOsValue,
+} from '../../../../common/endpoint/types';
 import { MAX_YARA_RULE_CONTENT_BYTE_LENGTH, MAXIMUM_RULE_IDENTIFIER_LENGTH } from './constants';
-
-const VALID_META_ARCH_VALUES = Object.freeze(['x86', 'arm64']);
-const VALID_META_SCAN_TYPE_VALUE = 'Memory';
-const VALID_META_OS_VALUES = Object.freeze(['Windows', 'Linux', 'MacOS']);
 
 const hasDuplicateValues = (values: string[]): boolean => new Set(values).size !== values.length;
 
@@ -142,12 +144,12 @@ const validateMetaArchField = (
     if (
       values.length > 2 ||
       hasDuplicateValues(values) ||
-      values.some((value) => !VALID_META_ARCH_VALUES.includes(value))
+      values.some((value) => !Object.values(MetaArchValue).includes(value as MetaArchValue))
     ) {
       const lineNumberOfRule = getRuleIdentifierLineNumber(textLines, rule.identifier);
       const lineNumber = findFirstOccurrenceLineNumberAfterLineNumber(
         textLines,
-        'arch',
+        YaraMetaKeyOfInterest.ARCH,
         lineNumberOfRule
       );
 
@@ -168,11 +170,11 @@ const validateMetaScanTypeField = (
   textLines: string[],
   result: YaraValidateResult
 ) => {
-  if (rule.meta.scan_type !== undefined && rule.meta.scan_type !== VALID_META_SCAN_TYPE_VALUE) {
+  if (rule.meta.scan_type !== undefined && rule.meta.scan_type !== MetaScanTypeValue.MEMORY) {
     const lineNumberOfRule = getRuleIdentifierLineNumber(textLines, rule.identifier);
     const lineNumber = findFirstOccurrenceLineNumberAfterLineNumber(
       textLines,
-      'scan_type',
+      YaraMetaKeyOfInterest.SCAN_TYPE,
       lineNumberOfRule
     );
 
@@ -200,12 +202,12 @@ const validateMetaOsField = (
     if (
       values.length > 3 ||
       hasDuplicateValues(values) ||
-      values.some((value) => !VALID_META_OS_VALUES.includes(value))
+      values.some((value) => !Object.values(MetaOsValue).includes(value as MetaOsValue))
     ) {
       const lineNumberOfRule = getRuleIdentifierLineNumber(textLines, rule.identifier);
       const lineNumber = findFirstOccurrenceLineNumberAfterLineNumber(
         textLines,
-        'os',
+        YaraMetaKeyOfInterest.OS,
         lineNumberOfRule
       );
 
@@ -229,7 +231,7 @@ const validateMetaOsField = (
         const lineNumberOfRule = getRuleIdentifierLineNumber(textLines, rule.identifier);
         const lineNumber = findFirstOccurrenceLineNumberAfterLineNumber(
           textLines,
-          'os',
+          YaraMetaKeyOfInterest.OS,
           lineNumberOfRule
         );
 

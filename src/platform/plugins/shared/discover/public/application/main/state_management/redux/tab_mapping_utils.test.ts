@@ -9,7 +9,8 @@
 
 import { omit } from 'lodash';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
-import { DiscoverTabType, METRICS_GRID_SETTINGS_DEFAULTS } from '@kbn/discover-utils';
+import { METRICS_GRID_SETTINGS_DEFAULTS } from '@kbn/discover-utils';
+import { DiscoverTabType } from '@kbn/discover-session-constants';
 import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
@@ -32,6 +33,14 @@ import {
 } from '../../../../../common/context_awareness';
 
 const services = createDiscoverServicesMock();
+const metricsTabTypeState: NonNullable<DiscoverSessionTab['tabTypeState']> = {
+  type: DiscoverTabType.Metrics,
+  dimensions: ['host.name'],
+  searchTerm: 'cpu',
+  counterAggregation: 'max',
+  gaugeAggregation: 'avg',
+  histogramPercentile: 'p99',
+};
 const tab1 = getTabStateMock({
   id: '1',
   label: 'Tab 1',
@@ -155,6 +164,7 @@ describe('tab mapping utils', () => {
           "duplicatedFromId": "0",
           "esqlVariables": Array [],
           "expandedDoc": undefined,
+          "expandedDocCascadePath": undefined,
           "expandedDocOwner": undefined,
           "forceFetchOnSelect": false,
           "globalState": Object {
@@ -178,6 +188,7 @@ describe('tab mapping utils', () => {
             "initializationStatus": "NotStarted",
           },
           "isDataViewLoading": false,
+          "isWarningCalloutDismissed": false,
           "label": "Tab 2",
           "overriddenVisContextAfterInvalidation": undefined,
           "previousAppState": Object {
@@ -244,6 +255,7 @@ describe('tab mapping utils', () => {
           "duplicatedFromId": "0",
           "esqlVariables": Array [],
           "expandedDoc": undefined,
+          "expandedDocCascadePath": undefined,
           "expandedDocOwner": undefined,
           "forceFetchOnSelect": false,
           "globalState": Object {
@@ -267,6 +279,7 @@ describe('tab mapping utils', () => {
             "initializationStatus": "NotStarted",
           },
           "isDataViewLoading": false,
+          "isWarningCalloutDismissed": false,
           "label": "Tab 2",
           "overriddenVisContextAfterInvalidation": undefined,
           "previousAppState": Object {
@@ -423,6 +436,7 @@ describe('tab mapping utils', () => {
               "desc",
             ],
           ],
+          "tabTypeState": undefined,
           "tags": Array [
             "tag1",
             "tag2",
@@ -450,6 +464,25 @@ describe('tab mapping utils', () => {
           },
         }
       `);
+    });
+
+    it('should preserve tab type state', async () => {
+      const persistedTab = {
+        ...getPersistedTabMock({
+          tabId: 'metrics-tab',
+          dataView: dataViewMockWithTimeField,
+          services,
+        }),
+        tabTypeState: metricsTabTypeState,
+      };
+
+      const savedSearch = await fromSavedObjectTabToSavedSearch({
+        tab: persistedTab,
+        discoverSession: undefined,
+        services,
+      });
+
+      expect(savedSearch.tabTypeState).toEqual(metricsTabTypeState);
     });
   });
 
@@ -657,6 +690,7 @@ describe('tab mapping utils', () => {
             },
           },
           "sort": Array [],
+          "tabTypeState": undefined,
           "timeRange": undefined,
           "timeRestore": false,
           "usesAdHocDataView": undefined,
@@ -706,6 +740,7 @@ describe('tab mapping utils', () => {
             },
           },
           "sort": Array [],
+          "tabTypeState": undefined,
           "timeRange": Object {
             "from": "now-15m",
             "to": "now",
@@ -765,6 +800,7 @@ describe('tab mapping utils', () => {
             },
           },
           "sort": Array [],
+          "tabTypeState": undefined,
           "timeRange": Object {
             "from": "now-15m",
             "to": "now",
@@ -815,6 +851,7 @@ describe('tab mapping utils', () => {
             },
           },
           "sort": Array [],
+          "tabTypeState": undefined,
           "timeRange": Object {
             "from": "now-15m",
             "to": "now",
@@ -825,6 +862,16 @@ describe('tab mapping utils', () => {
           "visContext": undefined,
         }
       `);
+    });
+
+    it('should preserve tab type state', () => {
+      const savedObjectTab = fromSavedSearchToSavedObjectTab({
+        tab: tab1,
+        savedSearch: { ...savedSearchMock, tabTypeState: metricsTabTypeState },
+        services,
+      });
+
+      expect(savedObjectTab.tabTypeState).toEqual(metricsTabTypeState);
     });
   });
 

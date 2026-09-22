@@ -176,6 +176,9 @@ list route **annotates** each item with `isRead` and returns the same order to e
   marking it read again updates the override timestamp (i.e. this is not "mute")
 - Callers with no user profile (API keys, headless consumers) get the list with `isRead` absent
   rather than a 403. The mark routes reject them, since there is no read state to write.
+- `_unread_status` answers "is there anything unread" as a single boolean for the bell badge,
+  resolved against the same collapsed representatives as the list. It is a read, so it stamps
+  `readAllBefore` for a first-time user just as the list does.
 
 ## Submitting notifications (`forType`)
 

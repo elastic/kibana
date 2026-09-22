@@ -683,12 +683,14 @@ export default ({ getService }: FtrProviderContext): void => {
             });
 
             // Check that the updated rule is returned with the response
-            expect(bulkEditResponse.attributes.results.updated[0].tags).toEqual(resultingTags);
+            expect(
+              removeServerGeneratedProperties(bulkEditResponse.attributes.results.updated[0]).tags
+            ).toEqual(resultingTags);
 
             // Check that the updates have been persisted
             const { body: updatedRule } = await fetchRule(ruleId).expect(200);
 
-            expect(updatedRule.tags).toEqual(resultingTags);
+            expect(removeServerGeneratedProperties(updatedRule).tags).toEqual(resultingTags);
           });
         });
 
@@ -740,12 +742,14 @@ export default ({ getService }: FtrProviderContext): void => {
             });
 
             // Check that the updated rule is returned with the response
-            expect(bulkEditResponse.attributes.results.updated[0].tags).toEqual(resultingTags);
+            expect(
+              removeServerGeneratedProperties(bulkEditResponse.attributes.results.updated[0]).tags
+            ).toEqual(resultingTags);
 
             // Check that the updates have been persisted
             const { body: updatedRule } = await fetchRule(ruleId).expect(200);
 
-            expect(updatedRule.tags).toEqual(resultingTags);
+            expect(removeServerGeneratedProperties(updatedRule).tags).toEqual(resultingTags);
           });
         });
 
@@ -796,12 +800,14 @@ export default ({ getService }: FtrProviderContext): void => {
             });
 
             // Check that the updated rule is returned with the response
-            expect(bulkEditResponse.attributes.results.updated[0].tags).toEqual(resultingTags);
+            expect(
+              removeServerGeneratedProperties(bulkEditResponse.attributes.results.updated[0]).tags
+            ).toEqual(resultingTags);
 
             // Check that the updates have been persisted
             const { body: updatedRule } = await fetchRule(ruleId).expect(200);
 
-            expect(updatedRule.tags).toEqual(resultingTags);
+            expect(removeServerGeneratedProperties(updatedRule).tags).toEqual(resultingTags);
           });
         });
 
@@ -880,7 +886,7 @@ export default ({ getService }: FtrProviderContext): void => {
               // Check that the no changes have been persisted
               const { body: updatedRule } = await fetchRule(ruleId).expect(200);
 
-              expect(updatedRule.tags).toEqual(resultingTags);
+              expect(removeServerGeneratedProperties(updatedRule).tags).toEqual(resultingTags);
             });
           }
         );
@@ -3565,14 +3571,18 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body.attributes.summary).toEqual({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
 
         // Check that the updated rule is returned with the response
-        expect(body.attributes.results.updated[0].tags).toEqual(['tag1', 'tag2', 'tag3']);
+        expect(removeServerGeneratedProperties(body.attributes.results.updated[0]).tags).toEqual([
+          'tag1',
+          'tag2',
+          'tag3',
+        ]);
         expect(body.attributes.results.updated[0].index).toEqual(['index1-*', 'initial-index-*']);
 
         // Check that the rule has been persisted
         const { body: updatedRule } = await fetchRule(ruleId).expect(200);
 
         expect(updatedRule.index).toEqual(['index1-*', 'initial-index-*']);
-        expect(updatedRule.tags).toEqual(['tag1', 'tag2', 'tag3']);
+        expect(removeServerGeneratedProperties(updatedRule).tags).toEqual(['tag1', 'tag2', 'tag3']);
       });
 
       it('should return one updated rule when applying one valid operation and one operation to be skipped on a rule', async () => {
@@ -3605,14 +3615,17 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body.attributes.summary).toEqual({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
 
         // Check that the updated rule is returned with the response
-        expect(body.attributes.results.updated[0].tags).toEqual(['tag1', 'tag2']);
+        expect(removeServerGeneratedProperties(body.attributes.results.updated[0]).tags).toEqual([
+          'tag1',
+          'tag2',
+        ]);
         expect(body.attributes.results.updated[0].index).toEqual(['index1-*', 'initial-index-*']);
 
         // Check that the rule has been persisted
         const { body: updatedRule } = await fetchRule(ruleId).expect(200);
 
         expect(updatedRule.index).toEqual(['index1-*', 'initial-index-*']);
-        expect(updatedRule.tags).toEqual(['tag1', 'tag2']);
+        expect(removeServerGeneratedProperties(updatedRule).tags).toEqual(['tag1', 'tag2']);
       });
 
       it('should return one skipped rule when two (all) operations result in a no-op', async () => {
@@ -3653,7 +3666,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body: skippedRule } = await fetchRule(ruleId).expect(200);
 
         expect(skippedRule.index).toEqual(['index1-*']);
-        expect(skippedRule.tags).toEqual(['tag1', 'tag2']);
+        expect(removeServerGeneratedProperties(skippedRule).tags).toEqual(['tag1', 'tag2']);
       });
     });
 

@@ -167,6 +167,7 @@ describe('CloudConnectorSelector', () => {
     await user.click(screen.getByText('AWS Connector 1'));
 
     expect(mockSetCredentials).toHaveBeenCalledWith({
+      name: 'AWS Connector 1',
       roleArn: 'arn:aws:iam::123456789012:role/Role1',
       externalId: 'external-id-1',
       cloudConnectorId: 'connector-1',
@@ -316,6 +317,7 @@ describe('CloudConnectorSelector', () => {
       await user.click(screen.getByText('GCP Connector 1'));
 
       expect(mockSetCredentials).toHaveBeenCalledWith({
+        name: 'GCP Connector 1',
         serviceAccount: 'test-service-account@project.iam.gserviceaccount.com',
         audience:
           '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',

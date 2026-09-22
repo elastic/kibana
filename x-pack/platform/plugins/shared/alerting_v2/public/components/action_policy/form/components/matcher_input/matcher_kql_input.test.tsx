@@ -58,11 +58,11 @@ describe('MatcherInput', () => {
       indexPatterns: Array<{ fields: Array<{ name: string }> }>;
     };
 
+    const fieldNames: string[] = indexPatterns[0].fields.map((f: { name: string }) => f.name);
     expect(indexPatterns).toHaveLength(1);
     expect(indexPatterns[0].fields).toHaveLength(MATCHER_CONTEXT_FIELDS.length);
-    expect(indexPatterns[0].fields.map((f: { name: string }) => f.name)).toEqual(
-      MATCHER_CONTEXT_FIELDS.map((f) => f.path)
-    );
+    expect(fieldNames).toEqual(MATCHER_CONTEXT_FIELDS.map((f) => f.path));
+    expect(fieldNames.some((n) => n.startsWith('rule.'))).toBe(false);
   });
 
   it('disables the language switcher and uses kuery language', () => {
@@ -83,10 +83,10 @@ describe('MatcherInput', () => {
       window.HTMLInputElement.prototype,
       'value'
     )!.set!;
-    nativeInputValueSetter.call(input, 'rule.name : "test"');
+    nativeInputValueSetter.call(input, 'episode_status: "active"');
     input.dispatchEvent(new Event('change', { bubbles: true }));
 
-    expect(onChange).toHaveBeenCalledWith('rule.name : "test"');
+    expect(onChange).toHaveBeenCalledWith('episode_status: "active"');
   });
 
   it('passes placeholder and data-test-subj props through', () => {

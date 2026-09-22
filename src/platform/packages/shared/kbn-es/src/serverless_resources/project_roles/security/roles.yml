@@ -1,4 +1,5 @@
 # ----- Copy from internal roles config in elasticsearch-controller
+# Read-tier Dashboard/Discover grants: elastic/elasticsearch-controller#2058
 # modeled after the t1_analyst minus osquery run saved queries privilege, plus endpoint exceptions read
 viewer:
   metadata:
@@ -7,6 +8,19 @@ viewer:
   cluster:
     - 'read_project_routing'
   indices:
+    - names:
+        - .metrics-endpoint.metadata_united_default*
+        - metrics-endpoint.policy-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - '.siem-signals*'
         - '.lists-*'
@@ -76,8 +90,12 @@ viewer:
         - feature_actions.read
         - feature_builtInAlerts.read
         - feature_osquery.read
-        - feature_discover_v2.all
-        - feature_dashboard_v2.all
+        # Dashboard/Discover `.all` was inert while those Kibana features were hidden.
+        # Keep `.read` so unhiding them does not grant write; SIEM `read` already
+        # composes the same read privileges. maps_v2/visualize_v2 stay `.all` because
+        # they remain hidden and Dashboard `read` already composes them.
+        - feature_discover_v2.read
+        - feature_dashboard_v2.read
         - feature_maps_v2.all
         - feature_visualize_v2.all
         - feature_savedQueryManagement.all
@@ -94,6 +112,29 @@ editor:
   cluster:
     - 'read_project_routing'
   indices:
+    - names:
+        - metrics-endpoint.metadata_current_*
+      privileges:
+        - read
+    - names:
+        - .logs-endpoint.actions-*
+        - .logs-endpoint.action.responses-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .metrics-endpoint.metadata_united_default*
+        - metrics-endpoint.policy-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - '.siem-signals*'
         - '.lists-*'
@@ -214,6 +255,19 @@ t1_analyst:
     - 'read_project_routing'
   indices:
     - names:
+        - .metrics-endpoint.metadata_united_default*
+        - metrics-endpoint.policy-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
+    - names:
         - '.alerts-security*'
         - '.siem-signals-*'
       privileges:
@@ -288,8 +342,10 @@ t1_analyst:
         - feature_builtInAlerts.read
         - feature_osquery.read
         - feature_osquery.run_saved_queries
-        - feature_discover_v2.all
-        - feature_dashboard_v2.all
+        # Same as viewer: Dashboard/Discover stay `.read`; maps_v2/visualize_v2 stay
+        # `.all` because those features remain hidden.
+        - feature_discover_v2.read
+        - feature_dashboard_v2.read
         - feature_maps_v2.all
         - feature_visualize_v2.all
         - feature_savedQueryManagement.all
@@ -304,6 +360,19 @@ t2_analyst:
   cluster:
     - 'read_project_routing'
   indices:
+    - names:
+        - .metrics-endpoint.metadata_united_default*
+        - metrics-endpoint.policy-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - .alerts-security*
         - .siem-signals-*
@@ -380,8 +449,10 @@ t2_analyst:
         - feature_builtInAlerts.read
         - feature_osquery.read
         - feature_osquery.run_saved_queries
-        - feature_discover_v2.all
-        - feature_dashboard_v2.all
+        # Same as viewer: Dashboard/Discover stay `.read`; maps_v2/visualize_v2 stay
+        # `.all` because those features remain hidden.
+        - feature_discover_v2.read
+        - feature_dashboard_v2.read
         - feature_maps_v2.all
         - feature_visualize_v2.all
         - feature_savedQueryManagement.all
@@ -396,6 +467,25 @@ t3_analyst:
   cluster:
     - 'read_project_routing'
   indices:
+    - names:
+        - .logs-endpoint.actions-*
+        - .logs-endpoint.action.responses-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .metrics-endpoint.metadata_united_default*
+        - metrics-endpoint.policy-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - apm-*-transaction*
         - traces-apm*
@@ -508,6 +598,19 @@ threat_intelligence_analyst:
     - 'read_project_routing'
   indices:
     - names:
+        - .metrics-endpoint.metadata_united_default*
+        - metrics-endpoint.policy-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
+    - names:
         - apm-*-transaction*
         - traces-apm*
         - auditbeat-*
@@ -603,6 +706,25 @@ rule_author:
   cluster:
     - 'read_project_routing'
   indices:
+    - names:
+        - .logs-endpoint.actions-*
+        - .logs-endpoint.action.responses-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .metrics-endpoint.metadata_united_default*
+        - metrics-endpoint.policy-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - apm-*-transaction*
         - traces-apm*
@@ -702,6 +824,25 @@ soc_manager:
   cluster:
     - 'read_project_routing'
   indices:
+    - names:
+        - .logs-endpoint.actions-*
+        - .logs-endpoint.action.responses-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .metrics-endpoint.metadata_united_default*
+        - metrics-endpoint.policy-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - apm-*-transaction*
         - traces-apm*
@@ -815,6 +956,13 @@ detections_admin:
   cluster: ['manage_index_templates', 'manage_transform', 'read_project_routing']
   indices:
     - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
+    - names:
         - apm-*-transaction*
         - traces-apm*
         - auditbeat-*
@@ -899,7 +1047,31 @@ platform_engineer:
     reserved: true
   cluster:
     - manage
+    - 'read_project_routing'
   indices:
+    - names:
+        - metrics-endpoint.metadata_current_*
+      privileges:
+        - read
+    - names:
+        - .logs-endpoint.actions-*
+        - .logs-endpoint.action.responses-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .metrics-endpoint.metadata_united_default*
+        - metrics-endpoint.policy-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - apm-*-transaction*
         - traces-apm*
@@ -997,6 +1169,25 @@ endpoint_operations_analyst:
   cluster:
     - 'read_project_routing'
   indices:
+    - names:
+        - .logs-endpoint.actions-*
+        - .logs-endpoint.action.responses-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .metrics-endpoint.metadata_united_default*
+        - metrics-endpoint.policy-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - metrics-endpoint.metadata_current_*
         - .fleet-agents*
@@ -1108,6 +1299,19 @@ endpoint_policy_manager:
   cluster:
     - 'read_project_routing'
   indices:
+    - names:
+        - .metrics-endpoint.metadata_united_default*
+        - metrics-endpoint.policy-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - metrics-endpoint.metadata_current_*
         - .fleet-agents*

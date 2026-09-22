@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   EuiTitle,
   useEuiMemoizedStyles,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 import type { FlyoutSectionProps } from './types';
@@ -35,19 +36,23 @@ const getSectionStyles = ({ euiTheme }: UseEuiTheme) => ({
 });
 
 export const FlyoutSection = ({
+  id,
   title,
   icon,
   tooltip,
   action,
   hasBorder = false,
+  borderOnChildren = false,
   children,
   'data-test-subj': dataTestSubj,
 }: FlyoutSectionProps) => {
   const styles = useEuiMemoizedStyles(getSectionStyles);
+  const sectionId = useGeneratedHtmlId({ conditionalId: id, prefix: 'flyoutSection' });
+  const titleId = `${sectionId}_title`;
 
   const titleWithIcon = renderTitleWithIcon(
     <EuiTitle size="xs">
-      <h4>{title}</h4>
+      <h4 id={titleId}>{title}</h4>
     </EuiTitle>,
     renderTitleIcon(icon, tooltip)
   );
@@ -68,14 +73,20 @@ export const FlyoutSection = ({
 
   return (
     <section
+      id={sectionId}
+      // An unnamed `section` is not exposed to assistive tech at all; naming it by its own
+      // heading makes it a navigable region.
+      aria-labelledby={titleId}
       css={styles.section}
       data-flyout-section="section"
+      // Read by the divider rule above on the *following* sibling, so it must stay set even when
+      // the panel itself lives on the children.
       data-bordered={hasBorder || undefined}
       data-test-subj={dataTestSubj}
     >
       {header}
       <EuiSpacer size="s" />
-      {hasBorder ? (
+      {hasBorder && !borderOnChildren ? (
         <EuiPanel hasShadow={false} hasBorder paddingSize="m">
           {children}
         </EuiPanel>

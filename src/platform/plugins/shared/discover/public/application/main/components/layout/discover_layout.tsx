@@ -302,6 +302,8 @@ export function DiscoverLayout() {
     () => new BehaviorSubject<SidebarToggleState>({ isCollapsed: false, toggle: () => {} })
   );
 
+  const isSidebarHidden = resultState === 'uninitialized';
+
   const mainDisplay = useMemo(() => {
     if (resultState === 'uninitialized') {
       addLog('[DiscoverLayout] uninitialized triggers data fetching');
@@ -402,19 +404,20 @@ export function DiscoverLayout() {
         onCancelClick={onCancelClick}
       />
       <EuiPageBody css={styles.pageBody}>
+        <SavedSearchURLConflictCallout
+          discoverSession={discoverSession}
+          spaces={spaces}
+          history={history}
+        />
         <div css={styles.sidebarContainer}>
           {dataViewLoading && (
             <EuiDelayRender delay={300}>
               <EuiProgress size="xs" color="accent" position="absolute" />
             </EuiDelayRender>
           )}
-          <SavedSearchURLConflictCallout
-            discoverSession={discoverSession}
-            spaces={spaces}
-            history={history}
-          />
           <DiscoverResizableLayout
             sidebarToggleState$={sidebarToggleState$}
+            isSidebarHidden={isSidebarHidden}
             sidebarPanel={
               <SidebarMemoized
                 columns={sidebarColumns}

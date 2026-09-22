@@ -9,6 +9,7 @@ import { css } from '@emotion/css';
 
 export const searchConnectorsPageTemplate = css({
   position: 'relative',
+  flexGrow: 1,
 
   '.searchConnectorsPageTemplate__content': {
     // Note: relative positioning is required for our centered Loading component

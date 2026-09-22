@@ -11,6 +11,7 @@ import { useDispatch, useSelector } from 'react-redux-v7';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
+import { OutPortal } from 'react-reverse-portal';
 import { CanUsePublicLocationsCallout } from './steps/can_use_public_locations_callout';
 import { DisabledCallout } from '../monitors_page/management/disabled_callout';
 import { useCanUsePublicLocations } from '../../../../hooks/use_capabilities';
@@ -34,6 +35,8 @@ import { useMonitorAddEditBreadcrumbs } from './use_breadcrumbs';
 import { EDIT_MONITOR_STEPS } from './steps/step_config';
 import { useMonitorNotFound } from './hooks/use_monitor_not_found';
 import { useGetUrlParams } from '../../hooks';
+import { EDIT_MONITOR_TITLE, MonitorBackPage, SyntheticsHeaderToolbar } from '../common/app_header';
+import { InspectMonitorPortalNode, MonitorTypePortalNode } from './portals';
 
 export const MonitorEditPage: React.FC = () => {
   useTrackPageview({ app: 'synthetics', path: 'edit-monitor' });
@@ -72,57 +75,63 @@ export const MonitorEditPage: React.FC = () => {
 
   const projectId = data?.[ConfigKey.PROJECT_ID];
 
-  if (locationsError) {
-    return <LocationsLoadingError />;
-  }
-
-  if (error) {
-    return (
-      <EuiEmptyPrompt
-        iconType="warning"
-        color="danger"
-        title={
-          <h3>
-            {i18n.translate('xpack.synthetics.monitorEditPage.error.label', {
-              defaultMessage: 'Unable to load monitor configuration',
-            })}
-          </h3>
-        }
-        body={
-          <p>
-            {i18n.translate('xpack.synthetics.monitorEditPage.error.content', {
-              defaultMessage: 'There was an error loading your monitor. Please try again later.',
-            })}
-          </p>
-        }
-      />
-    );
-  }
-
-  return data && locationsLoaded && !isLoading && !error ? (
-    <>
-      <DisabledCallout />
-      <CanUsePublicLocationsCallout canUsePublicLocations={canUsePublicLocations} />
-      <AlertingCallout isAlertingEnabled={data[ConfigKey.ALERT_CONFIG]?.status?.enabled} />
-      <MonitorForm
-        defaultValues={data}
-        readOnly={isReadOnly}
-        canUsePublicLocations={canUsePublicLocations}
-      >
-        <MonitorSteps
-          stepMap={EDIT_MONITOR_STEPS(isReadOnly)}
-          isEditFlow={true}
-          readOnly={isReadOnly}
-          projectId={projectId}
+  return (
+    <MonitorBackPage
+      title={EDIT_MONITOR_TITLE}
+      toolbar={
+        <SyntheticsHeaderToolbar>
+          <OutPortal node={MonitorTypePortalNode} />
+          <OutPortal node={InspectMonitorPortalNode} />
+        </SyntheticsHeaderToolbar>
+      }
+    >
+      {locationsError ? (
+        <LocationsLoadingError />
+      ) : error ? (
+        <EuiEmptyPrompt
+          iconType="warning"
+          color="danger"
+          title={
+            <h3>
+              {i18n.translate('xpack.synthetics.monitorEditPage.error.label', {
+                defaultMessage: 'Unable to load monitor configuration',
+              })}
+            </h3>
+          }
+          body={
+            <p>
+              {i18n.translate('xpack.synthetics.monitorEditPage.error.content', {
+                defaultMessage: 'There was an error loading your monitor. Please try again later.',
+              })}
+            </p>
+          }
         />
-        <MonitorDetailsLinkPortal
-          configId={data?.[ConfigKey.CONFIG_ID]}
-          name={data?.name}
-          updateUrl={false}
-        />
-      </MonitorForm>
-    </>
-  ) : (
-    <LoadingState />
+      ) : data && locationsLoaded && !isLoading ? (
+        <>
+          <DisabledCallout />
+          <CanUsePublicLocationsCallout canUsePublicLocations={canUsePublicLocations} />
+          <AlertingCallout isAlertingEnabled={data[ConfigKey.ALERT_CONFIG]?.status?.enabled} />
+          <MonitorForm
+            defaultValues={data}
+            readOnly={isReadOnly}
+            canUsePublicLocations={canUsePublicLocations}
+          >
+            <MonitorSteps
+              stepMap={EDIT_MONITOR_STEPS(isReadOnly)}
+              isEditFlow={true}
+              readOnly={isReadOnly}
+              projectId={projectId}
+            />
+            <MonitorDetailsLinkPortal
+              configId={data?.[ConfigKey.CONFIG_ID]}
+              name={data?.name}
+              updateUrl={false}
+            />
+          </MonitorForm>
+        </>
+      ) : (
+        <LoadingState />
+      )}
+    </MonitorBackPage>
   );
 };

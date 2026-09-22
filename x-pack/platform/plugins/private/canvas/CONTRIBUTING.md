@@ -109,4 +109,4 @@ Canvas uses [Storybook](https://storybook.js.org) to test and develop components
 
 ### Using Storybook
 
-The Canvas Storybook instance can be started by running `yarn storybook canvas` from the Kibana root directory.
+The Canvas Storybook instance can be started by running `pnpm storybook canvas` from the Kibana root directory.

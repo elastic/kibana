@@ -1,0 +1,128 @@
+openapi: 3.0.0
+info:
+  title: AlertZero Watch settings component schemas
+  version: '1'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    WatchAutonomyLevel:
+      type: string
+      enum: [manual, assisted, supervised]
+      description: >-
+        Autonomy dial levels per programme decision D15 (2026-07-28). Manual is the MVP default.
+        There is deliberately no mapping from the legacy 1–5 AutonomyLevel scale — see
+        https://github.com/elastic/security-team/issues/18718.
+
+    WorkerScheduleInterval:
+      type: string
+      pattern: '^[1-9][0-9]*[mhd]$'
+      maxLength: 6
+      description: >-
+        Interval between runs for a schedule-driven Worker, as a positive count and a unit of
+        minutes, hours or days (e.g. "24h"). Rendered verbatim into the Worker's `scheduled`
+        trigger. Seconds are not supported.
+
+    WorkerRunState:
+      type: string
+      enum: [ok, paused, degraded, unavailable]
+      description: >-
+        Run health of a long-running worker, shown instead of a timestamp when not ok. Workers only —
+        a skill is invoked rather than run continuously, so it has no health of its own.
+
+    WorkerSettingsExtras:
+      type: object
+      additionalProperties: true
+      description: >-
+        Worker-specific settings owned by the Worker's Watch team. The wire schema is open so the
+        shared read/update path stays generic; each Worker declares a closed schema for its own
+        extras (see the Watch-owned `*_watch_settings.schema.yaml` files) and the server validates
+        against that declaration, rejecting unknown or missing fields by name.
+
+    WorkerSettings:
+      type: object
+      additionalProperties: false
+      description: >-
+        Durable per-Worker settings stored as managed template values. Shared fields sit at the top
+        level; Worker-specific fields live under `extras`. Unknown top-level keys are rejected.
+      required:
+        - workerId
+        - autonomy
+      properties:
+        workerId:
+          type: string
+        autonomy:
+          $ref: '#/components/schemas/WatchAutonomyLevel'
+        scheduleInterval:
+          $ref: '#/components/schemas/WorkerScheduleInterval'
+          description: >-
+            Omitted for Workers that are not schedule-driven. Its presence is what tells the UI to
+            render the interval control.
+        extras:
+          $ref: '#/components/schemas/WorkerSettingsExtras'
+          description: Omitted for Workers that declare no Worker-specific settings.
+
+    WorkerSettingsWrite:
+      type: object
+      additionalProperties: false
+      description: >-
+        Settings patch; the editable subset of WorkerSettings with the same names and nesting.
+        Shared fields are per-field: omitted keeps the stored value, supplied replaces it. `extras`
+        is whole-object: omitted keeps the stored extras, supplied must be the complete valid object
+        for this Worker and replaces the stored one. There is no deep merge and `null` has no
+        special meaning.
+      properties:
+        autonomy:
+          $ref: '#/components/schemas/WatchAutonomyLevel'
+        scheduleInterval:
+          $ref: '#/components/schemas/WorkerScheduleInterval'
+        extras:
+          $ref: '#/components/schemas/WorkerSettingsExtras'
+
+    Worker:
+      type: object
+      description: A live registered Worker with Watch membership and durable settings.
+      required:
+        - id
+        - name
+        - watchIds
+        - enabled
+        - lastRun
+        - state
+        - settings
+        - settingsRevision
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        watchIds:
+          type: array
+          items:
+            type: string
+          description: Catalog Watch ids this Worker belongs to, derived from YAML tags
+        enabled:
+          type: boolean
+        lastRun:
+          type: string
+          nullable: true
+        state:
+          $ref: '#/components/schemas/WorkerRunState'
+        stateReason:
+          type: string
+        lifecycle:
+          $ref: './watch.schema.yaml#/components/schemas/Lifecycle'
+        settings:
+          $ref: '#/components/schemas/WorkerSettings'
+        settingsRevision:
+          type: integer
+          format: int64
+          minimum: 0
+          nullable: true
+          description: >-
+            Logical workflow version for best-effort stale settings detection. Null when the
+            per-space managed Worker has not been installed yet.
+        skills:
+          type: array
+          items:
+            $ref: './watch.schema.yaml#/components/schemas/WatchCallableRef'

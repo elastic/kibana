@@ -93,8 +93,8 @@ export class SearchExamplesPage {
     await this.dataViewSelector.setSelectedOptions([DATA_VIEW]);
     // Field options load after the data view resolves.
     await this.page.testSubj.locator('searchBucketField').waitFor({ state: 'visible' });
-    await this.replaceSingleComboSelection('searchBucketField', 'geo.src');
-    await this.replaceSingleComboSelection('searchMetricField', 'memory');
+    await this.searchBucketField.setSelectedOptions(['geo.src']);
+    await this.searchMetricField.setSelectedOptions(['memory']);
     await this.datePicker.setAbsoluteRange(LOGSTASH_TIME_RANGE);
   }
 
@@ -105,10 +105,7 @@ export class SearchExamplesPage {
   async configureWarningsDemo(dataViewName: string = SAMPLE_01_DATA_VIEW_NAME): Promise<void> {
     await this.dataViewSelector.setSelectedOptions([dataViewName]);
     await this.page.testSubj.locator('searchMetricField').waitFor({ state: 'visible' });
-    await this.replaceSingleComboSelection(
-      'searchMetricField',
-      'kubernetes.container.memory.usage.bytes'
-    );
+    await this.searchMetricField.setSelectedOptions(['kubernetes.container.memory.usage.bytes']);
     await this.datePicker.setAbsoluteRange(SAMPLE_01_TIME_RANGE);
   }
 
@@ -119,32 +116,12 @@ export class SearchExamplesPage {
    */
   async configureSearchSessionDemo(): Promise<void> {
     await this.dataViewSelector.setSelectedOptions([DATA_VIEW]);
-    await this.replaceSingleComboSelection('searchMetricField', 'bytes');
+    await this.searchMetricField.setSelectedOptions(['bytes']);
     await this.datePicker.setAbsoluteRange(LOGSTASH_TIME_RANGE);
     await this.page.testSubj
       .locator('dateRangePickerCustomRangePanel')
       .waitFor({ state: 'hidden' });
     await this.startSearch.click({ trial: true });
-  }
-
-  /**
-   * Picks `label` on a single-select combo. `setSelectedOptions` tries to
-   * clear existing pills first; these demo combos render pills without a
-   * close button, so that helper hangs. Typing the full label focuses the
-   * exact option (`geo.src` ahead of `geo.srcdest`); Enter commits it.
-   */
-  private async replaceSingleComboSelection(testSubj: string, label: string): Promise<void> {
-    const combo = this.page.components.comboBox(testSubj);
-    if ((await combo.getSelectedOptions()).includes(label)) {
-      return;
-    }
-
-    const root = this.page.testSubj.locator(testSubj);
-    const searchInput = root.getByTestId('comboBoxSearchInput');
-    await root.getByTestId('comboBoxInput').click();
-    await searchInput.fill(label);
-    await this.page.getByRole('listbox').waitFor({ state: 'visible' });
-    await searchInput.press('Enter');
   }
 
   /**
