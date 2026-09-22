@@ -6,7 +6,6 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { useIsMutating } from '@kbn/react-query';
 import { useTimelineItems } from '../components/conversations/timeline/use_timeline_items';
 import type { TimelineItem } from '../components/conversations/timeline/types';
 import { createUserMessageEvent } from '../components/conversations/timeline/items/user_message_event.factory';
@@ -14,7 +13,6 @@ import { useConversationId } from '../context/conversation/use_conversation_id';
 import { useCurrentConversationStreamType } from './use_is_current_conversation_streaming';
 import { useAnchoredItemKey } from './use_anchored_item_key';
 
-jest.mock('@kbn/react-query', () => ({ useIsMutating: jest.fn() }));
 jest.mock('../components/conversations/timeline/use_timeline_items', () => ({
   useTimelineItems: jest.fn(),
 }));
@@ -39,6 +37,7 @@ const turn = (key: string): TimelineItem => ({
 interface State {
   conversationId?: string;
   isStreaming?: boolean;
+  // A post without the agent (trigger mode "never"): a mutation runs but no stream starts.
   isPosting?: boolean;
   // The current conversation's stream is a resume (continuing a paused turn) rather than a send.
   isResuming?: boolean;
@@ -46,7 +45,7 @@ interface State {
 }
 
 const setState = (state: State) => {
-  const { isStreaming = false, isPosting = false, isResuming = false, items } = state;
+  const { isStreaming = false, isResuming = false, items } = state;
   // An explicit `undefined` is the new-conversation page, which has no id yet.
   const conversationId = 'conversationId' in state ? state.conversationId : 'a';
   jest.mocked(useConversationId).mockReturnValue(conversationId);
@@ -54,7 +53,6 @@ const setState = (state: State) => {
   // invisible here: this conversation reads its own `send` (or nothing).
   const streamType = isResuming ? 'resume' : isStreaming ? 'send' : undefined;
   jest.mocked(useCurrentConversationStreamType).mockReturnValue(streamType);
-  jest.mocked(useIsMutating).mockReturnValue(isPosting ? 1 : 0);
   jest.mocked(useTimelineItems).mockReturnValue(items);
 };
 
@@ -95,14 +93,14 @@ describe('useAnchoredItemKey', () => {
     expect(result.current).toBe('u2');
   });
 
-  it('anchors the item appended by a post without the agent', () => {
+  it('does not anchor a post without the agent: no run follows the message', () => {
     const { result, update } = renderAnchor({ items: history });
 
     update({ isPosting: true, items: history });
     expect(result.current).toBeUndefined();
 
     update({ isPosting: false, items: [...history, message('u2')] });
-    expect(result.current).toBe('u2');
+    expect(result.current).toBeUndefined();
   });
 
   it('keeps the previous anchor until the next send appends its item, then moves to it', () => {
