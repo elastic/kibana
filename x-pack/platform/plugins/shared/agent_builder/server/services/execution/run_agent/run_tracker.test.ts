@@ -128,6 +128,30 @@ describe('projectExecutionSteps', () => {
     expect(projectExecutionSteps({ steps, renderState: {}, inherited })).toEqual([question('q2')]);
   });
 
+  it('fails loudly when the inherited prefix no longer matches (a reducer change broke ordering)', () => {
+    const inherited = { steps: [reasoning('old'), toolCall('c1')], pendingToolCallIds: [] };
+    // a step inserted before the inherited ones
+    expect(() =>
+      projectExecutionSteps({
+        steps: [reasoning('inserted'), reasoning('old'), toolCall('c1')],
+        renderState: {},
+        inherited,
+      })
+    ).toThrow(/inherited step 1 \(tool_call\) is now reasoning/);
+    // a tool call swapped for another one at an inherited position
+    expect(() =>
+      projectExecutionSteps({
+        steps: [reasoning('old'), toolCall('other')],
+        renderState: {},
+        inherited,
+      })
+    ).toThrow(/inherited step 1/);
+    // fewer steps than inherited
+    expect(() =>
+      projectExecutionSteps({ steps: [reasoning('old')], renderState: {}, inherited })
+    ).toThrow(/1 steps for 2 inherited ones/);
+  });
+
   it('drops browser and dedicated-lifecycle calls using the render state', () => {
     const steps = [toolCall('srv'), toolCall('brw'), toolCall('ded')];
     expect(
@@ -189,6 +213,29 @@ describe('RunTracker', () => {
       name: 'researchAgent',
     });
     expect(tracker.latestState().steps).toEqual([]);
+  });
+
+  it('once the root run started, accepts chunks by run id only', () => {
+    const tracker = new RunTracker({ graphName: GRAPH });
+    tracker.seed({ steps: [] });
+    tracker.observeGraphEvent({
+      ...stateChunk([]),
+      event: 'on_chain_start',
+      run_id: 'root',
+    });
+    // a same-named run with another id, even without inherited node metadata
+    tracker.observeGraphEvent({ ...stateChunk([reasoning('other')]), run_id: 'nested' });
+    expect(tracker.latestState().steps).toEqual([]);
+    tracker.observeGraphEvent({ ...stateChunk([reasoning('ours')]), run_id: 'root' });
+    expect(tracker.latestState().steps).toEqual([reasoning('ours')]);
+    // a later same-named start does not steal the root id
+    tracker.observeGraphEvent({
+      ...stateChunk([]),
+      event: 'on_chain_start',
+      run_id: 'nested-2',
+    });
+    tracker.observeGraphEvent({ ...stateChunk([reasoning('nested-2')]), run_id: 'nested-2' });
+    expect(tracker.latestState().steps).toEqual([reasoning('ours')]);
   });
 
   it('buffers tool progress and drains it once', () => {

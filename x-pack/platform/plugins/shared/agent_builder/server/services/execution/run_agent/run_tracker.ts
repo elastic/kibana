@@ -20,6 +20,8 @@ import {
   isToolProgressEvent,
 } from '@kbn/agent-builder-common';
 import type { TodoItem } from '@kbn/agent-builder-common/chat/conversation';
+import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
+import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import { matchName } from '@kbn/agent-builder-genai-utils/langchain';
 import { applyStepUpdates, persistableSteps, stepUpdates } from './step_state';
 import type { ToolRenderStateMap } from './transient_state';
@@ -49,15 +51,26 @@ export interface RunSeed {
   inherited?: { steps: ConversationRoundStep[]; pendingToolCallIds: string[] };
 }
 
+const invalidState = (message: string) =>
+  createAgentExecutionError(message, AgentExecutionErrorCode.invalidState, {});
+
 /**
- * True for a root-graph `on_chain_stream` event of this run. With `streamMode: 'values'` its chunk
- * is the full graph state after a super-step. Nested runs of the same graph (a sub-agent) inherit
- * the parent node's metadata, so `langgraph_node` tells them apart from the root run.
+ * True for the root graph's own `on_chain_stream` event. With `streamMode: 'values'` its chunk is
+ * the full graph state after a super-step. Nested runs of the same graph (a sub-agent) are told
+ * apart by run id once the root `on_chain_start` has been seen — it always precedes any chunk — and
+ * by the inherited `langgraph_node` metadata otherwise (a nested run only reaches this stream
+ * through its parent node's callbacks, so it necessarily carries the node's metadata).
  */
-const isRootGraphStateChunk = (event: LangchainStreamEvent, graphName: string): boolean =>
-  event.event === 'on_chain_stream' &&
-  matchName(event, graphName) &&
-  event.metadata?.langgraph_node === undefined;
+const isRootGraphStateChunk = (
+  event: LangchainStreamEvent,
+  graphName: string,
+  rootRunId: string | undefined
+): boolean => {
+  if (event.event !== 'on_chain_stream' || !matchName(event, graphName)) return false;
+  return rootRunId !== undefined
+    ? event.run_id === rootRunId
+    : event.metadata?.langgraph_node === undefined;
+};
 
 const isStateSnapshot = (chunk: unknown): chunk is RunStateSnapshot =>
   typeof chunk === 'object' &&
@@ -88,6 +101,12 @@ export const projectExecutionSteps = ({
   const inheritedTodos = inherited.steps.find(isTodosStep);
   const inheritedNonTodos = inherited.steps.filter((step) => !isTodosStep(step));
   const pendingIds = new Set(inherited.pendingToolCallIds);
+  const nonTodosCount = steps.filter((step) => !isTodosStep(step)).length;
+  if (nonTodosCount < inheritedNonTodos.length) {
+    throw invalidState(
+      `[projection] ${nonTodosCount} steps for ${inheritedNonTodos.length} inherited ones`
+    );
+  }
 
   const owned: ConversationRoundStep[] = [];
   let position = 0;
@@ -104,6 +123,17 @@ export const projectExecutionSteps = ({
     if (!inheritedStep) {
       owned.push(step);
       continue;
+    }
+    // A wrong projection would persist silently; a reducer change breaking the prefix must not.
+    if (
+      step.type !== inheritedStep.type ||
+      (isToolCallStep(step) &&
+        isToolCallStep(inheritedStep) &&
+        step.tool_call_id !== inheritedStep.tool_call_id)
+    ) {
+      throw invalidState(
+        `[projection] inherited step ${position - 1} (${inheritedStep.type}) is now ${step.type}`
+      );
     }
     if (
       isToolCallStep(step) &&
@@ -129,6 +159,7 @@ export class RunTracker implements ToolExecutionBuffer {
   private seedState: RunStateSnapshot = { steps: [], toolRenderState: {} };
   private inherited: RunSeed['inherited'];
   private latest: RunStateSnapshot | undefined;
+  private rootRunId: string | undefined;
   private bufferedProgress: Map<string, ToolCallProgress[]> = new Map();
   private pendingTodos: TodoItem[] | undefined;
 
@@ -144,7 +175,16 @@ export class RunTracker implements ToolExecutionBuffer {
 
   /** Remembers the graph state streamed after each super-step (root `values` chunk). */
   observeGraphEvent(event: LangchainStreamEvent): void {
-    if (!isRootGraphStateChunk(event, this.graphName)) {
+    if (
+      this.rootRunId === undefined &&
+      event.event === 'on_chain_start' &&
+      matchName(event, this.graphName)
+    ) {
+      // the first start of a run named after the graph is the root run: nested ones come later
+      this.rootRunId = event.run_id;
+      return;
+    }
+    if (!isRootGraphStateChunk(event, this.graphName, this.rootRunId)) {
       return;
     }
     const chunk = event.data?.chunk;
