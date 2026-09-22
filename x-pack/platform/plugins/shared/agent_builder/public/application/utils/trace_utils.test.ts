@@ -33,21 +33,29 @@ const makeFile = (content: string): File =>
   new File([content], 'trace.json', { type: 'application/json' });
 
 describe('parseTraceSpansFromFile', () => {
-  it('accepts a bare TraceSpan array', async () => {
+  it('accepts a bare TraceSpan array, traceId is undefined', async () => {
     const spans = [{ span_id: 'a' }, { span_id: 'b' }];
     const result = await parseTraceSpansFromFile(makeFile(JSON.stringify(spans)));
-    expect(result).toEqual(spans);
+    expect(result).toEqual({ spans, traceId: undefined });
   });
 
-  it('accepts the { spans } envelope format', async () => {
+  it('accepts the { spans } envelope without trace_id', async () => {
     const spans = [{ span_id: 'a' }];
     const result = await parseTraceSpansFromFile(makeFile(JSON.stringify({ spans })));
-    expect(result).toEqual(spans);
+    expect(result).toEqual({ spans, traceId: undefined });
+  });
+
+  it('accepts the { trace_id, spans } envelope and preserves trace_id', async () => {
+    const spans = [{ span_id: 'a' }];
+    const result = await parseTraceSpansFromFile(
+      makeFile(JSON.stringify({ trace_id: 'tid-123', spans }))
+    );
+    expect(result).toEqual({ spans, traceId: 'tid-123' });
   });
 
   it('accepts an empty array', async () => {
     const result = await parseTraceSpansFromFile(makeFile(JSON.stringify([])));
-    expect(result).toEqual([]);
+    expect(result).toEqual({ spans: [], traceId: undefined });
   });
 
   it('rejects an array where any element lacks span_id', async () => {

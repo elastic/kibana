@@ -32,9 +32,6 @@ export const ConversationRightActions = () => {
       responsive={false}
     >
       <EuiFlexItem grow={false}>
-        <MoreActionsButton />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
         <ConversationShareButton />
       </EuiFlexItem>
       {hasTemplate && (
@@ -42,6 +39,9 @@ export const ConversationRightActions = () => {
           <ChatInfoButton />
         </EuiFlexItem>
       )}
+      <EuiFlexItem grow={false}>
+        <MoreActionsButton />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

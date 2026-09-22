@@ -27,9 +27,11 @@ interface UseLoadTraceFromFileResult {
   openFilePicker: () => void;
   /** Whether the trace flyout should be shown. */
   isFlyoutOpen: boolean;
-  /** Spans parsed from the loaded file, or null when flyout was opened from a round trace. */
+  /** Spans parsed from the loaded file, or null when no file is loaded. */
   loadedSpans: TraceSpan[] | null;
-  /** Call to close the flyout and reset loaded spans. */
+  /** Trace ID parsed from the loaded file envelope, or undefined for bare span arrays. */
+  loadedTraceId: string | undefined;
+  /** Call to close the flyout and reset loaded state. */
   closeFlyout: () => void;
   /** Ref to attach to the hidden `<input type="file">` element. */
   fileInputRef: React.RefObject<HTMLInputElement>;
@@ -39,6 +41,7 @@ interface UseLoadTraceFromFileResult {
 
 export const useLoadTraceFromFile = (): UseLoadTraceFromFileResult => {
   const [loadedSpans, setLoadedSpans] = useState<TraceSpan[] | null>(null);
+  const [loadedTraceId, setLoadedTraceId] = useState<string | undefined>(undefined);
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { addErrorToast } = useToasts();
@@ -50,6 +53,7 @@ export const useLoadTraceFromFile = (): UseLoadTraceFromFileResult => {
   const closeFlyout = useCallback(() => {
     setIsFlyoutOpen(false);
     setLoadedSpans(null);
+    setLoadedTraceId(undefined);
   }, []);
 
   const handleFileChange = useCallback(
@@ -58,9 +62,10 @@ export const useLoadTraceFromFile = (): UseLoadTraceFromFileResult => {
       e.target.value = '';
       if (!file) return;
       try {
-        const spans = await parseTraceSpansFromFile(file);
-        if (spans !== null) {
-          setLoadedSpans(spans);
+        const result = await parseTraceSpansFromFile(file);
+        if (result !== null) {
+          setLoadedSpans(result.spans);
+          setLoadedTraceId(result.traceId);
           setIsFlyoutOpen(true);
         } else {
           addErrorToast({ title: errorLabels.title, text: errorLabels.body });
@@ -72,5 +77,13 @@ export const useLoadTraceFromFile = (): UseLoadTraceFromFileResult => {
     [addErrorToast]
   );
 
-  return { openFilePicker, isFlyoutOpen, loadedSpans, closeFlyout, fileInputRef, handleFileChange };
+  return {
+    openFilePicker,
+    isFlyoutOpen,
+    loadedSpans,
+    loadedTraceId,
+    closeFlyout,
+    fileInputRef,
+    handleFileChange,
+  };
 };

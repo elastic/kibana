@@ -24,20 +24,32 @@ const readFileAsText = (file: File): Promise<string> =>
     reader.readAsText(file);
   });
 
+export interface ParsedTraceFile {
+  spans: TraceSpan[];
+  traceId: string | undefined;
+}
+
 /**
- * Parses a JSON file and extracts an array of TraceSpan objects.
- * Accepts either a bare TraceSpan[] or `{ spans: TraceSpan[] }` (our export format).
+ * Parses a JSON file and extracts TraceSpan objects and an optional trace ID.
+ * Accepts either a bare TraceSpan[] or `{ trace_id?, spans: TraceSpan[] }` (our export format).
  * Returns null when the file is not a recognised trace format.
  */
-export const parseTraceSpansFromFile = async (file: File): Promise<TraceSpan[] | null> => {
+export const parseTraceSpansFromFile = async (file: File): Promise<ParsedTraceFile | null> => {
   const text = await readFileAsText(file);
   const parsed: unknown = JSON.parse(text);
 
-  const spans: unknown = Array.isArray(parsed)
-    ? parsed
-    : parsed !== null && typeof parsed === 'object' && 'spans' in parsed
-    ? (parsed as { spans: unknown }).spans
-    : null;
+  let spans: unknown;
+  let traceId: string | undefined;
+
+  if (Array.isArray(parsed)) {
+    spans = parsed;
+  } else if (parsed !== null && typeof parsed === 'object' && 'spans' in parsed) {
+    const envelope = parsed as { spans: unknown; trace_id?: unknown };
+    spans = envelope.spans;
+    traceId = typeof envelope.trace_id === 'string' ? envelope.trace_id : undefined;
+  } else {
+    return null;
+  }
 
   if (!Array.isArray(spans)) return null;
 
@@ -46,5 +58,5 @@ export const parseTraceSpansFromFile = async (file: File): Promise<TraceSpan[] |
 
   if (!(spans as unknown[]).every(isSpan)) return null;
 
-  return spans as TraceSpan[];
+  return { spans: spans as TraceSpan[], traceId };
 };

@@ -86,8 +86,8 @@ export const RoundTraceFlyout: React.FC<RoundTraceFlyoutProps> = ({
       `}
     >
       <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
-          <EuiFlexItem>
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
             <EuiTitle size="s">
               <h2 id="agentBuilderRoundTraceFlyoutTitle" style={{ wordBreak: 'break-all' }}>
                 {traceId ? `${labels.title}: ${traceId}` : labels.title}

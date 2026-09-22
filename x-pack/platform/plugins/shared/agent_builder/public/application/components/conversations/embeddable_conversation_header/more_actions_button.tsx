@@ -87,8 +87,15 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
   const { conversation } = useConversation();
   const conversationRounds = useConversationRounds();
   const { agent, isLoading: isAgentLoading } = useAgentBuilderAgentById(agentId ?? undefined);
-  const { openFilePicker, isFlyoutOpen, loadedSpans, closeFlyout, fileInputRef, handleFileChange } =
-    useLoadTraceFromFile();
+  const {
+    openFilePicker,
+    isFlyoutOpen,
+    loadedSpans,
+    loadedTraceId,
+    closeFlyout,
+    fileInputRef,
+    handleFileChange,
+  } = useLoadTraceFromFile();
 
   const {
     services: { application, plugins },
@@ -326,7 +333,11 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
         <EuiContextMenuPanel items={menuItems} />
       </EuiPopover>
       {isFlyoutOpen && (
-        <RoundTraceFlyout initialSpans={loadedSpans ?? undefined} onClose={closeFlyout} />
+        <RoundTraceFlyout
+          traceId={loadedTraceId}
+          initialSpans={loadedSpans ?? undefined}
+          onClose={closeFlyout}
+        />
       )}
     </>
   );
