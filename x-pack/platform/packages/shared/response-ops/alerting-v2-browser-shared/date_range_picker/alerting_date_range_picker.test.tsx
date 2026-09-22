@@ -325,6 +325,7 @@ describe('AlertingDateRangePicker', () => {
     );
 
     expect(screen.getByTestId('alertingDateRangePicker')).toBeInTheDocument();
+    expect(lastPickerProps).toBeUndefined();
     expect(mockSuperDatePicker).toHaveBeenCalledWith(
       expect.objectContaining({
         start: 'now-15m',
