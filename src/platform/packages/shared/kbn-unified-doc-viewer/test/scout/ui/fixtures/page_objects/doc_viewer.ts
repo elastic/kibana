@@ -409,7 +409,6 @@ export class DocViewer {
     const nameCell = flyout.locator(`[data-test-subj="tableDocViewRow-${fieldName}-name"]`);
     const gridCell = nameCell.locator('xpath=ancestor::*[@data-gridcell-column-id][1]');
 
-    await nameCell.waitFor({ state: 'visible' });
     await nameCell.evaluate((el) => {
       el.scrollIntoView({ block: 'center', inline: 'nearest' });
     });

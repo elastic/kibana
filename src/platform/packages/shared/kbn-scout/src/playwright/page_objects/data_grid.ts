@@ -546,7 +546,6 @@ export class DataGrid {
     const actionButton = this.page.testSubj.locator(`dataGridHeaderCellActionButton-${field}`);
 
     await this.page.testSubj.hover(`dataGridHeaderCell-${field}`);
-    await actionButton.waitFor({ state: 'visible' });
     await actionButton.click();
 
     await this.page.testSubj.locator(`dataGridHeaderCellActionGroup-${field}`).waitFor({
