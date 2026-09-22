@@ -126,16 +126,18 @@ describe('esql_queries', () => {
   });
 
   it('builds actor lookup ES|QL against threat report actors', () => {
-    expect(buildActorLookupEsql({ value: 'APT-99' })).toBe(
-      'FROM ".kibana-threat-reports*" | WHERE extracted.threat_actors == "APT-99"'
+    expect(buildActorLookupEsql({ value: 'APT-99', spaceId: 'soc' })).toBe(
+      'FROM ".kibana-threat-reports*" | WHERE extracted.threat_actors == "APT-99" AND ' +
+        'space_id IN ("soc", "*")'
     );
-    expect(buildActorLookupEsql({ value: '  ' })).toBeUndefined();
+    expect(buildActorLookupEsql({ value: '  ', spaceId: 'soc' })).toBeUndefined();
   });
 
   it('builds threat report ioc_set_hash lookup ES|QL', () => {
-    expect(buildThreatReportIocSetHashLookupEsql({ value: 'set-hash-1' })).toBe(
-      'FROM ".kibana-threat-reports*" | WHERE extracted.ioc_set_hash == "set-hash-1"'
+    expect(buildThreatReportIocSetHashLookupEsql({ value: 'set-hash-1', spaceId: 'soc' })).toBe(
+      'FROM ".kibana-threat-reports*" | WHERE extracted.ioc_set_hash == "set-hash-1" AND ' +
+        'space_id IN ("soc", "*")'
     );
-    expect(buildThreatReportIocSetHashLookupEsql({ value: '  ' })).toBeUndefined();
+    expect(buildThreatReportIocSetHashLookupEsql({ value: '  ', spaceId: 'soc' })).toBeUndefined();
   });
 });

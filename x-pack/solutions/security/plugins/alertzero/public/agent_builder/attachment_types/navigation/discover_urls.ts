@@ -10,7 +10,11 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import type { Filter } from '@kbn/es-query';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import type { ApplicationStart } from '@kbn/core-application-browser';
-import { THREAT_REPORTS_INDEX_PATTERN, getAlertsIndex } from './esql_queries';
+import {
+  THREAT_REPORTS_INDEX_PATTERN,
+  GLOBAL_THREAT_INTEL_SPACE_ID,
+  getAlertsIndex,
+} from './esql_queries';
 
 /** Mirrors Security `APP_PATH` + `ALERT_DETAILS_REDIRECT_PATH` without importing security_solution. */
 export const SECURITY_ALERT_DETAILS_REDIRECT_PATH = '/app/security/alerts/redirect' as const;
@@ -147,11 +151,14 @@ export const buildDiscoverThreatReportNestedIocUrl = ({
   share,
   iocType,
   value,
+  spaceId,
   timeRange = DISCOVER_LOOKUP_TIME_RANGE,
 }: {
   share?: SharePluginStart;
   iocType: string;
   value: string;
+  /** Active space id; the report rows are space-scoped by `space_id`. */
+  spaceId: string;
   timeRange?: DiscoverLookupTimeRange;
 }): string | undefined => {
   if (!share || !iocType.trim() || !value.trim()) {
@@ -188,6 +195,30 @@ export const buildDiscoverThreatReportNestedIocUrl = ({
     },
   };
 
+  // Threat reports are logically space-scoped, same as the ES|QL exits in
+  // `esql_queries.ts`. This filter opens the shared hidden index directly, so it
+  // must apply the same `space_id IN (currentSpace, '*')` scoping or a user could
+  // read another space's report by following this link.
+  const spaceFilter: Filter = {
+    meta: {
+      index: THREAT_REPORTS_LOOKUP_DATA_VIEW_ID,
+      type: 'phrases',
+      key: 'space_id',
+      disabled: false,
+      negate: false,
+      alias: null,
+    },
+    query: {
+      bool: {
+        minimum_should_match: 1,
+        should: [
+          { match_phrase: { space_id: spaceId } },
+          { match_phrase: { space_id: GLOBAL_THREAT_INTEL_SPACE_ID } },
+        ],
+      },
+    },
+  };
+
   return locator.getRedirectUrl({
     dataViewSpec: {
       id: THREAT_REPORTS_LOOKUP_DATA_VIEW_ID,
@@ -201,6 +232,6 @@ export const buildDiscoverThreatReportNestedIocUrl = ({
       to: timeRange.to,
     },
     query: { language: 'kuery', query: '' },
-    filters: [nestedFilter],
+    filters: [nestedFilter, spaceFilter],
   } as SerializableRecord);
 };

@@ -41,7 +41,9 @@ export const huntIocSchema = z.object({
 const alertRefSchema = z.object({
   alert_id: z.string().min(1).max(512),
   index: z.string().min(1).max(256),
-  timestamp: z.string().min(1).max(64).optional(),
+  // Datetime-validated like the event/timeline timestamps: this value becomes the alert
+  // redirect's absolute time range, and a non-date string keeps the alert from loading.
+  timestamp: z.string().datetime().optional(),
 });
 
 const eventRefSchema = z.object({
@@ -170,7 +172,7 @@ const mapsToProposalSchema = z
  * hunt confirms a hit, plus the context needed to render and act on it without a live fetch.
  */
 export const significantSecurityEventAttachmentDataSchema = alertZeroAttachmentDataSchema.extend({
-  title: z.string().min(1).max(512),
+  title: z.string().trim().min(1).max(512),
   severity: z.enum(SEVERITY_LEVELS),
   confidence: z.number().min(0).max(1),
   status: z.enum(['open', 'investigating', 'resolved', 'false_positive']),

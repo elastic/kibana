@@ -139,4 +139,16 @@ describe('createSignificantSecurityEventAttachmentDefinition', () => {
     ).toEqual([]);
     expect(getButtons({ severity: 'high' })).toEqual([]);
   });
+
+  it('falls back to the empty state for a non-object payload instead of throwing', () => {
+    const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
+    // Persisted attachment data is `unknown` at runtime. A truthy JSON primitive must not
+    // reach `WeakMap.set`, which only accepts object keys.
+    const attachment = { data: 'a-string' } as unknown as SignificantSecurityEventAttachment;
+
+    expect(() => definition.getLabel(attachment)).not.toThrow();
+    expect(definition.getLabel(attachment)).toBe('Significant Security Event');
+    expect(() => definition.getHeader?.({ attachment } as never)).not.toThrow();
+    expect(definition.getActionButtons?.({ attachment } as never)).toEqual([]);
+  });
 });

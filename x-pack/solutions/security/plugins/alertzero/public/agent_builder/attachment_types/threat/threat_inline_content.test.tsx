@@ -180,6 +180,7 @@ describe('ThreatAttachmentInlineContent', () => {
       share: mockShare,
       iocType: 'ipv4-addr',
       value: iocValue,
+      spaceId: 'default',
     });
     const http = {
       fetch: jest.fn().mockResolvedValue({

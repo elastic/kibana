@@ -184,14 +184,23 @@ export const buildEntityLookupEsql = ({
 /**
  * Hunt correlation actor anchors live on threat reports, not ECS logs fields.
  */
-export const buildActorLookupEsql = ({ value }: { value: string }): string | undefined => {
+export const buildActorLookupEsql = ({
+  value,
+  spaceId,
+}: {
+  value: string;
+  spaceId: string;
+}): string | undefined => {
   if (!value.trim()) {
     return undefined;
   }
 
   return `FROM ${quoteEsqlIdentifier(
     THREAT_REPORTS_INDEX_PATTERN
-  )} | WHERE ${buildFieldEqualityWhere(['extracted.threat_actors'], value)}`;
+  )} | WHERE ${buildFieldEqualityWhere(
+    ['extracted.threat_actors'],
+    value
+  )} AND ${buildThreatReportSpaceWhere(spaceId)}`;
 };
 
 /**
@@ -201,8 +210,10 @@ export const buildActorLookupEsql = ({ value }: { value: string }): string | und
  */
 export const buildThreatReportIocSetHashLookupEsql = ({
   value,
+  spaceId,
 }: {
   value: string;
+  spaceId: string;
 }): string | undefined => {
   if (!value.trim()) {
     return undefined;
@@ -210,5 +221,8 @@ export const buildThreatReportIocSetHashLookupEsql = ({
 
   return `FROM ${quoteEsqlIdentifier(
     THREAT_REPORTS_INDEX_PATTERN
-  )} | WHERE ${buildFieldEqualityWhere(['extracted.ioc_set_hash'], value)}`;
+  )} | WHERE ${buildFieldEqualityWhere(
+    ['extracted.ioc_set_hash'],
+    value
+  )} AND ${buildThreatReportSpaceWhere(spaceId)}`;
 };

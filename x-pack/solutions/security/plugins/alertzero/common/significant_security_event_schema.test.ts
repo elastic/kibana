@@ -230,4 +230,57 @@ describe('significantSecurityEventAttachmentDataSchema', () => {
       expect(result.success).toBe(false);
     });
   });
+
+  describe('field validation for navigation-bound values', () => {
+    it('rejects a whitespace-only title so the label fallback is never blank', () => {
+      const result = significantSecurityEventAttachmentDataSchema.safeParse({
+        ...validPayload,
+        title: '   ',
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('trims a padded title', () => {
+      const result = significantSecurityEventAttachmentDataSchema.safeParse({
+        ...validPayload,
+        title: '  Credential access confirmed  ',
+      });
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.title).toBe('Credential access confirmed');
+      }
+    });
+
+    it('rejects a non-datetime alert timestamp used as the redirect time range', () => {
+      const result = significantSecurityEventAttachmentDataSchema.safeParse({
+        ...validPayload,
+        alerts: [
+          {
+            alert_id: 'alert-1',
+            index: '.alerts-security.alerts-default',
+            timestamp: 'not-a-date',
+          },
+        ],
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('accepts an ISO alert timestamp', () => {
+      const result = significantSecurityEventAttachmentDataSchema.safeParse({
+        ...validPayload,
+        alerts: [
+          {
+            alert_id: 'alert-1',
+            index: '.alerts-security.alerts-default',
+            timestamp: '2026-09-21T10:00:00.000Z',
+          },
+        ],
+      });
+
+      expect(result.success).toBe(true);
+    });
+  });
 });

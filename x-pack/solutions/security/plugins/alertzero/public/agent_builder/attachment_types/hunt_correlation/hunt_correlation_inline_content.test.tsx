@@ -140,9 +140,13 @@ describe('HuntCorrelationInlineContent', () => {
       share: mockShare,
       iocType: 'hash',
       value: hashValue,
+      spaceId: 'default',
     });
-    const iocSetEsql = buildThreatReportIocSetHashLookupEsql({ value: iocSetHashValue });
-    const actorEsql = buildActorLookupEsql({ value: 'APT-99' });
+    const iocSetEsql = buildThreatReportIocSetHashLookupEsql({
+      value: iocSetHashValue,
+      spaceId: 'default',
+    });
+    const actorEsql = buildActorLookupEsql({ value: 'APT-99', spaceId: 'default' });
     const expectedIocSetHref = `https://example.test/discover?esql=${encodeURIComponent(
       iocSetEsql as string
     )}`;

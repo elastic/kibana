@@ -71,7 +71,7 @@ const renderAnchorValue = ({
   navigation: AttachmentNavigationDeps;
 }): React.ReactNode => {
   if (kind === 'actor') {
-    const esql = buildActorLookupEsql({ value });
+    const esql = buildActorLookupEsql({ value, spaceId: navigation.spaceId });
     const href = esql ? buildDiscoverEsqlUrl({ share: navigation.share, esql }) : undefined;
     return (
       <IocBadge
@@ -95,6 +95,7 @@ const renderAnchorValue = ({
       share: navigation.share,
       iocType: 'hash',
       value,
+      spaceId: navigation.spaceId,
     });
     return (
       <span data-test-subj={`alertzeroHuntCorrelationAnchorLink-${kind}-${index}`}>
@@ -103,7 +104,7 @@ const renderAnchorValue = ({
     );
   }
 
-  const esql = buildThreatReportIocSetHashLookupEsql({ value });
+  const esql = buildThreatReportIocSetHashLookupEsql({ value, spaceId: navigation.spaceId });
   const href = esql ? buildDiscoverEsqlUrl({ share: navigation.share, esql }) : undefined;
   return (
     <span data-test-subj={`alertzeroHuntCorrelationAnchorLink-${kind}-${index}`}>

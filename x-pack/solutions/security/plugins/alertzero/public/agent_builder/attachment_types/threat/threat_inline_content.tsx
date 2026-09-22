@@ -150,6 +150,7 @@ const IocTypeValues: React.FC<{
       share: navigation.share,
       iocType: ioc.type ?? type,
       value: ioc.value ?? '',
+      spaceId: navigation.spaceId,
     });
     const tooltipContent = [ioc.tier, ioc.severity].filter(Boolean).join(', ');
     const badge = (

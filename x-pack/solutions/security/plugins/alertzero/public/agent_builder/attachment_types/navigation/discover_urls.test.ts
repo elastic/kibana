@@ -187,13 +187,18 @@ describe('buildDiscoverEsqlUrl', () => {
 describe('buildDiscoverThreatReportNestedIocUrl', () => {
   it('returns undefined when share or value is missing', () => {
     expect(
-      buildDiscoverThreatReportNestedIocUrl({ iocType: 'hash', value: 'abc' })
+      buildDiscoverThreatReportNestedIocUrl({ iocType: 'hash', value: 'abc', spaceId: 'default' })
     ).toBeUndefined();
     const share = {
       url: { locators: { get: () => ({ getRedirectUrl: jest.fn() }) } },
     } as unknown as SharePluginStart;
     expect(
-      buildDiscoverThreatReportNestedIocUrl({ share, iocType: 'hash', value: '  ' })
+      buildDiscoverThreatReportNestedIocUrl({
+        share,
+        iocType: 'hash',
+        value: '  ',
+        spaceId: 'default',
+      })
     ).toBeUndefined();
   });
 
@@ -208,9 +213,9 @@ describe('buildDiscoverThreatReportNestedIocUrl', () => {
     } as unknown as SharePluginStart;
 
     const hash = 'abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789';
-    expect(buildDiscoverThreatReportNestedIocUrl({ share, iocType: 'hash', value: hash })).toBe(
-      '/app/discover#/?_a=nested'
-    );
+    expect(
+      buildDiscoverThreatReportNestedIocUrl({ share, iocType: 'hash', value: hash, spaceId: 'soc' })
+    ).toBe('/app/discover#/?_a=nested');
 
     expect(getRedirectUrl).toHaveBeenCalledWith({
       dataViewSpec: {
@@ -244,6 +249,22 @@ describe('buildDiscoverThreatReportNestedIocUrl', () => {
                   ],
                 },
               },
+            },
+          },
+        },
+        {
+          meta: {
+            index: THREAT_REPORTS_LOOKUP_DATA_VIEW_ID,
+            type: 'phrases',
+            key: 'space_id',
+            disabled: false,
+            negate: false,
+            alias: null,
+          },
+          query: {
+            bool: {
+              minimum_should_match: 1,
+              should: [{ match_phrase: { space_id: 'soc' } }, { match_phrase: { space_id: '*' } }],
             },
           },
         },

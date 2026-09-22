@@ -54,11 +54,12 @@ export const createReadonlyAttachmentType = <T>({
   renderNoun: string;
   /**
    * Overrides the platform's `DEFAULT_MAX_CONTENT_LENGTH` (10 000 characters) for this
-   * attachment type. Each Hunt Watch type's `formatForAgent` bounds the number of items it
-   * renders from its largest arrays, but the schema's own per-field max lengths still allow
-   * a valid payload to exceed 10 000 characters; callers must size this to the type's own
-   * bounded worst case (see the type's own `*.ts` file for the accompanying max-size-payload
-   * test) rather than leaving it unset.
+   * attachment type. Each type's payload is bounded by its schema's per-field max lengths
+   * and array `.max()` caps, but those still combine well past 10 000 characters on a
+   * maximally-sized valid payload, so callers must size this to the type's own bounded
+   * worst case (see the type's own `*.ts` file for the accompanying max-size-payload
+   * test) rather than leaving it unset. `getRepresentation` hard-truncates anything that
+   * still exceeds it.
    */
   maxContentLength: number;
 }): AttachmentTypeDefinition => ({
@@ -87,10 +88,10 @@ export const createReadonlyAttachmentType = <T>({
         if (value.length <= maxContentLength) {
           return { type: 'text', value };
         }
-        // Belt-and-suspenders: formatForAgent bounds the item counts it renders from
-        // each array, but the schema's own per-field max lengths can still combine to
-        // exceed maxContentLength on a maximally-sized valid payload. Hard-truncate
-        // rather than let an oversized representation reach the model unbounded.
+        // Belt-and-suspenders: the schema's per-field max lengths and array caps bound a
+        // valid payload, but at their maximum they can still combine to exceed
+        // maxContentLength. Hard-truncate rather than let an oversized representation
+        // reach the model unbounded.
         const truncationNotice = `\n\n[truncated: representation exceeded ${maxContentLength} characters]`;
         return {
           type: 'text',

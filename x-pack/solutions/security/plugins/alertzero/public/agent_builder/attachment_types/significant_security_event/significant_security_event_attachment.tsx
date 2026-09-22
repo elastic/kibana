@@ -33,7 +33,9 @@ const parsedDataCache = new WeakMap<
 const parseOnce = (
   data: SignificantSecurityEventAttachment['data']
 ): ReturnType<typeof parseSignificantSecurityEventData> => {
-  if (!data) {
+  // `WeakMap` keys must be objects. Persisted attachment data is `unknown` at runtime, so a
+  // truthy JSON primitive (e.g. a string) would throw here before zod could reject it.
+  if (typeof data !== 'object' || data === null) {
     return parseSignificantSecurityEventData(data);
   }
   if (!parsedDataCache.has(data)) {

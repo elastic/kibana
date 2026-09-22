@@ -141,4 +141,29 @@ describe('createThreatAttachmentType', () => {
       expect(description).toContain('report_id');
     });
   });
+
+  describe('max-size payload', () => {
+    it('keeps the representation within maxContentLength at the schema max sizes', async () => {
+      const attachment: Attachment<string, unknown> = {
+        id: 'test-id',
+        type: THREAT_ATTACHMENT_ID,
+        data: {
+          attachmentLabel: 'Threat Report',
+          report_id: 'r'.repeat(512),
+          title: 't'.repeat(512),
+          severity: 'critical' as const,
+          source: 's'.repeat(256),
+        },
+      };
+
+      const formatted = await attachmentType.format(attachment, formatContext);
+      const representation = formatted.getRepresentation
+        ? await formatted.getRepresentation()
+        : { type: 'text', value: '' };
+
+      const value = (representation as TextAttachmentRepresentation).value;
+      expect(value.length).toBeLessThanOrEqual(attachmentType.maxContentLength ?? Infinity);
+      expect(value).not.toContain('[truncated:');
+    });
+  });
 });
