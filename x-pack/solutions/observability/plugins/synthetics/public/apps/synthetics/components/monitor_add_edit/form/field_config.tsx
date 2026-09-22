@@ -1208,8 +1208,8 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     }),
     validation: () => ({
       validate: {
-        validBodyJSON: (value: Record<string, string>) => {
-          if (Object.entries(value).some((check) => !check[0] || !check[1])) {
+        validBodyJSON: (value?: Record<string, string> | null) => {
+          if (value && Object.entries(value).some((check) => !check[0] || !check[1])) {
             return i18n.translate('xpack.synthetics.monitorConfig.metaFields.error', {
               defaultMessage:
                 'This meta fields is not valid. Make sure that both the field and value are defined.',
