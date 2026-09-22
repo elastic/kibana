@@ -1368,6 +1368,7 @@ steps:
                           description: One short sentence (max 20 words) naming the decision gate and the strongest evidence
                         contributing_factors:
                           type: array
+                          maxItems: 3
                           items:
                             type: string
                           description: At most 3 short phrases (max 6 words each) naming the strongest contributing factors

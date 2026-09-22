@@ -132,14 +132,19 @@ describe('AlertAnalysisWorkflowOutput', () => {
     ).toBe(false);
   });
 
-  it('rejects when host_name / user_name are missing from a verdict', () => {
-    const { host_name: _h, user_name: _u, ...verdictWithoutEntities } = sampleOutput.verdicts[0];
+  it('rejects when a verdict has more than 3 contributing_factors', () => {
     expect(
       AlertAnalysisWorkflowOutput.safeParse({
         ...sampleOutput,
-        verdicts: [verdictWithoutEntities],
+        verdicts: [
+          {
+            ...sampleOutput.verdicts[0],
+            contributing_factors: ['a', 'b', 'c', 'd'],
+          },
+        ],
         true_positive_count: 1,
         false_positive_count: 0,
+        inconclusive_count: 0,
       }).success
     ).toBe(false);
   });

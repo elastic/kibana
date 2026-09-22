@@ -62,7 +62,7 @@ export const AlertAnalysisVerdict = z.object({
   confidence_score: z.number().min(0).max(1),
   rationale: z.string(),
   // Required by the ai.agent schema; at most 3 short phrases naming the strongest signals.
-  contributing_factors: z.array(z.string()),
+  contributing_factors: z.array(z.string()).max(3),
   // Entity fields carried for Worker grouping / security.impact; defaulted to "unknown"
   // in YAML when the alert document has no host/user name.
   host_name: z.string(),
