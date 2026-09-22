@@ -45,7 +45,27 @@ describe('UiamServiceAccounts', () => {
     },
   });
 
-  const createParams = { name: 'nightshift-relay' };
+  const createParams = { name: 'nightshift-relay', roles: ['viewer', 'editor'] };
+
+  const createdAccount = {
+    id: 'service-account-id',
+    name: 'nightshift-relay',
+    roles: ['viewer', 'editor'],
+  };
+
+  /** The role assignments Kibana sends for `createParams`: application-only, org-wide, downscoped. */
+  const expectedRoleAssignments = {
+    project: {
+      security: [
+        {
+          role_id: 'security-application-only',
+          organization_id: 'organization-id',
+          all: true,
+          application_roles: ['viewer', 'editor'],
+        },
+      ],
+    },
+  };
 
   const createMockRequest = (authHeader?: string): KibanaRequest =>
     httpServerMock.createKibanaRequest({
@@ -57,7 +77,8 @@ describe('UiamServiceAccounts', () => {
     type: 'project' as const,
     name: 'nightshift-relay',
     organization_id: 'organization-id',
-    role_assignments: { limit: { access: ['application'], resource: ['project'] } },
+    role_assignments: expectedRoleAssignments,
+    limited_by: expectedRoleAssignments,
     assumable_by: [
       {
         type: 'project-service-account' as const,
@@ -97,12 +118,12 @@ describe('UiamServiceAccounts', () => {
   });
 
   describe('#create', () => {
-    it('forwards the caller access token, the fixed `role_assignments` and the derived `assumable_by`', async () => {
+    it('forwards the caller access token, the requested roles as application-only `role_assignments` and the derived `assumable_by`', async () => {
       mockUiam.createServiceAccount.mockResolvedValue(validResponse);
 
       await expect(
         serviceAccounts.create(createMockRequest('Bearer essu_my_token'), createParams)
-      ).resolves.toEqual({ id: 'service-account-id', name: 'nightshift-relay' });
+      ).resolves.toEqual(createdAccount);
 
       expect(mockUiam.createServiceAccount).toHaveBeenCalledTimes(1);
       expect(mockUiam.createServiceAccount).toHaveBeenCalledWith(
@@ -110,7 +131,7 @@ describe('UiamServiceAccounts', () => {
         {
           organization_id: 'organization-id',
           name: 'nightshift-relay',
-          role_assignments: { limit: { access: ['application'], resource: ['project'] } },
+          role_assignments: expectedRoleAssignments,
           assumable_by: [
             {
               type: 'project-service-account',
@@ -124,13 +145,34 @@ describe('UiamServiceAccounts', () => {
       );
     });
 
-    it('rejects `roles` with a 400, since UIAM cannot downscope yet', async () => {
+    // Neither backend dedupes for Kibana: Elasticsearch drops duplicates silently and UIAM has
+    // deferred its request validation, so the request is normalized before it leaves.
+    it('drops duplicate roles, keeping first occurrences in order', async () => {
+      mockUiam.createServiceAccount.mockResolvedValue(validResponse);
+
       await expect(
         serviceAccounts.create(createMockRequest('Bearer essu_my_token'), {
           ...createParams,
-          roles: ['viewer'],
+          roles: ['viewer', 'editor', 'viewer'],
         })
-      ).rejects.toMatchObject({ output: { statusCode: 400 } });
+      ).resolves.toEqual(createdAccount);
+
+      expect(mockUiam.createServiceAccount).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ role_assignments: expectedRoleAssignments }),
+        undefined
+      );
+    });
+
+    it("rejects an omitted `roles` with a 400 rather than granting the creator's privileges", async () => {
+      await expect(
+        serviceAccounts.create(createMockRequest('Bearer essu_my_token'), {
+          name: 'nightshift-relay',
+        } as never)
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        message: expect.stringContaining('`roles`'),
+      });
 
       expect(mockUiam.createServiceAccount).not.toHaveBeenCalled();
     });
@@ -230,6 +272,10 @@ describe('UiamServiceAccounts', () => {
         result: { ...validResponse, role_assignments: 'everything' } as never,
       },
       {
+        name: 'a missing `limited_by`',
+        result: { ...validResponse, limited_by: undefined },
+      },
+      {
         name: 'a missing `organization_id`',
         result: { ...validResponse, organization_id: undefined } as never,
       },
@@ -242,7 +288,7 @@ describe('UiamServiceAccounts', () => {
 
       await expect(
         serviceAccounts.create(createMockRequest('Bearer essu_my_token'), createParams)
-      ).resolves.toEqual({ id: 'service-account-id', name: 'nightshift-relay' });
+      ).resolves.toEqual(createdAccount);
       expect(logger.error).not.toHaveBeenCalled();
     });
 
@@ -279,7 +325,7 @@ describe('UiamServiceAccounts', () => {
       expect(mockUiam.createServiceAccount).toHaveBeenCalledTimes(1);
     });
 
-    it('rejects an empty `roles` before the "not supported" refusal', async () => {
+    it('rejects an empty `roles` with a 400 rather than asking UIAM for "no roles"', async () => {
       await expect(
         serviceAccounts.create(createMockRequest('Bearer essu_my_token'), {
           ...createParams,
@@ -299,6 +345,44 @@ describe('UiamServiceAccounts', () => {
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('Failed to create service account [nightshift-relay]')
       );
+    });
+
+    /** A UIAM refusal as `UiamService` surfaces it: a Boom carrying UIAM's error payload. */
+    const uiamRefusal = (code: string, statusCode = 400) => {
+      const error = new Boom.Boom('[code/type] upstream wording', { statusCode });
+      Object.assign(error.output.payload, { error: { code, message: 'upstream wording' } });
+      return error;
+    };
+
+    // UIAM's own wording is written for its clients. The first code only fires when the creator
+    // has no application roles at all, so the message must not blame the roles that were asked for.
+    it.each([
+      ['0x138916', 'your credential grants no application roles'],
+      ['0x91249F', 'downscoped twice'],
+      ['0x97E147', 'a service account cannot create service accounts'],
+    ])('rewords UIAM refusal %s as an actionable 400', async (code, wording) => {
+      mockUiam.createServiceAccount.mockRejectedValue(uiamRefusal(code));
+
+      await expect(
+        serviceAccounts.create(createMockRequest('Bearer essu_my_token'), createParams)
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        message: expect.stringContaining(wording),
+      });
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to create service account [nightshift-relay]')
+      );
+    });
+
+    // A duplicate name is already a 409 from UIAM, the same answer the Elasticsearch backend gives,
+    // so there is nothing to reword.
+    it('leaves other UIAM refusals as they are', async () => {
+      const error = uiamRefusal('0xF448ED', 409); // CREATE_SA_NAME_ALREADY_EXISTS
+      mockUiam.createServiceAccount.mockRejectedValue(error);
+
+      await expect(
+        serviceAccounts.create(createMockRequest('Bearer essu_my_token'), createParams)
+      ).rejects.toBe(error);
     });
   });
 

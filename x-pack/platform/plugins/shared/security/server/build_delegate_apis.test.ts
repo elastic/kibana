@@ -199,7 +199,7 @@ describe('buildSecurityApi', () => {
   });
 
   describe('serviceAccounts.create', () => {
-    const params = { name: 'nightshift-relay' };
+    const params = { name: 'nightshift-relay', roles: ['viewer'] };
 
     it('resolves the service lazily rather than at build time', () => {
       const getServiceAccounts = jest.fn().mockReturnValue(serviceAccounts);
@@ -228,7 +228,11 @@ describe('buildSecurityApi', () => {
     it('returns the result from the service', async () => {
       // Annotated, so a change to the contract shape fails here rather than sliding through:
       // passing an un-annotated variable to `mockResolvedValue` skips the excess-property check.
-      const created: ServiceAccount = { id: 'service-account-id', name: 'nightshift-relay' };
+      const created: ServiceAccount = {
+        id: 'service-account-id',
+        name: 'nightshift-relay',
+        roles: ['viewer'],
+      };
       serviceAccounts!.backend.create.mockResolvedValue(created);
 
       await expect(

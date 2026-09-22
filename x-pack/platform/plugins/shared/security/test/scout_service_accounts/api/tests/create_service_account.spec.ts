@@ -128,15 +128,15 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
       }
     }
 
-    // Thrown rather than warned: these accounts are cluster-scoped and several of them hold
-    // `superuser`, so a leak has to fail the suite instead of scrolling past in the log.
+    // Thrown rather than warned: these accounts are cluster-scoped and each holds a live
+    // credential, so a leak has to fail the suite instead of scrolling past in the log.
     if (failures.length > 0) {
       throw new Error(`Failed to clean up after the suite:\n${failures.join('\n')}`);
     }
   });
 
   apiTest(
-    'creates the account, mints its token, and reports only the id and name',
+    'creates the account with the requested roles, mints its token, and reports the id, name and roles',
     async ({ apiClient, esClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       const name = uniqueName('relay');
@@ -145,12 +145,16 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
       const response = await apiClient.post(CREATE_ENDPOINT, {
         headers: { ...cookieHeader, ...REQUEST_HEADERS },
         responseType: 'json',
-        body: { name },
+        body: { name, roles: ['viewer', 'editor'] },
       });
 
       expect(response.statusCode).toBe(200);
       // The long-lived credential never leaves the security plugin.
-      expect(response.body).toStrictEqual({ id: `${NAMESPACE}/${name}`, name });
+      expect(response.body).toStrictEqual({
+        id: `${NAMESPACE}/${name}`,
+        name,
+        roles: ['viewer', 'editor'],
+      });
 
       const account = await esClient.transport.request<Record<string, unknown>>({
         method: 'GET',
@@ -158,6 +162,7 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
       });
       expect(account[`${NAMESPACE}/${name}`]).toMatchObject({
         type: 'user_managed',
+        roles: ['viewer', 'editor'],
         enabled: true,
       });
 
@@ -169,25 +174,23 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
     }
   );
 
-  apiTest('assigns the roles the caller asked for', async ({ apiClient, esClient, samlAuth }) => {
+  // Every account is created with explicit roles. There is no "same as me" default: copying the
+  // creator's roles is the borrowed identity that service accounts exist to replace.
+  apiTest('refuses a request that names no roles', async ({ apiClient, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
-    const name = uniqueName('scoped');
+    const name = uniqueName('no-roles');
     created.push(name);
+    const headers = { ...cookieHeader, ...REQUEST_HEADERS };
 
-    const response = await apiClient.post(CREATE_ENDPOINT, {
-      headers: { ...cookieHeader, ...REQUEST_HEADERS },
-      responseType: 'json',
-      body: { name, roles: ['viewer'] },
-    });
+    for (const body of [{ name }, { name, roles: [] }]) {
+      const response = await apiClient.post(CREATE_ENDPOINT, {
+        headers,
+        responseType: 'json',
+        body,
+      });
 
-    expect(response.statusCode).toBe(200);
-    expect(response.body).toStrictEqual({ id: `${NAMESPACE}/${name}`, name });
-
-    const account = await esClient.transport.request<Record<string, unknown>>({
-      method: 'GET',
-      path: `/_security/service/${NAMESPACE}/${name}`,
-    });
-    expect(account[`${NAMESPACE}/${name}`]).toMatchObject({ roles: ['viewer'] });
+      expect(response.statusCode, `${JSON.stringify(body)} should be rejected`).toBe(400);
+    }
   });
 
   apiTest('refuses a name that is already taken', async ({ apiClient, samlAuth }) => {
@@ -199,7 +202,7 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
     const first = await apiClient.post(CREATE_ENDPOINT, {
       headers,
       responseType: 'json',
-      body: { name },
+      body: { name, roles: ['viewer'] },
     });
     expect(first.statusCode).toBe(200);
 
@@ -207,7 +210,7 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
     const second = await apiClient.post(CREATE_ENDPOINT, {
       headers,
       responseType: 'json',
-      body: { name },
+      body: { name, roles: ['editor'] },
     });
     expect(second.statusCode).toBe(409);
   });
@@ -223,7 +226,7 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
         const response = await apiClient.post(CREATE_ENDPOINT, {
           headers: { ...cookieHeader, ...REQUEST_HEADERS },
           responseType: 'json',
-          body: { name },
+          body: { name, roles: ['viewer'] },
         });
 
         // Rejected by Kibana's own validation, before anything reaches Elasticsearch.
@@ -233,43 +236,13 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
   );
 
   // Elasticsearch reports no roles at all for an API-key authentication, whatever the key can
-  // actually do, so the creator's roles cannot be copied the way they are for a session user.
-  // The key's `limited_by` is no substitute: it names the *owner's* roles regardless of how the
-  // key itself is restricted. With nothing to copy the account falls back to `superuser`, which
-  // escalates nothing at this gate — `manage_security` already implies full access — but must
-  // never be silent.
+  // actually do, which is one more reason the account's roles come from the request alone.
   //
   // Note the key also has to carry Kibana access: Kibana's privilege check always demands its
   // login action alongside the cluster privilege, so a key scoped to Elasticsearch alone is
   // refused before `manage_security` is even considered.
   apiTest(
-    'API-key caller: falls back to `superuser` when the roles cannot be derived',
-    async ({ apiClient, esClient, requestAuth }) => {
-      const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole({
-        kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
-        elasticsearch: { cluster: ['manage_security'] },
-      });
-      const name = uniqueName('from-api-key');
-      created.push(name);
-
-      const response = await apiClient.post(CREATE_ENDPOINT, {
-        headers: { ...apiKeyHeader, ...REQUEST_HEADERS },
-        responseType: 'json',
-        body: { name },
-      });
-
-      expect(response.statusCode).toBe(200);
-
-      const account = await esClient.transport.request<Record<string, unknown>>({
-        method: 'GET',
-        path: `/_security/service/${NAMESPACE}/${name}`,
-      });
-      expect(account[`${NAMESPACE}/${name}`]).toMatchObject({ roles: ['superuser'] });
-    }
-  );
-
-  apiTest(
-    'API-key caller: creates the account when the roles are named explicitly',
+    'API-key caller: creates the account with the requested roles',
     async ({ apiClient, esClient, requestAuth }) => {
       const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole({
         kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
@@ -285,7 +258,11 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
       });
 
       expect(response.statusCode).toBe(200);
-      expect(response.body).toStrictEqual({ id: `${NAMESPACE}/${name}`, name });
+      expect(response.body).toStrictEqual({
+        id: `${NAMESPACE}/${name}`,
+        name,
+        roles: ['viewer'],
+      });
 
       const account = await esClient.transport.request<Record<string, unknown>>({
         method: 'GET',
@@ -330,7 +307,7 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
     const response = await apiClient.post(CREATE_ENDPOINT, {
       headers: { ...cookieHeader, ...REQUEST_HEADERS },
       responseType: 'json',
-      body: { name },
+      body: { name, roles: ['viewer'] },
     });
 
     expect(response.statusCode).toBe(403);

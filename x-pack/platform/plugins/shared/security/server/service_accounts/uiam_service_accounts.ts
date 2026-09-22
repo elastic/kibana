@@ -17,7 +17,7 @@ import { parseCreateServiceAccountParams } from './create_params';
 import type { CreateServiceAccountFakeRequestParams } from './fake_requests';
 import { SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS, ServiceAccountFakeRequests } from './fake_requests';
 import { ensureManageSecurityPrivilege } from './manage_security_privilege';
-import { SERVICE_ACCOUNT_ROLE_ASSIGNMENTS } from './role_assignments';
+import { buildRoleAssignments } from './role_assignments';
 import { ServiceAccountTokenExchangeError } from './token_exchange_error';
 import type { CloudProjectContext, ServiceAccountsBackend } from './types';
 import type { SecurityLicense } from '../../common';
@@ -58,9 +58,32 @@ const exchangeTokenResponseSchema = z.object({
   token: z.string().min(1).max(SERVICE_ACCOUNT_TOKEN_MAX_LENGTH),
 });
 
-const exchangeErrorResponseSchema = z.object({
+const uiamErrorResponseSchema = z.object({
   error: z.object({ code: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH) }),
 });
+
+/**
+ * UIAM refusals of a create request that are the caller's to fix, keyed by UIAM error code and
+ * reworded for them: the upstream messages are written for UIAM's own clients.
+ *
+ * The first one never fires because of the roles that were requested. Kibana always sends at
+ * least one application role, so the only branch of UIAM's check that can trip is the creator
+ * resolving to no application roles in the organization. A user who asks for more than they hold
+ * gets a 200 and is limited at runtime instead.
+ */
+const CREATE_REFUSALS: Record<string, string> = {
+  // CREATE_SA_RESULTS_IN_NO_PRIVS
+  '0x138916':
+    'your credential grants no application roles in this organization, so the account would have ' +
+    'none. An account can only exercise roles its creator also holds',
+  // ALREADY_DOWNSCOPED
+  '0x91249F':
+    'the credential making this request is itself downscoped, and an account cannot be downscoped ' +
+    'twice. Make the request from a user session',
+  // CREATE_SA_SERVICE_ACCOUNT_NOT_SUPPORTED
+  '0x97E147':
+    'a service account cannot create service accounts. Make the request from a user session',
+};
 
 export interface UiamServiceAccountsOptions {
   logger: Logger;
@@ -138,16 +161,6 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
 
     const { name, roles } = parseCreateServiceAccountParams(params);
 
-    // UIAM's first iteration grants the account its creator's privileges and offers no way to
-    // narrow them, so a caller-supplied role list cannot be honoured. Rejected rather than
-    // ignored, so the asymmetry with the Elasticsearch backend is discoverable.
-    if (roles) {
-      throw Boom.badRequest(
-        'Cannot create a service account: `roles` is not supported on this deployment; the ' +
-          "service account is granted the creator's privileges"
-      );
-    }
-
     const authorization = getUiamAuthorizationHeaderFromRequest(request);
 
     await ensureManageSecurityPrivilege({
@@ -166,7 +179,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
         {
           organization_id: this.cloudProjectContext.organizationId,
           name,
-          role_assignments: SERVICE_ACCOUNT_ROLE_ASSIGNMENTS,
+          role_assignments: buildRoleAssignments(this.cloudProjectContext, roles),
           assumable_by: buildAssumableBy(this.cloudProjectContext),
         },
         // External API keys must not carry client authentication (`null`); everything else is
@@ -177,7 +190,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       this.logger.error(
         `Failed to create service account [${name}]: ${getDetailedErrorMessage(e)}`
       );
-      throw e;
+      throw getCreateRefusal(e) ?? e;
     }
 
     // Validated outside the block above, so a refusal to report the account is not logged a
@@ -193,7 +206,9 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       throw Boom.badGateway('The service account was created but could not be reported back.');
     }
 
-    return parsed.data;
+    // The roles are echoed from the request rather than read back: UIAM stores them as sent, and
+    // reading them out of its role assignments model is a job for the directory view.
+    return { ...parsed.data, roles };
   }
 
   /**
@@ -287,10 +302,23 @@ const RETRYABLE_TRANSPORT_CODES = new Set([
   'UND_ERR_SOCKET',
 ]);
 
+/**
+ * Rewords a UIAM create refusal listed in {@link CREATE_REFUSALS} as a 400 the caller can act on,
+ * or returns `null` for anything else so the original error propagates unchanged.
+ */
+const getCreateRefusal = (error: unknown): Boom.Boom | null => {
+  if (!Boom.isBoom(error)) {
+    return null;
+  }
+  const parsed = uiamErrorResponseSchema.safeParse(error.output.payload);
+  const reason = parsed.success ? CREATE_REFUSALS[parsed.data.error.code] : undefined;
+  return reason ? Boom.badRequest(`Cannot create a service account: ${reason}`) : null;
+};
+
 const getExchangeRetryDelay = (error: Error): number | null => {
   if (Boom.isBoom(error)) {
     const { statusCode, payload, headers } = error.output;
-    const parsed = exchangeErrorResponseSchema.safeParse(payload);
+    const parsed = uiamErrorResponseSchema.safeParse(payload);
     if (
       (parsed.success && TERMINAL_EXCHANGE_CODES.has(parsed.data.error.code)) ||
       !RETRYABLE_EXCHANGE_STATUSES.has(statusCode)

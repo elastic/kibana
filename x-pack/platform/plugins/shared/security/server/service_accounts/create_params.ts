@@ -21,12 +21,16 @@ export type ParsedCreateServiceAccountParams = ReturnType<
  * Callers of the server contract never pass through the route, and the name reaches an
  * Elasticsearch URL path from here.
  *
+ * Duplicate roles are dropped first, keeping first occurrences in order, so that the role cap
+ * counts distinct roles. Elasticsearch would drop duplicates silently and UIAM has not said what
+ * it does, so neither is relied on.
+ *
  * Rejects with a 400, so the failure looks the same whichever entry point the caller used.
  */
 export const parseCreateServiceAccountParams = (
   params: CreateServiceAccountParams
 ): ParsedCreateServiceAccountParams => {
-  const parsed = createServiceAccountParamsSchema.safeParse(params);
+  const parsed = createServiceAccountParamsSchema.safeParse(dedupeRoles(params));
 
   if (!parsed.success) {
     throw Boom.badRequest(
@@ -38,3 +42,10 @@ export const parseCreateServiceAccountParams = (
 
   return parsed.data;
 };
+
+/**
+ * Only touches what is already an array: anything else is left for the schema to describe, so the
+ * caller gets the validation message rather than a type error from here.
+ */
+const dedupeRoles = (params: CreateServiceAccountParams): CreateServiceAccountParams =>
+  Array.isArray(params?.roles) ? { ...params, roles: Array.from(new Set(params.roles)) } : params;

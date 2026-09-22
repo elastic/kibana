@@ -13,7 +13,8 @@ export { KIBANA_SOLUTION_TO_UIAM_PROJECT_TYPE } from './project_type';
 export { isExternalApiKey } from './is_external_api_key';
 export type {
   ServiceAccountAssumableBy,
-  ServiceAccountRoleAssignments,
+  UiamProjectRoleAssignment,
+  UiamRoleAssignments,
   UiamServiceAccount,
 } from './service_account_types';
 export {

@@ -1266,10 +1266,22 @@ describe('UiamService', () => {
   });
 
   describe('#createServiceAccount', () => {
+    const roleAssignments = {
+      project: {
+        security: [
+          {
+            role_id: 'security-application-only',
+            organization_id: 'organization-id',
+            all: true,
+            application_roles: ['viewer'],
+          },
+        ],
+      },
+    };
     const body = {
       organization_id: 'organization-id',
       name: 'nightshift-relay',
-      role_assignments: { limit: { access: ['application'], resource: ['project'] } },
+      role_assignments: roleAssignments,
       assumable_by: [
         {
           type: 'project-service-account' as const,
@@ -1286,7 +1298,8 @@ describe('UiamService', () => {
         type: 'project',
         name: 'nightshift-relay',
         organization_id: 'organization-id',
-        role_assignments: body.role_assignments,
+        role_assignments: roleAssignments,
+        limited_by: roleAssignments,
         assumable_by: body.assumable_by,
       };
 

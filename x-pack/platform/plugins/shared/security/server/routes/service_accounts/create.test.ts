@@ -20,9 +20,9 @@ import { routeDefinitionParamsMock } from '../index.mock';
 
 const enabledConfig = { serviceAccounts: { enabled: true } };
 
-const requestBody = { name: 'nightshift-relay' };
+const requestBody = { name: 'nightshift-relay', roles: ['viewer'] };
 
-const serviceAccount = { id: 'service-account-id', name: 'nightshift-relay' };
+const serviceAccount = { id: 'service-account-id', name: 'nightshift-relay', roles: ['viewer'] };
 
 describe('Create service account route', () => {
   function getMockContext(
@@ -171,8 +171,17 @@ describe('Create service account route', () => {
 
     const issuePathsFor = (body: unknown) => issuesFor(body).map((issue) => issue.path.join('.'));
 
-    it('accepts a name', () => {
+    it('accepts a name and roles', () => {
       expect(createServiceAccountBodySchema.parse(requestBody)).toEqual(requestBody);
+    });
+
+    // Every account is created with explicit roles; there is no "same as me" default.
+    it('rejects an omitted `roles`', () => {
+      expect(issuePathsFor({ name: 'nightshift-relay' })).toContain('roles');
+    });
+
+    it('rejects an empty `roles`', () => {
+      expect(issuePathsFor({ ...requestBody, roles: [] })).toContain('roles');
     });
 
     it('rejects unknown fields, so callers cannot smuggle in `assumable_by`', () => {
@@ -181,7 +190,7 @@ describe('Create service account route', () => {
       ]);
     });
 
-    // UIAM's first iteration takes a fixed payload, so callers do not get to choose privileges.
+    // Callers choose roles through `roles`; the UIAM role assignments model is Kibana's to build.
     it('rejects `role_assignments`, which Kibana supplies itself', () => {
       expect(
         issuesFor({ ...requestBody, role_assignments: { limit: { access: ['application'] } } })

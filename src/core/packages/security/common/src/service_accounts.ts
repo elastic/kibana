@@ -15,11 +15,16 @@
 export interface CreateServiceAccountParams {
   name: string;
   /**
-   * Role names to bound the new account's privileges by, on backends that support them. Omit to
-   * have them derived from the creating user's own roles where possible. An empty list is
-   * rejected rather than treated as "derive them for me", because the two mean different things.
+   * Role names that bound the new account's privileges. Required and non-empty: an account is
+   * never given its creator's privileges by default, since a workload inheriting whatever its
+   * last editor could do is the model service accounts exist to replace.
+   *
+   * On Elasticsearch the account gets exactly these roles. On UIAM it gets these application
+   * roles, further limited at runtime by the creator's own application roles as they were when
+   * the account was created. Neither backend checks that the names resolve to anything: an
+   * account whose roles grant nothing authenticates and then fails authorization.
    */
-  roles?: string[];
+  roles: string[];
 }
 
 /**
@@ -107,4 +112,6 @@ export interface ServiceAccount {
   id: string;
   /** The name the account was created with. */
   name: string;
+  /** The role names the account was created with. See {@link CreateServiceAccountParams.roles}. */
+  roles: string[];
 }

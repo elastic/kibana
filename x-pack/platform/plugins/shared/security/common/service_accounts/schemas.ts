@@ -12,6 +12,7 @@ import {
   SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
   SERVICE_ACCOUNT_NAME_MAX_LENGTH,
   SERVICE_ACCOUNT_NAME_REGEX,
+  SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH,
 } from './constants';
 
 export const serviceAccountIdSchema = z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH);
@@ -32,11 +33,11 @@ export const serviceAccountNameSchema = z
 export const serviceAccountRoleNameSchema = z
   .string()
   .min(1)
-  .max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH);
+  .max(SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH);
 
 /**
- * The role list an account is created with, whether the caller named it or Kibana derived it. One
- * schema for both, so that nothing Kibana writes falls outside what it is willing to read back.
+ * The role list an account is created with. What Kibana reads back from a backend is bounded by
+ * that backend's own limits instead, since accounts can be written there without Kibana.
  */
 export const serviceAccountRolesSchema = z
   .array(serviceAccountRoleNameSchema)
@@ -47,10 +48,10 @@ export const serviceAccountRolesSchema = z
  * Parameters for creating a service account. Validated in two places: the route body, and again
  * inside each backend, since callers of the server contract never pass through the route.
  *
- * An omitted `roles` asks Kibana to derive them. An empty `roles` asks for none, which is a
- * different question, so it is refused rather than guessed at.
+ * `roles` is required and non-empty. There is no "derive them from the creator" default: see
+ * `CreateServiceAccountParams` in `@kbn/core-security-common`.
  */
 export const createServiceAccountParamsSchema = z.object({
   name: serviceAccountNameSchema,
-  roles: serviceAccountRolesSchema.optional(),
+  roles: serviceAccountRolesSchema,
 });

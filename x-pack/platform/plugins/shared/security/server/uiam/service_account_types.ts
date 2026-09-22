@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { UiamProjectType } from '@kbn/core-security-server';
+
 /**
  * UIAM's own wire shapes for a service account. Private to the security plugin: the
  * `ServiceAccount` that Core exposes is backend-agnostic, and these describe one particular
@@ -28,15 +30,35 @@ export type ServiceAccountAssumableBy =
     };
 
 /**
- * Roles granted to a service account, as resolved by UIAM and reported on a service account.
- * Creating one does not take role assignments: UIAM's first iteration grants the service account
- * the privileges of its creator, minus any control plane privileges, so there is nothing for a
- * caller to choose.
- *
- * TODO(https://github.com/elastic/kibana/issues/284463): modelled loosely because the upstream
- * API specification does not pin the structure down; tighten it once it does.
+ * One project-scoped role assignment. `role_id` names a Cloud role; for service accounts Kibana
+ * only ever sends `<projectType>-application-only`, the role UIAM defines as carrying no
+ * control-plane privileges, so that the account's privileges are exactly its `application_roles`.
+ * Scope is either every project in the organization (`all: true`) or the listed `project_ids`.
  */
-export type ServiceAccountRoleAssignments = Record<string, unknown>;
+export interface UiamProjectRoleAssignment {
+  role_id: string;
+  organization_id: string;
+  all: boolean;
+  project_ids?: string[];
+  application_roles?: string[];
+}
+
+/**
+ * Role assignments as Kibana sends them when creating a service account and as UIAM reports them
+ * on one. Only the project section is modelled, keyed by project type: it is the one Kibana
+ * writes and the one it reads back for display. The other sections (organization, deployment,
+ * platform, and so on) are not something a Kibana-created account carries.
+ *
+ * On create, UIAM stores these as the account's roles and records the creator's own role
+ * assignments as the account's `limited_by`. At runtime UIAM and Elasticsearch authorize against
+ * both, so the account's effective privileges are the intersection. UIAM also accepts a
+ * `{ limit: { access, resource } }` request instead, meaning "the creator's own application
+ * privileges with no ceiling"; Kibana no longer sends that, since every account is created with
+ * explicit roles.
+ */
+export interface UiamRoleAssignments {
+  project?: Partial<Record<UiamProjectType, UiamProjectRoleAssignment[]>>;
+}
 
 /**
  * A service account as UIAM reports it. Narrowed to Core's backend-agnostic `ServiceAccount`
@@ -47,6 +69,8 @@ export interface UiamServiceAccount {
   type: 'project';
   name: string;
   organization_id: string;
-  role_assignments: ServiceAccountRoleAssignments;
+  role_assignments: UiamRoleAssignments;
+  /** The creator's role assignments, recorded as a ceiling. Absent for accounts created before downscoping existed. */
+  limited_by?: UiamRoleAssignments;
   assumable_by: ServiceAccountAssumableBy[];
 }

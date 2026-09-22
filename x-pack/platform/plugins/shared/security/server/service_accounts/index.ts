@@ -24,7 +24,7 @@ export type {
   ServiceAccountsServiceStart,
 } from './types';
 export { buildAssumableBy } from './assumable_by';
-export { SERVICE_ACCOUNT_ROLE_ASSIGNMENTS } from './role_assignments';
+export { buildRoleAssignments } from './role_assignments';
 export { EsServiceAccounts } from './es_service_accounts';
 export { UiamServiceAccounts } from './uiam_service_accounts';
 export { ServiceAccountFakeRequests } from './fake_requests';

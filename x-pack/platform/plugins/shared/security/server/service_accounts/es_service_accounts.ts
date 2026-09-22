@@ -25,13 +25,11 @@ import { ensureManageSecurityPrivilege } from './manage_security_privilege';
 import type { ServiceAccountsBackend } from './types';
 import type { SecurityLicense } from '../../common';
 import {
-  ES_SERVICE_ACCOUNT_FALLBACK_ROLE,
+  ES_SERVICE_ACCOUNT_MAX_ROLES,
   ES_SERVICE_ACCOUNT_NAMESPACE,
   ES_SERVICE_ACCOUNT_TOKEN_MAX_LENGTH,
   ES_SERVICE_ACCOUNT_TOKEN_NAME,
-  SERVICE_ACCOUNT_MAX_ROLES,
-  serviceAccountRoleNameSchema,
-  serviceAccountRolesSchema,
+  SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
 } from '../../common/service_accounts';
 import { getDetailedErrorMessage } from '../errors';
 import { securityTelemetry } from '../otel/instrumentation';
@@ -46,9 +44,15 @@ const userManagedEntrySchema = z.object({ type: z.literal('user_managed') });
  * The rest of what Elasticsearch reports for an account keyed by its `{namespace}/{service}`
  * principal. Parsed separately from the discriminator above, so "this is not Kibana's account"
  * and "Kibana cannot read this account" stay different answers.
+ *
+ * Bounded by what Elasticsearch allows, not by what Kibana sends: an account written outside
+ * Kibana, or before the send-side caps were lowered, can hold more, and it still has to read as
+ * "taken" rather than as unreadable.
  */
 const accountEntrySchema = z.object({
-  roles: z.array(serviceAccountRoleNameSchema).max(SERVICE_ACCOUNT_MAX_ROLES),
+  roles: z
+    .array(z.string().min(1).max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH))
+    .max(ES_SERVICE_ACCOUNT_MAX_ROLES),
   enabled: z.boolean(),
 });
 
@@ -166,12 +170,8 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     }
 
     const namespace = ES_SERVICE_ACCOUNT_NAMESPACE;
-    // The schema refuses an empty `roles` rather than letting it fall through to the derivation
-    // below, which would answer an explicit "no roles" with the widest possible grant.
-    const { name, roles: requestedRoles } = parseCreateServiceAccountParams(params);
+    const { name, roles } = parseCreateServiceAccountParams(params);
     const serviceAccountId = `${namespace}/${name}`;
-
-    const roles = requestedRoles ?? this.deriveRoles(user, serviceAccountId);
 
     const esClient = this.clusterClient.asScoped(request).asCurrentUser;
 
@@ -224,37 +224,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       );
       throw e;
     }
-    return { id: serviceAccountId, name };
-  }
-
-  /**
-   * The roles a new account gets when the caller named none: the creator's own, or the fallback
-   * role when the creator reports none, as an API-key authentication does.
-   *
-   * The creator's roles are held to the same bounds as an explicit `roles`. Elasticsearch caps
-   * neither the count nor the name length, so without this the account could be written and then
-   * refused by `readAccount`, turning the next create for that name into a 502 rather than a 409.
-   */
-  private deriveRoles(user: AuthenticatedUser, serviceAccountId: string): string[] {
-    if (user.roles.length === 0) {
-      this.logger.warn(
-        `No roles could be derived for service account [${serviceAccountId}] from the current ` +
-          `credentials, so it was granted [${ES_SERVICE_ACCOUNT_FALLBACK_ROLE}]. Specify \`roles\` ` +
-          `explicitly to scope it down.`
-      );
-      return [ES_SERVICE_ACCOUNT_FALLBACK_ROLE];
-    }
-
-    const parsed = serviceAccountRolesSchema.safeParse(user.roles);
-    if (!parsed.success) {
-      throw Boom.badRequest(
-        `Cannot create a service account: the roles of the current user cannot be copied to it ` +
-          `(${parsed.error.issues.map(({ message }) => message).join('; ')}). Specify \`roles\` ` +
-          `explicitly.`
-      );
-    }
-
-    return parsed.data;
+    return { id: serviceAccountId, name, roles };
   }
 
   // See https://github.com/elastic/kibana/issues/284466.

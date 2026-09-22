@@ -54,30 +54,36 @@ export const ES_SERVICE_ACCOUNT_TOKEN_NAME = 'kibana-managed';
 export const ES_SERVICE_ACCOUNT_TOKEN_MAX_LENGTH = 1024;
 
 /**
- * Role assigned when Kibana cannot work out what to give a new Elasticsearch service account —
- * that is, when the caller named no roles and their own credentials report none, as an API-key
- * authentication does. Creating the account requires `manage_security`, which Elasticsearch
- * treats as transitively granting full access, so this escalates nothing the caller could not
- * already do; it is nonetheless the widest possible grant, and Kibana warns when it applies.
+ * Cap on how many roles one service account may be given, on either backend.
+ *
+ * UIAM allows 50 application roles per role assignment, because the roles are encoded into every
+ * token it mints. Elasticsearch allows 1,000 and declined to lower that, so Kibana holds both
+ * backends to the smaller number rather than let the same request succeed on one and fail on the
+ * other.
  */
-export const ES_SERVICE_ACCOUNT_FALLBACK_ROLE = 'superuser';
+export const SERVICE_ACCOUNT_MAX_ROLES = 50;
 
 /**
- * Cap on how many roles one service account may be given.
- *
- * TODO: the right upper bound is still being decided. Elasticsearch caps no role count of its
- * own, so this number is Kibana's alone, and it does not agree with
- * {@link SERVICE_ACCOUNT_CREATE_MAX_BODY_BYTES}: 1000 roles at
- * {@link SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH} characters each is ~1 MB of JSON, so the body
- * cap is what a caller meets first, at roughly 63 max-length roles.
+ * Cap on the length of one role name Kibana will send. UIAM's bound for a role id. Elasticsearch
+ * accepts role names up to {@link SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH}, so a role with a
+ * longer name cannot be attached to a service account through Kibana, and the same reasoning as
+ * {@link SERVICE_ACCOUNT_MAX_ROLES} applies.
  */
-export const SERVICE_ACCOUNT_MAX_ROLES = 1000;
+export const SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH = 507;
+
+/**
+ * How many roles Elasticsearch itself allows on a user-managed service account. Bounds what Kibana
+ * is willing to read back from Elasticsearch, as opposed to {@link SERVICE_ACCOUNT_MAX_ROLES},
+ * which bounds what it sends: an account written outside Kibana, or before the lower cap, may
+ * hold up to this many, and must still read as "taken" rather than as unreadable.
+ */
+export const ES_SERVICE_ACCOUNT_MAX_ROLES = 1000;
 
 /**
  * Cap on the size of a create request body, which holds a name bounded by
- * {@link SERVICE_ACCOUNT_NAME_MAX_LENGTH} plus an optional role list. In practice this is also
- * the limit on how many roles one request can name, and a request that overruns it gets a 413
- * with no field-level message. See {@link SERVICE_ACCOUNT_MAX_ROLES} for the open question about
- * how the two should relate.
+ * {@link SERVICE_ACCOUNT_NAME_MAX_LENGTH} plus a role list bounded by
+ * {@link SERVICE_ACCOUNT_MAX_ROLES} and {@link SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH}. Those add up
+ * to under 30 KB, so a request within the field-level bounds never meets this limit, whose 413
+ * carries no field-level message.
  */
 export const SERVICE_ACCOUNT_CREATE_MAX_BODY_BYTES = 64 * 1024;

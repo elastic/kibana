@@ -8,6 +8,7 @@
 import {
   SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
   SERVICE_ACCOUNT_NAME_MAX_LENGTH,
+  SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH,
 } from './constants';
 import {
   serviceAccountIdSchema,
@@ -59,8 +60,9 @@ describe('service account schemas', () => {
       expect(serviceAccountRoleNameSchema.safeParse('').success).toBe(false);
     });
 
+    // UIAM's bound for a role id, which is the smaller of the two backends'.
     it('bounds the role name length', () => {
-      const max = SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH;
+      const max = SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH;
       expect(serviceAccountRoleNameSchema.safeParse('a'.repeat(max)).success).toBe(true);
       expect(serviceAccountRoleNameSchema.safeParse('a'.repeat(max + 1)).success).toBe(false);
     });
