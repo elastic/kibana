@@ -406,14 +406,17 @@ export function registerFeatureFlags(
         core.uiSettings.register({
           [OBSERVABILITY_NIGHTSHIFT_DEVELOPER_MODE]: {
             category: ['observability'],
-            name: i18n.translate('xpack.nightshift.developerModeName', {
+            name: i18n.translate('xpack.significantEvents.nightshiftDeveloperModeName', {
               defaultMessage: 'Nightshift developer mode',
             }) as string,
             value: false,
-            description: i18n.translate('xpack.nightshift.developerModeDescription', {
-              defaultMessage:
-                'When enabled, Nightshift shows extra developer-only UI and configuration options in this Kibana space.',
-            }),
+            description: i18n.translate(
+              'xpack.significantEvents.nightshiftDeveloperModeDescription',
+              {
+                defaultMessage:
+                  'When enabled, Nightshift shows extra developer-only UI and configuration options in this Kibana space.',
+              }
+            ),
             type: 'boolean',
             schema: schema.boolean(),
             requiresPageReload: false,

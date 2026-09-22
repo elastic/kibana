@@ -37,16 +37,22 @@ export const useDeveloperMode = (): UseDeveloperModeResult => {
         const wasSaved = await settingsClient.set(OBSERVABILITY_NIGHTSHIFT_DEVELOPER_MODE, enabled);
         if (!wasSaved) {
           throw new Error(
-            i18n.translate('xpack.nightshift.settings.developerModeSaveFailedErrorMessage', {
-              defaultMessage: 'The Nightshift developer mode setting could not be saved.',
-            })
+            i18n.translate(
+              'xpack.significantEventsApp.settings.developerModeSaveFailedErrorMessage',
+              {
+                defaultMessage: 'The Nightshift developer mode setting could not be saved.',
+              }
+            )
           );
         }
       } catch (error) {
         core.notifications.toasts.addDanger({
-          title: i18n.translate('xpack.nightshift.settings.developerModeSaveFailedTitle', {
-            defaultMessage: 'Unable to update Nightshift developer mode',
-          }),
+          title: i18n.translate(
+            'xpack.significantEventsApp.settings.developerModeSaveFailedTitle',
+            {
+              defaultMessage: 'Unable to update Nightshift developer mode',
+            }
+          ),
           text: getFormattedError(error).message,
         });
       }
