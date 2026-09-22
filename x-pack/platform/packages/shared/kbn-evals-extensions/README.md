@@ -39,36 +39,37 @@ identical to the full board's; only `overall` differs, because it averages over 
 columns instead of 32. Boards built from the two configs are therefore **not**
 comparable on `overall`.
 
-### Regenerating a board from golden
+### Generating a board
+
+The matrix CLI is the supported entrypoint. It queries scores and traces through
+the Kibana evals API, so it needs a reachable Kibana rather than direct cluster
+access:
 
 ```bash
-source ~/.elastic/golden-cluster-env.sh
-
-# 1. Aggregate scores (applies the scoring policy, emits a .policy.json stamp)
-OUT_JSON=/tmp/aggregated.json node --require ./src/setup_node_env \
-  x-pack/platform/packages/shared/kbn-evals-extensions/scripts/extract_golden_aggregate.ts
-
-# 2. Build the trace cache — the renderer refuses to publish a board without it
-python3 scripts/orca_vm/build_trace_cache.py --out /tmp/trace_cache.json
-
-# 3. Render
-AGGREGATED_JSON=/tmp/aggregated.json \
-TRACES_JSON=/tmp/trace_cache.json \
-MATRIX_CONFIG=x-pack/platform/packages/shared/kbn-evals-extensions/config/security_matrix_persona.json \
-OUT_DIR=target/persona_board \
-  node --require ./src/setup_node_env \
-  x-pack/platform/packages/shared/kbn-evals-extensions/scripts/render_from_golden.ts
+node scripts/evals ext matrix \
+  --config x-pack/platform/packages/shared/kbn-evals-extensions/config/security_matrix_persona.json \
+  --out target/persona_board \
+  --kbn-url "$EVAL_KBN_URL" \
+  --kbn-api-key "$EVAL_KBN_API_KEY" \
+  --html
 ```
 
-The renderer refuses to emit a board when the extract cannot satisfy the config —
+Useful flags: `--branch` and `--lookback-days` / `--as-of` select which runs are
+in scope, `--model` restricts the rows, and `--trace-cache <path>` reuses a
+previously fetched set of score documents instead of re-querying them.
+
+CI runs this step from `.buildkite/pipelines/evals/llm_evals.yml` after the eval
+suites finish, and publishes the generated board as a build artifact.
+
+The generator refuses to emit a board when the data cannot satisfy the config —
 too few cells resolve, `examplePrefixes` columns with no `prefix:` keys, a scoring
-policy the extract did not apply, or missing traces. Each refusal names the cause
+policy that was not applied, or missing traces. Each refusal names the cause
 and its override (`ALLOW_UNENFORCED_SCORING=1`, `ALLOW_NO_TRACES=1`); a scores-only
 board publishes numbers with no transcript behind them, so override deliberately.
 
-Pin a single grader with `JUDGE_MODEL_ID=<id>` on the extract step. Note that
-golden is mixed-judge: pinning drops every cell graded by anyone else, and the
-published provenance reports the real mix rather than asserting one judge.
+Pin a single grader with `JUDGE_MODEL_ID=<id>`. Note that golden data is
+mixed-judge: pinning drops every cell graded by anyone else, and the published
+provenance reports the real mix rather than asserting one judge.
 
 ### In an evaluation suite
 

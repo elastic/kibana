@@ -9,14 +9,12 @@ import { VERDICT_LADDERS, scoreVerdict } from './jury';
 import { isEisBacked, describeJudge } from './judge_provenance';
 
 /**
- * Scoring policy shared by the two paths that turn raw score documents into
- * matrix cells: the CLI transport (`query_matrix_scores`) and the golden
- * driver (`scripts/extract_golden_aggregate.ts`).
+ * Scoring policy applied when raw score documents are turned into matrix cells.
  *
- * Both used to implement this independently, and only the CLI implemented it
- * at all -- so a board rendered from a golden extract silently disagreed with
- * the published board by ~2 points per cell while exiting 0. Keeping the
- * per-document decision here means the two paths cannot drift again.
+ * This lives in one place because the decision used to be reimplemented per
+ * caller, and a board built by one path silently disagreed with another by
+ * ~2 points per cell while exiting 0. Keeping the per-document decision here
+ * means those paths cannot drift again.
  */
 
 /**
