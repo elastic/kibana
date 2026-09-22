@@ -15,6 +15,7 @@ import type {
   HuntTechnology,
 } from '@kbn/alertzero-common';
 import { resolveHuntScope } from './common/resolve_index_scope';
+import { loadReportHuntContext } from './common/load_report_context';
 import type { HuntScope } from './common/resolve_index_scope';
 import { huntForThreat, emptyHuntForThreatResult } from './tier1/hunt_for_threat';
 import { huntBehavior } from './tier2/hunt_behavior';
@@ -26,6 +27,7 @@ export type HuntCoordinatorTier2SkipReason =
   | 'no_environment_hits'
   | 'no_report_text'
   | 'no_searchable_input'
+  | 'report_not_found'
   | 'scope_blocked'
   | 'tier2_failed';
 
@@ -135,18 +137,56 @@ export const huntCoordinator = async (
   const {
     report_id: reportId,
     spaceId,
-    iocs = [],
-    techniques = [],
+    iocs: callerIocs = [],
+    techniques: callerTechniques = [],
     time_range: timeRange,
     size,
     max_assets: maxAssets,
     llm_confidence_threshold: llmThreshold,
     tier2_when: tier2When = 'on_hits',
     max_tier2_sample_events: maxSamples = DEFAULT_TIER2_SAMPLE_EVENTS,
-    text,
+    text: callerText,
     runId,
     technology,
   } = params;
+
+  // A report-driven run (the Worker's child passes only `report_id`) hunts the
+  // report's own IOCs and techniques and hands its text to Tier 2. Anything the
+  // caller supplies explicitly wins over what the report carries.
+  const needsReportContext =
+    reportId !== undefined &&
+    (callerIocs.length === 0 || callerTechniques.length === 0 || callerText === undefined);
+  const reportContext = needsReportContext
+    ? await loadReportHuntContext({ esClient, spaceId, reportId })
+    : null;
+  if (needsReportContext && reportContext === null) {
+    const message = `Report ${reportId} was not found in space ${spaceId}.`;
+    return {
+      status: 'tier1_only',
+      report_id: reportId,
+      runId,
+      technologies: [],
+      tier1: {
+        tier: 1,
+        ...emptyHuntForThreatResult(
+          'no_searchable_terms',
+          [],
+          [],
+          timeRange ?? { from: 'now-24h', to: 'now' },
+          message
+        ),
+      },
+      tier2_skipped_reason: 'report_not_found',
+      message,
+      next_step:
+        'Pass a report id that exists in this space, or pass iocs/techniques/text explicitly.',
+      completedSuccessfully: false,
+    };
+  }
+  const iocs = callerIocs.length > 0 ? callerIocs : reportContext?.iocs ?? [];
+  const techniques =
+    callerTechniques.length > 0 ? callerTechniques : reportContext?.techniques ?? [];
+  const text = callerText ?? reportContext?.text;
 
   // Resolve the index scope from the environment: the named technology, or every
   // technology whose required indices exist in this space.

@@ -21,6 +21,14 @@ jest.mock('./common/resolve_index_scope', () => ({
   }),
 }));
 
+jest.mock('./common/load_report_context', () => ({
+  loadReportHuntContext: jest.fn().mockResolvedValue({
+    iocs: [{ type: 'ip', value: '192.0.2.30' }],
+    techniques: ['T1078.004'],
+    text: 'report body text',
+  }),
+}));
+
 jest.mock('./tier1/hunt_for_threat', () => ({
   ...jest.requireActual('./tier1/hunt_for_threat'),
   huntForThreat: jest.fn().mockResolvedValue({
@@ -239,6 +247,85 @@ describe('huntCoordinator', () => {
         completedSuccessfully: false,
       })
     );
+  });
+
+  describe('a report-driven run', () => {
+    beforeEach(() => {
+      const { huntForThreat: mockT1 } = jest.requireMock('./tier1/hunt_for_threat');
+      const { loadReportHuntContext: mockLoad } = jest.requireMock('./common/load_report_context');
+      mockT1.mockClear();
+      mockLoad.mockClear();
+    });
+
+    it("hunts the report's own IOCs and techniques when the caller passes only report_id", async () => {
+      const { huntForThreat: mockT1 } = jest.requireMock('./tier1/hunt_for_threat');
+      await huntCoordinator(esClient, undefined, logger, {
+        report_id: 'rpt-1',
+        spaceId: 'hunt-a',
+        trigger: 'scheduled',
+        runId: 'run-10',
+      });
+      expect(mockT1).toHaveBeenCalledWith(
+        esClient,
+        expect.objectContaining({
+          iocs: [{ type: 'ip', value: '192.0.2.30' }],
+          techniques: ['T1078.004'],
+        })
+      );
+    });
+
+    it('loads the report from the acting space', async () => {
+      const { loadReportHuntContext: mockLoad } = jest.requireMock('./common/load_report_context');
+      await huntCoordinator(esClient, undefined, logger, {
+        report_id: 'rpt-1',
+        spaceId: 'hunt-a',
+        trigger: 'scheduled',
+        runId: 'run-11',
+      });
+      expect(mockLoad).toHaveBeenCalledWith({ esClient, spaceId: 'hunt-a', reportId: 'rpt-1' });
+    });
+
+    it('lets caller-supplied IOCs win over the report', async () => {
+      const { huntForThreat: mockT1 } = jest.requireMock('./tier1/hunt_for_threat');
+      await huntCoordinator(esClient, undefined, logger, {
+        report_id: 'rpt-1',
+        spaceId: 'hunt-a',
+        trigger: 'manual',
+        runId: 'run-12',
+        iocs: [{ type: 'domain', value: 'evil.example' }],
+      });
+      expect(mockT1).toHaveBeenCalledWith(
+        esClient,
+        expect.objectContaining({ iocs: [{ type: 'domain', value: 'evil.example' }] })
+      );
+    });
+
+    it('does not read the report when no report_id is given', async () => {
+      const { loadReportHuntContext: mockLoad } = jest.requireMock('./common/load_report_context');
+      await huntCoordinator(esClient, undefined, logger, {
+        spaceId: 'hunt-a',
+        trigger: 'scheduled',
+        runId: 'run-13',
+      });
+      expect(mockLoad).not.toHaveBeenCalled();
+    });
+
+    it('fails the run, never clean, when the report is not in the space', async () => {
+      const { loadReportHuntContext: mockLoad } = jest.requireMock('./common/load_report_context');
+      mockLoad.mockResolvedValueOnce(null);
+      const result = await huntCoordinator(esClient, undefined, logger, {
+        report_id: 'rpt-elsewhere',
+        spaceId: 'hunt-a',
+        trigger: 'scheduled',
+        runId: 'run-14',
+      });
+      expect(result).toEqual(
+        expect.objectContaining({
+          tier2_skipped_reason: 'report_not_found',
+          completedSuccessfully: false,
+        })
+      );
+    });
   });
 
   it('never writes feedback — completedSuccessfully is the caller signal', async () => {
