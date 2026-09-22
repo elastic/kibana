@@ -15,6 +15,8 @@ import {
   ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS,
 } from '.';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
+import { buildFieldsZodValidator } from '../../../spec/lib/build_fields_zod_validator';
+import { normalizeFieldsToJsonSchema } from '../../../spec/lib/field_conversion';
 import { WorkflowSchema } from '../../../spec/schema';
 
 /**
@@ -38,7 +40,8 @@ interface YamlStep {
 interface YamlWorkflow {
   steps: YamlStep[];
   tags?: string[];
-  outputs?: Array<{ name: string; type?: string }>;
+  consts?: { supported_verdicts?: string[] };
+  outputs?: Array<{ name: string; type?: string; required?: boolean }>;
   settings?: {
     timeout?: string;
     concurrency?: unknown;
@@ -139,6 +142,20 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       expect((analysis.outputs ?? []).filter(({ type }) => type == null)).toEqual([]);
     });
 
+    // The two halves of the attachment. Declaring them `required` is what makes a
+    // partial payload fail output validation instead of completing the run.
+    it.each(['verdict', 'summary_markdown'] as const)('requires %s', (name) => {
+      expect((analysis.outputs ?? []).find((output) => output.name === name)?.required).toBe(true);
+    });
+
+    // Optional by the attachment's own schema, and the analysis is allowed to have
+    // no reasoning to record.
+    it('leaves the rationale optional', () => {
+      expect(
+        (analysis.outputs ?? []).find(({ name }) => name === 'rationale_markdown')?.required
+      ).toBeUndefined();
+    });
+
     // `failed` is an execution state, never a classification: a timeout, a
     // permission failure, an unavailable required source or a tool error fails the
     // run, and the REVIEW maps that absence onto the attachment's `failed` verdict.
@@ -189,6 +206,120 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
     // attempt counter has to be carried.
     it('records which attempt produced the payload', () => {
       expect(stepIn('emit_result')?.with?.analysis_execution_id).toBe('{{ execution.id }}');
+    });
+  });
+
+  // `workflow.output` validates the emitted values against the declared outputs
+  // and FAILS the run when they do not match, so these run the declaration
+  // through the engine's own validator rather than asserting on the YAML. What
+  // this protects is the review: it cannot tell a partial payload from a complete
+  // one, so it would pair a real verdict with the "analysis failed" summary it
+  // substitutes for the missing half.
+  describe('runtime validation of the emitted payload', () => {
+    const validate = (payload: Record<string, unknown>) =>
+      buildFieldsZodValidator(normalizeFieldsToJsonSchema(analysis.outputs)).safeParse(payload)
+        .success;
+
+    const complete = {
+      verdict: 'inconclusive',
+      summary_markdown: 'A summary',
+      rationale_markdown: 'Some reasoning',
+    };
+
+    it('accepts a complete payload', () => {
+      expect(validate(complete)).toBe(true);
+    });
+
+    it.each(['verdict', 'summary_markdown'] as const)('rejects a payload missing %s', (name) => {
+      const { [name]: _omitted, ...partial } = complete;
+
+      expect(validate(partial)).toBe(false);
+    });
+
+    // `emit_result` reads the rationale with `${{ }}`, which resolves an absent
+    // value to `undefined` rather than `""`, so this is the shape a real run with
+    // no rationale emits.
+    it('accepts a payload with no rationale', () => {
+      expect(validate({ ...complete, rationale_markdown: undefined })).toBe(true);
+    });
+  });
+
+  // The contract boundary that outlives the placeholder: it checks what `analyze`
+  // produced, so whatever #19282 puts in its place is held to the same payload.
+  describe('the payload guard', () => {
+    const guard = stepIn('require_supported_verdict');
+
+    // Evaluates the real expressions in order, exactly as the engine does: the
+    // `data.set` computes validity, then the guard's `if` decides the branch.
+    const guards = (verdict: unknown, summaryMarkdown: unknown): unknown => {
+      const liquid = createWorkflowLiquidEngine();
+      const evaluate = (expression: unknown, context: Record<string, unknown>): unknown =>
+        liquid.evalValueSync(
+          String(expression)
+            .replace(/^\$\{\{/, '')
+            .replace(/\}\}$/, '')
+            .trim(),
+          context
+        );
+
+      const payloadValid = evaluate(stepIn('check_payload')?.with?.payload_valid, {
+        consts: analysis.consts,
+        steps: { analyze: { output: { verdict, summary_markdown: summaryMarkdown } } },
+      });
+
+      return evaluate(guard?.if, {
+        steps: { check_payload: { output: { payload_valid: payloadValid } } },
+      });
+    };
+
+    // Failing rather than emitting: an unsupported verdict would otherwise reach
+    // the review's switch, whose default arm does nothing at all.
+    it('fails the run rather than emitting a payload it cannot stand behind', () => {
+      expect(guard?.type).toBe('workflow.fail');
+    });
+
+    it.each(CLASSIFICATIONS)('stays out of the way for %s', (verdict) => {
+      expect(guards(verdict, 'A summary')).toBe(false);
+    });
+
+    // The enum the declared output cannot carry, because the editor type-checks
+    // `workflow.output` `with:` source text against it.
+    it('fires on failed, which is an execution state rather than a classification', () => {
+      expect(guards('failed', 'A summary')).toBe(true);
+    });
+
+    it('fires on a verdict outside the supported set', () => {
+      expect(guards('false-positive', 'A summary')).toBe(true);
+    });
+
+    // `{{ }}` stringifies an absent value to `""`, which `required` accepts, so
+    // the declared output alone would let this through.
+    it('fires on an empty verdict', () => {
+      expect(guards('', 'A summary')).toBe(true);
+    });
+
+    it('fires on an empty summary', () => {
+      expect(guards('inconclusive', '')).toBe(true);
+    });
+
+    it('fires when the analysis produced nothing at all', () => {
+      expect(guards(undefined, undefined)).toBe(true);
+    });
+
+    it('runs before the payload is emitted', () => {
+      expect(stepNames.indexOf('require_supported_verdict')).toBeLessThan(
+        stepNames.indexOf('emit_result')
+      );
+    });
+
+    it('enforces exactly the classifications the analysis may return', () => {
+      expect(analysis.consts?.supported_verdicts).toEqual([...CLASSIFICATIONS]);
+    });
+
+    // Emitting it would let an analysis claim an execution state as a
+    // classification and be believed.
+    it('does not let the analysis return the review-derived failed state', () => {
+      expect(analysis.consts?.supported_verdicts).not.toContain('failed');
     });
   });
 
