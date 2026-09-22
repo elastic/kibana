@@ -171,6 +171,7 @@ export function SearchQueryRulesPageProvider({ getService }: FtrProviderContext)
       },
       async clickAcknowledgeButton() {
         // The modal slides in on open, so the checkbox is still moving; a click issued before it settles misses the target and never toggles it. Poll its position until stable first.
+        let stableSamples = 0;
         let previousPosition = await (
           await testSubjects.find(this.TEST_IDS.DELETE_QUERY_RULES_RULESET_MODAL_ACKNOWLEDGE_BUTTON)
         ).getPosition();
@@ -180,10 +181,12 @@ export function SearchQueryRulesPageProvider({ getService }: FtrProviderContext)
               this.TEST_IDS.DELETE_QUERY_RULES_RULESET_MODAL_ACKNOWLEDGE_BUTTON
             )
           ).getPosition();
-          const settled =
-            currentPosition.x === previousPosition.x && currentPosition.y === previousPosition.y;
+          stableSamples =
+            currentPosition.x === previousPosition.x && currentPosition.y === previousPosition.y
+              ? stableSamples + 1
+              : 0;
           previousPosition = currentPosition;
-          return settled;
+          return stableSamples >= 2;
         });
         await testSubjects.setCheckbox(
           this.TEST_IDS.DELETE_QUERY_RULES_RULESET_MODAL_ACKNOWLEDGE_BUTTON,
