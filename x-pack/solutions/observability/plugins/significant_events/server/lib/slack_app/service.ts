@@ -7,6 +7,8 @@
 
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import {
   RelayRequestError,
   type InMemoryConnector,
@@ -243,10 +245,11 @@ export class SlackAppService {
     //   without regenerating the key when new data is onboarded.
     // - Nightshift data is reached through the `nightshift` Kibana feature (read includes
     //   every engine via includeIn), Streams data through `streams` (read), and
-    //   connectors/LLM through `actions` (read). Agent Builder needs `all` because the
-    //   admitted workflow persists its lifecycle through write-protected Nightshift routes.
-    //   Those go via the internal Kibana client, so no grants on system/dot indices
-    //   (unsupported in serverless) are needed.
+    //   connectors/LLM through `actions` (read). Those go via the internal Kibana client,
+    //   so no grants on system/dot indices (unsupported in serverless) are needed.
+    // - Agent Builder `all` is granted only in the default space: Relay posts inbound events
+    //   to the unprefixed Kibana URL, so that is the only space whose admitted workflows
+    //   persist their lifecycle through the write-protected Nightshift routes.
     const apiKeyResult = await this.server.security.authc.apiKeys.grantAsInternalUser(request, {
       name: 'nightshift-relay-agent-builder',
       metadata: { managed: true, managed_by: 'nightshift-relay', type: 'agent_builder_converse' },
@@ -268,10 +271,14 @@ export class SlackAppService {
               feature: {
                 nightshift: ['read'],
                 streams: ['read'],
-                agentBuilder: ['all'],
+                agentBuilder: ['read'],
                 actions: ['read'],
                 workflowsManagement: ['read'],
               },
+            },
+            {
+              spaces: [DEFAULT_SPACE_ID],
+              feature: { agentBuilder: ['all'] },
             },
           ],
         },

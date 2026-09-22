@@ -101,13 +101,28 @@ describe('deductive investigation workflow', () => {
       })
     );
     expect(requireStep('update_investigation_attachment').if).toContain('acknowledged == true');
+    expect(requireStep('update_investigation_attachment')['on-failure']).toEqual(
+      expect.objectContaining({ retry: expect.any(Object), continue: true })
+    );
     expect(requireStep('create_investigation_attachment').with).toEqual(
       expect.objectContaining({
         id: 'nightshift-investigation',
         type: 'platform.nightshift_investigation',
         data: attachmentData,
+        render_inline: true,
       })
     );
+    // A transient update failure must not fall through to a create that cannot succeed.
+    expect(requireStep('create_investigation_attachment').if).toContain(
+      "steps.update_investigation_attachment.error.message contains 'not found'"
+    );
+  });
+
+  it('hands the admission key to _ensure so the run can claim its Slack admission', () => {
+    expect(requireStep('persist_investigation_started').with?.body).toEqual({
+      execution_id: '{{ execution.id }}',
+      admission_key: '{{ inputs.context.admission_key }}',
+    });
   });
 
   it('space-scopes the path of every kibana.request step', () => {

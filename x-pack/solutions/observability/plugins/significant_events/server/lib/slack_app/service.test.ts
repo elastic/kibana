@@ -171,11 +171,13 @@ describe('SlackAppService', () => {
             feature: {
               nightshift: ['read'],
               streams: ['read'],
-              agentBuilder: ['all'],
+              agentBuilder: ['read'],
               actions: ['read'],
               workflowsManagement: ['read'],
             },
           },
+          // Write only where Relay delivers inbound events, not in every space.
+          { spaces: ['default'], feature: { agentBuilder: ['all'] } },
         ],
       });
       // The minted key is the caller-supplied credential; no relay-minted

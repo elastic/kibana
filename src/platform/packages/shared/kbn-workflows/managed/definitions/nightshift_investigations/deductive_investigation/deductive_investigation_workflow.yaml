@@ -272,11 +272,17 @@ steps:
         state: ${{ steps.investigate.output.structured_output }}
       description: Latest successful Nightshift investigation findings
     on-failure:
+      retry:
+        max-attempts: 3
+        delay: 2s
+        strategy: exponential
       continue: true
 
+  # Only the first successful round creates the attachment. Any other update failure would make
+  # the create fail too, since the attachment id is fixed.
   - name: create_investigation_attachment
     type: ai.attachment.add
-    if: '${{ steps.investigate.error == null and steps.persist_investigation_completed.output.acknowledged == true and steps.update_investigation_attachment.error != null }}'
+    if: "${{ steps.investigate.error == null and steps.persist_investigation_completed.output.acknowledged == true and steps.update_investigation_attachment.error.message contains 'not found' }}"
     with:
       conversation_id: '{{ inputs.conversation_id | default: execution.id }}'
       id: nightshift-investigation
@@ -285,6 +291,8 @@ steps:
         investigation_id: '{{ inputs.investigation_id | default: execution.id }}'
         state: ${{ steps.investigate.output.structured_output }}
       description: Latest successful Nightshift investigation findings
+      # The agent's response is already written, so it cannot reference this attachment itself.
+      render_inline: true
     on-failure:
       continue: true
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { MAX_KEYWORD_LENGTH } from '@kbn/nightshift-investigations-plugin/common';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
@@ -126,6 +127,18 @@ export const slackEventsRoute = createServerRoute({
     const investigations = server.nightshiftInvestigations;
     if (!investigations) {
       throw new Error('Nightshift investigations is unavailable');
+    }
+
+    // Checked here rather than on the route: the Agent Builder path above only needs read, and
+    // keys issued before Nightshift routing existed carry read alone.
+    const { authz } = server.security;
+    const { hasAllRequested } = await authz.checkPrivilegesDynamicallyWithRequest(request)({
+      kibana: [authz.actions.api.get('agentBuilder:write')],
+    });
+    if (!hasAllRequested) {
+      throw Boom.forbidden(
+        'Nightshift investigations from Slack require Agent Builder write; reconnect the Slack app'
+      );
     }
 
     const channelId = event.channel;

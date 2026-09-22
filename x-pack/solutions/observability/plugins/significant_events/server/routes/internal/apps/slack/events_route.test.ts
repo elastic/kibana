@@ -14,11 +14,18 @@ const admitSlackInput = jest
   .mockResolvedValue({ investigation_id: 'inv-1', execution_id: 'exec-1' });
 const getBooleanValue = jest.fn().mockResolvedValue(true);
 const fetch = jest.fn().mockResolvedValue({});
+const checkPrivileges = jest.fn().mockResolvedValue({ hasAllRequested: true });
 
 const server = {
   core: {
     featureFlags: { getBooleanValue },
     http: { selfClient: { asScoped: jest.fn().mockReturnValue({ fetch }) } },
+  },
+  security: {
+    authz: {
+      checkPrivilegesDynamicallyWithRequest: jest.fn().mockReturnValue(checkPrivileges),
+      actions: { api: { get: (operation: string) => `api:${operation}` } },
+    },
   },
   nightshiftInvestigations: {
     getInvestigationsClient: jest.fn().mockReturnValue({ admitSlackInput }),
@@ -48,6 +55,24 @@ const event = {
 beforeEach(() => {
   jest.clearAllMocks();
   getBooleanValue.mockResolvedValue(true);
+  checkPrivileges.mockResolvedValue({ hasAllRequested: true });
+});
+
+it('only requires Agent Builder read on the route, so read-only keys keep the Agent Builder path', () => {
+  expect(slackEventsRoute[endpoint].security).toEqual({
+    authz: { requiredPrivileges: ['agentBuilder:read'] },
+  });
+});
+
+it('rejects a Nightshift admission from a key without Agent Builder write', async () => {
+  checkPrivileges.mockResolvedValue({ hasAllRequested: false });
+  const body = params.shape.body.parse(event);
+
+  await expect(handler({ request: {}, params: { body }, server } as never)).rejects.toMatchObject({
+    output: { statusCode: 403 },
+  });
+  expect(checkPrivileges).toHaveBeenCalledWith({ kibana: ['api:agentBuilder:write'] });
+  expect(admitSlackInput).not.toHaveBeenCalled();
 });
 
 it('handles an unsupported event as a successful no-op', async () => {
@@ -152,6 +177,7 @@ it('uses the Kibana-controlled Agent Builder path when Nightshift is disabled', 
   await expect(handler({ request: {}, params: { body }, server } as never)).resolves.toEqual({});
 
   expect(admitSlackInput).not.toHaveBeenCalled();
+  expect(checkPrivileges).not.toHaveBeenCalled();
   expect(fetch).toHaveBeenCalledWith('/internal/agent_builder/converse/callback', {
     method: 'POST',
     version: '1',
