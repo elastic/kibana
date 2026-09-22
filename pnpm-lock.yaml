@@ -2758,6 +2758,9 @@ importers:
       '@kbn/nightshift-shared':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-nightshift-shared
+      '@kbn/nightshift-sources-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/plugins/shared/nightshift_sources
       '@kbn/no-data-page-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/no_data_page
@@ -9345,6 +9348,8 @@ importers:
   x-pack/platform/plugins/shared/ml/evals: {}
 
   x-pack/platform/plugins/shared/nightshift_investigations: {}
+
+  x-pack/platform/plugins/shared/nightshift_sources: {}
 
   x-pack/platform/plugins/shared/notification_center: {}
 
