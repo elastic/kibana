@@ -141,10 +141,11 @@ describe('variable validation budgets', () => {
     ]);
   });
 
-  it('parses a malformed scalar once, not once per reference in it', () => {
-    // An unterminated tag fails the Liquid parse, and until failed parses were
-    // cached every one of the references behind it parsed the scalar again:
-    // ~570 ms for this body, ~27 ms once cached.
+  it('reports the syntax error of a malformed scalar behind many references', () => {
+    // The unterminated tag fails the Liquid parse. That the scalar is parsed
+    // once rather than once per reference is pinned where the cache lives, in
+    // `extract_template_local_context.test.ts`; this fixture keeps the endpoint
+    // path on the same input.
     const yaml = buildWorkflowFrom('malformed-fixture', ['  seed: hello'], 1, () =>
       [
         `{% assign broken = ${'x'.repeat(120_000)}`,

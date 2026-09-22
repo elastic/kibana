@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getLiquidInstance } from '../../liquid/liquid_parse_cache';
 import {
   forLoopScopesContainingOffset,
   getAllForLoopScopes,
@@ -363,12 +364,19 @@ describe('template index cache', () => {
     expect(hasCachedTemplateLocalIndex(oldest)).toBe(false);
   });
 
-  it('caches a template that failed to parse, so it is parsed once', () => {
-    const malformed = '{% assign broken = ';
+  it('parses a template that failed to parse once, however many offsets ask', () => {
+    // Every reference in a scalar asks for the locals at its own offset. Before
+    // failed parses were cached, each of those asks parsed the scalar again.
+    const malformed = `{% assign broken = ${'x'.repeat(2_000)}`;
+    const parse = jest.spyOn(getLiquidInstance(), 'parse');
 
-    getTemplateLocalContext(malformed, malformed.length);
+    for (let offset = 0; offset < malformed.length; offset += 2) {
+      getTemplateLocalContext(malformed, offset);
+    }
 
+    expect(parse.mock.calls.filter(([source]) => source === malformed)).toHaveLength(1);
     expect(hasCachedTemplateLocalIndex(malformed)).toBe(true);
+    parse.mockRestore();
   });
 
   it('does not cache a template over the parse limit', () => {
