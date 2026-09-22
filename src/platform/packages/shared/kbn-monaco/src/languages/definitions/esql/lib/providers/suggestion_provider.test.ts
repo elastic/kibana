@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLVariableType, type PartialFieldsMetadataClient } from '@kbn/esql-types';
+import {
+  type ESQLCallbacks,
+  ESQLVariableType,
+  type PartialFieldsMetadataClient,
+} from '@kbn/esql-types';
 import { monaco } from '../../../../../monaco_imports';
 import { ESQLLang, type ESQLDependencies } from '../../language';
 import { createDisposedTextModel, createField, createTextModel } from './test_helpers';
@@ -505,7 +509,7 @@ describe('suggestion_provider', () => {
 
       const suggestionProvider = ESQLLang.getSuggestionProvider({
         getColumnsFor: jest.fn(hang),
-      });
+      } as unknown as ESQLCallbacks);
       const model = createTextModel({ value: 'FROM logs*' });
 
       const resultPromise = suggestionProvider.provideCompletionItems(
