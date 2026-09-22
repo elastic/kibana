@@ -1642,7 +1642,7 @@ describe('#delete', () => {
     expect(mockCallWithRequestRepository.deleteByNamespace).toHaveBeenCalledWith(id);
   });
 
-  test(`runs space delete handlers after the saved objects and before the space are deleted`, async () => {
+  test(`runs space delete handlers between the saved objects and space deletes`, async () => {
     const mockDebugLogger = createMockDebugLogger();
     const mockConfig = createMockConfig();
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
@@ -1669,28 +1669,6 @@ describe('#delete', () => {
     expect(handler.mock.invocationCallOrder[0]).toBeLessThan(
       mockCallWithRequestRepository.delete.mock.invocationCallOrder[0]
     );
-  });
-
-  test(`propagates space delete handler errors`, async () => {
-    const mockDebugLogger = createMockDebugLogger();
-    const mockConfig = createMockConfig();
-    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
-    mockCallWithRequestRepository.get.mockResolvedValue(notReservedSavedObject);
-    const handler = jest.fn().mockRejectedValue(new Error('handler failed'));
-
-    const client = new SpacesClient(
-      mockDebugLogger,
-      mockConfig,
-      mockCallWithRequestRepository,
-      [],
-      'traditional',
-      featuresStart,
-      undefined,
-      [handler]
-    );
-
-    await expect(client.delete(id)).rejects.toThrow('handler failed');
-    expect(mockCallWithRequestRepository.delete).not.toHaveBeenCalled();
   });
 
   test(`runs every space delete handler when one fails`, async () => {

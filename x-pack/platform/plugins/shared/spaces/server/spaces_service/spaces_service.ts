@@ -40,7 +40,8 @@ export interface SpacesServiceSetup {
   namespaceToSpaceId(namespace: string | undefined): string;
 
   /**
-   * Registers a handler that runs while a space is being deleted, after its saved objects are removed and before the space itself is.
+   * Registers a handler that runs during space deletion, after the saved objects are removed
+   * and before the space document is.
    * @param handler the handler to run.
    */
   registerSpaceDeleteHandler(handler: SpaceDeleteHandler): void;

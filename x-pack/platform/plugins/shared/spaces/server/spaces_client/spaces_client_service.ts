@@ -57,7 +57,8 @@ export interface SpacesClientServiceSetup {
   registerClientWrapper: (wrapper: SpacesClientWrapper) => void;
 
   /**
-   * Registers a handler that runs while a space is being deleted, after its saved objects are removed and before the space itself is.
+   * Registers a handler that runs during space deletion, after the saved objects are removed
+   * and before the space document is.
    */
   registerSpaceDeleteHandler: (handler: SpaceDeleteHandler) => void;
 }
