@@ -171,6 +171,10 @@ import {
   getKubernetesNamespaceNames,
   getKubernetesNodeNames,
   resourceTypeFilterVisibility,
+  CATEGORY_RESOURCE_TYPE_ALL,
+  CategoryResourceTypeFilter,
+  getEntityTypeLabels,
+  filterEntitiesByCategoryType,
 } from './kubernetes_cluster_filter';
 import type { KubernetesResourceType } from './kubernetes_cluster_filter';
 import {
@@ -978,6 +982,27 @@ const AllEntitiesViewInner = ({
     CLOUD_PROVIDER_FILTER_ALL
   );
 
+  // Generic category resource-type filter — shown on non-K8s category
+  // pages that have 2+ distinct entity types (Hosts, Cloud, Networking, etc.).
+  const [categoryTypeFilter, setCategoryTypeFilter] = useState<string>(CATEGORY_RESOURCE_TYPE_ALL);
+  const categoryTypeLabels = useMemo(
+    () => {
+      if (!categoryScope || categoryScope === 'kubernetes' || !isElasticOn) return [];
+      return getEntityTypeLabels(scopedEntities);
+    },
+    [categoryScope, isElasticOn, scopedEntities]
+  );
+  const showCategoryTypeFilter = categoryTypeLabels.length >= 2;
+
+  // Reset filter when category changes.
+  const prevCategoryScopeRef = useRef(categoryScope);
+  useEffect(() => {
+    if (prevCategoryScopeRef.current !== categoryScope) {
+      prevCategoryScopeRef.current = categoryScope;
+      setCategoryTypeFilter(CATEGORY_RESOURCE_TYPE_ALL);
+    }
+  }, [categoryScope]);
+
   // Pending-search consumption: the `search` string can't ride the
   // persisted-state pipeline (it's per-mount `useState`, not
   // localStorage). When a saved-view apply required navigating between
@@ -1226,7 +1251,15 @@ const AllEntitiesViewInner = ({
         : filteredEntitiesAfterCluster,
     [filteredEntitiesAfterCluster, isCloudCategoryPage, cloudProviderFilter]
   );
-  const filteredEntities = filteredEntitiesAfterProvider;
+  // Generic category resource-type filter (non-K8s categories with 2+ types).
+  const filteredEntitiesAfterCategoryType = useMemo(
+    () =>
+      showCategoryTypeFilter && categoryTypeFilter !== CATEGORY_RESOURCE_TYPE_ALL
+        ? filterEntitiesByCategoryType(filteredEntitiesAfterProvider, categoryTypeFilter)
+        : filteredEntitiesAfterProvider,
+    [filteredEntitiesAfterProvider, showCategoryTypeFilter, categoryTypeFilter]
+  );
+  const filteredEntities = filteredEntitiesAfterCategoryType;
 
   // ElasticOn summary "· N Groups": count distinct level-1 buckets under the
   // active grouping (Category by default), so the header stays truthful when
@@ -1280,7 +1313,8 @@ const AllEntitiesViewInner = ({
       effectiveK8sDeploymentFilter !== KUBERNETES_FILTER_ALL ||
       effectiveK8sNodeFilter !== KUBERNETES_FILTER_ALL
     )) ||
-    (isCloudCategoryPage && cloudProviderFilter !== CLOUD_PROVIDER_FILTER_ALL);
+    (isCloudCategoryPage && cloudProviderFilter !== CLOUD_PROVIDER_FILTER_ALL) ||
+    (showCategoryTypeFilter && categoryTypeFilter !== CATEGORY_RESOURCE_TYPE_ALL);
 
   // Reset every filter dimension in one click (ElasticOn toolbar).
   const handleClearFilters = useCallback(() => {
@@ -1294,6 +1328,7 @@ const AllEntitiesViewInner = ({
     setK8sNamespaceFilter(KUBERNETES_FILTER_ALL);
     setK8sDeploymentFilter(KUBERNETES_FILTER_ALL);
     setK8sNodeFilter(KUBERNETES_FILTER_ALL);
+    setCategoryTypeFilter(CATEGORY_RESOURCE_TYPE_ALL);
   }, [setActiveTagFilters]);
 
   // Resolve the clicked entity's `type` and `health` from the dataset so the
@@ -2171,6 +2206,15 @@ const AllEntitiesViewInner = ({
                       <CloudProviderFilter
                         value={cloudProviderFilter}
                         onChange={setCloudProviderFilter}
+                      />
+                    </EuiFlexItem>
+                  ) : null}
+                  {showCategoryTypeFilter ? (
+                    <EuiFlexItem grow={false}>
+                      <CategoryResourceTypeFilter
+                        typeLabels={categoryTypeLabels}
+                        value={categoryTypeFilter}
+                        onChange={setCategoryTypeFilter}
                       />
                     </EuiFlexItem>
                   ) : null}

@@ -647,3 +647,88 @@ export const KubernetesGroupBySelect = ({
     />
   );
 };
+
+// ---------------------------------------------------------------------------
+// Generic category resource-type filter
+// ---------------------------------------------------------------------------
+
+export const CATEGORY_RESOURCE_TYPE_ALL = '__all__';
+
+/**
+ * Extract the sorted, unique type labels from a list of entities.
+ * Uses `subType` when present (Cloud, K8s) and falls back to `type`.
+ */
+export const getEntityTypeLabels = (entities: readonly Entity[]): string[] => {
+  const types = new Set<string>();
+  for (const entity of entities) {
+    const label = entity.subType ?? entity.type;
+    if (label) types.add(label);
+  }
+  return [...types].sort();
+};
+
+/**
+ * Filter entities to a single type label. Pass-through when "All".
+ */
+export const filterEntitiesByCategoryType = (
+  entities: readonly Entity[],
+  typeFilter: string
+): readonly Entity[] => {
+  if (typeFilter === CATEGORY_RESOURCE_TYPE_ALL) return entities;
+  return entities.filter((e) => (e.subType ?? e.type) === typeFilter);
+};
+
+interface CategoryResourceTypeFilterProps {
+  readonly typeLabels: readonly string[];
+  readonly value: string;
+  readonly onChange: (next: string) => void;
+}
+
+/**
+ * Generic searchable resource-type filter for any category page.
+ * Shown when a category has 2+ distinct types.
+ */
+export const CategoryResourceTypeFilter = ({
+  typeLabels,
+  value,
+  onChange,
+}: CategoryResourceTypeFilterProps) => {
+  const allLabel = i18n.translate(
+    'xpack.streams.entityCentricLab.entities.categoryResourceTypeFilter.allOption',
+    { defaultMessage: 'All types' }
+  );
+  const options = useMemo<EuiComboBoxOptionOption[]>(
+    () => typeLabels.map((label) => ({ label, value: label })),
+    [typeLabels]
+  );
+  const selectedOptions = useMemo<EuiComboBoxOptionOption[]>(
+    () =>
+      value === CATEGORY_RESOURCE_TYPE_ALL
+        ? []
+        : [{ label: `Type: ${value}`, value }],
+    [value]
+  );
+  const handleChange = useCallback(
+    (selected: EuiComboBoxOptionOption[]) => {
+      onChange(selected.length > 0 ? (selected[0].value as string) : CATEGORY_RESOURCE_TYPE_ALL);
+    },
+    [onChange]
+  );
+  return (
+    <EuiComboBox
+      compressed
+      singleSelection={{ asPlainText: true }}
+      options={options}
+      selectedOptions={selectedOptions}
+      onChange={handleChange}
+      placeholder={allLabel}
+      isClearable
+      aria-label={i18n.translate(
+        'xpack.streams.entityCentricLab.entities.categoryResourceTypeFilter.ariaLabel',
+        { defaultMessage: 'Filter resources by type' }
+      )}
+      data-test-subj="entityCentricLabCategoryResourceTypeFilter"
+      style={{ minWidth: 180 }}
+    />
+  );
+};
