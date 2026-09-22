@@ -217,11 +217,12 @@ Step order is defined in `setup/bind_dispatcher_executor.ts`.
 
 ## Halt reasons
 
-| Reason        | Meaning                                                                                                                                                          |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `no_episodes` | Nothing relevant was found for this run; watermark advances to `windowEnd`.                                                                                      |
-| `no_actions`  | The run produced no stored outcomes after evaluation; watermark advances to `windowEnd`.                                                                         |
-| `aborted`     | The pipeline was stopped early by the TM signal or the soft deadline (`TICK_DEADLINE_MS`). If aborted before `StoreActionsStep`, the watermark does not advance. |
+| Reason                   | Meaning                                                                                                                                                          |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `no_episodes`            | Nothing relevant was found for this run; watermark advances to `windowEnd`.                                                                                      |
+| `no_actions`             | The run produced no stored outcomes after evaluation; watermark advances to `windowEnd`.                                                                         |
+| `aborted`                | The pipeline was stopped early by the TM signal or the soft deadline (`TICK_DEADLINE_MS`). If aborted before `StoreActionsStep`, the watermark does not advance. |
+| `inline_stats_too_large` | ES rejected the INLINE STATS pre-fetch query with `illegal_argument_exception: sub-plan execution results too large`. Watermark held; tick counts toward stuck-tick limit (see below). |
 
 ## Watermark contract
 
@@ -243,6 +244,19 @@ If the watermark does not advance for `STUCK_TICK_LIMIT` consecutive ticks (defa
 The blocking episodes are **not dispatched** — they are permanently marked as `unmatched`. This is the documented escape from a permanently un-recordable episode that would otherwise stall the dispatcher indefinitely.
 
 If the pipeline never reached `FetchEpisodesStep` (`episodes` empty), there is nothing to mark. While watermark lag is within `PRE_FETCH_STUCK_ADVANCE_LAG_MS` (one max scan window), the hatch holds the watermark, logs `DISPATCHER_ESCAPE_HATCH_PRE_FETCH_STUCK`, and resets the counter so a transient outage can recover. Once lag exceeds that threshold, it logs `DISPATCHER_ESCAPE_HATCH_PRE_FETCH_FORCED_ADVANCE` and advances to `windowEnd` anyway — unread events in that window are skipped so the dispatcher cannot stall forever.
+
+#### `inline_stats_too_large` recovery timeline (on-call reference)
+
+When cardinality exceeds the Serverless INLINE STATS sub-plan cap (~20.4 MB), the dispatcher enters the pre-fetch stuck path:
+
+| Phase | Ticks | Wall clock (~5 s/tick) | Logs |
+|-------|-------|------------------------|------|
+| Stuck accumulation | 1–9 | ~0–45 s | `DISPATCHER_INLINE_STATS_TOO_LARGE` (each tick) |
+| First hatch fire (lag ≤ 15 min) | 10 | ~50 s | `DISPATCHER_ESCAPE_HATCH_PRE_FETCH_STUCK` — counter resets, watermark held |
+| Hatch fires again every ~10 stuck ticks while lag ≤ 15 min | 20, 30, … | grows | same |
+| Force-advance (lag > 15 min on a hatch-firing tick) | varies | ~15 min+ after freeze | `DISPATCHER_ESCAPE_HATCH_PRE_FETCH_FORCED_ADVANCE` — watermark jumps to `windowEnd`; unread events skipped |
+
+Episodes in the skipped window are **not dispatched** (accepted data loss). Later windows dispatch normally. The root fix is reducing cardinality or splitting the INLINE STATS query.
 
 ## Delivery guarantees and limits
 

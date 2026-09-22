@@ -19,6 +19,9 @@ import { QueryServiceInternalToken } from '../../services/query_service/tokens';
 import { EPISODE_QUERY_LIMIT, getDispatchableAlertEventsQuery } from '../queries';
 import { EpisodeScan } from '../state';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
+import { isEsqlSubPlanTooLargeError } from '../../errors/esql_sub_plan_too_large_error';
+import { STUCK_TICK_LIMIT } from '../constants';
 
 interface RawAlertEpisode {
   last_event_timestamp: string;
@@ -47,19 +50,35 @@ export class FetchEpisodesStep implements DispatcherStep {
     const gte = windowStart.toISOString();
     const lte = windowEnd.toISOString();
 
-    const result = await this.queryService.executeQueryRows<RawAlertEpisode>({
-      query: getDispatchableAlertEventsQuery({ gte, lte }).query,
-      // Lucene push-down is lower-bounded only. An `lte: windowEnd` here would
-      // drop action docs stamped with `now` (after the settle buffer) and
-      // break `last_fired` dedup. Event rows are still capped at `lte` inside
-      // the ES|QL WHERE (type == "alert" AND @timestamp <= lte).
-      filter: {
-        range: {
-          '@timestamp': { gte },
+    let result: RawAlertEpisode[];
+    try {
+      result = await this.queryService.executeQueryRows<RawAlertEpisode>({
+        query: getDispatchableAlertEventsQuery({ gte, lte }).query,
+        // Lucene push-down is lower-bounded only. An `lte: windowEnd` here would
+        // drop action docs stamped with `now` (after the settle buffer) and
+        // break `last_fired` dedup. Event rows are still capped at `lte` inside
+        // the ES|QL WHERE (type == "alert" AND @timestamp <= lte).
+        filter: {
+          range: {
+            '@timestamp': { gte },
+          },
         },
-      },
-      abortSignal: signal,
-    });
+        abortSignal: signal,
+      });
+    } catch (err) {
+      if (isEsqlSubPlanTooLargeError(err)) {
+        logger.error({
+          error: err,
+          code: ALERTING_LOG_CODES.DISPATCHER_INLINE_STATS_TOO_LARGE,
+          message: () =>
+            `ES rejected the INLINE STATS pre-fetch query (sub-plan too large). ` +
+            `Watermark held at ${windowStart.toISOString()}; ` +
+            `the stuck-tick hatch may force-advance the watermark after ${STUCK_TICK_LIMIT} ticks.`,
+        });
+        return { type: 'halt', reason: 'inline_stats_too_large' };
+      }
+      throw err;
+    }
 
     // Event-row `lte` makes windowEnd a provable watermark advance target:
     // the scan has a defined upper edge to advance to.

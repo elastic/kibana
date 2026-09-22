@@ -381,6 +381,15 @@ export const ALERTING_LOG_CODES = {
    * call failed. The watermark is held so episodes will be retried next tick.
    */
   DISPATCHER_ESCAPE_HATCH_WRITE_FAILED: 'DISPATCHER_ESCAPE_HATCH_WRITE_FAILED',
+  /**
+   * ES rejected the INLINE STATS pre-fetch query with HTTP 400
+   * `illegal_argument_exception: sub-plan execution results too large`. This is a
+   * deterministic, non-retryable failure at the current cardinality level. The
+   * tick returns a halt (watermark held) so the existing stuck-tick counter
+   * increments and the pre-fetch escape hatch may later force-advance the watermark,
+   * skipping the window. See the dispatcher README for the recovery timeline.
+   */
+  DISPATCHER_INLINE_STATS_TOO_LARGE: 'DISPATCHER_INLINE_STATS_TOO_LARGE',
 
   // ────────────────────────────── Director ───────────────────────────
   /**

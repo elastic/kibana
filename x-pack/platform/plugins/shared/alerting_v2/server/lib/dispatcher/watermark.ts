@@ -34,6 +34,12 @@ export const computeNextWatermark = ({
   if (haltReason === 'aborted' && finalState.recordedEpisodes === undefined) {
     // Pipeline stopped before StoreActionsStep — no records written, do not advance.
     nextWatermark = eventWatermark;
+  } else if (haltReason === 'inline_stats_too_large') {
+    // ES rejected the INLINE STATS query: scan was refused, not executed.
+    // Hold the watermark so stuckTicks increments and the pre-fetch escape hatch
+    // can eventually force-advance. Do NOT use no_episodes here — that advances
+    // to windowEnd immediately and would silently skip the window on the first hit.
+    nextWatermark = eventWatermark;
   } else if (haltReason === 'no_actions') {
     // All episodes were filtered (e.g. maintenance window) — window fully consumed.
     // Must be checked before the truncated branch: a truncated batch where all
