@@ -13,6 +13,7 @@ const ES_ARCHIVE_MAPS_DATA = 'x-pack/platform/test/fixtures/es_archives/maps/dat
 const FILTER_BY_MAP_EXTENT_ACTION = 'embeddablePanelAction-FILTER_BY_MAP_EXTENT';
 const FILTER_BY_MAP_EXTENT_SWITCH = 'filterByMapExtentSwitch24ade730-afe4-42b6-919a-c4e0a98c94f2';
 const DEFAULT_INDEX_ID = 'c698b940-e149-11e8-a35a-370a8516603a';
+const FILTER_BY_MAP_EXTENT_DASHBOARD_ID = '42f6f040-b34f-11eb-8c95-dd19591c63df';
 
 test.describe(
   'Maps - filter by map extent',
@@ -36,72 +37,35 @@ test.describe(
       await uiSettings.unset('defaultIndex');
     });
 
-    // Failing: https://github.com/elastic/kibana/issues/283853
-    test.skip(true, 'Failing: https://github.com/elastic/kibana/issues/283853');
-
-    test('should not filter dashboard by map extent before "filter by map extent" is enabled', async ({
-      pageObjects,
-    }) => {
-      await pageObjects.dashboard.goto();
-      await pageObjects.dashboard.clickDashboardTitleLink('filter by map extent dashboard');
-      await pageObjects.dashboard.switchToEditMode();
-      await pageObjects.lens.assertLegacyMetric('Count of records', '6');
-    });
-
-    test('should filter dashboard by map extent when "filter by map extent" is enabled', async ({
-      page,
-      pageObjects,
-    }) => {
-      await pageObjects.dashboard.goto();
-      await pageObjects.dashboard.clickDashboardTitleLink('filter by map extent dashboard');
+    test('filter by map extent lifecycle', async ({ page, pageObjects }) => {
+      await pageObjects.dashboard.openDashboardWithId(FILTER_BY_MAP_EXTENT_DASHBOARD_ID);
       await pageObjects.dashboard.switchToEditMode();
 
-      await pageObjects.dashboard.clickPanelAction(FILTER_BY_MAP_EXTENT_ACTION, 'document example');
-      await pageObjects.lens.setEuiSwitch(FILTER_BY_MAP_EXTENT_SWITCH, true);
-      await page.keyboard.press('Escape');
-      await pageObjects.dashboard.waitForRenderComplete();
+      await test.step('metric shows all records before filter is enabled', async () => {
+        await pageObjects.lens.assertLegacyMetric('Count of records', '6');
+      });
 
-      await pageObjects.lens.assertLegacyMetric('Count of records', '1');
-    });
+      await test.step('metric filters to current extent when filter is enabled', async () => {
+        await pageObjects.dashboard.clickPanelAction(FILTER_BY_MAP_EXTENT_ACTION, 'document example');
+        await pageObjects.lens.setEuiSwitch(FILTER_BY_MAP_EXTENT_SWITCH, true);
+        await page.keyboard.press('Escape');
+        await pageObjects.dashboard.waitForRenderComplete();
+        await pageObjects.lens.assertLegacyMetric('Count of records', '1');
+      });
 
-    test('should filter dashboard by new map extent when map is moved', async ({
-      page,
-      pageObjects,
-    }) => {
-      await pageObjects.dashboard.goto();
-      await pageObjects.dashboard.clickDashboardTitleLink('filter by map extent dashboard');
-      await pageObjects.dashboard.switchToEditMode();
+      await test.step('metric updates when map is panned', async () => {
+        await pageObjects.maps.setView(32.95539, -93.93054, 5);
+        await pageObjects.dashboard.waitForRenderComplete();
+        await pageObjects.lens.assertLegacyMetric('Count of records', '2');
+      });
 
-      await pageObjects.dashboard.clickPanelAction(FILTER_BY_MAP_EXTENT_ACTION, 'document example');
-      await pageObjects.lens.setEuiSwitch(FILTER_BY_MAP_EXTENT_SWITCH, true);
-      await page.keyboard.press('Escape');
-      await pageObjects.dashboard.waitForRenderComplete();
-
-      await pageObjects.maps.setView(32.95539, -93.93054, 5);
-      await pageObjects.dashboard.waitForRenderComplete();
-
-      await pageObjects.lens.assertLegacyMetric('Count of records', '2');
-    });
-
-    test('should remove map extent filter when "filter by map extent" is disabled', async ({
-      page,
-      pageObjects,
-    }) => {
-      await pageObjects.dashboard.goto();
-      await pageObjects.dashboard.clickDashboardTitleLink('filter by map extent dashboard');
-      await pageObjects.dashboard.switchToEditMode();
-
-      await pageObjects.dashboard.clickPanelAction(FILTER_BY_MAP_EXTENT_ACTION, 'document example');
-      await pageObjects.lens.setEuiSwitch(FILTER_BY_MAP_EXTENT_SWITCH, true);
-      await page.keyboard.press('Escape');
-      await pageObjects.dashboard.waitForRenderComplete();
-
-      await pageObjects.dashboard.clickPanelAction(FILTER_BY_MAP_EXTENT_ACTION, 'document example');
-      await pageObjects.lens.setEuiSwitch(FILTER_BY_MAP_EXTENT_SWITCH, false);
-      await page.keyboard.press('Escape');
-      await pageObjects.dashboard.waitForRenderComplete();
-
-      await pageObjects.lens.assertLegacyMetric('Count of records', '6');
+      await test.step('metric returns to all records when filter is disabled', async () => {
+        await pageObjects.dashboard.clickPanelAction(FILTER_BY_MAP_EXTENT_ACTION, 'document example');
+        await pageObjects.lens.setEuiSwitch(FILTER_BY_MAP_EXTENT_SWITCH, false);
+        await page.keyboard.press('Escape');
+        await pageObjects.dashboard.waitForRenderComplete();
+        await pageObjects.lens.assertLegacyMetric('Count of records', '6');
+      });
     });
   }
 );
