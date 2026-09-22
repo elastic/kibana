@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBasicTableSelectors } from '@elastic/eui-test-helpers';
+import { euiSelectors } from '@kbn/scout';
 import type { KibanaUrl, ScoutPage } from '@kbn/scout';
 import { CONNECTORS_APP_PATH, CONNECTORS_LIST_SELECTORS } from './constants';
 
@@ -67,7 +67,7 @@ export const searchConnectors = async (page: ScoutPage, name: string) => {
   // before React adds the loading class, returning stale results.
   await page
     .locator(
-      `${EuiBasicTableSelectors.ROOT_SELECTOR}[data-test-subj="actionsTable"].euiBasicTable-loading`
+      `${euiSelectors.basicTable.ROOT_SELECTOR}[data-test-subj="actionsTable"].euiBasicTable-loading`
     )
     .waitFor({ state: 'visible', timeout: 1_000 })
     .catch(() => {});

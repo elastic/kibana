@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiContextMenuSelectors } from '@elastic/eui-test-helpers';
+import { euiSelectors } from '@kbn/scout';
 import type { Locator, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
@@ -155,7 +155,7 @@ export class DataVisualizerTable {
 
   async ensureAllMenuPopoversClosed() {
     await this.page.keyboard.press('Escape');
-    await this.page.locator(EuiContextMenuSelectors.PANEL_SELECTOR).waitFor({ state: 'hidden' });
+    await this.page.locator(euiSelectors.contextMenu.PANEL_SELECTOR).waitFor({ state: 'hidden' });
   }
 
   async ensureActionsMenuOpen(fieldName: string) {
@@ -164,7 +164,7 @@ export class DataVisualizerTable {
       .locator(this.rowSelector(fieldName, 'euiCollapsedItemActionsButton'))
       .click();
     await this.page
-      .locator(EuiContextMenuSelectors.PANEL_SELECTOR)
+      .locator(euiSelectors.contextMenu.PANEL_SELECTOR)
       .waitFor({ state: 'visible', timeout: 30_000 });
   }
 
@@ -175,7 +175,7 @@ export class DataVisualizerTable {
   isActionMenuViewInLensEnabled(_fieldName: string) {
     return this.page
       .locator(
-        `${EuiContextMenuSelectors.ITEM_SELECTOR}[data-test-subj="dataVisualizerActionViewInLensButton"]`
+        `${euiSelectors.contextMenu.ITEM_SELECTOR}[data-test-subj="dataVisualizerActionViewInLensButton"]`
       )
       .isEnabled();
   }
@@ -192,7 +192,7 @@ export class DataVisualizerTable {
     const testSubj = 'dataVisualizerActionDeleteIndexPatternFieldButton';
     await this.ensureActionsMenuOpen(fieldName);
     await this.page
-      .locator(`${EuiContextMenuSelectors.ITEM_SELECTOR}[data-test-subj="${testSubj}"]`)
+      .locator(`${euiSelectors.contextMenu.ITEM_SELECTOR}[data-test-subj="${testSubj}"]`)
       .click();
     await this.waitForActionsMenuClosed(fieldName, testSubj);
     await this.page.testSubj

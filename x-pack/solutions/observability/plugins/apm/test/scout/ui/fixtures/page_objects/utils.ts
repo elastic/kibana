@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBasicTableSelectors } from '@elastic/eui-test-helpers';
+import { euiSelectors } from '@kbn/scout-oblt';
 import type { Locator, ScoutPage } from '@kbn/scout-oblt';
 import { EXTENDED_TIMEOUT } from '../constants';
 
@@ -14,7 +14,7 @@ export async function waitForTableToLoad(page: ScoutPage, idOrLocator: Locator |
 
   await table.waitFor({ timeout: EXTENDED_TIMEOUT });
 
-  await table.locator(EuiBasicTableSelectors.ROOT_SELECTOR).waitFor();
+  await table.locator(euiSelectors.basicTable.ROOT_SELECTOR).waitFor();
 }
 
 export async function waitForChartToLoad(

@@ -25,7 +25,7 @@
  * TODO: add `data-test-subj` to the redirect toast in Canvas source.
  */
 
-import { EuiGlobalToastListSelectors } from '@elastic/eui-test-helpers';
+import { euiSelectors } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test, testData } from '../fixtures';
 
@@ -111,7 +111,7 @@ test.describe('Canvas saved object resolve', { tag: ['@local-stateful-classic'] 
 
     await test.step('redirect toast is shown with the new-location message', async () => {
       const toast = page.locator(
-        `${EuiGlobalToastListSelectors.ROOT_SELECTOR} ${EuiGlobalToastListSelectors.TOAST_SELECTOR} .euiText`
+        `${euiSelectors.toast.ROOT_SELECTOR} ${euiSelectors.toast.TOAST_SELECTOR} .euiText`
       );
       await expect(toast).toContainText("The Workpad you're looking for has a new location.", {
         timeout: 20_000,

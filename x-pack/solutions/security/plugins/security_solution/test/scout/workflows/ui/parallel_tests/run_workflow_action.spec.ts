@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { EuiGlobalToastListSelectors } from '@elastic/eui-test-helpers';
-import { spaceTest, tags, CUSTOM_QUERY_RULE, FULL_KIBANA_SECURITY_ROLE } from '@kbn/scout-security';
+import {
+  euiSelectors,
+  spaceTest,
+  tags,
+  CUSTOM_QUERY_RULE,
+  FULL_KIBANA_SECURITY_ROLE,
+} from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 
 // Failing: See https://github.com/elastic/kibana/issues/261392
@@ -93,7 +98,7 @@ spaceTest.describe.skip('Run workflow alert action', { tag: [...tags.stateful.cl
 
         // Assert the "View workflow execution" link button is present in the toast
         const viewExecutionButton = page
-          .locator(EuiGlobalToastListSelectors.TOAST_SELECTOR)
+          .locator(euiSelectors.toast.TOAST_SELECTOR)
           .getByRole('button', { name: 'View workflow execution' });
         await expect(viewExecutionButton).toBeVisible();
 

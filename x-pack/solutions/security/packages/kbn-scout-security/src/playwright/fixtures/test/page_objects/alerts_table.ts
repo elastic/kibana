@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { euiSelectors } from '@kbn/scout';
 import type { ScoutPage, Locator } from '@kbn/scout';
-import { EuiDataGridSelectors } from '@elastic/eui-test-helpers';
 import { expect } from '../../../../../ui';
 
 const PAGE_URL = 'security/alerts';
@@ -32,7 +32,7 @@ export class AlertsTablePage {
     this.alertsTable = this.page.testSubj.locator('alertsTableIsLoaded'); // Search for loaded Alerts table
     this.alertRow = this.page.testSubj
       .locator('alertsTableIsLoaded')
-      .locator(EuiDataGridSelectors.ROW_SELECTOR);
+      .locator(euiSelectors.dataGrid.ROW_SELECTOR);
     this.contextMenuButton = this.page.testSubj.locator('timeline-context-menu-button');
     this.actionsContextMenu = this.page.testSubj.locator('actions-context-menu');
     this.runWorkflowMenuItem = this.page.testSubj.locator('run-workflow-action');

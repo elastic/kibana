@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiContextMenuSelectors } from '@elastic/eui-test-helpers';
+import { euiSelectors } from '@kbn/scout';
 import {
   AppMenu,
   KibanaCodeEditorWrapper,
@@ -269,7 +269,7 @@ export class SavedObjectsManagementPage {
     const row = this.rowByTitle(title);
     await row.waitFor({ state: 'visible' });
     await row.locator('[data-test-subj="euiCollapsedItemActionsButton"]').click();
-    const menuPanel = this.page.locator(EuiContextMenuSelectors.PANEL_SELECTOR);
+    const menuPanel = this.page.locator(euiSelectors.contextMenu.PANEL_SELECTOR);
     await menuPanel.waitFor({ state: 'visible' });
     return menuPanel;
   }

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { EuiContextMenuSelectors } from '@elastic/eui-test-helpers';
-
+import { euiSelectors } from '@kbn/scout';
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
@@ -55,7 +54,7 @@ export class SavedObjectsManagementPage {
       .filter({ has: titleLocator });
     await row.waitFor({ state: 'visible' });
     await row.locator('[data-test-subj="euiCollapsedItemActionsButton"]').click();
-    const menuPanel = this.page.locator(EuiContextMenuSelectors.PANEL_SELECTOR);
+    const menuPanel = this.page.locator(euiSelectors.contextMenu.PANEL_SELECTOR);
     await menuPanel.waitFor({ state: 'visible' });
     return menuPanel;
   }
